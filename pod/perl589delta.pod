@@ -1323,6 +1323,12 @@ Fixed bug RT #40641 - encoding of Unicode characters in regular expressions.
 Fixed a bug where using certain patterns in a regex led to a panic.
 [RT #45337]
 
+Perl longer segfaults (due to infininte internal recursion) if the locale's
+character is not UTF-8 [RT #41442]:
+
+    use open ':locale';
+    print STDERR "\x{201e}"; # &bdquo;
+
 =head2 PerlIO
 
 Inconsistencies have been fixed in the reference counting PerlIO uses to keep
@@ -1629,15 +1635,9 @@ On VMS, escaped dots will be preserved when converted to UNIX syntax.
 
 C<keys %+> no longer throws an C<'ambiguous'> warning.
 
-=for fixme
-
-=item *
-
-C<chr(65535)> ought to be allowed in regexes.
-
 =item * 
 
-Using C<#!perl -d> could trigger an assertion, which has been fixed (30075).
+Using C<#!perl -d> could trigger an assertion, which has been fixed.
 
 =item *
 
@@ -1650,64 +1650,47 @@ used.
 
 =item *
 
-Width and precion in sprintf didn't handle wide characters correctly (30058).
+Width and precion in sprintf didn't handle characters above 255 correctly.
+[RT #40473]
 
 =item *
 
-List slices with indices out of range now work more consistently (30026).
+List slices with indices out of range now work more consistently.
+[RT #39882]
 
 =item *
 
-The C<-s> switch on the shebang line is again capable of parsing options with
-arguments of the form C<-foo=bar> (29865).
+A change introduced with perl 5.8.1 broke the parsing of arguments of the form
+C<-foo=bar> with the C<-s> on the <#!> line. This has been fixed. See
+http://bugs.activestate.com/show_bug.cgi?id=43483
 
 =item *
 
-tr/// is now threadsafe (29765)
+tr/// is now threadsafe. Previously it was storing a swash inside its OP,
+rather than in a pad.
 
 =item *
 
-De-duplicate C<@EXPORT> (26459)
-
-=item *
-
-C<pod2html> will label anchors more consistently (32079) and handles nested
-definition lists better (32727).
-
-=item *
-
-No longer segfaults when your locale charset is not utf8 with
-C<use open ':locale'> and printing Unicode characters to STDERR (30213)
+C<pod2html> labels anchors more consistently and handles nested definition
+lists better.
 
 =item *
 
 L<threads> cleanup veto has been extended to include C<perl_free> and
-C<perl_destruct> (29827)
-
-C<PL_veto_cleanup> now happens on all platforms, not
-just UNIX (31971)
+C<perl_destruct>
 
 =item *
 
 On some systems, changes to C<$ENV{TZ}> would not always be
 respected by the underlying calls to C<localtime_r>.  Perl now
-forces the inspection of the environment on these systems.  (29213)
-
-=item *
-
-Calling C<dump()> from Win32 and cygwin now gives a proper fatal error (26947).
-
-=item *
-
-Avoid a segfault for perl built without C<PERL_DONT_CREATE_GVSV> defined
-when writing to C<$ARGV>. (32472, 32473)
+forces the inspection of the environment on these systems.
 
 =item *
 
 The special variable C<$^R> is now more consistently set when executing
 regexps using the C<(?{...})> construct.  In particular, it will still
 be set even if backreferences or optional sub-patterns C<(?:...)?> are
-used.  (30100)
+used.
 
 =back
 
@@ -1724,39 +1707,49 @@ able to handle further incoming signals safely.
 This new fatal error occurs when a file test operator is used that is 
 not availble on the current platfom (25987).
 
-=head2 Can't upgrade %s (%d) to %d
-
-This error now reports the type of things that made the upgrade fail (27253).
-
-=head2 %s argument is not a HASH or ARRAY element or a subroutine
-
-This error, thrown if an invalid argument is provided to C<exists> now
-correctly includes "or a subroutine". (RT #38955)
-
-=head2 Cannot make the non-overridable builtin %s fatal
-
-This error in L<Fatal> previously did not show the name of the builtin in
-question (now represented by %s above).
-
-=head2 Offset outside string
-
-Changed to add the seek operation and is now included in the default warnings
-pragma (28903).
-
-=head2 Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
-
-New error, introduced as part of the fix to RT #40641 to handle encoding
-of Unicode characters in regular expression comments.
 
 =head2 FETCHSIZE returned a negative value
 
 New error indicating that a tied array has claimed to have a negative
 number of elements.
 
-=for fixme
+=head2 Can't upgrade %s (%d) to %d
 
-The "Unrecognised character 'x'" error now specifies in which column the
-unrecognised character actually occurred.
+Previously the interal error from the SV upgrade code was the less informative
+I<Can't upgrade that kind of scalar>. It now reprots the current internal type,
+and the new type requested.
+
+=head2 %s argument is not a HASH or ARRAY element or a subroutine
+
+This error, thrown if an invalid argument is provided to C<exists> now
+correctly includes "or a subroutine". [RT #38955]
+
+=head2 Cannot make the non-overridable builtin %s fatal
+
+This error in L<Fatal> previously did not show the name of the builtin in
+question (now represented by %s above).
+
+=head2 Unrecognized character '%s' in column %d
+
+This error previously did not state the column.
+
+=head2 Offset outside string
+
+This can now also be generated by a C<seek> on a file handle using
+C<PerlIO::scalar>.
+
+=head2 Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
+
+New error, introduced as part of the fix to RT #40641 to handle encoding
+of Unicode characters in regular expression comments.
+
+=head2 Your machine doesn't support dump/undump.
+
+A more informative fatal error issued when calling C<dump> on Win32 and
+Cygwin. (Given that the purpose of C<dump> is to abort with a core dump,
+and core dumps can't be produced on these platforms, this is more useful than
+silently exiting.)
+
 
 =head1 Changed Internals
 
@@ -2088,7 +2081,7 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
 
-=fixme rehoming
+=for fixme rehoming
 
 The Emacs perl mode (F<emacs/cperl-mode.el>) has been updated to version
 5.23.
