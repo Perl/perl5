@@ -4933,6 +4933,7 @@ NULL
 	  do_ifmatch:
 	    ST.me = scan;
 	    ST.logical = logical;
+	    logical = 0;
 	    /* execute body of (?...A) */
 	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)));
 	    /* NOTREACHED */
