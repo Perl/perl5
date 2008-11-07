@@ -546,13 +546,7 @@ S_missingterm(pTHX_ char *s)
 	if (nl)
 	    *nl = '\0';
     }
-    else if (
-#ifdef EBCDIC
-	iscntrl(PL_multi_close)
-#else
-	PL_multi_close < 32 || PL_multi_close == 127
-#endif
-	) {
+    else if (isCNTRL(PL_multi_close)) {
 	*tmpbuf = '^';
 	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
