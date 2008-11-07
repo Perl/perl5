@@ -8974,6 +8974,17 @@ Perl_regdump(pTHX_ const regexp *r)
 /*
 - regprop - printable representation of opcode
 */
+#define EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags) \
+STMT_START { \
+        if (do_sep) {                           \
+            Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]); \
+            if (flags & ANYOF_INVERT)           \
+                /*make sure the invert info is in each */ \
+                sv_catpvs(sv, "^");             \
+            do_sep = 0;                         \
+        }                                       \
+} STMT_END
+
 void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 {
@@ -9142,6 +9153,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)
 	    sv_catpvs(sv, "^");
+	
+	/* output what the standard cp 0-255 bitmap matches */
 	for (i = 0; i <= 256; i++) {
 	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
 		if (rangestart == -1)
@@ -9159,11 +9172,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		rangestart = -1;
 	    }
 	}
-        if (do_sep) {
-            sv_catpvs(sv,"][");
-            do_sep = 0;
-        }
-            
+        
+        EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
+        /* output any special charclass tests (used mostly under use locale) */
 	if (o->flags & ANYOF_CLASS)
 	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++)
 		if (ANYOF_CLASS_TEST(o,i)) {
@@ -9171,11 +9182,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		    do_sep = 1;
 		}
         
-        if (do_sep) {
-            sv_catpvs(sv,"][");
-            do_sep = 0;
-        }
-
+        EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
+        
+        /* output information about the unicode matching */
 	if (flags & ANYOF_UNICODE)
 	    sv_catpvs(sv, "{unicode}");
 	else if (flags & ANYOF_UNICODE_ALL)
