@@ -113,6 +113,11 @@ C<-Dv> display the process id as part of the trace output.
 
 =back
 
+=head2 XS-assisted SWASHGET
+
+Some pure-perl code that perl was using to retrieve Unicode properties and
+transliteration mappings has been reimplemented in XS.
+
 =head1 New Platforms
 
 Compile support added for:
@@ -1833,11 +1838,6 @@ particularly C<PL_na>, which is a small performance hit.
 =head1 New Tests
 
 =over 4
-
-=item *
-
-Regression tests for anchored regexes using C<\s> that failed to set C<$&>
-(30073).
 
 =item * 
 
