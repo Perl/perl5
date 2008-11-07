@@ -457,7 +457,7 @@ sub _unoverload {
     my $self = shift;
     my $type = shift;
 
-    $self->_try(sub { require overload; }, die_on_fail => 1);
+    $self->_try(sub { require overload; }, die_on_fail => 0);
 
     foreach my $thing (@_) {
         if( $self->_is_object($$thing) ) {
