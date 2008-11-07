@@ -2,7 +2,7 @@
 #
 # text-options.t -- Additional tests for Pod::Text options.
 #
-# Copyright 2002, 2004, 2006 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.

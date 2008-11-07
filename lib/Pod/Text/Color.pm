@@ -25,7 +25,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Pod::Text);
 
-$VERSION = 2.04;
+$VERSION = '2.05';
 
 ##############################################################################
 # Overrides

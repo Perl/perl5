@@ -58,7 +58,7 @@ use vars qw($running_under_some_shell);
 my $stdin;
 @ARGV = map { $_ eq '-' && !$stdin++ ? ('--', $_) : $_ } @ARGV;
 
-# Parse our options, trying to retain backwards compatibility with pod2man but
+# Parse our options, trying to retain backward compatibility with pod2man but
 # allowing short forms as well.  --lax is currently ignored.
 my %options;
 $options{errors} = 'pod';
@@ -78,7 +78,7 @@ if ($options{official} && !defined $options{center}) {
 my $verbose = $options{verbose};
 delete $options{verbose};
 
-# This isn't a valid Pod::Man option and is only accepted for backwards
+# This isn't a valid Pod::Man option and is only accepted for backward
 # compatibility.
 delete $options{lax};
 
@@ -191,9 +191,9 @@ Print out usage information.
 
 =item B<-l>, B<--lax>
 
-No longer used.  B<pod2man> used to check its input for validity as a manual
-page, but this should now be done by L<podchecker(1)> instead.  Accepted for
-backwards compatibility; this option no longer does anything.
+No longer used.  B<pod2man> used to check its input for validity as a
+manual page, but this should now be done by L<podchecker(1)> instead.
+Accepted for backward compatibility; this option no longer does anything.
 
 =item B<-n> I<name>, B<--name>=I<name>
 
@@ -270,6 +270,12 @@ and avoids corruption of documents containing non-ASCII characters.
 However, be warned that *roff source with literal UTF-8 characters is not
 supported by many implementations and may even result in segfaults and
 other bad behavior.
+
+Be aware that, when using this option, the input encoding of your POD
+source must be properly declared unless it is US-ASCII or Latin-1.  POD
+input without an C<=encoding> command will be assumed to be in Latin-1,
+and if it's actually in UTF-8, the output will be double-encoded.  See
+L<perlpod(1)> for more information on the C<=encoding> command.
 
 =item B<-v>, B<--verbose>
 
@@ -547,8 +553,8 @@ section numbering conventions.
 
 =head1 SEE ALSO
 
-L<Pod::Man>, L<Pod::Simple>, L<man(1)>, L<nroff(1)>, L<podchecker(1)>,
-L<troff(1)>, L<man(7)>
+L<Pod::Man>, L<Pod::Simple>, L<man(1)>, L<nroff(1)>, L<perlpod(1)>,
+L<podchecker(1)>, L<troff(1)>, L<man(7)>
 
 The man page documenting the an macro set may be L<man(5)> instead of
 L<man(7)> on your system.

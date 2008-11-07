@@ -79,7 +79,8 @@ $options{sentence} = 0;
 Getopt::Long::config ('bundling');
 GetOptions (\%options, 'alt|a', 'code', 'color|c', 'help|h', 'indent|i=i',
             'loose|l', 'margin|left-margin|m=i', 'overstrike|o',
-            'quotes|q=s', 'sentence|s', 'stderr', 'termcap|t', 'width|w=i')
+            'quotes|q=s', 'sentence|s', 'stderr', 'termcap|t', 'utf8|u',
+            'width|w=i')
     or exit 1;
 pod2usage (1) if $options{help};
 
@@ -113,11 +114,12 @@ __END__
 pod2text - Convert POD data to formatted ASCII text
 
 =for stopwords
--aclost --alt --stderr Allbery --overstrike overstrike --termcap
+-aclostu --alt --stderr Allbery --overstrike overstrike --termcap --utf8
+UTF-8
 
 =head1 SYNOPSIS
 
-pod2text [B<-aclost>] [B<--code>] [B<-i> I<indent>] S<[B<-q> I<quotes>]>
+pod2text [B<-aclostu>] [B<--code>] [B<-i> I<indent>] S<[B<-q> I<quotes>]>
     [B<--stderr>] S<[B<-w> I<width>]> [I<input> [I<output> ...]]
 
 pod2text B<-h>
@@ -220,6 +222,18 @@ have a termcap file somewhere where Term::Cap can find it and requires that
 your system support termios.  With this option, the output of B<pod2text>
 will contain terminal control sequences for your current terminal type.
 
+=item B<-u>, B<--utf8>
+
+By default, B<pod2text> tries to use the same output encoding as its input
+encoding (to be backward-compatible with older versions).  This option
+says to instead force the output encoding to UTF-8.
+
+Be aware that, when using this option, the input encoding of your POD
+source must be properly declared unless it is US-ASCII or Latin-1.  POD
+input without an C<=encoding> command will be assumed to be in Latin-1,
+and if it's actually in UTF-8, the output will be double-encoded.  See
+L<perlpod(1)> for more information on the C<=encoding> command.
+
 =item B<-w>, B<--width=>I<width>, B<->I<width>
 
 The column at which to wrap text on the right-hand side.  Defaults to 76,
@@ -271,7 +285,7 @@ current terminal device.
 =head1 SEE ALSO
 
 L<Pod::Text>, L<Pod::Text::Color>, L<Pod::Text::Overstrike>,
-L<Pod::Text::Termcap>, L<Pod::Simple>
+L<Pod::Text::Termcap>, L<Pod::Simple>, L<perlpod(1)>
 
 The current version of this script is always available from its web site at
 L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the

@@ -1,13 +1,21 @@
 #!/usr/bin/perl
 #
 # t/pod-spelling.t -- Test POD spelling.
+#
+# Copyright 2008 Russ Allbery <rra@stanford.edu>
+#
+# This program is free software; you may redistribute it and/or modify it
+# under the same terms as Perl itself.
 
 # Called to skip all tests with a reason.
 sub skip_all {
-    print "1..1\n";
-    print "ok 1 # skip - @_\n";
+    print "1..0 # Skipped: @_\n";
     exit;
 }
+
+# Skip all spelling tests unless flagged to run maintainer tests.
+skip_all "Spelling tests only run for maintainer"
+    unless $ENV{RRA_MAINTAINER_TESTS};
 
 # Make sure we have prerequisites.  hunspell is currently not supported due to
 # lack of support for contractions.

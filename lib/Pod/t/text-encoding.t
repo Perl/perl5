@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# text-utf8.t -- Test Pod::Text with UTF-8 input.
+# text-encoding.t -- Test Pod::Text with various weird encoding combinations.
 #
 # Copyright 2002, 2004, 2006, 2007, 2008 by Russ Allbery <rra@stanford.edu>
 #
@@ -16,12 +16,12 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
+    print "1..4\n";
 
-    # UTF-8 support requires Perl 5.8 or later.
+    # PerlIO encoding support requires Perl 5.8 or later.
     if ($] < 5.008) {
         my $n;
-        for $n (1..3) {
+        for $n (1..4) {
             print "ok $n # skip -- Perl 5.8 required for UTF-8 support\n";
         }
         exit;
@@ -37,15 +37,16 @@ use Pod::Text;
 $loaded = 1;
 print "ok 1\n";
 
-my $parser = Pod::Text->new or die "Cannot create parser\n";
 my $n = 2;
-eval { binmode (\*DATA, ':encoding(utf-8)') };
-eval { binmode (\*STDOUT, ':encoding(utf-8)') };
+eval { binmode (\*DATA, ':raw') };
+eval { binmode (\*STDOUT, ':raw') };
 while (<DATA>) {
+    my %opts;
+    $opts{utf8} = 1 if $n == 4;
+    my $parser = Pod::Text->new (%opts) or die "Cannot create parser\n";
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
-    eval { binmode (\*TMP, ':encoding(utf-8)') };
-    print TMP "=encoding UTF-8\n\n";
+    eval { binmode (\*TMP, ':raw') };
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
@@ -55,7 +56,7 @@ while (<DATA>) {
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
-    eval { binmode (\*TMP, ':encoding(utf-8)') };
+    eval { binmode (\*TMP, ':raw') };
     my $output;
     {
         local $/;
@@ -94,21 +95,23 @@ Test of S<>
 ###
 
 ###
+=encoding utf-8
+
 =head1 I can eat glass
 
 =over 4
 
 =item Esperanto
 
-Mi povas manĝi vitron, ĝi ne damaĝas min.
+Mi povas manÄi vitron, Äi ne damaÄas min.
 
 =item Braille
 
-⠊⠀⠉⠁⠝⠀⠑⠁⠞⠀⠛⠇⠁⠎⠎⠀⠁⠝⠙⠀⠊⠞⠀⠙⠕⠑⠎⠝⠞⠀⠓⠥⠗⠞⠀⠍⠑
+â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â ¥â â â â â 
 
 =item Hindi
 
-मैं काँच खा सकता हूँ और मुझे उससे कोई चोट नहीं पहुंचती.
+à¤®à¥à¤ à¤à¤¾à¤à¤ à¤à¤¾ à¤¸à¤à¤¤à¤¾ à¤¹à¥à¤ à¤à¤° à¤®à¥à¤à¥ à¤à¤¸à¤¸à¥ à¤à¥à¤ à¤à¥à¤ à¤¨à¤¹à¥à¤ à¤ªà¤¹à¥à¤à¤à¤¤à¥.
 
 =back
 
@@ -116,14 +119,23 @@ See L<http://www.columbia.edu/kermit/utf8.html>
 ###
 I can eat glass
     Esperanto
-        Mi povas manĝi vitron, ĝi ne damaĝas min.
+        Mi povas manÄi vitron, Äi ne damaÄas min.
 
     Braille
-        ⠊⠀⠉⠁⠝⠀⠑⠁⠞⠀⠛⠇⠁⠎⠎⠀⠁⠝⠙⠀⠊⠞⠀⠙⠕⠑⠎⠝⠞⠀⠓⠥⠗⠞⠀⠍⠑
+        â â â â â â â â â â â â â â â â â â â â â â â
+        â â â â â â â â â ¥â â â â â 
 
     Hindi
-        मैं काँच खा सकता हूँ और मुझे उससे कोई चोट नहीं पहुंचती.
+        à¤®à¥à¤ à¤à¤¾à¤à¤ à¤à¤¾ à¤¸à¤à¤¤à¤¾ à¤¹à¥à¤ à¤à¤°
+        à¤®à¥à¤à¥ à¤à¤¸à¤¸à¥ à¤à¥à¤ à¤à¥à¤ à¤¨à¤¹à¥à¤
+        à¤ªà¤¹à¥à¤à¤à¤¤à¥.
 
     See <http://www.columbia.edu/kermit/utf8.html>
 
+###
+
+###
+=head1 Beyoncé
+###
+BeyoncÃ©
 ###
