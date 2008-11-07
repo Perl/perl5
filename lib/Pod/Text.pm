@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = '3.12';
+$VERSION = '3.12_01';
 
 ##############################################################################
 # Initialization
