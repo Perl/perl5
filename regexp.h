@@ -371,11 +371,13 @@ and check for NULL.
 
 /* For source compatibility. We used to store these explicitly.  */
 #define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
+#define RX_PRECOMP_const(prog)	(RX_WRAPPED_const(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
 #define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ((struct regexp *)SvANY(prog))->pre_prefix - 1)
 #define RX_WRAPPED(prog)	SvPVX(prog)
+#define RX_WRAPPED_const(prog)	SvPVX_const(prog)
 #define RX_WRAPLEN(prog)	SvCUR(prog)
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_REFCNT(prog)		SvREFCNT(prog)

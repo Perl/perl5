@@ -2840,13 +2840,13 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 		STRLEN len;
 		char *retval;
 		char *buffer;
-		const SV *const referent = SvRV(sv);
+		SV *const referent = SvRV(sv);
 
 		if (!referent) {
 		    len = 7;
 		    retval = buffer = savepvn("NULLREF", len);
 		} else if (SvTYPE(referent) == SVt_REGEXP) {
-		    const REGEXP * const re = (REGEXP *)referent;
+		    REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
 		    I32 seen_evals = 0;
 
 		    assert(re);
@@ -10567,7 +10567,7 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	    }
 	    else {
 		/* Some other special case - random pointer */
-		SvPV_set(dstr, SvPVX(sstr));		
+		SvPV_set(dstr, (char *) SvPVX_const(sstr));		
 	    }
 	}
     }
