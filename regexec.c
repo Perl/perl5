@@ -2587,7 +2587,7 @@ S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8,
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            RX_PRECOMP(prog), RX_PRELEN(prog), 60);   
+            RX_PRECOMP_const(prog), RX_PRELEN(prog), 60);   
         
         RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
             start, end - start, 60); 

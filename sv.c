@@ -2836,7 +2836,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		char *retval;
 		char *buffer;
 		MAGIC *mg;
-		const SV *const referent = SvRV(sv);
+		SV *const referent = SvRV(sv);
 
 		if (!referent) {
 		    len = 7;
@@ -10519,7 +10519,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 	    }
 	    else {
 		/* Some other special case - random pointer */
-		SvPV_set(dstr, SvPVX(sstr));		
+		SvPV_set(dstr, (char *) SvPVX_const(sstr));		
 	    }
 	}
     }

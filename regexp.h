@@ -365,6 +365,8 @@ and check for NULL.
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 #define RX_PRECOMP(prog)	((prog)->precomp)
+/* *** 5.10.x-specific definition of RX_PRECOMP_const */
+#define RX_PRECOMP_const(prog)	((prog)->precomp)
 #define RX_PRELEN(prog)		((prog)->prelen)
 #define RX_WRAPPED(prog)	((prog)->wrapped)
 #define RX_WRAPLEN(prog)	((prog)->wraplen)

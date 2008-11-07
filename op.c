@@ -7889,7 +7889,7 @@ Perl_ck_join(pTHX_ OP *o)
     if (kid && kid->op_type == OP_MATCH) {
 	if (ckWARN(WARN_SYNTAX)) {
             const REGEXP *re = PM_GETRE(kPMOP);
-	    const char *pmstr = re ? RX_PRECOMP(re) : "STRING";
+	    const char *pmstr = re ? RX_PRECOMP_const(re) : "STRING";
 	    const STRLEN len = re ? RX_PRELEN(re) : 6;
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"/%.*s/ should probably be written as \"%.*s\"",

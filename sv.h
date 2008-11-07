@@ -1256,7 +1256,7 @@ the scalar's value cannot change unless written to.
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ const SV *const _svpvx = (const SV *)(sv);			\
+	(*({ SV *const _svpvx = MUTABLE_SV(sv);				\
 	    assert(SvTYPE(_svpvx) >= SVt_PV);				\
 	    assert(SvTYPE(_svpvx) != SVt_PVAV);				\
 	    assert(SvTYPE(_svpvx) != SVt_PVHV);				\
