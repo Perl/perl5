@@ -2883,6 +2883,7 @@ lib/Test/Simple/t/Builder/ok_obj.t	Test::Builder tests
 lib/Test/Simple/t/Builder/output.t	Test::Builder tests
 lib/Test/Simple/t/Builder/reset.t	Test::Builder tests
 lib/Test/Simple/t/Builder/try.t		Test::Builder tests
+lib/Test/Simple/t/c_flag.t	Test::Simple test
 lib/Test/Simple/t/circular_data.t	Test::Simple test
 lib/Test/Simple/t/cmp_ok.t	Test::More test
 lib/Test/Simple/t/diag.t	Test::More diag() test

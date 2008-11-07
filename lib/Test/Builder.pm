@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.82_01';
+our $VERSION = '0.85_02';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 # Make Test::Builder thread-safe for ithreads.
@@ -457,7 +457,7 @@ sub _unoverload {
     my $self = shift;
     my $type = shift;
 
-    $self->_try( sub { require overload } ) || return;
+    $self->_try(sub { require overload; }, die_on_fail => 1);
 
     foreach my $thing (@_) {
         if( $self->_is_object($$thing) ) {
@@ -499,6 +499,9 @@ sub _unoverload_num {
 # This is a hack to detect a dualvar such as $!
 sub _is_dualvar {
     my( $self, $val ) = @_;
+
+    # Objects are not dualvars.
+    return 0 if ref $val;
 
     no warnings 'numeric';
     my $numval = $val + 0;
@@ -698,6 +701,24 @@ my %numeric_cmps = map { ( $_, 1 ) } ( "<", "<=", ">", ">=", "==", "!=", "<=>" )
 sub cmp_ok {
     my( $self, $got, $type, $expect, $name ) = @_;
 
+    my $test;
+    my $error;
+    {
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
+
+        local( $@, $!, $SIG{__DIE__} );    # isolate eval
+
+        my($pack, $file, $line) = $self->caller();
+
+        $test = eval qq[
+#line 1 "cmp_ok [from $file line $line]"
+\$got $type \$expect;
+];
+        $error = $@;
+    }
+    local $Level = $Level + 1;
+    my $ok = $self->ok( $test, $name );
+
     # Treat overloaded objects as numbers if we're asked to do a
     # numeric comparison.
     my $unoverload
@@ -705,27 +726,16 @@ sub cmp_ok {
       ? '_unoverload_num'
       : '_unoverload_str';
 
-    $self->$unoverload( \$got, \$expect );
-
-    my $test;
-    {
-        ## no critic (BuiltinFunctions::ProhibitStringyEval)
-
-        local( $@, $!, $SIG{__DIE__} );    # isolate eval
-
-        my $code = $self->_caller_context;
-
-        # Yes, it has to look like this or 5.4.5 won't see the #line
-        # directive.
-        # Don't ask me, man, I just work here.
-        $test = eval "
-$code" . "\$got $type \$expect;";
-
-    }
-    local $Level = $Level + 1;
-    my $ok = $self->ok( $test, $name );
+    $self->diag(<<"END") if $error;
+An error occurred while using $type:
+------------------------------------
+$error
+------------------------------------
+END
 
     unless($ok) {
+        $self->$unoverload( \$got, \$expect );
+
         if( $type =~ /^(eq|==)$/ ) {
             $self->_is_diag( $got, $type, $expect );
         }
@@ -1032,14 +1042,21 @@ It is suggested you use this in place of eval BLOCK.
 =cut
 
 sub _try {
-    my( $self, $code ) = @_;
+    my( $self, $code, %opts ) = @_;
 
-    local $!;               # eval can mess up $!
-    local $@;               # don't set $@ in the test
-    local $SIG{__DIE__};    # don't trip an outside DIE handler.
-    my $return = eval { $code->() };
+    my $error;
+    my $return;
+    {
+        local $!;               # eval can mess up $!
+        local $@;               # don't set $@ in the test
+        local $SIG{__DIE__};    # don't trip an outside DIE handler.
+        $return = eval { $code->() };
+        $error = $@;
+    }
 
-    return wantarray ? ( $return, $@ ) : $return;
+    die $error if $error and $opts{die_on_fail};
+
+    return wantarray ? ( $return, $error ) : $return;
 }
 
 =end private
@@ -1286,7 +1303,7 @@ sub explain {
     return map {
         ref $_
           ? do {
-            require Data::Dumper;
+            $self->_try(sub { require Data::Dumper }, die_on_fail => 1);
 
             my $dumper = Data::Dumper->new( [$_] );
             $dumper->Indent(1)->Terse(1);
@@ -1327,10 +1344,10 @@ sub _print_to_fh {
 
     # Escape each line after the first with a # so we don't
     # confuse Test::Harness.
-    $msg =~ s/\n(.)/\n# $1/sg;
+    $msg =~ s{\n(?!\z)}{\n# }sg;
 
     # Stick a newline on the end if it needs it.
-    $msg .= "\n" unless $msg =~ /\n\Z/;
+    $msg .= "\n" unless $msg =~ /\n\z/;
 
     return print $fh $msg;
 }
@@ -1825,13 +1842,20 @@ Like the normal caller(), except it reports according to your level().
 
 C<$height> will be added to the level().
 
+If caller() winds up off the top of the stack it report the highest context.
+
 =cut
 
 sub caller {    ## no critic (Subroutines::ProhibitBuiltinHomonyms)
     my( $self, $height ) = @_;
     $height ||= 0;
 
-    my @caller = CORE::caller( $self->level + $height + 1 );
+    my $level = $self->level + $height + 1;
+    my @caller;
+    do {
+        @caller = CORE::caller( $level );
+        $level--;
+    } until @caller;
     return wantarray ? @caller : $caller[0];
 }
 

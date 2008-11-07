@@ -291,7 +291,7 @@ ERR
 #     expected: foo
 ERR
     My::Test::like $warnings,
-     qq[/^Argument "foo" isn't numeric in .* at $Filename line 211\\\.\n\$/];
+     qr/^Argument "foo" isn't numeric in .* at cmp_ok \[from $Filename line 211\] line 1\.\n$/;
 
 }
 

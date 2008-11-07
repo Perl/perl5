@@ -16,13 +16,13 @@ use Test::More tests => 9;
 my $tb = Test::Builder->create;
 $tb->level(0);
 
-#line 19
+#line 20
 ok !eval { $tb->plan(tests => undef) };
-is($@, "Got an undefined number of tests at $0 line 19.\n");
+is($@, "Got an undefined number of tests at $0 line 20.\n");
 
-#line 23
+#line 24
 ok !eval { $tb->plan(tests => 0) };
-is($@, "You said to run 0 tests at $0 line 23.\n");
+is($@, "You said to run 0 tests at $0 line 24.\n");
 
 #line 28
 ok !eval { $tb->ok(1) };

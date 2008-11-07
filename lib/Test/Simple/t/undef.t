@@ -32,7 +32,7 @@ sub warnings_is {
 }
 
 sub warnings_like {
-    $TB->like($warnings, "/$_[0]/");
+    $TB->like($warnings, $_[0]);
     $warnings = '';
 }
 
@@ -54,7 +54,7 @@ Test::More->builder->isnt_num(23, undef,  'isnt_num()');
 
 #line 45
 like( undef, '/.*/',        'undef is like anything' );
-warnings_like("Use of uninitialized value.* at $Filename line 45\\.\n");
+warnings_like(qr/Use of uninitialized value.* at $Filename line 45\.\n/);
 
 eq_array( [undef, undef], [undef, 23] );
 no_warnings;
@@ -74,7 +74,7 @@ no_warnings;
 
 #line 64
 cmp_ok( undef, '<=', 2, '  undef <= 2' );
-warnings_like("Use of uninitialized value.* at $Filename line 64\\.\n");
+warnings_like(qr/Use of uninitialized value.* at cmp_ok \[from $Filename line 64\] line 1\.\n/);
 
 
 
