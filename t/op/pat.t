@@ -4617,6 +4617,9 @@ sub kt
 }
 
 SKIP: {
+    # XXX: This set of tests is essentially broken, POSIX character classes
+    # should not have differing definitions under unicode. 
+    # There are property names for that.
     unless ($ordA == 65) { skip("Assumes ASCII", 4) }
 
     my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}

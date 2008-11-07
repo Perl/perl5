@@ -7804,6 +7804,22 @@ case ANYOF_N##NAME:                                     \
     what = WORD;                                        \
     break
 
+/* 
+   We dont use PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS as the direct test
+   so that it is possible to override the option here without having to 
+   rebuild the entire core. as we are required to do if we change regcomp.h
+   which is where PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS is defined.
+*/
+#if PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS
+#define BROKEN_UNICODE_CHARCLASS_MAPPINGS
+#endif
+
+#ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
+#define POSIX_CC_UNI_NAME(CCNAME) CCNAME
+#else
+#define POSIX_CC_UNI_NAME(CCNAME) "Posix" CCNAME
+#endif
+
 /*
    parse a class specification and produce either an ANYOF node that
    matches the pattern or if the pattern matches a single char only and
@@ -8092,18 +8108,24 @@ parseit:
 		 * A similar issue a little earlier when switching on value.
 		 * --jhi */
 		switch ((I32)namedclass) {
+		
+		case _C_C_T_(ALNUMC, isALNUMC(value), POSIX_CC_UNI_NAME("Alnum"));
+		case _C_C_T_(ALPHA, isALPHA(value), POSIX_CC_UNI_NAME("Alpha"));
+		case _C_C_T_(BLANK, isBLANK(value), POSIX_CC_UNI_NAME("Blank"));
+		case _C_C_T_(CNTRL, isCNTRL(value), POSIX_CC_UNI_NAME("Cntrl"));
+		case _C_C_T_(GRAPH, isGRAPH(value), POSIX_CC_UNI_NAME("Graph"));
+		case _C_C_T_(LOWER, isLOWER(value), POSIX_CC_UNI_NAME("Lower"));
+		case _C_C_T_(PRINT, isPRINT(value), POSIX_CC_UNI_NAME("Print"));
+		case _C_C_T_(PSXSPC, isPSXSPC(value), POSIX_CC_UNI_NAME("Space"));
+		case _C_C_T_(PUNCT, isPUNCT(value), POSIX_CC_UNI_NAME("Punct"));
+		case _C_C_T_(UPPER, isUPPER(value), POSIX_CC_UNI_NAME("Upper"));
+#ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
 		case _C_C_T_(ALNUM, isALNUM(value), "Word");
-		case _C_C_T_(ALNUMC, isALNUMC(value), "Alnum");
-		case _C_C_T_(ALPHA, isALPHA(value), "Alpha");
-		case _C_C_T_(BLANK, isBLANK(value), "Blank");
-		case _C_C_T_(CNTRL, isCNTRL(value), "Cntrl");
-		case _C_C_T_(GRAPH, isGRAPH(value), "Graph");
-		case _C_C_T_(LOWER, isLOWER(value), "Lower");
-		case _C_C_T_(PRINT, isPRINT(value), "Print");
-		case _C_C_T_(PSXSPC, isPSXSPC(value), "Space");
-		case _C_C_T_(PUNCT, isPUNCT(value), "Punct");
 		case _C_C_T_(SPACE, isSPACE(value), "SpacePerl");
-		case _C_C_T_(UPPER, isUPPER(value), "Upper");
+#else
+		case _C_C_T_(SPACE, isSPACE(value), "PerlSpace");
+		case _C_C_T_(ALNUM, isALNUM(value), "PerlWord");
+#endif		
 		case _C_C_T_(XDIGIT, isXDIGIT(value), "XDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
 		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
@@ -8150,7 +8172,7 @@ parseit:
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    yesno = '+';
-		    what = "Digit";
+		    what = POSIX_CC_UNI_NAME("Digit");
 		    break;
 		case ANYOF_NDIGIT:
 		    if (LOC)
@@ -8163,7 +8185,7 @@ parseit:
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    yesno = '!';
-		    what = "Digit";
+		    what = POSIX_CC_UNI_NAME("Digit");
 		    break;		
 		case ANYOF_MAX:
 		    /* this is to handle \p and \P */
