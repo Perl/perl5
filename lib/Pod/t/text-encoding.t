@@ -53,6 +53,7 @@ while (<DATA>) {
     }
     close TMP;
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
+    eval { binmode (\*OUT, ':raw') };
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
