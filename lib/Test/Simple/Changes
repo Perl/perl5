@@ -1,3 +1,25 @@
+0.85_01  Thu Oct 23 18:57:38 PDT 2008
+    New Features
+    * cmp_ok() now displays the error if the comparison throws one.
+      For example, broken overloaded objects.
+
+    Bug Fixes
+    * cmp_ok() no longer stringifies or numifies its arguments before comparing.
+      This makes cmp_ok() properly test overloaded ops.
+      [rt.cpan.org 24186] [code.google.com 16]
+    * diag() properly escapes blank lines.
+
+    Feature Changes
+    * cmp_ok() now reports warnings and errors as coming from inside cmp_ok,
+      as well as reporting the caller's file and line.  This let's the user
+      know where cmp_ok() was called from while reminding them that it is
+      being run in a different context.
+
+    Other
+    * Dependency on ExtUtils::MakeMaker 6.27 only on Windows otherwise the
+      nested tests won't run.
+
+
 0.84  Wed Oct 15 09:06:12 EDT 2008
     Other
     * 0.82 accidentally shipped with experimental Mouse dependency.

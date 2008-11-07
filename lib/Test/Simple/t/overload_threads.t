@@ -18,16 +18,7 @@ BEGIN {
     eval { require threads; 'threads'->import; 1; };
 }
 
-use Test::More;
-
-BEGIN {
-    if( !eval "require overload" ) {
-        plan skip_all => "needs overload.pm";
-    }
-    else {
-        plan tests => 5;
-    }
-}
+use Test::More tests => 5;
 
 
 package Overloaded;
