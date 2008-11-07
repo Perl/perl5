@@ -884,7 +884,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple
 				     lib/Test/Builder.pm lib/Test/Builder
-				     lib/Test/More.pm
+				     lib/Test/More.pm lib/Test/Tutorial.pod
 				     t/lib/Test/Simple t/lib/Dev/Null.pm],
 		'CPAN'		=> 1,
 		},
