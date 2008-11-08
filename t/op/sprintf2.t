@@ -6,7 +6,10 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1295;
+plan tests => 1319;
+
+use strict;
+use Config;
 
 is(
     sprintf("%.40g ",0.01),
@@ -139,3 +142,26 @@ foreach my $n (2**1e100, -2**1e100, 2**1e100/2**1e100) { # +Inf, -Inf, NaN
     eval { my $f = sprintf("%f", $n); };
     is $@, "", "sprintf(\"%f\", $n)";
 }
+
+# test %ll formats with and without HAS_QUAD
+eval { my $q = pack "q", 0 };
+my $Q = $@ eq '';
+
+my @tests = (
+  [ '%lld' => '%d', [qw( 4294967296 -100000000000000 )] ],
+  [ '%lli' => '%i', [qw( 4294967296 -100000000000000 )] ],
+  [ '%llu' => '%u', [qw( 4294967296  100000000000000 )] ],
+  [ '%Ld'  => '%d', [qw( 4294967296 -100000000000000 )] ],
+  [ '%Li'  => '%i', [qw( 4294967296 -100000000000000 )] ],
+  [ '%Lu'  => '%u', [qw( 4294967296  100000000000000 )] ],
+);
+
+for my $t (@tests) {
+  my($fmt, $conv) = @$t;
+  for my $num (@{$t->[2]}) {
+    my $w; local $SIG{__WARN__} = sub { $w = shift };
+    is(sprintf($fmt, $num), $Q ? $num : $fmt, "quad: $fmt -> $num");
+    like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$conv"/, "warning: $fmt");
+  }
+}
+
