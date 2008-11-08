@@ -91,6 +91,10 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 		GvIOp(gv) = newIO();
 		s->fh = newRV((SV *) gv);
 		s->io = GvIOp(gv);
+		if (gv) {
+		    /* shamelessly stolen from IO::File's new_tmpfile() */
+		    hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
+		}
 	    }
 	    IoIFP(s->io) = PerlIONext(f);
 	    IoOFP(s->io) = PerlIONext(f);
