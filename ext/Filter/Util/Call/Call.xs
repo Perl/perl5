@@ -125,9 +125,9 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    SAVEINT(current_idx) ; 	/* save current idx */
 	    current_idx = idx ;
 
-	    SAVESPTR(DEFSV) ;	/* save $_ */
+	    SAVE_DEFSV ;	/* save $_ */
 	    /* make $_ use our buffer */
-	    DEFSV = newSVpv("", 0) ; 
+	    DEFSV_set(newSVpv("", 0)) ; 
 
     	    PUSHMARK(sp) ;
 
