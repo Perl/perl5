@@ -148,20 +148,23 @@ eval { my $q = pack "q", 0 };
 my $Q = $@ eq '';
 
 my @tests = (
-  [ '%lld' => '%d', [qw( 4294967296 -100000000000000 )] ],
-  [ '%lli' => '%i', [qw( 4294967296 -100000000000000 )] ],
-  [ '%llu' => '%u', [qw( 4294967296  100000000000000 )] ],
-  [ '%Ld'  => '%d', [qw( 4294967296 -100000000000000 )] ],
-  [ '%Li'  => '%i', [qw( 4294967296 -100000000000000 )] ],
-  [ '%Lu'  => '%u', [qw( 4294967296  100000000000000 )] ],
+  [ '%lld' => [qw( 4294967296 -100000000000000 )] ],
+  [ '%lli' => [qw( 4294967296 -100000000000000 )] ],
+  [ '%llu' => [qw( 4294967296  100000000000000 )] ],
+  [ '%Ld'  => [qw( 4294967296 -100000000000000 )] ],
+  [ '%Li'  => [qw( 4294967296 -100000000000000 )] ],
+  [ '%Lu'  => [qw( 4294967296  100000000000000 )] ],
 );
 
 for my $t (@tests) {
-  my($fmt, $conv) = @$t;
-  for my $num (@{$t->[2]}) {
+  my($fmt, $nums) = @$t;
+  for my $num (@$nums) {
     my $w; local $SIG{__WARN__} = sub { $w = shift };
     is(sprintf($fmt, $num), $Q ? $num : $fmt, "quad: $fmt -> $num");
-    like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$conv"/, "warning: $fmt");
+    {
+      local our $TODO = $Q ? "" : "warning doesn't contain length modifiers";
+      like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$fmt"/, "warning: $fmt");
+    }
   }
 }
 
