@@ -2731,7 +2731,11 @@ print "# some Unicode properties\n";
     print "# SEGV in s/// and UTF-8\n";
     $s = "s#\x{100}" x 4;
     $s =~ s/[^\w]/ /g;
-    print $s eq "s \x{100}" x 4 ? "ok 861\n" : "not ok 861\n";
+    if ($ENV{REAL_POSIX_CC}) {
+        print $s eq "s  " x 4 ? "ok 861\n" : "not ok 861\n";
+    } else {
+        print $s eq "s \x{100}" x 4 ? "ok 861\n" : "not ok 861\n";
+    }
 }
 
 {
@@ -4642,6 +4646,7 @@ SKIP: {
 	grep {/[[:punct:]]/ != /\p{IsPunct}/} map {chr} 0x80..0xff;
     };
     if( $@ ){ skip( $@, 1); }
+    if( $ENV{REAL_POSIX_CC} ) { skip ('PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS set to 0',1); }
     iseq( join('', @isPunctLatin1), '', 
 	'IsPunct agrees with [:punct:] with explicit Latin1');
 } 
