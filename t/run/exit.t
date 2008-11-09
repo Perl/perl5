@@ -20,6 +20,24 @@ BEGIN {
     $numtests = ($^O eq 'VMS') ? 16 : ($^O eq 'MacOS') ? 0 : 17;
 }
 
+
+my $vms_exit_mode = 0;
+
+if ($^O eq 'VMS') {
+    if (eval 'require VMS::Feature') {
+        $vms_exit_mode = !(VMS::Feature::current("posix_exit"));
+    } else {
+        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} =~ /^[ET1]/i; 
+        my $posix_ex = $ENV{'PERL_VMS_POSIX_EXIT'} =~ /^[ET1]/i;
+        if (($unix_rpt || $posix_ex) ) {
+            $vms_exit_mode = 0;
+        } else {
+            $vms_exit_mode = 1;
+        }
+    }
+    $numtests = 29 unless $vms_exit_mode;
+}
+
 require "test.pl";
 plan(tests => $numtests);
 
@@ -34,7 +52,7 @@ is( $exit >> 8, 0,              'Normal exit' );
 is( $exit, $?,                  'Normal exit $?' );
 is( ${^CHILD_ERROR_NATIVE}, $native_success,  'Normal exit ${^CHILD_ERROR_NATIVE}' );
 
-if ($^O ne 'VMS') {
+if (!$vms_exit_mode) {
   my $posix_ok = eval { require POSIX; };
   my $wait_macros_ok = defined &POSIX::WIFEXITED;
   eval { POSIX::WIFEXITED() };
@@ -52,7 +70,11 @@ if ($^O ne 'VMS') {
   }
 
   SKIP: {
-    skip("Skip signals and core dump tests on Win32", 7) if $^O eq 'MSWin32';
+    skip("Skip signals and core dump tests on Win32 and VMS", 7) 
+        if ($^O eq 'MSWin32' || $^O eq 'VMS');
+
+    #TODO VMS will backtrace on this test and exits with code of 0
+    #instead of 15.
 
     $exit = run('kill 15, $$; sleep(1);');
 
@@ -69,7 +91,9 @@ if ($^O ne 'VMS') {
     }
   }
 
-} else {
+}
+
+if ($^O eq 'VMS') {
 
 # On VMS, successful returns from system() are reported 0,  VMS errors that
 # can not be translated to UNIX are reported as EVMSERR, which has a value
@@ -139,7 +163,7 @@ $exit = run("END { \$? = $exit_arg }");
 # status codes to SS$_ABORT on exit, but passes through unmodified UNIX
 # status codes that exit() is called with by scripts.
 
-$exit_arg = (44 & 7) if $^O eq 'VMS';  
+$exit_arg = (44 & 7) if $vms_exit_mode;
 
 is( $exit >> 8, $exit_arg,             'Changing $? in END block' );
 }
