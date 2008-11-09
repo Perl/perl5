@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.06_08';
+$VERSION   = '2.07';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
@@ -396,8 +396,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.06_08 of File::Path, released
-2008-11-05.
+This document describes version 2.07 of File::Path, released
+2008-11-09.
 
 =head1 SYNOPSIS
 
@@ -472,8 +472,8 @@ as it is created. By default nothing is printed.
 
 If present, it should be a reference to a scalar.
 This scalar will be made to reference an array, which will
-be used to store any errors that are encountered.  See the ERROR
-HANDLING section for more information.
+be used to store any errors that are encountered.  See the L</"ERROR
+HANDLING"> section for more information.
 
 If this parameter is not used, certain error conditions may raise
 a fatal error that will cause the program will halt, unless trapped
@@ -489,9 +489,9 @@ in an C<eval> block.
 
 =item mkpath( $dir1, $dir2,..., \%opt )
 
-The mkpath() function provide the legacy interface with a different
-interpretation of the arguments passed.  This function also returns
-the list of directories actually created during the call.
+The mkpath() function provide the legacy interface of make_path() with
+a different interpretation of the arguments passed.  The behaviour and
+return value of the function is otherwise identical to make_path().
 
 =item remove_tree( $dir1, $dir2, .... )
 
@@ -538,7 +538,7 @@ in handy when cleaning out an application's scratch directory.
 If present, it should be a reference to a scalar.
 This scalar will be made to reference an array, which will
 be used to store all files and directories unlinked
-during the call. If nothing is unlinked, a the array will be empty.
+during the call. If nothing is unlinked, the array will be empty.
 
   remove_tree( '/tmp', {result => \my $list} );
   print "unlinked $_\n" for @$list;
@@ -549,8 +549,8 @@ This is a useful alternative to the C<verbose> key.
 
 If present, it should be a reference to a scalar.
 This scalar will be made to reference an array, which will
-be used to store any errors that are encountered.  See the ERROR
-HANDLING section for more information.
+be used to store any errors that are encountered.  See the L</"ERROR
+HANDLING"> section for more information.
 
 Removing things is a much more dangerous proposition than
 creating things. As such, there are certain conditions that
@@ -571,8 +571,10 @@ of hand. This is the safest course of action.
 
 =item rmtree( $dir1, $dir2,..., \%opt )
 
-The rmtree() function provide the legacy interface with a different
-interpretation of the arguments passed.
+The rmtree() function provide the legacy interface of remove_tree()
+with a different interpretation of the arguments passed. The behaviour
+and return value of the function is otherwise identical to
+remove_tree().
 
 =back
 
@@ -594,30 +596,33 @@ errors), or via C<croak> (for fatal errors).
 
 If this behaviour is not desirable, the C<error> attribute may be
 used to hold a reference to a variable, which will be used to store
-the diagnostics. The result is a reference to a list of hash
-references. For each hash reference, the key is the name of the
-file, and the value is the error message (usually the contents of
-C<$!>). An example usage looks like:
+the diagnostics. The variable is made a reference to an array of hash
+references.  Each hash contain a single key/value pair where the key
+is the name of the file, and the value is the error message (including
+the contents of C<$!> when appropriate).  If a general error is
+encountered the diagnostic key will be empty.
+
+An example usage looks like:
 
   remove_tree( 'foo/bar', 'bar/rat', {error => \my $err} );
-  for my $diag (@$err) {
-    my ($file, $message) = each %$diag;
-    print "problem unlinking $file: $message\n";
+  if (@$err) {
+      for my $diag (@$err) {
+          my ($file, $message) = %$diag;
+          if ($file eq '') {
+              print "general error: $message\n";
+          }
+          else {
+              print "problem unlinking $file: $message\n";
+          }
+      }
+  }
+  else {
+      print "No error encountered\n";
   }
 
-If no errors are encountered, C<$err> will point to an empty list
-(thus there is no need to test for C<undef>). If a general error
-is encountered (for instance, C<remove_tree> attempts to remove a directory
-tree that does not exist), the diagnostic key will be empty, only
-the value will be set:
-
-  remove_tree( '/no/such/path', {error => \my $err} );
-  for my $diag (@$err) {
-    my ($file, $message) = each %$diag;
-    if ($file eq '') {
-      print "general error: $message\n";
-    }
-  }
+Note that if no errors are encountered, C<$err> will reference an
+empty array.  This means that C<$err> will always end up TRUE; so you
+need to test C<@$err> to determine if errors occured.
 
 =head2 NOTES
 
@@ -678,19 +683,19 @@ they will be C<carp>ed about. Program execution will not be halted.
 
 =item mkdir [path]: [errmsg] (SEVERE)
 
-C<mkpath> was unable to create the path. Probably some sort of
+C<make_path> was unable to create the path. Probably some sort of
 permissions error at the point of departure, or insufficient resources
 (such as free inodes on Unix).
 
 =item No root path(s) specified
 
-C<mkpath> was not given any paths to create. This message is only
+C<make_path> was not given any paths to create. This message is only
 emitted if the routine is called with the traditional interface.
 The modern interface will remain silent if given nothing to do.
 
 =item No such file or directory
 
-On Windows, if C<mkpath> gives you this warning, it may mean that
+On Windows, if C<make_path> gives you this warning, it may mean that
 you have exceeded your filesystem's maximum path length.
 
 =item cannot fetch initial working directory: [errmsg]
@@ -842,6 +847,9 @@ Paul Szabo identified the race condition originally, and Brendan
 O'Dea wrote an implementation for Debian that addressed the problem.
 That code was used as a basis for the current code. Their efforts
 are greatly appreciated.
+
+Gisle Aas made a number of improvements to the documentation for
+2.07 and his advice and assistance is also greatly appreciated.
 
 =head1 AUTHORS
 
