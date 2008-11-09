@@ -9122,6 +9122,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	STRLEN esignlen = 0;
 
 	const char *eptr = NULL;
+	const char *fmtstart;
 	STRLEN elen = 0;
 	SV *vecsv = NULL;
 	const U8 *vecstr = NULL;
@@ -9161,6 +9162,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	}
 	if (q++ >= patend)
 	    break;
+
+	fmtstart = q;
 
 /*
     We allow format specification elements in this order:
@@ -9976,16 +9979,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		SV * const msg = sv_newmortal();
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
 			  (PL_op->op_type == OP_PRTF) ? "" : "s");
-		if (c) {
-		    if (isPRINT(c))
-			Perl_sv_catpvf(aTHX_ msg,
-				       "\"%%%c\"", c & 0xFF);
-		    else
-			Perl_sv_catpvf(aTHX_ msg,
-				       "\"%%\\%03"UVof"\"",
-				       (UV)c & 0xFF);
-		} else
+		if (fmtstart < patend) {
+		    const char * const fmtend = q < patend ? q : patend;
+		    const char * f;
+		    sv_catpvs(msg, "\"%");
+		    for (f = fmtstart; f < fmtend; f++) {
+			if (isPRINT(*f)) {
+			    sv_catpvn(msg, f, 1);
+			} else {
+			    Perl_sv_catpvf(aTHX_ msg,
+					   "\\%03"UVof, (UV)*f & 0xFF);
+			}
+		    }
+		    sv_catpvs(msg, "\"");
+		} else {
 		    sv_catpvs(msg, "end of string");
+		}
 		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%"SVf, SVfARG(msg)); /* yes, this is reentrant */
 	    }
 

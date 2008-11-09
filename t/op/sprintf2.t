@@ -161,10 +161,7 @@ for my $t (@tests) {
   for my $num (@$nums) {
     my $w; local $SIG{__WARN__} = sub { $w = shift };
     is(sprintf($fmt, $num), $Q ? $num : $fmt, "quad: $fmt -> $num");
-    {
-      local our $TODO = $Q ? "" : "warning doesn't contain length modifiers";
-      like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$fmt"/, "warning: $fmt");
-    }
+    like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$fmt"/, "warning: $fmt");
   }
 }
 
