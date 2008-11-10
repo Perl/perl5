@@ -81,7 +81,7 @@ sub check_cfg {
 
 for my $cfg (@CFG) {
     unless (exists $MANIFEST{$cfg}) {
-	print "[skipping not-expected '$cfg']\n";
+	print STDERR "[skipping not-expected '$cfg']\n";
 	next;
     }
     my %cfg;
