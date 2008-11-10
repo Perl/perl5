@@ -6611,6 +6611,8 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 
 =over 4
 
+=item panic: sv_chop %s
+
 =item Maximal count of pending signals (%s) exceeded
 
 =item Panic: attempt to call %s in %s
@@ -6793,6 +6795,8 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 =item New or Changed Diagnostics
 
 =over 4
+
+=item panic: sv_chop %s
 
 =item Maximal count of pending signals (%s) exceeded
 
