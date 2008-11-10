@@ -2850,8 +2850,8 @@ X<error> X<exception>
 m X</m> X<regex, multiline> X<regexp, multiline> X<regular expression,
 multiline>, s X</s> X<regex, single-line> X<regexp, single-line> X<regular
 expression, single-line>, i X</i> X<regex, case-insensitive> X<regexp,
-case-insensitive> X<regular expression, case-insensitive>, x X</x>, p X</p>
-X<regex, preserve> X<regexp, preserve>, g and c X</g> X</c>
+case-insensitive> X<regular expression, case-insensitive>, x X</x>, g and c
+X</g> X</c>
 
 =item Regular Expressions
 
@@ -6503,27 +6503,172 @@ B<-V>
 
 =item Core Enhancements
 
+=over 4
+
+=item Unicode Character Database 5.1.0.
+
+=item stat and -X on directory handles
+
+=item Source filters in @INC
+
+=item Exceptions in constant folding
+
+=item C<no VERSION>
+
+=item Improved internal UTF-8 caching code
+
+=item Runtime relocatable installations
+
+=item New internal variables
+
+C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
+
+=item C<readpipe> is now overridable
+
+=item simple exception handling macros
+
+=item -D option enhancements 
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=back
+
+=item New Platforms
+
 =item Modules and Pragmata
+
+=over 4
+
+=item New Modules
+
+=item Updated Modules
+
+=back
 
 =item Utility Changes
 
+=over 4
+
+=item debugger upgraded to version 1.30
+
+=item F<perlthanks>
+
+=item F<perlbug>
+
+=item F<h2xs>
+
+=item F<h2ph>
+
+=back
+
 =item New Documentation
+
+=item Changes to Existing Documentation
 
 =item Performance Enhancements
 
 =item Installation and Configuration Improvements
 
+=over 4
+
+=item Relocatable installations
+
+=item Configuration improvements
+
+=item Compilation improvements
+
+=item Installation improvements.
+
+=item Platform Specific Changes
+
+=back
+
 =item Selected Bug Fixes
+
+=over 4
+
+=item Unicode
+
+=item PerlIO
+
+=item Magic
+
+=item Reblessing overloaded objects now works
+
+=item C<strict> now propagates correctly into string evals
+
+=item Other fixes
+
+=item Platform Specific Fixes
+
+=item Smaller fixes
+
+=back
 
 =item New or Changed Diagnostics
 
+=over 4
+
+=item Maximal count of pending signals (%s) exceeded
+
+=item Panic: attempt to call %s in %s
+
+=item FETCHSIZE returned a negative value
+
+=item Can't upgrade %s (%d) to %d
+
+=item %s argument is not a HASH or ARRAY element or a subroutine
+
+=item Cannot make the non-overridable builtin %s fatal
+
+=item Unrecognized character '%s' in column %d
+
+=item Offset outside string
+
+=item Invalid escape in the specified encoding in regexp; marked by <--
+HERE in m/%s/
+
+=item Your machine doesn't support dump/undump.
+
+=back
+
 =item Changed Internals
+
+=over 4
+
+=item Macro cleanups
+
+=back
 
 =item New Tests
 
+ext/DynaLoader/t/DynaLoader.t, t/comp/fold.t, t/io/pvbm.t,
+t/lib/proxy_constant_subs.t, t/op/attrhand.t, t/op/dbm.t,
+t/op/inccode-tie.t, t/op/incfilter.t, t/op/kill0.t, t/op/qrstack.t,
+t/op/qr.t, t/op/regexp_qr_embed.t, t/op/regexp_qr.t, t/op/rxcode.t,
+t/op/studytied.t, t/op/substT.t, t/op/symbolcache.t, t/op/upgrade.t,
+t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t, t/uni/chr.t, t/uni/greek.t,
+t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
+
 =item Known Problems
 
-=item Platform Specific Problems
+=item Platform Specific Notes
+
+=over 4
+
+=item Win32
+
+=item OS/2
+
+=item VMS
+
+=back
+
+=item Obituary
+
+=item Acknowledgements
 
 =item Reporting Bugs
 
@@ -6541,27 +6686,172 @@ B<-V>
 
 =item Core Enhancements
 
+=over 4
+
+=item Unicode Character Database 5.1.0.
+
+=item stat and -X on directory handles
+
+=item Source filters in @INC
+
+=item Exceptions in constant folding
+
+=item C<no VERSION>
+
+=item Improved internal UTF-8 caching code
+
+=item Runtime relocatable installations
+
+=item New internal variables
+
+C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
+
+=item C<readpipe> is now overridable
+
+=item simple exception handling macros
+
+=item -D option enhancements 
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=back
+
+=item New Platforms
+
 =item Modules and Pragmata
+
+=over 4
+
+=item New Modules
+
+=item Updated Modules
+
+=back
 
 =item Utility Changes
 
+=over 4
+
+=item debugger upgraded to version 1.30
+
+=item F<perlthanks>
+
+=item F<perlbug>
+
+=item F<h2xs>
+
+=item F<h2ph>
+
+=back
+
 =item New Documentation
+
+=item Changes to Existing Documentation
 
 =item Performance Enhancements
 
 =item Installation and Configuration Improvements
 
+=over 4
+
+=item Relocatable installations
+
+=item Configuration improvements
+
+=item Compilation improvements
+
+=item Installation improvements.
+
+=item Platform Specific Changes
+
+=back
+
 =item Selected Bug Fixes
+
+=over 4
+
+=item Unicode
+
+=item PerlIO
+
+=item Magic
+
+=item Reblessing overloaded objects now works
+
+=item C<strict> now propagates correctly into string evals
+
+=item Other fixes
+
+=item Platform Specific Fixes
+
+=item Smaller fixes
+
+=back
 
 =item New or Changed Diagnostics
 
+=over 4
+
+=item Maximal count of pending signals (%s) exceeded
+
+=item Panic: attempt to call %s in %s
+
+=item FETCHSIZE returned a negative value
+
+=item Can't upgrade %s (%d) to %d
+
+=item %s argument is not a HASH or ARRAY element or a subroutine
+
+=item Cannot make the non-overridable builtin %s fatal
+
+=item Unrecognized character '%s' in column %d
+
+=item Offset outside string
+
+=item Invalid escape in the specified encoding in regexp; marked by <--
+HERE in m/%s/
+
+=item Your machine doesn't support dump/undump.
+
+=back
+
 =item Changed Internals
+
+=over 4
+
+=item Macro cleanups
+
+=back
 
 =item New Tests
 
+ext/DynaLoader/t/DynaLoader.t, t/comp/fold.t, t/io/pvbm.t,
+t/lib/proxy_constant_subs.t, t/op/attrhand.t, t/op/dbm.t,
+t/op/inccode-tie.t, t/op/incfilter.t, t/op/kill0.t, t/op/qrstack.t,
+t/op/qr.t, t/op/regexp_qr_embed.t, t/op/regexp_qr.t, t/op/rxcode.t,
+t/op/studytied.t, t/op/substT.t, t/op/symbolcache.t, t/op/upgrade.t,
+t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t, t/uni/chr.t, t/uni/greek.t,
+t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
+
 =item Known Problems
 
-=item Platform Specific Problems
+=item Platform Specific Notes
+
+=over 4
+
+=item Win32
+
+=item OS/2
+
+=item VMS
+
+=back
+
+=item Obituary
+
+=item Acknowledgements
 
 =item Reporting Bugs
 
@@ -16868,15 +17158,20 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 =item DESCRIPTION
 
+make_path( $dir1, $dir2, .... ), make_path( $dir1, $dir2, ...., \%opts ),
+mode => $num, verbose => $bool, error => \$err, mkpath( $dir ), mkpath(
+$dir, $verbose, $mode ), mkpath( [$dir1, $dir2,...], $verbose, $mode ),
+mkpath( $dir1, $dir2,..., \%opt ), remove_tree( $dir1, $dir2, .... ),
+remove_tree( $dir1, $dir2, ...., \%opts ), verbose => $bool, safe => $bool,
+keep_root => $bool, result => \$res, error => \$err, rmtree( $dir ),
+rmtree( $dir, $verbose, $safe ), rmtree( [$dir1, $dir2,...], $verbose,
+$safe ), rmtree( $dir1, $dir2,..., \%opt )
+
 =over 4
 
-=item FUNCTIONS
-
-mode, verbose, error, verbose, safe, keep_root, result, error
-
-=item TRADITIONAL INTERFACE
-
 =item ERROR HANDLING
+
+B<NOTE:>
 
 =item NOTES
 
@@ -16887,17 +17182,18 @@ mode, verbose, error, verbose, safe, keep_root, result, error
 mkdir [path]: [errmsg] (SEVERE), No root path(s) specified, No such file or
 directory, cannot fetch initial working directory: [errmsg], cannot stat
 initial working directory: [errmsg], cannot chdir to [dir]: [errmsg],
-directory [dir] changed before chdir, expected dev=[n] inode=[n], actual
+directory [dir] changed before chdir, expected dev=[n] ino=[n], actual
 dev=[n] ino=[n], aborting. (FATAL), cannot make directory [dir]
 read+writeable: [errmsg], cannot read [dir]: [errmsg], cannot reset chmod
-[dir]: [errmsg], cannot chdir to [parent-dir] from [child-dir]: [errmsg],
-aborting. (FATAL), cannot stat prior working directory [dir]: [errmsg],
-aborting. (FATAL), previous directory [parent-dir] changed before entering
-[child-dir], expected dev=[n] inode=[n], actual dev=[n] ino=[n], aborting.
-(FATAL), cannot make directory [dir] writeable: [errmsg], cannot remove
-directory [dir]: [errmsg], cannot restore permissions of [dir] to [0nnn]:
-[errmsg], cannot make file [file] writeable: [errmsg], cannot unlink file
-[file]: [errmsg], cannot restore permissions of [file] to [0nnn]: [errmsg]
+[dir]: [errmsg], cannot remove [dir] when cwd is [dir], cannot chdir to
+[parent-dir] from [child-dir]: [errmsg], aborting. (FATAL), cannot stat
+prior working directory [dir]: [errmsg], aborting. (FATAL), previous
+directory [parent-dir] changed before entering [child-dir], expected
+dev=[n] ino=[n], actual dev=[n] ino=[n], aborting. (FATAL), cannot make
+directory [dir] writeable: [errmsg], cannot remove directory [dir]:
+[errmsg], cannot restore permissions of [dir] to [0nnn]: [errmsg], cannot
+make file [file] writeable: [errmsg], cannot unlink file [file]: [errmsg],
+cannot restore permissions of [file] to [0nnn]: [errmsg]
 
 =item SEE ALSO
 
