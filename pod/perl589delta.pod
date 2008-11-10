@@ -759,7 +759,7 @@ C<Switch> upgraded to version 2.13
 
 =item *
 
-C<Sys::Syslog> upraded to version 0.27
+C<Sys::Syslog> upgraded to version 0.27
 
 =item *
 
@@ -1598,7 +1598,7 @@ additional check for C<$Config{gccversion}>.
 
 =item *
 
-Use -DPTR_IS_LONG when using 64 bit integers
+Use C<-DPTR_IS_LONG> when using 64 bit integers
 
 =back
 
