@@ -10562,8 +10562,8 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 
     if (SvROK(sstr)) {
 	SvRV_set(dstr, SvWEAKREF(sstr)
-		       ? sv_dup(SvRV(sstr), param)
-		       : sv_dup_inc(SvRV(sstr), param));
+		       ? sv_dup(SvRV_const(sstr), param)
+		       : sv_dup_inc(SvRV_const(sstr), param));
 
     }
     else if (SvPVX_const(sstr)) {

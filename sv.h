@@ -1048,6 +1048,7 @@ the scalar's value cannot change unless written to.
 #  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
 #  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv)
 #  define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
+#  define SvRV_const(sv) (0 + (sv)->sv_u.svu_rv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
 #    define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
@@ -1119,7 +1120,7 @@ the scalar's value cannot change unless written to.
 	    &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
 	 }))
 #    define SvRV(sv)							\
-	(*({ const SV *const _svrv = (const SV *)(sv);			\
+	(*({ SV *const _svrv = MUTABLE_SV(sv);				\
 	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
 	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
 	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
@@ -1128,6 +1129,16 @@ the scalar's value cannot change unless written to.
 	    assert(!isGV_with_GP(_svrv));				\
 	    &((_svrv)->sv_u.svu_rv);					\
 	 }))
+#    define SvRV_const(sv)						\
+	({ const SV *const _svrv = (const SV *)(sv);			\
+	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
+	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVCV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVFM);				\
+	    assert(!isGV_with_GP(_svrv));				\
+	    (_svrv)->sv_u.svu_rv;					\
+	 })
 #    define SvMAGIC(sv)							\
 	(*({ const SV *const _svmagic = (const SV *)(sv);		\
 	    assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
@@ -1147,6 +1158,7 @@ the scalar's value cannot change unless written to.
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
 #    define SvRV(sv) ((sv)->sv_u.svu_rv)
+#    define SvRV_const(sv) (0 + (sv)->sv_u.svu_rv)
 #    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
