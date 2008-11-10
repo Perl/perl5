@@ -62,7 +62,7 @@ to verify that it is not the cause of suspected problems.
 
 =head2 Runtime relocatable installations
 
-There is now Configure support for creating a perl tree that is relocatable
+There is now F<Configure> support for creating a perl tree that is relocatable
 at run time. see L</Relocatable installations>.
 
 =head2 New internal variables
@@ -92,7 +92,7 @@ also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
 
 Perl 5.8.9 (and 5.10.0 onwards) now provides a couple of macros to do very
 basic exception handling in XS modules. You can use these macros if you call
-code that may croak, but you need to do some cleanup before giving control
+code that may C<croak>, but you need to do some cleanup before giving control
 back to Perl. See L<perlguts/Exception Handling> for more details.
 
 =head2 -D option enhancements 
@@ -115,8 +115,9 @@ C<-Dv> displays the process id as part of the trace output.
 
 =head2 XS-assisted SWASHGET
 
-Some pure-perl code that perl was using to retrieve Unicode properties and
-transliteration mappings has been reimplemented in XS. (SADAHIRO Tomoyuki)
+Some pure-perl code that the regexp engine was using to retrieve Unicode
+properties and transliteration mappings has been reimplemented in XS.
+(SADAHIRO Tomoyuki)
 
 =head2 Constant subroutines
 
@@ -273,7 +274,7 @@ each function defined in its namespace.
 
 =item *
 
-Now has documentation of detailed hint symbols.
+now has documentation of detailed hint symbols.
 
 =back
 
@@ -325,7 +326,7 @@ C<base> upgraded to version 2.13
 
 =item *
 
-Loading a module via base.pm would mask a global C<$SIG{__DIE__}> in that
+loading a module via base.pm would mask a global C<$SIG{__DIE__}> in that
 module.
 
 =item *
@@ -346,7 +347,7 @@ C<bignum> upgraded to 0.23
 
 C<Carp> upgraded to version 1.10
 
-Carp's argument backtrace code would show C<undef> as I<"undef"> - a string.
+The argument backtrace code would show C<undef> as I<"undef"> - a string.
 
 =item *
 
@@ -414,7 +415,7 @@ C<DirHandle> upgraded to version 1.02
 
 =item *
 
-Now localises C<$.>, C<$@>, C<$!>, C<$^E>, and C<$?> before closing the
+now localises C<$.>, C<$@>, C<$!>, C<$^E>, and C<$?> before closing the
 directory handle to suppress leaking any side effects of warnings about it
 already being closed.
 
@@ -466,7 +467,7 @@ C<ExtUtils::MakeMaker> upgraded to version 6.48
 
 =item *
 
-Support for C<INSTALLSITESCRIPT> and C<INSTALLVENDORSCRIPT>
+support for C<INSTALLSITESCRIPT> and C<INSTALLVENDORSCRIPT>
 configuration.
 
 =back
@@ -487,7 +488,7 @@ C<Fatal> upgraded to version 1.06
 
 =item *
 
-Allows built-ins in C<CORE::GLOBAL> to be made fatal.
+allows built-ins in C<CORE::GLOBAL> to be made fatal.
 
 =back
 
@@ -503,7 +504,7 @@ C<File::Copy> upgraded to 2.13
 
 =item *
 
-Now uses 3-arg open.
+now uses 3-arg open.
 
 =back
 
@@ -519,7 +520,7 @@ C<File::Glob> upgraded to version 1.06
 
 =item *
 
-Fixes spurious results with brackets inside braces.
+fixes spurious results with brackets inside braces.
 
 =back
 
@@ -540,7 +541,7 @@ improved handling of bad arguments.
 =item *
 
 some platform specific improvements (including for VMS and Cygwin), with
-an optimization on C<abs2rel> when handling both relative arguments.
+an optimisation on C<abs2rel> when handling both relative arguments.
 
 =back
 
@@ -572,7 +573,7 @@ C<Hash::Util> upgraded to version 0.06
 
 C<IO> upgraded to version 1.23
 
-Reduced number of calls to C<getpeername> in C<IO::Socket>.
+Reduced number of calls to C<getpeername> in C<IO::Socket>
 
 =item *
 
@@ -586,7 +587,7 @@ C<lib> upgraded to version 0.61
 
 =item *
 
-Avoid warning about loading F<.par> files
+avoid warning about loading F<.par> files.
 
 =back
 
@@ -614,7 +615,7 @@ C<Math::BigRat> upgraded to version 0.22
 
 =item *
 
-Implements new C<as_float> method.
+implements new C<as_float> method.
 
 =back
 
@@ -630,7 +631,7 @@ C<NDBM_File> upgraded to version 1.07
 
 =item *
 
-Improve F<g++> handling for systems using GDBM compatibility headers.
+improve F<g++> handling for systems using GDBM compatibility headers.
 
 =back
 
@@ -646,7 +647,7 @@ C<NEXT> upgraded to version 0.61
 
 =item *
 
-Fix several bugs with L<NEXT> when working with C<AUTOLOAD>, C<eval> block, and
+fix several bugs with C<NEXT> when working with C<AUTOLOAD>, C<eval> block, and
 within overloaded stringification.
 
 =back
@@ -667,7 +668,7 @@ C<PerlIO::scalar> upgraded to version 0.06
 
 =item *
 
-[RT #40267] C<PerlIO::scalar> doesn't respect readonly-ness
+[RT #40267] C<PerlIO::scalar> doesn't respect readonly-ness.
 
 =back
 
@@ -727,15 +728,15 @@ C<SDBM_File> upgraded to version 1.06
 
 =item *
 
-L<SelfLoader> upgraded to version 1.17
+C<SelfLoader> upgraded to version 1.17
 
 =item *
 
-L<Shell> upgraded to version 0.72
+C<Shell> upgraded to version 0.72
 
 =item *
 
-L<sigtrap> upgraded to version 1.04
+C<sigtrap> upgraded to version 1.04
 
 =item *
 
@@ -745,7 +746,7 @@ C<Socket> upgraded to version 1.81
 
 =item *
 
-This fixes an optimistic use of C<gethostbyname>.
+this fixes an optimistic use of C<gethostbyname>.
 
 =back
 
@@ -785,7 +786,7 @@ C<Test::Harness> upgraded version to 2.64
 
 =item *
 
-This made it able to handle newlines.
+this makes it able to handle newlines.
 
 =back
 
@@ -833,15 +834,15 @@ C<Thread::Queue> upgraded to version 2.11
 
 =item *
 
-Added capability to add complex structures (e.g., hash of hashes) to queues.
+added capability to add complex structures (e.g., hash of hashes) to queues.
 
 =item *
 
-Added capability to dequeue multiple items at once
+added capability to dequeue multiple items at once
 
 =item *
 
-Added new methods to inspect and manipulate queues:  C<peek>, C<insert> and
+added new methods to inspect and manipulate queues:  C<peek>, C<insert> and
 C<extract>
 
 =back
@@ -872,7 +873,7 @@ C<Time::Local> upgraded to version 1.1901
 
 C<Time::HiRes> upgraded to version 1.9715 with various build improvements 
 (including VMS) and minor platform-specific bug fixes (including
-for HP-UX 11 ia64)
+for HP-UX 11 ia64).
 
 =item *
 
@@ -882,21 +883,21 @@ C<threads> upgraded to 1.71
 
 =item *
 
-New thread state information methods: C<is_running>, C<is_detached>
+new thread state information methods: C<is_running>, C<is_detached>
 and C<is_joinable>.  C<list> method enhanced to return running or joinable
 threads.
 
 =item *
 
-New thread signal method: C<kill>
+new thread signal method: C<kill>
 
 =item *
 
-Added capability to specify thread stack size.
+added capability to specify thread stack size.
 
 =item *
 
-Added capability to control thread exiting behavior.  Added a new C<exit>
+added capability to control thread exiting behavior.  Added a new C<exit>
 method.
 
 =back
@@ -909,21 +910,21 @@ C<threads::shared> upgraded to version 1.26
 
 =item *
 
-Smaller and quicker implementation that eliminates one internal structure and
+smaller and faster implementation that eliminates one internal structure and
 the consequent level of indirection.
 
 =item *
 
-User locks are now stored in a safer manner.
+user locks are now stored in a safer manner.
 
 =item *
 
-New function C<shared_clone> creates a copy of an object leaving
+new function C<shared_clone> creates a copy of an object leaving
 shared elements as-is and deep-cloning non-shared elements.
 
 =item *
 
-Added new C<is_shared> method.
+added new C<is_shared> method.
 
 =back
 
@@ -943,7 +944,7 @@ C<Win32> upgraded to version 0.38
 
 =item *
 
-Added new function C<GetCurrentProcessId> which returns the regular Window
+added new function C<GetCurrentProcessId> which returns the regular Window
 process identifier of the current process, even when called from within a fork.
 
 =back
@@ -1069,7 +1070,7 @@ L<reverse> function documentation received scalar context examples.
 
 =back
 
-L<perllocale> documentation is adjusted for the number of localization and
+L<perllocale> documentation is adjusted for number localization and
 C<POSIX::setlocale> to fix Debian bug #379463.
 
 L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
@@ -1092,9 +1093,6 @@ L<perlrun> is updated to clarify on the hash seed I<PERL_HASH_SEED>. Also more
 information in options B<-x> and B<-u>.
 
 L<perlsub> example is updated to use a lexical variable for C<opendir> syntax.
-
-L<perltoc> the table of content is updated with several new documentation and
-cleaned up unnecessary noises.
 
 L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
 
@@ -1148,8 +1146,9 @@ char-classes as an escaping mechanism will see a speedup. (Yves Orton)
 =item *
 
 Creating anonymous array and hash references (ie. C<[]> and C<{}>) now incurs
-no more overhead than creating an anonymous list or hash. Nicholas Clark provided
-changes with a saving of two ops and one stack push, measured as a 6.4% improve 
+no more overhead than creating an anonymous list or hash. Nicholas Clark
+provided changes with a saving of two ops and one stack push, which was measured
+as a slightly better than 5% improvement for these operations.
 
 =item *
 
@@ -1176,12 +1175,12 @@ a key mismatch, present since the initial implementation). [RT #42839]
 
 =head2 Relocatable installations
 
-There is now Configure support for creating a relocatable perl tree. If
-you Configure with C<-Duserelocatableinc>, then the paths in C<@INC> (and
+There is now F<Configure> support for creating a relocatable perl tree. If
+you F<Configure> with C<-Duserelocatableinc>, then the paths in C<@INC> (and
 everything else in C<%Config>) can be optionally located via the path of the
 F<perl> executable.
 
-At start time, if any paths in C<@INC> or C<Config> that C<Configure> marked
+At start time, if any paths in C<@INC> or C<Config> that F<Configure> marked
 as relocatable (by starting them with C<".../">), then they are prefixed the
 directory of C<$^X>. This allows the relocation can be configured on a
 per-directory basis, although the default with C<-Duserelocatableinc> is that
@@ -1191,7 +1190,7 @@ prefix.
 =head2 Configuration improvements
 
 F<Configure> is now better at removing temporary files. Tom Callaway
-(from RedHat) also contributed patches that completes the set of flags
+(from RedHat) also contributed patches that complete the set of flags
 passed to the compiler and the linker, in particular that C<-fPIC> is now
 enabled on Linux. It will also croak when your F</dev/null> isn't a device.
 
@@ -1257,8 +1256,8 @@ Linux, MachTen, NetBSD, OS/390, QNX, SCO, Solaris, SunOS, System V Release 5.x
 =item *
 
 Drop C<-std=c89> and C<-ansi> if using C<long long> as the main integral type,
-else in FreeBSD 6.2 (and perhaps other releases), headers do not declare some
-functions required required by perl.
+else in FreeBSD 6.2 (and perhaps other releases), system headers do not
+declare some functions required by perl.
 
 =back
 
@@ -1293,12 +1292,12 @@ Help older VMS compilers by using C<ccflags> when building C<munchconfig.exe>.
 
 =item * 
 
-Don't try to build old L<Thread> extension on VMS when C<-Duseithreads> has
+Don't try to build old C<Thread> extension on VMS when C<-Duseithreads> has
 been chosen.
 
 =item *
 
-Passing a raw string of "NaN" to L<nawk> causes a core dump - so the string
+Passing a raw string of "NaN" to F<nawk> causes a core dump - so the string
 has been changed to "*NaN*"
 
 =item *
@@ -1316,9 +1315,8 @@ F<t/op/stat.t> tests will now test hard links on VMS if they are supported.
 When using a shared perl library F<installperl> no longer installs static
 library files, import library files and export library files (of statically
 linked extensions) and empty bootstrap files (of dynamically linked
-extensions).
-
-This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
+extensions). This fixes a problem building PAR-Packer on Win32 with a debug
+build of perl.
 
 =item *
 
@@ -1650,7 +1648,7 @@ The process id is no longer truncated to 16 bits on some Windows platforms
 =item *
 
 Fixed bug RT #54828 in F<perlio.c> when calling C<binmode> on Win32 and Cgywin
-may cause segmentation fault.
+may cause a segmentation fault.
 
 =back
 
@@ -1664,7 +1662,7 @@ It is now possible to overload C<eq> when using C<nomethod>.
 
 =item *
 
-Various problems using L<overload> with 64 bit integers corrected.
+Various problems using C<overload> with 64 bit integers corrected.
 
 =item *
 
@@ -1719,7 +1717,7 @@ lists better.
 
 =item *
 
-L<threads> cleanup veto has been extended to include C<perl_free()> and
+C<threads> cleanup veto has been extended to include C<perl_free()> and
 C<perl_destruct()>
 
 =item *
@@ -1775,7 +1773,7 @@ correctly includes "or a subroutine". [RT #38955]
 
 =head2 Cannot make the non-overridable builtin %s fatal
 
-This error in L<Fatal> previously did not show the name of the builtin in
+This error in C<Fatal> previously did not show the name of the builtin in
 question (now represented by %s above).
 
 =head2 Unrecognized character '%s' in column %d
@@ -1815,7 +1813,7 @@ replacement of the common idiom
     sv = newSV(0);
     sv_upgrade(sv, type);
 
-Similarly C<newSVpvn_flags()> can be used to combine C<Perl_newSVpv()> with
+Similarly C<Perl_newSVpvn_flags()> can be used to combine C<Perl_newSVpv()> with
 C<Perl_sv_2mortal()> or the equivalent C<Perl_sv_newmortal()> with
 C<Perl_sv_setpvn()>
 
@@ -1862,8 +1860,8 @@ All compile time options which affect binary compatibility have been grouped
 together into a global variable (C<PL_bincompat_options>).
 
 The values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION> are
-now backed into global variables (and hence into any shared perl library).
-Additionally under C<MULTIPLICITY>, the perl executable now record the size of
+now baked into global variables (and hence into any shared perl library).
+Additionally under C<MULTIPLICITY>, the perl executable now records the size of
 the interpreter structure (total, and for this version). Coupled with
 C<PL_bincompat_options> this will allow 5.8.10 (and later), when compiled with a
 shared perl library, to perform sanity checks in C<main()> to verify that the
