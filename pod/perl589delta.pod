@@ -25,7 +25,7 @@ notable changes.
 
 It is now possible to call C<stat> and the C<-X> filestat operators on
 directory handles. As both directory and file handles are barewords, there
-can be amiguities over which was intended. In these situations the file
+can be ambiguities over which was intended. In these situations the file
 handle semantics are preferred. Both also treat C<*FILE{IO}> filehandles
 like C<*FILE> filehandles.
 
@@ -53,7 +53,7 @@ want to use a version of perl older than the specified one.
 =head2 Improved internal UTF-8 caching code
 
 The code that caches calculated UTF-8 byte offsets for character offsets for
-a string has been re-writtten. Several bugs have been located and eliminated,
+a string has been re-written. Several bugs have been located and eliminated,
 and the code now makes better use of the information it has, so should be
 faster. In particular, it doesn't scan to the end of a string before
 calculating an offset within the string, which should speed up some operations
@@ -79,7 +79,7 @@ C<system> operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
 
 This variable controls the state of the internal UTF-8 offset caching code.
 1 for on (the default), 0 for off, -1 to debug the caching code by checking
-all its results against linear scans, and panicking on any discrepancy.
+all its results against linear scans, and panicing on any discrepancy.
 
 =back
 
@@ -218,7 +218,7 @@ C<B> upgraded from 1.09_01 to 1.19
 
 provides new PAD related abstraction macros C<B::NV::COP_SEQ_RANGE_LOW>,
 C<B::NV::COP_SEQ_RANGE_HIGH>, C<B::NV::PARENT_PAD_INDEX>,
-C<B::NV::PARENT_FAKELEX_FLAGS>, which hides the diffence in storage in
+C<B::NV::PARENT_FAKELEX_FLAGS>, which hides the difference in storage in
 5.10.0 and later.
 
 =item *
@@ -1154,7 +1154,7 @@ char-classes as an escaping mechanism will see a speedup. (Yves Orton)
 =item *
 
 Creating anonymous array and hash references (ie. C<[]> and C<{}>) now incurs
-no more overhead than creating an anonymous list or hash. Nicholas Clark provid
+no more overhead than creating an anonymous list or hash. Nicholas Clark provided
 changes with a saving of two ops and one stack push, measured as a 6.4% improve 
 
 =item *
@@ -1201,9 +1201,9 @@ C<Configure> is now better at removing temporary files. Tom Callaway
 passed to the compiler and the linker, in particular that C<-fPIC> is now
 enabled on Linux. It will also croak when your F</dev/null> isn't a device.
 
-A new configutation variable C<d_pseudofork> has been to C<Configure>, and is
+A new configuration variable C<d_pseudofork> has been to C<Configure>, and is
 available as  C<$Config{d_pseudofork}> in the C<Config> module. This
-distinguishes real C<fork> support from the pseudofork emuluation used on
+distinguishes real C<fork> support from the pseudofork emulation used on
 Windows platforms.
 
 C<Config.pod> and C<config.sh> are now placed correctly for cross-compilation.
@@ -1328,7 +1328,7 @@ This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
 
 =item *
 
-Various improvements to the win32 build process, includding support for Visual
+Various improvements to the win32 build process, including support for Visual
 C++ 2005 Express Edition (aka Visual C++ 8.x).
 
 =item * 
@@ -1363,7 +1363,7 @@ via C<tie>, overloading or C<$@> are now gone, some of which were never
 reported.
 
 C<unpack> will internally convert the string back from UTF-8 on numeric types.
-This is a compramise between the full consistency now in 5.10, and the current
+This is a compromise between the full consistency now in 5.10, and the current
 behaviour, which is often used as a "feature" on string types.
 
 Using C<:crlf> and C<UTF-16> IO layers together will now work.
@@ -1375,7 +1375,7 @@ Fixed bug RT #40641 - encoding of Unicode characters in regular expressions.
 Fixed a bug where using certain patterns in a regex led to a panic.
 [RT #45337]
 
-Perl longer segfaults (due to infininte internal recursion) if the locale's
+Perl longer segfaults (due to infinite internal recursion) if the locale's
 character is not UTF-8 [RT #41442]:
 
     use open ':locale';
@@ -1408,7 +1408,7 @@ For the implementation details, see L<perlguts/Magic Virtual Tables>.
 
 =head2 Reblessing overloaded objects now works
 
-Internaly, perl object-ness is on the referenant, not the reference, even
+Internally, perl object-ness is on the referent, not the reference, even
 though methods can only be called via a reference. However, the original
 implementation of overloading stored flags related to overloading on the
 reference, relying on the flags being copied when the reference was copied,
@@ -1416,23 +1416,23 @@ or set at the creation of a new reference. This manifests in a bug - if you
 rebless an object from a class that has overloading, into one that does not,
 then any other existing references think that they (still) point to an
 overloaded object, choose these C code paths, and then throw errors.
-Analagously, blessing into an overloaded class when other references exist will
+Analogously, blessing into an overloaded class when other references exist will
 result in them not using overloading.
 
 The implementation has been fixed for 5.10, but this fix changes the semantics
 of flag bits, so is not binary compatible, so can't be applied to 5.8.9.
 However, 5.8.9 has a work-around that implements the same bug fix. If the
-referant has multiple references, then all the other references are located and
+referent has multiple references, then all the other references are located and
 corrected. A full search is avoided whenever possible by scanning lexicals
 outwards from the current subroutine, and the argument stack.
 
 A certain well known Linux vendor applied incomplete versions of this bug fix
 to their F</usr/bin/perl> and then prematurely closed bug reports about
 performance issues without consulting back upstream. This not being enough,
-they then proceded to ignore the necessary fixes to these unreleased changes
+they then proceeded to ignore the necessary fixes to these unreleased changes
 for 11 months, until massive pressure was applied by their long-suffering
 paying customers, catalysed by the failings being featured on a prominent blog
-and slashdot.
+and Slashdot.
 
 =head2 C<strict> now propagates correctly into string evals
 
@@ -1499,7 +1499,7 @@ a C<system()> call.
 
 =item *
 
-Fixed bug RT #37886, unsafe dereferencations were allowed in the argument of
+Fixed bug RT #37886, symbolic deferencing was allowed in the argument of
 C<defined()> even under the influence of C<use strict 'refs'>.
 
 =item *
@@ -1529,7 +1529,7 @@ underlying hash.
 
 =item *
 
-Fix bug RT #6006, regex replaces using large replacement variables fail some of
+Fix bug RT #6006, regexp replaces using large replacement variables fail some of
 the time, I<i.e.> when substitution contains something like C<${10}> (note the
 bracket) instead of just C<$10>.
 
@@ -1645,7 +1645,7 @@ Aligned floating point build policies for F<cc> and F<gcc>.
 =item *
 
 Revisited a patch from 5.6.1 for RH7.2 for Intel's F<icc> [RT #7916], added an
-aditional check for C<$Config{gccversion}>.
+additional check for C<$Config{gccversion}>.
 
 =back
 
@@ -1698,7 +1698,7 @@ used.
 
 =item *
 
-Width and precion in sprintf didn't handle characters above 255 correctly.
+Width and precision in sprintf didn't handle characters above 255 correctly.
 [RT #40473]
 
 =item *
@@ -1763,8 +1763,8 @@ number of elements.
 
 =head2 Can't upgrade %s (%d) to %d
 
-Previously the interal error from the SV upgrade code was the less informative
-I<Can't upgrade that kind of scalar>. It now reprots the current internal type,
+Previously the internal error from the SV upgrade code was the less informative
+I<Can't upgrade that kind of scalar>. It now reports the current internal type,
 and the new type requested.
 
 =head2 %s argument is not a HASH or ARRAY element or a subroutine
@@ -1786,7 +1786,7 @@ This error previously did not state the column.
 This can now also be generated by a C<seek> on a file handle using
 C<PerlIO::scalar>.
 
-=head2 Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
+=head2 Invalid escape in the specified encoding in regexp; marked by <-- HERE in m/%s/
 
 New error, introduced as part of the fix to RT #40641 to handle encoding
 of Unicode characters in regular expression comments.
@@ -1839,10 +1839,10 @@ There have been many small cleanups made to the internals. In particular,
 C<sv_upgrade()> has been simplified considerably, with a straight-through
 code path that uses C<memset> and C<memcpy> to initialise the new body,
 rather than assignment via multiple temporary variables. It has also
-benefitted from simplification and de-duplication of the arena management
+benefited from simplification and de-duplication of the arena management
 code.
 
-A lot of small improvents in the code base were made due to reports from
+A lot of small improvements in the code base were made due to reports from
 the Coverity static code analyzer.
 
 Corrected use and documentation of C<gv_stashpv>, C<gv_stashpvn>, C<gv_stashsv>
@@ -1856,7 +1856,7 @@ is now also called without a context, and debugging output in this
 function has been disabled because that required that an interpreter was
 present, an invalid assumption at termination time.
 
-All compile time options which affect binary compatability have been grouped
+All compile time options which affect binary compatibility have been grouped
 together into a global variable (C<PL_bincompat_options>).
 
 The values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION> are
