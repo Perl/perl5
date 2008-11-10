@@ -540,7 +540,7 @@ improved handling of bad arguments.
 =item *
 
 some platform specific improvements (including for VMS and Cygwin), with
-an optimization on C<abs2rel()> when handling both relative arguments.
+an optimization on C<abs2rel> when handling both relative arguments.
 
 =back
 
@@ -630,7 +630,7 @@ C<NDBM_File> upgraded to version 1.07
 
 =item *
 
-Improve g++ handling for systems using GDBM compatibility headers.
+Improve F<g++> handling for systems using GDBM compatibility headers.
 
 =back
 
@@ -667,7 +667,7 @@ C<PerlIO::scalar> upgraded to version 0.06
 
 =item *
 
-[RT #40267] PerlIO::scalar doesn't respect readonly-ness
+[RT #40267] C<PerlIO::scalar> doesn't respect readonly-ness
 
 =back
 
@@ -943,7 +943,7 @@ C<Win32> upgraded to version 0.38
 
 =item *
 
-Added new function C<GetCurrentProcessId()> which returns the regular Window
+Added new function C<GetCurrentProcessId> which returns the regular Window
 process identifier of the current process, even when called from within a fork.
 
 =back
@@ -1070,7 +1070,7 @@ L<reverse> function documentation received scalar context examples.
 =back
 
 L<perllocale> documentation is adjusted for the number of localization and
-C<POSIX::setlocale()> to fix Debian bug #379463.
+C<POSIX::setlocale> to fix Debian bug #379463.
 
 L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
 C<Sys::Syslog::win32::Win32> 
@@ -1190,17 +1190,17 @@ prefix.
 
 =head2 Configuration improvements
 
-C<Configure> is now better at removing temporary files. Tom Callaway
+F<Configure> is now better at removing temporary files. Tom Callaway
 (from RedHat) also contributed patches that completes the set of flags
 passed to the compiler and the linker, in particular that C<-fPIC> is now
 enabled on Linux. It will also croak when your F</dev/null> isn't a device.
 
-A new configuration variable C<d_pseudofork> has been to C<Configure>, and is
+A new configuration variable C<d_pseudofork> has been to F<Configure>, and is
 available as  C<$Config{d_pseudofork}> in the C<Config> module. This
 distinguishes real C<fork> support from the pseudofork emulation used on
 Windows platforms.
 
-C<Config.pod> and C<config.sh> are now placed correctly for cross-compilation.
+F<Config.pod> and F<config.sh> are now placed correctly for cross-compilation.
 
 C<$Config{useshrplib}> is now 'true' rather than 'yes' when using a shared perl
 library.
@@ -1455,7 +1455,7 @@ with C<=cut>) as a synonym for C<=cut>.
 
 =item *
 
-Calling CORE::require()
+Calling C<CORE::require>
 
 C<CORE::require> and C<CORE::do> were always parsed as C<require> and C<do>
 when they were overridden. This is now fixed.
@@ -1479,7 +1479,7 @@ character in the C<LC_ALL> and C<LANG> environment variables. [RT # 49646]
 
 =item *
 
-A segfault observed with some gcc 3.3 optimisations is resolved.
+A segfault observed with some F<gcc> 3.3 optimisations is resolved.
 
 =item *
 
@@ -1512,9 +1512,10 @@ internals.
 
 =item *
 
-Fixed bug RT #32539, C<DynaLoader.o> is moved into C<libperl.so> to avoid the need to
-statically link DynaLoader into the stub perl executable. With this C<libperl.so>
-provides everything needed to get a functional embedded perl interpreter to run.
+Fixed bug RT #32539, F<DynaLoader.o> is moved into F<libperl.so> to avoid the
+need to statically link DynaLoader into the stub perl executable. With this
+F<libperl.so> provides everything needed to get a functional embedded perl
+interpreter to run.
 
 =item *
 
@@ -1576,7 +1577,7 @@ The process id is no longer truncated to 16 bits on some Windows platforms
 
 =item *
 
-Fixed bug RT #54828 in C<perlio.c> when calling C<binmode> on Win32 and Cgywin
+Fixed bug RT #54828 in F<perlio.c> when calling C<binmode> on Win32 and Cgywin
 may cause segmentation fault.
 
 =back
@@ -1708,12 +1709,12 @@ http://bugs.activestate.com/show_bug.cgi?id=43483
 
 =item *
 
-tr/// is now threadsafe. Previously it was storing a swash inside its OP,
+C<tr///> is now threadsafe. Previously it was storing a swash inside its OP,
 rather than in a pad.
 
 =item *
 
-C<pod2html> labels anchors more consistently and handles nested definition
+F<pod2html> labels anchors more consistently and handles nested definition
 lists better.
 
 =item *
@@ -1809,8 +1810,8 @@ The new API macro C<newSVpvs()> can be used in place of constructions such as
 C<newSVpvn("ISA", 3)>. It takes a single string constant, and at C compile
 time determines its length.
 
-The new API function C<newSV_type()> can be used as a more efficient replacement
-of the common idiom
+The new API function C<Perl_newSV_type()> can be used as a more efficient
+replacement of the common idiom
 
     sv = newSV(0);
     sv_upgrade(sv, type);
