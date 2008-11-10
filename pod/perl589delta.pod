@@ -118,6 +118,26 @@ C<-Dv> display the process id as part of the trace output.
 Some pure-perl code that perl was using to retrieve Unicode properties and
 transliteration mappings has been reimplemented in XS.
 
+=head2 Constant subroutines
+
+The interpreter internals now support a far more memory efficient form of
+inlineable constants. Storing a reference to a constant value in a symbol
+table is equivalent to a full typeglob referencing a constant subroutine,
+but using about 400 bytes less memory. This proxy constant subroutine is
+automatically upgraded to a real typeglob with subroutine if necessary.
+The approach taken is analogous to the existing space optimisation for
+subroutine stub declarations, which are stored as plain scalars in place
+of the full typeglob.
+
+However, to aid backwards compatibility of existing code, which (wrongly)
+does not expect anything other than typeglobs in symbol tables, nothing in
+core uses this feature, other than the regression tests.
+
+Stubs for prototyped subroutines have been stored in symbol tables as plain
+strings, and stubs for unprototyped subroutines as the number -1, since 5.005,
+so code which assumes that the core only places typeglobs in symbol tables
+has been making incorrect assumptions for over 10 years.
+
 =head1 New Platforms
 
 Compile support added for:
@@ -301,6 +321,19 @@ C<B::Terse> upgraded to version 1.05
 
 C<base> upgraded to version 2.13
 
+=over 4
+
+=item *
+
+Loading a module via base.pm would mask a global C<$SIG{__DIE__}> in that
+module.
+
+=item *
+
+push all classes at once in C<@ISA>
+
+=back
+
 =item *
 
 C<Benchmark> upgraded to version 1.10
@@ -312,6 +345,8 @@ C<bignum> upgraded to 0.23
 =item *
 
 C<Carp> upgraded to version 1.10
+
+Carp's argument backtrace code would show undef as "undef" - a string.
 
 =item *
 
@@ -920,7 +955,7 @@ C<XSLoader> upgraded to version 0.10
 =item *
 
 C<XS::APItest> and C<XS::Typemap> are for internal use only and hence
-no longer installed.
+no longer installed. Many more tests have been added to C<XS::APItest>.
 
 =back
 
@@ -1272,6 +1307,10 @@ been chosen.
 Passing a raw string of "NaN" to L<nawk> causes a core dump - so the string
 has been changed to "*NaN*"
 
+=item *
+
+F<t/op/stat.t> tests will now test hard links on VMS if they are supported.
+
 =back
 
 =head3 Windows
@@ -1307,6 +1346,10 @@ Add Win32 makefile option to link all extensions statically.
 =item *
 
 The F<WinCE> directory has been merged into the F<Win32> directory.
+
+=item *
+
+C<setlocale> tests have been re-enabled for Windows XP onwards.
 
 =back
 
@@ -1492,7 +1535,7 @@ bracket) instead of just C<$10>.
 
 =item *
 
-Fix bug RT #45053, newCONSTSUB() is now thread safe.
+Fix bug RT #45053, C<Perl_newCONSTSUB> is now thread safe.
 
 =back
 
@@ -1601,7 +1644,7 @@ Aligned floating point build policies for F<cc> and F<gcc>.
 
 =item *
 
-Revisited a patch from 5.6.1 for RH7.2 for Intel's F<icc> (RT #7916), added an
+Revisited a patch from 5.6.1 for RH7.2 for Intel's F<icc> [RT #7916], added an
 aditional check for C<$Config{gccversion}>.
 
 =back
@@ -1626,8 +1669,7 @@ It is now possible to overload C<eq> when using C<nomethod>.
 
 =item *
 
-Various problems using L<overload> with 64-bit ints corrected (identified
-in new tests).
+Various problems using L<overload> with 64 bit integers corrected.
 
 =item *
 
@@ -1837,134 +1879,115 @@ particularly C<PL_na>, which is a small performance hit.
 
 =head1 New Tests
 
-=over 4
-
-=item * 
-
-Regression tests for sprintf with 64 bit semantics (30058).
-
-=item *
-
-Tests for L<overload> for 64-bit ints (32141).
-
-=item *
-
-Tests for tainting and C<open> with C<|-> as second argument (30048).
-
-=item *
-
-C<exit> can now be called in expressions that the optimizer constant-folds
-(29976).
-
-=item *
-
-Test smallbuf overflow in S_incline (30024)
-
-=item *
-
-Tests for mathematical functions in L<POSIX>
-
-=item *
-
-Verify POSIX::AUTOLOAD works (29592)
-
-=item *
-
-Remove C<DynaLoader> from C<1_compile.t> as it's now part of C<libperl.so>
-(27549, 27566, 28226, 28227, 28228, 28274, 28308). Also skip failure test on
-these patforms: VMS, darwin, OpenBSD, and cygwin (28333, 28840, 29253, 29707).
-
-=item *
-
-Added bitflip hash tests (31914, 31915)
-
-=item *
-
-Tests for C<hv_delete>, C<hv_exists>, C<hv_fetch>, C<hv_store> (31905, 31912)
-
-=item *
-
-Test disabling key conversion in hash lookups (31923)
-
-=back
+Many modules updated from CPAN incorporate new tests. Some core specific
+tests have been added:
 
 =over 4
 
-=item *
+=item ext/DynaLoader/t/DynaLoader.t
 
-Significantly improved testing for C<$/> usage with C<PerlIO::Scalar> in-memory
-files.
+Tests for the C<DynaLoader> module.
 
-=item *
+=item t/comp/fold.t
 
-Test both C<MY_CXT> and C<MY_CXT_INTERP> in the CXT API.
+Tests for compile-time constant folding.
 
-=item *
+=item t/io/pvbm.t
 
-Added test to run regex substitution C<s///> under taint mode (29618).
+Tests incorporated from 5.10.0 which check that there is no unexpected
+interaction between the internal types C<PVBM> and C<PVGV>
 
-=item *
+=item t/lib/proxy_constant_subs.t
 
-Tests for L<Thread>.
+Tests for the new form of constant subroutines.
 
-=item *
+=item t/op/attrhand.t
 
-Regression tests for L<base> manipulation of C<@ISA> under certain
-inheritance conditions. (32469)
+Tests for C<Attribute::Handlers>
 
-=item *
+=item t/op/dbm.t
 
-Test that L<base> does not mask C<SIGDIE>. (32469)
+Tests for C<dbmopen>
 
-=item *
+=item t/op/inccode-tie.t
 
-Test that L<base> does not confuse the version. (32469)
+Calls all tests in F<t/op/inccode.t> after first tying C<@INC>.
 
-=item *
+=item t/op/incfilter.t
 
-Test that inheriting from a base with protected fields generates a warning.
-(32469)
+Tests for for source filters returned from code references in C<@INC>.
 
-=item *
+=item t/op/kill0.t
 
-Test that L<base> can coexist with a L<consant> called C<FIELDS>. (31420)
+Tests for RT #30970
 
-=item *
+=item t/op/qrstack.t
 
-Test that L<Carp::cluck> correctly reports undef values. (31858)
+Tests for RT #41484
 
-=item *
+=item t/op/qr.t
 
-Test that C<$@> is correctly localised in L<Locale::Maketext>. (25547)
+Tests for the qr// construct
 
-=item *
+=item t/op/regexp_qr_embed.t
 
-B<TODO> test for "C<goto()> from an if to an else doesn't undo local". (RT #43403)
+Tests for the qr// construct within another regexp
 
-=back
+=item t/op/regexp_qr.t
 
-=head1 Changed Tests
+Tests for the qr// construct
 
-=over 4
+=item t/op/rxcode.t
 
-=item *
+Tests for RT #32840
 
-C<setlocale()> tests have been re-enabled for Windows XP onwards. (31491)
+=item t/op/studytied.t
 
-=item *
+Tests for C<study> on tied scalars
 
-C<commonsense.t> tests no longer require that C<DB_File> or C<*DBM_File> are
-included. (31528)
+=item t/op/substT.t
 
-=item *
+Tests for C<subst> run under C<-T> mode
 
-Printing to C<stdout> by C<TabsWrap> tests has been consolidated to avoid
-problems with VMS pipes. (31646)
+=item t/op/symbolcache.t
 
-=item *
+Tests for C<undef> and C<delete> on stash entries that are bound to subroutines or methods.
 
-C<t/op/stat.t> tests will now test hard links on VMS if they are supported.
-(31665, 31666)
+=item t/op/upgrade.t
+
+Tests for C<Perl_sv_upgrade>
+
+=item t/pod/twice.t
+
+Tests for calling C<Pod::Parser> twice
+
+=item t/run/cloexec.t
+
+Tests for inheriting file descriptors across C<exec> (close-on-exec)
+
+=item t/uni/cache.t
+
+Tests for the UTF-8 caching code.
+
+=item t/uni/chr.t
+
+Test that strange encodings do not upsets C<Perl_pp_chr>
+
+=item t/uni/greek.t
+
+Tests for RT #40641
+
+=item t/uni/latin2.t
+
+Tests for RT #40641
+
+=item t/uni/overload.t
+
+Tests for returning Unicode from overloaded values.
+
+=item t/uni/tie.t
+
+Tests for returning Unicode from tied variables.
 
 =back
 
