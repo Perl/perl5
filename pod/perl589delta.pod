@@ -1744,6 +1744,12 @@ used.
 
 =head1 New or Changed Diagnostics
 
+=head2 panic: sv_chop %s
+
+This new fatal error occurs when the C routine C<sv_chop> routine was passed a
+position that is not within the scalar's string buffer. This is caused by
+buggy XS code, and at this point recovery is not possible.
+
 =head2 Maximal count of pending signals (%s) exceeded
 
 This new fatal error occurs when the perl process has to abort due to
