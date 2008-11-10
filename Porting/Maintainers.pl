@@ -111,7 +111,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Attribute/Handlers.pm
 				     lib/Attribute/Handlers],
-		'CPAN'		=> 0,
+		'CPAN'		=> 1,
 		},
 
 	'B::Concise' =>
@@ -354,6 +354,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Filter::Simple' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple],
+		'CPAN'		=> 1,
+		},
+
 	'Filter::Util::Call' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
@@ -401,6 +408,14 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
+		'CPAN'		=> 1,
+		},
+
+	'lib' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=>
+			q[lib/lib_pm.PL lib/lib.t],
 		'CPAN'		=> 1,
 		},
 
@@ -782,7 +797,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple
 				     lib/Test/Builder.pm lib/Test/Builder
-				     lib/Test/More.pm
+				     lib/Test/More.pm lib/Test/Tutorial.pod
 				     t/lib/Test/Simple],
 		'CPAN'		=> 1,
 		},
