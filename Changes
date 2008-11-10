@@ -28,6 +28,454 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34811] By: nicholas				   on 2008/11/10  21:09:51
+	Log: Hopefully today.
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 34810] By: nicholas				   on 2008/11/10  21:08:45
+	Log: Third pass. (On a printed copy.)
+	     F<> is for File
+	     C<> is for Code
+	     L<> is for Link
+	     [And yes, whilst modules are also links, I'd prefer them to be code]
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34809] By: nicholas				   on 2008/11/10  20:25:13
+	Log: One spelling error, and one syle change.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34808] By: nicholas				   on 2008/11/10  19:58:26
+	Log: Re-order platform specific bug fixes into alphabetical order.
+	     "panic" is lower case in the panic diagnostic.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 34807] By: nicholas				   on 2008/11/10  19:28:39
+	Log: Style check (second pass)
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34806] By: nicholas				   on 2008/11/10  19:18:38
+	Log: Mop up refugees from 34803, spoted by Vincent.
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh
+____________________________________________________________________________
+[ 34805] By: nicholas				   on 2008/11/10  19:14:16
+	Log: Big proof read and style sweep. (First iteration)
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34803] By: nicholas				   on 2008/11/10  18:53:49
+	Log: Cargo-cult 5.8.9 upgrade.
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux META.yml NetWare/Makefile
+	   ! Porting/config.sh README.os2 README.vms epoc/createpkg.pl
+	   ! patchlevel.h plan9/config.plan9 vos/build.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/install_perl.cm win32/Makefile
+	   ! win32/Makefile.ce win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_H.vc64 win32/makefile.mk
+____________________________________________________________________________
+[ 34802] By: nicholas				   on 2008/11/10  18:22:28
+	Log: Run Porting/makemeta.pl
+     Branch: maint-5.8/perl
+	   ! META.yml
+____________________________________________________________________________
+[ 34801] By: nicholas				   on 2008/11/10  18:20:18
+	Log: Pretty much any change perculates to the table of contents.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 34800] By: nicholas				   on 2008/11/10  18:19:14
+	Log: Note that panic: sv_chop %s is new.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34799] By: nicholas				   on 2008/11/10  18:17:42
+	Log: Run pod/perltoc --build-all.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 34798] By: nicholas				   on 2008/11/10  18:10:51
+	Log: Add an acknowledgements section.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34797] By: nicholas				   on 2008/11/10  18:02:52
+	Log: Integrate:
+	     [ 34787]
+	     Integrate:
+	     [ 34615]
+	     Upgrade to File::Path 2.06_06. (a diff from David via http)
+	     
+	     [ 34637]
+	     Upgrade to File::Path 2.06_07. (an e-mail from David)
+	     
+	     [ 34733]
+	     Upgrade to File::Path 2.06_08.
+	     
+	     [ 34784]
+	     Upgrade to File::Path 2.07
+     Branch: maint-5.8/perl
+	  !> lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 34796] By: nicholas				   on 2008/11/10  17:22:15
+	Log: Integrate:
+	     [ 34793]
+	     Integrate:
+	     [ 34760]
+	     lib/Test/Tutorial.pod is part of Test-Simple
+	     
+	     [ 34792]
+	     Subject: [PATCH] Update Maintainers.pl
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Date: Mon, 10 Nov 2008 09:41:40 +0100
+	     Message-ID: <20081110084141.12299.qmail@lists.develooper.com>
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl
+____________________________________________________________________________
+[ 34795] By: nicholas				   on 2008/11/10  16:50:39
+	Log: Run ispell over it.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34794] By: nicholas				   on 2008/11/10  16:41:40
+	Log: Proxy Constant Subroutines are in, so are an enhancement to note, even
+	     though they are disabled by default.
+	     Clean up "new tests":
+	     * add descriptions of all the new test files in t
+	     (and wonder why two that test things in lib/ are there)
+	     * move information about tests in modules to the modules section
+	     * move platform specific information about tests to that section
+	     some style tidying.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34767] By: nicholas				   on 2008/11/07  16:40:55
+	Log: Note the XS acelerated SWASHGET, and remove reference to one new
+	     subtest. I'm not sure if any of the subtest changes are really worth
+	     it.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34754] By: nicholas				   on 2008/11/06  16:32:21
+	Log: No, I'm pretty sure that *that* was the last fixme.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34753] By: nicholas				   on 2008/11/06  16:25:51
+	Log: Normalise the form of references to bug reports - RT #1234, and if it
+	     is in brackets, use [].
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34752] By: nicholas				   on 2008/11/06  16:18:08
+	Log: Remove the last fixme.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34751] By: nicholas				   on 2008/11/06  14:43:12
+	Log: I can't see where to put the comment about emacs perl mode. It's not
+	     installed in emacs by default, so I can't see that it's that important
+	     to summarise it for everyone. If you know you want it, you know you
+	     have to find it.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34750] By: nicholas				   on 2008/11/06  14:36:53
+	Log: More cleanup, including remove perforce revision numbers, and where
+	     possible add ticket numbers. (And in a consistent format)
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34749] By: nicholas				   on 2008/11/06  12:39:28
+	Log: Integrate:
+	     [ 33946]
+	     Integrate:
+	     ...
+	     
+	     [ 33644]
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Subject: [PATCH] PL_bincompat_opt should be exported on AIX and Windows
+	     Date: Thu, 3 Apr 2008 17:34:13 -0700
+	     Message-ID: <02c001c895eb$9bc3e920$d34bbb60$@com>
+	     
+	     (with one tweak--it should be PL_bincompat_options!)
+	     
+	     ...
+     Branch: maint-5.8/perl
+	  !> globvar.sym
+____________________________________________________________________________
+[ 34745] By: nicholas				   on 2008/11/05  23:54:43
+	Log: If I call it fixme, grep will find it for me.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34744] By: nicholas				   on 2008/11/05  23:54:13
+	Log: A note about future maintenance plans for 5.8.x.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34743] By: nicholas				   on 2008/11/05  23:30:05
+	Log: Finish =head1 Selected Bug Fixes. Maybe I should name Vipul.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34741] By: nicholas				   on 2008/11/05  22:19:40
+	Log: Try to order and group the "selected bug fixes"
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34740] By: nicholas				   on 2008/11/05  21:56:10
+	Log: But I can always wordsmith it further.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34739] By: nicholas				   on 2008/11/05  21:50:10
+	Log: I think that =head1 Installation and Configuration Improvements is done.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34738] By: nicholas				   on 2008/11/05  21:35:57
+	Log: More tidying. Move descriptions of bug fixes in module to their
+	     "ugraded" section.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34737] By: nicholas				   on 2008/11/05  20:05:52
+	Log: Some tidying, copy editing, tweaking.
+	     Move descriptions of changed documentation from "new" to "updated"
+	     documentation.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34736] By: nicholas				   on 2008/11/05  17:07:24
+	Log: Correct the remaining version numbers, remove a duplicate, and prune
+	     some excess data.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34735] By: nicholas				   on 2008/11/05  15:49:14
+	Log: Hand sort module entries into alphabetical order. (ie there may still
+	     be errors.) Remove a couple of duplicates; fix a couple of package
+	     names.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34734] By: nicholas				   on 2008/11/05  13:44:55
+	Log: Some tidying, and verification of module version numbers.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34732] By: nicholas				   on 2008/11/04  23:56:07
+	Log: Before I forget, two important bug fixes that it seems that everyone
+	     missed.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34731] By: nicholas				   on 2008/11/04  23:46:07
+	Log: The perl589delta project's TODOs. Mostly resolved as "wah! This
+	     perl589delta.pod is already very long. This doesn't feel important".
+	     When it comes to things like B's OptreeCheck, it definitely isn't.
+	     It's a test helper module, and not installed. Nicely written, well
+	     behaved, no-one need know that it even exists.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34730] By: nicholas				   on 2008/11/04  23:11:58
+	Log: Like 5.8.3, we get an obituary :-(
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34729] By: nicholas				   on 2008/11/04  22:48:46
+	Log: The 2008-10 split, and the rest of Changes. I think we're up to date.
+	     Now to deal with the TODOs, then the copy editing and rejigging, and
+	     finally verify that any bugs we say we've fixed, we have. Also, need
+	     to check that the VERSIONs stated in "upgraded to" are correct.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34728] By: nicholas				   on 2008/11/04  22:11:35
+	Log: Integrate:
+	     [ 34719]
+	     Integrate:
+	     [ 34712]
+	     The breakage caused by #34653 (sh|c)ould have been detected
+	     by the compiler. So further improve the STR_WITH_LEN() macro.
+     Branch: maint-5.8/perl
+	  !> handy.h
+____________________________________________________________________________
+[ 34727] By: nicholas				   on 2008/11/04  21:45:44
+	Log: Subject: [PATCH] Re: threads Changes
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510811041306p43e00bb4r3f4bdc51e682a84c@mail.gmail.com>
+	     Date: Tue, 4 Nov 2008 16:06:42 -0500
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34726] By: nicholas				   on 2008/11/04  21:39:52
+	Log: Integrate:
+	     [ 34715]
+	     Integrate:
+	     [ 34693]
+	     Add a flag PERLDBf_SAVESRC, which enables the saved lines part of
+	     PERLDBf_LINE, so that profilers (such as NYTProf) have access to the
+	     lines of the eval, without the speed impact of other parts of the
+	     debugger infrastructure. PERLDBf_LINE is unchanged. Based largely on a
+	     patch by Tim Bunce in <20081028152749.GA12500@timac.local>
+	     
+	     [ 34705]
+	     Subject: Re: @{"_<$filename"} is unreasonably tied to use of DB::DB ($^P & 0x2)
+	     From: Tim Bunce <Tim.Bunce@pobox.com>
+	     Message-ID: <20081103160130.GA45762@timac.local>
+	     Date: Mon, 3 Nov 2008 16:01:31 +0000
+	     
+	     [ 34706]
+	     Subject: Re: @{"_<$filename"} is unreasonably tied to use of DB::DB ($^P & 0x2)
+	     From: Tim Bunce <Tim.Bunce@pobox.com>
+	     Message-ID: <20081103162537.GB45762@timac.local>
+	     Date: Mon, 3 Nov 2008 16:25:37 +0000
+     Branch: maint-5.8/perl
+	  !> gv.c lib/perl5db.pl op.c perl.h pod/perlvar.pod pp_ctl.c
+	  !> toke.c
+____________________________________________________________________________
+[ 34725] By: nicholas				   on 2008/11/04  21:39:24
+	Log: 2008-09 - mostly only newer dual life modules felt important.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34724] By: nicholas				   on 2008/11/04  21:13:39
+	Log: Notes on the 2008-02 split. Possibly brutally short.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34723] By: nicholas				   on 2008/11/04  20:35:37
+	Log: Notes on the remaining 2007 splits. Possibly brutally short.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34722] By: nicholas				   on 2008/11/04  19:39:58
+	Log: Integrate:
+	     [ 34720]
+	     Integrate:
+	     [ 34670]
+	     Subject: Re: [PATCH] [doc] be more explicit about magic argv
+	     From: Moritz Lenz <moritz@casella.verplant.org>
+	     Date: Thu, 30 Oct 2008 20:30:00 +0100
+	     Message-ID: <20081030182902.25398.qmail@lists.develooper.com>
+	     
+	     [ 34703]
+	     Subject: [perl #60300] doc Carp $Carp::Internal{__PACKAGE__} example 
+	     From: Kevin Ryde (via RT) <perlbug-followup@perl.org>
+	     Date: Sat, 01 Nov 2008 16:27:09 -0700
+	     Message-ID: <rt-3.6.HEAD-29762-1225582029-1073.60300-75-0@perl.org>
+     Branch: maint-5.8/perl
+	  !> lib/Carp.pm pod/perlop.pod pod/perlrun.pod
+____________________________________________________________________________
+[ 34721] By: nicholas				   on 2008/11/04  18:59:34
+	Log: Integrate:
+	     [ 34713]
+	     Integrate:
+	     [ 34702]
+	     Subject: Re: CPAN-1.9301 can't clean bootstrap .cpan
+	     From: andreas.koenig.7os6VVqR@franz.ak.mind.de (Andreas J. Koenig)
+	     Message-ID: <87abci5swq.fsf@k75.linux.bogus>
+	     Date: Sun, 02 Nov 2008 11:22:29 +0100
+     Branch: maint-5.8/perl
+	  !> lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[ 34718] By: nicholas				   on 2008/11/04  09:38:17
+	Log: Integrate:
+	     [ 34707]
+	     Integrate:
+	     [ 34694]
+	     Explicitly specify some printf formats for constant strings.
+	     This is mostly to silence gcc's warning, "format not a string
+	     literal and no format arguments".
+	     
+	     [ 34695]
+	     Subject: [PATCH] explicit empty while loops
+	     From: "Robin Barker" <Robin.Barker@npl.co.uk>
+	     Date: Wed, 29 Oct 2008 13:22:04 -0000
+	     Message-ID: <46A0F33545E63740BC7563DE59CA9C6D4E2FD9@exchsvr2.npl.ad.local>
+	     
+	     [ 34700]
+	     Silence one more format warning
+     Branch: maint-5.8/perl
+	  !> av.c doop.c ext/PerlIO/scalar/scalar.xs handy.h mg.c op.c
+	  !> perl.c pp.c pp_ctl.c pp_hot.c pp_sort.c pp_sys.c sv.c toke.c
+	  !> util.c
+____________________________________________________________________________
+[ 34717] By: nicholas				   on 2008/11/04  09:05:12
+	Log: Integrate:
+	     [ 34704]
+	     Integrate:
+	     [ 32728]
+	     Subject:  [PATCH] 64-bit fix for Time::Local
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Thu, 20 Dec 2007 10:18:52 -0800
+	     Message-ID: <044301c84334$c6aa2960$53fe7c20$@com>
+	     
+	     [ 34699]
+	     Upgrade to Time::Local 1.1901.
+     Branch: maint-5.8/perl
+	  !> lib/Time/Local.pm lib/Time/Local.t
+____________________________________________________________________________
+[ 34716] By: nicholas				   on 2008/11/04  08:46:09
+	Log: Incorporate everything from the not-yet-done 2006 splits. (Or at least
+	     notes and placeholders for them). Move some things around. Steal, um
+	     flatter, some things from perl5100delta.pod.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34711] By: nicholas				   on 2008/11/03  22:24:01
+	Log: A first pass over what's there. Rejig some sections to use =head2 where
+	     that was the style I used in perl587delta.pod. Move things to more
+	     appropriate sections. Attempt to normalise the "Upgraded Modules"
+	     section. Remove the change numbers - if people really need this the
+	     commit messages are clear. Remove erroneous references to 5.10 features
+	     that crept in. (Useful - they had to be purged from other files too).
+	     Remove references to bug fixes that were actually 5.10.x only,
+	     utilities that are 5.10.x only, and utilities that are not installed.
+	     If they're not installed, they belong in "hacking" type documentation.
+	     Remove all references to perltodo. It's invariably out of date in
+	     5.8.x, and we don't want to encourage people to hack against this
+	     source tree.
+	     
+	     But by heck, there's already a lot there. Thank you everyone.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34709] By: nicholas				   on 2008/11/03  22:11:58
+	Log: Purge accidental references to //p, ${^PREMATCH}, ${^MATCH} and
+	     ${^POSTMATCH}.
+     Branch: maint-5.8/perl
+	   ! pod/perlop.pod pod/perlre.pod
+____________________________________________________________________________
+[ 34708] By: nicholas				   on 2008/11/03  21:27:44
+	Log: Initial check-in of the final (mostly complete) perl589delta from Paul
+	     Fenwick's volunteer team http://groups.google.com/group/perl589delta
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34701] By: nicholas				   on 2008/11/03  10:35:59
+	Log: Integrate:
+	     [ 34692]
+	     Integrate:
+	     [ 34691]
+	     Upgrade to Text::ParseWords 3.27
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl lib/Text/ParseWords.pm
+	  !> lib/Text/ParseWords.t lib/Text/ParseWords/taint.t
+____________________________________________________________________________
+[ 34690] By: nicholas				   on 2008/10/31  16:01:38
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34689] By: nicholas				   on 2008/10/31  15:09:42
 	Log: Rework the pseudohash tests so that they skip on 5.10.0 and later, and
 	     don't expose any syntax that 5.10.0 chokes on.
