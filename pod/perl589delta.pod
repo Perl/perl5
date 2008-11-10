@@ -105,18 +105,18 @@ C<-Dq> suppresses the I<EXECUTING...> message when running under C<-D>
 
 =item *
 
-C<-Dl> log runops loop entry and exit, and jump level popping.
+C<-Dl> logs runops loop entry and exit, and jump level popping.
 
 =item *
 
-C<-Dv> display the process id as part of the trace output.
+C<-Dv> displays the process id as part of the trace output.
 
 =back
 
 =head2 XS-assisted SWASHGET
 
 Some pure-perl code that perl was using to retrieve Unicode properties and
-transliteration mappings has been reimplemented in XS.
+transliteration mappings has been reimplemented in XS. (SADAHIRO Tomoyuki)
 
 =head2 Constant subroutines
 
@@ -346,7 +346,7 @@ C<bignum> upgraded to 0.23
 
 C<Carp> upgraded to version 1.10
 
-Carp's argument backtrace code would show undef as "undef" - a string.
+Carp's argument backtrace code would show C<undef> as I<"undef"> - a string.
 
 =item *
 
@@ -378,7 +378,7 @@ Fixes hash iterator current position with the pure Perl version [RT #40668]
 =item *
 
 Performance enhancements, which will be most evident on platforms where
-repeated calls to C's C<realloc> are slow, such as Win32.
+repeated calls to C's C<realloc()> are slow, such as Win32.
 
 =back
 
@@ -424,7 +424,7 @@ already being closed.
 
 C<DynaLoader> upgraded to version 1.09
 
-DynaLoader can now dynamically load a loadable object from a file with a
+C<DynaLoader> can now dynamically load a loadable object from a file with a
 non-default file extension.
 
 =item *
@@ -432,7 +432,7 @@ non-default file extension.
 C<Encode> upgraded to version 2.26
 
 C<Encode::Alias> includes a fix for encoding "646" on Solaris (better known as
-ASCII) .
+ASCII).
 
 =item *
 
@@ -535,7 +535,7 @@ C<File::Spec> upgraded to version 3.29
 
 =item *
 
-improved handling of bad arguments
+improved handling of bad arguments.
 
 =item *
 
@@ -745,7 +745,7 @@ C<Socket> upgraded to version 1.81
 
 =item *
 
-This fixes an optimistic use of C<gethostbyname()>.
+This fixes an optimistic use of C<gethostbyname>.
 
 =back
 
@@ -892,7 +892,7 @@ New thread signal method: C<kill>
 
 =item *
 
-Added capability to specify thread stack size
+Added capability to specify thread stack size.
 
 =item *
 
@@ -963,7 +963,7 @@ no longer installed. Many more tests have been added to C<XS::APItest>.
 
 =head2 debugger upgraded to version 1.30
 
-Andreas J. Koenig contributed two functions to save and load the debugger
+Andreas KE<ouml>nig contributed two functions to save and load the debugger
 history.
 
 =head2 F<perlthanks>
@@ -1018,7 +1018,7 @@ terminology and how to correctly handle Unicode in Perl scripts.
 
 L<perlunicode> is updated in section user defined properties.
 
-L<perluniintro> have been updated in the example of detecting data that is not
+L<perluniintro> has been updated in the example of detecting data that is not
 valid in particular encoding. 
 
 L<perlcommunity> provides an overview of the Perl Community along with further
@@ -1039,10 +1039,10 @@ L<perlcheat> is updated with better details on C<\w>, C<\d>, and C<\s>.
 L<perldebug> is updated with information on how to call the debugger.
 
 L<perldiag> documentation updated with I<subroutine with an ampersand> on the
-argument to C<exists()> and C<delete()> and also several terminology updates on
+argument to C<exists> and C<delete> and also several terminology updates on
 warnings.
 
-L<perlfork> documents the limitation of exec() inside pseudo-processes.
+L<perlfork> documents the limitation of C<exec> inside pseudo-processes.
 
 L<perlfunc>:
 
@@ -1054,8 +1054,8 @@ Documentation is fixed in section C<caller> and C<pop>.
 
 =item *
 
-Function C<alarm()> now mentions C<Time::HiRes::ualarm> in preference
-to C<select()>.
+Function C<alarm> now mentions C<Time::HiRes::ualarm> in preference
+to C<select>.
 
 =item *
 
@@ -1089,9 +1089,9 @@ L<perlrecharclass> describes the syntax and use of character classes in
 Perl Regular Expressions.
 
 L<perlrun> is updated to clarify on the hash seed I<PERL_HASH_SEED>. Also more
-information in option B<-x> and B<-u>.
+information in options B<-x> and B<-u>.
 
-L<perlsub> example is updated to use lexical variable on opendir syntax.
+L<perlsub> example is updated to use a lexical variable for C<opendir> syntax.
 
 L<perltoc> the table of content is updated with several new documentation and
 cleaned up unnecessary noises.
@@ -1106,16 +1106,10 @@ L<perlhack> documentation extensively improved by Jarkko Hietaniemi and others.
 L<perltoot> provides information on modifying C<@UNIVERSAL::ISA>.
 
 L<perlport> documentation extended to include different C<kill(-9, ...)>
-semantics on Windows. It also clearly states C<dump()> is not supported on Win32
+semantics on Windows. It also clearly states C<dump> is not supported on Win32
 and cygwin.
 
-=over 4
-
-=item *
-
-L<INSTALL> has been updated and modernized.
-
-=back
+F<INSTALL> has been updated and modernised.
 
 =head1 Performance Enhancements
 
@@ -1372,7 +1366,7 @@ Fixed problems with C<split>, Unicode C</\s+/> and C</ \0/>.
 
 Fixed bug RT #40641 - encoding of Unicode characters in regular expressions.
 
-Fixed a bug where using certain patterns in a regex led to a panic.
+Fixed a bug where using certain patterns in a regexp led to a panic.
 [RT #45337]
 
 Perl longer segfaults (due to infinite internal recursion) if the locale's
@@ -1489,18 +1483,18 @@ A segfault observed with some gcc 3.3 optimisations is resolved.
 
 =item *
 
-A possible segfault when L<unpack> used in scalar context with C<()> groups
+A possible segfault when C<unpack> used in scalar context with C<()> groups
 is resolved. [RT #50256]
 
 =item *
 
 Resolved issue where C<$!> could be changed by a signal handler interrupting
-a C<system()> call.
+a C<system> call.
 
 =item *
 
 Fixed bug RT #37886, symbolic deferencing was allowed in the argument of
-C<defined()> even under the influence of C<use strict 'refs'>.
+C<defined> even under the influence of C<use strict 'refs'>.
 
 =item *
 
@@ -1519,8 +1513,8 @@ internals.
 =item *
 
 Fixed bug RT #32539, C<DynaLoader.o> is moved into C<libperl.so> to avoid the need to
-statically link DynaLoader into the stub perl executable and make C<libperl.so>
-provides all codes needed to get a functional embedded perl interpreter runs.
+statically link DynaLoader into the stub perl executable. With this C<libperl.so>
+provides everything needed to get a functional embedded perl interpreter to run.
 
 =item *
 
@@ -1535,7 +1529,7 @@ bracket) instead of just C<$10>.
 
 =item *
 
-Fix bug RT #45053, C<Perl_newCONSTSUB> is now thread safe.
+Fix bug RT #45053, C<Perl_newCONSTSUB()> is now thread safe.
 
 =back
 
@@ -1551,7 +1545,7 @@ Various improvements to 64 bit builds.
 
 =item *
 
-Mutex protection added in C<PerlIOStdio_close> to avoid race conditions.
+Mutex protection added in C<PerlIOStdio_close()> to avoid race conditions.
 Hopefully this fixes failures in the threads tests F<free.t> and F<blocks.t>.
 
 =item *
@@ -1567,7 +1561,7 @@ window title.
 
 =item *
 
-C<File::Find> used to fail when the target dir is a bare drive letter and
+C<File::Find> used to fail when the target directory is a bare drive letter and
 C<no_chdir> is 1 (the default is 0). [RT #41555]
 
 =item *
@@ -1605,7 +1599,7 @@ Bugs in VMS exit handling tickled by C<Test::Harness> 2.64 have been fixed.
 
 =item *
 
-Fix fcntl locking capability test in C<configure.com>.
+Fix fcntl locking capability test in F<configure.com>.
 
 =item *
 
@@ -1673,7 +1667,7 @@ Various problems using L<overload> with 64 bit integers corrected.
 
 =item *
 
-The reference count of PerlIO file descriptors is now correctly handled.
+The reference count of C<PerlIO> file descriptors is now correctly handled.
 
 =item *
 
@@ -1724,13 +1718,13 @@ lists better.
 
 =item *
 
-L<threads> cleanup veto has been extended to include C<perl_free> and
-C<perl_destruct>
+L<threads> cleanup veto has been extended to include C<perl_free()> and
+C<perl_destruct()>
 
 =item *
 
 On some systems, changes to C<$ENV{TZ}> would not always be
-respected by the underlying calls to C<localtime_r>.  Perl now
+respected by the underlying calls to C<localtime_r()>.  Perl now
 forces the inspection of the environment on these systems.
 
 =item *
@@ -1746,7 +1740,7 @@ used.
 
 =head2 panic: sv_chop %s
 
-This new fatal error occurs when the C routine C<sv_chop> routine was passed a
+This new fatal error occurs when the C routine C<Perl_sv_chop()> was passed a
 position that is not within the scalar's string buffer. This is caused by
 buggy XS code, and at this point recovery is not possible.
 
@@ -1813,37 +1807,39 @@ but not for C<$#array>.
 
 The new API macro C<newSVpvs()> can be used in place of constructions such as
 C<newSVpvn("ISA", 3)>. It takes a single string constant, and at C compile
-time determins its length.
+time determines its length.
 
-The new API function C<newSV_type> can be used as a more efficient replacement
+The new API function C<newSV_type()> can be used as a more efficient replacement
 of the common idiom
 
     sv = newSV(0);
     sv_upgrade(sv, type);
 
-Similarly C<newSVpvn_flags()> can be used to combine C<newSVpv()> with
-C<sv_2mortal()> or the equivalent C<sv_newmortal()> with C<sv_setpvn()>
+Similarly C<newSVpvn_flags()> can be used to combine C<Perl_newSVpv()> with
+C<Perl_sv_2mortal()> or the equivalent C<Perl_sv_newmortal()> with
+C<Perl_sv_setpvn()>
 
 Two new macros C<mPUSHs()> and C<mXPUSHs()> are added, to make it easier to
 push mortal SVs onto the stack. They were then used to fix several bugs where
 values on the stack had not been mortalised.
 
-A C<sigbit> public function was added to test the sign of a NV. It maps to the
-system one when available.
+A C<Perl_signbit()> function was added to test the sign of an C<NV>. It 
+maps to the system one when available.
 
-C<av_reify>, C<lex_end>, C<mod>, C<op_clear>, C<pop_return>,
-C<qerror>, C<setdefout>, C<vivify_defelem> and C<yylex> are now
-visible to perl core extensions. This was required by C<Data::Alias>.
+C<Perl_av_reify()>, C<Perl_lex_end()>, C<Perl_mod()>, C<Perl_op_clear()>,
+C<Perl_pop_return()>, C<Perl_qerror()>, C<Perl_setdefout()>,
+C<Perl_vivify_defelem()> and C<Perl_yylex()> are now visible to extensions.
+This was required to allow C<Data::Alias> to work on Windows.
 
-C<find_runcv> is now visible to perl core extensions. This was required to
-allow C<Sub::Current> to work on Windows.
+C<Perl_find_runcv()> is now visible to perl core extensions. This was required
+to allow C<Sub::Current> to work on Windows.
 
 C<ptr_table*> functions are now available in unthreaded perl. C<Storable>
 takes advantage of this.
 
 There have been many small cleanups made to the internals. In particular,
-C<sv_upgrade()> has been simplified considerably, with a straight-through
-code path that uses C<memset> and C<memcpy> to initialise the new body,
+C<Perl_sv_upgrade()> has been simplified considerably, with a straight-through
+code path that uses C<memset()> and C<memcpy()> to initialise the new body,
 rather than assignment via multiple temporary variables. It has also
 benefited from simplification and de-duplication of the arena management
 code.
@@ -1851,16 +1847,16 @@ code.
 A lot of small improvements in the code base were made due to reports from
 the Coverity static code analyzer.
 
-Corrected use and documentation of C<gv_stashpv>, C<gv_stashpvn>, C<gv_stashsv>
-functions (last parameter is a bitmask, not boolean).
+Corrected use and documentation of C<Perl_gv_stashpv()>, C<Perl_gv_stashpvn()>,
+C<Perl_gv_stashsv()> functions (last parameter is a bitmask, not boolean).
 
 C<PERL_SYS_INIT>, C<PERL_SYS_INIT3> and C<PERL_SYS_TERM> macros have been
 changed into functions.
 
-C<PERLSYS_TERM> no longer requires a context. In C<PerlIO_teardown>
-is now also called without a context, and debugging output in this
-function has been disabled because that required that an interpreter was
-present, an invalid assumption at termination time.
+C<PERLSYS_TERM> no longer requires a context. C<PerlIO_teardown()>
+is now called without a context, and debugging output in this function has
+been disabled because that required that an interpreter was present, an invalid
+assumption at termination time.
 
 All compile time options which affect binary compatibility have been grouped
 together into a global variable (C<PL_bincompat_options>).
@@ -1869,12 +1865,12 @@ The values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION> are
 now backed into global variables (and hence into any shared perl library).
 Additionally under C<MULTIPLICITY>, the perl executable now record the size of
 the interpreter structure (total, and for this version). Coupled with
-PL_bincompat_options this will allow 5.8.10 (and later), when compiled with a
+C<PL_bincompat_options> this will allow 5.8.10 (and later), when compiled with a
 shared perl library, to perform sanity checks in C<main()> to verify that the
 shared library is indeed binary compatible.
 
 Symbolic references can now have embedded NULs. The new public function
-C<get_cvn_flags> can be used in extensions if you have to handle them.
+C<Perl_get_cvn_flags()> can be used in extensions if you have to handle them.
 
 =head2 Macro cleanups
 
@@ -1901,7 +1897,7 @@ Tests for compile-time constant folding.
 =item t/io/pvbm.t
 
 Tests incorporated from 5.10.0 which check that there is no unexpected
-interaction between the internal types C<PVBM> and C<PVGV>
+interaction between the internal types C<PVBM> and C<PVGV>.
 
 =item t/lib/proxy_constant_subs.t
 
@@ -1909,11 +1905,11 @@ Tests for the new form of constant subroutines.
 
 =item t/op/attrhand.t
 
-Tests for C<Attribute::Handlers>
+Tests for C<Attribute::Handlers>.
 
 =item t/op/dbm.t
 
-Tests for C<dbmopen>
+Tests for C<dbmopen>.
 
 =item t/op/inccode-tie.t
 
@@ -1925,35 +1921,35 @@ Tests for for source filters returned from code references in C<@INC>.
 
 =item t/op/kill0.t
 
-Tests for RT #30970
+Tests for RT #30970.
 
 =item t/op/qrstack.t
 
-Tests for RT #41484
+Tests for RT #41484.
 
 =item t/op/qr.t
 
-Tests for the qr// construct
+Tests for the C<qr//> construct.
 
 =item t/op/regexp_qr_embed.t
 
-Tests for the qr// construct within another regexp
+Tests for the C<qr//> construct within another regexp.
 
 =item t/op/regexp_qr.t
 
-Tests for the qr// construct
+Tests for the C<qr//> construct.
 
 =item t/op/rxcode.t
 
-Tests for RT #32840
+Tests for RT #32840.
 
 =item t/op/studytied.t
 
-Tests for C<study> on tied scalars
+Tests for C<study> on tied scalars.
 
 =item t/op/substT.t
 
-Tests for C<subst> run under C<-T> mode
+Tests for C<subst> run under C<-T> mode.
 
 =item t/op/symbolcache.t
 
@@ -1961,15 +1957,15 @@ Tests for C<undef> and C<delete> on stash entries that are bound to subroutines 
 
 =item t/op/upgrade.t
 
-Tests for C<Perl_sv_upgrade>
+Tests for C<Perl_sv_upgrade()>.
 
 =item t/pod/twice.t
 
-Tests for calling C<Pod::Parser> twice
+Tests for calling C<Pod::Parser> twice.
 
 =item t/run/cloexec.t
 
-Tests for inheriting file descriptors across C<exec> (close-on-exec)
+Tests for inheriting file descriptors across C<exec> (close-on-exec).
 
 =item t/uni/cache.t
 
@@ -1977,15 +1973,15 @@ Tests for the UTF-8 caching code.
 
 =item t/uni/chr.t
 
-Test that strange encodings do not upsets C<Perl_pp_chr>
+Test that strange encodings do not upset C<Perl_pp_chr()>.
 
 =item t/uni/greek.t
 
-Tests for RT #40641
+Tests for RT #40641.
 
 =item t/uni/latin2.t
 
-Tests for RT #40641
+Tests for RT #40641.
 
 =item t/uni/overload.t
 
@@ -2028,7 +2024,7 @@ filename if the long name is outside the current codepage (Jan Dubois).
 =item *
 
 C<Win32> upgraded to version 0.38. Now has a documented 'WinVista' response
-from GetOSName and support for Vista's privilege elevation in C<IsAdminUser>.
+from C<GetOSName> and support for Vista's privilege elevation in C<IsAdminUser>.
 Support for Unicode characters in path names. Improved cygwin and Win64
 compatibility. 
 
@@ -2099,9 +2095,9 @@ this document. In particular, Bradley Dean, Eddy Tan, and Vincent Pit
 provided half the team's contribution.
 
 The crack Berlin-based QA team of Andreas KE<ouml>nig and Slaven ReziE<263>
-tirelessly re-build snapshots, tested most everything CPAN against
+tirelessly re-built snapshots, tested most everything CPAN against
 them, and then identified the changes responsible for any module regressions,
-ensures that several show-stopper bugs were stomped before the first release
+ensuring that several show-stopper bugs were stomped before the first release
 candidate was cut.
 
 The other core committers contributed most of the changes, and applied most
