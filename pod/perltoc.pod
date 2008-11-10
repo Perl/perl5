@@ -6615,7 +6615,7 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 
 =item Maximal count of pending signals (%s) exceeded
 
-=item Panic: attempt to call %s in %s
+=item panic: attempt to call %s in %s
 
 =item FETCHSIZE returned a negative value
 
@@ -6800,7 +6800,7 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 
 =item Maximal count of pending signals (%s) exceeded
 
-=item Panic: attempt to call %s in %s
+=item panic: attempt to call %s in %s
 
 =item FETCHSIZE returned a negative value
 
