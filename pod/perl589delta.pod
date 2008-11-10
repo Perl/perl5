@@ -2079,6 +2079,30 @@ Nick Ing-Simmons, long time Perl hacker, author of the C<Tk> and C<Encode>
 modules, F<perlio.c> in the core, and 5.003_02 pumpking, died of a heart
 attack on 25th September 2006. He will be missed.
 
+=head1 Acknowledgements
+
+Some of the work in this release was funded by a TPF grant.
+
+Steve Hay worked behind the scenes working out the causes of the differences
+between core modules, their CPAN releases, and previous core releases, and
+the best way to rectify them. He doesn't want to do it again. I know this
+feeling, and I'm very glad he did it this time, instead of me.
+
+Paul Fenwick assembled a team of 18 volunteers, who broke the back of writing
+this document. In particular, Bradley Dean, Eddy Tan, and Vincent Pit
+provided half the team's contribution.
+
+The crack Berlin-based QA team of Andreas KE<ouml>nig and Slaven ReziE<263>
+tirelessly re-build snapshots, tested most everything CPAN against
+them, and then identified the changes responsible for any module regressions,
+ensures that several show-stopper bugs were stomped before the first release
+candidate was cut.
+
+The other core committers contributed most of the changes, and applied most
+of the patches sent in by the hundreds of contributors listed in F<AUTHORS>.
+
+And obviously, Larry Wall, without whom we wouldn't have Perl.
+
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
