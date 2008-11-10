@@ -463,15 +463,19 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 /*
 =for apidoc mg_localize
 
-Copy some of the magic from an existing SV to new localized version of
-that SV. Container magic (eg %ENV, $1, tie) gets copied, value magic
-doesn't (eg taint, pos).
+Copy some of the magic from an existing SV to new localized version of that
+SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg
+taint, pos).
+
+If empty is false then no set magic will be called on the new (empty) SV.
+This typically means that assignment will soon follow (e.g. 'local $x = $y'),
+and that will handle the magic.
 
 =cut
 */
 
 void
-Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
+Perl_mg_localize(pTHX_ SV *sv, SV *nsv, I32 empty)
 {
     dVAR;
     MAGIC *mg;
@@ -495,9 +499,11 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
 
     if (SvTYPE(nsv) >= SVt_PVMG && SvMAGIC(nsv)) {
 	SvFLAGS(nsv) |= SvMAGICAL(sv);
-	PL_localizing = 1;
-	SvSETMAGIC(nsv);
-	PL_localizing = 0;
+	if (empty) {
+	    PL_localizing = 1;
+	    SvSETMAGIC(nsv);
+	    PL_localizing = 0;
+	}
     }	    
 }
 

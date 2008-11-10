@@ -2795,7 +2795,7 @@
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
-#define mg_localize(a,b)	Perl_mg_localize(aTHX_ a,b)
+#define mg_localize(a,b,c)	Perl_mg_localize(aTHX_ a,b,c)
 #endif
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
@@ -3086,7 +3086,7 @@
 #define save_shared_pvref(a)	Perl_save_shared_pvref(aTHX_ a)
 #define save_gp(a,b)		Perl_save_gp(aTHX_ a,b)
 #define save_hash(a)		Perl_save_hash(aTHX_ a)
-#define save_helem(a,b,c)	Perl_save_helem(aTHX_ a,b,c)
+#define save_helem(a,b,c,d)	Perl_save_helem(aTHX_ a,b,c,d)
 #define save_hptr(a)		Perl_save_hptr(aTHX_ a)
 #define save_I16(a)		Perl_save_I16(aTHX_ a)
 #define save_I32(a)		Perl_save_I32(aTHX_ a)
@@ -3790,7 +3790,7 @@
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
+#define save_scalar_at(a,b)	S_save_scalar_at(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)

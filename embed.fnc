@@ -518,7 +518,7 @@ Apd	|void	|sortsv_flags	|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp|U3
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV *sv|NN SV *nsv|NULLOK const char *key \
 				|I32 klen
-pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
+pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv|I32 empty
 ApdR	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
 Apd	|int	|mg_free	|NN SV* sv
 Apd	|int	|mg_get		|NN SV* sv
@@ -790,7 +790,7 @@ Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
 Ap	|void	|save_gp	|NN GV* gv|I32 empty
 Ap	|HV*	|save_hash	|NN GV* gv
-Ap	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
+Ap	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr|I32 empty
 Ap	|void	|save_hptr	|NN HV** hptr
 Ap	|void	|save_I16	|NN I16* intp
 Ap	|void	|save_I32	|NN I32* intp
@@ -1550,7 +1550,7 @@ s	|SV*	|pm_description	|NN const PMOP *pm
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
-s	|SV*	|save_scalar_at	|NN SV **sptr
+s	|SV*	|save_scalar_at	|NN SV **sptr|I32 empty
 #endif
 
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
