@@ -33,6 +33,7 @@ no_index:
     - ext/Unicode/Normalize
     - ext/Win32
     - ext/Win32API/File
+    - lib/Attribute/Handlers
     - lib/AutoLoader
     - lib/base
     - lib/bignum
@@ -43,6 +44,7 @@ no_index:
     - lib/ExtUtils/Constant
     - lib/File/Spec
     - lib/File/Temp
+    - lib/Filter/Simple
     - lib/Getopt/Long
     - lib/I18N/LangTags
     - lib/Locale/Maketext/t
@@ -94,6 +96,7 @@ no_index:
     - lib/Archive/Extract.pm
     - lib/Archive/Tar
     - lib/Archive/Tar.pm
+    - lib/Attribute/Handlers.pm
     - lib/AutoLoader.pm
     - lib/AutoSplit.pm
     - lib/base.pm
@@ -212,6 +215,7 @@ no_index:
     - lib/File/Path.t
     - lib/File/Spec.pm
     - lib/File/Temp.pm
+    - lib/Filter/Simple.pm
     - lib/Getopt/Long.pm
     - lib/I18N/LangTags.pm
     - lib/if.pm
@@ -220,6 +224,8 @@ no_index:
     - lib/IO/Zlib.pm
     - lib/IPC/Cmd
     - lib/IPC/Cmd.pm
+    - lib/lib.t
+    - lib/lib_pm.PL
     - lib/Locale/Codes
     - lib/Locale/Constants.pm
     - lib/Locale/Constants.pod
@@ -325,7 +331,11 @@ no_index:
     - lib/Test/Harness.pm
     - lib/Test/More.pm
     - lib/Test/Simple.pm
+    - lib/Test/Tutorial.pod
     - lib/Text/Balanced.pm
+    - lib/Text/ParseWords
+    - lib/Text/ParseWords.pm
+    - lib/Text/ParseWords.t
     - lib/Text/Tabs.pm
     - lib/Text/Wrap.pm
     - lib/Thread/Queue.pm
