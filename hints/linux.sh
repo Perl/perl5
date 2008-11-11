@@ -91,6 +91,12 @@ case "`${cc:-cc} -V 2>&1`" in
     # The -mp flag is needed to pass various floating point related tests
     # The -no-gcc flag is needed otherwise, icc pretends (poorly) to be gcc
     ccflags="-we147 -mp -no-gcc $ccflags"
+    # Prevent relocation errors on 64bits arch
+    case "`uname -m`" in
+	*ia64*|*x86_64*)
+	    cccdlflags='-fPIC'
+	;;
+    esac
     # If we're using ICC, we usually want the best performance
     case "$optimize" in
     '') optimize='-O3' ;;
