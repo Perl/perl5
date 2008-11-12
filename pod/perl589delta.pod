@@ -970,9 +970,9 @@ history.
 =head2 F<perlthanks>
 
 Perl 5.8.9 adds a new utility F<perlthanks>, which is a variant of F<perlbug>,
-but for sending non-bug-reports authors and maintainers of Perl. Getting
-nothing bug reports can become a bit demoralising - we'll see if this changes
-things.
+but for sending non-bug-reports to the authors and maintainers of Perl.
+Getting nothing but bug reports can become a bit demoralising - we'll see if
+this changes things.
 
 =head2 F<perlbug>
 
