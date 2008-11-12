@@ -460,11 +460,15 @@ Found in file mg.c
 =item mg_localize
 X<mg_localize>
 
-Copy some of the magic from an existing SV to new localized version of
-that SV. Container magic (eg %ENV, $1, tie) gets copied, value magic
-doesn't (eg taint, pos).
+Copy some of the magic from an existing SV to new localized version of that
+SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg
+taint, pos).
 
-	void	mg_localize(SV* sv, SV* nsv)
+If empty is false then no set magic will be called on the new (empty) SV.
+This typically means that assignment will soon follow (e.g. 'local $x = $y'),
+and that will handle the magic.
+
+	void	mg_localize(SV* sv, SV* nsv, I32 empty)
 
 =for hackers
 Found in file mg.c
@@ -1102,7 +1106,7 @@ X<report_uninit>
 
 Print appropriate "Use of uninitialized variable" warning
 
-	void	report_uninit(SV* uninit_sv)
+	void	report_uninit(const SV *uninit_sv)
 
 =for hackers
 Found in file sv.c

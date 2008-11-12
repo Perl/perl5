@@ -816,9 +816,6 @@ Found in file perl.c
 =item pv_display
 X<pv_display>
 
-  char *pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len,
-                   STRLEN pvlim, U32 flags)
-
 Similar to
 
   pv_escape(dsv,pv,cur,pvlim,PERL_PV_ESCAPE_QUOTE);
@@ -3034,7 +3031,7 @@ value returned by the sub.  Otherwise, returns NULL.
 Constant subs can be created with C<newCONSTSUB> or as described in
 L<perlsub/"Constant Functions">.
 
-	SV*	cv_const_sv(CV* cv)
+	SV*	cv_const_sv(const CV *const cv)
 
 =for hackers
 Found in file op.c
