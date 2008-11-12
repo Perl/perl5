@@ -3,6 +3,9 @@
 # *NOTE* This is executed by basic.t and is included in both ExtUtils-Install
 # and ExtUtils-MakeMaker as well as Perl itself. Which bits of it execute depend
 # on each given packages basic.t
+#
+# If you patch any version of this file please make sure you let the other 
+# distributions know as well. It should be identical in all three cases.
 
 # This test puts MakeMaker through the paces of a basic perl module
 # build, test and installation of the Big::Fat::Dummy module.
@@ -229,3 +232,4 @@ SKIP: {
     ok( $files{'perllocal.pod'},'  perllocal.pod created' );
     rmtree('other');
 }
+

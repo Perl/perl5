@@ -1956,6 +1956,7 @@ lib/ExtUtils/CBuilder.pm	Compile and link C code for Perl modules
 lib/ExtUtils/CBuilder/t/01-basic.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/Changes		MakeMaker change log
+lib/ExtUtils/Changes_EU-Install		ExtUtils-Install change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Constant/Base.pm	generate XS code to import C header constants
