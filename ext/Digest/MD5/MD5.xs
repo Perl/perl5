@@ -1,5 +1,3 @@
-/* $Id: MD5.xs,v 1.45 2005/11/26 11:06:20 gisle Exp $ */
-
 /* 
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
