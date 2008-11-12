@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
     
 =head1 VERSION
 
-1.51
+1.52
 
 =cut
 
-$VERSION = '1.51';
+$VERSION = '1.52';
 $VERSION = eval $VERSION;
 
 =pod

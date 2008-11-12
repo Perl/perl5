@@ -1,5 +1,12 @@
 Revision history for ExtUtils-Install
 
+1.52
+
+Production rerelease of 1.51 to make the CPAN indexer happy about permissions 
+(hopefully). 
+
+SVN Revision 44.
+
 1.51
 
 Production release of 1.50_05. No other changes.
