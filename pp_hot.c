@@ -1828,7 +1828,8 @@ PP(pp_helem)
 		    SAVEDELETE(hv, savepvn(key,keylen),
 			       SvUTF8(keysv) ? -(I32)keylen : (I32)keylen);
 		} else
-		    save_helem(hv, keysv, svp, !(PL_op->op_flags & OPf_SPECIAL));
+		    save_helem_flags(hv, keysv, svp,
+				     (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
             }
 	}
 	else if (PL_op->op_private & OPpDEREF)

@@ -4185,7 +4185,8 @@ PP(pp_hslice)
 		    save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
 		else {
 		    if (preeminent)
-			save_helem(hv, keysv, svp, !(PL_op->op_flags & OPf_SPECIAL));
+			save_helem_flags(hv, keysv, svp,
+					 (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
 		    else {
 			STRLEN keylen;
 			const char * const key = SvPV_const(keysv, keylen);

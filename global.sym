@@ -450,7 +450,7 @@ Perl_save_generic_pvref
 Perl_save_shared_pvref
 Perl_save_gp
 Perl_save_hash
-Perl_save_helem
+Perl_save_helem_flags
 Perl_save_hptr
 Perl_save_I16
 Perl_save_I32

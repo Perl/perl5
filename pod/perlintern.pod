@@ -464,11 +464,11 @@ Copy some of the magic from an existing SV to new localized version of that
 SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg
 taint, pos).
 
-If empty is false then no set magic will be called on the new (empty) SV.
+If setmagic is false then no set magic will be called on the new (empty) SV.
 This typically means that assignment will soon follow (e.g. 'local $x = $y'),
 and that will handle the magic.
 
-	void	mg_localize(SV* sv, SV* nsv, I32 empty)
+	void	mg_localize(SV* sv, SV* nsv, bool setmagic)
 
 =for hackers
 Found in file mg.c

@@ -1848,7 +1848,7 @@ PERL_CALLCONV int	Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 #define PERL_ARGS_ASSERT_MG_COPY	\
 	assert(sv); assert(nsv)
 
-PERL_CALLCONV void	Perl_mg_localize(pTHX_ SV* sv, SV* nsv, I32 empty)
+PERL_CALLCONV void	Perl_mg_localize(pTHX_ SV* sv, SV* nsv, bool setmagic)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_MG_LOCALIZE	\
@@ -2830,11 +2830,18 @@ PERL_CALLCONV HV*	Perl_save_hash(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_SAVE_HASH	\
 	assert(gv)
 
-PERL_CALLCONV void	Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr, I32 empty)
+/* PERL_CALLCONV void	Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3); */
+#define PERL_ARGS_ASSERT_SAVE_HELEM	\
+	assert(hv); assert(key); assert(sptr)
+
+PERL_CALLCONV void	Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_SAVE_HELEM	\
+#define PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS	\
 	assert(hv); assert(key); assert(sptr)
 
 PERL_CALLCONV void	Perl_save_hptr(pTHX_ HV** hptr)
@@ -5498,7 +5505,7 @@ STATIC SV*	S_pm_description(pTHX_ const PMOP *pm)
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
-STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr, I32 empty)
+STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_SCALAR_AT	\
 	assert(sptr)

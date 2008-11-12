@@ -770,7 +770,7 @@
 #define save_shared_pvref	Perl_save_shared_pvref
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
-#define save_helem		Perl_save_helem
+#define save_helem_flags	Perl_save_helem_flags
 #define save_hptr		Perl_save_hptr
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
@@ -3086,7 +3086,7 @@
 #define save_shared_pvref(a)	Perl_save_shared_pvref(aTHX_ a)
 #define save_gp(a,b)		Perl_save_gp(aTHX_ a,b)
 #define save_hash(a)		Perl_save_hash(aTHX_ a)
-#define save_helem(a,b,c,d)	Perl_save_helem(aTHX_ a,b,c,d)
+#define save_helem_flags(a,b,c,d)	Perl_save_helem_flags(aTHX_ a,b,c,d)
 #define save_hptr(a)		Perl_save_hptr(aTHX_ a)
 #define save_I16(a)		Perl_save_I16(aTHX_ a)
 #define save_I32(a)		Perl_save_I32(aTHX_ a)

@@ -55,6 +55,10 @@
 #define SAVEt_STACK_CXPOS	44
 #define SAVEt_PARSER		45
 
+#define SAVEf_SETMAGIC		1
+
+#define save_helem(hv,key,sptr)	save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
+
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
 #endif

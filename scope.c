@@ -164,7 +164,7 @@ Perl_free_tmps(pTHX)
 }
 
 STATIC SV *
-S_save_scalar_at(pTHX_ SV **sptr, I32 empty)
+S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
     dVAR;
     SV * const osv = *sptr;
@@ -179,7 +179,7 @@ S_save_scalar_at(pTHX_ SV **sptr, I32 empty)
 	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
-	mg_localize(osv, sv, empty);
+	mg_localize(osv, sv, (flags & SAVEf_SETMAGIC) != 0);
     }
     return sv;
 }
@@ -199,7 +199,7 @@ Perl_save_scalar(pTHX_ GV *gv)
     SSPUSHPTR(SvREFCNT_inc_simple(gv));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_SV);
-    return save_scalar_at(sptr, TRUE);	/* XXX - FIXME - see #60360 */
+    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
 /* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
@@ -611,7 +611,7 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
 	SvREFCNT_inc_void(*sptr);
-    save_scalar_at(sptr, TRUE);	/* XXX - FIXME - see #60360 */
+    save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
     sv = *sptr;
     /* If we're localizing a tied array element, this new sv
      * won't actually be stored in the array - so it won't get
@@ -622,12 +622,12 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
 }
 
 void
-Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr, I32 empty)
+Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
 {
     dVAR;
     SV *sv;
 
-    PERL_ARGS_ASSERT_SAVE_HELEM;
+    PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS;
 
     SvGETMAGIC(*sptr);
     SSCHECK(4);
@@ -635,7 +635,7 @@ Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr, I32 empty)
     SSPUSHPTR(newSVsv(key));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_HELEM);
-    save_scalar_at(sptr, empty);
+    save_scalar_at(sptr, flags);
     sv = *sptr;
     /* If we're localizing a tied hash element, this new sv
      * won't actually be stored in the hash - so it won't get
@@ -657,7 +657,7 @@ Perl_save_svref(pTHX_ SV **sptr)
     SSPUSHPTR(sptr);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_SVREF);
-    return save_scalar_at(sptr, TRUE);	/* XXX - FIXME - see #60360 */
+    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
 void
