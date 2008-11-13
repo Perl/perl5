@@ -1590,7 +1590,7 @@ conversion routines don't handle.  Drat.
 expression that contains the C<(?{ ... })> zero-width assertion, which
 is unsafe.  See L<perlre/(?{ code })>, and L<perlsec>.
 
-=item %s: Eval-group not allowed at run time
+=item %s: Eval-group not allowed at runtime, use re 'eval'
 
 (F) Perl tried to compile a regular expression containing the
 C<(?{ ... })> zero-width assertion at run time, as it would when the
