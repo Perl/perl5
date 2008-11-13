@@ -164,7 +164,7 @@ case "$cc" in
 # -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
 #			    symbol: boot_$(EXP)	 can it be auto-generated?
 if test $usenativedlopen = 'true' ; then
-    lddlflags="$lddlflags -bhalt:4 -bexpall -G -bnoentry -lc"
+    lddlflags="$lddlflags -bhalt:4 -G -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc -lm"
 else
     lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
     fi
