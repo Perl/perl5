@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 use XSLoader ();
 require Exporter;
@@ -240,7 +240,7 @@ sub walksymtable {
         $fullname = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
-	    if ($sym ne "main::" && $sym ne "<none>::" && &$recurse($sym)) {
+	    if (svref_2object(\*$sym)->NAME ne "main::" && $sym ne "<none>::" && &$recurse($sym)) {
                walksymtable(\%$fullname, $method, $recurse, $sym);
 	    }
 	} else {
