@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 68;
+use Test::More tests => 74;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -147,10 +147,18 @@ sub getcode {
    return $deparser->coderef2text(shift);
 }
 
+package Moo;
+use overload '0+' => sub { 42 };
+
 package main;
 use strict;
 use warnings;
 use constant GLIPP => 'glipp';
+use constant PI => 4;
+use constant OVERLOADED_NUMIFICATION => bless({}, 'Moo');
+use Fcntl qw/O_NONBLOCK O_SYNC O_EXCL/;
+BEGIN { delete $::Fcntl::{O_SYNC}; }
+use POSIX qw/O_CREAT/;
 sub test {
    my $val = shift;
    my $res = B::Deparse::Wrapper::getcode($val);
@@ -422,15 +430,15 @@ else { x(); }
 my($y, $t);
 /x${y}z$t/;
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO new undocumented cpan-bug #33708"
+# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO new undocumented cpan-bug #33708"
 # 55  (cpan-bug #33708)
 %{$_ || {}}
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO hash constants not yet fixed"
+# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO hash constants not yet fixed"
 # 56  (cpan-bug #33708)
 use constant H => { "#" => 1 }; H->{"#"}
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO optimized away 0 not yet fixed"
+# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO optimized away 0 not yet fixed"
 # 57  (cpan-bug #33708)
 foreach my $i (@_) { 0 }
 ####
@@ -548,5 +556,25 @@ if (do { $a++; GLIPP }) { x() }
 >>>>
 x() if $a;
 if ($a == 1) { x(); } elsif ($b == 2) { z(); }
-if (do { foo(); 'glipp' }) { x(); }
-if (do { ++$a; 'glipp' }) { x(); }
+if (do { foo(); GLIPP }) { x(); }
+if (do { ++$a; GLIPP }) { x(); }
+####
+# 62 tests for deparsing constants
+warn PI;
+####
+# 63 tests for deparsing imported constants
+warn O_NONBLOCK;
+####
+# 64 tests for deparsing re-exported constants
+warn O_CREAT;
+####
+# 65 tests for deparsing imported constants that got deleted from the original namespace
+warn O_SYNC;
+####
+# 66 tests for deparsing constants which got turned into full typeglobs
+warn O_EXCL;
+eval '@Fcntl::O_EXCL = qw/affe tiger/;';
+warn O_EXCL;
+####
+# 67 tests for deparsing of blessed constant with overloaded numification
+warn OVERLOADED_NUMIFICATION;
