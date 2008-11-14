@@ -128,6 +128,24 @@ sub remove_tree {
     goto &rmtree;
 }
 
+sub _is_subdir {
+    my($dir, $test) = @_;
+
+    my($dv, $dd) = File::Spec->splitpath($dir, 1);
+    my($tv, $td) = File::Spec->splitpath($test, 1);
+
+    # not on same volume
+    return 0 if $dv ne $tv;
+
+    my @d = File::Spec->splitdir($dd);
+    my @t = File::Spec->splitdir($td);
+
+    # @t can't be a subdir if it's shorter than @d
+    return 0 if @t < @d;
+
+    return join('/', @d) eq join('/', splice @t, 0, +@d);
+}
+
 sub rmtree {
     my $old_style = !(@_ and UNIVERSAL::isa($_[-1],'HASH'));
 
@@ -171,9 +189,7 @@ sub rmtree {
         my $ortho_cwd  = $^O eq 'MSWin32' ? _slash_lc($arg->{cwd}) : $arg->{cwd};
         my $ortho_root_length = length($ortho_root);
         $ortho_root_length-- if $^O eq 'VMS'; # don't compare '.' with ']'
-        if ($ortho_root_length
-            && (substr($ortho_root, 0, $ortho_root_length) 
-             eq substr($ortho_cwd, 0, $ortho_root_length))) {
+        if ($ortho_root_length && _is_subdir($ortho_root, $ortho_cwd)) {
             local $! = 0;
             _error($arg, "cannot remove path when cwd is $arg->{cwd}", $p);
             next;
