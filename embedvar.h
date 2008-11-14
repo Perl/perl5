@@ -211,7 +211,7 @@
 #define PL_numeric_name		(vTHX->Inumeric_name)
 #define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
-#define PL_ofs_sv		(vTHX->Iofs_sv)
+#define PL_ofsgv		(vTHX->Iofsgv)
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_op			(vTHX->Iop)
 #define PL_op_mask		(vTHX->Iop_mask)
@@ -523,7 +523,7 @@
 #define PL_Inumeric_name	PL_numeric_name
 #define PL_Inumeric_radix_sv	PL_numeric_radix_sv
 #define PL_Inumeric_standard	PL_numeric_standard
-#define PL_Iofs_sv		PL_ofs_sv
+#define PL_Iofsgv		PL_ofsgv
 #define PL_Ioldname		PL_oldname
 #define PL_Iop			PL_op
 #define PL_Iop_mask		PL_op_mask

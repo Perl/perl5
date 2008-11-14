@@ -1409,7 +1409,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case ')':
 	case '<':
 	case '>':
-	case ',':
 	case '\\':
 	case '/':
 	case '\001':	/* $^A */
@@ -2328,7 +2327,6 @@ Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 	case ')':
 	case '<':
 	case '>':
-	case ',':
 	case '\\':
 	case '/':
 	case '|':

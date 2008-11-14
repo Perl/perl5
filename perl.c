@@ -946,8 +946,8 @@ perl_destruct(pTHXx)
 
     /* magical thingies */
 
-    SvREFCNT_dec(PL_ofs_sv);	/* $, */
-    PL_ofs_sv = NULL;
+    SvREFCNT_dec(PL_ofsgv);	/* *, */
+    PL_ofsgv = NULL;
 
     SvREFCNT_dec(PL_ors_sv);	/* $\ */
     PL_ors_sv = NULL;
@@ -4551,6 +4551,8 @@ S_init_predump_symbols(pTHX)
     IO *io;
 
     sv_setpvs(get_sv("\"", TRUE), " ");
+    PL_ofsgv = (GV*)SvREFCNT_inc(gv_fetchpvs(",", GV_ADD|GV_NOTQUAL, SVt_PV));
+
     PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
     io = GvIOp(PL_stdingv);

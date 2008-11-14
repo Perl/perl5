@@ -102,16 +102,16 @@ The input record separator - C<$/> in Perl space.
 
 The GV which was last used for a filehandle input operation. (C<< <FH> >>)
 
-=for apidoc mn|SV*|PL_ofs_sv
+=for apidoc mn|GV*|PL_ofsgv
 
-The output field separator - C<$,> in Perl space.
+The glob containing the output field separator - C<*,> in Perl space.
 
 =cut
 */
 
 PERLVAR(Irs,		SV *)		/* input record separator $/ */
 PERLVAR(Ilast_in_gv,	GV *)		/* GV used in last <FH> */
-PERLVAR(Iofs_sv,	SV *)		/* output field separator $, */
+PERLVAR(Iofsgv,		GV *)		/* GV of output field separator *, */
 PERLVAR(Idefoutgv,	GV *)		/* default FH for output */
 PERLVARI(Ichopset,	const char *, " \n-")	/* $: */
 PERLVAR(Iformtarget,	SV *)

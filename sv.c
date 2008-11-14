@@ -11761,6 +11761,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regex_pad = AvARRAY(PL_regex_padav);
 
     /* shortcuts to various I/O objects */
+    PL_ofsgv            = gv_dup(proto_perl->Iofsgv, param);
     PL_stdingv		= gv_dup(proto_perl->Istdingv, param);
     PL_stderrgv		= gv_dup(proto_perl->Istderrgv, param);
     PL_defgv		= gv_dup(proto_perl->Idefgv, param);
@@ -12107,7 +12108,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_curpm		= proto_perl->Icurpm;	/* XXX No PMOP ref count */
     PL_rs		= sv_dup_inc(proto_perl->Irs, param);
     PL_last_in_gv	= gv_dup(proto_perl->Ilast_in_gv, param);
-    PL_ofs_sv		= sv_dup_inc(proto_perl->Iofs_sv, param);
     PL_defoutgv		= gv_dup_inc(proto_perl->Idefoutgv, param);
     PL_chopset		= proto_perl->Ichopset;	/* XXX never deallocated */
     PL_toptarget	= sv_dup_inc(proto_perl->Itoptarget, param);

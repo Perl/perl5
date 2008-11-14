@@ -753,14 +753,16 @@ PP(pp_print)
 	goto just_say_no;
     }
     else {
+	SV * const ofs = GvSV(PL_ofsgv); /* $, */
 	MARK++;
-	if (PL_ofs_sv && SvOK(PL_ofs_sv)) {
+	if (ofs && (SvGMAGICAL(ofs) || SvOK(ofs))) {
 	    while (MARK <= SP) {
 		if (!do_print(*MARK, fp))
 		    break;
 		MARK++;
 		if (MARK <= SP) {
-		    if (!do_print(PL_ofs_sv, fp)) { /* $, */
+		    /* don't use 'ofs' here - it may be invalidated by magic callbacks */
+		    if (!do_print(GvSV(PL_ofsgv), fp)) {
 			MARK--;
 			break;
 		    }
