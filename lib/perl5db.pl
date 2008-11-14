@@ -3784,6 +3784,69 @@ sub sub {
     } ## end else [ if (wantarray)
 } ## end sub sub
 
+sub lsub : lvalue {
+
+	# lock ourselves under threads
+	lock($DBGR);
+
+    # Whether or not the autoloader was running, a scalar to put the
+    # sub's return value in (if needed), and an array to put the sub's
+    # return value in (if needed).
+    my ( $al, $ret, @ret ) = "";
+	if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+		print "creating new thread\n";
+	}
+
+    # If the last ten characters are C'::AUTOLOAD', note we've traced
+    # into AUTOLOAD for $sub.
+    if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+        $al = " for $$sub";
+    }
+
+    # We stack the stack pointer and then increment it to protect us
+    # from a situation that might unwind a whole bunch of call frames
+    # at once. Localizing the stack pointer means that it will automatically
+    # unwind the same amount when multiple stack frames are unwound.
+    local $stack_depth = $stack_depth + 1;    # Protect from non-local exits
+
+    # Expand @stack.
+    $#stack = $stack_depth;
+
+    # Save current single-step setting.
+    $stack[-1] = $single;
+
+    # Turn off all flags except single-stepping.
+    $single &= 1;
+
+    # If we've gotten really deeply recursed, turn on the flag that will
+    # make us stop with the 'deep recursion' message.
+    $single |= 4 if $stack_depth == $deep;
+
+    # If frame messages are on ...
+    (
+        $frame & 4    # Extended frame entry message
+        ? (
+            print_lineinfo( ' ' x ( $stack_depth - 1 ), "in  " ),
+
+            # Why -1? But it works! :-(
+            # Because print_trace will call add 1 to it and then call
+            # dump_trace; this results in our skipping -1+1 = 0 stack frames
+            # in dump_trace.
+            print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
+          )
+        : print_lineinfo( ' ' x ( $stack_depth - 1 ), "entering $sub$al\n" )
+
+          # standard frame entry message
+      )
+      if $frame;
+
+    # Pop the single-step value back off the stack.
+    $single |= $stack[ $stack_depth-- ];
+
+    # call the original lvalue sub.
+    &$sub;
+}
+
 =head1 EXTENDED COMMAND HANDLING AND THE COMMAND API
 
 In Perl 5.8.0, there was a major realignment of the commands and what they did,
