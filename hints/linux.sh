@@ -102,7 +102,11 @@ case "`${cc:-cc} -V 2>&1`" in
     '') optimize='-O3' ;;
     esac
     ;;
-*"Sun C"*)
+*" Sun "*"C"*)
+    # Sun's C compiler, which might have a 'tag' name between
+    # 'Sun' and the 'C':  Examples:
+    # cc: Sun C 5.9 Linux_i386 Patch 124871-01 2007/07/31
+    # cc: Sun Ceres C 5.10 Linux_i386 2008/07/10
     test "$optimize" || optimize='-xO2'
     cccdlflags='-KPIC'
     lddlflags='-G -Bdynamic'
