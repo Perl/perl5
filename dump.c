@@ -518,6 +518,8 @@ Perl_sv_peek(pTHX_ SV *sv)
   finish:
     while (unref--)
 	sv_catpv(t, ")");
+    if (PL_tainting && SvTAINTED(sv))
+	sv_catpv(t, " [tainted]");
     return SvPV_nolen(t);
 }
 
