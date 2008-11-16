@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.36_01';  # $Date: 2005/11/30 13:46:47 $
+$VERSION = '2.37';
 
 require Exporter;
 *import = \&Exporter::import;
@@ -310,7 +310,7 @@ string through encode_utf8() function:
 
 L<Digest>,
 L<Digest::MD2>,
-L<Digest::SHA1>,
+L<Digest::SHA>,
 L<Digest::HMAC>
 
 L<md5sum(1)>
