@@ -3044,6 +3044,7 @@ t/Module_Pluggable/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/No/Middle.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/TA/C/A/I.pm	Module::Pluggable tests
+t/mro/package_aliases.t		mro tests
 Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
