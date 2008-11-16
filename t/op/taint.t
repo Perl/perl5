@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 267;
+plan tests => 271;
 
 $| = 1;
 
@@ -1250,6 +1250,21 @@ foreach my $ord (78, 163, 256) {
     is($line, 'A1');
     $line =~ /(A\S*)/;
     ok(!tainted($1), "\\S match with chr $ord");
+}
+
+{
+    # 59998
+    sub cr { my $x = crypt($_[0], $_[1]); $x }
+    sub co { my $x = ~$_[0]; $x }
+    my ($a, $b);
+    $a = cr('hello', 'foo' . $TAINT);
+    $b = cr('hello', 'foo');
+    ok(tainted($a),  "tainted crypt");
+    ok(!tainted($b), "untainted crypt");
+    $a = co('foo' . $TAINT);
+    $b = co('foo');
+    ok(tainted($a),  "tainted complement");
+    ok(!tainted($b), "untainted complement");
 }
 
 # This may bomb out with the alarm signal so keep it last
