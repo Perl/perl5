@@ -3537,7 +3537,7 @@ PP(pp_entereval)
 
     /* prepare to compile string */
 
-    if (PERLDB_SAVESRC && PL_curstash != PL_debstash)
+    if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
 #ifdef USE_5005THREADS
