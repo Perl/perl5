@@ -42,6 +42,7 @@ if (! defined($_)) {
 my @patches;
 while (<PATCH_LEVEL>) {
     last if /^\s*}/;
+    next if /^\s*#/;  # preprocessor stuff
     chomp;
     s/^\s+,?\s*"?//;
     s/"\s+STRINGIFY\(PERL_PATCHNUM\)/$patchnum"/;
