@@ -2226,7 +2226,11 @@ Paul Fenwick assembled a team of 18 volunteers, who broke the back of writing
 this document. In particular, Bradley Dean, Eddy Tan, and Vincent Pit
 provided half the team's contribution.
 
-The crack Berlin-based QA team of Andreas KE<ouml>nig and Slaven ReziE<263>
+Schwern verified the list of updated module versions, correcting quite a few
+errors that I (and everyone else) had missed, both wrongly stated module
+versions, and changed modules that had not been listed.
+
+The crack Berlin-based QA team of Andreas KE<ouml>nig and Slaven Rezic
 tirelessly re-built snapshots, tested most everything CPAN against
 them, and then identified the changes responsible for any module regressions,
 ensuring that several show-stopper bugs were stomped before the first release
