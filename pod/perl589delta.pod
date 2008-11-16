@@ -181,11 +181,17 @@ pluggable sub-modules. The bundled version is 3.8
 =item *
 
 C<Module::CoreList> is a hash of hashes that is keyed on perl version as
-indicated in C<$]>. The bundled version is 2.12
+indicated in C<$]>. The bundled version is 2.16
 
 =item *
 
-C<Win32API::File> now available in core on Microsoft Windows.
+C<Win32API::File> now available in core on Microsoft Windows. The bundled
+version is 0.1001_01
+
+=item * 
+
+C<Devel::InnerPackage> finds all the packages defined by a single file. It is
+part of the C<Module::Pluggable> distribution. The bundled version is 0.3
 
 =back
 
@@ -341,7 +347,19 @@ C<Benchmark> upgraded to version 1.10
 
 =item *
 
+C<bigint> upgraded to 0.23
+
+=item *
+
 C<bignum> upgraded to 0.23
+
+=item *
+
+C<bigrat> upgraded to 0.23
+
+=item *
+
+C<blib> upgraded to 0.04
 
 =item *
 
@@ -352,6 +370,10 @@ The argument backtrace code would show C<undef> as I<"undef"> - a string.
 =item *
 
 C<CGI> upgraded to version 3.42
+
+=item *
+
+C<charnames> upgraded to 1.06
 
 =item *
 
@@ -389,6 +411,10 @@ C<DB_File> upgraded to version 1.817
 
 =item *
 
+C<DB_Filter> upgraded to version 0.02
+
+=item *
+
 C<Devel::DProf> upgraded to version 20080331.00.
 
 =item *
@@ -406,6 +432,10 @@ C<diagnostics> upgraded to version 1.16
 =item *
 
 C<Digest> upgraded to version 1.15
+
+=item *
+
+C<Digest::MD5> upgraded to version 2.36_01
 
 =item *
 
@@ -437,6 +467,10 @@ ASCII).
 
 =item *
 
+C<English> upgraded to version 1.03
+
+=item *
+
 C<Errno> upgraded to version 1.10
 
 =item *
@@ -457,7 +491,11 @@ C<ExtUtils::Embed> upgraded to version 1.28
 
 =item *
 
-C<ExtUtils::Install> upgraded to version 1.51
+C<ExtUtils::Install> upgraded to version 1.50_01
+
+=item *
+
+C<ExtUtils::Installed> upgraded to version 1.43
 
 =item *
 
@@ -494,7 +532,23 @@ allows built-ins in C<CORE::GLOBAL> to be made fatal.
 
 =item *
 
+C<Fcntl> upgraded to version 1.06
+
+=item *
+
+C<fields> upgraded to version 2.12
+
+=item *
+
 C<File::Basename> upgraded to version 2.77
+
+=item *
+
+C<FileCache> upgraded to version 1.07
+
+=item *
+
+C<File::Compare> upgraded to 1.1005
 
 =item *
 
@@ -507,6 +561,10 @@ C<File::Copy> upgraded to 2.13
 now uses 3-arg open.
 
 =back
+
+=item *
+
+C<File::DosGlob> upgraded to 1.01
 
 =item *
 
@@ -526,7 +584,7 @@ fixes spurious results with brackets inside braces.
 
 =item *
 
-C<File::Path> upgraded to version 2.04
+C<File::Path> upgraded to version 2.07
 
 =item *
 
@@ -547,15 +605,27 @@ an optimisation on C<abs2rel> when handling both relative arguments.
 
 =item *
 
+C<File::stat> upgraded to version 1.01
+
+=item *
+
 C<File::Temp> upgraded to version 0.20
+
+=item *
+
+C<filetest> upgraded to version 1.02
+
+=item *
+
+C<Filter::Util::Call> upgraded to version 1.07
+
+=item *
+
+C<Filter::Simple> upgraded to version 0.83
 
 =item * 
 
 C<FindBin> upgraded to version 1.49
-
-=item *
-
-C<FileCache> upgraded to version 1.07
 
 =item *
 
@@ -567,13 +637,29 @@ C<Getopt::Long> upgraded to version 2.37
 
 =item *
 
+C<Getopt::Std> upgraded to version 1.06
+
+=item *
+
 C<Hash::Util> upgraded to version 0.06
+
+=item *
+
+C<if> upgraded to version 0.05
 
 =item *
 
 C<IO> upgraded to version 1.23
 
 Reduced number of calls to C<getpeername> in C<IO::Socket>
+
+=item *
+
+C<IPC::Open> upgraded to version 1.03
+
+=item *
+
+C<IPC::Open3> upgraded to version 1.03
 
 =item *
 
@@ -593,7 +679,11 @@ avoid warning about loading F<.par> files.
 
 =item *
 
-C<libnet> upgraded to version 1.20
+C<libnet> upgraded to version 1.22
+
+=item *
+
+C<List::Util> upgraded to 1.19
 
 =item *
 
@@ -621,7 +711,11 @@ implements new C<as_float> method.
 
 =item *
 
-C<Math::Complex>, C<Math::Trig> upgraded to version 1.54.
+C<Math::Complex> upgraded to version 1.54.
+
+=item *
+
+C<Math::Trig> upgraded to version 1.18.
 
 =item *
 
@@ -654,7 +748,15 @@ within overloaded stringification.
 
 =item *
 
+C<ODBM_File> upgraded to 1.07
+
+=item *
+
 C<open> upgraded to 1.06
+
+=item *
+
+C<ops> upgraded to 1.02
 
 =item *
 
@@ -721,6 +823,10 @@ C<re> upgraded to version 0.06_01
 =item *
 
 C<Safe> upgraded to version 2.16
+
+=item *
+
+C<Scalar::Util> upgraded to 1.19
 
 =item *
 
@@ -849,6 +955,14 @@ C<extract>
 
 =item *
 
+C<Tie::Handle> upgraded to version 4.2
+
+=item *
+
+C<Tie::Hash> upgraded to version 1.03
+
+=item *
+
 C<Tie::Memoize> upgraded to version 1.1
 
 =over
@@ -859,7 +973,13 @@ C<Tie::Memoize::EXISTS> now correctly caches its results.
 
 =back
 
+=item *
+
 C<Tie::RefHash> upgraded to version 1.38
+
+=item *
+
+C<Tie::Scalar> upgraded to version 1.01
 
 =item *
 
@@ -935,6 +1055,10 @@ C<Unicode::Normalize> upgraded to version 1.02
 =item *
 
 C<Unicode::UCD> upgraded to version 0.25
+
+=item *
+
+C<warnings> upgraded to version 1.05_01
 
 =item *
 
@@ -1957,6 +2081,10 @@ Tests for C<undef> and C<delete> on stash entries that are bound to subroutines 
 
 Tests for C<Perl_sv_upgrade()>.
 
+=item t/mro/package_aliases.t
+
+MRO tests for C<isa> and package aliases.
+
 =item t/pod/twice.t
 
 Tests for calling C<Pod::Parser> twice.
@@ -2048,8 +2176,10 @@ C<File::Spec::Win32> upgraded to version 3.2701
 
 =item *
 
-C<OS2::Process>: Ilya Zakharevich has added and documented several C<Window*> and
-C<Clipbrd*> functions.
+C<OS2::Process> upgraded to 1.03
+
+Ilya Zakharevich has added and documented several C<Window*> and C<Clipbrd*>
+functions.
 
 =item *
 
@@ -2065,7 +2195,11 @@ C<OS2::REXX::DLL>, C<OS2::REXX> updated to version 1.03
 
 =item *
 
-C<File::Spec::VMS> upgraded to version 3.2701
+C<DCLsym> upgraded to version 1.03
+
+=item *
+
+C<Stdio> upgraded to version 2.4
 
 =item *
 
