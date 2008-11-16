@@ -1,6 +1,5 @@
 #!perl -w
 
-BEGIN { require 5.006 }
 use strict;
 use Config qw(%Config);
 use ExtUtils::MakeMaker;
@@ -21,12 +20,14 @@ if ($^O eq 'VMS') {
 
 push(@extra, 'INSTALLDIRS'  => 'perl') if $] >= 5.008;
 push(@extra, 'MAN3PODS' => {}) if $PERL_CORE; # Pods built by installman.
+push @extra, 'LICENSE' => 'perl' if $ExtUtils::MakeMaker::VERSION >= "6.30";
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
     'VERSION_FROM' => 'MD5.pm',
     'PREREQ_PM'    => { 'File::Spec' => 0,
 			'Digest::base' => '1.00',
+			'XSLoader' => 0,
 		      },
     @extra,
     'dist'         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

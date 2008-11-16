@@ -709,6 +709,11 @@ md5(...)
 		if (len == 11 && memEQ("Digest::MD5", data, 11)) {
 		    msg = "probably called as class method";
 		}
+		else if (SvROK(ST(0))) {
+		    SV* sv = SvRV(ST(0));
+		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+		        msg = "probably called as method";
+		}
 	    }
 	    if (msg) {
 	        const char *f = (ix == F_BIN) ? "md5" :
