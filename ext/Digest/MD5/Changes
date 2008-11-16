@@ -1,3 +1,16 @@
+2008-11-14   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.38
+
+   The 2.37 tarball was infected by various '._*' files.
+   Thank you, Mac OS X!
+
+   Applied warning fix from Geoff Richards [RT#19643]
+
+   Applied compatiblity fix from Alexandr Ciornii [RT#30348]
+
+
+
 2008-11-12   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.37
