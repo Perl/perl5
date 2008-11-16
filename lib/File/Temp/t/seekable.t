@@ -18,7 +18,10 @@ BEGIN { use_ok('File::Temp') };
 $tmp = File::Temp->new;
 isa_ok( $tmp, 'File::Temp' );
 isa_ok( $tmp, 'IO::Handle' );
-isa_ok( $tmp, 'IO::Seekable' );
+SKIP: {
+  skip "->isa is broken on 5.6.0", 1 if $] == 5.006000;
+  isa_ok( $tmp, 'IO::Seekable' );
+}
 
 # make sure the seek method is available...
 # Note that we need a reasonably modern IO::Seekable
