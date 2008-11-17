@@ -3662,9 +3662,7 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
     HV *saved_hh = NULL;
-    const char * const fakestr = "_<(eval )";
-    const int fakelen = 9 + 1;
-    
+
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
     }
@@ -3735,8 +3733,13 @@ PP(pp_entereval)
     if ((PERLDB_LINE || PERLDB_SAVESRC)
 	&& was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ok) {
-	/* Copy in anything fake and short. */
-	my_strlcpy(safestr, fakestr, fakelen);
+	/* Just need to change the string in our writable scratch buffer that
+	   will be used at scope exit to delete this eval's "file" name, to
+	   something safe. The key names are of the form "_<(eval 1)" upwards,
+	   so the 8th char is the first digit, which will not have a leading
+	   zero. So give it a leading zero, and it can't match anything, but
+	   still sits within the pattern space "reserved" for evals.  */
+	safestr[8] = '0';
     }
     return ok ? DOCATCH(PL_eval_start) : PL_op->op_next;
 }
