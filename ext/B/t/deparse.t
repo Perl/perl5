@@ -28,6 +28,7 @@ BEGIN {
     feature->import(':5.10');
 }
 use Test::More tests => 74;
+use Config ();
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -499,6 +500,7 @@ do {
 '???';
 !1;
 ####
+# SKIP ? $Config::Config{useithreads} && "TODO doesn't work with threads"
 # 61 tests that shouldn't be constant folded
 x() if $a;
 if ($a == 1) { x() } elsif ($b == 2) { z() }
@@ -522,6 +524,7 @@ warn O_CREAT;
 # 65 tests for deparsing imported constants that got deleted from the original namespace
 warn O_SYNC;
 ####
+# SKIP ? $Config::Config{useithreads} && "TODO doesn't work with threads"
 # 66 tests for deparsing constants which got turned into full typeglobs
 warn O_EXCL;
 eval '@Fcntl::O_EXCL = qw/affe tiger/;';
