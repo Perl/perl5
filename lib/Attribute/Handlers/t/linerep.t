@@ -25,13 +25,17 @@ sub Args : ATTR(CODE) {
 
 sub foo :Args(bar) {}
 
-my $bar :SArgs(grumpf);
+my $ref;
+sub myref { $ref = shift; }
+my $b;
+eval "my \$bar :SArgs(grumpf); \$b = \\\$bar";
+is( $b, $ref, 'referent' );
 
 sub SArgs : ATTR(SCALAR) {
     my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
     is( $package,	'main',		'package' );
     is( $symbol,	'LEXICAL',	'symbol' );
-    is( $referent,	\$bar,		'referent' );
+    myref($referent);
     is( $attr,		'SArgs',	'attr' );
     is( ref $data,	'ARRAY',	'data' );
     is( $data->[0],	'grumpf',	'data' );

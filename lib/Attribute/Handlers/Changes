@@ -113,3 +113,6 @@ Revision history for Perl extension Attribute::Handlers
 0.80	Fri Oct 24 12:06:00 CEST 2008
         - CPAN release of the Attribute::Handlers version in bleadperl.
 	
+0.81	Sun Nov  9 22:47:00 CET 2008
+        - Fix to make tests work on 5.6.X (Eric Rybski, RT #40781)
+	
