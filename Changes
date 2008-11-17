@@ -3660,7 +3660,7 @@ ____________________________________________________________________________
 	     [ 33106]
 	     Fix Win32 compiler warnings introduced by #33081 and #33085
 	     
-	     [just the 33081 part]
+	     [just the 33085 part]
 	     
 	     [ 33152]
 	     Subject: [PATCH] don't forbid brace groups with g++ 4.2.2
@@ -13958,21 +13958,24 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 30738] By: nicholas				   on 2007/03/23  22:36:51
 	Log: Integrate:
-	     [ 29605]
-	     Subject: [PATCH] Implement killpg() for MSWin32
+	     [ 29868]
+	     Subject: Re: [PATCH] win32_async_check() can still loop indefinitely
 	     From: Jan Dubois <jand@ActiveState.com>
-	     Date: Wed, 20 Dec 2006 15:41:00 -0800
-	     Message-ID: <m8hjo2pasv3hdbhd1sj9sasen7tm38hrhp@4ax.com>
+	     Date: Mon, 15 Jan 2007 19:25:11 -0800
+	     Message-ID: <rigoq25vda3sg4i7ppdb5o2jhvuiq15kqj@4ax.com>
      Branch: maint-5.8/perl
 	  !> win32/win32.c
 ____________________________________________________________________________
 [ 30737] By: nicholas				   on 2007/03/23  22:34:51
 	Log: Integrate:
-	     [ 29605]
-	     Subject: [PATCH] Implement killpg() for MSWin32
+	     [ 29732]
+	     Subject: Re: [PATCH] ANSIfy the PATH environment variable on Windows
 	     From: Jan Dubois <jand@ActiveState.com>
-	     Date: Wed, 20 Dec 2006 15:41:00 -0800
-	     Message-ID: <m8hjo2pasv3hdbhd1sj9sasen7tm38hrhp@4ax.com>
+	     Date: Mon, 08 Jan 2007 14:58:12 -0800
+	     Message-ID: <eei5q29hrchpam2i5g0000mbvu0b1hrm83@4ax.com>
+	     
+	     Fixes the Borland build, in which the PATH was getting corrupted
+	     when the variable that was just putenv()'d got free()'d
      Branch: maint-5.8/perl
 	  !> win32/win32.c
 ____________________________________________________________________________
