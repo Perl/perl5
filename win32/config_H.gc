@@ -1804,7 +1804,7 @@
 #   ifndef _MSC_VER
 #	define LONG_DOUBLESIZE 12		/**/
 #   else
-#	define LONG_DOUBLESIZE 10		/**/
+#	define LONG_DOUBLESIZE 8		/**/
 #   endif
 #endif
 
