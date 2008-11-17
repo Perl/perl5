@@ -3654,6 +3654,12 @@ earlier.
 numeric field that will never go blank so that the repetition never
 terminates. You might use ^# instead.  See L<perlform>.
 
+=item Replacement list is longer than search list
+
+(W misc) You have used a replacement list that is longer than the
+search list. So the additional elements in the replacement list
+are meaningless.
+
 =item Reversed %s= operator
 
 (W syntax) You wrote your assignment operator backwards.  The = must
@@ -4608,6 +4614,12 @@ must be written as
 
 The <-- HERE shows in the regular expression about
 where the problem was discovered. See L<perlre>.
+
+=item Useless use of /d modifier in transliteration operator
+
+(W misc) You have used the /d modifier where the searchlist has the
+same length as the replacelist. See L<perlop> for more information
+about the /d modifier.
 
 =item Useless use of %s in void context
 

@@ -551,7 +551,7 @@ Useless use of a constant (undef) in void context at - line 8.
 # op.c
 #
 use warnings 'misc' ;
-my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
+my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;my $d = 'test';
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
 @a =~ tr/a/b/ ;
@@ -564,9 +564,11 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 %$c =~ /abc/ ;
 %$c =~ s/a/b/ ;
 %$c =~ tr/a/b/ ;
+$d =~ tr/a/b/d ;
+$d =~ tr/a/bc/;
 {
 no warnings 'misc' ;
-my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
+my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ; my $d = 'test';
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
 @a =~ tr/a/b/ ;
@@ -579,6 +581,8 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 %$c =~ /abc/ ;
 %$c =~ s/a/b/ ;
 %$c =~ tr/a/b/ ;
+$d =~ tr/a/b/d ;
+$d =~ tr/a/bc/ ;
 }
 EXPECT
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 5.
@@ -593,8 +597,10 @@ Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 13
 Applying pattern match (m//) to %hash will act on scalar(%hash) at - line 14.
 Applying substitution (s///) to %hash will act on scalar(%hash) at - line 15.
 Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 16.
+Useless use of /d modifier in transliteration operator at - line 17.
+Replacement list is longer than search list at - line 18.
 Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
-BEGIN not safe after errors--compilation aborted at - line 18.
+BEGIN not safe after errors--compilation aborted at - line 20.
 ########
 # op.c
 use warnings 'parenthesis' ;

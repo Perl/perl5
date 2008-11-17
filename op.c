@@ -3451,6 +3451,15 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    }
 	}
     }
+
+    if(ckWARN(WARN_MISC)) {
+        if(del && rlen == tlen) {
+            Perl_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
+        } else if(rlen > tlen) {
+            Perl_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
+        } 
+    }
+
     if (grows)
 	o->op_private |= OPpTRANS_GROWS;
 #ifdef PERL_MAD
