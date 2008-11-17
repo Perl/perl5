@@ -129,6 +129,7 @@ while (<CFG>) {
     $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(PERL_\w+)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(USE_\w+)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(HAS_\w+)\b/;
 }
 close(CFG);
 
@@ -404,6 +405,10 @@ elsif ($PLATFORM eq 'aix') {
 		     PL_statusvalue_vms
 		     PL_sys_intern
 		     )]);
+    skip_symbols([qw(
+		     Perl_signbit
+		     )])
+	if $define{'HAS_SIGNBIT'};
     emit_symbols([qw(
 		     boot_DynaLoader
 		     )]);
