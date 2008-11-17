@@ -10,16 +10,19 @@ BEGIN {
 
 use strict;
 
-plan( tests => 10 );
+plan( tests => 19 );
 
 my @before = grep { /eval/ } keys %::;
 
 is (@before, 0, "No evals");
 
-for my $sep (' ') {
+my %seen;
+my $name = 'foo';
+
+for my $sep (' ', "\0") {
     $^P = 0xA;
 
-    my $prog = "sub foo {
+    my $prog = "sub $name {
     'Perl${sep}Rules'
 };
 1;
@@ -29,9 +32,9 @@ for my $sep (' ') {
     # Is there a more efficient way to write this?
     my @expect_lines = (undef, map ({"$_\n"} split "\n", $prog), "\n", ';');
 
-    my @keys = grep { /eval/ } keys %::;
+    my @keys = grep {!$seen{$_}} grep { /eval/ } keys %::;
 
-    is (@keys, 1, "1 eval");
+    is (@keys, 1, "1 new eval");
 
     my @got_lines = @{$::{$keys[0]}};
 
@@ -40,4 +43,6 @@ for my $sep (' ') {
     for (0..$#expect_lines) {
 	is ($got_lines[$_], $expect_lines[$_], "Line $_ is correct");
     }
+    $seen{$keys[0]}++;
+    $name++;
 }
