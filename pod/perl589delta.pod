@@ -9,8 +9,13 @@ the 5.8.9 release.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.8.8. If any exist,
-they are bugs and reports are welcome.
+A particular construction in the source code of extensions written in C++
+may need changing. See L</"Changed Internals"> for more details. All
+extensions written in C, most written in C++, and all existing compiled
+extensions are unaffected. This was necessary to improve C++ support.
+
+Other than this, there are no changes intentionally incompatible with 5.8.8.
+If any exist, they are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
@@ -1924,6 +1929,23 @@ and core dumps can't be produced on these platforms, this is more useful than
 silently exiting.)
 
 =head1 Changed Internals
+
+The perl sources can now be compiled with a C++ compiler instead of a C
+compiler. A necessary implementation details is that under C++, the macro
+C<XS> used to define XSUBs now includes an C<extern "C"> definition. A side
+effect of this is that B<C++> code that used the construction
+
+    typedef XS(SwigPerlWrapper);
+
+now needs to be written
+
+    typedef XSPROTO(SwigPerlWrapper);
+
+using the new C<XSPROTO> macro, in order to compile. C extensions are
+unaffected, although C extensions are encouraged to use C<XSPROTO> too.
+This change was present in the 5.10.0 release of perl, so any actively
+maintained code that happened to use this construction should already have
+been adapted. Code that needs changing will fail with a compilation error.
 
 C<set> magic on localizing/assigning to a magic variable will now only
 trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
