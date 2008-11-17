@@ -1508,6 +1508,8 @@ and releasing C<FILE *>s
 Several bugs have been fixed in Magic, the internal system used to implement
 features such as C<tie>, tainting and threads sharing.
 
+C<undef @array> on a tied array now correctly calls the C<CLEAR> method.
+
 Some of the bitwise ops were not checking whether their arguments were magical
 before using them. [RT #24816]
 
