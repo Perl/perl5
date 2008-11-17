@@ -3653,7 +3653,7 @@ PP(pp_entereval)
     register PERL_CONTEXT *cx;
     SV *sv;
     const I32 gimme = GIMME_V;
-    const I32 was = PL_sub_generation;
+    const I32 was = PL_breakable_sub_generation;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
     char *safestr;

@@ -186,6 +186,8 @@ END_EXTERN_C
 #define PL_body_roots		(*Perl_Ibody_roots_ptr(aTHX))
 #undef  PL_bodytarget
 #define PL_bodytarget		(*Perl_Ibodytarget_ptr(aTHX))
+#undef  PL_breakable_sub_generation
+#define PL_breakable_sub_generation	(*Perl_Ibreakable_sub_generation_ptr(aTHX))
 #undef  PL_checkav
 #define PL_checkav		(*Perl_Icheckav_ptr(aTHX))
 #undef  PL_checkav_save
