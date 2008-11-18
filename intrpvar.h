@@ -525,6 +525,8 @@ PERLVAR(Ilast_swash_klen,	U8)	/* Only needs to store 0-10  */
 PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
 #endif
 
+/* Space for a U8 */
+
 PERLVARI(Iglob_index,	int,	0)
 
 
