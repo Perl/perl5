@@ -3653,7 +3653,7 @@ PP(pp_entereval)
     register PERL_CONTEXT *cx;
     SV *sv;
     const I32 gimme = GIMME_V;
-    const U32 was = PL_breakable_sub_generation;
+    const U32 was = PL_breakable_sub_gen;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
     char *safestr;
@@ -3731,7 +3731,7 @@ PP(pp_entereval)
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
     if ((PERLDB_LINE || PERLDB_SAVESRC)
-	&& was != PL_breakable_sub_generation /* Some subs defined here. */
+	&& was != PL_breakable_sub_gen /* Some subs defined here. */
 	&& ok) {
 	/* Just need to change the string in our writable scratch buffer that
 	   will be used at scope exit to delete this eval's "file" name, to

@@ -75,7 +75,7 @@
 #define PL_body_arenas		(vTHX->Ibody_arenas)
 #define PL_body_roots		(vTHX->Ibody_roots)
 #define PL_bodytarget		(vTHX->Ibodytarget)
-#define PL_breakable_sub_generation	(vTHX->Ibreakable_sub_generation)
+#define PL_breakable_sub_gen	(vTHX->Ibreakable_sub_gen)
 #define PL_checkav		(vTHX->Icheckav)
 #define PL_checkav_save		(vTHX->Icheckav_save)
 #define PL_chopset		(vTHX->Ichopset)
@@ -388,7 +388,7 @@
 #define PL_Ibody_arenas		PL_body_arenas
 #define PL_Ibody_roots		PL_body_roots
 #define PL_Ibodytarget		PL_bodytarget
-#define PL_Ibreakable_sub_generation	PL_breakable_sub_generation
+#define PL_Ibreakable_sub_gen	PL_breakable_sub_gen
 #define PL_Icheckav		PL_checkav
 #define PL_Icheckav_save	PL_checkav_save
 #define PL_Ichopset		PL_chopset
