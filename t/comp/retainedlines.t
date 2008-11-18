@@ -10,7 +10,9 @@ BEGIN {
 
 use strict;
 
-plan( tests => 19 );
+plan (tests => 21);
+
+$^P = 0xA;
 
 my @before = grep { /eval/ } keys %::;
 
@@ -20,7 +22,6 @@ my %seen;
 my $name = 'foo';
 
 for my $sep (' ', "\0") {
-    $^P = 0xA;
 
     my $prog = "sub $name {
     'Perl${sep}Rules'
@@ -46,3 +47,11 @@ for my $sep (' ', "\0") {
     $seen{$keys[0]}++;
     $name++;
 }
+
+is (eval '1 + 1', 2, 'String eval works');
+
+my @after = grep { /eval/ } keys %::;
+
+is (@after, 0 + keys %seen,
+    "evals that don't define subroutines are correctly cleaned up");
+

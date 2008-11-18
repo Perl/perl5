@@ -3731,7 +3731,7 @@ PP(pp_entereval)
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
     if ((PERLDB_LINE || PERLDB_SAVESRC)
-	&& was != (I32)PL_sub_generation /* Some subs defined here. */
+	&& was != (U32)PL_breakable_sub_generation /* Some subs defined here. */
 	&& ok) {
 	/* Just need to change the string in our writable scratch buffer that
 	   will be used at scope exit to delete this eval's "file" name, to
