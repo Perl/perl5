@@ -4030,6 +4030,8 @@ t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr_embed_thr.t	See if regular expressions work with embedded qr// in another thread
 t/op/regexp_qr.t		See if regular expressions work as qr//
+t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
+t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/reg_fold.t			See if case folding works properly
