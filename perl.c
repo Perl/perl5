@@ -4833,7 +4833,8 @@ S_init_perllib(pTHX)
 #  endif
 #endif
 
-#ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
+#if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
+    /* Search for version-specific dirs below here */
     incpush(PERL_VENDORLIB_STEM, FALSE, TRUE, TRUE, TRUE);
 #endif
 
