@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.07';
+$VERSION   = '2.07_01';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
@@ -333,7 +333,7 @@ sub _rmtree {
                 }
                 else {
                     _error($arg, "cannot remove directory", $canon);
-                    if (!chmod($perm, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
+                    if ($Force_Writeable && !chmod($perm, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
                     ) {
                         _error($arg, sprintf("cannot restore permissions to 0%o",$perm), $canon);
                     }
