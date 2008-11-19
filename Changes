@@ -28,6 +28,220 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34894] By: nicholas				   on 2008/11/19  18:34:11
+	Log: Integrate:
+	     [ 34893]
+	     Integrate:
+	     [ 34881]
+	     Subject: Re: 5.8.9 RC1 patches for AIX
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Date: Tue, 18 Nov 2008 12:58:27 +0100
+	     Message-ID: <4922ADE3.5030701@tammer.net>
+     Branch: maint-5.8/perl
+	  !> README.aix
+____________________________________________________________________________
+[ 34892] By: nicholas				   on 2008/11/19  12:43:04
+	Log: Integrate:
+	     [ 34888]
+	     Integrate:
+	     [ 34870]
+	     Subject: [PATCH] Fix a missing single quote in hints/solaris_2.sh
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Message-ID: <Pine.LNX.4.64.0811171300350.16632@fractal.phys.lafayette.edu>
+	     Date: Mon, 17 Nov 2008 13:11:59 -0500 (EST)
+     Branch: maint-5.8/perl
+	  !> hints/solaris_2.sh
+____________________________________________________________________________
+[ 34891] By: nicholas				   on 2008/11/19  11:44:19
+	Log: Integrate:
+	     [ 34889]
+	     Integrate:
+	     [ 34823]
+	     sizeof(long double) is 8 bytes for all Microsoft compilers
+	     from Jan Dubois
+	     
+	     [ 34877]
+	     Change LONG_DOUBLESIZE macros to match config (ref change 34823)
+     Branch: maint-5.8/perl
+	  !> win32/config.vc win32/config.vc64 win32/config_H.gc
+	  !> win32/config_H.vc win32/config_H.vc64
+____________________________________________________________________________
+[ 34890] By: nicholas				   on 2008/11/19  11:04:36
+	Log: Integrate:
+	     [ 34884]
+	     Integrate:
+	     [ 34852]
+	     Subject: Re: 5.8.9 RC1 report
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Date: Thu, 13 Nov 2008 15:14:46 +0100
+	     Message-ID: <491C3656.3010509@tammer.net>
+	     
+	     [ 34885]
+	     Integrate:
+	     [ 34861]
+	     Subject: Re: 5.8.9 RC1 report
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Date: Mon, 17 Nov 2008 08:53:34 +0100
+	     Message-ID: <492122FE.5020001@tammer.net>
+     Branch: maint-5.8/perl
+	  !> hints/aix.sh makedef.pl
+____________________________________________________________________________
+[ 34878] By: nicholas				   on 2008/11/18  10:13:11
+	Log: Integrate:
+	     [ 34815]
+	     Subject: [PATCH] Relocations errors with Intel CC 10 on 64 bits archs
+	     From: Vincent Pit <perl@profvince.com>
+	     Date: Tue, 11 Nov 2008 15:58:07 +0100
+	     Message-ID: <49199D7F.7030304@profvince.com>
+	     
+	     [ 34835]
+	     Subject: [PATCH] Future-proof hints/linux.sh against Sun's cc -V output.
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Date: Fri, 14 Nov 2008 13:01:13 -0500 (EST)
+	     Message-ID: <Pine.LNX.4.64.0811141300220.6539@fractal.phys.lafayette.edu>
+     Branch: maint-5.8/perl
+	  !> hints/linux.sh
+____________________________________________________________________________
+[ 34875] By: nicholas				   on 2008/11/17  22:34:48
+	Log: Integrate:
+	     [ 34866]
+	     Integrate:
+	     [ 34859]
+	     Add a $VERSION, strict and some documentation to Tie::StdHandle.
+     Branch: maint-5.8/perl
+	  !> lib/Tie/StdHandle.pm
+____________________________________________________________________________
+[ 34872] By: nicholas				   on 2008/11/17  22:03:41
+	Log: Errors in my integration descriptions detected and corrected by Steve
+	     Hay.
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 34871] By: nicholas				   on 2008/11/17  21:44:55
+	Log: Note the change to XS(), and the addition of XSPROTO(), as something
+	     incompatible. Note also that it's been around in 5.10.0 for nearly a
+	     year, so one would expect any affected C++ modules to have adapted by
+	     now.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34869] By: nicholas				   on 2008/11/17  13:22:52
+	Log: Note that undef @array now correctly calls CLEAR on a tied array.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34868] By: nicholas				   on 2008/11/17  11:58:17
+	Log: Integrate:
+	     [ 34856]
+	     Integrate:
+	     [ 34814]
+	     add -t (tabular option) to Porting/corecpan.pl
+	     This allows multiple source trees to be compared
+     Branch: maint-5.8/perl
+	  !> Porting/corecpan.pl
+____________________________________________________________________________
+[ 34863] By: nicholas				   on 2008/11/17  09:46:32
+	Log: Integrate:
+	     [ 34847]
+	     Integrate:
+	     [ 34818]
+	     Sync up with Digest-MD5-2.37 from CPAN
+     Branch: maint-5.8/perl
+	  !> ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 34855] By: nicholas				   on 2008/11/16  21:26:16
+	Log: Integrate:
+	     [ 34851]
+	     Integrate:
+	     [ 34824]
+	     Skip #ifdefs and other preprocessor lines when parsing the
+	     local_patches section of patchlevel.h.
+     Branch: maint-5.8/perl
+	  !> utils/perlbug.PL
+____________________________________________________________________________
+[ 34853] By: nicholas				   on 2008/11/16  20:09:25
+	Log: Integrate:
+	     [ 30980]
+	     Subject: Re: new C3 MRO patch
+	     From: "Brandon Black" <blblack@gmail.com>
+	     Date: Tue, 17 Apr 2007 13:14:36 -0500
+	     Message-ID: <84621a60704171114k29b0460el5b08ce5185d55ed5@mail.gmail.com>
+	     
+	     [the t/TEST part]
+	     
+	     [ 31018]
+	     Make t/harness find the t/mro tests
+	     
+	     [ 34846]
+	     Integrate:
+	     [ 34839]
+	     Subject: MRO tests for isa() and package aliases
+	     From: Torsten Schoenfeld <kaffeetisch@gmx.de>
+	     Date: Sat, 15 Nov 2008 21:24:40 +0100
+	     Message-ID: <491F3008.4060205@gmx.de>
+     Branch: maint-5.8/perl
+	  +> t/mro/package_aliases.t
+	  !> MANIFEST t/TEST t/harness
+____________________________________________________________________________
+[ 34849] By: nicholas				   on 2008/11/16  19:27:34
+	Log: Acknowledge Schwern's hard work on the updated modules list.
+	     Bowdlerise Slaven's surname down to ISO-8859-1, so that our last-
+	     century man page tools don't choke on a c accute.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34848] By: nicholas				   on 2008/11/16  19:23:12
+	Log: Incorporate a large list of corrections and updates to module versions
+	     supplied by Schwern. Plus some cross-checking with corecpan.pl
+	     one missing =item * and mention t/mro/package_aliases.t, which I am in
+	     the process of integrating.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34842] By: nicholas				   on 2008/11/16  17:41:03
+	Log: Subject: [perl #60504] Which perldelta in 5.8.9 RC1 README?
+	     From: Tom Wyant (via RT) <perlbug-followup@perl.org>
+	     Message-ID: <rt-3.6.HEAD-10965-1226511451-1571.60504-75-0@perl.org>
+	     Date: Wed, 12 Nov 2008 09:37:32 -0800
+     Branch: maint-5.8/perl
+	   ! README
+____________________________________________________________________________
+[ 34841] By: nicholas				   on 2008/11/16  17:19:33
+	Log: Change 34693 introduced a regression spotted by Devel::SmallProf.
+     Branch: maint-5.8/perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 34826] By: nicholas				   on 2008/11/12  16:08:40
+	Log: Patch from bob (but reflowed)
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 34821] By: nicholas				   on 2008/11/12  10:45:45
+	Log: Integrate:
+	     [ 25261]
+	     Subject: [PATCH] Typos in *.p[lm]
+	     From: "Piotr Fusik" <pfusik@op.pl>
+	     Date: Sun, 31 Jul 2005 12:50:04 +0200
+	     Message-ID: <001401c595bd$dccb5d80$0bd34dd5@piec>
+     Branch: maint-5.8/perl
+	  !> lib/CGI/Carp.pm
+____________________________________________________________________________
+[ 34816] By: nicholas				   on 2008/11/11  20:10:28
+	Log: Disarm the maint branch.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 34813] By: nicholas				   on 2008/11/10  23:06:03
+	Log: This is RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 34812] By: nicholas				   on 2008/11/10  21:21:40
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34811] By: nicholas				   on 2008/11/10  21:09:51
 	Log: Hopefully today.
      Branch: maint-5.8/perl
