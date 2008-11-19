@@ -1764,7 +1764,7 @@
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
 #   ifndef __GNUC__
-#	define LONG_DOUBLESIZE 10		/**/
+#	define LONG_DOUBLESIZE 8		/**/
 #   else
 #	define LONG_DOUBLESIZE 12		/**/
 #   endif

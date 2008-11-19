@@ -1751,7 +1751,7 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 10		/**/
+#define LONG_DOUBLESIZE 8		/**/
 #endif
 
 /* HAS_LONG_LONG:
