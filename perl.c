@@ -2796,9 +2796,9 @@ S_call_body(pTHX_ const OP *myop, bool is_eval)
 {
     if (PL_op == myop) {
 	if (is_eval)
-	    PL_op = Perl_pp_entereval(aTHX);	/* this doesn't do a POPMARK */
+	    PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);	/* this doesn't do a POPMARK */
 	else
-	    PL_op = Perl_pp_entersub(aTHX);	/* this does */
+	    PL_op = PL_ppaddr[OP_ENTERSUB](aTHX);	/* this does */
     }
     if (PL_op)
 	CALLRUNOPS(aTHX);
