@@ -2156,7 +2156,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
 
-    if ((PL_op = Perl_pp_entersub(aTHX)))
+    if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
       CALLRUNOPS(aTHX);
     LEAVE;
     SPAGAIN;
