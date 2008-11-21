@@ -3573,7 +3573,7 @@ PP(pp_entereval)
     register PERL_CONTEXT *cx;
     SV *sv;
     const I32 gimme = GIMME_V;
-    const I32 was = PL_sub_generation;
+    const U32 was = PL_breakable_sub_gen;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
     char *safestr;
@@ -3653,7 +3653,7 @@ PP(pp_entereval)
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
     if ((PERLDB_LINE || PERLDB_SAVESRC)
-	&& was != (I32)PL_sub_generation /* Some subs defined here. */
+	&& was != PL_breakable_sub_gen /* Some subs defined here. */
 	&& ok) {
 	/* Copy in anything fake and short. */
 	my_strlcpy(safestr, fakestr, fakelen);

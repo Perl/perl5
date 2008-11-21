@@ -5583,6 +5583,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!block)
 	goto done;
 
+    /* If we assign an optree to a PVCV, then we've defined a subroutine that
+       the debugger could be able to set a breakpoint in, so signal to
+       pp_entereval that it should not throw away any saved lines at scope
+       exit.  */
+       
+    PL_breakable_sub_gen++;
     if (CvLVALUE(cv)) {
 	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0,
 			     mod(scalarseq(block), OP_LEAVESUBLV));
