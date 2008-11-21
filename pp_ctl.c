@@ -2703,7 +2703,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 	const char *t;
 	SV * const tmpstr = newSV_type(SVt_PVMG);
 
-	t = strchr(s, '\n');
+	t = (const char *)memchr(s, '\n', send - s);
 	if (t)
 	    t++;
 	else
