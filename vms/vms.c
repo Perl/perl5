@@ -9631,11 +9631,32 @@ Perl_readdir(pTHX_ DIR *dd)
 	&vs_spec,
 	&vs_len);
 
-    /* Drop NULL extensions on UNIX file specification */
-    if ((dd->flags & PERL_VMSDIR_M_UNIXSPECS &&
-	(e_len == 1) && decc_readdir_dropdotnotype)) {
-	e_len = 0;
-	e_spec[0] = '\0';
+    if (dd->flags & PERL_VMSDIR_M_UNIXSPECS) {
+
+        /* In Unix report mode, remove the ".dir;1" from the name */
+        /* if it is a real directory. */
+        if (decc_filename_unix_report || decc_efs_charset) {
+            if ((e_len == 4) && (vs_len == 2) && (vs_spec[1] == '1')) {
+                if ((toupper(e_spec[1]) == 'D') &&
+                    (toupper(e_spec[2]) == 'I') &&
+                    (toupper(e_spec[3]) == 'R')) {
+                    Stat_t statbuf;
+                    int ret_sts;
+
+                    ret_sts = stat(buff, (stat_t *)&statbuf);
+                    if ((ret_sts == 0) && S_ISDIR(statbuf.st_mode)) {
+                        e_len = 0;
+                        e_spec[0] = 0;
+                    }
+                }
+            }
+        }
+
+        /* Drop NULL extensions on UNIX file specification */
+	if ((e_len == 1) && decc_readdir_dropdotnotype) {
+	    e_len = 0;
+	    e_spec[0] = '\0';
+        }
     }
 
     strncpy(dd->entry.d_name, n_spec, n_len + e_len);
