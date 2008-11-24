@@ -954,12 +954,12 @@ The GV which was last used for a filehandle input operation. (C<< <FH> >>)
 =for hackers
 Found in file intrpvar.h
 
-=item PL_ofs_sv
-X<PL_ofs_sv>
+=item PL_ofsgv
+X<PL_ofsgv>
 
-The output field separator - C<$,> in Perl space.
+The glob containing the output field separator - C<*,> in Perl space.
 
-	SV*	PL_ofs_sv
+	GV*	PL_ofsgv
 
 =for hackers
 Found in file intrpvar.h
