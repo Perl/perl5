@@ -812,9 +812,7 @@
 #define setenv_getix		Perl_setenv_getix
 #endif
 #endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define setdefout		Perl_setdefout
-#endif
 #define share_hek		Perl_share_hek
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #ifdef PERL_CORE
@@ -3128,9 +3126,7 @@
 #define setenv_getix(a)		Perl_setenv_getix(aTHX_ a)
 #endif
 #endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
-#endif
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #ifdef PERL_CORE

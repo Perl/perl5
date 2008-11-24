@@ -826,7 +826,7 @@ Ap	|char*	|screaminstr	|NN SV *bigstr|NN SV *littlestr|I32 start_shift \
 #if !defined(VMS)
 p	|I32	|setenv_getix	|NN const char* nam
 #endif
-EXp	|void	|setdefout	|NULLOK GV* gv
+Apd	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 np	|Signal_t |sighandler	|int sig|NULLOK siginfo_t *info|NULLOK void *uap

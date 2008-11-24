@@ -1232,6 +1232,27 @@ Found in file pp_pack.c
 
 =back
 
+=head1 Functions in file pp_sys.c
+
+
+=over 8
+
+=item setdefout
+X<setdefout>
+
+Sets PL_defoutgv, the default file handle for output, to the passed in
+typeglob. As PL_defoutgv "owns" a reference on its typeglob, the reference
+count of the passed in typeglob is increased by one, and the reference count
+of the typeglob that PL_defoutgv points to is decreased by one.
+
+	void	setdefout(GV* gv)
+
+=for hackers
+Found in file pp_sys.c
+
+
+=back
+
 =head1 GV Functions
 
 =over 8
