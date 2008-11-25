@@ -18,11 +18,9 @@ BEGIN {
         Test::skip_all(q/Perl not compiled with 'useithreads'/);
     }
 
-    eval {
-        require Time::HiRes;
-        Time::HiRes->import('time');
-    };
-    Test::skip_all('Time::HiRes not available') if ($@);
+    if (! eval 'use Time::HiRes "time"; 1') {
+        Test::skip_all('Time::HiRes not available');
+    }
 }
 
 use ExtUtils::testlib;
