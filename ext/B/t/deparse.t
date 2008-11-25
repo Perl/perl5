@@ -157,7 +157,7 @@ use warnings;
 use constant GLIPP => 'glipp';
 use constant PI => 4;
 use constant OVERLOADED_NUMIFICATION => bless({}, 'Moo');
-use Fcntl qw/O_EXCL O_APPEND O_EXCL/;
+use Fcntl qw/O_TRUNC O_APPEND O_EXCL/;
 BEGIN { delete $::Fcntl::{O_APPEND}; }
 use POSIX qw/O_CREAT/;
 sub test {
@@ -565,7 +565,7 @@ if (do { ++$a; GLIPP }) { x(); }
 warn PI;
 ####
 # 63 tests for deparsing imported constants
-warn O_EXCL;
+warn O_TRUNC;
 ####
 # 64 tests for deparsing re-exported constants
 warn O_CREAT;
