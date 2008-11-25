@@ -28,6 +28,41 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34912] By: nicholas				   on 2008/11/25  16:54:58
+	Log: Integrate:
+	     [ 34911]
+	     Integrate:
+	     [ 34906]
+	     Subject: [PATCH] Re: [perl #56826] Perl-5.8.8 compilation on AIX 5.1
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Date: Fri, 11 Jul 2008 11:27:13 -0400 (EDT)
+	     Message-ID: <Pine.LNX.4.64.0807111112440.1349@fractal.phys.lafayette.edu>
+	     
+	     [ 34910]
+	     Add Rainer Tammer and Torsten Schönfeld to AUTHORS.
+     Branch: maint-5.8/perl
+	  !> AUTHORS INSTALL
+____________________________________________________________________________
+[ 34899] By: nicholas				   on 2008/11/21  19:02:42
+	Log: Integrate:
+	     [ 34897]
+	     Integrate:
+	     [ 34896]
+	     Subject: Hard-coded Perl_pp_entersub and Perl_pp_entereval should use PL_ppaddr
+	     From: Tim Bunce <Tim.Bunce@pobox.com>
+	     Message-ID: <20081120131719.GA32120@timac.local>
+	     Date: Thu, 20 Nov 2008 13:17:19 +0000
+	     
+	     [tweaked for blead because of change 27941]
+	     [and then tweaked back]
+     Branch: maint-5.8/perl
+	  !> gv.c perl.c
+____________________________________________________________________________
+[ 34895] By: nicholas				   on 2008/11/19  18:58:13
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34894] By: nicholas				   on 2008/11/19  18:34:11
 	Log: Integrate:
 	     [ 34893]
