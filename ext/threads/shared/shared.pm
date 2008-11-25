@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -187,7 +187,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.26
+This document describes threads::shared version 1.27
 
 =head1 SYNOPSIS
 
@@ -294,7 +294,7 @@ refs of shared data (discussed in next section):
 =item shared_clone REF
 
 C<shared_clone> takes a reference, and returns a shared version of its
-argument, preforming a deep copy on any non-shared elements.  Any shared
+argument, performing a deep copy on any non-shared elements.  Any shared
 elements in the argument are used as is (i.e., they are not cloned).
 
   my $cpy = shared_clone({'foo' => [qw/foo bar baz/]});
@@ -308,8 +308,8 @@ Object status (i.e., the class an object is blessed into) is also cloned.
 
 For cloning empty array or hash refs, the following may also be used:
 
-  $var = &share([]);   # Same as $var = share_clone([]);
-  $var = &share({});   # Same as $var = share_clone({});
+  $var = &share([]);   # Same as $var = shared_clone([]);
+  $var = &share({});   # Same as $var = shared_clone({});
 
 =item is_shared VARIABLE
 
@@ -532,6 +532,28 @@ circular references).  Use L<is_shared()/"is_shared VARIABLE">, instead:
         # The refs are equivalent
     }
 
+L<each()|perlfunc/"each HASH"> does not work properly on shared references
+embedded in shared structures.  For example:
+
+    my %foo :shared;
+    $foo{'bar'} = shared_clone({'a'=>'x', 'b'=>'y', 'c'=>'z'});
+
+    while (my ($key, $val) = each(%{$foo{'bar'}})) {
+        ...
+    }
+
+Either of the following will work instead:
+
+    my $ref = $foo{'bar'};
+    while (my ($key, $val) = each(%{$ref})) {
+        ...
+    }
+
+    foreach my $key (keys(%{$foo{'bar'}})) {
+        my $val = $foo{'bar'}{$key};
+        ...
+    }
+
 View existing bug reports at, and submit any new bugs, problems, patches, etc.
 to: L<http://rt.cpan.org/Public/Dist/Display.html?Name=threads-shared>
 
@@ -541,7 +563,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.26/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.27/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
