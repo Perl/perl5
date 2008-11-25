@@ -157,8 +157,8 @@ use warnings;
 use constant GLIPP => 'glipp';
 use constant PI => 4;
 use constant OVERLOADED_NUMIFICATION => bless({}, 'Moo');
-use Fcntl qw/O_NONBLOCK O_SYNC O_EXCL/;
-BEGIN { delete $::Fcntl::{O_SYNC}; }
+use Fcntl qw/O_EXCL O_APPEND O_EXCL/;
+BEGIN { delete $::Fcntl::{O_APPEND}; }
 use POSIX qw/O_CREAT/;
 sub test {
    my $val = shift;
@@ -516,13 +516,13 @@ if (do { ++$a; GLIPP }) { x(); }
 warn PI;
 ####
 # 63 tests for deparsing imported constants
-warn O_NONBLOCK;
+warn O_EXCL;
 ####
 # 64 tests for deparsing re-exported constants
 warn O_CREAT;
 ####
 # 65 tests for deparsing imported constants that got deleted from the original namespace
-warn O_SYNC;
+warn O_APPEND;
 ####
 # SKIP ? $Config::Config{useithreads} && "TODO doesn't work with threads"
 # 66 tests for deparsing constants which got turned into full typeglobs
