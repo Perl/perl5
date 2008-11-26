@@ -1,3 +1,13 @@
+2.00_01 - 2008-11-26
+
+    * remove const-* when building in the core
+    * inherit libscan behaviour from EU::MM
+    * integrate #33084 from blead
+    * try to make Win32 report NA instead of FAIL
+    * fix bug in IPC::SharedMem constructor returning undef when
+      shared memory id == 0 (thanks to Antonio Jose Coutinho for
+      spotting this)
+
 2.00 - 2007-12-30
 
     * fixed compilation issues with C++ compiler

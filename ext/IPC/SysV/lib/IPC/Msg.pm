@@ -21,7 +21,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 $VERSION = eval $VERSION;
 
 # Figure out if we have support for native sized types

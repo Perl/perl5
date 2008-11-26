@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 16 $
+#  $Revision: 18 $
 #  $Author: mhx $
-#  $Date: 2008/01/05 16:41:20 +0100 $
+#  $Date: 2008/11/26 23:12:58 +0100 $
 #
 ################################################################################
 #
@@ -24,9 +24,7 @@ unless ($ENV{'PERL_CORE'}) {
 }
 
 if ($^O eq 'MSWin32') {
-  my $msg = "The IPC::SysV module cannot be built on the $^O platform.";
-  my $str = '*' x length $msg;
-  die "\n$str\n$msg\n$str\n\n";
+  die "OS unsupported\n";
 }
 
 WriteMakefile(

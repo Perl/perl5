@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 2 $
+#  $Revision: 3 $
 #  $Author: mhx $
-#  $Date: 2007/10/14 05:16:08 +0200 $
+#  $Date: 2008/11/26 23:12:27 +0100 $
 #
 ################################################################################
 #
@@ -21,7 +21,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 $VERSION = eval $VERSION;
 
 # Figure out if we have support for native sized types
@@ -53,7 +53,9 @@ sub new
   @_ == 4 or croak 'IPC::SharedMem->new(KEY, SIZE, FLAGS)';
   my($class, $key, $size, $flags) = @_;
 
-  my $id = shmget $key, $size, $flags or return undef;
+  my $id = shmget $key, $size, $flags;
+
+  return undef unless defined $id;
 
   bless { _id => $id, _addr => undef, _isrm => 0 }, $class
 }
