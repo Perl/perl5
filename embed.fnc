@@ -711,12 +711,16 @@ s	|void	|pidgone	|Pid_t pid|int status
 #endif
 Ap	|void	|pmflag		|NN U32* pmfl|int ch
 p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
-p	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
+#if defined(PERL_IN_OP_C)
+s	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
+#endif
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|NULLOK OP* head|NULLOK OP* tail
 Ap	|void	|push_scope
 Amb	|OP*	|ref		|NULLOK OP* o|I32 type
-p	|OP*	|refkids	|NULLOK OP* o|I32 type
+#if defined(PERL_IN_OP_C)
+s	|OP*	|refkids	|NULLOK OP* o|I32 type
+#endif
 Ap	|void	|regdump	|NN const regexp* r
 Ap	|void	|regdump	|NN const regexp* r
 Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \

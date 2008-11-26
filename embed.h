@@ -694,15 +694,21 @@
 #define pmflag			Perl_pmflag
 #ifdef PERL_CORE
 #define pmruntime		Perl_pmruntime
-#define pmtrans			Perl_pmtrans
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define pmtrans			S_pmtrans
+#endif
 #endif
 #define pop_scope		Perl_pop_scope
 #ifdef PERL_CORE
 #define prepend_elem		Perl_prepend_elem
 #endif
 #define push_scope		Perl_push_scope
+#if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
-#define refkids			Perl_refkids
+#define refkids			S_refkids
+#endif
 #endif
 #define regdump			Perl_regdump
 #define regdump			Perl_regdump
@@ -3032,15 +3038,21 @@
 #define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
 #ifdef PERL_CORE
 #define pmruntime(a,b,c)	Perl_pmruntime(aTHX_ a,b,c)
-#define pmtrans(a,b,c)		Perl_pmtrans(aTHX_ a,b,c)
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
+#endif
 #endif
 #define pop_scope()		Perl_pop_scope(aTHX)
 #ifdef PERL_CORE
 #define prepend_elem(a,b,c)	Perl_prepend_elem(aTHX_ a,b,c)
 #endif
 #define push_scope()		Perl_push_scope(aTHX)
+#if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
-#define refkids(a,b)		Perl_refkids(aTHX_ a,b)
+#define refkids(a,b)		S_refkids(aTHX_ a,b)
+#endif
 #endif
 #define regdump(a)		Perl_regdump(aTHX_ a)
 #define regdump(a)		Perl_regdump(aTHX_ a)

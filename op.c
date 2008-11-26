@@ -1769,8 +1769,8 @@ S_is_handle_constructor(const OP *o, I32 numargs)
     }
 }
 
-OP *
-Perl_refkids(pTHX_ OP *o, I32 type)
+static OP *
+S_refkids(pTHX_ OP *o, I32 type)
 {
     if (o && o->op_flags & OPf_KIDS) {
         OP *kid;
@@ -3123,8 +3123,8 @@ static int uvcompare(const void *a, const void *b)
     return 0;
 }
 
-OP *
-Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
+static OP *
+S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 {
     dVAR;
     SV * const tstr = ((SVOP*)expr)->op_sv;
