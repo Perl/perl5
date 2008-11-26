@@ -1446,7 +1446,7 @@ PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o)
 
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
-PERL_CALLCONV OP*	Perl_linklist(pTHX_ OP* o)
+STATIC OP*	S_linklist(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_LINKLIST	\
 	assert(o)

@@ -445,7 +445,7 @@ Ap	|void	|op_null	|NN OP* o
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
-p	|OP*	|linklist	|NN OP* o
+s	|OP*	|linklist	|NN OP *o
 p	|OP*	|list		|NULLOK OP* o
 p	|OP*	|listkids	|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...

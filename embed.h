@@ -395,7 +395,7 @@
 #define op_refcnt_lock		Perl_op_refcnt_lock
 #define op_refcnt_unlock	Perl_op_refcnt_unlock
 #ifdef PERL_CORE
-#define linklist		Perl_linklist
+#define linklist		S_linklist
 #define list			Perl_list
 #define listkids		Perl_listkids
 #endif
@@ -2710,7 +2710,7 @@
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #ifdef PERL_CORE
-#define linklist(a)		Perl_linklist(aTHX_ a)
+#define linklist(a)		S_linklist(aTHX_ a)
 #define list(a)			Perl_list(aTHX_ a)
 #define listkids(a)		Perl_listkids(aTHX_ a)
 #endif
