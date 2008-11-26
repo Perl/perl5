@@ -839,8 +839,8 @@ Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 p	|OP*	|scope		|NULLOK OP* o
 Ap	|char*	|screaminstr	|NN SV *bigstr|NN SV *littlestr|I32 start_shift \
 				|I32 end_shift|NN I32 *old_posp|I32 last
-#if !defined(VMS)
-p	|I32	|setenv_getix	|NN const char* nam
+#if !defined(VMS) && defined(PERL_IN_UTIL_C)
+s	|I32	|setenv_getix	|NN const char* nam
 #endif
 Apd	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash

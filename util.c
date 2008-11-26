@@ -1774,8 +1774,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #endif /* WIN32 || NETWARE */
 
 #ifndef PERL_MICRO
-I32
-Perl_setenv_getix(pTHX_ const char *nam)
+static I32
+S_setenv_getix(pTHX_ const char *nam)
 {
     register I32 i;
     register const I32 len = strlen(nam);

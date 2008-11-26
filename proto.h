@@ -2961,8 +2961,8 @@ PERL_CALLCONV char*	Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_
 #define PERL_ARGS_ASSERT_SCREAMINSTR	\
 	assert(bigstr); assert(littlestr); assert(old_posp)
 
-#if !defined(VMS)
-PERL_CALLCONV I32	Perl_setenv_getix(pTHX_ const char* nam)
+#if !defined(VMS) && defined(PERL_IN_UTIL_C)
+STATIC I32	S_setenv_getix(pTHX_ const char* nam)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SETENV_GETIX	\
 	assert(nam)
