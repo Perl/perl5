@@ -706,8 +706,8 @@ Apd	|void	|require_pv	|NN const char* pv
 Apd	|void	|pack_cat	|NN SV *cat|NN const char *pat|NN const char *patend \
 				|NN SV **beglist|NN SV **endlist|NN SV ***next_in_list|U32 flags
 Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV **beglist|NN SV **endlist
-#ifdef PERL_USES_PL_PIDSTATUS
-p	|void	|pidgone	|Pid_t pid|int status
+#if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
+s	|void	|pidgone	|Pid_t pid|int status
 #endif
 Ap	|void	|pmflag		|NN U32* pmfl|int ch
 p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg

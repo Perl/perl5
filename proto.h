@@ -2497,8 +2497,8 @@ PERL_CALLCONV void	Perl_packlist(pTHX_ SV *cat, const char *pat, const char *pat
 #define PERL_ARGS_ASSERT_PACKLIST	\
 	assert(cat); assert(pat); assert(patend); assert(beglist); assert(endlist)
 
-#ifdef PERL_USES_PL_PIDSTATUS
-PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
+#if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
+STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #endif
 PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch)
 			__attribute__nonnull__(pTHX_1);

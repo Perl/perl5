@@ -3020,7 +3020,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 #ifdef PERL_USES_PL_PIDSTATUS
 void
-Perl_pidgone(pTHX_ Pid_t pid, int status)
+S_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
 
