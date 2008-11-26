@@ -610,7 +610,8 @@ struct subst {
 #define sb_rxres	cx_u.cx_subst.sbu_rxres
 #define sb_rx		cx_u.cx_subst.sbu_rx
 
-#define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],			\
+#ifdef PERL_CORE
+#  define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],		\
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_rflags		= r_flags,				\
@@ -628,11 +629,12 @@ struct subst {
 	rxres_save(&cx->sb_rxres, rx);					\
 	(void)ReREFCNT_inc(rx)
 
-#define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
-
-#define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
+#  define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\
 	ReREFCNT_dec(cx->sb_rx)
+#endif
+
+#define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
 
 struct context {
     union {

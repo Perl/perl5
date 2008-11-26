@@ -772,8 +772,11 @@ Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 p	|int	|rsignal_restore|int i|NULLOK Sigsave_t* t
 p	|int	|rsignal_save	|int i|Sighandler_t t1|NN Sigsave_t* save
 Ap	|Sighandler_t|rsignal_state|int i
-p	|void	|rxres_free	|NN void** rsp
-p	|void	|rxres_restore	|NN void **rsp|NN REGEXP *rx
+#if defined(PERL_IN_PP_CTL_C)
+s	|void	|rxres_free	|NN void** rsp
+s	|void	|rxres_restore	|NN void **rsp|NN REGEXP *rx
+#endif
+: Used in pp_hot.c
 p	|void	|rxres_save	|NN void **rsp|NN REGEXP *rx
 #if !defined(HAS_RENAME)
 p	|I32	|same_dirent	|NN const char* a|NN const char* b

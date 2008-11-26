@@ -357,8 +357,8 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     }
 }
 
-void
-Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
+static void
+S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -387,8 +387,8 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     }
 }
 
-void
-Perl_rxres_free(pTHX_ void **rsp)
+static void
+S_rxres_free(pTHX_ void **rsp)
 {
     UV * const p = (UV*)*rsp;
 

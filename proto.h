@@ -2705,17 +2705,19 @@ PERL_CALLCONV int	Perl_rsignal_save(pTHX_ int i, Sighandler_t t1, Sigsave_t* sav
 	assert(save)
 
 PERL_CALLCONV Sighandler_t	Perl_rsignal_state(pTHX_ int i);
-PERL_CALLCONV void	Perl_rxres_free(pTHX_ void** rsp)
+#if defined(PERL_IN_PP_CTL_C)
+STATIC void	S_rxres_free(pTHX_ void** rsp)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_RXRES_FREE	\
 	assert(rsp)
 
-PERL_CALLCONV void	Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
+STATIC void	S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_RXRES_RESTORE	\
 	assert(rsp); assert(rx)
 
+#endif
 PERL_CALLCONV void	Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

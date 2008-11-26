@@ -758,9 +758,13 @@
 #define rsignal_save		Perl_rsignal_save
 #endif
 #define rsignal_state		Perl_rsignal_state
+#if defined(PERL_IN_PP_CTL_C)
 #ifdef PERL_CORE
-#define rxres_free		Perl_rxres_free
-#define rxres_restore		Perl_rxres_restore
+#define rxres_free		S_rxres_free
+#define rxres_restore		S_rxres_restore
+#endif
+#endif
+#ifdef PERL_CORE
 #define rxres_save		Perl_rxres_save
 #endif
 #if !defined(HAS_RENAME)
@@ -3102,9 +3106,13 @@
 #define rsignal_save(a,b,c)	Perl_rsignal_save(aTHX_ a,b,c)
 #endif
 #define rsignal_state(a)	Perl_rsignal_state(aTHX_ a)
+#if defined(PERL_IN_PP_CTL_C)
 #ifdef PERL_CORE
-#define rxres_free(a)		Perl_rxres_free(aTHX_ a)
-#define rxres_restore(a,b)	Perl_rxres_restore(aTHX_ a,b)
+#define rxres_free(a)		S_rxres_free(aTHX_ a)
+#define rxres_restore(a,b)	S_rxres_restore(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
 #define rxres_save(a,b)		Perl_rxres_save(aTHX_ a,b)
 #endif
 #if !defined(HAS_RENAME)
