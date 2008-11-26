@@ -697,17 +697,6 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
     return init_i18nl10n(printwarn);
 }
 
-OP *
-Perl_oopsCV(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_OOPSCV;
-
-    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
-    /* STUB */
-    PERL_UNUSED_ARG(o);
-    NORETURN_FUNCTION_END;
-}
-
 PP(pp_padany)
 {
     DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);

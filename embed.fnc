@@ -652,7 +652,6 @@ Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 p	|PerlIO*|nextargv	|NN GV* gv
 ApP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
-pr	|OP*	|oopsCV		|NN OP* o
 Ap	|void	|op_free	|NULLOK OP* arg
 #ifdef PERL_MAD
 p	|OP*	|package	|NN OP* o

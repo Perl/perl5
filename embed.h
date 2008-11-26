@@ -618,9 +618,6 @@
 #define nextargv		Perl_nextargv
 #endif
 #define ninstr			Perl_ninstr
-#ifdef PERL_CORE
-#define oopsCV			Perl_oopsCV
-#endif
 #define op_free			Perl_op_free
 #ifdef PERL_MAD
 #ifdef PERL_CORE
@@ -2967,9 +2964,6 @@
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #endif
 #define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
-#ifdef PERL_CORE
-#define oopsCV(a)		Perl_oopsCV(aTHX_ a)
-#endif
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #ifdef PERL_MAD
 #ifdef PERL_CORE
