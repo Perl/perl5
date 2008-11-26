@@ -1050,7 +1050,11 @@
 #ifdef PERL_CORE
 #define yyparse			Perl_yyparse
 #define parser_free		Perl_parser_free
-#define yywarn			Perl_yywarn
+#endif
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define yywarn			S_yywarn
+#endif
 #endif
 #if defined(MYMALLOC)
 #define dump_mstats		Perl_dump_mstats
@@ -3393,7 +3397,11 @@
 #ifdef PERL_CORE
 #define yyparse()		Perl_yyparse(aTHX)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
-#define yywarn(a)		Perl_yywarn(aTHX_ a)
+#endif
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define yywarn(a)		S_yywarn(aTHX_ a)
+#endif
 #endif
 #if defined(MYMALLOC)
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)

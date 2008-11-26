@@ -3733,11 +3733,13 @@ PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *parser)
 #define PERL_ARGS_ASSERT_PARSER_FREE	\
 	assert(parser)
 
-PERL_CALLCONV int	Perl_yywarn(pTHX_ const char *const s)
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+STATIC int	S_yywarn(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_YYWARN	\
 	assert(s)
 
+#endif
 #if defined(MYMALLOC)
 PERL_CALLCONV void	Perl_dump_mstats(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);

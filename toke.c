@@ -12575,8 +12575,8 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 #ifdef __SC__
 #pragma segment Perl_yylex
 #endif
-int
-Perl_yywarn(pTHX_ const char *const s)
+static int
+S_yywarn(pTHX_ const char *const s)
 {
     dVAR;
 

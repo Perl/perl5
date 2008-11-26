@@ -1054,7 +1054,9 @@ p	|int	|yyerror	|NN const char *const s
 EXp	|int	|yylex
 p	|int	|yyparse
 p	|void	|parser_free	|NN const yy_parser *parser
-p	|int	|yywarn		|NN const char *const s
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+s	|int	|yywarn		|NN const char *const s
+#endif
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN const char* s
 Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
