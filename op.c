@@ -848,7 +848,6 @@ S_scalarboolean(pTHX_ OP *o)
     return scalar(o);
 }
 
-/* This is used in S_doeval in pp_ctl.c  */
 OP *
 Perl_scalar(pTHX_ OP *o)
 {
@@ -922,7 +921,6 @@ Perl_scalar(pTHX_ OP *o)
     return o;
 }
 
-/* This is used in S_doeval in pp_ctl.c  */
 OP *
 Perl_scalarvoid(pTHX_ OP *o)
 {
@@ -1218,7 +1216,6 @@ S_listkids(pTHX_ OP *o)
     return o;
 }
 
-/* This is used in S_doeval in pp_ctl.c  */
 OP *
 Perl_list(pTHX_ OP *o)
 {
@@ -2154,7 +2151,6 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     return o;
 }
 
-/* This is used in perly.y  */
 OP *
 Perl_sawparens(pTHX_ OP *o)
 {
