@@ -538,7 +538,7 @@ PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char *const s)
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
-PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
+STATIC OP*	S_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)

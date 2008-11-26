@@ -1363,7 +1363,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 }
 
 OP *
-Perl_vdie(pTHX_ const char* pat, va_list *args)
+S_vdie(pTHX_ const char* pat, va_list *args)
 {
     dVAR;
     const char *message;
