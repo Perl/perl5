@@ -2431,7 +2431,7 @@ Perl_jmaybe(pTHX_ OP *o)
 }
 
 OP *
-Perl_fold_constants(pTHX_ register OP *o)
+S_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
     register OP * VOL curop;
@@ -2572,7 +2572,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 }
 
 OP *
-Perl_gen_constant_list(pTHX_ register OP *o)
+S_gen_constant_list(pTHX_ register OP *o)
 {
     dVAR;
     register OP *curop;
@@ -2986,7 +2986,7 @@ Perl_newNULLLIST(pTHX)
 }
 
 OP *
-Perl_force_list(pTHX_ OP *o)
+S_force_list(pTHX_ OP *o)
 {
     if (!o || o->op_type != OP_LIST)
 	o = newLISTOP(OP_LIST, 0, o, NULL);

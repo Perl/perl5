@@ -247,14 +247,18 @@
 #define fbm_instr		Perl_fbm_instr
 #ifdef PERL_CORE
 #define find_script		Perl_find_script
-#define force_list		Perl_force_list
-#define fold_constants		Perl_fold_constants
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define force_list		S_force_list
+#define fold_constants		S_fold_constants
+#endif
 #endif
 #define form			Perl_form
 #define vform			Perl_vform
 #define free_tmps		Perl_free_tmps
 #ifdef PERL_CORE
-#define gen_constant_list	Perl_gen_constant_list
+#define gen_constant_list	S_gen_constant_list
 #endif
 #if !defined(HAS_GETENV_LEN)
 #ifdef PERL_CORE
@@ -2560,13 +2564,17 @@
 #define fbm_instr(a,b,c,d)	Perl_fbm_instr(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
 #define find_script(a,b,c,d)	Perl_find_script(aTHX_ a,b,c,d)
-#define force_list(a)		Perl_force_list(aTHX_ a)
-#define fold_constants(a)	Perl_fold_constants(aTHX_ a)
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define force_list(a)		S_force_list(aTHX_ a)
+#define fold_constants(a)	S_fold_constants(aTHX_ a)
+#endif
 #endif
 #define vform(a,b)		Perl_vform(aTHX_ a,b)
 #define free_tmps()		Perl_free_tmps(aTHX)
 #ifdef PERL_CORE
-#define gen_constant_list(a)	Perl_gen_constant_list(aTHX_ a)
+#define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #endif
 #if !defined(HAS_GETENV_LEN)
 #ifdef PERL_CORE

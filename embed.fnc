@@ -273,12 +273,14 @@ ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 				|NULLOK const char *const *const search_ext|I32 flags
-p	|OP*	|force_list	|NULLOK OP* arg
-p	|OP*	|fold_constants	|NN OP *o
+#if defined(PERL_IN_OP_C)
+s	|OP*	|force_list	|NULLOK OP* arg
+s	|OP*	|fold_constants	|NN OP *o
+#endif
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|free_tmps
-p	|OP*	|gen_constant_list|NULLOK OP* o
+s	|OP*	|gen_constant_list|NULLOK OP* o
 #if !defined(HAS_GETENV_LEN)
 p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 #endif

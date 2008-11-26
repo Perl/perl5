@@ -798,12 +798,14 @@ PERL_CALLCONV char*	Perl_find_script(pTHX_ const char *scriptname, bool dosearch
 #define PERL_ARGS_ASSERT_FIND_SCRIPT	\
 	assert(scriptname)
 
-PERL_CALLCONV OP*	Perl_force_list(pTHX_ OP* arg);
-PERL_CALLCONV OP*	Perl_fold_constants(pTHX_ OP *o)
+#if defined(PERL_IN_OP_C)
+STATIC OP*	S_force_list(pTHX_ OP* arg);
+STATIC OP*	S_fold_constants(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
 	assert(o)
 
+#endif
 PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2)
 			__attribute__nonnull__(pTHX_1);
@@ -816,7 +818,7 @@ PERL_CALLCONV char*	Perl_vform(pTHX_ const char* pat, va_list* args)
 	assert(pat)
 
 PERL_CALLCONV void	Perl_free_tmps(pTHX);
-PERL_CALLCONV OP*	Perl_gen_constant_list(pTHX_ OP* o);
+STATIC OP*	S_gen_constant_list(pTHX_ OP* o);
 #if !defined(HAS_GETENV_LEN)
 PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 			__attribute__nonnull__(pTHX_1)
