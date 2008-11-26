@@ -494,9 +494,6 @@
 #define mode_from_discipline	Perl_mode_from_discipline
 #endif
 #define moreswitches		Perl_moreswitches
-#ifdef PERL_CORE
-#define my			Perl_my
-#endif
 #define my_atof			Perl_my_atof
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 #define my_bcopy		Perl_my_bcopy
@@ -2810,9 +2807,6 @@
 #define mode_from_discipline(a,b)	Perl_mode_from_discipline(aTHX_ a,b)
 #endif
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
-#ifdef PERL_CORE
-#define my(a)			Perl_my(aTHX_ a)
-#endif
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 #define my_bcopy		Perl_my_bcopy

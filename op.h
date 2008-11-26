@@ -614,6 +614,10 @@ struct loop {
    cv_ckproto_len((cv), (gv), (p), (p) ? strlen(p) : 0)
 #endif
 
+#ifdef PERL_CORE
+#  define my(o)	my_attrs((o), NULL)
+#endif
+
 #ifdef USE_REENTRANT_API
 #include "reentr.h"
 #endif

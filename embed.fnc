@@ -530,7 +530,6 @@ Ap	|void	|mini_mktime	|NN struct tm *ptm
 EXp	|OP*	|mod		|NULLOK OP* o|I32 type
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
-p	|OP*	|my		|NN OP* o
 Ap	|NV	|my_atof	|NN const char *s
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 Anp	|char*	|my_bcopy	|NN const char* from|NN char* to|I32 len

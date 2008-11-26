@@ -1899,11 +1899,6 @@ PERL_CALLCONV const char*	Perl_moreswitches(pTHX_ const char* s)
 #define PERL_ARGS_ASSERT_MORESWITCHES	\
 	assert(s)
 
-PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_MY	\
-	assert(o)
-
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MY_ATOF	\

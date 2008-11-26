@@ -2152,14 +2152,6 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 }
 
 OP *
-Perl_my(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_MY;
-
-    return my_attrs(o, NULL);
-}
-
-OP *
 Perl_sawparens(pTHX_ OP *o)
 {
     PERL_UNUSED_CONTEXT;
