@@ -1796,11 +1796,6 @@ PERL_CALLCONV int	Perl_magic_wipepack(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_WIPEPACK	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV void	Perl_magicname(pTHX_ const char* sym, const char* name, I32 namlen)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_MAGICNAME	\
-	assert(sym)
-
 PERL_CALLCONV void	Perl_markstack_grow(pTHX);
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV int	Perl_magic_setcollxfrm(pTHX_ SV* sv, MAGIC* mg)

@@ -2892,17 +2892,6 @@ Perl_require_pv(pTHX_ const char *pv)
     POPSTACK;
 }
 
-void
-Perl_magicname(pTHX_ const char *sym, const char *name, I32 namlen)
-{
-    register GV * const gv = gv_fetchpv(sym, GV_ADD, SVt_PV);
-
-    PERL_ARGS_ASSERT_MAGICNAME;
-
-    if (gv)
-	sv_magic(GvSV(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, namlen);
-}
-
 STATIC void
 S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 {
@@ -4654,7 +4643,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	sv_setpv(GvSV(tmpgv),MacPerl_MPWFileName(PL_origfilename));
 #else
 	sv_setpv(GvSV(tmpgv),PL_origfilename);
-	magicname("0", "0", 1);
+	{
+	    GV * const gv = gv_fetchpv("0", GV_ADD, SVt_PV);
+	    if (gv)
+		sv_magic(GvSV(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, "0", 1);
+	}
 #endif
     }
     if ((PL_envgv = gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV))) {

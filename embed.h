@@ -475,7 +475,6 @@
 #define magic_set_all_env	Perl_magic_set_all_env
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
-#define magicname		Perl_magicname
 #endif
 #define markstack_grow		Perl_markstack_grow
 #if defined(USE_LOCALE_COLLATE)
@@ -2812,7 +2811,6 @@
 #define magic_set_all_env(a,b)	Perl_magic_set_all_env(aTHX_ a,b)
 #define magic_sizepack(a,b)	Perl_magic_sizepack(aTHX_ a,b)
 #define magic_wipepack(a,b)	Perl_magic_wipepack(aTHX_ a,b)
-#define magicname(a,b,c)	Perl_magicname(aTHX_ a,b,c)
 #endif
 #define markstack_grow()	Perl_markstack_grow(aTHX)
 #if defined(USE_LOCALE_COLLATE)
