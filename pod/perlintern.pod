@@ -349,7 +349,7 @@ Currently assumes that C<name> is NUL terminated (as well as len being valid).
 This assumption is met by all callers within the perl core, which all pass
 pointers returned by SvPV.
 
-	bool	is_gv_magical_sv(SV *name, U32 flags)
+	bool	is_gv_magical_sv(SV *const name_sv, U32 flags)
 
 =for hackers
 Found in file gv.c
