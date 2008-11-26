@@ -1277,6 +1277,11 @@ EXTERN_C char *crypt(const char *, const char *);
 	    set_errno(errcode);		\
 	    set_vaxc_errno(vmserrcode);	\
 	} STMT_END
+#   define dSAVEDERRNO    int saved_errno; unsigned saved_vms_errno
+#   define dSAVE_ERRNO    int saved_errno = errno; unsigned saved_vms_errno = vaxc$errno
+#   define SAVE_ERRNO     ( saved_errno = errno, saved_vms_errno = vaxc$errno )
+#   define RESTORE_ERRNO  SETERRNO(saved_errno, saved_vms_errno)
+
 #   define LIB_INVARG 		LIB$_INVARG
 #   define RMS_DIR    		RMS$_DIR
 #   define RMS_FAC    		RMS$_FAC
@@ -1291,6 +1296,11 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define SS_NORMAL  		SS$_NORMAL
 #else
 #   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
+#   define dSAVEDERRNO    int saved_errno
+#   define dSAVE_ERRNO    int saved_errno = errno
+#   define SAVE_ERRNO     (saved_errno = errno)
+#   define RESTORE_ERRNO  (errno = saved_errno)
+
 #   define LIB_INVARG 		0
 #   define RMS_DIR    		0
 #   define RMS_FAC    		0

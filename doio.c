@@ -663,9 +663,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     if (fd >= 0) {
-	const int save_errno = errno;
+	dSAVE_ERRNO;
 	fcntl(fd,F_SETFD,fd > PL_maxsysfd); /* can change errno */
-	errno = save_errno;
+	RESTORE_ERRNO;
     }
 #endif
     IoIFP(io) = fp;
@@ -1014,14 +1014,14 @@ Perl_do_eof(pTHX_ GV *gv)
 
 	{
 	     /* getc and ungetc can stomp on errno */
-	    const int saverrno = errno;
+	    dSAVE_ERRNO;
 	    const int ch = PerlIO_getc(IoIFP(io));
 	    if (ch != EOF) {
 		(void)PerlIO_ungetc(IoIFP(io),ch);
-		errno = saverrno;
+		RESTORE_ERRNO;
 		return FALSE;
 	    }
-	    errno = saverrno;
+	    RESTORE_ERRNO;
 	}
 
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {

@@ -817,10 +817,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     }
 #else
 	     {
-		 const int saveerrno = errno;
+		 dSAVE_ERRNO;
 		 sv_setnv(sv, (NV)errno);
 		 sv_setpv(sv, errno ? Strerror(errno) : "");
-		 errno = saveerrno;
+		 RESTORE_ERRNO;
 	     }
 #endif
 	     SvRTRIM(sv);
@@ -1036,7 +1036,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #else
 	{
-	const int saveerrno = errno;
+	dSAVE_ERRNO;
 	sv_setnv(sv, (NV)errno);
 #ifdef OS2
 	if (errno == errno_isOS2 || errno == errno_isOS2_set)
@@ -1044,7 +1044,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	else
 #endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");
-	errno = saveerrno;
+	RESTORE_ERRNO;
 	}
 #endif
 	SvRTRIM(sv);

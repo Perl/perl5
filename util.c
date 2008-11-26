@@ -1271,14 +1271,14 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
-	const int e = errno;
+	dSAVED_ERRNO;
 #endif
 	PerlIO * const serr = Perl_error_log;
 
 	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
-	errno = e;
+	RESTORE_ERRNO;
 #endif
     }
 }
@@ -2862,10 +2862,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     Pid_t pid;
     Pid_t pid2;
     bool close_failed;
-    int saved_errno = 0;
-#ifdef WIN32
-    int saved_win32_errno;
-#endif
+    dSAVEDERRNO;
 
     LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
@@ -2878,12 +2875,8 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 	return my_syspclose(ptr);
     }
 #endif
-    if ((close_failed = (PerlIO_close(ptr) == EOF))) {
-	saved_errno = errno;
-#ifdef WIN32
-	saved_win32_errno = GetLastError();
-#endif
-    }
+    if ((close_failed = (PerlIO_close(ptr) == EOF)))
+	SAVE_ERRNO;
 #ifdef UTS
     if(PerlProc_kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
@@ -2901,7 +2894,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     rsignal_restore(SIGQUIT, &qstat);
 #endif
     if (close_failed) {
-	SETERRNO(saved_errno, 0);
+	RESTORE_ERRNO;
 	return -1;
     }
     return(pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status));
@@ -5052,12 +5045,12 @@ S_socketpair_udp (int fd[2]) {
     errno = ECONNABORTED;
   tidy_up_and_fail:
     {
-	const int save_errno = errno;
+	dSAVE_ERRNO;
 	if (sockets[0] != -1)
 	    PerlLIO_close(sockets[0]);
 	if (sockets[1] != -1)
 	    PerlLIO_close(sockets[1]);
-	errno = save_errno;
+	RESTORE_ERRNO;
 	return -1;
     }
 }
@@ -5156,14 +5149,14 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 #endif
   tidy_up_and_fail:
     {
-	const int save_errno = errno;
+	dSAVE_ERRNO;
 	if (listener != -1)
 	    PerlLIO_close(listener);
 	if (connector != -1)
 	    PerlLIO_close(connector);
 	if (acceptor != -1)
 	    PerlLIO_close(acceptor);
-	errno = save_errno;
+	RESTORE_ERRNO;
 	return -1;
     }
 }

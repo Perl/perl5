@@ -5178,13 +5178,13 @@ PP(pp_gpwent)
 	 * has a different API than the Solaris/IRIX one. */
 #   if defined(HAS_GETSPNAM) && !defined(_AIX)
 	{
-	    const int saverrno = errno;
+	    dSAVE_ERRNO;
 	    const struct spwd * const spwent = getspnam(pwent->pw_name);
 			  /* Save and restore errno so that
 			   * underprivileged attempts seem
 			   * to have never made the unsccessful
 			   * attempt to retrieve the shadow password. */
-	    errno = saverrno;
+	    RESTORE_ERRNO;
 	    if (spwent && spwent->sp_pwdp)
 		sv_setpv(sv, spwent->sp_pwdp);
 	}
@@ -5562,15 +5562,15 @@ static int
 lockf_emulate_flock(int fd, int operation)
 {
     int i;
-    const int save_errno = errno;
     Off_t pos;
+    dSAVE_ERRNO;
 
     /* flock locks entire file so for lockf we need to do the same	*/
     pos = PerlLIO_lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
     if (pos > 0)	/* is seekable and needs to be repositioned	*/
 	if (PerlLIO_lseek(fd, (Off_t)0, SEEK_SET) < 0)
 	    pos = -1;	/* seek failed, so don't seek back afterwards	*/
-    errno = save_errno;
+    RESTORE_ERRNO;
 
     switch (operation) {
 

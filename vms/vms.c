@@ -11933,10 +11933,10 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     char temp_fspec[VMS_MAXRSS];
     char *save_spec;
     int retval = -1;
-    int saved_errno, saved_vaxc_errno;
+    dSAVEDERRNO;
 
     if (!fspec) return retval;
-    saved_errno = errno; saved_vaxc_errno = vaxc$errno;
+    SAVE_ERRNO;
     strcpy(temp_fspec, fspec);
 
     if (decc_bug_devnull != 0) {
@@ -12063,7 +12063,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 #     endif
     }
     /* If we were successful, leave errno where we found it */
-    if (retval == 0) { errno = saved_errno; vaxc$errno = saved_vaxc_errno; }
+    if (retval == 0) RESTORE_ERRNO;
     return retval;
 
 }  /* end of flex_stat_int() */
