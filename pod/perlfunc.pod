@@ -1549,7 +1549,8 @@ itself.  See L</wantarray> for more on how the evaluation context can be
 determined.
 
 If there is a syntax error or runtime error, or a C<die> statement is
-executed, an undefined value is returned by C<eval>, and C<$@> is set to the
+executed, C<eval> returns an undefined value in scalar context
+or an empty list in list context, and C<$@> is set to the
 error message.  If there was no error, C<$@> is guaranteed to be a null
 string.  Beware that using C<eval> neither silences perl from printing
 warnings to STDERR, nor does it stuff the text of warning messages into C<$@>.
