@@ -1943,7 +1943,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 }
 #endif /* ! VMS */
 
-bool
+static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
 #ifdef MACOS_TRADITIONAL

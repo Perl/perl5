@@ -785,7 +785,7 @@ Perl_op_refcnt_unlock(pTHX)
 
 #define LINKLIST(o) ((o)->op_next ? (o)->op_next : linklist((OP*)o))
 
-OP *
+static OP *
 S_linklist(pTHX_ OP *o)
 {
     OP *first;
@@ -817,7 +817,7 @@ S_linklist(pTHX_ OP *o)
     return o->op_next;
 }
 
-OP *
+static OP *
 S_scalarkids(pTHX_ OP *o)
 {
     if (o && o->op_flags & OPf_KIDS) {
@@ -1207,7 +1207,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     return o;
 }
 
-OP *
+static OP *
 S_listkids(pTHX_ OP *o)
 {
     if (o && o->op_flags & OPf_KIDS) {
@@ -1296,7 +1296,7 @@ Perl_list(pTHX_ OP *o)
     return o;
 }
 
-OP *
+static OP *
 S_scalarseq(pTHX_ OP *o)
 {
     dVAR;
@@ -2430,7 +2430,7 @@ Perl_jmaybe(pTHX_ OP *o)
     return o;
 }
 
-OP *
+static OP *
 S_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
@@ -2571,7 +2571,7 @@ S_fold_constants(pTHX_ register OP *o)
     return o;
 }
 
-OP *
+static OP *
 S_gen_constant_list(pTHX_ register OP *o)
 {
     dVAR;
@@ -2985,7 +2985,7 @@ Perl_newNULLLIST(pTHX)
     return newOP(OP_STUB, 0);
 }
 
-OP *
+static OP *
 S_force_list(pTHX_ OP *o)
 {
     if (!o || o->op_type != OP_LIST)

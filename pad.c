@@ -1150,7 +1150,7 @@ Mark all the current temporaries for reuse
  * to  a shared TARG.  Such an alias will change randomly and unpredictably.
  * We avoid doing this until we can think of a Better Way.
  * GSAR 97-10-29 */
-void
+static void
 S_pad_reset(pTHX)
 {
     dVAR;

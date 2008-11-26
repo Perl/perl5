@@ -1362,7 +1362,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
     return message;
 }
 
-OP *
+static OP *
 S_vdie(pTHX_ const char* pat, va_list *args)
 {
     dVAR;
