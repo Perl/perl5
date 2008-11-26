@@ -280,7 +280,9 @@ s	|OP*	|fold_constants	|NN OP *o
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|free_tmps
+#if defined(PERL_IN_OP_C)
 s	|OP*	|gen_constant_list|NULLOK OP* o
+#endif
 #if !defined(HAS_GETENV_LEN)
 p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 #endif
@@ -370,7 +372,9 @@ ApP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 Apd	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
-pR	|bool	|ingroup	|Gid_t testgid|bool effective
+#if defined(PERL_IN_DOIO_C)
+sR	|bool	|ingroup	|Gid_t testgid|bool effective
+#endif
 p	|void	|init_argv_symbols|int argc|NN char **argv
 p	|void	|init_debugger
 Ap	|void	|init_stacks

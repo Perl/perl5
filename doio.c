@@ -1944,7 +1944,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 #endif /* ! VMS */
 
 bool
-Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
+S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
 #ifdef MACOS_TRADITIONAL
     /* This is simply not correct for AppleShare, but fix it yerself. */
