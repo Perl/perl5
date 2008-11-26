@@ -429,11 +429,6 @@ PERL_CALLCONV int	Perl_printf_nocontext(const char *format, ...)
 	assert(format)
 
 #endif
-PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ const CV* cv, const GV* gv, const char* p)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CV_CKPROTO	\
-	assert(cv)
-
 PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN	\

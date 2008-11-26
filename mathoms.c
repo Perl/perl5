@@ -1276,14 +1276,6 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
     sv_usepvn_flags(sv,ptr,len, 0);
 }
 
-void
-Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
-{
-    PERL_ARGS_ASSERT_CV_CKPROTO;
-
-    cv_ckproto_len(cv, gv, p, p ? strlen(p) : 0);
-}
-
 /*
 =for apidoc unpack_str
 

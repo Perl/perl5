@@ -123,7 +123,6 @@
 #define printf_nocontext	Perl_printf_nocontext
 #endif
 #ifdef PERL_CORE
-#define cv_ckproto		Perl_cv_ckproto
 #define cv_ckproto_len		Perl_cv_ckproto_len
 #define cv_clone		Perl_cv_clone
 #endif
@@ -2437,7 +2436,6 @@
 #if defined(PERL_IMPLICIT_CONTEXT)
 #endif
 #ifdef PERL_CORE
-#define cv_ckproto(a,b,c)	Perl_cv_ckproto(aTHX_ a,b,c)
 #define cv_ckproto_len(a,b,c,d)	Perl_cv_ckproto_len(aTHX_ a,b,c,d)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #endif
