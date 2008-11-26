@@ -385,9 +385,6 @@ pd	|U32	|intro_my
 ApPR	|char*	|instr		|NN const char* big|NN const char* little
 p	|bool	|io_close	|NN IO* io|bool not_implicit
 pR	|OP*	|invert		|NULLOK OP* cmd
-#if defined(PERL_IN_GV_C)
-sdR	|bool	|is_gv_magical	|NN const char *name|STRLEN len|U32 flags
-#endif
 ApR	|I32	|is_lvalue_sub
 ApPR	|U32	|to_uni_upper_lc|U32 c
 ApPR	|U32	|to_uni_title_lc|U32 c
@@ -1904,7 +1901,7 @@ np	|void	|my_swabn	|NN void* ptr|int n
 
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
-dpR	|bool	|is_gv_magical_sv|NN SV *name|U32 flags
+dpR	|bool	|is_gv_magical_sv|NN SV *const name_sv|U32 flags
 
 ApR	|bool	|stashpv_hvname_match|NN const COP *c|NN const HV *hv
 

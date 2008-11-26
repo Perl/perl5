@@ -1150,14 +1150,6 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
-#if defined(PERL_IN_GV_C)
-STATIC bool	S_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_GV_MAGICAL	\
-	assert(name)
-
-#endif
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
 
@@ -6320,11 +6312,11 @@ PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_typ
 #define PERL_ARGS_ASSERT_GV_FETCHSV	\
 	assert(name)
 
-PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
+PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *const name_sv, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_GV_MAGICAL_SV	\
-	assert(name)
+	assert(name_sv)
 
 
 PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)

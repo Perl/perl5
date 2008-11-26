@@ -2210,25 +2210,6 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 /*
 =for apidoc is_gv_magical_sv
 
-Returns C<TRUE> if given the name of a magical GV. Calls is_gv_magical.
-
-=cut
-*/
-
-bool
-Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
-{
-    STRLEN len;
-    const char * const temp = SvPV_const(name, len);
-
-    PERL_ARGS_ASSERT_IS_GV_MAGICAL_SV;
-
-    return is_gv_magical(temp, len, flags);
-}
-
-/*
-=for apidoc is_gv_magical
-
 Returns C<TRUE> if given the name of a magical GV.
 
 Currently only useful internally when determining if a GV should be
@@ -2243,13 +2224,15 @@ pointers returned by SvPV.
 
 =cut
 */
-bool
-S_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
-{
-    PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(flags);
 
-    PERL_ARGS_ASSERT_IS_GV_MAGICAL;
+bool
+Perl_is_gv_magical_sv(pTHX_ SV *const name_sv, U32 flags)
+{
+    STRLEN len;
+    const char *const name = SvPV_const(name_sv, len);
+
+    PERL_UNUSED_ARG(flags);
+    PERL_ARGS_ASSERT_IS_GV_MAGICAL_SV;
 
     if (len > 1) {
 	const char * const name1 = name + 1;

@@ -334,8 +334,8 @@ Found in file pad.h
 
 =over 8
 
-=item is_gv_magical
-X<is_gv_magical>
+=item is_gv_magical_sv
+X<is_gv_magical_sv>
 
 Returns C<TRUE> if given the name of a magical GV.
 
@@ -348,16 +348,6 @@ allow selecting particular classes of magical variable.
 Currently assumes that C<name> is NUL terminated (as well as len being valid).
 This assumption is met by all callers within the perl core, which all pass
 pointers returned by SvPV.
-
-	bool	is_gv_magical(const char *name, STRLEN len, U32 flags)
-
-=for hackers
-Found in file gv.c
-
-=item is_gv_magical_sv
-X<is_gv_magical_sv>
-
-Returns C<TRUE> if given the name of a magical GV. Calls is_gv_magical.
 
 	bool	is_gv_magical_sv(SV *name, U32 flags)
 
