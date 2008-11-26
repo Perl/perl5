@@ -445,7 +445,9 @@ Ap	|void	|op_null	|NN OP* o
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
+#if defined(PERL_IN_OP_C)
 s	|OP*	|linklist	|NN OP *o
+#endif
 p	|OP*	|list		|NULLOK OP* o
 p	|OP*	|listkids	|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
@@ -812,8 +814,10 @@ Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 p	|OP*	|sawparens	|NULLOK OP* o
 p	|OP*	|scalar		|NULLOK OP* o
-p	|OP*	|scalarkids	|NULLOK OP* o
-p	|OP*	|scalarseq	|NULLOK OP* o
+#if defined(PERL_IN_OP_C)
+s	|OP*	|scalarkids	|NULLOK OP* o
+s	|OP*	|scalarseq	|NULLOK OP* o
+#endif
 p	|OP*	|scalarvoid	|NN OP* o
 Apd	|NV	|scan_bin	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Apd	|NV	|scan_hex	|NN const char* start|STRLEN len|NN STRLEN* retlen

@@ -394,8 +394,12 @@
 #endif
 #define op_refcnt_lock		Perl_op_refcnt_lock
 #define op_refcnt_unlock	Perl_op_refcnt_unlock
+#if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define linklist		S_linklist
+#endif
+#endif
+#ifdef PERL_CORE
 #define list			Perl_list
 #define listkids		Perl_listkids
 #endif
@@ -792,8 +796,14 @@
 #ifdef PERL_CORE
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
-#define scalarkids		Perl_scalarkids
-#define scalarseq		Perl_scalarseq
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define scalarkids		S_scalarkids
+#define scalarseq		S_scalarseq
+#endif
+#endif
+#ifdef PERL_CORE
 #define scalarvoid		Perl_scalarvoid
 #endif
 #define scan_bin		Perl_scan_bin
@@ -2709,8 +2719,12 @@
 #endif
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
+#if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define linklist(a)		S_linklist(aTHX_ a)
+#endif
+#endif
+#ifdef PERL_CORE
 #define list(a)			Perl_list(aTHX_ a)
 #define listkids(a)		Perl_listkids(aTHX_ a)
 #endif
@@ -3103,8 +3117,14 @@
 #ifdef PERL_CORE
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
-#define scalarkids(a)		Perl_scalarkids(aTHX_ a)
-#define scalarseq(a)		Perl_scalarseq(aTHX_ a)
+#endif
+#if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define scalarkids(a)		S_scalarkids(aTHX_ a)
+#define scalarseq(a)		S_scalarseq(aTHX_ a)
+#endif
+#endif
+#ifdef PERL_CORE
 #define scalarvoid(a)		Perl_scalarvoid(aTHX_ a)
 #endif
 #define scan_bin(a,b,c)		Perl_scan_bin(aTHX_ a,b,c)
