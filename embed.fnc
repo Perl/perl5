@@ -197,7 +197,9 @@ pM	|void	|delete_eval_scope
 p	|void	|deprecate	|NN const char *const s
 p	|void	|deprecate_old	|NN const char *const s
 Afp	|OP*	|die		|NULLOK const char* pat|...
+#if defined(PERL_IN_UTIL_C)
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
+#endif
 p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
@@ -669,7 +671,9 @@ pR	|OP*	|oopsHV		|NN OP* o
 pd	|void	|pad_leavemy
 Apd	|SV*	|pad_sv		|PADOFFSET po
 pd	|void	|pad_free	|PADOFFSET po
-pd	|void	|pad_reset
+#if defined(PERL_IN_PAD_C)
+sd	|void	|pad_reset
+#endif
 pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
 p	|void	|peep		|NULLOK OP* o
 dopM	|PerlIO*|start_glob	|NN SV *tmpglob|NN IO *io

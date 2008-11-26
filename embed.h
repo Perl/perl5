@@ -159,8 +159,12 @@
 #define deprecate_old		Perl_deprecate_old
 #endif
 #define die			Perl_die
+#if defined(PERL_IN_UTIL_C)
 #ifdef PERL_CORE
 #define vdie			S_vdie
+#endif
+#endif
+#ifdef PERL_CORE
 #define die_where		Perl_die_where
 #endif
 #define dounwind		Perl_dounwind
@@ -646,7 +650,13 @@
 #define pad_sv			Perl_pad_sv
 #ifdef PERL_CORE
 #define pad_free		Perl_pad_free
-#define pad_reset		Perl_pad_reset
+#endif
+#if defined(PERL_IN_PAD_C)
+#ifdef PERL_CORE
+#define pad_reset		S_pad_reset
+#endif
+#endif
+#ifdef PERL_CORE
 #define pad_swipe		Perl_pad_swipe
 #define peep			Perl_peep
 #endif
@@ -2483,8 +2493,12 @@
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
 #define deprecate_old(a)	Perl_deprecate_old(aTHX_ a)
 #endif
+#if defined(PERL_IN_UTIL_C)
 #ifdef PERL_CORE
 #define vdie(a,b)		S_vdie(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
 #define die_where(a,b)		Perl_die_where(aTHX_ a,b)
 #endif
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
@@ -2980,7 +2994,13 @@
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
 #ifdef PERL_CORE
 #define pad_free(a)		Perl_pad_free(aTHX_ a)
-#define pad_reset()		Perl_pad_reset(aTHX)
+#endif
+#if defined(PERL_IN_PAD_C)
+#ifdef PERL_CORE
+#define pad_reset()		S_pad_reset(aTHX)
+#endif
+#endif
+#ifdef PERL_CORE
 #define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
 #define peep(a)			Perl_peep(aTHX_ a)
 #endif

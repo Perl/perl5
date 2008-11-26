@@ -1151,7 +1151,7 @@ Mark all the current temporaries for reuse
  * We avoid doing this until we can think of a Better Way.
  * GSAR 97-10-29 */
 void
-Perl_pad_reset(pTHX)
+S_pad_reset(pTHX)
 {
     dVAR;
 #ifdef USE_BROKEN_PAD_RESET
