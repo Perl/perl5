@@ -459,11 +459,13 @@ PERLVAR(Imax_intro_pending,	I32)	/* end of vars to introduce */
 PERLVAR(Ipadix,		I32)		/* max used index in current "register" pad */
 
 PERLVAR(Ipadix_floor,	I32)		/* how low may inner block reset padix */
-PERLVAR(Ipad_reset_pending,	I32)	/* reset pad on next attempted alloc */
 
 PERLVAR(Ihints,		U32)		/* pragma-tic compile-time flags */
 
 PERLVAR(Idebug,		VOL U32)	/* flags given to -D switch */
+
+/* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
+PERLVARI(Ibreakable_sub_gen, U32, 0)
 
 PERLVARI(Iamagic_generation,	long,	0)
 
@@ -524,7 +526,7 @@ PERLVAR(Ilast_swash_klen,	U8)	/* Only needs to store 0-10  */
 PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
 #endif
 
-/* Space for a U8 */
+PERLVAR(Ipad_reset_pending,	bool)	/* reset pad on next attempted alloc */
 
 PERLVARI(Iglob_index,	int,	0)
 
@@ -678,9 +680,6 @@ PERLVARI(Idestroyhook, destroyable_proc_t, MEMBER_TO_FPTR(Perl_sv_destroyable))
 #ifdef DEBUG_LEAKING_SCALARS
 PERLVARI(Isv_serial, U32, 0) /* SV serial number, used in sv.c */
 #endif
-
-/* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
-PERLVARI(Ibreakable_sub_gen, U32, 0)
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */

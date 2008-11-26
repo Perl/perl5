@@ -180,7 +180,7 @@ Perl_pad_new(pTHX_ int flags)
 	    SAVEI32(PL_max_intro_pending);
 	    SAVEBOOL(PL_cv_has_eval);
 	    if (flags & padnew_SAVESUB) {
-		SAVEI32(PL_pad_reset_pending);
+		SAVEBOOL(PL_pad_reset_pending);
 	    }
 	}
     }
