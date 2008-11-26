@@ -29,7 +29,7 @@ sub ok {
     return $ok;
 }
 
-print "1..32\n";
+print "1..38\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -105,21 +105,40 @@ $owww = do { 4 if not $zok };
 ok( $owww eq '', 'last is if not' );
 
 # [perl #38809]
+@a = (7);
+$x = sub { do { return do { @a } }; 2 }->();
+ok(defined $x && $x == 1, 'return do { } receives caller scalar context');
+@x = sub { do { return do { @a } }; 2 }->();
+ok("@x" eq "7", 'return do { } receives caller list context');
+
 @a = (7, 8);
 $x = sub { do { return do { 1; @a } }; 3 }->();
-ok(defined $x && $x == 2, 'return do { } receives caller scalar context');
+ok(defined $x && $x == 2, 'return do { ; } receives caller scalar context');
 @x = sub { do { return do { 1; @a } }; 3 }->();
-ok("@x" eq "7 8", 'return do { } receives caller list context');
+ok("@x" eq "7 8", 'return do { ; } receives caller list context');
+
+@b = (11 .. 15);
+$x = sub { do { return do { 1; @a, @b } }; 3 }->();
+ok(defined $x && $x == 5, 'return do { ; , } receives caller scalar context');
+@x = sub { do { return do { 1; @a, @b } }; 3 }->();
+ok("@x" eq "7 8 11 12 13 14 15", 'return do { ; , } receives caller list context');
+
+$x = sub { do { return do { 1; @a }, do { 2; @b } }; 3 }->();
+ok(defined $x && $x == 5, 'return do { ; }, do { ; } receives caller scalar context');
+@x = sub { do { return do { 1; @a }, do { 2; @b } }; 3 }->();
+ok("@x" eq "7 8 11 12 13 14 15", 'return do { ; }, do { ; } receives caller list context');
+
 @a = (7, 8, 9);
 $x = sub { do { do { 1; return @a } }; 4 }->();
 ok(defined $x && $x == 3, 'do { return } receives caller scalar context');
 @x = sub { do { do { 1; return @a } }; 4 }->();
 ok("@x" eq "7 8 9", 'do { return } receives caller list context');
+
 @a = (7, 8, 9, 10);
 $x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
-ok(defined $x && $x == 4, 'return do { do { } } receives caller scalar context');
+ok(defined $x && $x == 4, 'return do { do { ; } } receives caller scalar context');
 @x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
-ok("@x" eq "7 8 9 10", 'return do { do { } } receives caller list context');
+ok("@x" eq "7 8 9 10", 'return do { do { ; } } receives caller list context');
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
