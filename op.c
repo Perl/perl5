@@ -1208,7 +1208,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 }
 
 OP *
-Perl_listkids(pTHX_ OP *o)
+S_listkids(pTHX_ OP *o)
 {
     if (o && o->op_flags & OPf_KIDS) {
         OP *kid;

@@ -1452,9 +1452,9 @@ STATIC OP*	S_linklist(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_LINKLIST	\
 	assert(o)
 
+STATIC OP*	S_listkids(pTHX_ OP* o);
 #endif
 PERL_CALLCONV OP*	Perl_list(pTHX_ OP* o);
-PERL_CALLCONV OP*	Perl_listkids(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_LOAD_MODULE	\

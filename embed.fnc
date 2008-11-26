@@ -447,9 +447,10 @@ Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
 #if defined(PERL_IN_OP_C)
 s	|OP*	|linklist	|NN OP *o
+s	|OP*	|listkids	|NULLOK OP* o
 #endif
+: This is used in S_doeval in pp_ctl.c
 p	|OP*	|list		|NULLOK OP* o
-p	|OP*	|listkids	|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
 Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex

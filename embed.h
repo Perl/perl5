@@ -397,11 +397,11 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define linklist		S_linklist
+#define listkids		S_listkids
 #endif
 #endif
 #ifdef PERL_CORE
 #define list			Perl_list
-#define listkids		Perl_listkids
 #endif
 #define load_module		Perl_load_module
 #define vload_module		Perl_vload_module
@@ -2722,11 +2722,11 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define linklist(a)		S_linklist(aTHX_ a)
+#define listkids(a)		S_listkids(aTHX_ a)
 #endif
 #endif
 #ifdef PERL_CORE
 #define list(a)			Perl_list(aTHX_ a)
-#define listkids(a)		Perl_listkids(aTHX_ a)
 #endif
 #define vload_module(a,b,c,d)	Perl_vload_module(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
