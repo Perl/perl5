@@ -383,7 +383,9 @@ pd	|U32	|intro_my
 ApPR	|char*	|instr		|NN const char* big|NN const char* little
 p	|bool	|io_close	|NN IO* io|bool not_implicit
 pR	|OP*	|invert		|NULLOK OP* cmd
-dpR	|bool	|is_gv_magical	|NN const char *name|STRLEN len|U32 flags
+#if defined(PERL_IN_GV_C)
+sdR	|bool	|is_gv_magical	|NN const char *name|STRLEN len|U32 flags
+#endif
 ApR	|I32	|is_lvalue_sub
 ApPR	|U32	|to_uni_upper_lc|U32 c
 ApPR	|U32	|to_uni_title_lc|U32 c

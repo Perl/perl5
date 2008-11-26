@@ -2244,7 +2244,7 @@ pointers returned by SvPV.
 =cut
 */
 bool
-Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
+S_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 {
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(flags);

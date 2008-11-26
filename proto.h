@@ -1148,12 +1148,14 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV bool	Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
+#if defined(PERL_IN_GV_C)
+STATIC bool	S_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_GV_MAGICAL	\
 	assert(name)
 
+#endif
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
 
