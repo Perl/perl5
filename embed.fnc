@@ -881,7 +881,10 @@ Apd	|char*	|sv_pvn		|NN SV *sv|NN STRLEN *lp
 Apd	|char*	|sv_pvutf8n	|NN SV *sv|NN STRLEN *lp
 Apd	|char*	|sv_pvbyten	|NN SV *sv|NN STRLEN *lp
 Apd	|I32	|sv_true	|NULLOK SV *const sv
-pd	|void	|sv_add_arena	|NN char *const ptr|const U32 size|const U32 flags
+#if defined (PERL_IN_SV_C)
+sd	|void	|sv_add_arena	|NN char *const ptr|const U32 size \
+				|const U32 flags
+#endif
 Apd	|int	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
 Afpd	|void	|sv_catpvf	|NN SV *const sv|NN const char *const pat|...
