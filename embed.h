@@ -56,9 +56,6 @@
 #define av_delete		Perl_av_delete
 #define av_exists		Perl_av_exists
 #define av_extend		Perl_av_extend
-#ifdef PERL_CORE
-#define av_fake			Perl_av_fake
-#endif
 #define av_fetch		Perl_av_fetch
 #define av_fill			Perl_av_fill
 #define av_len			Perl_av_len
@@ -2416,9 +2413,6 @@
 #define av_delete(a,b,c)	Perl_av_delete(aTHX_ a,b,c)
 #define av_exists(a,b)		Perl_av_exists(aTHX_ a,b)
 #define av_extend(a,b)		Perl_av_extend(aTHX_ a,b)
-#ifdef PERL_CORE
-#define av_fake(a,b)		Perl_av_fake(aTHX_ a,b)
-#endif
 #define av_fetch(a,b,c)		Perl_av_fetch(aTHX_ a,b,c)
 #define av_fill(a,b)		Perl_av_fill(aTHX_ a,b)
 #define av_len(a)		Perl_av_len(aTHX_ a)

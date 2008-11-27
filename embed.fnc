@@ -112,7 +112,6 @@ Apd	|void	|av_clear	|NN AV *av
 Apd	|SV*	|av_delete	|NN AV *av|I32 key|I32 flags
 ApdR	|bool	|av_exists	|NN AV *av|I32 key
 Apd	|void	|av_extend	|NN AV *av|I32 key
-pR	|AV*	|av_fake	|I32 size|NN SV **strp
 ApdR	|SV**	|av_fetch	|NN AV *av|I32 key|I32 lval
 Apd	|void	|av_fill	|NN AV *av|I32 fill
 ApdR	|I32	|av_len		|NN AV *av

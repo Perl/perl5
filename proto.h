@@ -175,12 +175,6 @@ PERL_CALLCONV void	Perl_av_extend(pTHX_ AV *av, I32 key)
 #define PERL_ARGS_ASSERT_AV_EXTEND	\
 	assert(av)
 
-PERL_CALLCONV AV*	Perl_av_fake(pTHX_ I32 size, SV **strp)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_AV_FAKE	\
-	assert(strp)
-
 PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, I32 key, I32 lval)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

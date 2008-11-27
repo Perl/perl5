@@ -607,29 +607,6 @@ Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
     sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0);
 }
 
-AV *
-Perl_av_fake(pTHX_ register I32 size, register SV **strp)
-{
-    register SV** ary;
-    register AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
-
-    PERL_ARGS_ASSERT_AV_FAKE;
-
-    Newx(ary,size+1,SV*);
-    AvALLOC(av) = ary;
-    Copy(strp,ary,size,SV*);
-    AvREIFY_only(av);
-    AvARRAY(av) = ary;
-    AvFILLp(av) = size - 1;
-    AvMAX(av) = size - 1;
-    while (size--) {
-        assert (*strp);
-        SvTEMP_off(*strp);
-        strp++;
-    }
-    return av;
-}
-
 bool
 Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
