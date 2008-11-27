@@ -29,7 +29,7 @@ These functions are related to the method resolution order of perl classes
 
 struct mro_alg {
     const char *name;
-    AV *(*resolve)(pTHX_ HV* stash, I32 level);
+    AV *(*resolve)(pTHX_ HV* stash, U32 level);
 };
 
 /* First one is the default */
@@ -152,7 +152,7 @@ invalidated).
 =cut
 */
 static AV*
-S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
+S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 {
     AV* retval;
     GV** gvp;
@@ -305,7 +305,7 @@ invalidated).
 */
 
 static AV*
-S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
+S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 {
     AV* retval;
     GV** gvp;
