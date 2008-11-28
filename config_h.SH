@@ -3297,6 +3297,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$ebcdic	EBCDIC 		/**/
 
+/* PERL_USE_DEVEL:
+ *	This symbol, if defined, indicates that Perl was configured with
+ *	-Dusedevel, to enable development features.  This should not be
+ *	done for production builds.
+ */
+#$usedevel	PERL_USE_DEVEL		/**/
+
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
  *	available to convert strings into long doubles.
