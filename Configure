@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Nov  6 21:06:19 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Fri Nov 28 08:39:51 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -209,6 +209,7 @@ to=''
 usecrosscompile=''
 extern_C=''
 mistrustnm=''
+usedevel=''
 perllibs=''
 dynamic_ext=''
 extensions=''
@@ -2142,7 +2143,8 @@ EOF
 : See if we are using a devel version and want that
 xversion=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
 case "$usedevel" in
-$define|true|[yY]*) ;;
+$define|true|[yY]*)
+    usedevel="$define" ;;
 *) case "$xversion" in
    *[13579])
 	cat >&4 <<EOH
@@ -2175,6 +2177,7 @@ EOH
 	esac
 	;;
     esac
+    usedevel="$undef"
     ;;
 esac
 case "$usedevel" in
@@ -7019,6 +7022,11 @@ case "$vendorprefix" in
 esac
 prefixvar=vendorarch
 . ./installprefix
+if $test X"$vendorarch" = X"$vendorlib"; then
+	d_vendorarch="$undef"
+else
+	d_vendorarch="$define"
+fi
 
 : Final catch-all directories to search
 $cat <<EOM
@@ -23028,6 +23036,7 @@ use5005threads='$use5005threads'
 use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecrosscompile='$usecrosscompile'
+usedevel='$usedevel'
 usedl='$usedl'
 usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'

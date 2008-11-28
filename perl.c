@@ -1876,6 +1876,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			     " PERL_MEM_LOG_TIMESTAMP"
 #  endif
+#  ifdef PERL_USE_DEVEL
+			     " PERL_USE_DEVEL"
+#  endif
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif

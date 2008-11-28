@@ -4890,6 +4890,10 @@ usecrosscompile (Cross.U):
 	This variable conditionally defines the USE_CROSS_COMPILE symbol,
 	and indicates that Perl has been cross-compiled.
 
+usedevel (Devel.U):
+	This variable indicates that Perl was configured with development
+	features enabled.  This should not be done for production builds.
+
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
