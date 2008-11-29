@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 10 $
+#  $Revision: 11 $
 #  $Author: mhx $
-#  $Date: 2007/10/22 13:10:24 +0200 $
+#  $Date: 2008/11/28 18:08:11 +0100 $
 #
 ################################################################################
 #
@@ -51,7 +51,8 @@ my $msq = sub {
 
 unless (defined $msq) {
   my $info = "IPC::Msg->new failed: $!";
-  if ($! == &IPC::SysV::ENOSPC || $! == &IPC::SysV::ENOSYS) {
+  if ($! == &IPC::SysV::ENOSPC || $! == &IPC::SysV::ENOSYS ||
+      $! == &IPC::SysV::ENOMEM || $! == &IPC::SysV::EACCES) {
     plan(skip_all => $info);
   }
   else {

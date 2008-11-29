@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 23 $
+#  $Revision: 24 $
 #  $Author: mhx $
-#  $Date: 2007/10/19 20:46:32 +0200 $
+#  $Date: 2008/11/28 18:08:10 +0100 $
 #
 ################################################################################
 #
@@ -24,7 +24,7 @@ use Config;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.00_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -58,7 +58,7 @@ $VERSION = eval $VERSION;
   S_IRGRP S_IWGRP S_IXGRP S_IRWXG
   S_IROTH S_IWOTH S_IXOTH S_IRWXO
 
-  ENOSPC ENOSYS
+  ENOSPC ENOSYS ENOMEM EACCES
 
 ), qw(
 

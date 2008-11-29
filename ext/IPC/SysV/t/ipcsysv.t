@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 12 $
+#  $Revision: 13 $
 #  $Author: mhx $
-#  $Date: 2007/10/22 13:10:22 +0200 $
+#  $Date: 2008/11/28 18:08:11 +0100 $
 #
 ################################################################################
 #
@@ -97,7 +97,8 @@ EOM
       return "$what failed: SIGSYS caught";
     }
     my $info = "$what failed: $why";
-    if ($why == &IPC::SysV::ENOSPC || $why == &IPC::SysV::ENOSYS) {
+    if ($why == &IPC::SysV::ENOSPC || $why == &IPC::SysV::ENOSYS ||
+        $why == &IPC::SysV::ENOMEM || $why == &IPC::SysV::EACCES) {
       do_sys_diag() if $why == &IPC::SysV::ENOSYS;
       return $info;
     }
