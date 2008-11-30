@@ -808,6 +808,7 @@
 #define save_pushptr		Perl_save_pushptr
 #if defined(PERL_IN_SCOPE_C)
 #ifdef PERL_CORE
+#define save_pushi32ptr		S_save_pushi32ptr
 #define save_pushptrptr		S_save_pushptrptr
 #endif
 #endif
@@ -3157,6 +3158,7 @@
 #define save_pushptr(a,b)	Perl_save_pushptr(aTHX_ a,b)
 #if defined(PERL_IN_SCOPE_C)
 #ifdef PERL_CORE
+#define save_pushi32ptr(a,b,c)	S_save_pushi32ptr(aTHX_ a,b,c)
 #define save_pushptrptr(a,b,c)	S_save_pushptrptr(aTHX_ a,b,c)
 #endif
 #endif

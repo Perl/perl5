@@ -348,19 +348,6 @@ Perl_save_item(pTHX_ register SV *item)
 }
 
 void
-Perl_save_int(pTHX_ int *intp)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_SAVE_INT;
-
-    SSCHECK(3);
-    SSPUSHINT(*intp);
-    SSPUSHPTR(intp);
-    SSPUSHINT(SAVEt_INT);
-}
-
-void
 Perl_save_bool(pTHX_ bool *boolp)
 {
     dVAR;
@@ -373,6 +360,26 @@ Perl_save_bool(pTHX_ bool *boolp)
     SSPUSHINT(SAVEt_BOOL);
 }
 
+static void
+S_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
+{
+    dVAR;
+    SSCHECK(3);
+    SSPUSHINT(i);
+    SSPUSHPTR(ptr);
+    SSPUSHINT(type);
+}
+
+void
+Perl_save_int(pTHX_ int *intp)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_INT;
+
+    save_pushi32ptr(*intp, intp, SAVEt_INT);
+}
+
 void
 Perl_save_I8(pTHX_ I8 *bytep)
 {
@@ -380,10 +387,7 @@ Perl_save_I8(pTHX_ I8 *bytep)
 
     PERL_ARGS_ASSERT_SAVE_I8;
 
-    SSCHECK(3);
-    SSPUSHINT(*bytep);
-    SSPUSHPTR(bytep);
-    SSPUSHINT(SAVEt_I8);
+    save_pushi32ptr(*bytep, bytep, SAVEt_I8);
 }
 
 void
@@ -393,10 +397,7 @@ Perl_save_I16(pTHX_ I16 *intp)
 
     PERL_ARGS_ASSERT_SAVE_I16;
 
-    SSCHECK(3);
-    SSPUSHINT(*intp);
-    SSPUSHPTR(intp);
-    SSPUSHINT(SAVEt_I16);
+    save_pushi32ptr(*intp, intp, SAVEt_I16);
 }
 
 void
@@ -406,10 +407,7 @@ Perl_save_I32(pTHX_ I32 *intp)
 
     PERL_ARGS_ASSERT_SAVE_I32;
 
-    SSCHECK(3);
-    SSPUSHINT(*intp);
-    SSPUSHPTR(intp);
-    SSPUSHINT(SAVEt_I32);
+    save_pushi32ptr(*intp, intp, SAVEt_I32);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
