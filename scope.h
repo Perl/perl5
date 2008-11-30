@@ -172,12 +172,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSPUSHINT(SAVEt_HINTS);				\
     } STMT_END
 
-#define SAVECOMPPAD() \
-    STMT_START {						\
-	SSCHECK(2);						\
-	SSPUSHPTR(MUTABLE_SV(PL_comppad));			\
-	SSPUSHINT(SAVEt_COMPPAD);				\
-    } STMT_END
+#define SAVECOMPPAD() save_pushptr(MUTABLE_SV(PL_comppad), SAVEt_COMPPAD)
 
 #define SAVESWITCHSTACK(f,t) \
     STMT_START {					\
@@ -202,12 +197,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
    could have done savefreesharedpvREF, but this way actually seems cleaner,
    as it simplifies the code that does the saves, and reduces the load on the
    save stack.  */
-#define SAVECOMPILEWARNINGS() \
-    STMT_START {					\
-	SSCHECK(2);					\
-	SSPUSHPTR(PL_compiling.cop_warnings);		\
-	SSPUSHINT(SAVEt_COMPILE_WARNINGS);		\
-    } STMT_END
+#define SAVECOMPILEWARNINGS() save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
 
 #define SAVESTACK_CXPOS() \
     STMT_START {                                  \
@@ -217,12 +207,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
         SSPUSHINT(SAVEt_STACK_CXPOS);             \
     } STMT_END
 
-#define SAVEPARSER(p) \
-    STMT_START {                                  \
-        SSCHECK(2);                               \
-        SSPUSHPTR(p);		                  \
-        SSPUSHINT(SAVEt_PARSER); 	          \
-    } STMT_END
+#define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))
