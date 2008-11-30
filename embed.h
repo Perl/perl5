@@ -790,6 +790,11 @@
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
 #define save_pushptr		Perl_save_pushptr
+#if defined(PERL_IN_SCOPE_C)
+#ifdef PERL_CORE
+#define save_pushptrptr		S_save_pushptrptr
+#endif
+#endif
 #ifdef PERL_CORE
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
@@ -3105,6 +3110,11 @@
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
 #define save_pushptr(a,b)	Perl_save_pushptr(aTHX_ a,b)
+#if defined(PERL_IN_SCOPE_C)
+#ifdef PERL_CORE
+#define save_pushptrptr(a,b,c)	S_save_pushptrptr(aTHX_ a,b,c)
+#endif
+#endif
 #ifdef PERL_CORE
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
