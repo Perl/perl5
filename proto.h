@@ -2787,9 +2787,9 @@ PERL_CALLCONV void	Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void
 	assert(p)
 
 PERL_CALLCONV void	Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p);
-PERL_CALLCONV void	Perl_save_freesv(pTHX_ SV* sv);
-PERL_CALLCONV void	Perl_save_freeop(pTHX_ OP* o);
-PERL_CALLCONV void	Perl_save_freepv(pTHX_ char* pv);
+/* PERL_CALLCONV void	Perl_save_freesv(pTHX_ SV* sv); */
+/* PERL_CALLCONV void	Perl_save_freeop(pTHX_ OP* o); */
+/* PERL_CALLCONV void	Perl_save_freepv(pTHX_ char* pv); */
 PERL_CALLCONV void	Perl_save_generic_svref(pTHX_ SV** sptr)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_GENERIC_SVREF	\
@@ -2874,8 +2874,8 @@ PERL_CALLCONV void	Perl_save_long(pTHX_ long* longp)
 #define PERL_ARGS_ASSERT_SAVE_LONG	\
 	assert(longp)
 
-PERL_CALLCONV void	Perl_save_mortalizesv(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	Perl_save_mortalizesv(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1); */
 #define PERL_ARGS_ASSERT_SAVE_MORTALIZESV	\
 	assert(sv)
 
@@ -2884,7 +2884,7 @@ PERL_CALLCONV void	Perl_save_nogv(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_SAVE_NOGV	\
 	assert(gv)
 
-PERL_CALLCONV void	Perl_save_op(pTHX);
+/* PERL_CALLCONV void	Perl_save_op(pTHX); */
 PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_SCALAR	\
@@ -2912,6 +2912,7 @@ PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr)
 #define PERL_ARGS_ASSERT_SAVE_SVREF	\
 	assert(sptr)
 
+PERL_CALLCONV void	Perl_save_pushptr(pTHX_ void *const ptr, const int type);
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);
 #if defined(PERL_IN_OP_C)

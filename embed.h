@@ -782,11 +782,6 @@
 #define save_delete		Perl_save_delete
 #define save_destructor		Perl_save_destructor
 #define save_destructor_x	Perl_save_destructor_x
-#define save_freesv		Perl_save_freesv
-#ifdef PERL_CORE
-#define save_freeop		Perl_save_freeop
-#endif
-#define save_freepv		Perl_save_freepv
 #define save_generic_svref	Perl_save_generic_svref
 #define save_generic_pvref	Perl_save_generic_pvref
 #define save_shared_pvref	Perl_save_shared_pvref
@@ -802,11 +797,7 @@
 #define save_iv			Perl_save_iv
 #define save_list		Perl_save_list
 #define save_long		Perl_save_long
-#define save_mortalizesv	Perl_save_mortalizesv
 #define save_nogv		Perl_save_nogv
-#ifdef PERL_CORE
-#define save_op			Perl_save_op
-#endif
 #define save_scalar		Perl_save_scalar
 #define save_pptr		Perl_save_pptr
 #define save_vptr		Perl_save_vptr
@@ -814,6 +805,7 @@
 #define save_padsv_and_mortalize	Perl_save_padsv_and_mortalize
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
+#define save_pushptr		Perl_save_pushptr
 #ifdef PERL_CORE
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
@@ -3130,11 +3122,8 @@
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)
 #define save_destructor_x(a,b)	Perl_save_destructor_x(aTHX_ a,b)
-#define save_freesv(a)		Perl_save_freesv(aTHX_ a)
 #ifdef PERL_CORE
-#define save_freeop(a)		Perl_save_freeop(aTHX_ a)
 #endif
-#define save_freepv(a)		Perl_save_freepv(aTHX_ a)
 #define save_generic_svref(a)	Perl_save_generic_svref(aTHX_ a)
 #define save_generic_pvref(a)	Perl_save_generic_pvref(aTHX_ a)
 #define save_shared_pvref(a)	Perl_save_shared_pvref(aTHX_ a)
@@ -3150,10 +3139,8 @@
 #define save_iv(a)		Perl_save_iv(aTHX_ a)
 #define save_list(a,b)		Perl_save_list(aTHX_ a,b)
 #define save_long(a)		Perl_save_long(aTHX_ a)
-#define save_mortalizesv(a)	Perl_save_mortalizesv(aTHX_ a)
 #define save_nogv(a)		Perl_save_nogv(aTHX_ a)
 #ifdef PERL_CORE
-#define save_op()		Perl_save_op(aTHX)
 #endif
 #define save_scalar(a)		Perl_save_scalar(aTHX_ a)
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
@@ -3162,6 +3149,7 @@
 #define save_padsv_and_mortalize(a)	Perl_save_padsv_and_mortalize(aTHX_ a)
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
+#define save_pushptr(a,b)	Perl_save_pushptr(aTHX_ a,b)
 #ifdef PERL_CORE
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)

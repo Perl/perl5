@@ -260,6 +260,12 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
 #define SSPTRt(off,type)        ((type*) ((char*)PL_savestack + off))
 
+#define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
+#define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)
+#define save_freeop(op)		save_pushptr((void *)(op), SAVEt_FREEOP)
+#define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
+#define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
+
 /*
  * Local variables:
  * c-indentation-style: bsd

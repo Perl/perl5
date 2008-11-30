@@ -443,6 +443,7 @@ Perl_save_delete
 Perl_save_destructor
 Perl_save_destructor_x
 Perl_save_freesv
+Perl_save_freeop
 Perl_save_freepv
 Perl_save_generic_svref
 Perl_save_generic_pvref
@@ -461,6 +462,7 @@ Perl_save_list
 Perl_save_long
 Perl_save_mortalizesv
 Perl_save_nogv
+Perl_save_op
 Perl_save_scalar
 Perl_save_pptr
 Perl_save_vptr
@@ -468,6 +470,7 @@ Perl_save_re_context
 Perl_save_padsv_and_mortalize
 Perl_save_sptr
 Perl_save_svref
+Perl_save_pushptr
 Perl_scan_bin
 Perl_scan_hex
 Perl_scan_num
