@@ -505,42 +505,12 @@ Perl_save_aptr(pTHX_ AV **aptr)
 }
 
 void
-Perl_save_freesv(pTHX_ SV *sv)
+Perl_save_pushptr(pTHX_ void *const ptr, const int type)
 {
     dVAR;
     SSCHECK(2);
-    SSPUSHPTR(sv);
-    SSPUSHINT(SAVEt_FREESV);
-}
-
-void
-Perl_save_mortalizesv(pTHX_ SV *sv)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_SAVE_MORTALIZESV;
-
-    SSCHECK(2);
-    SSPUSHPTR(sv);
-    SSPUSHINT(SAVEt_MORTALIZESV);
-}
-
-void
-Perl_save_freeop(pTHX_ OP *o)
-{
-    dVAR;
-    SSCHECK(2);
-    SSPUSHPTR(o);
-    SSPUSHINT(SAVEt_FREEOP);
-}
-
-void
-Perl_save_freepv(pTHX_ char *pv)
-{
-    dVAR;
-    SSCHECK(2);
-    SSPUSHPTR(pv);
-    SSPUSHINT(SAVEt_FREEPV);
+    SSPUSHPTR(ptr);
+    SSPUSHINT(type);
 }
 
 void
@@ -658,15 +628,6 @@ Perl_save_svref(pTHX_ SV **sptr)
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_SVREF);
     return save_scalar_at(sptr);
-}
-
-void
-Perl_save_op(pTHX)
-{
-    dVAR;
-    SSCHECK(2);
-    SSPUSHPTR(PL_op);
-    SSPUSHINT(SAVEt_OP);
 }
 
 I32

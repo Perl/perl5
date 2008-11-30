@@ -1498,6 +1498,44 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, 
     sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
 }
 
+void
+Perl_save_freesv(pTHX_ SV *sv)
+{
+    dVAR;
+    save_freesv(sv);
+}
+
+void
+Perl_save_mortalizesv(pTHX_ SV *sv)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_MORTALIZESV;
+
+    save_mortalizesv(sv);
+}
+
+void
+Perl_save_freeop(pTHX_ OP *o)
+{
+    dVAR;
+    save_freeop(o);
+}
+
+void
+Perl_save_freepv(pTHX_ char *pv)
+{
+    dVAR;
+    save_freepv(pv);
+}
+
+void
+Perl_save_op(pTHX)
+{
+    dVAR;
+    save_op();
+}
+
 #endif /* NO_MATHOMS */
 
 /*

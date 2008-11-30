@@ -872,10 +872,10 @@ Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
-Ap	|void	|save_freesv	|NULLOK SV* sv
+Apmb	|void	|save_freesv	|NULLOK SV* sv
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-p	|void	|save_freeop	|NULLOK OP* o
-Ap	|void	|save_freepv	|NULLOK char* pv
+pmb	|void	|save_freeop	|NULLOK OP* o
+Apmb	|void	|save_freepv	|NULLOK char* pv
 Ap	|void	|save_generic_svref|NN SV** sptr
 Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
@@ -891,10 +891,10 @@ Ap	|void	|save_item	|NN SV* item
 Ap	|void	|save_iv	|NN IV *ivp
 Ap	|void	|save_list	|NN SV** sarg|I32 maxsarg
 Ap	|void	|save_long	|NN long* longp
-Ap	|void	|save_mortalizesv|NN SV* sv
+Apmb	|void	|save_mortalizesv|NN SV* sv
 Ap	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
-p	|void	|save_op
+pmb	|void	|save_op
 Ap	|SV*	|save_scalar	|NN GV* gv
 Ap	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void *ptr
@@ -903,6 +903,7 @@ Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
+Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 : Used in perly.y
 p	|OP*	|sawparens	|NULLOK OP* o
 : Used in perly.y
