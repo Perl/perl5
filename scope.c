@@ -698,6 +698,8 @@ Perl_leave_scope(pTHX_ I32 base)
     register char* str;
     I32 i;
 
+    TAINT_NOT;
+
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
     while (PL_savestack_ix > base) {
