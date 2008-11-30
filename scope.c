@@ -184,6 +184,16 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     return sv;
 }
 
+static void
+S_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
+{
+    dVAR;
+    SSCHECK(3);
+    SSPUSHPTR(ptr1);
+    SSPUSHPTR(ptr2);
+    SSPUSHINT(type);
+}
+
 SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
@@ -195,10 +205,7 @@ Perl_save_scalar(pTHX_ GV *gv)
     PL_localizing = 1;
     SvGETMAGIC(*sptr);
     PL_localizing = 0;
-    SSCHECK(3);
-    SSPUSHPTR(SvREFCNT_inc_simple(gv));
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_SV);
+    save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(*sptr), SAVEt_SV);
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
@@ -211,10 +218,7 @@ Perl_save_generic_svref(pTHX_ SV **sptr)
 
     PERL_ARGS_ASSERT_SAVE_GENERIC_SVREF;
 
-    SSCHECK(3);
-    SSPUSHPTR(sptr);
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_GENERIC_SVREF);
+    save_pushptrptr(sptr, SvREFCNT_inc(*sptr), SAVEt_GENERIC_SVREF);
 }
 
 /* Like save_pptr(), but also Safefree()s the new value if it is different
@@ -227,10 +231,7 @@ Perl_save_generic_pvref(pTHX_ char **str)
 
     PERL_ARGS_ASSERT_SAVE_GENERIC_PVREF;
 
-    SSCHECK(3);
-    SSPUSHPTR(*str);
-    SSPUSHPTR(str);
-    SSPUSHINT(SAVEt_GENERIC_PVREF);
+    save_pushptrptr(*str, str, SAVEt_GENERIC_PVREF);
 }
 
 /* Like save_generic_pvref(), but uses PerlMemShared_free() rather than Safefree().
@@ -243,10 +244,7 @@ Perl_save_shared_pvref(pTHX_ char **str)
 
     PERL_ARGS_ASSERT_SAVE_SHARED_PVREF;
 
-    SSCHECK(3);
-    SSPUSHPTR(str);
-    SSPUSHPTR(*str);
-    SSPUSHINT(SAVEt_SHARED_PVREF);
+    save_pushptrptr(str, *str, SAVEt_SHARED_PVREF);
 }
 
 /* set the SvFLAGS specified by mask to the values in val */
@@ -272,10 +270,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 
     PERL_ARGS_ASSERT_SAVE_GP;
 
-    SSGROW(3);
-    SSPUSHPTR(SvREFCNT_inc(gv));
-    SSPUSHPTR(GvGP(gv));
-    SSPUSHINT(SAVEt_GP);
+    save_pushptrptr(SvREFCNT_inc(gv), GvGP(gv), SAVEt_GP);
 
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
@@ -313,10 +308,7 @@ Perl_save_ary(pTHX_ GV *gv)
 
     if (!AvREAL(oav) && AvREIFY(oav))
 	av_reify(oav);
-    SSCHECK(3);
-    SSPUSHPTR(gv);
-    SSPUSHPTR(oav);
-    SSPUSHINT(SAVEt_AV);
+    save_pushptrptr(gv, oav, SAVEt_AV);
 
     GvAV(gv) = NULL;
     av = GvAVn(gv);
@@ -333,10 +325,7 @@ Perl_save_hash(pTHX_ GV *gv)
 
     PERL_ARGS_ASSERT_SAVE_HASH;
 
-    SSCHECK(3);
-    SSPUSHPTR(gv);
-    SSPUSHPTR(ohv = GvHVn(gv));
-    SSPUSHINT(SAVEt_HV);
+    save_pushptrptr(gv, (ohv = GvHVn(gv)), SAVEt_HV);
 
     GvHV(gv) = NULL;
     hv = GvHVn(gv);
@@ -353,10 +342,9 @@ Perl_save_item(pTHX_ register SV *item)
 
     PERL_ARGS_ASSERT_SAVE_ITEM;
 
-    SSCHECK(3);
-    SSPUSHPTR(item);		/* remember the pointer */
-    SSPUSHPTR(sv);		/* remember the value */
-    SSPUSHINT(SAVEt_ITEM);
+    save_pushptrptr(item, /* remember the pointer */
+		    sv,   /* remember the value */
+		    SAVEt_ITEM);
 }
 
 void
@@ -434,10 +422,7 @@ Perl_save_pptr(pTHX_ char **pptr)
 
     PERL_ARGS_ASSERT_SAVE_PPTR;
 
-    SSCHECK(3);
-    SSPUSHPTR(*pptr);
-    SSPUSHPTR(pptr);
-    SSPUSHINT(SAVEt_PPTR);
+    save_pushptrptr(*pptr, pptr, SAVEt_PPTR);
 }
 
 void
@@ -447,10 +432,7 @@ Perl_save_vptr(pTHX_ void *ptr)
 
     PERL_ARGS_ASSERT_SAVE_VPTR;
 
-    SSCHECK(3);
-    SSPUSHPTR(*(char**)ptr);
-    SSPUSHPTR(ptr);
-    SSPUSHINT(SAVEt_VPTR);
+    save_pushptrptr(*(char**)ptr, ptr, SAVEt_VPTR);
 }
 
 void
@@ -460,10 +442,7 @@ Perl_save_sptr(pTHX_ SV **sptr)
 
     PERL_ARGS_ASSERT_SAVE_SPTR;
 
-    SSCHECK(3);
-    SSPUSHPTR(*sptr);
-    SSPUSHPTR(sptr);
-    SSPUSHINT(SAVEt_SPTR);
+    save_pushptrptr(*sptr, sptr, SAVEt_SPTR);
 }
 
 void
@@ -485,10 +464,7 @@ Perl_save_hptr(pTHX_ HV **hptr)
 
     PERL_ARGS_ASSERT_SAVE_HPTR;
 
-    SSCHECK(3);
-    SSPUSHPTR(*hptr);
-    SSPUSHPTR(hptr);
-    SSPUSHINT(SAVEt_HPTR);
+    save_pushptrptr(*hptr, hptr, SAVEt_HPTR);
 }
 
 void
@@ -498,10 +474,7 @@ Perl_save_aptr(pTHX_ AV **aptr)
 
     PERL_ARGS_ASSERT_SAVE_APTR;
 
-    SSCHECK(3);
-    SSPUSHPTR(*aptr);
-    SSPUSHPTR(aptr);
-    SSPUSHINT(SAVEt_APTR);
+    save_pushptrptr(*aptr, aptr, SAVEt_APTR);
 }
 
 void
@@ -623,10 +596,7 @@ Perl_save_svref(pTHX_ SV **sptr)
     PERL_ARGS_ASSERT_SAVE_SVREF;
 
     SvGETMAGIC(*sptr);
-    SSCHECK(3);
-    SSPUSHPTR(sptr);
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_SVREF);
+    save_pushptrptr(sptr, SvREFCNT_inc(*sptr), SAVEt_SVREF);
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
