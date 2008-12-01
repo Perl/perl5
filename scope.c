@@ -360,8 +360,8 @@ Perl_save_bool(pTHX_ bool *boolp)
     SSPUSHINT(SAVEt_BOOL);
 }
 
-static void
-S_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
+void
+Perl_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
 {
     dVAR;
     SSCHECK(3);

@@ -904,9 +904,8 @@ Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
-#if defined(PERL_IN_SCOPE_C)
-s	|void	|save_pushi32ptr|I32 i|NULLOK void *const ptr|const int type
-#endif
+: Used by SAVECOPARYBASE() in op.c
+p	|void	|save_pushi32ptr|I32 i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c
 p	|void	|save_pushptrptr|NULLOK void *const ptr1 \
 				|NULLOK void *const ptr2|const int type
