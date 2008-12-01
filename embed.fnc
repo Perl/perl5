@@ -910,6 +910,10 @@ p	|void	|save_pushi32ptr|I32 i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c
 p	|void	|save_pushptrptr|NULLOK void *const ptr1 \
 				|NULLOK void *const ptr2|const int type
+#if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
+s	|void	|save_pushptri32ptr|NULLOK void *const ptr1|const I32 i \
+				|NULLOK void *const ptr2|const int type
+#endif
 : Used in perly.y
 p	|OP*	|sawparens	|NULLOK OP* o
 : Used in perly.y
