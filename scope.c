@@ -618,6 +618,8 @@ Perl_leave_scope(pTHX_ I32 base)
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
     while (PL_savestack_ix > base) {
+	TAINT_NOT;
+
 	const int type = SSPOPINT;
 	switch (type) {
 	case SAVEt_ITEM:			/* normal string */
