@@ -546,12 +546,23 @@ Perl_save_hints(pTHX)
     }
     SSCHECK(4);
     if (PL_hints & HINT_LOCALIZE_HH) {
-	SSPUSHPTR(GvHV(PL_hintgv));
+	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints,
+			   PL_compiling.cop_hints_hash, SAVEt_HINTS);
 	GvHV(PL_hintgv) = Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv));
+    } else {
+	save_pushi32ptr(PL_hints, PL_compiling.cop_hints_hash, SAVEt_HINTS);
     }
-    SSPUSHINT(PL_hints);
-    SSPUSHPTR(PL_compiling.cop_hints_hash);
-    SSPUSHINT(SAVEt_HINTS);
+}
+
+static void
+S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
+			const int type)
+{
+    SSCHECK(4);
+    SSPUSHPTR(ptr1);
+    SSPUSHINT(i);
+    SSPUSHPTR(ptr2);
+    SSPUSHINT(type);
 }
 
 void
@@ -563,11 +574,8 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
     PERL_ARGS_ASSERT_SAVE_AELEM;
 
     SvGETMAGIC(*sptr);
-    SSCHECK(4);
-    SSPUSHPTR(SvREFCNT_inc_simple(av));
-    SSPUSHINT(idx);
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_AELEM);
+    save_pushptri32ptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
+		       SAVEt_AELEM);
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
 	SvREFCNT_inc_void(*sptr);
