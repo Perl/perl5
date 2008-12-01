@@ -839,11 +839,6 @@
 #define scope			Perl_scope
 #endif
 #define screaminstr		Perl_screaminstr
-#if !defined(VMS) && defined(PERL_IN_UTIL_C)
-#ifdef PERL_CORE
-#define setenv_getix		S_setenv_getix
-#endif
-#endif
 #define setdefout		Perl_setdefout
 #define share_hek		Perl_share_hek
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
@@ -3195,11 +3190,6 @@
 #define scope(a)		Perl_scope(aTHX_ a)
 #endif
 #define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
-#if !defined(VMS) && defined(PERL_IN_UTIL_C)
-#ifdef PERL_CORE
-#define setenv_getix(a)		S_setenv_getix(aTHX_ a)
-#endif
-#endif
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)

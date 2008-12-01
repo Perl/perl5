@@ -1667,8 +1667,15 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #ifndef PERL_USE_SAFE_PUTENV
     if (!PL_use_safe_putenv) {
     /* most putenv()s leak, so we manipulate environ directly */
-    register I32 i=setenv_getix(nam);          /* where does it go? */
+    register I32 i;
+    register const I32 len = strlen(nam);
     int nlen, vlen;
+
+    /* where does it go? */
+    for (i = 0; environ[i]; i++) {
+        if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
+            break;
+    }
 
     if (environ == PL_origenviron) {   /* need we copy environment? */
        I32 j;
@@ -1772,30 +1779,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 }
 
 #endif /* WIN32 || NETWARE */
-
-#ifndef PERL_MICRO
-static I32
-S_setenv_getix(pTHX_ const char *nam)
-{
-    register I32 i;
-    register const I32 len = strlen(nam);
-
-    PERL_ARGS_ASSERT_SETENV_GETIX;
-    PERL_UNUSED_CONTEXT;
-
-    for (i = 0; environ[i]; i++) {
-	if (
-#ifdef WIN32
-	    strnicmp(environ[i],nam,len) == 0
-#else
-	    strnEQ(environ[i],nam,len)
-#endif
-	    && environ[i][len] == '=')
-	    break;			/* strnEQ must come first to avoid */
-    }					/* potential SEGV's */
-    return i;
-}
-#endif /* !PERL_MICRO */
 
 #endif /* !VMS && !EPOC*/
 
