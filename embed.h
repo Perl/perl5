@@ -156,7 +156,7 @@
 #define deprecate_old		Perl_deprecate_old
 #endif
 #define die			Perl_die
-#if defined(PERL_IN_UTIL_C)
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define vdie			S_vdie
 #endif
@@ -195,7 +195,7 @@
 #ifdef PERL_CORE
 #define do_execfree		Perl_do_execfree
 #endif
-#ifdef PERL_IN_DOIO_C
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define exec_failed		S_exec_failed
 #endif
@@ -249,7 +249,7 @@
 #ifdef PERL_CORE
 #define find_script		Perl_find_script
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define force_list		S_force_list
 #define fold_constants		S_fold_constants
@@ -258,7 +258,7 @@
 #define form			Perl_form
 #define vform			Perl_vform
 #define free_tmps		Perl_free_tmps
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gen_constant_list	S_gen_constant_list
 #endif
@@ -312,7 +312,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define ibcmp_utf8		Perl_ibcmp_utf8
-#if defined(PERL_IN_DOIO_C)
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define ingroup			S_ingroup
 #endif
@@ -403,7 +403,7 @@
 #endif
 #define op_refcnt_lock		Perl_op_refcnt_lock
 #define op_refcnt_unlock	Perl_op_refcnt_unlock
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define linklist		S_linklist
 #define listkids		S_listkids
@@ -640,7 +640,7 @@
 #ifdef PERL_CORE
 #define pad_free		Perl_pad_free
 #endif
-#if defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_reset		S_pad_reset
 #endif
@@ -689,7 +689,7 @@
 #ifdef PERL_CORE
 #define pmruntime		Perl_pmruntime
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pmtrans			S_pmtrans
 #endif
@@ -699,7 +699,7 @@
 #define prepend_elem		Perl_prepend_elem
 #endif
 #define push_scope		Perl_push_scope
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refkids			S_refkids
 #endif
@@ -752,7 +752,7 @@
 #define rsignal_save		Perl_rsignal_save
 #endif
 #define rsignal_state		Perl_rsignal_state
-#if defined(PERL_IN_PP_CTL_C)
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define rxres_free		S_rxres_free
 #define rxres_restore		S_rxres_restore
@@ -822,7 +822,7 @@
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define scalarkids		S_scalarkids
 #define scalarseq		S_scalarseq
@@ -860,7 +860,7 @@
 #define sv_2bool		Perl_sv_2bool
 #define sv_2cv			Perl_sv_2cv
 #define sv_2io			Perl_sv_2io
-#ifdef PERL_IN_SV_C
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define glob_2number		S_glob_2number
 #define glob_2pv		S_glob_2pv
@@ -884,7 +884,7 @@
 #define sv_pvutf8n		Perl_sv_pvutf8n
 #define sv_pvbyten		Perl_sv_pvbyten
 #define sv_true			Perl_sv_true
-#if defined (PERL_IN_SV_C)
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define sv_add_arena		S_sv_add_arena
 #endif
@@ -1686,7 +1686,7 @@
 #ifdef PERL_CORE
 #define deb_stack_all		Perl_deb_stack_all
 #endif
-#ifdef PERL_IN_DEB_C
+#if defined(PERL_IN_DEB_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define deb_stack_n		S_deb_stack_n
 #endif
@@ -2494,7 +2494,7 @@
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
 #define deprecate_old(a)	Perl_deprecate_old(aTHX_ a)
 #endif
-#if defined(PERL_IN_UTIL_C)
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define vdie(a,b)		S_vdie(aTHX_ a,b)
 #endif
@@ -2535,7 +2535,7 @@
 #ifdef PERL_CORE
 #define do_execfree()		Perl_do_execfree(aTHX)
 #endif
-#ifdef PERL_IN_DOIO_C
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define exec_failed(a,b,c)	S_exec_failed(aTHX_ a,b,c)
 #endif
@@ -2589,7 +2589,7 @@
 #ifdef PERL_CORE
 #define find_script(a,b,c,d)	Perl_find_script(aTHX_ a,b,c,d)
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define force_list(a)		S_force_list(aTHX_ a)
 #define fold_constants(a)	S_fold_constants(aTHX_ a)
@@ -2597,7 +2597,7 @@
 #endif
 #define vform(a,b)		Perl_vform(aTHX_ a,b)
 #define free_tmps()		Perl_free_tmps(aTHX)
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #endif
@@ -2663,7 +2663,7 @@
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
 #define ibcmp_utf8(a,b,c,d,e,f,g,h)	Perl_ibcmp_utf8(aTHX_ a,b,c,d,e,f,g,h)
-#if defined(PERL_IN_DOIO_C)
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define ingroup(a,b)		S_ingroup(aTHX_ a,b)
 #endif
@@ -2754,7 +2754,7 @@
 #endif
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define linklist(a)		S_linklist(aTHX_ a)
 #define listkids(a)		S_listkids(aTHX_ a)
@@ -2988,7 +2988,7 @@
 #ifdef PERL_CORE
 #define pad_free(a)		Perl_pad_free(aTHX_ a)
 #endif
-#if defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_reset()		S_pad_reset(aTHX)
 #endif
@@ -3036,7 +3036,7 @@
 #ifdef PERL_CORE
 #define pmruntime(a,b,c)	Perl_pmruntime(aTHX_ a,b,c)
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
 #endif
@@ -3046,7 +3046,7 @@
 #define prepend_elem(a,b,c)	Perl_prepend_elem(aTHX_ a,b,c)
 #endif
 #define push_scope()		Perl_push_scope(aTHX)
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refkids(a,b)		S_refkids(aTHX_ a,b)
 #endif
@@ -3099,7 +3099,7 @@
 #define rsignal_save(a,b,c)	Perl_rsignal_save(aTHX_ a,b,c)
 #endif
 #define rsignal_state(a)	Perl_rsignal_state(aTHX_ a)
-#if defined(PERL_IN_PP_CTL_C)
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define rxres_free(a)		S_rxres_free(aTHX_ a)
 #define rxres_restore(a,b)	S_rxres_restore(aTHX_ a,b)
@@ -3173,7 +3173,7 @@
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
 #endif
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define scalarkids(a)		S_scalarkids(aTHX_ a)
 #define scalarseq(a)		S_scalarseq(aTHX_ a)
@@ -3211,7 +3211,7 @@
 #define sv_2bool(a)		Perl_sv_2bool(aTHX_ a)
 #define sv_2cv(a,b,c,d)		Perl_sv_2cv(aTHX_ a,b,c,d)
 #define sv_2io(a)		Perl_sv_2io(aTHX_ a)
-#ifdef PERL_IN_SV_C
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define glob_2number(a)		S_glob_2number(aTHX_ a)
 #define glob_2pv(a,b)		S_glob_2pv(aTHX_ a,b)
@@ -3235,7 +3235,7 @@
 #define sv_pvutf8n(a,b)		Perl_sv_pvutf8n(aTHX_ a,b)
 #define sv_pvbyten(a,b)		Perl_sv_pvbyten(aTHX_ a,b)
 #define sv_true(a)		Perl_sv_true(aTHX_ a)
-#if defined (PERL_IN_SV_C)
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define sv_add_arena(a,b,c)	S_sv_add_arena(aTHX_ a,b,c)
 #endif
@@ -4047,7 +4047,7 @@
 #ifdef PERL_CORE
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
 #endif
-#ifdef PERL_IN_DEB_C
+#if defined(PERL_IN_DEB_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define deb_stack_n(a,b,c,d,e)	S_deb_stack_n(aTHX_ a,b,c,d,e)
 #endif
