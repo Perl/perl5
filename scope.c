@@ -540,7 +540,6 @@ Perl_save_hints(pTHX)
 	    PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
 	    HINTS_REFCNT_UNLOCK;
     }
-    SSCHECK(4);
     if (PL_hints & HINT_LOCALIZE_HH) {
 	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints,
 			   PL_compiling.cop_hints_hash, SAVEt_HINTS);
