@@ -2913,9 +2913,7 @@ PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr)
 	assert(sptr)
 
 PERL_CALLCONV void	Perl_save_pushptr(pTHX_ void *const ptr, const int type);
-#if defined(PERL_IN_SCOPE_C)
-STATIC void	S_save_pushi32ptr(pTHX_ I32 i, void *const ptr, const int type);
-#endif
+PERL_CALLCONV void	Perl_save_pushi32ptr(pTHX_ I32 i, void *const ptr, const int type);
 PERL_CALLCONV void	Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type);
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);

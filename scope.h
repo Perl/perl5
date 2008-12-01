@@ -183,13 +183,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	PL_curstackinfo->si_stack = (t);		\
     } STMT_END
 
-#define SAVECOPARYBASE(c) \
-    STMT_START {					\
-	SSCHECK(3);					\
-	SSPUSHINT(CopARYBASE_get(c));			\
-	SSPUSHPTR(c);					\
-	SSPUSHINT(SAVEt_COP_ARYBASE);			\
-    } STMT_END
+#define SAVECOPARYBASE(c) save_pushi32ptr(CopARYBASE_get(c), c, SAVEt_COP_ARYBASE);
 
 /* Need to do the cop warnings like this, rather than a "SAVEFREESHAREDPV",
    because realloc() means that the value can actually change. Possibly
