@@ -11179,9 +11179,11 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_DELETE:
 	    hv = (const HV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
+	    i = POPINT(ss,ix);
+	    TOPINT(nss,ix) = i;
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
-	    /* fall through */
+	    break;
 	case SAVEt_STACK_POS:		/* Position on Perl stack */
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
