@@ -811,8 +811,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX_const(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
-		    do_open(gv,(char*)SvPVX_const(sv),SvCUR(sv),PL_inplace!=0,
-			    O_RDONLY,0,NULL);
+		    do_open(gv,(char*)SvPVX_const(sv),SvCUR(sv),TRUE,O_RDONLY,0,NULL);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX_const(sv));
@@ -844,17 +843,15 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
 		}
 
-		sv_setpvn(sv,">",!PL_inplace);
-		sv_catpvn(sv,PL_oldname,oldlen);
+		sv_setpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
+		if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),TRUE,
 #ifdef VMS
-		if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
-			     PL_inplace!=0,O_WRONLY|O_CREAT|O_TRUNC,0,NULL))
+			     O_WRONLY|O_CREAT|O_TRUNC,0,
 #else
-		    if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
-			     PL_inplace!=0,O_WRONLY|O_CREAT|OPEN_EXCL,0666,
-			     NULL))
+			     O_WRONLY|O_CREAT|OPEN_EXCL,0600,
 #endif
+			     NULL))
 		{
 		    if (ckWARN_d(WARN_INPLACE))	
 		        Perl_warner(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: %s",
