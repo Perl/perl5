@@ -11172,15 +11172,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    else
 		TOPPTR(nss,ix) = NULL;
 	    break;
-	case SAVEt_FREEPV:
-	    c = (char*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = pv_dup_inc(c);
-	    break;
 	case SAVEt_DELETE:
 	    hv = (const HV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
+	    /* Fall through */
+	case SAVEt_FREEPV:
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
 	    break;
