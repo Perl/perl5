@@ -157,22 +157,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SAVEOP()	save_op()
 
-#define SAVEHINTS() \
-    STMT_START {					\
-	if (PL_compiling.cop_hints_hash) {		\
-	    HINTS_REFCNT_LOCK;				\
-	    PL_compiling.cop_hints_hash->refcounted_he_refcnt++;	\
-	    HINTS_REFCNT_UNLOCK;			\
-	}						\
-	SSCHECK(4);					\
-	if (PL_hints & HINT_LOCALIZE_HH) {		\
-	    SSPUSHPTR(GvHV(PL_hintgv));			\
-	    GvHV(PL_hintgv) = Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)); \
-	}						\
-	SSPUSHINT(PL_hints);				\
-	SSPUSHPTR(PL_compiling.cop_hints_hash);		\
-	SSPUSHINT(SAVEt_HINTS);				\
-    } STMT_END
+#define SAVEHINTS()	save_hints()
 
 #define SAVECOMPPAD() save_pushptr(MUTABLE_SV(PL_comppad), SAVEt_COMPPAD)
 

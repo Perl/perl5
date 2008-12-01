@@ -2815,6 +2815,7 @@ PERL_CALLCONV HV*	Perl_save_hash(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_SAVE_HASH	\
 	assert(gv)
 
+PERL_CALLCONV void	Perl_save_hints(pTHX);
 /* PERL_CALLCONV void	Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

@@ -900,6 +900,7 @@ Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
 Ap	|void	|save_gp	|NN GV* gv|I32 empty
 Ap	|HV*	|save_hash	|NN GV* gv
+p	|void	|save_hints
 Amp	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Ap	|void	|save_hptr	|NN HV** hptr
