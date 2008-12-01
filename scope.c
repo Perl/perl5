@@ -505,11 +505,7 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 
     PERL_ARGS_ASSERT_SAVE_DELETE;
 
-    SSCHECK(4);
-    SSPUSHPTR(key);
-    SSPUSHINT(klen);
-    SSPUSHPTR(SvREFCNT_inc_simple(hv));
-    SSPUSHINT(SAVEt_DELETE);
+    save_pushptri32ptr(key, klen, SvREFCNT_inc_simple(hv), SAVEt_DELETE);
 }
 
 void
