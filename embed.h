@@ -793,10 +793,10 @@
 #if defined(PERL_IN_SCOPE_C)
 #ifdef PERL_CORE
 #define save_pushi32ptr		S_save_pushi32ptr
-#define save_pushptrptr		S_save_pushptrptr
 #endif
 #endif
 #ifdef PERL_CORE
+#define save_pushptrptr		Perl_save_pushptrptr
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
 #define scalarkids		Perl_scalarkids
@@ -3114,10 +3114,10 @@
 #if defined(PERL_IN_SCOPE_C)
 #ifdef PERL_CORE
 #define save_pushi32ptr(a,b,c)	S_save_pushi32ptr(aTHX_ a,b,c)
-#define save_pushptrptr(a,b,c)	S_save_pushptrptr(aTHX_ a,b,c)
 #endif
 #endif
 #ifdef PERL_CORE
+#define save_pushptrptr(a,b,c)	Perl_save_pushptrptr(aTHX_ a,b,c)
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
 #define scalarkids(a)		Perl_scalarkids(aTHX_ a)

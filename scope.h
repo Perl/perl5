@@ -176,10 +176,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SAVESWITCHSTACK(f,t) \
     STMT_START {					\
-	SSCHECK(3);					\
-	SSPUSHPTR(MUTABLE_SV(f));			\
-	SSPUSHPTR(MUTABLE_SV(t));			\
-	SSPUSHINT(SAVEt_SAVESWITCHSTACK);		\
+	save_pushptrptr(MUTABLE_SV(f), MUTABLE_SV(t), SAVEt_SAVESWITCHSTACK); \
 	SWITCHSTACK((f),(t));				\
 	PL_curstackinfo->si_stack = (t);		\
     } STMT_END

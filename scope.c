@@ -184,8 +184,8 @@ S_save_scalar_at(pTHX_ SV **sptr)
     return sv;
 }
 
-static void
-S_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
+void
+Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
 {
     dVAR;
     SSCHECK(3);
