@@ -11303,8 +11303,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = ptr;
 	    break;
 	case SAVEt_HINTS:
-	    i = POPINT(ss,ix);
-	    TOPINT(nss,ix) = i;
 	    ptr = POPPTR(ss,ix);
 	    if (ptr) {
 		HINTS_REFCNT_LOCK;
@@ -11312,6 +11310,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		HINTS_REFCNT_UNLOCK;
 	    }
 	    TOPPTR(nss,ix) = ptr;
+	    i = POPINT(ss,ix);
+	    TOPINT(nss,ix) = i;
 	    if (i & HINT_LOCALIZE_HH) {
 		hv = (const HV *)POPPTR(ss,ix);
 		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
