@@ -3730,9 +3730,10 @@ PP(pp_entereval)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
-    if ((PERLDB_LINE || PERLDB_SAVESRC)
-	&& was != PL_breakable_sub_gen /* Some subs defined here. */
-	&& ok) {
+    if (ok ? (was != PL_breakable_sub_gen /* Some subs defined here. */
+	      ? (PERLDB_LINE || PERLDB_SAVESRC)
+	      :  PERLDB_SAVESRC_NOSUBS)
+	: PERLDB_SAVESRC_INVALID) {
 	/* Just need to change the string in our writable scratch buffer that
 	   will be used at scope exit to delete this eval's "file" name, to
 	   something safe. The key names are of the form "_<(eval 1)" upwards,
