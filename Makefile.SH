@@ -36,6 +36,7 @@ case "$d_dosuid" in
 esac
 
 linklibperl='$(LIBPERL)'
+linklibperl_nonshr=''
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
 DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
@@ -81,15 +82,32 @@ true)
 		shrpldflags="$shrpldflags -Wl,--image-base,0x57000000"
 		;;
 	aix*)
-		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
-		case "$osvers" in
-		3*)	shrpldflags="$shrpldflags -e _nostart"
+		case "$cc" in
+		gcc*)
+			shrpldflags="-shared -Wl,-H512 -Wl,-T512 -Wl,-bhalt:4 -Wl,-bM:SRE -Wl,-bE:perl.exp"
+			case "$osvers" in
+			3*)	shrpldflags="$shrpldflags -e _nostart"
+				;;
+			*)	shrpldflags="$shrpldflags -Wl,-bnoentry"
+				;;
+			esac
+			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
+			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl_nonshr='-lperl_nonshr'
 			;;
-		*)	shrpldflags="$shrpldflags -bnoentry"
+		*)
+			shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
+			case "$osvers" in
+			3*)	shrpldflags="$shrpldflags -e _nostart"
+				;;
+			*)	shrpldflags="$shrpldflags -b noentry"
+				;;
+			esac
+			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
+			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		esac
-	        shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
-		linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 		;;
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
@@ -239,6 +257,7 @@ DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
+LLIBPERL_NONSHR= $linklibperl_nonshr
 SHRPENV = $shrpenv
 
 # Static targets are ordinarily built without CCCDLFLAGS.  However,
@@ -835,10 +854,24 @@ microperl:
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
+!NO!SUBS!
+
+case "${osname}" in
+aix*)
+$spitshell >>Makefile <<'!NO!SUBS!'
+suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL_NONSHR) $(LLIBPERL) `cat ext.libs` $(libs)
+
+!NO!SUBS!
+;;
+*)
+$spitshell >>Makefile <<'!NO!SUBS!'
 suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
+;;
+esac
 
 fi
 
