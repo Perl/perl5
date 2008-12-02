@@ -93,15 +93,30 @@ true)
 		shrpldflags="$shrpldflags -Wl,--image-base,0x57000000"
 		;;
 	aix*)
-		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
-		case "$osvers" in
-		3*)	shrpldflags="$shrpldflags -e _nostart"
+		case "$cc" in
+		gcc*)
+			shrpldflags="-shared -Wl,-H512 -Wl,-T512 -Wl,-bhalt:4 -Wl,-bM:SRE -Wl,-bE:perl.exp"
+			case "$osvers" in
+			3*)	shrpldflags="$shrpldflags -e _nostart"
+				;;
+			*)	shrpldflags="$shrpldflags -Wl,-bnoentry"
+				;;
+			esac
+			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
+			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 			;;
-		*)	shrpldflags="$shrpldflags -bnoentry"
+		*)
+			shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
+			case "$osvers" in
+			3*)	shrpldflags="$shrpldflags -e _nostart"
+				;;
+			*)	shrpldflags="$shrpldflags -b noentry"
+				;;
+			esac
+			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
+			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 			;;
 		esac
-	        shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
-		linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 		;;
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
