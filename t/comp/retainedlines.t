@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-plan (tests => 55);
+plan (tests => 57);
 
 $^P = 0xA;
 
@@ -52,6 +52,27 @@ for my $sep (' ', "\0") {
     eval $prog or die;
     check_retained_lines($prog, ord $sep);
     $name++;
+}
+
+{
+  # This contains a syntax error
+  my $prog = "sub $name {
+    'This is $name'
+  }
+1 +
+";
+
+  eval $prog and die;
+
+  is (eval "$name()", "This is $name", "Subroutine was compiled, despite error")
+    or diag $@;
+
+  my @after = grep { /eval/ } keys %::;
+
+  is (@after, 0 + keys %seen,
+      "current behaviour is that errors in eval trump subroutine definitions");
+
+  $name++;
 }
 
 foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
