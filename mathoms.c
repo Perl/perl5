@@ -16,7 +16,7 @@
  *     [p.5 of _The Lord of the Rings_: "Prologue"]
  */
 
-#ifndef NO_MATHOMS
+
 
 /* 
  * This file contains mathoms, various binary artifacts from previous
@@ -30,6 +30,12 @@
 #include "EXTERN.h"
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
+
+#ifdef NO_MATHOMS
+/* ..." warning: ISO C forbids an empty source file"
+   So make sure we have something in here by processing the headers anyway.
+ */
+#else
 
 PERL_CALLCONV OP * Perl_ref(pTHX_ OP *o, I32 type);
 PERL_CALLCONV void Perl_sv_unref(pTHX_ SV *sv);
