@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-plan (tests => 57);
+plan (tests => 65);
 
 $^P = 0xA;
 
@@ -67,11 +67,8 @@ for my $sep (' ', "\0") {
   is (eval "$name()", "This is $name", "Subroutine was compiled, despite error")
     or diag $@;
 
-  my @after = grep { /eval/ } keys %::;
-
-  is (@after, 0 + keys %seen,
-      "current behaviour is that errors in eval trump subroutine definitions");
-
+  check_retained_lines($prog,
+		       'eval that defines subroutine but has syntax error');
   $name++;
 }
 

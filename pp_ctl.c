@@ -3739,7 +3739,9 @@ PP(pp_entereval)
     } else {
 	/* We have already left the scope set up earler thanks to the LEAVE
 	   in doeval().  */
-	if (PERLDB_SAVESRC_INVALID) {
+	if (was != PL_breakable_sub_gen /* Some subs defined here. */
+	    ? (PERLDB_LINE || PERLDB_SAVESRC)
+	    :  PERLDB_SAVESRC_INVALID) {
 	    /* Retain the filegv we created.  */
 	} else {
 	    (void)hv_delete(PL_defstash, tmpbuf, len, G_DISCARD);
