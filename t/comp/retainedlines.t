@@ -95,10 +95,7 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
     is (eval $fail, undef, 'Failed string eval fails');
 
     if ($flags & 0x1000) {
-    TODO: {
-	    todo_skip "Can't yet retain lines for evals with syntax errors", 6;
-	    check_retained_lines($fail, sprintf "%#X", $^P);
-	}
+	check_retained_lines($fail, sprintf "%#X", $^P);
     } else {
 	my @after = grep { /eval/ } keys %::;
 

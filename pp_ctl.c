@@ -3048,7 +3048,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    POPEVAL(cx);
 	}
 	lex_end();
-	LEAVE;
+	LEAVE; /* pp_entereval knows about this LEAVE.  */
 
 	msg = SvPVx_nolen_const(ERRSV);
 	if (optype == OP_REQUIRE) {
@@ -3656,9 +3656,7 @@ PP(pp_entereval)
     const U32 was = PL_breakable_sub_gen;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
-    char *safestr;
     STRLEN len;
-    bool ok;
     CV* runcv;
     U32 seq;
     HV *saved_hh = NULL;
@@ -3696,8 +3694,6 @@ PP(pp_entereval)
        (i.e. before run-time proper). To work around the coredump that
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
-    safestr = savepvn(tmpbuf, len);
-    SAVEDELETE(PL_defstash, safestr, len);
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     if (saved_hh)
@@ -3729,29 +3725,27 @@ PP(pp_entereval)
     if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     PUTBACK;
-    ok = doeval(gimme, NULL, runcv, seq);
-    if (ok ? (was != PL_breakable_sub_gen /* Some subs defined here. */
-	      ? (PERLDB_LINE || PERLDB_SAVESRC)
-	      :  PERLDB_SAVESRC_NOSUBS)
-	: 0 /* PERLDB_SAVESRC_INVALID */
-	/* Much that I'd like to think that it was this trivial to add this
-	   feature, it's not, due to
-	       lex_end();
-	       LEAVE;
-	   in S_doeval() for the failure case. So really we want a more
-	   sophisticated way of (optionally) clearing the source code.
-	   Particularly as the current way is buggy, as a syntactically
-	   invalid eval string can still define a subroutine that is retained,
-	   and the user may wish to breakpoint. */) {
-	/* Just need to change the string in our writable scratch buffer that
-	   will be used at scope exit to delete this eval's "file" name, to
-	   something safe. The key names are of the form "_<(eval 1)" upwards,
-	   so the 8th char is the first digit, which will not have a leading
-	   zero. So give it a leading zero, and it can't match anything, but
-	   still sits within the pattern space "reserved" for evals.  */
-	safestr[8] = '0';
+
+    if (doeval(gimme, NULL, runcv, seq)) {
+	if (was != PL_breakable_sub_gen /* Some subs defined here. */
+	    ? (PERLDB_LINE || PERLDB_SAVESRC)
+	    :  PERLDB_SAVESRC_NOSUBS) {
+	    /* Retain the filegv we created.  */
+	} else {
+	    char *const safestr = savepvn(tmpbuf, len);
+	    SAVEDELETE(PL_defstash, safestr, len);
+	}
+	return DOCATCH(PL_eval_start);
+    } else {
+	/* We have already left the scope set up earler thanks to the LEAVE
+	   in doeval().  */
+	if (PERLDB_SAVESRC_INVALID) {
+	    /* Retain the filegv we created.  */
+	} else {
+	    (void)hv_delete(PL_defstash, tmpbuf, len, G_DISCARD);
+	}
+	return PL_op->op_next;
     }
-    return ok ? DOCATCH(PL_eval_start) : PL_op->op_next;
 }
 
 PP(pp_leaveeval)
