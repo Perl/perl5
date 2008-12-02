@@ -5333,7 +5333,7 @@ typedef struct am_table_short AMTS;
 				 PERLDBf_SUBLINE| PERLDBf_SINGLE|	\
 				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON |   \
 				 PERLDBf_SAVESRC)
-					/* No _NONAME, _GOTO, _ASSERTION */
+					/* No _NONAME, _GOTO */
 #define PERLDBf_SUB		0x01	/* Debug sub enter/exit */
 #define PERLDBf_LINE		0x02	/* Keep line # */
 #define PERLDBf_NOOPT		0x04	/* Switch off optimizations */
@@ -5359,7 +5359,6 @@ typedef struct am_table_short AMTS;
 #define PERLDB_GOTO	(PL_perldb && (PL_perldb & PERLDBf_GOTO))
 #define PERLDB_NAMEEVAL	(PL_perldb && (PL_perldb & PERLDBf_NAMEEVAL))
 #define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
-#define PERLDB_ASSERTION (PL_perldb && (PL_perldb & PERLDBf_ASSERTION))
 #define PERLDB_SAVESRC 	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC))
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
