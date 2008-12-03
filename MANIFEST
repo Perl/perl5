@@ -2606,6 +2606,8 @@ lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
 lib/Pod/t/pod-parser.t		podlators test
+lib/Pod/t/pod-spelling.t	podlators test
+lib/Pod/t/pod.t			podlators test
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/termcap.t		podlators test
 lib/Pod/t/text-options.t		podlators test

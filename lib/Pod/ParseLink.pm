@@ -1,6 +1,6 @@
 # Pod::ParseLink -- Parse an L<> formatting code in POD text.
 #
-# Copyright 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 2001, 2008 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -30,11 +30,7 @@ use Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(parselink);
 
-# Don't use the CVS revision as the version, since this module is also in Perl
-# core and too many things could munge CVS magic revision strings.  This
-# number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.06;
-
+$VERSION = 1.07;
 
 ##############################################################################
 # Implementation
@@ -99,7 +95,6 @@ sub parselink {
     }
 }
 
-
 ##############################################################################
 # Module return value and documentation
 ##############################################################################
@@ -112,6 +107,9 @@ __END__
 
 Pod::ParseLink - Parse an LE<lt>E<gt> formatting code in POD text
 
+=for stopwords
+markup Allbery
+
 =head1 SYNOPSIS
 
     use Pod::ParseLink;
@@ -120,11 +118,11 @@ Pod::ParseLink - Parse an LE<lt>E<gt> formatting code in POD text
 =head1 DESCRIPTION
 
 This module only provides a single function, parselink(), which takes the
-text of an LE<lt>E<gt> formatting code and parses it.  It returns the anchor
-text for the link (if any was given), the anchor text possibly inferred from
-the name and section, the name or URL, the section if any, and the type of
-link.  The type will be one of 'url', 'pod', or 'man', indicating a URL, a
-link to a POD page, or a link to a Unix manual page.
+text of an LE<lt>E<gt> formatting code and parses it.  It returns the
+anchor text for the link (if any was given), the anchor text possibly
+inferred from the name and section, the name or URL, the section if any,
+and the type of link.  The type will be one of C<url>, C<pod>, or C<man>,
+indicating a URL, a link to a POD page, or a link to a Unix manual page.
 
 Parsing is implemented per L<perlpodspec>.  For backward compatibility,
 links where there is no section and name contains spaces, or links where the
@@ -146,10 +144,10 @@ If the text of the LE<lt>E<gt> escape is entirely enclosed in double quotes,
 it's interpreted as a link to a section for backwards compatibility.
 
 No attempt is made to resolve formatting codes.  This must be done after
-calling parselink (since EE<lt>E<gt> formatting codes can be used to escape
-characters that would otherwise be significant to the parser and resolving
-them before parsing would result in an incorrect parse of a formatting code
-like:
+calling parselink() (since EE<lt>E<gt> formatting codes can be used to
+escape characters that would otherwise be significant to the parser and
+resolving them before parsing would result in an incorrect parse of a
+formatting code like:
 
     L<verticalE<verbar>barE<sol>slash>
 
@@ -175,7 +173,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2001 by Russ Allbery <rra@stanford.edu>.
+Copyright 2001, 2008 Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

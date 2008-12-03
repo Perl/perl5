@@ -1,7 +1,7 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2002, 2004, 2006
-#     by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008
+#     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -37,10 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-# Don't use the CVS revision as the version, since this module is also in Perl
-# core and too many things could munge CVS magic revision strings.  This
-# number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 3.08;
+$VERSION = 3.09;
 
 ##############################################################################
 # Initialization
@@ -634,6 +631,9 @@ __END__
 
 Pod::Text - Convert POD data to formatted ASCII text
 
+=for stopwords
+alt Allbery Sean Burke's
+
 =head1 SYNOPSIS
 
     use Pod::Text;
@@ -777,7 +777,8 @@ how to use Pod::Simple.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2004, 2006 Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008 Russ Allbery
+<rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

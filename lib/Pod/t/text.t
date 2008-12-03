@@ -57,6 +57,8 @@ while (<DATA>) {
     }
     if ($output eq $expected) {
         print "ok $n\n";
+    } elsif ($n == 4 && $Pod::Simple::VERSION < 3.06) {
+        print "ok $n # skip Pod::Simple S<> parsing bug\n";
     } else {
         print "not ok $n\n";
         print "Expected\n========\n$expected\nOutput\n======\n$output\n";

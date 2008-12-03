@@ -347,7 +347,7 @@ Oboy, is this C++ "fun" yet! (guesswork)
 ###
 .SH "NAME"
 "Stuff" (no guesswork)
-.Sh "\s-1THINGS\s0"
+.SS "\s-1THINGS\s0"
 .IX Subsection "THINGS"
 Oboy, is this \*(C+ \*(L"fun\*(R" yet! (guesswork)
 ###
