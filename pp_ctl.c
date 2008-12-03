@@ -3652,9 +3652,19 @@ PP(pp_entereval)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
-    if ((PERLDB_LINE || PERLDB_SAVESRC)
-	&& was != PL_breakable_sub_gen /* Some subs defined here. */
-	&& ok) {
+    if (ok ? (was != PL_breakable_sub_gen /* Some subs defined here. */
+	      ? (PERLDB_LINE || PERLDB_SAVESRC)
+	      :  PERLDB_SAVESRC_NOSUBS)
+	: 0 /* PERLDB_SAVESRC_INVALID */
+	/* Much that I'd like to think that it was this trivial to add this
+	   feature, it's not, due to
+	       lex_end();
+	       LEAVE;
+	   in S_doeval() for the failure case. So really we want a more
+	   sophisticated way of (optionally) clearing the source code.
+	   Particularly as the current way is buggy, as a syntactically
+	   invalid eval string can still define a subroutine that is retained,
+	   and the user may wish to breakpoint. */) {
 	/* Copy in anything fake and short. */
 	my_strlcpy(safestr, fakestr, fakelen);
     }
