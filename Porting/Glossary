@@ -142,7 +142,7 @@ baserev (baserev.U):
 
 bash (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 bin (bin.U):
 	This variable holds the name of the directory in which the user wants
@@ -246,7 +246,7 @@ cf_time (cf_who.U):
 
 chgrp (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 chmod (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -255,7 +255,7 @@ chmod (Loc.U):
 
 chown (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 clocktype (d_times.U):
 	This variable holds the type returned by times(). It can be long,
@@ -269,7 +269,7 @@ comm (Loc.U):
 
 compress (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 contains (contains.U):
 	This variable holds the command to do a grep with a proper return
@@ -284,7 +284,7 @@ cp (Loc.U):
 
 cpio (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 cpp (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -405,6 +405,11 @@ d_atolf (atolf.U):
 d_atoll (atoll.U):
 	This variable conditionally defines the HAS_ATOLL symbol, which
 	indicates to the C program that the atoll() routine is available.
+
+d_attribute_deprecated (d_attribut.U):
+	This variable conditionally defines HASATTRIBUTE_DEPRECATED, which
+	indicates that GCC can handle the attribute for marking deprecated
+	APIs
 
 d_attribute_format (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_FORMAT, which
@@ -2507,7 +2512,7 @@ egrep (Loc.U):
 
 emacs (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 endgrent_r_proto (d_endgrent_r.U):
 	This variable encodes the prototype of endgrent_r.
@@ -2584,7 +2589,7 @@ fflushNULL (fflushall.U):
 
 find (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 firstmakefile (Unix.U):
 	This variable defines the first file searched by make.  On unix,
@@ -2594,7 +2599,7 @@ firstmakefile (Unix.U):
 
 flex (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 fpossize (fpossize.U):
 	This variable contains the size of a fpostype in bytes.
@@ -3300,7 +3305,7 @@ incpath (usrinc.U):
 
 inews (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 initialinstalllocation (bin.U):
 	When userelocatableinc is true, this variable holds the location
@@ -3514,7 +3519,7 @@ known_extensions (Extensions.U):
 
 ksh (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 ld (dlsrc.U):
 	This variable indicates the program to be used to link
@@ -3596,11 +3601,11 @@ libswanted_uselargefiles (uselfs.U):
 
 line (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 lint (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 lkflags (ccflags.U):
 	This variable contains any additional C partial linker flags desired by
@@ -3650,11 +3655,11 @@ longsize (intsize.U):
 
 lp (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 lpr (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 ls (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3689,11 +3694,11 @@ madlysrc (mad.U):
 
 mail (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 mailx (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 make (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3798,7 +3803,7 @@ multiarch (multiarch.U):
 
 mv (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 myarchname (archname.U):
 	This variable holds the architecture name computed by Configure in
@@ -3998,7 +4003,7 @@ path_sep (Unix.U):
 
 perl (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously
@@ -4097,11 +4102,11 @@ plibpth (libpth.U):
 
 pmake (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 pr (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 prefix (prefix.U):
 	This variable holds the name of the directory below which the
@@ -4203,7 +4208,7 @@ rm_try (Unix.U):
 
 rmail (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 run (Cross.U):
 	This variable contains the command used by Configure
@@ -4255,7 +4260,7 @@ selecttype (selecttype.U):
 
 sendmail (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 setgrent_r_proto (d_setgrent_r.U):
 	This variable encodes the prototype of setgrent_r.
@@ -4319,7 +4324,7 @@ sh (sh.U):
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 sharpbang (spitshell.U):
 	This variable contains the string #! if this system supports that
@@ -4533,7 +4538,7 @@ sizetype (sizetype.U):
 
 sleep (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 sLOCALTIME_max (time_size.U):
 	This variable defines the maximum value of the time_t offset that
@@ -4545,7 +4550,7 @@ sLOCALTIME_min (time_size.U):
 
 smail (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 so (so.U):
 	This variable holds the extension used to identify shared libraries
@@ -4724,7 +4729,7 @@ strings (i_string.U):
 
 submit (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 subversion (patchlevel.U):
 	The subversion level of this package.
@@ -4741,11 +4746,11 @@ sysman (sysman.U):
 
 tail (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 tar (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 targetarch (Cross.U):
 	If cross-compiling, this variable contains the target architecture.
@@ -4753,11 +4758,11 @@ targetarch (Cross.U):
 
 tbl (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 tee (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 test (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -4802,7 +4807,7 @@ trnl (trnl.U):
 
 troff (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 ttyname_r_proto (d_ttyname_r.U):
 	This variable encodes the prototype of ttyname_r.
@@ -5017,7 +5022,7 @@ usrinc (usrinc.U):
 
 uuname (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 uvoformat (perlxvf.U):
 	This variable contains the format string used for printing
@@ -5189,7 +5194,7 @@ versiononly (versiononly.U):
 
 vi (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 voidflags (voidflags.U):
 	This variable contains the eventual value of the VOIDFLAGS symbol,
@@ -5211,7 +5216,7 @@ yaccflags (yacc.U):
 
 zcat (Loc.U):
 	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	The value is the empty string and is not useful.
 
 zip (Loc.U):
 	This variable is used internally by Configure to determine the

@@ -3153,6 +3153,9 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#ifdef HASATTRIBUTE_DEPRECATED
+#  define __attribute__deprecated__         __attribute__((deprecated))
+#endif
 #ifdef HASATTRIBUTE_FORMAT
 #  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
 #endif
@@ -3176,6 +3179,9 @@ typedef pthread_key_t	perl_key;
 #endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
+#ifndef __attribute__deprecated__
+#  define __attribute__deprecated__
+#endif
 #ifndef __attribute__format__
 #  define __attribute__format__(x,y,z)
 #endif
