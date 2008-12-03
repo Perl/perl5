@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = 3.09;
+$VERSION = 3.10;
 
 ##############################################################################
 # Initialization
@@ -84,6 +84,13 @@ sub new {
     my %opts = @_;
     my @opts = map { ("opt_$_", $opts{$_}) } keys %opts;
     %$self = (%$self, @opts);
+
+    # Send errors to stderr if requested.
+    if ($$self{opt_stderr}) {
+        $self->no_errata_section (1);
+        $self->complain_stderr (1);
+        delete $$self{opt_stderr};
+    }
 
     # Initialize various things from our parameters.
     $$self{opt_alt}      = 0  unless defined $$self{opt_alt};
@@ -238,7 +245,8 @@ sub reformat {
     return $self->wrap ($_);
 }
 
-# Output text to the output device.
+# Output text to the output device.  Replace non-breaking spaces with spaces
+# and soft hyphens with nothing.
 sub output {
     my ($self, $text) = @_;
     $text =~ tr/\240\255/ /d;
@@ -632,7 +640,7 @@ __END__
 Pod::Text - Convert POD data to formatted ASCII text
 
 =for stopwords
-alt Allbery Sean Burke's
+alt stderr Allbery Sean Burke's
 
 =head1 SYNOPSIS
 
@@ -711,6 +719,11 @@ If set to a true value, Pod::Text will assume that each sentence ends in two
 spaces, and will try to preserve that spacing.  If set to false, all
 consecutive whitespace in non-verbatim paragraphs is compressed into a
 single space.  Defaults to true.
+
+=item stderr
+
+Send error messages about invalid POD to standard error instead of
+appending a POD ERRORS section to the generated output.
 
 =item width
 
