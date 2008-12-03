@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Fri Nov 28 08:39:51 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Wed Dec  3 15:26:54 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -361,6 +361,7 @@ d_aintl=''
 d_alarm=''
 asctime_r_proto=''
 d_asctime_r=''
+d_attribute_deprecated=''
 d_attribute_format=''
 d_attribute_malloc=''
 d_attribute_nonnull=''
@@ -10497,6 +10498,34 @@ fi
 *) val="$d_attribute_unused" ;;
 esac
 set d_attribute_unused
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute deprecated
+case "$d_attribute_deprecated" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((deprecated)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+int I_am_deprecated(void) __attribute__((deprecated));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((deprecated))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((deprecated))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_deprecated" ;;
+esac
+set d_attribute_deprecated
 eval $setvar
 $rm -f attrib*
 
@@ -22136,6 +22165,7 @@ d_asctime64='$d_asctime64'
 d_asctime_r='$d_asctime_r'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
+d_attribute_deprecated='$d_attribute_deprecated'
 d_attribute_format='$d_attribute_format'
 d_attribute_malloc='$d_attribute_malloc'
 d_attribute_nonnull='$d_attribute_nonnull'
