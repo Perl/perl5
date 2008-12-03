@@ -2611,6 +2611,7 @@ lib/Pod/t/pod-spelling.t	podlators test
 lib/Pod/t/pod.t			podlators test
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/termcap.t		podlators test
+lib/Pod/t/text-encoding.t		podlators test
 lib/Pod/t/text-options.t		podlators test
 lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/text.t		podlators test

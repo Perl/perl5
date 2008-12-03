@@ -36,7 +36,7 @@ use POSIX qw(strftime);
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.20';
+$VERSION = '2.21';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -734,6 +734,19 @@ sub start_document {
         DEBUG and print "Document is contentless\n";
         $$self{CONTENTLESS} = 1;
         return;
+    }
+
+    # If we were given the utf8 option, set an output encoding on our file
+    # handle.  Wrap in an eval in case we're using a version of Perl too old
+    # to understand this.
+    #
+    # This is evil because it changes the global state of a file handle that
+    # we may not own.  However, we can't just blindly encode all output, since
+    # there may be a pre-applied output encoding (such as from PERL_UNICODE)
+    # and then we would double-encode.  This seems to be the least bad
+    # approach.
+    if ($$self{utf8}) {
+        eval { binmode ($$self{output_fh}, ':encoding(UTF-8)') };
     }
 
     # Determine information for the preamble and then output it.
@@ -1608,6 +1621,12 @@ be warned that *roff source with literal UTF-8 characters is not supported
 by many implementations and may even result in segfaults and other bad
 behavior.
 
+Be aware that, when using this option, the input encoding of your POD
+source must be properly declared unless it is US-ASCII or Latin-1.  POD
+input without an C<=encoding> command will be assumed to be in Latin-1,
+and if it's actually in UTF-8, the output will be double-encoded.  See
+L<perlpod(1)> for more information on the C<=encoding> command.
+
 =back
 
 The standard Pod::Simple method parse_file() takes one argument naming the
@@ -1643,10 +1662,14 @@ invalid.  A quote specification must be one, two, or four characters long.
 
 =head1 BUGS
 
+Encoding handling assumes that PerlIO is available and does not work
+properly if it isn't.  The C<utf8> option is therefore not supported
+unless Perl is built with PerlIO support.
+
 There is currently no way to turn off the guesswork that tries to format
 unmarked text appropriately, and sometimes it isn't wanted (particularly
 when using POD to document something other than Perl).  Most of the work
-towards fixing this has now been done, however, and all that's still needed
+toward fixing this has now been done, however, and all that's still needed
 is a user interface.
 
 The NAME section should be recognized specially and index entries emitted
@@ -1667,6 +1690,12 @@ perhaps on the fly as the characters are used.
 Pod::Man is excessively slow.
 
 =head1 CAVEATS
+
+If Pod::Man is given the C<utf8> option, the encoding of its output file
+handle will be forced to UTF-8 if possible, overriding any existing
+encoding.  This will be done even if the file handle is not created by
+Pod::Man and was passed in from outside.  This maintains consistency
+regardless of PERL_UNICODE and other settings.
 
 The handling of hyphens and em dashes is somewhat fragile, and one may get
 the wrong one under some circumstances.  This should only matter for

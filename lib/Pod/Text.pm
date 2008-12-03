@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = 3.11;
+$VERSION = '3.12';
 
 ##############################################################################
 # Initialization
@@ -246,10 +246,19 @@ sub reformat {
 }
 
 # Output text to the output device.  Replace non-breaking spaces with spaces
-# and soft hyphens with nothing.
+# and soft hyphens with nothing, and then try to fix the output encoding if
+# necessary to match the input encoding unless UTF-8 output is forced.  This
+# preserves the traditional pass-through behavior of Pod::Text.
 sub output {
     my ($self, $text) = @_;
     $text =~ tr/\240\255/ /d;
+    unless ($$self{opt_utf8} || $$self{CHECKED_ENCODING}) {
+        my $encoding = $$self{encoding} || '';
+        if ($encoding) {
+            eval { binmode ($$self{output_fh}, ":encoding($encoding)") };
+        }
+        $$self{CHECKED_ENCODING} = 1;
+    }
     print { $$self{output_fh} } $text;
 }
 
@@ -271,6 +280,22 @@ sub start_document {
     $$self{INDENTS} = [];       # Stack of indentations.
     $$self{MARGIN}  = $margin;  # Default left margin.
     $$self{PENDING} = [[]];     # Pending output.
+
+    # We have to redo encoding handling for each document.
+    delete $$self{CHECKED_ENCODING};
+
+    # If we were given the utf8 option, set an output encoding on our file
+    # handle.  Wrap in an eval in case we're using a version of Perl too old
+    # to understand this.
+    #
+    # This is evil because it changes the global state of a file handle that
+    # we may not own.  However, we can't just blindly encode all output, since
+    # there may be a pre-applied output encoding (such as from PERL_UNICODE)
+    # and then we would double-encode.  This seems to be the least bad
+    # approach.
+    if ($$self{opt_utf8}) {
+        eval { binmode ($$self{output_fh}, ':encoding(UTF-8)') };
+    }
 
     return '';
 }
@@ -640,7 +665,7 @@ __END__
 Pod::Text - Convert POD data to formatted ASCII text
 
 =for stopwords
-alt stderr Allbery Sean Burke's Christiansen
+alt stderr Allbery Sean Burke's Christiansen UTF-8 pre-Unicode utf8
 
 =head1 SYNOPSIS
 
@@ -725,6 +750,19 @@ single space.  Defaults to true.
 Send error messages about invalid POD to standard error instead of
 appending a POD ERRORS section to the generated output.
 
+=item utf8
+
+By default, Pod::Text uses the same output encoding as the input encoding
+of the POD source (provided that Perl was built with PerlIO; otherwise, it
+doesn't encode its output).  If this option is given, the output encoding
+is forced to UTF-8.
+
+Be aware that, when using this option, the input encoding of your POD
+source must be properly declared unless it is US-ASCII or Latin-1.  POD
+input without an C<=encoding> command will be assumed to be in Latin-1,
+and if it's actually in UTF-8, the output will be double-encoded.  See
+L<perlpod(1)> for more information on the C<=encoding> command.
+
 =item width
 
 The column at which to wrap text on the right-hand side.  Defaults to 76.
@@ -759,6 +797,29 @@ invalid.  A quote specification must be one, two, or four characters long.
 
 =back
 
+=head1 BUGS
+
+Encoding handling assumes that PerlIO is available and does not work
+properly if it isn't.  The C<utf8> option is therefore not supported
+unless Perl is built with PerlIO support.
+
+=head1 CAVEATS
+
+If Pod::Text is given the C<utf8> option, the encoding of its output file
+handle will be forced to UTF-8 if possible, overriding any existing
+encoding.  This will be done even if the file handle is not created by
+Pod::Text and was passed in from outside.  This maintains consistency
+regardless of PERL_UNICODE and other settings.
+
+If the C<utf8> option is not given, the encoding of its output file handle
+will be forced to the detected encoding of the input POD, which preserves
+whatever the input text is.  This ensures backward compatibility with
+earlier, pre-Unicode versions of this module, without large numbers of
+Perl warnings.
+
+This is not ideal, but it seems to be the best compromise.  If it doesn't
+work for you, please let me know the details of how it broke.
+
 =head1 NOTES
 
 This is a replacement for an earlier Pod::Text module written by Tom
@@ -774,7 +835,7 @@ subclass of it does.  Look for L<Pod::Text::Termcap>.
 
 =head1 SEE ALSO
 
-L<Pod::Simple>, L<Pod::Text::Termcap>, L<pod2text(1)>
+L<Pod::Simple>, L<Pod::Text::Termcap>, L<perlpod(1)>, L<pod2text(1)>
 
 The current version of this module is always available from its web site at
 L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the

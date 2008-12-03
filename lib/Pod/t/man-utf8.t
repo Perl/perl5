@@ -39,6 +39,7 @@ print "ok 1\n";
 
 my $n = 2;
 eval { binmode (\*DATA, ':encoding(utf-8)') };
+eval { binmode (\*STDOUT, ':encoding(utf-8)') };
 while (<DATA>) {
     my %options;
     next until $_ eq "###\n";
@@ -57,7 +58,6 @@ while (<DATA>) {
     close TMP;
     my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
-    eval { binmode (\*OUT, ':encoding(utf-8)') };
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     my $accents = 0;
