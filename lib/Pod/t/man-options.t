@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-# text.t -- Additional specialized tests for Pod::Text.
+# man-options.t -- Additional tests for Pod::Man options.
 #
-# Copyright 2002, 2004, 2006, 2007 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -16,33 +16,39 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..4\n";
+    print "1..2\n";
 }
 
 END {
     print "not ok 1\n" unless $loaded;
 }
 
-use Pod::Text;
-use Pod::Simple;
+use Pod::Man;
 
 $loaded = 1;
 print "ok 1\n";
 
-my $parser = Pod::Text->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
+    my %options;
     next until $_ eq "###\n";
+    while (<DATA>) {
+        last if $_ eq "###\n";
+        my ($option, $value) = split;
+        $options{$option} = $value;
+    }
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
     }
     close TMP;
+    my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
+    while (<TMP>) { last if /^\.nh/ }
     my $output;
     {
         local $/;
@@ -57,8 +63,6 @@ while (<DATA>) {
     }
     if ($output eq $expected) {
         print "ok $n\n";
-    } elsif ($n == 4 && $Pod::Simple::VERSION < 3.07) {
-        print "ok $n # skip Pod::Simple S<> parsing bug\n";
     } else {
         print "not ok $n\n";
         print "Expected\n========\n$expected\nOutput\n======\n$output\n";
@@ -67,37 +71,33 @@ while (<DATA>) {
 }
 
 # Below the marker are bits of POD and corresponding expected text output.
-# This is used to test specific features or problems with Pod::Text.  The
+# This is used to test specific features or problems with Pod::Man.  The
 # input and output are separated by lines containing only ###.
 
 __DATA__
 
 ###
-=head1 PERIODS
+utf8 1
+###
+=head1 BEYONCÉ
 
-This C<.> should be quoted.
-###
-PERIODS
-    This "." should be quoted.
+Beyoncé!  Beyoncé!  Beyoncé!!
 
-###
+    Beyoncé!  Beyoncé!
+      Beyoncé!  Beyoncé!
+        Beyoncé!  Beyoncé!
 
+Older versions did not convert Beyoncé in verbatim.
 ###
-=head1 CE<lt>E<gt> WITH SPACES
-
-What does C<<  this.  >> end up looking like?
+.SH "BEYONCÉ"
+.IX Header "BEYONCÉ"
+Beyoncé!  Beyoncé!  Beyoncé!!
+.PP
+.Vb 3
+\&    Beyoncé!  Beyoncé!
+\&      Beyoncé!  Beyoncé!
+\&        Beyoncé!  Beyoncé!
+.Ve
+.PP
+Older versions did not convert Beyoncé in verbatim.
 ###
-C<> WITH SPACES
-    What does "this." end up looking like?
-
-###
-
-###
-=head1 Test of SE<lt>E<gt>
-
-This is some S<  > whitespace.
-###
-Test of S<>
-    This is some    whitespace.
-###
-==

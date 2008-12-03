@@ -1,5 +1,4 @@
 # Pod::ParseLink -- Parse an L<> formatting code in POD text.
-# $Id: ParseLink.pm,v 1.6 2002/07/15 05:46:00 eagle Exp $
 #
 # Copyright 2001 by Russ Allbery <rra@stanford.edu>
 #
