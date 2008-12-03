@@ -16,13 +16,17 @@ skip_all "Test::Pod 1.00 required for testing POD" if $@;
 eval 'use Pod::Spell';
 skip_all "Pod::Spell required to test POD spelling" if $@;
 my @spell;
-for my $dir (split ':', $ENV{PATH}) {
-    if (-x "$dir/ispell") {
-        @spell = ("$dir/ispell", '-d', 'american', '-l', '-p', '/dev/null');
+my %options = (aspell => [ qw(-d en_US --home-dir=./ list) ],
+               ispell => [ qw(-d american -l -p /dev/null) ]);
+SEARCH: for my $program (qw/aspell ispell/) {
+    for my $dir (split ':', $ENV{PATH}) {
+        if (-x "$dir/$program") {
+            @spell = ("$dir/$program", @{ $options{$program} });
+        }
+        last SEARCH if @spell;
     }
-    last if @spell;
 }
-skip_all "ispell required to test POD spelling" unless @spell;
+skip_all "aspell or ispell required to test POD spelling" unless @spell;
 
 # Run the test, one for each POD file.
 $| = 1;
@@ -35,7 +39,8 @@ for my $pod (@pod) {
     if (not defined $child) {
         die "Cannot fork: $!\n";
     } elsif ($child == 0) {
-        my $pid = open (SPELL, '|-', @spell) or die "Cannot run @spell: $!\n";
+        my $pid = open (SPELL, '|-', @spell)
+            or die "Cannot run @spell: $!\n";
         open (POD, '<', $pod) or die "Cannot open $pod: $!\n";
         my $parser = Pod::Spell->new;
         $parser->parse_from_filehandle (\*POD, \*SPELL);
@@ -46,7 +51,7 @@ for my $pod (@pod) {
         my @words = <CHILD>;
         close CHILD;
         if ($? != 0) {
-            print "ok $n # skip - @spell failed\n";
+            print "ok $n # skip - @spell failed: $?\n";
         } elsif (@words) {
             for (@words) {
                 s/^\s+//;

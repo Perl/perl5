@@ -113,7 +113,7 @@ __END__
 pod2text - Convert POD data to formatted ASCII text
 
 =for stopwords
--aclost --alt --stderr Allbery
+-aclost --alt --stderr Allbery --overstrike overstrike --termcap
 
 =head1 SYNOPSIS
 

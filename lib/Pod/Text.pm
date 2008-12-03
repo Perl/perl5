@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = 3.10;
+$VERSION = 3.11;
 
 ##############################################################################
 # Initialization
@@ -640,7 +640,7 @@ __END__
 Pod::Text - Convert POD data to formatted ASCII text
 
 =for stopwords
-alt stderr Allbery Sean Burke's
+alt stderr Allbery Sean Burke's Christiansen
 
 =head1 SYNOPSIS
 
