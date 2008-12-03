@@ -648,6 +648,8 @@ Perl_leave_scope(pTHX_ I32 base)
     void* ptr;
     register char* str;
     I32 i;
+    /* Localise the effects of the TAINT_NOT inside the loop.  */
+    const bool was = PL_tainted;
 
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
@@ -1065,6 +1067,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}
     }
+
+    PL_tainted = was;
 }
 
 void

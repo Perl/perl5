@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 271;
+plan tests => 298;
 
 $| = 1;
 
@@ -1265,6 +1265,42 @@ foreach my $ord (78, 163, 256) {
     $b = co('foo');
     ok(tainted($a),  "tainted complement");
     ok(!tainted($b), "untainted complement");
+}
+
+{
+    my @data = qw(bonk zam zlonk qunckkk);
+    # Clearly some sort of usenet bang-path
+    my $string = $TAINT . join "!", @data;
+
+    ok(tainted($string), "tainted data");
+
+    my @got = split /!|,/, $string;
+
+    # each @got would be useful here, but I want the test for earlier perls
+    for my $i (0 .. $#data) {
+	ok(tainted($got[$i]), "tainted result $i");
+	is($got[$i], $data[$i], "correct content $i");
+    }
+
+    ok(tainted($string), "still tainted data");
+
+    my @got = split /[!,]/, $string;
+
+    # each @got would be useful here, but I want the test for earlier perls
+    for my $i (0 .. $#data) {
+	ok(tainted($got[$i]), "tainted result $i");
+	is($got[$i], $data[$i], "correct content $i");
+    }
+
+    ok(tainted($string), "still tainted data");
+
+    my @got = split /!/, $string;
+
+    # each @got would be useful here, but I want the test for earlier perls
+    for my $i (0 .. $#data) {
+	ok(tainted($got[$i]), "tainted result $i");
+	is($got[$i], $data[$i], "correct content $i");
+    }
 }
 
 # This may bomb out with the alarm signal so keep it last
