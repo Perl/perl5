@@ -27,6 +27,11 @@ Currently all versions of IBM's "xlc", "xlc_r", "cc", "cc_r" or
 "vac" ANSI/C compiler will work for building perl if that compiler
 works on your system.
 
+If you plan to link perl to any module that requires thread-support,
+like DBD::Oracle, it is better to use the _r version of the compiler.
+This will not build a threaded perl, but a thread-enabled perl. See
+also L<Threaded perl> later on.
+
 As of writing (2008-11) only the IBM XL C for AIX or XL C/C++ for AIX
 compiler is supported by IBM on AIX 5L/6.1.
 
@@ -101,7 +106,7 @@ can set:
 With the default setting the size is limited to 128MB.
 The -1 removes this limit.
 
-=head2 Recommended Options AIX 5.2/5.3 and 6.1 (threaded/32-bit)
+=head2 Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/32-bit)
 
 With the following options you get a threaded Perl version which
 passes all make tests in threaded 32-bit mode, which is the default
@@ -133,7 +138,7 @@ all make tests in 32-bit mode.
 The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
 
-=head2 Recommended Options AIX 5.2/5.3 and 6.1 (threaded/64-bit)
+=head2 Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/64-bit)
 
 With the following options you get a threaded Perl version which
 passes all make tests in 64-bit mode.
@@ -421,6 +426,6 @@ Rainer Tammer <tammer@tammer.net>
 
 =head1 DATE
 
-Version 0.0.7: 18 Nov 2008
+Version 0.0.8: 01 Dec 2008
 
 =cut
