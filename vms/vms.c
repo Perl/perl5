@@ -9345,10 +9345,10 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
         char def[NAM$C_MAXRSS+1], *st;
 
         if (getcwd(def, sizeof def,0) == NULL) {
-	    Safefree(unixified);
-	    Safefree(unixwild);
-	    Safefree(lcres);
-	    Safefree(tpl);
+	    PerlMem_free(unixified);
+	    PerlMem_free(unixwild);
+	    PerlMem_free(lcres);
+	    PerlMem_free(tpl);
 	    return 0;
 	}
 	if (!decc_efs_case_preserve) {
