@@ -2732,6 +2732,9 @@ typedef struct clone_params CLONE_PARAMS;
 
 #ifndef PERL_MICRO
 #if defined __GNUC__ && !defined(__INTEL_COMPILER)
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+#    define HASATTRIBUTE_DEPRECATED
+#  endif
 #  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
 #    define HASATTRIBUTE_FORMAT
 #    if defined __MINGW32__
