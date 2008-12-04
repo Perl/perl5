@@ -166,6 +166,19 @@ sub rmtree {
     for ($arg->{cwd}) { /\A(.*)\Z/; $_ = $1 } # untaint
 
     for my $p (@$paths) {
+        # need to fixup case and map \ to / on Windows
+        my $ortho_root = $^O eq 'MSWin32' ? _slash_lc($p)          : $p;
+        my $ortho_cwd  = $^O eq 'MSWin32' ? _slash_lc($arg->{cwd}) : $arg->{cwd};
+        my $ortho_root_length = length($ortho_root);
+        $ortho_root_length-- if $^O eq 'VMS'; # don't compare '.' with ']'
+        if ($ortho_root_length
+            && (substr($ortho_root, 0, $ortho_root_length) 
+             eq substr($ortho_cwd, 0, $ortho_root_length))) {
+            local $! = 0;
+            _error($arg, "cannot remove path when cwd is $arg->{cwd}", $p);
+            next;
+        }
+
         if ($Is_MacOS) {
             $p  = ":$p" unless $p =~ /:/;
             $p .= ":"   unless $p =~ /:\z/;
@@ -732,6 +745,15 @@ after the call.
 C<remove_tree>, after having deleted everything in a directory, attempted
 to restore its permissions to the original state but failed. The
 directory may wind up being left behind.
+
+=item cannot remove [dir] when cwd is [dir]
+
+The current working directory of the program is F</some/path/to/here>
+and you are attempting to remove an ancestor, such as F</some/path>.
+The directory tree is left untouched.
+
+The solution is to C<chdir> out of the child directory to a place
+outside the directory tree to be removed.
 
 =item cannot chdir to [parent-dir] from [child-dir]: [errmsg], aborting. (FATAL)
 
