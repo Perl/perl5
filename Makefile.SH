@@ -47,6 +47,7 @@ case "$d_dosuid" in
 esac
 
 linklibperl='$(LIBPERL)'
+linklibperl_nonshr=''
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
 DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
@@ -104,6 +105,7 @@ true)
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
 			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		*)
 			shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
@@ -115,6 +117,7 @@ true)
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
 			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		esac
 		;;
@@ -266,6 +269,7 @@ DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
+LLIBPERL_NONSHR= $linklibperl_nonshr
 SHRPENV = $shrpenv
 
 # Static targets are ordinarily built without CCCDLFLAGS.  However,
@@ -900,10 +904,24 @@ microperl:
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
+!NO!SUBS!
+
+case "${osname}" in
+aix*)
+$spitshell >>Makefile <<'!NO!SUBS!'
+suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL_NONSHR) $(LLIBPERL) `cat ext.libs` $(libs)
+
+!NO!SUBS!
+;;
+*)
+$spitshell >>Makefile <<'!NO!SUBS!'
 suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
+;;
+esac
 
 fi
 
