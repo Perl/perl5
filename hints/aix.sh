@@ -238,37 +238,25 @@ case "$usethreads" in
 
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	    *gcc*) ccflags="-D_THREAD_SAFE $ccflags" ;;
-
-	    cc_r) ;;
-	    '') cc=cc_r ;;
-
+	    *gcc*) 
+	      ccflags="-D_THREAD_SAFE $ccflags" 
+	      ;;
+	    cc_r) 
+	      ;;
+	    xlc_r) 
+	      # for -qlonglong
+	      ccflags="$ccflags -qlanglvl=extended"
+	      ;;
+	    # we do not need the C++ compiler
+	    xlC_r) 
+	      # for -qlonglong
+	      ccflags="$ccflags -qlanglvl=extended"
+	      cc=xlc_r 
+	      ;;
+	    '') 
+	      cc=cc_r 
+	      ;;
 	    *)
-
-
-	    # No | alternation in aix sed. :-(
-	    newcc=`echo $cc | sed -e 's/cc$/cc_r/' -e 's/xl[cC]$/cc_r/' -e 's/xl[cC]_r$/cc_r/'`
-	    case "$newcc" in
-		$cc) # No change
-		;;
-
-		*cc_r)
-		echo >&4 "Switching cc to cc_r because of POSIX threads."
-		# xlc_r has been known to produce buggy code in AIX 4.3.2.
-		# (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
-		# --jhi@iki.fi
-		cc="$newcc"
-		;;
-
-		*)
-		cat >&4 <<EOM
-*** For pthreads you should use the AIX C compiler cc_r.
-*** (now your compiler was set to '$cc')
-*** Cannot continue, aborting.
-EOM
-		exit 1
-		;;
-	    esac
 	esac
 
 	# Insert pthreads to libswanted, before any libc or libC.
@@ -279,6 +267,21 @@ EOM
 	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
 	shift
 	lddlflags="$*"
+	;;
+    *)
+	case "$cc" in
+	    xlc) 
+	      # for -qlonglong
+	      ccflags="$ccflags -qlanglvl=extended"
+	      ;;
+	    # we do not need the C++ compiler
+	    xlC) 
+	      # for -qlonglong
+	      ccflags="$ccflags -qlanglvl=extended"
+	      cc=xlc 
+	      ;;
+	    *)
+	esac
 	;;
 esac
 EOCBU
