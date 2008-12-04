@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 114;
+use Test::More tests => 108;
 use Config;
 
 BEGIN {
@@ -137,43 +137,6 @@ sub count {
     chdir updir();
     rmtree 'solo';
 }
-
-SKIP: {
-    # tests for rmtree() of ancestor directory
-    my $nr_tests = 6;
-    my $cwd = getcwd() or skip "failed to getcwd: $!", $nr_tests;
-    my $dir  = catdir($cwd, 'remove');
-    my $dir2 = catdir($cwd, 'remove', 'this', 'dir');
-
-    skip "failed to mkpath '$dir2': $!", $nr_tests
-        unless mkpath($dir2, {verbose => 0});
-    skip "failed to chdir dir '$dir2': $!", $nr_tests
-        unless chdir($dir2);
-
-    rmtree($dir, {error => \$error});
-    my $nr_err = @$error;
-    is($nr_err, 1, "ancestor error");
-
-    if ($nr_err) {
-        my ($file, $message) = each %{$error->[0]};
-        is($file, $dir, "ancestor named");
-        my $ortho_dir = $^O eq 'MSWin32' ? File::Path::_slash_lc($dir2) : $dir2;
-        $^O eq 'MSWin32' and $message
-            =~ s/\A(cannot remove path when cwd is )(.*)\Z/$1 . File::Path::_slash_lc($2)/e;
-        is($message, "cannot remove path when cwd is $ortho_dir", "ancestor reason");
-        ok(-d $dir2, "child not removed");
-        ok(-d $dir, "ancestor not removed");
-    }
-    else {
-        fail( "ancestor 1");
-        fail( "ancestor 2");
-        fail( "ancestor 3");
-        fail( "ancestor 4");
-    }
-    chdir $cwd;
-    rmtree($dir);
-    ok(!(-d $dir), "ancestor now removed");
-};
 
 my $count = rmtree({error => \$error});
 is( $count, 0, 'rmtree of nothing, count of zero' );
