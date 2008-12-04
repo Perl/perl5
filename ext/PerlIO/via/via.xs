@@ -89,8 +89,12 @@ PerlIOVia_method(pTHX_ PerlIO * f, char *method, CV ** save, int flags,
 	    if (!s->fh) {
 		GV *gv = newGVgen(HvNAME_get(s->stash));
 		GvIOp(gv) = newIO();
-		s->fh = newRV_noinc((SV *) gv);
+		s->fh = newRV((SV *) gv);
 		s->io = GvIOp(gv);
+		if (gv) {
+		    /* shamelessly stolen from IO::File's new_tmpfile() */
+		    hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
+		}
 	    }
 	    IoIFP(s->io) = PerlIONext(f);
 	    IoOFP(s->io) = PerlIONext(f);

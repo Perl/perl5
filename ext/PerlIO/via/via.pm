@@ -1,5 +1,5 @@
 package PerlIO::via;
-our $VERSION = '0.05';
+our $VERSION = '0.07';
 use XSLoader ();
 XSLoader::load 'PerlIO::via';
 1;
@@ -150,7 +150,7 @@ in future.
 
 =item $obj->TELL($fh)
 
-Returns file postion.
+Returns file position.
 Optional.  Default to be determined.
 
 =item $obj->UNREAD($buffer,$fh)
@@ -228,7 +228,7 @@ Given the following module, PerlIO::via::Hex :
 
     1;
 
-the following code opens up an output handle that will convert any
+The following code opens up an output handle that will convert any
 output to hexadecimal dump of the output bytes: for example "A" will
 be converted to "41" (on ASCII-based machines, on EBCDIC platforms
 the "A" will become "c1")
