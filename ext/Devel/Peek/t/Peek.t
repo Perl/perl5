@@ -646,8 +646,8 @@ do_test(26,
     FLAGS = \\(\\)
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
-    PV = 0					# $] >= 5.011
-    COMP_STASH = 0x0
+(?:    PV = 0
+)?    COMP_STASH = 0x0
     START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0					# $] < 5.009
