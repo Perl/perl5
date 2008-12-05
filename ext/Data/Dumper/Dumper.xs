@@ -195,7 +195,7 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
 #if PERL_VERSION < 10
                 sprintf(r, "\\x{%"UVxf"}", k);
                 r += strlen(r);
-                #my_sprintf is not supported by ppport.h
+                /* my_sprintf is not supported by ppport.h */
 #else
                 r = r + my_sprintf(r, "\\x{%"UVxf"}", k);
 #endif
