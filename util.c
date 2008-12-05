@@ -2875,8 +2875,8 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 	return my_syspclose(ptr);
     }
 #endif
-    if ((close_failed = (PerlIO_close(ptr) == EOF)))
-	SAVE_ERRNO;
+    close_failed = (PerlIO_close(ptr) == EOF);
+    SAVE_ERRNO;
 #ifdef UTS
     if(PerlProc_kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
