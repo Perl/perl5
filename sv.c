@@ -12243,6 +12243,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_PRTF:
     case OP_PRINT:
     case OP_SAY:
+	match = 1; /* print etc can return undef on defined args */
 	/* skip filehandle as it can't produce 'undef' warning  */
 	o = cUNOPx(obase)->op_first;
 	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)
@@ -12252,8 +12253,81 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
     case OP_ENTEREVAL: /* could be eval $undef or $x='$undef'; eval $x */
     case OP_RV2SV:
-    case OP_CUSTOM:
-	match = 1; /* XS or custom code could trigger random warnings */
+    case OP_CUSTOM: /* XS or custom code could trigger random warnings */
+
+	/* the following ops are capable of returning PL_sv_undef even for
+	 * defined arg(s) */
+
+    case OP_BACKTICK:
+    case OP_PIPE_OP:
+    case OP_FILENO:
+    case OP_BINMODE:
+    case OP_TIED:
+    case OP_GETC:
+    case OP_SYSREAD:
+    case OP_SEND:
+    case OP_IOCTL:
+    case OP_SOCKET:
+    case OP_SOCKPAIR:
+    case OP_BIND:
+    case OP_CONNECT:
+    case OP_LISTEN:
+    case OP_ACCEPT:
+    case OP_SHUTDOWN:
+    case OP_SSOCKOPT:
+    case OP_GETPEERNAME:
+    case OP_FTRREAD:
+    case OP_FTRWRITE:
+    case OP_FTREXEC:
+    case OP_FTROWNED:
+    case OP_FTEREAD:
+    case OP_FTEWRITE:
+    case OP_FTEEXEC:
+    case OP_FTEOWNED:
+    case OP_FTIS:
+    case OP_FTZERO:
+    case OP_FTSIZE:
+    case OP_FTFILE:
+    case OP_FTDIR:
+    case OP_FTLINK:
+    case OP_FTPIPE:
+    case OP_FTSOCK:
+    case OP_FTBLK:
+    case OP_FTCHR:
+    case OP_FTTTY:
+    case OP_FTSUID:
+    case OP_FTSGID:
+    case OP_FTSVTX:
+    case OP_FTTEXT:
+    case OP_FTBINARY:
+    case OP_FTMTIME:
+    case OP_FTATIME:
+    case OP_FTCTIME:
+    case OP_READLINK:
+    case OP_OPEN_DIR:
+    case OP_READDIR:
+    case OP_TELLDIR:
+    case OP_SEEKDIR:
+    case OP_REWINDDIR:
+    case OP_CLOSEDIR:
+    case OP_GMTIME:
+    case OP_ALARM:
+    case OP_SEMGET:
+    case OP_GETLOGIN:
+    case OP_UNDEF:
+    case OP_SUBSTR:
+    /* case OP_AEACH: not in 5.10.x */
+    case OP_EACH:
+    case OP_SORT:
+    case OP_CALLER:
+    case OP_DOFILE:
+    case OP_PROTOTYPE:
+    case OP_NCMP:
+    case OP_SMARTMATCH:
+    case OP_UNPACK:
+    case OP_SYSOPEN:
+    case OP_SYSSEEK:
+	match = 1;
 	goto do_op;
 
     case OP_ENTERSUB:
@@ -12264,6 +12338,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	  don't try to determine the value under those circumstances.
 	  Need a better fix at dome point. DAPM 11/2007 */
 	break;
+
 
     case OP_POS:
 	/* def-ness of rval pos() is independent of the def-ness of its arg */
