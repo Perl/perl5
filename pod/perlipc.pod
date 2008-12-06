@@ -536,7 +536,7 @@ output doesn't wind up on the user's terminal).
 				or die "Can't write to /dev/null: $!";
 	defined(my $pid = fork)	or die "Can't fork: $!";
 	exit if $pid;
-	setsid			or die "Can't start a new session: $!";
+	die "Can't start a new session: $!" if setsid == -1;
 	open STDERR, '>&STDOUT'	or die "Can't dup stdout: $!";
     }
 
