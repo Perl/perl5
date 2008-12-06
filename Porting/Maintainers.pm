@@ -166,7 +166,7 @@ sub show_results {
 		    my @files = get_module_files($m);
 		    printf "%-15s @files\n", $m;
 		} else {
-		    printf "%-15s $Modules{$m}{MAINTAINER}\n", $m;
+		    printf "%-15s %-12s %s\n", $m, $Modules{$m}{MAINTAINER}, $Modules{$m}{UPSTREAM}||'unknown';
 		}
 	    }
 	}

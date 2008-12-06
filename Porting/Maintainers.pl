@@ -63,6 +63,7 @@ package Maintainers;
 	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
+	'rurban'	=> 'Reini Urban <rurban@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
 	'salva'		=> 'Salvador Fandiño García <salva@cpan.org>',
 	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
@@ -83,6 +84,14 @@ package Maintainers;
 # names to be recursed down.  The CPAN can be either 1 (get the
 # latest one from CPAN) or 0 (there is no valid CPAN release).
 
+# UPSTREAM indicates where patches should go. undef implies
+# that this hasn't been discussed for the module at hand.
+# "blead" indicates that the copy of the module in the blead
+# sources is to be considered canonical, "cpan" means that the
+# module on CPAN is to be patched first. "first-come" means
+# that blead can be patched freely if it is in sync with the
+# latest release on CPAN.
+
 %Modules = (
 
 	'Archive::Extract' =>
@@ -90,6 +99,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Archive::Tar' =>
@@ -97,6 +107,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'AutoLoader' =>
@@ -104,7 +115,8 @@ package Maintainers;
 		'MAINTAINER'	=> 'smueller',
 		'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
 		'CPAN'		=> 1,
-	},
+		'UPSTREAM'	=> "cpan",
+		},
 
 	'Attribute::Handlers' =>
 		{
@@ -112,6 +124,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Attribute/Handlers.pm
 				     lib/Attribute/Handlers],
 		'CPAN'		=> 1,
+                'UPSTREAM'      => "blead",
 		},
 
 	'B::Concise' =>
@@ -119,6 +132,15 @@ package Maintainers;
 		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
+		},
+
+	'B::Debug' =>
+		{
+		'MAINTAINER'	=> 'rurban',
+		'FILES'		=> q[ext/B/B/Debug.pm ext/B/t/debug.t],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'B::Deparse' =>
@@ -126,6 +148,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'B::Lint' =>
@@ -134,6 +157,7 @@ package Maintainers;
 		'FILES'		=> q[ext/B/B/Lint.pm ext/B/t/lint.t
 				     ext/B/t/pluglib/B/Lint/Plugin/Test.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'base' =>
@@ -141,6 +165,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'bignum' =>
@@ -148,6 +173,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[lib/big{int,num,rat}.pm lib/bignum],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'constant' =>
@@ -155,6 +181,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'saper',
 		'FILES'		=> q[lib/constant.{pm,t}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Compress::Zlib' =>
@@ -162,6 +189,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/Compress/Zlib t/lib/ZlibTestUtils.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'CGI' =>
@@ -169,6 +197,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'lstein',
 		'FILES'		=> q[lib/CGI.pm lib/CGI],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Class::ISA' =>
@@ -176,6 +205,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sburke',
 		'FILES'		=> q[lib/Class/ISA.pm lib/Class/ISA],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'CPAN' =>
@@ -183,6 +213,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'andk',
 		'FILES'		=> q[lib/CPAN.pm lib/CPAN],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Cwd' =>
@@ -190,6 +221,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[ext/Cwd lib/Cwd.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Data::Dumper' =>
@@ -197,6 +229,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ilyam', # Not gsar.
 		'FILES'		=> q[ext/Data/Dumper],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'DB::File' =>
@@ -204,6 +237,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/DB_File],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Devel::PPPort' =>
@@ -211,6 +245,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mhx',
 		'FILES'		=> q[ext/Devel/PPPort],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Digest' =>
@@ -218,6 +253,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[lib/Digest.pm lib/Digest],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Digest::MD5' =>
@@ -225,6 +261,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/Digest/MD5],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
         'Digest::SHA' =>
@@ -232,6 +269,7 @@ package Maintainers;
                 'MAINTAINER'    => 'mshelor',
                 'FILES'         => q[ext/Digest/SHA],
                 'CPAN'          => 1,
+                'UPSTREAM'	=> undef,
                 },
 
 	'Encode' =>
@@ -239,6 +277,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'dankogai',
 		'FILES'		=> q[ext/Encode],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'encoding::warnings' =>
@@ -246,6 +285,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'audreyt',
 		'FILES'		=> q[lib/encoding/warnings.pm lib/encoding/warnings],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Errno' =>
@@ -253,6 +293,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'p5p', # Not gbarr.
 		'FILES'		=> q[ext/Errno],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Exporter' =>
@@ -260,6 +301,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ferreira',
 		'FILES'		=> q[lib/Exporter.pm lib/Exporter.t lib/Exporter/Heavy.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'ExtUtils::CBuilder' =>
@@ -267,6 +309,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/ExtUtils/CBuilder.pm lib/ExtUtils/CBuilder],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'ExtUtils::Command' =>
@@ -275,6 +318,7 @@ package Maintainers;
 		'FILES'		=> q[lib/ExtUtils/Command.pm
 				     lib/ExtUtils/t/{cp,eu_command}.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'ExtUtils::Constant' =>
@@ -283,16 +327,17 @@ package Maintainers;
 		'FILES'		=> q[lib/ExtUtils/Constant.pm lib/ExtUtils/Constant
 				     lib/ExtUtils/t/Constant.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
         'ExtUtils::Install' =>
-
 		{
 		'MAINTAINER' => 'yves',
 		# MakeMaker has a basic.t too, and we use that.
 		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm
 			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
 		'CPAN' => 1,
+		'UPSTREAM' => undef,
 		},
 
 	'ExtUtils::MakeMaker' =>
@@ -303,6 +348,7 @@ package Maintainers;
 			lib/ExtUtils/t/{[0-9FLV-Zabdf-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
 			t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'ExtUtils::Manifest' =>
@@ -310,6 +356,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rkobes',
 		'FILES'		=> q[lib/ExtUtils/{Manifest.pm,MANIFEST.SKIP} lib/ExtUtils/t/Manifest.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'ExtUtils::ParseXS' =>
@@ -317,6 +364,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/ExtUtils/ParseXS.pm lib/ExtUtils/ParseXS],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'faq' =>
@@ -324,6 +372,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'perlfaq',
 		'FILES'		=> q[pod/perlfaq*],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'File::Fetch' =>
@@ -331,6 +380,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'File::Path' =>
@@ -338,6 +388,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'dland',
 		'FILES'		=> q[lib/File/Path.pm lib/File/Path.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'File::Spec' =>
@@ -345,6 +396,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'File::Temp' =>
@@ -352,6 +404,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tjenness',
 		'FILES'		=> q[lib/File/Temp.pm lib/File/Temp],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Filter::Simple' =>
@@ -359,6 +412,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'smueller',
 		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple],
 		'CPAN'		=> 1,
+                'UPSTREAM'      => "blead",
 		},
 
 	'Filter::Util::Call' =>
@@ -367,6 +421,7 @@ package Maintainers;
 		'FILES'		=> q[ext/Filter/Util/Call ext/Filter/t/call.t
 				     t/lib/filter-util.pl],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Getopt::Long' =>
@@ -374,6 +429,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jv',
 		'FILES'		=> q[lib/Getopt/Long.pm lib/Getopt/Long],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'I18N::LangTags' =>
@@ -381,6 +437,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sburke',
 		'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'if' =>
@@ -388,6 +445,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ilyaz',
 		'FILES'		=> q[lib/if.{pm,t}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'IO' =>
@@ -395,6 +453,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/IO],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'IO::Zlib' =>
@@ -402,6 +461,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tomhughes',
 		'FILES'		=> q[lib/IO/Zlib.pm lib/IO/Zlib],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'IPC::Cmd' =>
@@ -409,6 +469,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'lib' =>
@@ -417,6 +478,7 @@ package Maintainers;
 		'FILES'		=>
 			q[lib/lib_pm.PL lib/lib.t],
 		'CPAN'		=> 1,
+                'UPSTREAM'      => "blead",
 		},
 
 	'libnet' =>
@@ -425,6 +487,7 @@ package Maintainers;
 		'FILES'		=>
 			q[lib/Net/{Cmd,Config,Domain,FTP,Netrc,NNTP,POP3,SMTP,Time}.pm lib/Net/ChangeLog lib/Net/FTP lib/Net/*.eg lib/Net/libnetFAQ.pod lib/Net/README lib/Net/t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Scalar-List-Utils' =>
@@ -432,6 +495,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/List/Util],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Locale::Codes' =>
@@ -439,6 +503,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'neilb',
 		'FILES'		=> q[lib/Locale/{Codes,Constants,Country,Currency,Language,Script}*],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Locale::Maketext' =>
@@ -446,6 +511,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ferreira',
 		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext.pod lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/{Guts,GutsLoader}.pm lib/Locale/Maketext/README lib/Locale/Maketext/TPJ13.pod lib/Locale/Maketext/t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Locale::Maketext::Simple' =>
@@ -453,6 +519,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'audreyt',
 		'FILES'		=> q[lib/Locale/Maketext/Simple.pm lib/Locale/Maketext/Simple],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Math::BigFloat' =>
@@ -460,6 +527,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[lib/Math/BigFloat.pm lib/Math/BigFloat],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Math::BigInt' =>
@@ -468,6 +536,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt
 				     t/lib/Math],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Math::BigInt::FastCalc' =>
@@ -475,6 +544,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[ext/Math/BigInt/FastCalc],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Math::BigRat' =>
@@ -482,6 +552,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[lib/Math/BigRat.pm lib/Math/BigRat],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
         'Math::Complex' =>
@@ -489,6 +560,7 @@ package Maintainers;
                 'MAINTAINER'    => 'zefram',
                 'FILES'         => q[lib/Math/Complex.pm lib/Math/Trig.pm],
                 'CPAN'          => 1,
+                'UPSTREAM'      => undef,
                 },
 
 	'Memoize' =>
@@ -496,6 +568,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mjd',
 		'FILES'		=> q[lib/Memoize.pm lib/Memoize],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'MIME::Base64' =>
@@ -503,6 +576,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/MIME/Base64],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Module::CoreList' =>
@@ -510,6 +584,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Module::Load' =>
@@ -517,6 +592,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Module/Load/t lib/Module/Load.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Module::Load::Conditional' =>
@@ -525,6 +601,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Module/Load/Conditional
 				     lib/Module/Load/Conditional.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Module::Loaded' =>
@@ -532,6 +609,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	# NB. tests are located in t/Module_Pluggable to avoid directory
@@ -541,6 +619,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'simonw',
 		'FILES'		=> q[ext/Module/Pluggable t/Module_Pluggable],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Net::Ping' =>
@@ -548,6 +627,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'smpeters',
 		'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'NEXT' =>
@@ -555,6 +635,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Object::Accessor' =>
@@ -562,6 +643,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Object/Accessor.pm lib/Object/Accessor],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Package::Constants' =>
@@ -569,6 +651,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Package/Constants lib/Package/Constants.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Params::Check' =>
@@ -576,6 +659,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlebcdic' =>
@@ -583,6 +667,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'pvhp',
 		'FILES'		=> q[pod/perlebcdic.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'PerlIO' =>
@@ -590,6 +675,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'PerlIO::via::QuotedPrint' =>
@@ -598,6 +684,7 @@ package Maintainers;
 		'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
 				     lib/PerlIO/via/t/QuotedPrint.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlre' =>
@@ -606,6 +693,7 @@ package Maintainers;
 		'FILES'		=> q[pod/perlrecharclass.pod
 				     pod/perlrebackslash.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 
@@ -614,6 +702,7 @@ package Maintainers;
 		MAINTAINER	=> 'avar',
 		FILES		=> 'pod/perlreapi.pod',
 		CPAN		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlreftut' =>
@@ -621,6 +710,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mjd',
 		'FILES'		=> q[pod/perlreftut.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlpacktut' =>
@@ -628,6 +718,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'laun',
 		'FILES'		=> q[pod/perlpacktut.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlpodspec' =>
@@ -635,6 +726,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sburke',
 		'FILES'		=> q[pod/perlpodspec.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'perlthrtut' =>
@@ -642,6 +734,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'elizabeth',
 		'FILES'		=> q[pod/perlthrtut.pod],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Pod::Escapes' =>
@@ -649,12 +742,14 @@ package Maintainers;
                 'MAINTAINER'    => 'sburke',
                 'FILES'         => q[lib/Pod/Escapes.pm lib/Pod/Escapes],
                 'CPAN'          => 1,
+                'UPSTREAM'      => undef,
                 },
 
         'Pod::Parser' => {
 		'MAINTAINER'	=> 'marekr',
 		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
         'Pod::Simple' =>
@@ -662,6 +757,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'arandal',
 		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Pod::LaTeX' =>
@@ -669,6 +765,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tjenness',
 		'FILES'		=> q[lib/Pod/LaTeX.pm lib/Pod/t/pod2latex.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'podlators' =>
@@ -676,6 +773,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{man,parselink,text*}.t}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Pod::Perldoc' =>
@@ -683,6 +781,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'osfameron',
 		'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Pod::Plainer' =>
@@ -690,6 +789,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rmbarker',
 		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Safe' =>
@@ -697,6 +797,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[ext/Safe ext/Opcode/Safe.pm],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'SelfLoader' =>
@@ -704,6 +805,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'smueller',
 		'FILES'		=> q[lib/SelfLoader.pm lib/SelfLoader],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> "blead",
 		},
 
 	'Shell' =>
@@ -711,6 +813,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ferreira',
 		'FILES'		=> q[lib/Shell.pm lib/Shell.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Storable' =>
@@ -718,6 +821,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'ams',
 		'FILES'		=> q[ext/Storable],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Switch' =>
@@ -725,6 +829,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Switch.pm lib/Switch],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Sys::Syslog' =>
@@ -732,6 +837,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'saper',
 		'FILES'		=> q[ext/Sys/Syslog],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'TabsWrap' =>
@@ -740,6 +846,7 @@ package Maintainers;
 		'FILES'		=>
 			q[lib/Text/{Tabs,Wrap}.pm lib/Text/TabsWrap],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Text::Balanced' =>
@@ -747,6 +854,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'dmanura',
 		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Text::ParseWords' =>
@@ -754,6 +862,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'chorny',
 		'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Text::Soundex' =>
@@ -761,6 +870,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'markm',
 		'FILES'		=> q[ext/Text/Soundex],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Term::ANSIColor' =>
@@ -768,6 +878,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Term::UI' =>
@@ -775,6 +886,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Term/UI.pm lib/Term/UI],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Test' =>
@@ -782,6 +894,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sburke',
 		'FILES'		=> q[lib/Test.pm lib/Test/t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Test::Harness' =>
@@ -790,6 +903,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Test/Harness.pm lib/Test/Harness
 				     t/lib/sample-tests],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Test::Simple' =>
@@ -800,6 +914,7 @@ package Maintainers;
 				     lib/Test/More.pm lib/Test/Tutorial.pod
 				     t/lib/Test/Simple],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Term::Cap' =>
@@ -807,6 +922,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jstowe',
 		'FILES'		=> q[lib/Term/Cap.{pm,t}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Thread::Queue' =>
@@ -814,6 +930,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[lib/Thread/Queue.pm lib/Thread/Queue],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Thread::Semaphore' =>
@@ -821,6 +938,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[lib/Thread/Semaphore.pm lib/Thread/Semaphore],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'threads' =>
@@ -829,6 +947,7 @@ package Maintainers;
 		'FILES'		=> q[ext/threads/hints ext/threads/t
 				     ext/threads/threads.{pm,xs}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'threads::shared' =>
@@ -836,6 +955,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[ext/threads/shared],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Tie::File' =>
@@ -843,6 +963,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mjd',
 		'FILES'		=> q[lib/Tie/File.pm lib/Tie/File],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Tie::RefHash' =>
@@ -850,6 +971,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'nuffin',
 		'FILES'		=> q[lib/Tie/RefHash.pm lib/Tie/RefHash],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Time::HiRes' =>
@@ -857,6 +979,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'zefram',
 		'FILES'		=> q[ext/Time/HiRes],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Time::Local' =>
@@ -864,6 +987,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'drolsky',
 		'FILES'		=> q[lib/Time/Local.{pm,t}],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
         'Time::Piece' =>
@@ -871,6 +995,7 @@ package Maintainers;
                 'MAINTAINER'    => 'msergeant',
                 'FILES'         => q[ext/Time/Piece],
                 'CPAN'          => 1,
+                'UPSTREAM'      => undef,
                 },
 
 	'Unicode::Collate' =>
@@ -879,6 +1004,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Unicode/Collate.pm
 				     lib/Unicode/Collate],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Unicode::Normalize' =>
@@ -886,6 +1012,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sadahiro',
 		'FILES'		=> q[ext/Unicode/Normalize],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'version' =>
@@ -893,6 +1020,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jpeacock',
 		'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'vms' =>
@@ -900,6 +1028,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'craig',
 		'FILES'		=> q[vms configure.com README.vms],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'warnings' =>
@@ -908,6 +1037,7 @@ package Maintainers;
 		'FILES'		=> q[warnings.pl lib/warnings.{pm,t}
 				     lib/warnings t/lib/warnings],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'win32' =>
@@ -915,6 +1045,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[win32 t/win32 README.win32 ext/Win32CORE],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Win32' =>
@@ -922,6 +1053,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[ext/Win32],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Win32API::File' =>
@@ -929,6 +1061,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'tyemq',
 		'FILES'		=> q[ext/Win32API/File],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'XSLoader' =>
@@ -936,6 +1069,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'saper',
 		'FILES'		=> q[ext/DynaLoader/t/XSLoader.t ext/DynaLoader/XSLoader_pm.PL],
 		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	's2p' =>
@@ -943,6 +1077,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'laun',
 		'FILES'		=> q[x2p/s2p.PL],
 		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
 		},
 	);
 
