@@ -6651,8 +6651,8 @@ t/lib/proxy_constant_subs.t, t/op/attrhand.t, t/op/dbm.t,
 t/op/inccode-tie.t, t/op/incfilter.t, t/op/kill0.t, t/op/qrstack.t,
 t/op/qr.t, t/op/regexp_qr_embed.t, t/op/regexp_qr.t, t/op/rxcode.t,
 t/op/studytied.t, t/op/substT.t, t/op/symbolcache.t, t/op/upgrade.t,
-t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t, t/uni/chr.t, t/uni/greek.t,
-t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
+t/mro/package_aliases.t, t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t,
+t/uni/chr.t, t/uni/greek.t, t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
 
 =item Known Problems
 
@@ -6836,8 +6836,8 @@ t/lib/proxy_constant_subs.t, t/op/attrhand.t, t/op/dbm.t,
 t/op/inccode-tie.t, t/op/incfilter.t, t/op/kill0.t, t/op/qrstack.t,
 t/op/qr.t, t/op/regexp_qr_embed.t, t/op/regexp_qr.t, t/op/rxcode.t,
 t/op/studytied.t, t/op/substT.t, t/op/symbolcache.t, t/op/upgrade.t,
-t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t, t/uni/chr.t, t/uni/greek.t,
-t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
+t/mro/package_aliases.t, t/pod/twice.t, t/run/cloexec.t, t/uni/cache.t,
+t/uni/chr.t, t/uni/greek.t, t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
 
 =item Known Problems
 
@@ -9159,6 +9159,44 @@ a), b), c), d), a), b), c), d)
 
 =item Compiling Perl 5 on AIX
 
+=item Supported Compilers
+
+=item Perl 5.8.9 was successfully compiled and tested on:
+
+    AIX Level		      | Compiler Level		| w th | w/o th
+    --------------------------+-------------------------+------+-------
+    5.1 TL9 32 bit	      | XL C/C++ V7		| OK   | OK
+    5.1 TL9 32 bit	      | gcc 3.2.2		| OK   | OK
+    5.1 TL9 64 bit	      | XL C/C++ V7		| OK   | OK
+    5.2 TL10 32 bit	      | XL C/C++ V8		| OK   | OK
+    5.2 TL10 64 bit	      | XL C/C++ V8		| OK   | OK
+    5.3 TL7 32 bit	      | XL C/C++ V9 + IZ35785	| OK   | OK
+    5.3 TL7 32 bit	      | gcc 4.2.4		| OK   | OK
+    5.3 TL7 64 bit	      | XL C/C++ V9 + IZ35785	| OK   | OK
+    6.1 TL1 32 bit	      | XL C/C++ V10		| OK   | OK
+    6.1 TL1 64 bit + IZ39077  | XL C/C++ V10		| OK   | OK
+
+    w th   = with thread
+    w/o th = without thread
+
+=item Building Dynamic Extensions on AIX
+
+=item Using Large Files with Perl
+
+=item Threaded Perl
+
+=item 64-bit Perl
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/32-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (32-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/64-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1(64-bit)
+
+=item Compiling Perl 5 on older AIX versions up to 4.3.3
+
 =item OS level
 
 =item Building Dynamic Extensions on AIX
@@ -9179,7 +9217,7 @@ a), b), c), d), a), b), c), d)
 
 =back
 
-=item AUTHOR
+=item AUTHORS
 
 =item DATE
 
@@ -24435,6 +24473,16 @@ scalars
 TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 
 =item MORE INFORMATION
+
+=back
+
+=head2 Tie::StdHandle - base class definitions for tied handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =back
 
