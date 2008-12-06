@@ -100,22 +100,24 @@ Should yield no problems.
 
 =head2 Threaded Perl
 
-Should yield no problems with AIX 5.2 / 5.3 and 6.1.
+Should yield no problems with AIX 5.1 / 5.2 / 5.3 and 6.1.
 
-IBM uses the AIX system Perl (V5.8.2 as of writing) for some AIX
-system scripts. If you switches the links in /usr/bin from the
+IBM uses the AIX system Perl (V5.6.0 on AIX 5.1 and V5.8.2 on
+AIX 5.2 / 5.3 and 6.1) for some AIX
+system scripts. If you switch the links in /usr/bin from the
 AIX system Perl (/usr/opt/perl5) to the newly build Perl then you
 get the same features as with the IBM AIX system Perl if the
 threaded options are used.
+
+The threaded perl build works also on AIX 5.1 but the IBM Perl
+build (Perl v5.6.0) is not threaded on AIX 5.1.
 
 =head2 64-bit Perl
 
 If your AIX system is installed with 64-bit support, you can expect 64-bit
 configurations to work. If you want to use 64-bit Perl on AIX 6.1
 you need a APAR for a libc.a bug which affects (n)dbm_XXX functions.
-The APAR number for this problem is currently not yet available. If
-the fileset bos.rte.libc is at level 6.1.1.2 or lower then the problem
-is no fixed on your system.
+The APAR number for this problem is IZ39077.
 
 If you need more memory (larger data segment) for your Perl programs you
 can set:
