@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 114;
+use Test::More tests => 120;
 use Config;
 
 BEGIN {
@@ -205,7 +205,8 @@ $count = rmtree($dir, 0);
 is($count, 1, "removed directory unsafe mode");
 
 $count = rmtree($dir2, 0, 1);
-is($count, 1, "removed directory safe mode");
+my $removed = $Is_VMS ? 0 : 1;
+is($count, $removed, "removed directory safe mode");
 
 # mkdir foo ./E/../Y
 # Y should exist
@@ -545,6 +546,27 @@ SKIP: {
     }
 }
 
-rmtree($tmp_base, {result => \$list} );
-is(ref($list), 'ARRAY', "received a final list of results");
-ok( !(-d $tmp_base), "test base directory gone" );
+SKIP: {
+    my $nr_tests = 6;
+    my $cwd = getcwd() or skip "failed to getcwd: $!", $nr_tests;
+    rmtree($tmp_base, {result => \$list} );
+    is(ref($list), 'ARRAY', "received a final list of results");
+    ok( !(-d $tmp_base), "test base directory gone" );
+    
+    my $p = getcwd();
+    my $x = "x$$";
+    my $xx = $x . "x";
+    
+    # setup
+    ok(mkpath($xx));
+    ok(chdir($xx));
+    END {
+         ok(chdir($p));
+         ok(rmtree($xx));
+    }
+    
+    # create and delete directory
+    my $px = catdir($p, $x);
+    ok(mkpath($px));
+    ok(rmtree($px), "rmtree");     # fails in File-Path-2.07
+}
