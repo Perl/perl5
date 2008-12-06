@@ -22,8 +22,12 @@ version - Perl extension for Version Objects
 =head1 DESCRIPTION
 
 Overloaded version objects for all modern versions of Perl.  This module
-implements all of the features of version objects which will be part
-of Perl 5.10.0.
+implements all of the features of version objects which are part
+of Perl 5.10.0.  All previous releases (i.e. before 0.74) are deprecated
+and should not be used due to incompatible API changes.  If you 'use
+version' in your code, you are strongly urged to set a minimum, e.g. 
+
+  use version 0.74; # to remain compatible with Perl v5.10.0
 
 =head2 BEST PRACTICES
 
@@ -406,6 +410,31 @@ For example:
 
 See also L<UNIVERSAL::VERSION>, as this also returns the stringified form
 when used as a class method.
+
+IMPORTANT NOTE: There is one exceptional cases shown in the above table
+where the "initializer" is not stringwise equivalent to the stringified
+representation.  If you use the C<qv()> operator on a version without a
+leading 'v' B<and> with only a single decimal place, the stringified output
+will have a leading 'v', to preserve the sense.  See the L<qv()> operator
+for more details.
+
+IMPORTANT NOTE 2: Attempting to bypass the normal stringification rules by
+manually applying L<numify()> and L<normal()> will sometimes yield
+surprising results:
+
+  print version->new(version->new("v1.0")->numify)->normal; # v1.0.0
+
+The reason for this is that the L<numify()> operator will turn "v1.0"
+into the equivalent string "1.000000".  Forcing the outer version object
+to L<normal()> form will display the mathematically equivalent "v1.0.0".
+
+As the example in L<new()> shows, you can always create a copy of an
+existing version object with the same value by the very compact:
+
+  $v2 = $v1->new($v1);
+
+and be assured that both C<$v1> and C<$v2> will be completely equivalent,
+down to the same internal representation as well as stringification.
 
 =back
 
