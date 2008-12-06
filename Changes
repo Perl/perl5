@@ -28,6 +28,23 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 35052] By: nicholas				   on 2008/12/06  17:10:16
+	Log: Integrate:
+	     [ 35051]
+	     Integrate:
+	     [ 35050]
+	     Subject: Re: AIX patches for Perl 5.8.9 RC2 - README.aix
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Message-ID: <493AAEF0.3020203@tammer.net>
+	     Date: Sat, 06 Dec 2008 17:57:20 +0100
+     Branch: maint-5.8/perl
+	  !> README.aix
+____________________________________________________________________________
+[ 35049] By: nicholas				   on 2008/12/06  16:23:34
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 35048] By: nicholas				   on 2008/12/06  15:59:37
 	Log: *and* another one. This reminds me a lot of the 5.8.8 release. "Are we
 	     nearly there yet?" "How about now?" "How about now?"
