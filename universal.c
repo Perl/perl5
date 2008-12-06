@@ -1084,7 +1084,7 @@ XS(XS_re_regnames_count)
     SPAGAIN;
 
     if (ret) {
-        XPUSHs(ret);
+        mXPUSHs(ret);
         PUTBACK;
         return;
     } else {
@@ -1119,10 +1119,7 @@ XS(XS_re_regname)
     ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(0), (flags | RXapif_REGNAME));
 
     if (ret) {
-        if (SvROK(ret))
-            XPUSHs(ret);
-        else
-            XPUSHs(SvREFCNT_inc(ret));
+        mXPUSHs(ret);
         XSRETURN(1);
     }
     XSRETURN_UNDEF;    
@@ -1176,8 +1173,11 @@ XS(XS_re_regnames)
         if (!entry)
             Perl_croak(aTHX_ "NULL array element in re::regnames()");
 
-        XPUSHs(*entry);
+        mXPUSHs(SvREFCNT_inc_simple_NN(*entry));
     }
+
+    SvREFCNT_dec(ret);
+
     PUTBACK;
     return;
 }
@@ -1207,10 +1207,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     SPAGAIN;
 
     if (ret) {
-        if (SvROK(ret))
-            XPUSHs(ret);
-        else
-            XPUSHs(SvREFCNT_inc(ret));
+        mXPUSHs(ret);
         PUTBACK;
         return;
     }
@@ -1339,7 +1336,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
     SPAGAIN;
 
     if (ret) {
-        XPUSHs(SvREFCNT_inc(ret));
+        mXPUSHs(ret);
         PUTBACK;
     } else {
         XSRETURN_UNDEF;
@@ -1372,7 +1369,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
     SPAGAIN;
 
     if (ret) {
-        XPUSHs(ret);
+        mXPUSHs(ret);
     } else {
         XSRETURN_UNDEF;
     }  
@@ -1404,7 +1401,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
     SPAGAIN;
 
     if (ret) {
-        XPUSHs(ret);
+        mXPUSHs(ret);
         PUTBACK;
         return;
     } else {
