@@ -79,7 +79,9 @@ no_index:
     - t/Module_Pluggable
 
   file:
+    - ext/B/B/Debug.pm
     - ext/B/B/Lint.pm
+    - ext/B/t/debug.t
     - ext/B/t/lint.t
     - ext/B/t/pluglib/B/Lint/Plugin/Test.pm
     - ext/Compress/Zlib
