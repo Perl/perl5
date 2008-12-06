@@ -5123,6 +5123,10 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
 #define PERLDBf_SAVESRC  	0x400	/* Save source lines into @{"_<$filename"} */
+#define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subrouties */
+#if 0 /* Not yet working. */
+#define PERLDBf_SAVESRC_INVALID	0x1000	/* Save source that did not compile */
+#endif
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
 #define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
@@ -5136,6 +5140,10 @@ typedef struct am_table_short AMTS;
 #define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
 
 #define PERLDB_SAVESRC 	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC))
+#define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
+#if 0 /* Not yet working. */
+#define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
+#endif
 
 #ifdef USE_LOCALE_NUMERIC
 
