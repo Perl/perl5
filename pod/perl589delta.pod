@@ -440,7 +440,7 @@ C<Digest> upgraded to version 1.15
 
 =item *
 
-C<Digest::MD5> upgraded to version 2.36_01
+C<Digest::MD5> upgraded to version 2.37
 
 =item *
 
@@ -589,7 +589,7 @@ fixes spurious results with brackets inside braces.
 
 =item *
 
-C<File::Path> upgraded to version 2.07
+C<File::Path> upgraded to version 2.07_02
 
 =item *
 
@@ -985,6 +985,10 @@ C<Tie::RefHash> upgraded to version 1.38
 =item *
 
 C<Tie::Scalar> upgraded to version 1.01
+
+=item *
+
+C<Tie::StdHandle> upgraded to version 4.2
 
 =item *
 
