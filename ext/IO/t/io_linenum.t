@@ -13,13 +13,6 @@ BEGIN {
 	@INC = '../lib';
     }
     require strict; import strict;
-
-    # Import test.pl into its own package
-    {
-        package TestPL;
-        require($ENV{PERL_CORE} ? './test.pl' : './t/test.pl');
-        TestPL::watchdog(15);
-    }
 }
 
 use Test;
