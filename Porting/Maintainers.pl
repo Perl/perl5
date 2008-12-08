@@ -1035,7 +1035,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[lib/Thread/Queue.pm lib/Thread/Queue],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'Thread::Semaphore' =>
@@ -1043,7 +1043,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[lib/Thread/Semaphore.pm lib/Thread/Semaphore],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'threads' =>
@@ -1052,7 +1052,7 @@ package Maintainers;
 		'FILES'		=> q[ext/threads/hints ext/threads/t
 				     ext/threads/threads.{pm,xs}],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'threads::shared' =>
@@ -1060,7 +1060,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[ext/threads/shared],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'Tie::File' =>
