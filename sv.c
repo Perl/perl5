@@ -4839,6 +4839,24 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
  * back-reference to sv onto the array associated with the backref magic.
  */
 
+/* A discussion about the backreferences array and its refcount:
+ *
+ * The AV holding the backreferences is pointed to either as the mg_obj of
+ * PERL_MAGIC_backref, or in the specific case of a HV that has the hv_aux
+ * structure, from the xhv_backreferences field. (A HV without hv_aux will
+ * have the standard magic instead.) The array is created with a refcount
+ * of 2. This means that if during global destruction the array gets
+ * picked on first to have its refcount decremented by the random zapper,
+ * it won't actually be freed, meaning it's still theere for when its
+ * parent gets freed.
+ * When the parent SV is freed, in the case of magic, the magic is freed,
+ * Perl_magic_killbackrefs is called which decrements one refcount, then
+ * mg_obj is freed which kills the second count.
+ * In the vase of a HV being freed, one ref is removed by
+ * Perl_hv_kill_backrefs, the other by Perl_sv_kill_backrefs, which it
+ * calls.
+ */
+
 void
 Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
@@ -4865,7 +4883,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	    } else {
 		av = newAV();
 		AvREAL_off(av);
-		SvREFCNT_inc_simple_void(av);
+		SvREFCNT_inc_simple_void(av); /* see discussion above */
 	    }
 	    *avp = av;
 	}
@@ -4878,9 +4896,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	    av = newAV();
 	    AvREAL_off(av);
 	    sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
-	    /* av now has a refcnt of 2, which avoids it getting freed
-	     * before us during global cleanup. The extra ref is removed
-	     * by magic_killbackrefs() when tsv is being freed */
+	    /* av now has a refcnt of 2; see discussion above */
 	}
     }
     if (AvFILLp(av) >= AvMAX(av)) {
@@ -4914,14 +4930,11 @@ S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 	if (mg)
 	    av = (AV *)mg->mg_obj;
     }
-    if (!av) {
-	if (PL_in_clean_all)
-	    return;
-	Perl_croak(aTHX_ "panic: del_backref");
-    }
 
-    if (SvIS_FREED(av))
-	return;
+    if (!av)
+	Perl_croak(aTHX_ "panic: del_backref");
+
+    assert(!SvIS_FREED(av));
 
     svp = AvARRAY(av);
     /* We shouldn't be in here more than once, but for paranoia reasons lets
@@ -4950,9 +4963,8 @@ Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
 
     PERL_UNUSED_ARG(sv);
 
-    /* Not sure why the av can get freed ahead of its sv, but somehow it does
-       in ext/B/t/bytecode.t test 15 (involving print <DATA>)  */
-    if (svp && !SvIS_FREED(av)) {
+    assert(!svp || !SvIS_FREED(av));
+    if (svp) {
 	SV *const *const last = svp + AvFILLp(av);
 
 	while (svp <= last) {
