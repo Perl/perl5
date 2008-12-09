@@ -1932,7 +1932,9 @@ S_sublex_done(pTHX)
 		  handle \cV (control characters)
 		  handle printf-style backslashes (\f, \r, \n, etc)
 	      } (end switch)
+	      continue
 	  } (end if backslash)
+          handle regular character
     } (end while character to read)
 		
 */
@@ -1942,13 +1944,32 @@ S_scan_const(pTHX_ char *start)
 {
     dVAR;
     register char *send = PL_bufend;		/* end of the constant */
-    SV *sv = newSV(send - start);		/* sv for the constant */
+    SV *sv = newSV(send - start);		/* sv for the constant.  See
+						   note below on sizing. */
     register char *s = start;			/* start of the constant */
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
     I32  has_utf8 = FALSE;			/* Output constant is UTF8 */
-    I32  this_utf8 = UTF;			/* The source string is assumed to be UTF8 */
+    I32  this_utf8 = UTF;			/* Is the source string assumed
+						   to be UTF8?  But, this can
+						   show as true when the source
+						   isn't utf8, as for example
+						   when it is entirely composed
+						   of hex constants */
+
+    /* Note on sizing:  The scanned constant is placed into sv, which is
+     * initialized by newSV() assuming one byte of output for every byte of
+     * input.  This routine expects newSV() to allocate an extra byte for a
+     * trailing NUL, which this routine will append if it gets to the end of
+     * the input.  There may be more bytes of input than output (eg., \N{LATIN
+     * CAPITAL LETTER A}), or more output than input if the constant ends up
+     * recoded to utf8, but each time a construct is found that might increase
+     * the needed size, SvGROW() is called.  Its size parameter each time is
+     * based on the best guess estimate at the time, namely the length used so
+     * far, plus the length the current construct will occupy, plus room for
+     * the trailing NUL, plus one byte for every input byte still unscanned */ 
+
     UV uv;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
@@ -2228,18 +2249,18 @@ S_scan_const(pTHX_ char *start)
 		    goto default_action;
 		}
 
-	    /* \132 indicates an octal constant */
+	    /* eg. \132 indicates the octal constant 0x132 */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
                     I32 flags = 0;
                     STRLEN len = 3;
-		    uv = grok_oct(s, &len, &flags, NULL);
+		    uv = NATIVE_TO_UNI(grok_oct(s, &len, &flags, NULL));
 		    s += len;
 		}
 		goto NUM_ESCAPE_INSERT;
 
-	    /* \x24 indicates a hex constant */
+	    /* eg. \x24 indicates the hex constant 0x24 */
 	    case 'x':
 		++s;
 		if (*s == '{') {
@@ -2254,67 +2275,46 @@ S_scan_const(pTHX_ char *start)
 			continue;
 		    }
                     len = e - s;
-		    uv = grok_hex(s, &len, &flags, NULL);
+		    uv = NATIVE_TO_UNI(grok_hex(s, &len, &flags, NULL));
 		    s = e + 1;
 		}
 		else {
 		    {
 			STRLEN len = 2;
                         I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-			uv = grok_hex(s, &len, &flags, NULL);
+			uv = NATIVE_TO_UNI(grok_hex(s, &len, &flags, NULL));
 			s += len;
 		    }
 		}
 
 	      NUM_ESCAPE_INSERT:
-		/* Insert oct or hex escaped character.
-		 * There will always enough room in sv since such
-		 * escapes will be longer than any UTF-8 sequence
-		 * they can end up as. */
+		/* Insert oct, hex, or \N{U+...} escaped character.  There will
+		 * always be enough room in sv since such escapes will be
+		 * longer than any UTF-8 sequence they can end up as, except if
+		 * they force us to recode the rest of the string into utf8 */
 		
-		/* We need to map to chars to ASCII before doing the tests
-		   to cover EBCDIC
-		*/
-		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(uv))) {
+		/* Here uv is the ordinal of the next character being added in
+		 * unicode (converted from native).  (It has to be done before
+		 * here because \N is interpreted as unicode, and oct and hex
+		 * as native.) */
+		if (!UNI_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
-		        /* Might need to recode whatever we have
-			 * accumulated so far if it contains any
-			 * hibit chars.
-			 *
-			 * (Can't we keep track of that and avoid
-			 *  this rescan? --jhi)
-			 */
-			int hicount = 0;
-			U8 *c;
-			for (c = (U8 *) SvPVX(sv); c < (U8 *)d; c++) {
-			    if (!NATIVE_IS_INVARIANT(*c)) {
-			        hicount++;
-			    }
-			}
-			if (hicount) {
-			    const STRLEN offset = d - SvPVX_const(sv);
-			    U8 *src, *dst;
-			    d = SvGROW(sv, SvLEN(sv) + hicount + 1) + offset;
-			    src = (U8 *)d - 1;
-			    dst = src+hicount;
-			    d  += hicount;
-			    while (src >= (const U8 *)SvPVX_const(sv)) {
-			        if (!NATIVE_IS_INVARIANT(*src)) {
-				    const U8 ch = NATIVE_TO_ASCII(*src);
-				    *dst-- = (U8)UTF8_EIGHT_BIT_LO(ch);
-				    *dst-- = (U8)UTF8_EIGHT_BIT_HI(ch);
-			        }
-			        else {
-				    *dst-- = *src;
-			        }
-				src--;
-			    }
-                        }
+			/* Might need to recode whatever we have accumulated so
+			 * far if it contains any chars variant in utf8 or
+			 * utf-ebcdic. */
+			  
+			SvCUR_set(sv, d - SvPVX_const(sv));
+			SvPOK_on(sv);
+			*d = '\0';
+			sv_utf8_upgrade(sv);
+			/* See Note on sizing above.  */
+			SvGROW(sv, SvCUR(sv) + UNISKIP(uv) + (STRLEN)(send - s) + 1);
+			d = SvPVX(sv) + SvCUR(sv);
+			has_utf8 = TRUE;
                     }
 
-                    if (has_utf8 || uv > 255) {
-		        d = (char*)uvchr_to_utf8((U8*)d, uv);
-			has_utf8 = TRUE;
+                    if (has_utf8) {
+		        d = (char*)uvuni_to_utf8((U8*)d, uv);
 			if (PL_lex_inwhat == OP_TRANS &&
 			    PL_sublex_info.sub_op) {
 			    PL_sublex_info.sub_op->op_private |=
@@ -2335,7 +2335,8 @@ S_scan_const(pTHX_ char *start)
 		}
 		continue;
 
- 	    /* \N{LATIN SMALL LETTER A} is a named character */
+	    /* \N{LATIN SMALL LETTER A} is a named character, and so is
+	     * \N{U+0041} */
  	    case 'N':
  		++s;
  		if (*s == '{') {
@@ -2350,7 +2351,8 @@ S_scan_const(pTHX_ char *start)
 			goto cont_scan;
 		    }
 		    if (e > s + 2 && s[1] == 'U' && s[2] == '+') {
-		        /* \N{U+...} */
+			/* \N{U+...} The ... is a unicode value even on EBCDIC
+			 * machines */
 		        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
 			  PERL_SCAN_DISALLOW_PREFIX;
 		        s += 3;
@@ -2388,22 +2390,23 @@ S_scan_const(pTHX_ char *start)
 			 }
 		    }
 #endif
+		    /* If destination is not in utf8 but this new character is,
+		     * recode the dest to utf8 */
 		    if (!has_utf8 && SvUTF8(res)) {
-			const char * const ostart = SvPVX_const(sv);
-			SvCUR_set(sv, d - ostart);
+			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
 			sv_utf8_upgrade(sv);
-			/* this just broke our allocation above... */
-			SvGROW(sv, (STRLEN)(send - start));
+			/* See Note on sizing above.  */
+			SvGROW(sv, SvCUR(sv) + len + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
-		    }
-		    if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
-			const char * const odest = SvPVX_const(sv);
+		    } else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
 
-			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
-			d = SvPVX(sv) + (d - odest);
+			/* See Note on sizing above.  (NOTE: SvCUR() is not set
+			 * correctly here). */
+			const STRLEN off = d - SvPVX_const(sv);
+			d = SvGROW(sv, off + len + (STRLEN)(send - s) + 1) + off;
 		    }
 #ifdef EBCDIC
 		    if (!dorange)
@@ -2468,20 +2471,41 @@ S_scan_const(pTHX_ char *start)
 #endif
 
     default_action:
-	/* If we started with encoded form, or already know we want it
-	   and then encode the next character */
-	if ((has_utf8 || this_utf8) && !NATIVE_IS_INVARIANT((U8)(*s))) {
+	/* If we started with encoded form, or already know we want it,
+	   then encode the next character */
+	if (! NATIVE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
 	    STRLEN len  = 1;
+
+
+	    /* One might think that it is wasted effort in the case of the
+	     * source being utf8 (this_utf8 == TRUE) to take the next character
+	     * in the source, convert it to an unsigned value, and then convert
+	     * it back again.  But the source has not been validated here.  The
+	     * routine that does the conversion checks for errors like
+	     * malformed utf8 */
+
 	    const UV nextuv   = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
 	    const STRLEN need = UNISKIP(NATIVE_TO_UNI(nextuv));
-	    s += len;
-	    if (need > len) {
-		/* encoded value larger than old, need extra space (NOTE: SvCUR() not set here) */
+	    if (!has_utf8) {
+		SvCUR_set(sv, d - SvPVX_const(sv));
+		SvPOK_on(sv);
+		*d = '\0';
+		sv_utf8_upgrade(sv);
+
+		/* See Note on sizing above.  */
+		SvGROW(sv, SvCUR(sv) + need + (STRLEN)(send - s) + 1);
+		d = SvPVX(sv) + SvCUR(sv);
+		has_utf8 = TRUE;
+	    } else if (need > len) {
+		/* encoded value larger than old, may need extra space (NOTE:
+		 * SvCUR() is not set correctly here).   See Note on sizing
+		 * above.  */
 		const STRLEN off = d - SvPVX_const(sv);
-		d = SvGROW(sv, SvLEN(sv) + (need-len)) + off;
+		d = SvGROW(sv, off + need + (STRLEN)(send - s) + 1) + off;
 	    }
+	    s += len;
+
 	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
-	    has_utf8 = TRUE;
 #ifdef EBCDIC
 	    if (uv > 255 && !dorange)
 		native_range = FALSE;
