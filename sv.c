@@ -10948,7 +10948,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
 	case SAVEt_PARSER:
 	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
+	    TOPPTR(nss,ix) = ptr ? 
+		    parser_dup((const yy_parser*)ptr, param) : NULL;
 	    break;
 	case SAVEt_PADSV:
 	    /* Nothing should be using this any more, post the integration of
@@ -11464,7 +11465,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_runops		= proto_perl->Irunops;
 
-    PL_parser		= parser_dup(proto_perl->Iparser, param);
+    PL_parser		= proto_perl->Iparser ?
+			    parser_dup(proto_perl->Iparser, param): NULL;
 
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
