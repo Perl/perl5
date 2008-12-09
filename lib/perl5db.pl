@@ -511,7 +511,7 @@ package DB;
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.31;
+$VERSION = 1.32;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -7990,26 +7990,28 @@ sub methods_via {
     # This is a package that is contributing the methods we're about to print.
     my $prefix  = shift;
     my $prepend = $prefix ? "via $prefix: " : '';
+    my @to_print;
 
-    my $name;
-    for $name (
+    # Extract from all the symbols in this class.
+    while (my ($name, $glob) = each %{"${class}::"}) {
+	# references directly in the symbol table are Proxy Constant
+	# Subroutines, and are by their very nature defined
+	# Otherwise, check if the thing is a typeglob, and if it is, it decays
+	# to a subroutine reference, which can be tested by defined.
+	# $glob might also be the value -1  (from sub foo;)
+	# or (say) '$$' (from sub foo ($$);)
+	# \$glob will be SCALAR in both cases.
+	if ((ref $glob || ($glob && ref \$glob eq 'GLOB' && defined &$glob))
+	    && !$seen{$name}++) {
+	    push @to_print, "$prepend$name\n";
+	}
+    }
 
-        # Keep if this is a defined subroutine in this class.
-        grep { defined &{ ${"${class}::"}{$_} } }
-
-        # Extract from all the symbols in this class.
-        sort keys %{"${class}::"}
-      )
     {
-
-        # If we printed this already, skip it.
-        next if $seen{$name}++;
-
-        # Print the new method name.
-        local $\ = '';
-        local $, = '';
-        print $DB::OUT "$prepend$name\n";
-    } ## end for $name (grep { defined...
+	local $\ = '';
+	local $, = '';
+	print $DB::OUT $_ foreach sort @to_print;
+    }
 
     # If the $crawl_upward argument is false, just quit here.
     return unless shift;
