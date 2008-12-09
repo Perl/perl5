@@ -186,9 +186,32 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 	    }
 	    while(subrv_items--) {
 		SV *const subsv = *subrv_p++;
-		if(!hv_exists_ent(stored, subsv, 0)) {
-		    (void)hv_store_ent(stored, subsv, &PL_sv_undef, 0);
-		    av_push(retval, newSVsv(subsv));
+		/* LVALUE fetch will create a new undefined SV if necessary
+		 */
+		HE *const he = hv_fetch_ent(stored, subsv, 1, 0);
+		assert(he);
+		if(HeVAL(he) != &PL_sv_undef) {
+		    /* It was newly created.  Steal it for our new SV, and
+		       replace it in the hash with the "real" thing.  */
+		    SV *const val = HeVAL(he);
+		    HEK *const key = HeKEY_hek(he);
+
+		    HeVAL(he) = &PL_sv_undef;
+		    /* Save copying by making a shared hash key scalar. We
+		       inline this here rather than calling Perl_newSVpvn_share
+		       because we already have the scalar, and we already have
+		       the hash key.  */
+		    assert(SvTYPE(val) == SVt_NULL);
+		    sv_upgrade(val, SVt_PV);
+		    SvPV_set(val, HEK_KEY(share_hek_hek(key)));
+		    SvCUR_set(val, HEK_LEN(key));
+		    SvREADONLY_on(val);
+		    SvFAKE_on(val);
+		    SvPOK_on(val);
+		    if (HEK_UTF8(key))
+			SvUTF8_on(val);
+
+		    av_push(retval, val);
 		}
             }
         }

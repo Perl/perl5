@@ -7272,6 +7272,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
+    /* The logic for this is inlined in S_mro_get_linear_isa_dfs(), so if it
+       changes here, update it there too.  */
     sv_upgrade(sv, SVt_PV);
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     SvCUR_set(sv, len);
