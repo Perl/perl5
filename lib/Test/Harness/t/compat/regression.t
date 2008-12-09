@@ -7,6 +7,7 @@ use Test::More tests => 1;
 use Test::Harness;
 
 {
+
     #28567
     unshift @INC, 'wibble';
     my @before = Test::Harness::_filtered_inc();

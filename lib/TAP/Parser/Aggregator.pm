@@ -2,7 +2,11 @@ package TAP::Parser::Aggregator;
 
 use strict;
 use Benchmark;
-use vars qw($VERSION);
+use vars qw($VERSION @ISA);
+
+use TAP::Object ();
+
+@ISA = qw(TAP::Object);
 
 =head1 NAME
 
@@ -10,11 +14,11 @@ TAP::Parser::Aggregator - Aggregate TAP::Parser results
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 
@@ -51,6 +55,8 @@ Returns a new C<TAP::Parser::Aggregator> object.
 
 =cut
 
+# new() implementation supplied by TAP::Object
+
 my %SUMMARY_METHOD_FOR;
 
 BEGIN {    # install summary methods
@@ -78,13 +84,6 @@ BEGIN {    # install summary methods
         };
     }
 }    # end install summary methods
-
-sub new {
-    my ($class) = @_;
-    my $self = bless {}, $class;
-    $self->_initialize;
-    return $self;
-}
 
 sub _initialize {
     my ($self) = @_;
@@ -124,6 +123,13 @@ sub add {
     $self->{parser_for}{$description} = $parser;
 
     while ( my ( $summary, $method ) = each %SUMMARY_METHOD_FOR ) {
+
+        # Slightly nasty. Instead we should maybe have 'cooked' accessors
+        # for results that may be masked by the parser.
+        next
+          if ( $method eq 'exit' || $method eq 'wait' )
+          && $parser->ignore_exit;
+
         if ( my $count = $parser->$method() ) {
             $self->{$summary} += $count;
             push @{ $self->{"descriptions_for_$summary"} } => $description;
@@ -393,12 +399,6 @@ sub todo_failed {
     warn
       '"todo_failed" is deprecated.  Please use "todo_passed".  See the docs.';
     goto &todo_passed;
-}
-
-sub _croak {
-    my $proto = shift;
-    require Carp;
-    Carp::croak(@_);
 }
 
 =head1 See Also

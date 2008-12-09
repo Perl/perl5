@@ -31,7 +31,6 @@ BEGIN {
 
     my @getter_setters = qw(
       _longest
-      _tests_without_extensions
       _printed_summary_header
       _colorizer
     );
@@ -52,11 +51,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 DESCRIPTION
 
@@ -192,6 +191,9 @@ Any keys for which the value is C<undef> will be ignored.
 
 Called by Test::Harness before any test output is generated. 
 
+This is an advisory and may not be called in the case where tests are
+being supplied to Test::Harness by an iterator.
+
 =cut
 
 sub prepare {
@@ -199,17 +201,10 @@ sub prepare {
 
     my $longest = 0;
 
-    my $tests_without_extensions = 0;
     foreach my $test (@tests) {
         $longest = length $test if length $test > $longest;
-        if ( $test !~ /\.\w+$/ ) {
-
-            # TODO: Coverage?
-            $tests_without_extensions = 1;
-        }
     }
 
-    $self->_tests_without_extensions($tests_without_extensions);
     $self->_longest($longest);
 }
 
@@ -217,13 +212,8 @@ sub _format_now { strftime "[%H:%M:%S]", localtime }
 
 sub _format_name {
     my ( $self, $test ) = @_;
-    my $name  = $test;
-    my $extra = 0;
-    unless ( $self->_tests_without_extensions ) {
-        $name =~ s/(\.\w+)$//;    # strip the .t or .pm
-        $extra = length $1;
-    }
-    my $periods = '.' x ( $self->_longest + $extra + 4 - length $test );
+    my $name = $test;
+    my $periods = '.' x ( $self->_longest + 4 - length $test );
 
     if ( $self->timer ) {
         my $stamp = $self->_format_now();

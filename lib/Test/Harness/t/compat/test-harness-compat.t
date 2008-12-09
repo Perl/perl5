@@ -9,6 +9,7 @@ BEGIN {
 }
 
 use strict;
+
 use lib 't/lib';
 
 use Test::More;
@@ -52,7 +53,7 @@ local $ENV{HARNESS_PERL_SWITCHES};
               head_end head_fail inc_taint junk_before_plan lone_not_bug
               no_nums no_output schwern sequence_misparse shbang_misparse
               simple simple_fail skip skip_nomsg skipall skipall_nomsg
-              stdout_stderr switches taint todo_inline
+              stdout_stderr taint todo_inline
               todo_misparse too_many vms_nit
               )
           ) => {
@@ -129,14 +130,6 @@ local $ENV{HARNESS_PERL_SWITCHES};
                     'name'   => 't/sample-tests/simple_fail',
                     'wstat'  => ''
                 },
-                't/sample-tests/switches' => {
-                    'canon'  => 1,
-                    'estat'  => '',
-                    'failed' => 1,
-                    'max'    => 1,
-                    'name'   => 't/sample-tests/switches',
-                    'wstat'  => ''
-                },
                 't/sample-tests/todo_misparse' => {
                     'canon'  => 1,
                     'estat'  => '',
@@ -173,15 +166,15 @@ local $ENV{HARNESS_PERL_SWITCHES};
                 }
             },
             'totals' => {
-                'bad'         => 13,
+                'bad'         => 12,
                 'bonus'       => 1,
-                'files'       => 28,
+                'files'       => 27,
                 'good'        => 15,
-                'max'         => 77,
+                'max'         => 76,
                 'ok'          => 78,
                 'skipped'     => 2,
                 'sub_skipped' => 2,
-                'tests'       => 28,
+                'tests'       => 27,
                 'todo'        => 2
             }
           },
@@ -603,6 +596,9 @@ local $ENV{HARNESS_PERL_SWITCHES};
             }
         },
         'switches' => {
+            'skip_if' => sub {
+                ( $ENV{PERL5OPT} || '' ) =~ m{(?:^|\s)-[dM]};
+            },
             'failed' => {
                 't/sample-tests/switches' => {
                     'canon'  => 1,
@@ -814,6 +810,13 @@ local $ENV{HARNESS_PERL_SWITCHES};
             if ( $result->{require} && $] < $result->{require} ) {
                 skip "Test requires Perl $result->{require}, we have $]", 4;
             }
+
+            if ( my $skip_if = $result->{skip_if} ) {
+                skip
+                  "Test '$test_key' can't run properly in this environment", 4
+                  if $skip_if->();
+            }
+
             my @test_names = split( /,/, $test_key );
             my @test_files
               = map { File::Spec->catfile( $TEST_DIR, $_ ) } @test_names;

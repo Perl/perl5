@@ -1,6 +1,8 @@
 package App::Prove::State;
 
 use strict;
+use vars qw($VERSION @ISA);
+
 use File::Find;
 use File::Spec;
 use Carp;
@@ -8,7 +10,6 @@ use TAP::Parser::YAMLish::Reader ();
 use TAP::Parser::YAMLish::Writer ();
 use TAP::Base;
 
-use vars qw($VERSION @ISA);
 @ISA = qw( TAP::Base );
 
 use constant IS_WIN32 => ( $^O =~ /^(MS)?Win32$/ );
@@ -20,11 +21,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 DESCRIPTION
 
@@ -47,6 +48,7 @@ and the operations that may be performed on it.
 
 =cut
 
+# override TAP::Base::new:
 sub new {
     my $class = shift;
     my %args = %{ shift || {} };
@@ -56,9 +58,10 @@ sub new {
             tests      => {},
             generation => 1
         },
-        select => [],
-        seq    => 1,
-        store  => delete $args{store},
+        select    => [],
+        seq       => 1,
+        store     => delete $args{store},
+        extension => delete $args{extension} || '.t',
     }, $class;
 
     my $store = $self->{store};
@@ -66,6 +69,19 @@ sub new {
       if defined $store && -f $store;
 
     return $self;
+}
+
+=head2 C<extension>
+
+Get or set the extension files must have in order to be considered
+tests. Defaults to '.t'.
+
+=cut
+
+sub extension {
+    my $self = shift;
+    $self->{extension} = shift if @_;
+    return $self->{extension};
 }
 
 sub DESTROY {
@@ -222,9 +238,9 @@ sub get_tests {
     my @selected = $self->_query;
 
     unless ( @argv || @{ $self->{select} } ) {
-        croak q{No tests named and 't' directory not found}
-          unless -d 't';
-        @argv = 't';
+        @argv = $recurse ? '.' : 't';
+        croak qq{No tests named and '@argv' directory not found}
+          unless -d $argv[0];
     }
 
     push @selected, $self->_get_raw_tests( $recurse, @argv ) if @argv;
@@ -278,6 +294,7 @@ sub _get_raw_tests {
 
     # Do globbing on Win32.
     @argv = map { glob "$_" } @argv if NEED_GLOB;
+    my $extension = $self->{extension};
 
     for my $arg (@argv) {
         if ( '-' eq $arg ) {
@@ -289,22 +306,22 @@ sub _get_raw_tests {
         push @tests,
             sort -d $arg
           ? $recurse
-              ? $self->_expand_dir_recursive($arg)
-              : glob( File::Spec->catfile( $arg, '*.t' ) )
+              ? $self->_expand_dir_recursive( $arg, $extension )
+              : glob( File::Spec->catfile( $arg, "*$extension" ) )
           : $arg;
     }
     return @tests;
 }
 
 sub _expand_dir_recursive {
-    my ( $self, $dir ) = @_;
+    my ( $self, $dir, $extension ) = @_;
 
     my @tests;
     find(
         {   follow => 1,      #21938
             wanted => sub {
                 -f 
-                  && /\.t$/
+                  && /\Q$extension\E$/
                   && push @tests => $File::Find::name;
               }
         },

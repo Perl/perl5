@@ -11,6 +11,7 @@ use TAP::Base;
 use TAP::Parser;
 use TAP::Parser::Aggregator;
 use TAP::Parser::Multiplexer;
+use TAP::Parser::Scheduler;
 
 use vars qw($VERSION @ISA);
 
@@ -22,11 +23,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -81,6 +82,8 @@ BEGIN {
         jobs            => sub { shift; shift },
         fork            => sub { shift; shift },
         test_args       => sub { shift; shift },
+        ignore_exit     => sub { shift; shift },
+        rules           => sub { shift; shift },
     );
 
     for my $method ( sort keys %VALIDATION_FOR ) {
@@ -185,7 +188,22 @@ TAP is fine.  You can use this argument to specify the name of the program
 (and optional switches) to run your tests with:
 
   exec => ['/usr/bin/ruby', '-w']
-  
+
+You can also pass a subroutine reference in order to determine and return the
+proper program to run based on a given test script. The subroutine reference
+should expect the TAP::Harness object itself as the first argument, and the
+file name as the second argument. It should return an array reference
+containing the command to be run and including the test file name. It can also
+simply return C<undef>, in which case TAP::Harness will fall back on executing
+the test script in Perl:
+
+  exec => sub {
+      my ( $harness, $test_file ) = @_;
+      # Let Perl tests run.
+      return undef if $test_file =~ /[.]t$/;
+      return [ qw( /usr/bin/ruby -w ), $test_file ] if $test_file =~ /[.]rb$/;
+  }
+
 =item * C<merge>
 
 If C<merge> is true the harness will create parsers that merge STDOUT
@@ -213,6 +231,28 @@ true:
 
 If set to a true value, only test results with directives will be displayed.
 This overrides other settings such as C<verbose> or C<failures>.
+
+=item * C<ignore_exit>
+
+If set to a true value instruct C<TAP::Parser> to ignore exit and wait
+status from test scripts.
+
+=item * C<rules>
+
+A reference to a hash of rules that control which tests may be
+executed in parallel. This is an experimental feature and the
+interface may change.
+
+    $harness->rules(
+        {   par => [
+                { seq => '../ext/DB_File/t/*' },
+                { seq => '../ext/IO_Compress_Zlib/t/*' },
+                { seq => '../lib/CPANPLUS/*' },
+                { seq => '../lib/ExtUtils/t/*' },
+                '*'
+            ]
+        }
+    );
 
 =item * C<stdout>
 
@@ -333,21 +373,32 @@ sub runtests {
     $aggregate->start;
     $self->aggregate_tests( $aggregate, @tests );
     $aggregate->stop;
-    $self->formatter->summary($aggregate);
+    $self->summary($aggregate);
     $self->_make_callback( 'after_runtests', $aggregate );
 
     return $aggregate;
 }
 
-sub _after_test {
-    my ( $self, $aggregate, $test, $parser ) = @_;
+=head3 C<summary>
 
-    $self->_make_callback( 'after_test', $test, $parser );
-    $aggregate->add( $test->[1], $parser );
+Output the summary for a TAP::Parser::Aggregator.
+
+=cut
+
+sub summary {
+    my ( $self, $aggregate ) = @_;
+    $self->formatter->summary($aggregate);
+}
+
+sub _after_test {
+    my ( $self, $aggregate, $job, $parser ) = @_;
+
+    $self->_make_callback( 'after_test', $job->as_array_ref, $parser );
+    $aggregate->add( $job->description, $parser );
 }
 
 sub _aggregate_forked {
-    my ( $self, $aggregate, @tests ) = @_;
+    my ( $self, $aggregate, $scheduler ) = @_;
 
     eval { require Parallel::Iterator };
 
@@ -357,9 +408,11 @@ sub _aggregate_forked {
     my $iter = Parallel::Iterator::iterate(
         { workers => $self->jobs || 0 },
         sub {
-            my ( $id, $test ) = @_;
+            my $job = shift;
 
-            my ( $parser, $session ) = $self->make_parser($test);
+            return if $job->is_spinner;
+
+            my ( $parser, $session ) = $self->make_parser($job);
 
             while ( defined( my $result = $parser->next ) ) {
                 exit 1 if $result->is_bailout;
@@ -373,18 +426,20 @@ sub _aggregate_forked {
             delete $parser->{_grammar};
             return $parser;
         },
-        \@tests
+        sub { $scheduler->get_job }
     );
 
-    while ( my ( $id, $parser ) = $iter->() ) {
-        $self->_after_test( $aggregate, $tests[$id], $parser );
+    while ( my ( $job, $parser ) = $iter->() ) {
+        next if $job->is_spinner;
+        $self->_after_test( $aggregate, $job, $parser );
+        $job->finish;
     }
 
     return;
 }
 
 sub _aggregate_parallel {
-    my ( $self, $aggregate, @tests ) = @_;
+    my ( $self, $aggregate, $scheduler ) = @_;
 
     my $jobs = $self->jobs;
     my $mux  = TAP::Parser::Multiplexer->new;
@@ -392,14 +447,19 @@ sub _aggregate_parallel {
     RESULT: {
 
         # Keep multiplexer topped up
-        while ( @tests && $mux->parsers < $jobs ) {
-            my $test = shift @tests;
-            my ( $parser, $session ) = $self->make_parser($test);
-            $mux->add( $parser, [ $session, $test ] );
+        FILL:
+        while ( $mux->parsers < $jobs ) {
+            my $job = $scheduler->get_job;
+
+            # If we hit a spinner stop filling and start running.
+            last FILL if !defined $job || $job->is_spinner;
+
+            my ( $parser, $session ) = $self->make_parser($job);
+            $mux->add( $parser, [ $session, $job ] );
         }
 
         if ( my ( $parser, $stash, $result ) = $mux->next ) {
-            my ( $session, $test ) = @$stash;
+            my ( $session, $job ) = @$stash;
             if ( defined $result ) {
                 $session->result($result);
                 exit 1 if $result->is_bailout;
@@ -408,7 +468,8 @@ sub _aggregate_parallel {
 
                 # End of parser. Automatically removed from the mux.
                 $self->finish_parser( $parser, $session );
-                $self->_after_test( $aggregate, $test, $parser );
+                $self->_after_test( $aggregate, $job, $parser );
+                $job->finish;
             }
             redo RESULT;
         }
@@ -418,10 +479,13 @@ sub _aggregate_parallel {
 }
 
 sub _aggregate_single {
-    my ( $self, $aggregate, @tests ) = @_;
+    my ( $self, $aggregate, $scheduler ) = @_;
 
-    for my $test (@tests) {
-        my ( $parser, $session ) = $self->make_parser($test);
+    JOB:
+    while ( my $job = $scheduler->get_job ) {
+        next JOB if $job->is_spinner;
+
+        my ( $parser, $session ) = $self->make_parser($job);
 
         while ( defined( my $result = $parser->next ) ) {
             $session->result($result);
@@ -435,7 +499,8 @@ sub _aggregate_single {
         }
 
         $self->finish_parser( $parser, $session );
-        $self->_after_test( $aggregate, $test, $parser );
+        $self->_after_test( $aggregate, $job, $parser );
+        $job->finish;
     }
 
     return;
@@ -477,7 +542,7 @@ Each elements of the @tests array is either
 
 =item * the file name of a test script to run
 
-=item * a reference to a [ file name, display name ]
+=item * a reference to a [ file name, display name ] array
 
 =back
 
@@ -492,30 +557,68 @@ different name.
 sub aggregate_tests {
     my ( $self, $aggregate, @tests ) = @_;
 
-    my $jobs = $self->jobs;
-
-    my @expanded = map { 'ARRAY' eq ref $_ ? $_ : [ $_, $_ ] } @tests;
+    my $jobs      = $self->jobs;
+    my $scheduler = $self->make_scheduler(@tests);
 
     # #12458
     local $ENV{HARNESS_IS_VERBOSE} = 1
       if $self->formatter->verbosity > 0;
 
-    # Formatter gets only names
-    $self->formatter->prepare( map { $_->[1] } @expanded );
+    # Formatter gets only names.
+    $self->formatter->prepare( map { $_->description } $scheduler->get_all );
 
     if ( $self->jobs > 1 ) {
         if ( $self->fork ) {
-            $self->_aggregate_forked( $aggregate, @expanded );
+            $self->_aggregate_forked( $aggregate, $scheduler );
         }
         else {
-            $self->_aggregate_parallel( $aggregate, @expanded );
+            $self->_aggregate_parallel( $aggregate, $scheduler );
         }
     }
     else {
-        $self->_aggregate_single( $aggregate, @expanded );
+        $self->_aggregate_single( $aggregate, $scheduler );
     }
 
     return;
+}
+
+sub _add_descriptions {
+    my $self = shift;
+
+    # First transformation: turn scalars into single element arrays
+    my @tests = map { 'ARRAY' eq ref $_ ? $_ : [$_] } @_;
+
+    # Work out how many different extensions we have
+    my %ext;
+    for my $test (@tests) {
+        $ext{$1}++ if $test->[0] =~ /\.(\w+)$/;
+    }
+
+    for my $test (@tests) {
+        if ( @$test == 1 ) {
+            $test->[1] = $test->[0];
+            $test->[1] =~ s/\.\w+$//
+              if keys %ext <= 1;
+        }
+    }
+    return @tests;
+}
+
+=head3 C<make_scheduler>
+
+Called by the harness when it needs to create a
+L<TAP::Parser::Scheduler>. Override in a subclass to provide an
+alternative scheduler. C<make_scheduler> is passed the list of tests
+that was passed to C<aggregate_tests>.
+
+=cut
+
+sub make_scheduler {
+    my ( $self, @tests ) = @_;
+    return TAP::Parser::Scheduler->new(
+        tests => [ $self->_add_descriptions(@tests) ],
+        rules => $self->rules
+    );
 }
 
 =head3 C<jobs>
@@ -582,19 +685,23 @@ This is a bit clunky and will be cleaned up in a later release.
 =cut
 
 sub _get_parser_args {
-    my ( $self, $test ) = @_;
-    my $test_prog = $test->[0];
+    my ( $self, $job ) = @_;
+    my $test_prog = $job->filename;
     my %args      = ();
     my @switches;
     @switches = $self->lib if $self->lib;
     push @switches => $self->switches if $self->switches;
-    $args{switches} = \@switches;
-    $args{spool}    = $self->_open_spool($test_prog);
-    $args{merge}    = $self->merge;
-    $args{exec}     = $self->exec;
+    $args{switches}    = \@switches;
+    $args{spool}       = $self->_open_spool($test_prog);
+    $args{merge}       = $self->merge;
+    $args{ignore_exit} = $self->ignore_exit;
 
     if ( my $exec = $self->exec ) {
-        $args{exec} = [ @$exec, $test_prog ];
+        $args{exec}
+          = ref $exec eq 'CODE'
+          ? $exec->( $self, $test_prog )
+          : [ @$exec, $test_prog ];
+        $args{source} = $test_prog unless $args{exec};
     }
     else {
         $args{source} = $test_prog;
@@ -618,14 +725,14 @@ overridden in subclasses.
 =cut
 
 sub make_parser {
-    my ( $self, $test ) = @_;
+    my ( $self, $job ) = @_;
 
-    my $args = $self->_get_parser_args($test);
-    $self->_make_callback( 'parser_args', $args, $test );
+    my $args = $self->_get_parser_args($job);
+    $self->_make_callback( 'parser_args', $args, $job->as_array_ref );
     my $parser = TAP::Parser->new($args);
 
-    $self->_make_callback( 'made_parser', $parser, $test );
-    my $session = $self->formatter->open_test( $test->[1], $parser );
+    $self->_make_callback( 'made_parser', $parser, $job->as_array_ref );
+    my $session = $self->formatter->open_test( $job->description, $parser );
 
     return ( $parser, $session );
 }

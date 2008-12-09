@@ -13,8 +13,10 @@ use TAP::Parser;
 use TAP::Harness;
 use App::Prove;
 
-my $test = File::Spec->catfile( ($ENV{PERL_CORE} ? 'lib' : 't'),
-				'sample-tests', 'echo' );
+my $test = File::Spec->catfile(
+    ( $ENV{PERL_CORE} ? 'lib' : 't' ),
+    'sample-tests', 'echo'
+);
 
 diag( "\n\n", bigness( join ' ', @ARGV ), "\n\n" ) if @ARGV;
 

@@ -12,14 +12,16 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 30;
+use Test::More tests => 26;
 
 use File::Spec;
 
+use EmptyParser;
 use TAP::Parser::Source;
 use TAP::Parser::Source::Perl;
 
-my $test = File::Spec->catfile(
+my $parser = EmptyParser->new;
+my $test   = File::Spec->catfile(
     ( $ENV{PERL_CORE} ? 'lib' : 't' ), 'source_tests',
     'source'
 );
@@ -39,7 +41,7 @@ ok $source->source( [ $perl, '-It/lib', '-T', $test ] ),
   '... and calling it with valid args should succeed';
 
 can_ok $source, 'get_stream';
-my $stream = $source->get_stream;
+my $stream = $source->get_stream($parser);
 
 isa_ok $stream, 'TAP::Parser::Iterator::Process',
   'get_stream returns the right object';
@@ -57,7 +59,7 @@ ok $source->source( [$test] ),
   '... and calling it with valid args should succeed';
 
 can_ok $source, 'get_stream';
-$stream = $source->get_stream;
+$stream = $source->get_stream($parser);
 
 isa_ok $stream, 'TAP::Parser::Iterator::Process',
   '... and the object it returns';
@@ -79,7 +81,7 @@ ok( grep( $_ =~ /^['"]?-T['"]?$/, $source->_switches ),
 
     # coverage for method get_steam
 
-    my $source = TAP::Parser::Source->new();
+    my $source = TAP::Parser::Source->new( { parser => $parser } );
 
     my @die;
 
@@ -94,36 +96,3 @@ ok( grep( $_ =~ /^['"]?-T['"]?$/, $source->_switches ),
     like pop @die, qr/No command found!/, '...and it failed as expect';
 }
 
-{
-
-    # coverage testing for error
-
-    my $source = TAP::Parser::Source->new();
-
-    my $error = $source->error;
-
-    is $error, undef, 'coverage testing for error()';
-
-    $source->error('save me');
-
-    $error = $source->error;
-
-    is $error, 'save me', '...and we got the expected message';
-}
-
-{
-
-    # coverage testing for exit
-
-    my $source = TAP::Parser::Source->new();
-
-    my $exit = $source->exit;
-
-    is $exit, undef, 'coverage testing for exit()';
-
-    $source->exit('save me');
-
-    $exit = $source->exit;
-
-    is $exit, 'save me', '...and we got the expected message';
-}

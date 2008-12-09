@@ -117,8 +117,9 @@ ok 1 - input file opened
 END_TAP
 
     my $parser = TAP::Parser->new(
-        {   spool  => $spoolHandle,
-            stream => TAP::Parser::Iterator->new( [ split /\n/ => $tap ] )
+        {   spool => $spoolHandle,
+            stream =>
+              TAP::Parser::IteratorFactory->new( [ split /\n/ => $tap ] )
         }
     );
 

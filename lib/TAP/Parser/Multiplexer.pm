@@ -1,12 +1,16 @@
 package TAP::Parser::Multiplexer;
 
 use strict;
+use vars qw($VERSION @ISA);
+
 use IO::Select;
-use vars qw($VERSION);
+use TAP::Object ();
 
 use constant IS_WIN32 => $^O =~ /^(MS)?Win32$/;
 use constant IS_VMS => $^O eq 'VMS';
 use constant SELECT_OK => !( IS_VMS || IS_WIN32 );
+
+@ISA = 'TAP::Object';
 
 =head1 NAME
 
@@ -14,11 +18,11 @@ TAP::Parser::Multiplexer - Multiplex multiple TAP::Parsers
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 
@@ -51,13 +55,14 @@ Returns a new C<TAP::Parser::Multiplexer> object.
 
 =cut
 
-sub new {
-    my ($class) = @_;
-    return bless {
-        select => IO::Select->new,
-        avid   => [],                # Parsers that can't select
-        count  => 0,
-    }, $class;
+# new() implementation supplied by TAP::Object
+
+sub _initialize {
+    my $self = shift;
+    $self->{select} = IO::Select->new;
+    $self->{avid}   = [];                # Parsers that can't select
+    $self->{count}  = 0;
+    return $self;
 }
 
 ##############################################################################
@@ -128,8 +133,6 @@ sub _iter {
 
         unless (@ready) {
             return unless $sel->count;
-
-            # TODO: Win32 doesn't do select properly on handles...
             @ready = $sel->can_read;
         }
 

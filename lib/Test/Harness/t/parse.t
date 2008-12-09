@@ -12,13 +12,13 @@ BEGIN {
     }
 }
 
-use Test::More tests => 268;
+use Test::More tests => 282;
 use IO::c55Capture;
 
 use File::Spec;
 
 use TAP::Parser;
-use TAP::Parser::Iterator;
+use TAP::Parser::IteratorFactory;
 
 sub _get_results {
     my $parser = shift;
@@ -40,6 +40,8 @@ my ( $PARSER, $PLAN, $PRAGMA, $TEST, $COMMENT, $BAILOUT, $UNKNOWN, $YAML, $VERSI
   TAP::Parser::Result::YAML
   TAP::Parser::Result::Version
 );
+
+my $factory = TAP::Parser::IteratorFactory->new;
 
 my $tap = <<'END_TAP';
 TAP version 13
@@ -220,7 +222,7 @@ ok $test->is_actual_ok,
   '... and the correct boolean version of is_actual_ok()';
 is $test->number, 5, '... and have the correct test number';
 ok !$test->description, '... and skipped tests have no description';
-is $test->directive, 'SKIP', '... and teh correct directive';
+is $test->directive, 'SKIP', '... and the correct directive';
 is $test->explanation, 'we have no description',
   '... but we should have an explanation';
 ok $test->has_skip, '... and it is a SKIPped test';
@@ -349,7 +351,7 @@ END_TAP
 my $aref = [ split /\n/ => $tap ];
 
 can_ok $PARSER, 'new';
-$parser = $PARSER->new( { stream => TAP::Parser::Iterator->new($aref) } );
+$parser = $PARSER->new( { stream => $factory->make_iterator($aref) } );
 isa_ok $parser, $PARSER, '... and calling it should succeed';
 
 # results() is sane?
@@ -435,29 +437,6 @@ is $test->raw, 'ok 2 - read the rest of the file',
 
 is scalar $parser->passed, 2,
   'Empty junk lines should not affect the correct number of tests passed';
-
-# coverage tests
-{
-
-    # calling a TAP::Parser internal method with a 'foreign' class
-
-    my $foreigner = bless {}, 'Foreigner';
-
-    my @die;
-
-    eval {
-        local $SIG{__DIE__} = sub { push @die, @_ };
-
-        TAP::Parser::_stream $foreigner, qw(a b c);
-    };
-
-    unless ( is @die, 1, 'coverage testing for TAP::Parser accessors' ) {
-        diag " >>> $_ <<<\n" for @die;
-    }
-
-    like pop @die, qr/_stream[(][)] may not be set externally/,
-      '... and we died with expected message';
-}
 
 {
 
@@ -662,10 +641,10 @@ END_TAP
 
     _get_results($parser);
 
-    ok !$parser->failed;
-    ok $parser->todo_passed;
+    ok !$parser->failed, 'parser didnt fail';
+    ok $parser->todo_passed, '... and todo_passed is true';
 
-    ok !$parser->has_problems, 'and has_problems is false';
+    ok !$parser->has_problems, '... and has_problems is false';
 
     # now parse_errors
 
@@ -679,11 +658,11 @@ END_TAP
 
     _get_results($parser);
 
-    ok !$parser->failed;
-    ok !$parser->todo_passed;
-    ok $parser->parse_errors;
+    ok !$parser->failed,      'parser didnt fail';
+    ok !$parser->todo_passed, '... and todo_passed is false';
+    ok $parser->parse_errors, '... and parse_errors is true';
 
-    ok $parser->has_problems;
+    ok $parser->has_problems, '... and has_problems';
 
     # Now wait and exit are hard to do in an OS platform-independent way, so
     # we won't even bother
@@ -701,27 +680,27 @@ END_TAP
 
     $parser->wait(1);
 
-    ok !$parser->failed;
-    ok !$parser->todo_passed;
-    ok !$parser->parse_errors;
+    ok !$parser->failed,       'parser didnt fail';
+    ok !$parser->todo_passed,  '... and todo_passed is false';
+    ok !$parser->parse_errors, '... and parse_errors is false';
 
-    ok $parser->wait;
+    ok $parser->wait, '... and wait is set';
 
-    ok $parser->has_problems;
+    ok $parser->has_problems, '... and has_problems';
 
     # and use the same for exit
 
     $parser->wait(0);
     $parser->exit(1);
 
-    ok !$parser->failed;
-    ok !$parser->todo_passed;
-    ok !$parser->parse_errors;
-    ok !$parser->wait;
+    ok !$parser->failed,       'parser didnt fail';
+    ok !$parser->todo_passed,  '... and todo_passed is false';
+    ok !$parser->parse_errors, '... and parse_errors is false';
+    ok !$parser->wait,         '... and wait is not set';
 
-    ok $parser->exit;
+    ok $parser->exit, '... and exit is set';
 
-    ok $parser->has_problems;
+    ok $parser->has_problems, '... and has_problems';
 }
 
 {
@@ -807,10 +786,6 @@ END_TAP
 
     @ISA = qw(TAP::Parser::Iterator);
 
-    sub new {
-        return bless {}, shift;
-    }
-
     sub next_raw {
         die 'this is the dying iterator';
     }
@@ -840,7 +815,11 @@ END_TAP
         $parser->_stream($stream);
 
         # build a new grammar
-        my $grammar = TAP::Parser::Grammar->new($stream);
+        my $grammar = TAP::Parser::Grammar->new(
+            {   stream => $stream,
+                parser => $parser
+            }
+        );
 
         # replace our grammar with this new one
         $parser->_grammar($grammar);
@@ -872,7 +851,11 @@ END_TAP
         $parser->_stream($stream);
 
         # build a new grammar
-        my $grammar = TAP::Parser::Grammar->new($stream);
+        my $grammar = TAP::Parser::Grammar->new(
+            {   stream => $stream,
+                parser => $parser
+            }
+        );
 
         # replace our grammar with this new one
         $parser->_grammar($grammar);
@@ -1017,4 +1000,41 @@ END_TAP
     }
 
     is_deeply [ sort keys %reachable ], [@states], "all states reachable";
+}
+
+{
+
+    # exit, wait, ignore_exit interactions
+
+    my @truth = (
+        [ 0, 0, 0, 0 ],
+        [ 0, 0, 1, 0 ],
+        [ 1, 0, 0, 1 ],
+        [ 1, 0, 1, 0 ],
+        [ 1, 1, 0, 1 ],
+        [ 1, 1, 1, 0 ],
+        [ 0, 1, 0, 1 ],
+        [ 0, 1, 1, 0 ],
+    );
+
+    for my $t (@truth) {
+        my ( $wait, $exit, $ignore_exit, $has_problems ) = @$t;
+        my $test_parser = sub {
+            my $parser = shift;
+            $parser->wait($wait);
+            $parser->exit($exit);
+            ok $has_problems ? $parser->has_problems : !$parser->has_problems,
+              "exit=$exit, wait=$wait, ignore=$ignore_exit";
+        };
+
+        my $parser = TAP::Parser->new( { tap => "1..1\nok 1\n" } );
+        $parser->ignore_exit($ignore_exit);
+        $test_parser->($parser);
+
+        $test_parser->(
+            TAP::Parser->new(
+                { tap => "1..1\nok 1\n", ignore_exit => $ignore_exit }
+            )
+        );
+    }
 }

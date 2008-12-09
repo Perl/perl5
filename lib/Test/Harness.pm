@@ -28,6 +28,7 @@ use vars qw(
   $Timer
   $Strap
   $has_time_hires
+  $IgnoreExit
 );
 
 # $ML $Last_ML_Print
@@ -43,11 +44,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -73,8 +74,9 @@ $Debug   = $ENV{HARNESS_DEBUG}   || 0;
 $Switches = '-w';
 $Columns = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
 $Columns--;    # Some shells have trouble with a full line of text.
-$Timer = $ENV{HARNESS_TIMER} || 0;
-$Color = $ENV{HARNESS_COLOR} || 0;
+$Timer      = $ENV{HARNESS_TIMER}       || 0;
+$Color      = $ENV{HARNESS_COLOR}       || 0;
+$IgnoreExit = $ENV{HARNESS_IGNORE_EXIT} || 0;
 
 =head1 SYNOPSIS
 
@@ -225,9 +227,7 @@ sub _new_harness {
     my $sub_args = shift || {};
 
     my ( @lib, @switches );
-    for my $opt (
-        split_shell( $Switches, $ENV{HARNESS_PERL_SWITCHES} ) )
-    {
+    for my $opt ( split_shell( $Switches, $ENV{HARNESS_PERL_SWITCHES} ) ) {
         if ( $opt =~ /^ -I (.*) $ /x ) {
             push @lib, $1;
         }
@@ -243,12 +243,13 @@ sub _new_harness {
     my $verbosity = ( $Verbose ? ( $Verbose !~ /\d/ ) ? 1 : $Verbose : 0 );
 
     my $args = {
-        timer      => $Timer,
-        directives => $Directives,
-        lib        => \@lib,
-        switches   => \@switches,
-        color      => $Color,
-        verbosity  => $verbosity,
+        timer       => $Timer,
+        directives  => $Directives,
+        lib         => \@lib,
+        switches    => \@switches,
+        color       => $Color,
+        verbosity   => $verbosity,
+        ignore_exit => $IgnoreExit,
     };
 
     $args->{stdout} = $sub_args->{out}

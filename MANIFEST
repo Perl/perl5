@@ -2653,23 +2653,29 @@ lib/TAP/Formatter/Console.pm		A parser for Test Anything Protocol
 lib/TAP/Formatter/Console/ParallelSession.pm	A parser for Test Anything Protocol
 lib/TAP/Formatter/Console/Session.pm	A parser for Test Anything Protocol
 lib/TAP/Harness.pm			A parser for Test Anything Protocol
+lib/TAP/Object.pm			A parser for Test Anything Protocol
 lib/TAP/Parser.pm			A parser for Test Anything Protocol
 lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Grammar.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Array.pm	A parser for Test Anything Protocol
+lib/TAP/Parser/IteratorFactory.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Process.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Stream.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Multiplexer.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Bailout.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Comment.pm	A parser for Test Anything Protocol
+lib/TAP/Parser/ResultFactory.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Plan.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Pragma.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Test.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Unknown.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Version.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/YAML.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Scheduler/Job.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Scheduler.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Scheduler/Spinner.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Source/Perl.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Utils.pm			A parser for Test Anything Protocol
@@ -2719,14 +2725,19 @@ lib/Test/Harness/t/iterators.t		Test::Harness test
 lib/Test/Harness/t/multiplexer.t	Test::Harness test
 lib/Test/Harness/t/nofork-mux.t		Test::Harness test
 lib/Test/Harness/t/nofork.t		Test::Harness test
+lib/Test/Harness/t/object.t		Test::Harness test
+lib/Test/Harness/t/parser-config.t	Test::Harness test
+lib/Test/Harness/t/parser-subclass.t	Test::Harness test
 lib/Test/Harness/t/parse.t		Test::Harness test
 lib/Test/Harness/t/premature-bailout.t	Test::Harness test
 lib/Test/Harness/t/process.t		Test::Harness test
+lib/Test/Harness/t/proveenv.t		Test::Harness test
 lib/Test/Harness/t/prove.t		Test::Harness test
 lib/Test/Harness/t/proverc.t		Test::Harness test
 lib/Test/Harness/t/proverun.t		Test::Harness test
 lib/Test/Harness/t/regression.t		Test::Harness test
 lib/Test/Harness/t/results.t		Test::Harness test
+lib/Test/Harness/t/scheduler.t		Test::Harness test
 lib/Test/Harness/t/source.t		Test::Harness test
 lib/Test/Harness/t/spool.t		Test::Harness test
 lib/Test/Harness/t/state.t		Test::Harness test
@@ -3618,6 +3629,7 @@ t/lib/dprof/test7_v		Perl code profiler tests
 t/lib/dprof/test8_t		Perl code profiler tests
 t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
+t/lib/EmptyParser.pm		Module for testing Test::Harness
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
@@ -3646,8 +3658,16 @@ t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
+t/lib/MyCustom.pm		Module for testing Test::Harness
+t/lib/MyGrammar.pm		Module for testing Test::Harness
+t/lib/MyIteratorFactory.pm	Module for testing Test::Harness
+t/lib/MyIterator.pm		Module for testing Test::Harness
+t/lib/MyPerlSource.pm		Module for testing Test::Harness
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
+t/lib/MyResultFactory.pm	Module for testing Test::Harness
+t/lib/MyResult.pm		Module for testing Test::Harness
+t/lib/MySource.pm		Module for testing Test::Harness
 t/lib/NoFork.pm			Module for testing Test::Harness
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
@@ -3718,6 +3738,9 @@ t/lib/source_tests/source		Test data for Test::Harness
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/subclass_tests/non_perl_source	Test data for Test::Harness
+t/lib/subclass_tests/perl_source	Test data for Test::Harness
+t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
