@@ -15,7 +15,7 @@ use Test::More;
 use App::Prove::State;
 
 sub mn {
-    my $pfx = $ENV{PERL_CORE} ? '../lib/Test/Harness/' : '';
+    my $pfx = $ENV{PERL_CORE} ? '../ext/Test/Harness/' : '';
     return map {"$pfx$_"} @_;
 }
 
