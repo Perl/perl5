@@ -3199,6 +3199,8 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 		}
 #endif
 	    }
+	} else {
+	    SAVE_ERRNO;   /* This is here only to silence compiler warnings */
 	}
         result = PerlSIO_fclose(stdio);
 	/* We treat error from stdio as success if we invalidated
