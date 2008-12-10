@@ -2025,51 +2025,60 @@ PP(pp_eof)
 {
     dVAR; dSP;
     GV *gv;
+    IO *io;
+    MAGIC *mg;
 
-    if (MAXARG == 0) {
-	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
-	    IO *io;
-	    gv = PL_last_in_gv = GvEGV(PL_argvgv);
-	    io = GvIO(gv);
-	    if (io && !IoIFP(io)) {
-		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
-		    IoLINES(io) = 0;
-		    IoFLAGS(io) &= ~IOf_START;
-		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
-		    if ( GvSV(gv) ) {
-			sv_setpvs(GvSV(gv), "-");
-		    }
-		    else {
-			GvSV(gv) = newSVpvs("-");
-		    }
-		    SvSETMAGIC(GvSV(gv));
-		}
-		else if (!nextargv(gv))
-		    RETPUSHYES;
-	    }
-	}
-	else
-	    gv = PL_last_in_gv;			/* eof */
-    }
-    else
+    if (MAXARG)
 	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
+    else if (PL_op->op_flags & OPf_SPECIAL)
+	gv = PL_last_in_gv = GvEGV(PL_argvgv);	/* eof() - ARGV magic */
+    else
+	gv = PL_last_in_gv;			/* eof */
 
-    if (gv) {
-	IO * const io = GvIO(gv);
-	MAGIC * mg;
-	if (io && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
-	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	    PUTBACK;
-	    ENTER;
-	    call_method("EOF", G_SCALAR);
-	    LEAVE;
-	    SPAGAIN;
-	    RETURN;
+    if (!gv)
+	RETPUSHNO;
+
+    if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	/*
+	 * in Perl 5.12 and later, the additional paramter is a bitmask:
+	 * 0 = eof
+	 * 1 = eof(FH)
+	 * 2 = eof()  <- ARGV magic
+	 */
+	if (MAXARG)
+	    mPUSHi(1);		/* 1 = eof(FH) - simple, explicit FH */
+	else if (PL_op->op_flags & OPf_SPECIAL)
+	    mPUSHi(2);		/* 2 = eof()   - ARGV magic */
+	else
+	    mPUSHi(0);		/* 0 = eof     - simple, implicit FH */
+	PUTBACK;
+	ENTER;
+	call_method("EOF", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
+    if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
+	if (io && !IoIFP(io)) {
+	    if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
+		IoLINES(io) = 0;
+		IoFLAGS(io) &= ~IOf_START;
+		do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
+		if (GvSV(gv))
+		    sv_setpvs(GvSV(gv), "-");
+		else
+		    GvSV(gv) = newSVpvs("-");
+		SvSETMAGIC(GvSV(gv));
+	    }
+	    else if (!nextargv(gv))
+		RETPUSHYES;
 	}
     }
 
-    PUSHs(boolSV(!gv || do_eof(gv)));
+    PUSHs(boolSV(do_eof(gv)));
     RETURN;
 }
 
