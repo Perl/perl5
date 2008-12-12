@@ -1,8 +1,30 @@
 Revision history for Perl extension Win32API::File.
 
+0.1101 by Alexandr Ciornii 2008-11-17
+        - require Win32.pm (not core on Cygwin 5.8.8)
+        - file.t uses Win32.pm only if necessary
+
+0.1100 by Alexandr Ciornii 2008-11-08
+        - license in Makefile.PL and README
+
+0.1001_02 by Alexandr Ciornii 2008-11-01
+        - list of changes from perl 5.10
+        - adaptation of core perl changes for CPAN
+        - ExtUtils::Myconst2perl hidden from indexing
+        - pod.t
+        - better Makefile.PL
+
+0.1001_01 (perl 5.10)
+        - tests adapted for core
+        - file.t moved from string checking to error code check
+        - file.t uses File::Spec->tmpdir()
+        - require Math::BigInt only if not in 64-bit mode
+        - remove indirect object notation in File.pm
+        - "Exterminate PL_na" by Nicholas Clark
+
 0.1001 2006-07-02 14:04
 	- Minor doc tweak, release as standalone for sychronization with
-	  with version in bleadperl (future 5.10)
+	  version in bleadperl (future 5.10)
 
 0.10 2005-09-09
 	- Added GetFileAttributes() function and corresponding constants.

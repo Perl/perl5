@@ -1,17 +1,20 @@
 #!/usr/bin/perl -w
+use 5.001; #not tested
 use ExtUtils::MakeMaker;
 use Config;
 use strict;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
+unless ($^O eq "MSWin32" || $^O eq "cygwin" || $^O eq "interix") { #not tested on Interix
+    die "OS unsupported\n";
+}
+
 WriteMakefile(
     'NAME'	=> 'Win32API::File',
     'VERSION_FROM' => 'File.pm', # finds $VERSION
     (  $Config{archname} =~ /-object\b/i  ?  ( 'CAPI' => 'TRUE' )  :  ()  ),
-    (  $] < 5.005  ?  ()  :
-	( 'AUTHOR'		=> 'Tye McQueen <tye@metronet.com>',
-	  'ABSTRACT_FROM'	=> 'File.pm' )
-    ),
+    'AUTHOR'		=> 'Tye McQueen <tye@metronet.com>',
+    'ABSTRACT_FROM'	=> 'File.pm',
     'postamble' => { IMPORT_LIST => [qw(/._/ !/[a-z]/ :MEDIA_TYPE)],
 		     IFDEF => "!/[a-z\\d]/",
 		     CPLUSPLUS => 1,
@@ -20,6 +23,17 @@ WriteMakefile(
 		     NO_REBUILD => 1,
 		   },
     (  ! $Config{libperl}  ?  ()  :  ( LIBPERL_A => $Config{libperl} )  ),
+    'INSTALLDIRS'   => ($] >= 5.008009 ? 'perl' : 'site'),
+    ($ExtUtils::MakeMaker::VERSION ge '6.31'? 
+     ('LICENSE'	=> 'perl', ) : ()),
+    ($ExtUtils::MakeMaker::VERSION ge '6.48'? 
+     ('MIN_PERL_VERSION' => 5.001,) : ()),
+    'PREREQ_PM'	=> {
+        'IO::File' => 0, #build
+        'File::Spec' => 0, #build
+        'Math::BigInt' => 0,
+        'Win32' => 0,
+    }
 );
 
 # Replacement for MakeMaker's "const2perl section" for versions
