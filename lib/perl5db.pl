@@ -941,6 +941,14 @@ sub eval {
 #   + Added macosx_get_fork_TTY support 
 # Changes: 1.30: Mar 06, 2007 Andreas Koenig <andk@cpan.org>
 #   + Added HistFile, HistSize
+# Changes: 1.31
+#   + Remove support for assertions and -A
+#   + stop NEXT::AUTOLOAD from emitting warnings under the debugger. RT #25053
+#   + "update for Mac OS X 10.5" [finding the tty device]
+#   + "What I needed to get the forked debugger to work" [on VMS]
+#   + [perl #57016] debugger: o warn=0 die=0 ignored
+#   + Note, but don't use, PERLDBf_SAVESRC
+#   + Fix #7013: lvalue subs not working inside debugger
 ########################################################################
 
 =head1 DEBUGGER INITIALIZATION
