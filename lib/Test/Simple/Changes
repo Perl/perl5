@@ -1,3 +1,7 @@
+0.86  Sun Nov  9 01:09:05 PST 2008
+    Same as 0.85_01
+
+
 0.85_01  Thu Oct 23 18:57:38 PDT 2008
     New Features
     * cmp_ok() now displays the error if the comparison throws one.
