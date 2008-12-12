@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Wed Jul  9 14:12:37 2008
+ * Configuration time: Fri Dec 12 15:47:15 2008
  * Configured by     : shay
  * Target system     : 
  */
@@ -1075,9 +1075,13 @@
 /* HASATTRIBUTE_UNUSED:
  *	Can we handle GCC attribute for unused variables and arguments
  */
+/* HASATTRIBUTE_DEPRECATED:
+ *	Can we handle GCC attribute for marking deprecated APIs
+ */
 /* HASATTRIBUTE_WARN_UNUSED_RESULT:
  *	Can we handle GCC attribute for warning on unused results
  */
+/*#define HASATTRIBUTE_DEPRECATED	/**/
 /*#define HASATTRIBUTE_FORMAT	/**/
 /*#define PRINTF_FORMAT_NULL_OK	/**/
 /*#define HASATTRIBUTE_NORETURN	/**/
@@ -2389,9 +2393,30 @@
  *	be included.  This is the location of the ndbm.h compatibility file
  *	in Debian 4.0.
  */
+/* NDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
+/* GDBMNDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <gdbm/ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
+/* GDBM_NDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <gdbm-ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
 /*#define I_NDBM	/**/
 /*#define I_GDBMNDBM	/**/
 /*#define I_GDBM_NDBM	/**/
+/*#define NDBM_H_USES_PROTOTYPES	/**/
+/*#define GDBMNDBM_H_USES_PROTOTYPES	/**/
+/*#define GDBM_NDBM_H_USES_PROTOTYPES	/**/
 
 /* I_NETDB:
  *	This symbol, if defined, indicates that <netdb.h> exists and
@@ -2730,6 +2755,12 @@
  *	various socket calls (just the base type, not the pointer-to).
  */
 #define Sock_size_t		int /**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR unsigned char	/**/
 
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
@@ -3239,11 +3270,12 @@
  */
 /*#define	EBCDIC 		/**/
 
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
+/* PERL_USE_DEVEL:
+ *	This symbol, if defined, indicates that Perl was configured with
+ *	-Dusedevel, to enable development features.  This should not be
+ *	done for production builds.
  */
-#define STDCHAR unsigned char	/**/
+/*#define	PERL_USE_DEVEL		/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -3939,6 +3971,37 @@
  */
 #define	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_CTIME64:
+ *	This symbol, if defined, indicates that the ctime64 () routine is
+ *	available to do the 64bit variant of ctime ()
+ */
+/* HAS_LOCALTIME64:
+ *	This symbol, if defined, indicates that the localtime64 () routine is
+ *	available to do the 64bit variant of localtime ()
+ */
+/* HAS_GMTIME64:
+ *	This symbol, if defined, indicates that the gmtime64 () routine is
+ *	available to do the 64bit variant of gmtime ()
+ */
+/* HAS_MKTIME64:
+ *	This symbol, if defined, indicates that the mktime64 () routine is
+ *	available to do the 64bit variant of mktime ()
+ */
+/* HAS_DIFFTIME64:
+ *	This symbol, if defined, indicates that the difftime64 () routine is
+ *	available to do the 64bit variant of difftime ()
+ */
+/* HAS_ASCTIME64:
+ *	This symbol, if defined, indicates that the asctime64 () routine is
+ *	available to do the 64bit variant of asctime ()
+ */
+/*#define	HAS_CTIME64		/**/
+/*#define	HAS_LOCALTIME64		/**/
+/*#define	HAS_GMTIME64		/**/
+/*#define	HAS_MKTIME64		/**/
+/*#define	HAS_DIFFTIME64		/**/
+/*#define	HAS_ASCTIME64		/**/
+
 /* HAS_TIMEGM:
  *	This symbol, if defined, indicates that the timegm routine is
  *	available to do the opposite of gmtime ()
@@ -4429,9 +4492,6 @@
  *	This symbol contains the minimum value for the time_t offset that
  *	the system function gmtime () accepts, and defaults to 0
  */
-#define GMTIME_MAX	2147483647	/**/
-#define GMTIME_MIN	0	/**/
-
 /* LOCALTIME_MAX:
  *	This symbol contains the maximum value for the time_t offset that
  *	the system function localtime () accepts, and defaults to 0
@@ -4440,6 +4500,8 @@
  *	This symbol contains the minimum value for the time_t offset that
  *	the system function localtime () accepts, and defaults to 0
  */
+#define GMTIME_MAX		2147483647	/**/
+#define GMTIME_MIN		0	/**/
 #define LOCALTIME_MAX	2147483647	/**/
 #define LOCALTIME_MIN	0	/**/
 
