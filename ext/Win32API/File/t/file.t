@@ -24,7 +24,7 @@ END {print "not ok 1\n" unless $loaded;}
 # the ../lib directory in @INC will no longer work once
 # we chdir() into the TEMP directory.
 
-use Win32;
+require Win32 unless defined &Win32::FormatMessage;
 use File::Spec;
 use Carp;
 use Carp::Heavy;
