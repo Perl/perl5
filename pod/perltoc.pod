@@ -6499,6 +6499,8 @@ B<-V>
 
 =item DESCRIPTION
 
+=item Notice
+
 =item Incompatible Changes
 
 =item Core Enhancements
@@ -6551,7 +6553,7 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 
 =over 4
 
-=item debugger upgraded to version 1.30
+=item debugger upgraded to version 1.31
 
 =item F<perlthanks>
 
@@ -6684,6 +6686,8 @@ t/uni/chr.t, t/uni/greek.t, t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
 
 =item DESCRIPTION
 
+=item Notice
+
 =item Incompatible Changes
 
 =item Core Enhancements
@@ -6736,7 +6740,7 @@ C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
 
 =over 4
 
-=item debugger upgraded to version 1.30
+=item debugger upgraded to version 1.31
 
 =item F<perlthanks>
 
