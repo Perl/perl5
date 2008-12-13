@@ -195,7 +195,7 @@ pluggable sub-modules. The bundled version is 3.8
 =item *
 
 C<Module::CoreList> is a hash of hashes that is keyed on perl version as
-indicated in C<$]>. The bundled version is 2.16
+indicated in C<$]>. The bundled version is 2.17
 
 =item *
 
@@ -1105,10 +1105,28 @@ no longer installed. Many more tests have been added to C<XS::APItest>.
 
 =head1 Utility Changes
 
-=head2 debugger upgraded to version 1.30
+=head2 debugger upgraded to version 1.31
+
+=over 4
+
+=item *
 
 Andreas KE<ouml>nig contributed two functions to save and load the debugger
 history.
+
+=item *
+
+C<NEXT::AUTOLOAD> no longer emits warnings under the debugger.
+
+=item *
+
+The debugger should now correctly find tty the device on OS X 10.5 and VMS.
+
+=item *
+
+LVALUE subs now work inside the debugger.
+
+=back
 
 =head2 F<perlthanks>
 
