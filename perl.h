@@ -127,7 +127,7 @@
 
 #  ifdef USE_5005THREADS
 struct perl_thread;
-#    define tTHX	register struct perl_thread *
+#    define tTHX	struct perl_thread *
 #    define pTHX	register struct perl_thread *thr PERL_UNUSED_DECL
 #    define aTHX	thr
 #    define dTHR	dNOOP /* only backward compatibility */
