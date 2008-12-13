@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.40";
+$VERSION                = "1.42";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $DO_NOT_USE_PREFIX      = 0;
@@ -689,10 +689,11 @@ sub _extract_file {
             }
         }
 
-        
-        ### '.' is the directory delimiter, of which the first one has to
-        ### be escaped/changed.
-        map tr/\./_/, @dirs if ON_VMS;        
+        ### '.' is the directory delimiter on VMS, which has to be escaped
+        ### or changed to '_' on vms.  vmsify is used, because older versions
+        ### of vmspath do not handle this properly.
+        ### Must not add a '/' to an empty directory though.
+        map { length() ? VMS::Filespec::vmsify($_.'/') : $_ } @dirs if ON_VMS;        
 
         my ($cwd_vol,$cwd_dir,$cwd_file) 
                     = File::Spec->splitpath( $cwd );
@@ -714,7 +715,8 @@ sub _extract_file {
                             $cwd_vol, File::Spec->catdir( @cwd, @dirs ), '' 
                         );
 
-        ### catdir() returns undef if the path is longer than 255 chars on VMS
+        ### catdir() returns undef if the path is longer than 255 chars on 
+        ### older VMS systems.
         unless ( defined $dir ) {
             $^W && $self->_error( qq[Could not compose a path for '$dirs'\n] );
             return;
@@ -789,7 +791,7 @@ sub _extract_file {
             $self->_error( qq[Could not update timestamp] );
     }
 
-    if( $CHOWN && CAN_CHOWN ) {
+    if( $CHOWN && CAN_CHOWN->() ) {
         chown $entry->uid, $entry->gid, $full or
             $self->_error( qq[Could not set uid/gid on '$full'] );
     }
@@ -1298,6 +1300,10 @@ I<Stuffit Expander> on MacOS.
 Be aware that the file's type/creator and resource fork will be lost,
 which is usually what you want in cross-platform archives.
 
+Instead of a filename, you can also pass it an existing C<Archive::Tar::File>
+object from, for example, another archive. The object will be clone, and
+effectively be a copy of the original, not an alias.
+
 Returns a list of C<Archive::Tar::File> objects that were just added.
 
 =cut
@@ -1308,6 +1314,15 @@ sub add_files {
 
     my @rv;
     for my $file ( @files ) {
+
+        ### you passed an Archive::Tar::File object
+        ### clone it so we don't accidentally have a reference to
+        ### an object from another archive
+        if( UNIVERSAL::isa( $file,'Archive::Tar::File' ) ) {
+            push @rv, $file->clone; 
+            next;
+        }
+    
         unless( -e $file || -l $file ) {
             $self->_error( qq[No such file: '$file'] );
             next;

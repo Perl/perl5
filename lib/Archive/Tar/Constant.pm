@@ -78,7 +78,7 @@ use constant BZIP           => do { !$ENV{'PERL5_AT_NO_BZIP'} and
 use constant GZIP_MAGIC_NUM => qr/^(?:\037\213|\037\235)/;
 use constant BZIP_MAGIC_NUM => qr/^BZh\d/;
 
-use constant CAN_CHOWN      => do { ($> == 0 and $^O ne "MacOS" and $^O ne "MSWin32") };
+use constant CAN_CHOWN      => sub { ($> == 0 and $^O ne "MacOS" and $^O ne "MSWin32") };
 use constant CAN_READLINK   => ($^O ne 'MSWin32' and $^O !~ /RISC(?:[ _])?OS/i and $^O ne 'VMS');
 use constant ON_UNIX        => ($^O ne 'MSWin32' and $^O ne 'MacOS' and $^O ne 'VMS');
 use constant ON_VMS         => $^O eq 'VMS'; 
