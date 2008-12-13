@@ -1482,9 +1482,9 @@ h2pl/mkvars			Program to make .pl from .ph files
 h2pl/README			How to turn .ph files into .pl files
 h2pl/tcbreak			cbreak test routine using .ph
 h2pl/tcbreak2			cbreak test routine using .pl
-haiku/haikuish.h		Header for the Haiku port
 haiku/Haiku/Haiku.pm		Haiku extension Perl module
 haiku/Haiku/Haiku.xs		Haiku extension external subroutines
+haiku/haikuish.h		Header for the Haiku port
 haiku/Haiku/Makefile.PL		Haiku extension makefile writer
 handy.h				Handy definitions
 hints/3b1cc			Hints for named architecture
@@ -2017,19 +2017,19 @@ lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
-lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
-lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
 lib/ExtUtils/t/basic_finish.pl	See if MakeMaker can build a module (part 2)
+lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
+lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
+lib/ExtUtils/t/cp.t		See if ExtUtils::Command works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
-lib/ExtUtils/t/cp.t		See if ExtUtils::Command works
 lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
@@ -2043,10 +2043,10 @@ lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
+lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
 lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
 lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
-lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -2795,8 +2795,8 @@ lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/man-options.t		podlators test
-lib/Pod/t/man-utf8.t		podlators test
 lib/Pod/t/man.t			podlators test
+lib/Pod/t/man-utf8.t		podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
@@ -2807,8 +2807,8 @@ lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/termcap.t		podlators test
 lib/Pod/t/text-encoding.t		podlators test
 lib/Pod/t/text-options.t		podlators test
-lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/text.t		podlators test
+lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
@@ -2877,8 +2877,8 @@ lib/Test/Simple/t/Builder/carp.t	Test::Builder test
 lib/Test/Simple/t/Builder/create.t	Test::Builder test 
 lib/Test/Simple/t/Builder/curr_test.t	Test::Builder->curr_test tests
 lib/Test/Simple/t/Builder/details.t	Test::Builder tests
-lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/has_plan2.t	Test::Builder tests
+lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/is_fh.t	Test::Builder tests
 lib/Test/Simple/t/Builder/maybe_regex.t	Test::Builder tests
 lib/Test/Simple/t/Builder/no_diag.t	Test::Builder tests
@@ -3524,8 +3524,8 @@ Porting/repository.pod	How to use the Perl repository
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
-Porting/timecheck.c		Test program for the 2038 fix
 Porting/timecheck2.c		Test program for the 2038 fix
+Porting/timecheck.c		Test program for the 2038 fix
 Porting/valgrindpp.pl		Summarize valgrind reports
 pp.c				Push/Pop code
 pp_ctl.c			Push/Pop code for control flow
@@ -4039,22 +4039,22 @@ t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
 t/op/reg_email.t		See if regex recursion works by parsing email addresses
-t/op/reg_posixcc.t		See if posix characterclasses behave consistantly
 t/op/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr_embed_thr.t	See if regular expressions work with embedded qr// in another thread
 t/op/regexp_qr.t		See if regular expressions work as qr//
-t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
-t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
+t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
+t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/op/reg_fold.t			See if case folding works properly
 t/op/reg_mesg.t			See if one can get regular expression errors
 t/op/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
 t/op/reg_nc_tie.t	        Test the tied methods of Tie::Hash::NamedCapture
 t/op/reg_pmod.t			See if regexp /p modifier works as expected
+t/op/reg_posixcc.t		See if posix characterclasses behave consistantly
 t/op/reg_unsafe.t		Check for unsafe match vars
 t/op/repeat.t			See if x operator works
 t/op/reset.t			See if reset operator works
