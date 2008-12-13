@@ -207,7 +207,52 @@ if( $Debug ) {
         ok( $obj,               "   Object created based on '$type'" );
         ok( !$obj->error,       "       No error logged" );
     }
+    
+    ### test unknown type
+    {   ### must turn on warnings to catch error here
+        local $Archive::Extract::WARN = 1;
+        
+        my $warnings;
+        local $SIG{__WARN__} = sub { $warnings .= "@_" };
+        
+        my $ae = $Class->new( archive => $Me );
+        ok( !$ae,               "   No archive created based on '$Me'" );
+        ok( !$Class->error,     "       Error not captured in class method" );
+        ok( $warnings,          "       Error captured as warning" );
+        like( $warnings, qr/Cannot determine file type for/,
+                                "           Error is: unknown file type" );
+    }                                
 }    
+
+### test multiple errors
+### XXX whitebox test
+{   ### grab a random file from the template, so we can make an object
+    my $ae = Archive::Extract->new( 
+                archive =>  File::Spec->catfile($SrcDir,[keys %$tmpl]->[0]) 
+             );
+    ok( $ae,                    "Archive created" );
+    ok( not($ae->error),        "   No errors yet" );
+
+    ### log a few errors
+    {   local $Archive::Extract::WARN = 0;
+        $ae->_error( $_ ) for 1..5;
+    }
+
+    my $err = $ae->error;
+    ok( $err,                   "   Errors retrieved" );
+    
+    my $expect = join $/, 1..5;
+    is( $err, $expect,          "       As expected" );
+
+    ### this resets the errors
+    ### override the 'check' routine to return false, so we bail out of 
+    ### extract() early and just run the error reset code;
+    {   no warnings qw[once redefine];
+        local *Archive::Extract::check = sub { return }; 
+        $ae->extract;
+    }
+    ok( not($ae->error),        "   Errors erased after ->extract() call" );
+}
 
 ### XXX whitebox test
 ### test __get_extract_dir 
@@ -243,15 +288,18 @@ SKIP: {   my $meth = '__get_extract_dir';
     }        
 }
 
-for my $switch (0,1) {
+### configuration to run in: allow perl or allow binaries
+for my $switch ( [0,1], [1,0] ) {
+    my $cfg = "PP: $switch->[0] Bin: $switch->[1]";
 
-    local $Archive::Extract::PREFER_BIN = $switch;
-    diag("Running extract with PREFER_BIN = $Archive::Extract::PREFER_BIN")
-        if $Debug;
+    local $Archive::Extract::_ALLOW_PURE_PERL   = $switch->[0];
+    local $Archive::Extract::_ALLOW_BIN         = $switch->[1];
+    
+    diag("Running extract with configuration: $cfg") if $Debug;
 
     for my $archive (keys %$tmpl) {
 
-        diag("Extracting $archive") if $Debug;
+        diag("Extracting $archive in config $cfg") if $Debug;
 
         ### check first if we can do the proper
 
@@ -313,7 +361,7 @@ for my $switch (0,1) {
 
             ### test buffers ###
             my $turn_off = !$use_buffer && !$pgm_fail &&
-                            $Archive::Extract::PREFER_BIN;
+                            $Archive::Extract::_ALLOW_BIN;
 
             ### whitebox test ###
             ### stupid warnings ###
@@ -331,20 +379,24 @@ for my $switch (0,1) {
   
                 my $rv = $ae->extract( to => $to );
     
-                ok( $rv, "extract() for '$archive' reports success");
-    
-                diag("Extractor was: " . $ae->_extractor)   if $Debug;
-    
                 SKIP: {
                     my $re  = qr/^No buffer captured/;
                     my $err = $ae->error || '';
               
                     ### skip buffer tests if we dont have buffers or
                     ### explicitly turned them off
-                    skip "No buffers available", 7,
+                    skip "No buffers available", 8
                         if ( $turn_off || !IPC::Cmd->can_capture_buffer)
                             && $err =~ $re;
 
+                    ### skip tests if we dont have an extractor
+                    skip "No extractor available", 8 
+                        if $err =~ /Extract failed; no extractors available/;
+    
+                    ok( $rv, "extract() for '$archive' reports success ($cfg)");
+    
+                    diag("Extractor was: " . $ae->_extractor)   if $Debug;
+    
                     ### if we /should/ have buffers, there should be
                     ### no errors complaining we dont have them...
                     unlike( $err, $re,
@@ -352,10 +404,16 @@ for my $switch (0,1) {
     
                     ### might be 1 or 2, depending wether we extracted 
                     ### a dir too
+                    my $files    = $ae->files || [];
                     my $file_cnt = grep { defined } $file, $dir;
-                    is( scalar @{ $ae->files || []}, $file_cnt,
+                    is( scalar @$files, $file_cnt,
                                     "Found correct number of output files" );
-                    is( $ae->files->[-1], $nix_path,
+                    
+                    ### due to prototypes on is(), if there's no -1 index on
+                    ### the array ref, it'll give a fatal exception:
+                    ### "Modification of non-creatable array value attempted,
+                    ### subscript -1 at -e line 1." So wrap it in do { }
+                    is( do { $files->[-1] }, $nix_path,
                                     "Found correct output file '$nix_path'" );
     
                     ok( -e $abs_path,
