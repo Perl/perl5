@@ -25,6 +25,7 @@ use Data::Dumper;
 use Archive::Tar::Constant;
 
 my $Class   = 'Archive::Tar';
+my $FClass  = $Class . '::File';
 use_ok( $Class );
 
 
@@ -114,7 +115,7 @@ chmod 0644, $COMPRESS_FILE;
 {   my $tar     = $Class->new;
 
     ok( $tar,                       "Object created" );
-    isa_ok( $tar,                   'Archive::Tar');
+    isa_ok( $tar,                   $Class );
 
     local $Archive::Tar::WARN  = 0;
 
@@ -166,26 +167,26 @@ chmod 0644, $COMPRESS_FILE;
         my $tar             = $Class->new;
 
         ### check we got the object
-        ok( $tar,                       "Object created" );
-        isa_ok( $tar,                   'Archive::Tar');
+        ok( $tar,               "Object created" );
+        isa_ok( $tar,           $Class );
 
         ### ->read test
         my @list    = $tar->read( $type );
         my $cnt     = scalar @list;
         my $expect  = scalar __PACKAGE__->get_expect();
 
-        ok( $cnt,           "Reading '$type' using 'read()'" );
-        is( $cnt, $expect,  "   All files accounted for" );
+        ok( $cnt,               "Reading '$type' using 'read()'" );
+        is( $cnt, $expect,      "   All files accounted for" );
 
         for my $file ( @list ) {
-            ok( $file,      "Got File object" );
-            isa_ok( $file,  "Archive::Tar::File" );
+            ok( $file,          "       Got File object" );
+            isa_ok( $file,  $FClass );
 
             ### whitebox test -- make sure find_entry gets the
             ### right files
             for my $test ( $file->full_path, $file ) {
                 is( $tar->_find_entry( $test ), $file,
-                            "   Found proper object" );
+                                "           Found proper object" );
             }
             
             next unless $file->is_file;
@@ -195,10 +196,10 @@ chmod 0644, $COMPRESS_FILE;
                 get_expect_name_and_contents( $name, \@EXPECT_NORMAL );
 
             ### ->fullname!
-            ok($expect_name,"   Found expected file '$name'" );
+            ok($expect_name,    "           Found expected file '$name'" );
 
             like($tar->get_content($name), $expect_content,
-                            "   Content OK" );
+                                "           Content OK" );
         }
 
 
@@ -230,30 +231,30 @@ chmod 0644, $COMPRESS_FILE;
 
     ### check we got the object
     ok( $tar,                       "Object created" );
-    isa_ok( $tar,                   'Archive::Tar');
+    isa_ok( $tar,                   $Class );
 
     ### add the files
     {   my @files = $tar->add_files( @add );
 
         is( scalar @files, scalar @add,
-                                    "Adding files");
-        is( $files[0]->name, 'b',   "   Proper name" );
+                                    "   Adding files");
+        is( $files[0]->name,'b',    "      Proper name" );
 
         SKIP: {
             skip( "You are building perl using symlinks", 1)
                 if ($ENV{PERL_CORE} and $Config{config_args} =~/Dmksymlinks/);
 
             is( $files[0]->is_file, 1,  
-                                    "   Proper type" );
+                                    "       Proper type" );
         }
 
         like( $files[0]->get_content, qr/^bbbbbbbbbbb\s*$/,
-                                    "   Content OK" );
+                                    "       Content OK" );
 
         ### check if we have then in our tar object
         for my $file ( @addunix ) {
             ok( $tar->contains_file($file),
-                                    "   File found in archive" );
+                                    "       File found in archive" );
         }
     }
 
@@ -263,17 +264,33 @@ chmod 0644, $COMPRESS_FILE;
         my @added   = $tar2->add_files( $COMPRESS_FILE );
         my @count   = $tar2->list_files;
 
-        is( scalar @added, 1,       "Added files to secondary archive" );
+        is( scalar @added, 1,       "   Added files to secondary archive" );
         is( scalar @added, scalar @count,
-                                    "   Does not conflict with first archive" );
+                                    "       No conflict with first archive" );
 
         ### check the adding of directories
         my @add_dirs  = File::Spec->catfile( @ROOT );
         my @dirs      = $tar2->add_files( @add_dirs );
         is( scalar @dirs, scalar @add_dirs,
-                                    "Adding dirs");
-        ok( $dirs[0]->is_dir,       "   Proper type" );
+                                    "       Adding dirs");
+        ok( $dirs[0]->is_dir,       "           Proper type" );
     }
+    
+    ### check if we can add a A::T::File object
+    {   my $tar2    = $Class->new;
+        my($added)  = $tar2->add_files( $add[0] );
+        
+        ok( $added,                 "   Added a file '$add[0]' to new object" );
+        isa_ok( $added, $FClass,    "       Object" );           
+
+        my($added2) = $tar2->add_files( $added );
+        ok( $added2,                "       Added an $FClass object" );
+        isa_ok( $added2, $FClass,   "           Object" );           
+        
+        is_deeply( [$added, $added2], [$tar2->get_files],
+                                    "       All files accounted for" );
+        isnt( $added, $added2,      "       Different memory allocations" );
+    }        
 }
 
 ### add data tests ###
@@ -284,16 +301,16 @@ chmod 0644, $COMPRESS_FILE;
 
         ### check we got the object
         ok( $tar,                   "Object created" );
-        isa_ok( $tar,               'Archive::Tar');
+        isa_ok( $tar,               $Class );
 
         ### add a new file item as data
         my $obj = $tar->add_data( @to_add );
 
-        ok( $obj,                   "Adding data" );
-        is( $obj->name, $to_add[0], "   Proper name" );
-        is( $obj->is_file, 1,       "   Proper type" );
+        ok( $obj,                   "   Adding data" );
+        is( $obj->name, $to_add[0], "       Proper name" );
+        is( $obj->is_file, 1,       "       Proper type" );
         like( $obj->get_content, qr/^$to_add[1]\s*$/,
-                                    "   Content OK" );
+                                    "       Content OK" );
     }
 
     {   ### binary data +
@@ -313,12 +330,12 @@ chmod 0644, $COMPRESS_FILE;
 
                 my $obj = $tar->add_data( $path, $data );
 
-                ok( $obj,               "Adding data '$file'" );
+                ok( $obj,               "   Adding data '$file'" );
                 is( $obj->full_path, $path,
-                                        "   Proper name" );
-                ok( $obj->is_file,      "   Proper type" );
+                                        "       Proper name" );
+                ok( $obj->is_file,      "       Proper type" );
                 is( $obj->get_content, $data,
-                                        "   Content OK" );
+                                        "       Content OK" );
             }
         }
     }
@@ -363,7 +380,7 @@ chmod 0644, $COMPRESS_FILE;
 
     ### remove returns the files left, which should be equal to list_files
     is( scalar($tar->remove($remove)), scalar($tar->list_files),
-                                    "Removing file '$remove'" );
+                                    "   Removing file '$remove'" );
 
     ### so what's left should be all expected files minus 1
     is( scalar($tar->list_files), scalar(__PACKAGE__->get_expect) - 1,
@@ -389,9 +406,9 @@ SKIP: {                             ### pesky warnings
 
         ### check if we stringify it ok
         {   my $string = $obj->write;
-            ok( $string,           "Stringified tar file has size" );
+            ok( $string,           "    Stringified tar file has size" );
             cmp_ok( length($string) % BLOCK, '==', 0,
-                                    "Tar archive stringified" );
+                                    "       Tar archive stringified" );
         }
 
         ### write tar tests
@@ -399,18 +416,18 @@ SKIP: {                             ### pesky warnings
 
             {   ### write()
                 ok( $obj->write($out),
-                                    "Wrote tarfile using 'write'" );
+                                    "       Wrote tarfile using 'write'" );
                 check_tar_file( $out );
                 check_tar_object( $obj, $struct );
 
                 ### now read it in again
                 ok( $new->read( $out ),
-                                    "Read '$out' in again" );
+                                    "       Read '$out' in again" );
 
                 check_tar_object( $new, $struct );
 
                 ### now extract it again
-                ok( $new->extract,  "Extracted '$out' with 'extract'" );
+                ok( $new->extract,  "       Extracted '$out' with 'extract'" );
                 check_tar_extract( $new, $struct );
 
                 rm( $out ) unless $NO_UNLINK;
@@ -419,12 +436,12 @@ SKIP: {                             ### pesky warnings
 
             {   ### create_archive()
                 ok( $Class->create_archive( $out, 0, $COMPRESS_FILE ),
-                                    "Wrote tarfile using 'create_archive'" );
+                                    "       Wrote tarfile using 'create_archive'" );
                 check_tar_file( $out );
 
                 ### now extract it again
                 ok( $Class->extract_archive( $out ),
-                                    "Extracted file using 'extract_archive'");
+                                    "       Extracted file using 'extract_archive'");
                 rm( $out ) unless $NO_UNLINK;
             }
         }
@@ -440,19 +457,19 @@ SKIP: {                             ### pesky warnings
 
                 {   ### write()
                     ok($obj->write($out, $compression),
-                                    "Writing compressed file '$out' using 'write'" );
+                                    "       Writing compressed file '$out' using 'write'" );
                     check_compressed_file( $out );
 
                     check_tar_object( $obj, $struct );
 
                     ### now read it in again
                     ok( $new->read( $out ),
-                                    "Read '$out' in again" );
+                                    "       Read '$out' in again" );
                     check_tar_object( $new, $struct );
 
                     ### now extract it again
                     ok( $new->extract,
-                                    "Extracted '$out' again" );
+                                    "       Extracted '$out' again" );
                     check_tar_extract( $new, $struct );
 
                     rm( $out ) unless $NO_UNLINK;
@@ -460,12 +477,12 @@ SKIP: {                             ### pesky warnings
 
                 {   ### create_archive()
                     ok( $Class->create_archive( $out, $compression, $COMPRESS_FILE ),
-                                    "Wrote '$out' using 'create_archive'" );
+                                    "       Wrote '$out' using 'create_archive'" );
                     check_compressed_file( $out );
 
                     ### now extract it again
                     ok( $Class->extract_archive( $out, $compression ),
-                                    "Extracted file using 'extract_archive'");
+                                    "       Extracted file using 'extract_archive'");
                     rm( $out ) unless $NO_UNLINK;
                 }
             }
@@ -494,8 +511,8 @@ SKIP: {                             ### pesky warnings
         for my $arg ( $obj, $obj->full_path ) {
 
             ok( $tar->$meth( $arg ),
-                                    "Extracted '$name' to cwd() with $meth" );
-            ok( -e $obj->full_path, "   Extracted file exists" );
+                                    "   Extract '$name' to cwd() with $meth" );
+            ok( -e $obj->full_path, "       Extracted file exists" );
             rm( $obj->full_path ) unless $NO_UNLINK;
         }
     }
@@ -507,8 +524,8 @@ SKIP: {                             ### pesky warnings
         my $outfile = File::Spec->catfile( $outpath, $$ ); #$obj->full_path );
 
         ok( $tar->$meth( $obj->full_path, $outfile ),
-                                    "Extracted file '$name' to $outpath with $meth" );
-        ok( -e $outfile,            "   Extracted file '$outfile' exists" );
+                                    "   Extract file '$name' to $outpath with $meth" );
+        ok( -e $outfile,            "       Extracted file '$outfile' exists" );
         rm( $outfile ) unless $NO_UNLINK;
     }
 
@@ -537,7 +554,7 @@ SKIP: {                             ### pesky warnings
         my $file    = File::Basename::basename( $COMPRESS_FILE );
 
         ok( $obj,                   "File added" );
-        isa_ok( $obj,               "Archive::Tar::File" );
+        isa_ok( $obj,               $FClass );
 
         ### internal storage ###
         is( $obj->name, $file,      "   Name set to '$file'" );
@@ -557,18 +574,18 @@ SKIP: {                             ### pesky warnings
 
     ### now read it back in, there should be no prefix
     {   ok( $tar->read( $OUT_TAR_FILE ),
-                                    "Tar file read in again" );
+                                    "   Tar file read in again" );
 
         my ($obj) = $tar->get_files;
-        ok( $obj,                   "   File retrieved" );
-        isa_ok( $obj,               "Archive::Tar::File" );
+        ok( $obj,                   "       File retrieved" );
+        isa_ok( $obj, $FClass,      "       Object" );
 
         is( $obj->name, $COMPRESS_FILE,
-                                    "   Name now set to '$COMPRESS_FILE'" );
-        is( $obj->prefix, '',       "   Prefix now empty" );
+                                    "       Name now set to '$COMPRESS_FILE'" );
+        is( $obj->prefix, '',       "       Prefix now empty" );
 
         my $re = quotemeta $COMPRESS_FILE;
-        like( $obj->raw, qr/^$re/,  "   Prefix + name in name slot of header" );
+        like( $obj->raw, qr/^$re/,  "       Prefix + name in name slot of header" );
     }
 
     rm( $OUT_TAR_FILE ) unless $NO_UNLINK;
