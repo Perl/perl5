@@ -9,7 +9,7 @@ the 5.8.9 release.
 
 =head1 Notice
 
-The 5.8.9 will be the last significant release of the 5.8.x
+The 5.8.9 release will be the last significant release of the 5.8.x
 series. Any future releases of 5.8.x will likely only be to deal with
 security issues, and platform build failures. Hence you should look to
 migrating to 5.10.x, if you have not started already.
@@ -88,7 +88,7 @@ This variable gives the native status returned by the last pipe close,
 backtick command, successful call to C<wait> or C<waitpid>, or from the
 C<system> operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
 
-=item ${^UTF8CACHE}
+=item C<${^UTF8CACHE}>
 
 This variable controls the state of the internal UTF-8 offset caching code.
 1 for on (the default), 0 for off, -1 to debug the caching code by checking
@@ -99,7 +99,7 @@ all its results against linear scans, and panicing on any discrepancy.
 =head2 C<readpipe> is now overridable
 
 The built-in function C<readpipe> is now overridable. Overriding it permits
-also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
+also to override its operator counterpart, C<qx//> (also known as C<``>).
 
 =head2 simple exception handling macros
 
@@ -237,7 +237,7 @@ C<B> upgraded from 1.09_01 to 1.19
 
 =item *
 
-provides new PAD related abstraction macros C<B::NV::COP_SEQ_RANGE_LOW>,
+provides new pad related abstraction macros C<B::NV::COP_SEQ_RANGE_LOW>,
 C<B::NV::COP_SEQ_RANGE_HIGH>, C<B::NV::PARENT_PAD_INDEX>,
 C<B::NV::PARENT_FAKELEX_FLAGS>, which hides the difference in storage in
 5.10.0 and later.
@@ -266,7 +266,7 @@ bugs fixed in the handling of C<PMOP>s.
 =item *
 
 C<B::BM::PREVIOUS> returns now C<U32>, not C<U16>.
-C<B::CV::START> and C<B:CV::ROOT> return now NULL on an XSUB,
+C<B::CV::START> and C<B:CV::ROOT> return now C<NULL> on an XSUB,
 C<B::CV::XSUB> and C<B::CV::XSUBANY> return 0 on a non-XSUB.
 
 =back
@@ -283,13 +283,13 @@ C<B::Concise> upgraded to 0.76
 
 =item *
 
-new option B<-src> causes the rendering of each statement (starting with
+new option C<-src> causes the rendering of each statement (starting with
 the nextstate OP) to be preceded by the first line of source code that
 generates it.
 
 =item *
 
-new option B<-stash="somepackage">, C<require>s "somepackage", and then renders
+new option C<-stash="somepackage">, C<require>s "somepackage", and then renders
 each function defined in its namespace.
 
 =item *
@@ -430,7 +430,7 @@ C<DB_Filter> upgraded to version 0.02
 
 =item *
 
-C<Devel::DProf> upgraded to version 20080331.00.
+C<Devel::DProf> upgraded to version 20080331.00
 
 =item *
 
@@ -867,7 +867,7 @@ C<Socket> upgraded to version 1.81
 
 =item *
 
-this fixes an optimistic use of C<gethostbyname>.
+this fixes an optimistic use of C<gethostbyname>
 
 =back
 
@@ -959,7 +959,7 @@ added capability to add complex structures (e.g., hash of hashes) to queues.
 
 =item *
 
-added capability to dequeue multiple items at once
+added capability to dequeue multiple items at once.
 
 =item *
 
@@ -1087,7 +1087,7 @@ C<Win32> upgraded to version 0.38
 
 =item *
 
-added new function C<GetCurrentProcessId> which returns the regular Window
+added new function C<GetCurrentProcessId> which returns the regular Windows
 process identifier of the current process, even when called from within a fork.
 
 =back
@@ -1120,7 +1120,8 @@ C<NEXT::AUTOLOAD> no longer emits warnings under the debugger.
 
 =item *
 
-The debugger should now correctly find tty the device on OS X 10.5 and VMS.
+The debugger should now correctly find tty the device on OS X 10.5 and VMS
+when the program C<fork>s.
 
 =item *
 
@@ -1161,7 +1162,7 @@ has examples for C<h2xs -X>
 =item *
 
 now attempts to deal sensibly with the difference in path implications
-between C<""> and C<<E<lt>E<gt>>> quoting in C<#include> statements.
+between C<""> and C<< E<lt>E<gt> >> quoting in C<#include> statements.
 
 =item *
 
@@ -1251,7 +1252,7 @@ L<perlrecharclass> describes the syntax and use of character classes in
 Perl Regular Expressions.
 
 L<perlrun> is updated to clarify on the hash seed I<PERL_HASH_SEED>. Also more
-information in options B<-x> and B<-u>.
+information in options C<-x> and C<-u>.
 
 L<perlsub> example is updated to use a lexical variable for C<opendir> syntax.
 
@@ -1556,8 +1557,8 @@ A bug with assigning large numbers and tainting has been resolved.
 [RT #40708]
 
 A new entry has been added to the MAGIC vtable - C<svt_local>. This is used
-when copying magic to the new value during C<local>. This allows problems
-with localising shared variables. 
+when copying magic to the new value during C<local>, allowing certain problems
+with localising shared variables to be resolved.
 
 For the implementation details, see L<perlguts/Magic Virtual Tables>.
 
@@ -1593,13 +1594,13 @@ and Slashdot.
 
 Under 5.8.8 and earlier:
 
-    $ perl -e 'use strict; eval "use foo bar" or die $@'
+    $ perl5.8.8 -e 'use strict; eval "use foo bar" or die $@'
     Can't locate foo.pm in @INC (@INC contains: ... .) at (eval 1) line 2.
     BEGIN failed--compilation aborted at (eval 1) line 2.
 
 Under 5.8.9 and later:
 
-    $ ./perl -Ilib -e 'use strict; eval "use foo bar" or die $@'
+    $ perl5.8.9 -e 'use strict; eval "use foo bar" or die $@'
     Bareword "bar" not allowed while "strict subs" in use at (eval 1) line 1.
 
 This may cause problems with programs that parse the error message and rely
@@ -1781,7 +1782,7 @@ Bugs in VMS exit handling tickled by C<Test::Harness> 2.64 have been fixed.
 
 =item *
 
-Fix fcntl locking capability test in F<configure.com>.
+Fix C<fcntl()> locking capability test in F<configure.com>.
 
 =item *
 
@@ -1806,11 +1807,11 @@ C<USE_IMP_SYS> has been fixed.
 =item *
 
 The process id is no longer truncated to 16 bits on some Windows platforms
-( L<http://bugs.activestate.com/show_bug.cgi?id=72443> )
+( http://bugs.activestate.com/show_bug.cgi?id=72443 )
 
 =item *
 
-Fixed bug RT #54828 in F<perlio.c> when calling C<binmode> on Win32 and Cgywin
+Fixed bug RT #54828 in F<perlio.c> where calling C<binmode> on Win32 and Cgywin
 may cause a segmentation fault.
 
 =back
@@ -2312,6 +2313,15 @@ to a tiny but sufficient test case.  Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analysed by the Perl porting team.  You can browse and search
 the Perl 5 bugs at http://bugs.perl.org/
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for security
+issues in the Perl core, not for modules independently distributed on CPAN.
 
 =head1 SEE ALSO
 
