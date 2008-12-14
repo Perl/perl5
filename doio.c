@@ -845,14 +845,14 @@ Perl_nextargv(pTHX_ register GV *gv)
 
 		sv_setpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),TRUE,
+		if (!Perl_do_openn(aTHX_ PL_argvoutgv, (char*)SvPVX_const(sv),
+				   SvCUR(sv), TRUE,
 #ifdef VMS
-			     O_WRONLY|O_CREAT|O_TRUNC,0,
+				   O_WRONLY|O_CREAT|O_TRUNC,0,
 #else
-			     O_WRONLY|O_CREAT|OPEN_EXCL,0600,
+				   O_WRONLY|O_CREAT|OPEN_EXCL,0600,
 #endif
-			     NULL))
-		{
+				   NULL, NULL, 0)) {
 		    if (ckWARN_d(WARN_INPLACE))	
 		        Perl_warner(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: %s",
 		          PL_oldname, Strerror(errno) );
