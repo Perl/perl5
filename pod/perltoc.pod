@@ -6523,7 +6523,7 @@ B<-V>
 
 =item New internal variables
 
-C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
+C<${^CHILD_ERROR_NATIVE}>, C<${^UTF8CACHE}>
 
 =item C<readpipe> is now overridable
 
@@ -6710,7 +6710,7 @@ t/uni/chr.t, t/uni/greek.t, t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
 
 =item New internal variables
 
-C<${^CHILD_ERROR_NATIVE}>, ${^UTF8CACHE}
+C<${^CHILD_ERROR_NATIVE}>, C<${^UTF8CACHE}>
 
 =item C<readpipe> is now overridable
 
