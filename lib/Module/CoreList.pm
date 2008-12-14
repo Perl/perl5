@@ -204,7 +204,7 @@ sub find_version {
     5.009004 => [perl => 28727],
     5.009005 => [perl => 31562],
     5.010000 => [perl => 32642],
-    # FIXME ONCE KNOWN 5.008009 => ['maint-5.8' => 35088],
+    5.008009 => ['maint-5.8' => 35095],
 );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
