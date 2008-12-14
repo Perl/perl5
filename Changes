@@ -28,6 +28,91 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 35093] By: nicholas				   on 2008/12/14  17:46:47
+	Log: Best estimiate patch number for 5.8.9 release.
+     Branch: maint-5.8/perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 35092] By: nicholas				   on 2008/12/14  17:45:14
+	Log: Hopefully today.
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 35091] By: nicholas				   on 2008/12/14  17:43:08
+	Log: Update perltoc again.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 35090] By: nicholas				   on 2008/12/14  17:41:22
+	Log: Update sample config.sh in Porting.
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh
+____________________________________________________________________________
+[ 35089] By: nicholas				   on 2008/12/14  16:38:27
+	Log: (Hopefully) the last tweaks to perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 35087] By: nicholas				   on 2008/12/13  22:48:44
+	Log: Fix the build for 5005 threads for non -DDEBUGGING. This must have been
+	     broken for a few months, but no-one has reported it. I infer that
+	     no-one uses 5005 threads any more.
+     Branch: maint-5.8/perl
+	   ! perl.h
+____________________________________________________________________________
+[ 35086] By: nicholas				   on 2008/12/13  22:35:26
+	Log: Run pod/buildtoc --build-all
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 35085] By: nicholas				   on 2008/12/13  22:19:18
+	Log: Mostly update Module::CoreList to 2.17, teaching it about 5.8.9.
+	     It can't "know" the Perforce revision of the release until it's close
+	     enough to guess.
+     Branch: maint-5.8/perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 35084] By: nicholas				   on 2008/12/13  21:58:37
+	Log: Note the improvements to the debugger. Note that Module::CoreList
+	     will be upgraded with the information for 5.8.9.
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 35083] By: nicholas				   on 2008/12/13  21:51:18
+	Log: Integrate:
+	     [ 35081]
+	     Integrate:
+	     [ 35066]
+	     Bump the debugger's version. Fail to update the changes.
+	     
+	     [ 35080]
+	     Document the changes between VERSIONS 1.30 and 1.31 of the debugger.
+     Branch: maint-5.8/perl
+	  !> lib/perl5db.pl
+____________________________________________________________________________
+[ 35057] By: nicholas				   on 2008/12/07  19:14:30
+	Log: Subject: some 589 delta nits
+	     From: Jarkko Hietaniemi <jhi@iki.fi>
+	     Message-ID: <493C1856.5030907@iki.fi>
+	     Date: Sun, 07 Dec 2008 13:39:18 -0500
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+____________________________________________________________________________
+[ 35056] By: nicholas				   on 2008/12/07  19:01:54
+	Log: Disarm the maint branch.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 35054] By: nicholas				   on 2008/12/06  22:50:43
+	Log: This is RC2
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 35053] By: nicholas				   on 2008/12/06  17:33:47
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 35052] By: nicholas				   on 2008/12/06  17:10:16
 	Log: Integrate:
 	     [ 35051]
