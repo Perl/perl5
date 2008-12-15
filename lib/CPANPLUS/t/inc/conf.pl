@@ -164,13 +164,10 @@ sub gimme_conf {
     $conf->set_program( pager   => '' );
 
     ### dmq tells us that we should run with /nologo
-    ### if using nmake, as it's very noise otherwise.
+    ### if using nmake, as it's very noisy otherwise.
     {   my $make = $conf->get_program('make');
-        if( $make and basename($make) =~ /^nmake/i and
-            $make !~ m|/nologo|
-        ) {
-            $make .= ' /nologo';
-            $conf->set_program( make => $make );
+        if( $make and basename($make) =~ /^nmake/i ) {
+            $conf->set_conf( makeflags => '/nologo' );
         }
     }
     
