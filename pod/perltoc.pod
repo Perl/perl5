@@ -6493,7 +6493,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.8.9
+=head2 perldelta, perl589delta - what is new for perl v5.8.9
 
 =over 4
 
@@ -6680,7 +6680,45 @@ t/uni/chr.t, t/uni/greek.t, t/uni/latin2.t, t/uni/overload.t, t/uni/tie.t
 
 =back
 
-=head2 perl589delta, perldelta - what is new for perl v5.8.9
+=head2 perl5810delta, perldelta - what is new for perl v5.8.10
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl589delta - what is new for perl v5.8.9
 
 =over 4
 

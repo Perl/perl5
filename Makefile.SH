@@ -926,7 +926,7 @@ extra.pods: miniperl$(EXE_EXT)
 	-@rm -f pod/perlvms.pod
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 	-@rm -f pod/perldelta.pod
-	-@test -f pod/perl589delta.pod && cd pod && $(LNS) perl589delta.pod perldelta.pod && cd .. && echo "pod/perldelta.pod" >> extra.pods # See buildtoc
+	-@test -f pod/perl5810delta.pod && cd pod && $(LNS) perl5810delta.pod perldelta.pod && cd .. && echo "pod/perldelta.pod" >> extra.pods # See buildtoc
 
 extras.make: perl$(EXE_EXT)
 	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) $(RUN) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`

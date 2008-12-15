@@ -144,6 +144,7 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl589delta	Perl changes in version 5.8.9
     perl588delta	Perl changes in version 5.8.8
     perl587delta	Perl changes in version 5.8.7
     perl586delta	Perl changes in version 5.8.6
