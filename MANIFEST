@@ -1184,6 +1184,20 @@ ext/Test/Harness/t/errors.t				Test::Harness test
 ext/Test/Harness/t/grammar.t				Test::Harness test
 ext/Test/Harness/t/harness.t				Test::Harness test
 ext/Test/Harness/t/iterators.t				Test::Harness test
+ext/Test/Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
+ext/Test/Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/IO/c55Capture.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyCustom.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyGrammar.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyIteratorFactory.pm		Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyIterator.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyPerlSource.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyResultFactory.pm		Module for testing Test::Harness
+ext/Test/Harness/t/lib/MyResult.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/MySource.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/NoFork.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 ext/Test/Harness/t/multiplexer.t			Test::Harness test
 ext/Test/Harness/t/nofork-mux.t				Test::Harness test
 ext/Test/Harness/t/nofork.t				Test::Harness test
@@ -3677,7 +3691,6 @@ t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
-t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
 t/lib/dprof/test2_t		Perl code profiler tests
@@ -3695,7 +3708,6 @@ t/lib/dprof/test7_v		Perl code profiler tests
 t/lib/dprof/test8_t		Perl code profiler tests
 t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
-t/lib/EmptyParser.pm		Module for testing Test::Harness
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
@@ -3709,7 +3721,6 @@ t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/HasSigDie.pm		Module for testing base.pm
-t/lib/IO/c55Capture.pm		Module for testing Test::Harness
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
@@ -3724,24 +3735,14 @@ t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
-t/lib/MyCustom.pm		Module for testing Test::Harness
-t/lib/MyGrammar.pm		Module for testing Test::Harness
-t/lib/MyIteratorFactory.pm	Module for testing Test::Harness
-t/lib/MyIterator.pm		Module for testing Test::Harness
-t/lib/MyPerlSource.pm		Module for testing Test::Harness
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
-t/lib/MyResultFactory.pm	Module for testing Test::Harness
-t/lib/MyResult.pm		Module for testing Test::Harness
-t/lib/MySource.pm		Module for testing Test::Harness
-t/lib/NoFork.pm			Module for testing Test::Harness
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
-t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t

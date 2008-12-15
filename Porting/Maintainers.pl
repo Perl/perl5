@@ -1006,9 +1006,7 @@ package Maintainers;
 	'Test::Harness' =>
 		{
 		'MAINTAINER'	=> 'andya',
-		'FILES'		=> q[ext/Test/Harness t/lib/Dev/Null.pm
-				     t/lib/App/Prove/Plugin/Dummy.pm
-				     t/lib/IO/c55Capture.pm t/lib/NoFork.pm],
+		'FILES'		=> q[ext/Test/Harness],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
