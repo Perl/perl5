@@ -350,7 +350,9 @@ for my $switch ( [0,1], [1,0] ) {
                         : ($OutDir);
 
         skip "No binaries or modules to extract ".$archive, 
-            (10 * scalar @outs) if $mod_fail && $pgm_fail;
+            (10 * scalar @outs) if
+            	($mod_fail && ($pgm_fail || !$Archive::Extract::_ALLOW_BIN)) ||
+		($pgm_fail && ($mod_fail || !$Archive::Extract::_ALLOW_PURE_PERL));
 
         ### we dont warnings spewed about missing modules, that might
         ### be a problem...
