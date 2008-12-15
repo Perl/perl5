@@ -20,7 +20,7 @@ my $prove = App::Prove->new;
 
 $prove->add_rc_file(
     File::Spec->catfile(
-        ( $ENV{PERL_CORE} ? 'lib' : 't' ), 'data', 'proverc'
+        ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ), 't', 'data', 'proverc'
     )
 );
 

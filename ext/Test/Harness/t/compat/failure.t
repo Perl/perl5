@@ -19,11 +19,14 @@ use Test::Harness;
         return sub { $died = 1 }
     }
 
-    my $curdir = File::Spec->curdir;
-    my $sample_tests
-      = $ENV{PERL_CORE}
-      ? File::Spec->catdir( $curdir, 'lib', 'sample-tests' )
-      : File::Spec->catdir( $curdir, 't',   'sample-tests' );
+    my $sample_tests;
+    if ($ENV{PERL_CORE}) {
+	my $updir = File::Spec->updir;
+	$sample_tests = File::Spec->catdir( $updir, 'ext', 'Test', 'Harness', 't', 'sample-tests' );
+    } else {
+	my $curdir = File::Spec->curdir;
+	$sample_tests = File::Spec->catdir( $curdir, 't', 'sample-tests' );
+    }
 
     {
         local $SIG{__DIE__} = prepare_for_death();

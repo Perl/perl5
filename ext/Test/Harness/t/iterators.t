@@ -42,8 +42,8 @@ my @schedule = (
             command => [
                 $^X,
                 File::Spec->catfile(
-                    ( $ENV{PERL_CORE} ? 'lib' : 't' ),
-                    'sample-tests', 'out_err_mix'
+                    ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ),
+                    't', 'sample-tests', 'out_err_mix'
                 )
             ],
             merge    => 1,

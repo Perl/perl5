@@ -14,16 +14,16 @@ use strict;
 use vars qw(%INIT %CUSTOM);
 
 use Test::More tests => 24;
-use File::Spec::Functions qw( catfile );
+use File::Spec::Functions qw( catfile updir );
 
 use_ok('TAP::Parser::SubclassTest');
 
 # TODO: foreach my $source ( ... )
-my $t_dir = $ENV{PERL_CORE} ? 'lib' : 't';
+my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test', 'Harness' ) : ();
 
 {    # perl source
     %INIT = %CUSTOM = ();
-    my $source = catfile( $t_dir, 'subclass_tests', 'perl_source' );
+    my $source = catfile( @t_path, 't', 'subclass_tests', 'perl_source' );
     my $p = TAP::Parser::SubclassTest->new( { source => $source } );
 
     # The grammar is lazily constructed so we need to ask for it to
@@ -78,7 +78,7 @@ SKIP: {    # non-perl source
     unless ( -e $cat ) {
         skip "no '$cat'", 4;
     }
-    my $file = catfile( $t_dir, 'data', 'catme.1' );
+    my $file = catfile( @t_path, 't', 'data', 'catme.1' );
     my $p = TAP::Parser::SubclassTest->new( { exec => [ $cat => $file ] } );
 
     is( $INIT{MySource},     1, 'initialized MySource subclass' );
