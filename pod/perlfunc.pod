@@ -7309,7 +7309,7 @@ X<wait>
 Behaves like the wait(2) system call on your system: it waits for a child
 process to terminate and returns the pid of the deceased process, or
 C<-1> if there are no child processes.  The status is returned in C<$?>
-and C<{^CHILD_ERROR_NATIVE}>.
+and C<${^CHILD_ERROR_NATIVE}>.
 Note that a return value of C<-1> could mean that child processes are
 being automatically reaped, as described in L<perlipc>.
 
@@ -7319,7 +7319,7 @@ X<waitpid>
 Waits for a particular child process to terminate and returns the pid of
 the deceased process, or C<-1> if there is no such child process.  On some
 systems, a value of 0 indicates that there are processes still running.
-The status is returned in C<$?> and C<{^CHILD_ERROR_NATIVE}>.  If you say
+The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.  If you say
 
     use POSIX ":sys_wait_h";
     #...
