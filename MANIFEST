@@ -2867,6 +2867,7 @@ lib/Test/Simple/t/is_deeply_dne_bug.t	Test::More test
 lib/Test/Simple/t/is_deeply_fail.t	Test::More test, is_deeply()
 lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
 lib/Test/Simple/t/is_fh.t	Test::Builder test, _is_fh()
+lib/Test/Simple/t/lib/Dev/Null.pm	Test::More test module
 lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
 lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
 lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
