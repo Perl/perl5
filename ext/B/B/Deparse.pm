@@ -4802,6 +4802,8 @@ dual-valued scalars correctly, as in:
 
     use constant E2BIG => ($!=7); $y = E2BIG; print $y, 0+$y;
 
+    use constant H => { "#" => 1 }; H->{"#"};
+
 =item *
 
 An input file that uses source filtering probably won't be deparsed into
@@ -4817,6 +4819,10 @@ have a compile-time side-effect, such as the obscure
     my $x if 0;
 
 which is not, consequently, deparsed correctly.
+
+    foreach my $i (@_) { 0 }
+  =>
+    foreach my $i (@_) { '???' }
 
 =item *
 

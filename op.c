@@ -4311,13 +4311,60 @@ Perl_newLOGOP(pTHX_ I32 type, I32 flags, OP *first, OP *other)
 }
 
 STATIC OP *
+S_search_const(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_SEARCH_CONST;
+
+    switch (o->op_type) {
+	case OP_CONST:
+	    return o;
+	case OP_NULL:
+	    if (o->op_flags & OPf_KIDS)
+		return search_const(cUNOPo->op_first);
+	    break;
+	case OP_LEAVE:
+	case OP_SCOPE:
+	case OP_LINESEQ:
+	{
+	    OP *kid;
+	    if (!(o->op_flags & OPf_KIDS))
+		return NULL;
+	    kid = cLISTOPo->op_first;
+	    do {
+		switch (kid->op_type) {
+		    case OP_ENTER:
+		    case OP_NULL:
+		    case OP_NEXTSTATE:
+			kid = kid->op_sibling;
+			break;
+		    default:
+			if (kid != cLISTOPo->op_last)
+			    return NULL;
+			goto last;
+		}
+	    } while (kid);
+	    if (!kid)
+		kid = cLISTOPo->op_last;
+last:
+	    return search_const(kid);
+	}
+    }
+
+    return NULL;
+}
+
+STATIC OP *
 S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 {
     dVAR;
     LOGOP *logop;
     OP *o;
-    OP *first = *firstp;
-    OP * const other = *otherp;
+    OP *first;
+    OP *other;
+    OP *cstop = NULL;
+
+    first = *firstp;
+    other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -4341,14 +4388,15 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    op_free(o);
 	}
     }
-    if (first->op_type == OP_CONST) {
-	if (first->op_private & OPpCONST_STRICT)
-	    no_bareword_allowed(first);
-	else if ((first->op_private & OPpCONST_BARE) && ckWARN(WARN_BAREWORD))
+    /* search for a constant op that could let us fold the test */
+    if ((cstop = search_const(first))) {
+	if (cstop->op_private & OPpCONST_STRICT)
+	    no_bareword_allowed(cstop);
+	else if ((cstop->op_private & OPpCONST_BARE) && ckWARN(WARN_BAREWORD))
 		Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
-	if ((type == OP_AND &&  SvTRUE(((SVOP*)first)->op_sv)) ||
-	    (type == OP_OR  && !SvTRUE(((SVOP*)first)->op_sv)) ||
-	    (type == OP_DOR && !SvOK(((SVOP*)first)->op_sv))) {
+	if ((type == OP_AND &&  SvTRUE(((SVOP*)cstop)->op_sv)) ||
+	    (type == OP_OR  && !SvTRUE(((SVOP*)cstop)->op_sv)) ||
+	    (type == OP_DOR && !SvOK(((SVOP*)cstop)->op_sv))) {
 	    *firstp = NULL;
 	    if (other->op_type == OP_CONST)
 		other->op_private |= OPpCONST_SHORTCIRCUIT;
@@ -4468,6 +4516,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     LOGOP *logop;
     OP *start;
     OP *o;
+    OP *cstop;
 
     if (!falseop)
 	return newLOGOP(OP_AND, 0, first, trueop);
@@ -4475,14 +4524,14 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	return newLOGOP(OP_OR, 0, first, falseop);
 
     scalarboolean(first);
-    if (first->op_type == OP_CONST) {
+    if ((cstop = search_const(first))) {
 	/* Left or right arm of the conditional?  */
-	const bool left = SvTRUE(((SVOP*)first)->op_sv);
+	const bool left = SvTRUE(((SVOP*)cstop)->op_sv);
 	OP *live = left ? trueop : falseop;
 	OP *const dead = left ? falseop : trueop;
-        if (first->op_private & OPpCONST_BARE &&
-	    first->op_private & OPpCONST_STRICT) {
-	    no_bareword_allowed(first);
+        if (cstop->op_private & OPpCONST_BARE &&
+	    cstop->op_private & OPpCONST_STRICT) {
+	    no_bareword_allowed(cstop);
 	}
 	if (PL_madskills) {
 	    /* This is all dead code when PERL_MAD is not defined.  */

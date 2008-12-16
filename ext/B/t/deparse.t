@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 61;
+use Test::More tests => 66;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -150,6 +150,7 @@ sub getcode {
 package main;
 use strict;
 use warnings;
+use constant GLIPP => 'glipp';
 sub test {
    my $val = shift;
    my $res = B::Deparse::Wrapper::getcode($val);
@@ -420,3 +421,77 @@ else { x(); }
 # 54 interpolation in regexps
 my($y, $t);
 /x${y}z$t/;
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO new undocumented cpan-bug #33708"
+# 55  (cpan-bug #33708)
+%{$_ || {}}
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO hash constants not yet fixed"
+# 56  (cpan-bug #33708)
+use constant H => { "#" => 1 }; H->{"#"}
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO optimized away 0 not yet fixed"
+# 57  (cpan-bug #33708)
+foreach my $i (@_) { 0 }
+####
+# 60 tests that should be constant folded
+x() if 1;
+x() if GLIPP;
+x() if !GLIPP;
+x() if GLIPP && GLIPP;
+x() if !GLIPP || GLIPP;
+x() if do { GLIPP };
+x() if do { no warnings 'void'; 5; GLIPP };
+x() if do { !GLIPP };
+if (GLIPP) { x() } else { z() }
+if (!GLIPP) { x() } else { z() }
+if (GLIPP) { x() } elsif (GLIPP) { z() }
+if (!GLIPP) { x() } elsif (GLIPP) { z() }
+if (GLIPP) { x() } elsif (!GLIPP) { z() }
+if (!GLIPP) { x() } elsif (!GLIPP) { z() }
+if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (GLIPP) { t() }
+if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
+if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
+>>>>
+x();
+x();
+'???';
+x();
+x();
+x();
+x();
+do {
+    '???'
+};
+do {
+    x()
+};
+do {
+    z()
+};
+do {
+    x()
+};
+do {
+    z()
+};
+do {
+    x()
+};
+'???';
+do {
+    t()
+};
+'???';
+!1;
+####
+# 61 tests that shouldn't be constant folded
+x() if $a;
+if ($a == 1) { x() } elsif ($b == 2) { z() }
+if (do { foo(); GLIPP }) { x() }
+if (do { $a++; GLIPP }) { x() }
+>>>>
+x() if $a;
+if ($a == 1) { x(); } elsif ($b == 2) { z(); }
+if (do { foo(); 'glipp' }) { x(); }
+if (do { ++$a; 'glipp' }) { x(); }
