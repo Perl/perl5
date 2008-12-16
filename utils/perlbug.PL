@@ -194,7 +194,11 @@ if ($outfile) {
     save_message_to_disk($outfile);
 } else {
     Send();
-    print "\nThank you for taking the time to file a bug report!\n\n";
+    if ($thanks) {
+	print "\nThank you for taking the time to send a thank-you message!\n\n";
+    } else {
+	print "\nThank you for taking the time to file a bug report!\n\n";
+    }
 }
 
 exit;
