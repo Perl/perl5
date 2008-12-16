@@ -10,11 +10,11 @@ TAP::Parser::Scheduler::Job - A single testing job.
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 SYNOPSIS
 
@@ -43,7 +43,7 @@ sub new {
     return bless {
         filename    => $name,
         description => $desc,
-        context     => \@ctx,
+        @ctx ? ( context => \@ctx ) : (),
     }, $class;
 }
 
@@ -81,7 +81,7 @@ sub finish {
 
 sub filename    { shift->{filename} }
 sub description { shift->{description} }
-sub context     { @{ shift->{context} } }
+sub context     { @{ shift->{context} || [] } }
 
 =head3 C<as_array_ref>
 
@@ -91,7 +91,7 @@ For backwards compatibility in callbacks.
 
 sub as_array_ref {
     my $self = shift;
-    return [ $self->filename, $self->description, $self->context ];
+    return [ $self->filename, $self->description, $self->{context} ||= [] ];
 }
 
 =head3 C<is_spinner>

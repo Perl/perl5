@@ -19,29 +19,50 @@ my @SCHEDULE;
 
 BEGIN {
 
-    my $sample_test = File::Spec->catfile(
-        ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ), 
-        't', 'sample-tests', 'simple'
-    );
-
-    @SCHEDULE = (
-        {   name   => 'Create empty',
-            args   => [$sample_test],
-            expect => [
-                [   'new',
-                    'TAP::Parser::Iterator::Process',
-                    {   merge   => undef,
-                        command => [
-                            'PERL',
-                            $sample_test
-                        ],
-                        setup    => \'CODE',
-                        teardown => \'CODE',
-
-                    }
-                ]
-            ]
+    # to add a new test to proverun, just list the name of the file in
+    # t/sample-tests and a name for the test.  The rest is handled
+    # automatically.
+    my @tests = (
+        {   file => 'simple',
+            name => 'Create empty',
         },
+        {   file => 'todo_inline',
+            name => 'Passing TODO',
+        },
+    );
+    foreach my $test (@tests) {
+        
+        # let's fully expand that filename
+        $test->{file} = File::Spec->catfile(
+            (   $ENV{PERL_CORE}
+                ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+                : ()
+            ),
+            't',
+            'sample-tests',
+            $test->{file}
+        );
+    }
+    @SCHEDULE = (
+        map {
+            {   name   => $_->{name},
+                args   => [ $_->{file} ],
+                expect => [
+                    [   'new',
+                        'TAP::Parser::Iterator::Process',
+                        {   merge   => undef,
+                            command => [
+                                'PERL',
+                                $_->{file},
+                            ],
+                            setup    => \'CODE',
+                            teardown => \'CODE',
+
+                        }
+                    ]
+                ]
+            }
+          } @tests
     );
 
     plan tests => @SCHEDULE * 3;
@@ -141,7 +162,7 @@ for my $test (@SCHEDULE) {
     # Why does this make the output from the test spew out of
     # our STDOUT?
     ok eval { $app->run }, 'run returned true';
-    ok !$@, 'no errors';
+    ok !$@, 'no errors' or diag $@;
 
     my @log = get_log();
 

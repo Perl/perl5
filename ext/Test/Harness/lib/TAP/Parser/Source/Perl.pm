@@ -8,6 +8,8 @@ use constant IS_WIN32 => ( $^O =~ /^(MS)?Win32$/ );
 use constant IS_VMS => ( $^O eq 'VMS' );
 
 use TAP::Parser::Source;
+use TAP::Parser::Utils qw( split_shell );
+
 @ISA = 'TAP::Parser::Source';
 
 =head1 NAME
@@ -16,11 +18,11 @@ TAP::Parser::Source::Perl - Stream Perl output
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 SYNOPSIS
 
@@ -145,14 +147,14 @@ sub get_stream {
     # Taint mode ignores environment variables so we must retranslate
     # PERL5LIB as -I switches and place PERL5OPT on the command line
     # in order that it be seen.
-    if ( grep { $_ eq "-T" } @switches ) {
+    if ( grep { $_ eq "-T" || $_ eq "-t" } @switches ) {
         push @switches,
           $self->_libs2switches(
             split $path_pat,
             $ENV{PERL5LIB} || $ENV{PERLLIB} || ''
           );
 
-        push @switches, $ENV{PERL5OPT} || ();
+        push @switches, split_shell( $ENV{PERL5OPT} );
     }
 
     my @command = $self->_get_command_for_switches(@switches)

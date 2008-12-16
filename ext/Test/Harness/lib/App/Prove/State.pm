@@ -6,6 +6,8 @@ use vars qw($VERSION @ISA);
 use File::Find;
 use File::Spec;
 use Carp;
+
+use App::Prove::State::Result;
 use TAP::Parser::YAMLish::Reader ();
 use TAP::Parser::YAMLish::Writer ();
 use TAP::Base;
@@ -21,11 +23,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 DESCRIPTION
 
@@ -54,10 +56,11 @@ sub new {
     my %args = %{ shift || {} };
 
     my $self = bless {
-        _ => {
-            tests      => {},
-            generation => 1
-        },
+        _ => $class->result_class->new(
+            {   tests      => {},
+                generation => 1,
+            }
+        ),
         select    => [],
         seq       => 1,
         store     => delete $args{store},
@@ -69,6 +72,18 @@ sub new {
       if defined $store && -f $store;
 
     return $self;
+}
+
+=head2 C<result_class>
+
+Returns the name of the class used for tracking test results.  This class
+should either subclass from C<App::Prove::State::Result> or provide an
+identical interface.
+
+=cut
+
+sub result_class {
+    return 'App::Prove::State::Result';
 }
 
 =head2 C<extension>
@@ -84,7 +99,24 @@ sub extension {
     return $self->{extension};
 }
 
-sub DESTROY {
+=head2 C<results>
+
+Get the results of the last test run.  Returns a C<result_class()> instance.
+
+=cut
+
+sub results {
+    my $self = shift;
+    $self->{_} || $self->result_class->new 
+}
+
+=head2 C<commit>
+
+Save the test results. Should be called after all tests have run.
+
+=cut
+
+sub commit {
     my $self = shift;
     if ( $self->{should_save} && defined( my $store = $self->{store} ) ) {
         $self->save($store);
@@ -151,53 +183,57 @@ sub apply_switch {
     my $self = shift;
     my @opts = @_;
 
-    my $last_gen = $self->{_}->{generation} - 1;
-    my $now      = $self->get_time;
+    my $last_gen      = $self->results->generation - 1;
+    my $last_run_time = $self->results->last_run_time;
+    my $now           = $self->get_time;
 
     my @switches = map { split /,/ } @opts;
 
     my %handler = (
         last => sub {
             $self->_select(
-                where => sub { $_->{gen} >= $last_gen },
-                order => sub { $_->{seq} }
+                where => sub { $_->generation >= $last_gen },
+                order => sub { $_->sequence }
             );
         },
         failed => sub {
             $self->_select(
-                where => sub { $_->{last_result} != 0 },
-                order => sub { -$_->{last_result} }
+                where => sub { $_->result != 0 },
+                order => sub { -$_->result }
             );
         },
         passed => sub {
-            $self->_select( where => sub { $_->{last_result} == 0 } );
+            $self->_select( where => sub { $_->result == 0 } );
         },
         all => sub {
             $self->_select();
         },
         todo => sub {
             $self->_select(
-                where => sub { $_->{last_todo} != 0 },
-                order => sub { -$_->{last_todo}; }
+                where => sub { $_->num_todo != 0 },
+                order => sub { -$_->num_todo; }
             );
         },
         hot => sub {
             $self->_select(
-                where => sub { defined $_->{last_fail_time} },
-                order => sub { $now - $_->{last_fail_time} }
+                where => sub { defined $_->last_fail_time },
+                order => sub { $now - $_->last_fail_time }
             );
         },
         slow => sub {
-            $self->_select( order => sub { -$_->{elapsed} } );
+            $self->_select( order => sub { -$_->elapsed } );
         },
         fast => sub {
-            $self->_select( order => sub { $_->{elapsed} } );
+            $self->_select( order => sub { $_->elapsed } );
         },
         new => sub {
-            $self->_select( order => sub { -$_->{mtime} } );
+            $self->_select( order => sub { -$_->mtime } );
         },
         old => sub {
-            $self->_select( order => sub { $_->{mtime} } );
+            $self->_select( order => sub { $_->mtime } );
+        },
+        fresh => sub {
+            $self->_select( where => sub { $_->mtime >= $last_run_time } );
         },
         save => sub {
             $self->{should_save}++;
@@ -251,7 +287,7 @@ sub _query {
     my $self = shift;
     if ( my @sel = @{ $self->{select} } ) {
         warn "No saved state, selection will be empty\n"
-          unless keys %{ $self->{_}->{tests} };
+          unless $self->results->num_tests;
         return map { $self->_query_clause($_) } @sel;
     }
     return;
@@ -260,14 +296,14 @@ sub _query {
 sub _query_clause {
     my ( $self, $clause ) = @_;
     my @got;
-    my $tests = $self->{_}->{tests};
+    my $results = $self->results;
     my $where = $clause->{where} || sub {1};
 
     # Select
-    for my $test ( sort keys %$tests ) {
-        next unless -f $test;
-        local $_ = $tests->{$test};
-        push @got, $test if $where->();
+    for my $name ( $results->test_names ) {
+        next unless -f $name;
+        local $_ = $results->test($name);
+        push @got, $name if $where->();
     }
 
     # Sort
@@ -278,7 +314,7 @@ sub _query_clause {
               || ( ( $a->[1] || 0 ) <=> ( $b->[1] || 0 ) )
           } map {
             [   $_,
-                do { local $_ = $tests->{$_}; $order->() }
+                do { local $_ = $results->test($_); $order->() }
             ]
           } @got;
     }
@@ -318,8 +354,9 @@ sub _expand_dir_recursive {
 
     my @tests;
     find(
-        {   follow => 1,      #21938
-            wanted => sub {
+        {   follow      => 1,      #21938
+            follow_skip => 2,
+            wanted      => sub {
                 -f 
                   && /\Q$extension\E$/
                   && push @tests => $File::Find::name;
@@ -339,8 +376,9 @@ Store the results of a test.
 sub observe_test {
     my ( $self, $test, $parser ) = @_;
     $self->_record_test(
-        $test, scalar( $parser->failed ) + ( $parser->has_problems ? 1 : 0 ),
-        scalar( $parser->todo ), $parser->start_time, $parser->end_time
+        $test->[0],
+        scalar( $parser->failed ) + ( $parser->has_problems ? 1 : 0 ),
+        scalar( $parser->todo ), $parser->start_time, $parser->end_time,
     );
 }
 
@@ -355,24 +393,24 @@ sub observe_test {
 #     state generation
 
 sub _record_test {
-    my ( $self, $test, $fail, $todo, $start_time, $end_time ) = @_;
-    my $rec = $self->{_}->{tests}->{ $test->[0] } ||= {};
+    my ( $self, $name, $fail, $todo, $start_time, $end_time ) = @_;
+    my $test = $self->results->test($name);
 
-    $rec->{seq} = $self->{seq}++;
-    $rec->{gen} = $self->{_}->{generation};
+    $test->sequence( $self->{seq}++ );
+    $test->generation( $self->results->generation );
 
-    $rec->{last_run_time} = $end_time;
-    $rec->{last_result}   = $fail;
-    $rec->{last_todo}     = $todo;
-    $rec->{elapsed}       = $end_time - $start_time;
+    $test->run_time($end_time);
+    $test->result($fail);
+    $test->num_todo($todo);
+    $test->elapsed( $end_time - $start_time );
 
     if ($fail) {
-        $rec->{total_failures}++;
-        $rec->{last_fail_time} = $end_time;
+        $test->total_failures( $test->total_failures + 1 );
+        $test->last_fail_time($end_time);
     }
     else {
-        $rec->{total_passes}++;
-        $rec->{last_pass_time} = $end_time;
+        $test->total_passes( $test->total_passes + 1 );
+        $test->last_pass_time($end_time);
     }
 }
 
@@ -384,10 +422,13 @@ Write the state to a file.
 
 sub save {
     my ( $self, $name ) = @_;
+
+    $self->results->last_run_time( $self->get_time );
+
     my $writer = TAP::Parser::YAMLish::Writer->new;
     local *FH;
     open FH, ">$name" or croak "Can't write $name ($!)";
-    $writer->write( $self->{_} || {}, \*FH );
+    $writer->write( $self->results->raw, \*FH );
     close FH;
 }
 
@@ -402,37 +443,47 @@ sub load {
     my $reader = TAP::Parser::YAMLish::Reader->new;
     local *FH;
     open FH, "<$name" or croak "Can't read $name ($!)";
-    $self->{_} = $reader->read(
-        sub {
-            my $line = <FH>;
-            defined $line && chomp $line;
-            return $line;
-        }
+
+    # XXX this is temporary
+    $self->{_} = $self->result_class->new(
+        $reader->read(
+            sub {
+                my $line = <FH>;
+                defined $line && chomp $line;
+                return $line;
+            }
+        )
     );
 
     # $writer->write( $self->{tests} || {}, \*FH );
     close FH;
     $self->_regen_seq;
     $self->_prune_and_stamp;
-    $self->{_}->{generation}++;
+    $self->results->generation( $self->results->generation + 1 );
 }
 
 sub _prune_and_stamp {
     my $self = shift;
-    for my $name ( keys %{ $self->{_}->{tests} || {} } ) {
+
+    my $results = $self->results;
+    my @tests   = $self->results->tests;
+    for my $test (@tests) {
+        my $name = $test->name;
         if ( my @stat = stat $name ) {
-            $self->{_}->{tests}->{$name}->{mtime} = $stat[9];
+            $test->mtime( $stat[9] );
         }
         else {
-            delete $self->{_}->{tests}->{$name};
+            $results->remove($name);
         }
     }
 }
 
 sub _regen_seq {
     my $self = shift;
-    for my $rec ( values %{ $self->{_}->{tests} || {} } ) {
-        $self->{seq} = $rec->{seq} + 1
-          if defined $rec->{seq} && $rec->{seq} >= $self->{seq};
+    for my $test ( $self->results->tests ) {
+        $self->{seq} = $test->sequence + 1
+          if defined $test->sequence && $test->sequence >= $self->{seq};
     }
 }
+
+1;

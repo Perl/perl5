@@ -164,11 +164,11 @@ BEGIN {    # START PLAN
             expect => {},
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
-                    'one',
-                    'two',
-                    'three'
+                    'one', 'two', 'three'
                 ]
             ],
         },
@@ -201,7 +201,7 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    { verbosity => 0, show_count => 1 },
                     'TAP::Harness',
                     'one', 'two',
                     'three'
@@ -219,7 +219,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( [ 'blib/lib', 'blib/arch' ] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -237,8 +238,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   color     => 1,
-                        verbosity => 0
+                    {   color      => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -257,7 +259,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   directives => 1,
-                        verbosity  => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -274,8 +277,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   exec      => [1],
-                        verbosity => 0
+                    {   exec       => [1],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -292,8 +296,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   failures  => 1,
-                        verbosity => 0
+                    {   failures   => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -312,7 +317,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   formatter_class => 'TAP::Harness',
-                        verbosity       => 0
+                        verbosity       => 0,
+                        show_count      => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -331,7 +337,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( [qw( four five six )] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -349,7 +356,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( ['lib'] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -366,8 +374,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   merge     => 1,
-                        verbosity => 0
+                    {   merge      => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -384,8 +393,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   errors    => 1,
-                        verbosity => 0
+                    {   errors     => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -402,7 +412,8 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -1
+                    {   verbosity  => -1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -419,7 +430,8 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -2
+                    {   verbosity  => -2,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -436,7 +448,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     'one', 'two', 'three'
                 ]
@@ -452,7 +466,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     'three', 'two', 'one'
                 ]
@@ -469,7 +485,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     'xxxone', 'xxxtwo',
                     'xxxthree'
@@ -486,8 +504,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   switches  => ['-T'],
-                        verbosity => 0
+                    {   switches   => ['-T'],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -504,8 +523,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   switches  => ['-t'],
-                        verbosity => 0
+                    {   switches   => ['-t'],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -522,7 +542,8 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 1
+                    {   verbosity  => 1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -539,8 +560,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   switches  => ['-W'],
-                        verbosity => 0
+                    {   switches   => ['-W'],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -557,8 +579,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   switches  => ['-w'],
-                        verbosity => 0
+                    {   switches   => ['-w'],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     'one', 'two', 'three'
@@ -577,7 +600,8 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 1
+                    {   verbosity  => 1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -595,7 +619,8 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 1
+                    {   verbosity  => 1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -611,8 +636,9 @@ BEGIN {    # START PLAN
             expect => { failures => 1 },
             runlog => [
                 [   '_runtests',
-                    {   failures  => 1,
-                        verbosity => 0
+                    {   failures   => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -628,8 +654,9 @@ BEGIN {    # START PLAN
             expect => { failures => 1 },
             runlog => [
                 [   '_runtests',
-                    {   failures  => 1,
-                        verbosity => 0
+                    {   failures   => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -646,7 +673,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( ['lib'] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -663,7 +691,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( ['lib'] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -680,7 +709,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( [ 'blib/lib', 'blib/arch' ] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -697,7 +727,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   lib => mabs( [ 'blib/lib', 'blib/arch' ] ),
-                        verbosity => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -713,7 +744,9 @@ BEGIN {    # START PLAN
             expect => { shuffle => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     "xxx$dummy_test"
                 ]
@@ -728,7 +761,9 @@ BEGIN {    # START PLAN
             expect => { shuffle => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     "xxx$dummy_test"
                 ]
@@ -743,8 +778,9 @@ BEGIN {    # START PLAN
             expect => { color => 1 },
             runlog => [
                 [   '_runtests',
-                    {   color     => 1,
-                        verbosity => 0
+                    {   color      => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -760,7 +796,9 @@ BEGIN {    # START PLAN
             expect => { recurse => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -775,7 +813,9 @@ BEGIN {    # START PLAN
             expect => { recurse => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -790,7 +830,9 @@ BEGIN {    # START PLAN
             expect => { backwards => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     reverse @dummy_tests
                 ]
@@ -807,8 +849,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   errors    => 1,
-                        verbosity => 0
+                    {   errors     => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -826,8 +869,9 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    {   errors    => 1,
-                        verbosity => 0
+                    {   errors     => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -843,7 +887,8 @@ BEGIN {    # START PLAN
             expect => { quiet => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -1
+                    {   verbosity  => -1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -859,7 +904,8 @@ BEGIN {    # START PLAN
             expect => { quiet => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -1
+                    {   verbosity  => -1,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -875,7 +921,8 @@ BEGIN {    # START PLAN
             expect => { really_quiet => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -2
+                    {   verbosity  => -2,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -891,7 +938,8 @@ BEGIN {    # START PLAN
             expect => { really_quiet => 1 },
             runlog => [
                 [   '_runtests',
-                    { verbosity => -2
+                    {   verbosity  => -2,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -907,8 +955,9 @@ BEGIN {    # START PLAN
             expect => { merge => 1 },
             runlog => [
                 [   '_runtests',
-                    {   merge     => 1,
-                        verbosity => 0
+                    {   merge      => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -924,8 +973,9 @@ BEGIN {    # START PLAN
             expect => { merge => 1 },
             runlog => [
                 [   '_runtests',
-                    {   merge     => 1,
-                        verbosity => 0
+                    {   merge      => 1,
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -942,7 +992,8 @@ BEGIN {    # START PLAN
             runlog => [
                 [   '_runtests',
                     {   directives => 1,
-                        verbosity  => 0
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -958,7 +1009,11 @@ BEGIN {    # START PLAN
             switches => [ '--exec', '-s', $dummy_test ],
             expect => { exec => '-s' },
             runlog => [
-                [   '_runtests', { exec => ['-s'], verbosity => 0 },
+                [   '_runtests',
+                    {   exec       => ['-s'],
+                        verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -974,8 +1029,9 @@ BEGIN {    # START PLAN
             expect => { exec => '/foo/bar/perl -Ilib' },
             runlog => [
                 [   '_runtests',
-                    {   exec      => [qw(/foo/bar/perl -Ilib)],
-                        verbosity => 0
+                    {   exec       => [qw(/foo/bar/perl -Ilib)],
+                        verbosity  => 0,
+                        show_count => 1,
                     },
                     'TAP::Harness',
                     $dummy_test
@@ -992,7 +1048,10 @@ BEGIN {    # START PLAN
             },
             runlog => [
                 [   '_runtests',
-                    { exec => [], verbosity => 0 },
+                    {   exec       => [],
+                        verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -1016,7 +1075,9 @@ BEGIN {    # START PLAN
             plan   => 1,
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -1043,7 +1104,9 @@ BEGIN {    # START PLAN
             plan   => 1,
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -1066,7 +1129,9 @@ BEGIN {    # START PLAN
             plan   => 1,
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]
@@ -1089,7 +1154,9 @@ BEGIN {    # START PLAN
             plan   => 1,
             runlog => [
                 [   '_runtests',
-                    { verbosity => 0 },
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
                     'TAP::Harness',
                     $dummy_test
                 ]

@@ -19,8 +19,10 @@ use TAP::Harness;
 
 my $HARNESS = 'TAP::Harness';
 
-my $source_tests = $ENV{PERL_CORE} ? '../ext/Test/Harness/t/source_tests' : 't/source_tests';
-my $sample_tests = $ENV{PERL_CORE} ? '../ext/Test/Harness/t/sample-tests' : 't/sample-tests';
+my $source_tests
+  = $ENV{PERL_CORE} ? '../ext/Test/Harness/t/source_tests' : 't/source_tests';
+my $sample_tests
+  = $ENV{PERL_CORE} ? '../ext/Test/Harness/t/sample-tests' : 't/sample-tests';
 
 plan tests => 113;
 
@@ -523,7 +525,9 @@ SKIP: {
     eval {
         _runtests(
             $harness,
-            $ENV{PERL_CORE} ? '../ext/Test/Harness/t/data/catme.1' : 't/data/catme.1'
+            $ENV{PERL_CORE}
+            ? '../ext/Test/Harness/t/data/catme.1'
+            : 't/data/catme.1'
         );
     };
 
@@ -810,7 +814,13 @@ sub _runtests {
 
     # coverage tests for the basically untested T::H::_open_spool
 
-    my @spool = ( ( $ENV{PERL_CORE} ? (File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ), ( 't', 'spool' ) );
+    my @spool = (
+        (   $ENV{PERL_CORE}
+            ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+            : ()
+        ),
+        ( 't', 'spool' )
+    );
     $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(@spool);
 
 # now given that we're going to be writing stuff to the file system, make sure we have
@@ -849,7 +859,8 @@ sub _runtests {
         {   name   => 'all the same',
             input  => [ 'foo.t', 'bar.t', 'fletz.t' ],
             output => [
-                [ 'foo.t', 'foo' ], [ 'bar.t', 'bar' ], [ 'fletz.t', 'fletz' ]
+                [ 'foo.t', 'foo' ], [ 'bar.t', 'bar' ],
+                [ 'fletz.t', 'fletz' ]
             ],
         },
         {   name   => 'all the same, already cooked',

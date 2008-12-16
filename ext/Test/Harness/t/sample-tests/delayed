@@ -1,8 +1,7 @@
 # Used to test Process.pm
-
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
-        unshift @INC, '../lib';
+        @INC = '../lib';
     }
 }
 

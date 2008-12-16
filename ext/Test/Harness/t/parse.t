@@ -605,8 +605,13 @@ END_TAP
 
     my $parser = TAP::Parser->new(
         {   source => File::Spec->catfile(
-                ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ),
-                't', 'sample-tests', 'simple'
+                (   $ENV{PERL_CORE}
+                    ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+                    : ()
+                ),
+                't',
+                'sample-tests',
+                'simple'
             ),
         }
     );
