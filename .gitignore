@@ -26,6 +26,19 @@
 *.o
 *.a
 
+# general build products (Win32)
+*.def
+*.dll
+*.exe
+*.exp
+*.ico
+*.ilk
+*.lib
+*.obj
+*.pdb
+*.res
+*.RES
+
 # ?
 ext.libs
 
