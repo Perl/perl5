@@ -119,6 +119,7 @@ h Internals and C Language Interface
   perlapio		Perl internal IO abstraction interface
 
   perlhack		Perl hackers guide
+  perlrepository		Perl source repository
 
 h Miscellaneous
 

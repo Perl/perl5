@@ -3449,7 +3449,7 @@ pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
 pod/perlre.pod			Perl regular expressions, the rest of the story
-pod/perlrepository.pod  Perl source repository
+pod/perlrepository.pod		Perl source repository
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
