@@ -53,7 +53,7 @@ This clones the repository and makes a local copy in the 'perl-ssh'
 directory.
 
 If you clone using git, which is faster than ssh, then you will need to
-modify your config in order to enable pushing. Edit .git/config where 
+modify your config in order to enable pushing. Edit .git/config where
 you will see something like:
 
   [remote "origin"]
@@ -80,7 +80,7 @@ The repository contains a few branches:
 
 You can see recent commits:
 
-  % git log 
+  % git log
 
 And pull new changes from the repository:
 
@@ -93,3 +93,65 @@ To switch to another branch:
 To switch back to blead:
 
   % git checkout blead
+
+=head1 SUBMITTING A PATCH
+
+If you have a patch in mind for Perl, you should first get a copy of
+the repository:
+
+  % git clone git://perl5.git.perl.org/perl.git perl-git
+
+Then change into the directory:
+
+  % cd perl-git
+
+Then make your changes. For example, if Leon Brocard changes his name
+to Orange Brocard, we should change his name in the AUTHORS file:
+
+  % perl -pi -e 's{Leon Brocard}{Orange Brocard}' AUTHORS
+
+You can see what files are changed:
+
+  % git status
+  # On branch blead
+  # Changes to be committed:
+  #   (use "git reset HEAD <file>..." to unstage)
+  #
+  #	modified:   AUTHORS
+  #
+
+
+And you can see the changes:
+
+  % git diff
+  diff --git a/AUTHORS b/AUTHORS
+  index 293dd70..722c93e 100644
+  --- a/AUTHORS
+  +++ b/AUTHORS
+  @@ -541,7 +541,7 @@ 
+   Lars Hecking                   <lhecking@nmrc.ucc.ie>
+   Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
+   Leif Huhn                      <leif@hale.dkstat.com>
+   Len Johnson                    <lenjay@ibm.net>
+  -Leon Brocard                   <acme@astray.com>
+  +Orange Brocard                 <acme@astray.com>
+   Les Peters                     <lpeters@aol.net>
+   Lesley Binks                   <lesley.binks@gmail.com>
+   Lincoln D. Stein               <lstein@cshl.org>
+
+Now commit your change locally:
+
+  % git add AUTHORS
+  % git commit -m 'Rename Leon Brocard to Orange Brocard'
+  Created commit 6196c1d: Rename Leon Brocard to Orange Brocard
+   1 files changed, 1 insertions(+), 1 deletions(-)
+
+Now you should create a patch file for all your local changes:
+
+  % git-format-patch origin
+  0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+
+You should now send an email to perl5-porters@perl.org with a
+description of your changes, and attach this patch file as an
+attachment.
+
