@@ -72,7 +72,8 @@ Once you have changed into the repository directory, you can inspect it.
 
 The repository contains a few branches:
 
-  % git branch -a * blead
+  % git branch -a
+  * blead
     origin/HEAD
     origin/blead
   ...
@@ -80,9 +81,15 @@ The repository contains a few branches:
 You can see recent commits:
 
   % git log 
-  ...
 
 And pull new changes from the repository:
 
   % git pull
-  ...
+
+To switch to another branch:
+
+  % git checkout origin/maint-5.8-dor
+
+To switch back to blead:
+
+  % git checkout blead
