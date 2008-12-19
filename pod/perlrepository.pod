@@ -1,0 +1,74 @@
+=head1 NAME
+
+perlrepository - Using the Perl source repository
+
+=head1 SYNOPSIS
+
+All of Perl's source code is kept centrally in a Git repository. The
+repository contains many Perl revisions from Perl 1 onwards and all
+the revisions from Perforce, the version control system we were using
+previously. This repository is accessible in different ways.
+
+The full repository takes up about 80MB of disk space. A check out of
+blead takes up about 160MB of disk space (including the repository). A
+build of blead takes up about 200MB (including the repository and the
+check out).
+
+=head1 GETTING ACCESS TO THE REPOSITORY
+
+=head2 READ ACCESS VIA THE WEB
+
+You may access this over the web. This allows you to browse the tree,
+see recent commits, search for particular commits and more. You may
+access it at:
+
+  http://perl5.git.perl.org/perl.git
+
+=head2 READ ACCESS VIA GIT
+
+You will need a copy of Git for your computer. You can fetch a copy of
+the repository using the Git protocol (which uses port 9418):
+
+  git clone git://perl5.git.perl.org/perl.git perl.git
+
+This clones the repository and makes a local copy in the 'perl.git'
+directory.
+
+If your local network does not allow you to use port 9418, then you can
+fetch a copy of the repository over HTTP:
+
+  git clone http://perl5.git.perl.org/perl.git perl.http
+
+This clones the repository and makes a local copy in the 'perl.http'
+directory.
+
+=head2 WRITE ACCESS TO THE REPOSITORY
+
+If you are a committer, then you can fetch a copy of the repository that
+you can push back on with:
+
+  git clone ssh://perl5.git.perl.org/gitroot/perl.git perl.ssh
+
+This clones the repository and makes a local copy in the 'perl.ssh'
+directory.
+
+=head1 OVERVIEW OF THE REPOSITORY
+
+Once you have changed into the repository directory, you can inspect it.
+
+The repository contains a few branches:
+
+  % git branch -a * blead
+    origin/HEAD
+    origin/blead
+  ...
+
+You can see recent commits:
+
+  % git log 
+  ...
+
+And pull new changes from the repository:
+
+  % git pull
+  ...
