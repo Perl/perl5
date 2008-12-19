@@ -388,10 +388,10 @@ DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 # installed too.
 !IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
     "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
-EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
-		  del $@.manifest
-EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
-		  del $@.manifest
+EMBED_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
+		  if exist $@.manifest del $@.manifest
+EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
+		  if exist $@.manifest del $@.manifest
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
