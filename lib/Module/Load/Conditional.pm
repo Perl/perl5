@@ -18,7 +18,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.26';
+    $VERSION        = '0.28';
     $VERBOSE        = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
@@ -115,6 +115,11 @@ to find the file:
 =item file
 
 Full path to the file that contains the module
+
+=item dir
+
+Directory, or more exact the C<@INC> entry, where the module was
+loaded from.
 
 =item version
 
@@ -226,6 +231,9 @@ sub check_install {
                 }
             }
     
+            ### store the directory we found the file in
+            $href->{dir} = $dir;
+    
             ### files need to be in unix format under vms,
             ### or they might be loaded twice
             $href->{file} = ON_VMS
@@ -236,18 +244,20 @@ sub check_install {
             if( $FIND_VERSION ) {
                 
                 my $in_pod = 0;
-                while (local $_ = <$fh> ) {
+                while ( my $line = <$fh> ) {
     
                     ### stolen from EU::MM_Unix->parse_version to address
                     ### #24062: "Problem with CPANPLUS 0.076 misidentifying
                     ### versions after installing Text::NSP 1.03" where a 
                     ### VERSION mentioned in the POD was found before
                     ### the real $VERSION declaration.
-                    $in_pod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $in_pod;
+                    $in_pod = $line =~ /^=(?!cut)/  ? 1 : 
+                              $line =~ /^=cut/      ? 0 : 
+                              $in_pod;
                     next if $in_pod;
                     
                     ### try to find a version declaration in this string.
-                    my $ver = __PACKAGE__->_parse_version( $_ );
+                    my $ver = __PACKAGE__->_parse_version( $line );
 
                     if( defined $ver ) {
                         $href->{version} = $ver;

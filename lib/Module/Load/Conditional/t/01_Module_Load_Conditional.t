@@ -20,8 +20,8 @@ use Test::More 'no_plan';
 
 use constant ON_VMS     => $^O eq 'VMS';
 
-use lib "$FindBin::Bin/../lib";
-use lib "$FindBin::Bin/to_load";
+use lib File::Spec->catdir($FindBin::Bin, qw[.. lib] );
+use lib File::Spec->catdir($FindBin::Bin, q[to_load] );
 
 use_ok( 'Module::Load::Conditional' );
 
@@ -46,6 +46,12 @@ use_ok( 'Module::Load::Conditional' );
     ok( $rv->{uptodate},    q[Verify self] );
     is( $rv->{version}, $Module::Load::Conditional::VERSION,  
                             q[  Found proper version] );
+    ok( $rv->{dir},         q[  Found directory information] );
+    
+    {   my $dir_re = qr/^$rv->{dir}/i;
+        like( $rv->{file}, $dir_re,
+                            q[      Dir subset of file path] );
+    }
 
     ### break up the specification
     my @rv_path = do {
@@ -73,6 +79,8 @@ use_ok( 'Module::Load::Conditional' );
             File::Spec::Unix->catfile(@rv_path),
                             q[  Found proper file]
     );
+    
+    
 
 }
 
