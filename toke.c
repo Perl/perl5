@@ -178,7 +178,7 @@ int yyactlevel = -1;
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define LOOPX(f) return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
-#define FTST(f)  return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)UNIOP))
+#define FTST(f)  return (yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
 #define FUN1(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
 #define BOop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITOROP)))
@@ -193,10 +193,12 @@ int yyactlevel = -1;
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
+ * The UNIDOR macro is for unary functions that can be followed by the //
+ * operator (such as C<shift // 0>).
  */
-#define UNI(f) { \
+#define UNI2(f,x) { \
 	yylval.ival = f; \
-	PL_expect = XTERM; \
+	PL_expect = x, \
 	PL_bufptr = s; \
 	PL_last_uni = PL_oldbufptr; \
 	PL_last_lop_op = f; \
@@ -205,6 +207,8 @@ int yyactlevel = -1;
 	s = PEEKSPACE(s); \
 	return REPORT( *s=='(' ? (int)FUNC1 : (int)UNIOP ); \
 	}
+#define UNI(f)    UNI2(f,XTERM)
+#define UNIDOR(f) UNI2(f,XTERMORDORDOR)
 
 #define UNIBRACK(f) { \
 	yylval.ival = f; \
@@ -376,8 +380,8 @@ S_printbuf(pTHX_ const char* fmt, const char* s)
 /*
  * S_ao
  *
- * This subroutine detects &&= and ||= and turns an ANDAND or OROR
- * into an OP_ANDASSIGN or OP_ORASSIGN
+ * This subroutine detects &&=, ||=, and //= and turns an ANDAND, OROR or DORDOR
+ * into an OP_ANDASSIGN, OP_ORASSIGN, or OP_DORASSIGN
  */
 
 STATIC int
@@ -389,6 +393,8 @@ S_ao(pTHX_ int toketype)
 	    yylval.ival = OP_ANDASSIGN;
 	else if (toketype == OROR)
 	    yylval.ival = OP_ORASSIGN;
+	else if (toketype == DORDOR)
+	    yylval.ival = OP_DORASSIGN;
 	toketype = ASSIGNOP;
     }
     return toketype;
@@ -1240,6 +1246,9 @@ S_sublex_start(pTHX)
 	}
 	yylval.opval = (OP*)newSVOP(op_type, 0, sv);
 	PL_lex_stuff = NULL;
+	/* Allow <FH> // "foo" */
+	if (op_type == OP_READLINE)
+	    PL_expect = XTERMORDORDOR;
 	return THING;
     }
 
@@ -3398,6 +3407,7 @@ Perl_yylex(pTHX)
 		    switch (tmp) {
 		    case KEY_or:
 		    case KEY_and:
+		    case KEY_err:
 		    case KEY_for:
 		    case KEY_unless:
 		    case KEY_if:
@@ -4011,6 +4021,9 @@ Perl_yylex(pTHX)
 		else if ((*s == '?' || *s == '-' || *s == '+')
 			 && !isSPACE(s[1]) && s[1] != '=')
 		    PL_expect = XTERM;		/* e.g. print $fh -1 */
+		else if (*s == '/' && !isSPACE(s[1]) && s[1] != '=' && s[1] != '/')
+		    PL_expect = XTERM;		/* e.g. print $fh /.../
+						   XXX except DORDOR operator */
 		else if (*s == '<' && s[1] == '<' && !isSPACE(s[2])
 			 && s[2] != '=')
 		    PL_expect = XTERM;		/* print $fh <<"EOF" */
@@ -4053,23 +4066,39 @@ Perl_yylex(pTHX)
 	PL_pending_ident = '@';
 	TERM('@');
 
-    case '/':			/* may either be division or pattern */
+    case '/':                  /* may be division, defined-or, or pattern */
+       if (PL_expect == XTERMORDORDOR && s[1] == '/') {
+	   s += 2;
+	   AOPERATOR(DORDOR);
+       }
     case '?':			/* may either be conditional or pattern */
-	if (PL_expect != XOPERATOR) {
+       if (PL_expect == XOPERATOR) {
+	   char tmp = *s++;
+	   if (tmp == '?') {
+	       OPERATOR('?');
+	   }
+	   else {
+	       tmp = *s++;
+	       if (tmp == '/') {
+		   /* A // operator. */
+		   AOPERATOR(DORDOR);
+	       }
+	       else {
+		   s--;
+		   Mop(OP_DIVIDE);
+	       }
+	   }
+       }
+       else {
 	    /* Disable warning on "study /blah/" */
 	    if (PL_oldoldbufptr == PL_last_uni
 		&& (*PL_last_uni != 's' || s - PL_last_uni < 5
 		    || memNE(PL_last_uni, "study", 5)
-		    || isALNUM_lazy_if(PL_last_uni+5,UTF)))
+		   || isALNUM_lazy_if(PL_last_uni+5,UTF)
+	       ))
 		check_uni();
 	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
-	}
-	{
-	    char tmp = *s++;
-	    if (tmp == '/')
-		Mop(OP_DIVIDE);
-	    OPERATOR(tmp);
 	}
 
     case '.':
@@ -4181,7 +4210,9 @@ Perl_yylex(pTHX)
 		TERM(THING);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
-	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF || PL_expect == XSTATE)) {
+	    else if (!isALPHA(*start) && (PL_expect == XTERM
+			|| PL_expect == XREF || PL_expect == XSTATE
+			|| PL_expect == XTERMORDORDOR)) {
 		GV *const gv = gv_fetchpvn_flags(s, start - s, 0, SVt_PVCV);
 		if (!gv) {
 		    s = scan_num(s, &yylval);
@@ -4302,6 +4333,16 @@ Perl_yylex(pTHX)
 		     && !hv_fetchs(GvHVn(PL_incgv), "Thread.pm", FALSE))
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
+	    }
+	    else if (gv && !gvp
+		    && tmp == -KEY_err
+		    && GvCVu(gv)
+		    && PL_expect != XOPERATOR
+		    && PL_expect != XTERMORDORDOR)
+	    {
+		/* any sub overrides the "err" keyword, except when really an
+		 * operator is expected */
+		tmp = 0;
 	    }
 	    else {			/* no override */
 		tmp = -tmp;
@@ -4862,6 +4903,9 @@ Perl_yylex(pTHX)
 	case KEY_eof:
 	    UNI(OP_EOF);
 
+	case KEY_err:
+	    OPERATOR(DOROP);
+
 	case KEY_exp:
 	    UNI(OP_EXP);
 
@@ -4944,7 +4988,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_GMTIME);
 
 	case KEY_getc:
-	    UNI(OP_GETC);
+	    UNIDOR(OP_GETC);
 
 	case KEY_getppid:
 	    FUN0(OP_GETPPID);
@@ -5196,10 +5240,10 @@ Perl_yylex(pTHX)
 	    LOP(OP_PUSH,XTERM);
 
 	case KEY_pop:
-	    UNI(OP_POP);
+	    UNIDOR(OP_POP);
 
 	case KEY_pos:
-	    UNI(OP_POS);
+	    UNIDOR(OP_POS);
 	
 	case KEY_pack:
 	    LOP(OP_PACK,XTERM);
@@ -5349,7 +5393,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_READDIR);
 
 	case KEY_readline:
-	    UNI(OP_READLINE);
+	    UNIDOR(OP_READLINE);
 
 	case KEY_readpipe:
 	    UNI(OP_BACKTICK);
@@ -5364,7 +5408,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_REVERSE,XTERM);
 
 	case KEY_readlink:
-	    UNI(OP_READLINK);
+	    UNIDOR(OP_READLINK);
 
 	case KEY_ref:
 	    UNI(OP_REF);
@@ -5431,7 +5475,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_SSOCKOPT,XTERM);
 
 	case KEY_shift:
-	    UNI(OP_SHIFT);
+	    UNIDOR(OP_SHIFT);
 
 	case KEY_shmctl:
 	    LOP(OP_SHMCTL,XTERM);
@@ -5668,7 +5712,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_UNLINK,XTERM);
 
 	case KEY_undef:
-	    UNI(OP_UNDEF);
+	    UNIDOR(OP_UNDEF);
 
 	case KEY_unpack:
 	    LOP(OP_UNPACK,XTERM);
@@ -5677,7 +5721,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    UNI(OP_UMASK);
+	    UNIDOR(OP_UMASK);
 
 	case KEY_unshift:
 	    LOP(OP_UNSHIFT,XTERM);
@@ -6069,7 +6113,7 @@ Perl_keyword (pTHX_ char *name, I32 len)
           goto unknown;
       }
 
-    case 3: /* 27 tokens of length 3 */
+    case 3: /* 28 tokens of length 3 */
       switch (name[0])
       {
         case 'E':
@@ -6159,6 +6203,14 @@ Perl_keyword (pTHX_ char *name, I32 len)
               if (name[2] == 'p')
               {                                   /* exp        */
                 return -KEY_exp;
+              }
+
+              goto unknown;
+
+            case 'r':
+              if (name[2] == 'r')
+              {                                   /* err        */
+                return -KEY_err;
               }
 
               goto unknown;

@@ -1880,6 +1880,8 @@
 #define pp_die			Perl_pp_die
 #define pp_divide		Perl_pp_divide
 #define pp_dofile		Perl_pp_dofile
+#define pp_dor			Perl_pp_dor
+#define pp_dorassign		Perl_pp_dorassign
 #define pp_dump			Perl_pp_dump
 #define pp_each			Perl_pp_each
 #define pp_egrent		Perl_pp_egrent
@@ -4015,6 +4017,8 @@
 #define pp_die()		Perl_pp_die(aTHX)
 #define pp_divide()		Perl_pp_divide(aTHX)
 #define pp_dofile()		Perl_pp_dofile(aTHX)
+#define pp_dor()		Perl_pp_dor(aTHX)
+#define pp_dorassign()		Perl_pp_dorassign(aTHX)
 #define pp_dump()		Perl_pp_dump(aTHX)
 #define pp_each()		Perl_pp_each(aTHX)
 #define pp_egrent()		Perl_pp_egrent(aTHX)

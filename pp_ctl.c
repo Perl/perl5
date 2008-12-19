@@ -1444,6 +1444,39 @@ PP(pp_xor)
 	RETSETNO;
 }
 
+PP(pp_dorassign)
+{
+    dSP;
+    register SV* sv;
+
+    sv = TOPs;
+    if (!sv || !SvANY(sv)) {
+	RETURNOP(cLOGOP->op_other);
+    }
+
+    switch (SvTYPE(sv)) {
+    case SVt_PVAV:
+	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
+	    RETURN;
+	break;
+    case SVt_PVHV:
+	if (HvARRAY(sv) || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
+	    RETURN;
+	break;
+    case SVt_PVCV:
+	if (CvROOT(sv) || CvXSUB(sv))
+	    RETURN;
+	break;
+    default:
+	if (SvGMAGICAL(sv))
+	    mg_get(sv);
+	if (SvOK(sv))
+	    RETURN;
+    }
+
+    RETURNOP(cLOGOP->op_other);
+}
+
 PP(pp_caller)
 {
     dSP;

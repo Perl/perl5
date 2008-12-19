@@ -392,5 +392,7 @@ PERL_PPDEF(Perl_pp_lock)
 PERL_PPDEF(Perl_pp_threadsv)
 PERL_PPDEF(Perl_pp_setstate)
 PERL_PPDEF(Perl_pp_method_named)
+PERL_PPDEF(Perl_pp_dor)
+PERL_PPDEF(Perl_pp_dorassign)
 
 /* ex: set ro: */

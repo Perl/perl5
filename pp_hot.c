@@ -440,6 +440,42 @@ PP(pp_or)
     }
 }
 
+PP(pp_dor)
+{
+    /* Most of this is lifted straight from pp_defined */
+    dSP;
+    register SV* sv;
+
+    sv = TOPs;
+    if (!sv || !SvANY(sv)) {
+	--SP;
+	RETURNOP(cLOGOP->op_other);
+    }
+    
+    switch (SvTYPE(sv)) {
+    case SVt_PVAV:
+	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
+	    RETURN;
+	break;
+    case SVt_PVHV:
+	if (HvARRAY(sv) || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
+	    RETURN;
+	break;
+    case SVt_PVCV:
+	if (CvROOT(sv) || CvXSUB(sv))
+	    RETURN;
+	break;
+    default:
+	if (SvGMAGICAL(sv))
+	    mg_get(sv);
+	if (SvOK(sv))
+	    RETURN;
+    }
+    
+    --SP;
+    RETURNOP(cLOGOP->op_other);
+}
+
 PP(pp_add)
 {
     dSP; dATARGET; bool useleft; SV *svl, *svr;

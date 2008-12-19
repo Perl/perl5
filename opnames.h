@@ -366,11 +366,13 @@ typedef enum opcode {
 	OP_THREADSV,	/* 348 */
 	OP_SETSTATE,	/* 349 */
 	OP_METHOD_NAMED,/* 350 */
-	OP_CUSTOM,	/* 351 */
+	OP_DOR,		/* 351 */
+	OP_DORASSIGN,	/* 352 */
+	OP_CUSTOM,	/* 353 */
 	OP_max		
 } opcode;
 
-#define MAXO 352
+#define MAXO 354
 #define OP_phoney_INPUT_ONLY -1
 #define OP_phoney_OUTPUT_ONLY -2
 

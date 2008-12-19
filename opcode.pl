@@ -1018,6 +1018,9 @@ threadsv	per-thread value	ck_null		ds0
 setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
 
+dor		defined or (//)			ck_null		|
+dorassign	defined or assignment (//=)	ck_null		s|
+
 # Add new ops before this, the custom operator.
 
 custom		unknown custom operator		ck_null		0

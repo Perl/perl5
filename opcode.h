@@ -384,6 +384,8 @@ EXT char *PL_op_name[] = {
 	"threadsv",
 	"setstate",
 	"method_named",
+	"dor",
+	"dorassign",
 	"custom",
 };
 #endif
@@ -743,6 +745,8 @@ EXT char *PL_op_desc[] = {
 	"per-thread value",
 	"set statement info",
 	"method with known name",
+	"defined or (//)",
+	"defined or assignment (//=)",
 	"unknown custom operator",
 };
 #endif
@@ -1111,6 +1115,8 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 #endif
 	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
+	MEMBER_TO_FPTR(Perl_pp_dor),
+	MEMBER_TO_FPTR(Perl_pp_dorassign),
 };
 #endif
 
@@ -1469,6 +1475,8 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* threadsv */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* dorassign */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 };
 #endif
@@ -1828,6 +1836,8 @@ EXT U32 PL_opargs[] = {
 	0x00000044,	/* threadsv */
 	0x00001404,	/* setstate */
 	0x00000c40,	/* method_named */
+	0x00000600,	/* dor */
+	0x00000604,	/* dorassign */
 	0x00000000,	/* custom */
 };
 #endif

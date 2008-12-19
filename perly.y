@@ -105,7 +105,7 @@ static void yydestruct(pTHX_ void *ptr);
 %nonassoc PREC_LOW
 %nonassoc LOOPEX
 
-%left <ival> OROP
+%left <ival> OROP DOROP
 %left ANDOP
 %right NOTOP
 %nonassoc LSTOP LSTOPSUB
@@ -113,7 +113,7 @@ static void yydestruct(pTHX_ void *ptr);
 %right <ival> ASSIGNOP
 %right '?' ':'
 %nonassoc DOTDOT
-%left OROR
+%left OROR DORDOR
 %left ANDAND
 %left <ival> BITOROP
 %left <ival> BITANDOP
@@ -432,6 +432,8 @@ expr	:	expr ANDOP expr
 			{ $$ = newLOGOP(OP_AND, 0, $1, $3); }
 	|	expr OROP expr
 			{ $$ = newLOGOP($2, 0, $1, $3); }
+	|	expr DOROP expr
+			{ $$ = newLOGOP(OP_DOR, 0, $1, $3); }
 	|	argexpr %prec PREC_LOW
 	;
 
@@ -559,6 +561,8 @@ termbinop	:	term ASSIGNOP term             /* $x = $y */
 			{ $$ = newLOGOP(OP_AND, 0, $1, $3); }
 	|	term OROR term                         /* $x || $y */
 			{ $$ = newLOGOP(OP_OR, 0, $1, $3); }
+	|	term DORDOR term                       /* $x // $y */
+			{ $$ = newLOGOP(OP_DOR, 0, $1, $3); }
 	|	term MATCHOP term                      /* $x =~ /$y/ */
 			{ $$ = bind_match($2, $1, $3); }
     ;

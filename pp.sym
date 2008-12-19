@@ -391,5 +391,7 @@ Perl_pp_lock
 Perl_pp_threadsv
 Perl_pp_setstate
 Perl_pp_method_named
+Perl_pp_dor
+Perl_pp_dorassign
 
 # ex: set ro:

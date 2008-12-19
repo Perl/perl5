@@ -3081,6 +3081,7 @@ t/op/delete.t			See if delete works
 t/op/die_exit.t			See if die and exit status interaction works
 t/op/die.t			See if die works
 t/op/do.t			See if subroutines work
+t/op/dor.t			See if defined-or (//) works
 t/op/each.t			See if hash iterators work
 t/op/eval.t			See if eval operator works
 t/op/exec.t			See if exec, system and qx work
