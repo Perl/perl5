@@ -343,7 +343,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
     {
         push(@m,
           q{
-	mt -nologo -manifest $@.manifest -outputresource:$@;2 && del $@.manifest});
+	if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2 && if exist $@.manifest del $@.manifest});
       }
     }
     push @m, '
