@@ -29,17 +29,17 @@ access it at:
 You will need a copy of Git for your computer. You can fetch a copy of
 the repository using the Git protocol (which uses port 9418):
 
-  git clone git://perl5.git.perl.org/perl.git perl.git
+  git clone git://perl5.git.perl.org/perl.git perl-git
 
-This clones the repository and makes a local copy in the 'perl.git'
+This clones the repository and makes a local copy in the 'perl-git'
 directory.
 
 If your local network does not allow you to use port 9418, then you can
 fetch a copy of the repository over HTTP:
 
-  git clone http://perl5.git.perl.org/perl.git perl.http
+  git clone http://perl5.git.perl.org/perl.git perl-http
 
-This clones the repository and makes a local copy in the 'perl.http'
+This clones the repository and makes a local copy in the 'perl-http'
 directory.
 
 =head2 WRITE ACCESS TO THE REPOSITORY
@@ -47,10 +47,10 @@ directory.
 If you are a committer, then you can fetch a copy of the repository that
 you can push back on with:
 
-  git clone ssh://perl5.git.perl.org/gitroot/perl.git perl.ssh
+  git clone ssh://perl5.git.perl.org/gitroot/perl.git perl-ssh
 
-This clones the repository and makes a local copy in the 'perl.ssh'
-directory. 
+This clones the repository and makes a local copy in the 'perl-ssh'
+directory.
 
 If you clone using git, which is faster than ssh, then you will need to
 modify your config in order to enable pushing. Edit .git/config where 
