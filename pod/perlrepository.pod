@@ -52,6 +52,20 @@ you can push back on with:
 This clones the repository and makes a local copy in the 'perl-ssh'
 directory.
 
+If you clone using git, which is faster than ssh, then you will need to
+modify your config in order to enable pushing. Edit .git/config where 
+you will see something like:
+
+  [remote "origin"]
+  url = git://perl5.git.perl.org/perl.git
+
+change that to something like this:
+
+  [remote "origin"]
+  url = ssh://perl5.git.perl.org/gitroot/perl.git
+
+NOTE: there are symlinks set up so that the /gitroot is actually optional.
+
 =head1 OVERVIEW OF THE REPOSITORY
 
 Once you have changed into the repository directory, you can inspect it.
