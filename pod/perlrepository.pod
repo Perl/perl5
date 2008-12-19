@@ -210,10 +210,11 @@ Now we can inspect the change:
    Lincoln D. Stein               <lstein@cshl.org>
 
 If you are a committer to Perl and you think the patch is good, you can
-then merge it into blead:
+then merge it into blead then push it out to the main repository:
 
   % git checkout blead
   % git pull . experimental
+  % git push
 
 If you want to delete your temporary branch, you may do so with:
 
