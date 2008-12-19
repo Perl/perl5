@@ -48,8 +48,9 @@ use_ok( 'Module::Load::Conditional' );
                             q[  Found proper version] );
     ok( $rv->{dir},         q[  Found directory information] );
     
-    {   my $dir_re = qr/^$rv->{dir}/i;
-        like( $rv->{file}, $dir_re,
+    {   my $dir = File::Spec->canonpath( $rv->{dir} );
+        my $dir_re = qr/^\Q$dir\E/i;
+        like( File::Spec->canonpath( $rv->{file} ), $dir_re,
                             q[      Dir subset of file path] );
     }
 
