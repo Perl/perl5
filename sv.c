@@ -3146,19 +3146,27 @@ Perl_sv_2bool(pTHX_ register SV *const sv)
 
 Converts the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
+Will C<mg_get> on C<sv> if appropriate.
 Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes have hibit clear.
+if the whole string is the same in UTF-8 as not.
+Returns the number of bytes in the converted string
 
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
+
+=for apidoc sv_utf8_upgrade_nomg
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 
 =for apidoc sv_utf8_upgrade_flags
 
 Converts the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
-will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
+if all the bytes are invariant in UTF-8. If C<flags> has C<SV_GMAGIC> bit set,
+will C<mg_get> on C<sv> if appropriate, else not.
+Returns the number of bytes in the converted string
+C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
 
 This is not as a general purpose byte encoding to Unicode interface:
@@ -3199,7 +3207,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
         sv_recode_to_utf8(sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
 	/* This function could be much more efficient if we
-	 * had a FLAG in SVs to signal if there are any hibit
+	 * had a FLAG in SVs to signal if there are any variant
 	 * chars in the PV.  Given that there isn't such a flag
 	 * make the loop as fast as possible. */
 	const U8 * const s = (U8 *) SvPVX_const(sv);
@@ -3208,7 +3216,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
 	
 	while (t < e) {
 	    const U8 ch = *t++;
-	    /* Check for hi bit */
+	    /* Check for variant */
 	    if (!NATIVE_IS_INVARIANT(ch)) {
 		STRLEN len = SvCUR(sv);
 		/* *Currently* bytes_to_utf8() adds a '\0' after every string
@@ -3228,7 +3236,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
 		break;
 	    }
 	}
-	/* Mark as UTF-8 even if no hibit - saves scanning loop */
+	/* Mark as UTF-8 even if no variant - saves scanning loop */
 	SvUTF8_on(sv);
     }
     return SvCUR(sv);
@@ -3238,7 +3246,8 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
 =for apidoc sv_utf8_downgrade
 
 Attempts to convert the PV of an SV from characters to bytes.
-If the PV contains a character beyond byte, this conversion will fail;
+If the PV contains a character that cannot fit
+in a byte, this conversion will fail;
 in this case, either returns false or, if C<fail_ok> is not
 true, croaks.
 

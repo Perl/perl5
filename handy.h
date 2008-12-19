@@ -412,33 +412,36 @@ C<strncmp>).
 =head1 Character classes
 
 =for apidoc Am|bool|isALNUM|char ch
-Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
-character (including underscore) or digit.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+alphanumeric character (including underscore) or digit.
 
 =for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin) 
+alphabetic character.
 
 =for apidoc Am|bool|isSPACE|char ch
-Returns a boolean indicating whether the C C<char> is whitespace.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+whitespace.
 
 =for apidoc Am|bool|isDIGIT|char ch
-Returns a boolean indicating whether the C C<char> is an ASCII
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 digit.
 
 =for apidoc Am|bool|isUPPER|char ch
-Returns a boolean indicating whether the C C<char> is an uppercase
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+uppercase character.
 
 =for apidoc Am|bool|isLOWER|char ch
-Returns a boolean indicating whether the C C<char> is a lowercase
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+lowercase character.
 
 =for apidoc Am|char|toUPPER|char ch
-Converts the specified character to uppercase.
+Converts the specified character to uppercase.  Characters outside the
+US-ASCII (Basic Latin) range are viewed as not having any case.
 
 =for apidoc Am|char|toLOWER|char ch
-Converts the specified character to lowercase.
+Converts the specified character to lowercase.  Characters outside the
+US-ASCII (Basic Latin) range are viewed as not having any case.
 
 =cut
 */

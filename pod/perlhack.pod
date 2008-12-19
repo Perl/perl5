@@ -518,7 +518,7 @@ you should see something like this:
   (Then creating the symlinks...)
 
 The specifics may vary based on your operating system, of course.
-After you see this, you can abort the F<Configure> script, and you
+After it's all done, you 
 will see that the directory you are in has a tree of symlinks to the
 F<perl-rsync> directories and files.
 
@@ -2646,6 +2646,61 @@ sizeof() of the field
 
 =item *
 
+Assuming the character set is ASCIIish
+
+Perl can compile and run under EBCDIC platforms.  See L<perlebcdic>.
+This is transparent for the most part, but because the character sets
+differ, you shouldn't use numeric (decimal, octal, nor hex) constants
+to refer to characters.  You can safely say 'A', but not 0x41.
+You can safely say '\n', but not \012.
+If a character doesn't have a trivial input form, you can
+create a #define for it in both C<utfebcdic.h> and C<utf8.h>, so that
+it resolves to different values depending on the character set being used.
+(There are three different EBCDIC character sets defined in C<utfebcdic.h>,
+so it might be best to insert the #define three times in that file.)
+
+Also, the range 'A' - 'Z' in ASCII is an unbroken sequence of 26 upper case
+alphabetic characters.  That is not true in EBCDIC.  Nor for 'a' to 'z'.
+But '0' - '9' is an unbroken range in both systems.  Don't assume anything
+about other ranges.
+
+Many of the comments in the existing code ignore the possibility of EBCDIC,
+and may be wrong therefore, even if the code works.
+This is actually a tribute to the successful transparent insertion of being
+able to handle EBCDIC.  without having to change pre-existing code.
+
+UTF-8 and UTF-EBCDIC are two different encodings used to represent Unicode
+code points as sequences of bytes.  Macros 
+with the same names (but different definitions)
+in C<utf8.h> and C<utfebcdic.h>
+are used to allow the calling code think that there is only one such encoding.
+This is almost always referred to as C<utf8>, but it means the EBCDIC
+version as well.  Comments in the code may well be wrong even if the code
+itself is right.
+For example, the concept of C<invariant characters> differs between ASCII and
+EBCDIC.
+On ASCII platforms, only characters that do not have the high-order
+bit set (i.e. whose ordinals are strict ASCII, 0 - 127)
+are invariant, and the documentation and comments in the code
+may assume that,
+often referring to something like, say, C<hibit>.
+The situation differs and is not so simple on EBCDIC machines, but as long as
+the code itself uses the C<NATIVE_IS_INVARIANT()> macro appropriately, it
+works, even if the comments are wrong.
+
+=item *
+
+Assuming the character set is just ASCII
+
+ASCII is a 7 bit encoding, but bytes have 8 bits in them.  The 128 extra
+characters have different meanings depending on the locale.  Absent a locale,
+currently these extra characters are generally considered to be unassigned,
+and this has presented some problems.
+This is scheduled to be changed in 5.12 so that these characters will
+be considered to be Latin-1 (ISO-8859-1).
+
+=item *
+
 Mixing #define and #ifdef
 
   #define BURGLE(x) ... \
@@ -2660,7 +2715,7 @@ you need two separate BURGLE() #defines, one for each #ifdef branch.
 
 =item *
 
-Adding stuff after #endif or #else
+Adding non-comment stuff after #endif or #else
 
   #ifdef SNOSH
   ...
@@ -2836,7 +2891,7 @@ admittedly use them if available to gain some extra speed
 
 =item *
 
-Binding together several statements
+Binding together several statements in a macro
 
 Use the macros STMT_START and STMT_END.
 
