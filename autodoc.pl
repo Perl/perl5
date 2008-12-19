@@ -238,7 +238,30 @@ Note that all Perl API global variables must be referenced with the C<PL_>
 prefix.  Some macros are provided for compatibility with the older,
 unadorned names, but this support may be disabled in a future release.
 
-The listing is alphabetical, case insensitive.
+Perl was originally written to handle US-ASCII only (that is characters
+whose ordinal numbers are in the range 0 - 127).
+And documentation and comments may still use the term ASCII, when
+sometimes in fact the entire range from 0 - 255 is meant.
+
+Note that Perl can be compiled and run under EBCDIC (See L<perlebcdic>)
+or ASCII.  Most of the documentation (and even comments in the code)
+ignore the EBCDIC possibility.  
+For almost all purposes the differences are transparent.
+As an example, under EBCDIC,
+instead of UTF-8, UTF-EBCDIC is used to encode Unicode strings, and so
+whenever this documentation refers to C<utf8>
+(and variants of that name, including in function names),
+it also (essentially transparently) means C<UTF-EBCDIC>.
+But the ordinals of characters differ between ASCII, EBCDIC, and
+the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy more bytes
+than in UTF-8.
+
+Also, on some EBCDIC machines, functions that are documented as operating on
+US-ASCII (or Basic Latin in Unicode terminology) may in fact operate on all
+256 characters in the EBCDIC range, not just the subset corresponding to
+US-ASCII.
+
+The listing below is alphabetical, case insensitive.
 
 _EOB_
 

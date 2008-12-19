@@ -243,9 +243,9 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 =for apidoc is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an INVARIANT (i.e. ASCII) character is a valid
-UTF-8 character.  The actual number of bytes in the UTF-8 character
-will be returned if it is valid, otherwise 0.
+character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
+character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
+character will be returned if it is valid, otherwise 0.
 
 =cut */
 STRLEN
@@ -635,7 +635,7 @@ Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-This function should only be used when returned UV is considered
+This function should only be used when the returned UV is considered
 an index into the Unicode semantic tables (e.g. swashes).
 
 If C<s> does not point to a well-formed UTF-8 character, zero is
@@ -751,7 +751,7 @@ Perl_utf8_hop(pTHX_ const U8 *s, I32 off)
 /*
 =for apidoc utf8_to_bytes
 
-Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
@@ -794,12 +794,13 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 /*
 =for apidoc bytes_from_utf8
 
-Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
 Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
-0 if C<s> is converted or contains all 7bit characters.
+0 if C<s> is converted or consisted entirely of characters that are invariant
+in utf8 (i.e., US-ASCII on non-EBCDIC machines).
 
 =cut
 */
@@ -849,11 +850,14 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 /*
 =for apidoc bytes_to_utf8
 
-Converts a string C<s> of length C<len> from ASCII into UTF-8 encoding.
+Converts a string C<s> of length C<len> from the native encoding into UTF-8.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
 
-If you want to convert to UTF-8 from other encodings than ASCII,
+A NUL character will be written after the end of the string.
+
+If you want to convert to UTF-8 from encodings other than
+the native (Latin1 or EBCDIC),
 see sv_recode_to_utf8().
 
 =cut

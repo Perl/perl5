@@ -2610,9 +2610,7 @@ you can use C<*s = uv>.
 =item *
 
 Mixing UTF-8 and non-UTF-8 strings is tricky. Use C<bytes_to_utf8> to get
-a new string which is UTF-8 encoded. There are tricks you can use to
-delay deciding whether you need to use a UTF-8 string until you get to a
-high character - C<HALF_UPGRADE> is one of those.
+a new string which is UTF-8 encoded, and then combine them.
 
 =back
 

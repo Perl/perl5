@@ -22,7 +22,30 @@ Note that all Perl API global variables must be referenced with the C<PL_>
 prefix.  Some macros are provided for compatibility with the older,
 unadorned names, but this support may be disabled in a future release.
 
-The listing is alphabetical, case insensitive.
+Perl was originally written to handle US-ASCII only (that is characters
+whose ordinal numbers are in the range 0 - 127).
+And documentation and comments may still use the term ASCII, when
+sometimes in fact the entire range from 0 - 256 is meant.
+
+Note that Perl can be compiled and run under EBCDIC (See L<perlebcdic>)
+or ASCII.  Most of the documentation (and even comments in the code)
+ignore the EBCDIC possibility.  
+For almost all purposes the differences are transparent.
+As an example, under EBCDIC,
+instead of UTF-8, UTF-EBCDIC is used to encode Unicode strings, and so
+whenever this documentation refers to C<utf8>
+(and variants of that name, including in function names),
+it also (essentially transparently) means C<UTF-EBCDIC>.
+But the ordinals of characters differ between ASCII, EBCDIC, and
+the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy more bytes
+than in UTF-8.
+
+Also, on some EBCDIC machines, functions that are documented as operating on
+US-ASCII (or Basic Latin in Unicode terminology) may in fact operate on all
+256 characters in the EBCDIC range, not just the subset corresponding to
+US-ASCII.
+
+The listing below is alphabetical, case insensitive.
 
 
 =head1 "Gimme" Values
@@ -510,8 +533,8 @@ Found in file scope.h
 =item isALNUM
 X<isALNUM>
 
-Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
-character (including underscore) or digit.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+alphanumeric character (including underscore) or digit.
 
 	bool	isALNUM(char ch)
 
@@ -521,8 +544,8 @@ Found in file handy.h
 =item isALPHA
 X<isALPHA>
 
-Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin) 
+alphabetic character.
 
 	bool	isALPHA(char ch)
 
@@ -532,7 +555,7 @@ Found in file handy.h
 =item isDIGIT
 X<isDIGIT>
 
-Returns a boolean indicating whether the C C<char> is an ASCII
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 digit.
 
 	bool	isDIGIT(char ch)
@@ -543,8 +566,8 @@ Found in file handy.h
 =item isLOWER
 X<isLOWER>
 
-Returns a boolean indicating whether the C C<char> is a lowercase
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+lowercase character.
 
 	bool	isLOWER(char ch)
 
@@ -554,7 +577,8 @@ Found in file handy.h
 =item isSPACE
 X<isSPACE>
 
-Returns a boolean indicating whether the C C<char> is whitespace.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+whitespace.
 
 	bool	isSPACE(char ch)
 
@@ -564,8 +588,8 @@ Found in file handy.h
 =item isUPPER
 X<isUPPER>
 
-Returns a boolean indicating whether the C C<char> is an uppercase
-character.
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+uppercase character.
 
 	bool	isUPPER(char ch)
 
@@ -575,7 +599,8 @@ Found in file handy.h
 =item toLOWER
 X<toLOWER>
 
-Converts the specified character to lowercase.
+Converts the specified character to lowercase.  Characters outside the
+US-ASCII (Basic Latin) range are viewed as not having any case.
 
 	char	toLOWER(char ch)
 
@@ -585,7 +610,8 @@ Found in file handy.h
 =item toUPPER
 X<toUPPER>
 
-Converts the specified character to uppercase.
+Converts the specified character to uppercase.  Characters outside the
+US-ASCII (Basic Latin) range are viewed as not having any case.
 
 	char	toUPPER(char ch)
 
@@ -6373,7 +6399,8 @@ Found in file sv.c
 X<sv_utf8_downgrade>
 
 Attempts to convert the PV of an SV from characters to bytes.
-If the PV contains a character beyond byte, this conversion will fail;
+If the PV contains a character that cannot fit
+in a byte, this conversion will fail;
 in this case, either returns false or, if C<fail_ok> is not
 true, croaks.
 
@@ -6404,8 +6431,10 @@ X<sv_utf8_upgrade>
 
 Converts the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
+Will C<mg_get> on C<sv> if appropriate.
 Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes have hibit clear.
+if the whole string is the same in UTF-8 as not.
+Returns the number of bytes in the converted string
 
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
@@ -6421,14 +6450,26 @@ X<sv_utf8_upgrade_flags>
 Converts the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
-will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
+if all the bytes are invariant in UTF-8. If C<flags> has C<SV_GMAGIC> bit set,
+will C<mg_get> on C<sv> if appropriate, else not.
+Returns the number of bytes in the converted string
+C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
 
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_utf8_upgrade_nomg
+X<sv_utf8_upgrade_nomg>
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+
+	STRLEN	sv_utf8_upgrade_nomg(SV *sv)
 
 =for hackers
 Found in file sv.c
@@ -6522,12 +6563,13 @@ Found in file sv.c
 =item bytes_from_utf8
 X<bytes_from_utf8>
 
-Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
 Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
-0 if C<s> is converted or contains all 7bit characters.
+0 if C<s> is converted or consisted entirely of characters that are invariant
+in utf8 (i.e., US-ASCII on non-EBCDIC machines).
 
 NOTE: this function is experimental and may change or be
 removed without notice.
@@ -6540,11 +6582,14 @@ Found in file utf8.c
 =item bytes_to_utf8
 X<bytes_to_utf8>
 
-Converts a string C<s> of length C<len> from ASCII into UTF-8 encoding.
+Converts a string C<s> of length C<len> from the native encoding into UTF-8.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
 
-If you want to convert to UTF-8 from other encodings than ASCII,
+A NUL character will be written after the end of the string.
+
+If you want to convert to UTF-8 from encodings other than
+the native (Latin1 or EBCDIC),
 see sv_recode_to_utf8().
 
 NOTE: this function is experimental and may change or be
@@ -6588,9 +6633,9 @@ Found in file utf8.c
 X<is_utf8_char>
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an INVARIANT (i.e. ASCII) character is a valid
-UTF-8 character.  The actual number of bytes in the UTF-8 character
-will be returned if it is valid, otherwise 0.
+character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
+character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
+character will be returned if it is valid, otherwise 0.
 
 	STRLEN	is_utf8_char(const U8 *p)
 
@@ -6895,7 +6940,7 @@ Found in file utf8.c
 =item utf8_to_bytes
 X<utf8_to_bytes>
 
-Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
@@ -6932,7 +6977,7 @@ Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-This function should only be used when returned UV is considered
+This function should only be used when the returned UV is considered
 an index into the Unicode semantic tables (e.g. swashes).
 
 If C<s> does not point to a well-formed UTF-8 character, zero is
