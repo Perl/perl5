@@ -53,7 +53,7 @@ This clones the repository and makes a local copy in the 'perl.ssh'
 directory. 
 
 If you clone using git, which is faster than ssh, then you will need to
-modify your config in order to enable config. edit .git/config where 
+modify your config in order to enable pushing. Edit .git/config where 
 you will see something like:
 
   [remote "origin"]
