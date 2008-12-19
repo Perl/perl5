@@ -126,7 +126,6 @@ You can see what files are changed:
   #	modified:   AUTHORS
   #
 
-
 And you can see the changes:
 
   % git diff
@@ -134,8 +133,7 @@ And you can see the changes:
   index 293dd70..722c93e 100644
   --- a/AUTHORS
   +++ b/AUTHORS
-  @@ -541,7 +541,7 @@ 
-   Lars Hecking                   <lhecking@nmrc.ucc.ie>
+  @@ -541,7 +541,7 @@    Lars Hecking                   <lhecking@nmrc.ucc.ie>
    Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
    Leif Huhn                      <leif@hale.dkstat.com>
    Len Johnson                    <lenjay@ibm.net>
@@ -169,3 +167,59 @@ If you want to delete your temporary branch, you may do so with:
   If you are sure you want to delete it, run 'git branch -D orange'.
   % git branch -D orange
   Deleted branch orange.
+
+=head1 ACCEPTING A PATCH
+
+If you have received a patch file generated using the above section,
+you should try out the patch.
+
+First we need to create a temporary new branch for these changes and
+switch into it:
+
+  % git branch experimental
+  % git checkout experimental
+
+Now we should apply the patch:
+
+  % git-am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+  Applying Rename Leon Brocard to Orange Brocard
+
+Now we can inspect the change:
+
+  % git log
+  commit b1b3dab48344cff6de4087efca3dbd63548ab5e2
+  Author: Leon Brocard <acme@astray.com>
+  Date:   Fri Dec 19 17:02:59 2008 +0000
+
+    Rename Leon Brocard to Orange Brocard
+  ...
+
+  % git diff blead
+  diff --git a/AUTHORS b/AUTHORS
+  index 293dd70..722c93e 100644
+  --- a/AUTHORS
+  +++ b/AUTHORS
+  @@ -541,7 +541,7 @@ Lars Hecking                        <lhecking@nmrc.ucc.ie>
+   Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
+   Leif Huhn                      <leif@hale.dkstat.com>
+   Len Johnson                    <lenjay@ibm.net>
+  -Leon Brocard                   <acme@astray.com>
+  +Orange Brocard                 <acme@astray.com>
+   Les Peters                     <lpeters@aol.net>
+   Lesley Binks                   <lesley.binks@gmail.com>
+   Lincoln D. Stein               <lstein@cshl.org>
+
+If you are a committer to Perl and you think the patch is good, you can
+then merge it into blead:
+
+  % git checkout blead
+  % git pull . experimental
+
+If you want to delete your temporary branch, you may do so with:
+
+  % git checkout blead
+  % git branch -d experimental
+  error: The branch 'experimental' is not an ancestor of your current HEAD.
+  If you are sure you want to delete it, run 'git branch -D experimental'.
+  % git branch -D experimental
+  Deleted branch experimental.
