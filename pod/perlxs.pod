@@ -293,7 +293,7 @@ or less equivalent:
           ST(0) = newSVpv("Hello World",0);
           sv_2mortal(ST(0));
           XSRETURN(1);
-  
+
   SV *
   beta()
       CODE:
