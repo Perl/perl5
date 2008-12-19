@@ -1104,6 +1104,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.dos      ..\pod\perldos.pod
 	copy ..\README.epoc     ..\pod\perlepoc.pod
 	copy ..\README.freebsd  ..\pod\perlfreebsd.pod
+	copy ..\README.haiku    ..\pod\perlhaiku.pod
 	copy ..\README.hpux     ..\pod\perlhpux.pod
 	copy ..\README.hurd     ..\pod\perlhurd.pod
 	copy ..\README.irix     ..\pod\perlirix.pod
@@ -1201,14 +1202,14 @@ distclean: realclean
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
-	    perlfreebsd.pod perlhpux.pod perlhurd.pod perlirix.pod \
-	    perljp.pod perlko.pod perllinux.pod perlmachten.pod \
-	    perlmacos.pod perlmacosx.pod perlmint.pod perlmpeix.pod \
-	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
-	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
-	    perlsolaris.pod perlsymbian.pod perltru64.pod perltw.pod \
-	    perluts.pod perlvmesa.pod perlvms.pod perlvms.pod perlvos.pod \
-	    perlwin32.pod \
+	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
+	    perlirix.pod perljp.pod perlko.pod perllinux.pod \
+	    perlmachten.pod perlmacos.pod perlmacosx.pod perlmint.pod \
+	    perlmpeix.pod perlnetware.pod perlopenbsd.pod perlos2.pod \
+	    perlos390.pod perlos400.pod perlplan9.pod perlqnx.pod \
+	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltru64.pod \
+	    perltw.pod perluts.pod perlvmesa.pod perlvms.pod perlvms.pod \
+	    perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
