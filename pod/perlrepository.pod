@@ -152,7 +152,7 @@ Now commit your change locally:
 
 Now you should create a patch file for all your local changes:
 
-  % git-format-patch origin
+  % git format-patch origin
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
 You should now send an email to perl5-porters@perl.org with a
@@ -181,7 +181,7 @@ switch into it:
 
 Now we should apply the patch:
 
-  % git-am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+  % git am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
   Applying Rename Leon Brocard to Orange Brocard
 
 Now we can inspect the change:
