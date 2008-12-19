@@ -115,6 +115,13 @@ push @map, (
 ) if &File::Fetch::ON_WIN;
 
 
+### sanity tests
+{   like( $File::Fetch::USER_AGENT, qr/$File::Fetch::VERSION/,
+                                "User agent contains version" );
+    like( $File::Fetch::FROM_EMAIL, qr/@/,
+                                q[Email contains '@'] );
+}                                
+
 ### parse uri tests ###
 for my $entry (@map ) {
     my $uri = $entry->{'uri'};
