@@ -67,6 +67,11 @@ change that to something like this:
 
 NOTE: there are symlinks set up so that the /gitroot is actually optional.
 
+You can also set up your user name and e-mail address. For example
+
+  % git config user.name "Leon Brocard"
+  % git config user.email acme@astray.com
+
 =head1 OVERVIEW OF THE REPOSITORY
 
 Once you have changed into the repository directory, you can inspect it.
