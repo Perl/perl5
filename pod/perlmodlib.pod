@@ -55,6 +55,10 @@ Get/set subroutine or variable attributes
 
 Set/get attributes of a subroutine (deprecated)
 
+=item autodie
+
+Replace functions with ones that succeed or die with lexical scope
+
 =item autouse
 
 Postpone load of modules until a function is used
