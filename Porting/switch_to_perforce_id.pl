@@ -6,7 +6,7 @@ use English;
 my $perforce_id = shift;
 die "Usage: switch_to_perforce_id.pl 34440" unless $perforce_id;
 
-open my $fh, 'git log -z --pretty=raw|' || die $!;
+open my $fh, 'git log -z --pretty=raw|' or die $!;
 local $INPUT_RECORD_SEPARATOR = "\0";
 
 my $re = qr/p4raw-id:.+\@$perforce_id/;
