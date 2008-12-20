@@ -105,8 +105,15 @@ Then change into the directory:
 
   % cd perl-git
 
-First we need to create a temporary new branch for these changes and
-switch into it:
+Alternatively, if you already have a Perl repository, you should
+ensure that you're on the I<blead> branch, and your repostiroy
+is up to date:
+
+  % git checkout blead
+  % git pull
+
+Now that we have everything up to date, we need to create a temporary new
+branch for these changes and switch into it:
 
   % git branch orange
   % git checkout orange
