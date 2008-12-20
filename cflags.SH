@@ -356,8 +356,10 @@ esac
 
 if test -d .git; then
   ccflags="-DPERL_PATCHNUM=`git describe` $ccflags"
-elsif test -f .patch; then
-  ccflags="-DPERL_PATCHNUM=`awk '{print $4}' .patch` $ccflags"
+else
+  if test -f .patch; then
+    ccflags="-DPERL_PATCHNUM=`awk '{print $4}' .patch` $ccflags"
+  fi
 fi
 
     : Can we perhaps use $ansi2knr here
