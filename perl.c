@@ -3304,7 +3304,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	PerlIO_printf(PerlIO_stdout(),
 		"\nThis is perl, %"SVf
 #ifdef PERL_PATCHNUM
-		" DEVEL" STRINGIFY(PERL_PATCHNUM)
+		" DEVEL:" STRINGIFY(PERL_PATCHNUM)
 #endif
 		" built for %s",
 		SVfARG(vstringify(PL_patchlevel)),
