@@ -25,7 +25,7 @@ unadorned names, but this support may be disabled in a future release.
 Perl was originally written to handle US-ASCII only (that is characters
 whose ordinal numbers are in the range 0 - 127).
 And documentation and comments may still use the term ASCII, when
-sometimes in fact the entire range from 0 - 256 is meant.
+sometimes in fact the entire range from 0 - 255 is meant.
 
 Note that Perl can be compiled and run under EBCDIC (See L<perlebcdic>)
 or ASCII.  Most of the documentation (and even comments in the code)
@@ -5134,6 +5134,16 @@ Like C<sv_setsv> but doesn't process magic.
 =for hackers
 Found in file sv.h
 
+=item sv_utf8_upgrade_nomg
+X<sv_utf8_upgrade_nomg>
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+
+	STRLEN	sv_utf8_upgrade_nomg(NN SV *sv)
+
+=for hackers
+Found in file sv.h
+
 
 =back
 
@@ -6530,16 +6540,6 @@ This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *const sv, const I32 flags)
-
-=for hackers
-Found in file sv.c
-
-=item sv_utf8_upgrade_nomg
-X<sv_utf8_upgrade_nomg>
-
-Like sv_utf8_upgrade, but doesn't do magic on C<sv>
-
-	STRLEN	sv_utf8_upgrade_nomg(SV *sv)
 
 =for hackers
 Found in file sv.c

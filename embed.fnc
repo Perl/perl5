@@ -1257,7 +1257,6 @@ AmdbR	|char*	|sv_pv		|NN SV *sv
 AmdbR	|char*	|sv_pvutf8	|NN SV *sv
 AmdbR	|char*	|sv_pvbyte	|NN SV *sv
 Amdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
-Amdb	|STRLEN	|sv_utf8_upgrade_nomg|NN SV *sv
 ApdM	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
 Apd	|void	|sv_utf8_encode |NN SV *const sv
 ApdM	|bool	|sv_utf8_decode |NN SV *const sv

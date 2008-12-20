@@ -3969,11 +3969,6 @@ PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 #define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE	\
 	assert(sv)
 
-/* PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_nomg(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1); */
-#define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_NOMG	\
-	assert(sv)
-
 PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE	\

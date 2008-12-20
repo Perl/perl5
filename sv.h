@@ -1523,6 +1523,10 @@ Like C<sv_setsv> but doesn't process magic.
 =for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Like C<sv_catsv> but doesn't process magic.
 
+=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|NN SV *sv
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+
 =cut
 */
 
