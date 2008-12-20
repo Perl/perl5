@@ -3521,7 +3521,6 @@ Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/README.y2038	Perl notes for the 2038 fix
 Porting/regcharclass.pl	Generate regcharclass.h from inline data
-Porting/repository.pod	How to use the Perl repository
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/switch_to_perforce_id.pl	Checkout a given p4 change number
 Porting/testall.atom		Cumulative profile with Third Degree
