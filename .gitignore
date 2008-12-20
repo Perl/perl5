@@ -1,7 +1,10 @@
 *.patch
 .config
 
+
+
 # files produced by './configure.gnu' on a Linux machine
+Makefile.old
 /Makefile
 /Policy.sh
 /cflags
@@ -57,3 +60,14 @@ x2p/a2p
 x2p/find2perl
 x2p/psed
 x2p/s2p
+
+# test byproduct
+ext/Test/Harness/t/ext/
+lib/App/
+lib/Archive/Tar/t/src/long/foo.tbz
+lib/Archive/Tar/t/src/short/foo.tbz
+lib/IPC/Cmd/t/src/x.tgz
+lib/TAP/
+lib/Test/Harness.pm
+t/rantests
+t/tmp*
