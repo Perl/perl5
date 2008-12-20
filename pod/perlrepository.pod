@@ -115,6 +115,10 @@ is up to date:
 Now that we have everything up to date, we need to create a temporary new
 branch for these changes and switch into it:
 
+  % git checkout -b orange
+  
+which is the short form of
+
   % git branch orange
   % git checkout orange
 
@@ -183,8 +187,7 @@ you should try out the patch.
 First we need to create a temporary new branch for these changes and
 switch into it:
 
-  % git branch experimental
-  % git checkout experimental
+  % git checkout -b experimental
 
 Now we should apply the patch:
 
