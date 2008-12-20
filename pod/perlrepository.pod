@@ -221,7 +221,7 @@ Then change into the directory:
   % cd perl-git
 
 Alternatively, if you already have a Perl repository, you should
-ensure that you're on the I<blead> branch, and your repostiroy
+ensure that you're on the I<blead> branch, and your repository
 is up to date:
 
   % git checkout blead
