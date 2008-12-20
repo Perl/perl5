@@ -1216,10 +1216,12 @@ B<perlbug> S<[ B<-v> ]> S<[ B<-a> I<address> ]> S<[ B<-s> I<subject> ]>
 S<[ B<-b> I<body> | B<-f> I<inputfile> ]> S<[ B<-F> I<outputfile> ]>
 S<[ B<-r> I<returnaddress> ]>
 S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
-S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-A> ]>  S<[ B<-h> ]>
+S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-A> ]>  S<[ B<-h> ]> S<[ B<-T> ]>
 
 B<perlbug> S<[ B<-v> ]> S<[ B<-r> I<returnaddress> ]>
  S<[ B<-A> ]> S<[ B<-ok> | B<-okay> | B<-nok> | B<-nokay> ]>
+
+B<perlthanks>
 
 =head1 DESCRIPTION
 
@@ -1301,7 +1303,7 @@ L<perldebug>.
 =item Do you have a proper test case?
 
 The easier it is to reproduce your bug, the more likely it will be
-fixed --  if nobody can duplicate your problem, it probably won't be 
+fixed -- if nobody can duplicate your problem, it probably won't be 
 addressed.
 
 A good test case has most of these attributes: short, simple code;
@@ -1370,6 +1372,12 @@ Whether you use C<perlbug> or send the email manually, please make
 your Subject line informative.  "a bug" is not informative.  Neither
 is "perl crashes" nor is "HELP!!!".  These don't help.  A compact
 description of what's wrong is fine.
+
+=item Can you use C<perlbug> to submit a thank-you note?
+
+Yes, you can do this by either using the C<-T> option, or by invoking
+the program as C<perlthanks>. Thank-you notes are good. It makes people
+smile. 
 
 =back
 
@@ -1489,6 +1497,10 @@ supply one on the command line.
 =item B<-t>
 
 Test mode.  The target address defaults to B<perlbug-test@perl.org>.
+
+=item B<-T>
+
+Send a thank-you note instead of a bug report. 
 
 =item B<-v>
 
