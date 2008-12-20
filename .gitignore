@@ -1,4 +1,4 @@
-.patch
+*.patch
 .config
 
 # files produced by './configure.gnu' on a Linux machine
