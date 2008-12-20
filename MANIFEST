@@ -3512,6 +3512,7 @@ Porting/findvars	Find occurrences of words
 Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
+Porting/git-find-p4-change	Find the change for a p4 change number
 Porting/Glossary	Glossary of config.sh variables
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
 Porting/Maintainers.pl	Information about maintainers
@@ -3527,6 +3528,7 @@ Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/README.y2038	Perl notes for the 2038 fix
 Porting/regcharclass.pl	Generate regcharclass.h from inline data
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
+Porting/switch_to_perforce_id.pl	Checkout a given p4 change number
 Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
 Porting/timecheck2.c		Test program for the 2038 fix
