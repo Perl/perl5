@@ -26,6 +26,8 @@ h Tutorials
   perltooc		Perl OO tutorial, part 2
   perlbot		Perl OO tricks and examples
 
+  perlperf		Perl Performance and Optimization Techniques
+
   perlstyle		Perl style guide
 
   perlcheat		Perl cheat sheet

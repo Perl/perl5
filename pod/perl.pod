@@ -42,6 +42,8 @@ For ease of access, the Perl manual has been split up into several sections.
     perltooc		Perl OO tutorial, part 2
     perlbot		Perl OO tricks and examples
 
+    perlperf		Perl Performance and Optimization Techniques
+
     perlstyle		Perl style guide
 
     perlcheat		Perl cheat sheet

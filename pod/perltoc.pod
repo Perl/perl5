@@ -653,6 +653,84 @@ X<record> X<structure> X<struct>
 
 =back
 
+=head2 perlperf - Perl Performance and Optimization Techniques
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERVIEW
+
+=over 4
+
+=item ONE STEP SIDEWAYS
+
+=item ONE STEP FORWARD
+
+=item ANOTHER STEP SIDEWAYS
+
+=back
+
+=item GENERAL GUIDELINES
+
+=item BENCHMARKS
+
+=over 4
+
+=item  Assigning and Dereferencing Variables.
+
+=item  Search and replace or tr
+
+=back
+
+=item PROFILING TOOLS
+
+=over 4
+
+=item Devel::DProf
+
+=item Devel::Profiler
+
+=item Devel::SmallProf
+
+=item Devel::FastProf
+
+=item Devel::NYTProf
+
+=back
+
+=item  SORTING
+
+Elapsed Real Time, User CPU Time, System CPU Time
+
+=item LOGGING
+
+=over 4
+
+=item  Logging if DEBUG (constant)
+
+=back
+
+=item POSTSCRIPT
+
+=item SEE ALSO
+
+=over 4
+
+=item PERLDOCS
+
+=item MAN PAGES
+
+=item MODULES
+
+=item URLS
+
+=back
+
+=item AUTHOR
+
+=back
+
 =head2 perlstyle - Perl style guide
 
 =over 4
