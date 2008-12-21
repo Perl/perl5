@@ -28,6 +28,24 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.10		Maintenance release working toward v5.8.10
 ---------------
 ____________________________________________________________________________
+[ 35104] By: nicholas				   on 2008/12/15  14:26:44
+	Log: It helps if you actually add your new file.
+     Branch: maint-5.8/perl
+	   + pod/perl5810delta.pod
+____________________________________________________________________________
+[ 35103] By: nicholas				   on 2008/12/15  11:36:54
+	Log: Create perl5810delta.
+     Branch: maint-5.8/perl
+	   ! MANIFEST Makefile.SH pod.lst pod/perl.pod pod/perl589delta.pod
+	   ! pod/perltoc.pod vms/descrip_mms.template win32/Makefile
+	   ! win32/makefile.mk win32/pod.mak
+____________________________________________________________________________
+[ 35100] By: nicholas				   on 2008/12/15  11:11:49
+	Log: Move the 5.8.9 changes to Changes5.8.9
+     Branch: maint-5.8/perl
+	  +> Changes5.8.9
+	   ! Changes MANIFEST patchlevel.h
+____________________________________________________________________________
 [ 35098] By: nicholas				   on 2008/12/15  10:19:55
 	Log: That was 5.8.9.
      Branch: maint-5.8/perl
