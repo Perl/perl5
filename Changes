@@ -29,6 +29,940 @@ Version v5.10.1		Development release working toward v5.10.1
 ---------------
 
 ____________________________________________________________________________
+[ 35117] By: davem				   on 2008/12/16  01:43:46
+	Log: Integrate:
+	     [ 34359]
+	     Upgrade to Test::Harness 3.14
+	     
+	     [ 34361]
+	     The program spawned from process.t needs to set up @INC correctly, as
+	     process.t does not add an -I../lib for core.
+     Branch: maint-5.10/perl
+	  +> ext/Test/Harness/lib/App/Prove/State/Result.pm
+	  +> ext/Test/Harness/lib/App/Prove/State/Result/Test.pm
+	  +> ext/Test/Harness/t/glob-to-regexp.t
+	  +> ext/Test/Harness/t/harness-subclass.t
+	  +> ext/Test/Harness/t/lib/NOP.pm
+	  +> ext/Test/Harness/t/state_results.t
+	  !> (integrate 60 files)
+____________________________________________________________________________
+[ 35116] By: davem				   on 2008/12/16  01:03:17
+	Log: Integrate:
+	     [ 34063]
+	     Subject: [PATCH] TODO B-Deparse cpan-bug 33708
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Mon, 16 Jun 2008 14:40:35 +0200
+	     Message-ID: <6910a60806160540v21c7affbte54ef0eedb0cb64d@mail.gmail.com>
+	     
+	     [ 34358]
+	     Subject: Re: [5.8] Change 33727 (op.c) breaks constant folding in "elsif"
+	     From: Vincent Pit <perl@profvince.com>
+	     Date: Sat, 13 Sep 2008 01:13:30 +0200
+	     Message-ID: <48CAF79A.6000001@profvince.com>
+     Branch: maint-5.10/perl
+	  !> embed.fnc embed.h ext/B/B/Deparse.pm ext/B/t/deparse.t op.c
+	  !> pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 35115] By: davem				   on 2008/12/15  22:57:38
+	Log: Integrate:
+	     [ 34321]
+	     Cross-propagate changes between make_ext and make_ext_cross.
+	     Hopefully we can heal the code fork soon.
+     Branch: maint-5.10/perl
+	  !> ext/util/make_ext ext/util/make_ext_cross
+____________________________________________________________________________
+[ 35114] By: davem				   on 2008/12/15  22:54:40
+	Log: Integrate:
+	     [ 34317]
+	     Subject: [PATCH at 34306] - crosscompilation - step 1 of N+1
+	     From: Vadim Konovalov <vadim@vkonovalov.ru>
+	     Date: Mon, 08 Sep 2008 07:04:09 +0400
+	     Message-ID: <48C49629.4000208@vkonovalov.ru>
+     Branch: maint-5.10/perl
+	  !> Cross/build-arm-n770-sh Cross/cflags-cross-arm
+	  !> Cross/config.sh-arm-linux Cross/config.sh-arm-linux-n770
+	  !> Makefile.SH
+____________________________________________________________________________
+[ 35113] By: davem				   on 2008/12/15  22:10:53
+	Log: Integrate:
+	     [ 34314]
+	     Subject: [PATCH?] $ENV{TEST_JOBS}	vs  $ENV{HARNESS_OPTIONS}
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Tue, 12 Aug 2008 20:50:47 +0200
+	     Message-ID: <20080812205047.05lrnmbqlccs08g8@horde.wizbit.be>
+	     
+	     [ 34329]
+	     Suck in r1147 from TH3's svn:
+	     Make test work if HARNESS_TIMER=1. Thanks Petdance.
+     Branch: maint-5.10/perl
+	  !> ext/Test/Harness/t/prove.t t/harness
+____________________________________________________________________________
+[ 35112] By: davem				   on 2008/12/15  21:01:29
+	Log: Integrate:
+	     [ 32892]
+	     Subject: [PATCH] v5.8.8: File::Temp.pm (_gettemp): ignore dir -w test on Cygwin
+	     From: Jari Aalto <jari.aalto@cante.net>
+	     Date: Sat, 05 Jan 2008 13:22:17 +0200
+	     Message-ID: <bq8034ba.fsf@blue.sea.net>
+	     
+	     [ 34238]
+	     Fix typo.
+	     
+	     [ 34838]
+	     Upgrade to File-Temp-0.21
+     Branch: maint-5.10/perl
+	  !> lib/File/Temp.pm lib/File/Temp/t/seekable.t
+____________________________________________________________________________
+[ 35111] By: davem				   on 2008/12/15  19:18:10
+	Log: #35108 missed a MANIFEST entry when merging/resolving 34229
+     Branch: maint-5.10/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 35110] By: davem				   on 2008/12/15  19:05:17
+	Log: Integrate:
+	     [ 34231]
+	     Khaaaaan! Change 34230 wasn't right. The tests all passed because I
+	     had a(nother) copy of Dev::Null in the "right" place. So make that
+	     right place official.
+	     
+	     [ 34232]
+	     And then change 34231 removed the other t/lib/Dev/Null.pm from the
+	     MANIFEST, when it too needs to stay. Third time lucky?
+	     
+	     [ 34233]
+	     No, third time not lucky. Remove the extraneous leading - sign.
+     Branch: maint-5.10/perl
+	  +> t/lib/Dev/Null.pm
+	   - lib/Test/Simple/t/lib/Dev/Null.pm
+	  !> MANIFEST Porting/Maintainers.pl
+____________________________________________________________________________
+[ 35109] By: davem				   on 2008/12/15  18:40:45
+	Log: Integrate:
+	     [ 34230]
+	     And then add the Dev::Null from Test-Simple-0.80
+     Branch: maint-5.10/perl
+	  +> lib/Test/Simple/t/lib/Dev/Null.pm
+	  !> MANIFEST
+____________________________________________________________________________
+[ 35108] By: davem				   on 2008/12/15  18:37:44
+	Log: Integrate:
+	     [ 34229]
+	     Move all of Test::Harness's test modules into ext/Test/Harness/t/lib
+     Branch: maint-5.10/perl
+	  +> ext/Test/Harness/t/lib/App/Prove/Plugin/Dummy.pm
+	  +> ext/Test/Harness/t/lib/Dev/Null.pm
+	  +> ext/Test/Harness/t/lib/EmptyParser.pm
+	  +> ext/Test/Harness/t/lib/IO/c55Capture.pm
+	  +> ext/Test/Harness/t/lib/MyCustom.pm
+	  +> ext/Test/Harness/t/lib/MyGrammar.pm
+	  +> ext/Test/Harness/t/lib/MyIterator.pm
+	  +> ext/Test/Harness/t/lib/MyIteratorFactory.pm
+	  +> ext/Test/Harness/t/lib/MyPerlSource.pm
+	  +> ext/Test/Harness/t/lib/MyResult.pm
+	  +> ext/Test/Harness/t/lib/MyResultFactory.pm
+	  +> ext/Test/Harness/t/lib/MySource.pm
+	  +> ext/Test/Harness/t/lib/NoFork.pm
+	  +> ext/Test/Harness/t/lib/TAP/Parser/SubclassTest.pm
+	   - t/lib/App/Prove/Plugin/Dummy.pm t/lib/Dev/Null.pm
+	   - t/lib/EmptyParser.pm t/lib/IO/c55Capture.pm t/lib/MyCustom.pm
+	   - t/lib/MyGrammar.pm t/lib/MyIterator.pm
+	   - t/lib/MyIteratorFactory.pm t/lib/MyPerlSource.pm
+	   - t/lib/MyResult.pm t/lib/MyResultFactory.pm t/lib/MySource.pm
+	   - t/lib/NoFork.pm t/lib/TAP/Parser/SubclassTest.pm
+	  !> MANIFEST Porting/Maintainers.pl
+	  !> ext/Test/Harness/t/compat/inc_taint.t
+	  !> ext/Test/Harness/t/grammar.t ext/Test/Harness/t/harness.t
+	  !> ext/Test/Harness/t/nofork-mux.t ext/Test/Harness/t/nofork.t
+	  !> ext/Test/Harness/t/parse.t ext/Test/Harness/t/parser-config.t
+	  !> ext/Test/Harness/t/parser-subclass.t
+	  !> ext/Test/Harness/t/prove.t ext/Test/Harness/t/source.t
+____________________________________________________________________________
+[ 35107] By: davem				   on 2008/12/15  17:48:33
+	Log: Integrate:
+	     [ 34227]
+	     Move t/lib/{data,sample-tests,source_tests,subclass_tests} into
+	     ext/Test/Harness/t/{data,sample-tests,source_tests,subclass_tests}
+	     (The same path as in the Test-Harness distribution.)
+     Branch: maint-5.10/perl
+	  +> (branch 65 files)
+	   - t/lib/data/catme.1 t/lib/data/proverc t/lib/data/sample.yml
+	   - t/lib/sample-tests/bailout t/lib/sample-tests/bignum
+	   - t/lib/sample-tests/bignum_many t/lib/sample-tests/combined
+	   - t/lib/sample-tests/combined_compat t/lib/sample-tests/delayed
+	   - t/lib/sample-tests/descriptive
+	   - t/lib/sample-tests/descriptive_trailing t/lib/sample-tests/die
+	   - t/lib/sample-tests/die_head_end
+	   - t/lib/sample-tests/die_last_minute
+	   - t/lib/sample-tests/die_unfinished
+	   - t/lib/sample-tests/duplicates t/lib/sample-tests/echo
+	   - t/lib/sample-tests/empty t/lib/sample-tests/escape_eol
+	   - t/lib/sample-tests/escape_hash t/lib/sample-tests/head_end
+	   - t/lib/sample-tests/head_fail t/lib/sample-tests/inc_taint
+	   - t/lib/sample-tests/junk_before_plan
+	   - t/lib/sample-tests/lone_not_bug t/lib/sample-tests/no_nums
+	   - t/lib/sample-tests/no_output t/lib/sample-tests/out_err_mix
+	   - t/lib/sample-tests/out_of_order t/lib/sample-tests/schwern
+	   - t/lib/sample-tests/schwern-todo-quiet
+	   - t/lib/sample-tests/segfault
+	   - t/lib/sample-tests/sequence_misparse
+	   - t/lib/sample-tests/shbang_misparse t/lib/sample-tests/simple
+	   - t/lib/sample-tests/simple_fail t/lib/sample-tests/simple_yaml
+	   - t/lib/sample-tests/skip t/lib/sample-tests/skip_nomsg
+	   - t/lib/sample-tests/skipall t/lib/sample-tests/skipall_nomsg
+	   - t/lib/sample-tests/skipall_v13
+	   - t/lib/sample-tests/space_after_plan
+	   - t/lib/sample-tests/stdout_stderr t/lib/sample-tests/strict
+	   - t/lib/sample-tests/switches t/lib/sample-tests/taint
+	   - t/lib/sample-tests/taint_warn t/lib/sample-tests/todo
+	   - t/lib/sample-tests/todo_inline
+	   - t/lib/sample-tests/todo_misparse t/lib/sample-tests/too_many
+	   - t/lib/sample-tests/version_good
+	   - t/lib/sample-tests/version_late t/lib/sample-tests/version_old
+	   - t/lib/sample-tests/vms_nit t/lib/sample-tests/with_comments
+	   - t/lib/source_tests/harness t/lib/source_tests/harness_badtap
+	   - t/lib/source_tests/harness_complain
+	   - t/lib/source_tests/harness_directives
+	   - t/lib/source_tests/harness_failure t/lib/source_tests/source
+	   - t/lib/subclass_tests/non_perl_source
+	   - t/lib/subclass_tests/perl_source
+	  !> MANIFEST Porting/Maintainers.pl
+	  !> ext/Test/Harness/t/compat/failure.t
+	  !> ext/Test/Harness/t/compat/inc_taint.t
+	  !> ext/Test/Harness/t/compat/test-harness-compat.t
+	  !> ext/Test/Harness/t/harness.t ext/Test/Harness/t/iterators.t
+	  !> ext/Test/Harness/t/multiplexer.t ext/Test/Harness/t/nofork.t
+	  !> ext/Test/Harness/t/parse.t ext/Test/Harness/t/parser-config.t
+	  !> ext/Test/Harness/t/parser-subclass.t
+	  !> ext/Test/Harness/t/process.t ext/Test/Harness/t/prove.t
+	  !> ext/Test/Harness/t/proverc.t ext/Test/Harness/t/proverun.t
+	  !> ext/Test/Harness/t/regression.t ext/Test/Harness/t/source.t
+	  !> ext/Test/Harness/t/testargs.t
+____________________________________________________________________________
+[ 35081] By: nicholas				   on 2008/12/13  10:00:22
+	Log: Integrate:
+	     [ 35066]
+	     Bump the debugger's version. Fail to update the changes.
+	     
+	     [ 35080]
+	     Document the changes between VERSIONS 1.30 and 1.31 of the debugger.
+     Branch: maint-5.10/perl
+	  !> lib/perl5db.pl
+____________________________________________________________________________
+[ 35072] By: davem				   on 2008/12/09  22:53:03
+	Log: Integrate:
+	     [ 34216]
+	     Note that we have no test coverage for this particular warning.
+	     
+	     [ 34217]
+	     No, I didn't mean to commit the version *with* the abort(). It was
+	     meant to be removed once I'd proved it by running the tests without
+	     aborting. Oops. use more 'coffee';
+     Branch: maint-5.10/perl
+	  !> universal.c
+____________________________________________________________________________
+[ 35071] By: davem				   on 2008/12/09  22:42:23
+	Log: Integrate:
+	     [ 34214]
+	     In S_mro_get_linear_isa_dfs(), hv_exists_ent() followed by an optional
+	     hv_store_ent() can be replaced with an lvalue fetch.
+	     
+	     [ 34215]
+	     In S_mro_get_linear_isa_dfs(), save copying by making a shared hash
+	     key scalar from the key of the hash entry we've just creating.
+	     (Currently the hash is disposed of afterwards, but soon it won't, so
+	     having both point to the same string buffer will also save memory.)
+     Branch: maint-5.10/perl
+	  !> mro.c sv.c
+____________________________________________________________________________
+[ 35070] By: davem				   on 2008/12/09  22:07:27
+	Log: Incorrect nonnull attribution on Perl_parser_dup
+	     Apply a fix to maint-5.10. The bleed fix (#33283) changed embed.fnc;
+	     we avoid that for maint (bincompat paranoia) and instead make sure
+	     parser_dup is never called with a null proto ptr.
+     Branch: maint-5.10/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 35069] By: davem				   on 2008/12/09  21:40:10
+	Log: Integrate:
+	     [ 34210]
+	     Assert that backreferences array is not freed rather than handling it
+	     
+	     In several places where the weakrefs backreferences array is used
+	     or freed, the code checks whether the array has already been freed
+	     and if so skips. Since the array already being freed is a bad bug,
+	     lets instead assert that this never happens, based on the
+	     assumptions that (a) such premature freeing bugs are likely ironed
+	     out by now, (b) if they aren't then we want to know about them and
+	     fix them rather than silently skip.
+	     
+	     [ 34211]
+	     better document how the weakref backrefs array is refcounted
+     Branch: maint-5.10/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 35068] By: davem				   on 2008/12/09  21:25:13
+	Log: Integrate:
+	     [ 34206]
+	     Move the modules, tests, prove and Changes file from lib/ to
+	     ext/Test/Harness. Not everything is there yet, but it makes it way
+	     easier to swap the directory out and replace it with a trunk svn
+	     checkout.
+	     
+	     [ 34207]
+	     Change 34206 forgot to update Maintainers.pl to reflect the 
+	     files.
+     Branch: maint-5.10/perl
+	  +> (branch 85 files)
+	   - lib/App/Prove.pm lib/App/Prove/State.pm lib/TAP/Base.pm
+	   - lib/TAP/Formatter/Color.pm lib/TAP/Formatter/Console.pm
+	   - lib/TAP/Formatter/Console/ParallelSession.pm
+	   - lib/TAP/Formatter/Console/Session.pm lib/TAP/Harness.pm
+	   - lib/TAP/Object.pm lib/TAP/Parser.pm
+	   - lib/TAP/Parser/Aggregator.pm lib/TAP/Parser/Grammar.pm
+	   - lib/TAP/Parser/Iterator.pm lib/TAP/Parser/Iterator/Array.pm
+	   - lib/TAP/Parser/Iterator/Process.pm
+	   - lib/TAP/Parser/Iterator/Stream.pm
+	   - lib/TAP/Parser/IteratorFactory.pm
+	   - lib/TAP/Parser/Multiplexer.pm lib/TAP/Parser/Result.pm
+	   - lib/TAP/Parser/Result/Bailout.pm
+	   - lib/TAP/Parser/Result/Comment.pm lib/TAP/Parser/Result/Plan.pm
+	   - lib/TAP/Parser/Result/Pragma.pm lib/TAP/Parser/Result/Test.pm
+	   - lib/TAP/Parser/Result/Unknown.pm
+	   - lib/TAP/Parser/Result/Version.pm lib/TAP/Parser/Result/YAML.pm
+	   - lib/TAP/Parser/ResultFactory.pm lib/TAP/Parser/Scheduler.pm
+	   - lib/TAP/Parser/Scheduler/Job.pm
+	   - lib/TAP/Parser/Scheduler/Spinner.pm lib/TAP/Parser/Source.pm
+	   - lib/TAP/Parser/Source/Perl.pm lib/TAP/Parser/Utils.pm
+	   - lib/TAP/Parser/YAMLish/Reader.pm
+	   - lib/TAP/Parser/YAMLish/Writer.pm lib/Test/Harness.pm
+	   - lib/Test/Harness/Changes lib/Test/Harness/bin/prove
+	   - lib/Test/Harness/t/000-load.t lib/Test/Harness/t/aggregator.t
+	   - lib/Test/Harness/t/bailout.t lib/Test/Harness/t/base.t
+	   - lib/Test/Harness/t/callbacks.t lib/Test/Harness/t/compat/env.t
+	   - lib/Test/Harness/t/compat/failure.t
+	   - lib/Test/Harness/t/compat/inc-propagation.t
+	   - lib/Test/Harness/t/compat/inc_taint.t
+	   - lib/Test/Harness/t/compat/nonumbers.t
+	   - lib/Test/Harness/t/compat/regression.t
+	   - lib/Test/Harness/t/compat/test-harness-compat.t
+	   - lib/Test/Harness/t/compat/version.t
+	   - lib/Test/Harness/t/console.t lib/Test/Harness/t/errors.t
+	   - lib/Test/Harness/t/grammar.t lib/Test/Harness/t/harness.t
+	   - lib/Test/Harness/t/iterators.t
+	   - lib/Test/Harness/t/multiplexer.t
+	   - lib/Test/Harness/t/nofork-mux.t lib/Test/Harness/t/nofork.t
+	   - lib/Test/Harness/t/object.t lib/Test/Harness/t/parse.t
+	   - lib/Test/Harness/t/parser-config.t
+	   - lib/Test/Harness/t/parser-subclass.t
+	   - lib/Test/Harness/t/premature-bailout.t
+	   - lib/Test/Harness/t/process.t lib/Test/Harness/t/prove.t
+	   - lib/Test/Harness/t/proveenv.t lib/Test/Harness/t/proverc.t
+	   - lib/Test/Harness/t/proverun.t lib/Test/Harness/t/regression.t
+	   - lib/Test/Harness/t/results.t lib/Test/Harness/t/scheduler.t
+	   - lib/Test/Harness/t/source.t lib/Test/Harness/t/spool.t
+	   - lib/Test/Harness/t/state.t lib/Test/Harness/t/streams.t
+	   - lib/Test/Harness/t/taint.t lib/Test/Harness/t/testargs.t
+	   - lib/Test/Harness/t/unicode.t lib/Test/Harness/t/utils.t
+	   - lib/Test/Harness/t/yamlish-output.t
+	   - lib/Test/Harness/t/yamlish-writer.t
+	   - lib/Test/Harness/t/yamlish.t
+	  !> MANIFEST Porting/Maintainers.pl utils/prove.PL
+____________________________________________________________________________
+[ 35065] By: davem				   on 2008/12/09  20:01:26
+	Log: Integrate:
+	     [ 34202]
+	     Subject: RE: [perl #35877] Strange regex failure?
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Sun, 03 Aug 2008 16:35:29 +0200
+	     Message-ID: <20080803163529.bd73ojeg2s4ow0w4@horde.wizbit.be>
+	     
+	     (Adds tests for perl #35877, which was fixed by change 29441)
+     Branch: maint-5.10/perl
+	  !> t/op/re_tests
+____________________________________________________________________________
+[ 35064] By: davem				   on 2008/12/09  19:29:47
+	Log: Integrate:
+	     [ 34190]
+	     Don't bother hashing the key, or performing any other preparatory work,
+	     if there isn't anything to find.
+     Branch: maint-5.10/perl
+	  !> hv.c
+____________________________________________________________________________
+[ 35063] By: davem				   on 2008/12/09  16:57:07
+	Log: Integrate:
+	     [ 34209]
+	     [perl #56908] DBI memory leak in 5.10.0 due to change 26530
+	     
+	     A weakref to a HV would leak, because the xhv_backreferences
+	     array is created with a refcount of 2 (to avoid premature freeing
+	     during global destruction), but the RC was only decremented once
+	     when the parent HV was freed.
+	     Also, when thread cloned, the new array was being created with a
+	     RC of 1, rather than 2, which coincidentally worked due to the
+	     first bug.
+     Branch: maint-5.10/perl
+	  !> hv.c sv.c
+____________________________________________________________________________
+[ 35062] By: davem				   on 2008/12/09  15:35:03
+	Log: Integrate:
+	     [ 34174]
+	     If TEST_JOBS is set to something non-zero, use TAP::Harness to run the
+	     tests in parallel. The tests aren't fully parallelisable yet to the
+	     level we'd like, but one needs to start somewhere.
+	     
+	     [ 34175]
+	     Avoid a potential testing race condition in Shell.pm's test.
+	     
+	     [ 34176]
+	     Run t/uni/*.t t/mro/*.t t/lib/*.t fully in parallel.
+	     
+	     [ 34177]
+	     As rules can be glob patterns, leave them as glob patterns, and instead
+	     expand the globs when we walk the rules to create the full list of
+	     tests. Tests run more quickly.
+	     
+	     [ 34181]
+	     Let rip with t/op/*.t in parallel too.
+	     
+	     [ 34185]
+	     Everything in t/ can now run in parallel.
+	     
+	     [ 34191]
+	     Don't need to do the globbing before building the rules, as it makes
+	     the rules larger than necessary, and potentially slows things down.
+	     
+	     [ 34192]
+	     Use App::Prove::State to store the timings for the tests, and if
+	     timings are available, reorder the parallelisable tests to run the
+	     slowest first. Timings for a second run are 18 seconds less for me:
+	     Files=1553, Tests=209393, 459 wallclock secs (94.89 usr 13.16 sys + 638.19 cusr 58.59 csys = 804.83 CPU)
+	     Files=1553, Tests=209393, 441 wallclock secs (82.83 usr 13.90 sys + 622.13 cusr 59.20 csys = 778.06 CPU)
+	     
+	     [ 34195]
+	     Subject: Re: Change 34175: Avoid a potential testing race condition in Shell.pm's test.
+	     From: Bram <p5p@perl.wizbit.be>
+	     Message-ID: <20080810202907.0pfnzshsoco8owg4@horde.wizbit.be>
+	     Date: Sun, 10 Aug 2008 20:29:07 +0200
+     Branch: maint-5.10/perl
+	  !> Makefile.SH lib/Shell.t t/harness vms/descrip_mms.template
+	  !> win32/Makefile win32/Makefile.ce win32/makefile.mk
+____________________________________________________________________________
+[ 35061] By: davem				   on 2008/12/09  14:34:14
+	Log: Integrate:
+	     [ 34169]
+	     Upgrade to Test::Harness 3.13
+     Branch: maint-5.10/perl
+	  +> lib/TAP/Object.pm lib/TAP/Parser/IteratorFactory.pm
+	  +> lib/TAP/Parser/ResultFactory.pm lib/TAP/Parser/Scheduler.pm
+	  +> lib/TAP/Parser/Scheduler/Job.pm
+	  +> lib/TAP/Parser/Scheduler/Spinner.pm
+	  +> lib/Test/Harness/t/object.t lib/Test/Harness/t/parser-config.t
+	  +> lib/Test/Harness/t/parser-subclass.t
+	  +> lib/Test/Harness/t/proveenv.t lib/Test/Harness/t/scheduler.t
+	  +> t/lib/EmptyParser.pm t/lib/MyCustom.pm t/lib/MyGrammar.pm
+	  +> t/lib/MyIterator.pm t/lib/MyIteratorFactory.pm
+	  +> t/lib/MyPerlSource.pm t/lib/MyResult.pm
+	  +> t/lib/MyResultFactory.pm t/lib/MySource.pm
+	  +> t/lib/TAP/Parser/SubclassTest.pm
+	  +> t/lib/subclass_tests/non_perl_source
+	  +> t/lib/subclass_tests/perl_source
+	  !> (integrate 60 files)
+____________________________________________________________________________
+[ 35051] By: nicholas				   on 2008/12/06  17:09:41
+	Log: Integrate:
+	     [ 35050]
+	     Subject: Re: AIX patches for Perl 5.8.9 RC2 - README.aix
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Message-ID: <493AAEF0.3020203@tammer.net>
+	     Date: Sat, 06 Dec 2008 17:57:20 +0100
+     Branch: maint-5.10/perl
+	  !> README.aix
+____________________________________________________________________________
+[ 35041] By: nicholas				   on 2008/12/06  15:12:45
+	Log: Integrate:
+	     [ 35039]
+	     Note perl5-security-report@perl.org in INSTALL. Must remember to
+	     mention it in the release announcement.
+     Branch: maint-5.10/perl
+	  !> INSTALL
+____________________________________________________________________________
+[ 35040] By: nicholas				   on 2008/12/06  15:10:59
+	Log: Integrate:
+	     [ 34949]
+	     Errors to STDERR please
+	     
+	     [ 35038]
+	     Subject: [PATCH] Re: add UPSTREAM flag to Maintainers.pl??
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Date: Mon, 10 Nov 2008 10:21:29 +0100
+	     Message-ID: <4917FD19.7080704@sneakemail.com>
+     Branch: maint-5.10/perl
+	  !> Porting/Maintainers.pl Porting/Maintainers.pm
+	  !> Porting/checkcfgvar.pl
+____________________________________________________________________________
+[ 35034] By: nicholas				   on 2008/12/06  13:34:40
+	Log: Integrate:
+	     [ 35008]
+	     Subject: Re: File::Path regression in 5.8.9
+	     From: Gisle Aas <gisle@activestate.com>
+	     Date: Wed, 19 Nov 2008 19:09:20 +0100
+	     Message-Id: <C72B3504-E0B8-4622-89AA-3C07C57C14E2@activestate.com>
+	     
+	     [plus bump $VERSION. Gah. Format F-word must die]
+	     
+	     [ 35009]
+	     For now, remove the 'cannot remove [dir] when cwd is [dir]' message,
+	     because the existing code will think that /tmp/abc is a subdirectory
+	     of /tmp/aa, and whilst we have a patch for Win32 and *nix, we've not
+	     tested on VMS, which has "interesting" path syntax.
+	     
+	     [ 35011]
+	     Revert 35009 so we can take another swing at ancestor detection.
+	     
+	     [ 35012]
+	     Subject: Re: File::Path regression in 5.8.9
+	     From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+	     Date: Fri, 14 Nov 2008 10:58:09 +0100
+	     Message-ID: <20081114105809.6435cba1@r2d2>
+	     
+	     Plus replace "$p/$x" with catdir($p, $x) in the test.
+	     
+	     [ 35013]
+	     While we are off the reservation, revert a stupid, VMS-specific
+	     test regression I caused David to make in 2.07.  (See
+	     http://rt.cpan.org/Public/Bug/Display.html?id=40512 ).
+     Branch: maint-5.10/perl
+	  !> lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 35031] By: nicholas				   on 2008/12/06  12:02:53
+	Log: Integrate:
+	     [ 34983]
+	     Unwind change 31976 then apply
+	     
+	     Subject: Re: 5.8.9 RC1 / 5.10.x / bleed patches for gcc / AIX
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Message-ID: <4935099B.8060004@tammer.net>
+	     Date: Tue, 02 Dec 2008 11:10:35 +0100
+	     
+	     [ 35007]
+	     Subject: AIX patches for Perl 5.8.9 RC2 and gcc on AIX + suidperl on AIX README.aix
+	     From: Rainer Tammer <tammer@tammer.net>
+	     Message-ID: <4937A39B.1070104@tammer.net>
+	     Date: Thu, 04 Dec 2008 10:32:11 +0100
+	     
+	     [the rest, including unwinding change 34983 first]
+     Branch: maint-5.10/perl
+	  !> Makefile.SH README.aix
+____________________________________________________________________________
+[ 35030] By: davem				   on 2008/12/06  02:00:14
+	Log: Integrate:
+	     [ 34156]
+	     Undo io_linenum.t part of #34148. It was io_multihomed.t that I meant
+	     (my mistake), and that is now covered by #34155.
+     Branch: maint-5.10/perl
+	  !> ext/IO/t/io_linenum.t
+____________________________________________________________________________
+[ 35029] By: davem				   on 2008/12/06  01:58:18
+	Log: Integrate:
+	     [ 34151]
+	     Welcome to refcount hell. Fix the leaks reported by #57024
+	     along with a bunch other named capture related leaks.
+     Branch: maint-5.10/perl
+	  !> regcomp.c universal.c
+____________________________________________________________________________
+[ 35028] By: davem				   on 2008/12/06  01:23:02
+	Log: Integrate:
+	     [ 34148]
+	     Subject: [PATCH] watchdog() some IO tests
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 11 Jul 2008 12:08:51 -0400
+	     Message-ID: <1ff86f510807110908q4ac81225see2b11aa4729397d@mail.gmail.com>
+	     
+	     [ 34155]
+	     Subject: [PATCH] Add watchdog() call to ext/IO/t/io_multihomed.t
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 23 Jul 2008 12:20:55 -0400
+	     Message-ID: <1ff86f510807230920o6414d5abu393a5cd293c6fa4f@mail.gmail.com>
+     Branch: maint-5.10/perl
+	  !> ext/IO/t/io_linenum.t ext/IO/t/io_multihomed.t
+	  !> ext/IO/t/io_udp.t
+____________________________________________________________________________
+[ 35027] By: davem				   on 2008/12/06  01:05:03
+	Log: Integrate:
+	     [ 34142]
+	     Upgrade to version 0.76 by John Peacock
+	     Fix segfault in serialized version objects
+	     (bug #56606)
+     Branch: maint-5.10/perl
+	  !> lib/version.pm lib/version.pod lib/version.t util.c
+____________________________________________________________________________
+[ 35026] By: davem				   on 2008/12/06  00:29:37
+	Log: un-integrate #34133:
+	     
+	     PVFMs don't need to access the IVX any more. (as of change 32836, which
+	     re-implemented SvOOK() to avoid using it)
+     Branch: maint-5.10/perl
+	   ! dump.c ext/Devel/Peek/t/Peek.t sv.h
+____________________________________________________________________________
+[ 35025] By: davem				   on 2008/12/05  23:23:18
+	Log: Integrate:
+	     [ 34143]
+	     Update to B::Debug 1.11, by Reini Urban
+	     Avoid B::Flags in CORE tests not to crash on old XS in @INC
+	     
+	     [ 34146]
+	     Really apply change #34143
+     Branch: maint-5.10/perl
+	  !> ext/B/B/Debug.pm
+____________________________________________________________________________
+[ 35024] By: davem				   on 2008/12/05  23:08:58
+	Log: Integrate:
+	     [ 34132]
+	     Test that formats can be dumped.
+	     
+	     [ 34133]
+	     PVFMs don't need to access the IVX any more. (as of change 32836, which
+	     re-implemented SvOOK() to avoid using it)
+	     
+	     [ 34167]
+	     You can't (and shouldn't) use CvDEPTH on a PVFM.
+	     
+	     [ 35022]
+	     in Dump output, PV field of format may or not be displayed in 5.10.0
+	     
+	     [ 35023]
+	     whether DEPTH gets dumped in formats varies within 5.10.0
+     Branch: maint-5.10/perl
+	  !> cv.h dump.c ext/Devel/Peek/t/Peek.t sv.h
+____________________________________________________________________________
+[ 35020] By: davem				   on 2008/12/05  21:18:07
+	Log: Integrate:
+	     [ 34116]
+	     Subject: [Patch t/op/re_tests] Re: [perl #56690] Some bugs in Perl regexp (core Perl issues)
+	     From: Abigail <abigail@abigail.be>
+	     Date: Tue, 8 Jul 2008 18:48:37 +0200
+	     Message-ID: <20080708164836.GB4537@almanda>
+	     
+	     [ 34131]
+	     Set d_timegm on VMS.
+     Branch: maint-5.10/perl
+	  !> configure.com t/op/re_tests
+____________________________________________________________________________
+[ 35019] By: davem				   on 2008/12/05  18:36:16
+	Log: Integrate:
+	     [ 34064]
+	     Warnings-free for metalint-3.5-27. Woot!
+	     Removed all files that are now identical to dist-3.5
+	     
+	     [ 34105]
+	     Part one of y2038 changes for Schwern
+	     
+	     [ 34107]
+	     Probe for timegm
+	     
+	     [ 34112]
+	     Be sure to use the correct type, so bits do not get wrapped
+	     
+	     [ 34114]
+	     Fine-grained sGMTIME_min/max detection
+	     
+	     [ 34115]
+	     Update Win32 canned configs
+	     
+	     Adds new values introduced by #34105/34107, incorporating this patch:
+	     
+	     Subject: RE: New probes
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Mon, 7 Jul 2008 15:58:48 -0700
+	     Message-ID: <072601c8e085$04694860$0d3bd920$@com>
+	     
+	     The appropriate values for the other compilers were determined by
+	     running the probe functions added to Configure by #34105/34112/34114.
+	     (Note that VC8 requires an invalid parameter handler to run those
+	     functions without crashing, and both VC8 and VC9 need %I64d rather
+	     than %ld to output the appropriate values.)
+	     
+	     Also applies the changes to the config_H.* files, together with changes
+	     for #33597/33598/33949 which never got added to them.
+     Branch: maint-5.10/perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH handy.h win32/config.bc win32/config.gc
+	  !> win32/config.vc win32/config.vc64 win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/config_H.vc64
+	  !> win32/config_sh.PL
+____________________________________________________________________________
+[ 35017] By: davem				   on 2008/12/05  01:54:55
+	Log: Integrate:
+	     [ 34077]
+	     Incorrect variable reported in uninitialized value warning.
+	     Ops that can return undef even for defined args, could mistakenly
+	     warn that the arg was undefined.
+	     
+	     (hacked slightly because OP_AEACH isn't present in 5.10.x)
+	     
+	     [ 34084]
+	     more incorrect variable reported in uninitialized value warnings
+	     (the ones that change #34077 missed). It also degrades some print
+	     warnings - ie variable names no longer displayed.
+	     
+	     [ 34088]
+	     qx($nosuchfile) isn't portable (Windows whines on STDERR)
+	     so skip these uninit var tests for now
+	     
+	     [ 34099]
+	     Omit tests introduced by #34077 and #34084 which fail on Win32
+	     
+	     [ 34308]
+	     Split all the tests for ops that can return undef for defined args
+	     into separate tests to diagnose the cause of daily build smoke.
+	     
+	     [ 34319]
+	     Re-instate all the warnings checks that don't work on Win32, but with
+	     a SKIP that triggers on Win32. (So that they get tested elsewhere)
+     Branch: maint-5.10/perl
+	   ! sv.c t/lib/warnings/9uninit
+____________________________________________________________________________
+[ 35016] By: davem				   on 2008/12/05  01:23:27
+	Log: Integrate:
+	     [ 34071]
+	     Make sure parser's filehandle is closed when finished
+	     
+	     (It was mistakenly left open if there was no old_parser, which caused
+	     t/comp/require.t to leave behind a 'bleah.pm' (from the test for
+	     #49472) on Win32, where the deletion of an open file fails.)
+     Branch: maint-5.10/perl
+	  !> toke.c
+____________________________________________________________________________
+[ 35015] By: davem				   on 2008/12/05  00:04:16
+	Log: Integrate:
+	     [ 34042]
+	     Subject: [patch@34016] VMS passes these t/io/open.t tests now.
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Message-id: <484F51EA.6050005@qsl.net>
+	     Date: Tue, 10 Jun 2008 23:17:46 -0500
+     Branch: maint-5.10/perl
+	  !> t/io/open.t
+____________________________________________________________________________
+[ 35014] By: davem				   on 2008/12/04  23:32:09
+	Log: Integrate:
+	     [ 34038]
+	     Subject: Re: [PATCH] More COW lvalues
+	     From: Reini Urban <rurban@x-ray.at>
+	     Message-ID: <484D491D.9050704@x-ray.at>
+	     Date: Mon, 09 Jun 2008 17:15:41 +0200
+	     
+	     [ 34039]
+	     Strength reduction optimisation seems to spot that a = a + 1; is just
+	     a++; so write it as the former, to keep PERL_DEBUG_COW happy.
+     Branch: maint-5.10/perl
+	  !> regcomp.c sv.h
+____________________________________________________________________________
+[ 35005] By: davem				   on 2008/12/04  01:25:36
+	Log: Integrate:
+	     [ 34029]
+	     Subject: [PATCH] readable assertion names
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Sun, 8 Jun 2008 14:41:51 +0200
+	     Message-ID: <6910a60806080541n4f7e1939q254797411545ebea@mail.gmail.com>
+	     
+	     [ 34030]
+	     Subject: Re: [PATCH] readable assertion names, now the rest
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Sun, 8 Jun 2008 16:17:32 +0200
+	     Message-ID: <6910a60806080717h1aaaef1fh425a2ef21a62c9ed@mail.gmail.com>
+	     
+	     [ 34031]
+	     Subject: Re: [PATCH] readable assertion names, now sv.h
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Sun, 8 Jun 2008 15:26:41 +0200
+	     Message-ID: <6910a60806080626kfda0dd1ja906513e8fd0aa39@mail.gmail.com>
+     Branch: maint-5.10/perl
+	  !> cv.h gv.h op.h pad.h regexp.h sv.h
+____________________________________________________________________________
+[ 35004] By: davem				   on 2008/12/04  00:32:41
+	Log: Integrate:
+	     [ 34025]
+	     Fix for bug [perl #54934] Attempt to free unreferenced scalar fiddling with the symbol table
+	     Keep the refcount of the globs generated by PerlIO::via balanced.
+	     
+	     [ 34026]
+	     Small typo fix.
+	     
+	     [ 34779]
+	     Make sure PerlIO::via doesn't leave its old GV's hanging
+	     in the stash they were created in. Steal the idea from
+	     IO::File to just delete the stash entry after creating
+	     the GV.
+	     This fixes perl #59268.
+     Branch: maint-5.10/perl
+	  !> ext/PerlIO/via/via.pm ext/PerlIO/via/via.xs
+____________________________________________________________________________
+[ 35003] By: davem				   on 2008/12/03  23:08:13
+	Log: Integrate:
+	     [ 34758]
+	     Upgrade to podlators-2.2.0
+     Branch: maint-5.10/perl
+	  +> lib/Pod/t/text-encoding.t
+	  !> MANIFEST lib/Pod/Man.pm lib/Pod/ParseLink.pm lib/Pod/Text.pm
+	  !> lib/Pod/Text/Color.pm lib/Pod/Text/Overstrike.pm
+	  !> lib/Pod/Text/Termcap.pm lib/Pod/t/man-utf8.t
+	  !> lib/Pod/t/pod-spelling.t lib/Pod/t/text-options.t
+	  !> lib/Pod/t/text-utf8.t pod/pod2man.PL pod/pod2text.PL
+____________________________________________________________________________
+[ 35002] By: davem				   on 2008/12/03  22:49:12
+	Log: Integrate:
+	     [ 34421]
+	     Upgrade to podlators-2.1.4
+     Branch: maint-5.10/perl
+	  +> lib/Pod/t/man-utf8.t
+	  !> MANIFEST lib/Pod/Man.pm lib/Pod/Text.pm
+	  !> lib/Pod/Text/Overstrike.pm lib/Pod/t/man-options.t
+	  !> lib/Pod/t/pod-spelling.t lib/Pod/t/text-utf8.t pod/pod2man.PL
+	  !> pod/pod2text.PL
+____________________________________________________________________________
+[ 35001] By: davem				   on 2008/12/03  22:46:40
+	Log: Integrate:
+	     [ 34364]
+	     Upgrade to podlators 2.1.3
+     Branch: maint-5.10/perl
+	  +> lib/Pod/t/text-utf8.t
+	  !> MANIFEST lib/Pod/Man.pm lib/Pod/ParseLink.pm lib/Pod/Text.pm
+	  !> lib/Pod/t/man-options.t lib/Pod/t/pod-spelling.t
+	  !> lib/Pod/t/text-options.t lib/Pod/t/text.t pod/pod2man.PL
+	  !> pod/pod2text.PL
+____________________________________________________________________________
+[ 35000] By: davem				   on 2008/12/03  22:44:45
+	Log: Integrate:
+	     [ 34153]
+	     Upgrade to podlators 2.1.2
+     Branch: maint-5.10/perl
+	  +> lib/Pod/t/pod-spelling.t lib/Pod/t/pod.t
+	  !> MANIFEST Porting/Maintainers.pl lib/Pod/Man.pm
+	  !> lib/Pod/ParseLink.pm lib/Pod/Text.pm lib/Pod/Text/Color.pm
+	  !> lib/Pod/Text/Overstrike.pm lib/Pod/Text/Termcap.pm
+	  !> lib/Pod/t/basic.man lib/Pod/t/man-options.t lib/Pod/t/man.t
+	  !> lib/Pod/t/text.t pod/pod2man.PL pod/pod2text.PL
+____________________________________________________________________________
+[ 34999] By: davem				   on 2008/12/03  22:37:52
+	Log: Integrate:
+	     [ 34000]
+	     Upgrade to Pod-Simple-3.07
+	     
+	     [ 34003]
+	     This needs to change so this doesn't need updating everytime
+	     we update Pod::Simple.
+	     
+	     [ 34004]
+	     Subject: [PATCH] incorrectly failing test in lib/Pod/t/text.t
+	     From: Hans Dieter Pearcey <hdp@pobox.com>
+	     Date: Thu, 5 Jun 2008 12:38:38 -0400
+	     Message-ID: <20080605163838.GA25576@glaive.weftsoar.net>
+     Branch: maint-5.10/perl
+	  !> lib/Pod/Simple.pm lib/Pod/Simple/XHTML.pm
+	  !> lib/Pod/Simple/t/xhtml01.t lib/Pod/t/text.t
+____________________________________________________________________________
+[ 34998] By: davem				   on 2008/12/03  22:35:39
+	Log: Integrate:
+	     [ 33987]
+	     Upgrade to podlators-2.1.0
+	     
+	     [ 33997]
+	     Upgrade to Pod-Simple-3.06
+	     
+	     [ 33999]
+	     It appears that the S<> bug in Pod::Simple hasn't been fixed yet.	
+	     Bump the version needed for the skip.
+     Branch: maint-5.10/perl
+	  +> lib/Pod/Simple/XHTML.pm lib/Pod/Simple/t/xhtml01.t
+	  +> lib/Pod/Simple/t/xhtml05.t lib/Pod/t/man-options.t
+	  !> MANIFEST lib/Pod/Man.pm lib/Pod/ParseLink.pm lib/Pod/Simple.pm
+	  !> lib/Pod/Simple.pod lib/Pod/Simple/BlackBox.pm
+	  !> lib/Pod/Simple/HTML.pm lib/Pod/Simple/HTMLBatch.pm
+	  !> lib/Pod/Simple/t/begin.t lib/Pod/Simple/t/fcodes_l.t
+	  !> lib/Pod/Simple/t/fcodes_s.t lib/Pod/Text.pm
+	  !> lib/Pod/Text/Color.pm lib/Pod/Text/Overstrike.pm
+	  !> lib/Pod/Text/Termcap.pm lib/Pod/t/basic.t lib/Pod/t/color.t
+	  !> lib/Pod/t/filehandle.t lib/Pod/t/man.t lib/Pod/t/parselink.t
+	  !> lib/Pod/t/pod-parser.t lib/Pod/t/termcap.t
+	  !> lib/Pod/t/text-options.t lib/Pod/t/text.t pod/pod2man.PL
+____________________________________________________________________________
+[ 34997] By: davem				   on 2008/12/03  21:39:10
+	Log: Integrate:
+	     [ 33993]
+	     Make Perl_vms_start_glob() decline politely when passed an empty
+	     argument.
+	     
+	     [ 34052]
+	     Subject: [patch@34044] Enable getgrgid on VMS
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Date: Thu, 12 Jun 2008 19:50:01 -0500
+	     Message-id: <4851C439.8070007@qsl.net>
+	     
+	     With some revisions.
+	     
+	     [ 34562]
+	     When testing the case sensitivity settings of the process
+	     on VMS, be a little more sensitive to older versions that
+	     don't have the capability.
+	     
+	     [ 34666]
+	     Subject: [patch@34600] vms.c setup_cmddsc
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Message-id: <490923D3.90407@qsl.net>
+	     Date: Wed, 29 Oct 2008 22:02:43 -0500
+	     
+	     Remove trailing dot when efs_charset is in effect.
+	     
+	     [ 34667]
+	     Subject: Re: patch@34561 VMS exec handling / cwd realpath fixes
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Date: Wed, 29 Oct 2008 22:21:38 -0500
+	     Message-id: <49092842.8090805@qsl.net>
+	     
+	     Convert symlink target to UNIX format on VMS. (Cwd changes not
+	     included here.)
+	     
+	     [ 34668]
+	     Try to demangle the mess created by 34667 (the "resubmittal" was actually
+	     not at all like the original patch I tested).
+	     
+	     [ 34790]
+	     Subject: [patch@34779] Get posix exit mode working/tested on VMS
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Date: Sun, 09 Nov 2008 00:46:03 -0600
+	     Message-id: <4916872B.5040500@qsl.net>
+	     
+	     [ 34901]
+	     Subject: [patch@34896] vms readdir() fixes for UNIX/EFS mode
+	     From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Date: Sat, 22 Nov 2008 11:31:58 -0600
+	     Message-id: <4928420E.2010607@qsl.net>
+     Branch: maint-5.10/perl
+	  !> perl.h t/op/groups.t t/run/exit.t vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 34996] By: davem				   on 2008/12/03  20:50:06
+	Log: Integrate:
+	     
+	     Just the 'make Copy.t strict-safe' part of:
+	     
+	     [ 33794]
+	     Subject: [PATCH] File::Copy & permission bits.
+	     From: Abigail <abigail@abigail.be>
+	     Date: Wed, 7 May 2008 23:16:54 +0200
+	     Message-ID: <20080507211654.GA7823@abigail.be>
+	     
+	     Just some comment changes from:
+	     
+	     [ 33795]
+	     Bump version and document last change.
+     Branch: maint-5.10/perl
+	   ! lib/File/Copy.pm lib/File/Copy.t
+____________________________________________________________________________
+[ 34993] By: davem				   on 2008/12/03  14:26:56
+	Log: regenerate Changes
+     Branch: maint-5.10/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34992] By: nicholas				   on 2008/12/03  13:14:22
 	Log: Integrate:
 	     [ 34943]
