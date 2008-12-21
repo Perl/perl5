@@ -1667,9 +1667,9 @@ lib/Attribute/Handlers/t/data_convert.t	Test attribute data conversion
 lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
-lib/autodie.pm			Functions suceed or die with lexical scope
 lib/autodie/exception.pm	Exception class for autodie
 lib/autodie/exception/system.pm Exception class for autodying system()
+lib/autodie.pm			Functions suceed or die with lexical scope
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
@@ -3440,6 +3440,7 @@ pod/perlopentut.pod		Perl open() tutorial
 pod/perlop.pod			Perl operators and precedence
 pod/perlothrtut.pod		Old Perl threads tutorial
 pod/perlpacktut.pod		Perl pack() and unpack() tutorial
+pod/perlperf.pod		Perl Performance and Optimization Techniques
 pod/perl.pod			Perl overview (this section)
 pod/perlpod.pod			Perl plain old documentation
 pod/perlpodspec.pod		Perl plain old documentation format specification
