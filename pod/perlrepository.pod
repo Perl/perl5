@@ -365,3 +365,50 @@ However, be aware this will delete ALL untracked content. You can use
 to remove all ignored untracked files, such as build and test byproduct, but leave any 
 manually created files alone.
 
+=head1 BISECTING
+
+C<git> provides a built-in way to determine, with a binary search in the history, which commit should be blamed for introducing a given bug.
+
+Suppose that we have a script F<~/testcase.pl> that exits with C<0> when some behaviour is correct, and with C<1> when it's faulty. We need an helper script that automates building C<perl> and running the testcase:
+
+  % cat ~/run
+  #!/bin/sh
+  git clean -dxf
+  # If you can use ccache, add -Dcc=ccache\ gcc -Dld=gcc to the Configure line
+  sh Configure -des -Dusedevel -Doptimize="-g" || exit 125
+  make || exit 125
+  ./perl -Ilib ~/testcase.pl
+
+This script may return C<125> to indicate that the corresponding commit should be skipped. Otherwise, it returns the status of F<~/testcase.pl>.
+
+We first enter in bisect mode with:
+
+  % git bisect start
+
+For example, if the bug is present on C<HEAD> but wasn't in 5.10.0, C<git> will learn about this when you enter:
+
+  % git bisect bad
+  % git bisect good perl-5.10.0
+  Bisecting: 853 revisions left to test after this
+
+This results in checking out the median commit between C<HEAD> and C<perl-5.10.0>. We can then run the bisecting process with:
+
+  % git bisect run ~/run
+
+When the first bad commit is isolated, C<git bisect> will tell you so:
+
+  ca4cfd28534303b82a216cfe83a1c80cbc3b9dc5 is first bad commit
+  commit ca4cfd28534303b82a216cfe83a1c80cbc3b9dc5
+  Author: Dave Mitchell <davem@fdisolutions.com>
+  Date:   Sat Feb 9 14:56:23 2008 +0000
+
+      [perl #49472] Attributes + Unkown Error
+      ...
+
+  bisect run success
+
+You can peek into the bisecting process with C<git bisect log> and C<git bisect visualize>. C<git bisect reset> will get you out of bisect mode.
+
+Please note that the first C<good> state must be an ancestor of the first C<bad> state. If you want to search for the commit that I<solved> some bug, you have to negate your test case (i.e. exit with C<1> if OK and C<0> if not) and still mark the lower bound as C<good> and the upper as C<bad>. The "first bad commit" has then to be understood as the "first commit where the bug is solved".
+
+C<git help bisect> has much more information on how you can tweak your binary searches.
