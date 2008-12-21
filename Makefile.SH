@@ -513,13 +513,13 @@ splintflags = \
 
 splintfiles = $(c1)
 
-.c$(OBJ_EXT):
+.c$(OBJ_EXT): cflags
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-.c.i:
+.c.i: cflags
 	$(CCCMDSRC) -E $*.c > $*.i
 
-.c.s:
+.c.s: cflags
 	$(CCCMDSRC) -S $*.c
 
 all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
@@ -538,7 +538,7 @@ sperl.i: perl.c $(h)
 .PHONY: all translators utilities make_patchnum
 
 make_patchnum:
-        sh $(shellflags) make_patchnum.sh
+	sh $(shellflags) make_patchnum.sh
 
 perl$(OBJ_EXT): make_patchnum .patchnum
 
