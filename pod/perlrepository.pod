@@ -150,6 +150,10 @@ To switch to another branch:
 
   % git checkout origin/maint-5.8-dor
 
+To make a local branch of a remote branch:
+
+  % git checkout -b maint-5.10 origin/maint-5.10
+
 To switch back to blead:
 
   % git checkout blead
