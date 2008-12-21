@@ -72,6 +72,17 @@ You can also set up your user name and e-mail address. For example
   % git config user.name "Leon Brocard"
   % git config user.email acme@astray.com
 
+It is also possible to keep C<origin> as a git remote, and add a new remote for ssh access:
+
+  % git remote add camel user@camel:/gitroot/perl.git
+
+This allows you to update your local repository by pulling from C<origin>, which is faster and doesn't require you to authentify, and to push your changes back with the C<camel> remote:
+
+  % git fetch camel
+  % git push camel
+
+The C<fetch> command just updates the C<camel> refs, as the objects themselves should have been fetched when pulling from C<origin>.
+
 =head1 OVERVIEW OF THE REPOSITORY
 
 Once you have changed into the repository directory, you can inspect it.
