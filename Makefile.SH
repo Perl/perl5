@@ -540,7 +540,9 @@ sperl.i: perl.c $(h)
 make_patchnum:
 	sh $(shellflags) make_patchnum.sh
 
-perl$(OBJ_EXT): make_patchnum .patchnum
+.patchnum: make_patchnum
+
+perl$(OBJ_EXT): .patchnum
 
 translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
