@@ -354,7 +354,7 @@ case "$cc" in
   ;;
 esac
 
-if [ -f .patchnum -a -n "$(cat .patchnum)"]; then
+if [ -f .patchnum -a -n "$(cat .patchnum)" ] ; then
     ccflags="-DPERL_PATCHNUM=`cat .patchnum`"
 fi
 
