@@ -1,6 +1,9 @@
+# ignore .patch from rsync, and any generated patch files from git-am
 *.patch
+# ignore local .config files
 .config
-
+# ignore generated .patchnum file
+.patchnum
 
 
 # files produced by './configure.gnu' on a Linux machine
