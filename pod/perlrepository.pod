@@ -338,3 +338,19 @@ If you want to delete your temporary branch, you may do so with:
   If you are sure you want to delete it, run 'git branch -D experimental'.
   % git branch -D experimental
   Deleted branch experimental.
+
+=head1 CLEANING A WORKING DIRECTORY
+
+The command C<git clean> can with varying arguments be used as a replacement for make-clean.
+
+To reset your working directory to a pristine condition you can do:
+
+  git clean -dxf
+
+However, be aware this will delete ALL untracked content. You can use
+
+  git clean -Xf
+
+to remove all ignored untracked files, such as build and test byproduct, but leave any 
+manually created files alone.
+
