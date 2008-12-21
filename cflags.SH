@@ -296,7 +296,11 @@ for file do
     op) ;;
     opmini) ;;
     pad) ;;
-    perl) ;;
+    perl) 
+        if [ -f .patchnum -a -n "$(cat .patchnum)" ] ; then
+                ccflags="-DPERL_PATCHNUM=`cat .patchnum` $ccflags"
+        fi
+        ;;
     perlapi) ;;
     perlmain) ;;
     perly) ;;
@@ -321,42 +325,39 @@ for file do
     *) ;;
     esac
 
-case "$cc" in
-*g++*)
-  # Extra paranoia in case people have bad canned ccflags:
-  # bad in the sense that the flags are accepted by g++,
-  # but then whined about.
-  for f in -Wdeclaration-after-statement -std=c89
-  do
-    ccflags=`echo $ccflags|sed 's/$f/ /'`
-  done
-  ;;
-esac
-cppflags=`echo $cppflags|sed 's/-Wdeclaration-after-statement/ /'`
-
-case "$cc" in
-*g++*)
-  # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
-  # because of all the warnings about Perl___notused, and g++ doesn't do
-  # __attribute__((unused)) (and even if at some stage it may, people do
-  # have older gcc installations), and ((void)x) isn't enough to silence
-  # the noises about XS functions not using their cv parameter, so we need
-  # the -Wno-unused-parameter too.
-  # Yes, we lose some valid warnings, but hopefully other compilers
-  # (like gcc) will still pick up those warnings.
-  for o in -Wno-unused-variable -Wno-unused-parameter
-  do
-    case "$warn" in
-    *$o*) ;;
-    *) warn="$warn $o" ;;
+    case "$cc" in
+    *g++*)
+      # Extra paranoia in case people have bad canned ccflags:
+      # bad in the sense that the flags are accepted by g++,
+      # but then whined about.
+      for f in -Wdeclaration-after-statement -std=c89
+      do
+        ccflags=`echo $ccflags|sed 's/$f/ /'`
+      done
+      ;;
     esac
-  done
-  ;;
-esac
+    cppflags=`echo $cppflags|sed 's/-Wdeclaration-after-statement/ /'`
 
-if [ -f .patchnum -a -n "$(cat .patchnum)" ] ; then
-    ccflags="-DPERL_PATCHNUM=`cat .patchnum`"
-fi
+    case "$cc" in
+    *g++*)
+      # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
+      # because of all the warnings about Perl___notused, and g++ doesn't do
+      # __attribute__((unused)) (and even if at some stage it may, people do
+      # have older gcc installations), and ((void)x) isn't enough to silence
+      # the noises about XS functions not using their cv parameter, so we need
+      # the -Wno-unused-parameter too.
+      # Yes, we lose some valid warnings, but hopefully other compilers
+      # (like gcc) will still pick up those warnings.
+      for o in -Wno-unused-variable -Wno-unused-parameter
+      do
+        case "$warn" in
+        *$o*) ;;
+        *) warn="$warn $o" ;;
+        esac
+      done
+      ;;
+    esac
+
 
     : Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
@@ -364,6 +365,7 @@ fi
 
     . $TOP/config.sh
 
+    # end per file behaviour
 done
 !NO!SUBS!
 chmod 755 cflags
