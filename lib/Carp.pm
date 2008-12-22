@@ -83,7 +83,7 @@ You can also alter the way the output and logic of C<Carp> works, by
 changing some global variables in the C<Carp> namespace. See the
 section on C<GLOBAL VARIABLES> below.
 
-Here is a more complete description of how c<carp> and c<croak> work.
+Here is a more complete description of how C<carp> and C<croak> work.
 What they do is search the call-stack for a function call stack where
 they have not been told that there shouldn't be an error.  If every
 call is marked safe, they give up and give a full stack backtrace
@@ -225,7 +225,7 @@ error is reported from somewhere misleading very high in the call
 stack.
 
 Therefore it is best to avoid C<$Carp::CarpLevel>.  Instead use
-C<@CARP_NOT>, C<%Carp::Internal> and %Carp::CarpInternal>.
+C<@CARP_NOT>, C<%Carp::Internal> and C<%Carp::CarpInternal>.
 
 Defaults to C<0>.
 

@@ -841,7 +841,7 @@ and then treats the two resulting references as arguments to C<&&>:
 
 This boolean expression is inevitably true, since both references are
 non-false. Fortunately, the overloaded C<'bool'> operator catches this
-situation and flags it as a error. 
+situation and flags it as an error. 
 
 =head1 DEPENDENCIES
 

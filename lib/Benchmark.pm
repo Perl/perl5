@@ -219,7 +219,7 @@ outputs a chart like:
 This chart is sorted from slowest to fastest, and shows the percent speed
 difference between each pair of tests.
 
-c<cmpthese> can also be passed the data structure that timethese() returns:
+C<cmpthese> can also be passed the data structure that timethese() returns:
 
     $results = timethese( -1, { a => "++\$i", b => "\$i *= 2" } ) ;
     cmpthese( $results );
