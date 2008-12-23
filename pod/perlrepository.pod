@@ -417,3 +417,14 @@ You can peek into the bisecting process with C<git bisect log> and C<git bisect 
 Please note that the first C<good> state must be an ancestor of the first C<bad> state. If you want to search for the commit that I<solved> some bug, you have to negate your test case (i.e. exit with C<1> if OK and C<0> if not) and still mark the lower bound as C<good> and the upper as C<bad>. The "first bad commit" has then to be understood as the "first commit where the bug is solved".
 
 C<git help bisect> has much more information on how you can tweak your binary searches.
+
+=head1 COMITTING TO MAINTENANCE VERSIONS
+
+To commit to a maintenance version of perl, you need to create a local
+tracking branch:
+
+  % git checkout --track -b maint-5.005 origin/maint-5.005
+
+This creates a local branch named maint-5.005, which tracks the remote
+branch origin/maint-5.005. Then you can pull, commit, merge and push
+as before.
