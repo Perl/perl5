@@ -20,7 +20,7 @@ if ($^O eq 'VMS') {
 
 push(@extra, 'INSTALLDIRS'  => 'perl') if $] >= 5.008;
 push(@extra, 'MAN3PODS' => {}) if $PERL_CORE; # Pods built by installman.
-push @extra, 'LICENSE' => 'perl' if $ExtUtils::MakeMaker::VERSION >= "6.30";
+push @extra, 'LICENSE' => 'perl' if eval($ExtUtils::MakeMaker::VERSION) >= "6.30";
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
