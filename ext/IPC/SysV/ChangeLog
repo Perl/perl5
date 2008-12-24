@@ -1,3 +1,8 @@
+Wed Dec 24 19:07:46 GMT 2008 Leon Brocard <acme@astray.com>
+
+    - Patched to compile under recent Linuxes, no longer include
+      asm/page.h
+
 Fri Jul  3 15:06:40 1998  Jarkko Hietaniemi  <jhi@iki.fi>
 
 	- Integrated IPC::SysV 1.03 to Perl 5.004_69.
