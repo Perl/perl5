@@ -10826,7 +10826,8 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(dstr));
 		break;
 	    case SVt_PVAV:
-		if (AvARRAY((const AV *)sstr)) {
+		/* avoid cloning an empty array */
+		if (AvARRAY((const AV *)sstr) && AvFILLp((const AV *)sstr) >= 0) {
 		    SV **dst_ary, **src_ary;
 		    SSize_t items = AvFILLp((const AV *)sstr) + 1;
 
@@ -10851,6 +10852,8 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		else {
 		    AvARRAY(MUTABLE_AV(dstr))	= NULL;
 		    AvALLOC((const AV *)dstr)	= (SV**)NULL;
+		    AvMAX(  (const AV *)dstr)	= -1;
+		    AvFILLp((const AV *)dstr)	= -1;
 		}
 		break;
 	    case SVt_PVHV:
