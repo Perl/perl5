@@ -4138,7 +4138,9 @@ fi
 version_patchlevel_string="version $patchlevel subversion $subversion"
 case "$perl_patchlevel" in
 0|'') ;;
-*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
+*)  perl_patchlevel=`echo $perl_patchlevel | sed 's/.* //'`
+    version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel"
+    ;;
 esac
 
 $echo "(You have $package $version_patchlevel_string.)"
@@ -23061,7 +23063,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
-echo "PERL_PATCHLEVEL=$perl_patchlevel" >>config.sh
+echo "PERL_PATCHLEVEL='$perl_patchlevel'" >>config.sh
 echo "PERL_CONFIG_SH=true" >>config.sh
 
 : propagate old symbols
