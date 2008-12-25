@@ -751,13 +751,13 @@ EOF
 EOF
 		}
 	    }
-	    push @wrap, <<EOF;
-#  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1) */
+	    push @wrap, <<EOF;  # !defined(xxx) && XXX_R_PROTO == REENTRANT_PROTO_Y_TS
+#   endif
 EOF
 	}
 
-	    push @wrap, <<EOF;
-#   endif /* HAS_\U$func */
+	    push @wrap, <<EOF;  # defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+#  endif
 EOF
 
 	push @wrap, $endif, "\n";
