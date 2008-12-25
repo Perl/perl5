@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Dec  3 15:26:54 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Thu Dec 25 12:54:36 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4145,7 +4145,9 @@ fi
 version_patchlevel_string="version $patchlevel subversion $subversion"
 case "$perl_patchlevel" in
 0|'') ;;
-*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
+*)  perl_patchlevel=`echo $perl_patchlevel | sed 's/.* //'`
+    version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel"
+    ;;
 esac
 
 $echo "(You have $package $version_patchlevel_string.)"
@@ -23135,7 +23137,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
-echo "PERL_PATCHLEVEL=$perl_patchlevel" >>config.sh
+echo "PERL_PATCHLEVEL='$perl_patchlevel'" >>config.sh
 echo "PERL_CONFIG_SH=true" >>config.sh
 
 : propagate old symbols
