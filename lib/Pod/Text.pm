@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = '3.12_01';
+$VERSION = '3.13';
 
 ##############################################################################
 # Initialization
@@ -609,6 +609,7 @@ sub pod2text {
         close $fh;
         return $retval;
     } else {
+        $parser->output_fh (\*STDOUT);
         return $parser->parse_file (@_);
     }
 }

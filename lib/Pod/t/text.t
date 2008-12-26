@@ -2,7 +2,7 @@
 #
 # text.t -- Additional specialized tests for Pod::Text.
 #
-# Copyright 2002, 2004, 2006, 2007 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2007, 2008 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -16,7 +16,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..4\n";
+    print "1..5\n";
 }
 
 END {
@@ -99,5 +99,32 @@ This is some S<  > whitespace.
 ###
 Test of S<>
     This is some    whitespace.
+
+###
+
+###
+=head1 Test of =for
+
+=for comment
+This won't be seen.
+
+Yes.
+
+=for text
+This should be seen.
+
+=for TEXT As should this.
+
+=for man
+But this shouldn't.
+
+Some more text.
+###
+Test of =for
+    Yes.
+
+This should be seen.
+As should this.
+    Some more text.
 
 ###

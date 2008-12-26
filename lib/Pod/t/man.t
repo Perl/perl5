@@ -17,7 +17,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..24\n";
+    print "1..25\n";
 }
 
 END {
@@ -450,4 +450,35 @@ E<eth>
 .ie n .SH """one"" and ""two"""
 .el .SH "\f(CWone\fP and \f(CWtwo\fP"
 .IX Header "one and two"
+###
+
+###
+=pod
+
+Some text.
+
+=for man
+Some raw nroff.
+
+=for roff \fBBold text.\fP
+
+=for html
+Stuff that's hidden.
+
+=for MAN \fIItalic text.\fP
+
+=for ROFF
+.PP
+\&A paragraph.
+
+More text.
+###
+Some text.
+Some raw nroff.
+\fBBold text.\fP
+\fIItalic text.\fP
+.PP
+\&A paragraph.
+.PP
+More text.
 ###
