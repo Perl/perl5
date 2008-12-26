@@ -249,6 +249,7 @@
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)
 #define PL_reginterp_cnt	(vTHX->Ireginterp_cnt)
+#define PL_registered_mros	(vTHX->Iregistered_mros)
 #define PL_regmatch_slab	(vTHX->Iregmatch_slab)
 #define PL_regmatch_state	(vTHX->Iregmatch_state)
 #define PL_rehash_seed		(vTHX->Irehash_seed)
@@ -563,6 +564,7 @@
 #define PL_Iregex_pad		PL_regex_pad
 #define PL_Iregex_padav		PL_regex_padav
 #define PL_Ireginterp_cnt	PL_reginterp_cnt
+#define PL_Iregistered_mros	PL_registered_mros
 #define PL_Iregmatch_slab	PL_regmatch_slab
 #define PL_Iregmatch_state	PL_regmatch_state
 #define PL_Irehash_seed		PL_rehash_seed

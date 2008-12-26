@@ -35,16 +35,12 @@ struct mro_alg {
     U32 hash; /* or 0 */
 };
 
-/* First one is the default */
-static struct mro_alg mros[] = {
-    {S_mro_get_linear_isa_dfs, "dfs", 3, 0, 0},
-    {S_mro_get_linear_isa_c3, "c3", 2, 0, 0}
-};
+static const struct mro_alg dfs_alg =
+    {S_mro_get_linear_isa_dfs, "dfs", 3, 0, 0};
 
-#define NUMBER_OF_MROS (sizeof(mros)/sizeof(struct mro_alg))
+static const struct mro_alg c3_alg =
+    {S_mro_get_linear_isa_c3, "c3", 2, 0, 0};
 
-#define dfs_alg	(&mros[0])
-#define c3_alg (&mros[1])
 
 SV *
 Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
@@ -96,16 +92,35 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
     return data;
 }
 
-static const struct mro_alg *
-S_get_mro_from_name(pTHX_ const char *const name) {
-    const struct mro_alg *algo = mros;
-    const struct mro_alg *const end = mros + NUMBER_OF_MROS;
-    while (algo < end) {
-	if(strEQ(name, algo->name))
-	    return algo;
-	++algo;
+const struct mro_alg *
+Perl_mro_get_from_name(pTHX_ SV *name) {
+    SV **data;
+
+    PERL_ARGS_ASSERT_MRO_GET_FROM_NAME;
+
+    data = Perl_hv_common(aTHX_ PL_registered_mros, name, NULL, 0, 0,
+			  HV_FETCH_JUST_SV, NULL, 0);
+    if (!data)
+	return NULL;
+    assert(SvTYPE(*data) == SVt_IV);
+    assert(SvIOK(*data));
+    return INT2PTR(const struct mro_alg *, SvUVX(*data));
+}
+
+void
+Perl_mro_register(pTHX_ const struct mro_alg *mro) {
+    SV *wrapper = newSVuv(PTR2UV(mro));
+
+    PERL_ARGS_ASSERT_MRO_REGISTER;
+
+    
+    if (!Perl_hv_common(aTHX_ PL_registered_mros, NULL,
+			mro->name, mro->length, mro->kflags,
+			HV_FETCH_ISSTORE, wrapper, mro->hash)) {
+	SvREFCNT_dec(wrapper);
+	Perl_croak(aTHX_ "panic: hv_store() failed in mro_register() "
+		   "for '%.*s' %d", (int) mro->length, mro->name, mro->kflags);
     }
-    return NULL;
 }
 
 struct mro_meta*
@@ -120,7 +135,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     HvAUX(stash)->xhv_mro_meta = newmeta;
     newmeta->cache_gen = 1;
     newmeta->pkg_gen = 1;
-    newmeta->mro_which = mros;
+    newmeta->mro_which = &dfs_alg;
 
     return newmeta;
 }
@@ -231,7 +246,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, dfs_alg)))) {
+    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, &dfs_alg)))) {
         return retval;
     }
 
@@ -337,7 +352,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
 
-    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, dfs_alg,
+    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, &dfs_alg,
 						MUTABLE_SV(retval)));
 }
 
@@ -382,7 +397,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, c3_alg)))) {
+    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, &c3_alg)))) {
         return retval;
     }
 
@@ -555,7 +570,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
 
-    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, c3_alg,
+    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, &c3_alg,
 						MUTABLE_SV(retval)));
     return retval;
 }
@@ -833,6 +848,9 @@ Perl_boot_core_mro(pTHX)
     dVAR;
     static const char file[] = __FILE__;
 
+    Perl_mro_register(aTHX_ &dfs_alg);
+    Perl_mro_register(aTHX_ &c3_alg);
+
     newXSproto("mro::get_linear_isa", XS_mro_get_linear_isa, file, "$;$");
     newXSproto("mro::set_mro", XS_mro_set_mro, file, "$$");
     newXSproto("mro::get_mro", XS_mro_get_mro, file, "$");
@@ -865,10 +883,9 @@ XS(XS_mro_get_linear_isa) {
         XSRETURN(1);
     }
     else if(items > 1) {
-        const char* const which = SvPV_nolen(ST(1));
-	const struct mro_alg *const algo = S_get_mro_from_name(aTHX_ which);
+	const struct mro_alg *const algo = Perl_mro_get_from_name(aTHX_ ST(1));
 	if (!algo)
-	    Perl_croak(aTHX_ "Invalid mro name: '%s'", which);
+	    Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", ST(1));
 	RETVAL = algo->resolve(aTHX_ class_stash, 0);
     }
     else {
@@ -885,7 +902,6 @@ XS(XS_mro_set_mro)
     dVAR;
     dXSARGS;
     SV* classname;
-    const char* whichstr;
     const struct mro_alg *which;
     HV* class_stash;
     struct mro_meta* meta;
@@ -894,14 +910,13 @@ XS(XS_mro_set_mro)
 	croak_xs_usage(cv, "classname, type");
 
     classname = ST(0);
-    whichstr = SvPV_nolen(ST(1));
     class_stash = gv_stashsv(classname, GV_ADD);
     if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%"SVf"'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
-    which = S_get_mro_from_name(aTHX_ whichstr);
+    which = Perl_mro_get_from_name(aTHX_ ST(1));
     if (!which)
-        Perl_croak(aTHX_ "Invalid mro name: '%s'", whichstr);
+        Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", ST(1));
 
     if(meta->mro_which != which) {
         meta->mro_which = which;

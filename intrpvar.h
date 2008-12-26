@@ -682,6 +682,12 @@ PERLVARI(Ibreakable_sub_gen, U32, 0)
 PERLVARI(Isv_serial, U32, 0) /* SV serial number, used in sv.c */
 #endif
 
+/* Register of known Method Resolution Orders.
+   What this actually points to is an implementation detail (it may change to
+   a structure incorporating a reference count - use mro_get_from_name to
+   retrieve a C<struct mro_alg *>  */
+PERLVAR(Iregistered_mros, HV *)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

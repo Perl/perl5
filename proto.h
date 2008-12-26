@@ -6577,6 +6577,16 @@ PERL_CALLCONV SV*	Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta, 
 #define PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA	\
 	assert(smeta); assert(which); assert(data)
 
+PERL_CALLCONV const struct mro_alg *	Perl_mro_get_from_name(pTHX_ SV *name)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MRO_GET_FROM_NAME	\
+	assert(name)
+
+PERL_CALLCONV void	Perl_mro_register(pTHX_ const struct mro_alg *mro)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MRO_REGISTER	\
+	assert(mro)
+
 PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_META_INIT	\
