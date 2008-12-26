@@ -5771,7 +5771,14 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
 	
 	    if (sw) {
-		if (swash_fetch(sw, p, do_utf8))
+		U8 * utf8_p;
+		if (do_utf8) {
+		    utf8_p = (U8 *) p;
+		} else {
+		    STRLEN len = 1;
+		    utf8_p = bytes_to_utf8(p, &len);
+		}
+		if (swash_fetch(sw, utf8_p, 1))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
 		    if (!match && lenp && av) {
@@ -5780,8 +5787,7 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
-			
-			    if (len <= plen && memEQ(s, (char*)p, len)) {
+			    if (len <= plen && memEQ(s, (char*)utf8_p, len)) {
 			        *lenp = len;
 				match = TRUE;
 				break;
@@ -5790,10 +5796,10 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 		    }
 		    if (!match) {
 		        U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-			STRLEN tmplen;
 
-		        to_utf8_fold(p, tmpbuf, &tmplen);
-			if (swash_fetch(sw, tmpbuf, do_utf8))
+			STRLEN tmplen;
+			to_utf8_fold(utf8_p, tmpbuf, &tmplen);
+			if (swash_fetch(sw, tmpbuf, 1))
 			    match = TRUE;
 		    }
 		}
