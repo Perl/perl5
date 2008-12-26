@@ -2,6 +2,7 @@
 
 Existing=`cat .patchnum 2>/dev/null`
 Existing_Sha1=`cat .sha1 2>/dev/null`
+
 if [ -e ".patch" ]; then
 	Current=`awk '{print $4}' .patch`
 	Sha1=`awk '{print $3}' .patch`
