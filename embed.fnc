@@ -2191,8 +2191,8 @@ Aop	|SV*	|mro_set_private_data|NN struct mro_meta *const smeta \
 				     |NN SV *const data
 Aop	|const struct mro_alg *|mro_get_from_name|NN SV *name
 Aop	|void	|mro_register	|NN const struct mro_alg *mro
-: Used in HvMROMETA() in gv.c, pp_hot.c, universal.c
-p	|struct mro_meta*	|mro_meta_init	|NN HV* stash
+: Used in HvMROMETA(), which is public.
+Xpo	|struct mro_meta*	|mro_meta_init	|NN HV* stash
 #if defined(USE_ITHREADS)
 : Only used in sv.c
 p	|struct mro_meta*	|mro_meta_dup	|NN struct mro_meta* smeta|NN CLONE_PARAMS* param
