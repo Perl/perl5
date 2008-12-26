@@ -23,7 +23,7 @@ SKIP: {
 }
 
 $lib = $Is_MacOS ? ':Bla2:' : 'Bla2';
-fresh_perl_is("print grep { \$_ eq '$lib' } \@INC", $lib,
+fresh_perl_is("print grep { \$_ eq '$lib' } \@INC[0..(\$#INC-1)]", $lib,
 	      { switches => ['-IBla2'] }, '-I');
 SKIP: {
   skip 'Double colons not allowed in dir spec', 1 if $Is_VMS;

@@ -1471,7 +1471,7 @@ s	|void	|Slab_to_rw	|NN void *op
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning	|NN SV* linestr_sv|NN PerlIO *rsfp
 s	|void	|forbid_setid	|const char flag|const bool suidscript
-s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
+s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate|bool unshift
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_main_stash
