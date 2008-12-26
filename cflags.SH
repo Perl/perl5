@@ -300,6 +300,9 @@ for file do
         if [ -f .patchnum -a -n "$(cat .patchnum)" ] ; then
                 ccflags="-DPERL_PATCHNUM=`cat .patchnum` $ccflags"
         fi
+        if [ -f .sha1 -a -n "$(cat .sha1)" ] ; then
+                ccflags="-DPERL_GIT_SHA1=`cat .sha1` $ccflags"
+        fi
         ;;
     perlapi) ;;
     perlmain) ;;
