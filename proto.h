@@ -6564,6 +6564,19 @@ PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 
 PERL_CALLCONV REGEXP *	Perl_get_re_arg(pTHX_ SV *sv);
 
+PERL_CALLCONV SV*	Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta, const struct mro_alg *const which)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA	\
+	assert(smeta); assert(which)
+
+PERL_CALLCONV SV*	Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta, const struct mro_alg *const which, SV *const data)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA	\
+	assert(smeta); assert(which); assert(data)
+
 PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_META_INIT	\

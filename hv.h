@@ -46,7 +46,9 @@ struct shared_he {
 struct mro_alg;
 
 struct mro_meta {
+    /* repurposed as a hash holding the different MROs private data. */
     AV      *mro_linear_dfs; /* cached dfs @ISA linearization */
+    /* repurposed as a pointer directly to the current MROs private data.  */
     AV      *mro_linear_c3;  /* cached c3 @ISA linearization */
     HV      *mro_nextmethod; /* next::method caching */
     U32     cache_gen;       /* Bumping this invalidates our method cache */
