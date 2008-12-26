@@ -9,6 +9,66 @@
  * Macros to implement UTF-EBCDIC as perl's internal encoding
  * Taken from version 7.1 of Unicode Techical Report #16:
  *  http://www.unicode.org/unicode/reports/tr16
+ *
+ * To summarize, the way it works is:
+ * To convert an EBCDIC character to UTF-EBCDIC:
+ *  1)	convert to Unicode.  The table in this file that does this is for
+ *	EBCDIC bytes is PL_e2a (with inverse PLa2e).  The 'a' stands for
+ *	ASCIIish, meaning latin1.
+ *  2)	convert that to a utf8-like string called I8 with variant characters
+ *	occupying multiple bytes.  This step is similar to the utf8-creating
+ *	step from Unicode, but the details are different.  There is a chart
+ *	about the bit patterns in a comment later in this file.  But
+ *	essentially here are the differences:
+ *			    UTF8		I8
+ *	invariant byte	    starts with 0	starts with 0 or 100
+ *	continuation byte   starts with 10	starts with 101
+ *	start byte	    same in both: if the code point requires N bytes,
+ *			    then the leading N bits are 1, followed by a 0.  (No
+ *			    trailing 0 for the very largest possible allocation
+ *			    in I8, far beyond the current Unicode standard's
+ *			    max, as shown in the comment later in this file.)
+ *  3)	Use the table published in tr16 to convert each byte from step 2 into
+ *	final UTF-EBCDIC.  The table in this file is PL_utf2e, and its invverse
+ *	is PL_e2utf.  They are constructed so that all EBCDIC invariants remain
+ *	invariant, but no others do.  For example, the ordinal value of 'A' is
+ *	193 in EBCDIC, and also is 193 in UTF-EBCDIC.  Step 1) converts it to
+ *	65, Step 2 leaves it at 65, and Step 3 converts it back to 193.  As an
+ *	example of how a variant character works, take LATIN SMALL LETTER Y
+ *	WITH DIAERESIS, which is typicially 0xDF in EBCDIC.  Step 1 converts it
+ *	to the Unicode value, 0xFF.  Step 2 converts that to two bytes =
+ *	11000111 10111111 = C7 BF, and Step 3 converts those to 0x47 0xE7
+ * 
+ * If you're starting from Unicode, skip step 1.  For UTF-EBCDIC to straight
+ * EBCDIC, reverse the steps.
+ *
+ * The EBCDIC invariants have been chosen to be those characters whose Unicode
+ * equivalents have ordinal numbers less than 160, that is the same characters
+ * that are expressible in ASCII, plus the C1 controls.  So there are 160
+ * invariants instead of the 128 in UTF-8.  (My guess is that this is because
+ * the C1 control NEL (and maybe others) is important in IBM.) 
+ *
+ * The purpose of Step 3 is to make the encoding be invariant for the chosen
+ * characters.  This messes up the convenient patterns found in step 2, so
+ * generally, one has to undo step 3 into a temporary to use them.  However,
+ * a "shadow", or parallel table, PL_utf8skip, has been constructed so that for
+ * each byte, it says how long the sequence is if that byte were to begin it 
+ *
+ * There are actually 3 slightly different UTF-EBCDIC encodings in this file,
+ * one for each of the code pages recognized by Perl.  That means that there
+ * are actually three different sets of tables, one for each code page.  (If
+ * Perl is compiled on platforms using other EBCDIC code pages, it may not
+ * compile, or silently mistake it for one of the three.)  
+ *
+ * EBCDIC characters above 0xFF are the same as Unicode in Perl's
+ * implementation of all 3 encodings, so for those Step 1 is trivial.
+ *
+ * (Note that the entries for invariant characters are necessarily the same in
+ * PL_e2a and PLe2f, and the same for their inverses.)
+ *
+ * UTF-EBCDIC strings are the same length or longer than UTF-8 representations
+ * of the same string.  The maximum code point representable as 2 bytes in
+ * UTF-EBCDIC is 0x3FFF, instead of 0x7FFF in UTF-8.
  */
 
 START_EXTERN_C
@@ -82,7 +142,9 @@ unsigned char PL_utf8skip[] = {
 };
 #endif
 
-/* Transform tables from tr16 applied after encoding to render encoding EBCDIC like */
+/* Transform tables from tr16 applied after encoding to render encoding EBCDIC
+ * like, meaning that all the invariants are actually invariant, eg, that 'A'
+ * remains 'A' */
 
 #if '^' == 95   /* if defined(__MVS__) || defined(??) (VM/ESA?) 1047 */
 EXTCONST unsigned char PL_utf2e[] = { /* UTF-8-mod to EBCDIC (IBM-1047) */

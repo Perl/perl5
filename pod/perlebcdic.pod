@@ -153,20 +153,21 @@ depends on the ordinal number of that code point,
 with larger numbers requiring more bytes.
 UTF-EBCDIC is like UTF-8, but based on EBCDIC.
 
-In UTF-8, the code points corresponding to the lowest 128
-ordinal numbers (0 - 127) are the same (or C<invariant>)
-in UTF-8 or not.  They occupy one byte each.  All other Unicode code points
-require more than one byte to be represented in UTF-8.
-With UTF-EBCDIC, the term C<invariant> has a somewhat different meaning.
-(First, note that this is very different from the L</13 variant characters>
+You may see the term C<invariant> character or code point.
+This simply means that the character has the same numeric
+value when encoded as when not.
+(Note that this is a very different concept from L<The /13 variant characters>
 mentioned above.)
-In UTF-EBCDIC, an C<invariant> character or code point
-is one which takes up exactly one byte encoded, regardless
-of whether or not the encoding changes its value
-(which it most likely will).
+For example, the ordinal value of 'A' is 193 in most EBCDIC code pages,
+and also is 193 when encoded in UTF-EBCDIC.
+All other code points occupy at least two bytes when encoded.
+In UTF-8, the code points corresponding to the lowest 128
+ordinal numbers (0 - 127: the ASCII characters) are invariant.
+In UTF-EBCDIC, there are 160 invariant characters.
 (If you care, the EBCDIC invariants are those characters
-which correspond to the the ASCII characters, plus those that correspond to
+which have ASCII equivalents, plus those that correspond to
 the C1 controls (80..9f on ASCII platforms).)
+
 A string encoded in UTF-EBCDIC may be longer (but never shorter) than
 one encoded in UTF-8.
 
