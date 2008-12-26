@@ -231,7 +231,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = MUTABLE_AV(Perl_mro_get_private_data(aTHX_ meta, dfs_alg)))) {
+    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, dfs_alg)))) {
         return retval;
     }
 
@@ -382,7 +382,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = MUTABLE_AV(Perl_mro_get_private_data(aTHX_ meta, c3_alg)))) {
+    if((retval = MUTABLE_AV(MRO_GET_PRIVATE_DATA(meta, c3_alg)))) {
         return retval;
     }
 

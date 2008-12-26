@@ -57,6 +57,11 @@ struct mro_meta {
     HV      *isa;            /* Everything this class @ISA */
 };
 
+#define MRO_GET_PRIVATE_DATA(smeta, which)		   \
+    (((smeta)->mro_which && (which) == (smeta)->mro_which) \
+     ? MUTABLE_SV((smeta)->mro_linear_c3)		   \
+     : Perl_mro_get_private_data(aTHX_ (smeta), (which)))
+
 /* Subject to change.
    Don't access this directly.
 */
