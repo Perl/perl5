@@ -28,17 +28,73 @@ These functions are related to the method resolution order of perl classes
 #include "perl.h"
 
 struct mro_alg {
-    const char *name;
     AV *(*resolve)(pTHX_ HV* stash, U32 level);
+    const char *name;
+    U16 length;
+    U16	kflags;	/* For the hash API - set HVhek_UTF8 if name is UTF-8 */
+    U32 hash; /* or 0 */
 };
 
 /* First one is the default */
 static struct mro_alg mros[] = {
-    {"dfs", S_mro_get_linear_isa_dfs},
-    {"c3", S_mro_get_linear_isa_c3}
+    {S_mro_get_linear_isa_dfs, "dfs", 3, 0, 0},
+    {S_mro_get_linear_isa_c3, "c3", 2, 0, 0}
 };
 
 #define NUMBER_OF_MROS (sizeof(mros)/sizeof(struct mro_alg))
+
+#define dfs_alg	(&mros[0])
+#define c3_alg (&mros[1])
+
+SV *
+Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
+			  const struct mro_alg *const which)
+{
+    SV **data;
+    PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA;
+
+    data = Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
+			  which->name, which->length, which->kflags,
+			  HV_FETCH_JUST_SV, NULL, which->hash);
+    if (!data)
+	return NULL;
+
+    /* If we've been asked to look up the private data for the current MRO, then
+       cache it.  */
+    if (smeta->mro_which == which)
+	smeta->mro_linear_c3 = MUTABLE_AV(*data);
+
+    return *data;
+}
+
+SV *
+Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
+			  const struct mro_alg *const which, SV *const data)
+{
+    PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA;
+
+    /* If we've been asked to look up the private data for the current MRO, then
+       cache it.  */
+    if (smeta->mro_which == which)
+	smeta->mro_linear_c3 = MUTABLE_AV(data);
+
+    if (!smeta->mro_linear_dfs) {
+	HV *const hv = newHV();
+	HvMAX(hv) = 0;	/* Start with 1 bucket. It's unlikely we'll need more.
+			 */
+	smeta->mro_linear_dfs = MUTABLE_AV(hv);
+    }
+
+    if (!Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
+			which->name, which->length, which->kflags,
+			HV_FETCH_ISSTORE, data, which->hash)) {
+	Perl_croak(aTHX_ "panic: hv_store() failed in set_mro_private_data() "
+		   "for '%.*s' %d", (int) which->length, which->name,
+		   which->kflags);
+    }
+
+    return data;
+}
 
 static const struct mro_alg *
 S_get_mro_from_name(pTHX_ const char *const name) {
@@ -85,9 +141,7 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
     if (newmeta->mro_linear_dfs)
 	newmeta->mro_linear_dfs
 	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_dfs, param)));
-    if (newmeta->mro_linear_c3)
-	newmeta->mro_linear_c3
-	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_c3, param)));
+    newmeta->mro_linear_c3 = NULL;
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
 	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_nextmethod, param)));
@@ -177,7 +231,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = meta->mro_linear_dfs)) {
+    if((retval = MUTABLE_AV(Perl_mro_get_private_data(aTHX_ meta, dfs_alg)))) {
         return retval;
     }
 
@@ -283,8 +337,8 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
 
-    meta->mro_linear_dfs = retval;
-    return retval;
+    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, dfs_alg,
+						MUTABLE_SV(retval)));
 }
 
 /*
@@ -328,7 +382,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     meta = HvMROMETA(stash);
 
     /* return cache if valid */
-    if((retval = meta->mro_linear_c3)) {
+    if((retval = MUTABLE_AV(Perl_mro_get_private_data(aTHX_ meta, c3_alg)))) {
         return retval;
     }
 
@@ -501,7 +555,8 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
 
-    meta->mro_linear_c3 = retval;
+    return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, c3_alg,
+						MUTABLE_SV(retval)));
     return retval;
 }
 
@@ -569,7 +624,6 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
     SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
-    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_c3));
     meta->mro_linear_dfs = NULL;
     meta->mro_linear_c3 = NULL;
     if (meta->isa) {
@@ -612,7 +666,6 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
             if(!revstash) continue;
             revmeta = HvMROMETA(revstash);
             SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_dfs));
-            SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_c3));
             revmeta->mro_linear_dfs = NULL;
             revmeta->mro_linear_c3 = NULL;
             if(!is_universal)
@@ -845,6 +898,8 @@ XS(XS_mro_set_mro)
 
     if(meta->mro_which != which) {
         meta->mro_which = which;
+	/* Scrub our cached pointer to the private data.  */
+	meta->mro_linear_c3 = NULL;
         /* Only affects local method cache, not
            even child classes */
         meta->cache_gen++;

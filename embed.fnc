@@ -2184,6 +2184,11 @@ XEMop	|void	|emulate_cop_io	|NN const COP *const c|NN SV *const sv
 : Used by SvRX and SvRXOK
 XEMop	|REGEXP *|get_re_arg|NULLOK SV *sv
 
+Aop	|SV*	|mro_get_private_data|NN struct mro_meta *const smeta \
+				     |NN const struct mro_alg *const which
+Aop	|SV*	|mro_set_private_data|NN struct mro_meta *const smeta \
+				     |NN const struct mro_alg *const which \
+				     |NN SV *const data
 : Used in HvMROMETA() in gv.c, pp_hot.c, universal.c
 p	|struct mro_meta*	|mro_meta_init	|NN HV* stash
 #if defined(USE_ITHREADS)
