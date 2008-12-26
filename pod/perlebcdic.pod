@@ -156,7 +156,7 @@ UTF-EBCDIC is like UTF-8, but based on EBCDIC.
 You may see the term C<invariant> character or code point.
 This simply means that the character has the same numeric
 value when encoded as when not.
-(Note that this is a very different concept from L<The /13 variant characters>
+(Note that this is a very different concept from L</The 13 variant characters>
 mentioned above.)
 For example, the ordinal value of 'A' is 193 in most EBCDIC code pages,
 and also is 193 when encoded in UTF-EBCDIC.
