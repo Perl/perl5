@@ -15,11 +15,11 @@ my $Is_VMS   = $^O eq 'VMS';
 my $lib;
 
 $lib = $Is_MacOS ? ':Bla:' : 'Bla';
-ok(grep { $_ eq $lib } @INC[0..($#INC-1)]);
+ok(grep { $_ eq $lib } @INC);
 SKIP: {
   skip 'Double colons not allowed in dir spec', 1 if $Is_VMS;
   $lib = $Is_MacOS ? 'Foo::Bar:' : 'Foo::Bar';
-  ok(grep { $_ eq $lib } @INC[0..($#INC-1)]);
+  ok(grep { $_ eq $lib } @INC);
 }
 
 $lib = $Is_MacOS ? ':Bla2:' : 'Bla2';

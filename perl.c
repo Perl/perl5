@@ -4873,8 +4873,7 @@ S_incpush_if_exists(pTHX_ SV *dir)
 
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
-	av_unshift( GvAVn( PL_incgv ), 1 );
-	av_store( GvAVn( PL_incgv ), 0, dir );
+	av_push(GvAVn(PL_incgv), dir);
 	dir = newSV(0);
     }
     return dir;
@@ -5094,9 +5093,8 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 #endif
 	}
 
-	/* finally add this lib directory at the beginning of @INC */
-	av_unshift( GvAVn( PL_incgv ), 1 );
-	av_store( GvAVn( PL_incgv ), 0, libdir );
+	/* finally push this lib directory on the end of @INC */
+	av_push(GvAVn(PL_incgv), libdir);
     }
     if (subdir) {
 	assert (SvREFCNT(subdir) == 1);
