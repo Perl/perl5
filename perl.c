@@ -1898,7 +1898,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #else
 		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
 #endif
-
+#ifdef PERL_PATCHNUM
+		    sv_catpvs(opts_prog, "  Git Description: " STRINGIFY(PERL_PATCHNUM) "\\n");
+#endif
 		    sv_catpvs(opts_prog,"  Compile-time options: $_\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)

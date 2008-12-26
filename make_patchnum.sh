@@ -12,7 +12,7 @@ fi
 
 if [ "$Existing" != "$Current" ]; then
 	echo "Updating .patchnum"
-	echo $Current > .patchnum
+	echo -n $Current > .patchnum
 else
 	echo "Reusing .patchnum" 
 fi
