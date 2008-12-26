@@ -4091,7 +4091,7 @@ Found in file sv.h
 X<SvIOKp>
 
 Returns a U32 value indicating whether the SV contains an integer.  Checks
-the B<private> setting.  Use C<SvIOK>.
+the B<private> setting.  Use C<SvIOK> instead.
 
 	U32	SvIOKp(SV* sv)
 
@@ -4284,7 +4284,7 @@ Found in file sv.h
 X<SvNIOKp>
 
 Returns a U32 value indicating whether the SV contains a number, integer or
-double.  Checks the B<private> setting.  Use C<SvNIOK>.
+double.  Checks the B<private> setting.  Use C<SvNIOK> instead.
 
 	U32	SvNIOKp(SV* sv)
 
@@ -4315,7 +4315,7 @@ Found in file sv.h
 X<SvNOKp>
 
 Returns a U32 value indicating whether the SV contains a double.  Checks the
-B<private> setting.  Use C<SvNOK>.
+B<private> setting.  Use C<SvNOK> instead.
 
 	U32	SvNOKp(SV* sv)
 
@@ -4451,7 +4451,7 @@ Found in file sv.h
 X<SvPOKp>
 
 Returns a U32 value indicating whether the SV contains a character string.
-Checks the B<private> setting.  Use C<SvPOK>.
+Checks the B<private> setting.  Use C<SvPOK> instead.
 
 	U32	SvPOKp(SV* sv)
 
@@ -6540,6 +6540,16 @@ This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *const sv, const I32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_utf8_upgrade_nomg
+X<sv_utf8_upgrade_nomg>
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+
+	STRLEN	sv_utf8_upgrade_nomg(SV *sv)
 
 =for hackers
 Found in file sv.c
