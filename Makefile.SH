@@ -1219,6 +1219,7 @@ _tidy:
 	-cd utils; $(LDLIBPTH) $(MAKE) clean
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm .patchnum
+	-rm .sha1
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
