@@ -23,6 +23,15 @@ developement releases.
 
 =head1 Selected Bug Fixes
 
+=over 4
+
+=item C<-I> on shebang line now adds directories in front of @INC
+
+as documented, and as does C<-I> when specified on the command-line.
+(Renée Bäcker)
+
+=back
+
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals

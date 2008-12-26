@@ -758,7 +758,6 @@ UTILS		=			\
 		..\utils\cpan2dist	\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
-		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
 		..\pod\pod2man		\
@@ -1522,7 +1521,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
-	-cd $(PODDIR) && del /f *.html *.bat checkpods \
+	-cd $(PODDIR) && del /f *.html *.bat podchecker \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
@@ -1535,7 +1534,7 @@ distclean: realclean
 	    perltw.pod perluts.pod perlvmesa.pod perlvms.pod perlvms.pod \
 	    perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
-	    podchecker podselect
+	    podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp instmodsh prove ptar ptardiff cpanp-run-perl cpanp cpan2dist shasum corelist config_data

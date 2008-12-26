@@ -616,7 +616,6 @@ UTILS		=			\
 		..\utils\cpan2dist	\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
-		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
 		..\pod\pod2man		\
@@ -1198,7 +1197,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
-	-cd $(PODDIR) && del /f *.html *.bat checkpods \
+	-cd $(PODDIR) && del /f *.html *.bat podchecker \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
