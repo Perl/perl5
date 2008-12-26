@@ -116,7 +116,7 @@ be used to force byte semantics on Unicode data.
 
 If strings operating under byte semantics and strings with Unicode
 character data are concatenated, the new string will have 
-character semantics.
+character semantics.  This can cause surprises: See <L/BUGS>, below
 
 Under character semantics, many operations that formerly operated on
 bytes now operate on characters. A character in Perl is
@@ -1451,7 +1451,8 @@ This can lead to unexpected results in which a string's semantics suddenly
 change if a code point above 255 is appended to or removed from it,
 which changes the string's semantics from byte to character or vice versa.
 This behavior is scheduled to change in version 5.12, but in the meantime,
-a workaround is to always call utf8::upgrade($string).
+a workaround is to always call utf8::upgrade($string), or to use the
+standard modules L<Encode> or L<charnames>.
 
 =head2 Interaction with Extensions
 
@@ -1532,6 +1533,15 @@ the Unicode properties (character classes) like C<\p{Nd}> are known to
 be quite a bit slower (5-20 times) than their simpler counterparts
 like C<\d> (then again, there 268 Unicode characters matching C<Nd>
 compared with the 10 ASCII characters matching C<d>).
+
+=head2 Possible problems on EBCDIC platforms
+
+In earlier versions, when byte and character data were concatenated,
+the new string was sometimes created by
+decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
+old Unicode string used EBCDIC.
+
+If you find any of these, please report them as bugs.
 
 =head2 Porting code from perl-5.6.X
 

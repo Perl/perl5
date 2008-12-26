@@ -214,7 +214,7 @@ changes.
 How to clone and use the git perl repository is described in L<perlrepository>.
 
 You can also choose to use rsync to get a copy of the current source tree
-for the bleadperl branch and all maintainance branches :
+for the bleadperl branch and all maintenance branches :
 
     $ rsync -avz rsync://perl5.git.perl.org/APC/perl-current .
     $ rsync -avz rsync://perl5.git.perl.org/APC/perl-5.10.x .
@@ -263,7 +263,7 @@ you're fixing a bug in the 5.8 track, patch against the C<blead> branch in
 the git repository.)
 
 If changes are accepted, they are applied to the development branch. Then
-the maintainance pumpking decides which of those patches is to be
+the maintenance pumpking decides which of those patches is to be
 backported to the maint branch.  Only patches that survive the heat of the
 development branch get applied to maintenance versions.
 
@@ -2332,16 +2332,17 @@ about other ranges.
 Many of the comments in the existing code ignore the possibility of EBCDIC,
 and may be wrong therefore, even if the code works.
 This is actually a tribute to the successful transparent insertion of being
-able to handle EBCDIC.  without having to change pre-existing code.
+able to handle EBCDIC without having to change pre-existing code.
 
 UTF-8 and UTF-EBCDIC are two different encodings used to represent Unicode
 code points as sequences of bytes.  Macros 
 with the same names (but different definitions)
 in C<utf8.h> and C<utfebcdic.h>
-are used to allow the calling code think that there is only one such encoding.
-This is almost always referred to as C<utf8>, but it means the EBCDIC
-version as well.  Comments in the code may well be wrong even if the code
-itself is right.
+are used to allow the calling code to think that there is only one such
+encoding.
+This is almost always referred to as C<utf8>, but it means the EBCDIC version
+as well.  Again, comments in the code may well be wrong even if the code itself
+is right.
 For example, the concept of C<invariant characters> differs between ASCII and
 EBCDIC.
 On ASCII platforms, only characters that do not have the high-order

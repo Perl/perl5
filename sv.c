@@ -3054,6 +3054,10 @@ Returns the number of bytes in the converted string
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
+=for apidoc sv_utf8_upgrade_nomg
+
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+
 =for apidoc sv_utf8_upgrade_flags
 
 Converts the PV of an SV to its UTF-8-encoded form.

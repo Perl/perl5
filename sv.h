@@ -771,7 +771,7 @@ double.
 
 =for apidoc Am|U32|SvNIOKp|SV* sv
 Returns a U32 value indicating whether the SV contains a number, integer or
-double.  Checks the B<private> setting.  Use C<SvNIOK>.
+double.  Checks the B<private> setting.  Use C<SvNIOK> instead.
 
 =for apidoc Am|void|SvNIOK_off|SV* sv
 Unsets the NV/IV status of an SV.
@@ -782,15 +782,15 @@ whether the value is defined or not.
 
 =for apidoc Am|U32|SvIOKp|SV* sv
 Returns a U32 value indicating whether the SV contains an integer.  Checks
-the B<private> setting.  Use C<SvIOK>.
+the B<private> setting.  Use C<SvIOK> instead.
 
 =for apidoc Am|U32|SvNOKp|SV* sv
 Returns a U32 value indicating whether the SV contains a double.  Checks the
-B<private> setting.  Use C<SvNOK>.
+B<private> setting.  Use C<SvNOK> instead.
 
 =for apidoc Am|U32|SvPOKp|SV* sv
 Returns a U32 value indicating whether the SV contains a character string.
-Checks the B<private> setting.  Use C<SvPOK>.
+Checks the B<private> setting.  Use C<SvPOK> instead.
 
 =for apidoc Am|U32|SvIOK|SV* sv
 Returns a U32 value indicating whether the SV contains an integer.
