@@ -59,6 +59,7 @@ package Maintainers;
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
 	'petdance'	=> 'Andy Lester <andy@petdance.com>',
+	'pjf'		=> 'Paul Fenwick <pjf@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
@@ -128,6 +129,14 @@ package Maintainers;
 				     lib/Attribute/Handlers],
 		'CPAN'		=> 1,
                 'UPSTREAM'      => "blead",
+		},
+
+	'autodie' =>
+		{
+		'MAINTAINER'    => 'pjf',
+		'FILES'         => q[lib/Fatal.pm lib/autodie.pm lib/autodie],
+		'CPAN'          => 1,
+		'UPSTREAM'      => 'cpan',
 		},
 
 	'B::Concise' =>
