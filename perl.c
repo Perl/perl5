@@ -1898,9 +1898,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #else
 		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
 #endif
-#ifdef PERL_PATCHNUM
-		    sv_catpvs(opts_prog, "  Git Description: " STRINGIFY(PERL_PATCHNUM) "\\n");
-#endif
+		    sv_catpvs(opts_prog,"  Source revision: " STRINGIFY(PERL_GIT_SHA1) "\\n");
 		    sv_catpvs(opts_prog,"  Compile-time options: $_\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -1910,7 +1908,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 				 "\"  Locally applied patches:\\n\",");
 			for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			    if (PL_localpatches[i])
-				Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
+#ifdef X_PERL_PATCHNUM
+				if (strEQ(PL_localpatches[i],"DEVEL"))
+				    Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
+					       0, STRINGIFY(PERL_PATCHNUM), 0);
+				else
+#endif
+				    Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
 					       0, PL_localpatches[i], 0);
 			}
 		    }
@@ -3320,10 +3324,9 @@ Perl_moreswitches(pTHX_ const char *s)
 			Perl_form(aTHX_ "        OS Specific Release: %s\n",
 					OSVERS));
 #endif /* !DGUX */
-#ifdef PERL_PATCHNUM
-	PerlIO_printf(PerlIO_stdout(), "\nGit Description: %s", STRINGIFY(PERL_PATCHNUM));
+#if defined PERL_PATCHNUM
+	PerlIO_printf(PerlIO_stdout(),"\nCompiled from: %s",STRINGIFY(PERL_PATCHNUM));
 #endif
-
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    PerlIO_printf(PerlIO_stdout(),
