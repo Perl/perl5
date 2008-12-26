@@ -284,7 +284,7 @@ C<SV*>.
    caller's responsibility */
 #define HvMROMETA(hv) (HvAUX(hv)->xhv_mro_meta \
                        ? HvAUX(hv)->xhv_mro_meta \
-                       : mro_meta_init(hv))
+                       : Perl_mro_meta_init(aTHX_ hv))
 
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */

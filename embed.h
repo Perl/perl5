@@ -1935,9 +1935,6 @@
 #endif
 #if !defined(HAS_SIGNBIT)
 #endif
-#ifdef PERL_CORE
-#define mro_meta_init		Perl_mro_meta_init
-#endif
 #if defined(USE_ITHREADS)
 #ifdef PERL_CORE
 #define mro_meta_dup		Perl_mro_meta_dup
@@ -4279,7 +4276,6 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #endif
 #ifdef PERL_CORE
-#define mro_meta_init(a)	Perl_mro_meta_init(aTHX_ a)
 #endif
 #if defined(USE_ITHREADS)
 #ifdef PERL_CORE
