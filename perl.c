@@ -4780,7 +4780,7 @@ S_init_perllib(pTHX)
    	SvREFCNT_dec(privdir);
     }
     if (!PL_tainting)
-	incpush(":", FALSE, FALSE, TRUE, FALSE, FALSE);
+	incpush(":", FALSE, FALSE, FALSE, FALSE, FALSE);
 #else
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
@@ -4839,7 +4839,7 @@ S_init_perllib(pTHX)
 #endif
 
     if (!PL_tainting)
-	incpush(".", FALSE, FALSE, TRUE, FALSE, FALSE);
+	incpush(".", FALSE, FALSE, FALSE, FALSE, FALSE);
 #endif /* MACOS_TRADITIONAL */
 }
 
