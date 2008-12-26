@@ -532,6 +532,8 @@ END_EXTERN_C
 #define PL_regex_padav		(*Perl_Iregex_padav_ptr(aTHX))
 #undef  PL_reginterp_cnt
 #define PL_reginterp_cnt	(*Perl_Ireginterp_cnt_ptr(aTHX))
+#undef  PL_registered_mros
+#define PL_registered_mros	(*Perl_Iregistered_mros_ptr(aTHX))
 #undef  PL_regmatch_slab
 #define PL_regmatch_slab	(*Perl_Iregmatch_slab_ptr(aTHX))
 #undef  PL_regmatch_state

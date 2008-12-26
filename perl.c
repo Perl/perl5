@@ -461,6 +461,8 @@ perl_construct(pTHXx)
     PL_timesbase.tms_cstime = 0;
 #endif
 
+    PL_registered_mros = newHV();
+
     ENTER;
 }
 
@@ -848,6 +850,8 @@ perl_destruct(pTHXx)
 
     PL_exitlist = NULL;
     PL_exitlistlen = 0;
+
+    SvREFCNT_dec(PL_registered_mros);
 
     /* jettison our possibly duplicated environment */
     /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied

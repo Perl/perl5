@@ -12174,6 +12174,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	  PTR2UV(PL_watchok));
     }
 
+    PL_registered_mros  = hv_dup_inc(proto_perl->Iregistered_mros, param);
+
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
