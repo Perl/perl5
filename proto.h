@@ -4753,7 +4753,7 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 	assert(linestr_sv); assert(rsfp)
 
 STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
-STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
+STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate, bool unshift);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_main_stash(pTHX);
