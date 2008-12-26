@@ -32,7 +32,7 @@ the repository using the Git protocol (which uses port 9418):
 
   git clone git://perl5.git.perl.org/perl.git perl-git
 
-This clones the repository and makes a local copy in the 'perl-git'
+This clones the repository and makes a local copy in the F<perl-git>
 directory.
 
 If your local network does not allow you to use port 9418, then you can
@@ -40,7 +40,7 @@ fetch a copy of the repository over HTTP (this is slower):
 
   git clone http://perl5.git.perl.org/perl.git perl-http
 
-This clones the repository and makes a local copy in the 'perl-http'
+This clones the repository and makes a local copy in the F<perl-http>
 directory.
 
 =head2 WRITE ACCESS TO THE REPOSITORY
@@ -79,7 +79,7 @@ remote for ssh access:
   % git remote add camel user@camel:/gitroot/perl.git
 
 This allows you to update your local repository by pulling from
-C<origin>, which is faster and doesn't require you to authentify, and
+C<origin>, which is faster and doesn't require you to authenticate, and
 to push your changes back with the C<camel> remote:
 
   % git fetch camel
@@ -93,14 +93,13 @@ themselves should have been fetched when pulling from C<origin>.
 Once you have changed into the repository directory, you can inspect
 it.
 
-
 After a clone the repository will contain a single local branch, which
 will be the current branch as well, as indicated by the asterix.
 
   % git branch
   * blead
 
-Using the -a switch to branch will also show the remote tracking
+Using the -a switch to C<branch> will also show the remote tracking
 branches in the repository:
 
   % git branch -a
@@ -253,7 +252,7 @@ to Orange Brocard, we should change his name in the AUTHORS file:
 You can see what files are changed:
 
   % git status
-  # On branch blead
+  # On branch orange
   # Changes to be committed:
   #   (use "git reset HEAD <file>..." to unstage)
   #
@@ -381,6 +380,11 @@ However, be aware this will delete ALL untracked content. You can use
 to remove all ignored untracked files, such as build and test
 byproduct, but leave any  manually created files alone.
 
+If you only want to cancel some uncommitted edits, you can use
+C<git checkout> and give it a list of files to be reverted.
+
+If you want to cancel one or several commits, you can use C<git reset>.
+
 =head1 BISECTING
 
 C<git> provides a built-in way to determine, with a binary search in
@@ -452,7 +456,15 @@ tracking branch:
 
   % git checkout --track -b maint-5.005 origin/maint-5.005
 
-This creates a local branch named maint-5.005, which tracks the remote
-branch origin/maint-5.005. Then you can pull, commit, merge and push as
+This creates a local branch named C<maint-5.005>, which tracks the remote
+branch C<origin/maint-5.005>. Then you can pull, commit, merge and push as
 before.
 
+You can also cherry-pick commits from blead and another branch, by
+using the C<git cherry-pick> command. It is recommended to use the B<-x>
+option to C<git cherry-pick> in order to record the SHA1 of the original
+commit in the new commit message.
+
+=head1 SEE ALSO
+
+The git documentation, accessible via C<git help command>.
