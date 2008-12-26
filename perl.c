@@ -3305,9 +3305,6 @@ Perl_moreswitches(pTHX_ const char *s)
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
 		"\nThis is perl, %"SVf
-#ifdef PERL_PATCHNUM
-		" DEVEL:" STRINGIFY(PERL_PATCHNUM)
-#endif
 		" built for %s",
 		SVfARG(vstringify(PL_patchlevel)),
 		ARCHNAME);
@@ -3323,6 +3320,9 @@ Perl_moreswitches(pTHX_ const char *s)
 			Perl_form(aTHX_ "        OS Specific Release: %s\n",
 					OSVERS));
 #endif /* !DGUX */
+#ifdef PERL_PATCHNUM
+	PerlIO_printf(PerlIO_stdout(), "\nGit Description: %s", STRINGIFY(PERL_PATCHNUM));
+#endif
 
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
