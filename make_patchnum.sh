@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. config.sh
+. ./config.sh
 
 Existing=`cat .patchnum 2>/dev/null`
 Existing_Sha1=`cat .sha1 2>/dev/null`
