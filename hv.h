@@ -52,8 +52,10 @@ struct mro_alg {
 struct mro_meta {
     /* repurposed as a hash holding the different MROs private data. */
     AV      *mro_linear_dfs; /* cached dfs @ISA linearization */
-    /* repurposed as a pointer directly to the current MROs private data.  */
-    AV      *mro_linear_c3;  /* cached c3 @ISA linearization */
+    /* a pointer directly to the current MROs private data.  If mro_linear_all
+       is NULL, this owns the SV reference, else it is just a pointer to a
+       value stored in and owned by mro_linear_all.  */
+    SV      *mro_linear_current;
     HV      *mro_nextmethod; /* next::method caching */
     U32     cache_gen;       /* Bumping this invalidates our method cache */
     U32     pkg_gen;         /* Bumps when local methods/@ISA change */
@@ -63,7 +65,7 @@ struct mro_meta {
 
 #define MRO_GET_PRIVATE_DATA(smeta, which)		   \
     (((smeta)->mro_which && (which) == (smeta)->mro_which) \
-     ? MUTABLE_SV((smeta)->mro_linear_c3)		   \
+     ? (smeta)->mro_linear_current			   \
      : Perl_mro_get_private_data(aTHX_ (smeta), (which)))
 
 /* Subject to change.

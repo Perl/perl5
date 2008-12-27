@@ -1698,12 +1698,12 @@ S_hfreeentries(pTHX_ HV *hv)
 		    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
 		    meta->mro_linear_dfs = NULL;
 		    /* This is just acting as a shortcut pointer.  */
-		    meta->mro_linear_c3 = NULL;
-		} else if (meta->mro_linear_c3) {
+		    meta->mro_linear_current = NULL;
+		} else if (meta->mro_linear_current) {
 		    /* Only the current MRO is stored, so this owns the data.
 		     */
-		    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_c3));
-		    meta->mro_linear_c3 = NULL;
+		    SvREFCNT_dec(meta->mro_linear_current);
+		    meta->mro_linear_current = NULL;
 		}
                 if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
                 SvREFCNT_dec(meta->isa);
