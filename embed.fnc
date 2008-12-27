@@ -2162,7 +2162,6 @@ p	|struct mro_meta*	|mro_meta_dup	|NN struct mro_meta* smeta|NN CLONE_PARAMS* pa
 #endif
 Apd	|AV*	|mro_get_linear_isa|NN HV* stash
 #if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
-sd	|AV*	|mro_get_linear_isa_c3|NN HV* stash|U32 level
 sd	|AV*	|mro_get_linear_isa_dfs|NN HV* stash|U32 level
 #endif
 : Used in hv.c, mg.c, pp.c, sv.c

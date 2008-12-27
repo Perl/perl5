@@ -921,6 +921,11 @@ ext/Module/Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module/Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module/Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
 ext/Module/Pluggable/Makefile.PL			Module::Pluggable
+ext/mro/Changes			mro extension
+ext/mro/Makefile.PL		mro extension
+ext/mro/mro.pm			mro extension
+ext/mro/mro.xs			mro extension
+ext/mro/t/pluggable.t		Test that c3 mro extension is actually pluggable
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
@@ -2451,7 +2456,6 @@ lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
 lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
 lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
-lib/mro.pm			mro extension
 lib/Net/Changes			libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet

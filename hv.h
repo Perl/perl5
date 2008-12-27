@@ -41,9 +41,13 @@ struct shared_he {
    Use the funcs in mro.c
 */
 
-
-/* structure may change, so not public yet */
-struct mro_alg;
+struct mro_alg {
+    AV *(*resolve)(pTHX_ HV* stash, U32 level);
+    const char *name;
+    U16 length;
+    U16	kflags;	/* For the hash API - set HVhek_UTF8 if name is UTF-8 */
+    U32 hash; /* or 0 */
+};
 
 struct mro_meta {
     /* repurposed as a hash holding the different MROs private data. */

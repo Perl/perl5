@@ -1251,6 +1251,7 @@ _cleaner2:
 	rm -f preload lib/re.pm
 	rm -rf lib/Encode lib/Compress lib/Hash lib/re
 	rm -rf lib/TAP lib/Module/Pluggable lib/App
+	rm -rf lib/mro
 	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)

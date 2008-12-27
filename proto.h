@@ -6606,11 +6606,6 @@ PERL_CALLCONV AV*	Perl_mro_get_linear_isa(pTHX_ HV* stash)
 	assert(stash)
 
 #if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
-STATIC AV*	S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_C3	\
-	assert(stash)
-
 STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS	\
