@@ -1909,6 +1909,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 			for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			    if (PL_localpatches[i])
 #ifdef X_PERL_PATCHNUM
+/* this is ifdef'ed out, we would enable this if we want to transform 
+   "DEVEL" registered patches into the git name */
 				if (strEQ(PL_localpatches[i],"DEVEL"))
 				    Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
 					       0, STRINGIFY(PERL_PATCHNUM), 0);
