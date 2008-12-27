@@ -513,13 +513,13 @@ splintflags = \
 
 splintfiles = $(c1)
 
-.c$(OBJ_EXT): cflags
+.c$(OBJ_EXT): 
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-.c.i: cflags
+.c.i: 
 	$(CCCMDSRC) -E $*.c > $*.i
 
-.c.s: cflags
+.c.s:
 	$(CCCMDSRC) -S $*.c
 
 all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
