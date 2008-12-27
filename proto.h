@@ -6587,6 +6587,12 @@ PERL_CALLCONV void	Perl_mro_register(pTHX_ const struct mro_alg *mro)
 #define PERL_ARGS_ASSERT_MRO_REGISTER	\
 	assert(mro)
 
+PERL_CALLCONV void	Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MRO_SET_MRO	\
+	assert(meta); assert(name)
+
 PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_META_INIT	\

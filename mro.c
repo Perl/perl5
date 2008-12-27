@@ -626,6 +626,34 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     }
 }
 
+void
+Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
+{
+    const struct mro_alg *const which = Perl_mro_get_from_name(aTHX_ name);
+ 
+    PERL_ARGS_ASSERT_MRO_SET_MRO;
+
+    if (!which)
+        Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", name);
+
+    if(meta->mro_which != which) {
+	if (meta->mro_linear_c3 && !meta->mro_linear_dfs) {
+	    /* If we were storing something directly, put it in the hash before
+	       we lose it. */
+	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which, 
+				      MUTABLE_SV(meta->mro_linear_c3));
+	}
+	meta->mro_which = which;
+	/* Scrub our cached pointer to the private data.  */
+	meta->mro_linear_c3 = NULL;
+        /* Only affects local method cache, not
+           even child classes */
+        meta->cache_gen++;
+        if(meta->mro_nextmethod)
+            hv_clear(meta->mro_nextmethod);
+    }
+}
+
 #include "XSUB.h"
 
 XS(XS_mro_get_linear_isa);
@@ -695,7 +723,6 @@ XS(XS_mro_set_mro)
     dVAR;
     dXSARGS;
     SV* classname;
-    const struct mro_alg *which;
     HV* class_stash;
     struct mro_meta* meta;
 
@@ -707,26 +734,7 @@ XS(XS_mro_set_mro)
     if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%"SVf"'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
-    which = Perl_mro_get_from_name(aTHX_ ST(1));
-    if (!which)
-        Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", ST(1));
-
-    if(meta->mro_which != which) {
-	if (meta->mro_linear_c3 && !meta->mro_linear_dfs) {
-	    /* If we were storing something directly, put it in the hash before
-	       we lose it. */
-	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which, 
-				      MUTABLE_SV(meta->mro_linear_c3));
-	}
-	meta->mro_which = which;
-	/* Scrub our cached pointer to the private data.  */
-	meta->mro_linear_c3 = NULL;
-        /* Only affects local method cache, not
-           even child classes */
-        meta->cache_gen++;
-        if(meta->mro_nextmethod)
-            hv_clear(meta->mro_nextmethod);
-    }
+    Perl_mro_set_mro(aTHX_ meta, ST(1));
 
     XSRETURN_EMPTY;
 }
