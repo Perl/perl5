@@ -68,8 +68,7 @@ implementation for older Perls.
 
 It's possible to change the MRO of a given class either by using C<use
 mro> as shown in the synopsis, or by using the L</mro::set_mro> function
-below.  The functions in the mro namespace do not require loading the
-C<mro> module, as they are actually provided by the core perl interpreter.
+below.
 
 The special methods C<next::method>, C<next::can>, and
 C<maybe::next::method> are not available until this C<mro> module
