@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. config.sh
+
 Existing=`cat .patchnum 2>/dev/null`
 Existing_Sha1=`cat .sha1 2>/dev/null`
 
@@ -15,9 +17,19 @@ elif [ -d ".git" ]; then
 fi
 
 if [ "$Existing" != "$Current" -o "$Existing_Sha1" != "$Sha1" ]; then
+	(echo "hi there\c" ; echo " ") >.echotmp
+	if $contains c .echotmp >/dev/null 2>&1 ; then
+		n='-n'
+		c=''
+	else
+		n=''
+		c='\c'
+	fi
+	rm -f .echotmp
 	echo "Updating .patchnum and .sha1"
-	echo -n $Current > .patchnum
-	echo -n $Sha1 > .sha1
+	echo $n "$Current$c" > .patchnum
+	echo $n "$Sha1$c" > .sha1
+
 else
 	echo "Reusing .patchnum and .sha1" 
 fi
