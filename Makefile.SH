@@ -522,7 +522,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) make_patchnum miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -540,9 +540,7 @@ sperl.i: perl.c $(h)
 make_patchnum:
 	sh $(shellflags) make_patchnum.sh
 
-.patchnum: make_patchnum
-
-perl$(OBJ_EXT): .patchnum
+perl$(OBJ_EXT): .patchnum .sha1
 
 translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
@@ -1326,7 +1324,7 @@ _test_prep: unpack_files
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+test_prep: make_patchnum test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
