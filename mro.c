@@ -57,16 +57,35 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
 {
     PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA;
 
-    /* If we've been asked to look up the private data for the current MRO, then
-       cache it.  */
-    if (smeta->mro_which == which)
-	smeta->mro_linear_c3 = MUTABLE_AV(data);
-
     if (!smeta->mro_linear_dfs) {
-	HV *const hv = newHV();
-	HvMAX(hv) = 0;	/* Start with 1 bucket. It's unlikely we'll need more.
-			 */
-	smeta->mro_linear_dfs = MUTABLE_AV(hv);
+	if (smeta->mro_which == which) {
+	    /* If all we need to store is the current MRO's data, then don't use
+	       memory on a hash with 1 element - store it direct, and signal
+	       this by leaving the would-be-hash NULL.  */
+	    smeta->mro_linear_c3 = MUTABLE_AV(data);
+	    return data;
+	} else {
+	    HV *const hv = newHV();
+	    /* Start with 2 buckets. It's unlikely we'll need more. */
+	    HvMAX(hv) = 1;	
+	    smeta->mro_linear_dfs = MUTABLE_AV(hv);
+
+	    if (smeta->mro_linear_c3) {
+		/* If we were storing something directly, put it in the hash
+		   before we lose it. */
+		Perl_mro_set_private_data(aTHX_ smeta, smeta->mro_which, 
+					  MUTABLE_SV(smeta->mro_linear_c3));
+	    }
+	}
+    }
+
+    /* We get here if we're storing more than one linearisation for this stash,
+       or the linearisation we are storing is not that if its current MRO.  */
+
+    if (smeta->mro_which == which) {
+	/* If we've been asked to store the private data for the current MRO,
+	   then cache it.  */
+	smeta->mro_linear_c3 = MUTABLE_AV(data);
     }
 
     if (!Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
@@ -141,10 +160,18 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
     Newx(newmeta, 1, struct mro_meta);
     Copy(smeta, newmeta, 1, struct mro_meta);
 
-    if (newmeta->mro_linear_dfs)
+    if (newmeta->mro_linear_dfs) {
 	newmeta->mro_linear_dfs
 	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_dfs, param)));
-    newmeta->mro_linear_c3 = NULL;
+	/* This is just acting as a shortcut pointer, and will be automatically
+	   updated on the first get.  */
+	newmeta->mro_linear_c3 = NULL;
+    } else if (newmeta->mro_linear_c3) {
+	/* Only the current MRO is stored, so this owns the data.  */
+	newmeta->mro_linear_c3
+	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_c3, param)));
+    }
+
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
 	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_nextmethod, param)));
@@ -407,9 +434,16 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
-    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
-    meta->mro_linear_dfs = NULL;
-    meta->mro_linear_c3 = NULL;
+    if (meta->mro_linear_dfs) {
+	SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
+	meta->mro_linear_dfs = NULL;
+	/* This is just acting as a shortcut pointer.  */
+	meta->mro_linear_c3 = NULL;
+    } else if (meta->mro_linear_c3) {
+	/* Only the current MRO is stored, so this owns the data.  */
+	SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_c3));
+	meta->mro_linear_c3 = NULL;
+    }
     if (meta->isa) {
 	SvREFCNT_dec(meta->isa);
 	meta->isa = NULL;
@@ -449,9 +483,16 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
             if(!revstash) continue;
             revmeta = HvMROMETA(revstash);
-            SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_dfs));
-            revmeta->mro_linear_dfs = NULL;
-            revmeta->mro_linear_c3 = NULL;
+	    if (revmeta->mro_linear_dfs) {
+		SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_dfs));
+		revmeta->mro_linear_dfs = NULL;
+		/* This is just acting as a shortcut pointer.  */
+		revmeta->mro_linear_c3 = NULL;
+	    } else if (revmeta->mro_linear_c3) {
+		/* Only the current MRO is stored, so this owns the data.  */
+		SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_c3));
+		revmeta->mro_linear_c3 = NULL;
+	    }
             if(!is_universal)
                 revmeta->cache_gen++;
             if(revmeta->mro_nextmethod)
@@ -671,7 +712,13 @@ XS(XS_mro_set_mro)
         Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", ST(1));
 
     if(meta->mro_which != which) {
-        meta->mro_which = which;
+	if (meta->mro_linear_c3 && !meta->mro_linear_dfs) {
+	    /* If we were storing something directly, put it in the hash before
+	       we lose it. */
+	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which, 
+				      MUTABLE_SV(meta->mro_linear_c3));
+	}
+	meta->mro_which = which;
 	/* Scrub our cached pointer to the private data.  */
 	meta->mro_linear_c3 = NULL;
         /* Only affects local method cache, not
