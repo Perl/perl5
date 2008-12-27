@@ -1186,6 +1186,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\App rmdir /s /q $(LIBDIR)\App
 	-if exist $(LIBDIR)\Module\Pluggable rmdir /s /q $(LIBDIR)\Module\Pluggable
 	-if exist $(LIBDIR)\TAP rmdir /s /q $(LIBDIR)\TAP
+	-if exist $(LIBDIR)\mro rmdir /s /q $(LIBDIR)\mro
 	-if exist $(LIBDIR)\IO\Compress rmdir /s /q $(LIBDIR)\IO\Compress
 	-if exist $(LIBDIR)\IO\Socket rmdir /s /q $(LIBDIR)\IO\Socket
 	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress

@@ -1964,7 +1964,6 @@
 #define mro_get_linear_isa	Perl_mro_get_linear_isa
 #if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define mro_get_linear_isa_c3	S_mro_get_linear_isa_c3
 #define mro_get_linear_isa_dfs	S_mro_get_linear_isa_dfs
 #endif
 #endif
@@ -4330,7 +4329,6 @@
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
 #if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define mro_get_linear_isa_c3(a,b)	S_mro_get_linear_isa_c3(aTHX_ a,b)
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #endif
 #endif

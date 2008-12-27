@@ -73,6 +73,7 @@ lib/App/
 lib/Archive/Tar/t/src/long/foo.tbz
 lib/Archive/Tar/t/src/short/foo.tbz
 lib/IPC/Cmd/t/src/x.tgz
+lib/mro.pm
 lib/TAP/
 lib/Test/Harness.pm
 t/rantests

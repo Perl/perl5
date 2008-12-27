@@ -5,6 +5,8 @@ use warnings;
 
 require q(./test.pl); plan(tests => 40);
 
+require mro;
+
 {
     package MRO_A;
     our @ISA = qw//;

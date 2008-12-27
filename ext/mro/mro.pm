@@ -1,6 +1,7 @@
 #      mro.pm
 #
 #      Copyright (c) 2007 Brandon L Black
+#      Copyright (c) 2008 Larry Wall and others
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
@@ -11,7 +12,7 @@ use warnings;
 
 # mro.pm versions < 1.00 reserved for MRO::Compat
 #  for partial back-compat to 5.[68].x
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 sub import {
     mro::set_mro(scalar(caller), $_[1]) if $_[1];
@@ -35,6 +36,9 @@ sub method {
     goto &$method if defined $method;
     return;
 }
+
+require XSLoader;
+XSLoader::load('mro', $VERSION);
 
 1;
 
