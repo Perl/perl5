@@ -179,6 +179,7 @@ for file in `$cat .clist`; do
            -e 's|\.c\.c|.c|' $uwinfix .cout .cerr| \
         $uniq | $sort | $uniq >> .deptmp
     fi
+    echo "$filebase\$(OBJ_EXT): cflags" >> .deptmp
 done
 
 $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
