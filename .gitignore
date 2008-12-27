@@ -6,6 +6,8 @@
 .patchnum
 .sha1
 
+# ignore bug*.pl
+bug*.pl
 
 # files produced by './configure.gnu' on a Linux machine
 Makefile.old
