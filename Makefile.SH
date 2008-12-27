@@ -1503,9 +1503,6 @@ pllist: $(pl)
 Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH
 
-cflags: cflags.SH
-	$(SHELL) cflags.SH
-
 .PHONY: distcheck
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
