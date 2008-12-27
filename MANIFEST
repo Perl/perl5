@@ -925,7 +925,6 @@ ext/mro/Changes			mro extension
 ext/mro/Makefile.PL		mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension
-ext/mro/t/pluggable.t		Test that c3 mro extension is actually pluggable
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture

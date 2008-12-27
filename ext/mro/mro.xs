@@ -242,10 +242,167 @@ __dopoptosub_at(const PERL_CONTEXT *cxstk, I32 startingblock) {
     return i;
 }
 
-MODULE = mro		PACKAGE = mro		PREFIX = mro
+MODULE = mro		PACKAGE = mro		PREFIX = mro_
 
 void
-mro_nextcan(...)
+mro_get_linear_isa(...)
+  PROTOTYPE: $;$
+  PREINIT:
+    AV* RETVAL;
+    HV* class_stash;
+    SV* classname;
+  PPCODE:
+    if(items < 1 || items > 2)
+	croak_xs_usage(cv, "classname [, type ]");
+
+    classname = ST(0);
+    class_stash = gv_stashsv(classname, 0);
+
+    if(!class_stash) {
+        /* No stash exists yet, give them just the classname */
+        AV* isalin = newAV();
+        av_push(isalin, newSVsv(classname));
+        ST(0) = sv_2mortal(newRV_noinc(MUTABLE_SV(isalin)));
+        XSRETURN(1);
+    }
+    else if(items > 1) {
+	const struct mro_alg *const algo = Perl_mro_get_from_name(aTHX_ ST(1));
+	if (!algo)
+	    Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", ST(1));
+	RETVAL = algo->resolve(aTHX_ class_stash, 0);
+    }
+    else {
+        RETVAL = mro_get_linear_isa(class_stash);
+    }
+    ST(0) = newRV_inc(MUTABLE_SV(RETVAL));
+    sv_2mortal(ST(0));
+    XSRETURN(1);
+
+void
+mro_set_mro(...)
+  PROTOTYPE: $$
+  PREINIT:
+    SV* classname;
+    const struct mro_alg *which;
+    HV* class_stash;
+    struct mro_meta* meta;
+  PPCODE:
+    if (items != 2)
+	croak_xs_usage(cv, "classname, type");
+
+    classname = ST(0);
+    class_stash = gv_stashsv(classname, GV_ADD);
+    if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%"SVf"'!", SVfARG(classname));
+    meta = HvMROMETA(class_stash);
+
+    Perl_mro_set_mro(aTHX_ meta, ST(1));
+
+    XSRETURN_EMPTY;
+
+void
+mro_get_mro(...)
+  PROTOTYPE: $
+  PREINIT:
+    SV* classname;
+    HV* class_stash;
+  PPCODE:
+    if (items != 1)
+	croak_xs_usage(cv, "classname");
+
+    classname = ST(0);
+    class_stash = gv_stashsv(classname, 0);
+
+    ST(0) = sv_2mortal(newSVpv(class_stash
+			       ? HvMROMETA(class_stash)->mro_which->name
+			       : "dfs", 0));
+    XSRETURN(1);
+
+void
+mro_get_isarev(...)
+  PROTOTYPE: $
+  PREINIT:
+    SV* classname;
+    HE* he;
+    HV* isarev;
+    AV* ret_array;
+  PPCODE:
+    if (items != 1)
+	croak_xs_usage(cv, "classname");
+
+    classname = ST(0);
+
+    he = hv_fetch_ent(PL_isarev, classname, 0, 0);
+    isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
+
+    ret_array = newAV();
+    if(isarev) {
+        HE* iter;
+        hv_iterinit(isarev);
+        while((iter = hv_iternext(isarev)))
+            av_push(ret_array, newSVsv(hv_iterkeysv(iter)));
+    }
+    mXPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
+
+    PUTBACK;
+
+void
+mro_is_universal(...)
+  PROTOTYPE: $
+  PREINIT:
+    SV* classname;
+    HV* isarev;
+    char* classname_pv;
+    STRLEN classname_len;
+    HE* he;
+  PPCODE:
+    if (items != 1)
+	croak_xs_usage(cv, "classname");
+
+    classname = ST(0);
+
+    classname_pv = SvPV(classname,classname_len);
+
+    he = hv_fetch_ent(PL_isarev, classname, 0, 0);
+    isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
+
+    if((classname_len == 9 && strEQ(classname_pv, "UNIVERSAL"))
+        || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))
+        XSRETURN_YES;
+    else
+        XSRETURN_NO;
+
+
+void
+mro_invalidate_method_caches(...)
+  PROTOTYPE: 
+  PPCODE:
+    if (items != 0)
+	croak_xs_usage(cv, "");
+
+    PL_sub_generation++;
+
+    XSRETURN_EMPTY;
+
+void
+mro_get_pkg_gen(...)
+  PROTOTYPE: $
+  PREINIT:
+    SV* classname;
+    HV* class_stash;
+  PPCODE:
+    if(items != 1)
+	croak_xs_usage(cv, "classname");
+    
+    classname = ST(0);
+
+    class_stash = gv_stashsv(classname, 0);
+
+    mXPUSHi(class_stash ? HvMROMETA(class_stash)->pkg_gen : 0);
+    
+    PUTBACK;
+
+void
+mro__nextcan(...)
   PREINIT:
     SV* self = ST(0);
     const I32 throw_nomethod = SvIVX(ST(1));

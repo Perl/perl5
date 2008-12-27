@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 sub nil {}
 
@@ -103,6 +103,10 @@ sub AddrRef {
 
 sub mycan {				# Real can would leave stubs.
   my ($package, $meth) = @_;
+
+  local $@;
+  local $!;
+  require mro;
 
   my $mro = mro::get_linear_isa($package);
   foreach my $p (@$mro) {
