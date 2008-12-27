@@ -2986,7 +2986,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    if ( got_wordnum ) {
 			if ( ! ST.accepted ) {
 			    ENTER;
-			    /* SAVETMPS; */ /* XXX is this necessary? dmq */
+			    SAVETMPS; /* XXX is this necessary? dmq */
 			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
 			    sv_accept_buff=newSV(bufflen *
 					    sizeof(reg_trie_accepted) - 1);
@@ -3205,6 +3205,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    }
 	    /* NOTREACHED */
         case TRIE_next:
+	    /* we dont want to throw this away, see bug 57042*/
+	    if (oreplsv != GvSV(PL_replgv))
+		sv_setsv(oreplsv, GvSV(PL_replgv));
             FREETMPS;
 	    LEAVE;
 	    sayYES;

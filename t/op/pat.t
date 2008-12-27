@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 3864;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 3865;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2935,7 +2935,7 @@ sub run_tests {
 
         SKIP: {
             our @stack = ();
-            my @expect = qw (
+            my @expect = qw(
                 stuff1
                 stuff2
                 <stuff1>and<stuff2>
@@ -4083,7 +4083,23 @@ sub run_tests {
         utf8::upgrade $s;
         ok "aaa" =~ /$s/;
     }
-
+    {
+        local $BugId = '57042';
+	local $Message = "Check if tree logic breaks \$^R";
+	my $cond_re = qr/\s*
+	    \s* (?:
+		   \( \s* A  (?{1})
+		 | \( \s* B  (?{2})
+	       )
+	   /x;
+	my @res;
+	for my $line ("(A)","(B)") {
+	   if ($line =~ m/$cond_re/) {
+	       push @res, $^R ? "#$^R" : "UNDEF";
+	   }
+	}
+	iseq "@res","#1 #2";
+    }
     #
     # This should be the last test.
     #
