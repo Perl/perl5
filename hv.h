@@ -50,8 +50,8 @@ struct mro_alg {
 };
 
 struct mro_meta {
-    /* repurposed as a hash holding the different MROs private data. */
-    AV      *mro_linear_dfs; /* cached dfs @ISA linearization */
+    /* a hash holding the different MROs private data.  */
+    HV      *mro_linear_all;
     /* a pointer directly to the current MROs private data.  If mro_linear_all
        is NULL, this owns the SV reference, else it is just a pointer to a
        value stored in and owned by mro_linear_all.  */

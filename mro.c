@@ -37,7 +37,7 @@ Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
     SV **data;
     PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA;
 
-    data = Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
+    data = Perl_hv_common(aTHX_ smeta->mro_linear_all, NULL,
 			  which->name, which->length, which->kflags,
 			  HV_FETCH_JUST_SV, NULL, which->hash);
     if (!data)
@@ -57,7 +57,7 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
 {
     PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA;
 
-    if (!smeta->mro_linear_dfs) {
+    if (!smeta->mro_linear_all) {
 	if (smeta->mro_which == which) {
 	    /* If all we need to store is the current MRO's data, then don't use
 	       memory on a hash with 1 element - store it direct, and signal
@@ -68,7 +68,7 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
 	    HV *const hv = newHV();
 	    /* Start with 2 buckets. It's unlikely we'll need more. */
 	    HvMAX(hv) = 1;	
-	    smeta->mro_linear_dfs = MUTABLE_AV(hv);
+	    smeta->mro_linear_all = hv;
 
 	    if (smeta->mro_linear_current) {
 		/* If we were storing something directly, put it in the hash
@@ -88,7 +88,7 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
 	smeta->mro_linear_current = data;
     }
 
-    if (!Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
+    if (!Perl_hv_common(aTHX_ smeta->mro_linear_all, NULL,
 			which->name, which->length, which->kflags,
 			HV_FETCH_ISSTORE, data, which->hash)) {
 	Perl_croak(aTHX_ "panic: hv_store() failed in set_mro_private_data() "
@@ -160,9 +160,9 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
     Newx(newmeta, 1, struct mro_meta);
     Copy(smeta, newmeta, 1, struct mro_meta);
 
-    if (newmeta->mro_linear_dfs) {
-	newmeta->mro_linear_dfs
-	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_dfs, param)));
+    if (newmeta->mro_linear_all) {
+	newmeta->mro_linear_all
+	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_all, param)));
 	/* This is just acting as a shortcut pointer, and will be automatically
 	   updated on the first get.  */
 	newmeta->mro_linear_current = NULL;
@@ -435,9 +435,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
-    if (meta->mro_linear_dfs) {
-	SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
-	meta->mro_linear_dfs = NULL;
+    if (meta->mro_linear_all) {
+	SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
+	meta->mro_linear_all = NULL;
 	/* This is just acting as a shortcut pointer.  */
 	meta->mro_linear_current = NULL;
     } else if (meta->mro_linear_current) {
@@ -484,9 +484,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
             if(!revstash) continue;
             revmeta = HvMROMETA(revstash);
-	    if (revmeta->mro_linear_dfs) {
-		SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_dfs));
-		revmeta->mro_linear_dfs = NULL;
+	    if (revmeta->mro_linear_all) {
+		SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_all));
+		revmeta->mro_linear_all = NULL;
 		/* This is just acting as a shortcut pointer.  */
 		revmeta->mro_linear_current = NULL;
 	    } else if (revmeta->mro_linear_current) {
@@ -631,7 +631,7 @@ Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
         Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", name);
 
     if(meta->mro_which != which) {
-	if (meta->mro_linear_current && !meta->mro_linear_dfs) {
+	if (meta->mro_linear_current && !meta->mro_linear_all) {
 	    /* If we were storing something directly, put it in the hash before
 	       we lose it. */
 	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which, 

@@ -1694,9 +1694,9 @@ S_hfreeentries(pTHX_ HV *hv)
 	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 
             if((meta = iter->xhv_mro_meta)) {
-		if (meta->mro_linear_dfs) {
-		    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
-		    meta->mro_linear_dfs = NULL;
+		if (meta->mro_linear_all) {
+		    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
+		    meta->mro_linear_all = NULL;
 		    /* This is just acting as a shortcut pointer.  */
 		    meta->mro_linear_current = NULL;
 		} else if (meta->mro_linear_current) {
