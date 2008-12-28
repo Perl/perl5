@@ -1783,12 +1783,13 @@ PP(pp_helem)
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvSHARED_HASH(keysv) : 0;
+    const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
 
     if (SvTYPE(hv) != SVt_PVHV)
 	RETPUSHUNDEF;
 
-    if (PL_op->op_private & OPpLVAL_INTRO) {
+    if (localizing) {
 	MAGIC *mg;
 	HV *stash;
 
@@ -1819,7 +1820,7 @@ PP(pp_helem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (PL_op->op_private & OPpLVAL_INTRO) {
+	if (localizing) {
 	    if (HvNAME_get(hv) && isGV(*svp))
 		save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
 	    else {
