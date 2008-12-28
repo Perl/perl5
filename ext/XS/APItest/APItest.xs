@@ -448,9 +448,13 @@ common(params)
 	if ((svp = hv_fetchs(params, "action", 0)))
 	    action = SvIV(*svp);
 	if ((svp = hv_fetchs(params, "val", 0)))
-	    val = *svp;
+	    val = newSVsv(*svp);
 	if ((svp = hv_fetchs(params, "hash", 0)))
 	    hash = SvUV(*svp);
+
+	if ((svp = hv_fetchs(params, "hash_pv", 0))) {
+	    PERL_HASH(hash, key, klen);
+	}
 
 	result = (HE *)hv_common(hv, keysv, key, klen, flags, action, val, hash);
 	if (!result) {

@@ -597,6 +597,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    if (flags & HVhek_FREEKEY)
 		Safefree(keysave);
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+	    /* If the caller calculated a hash, it was on the sequence of
+	       octets that are the UTF-8 form. We've now changed the sequence
+	       of octets stored to that of the equivalent byte representation,
+	       so the hash we need is different.  */
+	    hash = 0;
 	}
     }
 
