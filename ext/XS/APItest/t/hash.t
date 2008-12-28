@@ -150,6 +150,32 @@ if ($] > 5.009) {
     }
 }
 
+sub test_precomputed_hashes {
+    my $what = shift;
+    my $hash_it = shift;
+    my $ord = shift;
+    my $key_copy = $_[0];
+    $key_copy .= '';
+
+    my %hash;
+    is (XS::APItest::Hash::common({hv => \%hash,
+				   "key$what" => $_[0],
+				   val => $ord,
+				   "hash_$what" => $hash_it,
+				   action => XS::APItest::HV_FETCH_ISSTORE}),
+	$ord, "store $ord with $what \$hash_it = $hash_it");
+    is_deeply ([each %hash], [$_[0], $ord], "First key read is good");
+    is_deeply ([each %hash], [], "No second key good");
+    
+    is ($hash{$_[0]}, $ord, "Direct hash read finds $ord");
+
+    is_deeply ([each %hash], [$key_copy, $ord],
+	       "First key read is good with a copy");
+    is_deeply ([each %hash], [], "No second key good");
+    
+    is ($hash{$key_copy}, $ord, "Direct hash read finds $ord");
+}
+
 {
     my $as_utf8 = "\241" . chr 256;
     chop $as_utf8;
@@ -158,20 +184,11 @@ if ($] > 5.009) {
 	my $ord = ord $key;
 	foreach my $hash_it (0, 1) {
 	    foreach my $what (qw(pv sv)) {
-		my %hash;
-		is (XS::APItest::Hash::common({hv => \%hash,
-					       "key$what" => $key,
-					       val => $ord,
-					       "hash_$what" => $hash_it,
-					       action =>
-					       XS::APItest::HV_FETCH_ISSTORE}),
-		    $ord, "store $ord with $what \$hash_it = $hash_it");
-		is_deeply ([each %hash], [$key, $ord],
-			   "First key read is good");
-		is_deeply ([each %hash], [], "No second key good");
-
-		is ($hash{$key}, $ord, "Direct hash read finds $ord");
+		test_precomputed_hashes($what, $hash_it, $ord, $key);
 	    }
+	    # Generate a shared hash key scalar
+	    my %h = ($key => 1);
+	    test_precomputed_hashes('sv', $hash_it, $ord, (keys %h)[0]);
 	}
     }
 }
