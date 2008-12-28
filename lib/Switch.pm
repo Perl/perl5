@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.13';
+$VERSION = '2.13_01';
 
 
 # LOAD FILTERING MODULE...
@@ -850,8 +850,9 @@ and requires both these modules to be installed.
 
 =head1 AUTHOR
 
-Damian Conway (damian@conway.org). The maintainer of this module is now Rafael
-Garcia-Suarez (rgarciasuarez@gmail.com).
+Damian Conway (damian@conway.org). This module is now maintained by Rafael
+Garcia-Suarez (rgarciasuarez@gmail.com) and more generally by the Perl 5
+Porters (perl5-porters@perl.org), as part of the Perl core.
 
 =head1 BUGS
 
