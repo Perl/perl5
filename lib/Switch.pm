@@ -115,7 +115,8 @@ sub filter_blocks
 			}
 			next component;
 		}
-		if ($source =~ m/\G\s*($pod_or_DATA)/gc) {
+		if ($source =~ m/(\G\s*$pod_or_DATA)/gc) {
+			$text .= $1;
 			next component;
 		}
 		@pos = Text::Balanced::_match_variable(\$source,qr/\s*/);
