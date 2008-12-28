@@ -509,6 +509,17 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 }
 
 void
+Perl_save_adelete(pTHX_ AV *av, I32 key)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_ADELETE;
+
+    SvREFCNT_inc_void(av);
+    save_pushi32ptr(key, av, SAVEt_ADELETE);
+}
+
+void
 Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     dVAR;
@@ -863,6 +874,13 @@ Perl_leave_scope(pTHX_ I32 base)
 	    (void)hv_delete(hv, (char*)ptr, i, G_DISCARD);
 	    SvREFCNT_dec(hv);
 	    Safefree(ptr);
+	    break;
+	case SAVEt_ADELETE:
+	    ptr = SSPOPPTR;
+	    av = MUTABLE_AV(ptr);
+	    i = SSPOPINT;
+	    (void)av_delete(av, i, G_DISCARD);
+	    SvREFCNT_dec(av);
 	    break;
 	case SAVEt_DESTRUCTOR_X:
 	    ptr = SSPOPPTR;

@@ -54,6 +54,7 @@
 #define SAVEt_COMPILE_WARNINGS	43
 #define SAVEt_STACK_CXPOS	44
 #define SAVEt_PARSER		45
+#define SAVEt_ADELETE		46
 
 #define SAVEf_SETMAGIC		1
 
@@ -142,6 +143,8 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
 #define SAVEDELETE(h,k,l) \
 	  save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
+#define SAVEADELETE(a,k) \
+	  save_adelete(MUTABLE_AV(a), (I32)(k))
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
 
