@@ -37,9 +37,9 @@ Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
     SV **data;
     PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA;
 
-    data = Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
-			  which->name, which->length, which->kflags,
-			  HV_FETCH_JUST_SV, NULL, which->hash);
+    data = (SV **)Perl_hv_common(aTHX_ MUTABLE_HV(smeta->mro_linear_dfs), NULL,
+				which->name, which->length, which->kflags,
+				HV_FETCH_JUST_SV, NULL, which->hash);
     if (!data)
 	return NULL;
 
@@ -105,8 +105,8 @@ Perl_mro_get_from_name(pTHX_ SV *name) {
 
     PERL_ARGS_ASSERT_MRO_GET_FROM_NAME;
 
-    data = Perl_hv_common(aTHX_ PL_registered_mros, name, NULL, 0, 0,
-			  HV_FETCH_JUST_SV, NULL, 0);
+    data = (SV **)Perl_hv_common(aTHX_ PL_registered_mros, name, NULL, 0, 0,
+		      		HV_FETCH_JUST_SV, NULL, 0);
     if (!data)
 	return NULL;
     assert(SvTYPE(*data) == SVt_IV);
