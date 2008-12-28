@@ -1362,3 +1362,6 @@ foo(\h)bar	foo\tbar	y	$1	\t
 /\A(?(?=db2)db2|\D+)(?<!processed)\.csv\z/xms	sql_processed.csv	n	-	-
 /\N{U+0100}/	\x{100}	y	$&	\x{100}	# Bug #59328
 [\s][\S]	\x{a0}\x{a0}	nT	-	-	# TODO Unicode complements should not match same character
+
+# was generating malformed utf8
+'[\x{100}\xff]'i	\x{ff}	y	$&	\x{ff}
