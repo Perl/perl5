@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 123;
+plan tests => 183;
 
 my $list_assignment_supported = 1;
 
@@ -96,6 +96,58 @@ ok(!defined $a[0]);
 
 @a = ('a', 'b', 'c');
 {
+    local($a[4]) = 'x';
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+}
+is(scalar(@a), 3);
+ok(!exists $a[3]);
+ok(!exists $a[4]);
+
+@a = ('a', 'b', 'c');
+{
+    local($a[5]) = 'z';
+    $a[4] = 'y';
+    ok(!defined $a[3]);
+    is($a[4], 'y');
+    is($a[5], 'z');
+}
+is(scalar(@a), 5);
+ok(!defined $a[3]);
+is($a[4], 'y');
+ok(!exists $a[5]);
+
+@a = ('a', 'b', 'c');
+{
+    local(@a[4,6]) = ('x', 'z');
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+    ok(!defined $a[5]);
+    is($a[6], 'z');
+}
+is(scalar(@a), 3);
+ok(!exists $a[3]);
+ok(!exists $a[4]);
+ok(!exists $a[5]);
+ok(!exists $a[6]);
+
+@a = ('a', 'b', 'c');
+{
+    local(@a[4,6]) = ('x', 'z');
+    $a[5] = 'y';
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+    is($a[5], 'y');
+    is($a[6], 'z');
+}
+is(scalar(@a), 6);
+ok(!defined $a[3]);
+ok(!defined $a[4]);
+is($a[5], 'y');
+ok(!exists $a[6]);
+
+@a = ('a', 'b', 'c');
+{
     local($a[1]) = "X";
     shift @a;
 }
@@ -145,6 +197,8 @@ is($m, 5);
     sub TIEARRAY { bless [], $_[0] }
     sub STORE { print "# STORE [@_]\n"; $_[0]->[$_[1]] = $_[2] }
     sub FETCH { my $v = $_[0]->[$_[1]]; print "# FETCH [@_=$v]\n"; $v }
+    sub EXISTS { print "# EXISTS [@_]\n"; exists $_[0]->[$_[1]]; }
+    sub DELETE { print "# DELETE [@_]\n"; delete $_[0]->[$_[1]]; }
     sub CLEAR { print "# CLEAR [@_]\n"; @{$_[0]} = (); }
     sub FETCHSIZE { scalar(@{$_[0]}) }
     sub SHIFT { shift (@{$_[0]}) }
@@ -169,6 +223,60 @@ ok(!defined $a[0]);
     is("@a", $d);
 }
 
+# local() should preserve the existenceness of tied array elements
+@a = ('a', 'b', 'c');
+{
+    local($a[4]) = 'x';
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+}
+is(scalar(@a), 3);
+ok(!exists $a[3]);
+ok(!exists $a[4]);
+
+@a = ('a', 'b', 'c');
+{
+    local($a[5]) = 'z';
+    $a[4] = 'y';
+    ok(!defined $a[3]);
+    is($a[4], 'y');
+    is($a[5], 'z');
+}
+is(scalar(@a), 5);
+ok(!defined $a[3]);
+is($a[4], 'y');
+ok(!exists $a[5]);
+
+@a = ('a', 'b', 'c');
+{
+    local(@a[4,6]) = ('x', 'z');
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+    ok(!defined $a[5]);
+    is($a[6], 'z');
+}
+is(scalar(@a), 3);
+ok(!exists $a[3]);
+ok(!exists $a[4]);
+ok(!exists $a[5]);
+ok(!exists $a[6]);
+
+@a = ('a', 'b', 'c');
+{
+    local(@a[4,6]) = ('x', 'z');
+    $a[5] = 'y';
+    ok(!defined $a[3]);
+    is($a[4], 'x');
+    is($a[5], 'y');
+    is($a[6], 'z');
+}
+is(scalar(@a), 6);
+ok(!defined $a[3]);
+ok(!defined $a[4]);
+is($a[5], 'y');
+ok(!exists $a[6]);
+
+# see if localization works on tied hashes
 {
     package TH;
     sub TIEHASH { bless {}, $_[0] }
@@ -181,7 +289,6 @@ ok(!defined $a[0]);
     sub NEXTKEY { print "# NEXTKEY [@_]\n"; each %{$_[0]} }
 }
 
-# see if localization works on tied hashes
 tie %h, 'TH';
 %h = ('a' => 1, 'b' => 2, 'c' => 3);
 

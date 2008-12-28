@@ -3912,7 +3912,17 @@ PP(pp_aslice)
 
     if (SvTYPE(av) == SVt_PVAV) {
 	const I32 arybase = CopARYBASE_get(PL_curcop);
-	if (lval && PL_op->op_private & OPpLVAL_INTRO) {
+	const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
+	bool can_preserve = FALSE;
+
+	if (localizing) {
+	    MAGIC *mg;
+	    HV *stash;
+
+	    can_preserve = SvCANEXISTDELETE(av);
+	}
+
+	if (lval && localizing) {
 	    register SV **svp;
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
@@ -3923,18 +3933,32 @@ PP(pp_aslice)
 	    if (max > AvMAX(av))
 		av_extend(av, max);
 	}
+
 	while (++MARK <= SP) {
 	    register SV **svp;
 	    I32 elem = SvIV(*MARK);
+	    bool preeminent = TRUE;
 
 	    if (elem > 0)
 		elem -= arybase;
+	    if (localizing && can_preserve) {
+		/* If we can determine whether the element exist,
+		 * Try to preserve the existenceness of a tied array
+		 * element by using EXISTS and DELETE if possible.
+		 * Fallback to FETCH and STORE otherwise. */
+		preeminent = av_exists(av, elem);
+	    }
+
 	    svp = av_fetch(av, elem, lval);
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
 		    DIE(aTHX_ PL_no_aelem, elem);
-		if (PL_op->op_private & OPpLVAL_INTRO)
-		    save_aelem(av, elem, svp);
+		if (localizing) {
+		    if (preeminent)
+			save_aelem(av, elem, svp);
+		    else
+			SAVEADELETE(av, elem);
+		}
 	    }
 	    *MARK = svp ? *svp : &PL_sv_undef;
 	}

@@ -2913,6 +2913,8 @@ PP(pp_aelem)
     AV *const av = MUTABLE_AV(POPs);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
+    const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
+    bool preeminent = TRUE;
     SV *sv;
 
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
@@ -2923,6 +2925,19 @@ PP(pp_aelem)
 	elem -= CopARYBASE_get(PL_curcop);
     if (SvTYPE(av) != SVt_PVAV)
 	RETPUSHUNDEF;
+
+    if (localizing) {
+	MAGIC *mg;
+	HV *stash;
+
+	/* If we can determine whether the element exist,
+	 * Try to preserve the existenceness of a tied array
+	 * element by using EXISTS and DELETE if possible.
+	 * Fallback to FETCH and STORE otherwise. */
+	if (SvCANEXISTDELETE(av))
+	    preeminent = av_exists(av, elem);
+    }
+
     svp = av_fetch(av, elem, lval && !defer);
     if (lval) {
 #ifdef PERL_MALLOC_WRAP
@@ -2952,8 +2967,12 @@ PP(pp_aelem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    save_aelem(av, elem, svp);
+	if (localizing) {
+	    if (preeminent)
+		save_aelem(av, elem, svp);
+	    else
+		SAVEADELETE(av, elem);
+	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }
