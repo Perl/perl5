@@ -72,15 +72,9 @@ sub is_block
 	return !$ishash;
 }
 
-
-my $EOP = qr/\n|\Z/;
-my $CUT = qr/\n=cut.*$EOP/;
-my $pod_or_DATA = qr/ ^=(?:head[1-4]|item) .*? $CUT
-                    | ^=pod .*? $CUT
-                    | ^=for .*? $EOP
-                    | ^=begin \s* (\S+) .*? \n=end \s* \1 .*? $EOP
-                    | ^__(DATA|END)__\n.*
-                    /smx;
+my $pod_or_DATA = qr/ ^=[A-Za-z] .*? ^=cut (?![A-Za-z]) .*? $
+		    | ^__(DATA|END)__\n.*
+		    /smx;
 
 my $casecounter = 1;
 sub filter_blocks
