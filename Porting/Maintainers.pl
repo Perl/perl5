@@ -944,7 +944,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Switch.pm lib/Switch],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "blead",
 		},
 
 	'Sys::Syslog' =>
