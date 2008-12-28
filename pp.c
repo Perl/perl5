@@ -4143,31 +4143,28 @@ PP(pp_hslice)
     register HV * const hv = MUTABLE_HV(POPs);
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
-    bool other_magic = FALSE;
+    bool can_preserve = FALSE;
 
     if (localizing) {
         MAGIC *mg;
         HV *stash;
 
-        other_magic = mg_find((const SV *)hv, PERL_MAGIC_env) ||
-            ((mg = mg_find((const SV *)hv, PERL_MAGIC_tied))
-             /* Try to preserve the existenceness of a tied hash
-              * element by using EXISTS and DELETE if possible.
-              * Fallback to FETCH and STORE otherwise */
-             && (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(hv), mg))))
-             && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
-             && gv_fetchmethod_autoload(stash, "DELETE", TRUE));
+	if (SvCANEXISTDELETE(hv) || mg_find((const SV *)hv, PERL_MAGIC_env))
+	    can_preserve = TRUE;
     }
 
     while (++MARK <= SP) {
         SV * const keysv = *MARK;
         SV **svp;
         HE *he;
-        bool preeminent = FALSE;
+        bool preeminent = TRUE;
 
-        if (localizing) {
-            preeminent = SvRMAGICAL(hv) && !other_magic ? 1 :
-                hv_exists_ent(hv, keysv, 0);
+        if (localizing && can_preserve) {
+	    /* If we can determine whether the element exist,
+             * try to preserve the existenceness of a tied hash
+             * element by using EXISTS and DELETE if possible.
+             * Fallback to FETCH and STORE otherwise. */
+            preeminent = hv_exists_ent(hv, keysv, 0);
         }
 
         he = hv_fetch_ent(hv, keysv, lval, 0);

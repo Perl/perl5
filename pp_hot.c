@@ -1783,7 +1783,7 @@ PP(pp_helem)
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvSHARED_HASH(keysv) : 0;
-    I32 preeminent = 0;
+    bool preeminent = TRUE;
 
     if (SvTYPE(hv) != SVt_PVHV)
 	RETPUSHUNDEF;
@@ -1791,20 +1791,15 @@ PP(pp_helem)
     if (PL_op->op_private & OPpLVAL_INTRO) {
 	MAGIC *mg;
 	HV *stash;
-	/* does the element we're localizing already exist? */
-	preeminent = /* can we determine whether it exists? */
-	    (    !SvRMAGICAL(hv)
-		|| mg_find((const SV *)hv, PERL_MAGIC_env)
-		|| (     (mg = mg_find((const SV *)hv, PERL_MAGIC_tied))
-			/* Try to preserve the existenceness of a tied hash
-			* element by using EXISTS and DELETE if possible.
-			* Fallback to FETCH and STORE otherwise */
-		    && (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(hv), mg))))
-		    && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
-		    && gv_fetchmethod_autoload(stash, "DELETE", TRUE)
-		)
-	    ) ? hv_exists_ent(hv, keysv, 0) : 1;
+
+	/* If we can determine whether the element exist,
+	 * Try to preserve the existenceness of a tied hash
+	 * element by using EXISTS and DELETE if possible.
+	 * Fallback to FETCH and STORE otherwise. */
+	if (SvCANEXISTDELETE(hv) || mg_find((const SV *)hv, PERL_MAGIC_env))
+	    preeminent = hv_exists_ent(hv, keysv, 0);
     }
+
     he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
     svp = he ? &HeVAL(he) : NULL;
     if (lval) {

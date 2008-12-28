@@ -500,6 +500,15 @@ True if this op will be the return value of an lvalue subroutine
 =cut */
 #define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
 
+#define SvCANEXISTDELETE(sv) \
+ (!SvRMAGICAL(sv)            \
+  || ((mg = mg_find((const SV *) sv, PERL_MAGIC_tied))           \
+      && (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(sv), mg)))) \
+      && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)          \
+      && gv_fetchmethod_autoload(stash, "DELETE", TRUE)          \
+     )                       \
+  )
+
 /*
  * Local variables:
  * c-indentation-style: bsd
