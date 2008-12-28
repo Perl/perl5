@@ -450,7 +450,7 @@ common(params)
 	if ((svp = hv_fetchs(params, "val", 0)))
 	    val = *svp;
 	if ((svp = hv_fetchs(params, "hash", 0)))
-	    action = SvUV(*svp);
+	    hash = SvUV(*svp);
 
 	result = (HE *)hv_common(hv, keysv, key, klen, flags, action, val, hash);
 	if (!result) {
