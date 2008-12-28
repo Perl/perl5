@@ -378,8 +378,12 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
-	flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
+	if (SvIsCOW_shared_hash(keysv)) {
+	    flags = HVhek_KEYCANONICAL | (is_utf8 ? HVhek_UTF8 : 0);
+	} else {
+	    flags = 0;
+	}
     } else {
 	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
@@ -582,7 +586,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     }
 
-    if (is_utf8) {
+    if (is_utf8 & !(flags & HVhek_KEYCANONICAL)) {
 	char * const keysave = (char *)key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
