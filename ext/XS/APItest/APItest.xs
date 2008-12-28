@@ -455,6 +455,11 @@ common(params)
 	if ((svp = hv_fetchs(params, "hash_pv", 0))) {
 	    PERL_HASH(hash, key, klen);
 	}
+	if ((svp = hv_fetchs(params, "hash_sv", 0))) {
+	    STRLEN len;
+	    const char *const p = SvPV(keysv, len);
+	    PERL_HASH(hash, p, len);
+	}
 
 	result = (HE *)hv_common(hv, keysv, key, klen, flags, action, val, hash);
 	if (!result) {

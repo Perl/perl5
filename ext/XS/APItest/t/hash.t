@@ -156,17 +156,22 @@ if ($] > 5.009) {
     my $as_bytes = "\243";
     foreach my $key ('N', $as_bytes, $as_utf8, "\x{2623}") {
 	my $ord = ord $key;
-	foreach my $hash_pv (0, 1) {
-	    my %hash;
-	    is (XS::APItest::Hash::common({hv => \%hash, keypv => $key,
-					   val => $ord, hash_pv => $hash_pv,
-					   action =>
-					   XS::APItest::HV_FETCH_ISSTORE}),
-		$ord, "store $ord \$hash_pv = $hash_pv");
-	    is_deeply ([each %hash], [$key, $ord], "First key read is good");
-	    is_deeply ([each %hash], [], "No second key good");
+	foreach my $hash_it (0, 1) {
+	    foreach my $what (qw(pv sv)) {
+		my %hash;
+		is (XS::APItest::Hash::common({hv => \%hash,
+					       "key$what" => $key,
+					       val => $ord,
+					       "hash_$what" => $hash_it,
+					       action =>
+					       XS::APItest::HV_FETCH_ISSTORE}),
+		    $ord, "store $ord with $what \$hash_it = $hash_it");
+		is_deeply ([each %hash], [$key, $ord],
+			   "First key read is good");
+		is_deeply ([each %hash], [], "No second key good");
 
-	    is ($hash{$key}, $ord, "Direct hash read finds $ord");
+		is ($hash{$key}, $ord, "Direct hash read finds $ord");
+	    }
 	}
     }
 }
