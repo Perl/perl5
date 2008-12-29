@@ -177,7 +177,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "blead",
 		},
 
 	'bignum' =>
@@ -691,7 +691,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "blead",
 		},
 
 	'Module::Load' =>
@@ -912,7 +912,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[ext/Safe ext/Opcode/Safe.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "blead",
 		},
 
 	'SelfLoader' =>
