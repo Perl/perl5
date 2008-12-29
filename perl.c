@@ -462,6 +462,8 @@ perl_construct(pTHXx)
 #endif
 
     PL_registered_mros = newHV();
+    /* Start with 1 bucket, for DFS.  It's unlikely we'll need more.  */
+    HvMAX(PL_registered_mros) = 0;
 
     ENTER;
 }
