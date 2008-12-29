@@ -312,9 +312,14 @@ mro_get_mro(...)
     classname = ST(0);
     class_stash = gv_stashsv(classname, 0);
 
-    ST(0) = sv_2mortal(newSVpv(class_stash
-			       ? HvMROMETA(class_stash)->mro_which->name
-			       : "dfs", 0));
+    if (class_stash) {
+        const struct mro_alg *const meta = HvMROMETA(class_stash)->mro_which;
+ 	ST(0) = newSVpvn_flags(meta->name, meta->length,
+			       SVs_TEMP
+			       | ((meta->kflags & HVhek_UTF8) ? SVf_UTF8 : 0));
+    } else {
+      ST(0) = newSVpvn_flags("dfs", 3, SVs_TEMP);
+    }
     XSRETURN(1);
 
 void
