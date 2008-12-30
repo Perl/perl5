@@ -55,7 +55,9 @@ in this directory:
 
 1)	Copy the Perl source code onto your TARGET machine.
 2)	Execute sh Configure as normal and configure as required,
-	do not "make".
+	do not "make". Note that you should have C compiler on
+	the TARGET, because Configure depends on it (among other
+	essential *nix commands).
 3)	Copy the config.sh file that is generated to your BUILD
 	machine and place it in the Cross directory with the
 	filename config.sh-ARCH-OS.  For example,

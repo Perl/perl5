@@ -1659,7 +1659,7 @@ the particular platforms:
 
 README.ce
 
-=item Open Zaurus
+=item arm-linux (Open Zaurus, N770, etc)
 
 Cross/README
 
@@ -1688,19 +1688,13 @@ For some cross-compilation environments the Configure option
 C<-Dinstallprefix=...> might be handy, see L<Changing the installation
 directory>.
 
-About the cross-compilation support of Configure: what is known to
-work is running Configure in a cross-compilation environment and
-building the miniperl executable.  What is known not to work is
-building the perl executable because that would require building
-extensions: Dynaloader statically and File::Glob dynamically, for
-extensions one needs MakeMaker and MakeMaker is not yet
-cross-compilation aware, and neither is the main Makefile.
+About the cross-compilation support of Configure: it supports
+cross-compilation process up to building the miniperl executable.
+You should go this way if your platform is not supported for perl
+cross-compilation (i.e. it is not arm-linux, wince or another platform
+mentioned above).
 
-The cross-compilation setup of Configure has successfully been used in
-at least two Linux cross-compilation environments.  The setups were
-both such that the host system was Intel Linux with a gcc built for
-cross-compiling into ARM Linux, and there was a SSH connection to the
-target system.
+If this is your case, keep reading this section.
 
 To run Configure in cross-compilation mode the basic switch that
 has to be used is C<-Dusecrosscompile>.

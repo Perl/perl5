@@ -34,7 +34,6 @@ Cross/config.sh-arm-linux-n770	Cross-compilation
 Cross/generate_config_sh	Cross-compilation
 Cross/installperl.patch		Cross-compilation
 Cross/Makefile		Cross-compilation
-Cross/Makefile-cross-SH	Cross-compilation
 Cross/Makefile.SH.patch	Cross-compilation
 Cross/README		Cross-compilation
 Cross/README.new	Cross-compilation

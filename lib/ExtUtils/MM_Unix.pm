@@ -146,7 +146,7 @@ sub c_o {
 	$command -S $flags \$*.c
 
 .c\$(OBJ_EXT):
-	$command $flags \$*.c
+	$command $flags -o \$*\$(OBJ_EXT) \$*.c
 
 .cpp\$(OBJ_EXT):
 	$command $flags \$*.cpp
@@ -2585,7 +2585,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
     my $newer_than_target = $Is{VMS} ? '$(MMS$SOURCE_LIST)' : '$?';
     my $mpl_args = join " ", map qq["$_"], @ARGV;
 
-    $m .= sprintf <<'MAKE_FRAG', $newer_than_target, $mpl_args;
+    $m .= sprintf <<'MAKE_FRAG', $newer_than_target, $mpl_args unless defined $Cross::platform;
 # We take a very conservative approach here, but it's worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
 $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
@@ -2790,19 +2790,30 @@ sub perldepend {
     my($self) = shift;
     my(@m);
 
+    my $configsh = "config.sh";
     my $make_config = $self->cd('$(PERL_SRC)', '$(MAKE) lib/Config.pm');
 
-    push @m, sprintf <<'MAKE_FRAG', $make_config if $self->{PERL_SRC};
+    if (defined $Cross::platform) {
+	# in cross-compiling the dependant config.sh contains cross-identifier
+	# in its name, yet Config.pm is located in ./xlib/xxxx/
+	$make_config = $self->cd('$(PERL_SRC)', "\$(MAKE) xlib/$Cross::platform/Config.pm");
+	$configsh = "config-$Cross::platform.sh";
+    }
+
+    if ($self->{PERL_SRC}) {
+	push @m, "CONFIGSH = \$(PERL_SRC)/$configsh\n";
+	push @m, sprintf <<'MAKE_FRAG', $make_config;
 # Check for unpropogated config.sh changes. Should never happen.
 # We do NOT just update config.h because that is not sufficient.
 # An out of date config.h is not fatal but complains loudly!
-$(PERL_INC)/config.h: $(PERL_SRC)/config.sh
-	-$(NOECHO) $(ECHO) "Warning: $(PERL_INC)/config.h out of date with $(PERL_SRC)/config.sh"; false
+$(PERL_INC)/config.h: $(CONFIGSH)
+	-$(NOECHO) $(ECHO) "Warning: $(PERL_INC)/config.h out of date with $(CONFIGSH)"; false
 
-$(PERL_ARCHLIB)/Config.pm: $(PERL_SRC)/config.sh
-	$(NOECHO) $(ECHO) "Warning: $(PERL_ARCHLIB)/Config.pm may be out of date with $(PERL_SRC)/config.sh"
+$(PERL_ARCHLIB)/Config.pm: $(CONFIGSH)
+	$(NOECHO) $(ECHO) "Warning: $(PERL_ARCHLIB)/Config.pm may be out of date with $(CONFIGSH)"
 	%s
 MAKE_FRAG
+    }
 
     return join "", @m unless $self->needs_linking;
 
@@ -3732,7 +3743,7 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
     '
 .xs$(OBJ_EXT):
 	$(XSUBPPRUN) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) -o $*$(OBJ_EXT) $*.c
 ';
 }
 

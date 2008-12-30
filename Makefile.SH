@@ -13,11 +13,23 @@ esac
 case $CROSS_NAME in
 '')
 	Makefile=Makefile
+	make_ext=make_ext
+	utilities="utilities"
+	translators="translators"
+	MCROSS=""
 	;;
 *)
 	# if cross-compilation, the Makefile named accordingly
 	Makefile=Makefile-cross-$CROSS_NAME
-	. Cross/config-${CROSS_NAME}.sh
+	make_ext=make_ext_cross
+
+	# MCROSS is either empty or -MCross so proper TARGET machine config.pm
+	# will be activated
+	MCROSS="-MCross"
+	# cross-compiling of utilities (in utils), translators (in x2p) not yet here
+	utilities=""
+	translators=""
+	. config-${CROSS_NAME}.sh
 	;;
 esac
 
@@ -289,6 +301,7 @@ RUN = $run
 # These variables may need to be manually set for non-Unix systems.
 AR = $full_ar
 HOST_EXE_EXT = 
+HOST_OBJ_EXT = .o
 EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o
@@ -303,7 +316,7 @@ DYNALOADER = DynaLoader\$(OBJ_EXT)
 
 libs = $perllibs $cryptlib
 
-public = perl\$(EXE_EXT) $suidperl utilities translators
+public = perl\$(EXE_EXT) $suidperl $utilities $translators
 
 shellflags = $shellflags
 
@@ -376,6 +389,10 @@ CONFIGPM = lib/Config.pm lib/Config_heavy.pl
 CONFIGPOD = lib/Config.pod
 
 CONFIGH = config.h
+
+$(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+	$(LDLIBPTH) $(RUN) ./miniperl -Ilib configpm
+
 !NO!SUBS!
 	;;
 *)
@@ -390,11 +407,19 @@ CONFIGPM = xlib/\$(CROSS_NAME)/Config.pm
 CONFIGPOD = xlib/\$(CROSS_NAME)/Config.pod
 CONFIGH = xconfig.h
 
-xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
-	CONFIG_SH=Cross/config-\$(CROSS_NAME).sh CONFIG_H=xconfig.h \$(SHELL) config_h.SH
+xconfig.h: config_h.SH config-\$(CROSS_NAME).sh
+	CONFIG_SH=config-\$(CROSS_NAME).sh CONFIG_H=xconfig.h \$(SHELL) config_h.SH
 	#TODO \$(LDLIBPTH) ./miniperl -Ilib -MCross=\$(CROSS_NAME) config_h.PL "INST_VER=\$(INST_VER)" "CORE_DIR=\$(CROSS_LIB)" "CONFIG_H=xconfig.h"
 	cp xconfig.h \$(CROSS_LIB)/
 	cp xconfig.h \$(CROSS_LIB)/config.h
+
+\$(CONFIGPM): config.sh miniperl configpm Porting/Glossary
+	\$(LDLIBPTH) ./miniperl -Ilib configpm --cross=\$(CROSS_NAME)
+	cp *.h \$(CROSS_LIB)/
+	cp ext/re/re.pm \$(CROSS_LIB)/
+
+\$(CONFIGPOD): config.sh miniperl\$(EXE_EXT) configpm Porting/Glossary
+	\$(LDLIBPTH) \$(RUN) ./miniperl -Ilib configpm --cross=\$(CROSS_NAME)
 
 !GROK!THIS!
 	;;
@@ -576,8 +601,8 @@ globals\$(OBJ_EXT): uudmap.h
 uudmap.h: generate_uudmap\$(HOST_EXE_EXT)
 	\$(RUN) ./generate_uudmap\$(HOST_EXE_EXT) >uudmap.h
 
-generate_uudmap\$(HOST_EXE_EXT): generate_uudmap\$(OBJ_EXT)
-	\$(CC) -o generate_uudmap\$(EXE_EXT) \$(LDFLAGS) generate_uudmap\$(OBJ_EXT) \$(libs)
+generate_uudmap\$(HOST_EXE_EXT): generate_uudmap\$(HOST_OBJ_EXT)
+	\$(CC) -o generate_uudmap\$(HOST_EXE_EXT) \$(LDFLAGS) generate_uudmap\$(HOST_OBJ_EXT) \$(libs)
 
 !GROK!THIS!
 $spitshell >>$Makefile <<'!NO!SUBS!'
@@ -585,7 +610,7 @@ miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
-	sh writemain $(DYNALOADER) $(static_ext) > perlmain.c
+	sh writemain DynaLoader $(static_ext) > perlmain.c
 
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -801,18 +826,18 @@ miniperl$(EXE_EXT): $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 
 perl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	-@rm -f miniperl.xok
-	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX)$(EXE_EXT) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # Purify/Quantify Perls.
 
 pureperl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl$(EXE_EXT) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 purecovperl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purecov $(CC) -o purecovperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) purecov $(CC) -o purecovperl$(EXE_EXT) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 quantperl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl$(EXE_EXT) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # Valgrind perl (currently Linux only)
 
@@ -944,28 +969,35 @@ makeppport: miniperl\$(EXE_EXT) \$(CONFIGPM)
 !GROK!THIS!
 ;;
 *)
-$spitshell >>$Makefile <<'!NO!SUBS!'
+$spitshell >>$Makefile <<!GROK!THIS!
 .PHONY: makeppport
-makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport
+makeppport: miniperl\$(HOST_EXE_EXT) \$(CONFIGPM)
+	\$(LDLIBPTH) \$(RUN) ./miniperl\$(HOST_EXE_EXT) $MCROSS -Ilib mkppport
 
-!NO!SUBS!
+!GROK!THIS!
 ;;
 esac
 
-$spitshell >>$Makefile <<'!NO!SUBS!'
+$spitshell >>$Makefile <<!GROK!THIS!
+
+lib/lib.pm:	miniperl\$(EXE_EXT) \$(CONFIGPM)
+	@-rm -f \$@
+	\$(LDLIBPTH) \$(RUN) ./miniperl -Ilib $MCROSS lib/lib_pm.PL
 
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 # We need to autosplit in two steps because VOS can't handle so many args
 #
 .PHONY: preplibrary
-preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
+preplibrary: miniperl\$(EXE_EXT) \$(CONFIGPM) lib/lib.pm \$(PREPLIBRARY_LIBPERL)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
-	$(MAKE) lib/re.pm
+	\$(LDLIBPTH) \$(RUN) ./miniperl -Ilib $MCROSS -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules(\$\$_) if /\.pm\$\$/}}, "lib")'
+	\$(MAKE) lib/re.pm
 
+!GROK!THIS!
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
 $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) $(RUN) ./miniperl -Ilib configpm
 
@@ -984,10 +1016,6 @@ $(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
 
 x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
-
-lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
-	@-rm -f $@
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib lib/lib_pm.PL
 
 unidatafiles $(unidatafiles): uni.data
 
@@ -1148,18 +1176,22 @@ manicheck:	FORCE
 #
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
-$(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+!GROK!THIS!
 
-d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+$spitshell >>$Makefile <<!GROK!THIS!
+\$(DYNALOADER):	miniperl preplibrary FORCE
+	@\$(LDLIBPTH) sh ext/util/$make_ext \$(STATIC) \$@ MAKE=\$(MAKE) LIBPERL_A=\$(LIBPERL)
 
-s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+d_dummy \$(dynamic_ext):	miniperl preplibrary makeppport \$(DYNALOADER) FORCE
+	@\$(LDLIBPTH) sh ext/util/$make_ext dynamic \$@ MAKE=\$(MAKE) LIBPERL_A=\$(LIBPERL)
 
-n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
-!NO!SUBS!
+s_dummy \$(static_ext):	miniperl preplibrary makeppport \$(DYNALOADER) FORCE
+	@\$(LDLIBPTH) sh ext/util/$make_ext \$(STATIC) \$@ MAKE=\$(MAKE) LIBPERL_A=\$(LIBPERL)
+
+n_dummy \$(nonxs_ext):	miniperl preplibrary FORCE
+	@\$(LDLIBPTH) sh ext/util/$make_ext nonxs \$@ MAKE=\$(MAKE) LIBPERL_A=\$(LIBPERL)
+
+!GROK!THIS!
 
 $spitshell >>$Makefile <<EOF
 $extra_dep

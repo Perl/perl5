@@ -11,15 +11,15 @@ extra=""
 
 case $PERL_CONFIG_SH in
 '')
-	if test -f Cross/config-arm.sh; then TOP=.;
-	elif test -f ../Cross/config-arm.sh; then TOP=..;
-	elif test -f ../../Cross/config-arm.sh; then TOP=../..;
-	elif test -f ../../../Cross/config-arm.sh; then TOP=../../..;
-	elif test -f ../../../../Cross/config-arm.sh; then TOP=../../../..;
+	if test -f ./config-arm.sh; then TOP=.;
+	elif test -f ../config-arm.sh; then TOP=..;
+	elif test -f ../../config-arm.sh; then TOP=../..;
+	elif test -f ../../../config-arm.sh; then TOP=../../..;
+	elif test -f ../../../../config-arm.sh; then TOP=../../../..;
 	else
 		echo "Can't find config-arm.sh."; exit 1
 	fi
-	. $TOP/Cross/config-arm.sh
+	. $TOP/config-arm.sh
 	;;
 esac
 
@@ -152,6 +152,6 @@ fi
     echo "$CROSSCC -c -DUSE_CROSS_COMPILE -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
     eval "$also "'"$CROSSCC -DUSE_CROSS_COMPILE -DPERL_CORE -c $ccflags $stdflags $optimize $warn $extra"'
 
-    . $TOP/Cross/config-arm.sh
+    . $TOP/config-arm.sh
 
 done

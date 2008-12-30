@@ -1,12 +1,19 @@
 # this is a build script for ARM-linux cross-compiling.
-# it builds miniperl on HOST and then perl for TARGET
-# this approach is like Perl-CE cross-compiling, and allows
+#
+# Cross-compiling SDK could be downloaded from the URL
+#   http://www.codesourcery.com/gnu_toolchains/arm
+# or alternatively from
+#   http://www.handhelds.org/download/projects/toolchain/
+#
+# SDK also could be downloaded from www.maemo.org, somehow (how - TBD)
+#
+# Cross-compile process similar to Perl-CE cross-compiling, and allows
 # for full TARGET perl (as opposed to renamed miniperl)
-
-# to skip Configure/build for HOST miniperl, pass "noconf" argument to this script
-
+#
 # some trick is different, however - the file extension for objects files
 # are choosen to be .${CROSS_NAME}, .armo in our case
+
+# to skip Configure/build for HOST miniperl, pass "noconf" argument to this script
 
 # note how invoked Makefile.PL for cross-compilation:
 #   miniperl -MCross Makefile.PL
@@ -28,7 +35,8 @@ CROSSCC=${CCPREF}gcc
 export CROSSCC
 export CROSS_NAME
 
-cp config.sh-arm-linux-n770 config-${CROSS_NAME}.sh
+# (re-)building this config-xxxx.sh is TBD
+cp config.sh-arm-linux-n770 ../config-${CROSS_NAME}.sh
 
 # following should be done better:
 cd ..
@@ -38,50 +46,43 @@ if [[ "x$1" != xnoconf* ]] ; then
 CROSS_NAME= ./Configure -des -D prefix=./dummy -Dusedevel
 make miniperl
 make uudmap.h
-# fake uudmap, which should be on HOST
-# TODO - all host utilities should be clearly stated and not built for TARGET
-cp generate_uudmap generate_uudmap.${CROSS_NAME}
 fi
-
-#?? cd Cross
 
 # do the rest for TARGET
 $CROSSCC --version
 
-# call make thusly so it will crosscompile...
+# call make this way so it will crosscompile...
 XCOREDIR=xlib/$CROSS_NAME/CORE
-PERL_CONFIG_SH=Cross/config-${CROSS_NAME}.sh
-
-#?? . $PERL_CONFIG_SH 
+PERL_CONFIG_SH=config-${CROSS_NAME}.sh
 
 # make cflags do cross-compile work (now its hackish, will be improved!)
 rm cflags-cross-$CROSS_NAME
 cp Cross/cflags-cross-$CROSS_NAME .
 rm Makefile-cross-$CROSS_NAME
 CROSS_NAME=$CROSS_NAME sh Makefile.SH
-cp Cross/Makefile-cross-$CROSS_NAME .
 
 mkdir xlib
 mkdir xlib/$CROSS_NAME
 mkdir ${XCOREDIR}
 
-#??OBJ_EXT=.${CROSS_NAME}o
-# TODO these -- AR=${CCPREF}ar LD=${CCPREF}ld
 cmd="make -f Makefile-cross-$CROSS_NAME xconfig.h"
 echo "running $cmd"
-$cmd
+$cmd || exit
 
+
+#cmd="make -f Makefile-cross-$CROSS_NAME DynaLoader.${CROSS_NAME}o  OBJ_EXT=.${CROSS_NAME}o EXE_EXT=.$CROSS_NAME LIB_EXT=.${CROSS_NAME}a  AR=${CCPREF}ar LD=${CCPREF}ld"
+#echo "running $cmd"
+#$cmd || exit
+#
+
+cmd="make -f Makefile-cross-$CROSS_NAME all"
 echo "running $cmd"
-cmd="make -f Makefile-cross-$CROSS_NAME libperl.${CROSS_NAME}a  OBJ_EXT=.${CROSS_NAME}o EXE_EXT=.$CROSS_NAME LIB_EXT=.${CROSS_NAME}a  AR=${CCPREF}ar LD=${CCPREF}ld"
-$cmd
+$cmd || exit
 
-exit
-
-cmd="make -f Makefile-cross-$CROSS_NAME DynaLoader.${CROSS_NAME}o  OBJ_EXT=.${CROSS_NAME}o EXE_EXT=.$CROSS_NAME LIB_EXT=.${CROSS_NAME}a  AR=${CCPREF}ar LD=${CCPREF}ld"
-echo "running $cmd"
-$cmd
-
-cmd="make -f Makefile-cross-$CROSS_NAME perl.${CROSS_NAME}"
-echo "running $cmd"
-$cmd
-
+# extensions not currently built here:
+#  DB_File
+#  GDBM_File
+#  NDBM_File
+#  ODBM_File
+#  SDBM_File
+#

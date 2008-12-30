@@ -1,1 +1,3 @@
-Provide a better sandbox for building additional XS libraries.
+* move logic from ./Cross/build-arm-n770-sh to Makefile
+* construct automatic generation process of configs like ./Cross/config.sh-arm-linux-n770
+* generate object files in './xlib/xxx/' subdir?

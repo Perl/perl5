@@ -8,17 +8,114 @@ README.new - Cross-compilation for linux
 
 =head1 DESCRIPTION
 
-This is second approach to linux cross-compilation, which should allow
-building full perl and entensions for target platform. Cross-compilation
-for linux uses similar approach and shares the same files as
-cross-compilation for WinCE.
+This approach to linux cross-compilation allows building full perl and
+extensions for target platform. Cross-compilation for linux uses similar
+approach as cross-compilation for WinCE, and there are many similarities
+within generated files.
 
-We refer to HOST as the platform where the build is performed, and to
-TARGET as where final executables will run.
+We refer as HOST the platform where the build is performed, and the TARGET
+is where final executables will run.
 
-=head2 Basic ideas
+=head2 How to cross-compile
 
-=head3 common
+Look into the shell script ./Cross/build-arm-n770-sh, modify it and run.
+You should only modify few parameters: path to cross-compiler GCC and may
+be your cross-compilation identifier, which should be named "properly"
+(no minuses in its name, better name it "arm" or "scale" but not "arm-1").
+
+All should be smooth and you'll get your binaries for TARGET. Following below
+is the explanation of the build process, which is not even needed if you
+have no errors.
+
+=head2 Build process
+
+During cross-compilation following stages occur:
+
+=over 1
+
+=item C<miniperl> for HOST by running:
+
+
+=over 2
+
+=item C<Configure> for HOST
+
+=item generation of C<Makefile>
+
+=item building C<miniperl> using C<Makefile>
+
+=back
+
+=item generation of C<Makefile-cross-XXX>
+
+=item C<Config.pm> for TARGET
+
+=item C<miniperl> for TARGET
+
+=item C<perl> for TARGET
+
+=item extensions for TARGET
+
+=back
+
+=head3 Configure, Makefile
+
+In order to build C<miniperl> for HOST, the usual C<Configure> is run, which
+will generate C<Makefile> by running C<Makefile.SH> - this is no different
+compared to standard building process.
+
+=head3 Makefile-cross-XXXX
+
+To create Makefile for cross-compilation the script Makefile.SH is
+executed with variable CROSS_NAME set to the name of cross-compilation.
+
+=head3 miniperl
+
+The C<miniperl> executable is intended to run on HOST, and it
+will facilitate the remaining build process; binaries built after it are
+foreign (TARGET) and should not run locally (HOST).
+
+=head3 Config.pm
+
+After C<miniperl> is built, C<configpm --cross=XXX> is invoked to create an
+appropriate C<Config.pm> for TARGET and its corresponding
+C<Cross.pm>.
+
+File C<Cross.pm> is dead simple: for given cross-architecture places in @INC
+a path where perl modules are, and right C<Config.pm> in that place.
+
+C<miniperl> will not have workable C<Config.pm> of HOST within reach;
+it rather will use C<Config.pm> for TARGET from the cross-compilation directories.
+In fact, Config.pm for HOST during the cross-compilation does nothing except
+signalling the error.
+
+  # following command is okay:
+  ./miniperl -Ilib -MCross -MConfig -e 1
+  # following command will report an error
+  ./miniperl -Ilib -MConfig -e 1
+
+C<miniperl -MCross -MConfig -we 1> should run okay, and it will provide a
+correct C<Config.pm> for further compilations.
+
+During extensions build phase, the script C<./ext/util/make_ext_cross> is
+invoked.  It will invoke C<Makefile.PL> with C<-MCross> so to enable
+cross-compilation.
+
+=head2 Tools & SDK
+
+To compile, you need native compiler (to build miniperl) and cross-compiler
+to build the entire perl.
+
+Look at the sample script C<build-arm-n770-sh> and its comments as an
+example how the cross-compiling environment could be established.
+
+=over 4
+
+=item * TODO
+
+=back
+
+=head1 miscellaneous
 
 Unlike WinCE, output files from GCC cross-compiler are produced in the same
 directory where C files are. All TARGET binaries have different extensions
@@ -35,54 +132,6 @@ others:
   libperl.arma
 
 (this approach may be reconsidered, however.)
-
-=head3 build process
-
-C<miniperl> is built. This executable is intended to run on HOST, and it
-will facilitate the remaining build process; all binaries built after it are
-foreign (TARGET) and should not run locally (HOST).
-
-Unlike HOST build, miniperl will not have C<Config.pm> of HOST within reach;
-it rather will use the C<Config.pm> from the cross-compilation directories.
-In fact, if the build process does have Config.pm within reach, this is only
-an indication of a mistake somewhere in the middle.
-
-  # following command is okay:
-  ./miniperl -Ilib -MCross -MConfig -e 1
-  # following command should cluck, and it is bad if it does not:
-  ./miniperl -Ilib -MConfig -e 1
-
-After C<miniperl> is built, C<configpm> is invoked to create an
-appropriate C<Config.pm> in the right place and its corresponding
-C<Cross.pm>.
-
-File C<Cross.pm> is dead simple: for given cross-architecture places in @INC
-a path where perl modules are, and right C<Config.pm> in that place.
-
-That said, C<miniperl -Ilib -MConfig -we 1> should report an error, because
-it cannot find C<Config.pm>. If it does not give an error, a wrong C<Config.pm>
-is substituted, and resulting binaries will be a mess.
-
-C<miniperl -MCross -MConfig -we 1> should run okay, and it will provide a
-correct C<Config.pm> for further compilations.
-
-During extensions build phase, the script C<./ext/util/make_ext_cross> is
-invoked.
-
-All invocations of C<Makefile.PL> are provided with C<-MCross> so to enable
-cross-compilation.
-
-=head2 BUILD
-
-=head3 Tools & SDK
-
-To compile, you need the following:
-
-=over 4
-
-=item * TODO
-
-=back
 
 =head1 Things to be done
 

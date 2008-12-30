@@ -1,6 +1,6 @@
 # Explicitly avoid including '.' in @INC; autoloader gets confused since it
 # can find POSIX.pm, but can't find autosplit.ix.
-BEGIN { @INC = '../../lib';}
+BEGIN { @INC = '../../lib' unless defined $Cross::platform;}
 #
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
