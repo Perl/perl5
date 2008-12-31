@@ -29,7 +29,7 @@ elif [ -d ".git" ]; then
 	extra_info="git_commit_date='$commit_created'"
 	if [ -n "$branch" ] && [ -n "$remote" ]; then
 		unpushed_commit_list=`git cherry $remote/$branch | awk 'BEGIN{ORS=","} /\+/ {print $2}' | sed -e 's/,$//'`
-		unpushed_commits=`git cherry $remote/$branch | awk 'BEGIN{ORS="\t\\\n"} /\+/ {print ",\"" $2 "\""}'`
+		unpushed_commits=`git cherry $remote/$branch | awk 'BEGIN{ORS="\t\\\\\n"} /\+/ {print ",\"" $2 "\""}'`
 
 		if [ -n "$unpushed_commits" ]; then
 			commit_title="Local Commit:"
