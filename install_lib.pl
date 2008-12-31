@@ -29,6 +29,7 @@ OS
 	undef %Config::;
 	delete $INC{"Config.pm"};
 	delete $INC{"Config_heavy.pl"};
+	delete $INC{"Config_git.pl"};
 	# You never saw us. We weren't here.
 
 	require Config;

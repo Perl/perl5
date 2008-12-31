@@ -297,12 +297,12 @@ for file do
     opmini) ;;
     pad) ;;
     perl) 
-        if [ -f .patchnum -a -n "$(cat .patchnum)" ] ; then
-                ccflags="-DPERL_PATCHNUM=`cat .patchnum` $ccflags"
+        if [ -f .patchnum -a -n "$(awk 'BEGIN{ORS=""} /describe:/ {print $1}' .patchnum)" ] ; then
+                ccflags="-DPERL_PATCHNUM=$(awk 'BEGIN{ORS=""} /describe:/ {print $2}' .patchnum) $ccflags"
         fi
-        if [ -f .sha1 -a -n "$(cat .sha1)" ] ; then
-                ccflags="-DPERL_GIT_SHA1=`cat .sha1` $ccflags"
-        fi
+	if [ -f .patchnum -a -n "$(awk 'BEGIN{ORS=""} /status:/ {print $2}' .patchnum)" ] ; then
+                ccflags="-DPERL_GIT_UNCOMMITTED_CHANGES=$(awk 'BEGIN{ORS=""} /status:/ {print $2}' .patchnum) $ccflags"
+	fi
         ;;
     perlapi) ;;
     perlmain) ;;
