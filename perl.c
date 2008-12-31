@@ -3311,14 +3311,14 @@ Perl_moreswitches(pTHX_ const char *s)
 #ifdef PERL_PATCHNUM
 	    SV* num= newSVpvn(STRINGIFY(PERL_PATCHNUM),sizeof(STRINGIFY(PERL_PATCHNUM))-1);
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
-	    Perl_sv_catpvf(aTHX_ num,"%s","*");
+	    sv_catpvs(num, "*");
 #endif
 
 	    if (sv_len(num)>=sv_len(level) && strnEQ(SvPV_nolen(num),SvPV_nolen(level),sv_len(level))) {
 		SvREFCNT_dec(level);
 		level= num;
 	    } else {
-		Perl_sv_catpvf(aTHX_ level, " (%s)",SvPV_nolen(num));
+		Perl_sv_catpvf(aTHX_ level, " (%"SVf")", num);
 		SvREFCNT_dec(num);
 	    }
  #endif
