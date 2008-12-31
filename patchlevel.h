@@ -116,9 +116,21 @@ hunk.
  */
 
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
+#include "unpushed.h"
+#if !defined(PERL_GIT_UNPUSHED_COMMITS)
+#define PERL_GIT_UNPUSHED_COMMITS_PATCH /* no-op */
+#else
+#define PERL_GIT_UNPUSHED_COMMITS_PATCH PERL_GIT_UNPUSHED_COMMITS
+#endif
+#if !defined(PERL_GIT_UNCOMMITTED_CHANGES)
+#define PERL_GIT_UNCOMMITTED_CHANGES_PATCH /*no op*/
+#else
+#define PERL_GIT_UNCOMMITTED_CHANGES_PATCH , STRINGIFY(PERL_GIT_UNCOMMITTED_CHANGES)
+#endif
 static const char * const local_patches[] = {
 	NULL
-	,"MAINT35117"
+	PERL_GIT_UNPUSHED_COMMITS_PATCH    /* do not remove this line */
+        PERL_GIT_UNCOMMITTED_CHANGES_PATCH /* do not remove this line */
 	,NULL
 };
 

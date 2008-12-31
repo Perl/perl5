@@ -371,7 +371,10 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
+# we dont include lib/Config_git.pl here, as it causes circular dependencies
 CONFIGPM = lib/Config.pm lib/Config_heavy.pl
+# so we add it here:
+CONFIGPM_EXTRA = $(CONFIGPM) lib/Config_git.pl
 
 CONFIGPOD = lib/Config.pod
 
@@ -540,7 +543,8 @@ sperl.i: perl.c $(h)
 make_patchnum:
 	sh $(shellflags) make_patchnum.sh
 
-perl$(OBJ_EXT): .patchnum .sha1
+# make sure that we recompile perl.c if .patchnum changes
+perl$(OBJ_EXT): .patchnum unpushed.h
 
 translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
@@ -1219,7 +1223,8 @@ _tidy:
 	-cd utils; $(LDLIBPTH) $(MAKE) clean
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm .patchnum
-	-rm .sha1
+	-rm lib/Config_git.pl
+	-rm unpushed.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done

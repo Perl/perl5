@@ -260,10 +260,11 @@ SWTESTPM
 
 {
     local $TODO = '';   # these ones should work on VMS
-
+    # there are definitely known build configs where this test will fail
+    # DG/UX comes to mind. Maybe we should remove these special cases?
     my $v = sprintf "%vd", $^V;
     like( runperl( switches => ['-v'] ),
-	  qr/This is perl, v$v (?:DEVEL:[-A-Za-z0-9]+ )?built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
+	  qr/This is perl, v$v(?:[-\w]+| \([^)]+\))? built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
           '-v looks okay' );
 
 }
