@@ -1,3 +1,7 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
 =head1 NAME
 
 make_patchnum.pl - make patchnum
@@ -8,8 +12,42 @@ make_patchnum.pl - make patchnum
 
 =cut
 
-use strict;
-use warnings;
+BEGIN {
+    my $root=".";
+    while (!-e "$root/perl.c" and length($root)<100) {
+        if ($root eq '.') {
+	        $root="..";
+    	} else {
+	        $root.="/..";
+	    }
+    }
+    die "Can't find toplevel" if !-e "$root/perl.c";
+    sub path_to { "$root/$_[0]" } # use $_[0] if this'd be placed in toplevel.
+}
+
+sub read_file {
+    my $file = path_to(@_);
+    return "" unless -e $file;
+    open my $fh, '<', $file
+	or die "Failed to open for read '$file':$!";
+    return do { local $/; <$fh> };
+}
+
+sub write_file {
+    my ($file, $content) = @_;
+    $file= path_to($file);
+    open my $fh, '>', $file
+	or die "Failed to open for write '$file':$!";
+    print $fh $content;
+    close $fh;
+}
+
+sub backtick {
+    my $command = shift;
+    my $result = `$command`;
+    chomp $result;
+    return $result;
+}
 
 my $existing_patchnum = read_file('.patchnum');
 my $existing_config   = read_file('lib/Config_git.pl');
@@ -42,7 +80,7 @@ elsif (-d path_to('.git')) {
             join ",", map { (split /\s/, $_)[1] }
             grep {/\+/} split /\n/, backtick("git cherry $remote/$branch");
         # git cherry $remote/$branch | awk 'BEGIN{ORS="\t\\\\\n"} /\+/ {print ",\"" $2 "\""}'
-        $unpushed_commits = 
+        $unpushed_commits =
             join "", map { ',"'.(split /\s/, $_)[1].'"'."\t\\\n" }
             grep {/\+/} split /\n/, backtick("git cherry $remote/$branch");
         if (length $unpushed_commits) {
@@ -99,40 +137,4 @@ else {
     print "Reusing .patchnum and lib/Config_git.pl\n"
 }
 
-BEGIN {
-    my $root=".";
-    while (!-e "$root/perl.c" and length($root)<100) {
-        if ($root eq '.') {
-	        $root="..";
-    	} else {
-	        $root.="/..";
-	    }
-    }
-    die "Can't find toplevel" if !-e "$root/perl.c";
-	sub path_to { "$root/$_[0]" } # use $_[0] if this'd be placed in toplevel.
-}
-
-sub read_file {
-    my $file = path_to(@_);
-    return "" unless -e $file;
-    open my $fh, '<', $file 
-	or die "Failed to open for read '$file':$!";
-    return do { local $/; <$fh> };
-}
-
-sub write_file {
-    my ($file, $content) = @_;
-    $file= path_to($file);
-    open my $fh, '>', $file
-	or die "Failed to open for write '$file':$!";
-    print $fh $content;
-    close $fh;
-}
-
-sub backtick {
-    my $command = shift;
-    my $result = `$command`;
-    chomp $result;
-    return $result;
-}
-#$ ts=4:et
+# ex: set ts=4 sts=4 et ft=perl:
