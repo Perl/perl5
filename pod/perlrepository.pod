@@ -94,7 +94,7 @@ Once you have changed into the repository directory, you can inspect
 it.
 
 After a clone the repository will contain a single local branch, which
-will be the current branch as well, as indicated by the asterix.
+will be the current branch as well, as indicated by the asterisk.
 
   % git branch
   * blead
