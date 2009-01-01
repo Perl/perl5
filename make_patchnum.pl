@@ -10,7 +10,6 @@ make_patchnum.pl - make patchnum
 
 use strict;
 use warnings;
-no warnings 'uninitialized';
 
 my $existing_patchnum = read_file('.patchnum');
 my $existing_config   = read_file('lib/Config_git.pl');
@@ -19,10 +18,8 @@ my $existing_unpushed = read_file('unpushed.h');
 my $unpushed_commits = '/*no-op*/';
 my ($read, $branch, $snapshot_created, $commit_id, $describe);
 my ($changed, $extra_info, $commit_title, $new_patchnum);
-if (-s path_to('.patch')) {
-    open my $fh, '<', path_to('.patch') or die "Failed to read .patch:$!";
-    ($read, $branch, $snapshot_created, $commit_id, $describe) = map { chomp $_; $_ } <$fh>;
-    $changed = '';
+if (my $patch_file= read_file('.patch')) {
+    ($branch, $snapshot_created, $commit_id, $describe) = split /\s+/, $patchfile;
     $extra_info = "git_snapshot_date='$snapshot_created'";
     $commit_title = "Snapshot of:";
 }
@@ -35,7 +32,7 @@ elsif (-d path_to('.git')) {
         $remote = backtick("git config branch.$branch.remote");
     }
     $commit_id = backtick("git rev-parse HEAD");
-    $describe = backtick("git describe --tags");
+    $describe = backtick("git describe");
     my $commit_created = backtick(qq{git log -1 --pretty="format:%ci"});
     $new_patchnum = "describe: $describe";
     $extra_info = "git_commit_date='$commit_created'";
@@ -102,18 +99,32 @@ else {
     print "Reusing .patchnum and lib/Config_git.pl\n"
 }
 
-sub path_to { "../$_[0]" } # use $_[0] if this'd be placed in toplevel.
+BEGIN {
+    my $root=".";
+    while (!-e "$root/perl.c" and length($root)<100) {
+        if ($root eq '.') {
+	        $root="..";
+    	} else {
+	        $root.="/..";
+	    }
+    }
+    die "Can't find toplevel" if !-e "$root/perl.c";
+	sub path_to { "$root/$_[0]" } # use $_[0] if this'd be placed in toplevel.
+}
 
 sub read_file {
-    my $file = shift;
-    return unless -f path_to($file);
-    open my $fh, '<', path_to($file) or die "Failed to open $file:$!";
+    my $file = path_to(@_);
+    return "" unless -e $file;
+    open my $fh, '<', $file 
+	or die "Failed to open for read '$file':$!";
     return do { local $/; <$fh> };
 }
 
 sub write_file {
     my ($file, $content) = @_;
-    open my $fh, '>', path_to($file) or die "Failed to open $file:$!";
+    $file= path_to($file);
+    open my $fh, '>', $file
+	or die "Failed to open for write '$file':$!";
     print $fh $content;
     close $fh;
 }
@@ -124,4 +135,4 @@ sub backtick {
     chomp $result;
     return $result;
 }
-
+#$ ts=4:et
