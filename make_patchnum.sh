@@ -14,6 +14,7 @@ existing_unpushed=`cat unpushed.h 2>/dev/null`
 
 unpushed_commits='/*no-op*/'
 if [ -s ".patch" ] ; then
+	# this is the minimal expectation for the 
 	read branch snapshot_created commit_id describe < .patch
 	changed=""
 	extra_info="git_snapshot_date='$snapshot_created'"
@@ -25,7 +26,6 @@ elif [ -d ".git" ]; then
 	changed=`git diff-index --name-only HEAD`
 	describe=`git describe --tags`
 	commit_created=`git log -1 --pretty='format:%ci'`
-	new_patchnum="describe: $describe"
 	extra_info="git_commit_date='$commit_created'"
 	if [ -n "$branch" ] && [ -n "$remote" ]; then
 		unpushed_commit_list=`git cherry $remote/$branch | awk 'BEGIN{ORS=","} /\+/ {print $2}' | sed -e 's/,$//'`
@@ -40,14 +40,26 @@ git_unpushed='$unpushed_commit_list'"
 		fi
 			
 	fi
-	if [ -n "$changed" ]; then
-		changed="true"
-		commit_title="Derived from:"
-		new_patchnum="$new_patchnum
-status: uncommitted-changes"
-	fi
-	test -z "$commit_title" && commit_title='Commit id:'
+else
+	cat <<SNDOGS
+Something is wrong with your source tree. You should 
+either have a .git directory and a functional git toolset
+OR should have a .patch file in the source tree. Please
+report the particulars of this situation to 
+perl5-porters@perl.org.
+SNDOGS
+	exit 2
 fi
+
+# Set up defaults for various values
+new_patchnum="describe: $describe"
+if [ -n "$changed" ]; then
+	changed="true"
+	commit_title="Derived from:"
+	new_patchnum="$new_patchnum
+status: uncommitted-changes"
+fi
+test -z "$commit_title" && commit_title='Commit id:'
 
 new_unpushed=`cat <<EOFTEXT
 /*********************************************************************
