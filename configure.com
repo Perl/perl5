@@ -1408,9 +1408,10 @@ $   SET NOON
 $   OPEN/READ PATCH [-].patch
 $   READ PATCH line
 $   CLOSE PATCH
-$   tmp = F$EDIT(line,"COLLAPSE")
+$   tmp = F$EDIT(line,"TRIM,COMPRESS")
+$   IF F$ELEMENT(3, " ", tmp) .NES. "" THEN tmp = F$ELEMENT(3, " ", tmp)
 $   SET ON
-$   IF tmp .GT. perl_patchlevel then perl_patchlevel = tmp
+$   IF tmp .NES. "" THEN perl_patchlevel = tmp
 $ ENDIF
 $!
 $ version_patchlevel_string = "version ''patchlevel' subversion ''subversion'"

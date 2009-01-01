@@ -359,18 +359,23 @@ utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.co
 utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]cpanp.com [.utils]cpan2dist.com [.utils]cpanp-run-perl.com
 
 .ifdef NOX2P
-all : base extras archcorefiles preplibrary perlpods
+all : make_patchnum.ts base extras archcorefiles preplibrary perlpods
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .else
-all : base extras x2p archcorefiles preplibrary perlpods
+all : make_patchnum.ts base extras x2p archcorefiles preplibrary perlpods
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .endif
+
+make_patchnum.ts :
+	@ @make_patchnum.com
+	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
+
 base : miniperl perl
 	@ $(NOOP)
 extras : dynext libmods utils podxform extra.pods
@@ -1839,6 +1844,9 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
 	- @extra_pods CLEAN
+	- If F$Search(".patchnum").nes."" Then Delete/NoConfirm/Log .patchnum;*
+	- If F$Search("[.lib]Config_git.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_git.pl;*
+	- If F$Search("unpushed.h").nes."" Then Delete/NoConfirm/Log unpushed.h;*
 
 realclean : clean
 	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" realclean
