@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN {
     require "./test.pl";
-    plan(tests => 22);
+    plan(tests => 35);
 }
 
 use Scalar::Util qw(refaddr);
@@ -19,6 +19,7 @@ use Scalar::Util qw(refaddr);
 	fallback => 1,
 	'""' => sub { "foo" },
 	'0+' => sub { 42 },
+	cos => sub { "far side of overload table" },
     );
 
     sub new { bless {}, shift };
@@ -28,16 +29,19 @@ my $x = Stringifies->new;
 
 is( "$x", "foo", "stringifies" );
 is( 0 + $x, 42, "numifies" );
+is( cos($x), "far side of overload table", "cosinusfies" );
 
 {
     no overloading;
     is( "$x", overload::StrVal($x), "no stringification" );
     is( 0 + $x, refaddr($x), "no numification" );
+    is( cos($x), cos(refaddr($x)), "no cosinusfication" );
 
     {
 	no overloading '""';
 	is( "$x", overload::StrVal($x), "no stringification" );
 	is( 0 + $x, refaddr($x), "no numification" );
+	is( cos($x), cos(refaddr($x)), "no cosinusfication" );
     }
 }
 
@@ -46,37 +50,48 @@ is( 0 + $x, 42, "numifies" );
 
     is( "$x", overload::StrVal($x), "no stringification" );
     is( 0 + $x, 42, "numifies" );
+    is( cos($x), "far side of overload table", "cosinusfies" );
 
     {
 	no overloading;
 	is( "$x", overload::StrVal($x), "no stringification" );
 	is( 0 + $x, refaddr($x), "no numification" );
+	is( cos($x), cos(refaddr($x)), "no cosinusfication" );
     }
 
     use overloading '""';
 
     is( "$x", "foo", "stringifies" );
     is( 0 + $x, 42, "numifies" );
+    is( cos($x), "far side of overload table", "cosinusfies" );
 
     no overloading '0+';
     is( "$x", "foo", "stringifies" );
     is( 0 + $x, refaddr($x), "no numification" );
+    is( cos($x), "far side of overload table", "cosinusfies" );
 
     {
 	no overloading '""';
 	is( "$x", overload::StrVal($x), "no stringification" );
 	is( 0 + $x, refaddr($x), "no numification" );
+	is( cos($x), "far side of overload table", "cosinusfies" );
 
 	{
 	    use overloading;
 	    is( "$x", "foo", "stringifies" );
 	    is( 0 + $x, 42, "numifies" );
+	    is( cos($x), "far side of overload table", "cosinusfies" );
 	}
     }
 
     is( "$x", "foo", "stringifies" );
     is( 0 + $x, refaddr($x), "no numification" );
+    is( cos($x), "far side of overload table", "cosinusfies" );
 
+    no overloading "cos";
+    is( "$x", "foo", "stringifies" );
+    is( 0 + $x, refaddr($x), "no numification" );
+    is( cos($x), cos(refaddr($x)), "no cosinusfication" );
 
     BEGIN { ok(exists($^H{overloading}), "overloading hint present") }
 
