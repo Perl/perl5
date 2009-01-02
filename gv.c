@@ -1838,7 +1838,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	  char *pv = SvPV(lex_mask, len);
 
 	  /* Bit set, so this overloading operator is disabled */
-	  if ( (STRLEN)offset <= len && pv[offset] & ( 1 << bit ) )
+	  if ( (STRLEN)offset < len && pv[offset] & ( 1 << bit ) )
 	      return NULL;
       }
   }
