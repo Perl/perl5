@@ -59,7 +59,7 @@ overloading - perl pragma to lexically control overloading
 
     {
 	no overloading;
-	my $str = "$object"; # doesn't call strirngification overload
+	my $str = "$object"; # doesn't call stringification overload
     }
 
     # it's lexical, so this stringifies:
@@ -67,7 +67,7 @@ overloading - perl pragma to lexically control overloading
 
     # it can be enabled per op
     no overloading qw("");
-    warn "$object"
+    warn "$object";
 
     # and also reenabled
     use overloading;
@@ -84,7 +84,7 @@ Disables overloading entirely in the current lexical scope.
 
 =item C<no overloading @ops>
 
-Disables only specific overloads in the current lexical scopes.
+Disables only specific overloads in the current lexical scope.
 
 =item C<use overloading>
 
