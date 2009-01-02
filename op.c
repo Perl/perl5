@@ -4313,8 +4313,6 @@ Perl_newLOGOP(pTHX_ I32 type, I32 flags, OP *first, OP *other)
 STATIC OP *
 S_search_const(pTHX_ OP *o)
 {
-    PERL_ARGS_ASSERT_SEARCH_CONST;
-
     switch (o->op_type) {
 	case OP_CONST:
 	    return o;
