@@ -5,6 +5,8 @@ use Carp ();
 
 our $VERSION = '0.01';
 
+my $HINT_NO_AMAGIC = 0x01000000; # see perl.h
+
 require 5.011000;
 
 sub _ops_to_nums {
@@ -26,18 +28,18 @@ sub import {
 
 	if ( $^H{overloading} !~ /[^\0]/ ) {
 	    delete $^H{overloading};
-	    $^H &= ~0x01000000;
+	    $^H &= ~$HINT_NO_AMAGIC;
 	}
     } else {
 	delete $^H{overloading};
-	$^H &= ~0x01000000;
+	$^H &= ~$HINT_NO_AMAGIC;
     }
 }
 
 sub unimport {
     my ( $class, @ops ) = @_;
 
-    if ( exists $^H{overloading} or not $^H & 0x01000000 ) {
+    if ( exists $^H{overloading} or not $^H & $HINT_NO_AMAGIC ) {
 	if ( @ops ) {
 	    vec($^H{overloading} ||= '', $_, 1) = 1 for _ops_to_nums(@ops);
 	} else {
@@ -45,7 +47,7 @@ sub unimport {
 	}
     }
 
-    $^H |= 0x01000000;
+    $^H |= $HINT_NO_AMAGIC;
 }
 
 1;
