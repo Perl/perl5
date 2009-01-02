@@ -1863,11 +1863,12 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       else if ( lex_mask && SvPOK(lex_mask) ) {
 	  /* we have an entry in the hints hash, check if method has been
 	   * masked by overloading.pm */
+	  STRLEN len;
 	  const int offset = method / 8;
 	  const int bit    = method % 7;
-	  STRLEN len;
 	  char *pv = SvPV(lex_mask, len);
 
+	  /* Bit set, so this overloading operator is disabled */
 	  if ( (STRLEN)offset <= len && pv[offset] & ( 1 << bit ) )
 	      return NULL;
       }
