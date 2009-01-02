@@ -313,6 +313,19 @@ The right side of the arrow typically is the method name, but a simple
 scalar variable containing either the method name or a subroutine 
 reference can also be used.
 
+If the right side of the arrow is a scalar containing a reference
+to a subroutine, then this is equivalent to calling the referenced
+subroutine directly with the class name or object on the left side
+of the arrow as its first argument. No lookup is done and there is
+no requirement that the subroutine be defined in any package related
+to the class name or object on the left side of the arrow.
+
+For example, the following calls to $display are equivalent:
+
+    my $display = sub { my $self = shift; ... };
+    $fred->$display("Height", "Weight");
+    $display->($fred, "Height", "Weight");
+
 =head2 Indirect Object Syntax
 X<indirect object syntax> X<invocation, indirect> X<indirect>
 
