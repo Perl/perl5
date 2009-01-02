@@ -1592,6 +1592,11 @@
 #define vdie_common		S_vdie_common
 #define write_no_mem		S_write_no_mem
 #endif
+#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#ifdef PERL_CORE
+#define mem_log_common		S_mem_log_common
+#endif
+#endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3905,6 +3910,11 @@
 #define vdie_croak_common(a,b,c,d)	S_vdie_croak_common(aTHX_ a,b,c,d)
 #define vdie_common(a,b,c,d)	S_vdie_common(aTHX_ a,b,c,d)
 #define write_no_mem()		S_write_no_mem(aTHX)
+#endif
+#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#ifdef PERL_CORE
+#define mem_log_common		S_mem_log_common
+#endif
 #endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)

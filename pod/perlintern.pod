@@ -1092,7 +1092,7 @@ The name is returned as a mortal SV.
 Assumes that PL_op is the op that originally triggered the error, and that
 PL_comppad/PL_curpad points to the currently executing pad.
 
-	SV*	find_uninit_var(const OP *const obase, const SV *const uninit_sv, bool top)
+	SV*	find_uninit_var(OP* obase, SV* uninit_sv, bool top)
 
 =for hackers
 Found in file sv.c

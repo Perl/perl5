@@ -3308,8 +3308,6 @@ STATIC OP*	S_newDEFSVOP(pTHX)
 STATIC OP*	S_search_const(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SEARCH_CONST	\
-	assert(o)
 
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 			__attribute__warn_unused_result__
@@ -4217,6 +4215,13 @@ STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bo
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 
+#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *typename, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+			__attribute__nonnull__(4)
+			__attribute__nonnull__(8)
+			__attribute__nonnull__(10);
+
+#endif
 #endif
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
