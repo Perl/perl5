@@ -1834,7 +1834,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   * masked by overloading.pm */
 	  STRLEN len;
 	  const int offset = method / 8;
-	  const int bit    = method % 7;
+	  const int bit    = method % 8;
 	  char *pv = SvPV(lex_mask, len);
 
 	  /* Bit set, so this overloading operator is disabled */
