@@ -1398,6 +1398,11 @@ and $b.
 
 Ilya Zakharevich E<lt>F<ilya@math.mps.ohio-state.edu>E<gt>.
 
+=head1 SEE ALSO
+
+The L<overloading> pragma can be used to enable or disable overloaded
+operations within a lexical scope.
+
 =head1 DIAGNOSTICS
 
 When Perl is run with the B<-Do> switch or its equivalent, overloading
