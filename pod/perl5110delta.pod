@@ -11,7 +11,22 @@ developement releases.
 
 =head1 Core Enhancements
 
+=head1 The C<overloading> pragma
+
+This pragma allows you to lexically disable or enable overloading
+for some or all operations. (Yuval Kogman)
+
 =head1 Modules and Pragmata
+
+=head2 Pragmata Changes
+
+=over 4
+
+=item C<overloading>
+
+See L</"The C<overloading> pragma"> above.
+
+=back
 
 =head1 Utility Changes
 

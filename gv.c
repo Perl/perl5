@@ -1,7 +1,7 @@
 /*    gv.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
- *    2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1852,6 +1852,27 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   HV* stash=NULL;
 
   PERL_ARGS_ASSERT_AMAGIC_CALL;
+
+  if ( PL_curcop->cop_hints & HINT_NO_AMAGIC ) {
+      SV *lex_mask = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
+					      0, "overloading", 11, 0, 0);
+
+      if ( !lex_mask || !SvOK(lex_mask) )
+	  /* overloading lexically disabled */
+	  return NULL;
+      else if ( lex_mask && SvPOK(lex_mask) ) {
+	  /* we have an entry in the hints hash, check if method has been
+	   * masked by overloading.pm */
+	  STRLEN len;
+	  const int offset = method / 8;
+	  const int bit    = method % 7;
+	  char *pv = SvPV(lex_mask, len);
+
+	  /* Bit set, so this overloading operator is disabled */
+	  if ( (STRLEN)offset <= len && pv[offset] & ( 1 << bit ) )
+	      return NULL;
+      }
+  }
 
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (stash = SvSTASH(SvRV(left)))

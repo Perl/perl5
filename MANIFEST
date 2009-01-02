@@ -2547,6 +2547,9 @@ lib/open.t			See if the open pragma works
 lib/overload64.t		See if operator overloading works with 64-bit ints
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
+lib/overload/numbers.pm		Helper for overloading pragma
+lib/overloading.pm		Pragma to lexically control overloading
+lib/overloading.t		Tests for overloading.pm
 lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
