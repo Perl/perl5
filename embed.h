@@ -1315,6 +1315,7 @@
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define do_delete_local		S_do_delete_local
 #define refto			S_refto
 #endif
 #endif
@@ -3661,6 +3662,7 @@
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define do_delete_local()	S_do_delete_local(aTHX)
 #define refto(a)		S_refto(aTHX_ a)
 #endif
 #endif

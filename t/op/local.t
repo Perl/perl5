@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 183;
+plan tests => 296;
 
 my $list_assignment_supported = 1;
 
@@ -158,6 +158,109 @@ is($a[0].$a[1], "Xb");
     is("@a", $d);
 }
 
+@a = ('a', 'b', 'c');
+$a[4] = 'd';
+{
+    delete local $a[1];
+    is(scalar(@a), 5);
+    is($a[0], 'a');
+    ok(!exists($a[1]));
+    is($a[2], 'c');
+    ok(!exists($a[3]));
+    is($a[4], 'd');
+
+    ok(!exists($a[888]));
+    delete local $a[888];
+    is(scalar(@a), 5);
+    ok(!exists($a[888]));
+
+    ok(!exists($a[999]));
+    my ($d, $zzz) = delete local @a[4, 999];
+    is(scalar(@a), 3);
+    ok(!exists($a[4]));
+    ok(!exists($a[999]));
+    is($d, 'd');
+    is($zzz, undef);
+
+    my $c = delete local $a[2];
+    is(scalar(@a), 1);
+    ok(!exists($a[2]));
+    is($c, 'c');
+
+    $a[888] = 'yyy';
+    $a[999] = 'zzz';
+}
+is(scalar(@a), 5);
+is($a[0], 'a');
+is($a[1], 'b');
+is($a[2], 'c');
+ok(!defined($a[3]));
+is($a[4], 'd');
+ok(!exists($a[5]));
+ok(!exists($a[888]));
+ok(!exists($a[999]));
+
+%h = (a => 1, b => 2, c => 3, d => 4);
+{
+    delete local $h{b};
+    is(scalar(keys(%h)), 3);
+    is($h{a}, 1);
+    ok(!exists($h{b}));
+    is($h{c}, 3);
+    is($h{d}, 4);
+
+    ok(!exists($h{yyy}));
+    delete local $h{yyy};
+    is(scalar(keys(%h)), 3);
+    ok(!exists($h{yyy}));
+
+    ok(!exists($h{zzz}));
+    my ($d, $zzz) = delete local @h{qw/d zzz/};
+    is(scalar(keys(%h)), 2);
+    ok(!exists($h{d}));
+    ok(!exists($h{zzz}));
+    is($d, 4);
+    is($zzz, undef);
+
+    my $c = delete local $h{c};
+    is(scalar(keys(%h)), 1);
+    ok(!exists($h{c}));
+    is($c, 3);
+
+    $h{yyy} = 888;
+    $h{zzz} = 999;
+}
+is(scalar(keys(%h)), 4);
+is($h{a}, 1);
+is($h{b}, 2);
+is($h{c}, 3);
+ok($h{d}, 4);
+ok(!exists($h{yyy}));
+ok(!exists($h{zzz}));
+
+%h = ('a' => { 'b' => 1 }, 'c' => 2);
+{
+    my $a = delete local $h{a};
+    is(scalar(keys(%h)), 1);
+    ok(!exists($h{a}));
+    is($h{c}, 2);
+    is(scalar(keys(%$a)), 1);
+
+    my $b = delete local $a->{b};
+    is(scalar(keys(%$a)), 0);
+    is($b, 1);
+
+    $a->{d} = 3;
+}
+is(scalar(keys(%h)), 2);
+{
+    my $a = $h{a};
+    is(scalar(keys(%$a)), 2);
+    is($a->{b}, 1);
+    is($a->{d}, 3);
+}
+is($h{c}, 2);
+
 %h = ('a' => 1, 'b' => 2, 'c' => 3);
 {
     local($h{'a'}) = 'foo';
@@ -276,6 +379,48 @@ ok(!defined $a[4]);
 is($a[5], 'y');
 ok(!exists $a[6]);
 
+@a = ('a', 'b', 'c');
+$a[4] = 'd';
+{
+    delete local $a[1];
+    is(scalar(@a), 5);
+    is($a[0], 'a');
+    ok(!exists($a[1]));
+    is($a[2], 'c');
+    ok(!exists($a[3]));
+    is($a[4], 'd');
+
+    ok(!exists($a[888]));
+    delete local $a[888];
+    is(scalar(@a), 5);
+    ok(!exists($a[888]));
+
+    ok(!exists($a[999]));
+    my ($d, $zzz) = delete local @a[4, 999];
+    is(scalar(@a), 3);
+    ok(!exists($a[4]));
+    ok(!exists($a[999]));
+    is($d, 'd');
+    is($zzz, undef);
+
+    my $c = delete local $a[2];
+    is(scalar(@a), 1);
+    ok(!exists($a[2]));
+    is($c, 'c');
+
+    $a[888] = 'yyy';
+    $a[999] = 'zzz';
+}
+is(scalar(@a), 5);
+is($a[0], 'a');
+is($a[1], 'b');
+is($a[2], 'c');
+ok(!defined($a[3]));
+is($a[4], 'd');
+ok(!exists($a[5]));
+ok(!exists($a[888]));
+ok(!exists($a[999]));
+
 # see if localization works on tied hashes
 {
     package TH;
@@ -314,6 +459,44 @@ TODO: {
     local %h = %h;
     is(join("\n", map { "$_=>$h{$_}" } sort keys %h), $d);
 }
+
+%h = (a => 1, b => 2, c => 3, d => 4);
+{
+    delete local $h{b};
+    is(scalar(keys(%h)), 3);
+    is($h{a}, 1);
+    ok(!exists($h{b}));
+    is($h{c}, 3);
+    is($h{d}, 4);
+
+    ok(!exists($h{yyy}));
+    delete local $h{yyy};
+    is(scalar(keys(%h)), 3);
+    ok(!exists($h{yyy}));
+
+    ok(!exists($h{zzz}));
+    my ($d, $zzz) = delete local @h{qw/d zzz/};
+    is(scalar(keys(%h)), 2);
+    ok(!exists($h{d}));
+    ok(!exists($h{zzz}));
+    is($d, 4);
+    is($zzz, undef);
+
+    my $c = delete local $h{c};
+    is(scalar(keys(%h)), 1);
+    ok(!exists($h{c}));
+    is($c, 3);
+
+    $h{yyy} = 888;
+    $h{zzz} = 999;
+}
+is(scalar(keys(%h)), 4);
+is($h{a}, 1);
+is($h{b}, 2);
+is($h{c}, 3);
+ok($h{d}, 4);
+ok(!exists($h{yyy}));
+ok(!exists($h{zzz}));
 
 @a = ('a', 'b', 'c');
 {

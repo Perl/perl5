@@ -4066,12 +4066,195 @@ PP(pp_each)
     RETURN;
 }
 
-PP(pp_delete)
+STATIC OP *
+S_do_delete_local(pTHX)
 {
     dVAR;
     dSP;
     const I32 gimme = GIMME_V;
-    const I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
+    const MAGIC *mg;
+    HV *stash;
+
+    if (PL_op->op_private & OPpSLICE) {
+	dMARK; dORIGMARK;
+	SV * const osv = POPs;
+	const bool tied = SvRMAGICAL(osv)
+			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
+	const bool can_preserve = SvCANEXISTDELETE(osv)
+				    || mg_find((const SV *)osv, PERL_MAGIC_env);
+	const U32 type = SvTYPE(osv);
+	if (type == SVt_PVHV) {			/* hash element */
+	    HV * const hv = MUTABLE_HV(osv);
+	    while (++MARK <= SP) {
+		SV * const keysv = *MARK;
+		SV *sv = NULL;
+		bool preeminent = TRUE;
+		if (can_preserve)
+		    preeminent = hv_exists_ent(hv, keysv, 0);
+		if (tied) {
+		    HE *he = hv_fetch_ent(hv, keysv, 1, 0);
+		    if (he)
+			sv = HeVAL(he);
+		    else
+			preeminent = FALSE;
+		}
+		else {
+		    sv = hv_delete_ent(hv, keysv, 0, 0);
+		    SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+		}
+		if (preeminent) {
+		    save_helem_flags(hv, keysv, &sv, SAVEf_KEEPOLDELEM);
+		    if (tied) {
+			*MARK = sv_mortalcopy(sv);
+			mg_clear(sv);
+		    } else
+			*MARK = sv;
+		}
+		else {
+		    SAVEHDELETE(hv, keysv);
+		    *MARK = &PL_sv_undef;
+		}
+	    }
+	}
+	else if (type == SVt_PVAV) {                  /* array element */
+	    if (PL_op->op_flags & OPf_SPECIAL) {
+		AV * const av = MUTABLE_AV(osv);
+		while (++MARK <= SP) {
+		    I32 idx = SvIV(*MARK);
+		    SV *sv = NULL;
+		    bool preeminent = TRUE;
+		    if (can_preserve)
+			preeminent = av_exists(av, idx);
+		    if (tied) {
+			SV **svp = av_fetch(av, idx, 1);
+			if (svp)
+			    sv = *svp;
+			else
+			    preeminent = FALSE;
+		    }
+		    else {
+			sv = av_delete(av, idx, 0);
+		        SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+		    }
+		    if (preeminent) {
+		        save_aelem_flags(av, idx, &sv, SAVEf_KEEPOLDELEM);
+			if (tied) {
+			    *MARK = sv_mortalcopy(sv);
+			    mg_clear(sv);
+			} else
+			    *MARK = sv;
+		    }
+		    else {
+		        SAVEADELETE(av, idx);
+		        *MARK = &PL_sv_undef;
+		    }
+		}
+	    }
+	}
+	else
+	    DIE(aTHX_ "Not a HASH reference");
+	if (gimme == G_VOID)
+	    SP = ORIGMARK;
+	else if (gimme == G_SCALAR) {
+	    MARK = ORIGMARK;
+	    if (SP > MARK)
+		*++MARK = *SP;
+	    else
+		*++MARK = &PL_sv_undef;
+	    SP = MARK;
+	}
+    }
+    else {
+	SV * const keysv = POPs;
+	SV * const osv   = POPs;
+	const bool tied = SvRMAGICAL(osv)
+			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
+	const bool can_preserve = SvCANEXISTDELETE(osv)
+				    || mg_find((const SV *)osv, PERL_MAGIC_env);
+	const U32 type = SvTYPE(osv);
+	SV *sv = NULL;
+	if (type == SVt_PVHV) {
+	    HV * const hv = MUTABLE_HV(osv);
+	    bool preeminent = TRUE;
+	    if (can_preserve)
+		preeminent = hv_exists_ent(hv, keysv, 0);
+	    if (tied) {
+		HE *he = hv_fetch_ent(hv, keysv, 1, 0);
+		if (he)
+		    sv = HeVAL(he);
+		else
+		    preeminent = FALSE;
+	    }
+	    else {
+		sv = hv_delete_ent(hv, keysv, 0, 0);
+		SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+	    }
+	    if (preeminent) {
+		save_helem_flags(hv, keysv, &sv, SAVEf_KEEPOLDELEM);
+		if (tied) {
+		    SV *nsv = sv_mortalcopy(sv);
+		    mg_clear(sv);
+		    sv = nsv;
+		}
+	    }
+	    else
+		SAVEHDELETE(hv, keysv);
+	}
+	else if (type == SVt_PVAV) {
+	    if (PL_op->op_flags & OPf_SPECIAL) {
+		AV * const av = MUTABLE_AV(osv);
+		I32 idx = SvIV(keysv);
+		bool preeminent = TRUE;
+		if (can_preserve)
+		    preeminent = av_exists(av, idx);
+		if (tied) {
+		    SV **svp = av_fetch(av, idx, 1);
+		    if (svp)
+			sv = *svp;
+		    else
+			preeminent = FALSE;
+		}
+		else {
+		    sv = av_delete(av, idx, 0);
+		    SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+		}
+		if (preeminent) {
+		    save_aelem_flags(av, idx, &sv, SAVEf_KEEPOLDELEM);
+		    if (tied) {
+			SV *nsv = sv_mortalcopy(sv);
+			mg_clear(sv);
+			sv = nsv;
+		    }
+		}
+		else
+		    SAVEADELETE(av, idx);
+	    }
+	    else
+		DIE(aTHX_ "panic: avhv_delete no longer supported");
+	}
+	else
+	    DIE(aTHX_ "Not a HASH reference");
+	if (!sv)
+	    sv = &PL_sv_undef;
+	if (gimme != G_VOID)
+	    PUSHs(sv);
+    }
+
+    RETURN;
+}
+
+PP(pp_delete)
+{
+    dVAR;
+    dSP;
+    I32 gimme;
+    I32 discard;
+
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	return do_delete_local();
+
+    gimme = GIMME_V;
+    discard = (gimme == G_VOID) ? G_DISCARD : 0;
 
     if (PL_op->op_private & OPpSLICE) {
 	dMARK; dORIGMARK;
