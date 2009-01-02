@@ -1214,6 +1214,7 @@ PP(pp_qr)
     SV * const pkg = CALLREG_PACKAGE(rx);
     SV * const rv = sv_newmortal();
     SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
+    SvREFCNT_dec(pkg);
     if (RX_EXTFLAGS(rx) & RXf_TAINTED)
         SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(rx), PERL_MAGIC_qr,0,0);
