@@ -29,7 +29,7 @@
  *			    in I8, far beyond the current Unicode standard's
  *			    max, as shown in the comment later in this file.)
  *  3)	Use the table published in tr16 to convert each byte from step 2 into
- *	final UTF-EBCDIC.  The table in this file is PL_utf2e, and its invverse
+ *	final UTF-EBCDIC.  The table in this file is PL_utf2e, and its inverse
  *	is PL_e2utf.  They are constructed so that all EBCDIC invariants remain
  *	invariant, but no others do.  For example, the ordinal value of 'A' is
  *	193 in EBCDIC, and also is 193 in UTF-EBCDIC.  Step 1) converts it to
@@ -406,6 +406,7 @@ END_EXTERN_C
 
 /* Native to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      PL_e2a[(U8)(ch)]
+#define NATIVE8_TO_UNI(ch)     NATIVE_TO_ASCII(ch)	/* synonym */
 #define ASCII_TO_NATIVE(ch)      PL_a2e[(U8)(ch)]
 /* Transform after encoding */
 #define NATIVE_TO_UTF(ch)        PL_e2utf[(U8)(ch)]
@@ -461,7 +462,7 @@ END_EXTERN_C
 
 #define UNI_IS_INVARIANT(c)		((c) <  0xA0)
 /* UTF-EBCDIC sematic macros - transform back into UTF-8-Mod and then compare */
-#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_ASCII(c))
+#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE8_TO_UNI(c))
 #define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_UTF(c))
 #define UTF8_IS_START(c)		(NATIVE_TO_UTF(c) >= 0xA0 && (NATIVE_TO_UTF(c) & 0xE0) != 0xA0)
 #define UTF8_IS_CONTINUATION(c)		((NATIVE_TO_UTF(c) & 0xE0) == 0xA0)

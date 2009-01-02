@@ -1649,7 +1649,7 @@
 #define sv_setsv_flags		Perl_sv_setsv_flags
 #define sv_catpvn_flags		Perl_sv_catpvn_flags
 #define sv_catsv_flags		Perl_sv_catsv_flags
-#define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
+#define sv_utf8_upgrade_flags_grow	Perl_sv_utf8_upgrade_flags_grow
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
@@ -4007,7 +4007,7 @@
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)
 #define sv_catpvn_flags(a,b,c,d)	Perl_sv_catpvn_flags(aTHX_ a,b,c,d)
 #define sv_catsv_flags(a,b,c)	Perl_sv_catsv_flags(aTHX_ a,b,c)
-#define sv_utf8_upgrade_flags(a,b)	Perl_sv_utf8_upgrade_flags(aTHX_ a,b)
+#define sv_utf8_upgrade_flags_grow(a,b,c)	Perl_sv_utf8_upgrade_flags_grow(aTHX_ a,b,c)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)

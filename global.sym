@@ -709,7 +709,7 @@ Perl_Slab_Free
 Perl_sv_setsv_flags
 Perl_sv_catpvn_flags
 Perl_sv_catsv_flags
-Perl_sv_utf8_upgrade_flags
+Perl_sv_utf8_upgrade_flags_grow
 Perl_sv_pvn_force_flags
 Perl_sv_copypv
 Perl_my_atof2

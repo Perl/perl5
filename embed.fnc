@@ -1871,7 +1871,8 @@ Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
 				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
-Apd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
+Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
+Apd	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Apd	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value

@@ -1716,6 +1716,10 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 #define SV_COW_OTHER_PVS	1024
 /* Make sv_2pv_flags return NULL if something is undefined.  */
 #define SV_UNDEF_RETURNS_NULL	2048
+/* Tell sv_utf8_upgrade() to not check to see if an upgrade is really needed.
+ * This is used when the caller has already determined it is, and avoids
+ * redundant work */
+#define SV_FORCE_UTF8_UPGRADE	4096
 
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.
@@ -1775,6 +1779,7 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_pvbyte(sv) SvPVbyte_nolen(sv)
 
 #define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
+#define sv_utf8_upgrade_flags(sv, flags) sv_utf8_upgrade_flags_grow(sv, flags, 0)
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 #define sv_setsv(dsv, ssv) \

@@ -51,6 +51,7 @@ END_EXTERN_C
 
 /* Native character to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      (ch)
+#define NATIVE8_TO_UNI(ch)        (ch)
 #define ASCII_TO_NATIVE(ch)      (ch)
 /* Transform after encoding */
 #define NATIVE_TO_UTF(ch)        (ch)
@@ -213,7 +214,7 @@ encoded character.
 #define UNICODE_ILLEGAL			0xFFFF
 
 /* Though our UTF-8 encoding can go beyond this,
- * let's be conservative and do as Unicode 3.2 says. */
+ * let's be conservative and do as Unicode 5.1 says. */
 #define PERL_UNICODE_MAX	0x10FFFF
 
 #define UNICODE_ALLOW_SURROGATE 0x0001	/* Allow UTF-16 surrogates (EVIL) */

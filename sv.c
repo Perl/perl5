@@ -3173,14 +3173,44 @@ This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 =cut
+
+The grow version is currently not externally documented.  It adds a parameter,
+extra, which is the number of unused bytes the string of 'sv' is guaranteed to
+have free after it upon return.  This allows the caller to reserve extra space
+that it intends to fill, to avoid extra grows.
+
+Also externally undocumented for the moment is the flag SV_FORCE_UTF8_UPGRADE,
+which can be used to tell this function to not first check to see if there are
+any characters that are different in UTF-8 (variant characters) which would
+force it to allocate a new string to sv, but to assume there are.  Typically
+this flag is used by a routine that has already parsed the string to find that
+there are such characters, and passes this information on so that the work
+doesn't have to be repeated.
+
+(One might think that the calling routine could pass in the position of the
+first such variant, so it wouldn't have to be found again.  But that is not the
+case, because typically when the caller is likely to use this flag, it won't be
+calling this routine unless it finds something that won't fit into a byte.
+Otherwise it tries to not upgrade and just use bytes.  But some things that
+do fit into a byte are variants in utf8, and the caller may not have been
+keeping track of these.)
+
+If the routine itself changes the string, it adds a trailing NUL.  Such a NUL
+isn't guaranteed due to having other routines do the work in some input cases,
+or if the input is already flagged as being in utf8.
+
+The speed of this could perhaps be improved for many cases if someone wanted to
+write a fast function that counts the number of variant characters in a string,
+especially if it could return the position of the first one.
+
 */
 
 STRLEN
-Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
+Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, STRLEN extra)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_FLAGS;
+    PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_FLAGS_GROW;
 
     if (sv == &PL_sv_undef)
 	return 0;
@@ -3188,14 +3218,17 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
 	STRLEN len = 0;
 	if (SvREADONLY(sv) && (SvPOKp(sv) || SvIOKp(sv) || SvNOKp(sv))) {
 	    (void) sv_2pv_flags(sv,&len, flags);
-	    if (SvUTF8(sv))
+	    if (SvUTF8(sv)) {
+		if (extra) SvGROW(sv, SvCUR(sv) + extra);
 		return len;
+	    }
 	} else {
 	    (void) SvPV_force(sv,len);
 	}
     }
 
     if (SvUTF8(sv)) {
+	if (extra) SvGROW(sv, SvCUR(sv) + extra);
 	return SvCUR(sv);
     }
 
@@ -3203,42 +3236,204 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
         sv_force_normal_flags(sv, 0);
     }
 
-    if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING))
+    if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING)) {
         sv_recode_to_utf8(sv, PL_encoding);
-    else { /* Assume Latin-1/EBCDIC */
+	if (extra) SvGROW(sv, SvCUR(sv) + extra);
+	return SvCUR(sv);
+    }
+
+    if (SvCUR(sv) > 0) { /* Assume Latin-1/EBCDIC */
 	/* This function could be much more efficient if we
 	 * had a FLAG in SVs to signal if there are any variant
 	 * chars in the PV.  Given that there isn't such a flag
-	 * make the loop as fast as possible. */
-	const U8 * const s = (U8 *) SvPVX_const(sv);
-	const U8 * const e = (U8 *) SvEND(sv);
-	const U8 *t = s;
+	 * make the loop as fast as possible (although there are certainly ways
+	 * to speed this up, eg. through vectorization) */
+	U8 * s = (U8 *) SvPVX_const(sv);
+	U8 * e = (U8 *) SvEND(sv);
+	U8 *t = s;
+	STRLEN two_byte_count = 0;
 	
+	if (flags & SV_FORCE_UTF8_UPGRADE) goto must_be_utf8;
+
+	/* See if really will need to convert to utf8.  We mustn't rely on our
+	 * incoming SV being well formed and having a trailing '\0', as certain
+	 * code in pp_formline can send us partially built SVs. */
+
 	while (t < e) {
 	    const U8 ch = *t++;
-	    /* Check for variant */
-	    if (!NATIVE_IS_INVARIANT(ch)) {
-		STRLEN len = SvCUR(sv);
-		/* *Currently* bytes_to_utf8() adds a '\0' after every string
-		   it converts. This isn't documented. It's not clear if it's
-		   a bad thing to be doing, and should be changed to do exactly
-		   what the documentation says. If so, this code will have to
-		   be changed.
-		   As is, we mustn't rely on our incoming SV being well formed
-		   and having a trailing '\0', as certain code in pp_formline
-		   can send us partially built SVs. */
-		U8 * const recoded = bytes_to_utf8((U8*)s, &len);
+	    if (NATIVE_IS_INVARIANT(ch)) continue;
 
-		SvPV_free(sv); /* No longer using what was there before. */
-		SvPV_set(sv, (char*)recoded);
-		SvCUR_set(sv, len);
-		SvLEN_set(sv, len + 1); /* No longer know the real size. */
-		break;
+	    t--;    /* t already incremented; re-point to first variant */
+	    two_byte_count = 1;
+	    goto must_be_utf8;
+	}
+
+	/* utf8 conversion not needed because all are invariants.  Mark as
+	 * UTF-8 even if no variant - saves scanning loop */
+	SvUTF8_on(sv);
+	return SvCUR(sv);
+
+must_be_utf8:
+
+	/* Here, the string should be converted to utf8, either because of an
+	 * input flag (two_byte_count = 0), or because a character that
+	 * requires 2 bytes was found (two_byte_count = 1).  t points either to
+	 * the beginning of the string (if we didn't examine anything), or to
+	 * the first variant.  In either case, everything from s to t - 1 will
+	 * occupy only 1 byte each on output.
+	 *
+	 * There are two main ways to convert.  One is to create a new string
+	 * and go through the input starting from the beginning, appending each
+	 * converted value onto the new string as we go along.  It's probably
+	 * best to allocate enough space in the string for the worst possible
+	 * case rather than possibly running out of space and having to
+	 * reallocate and then copy what we've done so far.  Since everything
+	 * from s to t - 1 is invariant, the destination can be initialized
+	 * with these using a fast memory copy
+	 *
+	 * The other way is to figure out exactly how big the string should be
+	 * by parsing the entire input.  Then you don't have to make it big
+	 * enough to handle the worst possible case, and more importantly, if
+	 * the string you already have is large enough, you don't have to
+	 * allocate a new string, you can copy the last character in the input
+	 * string to the final position(s) that will be occupied by the
+	 * converted string and go backwards, stopping at t, since everything
+	 * before that is invariant.
+	 *
+	 * There are advantages and disadvantages to each method.
+	 *
+	 * In the first method, we can allocate a new string, do the memory
+	 * copy from the s to t - 1, and then proceed through the rest of the
+	 * string byte-by-byte.
+	 *
+	 * In the second method, we proceed through the rest of the input
+	 * string just calculating how big the converted string will be.  Then
+	 * there are two cases:
+	 *  1)	if the string has enough extra space to handle the converted
+	 *	value.  We go backwards through the string, converting until we
+	 *	get to the position we are at now, and then stop.  If this
+	 *	position is far enough along in the string, this method is
+	 *	faster than the other method.  If the memory copy were the same
+	 *	speed as the byte-by-byte loop, that position would be about
+	 *	half-way, as at the half-way mark, parsing to the end and back
+	 *	is one complete string's parse, the same amount as starting
+	 *	over and going all the way through.  Actually, it would be
+	 *	somewhat less than half-way, as it's faster to just count bytes
+	 *	than to also copy, and we don't have the overhead of allocating
+	 *	a new string, changing the scalar to use it, and freeing the
+	 *	existing one.  But if the memory copy is fast, the break-even
+	 *	point is somewhere after half way.  The counting loop could be
+	 *	sped up by vectorization, etc, to move the break-even point
+	 *	further towards the beginning.
+	 *  2)	if the string doesn't have enough space to handle the converted
+	 *	value.  A new string will have to be allocated, and one might
+	 *	as well, given that, start from the beginning doing the first
+	 *	method.  We've spent extra time parsing the string and in
+	 *	exchange all we've gotten is that we know precisely how big to
+	 *	make the new one.  Perl is more optimized for time than space,
+	 *	so this case is a loser.
+	 * So what I've decided to do is not use the 2nd method unless it is
+	 * guaranteed that a new string won't have to be allocated, assuming
+	 * the worst case.  I also decided not to put any more conditions on it
+	 * than this, for now.  It seems likely that, since the worst case is
+	 * twice as big as the unknown portion of the string (plus 1), we won't
+	 * be guaranteed enough space, causing us to go to the first method,
+	 * unless the string is short, or the first variant character is near
+	 * the end of it.  In either of these cases, it seems best to use the
+	 * 2nd method.  The only circumstance I can think of where this would
+	 * be really slower is if the string had once had much more data in it
+	 * than it does now, but there is still a substantial amount in it  */
+
+	{
+	    STRLEN invariant_head = t - s;
+	    STRLEN size = invariant_head + (e - t) * 2 + 1 + extra;
+	    if (SvLEN(sv) < size) {
+
+		/* Here, have decided to allocate a new string */
+
+		U8 *dst;
+		U8 *d;
+
+		Newx(dst, size, U8);
+
+		/* If no known invariants at the beginning of the input string,
+		 * set so starts from there.  Otherwise, can use memory copy to
+		 * get up to where we are now, and then start from here */
+
+		if (invariant_head <= 0) {
+		    d = dst;
+		} else {
+		    Copy(s, dst, invariant_head, char);
+		    d = dst + invariant_head;
+		}
+
+		while (t < e) {
+		    const UV uv = NATIVE8_TO_UNI(*t++);
+		    if (UNI_IS_INVARIANT(uv))
+			*d++ = (U8)UNI_TO_NATIVE(uv);
+		    else {
+			*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
+			*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
+		    }
+		}
+		*d = '\0';
+		SvPV_free(sv); /* No longer using pre-existing string */
+		SvPV_set(sv, (char*)dst);
+		SvCUR_set(sv, d - dst);
+		SvLEN_set(sv, size);
+	    } else {
+
+		/* Here, have decided to get the exact size of the string.
+		 * Currently this happens only when we know that there is
+		 * guaranteed enough space to fit the converted string, so
+		 * don't have to worry about growing.  If two_byte_count is 0,
+		 * then t points to the first byte of the string which hasn't
+		 * been examined yet.  Otherwise two_byte_count is 1, and t
+		 * points to the first byte in the string that will expand to
+		 * two.  Depending on this, start examining at t or 1 after t.
+		 * */
+
+		U8 *d = t + two_byte_count;
+
+
+		/* Count up the remaining bytes that expand to two */
+
+		while (d < e) {
+		    const U8 chr = *d++;
+		    if (! NATIVE_IS_INVARIANT(chr)) two_byte_count++;
+		}
+
+		/* The string will expand by just the number of bytes that
+		 * occupy two positions.  But we are one afterwards because of
+		 * the increment just above.  This is the place to put the
+		 * trailing NUL, and to set the length before we decrement */
+
+		d += two_byte_count;
+		SvCUR_set(sv, d - s);
+		*d-- = '\0';
+
+
+		/* Having decremented d, it points to the position to put the
+		 * very last byte of the expanded string.  Go backwards through
+		 * the string, copying and expanding as we go, stopping when we
+		 * get to the part that is invariant the rest of the way down */
+
+		e--;
+		while (e >= t) {
+		    const U8 ch = NATIVE8_TO_UNI(*e--);
+		    if (UNI_IS_INVARIANT(ch)) {
+			*d-- = UNI_TO_NATIVE(ch);
+		    } else {
+			*d-- = (U8)UTF8_EIGHT_BIT_LO(ch);
+			*d-- = (U8)UTF8_EIGHT_BIT_HI(ch);
+		    }
+		}
 	    }
 	}
-	/* Mark as UTF-8 even if no variant - saves scanning loop */
-	SvUTF8_on(sv);
     }
+
+    /* Mark as UTF-8 even if no variant - saves scanning loop */
+    SvUTF8_on(sv);
     return SvCUR(sv);
 }
 
