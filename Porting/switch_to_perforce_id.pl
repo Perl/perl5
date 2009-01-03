@@ -1,4 +1,8 @@
 #!perl
+#
+# given a perforce change number, checkout the equivalent git commit
+# into the git working directory
+#
 use strict;
 use warnings;
 use English;
