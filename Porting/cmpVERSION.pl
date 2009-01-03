@@ -14,6 +14,8 @@ use File::Compare;
 use File::Find;
 use File::Spec::Functions qw(rel2abs abs2rel catfile catdir curdir);
 
+@ARGV == 2 or die "usage: $0 source_dir1 source_dir2\n";
+
 for (@ARGV[0, 1]) {
     die "$0: '$_' does not look like Perl directory\n"
 	unless -f catfile($_, "perl.h") && -d catdir($_, "Porting");

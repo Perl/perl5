@@ -1,5 +1,8 @@
 #!./perl -w
 # this script must be run by the current perl to get perl's version right
+#
+# Create a META.yml file in the current directory. Muyst be run from the
+# root directory of a perl source tree.
 
 use strict;
 use warnings;
