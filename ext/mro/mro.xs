@@ -224,7 +224,6 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 
     return MUTABLE_AV(Perl_mro_set_private_data(aTHX_ meta, &c3_alg,
 						MUTABLE_SV(retval)));
-    return retval;
 }
 
 
