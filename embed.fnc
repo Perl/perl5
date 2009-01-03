@@ -1795,6 +1795,7 @@ s	|void	|printbuf	|NN const char* fmt|NN const char* s
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 s	|bool|isa_lookup	|NN HV *stash|NN const char * const name
+so	|HV *	|get_isa_hash	|NN HV *const stash
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
@@ -2174,7 +2175,6 @@ p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv
 Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
-so	|HV *	|get_isa_hash	|NN HV *const stash
 
 END_EXTERN_C
 /*
