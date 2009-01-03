@@ -1830,6 +1830,7 @@ s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 s	|bool|isa_lookup	|NN HV *stash|NN const char * const name
+so	|HV *	|get_isa_hash	|NN HV *const stash
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
@@ -2218,7 +2219,6 @@ ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 : Only used  in op.c
 xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
-so	|HV *	|get_isa_hash	|NN HV *const stash
 
 END_EXTERN_C
 /*
