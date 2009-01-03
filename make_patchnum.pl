@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# These two should go upon release to make the script Perl 5.005 compatible
 use strict;
 use warnings;
 
