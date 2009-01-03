@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+# output a list of:
+#  a) files listed in MANIFEST which don't exist
+#  b) files which exist but which aren't in MANIFEST
+
 use strict;
 use warnings;
 use File::Find;

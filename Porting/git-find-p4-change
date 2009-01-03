@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# given a perforce change number, output the equivalent git commit id
+
 die "usage: $0 [git-log-options] num" unless @ARGV;
 
 my $num = 1;
