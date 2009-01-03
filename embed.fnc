@@ -2218,8 +2218,7 @@ ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 : Only used  in op.c
 xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
-: Only used in univeral.c
-poM	|HV *	|get_isa_hash	|NN HV *const stash
+so	|HV *	|get_isa_hash	|NN HV *const stash
 
 END_EXTERN_C
 /*
