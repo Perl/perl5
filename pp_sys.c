@@ -29,6 +29,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
+#include "time64.h"
+#include "time64.c"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -200,15 +202,6 @@ void endservent(void);
 #endif
 
 #undef PERL_EFF_ACCESS	/* EFFective uid/gid ACCESS */
-
-/* AIX 5.2 and below use mktime for localtime, and defines the edge case
- * for time 0x7fffffff to be valid only in UTC. AIX 5.3 provides localtime64
- * available in the 32bit environment, which could warrant Configure
- * checks in the future.
- */
-#ifdef  _AIX
-#define LOCALTIME_EDGECASE_BROKEN
-#endif
 
 /* F_OK unused: if stat() cannot find it... */
 
@@ -4425,104 +4418,84 @@ PP(pp_tms)
 #endif /* HAS_TIMES */
 }
 
-#ifdef LOCALTIME_EDGECASE_BROKEN
-static struct tm *S_my_localtime (pTHX_ Time_t *tp)
-{
-    auto time_t     T;
-    auto struct tm *P;
-
-    /* No workarounds in the valid range */
-    if (!tp || *tp < 0x7fff573f || *tp >= 0x80000000)
-	return (localtime (tp));
-
-    /* This edge case is to workaround the undefined behaviour, where the
-     * TIMEZONE makes the time go beyond the defined range.
-     * gmtime (0x7fffffff) => 2038-01-19 03:14:07
-     * If there is a negative offset in TZ, like MET-1METDST, some broken
-     * implementations of localtime () (like AIX 5.2) barf with bogus
-     * return values:
-     * 0x7fffffff gmtime               2038-01-19 03:14:07
-     * 0x7fffffff localtime            1901-12-13 21:45:51
-     * 0x7fffffff mylocaltime          2038-01-19 04:14:07
-     * 0x3c19137f gmtime               2001-12-13 20:45:51
-     * 0x3c19137f localtime            2001-12-13 21:45:51
-     * 0x3c19137f mylocaltime          2001-12-13 21:45:51
-     * Given that legal timezones are typically between GMT-12 and GMT+12
-     * we turn back the clock 23 hours before calling the localtime
-     * function, and add those to the return value. This will never cause
-     * day wrapping problems, since the edge case is Tue Jan *19*
-     */
-    T = *tp - 82800; /* 23 hour. allows up to GMT-23 */
-    P = localtime (&T);
-    P->tm_hour += 23;
-    if (P->tm_hour >= 24) {
-	P->tm_hour -= 24;
-	P->tm_mday++;	/* 18  -> 19  */
-	P->tm_wday++;	/* Mon -> Tue */
-	P->tm_yday++;	/* 18  -> 19  */
-    }
-    return (P);
-} /* S_my_localtime */
-#endif
-
 PP(pp_gmtime)
 {
     dVAR;
     dSP;
-    Time_t when;
-    const struct tm *tmbuf;
+    Time64_T when;
+    struct TM tmbuf;
+    struct TM *err;
+    char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char * const monname[] =
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    if (MAXARG < 1)
-	(void)time(&when);
-    else
-#ifdef BIG_TIME
-	when = (Time_t)SvNVx(POPs);
-#else
-	when = (Time_t)SvIVx(POPs);
-#endif
+    if (MAXARG < 1) {
+	time_t now;
+	(void)time(&now);
+	when = (Time64_T)now;
+    }
+    else {
+	/* XXX POPq uses an SvIV so it won't work with 32 bit integer scalars
+	   using a double causes an unfortunate loss of accuracy on high numbers.
+	   What we really need is an SvQV.
+	*/
+	double input = POPn;
+	when = (Time64_T)input;
+	if( when != input ) {
+	    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
+			"%s(%.0f) too large", opname, input);
+	}
+    }
 
     if (PL_op->op_type == OP_LOCALTIME)
-#ifdef LOCALTIME_EDGECASE_BROKEN
-	tmbuf = S_my_localtime(aTHX_ &when);
-#else
-	tmbuf = localtime(&when);
-#endif
+        err = localtime64_r(&when, &tmbuf);
     else
-	tmbuf = gmtime(&when);
+	err = gmtime64_r(&when, &tmbuf);
 
-    if (GIMME != G_ARRAY) {
+    if( err == NULL ) {
+	/* XXX %lld broken for quads */
+	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		    "%s(%.0f) failed", opname, (double)when);
+    }
+
+    if (GIMME != G_ARRAY) {	/* scalar context */
 	SV *tsv;
+	/* XXX newSVpvf()'s %lld type is broken, so cheat with a double */
+	double year = (double)tmbuf.tm_year + 1900;
+
         EXTEND(SP, 1);
         EXTEND_MORTAL(1);
-	if (!tmbuf)
+	if (err == NULL)
 	    RETPUSHUNDEF;
-	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %d",
-			    dayname[tmbuf->tm_wday],
-			    monname[tmbuf->tm_mon],
-			    tmbuf->tm_mday,
-			    tmbuf->tm_hour,
-			    tmbuf->tm_min,
-			    tmbuf->tm_sec,
-			    tmbuf->tm_year + 1900);
+
+	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %.0f",
+			    dayname[tmbuf.tm_wday],
+			    monname[tmbuf.tm_mon],
+			    tmbuf.tm_mday,
+			    tmbuf.tm_hour,
+			    tmbuf.tm_min,
+			    tmbuf.tm_sec,
+			    year);
 	mPUSHs(tsv);
     }
-    else if (tmbuf) {
+    else {			/* list context */
+	if ( err == NULL )
+	    RETURN;
+
         EXTEND(SP, 9);
         EXTEND_MORTAL(9);
-        mPUSHi(tmbuf->tm_sec);
-	mPUSHi(tmbuf->tm_min);
-	mPUSHi(tmbuf->tm_hour);
-	mPUSHi(tmbuf->tm_mday);
-	mPUSHi(tmbuf->tm_mon);
-	mPUSHi(tmbuf->tm_year);
-	mPUSHi(tmbuf->tm_wday);
-	mPUSHi(tmbuf->tm_yday);
-	mPUSHi(tmbuf->tm_isdst);
+        mPUSHi(tmbuf.tm_sec);
+	mPUSHi(tmbuf.tm_min);
+	mPUSHi(tmbuf.tm_hour);
+	mPUSHi(tmbuf.tm_mday);
+	mPUSHi(tmbuf.tm_mon);
+	mPUSHn(tmbuf.tm_year);
+	mPUSHi(tmbuf.tm_wday);
+	mPUSHi(tmbuf.tm_yday);
+	mPUSHi(tmbuf.tm_isdst);
     }
     RETURN;
 }
