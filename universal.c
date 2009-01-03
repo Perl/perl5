@@ -33,8 +33,8 @@
 #include "perliol.h" /* For the PERLIO_F_XXX */
 #endif
 
-HV *
-Perl_get_isa_hash(pTHX_ HV *const stash)
+static HV *
+S_get_isa_hash(pTHX_ HV *const stash)
 {
     dVAR;
     struct mro_meta *const meta = HvMROMETA(stash);
@@ -78,7 +78,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
 {
     dVAR;
     const struct mro_meta *const meta = HvMROMETA(stash);
-    HV *const isa = meta->isa ? meta->isa : Perl_get_isa_hash(aTHX_ stash);
+    HV *const isa = meta->isa ? meta->isa : S_get_isa_hash(aTHX_ stash);
     STRLEN len = strlen(name);
     const HV *our_stash;
 
