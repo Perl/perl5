@@ -31,7 +31,7 @@ use constant ERROR_FATAL_CONFLICT => q{"use Fatal '%s'" is not allowed while "no
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '1.997';
+our $VERSION = '1.998';
 
 our $Debug ||= 0;
 
@@ -83,6 +83,7 @@ my %TAGS = (
     ':1.995' => [qw(:default)],
     ':1.996' => [qw(:default)],
     ':1.997' => [qw(:default)],
+    ':1.998' => [qw(:default)],
 
 );
 
@@ -1091,6 +1092,10 @@ the C<perlbug> command.
 C<Fatal> clobbers the context in which a function is called and always
 makes it a scalar context, except when the C<:void> tag is used.
 This problem does not exist in L<autodie>.
+
+"Used only once" warnings can be generated when C<autodie> or C<Fatal>
+is used with package filehandles (eg, C<FILE>).  It's strongly recommended
+you use scalar filehandles instead.
 
 =head1 AUTHOR
 

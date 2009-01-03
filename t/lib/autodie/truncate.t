@@ -6,13 +6,14 @@ use File::Temp qw(tempfile);
 use IO::Handle;
 
 my $tmpfh = tempfile();
+my $truncate_status;
 
 eval {
-    truncate($tmpfh, 0);
+    $truncate_status = truncate($tmpfh, 0);
 };
 
-if ($@) {
-    plan skip_all => 'Truncate not implemented on this system';
+if ($@ || !defined($truncate_status)) {
+    plan skip_all => 'Truncate not implemented or not working on this system';
 }
 
 plan tests => 3;
