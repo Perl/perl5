@@ -447,7 +447,7 @@ for my $str ("x", "\x{100}") {
 }
 
 sub PVBM () { "X" }
-index PVBM, "foo";
+index "foo", PVBM;
 
 my $warn = 0;
 local $^W = 1;
