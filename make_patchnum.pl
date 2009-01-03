@@ -9,7 +9,22 @@ make_patchnum.pl - make patchnum
 
 =head1 SYNOPSIS
 
-...
+  miniperl make_patchnum.pl
+
+  perl make_patchnum.pl
+
+This program creates the files holding the information
+about locally applied patches to the source code. The created
+files are C<.patchnum>, C<unpushed.h> and C<lib/Config_git.pl>.
+
+C<.patchnum> contains ???
+
+C<lib/Config_git.pl> contains the configuration of git for
+this branch.
+
+C<unpushed.h> contains the local changes that haven't been
+synchronized with the remote repository as configured with
+C<< git configure branch.<current branch>.remote >>
 
 =cut
 
