@@ -525,7 +525,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) make_patchnum miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) make_patchnum miniperl$(EXE_EXT) miniperl extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -543,8 +543,11 @@ sperl.i: perl.c $(h)
 make_patchnum:
 	sh $(shellflags) make_patchnum.sh
 
-# make sure that we recompile perl.c if .patchnum changes
-perl$(OBJ_EXT): .patchnum unpushed.h
+git_version.h:
+	sh $(shellflags) make_patchnum.sh
+
+# make sure that we recompile perl.c if the git version changes
+perl$(OBJ_EXT): git_version.h
 
 translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
@@ -1220,9 +1223,8 @@ _tidy:
 	-cd pod; $(LDLIBPTH) $(MAKE) clean
 	-cd utils; $(LDLIBPTH) $(MAKE) clean
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
-	-rm .patchnum
 	-rm lib/Config_git.pl
-	-rm unpushed.h
+	-rm git_version.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
