@@ -13,18 +13,30 @@ make_patchnum.pl - make patchnum
 
   perl make_patchnum.pl
 
+=head1 DESCRITPTION
+
 This program creates the files holding the information
 about locally applied patches to the source code. The created
-files are C<.patchnum>, C<unpushed.h> and C<lib/Config_git.pl>.
+files are  C<git_version.h> and C<lib/Config_git.pl>.
 
-C<.patchnum> contains ???
+=item C<lib/Config_git.pl>
 
-C<lib/Config_git.pl> contains the configuration of git for
-this branch.
+Contains status information from git in a form meant to be processed
+by the tied hash logic of Config.pm. It is actually optional,
+although -V will look strange without it.
 
-C<unpushed.h> contains the local changes that haven't been
-synchronized with the remote repository as configured with
-C<< git configure branch.<current branch>.remote >>
+C<git_version.h> contains similar information in a C header file
+format, designed to be used by patchlevel.h. This file is obtained
+from stock_git_version.h if miniperl is not available, and then
+later on replaced by the version created by this script.
+
+=head1 AUTHOR
+
+Yves Orton, Kenichi Ishigaki, Max Maischein
+
+=head1 COPYRIGHT
+
+Same terms as Perl itself.
 
 =cut
 
@@ -33,7 +45,7 @@ BEGIN {
     while (!-e "$root/perl.c" and length($root)<100) {
         if ($root eq '.') {
 	        $root="..";
-    	} else {
+        } else {
 	        $root.="/..";
 	    }
     }
@@ -76,12 +88,12 @@ sub write_files {
     my %content= map { /WARNING: '([^']+)'/ || die "Bad mojo!"; $1 => $_ } @_;
     my @files= sort keys %content;
     my $files= join " and ", map { "'$_'" } @files;
-    foreach my $file (@files) { 
+    foreach my $file (@files) {
         if (read_file($file) ne $content{$file}) {
             print "Updating $files\n";
             write_file($_,$content{$_}) for @files;
             return 1;
-        } 
+        }
     }
     print "Reusing $files\n";
     return 0;
@@ -100,7 +112,7 @@ elsif (-d path_to('.git')) {
     ($branch) = map { /\* ([^(]\S*)/ ? $1 : () } backtick('git branch');
     my ($remote,$merge);
     if (length $branch) {
-        $merge= backtick("git config branch.$branch.merge"); 
+        $merge= backtick("git config branch.$branch.merge");
         $merge =~ s!^refs/heads/!!;
         $remote= backtick("git config branch.$branch.remote");
     }

@@ -541,7 +541,7 @@ sperl.i: perl.c $(h)
 .PHONY: all translators utilities make_patchnum
 
 make_patchnum:
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib make_patchnum.pl || $(MAKE) miniperl 
+	$(LDLIBPTH) $(RUN) ./miniperl -Ilib make_patchnum.pl || $(MAKE) miniperl
 
 git_version.h: stock_git_version.h
 	cp stock_git_version.h git_version.h
