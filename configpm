@@ -548,11 +548,12 @@ foreach my $prefix (qw(libs libswanted)) {
 $heavy_txt .= "EOVIRTUAL\n";
 
 $heavy_txt .= <<'ENDOFGIT';
-eval { 
+eval {
 	# do not have hairy conniptions if this isnt available
 	require 'Config_git.pl';
 	$Config_SH_expanded .= $Config::Git_Data;
-};
+	1;
+} or warn "Warning: failed to load Config_git.pl, something strange about this perl...\n";
 ENDOFGIT
 
 $heavy_txt .= $fetch_string;
