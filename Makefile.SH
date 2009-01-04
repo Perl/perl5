@@ -406,7 +406,7 @@ esac
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm
+private = preplibrary $(CONFIGPM) $(CONFIGPOD) make_patchnum lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -525,7 +525,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl make_patchnum extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -541,8 +541,7 @@ sperl.i: perl.c $(h)
 .PHONY: all translators utilities make_patchnum
 
 make_patchnum:
-	sh $(shellflags) make_patchnum.sh || $(MAKE) miniperl
-
+	$(LDLIBPTH) $(RUN) ./miniperl -Ilib make_patchnum.pl || $(MAKE) miniperl 
 
 git_version.h: stock_git_version.h
 	cp stock_git_version.h git_version.h
@@ -1333,7 +1332,7 @@ _test_prep: unpack_files
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: make_patchnum test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+test_prep: test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
