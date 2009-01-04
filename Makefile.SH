@@ -525,7 +525,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) make_patchnum miniperl$(EXE_EXT) miniperl extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl make_patchnum extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -543,8 +543,8 @@ sperl.i: perl.c $(h)
 make_patchnum:
 	sh $(shellflags) make_patchnum.sh
 
-git_version.h:
-	sh $(shellflags) make_patchnum.sh
+git_version.h: stock_git_version.h
+	cp stock_git_version.h git_version.h
 
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
