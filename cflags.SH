@@ -213,6 +213,8 @@ warn="$warn"
 stdflags="$stdflags"
 # Extra extra.
 extra="$extra"
+# what do executables look like?
+_exe="$_exe"
 
 !GROK!THIS!
 
@@ -296,14 +298,7 @@ for file do
     op) ;;
     opmini) ;;
     pad) ;;
-    perl) 
-        if [ -f .patchnum -a -n "`awk 'BEGIN{ORS=""} /describe:/ {print $1}' .patchnum`" ] ; then
-                ccflags="-DPERL_PATCHNUM=`awk 'BEGIN{ORS=""} /describe:/ {print $2}' .patchnum` $ccflags"
-        fi
-	if [ -f .patchnum -a -n "`awk 'BEGIN{ORS=""} /status:/ {print $2}' .patchnum`" ] ; then
-                ccflags="-DPERL_GIT_UNCOMMITTED_CHANGES=`awk 'BEGIN{ORS=""} /status:/ {print $2}' .patchnum` $ccflags"
-	fi
-        ;;
+    perl) ;;
     perlapi) ;;
     perlmain) ;;
     perly) ;;

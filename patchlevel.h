@@ -116,7 +116,7 @@ hunk.
  */
 
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
-#include "unpushed.h"
+#include "git_version.h"
 #if !defined(PERL_GIT_UNPUSHED_COMMITS)
 #define PERL_GIT_UNPUSHED_COMMITS_PATCH /* no-op */
 #else
