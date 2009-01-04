@@ -19,6 +19,23 @@ use Test::More tests => 14;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
+my $vms_unix_rpt = 0;
+my $vms_efs = 0;
+my $vms_mode = 0;
+if ($^O eq 'VMS') {
+    if (eval 'require VMS::Feature') {
+        $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
+        $vms_efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_efs = $efs_charset =~ /^[ET1]/i;
+    }
+    $vms_mode = 1 unless ($vms_unix_rpt);
+}
+
+
 # look for the contents of the current directory
 $ENV{PATH} = "/bin";
 delete @ENV{qw(BASH_ENV CDPATH ENV IFS)};
@@ -109,7 +126,7 @@ is_deeply(\@a, ['a', 'b']);
 
 print "# @a\n";
 
-is_deeply(\@a, [($^O eq 'VMS'? 'test.' : 'TEST'), 'a', 'b']);
+is_deeply(\@a, [($vms_mode ? 'test.' : 'TEST'), 'a', 'b']);
 
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";
