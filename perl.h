@@ -2936,11 +2936,11 @@ typedef pthread_key_t	perl_key;
 	} STMT_END
 
   /* STATUS_UNIX_EXIT_SET - Takes a UNIX/POSIX exit code and sets
-   * the NATIVE error status based on it.  It does not assume that
-   * the UNIX/POSIX exit codes have any relationship to errno, except
-   * that 0 indicates a success.  When in the default mode to comply
-   * with the Perl VMS documentation, any other code sets the NATIVE
-   * status to a failure code of SS$_ABORT.
+   * the NATIVE error status based on it.
+   *
+   * When in the default mode to comply with the Perl VMS documentation,
+   * 0 is a success and any other code sets the NATIVE status to a failure
+   * code of SS$_ABORT.
    *
    * In the new POSIX EXIT mode, native status will be set so that the
    * actual exit code will can be retrieved by the calling program or
@@ -2954,29 +2954,30 @@ typedef pthread_key_t	perl_key;
 	STMT_START {					\
 	    I32 evalue = (I32)n;			\
 	    PL_statusvalue = evalue;			\
-	    if (evalue != -1) {				\
-	      if (evalue <= 0xFF00) {			\
-		if (evalue > 0xFF)			\
-		  evalue = (evalue >> child_offset_bits) & 0xFF; \
-		if (evalue == 0)			\
-		  PL_statusvalue_vms == SS$_NORMAL;	\
-		else					\
-		  if (MY_POSIX_EXIT)			\
-		    PL_statusvalue_vms =		\
-		       (C_FAC_POSIX | (evalue << 3 ) |	\
-		       ((evalue == 1) ? (STS$K_ERROR | STS$M_INHIB_MSG) : 1)); \
-		  else					\
-		    PL_statusvalue_vms = SS$_ABORT; \
-	      } else { /* forgive them Perl, for they have sinned */ \
-		if (evalue != EVMSERR) PL_statusvalue_vms = evalue; \
-		else PL_statusvalue_vms = vaxc$errno;		\
-	        /* And obviously used a VMS status value instead of UNIX */ \
-	        PL_statusvalue = EVMSERR;				\
-	      }							\
-	    }							\
-	    else PL_statusvalue_vms = SS$_ABORT;		\
-	    set_vaxc_errno(PL_statusvalue_vms);			\
+	    if (MY_POSIX_EXIT) { \
+	      if (evalue <= 0xFF00) {		\
+		  if (evalue > 0xFF)			\
+		    evalue = (evalue >> child_offset_bits) & 0xFF; \
+		  PL_statusvalue_vms =		\
+		    (C_FAC_POSIX | (evalue << 3 ) |	\
+		    ((evalue == 1) ? (STS$K_ERROR | STS$M_INHIB_MSG) : 1)); \
+	      } else /* forgive them Perl, for they have sinned */ \
+		PL_statusvalue_vms = evalue; \
+	    } else { \
+	      if (evalue == 0)			\
+		PL_statusvalue_vms = SS$_NORMAL;	\
+	      else if (evalue <= 0xFF00) \
+		PL_statusvalue_vms = SS$_ABORT; \
+	      else { /* forgive them Perl, for they have sinned */ \
+		  if (evalue != EVMSERR) PL_statusvalue_vms = evalue; \
+		  else PL_statusvalue_vms = vaxc$errno;	\
+		  /* And obviously used a VMS status value instead of UNIX */ \
+		  PL_statusvalue = EVMSERR;		\
+	      } \
+	      set_vaxc_errno(PL_statusvalue_vms);	\
+	    }						\
 	} STMT_END
+
 
   /* STATUS_EXIT_SET - Takes a NATIVE/UNIX/POSIX exit code
    * and sets the NATIVE error status based on it.  This special case

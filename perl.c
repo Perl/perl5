@@ -5362,22 +5362,34 @@ Perl_my_failure_exit(pTHX)
       */
     if (MY_POSIX_EXIT) {
 
-	/* In POSIX_EXIT mode follow Perl documentations and use 255 for
-	 * the exit code when there isn't an error.
-	 */
+        /* According to the die_exit.t tests, if errno is non-zero */
+        /* It should be used for the error status. */
 
-	if (STATUS_UNIX == 0)
-	    STATUS_UNIX_EXIT_SET(255);
-	else {
-	    STATUS_UNIX_EXIT_SET(STATUS_UNIX);
+	if (errno == EVMSERR) {
+	    STATUS_NATIVE = vaxc$errno;
+	} else {
 
-	    /* The exit code could have been set by $? or vmsish which
-	     * means that it may not be fatal.  So convert
-	     * success/warning codes to fatal.
-	     */
-	    if ((STATUS_NATIVE & (STS$K_SEVERE|STS$K_ERROR)) == 0)
+            /* According to die_exit.t tests, if the child_exit code is */
+            /* also zero, then we need to exit with a code of 255 */
+            if ((errno != 0) && (errno < 256))
+		STATUS_UNIX_EXIT_SET(errno);
+            else if (STATUS_UNIX < 255) {
 		STATUS_UNIX_EXIT_SET(255);
+            }
+
 	}
+
+	/* The exit code could have been set by $? or vmsish which
+	 * means that it may not have fatal set.  So convert
+	 * success/warning codes to fatal with out changing
+	 * the POSIX status code.  The severity makes VMS native
+	 * status handling work, while UNIX mode programs use the
+	 * the POSIX exit codes.
+	 */
+	 if ((STATUS_NATIVE & (STS$K_SEVERE|STS$K_ERROR)) == 0) {
+	    STATUS_NATIVE &= STS$M_COND_ID;
+	    STATUS_NATIVE |= STS$K_ERROR | STS$M_INHIB_MSG;
+         }
     }
     else {
 	/* Traditionally Perl on VMS always expects a Fatal Error. */

@@ -27,8 +27,10 @@ if ($^O eq 'VMS') {
     if (eval 'require VMS::Feature') {
         $vms_exit_mode = !(VMS::Feature::current("posix_exit"));
     } else {
-        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} =~ /^[ET1]/i; 
-        my $posix_ex = $ENV{'PERL_VMS_POSIX_EXIT'} =~ /^[ET1]/i;
+        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        my $env_posix_ex = $ENV{'PERL_VMS_POSIX_EXIT'} || '';
+        my $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        my $posix_ex = $env_posix_ex =~ /^[ET1]/i;
         if (($unix_rpt || $posix_ex) ) {
             $vms_exit_mode = 0;
         } else {
@@ -149,7 +151,7 @@ if ($^O eq 'VMS') {
 $exit_arg = 42;
 $exit = run("END { \$? = $exit_arg }");
 
-# On VMS, in the child process the actual exit status will be SS$_ABORT, 
+# On VMS, in the child process the actual exit status will be SS$_ABORT,
 # or 44, which is what you get from any non-zero value of $? except for
 # 65535 that has been dePOSIXified by STATUS_UNIX_SET.  If $? is set to
 # 65535 internally when there is a VMS status code that is valid, and
