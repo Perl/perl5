@@ -30,7 +30,6 @@ my %OSTYPES = qw(
 		 dynixptx  Unix
 		 freebsd   Unix
 		 linux     Unix
-		 haiku     Unix
 		 hpux      Unix
 		 irix      Unix
 		 darwin    Unix

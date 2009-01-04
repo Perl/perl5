@@ -29,7 +29,6 @@ my %OS = (
     Cygwin      => 'cygwin',
     Darwin      => 'darwin',
     EBCDIC      => 'os390|os400|posix-bc|vmesa',
-    Haiku       => 'haiku',
     HPUX        => 'hpux',
     Linux       => 'linux',
     MSDOS       => 'dos|os2|MSWin32|cygwin',
