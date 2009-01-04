@@ -24,7 +24,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.14';
+$VERSION = '2.15';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -49,6 +49,44 @@ if ($^O eq 'MacOS') {
 	warn 'Mac::MoreFiles could not be loaded; using non-native syscopy'
 		if $@ && $^W;
 }
+
+# Look up the feature settings on VMS using VMS::Feature when available.
+
+my $use_vms_feature = 0;
+BEGIN {
+    if ($^O eq 'VMS') {
+        if (eval 'require VMS::Feature') {
+            $use_vms_feature = 1;
+        }
+    }
+}
+
+# Need to look up the UNIX report mode.  This may become a dynamic mode
+# in the future.
+sub _vms_unix_rpt {
+    my $unix_rpt;
+    if ($use_vms_feature) {
+        $unix_rpt = VMS::Feature::current("filename_unix_report");
+    } else {
+        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
+    }
+    return $unix_rpt;
+}
+
+# Need to look up the EFS character set mode.  This may become a dynamic
+# mode in the future.
+sub _vms_efs {
+    my $efs;
+    if ($use_vms_feature) {
+        $efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
+        $efs = $env_efs =~ /^[ET1]/i;
+    }
+    return $efs;
+}
+
 
 sub _catname {
     my($from, $to) = @_;
@@ -140,14 +178,36 @@ sub copy {
 
             if (! -d $to && ! -d $from) {
 
+                my $vms_efs = _vms_efs();
+                my $unix_rpt = _vms_unix_rpt();
+                my $unix_mode = 0;
+                my $from_unix = 0;
+                $from_unix = 1 if ($from =~ /^\.\.?$/);
+                my $from_vms = 0;
+                $from_vms = 1 if ($from =~ m#[\[<\]]#);
+
+                # Need to know if we are in Unix mode.
+                if ($from_vms == $from_unix) {
+                    $unix_mode = $unix_rpt;
+                } else {
+                    $unix_mode = $from_unix;
+                }
+
                 # VMS has sticky defaults on extensions, which means that
                 # if there is a null extension on the destination file, it
                 # will inherit the extension of the source file
                 # So add a '.' for a null extension.
 
-                $copy_to = VMS::Filespec::vmsify($to);
+                # In unix_rpt mode, the trailing dot should not be added.
+
+                if ($vms_efs) {
+                    $copy_to = $to;
+                } else {
+                    $copy_to = VMS::Filespec::vmsify($to);
+                }
                 my ($vol, $dirs, $file) = File::Spec->splitpath($copy_to);
-                $file = $file . '.' unless ($file =~ /(?<!\^)\./);
+                $file = $file . '.'
+                    unless (($file =~ /(?<!\^)\./) || $unix_rpt);
                 $copy_to = File::Spec->catpath($vol, $dirs, $file);
 
                 # Get rid of the old versions to be like UNIX
@@ -257,14 +317,37 @@ sub move {
     if (-$^O eq 'VMS' && -e $from) {
 
         if (! -d $to && ! -d $from) {
+
+            my $vms_efs = _vms_efs();
+            my $unix_rpt = _vms_unix_rpt();
+            my $unix_mode = 0;
+            my $from_unix = 0;
+            $from_unix = 1 if ($from =~ /^\.\.?$/);
+            my $from_vms = 0;
+            $from_vms = 1 if ($from =~ m#[\[<\]]#);
+
+            # Need to know if we are in Unix mode.
+            if ($from_vms == $from_unix) {
+                $unix_mode = $unix_rpt;
+            } else {
+                $unix_mode = $from_unix;
+            }
+
             # VMS has sticky defaults on extensions, which means that
             # if there is a null extension on the destination file, it
             # will inherit the extension of the source file
             # So add a '.' for a null extension.
 
-            $rename_to = VMS::Filespec::vmsify($to);
+            # In unix_rpt mode, the trailing dot should not be added.
+
+            if ($vms_efs) {
+                $rename_to = $to;
+            } else {
+                $rename_to = VMS::Filespec::vmsify($to);
+            }
             my ($vol, $dirs, $file) = File::Spec->splitpath($rename_to);
-            $file = $file . '.' unless ($file =~ /(?<!\^)\./);
+            $file = $file . '.'
+                unless (($file =~ /(?<!\^)\./) || $unix_rpt);
             $rename_to = File::Spec->catpath($vol, $dirs, $file);
 
             # Get rid of the old versions to be like UNIX
