@@ -412,7 +412,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 #if PERL_VERSION < 8
 	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) 
 #elif PERL_VERSION < 11
-        if (realpack && realtype == SVt_PVMG && mg_find(sv, PERL_MAGIC_qr))
+        if (realpack && realtype == SVt_PVMG && mg_find(ival, PERL_MAGIC_qr))
 #else        
         if (realpack && realtype == SVt_REGEXP) 
 #endif
