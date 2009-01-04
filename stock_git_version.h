@@ -3,5 +3,5 @@
 *          DO NOT EDIT DIRECTLY - edit make_patchnum.sh instead      
 ****************************************************************************/
 #define PERL_PATCHNUM UNKOWN
-#define PERL_GIT_UNCOMMITTED_CHANGES UNKNOWN
+#define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
 #define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
