@@ -3342,7 +3342,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	{
 	    SV* level= vstringify(PL_patchlevel);
 #ifdef PERL_PATCHNUM
-	    SV* num= newSVpvn(STRINGIFY(PERL_PATCHNUM),sizeof(STRINGIFY(PERL_PATCHNUM))-1);
+	    SV* num= newSVpvn(PERL_PATCHNUM,sizeof(PERL_PATCHNUM)-1);
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
 	    sv_catpvs(num, "*");
 #endif
