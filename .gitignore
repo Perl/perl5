@@ -48,6 +48,10 @@ Makefile.old
 *.res
 *.RES
 
+dll.base
+/ext/DynaLoader/dl_win32.xs
+splittree.pl
+
 # ?
 ext.libs
 
@@ -66,6 +70,25 @@ x2p/a2p
 x2p/find2perl
 x2p/psed
 x2p/s2p
+
+# Win32 is missing a2p.bat?
+x2p/find2perl.bat
+x2p/psed.bat
+x2p/s2p.bat
+
+ext/Win32API/File/cFile_pc_to_blib
+lib/Win32.pm
+lib/Win32API/
+lib/Win32CORE.pm
+
+# These .bat files are created from their Perl correspondents
+pod/pod2html.bat
+pod/pod2latex.bat
+pod/pod2man.bat
+pod/pod2text.bat
+pod/pod2usage.bat
+pod/podchecker.bat
+pod/podselect.bat
 
 # test byproduct
 ext/Test/Harness/t/ext/
