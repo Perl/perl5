@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 3865;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 3961;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3896,6 +3896,15 @@ sub run_tests {
         iseq $1, "\xd6", "Upgrade error";
     }
 
+    {
+# more TRIE/AHOCORASICK problems with mixed utf8 / latin-1 and case folding
+	for my $chr (160 .. 255) {
+	    my $chr_byte = chr($chr);
+	    my $chr_utf8 = chr($chr); utf8::upgrade($chr_utf8);
+	    my $rx = qr{$chr_byte|X}i;
+	    ok($chr_utf8 =~ $rx, "utf8/latin, codepoint $chr");
+	}
+    }
 
     {
         # Regardless of utf8ness any character matches itself when 

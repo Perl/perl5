@@ -1006,15 +1006,16 @@ Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,  \
 uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
+    UV uvc_unfolded = 0;						    \
     switch (trie_type) {                                                    \
     case trie_utf8_fold:                                                    \
 	if ( foldlen>0 ) {                                                  \
-	    uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );     \
+	    uvc_unfolded = uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags ); \
 	    foldlen -= len;                                                 \
 	    uscan += len;                                                   \
 	    len=0;                                                          \
 	} else {                                                            \
-	    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );   \
+	    uvc_unfolded = uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags ); \
 	    uvc = to_uni_fold( uvc, foldbuf, &foldlen );                    \
 	    foldlen -= UNISKIP( uvc );                                      \
 	    uscan = foldbuf + UNISKIP( uvc );                               \
@@ -1053,6 +1054,9 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 		charid = (U16)SvIV(*svpp);                                  \
 	}                                                                   \
     }                                                                       \
+    if (!charid && trie_type == trie_utf8_fold && !UTF) {		    \
+	charid = trie->charmap[uvc_unfolded];			    	    \
+    }								    	    \
 } STMT_END
 
 #define REXEC_FBC_EXACTISH_CHECK(CoNd)                 \
