@@ -74,7 +74,7 @@ new_header=`cat <<EOFTEXT
 ****************************************************************************/
 #define PERL_PATCHNUM $describe
 $status
-#define PERL_GIT_UNPUSHED_COMMITS       $unpushed_commits
+#define PERL_GIT_UNPUSHED_COMMITS $unpushed_commits 
 /*leave-this-comment*/
 EOFTEXT
 `
