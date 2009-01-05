@@ -2825,8 +2825,6 @@ PERL_CALLCONV void	Perl_save_hints(pTHX);
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */
-#define PERL_ARGS_ASSERT_SAVE_HELEM	\
-	assert(hv); assert(key); assert(sptr)
 
 PERL_CALLCONV void	Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
@@ -3976,8 +3974,6 @@ PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 
 /* PERL_CALLCONV STRLEN	sv_utf8_upgrade_nomg(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1); */
-#define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_NOMG	\
-	assert(sv)
 
 PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
 			__attribute__nonnull__(pTHX_1);
@@ -5958,8 +5954,6 @@ PERL_CALLCONV void	Perl_sv_catsv_flags(pTHX_ SV *const dsv, SV *const ssv, const
 
 /* PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *const sv, const I32 flags)
 			__attribute__nonnull__(pTHX_1); */
-#define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_FLAGS	\
-	assert(sv)
 
 PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extra)
 			__attribute__nonnull__(pTHX_1);
