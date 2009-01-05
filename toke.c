@@ -824,6 +824,8 @@ S_incline(pTHX_ const char *s)
     n = s;
     while (isDIGIT(*s))
 	s++;
+    if (!SPACE_OR_TAB(*s) && *s != '\n' && *s != '\0')
+	return;
     while (SPACE_OR_TAB(*s))
 	s++;
     if (*s == '"' && (t = strchr(s+1, '"'))) {
