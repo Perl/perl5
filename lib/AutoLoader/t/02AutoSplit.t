@@ -26,6 +26,31 @@ use Test::More tests => 58;
 use File::Spec;
 use File::Find;
 
+my $Is_VMS   = $^O eq 'VMS';
+my $Is_VMS_mode = 0;
+my $Is_VMS_lc = 0;
+
+if ($Is_VMS) {
+    require VMS::Filespec if $Is_VMS;
+    my $vms_unix_rpt;
+    my $vms_case;
+
+    $Is_VMS_mode = 1;
+    $Is_VMS_lc = 1;
+    if (eval 'require VMS::Feature') {
+        $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
+        $vms_case = VMS::Feature::current("efs_case_preserve");
+    } else {
+        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_case = $efs_case =~ /^[ET1]/i;
+    }
+    $Is_VMS_lc = 0 if ($vms_case);
+    $Is_VMS_mode = 0 if ($vms_unix_rpt);
+}
+
+
 require AutoSplit; # Run time. Check it compiles.
 ok (1, "AutoSplit loaded");
 
@@ -72,7 +97,7 @@ sub split_a_file {
 
 my $i = 0;
 my $dir = File::Spec->catdir($incdir, 'auto');
-if ($^O eq 'VMS') {
+if ($Is_VMS_mode) {
   $dir = VMS::Filespec::unixify($dir);
   $dir =~ s/\/$//;
 } elsif ($^O eq 'MacOS') {
@@ -109,7 +134,7 @@ foreach (@tests) {
     $output = split_a_file (undef, $file, $dir, @extra_args);
   }
 
-  if ($^O eq 'VMS') {
+  if ($Is_VMS_mode) {
      my ($filespec, $replacement);
      while ($output =~ m/(\[.+\])/) {
        $filespec = $1;
@@ -128,7 +153,7 @@ foreach (@tests) {
     find (sub {$got{$File::Find::name}++ unless -d $_}, $dir);
     foreach (split /\n/, $args{Files}) {
       next if /^#/;
-      $_ = lc($_) if $^O eq 'VMS';
+      $_ = lc($_) if $Is_VMS_lc;
       unless (delete $got{$_}) {
         $missing{$_}++;
       }
