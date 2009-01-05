@@ -44,10 +44,10 @@ BEGIN {
     my $root=".";
     while (!-e "$root/perl.c" and length($root)<100) {
         if ($root eq '.') {
-	        $root="..";
+            $root="..";
         } else {
-	        $root.="/..";
-	    }
+            $root.="/..";
+        }
     }
     die "Can't find toplevel" if !-e "$root/perl.c";
     sub path_to { "$root/$_[0]" } # use $_[0] if this'd be placed in toplevel.
@@ -57,7 +57,7 @@ sub read_file {
     my $file = path_to(@_);
     return "" unless -e $file;
     open my $fh, '<', $file
-	or die "Failed to open for read '$file':$!";
+        or die "Failed to open for read '$file':$!";
     return do { local $/; <$fh> };
 }
 
@@ -65,7 +65,7 @@ sub write_file {
     my ($file, $content) = @_;
     $file= path_to($file);
     open my $fh, '>', $file
-	or die "Failed to open for write '$file':$!";
+        or die "Failed to open for write '$file':$!";
     print $fh $content;
     close $fh;
 }
@@ -173,4 +173,4 @@ git_commit_id_title='$commit_title'
 $extra_info
 ENDOFGIT
 EOF_CONFIG
-# ex: set ts=4 sts=4 et ft=perl:
+# ex: set ts=8 sts=4 sw=4 et ft=perl:
