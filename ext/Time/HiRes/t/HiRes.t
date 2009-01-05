@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..38\n"; }
+BEGIN { $| = 1; print "1..40\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -79,11 +79,14 @@ if ($have_fork) {
 	if ($timer_pid == 0) { # We are the kid, set up the timer.
 	    my $ppid = getppid();
 	    print "# I am the timer process $$, sleeping for $waitfor seconds...\n";
-	    sleep($waitfor);
-	    warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded!\n";
-	    print "# Terminating main process $ppid...\n";
-	    kill('TERM', $ppid);
-	    print "# This is the timer process $$, over and out.\n";
+	    sleep($waitfor - 2);    # Workaround for perlbug #49073
+	    sleep(2);               # Wait for parent to exit
+	    if (kill(0, $ppid)) {   # Check if parent still exists
+		warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded!\n";
+		print "# Terminating main process $ppid...\n";
+		kill('KILL', $ppid);
+		print "# This is the timer process $$, over and out.\n";
+	    }
 	    exit(0);
 	} else {
 	    print "# The timer process $timer_pid launched, continuing testing...\n";
@@ -238,10 +241,13 @@ my $has_ualarm = $Config{d_ualarm};
 
 $has_ualarm ||= $xdefine =~ /-DHAS_UALARM/;
 
-unless (   defined &Time::HiRes::gettimeofday
-	&& defined &Time::HiRes::ualarm
-	&& defined &Time::HiRes::usleep
-	&& $has_ualarm) {
+my $can_subsecond_alarm =
+   defined &Time::HiRes::gettimeofday &&
+   defined &Time::HiRes::ualarm &&
+   defined &Time::HiRes::usleep &&
+   $has_ualarm;
+
+unless ($can_subsecond_alarm) {
     for (15..17) {
 	print "ok $_ # Skip: no gettimeofday or no ualarm or no usleep\n";
     }
@@ -301,6 +307,10 @@ unless (   defined &Time::HiRes::gettimeofday
 		last;
 	    }
 	    my $exp = 0.3 * (5 - $i);
+	    if ($exp == 0) {
+		$not = "while: divisor became zero";
+		last;
+	    }
 	    # This test is more sensitive, so impose a softer limit.
 	    if (abs($ival/$exp - 1) > 4*$limit) {
 		my $ratio = abs($ival/$exp);
@@ -316,6 +326,10 @@ unless (   defined &Time::HiRes::gettimeofday
 	my $ival = Time::HiRes::tv_interval ($r);
 	print "# Tick! $i $ival\n";
 	my $exp = 0.3 * (5 - $i);
+	if ($exp == 0) {
+	    $not = "tick: divisor became zero";
+	    last;
+	}
 	# This test is more sensitive, so impose a softer limit.
 	if (abs($ival/$exp - 1) > 4*$limit) {
 	    my $ratio = abs($ival/$exp);
@@ -333,12 +347,13 @@ unless (   defined &Time::HiRes::gettimeofday
     print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
 }
 
-unless (   defined &Time::HiRes::setitimer
+unless (defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
 	&& has_symbol('ITIMER_VIRTUAL')
 	&& $Config{sig_name} =~ m/\bVTALRM\b/
-	&& $^O !~ /^(nto)$/ # nto: QNX 6 has the API but no implementation
-	&& $^O ne 'haiku') { # same for Haiku
+	&& $^O ne 'nto' # nto: QNX 6 has the API but no implementation
+	&& $^O ne 'haiku' # haiku: has the API but no implementation
+    ) {
     for (18..19) {
 	print "ok $_ # Skip: no virtual interval timers\n";
     }
@@ -730,12 +745,37 @@ if ($^O =~ /^(cygwin|MSWin)/) {
     skip 38;
 }
 
+unless ($can_subsecond_alarm) {
+    skip 39..40;
+} else {
+    {
+	my $alrm;
+	$SIG{ALRM} = sub { $alrm++ };
+	Time::HiRes::alarm(0.1);
+	my $t0 = time();
+	1 while time() - $t0 <= 1;
+	print $alrm ? "ok 39\n" : "not ok 39\n";
+    }
+    {
+	my $alrm;
+	$SIG{ALRM} = sub { $alrm++ };
+	Time::HiRes::alarm(1.1);
+	my $t0 = time();
+	1 while time() - $t0 <= 2;
+	print $alrm ? "ok 40\n" : "not ok 40\n";
+    }
+}
+
 END {
     if ($timer_pid) { # Only in the main process.
 	my $left = $TheEnd - time();
 	printf "# I am the main process $$, terminating the timer process $timer_pid\n# before it terminates me in %d seconds (testing took %d seconds).\n", $left, $waitfor - $left;
-	my $kill = kill('TERM', $timer_pid); # We are done, the timer can go.
-	printf "# kill TERM $timer_pid = %d\n", $kill;
+	if (kill(0, $timer_pid)) {
+	    local $? = 0;
+	    my $kill = kill('KILL', $timer_pid); # We are done, the timer can go.
+	    wait();
+	    printf "# kill KILL $timer_pid = %d\n", $kill;
+	}
 	unlink("ktrace.out"); # Used in BSD system call tracing.
 	print "# All done.\n";
     }
