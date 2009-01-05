@@ -1,5 +1,29 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9719	[2009-01-04]
+	- As with QNX, Haiku has the API of interval timers but not
+	  the implementation (bleadperl change #34630), hence skip
+	  the tests, via David Mitchell.
+
+1.9718	[2008-12-31]
+	- .xs code cleanup from Albert Dvornik
+	- in the #39 and #40 do not do us I did, mixing alarm() and
+	  sleep().  Now instead spin until enough time has passed.
+
+1.9717	[2008-12-30]
+	- Skip the tests added in 1.9716 (#39, #40) if there's no subsecond
+	  alarm capability, like with the older subsecond alarm tests
+
+1.9716	[2008-12-26]
+	- Change documentation to agree with reality: there are
+	  no interval timers in Win32.
+	- Address [rt.cpan.org #35899] (problem in subsecond sleeps),
+          add two tests to guard against this problem
+	- Address [rt.cpan.org #36600] 'Division by zero' failure in test suite
+	- Address [rt.cpan.org #37340] [PATCH] Address timer process in test
+	- Address [rt.cpan.org#40311 ] bad implementation of hrt_usleep
+          with TIME_HIRES_NANOSLEEP
+
 1.9715	[2008-04-08]
 	- Silly me: Makefile.PL does need to accept arguments other than mine.
 	  Some testing frameworks obviously do this.

@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 
-$VERSION = '1.9715';
+$VERSION = '1.9719';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -299,9 +299,9 @@ In list context, both the remaining time and the interval are returned.
 There are usually three or four interval timers (signals) available: the
 C<$which> can be C<ITIMER_REAL>, C<ITIMER_VIRTUAL>, C<ITIMER_PROF>, or
 C<ITIMER_REALPROF>.  Note that which ones are available depends: true
-UNIX platforms usually have the first three, but (for example) Win32
-and Cygwin have only C<ITIMER_REAL>, and only Solaris seems to have
-C<ITIMER_REALPROF> (which is used to profile multithreaded programs).
+UNIX platforms usually have the first three, but only Solaris seems to
+have C<ITIMER_REALPROF> (which is used to profile multithreaded programs).
+Win32 unfortunately does not haveinterval timers.
 
 C<ITIMER_REAL> results in C<alarm()>-like behaviour.  Time is counted in
 I<real time>; that is, wallclock time.  C<SIGALRM> is delivered when
@@ -344,8 +344,8 @@ January 1, 1970 Greenwich Mean Time (GMT).  Do not assume that
 CLOCK_REALTIME is zero, it might be one, or something else.
 Another potentially useful (but not available everywhere) value is
 C<CLOCK_MONOTONIC>, which guarantees a monotonically increasing time
-value (unlike time(), which can be adjusted).  See your system
-documentation for other possibly supported values.
+value (unlike time() or gettimeofday(), which can be adjusted).
+See your system documentation for other possibly supported values.
 
 =item clock_getres ( $which )
 
@@ -559,6 +559,9 @@ drift off from the system clock (and the original time())  by up to 0.5
 seconds. Time::HiRes will notice this eventually and recalibrate.
 Note that since Time::HiRes 1.77 the clock_gettime(CLOCK_MONOTONIC)
 might help in this (in case your system supports CLOCK_MONOTONIC).
+
+Some systems have APIs but not implementations: for example QNX and Haiku
+have the interval timer APIs but not the functionality.
 
 =head1 SEE ALSO
 

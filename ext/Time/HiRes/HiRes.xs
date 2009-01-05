@@ -402,10 +402,10 @@ gettimeofday (struct timeval *tp, void *tpz)
   * The TIME_HIRES_NANOSLEEP is set by Makefile.PL. */
 #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
 #define HAS_USLEEP
-#define usleep hrt_nanosleep  /* could conflict with ncurses for static build */
+#define usleep hrt_usleep  /* could conflict with ncurses for static build */
 
 void
-hrt_nanosleep(unsigned long usec) /* This is used to emulate usleep. */
+hrt_usleep(unsigned long usec) /* This is used to emulate usleep. */
 {
     struct timespec res;
     res.tv_sec = usec / IV_1E6;
@@ -444,21 +444,6 @@ hrt_usleep(unsigned long usec)
     Sleep (msec);
 }
 #endif /* #if !defined(HAS_USLEEP) && defined(WIN32) */
-
-#if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
-#define HAS_USLEEP
-#define usleep hrt_usleep  /* could conflict with ncurses for static build */
-
-void
-hrt_usleep(unsigned long usec)
-{
-	struct timespec ts1;
-	ts1.tv_sec  = usec * 1000; /* Ignoring wraparound. */
-	ts1.tv_nsec = 0;
-	nanosleep(&ts1, NULL);
-}
-
-#endif /* #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP) */
 
 #if !defined(HAS_USLEEP) && defined(HAS_POLL)
 #define HAS_USLEEP
@@ -925,7 +910,6 @@ ualarm(useconds,uinterval=0)
 	CODE:
 	if (useconds < 0 || uinterval < 0)
 	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, uinterval);
-	if (useconds >= IV_1E6 || uinterval >= IV_1E6) 
 #if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
 	  {
 	        struct itimerval itv;
@@ -936,10 +920,10 @@ ualarm(useconds,uinterval=0)
 		}
 	  }
 #else
+	if (useconds >= IV_1E6 || uinterval >= IV_1E6) 
 		croak("Time::HiRes::ualarm(%d, %d): useconds or uinterval equal to or more than %"IVdf, useconds, uinterval, IV_1E6);
+	RETVAL = ualarm(useconds, uinterval);
 #endif
-	else
-		RETVAL = ualarm(useconds, uinterval);
 
 	OUTPUT:
 	RETVAL
@@ -954,7 +938,6 @@ alarm(seconds,interval=0)
 	{
 	  IV useconds     = IV_1E6 * seconds;
 	  IV uinterval    = IV_1E6 * interval;
-	  if (seconds >= IV_1E6 || interval >= IV_1E6)
 #if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
 	  {
 	        struct itimerval itv;
@@ -965,8 +948,9 @@ alarm(seconds,interval=0)
 		}
 	  }
 #else
-	    RETVAL = (NV)ualarm((IV)(seconds  * IV_1E6),
-				(IV)(interval * IV_1E6)) / NV_1E6;
+	  if (useconds >= IV_1E6 || uinterval >= IV_1E6)
+		croak("Time::HiRes::alarm(%d, %d): seconds or interval equal to or more than 1.0 ", useconds, uinterval, IV_1E6);
+	    RETVAL = (NV)ualarm( useconds, uinterval ) / NV_1E6;
 #endif
 	}
 
