@@ -379,7 +379,17 @@ unsigned long strtoul (const char *, char **, int);
  * to follow the traditional.  However, to make the POSIX
  * wait W*() macros to work in BeOS, we need to unbend the
  * reality back in place. --jhi */
-#ifdef __BEOS__
+/* In actual fact the code below is to blame here. Perl has an internal
+ * representation of the exit status ($?), which it re-composes from the
+ * OS's representation using the W*() POSIX macros. The code below
+ * incorrectly uses the W*() macros on the internal representation,
+ * which fails for OSs that have a different representation (namely BeOS
+ * and Haiku). WMUNGE() is a hack that converts the internal
+ * representation into the OS specific one, so that the W*() macros work
+ * as expected. The better solution would be not to use the W*() macros
+ * in the first place, though. -- Ingo Weinhold
+ */
+#if defined(__BEOS__) || defined(__HAIKU__)
 #    define WMUNGE(x) (((x) & 0xFF00) >> 8 | ((x) & 0x00FF) << 8)
 #else
 #    define WMUNGE(x) (x)
@@ -664,42 +674,42 @@ WEXITSTATUS(status)
 	switch(ix) {
 	case 0:
 #ifdef WEXITSTATUS
-	    RETVAL = WEXITSTATUS(status);
+	    RETVAL = WEXITSTATUS(WMUNGE(status));
 #else
 	    not_here("WEXITSTATUS");
 #endif
 	    break;
 	case 1:
 #ifdef WIFEXITED
-	    RETVAL = WIFEXITED(status);
+	    RETVAL = WIFEXITED(WMUNGE(status));
 #else
 	    not_here("WIFEXITED");
 #endif
 	    break;
 	case 2:
 #ifdef WIFSIGNALED
-	    RETVAL = WIFSIGNALED(status);
+	    RETVAL = WIFSIGNALED(WMUNGE(status));
 #else
 	    not_here("WIFSIGNALED");
 #endif
 	    break;
 	case 3:
 #ifdef WIFSTOPPED
-	    RETVAL = WIFSTOPPED(status);
+	    RETVAL = WIFSTOPPED(WMUNGE(status));
 #else
 	    not_here("WIFSTOPPED");
 #endif
 	    break;
 	case 4:
 #ifdef WSTOPSIG
-	    RETVAL = WSTOPSIG(status);
+	    RETVAL = WSTOPSIG(WMUNGE(status));
 #else
 	    not_here("WSTOPSIG");
 #endif
 	    break;
 	case 5:
 #ifdef WTERMSIG
-	    RETVAL = WTERMSIG(status);
+	    RETVAL = WTERMSIG(WMUNGE(status));
 #else
 	    not_here("WTERMSIG");
 #endif
