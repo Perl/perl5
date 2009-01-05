@@ -4,6 +4,6 @@ This file is used at the very start of the build process when we dont have
 a miniperl available to make the real thing.  It is copied in place during
 the build process, and then later on replaced.
 ****************************************************************************/
-#define PERL_PATCHNUM UNKOWN
+#define PERL_PATCHNUM "UNKOWN"
 #define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
 #define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
