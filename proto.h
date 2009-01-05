@@ -3986,8 +3986,6 @@ PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *sv, bool fail_ok)
 
 /* PERL_CALLCONV STRLEN	sv_utf8_upgrade_nomg(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1); */
-#define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_NOMG	\
-	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_utf8_encode(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);

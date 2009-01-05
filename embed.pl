@@ -161,6 +161,7 @@ sub write_protos {
 	my $has_context = ( $flags !~ /n/ );
 	my $never_returns = ( $flags =~ /r/ );
 	my $commented_out = ( $flags =~ /m/ );
+	my $binarycompat = ( $flags =~ /b/ );
 	my $is_malloc = ( $flags =~ /a/ );
 	my $can_ignore = ( $flags !~ /R/ ) && !$is_malloc;
 	my @names_of_nn;
@@ -216,7 +217,7 @@ sub write_protos {
 		if ( $SPLINT && $nullok && !$commented_out ) {
 		    $arg = '/*@null@*/ ' . $arg;
 		}
-		if (defined $1 && $nn) {
+		if (defined $1 && $nn && !($commented_out && !$binarycompat)) {
 		    push @names_of_nn, $1;
 		}
 	    }
