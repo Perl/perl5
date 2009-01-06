@@ -372,9 +372,13 @@ all : make_patchnum.ts base extras x2p archcorefiles preplibrary perlpods
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .endif
 
-make_patchnum.ts :
-	@ @make_patchnum.com
+make_patchnum.ts : $(MINIPERL_EXE)
+        - $(MINIPERL) make_patchnum.pl
+        IF .NOT. $STATUS THEN $(MMS)$(MMSQUALIFIERS) miniperl
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
+
+git_version.h : stock_git_version.h
+	@ Copy/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 base : miniperl perl
 	@ $(NOOP)
@@ -1688,13 +1692,13 @@ pad$(O) : pad.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 op$(O) : op.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-perl$(O) : perl.c $(h)
+perl$(O) : perl.c git_version.h $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 perlapi$(O) : perlapi.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 perlio$(O) : perlio.c config.h $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-perlmain$(O) : perlmain.c $(h)
+perlmain$(O) : perlmain.c git_version.h $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 perly$(O) : perly.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
@@ -1844,9 +1848,9 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
 	- @extra_pods CLEAN
-	- If F$Search(".patchnum").nes."" Then Delete/NoConfirm/Log .patchnum;*
-	- If F$Search("[.lib]Config_git.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_git.pl;*
 	- If F$Search("unpushed.h").nes."" Then Delete/NoConfirm/Log unpushed.h;*
+	- If F$Search("[.lib]Config_git.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_git.pl;*
+	- If F$Search("git_version.h").nes."" Then Delete/NoConfirm/Log git_version.h;*
 
 realclean : clean
 	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" realclean
