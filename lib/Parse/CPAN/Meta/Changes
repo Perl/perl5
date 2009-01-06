@@ -1,0 +1,20 @@
+Revision history for Perl extension Parse-CPAN-Meta
+
+0.04 Wed  7 Jan 2009
+	- Matching changes in YAML::Tiny 1.36
+	- Fixing missing feature reported by H.Merijn Brand
+	- Changes to make Padre-CPAN-Meta core-compatible (SMUELLER)++
+
+0.03 Thu 20 Mar 2008
+	- Adding YAML.pm compatibility in scalar context
+
+0.02 Thu 10 Jan 2008
+	- Purging some references to YAML::Tiny that I missed
+
+0.01 Tue  8 Jan 2008
+	- Cloned from YAML::Tiny 1.21
+	- Removed all write functionality
+	- Reduced interface to Load and LoadFile
+	- Removed object-orientation
+	- Removed global $errstr, all errors are exceptions
+	- Applied prototypes to all functions

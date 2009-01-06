@@ -2583,6 +2583,25 @@ lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
 lib/Params/Check/t/01_Params-Check.t	Params::Check tests
+lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/Changes					Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/01_compile.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/02_basic.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/03_regression.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/04_scalar.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/11_meta_yml.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/12_plagger.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/13_perl_smith.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/14_yaml_org.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/15_multibyte.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/16_nullrefs.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/17_toolbar.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/multibyte.yml			Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/sample.yml				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/toolbar.yml				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/vanilla.yml				Parse::CPAN::Meta
 lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
 lib/parent/t/compile-time.t	tests for parent.pm
@@ -3867,6 +3886,7 @@ t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
+t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
