@@ -3740,19 +3740,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			U32 pm_flags = 0;
 			const I32 osize = PL_regsize;
 
-			if (DO_UTF8(ret)) {
-			    assert (SvUTF8(ret));
-			} else if (SvUTF8(ret)) {
-			    /* Not doing UTF-8, despite what the SV says. Is
-			       this only if we're trapped in use 'bytes'?  */
-			    /* Make a copy of the octet sequence, but without
-			       the flag on, as the compiler now honours the
-			       SvUTF8 flag on ret.  */
-			    STRLEN len;
-			    const char *const p = SvPV(ret, len);
-			    ret = newSVpvn_flags(p, len, SVs_TEMP);
-			}
-			assert(!(pm_flags & RXf_UTF8));
+			if (DO_UTF8(ret)) pm_flags |= RXf_UTF8;
 			re = CALLREGCOMP(ret, pm_flags);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
