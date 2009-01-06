@@ -3497,7 +3497,6 @@ pod/splitman			Splits perlfunc into multiple man pages
 pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/add-package.pl	Add/Update CPAN modules that are part of Core
-Porting/apply		Apply patches sent by mail
 Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkansi.pl	Check source code for ANSI-C violations
 Porting/checkARGS_ASSERT.pl	Check we use every PERL_ARGS_ASSERT* macro
@@ -3528,9 +3527,6 @@ Porting/Maintainers.pm	Library to pretty print info in Maintainers.pl
 Porting/makemeta	Create the top-level META.yml
 Porting/makerel		Release making utility
 Porting/manicheck	Check against MANIFEST
-Porting/p4d2p		Generate patch from p4 diff
-Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
-Porting/patchls		Flexible patch file listing utility
 Porting/podtidy		Reformat pod using Pod::Tidy
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/README.y2038	Perl notes for the 2038 fix
