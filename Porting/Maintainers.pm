@@ -79,7 +79,7 @@ $0: Usage: $0 [[--maintainer M --module M --files]|[--check] file ...]
 			with a file	checks if it has a maintainer
 			with a dir	checks all files have a maintainer
 			otherwise	checks for multiple maintainers
---opened	list all modules of files opened by perforce
+--opened	list all modules of modified files
 Matching is case-ignoring regexp, author matching is both by
 the short id and by the full name and email.  A "module" may
 not be just a module, it may be a file or files or a subdirectory.
@@ -106,14 +106,10 @@ sub process_options {
 		      );
 
     my @Files;
-   
+
     if ($Opened) {
-	@Files = `p4 opened`;
+	@Files = `git ls-files -m --full-name`;
 	die if $?;
-	foreach (@Files) {
-	    s!#.*!!s;
-	    s!^//depot/(?:perl|.*?/perl)/!!;
-	}
     } else {
 	@Files = @ARGV;
     }
