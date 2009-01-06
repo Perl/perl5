@@ -3526,7 +3526,6 @@ Porting/mergelog	log of merges from bleed to maint
 Porting/mergelog-tool	tool to process mergelog
 Porting/p4d2p		Generate patch from p4 diff
 Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
-Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/podtidy		Reformat pod using Pod::Tidy
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
