@@ -44,9 +44,16 @@
 
 # scripts etc
 /pod2html
+/pod2html.bat
 /pod2latex
+/pod2latex.bat
 /pod2man
+/pod2man.bat
 /pod2text
+/pod2text.bat
 /pod2usage
+/pod2usage.bat
 /podchecker
+/podchecker.bat
 /podselect
+/podselect.bat
