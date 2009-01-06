@@ -1,22 +1,34 @@
 #!/usr/bin/perl
 
 # given a perforce change number, output the equivalent git commit id
+# with -c, checks out the specified commit
 
-die "usage: $0 [git-log-options] num" unless @ARGV;
+die "usage: $0 [-c|--checkout] [git-log-options] changenum" unless @ARGV;
 
 my $num = 1;
+my $checkout = 0;
 
 for (@ARGV) {
 	m{^\d+$} && (($change,$_) = ($_,undef));
 	m{^-\d+$} && (($num,$_) = (-$_,undef));
+	$_ eq '-c' || $_ eq '--checkout'
+	    and $checkout = 1;
 }
 
 my $grep = "--grep=^p4raw-id:.*\@$change\$";
 @ARGV = grep { defined } @ARGV;
 
-if ( -t STDOUT or @ARGV ) {
-	system(qw(git log), $grep, "-$num", "--all", @ARGV);
+if ($checkout) {
+    my $commit = qx(git rev-list -1 --all '$grep');
+    chomp $commit;
+    die "no commit found" unless $commit;
+    system(git => checkout => $commit);
 }
 else {
+    if ( -t STDOUT or @ARGV ) {
+	system(qw(git log), $grep, "-$num", "--all", @ARGV);
+    }
+    else {
 	system(qw(git rev-list -1 --all), $grep);
+    }
 }
