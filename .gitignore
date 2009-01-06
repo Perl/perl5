@@ -91,7 +91,7 @@ pod/pod2usage.bat
 pod/podchecker.bat
 pod/podselect.bat
 
-# test byproduct
+# test byproducts
 ext/Test/Harness/t/ext/
 lib/App/
 lib/Archive/Tar/t/src/long/foo.tbz
@@ -102,3 +102,4 @@ lib/TAP/
 lib/Test/Harness.pm
 t/rantests
 t/tmp*
+t/perl
