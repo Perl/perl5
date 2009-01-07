@@ -344,6 +344,7 @@ static int decc_disable_to_vms_logname_translation = 1;
 static int decc_disable_posix_root = 1;
 int decc_efs_case_preserve = 0;
 static int decc_efs_charset = 0;
+static int decc_efs_charset_index = -1;
 static int decc_filename_unix_no_version = 0;
 static int decc_filename_unix_only = 0;
 int decc_filename_unix_report = 0;
@@ -356,12 +357,45 @@ static int vms_unlink_all_versions = 0;
 static int vms_posix_exit = 0;
 
 /* bug workarounds if needed */
-int decc_bug_readdir_efs1 = 0;
 int decc_bug_devnull = 1;
-int decc_bug_fgetname = 0;
 int decc_dir_barename = 0;
+int vms_bug_stat_filename = 0;
 
 static int vms_debug_on_exception = 0;
+static int vms_debug_fileify = 0;
+
+/* Simple logical name translation */
+static int simple_trnlnm
+   (const char * logname,
+    char * value,
+    int value_len)
+{
+    const $DESCRIPTOR(table_dsc, "LNM$FILE_DEV");
+    const unsigned long attr = LNM$M_CASE_BLIND;
+    struct dsc$descriptor_s name_dsc;
+    int status;
+    unsigned short result;
+    struct itmlst_3 itlst[2] = {{value_len, LNM$_STRING, value, &result},
+                                {0, 0, 0, 0}};
+
+    name_dsc.dsc$w_length = strlen(logname);
+    name_dsc.dsc$a_pointer = (char *)logname;
+    name_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
+    name_dsc.dsc$b_class = DSC$K_CLASS_S;
+
+    status = sys$trnlnm(&attr, &table_dsc, &name_dsc, 0, itlst);
+
+    if ($VMS_STATUS_SUCCESS(status)) {
+
+	 /* Null terminate and return the string */
+	/*--------------------------------------*/
+	value[result] = 0;
+        return result;
+    }
+
+    return 0;
+}
+
 
 /* Is this a UNIX file specification?
  *   No longer a simple check with EFS file specs
@@ -5839,7 +5873,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	(!decc_posix_compliant_pathnames && decc_disable_posix_root)) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
       trnlnm_iter_count = 0;
-      while (!strpbrk(trndir,"/]>:") && my_trnlnm(trndir,trndir,0)) {
+      while (!strpbrk(trndir,"/]>:") && simple_trnlnm(trndir,trndir,0)) {
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       }
@@ -6332,7 +6366,7 @@ static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int 
 
     trnlnm_iter_count = 0;
     while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
-	   && my_trnlnm(trndir,trndir,0)) {
+	   && simple_trnlnm(trndir,trndir,0)) {
       trnlnm_iter_count++; 
       if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       trnlen = strlen(trndir);
@@ -6743,7 +6777,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   if (cmp_rslt == 0) {
   int islnm;
 
-    islnm = my_trnlnm(tmp, "TMP", 0);
+    islnm = simple_trnlnm(tmp, "TMP", 0);
     if (!islnm) {
       strcpy(rslt, "/tmp");
       cp1 = cp1 + 4;
@@ -8055,7 +8089,7 @@ static char *mp_do_tovmsspec
     *cp1 = '\0';
     trndev = PerlMem_malloc(VMS_MAXRSS);
     if (trndev == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-    islnm =  my_trnlnm(rslt,trndev,0);
+    islnm =  simple_trnlnm(rslt,trndev,0);
 
      /* DECC special handling */
     if (!islnm) {
@@ -8063,13 +8097,13 @@ static char *mp_do_tovmsspec
 	strcpy(rslt,"sys$system");
 	cp1 = rslt + 10;
 	*cp1 = 0;
-	islnm =  my_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,0);
       }
       else if (strcmp(rslt,"tmp") == 0) {
 	strcpy(rslt,"sys$scratch");
 	cp1 = rslt + 11;
 	*cp1 = 0;
-	islnm =  my_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,0);
       }
       else if (!decc_disable_posix_root) {
         strcpy(rslt, "sys$posix_root");
@@ -8077,7 +8111,7 @@ static char *mp_do_tovmsspec
 	*cp1 = 0;
 	cp2 = path;
         while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
-	islnm =  my_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,0);
       }
       else if (strcmp(rslt,"dev") == 0) {
 	if (strncmp(cp2,"/null", 5) == 0) {
@@ -8086,7 +8120,7 @@ static char *mp_do_tovmsspec
 	    cp1 = rslt + 4;
 	    *cp1 = 0;
 	    cp2 = cp2 + 5;
-	    islnm =  my_trnlnm(rslt,trndev,0);
+	    islnm = simple_trnlnm(rslt,trndev,0);
 	  }
 	}
       }
@@ -9047,6 +9081,8 @@ int len;
 void
 vms_image_init(int *argcp, char ***argvp)
 {
+  int status;
+  char val_str[10];
   char eqv[LNM$C_NAMLENGTH+1] = "";
   unsigned int len, tabct = 8, tabidx = 0;
   unsigned long int *mask, iosb[2], i, rlst[128], rsz;
@@ -9064,6 +9100,35 @@ vms_image_init(int *argcp, char ***argvp)
 #ifdef KILL_BY_SIGPRC
     Perl_csighandler_init();
 #endif
+
+    /* This was moved from the pre-image init handler because on threaded */
+    /* Perl it was always returning 0 for the default value. */
+    status = simple_trnlnm("SYS$POSIX_ROOT", val_str, sizeof(val_str));
+    if (status > 0) {
+        int s;
+	s = decc$feature_get_index("DECC$DISABLE_POSIX_ROOT");
+	if (s > 0) {
+            int initial;
+	    initial = decc$feature_get_value(s, 4);
+	    if (initial >= 0) {
+                /* initial is -1 if nothing has set the feature */
+                /* initial is 1 if the logical name is present */
+		decc_disable_posix_root = decc$feature_get_value(s, 1);
+
+                /* If the value is not valid, force the feature off */
+		if (decc_disable_posix_root < 0) {
+		    decc$feature_set_value(s, 1, 1);
+		    decc_disable_posix_root = 1;
+		}
+	    }
+	    else {
+		/* Traditionally Perl assumes this is off */
+		decc_disable_posix_root = 1;
+		decc$feature_set_value(s, 1, 1);
+	    }
+	}
+    }
+
 
   _ckvmssts_noperl(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
   _ckvmssts_noperl(iosb[0]);
@@ -13603,7 +13668,6 @@ static int set_features
 {
     int status;
     int s;
-    int dflt;
     char* str;
     char val_str[10];
 #if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
@@ -13617,28 +13681,62 @@ static int set_features
     vms_debug_on_exception = 0;
     status = sys_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+       val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_debug_on_exception = 1;
        else
 	 vms_debug_on_exception = 0;
     }
 
+    /* Debug unix/vms file translation routines */
+    vms_debug_fileify = 0;
+    status = sys_trnlnm("PERL_VMS_FILEIFY_DEBUG", val_str, sizeof(val_str));
+    if ($VMS_STATUS_SUCCESS(status)) {
+	val_str[0] = _toupper(val_str[0]);
+        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
+	    vms_debug_fileify = 1;
+        else
+	    vms_debug_fileify = 0;
+    }
+
+
+    /* Historically PERL has been doing vmsify / stat differently than */
+    /* the CRTL.  In particular, under some conditions the CRTL will   */
+    /* remove some illegal characters like spaces from filenames       */
+    /* resulting in some differences.  The stat()/lstat() wrapper has  */
+    /* been reporting such file names as invalid and fails to stat them */
+    /* fixing this bug so that stat()/lstat() accept these like the     */
+    /* CRTL does will result in several tests failing.                  */
+    /* This should really be fixed, but for now, set up a feature to    */
+    /* enable it so that the impact can be studied.                     */
+    vms_bug_stat_filename = 0;
+    status = sys_trnlnm("PERL_VMS_BUG_STAT_FILENAME", val_str, sizeof(val_str));
+    if ($VMS_STATUS_SUCCESS(status)) {
+	val_str[0] = _toupper(val_str[0]);
+        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
+	    vms_bug_stat_filename = 1;
+        else
+	    vms_bug_stat_filename = 0;
+    }
+
+
     /* Create VTF-7 filenames from Unicode instead of UTF-8 */
     vms_vtf7_filenames = 0;
     status = sys_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+       val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_vtf7_filenames = 1;
        else
 	 vms_vtf7_filenames = 0;
     }
 
-
     /* unlink all versions on unlink() or rename() */
     vms_unlink_all_versions = 0;
     status = sys_trnlnm
 	("PERL_VMS_UNLINK_ALL_VERSIONS", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+       val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_unlink_all_versions = 1;
        else
@@ -13664,40 +13762,22 @@ static int set_features
 
     /* hacks to see if known bugs are still present for testing */
 
-    /* Readdir is returning filenames in VMS syntax always */
-    decc_bug_readdir_efs1 = 1;
-    status = sys_trnlnm("DECC_BUG_READDIR_EFS1", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
-       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
-         decc_bug_readdir_efs1 = 1;
-       else
-	 decc_bug_readdir_efs1 = 0;
-    }
-
     /* PCP mode requires creating /dev/null special device file */
     decc_bug_devnull = 0;
     status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+       val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
           decc_bug_devnull = 1;
        else
 	  decc_bug_devnull = 0;
     }
 
-    /* fgetname returning a VMS name in UNIX mode */
-    decc_bug_fgetname = 1;
-    status = sys_trnlnm("DECC_BUG_FGETNAME", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
-      if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
-	decc_bug_fgetname = 1;
-      else
-	decc_bug_fgetname = 0;
-    }
-
     /* UNIX directory names with no paths are broken in a lot of places */
     decc_dir_barename = 1;
     status = sys_trnlnm("DECC_DIR_BARENAME", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+      val_str[0] = _toupper(val_str[0]);
       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	decc_dir_barename = 1;
       else
@@ -13720,6 +13800,7 @@ static int set_features
     }
 
     s = decc$feature_get_index("DECC$EFS_CHARSET");
+    decc_efs_charset_index = s;
     if (s >= 0) {
 	decc_efs_charset = decc$feature_get_value(s, 1);
 	if (decc_efs_charset < 0)
@@ -13760,26 +13841,6 @@ static int set_features
 	decc_readdir_dropdotnotype = decc$feature_get_value(s, 1);
 	if (decc_readdir_dropdotnotype < 0)
 	    decc_readdir_dropdotnotype = 0;
-    }
-
-    status = sys_trnlnm("SYS$POSIX_ROOT", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
-	s = decc$feature_get_index("DECC$DISABLE_POSIX_ROOT");
-	if (s >= 0) {
-	    dflt = decc$feature_get_value(s, 4);
-	    if (dflt > 0) {
-		decc_disable_posix_root = decc$feature_get_value(s, 1);
-		if (decc_disable_posix_root <= 0) {
-		    decc$feature_set_value(s, 1, 1);
-		    decc_disable_posix_root = 1;
-		}
-	    }
-	    else {
-		/* Traditionally Perl assumes this is off */
-		decc_disable_posix_root = 1;
-		decc$feature_set_value(s, 1, 1);
-	    }
-	}
     }
 
 #if __CRTL_VER >= 80200000
@@ -13865,6 +13926,7 @@ static int set_features
     status = sys_trnlnm
 	("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
+       val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_posix_exit = 1;
        else
