@@ -968,7 +968,13 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           int i;
           if (!environ) {
             ivenv = 1; 
-            Perl_warn(aTHX_ "Can't read CRTL environ\n");
+#if defined(PERL_IMPLICIT_CONTEXT)
+            if (aTHX == NULL) {
+                fprintf(stderr,
+                    "%%PERL-W-VMS_INIT Can't read CRTL environ\n");
+            } else
+#endif
+                Perl_warn(aTHX_ "Can't read CRTL environ\n");
             continue;
           }
           retsts = SS$_NOLOGNAM;
@@ -992,7 +998,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           unsigned short int deflen = LNM$C_NAMLENGTH;
           struct dsc$descriptor_d eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
           /* dynamic dsc to accomodate possible long value */
-          _ckvmssts(lib$sget1_dd(&deflen,&eqvdsc));
+          _ckvmssts_noperl(lib$sget1_dd(&deflen,&eqvdsc));
           retsts = lib$get_symbol(&lnmdsc,&eqvdsc,&eqvlen,0);
           if (retsts & 1) { 
             if (eqvlen > MAX_DCL_SYMBOL) {
@@ -1008,7 +1014,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
           }
-          _ckvmssts(lib$sfree1_dd(&eqvdsc));
+          _ckvmssts_noperl(lib$sfree1_dd(&eqvdsc));
           if (retsts == LIB$_INVSYMNAM) { ivsym = 1; continue; }
           if (retsts == LIB$_NOSUCHSYM) continue;
           break;
@@ -1058,7 +1064,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
              retsts == SS$_NOLOGNAM) {
       set_errno(EINVAL);  set_vaxc_errno(retsts);
     }
-    else _ckvmssts(retsts);
+    else _ckvmssts_noperl(retsts);
     return 0;
 }  /* end of vmstrnenv */
 /*}}}*/
@@ -1336,6 +1342,12 @@ prime_env_iter(void)
     if (PL_curinterp) {
       aTHX = PERL_GET_INTERP;
     } else {
+      /* we never get here because the NULL pointer will cause the */
+      /* several of the routines called by this routine to access violate */
+
+      /* This routine is only called by hv.c/hv_iterinit which has a */
+      /* context, so the real fix may be to pass it through instead of */
+      /* the hoops above */
       aTHX = NULL;
     }
 #endif
@@ -1868,7 +1880,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
      * system services won't do this by themselves, so we may miss
      * a file "hiding" behind a logical name or search list. */
     vmsname = PerlMem_malloc(NAM$C_MAXRSS+1);
-    if (vmsname == NULL) _ckvmssts(SS$_INSFMEM);
+    if (vmsname == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
     rslt = do_rmsexpand(name,
 			vmsname,
@@ -1902,7 +1914,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
      * and the insert an ACE at the head of the ACL which allows us
      * to delete the file.
      */
-    _ckvmssts(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
+    _ckvmssts_noperl(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
     fildsc.dsc$w_length = strlen(vmsname);
     fildsc.dsc$a_pointer = vmsname;
     cxt = 0;
@@ -1921,7 +1933,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
         case RMS$_PRV:
           set_errno(EACCES); break;
         default:
-          _ckvmssts(aclsts);
+          _ckvmssts_noperl(aclsts);
       }
       set_vaxc_errno(aclsts);
       PerlMem_free(vmsname);
@@ -2122,7 +2134,7 @@ Perl_my_chmod(pTHX_ const char *file_spec, mode_t mode)
     /* First convert this to a VMS format specification */
     vms_src = PerlMem_malloc(VMS_MAXRSS);
     if (vms_src == NULL)
-	_ckvmssts(SS$_INSFMEM);
+	_ckvmssts_noperl(SS$_INSFMEM);
 
     rslt = do_tovmsspec(file_spec, vms_src, 0, NULL);
     if (rslt == NULL) {
@@ -2135,7 +2147,7 @@ Perl_my_chmod(pTHX_ const char *file_spec, mode_t mode)
     /* Now make it a directory spec so chmod is happy */
     vms_dir = PerlMem_malloc(VMS_MAXRSS + 1);
     if (vms_dir == NULL)
-	_ckvmssts(SS$_INSFMEM);
+	_ckvmssts_noperl(SS$_INSFMEM);
     rslt = do_fileify_dirspec(vms_src, vms_dir, 0, NULL);
     PerlMem_free(vms_src);
 
@@ -2374,7 +2386,7 @@ Perl_my_kill(int pid, int sig)
       case SS$_INSFMEM:
         set_errno(ENOMEM); break;
       default:
-        _ckvmssts(iss);
+        _ckvmssts_noperl(iss);
         set_errno(EVMSERR);
     } 
     set_vaxc_errno(iss);
@@ -2735,7 +2747,7 @@ create_mbx(pTHX_ unsigned short int *chan, struct dsc$descriptor_s *namdsc)
      * keep the size between 128 and MAXBUF.
      *
      */
-    _ckvmssts(lib$getsyi(&syiitm, &syssize, 0, 0, 0, 0));
+    _ckvmssts_noperl(lib$getsyi(&syiitm, &syssize, 0, 0, 0, 0));
   }
 
   if (vmstrnenv("PERL_MBX_SIZE", csize, 0, fildev, 0)) {
@@ -2746,9 +2758,10 @@ create_mbx(pTHX_ unsigned short int *chan, struct dsc$descriptor_s *namdsc)
   if (mbxbufsiz < 128) mbxbufsiz = 128;
   if (mbxbufsiz > syssize) mbxbufsiz = syssize;
 
-  _ckvmssts(sts = sys$crembx(0,chan,mbxbufsiz,mbxbufsiz,0,0,0));
+  _ckvmssts_noperl(sts = sys$crembx(0,chan,mbxbufsiz,mbxbufsiz,0,0,0));
 
-  _ckvmssts(sts = lib$getdvi(&dviitm, chan, NULL, NULL, namdsc, &namdsc->dsc$w_length));
+  sts = lib$getdvi(&dviitm, chan, NULL, NULL, namdsc, &namdsc->dsc$w_length);
+  _ckvmssts_noperl(sts);
   namdsc->dsc$a_pointer[namdsc->dsc$w_length] = '\0';
 
 }  /* end of create_mbx() */
@@ -2871,7 +2884,7 @@ static $DESCRIPTOR(nl_desc, "NL:");
 
 
 static unsigned long int
-pipe_exit_routine(pTHX)
+pipe_exit_routine()
 {
     pInfo info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
@@ -2885,6 +2898,17 @@ pipe_exit_routine(pTHX)
     info = open_pipes;
     while (info) {
         if (info->fp) {
+#if defined(PERL_IMPLICIT_CONTEXT)
+           /* We need to use the Perl context of the thread that created */
+           /* the pipe. */
+           pTHX;
+           if (info->err)
+               aTHX = info->err->thx;
+           else if (info->out)
+               aTHX = info->out->thx;
+           else if (info->in)
+               aTHX = info->in->thx;
+#endif
            if (!info->useFILE
 #if defined(USE_ITHREADS)
              && my_perl
@@ -2909,7 +2933,7 @@ pipe_exit_routine(pTHX)
       _ckvmssts_noperl(sys$setast(0));
       if (info->in && !info->in->shut_on_empty) {
         _ckvmssts_noperl(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
-                          0, 0, 0, 0, 0, 0));
+                                 0, 0, 0, 0, 0, 0));
         info->waiting = 1;
         did_stuff = 1;
       }
@@ -2979,6 +3003,18 @@ pipe_exit_routine(pTHX)
     }
 
     while(open_pipes) {
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+      /* We need to use the Perl context of the thread that created */
+      /* the pipe. */
+      pTHX;
+      if (info->err)
+          aTHX = info->err->thx;
+      else if (info->out)
+          aTHX = info->out->thx;
+      else if (info->in)
+          aTHX = info->in->thx;
+#endif
       if ((sts = my_pclose(open_pipes->fp)) == -1) retsts = vaxc$errno;
       else if (!(sts & 1)) retsts = sts;
     }
@@ -3141,11 +3177,11 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     int j, n;
 
     n = sizeof(Pipe);
-    _ckvmssts(lib$get_vm(&n, &p));
+    _ckvmssts_noperl(lib$get_vm(&n, &p));
 
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
-    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+    _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
 
     p->buf           = 0;
     p->shut_on_empty = FALSE;
@@ -3166,9 +3202,9 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     n = sizeof(CBuf) + p->bufsize;
 
     for (j = 0; j < INITIAL_TOCHILDQUEUE; j++) {
-        _ckvmssts(lib$get_vm(&n, &b));
+        _ckvmssts_noperl(lib$get_vm(&n, &b));
         b->buf = (char *) b + sizeof(CBuf);
-        _ckvmssts(lib$insqhi(b, &p->free));
+        _ckvmssts_noperl(lib$insqhi(b, &p->free));
     }
 
     pipe_tochild2_ast(p);
@@ -3195,17 +3231,17 @@ pipe_tochild1_ast(pPipe p)
         if (eof) {
             p->shut_on_empty = TRUE;
             b->eof     = TRUE;
-            _ckvmssts(sys$dassgn(p->chan_in));
+            _ckvmssts_noperl(sys$dassgn(p->chan_in));
         } else  {
-            _ckvmssts(iss);
+            _ckvmssts_noperl(iss);
         }
 
         b->eof  = eof;
         b->size = p->iosb.count;
-        _ckvmssts(sts = lib$insqhi(b, &p->wait));
+        _ckvmssts_noperl(sts = lib$insqhi(b, &p->wait));
         if (p->need_wake) {
             p->need_wake = FALSE;
-            _ckvmssts(sys$dclast(pipe_tochild2_ast,p,0));
+            _ckvmssts_noperl(sys$dclast(pipe_tochild2_ast,p,0));
         }
     } else {
         p->retry = 1;   /* initial call */
@@ -3216,18 +3252,18 @@ pipe_tochild1_ast(pPipe p)
         while (1) {
             iss = lib$remqti(&p->free, &b);
             if (iss == LIB$_QUEWASEMP) return;
-            _ckvmssts(iss);
-            _ckvmssts(lib$free_vm(&n, &b));
+            _ckvmssts_noperl(iss);
+            _ckvmssts_noperl(lib$free_vm(&n, &b));
         }
     }
 
     iss = lib$remqti(&p->free, &b);
     if (iss == LIB$_QUEWASEMP) {
         int n = sizeof(CBuf) + p->bufsize;
-        _ckvmssts(lib$get_vm(&n, &b));
+        _ckvmssts_noperl(lib$get_vm(&n, &b));
         b->buf = (char *) b + sizeof(CBuf);
     } else {
-       _ckvmssts(iss);
+       _ckvmssts_noperl(iss);
     }
 
     p->curr = b;
@@ -3236,7 +3272,7 @@ pipe_tochild1_ast(pPipe p)
              &p->iosb,
              pipe_tochild1_ast, p, b->buf, p->bufsize, 0, 0, 0, 0);
     if (iss == SS$_ENDOFFILE && p->shut_on_empty) iss = SS$_NORMAL;
-    _ckvmssts(iss);
+    _ckvmssts_noperl(iss);
 }
 
 
@@ -3258,9 +3294,9 @@ pipe_tochild2_ast(pPipe p)
     do {
         if (p->type) {         /* type=1 has old buffer, dispose */
             if (p->shut_on_empty) {
-                _ckvmssts(lib$free_vm(&n, &b));
+                _ckvmssts_noperl(lib$free_vm(&n, &b));
             } else {
-                _ckvmssts(lib$insqhi(b, &p->free));
+                _ckvmssts_noperl(lib$insqhi(b, &p->free));
             }
             p->type = 0;
         }
@@ -3269,11 +3305,11 @@ pipe_tochild2_ast(pPipe p)
         if (iss == LIB$_QUEWASEMP) {
             if (p->shut_on_empty) {
                 if (done) {
-                    _ckvmssts(sys$dassgn(p->chan_out));
+                    _ckvmssts_noperl(sys$dassgn(p->chan_out));
                     *p->pipe_done = TRUE;
-                    _ckvmssts(sys$setef(pipe_ef));
+                    _ckvmssts_noperl(sys$setef(pipe_ef));
                 } else {
-                    _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF,
+                    _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_WRITEOF,
                         &p->iosb2, pipe_tochild2_ast, p, 0, 0, 0, 0, 0, 0));
                 }
                 return;
@@ -3281,17 +3317,17 @@ pipe_tochild2_ast(pPipe p)
             p->need_wake = TRUE;
             return;
         }
-        _ckvmssts(iss);
+        _ckvmssts_noperl(iss);
         p->type = 1;
     } while (done);
 
 
     p->curr2 = b;
     if (b->eof) {
-        _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF,
+        _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_WRITEOF,
             &p->iosb2, pipe_tochild2_ast, p, 0, 0, 0, 0, 0, 0));
     } else {
-        _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEVBLK,
+        _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_WRITEVBLK,
             &p->iosb2, pipe_tochild2_ast, p, b->buf, b->size, 0, 0, 0, 0));
     }
 
@@ -3312,13 +3348,13 @@ pipe_infromchild_setup(pTHX_ char *rmbx, char *wmbx)
     unsigned int dviitm = DVI$_DEVBUFSIZ;
 
     int n = sizeof(Pipe);
-    _ckvmssts(lib$get_vm(&n, &p));
+    _ckvmssts_noperl(lib$get_vm(&n, &p));
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
 
-    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+    _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
     n = p->bufsize * sizeof(char);
-    _ckvmssts(lib$get_vm(&n, &p->buf));
+    _ckvmssts_noperl(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->info   = 0;
     p->type   = 0;
@@ -3345,7 +3381,7 @@ pipe_infromchild_ast(pPipe p)
 #endif
 
     if (p->info && p->info->closing && p->chan_out)  {           /* output shutdown */
-        _ckvmssts(sys$dassgn(p->chan_out));
+        _ckvmssts_noperl(sys$dassgn(p->chan_out));
         p->chan_out = 0;
     }
 
@@ -3359,22 +3395,22 @@ pipe_infromchild_ast(pPipe p)
     if (p->type == 1) {
         p->type = 0;
         if (myeof && p->chan_in) {                  /* input shutdown */
-            _ckvmssts(sys$dassgn(p->chan_in));
+            _ckvmssts_noperl(sys$dassgn(p->chan_in));
             p->chan_in = 0;
         }
 
         if (p->chan_out) {
             if (myeof || kideof) {      /* pass EOF to parent */
-                _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEOF, &p->iosb,
-                              pipe_infromchild_ast, p,
-                              0, 0, 0, 0, 0, 0));
+                _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_WRITEOF, &p->iosb,
+                                         pipe_infromchild_ast, p,
+                                         0, 0, 0, 0, 0, 0));
                 return;
             } else if (eof) {       /* eat EOF --- fall through to read*/
 
             } else {                /* transmit data */
-                _ckvmssts(sys$qio(0,p->chan_out,IO$_WRITEVBLK,&p->iosb,
-                              pipe_infromchild_ast,p,
-                              p->buf, p->iosb.count, 0, 0, 0, 0));
+                _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_WRITEVBLK,&p->iosb,
+                                         pipe_infromchild_ast,p,
+                                         p->buf, p->iosb.count, 0, 0, 0, 0));
                 return;
             }
         }
@@ -3384,7 +3420,7 @@ pipe_infromchild_ast(pPipe p)
 
     if (!p->chan_in && !p->chan_out) {
         *p->pipe_done = TRUE;
-        _ckvmssts(sys$setef(pipe_ef));
+        _ckvmssts_noperl(sys$setef(pipe_ef));
         return;
     }
 
@@ -3402,13 +3438,13 @@ pipe_infromchild_ast(pPipe p)
                           pipe_infromchild_ast,p,
                           p->buf, p->bufsize, 0, 0, 0, 0);
             if (p->shut_on_empty && iss == SS$_ENDOFFILE) iss = SS$_NORMAL;
-            _ckvmssts(iss);
+            _ckvmssts_noperl(iss);
         } else {           /* send EOFs for extra reads */
             p->iosb.status = SS$_ENDOFFILE;
             p->iosb.dvispec = 0;
-            _ckvmssts(sys$qio(0,p->chan_out,IO$_SETMODE|IO$M_READATTN,
-                      0, 0, 0,
-                      pipe_infromchild_ast, p, 0, 0, 0, 0));
+            _ckvmssts_noperl(sys$qio(0,p->chan_out,IO$_SETMODE|IO$M_READATTN,
+                                     0, 0, 0,
+                                     pipe_infromchild_ast, p, 0, 0, 0, 0));
         }
     }
 }
@@ -3436,7 +3472,7 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
 	unsigned short dvi_iosb[4];
 
 	cptr = getname(fd, out, 1);
-	if (cptr == NULL) _ckvmssts(SS$_NOSUCHDEV);
+	if (cptr == NULL) _ckvmssts_noperl(SS$_NOSUCHDEV);
 	d_dev.dsc$a_pointer = out;
 	d_dev.dsc$w_length = strlen(out);
 	d_dev.dsc$b_dtype = DSC$K_DTYPE_T;
@@ -3455,7 +3491,7 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
 
 	status = sys$getdviw
 	        (NO_EFN, 0, &d_dev, items, dvi_iosb, NULL, NULL, NULL);
-	_ckvmssts(status);
+	_ckvmssts_noperl(status);
 	if ($VMS_STATUS_SUCCESS(dvi_iosb[0])) {
 	    device[dev_len] = 0;
 
@@ -3466,20 +3502,20 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
 	}
     }
 
-    _ckvmssts(lib$get_vm(&n, &p));
+    _ckvmssts_noperl(lib$get_vm(&n, &p));
     p->fd_out = dup(fd);
     create_mbx(aTHX_ &p->chan_in, &d_mbx);
-    _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
+    _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
     n = (p->bufsize+1) * sizeof(char);
-    _ckvmssts(lib$get_vm(&n, &p->buf));
+    _ckvmssts_noperl(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->retry = 0;
     p->info  = 0;
     strcpy(out, mbx);
 
-    _ckvmssts(sys$qio(0, p->chan_in, IO$_READVBLK, &p->iosb,
-                  pipe_mbxtofd_ast, p,
-                  p->buf, p->bufsize, 0, 0, 0, 0));
+    _ckvmssts_noperl(sys$qio(0, p->chan_in, IO$_READVBLK, &p->iosb,
+                             pipe_mbxtofd_ast, p,
+                             p->buf, p->bufsize, 0, 0, 0, 0));
 
     return p;
 }
@@ -3501,7 +3537,7 @@ pipe_mbxtofd_ast(pPipe p)
         close(p->fd_out);
         sys$dassgn(p->chan_in);
         *p->pipe_done = TRUE;
-        _ckvmssts(sys$setef(pipe_ef));
+        _ckvmssts_noperl(sys$setef(pipe_ef));
         return;
     }
 
@@ -3511,13 +3547,13 @@ pipe_mbxtofd_ast(pPipe p)
         if (iss2 < 0) {
             p->retry++;
             if (p->retry < MAX_RETRY) {
-                _ckvmssts(sys$setimr(0,delaytime,pipe_mbxtofd_ast,p));
+                _ckvmssts_noperl(sys$setimr(0,delaytime,pipe_mbxtofd_ast,p));
                 return;
             }
         }
         p->retry = 0;
     } else if (err) {
-        _ckvmssts(iss);
+        _ckvmssts_noperl(iss);
     }
 
 
@@ -3525,7 +3561,7 @@ pipe_mbxtofd_ast(pPipe p)
           pipe_mbxtofd_ast, p,
           p->buf, p->bufsize, 0, 0, 0, 0);
     if (p->shut_on_empty && (iss == SS$_ENDOFFILE)) iss = SS$_NORMAL;
-    _ckvmssts(iss);
+    _ckvmssts_noperl(iss);
 }
 
 
@@ -3572,7 +3608,7 @@ store_pipelocs(pTHX)
 /*  the . directory from @INC comes last */
 
     p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
-    if (p == NULL) _ckvmssts(SS$_INSFMEM);
+    if (p == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     p->next = head_PLOC;
     head_PLOC = p;
     strcpy(p->dir,"./");
@@ -3580,7 +3616,7 @@ store_pipelocs(pTHX)
 /*  get the directory from $^X */
 
     unixdir = PerlMem_malloc(VMS_MAXRSS);
-    if (unixdir == NULL) _ckvmssts(SS$_INSFMEM);
+    if (unixdir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
 #ifdef PERL_IMPLICIT_CONTEXT
     if (aTHX && PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
@@ -3606,7 +3642,7 @@ store_pipelocs(pTHX)
 
         if ((tounixpath_utf8(temp, unixdir, NULL)) != NULL) {
             p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
-	    if (p == NULL) _ckvmssts(SS$_INSFMEM);
+	    if (p == NULL) _ckvmssts_noperl(SS$_INSFMEM);
             p->next = head_PLOC;
             head_PLOC = p;
             strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -3642,7 +3678,7 @@ store_pipelocs(pTHX)
 #ifdef ARCHLIB_EXP
     if ((tounixpath_utf8(ARCHLIB_EXP, unixdir, NULL)) != NULL) {
         p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
-	if (p == NULL) _ckvmssts(SS$_INSFMEM);
+	if (p == NULL) _ckvmssts_noperl(SS$_INSFMEM);
         p->next = head_PLOC;
         head_PLOC = p;
         strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -4059,7 +4095,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     /* If any errors, then clean up */
     if (!info->fp) {
        	n = sizeof(Info);
-	_ckvmssts(lib$free_vm(&n, &info));
+	_ckvmssts_noperl(lib$free_vm(&n, &info));
 	return NULL;
         }
 
@@ -4067,10 +4103,13 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     return info->fp;
 }
 
+static I32 my_pclose_pinfo(pTHX_ pInfo info);
+
 static PerlIO *
 safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 {
     static int handler_set_up = FALSE;
+    PerlIO * ret_fp;
     unsigned long int sts, flags = CLI$M_NOWAIT;
     /* The use of a GLOBAL table (as was done previously) rendered
      * Perl's qx() or `` unusable from a C<$ SET SYMBOL/SCOPE=NOGLOBAL> DCL
@@ -4120,19 +4159,19 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     */
 
     if (!pipe_ef) {
-        _ckvmssts(sys$setast(0));
+        _ckvmssts_noperl(sys$setast(0));
         if (!pipe_ef) {
             unsigned long int pidcode = JPI$_PID;
             $DESCRIPTOR(d_delay, RETRY_DELAY);
-            _ckvmssts(lib$get_ef(&pipe_ef));
-            _ckvmssts(lib$getjpi(&pidcode,0,0,&mypid,0,0));
-            _ckvmssts(sys$bintim(&d_delay, delaytime));
+            _ckvmssts_noperl(lib$get_ef(&pipe_ef));
+            _ckvmssts_noperl(lib$getjpi(&pidcode,0,0,&mypid,0,0));
+            _ckvmssts_noperl(sys$bintim(&d_delay, delaytime));
         }
         if (!handler_set_up) {
-          _ckvmssts(sys$dclexh(&pipe_exitblock));
+          _ckvmssts_noperl(sys$dclexh(&pipe_exitblock));
           handler_set_up = TRUE;
         }
-        _ckvmssts(sys$setast(1));
+        _ckvmssts_noperl(sys$setast(1));
     }
 
     /* see if we can find a VMSPIPE.COM */
@@ -4170,7 +4209,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
           set_errno(E2BIG); break;
         case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
-          _ckvmssts(sts); /* fall through */
+          _ckvmssts_noperl(sts); /* fall through */
         default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
           set_errno(EVMSERR); 
       }
@@ -4182,7 +4221,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
       return NULL; 
     }
     n = sizeof(Info);
-    _ckvmssts(lib$get_vm(&n, &info));
+    _ckvmssts_noperl(lib$get_vm(&n, &info));
         
     strcpy(mode,in_mode);
     info->mode = *mode;
@@ -4202,11 +4241,11 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     info->xchan_valid = 0;
 
     in = PerlMem_malloc(VMS_MAXRSS);
-    if (in == NULL) _ckvmssts(SS$_INSFMEM);
+    if (in == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     out = PerlMem_malloc(VMS_MAXRSS);
-    if (out == NULL) _ckvmssts(SS$_INSFMEM);
+    if (out == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     err = PerlMem_malloc(VMS_MAXRSS);
-    if (err == NULL) _ckvmssts(SS$_INSFMEM);
+    if (err == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
     in[0] = out[0] = err[0] = '\0';
 
@@ -4239,21 +4278,21 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         
             while (!info->out_done) {
                 int done;
-                _ckvmssts(sys$setast(0));
+                _ckvmssts_noperl(sys$setast(0));
                 done = info->out_done;
-                if (!done) _ckvmssts(sys$clref(pipe_ef));
-                _ckvmssts(sys$setast(1));
-                if (!done) _ckvmssts(sys$waitfr(pipe_ef));
+                if (!done) _ckvmssts_noperl(sys$clref(pipe_ef));
+                _ckvmssts_noperl(sys$setast(1));
+                if (!done) _ckvmssts_noperl(sys$waitfr(pipe_ef));
             }
 
             if (info->out->buf) {
                 n = info->out->bufsize * sizeof(char);
-                _ckvmssts(lib$free_vm(&n, &info->out->buf));
+                _ckvmssts_noperl(lib$free_vm(&n, &info->out->buf));
             }
             n = sizeof(Pipe);
-            _ckvmssts(lib$free_vm(&n, &info->out));
+            _ckvmssts_noperl(lib$free_vm(&n, &info->out));
             n = sizeof(Info);
-            _ckvmssts(lib$free_vm(&n, &info));
+            _ckvmssts_noperl(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return NULL;
         }
@@ -4298,26 +4337,26 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         /* error cleanup */
         if (!info->fp && info->in) {
             info->done = TRUE;
-            _ckvmssts(sys$qiow(0,info->in->chan_in, IO$_WRITEOF, 0,
-                              0, 0, 0, 0, 0, 0, 0, 0));
+            _ckvmssts_noperl(sys$qiow(0,info->in->chan_in, IO$_WRITEOF, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 0));
 
             while (!info->in_done) {
                 int done;
-                _ckvmssts(sys$setast(0));
+                _ckvmssts_noperl(sys$setast(0));
                 done = info->in_done;
-                if (!done) _ckvmssts(sys$clref(pipe_ef));
-                _ckvmssts(sys$setast(1));
-                if (!done) _ckvmssts(sys$waitfr(pipe_ef));
+                if (!done) _ckvmssts_noperl(sys$clref(pipe_ef));
+                _ckvmssts_noperl(sys$setast(1));
+                if (!done) _ckvmssts_noperl(sys$waitfr(pipe_ef));
             }
 
             if (info->in->buf) {
                 n = info->in->bufsize * sizeof(char);
-                _ckvmssts(lib$free_vm(&n, &info->in->buf));
+                _ckvmssts_noperl(lib$free_vm(&n, &info->in->buf));
             }
             n = sizeof(Pipe);
-            _ckvmssts(lib$free_vm(&n, &info->in));
+            _ckvmssts_noperl(lib$free_vm(&n, &info->in));
             n = sizeof(Info);
-            _ckvmssts(lib$free_vm(&n, &info));
+            _ckvmssts_noperl(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return NULL;
         }
@@ -4343,15 +4382,15 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 
     strncpy(symbol, in, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
-    _ckvmssts(lib$set_symbol(&d_sym_in, &d_symbol, &table));
+    _ckvmssts_noperl(lib$set_symbol(&d_sym_in, &d_symbol, &table));
 
     strncpy(symbol, err, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
-    _ckvmssts(lib$set_symbol(&d_sym_err, &d_symbol, &table));
+    _ckvmssts_noperl(lib$set_symbol(&d_sym_err, &d_symbol, &table));
 
     strncpy(symbol, out, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
-    _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
+    _ckvmssts_noperl(lib$set_symbol(&d_sym_out, &d_symbol, &table));
 
     /* Done with the names for the pipes */
     PerlMem_free(err);
@@ -4369,7 +4408,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 
     strncpy(symbol, p, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
-    _ckvmssts(lib$set_symbol(&d_sym_cmd, &d_symbol, &table));
+    _ckvmssts_noperl(lib$set_symbol(&d_sym_cmd, &d_symbol, &table));
 
         if (strlen(p) > MAX_DCL_SYMBOL) {
             p += MAX_DCL_SYMBOL;
@@ -4377,15 +4416,15 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
             p += strlen(p);
         }
     }
-    _ckvmssts(sys$setast(0));
+    _ckvmssts_noperl(sys$setast(0));
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
-    _ckvmssts(sys$setast(1));
+    _ckvmssts_noperl(sys$setast(1));
     /* Omit arg 2 (input file) so the child will get the parent's SYS$INPUT
      * and SYS$COMMAND.  vmspipe.com will redefine SYS$INPUT, but we'll still
      * have SYS$COMMAND if we need it.
      */
-    _ckvmssts(lib$spawn(&vmspipedsc, 0, &nl_desc, &flags,
+    _ckvmssts_noperl(lib$spawn(&vmspipedsc, 0, &nl_desc, &flags,
                       0, &info->pid, &info->completion,
                       0, popen_completion_ast,info,0,0,0));
 
@@ -4399,11 +4438,11 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     for (j = 0; j < 4; j++) {
         sprintf(cmd_sym_name,"PERL_POPEN_CMD%d",j);
         d_sym_cmd.dsc$w_length = strlen(cmd_sym_name);
-    _ckvmssts(lib$delete_symbol(&d_sym_cmd, &table));
+    _ckvmssts_noperl(lib$delete_symbol(&d_sym_cmd, &table));
     }
-    _ckvmssts(lib$delete_symbol(&d_sym_in,  &table));
-    _ckvmssts(lib$delete_symbol(&d_sym_err, &table));
-    _ckvmssts(lib$delete_symbol(&d_sym_out, &table));
+    _ckvmssts_noperl(lib$delete_symbol(&d_sym_in,  &table));
+    _ckvmssts_noperl(lib$delete_symbol(&d_sym_err, &table));
+    _ckvmssts_noperl(lib$delete_symbol(&d_sym_out, &table));
     vms_execfree(vmscmd);
         
 #ifdef PERL_IMPLICIT_CONTEXT
@@ -4411,23 +4450,34 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 #endif
     PL_forkprocess = info->pid;
 
+    ret_fp = info->fp;
     if (wait) {
+         dSAVEDERRNO;
          int done = 0;
          while (!done) {
-             _ckvmssts(sys$setast(0));
+             _ckvmssts_noperl(sys$setast(0));
              done = info->done;
-             if (!done) _ckvmssts(sys$clref(pipe_ef));
-             _ckvmssts(sys$setast(1));
-             if (!done) _ckvmssts(sys$waitfr(pipe_ef));
+             if (!done) _ckvmssts_noperl(sys$clref(pipe_ef));
+             _ckvmssts_noperl(sys$setast(1));
+             if (!done) _ckvmssts_noperl(sys$waitfr(pipe_ef));
          }
         *psts = info->completion;
 /* Caller thinks it is open and tries to close it. */
 /* This causes some problems, as it changes the error status */
 /*        my_pclose(info->fp); */
+
+         /* If we did not have a file pointer open, then we have to */
+         /* clean up here or eventually we will run out of something */
+         SAVE_ERRNO;
+         if (info->fp == NULL) {
+             my_pclose_pinfo(aTHX_ info);
+         }
+         RESTORE_ERRNO;
+
     } else { 
         *psts = info->pid;
     }
-    return info->fp;
+    return ret_fp;
 }  /* end of safe_popen */
 
 
@@ -4444,22 +4494,15 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 
 /*}}}*/
 
-/*{{{  I32 my_pclose(PerlIO *fp)*/
-I32 Perl_my_pclose(pTHX_ PerlIO *fp)
-{
-    pInfo info, last = NULL;
+
+/* Routine to close and cleanup a pipe info structure */
+
+static I32 my_pclose_pinfo(pTHX_ pInfo info) {
+
     unsigned long int retsts;
     int done, iss, n;
     int status;
-    
-    for (info = open_pipes; info != NULL; last = info, info = info->next)
-        if (info->fp == fp) break;
-
-    if (info == NULL) {  /* no such pipe open */
-      set_errno(ECHILD); /* quoth POSIX */
-      set_vaxc_errno(SS$_NONEXPR);
-      return -1;
-    }
+    pInfo next, last;
 
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
@@ -4522,8 +4565,16 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 
     /* remove from list of open pipes */
     _ckvmssts(sys$setast(0));
-    if (last) last->next = info->next;
-    else open_pipes = info->next;
+    last = NULL;
+    for (next = open_pipes; next != NULL; last = next, next = next->next) {
+        if (next == info)
+            break;
+    }
+
+    if (last)
+        last->next = info->next;
+    else
+        open_pipes = info->next;
     _ckvmssts(sys$setast(1));
 
     /* free buffers and structures */
@@ -4556,6 +4607,28 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     _ckvmssts(lib$free_vm(&n, &info));
 
     return retsts;
+}
+
+
+/*{{{  I32 my_pclose(PerlIO *fp)*/
+I32 Perl_my_pclose(pTHX_ PerlIO *fp)
+{
+    pInfo info, last = NULL;
+    I32 ret_status;
+    
+    /* Fixme - need ast and mutex protection here */
+    for (info = open_pipes; info != NULL; last = info, info = info->next)
+        if (info->fp == fp) break;
+
+    if (info == NULL) {  /* no such pipe open */
+      set_errno(ECHILD); /* quoth POSIX */
+      set_vaxc_errno(SS$_NONEXPR);
+      return -1;
+    }
+
+    ret_status = my_pclose_pinfo(aTHX_ info);
+
+    return ret_status;
 
 }  /* end of my_pclose() */
 
@@ -4925,7 +4998,7 @@ struct item_list_3
      * and the insert an ACE at the head of the ACL which allows us
      * to delete the file.
      */
-    _ckvmssts(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
+    _ckvmssts_noperl(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
 
     fildsc.dsc$w_length = strlen(vmsname);
     fildsc.dsc$a_pointer = vmsname;
@@ -5129,7 +5202,7 @@ Stat_t dst_st;
 
 	vms_src = PerlMem_malloc(VMS_MAXRSS);
 	if (vms_src == NULL)
-	    _ckvmssts(SS$_INSFMEM);
+	    _ckvmssts_noperl(SS$_INSFMEM);
 
 	/* Source is always a VMS format file */
 	ret_str = do_tovmsspec(src, vms_src, 0, NULL);
@@ -5141,7 +5214,7 @@ Stat_t dst_st;
 
 	vms_dst = PerlMem_malloc(VMS_MAXRSS);
 	if (vms_dst == NULL)
-	    _ckvmssts(SS$_INSFMEM);
+	    _ckvmssts_noperl(SS$_INSFMEM);
 
 	if (S_ISDIR(src_st.st_mode)) {
 	char * ret_str;
@@ -5149,7 +5222,7 @@ Stat_t dst_st;
 
 	    vms_dir_file = PerlMem_malloc(VMS_MAXRSS);
 	    if (vms_dir_file == NULL)
-		_ckvmssts(SS$_INSFMEM);
+		_ckvmssts_noperl(SS$_INSFMEM);
 
 	    /* The source must be a file specification */
 	    ret_str = do_fileify_dirspec(vms_src, vms_dir_file, 0, NULL);
@@ -5189,7 +5262,7 @@ Stat_t dst_st;
 	    /* The source must be a file specification */
 	    vms_dir_file = PerlMem_malloc(VMS_MAXRSS);
 	    if (vms_dir_file == NULL)
-		_ckvmssts(SS$_INSFMEM);
+		_ckvmssts_noperl(SS$_INSFMEM);
 
 	    ret_str = do_fileify_dirspec(vms_dst, vms_dir_file, 0, NULL);
 	    if (ret_str == NULL) {
@@ -5348,7 +5421,7 @@ mp_do_rmsexpand
     isunix = is_unix_filespec(filespec);
     if (isunix) {
       vmsfspec = PerlMem_malloc(VMS_MAXRSS);
-      if (vmsfspec == NULL) _ckvmssts(SS$_INSFMEM);
+      if (vmsfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       if (do_tovmsspec(filespec,vmsfspec,0,fs_utf8) == NULL) {
 	PerlMem_free(vmsfspec);
 	if (out)
@@ -5377,7 +5450,7 @@ mp_do_rmsexpand
     t_isunix = is_unix_filespec(defspec);
     if (t_isunix) {
       tmpfspec = PerlMem_malloc(VMS_MAXRSS);
-      if (tmpfspec == NULL) _ckvmssts(SS$_INSFMEM);
+      if (tmpfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       if (do_tovmsspec(defspec,tmpfspec,0,dfs_utf8) == NULL) {
 	PerlMem_free(tmpfspec);
 	if (vmsfspec != NULL)
@@ -5392,10 +5465,10 @@ mp_do_rmsexpand
   }
 
   esa = PerlMem_malloc(NAM$C_MAXRSS + 1);
-  if (esa == NULL) _ckvmssts(SS$_INSFMEM);
+  if (esa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
   esal = PerlMem_malloc(VMS_MAXRSS);
-  if (esal == NULL) _ckvmssts(SS$_INSFMEM);
+  if (esal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
   rms_set_esal(mynam, esa, NAM$C_MAXRSS, esal, VMS_MAXRSS-1);
 
@@ -5404,7 +5477,7 @@ mp_do_rmsexpand
    */
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
   outbufl = PerlMem_malloc(VMS_MAXRSS);
-  if (outbufl == NULL) _ckvmssts(SS$_INSFMEM);
+  if (outbufl == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
    rms_set_rsal(mynam, outbuf, NAM$C_MAXRSS, outbufl, (VMS_MAXRSS - 1));
 
@@ -5522,7 +5595,7 @@ mp_do_rmsexpand
       if (defesa != NULL) {
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
         defesal = PerlMem_malloc(VMS_MAXRSS + 1);
-        if (defesal == NULL) _ckvmssts(SS$_INSFMEM);
+        if (defesal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
 	struct FAB deffab = cc$rms_fab;
 	rms_setup_nam(defnam);
@@ -5656,7 +5729,7 @@ mp_do_rmsexpand
     }
     else if (isunix) {
       tmpfspec = PerlMem_malloc(VMS_MAXRSS);
-      if (tmpfspec == NULL) _ckvmssts(SS$_INSFMEM);
+      if (tmpfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       if (do_tounixspec(tbuf,tmpfspec,0,fs_utf8) == NULL) {
 	if (out) Safefree(out);
 	PerlMem_free(esa);
@@ -5761,7 +5834,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
       return NULL;
     }
     trndir = PerlMem_malloc(VMS_MAXRSS + 1);
-    if (trndir == NULL) _ckvmssts(SS$_INSFMEM);
+    if (trndir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     if (!strpbrk(dir+1,"/]>:")  &&
 	(!decc_posix_compliant_pathnames && decc_disable_posix_root)) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
@@ -5817,7 +5890,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
     }
 
     vmsdir = PerlMem_malloc(VMS_MAXRSS + 1);
-    if (vmsdir == NULL) _ckvmssts(SS$_INSFMEM);
+    if (vmsdir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     cp1 = strpbrk(trndir,"]:>");
     if (hasfilename || !cp1) { /* Unix-style path or filename */
       if (trndir[0] == '.') {
@@ -5976,11 +6049,11 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
       rms_setup_nam(dirnam);
 
       esa = PerlMem_malloc(NAM$C_MAXRSS + 1);
-      if (esa == NULL) _ckvmssts(SS$_INSFMEM);
+      if (esa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       esal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
       esal = PerlMem_malloc(VMS_MAXRSS);
-      if (esal == NULL) _ckvmssts(SS$_INSFMEM);
+      if (esal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
       rms_set_fna(dirfab, dirnam, trndir, strlen(trndir));
       rms_bind_fab_nam(dirfab, dirnam);
@@ -6253,7 +6326,7 @@ static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int 
     }
 
     trndir = PerlMem_malloc(VMS_MAXRSS);
-    if (trndir == NULL) _ckvmssts(SS$_INSFMEM);
+    if (trndir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     if (*dir) strcpy(trndir,dir);
     else getcwd(trndir,VMS_MAXRSS - 1);
 
@@ -6405,11 +6478,11 @@ static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int 
       }
       rms_set_fna(dirfab, dirnam, trndir, dirlen);
       esa = PerlMem_malloc(VMS_MAXRSS);
-      if (esa == NULL) _ckvmssts(SS$_INSFMEM);
+      if (esa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       esal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
       esal = PerlMem_malloc(VMS_MAXRSS);
-      if (esal == NULL) _ckvmssts(SS$_INSFMEM);
+      if (esal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
       rms_set_dna(dirfab, dirnam, ".DIR;1", 6);
       rms_bind_fab_nam(dirfab, dirnam);
@@ -6553,7 +6626,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
       int nl_flag;
 
       tunix = PerlMem_malloc(VMS_MAXRSS);
-      if (tunix == NULL) _ckvmssts(SS$_INSFMEM);
+      if (tunix == NULL) _ckvmssts_noperl(SS$_INSFMEM);
       strcpy(tunix, spec);
       tunix_len = strlen(tunix);
       nl_flag = 0;
@@ -6666,7 +6739,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   cmp_rslt = strncasecmp(spec,"SYS$SCRATCH:", 12);
 #endif
   tmp = PerlMem_malloc(VMS_MAXRSS);
-  if (tmp == NULL) _ckvmssts(SS$_INSFMEM);
+  if (tmp == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if (cmp_rslt == 0) {
   int islnm;
 
@@ -7981,7 +8054,7 @@ static char *mp_do_tovmsspec
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
     trndev = PerlMem_malloc(VMS_MAXRSS);
-    if (trndev == NULL) _ckvmssts(SS$_INSFMEM);
+    if (trndev == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     islnm =  my_trnlnm(rslt,trndev,0);
 
      /* DECC special handling */
@@ -9157,9 +9230,10 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
        *template, *base, *end, *cp1, *cp2;
   register int tmplen, reslen = 0, dirs = 0;
 
-  unixwild = PerlMem_malloc(VMS_MAXRSS);
-  if (unixwild == NULL) _ckvmssts(SS$_INSFMEM);
   if (!wildspec || !fspec) return 0;
+
+  unixwild = PerlMem_malloc(VMS_MAXRSS);
+  if (unixwild == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   template = unixwild;
   if (strpbrk(wildspec,"]>:") != NULL) {
     if (do_tounixspec(wildspec,unixwild,0,NULL) == NULL) {
@@ -9172,7 +9246,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
     unixwild[VMS_MAXRSS-1] = 0;
   }
   unixified = PerlMem_malloc(VMS_MAXRSS);
-  if (unixified == NULL) _ckvmssts(SS$_INSFMEM);
+  if (unixified == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if (strpbrk(fspec,"]>:") != NULL) {
     if (do_tounixspec(fspec,unixified,0,NULL) == NULL) {
         PerlMem_free(unixwild);
@@ -9226,7 +9300,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
     totells = ells;
     for (cp1 = ellipsis+4; *cp1; cp1++) if (*cp1 == '/') dirs++;
     tpl = PerlMem_malloc(VMS_MAXRSS);
-    if (tpl == NULL) _ckvmssts(SS$_INSFMEM);
+    if (tpl == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     if (ellipsis == template && opts & 1) {
       /* Template begins with an ellipsis.  Since we can't tell how many
        * directory names at the front of the resultant to keep for an
@@ -9262,7 +9336,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
          if (*front == '/' && !dirs--) { front++; break; }
     }
     lcres = PerlMem_malloc(VMS_MAXRSS);
-    if (lcres == NULL) _ckvmssts(SS$_INSFMEM);
+    if (lcres == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcres + (VMS_MAXRSS - 1);
          cp1++,cp2++) {
 	    if (!decc_efs_case_preserve) {
@@ -9874,12 +9948,12 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   register int isdcl;
 
   vmscmd = PerlMem_malloc(sizeof(struct dsc$descriptor_s));
-  if (vmscmd == NULL) _ckvmssts(SS$_INSFMEM);
+  if (vmscmd == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
   /* Make a copy for modification */
   cmdlen = strlen(incmd);
   cmd = PerlMem_malloc(cmdlen+1);
-  if (cmd == NULL) _ckvmssts(SS$_INSFMEM);
+  if (cmd == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   strncpy(cmd, incmd, cmdlen);
   cmd[cmdlen] = 0;
   image_name[0] = 0;
@@ -9961,19 +10035,19 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     imgdsc.dsc$w_length = wordbreak - s;
     retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,&rsts,&flags);
     if (!(retsts&1)) {
-        _ckvmssts(lib$find_file_end(&cxt));
+        _ckvmssts_noperl(lib$find_file_end(&cxt));
         retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,&rsts,&flags);
       if (!(retsts & 1) && *s == '$') {
-        _ckvmssts(lib$find_file_end(&cxt));
+        _ckvmssts_noperl(lib$find_file_end(&cxt));
 	imgdsc.dsc$a_pointer++; imgdsc.dsc$w_length--;
 	retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,&rsts,&flags);
 	if (!(retsts&1)) {
-	  _ckvmssts(lib$find_file_end(&cxt));
+	  _ckvmssts_noperl(lib$find_file_end(&cxt));
           retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,&rsts,&flags);
         }
       }
     }
-    _ckvmssts(lib$find_file_end(&cxt));
+    _ckvmssts_noperl(lib$find_file_end(&cxt));
 
     if (retsts & 1) {
       FILE *fp;
@@ -10095,7 +10169,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 
       if (cando_by_name(S_IXUSR,0,resspec)) {
         vmscmd->dsc$a_pointer = PerlMem_malloc(MAX_DCL_LINE_LENGTH);
-	if (vmscmd->dsc$a_pointer == NULL) _ckvmssts(SS$_INSFMEM);
+	if (vmscmd->dsc$a_pointer == NULL) _ckvmssts_noperl(SS$_INSFMEM);
         if (!isdcl) {
             strcpy(vmscmd->dsc$a_pointer,"$ MCR ");
 	    if (image_name[0] != 0) {
@@ -10165,7 +10239,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     if (retsts == RMS$_FNF || retsts == RMS$_DNF || retsts == RMS$_PRV ||
         retsts == RMS$_DEV || retsts == RMS$_DIR || retsts == RMS$_SYN ||
        (retsts & STS$M_CODE) == (SHR$_NOWILD & STS$M_CODE)) return retsts;
-    else { _ckvmssts(retsts); }
+    else { _ckvmssts_noperl(retsts); }
   }
 
   return (vmscmd->dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
@@ -10237,7 +10311,7 @@ Perl_vms_do_exec(pTHX_ const char *cmd)
       case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
         set_errno(E2BIG); break;
       case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
-        _ckvmssts(retsts); /* fall through */
+        _ckvmssts_noperl(retsts); /* fall through */
       default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
         set_errno(EVMSERR); 
     }
@@ -10338,7 +10412,7 @@ do_spawn2(pTHX_ const char *cmd, int flags)
         case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
           set_errno(E2BIG); break;
         case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
-          _ckvmssts(sts); /* fall through */
+          _ckvmssts_noperl(sts); /* fall through */
         default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
           set_errno(EVMSERR);
       }
@@ -11689,7 +11763,7 @@ Perl_cando_by_name_int
 
   /* Make sure we expand logical names, since sys$check_access doesn't */
   fileified = PerlMem_malloc(VMS_MAXRSS);
-  if (fileified == NULL) _ckvmssts(SS$_INSFMEM);
+  if (fileified == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if (!strpbrk(fname,"/]>:")) {
       strcpy(fileified,fname);
       trnlnm_iter_count = 0;
@@ -11701,7 +11775,7 @@ Perl_cando_by_name_int
   }
 
   vmsname = PerlMem_malloc(VMS_MAXRSS);
-  if (vmsname == NULL) _ckvmssts(SS$_INSFMEM);
+  if (vmsname == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if ( !(opts & PERL_RMSEXPAND_M_VMS_IN) ) {
     /* Don't know if already in VMS format, so make sure */
     if (!do_rmsexpand(fname, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS, NULL, NULL)) {
@@ -11772,19 +11846,19 @@ Perl_cando_by_name_int
    */
 
   /* get current process privs and username */
-  _ckvmssts(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
-  _ckvmssts(iosb[0]);
+  _ckvmssts_noperl(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
+  _ckvmssts_noperl(iosb[0]);
 
 #if defined(__VMS_VER) && __VMS_VER >= 60000000
 
   /* find out the space required for the profile */
-  _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
+  _ckvmssts_noperl(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
                                     &usrprodsc.dsc$w_length,&profile_context));
 
   /* allocate space for the profile and get it filled in */
   usrprodsc.dsc$a_pointer = PerlMem_malloc(usrprodsc.dsc$w_length);
-  if (usrprodsc.dsc$a_pointer == NULL) _ckvmssts(SS$_INSFMEM);
-  _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,usrprodsc.dsc$a_pointer,
+  if (usrprodsc.dsc$a_pointer == NULL) _ckvmssts_noperl(SS$_INSFMEM);
+  _ckvmssts_noperl(sys$create_user_profile(&usrdsc,&usrprolst,0,usrprodsc.dsc$a_pointer,
                                     &usrprodsc.dsc$w_length,&profile_context));
 
   /* use the profile to check access to the file; free profile & analyze results */
@@ -11818,7 +11892,7 @@ Perl_cando_by_name_int
       PerlMem_free(vmsname);
     return TRUE;
   }
-  _ckvmssts(retsts);
+  _ckvmssts_noperl(retsts);
 
   if (fileified != NULL)
     PerlMem_free(fileified);
@@ -12139,9 +12213,9 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     struct XABSUM xabsum;
 
     vmsin = PerlMem_malloc(VMS_MAXRSS);
-    if (vmsin == NULL) _ckvmssts(SS$_INSFMEM);
+    if (vmsin == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     vmsout = PerlMem_malloc(VMS_MAXRSS);
-    if (vmsout == NULL) _ckvmssts(SS$_INSFMEM);
+    if (vmsout == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     if (!spec_in  || !*spec_in  || !do_tovmsspec(spec_in,vmsin,1,NULL) ||
         !spec_out || !*spec_out || !do_tovmsspec(spec_out,vmsout,1,NULL)) {
       PerlMem_free(vmsin);
@@ -12151,11 +12225,11 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     }
 
     esa = PerlMem_malloc(VMS_MAXRSS);
-    if (esa == NULL) _ckvmssts(SS$_INSFMEM);
+    if (esa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     esal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
     esal = PerlMem_malloc(VMS_MAXRSS);
-    if (esal == NULL) _ckvmssts(SS$_INSFMEM);
+    if (esal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
     fab_in = cc$rms_fab;
     rms_set_fna(fab_in, nam, vmsin, strlen(vmsin));
@@ -12166,11 +12240,11 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     fab_in.fab$l_xab = (void *) &xabdat;
 
     rsa = PerlMem_malloc(VMS_MAXRSS);
-    if (rsa == NULL) _ckvmssts(SS$_INSFMEM);
+    if (rsa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     rsal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
     rsal = PerlMem_malloc(VMS_MAXRSS);
-    if (rsal == NULL) _ckvmssts(SS$_INSFMEM);
+    if (rsal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
     rms_set_rsal(nam, rsa, NAM$C_MAXRSS, rsal, (VMS_MAXRSS - 1));
     rms_set_esal(nam, esa, NAM$C_MAXRSS, esal, (VMS_MAXRSS - 1));
@@ -12229,16 +12303,16 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     dna_len = rms_nam_namel(nam) ? rms_nam_name_type_l_size(nam) : 0;
     rms_set_dna(fab_out, nam_out, rms_nam_namel(nam), dna_len);
     esa_out = PerlMem_malloc(NAM$C_MAXRSS + 1);
-    if (esa_out == NULL) _ckvmssts(SS$_INSFMEM);
+    if (esa_out == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     rsa_out = PerlMem_malloc(NAM$C_MAXRSS + 1);
-    if (rsa_out == NULL) _ckvmssts(SS$_INSFMEM);
+    if (rsa_out == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     esal_out = NULL;
     rsal_out = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
     esal_out = PerlMem_malloc(VMS_MAXRSS);
-    if (esal_out == NULL) _ckvmssts(SS$_INSFMEM);
+    if (esal_out == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     rsal_out = PerlMem_malloc(VMS_MAXRSS);
-    if (rsal_out == NULL) _ckvmssts(SS$_INSFMEM);
+    if (rsal_out == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 #endif
     rms_set_rsal(nam_out, rsa_out, NAM$C_MAXRSS, rsal_out, (VMS_MAXRSS - 1));
     rms_set_esal(nam_out, esa_out, NAM$C_MAXRSS, esal_out, (VMS_MAXRSS - 1));
@@ -12320,7 +12394,7 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     }
 
     ubf = PerlMem_malloc(32256);
-    if (ubf == NULL) _ckvmssts(SS$_INSFMEM);
+    if (ubf == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     rab_in = cc$rms_rab;
     rab_in.rab$l_fab = &fab_in;
     rab_in.rab$l_rop = RAB$M_BIO;
