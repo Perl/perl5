@@ -233,7 +233,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'andk',
 		'FILES'		=> q[lib/CPAN.pm lib/CPAN],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'CPAN',
 		},
 
 	'CPANPLUS' =>
