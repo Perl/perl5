@@ -2545,11 +2545,11 @@ lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
 lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/overload64.t		See if operator overloading works with 64-bit ints
-lib/overload.pm			Module for overloading perl operators
-lib/overload.t			See if operator overloading works
-lib/overload/numbers.pm		Helper for overloading pragma
 lib/overloading.pm		Pragma to lexically control overloading
 lib/overloading.t		Tests for overloading.pm
+lib/overload/numbers.pm		Helper for overloading pragma
+lib/overload.pm			Module for overloading perl operators
+lib/overload.t			See if operator overloading works
 lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
@@ -3664,9 +3664,6 @@ symbian/uid.pl			Helper code for config.pl
 symbian/version.pl		Helper code for config.pl
 symbian/xsbuild.pl		Building extensions
 taint.c				Tainting code
-time64.c                        64 bit clean time.h (code)
-time64.h                        64 bit clean time.h (header)
-time64_config.h                 64 bit clean time.h (configuration)
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work
@@ -3702,6 +3699,9 @@ t/comp/use.t			See if pragmata work
 t/comp/utf.t			See if UTFs work
 t/harness			Finer diagnostics from test suite
 thread.h			Threading header
+time64.c                        64 bit clean time.h (code)
+time64_config.h                 64 bit clean time.h (configuration)
+time64.h                        64 bit clean time.h (header)
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
 t/io/crlf.t			See if :crlf works
@@ -4079,9 +4079,9 @@ t/op/pow.t			See if ** works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
 t/op/qq.t			See if qq works
+t/op/qr_gc.t			See if qr doesn't leak
 t/op/qrstack.t			See if qr expands the stack properly
 t/op/qr.t			See if qr works
-t/op/qr_gc.t			See if qr doesn't leak
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
