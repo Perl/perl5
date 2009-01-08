@@ -630,10 +630,11 @@ int utf8_flag;
     case ']':
     case '%':
     case '^':
+    case '\\':
         /* Don't escape again if following character is 
          * already something we escape.
          */
-        if (strchr(".~!#&\'`()+@{},;[]%^=_", *(inspec+1))) {
+        if (strchr(".~!#&\'`()+@{},;[]%^=_\\", *(inspec+1))) {
 	    *outspec = *inspec;
 	    *output_cnt = 1;
 	    return 1;
@@ -5346,7 +5347,7 @@ Stat_t dst_st;
 
 	flags = 0;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
-	flags |= 2; /* LIB$M_FIL_LONG_NAMES */
+	flags |= 4; /* LIB$M_FIL_LONG_NAMES (bit 2) */
 #endif
 
 	sts = lib$rename_file(&old_file_dsc,
