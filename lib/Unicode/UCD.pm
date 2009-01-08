@@ -942,7 +942,7 @@ Unicode case mappings as returned by L</charinfo()> never are).
 
 If there are no case mappings for the L</code point argument>, or if all three
 possible mappings (I<lower>, I<title> and I<upper>) result in single code
-points and are locale independent and uncondtional, B<undef> is returned.
+points and are locale independent and unconditional, B<undef> is returned.
 
 Otherwise, a reference to a hash giving the mappings (or a reference to a hash
 of such hashes, explained below) is returned.
