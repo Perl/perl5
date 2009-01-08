@@ -2288,6 +2288,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	    }
 	    return NULL;
 	}
+	if (ckWARN(WARN_PIPE))
+	    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
 	sleep(5);
     }
     if (pid == 0) {
@@ -2433,9 +2435,11 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 		PerlLIO_close(pp[1]);
 	    }
 	    if (!doexec)
-		Perl_croak(aTHX_ "Can't fork");
+		Perl_croak(aTHX_ "Can't fork: %s", Strerror(errno));
 	    return NULL;
 	}
+	if (ckWARN(WARN_PIPE))
+	    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
 	sleep(5);
     }
     if (pid == 0) {

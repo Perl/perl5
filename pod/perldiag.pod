@@ -757,10 +757,15 @@ If you didn't mean to use a Unicode property, escape the C<\p>, either
 by C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, until
 possible C<\E>).
 
-=item Can't fork
+=item Can't fork: %s
 
 (F) A fatal error occurred while trying to fork while opening a
 pipeline.
+
+=item Can't fork, trying again in 5 seconds
+
+(W) A fork in a piped open failed with EAGAIN and will be retried
+after five seconds.
 
 =item Can't get filespec - stale stat buffer?
 
