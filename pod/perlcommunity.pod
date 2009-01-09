@@ -132,7 +132,7 @@ Europe, Asia) in a stunning grassroots display by the Perl community. For more
 information about either conference, check out their respective web pages:
 OSCON L<http://conferences.oreillynet.com/>; YAPC L<http://www.yapc.org>.
 
-A relatively new conference franchize with a large Perl portion is the
+A relatively new conference franchise with a large Perl portion is the
 Open Source Developers Conference or OSDC. First held in Australia it has
 recently also spread to Israel. More information can be found at:
 L<http://www.osdc.com.au/> for Australia, and L<http://www.osdc.org.il>
