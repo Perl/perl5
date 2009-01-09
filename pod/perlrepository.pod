@@ -239,7 +239,7 @@ that you're on the I<blead> branch, and your repository is up to date:
   % git pull
 
 (It's preferable to patch against the latest blead version, since patches
-are usually integrated from blead to the maintainance branches. This
+are usually integrated from blead to the maintenance branches. This
 does not apply, obviously, in the rare case where your patch is specific
 to a maintaince release.)
 
@@ -548,7 +548,7 @@ When the first bad commit is isolated, C<git bisect> will tell you so:
   Author: Dave Mitchell <davem@fdisolutions.com>
   Date:   Sat Feb 9 14:56:23 2008 +0000
 
-      [perl #49472] Attributes + Unkown Error
+      [perl #49472] Attributes + Unknown Error
       ...
 
   bisect run success
@@ -567,7 +567,7 @@ the "first commit where the bug is solved".
 C<git help bisect> has much more information on how you can tweak your
 binary searches.
 
-=head1 COMITTING TO MAINTENANCE VERSIONS
+=head1 COMMITTING TO MAINTENANCE VERSIONS
 
 To commit to a maintenance version of perl, you need to create a local
 tracking branch:
