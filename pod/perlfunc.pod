@@ -5274,7 +5274,7 @@ the original quicksort was faster.  5.8 has a sort pragma for
 limited control of the sort.  Its rather blunt control of the
 underlying algorithm may not persist into future Perls, but the
 ability to characterize the input or output in implementation
-independent ways quite probably will.  See L<sort>.
+independent ways quite probably will.  See L<the sort pragma|sort>.
 
 Examples:
 
