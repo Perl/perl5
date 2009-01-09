@@ -1,5 +1,9 @@
 Revision history for Perl distribution PathTools.
 
+- Apply patch from John Malmberg: (RT #42154)
+  "Update to support VMS in Unix compatible mode and/or file names using
+   extended character sets."
+
 3.29 - Wed Oct 29 20:48:11 2008
 
 - Promote to stable release.

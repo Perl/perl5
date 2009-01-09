@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.29';
+$VERSION = '3.29_01';
 my $xs_version = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -201,6 +201,45 @@ if ($^O eq 'os2') {
 
     return 1;
 }
+
+# Need to look up the feature settings on VMS.  The preferred way is to use the
+# VMS::Feature module, but that may not be available to dual life modules.
+
+my $use_vms_feature;
+BEGIN {
+    if ($^O eq 'VMS') {
+        if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+            $use_vms_feature = 1;
+        }
+    }
+}
+
+# Need to look up the UNIX report mode.  This may become a dynamic mode
+# in the future.
+sub _vms_unix_rpt {
+    my $unix_rpt;
+    if ($use_vms_feature) {
+        $unix_rpt = VMS::Feature::current("filename_unix_report");
+    } else {
+        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+    }
+    return $unix_rpt;
+}
+
+# Need to look up the EFS character set mode.  This may become a dynamic
+# mode in the future.
+sub _vms_efs {
+    my $efs;
+    if ($use_vms_feature) {
+        $efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
+        $efs = $env_efs =~ /^[ET1]/i; 
+    }
+    return $efs;
+}
+
 
 # If loading the XS stuff doesn't work, we can fall back to pure perl
 eval {
@@ -648,23 +687,36 @@ sub _vms_abs_path {
     return $ENV{'DEFAULT'} unless @_;
     my $path = shift;
 
-    if (-l $path) {
-        my $link_target = readlink($path);
-        die "Can't resolve link $path: $!" unless defined $link_target;
-	    
-        return _vms_abs_path($link_target);
-    }
+    my $efs = _vms_efs;
+    my $unix_rpt = _vms_unix_rpt;
 
-    if (defined &VMS::Filespec::vms_realpath) {
-        my $path = $_[0];
-        if ($path =~ m#(?<=\^)/# ) {
+    if (defined &VMS::Filespec::vmsrealpath) {
+        my $path_unix = 0;
+        my $path_vms = 0;
+
+        $path_unix = 1 if ($path =~ m#(?<=\^)/#);
+        $path_unix = 1 if ($path =~ /^\.\.?$/);
+        $path_vms = 1 if ($path =~ m#[\[<\]]#);
+        $path_vms = 1 if ($path =~ /^--?$/);
+
+        my $unix_mode = $path_unix;
+        if ($efs) {
+            # In case of a tie, the Unix report mode decides.
+            if ($path_vms == $path_unix) {
+                $unix_mode = $unix_rpt;
+            } else {
+                $unix_mode = 0 if $path_vms;
+            }
+        }
+
+        if ($unix_mode) {
             # Unix format
-            return VMS::Filespec::vms_realpath($path);
+            return VMS::Filespec::unixrealpath($path);
         }
 
 	# VMS format
 
-	my $new_path = VMS::Filespec::vms_realname($path); 
+	my $new_path = VMS::Filespec::vmsrealpath($path);
 
 	# Perl expects directories to be in directory format
 	$new_path = VMS::Filespec::pathify($new_path) if -d $path;
@@ -673,6 +725,13 @@ sub _vms_abs_path {
 
     # Fallback to older algorithm if correct ones are not
     # available.
+
+    if (-l $path) {
+        my $link_target = readlink($path);
+        die "Can't resolve link $path: $!" unless defined $link_target;
+
+        return _vms_abs_path($link_target);
+    }
 
     # may need to turn foo.dir into [.foo]
     my $pathified = VMS::Filespec::pathify($path);
