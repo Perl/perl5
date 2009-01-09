@@ -5,7 +5,7 @@ perldelta - what is new for perl v5.11.0
 =head1 DESCRIPTION
 
 This document describes differences between the 5.10.0 and the 5.11.0
-developement releases.
+development releases.
 
 =head1 Incompatible Changes
 
