@@ -63,7 +63,7 @@ and typically run on host computers.  The EBCDIC encodings derive
 from 8 bit byte extensions of Hollerith punched card encodings.
 The layout on the cards was such that high bits were set for the
 upper and lower case alphabet characters [a-z] and [A-Z], but there
-were gaps within each latin alphabet range.
+were gaps within each Latin alphabet range.
 
 Some IBM EBCDIC character sets may be known by character code set 
 identification numbers (CCSID numbers) or code page numbers.  Leading
