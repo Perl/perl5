@@ -5874,7 +5874,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	(!decc_posix_compliant_pathnames && decc_disable_posix_root)) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
       trnlnm_iter_count = 0;
-      while (!strpbrk(trndir,"/]>:") && simple_trnlnm(trndir,trndir,0)) {
+      while (!strpbrk(trndir,"/]>:") && simple_trnlnm(trndir,trndir,VMS_MAXRSS-1)) {
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       }
@@ -6367,7 +6367,7 @@ static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int 
 
     trnlnm_iter_count = 0;
     while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
-	   && simple_trnlnm(trndir,trndir,0)) {
+	   && simple_trnlnm(trndir,trndir,VMS_MAXRSS-1)) {
       trnlnm_iter_count++; 
       if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       trnlen = strlen(trndir);
@@ -6778,7 +6778,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   if (cmp_rslt == 0) {
   int islnm;
 
-    islnm = simple_trnlnm(tmp, "TMP", 0);
+    islnm = simple_trnlnm("TMP", tmp, VMS_MAXRSS-1);
     if (!islnm) {
       strcpy(rslt, "/tmp");
       cp1 = cp1 + 4;
@@ -8090,7 +8090,7 @@ static char *mp_do_tovmsspec
     *cp1 = '\0';
     trndev = PerlMem_malloc(VMS_MAXRSS);
     if (trndev == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-    islnm =  simple_trnlnm(rslt,trndev,0);
+    islnm =  simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
 
      /* DECC special handling */
     if (!islnm) {
@@ -8098,21 +8098,21 @@ static char *mp_do_tovmsspec
 	strcpy(rslt,"sys$system");
 	cp1 = rslt + 10;
 	*cp1 = 0;
-	islnm = simple_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
       else if (strcmp(rslt,"tmp") == 0) {
 	strcpy(rslt,"sys$scratch");
 	cp1 = rslt + 11;
 	*cp1 = 0;
-	islnm = simple_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
       else if (!decc_disable_posix_root) {
         strcpy(rslt, "sys$posix_root");
-	cp1 = rslt + 13;
+	cp1 = rslt + 14;
 	*cp1 = 0;
 	cp2 = path;
         while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
-	islnm = simple_trnlnm(rslt,trndev,0);
+	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
       else if (strcmp(rslt,"dev") == 0) {
 	if (strncmp(cp2,"/null", 5) == 0) {
@@ -8121,7 +8121,7 @@ static char *mp_do_tovmsspec
 	    cp1 = rslt + 4;
 	    *cp1 = 0;
 	    cp2 = cp2 + 5;
-	    islnm = simple_trnlnm(rslt,trndev,0);
+	    islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
 	  }
 	}
       }
