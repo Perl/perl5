@@ -983,7 +983,7 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 
 =head2 Investigate PADTMP hash pessimisation
 
-The peephole optimier converts constants used for hash key lookups to shared
+The peephole optimiser converts constants used for hash key lookups to shared
 hash key scalars. Under ithreads, something is undoing this work.
 See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
 
