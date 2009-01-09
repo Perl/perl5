@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 574;
+use Test::More tests => 577;
 
 
 $a = new Oscalar "087";
@@ -361,6 +361,13 @@ is(($aII << 3), '_<<_087_<<_');
 }
 is($int, 9);
 is($out, 1024);
+is($int, 9);
+{
+  BEGIN { overload::constant 'integer' => sub {$int++; shift()+1}; }
+  eval q{$out = 42};
+}
+is($int, 10);
+is($out, 43);
 
 $foo = 'foo';
 $foo1 = 'f\'o\\o';
