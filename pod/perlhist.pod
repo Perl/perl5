@@ -745,7 +745,7 @@ the Perl source distribution for somewhat more selected releases.
 
 =head2 SELECTED PATCH SIZES
 
-The "diff lines kb" means that for example the patch 5.003_08, to be
+The "diff lines kB" means that for example the patch 5.003_08, to be
 applied on top of the 5.003_07 (or whatever was before the 5.003_08)
 added lines for 110 kilobytes, it removed lines for 19 kilobytes, and
 changed lines for 424 kilobytes.  Just the lines themselves are
@@ -851,6 +851,7 @@ Thanks to the collective memory of the Perlfolk.  In addition to the
 Keepers of the Pumpkin also Alan Champion, Mark Dominus, 
 Andreas König, John Macdonald, Matthias Neeracher, Jeff Okamoto,
 Michael Peppler, Randal Schwartz, and Paul D. Smith sent corrections
-and additions.
+and additions. Abigail added file and patch size data for the 5.6.0 - 5.10
+era.
 
 =cut
