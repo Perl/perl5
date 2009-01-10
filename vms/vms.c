@@ -3043,12 +3043,12 @@ pipe_exit_routine()
       /* We need to use the Perl context of the thread that created */
       /* the pipe. */
       pTHX;
-      if (info->err)
-          aTHX = info->err->thx;
-      else if (info->out)
-          aTHX = info->out->thx;
-      else if (info->in)
-          aTHX = info->in->thx;
+      if (open_pipes->err)
+          aTHX = open_pipes->err->thx;
+      else if (open_pipes->out)
+          aTHX = open_pipes->out->thx;
+      else if (open_pipes->in)
+          aTHX = open_pipes->in->thx;
 #endif
       if ((sts = my_pclose(open_pipes->fp)) == -1) retsts = vaxc$errno;
       else if (!(sts & 1)) retsts = sts;
