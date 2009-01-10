@@ -9999,12 +9999,13 @@ static unsigned long int
 setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
                    struct dsc$descriptor_s **pvmscmd)
 {
-  char vmsspec[NAM$C_MAXRSS+1], resspec[NAM$C_MAXRSS+1];
+  char * vmsspec;
+  char * resspec;
   char image_name[NAM$C_MAXRSS+1];
   char image_argv[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
   $DESCRIPTOR(defdsc2,".");
-  $DESCRIPTOR(resdsc,resspec);
+  struct dsc$descriptor_s resdsc;
   struct dsc$descriptor_s *vmscmd;
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
@@ -10016,6 +10017,15 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   vmscmd = PerlMem_malloc(sizeof(struct dsc$descriptor_s));
   if (vmscmd == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
+  /* vmsspec is a DCL command buffer, not just a filename */
+  vmsspec = PerlMem_malloc(MAX_DCL_LINE_LENGTH + 1);
+  if (vmsspec == NULL)
+      _ckvmssts_noperl(SS$_INSFMEM);
+
+  resspec = PerlMem_malloc(VMS_MAXRSS);
+  if (resspec == NULL)
+      _ckvmssts_noperl(SS$_INSFMEM);
+
   /* Make a copy for modification */
   cmdlen = strlen(incmd);
   cmd = PerlMem_malloc(cmdlen+1);
@@ -10024,6 +10034,11 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   cmd[cmdlen] = 0;
   image_name[0] = 0;
   image_argv[0] = 0;
+
+  resdsc.dsc$a_pointer = resspec;
+  resdsc.dsc$b_dtype  = DSC$K_DTYPE_T;
+  resdsc.dsc$b_class  = DSC$K_CLASS_S;
+  resdsc.dsc$w_length = VMS_MAXRSS - 1;
 
   vmscmd->dsc$a_pointer = NULL;
   vmscmd->dsc$b_dtype  = DSC$K_DTYPE_T;
@@ -10035,6 +10050,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 
   if (strlen(cmd) > MAX_DCL_LINE_LENGTH) {
     PerlMem_free(cmd);
+    PerlMem_free(vmsspec);
+    PerlMem_free(resspec);
     return CLI$_BUFOVF;                /* continuation lines currently unsupported */
   }
 
@@ -10050,7 +10067,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   if (*rest == '.' || *rest == '/') {
     char *cp2;
     for (cp2 = resspec;
-         *rest && !isspace(*rest) && cp2 - resspec < sizeof resspec;
+         *rest && !isspace(*rest) && cp2 - resspec < (VMS_MAXRSS - 1);
          rest++, cp2++) *cp2 = *rest;
     *cp2 = '\0';
     if (do_tovmsspec(resspec,cp,0,NULL)) { 
@@ -10070,7 +10087,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 
       if (*rest) {
         for (cp2 = vmsspec + strlen(vmsspec);
-             *rest && cp2 - vmsspec < sizeof vmsspec;
+             *rest && cp2 - vmsspec < MAX_DCL_LINE_LENGTH;
              rest++, cp2++) *cp2 = *rest;
         *cp2 = '\0';
       }
@@ -10231,7 +10248,12 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	}
         fclose(fp);
       }
-      if (check_img && isdcl) return RMS$_FNF;
+      if (check_img && isdcl) {
+          PerlMem_free(cmd);
+          PerlMem_free(resspec);
+          PerlMem_free(vmsspec);
+          return RMS$_FNF;
+      }
 
       if (cando_by_name(S_IXUSR,0,resspec)) {
         vmscmd->dsc$a_pointer = PerlMem_malloc(MAX_DCL_LINE_LENGTH);
@@ -10275,6 +10297,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	}
         vmscmd->dsc$w_length = strlen(vmscmd->dsc$a_pointer);
         PerlMem_free(cmd);
+        PerlMem_free(vmsspec);
+        PerlMem_free(resspec);
         return (vmscmd->dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
       }
       else
@@ -10289,6 +10313,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   vmscmd->dsc$a_pointer[vmscmd->dsc$w_length] = 0;
 
   PerlMem_free(cmd);
+  PerlMem_free(resspec);
+  PerlMem_free(vmsspec);
 
   /* check if it's a symbol (for quoting purposes) */
   if (suggest_quote && !*suggest_quote) { 
