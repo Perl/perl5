@@ -276,7 +276,7 @@ SHRPENV = $shrpenv
 # if building a shared libperl.so that might later be linked into
 # another application, then it might be appropriate to also build static
 # extensions (usually just DynaLoader) with relocatable code (e.g. -fPIC
-# for GNU cc).  This is handled by ext/util/make_ext.
+# for GNU cc).  This is handled by ext/util/make_ext.pl.
 STATIC = $static_target
 
 # The following is used to include the current directory in
@@ -1156,16 +1156,16 @@ manicheck:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF
@@ -1225,7 +1225,7 @@ _tidy:
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm -f lib/Config_git.pl git_version.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl clean $$x MAKE=$(MAKE) ; \
 	done
 
 _cleaner1:
@@ -1234,7 +1234,7 @@ _cleaner1:
 	-cd utils; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) sh ext/util/make_ext $(CLEAN) $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
 	done
 	-@test ! -f $(RUN) ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
 
