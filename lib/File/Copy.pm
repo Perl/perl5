@@ -55,7 +55,7 @@ if ($^O eq 'MacOS') {
 my $use_vms_feature = 0;
 BEGIN {
     if ($^O eq 'VMS') {
-        if (eval 'require VMS::Feature') {
+        if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
             $use_vms_feature = 1;
         }
     }
