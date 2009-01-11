@@ -1158,16 +1158,16 @@ manicheck:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF
@@ -1227,7 +1227,7 @@ _tidy:
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm -f lib/Config_git.pl git_version.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl clean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl clean $$x MAKE=$(MAKE) ; \
 	done
 
 _cleaner1:
@@ -1236,7 +1236,7 @@ _cleaner1:
 	-cd utils; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) ext/util/make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
 	done
 	-@test ! -f $(RUN) ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
 
