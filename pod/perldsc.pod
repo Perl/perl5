@@ -568,7 +568,7 @@ X<array of hashes> X<AoH>
  }
 
 =head1 HASHES OF HASHES
-X<hass of hashes> X<HoH>
+X<hash of hashes> X<HoH>
 
 =head2 Declaration of a HASH OF HASHES
 
