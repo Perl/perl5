@@ -1043,6 +1043,12 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 	      /* fully initialized, in which case either thr or PL_curcop */
 	      /* might be bogus. We have to check, since ckWARN needs them */
 	      /* both to be valid if running threaded */
+#if defined(PERL_IMPLICIT_CONTEXT)
+              if (aTHX == NULL) {
+                  fprintf(stderr,
+                     "%Perl-VMS-Init, Value of CLI symbol \"%s\" too long",lnm);
+              } else
+#endif
 		if (ckWARN(WARN_MISC)) {
 		  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
 		}
@@ -1108,13 +1114,17 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 /* Define as a function so we can access statics. */
 int Perl_my_trnlnm(pTHX_ const char *lnm, char *eqv, unsigned long int idx)
 {
-  return vmstrnenv(lnm,eqv,idx,fildev,                                   
-#ifdef SECURE_INTERNAL_GETENV
-                   (PL_curinterp ? PL_tainting : will_taint) ? PERL__TRNENV_SECURE : 0
-#else
-                   0
+    int flags = 0;
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+    if (aTHX != NULL)
 #endif
-                                                                              );
+#ifdef SECURE_INTERNAL_GETENV
+        flags = (PL_curinterp ? PL_tainting : will_taint) ?
+                 PERL__TRNENV_SECURE : 0;
+#endif
+
+    return vmstrnenv(lnm, eqv, idx, fildev, flags);
 }
 /*}}}*/
 
@@ -1333,7 +1343,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
 }  /* end of my_getenv_len() */
 /*}}}*/
 
-static void create_mbx(pTHX_ unsigned short int *, struct dsc$descriptor_s *);
+static void create_mbx(unsigned short int *, struct dsc$descriptor_s *);
 
 static void riseandshine(unsigned long int dummy) { sys$wake(0,0); }
 
@@ -2764,7 +2774,7 @@ int test_unix_status;
 
 
 static void
-create_mbx(pTHX_ unsigned short int *chan, struct dsc$descriptor_s *namdsc)
+create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 {
   unsigned long int mbxbufsiz;
   static unsigned long int syssize = 0;
@@ -3214,8 +3224,8 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     n = sizeof(Pipe);
     _ckvmssts_noperl(lib$get_vm(&n, &p));
 
-    create_mbx(aTHX_ &p->chan_in , &d_mbx1);
-    create_mbx(aTHX_ &p->chan_out, &d_mbx2);
+    create_mbx(&p->chan_in , &d_mbx1);
+    create_mbx(&p->chan_out, &d_mbx2);
     _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
 
     p->buf           = 0;
@@ -3384,8 +3394,8 @@ pipe_infromchild_setup(pTHX_ char *rmbx, char *wmbx)
 
     int n = sizeof(Pipe);
     _ckvmssts_noperl(lib$get_vm(&n, &p));
-    create_mbx(aTHX_ &p->chan_in , &d_mbx1);
-    create_mbx(aTHX_ &p->chan_out, &d_mbx2);
+    create_mbx(&p->chan_in , &d_mbx1);
+    create_mbx(&p->chan_out, &d_mbx2);
 
     _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
     n = p->bufsize * sizeof(char);
@@ -3539,7 +3549,7 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
 
     _ckvmssts_noperl(lib$get_vm(&n, &p));
     p->fd_out = dup(fd);
-    create_mbx(aTHX_ &p->chan_in, &d_mbx);
+    create_mbx(&p->chan_in, &d_mbx);
     _ckvmssts_noperl(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
     n = (p->bufsize+1) * sizeof(char);
     _ckvmssts_noperl(lib$get_vm(&n, &p->buf));
@@ -4111,7 +4121,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 
     /* Now create a mailbox to be read by the application */
 
-    create_mbx(aTHX_ &p_chan, &d_mbx1);
+    create_mbx(&p_chan, &d_mbx1);
 
     /* write the name of the created terminal to the mailbox */
     status = sys$qiow(NO_EFN, p_chan, IO$_WRITEVBLK|IO$M_NOW,
