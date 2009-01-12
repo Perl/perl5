@@ -1236,7 +1236,7 @@ _cleaner1:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
 	done
-	-@test ! -f $(RUN) ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
+	-@test ! -f ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
 
 # Some systems do not support "?", so keep these files separate.
 _cleaner2:
@@ -1344,7 +1344,7 @@ unpack_files:
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -u -m
 
 cleanup_unpacked_files:
-	-@test ! -f $(RUN) ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -c
+	-@test ! -f ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -c
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
