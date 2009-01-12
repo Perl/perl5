@@ -1986,7 +1986,7 @@ expanded out.
 =item -v
 
 Run the tests under verbose mode so you can see what tests were run,
-and debug outbut.
+and debug output.
 
 =item -torture
 
