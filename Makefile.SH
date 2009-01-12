@@ -540,7 +540,7 @@ sperl.i: perl.c $(h)
 
 .PHONY: all translators utilities make_patchnum
 
-make_patchnum:
+make_patchnum: miniperl$(EXE_EXT)
 	$(LDLIBPTH) $(RUN) ./miniperl -Ilib make_patchnum.pl || $(MAKE) miniperl
 
 git_version.h: stock_git_version.h
@@ -808,7 +808,7 @@ miniperl$(EXE_EXT): $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
-perl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+perl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) make_patchnum
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
