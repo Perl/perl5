@@ -395,7 +395,7 @@ CONFIGH = xconfig.h
 
 xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
 	CONFIG_SH=Cross/config-\$(CROSS_NAME).sh CONFIG_H=xconfig.h \$(SHELL) config_h.SH
-	#TODO \$(LDLIBPTH) ./miniperl -Ilib -MCross=\$(CROSS_NAME) config_h.PL "INST_VER=\$(INST_VER)" "CORE_DIR=\$(CROSS_LIB)" "CONFIG_H=xconfig.h"
+	#TODO \$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib -MCross=\$(CROSS_NAME) config_h.PL "INST_VER=\$(INST_VER)" "CORE_DIR=\$(CROSS_LIB)" "CONFIG_H=xconfig.h"
 	cp xconfig.h \$(CROSS_LIB)/
 	cp xconfig.h \$(CROSS_LIB)/config.h
 
@@ -541,7 +541,7 @@ sperl.i: perl.c $(h)
 .PHONY: all translators utilities make_patchnum
 
 make_patchnum: miniperl$(EXE_EXT)
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib make_patchnum.pl || $(MAKE) miniperl
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl || $(MAKE) miniperl
 
 git_version.h: stock_git_version.h
 	cp stock_git_version.h git_version.h
@@ -947,7 +947,7 @@ $spitshell >>$Makefile <<!GROK!THIS!
 .PHONY: makeppport
 makeppport: miniperl\$(EXE_EXT) \$(CONFIGPM)
 	-@for f in Makefile.PL PPPort_pm.PL PPPort_xs.PL ppport_h.PL; do \
-	(cd ext/Devel/PPPort && `pwd`/run.sh ../../../miniperl -I../../../lib \$\$f); \
+	(cd ext/Devel/PPPort && `pwd`/run.sh ../../../miniperl$(EXE_EXT) -I../../../lib \$\$f); \
 	done
 
 !GROK!THIS!
@@ -972,16 +972,16 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
 	$(MAKE) lib/re.pm
 
 $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib configpm
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib configpm
 
 $(CONFIGPM): $(CONFIGPOD)
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
-	$(LDLIBPTH) $(RUN) ./miniperl minimod.pl > lib/ExtUtils/Miniperl.pm
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) minimod.pl > lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
 	@-rm -f $@
@@ -989,19 +989,19 @@ lib/re.pm: ext/re/re.pm
 
 $(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
 	@-rm -f $@
-	$(LDLIBPTH) $(RUN) ./miniperl -I`pwd`/lib $@.PL
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -I`pwd`/lib $@.PL
 
 x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
 lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
 	@-rm -f $@
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib lib/lib_pm.PL
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib lib/lib_pm.PL
 
 unidatafiles $(unidatafiles): uni.data
 
 uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
-	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl -I../../lib mktables -w
+	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib mktables -w
 	touch uni.data
 
 extra.pods: miniperl$(EXE_EXT)
@@ -1030,7 +1030,7 @@ extras.install: perl$(EXE_EXT)
 	no-install install.perl install.man install.html
 
 META.yml:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
-	$(LDLIBPTH) $(RUN) ./miniperl -Ilib Porting/makemeta
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib Porting/makemeta
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
