@@ -296,6 +296,9 @@ static char *mp_do_tounixpath(pTHX_ const char *path, char *buf, int ts, int *);
 static char *mp_do_tounixspec(pTHX_ const char *, char *, int, int *);
 static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int *);
 
+static char *int_tovmsspec
+   (const char *path, char *buf, int dir_flag, int * utf8_flag);
+
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
 #define PERL_LNM_MAX_ALLOWED_INDEX 127
 
@@ -920,6 +923,37 @@ const int verspec = 7;
 	*ver_len = item_list[verspec].length;
     }
     return ret_stat;
+}
+
+/* Routine to determine if the file specification ends with .dir */
+static int is_dir_ext(char * e_spec, int e_len, char * vs_spec, int vs_len) {
+
+    /* e_len must be 4, and version must be <= 2 characters */
+    if (e_len != 4 || vs_len > 2)
+        return 0;
+
+    /* If a version number is present, it needs to be one */
+    if ((vs_len == 2) && (vs_spec[1] != '1'))
+        return 0;
+
+    /* Look for the DIR on the extension */
+    if (vms_process_case_tolerant) {
+        if ((toupper(e_spec[1]) == 'D') &&
+            (toupper(e_spec[2]) == 'I') &&
+            (toupper(e_spec[3]) == 'R')) {
+            return 1;
+        }
+    } else {
+        /* Directory extensions are supposed to be in upper case only */
+        /* I would not be surprised if this rule can not be enforced */
+        /* if and when someone fully debugs the case sensitive mode */
+        if ((e_spec[1] == 'D') &&
+            (e_spec[2] == 'I') &&
+            (e_spec[3] == 'R')) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 
@@ -5296,7 +5330,7 @@ Stat_t dst_st;
 	    }
 
 	   /* The dest must be a VMS file specification */
-	   ret_str = do_tovmsspec(dst, vms_dst, 0, NULL);
+	   ret_str = int_tovmsspec(dst, vms_dst, 0, NULL);
 	   if (ret_str == NULL) {
 		PerlMem_free(vms_src);
 		PerlMem_free(vms_dst);
@@ -5335,7 +5369,7 @@ Stat_t dst_st;
 	    } else {
 
 		/* fileify a target VMS file specification */
-		ret_str = do_tovmsspec(dst, vms_dst, 0, NULL);
+		ret_str = int_tovmsspec(dst, vms_dst, 0, NULL);
 		if (ret_str == NULL) {
 		    PerlMem_free(vms_src);
 		    PerlMem_free(vms_dst);
@@ -5467,7 +5501,7 @@ mp_do_rmsexpand
     if (isunix) {
       vmsfspec = PerlMem_malloc(VMS_MAXRSS);
       if (vmsfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-      if (do_tovmsspec(filespec,vmsfspec,0,fs_utf8) == NULL) {
+      if (int_tovmsspec(filespec, vmsfspec, 0, fs_utf8) == NULL) {
 	PerlMem_free(vmsfspec);
 	if (out)
 	   Safefree(out);
@@ -5496,7 +5530,7 @@ mp_do_rmsexpand
     if (t_isunix) {
       tmpfspec = PerlMem_malloc(VMS_MAXRSS);
       if (tmpfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-      if (do_tovmsspec(defspec,tmpfspec,0,dfs_utf8) == NULL) {
+      if (int_tovmsspec(defspec, tmpfspec, 0, dfs_utf8) == NULL) {
 	PerlMem_free(tmpfspec);
 	if (vmsfspec != NULL)
 	    PerlMem_free(vmsfspec);
@@ -5857,6 +5891,8 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
     char *retspec, *cp1, *cp2, *lastdir;
     char *trndir, *vmsdir;
     unsigned short int trnlnm_iter_count;
+    int is_vms = 0;
+    int is_unix = 0;
     int sts;
     if (utf8_fl != NULL)
 	*utf8_fl = 0;
@@ -5963,13 +5999,13 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
           if (*(cp1+2) == '.') cp1++;
           if (*(cp1+2) == '/' || *(cp1+2) == '\0') {
 	    char * ret_chr;
-            if (do_tovmsspec(trndir,vmsdir,0,NULL) == NULL) {
+            if (int_tovmsspec(trndir, vmsdir, 0, utf8_fl) == NULL) {
 		PerlMem_free(trndir);
 		PerlMem_free(vmsdir);
 		return NULL;
 	    }
             if (strchr(vmsdir,'/') != NULL) {
-              /* If do_tovmsspec() returned it, it must have VMS syntax
+              /* If int_tovmsspec() returned it, it must have VMS syntax
                * delimiters in it, so it's a mixed VMS/Unix spec.  We take
                * the time to check this here only so we avoid a recursion
                * loop; otherwise, gigo.
@@ -6005,7 +6041,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
          */
 
         trndir[dirlen] = '/'; trndir[dirlen+1] = '\0';
-        if (do_tovmsspec(trndir,vmsdir,0,NULL) == NULL) {
+        if (int_tovmsspec(trndir, vmsdir, 0, NULL) == NULL) {
 	    PerlMem_free(trndir);
 	    PerlMem_free(vmsdir);
 	    return NULL;
@@ -6058,8 +6094,8 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
                  set_errno(ENOTDIR);
                  set_vaxc_errno(RMS$_DIR);
                  return NULL;
-	      }
-          }
+              }
+	  }
           dirlen = cp2 - trndir;
         }
       }
@@ -6073,10 +6109,52 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 
       /* We've picked up everything up to the directory file name.
          Now just add the type and version, and we're set. */
-      if ((!decc_efs_case_preserve) && vms_process_case_tolerant)
-	strcat(retspec,".dir;1");
-      else
-	strcat(retspec,".DIR;1");
+
+      /* We should only add type for VMS syntax, but historically Perl
+         has added it for UNIX style also */
+
+      /* Fix me - we should not be using the same routine for VMS and
+         UNIX format files.  Things are too tangled so we need to lookup
+         what syntax the output is */
+
+      is_unix = 0;
+      is_vms = 0;
+      lastdir = strrchr(trndir,'/');
+      if (lastdir) {
+          is_unix = 1;
+      } else {
+          lastdir = strpbrk(trndir,"]:>");
+          if (lastdir) {
+              is_vms = 1;
+          }
+      }
+
+      if ((is_vms == 0) && (is_unix == 0)) {
+          /* We still do not  know? */
+          is_unix = decc_filename_unix_report;
+          if (is_unix == 0)
+              is_vms = 1;
+      }
+
+      if ((is_unix && !decc_efs_charset) || is_vms) {
+
+           /* It is a bug to add a .dir to a UNIX format directory spec */
+           /* However Perl on VMS may have programs that expect this so */
+           /* If not using EFS character specifications allow it. */
+
+           if ((!decc_efs_case_preserve) && vms_process_case_tolerant) {
+               /* Traditionally Perl expects filenames in lower case */
+               strcat(retspec, ".dir");
+           } else {
+               /* VMS expects the .DIR to be in upper case */
+               strcat(retspec, ".DIR");
+           }
+
+           /* It is also a bug to put a VMS format version on a UNIX file */
+           /* specification.  Perl self tests are looking for this */
+           if (is_vms || !(decc_efs_charset || decc_filename_unix_report))
+               strcat(retspec, ";1");
+      }
       PerlMem_free(trndir);
       PerlMem_free(vmsdir);
       return retspec;
@@ -7943,11 +8021,11 @@ int utf8_flag;
 }
 
 
+
 /*{{{ char *tovmsspec[_ts](char *path, char *buf, int * utf8_flag)*/
-static char *mp_do_tovmsspec
-   (pTHX_ const char *path, char *buf, int ts, int dir_flag, int * utf8_flag) {
-  static char __tovmsspec_retbuf[VMS_MAXRSS];
-  char *rslt, *dirend;
+static char *int_tovmsspec
+   (const char *path, char *rslt, int dir_flag, int * utf8_flag) {
+  char *dirend;
   char *lastdot;
   char *vms_delim;
   register char *cp1;
@@ -7958,11 +8036,20 @@ static char *mp_do_tovmsspec
   char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
   int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 
-  if (path == NULL) return NULL;
+  if (vms_debug_fileify) {
+      if (path == NULL)
+          fprintf(stderr, "int_tovmsspec: path = NULL\n");
+      else
+          fprintf(stderr, "int_tovmsspec: path = %s\n", path);
+  }
+
+  if (path == NULL) {
+      /* If we fail, we should be setting errno */
+      set_errno(EINVAL);
+      set_vaxc_errno(SS$_BADPARAM);
+      return NULL;
+  }
   rslt_len = VMS_MAXRSS-1;
-  if (buf) rslt = buf;
-  else if (ts) Newx(rslt, VMS_MAXRSS, char);
-  else rslt = __tovmsspec_retbuf;
 
   /* '.' and '..' are "[]" and "[-]" for a quick check */
   if (path[0] == '.') {
@@ -8024,6 +8111,9 @@ static char *mp_do_tovmsspec
       if (utf8_flag != NULL)
 	*utf8_flag = 0;
       strcpy(rslt, path);
+      if (vms_debug_fileify) {
+          fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+      }
       return rslt;
     }
     /* Now, what to do with trailing "." cases where there is no
@@ -8042,28 +8132,51 @@ static char *mp_do_tovmsspec
     if (utf8_flag != NULL)
       *utf8_flag = 0;
     strcpy(rslt, path);
+    if (vms_debug_fileify) {
+        fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+    }
     return rslt;
   }
 
   dirend = strrchr(path,'/');
 
   if (dirend == NULL) {
+     char *macro_start;
+     int has_macro;
+
      /* If we get here with no UNIX directory delimiters, then this is
         not a complete file specification, either garbage a UNIX glob
 	specification that can not be converted to a VMS wildcard, or
-	it a UNIX shell macro.  MakeMaker wants these passed through AS-IS,
-	so apparently other programs expect this also.
+	it a UNIX shell macro.  MakeMaker wants shell macros passed
+	through AS-IS,
 
 	utf8 flag setting needs to be preserved.
       */
-      strcpy(rslt, path);
-      return rslt;
+      hasdir = 0;
+
+      has_macro = 0;
+      macro_start = strchr(path,'$');
+      if (macro_start != NULL) {
+          if (macro_start[1] == '(') {
+              has_macro = 1;
+          }
+      }
+      if ((decc_efs_charset == 0) || (has_macro)) {
+          strcpy(rslt, path);
+          if (vms_debug_fileify) {
+              fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+          }
+          return rslt;
+      }
   }
 
 /* If POSIX mode active, handle the conversion */
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   if (decc_efs_charset) {
     posix_to_vmsspec_hardway(rslt, rslt_len, path, dir_flag, utf8_flag);
+    if (vms_debug_fileify) {
+        fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+    }
     return rslt;
   }
 #endif
@@ -8094,6 +8207,9 @@ static char *mp_do_tovmsspec
       }
       if (utf8_flag != NULL)
 	*utf8_flag = 0;
+      if (vms_debug_fileify) {
+          fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+      }
       return rslt;
     }
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
@@ -8382,9 +8498,44 @@ static char *mp_do_tovmsspec
 
   if (utf8_flag != NULL)
     *utf8_flag = 0;
+  if (vms_debug_fileify) {
+      fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+  }
   return rslt;
 
-}  /* end of do_tovmsspec() */
+}  /* end of int_tovmsspec() */
+
+
+/*{{{ char *tovmsspec[_ts](char *path, char *buf, int * utf8_flag)*/
+static char *mp_do_tovmsspec
+   (pTHX_ const char *path, char *buf, int ts, int dir_flag, int * utf8_flag) {
+  static char __tovmsspec_retbuf[VMS_MAXRSS];
+    char * vmsspec, *ret_spec, *ret_buf;
+
+    vmsspec = NULL;
+    ret_buf = buf;
+    if (ret_buf == NULL) {
+        if (ts) {
+            Newx(vmsspec, VMS_MAXRSS, char);
+            if (vmsspec == NULL)
+                _ckvmssts(SS$_INSFMEM);
+            ret_buf = vmsspec;
+        } else {
+            ret_buf = __tovmsspec_retbuf;
+        }
+    }
+
+    ret_spec = int_tovmsspec(path, ret_buf, 0, utf8_flag);
+
+    if (ret_spec == NULL) {
+       /* Cleanup on isle 5, if this is thread specific we need to deallocate */
+       if (vmsspec)
+           Safefree(vmsspec);
+    }
+
+    return ret_spec;
+
+}  /* end of mp_do_tovmsspec() */
 /*}}}*/
 /* External entry points */
 char *Perl_tovmsspec(pTHX_ const char *path, char *buf)
@@ -8867,7 +9018,7 @@ int rms_sts;
     vmsspec = PerlMem_malloc(VMS_MAXRSS);
     if (vmsspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     if ((isunix = (int) strchr(item,'/')) != (int) NULL)
-      filespec.dsc$a_pointer = do_tovmsspec(item,vmsspec,0,NULL);
+      filespec.dsc$a_pointer = int_tovmsspec(item, vmsspec, 0, NULL);
     if (!isunix || !filespec.dsc$a_pointer)
       filespec.dsc$a_pointer = item;
     filespec.dsc$w_length = strlen(filespec.dsc$a_pointer);
@@ -10080,7 +10231,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
          *rest && !isspace(*rest) && cp2 - resspec < (VMS_MAXRSS - 1);
          rest++, cp2++) *cp2 = *rest;
     *cp2 = '\0';
-    if (do_tovmsspec(resspec,cp,0,NULL)) { 
+    if (int_tovmsspec(resspec, cp, 0, NULL)) { 
       s = vmsspec;
 
       /* When a UNIX spec with no file type is translated to VMS, */
@@ -12318,8 +12469,8 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     if (vmsin == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     vmsout = PerlMem_malloc(VMS_MAXRSS);
     if (vmsout == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-    if (!spec_in  || !*spec_in  || !do_tovmsspec(spec_in,vmsin,1,NULL) ||
-        !spec_out || !*spec_out || !do_tovmsspec(spec_out,vmsout,1,NULL)) {
+    if (!spec_in  || !*spec_in  || !int_tovmsspec(spec_in, vmsin, 1, NULL) ||
+        !spec_out || !*spec_out || !int_tovmsspec(spec_out, vmsout, 1, NULL)) {
       PerlMem_free(vmsin);
       PerlMem_free(vmsout);
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
