@@ -240,7 +240,8 @@ sub show_results {
 	    if (defined $ModuleByFile{$file}) {
 		my $module     = $ModuleByFile{$file};
 		my $maintainer = $Modules{$ModuleByFile{$file}}{MAINTAINER};
-		printf "%-15s $module $maintainer $Maintainers{$maintainer}\n", $file;
+		my $upstream   = $Modules{$module}{UPSTREAM}||'unknown';
+		printf "%-15s [%-7s] $module $maintainer $Maintainers{$maintainer}\n", $file, $upstream;
 	    } else {
 		printf "%-15s ?\n", $file;
 	    }
