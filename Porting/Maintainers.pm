@@ -71,7 +71,7 @@ sub get_maintainer_modules {
 
 sub usage {
     print <<__EOF__;
-$0: Usage: $0 [[--maintainer M --module M --files]|[--check] file ...]
+$0: Usage: $0 [[--maintainer M --module M --files]|[--check] [commit] | [file ...]
 --maintainer M	list all maintainers matching M
 --module M	list all modules matching M
 --files		list all files
@@ -110,6 +110,11 @@ sub process_options {
     if ($Opened) {
 	chomp (@Files = `git ls-files -m --full-name`);
 	die if $?;
+    } elsif (@ARGV == 1 &&
+	     $ARGV[0] =~ /^(?:HEAD|[0-9a-f]{4,40})(?:~\d+)?\^*$/) {
+	my $command = "git diff --name-only $ARGV[0]^ $ARGV[0]";
+	chomp (@Files = `$command`);
+	die "'$command' failed: $?" if $?;
     } else {
 	@Files = @ARGV;
     }
