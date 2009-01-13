@@ -298,6 +298,7 @@ static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int 
 
 static char *int_tovmsspec
    (const char *path, char *buf, int dir_flag, int * utf8_flag);
+static char * int_tounixspec(const char *spec, char *buf, int * utf8_fl);
 
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
 #define PERL_LNM_MAX_ALLOWED_INDEX 127
@@ -3904,7 +3905,7 @@ vmspipe_tempfile(pTHX)
     fclose(fp);
 
     if (decc_filename_unix_only)
-	do_tounixspec(file, file, 0, NULL);
+	int_tounixspec(file, file, NULL);
     fp = fopen(file,"r","shr=get");
     if (!fp) return 0;
     fstat(fileno(fp), (struct stat *)&s1);
@@ -5794,7 +5795,7 @@ mp_do_rmsexpand
     }
     if (!rsl) {
       if (isunix) {
-        if (do_tounixspec(tbuf, outbuf ,0 , fs_utf8) == NULL) {
+        if (int_tounixspec(tbuf, outbuf, fs_utf8) == NULL) {
 	  if (out) Safefree(out);
 	  if (esal != NULL)
 	    PerlMem_free(esal);
@@ -5809,7 +5810,7 @@ mp_do_rmsexpand
     else if (isunix) {
       tmpfspec = PerlMem_malloc(VMS_MAXRSS);
       if (tmpfspec == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-      if (do_tounixspec(tbuf,tmpfspec,0,fs_utf8) == NULL) {
+      if (int_tounixspec(tbuf, tmpfspec, fs_utf8) == NULL) {
 	if (out) Safefree(out);
 	PerlMem_free(esa);
 	if (esal != NULL)
@@ -6020,7 +6021,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 		PerlMem_free(vmsdir);
 		return NULL;
 	    }
-	    ret_chr = do_tounixspec(trndir,buf,ts,NULL);
+	    ret_chr = int_tounixspec(trndir, buf, utf8_fl);
 	    PerlMem_free(trndir);
 	    PerlMem_free(vmsdir);
             return ret_chr;
@@ -6051,7 +6052,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	    PerlMem_free(vmsdir);
 	    return NULL;
 	}
-	ret_chr = do_tounixspec(trndir,buf,ts,NULL);
+	ret_chr = int_tounixspec(trndir, buf, utf8_fl);
 	PerlMem_free(trndir);
 	PerlMem_free(vmsdir);
         return ret_chr;
@@ -6717,11 +6718,11 @@ char *Perl_pathify_dirspec_utf8(pTHX_ const char *dir, char *buf, int *utf8_fl)
 char *Perl_pathify_dirspec_utf8_ts(pTHX_ const char *dir, char *buf, int *utf8_fl)
 { return do_pathify_dirspec(dir,buf,1,utf8_fl); }
 
-/*{{{ char *tounixspec[_ts](char *spec, char *buf, int *)*/
-static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * utf8_fl)
+/* Internal tounixspec routine that does not use a thread context */
+/*{{{ char *int_tounixspec[_ts](char *spec, char *buf, int *)*/
+static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
 {
-  static char __tounixspec_retbuf[VMS_MAXRSS];
-  char *dirend, *rslt, *cp1, *cp3, *tmp;
+  char *dirend, *cp1, *cp3, *tmp;
   const char *cp2;
   int devlen, dirlen, retlen = VMS_MAXRSS;
   int expand = 1; /* guarantee room for leading and trailing slashes */
@@ -6730,13 +6731,24 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   if (utf8_fl != NULL)
     *utf8_fl = 0;
 
-  if (spec == NULL) return NULL;
-  if (strlen(spec) > (VMS_MAXRSS-1)) return NULL;
-  if (buf) rslt = buf;
-  else if (ts) {
-    Newx(rslt, VMS_MAXRSS, char);
+  if (vms_debug_fileify) {
+      if (spec == NULL)
+          fprintf(stderr, "int_tounixspec: spec = NULL\n");
+      else
+          fprintf(stderr, "int_tounixspec: spec = %s\n", spec);
   }
-  else rslt = __tounixspec_retbuf;
+
+
+  if (spec == NULL) {
+      set_errno(EINVAL);
+      set_vaxc_errno(SS$_BADPARAM);
+      return NULL;
+  }
+  if (strlen(spec) > (VMS_MAXRSS-1)) {
+      set_errno(E2BIG);
+      set_vaxc_errno(SS$_BUFFEROVF);
+      return NULL;
+  }
 
   /* New VMS specific format needs translation
    * glob passes filenames with trailing '\n' and expects this preserved.
@@ -6810,6 +6822,9 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   /* This is already UNIX or at least nothing VMS understands */
   if (cmp_rslt) {
     strcpy(rslt,spec);
+    if (vms_debug_fileify) {
+        fprintf(stderr, "int_tounixspec: rslt = %s\n", rslt);
+    }
     return rslt;
   }
 
@@ -6820,6 +6835,9 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   if (dirend == NULL) dirend = strchr(spec,':');
   if (dirend == NULL) {
     strcpy(rslt,spec);
+    if (vms_debug_fileify) {
+        fprintf(stderr, "int_tounixspec: rslt = %s\n", rslt);
+    }
     return rslt;
   }
 
@@ -6891,8 +6909,10 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
     }
     else if ( *cp2 != '^' && *cp2 != '.' && *cp2 != '-') { /* add the implied device */
       if (getcwd(tmp, VMS_MAXRSS-1 ,1) == NULL) {
-        if (ts) Safefree(rslt);
 	PerlMem_free(tmp);
+        if (vms_debug_fileify) {
+            fprintf(stderr, "int_tounixspec: rslt = NULL\n");
+        }
         return NULL;
       }
       trnlnm_iter_count = 0;
@@ -6904,18 +6924,18 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER+1) break;
       } while (vmstrnenv(tmp,tmp,0,fildev,0));
-      if (ts && !buf &&
-          ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > retlen)) {
-        retlen = devlen + dirlen;
-        Renew(rslt,retlen+1+2*expand,char);
-        cp1 = rslt;
-      }
+      cp1 = rslt;
       cp3 = tmp;
       *(cp1++) = '/';
       while (*cp3) {
         *(cp1++) = *(cp3++);
-        if (cp1 - rslt > (VMS_MAXRSS - 1) && !ts && !buf) {
+        if (cp1 - rslt > (VMS_MAXRSS - 1)) {
 	    PerlMem_free(tmp);
+            set_errno(ENAMETOOLONG);
+            set_vaxc_errno(SS$_BUFFEROVF);
+            if (vms_debug_fileify) {
+                fprintf(stderr, "int_tounixspec: rslt = NULL\n");
+            }
 	    return NULL; /* No room */
 	}
       }
@@ -6970,8 +6990,11 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
           *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '/';
         }
         if (*cp2 != '.' && *cp2 != ']' && *cp2 != '>') { /* we don't allow */
-          if (ts) Safefree(rslt);                        /* filespecs like */
+                                                         /* filespecs like */
           set_errno(EINVAL); set_vaxc_errno(RMS$_SYN);   /* [fred.--foo.bar] */
+          if (vms_debug_fileify) {
+              fprintf(stderr, "int_tounixspec: rslt = NULL\n");
+          }
           return NULL;
         }
       }
@@ -6979,9 +7002,77 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
     }
     else *(cp1++) = *cp2;
   }
+  /* Translate the rest of the filename. */
   while (*cp2) {
-    if ((*cp2 == '^') && (*(cp2+1) == '.')) cp2++;  /* '^.' --> '.' */
-    *(cp1++) = *(cp2++);
+      int dot_seen;
+      dot_seen = 0;
+      switch(*cp2) {
+      /* Fixme - for compatibility with the CRTL we should be removing */
+      /* spaces from the file specifications, but this may show that */
+      /* some tests that were appearing to pass are not really passing */
+      case '%':
+          cp2++;
+          *(cp1++) = '?';
+          break;
+      case '^':
+          /* Fix me hex expansions not implemented */
+          cp2++;  /* '^.' --> '.' and other. */
+          if (*cp2) {
+              if (*cp2 == '_') {
+                  cp2++;
+                  *(cp1++) = ' ';
+              } else {
+                  *(cp1++) = *(cp2++);
+              }
+          }
+          break;
+      case ';':
+          if (decc_filename_unix_no_version) {
+              /* Easy, drop the version */
+              while (*cp2)
+                  cp2++;
+              break;
+          } else {
+              /* Punt - passing the version as a dot will probably */
+              /* break perl in weird ways, but so did passing */
+              /* through the ; as a version.  Follow the CRTL and */
+              /* hope for the best. */
+              cp2++;
+              *(cp1++) = '.';
+          }
+          break;
+      case '.':
+          if (dot_seen) {
+              /* We will need to fix this properly later */
+              /* As Perl may be installed on an ODS-5 volume, but not */
+              /* have the EFS_CHARSET enabled, it still may encounter */
+              /* filenames with extra dots in them, and a precedent got */
+              /* set which allowed them to work, that we will uphold here */
+              /* If extra dots are present in a name and no ^ is on them */
+              /* VMS assumes that the first one is the extension delimiter */
+              /* the rest have an implied ^. */
+
+              /* this is also a conflict as the . is also a version */
+              /* delimiter in VMS, */
+
+              *(cp1++) = *(cp2++);
+              break;
+          }
+          dot_seen = 1;
+          /* This is an extension */
+          if (decc_readdir_dropdotnotype) {
+              cp2++;
+              if ((!*cp2) || (*cp2 == ';') || (*cp2 == '.')) {
+                  /* Drop the dot for the extension */
+                  break;
+              } else {
+                  *(cp1++) = '.';
+              }
+              break;
+          }
+      default:
+          *(cp1++) = *(cp2++);
+      }
   }
   *cp1 = '\0';
 
@@ -7007,7 +7098,42 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
       }
   }
 
+  if (vms_debug_fileify) {
+      fprintf(stderr, "int_tounixspec: rslt = %s\n", rslt);
+  }
   return rslt;
+
+}  /* end of int_tounixspec() */
+
+
+/*{{{ char *tounixspec[_ts](char *spec, char *buf, int *)*/
+static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * utf8_fl)
+{
+    static char __tounixspec_retbuf[VMS_MAXRSS];
+    char * unixspec, *ret_spec, *ret_buf;
+
+    unixspec = NULL;
+    ret_buf = buf;
+    if (ret_buf == NULL) {
+        if (ts) {
+            Newx(unixspec, VMS_MAXRSS, char);
+            if (unixspec == NULL)
+                _ckvmssts(SS$_INSFMEM);
+            ret_buf = unixspec;
+        } else {
+            ret_buf = __tounixspec_retbuf;
+        }
+    }
+
+    ret_spec = int_tounixspec(spec, ret_buf, utf8_fl);
+
+    if (ret_spec == NULL) {
+       /* Cleanup on isle 5, if this is thread specific we need to deallocate */
+       if (unixspec)
+           Safefree(unixspec);
+    }
+
+    return ret_spec;
 
 }  /* end of do_tounixspec() */
 /*}}}*/
@@ -9463,7 +9589,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
   if (unixwild == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   template = unixwild;
   if (strpbrk(wildspec,"]>:") != NULL) {
-    if (do_tounixspec(wildspec,unixwild,0,NULL) == NULL) {
+    if (int_tounixspec(wildspec, unixwild, NULL) == NULL) {
         PerlMem_free(unixwild);
 	return 0;
     }
@@ -9475,7 +9601,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
   unixified = PerlMem_malloc(VMS_MAXRSS);
   if (unixified == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if (strpbrk(fspec,"]>:") != NULL) {
-    if (do_tounixspec(fspec,unixified,0,NULL) == NULL) {
+    if (int_tounixspec(fspec, unixified, NULL) == NULL) {
         PerlMem_free(unixwild);
         PerlMem_free(unixified);
 	return 0;
@@ -13377,7 +13503,7 @@ int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
       /* the conversion in in ODS-2 mode */
 
       Newx(utarget, VMS_MAXRSS + 1, char);
-      if (do_tounixspec(contents, utarget, 0, NULL) == NULL) {
+      if (int_tounixspec(contents, utarget, NULL) == NULL) {
 
           /* This should not fail, as an untranslatable filename */
           /* should be passed through */
@@ -13579,7 +13705,7 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 	            vms_spec[file_len] = 0;
 
 	            /* The result is expected to be in UNIX format */
-		    rslt = do_tounixspec(vms_spec, outbuf, 0, utf8_fl);
+		    rslt = int_tounixspec(vms_spec, outbuf, utf8_fl);
 
                     /* Downcase if input had any lower case letters and 
 	             * case preservation is not in effect. 
