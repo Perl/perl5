@@ -8,7 +8,7 @@ WriteMakefile(
     MAN3PODS        => {},  # Pods will be built by installman.
     NAME            => "Hash::Util",
     DEFINE          => "-DPERL_EXT",
-    DIR             => ['FieldHash'],
+    NORECURS        => 1, # Hash::Util::FieldHash is treated as distinct.
 );
 
 package MY;
