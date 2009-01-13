@@ -766,7 +766,7 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_H		= $(CORE_NOCFG_H) .\config.h
+CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
 
 UUDMAP_H	= ..\uudmap.h
 
@@ -838,8 +838,8 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort \
-	$(PERLEXE) $(X2P) Extensions $(PERLSTATIC)
+all : .\config.h ..\git_version.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) \
+	$(UNIDATAFILES) MakePPPort $(PERLEXE) $(X2P) Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 ..\regcharclass.h : ..\Porting\regcharclass.pl
@@ -853,8 +853,8 @@ regnodes : ..\regnodes.h
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
-reonly : regnodes .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) \
-	$(PERLEXE) $(X2P) Extensions_reonly
+reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) \
+	$(UNIDATAFILES) $(PERLEXE) $(X2P) Extensions_reonly
 	@echo	Perl and 're' are up to date.
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -876,6 +876,17 @@ config.w32 : $(CFGSH_TMPL)
 .\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
+
+# ignore "errors" from make_patchnum.pl (it exits with status 1 when
+# not rewriting its output files)
+make_patchnum : $(MINIPERL)
+	cd ..
+	-miniperl -Ilib make_patchnum.pl
+	cd win32
+
+..\git_version.h : ..\stock_git_version.h
+	-del /f ..\git_version.h
+	copy ..\stock_git_version.h ..\git_version.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
@@ -1015,7 +1026,7 @@ perlmainst.c : runperl.c
 perlmainst$(o) : perlmainst.c
 	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
+$(PERLEXE): make_patchnum $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
@@ -1024,7 +1035,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
-$(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
+$(PERLEXESTATIC): make_patchnum $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
 	    @Extensions_static $(PERLSTATICLIB) /PDB:NONE \
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
@@ -1219,6 +1230,7 @@ distclean: realclean
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new \
 	        perlmainst.c
 	-del /f $(CONFIGPM)
+	-del /f ..\lib\Config_git.pl
 	-del /f bin\*.bat
 	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
@@ -1314,6 +1326,7 @@ _clean :
 	-@$(DEL) perlmainst$(o)
 	-@$(DEL) config.w32
 	-@$(DEL) config.h
+	-@$(DEL) ..\git_version.h
 	-@$(DEL) $(GLOBEXE)
 	-@$(DEL) $(PERLEXE)
 	-@$(DEL) $(WPERLEXE)
