@@ -380,7 +380,7 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
 
     /* Use the system gmtime() if time_t is small enough */
     if( SHOULD_USE_SYSTEM_GMTIME(*in_time) ) {
-        time_t safe_time = *in_time;
+        time_t safe_time = (time_t)*in_time;
         struct tm safe_date;
         GMTIME_R(&safe_time, &safe_date);
 
@@ -505,7 +505,7 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
 
     /* Use the system localtime() if time_t is small enough */
     if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
-        safe_time = *time;
+        safe_time = (time_t)*time;
 
         TRACE1("Using system localtime for %lld\n", *time);
 
@@ -532,7 +532,7 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
         gm_tm.tm_year = safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
     }
 
-    safe_time = timegm64(&gm_tm);
+    safe_time = (time_t)timegm64(&gm_tm);
     if( LOCALTIME_R(&safe_time, &safe_date) == NULL ) {
         TRACE1("localtime_r(%d) returned NULL\n", (int)safe_time);
         return NULL;

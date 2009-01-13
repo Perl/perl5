@@ -282,7 +282,6 @@ mro_set_mro(...)
   PROTOTYPE: $$
   PREINIT:
     SV* classname;
-    const struct mro_alg *which;
     HV* class_stash;
     struct mro_meta* meta;
   PPCODE:
