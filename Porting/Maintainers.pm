@@ -108,7 +108,7 @@ sub process_options {
     my @Files;
 
     if ($Opened) {
-	@Files = `git ls-files -m --full-name`;
+	chomp (@Files = `git ls-files -m --full-name`);
 	die if $?;
     } else {
 	@Files = @ARGV;
@@ -245,6 +245,9 @@ sub show_results {
 		printf "%-15s ?\n", $file;
 	    }
 	}
+    }
+    elsif ($Opened) {
+	print "(No files are modified)\n";
     }
     else {
 	usage();
