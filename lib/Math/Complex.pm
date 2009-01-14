@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf $ExpInf);
 
-$VERSION = 1.54;
+$VERSION = 1.55;
 
 use Config;
 

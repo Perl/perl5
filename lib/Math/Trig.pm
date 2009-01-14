@@ -10,14 +10,14 @@ package Math::Trig;
 use 5.005;
 use strict;
 
-use Math::Complex 1.54;
+use Math::Complex 1.55;
 use Math::Complex qw(:trig :pi);
 
 use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.18;
+$VERSION = 1.19;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -166,7 +166,7 @@ sub great_circle_distance {
 sub great_circle_direction {
     my ( $theta0, $phi0, $theta1, $phi1 ) = @_;
 
-    my $distance = &great_circle_distance;
+    my $distance = great_circle_distance($theta0, $phi0, $theta1, $phi1);
 
     my $lat0 = pip2 - $phi0;
     my $lat1 = pip2 - $phi1;
@@ -684,7 +684,7 @@ B<NOTE>: you B<cannot> get from A to B like this:
 and expect C to be B, because the bearing constantly changes when
 going from A to B (except in some special case like the meridians or
 the circles of latitudes) and in great_circle_destination() one gives
-a constant bearing to follow.
+a B<constant> bearing to follow.
 
 =head2 CAVEAT FOR GREAT CIRCLE FORMULAS
 
