@@ -253,7 +253,7 @@ sub show_results {
 	}
     }
     elsif ($Opened) {
-	print "(No files are modified)\n";
+	print STDERR "(No files are modified)\n";
     }
     else {
 	usage();
