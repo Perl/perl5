@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 3961;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 3962;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3976,6 +3976,13 @@ sub run_tests {
                    $reg =~ s/(x)/'b'/eg > 1 ? '##' : '++');
         iseq $reg, '../bbb/';
         iseq $te [0], '../';
+    }
+
+	# This currently has to come before any "use encoding" in this file.
+    {
+        local $Message;
+        local $BugId   = '59342';
+        must_warn 'qr/\400/', '^Use of octal value above 377';
     }
 
 
