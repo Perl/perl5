@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31012';
 
 use File::Spec;
 use IO::File;
@@ -175,7 +175,7 @@ EOF
     
     $MM_Args{EXE_FILES} = [ sort keys %{$build->script_files} ] if $build->script_files;
     
-    $MM_Args{PL_FILES} = {};
+    $MM_Args{PL_FILES} = $build->PL_files if $build->PL_files;
     
     local $Data::Dumper::Terse = 1;
     my $args = Data::Dumper::Dumper(\%MM_Args);

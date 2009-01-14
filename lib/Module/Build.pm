@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.30_01';
+$VERSION = '0.31012';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -36,6 +36,7 @@ my %OSTYPES = qw(
 		 darwin    Unix
 		 machten   Unix
 		 midnightbsd Unix
+		 mirbsd    Unix
 		 next      Unix
 		 openbsd   Unix
 		 netbsd    Unix

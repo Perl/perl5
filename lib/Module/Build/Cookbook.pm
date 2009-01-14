@@ -1,7 +1,7 @@
 package Module::Build::Cookbook;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31012';
 
 
 =head1 NAME
@@ -395,7 +395,7 @@ testing, do I generate a test file.
 I'm sure I could not have handled this complexity with EU::MM, but it
 was very easy to do with M::B.
 
-=back 4
+=back
 
 
 =head2 Modifying an action
@@ -431,6 +431,84 @@ the C<install> action:
   )->create_build_script;
 
 
+=head2 Adding an action
+
+You can add a new C<./Build> action simply by writing the method for
+it in your subclass.  Use C<depends_on> to declare that another action
+must have been run before your action.
+
+For example, let's say you wanted to be able to write C<./Build
+commit> to test your code and commit it to Subversion.
+
+  # Build.PL
+  use Module::Build;
+  my $class = Module::Build->subclass(
+      class => "Module::Build::Custom",
+      code => <<'SUBCLASS' );
+
+  sub ACTION_commit {
+      my $self = shift;
+
+      $self->depends_on("test");
+      $self->do_system(qw(svn commit));
+  }
+  SUBCLASS
+
+
+=head2 Bundling Module::Build
+
+Note: This section probably needs an update as the technology improves
+(see scripts/bundle.pl in the distribution).
+
+Suppose you want to use some new-ish features of Module::Build,
+e.g. newer than the version of Module::Build your users are likely to
+already have installed on their systems.  The first thing you should
+do is set C<configure_requires> to your minimum version of
+Module::Build.  See L<Module::Build::Authoring>.
+
+But not every build system honors C<configure_requires> yet.  Here's
+how you can ship a copy of Module::Build, but still use a newer
+installed version to take advantage of any bug fixes and upgrades.
+
+First, install Module::Build into F<Your-Project/inc/Module-Build>.
+CPAN will not index anything in the F<inc> directory so this copy will
+not show up in CPAN searches.
+
+    cd Module-Build
+    perl Build.PL --install_base /path/to/Your-Project/inc/Module-Build
+    ./Build test
+    ./Build install
+
+You should now have all the Module::Build .pm files in
+F<Your-Project/inc/Module-Build/lib/perl5>.
+
+Next, add this to the top of your F<Build.PL>.
+
+    my $Bundled_MB = 0.30;  # or whatever version it was.
+
+    # Find out what version of Module::Build is installed or fail quietly.
+    # This should be cross-platform.
+    my $Installed_MB = 
+        `$^X -e "eval q{require Module::Build; print Module::Build->VERSION} or exit 1";
+
+    # some operating systems put a newline at the end of every print.
+    chomp $Installed_MB;
+
+    $Installed_MB = 0 if $?;
+
+    # Use our bundled copy of Module::Build if it's newer than the installed.
+    unshift @INC, "inc/Module-Build/lib/perl5" if $Bundled_MB > $Installed_MB;
+
+    require Module::Build;
+
+And write the rest of your F<Build.PL> normally.  Module::Build will
+remember your change to C<@INC> and use it when you run F<./Build>.
+
+In the future, we hope to provide a more automated solution for this
+scenario; see C<inc/latest.pm> in the Module::Build distribution for
+one indication of the direction we're moving.
+
+
 =head1 AUTHOR
 
 Ken Williams <kwilliams@cpan.org>
@@ -438,7 +516,7 @@ Ken Williams <kwilliams@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
+Copyright (c) 2001-2008 Ken Williams.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

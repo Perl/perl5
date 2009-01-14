@@ -5,9 +5,46 @@ use strict;
 use File::Spec;
 use File::Path ();
 
+
+# Setup the code to clean out %ENV
 BEGIN {
-  # Make sure none of our tests load the users ~/.modulebuildrc file
-  $ENV{MODULEBUILDRC} = 'NONE';
+    # Environment variables which might effect our testing
+    my @delete_env_keys = qw(
+        DEVEL_COVER_OPTIONS
+        MODULEBUILDRC
+        HARNESS_TIMER
+        HARNESS_OPTIONS
+        HARNESS_VERBOSE
+        PREFIX
+        INSTALL_BASE
+        INSTALLDIRS
+    );
+
+    # Remember the ENV values because on VMS %ENV is global
+    # to the user, not the process.
+    my %restore_env_keys;
+
+    sub clean_env {
+        for my $key (@delete_env_keys) {
+            if( exists $ENV{$key} ) {
+                $restore_env_keys{$key} = delete $ENV{$key};
+            }
+            else {
+                delete $ENV{$key};
+            }
+        }
+    }
+
+    END {
+        while( my($key, $val) = each %restore_env_keys ) {
+            $ENV{$key} = $val;
+        }
+    }
+}
+
+
+BEGIN {
+  clean_env();
 
   # In case the test wants to use our other bundled
   # modules, make sure they can be loaded.
@@ -59,6 +96,8 @@ my @extra_exports = qw(
 push @EXPORT, @extra_exports;
 __PACKAGE__->export(scalar caller, @extra_exports);
 # XXX ^-- that should really happen in import()
+
+
 ########################################################################
 
 { # Setup a temp directory if it doesn't exist

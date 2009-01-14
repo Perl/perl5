@@ -2,7 +2,7 @@ package Module::Build::Platform::Default;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31012';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
