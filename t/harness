@@ -236,6 +236,11 @@ if ($jobs) {
 			 $state->observe_test(@_);
 		     }
 		    );
+	$h->callback(
+		     after_runtests => sub {
+			 $state->commit(@_);
+		     }
+		    );
     }
     $h->runtests(@tests);
 } else {
