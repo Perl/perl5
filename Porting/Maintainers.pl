@@ -657,7 +657,8 @@ package Maintainers;
         'Math::Complex' =>
                 {
                 'MAINTAINER'    => 'zefram',
-                'FILES'         => q[lib/Math/Complex.pm lib/Math/Trig.pm],
+                'FILES'         => q[lib/Math/Complex.pm lib/Math/Complex.t
+				     lib/Math/Trig.pm lib/Math/Trig.t],
                 'CPAN'          => 1,
                 'UPSTREAM'      => undef,
                 },
