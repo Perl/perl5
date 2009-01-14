@@ -22,6 +22,18 @@ use File::Find;
 use Config;
 
 my $Is_VMS = $^O eq 'VMS';
+my $Is_VMS_noefs = $Is_VMS;
+if ($Is_VMS) {
+    my $vms_efs = 0;
+    if (eval 'require VMS::Feature') {
+        $vms_efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
+        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+    }
+    $Is_VMS_noefs = 0 if $vms_efs;
+}
+
 
 # We're going to be chdir'ing and modules are sometimes loaded on the
 # fly in this test, so we need an absolute @INC.
@@ -358,7 +370,7 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     is( $skipchk->('mydefault.skip'), 1,
         'mydefault.skip excluded via mydefault.skip' );
 
-    my $extsep = $Is_VMS ? '_' : '.';
+    my $extsep = $Is_VMS_noefs ? '_' : '.';
     $Files{"$_.bak"}++ for ('MANIFEST', "MANIFEST${extsep}SKIP");
 }
 
