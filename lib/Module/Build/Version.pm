@@ -74,7 +74,7 @@ use strict;
 
 use locale;
 use vars qw ($VERSION @ISA @REGEXS);
-$VERSION = 0.74;
+$VERSION = 0.76;
 
 push @REGEXS, qr/
 	^v?	# optional leading 'v'
@@ -426,7 +426,11 @@ sub stringify
 	require Carp;
 	Carp::croak("Invalid version object");
     }
-    return $self->{original};
+    return exists $self->{original} 
+    	? $self->{original} 
+	: exists $self->{qv} 
+	    ? $self->normal
+	    : $self->numify;
 }
 
 sub vcmp
@@ -557,7 +561,8 @@ sub _un_vstring {
 # Thanks to Yitzchak Scott-Thoennes for this mode of operation
 {
     local $^W;
-    *UNIVERSAL::VERSION = sub {
+    *UNIVERSAL::VERSION # Module::Build::ModuleInfo doesn't see this now
+      = sub {
 	my ($obj, $req) = @_;
 	my $class = ref($obj) || $obj;
 

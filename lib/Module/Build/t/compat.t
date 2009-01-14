@@ -18,7 +18,7 @@ my $tests_per_type = 15;
 #find_in_path does not understand VMS.
 
 if ( $Config{make} && $^O ne 'VMS' ? find_in_path($Config{make}) : 1 ) {
-    plan tests => 34 + @makefile_types*$tests_per_type*2;
+    plan 'no_plan';
 } else {
     plan skip_all => "Don't know how to invoke 'make'";
 }
@@ -64,7 +64,7 @@ if ($is_vms_mms) {
 
 test_makefile_types();
 
-# Test with requires
+# Test with requires and PL_files
 
 my $distname = $dist->name;
 $dist->change_build_pl({ 
@@ -77,15 +77,26 @@ $dist->change_build_pl({
   build_requires      => {
     'Test::More'  => 0,
   },
+  PL_files            => { 'foo.PL' => 'foo' },
 });
+
+$dist->add_file("foo.PL", <<'END');
+open my $fh, ">$ARGV[0]" or die $!;
+print $fh "foo\n";
+END
 
 $dist->regen;
 
-test_makefile_types( requires => {
-    'perl' => $],
-    'File::Spec' => 0,
-    'Test::More' => 0,
-});
+test_makefile_types(
+    requires => {
+        'perl' => $],
+        'File::Spec' => 0,
+        'Test::More' => 0,
+    },
+    PL_files => {
+        'foo.PL' => 'foo',
+    },
+);
 
 ######################
 
@@ -260,6 +271,7 @@ $dist->remove;
 sub test_makefile_types {
   my %opts = @_;
   $opts{requires} ||= {};
+  $opts{PL_files} ||= {};
 
   foreach my $type (@makefile_types) {
     # Create M::B instance 
@@ -275,6 +287,7 @@ sub test_makefile_types {
     test_makefile_pl_requires_perl( $opts{requires}{perl} );
     test_makefile_creation($mb);
     test_makefile_prereq_pm( $opts{requires} );
+    test_makefile_pl_files( $opts{PL_files} ) if $type eq 'traditional';
       
     my ($output,$success);
     # Capture output to keep our STDOUT clean
@@ -282,6 +295,10 @@ sub test_makefile_types {
       $success = $mb->do_system(@make);
     });
     ok $success, "make ran without error";
+
+    for my $file (values %{ $opts{PL_files} }) {
+        ok -e $file, "PL_files generated - $file";
+    }
 
     # Can't let 'test' STDOUT go to our STDOUT, or it'll confuse Test::Harness.
     $output = stdout_of( sub {
@@ -334,9 +351,20 @@ sub test_makefile_prereq_pm {
   delete $requires{perl}; # until EU::MM supports this
   SKIP: {
     skip "$makefile not found", 1 unless -e $makefile;
-    my $prereq_pm = find_makefile_prereq_pm();
+    my $prereq_pm = find_params_in_makefile()->{PREREQ_PM} || {};
     is_deeply $prereq_pm, \%requires,
       "$makefile has correct PREREQ_PM line";
+  }
+}
+
+sub test_makefile_pl_files {
+  my $expected = shift;
+
+  SKIP: {
+    skip "$makefile not found", 1 unless -e $makefile;
+    my $pl_files = find_params_in_makefile()->{PL_FILES} || {};
+    is_deeply $pl_files, $expected,
+      "$makefile has correct PL_FILES line";
   }
 }
 
@@ -356,30 +384,28 @@ sub test_makefile_pl_requires_perl {
   }
 }
 
-# Following subroutine adapted from code in CPAN.pm 
-# by Andreas Koenig and A. Speer.
-sub find_makefile_prereq_pm {
+sub find_params_in_makefile {
   my $fh = IO::File->new( $makefile, 'r' ) 
     or die "Can't read $makefile: $!";
-  my $req = {};
   local($/) = "\n";
-  while (<$fh>) {
-    # locate PREREQ_PM
-    last if /MakeMaker post_initialize section/;
-    my($p) = m{^[\#]
-      \s+PREREQ_PM\s+=>\s+(.+)
-    }x;
-    next unless $p;
 
-    # extract modules
-    while ( $p =~ m/(?:\s)([\w\:]+)=>(q\[.*?\]|undef),?/g ){
+  my %params;
+  while (<$fh>) {
+    # Blank line after params.
+    last if keys %params and !/\S+/;
+
+    next unless m{^\# \s+ ( [A-Z_]+ ) \s+ => \s+ ( .* )$}x;
+
+    my($key, $val) = ($1, $2);
+    # extract keys and values
+    while ( $val =~ m/(?:\s)(\S+)=>(q\[.*?\]|undef),?/g ) {
       my($m,$n) = ($1,$2);
       if ($n =~ /^q\[(.*?)\]$/) {
         $n = $1;
       }
-      $req->{$m} = $n;
+      $params{$key}{$m} = $n;
     }
-    last;
   }
-  return $req;
+
+  return \%params;
 }

@@ -211,12 +211,12 @@ generated F<README>.
 
 [version 0.20]
 
-This should be a short description of the distribution.  This is used
-when generating metadata for F<META.yml> and PPD files.  If it is not
-given then C<Module::Build> looks in the POD of the module from which
-it gets the distribution's version.  It looks for the first line
-matching C<$package\s-\s(.+)>, and uses the captured text as the
-abstract.
+This should be a short description of the distribution.  This is used when
+generating metadata for F<META.yml> and PPD files.  If it is not given
+then C<Module::Build> looks in the POD of the module from which it gets
+the distribution's version.  If it finds a POD section marked "=head1
+NAME", then it looks for the first line matching C<\s+-\s+(.+)>,
+and uses the captured text as the abstract.
 
 =item dist_author
 
@@ -267,6 +267,10 @@ eval()-ing that line, then checking the value of the C<$VERSION>
 variable.  Quite ugly, really, but all the modules on CPAN depend on
 this process, so there's no real opportunity to change to something
 better.
+
+If the target file of L</dist_version_from> contains more than one package
+declaration, the version returned will be the one matching the configured
+L</module_name>.
 
 =item dynamic_config
 
@@ -791,6 +795,86 @@ C<class> parameter indicates the name to use for the new subclass, and
 defaults to C<MyModuleBuilder>.  The C<code> parameter specifies Perl
 code to use as the body of the subclass.
 
+=item add_property
+
+[version 0.31]
+
+  package 'My::Build';
+  use base 'Module::Build';
+  __PACKAGE__->add_property( 'pedantic' );
+  __PACKAGE__->add_property( answer => 42 );
+  __PACKAGE__->add_property(
+     'epoch',
+      default => sub { time },
+      check   => sub {
+          return 1 if /^\d+$/;
+          shift->property_error( "'$_' is not an epoch time" );
+          return 0;
+      },
+  );
+
+Adds a property to a Module::Build class. Properties are those attributes of a
+Module::Build object which can be passed to the constructor and which have
+accessors to get and set them. All of the core properties, such as
+C<module_name> and C<license>, are defined using this class method.
+
+The first argument to C<add_property()> is always the name of the property.
+The second argument can be either a default value for the property, or a list
+of key/value pairs. The supported keys are:
+
+=over
+
+=item C<default>
+
+The default value. May optionally be specified as a code reference, in which
+case the return value from the execution of the code reference will be used.
+If you need the default to be a code reference, just use a code reference to
+return it, e.g.:
+
+      default => sub { sub { ... } },
+
+=item C<check>
+
+A code reference that checks that a value specified for the property is valid.
+During the execution of the code reference, the new value will be included in
+the C<$_> variable. If the value is correct, the C<check> code reference
+should return true. If the value is not correct, it sends an error message to
+C<property_error()> and returns false.
+
+=back
+
+When this method is called, a new property will be installed in the
+Module::Build class, and an accessor will be built to allow the property to be
+get or set on the build object.
+
+  print $build->pedantic, $/;
+  $build->pedantic(0);
+
+If the default value is a hash reference, this generetes a special-case
+accessor method, wherein individual key/value pairs may be set or fetched:
+
+  print "stuff{foo} is: ", $build->stuff( 'foo' ), $/;
+  $build->stuff( foo => 'bar' );
+  print $build->stuff( 'foo' ), $/; # Outputs "bar"
+
+Of course, you can still set the entire hash reference at once, as well:
+
+  $build->stuff( { foo => 'bar', baz => 'yo' } );
+
+In either case, if a C<check> has been specified for the property, it will be
+applied to the entire hash. So the check code reference should look something
+like:
+
+      check => sub {
+            return 1 if defined $_ && exists $_->{foo};
+            shift->property_error(qq{Property "stuff" needs "foo"});
+            return 0;
+      },
+
+=item property_error
+
+[version 0.31]
+
 =back
 
 
@@ -882,7 +966,6 @@ prerequisites that were passed to the C<new()> method.
 Returns the internal ExtUtils::CBuilder object that can be used for
 compiling & linking C code.  If no such object is available (e.g. if
 the system has no compiler installed) an exception will be thrown.
-
 
 =item check_installed_status($module, $version)
 
@@ -1647,6 +1730,8 @@ accessor methods for the following properties:
 =item configure_requires()
 
 =item conflicts()
+
+=item create_license()
 
 =item create_makefile_pl()
 

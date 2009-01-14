@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31012';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -177,8 +177,14 @@ sub _construct {
 
 ################## End constructors #########################
 
-sub log_info { print @_ unless shift()->quiet }
-sub log_verbose { shift()->log_info(@_) if $_[0]->verbose }
+sub log_info {
+  my $self = shift;
+  print @_ unless(ref($self) and $self->quiet);
+}
+sub log_verbose {
+  my $self = shift;
+  $self->log_info(@_) if(ref($self) and $self->verbose);
+}
 sub log_warn {
   # Try to make our call stack invisible
   shift;
@@ -644,125 +650,172 @@ sub ACTION_config_data {
       );
 }
 
-{
-    my %valid_properties = ( __PACKAGE__,  {} );
-    my %additive_properties;
+########################################################################
+{ # enclosing these lexicals -- TODO 
+  my %valid_properties = ( __PACKAGE__,  {} );
+  my %additive_properties;
 
-    sub _mb_classes {
-      my $class = ref($_[0]) || $_[0];
-      return ($class, $class->mb_parents);
+  sub _mb_classes {
+    my $class = ref($_[0]) || $_[0];
+    return ($class, $class->mb_parents);
+  }
+
+  sub valid_property {
+    my ($class, $prop) = @_;
+    return grep exists( $valid_properties{$_}{$prop} ), $class->_mb_classes;
+  }
+
+  sub valid_properties {
+    return keys %{ shift->valid_properties_defaults() };
+  }
+
+  sub valid_properties_defaults {
+    my %out;
+    for (reverse shift->_mb_classes) {
+      @out{ keys %{ $valid_properties{$_} } } = map {
+        $_->()
+      } values %{ $valid_properties{$_} };
+    }
+    return \%out;
+  }
+
+  sub array_properties {
+    for (shift->_mb_classes) {
+      return @{$additive_properties{$_}->{ARRAY}}
+        if exists $additive_properties{$_}->{ARRAY};
+    }
+  }
+
+  sub hash_properties {
+    for (shift->_mb_classes) {
+      return @{$additive_properties{$_}->{'HASH'}}
+        if exists $additive_properties{$_}->{'HASH'};
+    }
+  }
+
+  sub add_property {
+    my ($class, $property) = (shift, shift);
+    die "Property '$property' already exists"
+      if $class->valid_property($property);
+    my %p = @_ == 1 ? ( default => shift ) : @_;
+
+    my $type = ref $p{default};
+    $valid_properties{$class}{$property} = $type eq 'CODE'
+      ? $p{default}
+      : sub { $p{default} };
+
+    push @{$additive_properties{$class}->{$type}}, $property
+      if $type;
+
+    unless ($class->can($property)) {
+      # TODO probably should put these in a util package
+      my $sub = $type eq 'HASH'
+        ? _make_hash_accessor($property, \%p)
+        : _make_accessor($property, \%p);
+      no strict 'refs';
+      *{"$class\::$property"} = $sub;
     }
 
-    sub valid_property {
-      my ($class, $prop) = @_;
-      return grep exists( $valid_properties{$_}{$prop} ), $class->_mb_classes;
-    }
+    return $class;
+  }
 
-    sub valid_properties {
-      return keys %{ shift->valid_properties_defaults() };
-    }
-
-    sub valid_properties_defaults {
-      my %out;
-      for (reverse shift->_mb_classes) {
-	@out{ keys %{ $valid_properties{$_} } } = values %{ $valid_properties{$_} };
-      }
-      return \%out;
-    }
-
-    sub array_properties {
-      for (shift->_mb_classes) {
-        return @{$additive_properties{$_}->{ARRAY}}
-	  if exists $additive_properties{$_}->{ARRAY};
-      }
-    }
-
-    sub hash_properties {
-      for (shift->_mb_classes) {
-        return @{$additive_properties{$_}->{'HASH'}}
-	  if exists $additive_properties{$_}->{'HASH'};
-      }
-    }
-
-    sub add_property {
-      my ($class, $property, $default) = @_;
-      die "Property '$property' already exists" if $class->valid_property($property);
-
-      $valid_properties{$class}{$property} = $default;
-
-      my $type = ref $default;
-      if ($type) {
-	push @{$additive_properties{$class}->{$type}}, $property;
-      }
-
-      unless ($class->can($property)) {
-        no strict 'refs';
-	if ( $type eq 'HASH' ) {
-          *{"$class\::$property"} = sub {
-            # XXX this needs 'use strict' again
-	    my $self = shift;
-	    my $x = $self->{properties};
-	    return $x->{$property} unless @_;
-
-	    if ( defined($_[0]) && !ref($_[0]) ) {
-	      if ( @_ == 1 ) {
-		return exists( $x->{$property}{$_[0]} ) ?
-		         $x->{$property}{$_[0]} : undef;
-              } elsif ( @_ % 2 == 0 ) {
-	        my %args = @_;
-	        while ( my($k, $v) = each %args ) {
-	          $x->{$property}{$k} = $v;
-	        }
-	      } else {
-		die "Unexpected arguments for property '$property'\n";
-	      }
-	    } else {
-	      $x->{$property} = $_[0];
-	    }
-	  };
-
-        } else {
-          *{"$class\::$property"} = sub {
-            # XXX this needs 'use strict' again
-	    my $self = shift;
-	    $self->{properties}{$property} = shift if @_;
-	    return $self->{properties}{$property};
-	  }
-        }
-
-      }
-      return $class;
-    }
-
-    sub _set_defaults {
+    sub property_error {
       my $self = shift;
-
-      # Set the build class.
-      $self->{properties}{build_class} ||= ref $self;
-
-      # If there was no orig_dir, set to the same as base_dir
-      $self->{properties}{orig_dir} ||= $self->{properties}{base_dir};
-
-      my $defaults = $self->valid_properties_defaults;
-      
-      foreach my $prop (keys %$defaults) {
-	$self->{properties}{$prop} = $defaults->{$prop}
-	  unless exists $self->{properties}{$prop};
-      }
-      
-      # Copy defaults for arrays any arrays.
-      for my $prop ($self->array_properties) {
-	$self->{properties}{$prop} = [@{$defaults->{$prop}}]
-	  unless exists $self->{properties}{$prop};
-      }
-      # Copy defaults for arrays any hashes.
-      for my $prop ($self->hash_properties) {
-	$self->{properties}{$prop} = {%{$defaults->{$prop}}}
-	  unless exists $self->{properties}{$prop};
-      }
+      die 'ERROR: ', @_;
     }
 
+  sub _set_defaults {
+    my $self = shift;
+
+    # Set the build class.
+    $self->{properties}{build_class} ||= ref $self;
+
+    # If there was no orig_dir, set to the same as base_dir
+    $self->{properties}{orig_dir} ||= $self->{properties}{base_dir};
+
+    my $defaults = $self->valid_properties_defaults;
+
+    foreach my $prop (keys %$defaults) {
+      $self->{properties}{$prop} = $defaults->{$prop}
+        unless exists $self->{properties}{$prop};
+    }
+
+    # Copy defaults for arrays any arrays.
+    for my $prop ($self->array_properties) {
+      $self->{properties}{$prop} = [@{$defaults->{$prop}}]
+        unless exists $self->{properties}{$prop};
+    }
+    # Copy defaults for arrays any hashes.
+    for my $prop ($self->hash_properties) {
+      $self->{properties}{$prop} = {%{$defaults->{$prop}}}
+        unless exists $self->{properties}{$prop};
+    }
+  }
+
+} # end closure
+########################################################################
+sub _make_hash_accessor {
+  my ($property, $p) = @_;
+  my $check = $p->{check} || sub { 1 };
+
+  return sub {
+    my $self = shift;
+
+    # This is only here to deprecate the historic accident of calling
+    # properties as class methods - I suspect it only happens in our
+    # test suite.
+    unless(ref($self)) {
+      carp("\n$property not a class method (@_)");
+      return;
+    }
+
+    my $x = $self->{properties};
+    return $x->{$property} unless @_;
+
+    my $prop = $x->{$property};
+    if ( defined $_[0] && !ref $_[0] ) {
+      if ( @_ == 1 ) {
+        return exists $prop->{$_[0]} ? $prop->{$_[0]} : undef;
+      } elsif ( @_ % 2 == 0 ) {
+        my %new = (%{ $prop }, @_);
+        local $_ = \%new;
+        $x->{$property} = \%new if $check->($self);
+        return $x->{$property};
+      } else {
+        die "Unexpected arguments for property '$property'\n";
+      }
+    } else {
+      die "Unexpected arguments for property '$property'\n"
+          if defined $_[0] && ref $_[0] ne 'HASH';
+      local $_ = $_[0];
+      $x->{$property} = shift if $check->($self);
+    }
+  };
 }
+########################################################################
+sub _make_accessor {
+  my ($property, $p) = @_;
+  my $check = $p->{check} || sub { 1 };
+
+  return sub {
+    my $self = shift;
+
+    # This is only here to deprecate the historic accident of calling
+    # properties as class methods - I suspect it only happens in our
+    # test suite.
+    unless(ref($self)) {
+      carp("\n$property not a class method (@_)");
+      return;
+    }
+
+    my $x = $self->{properties};
+    return $x->{$property} unless @_;
+    local $_ = $_[0];
+    $x->{$property} = shift if $check->($self);
+    return $x->{$property};
+  };
+}
+########################################################################
 
 # Add the default properties.
 __PACKAGE__->add_property(blib => 'blib');
@@ -772,7 +825,6 @@ __PACKAGE__->add_property(build_script => 'Build');
 __PACKAGE__->add_property(build_bat => 0);
 __PACKAGE__->add_property(config_dir => '_build');
 __PACKAGE__->add_property(include_dirs => []);
-__PACKAGE__->add_property(installdirs => 'site');
 __PACKAGE__->add_property(metafile => 'META.yml');
 __PACKAGE__->add_property(recurse_into => []);
 __PACKAGE__->add_property(use_rcfile => 1);
@@ -782,6 +834,20 @@ __PACKAGE__->add_property(config => undef);
 __PACKAGE__->add_property(test_file_exts => ['.t']);
 __PACKAGE__->add_property(use_tap_harness => 0);
 __PACKAGE__->add_property(tap_harness_args => {});
+__PACKAGE__->add_property(
+  'installdirs',
+  default => 'site',
+  check   => sub {
+    return 1 if /^(core|site|vendor)$/;
+    return shift->property_error(
+      $_ eq 'perl'
+      ? 'Perhaps you meant installdirs to be "core" rather than "perl"?'
+      : 'installdirs must be one of "core", "site", or "vendor"'
+    );
+    return shift->property_error("Perhaps you meant 'core'?") if $_ eq 'perl';
+    return 0;
+  },
+);
 
 {
   my $Is_ActivePerl = eval {require ActivePerl::DocTools};
@@ -814,6 +880,7 @@ __PACKAGE__->add_property($_) for qw(
   base_dir
   bindoc_dirs
   c_source
+  create_license
   create_makefile_pl
   create_readme
   debugger
@@ -1084,10 +1151,19 @@ sub check_autofeatures {
 
   $self->log_info("Checking features:\n");
 
-  my $max_name_len = 0;
-  $max_name_len = ( length($_) > $max_name_len ) ?
-                    length($_) : $max_name_len
-    for keys %$features;
+  # TODO refactor into ::Util
+  my $longest = sub {
+    my @str = @_ or croak("no strings given");
+
+    my @len = map({length($_)} @str);
+    my $max = 0;
+    my $longest;
+    for my $i (0..$#len) {
+      ($max, $longest) = ($len[$i], $str[$i]) if($len[$i] > $max);
+    }
+    return($longest);
+  };
+  my $max_name_len = length($longest->(keys %$features));
 
   while (my ($name, $info) = each %$features) {
     $self->log_info("  $name" . '.' x ($max_name_len - length($name) + 4));
@@ -1518,6 +1594,9 @@ sub cull_options {
     my $self = shift;
     my (@argv) = @_;
 
+    # XXX is it even valid to call this as a class method?
+    return({}, @argv) unless(ref($self)); # no object
+
     my $specs = $self->get_options;
     return({}, @argv) unless($specs and %$specs); # no user options
 
@@ -1579,6 +1658,7 @@ sub _translate_option {
   (my $tr_opt = $opt) =~ tr/-/_/;
 
   return $tr_opt if grep $tr_opt =~ /^(?:no_?)?$_$/, qw(
+    create_license
     create_makefile_pl
     create_readme
     extra_compiler_flags
@@ -1620,6 +1700,7 @@ sub _optional_arg {
 
   my @bool_opts = qw(
     build_bat
+    create_license
     create_readme
     pollute
     quiet
@@ -3100,6 +3181,32 @@ sub do_create_makefile_pl {
   $self->_add_to_manifest('MANIFEST', 'Makefile.PL');
 }
 
+sub do_create_license {
+  my $self = shift;
+  $self->log_info("Creating LICENSE file");
+
+  my $l = $self->license
+    or die "No license specified";
+
+  my $key = $self->valid_licenses->{$l}
+    or die "'$l' isn't a license key we know about";
+  my $class = "Software::License::$key";
+
+  eval "use $class; 1"
+    or die "Can't load Software::License to create LICENSE file: $@";
+
+  $self->delete_filetree('LICENSE');
+
+  my $author = join " & ", @{ $self->dist_author };
+  my $license = $class->new({holder => $author});
+  my $fh = IO::File->new('> LICENSE')
+    or die "Can't write LICENSE file: $!";
+  print $fh $license->fulltext;
+  close $fh;
+
+  $self->_add_to_manifest('MANIFEST', 'LICENSE');
+}
+
 sub do_create_readme {
   my $self = shift;
   $self->delete_filetree('README');
@@ -3346,11 +3453,35 @@ BEGIN { *scripts = \&script_files; }
 
 {
   my %licenses = (
+    perl         => 'Perl_5',
+    apache       => 'Apache_2_0',
+    artistic     => 'Artistic_1_0',
+    artistic_2   => 'Artistic_2_0',
+    lgpl         => 'LGPL_2_1',
+    lgpl2        => 'LGPL_2_1',
+    lgpl3        => 'LGPL_3_0',
+    bsd          => 'BSD',
+    gpl          => 'GPL_1',
+    gpl2         => 'GPL_2',
+    gpl3         => 'GPL_3',
+    mit          => 'MIT',
+    mozilla      => 'Mozilla_1_1',
+    open_source  => undef,
+    unrestricted => undef,
+    restrictive  => undef,
+    unknown      => undef,
+  );
+
+  # TODO - would be nice to not have these here, since they're more
+  # properly stored only in Software::License
+  my %license_urls = (
     perl         => 'http://dev.perl.org/licenses/',
     apache       => 'http://apache.org/licenses/LICENSE-2.0',
     artistic     => 'http://opensource.org/licenses/artistic-license.php',
     artistic_2   => 'http://opensource.org/licenses/artistic-license-2.0.php',
     lgpl         => 'http://opensource.org/licenses/lgpl-license.php',
+    lgpl2        => 'http://opensource.org/licenses/lgpl-2.1.php',
+    lgpl3        => 'http://opensource.org/licenses/lgpl-3.0.html',
     bsd          => 'http://opensource.org/licenses/bsd-license.php',
     gpl          => 'http://opensource.org/licenses/gpl-license.php',
     gpl2         => 'http://opensource.org/licenses/gpl-2.0.php',
@@ -3364,6 +3495,9 @@ BEGIN { *scripts = \&script_files; }
   );
   sub valid_licenses {
     return \%licenses;
+  }
+  sub _license_url {
+    return $license_urls{$_[1]};
   }
 }
 
@@ -3383,6 +3517,7 @@ sub ACTION_distmeta {
 
   $self->do_create_makefile_pl if $self->create_makefile_pl;
   $self->do_create_readme if $self->create_readme;
+  $self->do_create_license if $self->create_license;
   $self->do_create_metafile;
 }
 
@@ -3462,9 +3597,19 @@ sub prepare_metadata {
   }
   $node->{version} = '' . $node->{version}; # Stringify version objects
 
-  if (defined( $self->license ) &&
-      defined( my $url = $self->valid_licenses->{ $self->license } )) {
-    $node->{resources}{license} = $url;
+  if (defined( my $l = $self->license )) {
+    die "Unknown license string '$l'"
+      unless exists $self->valid_licenses->{ $self->license };
+
+    if (my $key = $self->valid_licenses->{ $self->license }) {
+      my $class = "Software::License::$key";
+      if (eval "use $class; 1") {
+        # S::L requires a 'holder' key
+        $node->{resources}{license} = $class->new({holder=>"nobody"})->url;
+      } else {
+        $node->{resources}{license} = $self->_license_url($key);
+      }
+    }
   }
 
   if (exists $p->{configure_requires}) {
@@ -3697,11 +3842,18 @@ sub make_tarball {
     $self->do_system($self->split_like_shell($self->{args}{gzip}), "$file.tar") if $self->{args}{gzip};
   } else {
     require Archive::Tar;
+
     # Archive::Tar versions >= 1.09 use the following to enable a compatibility
     # hack so that the resulting archive is compatible with older clients.
     $Archive::Tar::DO_NOT_USE_PREFIX = 0;
+
     my $files = $self->rscan_dir($dir);
-    Archive::Tar->create_archive("$file.tar.gz", 1, @$files);
+    my $tar   = Archive::Tar->new;
+    $tar->add_files(@$files);
+    for my $f ($tar->get_files) {
+      $f->mode($f->mode & ~022); # chmod go-w
+    }
+    $tar->write("$file.tar.gz", 1);
   }
 }
 

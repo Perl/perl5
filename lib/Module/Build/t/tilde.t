@@ -4,7 +4,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 17;
+use MBTest tests => 18;
 
 use_ok 'Module::Build';
 ensure_blib('Module::Build');
@@ -47,7 +47,7 @@ SKIP: {
 
     unless (defined $home) {
       my @info = eval { getpwuid $> };
-      skip "No home directory for tilde-expansion tests", 14 if $@;
+      skip "No home directory for tilde-expansion tests", 15 if $@;
       $home = $info[7];
     }
 
@@ -67,6 +67,13 @@ SKIP: {
 
     is( run_sample( prefix => '~' )->prefix,
 	$home );
+
+    # Test when HOME is different from getpwuid(), as in sudo.
+    {
+        local $ENV{HOME} = '/wibble/whomp';
+
+        is( run_sample( $p => '~' )->$p(),    "/wibble/whomp" );
+    }
 
     my $mb = run_sample( install_path => { html => '~/html',
 					   lib  => '~/lib'   }

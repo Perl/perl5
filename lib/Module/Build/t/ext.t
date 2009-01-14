@@ -106,8 +106,8 @@ foreach my $test (@win_splits) {
   # Make sure data can make a round-trip through an external perl
   # process, which can involve the shell command line
 
-  # Holy crap, I can't believe this works:
-  local $Module::Build{properties}{quiet} = 1;
+  # silence the printing for easier matching
+  local *Module::Build::log_info = sub {};
 
   my @data = map values(%$_), @unix_splits, @win_splits;
   for my $d (@data) {
@@ -124,7 +124,9 @@ foreach my $test (@win_splits) {
   # Make sure data can make a round-trip through an external backtick
   # process, which can involve the shell command line
 
-  local $Module::Build{properties}{quiet} = 1;
+  # silence the printing for easier matching
+  local *Module::Build::log_info = sub {};
+
   my @data = map values(%$_), @unix_splits, @win_splits;
   for my $d (@data) {
     chomp(my $out = Module::Build->_backticks('perl', '-le', 'print join " ", map "{$_}", @ARGV', @$d));
