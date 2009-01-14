@@ -1235,9 +1235,14 @@ _cleaner1:
 	-cd pod; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-cd utils; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
-	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
+	-@if test -f miniperl$(EXE_EXT) ; then \
+	for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
-	done
+	done ; \
+	else \
+	sh $(CLEAN).sh ; \
+	fi
+	rm -f realclean.sh veryclean.sh
 	-@test ! -f ./miniperl$(EXE_EXT) || $(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
 
 # Some systems do not support "?", so keep these files separate.
