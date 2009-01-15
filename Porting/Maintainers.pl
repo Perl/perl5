@@ -905,7 +905,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rmbarker',
 		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
 		'CPAN'		=> 0,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'Safe' =>
