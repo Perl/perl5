@@ -4229,7 +4229,7 @@ t/uni/class.t			See if Unicode classes work (\p)
 t/uni/fold.t			See if Unicode folding works
 t/uni/greek.t			See if Unicode in greek works
 t/uni/latin2.t			See if Unicode in latin2 works
-t/uni/lex_utf8			See if Unicode in lexer works
+t/uni/lex_utf8.t		See if Unicode in lexer works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
 t/uni/sprintf.t			See if Unicode sprintf works
