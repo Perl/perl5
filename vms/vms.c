@@ -9454,7 +9454,6 @@ void
 vms_image_init(int *argcp, char ***argvp)
 {
   int status;
-  char val_str[10];
   char eqv[LNM$C_NAMLENGTH+1] = "";
   unsigned int len, tabct = 8, tabidx = 0;
   unsigned long int *mask, iosb[2], i, rlst[128], rsz;
@@ -9475,16 +9474,18 @@ vms_image_init(int *argcp, char ***argvp)
 
     /* This was moved from the pre-image init handler because on threaded */
     /* Perl it was always returning 0 for the default value. */
-    status = simple_trnlnm("SYS$POSIX_ROOT", val_str, sizeof(val_str));
+    status = simple_trnlnm("SYS$POSIX_ROOT", eqv, LNM$C_NAMLENGTH);
     if (status > 0) {
         int s;
 	s = decc$feature_get_index("DECC$DISABLE_POSIX_ROOT");
 	if (s > 0) {
             int initial;
 	    initial = decc$feature_get_value(s, 4);
-	    if (initial >= 0) {
-                /* initial is -1 if nothing has set the feature */
-                /* initial is 1 if the logical name is present */
+	    if (initial > 0) {
+                /* initial is: 0 if nothing has set the feature */
+                /*            -1 if initialized to default */
+                /*             1 if set by logical name */
+                /*             2 if set by decc$feature_set_value */
 		decc_disable_posix_root = decc$feature_get_value(s, 1);
 
                 /* If the value is not valid, force the feature off */
@@ -9494,7 +9495,7 @@ vms_image_init(int *argcp, char ***argvp)
 		}
 	    }
 	    else {
-		/* Traditionally Perl assumes this is off */
+		/* Nothing has asked for it explicitly, so use our own default. */
 		decc_disable_posix_root = 1;
 		decc$feature_set_value(s, 1, 1);
 	    }
