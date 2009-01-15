@@ -31,6 +31,9 @@ Unicode::UCD - Unicode character database
     use Unicode::UCD 'charinfo';
     my $charinfo   = charinfo($codepoint);
 
+    use Unicode::UCD 'casespec';
+    my $casespec = casespec(0xFB00);
+
     use Unicode::UCD 'charblock';
     my $charblock  = charblock($codepoint);
 
@@ -275,6 +278,7 @@ sub han_charname { # internal: called from charinfo
     return sprintf("CJK UNIFIED IDEOGRAPH-%04X", shift);
 }
 
+# Overwritten by data in file
 my %first_last = (
    'CJK Ideograph Extension A' => [ 0x3400,   0x4DB5   ],
    'CJK Ideograph'             => [ 0x4E00,   0x9FA5   ],
@@ -942,10 +946,13 @@ Unicode case mappings as returned by L</charinfo()> never are).
 
 If there are no case mappings for the L</code point argument>, or if all three
 possible mappings (I<lower>, I<title> and I<upper>) result in single code
-points and are locale independent and unconditional, B<undef> is returned.
+points and are locale independent and unconditional, B<undef> is returned
+(which means that the case mappings, if any, for the code point are those
+returned by L</charinfo()>).
 
 Otherwise, a reference to a hash giving the mappings (or a reference to a hash
-of such hashes, explained below) is returned.
+of such hashes, explained below) is returned with the following keys and their
+meanings:
 
 The keys in the bottom layer hash with the meanings of their values are:
 
@@ -991,21 +998,34 @@ Conditions preceded by "NON_" represent the negation of the condition.
 A I<context> is one of those defined in the Unicode standard.
 For Unicode 5.1, they are defined in Section 3.13 C<Default Case Operations>
 available at
-L<http://www.unicode.org/versions/Unicode5.1.0/>
+L<http://www.unicode.org/versions/Unicode5.1.0/>.
+These are for context-sensitive casing.
 
 =back
 
-If the return value is to a hash of hashes, it is because there are multiple
-case mapping definitions for a single code point
-(because of different rules for different locales).
-Each sub-hash is of the form above, and the keys of the outer hash are
-the locales, which are
-defined as 2-letter ISO 3166 country codes, possibly
-followed by a "_" and a 2-letter ISO language code (possibly followed
-by a "_" and a variant code).  You can find the lists of all possible locales,
-see L<Locale::Country> and L<Locale::Language>.
+The hash described above is returned for locale-independent casing, where
+at least one of the mappings has length longer than one.  If B<undef> is 
+returned, the code point may have mappings, but if so, all are length one,
+and are returned by L</charinfo()>.
+Note that when this function does return a value, it will be for the complete
+set of mappings for a code point, even those whose length is one.
+
+If there are additional casing rules that apply only in certain locales,
+an additional key for each will be defined in the returned hash.  Each such key
+will be its locale name, defined as a 2-letter ISO 3166 country code, possibly
+followed by a "_" and a 2-letter ISO language code (possibly followed by a "_"
+and a variant code).  You can find the lists of all possible locales, see
+L<Locale::Country> and L<Locale::Language>.
 (In Unicode 5.1, the only locales returned by this function
 are C<lt>, C<tr>, and C<az>.)
+
+Each locale key is a reference to a hash that has the form above, and gives
+the casing rules for that particular locale, which take precedence over the
+locale-independent ones when in that locale.
+
+If the only casing for a code point is locale-dependent, then the returned
+hash will not have any of the base keys, like C<code>, C<upper>, etc., but
+will contain only locale keys.
 
 For more information about case mappings see
 L<http://www.unicode.org/unicode/reports/tr21/>
