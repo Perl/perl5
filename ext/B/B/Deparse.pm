@@ -3821,7 +3821,7 @@ sub pp_backtick {
     my($op, $cx) = @_;
     # skip pushmark if it exists (readpipe() vs ``)
     my $child = $op->first->sibling->isa('B::NULL')
-	? $op->first->first : $op->first->sibling;
+	? $op->first : $op->first->sibling;
     return single_delim("qx", '`', $self->dq($child));
 }
 
