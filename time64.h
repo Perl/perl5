@@ -28,7 +28,7 @@ struct TM64 {
 #endif
 
 #ifdef HAS_TM_TM_ZONE
-        char    *tm_zone;
+        const char    *tm_zone;
 #endif
 };
 

@@ -4425,7 +4425,7 @@ PP(pp_gmtime)
     Time64_T when;
     struct TM tmbuf;
     struct TM *err;
-    char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
+    const char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char * const monname[] =
