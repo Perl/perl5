@@ -100,7 +100,11 @@
 
 #ifdef __VMS
   /* Default is 1024 on VAX, 8192 otherwise */
-#  define THREAD_CREATE_NEEDS_STACK (32*1024)
+#  ifdef __ia64
+#    define THREAD_CREATE_NEEDS_STACK (48*1024)
+#  else
+#    define THREAD_CREATE_NEEDS_STACK (32*1024)
+#  endif
 #endif
 
 #ifdef I_MACH_CTHREADS
