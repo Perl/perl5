@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 48 $
+##  $Revision: 50 $
 ##  $Author: mhx $
-##  $Date: 2008/10/30 01:46:33 +0100 $
+##  $Date: 2009/01/18 14:10:55 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2008, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2009, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -162,6 +162,7 @@ __UNDEFINED__  boolSV(b)    ((b) ? &PL_sv_yes : &PL_sv_no)
 /* DEFSV appears first in 5.004_56 */
 __UNDEFINED__  DEFSV	    GvSV(PL_defgv)
 __UNDEFINED__  SAVE_DEFSV   SAVESPTR(GvSV(PL_defgv))
+__UNDEFINED__  DEFSV_set(sv) (GvSV(PL_defgv) = (sv))
 
 /* Older perls (<=5.003) lack AvFILLp */
 __UNDEFINED__  AvFILLp      AvFILL
@@ -384,6 +385,19 @@ DEFSV()
 	OUTPUT:
 		RETVAL
 
+void
+DEFSV_modify()
+	PPCODE:
+		XPUSHs(sv_mortalcopy(DEFSV));
+		ENTER;
+		SAVE_DEFSV;
+		DEFSV_set(newSVpvs("DEFSV"));
+		XPUSHs(sv_mortalcopy(DEFSV));
+		sv_2mortal(DEFSV);
+		LEAVE;
+		XPUSHs(sv_mortalcopy(DEFSV));
+		XSRETURN(3);
+
 int
 ERRSV()
 	CODE:
@@ -441,7 +455,7 @@ Perl_ppaddr_t(string)
 		LEAVE;
 		XSRETURN(1);
 
-=tests plan => 33
+=tests plan => 38
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -463,6 +477,15 @@ else {
   ok(1);
   ok(1);
 }
+
+my @r = &Devel::PPPort::DEFSV_modify();
+
+ok(@r == 3);
+ok($r[0], 'Fred');
+ok($r[1], 'DEFSV');
+ok($r[2], 'Fred');
+
+ok(&Devel::PPPort::DEFSV(), "Fred");
 
 eval { 1 };
 ok(!&Devel::PPPort::ERRSV());
