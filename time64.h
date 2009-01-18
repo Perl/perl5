@@ -28,7 +28,11 @@ struct TM64 {
 #endif
 
 #ifdef HAS_TM_TM_ZONE
+#  ifdef __GLIBC__
         const char    *tm_zone;
+#  else
+        char    *tm_zone;
+#  endif
 #endif
 };
 
