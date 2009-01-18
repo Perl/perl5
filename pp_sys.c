@@ -2983,18 +2983,21 @@ PP(pp_ftrread)
     int stat_mode = S_IRUSR;
 
     bool effective = FALSE;
+    char opchar;
     dSP;
 
     STACKED_FTEST_CHECK;
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:
+	opchar = 'R';
 #if !(defined(HAS_ACCESS) && defined(R_OK))
 	use_access = 0;
 #endif
 	break;
 
     case OP_FTRWRITE:
+	opchar = 'W';
 #if defined(HAS_ACCESS) && defined(W_OK)
 	access_mode = W_OK;
 #else
@@ -3004,6 +3007,7 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTREXEC:
+	opchar = 'X';
 #if defined(HAS_ACCESS) && defined(X_OK)
 	access_mode = X_OK;
 #else
@@ -3013,13 +3017,19 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTEWRITE:
+	opchar = 'w';
 #ifdef PERL_EFF_ACCESS
 	access_mode = W_OK;
 #endif
 	stat_mode = S_IWUSR;
-	/* Fall through  */
+#ifndef PERL_EFF_ACCESS
+	use_access = 0;
+#endif
+	effective = TRUE;
+	break;
 
     case OP_FTEREAD:
+	opchar = 'r';
 #ifndef PERL_EFF_ACCESS
 	use_access = 0;
 #endif
@@ -3027,6 +3037,7 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTEEXEC:
+	opchar = 'x';
 #ifdef PERL_EFF_ACCESS
 	access_mode = X_OK;
 #else
@@ -3035,6 +3046,18 @@ PP(pp_ftrread)
 	stat_mode = S_IXUSR;
 	effective = TRUE;
 	break;
+    }
+
+    if (SvAMAGIC(TOPs)) {
+	SV * const tmpsv = amagic_call(TOPs, 
+	    newSVpvn_flags(&opchar, 1, SVs_TEMP), 
+	    ftest_amg, 0);
+	
+	if (tmpsv) {
+	    SPAGAIN;
+	    SETs(tmpsv);
+	    RETURN;
+	}
     }
 
     if (use_access) {
