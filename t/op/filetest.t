@@ -100,13 +100,19 @@ my $over;
 {
     package OverFtest;
 
-    use overload -X => sub { $over = \@_; "-$_[1]"; };
+    use overload -X => sub { 
+        $over = [overload::StrVal($_[0]), $_[1]];
+        "-$_[1]"; 
+    };
 }
 
 my $o = bless [], "OverFtest";
+my $str = overload::StrVal($o);
 for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
+    $over = [];
     ok( my $rv = eval "-$op \$o",   "overloaded -$op succeeds" );
-    is( $over->[0], $o,             "correct object for overloaded -$op" );
+    $@ and diag( $@ );
+    is( $over->[0], $str,           "correct object for overloaded -$op" );
     is( $over->[1], $op,            "correct op for overloaded -$op" );
     is( $rv,        "-$op",         "correct return value for overloaded -$op");
 }
