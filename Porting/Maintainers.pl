@@ -660,7 +660,7 @@ package Maintainers;
                 'FILES'         => q[lib/Math/Complex.pm lib/Math/Complex.t
 				     lib/Math/Trig.pm lib/Math/Trig.t],
                 'CPAN'          => 1,
-                'UPSTREAM'      => undef,
+                'UPSTREAM'      => 'cpan',
                 },
 
 	'Memoize' =>
