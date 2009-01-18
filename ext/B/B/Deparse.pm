@@ -1603,8 +1603,10 @@ sub unop {
     my $kid;
     if ($op->flags & OPf_KIDS) {
 	$kid = $op->first;
-	if (defined prototype("CORE::$name")
-	   && prototype("CORE::$name") =~ /^;?\*/
+	my $builtinname = $name;
+	$builtinname =~ /^CORE::/ or $builtinname = "CORE::$name";
+	if (defined prototype($builtinname)
+	   && prototype($builtinname) =~ /^;?\*/
 	   && $kid->name eq "rv2gv") {
 	    $kid = $kid->first;
 	}
