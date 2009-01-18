@@ -217,5 +217,6 @@ repeat_ass	(x=
 concat		(.
 concat_ass	(.=
 smart		(~~
+ftest           (-X
 # Note: Perl_Gv_AMupdate() assumes that DESTROY is the last entry
 DESTROY		DESTROY
