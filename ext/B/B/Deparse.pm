@@ -3210,7 +3210,7 @@ sub check_proto {
     # An unbackslashed @ or % gobbles up the rest of the args
     1 while $proto =~ s/(?<!\\)([@%])[^\]]+$/$1/;
     while ($proto) {
-	$proto =~ s/^(\\?[\$\@&%*]|\\\[[\$\@&%*]+\]|;)//;
+	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;)//;
 	my $chr = $1;
 	if ($chr eq "") {
 	    return "&" if @args;
@@ -3222,7 +3222,7 @@ sub check_proto {
 	} else {
 	    $arg = shift @args;
 	    last unless $arg;
-	    if ($chr eq "\$") {
+	    if ($chr eq "\$" || $chr eq "_") {
 		if (want_scalar $arg) {
 		    push @reals, $self->deparse($arg, 6);
 		} else {
