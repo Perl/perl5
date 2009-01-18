@@ -2983,7 +2983,7 @@ PP(pp_ftrread)
     int stat_mode = S_IRUSR;
 
     bool effective = FALSE;
-    char opchar;
+    char opchar = '?';
     dSP;
 
     STACKED_FTEST_CHECK;
@@ -3090,8 +3090,19 @@ PP(pp_ftis)
     dVAR;
     I32 result;
     const int op_type = PL_op->op_type;
+    char opchar = '?';
     dSP;
     STACKED_FTEST_CHECK;
+
+    switch (op_type) {
+    case OP_FTIS:	opchar = 'e'; break;
+    case OP_FTSIZE:	opchar = 's'; break;
+    case OP_FTMTIME:	opchar = 'M'; break;
+    case OP_FTCTIME:	opchar = 'C'; break;
+    case OP_FTATIME:	opchar = 'A'; break;
+    }
+    tryAMAGICftest(opchar);
+
     result = my_stat();
     SPAGAIN;
     if (result < 0)
@@ -3128,10 +3139,12 @@ PP(pp_ftrowned)
 {
     dVAR;
     I32 result;
+    char opchar = '?';
     dSP;
 
     /* I believe that all these three are likely to be defined on most every
        system these days.  */
+    if (!SvAMAGIC(TOPs)) {
 #ifndef S_ISUID
     if(PL_op->op_type == OP_FTSUID)
 	RETPUSHNO;
@@ -3144,8 +3157,26 @@ PP(pp_ftrowned)
     if(PL_op->op_type == OP_FTSVTX)
 	RETPUSHNO;
 #endif
+    }
 
     STACKED_FTEST_CHECK;
+
+    switch (PL_op->op_type) {
+    case OP_FTROWNED:	opchar = 'O'; break;
+    case OP_FTEOWNED:	opchar = 'o'; break;
+    case OP_FTZERO:	opchar = 'z'; break;
+    case OP_FTSOCK:	opchar = 'S'; break;
+    case OP_FTCHR:	opchar = 'c'; break;
+    case OP_FTBLK:	opchar = 'b'; break;
+    case OP_FTFILE:	opchar = 'f'; break;
+    case OP_FTDIR:	opchar = 'd'; break;
+    case OP_FTPIPE:	opchar = 'p'; break;
+    case OP_FTSUID:	opchar = 'u'; break;
+    case OP_FTSGID:	opchar = 'g'; break;
+    case OP_FTSVTX:	opchar = 'k'; break;
+    }
+    tryAMAGICftest(opchar);
+
     result = my_stat();
     SPAGAIN;
     if (result < 0)
@@ -3212,8 +3243,11 @@ PP(pp_ftrowned)
 PP(pp_ftlink)
 {
     dVAR;
-    I32 result = my_lstat();
+    I32 result;
     dSP;
+
+    tryAMAGICftest('l');
+    result = my_lstat();
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
@@ -3230,6 +3264,8 @@ PP(pp_fttty)
     SV *tmpsv = NULL;
 
     STACKED_FTEST_CHECK;
+
+    tryAMAGICftest('t');
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
@@ -3279,6 +3315,8 @@ PP(pp_fttext)
     PerlIO *fp;
 
     STACKED_FTEST_CHECK;
+
+    tryAMAGICftest(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
