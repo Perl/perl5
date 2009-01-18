@@ -59,7 +59,7 @@ perl release instead, use Module::CoreList::first_release_by_date().
 
 Module::CoreList currently covers the 5.000, 5.001, 5.002, 5.003_07, 5.004,
 5.004_05, 5.005, 5.005_03, 5.005_04, 5.6.0, 5.6.1, 5.6.2, 5.7.3, 5.8.0, 5.8.1,
-5.8.2, 5.8.3, 5.8.4, 5.8.5, 5.8.6, 5.8.7, 5.8.8, 5.9.0, 5.9.1, 5.9.2, 5.9.3,
+5.8.2, 5.8.3, 5.8.4, 5.8.5, 5.8.6, 5.8.7, 5.8.8, 5.8.9, 5.9.0, 5.9.1, 5.9.2, 5.9.3,
 5.9.4, 5.9.5 and 5.10.0 releases of perl.
 
 =head1 HISTORY
@@ -74,7 +74,7 @@ Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002-2007 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002-2009 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
