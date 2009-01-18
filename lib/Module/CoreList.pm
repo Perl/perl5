@@ -9076,5 +9076,16 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     },
 );
 
+# Create aliases with trailing zeros for $] use
+
+$released{'5.000'} = $released{5};
+$released{'5.010000'} = $released{5.01};
+
+$patchlevel{'5.000'} = $patchlevel{5};
+$patchlevel{'5.010000'} = $patchlevel{5.01};
+
+$version{'5.000'} = $version{5};
+$version{'5.010000'} = $version{5.01};
+
 1;
 __END__
