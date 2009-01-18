@@ -6517,281 +6517,419 @@ char *Perl_fileify_dirspec_utf8(pTHX_ const char *dir, char *buf, int * utf8_fl)
 char *Perl_fileify_dirspec_utf8_ts(pTHX_ const char *dir, char *buf, int * utf8_fl)
 { return do_fileify_dirspec(dir,buf,1,utf8_fl); }
 
+static char * int_pathify_dirspec_simple(const char * dir, char * buf,
+    char * v_spec, int v_len, char * r_spec, int r_len,
+    char * d_spec, int d_len, char * n_spec, int n_len,
+    char * e_spec, int e_len, char * vs_spec, int vs_len) {
+
+    /* VMS specification - Try to do this the simple way */
+    if ((v_len + r_len > 0) || (d_len > 0)) {
+        int is_dir;
+
+        /* No name or extension component, already a directory */
+        if ((n_len + e_len + vs_len) == 0) {
+            strcpy(buf, dir);
+            return buf;
+        }
+
+        /* Special case, we may get [.foo]bar instead of [.foo]bar.dir */
+        /* This results from catfile() being used instead of catdir() */
+        /* So even though it should not work, we need to allow it */
+
+        /* If this is .DIR;1 then do a simple conversion */
+        is_dir = is_dir_ext(e_spec, e_len, vs_spec, vs_len);
+        if (is_dir || (e_len == 0) && (d_len > 0)) {
+             int len;
+             len = v_len + r_len + d_len - 1;
+             char dclose = d_spec[d_len - 1];
+             strncpy(buf, dir, len);
+             buf[len] = '.';
+             len++;
+             strncpy(&buf[len], n_spec, n_len);
+             len += n_len;
+             buf[len] = dclose;
+             buf[len + 1] = '\0';
+             return buf;
+        }
+
+#ifdef HAS_SYMLINK
+        else if (d_len > 0) {
+            /* In the olden days, a directory needed to have a .DIR */
+            /* extension to be a valid directory, but now it could  */
+            /* be a symbolic link */
+            int len;
+            len = v_len + r_len + d_len - 1;
+            char dclose = d_spec[d_len - 1];
+            strncpy(buf, dir, len);
+            buf[len] = '.';
+            len++;
+            strncpy(&buf[len], n_spec, n_len);
+            len += n_len;
+            if (e_len > 0) {
+                if (decc_efs_charset) {
+                    buf[len] = '^';
+                    len++;
+                    strncpy(&buf[len], e_spec, e_len);
+                    len += e_len;
+                } else {
+                    set_vaxc_errno(RMS$_DIR);
+                    set_errno(ENOTDIR);
+                    return NULL;
+                }
+            }
+            buf[len] = dclose;
+            buf[len + 1] = '\0';
+            return buf;
+        }
+#else
+        else {
+            set_vaxc_errno(RMS$_DIR);
+            set_errno(ENOTDIR);
+            return NULL;
+        }
+#endif
+    }
+    set_vaxc_errno(RMS$_DIR);
+    set_errno(ENOTDIR);
+    return NULL;
+}
+
+
+/* Internal routine to make sure or convert a directory to be in a */
+/* path specification.  No utf8 flag because it is not changed or used */
+static char *int_pathify_dirspec(const char *dir, char *buf)
+{
+    char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
+    int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
+    char * exp_spec, *ret_spec;
+    char * trndir;
+    unsigned short int trnlnm_iter_count;
+    STRLEN trnlen;
+    int need_to_lower;
+
+    if (vms_debug_fileify) {
+        if (dir == NULL)
+            fprintf(stderr, "int_pathify_dirspec: dir = NULL\n");
+        else
+            fprintf(stderr, "int_pathify_dirspec: dir = %s\n", dir);
+    }
+
+    /* We may need to lower case the result if we translated  */
+    /* a logical name or got the current working directory */
+    need_to_lower = 0;
+
+    if (!dir || !*dir) {
+      set_errno(EINVAL);
+      set_vaxc_errno(SS$_BADPARAM);
+      return NULL;
+    }
+
+    trndir = PerlMem_malloc(VMS_MAXRSS);
+    if (trndir == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+
+    /* If no directory specified use the current default */
+    if (*dir)
+        strcpy(trndir, dir);
+    else {
+        getcwd(trndir, VMS_MAXRSS - 1);
+        need_to_lower = 1;
+    }
+
+    /* now deal with bare names that could be logical names */
+    trnlnm_iter_count = 0;
+    while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
+           && simple_trnlnm(trndir, trndir, VMS_MAXRSS)) {
+        trnlnm_iter_count++; 
+        need_to_lower = 1;
+        if (trnlnm_iter_count >= PERL_LNM_MAX_ITER)
+            break;
+        trnlen = strlen(trndir);
+
+        /* Trap simple rooted lnms, and return lnm:[000000] */
+        if (!strcmp(trndir+trnlen-2,".]")) {
+            strcpy(buf, dir);
+            strcat(buf, ":[000000]");
+            PerlMem_free(trndir);
+
+            if (vms_debug_fileify) {
+                fprintf(stderr, "int_pathify_dirspec: buf = %s\n", buf);
+            }
+            return buf;
+        }
+    }
+
+    /* At this point we do not work with *dir, but the copy in  *trndir */
+
+    if (need_to_lower && !decc_efs_case_preserve) {
+        /* Legacy mode, lower case the returned value */
+        __mystrtolower(trndir);
+    }
+
+
+    /* Some special cases, '..', '.' */
+    sts = 0;
+    if ((trndir[0] == '.') && ((trndir[1] == '.') || (trndir[1] == '\0'))) {
+       /* Force UNIX filespec */
+       sts = 1;
+
+    } else {
+        /* Is this Unix or VMS format? */
+        sts = vms_split_path(trndir, &v_spec, &v_len, &r_spec, &r_len,
+                             &d_spec, &d_len, &n_spec, &n_len, &e_spec,
+                             &e_len, &vs_spec, &vs_len);
+        if (sts == 0) {
+
+            /* Just a filename? */
+            if ((v_len + r_len + d_len) == 0) {
+
+                /* Now we have a problem, this could be Unix or VMS */
+                /* We have to guess.  .DIR usually means VMS */
+
+                /* In UNIX report mode, the .DIR extension is removed */
+                /* if one shows up, it is for a non-directory or a directory */
+                /* in EFS charset mode */
+
+                /* So if we are in Unix report mode, assume that this */
+                /* is a relative Unix directory specification */
+
+                sts = 1;
+                if (!decc_filename_unix_report && decc_efs_charset) {
+                    int is_dir;
+                    is_dir = is_dir_ext(e_spec, e_len, vs_spec, vs_len);
+
+                    if (is_dir) {
+                        /* Traditional mode, assume .DIR is directory */
+                        buf[0] = '[';
+                        buf[1] = '.';
+                        strncpy(&buf[2], n_spec, n_len);
+                        buf[n_len + 2] = ']';
+                        buf[n_len + 3] = '\0';
+                        PerlMem_free(trndir);
+                        if (vms_debug_fileify) {
+                            fprintf(stderr,
+                                    "int_pathify_dirspec: buf = %s\n",
+                                    buf);
+                        }
+                        return buf;
+                    }
+                }
+            }
+        }
+    }
+    if (sts == 0) {
+        ret_spec = int_pathify_dirspec_simple(trndir, buf,
+            v_spec, v_len, r_spec, r_len,
+            d_spec, d_len, n_spec, n_len,
+            e_spec, e_len, vs_spec, vs_len);
+
+        if (ret_spec != NULL) {
+            PerlMem_free(trndir);
+            if (vms_debug_fileify) {
+                fprintf(stderr,
+                        "int_pathify_dirspec: ret_spec = %s\n", ret_spec);
+            }
+            return ret_spec;
+        }
+
+        /* Simple way did not work, which means that a logical name */
+        /* was present for the directory specification.             */
+        /* Need to use an rmsexpand variant to decode it completely */
+        exp_spec = PerlMem_malloc(VMS_MAXRSS);
+        if (exp_spec == NULL)
+            _ckvmssts_noperl(SS$_INSFMEM);
+
+        ret_spec = int_rmsexpand_vms(trndir, exp_spec, PERL_RMSEXPAND_M_LONG);
+        if (ret_spec != NULL) {
+            sts = vms_split_path(exp_spec, &v_spec, &v_len,
+                                 &r_spec, &r_len, &d_spec, &d_len,
+                                 &n_spec, &n_len, &e_spec,
+                                 &e_len, &vs_spec, &vs_len);
+            if (sts == 0) {
+                ret_spec = int_pathify_dirspec_simple(
+                    exp_spec, buf, v_spec, v_len, r_spec, r_len,
+                    d_spec, d_len, n_spec, n_len,
+                    e_spec, e_len, vs_spec, vs_len);
+
+                if ((ret_spec != NULL) && (!decc_efs_case_preserve)) {
+                    /* Legacy mode, lower case the returned value */
+                    __mystrtolower(ret_spec);
+                }
+            } else {
+                set_vaxc_errno(RMS$_DIR);
+                set_errno(ENOTDIR);
+                ret_spec = NULL;
+            }
+        }
+        PerlMem_free(exp_spec);
+        PerlMem_free(trndir);
+        if (vms_debug_fileify) {
+            if (ret_spec == NULL)
+                fprintf(stderr, "int_pathify_dirspec: ret_spec = NULL\n");
+            else
+                fprintf(stderr,
+                        "int_pathify_dirspec: ret_spec = %s\n", ret_spec);
+        }
+        return ret_spec;
+
+    } else {
+        /* Unix specification, Could be trivial conversion */
+        STRLEN dir_len;
+        dir_len = strlen(trndir);
+
+        /* If the extended file character set is in effect */
+        /* then pathify is simple */
+
+        if (!decc_efs_charset) {
+            /* Have to deal with traiing '.dir' or extra '.' */
+            /* that should not be there in legacy mode, but is */
+
+            char * lastdot;
+            char * lastslash;
+            int is_dir;
+
+            lastslash = strrchr(trndir, '/');
+            if (lastslash == NULL)
+                lastslash = trndir;
+            else
+                lastslash++;
+
+            lastdot = NULL;
+
+            /* '..' or '.' are valid directory components */
+            is_dir = 0;
+            if (lastslash[0] == '.') {
+                if (lastslash[1] == '\0') {
+                   is_dir = 1;
+                } else if (lastslash[1] == '.') {
+                    if (lastslash[2] == '\0') {
+                        is_dir = 1;
+                    } else {
+                        /* And finally allow '...' */
+                        if ((lastslash[2] == '.') && (lastslash[3] == '\0')) {
+                            is_dir = 1;
+                        }
+                    }
+                }
+            }
+
+            if (!is_dir) {
+               lastdot = strrchr(lastslash, '.');
+            }
+            if (lastdot != NULL) {
+                STRLEN e_len;
+
+                /* '.dir' is discarded, and any other '.' is invalid */
+                e_len = strlen(lastdot);
+
+                is_dir = is_dir_ext(lastdot, e_len, NULL, 0);
+
+                if (is_dir) {
+                    dir_len = dir_len - 4;
+
+                }
+            }
+        }
+
+        strcpy(buf, trndir);
+        if (buf[dir_len - 1] != '/') {
+            buf[dir_len] = '/';
+            buf[dir_len + 1] = '\0';
+        }
+
+        /* Under ODS-2 rules, '.' becomes '_', so fix it up */
+        if (!decc_efs_charset) {
+             int dir_start = 0;
+             char * str = buf;
+             if (str[0] == '.') {
+                 char * dots = str;
+                 int cnt = 1;
+                 while ((dots[cnt] == '.') && (cnt < 3))
+                     cnt++;
+                 if (cnt <= 3) {
+                     if ((dots[cnt] == '\0') || (dots[cnt] == '/')) {
+                         dir_start = 1;
+                         str += cnt;
+                     }
+                 }
+             }
+             for (; *str; ++str) {
+                 while (*str == '/') {
+                     dir_start = 1;
+                     *str++;
+                 }
+                 if (dir_start) {
+
+                     /* Have to skip up to three dots which could be */
+                     /* directories, 3 dots being a VMS extension for Perl */
+                     char * dots = str;
+                     int cnt = 0;
+                     while ((dots[cnt] == '.') && (cnt < 3)) {
+                         cnt++;
+                     }
+                     if (dots[cnt] == '\0')
+                         break;
+                     if ((cnt > 1) && (dots[cnt] != '/')) {
+                         dir_start = 0;
+                     } else {
+                         str += cnt;
+                     }
+
+                     /* too many dots? */
+                     if ((cnt == 0) || (cnt > 3)) {
+                         dir_start = 0;
+                     }
+                 }
+                 if (!dir_start && (*str == '.')) {
+                     *str = '_';
+                 }                 
+             }
+        }
+        PerlMem_free(trndir);
+        ret_spec = buf;
+        if (vms_debug_fileify) {
+            if (ret_spec == NULL)
+                fprintf(stderr, "int_pathify_dirspec: ret_spec = NULL\n");
+            else
+                fprintf(stderr,
+                        "int_pathify_dirspec: ret_spec = %s\n", ret_spec);
+        }
+        return ret_spec;
+    }
+}
+
 /*{{{ char *pathify_dirspec[_ts](char *path, char *buf)*/
 static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts, int * utf8_fl)
 {
     static char __pathify_retbuf[VMS_MAXRSS];
-    unsigned long int retlen;
-    char *retpath, *cp1, *cp2, *trndir;
-    unsigned short int trnlnm_iter_count;
-    STRLEN trnlen;
-    int sts;
-    if (utf8_fl != NULL)
-	*utf8_fl = 0;
-
-    if (!dir || !*dir) {
-      set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
+    char * pathified, *ret_spec, *ret_buf;
+    
+    pathified = NULL;
+    ret_buf = buf;
+    if (ret_buf == NULL) {
+        if (ts) {
+            Newx(pathified, VMS_MAXRSS, char);
+            if (pathified == NULL)
+                _ckvmssts(SS$_INSFMEM);
+            ret_buf = pathified;
+        } else {
+            ret_buf = __pathify_retbuf;
+        }
     }
 
-    trndir = PerlMem_malloc(VMS_MAXRSS);
-    if (trndir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-    if (*dir) strcpy(trndir,dir);
-    else getcwd(trndir,VMS_MAXRSS - 1);
+    ret_spec = int_pathify_dirspec(dir, ret_buf);
 
-    trnlnm_iter_count = 0;
-    while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
-	   && simple_trnlnm(trndir,trndir,VMS_MAXRSS-1)) {
-      trnlnm_iter_count++; 
-      if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
-      trnlen = strlen(trndir);
-
-      /* Trap simple rooted lnms, and return lnm:[000000] */
-      if (!strcmp(trndir+trnlen-2,".]")) {
-        if (buf) retpath = buf;
-        else if (ts) Newx(retpath,strlen(dir)+10,char);
-        else retpath = __pathify_retbuf;
-        strcpy(retpath,dir);
-        strcat(retpath,":[000000]");
-	PerlMem_free(trndir);
-        return retpath;
-      }
+    if (ret_spec == NULL) {
+       /* Cleanup on isle 5, if this is thread specific we need to deallocate */
+       if (pathified)
+           Safefree(pathified);
     }
 
-    /* At this point we do not work with *dir, but the copy in
-     * *trndir that is modifiable.
-     */
+    return ret_spec;
 
-    if (!strpbrk(trndir,"]:>")) { /* Unix-style path or plain name */
-      if (*trndir == '.' && (*(trndir+1) == '\0' ||
-                          (*(trndir+1) == '.' && *(trndir+2) == '\0')))
-        retlen = 2 + (*(trndir+1) != '\0');
-      else {
-        if ( !(cp1 = strrchr(trndir,'/')) &&
-             !(cp1 = strrchr(trndir,']')) &&
-             !(cp1 = strrchr(trndir,'>')) ) cp1 = trndir;
-        if ((cp2 = strchr(cp1,'.')) != NULL &&
-            (*(cp2-1) != '/' ||                /* Trailing '.', '..', */
-             !(*(cp2+1) == '\0' ||             /* or '...' are dirs.  */
-              (*(cp2+1) == '.' && *(cp2+2) == '\0') ||
-              (*(cp2+1) == '.' && *(cp2+2) == '.' && *(cp2+3) == '\0')))) {
-          int ver; char *cp3;
-
-	  /* For EFS or ODS-5 look for the last dot */
-	  if (decc_efs_charset) {
-	    cp2 = strrchr(cp1,'.');
-	  }
-	  if (vms_process_case_tolerant) {
-              if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-		PerlMem_free(trndir);
-                set_errno(ENOTDIR);
-                set_vaxc_errno(RMS$_DIR);
-                return NULL;
-              }
-	  }
-	  else {
-              if (!*(cp2+1) || *(cp2+1) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || *(cp2+2) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || *(cp2+3) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-		PerlMem_free(trndir);
-                set_errno(ENOTDIR);
-                set_vaxc_errno(RMS$_DIR);
-                return NULL;
-              }
-	  }
-          retlen = cp2 - trndir + 1;
-        }
-        else {  /* No file type present.  Treat the filename as a directory. */
-          retlen = strlen(trndir) + 1;
-        }
-      }
-      if (buf) retpath = buf;
-      else if (ts) Newx(retpath,retlen+1,char);
-      else retpath = __pathify_retbuf;
-      strncpy(retpath, trndir, retlen-1);
-      if (retpath[retlen-2] != '/') { /* If the path doesn't already end */
-        retpath[retlen-1] = '/';      /* with '/', add it. */
-        retpath[retlen] = '\0';
-      }
-      else retpath[retlen-1] = '\0';
-    }
-    else {  /* VMS-style directory spec */
-      char *esa, *esal, *cp;
-      char *my_esa;
-      int my_esa_len;
-      unsigned long int sts, cmplen, haslower;
-      struct FAB dirfab = cc$rms_fab;
-      int dirlen;
-      rms_setup_nam(savnam);
-      rms_setup_nam(dirnam);
-
-      /* If we've got an explicit filename, we can just shuffle the string. */
-      if ( ( (cp1 = strrchr(trndir,']')) != NULL ||
-             (cp1 = strrchr(trndir,'>')) != NULL     ) && *(cp1+1)) {
-        if ((cp2 = strchr(cp1,'.')) != NULL) {
-          int ver; char *cp3;
-	  if (vms_process_case_tolerant) {
-              if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-	       PerlMem_free(trndir);
-               set_errno(ENOTDIR);
-               set_vaxc_errno(RMS$_DIR);
-               return NULL;
-             }
-	  }
-	  else {
-              if (!*(cp2+1) || *(cp2+1) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || *(cp2+2) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || *(cp2+3) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-	       PerlMem_free(trndir);
-               set_errno(ENOTDIR);
-               set_vaxc_errno(RMS$_DIR);
-               return NULL;
-             }
-	  }
-        }
-        else {  /* No file type, so just draw name into directory part */
-          for (cp2 = cp1; *cp2; cp2++) ;
-        }
-        *cp2 = *cp1;
-        *(cp2+1) = '\0';  /* OK; trndir is guaranteed to be long enough */
-        *cp1 = '.';
-        /* We've now got a VMS 'path'; fall through */
-      }
-
-      dirlen = strlen(trndir);
-      if (trndir[dirlen-1] == ']' ||
-          trndir[dirlen-1] == '>' ||
-          trndir[dirlen-1] == ':') { /* It's already a VMS 'path' */
-        if (buf) retpath = buf;
-        else if (ts) Newx(retpath,strlen(trndir)+1,char);
-        else retpath = __pathify_retbuf;
-        strcpy(retpath,trndir);
-	PerlMem_free(trndir);
-        return retpath;
-      }
-      rms_set_fna(dirfab, dirnam, trndir, dirlen);
-      esa = PerlMem_malloc(VMS_MAXRSS);
-      if (esa == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-      esal = NULL;
-#if !defined(__VAX) && defined(NAML$C_MAXRSS)
-      esal = PerlMem_malloc(VMS_MAXRSS);
-      if (esal == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-#endif
-      rms_set_dna(dirfab, dirnam, ".DIR;1", 6);
-      rms_bind_fab_nam(dirfab, dirnam);
-      rms_set_esal(dirnam, esa, NAM$C_MAXRSS, esal, VMS_MAXRSS-1);
-#ifdef NAM$M_NO_SHORT_UPCASE
-      if (decc_efs_case_preserve)
-	  rms_set_nam_nop(dirnam, NAM$M_NO_SHORT_UPCASE);
-#endif
-
-      for (cp = trndir; *cp; cp++)
-        if (islower(*cp)) { haslower = 1; break; }
-
-      if (!(sts = (sys$parse(&dirfab)& STS$K_SUCCESS))) {
-        if ((dirfab.fab$l_sts == RMS$_DIR) || (dirfab.fab$l_sts == RMS$_DNF)) {
-	  rms_set_nam_nop(dirnam, NAM$M_SYNCHK);
-          sts = sys$parse(&dirfab) & STS$K_SUCCESS;
-        }
-        if (!sts) {
-	  PerlMem_free(trndir);
-	  PerlMem_free(esa);
-	  if (esal != NULL)
-	    PerlMem_free(esal);
-          set_errno(EVMSERR);
-          set_vaxc_errno(dirfab.fab$l_sts);
-          return NULL;
-        }
-      }
-      else {
-        savnam = dirnam;
-	/* Does the file really exist? */
-        if (!(sys$search(&dirfab)&STS$K_SUCCESS)) {
-          if (dirfab.fab$l_sts != RMS$_FNF) {
-	    int sts1;
-	    sts1 = rms_free_search_context(&dirfab);
-	    PerlMem_free(trndir);
-	    PerlMem_free(esa);
-	    if (esal != NULL)
-		PerlMem_free(esal);
-            set_errno(EVMSERR);
-            set_vaxc_errno(dirfab.fab$l_sts);
-            return NULL;
-          }
-          dirnam = savnam; /* No; just work with potential name */
-        }
-      }
-      if (rms_is_nam_fnb(dirnam, NAM$M_EXP_TYPE)) {  /* Was type specified? */
-        /* Yep; check version while we're at it, if it's there. */
-        cmplen = rms_is_nam_fnb(dirnam, NAM$M_EXP_VER) ? 6 : 4;
-        if (strncmp(rms_nam_typel(dirnam),".DIR;1",cmplen)) {
-	  int sts2;
-          /* Something other than .DIR[;1].  Bzzt. */
-	  sts2 = rms_free_search_context(&dirfab);
-	  PerlMem_free(trndir);
-	  PerlMem_free(esa);
-	  if (esal != NULL)
-	     PerlMem_free(esal);
-          set_errno(ENOTDIR);
-          set_vaxc_errno(RMS$_DIR);
-          return NULL;
-        }
-      }
-      /* Make sure we are using the right buffer */
-      if (esal != NULL) {
-	/* We only need one, clean up the other */
-	my_esa = esal;
-	my_esa_len = rms_nam_esll(dirnam);
-      } else {
-	my_esa = esa;
-        my_esa_len = rms_nam_esl(dirnam);
-      }
-
-      /* Null terminate the buffer */
-      my_esa[my_esa_len] = '\0';
-
-      /* OK, the type was fine.  Now pull any file name into the
-         directory path. */
-      if ((cp1 = strrchr(my_esa,']'))) *(rms_nam_typel(dirnam)) = ']';
-      else {
-        cp1 = strrchr(my_esa,'>');
-        *(rms_nam_typel(dirnam)) = '>';
-      }
-      *cp1 = '.';
-      *(rms_nam_typel(dirnam) + 1) = '\0';
-      retlen = (rms_nam_typel(dirnam)) - my_esa + 2;
-      if (buf) retpath = buf;
-      else if (ts) Newx(retpath,retlen,char);
-      else retpath = __pathify_retbuf;
-      strcpy(retpath,my_esa);
-      PerlMem_free(esa);
-      if (esal != NULL)
-	  PerlMem_free(esal);
-      sts = rms_free_search_context(&dirfab);
-      /* $PARSE may have upcased filespec, so convert output to lower
-       * case if input contained any lowercase characters. */
-      if (haslower && !decc_efs_case_preserve) __mystrtolower(retpath);
-    }
-
-    PerlMem_free(trndir);
-    return retpath;
 }  /* end of do_pathify_dirspec() */
-/*}}}*/
+
+
 /* External entry points */
 char *Perl_pathify_dirspec(pTHX_ const char *dir, char *buf)
 { return do_pathify_dirspec(dir,buf,0,NULL); }
@@ -8766,7 +8904,7 @@ static char *mp_do_tovmspath(pTHX_ const char *path, char *buf, int ts, int * ut
   if (path == NULL) return NULL;
   pathified = PerlMem_malloc(VMS_MAXRSS);
   if (pathified == NULL) _ckvmssts(SS$_INSFMEM);
-  if (do_pathify_dirspec(path,pathified,0,NULL) == NULL) {
+  if (int_pathify_dirspec(path, pathified) == NULL) {
     PerlMem_free(pathified);
     return NULL;
   }
@@ -8819,7 +8957,7 @@ static char *mp_do_tounixpath(pTHX_ const char *path, char *buf, int ts, int * u
   if (path == NULL) return NULL;
   pathified = PerlMem_malloc(VMS_MAXRSS);
   if (pathified == NULL) _ckvmssts(SS$_INSFMEM);
-  if (do_pathify_dirspec(path,pathified,0,NULL) == NULL) {
+  if (int_pathify_dirspec(path, pathified) == NULL) {
     PerlMem_free(pathified);
     return NULL;
   }
@@ -13878,8 +14016,8 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 
 		    if (sts == 0) {
 		        /* Now need to pathify it.
-		        char *tdir = do_pathify_dirspec(vms_dir_name,
-							outbuf, utf8_fl);
+		        char *tdir = int_pathify_dirspec(vms_dir_name,
+							 outbuf);
 
 			/* And now add the original filespec to it */
 			if (file_name != NULL) {
