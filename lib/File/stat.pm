@@ -3,6 +3,7 @@ use 5.006;
 
 use strict;
 use warnings;
+use Carp;
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
@@ -20,6 +21,123 @@ BEGIN {
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 }
 use vars @EXPORT_OK;
+
+use Fcntl qw(S_IRUSR S_IWUSR S_IXUSR);
+
+BEGIN {
+    # These constants will croak on use if the platform doesn't define
+    # them. It's important to avoid inflicting that on the user.
+    no strict 'refs';
+    for (qw(suid sgid svtx)) {
+        my $val = eval { &{"Fcntl::S_I\U$_"} };
+        *{"_$_"} = defined $val ? sub { $_[0] & $val ? 1 : "" } : sub { "" };
+    }
+    for (qw(SOCK CHR BLK REG DIR FIFO LNK)) {
+        *{"S_IS$_"} = defined eval { &{"Fcntl::S_IF$_"} }
+            ? \&{"Fcntl::S_IS$_"} : sub { "" };
+    }
+}
+
+# from doio.c
+sub _ingroup {
+
+    $^O eq "MacOS"  and return 1;
+    
+    my ($gid, $eff)   = @_;
+
+    # I am assuming that since VMS doesn't have getgroups(2), $) will
+    # always only contain a single entry.
+    $^O eq "VMS"    and return $_[0] == $);
+
+    my ($egid, @supp) = split " ", $);
+    my ($rgid)        = split " ", $(;
+
+    $gid == ($eff ? $egid : $rgid)  and return 1;
+    grep $gid == $_, @supp          and return 1;
+
+    return "";
+}
+
+# VMS uses the Unix version of the routine, even though this is very
+# suboptimal. VMS has a permissions structure that doesn't really fit
+# into struct stat, and unlike on Win32 the normal -X operators respect
+# that, but unfortunately by the time we get here we've already lost the
+# information we need. It looks to me as though if we were to preserve
+# the st_devnam entry of vmsish.h's fake struct stat (which actually
+# holds the filename) it might be possible to do this right, but both
+# getting that value out of the struct (perl's stat doesn't return it)
+# and interpreting it later would require this module to have an XS
+# component (at which point we might as well just call Perl_cando and
+# have done with it).
+    
+if (grep $^O eq $_, qw/os2 MSWin32 dos/) {
+
+    # from doio.c
+    *stat_cando = sub { ($_[0] & $_[2]->mode) ? 1 : "" };
+}
+else {
+
+    # from doio.c
+    *cando = sub {
+        my ($s, $mode, $eff) = @_;
+        my $uid = $eff ? $> : $<;
+
+        $uid == 0                   and return 1;
+
+        # This code basically assumes that the rwx bits of the mode are
+        # the 0777 bits, but so does Perl_cando.
+        if ($s->uid == $uid) {
+            $s->mode & $mode        and return 1;
+        }
+        elsif (_ingroup($s->gid, $eff)) {
+            $s->mode & ($mode >> 3) and return 1;
+        }
+        else {
+            $s->mode & ($mode >> 6) and return 1;
+        }
+        return "";
+    };
+}
+
+my %op = (
+    r => sub { cando($_[0], S_IRUSR, 1) },
+    w => sub { cando($_[0], S_IWUSR, 1) },
+    x => sub { cando($_[0], S_IXUSR, 1) },
+    o => sub { $_[0]->uid == $>         },
+
+    R => sub { cando($_[0], S_IRUSR, 0) },
+    W => sub { cando($_[0], S_IWUSR, 0) },
+    X => sub { cando($_[0], S_IXUSR, 0) },
+    O => sub { $_[0]->uid == $<         },
+
+    e => sub { 1 },
+    z => sub { $_[0]->size == 0     },
+    s => sub { $_[0]->size          },
+
+    f => sub { S_ISREG ($_[0]->mode) },
+    d => sub { S_ISDIR ($_[0]->mode) },
+    l => sub { S_ISLNK ($_[0]->mode) },
+    p => sub { S_ISFIFO($_[0]->mode) },
+    S => sub { S_ISSOCK($_[0]->mode) },
+    b => sub { S_ISBLK ($_[0]->mode) },
+    c => sub { S_ISCHR ($_[0]->mode) },
+
+    u => sub { _suid($_[0]->mode) },
+    g => sub { _sgid($_[0]->mode) },
+    k => sub { _svtx($_[0]->mode) },
+);
+
+use overload 
+    fallback => 1,
+    -X => sub {
+        my ($s, $op) = @_;
+        if ($op{$op}) {
+            return $op{$op}->($_[0]);
+        }
+        else {
+            croak "-$op is not implemented on a File::stat object";
+        }
+    };
 
 # Class::Struct forbids use of @ISA
 sub import { goto &Exporter::import }
@@ -47,7 +165,7 @@ sub lstat ($)  { populate(CORE::lstat(shift)) }
 sub stat ($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
-    return $st if $st;
+    return $st if defined $st;
 	my $fh;
     {
 		local $!;
