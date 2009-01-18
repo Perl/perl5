@@ -4796,7 +4796,8 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, register SV *const ssv, const I32 flags
 		    spv = SvPV_const(csv, slen);
 		}
 		else
-		    sv_utf8_upgrade_nomg(dsv);
+		    /* Leave enough space for the cat that's about to happen */
+		    sv_utf8_upgrade_flags_grow(dsv, 0, slen);
 	    }
 	    sv_catpvn_nomg(dsv, spv, slen);
 	}

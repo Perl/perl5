@@ -2306,9 +2306,10 @@ S_scan_const(pTHX_ char *start)
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
-			sv_utf8_upgrade(sv);
 			/* See Note on sizing above.  */
-			SvGROW(sv, SvCUR(sv) + UNISKIP(uv) + (STRLEN)(send - s) + 1);
+			sv_utf8_upgrade_flags_grow(sv,
+					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+					UNISKIP(uv) + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
                     }
@@ -2396,9 +2397,10 @@ S_scan_const(pTHX_ char *start)
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
-			sv_utf8_upgrade(sv);
 			/* See Note on sizing above.  */
-			SvGROW(sv, SvCUR(sv) + len + (STRLEN)(send - s) + 1);
+			sv_utf8_upgrade_flags_grow(sv,
+					    SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+					    len + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
 		    } else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
@@ -2490,10 +2492,10 @@ S_scan_const(pTHX_ char *start)
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
 		*d = '\0';
-		sv_utf8_upgrade(sv);
-
 		/* See Note on sizing above.  */
-		SvGROW(sv, SvCUR(sv) + need + (STRLEN)(send - s) + 1);
+		sv_utf8_upgrade_flags_grow(sv,
+					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+					need + (STRLEN)(send - s) + 1);
 		d = SvPVX(sv) + SvCUR(sv);
 		has_utf8 = TRUE;
 	    } else if (need > len) {

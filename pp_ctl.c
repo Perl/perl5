@@ -511,8 +511,7 @@ PP(pp_formline)
 	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
-		sv_utf8_upgrade(PL_formtarget);
-		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		sv_utf8_upgrade_flags_grow(PL_formtarget, SV_GMAGIC, fudge + 1);
 		t = SvEND(PL_formtarget);
 		targ_is_utf8 = TRUE;
 	    }
@@ -695,8 +694,8 @@ PP(pp_formline)
 		    if (!targ_is_utf8) {
 			SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 			*t = '\0';
-			sv_utf8_upgrade(PL_formtarget);
-			SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+			sv_utf8_upgrade_flags_grow(PL_formtarget, SV_GMAGIC,
+								    fudge + 1);
 			t = SvEND(PL_formtarget);
 			targ_is_utf8 = TRUE;
 		    }
@@ -807,7 +806,7 @@ PP(pp_formline)
 				      t - SvPVX_const(PL_formtarget));
 			    targ_is_utf8 = TRUE;
 			    /* Don't need get magic.  */
-			    sv_utf8_upgrade_flags(PL_formtarget, 0);
+			    sv_utf8_upgrade_nomg(PL_formtarget);
 			} else {
 			    SvCUR_set(PL_formtarget,
 				      t - SvPVX_const(PL_formtarget));
