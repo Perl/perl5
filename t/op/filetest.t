@@ -95,3 +95,18 @@ unlink $tempfile;
 ok( -f _ );
 sub _ { "this is not a file name" }
 ok( -f _ );
+
+my $over;
+{
+    package OverFtest;
+
+    use overload -X => sub { $over = \@_; "-$_[1]"; };
+}
+
+my $o = bless [], "OverFtest";
+for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
+    ok( my $rv = eval "-$op \$o",   "overloaded -$op succeeds" );
+    is( $over->[0], $o,             "correct object for overloaded -$op" );
+    is( $over->[1], $op,            "correct op for overloaded -$op" );
+    is( $rv,        "-$op",         "correct return value for overloaded -$op");
+}
