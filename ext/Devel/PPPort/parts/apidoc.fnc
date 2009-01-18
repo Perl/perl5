@@ -302,7 +302,7 @@ mn|GV *|PL_DBsub
 mn|GV*|PL_last_in_gv
 mn|SV *|PL_DBsingle
 mn|SV *|PL_DBtrace
-mn|GV*|PL_ofsgv
+mn|SV*|PL_ofs_sv
 mn|SV*|PL_rs
 ms||djSP
 m|STRLEN|PAD_COMPNAME_GEN|PADOFFSET po

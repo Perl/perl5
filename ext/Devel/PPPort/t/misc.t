@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (33) {
+  if (38) {
     load();
-    plan(tests => 33);
+    plan(tests => 38);
   }
 }
 
@@ -68,6 +68,15 @@ else {
   ok(1);
   ok(1);
 }
+
+my @r = &Devel::PPPort::DEFSV_modify();
+
+ok(@r == 3);
+ok($r[0], 'Fred');
+ok($r[1], 'DEFSV');
+ok($r[2], 'Fred');
+
+ok(&Devel::PPPort::DEFSV(), "Fred");
 
 eval { 1 };
 ok(!&Devel::PPPort::ERRSV());

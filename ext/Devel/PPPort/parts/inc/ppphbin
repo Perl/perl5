@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 48 $
+##  $Revision: 50 $
 ##  $Author: mhx $
-##  $Date: 2008/10/12 19:02:39 +0200 $
+##  $Date: 2009/01/18 14:10:54 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2008, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2009, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -791,7 +791,7 @@ sub strip
 if (\@ARGV && \$ARGV[0] eq '--unstrip') {
   eval { require Devel::PPPort };
   \$@ and die "Cannot require Devel::PPPort, please install.\\n";
-  if (\$Devel::PPPort::VERSION < $VERSION) {
+  if (eval \$Devel::PPPort::VERSION < $VERSION) {
     die "$0 was originally generated with Devel::PPPort $VERSION.\\n"
       . "Your Devel::PPPort is only version \$Devel::PPPort::VERSION.\\n"
       . "Please install a newer version, or --unstrip will not work.\\n";

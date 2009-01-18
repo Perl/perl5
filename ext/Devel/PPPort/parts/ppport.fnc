@@ -4,13 +4,13 @@
 :
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
-:  $Revision: 2 $
+:  $Revision: 3 $
 :  $Author: mhx $
-:  $Date: 2008/01/04 10:47:39 +0100 $
+:  $Date: 2009/01/18 14:10:51 +0100 $
 :
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
-:  Version 3.x, Copyright (C) 2004-2008, Marcus Holland-Moritz.
+:  Version 3.x, Copyright (C) 2004-2009, Marcus Holland-Moritz.
 :  Version 2.x, Copyright (C) 2001, Paul Marquess.
 :  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 :

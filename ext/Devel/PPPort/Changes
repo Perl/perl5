@@ -1,3 +1,9 @@
+3.15 - 2009-01-18
+
+    * added support for the following API
+        DEFSV_set
+    * fix --unstrip for development versions
+
 3.14_05 - 2008-10-31
 
     * fix stupid bugs in pv_pretty tests (only the
