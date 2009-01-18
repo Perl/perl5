@@ -3048,17 +3048,7 @@ PP(pp_ftrread)
 	break;
     }
 
-    if (SvAMAGIC(TOPs)) {
-	SV * const tmpsv = amagic_call(TOPs, 
-	    newSVpvn_flags(&opchar, 1, SVs_TEMP), 
-	    ftest_amg, 0);
-	
-	if (tmpsv) {
-	    SPAGAIN;
-	    SETs(tmpsv);
-	    RETURN;
-	}
-    }
+    tryAMAGICftest(opchar);
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)

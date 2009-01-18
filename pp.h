@@ -471,6 +471,22 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define tryAMAGICunDEREF_var(meth_enum) \
 	tryAMAGICunW_var(meth_enum,setAGAIN,0,(void)0)
 
+#define tryAMAGICftest(chr)			    \
+    STMT_START {				    \
+	if (SvAMAGIC(TOPs)) {			    \
+	    SV * const tmpsv = amagic_call(TOPs,    \
+		newSVpvn_flags(&chr, 1, SVs_TEMP),  \
+		ftest_amg, 0);			    \
+						    \
+	    if (tmpsv) {			    \
+		SPAGAIN;			    \
+		SETs(tmpsv);			    \
+		RETURN;				    \
+	    }					    \
+	}					    \
+    } STMT_END
+
+
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\
 		if (opASSIGN || (SvFLAGS(TARG) & SVs_PADMY))		\
