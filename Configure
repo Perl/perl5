@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Dec 25 12:54:36 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Jan 19 16:46:57 CET 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6366,6 +6366,7 @@ eval $setvar
 $rm -f reflect flect
 
 : now see if they want to do setuid emulation
+if $test $patchlevel -lt 11; then
 echo " "
 val="$undef"
 case "$d_suidsafe" in
@@ -6397,6 +6398,20 @@ EOM
 esac
 set d_dosuid
 eval $setvar
+else
+    case "$d_dosuid" in
+	"$define")
+	cat >&4 <<EOH
+
+SUID emulation has been removed for 5.12
+Please re-run Configure without -Dd_dosuid
+
+EOH
+	exit 1;
+	;;
+    esac
+    d_dosuid=undef
+fi
 
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "
