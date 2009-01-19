@@ -477,7 +477,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    const char tmpchr = (chr);			\
 	    SV * const tmpsv = amagic_call(TOPs,	\
 		newSVpvn_flags(&tmpchr, 1, SVs_TEMP),	\
-		ftest_amg, 0);				\
+		ftest_amg, AMGf_unary);			\
 							\
 	    if (tmpsv) {				\
 		SPAGAIN;				\
