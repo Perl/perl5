@@ -764,7 +764,7 @@ pipeline.
 
 =item Can't fork, trying again in 5 seconds
 
-(W) A fork in a piped open failed with EAGAIN and will be retried
+(W pipe) A fork in a piped open failed with EAGAIN and will be retried
 after five seconds.
 
 =item Can't get filespec - stale stat buffer?
