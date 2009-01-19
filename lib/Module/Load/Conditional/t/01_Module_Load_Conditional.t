@@ -49,7 +49,17 @@ use_ok( 'Module::Load::Conditional' );
     ok( $rv->{dir},         q[  Found directory information] );
     
     {   my $dir = File::Spec->canonpath( $rv->{dir} );
-        my $dir_re = qr/^\Q$dir\E/i;
+
+        ### special rules apply on VMS, as always...
+        if (ON_VMS) {
+            ### Need path syntax for VMS compares.
+            $dir = VMS::Filespec::pathify($dir);
+            ### Remove the trailing VMS specific directory delimiter
+            $dir =~ s/\]//;
+        }    
+    
+        ### quote for Win32 paths, use | to avoid slash confusion
+        my $dir_re = qr|^\Q$dir\E|i;
         like( File::Spec->canonpath( $rv->{file} ), $dir_re,
                             q[      Dir subset of file path] );
     }
