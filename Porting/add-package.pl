@@ -34,7 +34,9 @@ if ( $NoBranch ) {
     my $RepoCopy = "$Repo-$BranchName";
     print "Copying repository to $RepoCopy ..." if $Verbose;
     
-    system( "cp --archive -f $Repo $RepoCopy" )
+    ### --archive == -dPpR, but --archive is not portable, and neither
+    ### is -d, so settling for -PpR
+    system( "cp -PpR -f $Repo $RepoCopy" )
         and die "Copying master repo to $RepoCopy failed: $?";
 
     ### Going forward, use the copy in place of the original repo
