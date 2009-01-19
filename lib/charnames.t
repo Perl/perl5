@@ -15,7 +15,7 @@ require File::Spec;
 
 $| = 1;
 
-print "1..78\n";
+print "1..79\n";
 
 use charnames ':full';
 
@@ -355,6 +355,10 @@ if ($@) {
     print "not " unless $evaltry eq "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}";
     print "ok 78\n";
 }
+
+# Verify that db includes the normative NameAliases.txt names
+print "not " unless "\N{U+1D0C5}" eq "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}";
+print "ok 79\n";
 
 __END__
 # unsupported pragma
