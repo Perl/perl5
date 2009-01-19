@@ -1,6 +1,6 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
 #
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
 #     Russ Allbery <rra@stanford.edu>
 # Substantial contributions by Sean Burke <sburke@cpan.org>
 #
@@ -36,7 +36,7 @@ use POSIX qw(strftime);
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.21';
+$VERSION = '2.22';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -1718,7 +1718,7 @@ mine).
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
 Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it

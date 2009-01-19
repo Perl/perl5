@@ -2,7 +2,7 @@
 #
 # text.t -- Additional specialized tests for Pod::Text.
 #
-# Copyright 2002, 2004, 2006, 2007, 2008 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2007, 2008, 2009 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -16,7 +16,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..5\n";
+    print "1..6\n";
 }
 
 END {
@@ -126,5 +126,22 @@ Test of =for
 This should be seen.
 As should this.
     Some more text.
+
+###
+
+###
+=pod
+
+text
+
+  line1
+  
+  line3
+###
+    text
+
+      line1
+  
+      line3
 
 ###
