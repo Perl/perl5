@@ -53,9 +53,9 @@ Time64_T   timegm64      (struct TM *);
 
 /* Not everyone has gm/localtime_r(), provide a replacement */
 #ifdef HAS_LOCALTIME_R
-#    define LOCALTIME_R(clock, result) localtime_r(clock, result)
+#    define LOCALTIME_R(clock, result) (L_R_TZSET localtime_r(clock, result))
 #else
-#    define LOCALTIME_R(clock, result) fake_localtime_r(clock, result)
+#    define LOCALTIME_R(clock, result) (L_R_TZSET fake_localtime_r(clock, result))
 #endif
 #ifdef HAS_GMTIME_R
 #    define GMTIME_R(clock, result)    gmtime_r(clock, result)
