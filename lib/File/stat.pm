@@ -125,6 +125,10 @@ my %op = (
     u => sub { _suid($_[0]->mode) },
     g => sub { _sgid($_[0]->mode) },
     k => sub { _svtx($_[0]->mode) },
+
+    M => sub { ($^T - $_[0]->mtime) / 86400 },
+    C => sub { ($^T - $_[0]->ctime) / 86400 },
+    A => sub { ($^T - $_[0]->atime) / 86400 },
 );
 
 use overload 
