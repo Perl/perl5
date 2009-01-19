@@ -889,7 +889,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{color,filehandle,man*,parselink,pod-parser,pod-spelling,pod,termcap,text*}.t}],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Pod::Perldoc' =>
