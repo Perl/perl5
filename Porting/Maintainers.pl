@@ -103,7 +103,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Archive::Tar' =>
@@ -111,7 +111,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'AutoLoader' =>
@@ -252,24 +252,17 @@ package Maintainers;
 				     lib/CPANPLUS/Module lib/CPANPLUS/Module.pm
 				     lib/CPANPLUS/Selfupdate.pm
 				     lib/CPANPLUS/Shell lib/CPANPLUS/Shell.pm
+				     lib/CPANPLUS/Dist.pm lib/CPANPLUS/Dist/Base.pm
+				     lib/CPANPLUS/Dist/MM.pm lib/CPANPLUS/Dist/Sample.pm
 				     lib/CPANPLUS/t
 				    ],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'CPANPLUS::Dist' =>
-		{
-		'MAINTAINER'	=> 'kane',
-		'FILES'		=> q[lib/CPANPLUS/Dist.pm lib/CPANPLUS/Dist/Base.pm
-				     lib/CPANPLUS/Dist/MM.pm lib/CPANPLUS/Dist/Sample.pm],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'CPANPLUS::Dist::Build' =>
 		{
-		'MAINTAINER'	=> 'kane',
+		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm lib/CPANPLUS/Dist/Build],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
@@ -439,7 +432,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'File::Path' =>
@@ -544,7 +537,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'lib' =>
@@ -602,7 +595,7 @@ package Maintainers;
 		'MAINTAINER'    => 'kane',
                 'FILES'         => q[lib/Log/Message.pm lib/Log/Message/{Config,Handlers,Item}.pm lib/Log/Message/t],
                 'CPAN'          => 1,
-		'UPSTREAM'      => undef,
+		'UPSTREAM'      => 'cpan',
 		},
 
 	'Log::Message::Simple' =>
@@ -610,7 +603,7 @@ package Maintainers;
                 'MAINTAINER'    => 'kane',
                 'FILES'         => q[lib/Log/Message/Simple.pm lib/Log/Message/Simple],
                 'CPAN'          => 1,
-                'UPSTREAM'      => undef,
+                'UPSTREAM'      => 'cpan',
                 },
 
 	'mad' =>
@@ -700,7 +693,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Module/Load/t lib/Module/Load.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Module::Load::Conditional' =>
@@ -709,7 +702,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Module/Load/Conditional
 				     lib/Module/Load/Conditional.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Module::Loaded' =>
@@ -717,7 +710,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	# NB. tests are located in t/Module_Pluggable to avoid directory
@@ -751,7 +744,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Object/Accessor.pm lib/Object/Accessor],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Package::Constants' =>
@@ -759,7 +752,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Package/Constants lib/Package/Constants.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Params::Check' =>
@@ -767,7 +760,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'parent' =>
@@ -1002,7 +995,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Term/UI.pm lib/Term/UI],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Test' =>
