@@ -87,7 +87,7 @@ else {
         my ($s, $mode, $eff) = @_;
         my $uid = $eff ? $> : $<;
 
-        $uid == 0                   and return 1;
+        $^O ne "VMS" and $uid == 0  and return 1;
 
         my ($stmode, $stuid, $stgid) = @$s[2,4,5];
 
