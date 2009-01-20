@@ -1,7 +1,7 @@
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir '../lib/Archive/Tar' if -d '../lib/Archive/Tar';
-    }       
+    }
     use lib '../../..';
 }
 
@@ -80,7 +80,7 @@ if ($TOO_LONG) {
 my @ROOT        = grep { length }   'src', $TOO_LONG ? 'short' : 'long';
 my $NO_UNLINK   = $ARGV[0] ? 1 : 0;
 
-### enable debugging? 
+### enable debugging?
 ### pesky warnings
 $Archive::Tar::DEBUG = $Archive::Tar::DEBUG = 1 if $ARGV[1];
 
@@ -107,7 +107,7 @@ chmod 0644, $COMPRESS_FILE;
 {   for my $meth ( qw[has_zlib_support has_bzip2_support] ) {
         can_ok( $Class, $meth );
     }
-}    
+}
 
 
 
@@ -142,18 +142,18 @@ chmod 0644, $COMPRESS_FILE;
     ### check if ->error eq $error
     is( $tar->error, $Archive::Tar::error,
                                     "Error '$Archive::Tar::error' matches $Class->error method" );
-                     
-    ### check that 'contains_file' doesn't warn about missing files.                     
+
+    ### check that 'contains_file' doesn't warn about missing files.
     {   ### turn on warnings in general!
         local $Archive::Tar::WARN  = 1;
 
         my $warnings = '';
         local $SIG{__WARN__} = sub { $warnings .= "@_" };
-        
+
         my $rv = $tar->contains_file( $$ );
         ok( !$rv,                   "Does not contain file '$$'" );
         is( $warnings, '',          "   No warnings issued during lookup" );
-    }        
+    }
 }
 
 ### read tests ###
@@ -188,7 +188,7 @@ chmod 0644, $COMPRESS_FILE;
                 is( $tar->_find_entry( $test ), $file,
                                 "           Found proper object" );
             }
-            
+
             next unless $file->is_file;
 
             my $name = $file->full_path;
@@ -244,7 +244,7 @@ chmod 0644, $COMPRESS_FILE;
             skip( "You are building perl using symlinks", 1)
                 if ($ENV{PERL_CORE} and $Config{config_args} =~/Dmksymlinks/);
 
-            is( $files[0]->is_file, 1,  
+            is( $files[0]->is_file, 1,
                                     "       Proper type" );
         }
 
@@ -275,22 +275,22 @@ chmod 0644, $COMPRESS_FILE;
                                     "       Adding dirs");
         ok( $dirs[0]->is_dir,       "           Proper type" );
     }
-    
+
     ### check if we can add a A::T::File object
     {   my $tar2    = $Class->new;
         my($added)  = $tar2->add_files( $add[0] );
-        
+
         ok( $added,                 "   Added a file '$add[0]' to new object" );
-        isa_ok( $added, $FClass,    "       Object" );           
+        isa_ok( $added, $FClass,    "       Object" );
 
         my($added2) = $tar2->add_files( $added );
         ok( $added2,                "       Added an $FClass object" );
-        isa_ok( $added2, $FClass,   "           Object" );           
-        
+        isa_ok( $added2, $FClass,   "           Object" );
+
         is_deeply( [$added, $added2], [$tar2->get_files],
                                     "       All files accounted for" );
         isnt( $added, $added2,      "       Different memory allocations" );
-    }        
+    }
 }
 
 ### add data tests ###
@@ -389,11 +389,11 @@ chmod 0644, $COMPRESS_FILE;
 
 ### write + read + extract tests ###
 SKIP: {                             ### pesky warnings
-    skip('no IO::String', 326) if   !$Archive::Tar::HAS_PERLIO && 
-                                    !$Archive::Tar::HAS_PERLIO && 
+    skip('no IO::String', 326) if   !$Archive::Tar::HAS_PERLIO &&
+                                    !$Archive::Tar::HAS_PERLIO &&
                                     !$Archive::Tar::HAS_IO_STRING &&
                                     !$Archive::Tar::HAS_IO_STRING;
-                                    
+
     my $tar = $Class->new;
     my $new = $Class->new;
     ok( $tar->read( $TAR_FILE ),    "Read in '$TAR_FILE'" );
@@ -413,6 +413,11 @@ SKIP: {                             ### pesky warnings
 
         ### write tar tests
         {   my $out = $OUT_TAR_FILE;
+
+            ### bug #41798: 'Nonempty $\ when writing a TAR file produces a
+            ### corrupt TAR file' shows that setting $\ breaks writing tar files
+            ### set it here purposely so we can verify NOTHING breaks
+            local $\ = 'FOOBAR';
 
             {   ### write()
                 ok( $obj->write($out),
@@ -450,7 +455,7 @@ SKIP: {                             ### pesky warnings
         {   my @out;
             push @out, [ $OUT_TGZ_FILE => 1             ] if $Class->has_zlib_support;
             push @out, [ $OUT_TBZ_FILE => COMPRESS_BZIP ] if $Class->has_bzip2_support;
-        
+
             for my $entry ( @out ) {
 
                 my( $out, $compression ) = @$entry;
@@ -732,22 +737,22 @@ sub check_tar_extract {
         close $fh;
         $NO_UNLINK or 1 while unlink $path;
 
-        ### alternate extract path tests 
+        ### alternate extract path tests
         ### to abs and rel paths
         {   for my $outpath (   File::Spec->catdir( @ROOT ),
-                                File::Spec->rel2abs( 
+                                File::Spec->rel2abs(
                                     File::Spec->catdir( @ROOT )
                                 )
             ) {
 
                 my $outfile = File::Spec->catfile( $outpath, $$ );
-    
+
                 ok( $tar->extract_file( $file->full_path, $outfile ),
                                 "   Extracted file '$path' to $outfile" );
                 ok( -e $outfile,"   Extracted file '$outfile' exists" );
-    
+
                 rm( $outfile ) unless $NO_UNLINK;
-            }            
+            }
         }
     }
 
@@ -773,11 +778,11 @@ sub slurp_binfile {
 sub slurp_compressed_file {
     my $file = shift;
     my $fh;
-    
+
     ### bzip2
     if( $file =~ /.tbz$/ ) {
         require IO::Uncompress::Bunzip2;
-        $fh = IO::Uncompress::Bunzip2->new( $file )    
+        $fh = IO::Uncompress::Bunzip2->new( $file )
             or warn( "Error opening '$file' with IO::Uncompress::Bunzip2" ), return
 
     ### gzip
@@ -786,7 +791,7 @@ sub slurp_compressed_file {
         $fh = new IO::Zlib;
         $fh->open( $file, READ_ONLY->(1) )
             or warn( "Error opening '$file' with IO::Zlib" ), return
-    }        
+    }
 
     my $str;
     my $buff;

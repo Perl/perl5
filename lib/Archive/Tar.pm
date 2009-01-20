@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.42";
+$VERSION                = "1.44";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $DO_NOT_USE_PREFIX      = 0;
@@ -136,7 +136,7 @@ an already open filehandle (or an IO::Zlib object if it's compressed)
 
 The C<read> will I<replace> any previous content in C<$tar>!
 
-The second argument may be considered optional, but remains for 
+The second argument may be considered optional, but remains for
 backwards compatibility. Archive::Tar now looks at the file
 magic to determine what class should be used to open the file
 and will transparently Do The Right Thing.
@@ -171,7 +171,7 @@ the expression will be read.
 If set to true, immediately extract entries when reading them. This
 gives you the same memory break as the C<extract_archive> function.
 Note however that entries will not be read into memory, but written
-straight to disk. This means no C<Archive::Tar::File> objects are 
+straight to disk. This means no C<Archive::Tar::File> objects are
 created for you to inspect.
 
 =back
@@ -226,10 +226,10 @@ sub _get_handle {
                 $self->_error( qq[Could not open '$file' for reading: $!] );
                 return;
             };
-        
+
             ### read the first 4 bites of the file to figure out which class to
             ### use to open the file.
-            sysread( $tmp, $magic, 4 );    
+            sysread( $tmp, $magic, 4 );
             close $tmp;
         }
 
@@ -237,11 +237,11 @@ sub _get_handle {
         ### if you asked specifically for bzip compression, or if we're in
         ### read mode and the magic numbers add up, use bzip
         if( BZIP and (
-                ($compress eq COMPRESS_BZIP) or 
+                ($compress eq COMPRESS_BZIP) or
                 ( MODE_READ->($mode) and $magic =~ BZIP_MAGIC_NUM )
             )
         ) {
-        
+
             ### different reader/writer modules, different error vars... sigh
             if( MODE_READ->($mode) ) {
                 $fh = IO::Uncompress::Bunzip2->new( $file ) or do {
@@ -250,7 +250,7 @@ sub _get_handle {
                     );
                     return;
                 };
-            
+
             } else {
                 $fh = IO::Compress::Bzip2->new( $file ) or do {
                     $self->_error( qq[Could not write to '$file': ] .
@@ -259,13 +259,13 @@ sub _get_handle {
                     return;
                 };
             }
-            
+
         ### is it gzip?
         ### if you asked for compression, if you wanted to read or the gzip
         ### magic number is present (redundant with read)
         } elsif( ZLIB and (
                     $compress or MODE_READ->($mode) or $magic =~ GZIP_MAGIC_NUM
-                 )        
+                 )
         ) {
             $fh = IO::Zlib->new;
 
@@ -273,7 +273,7 @@ sub _get_handle {
                 $self->_error(qq[Could not create filehandle for '$file': $!]);
                 return;
             }
-            
+
         ### is it plain tar?
         } else {
             $fh = IO::File->new;
@@ -285,7 +285,7 @@ sub _get_handle {
 
             ### enable bin mode on tar archives
             binmode $fh;
-        }            
+        }
     }
 
     return $fh;
@@ -351,9 +351,9 @@ sub _read_tar {
         my $entry;
         {   my %extra_args = ();
             $extra_args{'name'} = $$real_name if defined $real_name;
-            
-            unless( $entry = Archive::Tar::File->new(   chunk => $chunk, 
-                                                        %extra_args ) 
+
+            unless( $entry = Archive::Tar::File->new(   chunk => $chunk,
+                                                        %extra_args )
             ) {
                 $self->_error( qq[Couldn't read chunk at offset $offset] );
                 next LOOP;
@@ -437,14 +437,14 @@ sub _read_tar {
         ### skip this entry if we're filtering
         if ($filter && $entry->name !~ $filter) {
             next LOOP;
-        
+
         ### skip this entry if it's a pax header. This is a special file added
         ### by, among others, git-generated tarballs. It holds comments and is
-        ### not meant for extracting. See #38932: pax_global_header extracted 
+        ### not meant for extracting. See #38932: pax_global_header extracted
         } elsif ( $entry->name eq PAX_HEADER ) {
             next LOOP;
         }
-        
+
         $self->_extract_file( $entry ) if $extract
                                             && !$entry->is_longlink
                                             && !$entry->is_unknown
@@ -483,7 +483,7 @@ underlying file.
 sub contains_file {
     my $self = shift;
     my $full = shift;
-    
+
     return unless defined $full;
 
     ### don't warn if the entry isn't there.. that's what this function
@@ -522,7 +522,7 @@ sub extract {
     ### you requested the extraction of only certian files
     if( @args ) {
         for my $file ( @args ) {
-            
+
             ### it's already an object?
             if( UNIVERSAL::isa( $file, 'Archive::Tar::File' ) ) {
                 push @files, $file;
@@ -530,18 +530,18 @@ sub extract {
 
             ### go find it then
             } else {
-            
+
                 my $found;
                 for my $entry ( @{$self->_data} ) {
                     next unless $file eq $entry->full_path;
-    
+
                     ### we found the file you're looking for
                     push @files, $entry;
                     $found++;
                 }
-    
+
                 unless( $found ) {
-                    return $self->_error( 
+                    return $self->_error(
                         qq[Could not find '$file' in archive] );
                 }
             }
@@ -622,20 +622,20 @@ sub _extract_file {
         ### absolute names are not allowed to be in tarballs under
         ### strict mode, so only allow it if a user tells us to do it
         if( not defined $alt and not $INSECURE_EXTRACT_MODE ) {
-            $self->_error( 
+            $self->_error(
                 q[Entry ']. $entry->full_path .q[' is an absolute path. ].
                 q[Not extracting absolute paths under SECURE EXTRACT MODE]
-            );  
+            );
             return;
         }
-        
+
         ### user asked us to, it's fine.
         $dir = File::Spec->catpath( $vol, $dirs, "" );
 
     ### it's a relative path ###
     } else {
-        my $cwd     = (ref $self and defined $self->{cwd}) 
-                        ? $self->{cwd} 
+        my $cwd     = (ref $self and defined $self->{cwd})
+                        ? $self->{cwd}
                         : cwd();
 
         my @dirs = defined $alt
@@ -643,22 +643,22 @@ sub _extract_file {
             : File::Spec::Unix->splitdir( $dirs );  # it's UNIX-style, likely
                                                     # straight from the tarball
 
-        if( not defined $alt            and 
-            not $INSECURE_EXTRACT_MODE 
-        ) {            
+        if( not defined $alt            and
+            not $INSECURE_EXTRACT_MODE
+        ) {
 
             ### paths that leave the current directory are not allowed under
             ### strict mode, so only allow it if a user tells us to do this.
             if( grep { $_ eq '..' } @dirs ) {
-    
+
                 $self->_error(
                     q[Entry ']. $entry->full_path .q[' is attempting to leave ].
                     q[the current working directory. Not extracting under ].
                     q[SECURE EXTRACT MODE]
                 );
                 return;
-            } 
-        
+            }
+
             ### the archive may be asking us to extract into a symlink. This
             ### is not sane and a possible security issue, as outlined here:
             ### https://rt.cpan.org/Ticket/Display.html?id=30380
@@ -667,7 +667,7 @@ sub _extract_file {
             my $full_path = $cwd;
             for my $d ( @dirs ) {
                 $full_path = File::Spec->catdir( $full_path, $d );
-                
+
                 ### we've already checked this one, and it's safe. Move on.
                 next if ref $self and $self->{_link_cache}->{$full_path};
 
@@ -683,7 +683,7 @@ sub _extract_file {
                     );
                     return;
                 }
-                
+
                 ### XXX keep a cache if possible, so the stats become cheaper:
                 $self->{_link_cache}->{$full_path} = 1 if ref $self;
             }
@@ -693,16 +693,16 @@ sub _extract_file {
         ### or changed to '_' on vms.  vmsify is used, because older versions
         ### of vmspath do not handle this properly.
         ### Must not add a '/' to an empty directory though.
-        map { length() ? VMS::Filespec::vmsify($_.'/') : $_ } @dirs if ON_VMS;        
+        map { length() ? VMS::Filespec::vmsify($_.'/') : $_ } @dirs if ON_VMS;
 
-        my ($cwd_vol,$cwd_dir,$cwd_file) 
+        my ($cwd_vol,$cwd_dir,$cwd_file)
                     = File::Spec->splitpath( $cwd );
         my @cwd     = File::Spec->splitdir( $cwd_dir );
         push @cwd, $cwd_file if length $cwd_file;
 
         ### We need to pass '' as the last elemant to catpath. Craig Berry
         ### explains why (msgid <p0624083dc311ae541393@[172.16.52.1]>):
-        ### The root problem is that splitpath on UNIX always returns the 
+        ### The root problem is that splitpath on UNIX always returns the
         ### final path element as a file even if it is a directory, and of
         ### course there is no way it can know the difference without checking
         ### against the filesystem, which it is documented as not doing.  When
@@ -711,11 +711,11 @@ sub _extract_file {
         ### know the result should be a directory.  I had thought you could omit
         ### the file argument to catpath in such a case, but apparently on UNIX
         ### you can't.
-        $dir        = File::Spec->catpath( 
-                            $cwd_vol, File::Spec->catdir( @cwd, @dirs ), '' 
+        $dir        = File::Spec->catpath(
+                            $cwd_vol, File::Spec->catdir( @cwd, @dirs ), ''
                         );
 
-        ### catdir() returns undef if the path is longer than 255 chars on 
+        ### catdir() returns undef if the path is longer than 255 chars on
         ### older VMS systems.
         unless ( defined $dir ) {
             $^W && $self->_error( qq[Could not compose a path for '$dirs'\n] );
@@ -736,7 +736,7 @@ sub _extract_file {
             $self->_error(qq[Could not create directory '$dir' for '$fp': $@]);
             return;
         }
-        
+
         ### XXX chown here? that might not be the same as in the archive
         ### as we're only chown'ing to the owner of the file we're extracting
         ### not to the owner of the directory itself, which may or may not
@@ -1065,17 +1065,17 @@ sub clear {
 
 Write the in-memory archive to disk.  The first argument can either
 be the name of a file or a reference to an already open filehandle (a
-GLOB reference). 
+GLOB reference).
 
-The second argument is used to indicate compression. You can either 
+The second argument is used to indicate compression. You can either
 compress using C<gzip> or C<bzip2>. If you pass a digit, it's assumed
-to be the C<gzip> compression level (between 1 and 9), but the use of 
+to be the C<gzip> compression level (between 1 and 9), but the use of
 constants is prefered:
 
   # write a gzip compressed file
   $tar->write( 'out.tgz', COMPRESSION_GZIP );
 
-  # write a bzip compressed file  
+  # write a bzip compressed file
   $tar->write( 'out.tbz', COMPRESSION_BZIP );
 
 Note that when you pass in a filehandle, the compression argument
@@ -1101,16 +1101,19 @@ sub write {
     my $gzip        = shift || 0;
     my $ext_prefix  = shift; $ext_prefix = '' unless defined $ext_prefix;
     my $dummy       = '';
-    
+
     ### only need a handle if we have a file to print to ###
     my $handle = length($file)
                     ? ( $self->_get_handle($file, $gzip, WRITE_ONLY->($gzip) )
                         or return )
                     : $HAS_PERLIO    ? do { open my $h, '>', \$dummy; $h }
-                    : $HAS_IO_STRING ? IO::String->new 
+                    : $HAS_IO_STRING ? IO::String->new
                     : __PACKAGE__->no_string_support();
 
-
+    ### Addresses: #41798: Nonempty $\ when writing a TAR file produces a
+    ### corrupt TAR file. Must clear out $\ to make sure no garbage is
+    ### printed to the archive
+    local $\;
 
     for my $entry ( @{$self->_data} ) {
         ### entries to be written to the tarfile ###
@@ -1122,7 +1125,7 @@ sub write {
         my $clone = $entry->clone;
 
 
-        ### so, if you don't want use to use the prefix, we'll stuff 
+        ### so, if you don't want use to use the prefix, we'll stuff
         ### everything in the name field instead
         if( $DO_NOT_USE_PREFIX ) {
 
@@ -1229,7 +1232,7 @@ sub write {
 
     ### make sure to close the handle;
     close $handle;
-    
+
     return $rv;
 }
 
@@ -1319,10 +1322,10 @@ sub add_files {
         ### clone it so we don't accidentally have a reference to
         ### an object from another archive
         if( UNIVERSAL::isa( $file,'Archive::Tar::File' ) ) {
-            push @rv, $file->clone; 
+            push @rv, $file->clone;
             next;
         }
-    
+
         unless( -e $file || -l $file ) {
             $self->_error( qq[No such file: '$file'] );
             next;
@@ -1449,9 +1452,9 @@ method call instead.
 =head2 $tar->setcwd( $cwd );
 
 C<Archive::Tar> needs to know the current directory, and it will run
-C<Cwd::cwd()> I<every> time it extracts a I<relative> entry from the 
+C<Cwd::cwd()> I<every> time it extracts a I<relative> entry from the
 tarfile and saves it in the file system. (As of version 1.30, however,
-C<Archive::Tar> will use the speed optimization described below 
+C<Archive::Tar> will use the speed optimization described below
 automatically, so it's only relevant if you're using C<extract_file()>).
 
 Since C<Archive::Tar> doesn't change the current directory internally
@@ -1466,7 +1469,7 @@ To use this performance boost, set the current directory via
 
 once before calling a function like C<extract_file> and
 C<Archive::Tar> will use the current directory setting from then on
-and won't call C<Cwd::cwd()> internally. 
+and won't call C<Cwd::cwd()> internally.
 
 To switch back to the default behaviour, use
 
@@ -1477,7 +1480,7 @@ and C<Archive::Tar> will call C<Cwd::cwd()> internally again.
 If you're using C<Archive::Tar>'s C<exract()> method, C<setcwd()> will
 be called for you.
 
-=cut 
+=cut
 
 sub setcwd {
     my $self     = shift;
@@ -1494,15 +1497,15 @@ Creates a tar file from the list of files provided.  The first
 argument can either be the name of the tar file to create or a
 reference to an open file handle (e.g. a GLOB reference).
 
-The second argument is used to indicate compression. You can either 
+The second argument is used to indicate compression. You can either
 compress using C<gzip> or C<bzip2>. If you pass a digit, it's assumed
-to be the C<gzip> compression level (between 1 and 9), but the use of 
+to be the C<gzip> compression level (between 1 and 9), but the use of
 constants is prefered:
 
   # write a gzip compressed file
   Archive::Tar->create_archive( 'out.tgz', COMPRESSION_GZIP, @filelist );
 
-  # write a bzip compressed file  
+  # write a bzip compressed file
   Archive::Tar->create_archive( 'out.tbz', COMPRESSION_BZIP, @filelist );
 
 Note that when you pass in a filehandle, the compression argument
@@ -1559,7 +1562,7 @@ Example usage:
         print $f->name, "\n";
 
         $f->extract or warn "Extraction failed";
-        
+
         # ....
     }
 
@@ -1574,8 +1577,8 @@ sub iter {
 
     ### get a handle to read from.
     my $handle = $class->_get_handle(
-        $filename, 
-        $compressed, 
+        $filename,
+        $compressed,
         READ_ONLY->( ZLIB )
     ) or return;
 
@@ -1589,7 +1592,7 @@ sub iter {
 
         ### return one piece of data
         return shift(@data)     if @data;
-        
+
         ### data is exhausted, free the filehandle
         undef $handle;
         return;
@@ -1605,7 +1608,7 @@ reference to an open file handle (e.g. a GLOB reference).
 If C<list_archive()> is passed an array reference as its third
 argument it returns a list of hash references containing the requested
 properties of each file.  The following list of properties is
-supported: full_path, name, size, mtime (last modified date), mode, 
+supported: full_path, name, size, mtime (last modified date), mode,
 uid, gid, linkname, uname, gname, devmajor, devminor, prefix.
 
 See C<Archive::Tar::File> for details about supported properties.
@@ -1655,7 +1658,7 @@ sub extract_archive {
 
 Returns true if we currently have C<IO::String> support loaded.
 
-Either C<IO::String> or C<perlio> support is needed to support writing 
+Either C<IO::String> or C<perlio> support is needed to support writing
 stringified archives. Currently, C<perlio> is the preferred method, if
 available.
 
@@ -1669,9 +1672,9 @@ sub has_io_string { return $HAS_IO_STRING; }
 
 Returns true if we currently have C<perlio> support loaded.
 
-This requires C<perl-5.8> or higher, compiled with C<perlio> 
+This requires C<perl-5.8> or higher, compiled with C<perlio>
 
-Either C<IO::String> or C<perlio> support is needed to support writing 
+Either C<IO::String> or C<perlio> support is needed to support writing
 stringified archives. Currently, C<perlio> is the preferred method, if
 available.
 
@@ -1753,13 +1756,13 @@ The default is C<1>.
 
 =head2 $Archive::Tar::DO_NOT_USE_PREFIX
 
-By default, C<Archive::Tar> will try to put paths that are over 
+By default, C<Archive::Tar> will try to put paths that are over
 100 characters in the C<prefix> field of your tar header, as
-defined per POSIX-standard. However, some (older) tar programs 
-do not implement this spec. To retain compatibility with these older 
-or non-POSIX compliant versions, you can set the C<$DO_NOT_USE_PREFIX> 
-variable to a true value, and C<Archive::Tar> will use an alternate 
-way of dealing with paths over 100 characters by using the 
+defined per POSIX-standard. However, some (older) tar programs
+do not implement this spec. To retain compatibility with these older
+or non-POSIX compliant versions, you can set the C<$DO_NOT_USE_PREFIX>
+variable to a true value, and C<Archive::Tar> will use an alternate
+way of dealing with paths over 100 characters by using the
 C<GNU Extended Header> feature.
 
 Note that clients who do not support the C<GNU Extended Header>
@@ -1800,11 +1803,11 @@ files to be extracted outside their current working directory.
 
 Allowing this could have security implications, as a malicious
 tar archive could alter or replace any file the extracting user
-has permissions to. Therefor, the default is to not allow 
-insecure extractions. 
+has permissions to. Therefor, the default is to not allow
+insecure extractions.
 
-If you trust the archive, or have other reasons to allow the 
-archive to write files outside your current working directory, 
+If you trust the archive, or have other reasons to allow the
+archive to write files outside your current working directory,
 set this variable to C<true>.
 
 Note that this is a backwards incompatible change from version
@@ -1812,9 +1815,9 @@ C<1.36> and before.
 
 =head2 $Archive::Tar::HAS_PERLIO
 
-This variable holds a boolean indicating if we currently have 
+This variable holds a boolean indicating if we currently have
 C<perlio> support loaded. This will be enabled for any perl
-greater than C<5.8> compiled with C<perlio>. 
+greater than C<5.8> compiled with C<perlio>.
 
 If you feel strongly about disabling it, set this variable to
 C<false>. Note that you will then need C<IO::String> installed
@@ -1825,7 +1828,7 @@ doing.
 
 =head2 $Archive::Tar::HAS_IO_STRING
 
-This variable holds a boolean indicating if we currently have 
+This variable holds a boolean indicating if we currently have
 C<IO::String> support loaded. This will be enabled for any perl
 that has a loadable C<IO::String> module.
 
@@ -1872,7 +1875,7 @@ over the files in the tarball without reading them all in memory at once.
 
 Probably more than X kb, since it will all be read into memory. If
 this is a problem, and you don't need to do in memory manipulation
-of the archive, consider using the C<iter> class method, or C</bin/tar> 
+of the archive, consider using the C<iter> class method, or C</bin/tar>
 instead.
 
 =item What do you do with unsupported filetypes in an archive?
@@ -1883,8 +1886,8 @@ try to make a copy of the original file, rather than throwing an error.
 
 This does require you to read the entire archive in to memory first,
 since otherwise we wouldn't know what data to fill the copy with.
-(This means that you cannot use the class methods, including C<iter> 
-on archives that have incompatible filetypes and still expect things 
+(This means that you cannot use the class methods, including C<iter>
+on archives that have incompatible filetypes and still expect things
 to work).
 
 For other filetypes, like C<chardevs> and C<blockdevs> we'll warn that
@@ -1898,7 +1901,7 @@ For paths greather than 100 characters, this is done using the
 C<POSIX header prefix>. Non-POSIX-compatible clients may not support
 this part of the specification, and may only support the C<GNU Extended
 Header> functionality. To facilitate those clients, you can set the
-C<$Archive::Tar::DO_NOT_USE_PREFIX> variable to C<true>. See the 
+C<$Archive::Tar::DO_NOT_USE_PREFIX> variable to C<true>. See the
 C<GLOBAL VARIABLES> section for details on this variable.
 
 Note that GNU tar earlier than version 1.14 does not cope well with
@@ -1914,9 +1917,9 @@ You can do this by filtering a list of C<Archive::Tar::File> objects
 based on your criteria. For example, to extract only files that have
 the string C<foo> in their title, you would use:
 
-    $tar->extract( 
+    $tar->extract(
         grep { $_->full_path =~ /foo/ } $tar->get_files
-    ); 
+    );
 
 This way, you can filter on any attribute of the files in the archive.
 Consult the C<Archive::Tar::File> documentation on how to use these
@@ -1993,22 +1996,22 @@ bytestrings before they are handed off to C<add_data()>:
 
     $tar->add_data('file.txt', $data);
 
-A opposite problem occurs if you extract a UTF8-encoded file from a 
+A opposite problem occurs if you extract a UTF8-encoded file from a
 tarball. Using C<get_content()> on the C<Archive::Tar::File> object
 will return its content as a bytestring, not as a Unicode string.
 
 If you want it to be a Unicode string (because you want character
 semantics with operations like regular expression matching), you need
-to decode the UTF8-encoded content and have Perl convert it into 
+to decode the UTF8-encoded content and have Perl convert it into
 a Unicode string:
 
     use Encode;
     my $data = $tar->get_content();
-    
+
     # Make it a Unicode string
     $data = decode('utf8', $data);
 
-There is no easy way to provide this functionality in C<Archive::Tar>, 
+There is no easy way to provide this functionality in C<Archive::Tar>,
 because a tarball can contain many files, and each of which could be
 encoded in a different way.
 
@@ -2075,10 +2078,10 @@ and especially Andrew Savige for their help and suggestions.
 
 =head1 COPYRIGHT
 
-This module is copyright (c) 2002 - 2008 Jos Boumans 
+This module is copyright (c) 2002 - 2008 Jos Boumans
 E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
-This library is free software; you may redistribute and/or modify 
+This library is free software; you may redistribute and/or modify
 it under the same terms as Perl itself.
 
 =cut
