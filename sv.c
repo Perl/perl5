@@ -5655,7 +5655,11 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		CV* destructor;
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
-		if (destructor) {
+		if (destructor
+			/* Don't bother calling an empty destructor */
+			&& (CvISXSUB(destructor)
+			|| CvSTART(destructor)->op_next->op_type != OP_LEAVESUB))
+		{
 		    SV* const tmpref = newRV(sv);
 	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
