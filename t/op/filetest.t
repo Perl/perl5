@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 28 + 27*10);
+plan(tests => 28 + 27*12);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -100,10 +100,11 @@ my $over;
 {
     package OverFtest;
 
-    use overload -X => sub { 
-        $over = [overload::StrVal($_[0]), $_[1]];
-        "-$_[1]"; 
-    };
+    use overload 
+        -X => sub { 
+            $over = [overload::StrVal($_[0]), $_[1]];
+            "-$_[1]"; 
+        };
 }
 {
     package OverString;
@@ -122,7 +123,7 @@ my $over;
 {
     package OverNeither;
 
-    # Need fallback. Previous veraions of perl required 'fallback' to do
+    # Need fallback. Previous versions of perl required 'fallback' to do
     # -X operations on an object with no "" overload.
     use overload 
         '+' => sub { 1 },
@@ -158,6 +159,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     ok( !$@,                        "-$op succeeds with random overloading" )
         or diag( $@ );
     is( $rv, eval "-$op \$nstr",    "correct -$op with random overloading" );
-}
 
-is( -r -f $ft,  "-r",               "stacked overloaded -X" );
+    is( eval "-r -$op \$ft", "-r",      "stacked overloaded -$op" );
+    is( eval "-$op -r \$ft", "-$op",    "overloaded stacked -$op" );
+}
