@@ -73,7 +73,7 @@ sub _ingroup {
 if (grep $^O eq $_, qw/os2 MSWin32 dos/) {
 
     # from doio.c
-    *stat_cando = sub { ($_[0] & $_[2]->mode) ? 1 : "" };
+    *cando = sub { ($_[0] & $_[2]->mode) ? 1 : "" };
 }
 else {
 
