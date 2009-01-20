@@ -488,7 +488,7 @@ Dumpvalue - provides screen dump of Perl data.
 =head1 SYNOPSIS
 
   use Dumpvalue;
-  my $dumper = new Dumpvalue;
+  my $dumper = Dumpvalue->new;
   $dumper->set(globPrint => 1);
   $dumper->dumpValue(\*::);
   $dumper->dumpvars('main');
@@ -500,7 +500,7 @@ Dumpvalue - provides screen dump of Perl data.
 
 A new dumper is created by a call
 
-  $d = new Dumpvalue(option1 => value1, option2 => value2)
+  $d = Dumpvalue->new(option1 => value1, option2 => value2)
 
 Recognized options:
 

@@ -194,7 +194,7 @@ overload - Package for overloading Perl operations
     ...
 
     package main;
-    $a = new SomeThing 57;
+    $a = SomeThing->new( 57 );
     $b=5+$a;
     ...
     if (overload::Overloaded $b) {...}
@@ -902,7 +902,7 @@ If some mutator methods are directly applied to the overloaded values,
 one may need to I<explicitly unlink> other values which references the
 same value:
 
-    $a = new Data 23;
+    $a = Data->new(23);
     ...
     $b = $a;		# $b is "linked" to $a
     ...
@@ -911,13 +911,13 @@ same value:
 
 Note that overloaded access makes this transparent:
 
-    $a = new Data 23;
+    $a = Data->new(23);
     $b = $a;		# $b is "linked" to $a
     $a += 4;		# would unlink $b automagically
 
 However, it would not make
 
-    $a = new Data 23;
+    $a = Data->new(23);
     $a = 4;		# Now $a is a plain 4, not 'Data'
 
 preserve "objectness" of $a.  But Perl I<has> a way to make assignments
@@ -947,7 +947,7 @@ Put this in F<two_face.pm> in your Perl library directory:
 Use it as follows:
 
   require two_face;
-  my $seven = new two_face ("vii", 7);
+  my $seven = two_face->new("vii", 7);
   printf "seven=$seven, seven=%d, eight=%d\n", $seven, $seven+1;
   print "seven contains `i'\n" if $seven =~ /i/;
 
@@ -994,7 +994,7 @@ array reference and a hash reference.
 
 Now one can access an object using both the array and hash syntax:
 
-  my $bar = new two_refs 3,4,5,6;
+  my $bar = two_refs->new(3,4,5,6);
   $bar->[2] = 11;
   $bar->{two} == 11 or die 'bad hash fetch';
 
@@ -1099,15 +1099,15 @@ This module is very unusual as overloaded modules go: it does not
 provide any usual overloaded operators, instead it provides the L<Last
 Resort> operator C<nomethod>.  In this example the corresponding
 subroutine returns an object which encapsulates operations done over
-the objects: C<new symbolic 3> contains C<['n', 3]>, C<2 + new
-symbolic 3> contains C<['+', 2, ['n', 3]]>.
+the objects: C<< symbolic->new(3) >> contains C<['n', 3]>, C<< 2 +
+symbolic->new(3) >> contains C<['+', 2, ['n', 3]]>.
 
 Here is an example of the script which "calculates" the side of
 circumscribed octagon using the above package:
 
   require symbolic;
   my $iter = 1;			# 2**($iter+2) = 8
-  my $side = new symbolic 1;
+  my $side = symbolic->new(1);
   my $cnt = $iter;
 
   while ($cnt--) {
@@ -1231,8 +1231,8 @@ explicit recursion in num()?  (Answer is at the end of this section.)
 Use this module like this:
 
   require symbolic;
-  my $iter = new symbolic 2;	# 16-gon
-  my $side = new symbolic 1;
+  my $iter = symbolic->new(2);	# 16-gon
+  my $side = symbolic->new(1);
   my $cnt = $iter;
 
   while ($cnt) {
@@ -1352,8 +1352,8 @@ To see it in action, add a method
 
 to the package C<symbolic>.  After this change one can do
 
-  my $a = new symbolic 3;
-  my $b = new symbolic 4;
+  my $a = symbolic->new(3);
+  my $b = symbolic->new(4);
   my $c = sqrt($a**2 + $b**2);
 
 and the numeric value of $c becomes 5.  However, after calling
