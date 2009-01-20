@@ -473,6 +473,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define tryAMAGICftest(chr)				\
     STMT_START {					\
+	assert(chr != '?');				\
 	if (SvAMAGIC(TOPs)) {				\
 	    const char tmpchr = (chr);			\
 	    SV * const tmpsv = amagic_call(TOPs,	\
@@ -480,7 +481,19 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 		ftest_amg, AMGf_unary);			\
 							\
 	    if (tmpsv) {				\
+		const OP *next = PL_op->op_next;	\
+							\
 		SPAGAIN;				\
+							\
+		if (next->op_type >= OP_FTRREAD &&	\
+		    next->op_type <= OP_FTBINARY &&	\
+		    next->op_private & OPpFT_STACKED	\
+		) {					\
+		    if (SvTRUE(tmpsv))			\
+			/* leave the object alone */	\
+			RETURN;				\
+		}					\
+							\
 		SETs(tmpsv);				\
 		RETURN;					\
 	    }						\

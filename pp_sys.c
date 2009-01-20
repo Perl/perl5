@@ -2986,18 +2986,26 @@ PP(pp_ftrread)
     char opchar = '?';
     dSP;
 
+    switch (PL_op->op_type) {
+    case OP_FTRREAD:	opchar = 'R'; break;
+    case OP_FTRWRITE:	opchar = 'W'; break;
+    case OP_FTREXEC:	opchar = 'X'; break;
+    case OP_FTEREAD:	opchar = 'r'; break;
+    case OP_FTEWRITE:	opchar = 'w'; break;
+    case OP_FTEEXEC:	opchar = 'x'; break;
+    }
+    tryAMAGICftest(opchar);
+
     STACKED_FTEST_CHECK;
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:
-	opchar = 'R';
 #if !(defined(HAS_ACCESS) && defined(R_OK))
 	use_access = 0;
 #endif
 	break;
 
     case OP_FTRWRITE:
-	opchar = 'W';
 #if defined(HAS_ACCESS) && defined(W_OK)
 	access_mode = W_OK;
 #else
@@ -3007,7 +3015,6 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTREXEC:
-	opchar = 'X';
 #if defined(HAS_ACCESS) && defined(X_OK)
 	access_mode = X_OK;
 #else
@@ -3017,19 +3024,13 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTEWRITE:
-	opchar = 'w';
 #ifdef PERL_EFF_ACCESS
 	access_mode = W_OK;
 #endif
 	stat_mode = S_IWUSR;
-#ifndef PERL_EFF_ACCESS
-	use_access = 0;
-#endif
-	effective = TRUE;
-	break;
+	/* fall through */
 
     case OP_FTEREAD:
-	opchar = 'r';
 #ifndef PERL_EFF_ACCESS
 	use_access = 0;
 #endif
@@ -3037,7 +3038,6 @@ PP(pp_ftrread)
 	break;
 
     case OP_FTEEXEC:
-	opchar = 'x';
 #ifdef PERL_EFF_ACCESS
 	access_mode = X_OK;
 #else
@@ -3047,8 +3047,6 @@ PP(pp_ftrread)
 	effective = TRUE;
 	break;
     }
-
-    tryAMAGICftest(opchar);
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
@@ -3092,7 +3090,6 @@ PP(pp_ftis)
     const int op_type = PL_op->op_type;
     char opchar = '?';
     dSP;
-    STACKED_FTEST_CHECK;
 
     switch (op_type) {
     case OP_FTIS:	opchar = 'e'; break;
@@ -3102,6 +3099,8 @@ PP(pp_ftis)
     case OP_FTATIME:	opchar = 'A'; break;
     }
     tryAMAGICftest(opchar);
+
+    STACKED_FTEST_CHECK;
 
     result = my_stat();
     SPAGAIN;
@@ -3142,25 +3141,6 @@ PP(pp_ftrowned)
     char opchar = '?';
     dSP;
 
-    /* I believe that all these three are likely to be defined on most every
-       system these days.  */
-    if (!SvAMAGIC(TOPs)) {
-#ifndef S_ISUID
-    if(PL_op->op_type == OP_FTSUID)
-	RETPUSHNO;
-#endif
-#ifndef S_ISGID
-    if(PL_op->op_type == OP_FTSGID)
-	RETPUSHNO;
-#endif
-#ifndef S_ISVTX
-    if(PL_op->op_type == OP_FTSVTX)
-	RETPUSHNO;
-#endif
-    }
-
-    STACKED_FTEST_CHECK;
-
     switch (PL_op->op_type) {
     case OP_FTROWNED:	opchar = 'O'; break;
     case OP_FTEOWNED:	opchar = 'o'; break;
@@ -3176,6 +3156,23 @@ PP(pp_ftrowned)
     case OP_FTSVTX:	opchar = 'k'; break;
     }
     tryAMAGICftest(opchar);
+
+    /* I believe that all these three are likely to be defined on most every
+       system these days.  */
+#ifndef S_ISUID
+    if(PL_op->op_type == OP_FTSUID)
+	RETPUSHNO;
+#endif
+#ifndef S_ISGID
+    if(PL_op->op_type == OP_FTSGID)
+	RETPUSHNO;
+#endif
+#ifndef S_ISVTX
+    if(PL_op->op_type == OP_FTSVTX)
+	RETPUSHNO;
+#endif
+
+    STACKED_FTEST_CHECK;
 
     result = my_stat();
     SPAGAIN;
@@ -3263,9 +3260,9 @@ PP(pp_fttty)
     GV *gv;
     SV *tmpsv = NULL;
 
-    STACKED_FTEST_CHECK;
-
     tryAMAGICftest('t');
+
+    STACKED_FTEST_CHECK;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
@@ -3314,9 +3311,9 @@ PP(pp_fttext)
     GV *gv;
     PerlIO *fp;
 
-    STACKED_FTEST_CHECK;
-
     tryAMAGICftest(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
+
+    STACKED_FTEST_CHECK;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
