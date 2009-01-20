@@ -9,18 +9,20 @@ our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 our $VERSION = '1.01';
 
+my @fields;
 BEGIN { 
     use Exporter   ();
     @EXPORT      = qw(stat lstat);
-    @EXPORT_OK   = qw( $st_dev	   $st_ino    $st_mode 
+    @fields      = qw( $st_dev	   $st_ino    $st_mode 
 		       $st_nlink   $st_uid    $st_gid 
 		       $st_rdev    $st_size 
 		       $st_atime   $st_mtime  $st_ctime 
 		       $st_blksize $st_blocks
 		    );
-    %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
+    @EXPORT_OK   = ( @fields, "stat_cando" );
+    %EXPORT_TAGS = ( FIELDS => [ @fields, @EXPORT ] );
 }
-use vars @EXPORT_OK;
+use vars @fields;
 
 use Fcntl qw(S_IRUSR S_IWUSR S_IXUSR);
 
@@ -73,7 +75,7 @@ sub _ingroup {
 if (grep $^O eq $_, qw/os2 MSWin32 dos/) {
 
     # from doio.c
-    *cando = sub { ($_[0] & $_[2]->mode) ? 1 : "" };
+    *cando = sub { ($_[0] & $_[2][2]) ? 1 : "" };
 }
 else {
 
@@ -84,57 +86,64 @@ else {
 
         $uid == 0                   and return 1;
 
+        my ($stmode, $stuid, $stgid) = @$s[2,4,5];
+
         # This code basically assumes that the rwx bits of the mode are
         # the 0777 bits, but so does Perl_cando.
-        if ($s->uid == $uid) {
-            $s->mode & $mode        and return 1;
+        if ($stuid == $uid) {
+            $stmode & $mode         and return 1;
         }
-        elsif (_ingroup($s->gid, $eff)) {
-            $s->mode & ($mode >> 3) and return 1;
+        elsif (_ingroup($stgid, $eff)) {
+            $stmode & ($mode >> 3)  and return 1;
         }
         else {
-            $s->mode & ($mode >> 6) and return 1;
+            $stmode & ($mode >> 6)  and return 1;
         }
         return "";
     };
 }
 
+# alias for those who don't like objects
+*stat_cando = \&cando;
+
 my %op = (
     r => sub { cando($_[0], S_IRUSR, 1) },
     w => sub { cando($_[0], S_IWUSR, 1) },
     x => sub { cando($_[0], S_IXUSR, 1) },
-    o => sub { $_[0]->uid == $>         },
+    o => sub { $_[0][4] == $>           },
 
     R => sub { cando($_[0], S_IRUSR, 0) },
     W => sub { cando($_[0], S_IWUSR, 0) },
     X => sub { cando($_[0], S_IXUSR, 0) },
-    O => sub { $_[0]->uid == $<         },
+    O => sub { $_[0][4] == $<           },
 
     e => sub { 1 },
-    z => sub { $_[0]->size == 0     },
-    s => sub { $_[0]->size          },
+    z => sub { $_[0][7] == 0    },
+    s => sub { $_[0][7]         },
 
-    f => sub { S_ISREG ($_[0]->mode) },
-    d => sub { S_ISDIR ($_[0]->mode) },
-    l => sub { S_ISLNK ($_[0]->mode) },
-    p => sub { S_ISFIFO($_[0]->mode) },
-    S => sub { S_ISSOCK($_[0]->mode) },
-    b => sub { S_ISBLK ($_[0]->mode) },
-    c => sub { S_ISCHR ($_[0]->mode) },
+    f => sub { S_ISREG ($_[0][2]) },
+    d => sub { S_ISDIR ($_[0][2]) },
+    l => sub { S_ISLNK ($_[0][2]) },
+    p => sub { S_ISFIFO($_[0][2]) },
+    S => sub { S_ISSOCK($_[0][2]) },
+    b => sub { S_ISBLK ($_[0][2]) },
+    c => sub { S_ISCHR ($_[0][2]) },
 
-    u => sub { _suid($_[0]->mode) },
-    g => sub { _sgid($_[0]->mode) },
-    k => sub { _svtx($_[0]->mode) },
+    u => sub { _suid($_[0][2]) },
+    g => sub { _sgid($_[0][2]) },
+    k => sub { _svtx($_[0][2]) },
 
-    M => sub { ($^T - $_[0]->mtime) / 86400 },
-    C => sub { ($^T - $_[0]->ctime) / 86400 },
-    A => sub { ($^T - $_[0]->atime) / 86400 },
+    M => sub { ($^T - $_[0][9] ) / 86400 },
+    C => sub { ($^T - $_[0][10]) / 86400 },
+    A => sub { ($^T - $_[0][8] ) / 86400 },
 );
 
+# we need fallback=>1 or stringifying breaks
 use overload 
     fallback => 1,
     -X => sub {
         my ($s, $op) = @_;
+
         if ($op{$op}) {
             return $op{$op}->($_[0]);
         }
