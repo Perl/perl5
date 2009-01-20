@@ -9,7 +9,7 @@ DirHandle - supply object methods for directory handles
 =head1 SYNOPSIS
 
     use DirHandle;
-    $d = new DirHandle ".";
+    $d = DirHandle->new(".");
     if (defined $d) {
         while (defined($_ = $d->read)) { something($_); }
         $d->rewind;
@@ -46,7 +46,7 @@ use Carp;
 use Symbol;
 
 sub new {
-    @_ >= 1 && @_ <= 2 or croak 'usage: new DirHandle [DIRNAME]';
+    @_ >= 1 && @_ <= 2 or croak 'usage: DirHandle->new( [DIRNAME] )';
     my $class = shift;
     my $dh = gensym;
     if (@_) {
