@@ -3,7 +3,10 @@ use 5.006;
 
 use strict;
 use warnings;
+use warnings::register;
 use Carp;
+
+BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
@@ -138,11 +141,24 @@ my %op = (
     A => sub { ($^T - $_[0][8] ) / 86400 },
 );
 
+use constant HINT_FILETEST_ACCESS => 0x00400000;
+
 # we need fallback=>1 or stringifying breaks
 use overload 
     fallback => 1,
     -X => sub {
         my ($s, $op) = @_;
+
+        if (index "rwxRWX", $op) {
+            (caller 0)[8] & HINT_FILETEST_ACCESS
+                and warnif("File::stat ignores use filetest 'access'");
+
+            $^O eq "VMS" and warnif("File::stat ignores VMS ACLs");
+
+            # It would be nice to have a warning about using -l on a
+            # non-lstat, but that would require an extra member in the
+            # object.
+        }
 
         if ($op{$op}) {
             return $op{$op}->($_[0]);
