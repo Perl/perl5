@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 28 + 27*12);
+plan(tests => 28 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -137,6 +137,12 @@ my $both = bless [], "OverBoth";
 my $neither = bless [], "OverNeither";
 my $nstr = overload::StrVal($neither);
 
+open my $gv, "<", "TEST";
+bless $gv, "OverString";
+open my $io, "<", "TEST";
+$io = *{$io}{IO};
+bless $io, "OverString";
+
 for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     $over = [];
     ok( my $rv = eval "-$op \$ft",  "overloaded -$op succeeds" )
@@ -151,6 +157,16 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
         or diag( $@ );
     is( $rv, eval "-$op 'TEST'",    "correct -$op on string overload" );
     is( $over,      1,              "string overload called for -$op" );
+
+    my ($exp, $is) = $op eq "l" ? (1, "is") : (0, "not");
+
+    $over = 0;
+    eval "-$op \$gv";
+    is( $over,      $exp,   "string overload $is called for -$op on GLOB" );
+
+    $over = 0;
+    eval "-$op \$io";
+    is( $over,      $exp,   "string overload $is called for -$op on IO");
 
     $rv = eval "-$op \$both";
     is( $rv,        "-$op",         "correct -$op on string/-X overload" );
