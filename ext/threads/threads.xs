@@ -356,7 +356,7 @@ S_good_stack_size(pTHX_ IV stack_size)
 #  endif
         if ((long)MY_POOL.page_size < 0) {
             if (errno) {
-                SV * const error = get_sv("@", FALSE);
+                SV * const error = get_sv("@", 0);
                 (void)SvUPGRADE(error, SVt_PV);
                 Perl_croak(aTHX_ "PANIC: sysconf: %s", SvPV_nolen(error));
             } else {
@@ -870,7 +870,7 @@ ithread_create(...)
             /* threads->create() */
             classname = (char *)SvPV_nolen(ST(0));
             stack_size = MY_POOL.default_stack_size;
-            thread_exit_only = get_sv("threads::thread_exit_only", TRUE);
+            thread_exit_only = get_sv("threads::thread_exit_only", GV_ADD);
             exit_opt = (SvTRUE(thread_exit_only))
                                     ? PERL_ITHR_THREAD_EXIT_ONLY : 0;
         }
