@@ -2429,7 +2429,7 @@ PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char* name, I32 create)
 #define PERL_ARGS_ASSERT_GET_SV	\
 	assert(name)
 
-PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char* name, I32 create)
+PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char *name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_AV	\
 	assert(name)

@@ -354,13 +354,14 @@ Found in file av.c
 =item get_av
 X<get_av>
 
-Returns the AV of the specified Perl array.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the AV of the specified Perl array.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	AV*	get_av(const char* name, I32 create)
+	AV*	get_av(const char *name, I32 flags)
 
 =for hackers
 Found in file perl.c
