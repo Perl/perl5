@@ -2612,7 +2612,7 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
 {
     PERL_ARGS_ASSERT_CALL_PV;
 
-    return call_sv(MUTABLE_SV(get_cv(sub_name, TRUE)), flags);
+    return call_sv(MUTABLE_SV(get_cv(sub_name, GV_ADD)), flags);
 }
 
 /*

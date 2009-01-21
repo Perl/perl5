@@ -24,7 +24,7 @@ db_get_cv(pTHX_ SV *sv)
 	    cv = INT2PTR(CV*,SvIVX(sv));
 	} else {
 	    if (SvPOK(sv)) {
-		cv = get_cv(SvPVX_const(sv), TRUE);
+		cv = get_cv(SvPVX_const(sv), GV_ADD);
 	    } else if (SvROK(sv)) {
 		cv = (CV*)SvRV(sv);
 	    } else {
@@ -470,7 +470,7 @@ prof_mark(pTHX_ opcode ptype)
 static void
 test_time(pTHX_ clock_t *r, clock_t *u, clock_t *s)
 {
-    CV * const cv = perl_get_cv("Devel::DProf::NONESUCH_noxs", FALSE);
+    CV * const cv = perl_get_cv("Devel::DProf::NONESUCH_noxs", 0);
     HV * const oldstash = PL_curstash;
     struct tms t1, t2;
     const U32 ototal = g_total;
