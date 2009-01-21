@@ -898,7 +898,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
 		 * it could have been extended by warnings::register */
-		HV * const bits=get_hv("warnings::Bits", FALSE);
+		HV * const bits=get_hv("warnings::Bits", 0);
 		if (bits) {
 		    SV ** const bits_all = hv_fetchs(bits, "all", FALSE);
 		    if (bits_all)

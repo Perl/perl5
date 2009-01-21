@@ -2455,7 +2455,7 @@ PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char* name, I32 create)
 #define PERL_ARGS_ASSERT_GET_AV	\
 	assert(name)
 
-PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char* name, I32 create)
+PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char *name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_HV	\
 	assert(name)

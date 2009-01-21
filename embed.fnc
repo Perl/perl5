@@ -762,7 +762,7 @@ Apd	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|NN SV* sv|I32 flags
 Apd	|SV*	|get_sv		|NN const char* name|I32 create
 Apd	|AV*	|get_av		|NN const char* name|I32 create
-Apd	|HV*	|get_hv		|NN const char* name|I32 create
+Apd	|HV*	|get_hv		|NN const char *name|I32 flags
 Apd	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
 Ap	|int	|init_i18nl10n	|int printwarn

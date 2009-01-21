@@ -442,7 +442,7 @@ specified below.
 If you know the name of a hash variable, you can get a pointer to its HV
 by using the following:
 
-    HV*  get_hv("package::varname", FALSE);
+    HV*  get_hv("package::varname", 0);
 
 This returns NULL if the variable does not exist.
 
@@ -669,7 +669,7 @@ your Perl script, use the following routines, depending on the variable type.
 
     SV*  get_sv("package::varname", TRUE);
     AV*  get_av("package::varname", TRUE);
-    HV*  get_hv("package::varname", TRUE);
+    HV*  get_hv("package::varname", GV_ADD);
 
 Notice the use of TRUE as the second parameter.  The new variable can now
 be set, using the routines appropriate to the data type.
