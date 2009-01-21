@@ -24,7 +24,9 @@ db_get_cv(pTHX_ SV *sv)
 	    cv = INT2PTR(CV*,SvIVX(sv));
 	} else {
 	    if (SvPOK(sv)) {
-		cv = get_cv(SvPVX_const(sv), GV_ADD);
+		STRLEN len;
+		const char *const name = SvPV(sv, len);
+		cv = get_cvn_flags(name, len, GV_ADD | SvUTF8(sv));
 	    } else if (SvROK(sv)) {
 		cv = (CV*)SvRV(sv);
 	    } else {
