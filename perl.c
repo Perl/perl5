@@ -2465,21 +2465,22 @@ Perl_get_sv(pTHX_ const char *name, I32 create)
 
 =for apidoc p||get_av
 
-Returns the AV of the specified Perl array.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the AV of the specified Perl array.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 =cut
 */
 
 AV*
-Perl_get_av(pTHX_ const char *name, I32 create)
+Perl_get_av(pTHX_ const char *name, I32 flags)
 {
-    GV* const gv = gv_fetchpv(name, create, SVt_PVAV);
+    GV* const gv = gv_fetchpv(name, flags, SVt_PVAV);
 
     PERL_ARGS_ASSERT_GET_AV;
 
-    if (create)
+    if (flags)
     	return GvAVn(gv);
     if (gv)
 	return GvAV(gv);
@@ -4837,7 +4838,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     /* touch @F array to prevent spurious warnings 20020415 MJD */
     if (PL_minus_a) {
-      (void) get_av("main::F", TRUE | GV_ADDMULTI);
+      (void) get_av("main::F", GV_ADD | GV_ADDMULTI);
     }
 }
 

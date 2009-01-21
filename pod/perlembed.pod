@@ -480,7 +480,7 @@ been wrapped here):
      my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
 
-     *match_list = get_av("array", FALSE);
+     *match_list = get_av("array", 0);
      num_matches = av_len(*match_list) + 1; /** assume $[ is 0 **/
 
      return num_matches;
