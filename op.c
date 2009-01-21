@@ -2338,8 +2338,7 @@ Perl_newPROG(pTHX_ OP *o)
 
 	/* Register with debugger */
 	if (PERLDB_INTER) {
-	    CV * const cv
-		= Perl_get_cvn_flags(aTHX_ STR_WITH_LEN("DB::postponed"), 0);
+	    CV * const cv = get_cvs("DB::postponed", 0);
 	    if (cv) {
 		dSP;
 		PUSHMARK(SP);

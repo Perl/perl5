@@ -327,6 +327,8 @@ and omits the hash parameter.
   ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
 			 (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val), 0))
 
+#define get_cvs(str, flags)					\
+	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
 /*
 =head1 Miscellaneous Functions
