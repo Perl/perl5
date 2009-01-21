@@ -2529,6 +2529,8 @@ Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
     return NULL;
 }
 
+/* Nothing in core calls this now, but we can't replace it with a macro and
+   move it to mathoms.c as a macro would evaluate name twice.  */
 CV*
 Perl_get_cv(pTHX_ const char *name, I32 flags)
 {
