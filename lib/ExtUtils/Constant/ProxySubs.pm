@@ -318,7 +318,7 @@ BOOT:
 #ifdef dTHX
     dTHX;
 #endif
-    HV *symbol_table = get_hv("$symbol_table", TRUE);
+    HV *symbol_table = get_hv("$symbol_table", GV_ADD);
 #ifndef SYMBIAN
     HV *${c_subname}_missing;
 #endif
