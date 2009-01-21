@@ -5914,14 +5914,11 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     dVAR;
     CV* cv;
 #ifdef USE_ITHREADS
-    const char *const temp_p = CopFILE(PL_curcop);
-    const STRLEN len = temp_p ? strlen(temp_p) : 0;
+    const char *const file = CopFILE(PL_curcop);
 #else
     SV *const temp_sv = CopFILESV(PL_curcop);
-    STRLEN len;
-    const char *const temp_p = temp_sv ? SvPV_const(temp_sv, len) : NULL;
+    const char *const file = temp_sv ? SvPV_const_nolen(temp_sv) : NULL;
 #endif
-    char *const file = savepvn(temp_p, temp_p ? len : 0);
 
     ENTER;
 
@@ -5949,10 +5946,10 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
-    cv = newXS_flags(name, const_sv_xsub, file, "", XS_DYNAMIC_FILENAME);
+    cv = newXS_flags(name, const_sv_xsub, file ? file : "", "",
+		     XS_DYNAMIC_FILENAME);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
-    Safefree(file);
 
 #ifdef USE_ITHREADS
     if (stash)
