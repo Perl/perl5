@@ -2466,21 +2466,22 @@ Perl_get_av(pTHX_ const char *name, I32 create)
 
 =for apidoc p||get_hv
 
-Returns the HV of the specified Perl hash.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the HV of the specified Perl hash.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 =cut
 */
 
 HV*
-Perl_get_hv(pTHX_ const char *name, I32 create)
+Perl_get_hv(pTHX_ const char *name, I32 flags)
 {
-    GV* const gv = gv_fetchpv(name, create, SVt_PVHV);
+    GV* const gv = gv_fetchpv(name, flags, SVt_PVHV);
 
     PERL_ARGS_ASSERT_GET_HV;
 
-    if (create)
+    if (flags)
     	return GvHVn(gv);
     if (gv)
 	return GvHV(gv);

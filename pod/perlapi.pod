@@ -1484,13 +1484,14 @@ Found in file handy.h
 =item get_hv
 X<get_hv>
 
-Returns the HV of the specified Perl hash.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the HV of the specified Perl hash.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	HV*	get_hv(const char* name, I32 create)
+	HV*	get_hv(const char *name, I32 flags)
 
 =for hackers
 Found in file perl.c

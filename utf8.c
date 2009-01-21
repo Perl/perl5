@@ -1498,7 +1498,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     if (special && (uv1 == 0xDF || uv1 > 0xFF)) {
          /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
-	 HV * const hv = get_hv(special, FALSE);
+	 HV * const hv = get_hv(special, 0);
 	 SV **svp;
 
 	 if (hv &&
