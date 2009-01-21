@@ -2445,7 +2445,7 @@ PERL_CALLCONV I32	Perl_eval_sv(pTHX_ SV* sv, I32 flags)
 #define PERL_ARGS_ASSERT_EVAL_SV	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char* name, I32 create)
+PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char *name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_SV	\
 	assert(name)

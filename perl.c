@@ -2440,21 +2440,22 @@ S_run_body(pTHX_ I32 oldscope)
 
 =for apidoc p||get_sv
 
-Returns the SV of the specified Perl scalar.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the SV of the specified Perl scalar.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 =cut
 */
 
 SV*
-Perl_get_sv(pTHX_ const char *name, I32 create)
+Perl_get_sv(pTHX_ const char *name, I32 flags)
 {
     GV *gv;
 
     PERL_ARGS_ASSERT_GET_SV;
 
-    gv = gv_fetchpv(name, create, SVt_PV);
+    gv = gv_fetchpv(name, flags, SVt_PV);
     if (gv)
 	return GvSV(gv);
     return NULL;
@@ -3102,7 +3103,7 @@ Perl_moreswitches(pTHX_ const char *s)
 		   PL_rs = newSVpvn(&ch, 1);
 	      }
 	 }
-	 sv_setsv(get_sv("/", TRUE), PL_rs);
+	 sv_setsv(get_sv("/", GV_ADD), PL_rs);
 	 return s + numlen;
     }
     case 'C':
@@ -3627,7 +3628,7 @@ S_init_main_stash(pTHX)
     PL_globalstash = GvHV(gv_fetchpvs("CORE::GLOBAL::", GV_ADDMULTI,
 				      SVt_PVHV));
     /* We must init $/ before switches are processed. */
-    sv_setpvs(get_sv("/", TRUE), "\n");
+    sv_setpvs(get_sv("/", GV_ADD), "\n");
 }
 
 STATIC int
@@ -4674,7 +4675,7 @@ S_init_predump_symbols(pTHX)
     GV *tmpgv;
     IO *io;
 
-    sv_setpvs(get_sv("\"", TRUE), " ");
+    sv_setpvs(get_sv("\"", GV_ADD), " ");
     PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
     io = GvIOp(PL_stdingv);

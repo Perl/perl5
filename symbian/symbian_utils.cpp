@@ -171,7 +171,7 @@ extern "C" {
 	} else {
 	  buf8.Format(_L8("Symbian error %d"), error);
 	}
-        SV* sv = Perl_get_sv(aTHX_ "\005", TRUE); /* $^E or ${^OS_ERROR} */
+        SV* sv = Perl_get_sv(aTHX_ "\005", GV_ADD); /* $^E or ${^OS_ERROR} */
         if (!sv)
             return (char*)NullErr;
         sv_setpv(sv, (const char *)buf8.PtrZ());
