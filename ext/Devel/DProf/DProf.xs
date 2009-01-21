@@ -194,17 +194,17 @@ dprof_times(pTHX_ struct tms *t)
     
     if (!g_frequ) {
 	if (CheckOSError(DosTmrQueryFreq(&g_frequ)))
-	    croak("DosTmrQueryFreq: %s", SvPV_nolen(perl_get_sv("!",TRUE)));
+	    croak("DosTmrQueryFreq: %s", SvPV_nolen(perl_get_sv("!",GV_ADD)));
 	else
 	    g_frequ = g_frequ/DPROF_HZ;	/* count per tick */
 	if (CheckOSError(DosTmrQueryTime(&cnt)))
 	    croak("DosTmrQueryTime: %s",
-		  SvPV_nolen_const(perl_get_sv("!",TRUE)));
+		  SvPV_nolen_const(perl_get_sv("!",GV_ADD)));
 	g_start_cnt = toLongLong(cnt);
     }
 
     if (CheckOSError(DosTmrQueryTime(&cnt)))
-	    croak("DosTmrQueryTime: %s", SvPV_nolen(perl_get_sv("!",TRUE)));
+	    croak("DosTmrQueryTime: %s", SvPV_nolen(perl_get_sv("!",GV_ADD)));
     t->tms_stime = 0;
     return (t->tms_utime = (toLongLong(cnt) - g_start_cnt)/g_frequ);
 #else		/* !OS2 */
@@ -240,13 +240,13 @@ dprof_times(pTHX_ struct tms *t)
 
     if (!tv0.tv_sec)
         if (gettimeofday(&tv0, NULL) < 0)
-            croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+            croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",GV_ADD)));
     
     if (getrusage(0, &ru) < 0)
-        croak("getrusage: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+        croak("getrusage: %s", SvPV_nolen_const(perl_get_sv("!",GV_ADD)));
 
     if (gettimeofday(&tv, NULL) < 0)
-        croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+        croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",GV_ADD)));
 
     t->tms_stime = DPROF_HZ * ru.ru_stime.tv_sec + ru.ru_stime.tv_usec;
     t->tms_utime = DPROF_HZ * ru.ru_utime.tv_sec + ru.ru_utime.tv_usec;

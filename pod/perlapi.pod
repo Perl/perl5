@@ -3987,13 +3987,14 @@ Found in file universal.c
 =item get_sv
 X<get_sv>
 
-Returns the SV of the specified Perl scalar.  If C<create> is set and the
-Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the SV of the specified Perl scalar.  C<flags> are passed to
+C<gv_fetchpv>. If C<GV_ADD> is set and the
+Perl variable does not exist then it will be created.  If C<flags> is zero
+and the variable does not exist then NULL is returned.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	SV*	get_sv(const char* name, I32 create)
+	SV*	get_sv(const char *name, I32 flags)
 
 =for hackers
 Found in file perl.c
@@ -7335,7 +7336,7 @@ sidestepping the normal C order of execution. See C<warn>.
 If you want to throw an exception object, assign the object to
 C<$@> and then pass C<NULL> to croak():
 
-   errsv = get_sv("@", TRUE);
+   errsv = get_sv("@", GV_ADD);
    sv_setsv(errsv, exception_object);
    croak(NULL);
 

@@ -325,15 +325,15 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
        /** Treat $a as an integer **/
        eval_pv("$a = 3; $a **= 2", TRUE);
-       printf("a = %d\n", SvIV(get_sv("a", FALSE)));
+       printf("a = %d\n", SvIV(get_sv("a", 0)));
 
        /** Treat $a as a float **/
        eval_pv("$a = 3.14; $a **= 2", TRUE);
-       printf("a = %f\n", SvNV(get_sv("a", FALSE)));
+       printf("a = %f\n", SvNV(get_sv("a", 0)));
 
        /** Treat $a as a string **/
        eval_pv("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
-       printf("a = %s\n", SvPV_nolen(get_sv("a", FALSE)));
+       printf("a = %s\n", SvPV_nolen(get_sv("a", 0)));
 
        perl_destruct(my_perl);
        perl_free(my_perl);
@@ -457,7 +457,7 @@ been wrapped here):
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
 
-     *string = get_sv("string", FALSE);
+     *string = get_sv("string", 0);
      return SvIV(retval);
  }
 

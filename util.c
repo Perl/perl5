@@ -1454,7 +1454,7 @@ sidestepping the normal C order of execution. See C<warn>.
 If you want to throw an exception object, assign the object to
 C<$@> and then pass C<NULL> to croak():
 
-   errsv = get_sv("@", TRUE);
+   errsv = get_sv("@", GV_ADD);
    sv_setsv(errsv, exception_object);
    croak(NULL);
 

@@ -191,7 +191,7 @@ have "magic".  See L<Magic Virtual Tables> later in this document.
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
 
-    SV*  get_sv("package::varname", FALSE);
+    SV*  get_sv("package::varname", 0);
 
 This returns NULL if the variable does not exist.
 
@@ -667,7 +667,7 @@ to write:
 To create a new Perl variable with an undef value which can be accessed from
 your Perl script, use the following routines, depending on the variable type.
 
-    SV*  get_sv("package::varname", TRUE);
+    SV*  get_sv("package::varname", GV_ADD);
     AV*  get_av("package::varname", GV_ADD);
     HV*  get_hv("package::varname", GV_ADD);
 
@@ -878,7 +878,7 @@ following code:
     extern int  dberror;
     extern char *dberror_list;
 
-    SV* sv = get_sv("dberror", TRUE);
+    SV* sv = get_sv("dberror", GV_ADD);
     sv_setiv(sv, (IV) dberror);
     sv_setpv(sv, dberror_list[dberror]);
     SvIOK_on(sv);
