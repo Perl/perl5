@@ -2575,7 +2575,7 @@ PP(pp_goto)
 		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    Perl_get_db_sub(aTHX_ NULL, cv);
 		    if (PERLDB_GOTO) {
-			CV * const gotocv = get_cv("DB::goto", FALSE);
+			CV * const gotocv = get_cv("DB::goto", 0);
 			if (gotocv) {
 			    PUSHMARK( PL_stack_sp );
 			    call_sv(MUTABLE_SV(gotocv), G_SCALAR | G_NODEBUG);
@@ -3098,7 +3098,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     /* Register with debugger: */
     if (PERLDB_INTER && saveop && saveop->op_type == OP_REQUIRE) {
-	CV * const cv = get_cv("DB::postponed", FALSE);
+	CV * const cv = get_cv("DB::postponed", 0);
 	if (cv) {
 	    dSP;
 	    PUSHMARK(SP);
