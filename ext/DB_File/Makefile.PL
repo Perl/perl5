@@ -10,7 +10,9 @@ my $OS2 = "-DOS2" if $Config{'osname'} eq 'os2' ;
 
 my $LIB = "-ldb" ;
 # so is win32
-$LIB = "-llibdb" if $^O eq 'MSWin32' ;
+if ( $^O eq 'MSWin32' ) {
+	$LIB = $Config{cc} =~ /gcc/ ? "-ldb" : "-llibdb";
+}
 
 WriteMakefile(
 	NAME 		=> 'DB_File',
