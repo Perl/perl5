@@ -151,7 +151,7 @@ typedef double NV;			/* Older perls lack the NV type */
 
 #define TRACEME(x)										\
   STMT_START {											\
-	if (SvTRUE(perl_get_sv("Storable::DEBUGME", TRUE)))	\
+	if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))	\
 		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }		\
   } STMT_END
 #else
@@ -401,7 +401,7 @@ typedef struct stcxt {
 
 #if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
 #define dSTCXT_SV 									\
-	SV *perinterp_sv = perl_get_sv(MY_VERSION, FALSE)
+	SV *perinterp_sv = perl_get_sv(MY_VERSION, 0)
 #else	/* >= perl5.004_68 */
 #define dSTCXT_SV									\
 	SV *perinterp_sv = *hv_fetch(PL_modglobal,		\
@@ -2332,7 +2332,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	if (
 		!(cxt->optype & ST_CLONE) && (cxt->canonical == 1 ||
 		(cxt->canonical < 0 && (cxt->canonical =
-			(SvTRUE(perl_get_sv("Storable::canonical", TRUE)) ? 1 : 0))))
+			(SvTRUE(perl_get_sv("Storable::canonical", GV_ADD)) ? 1 : 0))))
 	) {
 		/*
 		 * Storing in order, sorted by key.
@@ -2619,7 +2619,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	if (
 		cxt->deparse == 0 ||
 		(cxt->deparse < 0 && !(cxt->deparse =
-			SvTRUE(perl_get_sv("Storable::Deparse", TRUE)) ? 1 : 0))
+			SvTRUE(perl_get_sv("Storable::Deparse", GV_ADD)) ? 1 : 0))
 	) {
 		return store_other(aTHX_ cxt, (SV*)cv);
 	}
@@ -3397,7 +3397,7 @@ static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
 	if (
 		cxt->forgive_me == 0 ||
 		(cxt->forgive_me < 0 && !(cxt->forgive_me =
-			SvTRUE(perl_get_sv("Storable::forgive_me", TRUE)) ? 1 : 0))
+			SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
 	)
 		CROAK(("Can't store %s items", sv_reftype(sv, FALSE)));
 
@@ -3689,7 +3689,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
         length = sizeof (network_file_header);
     } else {
 #ifdef USE_56_INTERWORK_KLUDGE
-        if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", TRUE))) {
+        if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
             header = file_header_56;
             length = sizeof (file_header_56);
         } else
@@ -4913,7 +4913,7 @@ static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname)
 #else
         if (cxt->use_bytes < 0)
             cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
                    ? 1 : 0);
         if (cxt->use_bytes == 0)
             UTF8_CROAK();
@@ -4942,7 +4942,7 @@ static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 #else
         if (cxt->use_bytes < 0)
             cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
                    ? 1 : 0);
         if (cxt->use_bytes == 0)
             UTF8_CROAK();
@@ -5273,7 +5273,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     if (hash_flags & SHV_RESTRICTED) {
         if (cxt->derestrict < 0)
             cxt->derestrict
-                = (SvTRUE(perl_get_sv("Storable::downgrade_restricted", TRUE))
+                = (SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD))
                    ? 1 : 0);
         if (cxt->derestrict == 0)
             RESTRICTED_HASH_CROAK();
@@ -5342,7 +5342,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #else
                 if (cxt->use_bytes < 0)
                     cxt->use_bytes
-                        = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                        = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
                            ? 1 : 0);
                 if (cxt->use_bytes == 0)
                     UTF8_CROAK();
@@ -5443,14 +5443,14 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	if (cxt->eval == NULL) {
-		cxt->eval = perl_get_sv("Storable::Eval", TRUE);
+		cxt->eval = perl_get_sv("Storable::Eval", GV_ADD);
 		SvREFCNT_inc(cxt->eval);
 	}
 	if (!SvTRUE(cxt->eval)) {
 		if (
 			cxt->forgive_me == 0 ||
 			(cxt->forgive_me < 0 && !(cxt->forgive_me =
-				SvTRUE(perl_get_sv("Storable::forgive_me", TRUE)) ? 1 : 0))
+				SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
 		) {
 			CROAK(("Can't eval, please set $Storable::Eval to a true value"));
 		} else {
@@ -5465,7 +5465,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	SAVETMPS;
 
 	if (SvROK(cxt->eval) && SvTYPE(SvRV(cxt->eval)) == SVt_PVCV) {
-		SV* errsv = get_sv("@", TRUE);
+		SV* errsv = get_sv("@", GV_ADD);
 		sv_setpvn(errsv, "", 0);	/* clear $@ */
 		PUSHMARK(sp);
 		XPUSHs(sv_2mortal(newSVsv(sub)));
@@ -5777,7 +5777,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
             if (cxt->accept_future_minor < 0)
                 cxt->accept_future_minor
                     = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
-                                          TRUE))
+                                          GV_ADD))
                        ? 1 : 0);
             if (cxt->accept_future_minor == 1)
                 croak_now = 0;  /* Don't croak yet.  */
@@ -5814,7 +5814,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
 #ifdef USE_56_INTERWORK_KLUDGE
     /* No point in caching this in the context as we only need it once per
        retrieve, and we need to recheck it each read.  */
-    if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", TRUE))) {
+    if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
         if ((c != (sizeof (byteorderstr_56) - 1))
             || memNE(buf, byteorderstr_56, c))
             CROAK(("Byte order is not compatible"));
@@ -5948,7 +5948,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
             if (cxt->accept_future_minor < 0)
                 cxt->accept_future_minor
                     = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
-                                          TRUE))
+                                          GV_ADD))
                        ? 1 : 0);
             if (cxt->accept_future_minor == 1) {
                 CROAK(("Storable binary image v%d.%d contains data of type %d. "
