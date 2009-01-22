@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.26 2008/07/01 20:56:17 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.27 2009/01/21 22:55:07 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.26 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.27 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -863,12 +863,16 @@ B<know> that the STRING is well-formed UTF-8.  Returns the previous
 state of the UTF8 flag (so please don't treat the return value as
 indicating success or failure), or C<undef> if STRING is not a string.
 
+This function does not work on tainted values.
+
 =item _utf8_off(STRING)
 
 [INTERNAL] Turns off the UTF8 flag in STRING.  Do not use frivolously.
 Returns the previous state of the UTF8 flag (so please don't treat the
 return value as indicating success or failure), or C<undef> if STRING is
 not a string.
+
+This function does not work on tainted values.
 
 =back
 

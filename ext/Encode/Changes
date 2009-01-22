@@ -1,13 +1,36 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.26 2008/07/01 20:56:17 dankogai Exp dankogai $
+# $Id: Changes,v 2.27 2009/01/21 22:55:07 dankogai Exp dankogai $
 #
-$Revision: 2.26 $ $Date: 2008/07/01 20:56:17 $
+$Revision: 2.27 $ $Date: 2009/01/21 22:55:07 $
+! lib/Encode/MIME/Header.pm t/mime-header.t
+  Addressed: Encode::MIME::Header MIME-Q encoding truncates 
+    trailing zeros in some circumstances
+  http://rt.cpan.org/Ticket/Display.html?id=342627
+! lib/Encode/Alias.pm
+  Added alias: unicode-1-1-utf-7
+  http://rt.cpan.org/Ticket/Display.html?id=38558  
+! Encode.pm
+  Documented: _utf8_on() does not work for tainted values
+  http://rt.cpan.org/Ticket/Display.html?id=41163
+! bin/enc2xs
+  s[oss.software.ibm.com/icu][www.icu-project.org]g
+  http://rt.cpan.org/Ticket/Display.html?id=40245
+! lib/Encode/Guess.pm t/guess.t
+  Addressed:Empty file should produce an error message
+  http://rt.cpan.org/Ticket/Display.html?id=38652
+
+
+2.26 2008/07/01 20:56:17
+! Unicode/Unicode.xs AUTHORS
+  Refactored by Alex Davies
+  http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-10/msg00745.html
+  Message-Id: <7637669B2E3D46B187591747DA27F4C8@Amelie>
 ! Encode.pm
   Absense of Encode::ConfigLocal no longer carps no matter what.
-  https://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
-  https://rt.cpan.org/Ticket/Display.html?id=28638
-  https://rt.cpan.org/Ticket/Display.html?id=11511
+  http://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
+  http://rt.cpan.org/Ticket/Display.html?id=28638
+  http://rt.cpan.org/Ticket/Display.html?id=11511
 ! lib/Encode/JIS7.pm
   use encoding 'utf8' and 'iso-2022-jp' glitches on perl 5.10
   Thanks, MIYAGAWA
