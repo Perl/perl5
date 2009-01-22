@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.11 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 sub DEBUG () { 0 }
 
 use base qw(Exporter);
@@ -135,7 +135,7 @@ sub init_aliases {
     define_alias( qr/^(.*)$/ => '"\L$1"' );
 
     # UTF/UCS stuff
-    define_alias( qr/^UTF-?7$/i     => '"UTF-7"' );
+    define_alias( qr/^(unicode-1-1-)?UTF-?7$/i     => '"UTF-7"' );
     define_alias( qr/^UCS-?2-?LE$/i => '"UCS-2LE"' );
     define_alias(
         qr/^UCS-?2-?(BE)?$/i    => '"UCS-2BE"',
