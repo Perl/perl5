@@ -713,8 +713,8 @@ for (@o) {
 ok(@o > 100);
 ok($fail, 0);
 
-ok(exists $p{call_sv});
-ok(not ref $p{call_sv});
+ok(exists $p{call_pv});
+ok(not ref $p{call_pv});
 
 ok(exists $p{grok_bin});
 ok(ref $p{grok_bin}, 'HASH');

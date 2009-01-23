@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 50 $
+##  $Revision: 51 $
 ##  $Author: mhx $
-##  $Date: 2009/01/18 14:10:55 +0100 $
+##  $Date: 2009/01/23 18:28:31 +0100 $
 ##
 ################################################################################
 ##
@@ -162,7 +162,7 @@ __UNDEFINED__  boolSV(b)    ((b) ? &PL_sv_yes : &PL_sv_no)
 /* DEFSV appears first in 5.004_56 */
 __UNDEFINED__  DEFSV	    GvSV(PL_defgv)
 __UNDEFINED__  SAVE_DEFSV   SAVESPTR(GvSV(PL_defgv))
-__UNDEFINED__  DEFSV_set(sv) (GvSV(PL_defgv) = (sv))
+__UNDEFINED__  DEFSV_set(sv) (DEFSV = (sv))
 
 /* Older perls (<=5.003) lack AvFILLp */
 __UNDEFINED__  AvFILLp      AvFILL
@@ -393,7 +393,9 @@ DEFSV_modify()
 		SAVE_DEFSV;
 		DEFSV_set(newSVpvs("DEFSV"));
 		XPUSHs(sv_mortalcopy(DEFSV));
-		sv_2mortal(DEFSV);
+		/* Yes, this leaks the above scalar; 5.005 with threads for some reason */
+		/* frees it upon LEAVE, thus mortalizing it causes "attempt to free..." */
+		/* sv_2mortal(DEFSV); */
 		LEAVE;
 		XPUSHs(sv_mortalcopy(DEFSV));
 		XSRETURN(3);
