@@ -1485,27 +1485,10 @@ s	|void	|nuke_stacks
 s	|int	|open_script	|NN const char *scriptname|bool dosearch \
 				|NN bool *suidscript|NN PerlIO **rsfpp
 s	|void	|usage		|NN const char *name
-#ifdef DOSUID
-#  ifdef IAMSUID
-so	|void	|validate_suid	|NN const char *validarg \
-				|int fdscript \
-				|bool suidscript|NN SV* linestr_sv \
-				|NN PerlIO *rsfp
-#  else
-so	|void	|validate_suid	|NN const char *validarg \
-				|NN const char *scriptname|int fdscript \
-				|NN SV* linestr_sv \
-				|NN PerlIO *rsfp
-#  endif
-#else
-#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 so	|void	|validate_suid	|NN PerlIO *rsfp
-#  endif
 #endif
 
-#  if defined(IAMSUID)
-s	|int	|fd_on_nosuid_fs|int fd
-#  endif
 s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
 s	|SV *	|incpush_if_exists|NN SV *dir

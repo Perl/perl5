@@ -4786,38 +4786,14 @@ STATIC void	S_usage(pTHX_ const char *name)
 #define PERL_ARGS_ASSERT_USAGE	\
 	assert(name)
 
-#ifdef DOSUID
-#  ifdef IAMSUID
-STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv, PerlIO *rsfp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_4)
-			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_VALIDATE_SUID	\
-	assert(validarg); assert(linestr_sv); assert(rsfp)
-
-#  else
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, SV* linestr_sv, PerlIO *rsfp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4)
-			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_VALIDATE_SUID	\
-	assert(validarg); assert(scriptname); assert(linestr_sv); assert(rsfp)
-
-#  endif
-#else
-#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_VALIDATE_SUID	\
 	assert(rsfp)
 
-#  endif
 #endif
 
-#  if defined(IAMSUID)
-STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
-#  endif
 STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void	S_run_body(pTHX_ I32 oldscope)
 			__attribute__noreturn__;

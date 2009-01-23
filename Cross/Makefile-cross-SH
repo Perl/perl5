@@ -29,11 +29,6 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-case "$d_dosuid" in
-*define*) suidperl='suidperl' ;;
-*) suidperl='';;
-esac
-
 linklibperl='$(LIBPERL)'
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
@@ -252,7 +247,7 @@ DYNALOADER = DynaLoader\$(OBJ_EXT)
 
 libs = $perllibs $cryptlib
 
-public = perl\$(EXE_EXT) $suidperl utilities translators
+public = perl\$(EXE_EXT) utilities translators
 
 shellflags = $shellflags
 
@@ -725,25 +720,11 @@ perl.gcov: perl.config.gcov
 microperl:
 	$(MAKE) -f Makefile.micro
 
-# This version, if specified in Configure, does ONLY those scripts which need
-# set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
-# checks as well as the special code to validate that the script in question
-# has been invoked correctly.
-
-suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
-
 !NO!SUBS!
 
 fi
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
-sperl$(OBJ_EXT): perl.c $(h)
-	$(RMS) sperl.c
-	$(LNS) perl.c sperl.c
-	$(CCCMD) -DIAMSUID sperl.c
-	$(RMS) sperl.c
 
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
@@ -1013,7 +994,7 @@ _mopup:
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
-	-rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
+	-rm -f perl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
 	-rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
 	-rm -f config.over
 

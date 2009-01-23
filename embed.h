@@ -1299,19 +1299,8 @@
 #define open_script		S_open_script
 #define usage			S_usage
 #endif
-#ifdef DOSUID
-#  ifdef IAMSUID
-#  else
-#  endif
-#else
-#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
-#  endif
+#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 #endif
-#  if defined(IAMSUID)
-#ifdef PERL_CORE
-#define fd_on_nosuid_fs		S_fd_on_nosuid_fs
-#endif
-#  endif
 #ifdef PERL_CORE
 #define parse_body		S_parse_body
 #define run_body		S_run_body
@@ -3648,25 +3637,10 @@
 #define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
 #define usage(a)		S_usage(aTHX_ a)
 #endif
-#ifdef DOSUID
-#  ifdef IAMSUID
+#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef PERL_CORE
 #endif
-#  else
-#ifdef PERL_CORE
 #endif
-#  endif
-#else
-#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
-#ifdef PERL_CORE
-#endif
-#  endif
-#endif
-#  if defined(IAMSUID)
-#ifdef PERL_CORE
-#define fd_on_nosuid_fs(a)	S_fd_on_nosuid_fs(aTHX_ a)
-#endif
-#  endif
 #ifdef PERL_CORE
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
