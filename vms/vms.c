@@ -13474,11 +13474,14 @@ Perl_vms_start_glob
     unsigned long hasver = 0, isunix = 0;
     unsigned long int lff_flags = 0;
     int rms_sts;
+    int vms_old_glob = 1;
 
     if (!SvOK(tmpglob)) {
         SETERRNO(ENOENT,RMS$_FNF);
         return NULL;
     }
+
+    vms_old_glob = !decc_filename_unix_report;
 
 #ifdef VMS_LONGNAME_SUPPORT
     lff_flags = LIB$M_FIL_LONG_NAMES;
@@ -13524,16 +13527,47 @@ Perl_vms_start_glob
 	    break;
 	}
     }
+
+    /* In UNIX report mode, assume UNIX unless VMS directory delimiters seen */
+    if ((hasdir == 0) && decc_filename_unix_report) {
+        isunix = 1;
+    }
+
     if ((tmpfp = PerlIO_tmpfile()) != NULL) {
+	char * wv_spec, * wr_spec, * wd_spec, * wn_spec, * we_spec, * wvs_spec;
+	int wv_sts, wv_len, wr_len, wd_len, wn_len, we_len, wvs_len;
+	int wildstar = 0;
+	int wildquery = 0;
 	int found = 0;
 	Stat_t st;
 	int stat_sts;
 	stat_sts = PerlLIO_stat(SvPVX_const(tmpglob),&st);
 	if (!stat_sts && S_ISDIR(st.st_mode)) {
-	    wilddsc.dsc$a_pointer = tovmspath_utf8(SvPVX(tmpglob),vmsspec,NULL);
-	    ok = (wilddsc.dsc$a_pointer != NULL);
-	    /* maybe passed 'foo' rather than '[.foo]', thus not detected above */
-	    hasdir = 1; 
+            char * vms_dir;
+            const char * fname;
+            STRLEN fname_len;
+
+            /* Test to see if SvPVX_const(tmpglob) ends with a VMS */
+            /* path delimiter of ':>]', if so, then the old behavior has */
+            /* obviously been specificially requested */
+
+            fname = SvPVX_const(tmpglob);
+            fname_len = strlen(fname);
+            vms_dir = strpbrk(&fname[fname_len - 1], ":>]");
+            if (vms_old_glob || (vms_dir != NULL)) {
+                wilddsc.dsc$a_pointer = tovmspath_utf8(
+                                            SvPVX(tmpglob),vmsspec,NULL);
+                ok = (wilddsc.dsc$a_pointer != NULL);
+                /* maybe passed 'foo' rather than '[.foo]', thus not
+                   detected above */
+                hasdir = 1; 
+            } else {
+                /* Operate just on the directory, the special stat/fstat for */
+                /* leaves the fileified  specification in the st_devnam */
+                /* member. */
+                wilddsc.dsc$a_pointer = st.st_devnam;
+                ok = 1;
+            }
 	}
 	else {
 	    wilddsc.dsc$a_pointer = tovmsspec_utf8(SvPVX(tmpglob),vmsspec,NULL);
@@ -13544,21 +13578,41 @@ Perl_vms_start_glob
 
 	/* If not extended character set, replace ? with % */
 	/* With extended character set, ? is a wildcard single character */
-	if (!decc_efs_case_preserve) {
-	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
-	        if (*cp == '?') *cp = '%';
+	for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++) {
+	    if (*cp == '?') {
+                wildquery = 1;
+                if (!decc_efs_case_preserve)
+                    *cp = '%';
+            } else if (*cp == '%') {
+                wildquery = 1;
+            } else if (*cp == '*') {
+                wildstar = 1;
+            }
 	}
+
+        if (ok) {
+            wv_sts = vms_split_path(
+                wilddsc.dsc$a_pointer, &wv_spec, &wv_len, &wr_spec, &wr_len,
+                &wd_spec, &wd_len, &wn_spec, &wn_len, &we_spec, &we_len,
+                &wvs_spec, &wvs_len);
+        } else {
+            wn_spec = NULL;
+            wn_len = 0;
+            we_spec = NULL;
+            we_len = 0;
+        }
+
 	sts = SS$_NORMAL;
 	while (ok && $VMS_STATUS_SUCCESS(sts)) {
 	 char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
 	 int v_sts, v_len, r_len, d_len, n_len, e_len, vs_len;
+         int valid_find;
 
+            valid_find = 0;
 	    sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
 				&dfltdsc,NULL,&rms_sts,&lff_flags);
 	    if (!$VMS_STATUS_SUCCESS(sts))
 		break;
-
-	    found++;
 
 	    /* with varying string, 1st word of buffer contains result length */
 	    rstr[rslt->length] = '\0';
@@ -13583,9 +13637,28 @@ Perl_vms_start_glob
 	    if (!hasver && (vs_len > 0)) {
 		*vs_spec = '\0';
 		vs_len = 0;
+            }
+
+            if (isunix) {
+
+                /* In Unix report mode, remove the ".dir;1" from the name */
+                /* if it is a real directory */
+                if (decc_filename_unix_report || decc_efs_charset) {
+                    if (is_dir_ext(e_spec, e_len, vs_spec, vs_len)) {
+                        Stat_t statbuf;
+                        int ret_sts;
+
+                        ret_sts = flex_lstat(rstr, &statbuf);
+                        if ((ret_sts == 0) &&
+                            S_ISDIR(statbuf.st_mode)) {
+                            e_len = 0;
+                            e_spec[0] = 0;
+                        }
+                    }
+                }
 
 		/* No version & a null extension on UNIX handling */
-		if (isunix && (e_len == 1) && decc_readdir_dropdotnotype) {
+		if ((e_len == 1) && decc_readdir_dropdotnotype) {
 		    e_len = 0;
 		    *e_spec = '\0';
 		}
@@ -13595,16 +13668,45 @@ Perl_vms_start_glob
 	        for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
 	    }
 
-	    if (hasdir) {
-		if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
-		begin = rstr;
-	    }
-	    else {
-		/* Start with the name */
-		begin = n_spec;
-	    }
-	    strcat(begin,"\n");
-	    ok = (PerlIO_puts(tmpfp,begin) != EOF);
+            /* Find File treats a Null extension as return all extensions */
+            /* This is contrary to Perl expectations */
+
+            if (wildstar || wildquery || vms_old_glob) {
+                /* really need to see if the returned file name matched */
+                /* but for now will assume that it matches */
+                valid_find = 1;
+            } else {
+                /* Exact Match requested */
+                /* How are directories handled? - like a file */
+                if ((e_len == we_len) && (n_len == wn_len)) {
+                    int t1;
+                    t1 = e_len;
+                    if (t1 > 0)
+                        t1 = strncmp(e_spec, we_spec, e_len);
+                    if (t1 == 0) {
+                       t1 = n_len;
+                       if (t1 > 0)
+                           t1 = strncmp(n_spec, we_spec, n_len);
+                       if (t1 == 0)
+                           valid_find = 1;
+                    }
+                }
+            }
+
+            if (valid_find) {
+	        found++;
+
+	        if (hasdir) {
+		    if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
+		    begin = rstr;
+	        }
+	        else {
+		    /* Start with the name */
+		    begin = n_spec;
+	        }
+	        strcat(begin,"\n");
+	        ok = (PerlIO_puts(tmpfp,begin) != EOF);
+            }
 	}
 	if (cxt) (void)lib$find_file_end(&cxt);
 
