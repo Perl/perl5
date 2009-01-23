@@ -407,7 +407,7 @@ esac
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-private = preplibrary $(CONFIGPM) $(CONFIGPOD) make_patchnum lib/ExtUtils/Miniperl.pm
+private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -541,13 +541,10 @@ sperl$(OBJ_EXT): perl.c $(h)
 sperl.i: perl.c $(h)
 	$(CCCMDSRC) -DIAMSUID -E perl.c > sperl.i
 
-.PHONY: all translators utilities make_patchnum
+.PHONY: all translators utilities
 
-make_patchnum: miniperl$(EXE_EXT)
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl || $(MAKE) miniperl
-
-git_version.h: stock_git_version.h
-	cp stock_git_version.h git_version.h
+git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
+	-$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
@@ -604,7 +601,7 @@ miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
 	sh writemain $(DYNALOADER) $(static_ext) > perlmain.c
 
-perlmain$(OBJ_EXT): perlmain.c git_version.h
+perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 # The file ext.libs is a list of libraries that must be linked in
@@ -816,7 +813,7 @@ miniperl$(EXE_EXT): $& miniperlmain$(OBJ_EXT) $(mini_obj) opmini$(OBJ_EXT) perlm
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
-perl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) make_patchnum
+perl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
