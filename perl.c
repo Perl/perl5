@@ -4270,7 +4270,6 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
     PERL_ARGS_ASSERT_VALIDATE_SUID;
 
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
-#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	dVAR;
 
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
@@ -4281,7 +4280,6 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
-#  endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	/* not set-id, must be wrapped */
     }
 }
