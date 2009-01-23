@@ -548,6 +548,7 @@ git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
+sperl$(OBJ_EXT): git_version.h
 
 translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
