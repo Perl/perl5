@@ -1,3 +1,8 @@
+3.16 - 2009-01-23
+
+    * fix DEFSV_set() for threaded 5.005 perls
+    * add G_METHOD support to call_sv()
+
 3.15 - 2009-01-18
 
     * added support for the following API

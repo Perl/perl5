@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 18 $
+##  $Revision: 19 $
 ##  $Author: mhx $
-##  $Date: 2009/01/18 14:10:53 +0100 $
+##  $Date: 2009/01/23 18:27:48 +0100 $
 ##
 ################################################################################
 ##
@@ -25,6 +25,7 @@ call_argv
 call_method
 load_module
 vload_module
+G_METHOD
 
 =implementation
 
@@ -35,12 +36,25 @@ __UNDEFINED__  call_argv     perl_call_argv
 __UNDEFINED__  call_method   perl_call_method
 
 __UNDEFINED__  eval_sv       perl_eval_sv
+/* Replace: 0 */
 
 __UNDEFINED__ PERL_LOADMOD_DENY		0x1
 __UNDEFINED__ PERL_LOADMOD_NOIMPORT	0x2
 __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS	0x4
 
-/* Replace: 0 */
+#ifndef G_METHOD
+# define G_METHOD		64
+# ifdef call_sv
+#  undef call_sv
+# endif
+# if { VERSION < 5.6.0 }
+#  define call_sv(sv, flags)  ((flags) & G_METHOD ? perl_call_method((char *) SvPV_nolen_const(sv), \
+				(flags) & ~G_METHOD) : perl_call_sv(sv, flags))
+# else
+#  define call_sv(sv, flags)  ((flags) & G_METHOD ? Perl_call_method(aTHX_ (char *) SvPV_nolen_const(sv), \
+				(flags) & ~G_METHOD) : Perl_call_sv(aTHX_ sv, flags))
+# endif
+#endif
 
 /* Replace perl_eval_pv with eval_pv */
 
@@ -266,6 +280,23 @@ call_method(methname, flags, ...)
 		mPUSHi(i);
 
 void
+call_sv_G_METHOD(sv, flags, ...)
+	SV* sv
+	I32 flags
+	PREINIT:
+		I32 i;
+	PPCODE:
+		for (i=0; i<items-2; i++)
+		  ST(i) = ST(i+2); /* pop first two args */
+		PUSHMARK(SP);
+		SP += items - 2;
+		PUTBACK;
+		i = call_sv(sv, flags | G_METHOD);
+		SPAGAIN;
+		EXTEND(SP, 1);
+		mPUSHi(i);
+
+void
 load_module(flags, name, version, ...)
 	U32 flags
 	SV *name
@@ -276,7 +307,7 @@ load_module(flags, name, version, ...)
 		Perl_load_module(aTHX_ flags, SvREFCNT_inc_simple(name),
 		                 SvREFCNT_inc_simple(version), NULL);
 
-=tests plan => 46
+=tests plan => 52
 
 sub eq_array
 {
@@ -325,6 +356,7 @@ for $test (
     ok(eq_array( [ &Devel::PPPort::call_argv('f', $flags, @$args) ], $expected));
     ok(eq_array( [ &Devel::PPPort::eval_sv("f(qw(@$args))", $flags) ], $expected));
     ok(eq_array( [ &Devel::PPPort::call_method('meth', $flags, $obj, @$args) ], $expected));
+    ok(eq_array( [ &Devel::PPPort::call_sv_G_METHOD('meth', $flags, $obj, @$args) ], $expected));
 };
 
 ok(&Devel::PPPort::eval_pv('f()', 0), 'y');
