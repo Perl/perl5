@@ -3650,7 +3650,7 @@ sub const {
 	return ('undef', '1', $self->maybe_parens("!1", $cx, 21))[$$sv-1];
     } elsif (class($sv) eq "NULL") {
        return 'undef';
-    } elsif (my $const = $self->{'inlined_constants'}->{ 0 + $sv->object_2svref }) {
+    } elsif ($cx and my $const = $self->{'inlined_constants'}->{ 0 + $sv->object_2svref }) {
         return $const;
     }
     # convert a version object into the "v1.2.3" string in its V magic
