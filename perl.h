@@ -145,10 +145,23 @@
 #   endif
 #endif
 
+#undef START_EXTERN_C
+#undef END_EXTERN_C
+#undef EXTERN_C
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C
+#  define END_EXTERN_C
+#  define EXTERN_C extern
+#endif
+
 #ifdef PERL_GLOBAL_STRUCT
 #  ifndef PERL_GET_VARS
 #    ifdef PERL_GLOBAL_STRUCT_PRIVATE
-       extern struct perl_vars* Perl_GetVarsPrivate();
+       EXTERN_C struct perl_vars* Perl_GetVarsPrivate();
 #      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
 #      ifndef PERLIO_FUNCS_CONST
 #        define PERLIO_FUNCS_CONST /* Can't have these lying around. */
@@ -403,19 +416,6 @@
 #  else
 #    define dTHXs		dNOOP
 #  endif
-#endif
-
-#undef START_EXTERN_C
-#undef END_EXTERN_C
-#undef EXTERN_C
-#ifdef __cplusplus
-#  define START_EXTERN_C extern "C" {
-#  define END_EXTERN_C }
-#  define EXTERN_C extern "C"
-#else
-#  define START_EXTERN_C
-#  define END_EXTERN_C
-#  define EXTERN_C extern
 #endif
 
 /* Some platforms require marking function declarations
