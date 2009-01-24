@@ -544,7 +544,7 @@ sperl.i: perl.c $(h)
 .PHONY: all translators utilities
 
 git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
-	-$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
