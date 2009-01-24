@@ -284,11 +284,13 @@ c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regex
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c xsutils.c
 c = $(c0) $(c1) $(c2) $(c3)
 
-obj0 = $(MALLOC_O) $(SOCKO) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O)
-obj1 = globals$(O) gv$(O) hv$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O)
-obj2 = perl$(O) perlapi$(O) perlio$(O) perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O)
-obj3 = pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O)
-obj4 = universal$(O) utf8$(O) util$(O) vms$(O) xsutils$(O)
+obj0 = perl$(O)
+obj1 = $(MALLOC_O) $(SOCKO) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O) globals$(O) gv$(O) hv$(O) 
+obj2 = locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlapi$(O) perlio$(O) 
+obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
+obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O) xsutils$(O)
+
+mini_obj = perlmini$(O) $(obj1) $(obj2) $(obj3) $(obj4)
 obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 
 h0 = av.h cc_runtime.h config.h cop.h cv.h embed.h embedvar.h
@@ -359,26 +361,21 @@ utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.co
 utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]cpanp.com [.utils]cpan2dist.com [.utils]cpanp-run-perl.com
 
 .ifdef NOX2P
-all : make_patchnum.ts base extras archcorefiles preplibrary perlpods
+all : base extras archcorefiles preplibrary perlpods
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .else
-all : make_patchnum.ts base extras x2p archcorefiles preplibrary perlpods
+all : base extras x2p archcorefiles preplibrary perlpods
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .endif
 
-make_patchnum.ts : $(MINIPERL_EXE)
+git_version.h : $(MINIPERL_EXE) make_patchnum.pl
         - $(MINIPERL) make_patchnum.pl
-        IF .NOT. $STATUS THEN $(MMS)$(MMSQUALIFIERS) miniperl
-	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
-
-git_version.h : stock_git_version.h
-	@ Copy/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 base : miniperl perl
 	@ $(NOOP)
@@ -445,12 +442,16 @@ vmspipe.com : [.vms]vmspipe.com
 
 miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
-$(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
-$(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
-	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O),$(DBG)libperl$(OLB)/Library/Include=globals  $(CRTLOPTS)
+$(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
+	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
+$(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
+	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals  $(CRTLOPTS)
 
 $(DBG)libperl$(OLB) : $(obj)
+	@ If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
+	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
+
+$(DBG)libperlmini$(OLB) : $(mini_obj)
 	@ If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
 	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
 
@@ -472,6 +473,18 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
+
+perlmini.c : perl.c
+	@ IF F$SEARCH("$(MMS$TARGET)") .NES. "" THEN DELETE/NOCONFIRM/LOG $(MMS$TARGET);*
+	@ COPY/NOCONFIRM _NLA0: $(MMS$TARGET)
+	@ SET FILE /ATTRIBUTES=RFM:STMLF $(MMS$TARGET)
+	@ OPEN/APPEND perlmini $(MMS$TARGET)
+	@ WRITE perlmini "#define PERL_IS_MINIPERL"
+	@ CLOSE perlmini
+	@ APPEND/NOCONFIRM/LOG $(MMS$SOURCE) $(MMS$TARGET)
+
+perlmini$(O) : perlmini.c
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 uudmap.h : generate_uudmap$(E)
 	DEFINE/USER_MODE SYS$OUTPUT uudmap.h
@@ -1698,7 +1711,7 @@ perlapi$(O) : perlapi.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 perlio$(O) : perlio.c config.h $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-perlmain$(O) : perlmain.c git_version.h $(h)
+perlmain$(O) : perlmain.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 perly$(O) : perly.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
@@ -1836,6 +1849,7 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("vmsish.h").nes."" Then Delete/NoConfirm/Log vmsish.h;*
 	- If F$Search("vms.c")   .nes."" Then Delete/NoConfirm/Log vms.c;*
 	- If F$Search("perlmain.c")   .nes."" Then Delete/NoConfirm/Log perlmain.c;*
+	- If F$Search("perlmini.c")   .nes."" Then Delete/NoConfirm/Log perlmini.c;*
 	- If F$Search("uudmap.h")   .nes."" Then Delete/NoConfirm/Log uudmap.h;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
