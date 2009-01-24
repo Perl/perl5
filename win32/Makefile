@@ -877,11 +877,9 @@ config.w32 : $(CFGSH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
-# ignore "errors" from make_patchnum.pl (it exits with status 1 when
-# not rewriting its output files)
 make_patchnum : $(MINIPERL)
 	cd ..
-	-miniperl -Ilib make_patchnum.pl
+	miniperl -Ilib make_patchnum.pl
 	cd win32
 
 ..\git_version.h : ..\stock_git_version.h
