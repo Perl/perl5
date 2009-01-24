@@ -14,14 +14,14 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 136;
+plan tests => 157;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
 BEGIN { *CORE::GLOBAL::rename = sub { CORE::rename($_[0], $_[1]) }; }
 
 
-use File::Copy;
+use File::Copy qw(copy move cp);
 use Config;
 
 
@@ -228,8 +228,8 @@ for my $cross_partition_test (0..1) {
 
 SKIP: {
 
-    skip "-- Copy preserves RMS defaults, not source file permissions.", 21 if $^O eq 'VMS';
-    skip "Copy doesn't set file permissions correctly on Win32.", 21 if $^O eq "MSWin32";
+    skip "-- Copy preserves RMS defaults, not POSIX permissions.", 42 if $^O eq 'VMS';
+    skip "Copy doesn't set file permissions correctly on Win32.", 42 if $^O eq "MSWin32";
 
     # Just a sub to get better failure messages.
     sub __ ($) {
@@ -241,11 +241,17 @@ SKIP: {
     my $copy1 = "copy1-$$";
     my $copy2 = "copy2-$$";
     my $copy3 = "copy3-$$";
+    my $copy4 = "copy4-$$";
+    my $copy5 = "copy5-$$";
+    my $copy6 = "copy6-$$";
 
     open my $fh => ">", $src   or die $!;
     close   $fh                or die $!;
 
     open    $fh => ">", $copy3 or die $!;
+    close   $fh                or die $!;
+
+    open    $fh => ">", $copy6 or die $!;
     close   $fh                or die $!;
 
     my @tests = (
@@ -261,32 +267,43 @@ SKIP: {
     foreach my $test (@tests) {
         my ($umask, $s_perm, $c_perm1, $c_perm3) = @$test;
         # Make sure the copies doesn't exist.
-        ! -e $_ or unlink $_ or die $! for $copy1, $copy2;
+        ! -e $_ or unlink $_ or die $! for $copy1, $copy2, $copy4, $copy5;
 
-       (umask $umask) // die $!;
-        chmod $s_perm  => $src   or die $!;
+	(umask $umask) // die $!;
+        chmod $s_perm  => $src   or die sprintf "$!: $src => %o", $s_perm;
         chmod $c_perm3 => $copy3 or die $!;
+        chmod $c_perm3 => $copy6 or die $!;
 
         open my $fh => "<", $src or die $!;
 
         copy ($src, $copy1);
         copy ($fh,  $copy2);
         copy ($src, $copy3);
+        cp   ($src, $copy4);
+        cp   ($fh,  $copy5);
+        cp   ($src, $copy6);
 
+	my $permdef = 0666 & ~$umask;
         my $perm1 = (stat $copy1) [2] & 0xFFF;
         my $perm2 = (stat $copy2) [2] & 0xFFF;
         my $perm3 = (stat $copy3) [2] & 0xFFF;
-        is (__$perm1, __$c_perm1, "Permission bits set correctly");
-        is (__$perm2, __$c_perm1, "Permission bits set correctly");
+        my $perm4 = (stat $copy4) [2] & 0xFFF;
+        my $perm5 = (stat $copy5) [2] & 0xFFF;
+        my $perm6 = (stat $copy6) [2] & 0xFFF;
+        is (__$perm1, __$permdef, "Permission bits set correctly");
+        is (__$perm2, __$permdef, "Permission bits set correctly");
+        is (__$perm4, __$c_perm1, "Permission bits set correctly");
+        is (__$perm5, __$c_perm1, "Permission bits set correctly");
         TODO: {
             local $TODO = 'Permission bits inconsistent under cygwin' if $^O eq 'cygwin';
             is (__$perm3, __$c_perm3, "Permission bits not modified");
+            is (__$perm6, __$c_perm3, "Permission bits not modified");
         }
     }
     umask $old_mask or die $!;
 
     # Clean up.
-    ! -e $_ or unlink $_ or die $! for $src, $copy1, $copy2, $copy3;
+    ! -e $_ or unlink $_ or die $! for $src, $copy1, $copy2, $copy3, $copy4, $copy5, $copy6;
 }
 
 {

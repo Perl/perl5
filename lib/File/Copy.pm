@@ -12,9 +12,7 @@ use strict;
 use warnings;
 use File::Spec;
 use Config;
-# During perl build, we need File::Copy but Fcntl might not be built yet
-my $Fcntl_loaded = eval q{ use Fcntl qw [O_CREAT O_WRONLY O_TRUNC]; 1 };
-# Similarly Scalar::Util
+# During perl build, we need File::Copy but Scalar::Util might not be built yet
 # And then we need these games to avoid loading overload, as that will
 # confuse miniperl during the bootstrap of perl.
 my $Scalar_Util_loaded = eval q{ require Scalar::Util; require overload; 1 };
@@ -229,7 +227,7 @@ sub copy {
     } else {
        open $from_h, "<", $from or goto fail_open1;
        binmode $from_h or die "($!,$^E)";
-	$closefrom = 1;
+       $closefrom = 1;
     }
 
     # Seems most logical to do this here, in case future changes would want to
@@ -245,15 +243,8 @@ sub copy {
        $to_h = $to;
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
-	if ($Fcntl_loaded) {
-	    my $perm = (stat $from_h) [2] & 0xFFF;
-	    sysopen $to_h, $to, O_CREAT() | O_TRUNC() | O_WRONLY(), $perm
-		or goto fail_open2;
-	}
-	else {
-	    $to_h = \do { local *FH };
-	    open $to_h, ">", $to or goto fail_open2;
-	}
+	$to_h = \do { local *FH };
+	open $to_h, ">", $to or goto fail_open2;
 	binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
     }
@@ -295,10 +286,52 @@ sub copy {
     return 0;
 }
 
-sub move {
-    croak("Usage: move(FROM, TO) ") unless @_ == 2;
-
+sub cp {
     my($from,$to) = @_;
+    my(@fromstat) = stat $from;
+    my(@tostat) = stat $to;
+    my $perm;
+
+    return 0 unless copy(@_) and @fromstat;
+
+    if (@tostat) {
+        $perm = $tostat[2];
+    } else {
+        $perm = $fromstat[2] & ~(umask || 0);
+	@tostat = stat $to;
+    }
+    # Might be more robust to look for S_I* in Fcntl, but we're
+    # trying to avoid dependence on any XS-containing modules,
+    # since File::Copy is used during the Perl build.
+    $perm &= 07777;
+    if ($perm & 06000) {
+	croak("Unable to check setuid/setgid permissions for $to: $!")
+	    unless @tostat;
+
+	if ($perm & 04000 and                     # setuid
+	    $fromstat[4] != $tostat[4]) {         # owner must match
+	    $perm &= ~06000;
+	}
+
+	if ($perm & 02000) {                      # setgid
+	    my $ok = $fromstat[5] == $tostat[5];  # group must match
+	    if ($ok) {                            # and we must be in group
+	        my $uname = (getpwuid($>))[0] || '';
+		my(@members) = split /\s+/, (getgrgid($fromstat[5]))[3];
+		$ok = grep { $_ eq $uname } @members;
+	    }
+	    $perm &= ~06000 unless $ok;
+	}
+    }
+    return 0 unless @tostat;
+    return 1 if $perm == ($tostat[2] & 07777);
+    return eval { chmod $perm, $to; } ? 1 : 0;
+}
+
+sub _move {
+    croak("Usage: move(FROM, TO) ") unless @_ == 3;
+
+    my($from,$to,$fallback) = @_;
 
     my($fromsz,$tosz1,$tomt1,$tosz2,$tomt2,$sts,$ossts);
 
@@ -371,7 +404,7 @@ sub move {
         local $@;
         eval {
             local $SIG{__DIE__};
-            copy($from,$to) or die;
+            $fallback->($from,$to) or die;
             my($atime, $mtime) = (stat($from))[8,9];
             utime($atime, $mtime, $to);
             unlink($from)   or die;
@@ -386,8 +419,8 @@ sub move {
     return 0;
 }
 
-*cp = \&copy;
-*mv = \&move;
+sub move { _move(@_,\&copy); }
+sub mv   { _move(@_,\&cp);   }
 
 # &syscopy is an XSUB under OS/2
 unless (defined &syscopy) {
@@ -483,11 +516,15 @@ being written to the second file. The default buffer size depends
 upon the file, but will generally be the whole file (up to 2MB), or
 1k for filehandles that do not reference files (eg. sockets).
 
-You may use the syntax C<use File::Copy "cp"> to get at the
-"cp" alias for this function. The syntax is I<exactly> the same.
-
-As of version 2.14, on UNIX systems, "copy" will preserve permission
-bits like the shell utility C<cp> would do.
+You may use the syntax C<use File::Copy "cp"> to get at the C<cp>
+alias for this function. The syntax is I<exactly> the same.  The
+behavior is nearly the same as well: as of version 2.14, <cp> will
+preserve the source file's permission bits like the shell utility
+C<cp(1)> would do, while C<copy> uses the default permissions for the
+target file (which may depend on the process' C<umask>, file
+ownership, inherited ACLs, etc.).  If an error occurs in setting
+permissions, C<cp> will return 0, regardless of whether the file was
+successfully copied.
 
 =item move
 X<move> X<mv> X<rename>
@@ -503,8 +540,8 @@ the file to the new location and deletes the original.  If an error occurs
 during this copy-and-delete process, you may be left with a (possibly partial)
 copy of the file under the destination name.
 
-You may use the "mv" alias for this function in the same way that
-you may use the "cp" alias for C<copy>.
+You may use the C<mv> alias for this function in the same way that
+you may use the <cp> alias for C<copy>.
 
 =item syscopy
 X<syscopy>
