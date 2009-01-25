@@ -68,6 +68,12 @@
  */
 /*#define	HAS_CHSIZE		/ **/
 
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+/*#define HAS_CRYPT		/ **/
+
 /* HAS_CTERMID:
  *	This symbol, if defined, indicates that the ctermid routine is
  *	available to generate filename for terminal.
@@ -100,6 +106,26 @@
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 /*#define HAS_DLERROR	/ **/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+/*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/ **/
+/*#define DOSUID		/ **/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -344,6 +370,13 @@
  */
 /*#define HAS_PIPE		/ **/
 
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors.  Please check I_POLL and
+ *	I_SYS_POLL to know which header should be included as well.
+ */
+/*#define HAS_POLL		/ **/
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -407,6 +440,13 @@
  *	to change the effective uid of the current program.
  */
 /*#define HAS_SETEUID		/ **/
+
+/* HAS_SETGROUPS:
+ *	This symbol, if defined, indicates that the setgroups() routine is
+ *	available to set the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
+ */
+/*#define HAS_SETGROUPS		/ **/
 
 /* HAS_SETLINEBUF:
  *	This symbol, if defined, indicates that the setlinebuf routine is
@@ -602,6 +642,19 @@
  */
 /*#define HAS_WCTOMB		/ **/
 
+/* Groups_t:
+ *	This symbol holds the type used for the second argument to
+ *	getgroups() and setgroups().  Usually, this is the same as
+ *	gidtype (gid_t) , but sometimes it isn't.
+ *	It can be int, ushort, gid_t, etc... 
+ *	It may be necessary to include <sys/types.h> to get any 
+ *	typedef'ed information.  This is only required if you have
+ *	getgroups() or setgroups()..
+ */
+#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
+#define Groups_t int	/* Type for 2nd arg to [sg]etgroups() */
+#endif
+
 /* I_ARPA_INET:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <arpa/inet.h> to get inet_addr and friends declarations.
@@ -732,6 +785,13 @@
  *	include <sys/param.h>.
  */
 /*#define I_SYS_PARAM		/ **/
+
+/* I_SYS_POLL:
+ *	This symbol, if defined, indicates that the program may include
+ *	<sys/poll.h>.  When I_POLL is also defined, it's probably safest
+ *	to only include <poll.h>.
+ */
+/*#define I_SYS_POLL	/ **/
 
 /* I_SYS_RESOURCE:
  *	This symbol, if defined, indicates to the C program that it should
@@ -924,19 +984,16 @@
 #if 42 == 1
 #define CAT2(a,b)	a/**/b
 #define STRINGIFY(a)	"a"
-		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
 #define PeRl_CaTiFy(a, b)	a ## b
 #define PeRl_StGiFy(a)	#a
-/* the additional level of indirection enables these macros to be
- * used as arguments to other macros.  See K&R 2nd ed., page 231. */
 #define CAT2(a,b)	PeRl_CaTiFy(a,b)
 #define StGiFy(a)	PeRl_StGiFy(a)
 #define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
-#   include "Bletch: How does this C preprocessor concatenate tokens?"
+#include "Bletch: How does this C preprocessor concatenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -1016,9 +1073,13 @@
 /* HASATTRIBUTE_UNUSED:
  *	Can we handle GCC attribute for unused variables and arguments
  */
+/* HASATTRIBUTE_DEPRECATED:
+ *	Can we handle GCC attribute for marking deprecated APIs
+ */
 /* HASATTRIBUTE_WARN_UNUSED_RESULT:
  *	Can we handle GCC attribute for warning on unused results
  */
+/*#define HASATTRIBUTE_DEPRECATED	/ **/
 /*#define HASATTRIBUTE_FORMAT	/ **/
 /*#define PRINTF_FORMAT_NULL_OK	/ **/
 /*#define HASATTRIBUTE_NORETURN	/ **/
@@ -1038,12 +1099,6 @@
 #ifndef HASCONST
 #define const
 #endif
-
-/* HAS_CRYPT:
- *	This symbol, if defined, indicates that the crypt routine is available
- *	to encrypt passwords and the like.
- */
-/*#define HAS_CRYPT		/ **/
 
 /* HAS_CRYPT_R:
  *	This symbol, if defined, indicates that the crypt_r routine
@@ -1094,26 +1149,6 @@
  */
 /*#define HAS_CTIME_R	   / **/
 #define CTIME_R_PROTO 0	   /**/
-
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-/*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/ **/
-/*#define DOSUID		/ **/
 
 /* HAS_DRAND48_R:
  *	This symbol, if defined, indicates that the drand48_r routine
@@ -1807,13 +1842,6 @@
  */
 /*#define HAS_MSG		/ **/
 
-/* HAS_POLL:
- *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors.  Please check I_POLL and
- *	I_SYS_POLL to know which header should be included as well.
- */
-/*#define HAS_POLL		/ **/
-
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
  *	in joinable (aka undetached) state.  NOTE: not defined
@@ -1912,13 +1940,6 @@
  */
 /*#define HAS_SETGRENT_R	   / **/
 #define SETGRENT_R_PROTO 0	   /**/
-
-/* HAS_SETGROUPS:
- *	This symbol, if defined, indicates that the setgroups() routine is
- *	available to set the list of process groups.  If unavailable, multiple
- *	groups are probably not supported.
- */
-/*#define HAS_SETGROUPS		/ **/
 
 /* HAS_SETHOSTENT:
  *	This symbol, if defined, indicates that the sethostent() routine is
@@ -2319,19 +2340,6 @@
  */
 #define Gid_t int		/* Type for getgid(), etc... */
 
-/* Groups_t:
- *	This symbol holds the type used for the second argument to
- *	getgroups() and setgroups().  Usually, this is the same as
- *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, gid_t, etc...
- *	It may be necessary to include <sys/types.h> to get any
- *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgroups()..
- */
-#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
-#define Groups_t int	/* Type for 2nd arg to [sg]etgroups() */
-#endif
-
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition
@@ -2373,7 +2381,40 @@
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
  */
+/* I_GDBMNDBM:
+ *	This symbol, if defined, indicates that <gdbm/ndbm.h> exists and should
+ *	be included.  This was the location of the ndbm.h compatibility file
+ *	in RedHat 7.1.
+ */
+/* I_GDBM_NDBM:
+ *	This symbol, if defined, indicates that <gdbm-ndbm.h> exists and should
+ *	be included.  This is the location of the ndbm.h compatibility file
+ *	in Debian 4.0.
+ */
+/* NDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
+/* GDBMNDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <gdbm/ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
+/* GDBM_NDBM_H_USES_PROTOTYPES:
+ *	This symbol, if defined, indicates that <gdbm-ndbm.h> uses real ANSI C
+ *	prototypes instead of K&R style function declarations without any
+ *	parameter information. While ANSI C prototypes are supported in C++,
+ *	K&R style function declarations will yield errors.
+ */
 /*#define I_NDBM	/ **/
+/*#define I_GDBMNDBM	/ **/
+/*#define I_GDBM_NDBM	/ **/
+/*#define NDBM_H_USES_PROTOTYPES	/ **/
+/*#define GDBMNDBM_H_USES_PROTOTYPES	/ **/
+/*#define GDBM_NDBM_H_USES_PROTOTYPES	/ **/
 
 /* I_NETDB:
  *	This symbol, if defined, indicates that <netdb.h> exists and
@@ -3227,6 +3268,13 @@
  */
 /*#define	EBCDIC 		/ **/
 
+/* PERL_USE_DEVEL:
+ *	This symbol, if defined, indicates that Perl was configured with
+ *	-Dusedevel, to enable development features.  This should not be
+ *	done for production builds.
+ */
+/*#define	PERL_USE_DEVEL		/ **/
+
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
  *	available to convert strings into long doubles.
@@ -3921,6 +3969,43 @@
  */
 /*#define	HAS_TELLDIR_PROTO	/ **/
 
+/* HAS_CTIME64:
+ *	This symbol, if defined, indicates that the ctime64 () routine is
+ *	available to do the 64bit variant of ctime ()
+ */
+/* HAS_LOCALTIME64:
+ *	This symbol, if defined, indicates that the localtime64 () routine is
+ *	available to do the 64bit variant of localtime ()
+ */
+/* HAS_GMTIME64:
+ *	This symbol, if defined, indicates that the gmtime64 () routine is
+ *	available to do the 64bit variant of gmtime ()
+ */
+/* HAS_MKTIME64:
+ *	This symbol, if defined, indicates that the mktime64 () routine is
+ *	available to do the 64bit variant of mktime ()
+ */
+/* HAS_DIFFTIME64:
+ *	This symbol, if defined, indicates that the difftime64 () routine is
+ *	available to do the 64bit variant of difftime ()
+ */
+/* HAS_ASCTIME64:
+ *	This symbol, if defined, indicates that the asctime64 () routine is
+ *	available to do the 64bit variant of asctime ()
+ */
+/*#define	HAS_CTIME64		/ **/
+/*#define	HAS_LOCALTIME64		/ **/
+/*#define	HAS_GMTIME64		/ **/
+/*#define	HAS_MKTIME64		/ **/
+/*#define	HAS_DIFFTIME64		/ **/
+/*#define	HAS_ASCTIME64		/ **/
+
+/* HAS_TIMEGM:
+ *	This symbol, if defined, indicates that the timegm routine is
+ *	available to do the opposite of gmtime ()
+ */
+/*#define HAS_TIMEGM		/ **/
+
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
@@ -4065,6 +4150,12 @@
  *	should be included.
  */
 /*#define	I_LIBUTIL		/ **/
+
+/* I_MALLOCMALLOC:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <malloc/malloc.h>.
+ */
+/*#define I_MALLOCMALLOC		/ **/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
@@ -4267,7 +4358,7 @@
  *	This symbol contains the number of bits a variable of type NVTYPE
  *	can preserve of a variable of type UVTYPE.
  */
-/* NV_OVERFLOWS_INTEGERS_AT
+/* NV_OVERFLOWS_INTEGERS_AT:
  *	This symbol gives the largest integer value that NVs can hold. This
  *	value + 1.0 cannot be stored accurately. It is expressed as constant
  *	floating point expression to reduce the chance of decimale/binary
@@ -4387,7 +4478,30 @@
  *	Usual values include _iob, __iob, and __sF.
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
+#ifdef HAS_STDIO_STREAM_ARRAY
 #define STDIO_STREAM_ARRAY	
+#endif
+
+/* GMTIME_MAX:
+ *	This symbol contains the maximum value for the time_t offset that
+ *	the system function gmtime () accepts, and defaults to 0
+ */
+/* GMTIME_MIN:
+ *	This symbol contains the minimum value for the time_t offset that
+ *	the system function gmtime () accepts, and defaults to 0
+ */
+/* LOCALTIME_MAX:
+ *	This symbol contains the maximum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+/* LOCALTIME_MIN:
+ *	This symbol contains the minimum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+#define GMTIME_MAX		2147483647	/**/
+#define GMTIME_MIN		0	/**/
+#define LOCALTIME_MAX	2147483647	/**/
+#define LOCALTIME_MIN	0	/**/
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
