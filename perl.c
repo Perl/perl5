@@ -3644,7 +3644,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
     PERL_ARGS_ASSERT_OPEN_SCRIPT;
 
     if (PL_e_script) {
-	PL_origfilename = (PL_minus_E ? savepvs("-E") : savepvs( "-e" ));
+	PL_origfilename = savepvs("-e");
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */
