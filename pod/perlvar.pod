@@ -1021,6 +1021,9 @@ to ps(1) (assuming the operating system plays along).  Note that
 the view of C<$0> the other threads have will not change since they
 have their own copies of it.
 
+If the program has been given to perl via the switches C<-e> or C<-E>,
+C<$0> will contain the string C<"-e">.
+
 =item $[
 X<$[>
 
