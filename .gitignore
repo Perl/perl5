@@ -24,6 +24,7 @@ Makefile.old
 /myconfig
 /opmini.c
 /perlmain.c
+/perlmini.c
 /pod/Makefile
 /writemain
 /x2p/Makefile
