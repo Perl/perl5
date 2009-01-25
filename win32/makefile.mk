@@ -1125,7 +1125,7 @@ config.w32 : $(CFGSH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
-..\git_version.h : $(MINIPERL) make_patchnum.pl
+..\git_version.h : $(MINIPERL) ..\make_patchnum.pl
 	cd .. && miniperl -Ilib make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
