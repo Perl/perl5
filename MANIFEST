@@ -3605,7 +3605,6 @@ regnodes.h			Description of nodes of RE engine
 run.c				The interpreter loop
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
-stock_git_version.h		Empty git_version.h used when there is no miniperl around
 sv.c				Scalar value code
 sv.h				Scalar value header
 symbian/bld.inf			Symbian sample app build config
