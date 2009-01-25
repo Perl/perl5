@@ -302,6 +302,7 @@ static char * int_rmsexpand_tovms(
     const char * filespec, char * outbuf, unsigned opts);
 static char *int_tovmsspec
    (const char *path, char *buf, int dir_flag, int * utf8_flag);
+static char * int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl);
 static char * int_tounixspec(const char *spec, char *buf, int * utf8_fl);
 
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
@@ -5298,7 +5299,7 @@ Stat_t dst_st;
 		_ckvmssts_noperl(SS$_INSFMEM);
 
 	    /* The source must be a file specification */
-	    ret_str = do_fileify_dirspec(vms_src, vms_dir_file, 0, NULL);
+	    ret_str = int_fileify_dirspec(vms_src, vms_dir_file, NULL);
 	    if (ret_str == NULL) {
 		PerlMem_free(vms_src);
 		PerlMem_free(vms_dst);
@@ -5968,12 +5969,12 @@ char *Perl_rmsexpand_utf8_ts
 ** found in the Perl standard distribution.
  */
 
-/*{{{ char *fileify_dirspec[_ts](char *dir, char *buf, int * utf8_fl)*/
-static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *utf8_fl)
+/*{{{ char * int_fileify_dirspec[_ts](char *dir, char *buf, int * utf8_fl)*/
+static char *
+int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
 {
-    static char __fileify_retbuf[VMS_MAXRSS];
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
-    char *retspec, *cp1, *cp2, *lastdir;
+    char *cp1, *cp2, *lastdir;
     char *trndir, *vmsdir;
     unsigned short int trnlnm_iter_count;
     int is_vms = 0;
@@ -6058,18 +6059,43 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
     vmsdir = PerlMem_malloc(VMS_MAXRSS + 1);
     if (vmsdir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     cp1 = strpbrk(trndir,"]:>");
-    if (hasfilename || !cp1) { /* Unix-style path or filename */
+    if (hasfilename || !cp1) { /* filename present or not VMS */
+
+      if (decc_efs_charset && !cp1) {
+
+          /* EFS handling for UNIX mode */
+
+          /* Just remove the trailing '/' and we should be done */
+          STRLEN trndir_len;
+          trndir_len = strlen(trndir);
+
+          if (trndir_len > 1) {
+              trndir_len--;
+              if (trndir[trndir_len] == '/') {
+                  trndir[trndir_len] = '\0';
+              }
+          }
+          strcpy(buf, trndir);
+          PerlMem_free(trndir);
+          PerlMem_free(vmsdir);
+          return buf;
+      }
+
+      /* For non-EFS mode, this is left for backwards compatibility */
+      /* For EFS mode, this is only done for VMS format filespecs as */
+      /* Perl programs generally have problems when a UNIX format spec */
+      /* returns a VMS format spec */
       if (trndir[0] == '.') {
         if (trndir[1] == '\0' || (trndir[1] == '/' && trndir[2] == '\0')) {
 	  PerlMem_free(trndir);
 	  PerlMem_free(vmsdir);
-          return do_fileify_dirspec("[]",buf,ts,NULL);
+          return int_fileify_dirspec("[]", buf, NULL);
 	}
         else if (trndir[1] == '.' &&
                (trndir[2] == '\0' || (trndir[2] == '/' && trndir[3] == '\0'))) {
 	  PerlMem_free(trndir);
 	  PerlMem_free(vmsdir);
-          return do_fileify_dirspec("[-]",buf,ts,NULL);
+          return int_fileify_dirspec("[-]", buf, NULL);
 	}
       }
       if (dirlen && trndir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
@@ -6100,7 +6126,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
               set_errno(EINVAL);  set_vaxc_errno(RMS$_SYN);
 	      return NULL;
             }
-            if (do_fileify_dirspec(vmsdir,trndir,0,NULL) == NULL) {
+            if (int_fileify_dirspec(vmsdir, trndir, NULL) == NULL) {
 		PerlMem_free(trndir);
 		PerlMem_free(vmsdir);
 		return NULL;
@@ -6131,7 +6157,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	    PerlMem_free(vmsdir);
 	    return NULL;
 	}
-        if (do_fileify_dirspec(vmsdir,trndir,0,NULL) == NULL) {
+        if (int_fileify_dirspec(vmsdir, trndir, NULL) == NULL) {
 	    PerlMem_free(trndir);
 	    PerlMem_free(vmsdir);
 	    return NULL;
@@ -6146,51 +6172,43 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
         if ( !(lastdir = cp1 = strrchr(trndir,'/')) &&
              !(lastdir = cp1 = strrchr(trndir,']')) &&
              !(lastdir = cp1 = strrchr(trndir,'>'))) cp1 = trndir;
-        if ((cp2 = strchr(cp1,'.'))) {  /* look for explicit type */
-          int ver; char *cp3;
 
-	  /* For EFS or ODS-5 look for the last dot */
-	  if (decc_efs_charset) {
-	      cp2 = strrchr(cp1,'.');
-	  }
-	  if (vms_process_case_tolerant) {
-              if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-		  PerlMem_free(trndir);
-		  PerlMem_free(vmsdir);
-                  set_errno(ENOTDIR);
-                  set_vaxc_errno(RMS$_DIR);
-                  return NULL;
-	      }
-	  }
-	  else {
-              if (!*(cp2+1) || *(cp2+1) != 'D' ||  /* Wrong type. */
-                  !*(cp2+2) || *(cp2+2) != 'I' ||  /* Bzzt. */
-                  !*(cp2+3) || *(cp2+3) != 'R' ||
-                  (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
-                  (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
-                            (ver || *cp3)))))) {
-		 PerlMem_free(trndir);
-		 PerlMem_free(vmsdir);
-                 set_errno(ENOTDIR);
-                 set_vaxc_errno(RMS$_DIR);
-                 return NULL;
-              }
-	  }
-          dirlen = cp2 - trndir;
+        cp2 = strrchr(cp1,'.');
+        if (cp2) {
+            int e_len, vs_len = 0;
+            int is_dir = 0;
+            char * cp3;
+            cp3 = strchr(cp2,';');
+            e_len = strlen(cp2);
+            if (cp3) {
+                vs_len = strlen(cp3);
+                e_len = e_len - vs_len;
+            }
+            is_dir = is_dir_ext(cp2, e_len, cp3, vs_len);
+            if (!is_dir) {
+                if (!decc_efs_charset) {
+                    /* If this is not EFS, then not a directory */
+                    PerlMem_free(trndir);
+                    PerlMem_free(vmsdir);
+                    set_errno(ENOTDIR);
+                    set_vaxc_errno(RMS$_DIR);
+                    return NULL;
+                }
+            } else {
+                /* Ok, here we have an issue, technically if a .dir shows */
+                /* from inside a directory, then we should treat it as */
+                /* xxx^.dir.dir.  But we do not have that context at this */
+                /* point unless this is totally restructured, so we remove */
+                /* The .dir for now, and fix this better later */
+                dirlen = cp2 - trndir;
+            }
         }
+
       }
 
       retlen = dirlen + 6;
-      if (buf) retspec = buf;
-      else if (ts) Newx(retspec,retlen+1,char);
-      else retspec = __fileify_retbuf;
-      memcpy(retspec,trndir,dirlen);
-      retspec[dirlen] = '\0';
+      memcpy(buf, trndir, dirlen);
+      buf[dirlen] = '\0';
 
       /* We've picked up everything up to the directory file name.
          Now just add the type and version, and we're set. */
@@ -6229,20 +6247,20 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 
            if ((!decc_efs_case_preserve) && vms_process_case_tolerant) {
                /* Traditionally Perl expects filenames in lower case */
-               strcat(retspec, ".dir");
+               strcat(buf, ".dir");
            } else {
                /* VMS expects the .DIR to be in upper case */
-               strcat(retspec, ".DIR");
+               strcat(buf, ".DIR");
            }
 
            /* It is also a bug to put a VMS format version on a UNIX file */
            /* specification.  Perl self tests are looking for this */
            if (is_vms || !(decc_efs_charset || decc_filename_unix_report))
-               strcat(retspec, ";1");
+               strcat(buf, ";1");
       }
       PerlMem_free(trndir);
       PerlMem_free(vmsdir);
-      return retspec;
+      return buf;
     }
     else {  /* VMS-style directory spec */
 
@@ -6275,9 +6293,11 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
       for (cp = trndir; *cp; cp++)
         if (islower(*cp)) { haslower = 1; break; }
       if (!((sts = sys$parse(&dirfab)) & STS$K_SUCCESS)) {
-        if ((dirfab.fab$l_sts == RMS$_DIR) || (dirfab.fab$l_sts == RMS$_DNF)) {
-	  rms_set_nam_nop(dirnam, NAM$M_SYNCHK);
-          sts = sys$parse(&dirfab) & STS$K_SUCCESS;
+        if ((dirfab.fab$l_sts == RMS$_DIR) ||
+            (dirfab.fab$l_sts == RMS$_DNF) ||
+            (dirfab.fab$l_sts == RMS$_PRV)) {
+            rms_set_nam_nop(dirnam, NAM$M_SYNCHK);
+            sts = sys$parse(&dirfab);
         }
         if (!sts) {
 	  PerlMem_free(esa);
@@ -6295,7 +6315,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	/* Does the file really exist? */
         if (sys$search(&dirfab)& STS$K_SUCCESS) { 
           /* Yes; fake the fnb bits so we'll check type below */
-	rms_set_nam_fnb(dirnam, (NAM$M_EXP_TYPE | NAM$M_EXP_VER));
+          rms_set_nam_fnb(dirnam, (NAM$M_EXP_TYPE | NAM$M_EXP_VER));
         }
         else { /* No; just work with potential name */
           if (dirfab.fab$l_sts == RMS$_FNF) dirnam = savnam;
@@ -6350,17 +6370,14 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 
       if (rms_is_nam_fnb(dirnam, NAM$M_EXP_NAME)) {
         /* They provided at least the name; we added the type, if necessary, */
-        if (buf) retspec = buf;                            /* in sys$parse() */
-        else if (ts) Newx(retspec, my_esa_len + 1, char);
-        else retspec = __fileify_retbuf;
-        strcpy(retspec,my_esa);
+        strcpy(buf, my_esa);
 	sts = rms_free_search_context(&dirfab);
 	PerlMem_free(trndir);
 	PerlMem_free(esa);
 	if (esal != NULL)
 	    PerlMem_free(esal);
 	PerlMem_free(vmsdir);
-        return retspec;
+        return buf;
       }
       if ((cp1 = strstr(esa,".][000000]")) != NULL) {
         for (cp2 = cp1 + 9; *cp2; cp1++,cp2++) *cp1 = *cp2;
@@ -6398,10 +6415,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
       if ((cp1) != NULL) {
         /* There's more than one directory in the path.  Just roll back. */
         *cp1 = term;
-        if (buf) retspec = buf;
-        else if (ts) Newx(retspec,retlen+7,char);
-        else retspec = __fileify_retbuf;
-        strcpy(retspec,my_esa);
+        strcpy(buf, my_esa);
       }
       else {
         if (rms_is_nam_fnb(dirnam, NAM$M_ROOT_DIR)) {
@@ -6431,18 +6445,15 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	  }
 
           retlen = my_esa_len - 9; /* esa - '][' - '].DIR;1' */
-          if (buf) retspec = buf;
-          else if (ts) Newx(retspec,retlen+16,char);
-          else retspec = __fileify_retbuf;
           cp1 = strstr(my_esa,"][");
           if (!cp1) cp1 = strstr(my_esa,"]<");
           dirlen = cp1 - my_esa;
-          memcpy(retspec,my_esa,dirlen);
+          memcpy(buf, my_esa, dirlen);
           if (!strncmp(cp1+2,"000000]",7)) {
-            retspec[dirlen-1] = '\0';
+            buf[dirlen-1] = '\0';
 	    /* fix-me Not full ODS-5, just extra dots in directories for now */
-	    cp1 = retspec + dirlen - 1;
-	    while (cp1 > retspec)
+	    cp1 = buf + dirlen - 1;
+	    while (cp1 > buf)
 	    {
 	      if (*cp1 == '[')
 		break;
@@ -6454,36 +6465,33 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	    }
             if (*cp1 == '.') *cp1 = ']';
             else {
-              memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
+              memmove(cp1+8, cp1+1, buf+dirlen-cp1);
               memmove(cp1+1,"000000]",7);
             }
           }
           else {
-            memmove(retspec+dirlen,cp1+2,retlen-dirlen);
-            retspec[retlen] = '\0';
+            memmove(buf+dirlen, cp1+2, retlen-dirlen);
+            buf[retlen] = '\0';
             /* Convert last '.' to ']' */
-            cp1 = retspec+retlen-1;
+            cp1 = buf+retlen-1;
 	    while (*cp != '[') {
 	      cp1--;
 	      if (*cp1 == '.') {
 		/* Do not trip on extra dots in ODS-5 directories */
-		if ((cp1 == retspec) || (*(cp1-1) != '^'))
+		if ((cp1 == buf) || (*(cp1-1) != '^'))
 		break;
 	      }
 	    }
             if (*cp1 == '.') *cp1 = ']';
             else {
-              memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
+              memmove(cp1+8, cp1+1, buf+dirlen-cp1);
               memmove(cp1+1,"000000]",7);
             }
           }
         }
         else {  /* This is a top-level dir.  Add the MFD to the path. */
-          if (buf) retspec = buf;
-          else if (ts) Newx(retspec,retlen+16,char);
-          else retspec = __fileify_retbuf;
           cp1 = my_esa;
-          cp2 = retspec;
+          cp2 = buf;
           while ((*cp1 != ':')  && (*cp1 != '\0')) *(cp2++) = *(cp1++);
           strcpy(cp2,":[000000]");
           cp1 += 2;
@@ -6493,20 +6501,52 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
       sts = rms_free_search_context(&dirfab);
       /* We've set up the string up through the filename.  Add the
          type and version, and we're done. */
-      strcat(retspec,".DIR;1");
+      strcat(buf,".DIR;1");
 
       /* $PARSE may have upcased filespec, so convert output to lower
        * case if input contained any lowercase characters. */
-      if (haslower && !decc_efs_case_preserve) __mystrtolower(retspec);
+      if (haslower && !decc_efs_case_preserve) __mystrtolower(buf);
       PerlMem_free(trndir);
       PerlMem_free(esa);
       if (esal != NULL)
 	PerlMem_free(esal);
       PerlMem_free(vmsdir);
-      return retspec;
+      return buf;
     }
+}  /* end of int_fileify_dirspec() */
+
+
+/*{{{ char *fileify_dirspec[_ts](char *dir, char *buf, int * utf8_fl)*/
+static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *utf8_fl)
+{
+    static char __fileify_retbuf[VMS_MAXRSS];
+    char * fileified, *ret_spec, *ret_buf;
+
+    fileified = NULL;
+    ret_buf = buf;
+    if (ret_buf == NULL) {
+        if (ts) {
+            Newx(fileified, VMS_MAXRSS, char);
+            if (fileified == NULL)
+                _ckvmssts(SS$_INSFMEM);
+            ret_buf = fileified;
+        } else {
+            ret_buf = __fileify_retbuf;
+        }
+    }
+
+    ret_spec = int_fileify_dirspec(dir, ret_buf, utf8_fl);
+
+    if (ret_spec == NULL) {
+       /* Cleanup on isle 5, if this is thread specific we need to deallocate */
+       if (fileified)
+           Safefree(fileified);
+    }
+
+    return ret_spec;
 }  /* end of do_fileify_dirspec() */
 /*}}}*/
+
 /* External entry points */
 char *Perl_fileify_dirspec(pTHX_ const char *dir, char *buf)
 { return do_fileify_dirspec(dir,buf,0,NULL); }
@@ -12401,7 +12441,7 @@ Perl_cando_by_name_int
       || vmsname[retlen-1] == ':'
       || (!stat(vmsname, (stat_t *)&st) && S_ISDIR(st.st_mode))) {
 
-      if (!do_fileify_dirspec(vmsname,fileified,1,NULL)) {
+      if (!int_fileify_dirspec(vmsname, fileified, NULL)) {
         PerlMem_free(fileified);
         PerlMem_free(vmsname);
         return FALSE;
