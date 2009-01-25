@@ -29,8 +29,10 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
-#include "time64.h"
-#include "time64.c"
+#ifndef PERL_MICRO
+#  include "time64.h"
+#  include "time64.c"
+#endif
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -4422,9 +4424,15 @@ PP(pp_gmtime)
 {
     dVAR;
     dSP;
+#ifdef PERL_MICRO
+    Time_t when;
+    const struct tm *err;
+    struct tm tmbuf;
+#else
     Time64_T when;
     struct TM tmbuf;
     struct TM *err;
+#endif
     const char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -4432,6 +4440,20 @@ PP(pp_gmtime)
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+#ifdef PERL_MICRO
+    if (MAXARG < 1)
+	(void)time(&when);
+    else
+	when = (Time_t)SvIVx(POPs);
+
+    if (PL_op->op_type == OP_LOCALTIME)
+	err = localtime(&when);
+    else
+	err = gmtime(&when);
+
+    if (!err)
+	tmbuf = *err;
+#else
     if (MAXARG < 1) {
 	time_t now;
 	(void)time(&now);
@@ -4454,6 +4476,7 @@ PP(pp_gmtime)
         err = localtime64_r(&when, &tmbuf);
     else
 	err = gmtime64_r(&when, &tmbuf);
+#endif
 
     if( err == NULL ) {
 	/* XXX %lld broken for quads */
