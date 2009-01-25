@@ -120,6 +120,10 @@ hunk.
 #    define PERL_PATCHNUM "UNKNOWN-miniperl"
 #    define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
 #    define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
+#  elif defined(PERL_MICRO)
+#    define PERL_PATCHNUM "UNKNOWN-microperl"
+#    define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
+#    define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
 #  else
 #include "git_version.h"
 #  endif
