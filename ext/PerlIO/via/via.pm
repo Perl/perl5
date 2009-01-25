@@ -60,66 +60,65 @@ some level of "compatibility" with TIEHANDLE classes it is passed last.
 
 =over 4
 
-=item $class->PUSHED([$mode[,$fh]])
+=item $class->PUSHED([$mode,[$fh]])
 
 Should return an object or the class, or -1 on failure.  (Compare
 TIEHANDLE.)  The arguments are an optional mode string ("r", "w",
 "w+", ...) and a filehandle for the PerlIO layer below.  Mandatory.
 
-When layer is pushed as part of an C<open> call, C<PUSHED> will be called
-I<before> the actual open occurs whether than be via C<OPEN>, C<SYSOPEN>,
-C<FDOPEN> or by letting lower layer do the open.
+When the layer is pushed as part of an C<open> call, C<PUSHED> will be called
+I<before> the actual open occurs, whether that be via C<OPEN>, C<SYSOPEN>,
+C<FDOPEN> or by letting a lower layer do the open.
 
 =item $obj->POPPED([$fh])
 
-Optional - layer is about to be removed.
+Optional - called when the layer is about to be removed.
 
 =item $obj->UTF8($bellowFlag,[$fh])
 
 Optional - if present it will be called immediately after PUSHED has
-returned. It should return true value if the layer expects data to be
-UTF-8 encoded. If it returns true result is as if caller had done
+returned. It should return a true value if the layer expects data to be
+UTF-8 encoded. If it returns true, the result is as if the caller had done
 
    ":via(YourClass):utf8"
 
-If not present of it it returns false, then stream is left with
-flag clear.
+If not present or if it returns false, then the stream is left with
+the UTF-8 flag clear.
 The I<$bellowFlag> argument will be true if there is a layer below
 and that layer was expecting UTF-8.
 
+=item $obj->OPEN($path,$mode,[$fh])
 
-=item $obj->OPEN($path,$mode[,$fh])
-
-Optional - if not present lower layer does open.
-If present called for normal opens after layer is pushed.
+Optional - if not present a lower layer does the open.
+If present, called for normal opens after the layer is pushed.
 This function is subject to change as there is no easy way
-to get lower layer to do open and then regain control.
+to get a lower layer to do the open and then regain control.
 
-=item $obj->BINMODE([,$fh])
+=item $obj->BINMODE([$fh])
 
-Optional - if not available layer is popped on binmode($fh) or when C<:raw>
-is pushed. If present it should return 0 on success -1 on error and undef
+Optional - if not present the layer is popped on binmode($fh) or when C<:raw>
+is pushed. If present it should return 0 on success, -1 on error, or undef
 to pop the layer.
 
-=item $obj->FDOPEN($fd[,$fh])
+=item $obj->FDOPEN($fd,[$fh])
 
-Optional - if not present lower layer does open.
-If present called for opens which pass a numeric file
-descriptor after layer is pushed.
+Optional - if not present a lower layer does the open.
+If present, called after the layer is pushed for opens which pass
+a numeric file descriptor.
 This function is subject to change as there is no easy way
-to get lower layer to do open and then regain control.
+to get a lower layer to do the open and then regain control.
 
-=item $obj->SYSOPEN($path,$imode,$perm,[,$fh])
+=item $obj->SYSOPEN($path,$imode,$perm,[$fh])
 
-Optional - if not present lower layer does open.
-If present called for sysopen style opens which pass a numeric mode
-and permissions after layer is pushed.
+Optional - if not present a lower layer does the open.
+If present, called after the layer is pushed for sysopen style opens
+which pass a numeric mode and permissions.
 This function is subject to change as there is no easy way
-to get lower layer to do open and then regain control.
+to get a lower layer to do the open and then regain control.
 
 =item $obj->FILENO($fh)
 
-Returns a numeric value for Unix-like file descriptor. Return -1 if
+Returns a numeric value for a Unix-like file descriptor. Returns -1 if
 there isn't one.  Optional.  Default is fileno($fh).
 
 =item $obj->READ($buffer,$len,$fh)
@@ -129,12 +128,12 @@ equal to $len).  Optional.  Default is to use FILL instead.
 
 =item $obj->WRITE($buffer,$fh)
 
-Returns the number of octets from buffer that have been successfully written.
+Returns the number of octets from $buffer that have been successfully written.
 
 =item $obj->FILL($fh)
 
 Should return a string to be placed in the buffer.  Optional. If not
-provided must provide READ or reject handles open for reading in
+provided, must provide READ or reject handles open for reading in
 PUSHED.
 
 =item $obj->CLOSE($fh)
@@ -155,7 +154,7 @@ Optional.  Default to be determined.
 
 =item $obj->UNREAD($buffer,$fh)
 
-Returns the number of octets from buffer that have been successfully
+Returns the number of octets from $buffer that have been successfully
 saved to be returned on future FILL/READ calls.  Optional.  Default is
 to push data into a temporary layer above this one.
 
@@ -179,7 +178,7 @@ to signal error (die?) is worked out.
 
 =item $obj->EOF($fh)
 
-Optional. Returns end-of-file state. Default is function of return
+Optional. Returns end-of-file state. Default is a function of the return
 value of FILL or READ.
 
 =back
@@ -188,7 +187,7 @@ value of FILL or READ.
 
 Check the PerlIO::via:: namespace on CPAN for examples of PerlIO layers
 implemented in Perl.  To give you an idea how simple the implementation of
-a PerlIO layer can look, as simple example is included here.
+a PerlIO layer can look, a simple example is included here.
 
 =head2 Example - a Hexadecimal Handle
 
@@ -229,7 +228,7 @@ Given the following module, PerlIO::via::Hex :
     1;
 
 The following code opens up an output handle that will convert any
-output to hexadecimal dump of the output bytes: for example "A" will
+output to a hexadecimal dump of the output bytes: for example "A" will
 be converted to "41" (on ASCII-based machines, on EBCDIC platforms
 the "A" will become "c1")
 
