@@ -1079,7 +1079,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'nuffin',
 		'FILES'		=> q[lib/Tie/RefHash.pm lib/Tie/RefHash],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Time::HiRes' =>
