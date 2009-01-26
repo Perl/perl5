@@ -26,11 +26,6 @@ by an '!ext' and are appropriate to the type of building being done.
 If '--static' specified, only static extensions will be built.
 If '--dynamic' specified, only dynamic extensions will be built.
 
---create-perllibst-h
-    creates perllibst.h file for inclusion from perllib.c
---list-static-libs:
-    prints libraries for static linking and exits
-
 =cut
 
 use Cwd;
@@ -50,29 +45,6 @@ my %opts = map {$_=>1} map {/^--([\w\-]+)$/} @ARGV;
 my ($static,$dynamic) = ((exists $opts{static}?1:0),(exists $opts{dynamic}?1:0));
 if ("$static,$dynamic" eq "0,0") {
   ($static,$dynamic) = (1,1);
-}
-if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
-  my @statics = split /\s+/, $Config{static_ext};
-  if ($opts{'create-perllibst-h'}) {
-    open my $fh, ">perllibst.h"
-        or die "Failed to write to perllibst.h:$!";
-    my @statics1 = map {local $_=$_;s/\//__/g;$_} @statics;
-    my @statics2 = map {local $_=$_;s/\//::/g;$_} @statics;
-    print $fh "/*DO NOT EDIT\n  this file is included from perllib.c to init static extensions */\n";
-    print $fh "#ifdef STATIC1\n",(map {"    \"$_\",\n"} @statics),"#undef STATIC1\n#endif\n";
-    print $fh "#ifdef STATIC2\n",(map {"    EXTERN_C void boot_$_ (pTHX_ CV* cv);\n"} @statics1),"#undef STATIC2\n#endif\n";
-    print $fh "#ifdef STATIC3\n",(map {"    newXS(\"$statics2[$_]::bootstrap\", boot_$statics1[$_], file);\n"} 0 .. $#statics),"#undef STATIC3\n#endif\n";
-    close $fh;
-  } else {
-    my %extralibs;
-    for (@statics) {
-      open my $fh, "<..\\lib\\auto\\$_\\extralibs.ld" or die "can't open <..\\lib\\auto\\$_\\extralibs.ld: $!";
-      $extralibs{$_}++ for grep {/\S/} split /\s+/, join '', <$fh>;
-    }
-    print map {s|/|\\|g;m|([^\\]+)$|;"..\\lib\\auto\\$_\\$1$Config{_a} "} @statics;
-    print map {"$_ "} sort keys %extralibs;
-  }
-  exit(0);
 }
 
 (my $here = getcwd()) =~ s{/}{\\}g;
