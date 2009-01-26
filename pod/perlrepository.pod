@@ -574,6 +574,39 @@ the "first commit where the bug is solved".
 C<git help bisect> has much more information on how you can tweak your
 binary searches.
 
+=head1 SUBMITTING A PATCH VIA GITHUB
+
+GitHub is a website that makes it easy to fork and publish projects
+with Git. First you should set up a GitHub account and log in.
+
+Perl's git repository is mirrored on GitHub at this page:
+
+  http://github.com/github/perl/tree/blead
+
+Visit the page and click the "fork" button. This clones the Perl git
+repository for you and provides you with "Your Clone URL" from which
+you should clone:
+
+  % git clone git@github.com:USERNAME/perl.git perl-github
+
+We shall make the same patch as above, creating a new branch:
+
+  % cd perl-github
+  % git remote add upstream git://github.com/github/perl.git
+  % git pull upstream blead
+  % git checkout -b orange
+  % perl -pi -e 's{Leon Brocard}{Orange Brocard}' AUTHORS
+  % git add AUTHORS
+  % git commit -m 'Rename Leon Brocard to Orange Brocard'
+  % git push origin orange
+
+The orange branch has been pushed to GitHub, so you should now send an
+email to perl5-porters@perl.org with a description of your changes and
+the following information:
+
+  http://github.com/USERNAME/perl/tree/orange
+  git@github.com:USERNAME/perl.git branch orange
+
 =head1 COMMITTING TO MAINTENANCE VERSIONS
 
 To commit to a maintenance version of perl, you need to create a local
