@@ -284,8 +284,8 @@ SKIP: {
 
             $s_perm  |= $id << 9;
             $c_perm1 |= $id << 9;
-            diag sprintf "Src permission: %04o; umask %03o\n", $s_perm, $umask;
-
+            diag(sprintf "Src permission: %04o; umask %03o\n", $s_perm, $umask)
+                unless ($ENV{PERL_CORE});
             (umask $umask) // die $!;
             chmod $s_perm  => $src   or die sprintf "$!: $src => %o", $s_perm;
             chmod $c_perm3 => $copy3 or die $!;
