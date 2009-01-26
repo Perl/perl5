@@ -4120,6 +4120,7 @@ t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/rxcode.t			See if /(?{ code })/ works
+t/op/setpgrpstack.t		See if setpgrp works
 t/op/sleep.t			See if sleep works
 t/op/smartmatch.t		See if the ~~ operator works
 t/op/sort.t			See if sort works
