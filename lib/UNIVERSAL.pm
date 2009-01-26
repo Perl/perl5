@@ -154,14 +154,6 @@ You may call C<can> as a class (static) method or an object method.
 Again, the same rule about having a valid invocant applies -- use an C<eval>
 block or C<blessed> if you need to be extra paranoid.
 
-B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
-C<isa> uses a very similar method and cache-ing strategy. This may cause
-strange effects if the Perl code dynamically changes @ISA in any package.
-
-You may add other methods to the UNIVERSAL class via Perl or XS code.
-You do not need to C<use UNIVERSAL> to make these methods
-available to your program (and you should not do so).
-
 =item C<VERSION ( [ REQUIRE ] )>
 
 C<VERSION> will return the value of the variable C<$VERSION> in the
@@ -173,6 +165,16 @@ C<VERSION> can be called as either a class (static) method or an object
 method.
 
 =back
+
+=head1 WARNINGS
+
+B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
+C<isa> uses a very similar method and cache-ing strategy. This may cause
+strange effects if the Perl code dynamically changes @ISA in any package.
+
+You may add other methods to the UNIVERSAL class via Perl or XS code.
+You do not need to C<use UNIVERSAL> to make these methods
+available to your program (and you should not do so).
 
 =head1 EXPORTS
 
