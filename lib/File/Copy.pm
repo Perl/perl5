@@ -317,8 +317,10 @@ sub cp {
 	    my $ok = $fromstat[5] == $tostat[5];  # group must match
 	    if ($ok) {                            # and we must be in group
 	        my $uname = (getpwuid($>))[0] || '';
-		my(@members) = split /\s+/, (getgrgid($fromstat[5]))[3];
-		$ok = grep { $_ eq $uname } @members;
+                my $group = (getpwuid($>))[3];
+                $ok = $group && $group == $fromstat[5] ||
+                      grep { $_ eq $uname }
+                             split /\s+/, (getgrgid($fromstat[5]))[3];
 	    }
 	    $perm &= ~06000 unless $ok;
 	}
