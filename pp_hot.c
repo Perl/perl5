@@ -2423,7 +2423,7 @@ PP(pp_grepwhile)
 	if (PL_op->op_private & OPpGREP_LEX)
 	    PAD_SVl(PL_op->op_targ) = src;
 	else
-	    DEFSV = src;
+	    DEFSV_set(src);
 
 	RETURNOP(cLOGOP->op_other);
     }
