@@ -5758,6 +5758,9 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 			    match = TRUE;
 		    }
 		}
+
+		/* If we allocated a string above, free it */
+		if (! do_utf8) Safefree(utf8_p);
 	    }
 	}
 	if (match && lenp && *lenp == 0)
