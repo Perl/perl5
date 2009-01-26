@@ -11,10 +11,16 @@ our $VERSION = '1.04';
 require Exporter;
 @EXPORT_OK = qw(isa can VERSION);
 
+require warnings;
+
 # Make sure that even though the import method is called, it doesn't do
 # anything unless called on UNIVERSAL.
 sub import {
     return unless $_[0] eq __PACKAGE__;
+    warnings::warnif(
+      'deprecated',
+      'UNIVERSAL->import is deprecated and will be removed in a future perl',
+    );
     goto &Exporter::import;
 }
 
@@ -181,7 +187,8 @@ available to your program (and you should not do so).
 None by default.
 
 You may request the import of three functions (C<isa>, C<can>, and C<VERSION>),
-however it is usually harmful to do so.  Please don't do this in new code.
+B<but this feature is deprecated and will be removed>.  Please don't do this in
+new code.
 
 For example, previous versions of this documentation suggested using C<isa> as
 a function to determine the type of a reference:
