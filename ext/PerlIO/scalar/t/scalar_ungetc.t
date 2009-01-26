@@ -19,9 +19,9 @@ getc $io;
 
 my $a = ord 'A';
 
-note "buffer[$s]";
+print "# buffer[$s]\n";
 is $io->ungetc($a), $a, 'ungetc';
-note "buffer[$s]";
+print "# buffer[$s]\n";
 
 is getc($io), chr($a), 'getc';
 
