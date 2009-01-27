@@ -33,19 +33,34 @@ use FindExt;
 use Config;
 
 # @ARGV with '!' at first position are exclusions
-my %excl = map {$_=>1} map {/^!(.*)$/} @ARGV;
-@ARGV = grep {!/^!/} @ARGV;
 # @ARGV with '+' at first position are inclusions
-my %incl = map {$_=>1} map {/^\+(.*)$/} @ARGV;
-@ARGV = grep {!/^\+/} @ARGV;
+# -- are long options.
 
-# --static/--dynamic
-my %opts = map {$_=>1} map {/^--([\w\-]+)$/} @ARGV;
-@ARGV = grep {!/^--([\w\-]+)$/} @ARGV;
-my ($static,$dynamic) = ((exists $opts{static}?1:0),(exists $opts{dynamic}?1:0));
-if ("$static,$dynamic" eq "0,0") {
-  ($static,$dynamic) = (1,1);
+my %excl, %incl,
+my @argv;
+
+foreach (@ARGV) {
+    if (/^!(.*)$/) {
+	$excl{$1} = 1;
+    } elsif (/^\+(.*)$/) {
+	$incl{$1} = 1;
+    } elsif (/^--([\w\-]+)$/) {
+	$opts{$1} = 1;
+    } else {
+	push @argv, $_;
+    }
 }
+
+my $static = $opts{static};
+my $dynamic = $opts{dynamic};
+
+$static = $dynamic = 1 unless $static or $dynamic;
+
+my $make = shift @argv;
+$make .= " " . shift @argv while $argv[0] =~ /^-/;
+my $dep  = shift @argv;
+my $dir  = shift @argv;
+my $targ = shift @argv;
 
 (my $here = getcwd()) =~ s{/}{\\}g;
 my $perl = $^X;
@@ -61,13 +76,9 @@ unless (-f "$pl2bat.bat") {
     print "@args\n";
     system(@args) unless defined $::Cross::platform;
 }
-my $make = shift;
-$make .= " ".shift while $ARGV[0]=~/^-/;
-my $dep  = shift;
+
 my $dmod = -M $dep;
-my $dir  = shift;
 chdir($dir) || die "Cannot cd to $dir\n";
-my $targ  = shift;
 (my $ext = getcwd()) =~ s{/}{\\}g;
 my $code;
 FindExt::scan_ext($ext);
