@@ -4579,6 +4579,11 @@ sub kt
     }
 }
 {
+    my $a = 3; "" =~ /(??{ $a })/;
+    my $b = $a;
+    iseq($b, $a, "copy of scalar used for postponed subexpression");
+}
+{
      local $Message = "\$REGMARK in replacement -- Bug #49190";
      my $_ = "A";
      s/(*:B)A/$REGMARK/;
@@ -4663,12 +4668,6 @@ SKIP: {
        '(?>) does not cause wrongness on long string with UTF-8');
 }
 
-
-{
-    my $a = 3; "" =~ /(??{ $a })/;
-    my $b = $a;
-    iseq($b, $a, "copy of scalar used for postponed subexpression");
-}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
