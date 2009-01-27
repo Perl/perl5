@@ -17,7 +17,7 @@ the L<perl5100delta>, which describes differences between 5.8.8 and
 
 =item *
 
-The semantics of C<use feature :5.10*> have changes slightly.
+The semantics of C<use feature :5.10*> have changed slightly.
 See L<"Modules and Pragmata"> for more information.
 
 =item *
@@ -45,6 +45,22 @@ general, be added to maintenance releases. So  C<:5.10> and C<:5.10.X>
 have identical effect. This is a change to the behaviour documented for
 5.10.0.
 
+=item *
+
+C<Attribute::Handlers> upgraded from version 0.79 to 0.81
+
+=item *
+
+C<B> upgraded from version 1.17 to 1.22
+
+=item *
+
+C<Digest::MD5> upgraded from version 2.36_01 to 2.38
+
+=item *
+
+C<ExtUtils::Install> upgraded from version 1.44 to 1.52
+
 =back
 
 =head1 Utility Changes
@@ -57,6 +73,29 @@ have identical effect. This is a change to the behaviour documented for
 
 =head1 Selected Bug Fixes
 
+=head2 Other fixes
+
+=over
+
+=item *
+
+Fixed memory leak on C<while (1) { map 1, 1 }> [RT # 53038].
+
+=item *
+
+Some potential coredumps in PerlIO fixed [RT # 57322,54828].
+
+=item *
+
+The debugger now works with lvalue subroutines
+
+=item *
+
+C<crypt()> and string complement could return tainted values for untainted
+arguments [RT # 59998].
+
+=back
+
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals
@@ -64,6 +103,12 @@ have identical effect. This is a change to the behaviour documented for
 =head1 Known Problems
 
 =head2 Platform Specific Problems
+
+=head1 Acknowledgements
+
+Some of the work in this release was funded by a TPF grant.
+
+XXX more to come
 
 =head1 Reporting Bugs
 
