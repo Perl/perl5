@@ -1400,7 +1400,6 @@ ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
 ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
-ext/util/make_ext.pl		Used by Makefile to execute extension Makefiles
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension
@@ -3172,6 +3171,7 @@ Makefile.SH			A script that generates Makefile
 make_patchnum.pl		Script to generate git_version.h and lib/Config_git.pl files for all OS'es
 malloc.c			A version of malloc you might not want
 malloc_ctl.h			A version of malloc you might not want
+make_ext.pl			Used by Makefile to execute extension Makefiles
 MANIFEST			This list of files
 mathoms.c			A home for binary-compatible code artifacts
 META.yml			Distribution meta-data in YAML
