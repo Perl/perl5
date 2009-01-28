@@ -956,16 +956,16 @@ manicheck:	FORCE
 
 
 $(DYNALOADER):	preplibrary FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext_cross $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl --cross $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext_cross dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl --cross dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext_cross $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl --cross $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh ext/util/make_ext_cross nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib ext/util/make_ext.pl --cross nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF
