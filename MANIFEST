@@ -1401,7 +1401,6 @@ ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext.pl		Used by Makefile to execute extension Makefiles
-ext/util/make_ext_cross		Cross-compilation
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension
