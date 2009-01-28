@@ -56,11 +56,21 @@ my $dynamic = $opts{dynamic};
 
 $static = $dynamic = 1 unless $static or $dynamic;
 
-my $make = shift @argv;
-$make .= " " . shift @argv while $argv[0] =~ /^-/;
+my $makecmd = shift @argv;
 my $dep  = shift @argv;
 my $dir  = shift @argv;
 my $targ = shift @argv;
+
+my $make;
+if (defined($makecmd) and $makecmd =~ /^MAKE=(.*)$/) {
+	$make = $1;
+}
+else {
+	print "ext/util/make_ext:  WARNING:  Please include MAKE=\$(MAKE)\n";
+	print "\tin your call to make_ext.  See ext/util/make_ext for details.\n";
+	exit(1);
+}
+
 
 (my $here = getcwd()) =~ s{/}{\\}g;
 my $perl = $^X;
