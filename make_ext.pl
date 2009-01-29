@@ -6,12 +6,12 @@ use warnings;
 # It primarily used by the perl Makefile:
 #
 # d_dummy $(dynamic_ext): miniperl preplibrary FORCE
-# 	@$(RUN) ./miniperl ext/util/make_ext.pl dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+# 	@$(RUN) ./miniperl make_ext.pl --target=dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 #
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
-my (%excl, %incl, %opts, @argv);
+my (%excl, %incl, %opts, @extspec, @passthrough);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
@@ -20,15 +20,21 @@ foreach (@ARGV) {
 	$incl{$1} = 1;
     } elsif (/^--([\w\-]+)$/) {
 	$opts{$1} = 1;
+    } elsif (/^--([\w\-]+)=(.*)$/) {
+	$opts{$1} = $2;
+    } elsif (/^--([\w\-]+)=(.*)$/) {
+	$opts{$1} = $2;
+    } elsif (/=/) {
+	push @passthrough, $_;
     } else {
-	push @argv, $_;
+	push @extspec, $_;
     }
 }
 
-my $target   = shift @argv;
-my $extspec  = shift @argv;
-my $makecmd  = shift @argv; # Should be something like MAKE=make
-my $passthru = join ' ', @argv; # allow extra macro=value to be passed through
+my $target   = $opts{target};
+my $extspec  = $extspec[0];
+my $makecmd  = shift @passthrough; # Should be something like MAKE=make
+my $passthru = join ' ', @passthrough; # allow extra macro=value to be passed through
 print "\n";
 
 # Previously, $make was taken from config.sh.  However, the user might
