@@ -304,6 +304,7 @@ static char *int_tovmsspec
    (const char *path, char *buf, int dir_flag, int * utf8_flag);
 static char * int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl);
 static char * int_tounixspec(const char *spec, char *buf, int * utf8_fl);
+static char * int_tovmspath(const char *path, char *buf, int * utf8_fl);
 
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
 #define PERL_LNM_MAX_ALLOWED_INDEX 127
@@ -5354,7 +5355,7 @@ Stat_t dst_st;
 
 	    if ((dst_sts == 0) && S_ISDIR(dst_st.st_mode)) {
 		/* VMS pathify a dir target */
-		ret_str = do_tovmspath(dst, vms_dst, 0, NULL);
+		ret_str = int_tovmspath(dst, vms_dst, NULL);
 		if (ret_str == NULL) {
 		    PerlMem_free(vms_src);
 		    PerlMem_free(vms_dst);
@@ -8935,6 +8936,33 @@ char *Perl_tovmsspec_utf8(pTHX_ const char *path, char *buf, int * utf8_fl)
 char *Perl_tovmsspec_utf8_ts(pTHX_ const char *path, char *buf, int * utf8_fl)
   { return do_tovmsspec(path,buf,1,utf8_fl); }
 
+/*{{{ char *int_tovmspath(char *path, char *buf, const int *)*/
+/* Internal routine for use with out an explict context present */
+static char * int_tovmspath(const char *path, char *buf, int * utf8_fl) {
+
+    char * ret_spec, *pathified;
+
+    if (path == NULL)
+        return NULL;
+
+    pathified = PerlMem_malloc(VMS_MAXRSS);
+    if (pathified == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+
+    ret_spec = int_pathify_dirspec(path, pathified);
+
+    if (ret_spec == NULL) {
+        PerlMem_free(pathified);
+        return NULL;
+    }
+
+    ret_spec = int_tovmsspec(pathified, buf, 0, utf8_fl);
+    
+    PerlMem_free(pathified);
+    return ret_spec;
+
+}
+
 /*{{{ char *tovmspath[_ts](char *path, char *buf, const int *)*/
 static char *mp_do_tovmspath(pTHX_ const char *path, char *buf, int ts, int * utf8_fl) {
   static char __tovmspath_retbuf[VMS_MAXRSS];
@@ -10106,7 +10134,7 @@ Perl_opendir(pTHX_ const char *name)
     Stat_t sb;
 
     Newx(dir, VMS_MAXRSS, char);
-    if (do_tovmspath(name,dir,0,NULL) == NULL) {
+    if (int_tovmspath(name, dir, NULL) == NULL) {
       Safefree(dir);
       return NULL;
     }
