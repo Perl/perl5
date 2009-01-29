@@ -4260,7 +4260,7 @@ PP(pp_exec)
 	(void) do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
 	value = 0;
 #  else
-	value = (I32)do_exec3(SvPVx_nolen(sv_mortalcopy(*SP)), 0, 0);
+	value = (I32)do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
 #  endif
 #endif
     }
