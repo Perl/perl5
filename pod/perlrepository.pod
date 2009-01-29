@@ -8,10 +8,11 @@ perlrepository - Using the Perl source repository
 
 =head1 SYNOPSIS
 
-All of Perl's source code is kept centrally in a Git repository. The
-repository contains many Perl revisions from Perl 1 onwards and all the
-revisions from Perforce, the version control system we were using
-previously. This repository is accessible in different ways.
+All of Perl's source code is kept centrally in a Git repository at
+I<perl5.git.perl.org>. The repository contains many Perl revisions
+from Perl 1 onwards and all the revisions from Perforce, the version
+control system we were using previously. This repository is accessible
+in different ways.
 
 The full repository takes up about 80MB of disk space. A check out of
 the blead branch (that is, the master branch, which contains bleadperl,
@@ -23,11 +24,15 @@ the development version of perl 5) takes up about 160MB of disk space
 
 =head2 READ ACCESS VIA THE WEB
 
-You may access this over the web. This allows you to browse the tree,
-see recent commits, search for particular commits and more. You may
-access it at:
+You may access the repository over the web. This allows you to browse
+the tree, see recent commits, subscribe to RSS feeds for the changes,
+search for particular commits and more. You may access it at:
 
   http://perl5.git.perl.org/perl.git
+
+A mirror of the repository is found at:
+
+  http://github.com/github/perl
 
 =head2 READ ACCESS VIA GIT
 
@@ -57,7 +62,7 @@ that you can push back on with:
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
 
-If you clone using git, which is faster than ssh, then you will need to
+If you cloned using the git protocol, which is faster than ssh, then you will need to
 modify your config in order to enable pushing. Edit F<.git/config>
 where you will see something like:
 
@@ -69,8 +74,9 @@ change that to something like this:
   [remote "origin"]
   url = ssh://perl5.git.perl.org/gitroot/perl.git
 
-NOTE: there are symlinks set up so that the /gitroot is actually
-optional.
+NOTE: there are symlinks set up so that the /gitroot is optional and
+since SSH is the default protocol you can actually shorten the "url" to
+C<perl5.git.perl.org:/perl.git>.
 
 You can also set up your user name and e-mail address. For example
 
@@ -80,7 +86,7 @@ You can also set up your user name and e-mail address. For example
 It is also possible to keep C<origin> as a git remote, and add a new
 remote for ssh access:
 
-  % git remote add camel user@camel:/gitroot/perl.git
+  % git remote add camel perl5.git.perl.org:/perl.git
 
 This allows you to update your local repository by pulling from
 C<origin>, which is faster and doesn't require you to authenticate, and
@@ -291,10 +297,19 @@ And you can see the changes:
 
 Now commit your change locally:
 
-  % git add AUTHORS
-  % git commit -m 'Rename Leon Brocard to Orange Brocard'
+  % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
   Created commit 6196c1d: Rename Leon Brocard to Orange Brocard
    1 files changed, 1 insertions(+), 1 deletions(-)
+
+You can examine your last commit with:
+
+  % git show HEAD
+
+and if you are not happy with either the description or the patch
+itself you can fix it up by editing the files once more and then
+issue:
+
+  % git commit -a --amend
 
 Now you should create a patch file for all your local changes:
 
@@ -302,7 +317,7 @@ Now you should create a patch file for all your local changes:
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
 You should now send an email to perl5-porters@perl.org with a
-description of your changes, and attach this patch file as an
+description of your changes, and include this patch file as an
 attachment.
 
 If you want to delete your temporary branch, you may do so with:
@@ -446,19 +461,17 @@ If just a raw diff is provided, it is also possible use this two-step
 process:
 
   % git apply bugfix.diff
-  % git commit -am "Some fixing" --author="That Guy <that.guy@internets.com>"
+  % git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
 
 Now we can inspect the change:
 
-  % git log
+  % git show HEAD
   commit b1b3dab48344cff6de4087efca3dbd63548ab5e2
   Author: Leon Brocard <acme@astray.com>
   Date:   Fri Dec 19 17:02:59 2008 +0000
 
     Rename Leon Brocard to Orange Brocard
-  ...
 
-  % git diff blead
   diff --git a/AUTHORS b/AUTHORS
   index 293dd70..722c93e 100644
   --- a/AUTHORS
@@ -492,7 +505,7 @@ If you want to delete your temporary branch, you may do so with:
 =head1 CLEANING A WORKING DIRECTORY
 
 The command C<git clean> can with varying arguments be used as a
-replacement for make-clean.
+replacement for C<make clean>.
 
 To reset your working directory to a pristine condition you can do:
 
@@ -506,7 +519,8 @@ to remove all ignored untracked files, such as build and test
 byproduct, but leave any  manually created files alone.
 
 If you only want to cancel some uncommitted edits, you can use C<git
-checkout> and give it a list of files to be reverted.
+checkout> and give it a list of files to be reverted, or C<git
+checkout -f> to revert them all.
 
 If you want to cancel one or several commits, you can use C<git reset>.
 
@@ -596,8 +610,7 @@ We shall make the same patch as above, creating a new branch:
   % git pull upstream blead
   % git checkout -b orange
   % perl -pi -e 's{Leon Brocard}{Orange Brocard}' AUTHORS
-  % git add AUTHORS
-  % git commit -m 'Rename Leon Brocard to Orange Brocard'
+  % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
   % git push origin orange
 
 The orange branch has been pushed to GitHub, so you should now send an
