@@ -4,7 +4,7 @@ buildext.pl - build extensions
 
 =head1 SYNOPSIS
 
-    buildext.pl make [-make_opts] dep directory [target] [--static|--dynamic] +ext2 !ext1
+    buildext.pl make [-make_opts] dep directory [target] [--static|--dynamic|--all] +ext2 !ext1
 
 E.g.
 
@@ -28,6 +28,7 @@ If '--dynamic' specified, only dynamic extensions will be built.
 
 =cut
 
+use strict;
 use Cwd;
 use FindExt;
 use Config;
@@ -36,8 +37,7 @@ use Config;
 # @ARGV with '+' at first position are inclusions
 # -- are long options.
 
-my %excl, %incl,
-my @argv;
+my (%excl, %incl, %opts, @argv);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
@@ -51,10 +51,8 @@ foreach (@ARGV) {
     }
 }
 
-my $static = $opts{static};
-my $dynamic = $opts{dynamic};
-
-$static = $dynamic = 1 unless $static or $dynamic;
+my $static = $opts{static} || $opts{all};
+my $dynamic = $opts{dynamic} || $opts{all};
 
 my $makecmd = shift @argv;
 my $dep  = shift @argv;

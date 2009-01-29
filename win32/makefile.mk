@@ -1404,12 +1404,12 @@ Extensions_static : buildext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
 Extensions_clean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) $(EXTDIR) clean
-	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) ext clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) $(EXTDIR) --all clean
+	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) ext --all clean
 
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) $(EXTDIR) realclean
-	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) ext realclean
+	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" $(PERLDEP) ext --all realclean
 
 #-------------------------------------------------------------------------------
 
