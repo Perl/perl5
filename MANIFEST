@@ -1427,6 +1427,7 @@ ext/Win32/t/GetFileVersion.t	See if Win32 extension works
 ext/Win32/t/GetFolderPath.t	See if Win32 extension works
 ext/Win32/t/GetFullPathName.t	See if Win32 extension works
 ext/Win32/t/GetLongPathName.t	See if Win32 extension works
+ext/Win32/t/GetOSName.t		See if Win32 extension works
 ext/Win32/t/GetOSVersion.t	See if Win32 extension works
 ext/Win32/t/GetShortPathName.t	See if Win32 extension works
 ext/Win32/t/GuidGen.t		See if Win32 extension works
