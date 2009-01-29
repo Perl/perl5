@@ -1166,16 +1166,16 @@ manicheck:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=$(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=$(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF
@@ -1235,7 +1235,7 @@ _tidy:
 	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm -f lib/Config_git.pl git_version.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl clean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=clean $$x MAKE=$(MAKE) ; \
 	done
 
 _cleaner1:
@@ -1245,7 +1245,7 @@ _cleaner1:
 	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-@if test -f miniperl$(EXE_EXT) ; then \
 	for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $(CLEAN) $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=$(CLEAN) $$x MAKE=$(MAKE) ; \
 	done ; \
 	else \
 	sh $(CLEAN).sh ; \
