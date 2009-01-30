@@ -97,7 +97,6 @@ $mname =~ s!/!::!g;
 my $depth = $pname;
 $depth =~ s![^/]+!..!g;
 my $makefile = "Makefile";
-my $makeargs = '';
 my $makeopts = '';
 
 if (not -d "ext/$pname") {
@@ -119,19 +118,18 @@ chdir("ext/$pname");
 # 'dynamic', 'static', and 'static_pic' (the last one respects
 # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
 if ($target eq 'dynamic') {
-	$makeargs = "LINKTYPE=dynamic";
+	$passthru = "LINKTYPE=dynamic $passthru";
 	$target   = 'all';
 }
 elsif ($target eq 'static') {
-	$makeargs = "LINKTYPE=static CCCDLFLAGS=";
+	$passthru = "LINKTYPE=static CCCDLFLAGS= $passthru";
 	$target   = 'all';
 }
 elsif ($target eq 'static_pic') {
-	$makeargs = "LINKTYPE=static";
+	$passthru = "LINKTYPE=static $passthru";
 	$target   = 'all';
 }
 elsif ($target eq 'nonxs') {
-	$makeargs = "";
 	$target   = 'all';
 }
 elsif ($target =~ /clean$/) {
@@ -215,8 +213,4 @@ else {
 	  and print "$make config failed, continuing anyway...\n";
 }
 
-system(
-	"$run$make $target MAKE=$make $makeargs $passthru"
-) or exit();
-
-exit($?);
+system "$run$make $target MAKE=$make $passthru" and exit $?;
