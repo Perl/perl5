@@ -4,17 +4,17 @@ buildext.pl - build extensions
 
 =head1 SYNOPSIS
 
-    buildext.pl make [-make_opts] dep directory [target] [--static|--dynamic|--all] +ext2 !ext1
+    buildext.pl make [-make_opts] directory [target] [--static|--dynamic|--all] +ext2 !ext1
 
 E.g.
 
-    buildext.pl nmake -nologo perldll.def ..\ext
+    buildext.pl nmake -nologo ..\ext
 
-    buildext.pl nmake -nologo perldll.def ..\ext clean
+    buildext.pl nmake -nologo ..\ext clean
 
-    buildext.pl dmake perldll.def ..\ext
+    buildext.pl dmake ..\ext
 
-    buildext.pl dmake perldll.def ..\ext clean
+    buildext.pl dmake ..\ext clean
 
 Will skip building extensions which are marked with an '!' char.
 Mostly because they still not ported to specified platform.
@@ -55,7 +55,6 @@ my $static = $opts{static} || $opts{all};
 my $dynamic = $opts{dynamic} || $opts{all};
 
 my $makecmd = shift @argv;
-my $dep  = shift @argv;
 my $dir  = shift @argv;
 my $targ = shift @argv;
 
@@ -85,7 +84,6 @@ unless (-f "$pl2bat.bat") {
     system(@args) unless defined $::Cross::platform;
 }
 
-my $dmod = -M $dep;
 chdir($dir) || die "Cannot cd to $dir\n";
 (my $ext = getcwd()) =~ s{/}{\\}g;
 my $code;
@@ -109,8 +107,7 @@ foreach $dir (sort @ext)
   }
   if (chdir("$ext\\$dir"))
    {
-    my $mmod = -M 'Makefile';
-    if (!(-f 'Makefile') || $mmod > $dmod)
+    if (!-f 'Makefile')
      {
       print "\nRunning Makefile.PL in $dir\n";
       my @perl = ($perl, "-I$here\\..\\lib", 'Makefile.PL',
@@ -124,12 +121,13 @@ foreach $dir (sort @ext)
       print join(' ', @perl), "\n";
       $code = system(@perl);
       warn "$code from $dir\'s Makefile.PL" if $code;
-      $mmod = -M 'Makefile';
-      if ($mmod > $dmod)
-       {
-        warn "Makefile $mmod > $dmod ($dep)\n";
-       }
      }  
+    if (!$targ or $targ !~ /clean$/) {
+	# Give makefile an opportunity to rewrite itself.
+	# reassure users that life goes on...
+	system("$make config")
+	    and print "$make config failed, continuing anyway...\n";
+    }
     if ($targ)
      {
       print "Making $targ in $dir\n$make $targ\n";
