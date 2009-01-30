@@ -66,6 +66,36 @@ if (!defined($extspec) or $extspec eq '')  {
 	exit(1);
 }
 
+# check link type and do any preliminaries.  Valid link types are
+# 'dynamic', 'static', and 'static_pic' (the last one respects
+# CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
+if ($target eq 'dynamic') {
+	$passthru = "LINKTYPE=dynamic $passthru";
+	$target   = 'all';
+}
+elsif ($target eq 'static') {
+	$passthru = "LINKTYPE=static CCCDLFLAGS= $passthru";
+	$target   = 'all';
+}
+elsif ($target eq 'static_pic') {
+	$passthru = "LINKTYPE=static $passthru";
+	$target   = 'all';
+}
+elsif ($target eq 'nonxs') {
+	$target   = 'all';
+}
+elsif ($target =~ /clean$/) {
+}
+elsif ($target eq '') {
+	print "make_ext: no make target specified (eg static or dynamic)\n";
+	exit(1);
+}
+else {
+	# for the time being we are strict about what make_ext is used for
+	print "make_ext: unknown make target '$target'\n";
+	exit(1);
+}
+
 # The Perl Makefile.SH will expand all extensions to
 #	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
 # A user wishing to run make_ext might use
@@ -112,37 +142,6 @@ if ($Config{osname} eq 'catamount') {
 print "\tMaking $mname ($target)\n";
 
 chdir("ext/$pname");
-
-# check link type and do any preliminaries.  Valid link types are
-# 'dynamic', 'static', and 'static_pic' (the last one respects
-# CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
-if ($target eq 'dynamic') {
-	$passthru = "LINKTYPE=dynamic $passthru";
-	$target   = 'all';
-}
-elsif ($target eq 'static') {
-	$passthru = "LINKTYPE=static CCCDLFLAGS= $passthru";
-	$target   = 'all';
-}
-elsif ($target eq 'static_pic') {
-	$passthru = "LINKTYPE=static $passthru";
-	$target   = 'all';
-}
-elsif ($target eq 'nonxs') {
-	$target   = 'all';
-}
-elsif ($target =~ /clean$/) {
-}
-elsif ($target eq '') {
-	print "make_ext: no make target specified (eg static or dynamic)\n";
-	exit(1);
-}
-else {
-	# for the time being we are strict about what make_ext is used for
-	print "make_ext: unknown make target '$target'\n";
-	exit(1);
-}
-
 
 if (not -f $makefile) {
 	if (-f "Makefile.PL") {
