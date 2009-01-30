@@ -33,12 +33,31 @@ my $VERBOSE = $ENV{PERL_CORE} ? 0 : ($ENV{TEST_VERBOSE} || 0);
 my $lib_dir = $ENV{PERL_CORE} ? 
   File::Spec->catdir('pod', 'testpods', 'lib')
   : File::Spec->catdir($THISDIR,'lib');
+
+my $vms_unix_rpt = 0;
+my $vms_efs = 0;
+my $unix_mode = 1;
+
 if ($^O eq 'VMS') {
     $lib_dir = $ENV{PERL_CORE} ?
       VMS::Filespec::unixify(File::Spec->catdir('pod', 'testpods', 'lib'))
       : VMS::Filespec::unixify(File::Spec->catdir($THISDIR,'-','lib','pod'));
     $Qlib_dir = $lib_dir;
     $Qlib_dir =~ s#\/#::#g;
+
+    $unix_mode = 0;
+    if (eval 'require VMS::Feature') {
+        $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
+        $vms_efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+    }
+
+    # Traditional VMS mode only if VMS is not in UNIX compatible mode.
+    $unix_mode = ($vms_efs && $vms_unix_rpt);
 }
 
 print "### searching $lib_dir\n";
@@ -88,7 +107,11 @@ print "### found $result\n";
 
 require Config;
 if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
-    $compare = "lib.File]Find.pm";
+    if ($unix_mode) {
+        $compare = "../lib/File/Find.pm";
+    } else {
+        $compare = "lib.File]Find.pm";
+    }
     $result =~ s/perl_root:\[\-?\.?//i;
     $result =~ s/\[\-?\.?//i; # needed under `mms test`
     ok($result,$compare);
@@ -96,7 +119,7 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
 else {
     $compare = $ENV{PERL_CORE} ?
       File::Spec->catfile(File::Spec->updir, 'lib','File','Find.pm')
-      : File::Spec->catfile($Config::Config{privlib},"File","Find.pm");
+      : File::Spec->catfile($Config::Config{privlibexp},"File","Find.pm");
     ok(_canon($result),_canon($compare));
 }
 

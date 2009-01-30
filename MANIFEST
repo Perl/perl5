@@ -3780,6 +3780,7 @@ t/lib/compress/prime.pl		Compress::Zlib
 t/lib/compress/tied.pl		Compress::Zlib
 t/lib/compress/truncate.pl	Compress::Zlib
 t/lib/compress/zlib-generic.pl	Compress::Zlib
+t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
@@ -4185,6 +4186,8 @@ t/pod/plainer.t			Test Pod::Plainer
 t/pod/pod2usage2.t		Test Pod::Usage
 t/pod/pod2usage.t		Test Pod::Usage
 t/pod/pod2usage.xr		Expected results for pod2usage.t
+t/pod/podchkenc.t		Validate =encoding support
+t/pod/podchkenc.xr		Expected results for the above
 t/pod/poderrs.t			Test POD errors
 t/pod/poderrs.xr		Expected results for poderrs.t
 t/pod/podselect.t		Test Pod::Select
@@ -4196,6 +4199,8 @@ t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
 t/pod/twice.t			Test Pod::Parser
+t/pod/usage.pod			Test POD for pod2usage tests
+t/pod/usage2.pod		Test POD for pod2usage tests
 t/README			Instructions for regression tests
 t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.

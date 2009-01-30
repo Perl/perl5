@@ -856,7 +856,7 @@ package Maintainers;
 
         'Pod::Parser' => {
 		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
+		'FILES' => q[lib/Pod/{Checker,Find,InputObjects,Parser,ParseUtils,PlainText,Select,Usage}.pm lib/Pod/t/contains_pod.t pod/pod{2usage,checker,select}.PL t/lib/contains_bad_pod.xr t/lib/contains_pod.xr t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/pod2usage.* t/pod/podchkenc.* t/pod/poderrs.* t/pod/podselect.* t/pod/special_seqs.* t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/usage*.pod],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},

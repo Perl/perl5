@@ -16,21 +16,27 @@
 ############################################################################
 
 package Pod::PlainText;
+use strict;
 
 require 5.005;
 
 use Carp qw(carp croak);
 use Pod::Select ();
 
-use strict;
 use vars qw(@ISA %ESCAPES $VERSION);
 
 # We inherit from Pod::Select instead of Pod::Parser so that we can be used
 # by Pod::Usage.
 @ISA = qw(Pod::Select);
 
-$VERSION = '2.02';
+$VERSION = '2.03';
 
+BEGIN {
+   if ($] < 5.006) {
+      require Symbol;
+      import Symbol;
+   }
+}
 
 ############################################################################
 # Table of supported E<> escapes
@@ -130,7 +136,7 @@ sub initialize {
     $$self{INDENTS}  = [];              # Stack of indentations.
     $$self{MARGIN}   = $$self{indent};  # Current left margin in spaces.
 
-    $self->SUPER::initialize;
+    return $self->SUPER::initialize;
 }
 
 
@@ -147,9 +153,13 @@ sub command {
     my $command = shift;
     return if $command eq 'pod';
     return if ($$self{EXCLUDE} && $command ne 'end');
-    $self->item ("\n") if defined $$self{ITEM};
+    if (defined $$self{ITEM}) {
+      $self->item ("\n");
+      local $_ = "\n";
+      $self->output($_) if($command eq 'back');
+    }
     $command = 'cmd_' . $command;
-    $self->$command (@_);
+    return $self->$command (@_);
 }
 
 # Called for a verbatim paragraph.  Gets the paragraph, the line number, and
@@ -162,7 +172,7 @@ sub verbatim {
     local $_ = shift;
     return if /^\s*$/;
     s/^(\s*\S+)/(' ' x $$self{MARGIN}) . $1/gme;
-    $self->output ($_);
+    return $self->output($_);
 }
 
 # Called for a regular text block.  Gets the paragraph, the line number, and
@@ -170,7 +180,10 @@ sub verbatim {
 sub textblock {
     my $self = shift;
     return if $$self{EXCLUDE};
-    $self->output ($_[0]), return if $$self{VERBATIM};
+    if($$self{VERBATIM}) {
+      $self->output($_[0]);
+      return;
+    }
     local $_ = shift;
     my $line = shift;
 
@@ -215,7 +228,7 @@ sub textblock {
 
     # Now actually interpolate and output the paragraph.
     $_ = $self->interpolate ($_, $line);
-    s/\s+$/\n/;
+    s/\s*$/\n/s;
     if (defined $$self{ITEM}) {
         $self->item ($_ . "\n");
     } else {
@@ -266,7 +279,7 @@ sub preprocess_paragraph {
     my $self = shift;
     local $_ = shift;
     1 while s/^(.*?)(\t+)/$1 . ' ' x (length ($2) * 8 - length ($1) % 8)/me;
-    $_;
+    return $_;
 }
 
 
@@ -280,7 +293,7 @@ sub preprocess_paragraph {
 sub cmd_head1 {
     my $self = shift;
     local $_ = shift;
-    s/\s+$//;
+    s/\s+$//s;
     $_ = $self->interpolate ($_, shift);
     if ($$self{alt}) {
         $self->output ("\n==== $_ ====\n\n");
@@ -294,12 +307,12 @@ sub cmd_head1 {
 sub cmd_head2 {
     my $self = shift;
     local $_ = shift;
-    s/\s+$//;
+    s/\s+$//s;
     $_ = $self->interpolate ($_, shift);
     if ($$self{alt}) {
         $self->output ("\n==   $_   ==\n\n");
     } else {
-        $self->output (' ' x ($$self{indent} / 2) . $_ . "\n\n");
+        $self->output (' ' x ($$self{indent} / 2) . $_ . "\n");
     }
 }
 
@@ -307,7 +320,7 @@ sub cmd_head2 {
 sub cmd_head3 {
     my $self = shift;
     local $_ = shift;
-    s/\s+$//;
+    s/\s+$//s;
     $_ = $self->interpolate ($_, shift);
     if ($$self{alt}) {
         $self->output ("\n= $_ =\n");
@@ -334,7 +347,7 @@ sub cmd_back {
     my $self = shift;
     $$self{MARGIN} = pop @{ $$self{INDENTS} };
     unless (defined $$self{MARGIN}) {
-        carp "Unmatched =back";
+        carp 'Unmatched =back';
         $$self{MARGIN} = $$self{indent};
     }
 }
@@ -344,7 +357,7 @@ sub cmd_item {
     my $self = shift;
     if (defined $$self{ITEM}) { $self->item }
     local $_ = shift;
-    s/\s+$//;
+    s/\s+$//s;
     $$self{ITEM} = $self->interpolate ($_);
 }
 
@@ -367,7 +380,7 @@ sub cmd_end {
     my $self = shift;
     $$self{EXCLUDE} = 0;
     $$self{VERBATIM} = 0;
-}    
+}
 
 # One paragraph for a particular translator.  Ignore it unless it's intended
 # for text, in which case we treat it as a verbatim text block.
@@ -420,7 +433,7 @@ sub seq_l {
         $section = '"' . $1 . '"';
     } elsif (m/^[-:.\w]+(?:\(\S+\))?$/) {
         ($manpage, $section) = ($_, '');
-    } elsif (m%/%) {
+    } elsif (m{/}) {
         ($manpage, $section) = split (/\s*\/\s*/, $_, 2);
     }
 
@@ -431,14 +444,14 @@ sub seq_l {
     } elsif ($section =~ /^[:\w]+(?:\(\))?/) {
         $text .= 'the ' . $section . ' entry';
         $text .= (length $manpage) ? " in the $manpage manpage"
-                                   : " elsewhere in this document";
+                                   : ' elsewhere in this document';
     } else {
         $section =~ s/^\"\s*//;
         $section =~ s/\s*\"$//;
         $text .= 'the section on "' . $section . '"';
         $text .= " in the $manpage manpage" if length $manpage;
     }
-    $text;
+    return $text;
 }
 
 
@@ -458,7 +471,7 @@ sub item {
     local $_ = shift;
     my $tag = $$self{ITEM};
     unless (defined $tag) {
-        carp "item called without tag";
+        carp 'item called without tag';
         return;
     }
     undef $$self{ITEM};
@@ -478,7 +491,7 @@ sub item {
         $_ = $self->reformat ($_);
         s/^ /:/ if ($$self{alt} && $indent > 0);
         my $tagspace = ' ' x length $tag;
-        s/^($space)$tagspace/$1$tag/ or warn "Bizarre space in item";
+        s/^($space)$tagspace/$1$tag/ or carp 'Bizarre space in item';
         $self->output ($_);
     }
 }
@@ -507,7 +520,7 @@ sub wrap {
     }
     $output .= $spaces . $_;
     $output =~ s/\s+$/\n\n/;
-    $output;
+    return $output;
 }
 
 # Reformat a paragraph of text for the current margin.  Takes the text to
@@ -526,7 +539,7 @@ sub reformat {
     } else {
         s/\s+/ /g;
     }
-    $self->wrap ($_);
+    return $self->wrap($_);
 }
 
 # Output text to the output device.
@@ -563,12 +576,14 @@ sub pod2text {
     # means we need to turn the first argument into a file handle.  Magic
     # open will handle the <&STDIN case automagically.
     if (defined $_[1]) {
-        local *IN;
-        unless (open (IN, $_[0])) {
-            croak ("Can't open $_[0] for reading: $!\n");
-            return;
+        my $infh;
+        if ($] < 5.006) {
+          $infh = gensym();
         }
-        $_[0] = \*IN;
+        unless (open ($infh, $_[0])) {
+            croak ("Can't open $_[0] for reading: $!\n");
+        }
+        $_[0] = $infh;
         return $parser->parse_from_filehandle (@_);
     } else {
         return $parser->parse_from_file (@_);
