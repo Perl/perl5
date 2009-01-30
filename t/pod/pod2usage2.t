@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use Test::More;
+use strict;
 
 BEGIN {
   if ($^O eq 'MSWin32' || $^O eq 'VMS') {
@@ -150,7 +151,20 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 99, -sections 
 EOT
 
 # does the __DATA__ work ok as input
-($exit, $text) = getoutput( sub { system($^X, '-Mblib', File::Spec->catfile(qw(t pod p2u_data.pl))); exit($? >> 8); } );
+my ($blib, $test_script, $pod_file1, , $pod_file2);
+if ($ENV{PERL_CORE}) {
+  $blib = '-I../lib';
+  $test_script = File::Spec->catfile(qw(pod p2u_data.pl));
+  $pod_file1 = File::Spec->catfile(qw(pod usage.pod));
+  $pod_file2 = File::Spec->catfile(qw(pod usage2.pod));
+} else {
+  $blib = '-Mblib';
+  $test_script = File::Spec->catfile(qw(t pod p2u_data.pl));
+  $pod_file1 = File::Spec->catfile(qw(t pod usage.pod));
+  $pod_file2 = File::Spec->catfile(qw(t pod usage2.pod));
+}
+
+($exit, $text) = getoutput( sub { system($^X, $blib, $test_script); exit($? >> 8); } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 17,                 "Exit status pod2usage (-verbose => 2, -input => \*DATA)");
 ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 2, -input => \*DATA)") or diag "Got:\n$text\n";
@@ -166,7 +180,7 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 2, -input => \
 EOT
 
 # test that SYNOPSIS and USAGE are printed
-($exit, $text) = getoutput( sub { pod2usage(-input => File::Spec->catfile(qw(t pod usage.pod)),
+($exit, $text) = getoutput( sub { pod2usage(-input => $pod_file1,
                                             -exitval => 0, -verbose => 0); });
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with USAGE");
@@ -180,7 +194,7 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage with USAGE") or diag "Got:\
 EOT
 
 # test that SYNOPSIS and USAGE are printed with options
-($exit, $text) = getoutput( sub { pod2usage(-input => File::Spec->catfile(qw(t pod usage.pod)),
+($exit, $text) = getoutput( sub { pod2usage(-input => $pod_file1,
                                             -exitval => 0, -verbose => 1); });
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with USAGE and verbose=1");
@@ -197,7 +211,7 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage with USAGE and verbose=1") 
 EOT
 
 # test that only USAGE is printed when requested
-($exit, $text) = getoutput( sub { pod2usage(-input => File::Spec->catfile(qw(t pod usage.pod)),
+($exit, $text) = getoutput( sub { pod2usage(-input => $pod_file1,
                                             -exitval => 0, -verbose => 99, -sections => 'USAGE'); });
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with USAGE and verbose=99");
@@ -242,7 +256,7 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage with Pod::Find") or diag "G
 EOT
 
 # verify that sections are correctly found after nested headings
-($exit, $text) = getoutput( sub { pod2usage(-input => File::Spec->catfile(qw(t pod usage2.pod)),
+($exit, $text) = getoutput( sub { pod2usage(-input => $pod_file2,
                                             -exitval => 0, -verbose => 99,
                                             -sections => [qw(BugHeader BugHeader/.*')]) });
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
@@ -259,7 +273,7 @@ EOT
 
 # Verify that =over =back work OK
 ($exit, $text) = getoutput( sub {
-  pod2usage(-input => File::Spec->catfile(qw(t pod usage2.pod)),
+  pod2usage(-input => $pod_file2,
             -exitval => 0, -verbose => 99, -sections => 'BugHeader/BugHeader2') } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with over/back");
@@ -272,7 +286,7 @@ EOT
 
 # new array API for -sections
 ($exit, $text) = getoutput( sub {
-  pod2usage(-input => File::Spec->catfile(qw(t pod usage2.pod)),
+  pod2usage(-input => $pod_file2,
             -exitval => 0, -verbose => 99, -sections => [qw(Heading-1/!.+ Heading-2/.+)]) } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with -sections => []");
@@ -288,7 +302,7 @@ EOT
 
 # allow subheadings in OPTIONS and ARGUMENTS
 ($exit, $text) = getoutput( sub {
-  pod2usage(-input => File::Spec->catfile(qw(t pod usage2.pod)),
+  pod2usage(-input => $pod_file2,
             -exitval => 0, -verbose => 1) } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 $text =~ s{[*](destination|files)[*]}{$1}g; # strip * chars
