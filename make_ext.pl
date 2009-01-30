@@ -97,7 +97,6 @@ $mname =~ s!/!::!g;
 my $depth = $pname;
 $depth =~ s![^/]+!..!g;
 my $makefile = "Makefile";
-my $makeopts = '';
 
 if (not -d "ext/$pname") {
 	print "\tSkipping $extspec (directory does not exist)\n";
@@ -133,13 +132,6 @@ elsif ($target eq 'nonxs') {
 	$target   = 'all';
 }
 elsif ($target =~ /clean$/) {
-	# If Makefile has been moved to Makefile.old by a make clean
-	# then use Makefile.old for realclean rather than rebuild it
-	if (! -f $makefile and -f "Makefile.old") {
-		$makefile = "Makefile.old";
-		$makeopts = "-f $makefile";
-		print "Note: Using Makefile.old\n";
-	}
 }
 elsif ($target eq '') {
 	print "make_ext: no make target specified (eg static or dynamic)\n";
