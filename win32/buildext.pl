@@ -30,14 +30,14 @@ If '--dynamic' specified, only dynamic extensions will be built.
 
 use strict;
 use Cwd;
-use FindExt;
+require FindExt;
 use Config;
 
 # @ARGV with '!' at first position are exclusions
 # @ARGV with '+' at first position are inclusions
 # -- are long options.
 
-my (%excl, %incl, %opts, @argv);
+my (%excl, %incl, %opts, @extspec, @pass_through);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
@@ -48,17 +48,22 @@ foreach (@ARGV) {
 	$opts{$1} = 1;
     } elsif (/^--([\w\-]+)=(.*)$/) {
 	$opts{$1} = $2;
+    } elsif (/=/) {
+	push @pass_through, $_;
     } else {
-	push @argv, $_;
+	push @extspec, $_;
     }
 }
 
 my $static = $opts{static} || $opts{all};
 my $dynamic = $opts{dynamic} || $opts{all};
 
-my $makecmd = shift @argv;
+my $makecmd = shift @pass_through;
+unshift @pass_through, 'PERL_CORE=1';
+
 my $dir  = $opts{dir} || 'ext';
-my $targ = $opts{target};
+my $target = $opts{target};
+$target = 'all' unless defined $target;
 
 my $make;
 if (defined($makecmd) and $makecmd =~ /^MAKE=(.*)$/) {
@@ -70,6 +75,13 @@ else {
 	exit(1);
 }
 
+# Strip whitespace at end of $make to ease passing of (potentially empty) parameters
+$make =~ s/\s+$//;
+
+# fallback to config.sh's MAKE
+$make ||= $Config{make} || $ENV{MAKE};
+my @run = $Config{run};
+@run = () if not defined $run[0] or $run[0] eq '';
 
 (my $here = getcwd()) =~ s{/}{\\}g;
 my $perl = $^X;
@@ -89,7 +101,6 @@ unless (-f "$pl2bat.bat") {
 print "In ", getcwd();
 chdir($dir) || die "Cannot cd to $dir\n";
 (my $ext = getcwd()) =~ s{/}{\\}g;
-my $code;
 FindExt::scan_ext($ext);
 FindExt::set_static_extensions(split ' ', $Config{static_ext});
 
@@ -108,46 +119,49 @@ foreach $dir (sort @ext)
     warn "Skipping extension $ext\\$dir, not ported to current platform";
     next;
   }
-  if (chdir("$ext\\$dir"))
-   {
-    if (!-f 'Makefile')
-     {
-      print "\nRunning Makefile.PL in $dir\n";
-      my @perl = ($perl, "-I$here\\..\\lib", 'Makefile.PL',
-                  'INSTALLDIRS=perl', 'PERL_CORE=1',
-		  (FindExt::is_static($dir)
-                   ? ('LINKTYPE=static') : ()), # if ext is static
-		);
-      if (defined $::Cross::platform) {
-	@perl = (@perl[0,1],"-MCross=$::Cross::platform",@perl[2..$#perl]);
-      }
-      print join(' ', @perl), "\n";
-      $code = system(@perl);
-      warn "$code from $dir\'s Makefile.PL" if $code;
-     }  
-    if (!$targ or $targ !~ /clean$/) {
-	# Give makefile an opportunity to rewrite itself.
-	# reassure users that life goes on...
-	system("$make config")
-	    and print "$make config failed, continuing anyway...\n";
-    }
-    if ($targ)
-     {
-      print "Making $targ in $dir\n$make $targ\n";
-      $code = system("$make $targ");
-      die "Unsuccessful make($dir): code=$code" if $code!=0;
-     }
-    else
-     {
-      print "Making $dir\n$make\n";
-      $code = system($make);
-      die "Unsuccessful make($dir): code=$code" if $code!=0;
-     }
-    chdir($here) || die "Cannot cd to $here:$!";
-   }
-  else
-   {
-    warn "Cannot cd to $ext\\$dir:$!";
-   }
+
+  build_extension($ext, "$ext\\$dir", $here, "$here\\..\\lib",
+		  [@pass_through,
+		   FindExt::is_static($dir) ? ('LINKTYPE=static') : ()]);
  }
 
+sub build_extension {
+    my ($ext, $ext_dir, $return_dir, $lib_dir, $pass_through) = @_;
+    unless (chdir "$ext_dir") {
+	warn "Cannot cd to $ext_dir: $!";
+	return;
+    }
+    
+    if (!-f 'Makefile') {
+	print "\nRunning Makefile.PL in $ext_dir\n";
+
+	# Presumably this can be simplified
+	my @cross;
+	if (defined $::Cross::platform) {
+	    # Inherited from win32/buildext.pl
+	    @cross = "-MCross=$::Cross::platform";
+	} elsif ($opts{cross}) {
+	    # Inherited from make_ext.pl
+	    @cross = '-MCross';
+	}
+	    
+	my @perl = (@run, $perl, "-I$lib_dir", @cross, 'Makefile.PL',
+		    'INSTALLDIRS=perl', 'INSTALLMAN3DIR=none', 'PERL_CORE=1',
+		    @$pass_through);
+	print join(' ', @perl), "\n";
+	my $code = system @perl;
+	warn "$code from $ext_dir\'s Makefile.PL" if $code;
+    }
+    if (!$target or $target !~ /clean$/) {
+	# Give makefile an opportunity to rewrite itself.
+	# reassure users that life goes on...
+	my @config = (@run, $make, 'config', @$pass_through);
+	system @config and print "@config failed, continuing anyway...\n";
+    }
+    my @targ = (@run, $make, $target, @$pass_through);
+    print "Making $target in $ext_dir\n$@targ\n";
+    my $code = system @targ;
+    die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
+
+    chdir $return_dir || die "Cannot cd to $return_dir: $!";
+}
