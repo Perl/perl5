@@ -16,7 +16,7 @@ my $is_Win32 = $^O eq 'MSWin32';
 my $is_VMS = $^O eq 'VMS';
 my $is_Unix = !$is_Win32 && !$is_VMS;
 
-my (%excl, %incl, %opts, @extspec, @passthrough);
+my (%excl, %incl, %opts, @extspec, @pass_through);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
@@ -27,20 +27,18 @@ foreach (@ARGV) {
 	$opts{$1} = 1;
     } elsif (/^--([\w\-]+)=(.*)$/) {
 	$opts{$1} = $2;
-    } elsif (/^--([\w\-]+)=(.*)$/) {
-	$opts{$1} = $2;
     } elsif (/=/) {
-	push @passthrough, $_;
+	push @pass_through, $_;
     } else {
 	push @extspec, $_;
     }
 }
 
+my $makecmd  = shift @pass_through; # Should be something like MAKE=make
+unshift @pass_through, 'PERL_CORE=1';
+
 my $target   = $opts{target};
 my $extspec  = $extspec[0];
-my $makecmd  = shift @passthrough; # Should be something like MAKE=make
-my $passthru = join ' ', @passthrough; # allow extra macro=value to be passed through
-print "\n";
 
 # Previously, $make was taken from config.sh.  However, the user might
 # instead be running a possibly incompatible make.  This might happen if
@@ -61,9 +59,8 @@ else {
 
 # fallback to config.sh's MAKE
 $make ||= $Config{make} || $ENV{MAKE};
-my $run = $Config{run};
-$run = '' if not defined $run;
-$run .= ' ' if $run ne '';;
+my @run = $Config{run};
+@run = () if not defined $run[0] or $run[0] eq '';
 
 if (!defined($extspec) or $extspec eq '')  {
 	print "make_ext: no extension specified\n";
@@ -74,15 +71,15 @@ if (!defined($extspec) or $extspec eq '')  {
 # 'dynamic', 'static', and 'static_pic' (the last one respects
 # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
 if ($target eq 'dynamic') {
-	$passthru = "LINKTYPE=dynamic $passthru";
+	unshift @pass_through, 'LINKTYPE=dynamic';
 	$target   = 'all';
 }
 elsif ($target eq 'static') {
-	$passthru = "LINKTYPE=static CCCDLFLAGS= $passthru";
+	unshift @pass_through, 'LINKTYPE=static', 'CCCDLFLAGS=';
 	$target   = 'all';
 }
 elsif ($target eq 'static_pic') {
-	$passthru = "LINKTYPE=static $passthru";
+	unshift @pass_through, 'LINKTYPE=static';
 	$target   = 'all';
 }
 elsif ($target eq 'nonxs') {
@@ -130,7 +127,9 @@ my $mname = $pname;
 $mname =~ s!/!::!g;
 my $depth = $pname;
 $depth =~ s![^/]+!..!g;
-my $makefile = "Makefile";
+# Always need one more .. for ext/
+my $up = "../$depth";
+my $perl = "$up/miniperl";
 
 if (not -d "ext/$pname") {
 	print "\tSkipping $extspec (directory does not exist)\n";
@@ -145,13 +144,35 @@ if ($Config{osname} eq 'catamount') {
 
 print "\tMaking $mname ($target)\n";
 
-chdir("ext/$pname");
+build_extension('ext', "ext/$pname", $up, "$up/lib", \@pass_through);
 
-if (not -f $makefile) {
-	if (-f "Makefile.PL") {
-		my $cross = $opts{cross} ? ' -MCross' : '';
-		system("${run}../$depth/miniperl -I../$depth/lib$cross Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru");
+sub build_extension {
+    my ($ext, $ext_dir, $return_dir, $lib_dir, $pass_through) = @_;
+    unless (chdir "$ext_dir") {
+	warn "Cannot cd to $ext_dir: $!";
+	return;
+    }
+    
+    if (!-f 'Makefile') {
+	print "\nRunning Makefile.PL in $ext_dir\n";
+
+	# Presumably this can be simplified
+	my @cross;
+	if (defined $::Cross::platform) {
+	    # Inherited from win32/buildext.pl
+	    @cross = "-MCross=$::Cross::platform";
+	} elsif ($opts{cross}) {
+	    # Inherited from make_ext.pl
+	    @cross = '-MCross';
 	}
+	    
+	my @perl = (@run, $perl, "-I$lib_dir", @cross, 'Makefile.PL',
+		    'INSTALLDIRS=perl', 'INSTALLMAN3DIR=none',
+		    @$pass_through);
+	print join(' ', @perl), "\n";
+	my $code = system @perl;
+	warn "$code from $ext_dir\'s Makefile.PL" if $code;
+
 	# Right. The reason for this little hack is that we're sitting inside
 	# a program run by ./miniperl, but there are tasks we need to perform
 	# when the 'realclean', 'distclean' or 'veryclean' targets are run.
@@ -164,44 +185,45 @@ if (not -f $makefile) {
 	# But this always used to be a problem with the old /bin/sh version of
 	# this.
 	if ($is_Unix) {
-		my $suffix = '.sh';
-		foreach my $clean_target ('realclean', 'veryclean') {
-			my $file = "../$depth/$clean_target$suffix";
-			open my $fh, '>>', $file or die "open $file: $!";
-			# Quite possible that we're being run in parallel here.
-			# Can't use Fcntl this early to get the LOCK_EX
-			flock $fh, 2 or warn "flock $file: $!";
-			print $fh <<"EOS";
-chdir ext/$pname
-if test ! -f $makefile -a -f Makefile.old; then
+	    my $suffix = '.sh';
+	    foreach my $clean_target ('realclean', 'veryclean') {
+		my $file = "../$depth/$clean_target$suffix";
+		open my $fh, '>>', $file or die "open $file: $!";
+		# Quite possible that we're being run in parallel here.
+		# Can't use Fcntl this early to get the LOCK_EX
+		flock $fh, 2 or warn "flock $file: $!";
+		print $fh <<"EOS";
+cd $ext_dir
+if test ! -f Makefile -a -f Makefile.old; then
     echo "Note: Using Makefile.old"
-    make -f Makefile.old $clean_target MAKE=$make $passthru
+    make -f Makefile.old $clean_target MAKE=$make @pass_through
 else
-    if test ! -f $makefile ; then
+    if test ! -f Makefile ; then
 	echo "Warning: No Makefile!"
     fi
-    make $clean_target MAKE=$make $passthru
+    make $clean_target MAKE=$make @pass_through
 fi
-chdir ../$depth
+cd $return_dir
 EOS
-			close $fh or die "close $file: $!";
-		}
+		close $fh or die "close $file: $!";
+	    }
 	}
-}
+    }
 
-if (not -f $makefile) {
+    if (not -f 'Makefile') {
 	print "Warning: No Makefile!\n";
-}
+    }
 
-if ($target eq 'clean') {
-}
-elsif ($target eq 'realclean') {
-}
-else {
+    if (!$target or $target !~ /clean$/) {
 	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
-	system( "$run$make config MAKE=$make $passthru" )
-	  and print "$make config failed, continuing anyway...\n";
-}
+	my @config = (@run, $make, 'config', @$pass_through);
+	system @config and print "@config failed, continuing anyway...\n";
+    }
+    my @targ = (@run, $make, $target, @$pass_through);
+    print "Making $target in $ext_dir\n$@targ\n";
+    my $code = system @targ;
+    die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
-system "$run$make $target MAKE=$make $passthru" and exit $?;
+    chdir $return_dir || die "Cannot cd to $return_dir: $!";
+}
