@@ -4,17 +4,17 @@ buildext.pl - build extensions
 
 =head1 SYNOPSIS
 
-    buildext.pl make [-make_opts] directory [target] [--static|--dynamic|--all] +ext2 !ext1
+    buildext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
 
 E.g.
 
-    buildext.pl nmake -nologo ..\ext
+    buildext.pl "MAKE=nmake -nologo" --dir=..\ext
 
-    buildext.pl nmake -nologo ..\ext clean
+    buildext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
 
-    buildext.pl dmake ..\ext
+    buildext.pl MAKE=dmake --dir=..\ext
 
-    buildext.pl dmake ..\ext clean
+    buildext.pl MAKE=dmake --dir=..\ext --target=clean
 
 Will skip building extensions which are marked with an '!' char.
 Mostly because they still not ported to specified platform.
@@ -46,6 +46,8 @@ foreach (@ARGV) {
 	$incl{$1} = 1;
     } elsif (/^--([\w\-]+)$/) {
 	$opts{$1} = 1;
+    } elsif (/^--([\w\-]+)=(.*)$/) {
+	$opts{$1} = $2;
     } else {
 	push @argv, $_;
     }
@@ -55,16 +57,16 @@ my $static = $opts{static} || $opts{all};
 my $dynamic = $opts{dynamic} || $opts{all};
 
 my $makecmd = shift @argv;
-my $dir  = shift @argv;
-my $targ = shift @argv;
+my $dir  = $opts{dir} || 'ext';
+my $targ = $opts{target};
 
 my $make;
 if (defined($makecmd) and $makecmd =~ /^MAKE=(.*)$/) {
 	$make = $1;
 }
 else {
-	print "ext/util/make_ext:  WARNING:  Please include MAKE=\$(MAKE)\n";
-	print "\tin your call to make_ext.  See ext/util/make_ext for details.\n";
+	print "$0:  WARNING:  Please include MAKE=\$(MAKE)\n";
+	print "\tin your call to buildext.pl.  See buildext.pl for details.\n";
 	exit(1);
 }
 
@@ -84,11 +86,12 @@ unless (-f "$pl2bat.bat") {
     system(@args) unless defined $::Cross::platform;
 }
 
+print "In ", getcwd();
 chdir($dir) || die "Cannot cd to $dir\n";
 (my $ext = getcwd()) =~ s{/}{\\}g;
 my $code;
 FindExt::scan_ext($ext);
-FindExt::set_static_extensions(split ' ', $Config{static_ext}) if $ext ne "ext";
+FindExt::set_static_extensions(split ' ', $Config{static_ext});
 
 my @ext;
 push @ext, FindExt::static_ext() if $static;
