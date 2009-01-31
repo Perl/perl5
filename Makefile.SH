@@ -367,10 +367,8 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
-# we dont include lib/Config_git.pl here, as it causes circular dependencies
-CONFIGPM = lib/Config.pm lib/Config_heavy.pl
-# so we add it here:
-CONFIGPM_EXTRA = $(CONFIGPM) lib/Config_git.pl
+CONFIGPM_FROM_CONFIG_SH = lib/Config.pm lib/Config_heavy.pl
+CONFIGPM = $(CONFIGPM_FROM_CONFIG_SH) lib/Config_git.pl
 
 CONFIGPOD = lib/Config.pod
 
@@ -529,7 +527,7 @@ all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl extra.pods $(private) $(unidat
 
 .PHONY: all translators utilities
 
-git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
+lib/Config_git.pl git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
@@ -944,10 +942,8 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
 	$(MAKE) lib/re.pm
 
-$(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+$(CONFIGPM_FROM_CONFIG_SH) $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib configpm
-
-$(CONFIGPM): $(CONFIGPOD)
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) minimod.pl > lib/ExtUtils/Miniperl.pm
