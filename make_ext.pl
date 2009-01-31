@@ -38,6 +38,7 @@ my $makecmd  = shift @pass_through; # Should be something like MAKE=make
 unshift @pass_through, 'PERL_CORE=1';
 
 my $target   = $opts{target};
+$target = 'all' unless defined $target;
 my $extspec  = $extspec[0];
 
 # Previously, $make was taken from config.sh.  However, the user might
@@ -67,31 +68,11 @@ if (!defined($extspec) or $extspec eq '')  {
 	exit(1);
 }
 
-# check link type and do any preliminaries.  Valid link types are
-# 'dynamic', 'static', and 'static_pic' (the last one respects
-# CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
-if ($target eq 'dynamic') {
-	unshift @pass_through, 'LINKTYPE=dynamic';
-	$target   = 'all';
-}
-elsif ($target eq 'static') {
-	unshift @pass_through, 'LINKTYPE=static', 'CCCDLFLAGS=';
-	$target   = 'all';
-}
-elsif ($target eq 'static_pic') {
-	unshift @pass_through, 'LINKTYPE=static';
-	$target   = 'all';
-}
-elsif ($target eq 'nonxs') {
-	$target   = 'all';
-}
-elsif ($target =~ /clean$/) {
-}
-elsif ($target eq '') {
-	print "make_ext: no make target specified (eg static or dynamic)\n";
+if ($target eq '') {
+	print "make_ext: no make target specified (eg all or clean)\n";
 	exit(1);
 }
-else {
+elsif ($target !~ /(?:^all|clean)$/) {
 	# for the time being we are strict about what make_ext is used for
 	print "make_ext: unknown make target '$target'\n";
 	exit(1);
