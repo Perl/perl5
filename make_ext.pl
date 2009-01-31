@@ -12,6 +12,10 @@ use Config;
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
+my $is_Win32 = $^O eq 'MSWin32';
+my $is_VMS = $^O eq 'VMS';
+my $is_Unix = !$is_Win32 && !$is_VMS;
+
 my (%excl, %incl, %opts, @extspec, @passthrough);
 
 foreach (@ARGV) {
@@ -159,18 +163,14 @@ if (not -f $makefile) {
 	# some of them rely on a $(PERL) for their own distclean targets.
 	# But this always used to be a problem with the old /bin/sh version of
 	# this.
-	my $suffix = '.sh';
-	foreach my $clean_target ('realclean', 'veryclean') {
-		my $file = "../$depth/$clean_target$suffix";
-		open my $fh, '>>', $file or die "open $file: $!";
-		# Quite possible that we're being run in parallel here.
-		# Can't use Fcntl this early to get the LOCK_EX
-		flock $fh, 2 or warn "flock $file: $!";
-		if ($^O eq 'VMS') {
-			# Write out DCL here
-		} elsif ($^O eq 'MSWin32') {
-			# Might not need anything here.
-		} else {
+	if ($is_Unix) {
+		my $suffix = '.sh';
+		foreach my $clean_target ('realclean', 'veryclean') {
+			my $file = "../$depth/$clean_target$suffix";
+			open my $fh, '>>', $file or die "open $file: $!";
+			# Quite possible that we're being run in parallel here.
+			# Can't use Fcntl this early to get the LOCK_EX
+			flock $fh, 2 or warn "flock $file: $!";
 			print $fh <<"EOS";
 chdir ext/$pname
 if test ! -f $makefile -a -f Makefile.old; then
@@ -184,8 +184,8 @@ else
 fi
 chdir ../$depth
 EOS
+			close $fh or die "close $file: $!";
 		}
-		close $fh or die "close $file: $!";
 	}
 }
 
