@@ -64,7 +64,7 @@ true)
 	esac
 
 	pldlflags="$cccdlflags"
-	static_target='static_pic'
+	static_ldflags=''
 	case "${osname}${osvers}" in
 	next4*)
 		ld=libtool
@@ -180,7 +180,7 @@ EOT
 	;;
 
 *)	pldlflags=''
-	static_target='static'
+	static_ldflags='CCCDLFLAGS='
 	;;
 esac
 
@@ -277,8 +277,8 @@ SHRPENV = $shrpenv
 # if building a shared libperl.so that might later be linked into
 # another application, then it might be appropriate to also build static
 # extensions (usually just DynaLoader) with relocatable code (e.g. -fPIC
-# for GNU cc).  This is handled by make_ext.pl.
-STATIC = $static_target
+# for GNU cc).
+STATIC_LDFLAGS = $static_ldflags
 
 # The following is used to include the current directory in
 # the dynamic loader path you are building a shared libperl.
@@ -1162,16 +1162,16 @@ manicheck:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=$(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
 d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=$(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --target=nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF
