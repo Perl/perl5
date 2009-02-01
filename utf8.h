@@ -118,8 +118,8 @@ encoded character.
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfc) == 0xc0)
 
-#define UTF_START_MARK(len) ((len >  7) ? 0xFF : (0xFE << (7-len)))
-#define UTF_START_MASK(len) ((len >= 7) ? 0x00 : (0x1F >> (len-2)))
+#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFE << (7-(len))))
+#define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 #define UTF_CONTINUATION_MARK		0x80
 #define UTF_ACCUMULATION_SHIFT		6

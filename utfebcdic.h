@@ -472,8 +472,8 @@ END_EXTERN_C
 #define UTF8_IS_CONTINUED(c) 		(NATIVE_TO_UTF(c) >= 0xA0)
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(NATIVE_TO_UTF(c) >= 0xA0 && (NATIVE_TO_UTF(c) & 0xF8) == 0xC0)
 
-#define UTF_START_MARK(len) ((len >  7) ? 0xFF : ((U8)(0xFE << (7-len))))
-#define UTF_START_MASK(len) ((len >= 6) ? 0x01 : (0x1F >> (len-2)))
+#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8)(0xFE << (7-(len)))))
+#define UTF_START_MASK(len) (((len) >= 6) ? 0x01 : (0x1F >> ((len)-2)))
 #define UTF_CONTINUATION_MARK		0xA0
 #define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5
