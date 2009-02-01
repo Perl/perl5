@@ -29,53 +29,9 @@ foreach (@ARGV) {
 	$opts{$1} = $2;
     } elsif (/=/) {
 	push @pass_through, $_;
-    } else {
+    } elsif (length) {
 	push @extspec, $_;
     }
-}
-
-my $makecmd  = shift @pass_through; # Should be something like MAKE=make
-unshift @pass_through, 'PERL_CORE=1';
-
-my $target   = $opts{target};
-$target = 'all' unless defined $target;
-my $extspec  = $extspec[0];
-
-# Previously, $make was taken from config.sh.  However, the user might
-# instead be running a possibly incompatible make.  This might happen if
-# the user types "gmake" instead of a plain "make", for example.  The
-# correct current value of MAKE will come through from the main perl
-# makefile as MAKE=/whatever/make in $makecmd.  We'll be cautious in
-# case third party users of this script (are there any?) don't have the
-# MAKE=$(MAKE) argument, which was added after 5.004_03.
-my $make;
-if (defined($makecmd) and $makecmd =~ /^MAKE=(.*)$/) {
-	$make = $1;
-}
-else {
-	print "ext/util/make_ext:  WARNING:  Please include MAKE=\$(MAKE)\n";
-	print "\tin your call to make_ext.  See ext/util/make_ext for details.\n";
-	exit(1);
-}
-
-# fallback to config.sh's MAKE
-$make ||= $Config{make} || $ENV{MAKE};
-my @run = $Config{run};
-@run = () if not defined $run[0] or $run[0] eq '';
-
-if (!defined($extspec) or $extspec eq '')  {
-	print "make_ext: no extension specified\n";
-	exit(1);
-}
-
-if ($target eq '') {
-	print "make_ext: no make target specified (eg all or clean)\n";
-	exit(1);
-}
-elsif ($target !~ /(?:^all|clean)$/) {
-	# for the time being we are strict about what make_ext is used for
-	print "make_ext: unknown make target '$target'\n";
-	exit(1);
 }
 
 # The Perl Makefile.SH will expand all extensions to
@@ -85,50 +41,78 @@ elsif ($target !~ /(?:^all|clean)$/) {
 
 # canonise into X/Y form (pname)
 
-my $pname = $extspec;
-if ($extspec =~ /^lib/) {
+foreach (@extspec) {
+    if (/^lib/) {
 	# Remove lib/auto prefix and /*.* suffix
-	$pname =~ s{^lib/auto/}{};
-	$pname =~ s{[^/]*\.[^/]*$}{};
-}
-elsif ($extspec =~ /^ext/) {
+	s{^lib/auto/}{};
+	s{[^/]*\.[^/]*$}{};
+    } elsif (/^ext/) {
 	# Remove ext/ prefix and /pm_to_blib suffix
-	$pname =~ s{^ext/}{};
-	$pname =~ s{/pm_to_blib$}{};
-}
-elsif ($extspec =~ /::/) {
+	s{^ext/}{};
+	s{/pm_to_blib$}{};
+    } elsif (/::/) {
 	# Convert :: to /
-	$pname =~ s{::}{\/}g;
-}
-elsif ($extspec =~ /\..*o$/) {
-	$pname =~ s/\..*o//;
-}
-
-my $mname = $pname;
-$mname =~ s!/!::!g;
-my $depth = $pname;
-$depth =~ s![^/]+!..!g;
-# Always need one more .. for ext/
-my $up = "../$depth";
-my $perl = "$up/miniperl";
-
-if (not -d "ext/$pname") {
-	print "\tSkipping $extspec (directory does not exist)\n";
-	exit(0); # not an error ?
+	s{::}{\/}g;
+    } elsif (/\..*o$/) {
+	s/\..*o//;
+    }
 }
 
-if ($Config{osname} eq 'catamount') {
+my $makecmd  = shift @pass_through; # Should be something like MAKE=make
+unshift @pass_through, 'PERL_CORE=1';
+
+my $target   = $opts{target};
+$target = 'all' unless defined $target;
+
+# Previously, $make was taken from config.sh.  However, the user might
+# instead be running a possibly incompatible make.  This might happen if
+# the user types "gmake" instead of a plain "make", for example.  The
+# correct current value of MAKE will come through from the main perl
+# makefile as MAKE=/whatever/make in $makecmd.  We'll be cautious in
+# case third party users of this script (are there any?) don't have the
+# MAKE=$(MAKE) argument, which was added after 5.004_03.
+unless(defined $makecmd and $makecmd =~ /^MAKE=(.*)$/) {
+    die "$0:  WARNING:  Please include MAKE=\$(MAKE) in \@ARGV\n";
+}
+
+my $make = $1 || $Config{make} || $ENV{MAKE};
+# Using an array of 0 or 1 elements makes the subsequent code simpler.
+my @run = $Config{run};
+@run = () if not defined $run[0] or $run[0] eq '';
+
+if (!@extspec)  {
+    die "$0: no extension specified\n";
+}
+
+if ($target eq '') {
+    die "make_ext: no make target specified (eg all or clean)\n";
+} elsif ($target !~ /(?:^all|clean)$/) {
+    # for the time being we are strict about what make_ext is used for
+    die "$0: unknown make target '$target'\n";
+}
+
+foreach my $pname (@extspec)  {
+    my $mname = $pname;
+    $mname =~ s!/!::!g;
+    my $depth = $pname;
+    $depth =~ s![^/]+!..!g;
+    # Always need one more .. for ext/
+    my $up = "../$depth";
+    my $perl = "$up/miniperl";
+
+    if ($Config{osname} eq 'catamount') {
 	# Snowball's chance of building extensions.
-	print "This is $Config{osname}, not building $mname, sorry.\n";
-	exit(0);
+	die "This is $Config{osname}, not building $mname, sorry.\n";
+    }
+
+    print "\tMaking $mname ($target)\n";
+
+    build_extension('ext', "ext/$pname", $up, $perl, "$up/lib",
+		    \@pass_through);
 }
-
-print "\tMaking $mname ($target)\n";
-
-build_extension('ext', "ext/$pname", $up, "$up/lib", \@pass_through);
 
 sub build_extension {
-    my ($ext, $ext_dir, $return_dir, $lib_dir, $pass_through) = @_;
+    my ($ext, $ext_dir, $return_dir, $perl, $lib_dir, $pass_through) = @_;
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
 	return;
@@ -168,7 +152,7 @@ sub build_extension {
 	if ($is_Unix) {
 	    my $suffix = '.sh';
 	    foreach my $clean_target ('realclean', 'veryclean') {
-		my $file = "../$depth/$clean_target$suffix";
+		my $file = "$return_dir/$clean_target$suffix";
 		open my $fh, '>>', $file or die "open $file: $!";
 		# Quite possible that we're being run in parallel here.
 		# Can't use Fcntl this early to get the LOCK_EX
