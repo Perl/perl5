@@ -202,7 +202,7 @@ EOS
 	system @config and print "@config failed, continuing anyway...\n";
     }
     my @targ = (@run, $make, $target, @$pass_through);
-    print "Making $target in $ext_dir\n$@targ\n";
+    print "Making $target in $ext_dir\n\$ @targ\n";
     my $code = system @targ;
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
