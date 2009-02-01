@@ -65,21 +65,15 @@ my $dir  = $opts{dir} || 'ext';
 my $target = $opts{target};
 $target = 'all' unless defined $target;
 
-my $make;
-if (defined($makecmd) and $makecmd =~ /^MAKE=(.*)$/) {
-	$make = $1;
-}
-else {
-	print "$0:  WARNING:  Please include MAKE=\$(MAKE)\n";
-	print "\tin your call to buildext.pl.  See buildext.pl for details.\n";
-	exit(1);
+unless(defined $makecmd and $makecmd =~ /^MAKE=(.*)$/) {
+    die "$0:  WARNING:  Please include MAKE=\$(MAKE) in \@ARGV\n";
 }
 
-# Strip whitespace at end of $make to ease passing of (potentially empty) parameters
-$make =~ s/\s+$//;
-
-# fallback to config.sh's MAKE
-$make ||= $Config{make} || $ENV{MAKE};
+# This isn't going to cope with anything fancy, such as spaces inside command
+# names, but neither did what it replaced. Once there is a use case that needs
+# it, please supply patches. Until then, I'm sticking to KISS
+my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
+# Using an array of 0 or 1 elements makes the subsequent code simpler.
 my @run = $Config{run};
 @run = () if not defined $run[0] or $run[0] eq '';
 
@@ -155,10 +149,10 @@ sub build_extension {
     if (!$target or $target !~ /clean$/) {
 	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
-	my @config = (@run, $make, 'config', @$pass_through);
+	my @config = (@run, @make, 'config', @$pass_through);
 	system @config and print "@config failed, continuing anyway...\n";
     }
-    my @targ = (@run, $make, $target, @$pass_through);
+    my @targ = (@run, @make, $target, @$pass_through);
     print "Making $target in $ext_dir\n@targ\n";
     my $code = system @targ;
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
