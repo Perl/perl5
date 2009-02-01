@@ -2064,6 +2064,8 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
 }  /* end of kill_file() */
 /*}}}*/
 
+int vms_fid_to_name(char * outname, int outlen,
+                    const char * name, int lstat_flag, mode_t * mode);
 
 /*{{{int do_rmdir(char *name)*/
 int
@@ -3900,14 +3902,14 @@ vmspipe_tempfile(pTHX)
     fsync(fileno(fp));
 
     fgetname(fp, file, 1);
-    fstat(fileno(fp), (struct stat *)&s0);
+    fstat(fileno(fp), &s0.crtl_stat);
     fclose(fp);
 
     if (decc_filename_unix_only)
 	int_tounixspec(file, file, NULL);
     fp = fopen(file,"r","shr=get");
     if (!fp) return 0;
-    fstat(fileno(fp), (struct stat *)&s1);
+    fstat(fileno(fp), &s1.crtl_stat);
 
     cmp_result = VMS_INO_T_COMPARE(s0.crtl_stat.st_ino, s1.crtl_stat.st_ino);
     if ((cmp_result != 0) && (s0.st_ctime != s1.st_ctime))  {
@@ -10361,7 +10363,7 @@ Perl_readdir(pTHX_ DIR *dd)
                     Stat_t statbuf;
                     int ret_sts;
 
-                    ret_sts = stat(buff, (stat_t *)&statbuf);
+                    ret_sts = stat(buff, &statbuf.crtl_stat);
                     if ((ret_sts == 0) && S_ISDIR(statbuf.st_mode)) {
                         e_len = 0;
                         e_spec[0] = 0;
@@ -11134,7 +11136,7 @@ FILE *my_fdopen(int fd, const char *mode)
       memset(sockflags+sockflagsize,0,fdoff + 2 - sockflagsize);
       sockflagsize = fdoff + 2;
     }
-    if (fstat(fd, (struct stat *)&sbuf) == 0 && S_ISSOCK(sbuf.st_mode))
+    if (fstat(fd, &sbuf.crtl_stat) == 0 && S_ISSOCK(sbuf.st_mode))
       sockflags[fdoff] |= 1 << (fd % sizeof(unsigned int));
   }
   return fp;
@@ -12404,6 +12406,8 @@ is_null_device(name)
   return (*name++ == ':') && (*name != ':');
 }
 
+static int
+Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag);
 
 static I32
 Perl_cando_by_name_int
@@ -12459,15 +12463,15 @@ Perl_cando_by_name_int
   }
 
   /* sys$check_access needs a file spec, not a directory spec.
-   * Don't use flex_stat here, as that depends on thread context
-   * having been initialized, and we may get here during startup.
+   * flex_stat now will handle a null thread context during startup.
    */
 
   retlen = namdsc.dsc$w_length = strlen(vmsname);
   if (vmsname[retlen-1] == ']' 
       || vmsname[retlen-1] == '>' 
       || vmsname[retlen-1] == ':'
-      || (!stat(vmsname, (stat_t *)&st) && S_ISDIR(st.st_mode))) {
+      || (!Perl_flex_stat_int(NULL, vmsname, &st, 1) &&
+          S_ISDIR(st.st_mode))) {
 
       if (!int_fileify_dirspec(vmsname, fileified, NULL)) {
         PerlMem_free(fileified);
@@ -12599,7 +12603,7 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
 int
 Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 {
-  if (!fstat(fd,(stat_t *) statbufp)) {
+  if (!fstat(fd, &statbufp->crtl_stat)) {
     char *cptr;
     char *vms_filename;
     vms_filename = PerlMem_malloc(VMS_MAXRSS);
@@ -12669,18 +12673,21 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 {
-    char fileified[VMS_MAXRSS];
-    char temp_fspec[VMS_MAXRSS];
-    char *save_spec;
+    char *fileified;
+    char *temp_fspec;
+    const char *save_spec;
+    char *ret_spec;
     int retval = -1;
+    int efs_hack = 0;
     dSAVEDERRNO;
 
-    if (!fspec) return retval;
-    SAVE_ERRNO;
-    strcpy(temp_fspec, fspec);
+    if (!fspec) {
+        errno = EINVAL;
+        return retval;
+    }
 
     if (decc_bug_devnull != 0) {
-      if (is_null_device(temp_fspec)) { /* Fake a stat() for the null device */
+      if (is_null_device(fspec)) { /* Fake a stat() for the null device */
 	memset(statbufp,0,sizeof *statbufp);
         VMS_DEVICE_ENCODE(statbufp->st_dev, "_NLA0:", 0);
 	statbufp->st_mode = S_IFBLK | S_IREAD | S_IWRITE | S_IEXEC;
@@ -12704,58 +12711,86 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
      */
 
 
-#if __CRTL_VER >= 70300000 && !defined(__VAX)
-  /* The CRTL stat() falls down hard on multi-dot filenames in unix format unless
-   * DECC$EFS_CHARSET is in effect, so temporarily enable it if it isn't already.
-   */
-  if (!decc_efs_charset)
-    decc$feature_set_value(decc$feature_get_index("DECC$EFS_CHARSET"),1,1); 
-#endif
+    fileified = PerlMem_malloc(VMS_MAXRSS);
+    if (fileified == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+     
+    temp_fspec = PerlMem_malloc(VMS_MAXRSS);
+    if (temp_fspec == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+
+    strcpy(temp_fspec, fspec);
+
+    SAVE_ERRNO;
 
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   if (decc_posix_compliant_pathnames == 0) {
 #endif
-    if (do_fileify_dirspec(temp_fspec,fileified,0,NULL) != NULL) {
-      if (lstat_flag == 0)
-	retval = stat(fileified,(stat_t *) statbufp);
-      else
-	retval = lstat(fileified,(stat_t *) statbufp);
-      save_spec = fileified;
+
+    /* We may be able to optimize this, but in order for fileify_dirspec to
+     * always return a usuable answer, we have to call vmspath first to
+     * make sure that it is in VMS directory format, as stat/lstat on 8.3
+     * can not handle directories in unix format that it does not have read
+     * access to.  Vmspath handles the case where a bare name which could be
+     * a logical name gets passed.
+     */ 
+    ret_spec = int_tovmspath(fspec, temp_fspec, NULL);
+    if (ret_spec != NULL) {
+        ret_spec = int_fileify_dirspec(temp_fspec, fileified, NULL);
+        if (ret_spec != NULL) {
+            if (lstat_flag == 0)
+                retval = stat(fileified, &statbufp->crtl_stat);
+            else
+                retval = lstat(fileified, &statbufp->crtl_stat);
+            save_spec = fileified;
+        }
     }
+
+    if (retval && vms_bug_stat_filename) {
+
+        /* We should try again as a vmsified file specification */
+        /* However Perl traditionally has not done this, which  */
+        /* causes problems with existing tests */
+
+        ret_spec = int_tovmsspec(fspec, temp_fspec, 0, NULL);
+        if (ret_spec != NULL) {
+            if (lstat_flag == 0)
+                retval = stat(temp_fspec, &statbufp->crtl_stat);
+            else
+                retval = lstat(temp_fspec, &statbufp->crtl_stat);
+            save_spec = temp_fspec;
+        }
+    }
+
     if (retval) {
-      if (lstat_flag == 0)
-	retval = stat(temp_fspec,(stat_t *) statbufp);
-      else
-	retval = lstat(temp_fspec,(stat_t *) statbufp);
-      save_spec = temp_fspec;
+        /* Last chance - allow multiple dots with out EFS CHARSET */
+        /* The CRTL stat() falls down hard on multi-dot filenames in unix
+         * format unless * DECC$EFS_CHARSET is in effect, so temporarily
+         * enable it if it isn't already.
+         */
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+        if (!decc_efs_charset && (decc_efs_charset_index > 0))
+            decc$feature_set_value(decc_efs_charset_index, 1, 1); 
+#endif
+        if (lstat_flag == 0)
+	    retval = stat(fspec, &statbufp->crtl_stat);
+        else
+	    retval = lstat(fspec, &statbufp->crtl_stat);
+        save_spec = fspec;
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+        if (!decc_efs_charset && (decc_efs_charset_index > 0)) {
+            decc$feature_set_value(decc_efs_charset_index, 1, 0); 
+            efs_hack = 1;
+        }
+#endif
     }
-/*
- * In debugging, on 8.3 Alpha, I found a case where stat was returning a
- * file not found error for a directory named foo:[bar.t] or /foo/bar/t
- * and lstat was working correctly for the same file.
- * The only syntax that was working for stat was "foo:[bar]t.dir".
- *
- * Other directories with the same syntax worked fine.
- * So work around the problem when it shows up here.
- */
-    if (retval) {
-        int save_errno = errno;
-	if (do_tovmsspec(fspec, temp_fspec, 0, NULL) != NULL) {
-	    if (do_fileify_dirspec(temp_fspec, fileified, 0, NULL) != NULL) {
-		retval = stat(fileified, (stat_t *) statbufp);
-		save_spec = fileified;
-	    }
-	}
-	/* Restore the errno value if third stat does not succeed */
-	if (retval != 0)
-	    errno = save_errno;
-    }
+
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   } else {
     if (lstat_flag == 0)
-      retval = stat(temp_fspec,(stat_t *) statbufp);
+      retval = stat(temp_fspec, &statbufp->crtl_stat);
     else
-      retval = lstat(temp_fspec,(stat_t *) statbufp);
+      retval = lstat(temp_fspec, &statbufp->crtl_stat);
       save_spec = temp_fspec;
   }
 #endif
@@ -12774,7 +12809,22 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       if (lstat_flag)
 	rmsex_flags |= PERL_RMSEXPAND_M_SYMLINK;
 
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+      /* If we used the efs_hack above, we must also use it here for */
+      /* perl_cando to work */
+      if (efs_hack && (decc_efs_charset_index > 0)) {
+          decc$feature_set_value(decc_efs_charset_index, 1, 1);
+      }
+#endif
       cptr = int_rmsexpand_tovms(save_spec, statbufp->st_devnam, rmsex_flags);
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+      if (efs_hack && (decc_efs_charset_index > 0)) {
+          decc$feature_set_value(decc_efs_charset, 1, 0);
+      }
+#endif
+
+      /* Fix me: If this is NULL then stat found a file, and we could */
+      /* not convert the specification to VMS - Should never happen */
       if (cptr == NULL)
 	statbufp->st_devnam[0] = 0;
 
@@ -13994,6 +14044,11 @@ char *realpath(const char *file_name, char * resolved_name, ...);
 
 /* Hack, use old stat() as fastest way of getting ino_t and device */
 int decc$stat(const char *name, void * statbuf);
+#if !defined(__VAX) && __CRTL_VER >= 80200000
+int decc$lstat(const char *name, void * statbuf);
+#else
+#define decc$lstat decc$stat
+#endif
 
 
 /* Realpath is fragile.  In 8.3 it does not work if the feature
@@ -14004,20 +14059,103 @@ int decc$stat(const char *name, void * statbuf);
  * fall back to looking up the filename by the device name and FID.
  */
 
-int vms_fid_to_name(char * outname, int outlen, const char * name)
+int vms_fid_to_name(char * outname, int outlen,
+                    const char * name, int lstat_flag, mode_t * mode)
 {
+#pragma message save
+#pragma message disable MISALGNDSTRCT
+#pragma message disable MISALGNDMEM
+#pragma member_alignment save
+#pragma nomember_alignment
 struct statbuf_t {
     char	   * st_dev;
     unsigned short st_ino[3];
-    unsigned short padw;
+    unsigned short old_st_mode;
     unsigned long  padl[30];  /* plenty of room */
 } statbuf;
-int sts;
-struct dsc$descriptor_s dvidsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-struct dsc$descriptor_s specdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+#pragma message restore
+#pragma member_alignment restore
 
-    sts = decc$stat(name, &statbuf);
+    int sts;
+    struct dsc$descriptor_s dvidsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    struct dsc$descriptor_s specdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    char *fileified;
+    char *temp_fspec;
+    char *ret_spec;
+
+    /* Need to follow the mostly the same rules as flex_stat_int, or we may get
+     * unexpected answers
+     */
+
+    fileified = PerlMem_malloc(VMS_MAXRSS);
+    if (fileified == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+     
+    temp_fspec = PerlMem_malloc(VMS_MAXRSS);
+    if (temp_fspec == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+
+    sts = -1;
+    /* First need to try as a directory */
+    ret_spec = int_tovmspath(name, temp_fspec, NULL);
+    if (ret_spec != NULL) {
+        ret_spec = int_fileify_dirspec(temp_fspec, fileified, NULL); 
+        if (ret_spec != NULL) {
+            if (lstat_flag == 0)
+                sts = decc$stat(fileified, &statbuf);
+            else
+                sts = decc$lstat(fileified, &statbuf);
+        }
+    }
+
+    /* Then as a VMS file spec */
+    if (sts != 0) {
+        ret_spec = int_tovmsspec(name, temp_fspec, 0, NULL);
+        if (ret_spec != NULL) {
+            if (lstat_flag == 0) {
+                sts = decc$stat(temp_fspec, &statbuf);
+            } else {
+                sts = decc$lstat(temp_fspec, &statbuf);
+            }
+        }
+    }
+
+    if (sts) {
+        /* Next try - allow multiple dots with out EFS CHARSET */
+        /* The CRTL stat() falls down hard on multi-dot filenames in unix
+         * format unless * DECC$EFS_CHARSET is in effect, so temporarily
+         * enable it if it isn't already.
+         */
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+        if (!decc_efs_charset && (decc_efs_charset_index > 0))
+            decc$feature_set_value(decc_efs_charset_index, 1, 1); 
+#endif
+        ret_spec = int_tovmspath(name, temp_fspec, NULL);
+        if (lstat_flag == 0) {
+            sts = decc$stat(name, &statbuf);
+        } else {
+            sts = decc$lstat(name, &statbuf);
+        }
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+        if (!decc_efs_charset && (decc_efs_charset_index > 0))
+            decc$feature_set_value(decc_efs_charset_index, 1, 0); 
+#endif
+    }
+
+
+    /* and then because the Perl Unix to VMS conversion is not perfect */
+    /* Specifically the CRTL removes spaces and possibly other illegal ODS-2 */
+    /* characters from filenames so we need to try it as-is */
+    if (sts) {
+        if (lstat_flag == 0) {
+            sts = decc$stat(name, &statbuf);
+        } else {
+            sts = decc$lstat(name, &statbuf);
+        }
+    }
+
     if (sts == 0) {
+        int vms_sts;
 
 	dvidsc.dsc$a_pointer=statbuf.st_dev;
        dvidsc.dsc$w_length=strlen(statbuf.st_dev);
@@ -14025,10 +14163,15 @@ struct dsc$descriptor_s specdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 	specdsc.dsc$a_pointer = outname;
 	specdsc.dsc$w_length = outlen-1;
 
-       sts = lib$fid_to_name
+       vms_sts = lib$fid_to_name
 	    (&dvidsc, statbuf.st_ino, &specdsc, &specdsc.dsc$w_length);
-       if ($VMS_STATUS_SUCCESS(sts)) {
+       if ($VMS_STATUS_SUCCESS(vms_sts)) {
 	    outname[specdsc.dsc$w_length] = 0;
+
+            /* Return the mode */
+            if (mode) {
+                *mode = statbuf.old_st_mode;
+            }
 	    return 0;
 	}
     }
@@ -14058,12 +14201,13 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
         char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
         int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
         int file_len;
+        mode_t my_mode;
 
 	/* Fall back to fid_to_name */
 
         Newx(vms_spec, VMS_MAXRSS + 1, char);
 
-	sts = vms_fid_to_name(vms_spec, VMS_MAXRSS + 1, filespec);
+	sts = vms_fid_to_name(vms_spec, VMS_MAXRSS + 1, filespec, 0, &my_mode);
 	if (sts == 0) {
 
 
@@ -14182,7 +14326,7 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 		    /* Need realpath for the directory */
 		    sts = vms_fid_to_name(vms_dir_name,
 					  VMS_MAXRSS + 1,
-					  dir_name);
+					  dir_name, 0, NULL);
 
 		    if (sts == 0) {
 		        /* Now need to pathify it.
@@ -14215,7 +14359,7 @@ mp_do_vms_realname(pTHX_ const char *filespec, char *outbuf,
 
     /* Fall back to fid_to_name */
 
-    sts = vms_fid_to_name(outbuf, VMS_MAXRSS + 1, filespec);
+    sts = vms_fid_to_name(outbuf, VMS_MAXRSS + 1, filespec, 0, NULL);
     if (sts != 0) {
 	return NULL;
     }
