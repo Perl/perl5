@@ -5261,14 +5261,19 @@ Stat_t src_st;
 Stat_t dst_st;
 
     /* Validate the source file */
-    src_sts = flex_lstat(src, &src_st);
+    src_sts = Perl_flex_lstat(NULL, src, &src_st);
     if (src_sts != 0) {
 
 	/* No source file or other problem */
 	return src_sts;
     }
+    if (src_st.st_devnam[0] == 0)  {
+        /* This may be possible so fail if it is seen. */
+        errno = EIO;
+        return -1;
+    }
 
-    dst_sts = flex_lstat(dst, &dst_st);
+    dst_sts = Perl_flex_lstat(NULL, dst, &dst_st);
     if (dst_sts == 0) {
 
 	if (dst_st.st_dev != src_st.st_dev) {
@@ -5312,7 +5317,28 @@ Stat_t dst_st;
 
 	if (!S_ISDIR(dst_st.st_mode) || S_ISDIR(src_st.st_mode)) {
 	    int d_sts;
-	    d_sts = mp_do_kill_file(aTHX_ dst, S_ISDIR(dst_st.st_mode));
+	    d_sts = mp_do_kill_file(NULL, dst_st.st_devnam,
+	                             S_ISDIR(dst_st.st_mode));
+
+           /* Need to delete all versions ? */
+           if ((d_sts == 0) && (vms_unlink_all_versions == 1)) {
+                int i = 0;
+
+                while (lstat(dst_st.st_devnam, &dst_st.crtl_stat) == 0) {
+                    d_sts = mp_do_kill_file(NULL, dst_st.st_devnam, 0);
+                    if (d_sts != 0)
+                        break;
+                    i++;
+
+                    /* Make sure that we do not loop forever */
+                    if (i > 32767) {
+                        errno = EIO;
+                        d_sts = -1;
+                        break;
+                    }
+                }
+           }
+
 	    if (d_sts != 0)
 		return d_sts;
 
@@ -5333,7 +5359,6 @@ Stat_t dst_st;
 	/* if the source is a directory, then need to fileify */
 	/*  and dest must be a directory or non-existant. */
 
-	char * vms_src;
 	char * vms_dst;
 	int sts;
 	char * ret_str;
@@ -5344,18 +5369,6 @@ Stat_t dst_st;
 	/* We need to modify the src and dst depending
 	 * on if one or more of them are directories.
 	 */
-
-	vms_src = PerlMem_malloc(VMS_MAXRSS);
-	if (vms_src == NULL)
-	    _ckvmssts_noperl(SS$_INSFMEM);
-
-	/* Source is always a VMS format file */
-	ret_str = do_tovmsspec(src, vms_src, 0, NULL);
-	if (ret_str == NULL) {
-	    PerlMem_free(vms_src);
-	    errno = EIO;
-	    return -1;
-	}
 
 	vms_dst = PerlMem_malloc(VMS_MAXRSS);
 	if (vms_dst == NULL)
@@ -5369,24 +5382,11 @@ Stat_t dst_st;
 	    if (vms_dir_file == NULL)
 		_ckvmssts_noperl(SS$_INSFMEM);
 
-	    /* The source must be a file specification */
-	    ret_str = int_fileify_dirspec(vms_src, vms_dir_file, NULL);
-	    if (ret_str == NULL) {
-		PerlMem_free(vms_src);
-		PerlMem_free(vms_dst);
-		PerlMem_free(vms_dir_file);
-		errno = EIO;
-		return -1;
-	    }
-	    PerlMem_free(vms_src);
-	    vms_src = vms_dir_file;
-
 	    /* If the dest is a directory, we must remove it
 	    if (dst_sts == 0) {
 		int d_sts;
-		d_sts = mp_do_kill_file(aTHX_ dst, 1);
+		d_sts = mp_do_kill_file(NULL dst_st.st_devnam, 1);
 		if (d_sts != 0) {
-		    PerlMem_free(vms_src);
 		    PerlMem_free(vms_dst);
 		    errno = EIO;
 		    return sts;
@@ -5398,7 +5398,6 @@ Stat_t dst_st;
 	   /* The dest must be a VMS file specification */
 	   ret_str = int_tovmsspec(dst, vms_dst, 0, NULL);
 	   if (ret_str == NULL) {
-		PerlMem_free(vms_src);
 		PerlMem_free(vms_dst);
 		errno = EIO;
 		return -1;
@@ -5411,7 +5410,6 @@ Stat_t dst_st;
 
 	    ret_str = do_fileify_dirspec(vms_dst, vms_dir_file, 0, NULL);
 	    if (ret_str == NULL) {
-		PerlMem_free(vms_src);
 		PerlMem_free(vms_dst);
 		PerlMem_free(vms_dir_file);
 		errno = EIO;
@@ -5427,26 +5425,42 @@ Stat_t dst_st;
 		/* VMS pathify a dir target */
 		ret_str = int_tovmspath(dst, vms_dst, NULL);
 		if (ret_str == NULL) {
-		    PerlMem_free(vms_src);
 		    PerlMem_free(vms_dst);
 		    errno = EIO;
 		    return -1;
 		}
 	    } else {
+                char * v_spec, * r_spec, * d_spec, * n_spec;
+                char * e_spec, * vs_spec;
+                int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 
 		/* fileify a target VMS file specification */
 		ret_str = int_tovmsspec(dst, vms_dst, 0, NULL);
 		if (ret_str == NULL) {
-		    PerlMem_free(vms_src);
 		    PerlMem_free(vms_dst);
 		    errno = EIO;
 		    return -1;
 		}
+
+		sts = vms_split_path(vms_dst, &v_spec, &v_len, &r_spec, &r_len,
+                             &d_spec, &d_len, &n_spec, &n_len, &e_spec,
+                             &e_len, &vs_spec, &vs_len);
+		if (sts == 0) {
+		     if (e_len == 0) {
+		         /* Get rid of the version */
+		         if (vs_len != 0) {
+		             *vs_spec = '\0';
+		         }
+		         /* Need to specify a '.' so that the extension */
+		         /* is not inherited */
+		         strcat(vms_dst,".");
+		     }
+		}
 	    }
 	}
 
-	old_file_dsc.dsc$a_pointer = vms_src;
-	old_file_dsc.dsc$w_length = strlen(vms_src);
+	old_file_dsc.dsc$a_pointer = src_st.st_devnam;
+	old_file_dsc.dsc$w_length = strlen(src_st.st_devnam);
 	old_file_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
 	old_file_dsc.dsc$b_class = DSC$K_CLASS_S;
 
@@ -5474,7 +5488,6 @@ Stat_t dst_st;
 	   sts = vms_rename_with_acl(aTHX_ &old_file_dsc, &new_file_dsc, flags);
 	}
 
-	PerlMem_free(vms_src);
 	PerlMem_free(vms_dst);
 	if (!$VMS_STATUS_SUCCESS(sts)) {
 	    errno = EIO;
@@ -5487,10 +5500,25 @@ Stat_t dst_st;
 	/* Now get rid of any previous versions of the source file that
 	 * might still exist
 	 */
-	int save_errno;
-	save_errno = errno;
-	src_sts = mp_do_kill_file(aTHX_ src, S_ISDIR(src_st.st_mode));
-	errno = save_errno;
+	int i = 0;
+	dSAVEDERRNO;
+	SAVE_ERRNO;
+	src_sts = mp_do_kill_file(NULL, src_st.st_devnam,
+	                           S_ISDIR(src_st.st_mode));
+	while (lstat(src_st.st_devnam, &src_st.crtl_stat) == 0) {
+	     src_sts = mp_do_kill_file(NULL, src_st.st_devnam,
+	                               S_ISDIR(src_st.st_mode));
+	     if (src_sts != 0)
+	         break;
+	     i++;
+
+	     /* Make sure that we do not loop forever */
+	     if (i > 32767) {
+	         src_sts = -1;
+	         break;
+	     }
+	}
+	RESTORE_ERRNO;
     }
 
     /* We deleted the destination, so must force the error to be EIO */
