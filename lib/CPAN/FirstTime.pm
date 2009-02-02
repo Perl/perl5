@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = "5.5_01";
+$VERSION = "5.52";
 
 =head1 NAME
 
@@ -1198,7 +1198,10 @@ substitute. You can then revisit this dialog with
     #= MIRRORED.BY and conf_sites()
     #
 
-    my_yn_prompt("connect_to_internet_ok" => 1, $matcher);
+    # remember, this is only triggered if no urllist is given, so 0 is
+    # fair and protects the default site from being overloaded and
+    # gives the user more chances to select his own urllist.
+    my_yn_prompt("connect_to_internet_ok" => 0, $matcher);
     if ($matcher) {
         if ("urllist" =~ $matcher) {
             # conf_sites would go into endless loop with the smash prompt
@@ -1236,7 +1239,6 @@ sub my_dflt_prompt {
     my ($item, $dflt, $m) = @_;
     my $default = $CPAN::Config->{$item} || $dflt;
 
-    $DB::single = 1;
     if (!$m || $item =~ /$m/) {
         if (my $intro = $prompts{$item . "_intro"}) {
             $CPAN::Frontend->myprint($intro);
@@ -1273,7 +1275,6 @@ sub my_prompt_loop {
     my $default = $CPAN::Config->{$item} || $dflt;
     my $ans;
 
-    $DB::single = 1;
     if (!$m || $item =~ /$m/) {
         $CPAN::Frontend->myprint($prompts{$item . "_intro"});
         $CPAN::Frontend->myprint(" <$item>\n");

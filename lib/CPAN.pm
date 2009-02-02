@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9301';
+$CPAN::VERSION = '1.93_03'; # make the _03 a dev release and release it as 1.9304 after merge into blead
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -923,7 +923,7 @@ $Help = {
          '?' => \"help",
          '!' => "eval the rest of the line as perl",
          a => "whois author",
-         autobundle => "wtite inventory into a bundle file",
+         autobundle => "write inventory into a bundle file",
          b => "info about bundle",
          bye => \"quit",
          clean => "clean up a distribution's build directory",
@@ -934,6 +934,7 @@ $Help = {
          failed => "list all failed actions within current session",
          fforce => "redo a command from scratch",
          force => "redo a command",
+         get => "download a distribution",
          h => \"help",
          help => "overview over commands; 'help ...' explains specific commands",
          hosts => "statistics about recently used hosts",
@@ -952,7 +953,7 @@ $Help = {
          q => \"quit",
          quit => "leave the cpan shell",
          r => "review over upgradeable modules",
-         readme => "display the README of a distro woth a pager",
+         readme => "display the README of a distro with a pager",
          recent => "show recent uploads to the CPAN",
          # recompile
          reload => "'reload cpan' or 'reload index'",
@@ -1118,9 +1119,11 @@ Please report if something unexpected happens\n");
                         # XXX
                         # $_->{build_dir_reuse} = 0; # 2006-11-17 akoenig Why was that?
                         $_->{commandnumber_in_prompt} = 0; # visibility
-                        $_->{histfile} = "";               # who should win otherwise?
-                        $_->{cache_metadata} = 0;          # better would be a lock?
-                        $_->{use_sqlite} = 0;              # better would be a write lock!
+                        $_->{histfile}       = "";  # who should win otherwise?
+                        $_->{cache_metadata} = 0;   # better would be a lock?
+                        $_->{use_sqlite}     = 0;   # better would be a write lock!
+                        $_->{auto_commit}    = 0;   # we are violent, do not persist
+                        $_->{test_report}    = 0;   # Oliver Paukstadt had sent wrong reports in degraded mode
                     }
                 } else {
                     $CPAN::Frontend->mydie("
@@ -4229,6 +4232,20 @@ I would like to connect to one of the following sites to get '%s':
             if ($connect_to_internet_ok) {
                 @urllist = @CPAN::Defaultsites;
             } else {
+                my $sleep = 5;
+                $CPAN::Frontend->mywarn(sprintf qq{
+
+You have not configured a urllist and did not allow to connect to the
+internet. I will continue but it is very likely that we will face
+problems. If this happens, please consider to call either
+
+    o conf init connect_to_internet_ok
+or
+    o conf init urllist
+
+Sleeping $sleep seconds now.
+});
+                $CPAN::Frontend->mysleep($sleep);
                 @urllist = ();
             }
         } else {
@@ -5218,7 +5235,6 @@ sub reanimate_build_dir {
                                )) {
                 delete $do->{$skipper};
             }
-            # $DB::single = 1;
             if ($do->tested_ok_but_not_installed) {
                 $CPAN::META->is_tested($do->{build_dir},$do->{make_test}{TIME});
             }
@@ -6638,8 +6654,8 @@ sub parse_meta_yml {
     return unless -f $yaml;
     my $early_yaml;
     eval {
-        require Parse::Metayaml; # hypothetical
-        $early_yaml = Parse::Metayaml::LoadFile($yaml)->[0];
+        require Parse::CPAN::Meta;
+        $early_yaml = Parse::CPAN::Meta::LoadFile($yaml)->[0];
     };
     unless ($early_yaml) {
         eval { $early_yaml = CPAN->_yaml_loadfile($yaml)->[0]; };
@@ -8417,7 +8433,6 @@ sub follow_prereqs {
     my(@good_prereq_tuples);
     for my $p (@prereq_tuples) {
         # XXX watch out for foul ones
-        # $DB::single++;
         push @good_prereq_tuples, $p;
     }
     my $pretty_id = $self->pretty_id;
@@ -9303,7 +9318,6 @@ sub install {
     if (my $goto = $self->prefs->{goto}) {
         return $self->goto($goto);
     }
-    # $DB::single=1;
     unless ($self->{badtestcnt}) {
         $self->test;
     }
@@ -9480,7 +9494,6 @@ sub install {
         }
     }
     delete $self->{force_update};
-    # $DB::single = 1;
     $self->store_persistent_state;
 }
 
@@ -9800,7 +9813,7 @@ sub reports {
     my $cpanid    = $d->cpanid;    # "GBARR"
     my $distvname = $d->distvname; # "CPAN-DistnameInfo-0.02"
 
-    my $url = sprintf "http://cpantesters.perl.org/show/%s.yaml", $dist;
+    my $url = sprintf "http://www.cpantesters.org/show/%s.yaml", $dist;
 
     CPAN::LWP::UserAgent->config;
     my $Ua;
@@ -12270,7 +12283,7 @@ through the pager specified in C<$CPAN::Config->{pager}>.
 
 =item CPAN::Distribution::reports()
 
-Downloads report data for this distribution from cpantesters.perl.org
+Downloads report data for this distribution from www.cpantesters.org
 and displays a subset of them.
 
 =item CPAN::Distribution::read_yaml()

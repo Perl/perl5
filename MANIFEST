@@ -1811,6 +1811,7 @@ lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
 lib/CPAN/PAUSE2007.pub		CPAN public key
+lib/CPAN/PAUSE2009.pub		CPAN public key
 lib/CPANPLUS/Backend.pm	CPANPLUS
 lib/CPANPLUS/Backend/RV.pm	CPANPLUS
 lib/CPANPLUS/bin/cpan2dist	the cpan2dist utility
