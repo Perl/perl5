@@ -188,6 +188,7 @@ ext/DB_File/Changes	Berkeley DB extension change log
 ext/DB_File/DB_File_BS	Berkeley DB extension mkbootstrap fodder
 ext/DB_File/DB_File.pm	Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs	Berkeley DB extension external subroutines
+ext/DB_File/config.in	Part of Berkeley DB configuration
 ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
