@@ -1,5 +1,13 @@
 
 
+1.818 21 January 2009
+
+   * Updated Makefile.PL for Strawberry Perl. 
+     Patch suggested by David Golden.
+
+   * Remove IRIX notes from README. The page referenced doesn't exist
+     anymore.
+
 1.817 27 March 2008
 
    * Updated dbinfo
