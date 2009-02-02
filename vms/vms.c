@@ -2064,8 +2064,6 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
 }  /* end of kill_file() */
 /*}}}*/
 
-int vms_fid_to_name(char * outname, int outlen,
-                    const char * name, int lstat_flag, mode_t * mode);
 
 /*{{{int do_rmdir(char *name)*/
 int
@@ -2075,23 +2073,48 @@ Perl_do_rmdir(pTHX_ const char *name)
     int retval;
     Stat_t st;
 
-    dirfile = PerlMem_malloc(VMS_MAXRSS + 1);
-    if (dirfile == NULL)
-	_ckvmssts(SS$_INSFMEM);
+    /* lstat returns a VMS fileified specification of the name */
+    /* that is looked up, and also lets verifies that this is a directory */
 
-    /* Force to a directory specification */
-    if (do_fileify_dirspec(name, dirfile, 0, NULL) == NULL) {
-	PerlMem_free(dirfile);
-	return -1;
+    retval = Perl_flex_lstat(NULL, name, &st);
+    if (retval != 0) {
+        char * ret_spec;
+
+        /* Due to a historical feature, flex_stat/lstat can not see some */
+        /* Unix format file names that the rest of the CRTL can see */
+        /* Fixing that feature will cause some perl tests to fail */
+        /* So try this one more time. */
+
+        retval = lstat(name, &st.crtl_stat);
+        if (retval != 0)
+            return -1;
+
+        /* force it to a file spec for the kill file to work. */
+        ret_spec = do_fileify_dirspec(name, st.st_devnam, 0, NULL);
+        if (ret_spec == NULL) {
+            errno = EIO;
+            return -1;
+        }
     }
-    if (Perl_flex_lstat(aTHX_ dirfile, &st) || !S_ISDIR(st.st_mode)) {
+
+    if (!S_ISDIR(st.st_mode)) {
 	errno = ENOTDIR;
 	retval = -1;
     }
-    else
-	retval = mp_do_kill_file(aTHX_ dirfile, 1);
+    else {
+        dirfile = st.st_devnam;
 
-    PerlMem_free(dirfile);
+        /* It may be possible for flex_stat to find a file and vmsify() to */
+        /* fail with ODS-2 specifications.  mp_do_kill_file can not deal */
+        /* with that case, so fail it */
+        if (dirfile[0] == 0) {
+            errno = EIO;
+            return -1;
+        }
+
+	retval = mp_do_kill_file(aTHX_ dirfile, 1);
+    }
+
     return retval;
 
 }  /* end of do_rmdir */
@@ -2109,21 +2132,66 @@ Perl_do_rmdir(pTHX_ const char *name)
 int
 Perl_kill_file(pTHX_ const char *name)
 {
-    char rspec[NAM$C_MAXRSS+1];
-    char *tspec;
+    char * vmsfile;
     Stat_t st;
     int rmsts;
 
-   /* Remove() is allowed to delete directories, according to the X/Open
-    * specifications.
-    * This may need special handling to work with the ACL hacks.
-     */
-   if ((flex_lstat(name, &st) == 0) && S_ISDIR(st.st_mode)) {
-	rmsts = Perl_do_rmdir(aTHX_ name);
-	return rmsts;
+    /* Convert the filename to VMS format and see if it is a directory */
+    /* flex_lstat returns a vmsified file specification */
+    rmsts = Perl_flex_lstat(NULL, name, &st);
+    if (rmsts != 0) {
+
+        /* Due to a historical feature, flex_stat/lstat can not see some */
+        /* Unix format file names that the rest of the CRTL can see when */
+        /* ODS-2 file specifications are in use. */
+        /* Fixing that feature will cause some perl tests to fail */
+        /* [.lib.ExtUtils.t]Manifest.t is one of them */
+        st.st_mode = 0;
+        vmsfile = (char *) name; /* cast ok */
+
+    } else {
+        vmsfile = st.st_devnam;
+        if (vmsfile[0] == 0) {
+            /* It may be possible for flex_stat to find a file and vmsify() */
+            /* to fail with ODS-2 specifications.  mp_do_kill_file can not */
+            /* deal with that case, so fail it */
+            errno = EIO;
+            return -1;
+        }
     }
 
-   rmsts = mp_do_kill_file(aTHX_ name, 0);
+    /* Remove() is allowed to delete directories, according to the X/Open
+     * specifications.
+     * This may need special handling to work with the ACL hacks.
+     */
+    if (S_ISDIR(st.st_mode)) {
+        rmsts = mp_do_kill_file(aTHX_ vmsfile, 1);
+        return rmsts;
+    }
+
+    rmsts = mp_do_kill_file(aTHX_ vmsfile, 0);
+
+    /* Need to delete all versions ? */
+    if ((rmsts == 0) && (vms_unlink_all_versions == 1)) {
+        int i = 0;
+
+        /* Just use lstat() here as do not need st_dev */
+        /* and we know that the file is in VMS format or that */
+        /* because of a historical bug, flex_stat can not see the file */
+        while (lstat(vmsfile, (stat_t *)&st) == 0) {
+            rmsts = mp_do_kill_file(aTHX_ vmsfile, 0);
+            if (rmsts != 0)
+                break;
+            i++;
+
+            /* Make sure that we do not loop forever */
+            if (i > 32767) {
+                errno = EIO;
+                rmsts = -1;
+                break;
+            }
+        }
+    }
 
     return rmsts;
 
@@ -12736,7 +12804,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
      */ 
     ret_spec = int_tovmspath(fspec, temp_fspec, NULL);
     if (ret_spec != NULL) {
-        ret_spec = int_fileify_dirspec(temp_fspec, fileified, NULL);
+        ret_spec = int_fileify_dirspec(temp_fspec, fileified, NULL); 
         if (ret_spec != NULL) {
             if (lstat_flag == 0)
                 retval = stat(fileified, &statbufp->crtl_stat);
@@ -14158,14 +14226,14 @@ struct statbuf_t {
         int vms_sts;
 
 	dvidsc.dsc$a_pointer=statbuf.st_dev;
-       dvidsc.dsc$w_length=strlen(statbuf.st_dev);
+        dvidsc.dsc$w_length=strlen(statbuf.st_dev);
 
 	specdsc.dsc$a_pointer = outname;
 	specdsc.dsc$w_length = outlen-1;
 
-       vms_sts = lib$fid_to_name
+        vms_sts = lib$fid_to_name
 	    (&dvidsc, statbuf.st_ino, &specdsc, &specdsc.dsc$w_length);
-       if ($VMS_STATUS_SUCCESS(vms_sts)) {
+        if ($VMS_STATUS_SUCCESS(vms_sts)) {
 	    outname[specdsc.dsc$w_length] = 0;
 
             /* Return the mode */
