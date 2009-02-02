@@ -4328,7 +4328,6 @@ win32/bin/perlglob.pl		Win32 globbing
 win32/bin/pl2bat.pl		wrap perl scripts into batch files
 win32/bin/runperl.pl		run perl script via batch file namesake
 win32/bin/search.pl		Win32 port
-win32/buildext.pl		Build extensions once miniperl is built
 win32/ce-helpers/cecopy-lib.pl	WinCE port
 win32/ce-helpers/compile-all.bat	WinCE port
 win32/ce-helpers/compile.bat	WinCE port
