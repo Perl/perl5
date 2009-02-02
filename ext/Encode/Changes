@@ -1,12 +1,27 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.27 2009/01/21 22:55:07 dankogai Exp dankogai $
+# $Id: Changes,v 2.29 2009/02/01 13:14:37 dankogai Exp $
 #
-$Revision: 2.27 $ $Date: 2009/01/21 22:55:07 $
+$Revision: 2.29 $ $Date: 2009/02/01 13:14:37 $
+! Encode.pm
+  VERSION++ just to make PAUSE happy
+  Message-Id: <877i4anwwt.fsf@k75.linux.bogus>
+
+2.28 Date: 2009/02/01 12:30:18
+! Unicode/Unicode.xs
+  Latest refactoring broke the backward compatibility 
+  w/ Perl 5.8.6 and before now restored
+  Message-Id: <1233185156.DABa130.74940@basic2.hostingcompartido.com>
+  Message-Id: <693254b90902010027x277a5d0fm4f5700ba2f276239@mail.gmail.com>
+! lib/Encode/MIME/Header.pm
+  Addressed: Split header lines are joined incorrectly
+  http://rt.cpan.org/Ticket/Display.html?id=42902
+
+2.27 2009/01/21 22:55:07
 ! lib/Encode/MIME/Header.pm t/mime-header.t
   Addressed: Encode::MIME::Header MIME-Q encoding truncates 
     trailing zeros in some circumstances
-  http://rt.cpan.org/Ticket/Display.html?id=342627
+  http://rt.cpan.org/Ticket/Display.html?id=42627
 ! lib/Encode/Alias.pm
   Added alias: unicode-1-1-utf-7
   http://rt.cpan.org/Ticket/Display.html?id=38558  
@@ -19,13 +34,12 @@ $Revision: 2.27 $ $Date: 2009/01/21 22:55:07 $
 ! lib/Encode/Guess.pm t/guess.t
   Addressed:Empty file should produce an error message
   http://rt.cpan.org/Ticket/Display.html?id=38652
-
-
-2.26 2008/07/01 20:56:17
 ! Unicode/Unicode.xs AUTHORS
   Refactored by Alex Davies
   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-10/msg00745.html
   Message-Id: <7637669B2E3D46B187591747DA27F4C8@Amelie>
+
+2.26 2008/07/01 20:56:17
 ! Encode.pm
   Absense of Encode::ConfigLocal no longer carps no matter what.
   http://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
