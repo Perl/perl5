@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.4 2009/01/21 22:55:07 dankogai Exp dankogai $
+ $Id: Unicode.xs,v 2.5 2009/02/01 13:14:41 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -21,19 +21,30 @@
 #define PERLIO_BUFSIZ 1024 /* XXX value comes from PerlIOEncode_get_base */
 
 /* Avoid wasting too much space in the result buffer */
-static void
-shrink_buffer(SV *result)
-{
-    if (SvLEN(result) > 42 + SvCUR(result)) {
-	char *buf;
-	STRLEN datalen = 1 + SvCUR(result); /* include the NUL byte */
-	STRLEN buflen = PERL_STRLEN_ROUNDUP(datalen);
-	Newx(buf, buflen, char);
-	Copy(SvPVX(result), buf, datalen, char);
-	Safefree(SvPVX(result));
-	SvPV_set(result, buf);
-	SvLEN_set(result, buflen);
-    }
+/* static void */
+/* shrink_buffer(SV *result) */
+/* { */
+/*     if (SvLEN(result) > 42 + SvCUR(result)) { */
+/* 	char *buf; */
+/* 	STRLEN len = 1 + SvCUR(result); /\* include the NUL byte *\/ */
+/* 	New(0, buf, len, char); */
+/* 	Copy(SvPVX(result), buf, len, char); */
+/* 	Safefree(SvPVX(result)); */
+/* 	SvPV_set(result, buf); */
+/* 	SvLEN_set(result, len); */
+/*     } */
+/* } */
+
+#define shrink_buffer(result) { \
+    if (SvLEN(result) > 42 + SvCUR(result)) { \
+	char *newpv; \
+	STRLEN newlen = 1 + SvCUR(result); /* include the NUL byte */ \
+	New(0, newpv, newlen, char); \
+	Copy(SvPVX(result), newpv, newlen, char); \
+	Safefree(SvPVX(result)); \
+	SvPV_set(result, newpv); \
+	SvLEN_set(result, newlen); \
+    } \
 }
 
 static UV
