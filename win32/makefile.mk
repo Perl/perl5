@@ -1387,24 +1387,24 @@ MakePPPort_clean:
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
 
 #-------------------------------------------------------------------------------
-Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
+Extensions : ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic
 
-Extensions_reonly : buildext.pl $(PERLDEP) $(CONFIGPM)
+Extensions_reonly : ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic +re
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic +re
 
-Extensions_static : buildext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
+Extensions_static : ..\make_ext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --static
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
 Extensions_clean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=clean
 
 Extensions_realclean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=realclean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=realclean
 
 #-------------------------------------------------------------------------------
 
