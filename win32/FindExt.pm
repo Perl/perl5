@@ -10,15 +10,7 @@ my $no = join('|',qw(GDBM_File ODBM_File NDBM_File DB_File
 $no = qr/^(?:$no)$/i;
 
 my %ext;
-my $ext;
 my %static;
-
-sub getcwd {
-    $_ = `cd`;
-    chomp;
-    s:\\:/:g ;
-    return $ENV{'PWD'} = $_;
-}
 
 sub set_static_extensions {
     # adjust results of scan_ext, and also save
@@ -39,13 +31,9 @@ sub set_static_extensions {
 
 sub scan_ext
 {
- my $here = getcwd();
- my $dir  = shift;
- chdir($dir) || die "Cannot cd to $dir\n";
- ($ext = getcwd()) =~ s,/,\\,g;
- find_ext('');
- chdir($here) || die "Cannot cd to $here\n";
- my @ext = extensions();
+    my $dir  = shift;
+    find_ext("$dir/", '');
+    extensions();
 }
 
 sub dynamic_ext
@@ -83,23 +71,22 @@ sub is_static
 # NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 sub find_ext
 {
-    opendir my $dh, '.';
-    my @items = grep { !/^\.\.?$/ } readdir $dh;
-    closedir $dh;
-    for my $xxx (@items) {
+    my $prefix = shift;
+    my $dir = shift;
+    opendir my $dh, "$prefix$dir";
+    while (defined (my $xxx = readdir $dh)) {
+	next if $xxx =~ /^\.\.?$/;
         if ($xxx ne "DynaLoader") {
-            if (-f "$xxx/$xxx.xs" || -f "$xxx/$xxx.c" ) {
-                $ext{"$_[0]$xxx"} = $static{"$_[0]$xxx"} ? 'static' : 'dynamic';
-            } elsif (-f "$xxx/Makefile.PL") {
-                $ext{"$_[0]$xxx"} = 'nonxs';
+            if (-f "$prefix$dir$xxx/$xxx.xs" || -f "$prefix$dir$xxx/$xxx.c" ) {
+                $ext{"$dir$xxx"} = $static{"$dir$xxx"} ? 'static' : 'dynamic';
+            } elsif (-f "$prefix$dir$xxx/Makefile.PL") {
+                $ext{"$dir$xxx"} = 'nonxs';
             } else {
-                if (-d $xxx && @_ < 10) {
-                    chdir $xxx;
-                    find_ext("$_[0]$xxx/", @_);
-                    chdir "..";
+                if (-d "$prefix$dir$xxx" && $dir =~ tr#/## < 10) {
+                    find_ext($prefix, "$dir$xxx/");
                 }
             }
-            $ext{"$_[0]$xxx"} = 'known' if $ext{"$_[0]$xxx"} && $xxx =~ $no;
+            $ext{"$dir$xxx"} = 'known' if $ext{"$dir$xxx"} && $xxx =~ $no;
         }
     }
 
@@ -109,10 +96,10 @@ sub find_ext
 # recursive finding breaks SDBM_File/sdbm).
 # A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
 
-    if (!$_[0] && -d "threads/shared") {
+    if (!$dir && -d "${prefix}threads/shared") {
         $ext{"threads/shared"} = 'dynamic';
     }
-    if (!$_[0] && -d "Hash/Util/FieldHash") {
+    if (!$dir && -d "${prefix}Hash/Util/FieldHash") {
         $ext{"Hash/Util/FieldHash"} = 'dynamic';
     }
 }
