@@ -382,16 +382,13 @@ DELAYLOAD	*= -DELAYLOAD:ws2_32.dll delayimp.lib
 
 # Visual C++ 2005 and 2008 (VC++ 8.x and 9.x) create manifest files for EXEs and
 # DLLs. These either need copying everywhere with the binaries, or else need
-# embedding in them otherwise MSVCR80.dll or MSVCR90.dll won't be found. Embed
-# them for simplicity, and delete them afterwards so that they don't get
-# installed too.
-.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+# embedding in them otherwise MSVCR80.dll or MSVCR90.dll won't be found. For
+# simplicity, embed them if they exist (and delete them afterwards so that they
+# don't get installed too).
 EMBED_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
 		  if exist $@.manifest del $@.manifest
 EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
 		  if exist $@.manifest del $@.manifest
-.ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
