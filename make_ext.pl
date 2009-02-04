@@ -176,13 +176,12 @@ if ($is_Win32) {
     chdir '..'; # now in the Perl build directory
 }
 
-foreach my $pname (@extspec)  {
-    my $mname = $pname;
+foreach my $spec (@extspec)  {
+    my $mname = $spec;
     $mname =~ s!/!::!g;
-    my $depth = $pname;
-    $depth =~ s![^/]+!..!g;
-    # Always need one more .. for ext/
-    my $up = "../$depth";
+    my $ext_pathname = "ext/$spec";
+    my $up = $ext_pathname;
+    $up =~ s![^/]+!..!g;
 
     if ($Config{osname} eq 'catamount') {
 	# Snowball's chance of building extensions.
@@ -191,9 +190,9 @@ foreach my $pname (@extspec)  {
 
     print "\tMaking $mname ($target)\n";
 
-    build_extension('ext', "ext/$pname", $up, $perl || "$up/miniperl",
+    build_extension('ext', $ext_pathname, $up, $perl || "$up/miniperl",
 		    "$up/lib",
-		    [@pass_through, @{$extra_passthrough{$pname} || []}]);
+		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
 }
 
 sub build_extension {
