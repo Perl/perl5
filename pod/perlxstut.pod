@@ -90,8 +90,8 @@ extension, it will print out a well-known message and return.
 
 Run "C<h2xs -A -n Mytest>".  This creates a directory named Mytest,
 possibly under ext/ if that directory exists in the current working
-directory.  Several files will be created in the Mytest dir, including
-MANIFEST, Makefile.PL, Mytest.pm, Mytest.xs, Mytest.t, and Changes.
+directory.  Several files will be created under the Mytest dir, including
+MANIFEST, Makefile.PL, lib/Mytest.pm, Mytest.xs, t/Mytest.t, and Changes.
 
 The MANIFEST file contains the names of all the files just created in the
 Mytest directory.
