@@ -29,7 +29,7 @@ use vars qw(@ISA %ESCAPES $VERSION);
 # by Pod::Usage.
 @ISA = qw(Pod::Select);
 
-$VERSION = '2.03';
+$VERSION = '2.04';
 
 BEGIN {
    if ($] < 5.006) {
@@ -312,6 +312,7 @@ sub cmd_head2 {
     if ($$self{alt}) {
         $self->output ("\n==   $_   ==\n\n");
     } else {
+        $_ .= "\n" if $$self{loose};
         $self->output (' ' x ($$self{indent} / 2) . $_ . "\n");
     }
 }
@@ -325,6 +326,7 @@ sub cmd_head3 {
     if ($$self{alt}) {
         $self->output ("\n= $_ =\n");
     } else {
+        $_ .= "\n" if $$self{loose};
         $self->output (' ' x ($$self{indent}) . $_ . "\n");
     }
 }
@@ -643,12 +645,11 @@ C<=over> blocks.  Defaults to 4.
 
 =item loose
 
-If set to a true value, a blank line is printed after a C<=head1> heading.
-If set to false (the default), no blank line is printed after C<=head1>,
-although one is still printed after C<=head2>.  This is the default because
-it's the expected formatting for manual pages; if you're formatting
-arbitrary text documents, setting this to true may result in more pleasing
-output.
+If set to a true value, a blank line is printed after a C<=headN> headings.
+If set to false (the default), no blank line is printed after C<=headN>.
+This is the default because it's the expected formatting for manual pages;
+if you're formatting arbitrary text documents, setting this to true may
+result in more pleasing output.
 
 =item sentence
 

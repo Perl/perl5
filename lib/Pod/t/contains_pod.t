@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';
@@ -14,7 +13,6 @@ BEGIN {
         use lib qw( ./lib );
     }
 }
-
 
 use Test::More tests => 2;
 

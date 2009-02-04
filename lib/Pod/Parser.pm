@@ -12,7 +12,7 @@ use strict;
 
 ## These "variables" are used as local "glob aliases" for performance
 use vars qw($VERSION @ISA %myData %myOpts @input_stack);
-$VERSION = '1.36_01';  ## Current version of this package
+$VERSION = '1.37';  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -996,7 +996,7 @@ sub parse_paragraph {
                      " in paragraph at line $line in file $myData{_INFILE}\n";
         (ref $errorsub) and &{$errorsub}($errmsg)
             or (defined $errorsub) and $self->$errorsub($errmsg)
-                or  warn($errmsg);
+                or  carp($errmsg);
     }
 
     if (length $cmd) {
