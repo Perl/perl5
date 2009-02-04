@@ -77,15 +77,20 @@ sub find_ext
     while (defined (my $item = readdir $dh)) {
         next if $item =~ /^\.\.?$/;
         next if $item eq "DynaLoader";
-        my $this_ext = "$prefix$item";
-        if (-f "$ext_dir$this_ext/$item.xs" || -f "$ext_dir$this_ext/$item.c" ) {
+        my $this_ext = my $this_ext_dir = "$prefix$item";
+        my $leaf = $item;
+
+        $this_ext =~ s!-!/!g;
+        $leaf =~ s/.*-//;
+
+        if (-f "$ext_dir$this_ext_dir/$leaf.xs" || -f "$ext_dir$this_ext_dir/$leaf.c" ) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
-        } elsif (-f "$ext_dir$this_ext/Makefile.PL") {
+        } elsif (-f "$ext_dir$this_ext_dir/Makefile.PL") {
             $ext{$this_ext} = 'nonxs';
         } else {
             # It's not actually an extension. So recurse into it.
-            if (-d "$ext_dir$this_ext" && $prefix =~ tr#/## < 10) {
-                find_ext($ext_dir, "$this_ext/");
+            if (-d "$ext_dir$this_ext_dir" && $prefix =~ tr#/## < 10) {
+                find_ext($ext_dir, "$this_ext_dir/");
             }
         }
         $ext{$this_ext} = 'known' if $ext{$this_ext} && $item =~ $no;
