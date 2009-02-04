@@ -71,23 +71,24 @@ sub is_static
 # NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 sub find_ext
 {
+    my $ext_dir = shift;
     my $prefix = shift;
-    my $dir = shift;
-    opendir my $dh, "$prefix$dir";
-    while (defined (my $xxx = readdir $dh)) {
-	next if $xxx =~ /^\.\.?$/;
-        if ($xxx ne "DynaLoader") {
-            if (-f "$prefix$dir$xxx/$xxx.xs" || -f "$prefix$dir$xxx/$xxx.c" ) {
-                $ext{"$dir$xxx"} = $static{"$dir$xxx"} ? 'static' : 'dynamic';
-            } elsif (-f "$prefix$dir$xxx/Makefile.PL") {
-                $ext{"$dir$xxx"} = 'nonxs';
-            } else {
-                if (-d "$prefix$dir$xxx" && $dir =~ tr#/## < 10) {
-                    find_ext($prefix, "$dir$xxx/");
-                }
+    opendir my $dh, "$ext_dir$prefix";
+    while (defined (my $item = readdir $dh)) {
+        next if $item =~ /^\.\.?$/;
+        next if $item eq "DynaLoader";
+        my $this_ext = "$prefix$item";
+        if (-f "$ext_dir$this_ext/$item.xs" || -f "$ext_dir$this_ext/$item.c" ) {
+            $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
+        } elsif (-f "$ext_dir$this_ext/Makefile.PL") {
+            $ext{$this_ext} = 'nonxs';
+        } else {
+            # It's not actually an extension. So recurse into it.
+            if (-d "$ext_dir$this_ext" && $prefix =~ tr#/## < 10) {
+                find_ext($ext_dir, "$this_ext/");
             }
-            $ext{"$dir$xxx"} = 'known' if $ext{"$dir$xxx"} && $xxx =~ $no;
         }
+        $ext{$this_ext} = 'known' if $ext{$this_ext} && $item =~ $no;
     }
 
 # Special case:  Add in modules that nest beyond the first level.
@@ -96,12 +97,18 @@ sub find_ext
 # recursive finding breaks SDBM_File/sdbm).
 # A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
 
-    if (!$dir && -d "${prefix}threads/shared") {
+    if (!$prefix && -d "${ext_dir}threads/shared") {
         $ext{"threads/shared"} = 'dynamic';
     }
-    if (!$dir && -d "${prefix}Hash/Util/FieldHash") {
+    if (!$prefix && -d "${ext_dir}Hash/Util/FieldHash") {
         $ext{"Hash/Util/FieldHash"} = 'dynamic';
     }
 }
 
 1;
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
