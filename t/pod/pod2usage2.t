@@ -164,7 +164,7 @@ if ($ENV{PERL_CORE}) {
   $pod_file2 = File::Spec->catfile(qw(t pod usage2.pod));
 }
 
-($exit, $text) = getoutput( sub { system($^X, $blib, $test_script); exit($? >> 8); } );
+($exit, $text) = getoutput( sub { system($^X, $blib, $test_script); exit($?  >> 8); } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 17,                 "Exit status pod2usage (-verbose => 2, -input => \*DATA)");
 ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 2, -input => \*DATA)") or diag "Got:\n$text\n";

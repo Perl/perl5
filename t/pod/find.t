@@ -14,18 +14,14 @@ BEGIN {
 
 $| = 1;
 
-use Test;
+use Test::More tests => 4;
 
 BEGIN {
-  plan tests => 4;
-  use File::Spec;
+  # 1. load successful
+  use_ok('Pod::Find', qw(pod_find pod_where));
 }
 
-use Pod::Find qw(pod_find pod_where);
 use File::Spec;
-
-# load successful
-ok(1);
 
 require Cwd;
 my $THISDIR = Cwd::cwd();
@@ -60,7 +56,7 @@ if ($^O eq 'VMS') {
     $unix_mode = ($vms_efs && $vms_unix_rpt);
 }
 
-print "### searching $lib_dir\n";
+print "### 2. searching $lib_dir\n";
 my %pods = pod_find($lib_dir);
 my $result = join(',', sort values %pods);
 print "### found $result\n";
@@ -91,16 +87,16 @@ if ($^O eq 'VMS') {
     foreach(@compare) {
         $count += grep {/$_/} @result;
     }
-    ok($count/($#result+1)-1,$#compare);
+    is($count/($#result+1)-1,$#compare);
 }
 elsif (File::Spec->case_tolerant || $^O eq 'dos') {
-    ok(lc $result,lc $compare);
+    is(lc $result,lc $compare);
 }
 else {
-    ok($result,$compare);
+    is($result,$compare);
 }
 
-print "### searching for File::Find\n";
+print "### 3. searching for File::Find\n";
 $result = pod_where({ -inc => 1, -verbose => $VERBOSE }, 'File::Find')
   || 'undef - pod not found!';
 print "### found $result\n";
@@ -114,18 +110,28 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
     }
     $result =~ s/perl_root:\[\-?\.?//i;
     $result =~ s/\[\-?\.?//i; # needed under `mms test`
-    ok($result,$compare);
+    is($result,$compare);
 }
 else {
     $compare = $ENV{PERL_CORE} ?
       File::Spec->catfile(File::Spec->updir, 'lib','File','Find.pm')
       : File::Spec->catfile($Config::Config{privlibexp},"File","Find.pm");
-    ok(_canon($result),_canon($compare));
+    my $resfile = _canon($result);
+    my $cmpfile = _canon($compare);
+    if($^O =~ /dos|win32/i && $resfile =~ /~\d(?=\\|$)/) {
+      # we have ~1 short filenames
+      $resfile = quotemeta($resfile);
+      $resfile =~ s/\\~\d(?=\\|$)/[^\\\\]+/g;
+      ok($cmpfile =~ /^$resfile$/, "pod_where found File::Find (with long filename matching)") ||
+        diag("'$cmpfile' does not match /^$resfile\$/");
+    } else {
+      is($resfile,$cmpfile,"pod_where found File::Find");
+    }
 }
 
 # Search for a documentation pod rather than a module
 my $searchpod = 'Stuff';
-print "### searching for $searchpod.pod\n";
+print "### 4. searching for $searchpod.pod\n";
 $result = pod_where(
   { -dirs => [ File::Spec->catdir(
     $ENV{PERL_CORE} ? () : qw(t), 'pod', 'testpods', 'lib', 'Pod') ],
@@ -136,7 +142,8 @@ print "### found $result\n";
 $compare = File::Spec->catfile(
     $ENV{PERL_CORE} ? () : qw(t),
     'pod', 'testpods', 'lib', 'Pod' ,'Stuff.pm');
-ok(_canon($result),_canon($compare));
+is(_canon($result),_canon($compare));
+
 
 # make the path as generic as possible
 sub _canon
