@@ -76,18 +76,15 @@ my $dynamic = $opts{dynamic} || $opts{all};
 # canonise into X/Y form (pname)
 
 foreach (@extspec) {
-    if (/^lib/) {
+    if (s{^lib/auto/}{}) {
 	# Remove lib/auto prefix and /*.* suffix
-	s{^lib/auto/}{};
 	s{/[^/]+\.[^/]+$}{};
-    } elsif (/^ext/) {
+    } elsif (s{^ext/}{}) {
 	# Remove ext/ prefix and /pm_to_blib suffix
-	s{^ext/}{};
 	s{/pm_to_blib$}{};
-    } elsif (/::/) {
+    } elsif (s{::}{\/}g) {
 	# Convert :: to /
-	s{::}{\/}g;
-    } elsif (/\..*o$/) {
+    } else {
 	s/\..*o//;
     }
 }
