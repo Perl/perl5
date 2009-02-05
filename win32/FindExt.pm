@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 my $no = join('|',qw(GDBM_File ODBM_File NDBM_File DB_File
-		     Syslog SysV Langinfo));
+                     VMS Syslog SysV Langinfo));
 $no = qr/^(?:$no)$/i;
 
 my %ext;
