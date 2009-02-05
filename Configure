@@ -21759,6 +21759,8 @@ for xxx in $known_extensions ; do
 		# --jhi
 		avail_ext="$avail_ext $xxx"
 		;;
+	VMS*)
+		;;
 	Win32*)
 		case "$osname" in
 		cygwin) avail_ext="$avail_ext $xxx" ;;
