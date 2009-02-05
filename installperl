@@ -755,6 +755,8 @@ sub installlib {
 
     $name = "$dir/$name" if $dir ne '';
 
+    return if $name eq 'ExtUtils/XSSymSet.pm' and !$Is_VMS;
+
     my $installlib = $installprivlib;
     if ($dir =~ /^auto/ ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
