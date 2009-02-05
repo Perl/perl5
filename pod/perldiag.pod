@@ -4975,7 +4975,7 @@ So put in parentheses to say what you really mean.
 
 =item Wide character in %s
 
-(W utf8) Perl met a wide character (>255) when it wasn't expecting
+(S utf8) Perl met a wide character (>255) when it wasn't expecting
 one.  This warning is by default on for I/O (like print).  The easiest
 way to quiet this warning is simply to add the C<:utf8> layer to the
 output, e.g. C<binmode STDOUT, ':utf8'>.  Another way to turn off the
