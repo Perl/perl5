@@ -600,7 +600,7 @@ The most useful types that will be returned are:
     SVt_PVGV  Glob (possible a file handle)
     SVt_PVMG  Blessed or Magical Scalar
 
-    See the sv.h header file for more details.
+See the F<sv.h> header file for more details.
 
 =head2 Blessed References and Class Objects
 
