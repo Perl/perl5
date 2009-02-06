@@ -2745,7 +2745,7 @@ $ ENDIF
 $ dflt = dflt - "ByteLoader"          ! needs to be ported
 $ dflt = dflt - "DB_File"             ! needs to be ported
 $ dflt = dflt - "GDBM_File"           ! needs porting/special library
-$ dflt = dflt - "IPC/SysV"            ! needs to be ported
+$ dflt = dflt - "IPC-SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
 $ dflt = dflt - "Sys/Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
