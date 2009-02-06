@@ -2748,7 +2748,7 @@ $ dflt = dflt - "GDBM_File"           ! needs porting/special library
 $ dflt = dflt - "IPC-SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
-$ dflt = dflt - "Sys/Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
+$ dflt = dflt - "Sys-Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
 $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
