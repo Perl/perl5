@@ -21619,10 +21619,12 @@ find_extensions='
 	case "$xxx" in
 	    DynaLoader|dynaload) ;;
 	    *)
-	    if $test -f $xxx/$xxx.xs -o -f $xxx/$xxx.c; then
-		known_extensions="$known_extensions $1$xxx";
+	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
+	    leaf=`echo $xxx | $sed -e s/.*-//`;
+	    if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
+		known_extensions="$known_extensions $1$this_ext";
 	    elif $test -f $xxx/Makefile.PL; then
-		nonxs_extensions="$nonxs_extensions $1$xxx";
+		nonxs_extensions="$nonxs_extensions $1$this_ext";
 	    else
 		if $test -d $xxx -a $# -lt 10; then
 		    set $1$xxx/ $*;
