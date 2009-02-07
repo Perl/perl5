@@ -1818,9 +1818,8 @@ PP(pp_send)
 	    SV *sv;
 
 	    if (MARK == SP - 1) {
-		EXTEND(SP, 1000);
-		sv = sv_2mortal(newSViv(sv_len(*SP)));
-		PUSHs(sv);
+		sv = *SP;
+		mXPUSHi(sv_len(sv));
 		PUTBACK;
 	    }
 
