@@ -36,31 +36,27 @@ sub scan_ext
     extensions();
 }
 
-sub dynamic_ext
-{
- return sort grep $ext{$_} eq 'dynamic',keys %ext;
+sub _ext_eq {
+    my $key = shift;
+    sub {
+        sort grep $ext{$_} eq $key, keys %ext;
+    }
 }
 
-sub static_ext
-{
- return sort grep $ext{$_} eq 'static',keys %ext;
+*dynamic_ext = _ext_eq('dynamic');
+*static_ext = _ext_eq('static');
+*nonxs_ext = _ext_eq('nonxs');
+
+sub _ext_ne {
+    my $key = shift;
+    sub {
+        sort grep $ext{$_} ne $key, keys %ext;
+    }
 }
 
-sub nonxs_ext
-{
- return sort grep $ext{$_} eq 'nonxs',keys %ext;
-}
-
-sub extensions
-{
- return sort grep $ext{$_} ne 'known',keys %ext;
-}
-
-sub known_extensions
-{
- # faithfully copy Configure in not including nonxs extensions for the nonce
- return sort grep $ext{$_} ne 'nonxs',keys %ext;
-}
+*extensions = _ext_ne('known');
+# faithfully copy Configure in not including nonxs extensions for the nonce
+*known_extensions = _ext_ne('nonxs');
 
 sub is_static
 {
