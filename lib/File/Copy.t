@@ -286,6 +286,29 @@ SKIP: {
             $c_perm1 |= $id << 9;
             diag(sprintf "Src permission: %04o; umask %03o\n", $s_perm, $umask)
                 unless ($ENV{PERL_CORE});
+
+	    # Test that we can actually set a file to the correct permission.
+	    # Slightly convoluted, because some operating systems will let us
+	    # set a directory, but not a file. These should all work:
+	    mkdir $copy1 or die "Can't mkdir $copy1: $!";
+	    chmod $s_perm, $copy1 or die "Can't chmod %o $copy1: $!", $s_perm;
+	    rmdir $copy1 or die "Can't rmdir $copy1: $!";
+	    open my $fh0, '>', $copy1 or die "Can't open $copy1: $!";
+	    close $fh0 or die "Can't close $copy1: $!";
+	    unless (chmod $s_perm, $copy1) {
+		$TB->skip(sprintf "Can't chmod $copy1 to %o: $!", $s_perm)
+		    for 1..6;
+		next;
+	    }
+            my $perm0 = (stat $copy1) [2] & 07777;
+	    unless ($perm0 == $s_perm) {
+		$TB->skip(sprintf "chmod %o $copy1 lies - we actually get %o",
+			  $s_perm, $perm0)
+		    for 1..6;
+		next;
+	    }
+	    unlink $copy1 or die "Can't unlink $copy1: $!";
+
             (umask $umask) // die $!;
             chmod $s_perm  => $src   or die sprintf "$!: $src => %o", $s_perm;
             chmod $c_perm3 => $copy3 or die $!;
