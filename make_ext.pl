@@ -14,7 +14,7 @@ use Cwd;
 # d_dummy $(dynamic_ext): miniperl preplibrary FORCE
 # 	@$(RUN) ./miniperl make_ext.pl --target=dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 #
-# On Windows,
+# On Windows or VMS,
 # If '--static' is specified, static extensions will be built.
 # If '--dynamic' is specified, dynamic (and nonxs) extensions will be built.
 # If '--all' is specified, all extensions will be built.
@@ -172,6 +172,11 @@ if ($is_Win32) {
     }
     chdir '..'; # now in the Perl build directory
 }
+elsif ($is_VMS) {
+    $perl = $^X;
+    push @extspec, (split ' ', $Config{static_ext}) if $static;
+    push @extspec, (split ' ', $Config{dynamic_ext}) if $dynamic;
+}
 
 foreach my $spec (@extspec)  {
     my $mname = $spec;
@@ -180,6 +185,10 @@ foreach my $spec (@extspec)  {
     if (-d "ext/$spec") {
 	# Old style ext/Data/Dumper/
 	$ext_pathname = "ext/$spec";
+    } elsif ($is_VMS and -d "vms/ext/" . substr($spec, 4)) {
+	# We could get rid of this by moving everything from
+	# [.vms.ext...] to [.ext.VMS...]
+	$ext_pathname = "vms/ext/" . substr($spec, 4);
     } else {
 	# New style ext/Data-Dumper/
 	my $copy = $spec;
@@ -207,8 +216,19 @@ sub build_extension {
 	warn "Cannot cd to $ext_dir: $!";
 	return;
     }
+    my $makefile;
+    if ($is_VMS) {
+	$makefile = 'descrip.mms';
+	if ($target =~ /clean$/
+	    && !-f $makefile
+	    && -f "${makefile}_old") {
+	    $makefile = "${makefile}_old";
+	}
+    } else {
+	$makefile = 'Makefile';
+    }
     
-    if (!-f 'Makefile') {
+    if (!-f $makefile) {
 	print "\nRunning Makefile.PL in $ext_dir\n";
 
 	# Presumably this can be simplified
@@ -221,11 +241,17 @@ sub build_extension {
 	    @cross = '-MCross';
 	}
 	    
-	my @perl = (@run, $perl, "-I$lib_dir", @cross, 'Makefile.PL',
-		    'INSTALLDIRS=perl', 'INSTALLMAN3DIR=none',
-		    @$pass_through);
-	print join(' ', @perl), "\n";
-	my $code = system @perl;
+	my @args = ("-I$lib_dir", @cross, 'Makefile.PL');
+	if ($is_VMS) {
+	    my $libd = VMS::Filespec::vmspath($lib_dir);
+	    push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
+	} else {
+	    push @args, 'INSTALLDIRS=perl', 'INSTALLMAN3DIR=none';
+	}
+	push @args, @$pass_through;
+	_quote_args(\@args) if $is_VMS;
+	print join(' ', @run, $perl, @args), "\n";
+	my $code = system @run, $perl, @args;
 	warn "$code from $ext_dir\'s Makefile.PL" if $code;
 
 	# Right. The reason for this little hack is that we're sitting inside
@@ -265,20 +291,47 @@ EOS
 	}
     }
 
-    if (not -f 'Makefile') {
+    if (not -f $makefile) {
 	print "Warning: No Makefile!\n";
+    }
+
+    if ($is_VMS) {
+	_macroify_passthrough($pass_through);
+	unshift @$pass_through, "/DESCRIPTION=$makefile";
     }
 
     if (!$target or $target !~ /clean$/) {
 	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
-	my @config = (@run, @make, 'config', @$pass_through);
-	system @config and print "@config failed, continuing anyway...\n";
+	my @args = ('config', @$pass_through);
+	_quote_args(\@args) if $is_VMS;
+	system(@run, @make, @args) and print "@run @make @args failed, continuing anyway...\n";
     }
-    my @targ = (@run, @make, $target, @$pass_through);
-    print "Making $target in $ext_dir\n@targ\n";
-    my $code = system @targ;
+    my @targ = ($target, @$pass_through);
+    _quote_args(\@targ) if $is_VMS;
+    print "Making $target in $ext_dir\n@run @make @targ\n";
+    my $code = system(@run, @make, @targ);
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
     chdir $return_dir || die "Cannot cd to $return_dir: $!";
+}
+
+sub _quote_args {
+    my $args = shift; # must be array reference
+
+    # Do not quote qualifiers that begin with '/'.
+    map { if (!/^\//) {
+          $_ =~ s/\"/""/g;     # escape C<"> by doubling
+          $_ = q(").$_.q(");
+        }
+    } @{$args}
+    ;
+}
+
+sub _macroify_passthrough {
+    my $passthrough = shift;
+    _quote_args($passthrough);
+    my $macro = '/MACRO=(' . join(',',@$passthrough) . ')';
+    @$passthrough = ();
+    @$passthrough[0] = $macro;  
 }
