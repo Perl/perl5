@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 116;
+plan tests => 117;
 
 $a = {};
 bless $a, "Bob";
@@ -245,3 +245,11 @@ ok (!splatt->isa('plop'));
 ok (!splatt->isa('zlopp'));
 ok (splatt->isa('plop'));
 
+use warnings "deprecated";
+{
+    my $m;
+    local $SIG{__WARN__} = sub { $m = $_[0] };
+    eval "use UNIVERSAL";
+    like($m, qr/^UNIVERSAL->import is deprecated/,
+	"deprecation warning for UNIVERSAL->import");
+}
