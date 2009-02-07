@@ -5748,7 +5748,7 @@ UTF-8 bytes as a single character. Handles magic and type coercion.
 */
 
 /*
- * The length is cached in PERL_UTF8_magic, in the mg_len field.  Also the
+ * The length is cached in PERL_MAGIC_utf8, in the mg_len field.  Also the
  * mg_ptr is used, by sv_pos_u2b() and sv_pos_b2u() - see the comments below.
  * (Note that the mg_len is not the length of the mg_ptr field.
  * This allows the cache to store the character length of the string without
@@ -5977,7 +5977,7 @@ type coercion.
 
 /*
  * sv_pos_u2b() uses, like sv_pos_b2u(), the mg_ptr of the potential
- * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * PERL_MAGIC_utf8 of the sv to store the mapping between UTF-8 and
  * byte offsets.  See also the comments of S_utf8_mg_pos_cache_update().
  *
  */
@@ -6220,7 +6220,7 @@ Handles magic and type coercion.
 
 /*
  * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
- * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * PERL_MAGIC_utf8 of the sv to store the mapping between UTF-8 and
  * byte offsets.
  *
  */
