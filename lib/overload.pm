@@ -199,6 +199,9 @@ overload - Package for overloading Perl operations
 
 =head1 DESCRIPTION
 
+This pragma allows overloading of Perl's operators for a class.
+To overload built-in functions, see L<perlsub/Overriding Built-in Functions> instead.
+
 =head2 Declaration of overloaded functions
 
 The compilation directive
