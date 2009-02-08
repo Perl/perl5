@@ -2731,11 +2731,30 @@ $   IF F$EXTRACT(0,7,xxx) .EQS. "Encode/" THEN goto ext_loop  ! sub extension - 
 $   IF xxx .EQS. "B/C" THEN goto ext_loop  ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
-$   known_extensions = known_extensions + " ''xxx'"
+$!
+$! (extspec = xxx) =~ tr!-!/!
+$ extspec = ""
+$ idx = 0
+$ replace_dash_with_slash:
+$   before = F$ELEMENT(idx, "-", xxx)
+$   IF before .EQS. "-" THEN goto end_replace_dash_with_slash
+$   IF extspec .NES. "" 
+$   THEN
+$	extspec = extspec + "/"
+$   ENDIF
+$   extspec = extspec + before
+$   idx = idx + 1
+$   goto replace_dash_with_slash
+$
+$ end_replace_dash_with_slash:
+$   
+$   known_extensions = known_extensions + " ''extspec'"
 $   goto ext_loop
 $end_ext:
 $ close CONFIG
 $ DELETE/SYMBOL xxx
+$ DELETE/SYMBOL idx
+$ DELETE/SYMBOL extspec
 $ known_extensions = F$EDIT(known_extensions,"TRIM,COMPRESS")
 $ dflt = known_extensions
 $ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
@@ -2745,10 +2764,10 @@ $ ENDIF
 $ dflt = dflt - "ByteLoader"          ! needs to be ported
 $ dflt = dflt - "DB_File"             ! needs to be ported
 $ dflt = dflt - "GDBM_File"           ! needs porting/special library
-$ dflt = dflt - "IPC-SysV"            ! needs to be ported
+$ dflt = dflt - "IPC/SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
-$ dflt = dflt - "Sys-Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
+$ dflt = dflt - "Sys/Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
 $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
