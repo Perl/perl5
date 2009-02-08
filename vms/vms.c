@@ -2076,7 +2076,7 @@ Perl_do_rmdir(pTHX_ const char *name)
     /* lstat returns a VMS fileified specification of the name */
     /* that is looked up, and also lets verifies that this is a directory */
 
-    retval = Perl_flex_lstat(NULL, name, &st);
+    retval = flex_lstat(name, &st);
     if (retval != 0) {
         char * ret_spec;
 
@@ -2138,7 +2138,7 @@ Perl_kill_file(pTHX_ const char *name)
 
     /* Convert the filename to VMS format and see if it is a directory */
     /* flex_lstat returns a vmsified file specification */
-    rmsts = Perl_flex_lstat(NULL, name, &st);
+    rmsts = flex_lstat(name, &st);
     if (rmsts != 0) {
 
         /* Due to a historical feature, flex_stat/lstat can not see some */
@@ -5261,7 +5261,7 @@ Stat_t src_st;
 Stat_t dst_st;
 
     /* Validate the source file */
-    src_sts = Perl_flex_lstat(NULL, src, &src_st);
+    src_sts = flex_lstat(src, &src_st);
     if (src_sts != 0) {
 
 	/* No source file or other problem */
@@ -5273,7 +5273,7 @@ Stat_t dst_st;
         return -1;
     }
 
-    dst_sts = Perl_flex_lstat(NULL, dst, &dst_st);
+    dst_sts = flex_lstat(dst, &dst_st);
     if (dst_sts == 0) {
 
 	if (dst_st.st_dev != src_st.st_dev) {
@@ -5317,7 +5317,7 @@ Stat_t dst_st;
 
 	if (!S_ISDIR(dst_st.st_mode) || S_ISDIR(src_st.st_mode)) {
 	    int d_sts;
-	    d_sts = mp_do_kill_file(NULL, dst_st.st_devnam,
+	    d_sts = mp_do_kill_file(aTHX_ dst_st.st_devnam,
 	                             S_ISDIR(dst_st.st_mode));
 
            /* Need to delete all versions ? */
@@ -5325,7 +5325,7 @@ Stat_t dst_st;
                 int i = 0;
 
                 while (lstat(dst_st.st_devnam, &dst_st.crtl_stat) == 0) {
-                    d_sts = mp_do_kill_file(NULL, dst_st.st_devnam, 0);
+                    d_sts = mp_do_kill_file(aTHX_ dst_st.st_devnam, 0);
                     if (d_sts != 0)
                         break;
                     i++;
@@ -5385,7 +5385,7 @@ Stat_t dst_st;
 	    /* If the dest is a directory, we must remove it
 	    if (dst_sts == 0) {
 		int d_sts;
-		d_sts = mp_do_kill_file(NULL dst_st.st_devnam, 1);
+		d_sts = mp_do_kill_file(aTHX_ dst_st.st_devnam, 1);
 		if (d_sts != 0) {
 		    PerlMem_free(vms_dst);
 		    errno = EIO;
@@ -5503,10 +5503,10 @@ Stat_t dst_st;
 	int i = 0;
 	dSAVEDERRNO;
 	SAVE_ERRNO;
-	src_sts = mp_do_kill_file(NULL, src_st.st_devnam,
+	src_sts = mp_do_kill_file(aTHX_ src_st.st_devnam,
 	                           S_ISDIR(src_st.st_mode));
 	while (lstat(src_st.st_devnam, &src_st.crtl_stat) == 0) {
-	     src_sts = mp_do_kill_file(NULL, src_st.st_devnam,
+	     src_sts = mp_do_kill_file(aTHX_ src_st.st_devnam,
 	                               S_ISDIR(src_st.st_mode));
 	     if (src_sts != 0)
 	         break;
@@ -12505,6 +12505,8 @@ is_null_device(name)
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag);
 
+#define flex_stat_int(a,b,c)		Perl_flex_stat_int(aTHX_ a,b,c)
+
 static I32
 Perl_cando_by_name_int
    (pTHX_ I32 bit, bool effective, const char *fname, int opts)
@@ -12566,7 +12568,7 @@ Perl_cando_by_name_int
   if (vmsname[retlen-1] == ']' 
       || vmsname[retlen-1] == '>' 
       || vmsname[retlen-1] == ':'
-      || (!Perl_flex_stat_int(NULL, vmsname, &st, 1) &&
+      || (!flex_stat_int(vmsname, &st, 1) &&
           S_ISDIR(st.st_mode))) {
 
       if (!int_fileify_dirspec(vmsname, fileified, NULL)) {
@@ -12763,8 +12765,6 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 #endif
 #define lstat(_x, _y) stat(_x, _y)
 #endif
-
-#define flex_stat_int(a,b,c)		Perl_flex_stat_int(aTHX_ a,b,c)
 
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
