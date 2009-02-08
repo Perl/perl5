@@ -565,8 +565,8 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables
 	$(MINIPERL) $(MMS$SOURCE)
 	@ Rename/Log XSLoader.pm [.ext.DynaLoader]
 
-dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport
-       @make_ext "$(MINIPERL_EXE)" "$(MMS)"
+dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport $(MINIPERL_EXE)
+       $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all"
 
 [.lib]lib.pm : [.lib]lib_pm.PL
 	$(MINIPERL) $(MMS$SOURCE)
@@ -1836,7 +1836,7 @@ tidy : cleanlis
 	- If F$Search("[.lib.pods]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pods]*.com
 
 clean : tidy cleantest cleanup_unpacked_files
-	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" clean
+      	- $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all" "--target=clean"
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
@@ -1862,7 +1862,7 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("git_version.h").nes."" Then Delete/NoConfirm/Log git_version.h;*
 
 realclean : clean
-	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" realclean
+      	- $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all" "--target=realclean"
 	- $(MINIPERL) mkppport "--clean"
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
@@ -1873,7 +1873,6 @@ realclean : clean
 	- If F$Search("[.lib.unicore]Properties.").nes."" Then Delete/NoConfirm/Log [.lib.unicore]Properties.;*
 	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" $(unidatadirs)
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
-	- If F$Search("make_ext.Com").nes."" Then Delete/NoConfirm/Log make_ext.Com;*
 	- If F$Search("extra_pods.Com").nes."" Then Delete/NoConfirm/Log extra_pods.Com;*
 	- If F$Search("extra.pods").nes."" Then Delete/NoConfirm/Log extra.pods;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
