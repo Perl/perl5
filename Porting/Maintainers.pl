@@ -1167,7 +1167,7 @@ package Maintainers;
 	'Win32API::File' =>
 		{
 		'MAINTAINER'	=> 'tyemq',
-		'FILES'		=> q[ext/Win32API/File],
+		'FILES'		=> q[ext/Win32API-File],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
