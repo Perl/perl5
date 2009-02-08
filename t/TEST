@@ -151,6 +151,9 @@ unless (@ARGV) {
 			$extension =~ s!/t$!!;
 			# XXX Do I want to warn that I'm skipping these?
 			next if $skip{$extension};
+			$flat_extension = $extension;
+			$flat_extension =~ s!-!/!g;
+			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
 		    }
 		    my $path = File::Spec->catfile($updir, $t);
 		    push @ARGV, $path;
