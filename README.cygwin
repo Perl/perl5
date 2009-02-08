@@ -569,7 +569,7 @@ be kept as clean as possible.
   ext/Compress/Raw/Zlib/Changes ext/Compress/Raw/Zlib/README
   ext/Compress/Zlib/Changes ext/Cwd/Changes ext/DB_File/Changes
   ext/Encode/Changes ext/Sys/Syslog/Changes ext/Time/HiRes/Changes
-  ext/Win32API/File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
+  ext/Win32API-File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
   lib/ExtUtils/Changes lib/ExtUtils/NOTES lib/ExtUtils/PATCHING
   lib/ExtUtils/README lib/Module/Build/Changes lib/Net/Ping/Changes
   lib/Test/Harness/Changes
@@ -651,7 +651,7 @@ be kept as clean as possible.
                         - Find w32api/windows.h
   ext/Win32/Makefile.PL - Use various libraries under Cygwin
   ext/Win32/Win32.xs    - Child dir and child env under Cygwin
-  ext/Win32API/File/File.xs
+  ext/Win32API-File/File.xs
                         - _open_osfhandle not implemented under Cygwin
   ext/Win32CORE/Win32CORE.c
                         - __declspec(dllexport)
@@ -665,7 +665,7 @@ be kept as clean as possible.
                         - Convert paths to Windows paths
   ext/Time/HiRes/HiRes.pm
                         - Comment about various timers not available
-  ext/Win32API/File/File.pm
+  ext/Win32API-File/File.pm
                         - _open_osfhandle not implemented under Cygwin
   ext/Win32CORE/Win32CORE.pm
                         - History of Win32CORE under Cygwin
@@ -729,7 +729,7 @@ be kept as clean as possible.
   ext/Sys/Syslog/t/syslog.t
   ext/Time/HiRes/t/HiRes.t
   ext/Win32/t/Unicode.t
-  ext/Win32API/File/t/file.t
+  ext/Win32API-File/t/file.t
   ext/Win32CORE/t/win32core.t
   lib/AnyDBM_File.t
   lib/Archive/Extract/t/01_Archive-Extract.t
