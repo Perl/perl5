@@ -1860,8 +1860,8 @@ If your system is quite busy and doesn't respond quickly enough,
 these tests might fail.  If possible, try running the tests again
 with the system under a lighter load.  These timing-sensitive
 and load-sensitive tests include F<t/op/alarm.t>,
-F<ext/Time-HiRes/t/HiRes.t>, F<ext/threads/shared/t/waithires.t>,
-F<ext/threads/shared/t/stress.t>, F<lib/Benchmark.t>,
+F<ext/Time-HiRes/t/HiRes.t>, F<ext/threads-shared/t/waithires.t>,
+F<ext/threads-shared/t/stress.t>, F<lib/Benchmark.t>,
 F<lib/Memoize/t/expmod_t.t>, and F<lib/Memoize/t/speed.t>.
 
 You might also experience some failures in F<t/op/stat.t> if you build

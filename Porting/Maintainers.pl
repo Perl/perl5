@@ -1061,7 +1061,7 @@ package Maintainers;
 	'threads::shared' =>
 		{
 		'MAINTAINER'	=> 'jdhedden',
-		'FILES'		=> q[ext/threads/shared],
+		'FILES'		=> q[ext/threads-shared],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'blead',
 		},

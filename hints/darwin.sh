@@ -223,7 +223,7 @@ EOM
 *** due to problems with the 64-bit versions of msgctl, semctl,
 *** and shmctl. You should also expect the following test failures:
 ***
-***    ext/threads/shared/t/wait (threaded builds only)
+***    ext/threads-shared/t/wait (threaded builds only)
 
 EOM
 
