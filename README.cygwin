@@ -721,7 +721,7 @@ be kept as clean as possible.
   ext/DB_File/t/db-hash.t
   ext/DB_File/t/db-recno.t
   ext/DynaLoader/t/DynaLoader.t
-  ext/File/Glob/t/basic.t
+  ext/File-Glob/t/basic.t
   ext/GDBM_File/t/gdbm.t
   ext/POSIX/t/sysconf.t
   ext/POSIX/t/time.t

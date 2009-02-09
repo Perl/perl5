@@ -7,3 +7,4 @@ Makefile
 ppport.h
 !/Devel-PPPort/module2.c
 !/Devel-PPPort/module3.c
+!/File-Glob/bsd_glob.c

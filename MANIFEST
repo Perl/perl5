@@ -659,17 +659,17 @@ ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
 ext/Fcntl/t/fcntl.t	See if Fcntl works
 ext/Fcntl/t/mode.t	See if S_ISREG() and S_ISDIR() work
 ext/Fcntl/t/syslfs.t	See if large files work for sysio
-ext/File/Glob/bsd_glob.c	File::Glob extension run time code
-ext/File/Glob/bsd_glob.h	File::Glob extension header file
-ext/File/Glob/Changes		File::Glob extension changelog
-ext/File/Glob/Glob.pm		File::Glob extension module
-ext/File/Glob/Glob.xs		File::Glob extension external subroutines
-ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
-ext/File/Glob/t/basic.t		See if File::Glob works
-ext/File/Glob/t/case.t		See if File::Glob works
-ext/File/Glob/t/global.t	See if File::Glob works
-ext/File/Glob/TODO		File::Glob extension todo list
-ext/File/Glob/t/taint.t		See if File::Glob works
+ext/File-Glob/bsd_glob.c	File::Glob extension run time code
+ext/File-Glob/bsd_glob.h	File::Glob extension header file
+ext/File-Glob/Changes		File::Glob extension changelog
+ext/File-Glob/Glob.pm		File::Glob extension module
+ext/File-Glob/Glob.xs		File::Glob extension external subroutines
+ext/File-Glob/Makefile.PL	File::Glob extension makefile writer
+ext/File-Glob/t/basic.t		See if File::Glob works
+ext/File-Glob/t/case.t		See if File::Glob works
+ext/File-Glob/t/global.t	See if File::Glob works
+ext/File-Glob/TODO		File::Glob extension todo list
+ext/File-Glob/t/taint.t		See if File::Glob works
 ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
 ext/Filter/Util/Call/Call.xs	Filter::Util::Call extension external subroutines
 ext/Filter/Util/Call/Makefile.PL	Filter::Util::Call extension makefile writer
