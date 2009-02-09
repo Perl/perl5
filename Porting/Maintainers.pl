@@ -191,7 +191,7 @@ package Maintainers;
 	'Compress::Raw::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress/Raw],
+		'FILES'		=> q[ext/Compress-Raw-Zlib],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
