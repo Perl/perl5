@@ -659,7 +659,7 @@ be kept as clean as possible.
 =item Perl Modules/Scripts
 
   ext/B/t/OptreeCheck.pm - Comment about stderr/stdout order under Cygwin
-  ext/Digest/SHA/bin/shasum
+  ext/Digest-SHA/bin/shasum
                         - Use binary mode under Cygwin
   ext/Sys/Syslog/win32/Win32.pm
                         - Convert paths to Windows paths
