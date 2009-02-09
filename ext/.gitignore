@@ -11,3 +11,4 @@ ppport.h
 !/XS-APItest/core.c
 !/XS-APItest/exception.c
 !/XS-APItest/notcore.c
+!/XS-Typemap/stdio.c
