@@ -634,7 +634,7 @@ package Maintainers;
 	'Math::BigInt::FastCalc' =>
 		{
 		'MAINTAINER'	=> 'tels',
-		'FILES'		=> q[ext/Math/BigInt/FastCalc],
+		'FILES'		=> q[ext/Math-BigInt-FastCalc],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
