@@ -5592,7 +5592,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
         (void)time(&when);
 #   endif
 	/* If there are other OS specific ways of hires time than
-	 * gettimeofday() (see ext/Time/HiRes), the easiest way is
+	 * gettimeofday() (see ext/Time-HiRes), the easiest way is
 	 * probably that they would be used to fill in the struct
 	 * timeval. */
 # endif

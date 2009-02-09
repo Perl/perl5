@@ -6,6 +6,6 @@
 #
 
 ext/IPC-SysV
-ext/Time/HiRes
+ext/Time-HiRes
 ext/Win32API-File
 ext/DB_File

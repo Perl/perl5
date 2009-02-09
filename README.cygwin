@@ -568,7 +568,7 @@ be kept as clean as possible.
   Porting/checkAUTHORS.pl
   ext/Compress-Raw-Zlib/Changes ext/Compress-Raw-Zlib/README
   ext/Compress-Zlib/Changes ext/Cwd/Changes ext/DB_File/Changes
-  ext/Encode/Changes ext/Sys/Syslog/Changes ext/Time/HiRes/Changes
+  ext/Encode/Changes ext/Sys/Syslog/Changes ext/Time-HiRes/Changes
   ext/Win32API-File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
   lib/ExtUtils/Changes lib/ExtUtils/NOTES lib/ExtUtils/PATCHING
   lib/ExtUtils/README lib/Module/Build/Changes lib/Net/Ping/Changes
@@ -645,9 +645,9 @@ be kept as clean as possible.
                         - Cygwin has syslog.h
   ext/Sys/Syslog/win32/compile.pl
                         - Convert paths to Windows paths
-  ext/Time/HiRes/HiRes.xs
+  ext/Time-HiRes/HiRes.xs
                         - Various timers not available
-  ext/Time/HiRes/Makefile.PL
+  ext/Time-HiRes/Makefile.PL
                         - Find w32api/windows.h
   ext/Win32/Makefile.PL - Use various libraries under Cygwin
   ext/Win32/Win32.xs    - Child dir and child env under Cygwin
@@ -663,7 +663,7 @@ be kept as clean as possible.
                         - Use binary mode under Cygwin
   ext/Sys/Syslog/win32/Win32.pm
                         - Convert paths to Windows paths
-  ext/Time/HiRes/HiRes.pm
+  ext/Time-HiRes/HiRes.pm
                         - Comment about various timers not available
   ext/Win32API-File/File.pm
                         - _open_osfhandle not implemented under Cygwin
@@ -727,7 +727,7 @@ be kept as clean as possible.
   ext/POSIX/t/time.t
   ext/SDBM_File/t/sdbm.t
   ext/Sys/Syslog/t/syslog.t
-  ext/Time/HiRes/t/HiRes.t
+  ext/Time-HiRes/t/HiRes.t
   ext/Win32/t/Unicode.t
   ext/Win32API-File/t/file.t
   ext/Win32CORE/t/win32core.t
