@@ -1381,22 +1381,22 @@ ext/Time-Piece/t/04mjd.t	Test for Time::Piece
 ext/Time-Piece/t/05overload.t	Test for Time::Piece
 ext/Time-Piece/t/06subclass.t	Test for Time::Piece
 ext/Time-Piece/t/07arith.t	Test for Time::Piece
-ext/Unicode/Normalize/Changes	Unicode::Normalize
-ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
-ext/Unicode/Normalize/mkheader	Unicode::Normalize
-ext/Unicode/Normalize/Normalize.pm	Unicode::Normalize
-ext/Unicode/Normalize/Normalize.xs	Unicode::Normalize
-ext/Unicode/Normalize/README	Unicode::Normalize
-ext/Unicode/Normalize/t/fcdc.t	Unicode::Normalize
-ext/Unicode/Normalize/t/form.t	Unicode::Normalize
-ext/Unicode/Normalize/t/func.t	Unicode::Normalize
-ext/Unicode/Normalize/t/illegal.t	Unicode::Normalize
-ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
-ext/Unicode/Normalize/t/null.t	Unicode::Normalize
-ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
-ext/Unicode/Normalize/t/split.t	Unicode::Normalize
-ext/Unicode/Normalize/t/test.t	Unicode::Normalize
-ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
+ext/Unicode-Normalize/Changes	Unicode::Normalize
+ext/Unicode-Normalize/Makefile.PL	Unicode::Normalize
+ext/Unicode-Normalize/mkheader	Unicode::Normalize
+ext/Unicode-Normalize/Normalize.pm	Unicode::Normalize
+ext/Unicode-Normalize/Normalize.xs	Unicode::Normalize
+ext/Unicode-Normalize/README	Unicode::Normalize
+ext/Unicode-Normalize/t/fcdc.t	Unicode::Normalize
+ext/Unicode-Normalize/t/form.t	Unicode::Normalize
+ext/Unicode-Normalize/t/func.t	Unicode::Normalize
+ext/Unicode-Normalize/t/illegal.t	Unicode::Normalize
+ext/Unicode-Normalize/t/norm.t	Unicode::Normalize
+ext/Unicode-Normalize/t/null.t	Unicode::Normalize
+ext/Unicode-Normalize/t/proto.t	Unicode::Normalize
+ext/Unicode-Normalize/t/split.t	Unicode::Normalize
+ext/Unicode-Normalize/t/test.t	Unicode::Normalize
+ext/Unicode-Normalize/t/tie.t	Unicode::Normalize
 ext/Win32API-File/buffers.h	Win32API::File extension
 ext/Win32API-File/cFile.h	Win32API::File extension
 ext/Win32API-File/cFile.pc	Win32API::File extension
