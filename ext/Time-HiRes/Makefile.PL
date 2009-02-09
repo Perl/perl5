@@ -100,7 +100,7 @@ sub try_compile_and_link {
 
 	if ($ENV{PERL_CORE}) {
 	    my $updir = File::Spec->updir;
-	    $COREincdir = File::Spec->catdir(($updir) x 3);
+	    $COREincdir = File::Spec->catdir(($updir) x 2);
 	} else {
 	    $COREincdir = File::Spec->catdir($Config{'archlibexp'}, 'CORE');
 	}

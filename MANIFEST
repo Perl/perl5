@@ -1352,22 +1352,22 @@ ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/t/thread.t		General ithread tests from thr5005
-ext/Time/HiRes/Changes		Time::HiRes extension
-ext/Time/HiRes/fallback/const-c.inc	Time::HiRes extension
-ext/Time/HiRes/fallback/const-xs.inc	Time::HiRes extension
-ext/Time/HiRes/hints/aix.pl	Hint for Time::HiRes for named architecture
-ext/Time/HiRes/hints/dec_osf.pl		Hint for Time::HiRes for named architecture
-ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
-ext/Time/HiRes/hints/irix.pl	Hint for Time::HiRes for named architecture
-ext/Time/HiRes/hints/linux.pl	Hints for Time::HiRes for named architecture
-ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
-ext/Time/HiRes/hints/solaris.pl	Hints for Time::HiRes for named architecture
-ext/Time/HiRes/hints/svr4.pl	Hints for Time::HiRes for named architecture
-ext/Time/HiRes/HiRes.pm		Time::HiRes extension
-ext/Time/HiRes/HiRes.xs		Time::HiRes extension
-ext/Time/HiRes/Makefile.PL	Time::HiRes extension
-ext/Time/HiRes/t/HiRes.t	Test for Time::HiRes
-ext/Time/HiRes/typemap		Time::HiRes extension
+ext/Time-HiRes/Changes		Time::HiRes extension
+ext/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
+ext/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
+ext/Time-HiRes/hints/aix.pl	Hint for Time::HiRes for named architecture
+ext/Time-HiRes/hints/dec_osf.pl		Hint for Time::HiRes for named architecture
+ext/Time-HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
+ext/Time-HiRes/hints/irix.pl	Hint for Time::HiRes for named architecture
+ext/Time-HiRes/hints/linux.pl	Hints for Time::HiRes for named architecture
+ext/Time-HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
+ext/Time-HiRes/hints/solaris.pl	Hints for Time::HiRes for named architecture
+ext/Time-HiRes/hints/svr4.pl	Hints for Time::HiRes for named architecture
+ext/Time-HiRes/HiRes.pm		Time::HiRes extension
+ext/Time-HiRes/HiRes.xs		Time::HiRes extension
+ext/Time-HiRes/Makefile.PL	Time::HiRes extension
+ext/Time-HiRes/t/HiRes.t	Test for Time::HiRes
+ext/Time-HiRes/typemap		Time::HiRes extension
 ext/Time/Piece/Changes		Time::Piece extension
 ext/Time/Piece/Makefile.PL	Time::Piece extension
 ext/Time/Piece/Piece.pm		Time::Piece extension

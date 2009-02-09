@@ -1085,7 +1085,7 @@ package Maintainers;
 	'Time::HiRes' =>
 		{
 		'MAINTAINER'	=> 'zefram',
-		'FILES'		=> q[ext/Time/HiRes],
+		'FILES'		=> q[ext/Time-HiRes],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
