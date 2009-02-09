@@ -1453,13 +1453,13 @@ ext/XS-APItest/t/svpeek.t	XS::APItest extension
 ext/XS-APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
 ext/XS-APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
-ext/XS/Typemap/Makefile.PL	XS::Typemap extension
-ext/XS/Typemap/README		XS::Typemap extension
-ext/XS/Typemap/stdio.c		XS::Typemap extension
-ext/XS/Typemap/t/Typemap.t	test that typemaps work
-ext/XS/Typemap/typemap		XS::Typemap extension
-ext/XS/Typemap/Typemap.pm	XS::Typemap extension
-ext/XS/Typemap/Typemap.xs	XS::Typemap extension
+ext/XS-Typemap/Makefile.PL	XS::Typemap extension
+ext/XS-Typemap/README		XS::Typemap extension
+ext/XS-Typemap/stdio.c		XS::Typemap extension
+ext/XS-Typemap/t/Typemap.t	test that typemaps work
+ext/XS-Typemap/typemap		XS::Typemap extension
+ext/XS-Typemap/Typemap.pm	XS::Typemap extension
+ext/XS-Typemap/Typemap.xs	XS::Typemap extension
 fakesdio.h			stdio in terms of PerlIO
 fakethr.h			Fake threads header
 form.h				Public declarations for formats
