@@ -566,7 +566,7 @@ be kept as clean as possible.
   pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
   pod/perltoc.pod pod.lst Porting/Glossary Porting/repository.pod
   Porting/checkAUTHORS.pl
-  ext/Compress/Raw/Zlib/Changes ext/Compress/Raw/Zlib/README
+  ext/Compress-Raw-Zlib/Changes ext/Compress-Raw-Zlib/README
   ext/Compress/Zlib/Changes ext/Cwd/Changes ext/DB_File/Changes
   ext/Encode/Changes ext/Sys/Syslog/Changes ext/Time/HiRes/Changes
   ext/Win32API-File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
@@ -631,9 +631,9 @@ be kept as clean as possible.
 
 =item Compiled Module Source
 
-  ext/Compress/Raw/Zlib/Makefile.PL
+  ext/Compress-Raw-Zlib/Makefile.PL
                         - Can't install via CPAN shell under Cygwin
-  ext/Compress/Raw/Zlib/zlib-src/zutil.h
+  ext/Compress-Raw-Zlib/zlib-src/zutil.h
                         - Cygwin is Unix-like and has vsnprintf
   ext/Errno/Errno_pm.PL - Special handling for Win32 Perl under Cygwin
   ext/POSIX/POSIX.xs    - tzname defined externally
