@@ -670,10 +670,10 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
-ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
-ext/Filter/Util/Call/Call.xs	Filter::Util::Call extension external subroutines
-ext/Filter/Util/Call/Makefile.PL	Filter::Util::Call extension makefile writer
-ext/Filter/Util/Call/t/call.t	See if Filter::Util::Call works
+ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
+ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
+ext/Filter-Util-Call/Makefile.PL	Filter::Util::Call extension makefile writer
+ext/Filter-Util-Call/t/call.t	See if Filter::Util::Call works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
