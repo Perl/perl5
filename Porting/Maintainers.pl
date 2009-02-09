@@ -470,7 +470,7 @@ package Maintainers;
 	'Filter::Util::Call' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Filter/Util/Call
+		'FILES'		=> q[ext/Filter-Util-Call
 				     t/lib/filter-util.pl],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
