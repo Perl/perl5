@@ -3,7 +3,7 @@
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ( '../lib', '../ext/Test/Harness/t/lib' );
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
     }
     else {
         unshift @INC, 't/lib';

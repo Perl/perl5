@@ -22,7 +22,7 @@ use Test::Harness qw(execute_tests);
 local $ENV{HARNESS_PERL_SWITCHES};
 
 my $TEST_DIR
-  = $ENV{PERL_CORE} ? '../ext/Test/Harness/t/sample-tests' : 't/sample-tests';
+  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
 
 {
 

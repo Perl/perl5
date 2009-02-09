@@ -23,7 +23,7 @@ use Test::Harness;
     if ( $ENV{PERL_CORE} ) {
         my $updir = File::Spec->updir;
         $sample_tests
-          = File::Spec->catdir( $updir, 'ext', 'Test', 'Harness', 't',
+          = File::Spec->catdir( $updir, 'ext', 'Test-Harness', 't',
             'sample-tests' );
     }
     else {

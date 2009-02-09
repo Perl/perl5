@@ -3,7 +3,7 @@
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ( '../lib', '../ext/Test/Harness/t/lib' );
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
     }
     else {
         unshift @INC, 't/lib';
@@ -19,7 +19,7 @@ use File::Spec::Functions qw( catfile updir );
 use_ok('TAP::Parser::SubclassTest');
 
 # TODO: foreach my $source ( ... )
-my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test', 'Harness' ) : ();
+my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test-Harness' ) : ();
 
 {    # perl source
     %INIT = %CUSTOM = ();
