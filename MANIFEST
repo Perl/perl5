@@ -908,16 +908,16 @@ ext/Math/BigInt/FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 ext/Math/BigInt/FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
-ext/MIME/Base64/Base64.pm	MIME::Base64 extension
-ext/MIME/Base64/Base64.xs	MIME::Base64 extension
-ext/MIME/Base64/Changes		MIME::Base64 extension
-ext/MIME/Base64/Makefile.PL	MIME::Base64 extension
-ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
-ext/MIME/Base64/README		README for MIME::Base64
-ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
-ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
-ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
-ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
+ext/MIME-Base64/Base64.pm	MIME::Base64 extension
+ext/MIME-Base64/Base64.xs	MIME::Base64 extension
+ext/MIME-Base64/Changes		MIME::Base64 extension
+ext/MIME-Base64/Makefile.PL	MIME::Base64 extension
+ext/MIME-Base64/QuotedPrint.pm	MIME::Base64 extension
+ext/MIME-Base64/README		README for MIME::Base64
+ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
+ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
+ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
+ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
 ext/Module/Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module/Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module/Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
