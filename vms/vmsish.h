@@ -133,6 +133,7 @@
 #define vms_image_init	Perl_vms_image_init
 #define my_tmpfile		Perl_my_tmpfile
 #define vmstrnenv           	Perl_vmstrnenv            
+#define my_fgetname(a, b)	Perl_my_fgetname(a, b)
 #if !defined(PERL_IMPLICIT_CONTEXT)
 #define my_getenv_len		Perl_my_getenv_len
 #define vmssetenv		Perl_vmssetenv
@@ -520,6 +521,7 @@ struct interp_intern {
 #  define fwrite my_fwrite     /* for PerlSIO_fwrite */
 #  define fdopen my_fdopen
 #  define fclose my_fclose
+#  define fgetname(a, b) my_fgetname(a, b)
 #ifdef HAS_SYMLINK
 #  define symlink my_symlink
 #endif
@@ -973,6 +975,7 @@ bool	Perl_vms_do_exec (pTHX_ const char *);
 FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
 int     my_fwrite (const void *, size_t, size_t, FILE *);
+char *  Perl_my_fgetname (FILE *fp, char *buf);
 #ifdef HAS_SYMLINK
 int     Perl_my_symlink(pTHX_ const char *path1, const char *path2);
 #endif
