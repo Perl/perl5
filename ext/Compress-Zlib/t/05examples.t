@@ -37,7 +37,7 @@ my $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
 $Perl = qq["$Perl"] if $^O eq 'MSWin32' ;
  
 $Perl = "$Perl $Inc -w" ;
-my $examples = $ENV{PERL_CORE} ? "../ext/Compress/Zlib/examples" 
+my $examples = $ENV{PERL_CORE} ? "../ext/Compress-Zlib/examples" 
                                : "./examples";
 
 my $hello1 = <<EOM ;

@@ -207,7 +207,7 @@ package Maintainers;
 	'Compress::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress/Zlib],
+		'FILES'		=> q[ext/Compress-Zlib],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
