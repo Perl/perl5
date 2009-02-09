@@ -279,7 +279,7 @@ package Maintainers;
 	'Data::Dumper' =>
 		{
 		'MAINTAINER'	=> 'ilyam', # Not gsar.
-		'FILES'		=> q[ext/Data/Dumper],
+		'FILES'		=> q[ext/Data-Dumper],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
