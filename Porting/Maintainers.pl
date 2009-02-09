@@ -561,7 +561,7 @@ package Maintainers;
 	'Scalar-List-Utils' =>
 		{
 		'MAINTAINER'	=> 'gbarr',
-		'FILES'		=> q[ext/List/Util],
+		'FILES'		=> q[ext/List-Util],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
