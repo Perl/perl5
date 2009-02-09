@@ -295,7 +295,7 @@ package Maintainers;
 	'Devel::PPPort' =>
 		{
 		'MAINTAINER'	=> 'mhx',
-		'FILES'		=> q[ext/Devel/PPPort],
+		'FILES'		=> q[ext/Devel-PPPort],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
