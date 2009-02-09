@@ -1101,7 +1101,7 @@ package Maintainers;
         'Time::Piece' =>
                 {
                 'MAINTAINER'    => 'msergeant',
-                'FILES'         => q[ext/Time/Piece],
+                'FILES'         => q[ext/Time-Piece],
                 'CPAN'          => 1,
                 'UPSTREAM'      => undef,
                 },
