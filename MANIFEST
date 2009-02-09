@@ -198,12 +198,12 @@ ext/DB_File/t/db-hash.t		See if DB_File works
 ext/DB_File/t/db-recno.t	See if DB_File works
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
-ext/Devel/DProf/Changes		Perl code profiler changelog
-ext/Devel/DProf/DProf.pm	Perl code profiler
-ext/Devel/DProf/DProf.xs	Perl code profiler
-ext/Devel/DProf/Makefile.PL	Perl code profiler makefile writer
-ext/Devel/DProf/t/DProf.t	Perl code profiler
-ext/Devel/DProf/Todo		Perl code profiler todo list
+ext/Devel-DProf/Changes		Perl code profiler changelog
+ext/Devel-DProf/DProf.pm	Perl code profiler
+ext/Devel-DProf/DProf.xs	Perl code profiler
+ext/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
+ext/Devel-DProf/t/DProf.t	Perl code profiler
+ext/Devel-DProf/Todo		Perl code profiler todo list
 ext/Devel/Peek/Changes		Data debugging tool, changelog
 ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
