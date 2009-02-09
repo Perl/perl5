@@ -68,7 +68,7 @@ for (split /^/, $EXPECT) {
 	     next;
 	 }
          use File::Spec;
-	 my @path = qw(ext Digest MD5);
+	 my @path = qw(ext Digest-MD5);
 	 my $path = File::Spec->updir;
 	 while (@path) {
 	   $path = File::Spec->catdir($path, shift @path);

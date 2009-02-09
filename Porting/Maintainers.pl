@@ -311,7 +311,7 @@ package Maintainers;
 	'Digest::MD5' =>
 		{
 		'MAINTAINER'	=> 'gaas',
-		'FILES'		=> q[ext/Digest/MD5],
+		'FILES'		=> q[ext/Digest-MD5],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
