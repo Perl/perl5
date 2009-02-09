@@ -21642,12 +21642,6 @@ cd "$rsrc/ext"
 set X
 shift
 eval $find_extensions
-# Special case:  Add in modules that nest beyond the first level.
-# Currently threads/shared and Hash/Util/FieldHash, since they are
-# not picked up by the recursive find above (and adding in general
-# recursive finding breaks SDBM_File/sdbm).
-# A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
-known_extensions="$known_extensions threads/shared Hash/Util/FieldHash"
 set X $known_extensions
 shift
 known_extensions="$*"

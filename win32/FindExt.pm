@@ -91,19 +91,6 @@ sub find_ext
         }
         $ext{$this_ext} = 'known' if $ext{$this_ext} && $item =~ $no;
     }
-
-# Special case:  Add in modules that nest beyond the first level.
-# Currently threads/shared and Hash/Util/FieldHash, since they are
-# not picked up by the recursive find above (and adding in general
-# recursive finding breaks SDBM_File/sdbm).
-# A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
-
-    if (!$prefix && -d "${ext_dir}threads/shared") {
-        $ext{"threads/shared"} = 'dynamic';
-    }
-    if (!$prefix && -d "${ext_dir}Hash/Util/FieldHash") {
-        $ext{"Hash/Util/FieldHash"} = 'dynamic';
-    }
 }
 
 1;
