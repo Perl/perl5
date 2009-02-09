@@ -9397,7 +9397,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	/* Input from a pipe, reopen it in binary mode to disable	*/
 	/* carriage control processing.	 				*/
 
-	fgetname(stdin, mbxname);
+	fgetname(stdin, mbxname, 1);
 	mbxnam.dsc$a_pointer = mbxname;
 	mbxnam.dsc$w_length = strlen(mbxnam.dsc$a_pointer);	
 	lib$getdvi(&dvi_item, 0, &mbxnam, &bufsize, 0, 0);
@@ -11325,6 +11325,34 @@ Perl_my_flush(pTHX_ FILE *fp)
     if (res == 0 && vaxc$errno == RMS$_EOF) clearerr(fp);
 
     return res;
+}
+/*}}}*/
+
+/* fgetname() is not returning the correct file specifications when
+ * decc_filename_unix_report mode is active.  So we have to have it
+ * aways return filenames in VMS mode and convert it ourselves.
+ */
+
+/*{{{ char * my_fgetname(FILE *fp, buf)*/
+char *
+Perl_my_fgetname(FILE *fp, char * buf) {
+    char * retname;
+    char * vms_name;
+
+    retname = fgetname(fp, buf, 1);
+
+    /* If we are in VMS mode, then we are done */
+    if (!decc_filename_unix_report || (retname == NULL)) {
+       return retname;
+    }
+
+    /* Convert this to Unix format */
+    vms_name = PerlMem_malloc(VMS_MAXRSS + 1);
+    strcpy(vms_name, retname);
+    retname = int_tounixspec(vms_name, buf, NULL);
+    PerlMem_free(vms_name);
+
+    return retname;
 }
 /*}}}*/
 
