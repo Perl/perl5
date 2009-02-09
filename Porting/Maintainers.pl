@@ -667,7 +667,7 @@ package Maintainers;
 	'MIME::Base64' =>
 		{
 		'MAINTAINER'	=> 'gaas',
-		'FILES'		=> q[ext/MIME/Base64],
+		'FILES'		=> q[ext/MIME-Base64],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
