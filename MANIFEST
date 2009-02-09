@@ -697,12 +697,12 @@ ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash-Util/Makefile.PL	Makefile for Hash::Util
 ext/Hash-Util/t/Util.t		See if Hash::Util works
 ext/Hash-Util/Util.xs		XS bits of Hash::Util
-ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
-ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
-ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
-ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
-ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
-ext/I18N/Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
+ext/I18N-Langinfo/fallback/const-c.inc	I18N::Langinfo
+ext/I18N-Langinfo/fallback/const-xs.inc	I18N::Langinfo
+ext/I18N-Langinfo/Langinfo.pm	I18N::Langinfo
+ext/I18N-Langinfo/Langinfo.xs	I18N::Langinfo
+ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
+ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
 ext/IO/ChangeLog		IO perl module change log
 ext/IO_Compress_Base/Changes	IO::Compress::Base
 ext/IO_Compress_Base/lib/File/GlobMapper.pm	IO::Compress::Base
