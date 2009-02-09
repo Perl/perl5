@@ -3,7 +3,7 @@
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ( '../lib', '../ext/Test/Harness/t/lib' );
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
     }
     else {
         unshift @INC, 't/lib';
@@ -23,7 +23,7 @@ use_ok('MyGrammar');
 use_ok('MyIteratorFactory');
 use_ok('MyResultFactory');
 
-my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test', 'Harness' ) : ();
+my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test-Harness' ) : ();
 my $source = catfile( @t_path, 't', 'source_tests', 'source' );
 my %customize = (
     source_class           => 'MySource',

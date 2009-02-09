@@ -1009,7 +1009,7 @@ package Maintainers;
 	'Test::Harness' =>
 		{
 		'MAINTAINER'	=> 'andya',
-		'FILES'		=> q[ext/Test/Harness],
+		'FILES'		=> q[ext/Test-Harness],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},

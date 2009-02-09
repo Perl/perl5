@@ -3,7 +3,7 @@
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ( '../lib', '../ext/Test/Harness/t/lib' );
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
     }
     else {
         unshift @INC, 't/lib';
@@ -23,7 +23,7 @@ use TAP::Parser::Source::Perl;
 my $parser = EmptyParser->new;
 my $test   = File::Spec->catfile(
     (   $ENV{PERL_CORE}
-        ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
         : ()
     ),
     't',

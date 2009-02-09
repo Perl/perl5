@@ -31,7 +31,7 @@ my $IsWin32 = $^O eq 'MSWin32';
 my $SAMPLE_TESTS = File::Spec->catdir(
     File::Spec->curdir,
     (   $ENV{PERL_CORE}
-        ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
         : ()
     ),
     't',

@@ -3,7 +3,7 @@
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ( '../lib', '../ext/Test/Harness/t/lib' );
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
     }
     else {
         use lib 't/lib';
@@ -35,7 +35,7 @@ sub _all_ok {
     my ( $tot, $failed ) = Test::Harness::execute_tests(
         tests => [
             $ENV{PERL_CORE}
-            ? '../ext/Test/Harness/t/sample-tests/inc_taint'
+            ? '../ext/Test-Harness/t/sample-tests/inc_taint'
             : 't/sample-tests/inc_taint'
         ]
     );

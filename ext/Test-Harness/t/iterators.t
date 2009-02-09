@@ -43,7 +43,7 @@ my @schedule = (
                 $^X,
                 File::Spec->catfile(
                     (   $ENV{PERL_CORE}
-                        ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+                        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
                         : ()
                     ),
                     't',
