@@ -1118,7 +1118,7 @@ package Maintainers;
 	'Unicode::Normalize' =>
 		{
 		'MAINTAINER'	=> 'sadahiro',
-		'FILES'		=> q[ext/Unicode/Normalize],
+		'FILES'		=> q[ext/Unicode-Normalize],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
