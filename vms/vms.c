@@ -1818,6 +1818,11 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
 /*  vmssetuserlnm
  *  sets a user-mode logical in the process logical name table
  *  used for redirection of sys$error
+ *
+ *  Fix-me: The pTHX is not needed for this routine, however doio.c
+ *          is calling it with one instead of using a macro.
+ *          A macro needs to be added to vmsish.h and doio.c updated to use it.
+ *
  */
 void
 Perl_vmssetuserlnm(pTHX_ const char *name, const char *eqv)
@@ -2247,13 +2252,19 @@ Perl_my_chdir(pTHX_ const char *dir)
    * null file name/type.  However, it's commonplace under Unix,
    * so we'll allow it for a gain in portability.
    *
-   * - Preview- '/' will be valid soon on VMS
+   *  '/' is valid when SYS$POSIX_ROOT or POSIX compliant pathnames are active.
    */
   if ((dirlen > 1) && (dir1[dirlen-1] == '/')) {
-    char *newdir = savepvn(dir1,dirlen-1);
-    int ret = chdir(newdir);
-    Safefree(newdir);
-    return ret;
+      char *newdir;
+      int ret;
+      newdir = PerlMem_malloc(dirlen);
+      if (newdir ==NULL)
+          _ckvmssts_noperl(SS$_INSFMEM);
+      strncpy(newdir, dir1, dirlen-1);
+      newdir[dirlen-1] = '\0';
+      ret = chdir(newdir);
+      PerlMem_free(newdir);
+      return ret;
   }
   else return chdir(dir1);
 }  /* end of my_chdir */
@@ -2264,6 +2275,9 @@ Perl_my_chdir(pTHX_ const char *dir)
 int
 Perl_my_chmod(pTHX_ const char *file_spec, mode_t mode)
 {
+  Stat_t st;
+  int ret = -1;
+  char * changefile;
   STRLEN speclen = strlen(file_spec);
 
   /* zero length string sometimes gives ACCVIO */
@@ -2276,41 +2290,26 @@ Perl_my_chmod(pTHX_ const char *file_spec, mode_t mode)
    * Tests are showing that chmod() on VMS 8.3 is only accepting directories
    * in VMS file.dir notation.
    */
-  if ((speclen > 1) && (file_spec[speclen-1] == '/')) {
-    char *vms_src, *vms_dir, *rslt;
-    int ret = -1;
-    errno = EIO;
+  changefile = (char *) file_spec; /* cast ok */
+  ret = flex_lstat(file_spec, &st);
+  if (ret != 0) {
 
-    /* First convert this to a VMS format specification */
-    vms_src = PerlMem_malloc(VMS_MAXRSS);
-    if (vms_src == NULL)
-	_ckvmssts_noperl(SS$_INSFMEM);
+        /* Due to a historical feature, flex_stat/lstat can not see some */
+        /* Unix format file names that the rest of the CRTL can see when */
+        /* ODS-2 file specifications are in use. */
+        /* Fixing that feature will cause some perl tests to fail */
+        /* [.lib.ExtUtils.t]Manifest.t is one of them */
+        st.st_mode = 0;
 
-    rslt = do_tovmsspec(file_spec, vms_src, 0, NULL);
-    if (rslt == NULL) {
-	/* If we fail, then not a file specification */
-	PerlMem_free(vms_src);
-	errno = EIO;
-	return -1;
-    }
-
-    /* Now make it a directory spec so chmod is happy */
-    vms_dir = PerlMem_malloc(VMS_MAXRSS + 1);
-    if (vms_dir == NULL)
-	_ckvmssts_noperl(SS$_INSFMEM);
-    rslt = do_fileify_dirspec(vms_src, vms_dir, 0, NULL);
-    PerlMem_free(vms_src);
-
-    /* Now do it */
-    if (rslt != NULL) {
-	ret = chmod(vms_dir, mode);
-    } else {
-	errno = EIO;
-    }
-    PerlMem_free(vms_dir);
-    return ret;
+  } else {
+      /* It may be possible to get here with nothing in st_devname */
+      /* chmod still may work though */
+      if (st.st_devnam[0] != 0) {
+          changefile = st.st_devnam;
+      }
   }
-  else return chmod(file_spec, mode);
+  ret = chmod(changefile, mode);
+  return ret;
 }  /* end of my_chmod */
 /*}}}*/
 
@@ -4290,6 +4289,12 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     if (*in_mode == 'r') {
         PerlIO * xterm_fd;
 
+#if defined(PERL_IMPLICIT_CONTEXT)
+        /* Can not fork an xterm with a NULL context */
+        /* This probably could never happen */
+        xterm_fd = NULL;
+        if (aTHX != NULL)
+#endif
 	xterm_fd = create_forked_xterm(aTHX_ cmd, in_mode);
 	if (xterm_fd != NULL)
 	    return xterm_fd;
@@ -5064,12 +5069,6 @@ static int rms_erase(const char * vmsname)
 
   rms_set_fna(myfab, mynam, (char *)vmsname, strlen(vmsname)); /* cast ok */
   rms_bind_fab_nam(myfab, mynam);
-
-  /* Are we removing all versions? */
-  if (vms_unlink_all_versions == 1) {
-    const char * defspec = ";*";
-    rms_set_dna(myfab, mynam, (char *)defspec, strlen(defspec)); /* cast ok */
-  }
 
 #ifdef NAML$M_OPEN_SPECIAL
   rms_set_nam_nop(mynam, NAML$M_OPEN_SPECIAL);
@@ -14036,7 +14035,7 @@ int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
       /* As symbolic links can hold things other than files, we will only do */
       /* the conversion in in ODS-2 mode */
 
-      Newx(utarget, VMS_MAXRSS + 1, char);
+      utarget = PerlMem_malloc(VMS_MAXRSS + 1);
       if (int_tounixspec(contents, utarget, NULL) == NULL) {
 
           /* This should not fail, as an untranslatable filename */
@@ -14044,7 +14043,7 @@ int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
           utarget = (char *)contents;
       }
       sts = symlink(utarget, link_name);
-      Safefree(utarget);
+      PerlMem_free(utarget);
       return sts;
   }
 
