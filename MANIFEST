@@ -1299,12 +1299,12 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
-ext/Text/Soundex/Changes	Changelog for Text::Soundex
-ext/Text/Soundex/Makefile.PL	Text::Soundex extension makefile writer
-ext/Text/Soundex/README		README for Text::Soundex
-ext/Text/Soundex/Soundex.pm	Text::Soundex extension Perl module
-ext/Text/Soundex/Soundex.xs	Text::Soundex extension external subroutines
-ext/Text/Soundex/t/Soundex.t	test for Text::Soundex
+ext/Text-Soundex/Changes	Changelog for Text::Soundex
+ext/Text-Soundex/Makefile.PL	Text::Soundex extension makefile writer
+ext/Text-Soundex/README		README for Text::Soundex
+ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
+ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
+ext/Text-Soundex/t/Soundex.t	test for Text::Soundex
 ext/threads/hints/hpux.pl	Hint file for HPUX
 ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads

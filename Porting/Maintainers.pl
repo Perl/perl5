@@ -977,7 +977,7 @@ package Maintainers;
 	'Text::Soundex' =>
 		{
 		'MAINTAINER'	=> 'markm',
-		'FILES'		=> q[ext/Text/Soundex],
+		'FILES'		=> q[ext/Text-Soundex],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
