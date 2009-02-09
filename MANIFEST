@@ -962,13 +962,13 @@ ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/Safe.pm		Safe extension Perl module
 ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
-ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
-ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
-ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
-ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
-ext/PerlIO/encoding/t/encoding.t	See if PerlIO encoding conversion works
-ext/PerlIO/encoding/t/fallback.t	See if PerlIO fallbacks work
-ext/PerlIO/encoding/t/nolooping.t	Tests for PerlIO::encoding
+ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
+ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
+ext/PerlIO-encoding/Makefile.PL	PerlIO::encoding makefile writer
+ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
+ext/PerlIO-encoding/t/encoding.t	See if PerlIO encoding conversion works
+ext/PerlIO-encoding/t/fallback.t	See if PerlIO fallbacks work
+ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
 ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/scalar/scalar.pm	PerlIO layer for scalars
 ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
