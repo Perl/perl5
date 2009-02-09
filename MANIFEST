@@ -970,11 +970,11 @@ ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO-encoding/t/encoding.t	See if PerlIO encoding conversion works
 ext/PerlIO-encoding/t/fallback.t	See if PerlIO fallbacks work
 ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
-ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
-ext/PerlIO/scalar/scalar.pm	PerlIO layer for scalars
-ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
-ext/PerlIO/scalar/t/scalar.t	See if PerlIO::scalar works
-ext/PerlIO/scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
+ext/PerlIO-scalar/Makefile.PL	PerlIO layer for scalars
+ext/PerlIO-scalar/scalar.pm	PerlIO layer for scalars
+ext/PerlIO-scalar/scalar.xs	PerlIO layer for scalars
+ext/PerlIO-scalar/t/scalar.t	See if PerlIO::scalar works
+ext/PerlIO-scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
 ext/PerlIO/via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO/via/Makefile.PL	PerlIO layer for layers in perl
 ext/PerlIO/via/t/via.t		See if PerlIO::via works
