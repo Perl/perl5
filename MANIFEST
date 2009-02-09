@@ -204,11 +204,11 @@ ext/Devel-DProf/DProf.xs	Perl code profiler
 ext/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
 ext/Devel-DProf/t/DProf.t	Perl code profiler
 ext/Devel-DProf/Todo		Perl code profiler todo list
-ext/Devel/Peek/Changes		Data debugging tool, changelog
-ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
-ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
-ext/Devel/Peek/Peek.xs		Data debugging tool, externals
-ext/Devel/Peek/t/Peek.t		See if Devel::Peek works
+ext/Devel-Peek/Changes		Data debugging tool, changelog
+ext/Devel-Peek/Makefile.PL	Data debugging tool, makefile writer
+ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
+ext/Devel-Peek/Peek.xs		Data debugging tool, externals
+ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
 ext/Devel-PPPort/apicheck_c.PL	Devel::PPPort apicheck generator
 ext/Devel-PPPort/Changes	Devel::PPPort changes
 ext/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
