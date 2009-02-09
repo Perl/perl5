@@ -680,7 +680,7 @@ ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/typemap		GDBM extension interface types
-ext/Hash/Util/Changes		Change history of Hash::Util
+ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util-FieldHash/Changes			Changes for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/FieldHash.xs		XS portion
 ext/Hash-Util-FieldHash/lib/Hash/Util/FieldHash.pm	Perl portion and documentation
@@ -693,10 +693,10 @@ ext/Hash-Util-FieldHash/t/05_perlhook.t		Test script
 ext/Hash-Util-FieldHash/t/10_hash.t		Adapted from t/op/hash.t
 ext/Hash-Util-FieldHash/t/11_hashassign.t	Adapted from t/op/hashassign.t
 ext/Hash-Util-FieldHash/t/12_hashwarn.t		Adapted from t/op/hashwarn.t
-ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
-ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
-ext/Hash/Util/t/Util.t		See if Hash::Util works
-ext/Hash/Util/Util.xs		XS bits of Hash::Util
+ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
+ext/Hash-Util/Makefile.PL	Makefile for Hash::Util
+ext/Hash-Util/t/Util.t		See if Hash::Util works
+ext/Hash-Util/Util.xs		XS bits of Hash::Util
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
