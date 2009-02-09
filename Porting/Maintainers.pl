@@ -319,7 +319,7 @@ package Maintainers;
         'Digest::SHA' =>
                 {
                 'MAINTAINER'    => 'mshelor',
-                'FILES'         => q[ext/Digest/SHA],
+                'FILES'         => q[ext/Digest-SHA],
                 'CPAN'          => 1,
                 'UPSTREAM'	=> undef,
                 },
