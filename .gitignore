@@ -74,7 +74,7 @@ lib/Win32CORE.pm
 lib/CORE/
 
 # test byproducts
-ext/Test/Harness/t/ext/
+ext/Test-Harness/t/ext/
 lib/App/
 lib/Archive/Tar/t/src/long/foo.tbz
 lib/Archive/Tar/t/src/short/foo.tbz
