@@ -349,7 +349,7 @@ past where $2 ends, and so on.  You can use C<$#+> to determine
 how many subgroups were in the last successful match.  See the
 examples given for the C<@-> variable.
 
-=item %LAST_PARENT_MATCH
+=item %LAST_PAREN_MATCH
 
 =item %+
 X<%+>
