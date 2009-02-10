@@ -981,7 +981,7 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
 	$(MAKE) lib/re.pm
 
-$(CONFIGPM_FROM_CONFIG_SH) $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+$(CONFIGPM_FROM_CONFIG_SH) $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary lib/Config_git.pl
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib configpm
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
