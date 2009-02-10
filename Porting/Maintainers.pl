@@ -904,7 +904,7 @@ package Maintainers;
 	'Safe' =>
 		{
 		'MAINTAINER'	=> 'rgarcia',
-		'FILES'		=> q[ext/Safe ext/Opcode/Safe.pm],
+		'FILES'		=> q[ext/Safe],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> "blead",
 		},
