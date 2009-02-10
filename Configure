@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Jan 19 16:46:57 CET 2009 [metaconfig 3.5 PL0]
+# Generated on Tue Feb 10 15:55:56 CET 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21612,7 +21612,8 @@ nonxs_extensions=''
 : some additional extensions into the source tree and expect them
 : to be built.
 
-: Function to find available extensions, ignoring DynaLoader
+: Function to recursively find available extensions, ignoring DynaLoader
+: NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 find_extensions='
     for xxx in *; do
 	case "$xxx" in
@@ -21620,10 +21621,27 @@ find_extensions='
 	    *)
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
-	    if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
-		known_extensions="$known_extensions $this_ext";
-	    elif $test -d $xxx; then
-		nonxs_extensions="$nonxs_extensions $this_ext";
+	    if $test -d File-Glob; then
+		: All ext/ flattened
+		if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $test -d $xxx; then
+		    nonxs_extensions="$nonxs_extensions $this_ext";
+		fi
+	    else
+		if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
+		    known_extensions="$known_extensions $1$this_ext";
+		elif $test -f $xxx/Makefile.PL; then
+		    nonxs_extensions="$nonxs_extensions $1$this_ext";
+		else
+		    if $test -d $xxx -a $# -lt 10; then
+			set $1$xxx/ $*;
+			cd "$xxx";
+			eval $find_extensions;
+			cd ..;
+			shift;
+		    fi;
+		fi;
 	    fi
 	    ;;
 	esac;
@@ -21633,6 +21651,16 @@ cd "$rsrc/ext"
 set X
 shift
 eval $find_extensions
+if $test -d File-Glob; then
+    : All ext/ flattened
+else
+    # Special case:  Add in modules that nest beyond the first level.
+    # Currently threads/shared and Hash/Util/FieldHash, since they are
+    # not picked up by the recursive find above (and adding in general
+    # recursive finding breaks SDBM_File/sdbm).
+    # A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
+    known_extensions="$known_extensions threads/shared Hash/Util/FieldHash"
+fi
 set X $known_extensions
 shift
 known_extensions="$*"
