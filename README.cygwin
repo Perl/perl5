@@ -564,11 +564,11 @@ be kept as clean as possible.
   pod/perl561delta.pod pod/perl570delta.pod pod/perl572delta.pod
   pod/perl573delta.pod pod/perl58delta.pod pod/perl581delta.pod
   pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
-  pod/perltoc.pod pod.lst Porting/Glossary Porting/repository.pod
+  pod/perltoc.pod pod.lst Porting/Glossary pod/perlrepository.pod
   Porting/checkAUTHORS.pl
   ext/Compress-Raw-Zlib/Changes ext/Compress-Raw-Zlib/README
   ext/Compress-Zlib/Changes ext/Cwd/Changes ext/DB_File/Changes
-  ext/Encode/Changes ext/Sys/Syslog/Changes ext/Time-HiRes/Changes
+  ext/Encode/Changes ext/Sys-Syslog/Changes ext/Time-HiRes/Changes
   ext/Win32API-File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
   lib/ExtUtils/Changes lib/ExtUtils/NOTES lib/ExtUtils/PATCHING
   lib/ExtUtils/README lib/Module/Build/Changes lib/Net/Ping/Changes
