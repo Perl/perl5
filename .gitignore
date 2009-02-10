@@ -89,3 +89,7 @@ t/perl
 # make_ext.pl cleanup scripts
 realclean.sh
 veryclean.sh
+
+# metaconfig needs these two symlinks
+.package
+U
