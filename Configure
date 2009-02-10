@@ -21612,8 +21612,7 @@ nonxs_extensions=''
 : some additional extensions into the source tree and expect them
 : to be built.
 
-: Function to recursively find available extensions, ignoring DynaLoader
-: NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
+: Function to find available extensions, ignoring DynaLoader
 find_extensions='
     for xxx in *; do
 	case "$xxx" in
@@ -21622,17 +21621,9 @@ find_extensions='
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
 	    if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
-		known_extensions="$known_extensions $1$this_ext";
-	    elif $test -f $xxx/Makefile.PL; then
-		nonxs_extensions="$nonxs_extensions $1$this_ext";
-	    else
-		if $test -d $xxx -a $# -lt 10; then
-		    set $1$xxx/ $*;
-		    cd "$xxx";
-		    eval $find_extensions;
-		    cd ..;
-		    shift;
-		fi;
+		known_extensions="$known_extensions $this_ext";
+	    elif $test -d $xxx; then
+		nonxs_extensions="$nonxs_extensions $this_ext";
 	    fi
 	    ;;
 	esac;

@@ -32,7 +32,7 @@ sub set_static_extensions {
 sub scan_ext
 {
     my $dir  = shift;
-    find_ext("$dir/", '');
+    find_ext("$dir/");
     extensions();
 }
 
@@ -63,31 +63,25 @@ sub is_static
  return $ext{$_[0]} eq 'static'
 }
 
-# Function to recursively find available extensions, ignoring DynaLoader
-# NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
+# Function to find available extensions, ignoring DynaLoader
 sub find_ext
 {
     my $ext_dir = shift;
-    my $prefix = shift;
-    opendir my $dh, "$ext_dir$prefix";
+    opendir my $dh, "$ext_dir";
     while (defined (my $item = readdir $dh)) {
         next if $item =~ /^\.\.?$/;
         next if $item eq "DynaLoader";
-        my $this_ext = my $this_ext_dir = "$prefix$item";
+        next unless -d "$ext_dir$item";
+        my $this_ext = $item;
         my $leaf = $item;
 
         $this_ext =~ s!-!/!g;
         $leaf =~ s/.*-//;
 
-        if (-f "$ext_dir$this_ext_dir/$leaf.xs" || -f "$ext_dir$this_ext_dir/$leaf.c" ) {
+        if (-f "$ext_dir$item/$leaf.xs" || -f "$ext_dir$item/$leaf.c" ) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
-        } elsif (-f "$ext_dir$this_ext_dir/Makefile.PL") {
-            $ext{$this_ext} = 'nonxs';
         } else {
-            # It's not actually an extension. So recurse into it.
-            if (-d "$ext_dir$this_ext_dir" && $prefix =~ tr#/## < 10) {
-                find_ext($ext_dir, "$this_ext_dir/");
-            }
+            $ext{$this_ext} = 'nonxs';
         }
         $ext{$this_ext} = 'known' if $ext{$this_ext} && $item =~ $no;
     }
