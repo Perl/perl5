@@ -43,6 +43,8 @@ print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 
 print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
+@$missentry
+    = grep {$_ !~ m!^\.git/! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
 warn "Can't make a release with MANIFEST files missing.\n" if @$missfile;
 warn "Can't make a release with files not listed in MANIFEST.\n" if @$missentry;
 if ("@$missentry" =~ m/\.orig\b/) {
@@ -95,8 +97,6 @@ my @exe = qw(
     Porting/findrfuncs
     Porting/genlog
     Porting/makerel
-    Porting/p4genpatch
-    Porting/patchls
     Porting/*.pl
     mpeix/nm
     mpeix/relink
