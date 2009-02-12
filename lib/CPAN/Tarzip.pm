@@ -7,7 +7,7 @@ use File::Basename qw(basename);
 $VERSION = "5.5";
 # module is internal to CPAN.pm
 
-@ISA = qw(CPAN::Debug);
+@ISA = qw(CPAN::Debug); ## no critic
 $BUGHUNTING ||= 0; # released code must have turned off
 
 # it's ok if file doesn't exist, it just matters if it is .gz or .bz2
