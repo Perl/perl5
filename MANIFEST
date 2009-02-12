@@ -82,7 +82,7 @@ ext/Attribute-Handlers/demo/demo_range.pl	Attribute::Handlers demo
 ext/Attribute-Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 ext/Attribute-Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 ext/Attribute-Handlers/demo/MyClass.pm		Attribute::Handlers demo
-ext/Attribute-Handlers/lib//Attribute/Handlers.pm	Attribute::Handlers
+ext/Attribute-Handlers/lib/Attribute/Handlers.pm	Attribute::Handlers
 ext/Attribute-Handlers/README		Attribute::Handlers
 ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
 ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
