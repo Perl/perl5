@@ -1929,29 +1929,30 @@ lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CORE.pod			document the CORE namespace
 lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
-lib/CPAN/Author.pm
+lib/CPAN/Author.pm		helper package for CPAN.pm
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
-lib/CPAN/Bundle.pm
-lib/CPAN/CacheMgr.pm
-lib/CPAN/Complete.pm
+lib/CPAN/Bundle.pm		helper package for CPAN.pm
+lib/CPAN/CacheMgr.pm		helper package for CPAN.pm
+lib/CPAN/Complete.pm		helper package for CPAN.pm
 lib/CPAN/Debug.pm		helper package for CPAN.pm
 lib/CPAN/DeferedCode.pm		helper package for CPAN.pm
-lib/CPAN/DeferredCode.pm
-lib/CPAN/Distribution.pm
+lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
+lib/CPAN/Distribution.pm	helper package for CPAN.pm
 lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
-lib/CPAN/Distrostatus.pm
-lib/CPAN/Exception/
+lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
+lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
+lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
-lib/CPAN/FTP/
-lib/CPAN/FTP.pm
+lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
+lib/CPAN/FTP.pm			helper package for CPAN.pm
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
-lib/CPAN/Index.pm
-lib/CPAN/InfoObj.pm
+lib/CPAN/Index.pm		helper package for CPAN.pm
+lib/CPAN/InfoObj.pm		helper package for CPAN.pm
 lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files
 lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
 lib/CPAN/Kwalify.pm		helper package for CPAN.pm
-lib/CPAN/LWP/
-lib/CPAN/Module.pm
+lib/CPAN/LWP/UserAgent.pm	helper package for CPAN.pm
+lib/CPAN/Module.pm		helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
