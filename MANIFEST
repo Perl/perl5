@@ -67,6 +67,27 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
+ext/Attribute-Handlers/Changes			Attribute::Handlers
+ext/Attribute-Handlers/demo/demo2.pl		Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo3.pl		Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo4.pl		Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_call.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_chain.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_phases.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo.pl		Attribute::Handlers demo
+ext/Attribute-Handlers/demo/Demo.pm		Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_range.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+ext/Attribute-Handlers/demo/MyClass.pm		Attribute::Handlers demo
+ext/Attribute-Handlers/lib//Attribute/Handlers.pm	Attribute::Handlers
+ext/Attribute-Handlers/README		Attribute::Handlers
+ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
+ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
+ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
+ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attrs/attrs.pm		attrs extension Perl module
 ext/attrs/attrs.xs		attrs extension external subroutines
 ext/attrs/Makefile.PL		attrs extension makefile writer
@@ -1645,27 +1666,6 @@ lib/Archive/Tar/t/src/short/bar.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tbz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tgz.packed	Archive::Tar tests
 lib/assert.pl			assertion and panic with stack trace
-lib/Attribute/Handlers/Changes	Attribute::Handlers
-lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
-lib/Attribute/Handlers.pm	Attribute::Handlers
-lib/Attribute/Handlers/README		Attribute::Handlers
-lib/Attribute/Handlers/t/constants.t	Test constants and Attribute::Handlers
-lib/Attribute/Handlers/t/data_convert.t	Test attribute data conversion
-lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
-lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/autodie/exception.pm	Exception class for autodie
 lib/autodie/exception/system.pm	Exception class for autodying system()

@@ -125,8 +125,7 @@ package Maintainers;
 	'Attribute::Handlers' =>
 		{
 		'MAINTAINER'	=> 'rgarcia',
-		'FILES'		=> q[lib/Attribute/Handlers.pm
-				     lib/Attribute/Handlers],
+		'FILES'		=> q[ext/Attribute-Handlers],
 		'CPAN'		=> 1,
                 'UPSTREAM'      => "blead",
 		},
