@@ -2720,17 +2720,18 @@ $   IF F$EXTRACT(0,4,line) .NES. "ext/" .AND. -
        F$EXTRACT(0,8,line) .NES. "vms/ext/" THEN goto ext_loop
 $   line = F$EDIT(line,"COMPRESS")
 $   line = F$ELEMENT(0," ",line)
-$   line_len = F$LENGTH(line)
-$   IF F$EXTRACT(line_len - 12,12,line) .NES. "/Makefile.PL" THEN goto ext_loop
-$   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
-      xxx = F$EXTRACT(4,line_len - 16,line)
+$   IF F$EXTRACT(0,4,line) .EQS. "ext/"
+$   THEN
+$     xxx = F$ELEMENT(1,"/",line)
+$     IF F$SEARCH("[-.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
+$   ENDIF
+$   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/"
+$   THEN
+$     xxx = F$ELEMENT(2,"/",line)
+$     IF F$SEARCH("[-.vms.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
+$     xxx = "VMS/" + xxx
+$   ENDIF
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
-$   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
-$   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
-$   IF F$EXTRACT(0,7,xxx) .EQS. "Encode/" THEN goto ext_loop  ! sub extension - omit
-$   IF xxx .EQS. "B/C" THEN goto ext_loop  ! sub extension - omit
-$   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
-      xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $!
 $! (extspec = xxx) =~ tr!-!/!
 $ extspec = ""
@@ -2748,6 +2749,28 @@ $   goto replace_dash_with_slash
 $
 $ end_replace_dash_with_slash:
 $   
+$ xxx = known_extensions
+$ may_already_have_extension:
+$   idx = F$LOCATE(extspec, xxx)
+$   extlen = F$LENGTH(xxx) 
+$   IF idx .EQ. extlen THEN goto found_new_extension
+$!  But "Flirble" may just be part of "Acme-Flirble"
+$   IF idx .GT. 0 .AND. F$EXTRACT(idx - 1, 1, xxx) .NES. " "
+$   THEN
+$	xxx = F$EXTRACT(idx + F$LENGTH(extspec) + 1, extlen, xxx)
+$	GOTO may_already_have_extension
+$   ENDIF
+$!  But "Foo" may just be part of "Foo-Bar" so check for equality.
+$   xxx = F$EXTRACT(idx, extlen - idx, xxx)
+$   IF F$ELEMENT(0, " ", xxx) .EQS. extspec
+$   THEN 
+$	GOTO ext_loop
+$   ELSE 
+$	xxx = F$EXTRACT(F$LENGTH(extspec) + 1, extlen, xxx)
+	GOTO may_already_have_extension
+$   ENDIF
+$!
+$ found_new_extension:
 $   known_extensions = known_extensions + " ''extspec'"
 $   goto ext_loop
 $end_ext:
@@ -2755,6 +2778,7 @@ $ close CONFIG
 $ DELETE/SYMBOL xxx
 $ DELETE/SYMBOL idx
 $ DELETE/SYMBOL extspec
+$ DELETE/SYMBOL extlen
 $ known_extensions = F$EDIT(known_extensions,"TRIM,COMPRESS")
 $ dflt = known_extensions
 $ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
