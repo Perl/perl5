@@ -196,6 +196,9 @@ if (@ARGV) {
 			$extension =~ s!/t$!!;
 			# XXX Do I want to warn that I'm skipping these?
 			next if $skip{$extension};
+			my $flat_extension = $extension;
+			$flat_extension =~ s!-!/!g;
+			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
 		    }
 		    push @manitests, File::Spec->catfile($updir, $test);
 		}
