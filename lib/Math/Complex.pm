@@ -7,9 +7,11 @@
 
 package Math::Complex;
 
+use strict;
+
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf $ExpInf);
 
-$VERSION = 1.55;
+$VERSION = 1.56;
 
 use Config;
 
@@ -66,7 +68,24 @@ BEGIN {
     # print "# On this machine, Inf = '$Inf'\n";
 }
 
-use strict;
+use Scalar::Util qw(set_prototype);
+
+use warnings;
+no warnings 'syntax';  # To avoid the (_) warnings.
+
+BEGIN {
+    # For certain functions that we override, in 5.10 or better
+    # we can set a smarter prototype that will handle the lexical $_
+    # (also a 5.10+ feature).
+    if ($] >= 5.010000) {
+        set_prototype \&abs, '_';
+        set_prototype \&cos, '_';
+        set_prototype \&exp, '_';
+        set_prototype \&log, '_';
+        set_prototype \&sin, '_';
+        set_prototype \&sqrt, '_';
+    }
+}
 
 my $i;
 my %LOGN;
@@ -611,7 +630,7 @@ sub _conjugate {
 # Compute or set complex's norm (rho).
 #
 sub abs {
-	my ($z, $rho) = @_;
+	my ($z, $rho) = @_ ? @_ : $_;
 	unless (ref $z) {
 	    if (@_ == 2) {
 		$_[0] = $_[1];
@@ -672,7 +691,7 @@ sub arg {
 # Therefore if you want the two solutions use the root().
 #
 sub sqrt {
-	my ($z) = @_;
+	my ($z) = @_ ? $_[0] : $_;
 	my ($re, $im) = ref $z ? @{$z->_cartesian} : ($z, 0);
 	return $re < 0 ? cplx(0, CORE::sqrt(-$re)) : CORE::sqrt($re)
 	    if $im == 0;
@@ -805,9 +824,10 @@ sub theta {
 # Computes exp(z).
 #
 sub exp {
-	my ($z) = @_;
-	my ($x, $y) = @{$z->_cartesian};
-	return (ref $z)->emake(CORE::exp($x), $y);
+    my ($z) = @_ ? @_ : $_;
+    return CORE::exp($z) unless ref $z;
+    my ($x, $y) = @{$z->_cartesian};
+    return (ref $z)->emake(CORE::exp($x), $y);
 }
 
 #
@@ -837,7 +857,7 @@ sub _logofzero {
 # Compute log(z).
 #
 sub log {
-	my ($z) = @_;
+	my ($z) = @_ ? @_ : $_;
 	unless (ref $z) {
 	    _logofzero("log") if $z == 0;
 	    return $z > 0 ? CORE::log($z) : cplx(CORE::log(-$z), pi);
@@ -885,7 +905,7 @@ sub logn {
 # Compute cos(z) = (exp(iz) + exp(-iz))/2.
 #
 sub cos {
-	my ($z) = @_;
+	my ($z) = @_ ? @_ : $_;
 	return CORE::cos($z) unless ref $z;
 	my ($x, $y) = @{$z->_cartesian};
 	my $ey = CORE::exp($y);
@@ -902,7 +922,7 @@ sub cos {
 # Compute sin(z) = (exp(iz) - exp(-iz))/2.
 #
 sub sin {
-	my ($z) = @_;
+	my ($z) = @_ ? @_ : $_;
 	return CORE::sin($z) unless ref $z;
 	my ($x, $y) = @{$z->_cartesian};
 	my $ey = CORE::exp($y);

@@ -2366,6 +2366,7 @@ lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
 lib/Math/Trig.t			See if Math::Trig works
+lib/Math/underbar.t		See if Math::Complex works
 lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
 lib/Memoize/Expire.pm		Memoize expiry manager example
