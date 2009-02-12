@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = "5.52";
+$VERSION = "5.53";
 
 =head1 NAME
 
@@ -41,6 +41,8 @@ variables are collected.
 
 # down until the next =back the manpage must be parsed by the program
 # because the text is used in the init dialogues.
+
+my @podpara = split /\n\n/, <<'=back';
 
 =over 2
 
@@ -543,7 +545,7 @@ Use CPAN::SQLite if available? (yes/no)?
 Both YAML.pm and YAML::Syck are capable of deserialising code. As this
 requires a string eval, which might be a security risk, you can use
 this option to enable or disable the deserialisation of code via
-CPAN::DeferedCode. (Note: This does not work under perl 5.6)
+CPAN::DeferredCode. (Note: This does not work under perl 5.6)
 
 Do you want to enable code deserialisation (yes/no)?
 
@@ -567,6 +569,132 @@ modify it under the same terms as Perl itself.
 =cut
 
 use vars qw( %prompts );
+
+{
+
+    my @prompts = (
+
+manual_config => qq[
+
+CPAN is the world-wide archive of perl resources. It consists of about
+300 sites that all replicate the same contents around the globe. Many
+countries have at least one CPAN site already. The resources found on
+CPAN are easily accessible with the CPAN.pm module. If you want to use
+CPAN.pm, lots of things have to be configured. Fortunately, most of
+them can be determined automatically. If you prefer the automatic
+configuration, answer 'yes' below.
+
+If you prefer to enter a dialog instead, you can answer 'no' to this
+question and I'll let you configure in small steps one thing after the
+other. (Note: you can revisit this dialog anytime later by typing 'o
+conf init' at the cpan prompt.)
+],
+
+config_intro => qq{
+
+The following questions are intended to help you with the
+configuration. The CPAN module needs a directory of its own to cache
+important index files and maybe keep a temporary mirror of CPAN files.
+This may be a site-wide or a personal directory.
+
+},
+
+# cpan_home => qq{ },
+
+cpan_home_where => qq{
+
+First of all, I'd like to create this directory. Where?
+
+},
+
+external_progs => qq{
+
+The CPAN module will need a few external programs to work properly.
+Please correct me, if I guess the wrong path for a program. Don't
+panic if you do not have some of them, just press ENTER for those. To
+disable the use of a program, you can type a space followed by ENTER.
+
+},
+
+proxy_intro => qq{
+
+If you're accessing the net via proxies, you can specify them in the
+CPAN configuration or via environment variables. The variable in
+the \$CPAN::Config takes precedence.
+
+},
+
+proxy_user => qq{
+
+If your proxy is an authenticating proxy, you can store your username
+permanently. If you do not want that, just press RETURN. You will then
+be asked for your username in every future session.
+
+},
+
+proxy_pass => qq{
+
+Your password for the authenticating proxy can also be stored
+permanently on disk. If this violates your security policy, just press
+RETURN. You will then be asked for the password in every future
+session.
+
+},
+
+urls_intro => qq{
+
+Now we need to know where your favorite CPAN sites are located. Push
+a few sites onto the array (just in case the first on the array won\'t
+work). If you are mirroring CPAN to your local workstation, specify a
+file: URL.
+
+First, pick a nearby continent and country by typing in the number(s)
+in front of the item(s) you want to select. You can pick several of
+each, separated by spaces. Then, you will be presented with a list of
+URLs of CPAN mirrors in the countries you selected, along with
+previously selected URLs. Select some of those URLs, or just keep the
+old list. Finally, you will be prompted for any extra URLs -- file:,
+ftp:, or http: -- that host a CPAN mirror.
+
+},
+
+password_warn => qq{
+
+Warning: Term::ReadKey seems not to be available, your password will
+be echoed to the terminal!
+
+},
+
+              );
+
+    die "Coding error in \@prompts declaration.  Odd number of elements, above"
+        if (@prompts % 2);
+
+    %prompts = @prompts;
+
+    if (scalar(keys %prompts) != scalar(@prompts)/2) {
+        my %already;
+        for my $item (0..$#prompts) {
+            next if $item % 2;
+            die "$prompts[$item] is duplicated\n" if $already{$prompts[$item]}++;
+        }
+    }
+
+    shift @podpara;
+    while (@podpara) {
+        warn "Alert: cannot parse my own manpage for init dialog" unless $podpara[0] =~ s/^=item\s+//;
+        my $name = shift @podpara;
+        my @para;
+        while (@podpara && $podpara[0] !~ /^=item/) {
+            push @para, shift @podpara;
+        }
+        $prompts{$name} = pop @para;
+        if (@para) {
+            $prompts{$name . "_intro"} = join "", map { "$_\n\n" } @para;
+        }
+    }
+
+}
 
 sub init {
     my($configpm, %args) = @_;
@@ -612,7 +740,7 @@ sub init {
     local($\) = "";
     local($|) = 1;
 
-    my($ans,$default);
+    my($ans,$default); # why so half global?
 
     #
     #= Files, directories
@@ -685,94 +813,21 @@ sub init {
                       } =~ /$matcher/) {
         $CPAN::Frontend->myprint($prompts{config_intro});
 
-        if (!$matcher or 'cpan_home' =~ /$matcher/) {
-            my $cpan_home = $CPAN::Config->{cpan_home}
-                || File::Spec->catdir(CPAN::HandleConfig::home(), ".cpan");
+        init_cpan_home($matcher);
 
-            if (-d $cpan_home) {
-                $CPAN::Frontend->myprint(qq{
-
-I see you already have a  directory
-    $cpan_home
-Shall we use it as the general CPAN build and cache directory?
-
-});
-            } else {
-                # no cpan-home, must prompt and get one
-                $CPAN::Frontend->myprint($prompts{cpan_home_where});
-            }
-
-            $default = $cpan_home;
-            my $loop = 0;
-            my $last_ans;
-            $CPAN::Frontend->myprint(" <cpan_home>\n");
-          PROMPT: while ($ans = prompt("CPAN build and cache directory?",$default)) {
-                print "\n";
-                if (File::Spec->file_name_is_absolute($ans)) {
-                    my @cpan_home = split /[\/\\]/, $ans;
-                  DIR: for my $dir (@cpan_home) {
-                        if ($dir =~ /^~/ and (!$last_ans or $ans ne $last_ans)) {
-                            $CPAN::Frontend
-                                ->mywarn("Warning: a tilde in the path will be ".
-                                         "taken as a literal tilde. Please ".
-                                         "confirm again if you want to keep it\n");
-                            $last_ans = $default = $ans;
-                            next PROMPT;
-                        }
-                    }
-                } else {
-                    require Cwd;
-                    my $cwd = Cwd::cwd();
-                    my $absans = File::Spec->catdir($cwd,$ans);
-                    $CPAN::Frontend->mywarn("The path '$ans' is not an ".
-                                            "absolute path. Please specify ".
-                                            "an absolute path\n");
-                    $default = $absans;
-                    next PROMPT;
-                }
-                eval { File::Path::mkpath($ans); }; # dies if it can't
-                if ($@) {
-                    $CPAN::Frontend->mywarn("Couldn't create directory $ans.\n".
-                                            "Please retry.\n");
-                    next PROMPT;
-                }
-                if (-d $ans && -w _) {
-                    last PROMPT;
-                } else {
-                    $CPAN::Frontend->mywarn("Couldn't find directory $ans\n".
-                                            "or directory is not writable. Please retry.\n");
-                    if (++$loop > 5) {
-                        $CPAN::Frontend->mydie("Giving up");
-                    }
-                }
-            }
-            $CPAN::Config->{cpan_home} = $ans;
-        }
-
-        if (!$matcher or 'keep_source_where' =~ /$matcher/) {
-            my_dflt_prompt("keep_source_where",
-                           File::Spec->catdir($CPAN::Config->{cpan_home},"sources"),
-                           $matcher,
-                          );
-        }
-
-        if (!$matcher or 'build_dir' =~ /$matcher/) {
-            my_dflt_prompt("build_dir",
-                           File::Spec->catdir($CPAN::Config->{cpan_home},"build"),
-                           $matcher
-                          );
-        }
-
-        if (!$matcher or 'build_dir_reuse' =~ /$matcher/) {
-            my_yn_prompt(build_dir_reuse => 0, $matcher);
-        }
-
-        if (!$matcher or 'prefs_dir' =~ /$matcher/) {
-            my_dflt_prompt("prefs_dir",
-                           File::Spec->catdir($CPAN::Config->{cpan_home},"prefs"),
-                           $matcher
-                          );
-        }
+        my_dflt_prompt("keep_source_where",
+                       File::Spec->catdir($CPAN::Config->{cpan_home},"sources"),
+                       $matcher,
+                      );
+        my_dflt_prompt("build_dir",
+                       File::Spec->catdir($CPAN::Config->{cpan_home},"build"),
+                       $matcher
+                      );
+        my_yn_prompt(build_dir_reuse => 0, $matcher);
+        my_dflt_prompt("prefs_dir",
+                       File::Spec->catdir($CPAN::Config->{cpan_home},"prefs"),
+                       $matcher
+                      );
     }
 
     #
@@ -784,19 +839,10 @@ Shall we use it as the general CPAN build and cache directory?
     #
     #= Cache size, Index expire
     #
+    my_dflt_prompt(build_cache => 100, $matcher);
 
-    if (!$matcher or 'build_cache' =~ /$matcher/) {
-        # large enough to build large dists like Tk
-        my_dflt_prompt(build_cache => 100, $matcher);
-    }
-
-    if (!$matcher or 'index_expire' =~ /$matcher/) {
-        my_dflt_prompt(index_expire => 1, $matcher);
-    }
-
-    if (!$matcher or 'scan_cache' =~ /$matcher/) {
-        my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|never');
-    }
+    my_dflt_prompt(index_expire => 1, $matcher);
+    my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|never');
 
     #
     #= cache_metadata
@@ -809,22 +855,15 @@ Shall we use it as the general CPAN build and cache directory?
     #= Do we follow PREREQ_PM?
     #
 
-    if (!$matcher or 'prerequisites_policy' =~ /$matcher/) {
-        my_prompt_loop(prerequisites_policy => 'ask', $matcher,
-                       'follow|ask|ignore');
-    }
-
-    if (!$matcher or 'build_requires_install_policy' =~ /$matcher/) {
-        my_prompt_loop(build_requires_install_policy => 'ask/yes', $matcher,
-                       'yes|no|ask/yes|ask/no');
-    }
+    my_prompt_loop(prerequisites_policy => 'ask', $matcher,
+                   'follow|ask|ignore');
+    my_prompt_loop(build_requires_install_policy => 'ask/yes', $matcher,
+                   'yes|no|ask/yes|ask/no');
 
     #
     #= Module::Signature
     #
-    if (!$matcher or 'check_sigs' =~ /$matcher/) {
-        my_yn_prompt(check_sigs => 0, $matcher);
-    }
+    my_yn_prompt(check_sigs => 0, $matcher);
 
     #
     #= CPAN::Reporter
@@ -842,9 +881,7 @@ Shall we use it as the general CPAN build and cache directory?
         }
     }
 
-    if (!$matcher or 'trust_test_report_history' =~ /$matcher/) {
-        my_yn_prompt(trust_test_report_history => 0, $matcher);
-    }
+    my_yn_prompt(trust_test_report_history => 0, $matcher);
 
     #
     #= YAML vs. YAML::Syck
@@ -861,96 +898,15 @@ Shall we use it as the general CPAN build and cache directory?
     #
     #= YAML code deserialisation
     #
-    if (!$matcher or "yaml_load_code" =~ /$matcher/) {
-        my_yn_prompt(yaml_load_code => 0, $matcher);
-    }
+    my_yn_prompt(yaml_load_code => 0, $matcher);
 
     #
     #= External programs
     #
-
-    my @external_progs = qw/bzip2 gzip tar unzip
-
-                            make
-
-                            curl lynx wget ncftpget ncftp ftp
-
-                            gpg
-
-                            patch applypatch
-                            /;
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
-    if (!$matcher or "@external_progs" =~ /$matcher/) {
-        $CPAN::Frontend->myprint($prompts{external_progs});
+    _init_external_progs($matcher,\@path);
 
-        my $old_warn = $^W;
-        local $^W if $^O eq 'MacOS';
-        local $^W = $old_warn;
-        my $progname;
-        for $progname (@external_progs) {
-            next if $matcher && $progname !~ /$matcher/;
-            if ($^O eq 'MacOS') {
-                $CPAN::Config->{$progname} = 'not_here';
-                next;
-            }
-
-            my $progcall = $progname;
-            unless ($matcher) {
-                # we really don't need ncftp if we have ncftpget, but
-                # if they chose this dialog via matcher, they shall have it
-                next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
-            }
-            my $path = $CPAN::Config->{$progname}
-                || $Config::Config{$progname}
-                    || "";
-            if (File::Spec->file_name_is_absolute($path)) {
-                # testing existence is not good enough, some have these exe
-                # extensions
-
-                # warn "Warning: configured $path does not exist\n" unless -e $path;
-                # $path = "";
-            } elsif ($path =~ /^\s+$/) {
-                # preserve disabled programs
-            } else {
-                $path = '';
-            }
-            unless ($path) {
-                # e.g. make -> nmake
-                $progcall = $Config::Config{$progname} if $Config::Config{$progname};
-            }
-
-            $path ||= find_exe($progcall,\@path);
-            unless ($path) { # not -e $path, because find_exe already checked that
-                local $"=";";
-                $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH[@path]\n");
-                if ($progname eq "make") {
-                    $CPAN::Frontend->mywarn("ALERT: 'make' is an essential tool for ".
-                                            "building perl Modules. Please make sure you ".
-                                            "have 'make' (or some equivalent) ".
-                                            "working.\n"
-                                           );
-                    if ($^O eq "MSWin32") {
-                        $CPAN::Frontend->mywarn("
-Windows users may want to follow this procedure when back in the CPAN shell:
-
-    look YVES/scripts/alien_nmake.pl
-    perl alien_nmake.pl
-
-This will install nmake on your system which can be used as a 'make'
-substitute. You can then revisit this dialog with
-
-    o conf init make
-
-");
-                    }
-                }
-            }
-            $prompts{$progname} = "Where is your $progname program?";
-            my_dflt_prompt($progname,$path,$matcher);
-        }
-    }
-
-    if (!$matcher or 'pager' =~ /$matcher/) {
+    {
         my $path = $CPAN::Config->{'pager'} ||
             $ENV{PAGER} || find_exe("less",\@path) ||
                 find_exe("more",\@path) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
@@ -958,7 +914,7 @@ substitute. You can then revisit this dialog with
         my_dflt_prompt(pager => $path, $matcher);
     }
 
-    if (!$matcher or 'shell' =~ /$matcher/) {
+    {
         my $path = $CPAN::Config->{'shell'};
         if ($path && File::Spec->file_name_is_absolute($path)) {
             $CPAN::Frontend->mywarn("Warning: configured $path does not exist\n")
@@ -979,30 +935,19 @@ substitute. You can then revisit this dialog with
     # verbosity
     #
 
-    if (!$matcher or 'tar_verbosity' =~ /$matcher/) {
-        my_prompt_loop(tar_verbosity => 'v', $matcher,
-                       'none|v|vv');
-    }
-
-    if (!$matcher or 'load_module_verbosity' =~ /$matcher/) {
-        my_prompt_loop(load_module_verbosity => 'v', $matcher,
-                       'none|v');
-    }
-
-    if (!$matcher or 'perl5lib_verbosity' =~ /$matcher/) {
-        my_prompt_loop(perl5lib_verbosity => 'v', $matcher,
-                       'none|v');
-    }
-
+    my_prompt_loop(tar_verbosity => 'v', $matcher,
+                   'none|v|vv');
+    my_prompt_loop(load_module_verbosity => 'v', $matcher,
+                   'none|v');
+    my_prompt_loop(perl5lib_verbosity => 'v', $matcher,
+                   'none|v');
     my_yn_prompt(inhibit_startup_message => 0, $matcher);
 
     #
     #= Installer, arguments to make etc.
     #
 
-    if (!$matcher or 'prefer_installer' =~ /$matcher/) {
-        my_prompt_loop(prefer_installer => 'MB', $matcher, 'MB|EUMM|RAND');
-    }
+    my_prompt_loop(prefer_installer => 'MB', $matcher, 'MB|EUMM|RAND');
 
     if (!$matcher or 'makepl_arg make_arg' =~ /$matcher/) {
         my_dflt_prompt(makepl_arg => "", $matcher);
@@ -1048,9 +993,7 @@ substitute. You can then revisit this dialog with
     #
     #== halt_on_failure
     #
-    if (!$matcher or 'halt_on_failure' =~ /$matcher/) {
-        my_yn_prompt(halt_on_failure => 0, $matcher);
-    }
+    my_yn_prompt(halt_on_failure => 0, $matcher);
 
     #
     #= Proxies
@@ -1100,10 +1043,8 @@ substitute. You can then revisit this dialog with
     #= how cwd works
     #
 
-    if (!$matcher or 'getcwd' =~ /$matcher/) {
-        my_prompt_loop(getcwd => 'cwd', $matcher,
-                       'cwd|getcwd|fastcwd|backtickcwd');
-    }
+    my_prompt_loop(getcwd => 'cwd', $matcher,
+                   'cwd|getcwd|fastcwd|backtickcwd');
 
     #
     #= the CPAN shell itself (prompt, color)
@@ -1157,9 +1098,7 @@ substitute. You can then revisit this dialog with
     #== term_is_latin
     #
 
-    if (!$matcher or 'term_is_latin' =~ /$matcher/) {
-        my_yn_prompt(term_is_latin => 1, $matcher);
-    }
+    my_yn_prompt(term_is_latin => 1, $matcher);
 
     #
     #== save history in file 'histfile'
@@ -1232,6 +1171,156 @@ substitute. You can then revisit this dialog with
                                  "make the config permanent!\n\n");
     } else {
         CPAN::HandleConfig->commit($configpm);
+    }
+}
+
+sub _init_external_progs {
+    my($matcher,$PATH) = @_;
+    my @external_progs = qw/bzip2 gzip tar unzip
+
+                            make
+
+                            curl lynx wget ncftpget ncftp ftp
+
+                            gpg
+
+                            patch applypatch
+                            /;
+    if (!$matcher or "@external_progs" =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{external_progs});
+
+        my $old_warn = $^W;
+        local $^W if $^O eq 'MacOS';
+        local $^W = $old_warn;
+        my $progname;
+        for $progname (@external_progs) {
+            next if $matcher && $progname !~ /$matcher/;
+            if ($^O eq 'MacOS') {
+                $CPAN::Config->{$progname} = 'not_here';
+                next;
+            }
+
+            my $progcall = $progname;
+            unless ($matcher) {
+                # we really don't need ncftp if we have ncftpget, but
+                # if they chose this dialog via matcher, they shall have it
+                next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
+            }
+            my $path = $CPAN::Config->{$progname}
+                || $Config::Config{$progname}
+                    || "";
+            if (File::Spec->file_name_is_absolute($path)) {
+                # testing existence is not good enough, some have these exe
+                # extensions
+
+                # warn "Warning: configured $path does not exist\n" unless -e $path;
+                # $path = "";
+            } elsif ($path =~ /^\s+$/) {
+                # preserve disabled programs
+            } else {
+                $path = '';
+            }
+            unless ($path) {
+                # e.g. make -> nmake
+                $progcall = $Config::Config{$progname} if $Config::Config{$progname};
+            }
+
+            $path ||= find_exe($progcall,$PATH);
+            unless ($path) { # not -e $path, because find_exe already checked that
+                local $"=";";
+                $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH[@$PATH]\n");
+                if ($progname eq "make") {
+                    $CPAN::Frontend->mywarn("ALERT: 'make' is an essential tool for ".
+                                            "building perl Modules. Please make sure you ".
+                                            "have 'make' (or some equivalent) ".
+                                            "working.\n"
+                                           );
+                    if ($^O eq "MSWin32") {
+                        $CPAN::Frontend->mywarn("
+Windows users may want to follow this procedure when back in the CPAN shell:
+
+    look YVES/scripts/alien_nmake.pl
+    perl alien_nmake.pl
+
+This will install nmake on your system which can be used as a 'make'
+substitute. You can then revisit this dialog with
+
+    o conf init make
+
+");
+                    }
+                }
+            }
+            $prompts{$progname} = "Where is your $progname program?";
+            my_dflt_prompt($progname,$path,$matcher);
+        }
+    }
+}
+
+sub init_cpan_home {
+    my($matcher) = @_;
+    if (!$matcher or 'cpan_home' =~ /$matcher/) {
+        my $cpan_home = $CPAN::Config->{cpan_home}
+            || File::Spec->catdir(CPAN::HandleConfig::home(), ".cpan");
+
+        if (-d $cpan_home) {
+            $CPAN::Frontend->myprint(qq{
+
+I see you already have a  directory
+    $cpan_home
+Shall we use it as the general CPAN build and cache directory?
+
+});
+        } else {
+            # no cpan-home, must prompt and get one
+            $CPAN::Frontend->myprint($prompts{cpan_home_where});
+        }
+
+        my $default = $cpan_home;
+        my $loop = 0;
+        my($last_ans,$ans);
+        $CPAN::Frontend->myprint(" <cpan_home>\n");
+    PROMPT: while ($ans = prompt("CPAN build and cache directory?",$default)) {
+            print "\n";
+            if (File::Spec->file_name_is_absolute($ans)) {
+                my @cpan_home = split /[\/\\]/, $ans;
+            DIR: for my $dir (@cpan_home) {
+                    if ($dir =~ /^~/ and (!$last_ans or $ans ne $last_ans)) {
+                        $CPAN::Frontend
+                            ->mywarn("Warning: a tilde in the path will be ".
+                                     "taken as a literal tilde. Please ".
+                                     "confirm again if you want to keep it\n");
+                        $last_ans = $default = $ans;
+                        next PROMPT;
+                    }
+                }
+            } else {
+                require Cwd;
+                my $cwd = Cwd::cwd();
+                my $absans = File::Spec->catdir($cwd,$ans);
+                $CPAN::Frontend->mywarn("The path '$ans' is not an ".
+                                        "absolute path. Please specify ".
+                                        "an absolute path\n");
+                $default = $absans;
+                next PROMPT;
+            }
+            eval { File::Path::mkpath($ans); }; # dies if it can't
+            if ($@) {
+                $CPAN::Frontend->mywarn("Couldn't create directory $ans.\n".
+                                        "Please retry.\n");
+                next PROMPT;
+            }
+            if (-d $ans && -w _) {
+                last PROMPT;
+            } else {
+                $CPAN::Frontend->mywarn("Couldn't find directory $ans\n".
+                                        "or directory is not writable. Please retry.\n");
+                if (++$loop > 5) {
+                    $CPAN::Frontend->mydie("Giving up");
+                }
+            }
+        }
+        $CPAN::Config->{cpan_home} = $ans;
     }
 }
 
@@ -1586,141 +1675,5 @@ sub prompt_no_strip ($;$) {
 }
 
 
-BEGIN {
-
-my @prompts = (
-
-manual_config => qq[
-
-CPAN is the world-wide archive of perl resources. It consists of about
-300 sites that all replicate the same contents around the globe. Many
-countries have at least one CPAN site already. The resources found on
-CPAN are easily accessible with the CPAN.pm module. If you want to use
-CPAN.pm, lots of things have to be configured. Fortunately, most of
-them can be determined automatically. If you prefer the automatic
-configuration, answer 'yes' below.
-
-If you prefer to enter a dialog instead, you can answer 'no' to this
-question and I'll let you configure in small steps one thing after the
-other. (Note: you can revisit this dialog anytime later by typing 'o
-conf init' at the cpan prompt.)
-],
-
-config_intro => qq{
-
-The following questions are intended to help you with the
-configuration. The CPAN module needs a directory of its own to cache
-important index files and maybe keep a temporary mirror of CPAN files.
-This may be a site-wide or a personal directory.
-
-},
-
-# cpan_home => qq{ },
-
-cpan_home_where => qq{
-
-First of all, I'd like to create this directory. Where?
-
-},
-
-external_progs => qq{
-
-The CPAN module will need a few external programs to work properly.
-Please correct me, if I guess the wrong path for a program. Don't
-panic if you do not have some of them, just press ENTER for those. To
-disable the use of a program, you can type a space followed by ENTER.
-
-},
-
-proxy_intro => qq{
-
-If you're accessing the net via proxies, you can specify them in the
-CPAN configuration or via environment variables. The variable in
-the \$CPAN::Config takes precedence.
-
-},
-
-proxy_user => qq{
-
-If your proxy is an authenticating proxy, you can store your username
-permanently. If you do not want that, just press RETURN. You will then
-be asked for your username in every future session.
-
-},
-
-proxy_pass => qq{
-
-Your password for the authenticating proxy can also be stored
-permanently on disk. If this violates your security policy, just press
-RETURN. You will then be asked for the password in every future
-session.
-
-},
-
-urls_intro => qq{
-
-Now we need to know where your favorite CPAN sites are located. Push
-a few sites onto the array (just in case the first on the array won\'t
-work). If you are mirroring CPAN to your local workstation, specify a
-file: URL.
-
-First, pick a nearby continent and country by typing in the number(s)
-in front of the item(s) you want to select. You can pick several of
-each, separated by spaces. Then, you will be presented with a list of
-URLs of CPAN mirrors in the countries you selected, along with
-previously selected URLs. Select some of those URLs, or just keep the
-old list. Finally, you will be prompted for any extra URLs -- file:,
-ftp:, or http: -- that host a CPAN mirror.
-
-},
-
-password_warn => qq{
-
-Warning: Term::ReadKey seems not to be available, your password will
-be echoed to the terminal!
-
-},
-
-              );
-
-die "Coding error in \@prompts declaration.  Odd number of elements, above"
-    if (@prompts % 2);
-
-%prompts = @prompts;
-
-if (scalar(keys %prompts) != scalar(@prompts)/2) {
-    my %already;
-    for my $item (0..$#prompts) {
-        next if $item % 2;
-        die "$prompts[$item] is duplicated\n" if $already{$prompts[$item]}++;
-    }
-}
-
-local *FH;
-my $pmfile = __FILE__;
-open FH, $pmfile or die "Could not open '$pmfile': $!";
-local $/ = "";
-my @podpara;
-while (<FH>) {
-    next if 1 .. /^=over/;
-    chomp;
-    push @podpara, $_;
-    last if /^=back/;
-}
-pop @podpara;
-while (@podpara) {
-    warn "Alert: cannot parse my own manpage for init dialog" unless $podpara[0] =~ s/^=item\s+//;
-    my $name = shift @podpara;
-    my @para;
-    while (@podpara && $podpara[0] !~ /^=item/) {
-        push @para, shift @podpara;
-    }
-    $prompts{$name} = pop @para;
-    if (@para) {
-        $prompts{$name . "_intro"} = join "", map { "$_\n\n" } @para;
-    }
-}
-
-} # EOBEGIN
 
 1;
