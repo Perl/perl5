@@ -33,17 +33,8 @@ tie my %tied_hash, 'Tie::StdHash';
     use overload '~~' => sub { my %hash = %{ $_[0] }; %hash ~~ $_[1] };
 }
 
-{
-    package Test::Object::OverloadCodeRef;
-    sub new { bless $_[1] }
-    use overload '~~' => sub { shift->($_[1]) };
-}
-
 our $ov_obj = Test::Object::CopyOverload->new;
 our $obj = Test::Object::NoOverload->new;
-our $false_obj = Test::Object::OverloadCodeRef->new(sub { 0 });
-our $true_obj = Test::Object::OverloadCodeRef->new(sub { 1 });
-
 
 # Load and run the tests
 my @tests = map [chomp and split /\t+/, $_, 3], grep !/^#/ && /\S/, <DATA>;
