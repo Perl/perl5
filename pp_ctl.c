@@ -4087,8 +4087,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     if (SvGMAGICAL(e))
 	e = sv_mortalcopy(e);
 
-    if (SM_OBJECT)
-	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+    if (SM_OBJECT) {
+	if (!SvOK(d) || !SvOK(e))
+	    RETPUSHNO;
+	else
+	    Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+    }
 
     if (SM_CV_NEP) {
 	I32 c;

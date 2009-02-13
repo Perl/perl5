@@ -102,6 +102,7 @@ __DATA__
 !	$ov_obj		"foo"
 !	$ov_obj		\&foo
 @	$ov_obj		\&fatal
+!	$ov_obj		undef
 
 # regular object
 @	$obj	"key"
@@ -112,6 +113,7 @@ __DATA__
 @	$obj	sub { 0 }
 @	$obj	\&foo
 @	$obj	\&fatal
+!	$obj	undef
 
 # CODE ref against argument
 #  - arg is code ref
