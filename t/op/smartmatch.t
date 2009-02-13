@@ -10,10 +10,6 @@ use strict;
 use Tie::Array;
 use Tie::Hash;
 
-# The feature mechanism is tested in t/lib/feature/smartmatch:
-# This file tests the semantics of the operator, without worrying
-# about feature issues such as scoping etc.
-
 # Predeclare vars used in the tests:
 my $deep1 = []; push @$deep1, \$deep1;
 my $deep2 = []; push @$deep2, \$deep2;
@@ -94,6 +90,10 @@ sub fatal {die "fatal sub\n"}
 sub a_const() {die "const\n" if @_; "a constant"}
 sub b_const() {die "const\n" if @_; "a constant"}
 
+# Prefix character :
+#   - expected to match
+# ! - expected to not match
+# @ - expected to be a compilation failure
 __DATA__
 # OBJECT
 # - overloaded
