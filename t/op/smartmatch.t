@@ -206,9 +206,13 @@ __DATA__
 
 # - a number
 	[qw(1foo 2bar)]		2
+	[qw(foo 2)]		2
+	[qw(foo 2)]		2.0_0e+0
+!	[qw(1foo bar2)]		2
 
 # - a string
 !	[qw(1foo 2bar)]		"2"
+	[qw(1foo 2bar)]		"2bar"
 
 # Number against number
 	2		2
