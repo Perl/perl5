@@ -18,8 +18,6 @@ use Tie::Hash;
 my $deep1 = []; push @$deep1, \$deep1;
 my $deep2 = []; push @$deep2, \$deep2;
 
-{my $const = "a constant"; sub a_const () {$const}}
-
 my @nums = (1..10);
 tie my @tied_nums, 'Tie::StdArray';
 @tied_nums =  (1..10);
