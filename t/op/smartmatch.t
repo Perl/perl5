@@ -80,6 +80,9 @@ sub fatal {die "fatal sub\n"}
 
 sub a_const() {die "const\n" if @_; "a constant"}
 sub b_const() {die "const\n" if @_; "a constant"}
+sub FALSE() { 0 }
+sub TRUE() { 1 }
+sub TWO() { 1 }
 
 # Prefix character :
 #   - expected to match
@@ -91,25 +94,31 @@ __DATA__
 	$ov_obj		"key"
 	$ov_obj		{"key" => 1}
 !	$ov_obj		"foo"
+	$ov_obj		sub { shift ~~ "key" }
+!	$ov_obj		sub { shift ~~ "foo" }
 !	$ov_obj		\&foo
 @	$ov_obj		\&fatal
+!	$ov_obj		FALSE
+!	$ov_obj		\&FALSE
 !	$ov_obj		undef
 
 # regular object
 @	$obj	"key"
 @	$obj	{"key" => 1}
-@	$obj	"foo"
 @	$obj	$obj
 @	$obj	sub { 1 }
 @	$obj	sub { 0 }
 @	$obj	\&foo
 @	$obj	\&fatal
+@	$obj	FALSE
+@	$obj	\&FALSE
 !	$obj	undef
 
 # CODE ref against argument
 #  - arg is code ref
 	\&foo		\&foo
 !	\&foo		sub {}
+!	\&foo		sub { "$_[0]" =~ /^CODE/ }
 !	\&foo		\&bar
 	\&fatal		\&fatal
 !	\&foo		\&fatal
@@ -119,6 +128,7 @@ __DATA__
 !	0	sub{shift}
 !	undef	sub{shift}
 	undef	sub{not shift}
+	FALSE	sub{not shift}
 	1	sub{scalar @_}
 	[]	\&bar
 	{}	\&bar
@@ -142,6 +152,20 @@ __DATA__
 	a_const		b_const
 	\&a_const	\&a_const
 !	\&a_const	\&b_const
+!	undef		\&FALSE
+	undef		\&TRUE
+!	0		\&FALSE
+	0		\&TRUE
+!	1		\&FALSE
+	1		\&TRUE
+	\&FALSE		\&FALSE
+!	\&FALSE		\&foo
+!	\&FALSE		\&bar
+!	\&TRUE		\&foo
+!	\&TRUE		\&bar
+!	\&TWO		\&foo
+!	\&TWO		\&bar
+	\&FALSE		\&FALSE
 
 # - non-null-prototyped subs
 !	\&bar		\&gorch
@@ -210,12 +234,15 @@ __DATA__
 # Number against number
 	2		2
 !	2		3
+	0		FALSE
+	3-2		TRUE
 
 # Number against string
 	2		"2"
 	2		"2.0"
 !	2		"2bananas"
 !	2_3		"2_3"
+	FALSE		"0"
 
 # Regex against string
 	qr/x/		"x"
