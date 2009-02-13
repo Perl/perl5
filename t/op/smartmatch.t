@@ -268,3 +268,5 @@ __DATA__
 !	!1		undef
 !	\&foo		undef
 !	sub { }		undef
+	undef		undef
+	$::undef	undef
