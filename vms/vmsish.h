@@ -363,9 +363,9 @@
 #define NATIVE_HINTS		(PL_hints >> HINT_V_VMSISH)  /* used in op.c */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  define TEST_VMSISH(h)	(my_perl && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))
+#  define TEST_VMSISH(h)	(my_perl && PL_curcop && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))
 #else
-#  define TEST_VMSISH(h)	(PL_curcop->op_private & ((h) >> HINT_V_VMSISH))
+#  define TEST_VMSISH(h)	(PL_curcop && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))
 #endif
 #define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
 #define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)
