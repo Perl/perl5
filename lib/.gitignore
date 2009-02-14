@@ -47,6 +47,7 @@
 /Math/BigInt/FastCalc.pm
 /Module/Pluggable.pm
 /Module/Pluggable
+/NDBM_File.pm
 /O.pm
 /ODBM_File.pm
 /Opcode.pm
