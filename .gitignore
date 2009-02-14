@@ -32,6 +32,12 @@ Makefile.old
 /x2p/makefile
 /x2p/makefile.old
 
+# alternative names on OS X
+/GNUmakefile
+/GNUmakefile.old
+/x2p/GNUmakefile
+/x2p/GNUmakefile.old
+
 # general build products
 *.o
 *.a
@@ -85,6 +91,7 @@ lib/Test/Harness.pm
 t/rantests
 t/tmp*
 t/perl
+t/test_state
 
 # make_ext.pl cleanup scripts
 realclean.sh
