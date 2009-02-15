@@ -42,7 +42,7 @@ ExtUtils::Install - install files from here to there
 
 =cut
 
-$VERSION = '1.52';
+$VERSION = '1.52_01';
 $VERSION = eval $VERSION;
 
 =pod
@@ -92,10 +92,33 @@ Dies with a special message.
 =cut
 
 my $Is_VMS     = $^O eq 'VMS';
+my $Is_VMS_noefs = $Is_VMS;
 my $Is_MacPerl = $^O eq 'MacOS';
 my $Is_Win32   = $^O eq 'MSWin32';
 my $Is_cygwin  = $^O eq 'cygwin';
 my $CanMoveAtBoot = ($Is_Win32 || $Is_cygwin);
+
+    if( $Is_VMS ) {
+        my $vms_unix_rpt;
+        my $vms_efs;
+        my $vms_case;
+
+        if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+            $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
+            $vms_efs = VMS::Feature::current("efs_charset");
+            $vms_case = VMS::Feature::current("efs_case_preserve");
+        } else {
+            my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+            my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
+            my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
+            $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+            $vms_efs = $efs_charset =~ /^[ET1]/i;
+            $vms_case = $efs_case =~ /^[ET1]/i;
+        }
+        $Is_VMS_noefs = 0 if ($vms_efs); 
+    }
+
+
 
 # *note* CanMoveAtBoot is only incidentally the same condition as below
 # this needs not hold true in the future.
@@ -405,7 +428,9 @@ sub _can_write_dir {
     my $path='';
     my @make;
     while (@dirs) {
-        if ($Is_VMS) {
+        if ($Is_VMS_noefs) {
+            # There is a bug in catdir that is fixed when the EFS character
+            # set is enabled, which requires this VMS specific code.
             $dir = File::Spec->catdir($vol,@dirs);
         }
         else {
