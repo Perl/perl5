@@ -4110,8 +4110,11 @@ S_init_perllib(pTHX_ U32 old_vers)
 	if (s)
 #endif
 	    incpush_use_sep(s, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
-	else if (!old_vers)
-	    incpush_use_sep(PerlEnv_getenv("PERLLIB"), 0);
+	else if (!old_vers) {
+	    s = PerlEnv_getenv("PERLLIB");
+	    if (s)
+		incpush_use_sep(s, 0);
+	}
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -4542,8 +4545,10 @@ S_incpush_use_sep(pTHX_ const char *p, U32 flags)
     /* This logic has been broken out from S_incpush(). It may be possible to
        simplify it.  */
 
+    PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
+
     /* Break at all separators */
-    while (p && *p) {
+    while (*p) {
         const char *s;
 
 	/* skip any consecutive separators */
