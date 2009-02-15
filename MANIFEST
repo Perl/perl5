@@ -74,8 +74,8 @@ ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
-ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B/Lint/Debug.pm	Adds debugging stringification to B::
+ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
@@ -351,6 +351,7 @@ ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newSVpv.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
@@ -368,7 +369,6 @@ ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
 ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
@@ -851,12 +851,12 @@ ext/IPC/SysV/README		IPC::SysV README
 ext/IPC/SysV/regen.pl	IPC::SysV file regeneration script
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
 ext/IPC/SysV/t/ipcsysv.t		IPC::SysV test file
-ext/IPC/SysV/t/pod.t	IPC::SysV test file
-ext/IPC/SysV/t/podcov.t	IPC::SysV test file
 ext/IPC/SysV/t/msg.t		IPC::SysV test file
+ext/IPC/SysV/TODO	IPC::SysV todo file
+ext/IPC/SysV/t/podcov.t	IPC::SysV test file
+ext/IPC/SysV/t/pod.t	IPC::SysV test file
 ext/IPC/SysV/t/sem.t		IPC::SysV test file
 ext/IPC/SysV/t/shm.t	IPC::SysV test file
-ext/IPC/SysV/TODO	IPC::SysV todo file
 ext/IPC/SysV/typemap	IPC::SysV typemap
 ext/List/Util/Changes		Util extension
 ext/List/Util/lib/List/Util.pm	List::Util
@@ -1481,9 +1481,9 @@ h2pl/mkvars			Program to make .pl from .ph files
 h2pl/README			How to turn .ph files into .pl files
 h2pl/tcbreak			cbreak test routine using .ph
 h2pl/tcbreak2			cbreak test routine using .pl
-haiku/haikuish.h		Header for the Haiku port
 haiku/Haiku/Haiku.pm		Haiku extension Perl module
 haiku/Haiku/Haiku.xs		Haiku extension external subroutines
+haiku/haikuish.h		Header for the Haiku port
 haiku/Haiku/Makefile.PL		Haiku extension makefile writer
 handy.h				Handy definitions
 hints/3b1cc			Hints for named architecture
@@ -1666,9 +1666,9 @@ lib/Attribute/Handlers/t/data_convert.t	Test attribute data conversion
 lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
+lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
-lib/AutoLoader.pm		Autoloader base class
 lib/AutoSplit.pm		Split up autoload functions
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
@@ -1770,8 +1770,8 @@ lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
 lib/CGI/t/uploadInfo.t		See if CGI.pm works
-lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
+lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
@@ -2015,36 +2015,36 @@ lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
-lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
-lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
 lib/ExtUtils/t/basic_finish.pl	See if MakeMaker can build a module (part 2)
+lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
+lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
+lib/ExtUtils/t/cp.t		See if ExtUtils::Command works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
-lib/ExtUtils/t/cp.t		See if ExtUtils::Command works
 lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
 lib/ExtUtils/t/hints.t		See if hint files are honored.
+lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
-lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
+lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
 lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
 lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
-lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -2542,8 +2542,8 @@ lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
 lib/parent/t/compile-time.t	tests for parent.pm
 lib/parent/t/lib/Dummy2.plugin	test files for parent.pm
-lib/parent/t/lib/Dummy.pm	test files for parent.pm
 lib/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
+lib/parent/t/lib/Dummy.pm	test files for parent.pm
 lib/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
 lib/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
 lib/parent/t/parent-classfromclassfile.t	tests for parent.pm
@@ -2761,9 +2761,9 @@ lib/Pod/Simple/t/testlib3/squaa/Vliff.pm	Pod::Simple test file
 lib/Pod/Simple/t/tiedfh.t	Pod::Simple test file
 lib/Pod/Simple/t/verbatim.t		Pod::Simple test file
 lib/Pod/Simple/t/verb_fmt.t	Pod::Simple test file
-lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
 lib/Pod/Simple/t/xhtml01.t	Pod::Simple test file
 lib/Pod/Simple/t/xhtml05.t	Pod::Simple test file
+lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
 lib/Pod/Simple/XHTML.pm		turn Pod into XHTML
 lib/Pod/Simple/XMLOutStream.pm	turn Pod into XML
 lib/Pod/t/basic.cap		podlators test
@@ -2789,8 +2789,8 @@ lib/Pod/t/htmllink.t		pod2html link test
 lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
-lib/Pod/t/man.t			podlators test
 lib/Pod/t/man-options.t		podlators test
+lib/Pod/t/man.t			podlators test
 lib/Pod/t/man-utf8.t		podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
@@ -2802,8 +2802,8 @@ lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/termcap.t		podlators test
 lib/Pod/t/text-encoding.t		podlators test
 lib/Pod/t/text-options.t		podlators test
-lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/text.t		podlators test
+lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
@@ -2813,9 +2813,9 @@ lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
-lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
+lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
@@ -2872,8 +2872,8 @@ lib/Test/Simple/t/Builder/carp.t	Test::Builder test
 lib/Test/Simple/t/Builder/create.t	Test::Builder test 
 lib/Test/Simple/t/Builder/curr_test.t	Test::Builder->curr_test tests
 lib/Test/Simple/t/Builder/details.t	Test::Builder tests
-lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/has_plan2.t	Test::Builder tests
+lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/is_fh.t	Test::Builder tests
 lib/Test/Simple/t/Builder/maybe_regex.t	Test::Builder tests
 lib/Test/Simple/t/Builder/no_diag.t	Test::Builder tests
@@ -3310,8 +3310,8 @@ parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perlapi.c			Perl API functions
 perlapi.h			Perl API function declarations
-perldtrace.d			D script for Perl probes
 perl.c				main()
+perldtrace.d			D script for Perl probes
 perl.h				Global declarations
 perlio.c			C code for PerlIO abstraction
 perlio.h			PerlIO abstraction
@@ -3521,8 +3521,8 @@ Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/switch_to_perforce_id.pl	Checkout a given p4 change number
 Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
-Porting/timecheck.c		Test program for the 2038 fix
 Porting/timecheck2.c		Test program for the 2038 fix
+Porting/timecheck.c		Test program for the 2038 fix
 Porting/valgrindpp.pl		Summarize valgrind reports
 pp.c				Push/Pop code
 pp_ctl.c			Push/Pop code for control flow
@@ -3786,8 +3786,8 @@ t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
-t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
 t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
@@ -3873,11 +3873,11 @@ t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
 t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
@@ -4037,22 +4037,22 @@ t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
 t/op/reg_email.t		See if regex recursion works by parsing email addresses
-t/op/reg_posixcc.t		See if posix characterclasses behave consistantly
 t/op/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr_embed_thr.t	See if regular expressions work with embedded qr// in another thread
 t/op/regexp_qr.t		See if regular expressions work as qr//
-t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
-t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
+t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
+t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/op/reg_fold.t			See if case folding works properly
 t/op/reg_mesg.t			See if one can get regular expression errors
 t/op/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
 t/op/reg_nc_tie.t	        Test the tied methods of Tie::Hash::NamedCapture
 t/op/reg_pmod.t			See if regexp /p modifier works as expected
+t/op/reg_posixcc.t		See if posix characterclasses behave consistantly
 t/op/reg_unsafe.t		Check for unsafe match vars
 t/op/repeat.t			See if x operator works
 t/op/reset.t			See if reset operator works
@@ -4181,6 +4181,7 @@ t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
 t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
 t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
@@ -4190,7 +4191,6 @@ t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
-t/uni/tie.t			See if Unicode tie works
 t/x2p/s2p.t			See if s2p/psed work
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
