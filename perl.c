@@ -4272,7 +4272,7 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
 }
 
 STATIC void
-S_incpush(pTHX_ const char *dir, U32 flags)
+S_incpush(pTHX_ const char *p, U32 flags)
 {
     dVAR;
     const U8 addsubdirs  = flags & INCPUSH_ADD_SUB_DIRS;
@@ -4281,7 +4281,6 @@ S_incpush(pTHX_ const char *dir, U32 flags)
     const U8 canrelocate = flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = flags & INCPUSH_UNSHIFT;
     SV *subdir = NULL;
-    const char *p = dir;
     AV *inc;
 
     if (!p || !*p)
