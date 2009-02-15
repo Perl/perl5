@@ -4235,7 +4235,7 @@ S_init_perllib(pTHX)
    Generate a new SV if we do this, to save needing to copy the SV we push
    onto @INC  */
 STATIC SV *
-S_incpush_if_exists(pTHX_ SV *dir)
+S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
 {
     dVAR;
     Stat_t tmpstatbuf;
@@ -4244,7 +4244,7 @@ S_incpush_if_exists(pTHX_ SV *dir)
 
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
-	av_push(GvAVn(PL_incgv), dir);
+	av_push(av, dir);
 	dir = newSV(0);
     }
     return dir;
@@ -4257,9 +4257,12 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
     dVAR;
     SV *subdir = NULL;
     const char *p = dir;
+    AV *inc;
 
     if (!p || !*p)
 	return;
+
+    inc = GvAVn(PL_incgv);
 
     if (addsubdirs || addoldvers) {
 	subdir = newSV(0);
@@ -4269,6 +4272,15 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
     while (p && *p) {
 	SV *libdir = newSV(0);
         const char *s;
+	/* Change 20189146be79a0596543441fa369c6bf7f85103f, to fix RT#6665,
+	   arranged to unshift #! line -I onto the front of @INC. However,
+	   -I can add version and architecture specific libraries, and they
+	   need to go first. The old code assumed that it was always
+	   pushing. Hence to make it work, need to push the architecture
+	   (etc) libraries onto a temporary array, then "unshift" that onto
+	   the front of @INC.  */
+	AV *const av
+	    = (addsubdirs || addoldvers) ? (unshift ? newAV() : inc) : NULL;
 
 	/* skip any consecutive separators */
 	if (usesep) {
@@ -4436,19 +4448,19 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 			       SVfARG(libdir),
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
-		subdir = S_incpush_if_exists(aTHX_ subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../version if -d .../version */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH,
 			       SVfARG(libdir),
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
-		subdir = S_incpush_if_exists(aTHX_ subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../archname if -d .../archname */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT,
 			       SVfARG(libdir), ARCHNAME);
-		subdir = S_incpush_if_exists(aTHX_ subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 	    }
 
@@ -4458,7 +4470,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 		    /* .../xxx if -d .../xxx */
 		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT,
 				   SVfARG(libdir), *incver);
-		    subdir = S_incpush_if_exists(aTHX_ subdir);
+		    subdir = S_incpush_if_exists(aTHX_ av, subdir);
 		}
 	    }
 #endif
@@ -4466,11 +4478,26 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
-	    av_unshift( GvAVn( PL_incgv ), 1 );
-	    av_store( GvAVn( PL_incgv ), 0, libdir );
+	    U32 extra = av_len(av) + 1;
+	    av_unshift(inc, extra + 1);
+	    av_store(inc, extra, libdir);
+	    while (extra--) {
+		/* av owns a reference, av_store() expects to be donated a
+		   reference, and av expects to be sane when it's cleared.
+		   If I wanted to be naughty and wrong, I could peek inside the
+		   implementation of av_clear(), realise that it uses
+		   SvREFCNT_dec() too, so av's array could be a run of NULLs,
+		   and so directly steal from it (with a memcpy() to inc, and
+		   then memset() to NULL them out. But people copy code from the
+		   core expecting it to be best practise, so let's use the API.
+		   Although studious readers will note that I'm not checking any
+		   return codes.  */
+		av_store(inc, extra, SvREFCNT_inc(*av_fetch(av, extra, FALSE)));
+	    }
+	    SvREFCNT_dec(av);
 	}
 	else {
-	    av_push(GvAVn(PL_incgv), libdir);
+	    av_push(inc, libdir);
 	}
     }
     if (subdir) {

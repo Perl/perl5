@@ -4798,10 +4798,11 @@ STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void	S_run_body(pTHX_ I32 oldscope)
 			__attribute__noreturn__;
 
-STATIC SV *	S_incpush_if_exists(pTHX_ SV *dir)
-			__attribute__nonnull__(pTHX_1);
+STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS	\
-	assert(dir)
+	assert(av); assert(dir)
 
 #endif
 

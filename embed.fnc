@@ -1491,7 +1491,7 @@ so	|void	|validate_suid	|NN PerlIO *rsfp
 
 s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
-s	|SV *	|incpush_if_exists|NN SV *dir
+s	|SV *	|incpush_if_exists|NN AV *const av|NN SV *dir
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
