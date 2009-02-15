@@ -1626,6 +1626,12 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     return ret;
 }
 
+#define INCPUSH_ADD_SUB_DIRS	0x01
+#define INCPUSH_ADD_OLD_VERS	0x02
+#define INCPUSH_USE_SEP		0x04
+#define INCPUSH_CAN_RELOCATE	0x08
+#define INCPUSH_UNSHIFT		0x10
+
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
@@ -1743,7 +1749,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (s && *s) {
 		STRLEN len = strlen(s);
 		const char * const p = savepvn(s, len);
-		incpush(p, TRUE, TRUE, FALSE, FALSE, FALSE);
+		incpush(p, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
 		sv_catpvs(sv, "-I");
 		sv_catpvn(sv, p, len);
 		sv_catpvs(sv, " ");
@@ -3093,7 +3099,8 @@ Perl_moreswitches(pTHX_ const char *s)
 		    p++;
 	    } while (*p && *p != '-');
 	    e = savepvn(s, e-s);
-	    incpush(e, TRUE, TRUE, FALSE, FALSE, TRUE);
+	    incpush(e,
+		    INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS|INCPUSH_UNSHIFT);
 	    Safefree(e);
 	    s = p;
 	    if (*s == '-')
@@ -4105,9 +4112,10 @@ S_init_perllib(pTHX)
 #else
 	if (s)
 #endif
-	    incpush(s, TRUE, TRUE, TRUE, FALSE, FALSE);
+	    incpush(s,
+		    INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS|INCPUSH_USE_SEP);
 	else
-	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE, TRUE, FALSE, FALSE);
+	    incpush(PerlEnv_getenv("PERLLIB"), INCPUSH_USE_SEP);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -4116,9 +4124,13 @@ S_init_perllib(pTHX)
 	char buf[256];
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
-	    do { incpush(buf,TRUE,TRUE,TRUE,FALSE, FALSE); } while (my_trnlnm("PERL5LIB",buf,++idx));
+	    do {
+		incpush(buf, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS
+			|INCPUSH_USE_SEP);
+	    } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else
-	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE,FALSE,TRUE,FALSE, FALSE);
+	    while (my_trnlnm("PERLLIB",buf,idx++))
+		incpush(buf, INCPUSH_USE_SEP);
 #endif /* VMS */
     }
 
@@ -4126,11 +4138,13 @@ S_init_perllib(pTHX)
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, TRUE, TRUE, TRUE, TRUE, FALSE);
+    incpush(APPLLIB_EXP,
+	    INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS|INCPUSH_USE_SEP
+	    |INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef ARCHLIB_EXP
-    incpush(ARCHLIB_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(ARCHLIB_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #endif
 #ifdef MACOS_TRADITIONAL
     {
@@ -4143,74 +4157,81 @@ S_init_perllib(pTHX)
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE, FALSE, FALSE);
+	    incpush(SvPVX(privdir), INCPUSH_ADD_SUB_DIRS|INCPUSH_USE_SEP);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE, FALSE, FALSE);
+	    incpush(SvPVX(privdir), INCPUSH_ADD_SUB_DIRS|INCPUSH_USE_SEP);
 	
    	SvREFCNT_dec(privdir);
     }
     if (!PL_tainting)
-	incpush(":", FALSE, FALSE, FALSE, FALSE, FALSE);
+	incpush(":", 0);
 #else
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
 #if defined(WIN32)
-    incpush(PRIVLIB_EXP, TRUE, FALSE, TRUE, TRUE, FALSE);
+    incpush(PRIVLIB_EXP,
+	    INCPUSH_ADD_SUB_DIRS|INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #else
-    incpush(PRIVLIB_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(PRIVLIB_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef SITEARCH_EXP
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(SITEARCH_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(SITEARCH_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
     /* this picks up sitearch as well */
-    incpush(SITELIB_EXP, TRUE, FALSE, TRUE, TRUE, FALSE);
+    incpush(SITELIB_EXP,
+	    INCPUSH_ADD_SUB_DIRS|INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  else
-    incpush(SITELIB_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(SITELIB_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    incpush(SITELIB_STEM, FALSE, TRUE, TRUE, TRUE, FALSE);
+    incpush(SITELIB_STEM,
+	    INCPUSH_ADD_OLD_VERS|INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(PERL_VENDORARCH_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(PERL_VENDORARCH_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
-    incpush(PERL_VENDORLIB_EXP, TRUE, FALSE, TRUE, TRUE, FALSE);	/* this picks up vendorarch as well */
+    /* this picks up vendorarch as well */
+    incpush(PERL_VENDORLIB_EXP,
+	    INCPUSH_ADD_SUB_DIRS|INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  else
-    incpush(PERL_VENDORLIB_EXP, FALSE, FALSE, TRUE, TRUE, FALSE);
+    incpush(PERL_VENDORLIB_EXP, INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    incpush(PERL_VENDORLIB_STEM, FALSE, TRUE, TRUE, TRUE, FALSE);
+    incpush(PERL_VENDORLIB_STEM,
+	    INCPUSH_ADD_OLD_VERS|INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE, TRUE, TRUE, FALSE);
+    incpush(PERL_OTHERLIBDIRS, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS
+	    |INCPUSH_USE_SEP|INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!PL_tainting)
-	incpush(".", FALSE, FALSE, FALSE, FALSE, FALSE);
+	incpush(".", 0);
 #endif /* MACOS_TRADITIONAL */
 }
 
@@ -4251,10 +4272,14 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
 }
 
 STATIC void
-S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
-	  bool canrelocate, bool unshift)
+S_incpush(pTHX_ const char *dir, U32 flags)
 {
     dVAR;
+    const U8 addsubdirs  = flags & INCPUSH_ADD_SUB_DIRS;
+    const U8 addoldvers  = flags & INCPUSH_ADD_OLD_VERS;
+    const U8 usesep      = flags & INCPUSH_USE_SEP;
+    const U8 canrelocate = flags & INCPUSH_CAN_RELOCATE;
+    const U8 unshift     = flags & INCPUSH_UNSHIFT;
     SV *subdir = NULL;
     const char *p = dir;
     AV *inc;
