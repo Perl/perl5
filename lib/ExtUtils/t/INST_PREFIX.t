@@ -103,6 +103,7 @@ is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
 my($perl_src, $mm_perl_src);
 if( $ENV{PERL_CORE} ) {
     $perl_src = File::Spec->catdir($Updir, $Updir);
+    $perl_src = VMS::Filespec::vmsify($perl_src) if $Is_VMS;
     $perl_src = File::Spec->canonpath($perl_src);
     $mm_perl_src = File::Spec->canonpath($mm->{PERL_SRC});
 }
@@ -153,6 +154,7 @@ while( my($type, $vars) = each %Install_Vars) {
     _set_config(installman3dir => '');
 
     my $wibble = File::Spec->catdir(qw(wibble and such));
+    $wibble = VMS::Filespec::vmspath($wibble) if $Is_VMS;
     my $stdout = tie *STDOUT, 'TieOut' or die;
     my $mm = WriteMakefile(
                            NAME          => 'Big::Dummy',
@@ -187,7 +189,9 @@ while( my($type, $vars) = each %Install_Vars) {
                    INSTALLMAN3DIR=> 'foo/bar/baz',
                   );
 
-    is( $mm->{INSTALLVENDORMAN1DIR}, File::Spec->catdir('foo','bar'), 
+    my $expect = File::Spec->catdir('foo','bar');
+    $expect = VMS::Filespec::vmspath($expect) if $Is_VMS;
+    is( $mm->{INSTALLVENDORMAN1DIR}, $expect, 
                       'installvendorman1dir (in %Config) not modified' );
     isnt( $mm->{INSTALLVENDORMAN3DIR}, '', 
                       'installvendorman3dir (not in %Config) set'  );
@@ -212,9 +216,14 @@ while( my($type, $vars) = each %Install_Vars) {
                            VERSION_FROM  => 'lib/Big/Dummy.pm',
                            PERL_CORE     => $ENV{PERL_CORE},
                           );
-
-    is( $mm->{INSTALLMAN1DIR}, File::Spec->catdir('foo', 'bar') );
-    is( $mm->{INSTALLMAN3DIR}, File::Spec->catdir('foo', 'baz') );
+    my $expect1 = File::Spec->catdir('foo', 'bar');
+    my $expect2 = File::Spec->catdir('foo', 'baz');
+    if ($Is_VMS) {
+        $expect1 = VMS::Filespec::vmspath($expect1);
+        $expect2 = VMS::Filespec::vmspath($expect2);
+    }
+    is( $mm->{INSTALLMAN1DIR}, $expect1 );
+    is( $mm->{INSTALLMAN3DIR}, $expect2 );
     SKIP: {
         skip "VMS must expand macros in INSTALL* vars", 4 if $Is_VMS;
 
@@ -246,8 +255,14 @@ while( my($type, $vars) = each %Install_Vars) {
                            PERL_CORE     => $ENV{PERL_CORE},
                           );
 
-    is( $mm->{INSTALLMAN1DIR}, File::Spec->catdir('foo', 'bar') );
-    is( $mm->{INSTALLMAN3DIR}, File::Spec->catdir('foo', 'baz') );
+    my $expect1 = File::Spec->catdir('foo', 'bar');
+    my $expect2 = File::Spec->catdir('foo', 'baz');
+    if ($Is_VMS) {
+        $expect1 = VMS::Filespec::vmspath($expect1);
+        $expect2 = VMS::Filespec::vmspath($expect2);
+    }
+    is( $mm->{INSTALLMAN1DIR}, $expect1 );
+    is( $mm->{INSTALLMAN3DIR}, $expect2 );
     SKIP: {
         skip "VMS must expand macros in INSTALL* vars", 2 if $Is_VMS;
         is( $mm->{INSTALLSITEMAN1DIR},   '$(INSTALLMAN1DIR)' );
