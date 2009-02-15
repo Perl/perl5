@@ -4140,10 +4140,6 @@ S_init_perllib(pTHX_ U32 old_vers)
     }
 #endif
 
-#ifdef ARCHLIB_EXP
-    if (!old_vers)
-	incpush_use_sep(ARCHLIB_EXP, INCPUSH_CAN_RELOCATE);
-#endif
     if (!old_vers) {
 #ifdef MACOS_TRADITIONAL
 	Stat_t tmpstatbuf;
@@ -4152,6 +4148,11 @@ S_init_perllib(pTHX_ U32 old_vers)
 	
 	if (!macperl)
 	    macperl = "";
+
+#  ifdef ARCHLIB_EXP
+    if (!old_vers)
+	incpush_use_sep(ARCHLIB_EXP, INCPUSH_CAN_RELOCATE);
+#  endif
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
@@ -4164,15 +4165,6 @@ S_init_perllib(pTHX_ U32 old_vers)
 	if (!PL_tainting)
 	    S_incpush(aTHX_ STR_WITH_LEN(":"), 0);
 #else
-#ifndef PRIVLIB_EXP
-#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
-#endif
-
-#if defined(WIN32)
-	incpush_use_sep(PRIVLIB_EXP, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#else
-	incpush_use_sep(PRIVLIB_EXP, INCPUSH_CAN_RELOCATE);
-#endif
 
 #ifdef SITEARCH_EXP
     /* sitearch is always relative to sitelib on Windows for
@@ -4220,6 +4212,21 @@ S_init_perllib(pTHX_ U32 old_vers)
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
     incpush_use_sep(PERL_VENDORLIB_STEM, old_vers|INCPUSH_CAN_RELOCATE);
+#endif
+
+    if (!old_vers)
+#ifdef ARCHLIB_EXP
+	incpush_use_sep(ARCHLIB_EXP, INCPUSH_CAN_RELOCATE);
+#endif
+
+#ifndef PRIVLIB_EXP
+#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
+#endif
+
+#if defined(WIN32)
+	incpush_use_sep(PRIVLIB_EXP, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+#else
+	incpush_use_sep(PRIVLIB_EXP, INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
