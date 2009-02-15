@@ -1288,6 +1288,7 @@
 #define find_beginning		S_find_beginning
 #define forbid_setid		S_forbid_setid
 #define incpush			S_incpush
+#define incpush_use_sep		S_incpush_use_sep
 #define init_interp		S_init_interp
 #define init_ids		S_init_ids
 #define init_main_stash		S_init_main_stash
@@ -3625,7 +3626,8 @@
 #ifdef PERL_CORE
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
-#define incpush(a,b)		S_incpush(aTHX_ a,b)
+#define incpush(a,b,c)		S_incpush(aTHX_ a,b,c)
+#define incpush_use_sep(a,b)	S_incpush_use_sep(aTHX_ a,b)
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
