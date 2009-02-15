@@ -51,6 +51,14 @@ C<Attribute::Handlers> upgraded from version 0.79 to 0.81
 
 =item *
 
+C<Archive::Extract> upgraded from version 0.24 to 0.30
+
+=item *
+
+C<Archive::Tar> upgraded from version 1.38 to 1.42
+
+=item *
+
 C<B> upgraded from version 1.17 to 1.22
 
 =item *
@@ -63,7 +71,20 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
-C<Unicode::UCD> upgraded from version 0.25 to 0.26
+C<Module::CoreList> upgraded from version 2.13 to 2.17
+
+
+=item *
+
+C<Test::Simple> upgraded from version 0.80 to 0.86_01 XXX not a CPAN release
+
+=item *
+
+C<Unicode::UCD> upgraded from version 0.25 to 0.27
+
+=item *
+
+C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
 
 =back
 
@@ -109,8 +130,20 @@ The debugger now works with lvalue subroutines
 
 =item *
 
+The debugger's C<m> command was broken on modules that defined constants
+[RT #61222].
+
+
+=item *
+
 C<crypt()> and string complement could return tainted values for untainted
 arguments [RT # 59998].
+
+=item *
+
+The C<-i.sufffix> command-line switch now recreates the file using
+restricted permissions, before changing its mode to match the original
+file. This eliminates a potential race condition.
 
 =back
 
@@ -119,6 +152,10 @@ arguments [RT # 59998].
 =head1 Changed Internals
 
 C<vcroak()> now accepts a null first argument.
+
+New macros C<dSAVEDERRNO>, C<dSAVE_ERRNO>, C<SAVE_ERRNO>, C<RESTORE_ERRNO>
+have been added to formalise the temporary saving of the C<errno>
+variable.
 
 =head1 Known Problems
 
