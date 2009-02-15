@@ -3631,7 +3631,7 @@
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
-#define init_perllib()		S_init_perllib(aTHX)
+#define init_perllib(a)		S_init_perllib(aTHX_ a)
 #define init_postdump_symbols(a,b,c)	S_init_postdump_symbols(aTHX_ a,b,c)
 #define init_predump_symbols()	S_init_predump_symbols(aTHX)
 #define my_exit_jump()		S_my_exit_jump(aTHX)
