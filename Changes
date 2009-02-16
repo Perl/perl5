@@ -75,80 +75,143 @@ indicator:
 
 
 ----------------
-Version 5.005_04        Fourth maintenance release of 5.005
+Version 5.005_05        Fifth maintenance release of 5.005
 ----------------
 
 
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/09/02  08:19:41
-        Log: Update time.t to blead's as it was occasionally failing
+[33a728] By: acme                                  on 2009/02/16  15:45:27
+        Log: Copy over perlhist from blead
      Branch: maint-5.005/perl
-           ! t/op/time.t
+           ! pod/perlhist.pod
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/09/01  21:07:49
-        Log: Fix IPC::SysV test under VC++ 6.0 (Thanks to Steve Hay)
+[4c71ee] By: acme                                  on 2009/02/16  15:41:38
+        Log: Add information about the 5.005_05 release to perldelta
      Branch: maint-5.005/perl
-           ! t/lib/ipc_sysv.t
+           ! pod/perldelta.pod
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/09/01  19:31:20
-        Log: For newer FreeBSDs the return type of malloc() and free()
-             is being guessed wrong because the 5.005 configure doesn't
-             check that if the malloc.h exists that it doesn't simply do 
-             "#error ..." as it does in a number of more recent OS - 
-             I've copied in the test from the blead Configure and
-             jiggled a few things around and all is hunk-dory - with 
-             this everything compiles and tests fine on 
-             FreeBSD 6.2-RELEASE-p4 (Thanks to Jonathan Stowe)
+[6cc52c] By: acme                                  on 2009/02/16  15:41:06
+        Log: Add a script to generate the Changes file from git
+     Branch: maint-5.005/perl
+           + Porting/genlog_git
+____________________________________________________________________________
+[891d57] By: acme                                  on 2009/01/11  21:37:08
+        Log: Add config.sh.old and */Makefile.old files to .gitignore
+     Branch: maint-5.005/perl
+           ! .gitignore
+____________________________________________________________________________
+[00951a] By: acme                                  on 2009/01/11  18:10:12
+        Log: Find signal names under recent sorts. Previously, you would get
+             "AAK! I can't compile the test programs -- Guessing"
      Branch: maint-5.005/perl
            ! Configure
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/10  16:14:49
+[205bd5] By: acme                                  on 2008/12/24  19:13:31
+        Log: Patched IPC::SysV to compile under recent Linuxes. No longer
+             include asm/page.h
+     Branch: maint-5.005/perl
+           ! ext/IPC/SysV/ChangeLog ext/IPC/SysV/SysV.xs
+____________________________________________________________________________
+[d64920] By: acme                                  on 2008/12/23  16:09:58
+        Log: Allow recent gccs (4.2.0 20060715 onwards) to build perl. It
+             switched from '<command line>' to '<command-line>'. From
+             Perforce change 28615 (Git
+             cf14425e2bd169ce935f76d359f3253b51e441a0)
+     Branch: maint-5.005/perl
+           ! makedepend.SH
+____________________________________________________________________________
+[cec7e5] By: acme                                  on 2008/12/23  15:59:12
+        Log: Add files to .gitignore which are generated while building perl
+     Branch: maint-5.005/perl
+           ! .gitignore
+____________________________________________________________________________
+[502572] By: acme                                  on 2008/12/19  12:04:25
+        Log: copy over bleads .gitignore
+     Branch: maint-5.005/perl
+           ! .gitignore
+____________________________________________________________________________
+[060039] By: acme                                  on 2007/10/02  07:20:07
+        Log: Update time.t to blead's as it was occasionally failing
+     Branch: maint-5.005/perl
+           ! Changes t/op/time.t
+____________________________________________________________________________
+[0216df] By: acme                                  on 2007/10/02  06:49:52
+        Log: Fix IPC::SysV test under VC++ 6.0 (Thanks to Steve Hay)
+     Branch: maint-5.005/perl
+           ! Changes t/lib/ipc_sysv.t
+____________________________________________________________________________
+[c4bc74] By: acme                                  on 2007/10/01  18:41:51
+        Log: For newer FreeBSDs the return type of malloc() and free() is
+             being guessed wrong because the 5.005 configure doesn't check
+             that if the malloc.h exists that it doesn't simply do "#error
+             ..." as it does in a number of more recent OS - I've copied in
+             the test from the blead Configure and jiggled a few things
+             around and all is hunk-dory - with this everything compiles and
+             tests fine on FreeBSD 6.2-RELEASE-p4 (Thanks to Jonathan Stowe)
+     Branch: maint-5.005/perl
+           ! Changes Configure
+____________________________________________________________________________
+[faa7dc] By: acme                                  on 2007/07/01  14:27:22
+        Log: remove TODO
+     Branch: maint-5.005/perl
+           ! TODO
+____________________________________________________________________________
+[1024a7] By: acme                                  on 2007/06/10  15:16:57
         Log: Fix line endings on Windows files
      Branch: maint-5.005/perl
-           ! README.dos README.win32 djgpp/configure.bat win32/Makefile
-           ! win32/makefile.mk
+           ! Changes README.dos README.win32 djgpp/configure.bat
+             win32/Makefile win32/makefile.mk
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/10  16:10:19
+[44fd7e] By: acme                                  on 2007/06/10  15:11:33
         Log: Update compare test from blead (hopefully is more portable)
      Branch: maint-5.005/perl
-           ! t/op/cmp.t
+           ! Changes t/op/cmp.t
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/10  13:21:12
+[1c5f2b] By: acme                                  on 2007/06/10  12:21:32
         Log: Update IPC SysV test from blead (hopefully is more graceful
              under duress)
      Branch: maint-5.005/perl
-           ! t/lib/ipc_sysv.t
+           ! Changes t/lib/ipc_sysv.t
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/10  13:05:58
+[7a4182] By: acme                                  on 2007/06/10  12:07:01
         Log: Update perlbug email address to perlbug@perl.org
      Branch: maint-5.005/perl
-           ! utils/perlbug.PL pod/perllocale.pod pod/perlfaq2.pod 
-           ! pod/perl.pod hints/README.hints configure.com README.win32
-           ! README.vms README INSTALL Configure
+           ! Changes Configure INSTALL README README.vms README.win32
+             configure.com hints/README.hints pod/perl.pod pod/perlfaq2.pod
+             pod/perllocale.pod utils/perlbug.PL
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/10  12:52:18
-        Log: Tests in t/lib/db-recno.t fail on both of these machines.
-             The attached patch fixes this by making sure the file DB_File
-             is being tied to is created. The cause is probably in the 
-             DB_File.xs DoTie_ but I didn't track down where
-             (patch by Avar)
+[f5f404] By: acme                                  on 2007/06/10  11:58:03
+        Log: Tests in t/lib/db-recno.t fail on both of these machines. The
+             attached patch fixes this by making sure the file DB_File is
+             being tied to is created. The cause is probably in the
+             DB_File.xs DoTie_ but I didn't track down where (patch by Avar)
      Branch: maint-5.005/perl
-           ! t/lib/db-recno.t
+           ! Changes t/lib/db-recno.t
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/09  07:27:22
+[4bdb4d] By: acme                                  on 2007/06/09  14:01:16
+        Log: whoops, fix the right files
+     Branch: maint-5.005/perl
+           ! Changes t/lib/db-btree.t t/lib/db-hash.t
+____________________________________________________________________________
+[4e1d75] By: acme                                  on 2007/06/09  06:31:31
         Log: Skip the test if DB_File is not being built
      Branch: maint-5.005/perl
-           ! t/lib/db-btree.t
+           ! Changes t/lib/db-hash.t
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/02  15:36:02
+[2046d3] By: acme                                  on 2007/06/04  14:13:05
+        Log: TODO
+     Branch: maint-5.005/perl
+           ! TODO
+____________________________________________________________________________
+[063cca] By: acme                                  on 2007/06/02  14:37:31
         Log: Update for new releases
      Branch: maint-5.005/perl
-           ! pod/perlhist
+           ! Changes pod/perlhist.pod
 ____________________________________________________________________________
-[      ] By: acme                                  on 2007/06/02  15:19:45
-        Log: Fix for Ubuntu Feisty
+[723ed9] By: acme                                  on 2007/06/02  14:28:47
+        Log: fix for ubuntu feisty
      Branch: maint-5.005/perl
-           ! makedepend.SH
+           ! Changes makedepend.SH
 ____________________________________________________________________________
 [ 22360] By: acme                                  on 2004/02/23  13:23:16
         Log: Update for 5.005_04 release
