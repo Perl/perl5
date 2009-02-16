@@ -1,8 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.29 2009/02/01 13:14:37 dankogai Exp $
+# $Id: Changes,v 2.31 2009/02/16 06:18:09 dankogai Exp dankogai $
 #
-$Revision: 2.29 $ $Date: 2009/02/01 13:14:37 $
+$Revision: 2.31 $ $Date: 2009/02/16 06:18:09 $
+! lib/Encode/MIME/Header.pm
+  "Revert [29767] and [29771] since it breaks perl 5.8" by miyagawa
+  http://coderepos.org/share/changeset/30111
+
+2.30 2009/02/15 17:44:13
+! encoding.pm
+  fixed regexes, et cetera. by drry
+  http://coderepos.org/share/changeset/29767
+! lib/Encode/MIME/Header.pm
+  Addressed: Encode::MIME::Header::decode should respect CHECK
+  http://rt.cpan.org/Ticket/Display.html?id=43204
+  http://coderepos.org/share/changeset/29767
+
+2.29 2009/02/01 13:14:37
 ! Encode.pm
   VERSION++ just to make PAUSE happy
   Message-Id: <877i4anwwt.fsf@k75.linux.bogus>
