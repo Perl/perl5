@@ -1,0 +1,44 @@
+#!perl
+use strict;
+use warnings;
+use IO::File;
+use Perl6::Say;
+use DateTime;
+
+my $fh = IO::File->new("git log --pretty=raw --stat -z | ") || die $!;
+$/ = "\0";
+while ( my $bit = <$fh> ) {
+    last if $bit =~ /p4raw-id/;
+$bit =~ s/git-svn-id.+$//m;
+
+    my ($commit) = $bit =~ /^commit ([a-z0-9]+)$/m;
+    my ( $author, $epoch ) = $bit =~ /^author (.+)<.+?> (\d+)/m;
+
+    my $dt = DateTime->from_epoch( epoch => $epoch );
+    my $datetime = $dt->ymd('/') . '  ' . $dt->hms;
+
+    my $comment = join ' ',
+        map { $_ =~ s/^    //; $_ } grep { $_ =~ /^    / } split "\n", $bit;
+    $comment =~ s/ {2,}/ /g;
+$comment =~ s/Log://;
+$comment =~ s/^ +//;
+    my $files = join ' ', map { $_ =~ s/^ //; $_ =~ s/ \|.+$//ms; $_ }
+        grep { $_ =~ /^ [a-zA-z.]/ } split "\n", $bit;
+    $files =~ s/ {2,}/ /g;
+
+    format STDOUT =
+____________________________________________________________________________
+[@<<<<<] By: acme                                  on @<<<<<<<<<<<<<<<<<<<<<
+$commit                                               $datetime
+        Log: ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+             $comment
+~~           ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+             $comment
+     Branch: maint-5.005/perl
+           ! ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+             $files
+~~           ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+             $files
+.
+    write STDOUT;
+}
