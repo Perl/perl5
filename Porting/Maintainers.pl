@@ -388,7 +388,7 @@ package Maintainers;
 		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm
 			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
 		'CPAN' => 1,
-		'UPSTREAM' => undef,
+		'UPSTREAM' => 'blead',
 		},
 
 	'ExtUtils::MakeMaker' =>
