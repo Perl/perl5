@@ -1,7 +1,7 @@
 #ifndef __PATCHLEVEL_H_INCLUDED__
 #define PATCHLEVEL 5
 #undef SUBVERSION     /* OS/390 has a SUBVERSION in a system header */
-#define SUBVERSION 4
+#define SUBVERSION 5
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -40,6 +40,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
+	,"RC1 - 5.005_05 release candidate 1"
 	,NULL
 };
 
