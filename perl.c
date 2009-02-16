@@ -4179,7 +4179,9 @@ S_init_perllib(pTHX_ U32 old_vers)
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
     /* this picks up sitearch as well */
-	incpush_use_sep(SITELIB_EXP, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	s = win32_get_sitelib(PERL_FS_VERSION);
+	if (s)
+	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
 	incpush_use_sep(SITELIB_EXP, INCPUSH_CAN_RELOCATE);
 #  endif
@@ -4203,8 +4205,9 @@ S_init_perllib(pTHX_ U32 old_vers)
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
     /* this picks up vendorarch as well */
-	incpush_use_sep(PERL_VENDORLIB_EXP,
-			INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	s = win32_get_vendorlib(PERL_FS_VERSION);
+	if (s)
+	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
 	incpush_use_sep(PERL_VENDORLIB_EXP, INCPUSH_CAN_RELOCATE);
 #  endif
@@ -4226,7 +4229,9 @@ S_init_perllib(pTHX_ U32 old_vers)
 #endif
 
 #if defined(WIN32)
-	incpush_use_sep(PRIVLIB_EXP, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	s = win32_get_privlib(PERL_FS_VERSION);
+	if (s)
+	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else
 	incpush_use_sep(PRIVLIB_EXP, INCPUSH_CAN_RELOCATE);
 #endif
