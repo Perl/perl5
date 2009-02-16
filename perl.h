@@ -4729,6 +4729,10 @@ typedef struct exitlistentry {
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
 
+#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
+				STRINGIFY(PERL_VERSION) "." \
+				STRINGIFY(PERL_SUBVERSION)
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #  include "perlvars.h"
