@@ -23,6 +23,7 @@ Porting/findvars	Find occurrences of words
 Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
+Porting/genlog_git		Generate formatted changelogs by querying Git
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs
 Porting/patching.pod	How to report changes made to Perl
