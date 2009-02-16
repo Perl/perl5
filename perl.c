@@ -4474,8 +4474,8 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH,
-			       SVfARG(libdir));
+		sv_setsv(subdir, libdir);
+		sv_catpvs(subdir, PERL_ARCH_FMT_PATH);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../archname if -d .../archname */
