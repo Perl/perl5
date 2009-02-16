@@ -2021,6 +2021,13 @@ ____________________________________________________________________________
      Branch: perl
 	   + lib/ExtUtils/MM_Haiku.pm
 ____________________________________________________________________________
+[ 34631] By: merijn				   on 2008/10/29  08:18:00
+	Log: Two haiku files to add
+     Branch: lib
+	   + ExtUtils/MM_Haiku.pm
+     Branch: perl
+	   + hints/haiku.sh
+____________________________________________________________________________
 [ 34630] By: merijn				   on 2008/10/29  08:09:06
 	Log: Subject: [PATCH] Haiku Port
 	     From: Ingo Weinhold <ingo_weinhold@gmx.de>
