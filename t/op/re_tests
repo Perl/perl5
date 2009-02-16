@@ -1365,3 +1365,5 @@ foo(\h)bar	foo\tbar	y	$1	\t
 
 # was generating malformed utf8
 '[\x{100}\xff]'i	\x{ff}	y	$&	\x{ff}
+
+((??{ "(?:|)" }))\s	C\x20 	y	-	-
