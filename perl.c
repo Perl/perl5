@@ -5188,8 +5188,8 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH,
-			       SVfARG(libdir));
+		sv_setsv(subdir, libdir);
+		sv_catpvs(subdir, PERL_ARCH_FMT_PATH);
 		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../archname if -d .../archname */
