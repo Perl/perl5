@@ -6,6 +6,15 @@ perldelta - what's new for perl5.005
 
 This document describes differences between the 5.004 release and this one.
 
+=head1 5.005_05
+
+This section describes the differences between the 5.005_04 and
+5.005_05 releases. 5.005_05 is mainly an operating system
+compatibility release.
+
+Perl now compiles and runs under modern Unix systems, including those
+with recent Berkeley DB libraries or GCC.
+
 =head1 5.005_04
 
 This section describes the differences between the 5.005_03 and
