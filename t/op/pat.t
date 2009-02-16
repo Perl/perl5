@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 3962;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 3965;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -4117,6 +4117,13 @@ sub run_tests {
 	   }
 	}
 	iseq "@res","#1 #2";
+    }
+    {
+	no warnings 'closure';
+	my $re = qr/A(??{"1"})/;
+	ok "A1B" =~ m/^((??{ $re }))((??{"B"}))$/;
+	ok $1 eq "A1";
+	ok $2 eq "B";
     }
     #
     # This should be the last test.
