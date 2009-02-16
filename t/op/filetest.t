@@ -80,13 +80,14 @@ ok( (-s -f 'TEST' > 1), "-s returns real size" );
 ok( -f -s 'TEST' == 1 );
 
 # now with an empty file
-open my $fh, ">", "foo";
+my $tempfile = tempfile();
+open my $fh, ">", $tempfile;
 close $fh;
-ok( -f "foo" );
-is( -s "foo", 0 );
-is( -f -s "foo", 0 );
-is( -s -f "foo", 0 );
-unlink "foo";
+ok( -f $tempfile );
+is( -s $tempfile, 0 );
+is( -f -s $tempfile, 0 );
+is( -s -f $tempfile, 0 );
+unlink $tempfile;
 
 # test that _ is a bareword after filetest operators
 

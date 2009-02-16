@@ -285,7 +285,7 @@ my $TEST = catfile(curdir(), 'TEST');
 # How about command-line arguments? The problem is that we don't
 # always get some, so we'll run another process with some.
 SKIP: {
-    my $arg = catfile(curdir(), tempfile());
+    my $arg = tempfile();
     open PROG, "> $arg" or die "Can't create $arg: $!";
     print PROG q{
 	eval { join('', @ARGV), kill 0 };
