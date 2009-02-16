@@ -26,7 +26,12 @@
 #  if (DJGPP==2 && DJGPP_MINOR < 2)
 #    define NO_LOCALECONV_MON_THOUSANDS_SEP
 #  endif
-#  define PERL_FS_VER_FMT	"%d_%d_%d"
+#  ifndef PERL_CORE
+#    define PERL_FS_VER_FMT	"%d_%d_%d"
+#  endif
+#  define PERL_FS_VERSION	STRINGIFY(PERL_REVISION) "_" \
+				STRINGIFY(PERL_VERSION) "_" \
+				STRINGIFY(PERL_SUBVERSION)
 #else	/* DJGPP */
 #  ifdef WIN32
 #    define PERL_SYS_INIT_BODY(c,v)					\

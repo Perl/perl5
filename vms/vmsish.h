@@ -418,7 +418,12 @@ struct interp_intern {
 #define HAS_KILL
 #define HAS_WAIT
 
-#define PERL_FS_VER_FMT		"%d_%d_%d"
+#ifndef PERL_CORE
+#  define PERL_FS_VER_FMT	"%d_%d_%d"
+#endif
+#define PERL_FS_VERSION		STRINGIFY(PERL_REVISION) "_" \
+				STRINGIFY(PERL_VERSION) "_" \
+				STRINGIFY(PERL_SUBVERSION)
 /* Temporary; we need to add support for this to Configure.Com */
 #ifdef PERL_INC_VERSION_LIST
 #  undef PERL_INC_VERSION_LIST
