@@ -4462,15 +4462,18 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #endif
 	    if (addsubdirs) {
 #ifdef MACOS_TRADITIONAL
-#define PERL_ARCH_FMT 		"%s:"
+#define PERL_ARCH_FMT_PREFIX	""
+#define PERL_ARCH_FMT_SUFFIX	":"
 #define PERL_ARCH_FMT_PATH	PERL_FS_VERSION ""
 #else
-#define PERL_ARCH_FMT 		"/%s"
+#define PERL_ARCH_FMT_PREFIX	"/"
+#define PERL_ARCH_FMT_SUFFIX	""
 #define PERL_ARCH_FMT_PATH	"/" PERL_FS_VERSION
 #endif
 		/* .../version/archname if -d .../version/archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH PERL_ARCH_FMT,
-			       SVfARG(libdir), ARCHNAME);
+		sv_setsv(subdir, libdir);
+		sv_catpvs(subdir, PERL_ARCH_FMT_PATH \
+			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../version if -d .../version */
@@ -4479,8 +4482,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../archname if -d .../archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT,
-			       SVfARG(libdir), ARCHNAME);
+		sv_setsv(subdir, libdir);
+		sv_catpvs(subdir,
+			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 	    }
@@ -4489,7 +4493,8 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
-		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT,
+		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PREFIX \
+				   "%s" PERL_ARCH_FMT_SUFFIX,
 				   SVfARG(libdir), *incver);
 		    subdir = S_incpush_if_exists(aTHX_ av, subdir);
 		}
