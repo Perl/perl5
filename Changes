@@ -80,6 +80,21 @@ Version 5.005_05        Fifth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[bf2d1f] By: acme                                  on 2009/02/16  16:04:22
+        Log: Ignore .git files
+     Branch: maint-5.005/perl
+           ! Porting/makerel
+____________________________________________________________________________
+[e7612f] By: acme                                  on 2009/02/16  16:01:44
+        Log: Add Porting/genlog_git to the MANIFEST
+     Branch: maint-5.005/perl
+           ! MANIFEST
+____________________________________________________________________________
+[fceb80] By: acme                                  on 2009/02/16  15:48:14
+        Log: Update for 5.005_05 RC1
+     Branch: maint-5.005/perl
+           ! patchlevel.h
+____________________________________________________________________________
 [33a728] By: acme                                  on 2009/02/16  15:45:27
         Log: Copy over perlhist from blead
      Branch: maint-5.005/perl
