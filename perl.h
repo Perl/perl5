@@ -3060,10 +3060,18 @@ typedef pthread_key_t	perl_key;
 #  define MEMBER_TO_FPTR(name)		name
 #endif
 
+#ifndef PERL_CORE
 /* format to use for version numbers in file/directory names */
 /* XXX move to Configure? */
-#ifndef PERL_FS_VER_FMT
-#  define PERL_FS_VER_FMT	"%d.%d.%d"
+/* This was only ever used for the current version, and that can be done at
+   compile time, as PERL_FS_VERSION, so should we just delete it?  */
+#  ifndef PERL_FS_VER_FMT
+#    define PERL_FS_VER_FMT	"%d.%d.%d"
+#  endif
+#endif
+
+#ifndef PERL_FS_VERSION
+#  define PERL_FS_VERSION	PERL_VERSION_STRING
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a

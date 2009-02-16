@@ -4463,23 +4463,19 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    if (addsubdirs) {
 #ifdef MACOS_TRADITIONAL
 #define PERL_ARCH_FMT 		"%s:"
-#define PERL_ARCH_FMT_PATH	PERL_FS_VER_FMT ""
+#define PERL_ARCH_FMT_PATH	PERL_FS_VERSION ""
 #else
 #define PERL_ARCH_FMT 		"/%s"
-#define PERL_ARCH_FMT_PATH	"/" PERL_FS_VER_FMT
+#define PERL_ARCH_FMT_PATH	"/" PERL_FS_VERSION
 #endif
 		/* .../version/archname if -d .../version/archname */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH PERL_ARCH_FMT,
-			       SVfARG(libdir),
-			       (int)PERL_REVISION, (int)PERL_VERSION,
-			       (int)PERL_SUBVERSION, ARCHNAME);
+			       SVfARG(libdir), ARCHNAME);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../version if -d .../version */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH,
-			       SVfARG(libdir),
-			       (int)PERL_REVISION, (int)PERL_VERSION,
-			       (int)PERL_SUBVERSION);
+			       SVfARG(libdir));
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 		/* .../archname if -d .../archname */
