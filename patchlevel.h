@@ -17,10 +17,6 @@
 #define PERL_VERSION	10		/* epoch */
 #define PERL_SUBVERSION	0		/* generation */
 
-#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
-				STRINGIFY(PERL_VERSION) "." \
-				STRINGIFY(PERL_SUBVERSION)
-
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
    compatibility to run XS code built with the older version).
