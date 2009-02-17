@@ -37,11 +37,12 @@ our $ov_obj = Test::Object::CopyOverload->new;
 our $obj = Test::Object::NoOverload->new;
 
 # Load and run the tests
-my @tests = map [chomp and split /\t+/, $_, 3], grep !/^#/ && /\S/, <DATA>;
-plan tests => 2 * @tests;
+plan "no_plan";
 
-for my $test (@tests) {
-    my ($yn, $left, $right) = @$test;
+while (<DATA>) {
+    next if /^#/ || !/\S/;
+    chomp;
+    my ($yn, $left, $right) = split /\t+/;
 
     match_test($yn, $left, $right);
     match_test($yn, $right, $left);
@@ -52,21 +53,23 @@ sub match_test {
 
     die "Bad test spec: ($yn, $left, $right)"
 	unless $yn eq "" || $yn eq "!" || $yn eq '@';
-    
+
     my $tstr = "$left ~~ $right";
-    
-    my $res;
-    $res = eval $tstr // "";	#/ <- fix syntax colouring
+
+    my $res = eval $tstr;
 
     chomp $@;
 
     if ( $yn eq '@' ) {
-	ok( $@ ne '', sprintf "%s%s: %s", $tstr, $@ ? ( ', $@', $@ ) : ( '', $res ) );
+	ok( $@ ne '', "$tstr dies" )
+	    and print "# \$\@ was: $@\n";
     } else {
+	my $test_name = $tstr . ($yn eq '!' ? " does not match" : " matches");
 	if ( $@ ne '' ) {
-	    fail("$tstr, \$\@: $@");
+	    fail($test_name);
+	    print "# \$\@ was: $@\n";
 	} else {
-	    ok( ($yn eq '!' xor $res), "$tstr: $res");
+	    ok( ($yn eq '!' xor $res), $test_name );
 	}
     }
 }
