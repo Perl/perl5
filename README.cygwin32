@@ -8,9 +8,9 @@ project and the Cygwin32 API.
 
 2)  Modify the ld2 script by making the PERLPATH variable contain the
     Perl source root directory.  For example, if you extracted perl to
-    "/perl5.004", change the script so it contains the line:
+    "/perl5.005", change the script so it contains the line:
 
-	PERLPATH=/perl5.004
+	PERLPATH=/perl5.005
 
 3)  Copy the two scripts ld2 and gcc2 from the cygwin32 subdirectory to a
     directory in your PATH environment variable.  For example, copy to
@@ -53,7 +53,7 @@ project and the Cygwin32 API.
     during the install process.  You can get around this by invoking the
     install script using a full pathname for perl, such as:
 
-	/perl5.004/perl installperl
+	/perl5.005/perl installperl
 
     This should complete the installation process.
 
