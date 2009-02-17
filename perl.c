@@ -4292,10 +4292,10 @@ STATIC void
 S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
-    const U8 addsubdirs  = flags & INCPUSH_ADD_SUB_DIRS;
-    const U8 addoldvers  = flags & INCPUSH_ADD_OLD_VERS;
-    const U8 canrelocate = flags & INCPUSH_CAN_RELOCATE;
-    const U8 unshift     = flags & INCPUSH_UNSHIFT;
+    const U8 addsubdirs  = (U8)flags & INCPUSH_ADD_SUB_DIRS;
+    const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
+    const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
+    const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
     const U8 push_basedir = (flags & INCPUSH_NOT_BASEDIR) ? 0 : 1;
     SV *subdir = NULL;
     AV *inc;
