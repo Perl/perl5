@@ -80,6 +80,23 @@ Version 5.005_05        Fifth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[827511] By: acme                                  on 2009/02/17  01:27:01
+        Log: Copy over FreeBSD hints from blead to make dynamic extensions
+             work (thanks Nicholas)
+     Branch: maint-5.005/perl
+           ! hints/freebsd.sh
+____________________________________________________________________________
+[744ae6] By: acme                                  on 2009/02/17  01:27:01
+        Log: Copy over FreeBSD hints from blead to make dynamic extensions
+             work (thanks Nicholas)
+     Branch: maint-5.005/perl
+           ! hints/freebsd.sh
+____________________________________________________________________________
+[ba76e1] By: acme                                  on 2009/02/16  16:20:47
+        Log: Remove Perl6::Say (thanks rgs), perltidy
+     Branch: maint-5.005/perl
+           ! Porting/genlog_git
+____________________________________________________________________________
 [bf2d1f] By: acme                                  on 2009/02/16  16:04:22
         Log: Ignore .git files
      Branch: maint-5.005/perl
