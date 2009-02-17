@@ -201,7 +201,7 @@ __DATA__
 
 #  - a regex
 	{foo => 1}	qr/^(fo[ox])$/
-!	+{0..100}	qr/[13579]$/
+!	+{0..99}	qr/[13579]$/
 
 #  - a string
 	+{foo => 1, bar => 2}	"foo"
@@ -267,7 +267,7 @@ __DATA__
 	%hash		[qw(bar)]
 !	%hash		[qw(a b c)]
 	%hash		%hash
-	%hash		{%hash}
+	%hash		+{%hash}
 	%hash		%tied_hash
 	%tied_hash	%tied_hash
 	%hash		{ foo => 5, bar => 10 }
