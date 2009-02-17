@@ -80,6 +80,12 @@ Version 5.005_05        Fifth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[265430] By: acme                                  on 2009/02/17  11:17:23
+        Log: Add a diag() method to t/lib/ipc_sysv.t (as we copied it from
+             blead)
+     Branch: maint-5.005/perl
+           ! t/lib/ipc_sysv.t
+____________________________________________________________________________
 [827511] By: acme                                  on 2009/02/17  01:27:01
         Log: Copy over FreeBSD hints from blead to make dynamic extensions
              work (thanks Nicholas)
