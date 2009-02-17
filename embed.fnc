@@ -1475,7 +1475,7 @@ s	|void	|find_beginning	|NN SV* linestr_sv|NN PerlIO *rsfp
 s	|void	|forbid_setid	|const char flag|const bool suidscript
 s	|void	|incpush	|NULLOK const char *const dir|STRLEN len \
 				|U32 flags
-s	|void	|incpush_use_sep|NN const char *p|U32 flags
+s	|void	|incpush_use_sep|NN const char *p|STRLEN len|U32 flags
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_main_stash

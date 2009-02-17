@@ -4108,11 +4108,11 @@ S_init_perllib(pTHX_ U32 old_vers)
 #else
 	if (s)
 #endif
-	    incpush_use_sep(s, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(s, 0, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
 	else if (!old_vers) {
 	    s = PerlEnv_getenv("PERLLIB");
 	    if (s)
-		incpush_use_sep(s, 0);
+		incpush_use_sep(s, 0, 0);
 	}
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
@@ -4123,11 +4123,11 @@ S_init_perllib(pTHX_ U32 old_vers)
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
 	    do {
-		incpush_use_sep(buf, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
+		incpush_use_sep(buf, 0, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
 	    } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else if (!old_vers)
 	    while (my_trnlnm("PERLLIB",buf,idx++))
-		incpush_use_sep(buf, 0);
+		incpush_use_sep(buf, 0, 0);
 #endif /* VMS */
     }
 
@@ -4136,9 +4136,9 @@ S_init_perllib(pTHX_ U32 old_vers)
 */
 #ifdef APPLLIB_EXP
     if (!old_vers) {
-	incpush_use_sep(APPLLIB_EXP, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
     } else {
-	incpush_use_sep(APPLLIB_EXP, old_vers|INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), old_vers|INCPUSH_CAN_RELOCATE);
     }
 #endif
 
@@ -4153,14 +4153,14 @@ S_init_perllib(pTHX_ U32 old_vers)
 
 #  ifdef ARCHLIB_EXP
     if (!old_vers)
-	incpush_use_sep(ARCHLIB_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush_use_sep(SvPVX(privdir), INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir), INCPUSH_ADD_SUB_DIRS);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
-	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
+	if (PerlLIO_stat(SvPVX(privdir), SvCUR(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
 	    incpush_use_sep(SvPVX(privdir), INCPUSH_ADD_SUB_DIRS);
 	
    	SvREFCNT_dec(privdir);
@@ -4172,7 +4172,7 @@ S_init_perllib(pTHX_ U32 old_vers)
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-	incpush_use_sep(SITEARCH_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -4181,16 +4181,16 @@ S_init_perllib(pTHX_ U32 old_vers)
     /* this picks up sitearch as well */
 	s = win32_get_sitelib(PERL_FS_VERSION);
 	if (s)
-	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	    incpush_use_sep(s, 0, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-	incpush_use_sep(SITELIB_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
     }
 
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    incpush_use_sep(SITELIB_STEM, old_vers|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), old_vers|INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!old_vers) {
@@ -4198,7 +4198,7 @@ S_init_perllib(pTHX_ U32 old_vers)
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-	incpush_use_sep(PERL_VENDORARCH_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -4207,21 +4207,21 @@ S_init_perllib(pTHX_ U32 old_vers)
     /* this picks up vendorarch as well */
 	s = win32_get_vendorlib(PERL_FS_VERSION);
 	if (s)
-	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	    incpush_use_sep(s, 0, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-	incpush_use_sep(PERL_VENDORLIB_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
     }
 
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    incpush_use_sep(PERL_VENDORLIB_STEM, old_vers|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), old_vers|INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!old_vers) {
 #ifdef ARCHLIB_EXP
-	incpush_use_sep(ARCHLIB_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifndef PRIVLIB_EXP
@@ -4231,18 +4231,18 @@ S_init_perllib(pTHX_ U32 old_vers)
 #if defined(WIN32)
 	s = win32_get_privlib(PERL_FS_VERSION);
 	if (s)
-	    incpush_use_sep(s, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+	    incpush_use_sep(s, 0, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else
-	incpush_use_sep(PRIVLIB_EXP, INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
     }
 
 #ifdef PERL_OTHERLIBDIRS
     if (!old_vers) {
-	incpush_use_sep(PERL_OTHERLIBDIRS, INCPUSH_ADD_SUB_DIRS
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), INCPUSH_ADD_SUB_DIRS
 			|INCPUSH_CAN_RELOCATE);
     } else {
-	incpush_use_sep(PERL_OTHERLIBDIRS, old_vers|INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), old_vers|INCPUSH_CAN_RELOCATE);
     }
 #endif
 
@@ -4544,33 +4544,36 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 }
 
 STATIC void
-S_incpush_use_sep(pTHX_ const char *p, U32 flags)
+S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 {
+    const char *s;
+    const char *end;
     /* This logic has been broken out from S_incpush(). It may be possible to
        simplify it.  */
 
     PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
 
+    if (!len)
+	len = strlen(p);
+
+    end = p + len;
+
     /* Break at all separators */
-    while (*p) {
-        const char *s;
+    while ((s = memchr(p, PERLLIB_SEP, end - p))) {
+	if (s == p) {
+	    /* skip any consecutive separators */
 
-	/* skip any consecutive separators */
-	while ( *p == PERLLIB_SEP ) {
 	    /* Uncomment the next line for PATH semantics */
+	    /* But you'll need to write tests */
 	    /* av_push(GvAVn(PL_incgv), newSVpvs(".")); */
-	    p++;
-	}
-
-	if ((s = strchr(p, PERLLIB_SEP)) != NULL ) {
+	} else {
 	    incpush(p, (STRLEN)(s - p), flags);
-	    p = s + 1;
 	}
-	else {
-	    incpush(p, 0, flags);
-	    return;
-	}
+	p = s + 1;
     }
+    if (p != end)
+	incpush(p, (STRLEN)(end - p), flags);
+
 }
 
 void
