@@ -95,20 +95,25 @@ __DATA__
 # OBJECT
 # - overloaded
 	$ov_obj		"key"
-	$ov_obj		{"key" => 1}
 !	$ov_obj		"foo"
+	$ov_obj		{"key" => 1}
+!	$ov_obj		{"foo" => 1}
+	$ov_obj		["key" => 1]
+!	$ov_obj		["foo" => 1]
 	$ov_obj		sub { shift ~~ "key" }
 !	$ov_obj		sub { shift ~~ "foo" }
 !	$ov_obj		\&foo
+	$ov_obj		\&bar
 @	$ov_obj		\&fatal
 !	$ov_obj		FALSE
 !	$ov_obj		\&FALSE
 !	$ov_obj		undef
+	$ov_obj		$ov_obj
 
 # regular object
 @	$obj	"key"
 @	$obj	{"key" => 1}
-@	$obj	$obj
+@	$obj	["key" => 1]
 @	$obj	sub { 1 }
 @	$obj	sub { 0 }
 @	$obj	\&foo
@@ -116,6 +121,7 @@ __DATA__
 @	$obj	FALSE
 @	$obj	\&FALSE
 !	$obj	undef
+@	$obj	$obj
 
 # CODE ref against argument
 #  - arg is code ref
@@ -146,8 +152,6 @@ __DATA__
 @	[]	\&fatal
 @	"foo"	\&fatal
 @	qr//	\&fatal
-@	$obj	\&bar
-	$ov_obj	\&bar
 
 # - null-prototyped subs
 	a_const		"a constant"
