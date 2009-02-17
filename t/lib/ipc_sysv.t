@@ -203,3 +203,8 @@ END {
     msgctl($msg,IPC_RMID,0)       if defined $msg;
     semctl($sem,0,IPC_RMID,undef) if defined $sem;
 }
+
+sub diag {
+    my $message = shift;
+    print "$message\n";
+}
