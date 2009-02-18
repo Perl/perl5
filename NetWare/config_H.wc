@@ -3066,7 +3066,7 @@
  *	be tacked onto this variable to generate a list of directories to search.
  */
 #define SITELIB "c:\\perl\\site\\5.11.0\\lib"		/**/
-#define SITELIB_EXP (nw_get_sitelib("5.11.0"))	/**/
+/*#define SITELIB_EXP ""	/**/
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:

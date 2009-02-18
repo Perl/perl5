@@ -29,7 +29,6 @@
 
 #ifdef NETWARE
 #include "nwutil.h"	
-char *nw_get_sitelib(const char *pl);
 #endif
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
