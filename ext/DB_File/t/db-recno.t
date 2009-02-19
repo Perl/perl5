@@ -1477,7 +1477,7 @@ sub test_splice {
 
     foreach ($ms_error, @ms_warnings) {
 	chomp;
-	s/ at \S+ line \d+\.?.*//s;
+    s/ at \S+(\s+\S+)*? line \d+\.?.*//s;
     }
 
     return "different errors: '$s_error' vs '$ms_error'"
