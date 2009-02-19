@@ -1,5 +1,10 @@
 
 
+1.819 18 February 2009
+
+   * t/db-recno.t fails if run in a path that contains spaces
+     [rt.cpan.org #43288]
+
 1.818 21 January 2009
 
    * Updated Makefile.PL for Strawberry Perl. 
