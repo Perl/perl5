@@ -637,7 +637,11 @@ And you can see the commits:
 
 If you approve of a specific commit, you can cherry pick it:
 
-  % git cherry-pick -x 3adac458cb1c1d41af47fc66e67b49c8dec2323f
+  % git cherry-pick 3adac458cb1c1d41af47fc66e67b49c8dec2323f
+
+Or you could just merge the whole branch if you like it all:
+
+  % git merge dandv/blead
 
 And then push back to the repository:
 
