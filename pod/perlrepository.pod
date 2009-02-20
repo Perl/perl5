@@ -9,10 +9,10 @@ perlrepository - Using the Perl source repository
 =head1 SYNOPSIS
 
 All of Perl's source code is kept centrally in a Git repository at
-I<perl5.git.perl.org>. The repository contains many Perl revisions
-from Perl 1 onwards and all the revisions from Perforce, the version
-control system we were using previously. This repository is accessible
-in different ways.
+I<perl5.git.perl.org>. The repository contains many Perl revisions from
+Perl 1 onwards and all the revisions from Perforce, the version control
+system we were using previously. This repository is accessible in
+different ways.
 
 The full repository takes up about 80MB of disk space. A check out of
 the blead branch (that is, the master branch, which contains bleadperl,
@@ -62,9 +62,9 @@ that you can push back on with:
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
 
-If you cloned using the git protocol, which is faster than ssh, then you will need to
-modify your config in order to enable pushing. Edit F<.git/config>
-where you will see something like:
+If you cloned using the git protocol, which is faster than ssh, then
+you will need to modify your config in order to enable pushing. Edit
+F<.git/config> where you will see something like:
 
   [remote "origin"]
   url = git://perl5.git.perl.org/perl.git
@@ -306,8 +306,7 @@ You can examine your last commit with:
   % git show HEAD
 
 and if you are not happy with either the description or the patch
-itself you can fix it up by editing the files once more and then
-issue:
+itself you can fix it up by editing the files once more and then issue:
 
   % git commit -a --amend
 
@@ -519,8 +518,8 @@ to remove all ignored untracked files, such as build and test
 byproduct, but leave any  manually created files alone.
 
 If you only want to cancel some uncommitted edits, you can use C<git
-checkout> and give it a list of files to be reverted, or C<git
-checkout -f> to revert them all.
+checkout> and give it a list of files to be reverted, or C<git checkout
+-f> to revert them all.
 
 If you want to cancel one or several commits, you can use C<git reset>.
 
@@ -619,6 +618,30 @@ the following information:
 
   http://github.com/USERNAME/perl/tree/orange
   git@github.com:USERNAME/perl.git branch orange
+
+=head1 MERGING FROM A BRANCH VIA GITHUB
+
+If someone has provided a branch via GitHub and you are a committer,
+you  should use the following in your perl-ssh directory:
+
+  % git remote add dandv git://github.com/dandv/perl.git
+  % git fetch
+
+Now you can see the differences between the branch and blead:
+
+  % git diff dandv/blead
+
+And you can see the commits:
+
+  % git log dandv/blead
+
+If you approve of a specific commit, you can cherry pick it:
+
+  % git cherry-pick -x 3adac458cb1c1d41af47fc66e67b49c8dec2323f
+
+And then push back to the repository:
+
+  % git push
 
 =head1 COMMITTING TO MAINTENANCE VERSIONS
 
