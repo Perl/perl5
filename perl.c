@@ -4558,7 +4558,7 @@ S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
     end = p + len;
 
     /* Break at all separators */
-    while ((s = memchr(p, PERLLIB_SEP, end - p))) {
+    while ((s = (const char*)memchr(p, PERLLIB_SEP, end - p))) {
 	if (s == p) {
 	    /* skip any consecutive separators */
 
