@@ -859,7 +859,7 @@ things we've covered.  This program finds prime numbers using threads.
     13 }
     14 $stream->enqueue(undef);
     15
-    16 threads->create(\&check_num, $stream, 2);
+    16 my $kid = threads->create(\&check_num, $stream, 2);
     17 $kid->join();
     18
     19 sub check_num {
