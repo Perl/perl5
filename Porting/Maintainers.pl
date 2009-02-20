@@ -955,7 +955,7 @@ package Maintainers;
 		'FILES'		=>
 			q[lib/Text/{Tabs,Wrap}.pm lib/Text/TabsWrap],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Text::Balanced' =>
