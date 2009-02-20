@@ -37,11 +37,12 @@ our $ov_obj = Test::Object::CopyOverload->new;
 our $obj = Test::Object::NoOverload->new;
 
 # Load and run the tests
-my @tests = map [chomp and split /\t+/, $_, 3], grep !/^#/ && /\S/, <DATA>;
-plan tests => 2 * @tests;
+plan "no_plan";
 
-for my $test (@tests) {
-    my ($yn, $left, $right) = @$test;
+while (<DATA>) {
+    next if /^#/ || !/\S/;
+    chomp;
+    my ($yn, $left, $right) = split /\t+/;
 
     match_test($yn, $left, $right);
     match_test($yn, $right, $left);
@@ -52,21 +53,23 @@ sub match_test {
 
     die "Bad test spec: ($yn, $left, $right)"
 	unless $yn eq "" || $yn eq "!" || $yn eq '@';
-    
+
     my $tstr = "$left ~~ $right";
-    
-    my $res;
-    $res = eval $tstr // "";	#/ <- fix syntax colouring
+
+    my $res = eval $tstr;
 
     chomp $@;
 
     if ( $yn eq '@' ) {
-	ok( $@ ne '', sprintf "%s%s: %s", $tstr, $@ ? ( ', $@', $@ ) : ( '', $res ) );
+	ok( $@ ne '', "$tstr dies" )
+	    and print "# \$\@ was: $@\n";
     } else {
+	my $test_name = $tstr . ($yn eq '!' ? " does not match" : " matches");
 	if ( $@ ne '' ) {
-	    fail("$tstr, \$\@: $@");
+	    fail($test_name);
+	    print "# \$\@ was: $@\n";
 	} else {
-	    ok( ($yn eq '!' xor $res), "$tstr: $res");
+	    ok( ($yn eq '!' xor $res), $test_name );
 	}
     }
 }
@@ -92,20 +95,25 @@ __DATA__
 # OBJECT
 # - overloaded
 	$ov_obj		"key"
-	$ov_obj		{"key" => 1}
 !	$ov_obj		"foo"
+	$ov_obj		{"key" => 1}
+!	$ov_obj		{"foo" => 1}
+	$ov_obj		["key" => 1]
+!	$ov_obj		["foo" => 1]
 	$ov_obj		sub { shift ~~ "key" }
 !	$ov_obj		sub { shift ~~ "foo" }
 !	$ov_obj		\&foo
+	$ov_obj		\&bar
 @	$ov_obj		\&fatal
 !	$ov_obj		FALSE
 !	$ov_obj		\&FALSE
 !	$ov_obj		undef
+	$ov_obj		$ov_obj
 
 # regular object
 @	$obj	"key"
 @	$obj	{"key" => 1}
-@	$obj	$obj
+@	$obj	["key" => 1]
 @	$obj	sub { 1 }
 @	$obj	sub { 0 }
 @	$obj	\&foo
@@ -113,6 +121,7 @@ __DATA__
 @	$obj	FALSE
 @	$obj	\&FALSE
 !	$obj	undef
+@	$obj	$obj
 
 # CODE ref against argument
 #  - arg is code ref
@@ -143,8 +152,6 @@ __DATA__
 @	[]	\&fatal
 @	"foo"	\&fatal
 @	qr//	\&fatal
-@	$obj	\&bar
-	$ov_obj	\&bar
 
 # - null-prototyped subs
 	a_const		"a constant"
@@ -198,7 +205,7 @@ __DATA__
 
 #  - a regex
 	{foo => 1}	qr/^(fo[ox])$/
-!	+{0..100}	qr/[13579]$/
+!	+{0..99}	qr/[13579]$/
 
 #  - a string
 	+{foo => 1, bar => 2}	"foo"
@@ -264,7 +271,7 @@ __DATA__
 	%hash		[qw(bar)]
 !	%hash		[qw(a b c)]
 	%hash		%hash
-	%hash		{%hash}
+	%hash		+{%hash}
 	%hash		%tied_hash
 	%tied_hash	%tied_hash
 	%hash		{ foo => 5, bar => 10 }
