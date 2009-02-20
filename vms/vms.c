@@ -219,6 +219,17 @@ return 0;
 #  define RTL_USES_UTC 1
 #endif
 
+#if !defined(__VAX) && __CRTL_VER >= 80200000
+#ifdef lstat
+#undef lstat
+#endif
+#else
+#ifdef lstat
+#undef lstat
+#endif
+#define lstat(_x, _y) stat(_x, _y)
+#endif
+
 /* Routine to create a decterm for use with the Perl debugger */
 /* No headers, this information was found in the Programming Concepts Manual */
 
@@ -12781,17 +12792,6 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 
 }  /* end of flex_fstat() */
 /*}}}*/
-
-#if !defined(__VAX) && __CRTL_VER >= 80200000
-#ifdef lstat
-#undef lstat
-#endif
-#else
-#ifdef lstat
-#undef lstat
-#endif
-#define lstat(_x, _y) stat(_x, _y)
-#endif
 
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
