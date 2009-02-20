@@ -36,14 +36,20 @@ tie my %tied_hash, 'Tie::StdHash';
 our $ov_obj = Test::Object::CopyOverload->new;
 our $obj = Test::Object::NoOverload->new;
 
+my @keyandmore = qw(key and more);
+my @fooormore = qw(foo or more);
+my %keyandmore = map { $_ => 0 } @keyandmore;
+my %fooormore = map { $_ => 0 } @fooormore;
+
 # Load and run the tests
 plan "no_plan";
 
 while (<DATA>) {
     next if /^#/ || !/\S/;
     chomp;
-    my ($yn, $left, $right) = split /\t+/;
+    my ($yn, $left, $right, $note) = split /\t+/;
 
+    local $::TODO = $note =~ /TODO/;
     match_test($yn, $left, $right);
     match_test($yn, $right, $left);
 }
@@ -77,8 +83,8 @@ sub match_test {
 
 
 sub foo {}
-sub bar {2}
-sub gorch {2}
+sub bar {42}
+sub gorch {42}
 sub fatal {die "fatal sub\n"}
 
 sub a_const() {die "const\n" if @_; "a constant"}
@@ -91,16 +97,40 @@ sub TWO() { 1 }
 #   - expected to match
 # ! - expected to not match
 # @ - expected to be a compilation failure
+# Data types to test :
+#   Object-overloaded
+#   Object
+#   Code
+#   Code()
+#   Coderef
+#   Hash
+#   Hashref
+#   Array
+#   Arrayref
+#   Regex (// and qr//)
+#   Num
+#   Str
+#   undef
 __DATA__
 # OBJECT
 # - overloaded
 	$ov_obj		"key"
 !	$ov_obj		"foo"
 	$ov_obj		{"key" => 1}
+	$ov_obj		{"key" => 1, bar => 2}		TODO
 !	$ov_obj		{"foo" => 1}
 	$ov_obj		["key" => 1]
 !	$ov_obj		["foo" => 1]
+	$ov_obj		@keyandmore
+!	$ov_obj		@fooormore
+	$ov_obj		%keyandmore			TODO
+!	$ov_obj		%fooormore
+	$ov_obj		/key/
+!	$ov_obj		/foo/
+	$ov_obj		qr/Key/i
+!	$ov_obj		qr/foo/
 	$ov_obj		sub { shift ~~ "key" }
+!	$ov_obj		sub { shift eq "key" }
 !	$ov_obj		sub { shift ~~ "foo" }
 !	$ov_obj		\&foo
 	$ov_obj		\&bar
@@ -114,6 +144,8 @@ __DATA__
 @	$obj	"key"
 @	$obj	{"key" => 1}
 @	$obj	["key" => 1]
+@	$obj	/key/
+@	$obj	qr/key/
 @	$obj	sub { 1 }
 @	$obj	sub { 0 }
 @	$obj	\&foo
@@ -152,6 +184,11 @@ __DATA__
 @	[]	\&fatal
 @	"foo"	\&fatal
 @	qr//	\&fatal
+# pass argument by reference
+	@fooormore	sub{scalar @_ == 1}
+	@fooormore	sub{"@_" =~ /ARRAY/}
+	%fooormore	sub{"@_" =~ /HASH/}
+	/fooormore/	sub{ref $_[0] eq 'Regexp'}
 
 # - null-prototyped subs
 	a_const		"a constant"
@@ -272,6 +309,7 @@ __DATA__
 !	%hash		[qw(a b c)]
 	%hash		%hash
 	%hash		+{%hash}
+	%hash		\%hash
 	%hash		%tied_hash
 	%tied_hash	%tied_hash
 	%hash		{ foo => 5, bar => 10 }
