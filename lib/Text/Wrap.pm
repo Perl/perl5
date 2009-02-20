@@ -201,8 +201,8 @@ the number of characters you do want for your tabstops.
 
 If you want to separate your lines with something other than C<\n>
 then set C<$Text::Wrap::separator> to your preference.  This replaces
-all newlines with C<$Text::Wrap::separator>.  If you just to preserve
-existing newlines but add new breaks with something else, set 
+all newlines with C<$Text::Wrap::separator>.  If you just want to
+preserve existing newlines but add new breaks with something else, set 
 C<$Text::Wrap::separator2> instead.
 
 When words that are longer than C<$columns> are encountered, they
