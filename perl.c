@@ -4145,8 +4145,8 @@ S_init_perllib(pTHX_ U32 old_vers)
     }
 #endif
 
-    if (!old_vers) {
 #ifdef MACOS_TRADITIONAL
+    if (!old_vers) {
 	Stat_t tmpstatbuf;
     	SV * privdir = newSV(0);
 	char * macperl = PerlEnv_getenv("MACPERL");
@@ -4164,12 +4164,14 @@ S_init_perllib(pTHX_ U32 old_vers)
 	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir), INCPUSH_ADD_SUB_DIRS);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), SvCUR(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush_use_sep(SvPVX(privdir), INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir), INCPUSH_ADD_SUB_DIRS);
 	
    	SvREFCNT_dec(privdir);
 	if (!PL_tainting)
 	    S_incpush(aTHX_ STR_WITH_LEN(":"), 0);
+    }
 #else
+    if (!old_vers) {
 
 #ifdef SITEARCH_EXP
     /* sitearch is always relative to sitelib on Windows for
