@@ -29,7 +29,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
-#ifndef PERL_MICRO
+#if !defined(PERL_MICRO) && defined(Quad_t)
 #  include "time64.h"
 #  include "time64.c"
 #endif
@@ -4424,7 +4424,7 @@ PP(pp_gmtime)
 {
     dVAR;
     dSP;
-#ifdef PERL_MICRO
+#if defined(PERL_MICRO) || !defined(Quad_t)
     Time_t when;
     const struct tm *err;
     struct tm tmbuf;
@@ -4440,7 +4440,7 @@ PP(pp_gmtime)
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-#ifdef PERL_MICRO
+#if defined(PERL_MICRO) || !defined(Quad_t)
     if (MAXARG < 1)
 	(void)time(&when);
     else
