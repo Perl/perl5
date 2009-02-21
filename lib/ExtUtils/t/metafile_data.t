@@ -39,6 +39,9 @@ my $new_mm = sub {
         configure_requires      => {
             'ExtUtils::MakeMaker'       => 0,
         },
+        build_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
 
         no_index        => {
             directory           => [qw(t inc)],
@@ -61,6 +64,9 @@ my $new_mm = sub {
         distribution_type       => 'module',
 
         configure_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+        build_requires      => {
             'ExtUtils::MakeMaker'       => 0,
         },
 
@@ -113,6 +119,10 @@ my $new_mm = sub {
         configure_requires      => {
             Stuff       => 2.34,
         },
+        build_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+
         requires       => {
             Foo                 => 2.34,
             Bar                 => 4.56,
@@ -157,6 +167,9 @@ my $new_mm = sub {
         configure_requires      => {
             'ExtUtils::MakeMaker'       => 0,
         },
+        build_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
 
         requires        => {
             perl        => '5.006',
@@ -198,6 +211,9 @@ my $new_mm = sub {
         distribution_type       => 'module',
 
         configure_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+        build_requires      => {
             'ExtUtils::MakeMaker'       => 0,
         },
 
