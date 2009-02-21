@@ -4238,7 +4238,11 @@ S_init_perllib(pTHX_ U32 old_vers)
 	if (s)
 	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else
+#  ifdef NETWARE
+	S_incpush_use_sep(aTHX_ PRIVLIB_EXP, 0, INCPUSH_CAN_RELOCATE);
+#  else
 	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
+#  endif
 #endif
     }
 
