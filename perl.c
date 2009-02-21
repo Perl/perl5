@@ -1979,7 +1979,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     S_set_caret_X(aTHX);
     TAINT_NOT;
     init_perllib(0);
-    init_perllib(INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
+    init_perllib(0x100 /* A value that is not a used flag bit.  */ );
 
     {
 	bool suidscript = FALSE;
@@ -4111,7 +4111,7 @@ S_init_perllib(pTHX_ U32 old_vers)
 #else
 	if (s)
 #endif
-	    incpush_use_sep(s, 0, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(s, 0, old_vers ? INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR : INCPUSH_ADD_SUB_DIRS);
 	else if (!old_vers) {
 	    s = PerlEnv_getenv("PERLLIB");
 	    if (s)
@@ -4126,7 +4126,7 @@ S_init_perllib(pTHX_ U32 old_vers)
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
 	    do {
-		incpush_use_sep(buf, 0, old_vers ? old_vers : INCPUSH_ADD_SUB_DIRS);
+		incpush_use_sep(buf, 0, old_vers ? INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR : INCPUSH_ADD_SUB_DIRS);
 	    } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else if (!old_vers)
 	    while (my_trnlnm("PERLLIB",buf,idx++))
@@ -4141,7 +4141,7 @@ S_init_perllib(pTHX_ U32 old_vers)
     if (!old_vers) {
 	S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
     } else {
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), old_vers|INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
     }
 #endif
 
@@ -4195,7 +4195,7 @@ S_init_perllib(pTHX_ U32 old_vers)
 
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), old_vers|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), old_vers ? INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE : INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!old_vers) {
@@ -4221,7 +4221,7 @@ S_init_perllib(pTHX_ U32 old_vers)
 
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), old_vers|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), old_vers ? INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE : INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!old_vers) {
@@ -4251,7 +4251,7 @@ S_init_perllib(pTHX_ U32 old_vers)
 	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), INCPUSH_ADD_SUB_DIRS
 			|INCPUSH_CAN_RELOCATE);
     } else {
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), old_vers|INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
     }
 #endif
 
