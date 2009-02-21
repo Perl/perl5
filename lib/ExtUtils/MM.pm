@@ -3,7 +3,7 @@ package ExtUtils::MM;
 use strict;
 use ExtUtils::MakeMaker::Config;
 
-our $VERSION = '6.48_01';
+our $VERSION = '6.49_01';
 
 require ExtUtils::Liblist;
 require ExtUtils::MakeMaker;
@@ -58,7 +58,7 @@ if( $^O eq 'MSWin32' ) {
 $Is{UWIN}   = $^O =~ /^uwin(-nt)?$/;
 $Is{Cygwin} = $^O eq 'cygwin';
 $Is{NW5}    = $Config{osname} eq 'NetWare';  # intentional
-$Is{BeOS}   = $^O =~ /beos/i;    # XXX should this be that loose?
+$Is{BeOS}   = ($^O =~ /beos/i or $^O eq 'haiku');
 $Is{DOS}    = $^O eq 'dos';
 if( $Is{NW5} ) {
     $^O = 'NetWare';
@@ -68,7 +68,6 @@ $Is{VOS}    = $^O eq 'vos';
 $Is{QNX}    = $^O eq 'qnx';
 $Is{AIX}    = $^O eq 'aix';
 $Is{Darwin} = $^O eq 'darwin';
-$Is{Haiku}  = $^O eq 'haiku';
 
 $Is{Unix}   = !grep { $_ } values %Is;
 

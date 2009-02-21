@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.48_01';
+our $VERSION = '6.49_01';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -2587,7 +2587,13 @@ following parameters are recognized:
 
 An example:
 
-    WriteMakefile( 'dist' => { COMPRESS=>"bzip2", SUFFIX=>".bz2" })
+    WriteMakefile(
+        ...other options...
+        dist => {
+            COMPRESS => "bzip2",
+            SUFFIX   => ".bz2"
+        }
+    );
 
 
 =head2 Module Meta-Data
