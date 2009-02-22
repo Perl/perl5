@@ -4338,6 +4338,8 @@ STATIC void
 S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
+    const U8 using_sub_dirs
+	= (U8)flags & (INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
     const U8 addsubdirs  = (U8)flags & INCPUSH_ADD_SUB_DIRS;
     const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
@@ -4351,7 +4353,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 
     inc = GvAVn(PL_incgv);
 
-    if (addsubdirs || addoldvers) {
+    if (using_sub_dirs) {
 	subdir = newSV(0);
     }
 
@@ -4364,8 +4366,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	   pushing. Hence to make it work, need to push the architecture
 	   (etc) libraries onto a temporary array, then "unshift" that onto
 	   the front of @INC.  */
-	AV *const av
-	    = (addsubdirs || addoldvers) ? (unshift ? newAV() : inc) : NULL;
+	AV *const av = (using_sub_dirs) ? (unshift ? newAV() : inc) : NULL;
 
 	if (len) {
 	    /* I am not convinced that this is valid when PERLLIB_MANGLE is
