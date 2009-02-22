@@ -4532,13 +4532,6 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		sv_setsv(subdir, libdir);
 		sv_catpvs(subdir, PERL_ARCH_FMT_PATH);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
-
-		/* .../archname if -d .../archname */
-		sv_setsv(subdir, libdir);
-		sv_catpvs(subdir,
-			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
-		subdir = S_incpush_if_exists(aTHX_ av, subdir);
-
 	    }
 
 #ifdef PERL_INC_VERSION_LIST
@@ -4552,6 +4545,15 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		}
 	    }
 #endif
+
+	    if (addsubdirs) {
+		/* .../archname if -d .../archname */
+		sv_setsv(subdir, libdir);
+		sv_catpvs(subdir,
+			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir);
+
+	    }
 	}
 
 	/* finally add this lib directory at the end of @INC */
