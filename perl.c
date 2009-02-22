@@ -1624,11 +1624,14 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     return ret;
 }
 
-#define INCPUSH_ADD_SUB_DIRS	0x01
 #define INCPUSH_ADD_OLD_VERS	0x02
 #define INCPUSH_NOT_BASEDIR	0x04
 #define INCPUSH_CAN_RELOCATE	0x08
 #define INCPUSH_UNSHIFT		0x10
+#define INCPUSH_ADD_VERSIONED_SUB_DIRS 0x20
+#define INCPUSH_ADD_ARCHONLY_SUB_DIRS 0x40
+#define INCPUSH_ADD_SUB_DIRS	\
+    (INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_ADD_ARCHONLY_SUB_DIRS)
 
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
@@ -4227,7 +4230,8 @@ S_init_perllib(pTHX)
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), INCPUSH_ADD_SUB_DIRS
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS),
+		      INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_NOT_BASEDIR
 		      |INCPUSH_CAN_RELOCATE);
 #endif
 #endif /* MACOS_TRADITIONAL */
@@ -4280,7 +4284,9 @@ S_init_perllib(pTHX)
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS),
+		      INCPUSH_ADD_OLD_VERS|INCPUSH_ADD_ARCHONLY_SUB_DIRS
+		      |INCPUSH_CAN_RELOCATE);
 #endif
 
     if (!PL_tainting)
@@ -4329,8 +4335,12 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
     const U8 using_sub_dirs
-	= (U8)flags & (INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
-    const U8 addsubdirs  = (U8)flags & INCPUSH_ADD_SUB_DIRS;
+	= (U8)flags & (INCPUSH_ADD_VERSIONED_SUB_DIRS
+		       |INCPUSH_ADD_ARCHONLY_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
+    const U8 add_versioned_sub_dirs
+	= (U8)flags & INCPUSH_ADD_VERSIONED_SUB_DIRS;
+    const U8 add_archonly_sub_dirs
+	= (U8)flags & INCPUSH_ADD_ARCHONLY_SUB_DIRS;
     const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
@@ -4502,7 +4512,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		              "Failed to unixify @INC element \"%s\"\n",
 			      SvPV(libdir,len));
 #endif
-	    if (addsubdirs) {
+	    if (add_versioned_sub_dirs) {
 #ifdef MACOS_TRADITIONAL
 #define PERL_ARCH_FMT_PREFIX	""
 #define PERL_ARCH_FMT_SUFFIX	":"
@@ -4536,7 +4546,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    }
 #endif
 
-	    if (addsubdirs) {
+	    if (add_archonly_sub_dirs) {
 		/* .../archname if -d .../archname */
 		sv_setsv(subdir, libdir);
 		sv_catpvs(subdir,
