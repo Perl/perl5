@@ -4482,7 +4482,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.
 	 */
-	if (addsubdirs || addoldvers) {
+	if (using_sub_dirs) {
 #ifdef PERL_INC_VERSION_LIST
 	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
