@@ -4355,17 +4355,12 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
     const U8 push_basedir = (flags & INCPUSH_NOT_BASEDIR) ? 0 : 1;
-    SV *subdir = NULL;
     AV *inc;
 
     if (!dir || !*dir)
 	return;
 
     inc = GvAVn(PL_incgv);
-
-    if (using_sub_dirs) {
-	subdir = newSV(0);
-    }
 
     {
 	SV *libdir;
@@ -4503,6 +4498,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 * archname-specific sub-directories.
 	 */
 	if (using_sub_dirs) {
+	    SV *subdir = newSV(0);
 #ifdef PERL_INC_VERSION_LIST
 	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
@@ -4511,6 +4507,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #ifdef VMS
 	    char *unix;
 	    STRLEN len;
+
 
 	    if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
 		len = strlen(unix);
@@ -4564,6 +4561,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		subdir = S_incpush_if_exists(aTHX_ av, subdir);
 
 	    }
+
+	    assert (SvREFCNT(subdir) == 1);
+	    SvREFCNT_dec(subdir);
 	}
 
 	/* finally add this lib directory at the end of @INC */
@@ -4595,10 +4595,6 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    assert (SvREFCNT(libdir) == 1);
 	    SvREFCNT_dec(libdir);
 	}
-    }
-    if (subdir) {
-	assert (SvREFCNT(subdir) == 1);
-	SvREFCNT_dec(subdir);
     }
 }
 
