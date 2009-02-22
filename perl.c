@@ -4325,7 +4325,7 @@ S_init_perllib(pTHX)
    Generate a new SV if we do this, to save needing to copy the SV we push
    onto @INC  */
 STATIC SV *
-S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
+S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
 {
     dVAR;
     Stat_t tmpstatbuf;
@@ -4335,7 +4335,10 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir)
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
 	av_push(av, dir);
-	dir = newSV(0);
+	dir = newSVsv(stem);
+    } else {
+	/* Truncate dir back to stem.  */
+	SvCUR_set(dir, SvCUR(stem));
     }
     return dir;
 }
@@ -4498,7 +4501,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 * archname-specific sub-directories.
 	 */
 	if (using_sub_dirs) {
-	    SV *subdir = newSV(0);
+	    SV *subdir;
 #ifdef PERL_INC_VERSION_LIST
 	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
@@ -4519,6 +4522,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		              "Failed to unixify @INC element \"%s\"\n",
 			      SvPV(libdir,len));
 #endif
+
+	    subdir = newSVsv(libdir);
+
 	    if (add_versioned_sub_dirs) {
 #ifdef MACOS_TRADITIONAL
 #define PERL_ARCH_FMT_PREFIX	""
@@ -4530,35 +4536,31 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #define PERL_ARCH_FMT_PATH	"/" PERL_FS_VERSION
 #endif
 		/* .../version/archname if -d .../version/archname */
-		sv_setsv(subdir, libdir);
 		sv_catpvs(subdir, PERL_ARCH_FMT_PATH \
 			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
-		subdir = S_incpush_if_exists(aTHX_ av, subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 
 		/* .../version if -d .../version */
-		sv_setsv(subdir, libdir);
 		sv_catpvs(subdir, PERL_ARCH_FMT_PATH);
-		subdir = S_incpush_if_exists(aTHX_ av, subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 	    }
 
 #ifdef PERL_INC_VERSION_LIST
 	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
-		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PREFIX \
-				   "%s" PERL_ARCH_FMT_SUFFIX,
-				   SVfARG(libdir), *incver);
-		    subdir = S_incpush_if_exists(aTHX_ av, subdir);
+		    Perl_sv_catpvf(aTHX_ subdir, PERL_ARCH_FMT_PREFIX \
+				   "%s" PERL_ARCH_FMT_SUFFIX, *incver);
+		    subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 		}
 	    }
 #endif
 
 	    if (add_archonly_sub_dirs) {
 		/* .../archname if -d .../archname */
-		sv_setsv(subdir, libdir);
 		sv_catpvs(subdir,
 			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
-		subdir = S_incpush_if_exists(aTHX_ av, subdir);
+		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 
 	    }
 
