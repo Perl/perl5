@@ -1624,12 +1624,12 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     return ret;
 }
 
-#define INCPUSH_ADD_OLD_VERS	0x02
-#define INCPUSH_NOT_BASEDIR	0x04
-#define INCPUSH_CAN_RELOCATE	0x08
-#define INCPUSH_UNSHIFT		0x10
-#define INCPUSH_ADD_VERSIONED_SUB_DIRS 0x20
-#define INCPUSH_ADD_ARCHONLY_SUB_DIRS 0x40
+#define INCPUSH_UNSHIFT			0x01
+#define INCPUSH_ADD_OLD_VERS		0x02
+#define INCPUSH_ADD_VERSIONED_SUB_DIRS	0x04
+#define INCPUSH_ADD_ARCHONLY_SUB_DIRS	0x08
+#define INCPUSH_NOT_BASEDIR		0x10
+#define INCPUSH_CAN_RELOCATE		0x20
 #define INCPUSH_ADD_SUB_DIRS	\
     (INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_ADD_ARCHONLY_SUB_DIRS)
 
@@ -4143,7 +4143,8 @@ S_init_perllib(pTHX)
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP),
+		      INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef MACOS_TRADITIONAL
@@ -4161,10 +4162,12 @@ S_init_perllib(pTHX)
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir), INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir),
+			    INCPUSH_ADD_SUB_DIRS);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), SvCUR(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir), INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(SvPVX(privdir), SvCUR(privdir),
+			    INCPUSH_ADD_SUB_DIRS);
 	
    	SvREFCNT_dec(privdir);
 	if (!PL_tainting)
@@ -4175,7 +4178,8 @@ S_init_perllib(pTHX)
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP), INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP),
+			  INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -4194,7 +4198,8 @@ S_init_perllib(pTHX)
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP),
+		      INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -4205,7 +4210,8 @@ S_init_perllib(pTHX)
 	if (s)
 	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP),
+			  INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -4259,7 +4265,8 @@ S_init_perllib(pTHX)
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
 	    do {
-		incpush_use_sep(buf, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
+		incpush_use_sep(buf, 0,
+				INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
 	    } while (my_trnlnm("PERL5LIB",buf,++idx));
 #endif /* VMS */
     }
@@ -4268,19 +4275,22 @@ S_init_perllib(pTHX)
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS
+		      |INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifndef MACOS_TRADITIONAL
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM),
+		      INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
 #endif
 
 
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
+    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM),
+		      INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
