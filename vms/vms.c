@@ -10473,18 +10473,14 @@ Perl_readdir(pTHX_ DIR *dd)
         /* In Unix report mode, remove the ".dir;1" from the name */
         /* if it is a real directory. */
         if (decc_filename_unix_report || decc_efs_charset) {
-            if ((e_len == 4) && (vs_len == 2) && (vs_spec[1] == '1')) {
-                if ((toupper(e_spec[1]) == 'D') &&
-                    (toupper(e_spec[2]) == 'I') &&
-                    (toupper(e_spec[3]) == 'R')) {
-                    Stat_t statbuf;
-                    int ret_sts;
+            if (is_dir_ext(e_spec, e_len, vs_spec, vs_len)) {
+                Stat_t statbuf;
+                int ret_sts;
 
-                    ret_sts = stat(buff, &statbuf.crtl_stat);
-                    if ((ret_sts == 0) && S_ISDIR(statbuf.st_mode)) {
-                        e_len = 0;
-                        e_spec[0] = 0;
-                    }
+                ret_sts = flex_lstat(buff, &statbuf);
+                if ((ret_sts == 0) && S_ISDIR(statbuf.st_mode)) {
+                    e_len = 0;
+                    e_spec[0] = 0;
                 }
             }
         }
@@ -14369,6 +14365,20 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 	            /* Trim off the version */
 	            int file_len = v_len + r_len + d_len + n_len + e_len;
 	            vms_spec[file_len] = 0;
+
+	            /* Trim off the .DIR if this is a directory */
+	            if (is_dir_ext(e_spec, e_len, vs_spec, vs_len)) {
+                        if (S_ISDIR(my_mode)) {
+                            e_len = 0;
+                            e_spec[0] = 0;
+                        }
+	            }
+
+	            /* Drop NULL extensions on UNIX file specification */
+		    if ((e_len == 1) && decc_readdir_dropdotnotype) {
+			e_len = 0;
+			e_spec[0] = '\0';
+		    }
 
 	            /* The result is expected to be in UNIX format */
 		    rslt = int_tounixspec(vms_spec, outbuf, utf8_fl);
