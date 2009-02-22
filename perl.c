@@ -4358,13 +4358,13 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
     const U8 push_basedir = (flags & INCPUSH_NOT_BASEDIR) ? 0 : 1;
-    AV *inc;
+    AV *const inc = GvAVn(PL_incgv);
 
-    if (!dir || !*dir)
-	return;
+    PERL_ARGS_ASSERT_INCPUSH;
+    assert(len > 0);
 
-    inc = GvAVn(PL_incgv);
-
+    /* Could remove this vestigial extra block, if we don't mind a lot of
+       re-indenting diff noise.  */
     {
 	SV *libdir;
 	/* Change 20189146be79a0596543441fa369c6bf7f85103f, to fix RT#6665,

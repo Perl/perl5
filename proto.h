@@ -4759,7 +4759,11 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 	assert(linestr_sv); assert(rsfp)
 
 STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
-STATIC void	S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags);
+STATIC void	S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INCPUSH	\
+	assert(dir)
+
 STATIC void	S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INCPUSH_USE_SEP	\
