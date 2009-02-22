@@ -4092,6 +4092,9 @@ STATIC void
 S_init_perllib(pTHX)
 {
     dVAR;
+#ifndef VMS
+    const char *perl5lib;
+#endif
     char *s;
 #ifdef WIN32
     STRLEN len;
@@ -4099,18 +4102,18 @@ S_init_perllib(pTHX)
 
     if (!PL_tainting) {
 #ifndef VMS
-	s = PerlEnv_getenv("PERL5LIB");
+	perl5lib = PerlEnv_getenv("PERL5LIB");
 /*
  * It isn't possible to delete an environment variable with
  * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
  * case we treat PERL5LIB as undefined if it has a zero-length value.
  */
 #if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
-	if (s && *s != '\0')
+	if (perl5lib && *perl5lib != '\0')
 #else
-	if (s)
+	if (perl5lib)
 #endif
-	    incpush_use_sep(s, 0, INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(perl5lib, 0, INCPUSH_ADD_SUB_DIRS);
 	else {
 	    s = PerlEnv_getenv("PERLLIB");
 	    if (s)
@@ -4241,18 +4244,18 @@ S_init_perllib(pTHX)
 
     if (!PL_tainting) {
 #ifndef VMS
-	s = PerlEnv_getenv("PERL5LIB");
 /*
  * It isn't possible to delete an environment variable with
  * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
  * case we treat PERL5LIB as undefined if it has a zero-length value.
  */
 #if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
-	if (s && *s != '\0')
+	if (perl5lib && *perl5lib != '\0')
 #else
-	if (s)
+	if (perl5lib)
 #endif
-	    incpush_use_sep(s, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
+	    incpush_use_sep(perl5lib, 0,
+			    INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
