@@ -4093,7 +4093,7 @@ S_init_perllib(pTHX)
 {
     dVAR;
 #ifndef VMS
-    const char *perl5lib;
+    const char *perl5lib = NULL;
 #endif
     const char *s;
 #ifdef WIN32
