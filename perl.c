@@ -4095,7 +4095,7 @@ S_init_perllib(pTHX)
 #ifndef VMS
     const char *perl5lib;
 #endif
-    char *s;
+    const char *s;
 #ifdef WIN32
     STRLEN len;
 #endif
