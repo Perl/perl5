@@ -20,11 +20,7 @@ use ExtUtils::testlib;
 use threads;
 
 BEGIN {
-    eval {
-        require threads::shared;
-        threads::shared->import();
-    };
-    if ($@ || ! $threads::shared::threads_shared) {
+    if (! eval 'use threads::shared; 1') {
         skip_all('threads::shared not available');
     }
 
@@ -170,7 +166,7 @@ package main;
 
 # bugid #24165
 
-run_perl(prog => 'use threads 1.71;' .
+run_perl(prog => 'use threads 1.72;' .
                  'sub a{threads->create(shift)} $t = a sub{};' .
                  '$t->tid; $t->join; $t->tid',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
