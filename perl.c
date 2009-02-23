@@ -1642,7 +1642,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     char **argv = PL_origargv;
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
-    register SV *sv;
     register char c;
     const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
@@ -1654,8 +1653,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     SvGROW(linestr_sv, 80);
     sv_setpvs(linestr_sv,"");
 
-    sv = newSVpvs("");		/* first used for -I flags */
-    SAVEFREESV(sv);
     init_main_stash();
 
     {
@@ -1750,9 +1747,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (s && *s) {
 		STRLEN len = strlen(s);
 		incpush(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
-		sv_catpvs(sv, "-I");
-		sv_catpvn(sv, s, len);
-		sv_catpvs(sv, " ");
 	    }
 	    else
 		Perl_croak(aTHX_ "No directory specified for -I");
