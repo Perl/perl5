@@ -4133,9 +4133,10 @@ S_init_perllib(pTHX)
 	    do {
 		incpush_use_sep(buf, 0, INCPUSH_ADD_SUB_DIRS);
 	    } while (my_trnlnm("PERL5LIB",buf,++idx));
-	else if
+	else {
 	    while (my_trnlnm("PERLLIB",buf,idx++))
 		incpush_use_sep(buf, 0, 0);
+	}
 #endif /* VMS */
     }
 
