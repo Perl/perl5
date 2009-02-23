@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 8;
+use MBTest tests => 6;
 
 use_ok 'Module::Build';
 ensure_blib('Module::Build');
@@ -16,36 +16,24 @@ $dist->regen;
 
 $dist->chdir_in;
 
-
-
 my $mb = Module::Build->new_from_context;
-my @files;
 
 {
   # Make sure copy_if_modified() can handle spaces in filenames
   
   my @tmp;
-  foreach (1..2) {
-    my $tmp = File::Spec->catdir('t', "tmp$_");
-    $mb->add_to_cleanup($tmp);
-    push @files, $tmp;
-    unless (-d $tmp) {
-      mkdir($tmp, 0777) or die "Can't create $tmp: $!";
-    }
-    ok -d $tmp;
-    $tmp[$_] = $tmp;
-  }
+  push @tmp, MBTest->tmpdir for (0 .. 1);
   
   my $filename = 'file with spaces.txt';
   
-  my $file = File::Spec->catfile($tmp[1], $filename);
+  my $file = File::Spec->catfile($tmp[0], $filename);
   my $fh = IO::File->new($file, '>') or die "Can't create $file: $!";
   print $fh "Foo\n";
   $fh->close;
   ok -e $file;
   
   
-  my $file2 = $mb->copy_if_modified(from => $file, to_dir => $tmp[2]);
+  my $file2 = $mb->copy_if_modified(from => $file, to_dir => $tmp[1]);
   ok $file2;
   ok -e $file2;
 }

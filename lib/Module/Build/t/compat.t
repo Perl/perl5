@@ -215,23 +215,31 @@ ok $mb, "Module::Build->new_from_context";
        'Should be non-verbose';
 
   (my $libdir2 = $libdir) =~ s/libdir/lbiidr/;
-  my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2");
 
-  if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
-    $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
-    pop @make_args while scalar(@make_args) > 1;
-  }
-  ($output) = stdout_stderr_of(
-    sub {
-      $ran_ok = $mb->do_system(@make, 'fakeinstall', @make_args);
+  SKIP: {
+    require ExtUtils::Install;
+    skip "Needs ExtUtils::Install 1.32 or later", 2
+      if ExtUtils::Install->VERSION < 1.32;
+
+    my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2");
+
+    if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
+      $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
+      pop @make_args while scalar(@make_args) > 1;
     }
-  );
 
-  ok $ran_ok, "make fakeinstall with INSTALLDIRS=vendor ran ok";
-  $output =~ s/^/# /gm;  # Don't confuse our own test output
-  like $output,
-       qr/\Q$libdir2\E .* Simple\.pm/x,
-       'Should have installdirs=vendor';
+    ($output) = stdout_stderr_of(
+      sub {
+        $ran_ok = $mb->do_system(@make, 'fakeinstall', @make_args);
+      }
+    );
+
+    ok $ran_ok, "make fakeinstall with INSTALLDIRS=vendor ran ok";
+    $output =~ s/^/# /gm;  # Don't confuse our own test output
+    like $output,
+        qr/\Q$libdir2\E .* Simple\.pm/x,
+        'Should have installdirs=vendor';
+  }
 
   stdout_of( sub { $mb->do_system(@make, 'realclean'); } );
   ok ! -e $makefile, "$makefile shouldn't exist";

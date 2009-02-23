@@ -405,6 +405,12 @@ sub change_build_pl {
     use strict;
     use Module::Build;
     my \$b = Module::Build->new(
+    # Some CPANPLUS::Dist::Build versions need to allow mismatches 
+    # On logic: thanks to Module::Install, CPAN.pm must set both keys, but
+    # CPANPLUS sets only the one
+    allow_mb_mismatch => ( 
+      \$ENV{PERL5_CPANPLUS_IS_RUNNING} && ! \$ENV{PERL5_CPAN_IS_RUNNING} ? 1 : 0
+    ),
     $args
     );
     \$b->create_build_script();
@@ -417,6 +423,13 @@ sub change_file {
   my $data = shift;
   $self->{filedata}{$file} = $data;
   $self->{pending}{change}{$file} = 1;
+}
+
+sub get_file {
+  my $self = shift;
+  my $file = shift;
+  exists($self->{filedata}{$file}) or croak("no such entry: '$file'");
+  return $self->{filedata}{$file};
 }
 
 sub chdir_in {
