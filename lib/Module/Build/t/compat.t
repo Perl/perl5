@@ -237,7 +237,7 @@ ok $mb, "Module::Build->new_from_context";
     ok $ran_ok, "make fakeinstall with INSTALLDIRS=vendor ran ok";
     $output =~ s/^/# /gm;  # Don't confuse our own test output
     like $output,
-        qr/\Q$libdir2\E .* Simple\.pm/x,
+        qr/\Q$libdir2\E .* Simple\.pm/ix,
         'Should have installdirs=vendor';
   }
 
