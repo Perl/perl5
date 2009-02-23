@@ -4355,7 +4355,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	= (U8)flags & INCPUSH_ADD_VERSIONED_SUB_DIRS;
     const U8 add_archonly_sub_dirs
 	= (U8)flags & INCPUSH_ADD_ARCHONLY_SUB_DIRS;
+#ifdef PERL_INC_VERSION_LIST
     const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
+#endif
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
     const U8 push_basedir = (flags & INCPUSH_NOT_BASEDIR) ? 0 : 1;
