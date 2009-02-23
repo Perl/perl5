@@ -3028,7 +3028,9 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     	stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
     set_this:
 	PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
-	PerlIOUnix_refcnt_inc(fileno(stdio));
+        if(stdio) {
+	    PerlIOUnix_refcnt_inc(fileno(stdio));
+        }
     }
     return f;
 }
