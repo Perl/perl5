@@ -158,7 +158,8 @@ my @nonxs = grep(!/^Errno$/, split(' ', $Config{'nonxs_ext'}));
 
 find(sub {
     if (($File::Find::name =~ m{^ext\b(.*)/([^/]+)\.pm$}) &&
-        ! grep { $File::Find::name =~ /^ext\/$_/ } @nonxs)
+        ! grep { (my $dir = $_) =~ s/\//-/g;
+                 $File::Find::name =~ /^ext\/$dir/ } @nonxs)
     {
 	my($path, $modname) = ($1,$2);
 
