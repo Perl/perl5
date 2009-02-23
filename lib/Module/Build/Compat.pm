@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.31012';
+$VERSION = '0.31_04';
 
 use File::Spec;
 use IO::File;
@@ -143,6 +143,7 @@ EOF
     eval "use Module::Build::Compat 0.02; 1" or die $@;
     %s
     Module::Build::Compat->run_build_pl(args => \@ARGV);
+    exit(0) unless(-e 'Build'); # cpantesters convention
     require %s;
     Module::Build::Compat->write_makefile(build_class => '%s');
 EOF

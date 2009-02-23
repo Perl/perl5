@@ -1548,6 +1548,18 @@ Examples:
     }
   }
 
+=item prereq_data()
+
+[version 0.32]
+
+Returns a reference to a hash describing all prerequisites.  The keys of the
+hash will the various prerequisite types ('requires', 'build_requires',
+'configure_requires', 'recommends', or 'conflicts') and the values will
+references to hashes of module names and version numbers.  Only prerequisites
+types that are defined will be included.  The C<prereq_data> action is just a
+thin wrapper around the C<prereq_data()> method and dumps the hash as a string
+that can be loaded using C<eval()>.
+
 =item prereq_report()
 
 [version 0.28]

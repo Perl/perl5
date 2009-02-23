@@ -136,12 +136,10 @@ foreach my $test (@win_splits) {
 
 {
   # Make sure run_perl_script() propagates @INC
-  my $dir = 'whosiewhatzit';
-  mkdir $dir, 0777;
+  my $dir = MBTest->tmpdir;
   local @INC = ($dir, @INC);
   my $output = stdout_of( sub { Module::Build->run_perl_script('-le', [], ['print for @INC']) } );
-  like $output, qr{^$dir}m;
-  rmdir $dir;
+  like $output, qr{^\Q$dir\E}m;
 }
 
 ##################################################################

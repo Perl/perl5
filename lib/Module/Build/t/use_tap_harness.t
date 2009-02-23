@@ -3,10 +3,10 @@
 use strict;
 use Test::More;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-if (eval { require TAP::Parser }) {
+if (eval { require TAP::Harness } && TAP::Harness->VERSION >= 3) {
     plan tests => 8;
 } else {
-    plan skip_all => 'TAP::Parser not installed'
+    plan skip_all => 'TAP::Harness 3+ not installed'
 }
 
 use MBTest;

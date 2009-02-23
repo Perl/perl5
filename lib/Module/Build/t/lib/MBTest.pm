@@ -3,6 +3,7 @@ package MBTest;
 use strict;
 
 use File::Spec;
+use File::Temp ();
 use File::Path ();
 
 
@@ -76,7 +77,7 @@ use Cwd ();
 
 # We pass everything through to Test::More
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = 0.01;
+$VERSION = 0.01_01;
 @ISA = qw(Test::More); # Test::More isa Exporter
 @EXPORT = @Test::More::EXPORT;
 %EXPORT_TAGS = %Test::More::EXPORT_TAGS;
@@ -100,18 +101,13 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 
 ########################################################################
 
-{ # Setup a temp directory if it doesn't exist
+# always return to the current directory
+{ 
   my $cwd = Cwd::cwd;
-  my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' . $$);
-  mkdir $tmp, 0777 unless -d $tmp;
 
-  sub tmpdir { $tmp }
   END {
-    if(-d $tmp) {
-      # Go back to where you came from!
-      chdir $cwd or die "Couldn't chdir to $cwd";
-      File::Path::rmtree($tmp) or diag "cannot clean dir '$tmp'";
-    }
+    # Go back to where you came from!
+    chdir $cwd or die "Couldn't chdir to $cwd";
   }
 }
 ########################################################################
@@ -124,6 +120,13 @@ __PACKAGE__->export(scalar caller, @extra_exports);
   }
 }
 ########################################################################
+
+# Setup a temp directory 
+sub tmpdir { 
+  return File::Temp::tempdir( 'MB-XXXXXXXX', 
+    CLEANUP => 1, DIR => $ENV{PERL_CORE} ? Cwd::cwd : File::Spec->tmpdir
+  );
+}
 
 sub save_handle {
   my ($handle, $subr) = @_;
@@ -209,10 +212,14 @@ sub ensure_blib {
   # Make sure the given module was loaded from blib/, not the larger system
   my $mod = shift;
   (my $path = $mod) =~ s{::}{/}g;
-  
+ 
+  local $Test::Builder::Level = $Test::Builder::Level + 1; 
  SKIP: {
     skip "no blib in core", 1 if $ENV{PERL_CORE};
-    like $INC{"$path.pm"}, qr/\bblib\b/, "Make sure $mod was loaded from blib/";
+    like $INC{"$path.pm"}, qr/\bblib\b/, "Make sure $mod was loaded from blib/"
+      or diag "PERL5LIB: " . ($ENV{PERL5LIB} || '') . "\n" .
+              "PERL5OPT: " . ($ENV{PERL5OPT} || '') . "\n" .
+              "\@INC contains:\n  " . join("\n  ", @INC) . "\n"; 
   }
 }
 

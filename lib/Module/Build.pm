@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.31012';
+$VERSION = '0.31_04';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -161,11 +161,11 @@ This illustrates initial configuration and the running of three
 'actions'.  In this case the actions run are 'build' (the default
 action), 'test', and 'install'.  Other actions defined so far include:
 
-  build                          manifest    
-  clean                          manpages    
-  code                           pardist     
-  config_data                    ppd         
-  diff                           ppmdist     
+  build                          manpages    
+  clean                          pardist     
+  code                           ppd         
+  config_data                    ppmdist     
+  diff                           prereq_data 
   dist                           prereq_report
   distcheck                      pure_install
   distclean                      realclean   
@@ -178,6 +178,7 @@ action), 'test', and 'install'.  Other actions defined so far include:
   help                           testpod     
   html                           testpodcoverage
   install                        versioninstall
+  manifest                                   
 
 
 You can run the 'help' action for a complete list of actions.
@@ -512,6 +513,14 @@ C<codebase> argument described under that action.
 This uses the same mechanism as the C<dist> action to tar & zip its
 output, so you can supply C<tar> and/or C<gzip> parameters to affect
 the result.
+
+=item prereq_data
+
+[version 0.32]
+
+This action prints out a Perl data structure of all prerequsites and the versions
+required.  The output can be loaded again using C<eval()>.  This can be useful for
+external tools that wish to query a Build script for prerequisites.
 
 =item prereq_report
 

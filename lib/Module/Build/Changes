@@ -1,5 +1,41 @@
 Revision history for Perl extension Module::Build.
 
+0.31_04 - Fri Feb 20 11:04:59 PST 2009
+
+ Other
+ - Bumped Test::Harness prereq to 3.16 for latest PERL5LIB fixes (solves
+   test failures when installing Module::Build using CPANPLUS::Dist::Build)
+   [David Golden]
+
+0.31_03 - Sun Feb  8 14:54:01 PST 2009
+
+ Enhancements
+ - added a "prereq_data" action that prints a Perl data structure of
+   all prerequisites; can be loaded by external tools using eval()
+   [David Golden]
+
+ Bug-fixes
+ - 'fakeinstall' action warns and skips without ExtUtils::Install 1.32+
+   [David Golden, reported by Zefram]
+ - allows Module::Build version mismatch when installing self; works around
+   limitations in CPANPLUS::Dist::Build [David Golden]
+
+0.31_02 - Tue Jan 27 09:16:43 PST 2009
+
+ Other
+ - tests now use File::Temp (added to build_requires); appears to fix
+   Win32 testing heisenbug on directory removal during high system loads
+ - use_tap_harness.t will skip unless a release version of TAP::Harness
+   is installed
+ - improved diagnostics to ensure_blib() tests in t/lib/MBTest.pm
+
+ Compat
+ - passthrough Makefile.PL will now play nice with cpantesters' on
+   exit(0) (RT#32018) [Eric Wilhelm]
+
+ Bug Fixes
+ - fix for doubling-up of --prefix (RT#19951)
+
 0.31012 - Wed Jan 14 01:36:19 PST 2009
 
  Bug Fixes
