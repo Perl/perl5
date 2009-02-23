@@ -188,21 +188,6 @@ sub do_system {
   return !system("$cmd $args");
 }
 
-=item oneliner
-
-Override to ensure that we do not quote the command.
-
-=cut
-
-sub oneliner {
-    my $self = shift;
-    my $oneliner = $self->SUPER::oneliner(@_);
-
-    $oneliner =~ s/^\"\S+\"//;
-
-    return "MCR $^X $oneliner";
-}
-
 =item _infer_xs_spec
 
 Inherit the standard version but tweak the library file name to be 
@@ -324,7 +309,6 @@ sub _detildefy {
 
         # Trivial case of just ~ by it self
         if ($spec eq '') {
-            $home =~ s#/$##;
             return $home;
         }
 
@@ -399,20 +383,6 @@ Convert the directory path to the local syntax
 sub localize_dir_path {
   my ($self, $path) = @_;
   return VMS::Filespec::vmspath($path);
-}
-
-=item ACTION_clean
-
-The home-grown glob() expands a bit too aggressively when given a bare name,
-so default in a zero-length extension.
-
-=cut
-
-sub ACTION_clean {
-  my ($self) = @_;
-  foreach my $item (map glob(VMS::Filespec::rmsexpand($_, '.;0')), $self->cleanup) {
-    $self->delete_filetree($item);
-  }
 }
 
 =back
