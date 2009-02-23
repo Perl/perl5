@@ -2827,7 +2827,7 @@ sub htmlify_pods {
     my ($name, $path) = File::Basename::fileparse($pods->{$pod},
                                                  file_qr('\.(?:pm|plx?|pod)$'));
     my @dirs = File::Spec->splitdir( File::Spec->canonpath( $path ) );
-    pop( @dirs ) if $dirs[-1] eq File::Spec->curdir;
+    pop( @dirs ) if scalar(@dirs) && $dirs[-1] eq File::Spec->curdir;
 
     my $fulldir = File::Spec->catfile($htmldir, @rootdirs, @dirs);
     my $outfile = File::Spec->catfile($fulldir, "${name}.html");
@@ -4077,7 +4077,7 @@ sub install_map {
       # Need to remove volume from $map{$_} using splitpath, or else
       # we'll create something crazy like C:\Foo\Bar\E:\Baz\Quux
       # VMS will always have the file separate than the path.
-      my ($volume, $path, $file) = File::Spec->splitpath( $map{$_}, 1 );
+      my ($volume, $path, $file) = File::Spec->splitpath( $map{$_}, 0 );
 
       # catdir needs a list of directories, or it will create something
       # crazy like volume:[Foo.Bar.volume.Baz.Quux]

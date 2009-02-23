@@ -280,7 +280,7 @@ sub fake_makefile {
 
   my $Build = 'Build' . $filetype . ' --makefile_env_macros 1';
   my $unlink = $class->oneliner('1 while unlink $ARGV[0]', [], [$args{makefile}]);
-  $unlink =~ s/\$/\$\$/g;
+  $unlink =~ s/\$/\$\$/g unless $class->is_vmsish;
 
   my $maketext = <<"EOF";
 all : force_do_it
