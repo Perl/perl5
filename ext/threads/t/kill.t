@@ -18,11 +18,7 @@ use ExtUtils::testlib;
 use threads;
 
 BEGIN {
-    eval {
-        require threads::shared;
-        threads::shared->import();
-    };
-    if ($@ || ! $threads::shared::threads_shared) {
+    if (! eval 'use threads::shared; 1') {
         print("1..0 # SKIP threads::shared not available\n");
         exit(0);
     }
