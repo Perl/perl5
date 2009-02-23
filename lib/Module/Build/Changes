@@ -1,5 +1,69 @@
 Revision history for Perl extension Module::Build.
 
+0.31012 - Wed Jan 14 01:36:19 PST 2009
+
+ Bug Fixes
+ - t/tilde.t maybe actually fixed on MSWin32 now.
+
+0.31011 - Mon Jan 12 21:57:04 PST 2009
+
+ Bug Fixes
+ - t/tilde.t had been failing on MSWin32 (RT#42349)
+
+0.3101 - Mon Jan 12 13:52:36 PST 2009
+
+ Other
+ - added 'mirbsd' as a Unix-type OS [BinGOs]
+ - added 'haiku' as a Unix-type OS (backported from bleadperl)
+ - skips certain tests on VMS (backported from bleadperl)
+ - sets $^X to absolute path in tests (backported from bleadperl)
+
+0.31 - Sat Dec 20 15:03:33 2008
+
+ Deprecations
+ - Use of attributes as class methods is deprecated (this was never a
+   documented feature and appears to only have worked accidentally.)
+
+0.30_02 - Mon Dec 15 12:23:55 PST 2008
+
+ Bug Fixes
+ - make Software::License dependency "softer".
+
+0.30_01 - Thu Dec 11 18:25:53 PST 2008
+
+ New Docs
+ - Added a recipe for writing a new action to the Cookbook
+ - Added a recipe for bundling Module::Build to the Cookbook.
+
+ Doc Fixes
+ - Clarified dist_abstract search procedure in API.pod (RT#41056) [Mario
+   Domgoergen]
+
+ Bug Fixes
+ - Workaround HARNESS_TIMER env issue in t/compat.t (RT#39635)
+ - Fix ~ expansion when $HOME is different from /etc/passwd as
+   when running sudo.  [rt.cpan.org 39662]
+ - Fixed a small POD error in the Cookbook. [Damyan Ivanov]
+ - Unset group/other write permission bits when using Archive::Tar to
+   build the dist tarball. (RT#39804) [David Golden]
+
+ Enhancements
+ - We now support a 'create_license' parameter to new() that will
+   create a LICENSE file during the 'dist' phase with the full text of
+   the license.  This requires Software::License on the author's
+   machine.  THIS ALSO STILL NEEDS DOCS.
+ - Added lgpl2/lgpl3 entries to the supported licenses (RT#40532).
+ - Support for validating properties with a check subref. [David
+   Wheeler]
+
+ Test Fixes
+ - Defend against more stray environment variables interfering
+   with the tests.
+
+ Other
+ - Updated our embedded version.pm to 0.76, enhanced documentation on
+   dist_version_from.  [John Peacock]
+
 0.30 - Thu Sep 25 20:57:36 2008
 
  - First non-beta release since April 2007.  In the meantime, Sarkozy
