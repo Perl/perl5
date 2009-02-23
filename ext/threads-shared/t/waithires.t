@@ -61,7 +61,7 @@ ok($TEST++, 1, 'Loaded');
 #
 # =head1 Platform Specific Problems
 #
-# The regression test ext/threads-shared/t/wait.t fails on early RedHat 9
+# The regression test ext/threads/shared/t/wait.t fails on early RedHat 9
 # and HP-UX 10.20 due to bugs in their threading implementations.
 # RedHat users should see https://rhn.redhat.com/errata/RHBA-2003-136.html
 # and consider upgrading their glibc.

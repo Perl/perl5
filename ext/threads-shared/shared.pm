@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -187,7 +187,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.27
+This document describes threads::shared version 1.28
 
 =head1 SYNOPSIS
 
@@ -323,20 +323,33 @@ L<refaddr()|Scalar::Util/"refaddr EXPR">).  Otherwise, returns C<undef>.
       print("\$var is not shared\n");
   }
 
+When used on an element of an array or hash, C<is_shared> checks if the
+specified element belongs to a shared array or hash.  (It does not check
+the contents of that element.)
+
+  my %hash :shared;
+  if (is_shared(%hash)) {
+      print("\%hash is shared\n");
+  }
+
+  $hash{'elem'} = 1;
+  if (is_shared($hash{'elem'})) {
+      print("\$hash{'elem'} is in a shared hash\n");
+  }
+
 =item lock VARIABLE
 
-C<lock> places a lock on a variable until the lock goes out of scope.  If the
-variable is locked by another thread, the C<lock> call will block until it's
-available.  Multiple calls to C<lock> by the same thread from within
-dynamically nested scopes are safe -- the variable will remain locked until
-the outermost lock on the variable goes out of scope.
+C<lock> places a B<advisory> lock on a variable until the lock goes out of
+scope.  If the variable is locked by another thread, the C<lock> call will
+block until it's available.  Multiple calls to C<lock> by the same thread from
+within dynamically nested scopes are safe -- the variable will remain locked
+until the outermost lock on the variable goes out of scope.
 
-Locking a container object, such as a hash or array, doesn't lock the elements
-of that container. For example, if a thread does a C<lock(@a)>, any other
-thread doing a C<lock($a[12])> won't block.
+C<lock> follows references exactly I<one> level:
 
-C<lock()> follows references exactly I<one> level.  C<lock(\$a)> is equivalent
-to C<lock($a)>, while C<lock(\\$a)> is not.
+  my %hash :shared;
+  my $ref = \%hash;
+  lock($ref);           # This is equivalent to lock(%hash)
 
 Note that you cannot explicitly unlock a variable; you can only wait for the
 lock to go out of scope.  This is most easily accomplished by locking the
@@ -349,6 +362,16 @@ variable inside a block.
       ...
   }
   # $var is now unlocked
+
+As locks are advisory, they do not prevent data access or modification by
+another thread that does not itself attempt to obtain a lock on the variable.
+
+You cannot lock the individual elements of a container variable:
+
+  my %hash :shared;
+  $hash{'foo'} = 'bar';
+  #lock($hash{'foo'});          # Error
+  lock(%hash);                  # Works
 
 If you need more fine-grained control over shared variable access, see
 L<Thread::Semaphore>.
@@ -510,10 +533,12 @@ Taking references to the elements of shared arrays and hashes does not
 autovivify the elements, and neither does slicing a shared array/hash over
 non-existent indices/keys autovivify the elements.
 
-C<share()> allows you to C<< share($hashref->{key}) >> without giving any
-error message.  But the C<< $hashref->{key} >> is B<not> shared, causing the
-error "locking can only be used on shared values" to occur when you attempt to
-C<< lock($hasref->{key}) >>.
+C<share()> allows you to C<< share($hashref->{key}) >> and
+C<< share($arrayref->[idx]) >> without giving any error message.  But the
+C<< $hashref->{key} >> or C<< $arrayref->[idx] >> is B<not> shared, causing
+the error "lock can only be used on shared values" to occur when you attempt
+to C<< lock($hasref->{key}) >> or C<< lock($arrayref->[idx]) >> in another
+thread.
 
 Using L<refaddr()|Scalar::Util/"refaddr EXPR">) is unreliable for testing
 whether or not two shared references are equivalent (e.g., when testing for
@@ -563,7 +588,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.27/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.28/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
