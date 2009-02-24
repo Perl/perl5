@@ -51,42 +51,47 @@ binmode STDOUT, ":utf8";
 
 my $plain = 'foo';
 my $utf8 = "\x{123}\x{84}\x{20F}\x{2C1}";
+my $code = \&is;
 
 my %a :shared;
 $a{$plain} = $plain;
 $a{$utf8} = $utf8;
-$a{\&is} = 'code';
+$a{$code} = 'code';
 
 is(exists($a{$plain}), 1, 'Found plain key in shared hash');
 is(exists($a{$utf8}), 1, 'Found UTF-8 key in shared hash');
-is(exists($a{\&is}), 1, 'Found code ref key in shared hash');
+is(exists($a{$code}), 1, 'Found code ref key in shared hash');
 
 while (my ($key, $value) = each (%a)) {
     if ($key eq $plain) {
         is($key, $plain, 'Plain key in shared hash');
     } elsif ($key eq $utf8) {
         is($key, $utf8, 'UTF-8 key in shared hash');
+    } elsif ($key eq "$code") {
+        is($key, "$code", 'Code ref key in shared hash');
     } else {
-        is($key, \&is, 'Code ref key in shared hash');
+        is($key, "???", 'Bad key');
     }
 }
 
 my $a = &share({});
 $$a{$plain} = $plain;
 $$a{$utf8} = $utf8;
-$$a{\&is} = 'code';
+$$a{$code} = 'code';
 
 is(exists($$a{$plain}), 1, 'Found plain key in shared hash ref');
 is(exists($$a{$utf8}), 1, 'Found UTF-8 key in shared hash ref');
-is(exists($$a{\&is}), 1, 'Found code ref key in shared hash ref');
+is(exists($$a{$code}), 1, 'Found code ref key in shared hash ref');
 
 while (my ($key, $value) = each (%$a)) {
     if ($key eq $plain) {
         is($key, $plain, 'Plain key in shared hash ref');
     } elsif ($key eq $utf8) {
         is($key, $utf8, 'UTF-8 key in shared hash ref');
+    } elsif ($key eq "$code") {
+        is($key, "$code", 'Code ref key in shared hash ref');
     } else {
-        is($key, \&is, 'Code ref key in shared hash ref');
+        is($key, "???", 'Bad key');
     }
 }
 
