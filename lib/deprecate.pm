@@ -20,10 +20,23 @@ sub import {
 
 	next if $site eq $priv;
 	if ("$priv/$expect_leaf" eq $file) {
+	    my $call_depth=1;
+	    my @caller;
+	    while (@caller = caller $call_depth++) {
+		last if $caller[7]			# use/require
+		    and $caller[6] eq $expect_leaf;	# the package file
+	    }
+	    unless (@caller) {
+		require Carp;
+		Carp::cluck(<<"EOM");
+Can't find use/require $expect_leaf in caller stack
+EOM
+		next;
+	    }
+
 	    # This is fragile, because it
-	    # 1: depends on the number of call stacks in if.pm
-	    # 2: is directly poking in the internals of warnings.pm
-	    my ($call_file, $call_line, $callers_bitmask) = (caller 3)[1,2,9];
+	    # is directly poking in the internals of warnings.pm
+	    my ($call_file, $call_line, $callers_bitmask) = @caller[1,2,9];
 
 	    if (defined $callers_bitmask
             	&& (vec($callers_bitmask, $warnings::Offsets{deprecated}, 1)
