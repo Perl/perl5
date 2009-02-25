@@ -137,7 +137,7 @@ my @TestFiles;
        ? system( "cp -fR $CPV t $TopDir" ) && die "Copy of t/ failed: $?"
        : warn "No t/ directory found\n";
 
-    @TestFiles =    map { chomp; s|^$TopDirRe||; $_ }
+    @TestFiles =    map { chomp; s|^$TopDirRe||; s|//|/|g; $_ }
                     ### should we get rid of this file?
                     grep { $ExcludeRe && $_ =~ $ExcludeRe
                         ? do {  warn "Removing $_\n";
@@ -169,7 +169,7 @@ BIN: {
 
     system($CopyCmd) && die "Copy of $BinDir failed: $?";
 
-    @BinFiles = map { chomp; s|^$TopDirRe||; $_ }
+    @BinFiles = map { chomp; s|^$TopDirRe||; s|//|/|g; $_ }
                 ### should we get rid of this file?
                 grep { $ExcludeRe && $_ =~ $ExcludeRe
                     ? do {  warn "Removing $_\n";
