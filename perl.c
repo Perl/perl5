@@ -3625,7 +3625,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
  * perl with that fd as it has always done.
  */
     }
-    if (*suidscript) {
+    if (!*suidscript) {
 	Perl_croak(aTHX_ "suidperl needs (suid) fd script\n");
     }
 #else /* IAMSUID */
