@@ -2,26 +2,27 @@ use strict;
 
 BEGIN {
 	chdir 't' if -d 't';
-	chdir 'lib/deprecate' or die "Can't see lib/deprecate";
-	@INC = qw(../../../lib
-		lib/perl/arch
-		lib/perl
-		lib/site/arch
-		lib/site
-	);
+	@INC = qw(../lib);
 }
 use File::Copy ();
 use File::Path ();
+use File::Spec ();
 use Test::More tests => 10;
 
+my $test_dir = File::Spec->catdir(qw(lib deprecate));
+chdir $test_dir or die "Can't chdir $test_dir";
+@INC = ( File::Spec->catdir( (File::Spec->updir)x3, qw(lib)) );
+
 my %libdir = (
-	privlibexp	=> 'lib/perl',
-	sitelibexp	=> 'lib/site',
-	archlibexp	=> 'lib/perl/arch',
-	sitearchexp	=> 'lib/site/arch',
+	privlibexp	=> File::Spec->catdir(qw(lib perl)),
+	sitelibexp	=> File::Spec->catdir(qw(lib site)),
+	archlibexp	=> File::Spec->catdir(qw(lib perl arch)),
+	sitearchexp	=> File::Spec->catdir(qw(lib site arch)),
 );
 
-mkdir for 'lib', sort values %libdir;
+File::Path::make_path(values %libdir); 
+
+push @INC, @libdir{qw(archlibexp privlibexp sitearchexp sitelibexp)};
 
 our %tests = (
 	privlibexp	=> 1,
@@ -32,11 +33,13 @@ our %tests = (
 
 local %deprecate::Config = (%libdir);
 
+my $module = 'Deprecated.pm';
 for my $lib (sort keys %tests) {
     my $dir = $libdir{$lib};
-    File::Copy::copy 'Deprecated.pm', "$dir/Deprecated.pm";
+    my $pm = File::Spec->catfile($dir, $module);
+    File::Copy::copy($module, $pm);
 
-    my $warn;
+    my $warn = '';
     {   local $SIG{__WARN__} = sub { $warn .= $_[0]; };
         use warnings qw(deprecated);
 #line 1001
@@ -51,16 +54,20 @@ for my $lib (sort keys %tests) {
 	ok( !$warn, "$lib - no message" );
     }
 
-    delete $INC{'Deprecated.pm'};
-    unlink "$dir/Deprecated.pm";
+    delete $INC{$module};
+    unlink $pm;
 }
 
+my $sub_dir = 'Optionally';
+my $opt_mod = $sub_dir .'.pm';
 for my $lib (sort keys %tests) {
-    my $dir = $libdir{$lib};
-    mkdir "$dir/Optionally";
-    File::Copy::copy 'Optionally.pm', "$dir/Optionally/Deprecated.pm";
+    my $dir = File::Spec->catdir($libdir{$lib}, $sub_dir);
+    File::Path::make_path($dir);
 
-    my $warn;
+    my $pm = File::Spec->catfile($dir, $module);
+    File::Copy::copy($opt_mod, $pm);
+
+    my $warn = '';
     {   local $SIG{__WARN__} = sub { $warn .= $_[0]; };
         use warnings qw(deprecated);
 	require Optionally::Deprecated;
@@ -73,7 +80,8 @@ for my $lib (sort keys %tests) {
 	ok( !$warn, "$lib - use if - no message" );
     }
 
-    delete $INC{'Optionally/Deprecated.pm'};
-    unlink "$dir/Optionally/Deprecated.pm";
+    delete $INC{"$sub_dir/$module"};
+    unlink $pm;
 }
-# END { File::Path::rmtree 'lib' }
+
+END { File::Path::remove_tree('lib') }
