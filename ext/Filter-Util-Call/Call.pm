@@ -1,14 +1,14 @@
 
 # Call.pm
 #
-# Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
+# Copyright (c) 1995-2009 Paul Marquess. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
  
 package Filter::Util::Call ;
 
-require 5.002 ;
+require 5.005 ;
 require DynaLoader;
 require Exporter;
 use Carp ;
@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA @EXPORT) ;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-$VERSION = "1.07_02" ;
+$VERSION = "1.08" ;
 
 sub filter_read_exact($)
 {
