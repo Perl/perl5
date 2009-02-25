@@ -1,11 +1,11 @@
-#!perl -w
-use strict;
-
 package deprecate;
-use Config;
-use Carp;
+use strict;
 use warnings;
 our $VERSION = 0.01;
+
+# our %Config can ignore %Config::Config, e.g. for testing
+our %Config;
+unless (%Config) { require Config; *Config = \%Config::Config; }
 
 sub import {
     my ($package, $file, $line) = caller;
@@ -42,7 +42,7 @@ EOM
             	&& (vec($callers_bitmask, $warnings::Offsets{deprecated}, 1)
 		    || vec($callers_bitmask, $warnings::Offsets{all}, 1))) {
 		warn <<"EOM";
-$package will be removed from the Perl core distribution in the next major release. Please install it from CPAN. It is being used at $call_file line $call_line
+$package will be removed from the Perl core distribution in the next major release. Please install it from CPAN. It is being used at $call_file, line $call_line.
 EOM
 	    }
 	    return;

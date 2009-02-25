@@ -3809,6 +3809,9 @@ t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
+t/lib/deprecate.t		Test deprecate.pm
+t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
+t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Test::More test module
 t/lib/dprof/test1_t		Perl code profiler tests
