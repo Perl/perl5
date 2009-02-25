@@ -5,7 +5,7 @@ perlperf - Perl Performance and Optimization Techniques
 =head1 DESCRIPTION
 
 This is an introduction to the use of performance and optimization techniques
-which can be used with particular reference to perl progams.  While many perl
+which can be used with particular reference to perl programs.  While many perl
 developers have come from other languages, and can use their prior knowledge
 where appropriate, there are many other people who might benefit from a few
 perl specific pointers.  If you want the condensed version, perhaps the best
