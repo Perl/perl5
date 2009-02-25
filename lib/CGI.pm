@@ -6455,7 +6455,7 @@ list.  Otherwise, they will be strung together on a horizontal line.
 =back
 
 
-The optional B<-labels> argument is a pointer to an associative array
+The optional b<-labels> argument is a pointer to an associative array
 relating the checkbox values to the user-visible labels that will be
 printed next to them.  If not provided, the values will be used as the
 default.
@@ -6467,7 +6467,7 @@ checkbox group formatted with the specified number of rows and
 columns.  You can provide just the -columns parameter if you wish;
 checkbox_group will calculate the correct number of rows for you.
 
-The option B<-disabled> takes an array of checkbox values and disables
+The option b<-disabled> takes an array of checkbox values and disables
 them by greying them out (this may not be supported by all browsers).
 
 The optional B<-attributes> argument is provided to assign any of the
@@ -7539,7 +7539,7 @@ running under IIS and put itself into this mode.  You do not need to
 do this manually, although it won't hurt anything if you do.  However,
 note that if you have applied Service Pack 6, much of the
 functionality of NPH scripts, including the ability to redirect while
-setting a cookie, B<do not work at all> on IIS without a special patch
+setting a cookie, b<do not work at all> on IIS without a special patch
 from Microsoft.  See
 http://support.microsoft.com/support/kb/articles/Q280/3/41.ASP:
 Non-Parsed Headers Stripped From CGI Applications That Have nph-
