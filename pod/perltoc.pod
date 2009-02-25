@@ -1312,6 +1312,10 @@ array of hashes or arrays?
 =item How do I flush/unbuffer an output filehandle?  Why must I do this?
 X<flush> X<buffer> X<unbuffer> X<autoflush>
 
+=item How do I change, delete, or insert a line in a file, or append to the
+beginning of a file?
+X<file, editing>
+
 =item How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
 
@@ -1342,6 +1346,9 @@ X<write, into a string>
 
 =item How can I open a filehandle to a string?
 X<string>, X<open>, X<IO::Scalar>, X<filehandle>
+
+=item How can I output my numbers with commas added?
+X<number, commify>
 
 =item How can I translate tildes (~) in a filename?
 X<tilde> X<tilde expansion>
@@ -1866,7 +1873,7 @@ X<block>
 =item Switch statements
 X<switch> X<case> X<given> X<when> X<default>
 
-o, o, o, o, o, o, o
+o, o
 
 =item Goto
 X<goto>
@@ -2028,9 +2035,10 @@ X<operator, regexp>
 qr/STRING/msixpo X<qr> X</i> X</m> X</o> X</s> X</x> X</p>,
 m/PATTERN/msixpogc X<m> X<operator, match> X<regexp, options> X<regexp>
 X<regex, options> X<regex> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c>,
-/PATTERN/msixpogc, ?PATTERN? X<?>, s/PATTERN/REPLACEMENT/msixpogce
-X<substitute> X<substitution> X<replace> X<regexp, replace> X<regexp,
-substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e>
+/PATTERN/msixpogc, The empty pattern //, Matching in list context, \G
+assertion, ?PATTERN? X<?>, s/PATTERN/REPLACEMENT/msixpogce X<substitute>
+X<substitution> X<replace> X<regexp, replace> X<regexp, substitute> X</m>
+X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e>
 
 =item Quote-Like Operators
 X<operator, quote-like>
@@ -2254,7 +2262,7 @@ READHANDLE,WRITEHANDLE X<pipe>, pop ARRAY X<pop> X<stack>, pop, pos SCALAR
 X<pos> X<match, position>, pos, print FILEHANDLE LIST X<print>, print LIST,
 print, printf FILEHANDLE FORMAT, LIST X<printf>, printf FORMAT, LIST,
 prototype FUNCTION X<prototype>, push ARRAY,LIST X<push> X<stack>,
-q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR
+q/STRING/, qq/STRING/, qx/STRING/, qw/STRING/, qr/STRING/, quotemeta EXPR
 X<quotemeta> X<metacharacter>, quotemeta, rand EXPR X<rand> X<random>,
 rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET X<read> X<file, read>, read
 FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE X<readdir>, readline EXPR,
@@ -2880,8 +2888,9 @@ X<regex, preserve> X<regexp, preserve>, g and c X</g> X</c>
 
 =item Regular Expressions
 
-[1], [2], [3], cntrl X<cntrl>, graph X<graph>, print X<print>, punct
-X<punct>, xdigit X<xdigit>
+[1], [2], [3], [1], [2], [3], C<$>, C<+> C<< < >> C<=> C<< > >> C<|> C<~>,
+C<^> C<`>, cntrl X<cntrl>, graph X<graph>, print X<print>, punct X<punct>,
+xdigit X<xdigit>
 
 =item Extended Patterns
 
@@ -3173,7 +3182,8 @@ X<indirect object syntax> X<invocation, indirect> X<indirect>
 =item Default UNIVERSAL methods
 X<UNIVERSAL>
 
-isa(CLASS) X<isa>, can(METHOD) X<can>, VERSION( [NEED] ) X<VERSION>
+isa(CLASS) X<isa>, DOES(ROLE), can(METHOD) X<can>, VERSION( [NEED] )
+X<VERSION>
 
 =item Destructors
 X<destructor> X<DESTROY>
@@ -3970,6 +3980,9 @@ classes, Use of "Is" Prefix, Blocks
 
 =item Interaction with Locales
 
+=item Problems with characters whose ordinal numbers are in the range 128 -
+255 with no Locale specified
+
 =item Interaction with Extensions
 
 =item Speed
@@ -4153,7 +4166,7 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 =item Convert, sort data, then re convert.
 
-=item Perform sorting on one type of machine only.
+=item Perform sorting on one type of platform only.
 
 =back
 
@@ -4281,43 +4294,44 @@ X<CLONE> X<CLONE_SKIP> X<thread> X<threads> X<ithread>
 
 =item Pragmatic Modules
 
-attributes, attrs, autouse, base, bigint, bignum, bigrat, blib, bytes,
-charnames, constant, diagnostics, encoding, encoding::warnings, feature,
-fields, filetest, if, integer, less, lib, locale, mro, open, ops, overload,
-re, sigtrap, sort, strict, subs, threads, threads::shared, utf8, vars,
-version, vmsish, warnings, warnings::register
+attributes, attrs, autodie, autouse, base, bigint, bignum, bigrat, blib,
+bytes, charnames, constant, diagnostics, encoding, encoding::warnings,
+feature, fields, filetest, if, integer, less, lib, locale, mro, open, ops,
+overload, re, sigtrap, sort, strict, subs, threads, threads::shared, utf8,
+vars, version, vmsish, warnings, warnings::register
 
 =item Standard Modules
 
 AnyDBM_File, Archive::Extract, Archive::Tar, Archive::Tar::File,
 Attribute::Handlers, AutoLoader, AutoSplit, B, B::Concise, B::Debug,
-B::Deparse, B::Lint, B::Showlex, B::Terse, B::Xref, Benchmark, CGI,
-CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push,
-CGI::Switch, CGI::Util, CORE, CPAN, CPAN::API::HOWTO, CPAN::FirstTime,
-CPAN::Kwalify, CPAN::Nox, CPAN::Version, CPANPLUS, CPANPLUS::Dist::Base,
-CPANPLUS::Dist::Sample, CPANPLUS::Shell::Classic,
-CPANPLUS::Shell::Default::Plugins::HOWTO, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Compress::Raw::Zlib, Compress::Zlib, Config, Cwd, DB,
-DBM_Filter, DBM_Filter::compress, DBM_Filter::encode, DBM_Filter::int32,
-DBM_Filter::null, DBM_Filter::utf8, DB_File, Data::Dumper, Devel::DProf,
-Devel::InnerPackage, Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5,
-Digest::SHA, Digest::base, Digest::file, DirHandle, Dumpvalue, DynaLoader,
-Encode, Encode::Alias, Encode::Byte, Encode::CJKConstants, Encode::CN,
-Encode::CN::HZ, Encode::Config, Encode::EBCDIC, Encode::Encoder,
-Encode::Encoding, Encode::GSM0338, Encode::Guess, Encode::JP,
-Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR,
-Encode::MIME::Header, Encode::MIME::Name, Encode::PerlIO,
-Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
-Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
-ExtUtils::CBuilder, ExtUtils::CBuilder::Platform::Windows,
-ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
-ExtUtils::Constant::Base, ExtUtils::Constant::Utils,
-ExtUtils::Constant::XS, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_AIX,
-ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
-ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_QNX,
-ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_VOS,
-ExtUtils::MM_Win32, ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
+B::Deparse, B::Lint, B::Lint::Debug, B::Showlex, B::Terse, B::Xref,
+Benchmark, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
+CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CORE, CPAN,
+CPAN::API::HOWTO, CPAN::FirstTime, CPAN::Kwalify, CPAN::Nox, CPAN::Version,
+CPANPLUS, CPANPLUS::Dist::Base, CPANPLUS::Dist::Sample,
+CPANPLUS::Shell::Classic, CPANPLUS::Shell::Default::Plugins::HOWTO, Carp,
+Carp::Heavy, Class::ISA, Class::Struct, Compress::Raw::Zlib,
+Compress::Zlib, Config, Cwd, DB, DBM_Filter, DBM_Filter::compress,
+DBM_Filter::encode, DBM_Filter::int32, DBM_Filter::null, DBM_Filter::utf8,
+DB_File, Data::Dumper, Devel::DProf, Devel::InnerPackage, Devel::Peek,
+Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA, Digest::base,
+Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias,
+Encode::Byte, Encode::CJKConstants, Encode::CN, Encode::CN::HZ,
+Encode::Config, Encode::EBCDIC, Encode::Encoder, Encode::Encoding,
+Encode::GSM0338, Encode::Guess, Encode::JP, Encode::JP::H2Z,
+Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR, Encode::MIME::Header,
+Encode::MIME::Name, Encode::PerlIO, Encode::Supported, Encode::Symbol,
+Encode::TW, Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno,
+Exporter, Exporter::Heavy, ExtUtils::CBuilder,
+ExtUtils::CBuilder::Platform::Windows, ExtUtils::Command,
+ExtUtils::Command::MM, ExtUtils::Constant, ExtUtils::Constant::Base,
+ExtUtils::Constant::Utils, ExtUtils::Constant::XS, ExtUtils::Embed,
+ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM,
+ExtUtils::MM_AIX, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
+ExtUtils::MM_DOS, ExtUtils::MM_Darwin, ExtUtils::MM_MacOS,
+ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_QNX, ExtUtils::MM_UWIN,
+ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_VOS, ExtUtils::MM_Win32,
+ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
 ExtUtils::MakeMaker::Config, ExtUtils::MakeMaker::FAQ,
 ExtUtils::MakeMaker::Tutorial, ExtUtils::MakeMaker::bytes,
 ExtUtils::MakeMaker::vmsish, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
@@ -4338,18 +4352,19 @@ IO::Socket::UNIX, IO::Uncompress::AnyInflate,
 IO::Uncompress::AnyUncompress, IO::Uncompress::Base,
 IO::Uncompress::Gunzip, IO::Uncompress::Inflate,
 IO::Uncompress::RawInflate, IO::Uncompress::Unzip, IO::Zlib, IPC::Cmd,
-IPC::Open2, IPC::Open3, IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore,
-List::Util, Locale::Constants, Locale::Country, Locale::Currency,
-Locale::Language, Locale::Maketext, Locale::Maketext::Simple,
-Locale::Maketext::TPJ13, Locale::Script, Log::Message,
-Log::Message::Config, Log::Message::Handlers, Log::Message::Item,
-MIME::Base64, MIME::QuotedPrint, Math::BigFloat, Math::BigInt,
-Math::BigInt::Calc, Math::BigInt::CalcEmu, Math::BigInt::FastCalc,
-Math::BigRat, Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File,
-Memoize::Expire, Memoize::ExpireFile, Memoize::ExpireTest,
-Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, Module::Build,
-Module::Build::API, Module::Build::Authoring, Module::Build::Base,
-Module::Build::Compat, Module::Build::ConfigData, Module::Build::Cookbook,
+IPC::Msg, IPC::Open2, IPC::Open3, IPC::Semaphore, IPC::SharedMem,
+IPC::SysV, List::Util, Locale::Constants, Locale::Country,
+Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::Simple, Locale::Maketext::TPJ13, Locale::Script,
+Log::Message, Log::Message::Config, Log::Message::Handlers,
+Log::Message::Item, MIME::Base64, MIME::QuotedPrint, Math::BigFloat,
+Math::BigInt, Math::BigInt::Calc, Math::BigInt::CalcEmu,
+Math::BigInt::FastCalc, Math::BigRat, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Storable, Module::Build, Module::Build::API,
+Module::Build::Authoring, Module::Build::Base, Module::Build::Compat,
+Module::Build::ConfigData, Module::Build::Cookbook,
 Module::Build::ModuleInfo, Module::Build::Notes, Module::Build::PPMMaker,
 Module::Build::Platform::Amiga, Module::Build::Platform::Default,
 Module::Build::Platform::EBCDIC, Module::Build::Platform::MPEiX,
@@ -4666,9 +4681,9 @@ L<config_data|config_data>, L<libnetcfg|libnetcfg>, L<perlivp>
 
 =item Development
 
-L<perlbug|perlbug>, L<h2ph|h2ph>, L<c2ph|c2ph> and L<pstruct|pstruct>,
-L<h2xs|h2xs>, L<enc2xs>, L<xsubpp>, L<dprofpp|dprofpp>, L<prove>,
-L<corelist>
+L<perlbug|perlbug>, L<perlthanks|perlthanks>, L<h2ph|h2ph>, L<c2ph|c2ph>
+and L<pstruct|pstruct>, L<h2xs|h2xs>, L<enc2xs>, L<xsubpp>,
+L<dprofpp|dprofpp>, L<prove>, L<corelist>
 
 =item General tools
 
@@ -5777,8 +5792,8 @@ Nullsv X<Nullsv>
 
 get_hv X<get_hv>, HEf_SVKEY X<HEf_SVKEY>, HeHASH X<HeHASH>, HeKEY X<HeKEY>,
 HeKLEN X<HeKLEN>, HePV X<HePV>, HeSVKEY X<HeSVKEY>, HeSVKEY_force
-X<HeSVKEY_force>, HeSVKEY_set X<HeSVKEY_set>, HeVAL X<HeVAL>, HvNAME
-X<HvNAME>, hv_assert X<hv_assert>, hv_clear X<hv_clear>,
+X<HeSVKEY_force>, HeSVKEY_set X<HeSVKEY_set>, HeUTF8 X<HeUTF8>, HeVAL
+X<HeVAL>, HvNAME X<HvNAME>, hv_assert X<hv_assert>, hv_clear X<hv_clear>,
 hv_clear_placeholders X<hv_clear_placeholders>, hv_delete X<hv_delete>,
 hv_delete_ent X<hv_delete_ent>, hv_exists X<hv_exists>, hv_exists_ent
 X<hv_exists_ent>, hv_fetch X<hv_fetch>, hv_fetchs X<hv_fetchs>,
@@ -5862,21 +5877,21 @@ XCPT_TRY_END X<XCPT_TRY_END>, XCPT_TRY_START X<XCPT_TRY_START>
 =item Stack Manipulation Macros
 
 dMARK X<dMARK>, dORIGMARK X<dORIGMARK>, dSP X<dSP>, EXTEND X<EXTEND>, MARK
-X<MARK>, mPUSHi X<mPUSHi>, mPUSHn X<mPUSHn>, mPUSHp X<mPUSHp>, mPUSHu
-X<mPUSHu>, mXPUSHi X<mXPUSHi>, mXPUSHn X<mXPUSHn>, mXPUSHp X<mXPUSHp>,
-mXPUSHu X<mXPUSHu>, ORIGMARK X<ORIGMARK>, POPi X<POPi>, POPl X<POPl>, POPn
-X<POPn>, POPp X<POPp>, POPpbytex X<POPpbytex>, POPpx X<POPpx>, POPs
-X<POPs>, PUSHi X<PUSHi>, PUSHMARK X<PUSHMARK>, PUSHmortal X<PUSHmortal>,
-PUSHn X<PUSHn>, PUSHp X<PUSHp>, PUSHs X<PUSHs>, PUSHu X<PUSHu>, PUTBACK
-X<PUTBACK>, SP X<SP>, SPAGAIN X<SPAGAIN>, XPUSHi X<XPUSHi>, XPUSHmortal
-X<XPUSHmortal>, XPUSHn X<XPUSHn>, XPUSHp X<XPUSHp>, XPUSHs X<XPUSHs>,
-XPUSHu X<XPUSHu>, XSRETURN X<XSRETURN>, XSRETURN_EMPTY X<XSRETURN_EMPTY>,
-XSRETURN_IV X<XSRETURN_IV>, XSRETURN_NO X<XSRETURN_NO>, XSRETURN_NV
-X<XSRETURN_NV>, XSRETURN_PV X<XSRETURN_PV>, XSRETURN_UNDEF
-X<XSRETURN_UNDEF>, XSRETURN_UV X<XSRETURN_UV>, XSRETURN_YES
-X<XSRETURN_YES>, XST_mIV X<XST_mIV>, XST_mNO X<XST_mNO>, XST_mNV
-X<XST_mNV>, XST_mPV X<XST_mPV>, XST_mUNDEF X<XST_mUNDEF>, XST_mYES
-X<XST_mYES>
+X<MARK>, mPUSHi X<mPUSHi>, mPUSHn X<mPUSHn>, mPUSHp X<mPUSHp>, mPUSHs
+X<mPUSHs>, mPUSHu X<mPUSHu>, mXPUSHi X<mXPUSHi>, mXPUSHn X<mXPUSHn>,
+mXPUSHp X<mXPUSHp>, mXPUSHs X<mXPUSHs>, mXPUSHu X<mXPUSHu>, ORIGMARK
+X<ORIGMARK>, POPi X<POPi>, POPl X<POPl>, POPn X<POPn>, POPp X<POPp>,
+POPpbytex X<POPpbytex>, POPpx X<POPpx>, POPs X<POPs>, PUSHi X<PUSHi>,
+PUSHMARK X<PUSHMARK>, PUSHmortal X<PUSHmortal>, PUSHn X<PUSHn>, PUSHp
+X<PUSHp>, PUSHs X<PUSHs>, PUSHu X<PUSHu>, PUTBACK X<PUTBACK>, SP X<SP>,
+SPAGAIN X<SPAGAIN>, XPUSHi X<XPUSHi>, XPUSHmortal X<XPUSHmortal>, XPUSHn
+X<XPUSHn>, XPUSHp X<XPUSHp>, XPUSHs X<XPUSHs>, XPUSHu X<XPUSHu>, XSRETURN
+X<XSRETURN>, XSRETURN_EMPTY X<XSRETURN_EMPTY>, XSRETURN_IV X<XSRETURN_IV>,
+XSRETURN_NO X<XSRETURN_NO>, XSRETURN_NV X<XSRETURN_NV>, XSRETURN_PV
+X<XSRETURN_PV>, XSRETURN_UNDEF X<XSRETURN_UNDEF>, XSRETURN_UV
+X<XSRETURN_UV>, XSRETURN_YES X<XSRETURN_YES>, XST_mIV X<XST_mIV>, XST_mNO
+X<XST_mNO>, XST_mNV X<XST_mNV>, XST_mPV X<XST_mPV>, XST_mUNDEF
+X<XST_mUNDEF>, XST_mYES X<XST_mYES>
 
 =item SV Flags
 
@@ -5886,29 +5901,29 @@ X<SVt_PVMG>
 
 =item SV Manipulation Functions
 
-get_sv X<get_sv>, newRV_inc X<newRV_inc>, SvCUR X<SvCUR>, SvCUR_set
-X<SvCUR_set>, SvEND X<SvEND>, SvGAMAGIC X<SvGAMAGIC>, SvGROW X<SvGROW>,
-SvIOK X<SvIOK>, SvIOKp X<SvIOKp>, SvIOK_notUV X<SvIOK_notUV>, SvIOK_off
-X<SvIOK_off>, SvIOK_on X<SvIOK_on>, SvIOK_only X<SvIOK_only>, SvIOK_only_UV
-X<SvIOK_only_UV>, SvIOK_UV X<SvIOK_UV>, SvIsCOW X<SvIsCOW>,
-SvIsCOW_shared_hash X<SvIsCOW_shared_hash>, SvIV X<SvIV>, SvIVX X<SvIVX>,
-SvIVx X<SvIVx>, SvIV_nomg X<SvIV_nomg>, SvIV_set X<SvIV_set>, SvLEN
-X<SvLEN>, SvLEN_set X<SvLEN_set>, SvMAGIC_set X<SvMAGIC_set>, SvNIOK
-X<SvNIOK>, SvNIOKp X<SvNIOKp>, SvNIOK_off X<SvNIOK_off>, SvNOK X<SvNOK>,
-SvNOKp X<SvNOKp>, SvNOK_off X<SvNOK_off>, SvNOK_on X<SvNOK_on>, SvNOK_only
-X<SvNOK_only>, SvNV X<SvNV>, SvNVX X<SvNVX>, SvNVx X<SvNVx>, SvNV_set
-X<SvNV_set>, SvOK X<SvOK>, SvOOK X<SvOOK>, SvPOK X<SvPOK>, SvPOKp
-X<SvPOKp>, SvPOK_off X<SvPOK_off>, SvPOK_on X<SvPOK_on>, SvPOK_only
-X<SvPOK_only>, SvPOK_only_UTF8 X<SvPOK_only_UTF8>, SvPV X<SvPV>, SvPVbyte
-X<SvPVbyte>, SvPVbytex X<SvPVbytex>, SvPVbytex_force X<SvPVbytex_force>,
-SvPVbyte_force X<SvPVbyte_force>, SvPVbyte_nolen X<SvPVbyte_nolen>,
-SvPVutf8 X<SvPVutf8>, SvPVutf8x X<SvPVutf8x>, SvPVutf8x_force
-X<SvPVutf8x_force>, SvPVutf8_force X<SvPVutf8_force>, SvPVutf8_nolen
-X<SvPVutf8_nolen>, SvPVX X<SvPVX>, SvPVx X<SvPVx>, SvPV_force
-X<SvPV_force>, SvPV_force_nomg X<SvPV_force_nomg>, SvPV_nolen
-X<SvPV_nolen>, SvPV_nomg X<SvPV_nomg>, SvPV_set X<SvPV_set>, SvREFCNT
-X<SvREFCNT>, SvREFCNT_dec X<SvREFCNT_dec>, SvREFCNT_inc X<SvREFCNT_inc>,
-SvREFCNT_inc_NN X<SvREFCNT_inc_NN>, SvREFCNT_inc_simple
+get_sv X<get_sv>, newRV_inc X<newRV_inc>, newSVpvn_utf8 X<newSVpvn_utf8>,
+SvCUR X<SvCUR>, SvCUR_set X<SvCUR_set>, SvEND X<SvEND>, SvGAMAGIC
+X<SvGAMAGIC>, SvGROW X<SvGROW>, SvIOK X<SvIOK>, SvIOKp X<SvIOKp>,
+SvIOK_notUV X<SvIOK_notUV>, SvIOK_off X<SvIOK_off>, SvIOK_on X<SvIOK_on>,
+SvIOK_only X<SvIOK_only>, SvIOK_only_UV X<SvIOK_only_UV>, SvIOK_UV
+X<SvIOK_UV>, SvIsCOW X<SvIsCOW>, SvIsCOW_shared_hash
+X<SvIsCOW_shared_hash>, SvIV X<SvIV>, SvIVX X<SvIVX>, SvIVx X<SvIVx>,
+SvIV_nomg X<SvIV_nomg>, SvIV_set X<SvIV_set>, SvLEN X<SvLEN>, SvLEN_set
+X<SvLEN_set>, SvMAGIC_set X<SvMAGIC_set>, SvNIOK X<SvNIOK>, SvNIOKp
+X<SvNIOKp>, SvNIOK_off X<SvNIOK_off>, SvNOK X<SvNOK>, SvNOKp X<SvNOKp>,
+SvNOK_off X<SvNOK_off>, SvNOK_on X<SvNOK_on>, SvNOK_only X<SvNOK_only>,
+SvNV X<SvNV>, SvNVX X<SvNVX>, SvNVx X<SvNVx>, SvNV_set X<SvNV_set>, SvOK
+X<SvOK>, SvOOK X<SvOOK>, SvPOK X<SvPOK>, SvPOKp X<SvPOKp>, SvPOK_off
+X<SvPOK_off>, SvPOK_on X<SvPOK_on>, SvPOK_only X<SvPOK_only>,
+SvPOK_only_UTF8 X<SvPOK_only_UTF8>, SvPV X<SvPV>, SvPVbyte X<SvPVbyte>,
+SvPVbytex X<SvPVbytex>, SvPVbytex_force X<SvPVbytex_force>, SvPVbyte_force
+X<SvPVbyte_force>, SvPVbyte_nolen X<SvPVbyte_nolen>, SvPVutf8 X<SvPVutf8>,
+SvPVutf8x X<SvPVutf8x>, SvPVutf8x_force X<SvPVutf8x_force>, SvPVutf8_force
+X<SvPVutf8_force>, SvPVutf8_nolen X<SvPVutf8_nolen>, SvPVX X<SvPVX>, SvPVx
+X<SvPVx>, SvPV_force X<SvPV_force>, SvPV_force_nomg X<SvPV_force_nomg>,
+SvPV_nolen X<SvPV_nolen>, SvPV_nomg X<SvPV_nomg>, SvPV_set X<SvPV_set>,
+SvREFCNT X<SvREFCNT>, SvREFCNT_dec X<SvREFCNT_dec>, SvREFCNT_inc
+X<SvREFCNT_inc>, SvREFCNT_inc_NN X<SvREFCNT_inc_NN>, SvREFCNT_inc_simple
 X<SvREFCNT_inc_simple>, SvREFCNT_inc_simple_NN X<SvREFCNT_inc_simple_NN>,
 SvREFCNT_inc_simple_void X<SvREFCNT_inc_simple_void>,
 SvREFCNT_inc_simple_void_NN X<SvREFCNT_inc_simple_void_NN>,
@@ -5923,14 +5938,15 @@ SvUVX X<SvUVX>, SvUVx X<SvUVx>, SvUV_nomg X<SvUV_nomg>, SvUV_set
 X<SvUV_set>, SvVOK X<SvVOK>, sv_catpvn_nomg X<sv_catpvn_nomg>,
 sv_catsv_nomg X<sv_catsv_nomg>, sv_derived_from X<sv_derived_from>, sv_does
 X<sv_does>, sv_report_used X<sv_report_used>, sv_setsv_nomg
-X<sv_setsv_nomg>
+X<sv_setsv_nomg>, sv_utf8_upgrade_nomg X<sv_utf8_upgrade_nomg>
 
 =item SV-Body Allocation
 
 looks_like_number X<looks_like_number>, newRV_noinc X<newRV_noinc>, newSV
 X<newSV>, newSVhek X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>,
 newSVpv X<newSVpv>, newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>,
-newSVpvn_share X<newSVpvn_share>, newSVpvs X<newSVpvs>, newSVpvs_share
+newSVpvn_flags X<newSVpvn_flags>, newSVpvn_share X<newSVpvn_share>,
+newSVpvs X<newSVpvs>, newSVpvs_flags X<newSVpvs_flags>, newSVpvs_share
 X<newSVpvs_share>, newSVrv X<newSVrv>, newSVsv X<newSVsv>, newSVuv
 X<newSVuv>, newSV_type X<newSV_type>, sv_2bool X<sv_2bool>, sv_2cv
 X<sv_2cv>, sv_2io X<sv_2io>, sv_2iv_flags X<sv_2iv_flags>, sv_2mortal
@@ -6046,7 +6062,8 @@ start_glob X<start_glob>
 
 =item Magical Functions
 
-magic_sethint X<magic_sethint>, mg_localize X<mg_localize>
+magic_clearhint X<magic_clearhint>, magic_sethint X<magic_sethint>,
+mg_localize X<mg_localize>
 
 =item MRO Functions
 
@@ -6364,7 +6381,53 @@ DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
 I<The Road goes ever on and on, down from the door where it began.>
 
+=over 4
+
+=item Metaphoric Quotations
+
+=back
+
 =item AUTHOR
+
+=back
+
+=head2 perlrepository - Using the Perl source repository
+
+=over 4
+
+=item SYNOPSIS
+
+=item GETTING ACCESS TO THE REPOSITORY
+
+=over 4
+
+=item READ ACCESS VIA THE WEB
+
+=item READ ACCESS VIA GIT
+
+=item WRITE ACCESS TO THE REPOSITORY
+
+=back
+
+=item OVERVIEW OF THE REPOSITORY
+
+=over 4
+
+=item FINDING OUT YOUR STATUS
+
+=back
+
+=item SUBMITTING A PATCH
+
+=item ACCEPTING A PATCH
+
+=item CLEANING A WORKING DIRECTORY
+
+=item BISECTING
+
+=item COMITTING TO MAINTENANCE VERSIONS
+
+=item SEE ALSO
 
 =back
 
@@ -6420,17 +6483,13 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Smartmatch design issues
+
 =item Remove duplication of test setup.
-
-=item merge common code in installperl and installman
-
-=item common test code for timed bail out
 
 =item POD -E<gt> HTML conversion in the core still sucks
 
 =item merge checkpods and podchecker
-
-=item perlmodlib.PL rewrite
 
 =item Parallel testing
 
@@ -6448,13 +6507,15 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Dual life everything
 
-=item Improving C<threads::shared>
+=item Bundle dual life modules in ext/
 
 =item POSIX memory footprint
 
 =item embed.pl/makedef.pl
 
 =item use strict; and AutoLoad
+
+=item profile installman
 
 =back
 
@@ -6476,13 +6537,17 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item roffitall
 
+=item Split "linker" from "compiler"
+
+C<cc> (in F<cc.U>), C<ld> (in F<dlsrc.U>)
+
 =back
 
 =item Tasks that need a little C knowledge
 
 =over 4
 
-=item Exterminate PL_na!
+=item Weed out needless PERL_UNUSED_ARG
 
 =item Modernize the order of directories in @INC
 
@@ -6498,15 +6563,23 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Use secure CRT functions when building with VC8 on Win32
 
+=item Fix POSIX::access() and chdir() on Win32
+
 =item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
 
 =item -D_FORTIFY_SOURCE=2, -fstack-protector
+
+=item Arenas for GPs? For MAGIC?
+
+=item Shared arenas
 
 =back
 
 =item Tasks that need a knowledge of XS
 
 =over 4
+
+=item safely supporting POSIX SA_SIGINFO
 
 =item autovivification
 
@@ -6545,6 +6618,8 @@ Perl_gv_fetchmethod_autoload()
 
 =over 4
 
+=item error reporting of [$a ; $b]
+
 =item UTF-8 revamp
 
 =item Properly Unicode safe tokeniser and pads.
@@ -6562,8 +6637,6 @@ Perl_gv_fetchmethod_autoload()
 =item Optimize away empty destructors
 
 =item LVALUE functions for lists
-
-=item LVALUE functions in the debugger
 
 =item regexp optimiser optional
 
@@ -6588,6 +6661,14 @@ Perl_gv_fetchmethod_autoload()
 =item Virtualize operating system access
 
 =item Investigate PADTMP hash pessimisation
+
+=item Store the current pad in the OP slab allocator
+
+=item repack the optree
+
+=item eliminate incorrect line numbers in warnings
+
+=item optimize tail-calls
 
 =back
 
@@ -6664,187 +6745,25 @@ B<-V>
 
 =back
 
-=head2 perldelta, perl5100delta - what is new for perl 5.10.0
+=head2 perldelta - what is new for perl v5.10.1
 
 =over 4
 
 =item DESCRIPTION
 
-=item Core Enhancements
-
-=over 4
-
-=item The C<feature> pragma
-
-=item New B<-E> command-line switch
-
-=item Defined-or operator
-
-=item Switch and Smart Match operator
-
-=item Regular expressions
-
-Recursive Patterns, Named Capture Buffers, Possessive Quantifiers,
-Backtracking control verbs, Relative backreferences, C<\K> escape, Vertical
-and horizontal whitespace, and linebreak
-
-=item C<say()>
-
-=item Lexical C<$_>
-
-=item The C<_> prototype
-
-=item UNITCHECK blocks
-
-=item New Pragma, C<mro>
-
-=item readdir() may return a "short filename" on Windows
-
-=item readpipe() is now overridable
-
-=item Default argument for readline()
-
-=item state() variables
-
-=item Stacked filetest operators
-
-=item UNIVERSAL::DOES()
-
-=item Formats
-
-=item Byte-order modifiers for pack() and unpack()
-
-=item C<no VERSION>
-
-=item C<chdir>, C<chmod> and C<chown> on filehandles
-
-=item OS groups
-
-=item Recursive sort subs
-
-=item Exceptions in constant folding
-
-=item Source filters in @INC
-
-=item New internal variables
-
-C<${^RE_DEBUG_FLAGS}>, C<${^CHILD_ERROR_NATIVE}>, C<${^RE_TRIE_MAXBUF}>,
-C<${^WIN32_SLOPPY_STAT}>
-
-=item Miscellaneous
-
-=item UCD 5.0.0
-
-=item MAD
-
-=item kill() on Windows
-
-=back
-
 =item Incompatible Changes
 
-=over 4
-
-=item Packing and UTF-8 strings
-
-=item Byte/character count feature in unpack()
-
-=item The C<$*> and C<$#> variables have been removed
-
-=item substr() lvalues are no longer fixed-length
-
-=item Parsing of C<-f _>
-
-=item C<:unique>
-
-=item Effect of pragmas in eval
-
-=item chdir FOO
-
-=item Handling of .pmc files
-
-=item $^V is now a C<version> object instead of a v-string
-
-=item @- and @+ in patterns
-
-=item $AUTOLOAD can now be tainted
-
-=item Tainting and printf
-
-=item undef and signal handlers
-
-=item strictures and dereferencing in defined()
-
-=item C<(?p{})> has been removed
-
-=item Pseudo-hashes have been removed
-
-=item Removal of the bytecode compiler and of perlcc
-
-=item Removal of the JPL
-
-=item Recursive inheritance detected earlier
-
-=back
+=item Core Enhancements
 
 =item Modules and Pragmata
 
-=over 4
-
-=item Upgrading individual core modules
-
-=item Pragmata Changes
-
-C<feature>, C<mro>, Scoping of the C<sort> pragma, Scoping of C<bignum>,
-C<bigint>, C<bigrat>, C<base>, C<strict> and C<warnings>, C<version>,
-C<warnings>, C<less>
-
-=item New modules
-
-=item Selected Changes to Core Modules
-
-C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
-
-=back
+C<feature>
 
 =item Utility Changes
 
-perl -d, ptar, ptardiff, shasum, corelist, h2ph and h2xs, perlivp,
-find2perl, config_data, cpanp, cpan2dist, pod2html
-
-=item New Documentation
+=item Documentation
 
 =item Performance Enhancements
-
-=over 4
-
-=item In-place sorting
-
-=item Lexical array access
-
-=item XS-assisted SWASHGET
-
-=item Constant subroutines
-
-=item C<PERL_DONT_CREATE_GVSV>
-
-=item Weak references are cheaper
-
-=item sort() enhancements
-
-=item Memory optimisations
-
-=item UTF-8 cache optimisation
-
-=item Sloppy stat on Windows
-
-=item Regular expressions optimisations
-
-Engine de-recursivised, Single char char-classes treated as literals, Trie
-optimisation of literal string alternations, Aho-Corasick start-point
-optimisation
-
-=back
 
 =item Installation and Configuration Improvements
 
@@ -6852,83 +6771,33 @@ optimisation
 
 =item Configuration improvements
 
-C<-Dusesitecustomize>, Relocatable installations, strlcat() and strlcpy(),
-C<d_pseudofork> and C<d_printf_format_null>, Configure help
-
 =item Compilation improvements
 
-Parallel build, Borland's compilers support, Static build on Windows,
-ppport.h files, C++ compatibility, Support for Microsoft 64-bit compiler,
-Visual C++, Win32 builds
-
-=item Installation improvements
-
-Module auxiliary files
-
-=item New Or Improved Platforms
+=item Installation improvements.
 
 =back
 
 =item Selected Bug Fixes
 
-strictures in regexp-eval blocks, Calling CORE::require(), Subscripts of
-slices, C<no warnings 'category'> works correctly with -w, threads
-improvements, chr() and negative values, PERL5SHELL and tainting, Using
-*FILE{IO}, Overloading and reblessing, Overloading and UTF-8, eval memory
-leaks fixed, Random device on Windows, PERLIO_DEBUG, PerlIO::scalar and
-read-only scalars, study() and UTF-8, Critical signals, @INC-hook fix,
-C<-t> switch fix, Duping UTF-8 filehandles, Localisation of hash elements
+=over 4
+
+=item Other fixes
+
+=back
 
 =item New or Changed Diagnostics
 
-Use of uninitialized value, Deprecated use of my() in false conditional,
-!=~ should be !~, Newline in left-justified string, Too late for "-T"
-option, "%s" variable %s masks earlier declaration,
-readdir()/closedir()/etc. attempted on invalid dirhandle, Opening
-dirhandle/filehandle %s also as a file/directory, Use of -P is deprecated,
-v-string in use/require is non-portable, perl -V
-
 =item Changed Internals
-
-=over 4
-
-=item Reordering of SVt_* constants
-
-=item Elimination of SVt_PVBM
-
-=item New type SVt_BIND
-
-=item Removal of CPP symbols
-
-=item Less space is used by ops
-
-=item New parser
-
-=item Use of C<const>
-
-=item Mathoms
-
-=item C<AvFLAGS> has been removed
-
-=item C<av_*> changes
-
-=item $^H and %^H
-
-=item B:: modules inheritance changed
-
-=item Anonymous hash and array constructors
-
-=back
 
 =item Known Problems
 
 =over 4
 
-=item UTF-8 problems
+=item Platform Specific Problems
 
 =back
 
-=item Platform Specific Problems
+=item Acknowledgements
 
 =item Reporting Bugs
 
@@ -6948,6 +6817,8 @@ v-string in use/require is non-portable, perl -V
 
 =item Modules and Pragmata
 
+C<feature>
+
 =item Utility Changes
 
 =item Documentation
@@ -6956,7 +6827,23 @@ v-string in use/require is non-portable, perl -V
 
 =item Installation and Configuration Improvements
 
+=over 4
+
+=item Configuration improvements
+
+=item Compilation improvements
+
+=item Installation improvements.
+
+=back
+
 =item Selected Bug Fixes
+
+=over 4
+
+=item Other fixes
+
+=back
 
 =item New or Changed Diagnostics
 
@@ -6969,6 +6856,8 @@ v-string in use/require is non-portable, perl -V
 =item Platform Specific Problems
 
 =back
+
+=item Acknowledgements
 
 =item Reporting Bugs
 
@@ -10315,6 +10204,44 @@ a), b), c), d), a), b), c), d)
 
 =item Compiling Perl 5 on AIX
 
+=item Supported Compilers
+
+=item Perl 5.8.9 was successfully compiled and tested on:
+
+    AIX Level		      | Compiler Level		| w th | w/o th
+    --------------------------+-------------------------+------+-------
+    5.1 TL9 32 bit	      | XL C/C++ V7		| OK   | OK
+    5.1 TL9 32 bit	      | gcc 3.2.2		| OK   | OK
+    5.1 TL9 64 bit	      | XL C/C++ V7		| OK   | OK
+    5.2 TL10 32 bit	      | XL C/C++ V8		| OK   | OK
+    5.2 TL10 64 bit	      | XL C/C++ V8		| OK   | OK
+    5.3 TL7 32 bit	      | XL C/C++ V9 + IZ35785	| OK   | OK
+    5.3 TL7 32 bit	      | gcc 4.2.4		| OK   | OK
+    5.3 TL7 64 bit	      | XL C/C++ V9 + IZ35785	| OK   | OK
+    6.1 TL1 32 bit	      | XL C/C++ V10		| OK   | OK
+    6.1 TL1 64 bit + IZ39077  | XL C/C++ V10		| OK   | OK
+
+    w th   = with thread
+    w/o th = without thread
+
+=item Building Dynamic Extensions on AIX
+
+=item Using Large Files with Perl
+
+=item Threaded Perl
+
+=item 64-bit Perl
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/32-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (32-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1 (threaded/64-bit)
+
+=item Recommended Options AIX 5.1/5.2/5.3 and 6.1(64-bit)
+
+=item Compiling Perl 5 on older AIX versions up to 4.3.3
+
 =item OS level
 
 =item Building Dynamic Extensions on AIX
@@ -10323,7 +10250,7 @@ a), b), c), d), a), b), c), d)
 
 =item The usenm option
 
-=item Using GNU's gcc for building perl
+=item Using GNU's gcc for building Perl
 
 =item Using Large Files with Perl
 
@@ -10335,7 +10262,7 @@ a), b), c), d), a), b), c), d)
 
 =back
 
-=item AUTHOR
+=item AUTHORS
 
 =item DATE
 
@@ -10757,6 +10684,20 @@ DJGPP, Pthreads
 
 =back
 
+=head2 perlhaiku, README.haiku - Perl version 5.10+ on Haiku
+
+=over 4
+
+=item DESCRIPTION
+
+=item BUILD AND INSTALL
+
+=item KNOWN PROBLEMS
+
+=item CONTACT
+
+=back
+
 =head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
 (HP-UX) systems
 
@@ -10785,6 +10726,8 @@ DJGPP, Pthreads
 =item Itanium Processor Family (IPF) and HP-UX
 
 =item Itanium, Itanium 2 & Madison 6
+
+=item HP-UX versions
 
 =item Building Dynamic Extensions on HP-UX
 
@@ -11822,7 +11765,7 @@ utime LIST, waitpid PID,FLAGS
 =item Setting Up Perl on Win32
 
 Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Visual
-C++ 2008 Express Edition Beta 2, Microsoft Visual C++ 2005 Express Edition,
+C++ 2008 Express Edition, Microsoft Visual C++ 2005 Express Edition,
 Microsoft Visual C++ Toolkit 2003, Microsoft Platform SDK 64-bit Compiler,
 MinGW release 3 with gcc, MinGW release 1 with gcc
 
@@ -11924,10 +11867,10 @@ data structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, is_shared VARIABLE, lock VARIABLE, cond_wait VARIABLE,
-cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT,
-cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE,
-cond_broadcast VARIABLE
+share VARIABLE, shared_clone REF, is_shared VARIABLE, lock VARIABLE,
+cond_wait VARIABLE, cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE,
+ABS_TIMEOUT, cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal
+VARIABLE, cond_broadcast VARIABLE
 
 =item OBJECTS
 
@@ -11938,6 +11881,8 @@ cond_broadcast VARIABLE
 =item SEE ALSO
 
 =item AUTHOR
+
+=item LICENSE
 
 =back
 
@@ -12015,14 +11960,16 @@ inside special blocks, Unsafe signals, Perl has been built with
 C<PERL_OLD_SIGNALS> (see C<perl -V>), The environment variable
 C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">), The
 module L<Perl::Unsafe::Signals> is used, Returning closures from threads,
-Returning objects from threads, Perl Bugs and the CPAN Version of
-L<threads>
+Returning objects from threads, END blocks in threads, Perl Bugs and the
+CPAN Version of L<threads>
 
 =item REQUIREMENTS
 
 =item SEE ALSO
 
 =item AUTHOR
+
+=item LICENSE
 
 =item ACKNOWLEDGEMENTS
 
@@ -12037,6 +11984,8 @@ L<threads>
 =item DESCRIPTION
 
 =over 4
+
+=item What C<import> does
 
 =item Built-in Attributes
 
@@ -12068,7 +12017,116 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =item EXAMPLES
 
+=item MORE EXAMPLES
+
 =item SEE ALSO
+
+=back
+
+=head2 autodie - Replace functions with ones that succeed or die with
+lexical scope
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXCEPTIONS
+
+=item CATEGORIES
+
+=item FUNCTION SPECIFIC NOTES
+
+=over 4
+
+=item flock
+
+=item system/exec
+
+=back
+
+=item GOTCHAS
+
+=item DIAGNOSTICS
+
+:void cannot be used with lexical scope
+
+=item BUGS
+
+=over 4
+
+=item REPORTING BUGS
+
+=back
+
+=item FEEDBACK
+
+=item AUTHOR
+
+=item LICENSE
+
+=item SEE ALSO
+
+=item ACKNOWLEDGEMENTS
+
+=back
+
+=head2 autodiexception, autodie::exception - Exceptions from autodying
+functions.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Common Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Advanced methods
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=item LICENSE
+
+=item AUTHOR
+
+=back
+
+=head2 autodiexception::system, autodie::exception::system - Exceptions
+from autodying system().
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item stringify
+
+=back
+
+=over 4
+
+=item LICENSE
+
+=item AUTHOR
 
 =back
 
@@ -12341,11 +12399,13 @@ escapes
 
 =item CAVEATS
 
+=item SEE ALSO
+
 =item BUGS
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
@@ -12390,10 +12450,6 @@ escapes
 =item PerlIO layers for C<STD(IN|OUT)>
 
 =item Implicit upgrading for byte strings
-
-=item Side effects
-
-=item Side effects
 
 =item Side effects
 
@@ -12625,6 +12681,8 @@ This probably does nothing, This works only on 5.10+
 
 =item AUTHOR
 
+=item COPYRIGHT AND LICENSE
+
 =back
 
 =head2 locale - Perl pragma to use and avoid POSIX locales for built-in
@@ -12853,6 +12911,33 @@ type, `%s' is not a code reference
 
 =back
 
+=head2 parent - Establish an ISA relationship with base classes at compile
+time
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DIAGNOSTICS
+
+Class 'Foo' tried to inherit from itself
+
+=item HISTORY
+
+=item CAVEATS
+
+=item SEE ALSO
+
+=item AUTHORS AND CONTRIBUTORS
+
+=item MAINTAINER
+
+=item LICENSE
+
+=back
+
 =head2 sigtrap - Perl pragma to enable simple signal handling
 
 =over 4
@@ -12934,10 +13019,10 @@ structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, is_shared VARIABLE, lock VARIABLE, cond_wait VARIABLE,
-cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT,
-cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE,
-cond_broadcast VARIABLE
+share VARIABLE, shared_clone REF, is_shared VARIABLE, lock VARIABLE,
+cond_wait VARIABLE, cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE,
+ABS_TIMEOUT, cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal
+VARIABLE, cond_broadcast VARIABLE
 
 =item OBJECTS
 
@@ -12948,6 +13033,8 @@ cond_broadcast VARIABLE
 =item SEE ALSO
 
 =item AUTHOR
+
+=item LICENSE
 
 =back
 
@@ -13101,6 +13188,183 @@ warnings::warnif($object, $message)
 
 =back
 
+=head2 App::Prove - Implements the C<prove> command.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Attributes
+
+C<archive>, C<argv>, C<backwards>, C<blib>, C<color>, C<directives>,
+C<dry>, C<exec>, C<extension>, C<failures>, C<fork>, C<formatter>,
+C<harness>, C<ignore_exit>, C<includes>, C<jobs>, C<lib>, C<merge>,
+C<modules>, C<parse>, C<plugins>, C<quiet>, C<really_quiet>, C<recurse>,
+C<rules>, C<show_count>, C<show_help>, C<show_man>, C<show_version>,
+C<shuffle>, C<state>, C<taint_fail>, C<taint_warn>, C<test_args>, C<timer>,
+C<verbose>, C<warnings_fail>, C<warnings_warn>
+
+=back
+
+=head2 App::Prove::State - State storage for the C<prove> command.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item C<result_class>
+
+=back
+
+=over 4
+
+=item C<extension>
+
+=back
+
+=over 4
+
+=item C<results>
+
+=back
+
+=over 4
+
+=item C<commit>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+C<last>, C<failed>, C<passed>, C<all>, C<hot>, C<todo>, C<slow>, C<fast>,
+C<new>, C<old>, C<save>
+
+=back
+
+=head2 App::Prove::State::Result - Individual test suite results.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item C<state_version>
+
+=back
+
+=over 4
+
+=item C<test_class>
+
+=back
+
+=head2 App::Prove::State::Result::Test - Individual test results.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
 =head2 Archive::Extract - A generic archive extracting mechanism
 
 =over 4
@@ -13120,7 +13384,7 @@ warnings::warnif($object, $message)
 =item $ae = Archive::Extract->new(archive => '/path/to/archive',[type =>
 TYPE])
 
-tar, tgz, gz, Z, zip, bz2, tbz
+tar, tgz, gz, Z, zip, bz2, tbz, lzma
 
 =back
 
@@ -13168,6 +13432,8 @@ $ae->extract_path, $ae->files
 
 =item $ae->is_zip
 
+=item $ae->is_lzma
+
 =back
 
 =over 4
@@ -13177,6 +13443,14 @@ $ae->extract_path, $ae->files
 =item $ae->bin_gzip
 
 =item $ae->bin_unzip
+
+=item $ae->bin_unlzma
+
+=back
+
+=over 4
+
+=item $bool = $ae->have_old_bunzip2
 
 =back
 
@@ -13240,9 +13514,9 @@ Mime magic support
 
 =over 4
 
-=item $tar->read ( $filename|$handle, $compressed, {opt => 'val'} )
+=item $tar->read ( $filename|$handle, [$compressed, {opt => 'val'}] )
 
-limit, extract
+limit, filter, extract
 
 =back
 
@@ -13340,23 +13614,11 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 
 =over 4
 
-=item $bool = $tar->has_io_string
-
-=back
-
-=over 4
-
-=item $bool = $tar->has_perlio
-
-=back
-
-=over 4
-
 =item Class Methods
 
 =over 4
 
-=item Archive::Tar->create_archive($file, $compression, @filelist)
+=item Archive::Tar->create_archive($file, $compressed, @filelist)
 
 =back
 
@@ -13364,13 +13626,43 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 
 =over 4
 
-=item Archive::Tar->list_archive ($file, $compressed, [\@properties])
+=item Archive::Tar->iter( $filename, [ $compressed, {opt => $val} ] )
 
 =back
 
 =over 4
 
-=item Archive::Tar->extract_archive ($file, $gzip)
+=item Archive::Tar->list_archive($file, $compressed, [\@properties])
+
+=back
+
+=over 4
+
+=item Archive::Tar->extract_archive($file, $compressed)
+
+=back
+
+=over 4
+
+=item $bool = Archive::Tar->has_io_string
+
+=back
+
+=over 4
+
+=item $bool = Archive::Tar->has_perlio
+
+=back
+
+=over 4
+
+=item $bool = Archive::Tar->has_zlib_support
+
+=back
+
+=over 4
+
+=item $bool = Archive::Tar->has_bzip2_support
 
 =back
 
@@ -13412,7 +13704,7 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 
 What's the minimum perl version required to run Archive::Tar?, Isn't
 Archive::Tar slow?, Isn't Archive::Tar heavier on memory than /bin/tar?,
-Can't you lazy-load data instead?, How much memory will an X kb tar file
+Can you lazy-load data instead?, How much memory will an X kb tar file
 need?, What do you do with unsupported filetypes in an archive?, I'm using
 WinZip, or some other non-POSIX client, and files are not being extracted
 properly!, How do I extract only files that have property X from an
@@ -13462,55 +13754,61 @@ uname, gname, devmajor, devminor, prefix, raw
 
 =over 4
 
-=item new( file => $path )
+=item Archive::Tar::File->new( file => $path )
 
-=item new( data => $path, $data, $opt )
+=item Archive::Tar::File->new( data => $path, $data, $opt )
 
-=item new( chunk => $chunk )
-
-=back
+=item Archive::Tar::File->new( chunk => $chunk )
 
 =back
-
-=over 4
-
-=item full_path
 
 =back
 
 =over 4
 
-=item validate
+=item $bool = $file->extract( [ $alternative_name ] )
 
 =back
 
 =over 4
 
-=item has_content
+=item $path = $file->full_path
 
 =back
 
 =over 4
 
-=item get_content
+=item $bool = $file->validate
 
 =back
 
 =over 4
 
-=item get_content_by_ref
+=item $bool = $file->has_content
 
 =back
 
 =over 4
 
-=item replace_content( $content )
+=item $content = $file->get_content
 
 =back
 
 =over 4
 
-=item rename( $new_name )
+=item $cref = $file->get_content_by_ref
+
+=back
+
+=over 4
+
+=item $bool = $file->replace_content( $content )
+
+=back
+
+=over 4
+
+=item $bool = $file->rename( $new_name )
 
 =back
 
@@ -13518,8 +13816,9 @@ uname, gname, devmajor, devminor, prefix, raw
 
 =item Convenience methods
 
-is_file, is_dir, is_hardlink, is_symlink, is_chardev, is_blockdev, is_fifo,
-is_socket, is_longlink, is_label, is_unknown
+$file->is_file, $file->is_dir, $file->is_hardlink, $file->is_symlink,
+$file->is_chardev, $file->is_blockdev, $file->is_fifo, $file->is_socket,
+$file->is_longlink, $file->is_label, $file->is_unknown
 
 =back
 
@@ -13563,7 +13862,7 @@ be able to apply END handler>
 
 =item BUGS
 
-=item COPYRIGHT
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -13595,6 +13894,10 @@ be able to apply END handler>
 
 =item SEE ALSO
 
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
 =back
 
 =head2 AutoSplit - split a package for autoloading
@@ -13614,6 +13917,10 @@ $keep, $check, $modtime
 =back
 
 =item DIAGNOSTICS
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -13888,7 +14195,13 @@ a{_POSIX_SAVED_IDS}', perl -MB::Concise -e
 
 =item DESCRIPTION
 
+=item OPTIONS
+
+=item Changes
+
 =item AUTHOR
+
+=item LICENSE
 
 =back
 
@@ -13958,6 +14271,16 @@ validate against older perls
 =item BUGS
 
 =item AUTHOR
+
+=item ACKNOWLEDGEMENTS
+
+=back
+
+=head2 B::Lint::Debug - Adds debugging stringification to B::
+
+=over 4
+
+=item DESCRIPTION
 
 =back
 
@@ -14132,8 +14455,8 @@ B<:standard>, B<:all>
 
 =item PRAGMAS
 
--any, -compile, -nosticky, -tabindex, -no_undef_params, -no_xhtml, -nph,
--newstyle_urls, -oldstyle_urls, -autoload, -no_debug, -debug,
+-any, -compile, -nosticky, -tabindex, -no_undef_params, -no_xhtml, -utf8,
+-nph, -newstyle_urls, -oldstyle_urls, -autoload, -no_debug, -debug,
 -private_tempfiles
 
 =item SPECIAL FORMS FOR IMPORTING HTML-TAG FUNCTIONS
@@ -14591,6 +14914,8 @@ and the C<fforce> pragma, Lockfile, Signals
 
 =item Integrating local directories
 
+=item Redirection
+
 =back
 
 =item CONFIGURATION
@@ -14633,8 +14958,9 @@ cwd, getcwd, fastcwd, backtickcwd
 =item Language Specs
 
 comment [scalar], cpanconfig [hash], depends [hash] *** EXPERIMENTAL
-FEATURE ***, disabled [boolean], goto [string], install [hash], make
-[hash], match [hash], patches [array], pl [hash], test [hash]
+FEATURE ***, disabled [boolean], features [array] *** EXPERIMENTAL FEATURE
+***, goto [string], install [hash], make [hash], match [hash], patches
+[array], pl [hash], test [hash]
 
 =item Processing Instructions
 
@@ -14669,21 +14995,21 @@ CPAN::Distribution::containsmods(), CPAN::Distribution::cvs_import(),
 CPAN::Distribution::dir(), CPAN::Distribution::force($method,@args),
 CPAN::Distribution::get(), CPAN::Distribution::install(),
 CPAN::Distribution::install_tested(), CPAN::Distribution::isa_perl(),
-CPAN::Distribution::is_tested(), CPAN::Distribution::look(),
-CPAN::Distribution::make(), CPAN::Distribution::perldoc(),
-CPAN::Distribution::prefs(), CPAN::Distribution::prereq_pm(),
-CPAN::Distribution::readme(), CPAN::Distribution::reports(),
-CPAN::Distribution::read_yaml(), CPAN::Distribution::test(),
-CPAN::Distribution::uptodate(), CPAN::Index::force_reload(),
-CPAN::Index::reload(), CPAN::InfoObj::dump(), CPAN::Module::as_glimpse(),
-CPAN::Module::as_string(), CPAN::Module::clean(),
-CPAN::Module::cpan_file(), CPAN::Module::cpan_version(),
-CPAN::Module::cvs_import(), CPAN::Module::description(),
-CPAN::Module::distribution(), CPAN::Module::dslip_status(),
-CPAN::Module::force($method,@args), CPAN::Module::get(),
-CPAN::Module::inst_file(), CPAN::Module::available_file(),
-CPAN::Module::inst_version(), CPAN::Module::available_version(),
-CPAN::Module::install(), CPAN::Module::look(), CPAN::Module::make(),
+CPAN::Distribution::look(), CPAN::Distribution::make(),
+CPAN::Distribution::perldoc(), CPAN::Distribution::prefs(),
+CPAN::Distribution::prereq_pm(), CPAN::Distribution::readme(),
+CPAN::Distribution::reports(), CPAN::Distribution::read_yaml(),
+CPAN::Distribution::test(), CPAN::Distribution::uptodate(),
+CPAN::Index::force_reload(), CPAN::Index::reload(), CPAN::InfoObj::dump(),
+CPAN::Module::as_glimpse(), CPAN::Module::as_string(),
+CPAN::Module::clean(), CPAN::Module::cpan_file(),
+CPAN::Module::cpan_version(), CPAN::Module::cvs_import(),
+CPAN::Module::description(), CPAN::Module::distribution(),
+CPAN::Module::dslip_status(), CPAN::Module::force($method,@args),
+CPAN::Module::get(), CPAN::Module::inst_file(),
+CPAN::Module::available_file(), CPAN::Module::inst_version(),
+CPAN::Module::available_version(), CPAN::Module::install(),
+CPAN::Module::look(), CPAN::Module::make(),
 CPAN::Module::manpage_headline(), CPAN::Module::perldoc(),
 CPAN::Module::readme(), CPAN::Module::reports(), CPAN::Module::test(),
 CPAN::Module::uptodate(), CPAN::Module::userid()
@@ -14742,7 +15068,8 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15), 16)
+1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15), 16), 17),
+18)
 
 =item COMPATIBILITY
 
@@ -14790,6 +15117,37 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =back
 
+=head2 CPAN::Distroprefs -- read and match distroprefs
+
+=over 4
+
+=item SYNOPSIS 
+
+=item DESCRIPTION
+
+=item INTERFACE
+
+a CPAN::Distroprefs::Result object, C<undef>, indicating that no prefs
+files remain to be found
+
+=item RESULTS
+
+=over 4
+
+=item Common
+
+=item Errors
+
+=item Successes
+
+=back
+
+=item PREFS 
+
+=item LICENSE
+
+=back
+
 =head2 CPAN::FirstTime - Utility for CPAN::Config file Initialization
 
 =over 4
@@ -14803,14 +15161,17 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 auto_commit, build_cache, build_dir, build_dir_reuse,
 build_requires_install_policy, cache_metadata, check_sigs, colorize_output,
 colorize_print, colorize_warn, colorize_debug, commandnumber_in_prompt,
-ftp_passive, getcwd, histfile, histsize, inactivity_timeout, index_expire,
-inhibit_startup_message, keep_source_where, load_module_verbosity,
-makepl_arg, make_arg, make_install_arg, make_install_make_command,
-mbuildpl_arg, mbuild_arg, mbuild_install_arg, mbuild_install_build_command,
-pager, prefer_installer, prefs_dir, prerequisites_policy,
-randomize_urllist, scan_cache, shell, show_unparsable_versions,
-show_upload_date, show_zero_versions, tar_verbosity, term_is_latin,
-term_ornaments, test_report, use_sqlite, yaml_load_code, yaml_module
+connect_to_internet_ok, ftp_passive, ftpstats_period, ftpstats_size,
+getcwd, halt_on_failure, histfile, histsize, inactivity_timeout,
+index_expire, inhibit_startup_message, keep_source_where,
+load_module_verbosity, makepl_arg, make_arg, make_install_arg,
+make_install_make_command, mbuildpl_arg, mbuild_arg, mbuild_install_arg,
+mbuild_install_build_command, pager, prefer_installer, prefs_dir,
+prerequisites_policy, randomize_urllist, scan_cache, shell,
+show_unparsable_versions, show_upload_date, show_zero_versions,
+tar_verbosity, term_is_latin, term_ornaments, test_report,
+perl5lib_verbosity, trust_test_report_history, use_sqlite, yaml_load_code,
+yaml_module
 
 =over 4
 
@@ -16968,6 +17329,35 @@ B<-ADLER32>, B<-ConsumeInput>
 
 =back
 
+=head2 Compress::Raw::Zlib::pod::FAQ, Compress::Raw::Zlib::FAQ --
+Frequently Asked Questions about Compress::Raw::Zlib
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compatibility with Unix compress/uncompress.
+
+=item Accessing .tar.Z files
+
+=item Accessing Zip Files
+
+=item Zlib Library Version Support
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Compress::Zlib - Interface to zlib compression library
 
 =over 4
@@ -17018,7 +17408,8 @@ B<-Dictionary>, B<-Bufsize>
 
 =item B<($out, $status) = $d-E<gt>deflate($buffer)>
 
-=item B<($out, $status) = $d-E<gt>flush([flush_type])>
+=item B<($out, $status) = $d-E<gt>flush()>
+=head2 B<($out, $status) = $d-E<gt>flush($flush_type)>
 
 =item B<$status = $d-E<gt>deflateParams([OPT])>
 
@@ -17125,7 +17516,8 @@ B<-Dictionary>, B<-Bufsize>
 
 =item B<($out, $status) = $d-E<gt>deflate($buffer)>
 
-=item B<($out, $status) = $d-E<gt>flush([flush_type])>
+=item B<($out, $status) = $d-E<gt>flush()>
+=head2 B<($out, $status) = $d-E<gt>flush($flush_type)>
 
 =item B<$status = $d-E<gt>deflateParams([OPT])>
 
@@ -17181,6 +17573,33 @@ B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
 
 =back
 
+=head2 Compress::Zlib::pod::FAQ, Compress::Zlib::FAQ -- Frequently Asked
+Questions about Compress::Zlib
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compatibility with Unix compress/uncompress.
+
+=item Accessing .tar.Z files
+
+=item Accessing Zip Files
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Config - access Perl configuration information
 
 =over 4
@@ -17197,24 +17616,40 @@ myconfig(), config_sh(), config_re($regex), config_vars(@names)
 
 =item GLOSSARY
 
+=back
+
 =over 4
 
 =item _
 
+=back
+
 C<_a>, C<_exe>, C<_o>
 
+=over 4
+
 =item a
+
+=back
 
 C<afs>, C<afsroot>, C<alignbytes>, C<ansi2knr>, C<aphostname>,
 C<api_revision>, C<api_subversion>, C<api_version>, C<api_versionstring>,
 C<ar>, C<archlib>, C<archlibexp>, C<archname>, C<archname64>, C<archobjs>,
 C<asctime_r_proto>, C<awk>
 
+=over 4
+
 =item b
+
+=back
 
 C<baserev>, C<bash>, C<bin>, C<binexp>, C<bison>, C<byacc>, C<byteorder>
 
+=over 4
+
 =item c
+
+=back
 
 C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
 C<ccflags_uselargefiles>, C<ccname>, C<ccsymbols>, C<ccversion>, C<cf_by>,
@@ -17224,61 +17659,68 @@ C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>, C<cpprun>,
 C<cppstdin>, C<cppsymbols>, C<crypt_r_proto>, C<cryptlib>, C<csh>,
 C<ctermid_r_proto>, C<ctime_r_proto>
 
+=over 4
+
 =item d
 
+=back
+
 C<d__fwalk>, C<d_access>, C<d_accessx>, C<d_aintl>, C<d_alarm>,
-C<d_archlib>, C<d_asctime_r>, C<d_atolf>, C<d_atoll>,
-C<d_attribute_format>, C<d_attribute_malloc>, C<d_attribute_nonnull>,
-C<d_attribute_noreturn>, C<d_attribute_pure>, C<d_attribute_unused>,
-C<d_attribute_warn_unused_result>, C<d_bcmp>, C<d_bcopy>, C<d_bsd>,
-C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_builtin_choose_expr>,
-C<d_builtin_expect>, C<d_bzero>, C<d_c99_variadic_macros>, C<d_casti32>,
-C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
-C<d_class>, C<d_clearenv>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
-C<d_copysignl>, C<d_cplusplus>, C<d_crypt>, C<d_crypt_r>, C<d_csh>,
-C<d_ctermid>, C<d_ctermid_r>, C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>,
-C<d_dbminitproto>, C<d_difftime>, C<d_dir_dd_fd>, C<d_dirfd>,
-C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
-C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
-C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>, C<d_endnent>,
-C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>, C<d_endpwent>,
-C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>, C<d_eofnblk>,
-C<d_eunice>, C<d_faststdio>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
-C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
-C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
-C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
-C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>,
-C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_futimes>, C<d_Gconvert>,
-C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>,
-C<d_getgrent_r>, C<d_getgrgid_r>, C<d_getgrnam_r>, C<d_getgrps>,
-C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
-C<d_gethostbyaddr_r>, C<d_gethostbyname_r>, C<d_gethostent_r>,
-C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>, C<d_getlogin_r>,
-C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>,
-C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>, C<d_getnetent_r>,
-C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
-C<d_getpent>, C<d_getpgid>, C<d_getpgrp>, C<d_getpgrp2>, C<d_getppid>,
-C<d_getprior>, C<d_getprotobyname_r>, C<d_getprotobynumber_r>,
-C<d_getprotoent_r>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
-C<d_getpwent_r>, C<d_getpwnam_r>, C<d_getpwuid_r>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservbyname_r>, C<d_getservbyport_r>,
-C<d_getservent_r>, C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>,
-C<d_gettimeod>, C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
+C<d_archlib>, C<d_asctime64>, C<d_asctime_r>, C<d_atolf>, C<d_atoll>,
+C<d_attribute_deprecated>, C<d_attribute_format>, C<d_attribute_malloc>,
+C<d_attribute_nonnull>, C<d_attribute_noreturn>, C<d_attribute_pure>,
+C<d_attribute_unused>, C<d_attribute_warn_unused_result>, C<d_bcmp>,
+C<d_bcopy>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>,
+C<d_builtin_choose_expr>, C<d_builtin_expect>, C<d_bzero>,
+C<d_c99_variadic_macros>, C<d_casti32>, C<d_castneg>, C<d_charvspr>,
+C<d_chown>, C<d_chroot>, C<d_chsize>, C<d_class>, C<d_clearenv>,
+C<d_closedir>, C<d_cmsghdr_s>, C<d_const>, C<d_copysignl>, C<d_cplusplus>,
+C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid>, C<d_ctermid_r>,
+C<d_ctime64>, C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>,
+C<d_difftime>, C<d_difftime64>, C<d_dir_dd_fd>, C<d_dirfd>, C<d_dirnamlen>,
+C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>, C<d_drand48_r>,
+C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>, C<d_endgrent_r>,
+C<d_endhent>, C<d_endhostent_r>, C<d_endnent>, C<d_endnetent_r>,
+C<d_endpent>, C<d_endprotoent_r>, C<d_endpwent>, C<d_endpwent_r>,
+C<d_endsent>, C<d_endservent_r>, C<d_eofnblk>, C<d_eunice>, C<d_faststdio>,
+C<d_fchdir>, C<d_fchmod>, C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>,
+C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>, C<d_finite>,
+C<d_finitel>, C<d_flexfnam>, C<d_flock>, C<d_flockproto>, C<d_fork>,
+C<d_fp_class>, C<d_fpathconf>, C<d_fpclass>, C<d_fpclassify>,
+C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>,
+C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>,
+C<d_ftime>, C<d_futimes>, C<d_Gconvert>, C<d_gdbm_ndbm_h_uses_prototypes>,
+C<d_gdbmndbm_h_uses_prototypes>, C<d_getcwd>, C<d_getespwnam>,
+C<d_getfsstat>, C<d_getgrent>, C<d_getgrent_r>, C<d_getgrgid_r>,
+C<d_getgrnam_r>, C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>,
+C<d_gethent>, C<d_gethname>, C<d_gethostbyaddr_r>, C<d_gethostbyname_r>,
+C<d_gethostent_r>, C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>,
+C<d_getlogin_r>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>,
+C<d_getnetent_r>, C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp>, C<d_getpgrp2>,
+C<d_getppid>, C<d_getprior>, C<d_getprotobyname_r>,
+C<d_getprotobynumber_r>, C<d_getprotoent_r>, C<d_getprotoprotos>,
+C<d_getprpwnam>, C<d_getpwent>, C<d_getpwent_r>, C<d_getpwnam_r>,
+C<d_getpwuid_r>, C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>,
+C<d_getservbyname_r>, C<d_getservbyport_r>, C<d_getservent_r>,
+C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>, C<d_gettimeod>,
+C<d_gmtime64>, C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
 C<d_htonl>, C<d_ilogbl>, C<d_inc_version_list>, C<d_index>, C<d_inetaton>,
 C<d_int64_t>, C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>,
 C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
-C<d_libm_lib_version>, C<d_link>, C<d_localtime_r>,
+C<d_libm_lib_version>, C<d_link>, C<d_localtime64>, C<d_localtime_r>,
 C<d_localtime_r_needs_tzset>, C<d_locconv>, C<d_lockf>, C<d_longdbl>,
 C<d_longlong>, C<d_lseekproto>, C<d_lstat>, C<d_madvise>,
 C<d_malloc_good_size>, C<d_malloc_size>, C<d_mblen>, C<d_mbstowcs>,
 C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
 C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
-C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>,
-C<d_modflproto>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
-C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
-C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>, C<d_msgsnd>,
-C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nl_langinfo>,
+C<d_mkstemps>, C<d_mktime>, C<d_mktime64>, C<d_mmap>, C<d_modfl>,
+C<d_modfl_pow32_bug>, C<d_modflproto>, C<d_mprotect>, C<d_msg>,
+C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
+C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>,
+C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_ndbm>,
+C<d_ndbm_h_uses_prototypes>, C<d_nice>, C<d_nl_langinfo>,
 C<d_nv_preserves_uv>, C<d_nv_zero_is_allbits_zero>, C<d_off64_t>,
 C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
 C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
@@ -17318,7 +17760,7 @@ C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>,
 C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
 C<d_syscallproto>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
 C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_tm_tm_gmtoff>,
+C<d_telldirproto>, C<d_time>, C<d_timegm>, C<d_times>, C<d_tm_tm_gmtoff>,
 C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>, C<d_ttyname_r>, C<d_tzname>,
 C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
 C<d_unordered>, C<d_unsetenv>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>,
@@ -17328,22 +17770,34 @@ C<d_vprintf>, C<d_vsnprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
 C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>,
 C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
 C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
-C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
+C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dtrace>, C<dynamic_ext>
+
+=over 4
 
 =item e
+
+=back
 
 C<eagain>, C<ebcdic>, C<echo>, C<egrep>, C<emacs>, C<endgrent_r_proto>,
 C<endhostent_r_proto>, C<endnetent_r_proto>, C<endprotoent_r_proto>,
 C<endpwent_r_proto>, C<endservent_r_proto>, C<eunicefix>, C<exe_ext>,
-C<expr>, C<extensions>, C<extras>
+C<expr>, C<extensions>, C<extern_C>, C<extras>
+
+=over 4
 
 =item f
+
+=back
 
 C<fflushall>, C<fflushNULL>, C<find>, C<firstmakefile>, C<flex>,
 C<fpossize>, C<fpostype>, C<freetype>, C<from>, C<full_ar>, C<full_csh>,
 C<full_sed>
 
+=over 4
+
 =item g
+
+=back
 
 C<gccansipedantic>, C<gccosandvers>, C<gccversion>, C<getgrent_r_proto>,
 C<getgrgid_r_proto>, C<getgrnam_r_proto>, C<gethostbyaddr_r_proto>,
@@ -17356,48 +17810,65 @@ C<getservent_r_proto>, C<getspnam_r_proto>, C<gidformat>, C<gidsign>,
 C<gidsize>, C<gidtype>, C<glibpth>, C<gmake>, C<gmtime_r_proto>,
 C<gnulibc_version>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
 
+=over 4
+
 =item h
+
+=back
 
 C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<html1dir>, C<html1direxp>,
 C<html3dir>, C<html3direxp>
 
+=over 4
+
 =item i
 
+=back
+
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
-C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_crypt>, C<i_db>,
-C<i_dbm>, C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>,
-C<i_fp>, C<i_fp_class>, C<i_gdbm>, C<i_grp>, C<i_ieeefp>, C<i_inttypes>,
-C<i_langinfo>, C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>,
-C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>,
-C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>,
-C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>,
-C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>,
-C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>,
-C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>,
-C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>,
-C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
-C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
-C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
-C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
-C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
-C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
-C<incpath>, C<inews>, C<initialinstalllocation>, C<installarchlib>,
-C<installbin>, C<installhtml1dir>, C<installhtml3dir>, C<installman1dir>,
-C<installman3dir>, C<installprefix>, C<installprefixexp>,
-C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
-C<installsitehtml1dir>, C<installsitehtml3dir>, C<installsitelib>,
-C<installsiteman1dir>, C<installsiteman3dir>, C<installsitescript>,
-C<installstyle>, C<installusrbinperl>, C<installvendorarch>,
-C<installvendorbin>, C<installvendorhtml1dir>, C<installvendorhtml3dir>,
-C<installvendorlib>, C<installvendorman1dir>, C<installvendorman3dir>,
-C<installvendorscript>, C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>,
-C<ivtype>
+C<i8size>, C<i8type>, C<i_arpainet>, C<i_assert>, C<i_bsdioctl>,
+C<i_crypt>, C<i_db>, C<i_dbm>, C<i_dirent>, C<i_dld>, C<i_dlfcn>,
+C<i_fcntl>, C<i_float>, C<i_fp>, C<i_fp_class>, C<i_gdbm>, C<i_gdbm_ndbm>,
+C<i_gdbmndbm>, C<i_grp>, C<i_ieeefp>, C<i_inttypes>, C<i_langinfo>,
+C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>, C<i_malloc>,
+C<i_mallocmalloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
+C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
+C<i_prot>, C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>,
+C<i_shadow>, C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>,
+C<i_string>, C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>,
+C<i_sysfilio>, C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>,
+C<i_sysmode>, C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_syspoll>,
+C<i_sysresrc>, C<i_syssecrt>, C<i_sysselct>, C<i_syssockio>, C<i_sysstat>,
+C<i_sysstatfs>, C<i_sysstatvfs>, C<i_systime>, C<i_systimek>,
+C<i_systimes>, C<i_systypes>, C<i_sysuio>, C<i_sysun>, C<i_sysutsname>,
+C<i_sysvfs>, C<i_syswait>, C<i_termio>, C<i_termios>, C<i_time>,
+C<i_unistd>, C<i_ustat>, C<i_utime>, C<i_values>, C<i_varargs>,
+C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>, C<inc_version_list>,
+C<inc_version_list_init>, C<incpath>, C<inews>, C<initialinstalllocation>,
+C<installarchlib>, C<installbin>, C<installhtml1dir>, C<installhtml3dir>,
+C<installman1dir>, C<installman3dir>, C<installprefix>,
+C<installprefixexp>, C<installprivlib>, C<installscript>,
+C<installsitearch>, C<installsitebin>, C<installsitehtml1dir>,
+C<installsitehtml3dir>, C<installsitelib>, C<installsiteman1dir>,
+C<installsiteman3dir>, C<installsitescript>, C<installstyle>,
+C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
+C<installvendorhtml1dir>, C<installvendorhtml3dir>, C<installvendorlib>,
+C<installvendorman1dir>, C<installvendorman3dir>, C<installvendorscript>,
+C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>, C<ivtype>
+
+=over 4
 
 =item k
 
+=back
+
 C<known_extensions>, C<ksh>
 
+=over 4
+
 =item l
+
+=back
 
 C<ld>, C<lddlflags>, C<ldflags>, C<ldflags_uselargefiles>, C<ldlibpthname>,
 C<less>, C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
@@ -17407,37 +17878,53 @@ C<localtime_r_proto>, C<locincpth>, C<loclibpth>, C<longdblsize>,
 C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>,
 C<lseektype>
 
+=over 4
+
 =item m
+
+=back
 
 C<mad>, C<madlyh>, C<madlyobj>, C<madlysrc>, C<mail>, C<mailx>, C<make>,
 C<make_set_make>, C<mallocobj>, C<mallocsrc>, C<malloctype>, C<man1dir>,
-C<man1direxp>, C<man1ext>, C<man3dir>, C<man3direxp>, C<man3ext>
+C<man1direxp>, C<man1ext>, C<man3dir>, C<man3direxp>, C<man3ext>,
+C<mips_type>, C<mistrustnm>, C<mkdir>, C<mmaptype>, C<modetype>, C<more>,
+C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
 
-=item M
-
-C<Mcc>, C<mips_type>, C<mistrustnm>, C<mkdir>, C<mmaptype>, C<modetype>,
-C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>,
-C<myuname>
+=over 4
 
 =item n
 
+=back
+
 C<n>, C<need_va_copy>, C<netdb_hlen_type>, C<netdb_host_type>,
 C<netdb_name_type>, C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>,
-C<nonxs_ext>, C<nroff>, C<nv_preserves_uv_bits>, C<nveformat>,
-C<nvEUformat>, C<nvfformat>, C<nvFUformat>, C<nvgformat>, C<nvGUformat>,
-C<nvsize>, C<nvtype>
+C<nonxs_ext>, C<nroff>, C<nv_overflows_integers_at>,
+C<nv_preserves_uv_bits>, C<nveformat>, C<nvEUformat>, C<nvfformat>,
+C<nvFUformat>, C<nvgformat>, C<nvGUformat>, C<nvsize>, C<nvtype>
+
+=over 4
 
 =item o
+
+=back
 
 C<o_nonblock>, C<obj_ext>, C<old_pthread_create_joinable>, C<optimize>,
 C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 
+=over 4
+
 =item p
+
+=back
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl>,
 C<perl5>
 
+=over 4
+
 =item P
+
+=back
 
 C<PERL_API_REVISION>, C<PERL_API_SUBVERSION>, C<PERL_API_VERSION>,
 C<PERL_CONFIG_SH>, C<PERL_PATCHLEVEL>, C<perl_patchlevel>,
@@ -17446,30 +17933,43 @@ C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
 C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
 C<procselfexe>, C<prototype>, C<ptrsize>
 
+=over 4
+
 =item q
+
+=back
 
 C<quadkind>, C<quadtype>
 
+=over 4
+
 =item r
+
+=back
 
 C<randbits>, C<randfunc>, C<random_r_proto>, C<randseedtype>, C<ranlib>,
 C<rd_nodata>, C<readdir64_r_proto>, C<readdir_r_proto>, C<revision>, C<rm>,
 C<rm_try>, C<rmail>, C<run>, C<runnm>
 
+=over 4
+
 =item s
+
+=back
 
 C<sched_yield>, C<scriptdir>, C<scriptdirexp>, C<sed>, C<seedfunc>,
 C<selectminbits>, C<selecttype>, C<sendmail>, C<setgrent_r_proto>,
 C<sethostent_r_proto>, C<setlocale_r_proto>, C<setnetent_r_proto>,
-C<setprotoent_r_proto>, C<setpwent_r_proto>, C<setservent_r_proto>, C<sh>,
-C<shar>, C<sharpbang>, C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>,
-C<sig_count>, C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>,
-C<sig_size>, C<signal_t>, C<sitearch>, C<sitearchexp>, C<sitebin>,
-C<sitebinexp>, C<sitehtml1dir>, C<sitehtml1direxp>, C<sitehtml3dir>,
-C<sitehtml3direxp>, C<sitelib>, C<sitelib_stem>, C<sitelibexp>,
-C<siteman1dir>, C<siteman1direxp>, C<siteman3dir>, C<siteman3direxp>,
-C<siteprefix>, C<siteprefixexp>, C<sitescript>, C<sitescriptexp>,
-C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>,
+C<setprotoent_r_proto>, C<setpwent_r_proto>, C<setservent_r_proto>,
+C<sGMTIME_max>, C<sGMTIME_min>, C<sh>, C<shar>, C<sharpbang>, C<shmattype>,
+C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>, C<sig_name>,
+C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<sig_size>, C<signal_t>,
+C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitehtml1dir>,
+C<sitehtml1direxp>, C<sitehtml3dir>, C<sitehtml3direxp>, C<sitelib>,
+C<sitelib_stem>, C<sitelibexp>, C<siteman1dir>, C<siteman1direxp>,
+C<siteman3dir>, C<siteman3direxp>, C<siteprefix>, C<siteprefixexp>,
+C<sitescript>, C<sitescriptexp>, C<sizesize>, C<sizetype>, C<sleep>,
+C<sLOCALTIME_max>, C<sLOCALTIME_min>, C<smail>, C<so>, C<sockethdr>,
 C<socketlib>, C<socksizetype>, C<sort>, C<spackage>, C<spitshell>,
 C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>,
 C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>,
@@ -17479,26 +17979,39 @@ C<stdchar>, C<stdio_base>, C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>,
 C<stdio_ptr>, C<stdio_stream_array>, C<strerror_r_proto>, C<strings>,
 C<submit>, C<subversion>, C<sysman>
 
+=over 4
+
 =item t
+
+=back
 
 C<tail>, C<tar>, C<targetarch>, C<tbl>, C<tee>, C<test>, C<timeincl>,
 C<timetype>, C<tmpnam_r_proto>, C<to>, C<touch>, C<tr>, C<trnl>, C<troff>,
 C<ttyname_r_proto>
 
+=over 4
+
 =item u
+
+=back
 
 C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
 C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
 C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
-C<use64bitint>, C<usecrosscompile>, C<usedl>, C<usefaststdio>,
-C<useithreads>, C<uselargefiles>, C<uselongdouble>, C<usemallocwrap>,
-C<usemorebits>, C<usemultiplicity>, C<usemymalloc>, C<usenm>, C<useopcode>,
-C<useperlio>, C<useposix>, C<usereentrant>, C<userelocatableinc>,
-C<usesfio>, C<useshrplib>, C<usesitecustomize>, C<usesocks>, C<usethreads>,
-C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>, C<uvoformat>,
-C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>, C<uvXUformat>
+C<use64bitint>, C<usecrosscompile>, C<usedevel>, C<usedl>, C<usedtrace>,
+C<usefaststdio>, C<useithreads>, C<uselargefiles>, C<uselongdouble>,
+C<usemallocwrap>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
+C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usereentrant>,
+C<userelocatableinc>, C<usesfio>, C<useshrplib>, C<usesitecustomize>,
+C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>, C<usrinc>,
+C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>,
+C<uvXUformat>
+
+=over 4
 
 =item v
+
+=back
 
 C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
 C<vendorhtml1dir>, C<vendorhtml1direxp>, C<vendorhtml3dir>,
@@ -17508,19 +18021,31 @@ C<vendorman3direxp>, C<vendorprefix>, C<vendorprefixexp>, C<vendorscript>,
 C<vendorscriptexp>, C<version>, C<version_patchlevel_string>,
 C<versiononly>, C<vi>, C<voidflags>
 
+=over 4
+
 =item x
+
+=back
 
 C<xlibpth>
 
+=over 4
+
 =item y
+
+=back
 
 C<yacc>, C<yaccflags>
 
+=over 4
+
 =item z
+
+=back
 
 C<zcat>, C<zip>
 
-=back
+=over 4
 
 =item NOTE
 
@@ -18009,10 +18534,10 @@ Dumper
 
 =item Perl API not supported by ppport.h
 
-perl 5.9.5, perl 5.9.4, perl 5.9.3, perl 5.9.2, perl 5.9.1, perl 5.9.0,
-perl 5.8.3, perl 5.8.1, perl 5.8.0, perl 5.7.3, perl 5.7.2, perl 5.7.1,
-perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
-5.004
+perl 5.11.0, perl 5.10.0, perl 5.9.5, perl 5.9.4, perl 5.9.3, perl 5.9.2,
+perl 5.9.1, perl 5.9.0, perl 5.8.3, perl 5.8.1, perl 5.8.0, perl 5.7.3,
+perl 5.7.2, perl 5.7.1, perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005,
+perl 5.004_05, perl 5.004
 
 =back
 
@@ -18188,6 +18713,55 @@ B<hmac_sha384_base64($data, $key)>, B<hmac_sha512_base64($data, $key)>
 
 =back
 
+=head2 Digest::SHA::lib::Digest::SHA, Digest::SHA - Perl extension for
+SHA-1/224/256/384/512
+
+=over 4
+
+=item SYNOPSIS
+
+=item SYNOPSIS (HMAC-SHA)
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item NIST STATEMENT ON SHA-1
+
+=item PADDING OF BASE64 DIGESTS
+
+=item EXPORT
+
+=item EXPORTABLE FUNCTIONS
+
+B<sha1($data, ...)>, B<sha224($data, ...)>, B<sha256($data, ...)>,
+B<sha384($data, ...)>, B<sha512($data, ...)>, B<sha1_hex($data, ...)>,
+B<sha224_hex($data, ...)>, B<sha256_hex($data, ...)>, B<sha384_hex($data,
+...)>, B<sha512_hex($data, ...)>, B<sha1_base64($data, ...)>,
+B<sha224_base64($data, ...)>, B<sha256_base64($data, ...)>,
+B<sha384_base64($data, ...)>, B<sha512_base64($data, ...)>, B<new($alg)>,
+B<reset($alg)>, B<hashsize>, B<algorithm>, B<clone>, B<add($data, ...)>,
+B<add_bits($data, $nbits)>, B<add_bits($bits)>, B<addfile(*FILE)>,
+B<addfile($filename [, $mode])>, B<dump($filename)>, B<load($filename)>,
+B<digest>, B<hexdigest>, B<b64digest>, B<hmac_sha1($data, $key)>,
+B<hmac_sha224($data, $key)>, B<hmac_sha256($data, $key)>,
+B<hmac_sha384($data, $key)>, B<hmac_sha512($data, $key)>,
+B<hmac_sha1_hex($data, $key)>, B<hmac_sha224_hex($data, $key)>,
+B<hmac_sha256_hex($data, $key)>, B<hmac_sha384_hex($data, $key)>,
+B<hmac_sha512_hex($data, $key)>, B<hmac_sha1_base64($data, $key)>,
+B<hmac_sha224_base64($data, $key)>, B<hmac_sha256_base64($data, $key)>,
+B<hmac_sha384_base64($data, $key)>, B<hmac_sha512_base64($data, $key)>
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item ACKNOWLEDGMENTS
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Digest::base - Digest base class
 
 =over 4
@@ -18313,7 +18887,7 @@ C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
@@ -18364,6 +18938,12 @@ Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode (I<CHECK> =
 Encode::FB_PERLQQ), HTML charref mode (I<CHECK> = Encode::FB_HTMLCREF), XML
 charref mode (I<CHECK> = Encode::FB_XMLCREF), The bitmask,
 Encode::LEAVE_SRC
+
+=over 4
+
+=item coderef for CHECK
+
+=back
 
 =item Defining Encodings
 
@@ -19097,10 +19677,6 @@ non-ascii or non-utf8
 
 =item Side effects
 
-=item Side effects
-
-=item Side effects
-
 =back
 
 =item FEATURES THAT REQUIRE 5.8.1
@@ -19241,7 +19817,7 @@ arrays
 
 =item How to Import
 
-C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
+C<use YourModule;>, C<use YourModule ();>, C<use YourModule qw(...);>
 
 =back
 
@@ -19422,14 +19998,15 @@ IV, UV, NV, PV, PVN, SV, YES, NO, UNDEF
 
 constant_types
 
-XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
+XS_constant PACKAGE, TYPES, XS_SUBNAME, C_SUBNAME
 
 autoload PACKAGE, VERSION, AUTOLOADER
 
 WriteMakefileSnippet
 
 WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
-BREAKOUT_AT, NAMES, C_FH, C_FILE, XS_FH, XS_FILE, SUBNAME, C_SUBNAME
+BREAKOUT_AT, NAMES, PROXYSUBS, C_FH, C_FILE, XS_FH, XS_FILE, XS_SUBNAME,
+C_SUBNAME
 
 =over 4
 
@@ -19544,6 +20121,10 @@ ccopts(), xsi_header(), xsi_protos(@modules), xsi_body(@modules)
 
 =item SYNOPSIS
 
+=back
+
+=over 4
+
 =item DESCRIPTION
 
 _chmod($$;$), _warnonce(@), _choke(@)
@@ -19558,21 +20139,21 @@ _unlink_or_rename( $file, $tryhard, $installing )
 
 =item Functions
 
-B<install>
+_get_install_skip
 
 =back
-
-_get_install_skip
 
 _have_write_access
 
 _can_write_dir(C<$dir>)
 
-_mkpath($dir,$show,$mode,$verbose,$fake)
+_mkpath($dir,$show,$mode,$verbose,$dry_run)
 
-_copy($from,$to,$verbose,$fake)
+_copy($from,$to,$verbose,$dry_run)
 
 _chdir($from)
+
+B<install>
 
 _do_cleanup
 
@@ -19586,7 +20167,7 @@ B<install_default> I<DISCOURAGED>
 
 B<uninstall>
 
-inc_uninstall($filepath,$libdir,$verbose,$nonono,$ignore)
+inc_uninstall($filepath,$libdir,$verbose,$dry_run,$ignore,$results)
 
 run_filter($cmd,$src,$dest)
 
@@ -19601,7 +20182,7 @@ _invokant
 =item ENVIRONMENT
 
 B<PERL_INSTALL_ROOT>, B<EU_INSTALL_IGNORE_SKIP>,
-B<EU_INSTALL_SITE_SKIPFILE>
+B<EU_INSTALL_SITE_SKIPFILE>, B<EU_INSTALL_ALWAYS_COPY>
 
 =item AUTHOR
 
@@ -19812,6 +20393,22 @@ B<replace_manpage_separator>
 =item AUTHOR
 
 =item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MM_Darwin - special behaviors for OS X
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overriden Methods
+
+=back
 
 =back
 
@@ -20406,14 +21003,15 @@ INSTALLVENDORARCH, INSTALLVENDORBIN, INSTALLVENDORLIB,
 INSTALLVENDORMAN1DIR, INSTALLVENDORMAN3DIR, INSTALLVENDORSCRIPT,
 INST_ARCHLIB, INST_BIN, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT,
 LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS, LICENSE, LINKTYPE, MAKE,
-MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
-NEEDS_LINKING, NOECHO, NORECURS, NO_META, NO_VC, OBJECT, OPTIMIZE, PERL,
-PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLPREFIX,
-PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
-PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SIGN,
-SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, VERSION_SYM,
-XS, XSOPT, XSPROTOARG, XS_VERSION
+MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, META_ADD,
+META_MERGE, MIN_PERL_VERSION, MYEXTLIB, NAME, NEEDS_LINKING, NOECHO,
+NORECURS, NO_META, NO_VC, OBJECT, OPTIMIZE, PERL, PERL_CORE, PERLMAINCC,
+PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLPREFIX, PERLRUN, PERLRUNINST,
+PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE,
+PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM,
+PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SIGN, SKIP, TYPEMAPS, VENDORPREFIX,
+VERBINST, VERSION, VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG,
+XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -20583,6 +21181,8 @@ skipcheck
 
 maniread
 
+maniskip
+
 manicopy
 
 maniadd
@@ -20713,17 +21313,29 @@ errors()
 
 =back
 
-=head2 Fatal - replace functions with equivalents which succeed or die
+=head2 Fatal - Replace functions with equivalents which succeed or die
 
 =over 4
 
 =item SYNOPSIS
 
+=item BEST PRACTICE
+
 =item DESCRIPTION
+
+=item DIAGNOSTICS
+
+Bad subroutine name for Fatal: %s, %s is not a Perl subroutine, %s is
+neither a builtin, nor a Perl subroutine, Cannot make the non-overridable
+%s fatal, Internal error: %s
 
 =item BUGS
 
 =item AUTHOR
+
+=item LICENSE
+
+=item SEE ALSO
 
 =back
 
@@ -21010,10 +21622,6 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 =item DESCRIPTION
 
-This code is a work in progress, There are known bugs, The interface
-defined here is tentative, There are portability issues, Do not use in
-production code, Consider yourself warned!
-
 =over 4
 
 =item Behind The Scenes
@@ -21060,15 +21668,20 @@ B<~>, B<~user>, B<.>, B<*>, B<?>, B<\>,  B<[]>,  B<{,}>,  B<()>
 
 =item DESCRIPTION
 
+make_path( $dir1, $dir2, .... ), make_path( $dir1, $dir2, ...., \%opts ),
+mode => $num, verbose => $bool, error => \$err, mkpath( $dir ), mkpath(
+$dir, $verbose, $mode ), mkpath( [$dir1, $dir2,...], $verbose, $mode ),
+mkpath( $dir1, $dir2,..., \%opt ), remove_tree( $dir1, $dir2, .... ),
+remove_tree( $dir1, $dir2, ...., \%opts ), verbose => $bool, safe => $bool,
+keep_root => $bool, result => \$res, error => \$err, rmtree( $dir ),
+rmtree( $dir, $verbose, $safe ), rmtree( [$dir1, $dir2,...], $verbose,
+$safe ), rmtree( $dir1, $dir2,..., \%opt )
+
 =over 4
 
-=item FUNCTIONS
-
-mode, verbose, error, verbose, safe, keep_root, result, error
-
-=item TRADITIONAL INTERFACE
-
 =item ERROR HANDLING
+
+B<NOTE:>
 
 =item NOTES
 
@@ -21079,17 +21692,18 @@ mode, verbose, error, verbose, safe, keep_root, result, error
 mkdir [path]: [errmsg] (SEVERE), No root path(s) specified, No such file or
 directory, cannot fetch initial working directory: [errmsg], cannot stat
 initial working directory: [errmsg], cannot chdir to [dir]: [errmsg],
-directory [dir] changed before chdir, expected dev=[n] inode=[n], actual
+directory [dir] changed before chdir, expected dev=[n] ino=[n], actual
 dev=[n] ino=[n], aborting. (FATAL), cannot make directory [dir]
 read+writeable: [errmsg], cannot read [dir]: [errmsg], cannot reset chmod
-[dir]: [errmsg], cannot chdir to [parent-dir] from [child-dir]: [errmsg],
-aborting. (FATAL), cannot stat prior working directory [dir]: [errmsg],
-aborting. (FATAL), previous directory [parent-dir] changed before entering
-[child-dir], expected dev=[n] inode=[n], actual dev=[n] ino=[n], aborting.
-(FATAL), cannot make directory [dir] writeable: [errmsg], cannot remove
-directory [dir]: [errmsg], cannot restore permissions of [dir] to [0nnn]:
-[errmsg], cannot make file [file] writeable: [errmsg], cannot unlink file
-[file]: [errmsg], cannot restore permissions of [file] to [0nnn]: [errmsg]
+[dir]: [errmsg], cannot remove [dir] when cwd is [dir], cannot chdir to
+[parent-dir] from [child-dir]: [errmsg], aborting. (FATAL), cannot stat
+prior working directory [dir]: [errmsg], aborting. (FATAL), previous
+directory [parent-dir] changed before entering [child-dir], expected
+dev=[n] ino=[n], actual dev=[n] ino=[n], aborting. (FATAL), cannot make
+directory [dir] writeable: [errmsg], cannot remove directory [dir]:
+[errmsg], cannot restore permissions of [dir] to [0nnn]: [errmsg], cannot
+make file [file] writeable: [errmsg], cannot unlink file [file]: [errmsg],
+cannot restore permissions of [file] to [0nnn]: [errmsg]
 
 =item SEE ALSO
 
@@ -21431,9 +22045,11 @@ B<new>
 
 =back
 
+B<newdir>
+
 B<filename>
 
-B<unlink_on_destroy>
+B<dirname>, B<unlink_on_destroy>
 
 B<DESTROY>
 
@@ -21514,6 +22130,8 @@ B<$KEEP_ALL>, B<$DEBUG>
 =item Temporary files and NFS
 
 =item Forking
+
+=item Directory removal
 
 =item BINMODE
 
@@ -21614,7 +22232,9 @@ from the other partial filters described in the previous section.
 
 =item AUTHOR
 
-=item COPYRIGHT
+=item CONTACT
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -22432,6 +23052,14 @@ Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -22535,6 +23163,14 @@ C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
 
 =item EXAMPLES
 
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -22634,6 +23270,14 @@ Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -22684,12 +23328,13 @@ A filename, A filehandle, A scalar reference
 
 C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
 Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< ExtAttr =>
-$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< Comment =>
-$comment >>, C<< ZipComment => $comment >>, C<< Method => $method >>, C<<
-Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<< TextFlag => 0|1 >>, C<<
-ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral => $data >>, C<<
-Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
->>, -Level, -Strategy, C<< Strict => 0|1 >>
+$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< exUnix2 => [$uid,
+$gid] >>, C<< Comment => $comment >>, C<< ZipComment => $comment >>, C<<
+Method => $method >>, C<< Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<<
+TextFlag => 0|1 >>, C<< ExtraFieldLocal => $data >> =item C<<
+ExtraFieldCentral => $data >>, C<< Minimal => 1|0 >>, C<< BlockSize100K =>
+number >>, C<< WorkFactor => number >>, -Level, -Strategy, C<< Strict =>
+0|1 >>
 
 =item Examples
 
@@ -22738,6 +23383,14 @@ Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
 :all, :constants, :flush, :level, :strategy, :zip_method
 
 =item EXAMPLES
+
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
 
 =item SEE ALSO
 
@@ -23090,6 +23743,12 @@ the sub-field structure as defined in RFC 1952
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -23325,6 +23984,12 @@ Name, Comment
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -23429,6 +24094,12 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 :all
 
 =item EXAMPLES
+
+=over 4
+
+=item Working with Net::FTP
+
+=back
 
 =item SEE ALSO
 
@@ -23535,6 +24206,12 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -23640,6 +24317,14 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=item Walking through a zip file
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -23685,7 +24370,7 @@ IO::Zlib::import: 'gzip_read_open' requires an argument, IO::Zlib::import:
 an argument, IO::Zlib::import: 'gzip_write_open' '...' is illegal,
 IO::Zlib::import: no Compress::Zlib and no external gzip, IO::Zlib::open:
 needs a filename, IO::Zlib::READ: NBYTES must be specified,
-IO::Zlib::WRITE: too long LENGTH, IO::Zlib::WRITE: OFFSET is not supported
+IO::Zlib::WRITE: too long LENGTH
 
 =item SEE ALSO
 
@@ -23951,10 +24636,6 @@ File Glob to Allow Input and Output Files
 
 =item DESCRIPTION
 
-This code is a work in progress, There are known bugs, The interface
-defined here is tentative, There are portability issues, Do not use in
-production code, Consider yourself warned!
-
 =over 4
 
 =item Behind The Scenes
@@ -24137,6 +24818,40 @@ Base Class for IO::Uncompress modules
 
 =back
 
+=head2 IO_Compress_Base::pod::FAQ, IO::Compress::Base::FAQ -- Frequently
+Asked Questions about IO::Compress::Base
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compatibility with Unix compress/uncompress.
+
+=item Accessing .tar.Z files
+
+=item Accessing Zip Files
+
+=item Compressed files and Net::FTP
+
+=item How do I recompress using a different compression?
+
+=item Using C<InputLength> to uncompress data embedded in a larger
+file/buffer.
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 IO_Compress_Zlib::IO::Compress::Deflate, IO::Compress::Deflate -
 Write RFC 1950 files/buffers
 
@@ -24226,6 +24941,14 @@ Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 :all, :constants, :flush, :level, :strategy
 
 =item EXAMPLES
+
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
 
 =item SEE ALSO
 
@@ -24331,6 +25054,14 @@ C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
 
 =item EXAMPLES
 
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -24431,6 +25162,14 @@ Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -24482,12 +25221,13 @@ A filename, A filehandle, A scalar reference
 
 C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
 Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< ExtAttr =>
-$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< Comment =>
-$comment >>, C<< ZipComment => $comment >>, C<< Method => $method >>, C<<
-Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<< TextFlag => 0|1 >>, C<<
-ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral => $data >>, C<<
-Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
->>, -Level, -Strategy, C<< Strict => 0|1 >>
+$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< exUnix2 => [$uid,
+$gid] >>, C<< Comment => $comment >>, C<< ZipComment => $comment >>, C<<
+Method => $method >>, C<< Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<<
+TextFlag => 0|1 >>, C<< ExtraFieldLocal => $data >> =item C<<
+ExtraFieldCentral => $data >>, C<< Minimal => 1|0 >>, C<< BlockSize100K =>
+number >>, C<< WorkFactor => number >>, -Level, -Strategy, C<< Strict =>
+0|1 >>
 
 =item Examples
 
@@ -24536,6 +25276,14 @@ Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
 :all, :constants, :flush, :level, :strategy, :zip_method
 
 =item EXAMPLES
+
+=over 4
+
+=item Apache::GZip Revisited
+
+=item Working with Net::FTP
+
+=back
 
 =item SEE ALSO
 
@@ -24648,6 +25396,12 @@ the sub-field structure as defined in RFC 1952
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -24759,6 +25513,12 @@ Name, Comment
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -24864,6 +25624,12 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 :all
 
 =item EXAMPLES
+
+=over 4
+
+=item Working with Net::FTP
+
+=back
 
 =item SEE ALSO
 
@@ -24971,6 +25737,12 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -25077,6 +25849,50 @@ $size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item EXAMPLES
 
+=over 4
+
+=item Working with Net::FTP
+
+=item Walking through a zip file
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::pod::FAQ, IO::Compress::Zlib::FAQ -- Frequently
+Asked Questions about IO::Compress::Zlib
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compatibility with Unix compress/uncompress.
+
+=item Accessing .tar.Z files
+
+=item Accessing Zip Files
+
+=item Compressed files and Net::FTP
+
+=item How do I recompress using a different compression?
+
+=item Apache::GZip Revisited
+
+=item Using C<InputLength> to uncompress data embedded in a larger
+file/buffer.
+
+=back
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -25103,7 +25919,7 @@ FLAGS ] ), stat
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -25157,13 +25973,13 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
 =back
 
-=head2 IPC::SysV - SysV IPC constants
+=head2 IPC::SharedMem - SysV Shared Memory IPC object class
 
 =over 4
 
@@ -25171,7 +25987,10 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item DESCRIPTION
 
-ftok( PATH, ID )
+=item METHODS
+
+new ( KEY , SIZE , FLAGS ), id, read ( POS, SIZE ), write ( STRING, POS,
+SIZE ), remove, is_removed, stat, attach ( [FLAG] ), detach, addr
 
 =item SEE ALSO
 
@@ -25181,7 +26000,26 @@ ftok( PATH, ID )
 
 =back
 
-=head2 IPC::SysV::Msg, IPC::Msg - SysV Msg IPC object class
+=head2 IPC::SysV - System V IPC constants and system calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH ), ftok( PATH, ID ), shmat( ID, ADDR, FLAG ), shmdt( ADDR ),
+memread( ADDR, VAR, POS, SIZE ), memwrite( ADDR, STRING, POS, SIZE )
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::Msg, IPC::Msg - SysV Msg IPC object class
 
 =over 4
 
@@ -25197,14 +26035,14 @@ FLAGS ] ), stat
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
 =back
 
-=head2 IPC::SysV::Semaphore, IPC::Semaphore - SysV Semaphore IPC object
-class
+=head2 IPC::SysV::lib::IPC::Semaphore, IPC::Semaphore - SysV Semaphore IPC
+object class
 
 =over 4
 
@@ -25221,7 +26059,49 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::SharedMem, IPC::SharedMem - SysV Shared Memory
+IPC object class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , SIZE , FLAGS ), id, read ( POS, SIZE ), write ( STRING, POS,
+SIZE ), remove, is_removed, stat, attach ( [FLAG] ), detach, addr
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::SysV, IPC::SysV - System V IPC constants and
+system calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH ), ftok( PATH, ID ), shmat( ID, ADDR, FLAG ), shmdt( ADDR ),
+memread( ADDR, VAR, POS, SIZE ), memwrite( ADDR, STRING, POS, SIZE )
+
+=item SEE ALSO
+
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -25374,8 +26254,6 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 =item SEE ALSO
 
 =item COPYRIGHT
-
-=item BLATANT PLUG
 
 =back
 
@@ -26456,6 +27334,8 @@ the same terms as Perl itself.
 
 =item as_int()/as_number()
 
+=item as_float()
+
 =item as_hex()
 
 =item as_bin()
@@ -26524,6 +27404,8 @@ the same terms as Perl itself.
 
 =item config()
 
+=item objectify()
+
 =back
 
 =item BUGS
@@ -26563,9 +27445,13 @@ functions
 
 =item USAGE
 
+=item CONSTANTS
+
 =over 4
 
 =item PI
+
+=item Inf
 
 =back
 
@@ -26575,7 +27461,11 @@ functions
 
 =item BUGS
 
+=item SEE ALSO
+
 =item AUTHORS
+
+=item LICENSE
 
 =back
 
@@ -26641,11 +27531,17 @@ cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
 
 =item CAVEAT FOR GREAT CIRCLE FORMULAS
 
+=item Real-valued asin and acos
+
+asin_real, acos_real
+
 =back
 
 =item BUGS
 
 =item AUTHORS
+
+=item LICENSE
 
 =back
 
@@ -27407,7 +28303,7 @@ at runtime
 =item $href = check_install( module => NAME [, version => VERSION, verbose
 => BOOL ] );
 
-module, version, verbose, file, version, uptodate
+module, version, verbose, file, dir, version, uptodate
 
 =back
 
@@ -27486,6 +28382,8 @@ modules, verbose, nocache
 
 =over 4
 
+=item BUG REPORTS
+
 =item AUTHOR
 
 =item COPYRIGHT
@@ -27531,6 +28429,8 @@ have plugins
 
 =item file_regex
 
+=item include_editor_junk
+
 =back
 
 =item METHODs
@@ -27561,6 +28461,122 @@ ability to have plugins
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item OPTIONS
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Pluggable::lib::Devel::InnerPackage, Devel::InnerPackage -
+find all the inner packages of a package
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item list_packages <package name>
+
+=back
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
+
+=back
+
+=head2 Module::Pluggable::lib::Module::Pluggable, Module::Pluggable -
+automatically give your module the ability to have plugins
+
+=over 4
+
+=item SYNOPSIS
+
+=item EXAMPLE
+
+=item DESCRIPTION
+
+=item ADVANCED USAGE
+
+=item INNER PACKAGES
+
+=item OPTIONS
+
+=over 4
+
+=item sub_name
+
+=item search_path
+
+=item search_dirs 
+
+=item instantiate
+
+=item require
+
+=item inner
+
+=item only
+
+=item except
+
+=item package
+
+=item file_regex
+
+=item include_editor_junk
+
+=back
+
+=item METHODs
+
+=over 4
+
+=item search_path
+
+=back
+
+=item FUTURE PLANS
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Pluggable::lib::Module::Pluggable::Object,
+Module::Pluggable::Object - automatically give your module the ability to
+have plugins
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
 
 =item AUTHOR
 
@@ -28186,6 +29202,13 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =over 4
 
+=item $bool = $self->mk_aliases( alias => method, [alias2 => method2, ...]
+);
+
+=back
+
+=over 4
+
 =item $clone = $self->mk_clone;
 
 =back
@@ -28228,6 +29251,12 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =over 4
 
+=item $bool = $self->___alias( ALIAS => METHOD );
+
+=back
+
+=over 4
+
 =item LVALUE ACCESSORS
 
 =over 4
@@ -28261,6 +29290,8 @@ Allow handlers, Callbacks
 =back
 
 =item CAVEATS
+
+=item BUG REPORTS
 
 =item AUTHOR
 
@@ -28525,6 +29556,8 @@ WTERMSIG, WIFSTOPPED, WSTOPSIG
 =back
 
 =over 4
+
+=item BUG REPORTS
 
 =item AUTHOR
 
@@ -29257,7 +30290,7 @@ B<_split_delimited>
 =item DESCRIPTION
 
 center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, name, quotes,
-release, section
+release, section, stderr, utf8
 
 =item DIAGNOSTICS
 
@@ -29955,6 +30988,8 @@ $parser->source_dead >>
 
 =item AUTHOR
 
+Allison Randal C<allison@perl.org>, Hans Dieter Pearcey C<hdp@cpan.org>
+
 =back
 
 =head2 Pod::Simple::Checker -- check the Pod syntax of a document
@@ -30404,6 +31439,70 @@ I<SOMEVALUE> ) >>, C<< $parser->preserve_whitespace( I<SOMEVALUE> ) >>
 
 =back
 
+=head2 Pod::Simple::XHTML -- format Pod as validating XHTML
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item perldoc_url_prefix
+
+=item perldoc_url_postfix
+
+=item title_prefix, title_postfix
+
+=item html_css
+
+=item html_javascript
+
+=item html_doctype
+
+=item html_header_tags
+
+=item default_title
+
+=item force_title
+
+=item html_header, html_footer
+
+=item index
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=back
+
+=over 4
+
+=item handle_text
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=item AUTHOR
+
+=back
+
 =head2 Pod::Simple::XMLOutStream -- turn Pod into XML
 
 =over 4
@@ -30453,12 +31552,16 @@ parse tree
 
 =item DESCRIPTION
 
-alt, code, indent, loose, margin, quotes, sentence, width
+alt, code, indent, loose, margin, quotes, sentence, stderr, utf8, width
 
 =item DIAGNOSTICS
 
 Bizarre space in item, Item called without tag, Can't open %s for reading:
 %s, Invalid quote specification "%s"
+
+=item BUGS
+
+=item CAVEATS
 
 =item NOTES
 
@@ -30488,8 +31591,8 @@ Bizarre space in item, Item called without tag, Can't open %s for reading:
 
 =back
 
-=head2 Pod::Text::Overstrike - Convert POD data to formatted overstrike
-text
+=head2 Pod::Text::Overstrike, =for stopwords
+overstrike
 
 =over 4
 
@@ -30629,8 +31732,6 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 
 =item COPYRIGHT
 
-=item BLATANT PLUG
-
 =back
 
 =head2 Search::Dict, look - search for key in dictionary file
@@ -30678,6 +31779,10 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 =back
 
 =item Multiple packages and fully qualified subroutine names
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -30873,6 +31978,7 @@ B<openlog($ident, $logopt, $facility)>, B<syslog($priority, $message)>,
 B<syslog($priority, $format, @args)>, B<Note>,
 B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
+B<setlogsock($sock_type, $stream_location, $sock_timeout)> (added in 0.25),
 B<Note>, B<closelog()>
 
 =item THE RULES OF SYS::SYSLOG
@@ -30949,6 +32055,7 @@ B<openlog($ident, $logopt, $facility)>, B<syslog($priority, $message)>,
 B<syslog($priority, $format, @args)>, B<Note>,
 B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
+B<setlogsock($sock_type, $stream_location, $sock_timeout)> (added in 0.25),
 B<Note>, B<closelog()>
 
 =item THE RULES OF SYS::SYSLOG
@@ -31018,6 +32125,1209 @@ Sys::Syslog
 =item AUTHORS
 
 =item LICENSE
+
+=back
+
+=head2 TAP::Base - Base class that provides common functionality to
+L<TAP::Parser> and L<TAP::Harness>
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAP::Formatter::Color - Run Perl test scripts with color
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAP::Formatter::Console - Harness output delegate for default
+console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<verbosity>, C<verbose>, C<timer>, C<failures>, C<quiet>, C<really_quiet>,
+C<silent>, C<errors>, C<directives>, C<stdout>, C<color>, C<jobs>,
+C<show_count>
+
+=back
+
+=back
+
+=head2 TAP::Formatter::Console::ParallelSession - Harness output delegate
+for parallel console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAP::Formatter::Console::Session - Harness output delegate for
+default console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<formatter>, C<parser>, C<name>, C<show_count>
+
+=back
+
+=back
+
+=head2 TAP::Harness - Run test scripts with statistics
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<verbosity>, C<timer>, C<failures>, C<show_count>, C<lib>, C<switches>,
+C<test_args>, C<color>, C<exec>, C<merge>, C<aggregator_class>,
+C<formatter_class>, C<multiplexer_class>, C<parser_class>,
+C<scheduler_class>, C<formatter>, C<errors>, C<directives>, C<ignore_exit>,
+C<jobs>, C<fork>, C<rules>, C<stdout>
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+the file name of a test script to run, a reference to a [ file name,
+display name ] array
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Methods
+
+C<start>, C<tests>
+
+=back
+
+=back
+
+=over 4
+
+=item REPLACING
+
+=item SEE ALSO
+
+=back
+
+=head2 TAP::Object - Base class that provides common functionality to all
+C<TAP::*> modules
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser, TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<source>, C<tap>, C<exec>, C<callback>, C<switches>, C<test_args>,
+C<spool>, C<merge>, C<source_class>, C<perl_source_class>,
+C<grammar_class>, C<iterator_factory_class>, C<result_factory_class>
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item INDIVIDUAL RESULTS
+
+=over 4
+
+=item Result types
+
+Version, Plan, Pragma, Test, Comment, Bailout, Unknown
+
+=item Common type methods
+
+=item C<plan> methods
+
+=item C<pragma> methods
+
+=item C<bailout> methods
+
+=item C<unknown> methods
+
+=item C<test> methods
+
+=back
+
+=item TOTAL RESULTS
+
+=over 4
+
+=item Individual Results
+
+=back
+
+=back
+
+=over 4
+
+=item Pragmas
+
+=back
+
+=over 4
+
+=item Summary Results
+
+=back
+
+=over 4
+
+=item C<ignore_exit>
+
+=back
+
+Misplaced plan, No plan, More than one plan, Test numbers out of sequence
+
+=over 4
+
+=item CALLBACKS
+
+C<test>, C<version>, C<plan>, C<comment>, C<bailout>, C<yaml>, C<unknown>,
+C<ELSE>, C<ALL>, C<EOF>
+
+=item TAP GRAMMAR
+
+=item BACKWARDS COMPATABILITY
+
+=over 4
+
+=item Differences
+
+TODO plans, 'Missing' tests
+
+=back
+
+=item SUBCLASSING
+
+=over 4
+
+=item Parser Components
+
+option 1, option 2
+
+=back
+
+=item ACKNOWLEDGEMENTS
+
+Michael Schwern, Andy Lester, chromatic, GEOFFR, Shlomi Fish, Torsten
+Schoenfeld, Jerry Gay, Aristotle, Adam Kennedy, Yves Orton, Adrian Howard,
+Sean & Lil, Andreas J. Koenig, Florian Ragwitz, Corion, Mark Stosberg, Matt
+Kraai, David Wheeler, Alex Vandiver
+
+=item AUTHORS
+
+=item BUGS
+
+=item COPYRIGHT & LICENSE
+
+=back
+
+=head2 TAParser::Aggregator, TAP::Parser::Aggregator - Aggregate
+TAP::Parser results
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item Summary methods
+
+failed, parse_errors, passed, skipped, todo, todo_passed, wait, exit
+
+=back
+
+Failed tests, Parse erros, Bad exit or wait status
+
+=over 4
+
+=item See Also
+
+=back
+
+=head2 TAParser::Grammar, TAP::Parser::Grammar - A grammar for the Test
+Anything Protocol.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item TAP GRAMMAR
+
+=item SUBCLASSING
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Iterator, TAP::Parser::Iterator - Internal base class for
+TAP::Parser Iterators
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Iterator::Array, TAP::Parser::Iterator::Array - Internal
+TAP::Parser array Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Iterator::Process, TAP::Parser::Iterator::Process -
+Internal TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Iterator::Stream, TAP::Parser::Iterator::Stream - Internal
+TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::IteratorFactory, TAP::Parser::IteratorFactory - Internal
+TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Multiplexer, TAP::Parser::Multiplexer - Multiplex multiple
+TAP::Parsers
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item See Also
+
+=back
+
+=head2 TAParser::Result, TAP::Parser::Result - Base class for TAP::Parser
+output objects
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=over 4
+
+=item DESCRIPTION
+
+=item METHODS
+
+=back
+
+=back
+
+=over 4
+
+=item Boolean methods
+
+C<is_plan>, C<is_pragma>, C<is_test>, C<is_comment>, C<is_bailout>,
+C<is_version>, C<is_unknown>, C<is_yaml>
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Result::Bailout, TAP::Parser::Result::Bailout - Bailout
+result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::Result::Comment, TAP::Parser::Result::Comment - Comment
+result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::Result::Plan, TAP::Parser::Result::Plan - Plan result
+token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::Result::Pragma, TAP::Parser::Result::Pragma - TAP pragma
+token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::Result::Test, TAP::Parser::Result::Test - Test result
+token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=back
+
+=head2 TAParser::Result::Unknown, TAP::Parser::Result::Unknown - Unknown
+result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=head2 TAParser::Result::Version, TAP::Parser::Result::Version - TAP syntax
+version token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::Result::YAML, TAP::Parser::Result::YAML - YAML result
+token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 TAParser::ResultFactory, TAP::Parser::ResultFactory - Factory for
+creating TAP::Parser output objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item METHODS
+
+=item Class Methods
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Scheduler, TAP::Parser::Scheduler - Schedule tests during
+parallel testing
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAParser::Scheduler::Job, TAP::Parser::Scheduler::Job - A single
+testing job.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAParser::Scheduler::Spinner, TAP::Parser::Scheduler::Spinner - A
+no-op job.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 TAParser::Source, TAP::Parser::Source - Stream output from some
+source
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Source::Perl, TAP::Parser::Source::Perl - Stream Perl
+output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 TAParser::Utils, TAP::Parser::Utils - Internal TAP::Parser utilities
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item INTERFACE
+
+=back
+
+=back
+
+=head2 TAParser::YAMLish::Reader, TAP::Parser::YAMLish::Reader - Read
+YAMLish data from iterator
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 TAParser::YAMLish::Writer, TAP::Parser::YAMLish::Writer - Write
+YAMLish data
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+a reference to a scalar to append YAML to, the handle of an open file, a
+reference to an array into which YAML will be pushed, a code reference
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
 
 =back
 
@@ -31323,11 +33633,9 @@ B<reset>
 
 =item Setting up tests
 
-B<exported_to>
+B<plan>
 
 =back
-
-B<plan>
 
 B<expected_tests>
 
@@ -31336,6 +33644,8 @@ B<no_plan>
 B<has_plan>
 
 B<skip_all>
+
+B<exported_to>
 
 =over 4
 
@@ -31399,11 +33709,15 @@ B<diag>
 
 =back
 
+B<note>
+
+B<explain>
+
 B<_print>
 
-B<_print_diag>
-
 B<output>, B<failure_output>, B<todo_output>
+
+reset_outputs
 
 carp, croak
 
@@ -31420,6 +33734,14 @@ B<summary>
 B<details>
 
 B<todo>
+
+B<find_TODO>
+
+B<in_todo>
+
+B<todo_start>
+
+C<todo_end>
 
 B<caller>
 
@@ -31543,20 +33865,1452 @@ Test::Builder::Tester
 
 =item DESCRIPTION
 
+=item FUNCTIONS
+
 =over 4
 
-=item Taint mode
-
-=item Configuration variables.
-
-C<$Test::Harness::Verbose>, C<$Test::Harness::switches>,
-C<$Test::Harness::Timer>
-
-=item Failure
-
-B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<List of Failed>
+=item runtests( @test_files )
 
 =back
+
+=back
+
+=over 4
+
+=item execute_tests( tests => \@test_files, out => \*FH )
+
+=back
+
+=over 4
+
+=item EXPORT
+
+=item ENVIRONMENT VARIABLES THAT TAP::HARNESS::COMPATIBLE SETS
+
+C<HARNESS_ACTIVE>, C<HARNESS_VERSION>
+
+=item ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
+
+C<HARNESS_TIMER>, C<HARNESS_VERBOSE>, C<HARNESS_OPTIONS>, C<< j<n> >>, C<<
+f >>
+
+=item Taint Mode
+
+=item SEE ALSO
+
+=item BUGS
+
+=item AUTHORS
+
+=item LICENCE AND COPYRIGHT
+
+=back
+
+=head2 Test::Harness::lib::App::Prove, App::Prove - Implements the C<prove>
+command.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Attributes
+
+C<archive>, C<argv>, C<backwards>, C<blib>, C<color>, C<directives>,
+C<dry>, C<exec>, C<extension>, C<failures>, C<fork>, C<formatter>,
+C<harness>, C<ignore_exit>, C<includes>, C<jobs>, C<lib>, C<merge>,
+C<modules>, C<parse>, C<plugins>, C<quiet>, C<really_quiet>, C<recurse>,
+C<rules>, C<show_count>, C<show_help>, C<show_man>, C<show_version>,
+C<shuffle>, C<state>, C<taint_fail>, C<taint_warn>, C<test_args>, C<timer>,
+C<verbose>, C<warnings_fail>, C<warnings_warn>
+
+=back
+
+=head2 Test::Harness::lib::App::Prove::State, App::Prove::State - State
+storage for the C<prove> command.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item C<result_class>
+
+=back
+
+=over 4
+
+=item C<extension>
+
+=back
+
+=over 4
+
+=item C<results>
+
+=back
+
+=over 4
+
+=item C<commit>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+C<last>, C<failed>, C<passed>, C<all>, C<hot>, C<todo>, C<slow>, C<fast>,
+C<new>, C<old>, C<save>
+
+=back
+
+=head2 Test::Harness::lib::App::Prove::State::Result,
+App::Prove::State::Result - Individual test suite results.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item C<state_version>
+
+=back
+
+=over 4
+
+=item C<test_class>
+
+=back
+
+=head2 Test::Harness::lib::App::Prove::State::Result::Test,
+App::Prove::State::Result::Test - Individual test results.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAP::Base, TAP::Base - Base class that provides
+common functionality to L<TAP::Parser> and L<TAP::Harness>
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAP::Formatter::Color, TAP::Formatter::Color -
+Run Perl test scripts with color
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAP::Formatter::Console, TAP::Formatter::Console
+- Harness output delegate for default console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<verbosity>, C<verbose>, C<timer>, C<failures>, C<quiet>, C<really_quiet>,
+C<silent>, C<errors>, C<directives>, C<stdout>, C<color>, C<jobs>,
+C<show_count>
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAP::Formatter::Console::ParallelSession,
+TAP::Formatter::Console::ParallelSession - Harness output delegate for
+parallel console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAP::Formatter::Console::Session,
+TAP::Formatter::Console::Session - Harness output delegate for default
+console output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<formatter>, C<parser>, C<name>, C<show_count>
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAP::Harness, TAP::Harness - Run test scripts
+with statistics
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<verbosity>, C<timer>, C<failures>, C<show_count>, C<lib>, C<switches>,
+C<test_args>, C<color>, C<exec>, C<merge>, C<aggregator_class>,
+C<formatter_class>, C<multiplexer_class>, C<parser_class>,
+C<scheduler_class>, C<formatter>, C<errors>, C<directives>, C<ignore_exit>,
+C<jobs>, C<fork>, C<rules>, C<stdout>
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+the file name of a test script to run, a reference to a [ file name,
+display name ] array
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Methods
+
+C<start>, C<tests>
+
+=back
+
+=back
+
+=over 4
+
+=item REPLACING
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAP::Object, TAP::Object - Base class that
+provides common functionality to all C<TAP::*> modules
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser, TAP::Parser - Parse
+L<TAP|Test::Harness::TAP> output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+C<source>, C<tap>, C<exec>, C<callback>, C<switches>, C<test_args>,
+C<spool>, C<merge>, C<source_class>, C<perl_source_class>,
+C<grammar_class>, C<iterator_factory_class>, C<result_factory_class>
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item INDIVIDUAL RESULTS
+
+=over 4
+
+=item Result types
+
+Version, Plan, Pragma, Test, Comment, Bailout, Unknown
+
+=item Common type methods
+
+=item C<plan> methods
+
+=item C<pragma> methods
+
+=item C<bailout> methods
+
+=item C<unknown> methods
+
+=item C<test> methods
+
+=back
+
+=item TOTAL RESULTS
+
+=over 4
+
+=item Individual Results
+
+=back
+
+=back
+
+=over 4
+
+=item Pragmas
+
+=back
+
+=over 4
+
+=item Summary Results
+
+=back
+
+=over 4
+
+=item C<ignore_exit>
+
+=back
+
+Misplaced plan, No plan, More than one plan, Test numbers out of sequence
+
+=over 4
+
+=item CALLBACKS
+
+C<test>, C<version>, C<plan>, C<comment>, C<bailout>, C<yaml>, C<unknown>,
+C<ELSE>, C<ALL>, C<EOF>
+
+=item TAP GRAMMAR
+
+=item BACKWARDS COMPATABILITY
+
+=over 4
+
+=item Differences
+
+TODO plans, 'Missing' tests
+
+=back
+
+=item SUBCLASSING
+
+=over 4
+
+=item Parser Components
+
+option 1, option 2
+
+=back
+
+=item ACKNOWLEDGEMENTS
+
+Michael Schwern, Andy Lester, chromatic, GEOFFR, Shlomi Fish, Torsten
+Schoenfeld, Jerry Gay, Aristotle, Adam Kennedy, Yves Orton, Adrian Howard,
+Sean & Lil, Andreas J. Koenig, Florian Ragwitz, Corion, Mark Stosberg, Matt
+Kraai, David Wheeler, Alex Vandiver
+
+=item AUTHORS
+
+=item BUGS
+
+=item COPYRIGHT & LICENSE
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Aggregator, TAP::Parser::Aggregator -
+Aggregate TAP::Parser results
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item Summary methods
+
+failed, parse_errors, passed, skipped, todo, todo_passed, wait, exit
+
+=back
+
+Failed tests, Parse erros, Bad exit or wait status
+
+=over 4
+
+=item See Also
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Grammar, TAP::Parser::Grammar - A
+grammar for the Test Anything Protocol.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item TAP GRAMMAR
+
+=item SUBCLASSING
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Iterator, TAP::Parser::Iterator -
+Internal base class for TAP::Parser Iterators
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Iterator::Array,
+TAP::Parser::Iterator::Array - Internal TAP::Parser array Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Iterator::Process,
+TAP::Parser::Iterator::Process - Internal TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Iterator::Stream,
+TAP::Parser::Iterator::Stream - Internal TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::IteratorFactory,
+TAP::Parser::IteratorFactory - Internal TAP::Parser Iterator
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item ATTRIBUTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Multiplexer, TAP::Parser::Multiplexer
+- Multiplex multiple TAP::Parsers
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item See Also
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result, TAP::Parser::Result - Base
+class for TAP::Parser output objects
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=over 4
+
+=item DESCRIPTION
+
+=item METHODS
+
+=back
+
+=back
+
+=over 4
+
+=item Boolean methods
+
+C<is_plan>, C<is_pragma>, C<is_test>, C<is_comment>, C<is_bailout>,
+C<is_version>, C<is_unknown>, C<is_yaml>
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Bailout,
+TAP::Parser::Result::Bailout - Bailout result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Comment,
+TAP::Parser::Result::Comment - Comment result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Plan,
+TAP::Parser::Result::Plan - Plan result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Pragma,
+TAP::Parser::Result::Pragma - TAP pragma token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Test,
+TAP::Parser::Result::Test - Test result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Unknown,
+TAP::Parser::Result::Unknown - Unknown result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::Version,
+TAP::Parser::Result::Version - TAP syntax version token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Result::YAML,
+TAP::Parser::Result::YAML - YAML result token.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERRIDDEN METHODS
+
+C<as_string>, C<raw>
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=head2 Test::Harness::lib::TAParser::ResultFactory,
+TAP::Parser::ResultFactory - Factory for creating TAP::Parser output
+objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item METHODS
+
+=item Class Methods
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Scheduler, TAP::Parser::Scheduler -
+Schedule tests during parallel testing
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Scheduler::Job,
+TAP::Parser::Scheduler::Job - A single testing job.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Scheduler::Spinner,
+TAP::Parser::Scheduler::Spinner - A no-op job.
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Source, TAP::Parser::Source - Stream
+output from some source
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=back
+
+=back
+
+=over 4
+
+=item Instance Methods
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Source::Perl,
+TAP::Parser::Source::Perl - Stream Perl output
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=back
+
+=over 4
+
+=item SUBCLASSING
+
+=over 4
+
+=item Example
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::lib::TAParser::Utils, TAP::Parser::Utils - Internal
+TAP::Parser utilities
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item INTERFACE
+
+=back
+
+=back
+
+=head2 Test::Harness::lib::TAParser::YAMLish::Reader,
+TAP::Parser::YAMLish::Reader - Read YAMLish data from iterator
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 Test::Harness::lib::TAParser::YAMLish::Writer,
+TAP::Parser::YAMLish::Writer - Write YAMLish data
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item Class Methods
+
+=item Instance Methods
+
+a reference to a scalar to append YAML to, the handle of an open file, a
+reference to an array into which YAML will be pushed, a code reference
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 Test::Harness::lib::Test::Harness, Test::Harness - Run Perl standard
+test scripts with statistics
+
+=over 4
+
+=item VERSION
+
+=back
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item FUNCTIONS
 
@@ -31578,318 +35332,24 @@ B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<List of Failed>
 
 =item EXPORT
 
-=item DIAGNOSTICS
-
-C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
-%s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d (wstat
-%d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
-%s>, C<FAILED--Further testing stopped: %s>
-
-=item ENVIRONMENT VARIABLES THAT TEST::HARNESS SETS
+=item ENVIRONMENT VARIABLES THAT TAP::HARNESS::COMPATIBLE SETS
 
 C<HARNESS_ACTIVE>, C<HARNESS_VERSION>
 
 =item ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
 
-C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>, C<HARNESS_DEBUG>,
-C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_NOTTY>, C<HARNESS_PERL>,
-C<HARNESS_PERL_SWITCHES>, C<HARNESS_TIMER>, C<HARNESS_VERBOSE>,
-C<HARNESS_STRAP_CLASS>
+C<HARNESS_TIMER>, C<HARNESS_VERBOSE>, C<HARNESS_OPTIONS>, C<< j<n> >>, C<<
+f >>
 
-=item EXAMPLE
+=item Taint Mode
 
 =item SEE ALSO
-
-=item TODO
 
 =item BUGS
 
-=item SUPPORT
-
-AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
-tracker, Search CPAN
-
-=item SOURCE CODE
-
 =item AUTHORS
 
-=item COPYRIGHT
-
-=back
-
-=head2 Test::Harness::Assert - simple assert
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS
-
-=over 4
-
-=item C<assert()>
-
-=back
-
-=back
-
-=over 4
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
-=head2 Test::Harness::Iterator - Internal Test::Harness Iterator
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item new()
-
-=item next()
-
-=back
-
-=back
-
-=head2 Test::Harness::Point - object for tracking a single test point
-
-=over 4
-
-=item SYNOPSIS
-
-=item CONSTRUCTION
-
-=over 4
-
-=item new()
-
-=back
-
-=back
-
-=over 4
-
-=item from_test_line( $line )
-
-=back
-
-=over 4
-
-=item ACCESSORS
-
-ok, number
-
-=back
-
-=head2 Test::Harness::Results - object for tracking results from a single
-test file
-
-=over 4
-
-=item SYNOPSIS
-
-=item CONSTRUCTION
-
-=over 4
-
-=item new()
-
-=back
-
-=back
-
-=over 4
-
-=item ACCESSORS
-
-wait, exit
-
-=back
-
-=head2 Test::Harness::Straps - detailed analysis of test results
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTION
-
-=over 4
-
-=item new()
-
-=back
-
-=back
-
-=over 4
-
-=item ANALYSIS
-
-=over 4
-
-=item $strap->analyze( $name, \@output_lines )
-
-=back
-
-=back
-
-=over 4
-
-=item $strap->analyze_file( $test_file )
-
-=back
-
-=over 4
-
-=item Parsing
-
-=back
-
-=over 4
-
-=item EXAMPLES
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
-=head2 Test::Harness::TAP - Documentation for the TAP format
-
-=over 4
-
-=item SYNOPSIS
-
-=item TODO
-
-=item THE TAP FORMAT
-
-=item HARNESS BEHAVIOR
-
-=item TESTS LINES AND THE PLAN
-
-=over 4
-
-=item The plan
-
-=item The test line
-
-C<ok> or C<not ok>, Test number, Description, Directive, ok/not ok
-(required), Test number (recommended), Description (recommended), Directive
-(only when necessary)
-
-=back
-
-=item DIRECTIVES
-
-=over 4
-
-=item TODO tests
-
-=item Skipping tests
-
-=back
-
-=item OTHER LINES
-
-=over 4
-
-=item Bail out!
-
-=item Diagnostics
-
-=item Anything else
-
-=back
-
-=item EXAMPLES
-
-=over 4
-
-=item Common with explanation
-
-=item Unknown amount and failures
-
-=item Giving up
-
-=item Skipping a few
-
-=item Skipping everything
-
-=item Got spare tuits?
-
-=item Creative liberties
-
-=back
-
-=item Non-Perl TAP
-
-=over 4
-
-=item C/C++
-
-Specify a test plan, Run tests, Skip tests in certain situations, Have TODO
-tests, Produce TAP compatible diagnostics
-
-=item Python
-
-=item JavaScript
-
-=item PHP
-
-phpt, PHPUnit, SimpleTest, Apache-Test
-
-=back
-
-=item AUTHORS
-
-=item ACKNOWLEDGEMENTS
-
-=item COPYRIGHT
-
-=back
-
-=head2 Test::Harness::Util - Utility functions for Test::Harness::*
-
-=over 4
-
-=item SYNOPSIS
-
-=item PUBLIC FUNCTIONS
-
-=over 4
-
-=item all_in( {parm => value, parm => value} )
-
-start, recurse
-
-=back
-
-=back
-
-=over 4
-
-=item shuffle( @list )
-
-=back
-
-=over 4
-
-=item blibdir()
+=item LICENCE AND COPYRIGHT
 
 =back
 
@@ -31931,6 +35391,8 @@ B<can_ok>
 
 B<isa_ok>
 
+B<new_ok>
+
 B<pass>, B<fail>
 
 =over 4
@@ -31955,9 +35417,11 @@ B<is_deeply>
 
 =item Diagnostics
 
-B<diag>
+B<diag>, B<note>
 
 =back
+
+B<explain>
 
 =over 4
 
@@ -32043,16 +35507,13 @@ B<ok>
 
 =item SEE ALSO
 
-L<Test::More>, L<Test>, L<Test::Unit>, L<Test::Inline>, L<SelfTest>,
-L<Test::Harness>
+L<Test::More>
 
 =item AUTHORS
 
 =item COPYRIGHT
 
 =back
-
-=head2 Test::Tutorial - A tutorial about writing really basic tests
 
 =over 4
 
@@ -32271,33 +35732,66 @@ lock(\&sub), eval, flags
 
 =back
 
-=head2 Thread::Queue - thread-safe queues
+=head2 Thread::Queue - Thread-safe queues
 
 =over 4
+
+=item VERSION
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
-=item FUNCTIONS AND METHODS
+Ordinary scalars, Array refs, Hash refs, Scalar refs, Objects based on the
+above
 
-new, enqueue LIST, dequeue, dequeue_nb, pending
+=item QUEUE CREATION
+
+->new(), ->new(LIST)
+
+=item BASIC METHODS
+
+->enqueue(LIST), ->dequeue(), ->dequeue(COUNT), ->dequeue_nb(),
+->dequeue_nb(COUNT), ->pending()
+
+=item ADVANCED METHODS
+
+->peek(), ->peek(INDEX), ->insert(INDEX, LIST), ->extract(),
+->extract(INDEX), ->extract(INDEX, COUNT)
+
+=item NOTES
+
+=item LIMITATIONS
 
 =item SEE ALSO
 
+=item MAINTAINER
+
+=item LICENSE
+
 =back
 
-=head2 Thread::Semaphore - thread-safe semaphores
+=head2 Thread::Semaphore - Thread-safe semaphores
 
 =over 4
+
+=item VERSION
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
-=item FUNCTIONS AND METHODS
+=item METHODS
 
-new, new NUMBER, down, down NUMBER, up, up NUMBER
+->new(), ->new(NUMBER), ->down(), ->down(NUMBER), ->up(), ->up(NUMBER)
+
+=item NOTES
+
+=item SEE ALSO
+
+=item MAINTAINER
+
+=item LICENSE
 
 =back
 
@@ -32499,6 +35993,16 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 
 =back
 
+=head2 Tie::StdHandle - base class definitions for tied handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
 =head2 Tie::SubstrHash - Fixed-table-size, fixed-key-length hashing
 
 =over 4
@@ -32541,6 +36045,10 @@ $flags = 0), clock(), stat, stat FH, stat EXPR
 =item negative time not invented yet
 
 =item internal error: useconds < 0 (unsigned ... signed ...)
+
+=item useconds or uinterval equal to or more than 1000000
+
+=item unimplemented in this platform
 
 =back
 
@@ -32865,83 +36373,87 @@ http://www.unicode.org/review/pr-29.html, http://www.unicode.org/notes/tn5/
 
 =item DESCRIPTION
 
-=back
-
 =over 4
 
-=item charinfo
+=item code point argument
+
+=item B<charinfo()>
+
+B<code>, B<name>, B<category>, B<combining>, B<bidi>, B<decomposition>,
+B<decimal>, B<digit>, B<numeric>, B<mirrored>, B<unicode10>, B<comment>,
+B<upper>, B<lower>, B<title>, B<block>, B<script>
 
 =back
-
-=over 4
-
-=item charblock
-
-=back
-
-=over 4
-
-=item charscript
 
 =back
 
 =over 4
 
-=item charblocks
+=item B<charblock()>
 
 =back
 
 =over 4
 
-=item charscripts
+=item B<charscript()>
 
 =back
 
 =over 4
 
-=item Blocks versus Scripts
-
-=item Matching Scripts and Blocks
-
-=item Code Point Arguments
-
-=item charinrange
+=item B<charblocks()>
 
 =back
 
 =over 4
 
-=item general_categories
+=item B<charscripts()>
 
 =back
 
 =over 4
 
-=item bidi_types
+=item B<charinrange()>
 
 =back
 
 =over 4
 
-=item compexcl
+=item B<general_categories()>
 
 =back
 
 =over 4
 
-=item casefold
+=item B<bidi_types()>
 
 =back
 
 =over 4
 
-=item casespec
+=item B<compexcl()>
 
 =back
 
 =over 4
 
-=item namedseq()
+=item B<casefold()>
+
+B<code>, B<full>, B<simple>, B<mapping>, B<status>, B<*>, B<*>, B<turkic>
+
+=back
+
+=over 4
+
+=item B<casespec()>
+
+B<code>, B<lower>, B<title>, B<lower>, B<condition>
+
+=back
+
+=over 4
+
+=item B<namedseq()>
 
 =back
 
@@ -32952,6 +36464,10 @@ http://www.unicode.org/review/pr-29.html, http://www.unicode.org/notes/tn5/
 =back
 
 =over 4
+
+=item B<Blocks versus Scripts>
+
+=item B<Matching Scripts and Blocks>
 
 =item Implementation Note
 
@@ -33021,11 +36537,11 @@ Win32::CreateFile(FILE), Win32::DomainName(),
 Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
 Win32::FsType(), Win32::FreeLibrary(HANDLE),
 Win32::GetANSIPathName(FILENAME), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentThreadId(),
-Win32::GetFileVersion(FILENAME), Win32::GetFolderPath(FOLDER [, CREATE]),
-Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
-Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
-Win32::GetOSVersion(), Win32::GetOSName(),
+Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentProcessId(),
+Win32::GetCurrentThreadId(), Win32::GetFileVersion(FILENAME),
+Win32::GetFolderPath(FOLDER [, CREATE]), Win32::GetFullPathName(FILENAME),
+Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
+Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::GuidGen(), Win32::IsAdminUser(),
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
@@ -33227,7 +36743,7 @@ C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
