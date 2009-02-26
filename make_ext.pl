@@ -82,6 +82,9 @@ foreach (@extspec) {
     } elsif (s{^ext/}{}) {
 	# Remove ext/ prefix and /pm_to_blib suffix
 	s{/pm_to_blib$}{};
+	# Targets are given as files on disk, but the extension spec is still
+	# written using /s for each ::
+	tr!-!/!;
     } elsif (s{::}{\/}g) {
 	# Convert :: to /
     } else {
