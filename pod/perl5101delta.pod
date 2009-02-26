@@ -27,12 +27,33 @@ with an object that has no overload defined for it. (This way
 C<~~> will not break encapsulation by matching against the
 object's internal representation as a reference.)
 
+=item *
+
+The version control system used for the development of the perl
+interpreter has been switched from Perforce to git.  This is mainly an
+internal issue that only affects people actively working on the perl core;
+but it may have minor external visibility, for example in some of details
+of the output of C<perl -V>. See L<perlrepository> for more information.
+
 =back
 
 
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata
+
+=head2 New Modules
+
+=over
+
+=item *
+
+C<autodie> is a lexically-scoped replacement for the C<Fatal> module.
+The bundled version is 1.998.
+
+=back
+
+=head2 Updated Modules
 
 =over
 
@@ -71,8 +92,36 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
+C<Fatal> upgraded from version 1.05 to 1.998. See also the new pragma
+C<autodie>.
+
+=item *
+
+C<Log::Message> upgraded from version 0.01 to 0.02
+
+=item *
+
 C<Module::CoreList> upgraded from version 2.13 to 2.17
 
+=item *
+
+C<Module::Loaded> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<Module::Load::Conditional> upgraded from version 0.22 to 0.30
+
+=item *
+
+C<Package::Constants> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<Pod::Text> upgraded from version 3.08 to 3.13
+
+=item *
+
+C<Symbol> upgraded from version 1.06 to 1.07
 
 =item *
 
@@ -90,7 +139,13 @@ C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
 
 =head1 Utility Changes
 
-=head1 Documentation
+=head1 New Documentation
+
+L<perlperf> by Richard Foley, provides an introduction to the use of
+performance and optimization techniques which can be used with particular
+reference to perl programs.
+
+L<perlrepository> describes how to access the perl source using git.
 
 =head1 Performance Enhancements
 
@@ -107,6 +162,12 @@ perl is built with  C<-Dusedevel>.
 =head2 Compilation improvements
 
 =head2 Installation improvements.
+
+=head2 Platform Specific Changes
+
+=head3 NetBSD
+
+hints now supports versions 5.*.
 
 
 
@@ -144,6 +205,16 @@ arguments [RT # 59998].
 The C<-i.sufffix> command-line switch now recreates the file using
 restricted permissions, before changing its mode to match the original
 file. This eliminates a potential race condition.
+
+=item *
+
+On some UNIX systems, the value in C<$?> would not have the top bit set
+(C<$? & 128>) even if the child core dumped.
+
+=item *
+
+Under some circumstances, $^R could incorrectly become undefined
+[RT # 57042].
 
 =back
 
