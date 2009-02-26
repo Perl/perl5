@@ -205,7 +205,8 @@ done
 
 nonxs_list=' '
 for f in $nonxs_ext; do
-    nonxs_list="$nonxs_list ext/$f/pm_to_blib"
+    p=`echo "$f" | tr / -`
+    nonxs_list="$nonxs_list ext/$p/pm_to_blib"
 done
 
 dtrace_h=''
