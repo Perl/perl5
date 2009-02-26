@@ -205,7 +205,6 @@ done
 
 nonxs_list=' '
 for f in $nonxs_ext; do
-    base=`echo "$f" | sed 's/.*\///'`
     nonxs_list="$nonxs_list ext/$f/pm_to_blib"
 done
 
