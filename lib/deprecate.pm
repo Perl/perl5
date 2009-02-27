@@ -56,9 +56,7 @@ __END__
 
 =head1 NAME
 
-deprecate - Perl (core) extension for deprecating the core version of a module,
-	    in favour of the version on CPAN.
-
+deprecate - Perl pragma for deprecating the core version of a module
 
 =head1 SYNOPSIS
 
