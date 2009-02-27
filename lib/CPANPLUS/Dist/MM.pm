@@ -2,8 +2,7 @@ package CPANPLUS::Dist::MM;
 
 use strict;
 use vars    qw[@ISA $STATUS];
-@ISA =      qw[CPANPLUS::Dist];
-
+use base    'CPANPLUS::Dist::Base';
 
 use CPANPLUS::Internals::Constants;
 use CPANPLUS::Internals::Constants::Report;
@@ -27,10 +26,8 @@ CPANPLUS::Dist::MM
 
 =head1 SYNOPSIS
 
-    my $mm = CPANPLUS::Dist->new( 
-                                format  => 'makemaker',
-                                module  => $modobj, 
-                            );
+    $mm = CPANPLUS::Dist::MM->new( module => $modobj );
+    
     $mm->create;        # runs make && make test
     $mm->install;       # runs make install
 
@@ -219,7 +216,8 @@ sub prepare {
     }
     
     my $args;
-    my( $force, $verbose, $perl, $mmflags );
+    my( $force, $verbose, $perl, $mmflags, $prereq_target, $prereq_format,
+        $prereq_build );
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             perl            => {    default => $^X, store => \$perl },
@@ -230,10 +228,15 @@ sub prepare {
                                     store   => \$force },
             verbose         => {    default => $conf->get_conf('verbose'), 
                                     store   => \$verbose },
+            prereq_target   => {    default => '', store => \$prereq_target }, 
+            prereq_format   => {    default => '',
+                                    store   => \$prereq_format },   
+            prereq_build    => {    default => 0, store => \$prereq_build },     
         };                                            
 
         $args = check( $tmpl, \%hash ) or return;
     }
+    
     
     ### maybe we already ran a create on this object? ###
     return 1 if $dist->status->prepared && !$force;
@@ -250,6 +253,39 @@ sub prepare {
     
     my $fail; 
     RUN: {
+
+        ### we resolve 'configure requires' here, so we can run the 'perl
+        ### Makefile.PL' command
+        ### XXX for tests: mock f_c_r to something that *can* resolve and
+        ### something that *doesnt* resolve. Check the error log for ok
+        ### on this step or failure
+        ### XXX make a seperate tarball to test for this scenario: simply
+        ### containing a makefile.pl/build.pl for test purposes?
+        {   my $configure_requires = $dist->find_configure_requires;     
+            my $ok = $dist->_resolve_prereqs(
+                            format          => $prereq_format,
+                            verbose         => $verbose,
+                            prereqs         => $configure_requires,
+                            target          => $prereq_target,
+                            force           => $force,
+                            prereq_build    => $prereq_build,
+                    );    
+    
+            unless( $ok ) {
+           
+                #### use $dist->flush to reset the cache ###
+                error( loc( "Unable to satisfy '%1' for '%2' " .
+                            "-- aborting install", 
+                            'configure_requires', $self->module ) );    
+                $dist->status->prepared(0);
+                $fail++; 
+                last RUN;
+            } 
+            ### end of prereq resolving ###
+        }
+        
+
+
         ### don't run 'perl makefile.pl' again if there's a makefile already 
         if( -e MAKEFILE->() && (-M MAKEFILE->() < -M $dir) && !$force ) {
             msg(loc("'%1' already exists, not running '%2 %3' again ".
@@ -436,7 +472,7 @@ sub _find_prereqs {
     }
     
     my %p;
-    while( <$fh> ) {
+    while( local $_ = <$fh> ) {
         my ($found) = m|^[\#]\s+PREREQ_PM\s+=>\s+(.+)|;         
         
         next unless $found;
@@ -579,7 +615,7 @@ sub create {
         ### end of prereq resolving ###    
         
         my $captured;
-        
+
         ### 'make' section ###    
         if( -d BLIB->($dir) && (-M BLIB->($dir) < -M $dir) && !$force ) {
             msg(loc("Already ran '%1' for this module [%2] -- " .

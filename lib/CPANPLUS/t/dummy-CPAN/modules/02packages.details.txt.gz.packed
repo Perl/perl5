@@ -10,10 +10,10 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed
 
-Created at Fri Dec 14 13:43:16 2007
+Created at Tue Feb 24 22:22:00 2009
 #########################################################################
 __UU__
-M'XL("$TN$T<``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`G=-1;],P$`#@=_^*
+M'XL("-"H)4<``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`G=-1;],P$`#@=_^*
 M>^`!I,;Q4D63_$136@2T8Z)$VQORXEMKD=B1?5DHOQY[9=JH*#!.EB+9Y\]W
 M5KPT+4IX"%'TJOFJMABX1E*F#9R^$:L_K1YS8$?4RSP?QY'WZ%O>N"Z?7\XN
 M\L[IH<60GU#>8&B\Z<DX&[7+0PI8U6&`6S=8#<:"-AX;<GX/+^Y--=#.^9`;

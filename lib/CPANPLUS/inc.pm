@@ -38,7 +38,7 @@ CPANPLUS::inc - runtime inclusion of privately bundled modules
 
 =head1 SYNOPSIS
 
-    ### set up CPANPLUS::inc to do it's thing ###
+    ### set up CPANPLUS::inc to do its thing ###
     BEGIN { use CPANPLUS::inc };
 
     ### enable debugging ###

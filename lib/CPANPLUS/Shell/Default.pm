@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.84";
+    $VERSION = "0.86_06";
 }
 
 load CPANPLUS::Shell;
@@ -247,8 +247,13 @@ sub _input_loop {
         $cb->_flush( list => [qw|lib load|] );
 
     } continue {
+        ### clear the sigint count
         $self->_signals->{INT}{count}--
-            if $self->_signals->{INT}{count}; # clear the sigint count
+            if $self->_signals->{INT}{count};  
+            
+        ### reset the 'install prereq?' cached answer
+        $self->settings->{'install_all_prereqs'} = undef;                                
+                            
     }
 
     return 1;
@@ -425,7 +430,7 @@ sub _select_modules {
 
 sub _format_version {
     my $self    = shift;
-    my $version = shift;
+    my $version = shift || 0;
 
     ### fudge $version into the 'optimal' format
     $version = 0 if $version eq 'undef';
@@ -959,6 +964,12 @@ sub __ask_about_install {
     $Shell->__print( loc("Module '%1' requires '%2' to be installed",
                          $mod->module, $prereq->module ) );
     $Shell->__print( "\n\n" );
+    
+    ### previously cached answer?
+    return $Shell->settings->{'install_all_prereqs'}
+        if defined $Shell->settings->{'install_all_prereqs'};
+    
+    
     $Shell->__print( 
         loc(    "If you don't wish to see this question anymore\n".
                 "you can disable it by entering the following ".
@@ -966,12 +977,28 @@ sub __ask_about_install {
                 's conf prereqs 1; s save' ) );
     $Shell->__print("\n\n");
 
-    my $bool =  $term->ask_yn(
+    my $yes     = loc("Yes");
+    my $no      = loc("No");
+    my $all     = loc("Yes to all (for this module)");
+    my $none    = loc("No to all  (for this module)");
+
+    my $reply   = $term->get_reply(
                     prompt  => loc("Should I install this module?"),
-                    default => 'y'
+                    choices => [ $yes, $no, $all, $none ],
+                    default => $yes,
                 );
 
-    return $bool;
+    ### if 'all' or 'none', save this, so we can apply it to 
+    ### other prereqs in this chain.
+    $Shell->settings->{'install_all_prereqs'} = 
+        $reply eq $all  ? 1 :
+        $reply eq $none ? 0 :
+        undef;
+
+    ### if 'yes' or 'all', the user wants it installed
+    return  $reply eq $all ? 1 :
+            $reply eq $yes ? 1 :
+            0;
 }
 
 sub __ask_about_send_test_report {
@@ -1054,7 +1081,8 @@ sub _details {
     $self->_pager_open if scalar @$mods * 10 > $self->_term_rowcount;
 
 
-    my $format = "%-30s %-30s\n";
+    my $format  = "%-24s %-45s\n";
+    my $cformat = "%-24s %-45s %-10s\n";
     for my $mod (@$mods) {
         my $href = $mod->details( %$opts );
         my @list = sort { $a->module cmp $b->module } $mod->contains;
@@ -1074,7 +1102,8 @@ sub _details {
             my $showed;
             for my $item ( @list ) {
                 $self->__printf(
-                    $format, ($showed ? '' : 'Contains:'), $item->module
+                    $cformat, ($showed ? '' : 'Contains:'), 
+                             $item->module, $item->version
                 );
                 $showed++;
             }
@@ -1172,7 +1201,7 @@ sub _set_conf {
             boxed   => CONFIG_BOXED,
         }->{ $key } || CONFIG_USER;      
         
-        ### boxed is special, so let's get it's value from %INC
+        ### boxed is special, so let's get its value from %INC
         ### so we can tell it where to save
         ### XXX perhaps this logic should be generic for all
         ### types, and put in the ->save() routine
@@ -1205,14 +1234,14 @@ sub _set_conf {
             user    => CONFIG_USER,
             system  => CONFIG_SYSTEM,
         }->{ $key } || CONFIG_USER;      
-        
+
         my $file = $conf->_config_pm_to_file( $where );
         system("$editor $file");
 
         ### now reload it
         ### disable warnings for this
         {   require Module::Loaded;
-            Module::Loaded::mark_as_unloaded( $_ ) for $conf->configs;
+            Module::Loaded::mark_as_unloaded( $where );
 
             ### reinitialize the config
             local $^W;
@@ -1233,6 +1262,9 @@ sub _set_conf {
             $i++;
             $self->__print( "\t[$i] $uri\n" );
         }
+        
+        $self->__print(
+            loc("\nTo edit this list, please type: '%1'\n", 's edit') );
 
     } elsif ( $type eq 'selfupdate' ) {
         my %valid = map { $_ => $_ } 
@@ -1314,11 +1346,11 @@ sub _set_conf {
                     $self->__printf( "    $format\n", $name, $val );
                 }
 
-            } elsif ( $key eq 'hosts' ) {
+            } elsif ( $key eq 'hosts' or $key eq 'lib' ) {
                 $self->__print( 
-                    loc(  "Setting hosts is not trivial.\n" .
-                          "It is suggested you use '%1' and edit the " .
-                          "configuration file manually", 's edit')
+                    loc(  "Setting %1 is not trivial.\n" .
+                          "It is suggested you use '%2' and edit the " .
+                          "configuration file manually", $key, 's edit')
                 );
             } else {
                 my $method = 'set_' . $type;
@@ -1626,7 +1658,7 @@ sub _reports {
         }
     }
     
-    ### dispatch a plugin command to it's function
+    ### dispatch a plugin command to its function
     sub _meta {
         my $self = shift;
         my %hash = @_;
@@ -1681,7 +1713,10 @@ sub _reports {
             
             my $who = $pkg eq $this
                 ? "Standard Plugin"
-                : do { $pkg =~ s/^$this/../; "Provided by: $pkg" };
+                : do {  my $v = $self->_format_version($pkg->VERSION) || '';
+                        $pkg =~ s/^$this/../;
+                        sprintf "Provided by: %-30s %-10s", $pkg, $v; 
+                    };
             
             $self->__printf( $help_format, $name, $who );
         }          
@@ -1808,6 +1843,10 @@ sub _read_configuration_from_rc {
         loc( "You can run an interactive setup using '%1'", 's reconfigure' ),    
         loc( "You can add custom sources to your index. See '%1' for details",
              '/cs --help' ),
+        loc( "CPANPLUS now has an experimental SQLite backend. You can enable ".
+             "it via: '%1'. Update dependencies via '%2'",
+             's conf source_engine CPANPLUS::Internals::Source::SQLite; s save',
+             's selfupdate enabled_features ' ),             
     );
     
     sub _show_random_tip {

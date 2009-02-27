@@ -11,13 +11,13 @@ use vars    qw[$VERSION @ISA @EXPORT];
 
 use Package::Constants;
 
+### for the version
+require CPANPLUS::Internals;
 
-$VERSION    = '0.01_01';
+$VERSION    = $CPANPLUS::Internals::VERSION = $CPANPLUS::Internals::VERSION;
 @ISA        = qw[Exporter];
 @EXPORT     = Package::Constants->list( __PACKAGE__ );
 
-### for the version
-require CPANPLUS::Internals;
 
 ### OS to regex map ###
 my %OS = (
@@ -29,7 +29,6 @@ my %OS = (
     Cygwin      => 'cygwin',
     Darwin      => 'darwin',
     EBCDIC      => 'os390|os400|posix-bc|vmesa',
-    Haiku       => 'haiku',
     HPUX        => 'hpux',
     Linux       => 'linux',
     MSDOS       => 'dos|os2|MSWin32|cygwin',
@@ -231,11 +230,6 @@ WriteMakefile(
 $prereqs
     }
 );
-
-If you are interested in making a more flexible Makefile.PL that can
-probe for missing dependencies and install them, ExtUtils::AutoInstall
-at <http://search.cpan.org/dist/ExtUtils-AutoInstall/> may be
-worth a look.
 
 Thanks! :-)
 

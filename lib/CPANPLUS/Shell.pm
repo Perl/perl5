@@ -124,6 +124,8 @@ $TMPL = {
     remote          => { default => undef },
     noninteractive  => { default => '' },
     cache           => { default => [ ] },
+    settings        => { default => { install_all_prereqs => undef },
+                         no_override => 1 },
     _old_sigpipe    => { default => '', no_override => 1 },
     _old_outfh      => { default => '', no_override => 1 },
     _signals        => { default => { INT => { } }, no_override => 1 },
