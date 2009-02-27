@@ -40,7 +40,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"RC1 - 5.005_05 release candidate 1"
+	,"RC2 - 5.005_05 release candidate 2"
 	,NULL
 };
 
