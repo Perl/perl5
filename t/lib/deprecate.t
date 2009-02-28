@@ -48,7 +48,8 @@ for my $lib (sort keys %tests) {
     }
     if( $tests{$lib} ) {
         like($warn, qr/^Deprecated\s+will\s+be\s+removed\b/, "$lib - message");
-        like($warn, qr/$0,?\s+line\s+1001\.?\n*$/, "$lib - location");
+        my $me = quotemeta($0);
+        like($warn, qr/$me,?\s+line\s+1001\.?\n*$/, "$lib - location");
     }
     else {
 	ok( !$warn, "$lib - no message" );

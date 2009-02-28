@@ -15,11 +15,14 @@ sub import {
     foreach my $pair ([qw(sitearchexp archlibexp)],
 		      [qw(sitelibexp privlibexp)]) {
 	my ($site, $priv) = @Config{@$pair};
+	if ($^O eq 'VMS') {
+	    for my $d ($site, $priv) { $d = VMS::Filespec::unixify($d) };
+	}
 	# Just in case anyone managed to configure with trailing /s
 	s!/*$!!g foreach $site, $priv;
 
 	next if $site eq $priv;
-	if ("$priv/$expect_leaf" eq $file) {
+	if (uc("$priv/$expect_leaf") eq uc($file)) {
 	    my $call_depth=1;
 	    my @caller;
 	    while (@caller = caller $call_depth++) {
