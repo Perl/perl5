@@ -82,6 +82,7 @@ SV* HUF_obj_id(SV* obj) {
     id = HUF_OBJ_ID(item);
     mg = sv_magicext(item, id, PERL_MAGIC_ext, NULL, NULL, 0);
     mg->mg_private = HUF_IDCACHE;
+    SvREFCNT_dec(id); /* refcnt++ in sv_magicext() */
 
     /* Return the object ID */
     return id;
