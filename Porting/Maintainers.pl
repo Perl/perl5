@@ -187,6 +187,14 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
+	'Compress::Raw::Bzip2' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/Compress-Raw-Bzip2],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
 	'Compress::Raw::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
