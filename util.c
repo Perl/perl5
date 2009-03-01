@@ -4125,6 +4125,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
     for (;;) {
 	DIR *dir;
+	int namelen;
 	odev = cdev;
 	oino = cino;
 
@@ -4147,9 +4148,9 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 	while ((dp = PerlDir_read(dir)) != NULL) {
 #ifdef DIRNAMLEN
-	    const int namelen = dp->d_namlen;
+	    namelen = dp->d_namlen;
 #else
-	    const int namelen = strlen(dp->d_name);
+	    namelen = strlen(dp->d_name);
 #endif
 	    /* skip . and .. */
 	    if (SV_CWD_ISDOT(dp)) {
