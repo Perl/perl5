@@ -9,7 +9,7 @@ BEGIN {
     require Exporter;
     use vars    qw[$VERSION @ISA @EXPORT];
   
-    $VERSION    = 0.10;
+    $VERSION    = '0.12';
     @ISA        = qw[Exporter];
     @EXPORT     = qw[ BUILD_DIR BUILD ];
 }
