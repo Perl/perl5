@@ -95,6 +95,41 @@ sub _find_tests {
     }
 }
 
+
+# Scan the text of the test program to find switches and special options
+# we might need to apply.
+sub _scan_test {
+    my($test, $type) = @_;
+
+    open(my $script, "<", $test) or die "Can't read $test.\n";
+    my $first_line = <$script>;
+
+    $first_line =~ tr/\0//d if $::with_utf16;
+
+    my $switch = "";
+    if ($first_line =~ /#!.*\bperl.*\s-\w*([tT])/) {
+        $switch = qq{"-$1"};
+    } else {
+        if ($::taintwarn) {
+            # not all tests are expected to pass with this option
+            $switch = '"-t"';
+        } else {
+            $switch = '';
+        }
+    }
+
+    my $file_opts = "";
+    if ($type eq 'deparse') {
+        # Look for #line directives which change the filename
+        while (<$script>) {
+            $file_opts .= ",-f$3$4"
+              if /^#\s*line\s+(\d+)\s+((\w+)|"([^"]+)")/;
+        }
+    }
+
+    return { file => $file_opts, switch => $switch };
+}
+
 sub _quote_args {
     my ($args) = @_;
     my $argstring = '';
@@ -279,44 +314,16 @@ EOT
 	# XXX DAPM %OVER not defined anywhere
 	# $test = $OVER{$test} if exists $OVER{$test};
 
-	open(SCRIPT,"<",$test) or die "Can't read $test.\n";
-	$_ = <SCRIPT>;
-	close(SCRIPT) unless ($type eq 'deparse');
-	if ($::with_utf16) {
-	    $_ =~ tr/\0//d;
-	}
-	my $switch;
-	if (/#!.*\bperl.*\s-\w*([tT])/) {
-	    $switch = qq{"-$1"};
-	}
-	else {
-	    if ($::taintwarn) {
-		# not all tests are expected to pass with this option
-		$switch = '"-t"';
-	    }
-	    else {
-		$switch = '';
-	    }
-	}
-
-	my $file_opts = "";
-	if ($type eq 'deparse') {
-	    # Look for #line directives which change the filename
-	    while (<SCRIPT>) {
-		$file_opts .= ",-f$3$4"
-			if /^#\s*line\s+(\d+)\s+((\w+)|"([^"]+)")/;
-	    }
-	    close(SCRIPT);
-	}
+        my $options = _scan_test($test, $type);
 
 	my $utf8 = $::with_utf8 ? '-I../lib -Mutf8' : '';
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
 	if ($type eq 'deparse') {
 	    my $deparse_cmd =
-		"./perl $testswitch $switch -I../lib -MO=-qq,Deparse,-sv1.,".
-		"-l$::deparse_opts$file_opts ".
+		"./perl $testswitch $options->{switch} -I../lib -MO=-qq,Deparse,-sv1.,".
+		"-l$::deparse_opts$options->{file} ".
 		"$test > $test.dp ".
-		"&& ./perl $testswitch $switch -I../lib $test.dp |";
+		"&& ./perl $testswitch $options->{switch} -I../lib $test.dp |";
 	    open(RESULTS, $deparse_cmd)
 		or print "can't deparse '$deparse_cmd': $!.\n";
 	}
@@ -332,7 +339,7 @@ EOT
 		$perl = "$valgrind --log-fd=3 $vg_opts $perl";
 		$redir = "3>$valgrind_log";
 	    }
-	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
+	    my $run = "$perl" . _quote_args("$testswitch $options->{switch} $utf8")
 			      . " $test $redir|";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
