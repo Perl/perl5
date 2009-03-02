@@ -5,6 +5,9 @@
 # probably obsolete on the avoidance side, though still currrent
 # on the peculiarity side.)
 
+# Location to put the Valgrind log.
+my $Valgrind_Log = 'current.valgrind';
+
 $| = 1;
 
 # for testing TEST only
@@ -128,6 +131,53 @@ sub _scan_test {
     }
 
     return { file => $file_opts, switch => $switch };
+}
+
+
+sub _run_test {
+    my($test, $type) = @_;
+
+    my $options = _scan_test($test, $type);
+
+    my $utf8 = $::with_utf8 ? '-I../lib -Mutf8' : '';
+    my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
+
+    my $results;
+    if ($type eq 'deparse') {
+        my $deparse_cmd =
+          "./perl $testswitch $options->{switch} -I../lib -MO=-qq,Deparse,-sv1.,".
+          "-l$::deparse_opts$options->{file} ".
+          "$test > $test.dp ".
+          "&& ./perl $testswitch $options->{switch} -I../lib $test.dp |";
+        open($results, $deparse_cmd)
+          or print "can't deparse '$deparse_cmd': $!.\n";
+    }
+    elsif ($type eq 'perl') {
+        my $perl = $ENV{PERL} || './perl';
+        my $redir = $^O eq 'VMS' ? '2>&1' : '';
+
+        if ($ENV{PERL_VALGRIND}) {
+            my $valgrind = $ENV{VALGRIND} // 'valgrind';
+            my $vg_opts = $ENV{VG_OPTS}
+              //  "--suppressions=perl.supp --leak-check=yes "
+                . "--leak-resolution=high --show-reachable=yes "
+                  . "--num-callers=50"; 
+            $perl = "$valgrind --log-fd=3 $vg_opts $perl";
+            $redir = "3>$Valgrind_Log";
+        }
+
+        my $run = "$perl" . _quote_args("$testswitch $options->{switch} $utf8")
+          . " $test $redir|";
+        open($results, $run) or print "can't run '$run': $!.\n";
+    }
+
+    # Our environment may force us to use UTF-8, but we can't be sure that
+    # anything we're reading from will be generating (well formed) UTF-8
+    # This may not be the best way - possibly we should unset ${^OPEN} up
+    # top?
+    binmode $results;
+
+    return $results;
 }
 
 sub _quote_args {
@@ -280,7 +330,6 @@ EOT
     # + 3 : we want three dots between the test name and the "ok"
     my $dotdotdot = $maxlen + 3 ;
     my $valgrind = 0;
-    my $valgrind_log = 'current.valgrind';
     my $total_files = @tests;
     my $good_files = 0;
     my $tested_files  = 0;
@@ -314,40 +363,7 @@ EOT
 	# XXX DAPM %OVER not defined anywhere
 	# $test = $OVER{$test} if exists $OVER{$test};
 
-        my $options = _scan_test($test, $type);
-
-	my $utf8 = $::with_utf8 ? '-I../lib -Mutf8' : '';
-	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
-	if ($type eq 'deparse') {
-	    my $deparse_cmd =
-		"./perl $testswitch $options->{switch} -I../lib -MO=-qq,Deparse,-sv1.,".
-		"-l$::deparse_opts$options->{file} ".
-		"$test > $test.dp ".
-		"&& ./perl $testswitch $options->{switch} -I../lib $test.dp |";
-	    open(RESULTS, $deparse_cmd)
-		or print "can't deparse '$deparse_cmd': $!.\n";
-	}
-	elsif ($type eq 'perl') {
-	    my $perl = $ENV{PERL} || './perl';
-	    my $redir = $^O eq 'VMS' ? '2>&1' : '';
-	    if ($ENV{PERL_VALGRIND}) {
-		my $valgrind = $ENV{VALGRIND} // 'valgrind';
-		my $vg_opts = $ENV{VG_OPTS}
-		    //  "--suppressions=perl.supp --leak-check=yes "
-			. "--leak-resolution=high --show-reachable=yes "
-			. "--num-callers=50"; 
-		$perl = "$valgrind --log-fd=3 $vg_opts $perl";
-		$redir = "3>$valgrind_log";
-	    }
-	    my $run = "$perl" . _quote_args("$testswitch $options->{switch} $utf8")
-			      . " $test $redir|";
-	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
-	}
-	# Our environment may force us to use UTF-8, but we can't be sure that
-	# anything we're reading from will be generating (well formed) UTF-8
-	# This may not be the best way - possibly we should unset ${^OPEN} up
-	# top?
-	binmode RESULTS;
+        my $results = _run_test($test, $type);
 
 	my $failure;
 	my $next = 0;
@@ -356,7 +372,7 @@ EOT
 	my $trailing_leader = 0;
 	my $max;
 	my %todo;
-	while (<RESULTS>) {
+	while (<$results>) {
 	    next if /^\s*$/; # skip blank lines
 	    if (/^1..$/ && ($^O eq 'VMS')) {
 		# VMS pipe bug inserts blank lines.
@@ -440,7 +456,7 @@ EOT
 		}
 	    }
 	}
-	close RESULTS;
+	close $results;
 
 	if (not defined $failure) {
 	    $failure = 'FAILED--no leader found' unless $seen_leader;
@@ -448,16 +464,16 @@ EOT
 
 	if ($ENV{PERL_VALGRIND}) {
 	    my @valgrind;
-	    if (-e $valgrind_log) {
-		if (open(V, $valgrind_log)) {
+	    if (-e $Valgrind_Log) {
+		if (open(V, $Valgrind_Log)) {
 		    @valgrind = <V>;
 		    close V;
 		} else {
-		    warn "$0: Failed to open '$valgrind_log': $!\n";
+		    warn "$0: Failed to open '$Valgrind_Log': $!\n";
 		}
 	    }
 	    if ($ENV{VG_OPTS} =~ /cachegrind/) {
-		if (rename $valgrind_log, "$test.valgrind") {
+		if (rename $Valgrind_Log, "$test.valgrind") {
 		    $valgrind++;
 		} else {
 		    warn "$0: Failed to create '$test.valgrind': $!\n";
@@ -480,7 +496,7 @@ EOT
 		    }
 		}
 		if ($errors or $leaks) {
-		    if (rename $valgrind_log, "$test.valgrind") {
+		    if (rename $Valgrind_Log, "$test.valgrind") {
 			$valgrind++;
 		    } else {
 			warn "$0: Failed to create '$test.valgrind': $!\n";
@@ -489,9 +505,9 @@ EOT
 	    } else {
 		warn "No valgrind output?\n";
 	    }
-	    if (-e $valgrind_log) {
-		unlink $valgrind_log
-		    or warn "$0: Failed to unlink '$valgrind_log': $!\n";
+	    if (-e $Valgrind_Log) {
+		unlink $Valgrind_Log
+		    or warn "$0: Failed to unlink '$Valgrind_Log': $!\n";
 	    }
 	}
 	if ($type eq 'deparse') {
