@@ -35,3 +35,44 @@ eval {
 };
 
 is($@,"","Other package open should be unaffected");
+
+# Due to odd filenames reported when doing string evals,
+# older versions of autodie would not propogate into string evals.
+
+eval q{
+    open(my $fh, '<', NO_SUCH_FILE);
+};
+
+TODO: {
+    local $TODO = "No known way of propagating into string eval in 5.8"
+        if $] < 5.010;
+
+    ok($@, "Failing-open string eval should throw an exception");
+    isa_ok($@, 'autodie::exception');
+}
+
+eval q{
+    no autodie;
+
+    open(my $fh, '<', NO_SUCH_FILE);
+};
+
+is("$@","","disabling autodie in string context should work");
+
+eval {
+    open(my $fh, '<', NO_SUCH_FILE);
+};
+
+ok($@,"...but shouldn't disable it for the calling code.");
+isa_ok($@, 'autodie::exception');
+
+eval q{
+    no autodie;
+
+    use autodie qw(open);
+
+    open(my $fh, '<', NO_SUCH_FILE);
+};
+
+ok($@,"Wacky flipping of autodie in string eval should work too!");
+isa_ok($@, 'autodie::exception');
