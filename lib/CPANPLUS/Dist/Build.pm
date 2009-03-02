@@ -31,7 +31,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.08';
+$VERSION = '0.10';
 
 =pod
 
