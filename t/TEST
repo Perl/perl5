@@ -279,7 +279,7 @@ EOT
 	# XXX DAPM %OVER not defined anywhere
 	# $test = $OVER{$test} if exists $OVER{$test};
 
-	open(SCRIPT,"<",$test) or die "Can't run $test.\n";
+	open(SCRIPT,"<",$test) or die "Can't read $test.\n";
 	$_ = <SCRIPT>;
 	close(SCRIPT) unless ($type eq 'deparse');
 	if ($::with_utf16) {
