@@ -73,6 +73,7 @@ package Maintainers;
 	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
+	'simonw'	=> 'Simon Wistow <simonw@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'smpeters'	=> 'Steve Peters <steve@fisharerojo.org>',
 	'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
