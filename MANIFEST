@@ -139,7 +139,6 @@ ext/Compress-Raw-Bzip2/Bzip2.xs
 ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Bzip2/fallback/constants.h
 ext/Compress-Raw-Bzip2/fallback/constants.xs
-ext/Compress-Raw-Bzip2/MANIFEST
 ext/Compress-Raw-Bzip2/private/MakeUtil.pm
 ext/Compress-Raw-Bzip2/t/000prereq.t
 ext/Compress-Raw-Bzip2/t/01bzip2.t
