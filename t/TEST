@@ -138,21 +138,24 @@ sub _run_test {
 
     my $options = _scan_test($test, $type);
 
-    my $utf8 = $::with_utf8 ? '-I../lib -Mutf8' : '';
-    my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
+    my $perl = './perl';
+    my $lib  = '../lib';
+
+    my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
+    my $testswitch = '-I. -MTestInit';  # -T will remove . from @INC
 
     my $results;
     if ($type eq 'deparse') {
         my $deparse_cmd =
-          "./perl $testswitch $options->{switch} -I../lib -MO=-qq,Deparse,-sv1.,".
+          "$perl $testswitch $options->{switch} -I$lib -MO=-qq,Deparse,-sv1.,".
           "-l$::deparse_opts$options->{file} ".
           "$test > $test.dp ".
-          "&& ./perl $testswitch $options->{switch} -I../lib $test.dp |";
+          "&& $perl $testswitch $options->{switch} -I$lib $test.dp |";
         open($results, $deparse_cmd)
           or print "can't deparse '$deparse_cmd': $!.\n";
     }
     elsif ($type eq 'perl') {
-        my $perl = $ENV{PERL} || './perl';
+        my $perl = $ENV{PERL} || $perl;
         my $redir = $^O eq 'VMS' ? '2>&1' : '';
 
         if ($ENV{PERL_VALGRIND}) {
@@ -165,7 +168,7 @@ sub _run_test {
             $redir = "3>$Valgrind_Log";
         }
 
-        my $run = "$perl" . _quote_args("$testswitch $options->{switch} $utf8")
+        my $run = $perl . _quote_args("$testswitch $options->{switch} $utf8")
           . " $test $redir|";
         open($results, $run) or print "can't run '$run': $!.\n";
     }
