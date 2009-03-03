@@ -780,6 +780,14 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
+	'Parse::CPAN::Meta' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/Parse/CPAN/Meta.pm t/lib/Parse/CPAN/Meta/Test.pm lib/Parse/CPAN/Meta],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> "cpan",
+		},
+
 	'perlebcdic' =>
 		{
 		'MAINTAINER'	=> 'pvhp',
