@@ -11,8 +11,8 @@ my $Valgrind_Log = 'current.valgrind';
 $| = 1;
 
 # for testing TEST only
-#BEGIN { require '../lib/strict.pm'; strict->import() };
-#BEGIN { require '../lib/warnings.pm'; warnings->import() };
+#BEGIN { require '../lib/strict.pm'; "strict"->import() };
+#BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
 # Let tests know they're running in the perl core.  Useful for modules
 # which live dual lives on CPAN.
