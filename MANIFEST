@@ -3814,12 +3814,13 @@ t/lib/autodie/autodie_test_module.pm	autodie - test helper
 t/lib/autodie/backcompat.t		autodie - More Fatal backcompat
 t/lib/autodie/basic_exceptions.t	autodie - Basic exception tests
 t/lib/autodie/binmode.t			autodie - Binmode testing
-t/lib/autodie/context_lexical.t		autodie - Context clobbering lexically
+t/lib/autodie/caller.t			autodie - Caller diagnostics
 t/lib/autodie/context.t			autodie - Context clobbering tests
+t/lib/autodie/context_lexical.t		autodie - Context clobbering lexically
 t/lib/autodie/crickey.t			autodie - Like an Australian
 t/lib/autodie/dbmopen.t			autodie - dbm tests
-t/lib/autodie/exception_class.t		autodie - Exception class subclasses
 t/lib/autodie/exceptions.t		autodie - 5.10 exception tests.
+t/lib/autodie/exception_class.t		autodie - Exception class subclasses
 t/lib/autodie/exec.t			autodie - exec tests.
 t/lib/autodie/Fatal.t			autodie - Fatal backcompatibility
 t/lib/autodie/filehandles.t		autodie - filehandle tests
@@ -3842,6 +3843,7 @@ t/lib/autodie/scope_leak.t		autodie - file scope leak tests
 t/lib/autodie/sysopen.t			autodie - sysopen tests
 t/lib/autodie/truncate.t		autodie - File truncation tests
 t/lib/autodie/unlink.t			autodie - Unlink system tests.
+t/lib/autodie/user-context.t		autodie - Context changes for usersubs
 t/lib/autodie/usersub.t			autodie - user subroutine tests
 t/lib/autodie/version.t			autodie - versioning tests
 t/lib/autodie/version_tag.t
