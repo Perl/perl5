@@ -5,7 +5,7 @@ use Carp 'croak';
 BEGIN {
 	require 5.004;
 	require Exporter;
-	$Parse::CPAN::Meta::VERSION   = '0.04';
+	$Parse::CPAN::Meta::VERSION   = '0.04_01';
 	@Parse::CPAN::Meta::ISA       = qw{ Exporter      };
 	@Parse::CPAN::Meta::EXPORT_OK = qw{ Load LoadFile };
 }
@@ -25,7 +25,19 @@ my %UNESCAPES = (
 );
 
 
-
+my %BOM = (                                                       
+	"\357\273\277" => 'UTF-8',                                    
+	"\376\377"     => 'UTF-16BE',                                 
+	"\377\376"     => 'UTF-16LE',                                 
+	"\0\0\376\377" => 'UTF-32BE',                                 
+	"\377\376\0\0" => 'UTF-32LE'                                  
+);                                                                
+                                                                  
+sub BOM_MIN_LENGTH () { 2 }                                       
+sub BOM_MAX_LENGTH () { 4 }                                       
+sub HAVE_UTF8      () { $] >= 5.007003 }                          
+                                                                  
+BEGIN { require utf8 if HAVE_UTF8 }
 
 
 #####################################################################
@@ -53,17 +65,32 @@ sub LoadFile ($) {
 # Parse a document from a string.
 # Doing checks on $_[0] prevents us having to do a string copy.
 sub Load ($) {
-	unless ( defined $_[0] ) {
+
+	my $str = $_[0];
+
+	# Handle special cases
+	foreach my $length ( BOM_MIN_LENGTH .. BOM_MAX_LENGTH ) {
+		if ( my $enc = $BOM{substr($str, 0, $length)} ) {
+			croak("Stream has a non UTF-8 BOM") unless $enc eq 'UTF-8';
+			substr($str, 0, $length) = ''; # strip UTF-8 bom if found, we'll just ignore it
+		}
+	}
+
+	if ( HAVE_UTF8 ) {
+		utf8::decode($str); # try to decode as utf8
+	}
+
+	unless ( defined $str ) {
 		croak("Did not provide a string to Load");
 	}
-	return () unless length $_[0];
-	unless ( $_[0] =~ /[\012\015]+$/ ) {
+	return() unless length $str;
+	unless ( $str =~ /[\012\015]+$/ ) {
 		croak("Stream does not end with newline character");
 	}
 
 	# Split the file into lines
 	my @lines = grep { ! /^\s*(?:\#.*)?$/ }
-	            split /(?:\015{1,2}\012|\015|\012)/, shift;
+	            split /(?:\015{1,2}\012|\015|\012)/, $str;
 
 	# A nibbling parser
 	my @documents = ();
