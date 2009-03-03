@@ -70,7 +70,6 @@ $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 # Roll your own File::Find!
-use TestInit;
 if ($show_elapsed_time) { require Time::HiRes }
 
 my %skip = (
