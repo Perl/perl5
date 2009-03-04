@@ -531,7 +531,7 @@ This construct is very flexible and powerful. For example:
 	}
 	
 	when (\&complicated_check) {
-	    say 'complicated_check($foo) is true';
+	    say 'a complicated check for $foo is true';
 	}
 	
 	default {
@@ -567,7 +567,7 @@ a subroutine or method call
 =item *
 
 a regular expression match, i.e. C</REGEX/> or C<$foo =~ /REGEX/>,
-or a negated regular expression match C<$foo !~ /REGEX/>.
+or a negated regular expression match (C<!/REGEX/> or C<$foo !~ /REGEX/>).
 
 =item *
 
@@ -580,26 +580,27 @@ C<defined(...)>, C<exists(...)>, or C<eof(...)>
 
 =item *
 
-A negated expression C<!(...)> or C<not (...)>, or a logical
+a negated expression C<!(...)> or C<not (...)>, or a logical
 exclusive-or C<(...) xor (...)>.
 
 =back
 
-then the value of EXPR is used directly as a boolean.
+In those cases the value of EXPR is used directly as a boolean.
+
 Furthermore:
 
 =over 4
 
-=item o
+=item *
 
 If EXPR is C<... && ...> or C<... and ...>, the test
 is applied recursively to both arguments. If I<both>
 arguments pass the test, then the argument is treated
 as boolean.
 
-=item o
+=item *
 
-If EXPR is C<... || ...> or C<... or ...>, the test
+If EXPR is C<... || ...>, C<... // ...> or C<... or ...>, the test
 is applied recursively to the first argument.
 
 =back

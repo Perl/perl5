@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 111;
+use Test::More tests => 112;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -517,6 +517,16 @@ sub bar {"bar"}
 	}
     }
     ok($ok, '((1 == $ok) || "foo") smartmatched');
+}
+
+{
+    my $ok = 0;
+    given("foo") {
+	when((1 == $ok || undef) // "foo") {
+	    $ok = 1;
+	}
+    }
+    ok($ok, '((1 == $ok || undef) // "foo") smartmatched');
 }
 
 TODO: {
