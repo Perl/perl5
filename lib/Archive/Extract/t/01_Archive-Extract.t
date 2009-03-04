@@ -42,22 +42,28 @@ if ((IS_WIN32 or IS_CYGWIN) && ! $ENV{PERL_CORE}) {
     diag( "See bug #19713 in rt.cpan.org. It is safe to ignore them" );
 }
 
-my $Debug   = $ARGV[0] ? 1 : 0;
 my $Me      = basename( $0 );
 my $Class   = 'Archive::Extract';
+
+use_ok($Class);
+
+### debug will always be enabled on dev versions
+my $Debug   = (not $ENV{PERL_CORE} and 
+              ($ARGV[0] or $Archive::Extract::VERSION =~ /_/))
+                ? 1 
+                : 0;
+
 my $Self    = File::Spec->rel2abs( 
                     IS_WIN32 ? &Win32::GetShortPathName( cwd() ) : cwd() 
                 );
 my $SrcDir  = File::Spec->catdir( $Self,'src' );
 my $OutDir  = File::Spec->catdir( $Self,'out' );
 
-use_ok($Class);
-
-### set verbose if debug is on ###
 ### stupid stupid silly stupid warnings silly! ###
-$Archive::Extract::VERBOSE  = $Archive::Extract::VERBOSE = $Debug;
-$Archive::Extract::WARN     = $Archive::Extract::WARN    = $Debug ? 1 : 0;
+$Archive::Extract::DEBUG    = $Archive::Extract::DEBUG  = $Debug;
+$Archive::Extract::WARN     = $Archive::Extract::WARN   = $Debug;
 
+diag( "\n\n*** DEBUG INFORMATION ENABLED ***\n\n" ) if $Debug;
 
 my $tmpl = {
     ### plain files
@@ -409,7 +415,7 @@ for my $switch ( [0,1], [1,0] ) {
                     my $files    = $ae->files || [];
                     my $file_cnt = grep { defined } $file, $dir;
                     is( scalar @$files, $file_cnt,
-                                    "Found correct number of output files" );
+                                    "Found correct number of output files (@$files)" );
                     
                     ### due to prototypes on is(), if there's no -1 index on
                     ### the array ref, it'll give a fatal exception:
