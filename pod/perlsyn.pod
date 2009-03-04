@@ -583,6 +583,11 @@ C<defined(...)>, C<exists(...)>, or C<eof(...)>
 a negated expression C<!(...)> or C<not (...)>, or a logical
 exclusive-or C<(...) xor (...)>.
 
+=item *
+
+a filetest operator, with the exception of C<-s>, C<-M>, C<-A>, and C<-C>,
+that return numerical values, not boolean ones.
+
 =back
 
 In those cases the value of EXPR is used directly as a boolean.
