@@ -11,11 +11,11 @@ delete $ENV{PERL5LIB};
 
 my $torture; # torture testing?
 
-use Test::Harness;
+use TAP::Harness 3.13;
 use strict;
 
-$Test::Harness::switches = "";    # Too much noise otherwise
-$Test::Harness::Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
+my $Verbose = 0;
+$Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 
 if ($ARGV[0] && $ARGV[0] eq '-torture') {
     shift;
@@ -88,17 +88,14 @@ if ($ARGV[0] && $ARGV[0]=~/^-re/) {
 }
 
 my $jobs = $ENV{TEST_JOBS};
-my ($fork, $rules, $state);
+my ($rules, $state, $color);
 if ($ENV{HARNESS_OPTIONS}) {
     for my $opt ( split /:/, $ENV{HARNESS_OPTIONS} ) {
         if ( $opt =~ /^j(\d*)$/ ) {
             $jobs ||= $1 || 9;
         }
-        elsif ( $opt eq 'f' ) {
-            $fork = 1;
-        }
         elsif ( $opt eq 'c' ) {
-#            $args->{color} = 1;
+            $color = 1;
         }
         else {
             die "Unknown HARNESS_OPTIONS item: $opt\n";
@@ -238,12 +235,13 @@ if ($^O eq 'MSWin32') {
 @tests=grep /$re/, @tests 
     if $re;
 
+my $h = TAP::Harness->new({
+    rules       => $rules,
+    color       => $color,
+    jobs        => $jobs,
+    verbosity   => $Verbose,
+});
 if ($jobs) {
-    eval 'use TAP::Harness 3.13; 1' or die $@;
-
-    # Test::Harness parses $ENV{HARNESS_OPTIONS}, TAP::Harness does not
-    local $ENV{HARNESS_OPTIONS};
-    my $h = TAP::Harness->new({ jobs => $jobs, rules => $rules, ($fork ? (fork => $fork) : ())});
     if ($state) {
 	$h->callback(
 		     after_test => sub {
@@ -262,8 +260,6 @@ if ($jobs) {
 		     push @{ $args->{switches} }, '-I../lib';
 		 }
 		);
-    $h->runtests(@tests);
-} else {
-    Test::Harness::runtests @tests;
 }
+$h->runtests(@tests);
 exit(0);
