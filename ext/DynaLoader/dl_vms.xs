@@ -99,20 +99,10 @@ copy_errmsg(msg,unused)
     dTHX;
     dMY_CXT;
     if (*(msg->dsc$a_pointer) == '%') { /* first line */
-      if (dl_last_error)
-        strncpy((dl_last_error = saferealloc(dl_last_error,msg->dsc$w_length+1)),
-                 msg->dsc$a_pointer, msg->dsc$w_length);
-      else
-        strncpy((dl_last_error = safemalloc(msg->dsc$w_length+1)),
-                 msg->dsc$a_pointer, msg->dsc$w_length);
-      dl_last_error[msg->dsc$w_length] = '\0';
+        sv_setpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
     }
     else { /* continuation line */
-      int errlen = strlen(dl_last_error);
-      dl_last_error = saferealloc(dl_last_error, errlen + msg->dsc$w_length + 2);
-      dl_last_error[errlen] = '\n';  dl_last_error[errlen+1] = '\0';
-      strncat(dl_last_error, msg->dsc$a_pointer, msg->dsc$w_length);
-      dl_last_error[errlen+msg->dsc$w_length+1] = '\0';
+        sv_catpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
     }
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "Saved error message: %s\n", dl_last_error));
     return 0;
