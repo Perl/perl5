@@ -27,11 +27,11 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
          ];
 
 @ISA                    = qw[Exporter];
-@EXPORT                 = ( COMPRESS_GZIP, COMPRESS_BZIP );
+@EXPORT                 = qw[ COMPRESS_GZIP COMPRESS_BZIP ];
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.44";
+$VERSION                = "1.46";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $DO_NOT_USE_PREFIX      = 0;
@@ -68,8 +68,8 @@ Archive::Tar - module for manipulations of tar archives
     $tar->rename('oldname', 'new/file/name');
 
     $tar->write('files.tar');                   # plain tar
-    $tar->write('files.tgz', COMPRESSED_GZIP);  # gzip compressed
-    $tar->write('files.tbz', COMPRESSED_BZIP);  # bzip2 compressed
+    $tar->write('files.tgz', COMPRESS_GZIP);    # gzip compressed
+    $tar->write('files.tbz', COMPRESS_BZIP);    # bzip2 compressed
 
 =head1 DESCRIPTION
 
@@ -1073,10 +1073,10 @@ to be the C<gzip> compression level (between 1 and 9), but the use of
 constants is prefered:
 
   # write a gzip compressed file
-  $tar->write( 'out.tgz', COMPRESSION_GZIP );
+  $tar->write( 'out.tgz', COMPRESS_GZIP );
 
   # write a bzip compressed file
-  $tar->write( 'out.tbz', COMPRESSION_BZIP );
+  $tar->write( 'out.tbz', COMPRESS_BZIP );
 
 Note that when you pass in a filehandle, the compression argument
 is ignored, as all files are printed verbatim to your filehandle.
@@ -1503,10 +1503,10 @@ to be the C<gzip> compression level (between 1 and 9), but the use of
 constants is prefered:
 
   # write a gzip compressed file
-  Archive::Tar->create_archive( 'out.tgz', COMPRESSION_GZIP, @filelist );
+  Archive::Tar->create_archive( 'out.tgz', COMPRESS_GZIP, @filelist );
 
   # write a bzip compressed file
-  Archive::Tar->create_archive( 'out.tbz', COMPRESSION_BZIP, @filelist );
+  Archive::Tar->create_archive( 'out.tbz', COMPRESS_BZIP, @filelist );
 
 Note that when you pass in a filehandle, the compression argument
 is ignored, as all files are printed verbatim to your filehandle.
