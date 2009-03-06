@@ -26,9 +26,9 @@
 # -------------------------------------------
 
 M  a70a5f2eb5 2007/12/19 32643
-R  d70281d618 2007/12/19 32644 (unknown reason)
+R  d70281d618 2007/12/19 32644 blead-specific
 M  270d01deff 2007/12/19 32645
-R  4eeeaff6ef 2007/12/19 32646 (unknown reason)
+R  4eeeaff6ef 2007/12/19 32646 blead-specific
 M  5e49647a08 2007/12/19 32647
 M  13a7998c93 2007/12/19 32648
 P  7120b314ec 2007/12/19 32649 just the pod/perl5100delta.pod change
@@ -37,7 +37,7 @@ M  c97a6147af 2007/12/19 32651
 M  b0ad0448d7 2007/12/19 32652
 M  1cdea1e2b4 2007/12/19 32653
 M  328c41c4a9 2007/12/19 32654
-R  f463b80e1c 2007/12/19 32655 (unknown reason)
+R  f463b80e1c 2007/12/19 32655 blead-specific
 M  d40f418c09 2007/12/19 32656
 M  8fda732ba3 2007/12/19 32657
 M  794f469712 2007/12/19 32658
@@ -54,52 +54,52 @@ M  01c2a943c2 2007/12/20 32668
 M  6682be1cb0 2007/12/20 32669
 M  8119684ffb 2007/12/20 32670
 M  1318745670 2007/12/20 32671
-R  56d7a0868d 2007/12/20 32672 (unknown reason)
+M  56d7a0868d 2007/12/20 32672
 M  69f36734c1 2007/12/20 32673
 M  82c0efa4e8 2007/12/20 32674
-R  ac572bf4fd 2007/12/20 32675 (unknown reason)
-R  78ac7dd959 2007/12/20 32676 (unknown reason)
-R  bd649c1676 2007/12/20 32677 (unknown reason)
-R  e50442680d 2007/12/20 32678 (unknown reason)
-R  3bdcbd26ea 2007/12/20 32679 (unknown reason)
+M  ac572bf4fd 2007/12/20 32675
+M  78ac7dd959 2007/12/20 32676
+M  bd649c1676 2007/12/20 32677
+M  e50442680d 2007/12/20 32678
+M  3bdcbd26ea 2007/12/20 32679
 R  878d132a73 2007/12/20 32680 each @array; too scary!
-R  360ea906b1 2007/12/20 32681 (unknown reason)
-R  6fc9eaaa1c 2007/12/20 32682 (unknown reason)
+M  360ea906b1 2007/12/20 32681
+R  6fc9eaaa1c 2007/12/20 32682 regen: do manually
 M  959037a055 2007/12/21 32683
-R  ba235770e5 2007/12/21 32684 (unknown reason)
+R  ba235770e5 2007/12/21 32684 don't delete Perl_magic_setglob (BinCompat)
 M  5e2a19fce2 2007/12/21 32685
 M  c826f41b69 2007/12/21 32686
 M  644741fd20 2007/12/21 32687
 M  22883ac550 2007/12/21 32688
 M  3f5211dd25 2007/12/21 32689
 M  aab391487e 2007/12/21 32690
-R  f05ddbb84c 2007/12/21 32691 (unknown reason)
-R  aeedbbed67 2007/12/21 32692 (unknown reason)
-R  a9eee89a8b 2007/12/22 32693 (unknown reason)
+M  f05ddbb84c 2007/12/21 32691
+R  aeedbbed67 2007/12/21 32692 more each @array (see 32680)
+M  a9eee89a8b 2007/12/22 32693
 M  54cea8cc4e 2007/12/22 32698
 M  9568a12365 2007/12/22 32699
-R  64484faa0b 2007/12/22 32701 (unknown reason)
-R  3376de987a 2007/12/22 32702 (unknown reason)
-R  d3f5e39945 2007/12/22 32703 (unknown reason)
+M  64484faa0b 2007/12/22 32701
+M  3376de987a 2007/12/22 32702
+M  d3f5e39945 2007/12/22 32703
 M  bfd025d94e 2007/12/22 32704
 M  2a0de2c52a 2007/12/22 32705
 M  d0cc0e64ef 2007/12/22 32706
-R  24792b8dab 2007/12/22 32707 (unknown reason)
-R  de84dc04df 2007/12/22 32708 (unknown reason)
+R  24792b8dab 2007/12/22 32707 removes core defn of Null*; not BackCompat
+R  de84dc04df 2007/12/22 32708 make assert not eval-able; not BackCompat
 M  8f85282b4f 2007/12/22 32709
 M  f57255841c 2007/12/22 32710
 M  51310be14a 2007/12/22 32711
 M  dfe169eecc 2007/12/22 32712
 M  4e205ed637 2007/12/23 32713
-R  95bfaf42e7 2007/12/23 32714 (unknown reason)
-R  6977076943 2007/12/23 32715 (unknown reason)
-R  718140ec19 2007/12/23 32716 (unknown reason)
-R  e537ac38cb 2007/12/23 32717 (unknown reason)
-R  2fdb99a57e 2007/12/23 32718 (unknown reason)
-R  27ceb59774 2007/12/23 32719 (unknown reason)
+R  95bfaf42e7 2007/12/23 32714 s/510/511/g;
+R  6977076943 2007/12/23 32715 new assert
+M  718140ec19 2007/12/23 32716
+M  e537ac38cb 2007/12/23 32717
+R  2fdb99a57e 2007/12/23 32718 typo fix to 32708
+R  27ceb59774 2007/12/23 32719 typo fix to 32708
 M  1f36f092f8 2007/12/24 32720
 M  d34ed59f58 2007/12/25 32721
-R  abf0ed0d39 2007/12/25 32722 (unknown reason)
+R  abf0ed0d39 2007/12/25 32722 s/510/511/g
 M  2421bbdb12 2007/12/25 32723
 M  c975a42590 2007/12/26 32724
 P  b53eecb41c 2007/12/26 32725 just ext/Storable/Storable.xs
@@ -108,21 +108,21 @@ M  056749dc23 2007/12/26 32727
 M  d374f9c73e 2007/12/26 32728
 M  460b70c2ae 2007/12/26 32729
 M  db1511c850 2007/12/26 32730
-R  d6f4ea2ea9 2007/12/26 32731 (unknown reason)
+M  d6f4ea2ea9 2007/12/26 32731
 M  62ba2c9348 2007/12/26 32732
 M  0707d6cc81 2007/12/26 32733
 P  4df7f6afd8 2007/12/26 32734 didn't actually remove RV
 M  a784fd7c04 2007/12/26 32735
 M  dd48e7ab8e 2007/12/26 32736
-R  43230e26bd 2007/12/26 32737 (unknown reason)
-R  238b27b30e 2007/12/26 32738 (unknown reason)
+M  43230e26bd 2007/12/26 32737
+R  238b27b30e 2007/12/26 32738 specific to non-SVt_RV
 M  7d879f32d6 2007/12/27 32739
 P  3ce3ed558a 2007/12/27 32740 appears B.pm and Peek.t were silently merged
 M  eedd3f9945 2007/12/27 32741
-R  124ee91afb 2007/12/27 32742 (unknown reason)
+R  124ee91afb 2007/12/27 32742 new assertion
 M  1f257c956c 2007/12/27 32743
 M  2cd48dfddd 2007/12/27 32744
-R  f708cfc10f 2007/12/27 32745 (unknown reason)
+R  f708cfc10f 2007/12/27 32745 REGEXP as native type
 M  88044e374e 2007/12/27 32746
 M  03949bffb4 2007/12/27 32747
 P  a2794585f2 2007/12/27 32748 merged just the pat.t tests; the rest was REGEXP-as-SV-type stuff
@@ -132,35 +132,35 @@ P  5c35adbb8f 2007/12/28 32751 skipped adding SVt_REGEXP type
 P  f19b4ba939 2007/12/28 32752 just the Peek.t part
 M  220fc49f9c 2007/12/28 32753
 M  3a9b2cacfb 2007/12/28 32754
-R  2c96c0d61c 2007/12/28 32755 (unknown reason)
+R  2c96c0d61c 2007/12/28 32755 'struct regexp' stuff; not BinCompat
 M  bb661a585c 2007/12/28 32756
-R  51aa200460 2007/12/28 32757 (unknown reason)
+R  51aa200460 2007/12/28 32757 'struct regexp' stuff; not BinCompat
 M  866c78d1cf 2007/12/29 32758
 M  a1cf41cd41 2007/12/29 32759
-R  453d94a93e 2007/12/29 32760 (unknown reason)
+R  453d94a93e 2007/12/29 32760 Perl_av_iter_p() return IV* rather than I32*
 M  10300be478 2007/12/29 32761
 M  c8e4cf8b70 2007/12/29 32762
 M  15895f8a35 2007/12/29 32763
 M  c0bacbefa7 2007/12/29 32773
 M  14f3b9f2b0 2007/12/29 32774
-R  52d81aa88a 2007/12/29 32775 (unknown reason)
-R  156d2b4303 2007/12/29 32776 (unknown reason)
+R  52d81aa88a 2007/12/29 32775 reorders external regexp flags
+R  156d2b4303 2007/12/29 32776 fix for 32760
 M  0d3c21b03f 2007/12/29 32777
-R  50af2e611e 2007/12/29 32778 (unknown reason)
+M  50af2e611e 2007/12/29 32778
 M  50baa5ea22 2007/12/29 32779
 M  a7c93bfc3d 2007/12/30 32780
 M  b7a4fb4f15 2007/12/30 32781
 M  02f90d034d 2007/12/30 32782
-R  20f4945e16 2007/12/30 32783 (unknown reason)
+R  20f4945e16 2007/12/30 32783 bit reorg of sv.h - would be too hard to merge
 M  f019531057 2007/12/30 32784
-R  b07fa058fb 2007/12/30 32785 (unknown reason)
+R  b07fa058fb 2007/12/30 32785 fix for 32783
 M  d020892c81 2007/12/31 32786
 M  7a7524138a 2007/12/31 32787
-R  ceb531cd9f 2007/12/31 32788 (unknown reason)
-R  488344d27a 2007/12/31 32789 (unknown reason)
-R  68cad0541e 2007/12/31 32790 (unknown reason)
+M  ceb531cd9f 2007/12/31 32788
+M  488344d27a 2007/12/31 32789
+R  68cad0541e 2007/12/31 32790 don't delete mathoms added by 32789
 M  b9893e571a 2007/12/31 32791
-R  20bff64c49 2007/12/31 32792 (unknown reason)
+R  20bff64c49 2007/12/31 32792 fix for 32760
 M  e9a8c0991e 2008/01/01 32793
 M  04b62921f0 2008/01/01 32795
 M  580e570ede 2008/01/01 32797
@@ -169,15 +169,16 @@ M  483e88ad22 2008/01/01 32799
 M  13e592d266 2008/01/01 32800
 M  3d66076ad0 2008/01/02 32801
 M  07bc277f32 2008/01/02 32802
-R  84679df57c 2008/01/02 32803 (unknown reason)
-P  288b8c02c5 2008/01/02 32804 just cflags.SH ext/Devel/Peek/t/Peek.t
+M  84679df57c 2008/01/02 32803
+P  288b8c02c5 2008/01/02 32804 add SVt_REGEXP: only merge
+				    cflags.SH ext/Devel/Peek/t/Peek.t
 M  d991eed6a6 2008/01/02 32805
-R  e350b669f3 2008/01/02 32806 (unknown reason)
+R  e350b669f3 2008/01/02 32806 fix to 32804
 M  740cce10af 2008/01/02 32807
 M  94fc106db5 2008/01/03 32808
 M  37589e1eef 2008/01/03 32809
 M  d914baabc2 2008/01/03 32810
-R  e04fc022e4 2008/01/03 32811 (unknown reason)
+M  e04fc022e4 2008/01/03 32811
 M  289d3c6afe 2008/01/03 32812
 M  a663657d0c 2008/01/03 32813
 M  09cae46f2f 2008/01/03 32814
@@ -201,10 +202,10 @@ M  70b32c0be2 2008/01/04 32831
 M  553688848e 2008/01/04 32832
 M  d1f3479f8c 2008/01/04 32833
 M  8f14ea018e 2008/01/04 32834
-R  7f60507992 2008/01/04 32835 (unknown reason)
-R  7a4bba223a 2008/01/04 32836 (unknown reason)
-R  bdd9a1b1ec 2008/01/05 32837 (unknown reason)
-R  69240efd70 2008/01/05 32838 (unknown reason)
+R  7f60507992 2008/01/04 32835 fix to 32804
+M  7a4bba223a 2008/01/04 32836
+R  bdd9a1b1ec 2008/01/05 32837 specific to new regexp stuff
+M  69240efd70 2008/01/05 32838
 M  5a51db0500 2008/01/05 32839
 M  efd26800e7 2008/01/05 32840
 P  f7c278bfa9 2008/01/05 32841 skip more regexp type diddling
@@ -1838,14 +1839,14 @@ M  4e7245b537 2008/12/27 Merge branch 'blead' of nicholas@perl5.git.perl.or
 -  3a6fa573ae 2008/12/27 In struct mro_meta, rename mro_linear_c3 to mro_li
 -  9953ff723f 2008/12/27 In struct mro_meta, rename mro_linear_dfs to mro_l
 -  1e9bd1186a 2008/12/27 Move all mro:: XS functions from mro.c to ext/mro/
--  a44093a96f 2008/12/28 Fix typo in code not yet used.
--  527df579b2 2008/12/28 Precomputing the hash value for a string represent
--  58ca560a9a 2008/12/28 Also test Perl_hv_common() and pre-computed hashes
--  90acdc2acf 2008/12/28 Verify that pre-computing hashes with shared hash 
--  44b87b5061 2008/12/28 Add a key flag HVhek_KEYCANONICAL for Perl_hv_comm
+M  a44093a96f 2008/12/28 Fix typo in code not yet used.
+M  527df579b2 2008/12/28 Precomputing the hash value for a string represent
+M  58ca560a9a 2008/12/28 Also test Perl_hv_common() and pre-computed hashes
+M  90acdc2acf 2008/12/28 Verify that pre-computing hashes with shared hash 
+M  44b87b5061 2008/12/28 Add a key flag HVhek_KEYCANONICAL for Perl_hv_comm
 -  5844ac76c2 2008/12/28 Add casts to gain C++ compatibility, as spotted by
--  3cf20fa2fb 2008/12/28 Revise malformed utf8 test case
--  3f0c5693d0 2008/12/28 Fix malformed utf8 in regexec.c
+M  3cf20fa2fb 2008/12/28 Revise malformed utf8 test case
+M  3f0c5693d0 2008/12/28 Fix malformed utf8 in regexec.c
 -  d30e492cce 2008/12/28 Introduce SvCANEXISTDELETE in pp.h, which simplify
 -  c68ec7a9f9 2008/12/28 Add save_adelete()/SAVEADELETE() to save on the st
 -  4ad10a0b60 2008/12/28 On scope end, delete localized array elements that
@@ -2422,3 +2423,16 @@ M  b8a4246cca 2009/01/19 Upgrade to Module::Load::Conditional 0.30
 -  15e5e8668b 2009/02/25 add-package.pl fixup
 -  c0f08d2c3a 2009/02/25 test script for deprecate.pm
 -  851e29585b 2009/02/25 MakeMaker is first-come in Maintainers.pl.
+-  e4866e2e9b 2009/02/25 fix typo in pod/perlperf.pod
+-  d9e167fc3a 2009/02/25 Update Filter::Util::Call to 1.08
+-  20caf59dc5 2009/02/26 Make non-blocking mode work on Windows in IO::Sock
+-  3aa396043e 2009/02/26 Remove needless sed line added with 4318d5a0158916
+-  6c0ec79a2e 2009/02/26 Correct the paths for the nonxs_ext targets, follo
+-  ac62bc6fc9 2009/02/26 Remove spurious TODO indicators
+-  57df1c468e 2009/02/26 6c0ec79a2e9c445ac9999df2 failed to build from dist
+-  04fd187ebc 2009/02/27 add standard documentation to deprecate
+-  6b913759a0 2009/02/27 rewrote deprecate test using File::Spec
+-  b032e88887 2009/02/27 NAME section must fit on one line
+-  f72763ca64 2009/02/28 Hash::Util::FieldHash 1.03 leaks SVs which are use
+-  096fcbb836 2009/02/28 Make deprecate.pm work on VMS.
+-  c23d817369 2009/03/01 Update to Term::ANSIColor 2.00
