@@ -5231,7 +5231,14 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    ||  cSVOPo->op_sv == &PL_sv_no)
 	    
 		return TRUE;
+	    else
+		return FALSE;
 		
+	case OP_FLOP:
+	    /* Detect "..." flip-flop operator */
+	    if (cUNOPo->op_first->op_flags & OPf_SPECIAL)
+		return TRUE;
+
 	/* FALL THROUGH */
 	default:
 	    return FALSE;
