@@ -4029,17 +4029,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
     REGEXP *this_regex, *other_regex;
 
-#   define NOT_EMPTY_PROTO(cv) (!SvPOK(cv) || SvCUR(cv) == 0)
-
 #   define SM_REF(type) ( \
 	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_##type) && (Other = e)) \
 	|| (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_##type) && (Other = d)))
-
-#   define SM_CV_NEP   /* Find a code ref without an empty prototype */ \
-	((SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_PVCV)		\
-	    && NOT_EMPTY_PROTO(This) && (Other = e))			\
-	|| (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_PVCV)		\
-	    && NOT_EMPTY_PROTO(This) && (Other = d)))
 
 #   define SM_REGEX ( \
 	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_REGEXP)		\
@@ -4094,17 +4086,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
     }
 
-    if (SM_CV_NEP) {
+    if (SM_REF(PVCV)) {
 	I32 c;
-	
-	if ( SM_OTHER_REF(PVCV) && NOT_EMPTY_PROTO(SvRV(Other)) )
-	{
-	    if (This == SvRV(Other))
-		RETPUSHYES;
-	    else
-		RETPUSHNO;
-	}
-	
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
@@ -4336,42 +4319,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    ? &PL_sv_yes
 	    : &PL_sv_no);
 	destroy_matcher(matcher);
-	RETURN;
-    }
-    else if (SM_REF(PVCV)) {
-	I32 c;
-	/* This must be a null-prototyped sub, because we
-	   already checked for the other kind. */
-	
-	ENTER;
-	SAVETMPS;
-	PUSHMARK(SP);
-	PUTBACK;
-	c = call_sv(This, G_SCALAR);
-	SPAGAIN;
-	if (c == 0)
-	    PUSHs(&PL_sv_undef);
-	else if (SvTEMP(TOPs))
-	    SvREFCNT_inc_void(TOPs);
-
-	if (SM_OTHER_REF(PVCV)) {
-	    /* This one has to be null-proto'd too.
-	       Call both of 'em, and compare the results */
-	    PUSHMARK(SP);
-	    c = call_sv(SvRV(Other), G_SCALAR);
-	    SPAGAIN;
-	    if (c == 0)
-		PUSHs(&PL_sv_undef);
-	    else if (SvTEMP(TOPs))
-		SvREFCNT_inc_void(TOPs);
-	    FREETMPS;
-	    LEAVE;
-	    PUTBACK;
-	    return pp_eq();
-	}
-	
-	FREETMPS;
-	LEAVE;
 	RETURN;
     }
     else if ( ((SvIOK(d) || SvNOK(d)) && (This = d) && (Other = e))

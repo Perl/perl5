@@ -157,12 +157,7 @@ __DATA__
 
 # CODE ref against argument
 #  - arg is code ref
-	\&foo		\&foo
 !	\&foo		sub {}
-!	\&foo		sub { "$_[0]" =~ /^CODE/ }
-!	\&foo		\&bar
-	\&fatal		\&fatal
-!	\&foo		\&fatal
 
 # - arg is not code ref
 	1	sub{shift}
@@ -194,25 +189,15 @@ __DATA__
 	a_const		"a constant"
 	a_const		a_const
 	a_const		b_const
-	\&a_const	\&a_const
-!	\&a_const	\&b_const
 !	undef		\&FALSE
 	undef		\&TRUE
 !	0		\&FALSE
 	0		\&TRUE
 !	1		\&FALSE
 	1		\&TRUE
-	\&FALSE		\&FALSE
 !	\&FALSE		\&foo
-!	\&FALSE		\&bar
-!	\&TRUE		\&foo
-!	\&TRUE		\&bar
-!	\&TWO		\&foo
-!	\&TWO		\&bar
-	\&FALSE		\&FALSE
 
 # - non-null-prototyped subs
-!	\&bar		\&gorch
 	bar		gorch
 @	fatal		bar
 

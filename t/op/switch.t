@@ -428,11 +428,11 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 }
 
 # Sub and method calls
-sub bar {"bar"}
+sub notfoo {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(bar()) {$ok = 1}
+	when(notfoo()) {$ok = 1}
     }
     ok($ok, "Sub call acts as boolean")
 }
@@ -440,7 +440,7 @@ sub bar {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(main->bar()) {$ok = 1}
+	when(main->notfoo()) {$ok = 1}
     }
     ok($ok, "Class-method call acts as boolean")
 }
@@ -449,7 +449,7 @@ sub bar {"bar"}
     my $ok = 0;
     my $obj = bless [];
     given("foo") {
-	when($obj->bar()) {$ok = 1}
+	when($obj->notfoo()) {$ok = 1}
     }
     ok($ok, "Object-method call acts as boolean")
 }
@@ -721,18 +721,18 @@ my $f = tie my $v, "FetchCounter";
 {
     no warnings "redefine";
     my $called_foo = 0;
-    sub foo {$called_foo = 1}
+    sub foo {$called_foo = 1; "@_" eq "foo"}
     my $called_bar = 0;
-    sub bar {$called_bar = 1}
+    sub bar {$called_bar = 1; "@_" eq "bar"}
     my ($matched_foo, $matched_bar) = (0, 0);
-    given(\&foo) {
+    given("foo") {
 	when(\&bar) {$matched_bar = 1}
 	when(\&foo) {$matched_foo = 1}
     }
-    is($called_foo, 0,  "Code ref comparison: foo not called");
-    is($called_bar, 0,  "Code ref comparison: bar not called");
-    is($matched_bar, 0, "Code ref didn't match different one");
-    is($matched_foo, 1, "Code ref did match itself");
+    is($called_foo, 1,  "foo() was called");
+    is($called_bar, 1,  "bar() was called");
+    is($matched_bar, 0, "bar didn't match");
+    is($matched_foo, 1, "foo did match");
 }
 
 sub contains_x {
