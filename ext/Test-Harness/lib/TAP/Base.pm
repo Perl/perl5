@@ -9,15 +9,16 @@ use TAP::Object;
 
 =head1 NAME
 
-TAP::Base - Base class that provides common functionality to L<TAP::Parser> and L<TAP::Harness>
+TAP::Base - Base class that provides common functionality to L<TAP::Parser>
+and L<TAP::Harness>
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 my $GOT_TIME_HIRES;
 
@@ -51,16 +52,7 @@ C<TAP::Base> provides callback management.
 
 =head2 Class Methods
 
-=head3 C<new>
-
 =cut
-
-sub new {
-    my ( $class, $arg_for ) = @_;
-
-    my $self = bless {}, $class;
-    return $self->_initialize($arg_for);
-}
 
 sub _initialize {
     my ( $self, $arg_for, $ok_callback ) = @_;

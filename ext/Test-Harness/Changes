@@ -1,7 +1,26 @@
 Revision history for Test-Harness
 
+3.16    2009-02-19
+        - Fix path splicing on platforms where the path separator
+          is not ':'.
+        - Fixes/skips for failing Win32 tests.
+        - Don't break with older CPAN::Reporter versions.
 
-3.14
+3.15    2009-02-17
+        - Refactor getter/setter generation into TAP::Object.
+        - The App::Prove::State::Result::Test now stores the parser object.
+        - After discussion with Andy, agreed to clean up the test output
+          somewhat.  t/foo.....ok becomes t/foo.t ... ok
+        - Make Bail out! die instead of exiting. Dies with the same
+          message as 2.64 for (belated) backwards compatibility.
+        - Alex Vaniver's patch to refactor TAP::Formatter::Console into
+          a new class, TAP::Formatter::File and a common base class: 
+          TAP::Formatter::Base.
+        - Fix a bug where PERL5LIB might be put in the wrong spot in @INC.
+          #40257
+        - Steve Purkis implemented a plugin mechanism for App::Prove.
+
+3.14    2008-09-13
         - Created a proper (ha!) API for prove state results and tests.
         - Added --count and --nocount options to prove to control X/Y display
           while running tests.

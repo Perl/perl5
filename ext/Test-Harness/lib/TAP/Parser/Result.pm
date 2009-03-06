@@ -26,11 +26,11 @@ TAP::Parser::Result - Base class for TAP::Parser output objects
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 SYNOPSIS
 
@@ -68,10 +68,10 @@ sub _initialize {
     my ( $self, $token ) = @_;
     if ($token) {
 
-        # assign to a hash slice to make a shallow copy of the token.
-        # I guess we could assign to the hash as (by default) there are not
-        # contents, but that seems less helpful if someone wants to subclass us
-        @{$self}{keys %$token} = values %$token;
+       # assign to a hash slice to make a shallow copy of the token.
+       # I guess we could assign to the hash as (by default) there are not
+       # contents, but that seems less helpful if someone wants to subclass us
+        @{$self}{ keys %$token } = values %$token;
     }
     return $self;
 }

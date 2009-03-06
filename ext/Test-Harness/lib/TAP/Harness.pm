@@ -19,11 +19,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -226,7 +226,8 @@ L<TAP::Parser::Aggregator>.
 =item * C<formatter_class>
 
 The name of the class to use to format output. The default is
-L<TAP::Formatter::Console>.
+L<TAP::Formatter::Console>, or L<TAP::Formatter::File> if the output
+isn't a TTY.
 
 =item * C<multiplexer_class>
 
@@ -347,6 +348,9 @@ Any keys for which the value is C<undef> will be ignored.
 
         $self->jobs(1) unless defined $self->jobs;
 
+        local $default_class{formatter_class} = 'TAP::Formatter::File'
+          unless -t ( $arg_for{stdout} || \*STDOUT );
+
         while ( my ( $attr, $class ) = each %default_class ) {
             $self->$attr( $self->$attr() || $class );
         }
@@ -462,7 +466,7 @@ sub _aggregate_forked {
             my ( $parser, $session ) = $self->make_parser($job);
 
             while ( defined( my $result = $parser->next ) ) {
-                exit 1 if $result->is_bailout;
+                $self->_bailout($result) if $result->is_bailout;
             }
 
             $self->finish_parser( $parser, $session );
@@ -483,6 +487,13 @@ sub _aggregate_forked {
     }
 
     return;
+}
+
+sub _bailout {
+    my ( $self, $result ) = @_;
+    my $explanation = $result->explanation;
+    die "FAILED--Further testing stopped"
+      . ( $explanation ? ": $explanation\n" : ".\n" );
 }
 
 sub _aggregate_parallel {
@@ -509,7 +520,7 @@ sub _aggregate_parallel {
             my ( $session, $job ) = @$stash;
             if ( defined $result ) {
                 $session->result($result);
-                exit 1 if $result->is_bailout;
+                $self->_bailout($result) if $result->is_bailout;
             }
             else {
 
@@ -541,7 +552,7 @@ sub _aggregate_single {
                 # Keep reading until input is exhausted in the hope
                 # of allowing any pending diagnostics to show up.
                 1 while $parser->next;
-                exit 1;
+                $self->_bailout($result);
             }
         }
 
@@ -635,23 +646,10 @@ sub aggregate_tests {
 sub _add_descriptions {
     my $self = shift;
 
-    # First transformation: turn scalars into single element arrays
-    my @tests = map { 'ARRAY' eq ref $_ ? $_ : [$_] } @_;
-
-    # Work out how many different extensions we have
-    my %ext;
-    for my $test (@tests) {
-        $ext{$1}++ if $test->[0] =~ /\.(\w+)$/;
-    }
-
-    for my $test (@tests) {
-        if ( @$test == 1 ) {
-            $test->[1] = $test->[0];
-            $test->[1] =~ s/\.\w+$//
-              if keys %ext <= 1;
-        }
-    }
-    return @tests;
+    # Turn unwrapped scalars into anonymous arrays and copy the name as
+    # the description for tests that have only a name.
+    return map { @$_ == 1 ? [ $_->[0], $_->[0] ] : $_ }
+      map { 'ARRAY' eq ref $_ ? $_ : [$_] } @_;
 }
 
 =head3 C<make_scheduler>
@@ -674,10 +672,9 @@ sub make_scheduler {
 
 =head3 C<jobs>
 
-Gets or sets the number of concurrent test runs the harness is handling.
-For the default harness this value is always 1. A parallel harness such
-as L<TAP::Harness::Parallel> will override this to return the number of
-jobs it is handling.
+Gets or sets the number of concurrent test runs the harness is
+handling.  By default, this value is 1 -- for parallel testing, this
+should be set higher.
 
 =head3 C<fork>
 

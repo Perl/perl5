@@ -259,6 +259,32 @@ names of any directories found in C<PERL5LIB> as -I switches. The net
 effect of this is that C<PERL5LIB> is honoured even when prove is run in
 taint mode.
 
+=head1 PLUGINS
+
+Plugins can be loaded using the C<< -PI<plugin> >> syntax, eg:
+
+  prove -PMyPlugin
+
+This will search for a module named C<App::Prove::Plugin::MyPlugin>, or failing
+that, C<MyPlugin>.  If the plugin can't be found, C<prove> will complain & exit.
+
+You can pass arguments to your plugin by appending C<=arg1,arg2,etc> to the
+plugin name:
+
+  prove -PMyPlugin=fou,du,fafa
+
+Please check individual plugin documentation for more details.
+
+=head2 Available Plugins
+
+For an up-to-date list of plugins available, please check CPAN:
+
+L<http://search.cpan.org/search?query=App%3A%3AProve+Plugin>
+
+=head2 Writing Plugins
+
+Please see L<App::Prove/PLUGINS>.
+
 =cut
 
 # vim:ts=4:sw=4:et:sta

@@ -57,12 +57,20 @@ sub mabs {
 
 {
     my @import_log = ();
-
     sub test_log_import { push @import_log, [@_] }
 
     sub get_import_log {
         my @log = @import_log;
         @import_log = ();
+        return @log;
+    }
+
+    my @plugin_load_log = ();
+    sub test_log_plugin_load { push @plugin_load_log, [@_] }
+
+    sub get_plugin_load_log {
+        my @log = @plugin_load_log;
+        @plugin_load_log = ();
         return @log;
     }
 }
@@ -1127,6 +1135,47 @@ BEGIN {    # START PLAN
                   "Plugin loaded OK";
             },
             plan   => 1,
+            runlog => [
+                [   '_runtests',
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
+                    'TAP::Harness',
+                    $dummy_test
+                ]
+            ],
+        },
+
+        {   name     => 'Load plugin (args + call load method)',
+            switches => [ '-P', 'Dummy2=fou,du,fafa', $dummy_test ],
+            args     => {
+                argv => [qw( one two three )],
+            },
+            expect => {
+                plugins => ['Dummy2'],
+            },
+            extra => sub {
+                my @import = get_import_log();
+                is_deeply \@import,
+                  [ [ 'App::Prove::Plugin::Dummy2', 'fou', 'du', 'fafa' ] ],
+                  "Plugin loaded OK";
+
+                my @loaded = get_plugin_load_log();
+                is( scalar @loaded, 1, 'Plugin->load called OK' );
+                my ( $plugin_class, $args ) = @{ shift @loaded };
+                is( $plugin_class, 'App::Prove::Plugin::Dummy2',
+                    'plugin_class passed'
+                );
+                isa_ok(
+                    $args->{app_prove}, 'App::Prove',
+                    'app_prove object passed'
+                );
+                is_deeply(
+                    $args->{args}, [qw( fou du fafa )],
+                    'expected args passed'
+                );
+            },
+            plan   => 5,
             runlog => [
                 [   '_runtests',
                     {   verbosity  => 0,

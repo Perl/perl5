@@ -1186,10 +1186,14 @@ ext/Test-Harness/lib/App/Prove/State.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/App/Prove/State/Result.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/App/Prove/State/Result/Test.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/TAP/Base.pm			A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/Base.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Color.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console/ParallelSession.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console/Session.pm	A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/File.pm		A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/File/Session.pm	A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/Session.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Harness.pm			A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Object.pm			A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
@@ -1239,12 +1243,15 @@ ext/Test-Harness/t/data/catme.1				Test data for Test::Harness
 ext/Test-Harness/t/data/proverc				Test data for Test::Harness
 ext/Test-Harness/t/data/sample.yml			Test data for Test::Harness
 ext/Test-Harness/t/errors.t				Test::Harness test
+ext/Test-Harness/t/file.t				Test::Harness test
 ext/Test-Harness/t/glob-to-regexp.t			Test::Harness test
 ext/Test-Harness/t/grammar.t				Test::Harness test
+ext/Test-Harness/t/harness-bailout.t			Test::Harness test
 ext/Test-Harness/t/harness-subclass.t			Test::Harness test
 ext/Test-Harness/t/harness.t				Test::Harness test
 ext/Test-Harness/t/iterators.t				Test::Harness test
 ext/Test-Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
+ext/Test-Harness/t/lib/App/Prove/Plugin/Dummy2.pm	Module for testing Test::Harness
 ext/Test-Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
 ext/Test-Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
 ext/Test-Harness/t/lib/IO/c55Capture.pm			Module for testing Test::Harness
@@ -1266,6 +1273,7 @@ ext/Test-Harness/t/object.t				Test::Harness test
 ext/Test-Harness/t/parser-config.t			Test::Harness test
 ext/Test-Harness/t/parser-subclass.t			Test::Harness test
 ext/Test-Harness/t/parse.t				Test::Harness test
+ext/Test-Harness/t/perl5lib.t				Test::Harness test
 ext/Test-Harness/t/premature-bailout.t			Test::Harness test
 ext/Test-Harness/t/process.t				Test::Harness test
 ext/Test-Harness/t/proveenv.t				Test::Harness test
