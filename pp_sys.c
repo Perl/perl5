@@ -5328,7 +5328,11 @@ PP(pp_ggrent)
 	PUSHs(sv);
 	if (grent) {
 	    if (which == OP_GGRNAM)
+#if Gid_t_sign <= 0
 		sv_setiv(sv, (IV)grent->gr_gid);
+#else
+		sv_setuv(sv, (UV)grent->gr_gid);
+#endif
 	    else
 		sv_setpv(sv, grent->gr_name);
 	}
@@ -5344,7 +5348,11 @@ PP(pp_ggrent)
 	PUSHs(sv_mortalcopy(&PL_sv_no));
 #endif
 
+#if Gid_t_sign <= 0
 	mPUSHi(grent->gr_gid);
+#else
+	mPUSHu(grent->gr_gid);
+#endif
 
 #if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API))
 	/* In UNICOS/mk (_CRAYMPP) the multithreading
