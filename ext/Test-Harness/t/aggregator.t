@@ -3,7 +3,7 @@
 use strict;
 use lib 't/lib';
 
-use Test::More tests => 79;
+use Test::More tests => 81;
 
 use TAP::Parser;
 use TAP::Parser::IteratorFactory;
@@ -104,6 +104,10 @@ is_deeply [ $agg->todo_passed ], [qw(tap2)],
 can_ok $agg, 'total';
 is $agg->total, $agg->passed + $agg->failed,
   '... and we should have the correct number of total tests';
+
+can_ok $agg, 'planned';
+is $agg->planned, $agg->passed + $agg->failed,
+  '... and we should have the correct number of planned tests';
 
 can_ok $agg, 'has_problems';
 ok $agg->has_problems, '... and it should report true if there are problems';

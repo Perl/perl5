@@ -83,7 +83,7 @@ my @schedule = (
 );
 
 sub _can_open3 {
-    return $^O eq 'MSWin32' || $Config{d_fork};
+    return $Config{d_fork};
 }
 
 my $factory = TAP::Parser::IteratorFactory->new;

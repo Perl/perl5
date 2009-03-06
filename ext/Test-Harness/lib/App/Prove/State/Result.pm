@@ -14,11 +14,11 @@ App::Prove::State::Result - Individual test suite results.
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
@@ -63,10 +63,11 @@ sub _initialize {
     my ( $self, $tests ) = @_;
     my %tests;
     while ( my ( $name, $test ) = each %$tests ) {
-        $tests{$name} = $self->test_class->new({
-            %$test, 
-            name => $name
-        });
+        $tests{$name} = $self->test_class->new(
+            {   %$test,
+                name => $name
+            }
+        );
     }
     $self->tests( \%tests );
     return $self;
@@ -170,7 +171,7 @@ sub test {
         return $test;
     }
     else {
-        my $test = $self->test_class->new({name => $name});
+        my $test = $self->test_class->new( { name => $name } );
         $self->{tests}->{$name} = $test;
         return $test;
     }

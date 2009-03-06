@@ -10,11 +10,10 @@ BEGIN {
     }
 }
 
-# Test that options in PERL5LIB and PERL5OPT are propogated to tainted
-# tests
+# Test that options in PERL5OPT are propogated to tainted tests
 
 use strict;
-use Test::More ( $^O eq 'VMS' ? ( skip_all => 'VMS' ) : ( tests => 3 ) );
+use Test::More ( $^O eq 'VMS' ? ( skip_all => 'VMS' ) : ( tests => 1 ) );
 
 use Config;
 use TAP::Parser;
@@ -30,7 +29,13 @@ sub run_test_file {
     printf TEST $test_template, @args;
     close TEST;
 
-    my $p = TAP::Parser->new( { source => $test_file } );
+    my $p = TAP::Parser->new(
+        {   source => $test_file,
+
+            # Test taint when there's spaces in a -I path
+            switches => [q["-Ifoo bar"]],
+        }
+    );
     1 while $p->next;
     ok !$p->has_problems;
 
@@ -38,35 +43,6 @@ sub run_test_file {
 }
 
 {
-    local $ENV{PERL5LIB} = join $Config{path_sep}, grep defined, 'wibble',
-      $ENV{PERL5LIB};
-    run_test_file( <<'END', $lib_path );
-#!/usr/bin/perl -T
-
-BEGIN { unshift @INC, ( %s ); }
-use Test::More tests => 1;
-
-ok grep(/^wibble$/, @INC) or diag join "\n", @INC;
-END
-}
-
-{
-    my $perl5lib = $ENV{PERL5LIB};
-    local $ENV{PERL5LIB};
-    local $ENV{PERLLIB} = join $Config{path_sep}, grep defined, 'wibble',
-      $perl5lib;
-    run_test_file( <<'END', $lib_path );
-#!/usr/bin/perl -T
-
-BEGIN { unshift @INC, ( %s ); }
-use Test::More tests => 1;
-
-ok grep(/^wibble$/, @INC) or diag join "\n", @INC;
-END
-}
-
-{
-    local $ENV{PERL5LIB} = join $Config{path_sep}, @INC;
     local $ENV{PERL5OPT} = '-Mstrict';
     run_test_file(<<'END');
 #!/usr/bin/perl -T

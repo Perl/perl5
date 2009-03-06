@@ -10,11 +10,11 @@ App::Prove::State::Result::Test - Individual test results.
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
@@ -42,6 +42,7 @@ my %methods = (
     seq            => { method => 'sequence', default => 1 },
     total_passes   => { method => 'total_passes', default => 0 },
     total_failures => { method => 'total_failures', default => 0 },
+    parser         => { method => 'parser' },
 );
 
 while ( my ( $key, $description ) = each %methods ) {
@@ -132,14 +133,20 @@ The number of times the test has passed.
 
 The number of times the test has failed.
 
+=head3 C<parser>
+
+The underlying parser object.  This is useful if you need the full
+information for the test program.
+
 =cut
 
 sub raw {
     my $self = shift;
     my %raw  = %$self;
 
-    # this is backwards-compatibility hack and is not gauranteed.
+    # this is backwards-compatibility hack and is not guaranteed.
     delete $raw{name};
+    delete $raw{parser};
     return \%raw;
 }
 

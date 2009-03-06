@@ -12,11 +12,11 @@ TAP::Parser::Scheduler - Schedule tests during parallel testing
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 SYNOPSIS
 
@@ -193,7 +193,7 @@ Get a list of all remaining tests.
 
 sub get_all {
     my $self = shift;
-    my @all = $self->_gather( $self->{schedule} );
+    my @all  = $self->_gather( $self->{schedule} );
     $self->{count} = @all;
     @all;
 }
@@ -202,7 +202,7 @@ sub _gather {
     my ( $self, $rule ) = @_;
     return unless defined $rule;
     return $rule unless 'ARRAY' eq ref $rule;
-    return map { defined () ? $self->_gather($_) : () } map {@$_} @$rule;
+    return map { defined() ? $self->_gather($_) : () } map {@$_} @$rule;
 }
 
 =head3 C<get_job>
@@ -218,8 +218,8 @@ sub get_job {
     $self->{count} ||= $self->get_all;
     my @jobs = $self->_find_next_job( $self->{schedule} );
     if (@jobs) {
-	--$self->{count};
-	return $jobs[0];
+        --$self->{count};
+        return $jobs[0];
     }
 
     return TAP::Parser::Scheduler::Spinner->new
@@ -244,11 +244,12 @@ sub _find_next_job {
 
     my @queue = ();
     my $index = 0;
-    while ($index < @$rule) {
+    while ( $index < @$rule ) {
         my $seq = $rule->[$index];
+
         # Prune any exhausted items.
         shift @$seq while @$seq && _is_empty( $seq->[0] );
-        if ( @$seq ) {
+        if (@$seq) {
             if ( defined $seq->[0] ) {
                 if ( 'ARRAY' eq ref $seq->[0] ) {
                     push @queue, $seq;
@@ -262,6 +263,7 @@ sub _find_next_job {
             ++$index;
         }
         else {
+
             # Remove the empty sub-array from the array
             splice @$rule, $index, 1;
         }

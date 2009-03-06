@@ -1,23 +1,15 @@
 package TAP::Formatter::Console::Session;
 
 use strict;
-use TAP::Base;
+use TAP::Formatter::Session;
 
 use vars qw($VERSION @ISA);
 
-@ISA = qw(TAP::Base);
+@ISA = qw(TAP::Formatter::Session);
 
 my @ACCESSOR;
 
 BEGIN {
-
-    @ACCESSOR = qw( name formatter parser show_count );
-
-    for my $method (@ACCESSOR) {
-        no strict 'refs';
-        *$method = sub { shift->{$method} };
-    }
-
     my @CLOSURE_BINDING = qw( header result clear_for_close close_test );
 
     for my $method (@CLOSURE_BINDING) {
@@ -36,88 +28,15 @@ TAP::Formatter::Console::Session - Harness output delegate for default console o
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
 This provides console orientated output formatting for TAP::Harness.
-
-=head1 SYNOPSIS
-
-=cut
-
-=head1 METHODS
-
-=head2 Class Methods
-
-=head3 C<new>
-
- my %args = (
-    formatter => $self,
- )
- my $harness = TAP::Formatter::Console::Session->new( \%args );
-
-The constructor returns a new C<TAP::Formatter::Console::Session> object.
-
-=over 4
-
-=item * C<formatter>
-
-=item * C<parser>
-
-=item * C<name>
-
-=item * C<show_count>
-
-=back
-
-=cut
-
-sub _initialize {
-    my ( $self, $arg_for ) = @_;
-    $arg_for ||= {};
-
-    $self->SUPER::_initialize($arg_for);
-    my %arg_for = %$arg_for;    # force a shallow copy
-
-    for my $name (@ACCESSOR) {
-        $self->{$name} = delete $arg_for{$name};
-    }
-
-    if ( !defined $self->show_count ) {
-        $self->{show_count} = 1;    # defaults to true
-    }
-    if ( $self->show_count ) {      # but may be a damned lie!
-        $self->{show_count} = $self->_should_show_count;
-    }
-
-    if ( my @props = sort keys %arg_for ) {
-        $self->_croak("Unknown arguments to TAP::Harness::new (@props)");
-    }
-
-    return $self;
-}
-
-=head3 C<header>
-
-Output test preamble
-
-=head3 C<result>
-
-Called by the harness for each line of TAP it receives.
-
-=head3 C<close_test>
-
-Called to close a test session.
-
-=head3 C<clear_for_close>
-
-Called by C<close_test> to clear the line showing test progress, or the parallel
-test ruler, prior to printing the final test result.
 
 =cut
 
@@ -217,9 +136,9 @@ sub _closures {
                 my $now    = CORE::time;
 
                 # Print status roughly once per second.
-		# We will always get the first number as a side effect of
-		# $last_status_printed starting with the value 0, which $now
-		# will never be. (Unless someone sets their clock to 1970)
+                # We will always get the first number as a side effect of
+                # $last_status_printed starting with the value 0, which $now
+                # will never be. (Unless someone sets their clock to 1970)
                 if ( $last_status_printed != $now ) {
                     $formatter->$output("\r$pretty$number$plan");
                     $last_status_printed = $now;
@@ -242,13 +161,13 @@ sub _closures {
         },
 
         clear_for_close => sub {
-            my $spaces = ' ' x
-              length( '.' . $pretty . $plan . $parser->tests_run );
+            my $spaces
+              = ' ' x length( '.' . $pretty . $plan . $parser->tests_run );
             $formatter->$output("\r$spaces");
         },
-            
+
         close_test => sub {
-            if ($show_count && !$really_quiet) {
+            if ( $show_count && !$really_quiet ) {
                 $self->clear_for_close;
                 $formatter->$output("\r$pretty");
             }
@@ -285,67 +204,14 @@ sub _closures {
     };
 }
 
-sub _should_show_count {
+=head2 C<< 	clear_for_close >>
 
-    # we need this because if someone tries to redirect the output, it can get
-    # very garbled from the carriage returns (\r) in the count line.
-    return !shift->formatter->verbose && -t STDOUT;
-}
+=head2 C<< 	close_test >>
 
-sub _output_test_failure {
-    my ( $self, $parser ) = @_;
-    my $formatter = $self->formatter;
-    return if $formatter->really_quiet;
+=head2 C<< 	header >>
 
-    my $tests_run     = $parser->tests_run;
-    my $tests_planned = $parser->tests_planned;
+=head2 C<< 	result >>
 
-    my $total
-      = defined $tests_planned
-      ? $tests_planned
-      : $tests_run;
-
-    my $passed = $parser->passed;
-
-    # The total number of fails includes any tests that were planned but
-    # didn't run
-    my $failed = $parser->failed + $total - $tests_run;
-    my $exit   = $parser->exit;
-
-    if ( my $exit = $parser->exit ) {
-        my $wstat = $parser->wait;
-        my $status = sprintf( "%d (wstat %d, 0x%x)", $exit, $wstat, $wstat );
-        $formatter->_failure_output(" Dubious, test returned $status\n");
-    }
-
-    if ( $failed == 0 ) {
-        $formatter->_failure_output(
-            $total
-            ? " All $total subtests passed "
-            : ' No subtests run '
-        );
-    }
-    else {
-        $formatter->_failure_output(" Failed $failed/$total subtests ");
-        if ( !$total ) {
-            $formatter->_failure_output("\nNo tests run!");
-        }
-    }
-
-    if ( my $skipped = $parser->skipped ) {
-        $passed -= $skipped;
-        my $test = 'subtest' . ( $skipped != 1 ? 's' : '' );
-        $formatter->_output(
-            "\n\t(less $skipped skipped $test: $passed okay)");
-    }
-
-    if ( my $failed = $parser->todo_passed ) {
-        my $test = $failed > 1 ? 'tests' : 'test';
-        $formatter->_output(
-            "\n\t($failed TODO $test unexpectedly succeeded)");
-    }
-
-    $formatter->_output("\n");
-}
+=cut
 
 1;
