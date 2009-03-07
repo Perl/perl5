@@ -1025,7 +1025,7 @@ XS(XS_PerlIO_get_layers)
 					       (SvUTF8(*argsvp) ? SVf_UTF8 : 0)
 					       | SVs_TEMP)
 			      : &PL_sv_undef);
-		       XPUSHs(namok
+		       XPUSHs(flgok
 			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*flgsvp))
 			      : &PL_sv_undef);
 		       nitem += 3;
