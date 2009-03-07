@@ -947,6 +947,7 @@ ext/List-Util/t/reduce.t	List::Util
 ext/List-Util/t/refaddr.t	Scalar::Util
 ext/List-Util/t/reftype.t	Scalar::Util
 ext/List-Util/t/shuffle.t	List::Util
+ext/List-Util/t/stack-corruption.t	List::Util
 ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
@@ -2610,6 +2611,7 @@ lib/Parse/CPAN/Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::M
 lib/Parse/CPAN/Meta/t/data/multibyte.yml			Parse::CPAN::Meta
 lib/Parse/CPAN/Meta/t/data/sample.yml				Parse::CPAN::Meta
 lib/Parse/CPAN/Meta/t/data/toolbar.yml				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/utf_16_le_bom.yml			Parse::CPAN::Meta
 lib/Parse/CPAN/Meta/t/data/vanilla.yml				Parse::CPAN::Meta
 lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
@@ -3048,6 +3050,8 @@ lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/dandv.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/dnsparks.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
 lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
@@ -3056,6 +3060,7 @@ lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
+lib/Text/TabsWrap/t/wrap_separator2.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
 lib/Thread/Queue.pm		Thread-safe queues
@@ -3812,6 +3817,7 @@ t/lib/autodie/lib/autodie/test/au/exception.pm	autodie - Australian helper
 t/lib/autodie/lib/autodie/test/au.pm		autodie - Austrlaian helper
 t/lib/autodie/lib/autodie/test/badname.pm	autodie - Bad exception class
 t/lib/autodie/lib/autodie/test/missing.pm	autodie - Missing exception class
+t/lib/autodie/lib/Caller_helper.pm	autodie - Caller helper
 t/lib/autodie/lib/lethal.pm		autodie - with a better name
 t/lib/autodie/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 t/lib/autodie/lib/pujHa/ghach.pm	autodie - Like a Klingon
