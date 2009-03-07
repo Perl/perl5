@@ -143,7 +143,7 @@ dl_private_init(pTHX)
     dl_generic_private_init(aTHX);
     {
 	dMY_CXT;
-	dl_require_symbols = get_av("DynaLoader::dl_require_symbols", 0x4);
+	dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
 	/* Set up the static control blocks for dl_expand_filespec() */
 	dl_fab = cc$rms_fab;
 	dl_nam = cc$rms_nam;
@@ -357,5 +357,21 @@ dl_error()
     RETVAL = dl_last_error ;
     OUTPUT:
       RETVAL
+
+#if defined(USE_ITHREADS)
+
+void
+CLONE(...)
+    CODE:
+    MY_CXT_CLONE;
+
+    /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
+     * using Perl variables that belong to another thread, we create our 
+     * own for this thread.
+     */
+    MY_CXT.x_dl_last_error = newSVpvn("", 0);
+    dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
+
+#endif
 
 # end.
