@@ -29,7 +29,8 @@ use Test::Harness;
 use App::Prove;
 
 # Change PERL5LIB so we ensure it's preserved.
-$ENV{PERL5LIB} = join( $path_sep, 'wibble', $ENV{PERL5LIB} );
+$ENV{PERL5LIB} = join( $path_sep, 'wibble',
+    ($ENV{PERL_CORE} ? '../lib' : ()), $ENV{PERL5LIB} || '' );
 
 open TEST, ">perl5lib_check.t.tmp";
 print TEST <<"END";
