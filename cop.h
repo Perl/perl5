@@ -864,6 +864,7 @@ See L<perlcall/Lightweight Callbacks>.
  	multicall_oldcatch = CATCH_GET;					\
 	SAVETMPS; SAVEVPTR(PL_op);					\
 	CATCH_SET(TRUE);						\
+	PUSHSTACKi(PERLSI_SORT);					\
 	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
 	PUSHSUB(cx);							\
 	if (++CvDEPTH(cv) >= 2) {					\
@@ -887,8 +888,10 @@ See L<perlcall/Lightweight Callbacks>.
 	LEAVESUB(multicall_cv);						\
 	CvDEPTH(multicall_cv)--;					\
 	POPBLOCK(cx,PL_curpm);						\
+	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\
+	SPAGAIN;							\
     } STMT_END
 
 /*
