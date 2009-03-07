@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.31 2009/02/16 06:13:11 dankogai Exp $
+# $Id: Encode.pm,v 2.32 2009/03/07 07:32:37 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.31 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.32 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -146,6 +146,10 @@ sub encode($$;$) {
     return undef unless defined $string;
     $string .= '' if ref $string;    # stringify;
     $check ||= 0;
+    unless ( defined $name ) {
+        require Carp;
+        Carp::croak("Encoding name should not be undef");
+    }
     my $enc = find_encoding($name);
     unless ( defined $enc ) {
         require Carp;

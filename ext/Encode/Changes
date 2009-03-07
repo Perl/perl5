@@ -1,8 +1,18 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.31 2009/02/16 06:18:09 dankogai Exp dankogai $
+# $Id: Changes,v 2.32 2009/03/07 07:32:37 dankogai Exp dankogai $
 #
-$Revision: 2.31 $ $Date: 2009/02/16 06:18:09 $
+$Revision: 2.32 $ $Date: 2009/03/07 07:32:37 $
+! lib/Encode/Alias.pm t/Alias.t
+  Encode now resolves 'en_US.UTF-8' to utf-8-strict like 'ja_JP.euc'
+  Those who set locale on their shells should be happier now.
+! AUTHORS
+  added tokuhirom
+! Encode.pm
+  "encode(undef, 'str') should die earlier"
+  http://coderepos.org/share/changeset/30790
+
+2.31 2009/02/16 06:18:09
 ! lib/Encode/MIME/Header.pm
   "Revert [29767] and [29771] since it breaks perl 5.8" by miyagawa
   http://coderepos.org/share/changeset/30111
