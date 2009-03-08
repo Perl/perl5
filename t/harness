@@ -6,8 +6,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';              # pick up only this build's lib
-    $ENV{PERL5LIB} = '../lib';    # so children will see it too
 }
+delete $ENV{PERL5LIB};
 
 my $torture; # torture testing?
 
@@ -244,6 +244,12 @@ if ($jobs) {
 		     }
 		    );
     }
+    $h->callback(
+		 parser_args => sub {
+		     my ( $args, $test ) = @_;
+		     push @{ $args->{switches} }, '-I../lib';
+		 }
+		);
     $h->runtests(@tests);
 } else {
     Test::Harness::runtests @tests;
