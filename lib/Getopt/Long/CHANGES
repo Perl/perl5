@@ -1,5 +1,5 @@
 Changes in version 2.37
---lib/Getopt/Long/CHANGES
+-----------------------
 
 * Bugfix: With gnu_compat, --foo= will no longer trigger "Option
   requires an argument" but return the empty string.
