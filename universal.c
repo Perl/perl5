@@ -237,7 +237,6 @@ XS(XS_Regexp_DESTROY);
 XS(XS_Internals_hash_seed);
 XS(XS_Internals_rehash_seed);
 XS(XS_Internals_HvREHASH);
-XS(XS_Internals_inc_sub_generation);
 XS(XS_re_is_regexp); 
 XS(XS_re_regname);
 XS(XS_re_regnames);
