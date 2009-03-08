@@ -281,7 +281,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[ext/Cwd lib/Cwd.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Data::Dumper' =>
@@ -456,7 +456,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "cpan",
 		},
 
 	'File::Temp' =>
