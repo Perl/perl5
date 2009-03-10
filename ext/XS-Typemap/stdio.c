@@ -23,6 +23,6 @@ int xsfclose ( FILE * stream ) {
 
 
 int xsfprintf ( FILE * stream, const char * text ) {
-  return fprintf( stream, text );
+  return fprintf( stream, "%s", text );
 }
 
