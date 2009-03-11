@@ -1,5 +1,8 @@
 Revision history for Perl extension Parse-CPAN-Meta
 
+0.05 Wed 11 Mar 2009
+	- Upgrade previous release to a stable release.
+
 0.04_01 Tue  3 Mar 2009
 	- Merge Unicode / BOM fixes from YAML::Tiny
 
