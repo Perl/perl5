@@ -41,9 +41,6 @@ sub SArgs : ATTR(SCALAR) {
     is( ref $data,	'ARRAY',	'data' );
     is( $data->[0],	'grumpf',	'data' );
     is( $phase,		'CHECK',	'phase' );
-    TODO: {
-	local $TODO = "Doesn't work correctly" if $] < 5.011;
     is( $filename,	__FILE__,	'filename' );
     is( $linenum,	42,		'linenum' );
-    }
 }
