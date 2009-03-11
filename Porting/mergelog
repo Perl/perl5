@@ -208,31 +208,33 @@ R  bdd9a1b1ec 2008/01/05 32837 specific to new regexp stuff
 M  69240efd70 2008/01/05 32838
 M  5a51db0500 2008/01/05 32839
 M  efd26800e7 2008/01/05 32840
-P  f7c278bfa9 2008/01/05 32841 skip more regexp type diddling
+P  f7c278bfa9 2008/01/05 32841 skip more struct regexp diddling
+		just apply ext/B/t/optree_constants.t, ext/Devel/Peek/t/Peek.t
 M  08f1872725 2008/01/05 32842
 M  5509d87acd 2008/01/05 32843
 M  e16f710823 2008/01/05 32844
-R  9d17798df3 2008/01/05 32845 (unknown reason)
+R  9d17798df3 2008/01/05 32845 skip more struct regexp diddling
+
 M  ec4c3bb069 2008/01/05 32846
 M  88570a3e91 2008/01/05 32847
 M  4979e2888f 2008/01/05 32848
 M  3c8556c3bf 2008/01/05 32849
-R  e2560c3357 2008/01/05 32850 (unknown reason)
-M  b9ad30b40c 2008/01/05 32851
-R  8f6ae13c8a 2008/01/05 32852 (unknown reason)
+R  e2560c3357 2008/01/05 32850 fix for bleed-specific re stuff
+M  b9ad30b40c 2008/01/05 32851 Make Perl_pregcomp() use SvUTF8: not BinCompat
+R  8f6ae13c8a 2008/01/05 32852 Abolish RXf_UTF8: not BackCompat
 M  5daac39cdf 2008/01/05 32853
-R  1af6200d18 2008/01/05 32854 (unknown reason)
+R  1af6200d18 2008/01/05 32854 skip more struct regexp diddling
 M  a6307b373e 2008/01/05 32855
 M  9d6c4c89d7 2008/01/05 32856
 M  0357f1fd55 2008/01/05 32857
 M  d0a30c4343 2008/01/05 32858
 P  08e4474067 2008/01/05 32859 only Peek.t from SVt_REGEXP stuff
 M  62a1a1efb4 2008/01/05 32860
-R  d2f13c598f 2008/01/05 32861 (unknown reason)
-R  a11c868346 2008/01/05 32862 (unknown reason)
-R  fd44068c47 2008/01/06 32863 (unknown reason)
+R  d2f13c598f 2008/01/05 32861 Make REGEXP a type distinct from SV.
+R  a11c868346 2008/01/05 32862 bleed-only
+R  fd44068c47 2008/01/06 32863 uses SVt_REGEXP
 m  92905b42ad 2008/01/06 32864 Filter::Util::Call bits awaiting new CPAN release
-R  5186cc1225 2008/01/06 32865 (unknown reason)
+M  5186cc1225 2008/01/06 32865
 M  ecd6c0a032 2008/01/06 32866
 M  9cddf794fc 2008/01/06 32867
 M  ede1273d4e 2008/01/06 32868
@@ -244,13 +246,13 @@ M  3a28f3fb1b 2008/01/06 32873
 M  b376053de5 2008/01/06 32874
 M  e846cbe53f 2008/01/06 32875
 M  74295f0bd8 2008/01/06 32876
-R  1f27373c61 2008/01/06 32877 (unknown reason)
+M  1f27373c61 2008/01/06 32877
 M  c57cf257e9 2008/01/06 32878
 M  3bc0704bd7 2008/01/06 32879
 P  0fc92fc6bb 2008/01/06 32880 only Peek.t, Test/Builder.pm from
 				SVt_REGEXP stuff
 M  4ab99479ee 2008/01/06 32881
-R  b7c9370f5c 2008/01/06 32882 (unknown reason)
+R  b7c9370f5c 2008/01/06 32882 uses SVt_REGEXP
 M  f84167b372 2008/01/06 32883
 M  a5d81eb5c7 2008/01/07 32884
 M  8725a05e43 2008/01/07 32885
@@ -258,18 +260,18 @@ M  b6c155fe18 2008/01/07 32886
 M  10a3d64ebf 2008/01/07 32887
 M  f5df47822a 2008/01/07 32888
 M  5e895007ab 2008/01/07 32889
-R  b7e0bd9e80 2008/01/07 32890 (unknown reason)
+R  b7e0bd9e80 2008/01/07 32890 uses SVt_REGEXP
 M  fafafbaf70 2008/01/07 32891
 M  205f85e8df 2008/01/07 32892
 M  c1939273d4 2008/01/07 32893
 M  a43d94f2c0 2008/01/07 32894
 M  36c662f48c 2008/01/07 32895
-R  f63535fc1e 2008/01/07 32896 (unknown reason)
+R  f63535fc1e 2008/01/07 32896 part of 32880
 M  7d8473223d 2008/01/08 32897
-R  9a8b670905 2008/01/08 32899 (unknown reason)
-R  10599a699e 2008/01/08 32900 (unknown reason)
-R  937c6efd46 2008/01/08 32901 (unknown reason)
-R  86d2c25d57 2008/01/08 32902 (unknown reason)
+R  9a8b670905 2008/01/08 32899 fix subsumed by later fixes
+R  10599a699e 2008/01/08 32900 uses SVt_REGEXP
+R  937c6efd46 2008/01/08 32901 uses SVt_REGEXP
+R  86d2c25d57 2008/01/08 32902 uses SVt_REGEXP 
 M  536daee00b 2008/01/08 32903
 M  b0169937a1 2008/01/08 32904
 M  1f0bbb5680 2008/01/08 32905
@@ -280,15 +282,15 @@ M  9210de830a 2008/01/09 32909
 M  2e8342de65 2008/01/09 32910
 M  192c1e277b 2008/01/09 32911
 M  d0328fd7d6 2008/01/09 32912
-R  d2ece331da 2008/01/09 32913 (unknown reason)
+R  d2ece331da 2008/01/09 32913 fix to 32899
 M  86a885eb6a 2008/01/09 32914
 M  084e50c2bb 2008/01/09 32915
 M  c90cd22b2f 2008/01/09 32916
 M  77abb4c607 2008/01/09 32918
-R  e3dd4663a7 2008/01/09 32920 (unknown reason)
+M  e3dd4663a7 2008/01/09 32920
 M  c2dedb9378 2008/01/09 32921
-R  d610630931 2008/01/09 32922 (unknown reason)
-P  0a0b43fa5b 2008/01/09 32925 just pod/perlapi.pod
+M  d610630931 2008/01/09 32922
+P  0a0b43fa5b 2008/01/09 32925 just pod/perlapi.pod (rest is fix for 32851)
 !  3f163fbbeb 2008/01/09 32926 IPC::SysV awaiting mhx approval
 M  613d6c3e99 2008/01/09 32927
 M  3f9706904c 2008/01/09 32928
@@ -297,40 +299,40 @@ M  89eb5450df 2008/01/09 32930
 M  e3faa678eb 2008/01/09 32931
 M  66b1de8708 2008/01/09 32932
 M  1db36481d1 2008/01/09 32933
-R  67d2d14de0 2008/01/10 32934 (unknown reason)
+R  67d2d14de0 2008/01/10 32934 remove reg_stringify: not BinCompat
 M  574b88211c 2008/01/10 32935
 M  bfd95973f1 2008/01/10 32937
 M  9231370572 2008/01/10 32938
 M  86c29d75e7 2008/01/10 32939
 M  f9077f1bb4 2008/01/10 32940
-R  61525e559c 2008/01/10 32941 (unknown reason)
-R  110f3028c1 2008/01/10 32942 (unknown reason)
-R  5c9f9c9cf9 2008/01/10 32943 (unknown reason)
+M  61525e559c 2008/01/10 32941
+R  110f3028c1 2008/01/10 32942 fix subsumed by later fixes
+R  5c9f9c9cf9 2008/01/10 32943 SVt_REGEXP specific
 M  e68531976a 2008/01/10 32944
 M  ad86357938 2008/01/11 32945
 M  6800ac04a9 2008/01/11 32946
 M  4b48cf3945 2008/01/11 32947
 M  52b4506763 2008/01/11 32948
 M  ccb2c8b8ab 2008/01/11 32949
-R  14a49a2428 2008/01/11 32950 (unknown reason)
-R  1017f0c58d 2008/01/11 32951 (unknown reason)
-R  737ddd9966 2008/01/11 32952 (unknown reason)
+R  14a49a2428 2008/01/11 32950 SVt_REGEXP specific
+R  1017f0c58d 2008/01/11 32951 SVt_REGEXP specific
+R  737ddd9966 2008/01/11 32952 remove PM_GETRE_SAFE etc: not SrcCompat
 M  5ac1e9b286 2008/01/11 32953
-R  4c84d7f2a0 2008/01/11 32954 (unknown reason)
+R  4c84d7f2a0 2008/01/11 32954 remove -P switch: not BackCompat
 M  2b9dff6775 2008/01/11 32955
-R  9688998215 2008/01/11 32956 (unknown reason)
-R  2f3529075c 2008/01/11 32958 (unknown reason)
-R  402d2eb199 2008/01/11 32959 (unknown reason)
+R  9688998215 2008/01/11 32956 fix to 32954
+R  2f3529075c 2008/01/11 32958 fix to 32954
+R  402d2eb199 2008/01/11 32959 make PL_regex_pad[0] and SV: breakage risk
 M  895aa832c4 2008/01/11 32960
-R  4450b63044 2008/01/11 32961 (unknown reason)
-R  200ff815b6 2008/01/11 32962 (unknown reason)
+R  4450b63044 2008/01/11 32961 SVt_REGEXP specific
+R  200ff815b6 2008/01/11 32962 fix to 32961
 M  c9242b3f0d 2008/01/11 32963
 M  e7c47b03cc 2008/01/12 32964
 M  83d8c2948c 2008/01/12 32965
 M  1de7d430c3 2008/01/12 32966
 M  ea9222e036 2008/01/12 32967
 M  d064452989 2008/01/12 32968
-R  9f621bb00a 2008/01/12 32969 (unknown reason)
+R  9f621bb00a 2008/01/12 32969 length(undef) returns undef not 0: not BackCompat
 M  7637cd0734 2008/01/13 32970
 R  656266fc52 2008/01/13 32971 (unknown reason)
 M  34f1896bf0 2008/01/14 32974
@@ -2436,3 +2438,43 @@ M  b8a4246cca 2009/01/19 Upgrade to Module::Load::Conditional 0.30
 -  f72763ca64 2009/02/28 Hash::Util::FieldHash 1.03 leaks SVs which are use
 -  096fcbb836 2009/02/28 Make deprecate.pm work on VMS.
 -  c23d817369 2009/03/01 Update to Term::ANSIColor 2.00
+-  e83ba0bd96 2009/03/01 Update CPANPLUS::Dist::Build to 0.08
+-  223ddb2fc0 2009/03/01 Mark modules upgraded today as "upstream from CPAN
+-  bdb7fd9ff2 2009/03/01 Add Compress-Raw-Bzip2, by Paul Marquess
+-  1c058b48fe 2009/03/01 Better gitignore file for Compress-Raw-Bzip2
+-  f56ed502c9 2009/03/01 Make util.c compile on systems without getcwd()
+-  b6be863a9c 2009/03/02 Bump versions to 0.10 for CPAN sync
+-  4443dd534c 2009/03/02 Update CPANPLUS to 0.85_06
+-  be96f5c3c1 2009/03/02 Integrate Parse::CPAN::Meta 0.04 into core
+-  4ec613fc9e 2009/03/02 Bump versions to 0.12 to sync with CPAN version
+-  985e6bb7f5 2009/03/03 Remove the MANIFEST from Compress-Raw-Bzip2
+-  8d4c519e13 2009/03/03 Add contact info for Simon Wistow in Porting/Maint
+-  32a618150c 2009/03/03 Add Parse::CPAN::Meta to Porting/Maintainers.pl
+-  c59d1bfa19 2009/03/03 Update Parse::CPAN::Meta to 0.04_01
+-  8f42c23d28 2009/03/04 Add a failing test for stack corruption with MULTI
+-  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
+-  cad0fd6e0f 2009/03/05 Fix installation of 'autodie'
+-  db4e6d0949 2009/03/05 Merge of autodie 1.999 into blead.
+-  86840a9d37 2009/03/05 Updated MANIFEST for autodie 1.999
+-  bef46b70a2 2009/03/05 Update Archive::Tar to 1.46
+-  ec6cc21dee 2009/03/05 In dl_vms.xs, treat dl_last_error like the SV that
+-  3e8320ccc2 2009/03/06 fix a couple of comments that annoyingly look like
+-  2645075aa0 2009/03/06 Upgrade to Module-Build-0.32
+-  69e34dac30 2009/03/06 Upgrade Text::Tabs+Text::Wrap to version 2009.0305
+-  bdaf8c65d3 2009/03/06 Upgrade to Test-Harness-3.16
+-  3f8c823a28 2009/03/07 Add a bunch of missing files to the MANIFEST
+-  f325df1b45 2009/03/07 Fixing the cast for the result of (getgrent())->gr
+-  9f5407a9b9 2009/03/07 Fix test failure with t/TEST
+-  4e71788c75 2009/03/07 Update to Encode 2.32
+-  8c472fc1d4 2009/03/07 Make DynaLoader clone its private data under threa
+-  96ccaf5388 2009/03/07 Make PerlIO::get_layers really test flgok before r
+-  1bbbfc5065 2009/03/07 Fix MULTICALL in List-Util
+-  7cae69c7f0 2009/03/08 Cwd and File::Spec are maintained as part of PathT
+-  6b3d80d96d 2009/03/08 synchronize Getopt::Long CHANGES file to the corre
+-  a4876a67e7 2009/03/08 Fix synchronization of Getopt::Long CHANGES file t
+-  e8fb11d7f7 2009/03/08 Update t/harness to reflect behaviour changes in T
+-  a5e72d97a7 2009/03/08 Need to -I../lib explicitly, as TAP::Parser no lon
+-  e276a45bf1 2009/03/08 Remove declaration of XS_Internals_inc_sub_generat
+-  af6492bf9e 2009/03/08 lib/Text/TabsWrap/t/dnsparks.t should skip under T
+-  edd52d85e4 2009/03/10 Fix a printf compilation warning
+-  b92436812d 2009/03/11 Merge Attribute::Handlers 0.82 into core
