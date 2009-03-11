@@ -31,7 +31,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.12';
+$VERSION = '0.14';
 
 =pod
 
@@ -222,7 +222,8 @@ sub prepare {
     }
 
     my $args;
-    my( $force, $verbose, $buildflags, $perl);
+    my( $force, $verbose, $buildflags, $perl, $prereq_target, $prereq_format,
+        $prereq_build );
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             force           => {    default => $conf->get_conf('force'),
@@ -232,6 +233,10 @@ sub prepare {
             perl            => {    default => $^X, store => \$perl },
             buildflags      => {    default => $conf->get_conf('buildflags'),
                                     store   => \$buildflags },
+            prereq_target   => {    default => '', store => \$prereq_target }, 
+            prereq_format   => {    default => '',
+                                    store   => \$prereq_format },   
+            prereq_build    => {    default => 0, store => \$prereq_build },
         };
 
         $args = check( $tmpl, \%hash ) or return;
@@ -267,6 +272,39 @@ sub prepare {
 
     my $fail;
     RUN: {
+        # 0.85_01
+        ### we resolve 'configure requires' here, so we can run the 'perl
+        ### Makefile.PL' command
+        ### XXX for tests: mock f_c_r to something that *can* resolve and
+        ### something that *doesnt* resolve. Check the error log for ok
+        ### on this step or failure
+        ### XXX make a seperate tarball to test for this scenario: simply
+        ### containing a makefile.pl/build.pl for test purposes?
+        my $safe_ver = version->new('0.85_01');
+        if ( version->new($CPANPLUS::Internals::VERSION) >= $safe_ver )
+        {   my $configure_requires = $dist->find_configure_requires;     
+            my $ok = $dist->_resolve_prereqs(
+                            format          => $prereq_format,
+                            verbose         => $verbose,
+                            prereqs         => $configure_requires,
+                            target          => $prereq_target,
+                            force           => $force,
+                            prereq_build    => $prereq_build,
+                    );    
+    
+            unless( $ok ) {
+           
+                #### use $dist->flush to reset the cache ###
+                error( loc( "Unable to satisfy '%1' for '%2' " .
+                            "-- aborting install", 
+                            'configure_requires', $self->module ) );    
+                $dist->status->prepared(0);
+                $fail++; 
+                last RUN;
+            } 
+            ### end of prereq resolving ###
+        }
+
         # Wrap the exception that may be thrown here (should likely be
         # done at a much higher level).
         my $prep_output;
@@ -284,10 +322,12 @@ sub prepare {
 
         msg( $prep_output, 0 );
 
-        $self->status->prereqs( $dist->_find_prereqs( verbose => $verbose, 
-                                                      dir => $dir, 
-                                                      perl => $perl,
-                                                      buildflags => $buildflags ) );
+        my $prereqs = $self->status->prereqs;
+
+        $prereqs ||= $dist->_find_prereqs( verbose => $verbose, 
+                                           dir => $dir, 
+                                           perl => $perl,
+                                           buildflags => $buildflags );
 
     }
     
@@ -338,7 +378,7 @@ sub _find_prereqs {
 
     my $content;
 
-    if ( version->new( $Module::Build::VERSION ) >= $safe_ver ) {
+    if ( version->new( $Module::Build::VERSION ) >= $safe_ver and ! ON_WIN32 ) {
         # Use the new Build action 'prereq_data'
         
         unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', $buildflags],
@@ -364,6 +404,7 @@ sub _find_prereqs {
         $content = do { local $/; <$fh> };
     }
 
+    return unless $content;
     my $bphash = eval $content;
     return unless $bphash and ref $bphash eq 'HASH';
     foreach my $type ('requires', 'build_requires') {
