@@ -2837,6 +2837,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	state_num = OP(scan);
 
       reenter_switch:
+
+	assert(PL_reglastparen == &rex->lastparen);
+	assert(PL_reglastcloseparen == &rex->lastcloseparen);
+	assert(PL_regoffs == rex->offs);
+
 	switch (state_num) {
 	case BOL:
 	    if (locinput == PL_bostr)
@@ -3842,9 +3847,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    regcpblow(ST.cp);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
-	    
+
+	    /* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
 	    PL_reglastparen = &rex->lastparen;
 	    PL_reglastcloseparen = &rex->lastcloseparen;
+	    /* also update PL_regoffs */
+	    PL_regoffs = rex->offs;
 	    
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
@@ -3859,6 +3867,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    ReREFCNT_dec(rex);
 	    SETREX(rex,ST.prev_rex);
 	    rexi = RXi_GET(rex); 
+	    /* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
 	    PL_reglastparen = &rex->lastparen;
 	    PL_reglastcloseparen = &rex->lastcloseparen;
 
@@ -4860,6 +4869,11 @@ NULL
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
 		ReREFCNT_inc(rex);
 		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
+
+		/* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
+		PL_reglastparen = &rex->lastparen;
+		PL_reglastcloseparen = &rex->lastcloseparen;
+
 		REGCP_SET(st->u.eval.lastcp);
 		PL_reginput = locinput;
 
