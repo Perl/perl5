@@ -50,33 +50,32 @@ while (<DATA>) {
     my ($yn, $left, $right, $note) = split /\t+/;
 
     local $::TODO = $note =~ /TODO/;
-    match_test($yn, $left, $right);
-    match_test($yn, $right, $left);
-}
 
-sub match_test {
-    my ($yn, $left, $right) = @_;
-
-    die "Bad test spec: ($yn, $left, $right)"
-	unless $yn eq "" || $yn eq "!" || $yn eq '@';
+    die "Bad test spec: ($yn, $left, $right)" if $yn =~ /[^!@=]/;
 
     my $tstr = "$left ~~ $right";
 
+    test_again:
     my $res = eval $tstr;
 
     chomp $@;
 
-    if ( $yn eq '@' ) {
+    if ( $yn =~ /@/ ) {
 	ok( $@ ne '', "$tstr dies" )
 	    and print "# \$\@ was: $@\n";
     } else {
-	my $test_name = $tstr . ($yn eq '!' ? " does not match" : " matches");
+	my $test_name = $tstr . ($yn =~ /!/ ? " does not match" : " matches");
 	if ( $@ ne '' ) {
 	    fail($test_name);
 	    print "# \$\@ was: $@\n";
 	} else {
-	    ok( ($yn eq '!' xor $res), $test_name );
+	    ok( ($yn =~ /!/ xor $res), $test_name );
 	}
+    }
+
+    if ( $yn =~ s/=// ) {
+	$tstr = "$right ~~ $left";
+	goto test_again;
     }
 }
 
@@ -87,8 +86,6 @@ sub bar {42}
 sub gorch {42}
 sub fatal {die "fatal sub\n"}
 
-sub a_const() {die "const\n" if @_; "a constant"}
-sub b_const() {die "const\n" if @_; "a constant"}
 sub FALSE() { 0 }
 sub TRUE() { 1 }
 sub TWO() { 1 }
@@ -97,63 +94,91 @@ sub TWO() { 1 }
 #   - expected to match
 # ! - expected to not match
 # @ - expected to be a compilation failure
+# = - expected to match symmetrically (runs test twice)
 # Data types to test :
+#   undef
 #   Object-overloaded
 #   Object
-#   Code
-#   Code()
 #   Coderef
 #   Hash
 #   Hashref
 #   Array
 #   Arrayref
+#   Tied arrays and hashes
+#   Arrays that reference themselves
 #   Regex (// and qr//)
+#   Range
 #   Num
 #   Str
-#   undef
+# Other syntactic items of interest:
+#   Constants
+#   Values returned by a sub call
 __DATA__
-# OBJECT
-# - overloaded
-	$ov_obj		"key"
-!	$ov_obj		"foo"
-	$ov_obj		{"key" => 1}
-	$ov_obj		{"key" => 1, bar => 2}		TODO
-!	$ov_obj		{"foo" => 1}
-	$ov_obj		["key" => 1]
-!	$ov_obj		["foo" => 1]
-	$ov_obj		@keyandmore
-!	$ov_obj		@fooormore
-	$ov_obj		%keyandmore			TODO
-!	$ov_obj		%fooormore
-	$ov_obj		/key/
-!	$ov_obj		/foo/
-	$ov_obj		qr/Key/i
-!	$ov_obj		qr/foo/
-	$ov_obj		sub { shift ~~ "key" }
-!	$ov_obj		sub { shift eq "key" }
-!	$ov_obj		sub { shift ~~ "foo" }
-!	$ov_obj		\&foo
-	$ov_obj		\&bar
-@	$ov_obj		\&fatal
-!	$ov_obj		FALSE
-!	$ov_obj		\&FALSE
+# Any ~~ undef
 !	$ov_obj		undef
+!	$obj		undef
+!	sub {}		undef
+!	%hash		undef
+!	\%hash		undef
+!	{}		undef
+!	@nums		undef
+!	\@nums		undef
+!	[]		undef
+!	%tied_hash	undef
+!	@tied_nums	undef
+!	$deep1		undef
+!	/foo/		undef
+!	qr/foo/		undef
+!	21..30		undef
+!	189		undef
+!	"foo"		undef
+!	""		undef
+!	!1		undef
+	undef		undef
+
+# Any ~~ object overloaded
+# object overloaded ~~ Any
 	$ov_obj		$ov_obj
+=@	$ov_obj		\&fatal
+=!	$ov_obj		\&FALSE
+=!	$ov_obj		\&foo
+=	$ov_obj		\&bar
+=	$ov_obj		sub { shift ~~ "key" }
+=!	$ov_obj		sub { shift eq "key" }
+=!	$ov_obj		sub { shift ~~ "foo" }
+=	$ov_obj		%keyandmore			TODO
+=!	$ov_obj		%fooormore
+=	$ov_obj		{"key" => 1}
+=	$ov_obj		{"key" => 1, bar => 2}		TODO
+=!	$ov_obj		{"foo" => 1}
+=	$ov_obj		@keyandmore
+=!	$ov_obj		@fooormore
+=	$ov_obj		["key" => 1]
+=!	$ov_obj		["foo" => 1]
+=	$ov_obj		/key/
+=!	$ov_obj		/foo/
+=	$ov_obj		qr/Key/i
+=!	$ov_obj		qr/foo/
+=	$ov_obj		"key"
+=!	$ov_obj		"foo"
+=!	$ov_obj		FALSE
 
 # regular object
-@	$obj	"key"
-@	$obj	{"key" => 1}
-@	$obj	["key" => 1]
-@	$obj	/key/
-@	$obj	qr/key/
-@	$obj	sub { 1 }
-@	$obj	sub { 0 }
-@	$obj	\&foo
-@	$obj	\&fatal
-@	$obj	FALSE
-@	$obj	\&FALSE
-!	$obj	undef
-@	$obj	$obj
+=@	$obj	$ov_obj
+=@	$obj	$obj
+=@	$obj	\&fatal
+=@	$obj	\&FALSE
+=@	$obj	\&foo
+=@	$obj	sub { 1 }
+=@	$obj	sub { 0 }
+=@	$obj	%keyandmore
+=@	$obj	{"key" => 1}
+=@	$obj	@fooormore
+=@	$obj	["key" => 1]
+=@	$obj	/key/
+=@	$obj	qr/key/
+=@	$obj	"key"
+=@	$obj	FALSE
 
 # CODE ref against argument
 #  - arg is code ref
@@ -186,9 +211,6 @@ __DATA__
 	/fooormore/	sub{ref $_[0] eq 'Regexp'}
 
 # - null-prototyped subs
-	a_const		"a constant"
-	a_const		a_const
-	a_const		b_const
 !	undef		\&FALSE
 	undef		\&TRUE
 !	0		\&FALSE
@@ -303,20 +325,3 @@ __DATA__
 	@nums		{  1, '',  2, '' }
 	@nums		{  1, '', 12, '' }
 !	@nums		{ 11, '', 12, '' }
-
-# UNDEF
-!	3		undef
-!	1		undef
-!	[]		undef
-!	{}		undef
-!	\%::main	undef
-!	[1,2]		undef
-!	%hash		undef
-!	@nums		undef
-!	"foo"		undef
-!	""		undef
-!	!1		undef
-!	\&foo		undef
-!	sub { }		undef
-	undef		undef
-	$::undef	undef
