@@ -286,10 +286,10 @@ package Maintainers;
 
 	'Data::Dumper' =>
 		{
-		'MAINTAINER'	=> 'ilyam', # Not gsar.
+		'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam
 		'FILES'		=> q[ext/Data-Dumper],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'DB::File' =>
