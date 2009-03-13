@@ -4464,7 +4464,7 @@ PP(pp_gmtime)
 	   using a double causes an unfortunate loss of accuracy on high numbers.
 	   What we really need is an SvQV.
 	*/
-	double input = POPn;
+	double input = Perl_floor(POPn);
 	when = (Time64_T)input;
 	if (when != input && ckWARN(WARN_OVERFLOW)) {
 	    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
