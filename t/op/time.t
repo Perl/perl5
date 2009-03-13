@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 42;
+plan tests => 44;
 
 ($beguser,$begsys) = times;
 
@@ -129,4 +129,18 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
           or diag("@time");
         like scalar localtime($time), $scalar,       "  scalar";
     }
+}
+
+# Test floating point args
+{
+    eval {
+        $SIG{__WARN__} = sub { die @_; };
+        localtime(1.23);
+    };
+    is($@, '', 'Ignore fractional time');
+    eval {
+        $SIG{__WARN__} = sub { die @_; };
+        gmtime(1.23);
+    };
+    is($@, '', 'Ignore fractional time');
 }
