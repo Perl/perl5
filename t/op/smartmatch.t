@@ -135,6 +135,7 @@ __DATA__
 !	""		undef
 !	!1		undef
 	undef		undef
+	(my $u)		undef
 
 # Any ~~ object overloaded
 # object overloaded ~~ Any

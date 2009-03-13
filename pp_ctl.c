@@ -4042,12 +4042,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	&& (this_regex = (REGEXP*) This)				\
 	&& (Other = d))	)
 	
-
-#   define SM_OBJECT ( \
-	   (sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))		\
-    ||									\
-	   (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) )	\
-
 #   define SM_OTHER_REF(type) \
 	(SvROK(Other) && SvTYPE(SvRV(Other)) == SVt_##type)
 
@@ -4063,7 +4057,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
     tryAMAGICbinSET(smart, 0);
-    
+
     SP -= 2;	/* Pop the values */
 
     /* Take care only to invoke mg_get() once for each argument. 
@@ -4079,12 +4073,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     if (SvGMAGICAL(e))
 	e = sv_mortalcopy(e);
 
-    if (SM_OBJECT) {
-	if (!SvOK(d) || !SvOK(e))
+    if (!SvOK(e)) {
+	if (SvOK(d))
 	    RETPUSHNO;
 	else
-	    Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+	    RETPUSHYES;
     }
+
+    if ((sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
+	    || (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)))
+	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
 
     if (SM_REF(PVCV)) {
 	I32 c;
@@ -4304,12 +4302,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-    }
-    else if (!SvOK(d) || !SvOK(e)) {
-	if (!SvOK(d) && !SvOK(e))
-	    RETPUSHYES;
-	else
-	    RETPUSHNO;
     }
     else if (SM_REGEX) {
 	PMOP * const matcher = make_matcher(this_regex);
