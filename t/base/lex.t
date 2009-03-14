@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..56\n";
+print "1..57\n";
 
 $x = 'x';
 
@@ -267,3 +267,11 @@ foo::::::bar;
 eval "\$x =\xE2foo";
 if ($@ =~ /Unrecognized character \\xE2 in column 5/) { print "ok $test\n"; } else { print "not ok $test\n"; }
 $test++;
+
+# Is "[~" scanned correctly?
+eval '
+    my @a;
+    my $x = $a[~1]
+';
+print "not " if($@);
+print "ok 57\n";

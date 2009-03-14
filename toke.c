@@ -4290,7 +4290,10 @@ Perl_yylex(pTHX)
 	BOop(OP_BIT_XOR);
     case '[':
 	PL_lex_brackets++;
-	/* FALL THROUGH */
+	{
+	    const char tmp = *s++;
+	    OPERATOR(tmp);
+	}
     case '~':
 	if (s[1] == '~'
 	    && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR))
