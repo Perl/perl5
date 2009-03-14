@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.017 1 February 2009
+
+      * Added 'LimitOutput' option
+        TODO - document it
+
+      * Documented Compress::Raw::Zlib::zlib_version()
+
+      * Documented Compress::Raw::Zlib::deflateReset()
+        [RT #40566]
+
   2.015 3 September 2008
 
       * Makefile.PL
