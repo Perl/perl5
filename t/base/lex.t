@@ -269,9 +269,6 @@ if ($@ =~ /Unrecognized character \\xE2 in column 5/) { print "ok $test\n"; } el
 $test++;
 
 # Is "[~" scanned correctly?
-eval '
-    my @a;
-    my $x = $a[~1]
-';
-print "not " if($@);
+@a = (1,2,3);
+print "not " unless($a[~~2] == 3);
 print "ok 57\n";
