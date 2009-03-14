@@ -1,11 +1,11 @@
 
                              Compress-Raw-Zlib
 
-                             Version 2.015
+                             Version 2.017
 
-                            2nd September 2008
+                            28th February 2009
 
-       Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
+       Copyright (c) 2005-2009 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
            and/or modify it under the same terms as Perl itself.
 
@@ -177,6 +177,35 @@ this module.
 TROUBLESHOOTING
 ---------------
 
+Undefined Symbol gzsetparams
+----------------------------
+
+If you get the error shown below when you run the Compress-Raw-Zlib test
+harness it probably means you are running a copy of zlib that is
+version 1.0.5 or older.
+
+t/01version.........Can't load 'blib/arch/auto/Compress/Zlib/Zlib.so' for 
+                    module Compress::Raw::Zlib: blib/arch/auto/Compress/Raw/Zlib/Zlib.so:
+                    undefined symbol: gzsetparams at ...
+
+There are two ways to fix this problem:
+
+    1. Upgrade to the latest version of zlib.
+
+    2. Edit config.in and set the OLD_ZLIB variable to True.
+
+Test Harness 01version fails
+----------------------------
+If the 01version test harness fails, and the problem isn't covered by the
+scenario above, it probably means that you have two versions of 
+zlib installed on your system.
+
+Run the command below to see if this is indeed the case
+
+    make test TEST_VERBOSE=1 TEST_FILES=t/01version.t 
+
+Try removing the one you don't want to use and rebuild.   
+
 Solaris build fails with "language optional software package not installed"
 ---------------------------------------------------------------------------
 
@@ -277,7 +306,7 @@ it ships with a pre-compiled version of Compress-Raw-Zlib. To check if a
 newer version of Compress-Raw-Zlib is available run this from the command
 prompt
 
-    C:\> ppm verify -upgrade Compress-Zlib
+    C:\> ppm verify -upgrade Compress-Raw-Zlib
 
 If you are not running Activestate Perl and you don't have access
 to a C compiler, you will not be able to build and install this module.
@@ -326,7 +355,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Zlib then search Compress::Raw::Zlib.pm
         for a line like this:
 
-          $VERSION = "2.015" ;
+          $VERSION = "2.017" ;
 
      c. The version of zlib you have used.
         If you have successfully installed Compress-Raw-Zlib, this one-liner

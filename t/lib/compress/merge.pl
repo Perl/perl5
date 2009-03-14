@@ -91,7 +91,7 @@ sub run
 
                 {
                     if ($to_file) {
-                        is $$Error, "Output file '$out_file' is not writable",
+                        like $$Error, "/Permission denied/",
                                 "  Got non-writable filename message" ;
                     }
                     else {
@@ -137,7 +137,7 @@ sub run
 
             ok ! $CompressClass->new($buffer, Merge => 1), "  constructor fails";
             {
-                like $$Error, '/Cannot create InflateScan object: (Header Error|unexpected end of file)/', "  got Bad Magic" ;
+                like $$Error, '/Cannot create InflateScan object: (Header Error|unexpected end of file|Inflation Error: data error)/', "  got Bad Magic" ;
             }
 
         }

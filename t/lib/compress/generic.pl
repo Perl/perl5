@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 670 + $extra) ;
+    plan(tests => 675 + $extra) ;
 }
 
 sub myGZreadFile
@@ -58,12 +58,14 @@ sub run
             
         my($out, $gz);
         $out = "" ;
-        eval qq[\$a = new $CompressClass ] . '$out ;' ;
-        like $@, mkEvalErr("^$CompressClass: output filename is undef or null string");
+        $a = new $CompressClass $out ;
+        is $!, "No such file or directory", '$! = "no such file or directory"';
+        is $$Error, "cannot open file '': No such file or directory";
             
         $out = undef ;
-        eval qq[\$a = new $CompressClass \$out ;] ;
-        like $@, mkEvalErr("^$CompressClass: output filename is undef or null string");
+        $a = new $CompressClass $out ;
+        is $!, "No such file or directory", '$! = "no such file or directory"';
+        is $$Error, "cannot open file '': No such file or directory";
             
         my $x ;
         $gz = new $CompressClass(\$x); 
@@ -90,18 +92,22 @@ sub run
         title "Testing $UncompressClass Errors";
 
         my $out = "" ;
-        eval qq[\$a = new $UncompressClass \$out ;] ;
-        like $@, mkEvalErr("^$UncompressClass: input filename is undef or null string");
+        $a = new  $UncompressClass $out ;
+        is $!, "No such file or directory", '$! = "no such file or directory"';
+        is $$UnError, "cannot open file '': No such file or directory";
+
         $out = undef ;
-        eval qq[\$a = new $UncompressClass \$out ;] ;
-        like $@, mkEvalErr("^$UncompressClass: input filename is undef or null string");
+        $a = new  $UncompressClass $out ;
+        is $!, "No such file or directory", '$! = "no such file or directory"';
+        is $$UnError, "cannot open file '': No such file or directory";
 
         my $lex = new LexFile my $name ;
 
         ok ! -e $name, "  $name does not exist";
         
         eval qq[\$a = new $UncompressClass "$name" ;] ;
-        is $$UnError, "input file '$name' does not exist";
+        is $!, "No such file or directory", '$! = "no such file or directory"';
+        is $$UnError, "cannot open file '$name': No such file or directory";
 
         my $gc ;
         my $guz = new $CompressClass(\$gc); 
