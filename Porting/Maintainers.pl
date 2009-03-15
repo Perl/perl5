@@ -305,7 +305,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mhx',
 		'FILES'		=> q[ext/Devel-PPPort],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Digest' =>
