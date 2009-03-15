@@ -548,6 +548,14 @@ package Maintainers;
 		'UPSTREAM'	=> 'cpan',
 		},
 
+	'IPC::SysV' =>
+		{
+		'MAINTAINER'	=> 'mhx',
+		'FILES'		=> q[ext/IPC-SysV],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> 'cpan',
+		},
+
 	'lib' =>
 		{
 		'MAINTAINER'	=> 'smueller',
