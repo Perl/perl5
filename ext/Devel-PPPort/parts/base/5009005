@@ -29,4 +29,6 @@ regfree_internal               # U
 savesharedpvn                  # U
 scan_vstring                   # E (Perl_scan_vstring)
 upg_version                    # E (Perl_upg_version)
+PERL_PV_ESCAPE_RE              # added by devel/scanprov
+PL_parser                      # added by devel/scanprov
 SV_COW_SHARED_HASH_KEYS        # added by devel/scanprov
