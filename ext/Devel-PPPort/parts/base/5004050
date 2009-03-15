@@ -8,7 +8,7 @@ do_binmode                     # E
 newCONSTSUB                    # E
 newSVpvn                       # E
 save_aelem                     # E
-save_helem                     # E
+save_helem                     # U
 sv_catpv_mg                    # E
 sv_catpvn_mg                   # U
 sv_catsv_mg                    # U

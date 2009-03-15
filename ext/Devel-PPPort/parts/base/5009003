@@ -39,6 +39,7 @@ vverify                        # U
 PERLIO_FUNCS_CAST              # added by devel/scanprov
 PERLIO_FUNCS_DECL              # added by devel/scanprov
 PERL_UNUSED_ARG                # added by devel/scanprov
+PTR2nat                        # added by devel/scanprov
 STR_WITH_LEN                   # added by devel/scanprov
 SV_CONST_RETURN                # added by devel/scanprov
 SV_MUTABLE_RETURN              # added by devel/scanprov
@@ -58,5 +59,6 @@ SvPV_mutable                   # added by devel/scanprov
 SvPV_nolen_const               # added by devel/scanprov
 SvPV_nomg_const                # added by devel/scanprov
 SvPV_nomg_const_nolen          # added by devel/scanprov
+SvPV_renew                     # added by devel/scanprov
 SvSHARED_HASH                  # added by devel/scanprov
 dVAR                           # added by devel/scanprov

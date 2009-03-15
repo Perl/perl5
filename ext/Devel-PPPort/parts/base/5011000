@@ -11,21 +11,37 @@ gv_fetchmethod_flags           # U
 hv_assert                      # U
 mPUSHs                         # U
 mXPUSHs                        # U
+mro_get_from_name              # U
+mro_get_private_data           # U
+mro_register                   # U
+mro_set_mro                    # U
+mro_set_private_data           # U
 newSVpvn_flags                 # U
 newSVpvn_utf8                  # U
 newSVpvs_flags                 # U
 pad_sv                         # U
 pregfree2                      # U
 ref                            # U (Perl_ref)
+save_adelete                   # U
+save_helem_flags               # U
 save_padsv_and_mortalize       # U
+save_pushptr                   # U
 stashpv_hvname_match           # U
 sv_insert_flags                # U
 sv_magic_portable              # U
+sv_utf8_upgrade_flags_grow     # U
+DEFSV_set                      # added by devel/scanprov
 PERL_BCDVERSION                # added by devel/scanprov
 PERL_MAGIC_glob                # added by devel/scanprov
 PERL_MAGIC_mutex               # added by devel/scanprov
+PL_bufend                      # added by devel/scanprov
+PL_bufptr                      # added by devel/scanprov
 PL_copline                     # added by devel/scanprov
 PL_expect                      # added by devel/scanprov
+PL_lex_state                   # added by devel/scanprov
+PL_lex_stuff                   # added by devel/scanprov
+PL_linestr                     # added by devel/scanprov
+PL_tokenbuf                    # added by devel/scanprov
 WARN_ASSERTIONS                # added by devel/scanprov
 aTHXR                          # added by devel/scanprov
 aTHXR_                         # added by devel/scanprov

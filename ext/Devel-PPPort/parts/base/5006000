@@ -284,5 +284,11 @@ dTHX                           # added by devel/scanprov
 dTHXa                          # added by devel/scanprov
 dTHXoa                         # added by devel/scanprov
 dXSTARG                        # added by devel/scanprov
+isALNUMC                       # added by devel/scanprov
+isASCII                        # added by devel/scanprov
+isCNTRL                        # added by devel/scanprov
+isGRAPH                        # added by devel/scanprov
+isPUNCT                        # added by devel/scanprov
+isXDIGIT                       # added by devel/scanprov
 pTHX                           # added by devel/scanprov
 pTHX_                          # added by devel/scanprov

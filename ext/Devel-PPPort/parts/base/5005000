@@ -24,6 +24,7 @@ sv_peek                        # U
 sv_pvn                         # E
 sv_true                        # E
 sv_uv                          # E
+CPERLscope                     # added by devel/scanprov
 END_EXTERN_C                   # added by devel/scanprov
 EXTERN_C                       # added by devel/scanprov
 NOOP                           # added by devel/scanprov
