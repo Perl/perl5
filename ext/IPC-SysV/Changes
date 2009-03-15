@@ -1,3 +1,7 @@
+2.01 - 2009-03-15
+
+    released without changes
+
 2.00_02 - 2008-11-28
 
     * check for ENOMEM and EACCES and skip tests as neccessary
