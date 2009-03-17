@@ -220,8 +220,12 @@ __DATA__
 @	undef		\&fatal
 @	1		\&fatal
 @	[1]		\&fatal
+@	{a=>1}		\&fatal
 @	"foo"		\&fatal
 @	qr//		\&fatal
+# sub is not called on empty hashes / arrays
+	[]		\&fatal
+	+{}		\&fatal
 
 # - null-prototyped subs
 !	undef		\&FALSE
