@@ -145,7 +145,7 @@ __DATA__
 =!	$ov_obj		\&foo
 =	$ov_obj		\&bar
 =	$ov_obj		sub { shift ~~ "key" }
-=!	$ov_obj		sub { shift eq "key" }
+=!	$ov_obj		sub { shift ne "key" }
 =!	$ov_obj		sub { shift ~~ "foo" }
 =	$ov_obj		%keyandmore			TODO
 =!	$ov_obj		%fooormore
@@ -181,35 +181,47 @@ __DATA__
 =@	$obj	"key"
 =@	$obj	FALSE
 
-# CODE ref against argument
-#  - arg is code ref
-!	\&foo		sub {}
-
-# - arg is not code ref
-	1	sub{shift}
-!	0	sub{shift}
-!	undef	sub{shift}
-	undef	sub{not shift}
-	FALSE	sub{not shift}
-	1	sub{scalar @_}
-	[]	\&bar
-	{}	\&bar
-	qr//	\&bar
-!	[]	\&foo
-!	{}	\&foo
-!	qr//	\&foo
-!	undef	\&foo
-	undef	\&bar
-@	undef	\&fatal
-@	1	\&fatal
-@	[]	\&fatal
-@	"foo"	\&fatal
-@	qr//	\&fatal
-# pass argument by reference
-	@fooormore	sub{scalar @_ == 1}
-	@fooormore	sub{"@_" =~ /ARRAY/}
-	%fooormore	sub{"@_" =~ /HASH/}
+# ~~ Coderef
+	sub{0}		sub { ref $_[0] eq "CODE" }
+	%fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	%fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
+	\%fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	\%fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
+	+{%fooormore}	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	+{%fooormore}	sub { $_[0] =~ /^(foo|or|less)$/ }
+	@fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	@fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
+	\@fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	\@fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
+	[@fooormore]	sub { $_[0] =~ /^(foo|or|more)$/ }
+!	[@fooormore]	sub { $_[0] =~ /^(foo|or|less)$/ }
+	%fooormore	sub{@_==1}
+	@fooormore	sub{@_==1}
+	"foo"		sub { $_[0] =~ /^(foo|or|more)$/ }
+!	"more"		sub { $_[0] =~ /^(foo|or|less)$/ }
 	/fooormore/	sub{ref $_[0] eq 'Regexp'}
+	qr/fooormore/	sub{ref $_[0] eq 'Regexp'}
+	1		sub{shift}
+!	0		sub{shift}
+!	undef		sub{shift}
+	undef		sub{not shift}
+	FALSE		sub{not shift}
+	[1]		\&bar
+	{a=>1}		\&bar
+	qr//		\&bar
+!	[1]		\&foo
+!	{a=>1}		\&foo
+# empty stuff matches, because the sub is never called:
+	[]		\&foo
+	{}		\&foo
+!	qr//		\&foo
+!	undef		\&foo
+	undef		\&bar
+@	undef		\&fatal
+@	1		\&fatal
+@	[1]		\&fatal
+@	"foo"		\&fatal
+@	qr//		\&fatal
 
 # - null-prototyped subs
 !	undef		\&FALSE

@@ -4084,22 +4084,78 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    || (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)))
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
 
-    if (SM_REF(PVCV)) {
+    if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVCV) {
 	I32 c;
-	ENTER;
-	SAVETMPS;
-	PUSHMARK(SP);
-	PUSHs(Other);
-	PUTBACK;
-	c = call_sv(This, G_SCALAR);
-	SPAGAIN;
-	if (c == 0)
-	    PUSHs(&PL_sv_no);
-	else if (SvTEMP(TOPs))
-	    SvREFCNT_inc_void(TOPs);
-	FREETMPS;
-	LEAVE;
-	RETURN;
+	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
+	    /* Test sub truth for each key */
+	    HE *he;
+	    bool andedresults = TRUE;
+	    HV *hv = (HV*) SvRV(d);
+	    (void) hv_iterinit(hv);
+	    while ( (he = hv_iternext(hv)) ) {
+		ENTER;
+		SAVETMPS;
+		PUSHMARK(SP);
+		PUSHs(hv_iterkeysv(he));
+		PUTBACK;
+		c = call_sv(e, G_SCALAR);
+		SPAGAIN;
+		if (c == 0)
+		    andedresults = FALSE;
+		else
+		    andedresults = SvTRUEx(POPs) && andedresults;
+		FREETMPS;
+		LEAVE;
+	    }
+	    if (andedresults)
+		RETPUSHYES;
+	    else
+		RETPUSHNO;
+	}
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
+	    /* Test sub truth for each element */
+	    I32 i;
+	    bool andedresults = TRUE;
+	    AV *av = (AV*) SvRV(d);
+	    const I32 len = av_len(av);
+	    for (i = 0; i <= len; ++i) {
+		SV * const * const svp = av_fetch(av, i, FALSE);
+		ENTER;
+		SAVETMPS;
+		PUSHMARK(SP);
+		if (svp)
+		    PUSHs(*svp);
+		PUTBACK;
+		c = call_sv(e, G_SCALAR);
+		SPAGAIN;
+		if (c == 0)
+		    andedresults = FALSE;
+		else
+		    andedresults = SvTRUEx(POPs) && andedresults;
+		FREETMPS;
+		LEAVE;
+	    }
+	    if (andedresults)
+		RETPUSHYES;
+	    else
+		RETPUSHNO;
+	}
+	else {
+	    ENTER;
+	    SAVETMPS;
+	    PUSHMARK(SP);
+	    PUSHs(d);
+	    PUTBACK;
+	    c = call_sv(e, G_SCALAR);
+	    SPAGAIN;
+	    if (c == 0)
+		PUSHs(&PL_sv_no);
+	    else if (SvTEMP(TOPs))
+		SvREFCNT_inc_void(TOPs);
+	    FREETMPS;
+	    LEAVE;
+	    RETURN;
+	}
     }
     else if (SM_REF(PVHV)) {
 	if (SM_OTHER_REF(PVHV)) {
