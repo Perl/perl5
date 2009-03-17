@@ -683,42 +683,43 @@ entries apply in those cases.
 
     (overloading trumps everything below)
 
-    Hash    CodeRef   sub truth for each key   !grep { !$b->($_) } keys %$a
-    Array   CodeRef   sub truth for each elt   !grep { !$b->($_) } @$a
-    Any     CodeRef   scalar sub truth         $b->($a)
+    Hash    CodeRef   sub truth for each key[1] !grep { !$b->($_) } keys %$a
+    Array   CodeRef   sub truth for each elt[1] !grep { !$b->($_) } @$a
+    Any     CodeRef   scalar sub truth          $b->($a)
 
     Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
     Array   Hash      hash slice existence     @$a == grep {exists $b->{$_}} @$a
-    Regex   Hash      hash key grep            grep /$a/, keys %$b
+    Regex   Hash      hash key grep[1]         grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
     Any     Hash      hash entry existence     exists $b->{$a}
 
-    Hash    Array     hash slice existence     @$b == grep {exists $a->{$_}} @$b
-    Array   Array     arrays are comparable[1]
-    Any     Array     match against an array element[2]
+    Hash    Array     hash slice existence[1]  @$b == grep {exists $a->{$_}} @$b
+    Array   Array     arrays are comparable[2]
+    Any     Array     match against an array element[3]
                                                grep $a ~~ $_, @$b
 
     Hash    Regex     hash key grep            grep /$b/, keys %$a
     Array   Regex     array grep               grep /$b/, @$a
     Any     Regex     pattern match            $a =~ /$b/
 
-    Num     Range[3]  in numeric range
-    undef   Range[3]  always false
-    Any     Range[3]  in string range
+    Num     Range[4]  in numeric range
+    undef   Range[4]  always false
+    Any     Range[4]  in string range
 
-    Num     numish[4] numeric equality         $a == $b
+    Num     numish[5] numeric equality         $a == $b
     Any     Str       string equality          $a eq $b
     Any     Num       numeric equality         $a == $b
     Any     Any       string equality          $a eq $b
 
 
- 1 - that is, each element matches the element of same index in the other
-     array. [2]
- 2 - If a circular reference is found, we fall back to referential equality.
- 3 - a range is written EXPR..EXPR (using the C<..> range operator, but
+ 1 - empty hashes or array won't match.
+ 2 - that is, each element matches the element of same index in the other
+     array. [3]
+ 3 - If a circular reference is found, we fall back to referential equality.
+ 4 - a range is written EXPR..EXPR (using the C<..> range operator, but
      NOT the three-dot version C<...>, which will be treated as a boolean
      operator)
- 4 - either a real number, or a string that looks like a number
+ 5 - either a real number, or a string that looks like a number
 
 The "matching code" doesn't represent the I<real> matching code,
 of course: it's just there to explain the intended meaning. Unlike
