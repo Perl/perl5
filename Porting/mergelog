@@ -334,9 +334,9 @@ M  ea9222e036 2008/01/12 32967
 M  d064452989 2008/01/12 32968
 R  9f621bb00a 2008/01/12 32969 length(undef) returns undef not 0: not BackCompat
 M  7637cd0734 2008/01/13 32970
-R  656266fc52 2008/01/13 32971 (unknown reason)
+R  656266fc52 2008/01/13 32971 update to 9f621bb00a
 M  34f1896bf0 2008/01/14 32974
-R  9064044581 2008/01/14 32976 (unknown reason)
+R  9064044581 2008/01/14 32976 SVt_REGEXP specific
 M  643faf2806 2008/01/14 32977
 M  3e946625bd 2008/01/14 32978
 M  a2309040b8 2008/01/15 32979
@@ -347,7 +347,7 @@ M  f5798d0b20 2008/01/16 32986
 M  dda3675659 2008/01/17 32987
 M  ac27d13b82 2008/01/17 32988
 M  f3828575f1 2008/01/17 32989
-R  b88df9907a 2008/01/17 32990 (unknown reason)
+R  b88df9907a 2008/01/17 32990 adds new warning
 M  3d826b294b 2008/01/18 32993
 M  eb36cb72ef 2008/01/18 32994
 M  4bc6199fc6 2008/01/18 32995
@@ -363,30 +363,30 @@ M  47031da69d 2008/01/18 33004
 M  d11865445a 2008/01/19 33009
 M  0cbdab3870 2008/01/20 33010
 M  0588a1501b 2008/01/20 33011
-R  10067d9ac7 2008/01/20 33012 (unknown reason)
+R  10067d9ac7 2008/01/20 33012 changes sig of PUSHFORMAT
 M  c2d565bf20 2008/01/20 33013
-R  f9c764c5b8 2008/01/20 33014 (unknown reason)
-R  a61a706455 2008/01/20 33015 (unknown reason)
-R  8e6639977c 2008/01/20 33016 (unknown reason)
+R  f9c764c5b8 2008/01/20 33014 changes struct block_sub; not BinCompat
+R  a61a706455 2008/01/20 33015 changes struct block_loop; not BinCompat
+R  8e6639977c 2008/01/20 33016 changes block_sub etc; not BinCompat
 M  bafb2adc25 2008/01/20 33017
-R  ae423868f0 2008/01/20 33018 (unknown reason)
-R  bf38a47800 2008/01/21 33019 (unknown reason)
+R  ae423868f0 2008/01/20 33018 changes block_sub etc; not BinCompat
+R  bf38a47800 2008/01/21 33019 Change the hasargs return value from caller
 M  4f9115300b 2008/01/21 33020
 M  51ce55291b 2008/01/21 33021
-R  98625aca47 2008/01/21 33022 (unknown reason)
+R  98625aca47 2008/01/21 33022 Change the wantarray result from caller
 M  b8d2d791b6 2008/01/21 33023
 M  7df0357e86 2008/01/21 33024
-R  2f8edad0d3 2008/01/21 33025 (unknown reason)
+R  2f8edad0d3 2008/01/21 33025 change values for G_SCALAR etc
 M  377b109895 2008/01/21 33026
-R  3701055e79 2008/01/21 33027 (unknown reason)
-R  446d078759 2008/01/21 33028 (unknown reason)
+R  3701055e79 2008/01/21 33027 Squeeze the context type down to 4 bits
+R  446d078759 2008/01/21 33028 In struct block change blku_type from U8 to U16,
 M  85a646323d 2008/01/21 33029
-R  17347a5143 2008/01/21 33030 (unknown reason)
+R  17347a5143 2008/01/21 33030 In struct block_eval, eliminate old_in_eval
 M  ebef0ab4be 2008/01/21 33031
-R  1f27d7886b 2008/01/21 33032 (unknown reason)
+R  1f27d7886b 2008/01/21 33032 Tidy up context type flags.
 M  99710fe38e 2008/01/21 33033
 M  c5bed6a7fc 2008/01/21 33034
-R  1ed74d0486 2008/01/21 33035 (unknown reason)
+R  1ed74d0486 2008/01/21 33035 Eliminate the U8 sbu_once from struct subst,
 M  5c8c4cb2e5 2008/01/22 33036
 M  776a38e311 2008/01/22 33038
 M  c297d531cc 2008/01/22 33040
@@ -405,39 +405,39 @@ M  9bdb0282d4 2008/01/23 33053
 M  7ea950175c 2008/01/23 33054
 M  b10924eb6f 2008/01/23 33055
 M  9f99c5dc9c 2008/01/23 33056
-R  3b719c58b6 2008/01/24 33057 (unknown reason)
+R  3b719c58b6 2008/01/24 33057 Split CXt_LOOP into CXt_LOOP_PLAIN and ...
 M  4b70616db4 2008/01/24 33058
-R  a28356daf9 2008/01/24 33059 (unknown reason)
-R  8b73ab1881 2008/01/24 33060 (unknown reason)
-R  c6fdafd0fe 2008/01/24 33061 (unknown reason)
-R  c25bf6989e 2008/01/24 33062 (unknown reason)
-R  493b0a3c46 2008/01/24 33063 (unknown reason)
+R  a28356daf9 2008/01/24 33059 adds CXt_LOOP_STACK
+R  8b73ab1881 2008/01/24 33060 uses CXt_LOOP_STACK
+R  c6fdafd0fe 2008/01/24 33061 adds CXt_LOOP_LAZYIV
+R  c25bf6989e 2008/01/24 33062 uses CXt_LOOP_STACK
+R  493b0a3c46 2008/01/24 33063 uses CXt_LOOP_LAZYIV
 M  de5429e8ea 2008/01/24 33064
-R  a12a6a4d3f 2008/01/24 33065 (unknown reason)
+R  a12a6a4d3f 2008/01/24 33065 uses new warning only added in blead
 M  f38e12df22 2008/01/25 33066
-R  3bf7733be4 2008/01/25 33067 (unknown reason)
+R  3bf7733be4 2008/01/25 33067 depends on new CXt_ stuff
 M  267cc4a811 2008/01/25 33068
 R  167f2c4d08 2008/01/25 33069 not BinCompat
-R  d01136d6c9 2008/01/26 33070 (unknown reason)
+R  d01136d6c9 2008/01/26 33070 more messing with struct block_loop
 P  c0a413d189 2008/01/26 33071 only Peek.t; rest is fix for skipped 33069
-R  5edb5b2abb 2008/01/26 33072 (unknown reason)
-R  840fe43365 2008/01/26 33073 (unknown reason)
-R  b99874c792 2008/01/26 33074 (unknown reason)
-R  9a98d8a1ee 2008/01/26 33075 (unknown reason)
-R  d28d780685 2008/01/26 33076 (unknown reason)
-R  7fe4498558 2008/01/26 33077 (unknown reason)
-R  f32d39a24d 2008/01/26 33078 (unknown reason)
-R  dceb5f6256 2008/01/26 33079 (unknown reason)
+R  5edb5b2abb 2008/01/26 33072 Eliminate OP_SETSTATE
+R  840fe43365 2008/01/26 33073 update to 33070
+R  b99874c792 2008/01/26 33074 more loop messing
+R  9a98d8a1ee 2008/01/26 33075 fix to 33074
+R  d28d780685 2008/01/26 33076 more loop messing
+R  7fe4498558 2008/01/26 33077 fixes to bleed-only bits
+R  f32d39a24d 2008/01/26 33078 blead-specific optimisation
+R  dceb5f6256 2008/01/26 33079 fix to 33072
 P  09edbca0f5 2008/01/26 33080 itersave not removed
 R  e846cb9248 2008/01/26 33081 not BinCompat
 M  b900987b60 2008/01/27 33082
 P  c9289b7b6d 2008/01/28 33083 Perl_save_padsv not removed
 M  899488baa2 2008/01/28 33084
 M  001d637e39 2008/01/28 33085 *** Perl_call_sv() VOL added to flags arg.
-R  6b75f04219 2008/01/28 33086 (unknown reason)
+R  6b75f04219 2008/01/28 33086 changed sig of PUSHEVAL
 M  c6502f5c7c 2008/01/28 33087
-R  0a0ffbced7 2008/01/28 33088 (unknown reason)
-R  704d42154d 2008/01/28 33089 (unknown reason)
+R  0a0ffbced7 2008/01/28 33088 lc(undef) etc now warn
+M  704d42154d 2008/01/28 33089
 M  ea7cd9ccaf 2008/01/28 33090
 M  53bc175b76 2008/01/28 33091
 M  a62d3a1b93 2008/01/28 33092
@@ -450,16 +450,16 @@ M  8d2ac73b58 2008/01/28 33098
 M  74175ec198 2008/01/28 33099
 M  a0604b4cdf 2008/01/29 33101
 M  7a823c1420 2008/01/29 33102
-R  15f169a108 2008/01/29 33103 (unknown reason)
+R  15f169a108 2008/01/29 33103 consting
 M  e3176d0917 2008/01/29 33104
 M  c3c3bebb63 2008/01/29 33105
 P  8c54174d09 2008/01/29 33106 fixes for 33081 not merged
-R  52d1f6fbd7 2008/01/29 33109 (unknown reason)
+R  52d1f6fbd7 2008/01/29 33109 update to 33106
 M  fad23372ba 2008/01/30 33124
 M  2b631c9356 2008/01/30 33125
 M  e148a7d386 2008/01/30 33127
 m  384f06ae49 2008/01/30 33129 lib/Math/BigInt/CalcEmu.pm pod fix skipped
-R  83f994449f 2008/01/31 33142 (unknown reason)
+R  83f994449f 2008/01/31 33142 fix to 33103
 M  af20bb8057 2008/01/31 33143
 M  a371bcf3a4 2008/01/31 33144
 M  70aab261fe 2008/01/31 33152
@@ -468,19 +468,19 @@ M  ea6a7c5888 2008/01/31 33154
 M  43b09ad7a3 2008/02/01 33163
 M  bb9fb6628b 2008/02/01 33170
 M  437d3b4e2c 2008/02/01 33178
-R  fb632ce3b9 2008/02/02 33181 (unknown reason)
-R  92e45a3e6a 2008/02/02 33182 (unknown reason)
+M  fb632ce3b9 2008/02/02 33181 
+R  92e45a3e6a 2008/02/02 33182 minor optimisation with breakage risk
 M  357244ac7b 2008/02/02 33193
 M  349133794f 2008/02/02 33206
 M  98deaf8b6f 2008/02/02 33208
 M  b57c8994d1 2008/02/03 33222
 M  000fd473bc 2008/02/03 33223
 M  1bcecb7728 2008/02/03 33226
-R  e1c418065b 2008/02/03 33228 (unknown reason)
+R  e1c418065b 2008/02/03 33228 consting
 M  a0e63aba9e 2008/02/04 33229
 M  196d796ca0 2008/02/04 33230
-R  de37a1949a 2008/02/04 33231 (unknown reason)
-R  76753e7fcd 2008/02/04 33232 (unknown reason)
+R  de37a1949a 2008/02/04 33231 consting
+R  76753e7fcd 2008/02/04 33232 messing with CXt_ values
 M  8f3d514bf2 2008/02/04 33233
 M  d0f7eaaf66 2008/02/04 33234
 M  519bf2a30a 2008/02/04 33235
@@ -491,11 +491,11 @@ M  c6f750d107 2008/02/06 33239
 M  913ba1b7a5 2008/02/06 33241
 M  5d6b07c5a4 2008/02/06 33242
 M  6127f3cdd0 2008/02/07 33244
-R  aad570aaa6 2008/02/07 33245 (unknown reason)
+R  aad570aaa6 2008/02/07 33245 consting
 M  08c5d56415 2008/02/07 33246
 M  82cfb3a2c3 2008/02/08 33247
 M  b727803b27 2008/02/08 33248
-R  5de3775cb1 2008/02/08 33249 (unknown reason)
+R  5de3775cb1 2008/02/08 33249 consting
 M  a592ba15a3 2008/02/08 33250
 M  ddd401edfb 2008/02/08 33251
 R  d5ece4e2f6 2008/02/08 33252 (unknown reason)
