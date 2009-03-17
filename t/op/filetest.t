@@ -164,6 +164,10 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     eval "-$op \$gv";
     is( $over,      $exp,   "string overload $is called for -$op on GLOB" );
 
+    # IO refs always get string overload called. This might be a bug.
+    $op eq "t" || $op eq "T" || $op eq "B"
+        and ($exp, $is) = (1, "is");
+
     $over = 0;
     eval "-$op \$io";
     is( $over,      $exp,   "string overload $is called for -$op on IO");
