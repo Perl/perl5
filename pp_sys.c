@@ -3240,11 +3240,13 @@ PP(pp_ftrowned)
 PP(pp_ftlink)
 {
     dVAR;
-    I32 result;
     dSP;
+    I32 result;
 
     tryAMAGICftest('l');
     result = my_lstat();
+    SPAGAIN;
+
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
