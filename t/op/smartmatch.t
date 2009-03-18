@@ -153,15 +153,15 @@ __DATA__
 =	$ov_obj		{"key" => 1}
 =	$ov_obj		{"key" => 1, bar => 2}		TODO
 =!	$ov_obj		{"foo" => 1}
-=	$ov_obj		@keyandmore
+=	$ov_obj		@keyandmore			TODO
 =!	$ov_obj		@fooormore
-=	$ov_obj		["key" => 1]
+=	$ov_obj		["key" => 1]			TODO
 =!	$ov_obj		["foo" => 1]
-=	$ov_obj		/key/
+=	$ov_obj		/key/				TODO
 =!	$ov_obj		/foo/
-=	$ov_obj		qr/Key/i
+=	$ov_obj		qr/Key/i			TODO
 =!	$ov_obj		qr/foo/
-=	$ov_obj		"key"
+=	$ov_obj		"key"				TODO
 =!	$ov_obj		"foo"
 =!	$ov_obj		FALSE
 =!	$ov_obj		TRUE
@@ -261,6 +261,9 @@ __DATA__
 	"foo"		+{foo => 1, bar => 2}
 !	"baz"		+{foo => 1, bar => 2}
 
+#  - undef
+!	undef		%hash
+!	undef		+{"" => "empty key"}
 
 # ARRAY ref against:
 #  - another array ref

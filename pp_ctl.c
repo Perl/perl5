@@ -4161,15 +4161,19 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETURN;
 	}
     }
-    else if (SM_REF(PVHV)) {
-	if (SM_OTHER_REF(PVHV)) {
+    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVHV) {
+	if (!SvOK(d)) {
+	    RETPUSHNO;
+	}
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    /* Check that the key-sets are identical */
 	    HE *he;
-	    HV *other_hv = MUTABLE_HV(SvRV(Other));
+	    HV *other_hv = MUTABLE_HV(SvRV(d));
 	    bool tied = FALSE;
 	    bool other_tied = FALSE;
 	    U32 this_key_count  = 0,
 	        other_key_count = 0;
+	    This = SvRV(e);
 	    
 	    /* Tied hashes don't know how many keys they have. */
 	    if (SvTIED_mg(This, PERL_MAGIC_tied)) {
@@ -4215,10 +4219,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    else
 		RETPUSHYES;
 	}
-	else if (SM_OTHER_REF(PVAV)) {
-	    AV * const other_av = MUTABLE_AV(SvRV(Other));
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
+	    AV * const other_av = MUTABLE_AV(SvRV(d));
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
+	    This = SvRV(e);
 
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
@@ -4233,9 +4238,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-	else if (SM_OTHER_REGEX) {
+	else if (SvROK(d)
+		&& (SvTYPE(SvRV(d)) == SVt_REGEXP)
+		&& (other_regex = (REGEXP*) SvRV(d))) {
 	    PMOP * const matcher = make_matcher(other_regex);
 	    HE *he;
+	    This = SvRV(e);
 
 	    (void) hv_iterinit(MUTABLE_HV(This));
 	    while ( (he = hv_iternext(MUTABLE_HV(This))) ) {
@@ -4249,7 +4257,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else {
-	    if (hv_exists_ent(MUTABLE_HV(This), Other, 0))
+	    if (hv_exists_ent(MUTABLE_HV(SvRV(e)), d, 0))
 		RETPUSHYES;
 	    else
 		RETPUSHNO;
