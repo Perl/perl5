@@ -86,9 +86,9 @@ sub bar {42}
 sub gorch {42}
 sub fatal {die "fatal sub\n"}
 
+# to test constant folding
 sub FALSE() { 0 }
 sub TRUE() { 1 }
-sub TWO() { 1 }
 
 # Prefix character :
 #   - expected to match
@@ -142,6 +142,7 @@ __DATA__
 	$ov_obj		$ov_obj
 =@	$ov_obj		\&fatal
 =!	$ov_obj		\&FALSE
+=	$ov_obj		\&TRUE
 =!	$ov_obj		\&foo
 =	$ov_obj		\&bar
 =	$ov_obj		sub { shift ~~ "key" }
@@ -163,10 +164,11 @@ __DATA__
 =	$ov_obj		"key"
 =!	$ov_obj		"foo"
 =!	$ov_obj		FALSE
+=!	$ov_obj		TRUE
 
 # regular object
 =@	$obj	$ov_obj
-=@	$obj	$obj
+@	$obj	$obj
 =@	$obj	\&fatal
 =@	$obj	\&FALSE
 =@	$obj	\&foo
@@ -226,19 +228,6 @@ __DATA__
 # sub is not called on empty hashes / arrays
 !	[]		\&fatal
 !	+{}		\&fatal
-
-# - null-prototyped subs
-!	undef		\&FALSE
-	undef		\&TRUE
-!	0		\&FALSE
-	0		\&TRUE
-!	1		\&FALSE
-	1		\&TRUE
-!	\&FALSE		\&foo
-
-# - non-null-prototyped subs
-	bar		gorch
-@	fatal		bar
 
 # HASH ref against:
 #   - another hash ref
