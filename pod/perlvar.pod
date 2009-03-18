@@ -241,7 +241,7 @@ See L</@-> for a replacement.
 =item ${^MATCH}
 X<${^MATCH}>
 
-This is similar to C<$&> (C<$POSTMATCH>) except that it does not incur the
+This is similar to C<$&> (C<$MATCH>) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
 the C</p> modifier.
