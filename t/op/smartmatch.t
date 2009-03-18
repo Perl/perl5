@@ -243,23 +243,23 @@ __DATA__
 	\%tied_hash	\%tied_hash
 
 #  - an array ref
-	\%::		[keys %main::]
-!	\%::		[]
-	{"" => 1}	[undef]
-	{ foo => 1 }	["foo"]
-	{ foo => 1 }	["foo", "bar"]
-	\%hash		["foo", "bar"]
-	\%hash		["foo"]
-!	\%hash		["quux"]
-	\%hash		[qw(foo quux)]
+	[keys %main::]	\%::
+!	[]		\%::
+	[undef]		{"" => 1}
+	["foo"]		{ foo => 1 }
+	["foo", "bar"]	{ foo => 1 }
+	["foo", "bar"]	\%hash
+	["foo"]		\%hash
+!	["quux"]	\%hash
+	[qw(foo quux)]	\%hash
 
 #  - a regex
-	{foo => 1}	qr/^(fo[ox])$/
-!	+{0..99}	qr/[13579]$/
+	qr/^(fo[ox])$/		{foo => 1}
+!	qr/[13579]$/		+{0..99}
 
 #  - a string
-	+{foo => 1, bar => 2}	"foo"
-!	+{foo => 1, bar => 2}	"baz"
+	"foo"		+{foo => 1, bar => 2}
+!	"baz"		+{foo => 1, bar => 2}
 
 
 # ARRAY ref against:
@@ -316,10 +316,10 @@ __DATA__
 	@nums		[1..10]
 !	@nums		[0..9]
 
-	%hash		"foo"
-	%hash		/bar/
-	%hash		[qw(bar)]
-!	%hash		[qw(a b c)]
+	"foo"		%hash
+	/bar/		%hash
+	[qw(bar)]	%hash
+!	[qw(a b c)]	%hash
 	%hash		%hash
 	%hash		+{%hash}
 	%hash		\%hash
