@@ -704,18 +704,18 @@ Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
 EXp	|REGEXP*|reg_temp_copy	|NN REGEXP* r
-Ap	|void	|regfree_internal|NN REGEXP *const rx
+Ap	|void	|regfree_internal|NN REGEXP *const r
 Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
 Ap	|REGEXP*|pregcomp	|NN const SV * const pattern|const U32 flags
 Ap	|REGEXP*|re_compile	|NN const SV * const pattern|const U32 flags
-Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
+Ap	|char*	|re_intuit_start|NN REGEXP * const prog|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data
-Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
-Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
+Ap	|SV*	|re_intuit_string|NN REGEXP  *const prog
+Ap	|I32	|regexec_flags	|NN REGEXP *const prog|NN char *stringarg \
 				|NN char *strend|NN char *strbeg|I32 minend \
 				|NN SV *sv|NULLOK void *data|U32 flags
 ApR	|regnode*|regnext	|NULLOK regnode* p
