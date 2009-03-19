@@ -4023,12 +4023,14 @@ t/Module_Pluggable/08nothing.t	Module::Pluggable tests
 t/Module_Pluggable/09require.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_inner.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_noinner.t	Module::Pluggable tests
+t/Module_Pluggable/10innerpack_onefile.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_override.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_super.t		Module::Pluggable tests
 t/Module_Pluggable/10innerpack.t	Module::Pluggable tests
 t/Module_Pluggable/11usetwice.t	Module::Pluggable tests
 t/Module_Pluggable/12onlyarray.t	Module::Pluggable tests
 t/Module_Pluggable/12onlyregex.t	Module::Pluggable tests
+t/Module_Pluggable/12onlyrequire.t	Module::Pluggable tests
 t/Module_Pluggable/12only.t	Module::Pluggable tests
 t/Module_Pluggable/13exceptarray.t	Module::Pluggable tests
 t/Module_Pluggable/13exceptregex.t	Module::Pluggable tests
@@ -4042,6 +4044,7 @@ t/Module_Pluggable/19can_ok_clobber.t	Module::Pluggable tests
 t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
 t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+t/Module_Pluggable/lib/Acme/Foo-Bar.pm			Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
@@ -4063,6 +4066,7 @@ t/Module_Pluggable/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/No/Middle.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/TA/C/A/I.pm	Module::Pluggable tests
+t/Module_Pluggable/lib/Zot/.Zork.pm	Module::Pluggable tests
 t/mro/basic_01_c3.t		mro tests
 t/mro/basic_01_dfs.t		mro tests
 t/mro/basic_02_c3.t		mro tests
