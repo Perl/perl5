@@ -41,7 +41,6 @@ WriteMakefile
                          },
           'EXE_FILES'    => [],
           'INSTALLDIRS'  => ($] >= 5.008009) ? "perl" : "site",
-          'INST_LIB'     => ($] >= 5.008009) ? 'blib/arch' : 'blib/lib',
           'PL_FILES'     => {},
           'realclean'    => {FILES=> join ' ', @files},
           # In the core pods will be built by installman.
