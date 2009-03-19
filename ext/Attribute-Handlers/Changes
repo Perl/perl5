@@ -119,4 +119,6 @@ Revision history for Perl extension Attribute::Handlers
 0.82	Wed Mar 11 17:17:00 CET 2009
         - Bring test code in line with core perl.
 	
-	
+0.83	Fri Mar 13 15:14:00 CET 2009
+        - Re-add a TODO marker in the tests that would fail on 5.6.2.
+
