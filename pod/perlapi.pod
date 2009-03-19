@@ -373,7 +373,7 @@ Creates a new AV.  The reference count is set to 1.
 	AV*	newAV()
 
 =for hackers
-Found in file av.c
+Found in file av.h
 
 =item sortsv
 X<sortsv>
@@ -1943,7 +1943,7 @@ Creates a new HV.  The reference count is set to 1.
 	HV*	newHV()
 
 =for hackers
-Found in file hv.c
+Found in file hv.h
 
 
 =back
@@ -2420,7 +2420,7 @@ C<strend>.  It returns C<NULL> if the string can't be found.  The C<sv>
 does not have to be fbm_compiled, but the search will not be as fast
 then.
 
-	char*	fbm_instr(unsigned char* big, unsigned char* bigend, SV* littlesv, U32 flags)
+	char*	fbm_instr(unsigned char* big, unsigned char* bigend, SV* littlestr, U32 flags)
 
 =for hackers
 Found in file util.c
@@ -2531,7 +2531,7 @@ is an alpha version).  The boolean qv denotes that the version
 should be interpreted as if it had multiple decimals, even if
 it doesn't.
 
-	const char*	scan_version(const char *vstr, SV *sv, bool qv)
+	const char*	scan_version(const char *s, SV *rv, bool qv)
 
 =for hackers
 Found in file util.c
@@ -2672,7 +2672,7 @@ X<vcmp>
 Version object aware cmp.  Both operands must already have been 
 converted into version objects.
 
-	int	vcmp(SV *lvs, SV *rvs)
+	int	vcmp(SV *lhv, SV *rhv)
 
 =for hackers
 Found in file util.c
