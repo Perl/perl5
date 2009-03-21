@@ -2422,7 +2422,7 @@ palindrome in between.
 
     /(?: (\w) (?...Here be a palindrome...) \{-1} | \w? )/x
 
-Adding C<\W*> at either end to eliminate was is to be ignored, we already
+Adding C<\W*> at either end to eliminate what is to be ignored, we already
 have the full pattern:
 
     my $pp = qr/^(\W* (?: (\w) (?1) \g{-1} | \w? ) \W*)$/ix;
