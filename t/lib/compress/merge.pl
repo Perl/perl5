@@ -91,7 +91,7 @@ sub run
 
                 {
                     if ($to_file) {
-                        like $$Error, "/Permission denied/",
+                        like lc($$Error), '/permission denied/',
                                 "  Got non-writable filename message" ;
                     }
                     else {
