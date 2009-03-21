@@ -31,7 +31,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.14';
+$VERSION = '0.16';
 
 =pod
 
@@ -267,7 +267,7 @@ sub prepare {
     local @INC           = CPANPLUS::inc->original_inc;
 
     ### this will generate warnings under anything lower than M::B 0.2606
-    my %buildflags = $dist->_buildflags_as_hash( $buildflags );
+    my @buildflags = $dist->_buildflags_as_list( $buildflags );
     $dist->status->_buildflags( $buildflags );
 
     my $fail;
@@ -312,7 +312,7 @@ sub prepare {
         my $env = 'ENV_CPANPLUS_IS_EXECUTING';
         local $ENV{$env} = BUILD_PL->( $dir );
 
-        unless ( scalar run(    command => [$perl, BUILD_PL->($dir), $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD_PL->($dir), @buildflags],
                                 buffer  => \$prep_output,
                                 verbose => $verbose ) 
         ) {
@@ -379,9 +379,11 @@ sub _find_prereqs {
     my $content;
 
     if ( version->new( $Module::Build::VERSION ) >= $safe_ver and ! ON_WIN32 ) {
+        my @buildflags = $dist->_buildflags_as_list( $buildflags );
+
         # Use the new Build action 'prereq_data'
         
-        unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', @buildflags],
                                 buffer  => \$content,
                                 verbose => 0 ) 
         ) {
@@ -540,7 +542,7 @@ sub create {
                 if $self->best_path_to_module_build;
 
     ### this will generate warnings under anything lower than M::B 0.2606
-    my %buildflags = $dist->_buildflags_as_hash( $buildflags );
+    my @buildflags = $dist->_buildflags_as_list( $buildflags );
     $dist->status->_buildflags( $buildflags );
 
     my $fail; my $prereq_fail; my $test_fail;
@@ -573,7 +575,7 @@ sub create {
 
         my $captured;
 
-        unless ( scalar run(    command => [$perl, BUILD->($dir), $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD->($dir), @buildflags],
                                 buffer  => \$captured,
                                 verbose => $verbose ) 
         ) {
@@ -595,7 +597,7 @@ sub create {
         unless( $skiptest ) {
             my $test_output;
             my $flag    = ON_VMS ? '"test"' : 'test';
-            my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+            my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
             unless ( scalar run(    command => $cmd,
                                     buffer  => \$test_output,
                                     verbose => $verbose ) 
@@ -704,7 +706,8 @@ sub install {
     }
 
     my $fail;
-    my $buildflags = $dist->status->_buildflags;
+    my @buildflags = $dist->_buildflags_as_list( $dist->status->_buildflags );
+
     ### hmm, how is this going to deal with sudo?
     ### for now, check effective uid, if it's not root,
     ### shell out, otherwise use the method
@@ -715,7 +718,7 @@ sub install {
         ### M::B at the top of the build.pl
         ### On VMS, flags need to be quoted
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
         my $sudo    = $conf->get_program('sudo');
         unshift @$cmd, $sudo if $sudo;
 
@@ -729,11 +732,9 @@ sub install {
             $fail++;
         }
     } else {
-        my %buildflags = $dist->_buildflags_as_hash($buildflags);
-
         my $install_output;
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
         unless( scalar run( command => $cmd,
                             buffer  => \$install_output,
                             verbose => $verbose )
@@ -754,15 +755,13 @@ sub install {
     return $dist->status->installed( $fail ? 0 : 1 );
 }
 
-### returns the string 'foo=bar zot=quux' as (foo => bar, zot => quux)
-sub _buildflags_as_hash {
+### returns the string 'foo=bar --zot quux'
+###        as the list 'foo=bar', '--zot', 'qux'
+sub _buildflags_as_list {
     my $self    = shift;
     my $flags   = shift or return;
 
-    my @argv    = Module::Build->split_like_shell($flags);
-    my ($argv)  = Module::Build->read_args(@argv);
-
-    return %$argv;
+    return Module::Build->split_like_shell($flags);
 }
 
 =head1 AUTHOR
