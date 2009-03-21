@@ -18,6 +18,7 @@ package Maintainers;
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
+	'bingos'	=> 'Chris Williams <chris@bingosnet.co.uk>',
 	'chorny'	=> "Alexandr Ciornii <alexchorny\100gmail.com>",
 	'corion'	=> 'Max Maischein <corion@corion.net>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
@@ -270,7 +271,7 @@ package Maintainers;
 
 	'CPANPLUS::Dist::Build' =>
 		{
-		'MAINTAINER'	=> 'kwilliams',
+		'MAINTAINER'	=> 'bingos',
 		'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm lib/CPANPLUS/Dist/Build],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'cpan',
