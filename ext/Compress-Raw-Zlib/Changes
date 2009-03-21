@@ -4,7 +4,8 @@ CHANGES
   2.017 1 February 2009
 
       * Added 'LimitOutput' option
-        TODO - document it
+
+      * Fixed coring issue when LimitOutput was used.
 
       * Documented Compress::Raw::Zlib::zlib_version()
 
