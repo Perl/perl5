@@ -494,7 +494,6 @@ sub run_tests {
             nok "b$a="  =~ /a$a=/;
              ok "b$a="  =~ /ba+=/;
 
-            local $TODO = "See bug 60464" if $l > 32767;
              ok "ba$a=" =~ /b(?:a|b)+=/;
         }
     }
@@ -4021,14 +4020,12 @@ sub run_tests {
 
     {
         local $BugId =  '60034';
-        local $TODO  = "See bug 60034";
         my $a = "xyzt" x 8192;
         ok $a =~ /\A(?>[a-z])*\z/,
                 '(?>) does not cause wrongness on long string';
         my $b = $a . chr 256;
         chop $b;
         {
-            local $TODO;
             iseq $a, $b;
         }
         ok $b =~ /\A(?>[a-z])*\z/,
