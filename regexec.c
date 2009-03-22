@@ -4430,8 +4430,11 @@ NULL
 	        cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
 	        goto fake_end;
 	        
-	    if ( ST.count < (ST.minmod ? ARG1(ST.me) : ARG2(ST.me)) )
-		goto curlym_do_A; /* try to match another A */
+	    {
+		I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
+		if ( max == REG_INFTY || ST.count < max )
+		    goto curlym_do_A; /* try to match another A */
+	    }
 	    goto curlym_do_B; /* try to match B */
 
 	case CURLYM_A_fail: /* just failed to match an A */
