@@ -688,7 +688,7 @@ entries apply in those cases.
     Any     CodeRef   scalar sub truth          $b->($a)
 
     Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
-    Array   Hash      hash slice existence     @$a == grep {exists $b->{$_}} @$a
+    Array   Hash      hash slice existence[1]  @$a == grep {exists $b->{$_}} @$a
     Regex   Hash      hash key grep[1]         grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
     Any     Hash      hash entry existence     exists $b->{$a}

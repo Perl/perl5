@@ -232,7 +232,7 @@ __DATA__
 # HASH ref against:
 #   - another hash ref
 	{}		{}
-!	{}		{1 => 2}
+=!	{}		{1 => 2}
 	{1 => 2}	{1 => 2}
 	{1 => 2}	{1 => 3}
 !	{1 => 2}	{2 => 3}
@@ -245,7 +245,10 @@ __DATA__
 #  - an array ref
 	[keys %main::]	\%::
 !	[]		\%::
+!	[""]		{}
+!	[]		{}
 	[undef]		{"" => 1}
+	[""]		{"" => 1}
 	["foo"]		{ foo => 1 }
 	["foo", "bar"]	{ foo => 1 }
 	["foo", "bar"]	\%hash
@@ -256,6 +259,8 @@ __DATA__
 #  - a regex
 	qr/^(fo[ox])$/		{foo => 1}
 !	qr/[13579]$/		+{0..99}
+!	qr/a*/			{}
+	qr/a*/			{b=>2}
 
 #  - a string
 	"foo"		+{foo => 1, bar => 2}
@@ -264,6 +269,7 @@ __DATA__
 #  - undef
 !	undef		%hash
 !	undef		+{"" => "empty key"}
+!	undef		{}
 
 # ARRAY ref against:
 #  - another array ref
