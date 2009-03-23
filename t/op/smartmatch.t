@@ -275,7 +275,8 @@ __DATA__
 #  - another array ref
 	[]			[]
 !	[]			[1]
-	[["foo"], ["bar"]]	[qr/o/, qr/a/]
+!	[["foo"], ["bar"]]	[qr/o/, qr/a/]
+	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
 	["foo", "bar"]		[qr/o/, qr/a/]
 !	["foo", "bar"]		[qr/o/, "foo"]
 	$deep1			$deep1
@@ -313,8 +314,8 @@ __DATA__
 	FALSE		"0"
 
 # Regex against string
-	qr/x/		"x"
-!	qr/y/		"x"
+	"x"		qr/x/
+!	"x"		qr/y/
 
 # Regex against number
 	12345		qr/3/

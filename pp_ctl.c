@@ -4027,17 +4027,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
     SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
-    REGEXP *this_regex, *other_regex;
 
-#   define SM_REGEX ( \
-	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_REGEXP)		\
-	&& (this_regex = (REGEXP*) This)				\
-	&& (Other = e))							\
-    ||									\
-	   (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_REGEXP)		\
-	&& (this_regex = (REGEXP*) This)				\
-	&& (Other = d))	)
-	
 #   define SM_SEEN_THIS(sv) hv_exists_ent(seen_this, \
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
@@ -4229,10 +4219,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-	else if (SvROK(d)
-		&& (SvTYPE(SvRV(d)) == SVt_REGEXP)
-		&& (other_regex = (REGEXP*) SvRV(d))) {
-	    PMOP * const matcher = make_matcher(other_regex);
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
 	    HE *he;
 	    This = SvRV(e);
 
@@ -4312,8 +4300,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 			(void)hv_store_ent(seen_other,
 				sv_2mortal(newSViv(PTR2IV(*other_elem))),
 				&PL_sv_undef, 0);
-			PUSHs(*this_elem);
 			PUSHs(*other_elem);
+			PUSHs(*this_elem);
 			
 			PUTBACK;
 			(void) do_smartmatch(seen_this, seen_other);
@@ -4326,9 +4314,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	    }
 	}
-	else if (SvROK(d) && (SvTYPE(SvRV(d)) == SVt_REGEXP)
-		&& (other_regex = (REGEXP*) SvRV(d))) {
-	    PMOP * const matcher = make_matcher(other_regex);
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
 	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
@@ -4384,11 +4371,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
     }
     /* ~~ qr// */
-    else if (SM_REGEX) {
-	PMOP * const matcher = make_matcher(this_regex);
+    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
+	PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
 
 	PUTBACK;
-	PUSHs(matcher_matches_sv(matcher, Other)
+	PUSHs(matcher_matches_sv(matcher, d)
 	    ? &PL_sv_yes
 	    : &PL_sv_no);
 	destroy_matcher(matcher);
