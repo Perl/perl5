@@ -302,15 +302,17 @@ __DATA__
 
 # Number against number
 	2		2
+	20		2_0
 !	2		3
 	0		FALSE
 	3-2		TRUE
+	undef		0
 
 # Number against string
-	2		"2"
-	2		"2.0"
+=	2		"2"
+=	2		"2.0"
 !	2		"2bananas"
-!	2_3		"2_3"
+!=	2_3		"2_3"
 	FALSE		"0"
 
 # Regex against string

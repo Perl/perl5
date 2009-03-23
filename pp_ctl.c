@@ -4026,7 +4026,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
-    SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
 
 #   define SM_SEEN_THIS(sv) hv_exists_ent(seen_this, \
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
@@ -4154,35 +4153,35 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    bool other_tied = FALSE;
 	    U32 this_key_count  = 0,
 	        other_key_count = 0;
-	    This = SvRV(e);
+	    HV *hv = MUTABLE_HV(SvRV(e));
 	    
 	    /* Tied hashes don't know how many keys they have. */
-	    if (SvTIED_mg(This, PERL_MAGIC_tied)) {
+	    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
 		tied = TRUE;
 	    }
 	    else if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied)) {
 		HV * const temp = other_hv;
-		other_hv = MUTABLE_HV(This);
-		This  = MUTABLE_SV(temp);
+		other_hv = hv;
+		hv = temp;
 		tied = TRUE;
 	    }
 	    if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied))
 		other_tied = TRUE;
 	    
-	    if (!tied && HvUSEDKEYS((const HV *) This) != HvUSEDKEYS(other_hv))
+	    if (!tied && HvUSEDKEYS((const HV *) hv) != HvUSEDKEYS(other_hv))
 	    	RETPUSHNO;
 
 	    /* The hashes have the same number of keys, so it suffices
 	       to check that one is a subset of the other. */
-	    (void) hv_iterinit(MUTABLE_HV(This));
-	    while ( (he = hv_iternext(MUTABLE_HV(This))) ) {
+	    (void) hv_iterinit(hv);
+	    while ( (he = hv_iternext(hv)) ) {
 	    	I32 key_len;
 		char * const key = hv_iterkey(he, &key_len);
 	    	
 	    	++ this_key_count;
 	    	
 	    	if(!hv_exists(other_hv, key, key_len)) {
-	    	    (void) hv_iterinit(MUTABLE_HV(This));	/* reset iterator */
+	    	    (void) hv_iterinit(hv);	/* reset iterator */
 		    RETPUSHNO;
 	    	}
 	    }
@@ -4204,7 +4203,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    AV * const other_av = MUTABLE_AV(SvRV(d));
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
-	    This = SvRV(e);
+	    HV *hv = MUTABLE_HV(SvRV(e));
 
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
@@ -4213,7 +4212,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 		if (svp) {	/* ??? When can this not happen? */
 		    key = SvPV(*svp, key_len);
-		    if (hv_exists(MUTABLE_HV(This), key, key_len))
+		    if (hv_exists(hv, key, key_len))
 		        RETPUSHYES;
 		}
 	    }
@@ -4222,12 +4221,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
 	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
 	    HE *he;
-	    This = SvRV(e);
+	    HV *hv = MUTABLE_HV(SvRV(e));
 
-	    (void) hv_iterinit(MUTABLE_HV(This));
-	    while ( (he = hv_iternext(MUTABLE_HV(This))) ) {
+	    (void) hv_iterinit(hv);
+	    while ( (he = hv_iternext(hv)) ) {
 		if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
-		    (void) hv_iterinit(MUTABLE_HV(This));
+		    (void) hv_iterinit(hv);
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
 		}
@@ -4244,7 +4243,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     /* ~~ @array */
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVAV) {
-	This = SvRV(e);
 	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(e));
 	    const I32 other_len = av_len(other_av) + 1;
@@ -4329,7 +4327,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    destroy_matcher(matcher);
 	    RETPUSHNO;
 	}
-	else if (SvIOK(d) || SvNOK(d)) {
+	else if (SvNIOK(d)) {
 	    I32 i;
 
 	    for(i = 0; i <= AvFILL(MUTABLE_AV(SvRV(e))); ++i) {
@@ -4383,16 +4381,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     /* ~~ X..Y TODO */
     /* ~~ scalar */
-    else if ( ((SvIOK(d) || SvNOK(d)) && (This = d) && (Other = e))
-         ||   ((SvIOK(e) || SvNOK(e)) && (This = e) && (Other = d)) )
-    {
-	if (SvPOK(Other) && !looks_like_number(Other)) {
-	    /* String comparison */
-	    PUSHs(d); PUSHs(e);
-	    PUTBACK;
-	    return pp_seq();
-	}
-	/* Otherwise, numeric comparison */
+    else if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
+	/* numeric comparison */
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)

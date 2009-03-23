@@ -705,9 +705,8 @@ entries apply in those cases.
     undef   Range[4]  always false
     Any     Range[4]  in string range
 
-    Num     numish[5] numeric equality         $a == $b
-    Any     Str       string equality          $a eq $b
     Any     Num       numeric equality         $a == $b
+    Num     numish[5] numeric equality         $a == $b
     Any     Any       string equality          $a eq $b
 
 
