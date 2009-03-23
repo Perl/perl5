@@ -153,9 +153,9 @@ __DATA__
 =	$ov_obj		{"key" => 1}
 =	$ov_obj		{"key" => 1, bar => 2}		TODO
 =!	$ov_obj		{"foo" => 1}
-=	$ov_obj		@keyandmore			TODO
+=	$ov_obj		@keyandmore
 =!	$ov_obj		@fooormore
-=	$ov_obj		["key" => 1]			TODO
+=	$ov_obj		["key" => 1]
 =!	$ov_obj		["foo" => 1]
 =	$ov_obj		/key/				TODO
 =!	$ov_obj		/foo/
@@ -284,18 +284,20 @@ __DATA__
 	\@nums			\@tied_nums
 
 #  - a regex
-	[qw(foo bar baz quux)]	qr/x/
-!	[qw(foo bar baz quux)]	qr/y/
+	qr/x/		[qw(foo bar baz quux)]
+!	qr/y/		[qw(foo bar baz quux)]
+	/x/		[qw(foo bar baz quux)]
+!	/y/		[qw(foo bar baz quux)]
 
 # - a number
-	[qw(1foo 2bar)]		2
-	[qw(foo 2)]		2
-	[qw(foo 2)]		2.0_0e+0
-!	[qw(1foo bar2)]		2
+	2		[qw(1foo 2bar)]
+	2		[qw(foo 2)]
+	2.0_0e+0	[qw(foo 2)]
+!	2		[qw(1foo bar2)]
 
 # - a string
-!	[qw(1foo 2bar)]		"2"
-	[qw(1foo 2bar)]		"2bar"
+!	"2"		[qw(1foo 2bar)]
+	"2bar"		[qw(1foo 2bar)]
 
 # Number against number
 	2		2
@@ -317,9 +319,8 @@ __DATA__
 # Regex against number
 	12345		qr/3/
 
-
 # Test the implicit referencing
-	@nums		7
+	7		@nums
 	@nums		\@nums
 !	@nums		\\@nums
 	@nums		[1..10]

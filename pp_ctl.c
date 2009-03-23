@@ -4029,10 +4029,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
     REGEXP *this_regex, *other_regex;
 
-#   define SM_REF(type) ( \
-	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_##type) && (Other = e)) \
-	|| (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_##type) && (Other = d)))
-
 #   define SM_REGEX ( \
 	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_REGEXP)		\
 	&& (this_regex = (REGEXP*) This)				\
@@ -4042,14 +4038,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	&& (this_regex = (REGEXP*) This)				\
 	&& (Other = d))	)
 	
-#   define SM_OTHER_REF(type) \
-	(SvROK(Other) && SvTYPE(SvRV(Other)) == SVt_##type)
-
-#   define SM_OTHER_REGEX (SvROK(Other)					\
-	&& (SvTYPE(SvRV(Other)) == SVt_REGEXP)				\
-	&& (other_regex = (REGEXP*) SvRV(Other)))
-
-
 #   define SM_SEEN_THIS(sv) hv_exists_ent(seen_this, \
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
@@ -4073,6 +4061,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     if (SvGMAGICAL(e))
 	e = sv_mortalcopy(e);
 
+    /* ~~ undef */
     if (!SvOK(e)) {
 	if (SvOK(d))
 	    RETPUSHNO;
@@ -4084,6 +4073,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    || (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)))
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
 
+    /* ~~ sub */
     if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVCV) {
 	I32 c;
 	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
@@ -4161,6 +4151,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETURN;
 	}
     }
+    /* ~~ %hash */
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVHV) {
 	if (!SvOK(d)) {
 	    RETPUSHNO;
@@ -4263,10 +4254,30 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHNO;
 	}
     }
-    else if (SM_REF(PVAV)) {
-	if (SM_OTHER_REF(PVAV)) {
-	    AV *other_av = MUTABLE_AV(SvRV(Other));
-	    if (av_len(MUTABLE_AV(This)) != av_len(other_av))
+    /* ~~ @array */
+    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVAV) {
+	This = SvRV(e);
+	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
+	    AV * const other_av = MUTABLE_AV(SvRV(e));
+	    const I32 other_len = av_len(other_av) + 1;
+	    I32 i;
+
+	    for (i = 0; i < other_len; ++i) {
+		SV ** const svp = av_fetch(other_av, i, FALSE);
+		char *key;
+		STRLEN key_len;
+
+		if (svp) {	/* ??? When can this not happen? */
+		    key = SvPV(*svp, key_len);
+		    if (hv_exists(MUTABLE_HV(SvRV(d)), key, key_len))
+		        RETPUSHYES;
+		}
+	    }
+	    RETPUSHNO;
+	}
+	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
+	    AV *other_av = MUTABLE_AV(SvRV(d));
+	    if (av_len(MUTABLE_AV(SvRV(e))) != av_len(other_av))
 		RETPUSHNO;
 	    else {
 	    	I32 i;
@@ -4281,7 +4292,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    (void) sv_2mortal(MUTABLE_SV(seen_other));
 		}
 		for(i = 0; i <= other_len; ++i) {
-		    SV * const * const this_elem = av_fetch(MUTABLE_AV(This), i, FALSE);
+		    SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
 		    if (!this_elem || !other_elem) {
@@ -4315,13 +4326,14 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	    }
 	}
-	else if (SM_OTHER_REGEX) {
+	else if (SvROK(d) && (SvTYPE(SvRV(d)) == SVt_REGEXP)
+		&& (other_regex = (REGEXP*) SvRV(d))) {
 	    PMOP * const matcher = make_matcher(other_regex);
-	    const I32 this_len = av_len(MUTABLE_AV(This));
+	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
+		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		if (svp && matcher_matches_sv(matcher, *svp)) {
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
@@ -4330,15 +4342,15 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    destroy_matcher(matcher);
 	    RETPUSHNO;
 	}
-	else if (SvIOK(Other) || SvNOK(Other)) {
+	else if (SvIOK(d) || SvNOK(d)) {
 	    I32 i;
 
-	    for(i = 0; i <= AvFILL(MUTABLE_AV(This)); ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
+	    for(i = 0; i <= AvFILL(MUTABLE_AV(SvRV(e))); ++i) {
+		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		if (!svp)
 		    continue;
 		
-		PUSHs(Other);
+		PUSHs(d);
 		PUSHs(*svp);
 		PUTBACK;
 		if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
@@ -4351,16 +4363,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-	else if (SvPOK(Other)) {
-	    const I32 this_len = av_len(MUTABLE_AV(This));
+	else if (SvPOK(d)) {
+	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
+		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		if (!svp)
 		    continue;
 		
-		PUSHs(Other);
+		PUSHs(d);
 		PUSHs(*svp);
 		PUTBACK;
 		(void) pp_seq();
@@ -4371,6 +4383,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
     }
+    /* ~~ qr// */
     else if (SM_REGEX) {
 	PMOP * const matcher = make_matcher(this_regex);
 
@@ -4381,6 +4394,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	destroy_matcher(matcher);
 	RETURN;
     }
+    /* ~~ X..Y TODO */
+    /* ~~ scalar */
     else if ( ((SvIOK(d) || SvNOK(d)) && (This = d) && (Other = e))
          ||   ((SvIOK(e) || SvNOK(e)) && (This = e) && (Other = d)) )
     {
