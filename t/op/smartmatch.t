@@ -29,8 +29,8 @@ tie my %tied_hash, 'Tie::StdHash';
 
 {
     package Test::Object::CopyOverload;
-    sub new { bless { key => 1 } }
-    use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] ~~ %hash };
+    sub new { bless { key => 'magic' } }
+    use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] eq $hash{key} };
 }
 
 our $ov_obj = Test::Object::CopyOverload->new;
@@ -87,6 +87,7 @@ sub fatal {die "fatal sub\n"}
 # to test constant folding
 sub FALSE() { 0 }
 sub TRUE() { 1 }
+sub NOT_DEF() { undef }
 
 # Prefix character :
 #   - expected to match
@@ -134,18 +135,17 @@ __DATA__
 !	!1		undef
 	undef		undef
 	(my $u)		undef
+	NOT_DEF		undef
+	&NOT_DEF	undef
 
 # Any ~~ object overloaded
 # object overloaded ~~ Any
-	$ov_obj		$ov_obj
 =!	$ov_obj		\&fatal
-=	$ov_obj		{"key" => 2}
-=!	$ov_obj		{"key" => 1, bar => 2}
-=	$ov_obj		/key/
-=!	$ov_obj		/bar/
+=	$ov_obj		'magic'
+=!	$ov_obj		'not magic'
+=!	$ov_obj		$obj
 
 # regular object
-=@	$obj	$ov_obj
 @	$obj	$obj
 =@	$obj	\&fatal
 =@	$obj	\&FALSE
@@ -217,7 +217,7 @@ __DATA__
 	\%main::	{map {$_ => 'x'} keys %main::}
 
 #  - tied hash ref
-	\%hash		\%tied_hash
+=	\%hash		\%tied_hash
 	\%tied_hash	\%tied_hash
 
 #  - an array ref
@@ -245,6 +245,7 @@ __DATA__
 !	"baz"		+{foo => 1, bar => 2}
 
 #  - undef
+!	undef		{ hop => 'zouu' }
 !	undef		%hash
 !	undef		+{"" => "empty key"}
 !	undef		{}
@@ -252,11 +253,15 @@ __DATA__
 # ARRAY ref against:
 #  - another array ref
 	[]			[]
-!	[]			[1]
+=!	[]			[1]
 !	[["foo"], ["bar"]]	[qr/o/, qr/a/]
 	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
 	["foo", "bar"]		[qr/o/, qr/a/]
+	["foo", "bar"]		[["foo"], ["bar"]]
 !	["foo", "bar"]		[qr/o/, "foo"]
+	["foo", undef, "bar"]	[qr/o/, undef, "bar"]
+	["foo", undef, "bar"]	[qr/o/, "",    "bar"]
+!	["foo", "", "bar"]	[qr/o/, undef, "bar"]
 	$deep1			$deep1
 !	$deep1			$deep2
 
@@ -299,6 +304,7 @@ __DATA__
 
 # Regex against number
 	12345		qr/3/
+!	12345		qr/7/
 
 # Test the implicit referencing
 	7		@nums
