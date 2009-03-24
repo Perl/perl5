@@ -433,7 +433,8 @@ This I<just> matches the address itself:
     my $dot_atom   = qr{$atom(?:\.$atom)*};
     my $quoted     = qr{"(?:\\[^\r\n]|[^\\"])*"};
     my $local      = qr{(?:$dot_atom|$quoted)};
-    my $domain_lit = qr{\[(?:\\\S|[\x21-\x5a\x5e-\x7e])*\]};
+    my $quotedpair = qr{\\[\x00-\x09\x0B-\x0c\x0e-\x7e]};
+    my $domain_lit = qr{\[(?:$quotedpair|[\x21-\x5a\x5e-\x7e])*\]};
     my $domain     = qr{(?:$dot_atom|$domain_lit)};
     my $addr_spec  = qr{$local\@$domain};
 
