@@ -30,7 +30,7 @@ tie my %tied_hash, 'Tie::StdHash';
 {
     package Test::Object::CopyOverload;
     sub new { bless { key => 1 } }
-    use overload '~~' => sub { my %hash = %{ $_[0] }; %hash ~~ $_[1] };
+    use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] ~~ %hash };
 }
 
 our $ov_obj = Test::Object::CopyOverload->new;
@@ -79,8 +79,6 @@ while (<DATA>) {
     }
 }
 
-
-
 sub foo {}
 sub bar {42}
 sub gorch {42}
@@ -115,7 +113,7 @@ sub TRUE() { 1 }
 #   Values returned by a sub call
 __DATA__
 # Any ~~ undef
-!	$ov_obj		undef
+!=	$ov_obj		undef
 !	$obj		undef
 !	sub {}		undef
 !	%hash		undef
@@ -140,31 +138,11 @@ __DATA__
 # Any ~~ object overloaded
 # object overloaded ~~ Any
 	$ov_obj		$ov_obj
-=@	$ov_obj		\&fatal
-=!	$ov_obj		\&FALSE
-=	$ov_obj		\&TRUE
-=!	$ov_obj		\&foo
-=	$ov_obj		\&bar
-=	$ov_obj		sub { shift ~~ "key" }
-=!	$ov_obj		sub { shift ne "key" }
-=!	$ov_obj		sub { shift ~~ "foo" }
-=	$ov_obj		%keyandmore			TODO
-=!	$ov_obj		%fooormore
-=	$ov_obj		{"key" => 1}
-=	$ov_obj		{"key" => 1, bar => 2}		TODO
-=!	$ov_obj		{"foo" => 1}
-=	$ov_obj		@keyandmore
-=!	$ov_obj		@fooormore
-=	$ov_obj		["key" => 1]
-=!	$ov_obj		["foo" => 1]
-=	$ov_obj		/key/				TODO
-=!	$ov_obj		/foo/
-=	$ov_obj		qr/Key/i			TODO
-=!	$ov_obj		qr/foo/
-=	$ov_obj		"key"				TODO
-=!	$ov_obj		"foo"
-=!	$ov_obj		FALSE
-=!	$ov_obj		TRUE
+=!	$ov_obj		\&fatal
+=	$ov_obj		{"key" => 2}
+=!	$ov_obj		{"key" => 1, bar => 2}
+=	$ov_obj		/key/
+=!	$ov_obj		/bar/
 
 # regular object
 =@	$obj	$ov_obj
