@@ -1983,7 +1983,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dVAR;
     const key_t key = (key_t)SvNVx(*++mark);
-    const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
+    SV *nsv = optype == OP_MSGGET ? NULL : *++mark;
     const I32 flags = SvIVx(*++mark);
 
     PERL_ARGS_ASSERT_DO_IPCGET;
@@ -1998,11 +1998,11 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMGET:
-	return semget(key, n, flags);
+	return semget(key, (int) SvIV(nsv), flags);
 #endif
 #ifdef HAS_SHM
     case OP_SHMGET:
-	return shmget(key, n, flags);
+	return shmget(key, (size_t) SvUV(nsv), flags);
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
