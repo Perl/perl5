@@ -4033,7 +4033,15 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 #   define SM_SEEN_OTHER(sv) hv_exists_ent(seen_other, \
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
-    tryAMAGICbinSET(smart, 0);
+    if (SvAMAGIC(d) || SvAMAGIC(e)) {
+	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
+	if (tmpsv) {
+	    SPAGAIN;
+	    (void)POPs;
+	    SETs(tmpsv);
+	    RETURN;
+	}
+    }
 
     SP -= 2;	/* Pop the values */
 
