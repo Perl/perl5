@@ -69,8 +69,8 @@ my $version = `$bison -V`;
 unless ($version =~ /\b(1\.875[a-z]?|2\.[0134])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-2.0, 2.1 or 2.3 is required.  Try installing
-    http://ftp.gnu.org/gnu/bison/bison-2.1.tar.gz
+2.0, 2.1, 2.3 or 2.4 is required.  Try installing
+    http://ftp.gnu.org/gnu/bison/bison-2.4.1.tar.gz
 or similar.  Your bison identifies itself as:
 
 $version
