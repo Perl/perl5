@@ -688,8 +688,8 @@ entries apply in those cases.
     Any     CodeRef   scalar sub truth          $b->($a)
 
     Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
-    Array   Hash      hash slice existence[1]  @$a == grep $_ ~~ $b, @$a
-    Regex   Hash      hash key grep[1]         grep /$a/, keys %$b
+    Array   Hash      hash slice existence     @$a == grep $_ ~~ $b, @$a
+    Regex   Hash      hash key grep            grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
     Any     Hash      hash entry existence     exists $b->{$a}
 
@@ -710,7 +710,7 @@ entries apply in those cases.
     Any     Any       string equality          $a eq $b
 
 
- 1 - empty hashes or array won't match.
+ 1 - empty hashes or arrays will match.
  2 - that is, each element matches the element of same index in the other
      array. [3]
  3 - If a circular reference is found, we fall back to referential equality.

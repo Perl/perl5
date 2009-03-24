@@ -192,8 +192,8 @@ __DATA__
 !	[1]		\&foo
 !	{a=>1}		\&foo
 # empty stuff matches, because the sub is never called:
-!	[]		\&foo
-!	{}		\&foo
+	[]		\&foo
+	{}		\&foo
 !	qr//		\&foo
 !	undef		\&foo
 	undef		\&bar
@@ -204,8 +204,8 @@ __DATA__
 @	"foo"		\&fatal
 @	qr//		\&fatal
 # sub is not called on empty hashes / arrays
-!	[]		\&fatal
-!	+{}		\&fatal
+	[]		\&fatal
+	+{}		\&fatal
 
 # HASH ref against:
 #   - another hash ref

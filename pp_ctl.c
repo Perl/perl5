@@ -4072,7 +4072,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    HV *hv = (HV*) SvRV(d);
 	    I32 numkeys = hv_iterinit(hv);
 	    if (numkeys == 0)
-		RETPUSHNO;
+		RETPUSHYES;
 	    while ( (he = hv_iternext(hv)) ) {
 		ENTER;
 		SAVETMPS;
@@ -4100,7 +4100,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    AV *av = (AV*) SvRV(d);
 	    const I32 len = av_len(av);
 	    if (len == -1)
-		RETPUSHNO;
+		RETPUSHYES;
 	    for (i = 0; i <= len; ++i) {
 		SV * const * const svp = av_fetch(av, i, FALSE);
 		ENTER;
