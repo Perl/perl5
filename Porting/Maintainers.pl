@@ -747,7 +747,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'smpeters',
 		'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'NEXT' =>
