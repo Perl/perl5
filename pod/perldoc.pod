@@ -252,6 +252,9 @@ number, the more it emits.
 Up to 3.14_05, the switch B<-v> was used to produce verbose
 messages of B<perldoc> operation, which is now enabled by B<-D>.
 
+=head1 SEE ALSO
+
+L<perlpod>, L<Pod::Perldoc>
 
 =head1 AUTHOR
 
