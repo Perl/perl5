@@ -269,6 +269,8 @@ sideff	:	error
 					(OP*)NULL, $3, $1, (OP*)NULL);
 			  TOKEN_GETMAD($2,((LISTOP*)$$)->op_first->op_sibling,'w');
 			}
+	|	expr WHEN expr
+			{ $$ = newWHENOP($3, scope($1)); }
 	;
 
 /* else and elsif blocks */
