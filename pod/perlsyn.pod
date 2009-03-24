@@ -701,9 +701,8 @@ entries apply in those cases.
     Array   Regex     array grep               grep /$b/, @$a
     Any     Regex     pattern match            $a =~ /$b/
 
-    Num     Range[4]  in numeric range
     undef   Range[4]  always false
-    Any     Range[4]  in string range
+    Any     Range[4]  in range
 
     Any     Num       numeric equality         $a == $b
     Num     numish[5] numeric equality         $a == $b
@@ -716,7 +715,8 @@ entries apply in those cases.
  3 - If a circular reference is found, we fall back to referential equality.
  4 - a range is written EXPR..EXPR (using the C<..> range operator, but
      NOT the three-dot version C<...>, which will be treated as a boolean
-     operator)
+     operator). Numeric ranges will use numeric comparison: that is,
+     "4.5 ~~ 3..5" will be true.
  5 - either a real number, or a string that looks like a number
 
 The "matching code" doesn't represent the I<real> matching code,
