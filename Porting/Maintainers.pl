@@ -63,6 +63,7 @@ package Maintainers;
 	'pjf'		=> 'Paul Fenwick <pjf@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
+	'rafl'		=> 'Florian Ragwitz <flora@cpan.org>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
 	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
@@ -751,10 +752,10 @@ package Maintainers;
 
 	'NEXT' =>
 		{
-		'MAINTAINER'	=> 'dconway',
+		'MAINTAINER'	=> 'rafl',
 		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Object::Accessor' =>
