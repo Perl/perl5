@@ -87,8 +87,8 @@ sub run
 
         ok ! -e $name, "  $name does not exist";
         
-        eval qq[\$a = new $UncompressClass "$name" ;] ;
-        is lc($!), "no such file or directory", '$! = "no such file or directory"';
+        $a = new $UncompressClass "$name" ;
+        is $a, undef;
 
         my $gc ;
         my $guz = new $CompressClass(\$gc); 

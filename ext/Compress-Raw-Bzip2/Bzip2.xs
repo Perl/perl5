@@ -267,6 +267,8 @@ char * string;
             case SVt_PVHV:
             case SVt_PVCV:
                 croak("%s: buffer parameter is not a SCALAR reference", string);
+            default:
+                break;
         }
         if (SvROK(sv))
             croak("%s: buffer parameter is a reference to a reference", string) ;
@@ -304,6 +306,8 @@ char * string ;
             case SVt_PVHV:
             case SVt_PVCV:
                 croak("%s: buffer parameter is not a SCALAR reference", string);
+            default:
+                break;
         }
         if (SvROK(sv))
             croak("%s: buffer parameter is a reference to a reference", string) ;
