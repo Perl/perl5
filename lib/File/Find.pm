@@ -411,6 +411,10 @@ File::Find used to produce incorrect results if called recursively.
 During the development of perl 5.8 this bug was fixed.
 The first fixed version of File::Find was 1.01.
 
+=head1 SEE ALSO
+
+find, find2perl.
+
 =cut
 
 our @ISA = qw(Exporter);
