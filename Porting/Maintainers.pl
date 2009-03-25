@@ -737,7 +737,7 @@ package Maintainers;
 	'Module::Pluggable' =>
 		{
 		'MAINTAINER'	=> 'simonw',
-		'FILES'		=> q[ext/Module-Pluggable t/Module_Pluggable],
+		'FILES'		=> q[ext/Module-Pluggable],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
