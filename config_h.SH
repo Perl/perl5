@@ -3574,6 +3574,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_futimes HAS_FUTIMES		/**/
 
+/* HAS_GETADDRINFO:
+ *	This symbol, if defined, indicates that the getaddrinfo() function
+ *	is available for use.
+ */
+#$d_getaddrinfo HAS_GETADDRINFO		/**/
+
 /* HAS_GETCWD:
  *	This symbol, if defined, indicates that the getcwd routine is
  *	available to get the current working directory.
@@ -3610,6 +3616,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getmntent HAS_GETMNTENT		/**/
 
+/* HAS_GETNAMEINFO:
+ *	This symbol, if defined, indicates that the getnameinfo() function
+ *	is available for use.
+ */
+#$d_getnameinfo HAS_GETNAMEINFO		/**/
+
 /* HAS_GETPRPWNAM:
  *	This symbol, if defined, indicates that the getprpwnam system call is
  *	available to retrieve protected (shadow) password entries by name.
@@ -3633,6 +3645,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available.  If scalbnl is also present we can emulate frexpl.
  */
 #$d_ilogbl HAS_ILOGBL		/**/
+
+/* HAS_INETNTOP:
+ *	This symbol, if defined, indicates that the inet_ntop() function
+ *	is available to parse IPv4 and IPv6 strings.
+ */
+#$d_inetntop HAS_INETNTOP		/**/
+
+/* HAS_INETPTON:
+ *	This symbol, if defined, indicates that the inet_pton() function
+ *	is available to parse IPv4 and IPv6 strings.
+ */
+#$d_inetpton HAS_INETPTON		/**/
 
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.

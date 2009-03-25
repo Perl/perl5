@@ -899,6 +899,11 @@ d_gdbmndbm_h_uses_prototypes (i_ndbm.U):
 	undefined. Consult the different d_*ndbm_h_uses_prototypes variables
 	to get the same information for alternative ndbm.h include files.
 
+d_getaddrinfo (d_getaddrinfo.U):
+	This variable conditionally defines the HAS_GETADDRINFO symbol,
+	which indicates to the C program that the getaddrinfo() function
+	is available.
+
 d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
 	indicates to the C program that the getcwd() routine is available
@@ -1000,6 +1005,11 @@ d_getmntent (d_getmntent.U):
 	This variable conditionally defines the HAS_GETMNTENT symbol, which
 	indicates to the C program that the getmntent() routine is available
 	to iterate through mounted files to get their mount info.
+
+d_getnameinfo (d_getnameinfo.U):
+	This variable conditionally defines the HAS_GETNAMEINFO symbol,
+	which indicates to the C program that the getnameinfo() function
+	is available.
 
 d_getnbyaddr (d_getnbyad.U):
 	This variable conditionally defines the HAS_GETNETBYADDR symbol, which
@@ -1217,6 +1227,16 @@ d_inetaton (d_inetaton.U):
 	This variable conditionally defines the HAS_INET_ATON symbol, which
 	indicates to the C program that the inet_aton() function is available
 	to parse IP address "dotted-quad" strings.
+
+d_inetntop (d_inetntop.U):
+	This variable conditionally defines the HAS_INETNTOP symbol,
+	which indicates to the C program that the inet_ntop() function
+	is available.
+
+d_inetpton (d_inetpton.U):
+	This variable conditionally defines the HAS_INETPTON symbol,
+	which indicates to the C program that the inet_pton() function
+	is available.
 
 d_int64_t (d_int64_t.U):
 	This symbol will be defined if the C compiler supports int64_t.
