@@ -97,6 +97,7 @@ t/test_state
 realclean.sh
 veryclean.sh
 
-# metaconfig needs these two symlinks
+# metaconfig needs these three symlinks
 .package
 U
+MANIFEST.new
