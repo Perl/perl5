@@ -23,7 +23,7 @@ extern "C" {
  * support is added and NETaa14816 is considered in full.
  * It does not address tzname aspects of NETaa14816.
  */
-#if !defined(HAS_GNULIBC)
+#if defined(HAS_GNULIBC)
 # ifndef STRUCT_TM_HASZONE
 #    define STRUCT_TM_HASZONE
 # else
