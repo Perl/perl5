@@ -188,18 +188,15 @@ typedef U64TYPE U64;
 #   endif
 #endif
 
-/* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(HAS_PSEUDOFORK) && defined(USE_DTRACE)
-#if defined(LOCALTIME_R_NEEDS_TZSET) && defined(HAS_TIMEGM)
-#if defined(GMTIME_MAX) && defined(GMTIME_MIN) && defined(LOCALTIME_MAX) && defined(LOCALTIME_MIN)
-#if defined(HAS_CTIME64) && defined(HAS_LOCALTIME64) && defined(HAS_GMTIME64)
-#if defined(HAS_MKTIME64) && defined(HAS_DIFFTIME64) && defined(HAS_ASCTIME64)
-/* Not (yet) used at top level, but mention them for metaconfig */
-#endif
-#endif
-#endif
-#endif
-#endif
+/* HMB H.Merijn Brand - a placeholder for preparing Configure patches:
+ * 
+ * USE_DTRACE	HAS_PSEUDOFORK	HAS_TIMEGM	LOCALTIME_R_NEEDS_TZSET	
+ * GMTIME_MAX	GMTIME_MIN	LOCALTIME_MAX	LOCALTIME_MIN
+ * HAS_CTIME64	HAS_LOCALTIME64	HAS_GMTIME64	HAS_DIFFTIME64
+ * HAS_MKTIME64	HAS_ASCTIME64	HAS_GETADDRINFO	HAS_GETNAMEINFO
+ * HAS_INETNTOP	HAS_INETPTON
+ * Not (yet) used at top level, but mention them for metaconfig
+ */
 
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
    I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
