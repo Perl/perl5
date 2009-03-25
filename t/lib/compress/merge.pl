@@ -89,15 +89,7 @@ sub run
                 
                 ok ! $gz, "  Did not create $CompressClass object";
 
-                {
-                    if ($to_file) {
-                        like lc($$Error), '/permission denied/',
-                                "  Got non-writable filename message" ;
-                    }
-                    else {
-                        ok $$Error, "  Got error message" ;
-                    }
-                }
+                ok $$Error, "  Got error message" ;
             }
 
             chmod 0777, $out_file ;
