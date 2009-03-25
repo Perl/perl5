@@ -55,6 +55,12 @@ my $startperl = "#! $perlpath -w";
 #   Ken Pizzini <ken@halcyon.com>
 #
 # Modified 2000-01-28 to use the 'follow' option of File::Find
+#
+# Note currently
+# $ find2perl -name a|wc #produces a shorter program
+#     30      72     569
+# $ find2perl        |wc #than this:
+#     33      76     655
 
 sub tab ();
 sub n ($$);
@@ -921,7 +927,7 @@ Predicates which take a numeric argument N can come in three forms:
 
 =head1 SEE ALSO
 
-find
+find, File::Find.
 
 =cut
 !NO!SUBS!
