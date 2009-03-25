@@ -688,14 +688,17 @@ entries apply in those cases.
     Any     CodeRef   scalar sub truth          $b->($a)
 
     Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
-    Array   Hash      hash slice existence     grep $_ ~~ $b, @$a
+    Array   Hash      hash slice existence     grep { exists $b->{$_} } @$a
     Regex   Hash      hash key grep            grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
     Any     Hash      hash entry existence     exists $b->{$a}
 
+    Hash    Array     hash slice existence     grep { exists $a->{$_} } @$b
     Array   Array     arrays are comparable[2]
+    Regex   Array     array grep               grep /$a/, @$b
+    undef   Array     array contains undef     grep !defined, @$b
     Any     Array     match against an array element[3]
-                                               grep $_ ~~ $a, @$b
+                                               grep $a ~~ $_, @$b
 
     Hash    Regex     hash key grep            grep /$b/, keys %$a
     Array   Regex     array grep               grep /$b/, @$a
