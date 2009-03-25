@@ -1,8 +1,15 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.32 2009/03/07 07:32:37 dankogai Exp dankogai $
+# $Id: Changes,v 2.33 2009/03/25 07:55:57 dankogai Exp dankogai $
 #
-$Revision: 2.32 $ $Date: 2009/03/07 07:32:37 $
+$Revision: 2.33 $ $Date: 2009/03/25 07:55:57 $
+! lib/Encode/MIME/Header.pm
+  Decontaminated $& which sneaked in on 2.31.
+  <67FC9F3A39C746DA95AAB6BB01539099@robmhp>
+  <693254b90903242352x2dc26ba6p5e68deb871fa88ae@mail.gmail.com>
+  http://coderepos.org/share/changeset/31542
+
+2.32 2009/03/07 07:32:37
 ! lib/Encode/Alias.pm t/Alias.t
   Encode now resolves 'en_US.UTF-8' to utf-8-strict like 'ja_JP.euc'
   Those who set locale on their shells should be happier now.
