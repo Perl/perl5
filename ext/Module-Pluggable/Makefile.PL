@@ -13,13 +13,11 @@ my %dodgy_files = (
 );
 
 my $core = grep { $_ eq 'PERL_CORE=1' } @ARGV;
-my @path = $core ? (File::Spec->updir, File::Spec->updir, File::Spec->updir,
-                   "t", "Module_Pluggable") : ($FindBin::Bin,"t");
 
 my @files;
 unless (grep { lc($^O) eq $_ } qw(vms vos)) {
     foreach my $test (keys %dodgy_files) {
-        my ($file) = (catfile(@path, "lib", $test)=~/^(.*)$/);
+        my ($file) = (catfile($FindBin::Bin, "t", "lib", $test)=~/^(.*)$/);
         if (open(FH, ">$file")) {
             my $name = $dodgy_files{$test};
             print FH "package $name;\nsub new {}\n1;";
