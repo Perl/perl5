@@ -37,7 +37,6 @@ my %att = (
 	$PERL_CORE ? () : (
 	    'EXE_FILES'		=> [ 'shasum' ],
 	    'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
-            'MAN3PODS'      => {},      # Pods will be built by installman.
 	),
 );
 
