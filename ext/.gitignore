@@ -12,3 +12,9 @@ ppport.h
 !/XS-APItest/exception.c
 !/XS-APItest/notcore.c
 !/XS-Typemap/stdio.c
+/Filter-Util-Call/Makefile.PL
+/Opcode/Makefile.PL
+/PerlIO-encoding/Makefile.PL
+/PerlIO-scalar/Makefile.PL
+/PerlIO-via/Makefile.PL
+/Test-Harness/Makefile.PL
