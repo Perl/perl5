@@ -3,7 +3,6 @@ use ExtUtils::Constant 0.11 'WriteConstants';
 WriteMakefile(
     NAME		=> 'File::Glob',
     VERSION_FROM	=> 'Glob.pm',
-    MAN3PODS		=> {},     # Pods will be built by installman.
     OBJECT		=> 'bsd_glob$(OBJ_EXT) Glob$(OBJ_EXT)',
     realclean => {FILES=> 'const-c.inc const-xs.inc'},
 

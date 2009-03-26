@@ -15,8 +15,4 @@ WriteMakefile(
     INC               => '', # e.g., '-I/usr/include/other'
     # Un-comment this if you add C files to link with later:
     # OBJECT            => '$(O_FILES)', # link all the C files too
-    # Don't manify in core build
-    (grep( /^PERL_CORE=1$/, @ARGV) ?
-        (MAN3PODS => {}) :
-        ()),
 );
