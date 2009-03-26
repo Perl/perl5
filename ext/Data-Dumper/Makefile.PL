@@ -7,7 +7,6 @@ WriteMakefile(
 	      		     SUFFIX	=> 'gz',
 	      		     DIST_DEFAULT => 'all tardist',
 			   },
-	MAN3PODS	=> {},
         (
             (grep { $_ eq 'PERL_CORE=1' } @ARGV)
                 ? ()
