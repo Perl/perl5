@@ -78,7 +78,7 @@ sub _ingroup {
 if (grep $^O eq $_, qw/os2 MSWin32 dos/) {
 
     # from doio.c
-    *cando = sub { ($_[0] & $_[2][2]) ? 1 : "" };
+    *cando = sub { ($_[0][2] & $_[1]) ? 1 : "" };
 }
 else {
 
