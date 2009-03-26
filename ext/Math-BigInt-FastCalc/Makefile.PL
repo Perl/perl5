@@ -10,5 +10,4 @@ WriteMakefile(
     },
     INSTALLDIRS		=> 'perl',
     PREREQ_FATAL	=> 1,
-    MAN3PODS		=> {},
  );
