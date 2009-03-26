@@ -1233,7 +1233,6 @@ ext/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/Test/Harness.pm			A test harness
-ext/Test-Harness/Makefile.PL				Makefile.PL for Test::Harness
 ext/Test-Harness/t/000-load.t				Test::Harness test
 ext/Test-Harness/t/aggregator.t				Test::Harness test
 ext/Test-Harness/t/bailout.t				Test::Harness test
