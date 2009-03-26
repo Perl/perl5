@@ -513,7 +513,7 @@ package Maintainers;
 	'IO' =>
 		{
 		'MAINTAINER'	=> 'gbarr',
-		'FILES'		=> q[ext/IO],
+		'FILES'		=> q[ext/IO/],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
