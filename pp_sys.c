@@ -4473,9 +4473,9 @@ PP(pp_gmtime)
     }
 
     if (PL_op->op_type == OP_LOCALTIME)
-        err = localtime64_r(&when, &tmbuf);
+        err = S_localtime64_r(&when, &tmbuf);
     else
-	err = gmtime64_r(&when, &tmbuf);
+	err = S_gmtime64_r(&when, &tmbuf);
 #endif
 
     if (err == NULL && ckWARN(WARN_OVERFLOW)) {

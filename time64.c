@@ -33,9 +33,9 @@ long' type can use localtime64_r() and gmtime64_r() which correctly
 converts the time even on 32-bit systems. Whether you have 64-bit time
 values will depend on the operating system.
 
-localtime64_r() is a 64-bit equivalent of localtime_r().
+S_localtime64_r() is a 64-bit equivalent of localtime_r().
 
-gmtime64_r() is a 64-bit equivalent of gmtime_r().
+S_gmtime64_r() is a 64-bit equivalent of gmtime_r().
 
 */
 
@@ -110,27 +110,27 @@ static const int dow_year_start[SOLAR_CYCLE_LENGTH] = {
 
 /* Multi varadic macros are a C99 thing, alas */
 #ifdef TIME_64_DEBUG
-#    define TRACE(format) (fprintf(stderr, format))
-#    define TRACE1(format, var1)    (fprintf(stderr, format, var1))
-#    define TRACE2(format, var1, var2)    (fprintf(stderr, format, var1, var2))
-#    define TRACE3(format, var1, var2, var3)    (fprintf(stderr, format, var1, var2, var3))
+#    define TIME64_TRACE(format) (fprintf(stderr, format))
+#    define TIME64_TRACE1(format, var1)    (fprintf(stderr, format, var1))
+#    define TIME64_TRACE2(format, var1, var2)    (fprintf(stderr, format, var1, var2))
+#    define TIME64_TRACE3(format, var1, var2, var3)    (fprintf(stderr, format, var1, var2, var3))
 #else
-#    define TRACE(format) ((void)0)
-#    define TRACE1(format, var1) ((void)0)
-#    define TRACE2(format, var1, var2) ((void)0)
-#    define TRACE3(format, var1, var2, var3) ((void)0)
+#    define TIME64_TRACE(format) ((void)0)
+#    define TIME64_TRACE1(format, var1) ((void)0)
+#    define TIME64_TRACE2(format, var1, var2) ((void)0)
+#    define TIME64_TRACE3(format, var1, var2, var3) ((void)0)
 #endif
 
-static int is_exception_century(Year year)
+static int S_is_exception_century(Year year)
 {
     int is_exception = ((year % 100 == 0) && !(year % 400 == 0));
-    TRACE1("# is_exception_century: %s\n", is_exception ? "yes" : "no");
+    TIME64_TRACE1("# is_exception_century: %s\n", is_exception ? "yes" : "no");
 
     return(is_exception);
 }
 
 
-Time64_T timegm64(struct TM *date) {
+static Time64_T S_timegm64(struct TM *date) {
     int      days    = 0;
     Time64_T seconds = 0;
     Year     year;
@@ -166,7 +166,7 @@ Time64_T timegm64(struct TM *date) {
 
 
 #ifdef DEBUGGING
-static int check_tm(struct TM *tm)
+static int S_check_tm(struct TM *tm)
 {
     /* Don't forget leap seconds */
     assert(tm->tm_sec >= 0);
@@ -203,7 +203,7 @@ static int check_tm(struct TM *tm)
 /* The exceptional centuries without leap years cause the cycle to
    shift by 16
 */
-static Year cycle_offset(Year year)
+static Year S_cycle_offset(Year year)
 {
     const Year start_year = 2000;
     Year year_diff  = year - start_year;
@@ -215,7 +215,7 @@ static Year cycle_offset(Year year)
     exceptions  = year_diff / 100;
     exceptions -= year_diff / 400;
 
-    TRACE3("# year: %lld, exceptions: %lld, year_diff: %lld\n",
+    TIME64_TRACE3("# year: %lld, exceptions: %lld, year_diff: %lld\n",
           year, exceptions, year_diff);
 
     return exceptions * 16;
@@ -238,17 +238,17 @@ static Year cycle_offset(Year year)
    It doesn't need the same leap year status since we only care about
    January 1st.
 */
-static int safe_year(Year year)
+static int S_safe_year(Year year)
 {
     int safe_year;
-    Year year_cycle = year + cycle_offset(year);
+    Year year_cycle = year + S_cycle_offset(year);
 
     /* Change non-leap xx00 years to an equivalent */
-    if( is_exception_century(year) )
+    if( S_is_exception_century(year) )
         year_cycle += 11;
 
     /* Also xx01 years, since the previous year will be wrong */
-    if( is_exception_century(year - 1) )
+    if( S_is_exception_century(year - 1) )
         year_cycle += 17;
 
     year_cycle %= SOLAR_CYCLE_LENGTH;
@@ -261,14 +261,14 @@ static int safe_year(Year year)
 
     assert(safe_year <= 2037 && safe_year >= 2010);
 
-    TRACE3("# year: %lld, year_cycle: %lld, safe_year: %d\n",
+    TIME64_TRACE3("# year: %lld, year_cycle: %lld, safe_year: %d\n",
           year, year_cycle, safe_year);
 
     return safe_year;
 }
 
 
-void copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
+static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
     if( src == NULL ) {
         memset(dest, 0, sizeof(*dest));
     }
@@ -300,7 +300,7 @@ void copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
 }
 
 
-void copy_big_TM_to_little_tm(const struct TM *src, struct tm *dest) {
+static void S_copy_big_TM_to_little_tm(const struct TM *src, struct tm *dest) {
     if( src == NULL ) {
         memset(dest, 0, sizeof(*dest));
     }
@@ -332,8 +332,9 @@ void copy_big_TM_to_little_tm(const struct TM *src, struct tm *dest) {
 }
 
 
+#ifndef HAS_LOCALTIME_R
 /* Simulate localtime_r() to the best of our ability */
-struct tm * fake_localtime_r(const time_t *clock, struct tm *result) {
+static struct tm * S_localtime_r(const time_t *clock, struct tm *result) {
     dTHX;    /* in case the following is defined as Perl_my_localtime(aTHX_ ...) */
     const struct tm *static_result = localtime(clock);
 
@@ -348,10 +349,11 @@ struct tm * fake_localtime_r(const time_t *clock, struct tm *result) {
         return result;
     }
 }
+#endif
 
-
+#ifndef HAS_GMTIME_R
 /* Simulate gmtime_r() to the best of our ability */
-struct tm * fake_gmtime_r(const time_t *clock, struct tm *result) {
+static struct tm * S_gmtime_r(const time_t *clock, struct tm *result) {
     dTHX;    /* in case the following is defined as Perl_my_gmtime(aTHX_ ...) */
     const struct tm *static_result = gmtime(clock);
 
@@ -366,9 +368,9 @@ struct tm * fake_gmtime_r(const time_t *clock, struct tm *result) {
         return result;
     }
 }
+#endif
 
-
-struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
+static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
 {
     int v_tm_sec, v_tm_min, v_tm_hour, v_tm_mon, v_tm_wday;
     Time64_T v_tm_tday;
@@ -386,8 +388,8 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
         struct tm safe_date;
         GMTIME_R(&safe_time, &safe_date);
 
-        copy_little_tm_to_big_TM(&safe_date, p);
-        assert(check_tm(p));
+        S_copy_little_tm_to_big_TM(&safe_date, p);
+        assert(S_check_tm(p));
 
         return p;
     }
@@ -489,13 +491,13 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
     p->tm_mon  = v_tm_mon;
     p->tm_wday = v_tm_wday;
 
-    assert(check_tm(p));
+    assert(S_check_tm(p));
 
     return p;
 }
 
 
-struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
+struct TM *S_localtime64_r (const Time64_T *time, struct TM *local_tm)
 {
     time_t safe_time;
     struct tm safe_date;
@@ -509,18 +511,18 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
     if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
         safe_time = (time_t)*time;
 
-        TRACE1("Using system localtime for %lld\n", *time);
+        TIME64_TRACE1("Using system localtime for %lld\n", *time);
 
         LOCALTIME_R(&safe_time, &safe_date);
 
-        copy_little_tm_to_big_TM(&safe_date, local_tm);
-        assert(check_tm(local_tm));
+        S_copy_little_tm_to_big_TM(&safe_date, local_tm);
+        assert(S_check_tm(local_tm));
 
         return local_tm;
     }
 
-    if( gmtime64_r(time, &gm_tm) == NULL ) {
-        TRACE1("gmtime64_r returned null for %lld\n", *time);
+    if( S_gmtime64_r(time, &gm_tm) == NULL ) {
+        TIME64_TRACE1("gmtime64_r returned null for %lld\n", *time);
         return NULL;
     }
 
@@ -530,21 +532,21 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
         gm_tm.tm_year < (1970 - 1900)
        )
     {
-        TRACE1("Mapping tm_year %lld to safe_year\n", (Year)gm_tm.tm_year);
-        gm_tm.tm_year = safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
+        TIME64_TRACE1("Mapping tm_year %lld to safe_year\n", (Year)gm_tm.tm_year);
+        gm_tm.tm_year = S_safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
     }
 
-    safe_time = (time_t)timegm64(&gm_tm);
+    safe_time = (time_t)S_timegm64(&gm_tm);
     if( LOCALTIME_R(&safe_time, &safe_date) == NULL ) {
-        TRACE1("localtime_r(%d) returned NULL\n", (int)safe_time);
+        TIME64_TRACE1("localtime_r(%d) returned NULL\n", (int)safe_time);
         return NULL;
     }
 
-    copy_little_tm_to_big_TM(&safe_date, local_tm);
+    S_copy_little_tm_to_big_TM(&safe_date, local_tm);
 
     local_tm->tm_year = orig_year;
     if( local_tm->tm_year != orig_year ) {
-        TRACE2("tm_year overflow: tm_year %lld, orig_year %lld\n",
+        TIME64_TRACE2("tm_year overflow: tm_year %lld, orig_year %lld\n",
               (Year)local_tm->tm_year, (Year)orig_year);
 
 #ifdef EOVERFLOW
@@ -579,7 +581,7 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
     if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
         local_tm->tm_yday--;
 
-    assert(check_tm(local_tm));
+    assert(S_check_tm(local_tm));
 
     return local_tm;
 }
