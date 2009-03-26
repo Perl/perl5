@@ -143,6 +143,8 @@ open my $io, "<", "TEST";
 $io = *{$io}{IO};
 bless $io, "OverString";
 
+eval { require Fcntl };
+
 for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     $over = [];
     ok( my $rv = eval "-$op \$ft",  "overloaded -$op succeeds" )
@@ -151,14 +153,23 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     is( $over->[1], $op,            "correct op for overloaded -$op" );
     is( $rv,        "-$op",         "correct return value for overloaded -$op");
 
+    my ($exp, $is) = (1, "is");
+    if (
+        $op eq "u" and not eval { Fcntl::S_ISUID() } or
+        $op eq "g" and not eval { Fcntl::S_ISGID() } or
+        $op eq "k" and not eval { Fcntl::S_ISVTX() }
+    ) {
+        ($exp, $is) = (0, "not");
+    }
+
     $over = 0;
     $rv = eval "-$op \$str";
     ok( !$@,                        "-$op succeeds with string overloading" )
         or diag( $@ );
     is( $rv, eval "-$op 'TEST'",    "correct -$op on string overload" );
-    is( $over,      1,              "string overload called for -$op" );
+    is( $over,      $exp,           "string overload $is called for -$op" );
 
-    my ($exp, $is) = $op eq "l" ? (1, "is") : (0, "not");
+    ($exp, $is) = $op eq "l" ? (1, "is") : (0, "not");
 
     $over = 0;
     eval "-$op \$gv";
