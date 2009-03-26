@@ -300,38 +300,6 @@ static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
 }
 
 
-static void S_copy_big_TM_to_little_tm(const struct TM *src, struct tm *dest) {
-    if( src == NULL ) {
-        memset(dest, 0, sizeof(*dest));
-    }
-    else {
-#       ifdef USE_TM64
-            dest->tm_sec        = src->tm_sec;
-            dest->tm_min        = src->tm_min;
-            dest->tm_hour       = src->tm_hour;
-            dest->tm_mday       = src->tm_mday;
-            dest->tm_mon        = src->tm_mon;
-            dest->tm_year       = (int)src->tm_year;
-            dest->tm_wday       = src->tm_wday;
-            dest->tm_yday       = src->tm_yday;
-            dest->tm_isdst      = src->tm_isdst;
-
-#           ifdef HAS_TM_TM_GMTOFF
-                dest->tm_gmtoff  = src->tm_gmtoff;
-#           endif
-
-#           ifdef HAS_TM_TM_ZONE
-                dest->tm_zone  = src->tm_zone;
-#           endif
-
-#       else
-            /* They're the same type */
-            memcpy(dest, src, sizeof(*dest));
-#       endif
-    }
-}
-
-
 #ifndef HAS_LOCALTIME_R
 /* Simulate localtime_r() to the best of our ability */
 static struct tm * S_localtime_r(const time_t *clock, struct tm *result) {
