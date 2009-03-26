@@ -1079,8 +1079,7 @@ package Maintainers;
 	'threads' =>
 		{
 		'MAINTAINER'	=> 'jdhedden',
-		'FILES'		=> q[ext/threads/hints ext/threads/t
-				     ext/threads/threads.{pm,xs}],
+		'FILES'		=> q[ext/threads],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'blead',
 		},
