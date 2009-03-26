@@ -6,5 +6,4 @@ WriteMakefile(
     NAME              => 'mro',
     VERSION_FROM      => 'mro.pm', # finds $VERSION
     ABSTRACT_FROM     => 'mro.pm', # retrieve abstract from module
-    MAN3PODS          => {},
     AUTHOR            => 'Brandon L. Black <blblack@gmail.com>');

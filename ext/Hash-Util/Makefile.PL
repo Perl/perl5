@@ -5,10 +5,8 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     VERSION_FROM    => "lib/Hash/Util.pm",
-    MAN3PODS        => {},  # Pods will be built by installman.
     NAME            => "Hash::Util",
     DEFINE          => "-DPERL_EXT",
-    NORECURS        => 1, # Hash::Util::FieldHash is treated as distinct.
 );
 
 package MY;
