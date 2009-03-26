@@ -216,6 +216,11 @@ On some UNIX systems, the value in C<$?> would not have the top bit set
 Under some circumstances, $^R could incorrectly become undefined
 [RT # 57042].
 
+=item *
+
+(XS) In various hash functions, passing a pre-computed hash to when the
+key is utf8 might result in an incorrect lookup.
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -227,6 +232,9 @@ C<vcroak()> now accepts a null first argument.
 New macros C<dSAVEDERRNO>, C<dSAVE_ERRNO>, C<SAVE_ERRNO>, C<RESTORE_ERRNO>
 have been added to formalise the temporary saving of the C<errno>
 variable.
+
+The function C<Perl_sv_insert_flags> has been added to augment
+C<Perl_sv_insert>.
 
 =head1 Known Problems
 
