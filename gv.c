@@ -1983,6 +1983,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   break;
 	 case int_amg:
 	 case iter_amg:			/* XXXX Eventually should do to_gv. */
+	 case ftest_amg:		/* XXXX Eventually should do to_gv. */
 	     /* FAIL safe */
 	     return NULL;	/* Delegate operation to standard mechanisms. */
 	     break;

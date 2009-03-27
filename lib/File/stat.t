@@ -19,7 +19,7 @@ BEGIN {
     unless (@stat) { plan skip_all => "1..0 # Skip: no file TEST"; exit 0 }
 }
 
-plan tests => 19;
+plan tests => 19 + 24*2 + 3;
 
 use_ok( 'File::stat' );
 
@@ -56,6 +56,23 @@ is( $stat->blksize, $stat[11], "IO block size in position 11" );
 
 is( $stat->blocks, $stat[12], "number of blocks in position 12" );
 
+for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
+    SKIP: {
+        $^O eq "VMS" and index "rwxRWX", $_
+            and skip "File::stat ignores VMS ACLs", 1;
+
+        my $rv = eval "-$_ \$stat";
+        ok( !$@,                            "-$_ overload succeeds" )
+            or diag( $@ );
+        is( $rv, eval "-$_ 'TEST'",         "correct -$_ overload" );
+    }
+}
+
+for (split //, "tTB") {
+    eval "-$_ \$stat";
+    like( $@, qr/\Q-$_ is not implemented/, "-$_ overload fails" );
+}
+
 SKIP: {
 	local *STAT;
 	skip("Could not open file: $!", 2) unless open(STAT, 'TEST');
@@ -81,8 +98,9 @@ SKIP: {
 	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
 }
 
+
 local $!;
 $stat = stat '/notafile';
-isn't( $!, '', 'should populate $!, given invalid file' );
+isnt( $!, '', 'should populate $!, given invalid file' );
 
 # Testing pretty much anything else is unportable.
