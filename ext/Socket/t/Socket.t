@@ -174,6 +174,5 @@ if($Config{d_inetntop} && $Config{d_inetaton}){
     print (lc(inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")) eq "2001:503:ba3e::2:30") ? "ok 20\n" : "not ok 20\n");
 } else {
     # no IPv6 
-    print "ok 18 - skipped on this platform\n";
-    print "ok 19 - skipped on this platform\n";
+    print "ok $_ - skipped on this platform\n" for 18 .. 20;
 }
