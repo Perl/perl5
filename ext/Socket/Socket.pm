@@ -198,6 +198,7 @@ use XSLoader ();
 @ISA = qw(Exporter);
 @EXPORT = qw(
 	inet_aton inet_ntoa
+	inet_pton inet_ntop
 	sockaddr_family
 	pack_sockaddr_in unpack_sockaddr_in
 	pack_sockaddr_un unpack_sockaddr_un
