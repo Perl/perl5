@@ -465,7 +465,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
 }
 
 
-struct TM *S_localtime64_r (const Time64_T *time, struct TM *local_tm)
+static struct TM *S_localtime64_r (const Time64_T *time, struct TM *local_tm)
 {
     time_t safe_time;
     struct tm safe_date;
