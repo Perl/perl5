@@ -49,9 +49,10 @@ cmp_ok($t->daylight_savings, '==', 0);
 # ->tzoffset?
 {
     local $ENV{TZ} = "EST";
+    Time::Piece::_tzset();  # register the environment change
     my $lt = localtime;
     cmp_ok(scalar($lt->tzoffset), 'eq', '-18000');
-    cmp_ok($lt->strftime("%z"), 'eq', '-0500');
+    cmp_ok($lt->strftime("%Z"), 'eq', 'EST');
 }
 
 cmp_ok(($t->julian_day / 2451604.0243 ) - 1, '<', 0.001);
