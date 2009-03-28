@@ -4074,7 +4074,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV))
+		     && SvTYPE(sstr) >= SVt_PVIV && SvTYPE(sstr) != SVt_PVFM))
 		: 1)
 #endif
             ) {
