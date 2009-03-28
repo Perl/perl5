@@ -1866,7 +1866,7 @@ Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 Ap	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_OLD_COPY_ON_WRITE
 : Used in pp_hot.c and regexec.c
-pMXE	|SV*	|sv_setsv_cow	|NN SV* dstr|NN SV* sstr
+pMXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 #endif
 
 Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
