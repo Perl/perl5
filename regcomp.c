@@ -5255,7 +5255,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv,
             goto getlen;
         } else {
             if (ckWARN(WARN_UNINITIALIZED))
-                report_uninit((const SV *)sv);
+                report_uninit((SV *)sv);
             return 0;
         }
     }
