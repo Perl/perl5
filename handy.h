@@ -55,7 +55,9 @@ Null SV pointer.
  * AV *av2 = MUTABLE_AV(sv); <== GOOD: it may warn
  */
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+/* For 5.10.x, disable the const cast checking that MUTABLE_PTR does in
+ * blead */
+#if 0 && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
 #else
 #  define MUTABLE_PTR(p) ((void *) (p))
