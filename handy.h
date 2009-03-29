@@ -48,6 +48,15 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #define TRUE (1)
 #define FALSE (0)
 
+/* The MUTABLE_*() macros cast pointers to the types shown, in such a way
+ * (compiler permitting) that casting away const-ness will give a warning;
+ * e.g.:
+ *
+ * const SV *sv = ...;
+ * AV *av1 = (AV*)sv;        <== BAD:  the const has been silently cast away
+ * AV *av2 = MUTABLE_AV(sv); <== GOOD: it may warn
+ */
+
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
 #else
