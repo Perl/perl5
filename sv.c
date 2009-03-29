@@ -5656,6 +5656,9 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor
+			/* A constant subroutine can have no side effects, so
+			   don't bother calling it.  */
+			&& !CvCONST(destructor)
 			/* Don't bother calling an empty destructor */
 			&& (CvISXSUB(destructor)
 			|| CvSTART(destructor)->op_next->op_type != OP_LEAVESUB))

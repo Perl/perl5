@@ -5949,6 +5949,11 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
+Passing NULL for SV creates a constant sub equivalent to C<sub BAR () {}>,
+which won't be called if used as a destructor, but will suppress the overhead
+of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
+compile time.)
+
 =cut
 */
 
@@ -8968,6 +8973,7 @@ const_sv_xsub(pTHX_ CV* cv)
 {
     dVAR;
     dXSARGS;
+    SV *const sv = MUTABLE_SV(XSANY.any_ptr);
     if (items != 0) {
 	NOOP;
 #if 0
@@ -8975,8 +8981,11 @@ const_sv_xsub(pTHX_ CV* cv)
                    HvNAME_get(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
 #endif
     }
+    if (!sv) {
+	XSRETURN(0);
+    }
     EXTEND(sp, 1);
-    ST(0) = MUTABLE_SV(XSANY.any_ptr);
+    ST(0) = sv;
     XSRETURN(1);
 }
 

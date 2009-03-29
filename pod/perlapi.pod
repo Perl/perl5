@@ -3091,6 +3091,11 @@ X<newCONSTSUB>
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
+Passing NULL for SV creates a constant sub equivalent to C<sub BAR () {}>,
+which won't be called if used as a destructor, but will suppress the overhead
+of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
+compile time.)
+
 	CV*	newCONSTSUB(HV* stash, const char* name, SV* sv)
 
 =for hackers
