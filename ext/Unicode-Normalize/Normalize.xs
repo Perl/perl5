@@ -33,9 +33,11 @@
 /* utf8_hop() hops back before start. Maybe broken UTF-8 */
 #define ErrHopBeforeStart "panic (Unicode::Normalize): hopping before start"
 
-/* It should never happen as there is no instance in UTF-8 and UTF-EBCDIC;
-   according to Versioning and Stability in UAX#15, no new composition
-   should come in future. */
+/* It should never happen as there is no instance in UTF-8 and UTF-EBCDIC.
+   If Unicode would add a new composition of A + B to C
+   where bytes::length(A) + bytes::length(B) < bytes::length(C),
+   this code should be fixed.
+   In this case, mkheader will prevent Unicode::Normalize from building. */
 #define ErrLongerThanSrc "panic (Unicode::Normalize %s): longer than source"
 
 /* uvuni_to_utf8 wants UTF8_MAXBYTES free bytes available */

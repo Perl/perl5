@@ -17,6 +17,7 @@ WriteMakefile(
     'VERSION_FROM'	=> 'Normalize.pm', # finds $VERSION
     'clean'		=> $clean,
     'PREREQ_PM'	  	=> {
+	bytes		=> 0,
 	Carp		=> 0,
 	constant	=> 0,
 	DynaLoader	=> 0,
@@ -27,5 +28,4 @@ WriteMakefile(
 	Test		=> 0,
 	warnings	=> 0,
     },
-    'MAN3PODS'		=> {},
 );
