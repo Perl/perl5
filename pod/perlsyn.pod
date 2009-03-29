@@ -117,7 +117,7 @@ is treated as 0.
 
 =head2 Statement Modifiers
 X<statement modifier> X<modifier> X<if> X<unless> X<while>
-X<until> X<foreach> X<for>
+X<until> X<when> X<foreach> X<for>
 
 Any simple statement may optionally be followed by a I<SINGLE> modifier,
 just before the terminating semicolon (or block ending).  The possible
@@ -127,6 +127,8 @@ modifiers are:
     unless EXPR
     while EXPR
     until EXPR
+    when EXPR
+    for LIST
     foreach LIST
 
 The C<EXPR> following the modifier is referred to as the "condition".
@@ -138,6 +140,22 @@ the condition is true (i.e., if the condition is false).
 
     print "Basset hounds got long ears" if length $ear >= 10;
     go_outside() and play() unless $is_raining;
+
+C<when> executes the statement I<when> C<$_> smart matches C<EXPR>, and
+then either C<break>s out if it's enclosed in a C<given> scope or skips
+to the C<next> element when it lies directly inside a C<for> loop.
+See also L</"Switch statements">.
+
+    given ($something) {
+        $abc    = 1 when /^abc/;
+        $just_a = 1 when /^a/;
+        $other  = 1;
+    }
+
+    for (@names) {
+	admin($_)   when [ qw/Alice Bob/ ];
+	regular($_) when [ qw/Chris David Ellen/ ];
+    }
 
 The C<foreach> modifier is an iterator: it executes the statement once
 for each item in the LIST (with C<$_> aliased to each item in turn).
@@ -716,7 +734,8 @@ See L<overload>.
 The Perl 5 smart match and C<given>/C<when> constructs are not
 absolutely identical to their Perl 6 analogues. The most visible
 difference is that, in Perl 5, parentheses are required around
-the argument to C<given()> and C<when()>. Parentheses in Perl 6
+the argument to C<given()> and C<when()> (except when this last
+one is used as a statement modifier). Parentheses in Perl 6
 are always optional in a control construct such as C<if()>,
 C<while()>, or C<when()>; they can't be made optional in Perl
 5 without a great deal of potential confusion, because Perl 5
