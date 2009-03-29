@@ -1,5 +1,9 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.03  Sun Mar 29 12:56:23 2009
+    - mkheader: check if no composition needs growing the string.
+    - Makefile.PL: a tweak
+
 1.02  Tue Jun  5 22:46:45 2007
     - XSUB: mkheader, _U_stringify() - avoid unpack('C*') on unicode.
     - test: short.t removed - pure perl is not inapprotiate for test of
