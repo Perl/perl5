@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
- * fields for which we don't have Configure support yet:
+ * fields for which we don't have Configure support prior to Perl 5.8.0:
  *   char *tm_zone;   -- abbreviation of timezone name
  *   long tm_gmtoff;  -- offset from GMT in seconds
  * To workaround core dumps from the uninitialised tm_zone we get the
@@ -19,10 +19,11 @@ extern "C" {
  * localtime(time()). That should give the desired result most of the
  * time. But probably not always!
  *
- * This is a temporary workaround to be removed once Configure
- * support is added and NETaa14816 is considered in full.
- * It does not address tzname aspects of NETaa14816.
+ * This is a vestigial workaround for Perls prior to 5.8.0.  We now
+ * rely on the initialization (still likely a workaround) in util.c.
  */
+#if !defined(PERL_VERSION) || PERL_VERSION < 8
+
 #if defined(HAS_GNULIBC)
 # ifndef STRUCT_TM_HASZONE
 #    define STRUCT_TM_HASZONE
@@ -30,6 +31,8 @@ extern "C" {
 #    define USE_TM_GMTOFF
 # endif
 #endif
+
+#endif /* end of pre-5.8 */
 
 #define    DAYS_PER_YEAR    365
 #define    DAYS_PER_QYEAR    (4*DAYS_PER_YEAR+1)
@@ -45,6 +48,8 @@ extern "C" {
 /* as used here, the algorithm leaves Sunday as day 1 unless we adjust it */
 #define    WEEKDAY_BIAS    6    /* (1+6)%7 makes Sunday 0 again */
 
+#if !defined(PERL_VERSION) || PERL_VERSION < 8
+
 #ifdef STRUCT_TM_HASZONE
 static void
 my_init_tm(struct tm *ptm)        /* see mktime, strftime and asctime    */
@@ -57,6 +62,11 @@ my_init_tm(struct tm *ptm)        /* see mktime, strftime and asctime    */
 #else
 # define my_init_tm(ptm)
 #endif
+
+#else
+/* use core version from util.c in 5.8.0 and later */
+# define my_init_tm init_tm
+#endif 
 
 /*
  * my_mini_mktime - normalise struct tm values without the localtime()
