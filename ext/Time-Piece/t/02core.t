@@ -48,7 +48,7 @@ cmp_ok($t->daylight_savings, '==', 0);
 
 # ->tzoffset?
 {
-    local $ENV{TZ} = "EST";
+    local $ENV{TZ} = "EST5";
     Time::Piece::_tzset();  # register the environment change
     my $lt = localtime;
     cmp_ok(scalar($lt->tzoffset), 'eq', '-18000');
