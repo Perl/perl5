@@ -177,7 +177,7 @@
 #define do_exec			Perl_do_exec
 #endif
 #endif
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
 #define do_spawn_nowait		Perl_do_spawn_nowait
@@ -2489,7 +2489,7 @@
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
 #endif
 #endif
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
