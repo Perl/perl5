@@ -40,7 +40,30 @@ of the output of C<perl -V>. See L<perlrepository> for more information.
 
 =head1 Core Enhancements
 
+=head2 a proper interface for pluggable Method Resolution Orders
+
+XXX Nicholas said he needsd to document the following change, at which
+point update this entry:
+b2685f0c86 2008/12/27
+
+=head2 The C<overloading> pragma
+
+This pragma allows you to lexically disable or enable overloading
+for some or all operations. (Yuval Kogman)
+
+
 =head1 Modules and Pragmata
+
+=head2 Pragmata Changes
+
+=over 4
+
+=item C<overloading>
+
+See L</"The C<overloading> pragma"> above.
+
+=back
+
 
 =head2 New Modules
 
@@ -88,6 +111,10 @@ C<Digest::MD5> upgraded from version 2.36_01 to 2.38
 
 =item *
 
+C<IPC::SysV> upgraded from version 1.05 to 2.00_02 XXX
+
+=item *
+
 C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
@@ -118,6 +145,10 @@ C<Package::Constants> upgraded from version 0.01 to 0.02
 =item *
 
 C<Pod::Text> upgraded from version 3.08 to 3.13
+
+=item *
+
+C<Switch> upgraded from version 2.13 to 2.14
 
 =item *
 
@@ -233,6 +264,11 @@ key is utf8 might result in an incorrect lookup.
 
 C<$object->isa('Foo')> would report false if the package C<Foo> didn't
 exist, even if the object's C<@ISA> contained C<Foo>.
+
+=item *
+
+Bitwise operations on references could crash the interpreter, e.g.
+C<$x=\$y; $x |= "foo"> [RT #54956].
 
 =back
 
