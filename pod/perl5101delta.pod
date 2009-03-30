@@ -149,6 +149,14 @@ L<perlrepository> describes how to access the perl source using git.
 
 =head1 Performance Enhancements
 
+=over
+
+=item *
+
+A new internal cache means that C<isa()> will often be faster.
+
+=back
+
 =head1 Installation and Configuration Improvements
 
 =head2 Configuration improvements
@@ -221,9 +229,20 @@ Under some circumstances, $^R could incorrectly become undefined
 (XS) In various hash functions, passing a pre-computed hash to when the
 key is utf8 might result in an incorrect lookup.
 
+=item *
+
+C<$object->isa('Foo')> would report false if the package C<Foo> didn't
+exist, even if the object's C<@ISA> contained C<Foo>.
+
 =back
 
 =head1 New or Changed Diagnostics
+
+=head2 Can't locate package %s for the parents of %s
+
+This warning has been removed. In general, it only got produced in
+conjunction with other warnings, and removing it allowed an isa lookup
+optimisation to be added.
 
 =head1 Changed Internals
 
@@ -235,6 +254,9 @@ variable.
 
 The function C<Perl_sv_insert_flags> has been added to augment
 C<Perl_sv_insert>.
+
+The function C<Perl_croak_xs_usage> has been added as a wrapper to
+C<Perl_croak>.
 
 =head1 Known Problems
 

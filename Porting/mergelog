@@ -899,7 +899,7 @@ M  02c1405339 2008/05/08 33790
 M  bd1c7bd234 2008/05/08 33791
 M  b1d302cbe7 2008/05/08 33792
 M  cfa308ca48 2008/05/08 33793
-P  81ec4fbc83 2008/05/08 33794 Just the 'make Copy.t strict-safe' part`
+P  81ec4fbc83 2008/05/08 33794 Just the 'make Copy.t strict-safe' part
 R  9c76cba290 2008/05/08 33795 (the version bump of this change appears in maint via #34522)
 R  91ca337ee7 2008/05/08 33796 (unknown reason)
 M  8a3f7e956e 2008/05/09 33797
@@ -924,7 +924,7 @@ M  61699fd9cf 2008/05/15 33829
 M  839c1407d2 2008/05/15 33830
 M  1e968d83d8 2008/05/15 33831
 M  06c0dd34a6 2008/05/16 33832
-R  f05d7009ff 2008/05/16 33833 (unknown reason)
+M  f05d7009ff 2008/05/16 33833
 M  1d888ee364 2008/05/16 33834
 M  5668511f4f 2008/05/16 33835
 M  373098c085 2008/05/16 33836
@@ -965,13 +965,13 @@ M  72bfe1b2b3 2008/05/21 33897
 M  ea86b3de35 2008/05/21 33898
 M  1eea129cab 2008/05/21 33899
 M  79706302bf 2008/05/21 33900
-R  afa74d4282 2008/05/21 33901 (unknown reason)
-R  8565890c86 2008/05/21 33902 (unknown reason)
+M  afa74d4282 2008/05/21 33901
+M  8565890c86 2008/05/21 33902
 M  5488f21b4e 2008/05/22 33905
 M  effb568a5e 2008/05/22 33906
 M  827116e637 2008/05/22 33907
 M  b60ab40eb1 2008/05/23 33909
-R  93c512172a 2008/05/23 33910 (unknown reason)
+M  93c512172a 2008/05/23 33910
 M  68c65ec0ad 2008/05/23 33911
 M  b27284eed0 2008/05/23 33912
 M  b8e1b25f6a 2008/05/23 33914
@@ -1011,10 +1011,10 @@ M  83b907a4c2 2008/06/03 33993
 M  ccea220c53 2008/06/04 33995
 M  f0291b57b3 2008/06/04 33996
 M  69473a205b 2008/06/04 33997
-R  42e4baff30 2008/06/05 33998 (unknown reason)
+R  42e4baff30 2008/06/05 33998 assimilate HTML-Parser; reversed by 34001
 M  8365c870bf 2008/06/05 33999
 M  8737ae4dee 2008/06/05 34000
-R  8ba733f51b 2008/06/05 34001 (unknown reason)
+R  8ba733f51b 2008/06/05 34001 see 33998
 M  dce0cf36a3 2008/06/05 34002
 M  df19a7184d 2008/06/05 34003
 M  3fe752ba88 2008/06/06 34004
@@ -1224,7 +1224,7 @@ M  98fca0e8e7 2008/09/02 34240
 M  162f8c6795 2008/09/02 34241
 M  8d159ec130 2008/09/02 34242
 M  98af1e1420 2008/09/02 34243
-R  b51c85cfec 2008/09/03 34252 (unknown reason)
+R  b51c85cfec 2008/09/03 34252 version bumps subsumed by later merges
 M  9c7085bebb 2008/09/03 34258
 M  920f5fe1a2 2008/09/05 34272
 M  598d6e99fa 2008/09/05 34278
@@ -1235,7 +1235,8 @@ M  00ca1d0d42 2008/09/07 34306
 M  b91dd380a9 2008/09/07 34307
 M  0b9c91f651 2008/09/07 34308
 M  5625ef69b6 2008/09/07 34309
-R  edbe35ea95 2008/09/07 34310 (unknown reason)
+R  edbe35ea95 2008/09/07 34310 optimise 'if !$x' -
+				might have subtle overloading issues
 M  6ae70e43e2 2008/09/07 34311
 M  ea581a515b 2008/09/07 34312
 M  cd1b270f96 2008/09/07 34314
@@ -1246,11 +1247,11 @@ M  f0cb210418 2008/09/08 34318
 M  2234743e59 2008/09/08 34319
 M  f8a128a908 2008/09/08 34320
 M  e37e15afdc 2008/09/08 34321
-R  07f3cdf531 2008/09/08 34322 (unknown reason)
+R  07f3cdf531 2008/09/08 34322 see 34310
 M  8b80c7bdc6 2008/09/09 34324
 M  0642d82a23 2008/09/09 34328
 M  9965363eb5 2008/09/09 34329
-R  76eeff750b 2008/09/10 34330 (unknown reason)
+R  76eeff750b 2008/09/10 34330 update Changes
 M  6516816e47 2008/09/10 34334
 M  a6c9a8153f 2008/09/10 34337
 M  31f0e52e4a 2008/09/11 34338
@@ -1259,11 +1260,11 @@ M  515a4f721c 2008/09/11 34349
 M  4a9e32d883 2008/09/11 34350
 M  d43aa7f92b 2008/09/11 34351
 M  90903f12d8 2008/09/11 34352
-R  c109477dfd 2008/09/11 34353 (unknown reason)
-R  a49ba3fcbe 2008/09/12 34354 (unknown reason)
-R  5782d50227 2008/09/12 34355 (unknown reason)
-R  6e4aef5913 2008/09/12 34356 (unknown reason)
-R  ed09b296cb 2008/09/12 34357 (unknown reason)
+M  c109477dfd 2008/09/11 34353
+M  a49ba3fcbe 2008/09/12 34354
+M  5782d50227 2008/09/12 34355
+M  6e4aef5913 2008/09/12 34356
+M  ed09b296cb 2008/09/12 34357
 M  71c4dbc371 2008/09/13 34358
 M  27fc0087fc 2008/09/13 34359
 M  18eb2ade7d 2008/09/14 34361
@@ -1278,8 +1279,11 @@ M  f89542f789 2008/09/16 34377
 M  7ed5353dcf 2008/09/17 34378
 M  f2b0c9f791 2008/09/17 34379
 M  3544fab439 2008/09/19 34380
-R  c33269f7cc 2008/09/20 34381 (unknown reason)
-R  1da83c398c 2008/09/20 34383 (unknown reason)
+R  c33269f7cc 2008/09/20 34381 make 2 fns static:
+			    S_regdump_extflags was arady present in 5.10.0,
+			    S_get_aux_mg was added by 32680, which isn't merged
+R  1da83c398c 2008/09/20 34383 fix for S_refcounted_he_new_common,
+				which is only in blead
 !  5eb30066fe 2008/09/20 34384 IO::Handle awaiting CPAN sync
 M  d3383c7531 2008/09/21 34385
 M  592b6146ab 2008/09/21 34386
@@ -1349,15 +1353,15 @@ M  95e0691656 2008/10/16 34494
 M  a65cb92d1f 2008/10/17 34498
 M  1b289682be 2008/10/18 34504
 M  711690a16d 2008/10/18 34505
-R  a954f6ee31 2008/10/18 34506 (unknown reason)
+M  a954f6ee31 2008/10/18 34506 see fd3789393493ada3cc3ec01fcbc500c4e9c0f5b1
 M  b023a8eeff 2008/10/18 34507
 M  1d5acac0f9 2008/10/18 34508
-R  14297b8f35 2008/10/18 34509 (unknown reason)
+R  14297b8f35 2008/10/18 34509 makemeta
 M  dbcf044e38 2008/10/18 34510
 M  444c2e40cd 2008/10/18 34513
 M  486bcc50ba 2008/10/19 34514
 M  e55c0a828f 2008/10/19 34519
-R  15baf0c4b0 2008/10/20 34521 (unknown reason)
+R  15baf0c4b0 2008/10/20 34521 lib/File/Copy.pm - skipping new perms stuff
 !  5f259b1a7b 2008/10/20 34526 waiting for Module::Build 0.31012 (14 Jan)
 M  afe79e7bf0 2008/10/20 34528
 M  325f7ffd84 2008/10/20 34529
@@ -1377,8 +1381,8 @@ M  28ff97357b 2008/10/23 34562
 M  2adc35ddaf 2008/10/24 34566
 M  0b0ab8012d 2008/10/24 34567
 M  d7a2c63ca1 2008/10/24 34568
-R  56b5603ec7 2008/10/24 34569 (unknown reason)
-R  4ca7bcefeb 2008/10/24 34570 (unknown reason)
+R  56b5603ec7 2008/10/24 34569 make regen
+M  4ca7bcefeb 2008/10/24 34570
 M  dfc72f41b0 2008/10/24 34571
 M  4975ecc97f 2008/10/24 34573
 M  bef8a12803 2008/10/24 34574
@@ -1401,29 +1405,29 @@ M  12754f92d4 2008/10/26 34598
 M  5fe77bf88d 2008/10/26 34600
 M  61c26d1849 2008/10/27 34602
 M  159e8d6463 2008/10/27 34603
-R  bb5dd93d07 2008/10/27 34604 (unknown reason)
-R  b1bc3f345d 2008/10/27 34605 (unknown reason)
+R  bb5dd93d07 2008/10/27 34604 de-consting
+M  b1bc3f345d 2008/10/27 34605
 M  c7304ea260 2008/10/27 34606
 M  fa89a9aebf 2008/10/27 34607
-R  a062e10d14 2008/10/27 34608 (unknown reason)
+M  a062e10d14 2008/10/27 34608
 M  4a4ab19ce2 2008/10/27 34609
-R  8f629a87fe 2008/10/27 34610 (unknown reason)
+M  8f629a87fe 2008/10/27 34610
 M  3b3a0cf42f 2008/10/27 34611
-R  f065df047b 2008/10/27 34612 (unknown reason)
-R  e9726144ea 2008/10/27 34613 (unknown reason)
+M  f065df047b 2008/10/27 34612
+M  e9726144ea 2008/10/27 34613
 M  3f08339969 2008/10/28 34615
 M  f47f16450c 2008/10/28 34617
-R  0c289d1353 2008/10/28 34618 (unknown reason)
-R  dbebbdb4f8 2008/10/28 34619 (unknown reason)
+R  0c289d1353 2008/10/28 34618 consting
+M  dbebbdb4f8 2008/10/28 34619
 M  44591ba566 2008/10/28 34620
-R  c690345083 2008/10/28 34621 (unknown reason)
-R  3cb1dbc621 2008/10/28 34622 (unknown reason)
-R  4c4652b6d9 2008/10/28 34623 (unknown reason)
-R  ef8f769977 2008/10/28 34624 (unknown reason)
-R  1d1936752b 2008/10/28 34626 (unknown reason)
-R  6c1b357c76 2008/10/28 34627 (unknown reason)
-R  b8082b6e76 2008/10/28 34628 (unknown reason)
-R  85fbaab29c 2008/10/28 34629 (unknown reason)
+M  c690345083 2008/10/28 34621
+M  3cb1dbc621 2008/10/28 34622
+M  4c4652b6d9 2008/10/28 34623
+M  ef8f769977 2008/10/28 34624
+M  1d1936752b 2008/10/28 34626
+R  6c1b357c76 2008/10/28 34627 consting
+M  b8082b6e76 2008/10/28 34628
+M  85fbaab29c 2008/10/28 34629
 !  df00ff3bee 2008/10/29 34630 waiting for Module::Build 0.31012 (14 Jan)
 M  4b0b5bad69 2008/10/29 34631
 !  1c1947d58d 2008/10/29 34634 MM_Haiku.pm: waiting for ExtUtils::MakeMaker CPAN to include it
@@ -1433,14 +1437,14 @@ M  cb1ea1622d 2008/10/29 34639
 M  c146e5603f 2008/10/29 34640
 M  87cea99e29 2008/10/29 34642
 M  21887892fe 2008/10/29 34643
-R  d45f5b305b 2008/10/29 34645 (unknown reason)
-R  126f53f392 2008/10/29 34646 (unknown reason)
-R  ea726b5259 2008/10/29 34647 (unknown reason)
+R  d45f5b305b 2008/10/29 34645 consting
+R  126f53f392 2008/10/29 34646 consting
+M  ea726b5259 2008/10/29 34647
 M  d969665116 2008/10/29 34648
 M  70d97eb0b4 2008/10/29 34649
-R  502c6561fc 2008/10/29 34650 (unknown reason)
+M  502c6561fc 2008/10/29 34650
 M  76f68e9bb8 2008/10/29 34653
-R  a45c7426c9 2008/10/29 34654 (unknown reason)
+M  a45c7426c9 2008/10/29 34654
 M  d724f706d6 2008/10/30 34660
 M  e7d3eb55e8 2008/10/30 34661
 M  cfbf46cd7f 2008/10/30 34666
@@ -1448,14 +1452,14 @@ M  4148925fb9 2008/10/30 34667
 M  643f470b35 2008/10/30 34668
 M  db42c9028c 2008/10/30 34669
 M  48ab574387 2008/10/30 34670
-R  daba3364ed 2008/10/30 34671 (unknown reason)
-R  1593ad5716 2008/10/30 34672 (unknown reason)
-R  b3dbd76e6e 2008/10/30 34673 (unknown reason)
-R  ad64d0ecd5 2008/10/30 34675 (unknown reason)
+M  daba3364ed 2008/10/30 34671
+R  1593ad5716 2008/10/30 34672 consting
+R  b3dbd76e6e 2008/10/30 34673 consting (follow-up to 34673)
+M  ad64d0ecd5 2008/10/30 34675
 M  b7e2d8c7ee 2008/10/31 34676
-R  260890edab 2008/10/31 34677 (unknown reason)
-R  88e52f1cd8 2008/10/31 34678 (unknown reason)
-R  159b6efe04 2008/10/31 34679 (unknown reason)
+M  260890edab 2008/10/31 34677
+R  88e52f1cd8 2008/10/31 34678 consting (fix to 34672)
+M  159b6efe04 2008/10/31 34679
 M  9480d411d9 2008/10/31 34691
 M  b8fcbefe62 2008/11/01 34693
 M  f1f6607626 2008/11/02 34694
@@ -1486,11 +1490,11 @@ M  82d700dc3b 2008/11/07 34761
 M  eaa0815147 2008/11/07 34762
 M  b5f955b7be 2008/11/07 34763
 M  296ff6bd3a 2008/11/07 34764
-R  9b411def1b 2008/11/07 34765 (unknown reason)
+R  9b411def1b 2008/11/07 34765 Pod-Perldoc-3.15: 14_06 changes -v arg to -D
 M  3339dfd8ef 2008/11/07 34766
 M  463559e728 2008/11/07 34768
 M  da7fcca4b8 2008/11/07 34769
-R  d2c6dc5ee5 2008/11/07 34770 uses MUTABLE_SV so not BackCompat
+P  d2c6dc5ee5 2008/11/07 34770 skipped some bleed regex-specific chunks
 M  36ba69bed1 2008/11/08 34771
 M  d0da4e620e 2008/11/08 34772
 M  3ff3a8b6a3 2008/11/08 34773
@@ -1500,9 +1504,9 @@ m  414bf5ae08 2008/11/08 34776 the Filter/Util/Call bits not yet merged; awaitin
 M  622e1e49fb 2008/11/08 34777
 M  2376d97dd5 2008/11/08 34778
 M  8d06e08c4f 2008/11/08 34779
-R  53f65a9ef4 2008/11/09 34780 on 32-bit platforms sprintf '%lld',2^32) now gives 
-             'Invalid conversion in printf:' warning and outputs %lld
-             rather than -1. Not very backwards compatible.
+R  53f65a9ef4 2008/11/09 34780 on 32-bit platforms sprintf '%lld',2^32) now
+		gives 'Invalid conversion in printf:' warning and outputs %lld
+		rather than -1. Not very backwards compatible.
 R  8ff953de44 2008/11/09 34781 rejected for same reason as 34780
 M  d85e265b2a 2008/11/09 34782
 R  1d1ac7bc98 2008/11/09 34783 rejected for same reason as 34780
@@ -1512,12 +1516,13 @@ M  4c90698d34 2008/11/10 34786
 M  b306dcb398 2008/11/10 34789
 M  1a3aec58bb 2008/11/10 34790
 M  b538b56a2e 2008/11/10 34792
-R  f19a12a3a6 2008/11/10 34804 uses MUTABLE_SV so not BackCompat
+M  f19a12a3a6 2008/11/10 34804
 M  b78893c993 2008/11/10 34814
 M  95960e9d32 2008/11/11 34815
 M  f9cff2501b 2008/11/12 34817
 M  0c8767aece 2008/11/12 34818
-R  9711599ee3 2008/11/12 34819 local $SIG{FOO}: patch changes sig of mg_localize, so not BinCompat
+R  9711599ee3 2008/11/12 34819 local $SIG{FOO}: patch changes sig of
+				mg_localize, so not BinCompat
 R  64f0785ed5 2008/11/12 34820 updating perlapi etc is branch-specific
 M  25cf7dea41 2008/11/12 34822
 M  95458265ab 2008/11/12 34823
@@ -2481,3 +2486,127 @@ M  b8a4246cca 2009/01/19 Upgrade to Module::Load::Conditional 0.30
 -  af6492bf9e 2009/03/08 lib/Text/TabsWrap/t/dnsparks.t should skip under T
 -  edd52d85e4 2009/03/10 Fix a printf compilation warning
 -  b92436812d 2009/03/11 Merge Attribute::Handlers 0.82 into core
+-  7cc1b246ee 2009/03/11 Merge Parse::CPAN::Meta 0.05 into core
+-  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
+-  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
+-  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
+-  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
+-  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
+-  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
+-  4d9f3eeb6f 2009/03/13 Ilya M. is no longer maintaining Data::Dumper. Ass
+-  5a7ebd3db9 2009/03/13 Add -E in the command-line usage in perl.pod
+-  43eb98159e 2009/03/13 Tests for floating point args to localtime and gmt
+-  df3467db16 2009/03/14 Return OPERATOR('[') for '[' without falling throu
+-  f50fa36f2a 2009/03/14 Better test case for [perl #63854] Error parsing "
+-  319fab5061 2009/03/14 Create IO-Compress
+-  cee5ec9732 2009/03/14 Remove directories from manifest
+-  eb1dd64e3e 2009/03/14 Disambiguate mention of -E in perl.pod and in perl
+-  8f11c4a440 2009/03/15 Upgrade to IPC::SysV 2.01
+-  17c79f4337 2009/03/15 Add IPC::SysV to Porting/Maintainers.pl
+-  78b3516b6c 2009/03/15 Update UPSTREAM for Devel::PPPort
+-  7bb03b244e 2009/03/15 Upgrade to Devel::PPPort 3.17
+-  6210e03fb1 2009/03/18 Fix typo in English name of $&
+-  245490700b 2009/03/18 Doc fix: the /k regexp modifier should really be w
+-  a0df7637f6 2009/03/19 Upgrade to Module-Pluggable-3.9
+-  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
+-  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
+-  53102b2bf3 2009/03/19 Bump Module-Pluggable VERSION following 4a28828fc8
+-  de9b652d38 2009/03/19 pod/perlreftut.pod: keep example in tune with the 
+-  38bb37b9aa 2009/03/20 Revert the op.c part of 3049cdab to enable shared 
+-  16bf6aa6d6 2009/03/20 Remove unnecessary MANIFEST file for IO-Compress
+-  baddfc4720 2009/03/21 Update CPANPLUS::Dist::Build to 0.16
+-  07abd197a8 2009/03/21 Correct a few file references in README files
+-  e57a4e52f2 2009/03/21 fix typo - s/was/what/ is to be ignored
+-  ac56ae2e85 2009/03/22 update MANIFEST for file removed by 16bf6aa6d68d98
+-  c966426a3b 2009/03/22 fix [RT #60034]. An equivalent fix was already in 
+-  7efcbeefb3 2009/03/22 Fixes for ext/compress
+-  76467b2a65 2009/03/23 Upgrade to ExtUtils-MakeMaker-6.50
+-  18a10db9e0 2009/03/24 Mark Florian Ragwitz as the NEXT maintainer. NEXT 
+-  d5fe29ea03 2009/03/24 Mark upstream as blead for Net::Ping.
+-  3dae3b3445 2009/03/24 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				MERGE: d5fe29ea03 18a10db9e0
+-  373b131131 2009/03/24 Add a SEE ALSO section based on suggestions from D
+-  6f63574e65 2009/03/24 Fix for regular expressions for RFC2822.
+-  2d373db117 2009/03/24 For some reason, the core version and the cpan ver
+-  c331296618 2009/03/24 Fix perl #63924: shmget limited to 32 bit segment 
+-  f14bcc5683 2009/03/24 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+				MERGE: c331296618 2d373db117
+-  ce1534abac 2009/03/24 Make regen_perly.pl compatible with bison 2.4
+-  aae7e7b3d1 2009/03/24 Update the version requirement message in regen_pe
+-  86247f3d60 2009/03/25 Upgrade to Encode-2.33.
+-  3d43828503 2009/03/25 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				MERGE: 86247f3d60 aae7e7b3d1
+-  9b33fb8e6c 2009/03/25 Add SEE ALSO's to find2perl and File::Find.
+-  036055ae9a 2009/03/25 [perl #63914] Time::Piece reports timezone incorre
+-  06b0438142 2009/03/25 find2perl (was Re: help unblock me from *@perl.org
+-  281206e6bb 2009/03/25 One more to ignore for metaconfig
+-  5086dff9f4 2009/03/25 Detection of IPv6 clueful functions by Configure (
+-  d7fba2bf7c 2009/03/25 IPv6 config variables for the other OS's
+-  d002ef56a2 2009/03/25 Move Module:Pluggable tests from t/Module_Pluggabl
+-  83c6af6020 2009/03/25 d002ef56a2861d99 didn't fix the Makefile.PL to ref
+-  8c8d0d995d 2009/03/25 Add new overloading type.
+-  9846fe2208 2009/03/25 Run overload.pl.
+-  d89f1457dd 2009/03/25 Tests for -X overloading.
+-  1b606c4906 2009/03/25 Call -X magic from pp_ftread.
+-  d3ebc3eb19 2009/03/25 Adjust tests.
+-  180b7b9bf7 2009/03/25 Move magic logic into tryAMAGICftest macro.
+-  07fe7c6a9f 2009/03/25 Finish the rest of the -X ops.
+-  448e77d75c 2009/03/25 Add -X overloading to File::stat.
+-  0f0923a377 2009/03/25 -M, -C, -A for File::stat.
+-  f6aa80235c 2009/03/25 More tests for -X/string/random overloading.
+-  c4c7412cbf 2009/03/25 Fall back to "" overload for -X.
+-  4d57d24f51 2009/03/25 Test stacked overloaded -X.
+-  7fb13887d7 2009/03/25 Stacked overloaded -X.
+-  709edd5bfa 2009/03/25 I missed a s/stat_cando/cando/ in File::stat.
+-  cd22a09c8c 2009/03/25 Tests for -X overload on File::stat.
+-  e22107918e 2009/03/25 Docs for -X overloading.
+-  4f9e790296 2009/03/25 Reinstate File::stat::stat_cando.
+-  b7c4737f31 2009/03/25 Warnings for File::stat deficiencies.
+-  cf5afd7805 2009/03/25 I assume VMS doesn't have a superuser.
+-  f29a27fe8a 2009/03/25 Bump File::stat's $VERSION.
+-  6cf0ee866a 2009/03/25 Docs for File::stat.
+-  d0c91b6afc 2009/03/25 Test -X overloads on GLOB and IO refs.
+-  52f7f5abcb 2009/03/25 IO refs always stringify for -t, -T and -B.
+-  500ff13f18 2009/03/25 -l was missing an SPAGAIN.
+-  776304fb74 2009/03/25 fix smoke issues with the compression modules
+-  df4bc1f3db 2009/03/26 make_ext.pl's automatic Makefile.PL generation can
+-  b81ac31e6a 2009/03/26 No need to set MAN3PODS now that make_ext.pl takes
+-  a2b175af91 2009/03/26 make_ext.pl should also set INSTALLMAN1DIR=none wh
+-  c3e2aceb2c 2009/03/26 Simplify the file description for ext/threads
+-  c71e4075e7 2009/03/26 Remove now-redundant references to MAN3PODS in cor
+-  12f277603d 2009/03/26 Remove MAN3PODS and NORECURS from Makefile.PLs whe
+-  e34f487206 2009/03/26 Correct the path for IO - needs a trailing / to st
+-  7a71a51454 2009/03/26 Remove MAN3PODS from modules' Makefile.PLs which a
+-  4d3e0127a2 2009/03/26 Undo the local change to Time::Piece's Makfile.PL 
+-  fc833dfd81 2009/03/26 make_ext.pl's automatic Makefile.PL generation can
+-  5c1e544edd 2009/03/26 Ignore Makefile.PLs that are now autogenerated.
+-  fa7f7498c3 2009/03/26 -ugk don't call string overload when S_IXXX isn't 
+-  0e985b6b12 2009/03/26 The DOSish branch of File::stat->cando had its arg
+-  7430375d19 2009/03/26 Namespace clean-up for time64.
+-  c8269701e1 2009/03/26 Remove unused function S_copy_big_TM_to_little_tm 
+-  036d8bd42e 2009/03/27 Add inet_pton() and inet_ntop() to Socket.
+-  81cdde7ffa 2009/03/27 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				MERGE: 036d8bd42e c8269701e1
+-  e9872d0414 2009/03/27 What am I thinking?  Just bump the version.
+-  4411113f31 2009/03/27 Add inet_pton and inet_ntop to the list of functio
+-  40b195f125 2009/03/27 Merge commit 'mauzo/over-X' into blead
+				MERGE: 4411113f31 0e985b6b12
+-  d82dd1bcff 2009/03/27 Some standards compliance for the new Time::Piece 
+-  37fa5116bc 2009/03/27 Fix concise-xs.t after recent changes to Socket.pm
+-  673062a98a 2009/03/27 Forgot one "static" in 7430375d1909c2b62c1fb3f9c6e
+-  d21dfdd8f2 2009/03/27 Also skip test 20 in t/Socket.t when no IPv6 is av
+-  b11720532d 2009/03/28 Improve mro merging error messages.
+-  f20dcd76e7 2009/03/28 Allow when to be used as a statement modifier
+-  7536ed5788 2009/03/28 In Perl_sv_setsv_cow(), dstr can be NULL.
+-  4b1c7d9edb 2009/03/28 Don't COW PVFMs, as the IVX is now used for FmLINE
+-  a214957f7e 2009/03/29 Don't call SvPV_const() on the method name at the 
+-  d4d72fe625 2009/03/29 Make Time::Piece use the init_tm() in util.c, bump
+-  a773d2c778 2009/03/29 DB_File 1.820: Remove MAN3PODS => {}
+-  51683ce6d9 2009/03/29 Update to Unicode::Normalize 1.03
+-  9340c80aae 2009/03/29 In Perl_newCONSTSUB(), sv should not be NULL.
+-  99ab892b64 2009/03/29 Change Perl_newCONSTSUB() so that a NULL sv genera
+-  d5cecc0e63 2009/03/29 Change Regexp::DESTROY to be a constant subroutine
+-  a35666c6be 2009/03/29 Document that DESTROY is subject to AUTOLOAD, and 
+-  2a8f410418 2009/03/29 Merge commit 'origin/postfixwhen' into blead
+				MERGE: a35666c6be f20dcd76e7
+M  cf3f0ffbff 2009/03/29 provide minimal documentation for the MUTABLE_*() 
