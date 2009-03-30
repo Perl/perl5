@@ -5,7 +5,7 @@ use Carp ();
 
 our $VERSION = '0.01';
 
-require 5.011000;
+require 5.010000; # XXX should be 5.010001
 
 sub _ops_to_nums {
     require overload::numbers;
