@@ -3950,7 +3950,7 @@ C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
     Perl_croak(aTHX_ "Usage %s::%s(%s)", "ouch" "awk", "eee_yow");
 
-	void	croak_xs_usage(CV *const cv, const char *const params)
+	void	croak_xs_usage(const CV *const cv, const char *const params)
 
 =for hackers
 Found in file universal.c
