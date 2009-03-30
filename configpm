@@ -124,6 +124,10 @@ $config_txt .= sprintf <<'ENDOFBEG', ($myver) x 3;
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
+# for a description of the variables, please have a look at the
+# Glossary file, as written in the Porting folder, or use the url:
+# http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/Glossary
+
 package Config;
 use strict;
 # use warnings; Pulls in Carp
@@ -771,6 +775,10 @@ stored in the readonly-variable C<%Config>, indexed by their names.
 Values stored in config.sh as 'undef' are returned as undefined
 values.  The perl C<exists> function can be used to check if a
 named variable exists.
+
+For a description of the variables, please have a look at the
+Glossary file, as written in the Porting folder, or use the url:
+http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/Glossary
 
 =over 4
 
