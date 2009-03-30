@@ -2,7 +2,7 @@
 
 use IO::Uncompress::Bunzip2 qw( $Bunzip2Error );
 use strict ;
-local ($^W) = 1; #use warnings ;
+use warnings ;
 
 #die "Usage: gzcat file...\n"
 #    unless @ARGV ;

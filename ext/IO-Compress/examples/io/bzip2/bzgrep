@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict ;
-local ($^W) = 1; #use warnings ;
+use warnings ;
 use IO::Uncompress::Bunzip2 qw($Bunzip2Error);
 
 die "Usage: gzgrep pattern [file...]\n"

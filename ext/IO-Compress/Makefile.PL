@@ -22,7 +22,7 @@ WriteMakefile(
 
     (
       $ENV{SKIP_FOR_CORE}
-        ? (MAN3PODS    => {})
+        ? ()
 	    : (PREREQ_PM   => { 'Compress::Raw::Bzip2' => $::VERSION,
 		                    'Compress::Raw::Zlib'   => $::VERSION,
 		                    $] >= 5.005 && $] < 5.006   
@@ -35,6 +35,14 @@ WriteMakefile(
     $] >= 5.005
         ? (ABSTRACT => 'IO Interface to compressed data files/buffers',
             AUTHOR  => 'Paul Marquess <pmqs@cpan.org>')
+        : ()
+    ),
+
+    INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
+    
+    (
+    $] >= 5.009 && ! $ENV{PERL_CORE}
+        ? (INST_LIB    => 'blib/arch')
         : ()
     ),
 

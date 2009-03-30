@@ -702,12 +702,9 @@ sub filterUncompressed
 }    
 
 
-# from Archive::Zip
+# from Archive::Zip & info-zip
 sub _dosToUnixTime
 {
-    #use Time::Local 'timelocal_nocheck';
-    use Time::Local 'timelocal';
-
 	my $dt = shift;
 
 	my $year = ( ( $dt >> 25 ) & 0x7f ) + 80;
@@ -718,11 +715,11 @@ sub _dosToUnixTime
 	my $min  = ( ( $dt >> 5 ) & 0x3f );
 	my $sec  = ( ( $dt << 1 ) & 0x3e );
 
-	# catch errors
-	my $time_t =
-	  eval { timelocal( $sec, $min, $hour, $mday, $mon, $year ); };
-	return 0 
-        if $@;
+
+    use POSIX 'mktime';
+
+    my $time_t = mktime( $sec, $min, $hour, $mday, $mon, $year, 0, 0, -1 );
+    return 0 if ! defined $time_t;
 	return $time_t;
 }
 
