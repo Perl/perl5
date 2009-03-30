@@ -998,146 +998,13 @@ When C<LimitOutout> is not specified C<< $i->inflate >> will use as much
 memory as it takes to write all the uncompressed data it creates by
 uncompressing the input buffer.
 
-See ?? for a discussion on why C<LimitOutput> is needed and how to use it.
-
 If C<LimitOutput> is enabled, the C<ConsumeInput> option will also be
 enabled.
 
-The input buffer may not have been fully processed, so the C<LimitOutput>
-option will enable C<ConsumeInput>
-
 This option defaults to false.
 
-B<Why LimitOutput?>
-
-By default C<< $i->inflate($input, $output) >> will uncompress I<all> data
-in C<$input> and write I<all> of the uncompressed data it has generated to
-C<$output>. This makes the interface to C<inflate> much simpler - if the
-method has uncompressed C<$input> successfully I<all> compressed data in
-C<$input> will have been dealt with. So if you are reading from an input
-source and uncompressing as you go the code will look something like this
-
-    use strict ;
-    use warnings ;
-    
-    use Compress::Raw::Zlib;
-    
-    my $x = new Compress::Raw::Zlib::Inflate()
-       or die "Cannot create a inflation stream\n" ;
-    
-    my $input = '' ;
-    
-    my ($output, $status) ;
-    while (read(STDIN, $input, 4096))
-    {
-        $status = $x->inflate($input, $output) ;
-    
-        print $output ;
-    
-        last if $status != Z_OK ;
-    }
-    
-    die "inflation failed\n"
-        unless $status == Z_STREAM_END ;
-
-The points to note are 
-
-=over 5
-
-=item *
-
-C<inflate> will only terminate the loop if it returns a status that isn't
-C<Z_OK>, i.e. the end of the compressed data stream has been reached or
-there has been an error in uncompression.
-
-=item *
-
-After the call to C<inflate> I<all> of the uncompressed data in C<$input>
-will have been processed. This means the subsequent call to C<read> can
-overwrite it's contents without any problem.
-
-=back
-
-For most use-cases the behavior described above is acceptable (this module
-and it's predecessor, C<Compress::Zlib>, have used it for over 10 years
-without an issue), but in a few very specific use-cases the amount of
-memory required for C<$output> can prohibitively large. For example, if the
-compressed data stream contains the same pattern repeated thousands of
-times a relatively small compressed data stream can uncompress into hundreds
-of megabytes.  Remember C<inflate> will keep allocating memory until all
-the uncompressed data has been written to the output buffer - the size of
-C<$output> is unbounded. 
-
-If you need to cope with this use-case, C<LimitOutput> is for you.
-
-The main difference in your code when using C<LimitOutput> is having to
-deal with cases where the C<$input> parameter still contains some
-uncompressed data that C<inflate> hasn't processed yet. Below is a typical
-code
-
-    use strict ;
-    use warnings ;
-    
-    use Compress::Raw::Zlib;
-    
-    my $x = new Compress::Raw::Zlib::Inflate(LimitOutput => 1)
-       or die "Cannot create a inflation stream\n" ;
-    
-    my $input = '' ;
-    binmode STDIN;
-    binmode STDOUT;
-    
-    my ($output, $status) ;
-
-  OUTER:
-    while (read(STDIN, $input, 4096))
-    {
-        do
-        {
-            $status = $x->inflate($input, $output) ;
-
-            print $output ;
-
-            last OUTER
-                unless $status == Z_OK || $status == Z_BUF_ERROR ;
-        }
-        while ($status == Z_OK && length $input);
-    }
-    
-    die "inflation failed\n"
-        unless $status == Z_STREAM_END ;
-
-Points to note this time:
-
-=over 5
-
-=item *
-
-There are now two nested loops: the outer loop for reading the compressed
-data from STDIN; and the inner loop to repeatedly uncompress the C<$input>
-buffer.
-
-=item *
-
-There are two way the inner loop can be terminated
-
-=back
-
-If you know the underlying zlib interface, C<LimitOutput> will call the
-zlib C<inflate> function once 
-
-Limiting the size of the output buffer means that there will be cases where
-C<$input> will not have been completely processed.
-
-See L</Examples> for an example of how to use C<LimitOutput>.
-
-it will return after a single call to the underlying
-zlib C<inflate> function. 
-
-once the output buffer is full.
-
-As with the default it will also return if an error is encountered or the
-end of the compressed data stream is reached. 
+See L</The LimitOutput option> for a discussion on why C<LimitOutput> is
+needed and how to use it.
 
 =back
 
@@ -1288,8 +1155,7 @@ Here is an example of using C<inflate>.
     {
         $status = $x->inflate($input, $output) ;
     
-        print $output 
-            if $status == Z_OK or $status == Z_STREAM_END ;
+        print $output ;
     
         last if $status != Z_OK ;
     }
@@ -1364,6 +1230,142 @@ These functions allow checksums to be merged.
 =head2 my $version = Compress::Raw::Zlib::zlib_version();
 
 Returns the version of the zlib library.
+
+=head1 The LimitOutput option.
+
+By default C<< $i->inflate($input, $output) >> will uncompress I<all> data
+in C<$input> and write I<all> of the uncompressed data it has generated to
+C<$output>. This makes the interface to C<inflate> much simpler - if the
+method has uncompressed C<$input> successfully I<all> compressed data in
+C<$input> will have been dealt with. So if you are reading from an input
+source and uncompressing as you go the code will look something like this
+
+    use strict ;
+    use warnings ;
+    
+    use Compress::Raw::Zlib;
+    
+    my $x = new Compress::Raw::Zlib::Inflate()
+       or die "Cannot create a inflation stream\n" ;
+    
+    my $input = '' ;
+    
+    my ($output, $status) ;
+    while (read(STDIN, $input, 4096))
+    {
+        $status = $x->inflate($input, $output) ;
+    
+        print $output ;
+    
+        last if $status != Z_OK ;
+    }
+    
+    die "inflation failed\n"
+        unless $status == Z_STREAM_END ;
+
+The points to note are 
+
+=over 5
+
+=item *
+
+The main processing loop in the code handles reading of compressed data
+from STDIN.
+
+=item *
+
+The status code returned from C<inflate> will only trigger termination of
+the main processing loop if it isn't C<Z_OK>. When C<LimitOutput> has not
+been used the C<Z_OK> status means means that the end of the compressed
+data stream has been reached or there has been an error in uncompression.
+
+=item *
+
+After the call to C<inflate> I<all> of the uncompressed data in C<$input>
+will have been processed. This means the subsequent call to C<read> can
+overwrite it's contents without any problem.
+
+=back
+
+For most use-cases the behavior described above is acceptable (this module
+and it's predecessor, C<Compress::Zlib>, have used it for over 10 years
+without an issue), but in a few very specific use-cases the amount of
+memory required for C<$output> can prohibitively large. For example, if the
+compressed data stream contains the same pattern repeated thousands of
+times, a relatively small compressed data stream can uncompress into
+hundreds of megabytes.  Remember C<inflate> will keep allocating memory
+until I<all> the uncompressed data has been written to the output buffer -
+the size of C<$output> is unbounded. 
+
+The C<LimitOutput> option is designed to help with this use-case.
+
+The main difference in your code when using C<LimitOutput> is having to
+deal with cases where the C<$input> parameter still contains some
+uncompressed data that C<inflate> hasn't processed yet. The status code
+returned from C<inflate> will be C<Z_OK> if uncompression took place and
+C<Z_BUF_ERROR> if the output buffer is full.
+
+Below is typical code that shows how to use C<LimitOutput>.
+
+    use strict ;
+    use warnings ;
+    
+    use Compress::Raw::Zlib;
+    
+    my $x = new Compress::Raw::Zlib::Inflate(LimitOutput => 1)
+       or die "Cannot create a inflation stream\n" ;
+    
+    my $input = '' ;
+    binmode STDIN;
+    binmode STDOUT;
+    
+    my ($output, $status) ;
+
+  OUTER:
+    while (read(STDIN, $input, 4096))
+    {
+        do
+        {
+            $status = $x->inflate($input, $output) ;
+
+            print $output ;
+
+            last OUTER
+                unless $status == Z_OK || $status == Z_BUF_ERROR ;
+        }
+        while ($status == Z_OK && length $input);
+    }
+    
+    die "inflation failed\n"
+        unless $status == Z_STREAM_END ;
+
+Points to note this time:
+
+=over 5
+
+=item *
+
+There are now two nested loops in the code: the outer loop for reading the
+compressed data from STDIN, as before; and the inner loop to carry out the
+uncompression.
+
+=item *
+
+There are two exit points from the inner uncompression loop.
+
+Firstly when C<inflate> has returned a status other than C<Z_OK> or
+C<Z_BUF_ERROR>.  This means that either the end of the compressed data
+stream has been reached (C<Z_STREAM_END>) or there is an error in the
+compressed data. In either of these cases there is no point in continuing
+with reading the compressed data, so both loops are terminated.
+
+The second exit point tests if there is any data left in the input buffer,
+C<$input> - remember that the C<ConsumeInput> option is automatically
+enabled when C<LimitOutput> is used.  When the input buffer has been
+exhausted, the outer loop can run again and overwrite a now empty
+C<$input>.
+
+=back
 
 =head1 ACCESSING ZIP FILES
 

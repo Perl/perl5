@@ -31,7 +31,7 @@ BEGIN
    eval ' use IO::Uncompress::Adapter::Bunzip2 2.017 ;';
    eval ' use IO::Uncompress::Adapter::LZO 2.017 ;';
    eval ' use IO::Uncompress::Adapter::Lzf 2.017 ;';
-   #eval ' use IO::Uncompress::Adapter::UnLzma 2.016 ;';
+   #eval ' use IO::Uncompress::Adapter::UnLzma 2.017 ;';
 
    eval ' use IO::Uncompress::Bunzip2 2.017 ;';
    eval ' use IO::Uncompress::UnLzop 2.017 ;';
@@ -40,7 +40,7 @@ BEGIN
    eval ' use IO::Uncompress::RawInflate 2.017 ;';
    eval ' use IO::Uncompress::Unzip 2.017 ;';
    eval ' use IO::Uncompress::UnLzf 2.017 ;';
-   #eval ' use IO::Uncompress::UnLzma 2.016 ;';
+   #eval ' use IO::Uncompress::UnLzma 2.017 ;';
 }
 
 sub new

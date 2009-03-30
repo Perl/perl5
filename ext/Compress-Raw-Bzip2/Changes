@@ -1,9 +1,11 @@
 CHANGES
 -------
 
-  2.017 26 February 2009
+  2.017 28 March 2009
 
       * Minor changes to allow building in perl core.
+
+      * Removed MAN3PODS from Makefile.PL
 
   2.015 3 September 2008
 

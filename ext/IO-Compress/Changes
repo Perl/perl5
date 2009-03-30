@@ -3,13 +3,17 @@ CHANGES
 
   2.017 30 March 2009
 
-      * TODO - mention LimitOutput
-
-      * A few chenges to get the test harness to work on VMS courtesy of
-        Craig. A. Berry.
-
       * Merged IO-Compress-Base, IO-Compress-Bzip2, IO-Compress-Zlib &
         Compress-Zlib into IO-Compress.
+
+      * The interface to Compress-Raw-Zlib now uses the new LimitOutput
+        feature. This will make all of the zlib-related IO-Compress modules
+        less greedy in their memory consumption.
+
+      * Removed MAN3PODS from Makefile.PL
+
+      * A few changes to get the test harness to work on VMS courtesy of
+        Craig. A. Berry.
 
       * IO::Compress::Base & IO::Uncompress::Base
         Downgraded some croaks in the constructors to just set $! (by letting 
@@ -26,6 +30,10 @@ CHANGES
           zip64 is enabled. They were set to 0x0000FFFF instead of
           0xFFFFFFFF. Also the ZIP64 extra field was 4 bytes short.
           Problem spotted by Dino Chiesa.
+
+      * IO::Uncompress::Unzip 
+        - use POSIX::mktime instead of Time::Local::timelocal to convert
+          the zip DOS time field into Unix time.
 
       * Compress::Zlib 
         - Documented Compress::Zlib::zlib_version()

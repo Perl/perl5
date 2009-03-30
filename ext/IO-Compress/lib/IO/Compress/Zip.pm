@@ -21,9 +21,9 @@ BEGIN
            import  IO::Compress::Bzip2 2.017 ; 
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
-#           import  IO::Compress::Adapter::Lzma 2.016 ; 
+#           import  IO::Compress::Adapter::Lzma 2.017 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.016 ; 
+#           import  IO::Compress::Lzma 2.017 ; 
 #         } ;
 }
 

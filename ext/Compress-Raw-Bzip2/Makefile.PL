@@ -35,13 +35,6 @@ WriteMakefile(
                     },
 
     (
-      $ENV{SKIP_FOR_CORE}
-        ? (MAN3PODS    => {})
-        : ()
-    ),
-       
-
-    (
       $BUILD_BZIP2
         ? bzip2_files($BZIP2_LIB)
         : (LIBS => [ "-L$BZIP2_LIB -lbz2 " ])
@@ -53,6 +46,8 @@ WriteMakefile(
             AUTHOR       => 'Paul Marquess <pmqs@cpan.org>')
         : ()
     ),
+
+    INSTALLDIRS => ($] > 5.010 ? 'perl' : 'site'),
 
     ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?
         ('LICENSE'  => 'perl')         : ()),    

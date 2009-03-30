@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.016 qw(:Status);
+use IO::Compress::Base::Common 2.017 qw(:Status);
 
 #use Compress::Bzip2 ;
-use Compress::Raw::Bzip2 2.016 ;
+use Compress::Raw::Bzip2 2.017 ;
 
 our ($VERSION, @ISA);
-$VERSION = '2.016';
+$VERSION = '2.017';
 
 #@ISA = qw( Compress::Raw::Bunzip2 );
 

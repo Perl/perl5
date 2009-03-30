@@ -1,9 +1,11 @@
 CHANGES
 -------
 
-  2.017 1 February 2009
+  2.017 28 March 2009
 
       * Added 'LimitOutput' option
+
+      * Removed MAN3PODS from Makefile.PL
 
       * Fixed coring issue when LimitOutput was used.
 
