@@ -490,7 +490,7 @@ semi-permanently (otherwise it might be deleted
 out from under you the next time the cache is
 invalidated).
 
-	AV*	mro_get_linear_isa_c3(HV* stash, I32 level)
+	AV*	mro_get_linear_isa_c3(HV* stash, U32 level)
 
 =for hackers
 Found in file mro.c
@@ -509,7 +509,7 @@ semi-permanently (otherwise it might be deleted
 out from under you the next time the cache is
 invalidated).
 
-	AV*	mro_get_linear_isa_dfs(HV* stash, I32 level)
+	AV*	mro_get_linear_isa_dfs(HV* stash, U32 level)
 
 =for hackers
 Found in file mro.c
