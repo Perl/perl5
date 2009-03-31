@@ -4,6 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    undef &Regexp::DESTROY;
 }
 
 plan tests => 2;
@@ -12,7 +13,6 @@ $TODO = "leaking since 32751";
 
 my $destroyed;
 {
-    no warnings 'redefine';
     sub Regexp::DESTROY { $destroyed++ }
 }
 
