@@ -73,3 +73,7 @@ lddlflags="$lddlflags $ldflags"
 #ldflags="$ldflags -s"
 #ccdlflags="$ccdlflags -s"
 #lddlflags="$lddlflags -s"
+
+# IPv6 not fully implemented under Cygwin
+d_inetntop='undef'
+d_inetpton='undef'
