@@ -31,7 +31,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.16';
+$VERSION = '0.18';
 
 =pod
 
@@ -501,7 +501,12 @@ sub create {
         $args = check( $tmpl, \%hash ) or return;
     }
 
-    return 1 if $dist->status->created && !$force;
+    # restore the state as we have created this already.
+    if ( $dist->status->created && !$force ) {
+        ### add this directory to your lib ###
+        $self->add_to_includepath();
+        return 1;
+    }
 
     $dist->status->_create_args( $args );
 
