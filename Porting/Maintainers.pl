@@ -491,7 +491,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'jv',
 		'FILES'		=> q[lib/Getopt/Long.pm lib/Getopt/Long],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'I18N::LangTags' =>
