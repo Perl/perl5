@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -194,34 +194,21 @@ The following are the built-in attributes for subroutines:
 
 =over 4
 
-=item locked
-
-B<5.005 threads only!  The use of the "locked" attribute currently
-only makes sense if you are using the deprecated "Perl 5.005 threads"
-implementation of threads.>
-
-Setting this attribute is only meaningful when the subroutine or
-method is to be called by multiple threads.  When set on a method
-subroutine (i.e., one marked with the B<method> attribute below),
-Perl ensures that any invocation of it implicitly locks its first
-argument before execution.  When set on a non-method subroutine,
-Perl ensures that a lock is taken on the subroutine itself before
-execution.  The semantics of the lock are exactly those of one
-explicitly taken with the C<lock> operator immediately after the
-subroutine is entered.
-
-=item method
-
-Indicates that the referenced subroutine is a method.
-This has a meaning when taken together with the B<locked> attribute,
-as described there.  It also means that a subroutine so marked
-will not trigger the "Ambiguous call resolved as CORE::%s" warning.
-
 =item lvalue
 
 Indicates that the referenced subroutine is a valid lvalue and can
 be assigned to. The subroutine must return a modifiable value such
 as a scalar variable, as described in L<perlsub>.
+
+=item method
+
+Indicates that the referenced subroutine is a method. A subroutine so marked
+will not trigger the "Ambiguous call resolved as CORE::%s" warning.
+
+=item locked
+
+The "locked" attribute has no effect in 5.10.0 and later. It was used as part
+of the now-removed "Perl 5.005 threads".
 
 =back
 
