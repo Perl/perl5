@@ -40,6 +40,8 @@ else {
 }
 write_errno_pm();
 unlink "errno.c" if -f "errno.c";
+close OUT or die "Error closing Errno.tmp: $!";
+select STDOUT;
 rename "Errno.tmp", "Errno.pm" or die "Cannot rename Errno.tmp to Errno.pm: $!";
 
 sub process_file {
