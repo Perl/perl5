@@ -296,6 +296,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
                XS_Internals_hv_clear_placehold, file, "\\%");
     newXSproto("PerlIO::get_layers",
                XS_PerlIO_get_layers, file, "*;@");
+    /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
     CvFILE(newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL))
 	= (char *)file;
     newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
