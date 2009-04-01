@@ -1138,7 +1138,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Unicode/Collate.pm
 				     lib/Unicode/Collate],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'first-come',
 		},
 
 	'Unicode::Normalize' =>
@@ -1146,7 +1146,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sadahiro',
 		'FILES'		=> q[ext/Unicode-Normalize],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'first-come',
 		},
 
 	'version' =>
