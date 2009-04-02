@@ -2701,6 +2701,25 @@ typedef struct clone_params CLONE_PARAMS;
 #  define PERL_SYS_INIT3_BODY(argvp,argcp,envp) PERL_SYS_INIT_BODY(argvp,argcp)
 #endif
 
+/*
+=for apidoc Am|void|PERL_SYS_INIT|int argc|char** argv
+Provides system-specific tune up of the C runtime environment necessary to
+run Perl interpreters. This should be called only once, before creating
+any Perl interpreters.
+
+=for apidoc Am|void|PERL_SYS_INIT3|int argc|char** argv|char** env
+Provides system-specific tune up of the C runtime environment necessary to
+run Perl interpreters. This should be called only once, before creating
+any Perl interpreters.
+
+=for apidoc Am|void|PERL_SYS_TERM|
+Provides system-specific clean up of the C runtime environment after
+running Perl interpreters. This should be called only once, after
+freeing any remaining Perl interpreters.
+
+=cut
+ */
+
 #define PERL_SYS_INIT(argc, argv)	Perl_sys_init(argc, argv)
 #define PERL_SYS_INIT3(argc, argv, env)	Perl_sys_init3(argc, argv, env)
 #define PERL_SYS_TERM()			Perl_sys_term()
