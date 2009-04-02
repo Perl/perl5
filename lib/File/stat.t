@@ -58,8 +58,8 @@ is( $stat->blocks, $stat[12], "number of blocks in position 12" );
 
 for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
     SKIP: {
-        $^O eq "VMS" and index "rwxRWX", $_
-            and skip "File::stat ignores VMS ACLs", 1;
+        $^O eq "VMS" and index("rwxRWX", $_) >= 0
+            and skip "File::stat ignores VMS ACLs", 2;
 
         my $rv = eval "-$_ \$stat";
         ok( !$@,                            "-$_ overload succeeds" )
