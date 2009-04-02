@@ -1207,6 +1207,50 @@ Found in file mathoms.c
 
 =back
 
+=head1 Functions in file perl.h
+
+
+=over 8
+
+=item PERL_SYS_INIT
+X<PERL_SYS_INIT>
+
+Provides system-specific tune up of the C runtime environment necessary to
+run Perl interpreters. This should be called only once, before creating
+any Perl interpreters.
+
+	void	PERL_SYS_INIT(int argc, char** argv)
+
+=for hackers
+Found in file perl.h
+
+=item PERL_SYS_INIT3
+X<PERL_SYS_INIT3>
+
+Provides system-specific tune up of the C runtime environment necessary to
+run Perl interpreters. This should be called only once, before creating
+any Perl interpreters.
+
+	void	PERL_SYS_INIT3(int argc, char** argv, char** env)
+
+=for hackers
+Found in file perl.h
+
+=item PERL_SYS_TERM
+X<PERL_SYS_TERM>
+
+Provides system-specific clean up of the C runtime environment after
+running Perl interpreters. This should be called only once, after
+freeing any remaining Perl interpreters.
+
+	void	PERL_SYS_TERM()
+
+=for hackers
+Found in file perl.h
+
+
+=back
+
 =head1 Functions in file pp_ctl.c
 
 
