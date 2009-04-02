@@ -207,6 +207,10 @@ interpreter, and PERL_SYS_TERM() after you free your last interpreter.
 Since PERL_SYS_INIT3() may change C<env>, it may be more appropriate to
 provide C<env> as an argument to perl_parse().
 
+Also notice that no matter what arguments you pass to perl_parse(),
+PERL_SYS_INIT3() must be invoked on the C main() argc, argv and env and
+only once.
+
 Now compile this program (I'll call it I<interp.c>) into an executable:
 
     % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
