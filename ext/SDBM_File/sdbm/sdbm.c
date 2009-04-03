@@ -93,7 +93,7 @@ sdbm_open(register char *file, register int flags, register int mode)
  */
 	strcat(strcpy(dirname, file), DIRFEXT);
 	pagname = strcpy(dirname + strlen(dirname) + 1, file);
-	pagname = strcat(pagname, PAGFEXT);
+	strcat(pagname, PAGFEXT);
 
 	db = sdbm_prep(dirname, pagname, flags, mode);
 	free((char *) dirname);
