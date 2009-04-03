@@ -91,7 +91,7 @@ sdbm_open(register char *file, register int flags, register int mode)
 /*
  * build the file names
  */
-	dirname = strcat(strcpy(dirname, file), DIRFEXT);
+	strcat(strcpy(dirname, file), DIRFEXT);
 	pagname = strcpy(dirname + strlen(dirname) + 1, file);
 	pagname = strcat(pagname, PAGFEXT);
 
