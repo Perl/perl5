@@ -561,8 +561,8 @@ Of course, if we constructed all of our horses by hand, we'd most
 likely make mistakes from time to time.  We're also violating one of
 the properties of object-oriented programming, in that the "inside
 guts" of a Horse are visible.  That's good if you're a veterinarian,
-but not if you just like to own horses.  So, let's let the Horse class
-build a new horse:
+but not if you just like to own horses.  So, let's have the Horse
+class handle the details inside a class method:
 
   { package Horse;
     @ISA = qw(Animal);
@@ -578,14 +578,15 @@ build a new horse:
     }
   }
 
-Now with the new C<named> method, we can build a horse:
+Now with the new C<named> method, we can build a horse as follows:
 
   my $horse = Horse->named("Mr. Ed");
 
 Notice we're back to a class method, so the two arguments to
 C<Horse::named> are C<Horse> and C<Mr. Ed>.  The C<bless> operator
-not only blesses C<$name>, it also returns the reference to C<$name>,
-so that's fine as a return value.  And that's how to build a horse.
+not only blesses C<$name>, it also returns that reference.
+
+This C<Horse::named> method is called a "constructor".
 
 We've called the constructor C<named> here, so that it quickly denotes
 the constructor's argument as the name for this particular C<Horse>.
