@@ -741,40 +741,77 @@ Let's make a sheep that has a name and a color:
 so C<< $bad->{Name} >> has C<Evil>, and C<< $bad->{Color} >> has
 C<black>.  But we want to make C<< $bad->name >> access the name, and
 that's now messed up because it's expecting a scalar reference.  Not
-to worry, because that's pretty easy to fix up:
+to worry, because that's pretty easy to fix up.
+
+One solution is to override C<Animal::name> and C<Animal::named> by
+defining them anew in C<Sheep>, but then any methods added later to
+C<Animal> might still mess up, and we'd have to override all of those
+too. Therefore, it's never a good idea to define the data layout in a
+way that's different from the data layout of the base classes. In fact,
+it's a good idea to use blessed hash references in all cases. Also, this
+is also why it's important to have constructors do the low-level work.
+So, let's redefine C<Animal>:
 
   ## in Animal
   sub name {
     my $either = shift;
     ref $either ? $either->{Name} : "Any $either";
   }
-
-And of course C<named> still builds a scalar sheep, so let's fix that
-as well:
-
-  ## in Animal
   sub named {
     my $class = shift;
     my $name = shift;
-    my $self = { Name => $name, Color => $class->default_color };
+    my $self = { Name => $name };
     bless $self, $class;
   }
 
+Of course, we still need to override C<named> in order to handle
+constructing a C<Sheep> with a certain color:
+
+  ## in Sheep
+  sub named {
+    my ($class, $name) = @_;
+    my $self = $class->SUPER::named(@_);
+    $$self{Color} = $class->default_color;
+    $self
+  }
+
+(Note that C<@_> contains the parameters to C<named>.)
+
 What's this C<default_color>?  Well, if C<named> has only the name,
-we still need to set a color, so we'll have a class-specific initial color.
+we still need to set a color, so we'll have a class-specific default color.
 For a sheep, we might define it as white:
 
   ## in Sheep
   sub default_color { "white" }
 
-And then to keep from having to define one for each additional class,
-we'll define a "backstop" method that serves as the "default default",
-directly in C<Animal>:
+Now:
+
+  my $sheep = Sheep->named("Bad");
+  print $sheep->{Color}, "\n";
+
+outputs:
+
+  white
+
+Now, there's nothing particularly specific to C<Sheep> when it comes
+to color, so let's remove C<Sheep::named> and implement C<Animal::named>
+to handle color instead:
+
+  ## in Animal
+  sub named {
+    my ($class, $name) = @_;
+    my $self = { Name => $name, Color => $class->default_color };
+    bless $self, $class;
+  }
+
+And then to keep from having to define C<default_color> for each additional
+class, we'll define a method that serves as the "default default" directly
+in C<Animal>:
 
   ## in Animal
   sub default_color { "brown" }
 
-Now, because C<name> and C<named> were the only methods that
+Of course, because C<name> and C<named> were the only methods that
 referenced the "structure" of the object, the rest of the methods can
 remain the same, so C<speak> still works as before.
 
