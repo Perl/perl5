@@ -2420,7 +2420,7 @@ containing just one word character is a palindrome. Otherwise it must
 have a word character up front and the same at its end, with another
 palindrome in between.
 
-    /(?: (\w) (?...Here be a palindrome...) \{-1} | \w? )/x
+    /(?: (\w) (?...Here be a palindrome...) \g{-1} | \w? )/x
 
 Adding C<\W*> at either end to eliminate what is to be ignored, we already
 have the full pattern:
