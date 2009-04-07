@@ -426,12 +426,12 @@ which constructs an argument list of:
 
   ("Class", @args)
 
-and attempts to invoke
+and attempts to invoke:
 
   Class::method("Class", @args);
 
 However, if C<Class::method> is not found, then C<@Class::ISA> is examined
-(recursively) to locate a package that does indeed contain C<method>,
+(recursively) to locate a class (a package) that does indeed contain C<method>,
 and that subroutine is invoked instead.
 
 Using this simple syntax, we have class methods, (multiple) inheritance,
@@ -465,61 +465,61 @@ sound, and the output of:
   a Horse goes neigh!
 
 But all of our Horse objects would have to be absolutely identical.
-If I add a subroutine, all horses automatically share it.  That's
+If we add a subroutine, all horses automatically share it. That's
 great for making horses the same, but how do we capture the
-distinctions about an individual horse?  For example, suppose I want
-to give my first horse a name.  There's got to be a way to keep its
+distinctions of an individual horse?  For example, suppose we want
+to give our first horse a name. There's got to be a way to keep its
 name separate from the other horses.
 
-We can do that by drawing a new distinction, called an "instance".
-An "instance" is generally created by a class.  In Perl, any reference
-can be an instance, so let's start with the simplest reference
-that can hold a horse's name: a scalar reference.
+That is to say, we want particular instances of C<Horse> to have
+different names.
+
+In Perl, any reference can be an "instance", so let's start with the
+simplest reference that can hold a horse's name: a scalar reference.
 
   my $name = "Mr. Ed";
-  my $talking = \$name;
+  my $horse = \$name;
 
-So now C<$talking> is a reference to what will be the instance-specific
-data (the name).  The final step in turning this into a real instance
-is with a special operator called C<bless>:
+So, now C<$horse> is a reference to what will be the instance-specific
+data (the name). The final step is to turn this reference into a real
+instance of a C<Horse> by using the special operator C<bless>:
 
-  bless $talking, Horse;
+  bless $horse, Horse;
 
 This operator stores information about the package named C<Horse> into
 the thing pointed at by the reference.  At this point, we say
-C<$talking> is an instance of C<Horse>.  That is, it's a specific
+C<$horse> is an instance of C<Horse>.  That is, it's a specific
 horse.  The reference is otherwise unchanged, and can still be used
 with traditional dereferencing operators.
 
 =head2 Invoking an instance method
 
-The method arrow can be used on instances, as well as names of
-packages (classes).  So, let's get the sound that C<$talking> makes:
+The method arrow can be used on instances, as well as classes (the names
+of packages). So, let's get the sound that C<$horse> makes:
 
-  my $noise = $talking->sound;
+  my $noise = $horse->sound("some", "unnecessary", "args");
 
-To invoke C<sound>, Perl first notes that C<$talking> is a blessed
+To invoke C<sound>, Perl first notes that C<$horse> is a blessed
 reference (and thus an instance).  It then constructs an argument
-list, in this case from just C<($talking)>.  (Later we'll see that
-arguments will take their place following the instance variable,
-just like with classes.)
+list, as per usual.
 
 Now for the fun part: Perl takes the class in which the instance was
-blessed, in this case C<Horse>, and uses that to locate the subroutine
-to invoke the method.  In this case, C<Horse::sound> is found directly
-(without using inheritance), yielding the final subroutine invocation:
+blessed, in this case C<Horse>, and uses that calss to locate the
+subroutine. In this case, C<Horse::sound> is found directly (without
+using inheritance). In the end, it is as though our initial line were
+written as follows:
 
-  Horse::sound($talking)
+  my $noise = Horse::sound($horse, "some", "unnecessary", "args");
 
 Note that the first parameter here is still the instance, not the name
 of the class as before.  We'll get C<neigh> as the return value, and
 that'll end up as the C<$noise> variable above.
 
-If Horse::sound had not been found, we'd be wandering up the
-C<@Horse::ISA> list to try to find the method in one of the
-superclasses, just as for a class method.  The only difference between
-a class method and an instance method is whether the first parameter
-is an instance (a blessed reference) or a class name (a string).
+If Horse::sound had not been found, we'd be wandering up the C<@Horse::ISA>
+array, trying to find the method in one of the superclasses. The only
+difference between a class method and an instance method is whether the
+first parameter is an instance (a blessed reference) or a class name (a
+string).
 
 =head2 Accessing the instance data
 
@@ -536,16 +536,22 @@ the name:
     }
   }
 
-Now we call for the name:
+Inside C<Horse::name>, the C<@_> array contains:
 
-  print $talking->name, " says ", $talking->sound, "\n";
+    (C<$horse>, "some", "unnecessary", "args")
 
-Inside C<Horse::name>, the C<@_> array contains just C<$talking>,
-which the C<shift> stores into C<$self>.  (It's traditional to shift
-the first parameter off into a variable named C<$self> for instance
-methods, so stay with that unless you have strong reasons otherwise.)
-Then, C<$self> gets de-referenced as a scalar ref, yielding C<Mr. Ed>,
-and we're done with that.  The result is:
+so the C<shift> stores C<$horse> into C<$self>. Then, C<$self> gets
+de-referenced with C<$$self> as normal, yielding C<"Mr. Ed">.
+
+It's traditional to C<shift> the first parameter into a variable named
+C<$self> for instance methods and into a variable named C<$class> for
+class methods.
+
+Then, the following line:
+
+  print $horse->name, " says ", $horse->sound, "\n";
+
+outputs:
 
   Mr. Ed says neigh.
 
@@ -574,7 +580,7 @@ build a new horse:
 
 Now with the new C<named> method, we can build a horse:
 
-  my $talking = Horse->named("Mr. Ed");
+  my $horse = Horse->named("Mr. Ed");
 
 Notice we're back to a class method, so the two arguments to
 C<Horse::named> are C<Horse> and C<Mr. Ed>.  The C<bless> operator
@@ -620,8 +626,8 @@ C<Animal>, so let's put it there:
 
 Ahh, but what happens if we invoke C<speak> on an instance?
 
-  my $talking = Horse->named("Mr. Ed");
-  $talking->speak;
+  my $horse = Horse->named("Mr. Ed");
+  $horse->speak;
 
 We get a debugging value:
 
@@ -652,9 +658,9 @@ dereference or a derived string.  Now we can use this with either an
 instance or a class.  Note that I've changed the first parameter
 holder to C<$either> to show that this is intended:
 
-  my $talking = Horse->named("Mr. Ed");
+  my $horse = Horse->named("Mr. Ed");
   print Horse->name, "\n"; # prints "an unnamed Horse\n"
-  print $talking->name, "\n"; # prints "Mr Ed.\n"
+  print $horse->name, "\n"; # prints "Mr Ed.\n"
 
 and now we'll fix C<speak> to use this:
 
@@ -703,8 +709,8 @@ Let's train our animals to eat:
 
 And now try it out:
 
-  my $talking = Horse->named("Mr. Ed");
-  $talking->eat("hay");
+  my $horse = Horse->named("Mr. Ed");
+  $horse->eat("hay");
   Sheep->eat("grass");
 
 which prints:
@@ -715,7 +721,7 @@ which prints:
 An instance method with parameters gets invoked with the instance,
 and then the list of parameters.  So that first invocation is like:
 
-  Animal::eat($talking, "hay");
+  Animal::eat($horse, "hay");
 
 =head2 More interesting instances
 
@@ -795,9 +801,9 @@ in-place, rather than with a C<shift>.  (This saves us a bit of time
 for something that may be invoked frequently.)  And now we can fix
 that color for Mr. Ed:
 
-  my $talking = Horse->named("Mr. Ed");
-  $talking->set_color("black-and-white");
-  print $talking->name, " is colored ", $talking->color, "\n";
+  my $horse = Horse->named("Mr. Ed");
+  $horse->set_color("black-and-white");
+  print $horse->name, " is colored ", $horse->color, "\n";
 
 which results in:
 
