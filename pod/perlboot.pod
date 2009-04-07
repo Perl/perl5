@@ -171,8 +171,8 @@ This method provides the constant text for the sound itself.
     { package Cow;
       sub sound { "moooo" }
       sub speak {
-	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n";
+        my $class = shift;
+        print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -183,8 +183,8 @@ returns C<moooo>.  But how different would this be for the C<Horse>?
     { package Horse;
       sub sound { "neigh" }
       sub speak {
-	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n";
+        my $class = shift;
+        print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -199,8 +199,8 @@ definition for C<speak>:
 
     { package Animal;
       sub speak {
-	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n";
+      my $class = shift;
+      print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -283,8 +283,8 @@ Let's add a mouse, which can barely be heard:
       sub sound { "squeak" }
       sub speak {
         my $class = shift;
-	print "a $class goes ", $class->sound, "!\n";
-	print "[but you can barely hear it!]\n";
+        print "a $class goes ", $class->sound, "!\n";
+        print "[but you can barely hear it!]\n";
       }
     }
 
@@ -324,7 +324,7 @@ First, we can invoke the C<Animal::speak> method directly:
       sub speak {
         my $class = shift;
         Animal::speak($class);
-	print "[but you can barely hear it!]\n";
+        print "[but you can barely hear it!]\n";
       }
     }
 
@@ -660,8 +660,8 @@ Let's train our animals to eat:
     sub name {
       my $either = shift;
       ref $either
-	? $$either # it's an instance, return name
-	: "an unnamed $either"; # it's a class, return generic
+        ? $$either # it's an instance, return name
+        : "an unnamed $either"; # it's a class, return generic
     }
     sub speak {
       my $either = shift;
