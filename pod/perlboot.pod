@@ -264,20 +264,14 @@ Or allow it as an implicitly named package variable:
     use vars qw(@ISA);
     @ISA = qw(Animal);
 
-If you're bringing in the class from outside, via an object-oriented
-module, you change:
-
-    package Cow;
-    use Animal;
-    use vars qw(@ISA);
-    @ISA = qw(Animal);
-
-into just:
+If the C<Animal> class comes from another (object-oriented) module, then
+just employ C<use base> to specify that C<Animal> should serve as the basis
+for the C<Cow> class:
 
     package Cow;
     use base qw(Animal);
 
-And that's pretty darn compact.
+Now that's pretty darn simple!
 
 =head2 Overriding the methods
 
