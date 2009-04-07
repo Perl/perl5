@@ -1,4 +1,4 @@
-#!./perl -w
+#!./perl
 
 BEGIN {
     chdir 't' if -d 't';
@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 use strict;
+use warnings;
+no warnings 'deprecated';
 use vars qw(@array @r $k $v);
 
 plan tests => 48;

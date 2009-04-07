@@ -4661,6 +4661,11 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
 
+=item Use of assignment to $[ is deprecated
+
+(D deprecated) The C<$[> variable (index of the first element in an array)
+is deprecated. See L<perlvar/"$[">.
+
 =item Use of bare << to mean <<"" is deprecated
 
 (D deprecated, W syntax) You are now encouraged to use the explicitly quoted

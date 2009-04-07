@@ -4355,6 +4355,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    PL_eval_start = 0;
 	else {
 	    if (!PL_madskills) { /* assignment to $[ is ignored when making a mad dump */
+		deprecate("assignment to $[");
 		op_free(o);
 		o = newSVOP(OP_CONST, 0, newSViv(CopARYBASE_get(&PL_compiling)));
 		o->op_private |= OPpCONST_ARYBASE;
