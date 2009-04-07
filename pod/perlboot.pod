@@ -603,7 +603,7 @@ right?)
 
 But was there anything specific to C<Horse> in that method?  No.  Therefore,
 it's also the same recipe for building anything else that inherited from
-C<Animal>, so let's put it there:
+C<Animal>, so let's put C<name> and C<named> there:
 
   { package Animal;
     sub speak {
@@ -649,9 +649,7 @@ classname).  Let's modify the C<name> method first to notice the change:
 
   sub name {
     my $either = shift;
-    ref $either
-      ? $$either # it's an instance, return name
-      : "an unnamed $either"; # it's a class, return generic
+    ref $either ? $$either : "Any $either";
   }
 
 Here, the C<?:> operator comes in handy to select either the
@@ -660,7 +658,7 @@ instance or a class.  Note that I've changed the first parameter
 holder to C<$either> to show that this is intended:
 
   my $horse = Horse->named("Mr. Ed");
-  print Horse->name, "\n"; # prints "an unnamed Horse\n"
+  print Horse->name, "\n"; # prints "Any Horse\n"
   print $horse->name, "\n"; # prints "Mr Ed.\n"
 
 and now we'll fix C<speak> to use this:
@@ -685,9 +683,7 @@ Let's train our animals to eat:
     }
     sub name {
       my $either = shift;
-      ref $either
-        ? $$either # it's an instance, return name
-        : "an unnamed $either"; # it's a class, return generic
+      ref $either ? $$either : "Any $either";
     }
     sub speak {
       my $either = shift;
@@ -717,7 +713,7 @@ And now try it out:
 which prints:
 
   Mr. Ed eats hay.
-  an unnamed Sheep eats grass.
+  Any Sheep eats grass.
 
 An instance method with parameters gets invoked with the instance,
 and then the list of parameters.  So that first invocation is like:
@@ -750,9 +746,7 @@ to worry, because that's pretty easy to fix up:
   ## in Animal
   sub name {
     my $either = shift;
-    ref $either ?
-      $either->{Name} :
-      "an unnamed $either";
+    ref $either ? $either->{Name} : "Any $either";
   }
 
 And of course C<named> still builds a scalar sheep, so let's fix that
