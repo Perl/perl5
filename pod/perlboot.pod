@@ -315,7 +315,7 @@ should always act like an C<Animal>).
 
 So, let's make C<Mouse> an C<Animal>!
 
-First, we can invoke the C<Animal::speak> method directly:
+The obvious solution is to invoke C<Animal::speak> directly:
 
     # Animal package from before
     { package Mouse;
@@ -328,29 +328,41 @@ First, we can invoke the C<Animal::speak> method directly:
       }
     }
 
-Note that we have to include the C<$class> parameter (almost surely
-the value of C<"Mouse">) as the first parameter to C<Animal::speak>,
-since we've stopped using the method arrow.  Why did we stop?  Well,
-if we invoke C<< Animal->speak >> there, the first parameter to the
-method will be C<"Animal"> not C<"Mouse">, and when time comes for it
-to call for the C<sound>, it won't have the right class to come back
-to this package.
+Note that we're using C<Animal::speak>. If we were to invoke
+C<< Animal->speak >> instead, the first parameter to C<Animal::speak>
+would automatically be C<"Animal"> rather than C<"Mouse">, so that
+the call to C<< $class->sound >> in C<Animal::speak> would become
+C<< Animal->sound >> rather than C<< Mouse->sound >>.
 
-Invoking C<Animal::speak> directly is a mess, however.  What if
-C<Animal::speak> didn't exist before, and was being inherited from a
-class mentioned in C<@Animal::ISA>?  Because we are no longer using
-the method arrow, we get one and only one chance to hit the right
-subroutine.
+Also, without the method arrow C<< -> >>, it becomes necessary to specify
+the first parameter to C<Animal::speak> ourselves, which is why C<$class>
+is explicitly passed: C<Animal::speak($class)>.
 
-Also note that the C<Animal> classname is now hardwired into the
-subroutine selection.  This is a mess if someone maintains the code,
-changing C<@ISA> for C<Mouse> and didn't notice C<Animal> there in
-C<speak>.  So, this is probably not the right way to go.
+However, invoking C<Animal::speak> directly is a mess: Firstly, it assumes
+that the C<speak> method is a member of the C<Animal> class; what if C<Animal>
+actually inherits C<speak> from its own base? Because we are no longer using
+C<< -> >> to access C<speak>, the special method look up mechanism wouldn't be
+used, so C<speak> wouldn't even be found!
+
+The second problem is more subtle: C<Animal> is now hardwired into the subroutine
+selection. Let's assume that C<Animal::speak> does exist. What happens when,
+at a later time, someone expands the class hierarchy by having C<Mouse>
+inherit from C<Mus> instead of C<Animal>. Unless the invocation of C<Animal::speak>
+is also changed to an invocation of C<Mus::speak>, centuries worth of taxonomical
+classification could be obliterated!
+
+What we have here is a fragile or leaky abstraction; it is the beginning of a
+maintenance nightmare. What we need is the ability to search for the right
+method wih as few assumptions as possible.
 
 =head2 Starting the search from a different place
 
-A better solution is to tell Perl to search from a higher place
-in the inheritance chain:
+A I<better> solution is to tell Perl where in the inheritance chain to begin searching
+for C<speak>. This can be achieved with a modified version of the method arrow C<< -> >>:
+
+    ClassName->FirstPlaceToLook::method
+
+So, the improved C<Mouse> class is:
 
     # same Animal as before
     { package Mouse;
@@ -362,22 +374,20 @@ in the inheritance chain:
       }
     }
 
-Ahh.  This works.  Using this syntax, we start with C<Animal> to find
-C<speak>, and use all of C<Animal>'s inheritance chain if not found
-immediately.  And yet the first parameter will be C<$class>, so the
-found C<speak> method will get C<Mouse> as its first entry, and
-eventually work its way back to C<Mouse::sound> for the details.
+Using this syntax, we start with C<Animal> to find C<speak>, and then
+use all of C<Animal>'s inheritance chain if it is not found immediately.
+As usual, the first parameter to C<speak> would be C<$class>, so we no
+longer need to pass C<$class> explicitly to C<speak>.
 
-But this isn't the best solution.  We still have to keep the C<@ISA>
-and the initial search package coordinated.  Worse, if C<Mouse> had
-multiple entries in C<@ISA>, we wouldn't necessarily know which one
-had actually defined C<speak>.  So, is there an even better way?
+But what about the second problem? We're still hardwiring C<Animal> into
+the method lookup.
 
 =head2 The SUPER way of doing things
 
-By changing the C<Animal> class to the C<SUPER> class in that
-invocation, we get a search of all of our super classes (classes
-listed in C<@ISA>) automatically:
+If C<Animal> is replaced with the special placeholder C<SUPER> in that
+invocation, then the contents of C<Mouse>'s C<@ISA> are used for the
+search, beginning with C<$ISA[0]>. So, all of the problems can be fixed
+as follows:
 
     # same Animal as before
     { package Mouse;
@@ -389,9 +399,17 @@ listed in C<@ISA>) automatically:
       }
     }
 
-So, C<SUPER::speak> means look in the current package's C<@ISA> for
-C<speak>, invoking the first one found. Note that it does I<not> look in
-the C<@ISA> of C<$class>.
+In general, C<SUPER::speak> means look in the current package's C<@ISA>
+for a class that implements C<speak>, and invoke the first one found.
+The placeholder is called C<SUPER>, because many other languages refer
+to base classes as "I<super>classes", and Perl likes to be eclectic.
+
+Note that a call such as
+
+    $class->SUPER::method;
+
+does I<not> look in the C<@ISA> of C<$class> unless C<$class> happens to
+be the current package.
 
 =head2 Where we're at so far...
 
