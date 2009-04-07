@@ -411,7 +411,7 @@ Note that a call such as
 does I<not> look in the C<@ISA> of C<$class> unless C<$class> happens to
 be the current package.
 
-=head2 Where we're at so far...
+=head2 Let's review...
 
 So far, we've seen the method arrow syntax:
 
@@ -428,18 +428,19 @@ which constructs an argument list of:
 
 and attempts to invoke
 
-  Class::method("Class", @Args);
+  Class::method("Class", @args);
 
 However, if C<Class::method> is not found, then C<@Class::ISA> is examined
 (recursively) to locate a package that does indeed contain C<method>,
 and that subroutine is invoked instead.
 
-Using this simple syntax, we have class methods, (multiple)
-inheritance, overriding, and extending.  Using just what we've seen so
-far, we've been able to factor out common code, and provide a nice way
-to reuse implementations with variations.  This is at the core of what
-objects provide, but objects also provide instance data, which we
-haven't even begun to cover.
+Using this simple syntax, we have class methods, (multiple) inheritance,
+overriding, and extending. Using just what we've seen so far, we've
+been able to factor out common code (though that's never a good reason
+for inheritance!), and provide a nice way to reuse implementations with
+variations.
+
+Now, what about data?
 
 =head2 A horse is a horse, of course of course -- or is it?
 
