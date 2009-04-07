@@ -296,15 +296,24 @@ which results in:
     [but you can barely hear it!]
 
 Here, C<Mouse> has its own speaking routine, so C<< Mouse->speak >>
-doesn't immediately invoke C<< Animal->speak >>.  This is known as
-"overriding".  In fact, we didn't even need to say that a C<Mouse> was
-an C<Animal> at all, since all of the methods needed for C<speak> are
-completely defined with C<Mouse>.
+doesn't immediately invoke C<< Animal->speak >>. This is known as
+"overriding". In fact, we don't even need to say that a C<Mouse> is
+an C<Animal> at all, because all of the methods needed for C<speak> are
+completely defined for C<Mouse>; this is known as "duck typing":
+"If it walks like a duck and quacks like a duck, I would call it a duck"
+(James Whitcomb). However, it would probably be beneficial to allow a
+closer examination to conclude that a C<Mouse> is indeed an C<Animal>,
+so it is actually better to define C<Mouse> with C<Animal> as its base
+(that is, it is better to "derive C<Mouse> from C<Animal>").
 
-But we've now duplicated some of the code from C<< Animal->speak >>,
-and this can once again be a maintenance headache.  So, can we avoid
-that?  Can we say somehow that a C<Mouse> does everything any other
-C<Animal> does, but add in the extra comment?  Sure!
+Moreover, this duplication of code could become a maintenance headache
+(though code-reuse is not actually a good reason for inheritance; good
+design practices dictate that a derived class should be usable wherever
+its base class is usable, which might not be the outcome if code-reuse
+is the sole criterion for inheritance. Just remember that a C<Mouse>
+should always act like an C<Animal>).
+
+So, let's make C<Mouse> an C<Animal>!
 
 First, we can invoke the C<Animal::speak> method directly:
 
