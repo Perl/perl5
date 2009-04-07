@@ -568,11 +568,11 @@ build a new horse:
     @ISA = qw(Animal);
     sub sound { "neigh" }
     sub name {
-      my $self = shift;
+      my $self = shift;     # instance method, so use $self
       $$self;
     }
     sub named {
-      my $class = shift;
+      my $class = shift;    # class method, so use $class
       my $name = shift;
       bless \$name, $class;
     }
