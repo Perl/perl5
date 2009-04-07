@@ -843,14 +843,13 @@ which results in:
 
 =head2 Summary
 
-So, now we have class methods, constructors, instance methods,
-instance data, and even accessors.  But that's still just the
-beginning of what Perl has to offer.  We haven't even begun to talk
-about accessors that double as getters and setters, destructors,
-indirect object notation, subclasses that add instance data, per-class
-data, overloading, "isa" and "can" tests, C<UNIVERSAL> class, and so
-on.  That's for the rest of the Perl documentation to cover.
-Hopefully, this gets you started, though.
+So, now we have class methods, constructors, instance methods, instance
+data, and even accessors. But that's still just the beginning of what
+Perl has to offer. We haven't even begun to talk about accessors that
+double as getters and setters, destructors, indirect object notation,
+overloading, "isa" and "can" tests, the C<UNIVERSAL> class, and so on.
+That's for the rest of the Perl documentation to cover. Hopefully, this
+gets you started, though.
 
 =head1 SEE ALSO
 
@@ -867,10 +866,14 @@ Class::MethodMaker and Tie::SecureHash
 =head1 COPYRIGHT
 
 Copyright (c) 1999, 2000 by Randal L. Schwartz and Stonehenge
-Consulting Services, Inc.  Permission is hereby granted to distribute
-this document intact with the Perl distribution, and in accordance
-with the licenses of the Perl distribution; derived documents must
-include this copyright notice intact.
+Consulting Services, Inc.
+
+Copyright (c) 2009 by Michael F. Witten.
+
+Permission is hereby granted to distribute this document intact with
+the Perl distribution, and in accordance with the licenses of the Perl
+distribution; derived documents must include this copyright notice
+intact.
 
 Portions of this text have been derived from Perl Training materials
 originally appearing in the I<Packages, References, Objects, and
