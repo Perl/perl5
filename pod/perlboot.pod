@@ -58,7 +58,7 @@ This results in:
     a Sheep goes baaaah!
 
 Wow.  That symbolic coderef de-referencing there is pretty nasty.
-We're counting on C<no strict subs> mode, certainly not recommended
+We're counting on C<no strict refs> mode, certainly not recommended
 for larger programs.  And why was that necessary?  Because the name of
 the package seems to be inseparable from the name of the subroutine we
 want to invoke within that package.
