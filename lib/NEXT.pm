@@ -1,5 +1,5 @@
 package NEXT;
-$VERSION = '0.61';
+$VERSION = '0.62';
 use Carp;
 use strict;
 use overload ();
@@ -61,11 +61,19 @@ sub NEXT::ELSEWHERE::buildAUTOLOAD
                 last if shift @forebears eq $caller_class
             }
             no strict 'refs';
-            @{$NEXT::NEXT{$key,$wanted_method}} = 
-                map { *{"${_}::$caller_method"}{CODE}||() } @forebears
+            @{$NEXT::NEXT{$key,$wanted_method}} =
+                map {
+                    my $stash = \%{"${_}::"};
+                    ($stash->{$caller_method} && (*{$stash->{$caller_method}}{CODE}))
+                        ? *{$stash->{$caller_method}}{CODE}
+                        : () } @forebears
                     unless $wanted_method eq 'AUTOLOAD';
-            @{$NEXT::NEXT{$key,$wanted_method}} = 
-                map { (*{"${_}::AUTOLOAD"}{CODE}) ? "${_}::AUTOLOAD" : ()} @forebears
+            @{$NEXT::NEXT{$key,$wanted_method}} =
+                map {
+                    my $stash = \%{"${_}::"};
+                    ($stash->{AUTOLOAD} && (*{$stash->{AUTOLOAD}}{CODE}))
+                        ? "${_}::AUTOLOAD"
+                        : () } @forebears
                     unless @{$NEXT::NEXT{$key,$wanted_method}||[]};
             $NEXT::SEEN->{$key,*{$caller}{CODE}}++;
         }
