@@ -477,13 +477,14 @@ inet_pton(af, host)
         const char *  host
         CODE:
 #ifdef HAS_INETPTON
+        int ok;
         struct in6_addr ip_address;
         if(af != AF_INET && af != AF_INET6) {
            croak("Bad address family for %s, got %d, should be either AF_INET or AF_INET6",
                         "Socket::inet_pton",
                         af);
         }
-        int ok = (*host != '\0') && inet_pton(af, host, &ip_address);
+        ok = (*host != '\0') && inet_pton(af, host, &ip_address);
 
         ST(0) = sv_newmortal();
         if (ok) {
