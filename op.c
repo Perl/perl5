@@ -6116,9 +6116,13 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	    const line_t oldline = CopLINE(PL_curcop);
 	    if (PL_parser && PL_parser->copline != NOLINE)
 		CopLINE_set(PL_curcop, PL_parser->copline);
-	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			o ? "Format %"SVf" redefined"
-			: "Format STDOUT redefined", SVfARG(cSVOPo->op_sv));
+	    if (o) {
+		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+			    "Format %"SVf" redefined", SVfARG(cSVOPo->op_sv));
+	    } else {
+		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+			    "Format STDOUT redefined");
+	    }
 	    CopLINE_set(PL_curcop, oldline);
 	}
 	SvREFCNT_dec(cv);
