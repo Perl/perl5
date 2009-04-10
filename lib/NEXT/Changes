@@ -1,5 +1,11 @@
 Revision history for Perl extension NEXT.pm.
 
+0.63    Fri Apr 10 16:52:44 2009
+    - Specify plans for all tests (Jarkko Hietaniemi). Merged from blead
+      perl (Florian Ragwitz).
+    - Default to installing to privlib instead of sitelib on perls where
+      NEXT is core (Jerry D. Hedden).
+
 0.62    Wed Apr  8 03:27:25 2009
     - Be less aggressive when looking at the symbol table to find
       methods. This prevents "used only once" warnings on 5.10.
