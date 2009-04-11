@@ -1400,8 +1400,8 @@ ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
 ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
-ext/util/make_ext.pl		Used by Makefile to execute extension Makefiles
 ext/util/make_ext_cross		Cross-compilation
+ext/util/make_ext.pl		Used by Makefile to execute extension Makefiles
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension
@@ -2539,11 +2539,11 @@ lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
 lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/overload64.t		See if operator overloading works with 64-bit ints
-lib/overload.pm			Module for overloading perl operators
-lib/overload.t			See if operator overloading works
-lib/overload/numbers.pm		Helper for overloading pragma
 lib/overloading.pm		Pragma to lexically control overloading
 lib/overloading.t		Tests for overloading.pm
+lib/overload/numbers.pm		Helper for overloading pragma
+lib/overload.pm			Module for overloading perl operators
+lib/overload.t			See if operator overloading works
 lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
@@ -4071,9 +4071,9 @@ t/op/pow.t			See if ** works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
 t/op/qq.t			See if qq works
+t/op/qr_gc.t			See if qr doesn't leak
 t/op/qrstack.t			See if qr expands the stack properly
 t/op/qr.t			See if qr works
-t/op/qr_gc.t			See if qr doesn't leak
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
