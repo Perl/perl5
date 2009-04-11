@@ -6649,7 +6649,6 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
 
-
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
