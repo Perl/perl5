@@ -88,6 +88,8 @@ ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
 ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
 ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
+ext/attributes/attributes.pm		For "sub foo : attrlist"
+ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
@@ -1768,7 +1770,6 @@ lib/Archive/Tar/t/src/short/bar.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tbz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tgz.packed	Archive::Tar tests
 lib/assert.pl			assertion and panic with stack trace
-lib/attributes.pm		For "sub foo : attrlist"
 lib/autodie/exception.pm	Exception class for autodie
 lib/autodie/exception/system.pm	Exception class for autodying system()
 lib/autodie.pm			Functions suceed or die with lexical scope
@@ -4522,4 +4523,3 @@ x2p/util.c			Utility routines
 x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
 XSUB.h				Include file for extension subroutines
-xsutils.c			Additional bundled package methods not in UNIVERSAL::

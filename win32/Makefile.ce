@@ -593,8 +593,7 @@ MICROCORE_SRC	=		\
 		..\toke.c	\
 		..\universal.c	\
 		..\utf8.c	\
-		..\util.c	\
-		..\xsutils.c
+		..\util.c
 
 EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
 
@@ -654,7 +653,7 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX B re \
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname
 
@@ -822,7 +821,6 @@ $(DLLDIR)\win32thread.obj \
 $(DLLDIR)\wince.obj \
 $(DLLDIR)\win32io.obj \
 $(DLLDIR)\wincesck.obj \
-$(DLLDIR)\xsutils.obj \
 $(DLLDIR)\perllib.obj \
 $(DLLDIR)\DynaLoader.obj
 !IF "$(PERL_MALLOC)" == "define"

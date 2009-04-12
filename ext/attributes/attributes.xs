@@ -17,42 +17,12 @@
 
 
 #include "EXTERN.h"
-#define PERL_IN_XSUTILS_C
 #include "perl.h"
+#include "XSUB.h"
 
 /*
  * Contributed by Spider Boardman (spider.boardman@orb.nashua.nh.us).
  */
-
-/* package attributes; */
-PERL_XS_EXPORT_C void XS_attributes_reftype(pTHX_ CV *cv);
-PERL_XS_EXPORT_C void XS_attributes__modify_attrs(pTHX_ CV *cv);
-PERL_XS_EXPORT_C void XS_attributes__guess_stash(pTHX_ CV *cv);
-PERL_XS_EXPORT_C void XS_attributes__fetch_attrs(pTHX_ CV *cv);
-PERL_XS_EXPORT_C void XS_attributes_bootstrap(pTHX_ CV *cv);
-
-
-/*
- * Note that only ${pkg}::bootstrap definitions should go here.
- * This helps keep down the start-up time, which is especially
- * relevant for users who don't invoke any features which are
- * (partially) implemented here.
- *
- * The various bootstrap definitions can take care of doing
- * package-specific newXS() calls.  Since the layout of the
- * bundled *.pm files is in a version-specific directory,
- * version checks in these bootstrap calls are optional.
- */
-
-static const char file[] = __FILE__;
-
-void
-Perl_boot_core_xsutils(pTHX)
-{
-    newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
-}
-
-#include "XSUB.h"
 
 static int
 modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
@@ -142,31 +112,13 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
     return nret;
 }
 
+MODULE = attributes		PACKAGE = attributes
 
-
-/* package attributes; */
-
-XS(XS_attributes_bootstrap)
-{
-    dVAR;
-    dXSARGS;
-
-    if( items > 1 )
-	croak_xs_usage(cv, "$module");
-
-    newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	file);
-    newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, file, "$");
-    newXSproto("attributes::_fetch_attrs", XS_attributes__fetch_attrs, file, "$");
-    newXSproto("attributes::reftype",	XS_attributes_reftype,	file, "$");
-
-    XSRETURN(0);
-}
-
-XS(XS_attributes__modify_attrs)
-{
-    dVAR;
-    dXSARGS;
+void
+_modify_attrs(...)
+  PREINIT:
     SV *rv, *sv;
+  PPCODE:
 
     if (items < 1) {
 usage:
@@ -181,22 +133,19 @@ usage:
 	XSRETURN(modify_SV_attributes(aTHX_ sv, &ST(0), &ST(1), items-1));
 
     XSRETURN(0);
-}
 
-XS(XS_attributes__fetch_attrs)
-{
-    dVAR;
-    dXSARGS;
+void
+_fetch_attrs(...)
+  PREINIT:
     SV *rv, *sv;
     cv_flags_t cvflags;
-
+  PPCODE:
     if (items != 1) {
 usage:
 	croak_xs_usage(cv, "$reference");
     }
 
     rv = ST(0);
-    SP -= items;
     if (!(SvOK(rv) && SvROK(rv)))
 	goto usage;
     sv = SvRV(rv);
@@ -222,15 +171,13 @@ usage:
     }
 
     PUTBACK;
-}
 
-XS(XS_attributes__guess_stash)
-{
-    dVAR;
-    dXSARGS;
+void
+_guess_stash(...)
+  PREINIT:
     SV *rv, *sv;
     dXSTARG;
-
+  PPCODE:
     if (items != 1) {
 usage:
 	croak_xs_usage(cv, "$reference");
@@ -270,15 +217,13 @@ usage:
 
     SvSETMAGIC(TARG);
     XSRETURN(1);
-}
 
-XS(XS_attributes_reftype)
-{
-    dVAR;
-    dXSARGS;
+void
+reftype(...)
+  PREINIT:
     SV *rv, *sv;
     dXSTARG;
-
+  PPCODE:
     if (items != 1) {
 usage:
 	croak_xs_usage(cv, "$reference");
@@ -294,8 +239,6 @@ usage:
     SvSETMAGIC(TARG);
 
     XSRETURN(1);
-}
-
 /*
  * Local variables:
  * c-indentation-style: bsd

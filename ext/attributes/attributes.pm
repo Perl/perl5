@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.10;
+our $VERSION = 0.11;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -17,16 +17,6 @@ sub carp {
     require Carp;
     goto &Carp::carp;
 }
-
-## forward declaration(s) rather than wrapping the bootstrap call in BEGIN{}
-#sub reftype ($) ;
-#sub _fetch_attrs ($) ;
-#sub _guess_stash ($) ;
-#sub _modify_attrs ;
-#
-# The extra trips through newATTRSUB in the interpreter wipe out any savings
-# from avoiding the BEGIN block.  Just do the bootstrap now.
-BEGIN { bootstrap attributes }
 
 sub import {
     @_ > 2 && ref $_[2] or do {
@@ -73,8 +63,8 @@ sub get ($) {
     @_ == 1  && ref $_[0] or
 	croak 'Usage: '.__PACKAGE__.'::get $ref';
     my $svref = shift;
-    my $svtype = uc reftype $svref;
-    my $stash = _guess_stash $svref;
+    my $svtype = uc reftype($svref);
+    my $stash = _guess_stash($svref);
     $stash = caller unless defined $stash;
     my $pkgmeth;
     $pkgmeth = UNIVERSAL::can($stash, "FETCH_${svtype}_ATTRIBUTES")
@@ -86,6 +76,9 @@ sub get ($) {
 }
 
 sub require_version { goto &UNIVERSAL::VERSION }
+
+require XSLoader;
+XSLoader::load('attributes', $VERSION);
 
 1;
 __END__
@@ -479,4 +472,3 @@ which this module replaces;
 L<perlfunc/use> for details on the normal invocation mechanism.
 
 =cut
-

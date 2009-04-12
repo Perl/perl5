@@ -1113,7 +1113,6 @@
 #endif
 #ifdef PERL_CORE
 #define my_attrs		Perl_my_attrs
-#define boot_core_xsutils	Perl_boot_core_xsutils
 #endif
 #if defined(USE_ITHREADS)
 #define cx_dup			Perl_cx_dup
@@ -3444,7 +3443,6 @@
 #endif
 #ifdef PERL_CORE
 #define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
-#define boot_core_xsutils()	Perl_boot_core_xsutils(aTHX)
 #endif
 #if defined(USE_ITHREADS)
 #define cx_dup(a,b,c,d)		Perl_cx_dup(aTHX_ a,b,c,d)
