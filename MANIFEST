@@ -3600,7 +3600,6 @@ pod/perlnumber.pod		Perl number semantics
 pod/perlobj.pod			Perl objects
 pod/perlopentut.pod		Perl open() tutorial
 pod/perlop.pod			Perl operators and precedence
-pod/perlothrtut.pod		Old Perl threads tutorial
 pod/perlpacktut.pod		Perl pack() and unpack() tutorial
 pod/perlperf.pod		Perl Performance and Optimization Techniques
 pod/perl.pod			Perl overview (this section)

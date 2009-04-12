@@ -91,7 +91,6 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnumber		Perl number semantics
 
     perlthrtut		Perl threads tutorial
-      perlothrtut	Old Perl threads tutorial
 
     perlport		Perl portability guide
     perllocale		Perl locale support

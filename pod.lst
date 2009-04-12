@@ -76,7 +76,6 @@ h Reference Manual
   perlnumber		Perl number semantics
 
   perlthrtut		Perl threads tutorial
-2 perlothrtut		Old Perl threads tutorial
 
   perlport		Perl portability guide
   perllocale		Perl locale support
