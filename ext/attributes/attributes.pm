@@ -225,8 +225,6 @@ of the now-removed "Perl 5.005 threads".
 
 =back
 
-For global variables there is C<unique> attribute: see L<perlfunc/our>.
-
 =head2 Available Subroutines
 
 The following subroutines are available for general use once this module
@@ -333,7 +331,7 @@ Some examples of syntactically valid attribute lists:
     switch(10,foo(7,3))  :  expensive
     Ugly('\(") :Bad
     _5x5
-    locked method
+    lvalue method
 
 Some examples of syntactically invalid attribute lists (with annotation):
 
@@ -397,22 +395,22 @@ Effect:
 Code:
 
     package X;
-    sub foo : locked ;
+    sub foo : lvalue ;
 
 Effect:
 
-    use attributes X => \&foo, "locked";
+    use attributes X => \&foo, "lvalue";
 
 =item 4.
 
 Code:
 
     package X;
-    sub Y::x : locked { 1 }
+    sub Y::x : lvalue { 1 }
 
 Effect:
 
-    use attributes Y => \&Y::x, "locked";
+    use attributes Y => \&Y::x, "lvalue";
 
 =item 5.
 
@@ -425,11 +423,11 @@ Code:
     BEGIN { *bar = \&X::foo; }
 
     package Z;
-    sub Y::bar : locked ;
+    sub Y::bar : lvalue ;
 
 Effect:
 
-    use attributes X => \&X::foo, "locked";
+    use attributes X => \&X::foo, "lvalue";
 
 =back
 
