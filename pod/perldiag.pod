@@ -313,6 +313,13 @@ attribute on a code reference. The :locked attribute is obsolete, has had no
 effect since 5005 threads were removed, and will be removed in the next major
 release of Perl 5.
 
+=item Attribute "unique" is deprecated
+
+(D deprecated) You have used the attributes pragam to modify the "unique"
+attribute on a array, hash or scalar reference. The :unique attribute is has
+had no no effect since Perl 5.8.8, and will be removed in the next major
+release of Perl 5.
+
 =item Bad arg length for %s, is %d, should be %s
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl()

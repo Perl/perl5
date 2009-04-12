@@ -18,6 +18,11 @@ sub carp {
     goto &Carp::carp;
 }
 
+my %deprecated;
+$deprecated{CODE} = qr/\A-?(locked)\z/;
+$deprecated{ARRAY} = $deprecated{HASH} = $deprecated{SCALAR}
+    = qr/\A-?(unique)\z/;
+
 sub _modify_attrs_and_deprecate {
     my $svtype = shift;
     # Now that we've removed handling of locked from the XS code, we need to
@@ -25,9 +30,9 @@ sub _modify_attrs_and_deprecate {
     # XS, we can't control the warning based on *our* caller's lexical settings,
     # and the warned line is in this package)
     grep {
-	$svtype eq 'CODE' && /\A-?locked\z/ ? do {
+	$deprecated{$svtype} && /$deprecated{$svtype}/ ? do {
 	    require warnings;
-	    warnings::warnif('deprecated', 'Attribute "locked" is deprecated');
+	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated");
 	    0;
 	} : 1
     } _modify_attrs(@_);

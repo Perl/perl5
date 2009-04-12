@@ -68,31 +68,12 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	    }
 	    break;
 	default:
-	    switch ((int)len) {
-	    case 6:
-		switch (name[5]) {
-		case 'd':
-		    if (memEQ(name, "share", 5)) {
+	    if (memEQs(name, 6, "shared")) {
 			if (negated)
 			    Perl_croak(aTHX_ "A variable may not be unshared");
 			SvSHARE(sv);
                         continue;
-                    }
-		    break;
-		case 'e':
-		    if (memEQ(name, "uniqu", 5)) {
-			if (isGV_with_GP(sv)) {
-			    if (negated) {
-				GvUNIQUE_off(sv);
-			    } else {
-				GvUNIQUE_on(sv);
-			    }
-			}
-			/* Hope this came from toke.c if not a GV. */
-                        continue;
-                    }
-                }
-            }
+	    }
 	    break;
 	}
 	/* anything recognized had a 'continue' above */

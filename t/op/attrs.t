@@ -149,14 +149,15 @@ like $@, qr/Can't declare scalar dereference in "my"/;
 
 
 my @code = qw(lvalue method);
-my @other = qw(shared unique);
-my @deprecated = qw(locked);
+my @other = qw(shared);
+my @deprecated = qw(locked unique);
 my %valid;
 $valid{CODE} = {map {$_ => 1} @code};
 $valid{SCALAR} = {map {$_ => 1} @other};
 $valid{ARRAY} = $valid{HASH} = $valid{SCALAR};
 my %deprecated;
 $deprecated{CODE} = { locked => 1 };
+$deprecated{ARRAY} = $deprecated{HASH} = $deprecated{SCALAR} = { unique => 1 };
 
 our ($scalar, @array, %hash);
 foreach my $value (\&foo, \$scalar, \@array, \%hash) {
