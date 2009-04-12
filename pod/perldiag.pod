@@ -3404,24 +3404,6 @@ If instead you intended to match the word 'foo' at the end of the line
 followed by whitespace and the word 'bar' on the next line then you can use
 C<m/$(?)\/> (for example: C<m/foo$(?)\s+bar/>).
 
-=item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
-
-(D deprecated) You have written something like this:
-
-    sub doit
-    {
-        use attrs qw(locked);
-    }
-
-You should use the new declaration syntax instead.
-
-    sub doit : locked
-    {
-        ...
-
-The C<use attrs> pragma is now obsolete, and is only provided for
-backward-compatibility. See L<perlsub/"Subroutine Attributes">.
-
 =item Precedence problem: open %s should be open(%s)
 
 (S precedence) The old irregular construct

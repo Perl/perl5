@@ -312,7 +312,6 @@ IO_NLM		= $(AUTODIR)\IO\IO.NLM
 OPCODE_NLM	= $(AUTODIR)\Opcode\Opcode.NLM
 SDBM_FILE_NLM = $(AUTODIR)\SDBM_File\SDBM_File.NLM
 POSIX_NLM	= $(AUTODIR)\POSIX\POSIX.NLM
-ATTRS_NLM	= $(AUTODIR)\attrs\attrs.NLM
 B_NLM		= $(AUTODIR)\B\B.NLM
 DUMPER_NLM	= $(AUTODIR)\Data\Dumper\Dumper.NLM
 PEEK_NLM	= $(AUTODIR)\Devel\Peek\Peek.NLM
@@ -336,7 +335,6 @@ EXTENSION_NLM	= 		\
 		$(SOCKET_NLM)	\
 		$(OPCODE_NLM)	\
 		$(B_NLM)		\
-		$(ATTRS_NLM)	\
 		$(SDBM_FILE_NLM)	\
 		$(POSIX_NLM)	\
 		$(DUMPER_NLM)	\
@@ -788,7 +786,7 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs B re \
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
 		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
@@ -803,7 +801,6 @@ OPCODE		= $(EXTDIR)\Opcode\Opcode
 SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
 IO			= $(EXTDIR)\IO\IO
 POSIX		= $(EXTDIR)\POSIX\POSIX
-ATTRS		= $(EXTDIR)\attrs\attrs
 B			= $(EXTDIR)\B\B
 RE			= $(EXTDIR)\re\re
 DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
@@ -830,7 +827,6 @@ EXTENSION_C	= 		\
 		$(SDBM_FILE).c	\
 		$(IO).c		\
 		$(POSIX).c	\
-		$(ATTRS).c	\
 		$(RE).c		\
 		$(DUMPER).c	\
 		$(PEEK).c	\
@@ -1226,12 +1222,6 @@ $(POSIX_NLM):
 	$(MAKE)
 	cd ..\..\netware
 
-$(ATTRS_NLM):
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\netware
-
 $(SDBM_FILE_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
@@ -1397,7 +1387,7 @@ distclean: clean nwclean
 	-del /f /q $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f /q $(EXTDIR)\DynaLoader\DynaLoader.pm
 	-del /f /q $(EXTDIR)\DynaLoader\XSLoader.pm
-	-del /f /q $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f /q $(LIBDIR)\.exists $(LIBDIR)\DynaLoader.pm
 	-del /f /q $(LIBDIR)\XSLoader.pm
 	-del /f /q $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f /q $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm

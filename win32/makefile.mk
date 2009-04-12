@@ -1476,7 +1476,7 @@ distclean: realclean
 	-del /f $(EXTDIR)\DynaLoader\XSLoader.pm
 	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
 	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
-	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f $(LIBDIR)\.exists $(LIBDIR)\DynaLoader.pm
 	-del /f $(LIBDIR)\XSLoader.pm $(LIBDIR)\lib.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm

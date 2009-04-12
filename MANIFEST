@@ -88,10 +88,6 @@ ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
 ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
 ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
-ext/attrs/attrs.pm		attrs extension Perl module
-ext/attrs/attrs.xs		attrs extension external subroutines
-ext/attrs/Makefile.PL		attrs extension makefile writer
-ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
