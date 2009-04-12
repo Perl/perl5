@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 66;
+use Test::More tests => 68;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -433,6 +433,12 @@ use constant H => { "#" => 1 }; H->{"#"}
 # SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO optimized away 0 not yet fixed"
 # 57  (cpan-bug #33708)
 foreach my $i (@_) { 0 }
+####
+# 58 placeholder for skipped edbe35ea95
+1;
+####
+# 59 placeholder for skipped edbe35ea95
+1;
 ####
 # 60 tests that should be constant folded
 x() if 1;
