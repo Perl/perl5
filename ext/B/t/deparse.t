@@ -215,12 +215,8 @@ $test /= 2 if ++$test;
 }
 ####
 # 8
-{
-    my $test = sub : locked method {
-	my $x;
-    }
-    ;
-}
+# Was sub : locked method { ... }
+# This number could be re-used.
 ####
 # 9
 {
