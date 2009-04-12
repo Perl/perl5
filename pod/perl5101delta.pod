@@ -103,11 +103,24 @@ C<Archive::Tar> upgraded from version 1.38 to 1.42
 
 =item *
 
+C<Autoloader> upgraded from version 5.63 to 5.68
+
+=item *
+
 C<B> upgraded from version 1.17 to 1.22
 
 =item *
 
+C<Devel::PPPort> upgraded from version 3.13 to 3.15
+
+=item *
+
 C<Digest::MD5> upgraded from version 2.36_01 to 2.38
+
+
+=item *
+
+C<Filter::Simple> upgraded from version 0.82 to 0.84
 
 =item *
 
@@ -115,7 +128,15 @@ C<IPC::SysV> upgraded from version 1.05 to 2.00_02 XXX
 
 =item *
 
+C<ExtUtils::Command> upgraded from version 1.13 to 1.16
+
+=item *
+
 C<ExtUtils::Install> upgraded from version 1.44 to 1.52
+
+=item *
+
+C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
 
 =item *
 
@@ -125,6 +146,14 @@ C<autodie>.
 =item *
 
 C<Log::Message> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<Math::Complex> upgraded from version 1.37 to 1.55
+
+=item *
+
+C<Module::Build> upgraded from version 0.2808_01 to 0.31012
 
 =item *
 
@@ -148,6 +177,10 @@ C<Pod::Text> upgraded from version 3.08 to 3.13
 
 =item *
 
+C<Posix> upgraded from version 1.13 to 1.17
+
+=item *
+
 C<Switch> upgraded from version 2.13 to 2.14
 
 =item *
@@ -157,6 +190,10 @@ C<Symbol> upgraded from version 1.06 to 1.07
 =item *
 
 C<Test::Simple> upgraded from version 0.80 to 0.86_01 XXX not a CPAN release
+
+=item *
+
+C<Time::HiRes> upgraded from version 1.9711 to 1.9719
 
 =item *
 
@@ -269,6 +306,29 @@ exist, even if the object's C<@ISA> contained C<Foo>.
 
 Bitwise operations on references could crash the interpreter, e.g.
 C<$x=\$y; $x |= "foo"> [RT #54956].
+
+=item *
+
+Patterns including alternation might be sensitive to the internal UTF8
+representation, e.g.
+
+    my $byte = chr(192);
+    my $utf8 = chr(192); utf8::upgrade($utf8);
+    $utf8 =~ /$byte|X}/i;	# failed in 5.10.0
+
+=item *
+
+Within utf8-encoded Perl source files (i.e. where C<use utf8> is in
+effect), double-quoted literal strings could be corrupted where a C<\xNN>,
+C<\0NNN> or C<\N{}> is followed by a literal character with ordinal value
+greater than 255 [RT #59908].
+
+=item *
+
+C<B::Deparse> failed to correctly deparse various constructs:
+C<readpipe STRING> [RT #62428], C<CORE::require(STRING)> [RT #62488],
+C<sub foo(_)> [RT #62484].
+
 
 =back
 

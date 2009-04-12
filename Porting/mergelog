@@ -222,7 +222,9 @@ M  88570a3e91 2008/01/05 32847
 M  4979e2888f 2008/01/05 32848
 M  3c8556c3bf 2008/01/05 32849
 R  e2560c3357 2008/01/05 32850 fix for bleed-specific re stuff
-M  b9ad30b40c 2008/01/05 32851 Make Perl_pregcomp() use SvUTF8: not BinCompat
+R  b9ad30b40c 2008/01/05 32851 Make Perl_pregcomp() use SvUTF8: not BinCompat
+			    originally merged as 33972, then  backed out again
+			    by 1f1f9ba37f5670f787f95ba511742e9cf4d9ca66
 R  8f6ae13c8a 2008/01/05 32852 Abolish RXf_UTF8: not BackCompat
 M  5daac39cdf 2008/01/05 32853
 R  1af6200d18 2008/01/05 32854 skip more struct regexp diddling
@@ -578,7 +580,7 @@ M  f7918450ac 2008/02/18 33328
 M  898471883c 2008/02/18 33329
 M  3fe25e0f6c 2008/02/18 33330
 M  54c7876f68 2008/02/18 33331
-m  473d7a83d6 2008/02/18 33332 DistGen.pm needs merging when Module::Build@jan14
+M  473d7a83d6 2008/02/18 33332
 M  788c0c32a9 2008/02/18 33333
 M  16ec96eb5a 2008/02/18 33334
 M  cb644b64ca 2008/02/20 33335
@@ -1031,7 +1033,7 @@ R  aef2a98a19 2008/06/08 34023 (unknown reason)
 M  24ead1638d 2008/06/08 34024
 M  5a33563ff2 2008/06/08 34025
 M  055cc54b41 2008/06/08 34026
-MMMM6db67f2d9 2008/06/08 34027 smartmatch doc patch
+M  d6db67f2d9 2008/06/08 34027 smartmatch doc patch
 R  91a462243e 2008/06/08 34028 (unknown reason)
 M  603aa20df5 2008/06/08 34029
 M  7948fc082b 2008/06/08 34030
@@ -1319,9 +1321,9 @@ M  e6a5675bfd 2008/09/29 34441
 M  ec0c3fb5aa 2008/09/29 34442
 M  690aedd128 2008/09/29 34443
 M  5bca5c48fc 2008/09/29 34444
-!  738349a8c2 2008/09/30 34446 waiting for Module::Build 0.31012 (14 Jan)
-!  c1c8b72b4c 2008/09/30 34447 waiting for Module::Build 0.31012 (14 Jan)
-!  d1ef72e8d5 2008/09/30 34448 waiting for Module::Build 0.31012 (14 Jan)
+M  738349a8c2 2008/09/30 34446
+M  c1c8b72b4c 2008/09/30 34447
+M  d1ef72e8d5 2008/09/30 34448
 M  049aaf37de 2008/09/30 34449
 M  565590b5d6 2008/10/01 34451
 M  642eb38136 2008/10/01 34452
@@ -1363,8 +1365,8 @@ M  dbcf044e38 2008/10/18 34510
 M  444c2e40cd 2008/10/18 34513
 M  486bcc50ba 2008/10/19 34514
 M  e55c0a828f 2008/10/19 34519
-R  15baf0c4b0 2008/10/20 34521 lib/File/Copy.pm - skipping new perms stuff
-!  5f259b1a7b 2008/10/20 34526 waiting for Module::Build 0.31012 (14 Jan)
+!  15baf0c4b0 2008/10/20 34521 lib/File/Copy.pm - skipping new perms stuff
+M  5f259b1a7b 2008/10/20 34526
 M  afe79e7bf0 2008/10/20 34528
 M  325f7ffd84 2008/10/20 34529
 M  7a0d61f233 2008/10/20 34531
@@ -1430,7 +1432,8 @@ M  1d1936752b 2008/10/28 34626
 R  6c1b357c76 2008/10/28 34627 consting
 M  b8082b6e76 2008/10/28 34628
 M  85fbaab29c 2008/10/28 34629
-!  df00ff3bee 2008/10/29 34630 waiting for Module::Build 0.31012 (14 Jan)
+m  df00ff3bee 2008/10/29 34630 skipped dual-life modules for now
+    (they were actually backed out by 0b9295fd2a2a3ba86b0db1bc39ec1a37be80ac61)
 M  4b0b5bad69 2008/10/29 34631
 !  1c1947d58d 2008/10/29 34634 MM_Haiku.pm: waiting for ExtUtils::MakeMaker CPAN to include it
 M  2f9d49b43d 2008/10/29 34637
@@ -1688,7 +1691,7 @@ R  32e653230c 2008/12/11 35074 adds extra arg to tie's EOF method; new feature, 
 M  955d1b3d5f 2008/12/12 35075
 M  58ff3f5e57 2008/12/12 35076 silent hack to Test::Harness 3.14; needed for Test::Simple 0.86
 M  8f70d4fde1 2008/12/12 35077
-!  798f208dbf 2008/12/12 35078 waiting for Module::Build 0.31012 (14 Jan)
+M  798f208dbf 2008/12/12 35078
 M  3826db83df 2008/12/12 35079
 M  98960e6aa9 2008/12/12 35080
 M  30fc4309ed 2008/12/13 35082
@@ -1856,7 +1859,8 @@ R  3a6fa573ae 2008/12/27 not BinCompat
 R  9953ff723f 2008/12/27 not BinCompat
 R  1e9bd1186a 2008/12/27 Move all mro:: XS functions from mro.c to ext/mro/
 			    Nicholas thinks this is probably not BackCompat
-			    If this is ever merged, see also fbb5a95cd7
+			    If this is ever merged, see also fbb5a95cd7,
+			    cd1759d8c2
 M  a44093a96f 2008/12/28 Fix typo in code not yet used.
 M  527df579b2 2008/12/28 Precomputing the hash value for a string represent
 M  58ca560a9a 2008/12/28 Also test Perl_hv_common() and pre-computed hashes
@@ -1929,190 +1933,225 @@ M  aea323039b 2009/01/03 get_isa_hash() is only used in S_isa_lookup(), so
 M  0c429c7857 2009/01/03 Add some basic decriptions and/or usage info to so
 M  a7d002a112 2009/01/03 some more Porting/ script documentation
 M  2547c837a7 2009/01/03 add -d option to Porting/cmpVERSION.pl to display 
--  a272e669f4 2009/01/03 Patch in a 64 bit clean gmtime_r() and localtime_r
--  9af245219b 2009/01/03 Update to the latest version of the y2038 code.
--  a64acb403a 2009/01/03 Update from the latest y2038.
--  767e26d7c8 2009/01/03 Remove all of localtime64's own includes. Perl's a
--  af9b2bf51b 2009/01/03 Change the way the check_tm assertion function is 
--  769448c3ca 2009/01/03 Cleaning up the Time::gmtime and Time::localtime t
--  9b3ca67b76 2009/01/03 Write down the logic behind the localtime vs gmtim
--  7bda3dfccb 2009/01/03 Update from y2038.
--  5b6366c2b2 2009/01/03 Fix the overflow warning to just check for an erro
--  af8328142f 2009/01/03 Update from y2038 project.
--  c07fe26c2b 2009/01/03 Pull in changes from y2038
--  ea722b766b 2009/01/03 Update from y2038
--  003c3b95c2 2009/01/03 Update from y2038 project.
--  65a38213a5 2009/01/03 We are no longer slaves to the vagaries of time_t.
--  b9020a0ae3 2009/01/03 Fix the test plan on gmtime
--  750c447b41 2009/01/03 Update from y2038
--  948ea7a98b 2009/01/03 Update from y2038
--  dc164757d6 2009/01/03 Update some docs to explain that Perl no longer ha
--  4c91ace1ab 2009/01/03 Everything should now work with negative times, so
--  7643e68fdb 2009/01/03 Rename localtime64.[ch] to time64.[ch] to mirror c
--  806a119aef 2009/01/03 Remove the AIX work around code. Instead it should
--  7315c673ba 2009/01/03 Fix pulling a large time off the stack by using a 
--  0fb7f756cb 2009/01/03 We are no longer bound by the limits of the tm str
--  8efababc2f 2009/01/03 Fix gmtime() and localtime() so they can pop times
--  b86b480f73 2009/01/03 Update from y2038
--  461d5a49bc 2009/01/03 Update from y2038.
--  0e3c5d8bc7 2009/01/03 Turn quads on in the VC configurations.
--  1821818801 2009/01/03 Apply bleadperl@34470 by hand while waiting for th
--  d4fb0a1f15 2009/01/03 Update from y2038
--  f433f45e72 2009/01/03 Merge branch 'schwern/y2038' into blead
-				MERGE: 2547c837a7 d4fb0a1f15
+#
+# start of y2038 block; not yet applied as possibly not stable
+#
+!  a272e669f4 2009/01/03 Patch in a 64 bit clean gmtime_r() and localtime_r
+!  9af245219b 2009/01/03 Update to the latest version of the y2038 code.
+!  a64acb403a 2009/01/03 Update from the latest y2038.
+!  767e26d7c8 2009/01/03 Remove all of localtime64's own includes. Perl's a
+!  af9b2bf51b 2009/01/03 Change the way the check_tm assertion function is 
+!  769448c3ca 2009/01/03 Cleaning up the Time::gmtime and Time::localtime t
+!  9b3ca67b76 2009/01/03 Write down the logic behind the localtime vs gmtim
+!  7bda3dfccb 2009/01/03 Update from y2038.
+!  5b6366c2b2 2009/01/03 Fix the overflow warning to just check for an erro
+!  af8328142f 2009/01/03 Update from y2038 project.
+!  c07fe26c2b 2009/01/03 Pull in changes from y2038
+!  ea722b766b 2009/01/03 Update from y2038
+!  003c3b95c2 2009/01/03 Update from y2038 project.
+!  65a38213a5 2009/01/03 We are no longer slaves to the vagaries of time_t.
+!  b9020a0ae3 2009/01/03 Fix the test plan on gmtime
+!  750c447b41 2009/01/03 Update from y2038
+!  948ea7a98b 2009/01/03 Update from y2038
+!  dc164757d6 2009/01/03 Update some docs to explain that Perl no longer ha
+!  4c91ace1ab 2009/01/03 Everything should now work with negative times, so
+!  7643e68fdb 2009/01/03 Rename localtime64.[ch] to time64.[ch] to mirror c
+!  806a119aef 2009/01/03 Remove the AIX work around code. Instead it should
+!  7315c673ba 2009/01/03 Fix pulling a large time off the stack by using a 
+!  0fb7f756cb 2009/01/03 We are no longer bound by the limits of the tm str
+!  8efababc2f 2009/01/03 Fix gmtime() and localtime() so they can pop times
+!  b86b480f73 2009/01/03 Update from y2038
+!  461d5a49bc 2009/01/03 Update from y2038.
+!  0e3c5d8bc7 2009/01/03 Turn quads on in the VC configurations.
+!  1821818801 2009/01/03 Apply bleadperl@34470 by hand while waiting for th
+!  d4fb0a1f15 2009/01/03 Update from y2038
+!  f433f45e72 2009/01/03 Merge branch 'schwern/y2038' into blead
+#
+# end of y2038 block
+#
 M  4ba0c7624a 2009/01/03 Changing get_isa_hash() to static means that it ne
--  ef3b26468f 2009/01/03 Merge branch 'blead' of camel:/gitroot/perl into b
+R  ef3b26468f 2009/01/03 skip merge; 4ba0c7624a applied instead
 				MERGE: f433f45e72 4ba0c7624a
--  105ae85463 2009/01/03 Remove duplicate return in S_mro_get_linear_isa_c3
+M  105ae85463 2009/01/03 Remove duplicate return in S_mro_get_linear_isa_c3
 M  bd2db5df3c 2009/01/04 make Dumper.xs work with 5.10.x
--  c012444fd8 2009/01/04 Another regexp failure with utf8-flagged string an
--  6bb0de4e5b 2009/01/04 bump Errno version number after change 34630 (add 
--  7b1668ed3d 2009/01/04 bump ExtUtils/MM.pm version number after change 34
--  166a466fb1 2009/01/04 modified make_patchnum.sh script
--  8ed12dca53 2009/01/04 prepare for refactoring to perl
--  786aaa2520 2009/01/04 Almost a literal conversion of make_patchnum.sh
--  b6194a9dbf 2009/01/04 various changes
--  29299e4722 2009/01/04 move subs from bottom to top, and add a vim and sh
--  f22725be88 2009/01/04 Message about making make_patchnum.pl Perl 5.005 c
--  dcff826f70 2009/01/04 eliminate .patchnum and related infrastrcuture fro
--  6033099bd8 2009/01/04 Add more documentation to make_patchnum.pl
--  e59c84fcaa 2009/01/04 Added win32/.gitignore to ignore stuff from the Wi
--  d11bf41369 2009/01/04 Added config.w32 to win32/.gitignore
--  e47d8d2377 2009/01/04 Added stuff so that perl.exe now builds clean with
--  e9be352a56 2009/01/04 doesnt quite work yet, but provisional steps towar
--  12d7e04de3 2009/01/04 this seems to work, still not using the perl versi
--  eb5c076f82 2009/01/04 eliminate make_patchnum.sh, and make the build pro
--  505afc734e 2009/01/04 add better pod and headers, and clean up some whit
--  a49f3ea332 2009/01/04 eliminate double stringification, the defines as d
--  ef3a38ffad 2009/01/05 Make time64.c's internal copy function names more 
--  e08e1e1d05 2009/01/05 VMS posix exit fixes
--  17a5646396 2009/01/05 UNKNOWN should not have been a bareword at e9be352
--  20231e4a0b 2009/01/05 Typo fix in stock PERL_PATCHNUM definition
--  91c3081c67 2009/01/05 Correct vim modeline
--  737f445947 2009/01/05 Update copyright year to 2009.
--  1702870677 2009/01/05 Adjustments to POSIX for the Haiku port
--  e5c8c22050 2009/01/05 Bump two module versions after Haiku port
--  e5620114d8 2009/01/05 Upgrade to Time::HiRes 1.9719
--  ff34631365 2009/01/05 "rm -f" better in "make clean" targets
--  aa4ca55799 2009/01/05 Emit less PERL_ARGS_ASSERT_* macros
--  b480728ce1 2009/01/05 Update AutoLoader to 5.68.
--  ca03d8e975 2009/01/05 Add lib/CORE/ to .gitignore (needed on Windows)
--  05b0cfd1d0 2009/01/06 On VMS, run make_patchnum.pl, not make_patchnum.co
--  02c87a88cb 2009/01/06 Merge t/.gitignore in main git ignore file
--  318c766aaa 2009/01/06 Move .bat gitignores with their unix counterparts
--  87dd31c880 2009/01/06 Remove notes about -v from perltodo
--  1be1464a25 2009/01/06 Use git instead of p4 for the --opened option of P
--  a44f43ac9f 2009/01/06 Delete the largely obsolete Porting/patching.pod
--  291c4ed918 2009/01/06 Remove a couple of p4-specific utilities
--  8ff80fc4c8 2009/01/06 Add a --checkout / -c flag to git-find-p4-change
--  26b6dc3ff0 2009/01/06 Require a space or a newline after a "#line XXX" d
--  d60c045354 2009/01/06 Added 21st century data to 'SELECTED RELEASE SIZES
--  2ecb5b57f4 2009/01/06 Remove duplicate entry
--  cd47ef9975 2009/01/06 Update data for 5.7.3 release
--  ee4d0b42de 2009/01/06 Calculated patch sizes for the modern era.
--  5d2559deee 2009/01/06 Sync with Filter::Simple 0.84 which has a CPAN-rel
--  a45445a7d0 2009/01/06 Avoid wrapping long lines when displaying as man p
--  256697c9a2 2009/01/06 Updated the 'some statistics for the other subdire
--  f0fcb8ecf1 2009/01/06 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+M  c012444fd8 2009/01/04 Another regexp failure with utf8-flagged string an
+!  6bb0de4e5b 2009/01/04 waiting for Errno to be updated on CPAN
+!  7b1668ed3d 2009/01/04 bump ExtUtils/MM.pm version number after change 34
+			    wait for newer MM
+M  166a466fb1 2009/01/04 modified make_patchnum.sh script
+M  8ed12dca53 2009/01/04 prepare for refactoring to perl
+M  786aaa2520 2009/01/04 Almost a literal conversion of make_patchnum.sh
+M  b6194a9dbf 2009/01/04 various changes
+M  29299e4722 2009/01/04 move subs from bottom to top, and add a vim and sh
+M  f22725be88 2009/01/04 Message about making make_patchnum.pl Perl 5.005 c
+M  dcff826f70 2009/01/04 eliminate .patchnum and related infrastrcuture fro
+M  6033099bd8 2009/01/04 Add more documentation to make_patchnum.pl
+M  e59c84fcaa 2009/01/04 Added win32/.gitignore to ignore stuff from the Wi
+M  d11bf41369 2009/01/04 Added config.w32 to win32/.gitignore
+M  e47d8d2377 2009/01/04 Added stuff so that perl.exe now builds clean with
+M  e9be352a56 2009/01/04 doesnt quite work yet, but provisional steps towar
+M  12d7e04de3 2009/01/04 this seems to work, still not using the perl versi
+M  eb5c076f82 2009/01/04 eliminate make_patchnum.sh, and make the build pro
+M  505afc734e 2009/01/04 add better pod and headers, and clean up some whit
+M  a49f3ea332 2009/01/04 eliminate double stringification, the defines as d
+!  ef3a38ffad 2009/01/05 y2038
+M  e08e1e1d05 2009/01/05 VMS posix exit fixes
+M  17a5646396 2009/01/05 UNKNOWN should not have been a bareword at e9be352
+M  20231e4a0b 2009/01/05 Typo fix in stock PERL_PATCHNUM definition
+M  91c3081c67 2009/01/05 Correct vim modeline
+M  737f445947 2009/01/05 Update copyright year to 2009.
+M  1702870677 2009/01/05 Adjustments to POSIX for the Haiku port
+m  e5c8c22050 2009/01/05 Bump two module versions after Haiku port
+			this is merged: lib/Module/Build.pm -> 0.30_01
+			not yet: lib/CPANPLUS/Internals/Constants/Report.pm
+M  e5620114d8 2009/01/05 Upgrade to Time::HiRes 1.9719
+M  ff34631365 2009/01/05 "rm -f" better in "make clean" targets
+M  aa4ca55799 2009/01/05 Emit less PERL_ARGS_ASSERT_* macros
+M  b480728ce1 2009/01/05 Update AutoLoader to 5.68.
+M  ca03d8e975 2009/01/05 Add lib/CORE/ to .gitignore (needed on Windows)
+M  05b0cfd1d0 2009/01/06 On VMS, run make_patchnum.pl, not make_patchnum.co
+M  02c87a88cb 2009/01/06 Merge t/.gitignore in main git ignore file
+M  318c766aaa 2009/01/06 Move .bat gitignores with their unix counterparts
+M  87dd31c880 2009/01/06 Remove notes about -v from perltodo
+M  1be1464a25 2009/01/06 Use git instead of p4 for the --opened option of P
+M  a44f43ac9f 2009/01/06 Delete the largely obsolete Porting/patching.pod
+M  291c4ed918 2009/01/06 Remove a couple of p4-specific utilities
+M  8ff80fc4c8 2009/01/06 Add a --checkout / -c flag to git-find-p4-change
+R  26b6dc3ff0 2009/01/06 Require a space or a newline after a "#line XXX" d
+			    might break something
+M  d60c045354 2009/01/06 Added 21st century data to 'SELECTED RELEASE SIZES
+M  2ecb5b57f4 2009/01/06 Remove duplicate entry
+M  cd47ef9975 2009/01/06 Update data for 5.7.3 release
+M  ee4d0b42de 2009/01/06 Calculated patch sizes for the modern era.
+M  5d2559deee 2009/01/06 Sync with Filter::Simple 0.84 which has a CPAN-rel
+M  a45445a7d0 2009/01/06 Avoid wrapping long lines when displaying as man p
+M  256697c9a2 2009/01/06 Updated the 'some statistics for the other subdire
+R  f0fcb8ecf1 2009/01/06 Merge branch 'blead' of ssh://perl5.git.perl.org/g
 				MERGE: 256697c9a2 5d2559deee
--  e9daf013fd 2009/01/06 Add David Golden (DAGOLDEN) to AUTHORS
--  2dc734a0f7 2009/01/06 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+				commits individually merged
+M  e9daf013fd 2009/01/06 Add David Golden (DAGOLDEN) to AUTHORS
+R  2dc734a0f7 2009/01/06 Merge branch 'blead' of ssh://perl5.git.perl.org/g
 				MERGE: e9daf013fd f0fcb8ecf1
--  ebd4d70bfc 2009/01/07 VMS thread context fixes
--  b53f367798 2009/01/07 VMS feature logical name fixes
--  6191341389 2009/01/07 CPAN.pm on CPAN is considered upstream
--  19d2664622 2009/01/08 sort MANIFEST
--  1e70e886df 2009/01/08 Use a slightly more paranoid regex
--  fc06fdeb76 2009/01/08 Make File::Copy detect Unix compatibility mode on 
--  c45e3c4898 2009/01/08 Fixed spelling of 'uncondtional', as reported by R
--  3e2a970dfe 2009/01/08 t/x2p/s2p.t fix for VMS in UNIX mode
--  6d74d930c1 2009/01/08 t/op/chdir.t, t/op/defins.t on VMS
--  0e88df1c02 2009/01/08 mkppport using catfile for catdir
--  ca48d8be88 2009/01/08 lib/blib.t, lib/h2xs.t patches for VMS
--  6a164b5b33 2009/01/08 ext/File/Gob/t/basic.t, ext/POSIX/t/posix.t vms fi
--  449de3c2d9 2009/01/08 vms.c backslash efs and long name fixes
--  c25fe68d8a 2009/01/09 Change the link to the sort pragma to be more clea
--  ca7d924f07 2009/01/09 Prefer tabs over spaces in MANIFEST
--  9469eb4a69 2009/01/09 Fixed some spelling errors
--  1a47dce1fa 2009/01/09 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+				commits individually merged
+M  ebd4d70bfc 2009/01/07 VMS thread context fixes
+M  b53f367798 2009/01/07 VMS feature logical name fixes
+M  6191341389 2009/01/07 CPAN.pm on CPAN is considered upstream
+R  19d2664622 2009/01/08 sort MANIFEST
+			did it separately instead
+M  1e70e886df 2009/01/08 Use a slightly more paranoid regex
+!  fc06fdeb76 2009/01/08 Make File::Copy detect Unix compatibility mode on 
+			Didn't apply 2.14 as it changed semantics, so
+			skip this 2.15 too. Maybe review later and merge
+			the non-dodgy bits of 2.14?
+M  c45e3c4898 2009/01/08 Fixed spelling of 'uncondtional', as reported by R
+M  3e2a970dfe 2009/01/08 t/x2p/s2p.t fix for VMS in UNIX mode
+M  6d74d930c1 2009/01/08 t/op/chdir.t, t/op/defins.t on VMS
+M  0e88df1c02 2009/01/08 mkppport using catfile for catdir
+M  ca48d8be88 2009/01/08 lib/blib.t, lib/h2xs.t patches for VMS
+M  6a164b5b33 2009/01/08 ext/File/Gob/t/basic.t, ext/POSIX/t/posix.t vms fi
+M  449de3c2d9 2009/01/08 vms.c backslash efs and long name fixes
+M  c25fe68d8a 2009/01/09 Change the link to the sort pragma to be more clea
+m  ca7d924f07 2009/01/09 Prefer tabs over spaces in MANIFEST
+			    y2038 bits not merged yet
+M  9469eb4a69 2009/01/09 Fixed some spelling errors
+R  1a47dce1fa 2009/01/09 Merge branch 'blead' of ssh://perl5.git.perl.org/g
 				MERGE: 9469eb4a69 ca7d924f07
--  699e896abc 2009/01/09 -Be consistent with kb/kB.
--  9a2f2e6b8d 2009/01/09 Fix typo in pod/perltodo.pod
--  9948897efc 2009/01/09 Typo fix in pod/perl5110delta.pod
--  b8486b9d23 2009/01/09 simple_trnlnm needs an actual length as its last a
--  478780ab3d 2009/01/09 fake_localtime_r and fake_gmtime_r may need thread
--  6c981e149c 2009/01/09 Capitalize "latin"
--  80983d2147 2009/01/09 Fix typo
--  c1e3149410 2009/01/09 Be consistent in writing deobfuscator
--  53e80d0bfa 2009/01/09 Merge changes from PathTools: 'Update to support V
--  ae5a807c7d 2009/01/09 'VMS support for Unix and extended file specificat
--  8ddb446c41 2009/01/10 Typo fix in pod/perldiag.pod
--  0fb8cc817d 2009/01/10 move ext/utils/make_ext to ext/utils/make_ext.pl
--  8e0aa7ce8b 2009/01/10 Fix typo in pod/perldsc.pod
--  a2f19a19a2 2009/01/10 miniperl-ification of ext/utils/make_ext
--  36b6faa83d 2009/01/10 Revision to thread context fixes from ebd4d70bfcb4
--  e919cd191e 2009/01/10 vms setup_cmddsc buffer fixes.
--  37930f0f2f 2009/01/10 File::Copy fixes for VMS follow-up
--  3dac15a5e5 2009/01/11 Merge branch 'blead' into miniperl-make-ext
-				MERGE: a2f19a19a2 37930f0f2f
--  c24e7b67b5 2009/01/11 Remove make_patchnum.com (now using make_patchnum.
--  2b52f3e448 2009/01/11 Merge branch 'blead' into miniperl-make-ext
+			    merged individual commits instead
+M  699e896abc 2009/01/09 -Be consistent with kb/kB.
+M  9a2f2e6b8d 2009/01/09 Fix typo in pod/perltodo.pod
+R  9948897efc 2009/01/09 Typo fix in pod/perl5110delta.pod
+				blead-specific
+M  b8486b9d23 2009/01/09 simple_trnlnm needs an actual length as its last a
+!  478780ab3d 2009/01/09 fake_localtime_r and fake_gmtime_r may need thread
+			    y2038
+M  6c981e149c 2009/01/09 Capitalize "latin"
+M  80983d2147 2009/01/09 Fix typo
+M  c1e3149410 2009/01/09 Be consistent in writing deobfuscator
+!  53e80d0bfa 2009/01/09 Merge changes from PathTools: 'Update to support V
+			    bumps PathTools to 3.29_01. Wait for CPAN to sync
+!  ae5a807c7d 2009/01/09 'VMS support for Unix and extended file specificat
+			    see 53e80d0bfa
+R  8ddb446c41 2009/01/10 Typo fix in pod/perldiag.pod
+			    fix for 777723442a
+A  0fb8cc817d 2009/01/10 move ext/utils/make_ext to ext/utils/make_ext.pl
+M  8e0aa7ce8b 2009/01/10 Fix typo in pod/perldsc.pod
+A  a2f19a19a2 2009/01/10 miniperl-ification of ext/utils/make_ext
+M  36b6faa83d 2009/01/10 Revision to thread context fixes from ebd4d70bfcb4
+M  e919cd191e 2009/01/10 vms setup_cmddsc buffer fixes.
+!  37930f0f2f 2009/01/10 File::Copy fixes for VMS follow-up
+			    see fc06fdeb76
+A  3dac15a5e5 2009/01/11 MERGE: a2f19a19a2 37930f0f2f
+M  c24e7b67b5 2009/01/11 Remove make_patchnum.com (now using make_patchnum.
+M  2b52f3e448 2009/01/11 Merge branch 'blead' into miniperl-make-ext
 				MERGE: 3dac15a5e5 c24e7b67b5
--  5a4e0b04af 2009/01/11 Remove make_patchnum.com from MANIFEST following
--  e5d7cba1d0 2009/01/11 Add -Ilib to the invocations of make_ext.pl. I gue
--  8a646e0bef 2009/01/11 more vms thread ctx fixes
--  7898bf0b95 2009/01/12 Test that overload::constant works in eval("")
--  5abd40ff97 2009/01/12 add git-make-p4-refs script to Porting
--  2a167b4e6e 2009/01/12 Merge commit 'nothingmuch/p4_git_utils' into blead
+			    I aggregate-merged the following three:
+				0fb8cc817d a2f19a19a2 3dac15a5e5
+M  5a4e0b04af 2009/01/11 Remove make_patchnum.com from MANIFEST following
+M  e5d7cba1d0 2009/01/11 Add -Ilib to the invocations of make_ext.pl. I gue
+M  8a646e0bef 2009/01/11 more vms thread ctx fixes
+M  7898bf0b95 2009/01/12 Test that overload::constant works in eval("")
+M  5abd40ff97 2009/01/12 add git-make-p4-refs script to Porting
+R  2a167b4e6e 2009/01/12 Merge commit 'nothingmuch/p4_git_utils' into blead
 				MERGE: 7898bf0b95 5abd40ff97
--  8550bf4881 2009/01/12 Fix typo in pod/perlhack.pod
--  85d5bcfac3 2009/01/12 Ignore ext/DB_File/constants.xs.
--  1ec755da0d 2009/01/12 make_patchnum requires miniperl$(EXE_EXT) to run, 
--  af4015f1af 2009/01/12 Correct the over-zealous addition of $(RUN) into t
--  7222c10abc 2009/01/12 Add $(EXE_EXT) where it was missing from $(RUN) ./
--  efdc43f501 2009/01/12 show -E in error message when called with -E
--  37d5d4df4e 2009/01/12 Fix my refactoring typo in change 33001 that broke
--  df27866545 2009/01/13 vms - vmsspec refactor
--  abf724c9ab 2009/01/13 Capitalize "SysV" correctly
--  0e5ce2c762 2009/01/13 vms - unixspec refactor
--  a148edb68f 2009/01/13 Restore Win32 build by creating git_version.h.
--  049aabcba3 2009/01/13 Give the git file browser URL as the most up to da
--  cd1759d8c2 2009/01/13 Silence Win32 compiler warnings.
--  554fcfb9c5 2009/01/13 Silence time64.c build warning
--  550428fe48 2009/01/13 ext/Hash/Util/Makefile.PL should not recurse to Fi
--  fdd40f9619 2009/01/13 chomp the output from git ls-files. Display a help
--  c5654d5b66 2009/01/13 Add the upstream status to the output of Porting/M
--  29638d28d4 2009/01/13 If there is one argument, and it looks like a comm
--  61edc68382 2009/01/14 Make make_ext.pl write out a shell script of its a
--  0b4436e8e0 2009/01/14 Actually commit the state infomation at the end of
--  f340d83a2d 2009/01/14 applying patches and upstream
--  07714eb488 2009/01/14 Allow '\r' after "#line XXX" directives.
--  15cb7b9da6 2009/01/14 Upgrade to Module-Build-0.31012
--  2319519c80 2009/01/14 Upgrade to ExtUtils-Command-1.16
--  7e4d713840 2009/01/14 Upgrade to ExtUtils-Manifest-1.56
--  1e98a568fc 2009/01/14 Upgrade to Math-Complex-1.55
--  4621490ec7 2009/01/14 Note Math-Complex's test files in Porting/Maintain
--  e23621c75d 2009/01/15 make add-package git friendly and fix bugs (take 2
--  77a135fea3 2009/01/15 [perl #59908] \x, \0, and \N{} not ok in double-qu
--  5d8e6e4189 2009/01/15 Change documentation for UCD::casespec() to match 
--  6fb6c61459 2009/01/15 vms rmsexpand refactor
--  98c7875d34 2009/01/15 Fix handling of DECC$DISABLE_POSIX_ROOT feature on
--  4e759823f6 2009/01/15 Fix t/uni/lex_utf8.t entry in MANIFEST
--  8f718e95d9 2009/01/16 use F<> in perlrepository.pod consistently and rem
--  609122bd05 2009/01/16 Add warning about octal > 377 in some regexes
--  c53941b4d2 2009/01/16 Fix deparsing of readpipe() ([perl #62428])
--  3319632a10 2009/01/17 Need even more stack for VMS_IA64-ithread.
--  b1b1ee3cbf 2009/01/18 UPSTREAM => blead; because CPAN => 0
--  a8cb02613d 2009/01/18 consting goodness for time64
--  6db37112cd 2009/01/18 Add 5.8.9 to list of versions known to Module::Cor
--  65395b02d2 2009/01/18 Add ExtUtils::Miniperl to the list of core modules
--  8f83a467c1 2009/01/18 Add aliases for several version numbers in Module:
--  51d6c659b2 2009/01/18 Upgrade to Devel::PPPort 3.15
--  ca05901bcd 2009/01/18 Jarkko says: Upstream for Math::Complex is the CPA
--  deb20ba305 2009/01/18 [perl #62488] B::Deparse fails on 'CORE::require(S
--  21b5215870 2009/01/18 Make B::Deparse handle the _ prototype
--  b02dc803f4 2009/01/18 Not everybody (hardly anybody?) uses const for tm.
--  642d3d283b 2009/01/19 ignore realclean.sh
+				    merged individual commits instead
+M  8550bf4881 2009/01/12 Fix typo in pod/perlhack.pod
+M  85d5bcfac3 2009/01/12 Ignore ext/DB_File/constants.xs.
+M  1ec755da0d 2009/01/12 make_patchnum requires miniperl$(EXE_EXT) to run, 
+M  af4015f1af 2009/01/12 Correct the over-zealous addition of $(RUN) into t
+M  7222c10abc 2009/01/12 Add $(EXE_EXT) where it was missing from $(RUN) ./
+M  efdc43f501 2009/01/12 show -E in error message when called with -E
+R  37d5d4df4e 2009/01/12 Fix my refactoring typo in change 33001 that broke
+		for some reason, I directly fixed this (commit
+		d42378e0ada9dd1d4ab5ffa99eeedae3bf14dd02, rather than
+		merging Nicholas's fix)
+M  df27866545 2009/01/13 vms - vmsspec refactor
+M  abf724c9ab 2009/01/13 Capitalize "SysV" correctly
+M  0e5ce2c762 2009/01/13 vms - unixspec refactor
+M  a148edb68f 2009/01/13 Restore Win32 build by creating git_version.h.
+M  049aabcba3 2009/01/13 Give the git file browser URL as the most up to da
+!  cd1759d8c2 2009/01/13 Silence Win32 compiler warnings.
+			    fixes to: 1e9bd1186a (mro code moving), y2038
+!  554fcfb9c5 2009/01/13 Silence time64.c build warning
+			    y2038
+M  550428fe48 2009/01/13 ext/Hash/Util/Makefile.PL should not recurse to Fi
+M  fdd40f9619 2009/01/13 chomp the output from git ls-files. Display a help
+M  c5654d5b66 2009/01/13 Add the upstream status to the output of Porting/M
+M  29638d28d4 2009/01/13 If there is one argument, and it looks like a comm
+M  61edc68382 2009/01/14 Make make_ext.pl write out a shell script of its a
+M  0b4436e8e0 2009/01/14 Actually commit the state infomation at the end of
+M  f340d83a2d 2009/01/14 applying patches and upstream
+R  07714eb488 2009/01/14 Allow '\r' after "#line XXX" directives.
+			    fix for 26b6dc3ff0
+M  15cb7b9da6 2009/01/14 Upgrade to Module-Build-0.31012
+M  2319519c80 2009/01/14 Upgrade to ExtUtils-Command-1.16
+M  7e4d713840 2009/01/14 Upgrade to ExtUtils-Manifest-1.56
+M  1e98a568fc 2009/01/14 Upgrade to Math-Complex-1.55
+M  4621490ec7 2009/01/14 Note Math-Complex's test files in Porting/Maintain
+M  e23621c75d 2009/01/15 make add-package git friendly and fix bugs (take 2
+M  77a135fea3 2009/01/15 [perl #59908] \x, \0, and \N{} not ok in double-qu
+M  5d8e6e4189 2009/01/15 Change documentation for UCD::casespec() to match 
+M  6fb6c61459 2009/01/15 vms rmsexpand refactor
+M  98c7875d34 2009/01/15 Fix handling of DECC$DISABLE_POSIX_ROOT feature on
+M  4e759823f6 2009/01/15 Fix t/uni/lex_utf8.t entry in MANIFEST
+M  8f718e95d9 2009/01/16 use F<> in perlrepository.pod consistently and rem
+R  609122bd05 2009/01/16 Add warning about octal > 377 in some regexes
+			    skip, as it adds a new warning to possibly
+			    working code
+M  c53941b4d2 2009/01/16 Fix deparsing of readpipe() ([perl #62428])
+M  3319632a10 2009/01/17 Need even more stack for VMS_IA64-ithread.
+M  b1b1ee3cbf 2009/01/18 UPSTREAM => blead; because CPAN => 0
+!  a8cb02613d 2009/01/18 consting goodness for time64
+			    y2038
+M  6db37112cd 2009/01/18 Add 5.8.9 to list of versions known to Module::Cor
+M  65395b02d2 2009/01/18 Add ExtUtils::Miniperl to the list of core modules
+M  8f83a467c1 2009/01/18 Add aliases for several version numbers in Module:
+M  51d6c659b2 2009/01/18 Upgrade to Devel::PPPort 3.15
+M  ca05901bcd 2009/01/18 Jarkko says: Upstream for Math::Complex is the CPA
+M  deb20ba305 2009/01/18 [perl #62488] B::Deparse fails on 'CORE::require(S
+M  21b5215870 2009/01/18 Make B::Deparse handle the _ prototype
+!  b02dc803f4 2009/01/18 Not everybody (hardly anybody?) uses const for tm.
+			    y2038
+M  642d3d283b 2009/01/19 ignore realclean.sh
 -  7bf7986364 2009/01/19 Combine sv_utf8_upgrade with a following grow
 -  4c6e94b1e7 2009/01/19 Be sure to call L_R_TZSET before localtime_r()
 -  b3647a3612 2009/01/19 about warnings if forks fail in Perl_my_popen
@@ -2151,28 +2190,29 @@ M  b8a4246cca 2009/01/19 Upgrade to Module::Load::Conditional 0.30
 -  2c67934f13 2009/01/21 Note that nothing in core uses Perl_get_cv any mor
 -  64bc6d5446 2009/01/22 Upgrade to Encode-2.27
 -  7c7ad0a9c4 2009/01/23 Fix deparsing of constant subroutines
--  bf799c6455 2009/01/23 Add a perlmini.o and perlmini.c akin to opmini.o a
--  486cd78004 2009/01/23 Amend patchlevel.h so that git_version.h is only #
+M  bf799c6455 2009/01/23 Add a perlmini.o and perlmini.c akin to opmini.o a
+M  486cd78004 2009/01/23 Amend patchlevel.h so that git_version.h is only #
 -  ac2e3cea0e 2009/01/23 Upgrade to Devel::PPPort 3.16
 -  cf5a8da688 2009/01/23 Ensure that C++ modules can be built against a per
 -  35726f546a 2009/01/23 Remove redundant #ifndef SETUID_SCRIPTS_ARE_SECURE
--  42f7d22ff0 2009/01/23 sperl.o also needs to depend on git_version.h
+M  42f7d22ff0 2009/01/23 sperl.o also needs to depend on git_version.h
 -  cc69b689ee 2009/01/23 suidperl goes.
--  5c9818e9e6 2009/01/24 Build miniperl with a special version of perl.c on
+M  5c9818e9e6 2009/01/24 Build miniperl with a special version of perl.c on
 -  6ef6dcadfc 2009/01/24 VMS has a mode where it preserved case, and also h
--  16ad9bfac1 2009/01/24 The exit code of make_patchnum.pl is no longer use
--  8c4561fbb4 2009/01/24 Add -DPERL_IS_MINIPERL when building the object fi
--  931482b7d6 2009/01/25 Port 486cd780047ff22471c5cbe417911a042ae23962 to w
--  ec47230bf7 2009/01/25 microperl also needs a canned git config.
+M  16ad9bfac1 2009/01/24 The exit code of make_patchnum.pl is no longer use
+M  8c4561fbb4 2009/01/24 Add -DPERL_IS_MINIPERL when building the object fi
+M  931482b7d6 2009/01/25 Port 486cd780047ff22471c5cbe417911a042ae23962 to w
+M  ec47230bf7 2009/01/25 microperl also needs a canned git config.
 -  5d09c1ed83 2009/01/25 microperl has no idea about 64 bit types, so don't
 -  0639114fb4 2009/01/25 Regenerate uconfig.h
--  a90aae4c56 2009/01/25 Remove stock_git_version.h as nothing uses it any 
+M  a90aae4c56 2009/01/25 Remove stock_git_version.h as nothing uses it any 
 -  076a2a80a0 2009/01/25 Code refs aren't lockable
 -  e63b33793c 2009/01/25 Move cp(1)-like permission changes from copy to cp
--  8afc33d629 2009/01/25 Revert "show -E in error message when called with 
--  52c447a82d 2009/01/25 Document that $0 is set to "-e" when perl is run w
--  96f2655e63 2009/01/25 Merge branch 'Eefix' into blead
+M  8afc33d629 2009/01/25 Revert "show -E in error message when called with 
+M  52c447a82d 2009/01/25 Document that $0 is set to "-e" when perl is run w
+R  96f2655e63 2009/01/25 Merge branch 'Eefix' into blead
 				MERGE: e63b33793c 52c447a82d
+				individual commits merged
 -  fcd65f8d43 2009/01/25 Unbreak build on Windows
 -  04bf47ee13 2009/01/25 Unbreak Makefile too (replicate fcd65f8d4322911242
 -  9ec269cbd7 2009/01/25 Some POD patches for PerlIO and PerlIO::var
@@ -2632,3 +2672,46 @@ M  cf3f0ffbff 2009/03/29 provide minimal documentation for the MUTABLE_*()
 -  dc82791df0 2009/03/30 Updates for ext/compress*
 -  3acf89b2d2 2009/03/30 Make references to the Glossary in Config.pm and C
 -  b1c3c09642 2009/03/30 TZ setting must contain an offset.
+-  89b75a3bb5 2009/03/31 Upgrade to CPANPLUS-Dist-Build-0.18.
+-  b75281af56 2009/03/31 Avoid "Constant subroutine ... redefined" warning,
+-  85a79b09b8 2009/03/31 Note why we need a seemingly useless empty &Regexp
+-  cedab142c3 2009/03/31 Don't create an empty Errno.pm if there is an erro
+-  a19443d4be 2009/03/31 Upgrade to Getopt::Long 2.38
+-  87da6a1ba6 2009/03/31 Getopt::Long is maintained on CPAN
+-  f5800e99d7 2009/03/31 Close the file before renaming it. Problem spotted
+-  2dcc2c2419 2009/03/31 Can't use inet_ntop and inet_pton under Cygwin bec
+-  0a8c518df2 2009/03/31 Remove the 5.005 threads details from the document
+-  80c061e3d2 2009/04/01 Sadahiro says that "first-come" should be preferre
+-  e9fd6cc75e 2009/04/02 Skip bug in new File::stat test.
+-  eb53357261 2009/04/02 document PERL_SYS_INIT, PERL_SYS_TERM and that the
+-  8c31914eb8 2009/04/03 Don't assign needlessly to dirname. (which seems t
+-  ae2e8cc73f 2009/04/03 Don't needlessly assign to pagname (which seems to
+-  081f72ad6f 2009/04/03 In sdbm_open(), replace strcat()s and strcpy()s wi
+-  f67e8e0b61 2009/04/06 Remove libbsd/libBSD from wanted libs on AIX
+-  55b6781562 2009/04/07 Deprecate assignment to $[
+-  05d7b09c88 2009/04/07 Make h2ph look in "include-fixed", needed by at le
+-  fd2b7f5590 2009/04/07 Docs: Typo: \{-1} -> \g{-1}
+-  074a7adc8d 2009/04/07 Docs: Typo: 'no strict subs' -> 'no strict refs'
+-  4dfdcbc906 2009/04/07 Docs: Minor reorganization.
+-  2ee409f9fc 2009/04/07 Docs: Make the "use base" purpose more obvious
+-  c98e0e85db 2009/04/07 Docs: Quick explanation of duck typing and a warni
+-  549d696aa7 2009/04/07 Docs: Get rid of those awful tabs!
+-  c7b05296e4 2009/04/07 Docs: Better[?] development of SUPER
+-  507fa6a58e 2009/04/07 Docs: Cleanup lead-in to instance variables
+-  32914eef96 2009/04/07 Docs: Better orgnization of instance discussion
+-  33739d6a0b 2009/04/07 Docs: Make use of $self and $class clear
+-  64261f91d3 2009/04/07 Docs: Minor modifications to discussion of constru
+-  c30f1015c2 2009/04/07 Docs: Clarify that a class is not an instance
+-  9cbc8da9ae 2009/04/07 Docs: Expanded treatment of adding instance variab
+-  9014bf7fb4 2009/04/07 Docs: Update summary and add copyright
+-  9fd5bac037 2009/04/07 Docs: Fixed a couple of [my] typos
+-  082b74eb74 2009/04/08 Upgrade to NEXT-0.62.
+-  36d7a91d20 2009/04/08 h2xs incorrectly treats enum values like macros
+-  a8ba03fb20 2009/04/08 Use of freed comppad array during clear_yystack()
+-  932dfdf14c 2009/04/08 Net::hostent fails make test if can't resolve loca
+-  5929274fd6 2009/04/09 Merge commit 'rafl/blead' into blead
+				MERGE: 932dfdf14c 082b74eb74
+-  0e4fe7cb8f 2009/04/09 Update CPANPLUS::Dist::Build to 0.20
+-  5a8cf36709 2009/04/09 Fix declaration-after-statement in ext/Socket/Sock
+-  ee6d2783b2 2009/04/09 Don't SEGV while warning about redefining the form
+-  f1a7681278 2009/04/10 Upgrade to NEXT-0.63.
