@@ -40,11 +40,17 @@ of the output of C<perl -V>. See L<perlrepository> for more information.
 
 =head1 Core Enhancements
 
-=head2 a proper interface for pluggable Method Resolution Orders
+=head2 Unicode Character Database 5.1.0
 
-XXX Nicholas said he needsd to document the following change, at which
-point update this entry:
-b2685f0c86 2008/12/27
+The copy of the Unicode Character Database included in Perl 5.10.1 has
+been updated to 5.1.0 from 5.0.0. See
+L<http://www.unicode.org/versions/Unicode5.1.0/#NotableChanges> for the
+notable changes.
+
+=head2 A proper interface for pluggable Method Resolution Orders
+
+XXX Nicholas said he needs to document the following change, at which
+point update this entry (b2685f0c86 2008/12/27)
 
 =head2 The C<overloading> pragma
 
@@ -99,7 +105,7 @@ C<Archive::Extract> upgraded from version 0.24 to 0.30
 
 =item *
 
-C<Archive::Tar> upgraded from version 1.38 to 1.42
+C<Archive::Tar> upgraded from version 1.38 to 1.44
 
 =item *
 
@@ -111,12 +117,32 @@ C<B> upgraded from version 1.17 to 1.22
 
 =item *
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.15
+C<B::Deparse> upgraded from version 0.83 to 0.87
+
+=item *
+
+C<CPAN> upgraded from version 1.9205 to 1.93_03 
+
+=item *
+
+C<Devel::PPPort> upgraded from version 3.13 to 3.16
+
+=item *
+
+C<DB_File> upgraded from version 1.816_1 to 1.818
 
 =item *
 
 C<Digest::MD5> upgraded from version 2.36_01 to 2.38
 
+=item *
+
+C<Dynaloader> XXX the "1.09" in 5.8.9 is probably different from that in
+bleed/maint
+
+=item *
+
+C<Encode> upgraded from version 2.23 to 2.27
 
 =item *
 
@@ -129,6 +155,11 @@ C<IPC::SysV> upgraded from version 1.05 to 2.00_02 XXX
 =item *
 
 C<ExtUtils::Command> upgraded from version 1.13 to 1.16
+
+=item *
+
+C<ExtUtils::Constant> XXX various .pms from this have newer versions than
+CPAN, both in 5.10.0 and 5.10.x
 
 =item *
 
@@ -161,7 +192,7 @@ C<Module::CoreList> upgraded from version 2.13 to 2.17
 
 =item *
 
-C<Module::Loaded> upgraded from version 0.01 to 0.02
+C<Module::Load> upgraded from version 0.12 to 0.14
 
 =item *
 
@@ -169,7 +200,15 @@ C<Module::Load::Conditional> upgraded from version 0.22 to 0.30
 
 =item *
 
+C<Module::Loaded> upgraded from version 0.01 to 0.02
+
+=item *
+
 C<Package::Constants> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<Pod::MAN> upgraded from version 2.16 to 2.22
 
 =item *
 
@@ -178,6 +217,11 @@ C<Pod::Text> upgraded from version 3.08 to 3.13
 =item *
 
 C<Posix> upgraded from version 1.13 to 1.17
+
+=item *
+
+C<Storable> XXX the "2.19" in 5.8.9 is probably different from that in
+bleed/maint
 
 =item *
 
@@ -201,11 +245,19 @@ C<Unicode::UCD> upgraded from version 0.25 to 0.27
 
 =item *
 
+C<Win32> upgraded from version 0.34 to version 0.39
+
+=item *
+
 C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
 
 =back
 
 =head1 Utility Changes
+
+=head2 F<h2xs>
+
+Now handles C++ style constants (C<//>) properly in enums.
 
 =head1 New Documentation
 
@@ -299,6 +351,11 @@ key is utf8 might result in an incorrect lookup.
 
 =item *
 
+(XS) Including F<XSUB.h> before F<perl.h> gave a compile-time error
+[RT #57176].
+
+=item *
+
 C<$object->isa('Foo')> would report false if the package C<Foo> didn't
 exist, even if the object's C<@ISA> contained C<Foo>.
 
@@ -327,8 +384,8 @@ greater than 255 [RT #59908].
 
 C<B::Deparse> failed to correctly deparse various constructs:
 C<readpipe STRING> [RT #62428], C<CORE::require(STRING)> [RT #62488],
-C<sub foo(_)> [RT #62484].
-
+C<sub foo(_)> [RT #62484]. Also, constant subroutines were deparsed as
+their values.
 
 =back
 
@@ -357,6 +414,19 @@ C<Perl_croak>.
 =head1 Known Problems
 
 =head2 Platform Specific Problems
+
+=head1 Deprecations
+
+The following items are now deprecated.
+
+=over
+
+=item *
+
+C<suidperl> will be removed in 5.12.0. This provides a mechanism to
+emulate setuid permission bits on systems that don't support it properly.
+
+=back
 
 =head1 Acknowledgements
 

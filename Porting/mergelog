@@ -1548,13 +1548,7 @@ M  7d83ec3941 2008/11/16 34838
 M  0643ac23d9 2008/11/16 34839
 M  2cce807b99 2008/11/16 34840
 M  0a87f2eacd 2008/11/16 34843
-!  2990415a45 2008/11/16 34844 this needs 7c7ad0a9c4e075 from 23/1/09 too
-	Also, this thread imples there might be ithreads breakage:
-
-	    From: Rafael Garcia-Suarez <rgarciasuarez@gmail.com>
-	    Date: Sun, 16 Nov 2008 19:01:02 +0100
-	    Subject: Re: [PATCH] Deparse inlined constants.
-
+M  2990415a45 2008/11/16 34844
 M  7834d9fbab 2008/11/16 34845
 M  79c530cb74 2008/11/16 34852
 M  47a7661deb 2008/11/16 34854
@@ -1563,7 +1557,7 @@ M  d10ced8a07 2008/11/16 34859
 M  ec93b65fd8 2008/11/17 34860
 M  5cdbb95e9c 2008/11/17 34861
 M  e016bc2d26 2008/11/17 34862
-!  1bb3cfc505 2008/11/17 34864 see 34844
+M  1bb3cfc505 2008/11/17 34864
 M  324f9e447b 2008/11/17 34867
 M  c9907023d8 2008/11/17 34870
 M  aac018bb00 2008/11/17 34873
@@ -1587,9 +1581,9 @@ R  b08e453b5a 2008/11/25 34905 introduces new warning
 M  74b7c41f0d 2008/11/25 34906
 R  e91684bfbb 2008/11/25 34907 fix for do {return } context - I don't trust op-fiddling
 R  5658d0a991 2008/11/25 34908 void push() no longer calls FETCHSIZE: visible optimisation
-!  aaf9c2b266 2008/11/25 34909 needs 34844
+M  aaf9c2b266 2008/11/25 34909
 M  9b5c4ba4b5 2008/11/25 34910
-!  3779476a6b 2008/11/25 34914 needs 34909 and 34844
+M  3779476a6b 2008/11/25 34914
 M  2e58fc35b9 2008/11/25 34915
 R  7d0905b923 2008/11/26 34917 Replace Perl_my() with macro: Not BinCompat
 R  12e93c28cc 2008/11/26 34918 make linklist private: not BinCompat
@@ -1794,10 +1788,8 @@ M  64ab118f07 2008/12/25 Move 'make check' in pods/ to using Pod::Checker
 M  f4084e3915 2008/12/25 Minor pod fixes to make Pod::Checker happy with th
 M  94442a1e23 2008/12/25 Remove all mention of checkpods
 M  7a21560e6d 2008/12/25 Remove completed perltodo entry
-!  caa547d451 2008/12/25 this has been included in 1.37, but bleed doesn't
-				have pure 1.37 - so wait for bleed to sync
-				with a new CPAN release
-!  4df4f5d097 2008/12/25 ditto like caa547d451 
+M  caa547d451 2008/12/25
+M  4df4f5d097 2008/12/25
 M  9ae51f7f1f 2008/12/25 Some source files and documentation files need not
 M  d4222de008 2008/12/25 Lies, damn lies and end-of-block comments
 M  0147cd53fa 2008/12/25 Use the F formatting codes for filenames in pod/pe
@@ -2152,147 +2144,165 @@ M  21b5215870 2009/01/18 Make B::Deparse handle the _ prototype
 !  b02dc803f4 2009/01/18 Not everybody (hardly anybody?) uses const for tm.
 			    y2038
 M  642d3d283b 2009/01/19 ignore realclean.sh
--  7bf7986364 2009/01/19 Combine sv_utf8_upgrade with a following grow
--  4c6e94b1e7 2009/01/19 Be sure to call L_R_TZSET before localtime_r()
--  b3647a3612 2009/01/19 about warnings if forks fail in Perl_my_popen
--  c973c02eeb 2009/01/19 Add warning category
--  9d1cda07d7 2009/01/19 Upgrade to podlators 2.2.2
--  ae209c08de 2009/01/19 Mark podlators as preferably to be patched upstrea
--  c7c8b664ff 2009/01/19 Fix h2xs enum handling with C++ comments
--  ae6979a87b 2009/01/19 Add NameAliases.txt; regenerate mktables.list
--  0161444183 2009/01/19 SetUID scripts are deprecated for 5.12
--  fdd05153c5 2009/01/19 Update Maintainers.pl
+R  7bf7986364 2009/01/19 Combine sv_utf8_upgrade with a following grow
+			 needs b3ab6785f6
+!  4c6e94b1e7 2009/01/19 Be sure to call L_R_TZSET before localtime_r()
+			    y2038
+R  b3647a3612 2009/01/19 about warnings if forks fail in Perl_my_popen
+			    new warnings - possible BackCompat issues
+R  c973c02eeb 2009/01/19 Add warning category
+			    fix for b3647a3612
+M  9d1cda07d7 2009/01/19 Upgrade to podlators 2.2.2
+M  ae209c08de 2009/01/19 Mark podlators as preferably to be patched upstrea
+M  c7c8b664ff 2009/01/19 Fix h2xs enum handling with C++ comments
+M  ae6979a87b 2009/01/19 Add NameAliases.txt; regenerate mktables.list
+M  0161444183 2009/01/19 SetUID scripts are deprecated for 5.12
+M  fdd05153c5 2009/01/19 Update Maintainers.pl
 M  b8a4246cca 2009/01/19 Upgrade to Module::Load::Conditional 0.30
--  ab06b35309 2009/01/19 add-package fix
--  85a8a980a9 2009/01/19 Upgrade to Module::Load 0.14
--  1fe570cc5e 2009/01/20 Pathify_dirspec replacement
--  fbb3ee5af3 2009/01/20 Optimize away calls to empty DESTROY methods
--  15a6779ee7 2009/01/20 Remove perltodo entry about empty destructors
--  4823492e83 2009/01/20 Merge branch 'empty-destroy-optimisation' into ble
+M  ab06b35309 2009/01/19 add-package fix
+M  85a8a980a9 2009/01/19 Upgrade to Module::Load 0.14
+M  1fe570cc5e 2009/01/20 Pathify_dirspec replacement
+M  fbb3ee5af3 2009/01/20 Optimize away calls to empty DESTROY methods
+M  15a6779ee7 2009/01/20 Remove perltodo entry about empty destructors
+R  4823492e83 2009/01/20 Merge branch 'empty-destroy-optimisation' into ble
 				MERGE: 1fe570cc5e 15a6779ee7
--  e0d6880329 2009/01/20 Upgrade to Archive-Tar-1.44
--  54d012c665 2009/01/21 Change 28063 should have removed the call to savep
--  def18e4c9f 2009/01/21 Change 54d012c665eb635f1e4fac1f1ec5aba1229ad9ca wa
--  5079785043 2009/01/21 Make DB_File use -ldb on MSWin32 with a gcc compil
--  b8921b3e20 2009/01/21 POD typos
--  8253c7d6f3 2009/01/21 Correct the call to get_hv() to use GV_ADD for the
--  797f796a96 2009/01/21 remove some indirect method calls, add a caveat
--  2b393bf410 2009/01/21 now get non-dual lived code
--  6673a63c63 2009/01/21 Update the documentation of get_hv() to note that 
--  cbfd0a879b 2009/01/21 Update the documentation of get_av() to note that 
--  64ace3f88f 2009/01/21 Update the documentation of get_sv() to note that 
--  3509f64745 2009/01/21 Correct the form of the flags passed to perl_get_s
--  8583b25748 2009/01/21 Correct the form of the flags passed to perl_get_s
--  0da0e72871 2009/01/21 Correct the form of the flags passed to perl_get_c
--  e350d0e0ab 2009/01/21 In attrs::get(), use Perl_get_cvn_flags() rather t
--  b96d8cd966 2009/01/21 Add get_cvs() as a shortcut for STR_WITH_LEN() and
--  3f48f963d8 2009/01/21 Convert db_get_cv() to use get_cvn_flags() as it a
--  2c67934f13 2009/01/21 Note that nothing in core uses Perl_get_cv any mor
--  64bc6d5446 2009/01/22 Upgrade to Encode-2.27
--  7c7ad0a9c4 2009/01/23 Fix deparsing of constant subroutines
+				(individual commits merged instead)
+M  e0d6880329 2009/01/20 Upgrade to Archive-Tar-1.44
+M  54d012c665 2009/01/21 Change 28063 should have removed the call to savep
+M  def18e4c9f 2009/01/21 Change 54d012c665eb635f1e4fac1f1ec5aba1229ad9ca wa
+M  5079785043 2009/01/21 Make DB_File use -ldb on MSWin32 with a gcc compil
+M  b8921b3e20 2009/01/21 POD typos
+M  8253c7d6f3 2009/01/21 Correct the call to get_hv() to use GV_ADD for the
+M  797f796a96 2009/01/21 remove some indirect method calls, add a caveat
+M  2b393bf410 2009/01/21 now get non-dual lived code
+M  6673a63c63 2009/01/21 Update the documentation of get_hv() to note that 
+M  cbfd0a879b 2009/01/21 Update the documentation of get_av() to note that 
+M  64ace3f88f 2009/01/21 Update the documentation of get_sv() to note that 
+M  3509f64745 2009/01/21 Correct the form of the flags passed to perl_get_s
+M  8583b25748 2009/01/21 Correct the form of the flags passed to perl_get_s
+M  0da0e72871 2009/01/21 Correct the form of the flags passed to perl_get_c
+M  e350d0e0ab 2009/01/21 In attrs::get(), use Perl_get_cvn_flags() rather t
+R  b96d8cd966 2009/01/21 Add get_cvs() as a shortcut for STR_WITH_LEN() and
+			    the new get_cvs macro isn't core only.
+M  3f48f963d8 2009/01/21 Convert db_get_cv() to use get_cvn_flags() as it a
+R  2c67934f13 2009/01/21 Note that nothing in core uses Perl_get_cv any mor
+			    not true for maint
+M  64bc6d5446 2009/01/22 Upgrade to Encode-2.27
+M  7c7ad0a9c4 2009/01/23 Fix deparsing of constant subroutines
 M  bf799c6455 2009/01/23 Add a perlmini.o and perlmini.c akin to opmini.o a
 M  486cd78004 2009/01/23 Amend patchlevel.h so that git_version.h is only #
--  ac2e3cea0e 2009/01/23 Upgrade to Devel::PPPort 3.16
--  cf5a8da688 2009/01/23 Ensure that C++ modules can be built against a per
--  35726f546a 2009/01/23 Remove redundant #ifndef SETUID_SCRIPTS_ARE_SECURE
+M  ac2e3cea0e 2009/01/23 Upgrade to Devel::PPPort 3.16
+M  cf5a8da688 2009/01/23 Ensure that C++ modules can be built against a per
+M  35726f546a 2009/01/23 Remove redundant #ifndef SETUID_SCRIPTS_ARE_SECURE
 M  42f7d22ff0 2009/01/23 sperl.o also needs to depend on git_version.h
--  cc69b689ee 2009/01/23 suidperl goes.
+R  cc69b689ee 2009/01/23 suidperl goes. Not BackCompat.
 M  5c9818e9e6 2009/01/24 Build miniperl with a special version of perl.c on
--  6ef6dcadfc 2009/01/24 VMS has a mode where it preserved case, and also h
+M  6ef6dcadfc 2009/01/24 VMS has a mode where it preserved case, and also h
 M  16ad9bfac1 2009/01/24 The exit code of make_patchnum.pl is no longer use
 M  8c4561fbb4 2009/01/24 Add -DPERL_IS_MINIPERL when building the object fi
 M  931482b7d6 2009/01/25 Port 486cd780047ff22471c5cbe417911a042ae23962 to w
 M  ec47230bf7 2009/01/25 microperl also needs a canned git config.
--  5d09c1ed83 2009/01/25 microperl has no idea about 64 bit types, so don't
--  0639114fb4 2009/01/25 Regenerate uconfig.h
+!  5d09c1ed83 2009/01/25 microperl has no idea about 64 bit types, so don't
+			    y2038
+M  0639114fb4 2009/01/25 Regenerate uconfig.h
 M  a90aae4c56 2009/01/25 Remove stock_git_version.h as nothing uses it any 
--  076a2a80a0 2009/01/25 Code refs aren't lockable
--  e63b33793c 2009/01/25 Move cp(1)-like permission changes from copy to cp
+R  076a2a80a0 2009/01/25 Code refs aren't lockable
+			    potentially not BackCompat
+!  e63b33793c 2009/01/25 Move cp(1)-like permission changes from copy to cp
+			    more permission messing stuff
 M  8afc33d629 2009/01/25 Revert "show -E in error message when called with 
 M  52c447a82d 2009/01/25 Document that $0 is set to "-e" when perl is run w
 R  96f2655e63 2009/01/25 Merge branch 'Eefix' into blead
 				MERGE: e63b33793c 52c447a82d
 				individual commits merged
--  fcd65f8d43 2009/01/25 Unbreak build on Windows
--  04bf47ee13 2009/01/25 Unbreak Makefile too (replicate fcd65f8d4322911242
--  9ec269cbd7 2009/01/25 Some POD patches for PerlIO and PerlIO::var
--  1ffb79efad 2009/01/25 Add perlmini.c to .gitignore
--  29a982501a 2009/01/25 [perl #57176] Including XSUB.h before perl.h gives
--  85e7c9deba 2009/01/25 vms glob patches
--  8a5aa89570 2009/01/25 According to Yuval, Tie::RefHash is maintained at 
--  a979ce91b3 2009/01/25 vms fileify_dirspec refactor / Unix mode fixes
--  b3a04dd304 2009/01/26 Fix memory leak
--  7fa8fd0b55 2009/01/26 Check for the group entry returned by getpwuid as 
--  205139309c 2009/01/26 Tests to check cp() doesn't drop set[eu]id bits.
--  0549aefb17 2009/01/26 Run podtidy on pod/perlrepository.pod and document
--  03050721b3 2009/01/26 Add a section on how to submit a patch using GitHu
--  4497a157d1 2009/01/26 Make t/win32/system.t use the more common compiler
--  c6d234b82f 2009/01/26 Break the --create-perllibst-h and --list-static-l
--  b1144ebad0 2009/01/27 Silence verbosity in lib/File/Copy.t during 'make 
--  3127de7dcb 2009/01/27 unicore Makefile didn't clean sub-sub directories
--  b6922eda63 2009/01/27 Change to use 5.1 Unicode file versions
--  4feb7f0986 2009/01/27 In buildext.pl, refactor the @ARGV parsing into a 
--  23d483e2ac 2009/01/27 In the code for printing -v, replace longhand newS
--  97a26ad97b 2009/01/28 Fold ext/util/make_ext_cross into ext/util/make_ex
--  3f3ffb6144 2009/01/28 Move ext/util/make_ext.pl to the top level.
--  8ed969f8dc 2009/01/28 Pass $(MAKE) as one quoted commandline argument, t
--  06ba78de6d 2009/01/29 do_exec() is a mathom, so call its replacement dir
--  aaaf44d72f 2009/01/29 Add an explicit --all option to buildext.pl, rathe
--  c9e1d5f914 2009/01/29 Upgrade to Win32-0.39.
--  5dd60a5265 2009/01/29 Revert "do_exec() is a mathom, so call its replace
--  4846f1d798 2009/01/29 vmspath without thread context.
--  e2fabae1d9 2009/01/29 Add --options with arguments to make_ext.pl. Pass 
--  c15dd1a1b8 2009/01/29 win32/ext was removed by change 30379 in 2007, so 
--  dc3c30404e 2009/01/29 Tweaks to pod/perlrepository.pod
--  1bc4b319ba 2009/01/30 Upgrade to Pod-Parser-1.36.
--  57f7515dc9 2009/01/30 Pod correction for ExtUtils::XSSymSet.
--  42fe6305f0 2009/01/30 Replace the one file timestamp dependency check wi
--  222046efb2 2009/01/30 Fix paths on new pod2usage2 tests to work in the c
--  b8d39eba91 2009/01/30 Use Config; rather than parsing config.sh and push
--  9822e6e0ce 2009/01/30 Eliminate $makeargs by prepending its contents to 
--  d793a8a7f7 2009/01/30 The logic to set $makefile to 'Makefile.old' can't
--  c337d41ae5 2009/01/30 Move the target generic logic above the extension 
--  e3b840254a 2009/01/31 The hack to write out realclean.sh and veryclean.s
--  744ac0eac5 2009/01/31 Make lib/Config_heavy.pl part of $(CONFIGPM) as th
--  1a76ca1adb 2009/01/31 Make dir and target --options to buildext.pl. Upda
--  484c6321d9 2009/01/31 Create build_extension() to encapsulate the per-ex
--  fc67841296 2009/01/31 Use the build_extension() routine from win32/build
--  07f3cc2a61 2009/01/31 Move the static/dynamic/nonxs LINKTYPE logic from 
--  3b333d01f6 2009/01/31 Update Makefile-cross-SH with 07f3cc2a611daebb9d83
--  11f6a7695e 2009/02/01 Correctly escape $ in debug statement
--  a79902b1d0 2009/02/01 The $@ was actually a botched conversion from $mak
--  ca5de986dd 2009/02/01 Loop over @extspec, calling build_extension() on e
--  eb1f8df73c 2009/02/01 Replacing system $scalar with system @list require
--  34001da35a 2009/02/01 Make Time/HiRes/Makefile.PL produce a Makefile if 
--  a520a2c43d 2009/02/01 For the vmsish pragma, make sure there is a thread
--  312ac60b38 2009/02/01 vms stat patches (take 2)
--  cbbb00c6b5 2009/02/01 Cast result to character size before array indexed
--  22901f3092 2009/02/01 Put parentheses around macro arguments
--  d8bf0b8cc0 2009/02/02 Upgrade DB_File to 1.818.
+M  fcd65f8d43 2009/01/25 Unbreak build on Windows
+M  04bf47ee13 2009/01/25 Unbreak Makefile too (replicate fcd65f8d4322911242
+M  9ec269cbd7 2009/01/25 Some POD patches for PerlIO and PerlIO::var
+M  1ffb79efad 2009/01/25 Add perlmini.c to .gitignore
+M  29a982501a 2009/01/25 [perl #57176] Including XSUB.h before perl.h gives
+M  85e7c9deba 2009/01/25 vms glob patches
+M  8a5aa89570 2009/01/25 According to Yuval, Tie::RefHash is maintained at 
+M  a979ce91b3 2009/01/25 vms fileify_dirspec refactor / Unix mode fixes
+M  b3a04dd304 2009/01/26 Fix memory leak
+!  7fa8fd0b55 2009/01/26 Check for the group entry returned by getpwuid as 
+			    more File/Copy.pm perms stuff
+!  205139309c 2009/01/26 Tests to check cp() doesn't drop set[eu]id bits.
+			    more File/Copy.pm perms stuff
+M  0549aefb17 2009/01/26 Run podtidy on pod/perlrepository.pod and document
+M  03050721b3 2009/01/26 Add a section on how to submit a patch using GitHu
+M  4497a157d1 2009/01/26 Make t/win32/system.t use the more common compiler
+M  c6d234b82f 2009/01/26 Break the --create-perllibst-h and --list-static-l
+!  b1144ebad0 2009/01/27 Silence verbosity in lib/File/Copy.t during 'make 
+			    more File/Copy.pm perms stuff
+M  3127de7dcb 2009/01/27 unicore Makefile didn't clean sub-sub directories
+M  b6922eda63 2009/01/27 Change to use 5.1 Unicode file versions
+M  4feb7f0986 2009/01/27 In buildext.pl, refactor the @ARGV parsing into a 
+M  23d483e2ac 2009/01/27 In the code for printing -v, replace longhand newS
+M  97a26ad97b 2009/01/28 Fold ext/util/make_ext_cross into ext/util/make_ex
+M  3f3ffb6144 2009/01/28 Move ext/util/make_ext.pl to the top level.
+M  8ed969f8dc 2009/01/28 Pass $(MAKE) as one quoted commandline argument, t
+R  06ba78de6d 2009/01/29 do_exec() is a mathom, so call its replacement dir
+			    in bleed, was soon reverted by 5dd60a5265
+M  aaaf44d72f 2009/01/29 Add an explicit --all option to buildext.pl, rathe
+M  c9e1d5f914 2009/01/29 Upgrade to Win32-0.39.
+R  5dd60a5265 2009/01/29 Revert "do_exec() is a mathom, so call its replace
+			    see 06ba78de6d
+M  4846f1d798 2009/01/29 vmspath without thread context.
+M  e2fabae1d9 2009/01/29 Add --options with arguments to make_ext.pl. Pass 
+M  c15dd1a1b8 2009/01/29 win32/ext was removed by change 30379 in 2007, so 
+M  dc3c30404e 2009/01/29 Tweaks to pod/perlrepository.pod
+M  1bc4b319ba 2009/01/30 Upgrade to Pod-Parser-1.36.
+M  57f7515dc9 2009/01/30 Pod correction for ExtUtils::XSSymSet.
+M  42fe6305f0 2009/01/30 Replace the one file timestamp dependency check wi
+M  222046efb2 2009/01/30 Fix paths on new pod2usage2 tests to work in the c
+M  b8d39eba91 2009/01/30 Use Config; rather than parsing config.sh and push
+M  9822e6e0ce 2009/01/30 Eliminate $makeargs by prepending its contents to 
+M  d793a8a7f7 2009/01/30 The logic to set $makefile to 'Makefile.old' can't
+M  c337d41ae5 2009/01/30 Move the target generic logic above the extension 
+M  e3b840254a 2009/01/31 The hack to write out realclean.sh and veryclean.s
+M  744ac0eac5 2009/01/31 Make lib/Config_heavy.pl part of $(CONFIGPM) as th
+M  1a76ca1adb 2009/01/31 Make dir and target --options to buildext.pl. Upda
+M  484c6321d9 2009/01/31 Create build_extension() to encapsulate the per-ex
+M  fc67841296 2009/01/31 Use the build_extension() routine from win32/build
+M  07f3cc2a61 2009/01/31 Move the static/dynamic/nonxs LINKTYPE logic from 
+M  3b333d01f6 2009/01/31 Update Makefile-cross-SH with 07f3cc2a611daebb9d83
+M  11f6a7695e 2009/02/01 Correctly escape $ in debug statement
+M  a79902b1d0 2009/02/01 The $@ was actually a botched conversion from $mak
+M  ca5de986dd 2009/02/01 Loop over @extspec, calling build_extension() on e
+M  eb1f8df73c 2009/02/01 Replacing system $scalar with system @list require
+M  34001da35a 2009/02/01 Make Time/HiRes/Makefile.PL produce a Makefile if 
+M  a520a2c43d 2009/02/01 For the vmsish pragma, make sure there is a thread
+M  312ac60b38 2009/02/01 vms stat patches (take 2)
+M  cbbb00c6b5 2009/02/01 Cast result to character size before array indexed
+M  22901f3092 2009/02/01 Put parentheses around macro arguments
+M  d8bf0b8cc0 2009/02/02 Upgrade DB_File to 1.818.
 -  a37eaad4a1 2009/02/02 Upgrade to Encode-2.29.
--  a7f1e69b4b 2009/02/02 Update CPAN.pm to 1.93_03
--  421926c2f2 2009/02/02 Restore broken clean target in win32/makefile.mk
--  a681c2f143 2009/02/02 When loading a PerlIO::via layer, first look in th
--  2fe765f8bd 2009/02/02 Bump version of PerlIO::via after previous change
--  b7d08f5e04 2009/02/02 Add missed file ext/DB_File/config.in and update e
--  440530af1a 2009/02/02 ext/DB_File needs a ppport.h
--  767c16ab36 2009/02/02 Make t/pod/pod2usage2.t work on case insensitive f
--  286d62c215 2009/02/02 Fold win32/buildext.pl into make_ext.pl
--  d1b150139f 2009/02/02 Convert the last few references from buildext.pl t
+M  a7f1e69b4b 2009/02/02 Update CPAN.pm to 1.93_03
+M  421926c2f2 2009/02/02 Restore broken clean target in win32/makefile.mk
+R  a681c2f143 2009/02/02 When loading a PerlIO::via layer, first look in th
+			    alters search order for C<open "via(Foo)">.
+			    While a useful bugfix, might break old code
+R  2fe765f8bd 2009/02/02 Bump version of PerlIO::via after previous change
+			    see a681c2f143
+M  b7d08f5e04 2009/02/02 Add missed file ext/DB_File/config.in and update e
+M  440530af1a 2009/02/02 ext/DB_File needs a ppport.h
+M  767c16ab36 2009/02/02 Make t/pod/pod2usage2.t work on case insensitive f
+M  286d62c215 2009/02/02 Fold win32/buildext.pl into make_ext.pl
+M  d1b150139f 2009/02/02 Convert the last few references from buildext.pl t
 !  200cbd6aa5 2009/02/03 awaiting MM > 6.48, CBuilder > 0.24
 -  3ddd48aab4 2009/02/03 Oops. Missed these two files from commit 200cbd6aa
--  d57db09df2 2009/02/03 Refactor to avoid changing directory, and avoid ne
+M  d57db09df2 2009/02/03 Refactor to avoid changing directory, and avoid ne
 -  d94c5a782e 2009/02/04 vms kill_file / rmdir updates
 -  b94a8c495f 2009/02/04 vms rename Unix mode fixes
 -  21afb10428 2009/02/04 long-ago h2xs changes
 -  1f200948c4 2009/02/04 setpgrp() should extend the stack before modifying
--  0598b5ab36 2009/02/04 A test for FindExt, not run by make test. (Useful 
--  3380c781dc 2009/02/04 Clearer variable names. Add a mode line coda.
--  f44bdceebe 2009/02/04 Also cope with extension directory names of the fo
+M  0598b5ab36 2009/02/04 A test for FindExt, not run by make test. (Useful 
+M  3380c781dc 2009/02/04 Clearer variable names. Add a mode line coda.
+M  f44bdceebe 2009/02/04 Also cope with extension directory names of the fo
 -  8b2bdce690 2009/02/04 Upgrade to Pod-Parser-1.37.
--  e08c66ce39 2009/02/04 Some refactoring in the loop that constructs param
--  c5aac6ab21 2009/02/04 Remove the / from the end of the extension directo
--  7ad017a880 2009/02/04 When normalising @extspec, use the result of s/// 
+M  e08c66ce39 2009/02/04 Some refactoring in the loop that constructs param
+M  c5aac6ab21 2009/02/04 Remove the / from the end of the extension directo
+M  7ad017a880 2009/02/04 When normalising @extspec, use the result of s/// 
 -  e2c1c280e8 2009/02/05 Move XSSymSet.pm to lib/ExtUtils/, but only instal
 -  aefe3e7eb5 2009/02/05 Exclude VMS extensions on non-VMS.
 -  c8f794576f 2009/02/05 "wide character" warnings are severe
