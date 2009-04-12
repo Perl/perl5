@@ -485,8 +485,6 @@ element ('Test').
 
 L<perlsub/"Private Variables via my()"> and
 L<perlsub/"Subroutine Attributes"> for details on the basic declarations;
-L<attrs> for the obsolescent form of subroutine attribute specification
-which this module replaces;
 L<perlfunc/use> for details on the normal invocation mechanism.
 
 =cut
