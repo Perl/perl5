@@ -54,15 +54,6 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			continue;
 		    }
 		    break;
-		case 'k':
-		    if (memEQ(name, "locked", 6)) {
-			if (negated)
-			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_LOCKED;
-			else
-			    CvFLAGS(MUTABLE_CV(sv)) |= CVf_LOCKED;
-			continue;
-		    }
-		    break;
 		case 'h':
 		    if (memEQ(name, "method", 6)) {
 			if (negated)

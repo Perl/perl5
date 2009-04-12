@@ -148,21 +148,27 @@ eval 'my $$foo : bar = 1';
 like $@, qr/Can't declare scalar dereference in "my"/;
 
 
-my @code = qw(lvalue locked method);
+my @code = qw(lvalue method);
 my @other = qw(shared unique);
+my @deprecated = qw(locked);
 my %valid;
 $valid{CODE} = {map {$_ => 1} @code};
 $valid{SCALAR} = {map {$_ => 1} @other};
 $valid{ARRAY} = $valid{HASH} = $valid{SCALAR};
+my %deprecated;
+$deprecated{CODE} = { locked => 1 };
 
 our ($scalar, @array, %hash);
 foreach my $value (\&foo, \$scalar, \@array, \%hash) {
     my $type = ref $value;
     foreach my $negate ('', '-') {
-	foreach my $attr (@code, @other) {
+	foreach my $attr (@code, @other, @deprecated) {
 	    my $attribute = $negate . $attr;
 	    eval "use attributes __PACKAGE__, \$value, '$attribute'";
-	    if ($valid{$type}{$attr}) {
+	    if ($deprecated{$type}{$attr}) {
+		like $@, qr/^Attribute "$attr" is deprecated at \(eval \d+\)/,
+		    "$type attribute $attribute deprecated";
+	    } elsif ($valid{$type}{$attr}) {
 		if ($attribute eq '-shared') {
 		    like $@, qr/^A variable may not be unshared/;
 		} else {

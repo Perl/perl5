@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.11;
+our $VERSION = 0.12;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -18,6 +18,21 @@ sub carp {
     goto &Carp::carp;
 }
 
+sub _modify_attrs_and_deprecate {
+    my $svtype = shift;
+    # Now that we've removed handling of locked from the XS code, we need to
+    # remove it here, else it ends up in @badattrs. (If we do the deprecation in
+    # XS, we can't control the warning based on *our* caller's lexical settings,
+    # and the warned line is in this package)
+    grep {
+	$svtype eq 'CODE' && /\A-?locked\z/ ? do {
+	    require warnings;
+	    warnings::warnif('deprecated', 'Attribute "locked" is deprecated');
+	    0;
+	} : 1
+    } _modify_attrs(@_);
+}
+
 sub import {
     @_ > 2 && ref $_[2] or do {
 	require Exporter;
@@ -31,7 +46,7 @@ sub import {
 	if defined $home_stash && $home_stash ne '';
     my @badattrs;
     if ($pkgmeth) {
-	my @pkgattrs = _modify_attrs($svref, @attrs);
+	my @pkgattrs = _modify_attrs_and_deprecate($svtype, $svref, @attrs);
 	@badattrs = $pkgmeth->($home_stash, $svref, @pkgattrs);
 	if (!@badattrs && @pkgattrs) {
             require warnings;
@@ -49,7 +64,7 @@ sub import {
 	}
     }
     else {
-	@badattrs = _modify_attrs($svref, @attrs);
+	@badattrs = _modify_attrs_and_deprecate($svtype, $svref, @attrs);
     }
     if (@badattrs) {
 	croak "Invalid $svtype attribute" .

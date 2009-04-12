@@ -306,6 +306,13 @@ of an array and later assigning through that reference. For example
 used as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
 
+=item Attribute "locked" is deprecated
+
+(D deprecated) You have used the attributes pragam to modify the "locked"
+attribute on a code reference. The :locked attribute is obsolete, has had no
+effect since 5005 threads were removed, and will be removed in the next major
+release of Perl 5.
+
 =item Bad arg length for %s, is %d, should be %s
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl()
