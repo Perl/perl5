@@ -108,6 +108,7 @@ usage:
 
 void
 _fetch_attrs(...)
+  PROTOTYPE: $
   PREINIT:
     SV *rv, *sv;
     cv_flags_t cvflags;
@@ -138,6 +139,7 @@ usage:
 
 void
 _guess_stash(...)
+  PROTOTYPE: $
   PREINIT:
     SV *rv, *sv;
     dXSTARG;
@@ -184,6 +186,7 @@ usage:
 
 void
 reftype(...)
+  PROTOTYPE: $
   PREINIT:
     SV *rv, *sv;
     dXSTARG;
