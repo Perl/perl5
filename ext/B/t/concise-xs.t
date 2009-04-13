@@ -173,7 +173,9 @@ my $testpkgs = {
 		     PMf_MULTILINE PMf_ONCE PMf_SINGLELINE
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
 		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
-		     /, $] > 5.009 ? ('RXf_SKIPWHITE') : ('PMf_SKIPWHITE')],
+		     /, $] > 5.009 ? ('RXf_SKIPWHITE') : ('PMf_SKIPWHITE'),
+		    'CVf_LOCKED', # This ends up as a constant, pre or post 5.10
+		    ],
 		 },
 
     POSIX => { dflt => 'constant',			# all but 252/589

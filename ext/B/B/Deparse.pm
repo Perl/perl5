@@ -20,11 +20,18 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
-	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.88;
+	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
+	 ($] < 5.011 ? 'CVf_LOCKED' : ());
+$VERSION = 0.89;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
+
+BEGIN {
+    # Easiest way to keep this code portable between 5.12.x and 5.10.x looks to
+    # be to fake up a dummy CVf_LOCKED that will never actually be true.
+    *CVf_LOCKED = sub () {0} unless defined &CVf_LOCKED;
+}
 
 # Changes between 0.50 and 0.51:
 # - fixed nulled leave with live enter in sort { }
