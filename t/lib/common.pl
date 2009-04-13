@@ -185,8 +185,8 @@ for (@prgs){
 	$ok = $results eq $expected;
     }
  
-    our $TODO = $reason{todo};
-    print_err_line( $switch, $prog, $expected, $results, $TODO ) unless $ok;
+    local $::TODO = $reason{todo};
+    print_err_line( $switch, $prog, $expected, $results, $::TODO ) unless $ok;
 
     ok($ok);
 

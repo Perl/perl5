@@ -65,7 +65,7 @@ while (<DATA>) {
 	}
     }
 
-    s/#\s*(.*)$//mg;
+    s/^\s*#\s*(.*)$//mg;
     my ($num, $testname) = $1 =~ m/(\d+)\s*(.*)/;
 
     if ($reason{skip}) {
@@ -95,7 +95,7 @@ while (<DATA>) {
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-	our $TODO = $reason{todo};
+	local $::TODO = $reason{todo};
         like($deparsed, qr/$regex/, $testname);
     }
 }
@@ -436,15 +436,15 @@ else { x(); }
 my($y, $t);
 /x${y}z$t/;
 ####
-# TODO new undocumented cpan-bug #33708"
+# TODO new undocumented cpan-bug #33708
 # 55  (cpan-bug #33708)
 %{$_ || {}}
 ####
-# TODO hash constants not yet fixed"
+# TODO hash constants not yet fixed
 # 56  (cpan-bug #33708)
 use constant H => { "#" => 1 }; H->{"#"}
 ####
-# TODO optimized away 0 not yet fixed"
+# TODO optimized away 0 not yet fixed
 # 57  (cpan-bug #33708)
 foreach my $i (@_) { 0 }
 ####
