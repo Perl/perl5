@@ -209,7 +209,6 @@ ext/Cwd/t/win32.t		See if Cwd works on Win32
 ext/Data-Dumper/Changes		Data pretty printer, changelog
 ext/Data-Dumper/Dumper.pm	Data pretty printer, module
 ext/Data-Dumper/Dumper.xs	Data pretty printer, externals
-ext/Data-Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data-Dumper/t/bless.t	See if Data::Dumper works
 ext/Data-Dumper/t/bugs.t	See if Data::Dumper works
 ext/Data-Dumper/t/dumper.t	See if Data::Dumper works
@@ -716,7 +715,6 @@ ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util-FieldHash/Changes			Changes for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/FieldHash.xs		XS portion
 ext/Hash-Util-FieldHash/lib/Hash/Util/FieldHash.pm	Perl portion and documentation
-ext/Hash-Util-FieldHash/Makefile.PL		Makefile for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/t/01_load.t		Test script
 ext/Hash-Util-FieldHash/t/02_function.t		Test script
 ext/Hash-Util-FieldHash/t/03_class.t		Test script
@@ -966,7 +964,6 @@ ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/Util.xs		Util extension
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
-ext/Math-BigInt-FastCalc/Makefile.PL	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
@@ -1046,7 +1043,6 @@ ext/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 ext/Module-Pluggable/t/lib/TA/C/A/I.pm	Module::Pluggable tests
 ext/Module-Pluggable/t/lib/Zot/.Zork.pm	Module::Pluggable tests
 ext/mro/Changes			mro extension
-ext/mro/Makefile.PL		mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension
 ext/mro/t/pluggable.t		Test that c3 mro extension is actually pluggable
@@ -1230,7 +1226,6 @@ ext/Storable/t/utf8.t		See if Storable works
 ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
-ext/Sys-Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Sys-Syslog/Changes		Changlog for Sys::Syslog
 ext/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
@@ -1427,7 +1422,6 @@ ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
-ext/Text-Soundex/Makefile.PL	Text::Soundex extension makefile writer
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
