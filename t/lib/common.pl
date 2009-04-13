@@ -15,9 +15,7 @@ our $pragma_name;
 $| = 1;
 
 my $Is_MacOS = $^O eq 'MacOS';
-my $tmpfile = "tmp0000";
-1 while -e ++$tmpfile;
-END { 1 while unlink $tmpfile }
+my $tmpfile = tempfile();
 
 my @prgs = () ;
 my @w_files = () ;
@@ -129,7 +127,7 @@ for (@prgs){
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
-    $results =~ s/tmp\d+/-/g;
+    $results =~ s/$::tempfile_regexp/-/g;
     if ($^O eq 'VMS') {
         # some tests will trigger VMS messages that won't be expected
         $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
