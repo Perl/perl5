@@ -125,8 +125,6 @@ usage:
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
 	cvflags = CvFLAGS((const CV *)sv);
-	if (cvflags & CVf_LOCKED)
-	    XPUSHs(newSVpvs_flags("locked", SVs_TEMP));
 	if (cvflags & CVf_LVALUE)
 	    XPUSHs(newSVpvs_flags("lvalue", SVs_TEMP));
 	if (cvflags & CVf_METHOD)

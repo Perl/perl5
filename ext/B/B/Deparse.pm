@@ -17,7 +17,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
-         CVf_METHOD CVf_LOCKED CVf_LVALUE
+         CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
@@ -865,10 +865,9 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
-    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE)) {
+    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LVALUE)) {
         $proto .= ": ";
         $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
-        $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
         $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
     }
 

@@ -159,7 +159,7 @@ my $testpkgs = {
 	XS => [qw( svref_2object perlstring opnumber main_start
 		   main_root main_cv )],
 
-	constant => [qw/ ASSIGN CVf_LOCKED CVf_LVALUE
+	constant => [qw/ ASSIGN CVf_LVALUE
 		     CVf_METHOD LIST_CONTEXT OP_CONST OP_LIST OP_RV2SV
 		     OP_STRINGIFY OPf_KIDS OPf_MOD OPf_REF OPf_SPECIAL
 		     OPf_STACKED OPf_WANT OPf_WANT_LIST OPf_WANT_SCALAR
