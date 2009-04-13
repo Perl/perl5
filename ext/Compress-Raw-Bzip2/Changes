@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.018 11 April 2009
+
+      * Changes to bzip2 source to get the module to build using a C++
+        compiler
+
   2.017 28 March 2009
 
       * Minor changes to allow building in perl core.

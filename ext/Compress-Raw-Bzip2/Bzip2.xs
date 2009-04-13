@@ -338,6 +338,9 @@ PROTOTYPES:	DISABLE
 INCLUDE: constants.xs
 
 BOOT:
+#ifndef NO_WRITEABLE_DATA
+  trace = TRACE_DEFAULT ;
+#endif
     /* Check this version of bzip2 is == 1 */
     if (BZ2_bzlibVersion()[0] != '1')
 	croak(COMPRESS_CLASS " needs bzip2 version 1.x, you have %s\n", BZ2_bzlibVersion()) ;
@@ -350,8 +353,8 @@ const char *
 bzlibversion()
 
 void
-new(class, appendOut=1, blockSize100k=1, workfactor=0, verbosity=0)
-    const char * class
+new(className, appendOut=1, blockSize100k=1, workfactor=0, verbosity=0)
+    const char * className
     int appendOut
     int	blockSize100k
     int workfactor
@@ -387,7 +390,7 @@ new(class, appendOut=1, blockSize100k=1, workfactor=0, verbosity=0)
         err = BZ_MEM_ERROR ;
 
     {
-        SV* obj = sv_setref_pv(sv_newmortal(), class, (void*)s);
+        SV* obj = sv_setref_pv(sv_newmortal(), className, (void*)s);
         XPUSHs(obj);
     }
     if(0)
@@ -405,8 +408,8 @@ new(class, appendOut=1, blockSize100k=1, workfactor=0, verbosity=0)
 MODULE = Compress::Raw::Bunzip2 PACKAGE = Compress::Raw::Bunzip2
 
 void
-new(class, appendOut=1 , consume=1, small=0, verbosity=0)
-    const char* class
+new(className, appendOut=1 , consume=1, small=0, verbosity=0)
+    const char* className
     int appendOut
     int consume
     int small
@@ -440,7 +443,7 @@ new(class, appendOut=1 , consume=1, small=0, verbosity=0)
 	err = BZ_MEM_ERROR ;
 
     {
-        SV* obj = sv_setref_pv(sv_newmortal(), class, (void*)s);
+        SV* obj = sv_setref_pv(sv_newmortal(), className, (void*)s);
         XPUSHs(obj);
     }
        if (0)

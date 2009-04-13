@@ -165,7 +165,7 @@ int BZ_API(BZ2_bzCompressInit)
    if (strm->bzalloc == NULL) strm->bzalloc = default_bzalloc;
    if (strm->bzfree == NULL) strm->bzfree = default_bzfree;
 
-   s = BZALLOC( sizeof(EState) );
+   s = (EState*) BZALLOC( sizeof(EState) );
    if (s == NULL) return BZ_MEM_ERROR;
    s->strm = strm;
 
@@ -174,9 +174,9 @@ int BZ_API(BZ2_bzCompressInit)
    s->ftab = NULL;
 
    n       = 100000 * blockSize100k;
-   s->arr1 = BZALLOC( n                  * sizeof(UInt32) );
-   s->arr2 = BZALLOC( (n+BZ_N_OVERSHOOT) * sizeof(UInt32) );
-   s->ftab = BZALLOC( 65537              * sizeof(UInt32) );
+   s->arr1 = (UInt32*) BZALLOC( n                  * sizeof(UInt32) );
+   s->arr2 = (UInt32*) BZALLOC( (n+BZ_N_OVERSHOOT) * sizeof(UInt32) );
+   s->ftab = (UInt32*) BZALLOC( 65537              * sizeof(UInt32) );
 
    if (s->arr1 == NULL || s->arr2 == NULL || s->ftab == NULL) {
       if (s->arr1 != NULL) BZFREE(s->arr1);
@@ -362,7 +362,7 @@ Bool handle_compress ( bz_stream* strm )
 {
    Bool progress_in  = False;
    Bool progress_out = False;
-   EState* s = strm->state;
+   EState* s = (EState*) strm->state;
    
    while (True) {
 
@@ -409,7 +409,7 @@ int BZ_API(BZ2_bzCompress) ( bz_stream *strm, int action )
    Bool progress;
    EState* s;
    if (strm == NULL) return BZ_PARAM_ERROR;
-   s = strm->state;
+   s = (EState*) strm->state;
    if (s == NULL) return BZ_PARAM_ERROR;
    if (s->strm != strm) return BZ_PARAM_ERROR;
 
@@ -469,7 +469,7 @@ int BZ_API(BZ2_bzCompressEnd)  ( bz_stream *strm )
 {
    EState* s;
    if (strm == NULL) return BZ_PARAM_ERROR;
-   s = strm->state;
+   s = (EState*) strm->state;
    if (s == NULL) return BZ_PARAM_ERROR;
    if (s->strm != strm) return BZ_PARAM_ERROR;
 
@@ -505,7 +505,7 @@ int BZ_API(BZ2_bzDecompressInit)
    if (strm->bzalloc == NULL) strm->bzalloc = default_bzalloc;
    if (strm->bzfree == NULL) strm->bzfree = default_bzfree;
 
-   s = BZALLOC( sizeof(DState) );
+   s = (DState*) BZALLOC( sizeof(DState) );
    if (s == NULL) return BZ_MEM_ERROR;
    s->strm                  = strm;
    strm->state              = s;
@@ -684,7 +684,10 @@ Bool unRLE_obuf_to_output_FAST ( DState* s )
 
 
 /*---------------------------------------------------*/
-__inline__ Int32 BZ2_indexIntoF ( Int32 indx, Int32 *cftab )
+#ifndef __cplusplus
+__inline__
+#endif
+Int32 BZ2_indexIntoF ( Int32 indx, Int32 *cftab )
 {
    Int32 nb, na, mid;
    nb = 0;
@@ -810,7 +813,7 @@ int BZ_API(BZ2_bzDecompress) ( bz_stream *strm )
    Bool    corrupt;
    DState* s;
    if (strm == NULL) return BZ_PARAM_ERROR;
-   s = strm->state;
+   s = (DState*) strm->state;
    if (s == NULL) return BZ_PARAM_ERROR;
    if (s->strm != strm) return BZ_PARAM_ERROR;
 
@@ -863,7 +866,7 @@ int BZ_API(BZ2_bzDecompressEnd)  ( bz_stream *strm )
 {
    DState* s;
    if (strm == NULL) return BZ_PARAM_ERROR;
-   s = strm->state;
+   s = (DState*) strm->state;
    if (s == NULL) return BZ_PARAM_ERROR;
    if (s->strm != strm) return BZ_PARAM_ERROR;
 
@@ -934,7 +937,7 @@ BZFILE* BZ_API(BZ2_bzWriteOpen)
    if (ferror(f))
       { BZ_SETERR(BZ_IO_ERROR); return NULL; };
 
-   bzf = malloc ( sizeof(bzFile) );
+   bzf = (bzFile*) malloc ( sizeof(bzFile) );
    if (bzf == NULL)
       { BZ_SETERR(BZ_MEM_ERROR); return NULL; };
 
@@ -982,7 +985,7 @@ void BZ_API(BZ2_bzWrite)
       { BZ_SETERR(BZ_OK); return; };
 
    bzf->strm.avail_in = len;
-   bzf->strm.next_in  = buf;
+   bzf->strm.next_in  = (char*)buf;
 
    while (True) {
       bzf->strm.avail_out = BZ_MAX_UNUSED;
@@ -1107,7 +1110,7 @@ BZFILE* BZ_API(BZ2_bzReadOpen)
    if (ferror(f))
       { BZ_SETERR(BZ_IO_ERROR); return NULL; };
 
-   bzf = malloc ( sizeof(bzFile) );
+   bzf = (bzFile*) malloc ( sizeof(bzFile) );
    if (bzf == NULL) 
       { BZ_SETERR(BZ_MEM_ERROR); return NULL; };
 
@@ -1179,7 +1182,7 @@ int BZ_API(BZ2_bzRead)
       { BZ_SETERR(BZ_OK); return 0; };
 
    bzf->strm.avail_out = len;
-   bzf->strm.next_out = buf;
+   bzf->strm.next_out = (char*) buf;
 
    while (True) {
 
