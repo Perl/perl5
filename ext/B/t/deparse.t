@@ -50,24 +50,27 @@ while (<DATA>) {
     chomp;
     # This code is pinched from the t/lib/common.pl for TODO.
     # It's not clear how to avoid duplication
-    my ($skip, $skip_reason);
-    s/^#\s*SKIP\s*(.*)\n//m and $skip_reason = $1;
-    # If the SKIP reason starts ? then it's taken as a code snippet to evaluate
-    # This provides the flexibility to have conditional SKIPs
-    if ($skip_reason && $skip_reason =~ s/^\?//) {
-	my $temp = eval $skip_reason;
-	if ($@) {
-	    die "# In SKIP code reason:\n# $skip_reason\n$@";
+    # Now tweaked a bit to do skip or todo
+    my %reason;
+    foreach my $what (qw(skip todo)) {
+	s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
+	# If the SKIP reason starts ? then it's taken as a code snippet to
+	# evaluate. This provides the flexibility to have conditional SKIPs
+	if ($reason{$what} && $reason{$what} =~ s/^\?//) {
+	    my $temp = eval $reason{$what};
+	    if ($@) {
+		die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
+	    }
+	    $reason{$what} = $temp;
 	}
-	$skip_reason = $temp;
     }
 
     s/#\s*(.*)$//mg;
     my ($num, $testname) = $1 =~ m/(\d+)\s*(.*)/;
 
-    if ($skip_reason) {
+    if ($reason{skip}) {
 	# Like this to avoid needing a label SKIP:
-	Test::More->builder->skip($skip_reason);
+       Test::More->builder->skip($reason{skip});
 	next;
     }
 
@@ -91,6 +94,8 @@ while (<DATA>) {
 	$regex =~ s/(\S+)/\Q$1/g;
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
+
+	our $TODO = $reason{todo};
         like($deparsed, qr/$regex/, $testname);
     }
 }
@@ -427,15 +432,15 @@ else { x(); }
 my($y, $t);
 /x${y}z$t/;
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO new undocumented cpan-bug #33708"
+# TODO new undocumented cpan-bug #33708"
 # 55  (cpan-bug #33708)
 %{$_ || {}}
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO hash constants not yet fixed"
+# TODO hash constants not yet fixed"
 # 56  (cpan-bug #33708)
 use constant H => { "#" => 1 }; H->{"#"}
 ####
-# SKIP ?$B::Deparse::VERSION <= 0.88 && "TODO optimized away 0 not yet fixed"
+# TODO optimized away 0 not yet fixed"
 # 57  (cpan-bug #33708)
 foreach my $i (@_) { 0 }
 ####
