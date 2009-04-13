@@ -511,11 +511,43 @@ sub uptodate {
     my $cpan = $self->cpan_version;
     local ($^W) = 0;
     CPAN::Version->vgt($cpan,$inst) and return 0;
-    CPAN->debug(join("",
-                     "returning uptodate. inst_file[",
-                     $self->inst_file,
-                     "cpan[$cpan] inst[$inst]")) if $CPAN::DEBUG;
+    my $inst_file = $self->inst_file;
+    # trying to support deprecated.pm by Nicholas 2009-02
+    my $in_priv_or_arch = "";
+    my $isa_perl = "";
+    if ($] >= 5.011) { # probably harmful when distros say INSTALLDIRS=perl?
+        if (0 == CPAN::Version->vcmp($cpan,$inst)) {
+            if ($in_priv_or_arch = $self->_in_priv_or_arch($inst_file)) {
+                if (my $distribution = $self->distribution) {
+                    unless ($isa_perl = $distribution->isa_perl) {
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    CPAN->debug
+        (join
+         ("",
+          "returning uptodate. ",
+          "inst_file[$inst_file]",
+          "cpan[$cpan]inst[$inst]",
+          "in_priv_or_arch[$in_priv_or_arch]",
+          "isa_perl[$isa_perl]",
+         )) if $CPAN::DEBUG;
     return 1;
+}
+
+# returns true if installed in privlib or archlib
+sub _in_priv_or_arch {
+    my($self,$inst_file) = @_;
+    for my $confdirname (qw(archlibexp privlibexp)) {
+        my $confdir = $Config::Config{$confdirname};
+        if ($confdir eq substr($inst_file,0,length($confdir))) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 #-> sub CPAN::Module::install ;

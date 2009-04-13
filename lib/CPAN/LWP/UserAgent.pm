@@ -5,6 +5,8 @@ use strict;
 use vars qw(@ISA $USER $PASSWD $SETUPDONE);
 # we delay requiring LWP::UserAgent and setting up inheritance until we need it
 
+$CPAN::LWP::UserAgent::VERSION = $CPAN::LWP::UserAgent::VERSION = "1.00";
+
 sub config {
     return if $SETUPDONE;
     if ($CPAN::META->has_usable('LWP::UserAgent')) {

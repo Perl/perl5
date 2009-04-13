@@ -551,11 +551,12 @@ Do you want to enable code deserialisation (yes/no)?
 
 =item yaml_module
 
-At the time of this writing there are two competing YAML modules,
-YAML.pm and YAML::Syck. The latter is faster but needs a C compiler
-installed on your system. There may be more alternative YAML
-conforming modules but at the time of writing a potential third
-player, YAML::Tiny, seemed not powerful enough to work with CPAN.pm.
+At the time of this writing (2009-03) there are three YAML
+implementations working: YAML, YAML::Syck, and YAML::XS. The latter
+two are faster but need a C compiler installed on your system. There
+may be more alternative YAML conforming modules. When I tried two
+other players, YAML::Tiny and YAML::Perl, they seemed not powerful
+enough to work with CPAN.pm. This may have changed in the meantime.
 
 Which YAML implementation would you prefer?
 
@@ -1379,49 +1380,91 @@ sub my_prompt_loop {
 
 sub conf_sites {
     my $m = 'MIRRORED.BY';
+    my $use_mby;
     my $mby = File::Spec->catfile($CPAN::Config->{keep_source_where},$m);
     File::Path::mkpath(File::Basename::dirname($mby));
     if (-f $mby && -f $m && -M $m < -M $mby) {
+        $use_mby = 1;
         require File::Copy;
         File::Copy::copy($m,$mby) or die "Could not update $mby: $!";
     }
-    my $loopcount = 0;
     local $^T = time;
     my $overwrite_local = 0;
     if ($mby && -f $mby && -M _ <= 60 && -s _ > 0) {
+        $use_mby = 1;
         my $mtime = localtime((stat _)[9]);
         my $prompt = qq{Found $mby as of $mtime
 
-I\'d use that as a database of CPAN sites. If that is OK for you,
-please answer 'y', but if you want me to get a new database now,
-please answer 'n' to the following question.
+I'd use that as a database of CPAN sites. If that is OK for you,
+please answer 'y', but if you want me to get a new database from the
+internet now, please answer 'n' to the following question.
 
 Shall I use the local database in $mby?};
         my $ans = prompt($prompt,"y");
-        $overwrite_local = 1 unless $ans =~ /^y/i;
+        if ($ans =~ /^y/i) {
+            $CPAN::Config->{connect_to_internet_ok} = 1;
+        } else {
+            $overwrite_local = 1;
+        }
     }
-    while ($mby) {
-        if ($overwrite_local) {
-            $CPAN::Frontend->myprint(qq{Trying to overwrite $mby\n});
-            $mby = CPAN::FTP->localize($m,$mby,3);
-            $overwrite_local = 0;
-        } elsif ( ! -f $mby ) {
-            $CPAN::Frontend->myprint(qq{You have no $mby\n  I\'m trying to fetch one\n});
-            $mby = CPAN::FTP->localize($m,$mby,3);
-        } elsif (-M $mby > 60 && $loopcount == 0) {
-            $CPAN::Frontend->myprint(qq{Your $mby is older than 60 days,\n  I\'m trying }.
-                                     qq{to fetch one\n});
-            $mby = CPAN::FTP->localize($m,$mby,3);
-            $loopcount++;
-        } elsif (-s $mby == 0) {
-            $CPAN::Frontend->myprint(qq{You have an empty $mby,\n  I\'m trying to fetch one\n});
-            $mby = CPAN::FTP->localize($m,$mby,3);
+    local $urllist = $CPAN::Config->{urllist};
+    my $better_mby;
+    while () { # multiple errors possible
+        if ($use_mby
+            or (defined $CPAN::Config->{connect_to_internet_ok}
+                and $CPAN::Config->{connect_to_internet_ok})){
+            if ($overwrite_local) {
+                $CPAN::Frontend->myprint(qq{Trying to overwrite $mby\n});
+                $better_mby = CPAN::FTP->localize($m,$mby,3);
+                $overwrite_local = 0;
+                $use_mby=1 if $mby;
+            } elsif ( ! -f $mby ) {
+                $CPAN::Frontend->myprint(qq{You have no $mby\n  I'm trying to fetch one\n});
+                $better_mby = CPAN::FTP->localize($m,$mby,3);
+                $use_mby=1 if $mby;
+            } elsif ( -M $mby > 60 ) {
+                $CPAN::Frontend->myprint(qq{Your $mby is older than 60 days,\n  I'm trying }.
+                                         qq{to fetch a new one\n});
+                $better_mby = CPAN::FTP->localize($m,$mby,3);
+                $use_mby=1 if $mby;
+            } elsif (-s $mby == 0) {
+                $CPAN::Frontend->myprint(qq{You have an empty $mby,\n  I'm trying to fetch a better one\n});
+                $better_mby = CPAN::FTP->localize($m,$mby,3);
+                $use_mby=1 if $mby;
+            } else {
+                last;
+            }
+            if ($better_mby) {
+                $mby = $better_mby;
+            }
+        } elsif (not @$urllist
+                 and (not defined $CPAN::Config->{connect_to_internet_ok}
+                      or not $CPAN::Config->{connect_to_internet_ok})) {
+            $CPAN::Frontend->myprint(qq{CPAN needs access to at least one CPAN mirror.
+
+As you did not allow me to connect to the internet you need to supply
+a valid CPAN URL now.\n\n});
+
+            my @default = map {"file://$_"} grep {-e} "/home/ftp/pub/CPAN", "/home/ftp/pub/PAUSE";
+            my $ans = prompt("Please enter the URL of your CPAN mirror",shift @default);
+            if ($ans) {
+                push @$urllist, $ans;
+                next;
+            }
         } else {
             last;
         }
     }
-    local $urllist = [];
-    read_mirrored_by($mby);
+    if ($use_mby){
+        read_mirrored_by($mby);
+    } else {
+        if (not defined $CPAN::Config->{connect_to_internet_ok}
+            or not $CPAN::Config->{connect_to_internet_ok}) {
+            $CPAN::Frontend->myprint("Configuration does not allow connecting to the internet.\n");
+        }
+        $CPAN::Frontend->myprint("Current set of CPAN URLs:\n");
+        map { $CPAN::Frontend->myprint("  $_\n") } @$urllist;
+    }
     bring_your_own();
     $CPAN::Config->{urllist} = $urllist;
 }
@@ -1646,10 +1689,11 @@ later if you\'re sure it\'s right.\n},
         }
     } while $ans || !%seen;
 
-    push @$urllist, @urls;
+    @$urllist = CPAN::_uniq(@$urllist, @urls);
+    $CPAN::Config->{urllist} = $urllist;
     # xxx delete or comment these out when you're happy that it works
     $CPAN::Frontend->myprint("New set of picks:\n");
-    map { $CPAN::Frontend->myprint("  $_\n") } @$urllist;
+    for ( @$urllist ) { $CPAN::Frontend->myprint("  $_\n") };
 }
 
 

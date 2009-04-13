@@ -1935,11 +1935,11 @@ lib/CPAN/Bundle.pm		helper package for CPAN.pm
 lib/CPAN/CacheMgr.pm		helper package for CPAN.pm
 lib/CPAN/Complete.pm		helper package for CPAN.pm
 lib/CPAN/Debug.pm		helper package for CPAN.pm
-lib/CPAN/DeferedCode.pm		helper package for CPAN.pm
 lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
 lib/CPAN/Distribution.pm	helper package for CPAN.pm
 lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
 lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
+lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
 lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files

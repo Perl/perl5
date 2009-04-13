@@ -1,6 +1,8 @@
 package CPAN::FTP::netrc;
 use strict;
 
+$CPAN::FTP::netrc::VERSION = $CPAN::FTP::netrc::VERSION = "1.00";
+
 # package CPAN::FTP::netrc;
 sub new {
     my($class) = @_;

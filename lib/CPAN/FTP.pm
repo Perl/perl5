@@ -4,6 +4,8 @@ package CPAN::FTP;
 use strict;
 
 use Fcntl qw(:flock);
+use File::Basename qw(dirname);
+use File::Path qw(mkpath);
 use CPAN::FTP::netrc;
 use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 @CPAN::FTP::ISA = qw(CPAN::Debug);
@@ -20,6 +22,7 @@ sub _ftp_statistics {
     my $locktype = $fh ? LOCK_EX : LOCK_SH;
     $fh ||= FileHandle->new;
     my $file = File::Spec->catfile($CPAN::Config->{cpan_home},"FTPstats.yml");
+    mkpath dirname $file;
     open $fh, "+>>$file" or $CPAN::Frontend->mydie("Could not open '$file': $!");
     my $sleep = 1;
     my $waitstart;
@@ -164,7 +167,7 @@ sub _recommend_url_for {
         while (my $last = pop @$history) {
             last if $last->{end} - time > 3600; # only young results are interesting
             next unless $last->{file}; # dirname of nothing dies!
-            next unless $file eq File::Basename::dirname($last->{file});
+            next unless $file eq dirname($last->{file});
             return $last->{thesiteurl};
         }
     }
@@ -269,9 +272,11 @@ sub localize {
     $force ||= 0;
     Carp::croak( "Usage: ->localize(cpan_file,as_local_file[,$force])" )
         unless defined $aslocal;
-    $self->debug("file[$file] aslocal[$aslocal] force[$force]")
-        if $CPAN::DEBUG;
-
+    if ($CPAN::DEBUG){
+        require Carp;
+        my $longmess = Carp::longmess();
+        $self->debug("file[$file] aslocal[$aslocal] force[$force] carplongmess[$longmess]");
+    }
     if ($^O eq 'MacOS') {
         # Comment by AK on 2000-09-03: Uniq short filenames would be
         # available in CHECKSUMS file
@@ -314,8 +319,7 @@ sub localize {
         $maybe_restore++;
     }
 
-    my($aslocal_dir) = File::Basename::dirname($aslocal);
-    $self->mymkpath($aslocal_dir); # too early for file URLs / RT #28438
+    my($aslocal_dir) = dirname($aslocal);
     # Inheritance is not easier to manage than a few if/else branches
     if ($CPAN::META->has_usable('LWP::UserAgent')) {
         unless ($Ua) {
@@ -393,6 +397,7 @@ sub localize {
   LEVEL: for $levelno (0..$#levels) {
         my $level_tuple = $levels[$levelno];
         my($level,$scheme,$sitetag) = @$level_tuple;
+        $self->mymkpath($aslocal_dir) unless $scheme && "file" eq $scheme;
         my $defaultsites = $sitetag && $sitetag eq "defaultsites";
         my @urllist;
         if ($defaultsites) {
@@ -415,21 +420,12 @@ I would like to connect to one of the following sites to get '%s':
             if ($connect_to_internet_ok) {
                 @urllist = @CPAN::Defaultsites;
             } else {
-                my $sleep = 5;
-                $CPAN::Frontend->mywarn(sprintf qq{
-
-You have not configured a urllist and did not allow to connect to the
-internet. I will continue but it is very likely that we will face
-problems. If this happens, please consider to call either
-
-    o conf init connect_to_internet_ok
-or
-    o conf init urllist
-
-Sleeping $sleep seconds now.
-});
-                $CPAN::Frontend->mysleep($sleep);
-                @urllist = ();
+                my $sleep = 2;
+                # the tricky thing about dying here is that everybody
+                # believes that calls to exists() or all_objects() are
+                # safe.
+                require CPAN::Exception::blocked_urllist;
+                die CPAN::Exception::blocked_urllist->new;
             }
         } else {
             my @host_seq = $level =~ /dleasy/ ?
@@ -503,7 +499,7 @@ Sleeping $sleep seconds now.
 
 sub mymkpath {
     my($self, $aslocal_dir) = @_;
-    File::Path::mkpath($aslocal_dir);
+    mkpath($aslocal_dir);
     $CPAN::Frontend->mywarn(qq{Warning: You are not allowed to write into }.
                             qq{directory "$aslocal_dir".
     I\'ll continue, but if you encounter problems, they may be due
@@ -684,8 +680,8 @@ sub hostdlhard {
     my($ro_url);
     my($devnull) = $CPAN::Config->{devnull} || "";
     # < /dev/null ";
-    my($aslocal_dir) = File::Basename::dirname($aslocal);
-    File::Path::mkpath($aslocal_dir);
+    my($aslocal_dir) = dirname($aslocal);
+    mkpath($aslocal_dir);
   HOSTHARD: for $ro_url (@$host_seq) {
         $self->_set_attempt($stats,"dlhard",$ro_url);
         my $url = "$ro_url$file";
@@ -867,8 +863,8 @@ sub hostdlhardest {
 
     return unless @$host_seq;
     my($ro_url);
-    my($aslocal_dir) = File::Basename::dirname($aslocal);
-    File::Path::mkpath($aslocal_dir);
+    my($aslocal_dir) = dirname($aslocal);
+    mkpath($aslocal_dir);
     my $ftpbin = $CPAN::Config->{ftp};
     unless ($ftpbin && length $ftpbin && MM->maybe_command($ftpbin)) {
         $CPAN::Frontend->myprint("No external ftp command available\n\n");
