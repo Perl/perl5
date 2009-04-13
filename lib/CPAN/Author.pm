@@ -82,16 +82,37 @@ sub ls {
     @dl = $self->dir_listing([@csf,"CHECKSUMS"], 1, 1);
     if ($glob) {
         if ($CPAN::META->has_inst("Text::Glob")) {
+            $glob =~ s|/$|/*|;
             my $rglob = Text::Glob::glob_to_regex($glob);
-            @dl = grep { $_->[2] =~ /$rglob/ } @dl;
+            CPAN->debug("glob[$glob]rglob[$rglob]dl[@dl]") if $CPAN::DEBUG;
+            my @tmpdl = grep { $_->[2] =~ /$rglob/ } @dl;
+            if (1==@tmpdl && $tmpdl[0][0]==0) {
+                $rglob = Text::Glob::glob_to_regex("$glob/*");
+                @dl = grep { $_->[2] =~ /$rglob/ } @dl;
+            } else {
+                @dl = @tmpdl;
+            }
+            CPAN->debug("rglob[$rglob]dl[@dl]") if $CPAN::DEBUG;
         } else {
             $CPAN::Frontend->mydie("Text::Glob not installed, cannot proceed");
         }
     }
     unless ($silent >= 2) {
-        $CPAN::Frontend->myprint(join "", map {
-            sprintf("%8d %10s %s/%s\n", $_->[0], $_->[1], $id, $_->[2])
-        } sort { $a->[2] cmp $b->[2] } @dl);
+        $CPAN::Frontend->myprint
+            (
+             join "",
+             map {
+                 sprintf
+                     (
+                      "%8d %10s %s/%s%s\n",
+                      $_->[0],
+                      $_->[1],
+                      $id,
+                      $_->[2],
+                      0==$_->[0]?"/":"",
+                     )
+                 } sort { $a->[2] cmp $b->[2] } @dl
+            );
     }
     @dl;
 }
@@ -110,6 +131,7 @@ sub dir_listing {
 
     my $fh;
 
+    CPAN->debug("chksumfile[@$chksumfile]recursive[$recursive]may_ftp[$may_ftp]") if $CPAN::DEBUG;
     # Purge and refetch old (pre-PGP) CHECKSUMS; they are a security
     # hazard.  (Without GPG installed they are not that much better,
     # though.)
@@ -179,6 +201,7 @@ sub dir_listing {
                 my(@dir) = @$chksumfile;
                 pop @dir;
                 push @dir, $f, "CHECKSUMS";
+                push @result, [ 0, "-", $f ];
                 push @result, map {
                     [$_->[0], $_->[1], "$f/$_->[2]"]
                 } $self->dir_listing(\@dir,1,$may_ftp);

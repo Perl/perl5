@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.93_51';
+$CPAN::VERSION = '1.93_52';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -25,7 +25,7 @@ use CPAN::Debug;
 use CPAN::Distribution;
 use CPAN::Distrostatus;
 use CPAN::FTP;
-use CPAN::Index;
+use CPAN::Index 1.93; # https://rt.cpan.org/Ticket/Display.html?id=43349
 use CPAN::InfoObj;
 use CPAN::Module;
 use CPAN::Prompt;
@@ -248,7 +248,7 @@ sub soft_chdir_with_alternatives ($);
 sub _uniq {
     my(@list) = @_;
     my %seen;
-    return map { !$seen{$_} } @list;
+    return grep { !$seen{$_}++ } @list;
 }
 
 #-> sub CPAN::shell ;
@@ -351,7 +351,8 @@ ReadLine support %s
         } elsif (/^\!/) {
             s/^\!//;
             my($eval) = $_;
-            package CPAN::Eval;
+            package
+                CPAN::Eval; # hide from the indexer
             use strict;
             use vars qw($import_done);
             CPAN->import(':DEFAULT') unless $import_done++;
@@ -374,13 +375,20 @@ ReadLine support %s
                 CPAN::Shell->$command(@line)
               };
             _unredirect;
+            my $reported_error;
             if ($@) {
-                my $err = "$@";
-                if ($err =~ /\S/) {
-                    require Carp;
-                    require Dumpvalue;
-                    my $dv = Dumpvalue->new(tick => '"');
-                    Carp::cluck(sprintf "Catching error: %s", $dv->stringify($err));
+                my $err = $@;
+                if (ref $err and $err->isa('CPAN::Exception::blocked_urllist')) {
+                    $CPAN::Frontend->mywarn("Client not fully configured, please proceed with configuring.$err");
+                    $reported_error = ref $err;
+                } else {
+                    # I'd prefer never to arrive here and make all errors exception objects
+                    if ($err =~ /\S/) {
+                        require Carp;
+                        require Dumpvalue;
+                        my $dv = Dumpvalue->new(tick => '"');
+                        Carp::cluck(sprintf "Catching error: %s", $dv->stringify($err));
+                    }
                 }
             }
             if ($command =~ /^(
@@ -400,7 +408,13 @@ ReadLine support %s
                              |upgrade
                             )$/x) {
                 # only commands that tell us something about failed distros
-                CPAN::Shell->failed($CPAN::CurrentCommandId,1);
+                # eval necessary for people without an urllist
+                eval {CPAN::Shell->failed($CPAN::CurrentCommandId,1);};
+                if (my $err = $@) {
+                    unless (ref $err and $reported_error eq ref $err) {
+                        die $@;
+                    }
+                }
             }
             soft_chdir_with_alternatives(\@cwd);
             $CPAN::Frontend->myprint("\n");

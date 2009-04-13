@@ -15,6 +15,28 @@ sub force_reload {
     $class->reload(1);
 }
 
+my @indexbundle =
+    (
+     {
+      reader => "rd_authindex",
+      dir => "authors",
+      remotefile => '01mailrc.txt.gz',
+      shortlocalfile => '01mailrc.gz',
+     },
+     {
+      reader => "rd_modpacks",
+      dir => "modules",
+      remotefile => '02packages.details.txt.gz',
+      shortlocalfile => '02packag.gz',
+     },
+     {
+      reader => "rd_modlist",
+      dir => "modules",
+      remotefile => '03modlist.data.gz',
+      shortlocalfile => '03mlist.gz',
+     },
+    );
+
 #-> sub CPAN::Index::reload ;
 sub reload {
     my($self,$force) = @_;
@@ -54,39 +76,26 @@ sub reload {
 
         my $needshort = $^O eq "dos";
 
-        $self->rd_authindex($self
-                          ->reload_x(
-                                     "authors/01mailrc.txt.gz",
-                                     $needshort ?
-                                     File::Spec->catfile('authors', '01mailrc.gz') :
-                                     File::Spec->catfile('authors', '01mailrc.txt.gz'),
-                                     $force));
-        $t2 = time;
-        $debug = "timing reading 01[".($t2 - $time)."]";
-        $time = $t2;
-        return if $CPAN::Signal; # this is sometimes lengthy
-        $self->rd_modpacks($self
-                         ->reload_x(
-                                    "modules/02packages.details.txt.gz",
-                                    $needshort ?
-                                    File::Spec->catfile('modules', '02packag.gz') :
-                                    File::Spec->catfile('modules', '02packages.details.txt.gz'),
-                                    $force));
-        $t2 = time;
-        $debug .= "02[".($t2 - $time)."]";
-        $time = $t2;
-        return if $CPAN::Signal; # this is sometimes lengthy
-        $self->rd_modlist($self
-                        ->reload_x(
-                                   "modules/03modlist.data.gz",
-                                   $needshort ?
-                                   File::Spec->catfile('modules', '03mlist.gz') :
-                                   File::Spec->catfile('modules', '03modlist.data.gz'),
-                                   $force));
+    INX: for my $indexbundle (@indexbundle) {
+            my $reader = $indexbundle->{reader};
+            my $localfile = $needshort ? $indexbundle->{shortlocalfile} : $indexbundle->{remotefile};
+            my $localpath = File::Spec->catfile($indexbundle->{dir}, $localfile);
+            my $remote = join "/", $indexbundle->{dir}, $indexbundle->{remotefile};
+            my $localized = $self->reload_x($remote, $localpath, $force);
+            $self->$reader($localized); # may die but we let the shell catch it
+            if ($CPAN::DEBUG){
+                $t2 = time;
+                $debug = "timing reading 01[".($t2 - $time)."]";
+                $time = $t2;
+            }
+            return if $CPAN::Signal; # this is sometimes lengthy
+        }
         $self->write_metadata_cache;
-        $t2 = time;
-        $debug .= "03[".($t2 - $time)."]";
-        $time = $t2;
+        if ($CPAN::DEBUG){
+            $t2 = time;
+            $debug .= "03[".($t2 - $time)."]";
+            $time = $t2;
+        }
         CPAN->debug($debug) if $CPAN::DEBUG;
     }
     if ($CPAN::Config->{build_dir_reuse}) {
