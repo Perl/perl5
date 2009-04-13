@@ -1492,7 +1492,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (isGV_with_GP(sv)) {
 	    if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
 	    if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
-	    if (GvUNIQUE(sv))   sv_catpv(d, "UNIQUE,");
 	    if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	    if (GvIN_PAD(sv))   sv_catpv(d, "IN_PAD,");
 	}

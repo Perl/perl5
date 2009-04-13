@@ -5588,12 +5588,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     cv = (!name || GvCVGEN(gv)) ? NULL : GvCV(gv);
 
-#ifdef GV_UNIQUE_CHECK
-    if (cv && GvUNIQUE(gv) && SvREADONLY(cv)) {
-        Perl_croak(aTHX_ "Can't define subroutine %s (GV is unique)", name);
-    }
-#endif
-
     if (!block || !ps || *ps || attrs
 	|| (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
 #ifdef PERL_MAD
@@ -5606,12 +5600,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
-
-#ifdef GV_UNIQUE_CHECK
-        if (exists && GvUNIQUE(gv)) {
-            Perl_croak(aTHX_ "Can't redefine unique subroutine %s", name);
-        }
-#endif
 
         /* if the subroutine doesn't exist and wasn't pre-declared
          * with a prototype, assume it will be AUTOLOADed,
@@ -6155,11 +6143,6 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	? gv_fetchsv(cSVOPo->op_sv, GV_ADD, SVt_PVFM)
 	: gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVFM);
 
-#ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE(gv)) {
-        Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
-    }
-#endif
     GvMULTI_on(gv);
     if ((cv = GvFORM(gv))) {
 	if (ckWARN(WARN_REDEFINE)) {

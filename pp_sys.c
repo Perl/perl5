@@ -804,11 +804,6 @@ PP(pp_tie)
 	    break;
 	case SVt_PVGV:
 	    if (isGV_with_GP(varsv)) {
-#ifdef GV_UNIQUE_CHECK
-		if (GvUNIQUE((const GV *)varsv)) {
-		    Perl_croak(aTHX_ "Attempt to tie unique GV");
-		}
-#endif
 		methname = "TIEHANDLE";
 		how = PERL_MAGIC_tiedscalar;
 		/* For tied filehandles, we apply tiedscalar magic to the IO

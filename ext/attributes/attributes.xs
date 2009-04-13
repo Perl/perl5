@@ -131,12 +131,6 @@ usage:
 	    XPUSHs(newSVpvs_flags("lvalue", SVs_TEMP));
 	if (cvflags & CVf_METHOD)
 	    XPUSHs(newSVpvs_flags("method", SVs_TEMP));
-        if (GvUNIQUE(CvGV((const CV *)sv)))
-	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
-	break;
-    case SVt_PVGV:
-	if (isGV_with_GP(sv) && GvUNIQUE(sv))
-	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     default:
 	break;

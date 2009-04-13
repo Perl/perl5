@@ -3621,12 +3621,6 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
-#ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ "%s", PL_no_modify);
-    }
-#endif
-
     if(GvGP(MUTABLE_GV(sstr))) {
         /* If source has method cache entry, clear it */
         if(GvCVGEN(sstr)) {
@@ -3679,12 +3673,6 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     const U32 stype = SvTYPE(sref);
 
     PERL_ARGS_ASSERT_GLOB_ASSIGN_REF;
-
-#ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ "%s", PL_no_modify);
-    }
-#endif
 
     if (intro) {
 	GvINTRO_off(dstr);	/* one-shot flag */
@@ -10909,9 +10897,6 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		break;
 
 	    case SVt_PVGV:
-		if (GvUNIQUE((const GV *)sstr)) {
-		    NOOP;   /* Do sharing here, and fall through */
-		}
 	    case SVt_PVIO:
 	    case SVt_PVFM:
 	    case SVt_PVHV:
@@ -11123,8 +11108,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));
 		OP_REFCNT_UNLOCK;
 		if (CvCONST(dstr) && CvISXSUB(dstr)) {
-		    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(dstr)) ?
-			SvREFCNT_inc(CvXSUBANY(dstr).any_ptr) :
+		    CvXSUBANY(dstr).any_ptr =
 			sv_dup_inc((const SV *)CvXSUBANY(dstr).any_ptr, param);
 		}
 		/* don't dup if copying back - CvGV isn't refcounted, so the
