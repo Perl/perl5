@@ -73,17 +73,20 @@ for (@prgs){
     }
     my($prog,$expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
 
-    my ($todo, $todo_reason);
-    $todo = $prog =~ s/^#\s*TODO\s*(.*)\n//m and $todo_reason = $1;
-    # If the TODO reason starts ? then it's taken as a code snippet to evaluate
-    # This provides the flexibility to have conditional TODOs
-    if ($todo_reason && $todo_reason =~ s/^\?//) {
-	my $temp = eval $todo_reason;
-	if ($@) {
-	    die "# In TODO code reason:\n# $todo_reason\n$@";
+    my %reason;
+    foreach my $what (qw(skip todo)) {
+	$prog =~ s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
+	# If the SKIP reason starts ? then it's taken as a code snippet to
+	# evaluate. This provides the flexibility to have conditional SKIPs
+	if ($reason{$what} && $reason{$what} =~ s/^\?//) {
+	    my $temp = eval $reason{$what};
+	    if ($@) {
+		die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
+	    }
+	    $reason{$what} = $temp;
 	}
-	$todo_reason = $temp;
     }
+
     if ( $prog =~ /--FILE--/) {
         my(@files) = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
 	shift @files ;
@@ -184,9 +187,9 @@ for (@prgs){
 	$ok = $results eq $expected;
     }
  
-    print_err_line( $switch, $prog, $expected, $results, $todo ) unless $ok;
+    our $TODO = $reason{todo};
+    print_err_line( $switch, $prog, $expected, $results, $TODO ) unless $ok;
 
-    our $TODO = $todo ? $todo_reason : 0;
     ok($ok);
 
     foreach (@temps)
