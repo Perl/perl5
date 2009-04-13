@@ -505,8 +505,10 @@ do {
 '???';
 !1;
 ####
-# SKIP ? $Config::Config{useithreads} && "TODO doesn't work with threads"
+# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
 # 61 tests that shouldn't be constant folded
+# It might be fundamentally impossible to make this work on ithreads, in which
+# case the TODO should become a SKIP
 x() if $a;
 if ($a == 1) { x() } elsif ($b == 2) { z() }
 if (do { foo(); GLIPP }) { x() }
@@ -529,8 +531,10 @@ warn O_CREAT;
 # 65 tests for deparsing imported constants that got deleted from the original namespace
 warn O_APPEND;
 ####
-# SKIP ? $Config::Config{useithreads} && "TODO doesn't work with threads"
+# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
 # 66 tests for deparsing constants which got turned into full typeglobs
+# It might be fundamentally impossible to make this work on ithreads, in which
+# case the TODO should become a SKIP
 warn O_EXCL;
 eval '@Fcntl::O_EXCL = qw/affe tiger/;';
 warn O_EXCL;
