@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 74;
+use Test::More tests => 77;
 use Config ();
 
 use B::Deparse;
@@ -541,3 +541,24 @@ warn O_EXCL;
 ####
 # 67 tests for deparsing of blessed constant with overloaded numification
 warn OVERLOADED_NUMIFICATION;
+####
+# TODO Only strict 'refs' currently supported
+# 68 strict
+no strict;
+$x;
+####
+# TODO Subsets of warnings could be encoded textually, rather than as bitflips.
+no warnings 'deprecated';
+my $x;
+####
+# TODO Better test for CPAN #33708 - the deparsed code has different behaviour
+use strict;
+no warnings;
+
+foreach (0..3) {
+    my $x = 2;
+    {
+	my $x if 0;
+	print ++$x, "\n";
+    }
+}
