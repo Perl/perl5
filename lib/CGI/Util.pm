@@ -210,7 +210,6 @@ sub unescape {
   my $todecode = shift;
   return undef unless defined($todecode);
   $todecode =~ tr/+/ /;       # pluses become spaces
-    $EBCDIC = "\t" ne "\011";
     if ($EBCDIC) {
       $todecode =~ s/%([0-9a-fA-F]{2})/chr $A2E[hex($1)]/ge;
     } else {
@@ -232,16 +231,24 @@ sub unescape {
 }
 
 # URL-encode data
+#
+# We cannot use the %u escapes, they were rejected by W3C, so the official
+# way is %XX-escaped utf-8 encoding.
+# Naturally, Unicode strings have to be converted to their utf-8 byte
+# representation.  (No action is required on 5.6.)
+# Byte strings were traditionally used directly as a sequence of octets.
+# This worked if they actually represented binary data (i.e. in CGI::Compress).
+# This also worked if these byte strings were actually utf-8 encoded; e.g.,
+# when the source file used utf-8 without the apropriate "use utf8;".
+# This fails if the byte string is actually a Latin 1 encoded string, but it
+# was always so and cannot be fixed without breaking the binary data case.
+# -- Stepan Kasal <skasal@redhat.com>
+#
 sub escape {
   shift() if @_ > 1 and ( ref($_[0]) || (defined $_[1] && $_[0] eq $CGI::DefaultClass));
   my $toencode = shift;
   return undef unless defined($toencode);
-  $toencode = eval { pack("C*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
-
-  # force bytes while preserving backward compatibility -- dankogai
-  # but commented out because it was breaking CGI::Compress -- lstein
-  # $toencode = eval { pack("U*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
-
+  utf8::encode($toencode) if ($] > 5.007 && utf8::is_utf8($toencode));
     if ($EBCDIC) {
       $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {
