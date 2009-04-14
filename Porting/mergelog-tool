@@ -21,7 +21,7 @@ my %STATUS = (
     'A' => 'part of branch merged in single Aggregate merge',
     'm' => 'Partally merged, the rest pending',
     '!' => 'Reviewed but awaiting action',
-    '-' => 'Unreviewed',
+    '.' => 'Unreviewed',
 );
 
 
@@ -91,7 +91,7 @@ sub read_merge_record_file {
 	    my ($flag, $commit, $date, $rest) = split ' ', $_, 4;
 	    defined $rest
 		or die "$0: malformed line at $file:$.:\n$_";
-	    $flag =~ /^[AMPRm!\-]$/
+	    $flag =~ /^[AMPRm!\.]$/
 		or die "$0: unrecognised flag '$flag' at $file:$.\n";
 	    $commit =~ /^[0-9a-f]{$SHA_LEN}$/
 		or die "$0: badly-formed commit '$commit' at $file:$.\n";
@@ -216,10 +216,10 @@ sub generate_mailboxes {
 	    $fh = $mboxes{rejected};
 	    $counts{rejected}++;
 	}
-	elsif ($record->[0] =~ /^[m!\-]$/) {
+	elsif ($record->[0] =~ /^[m!\.]$/) {
 	    $fh = $mboxes{pending};
 	    $counts{pending}++;
-	    $status = '' if $record->[0] eq '-'; # mark email as new
+	    $status = '' if $record->[0] eq '.'; # mark email as new
 	}
 	else {
 	    die "$0: Unexpected flag type '$record->[0]'\n";
@@ -324,7 +324,7 @@ sub update_record_file {
 		. join ' ', map substr($_,0,$SHA_LEN), @parents;
 	}
 	@$c = ();
-	push @$c, '-', $sha1, $date, $subject;
+	push @$c, '.', $sha1, $date, $subject;
     }
 
 
