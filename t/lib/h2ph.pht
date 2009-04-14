@@ -1,6 +1,6 @@
 require '_h2ph_pre.ph';
 
-no warnings 'redefine';
+no warnings qw(redefine misc);
 
 unless(defined(&SQUARE)) {
     sub SQUARE {
@@ -22,6 +22,8 @@ unless(defined(&_H2PH_H_)) {
         my($a,$b) = @_;
 	    eval q((($a) > ($b) ? ($a) : ($b)));
     }' unless defined(&MAX);
+    eval 'sub NOTTRUE () {0;}' unless defined(&NOTTRUE);
+    undef(&NOTTRUE) if defined(&NOTTRUE);
     if(defined(&__SOME_UNIMPORTANT_PROPERTY)) {
 	eval 'sub MIN {
 	    my($a,$b) = @_;

@@ -26,6 +26,10 @@
 #undef MAX
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+/* Test #undef'ining an existing constant function */
+#define NOTTRUE 0
+#undef NOTTRUE
+
 /* Test #ifdef */
 #ifdef __SOME_UNIMPORTANT_PROPERTY
 #define MIN(a,b) ((a) < (b) ? (a) : (b))

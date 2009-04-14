@@ -123,7 +123,7 @@ while (defined (my $file = next_file())) {
 
     print OUT
         "require '_h2ph_pre.ph';\n\n",
-        "no warnings 'redefine';\n\n";
+        "no warnings qw(redefine misc);\n\n";
 
     while (defined (local $_ = next_line($file))) {
 	if (s/^\s*\#\s*//) {
