@@ -38,6 +38,7 @@ my %OSTYPES = qw(
 		 os2       Unix
 		 gnu       Unix
 		 gnukfreebsd Unix
+		 haiku     Unix
 		 
 		 dos       Windows
 		 MSWin32   Windows
