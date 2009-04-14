@@ -15,7 +15,7 @@ if (!(-e $extracted_program)) {
     exit 0;
 }
 
-print "1..2\n";
+print "1..4\n";
 
 # quickly compare two text files
 sub txt_compare {
@@ -32,6 +32,14 @@ print(($ok == 0 ? "" : "not "), "ok 1\n");
 $ok = txt_compare("lib/h2ph.ph", "lib/h2ph.pht");
 print(($ok == 0 ? "" : "not "), "ok 2\n");
     
+# does the output compile?
+$ok = system($^X, "-I../lib", "lib/h2ph.pht");
+print(($ok == 0 ? "" : "not "), "ok 3\n");
+
+# is the output warning free?
+$ok = system($^X, "-w", "-I../lib", "-e", '$SIG{__WARN__} = sub { die $_[0] }; require "lib/h2ph.pht"');
+print(($ok == 0 ? "" : "not "), "ok 4\n");
+
 # cleanup - should this be in an END block?
 unlink("lib/h2ph.ph");
 unlink("_h2ph_pre.ph");

@@ -47,15 +47,17 @@ unless(defined(&_H2PH_H_)) {
     } else {
 	eval 'sub WHATEVER () {1000;}' unless defined(&WHATEVER);
     }
-    require 'sys/socket.ph';
-    require 'sys/ioctl.ph';
-    eval {
-	my(@REM);
-	my(%INCD) = map { $INC{$_} => 1 } (grep { $_ eq "sys/fcntl.ph" } keys(%INC));
-	@REM = map { "$_/sys/fcntl.ph" } (grep { not exists($INCD{"$_/sys/fcntl.ph"}) and -f "$_/sys/fcntl.ph" } @INC);
-	require "$REM[0]" if @REM;
-    };
-    warn($@) if $@;
+    if(0) {
+	require 'sys/socket.ph';
+	require 'sys/ioctl.ph';
+	eval {
+	    my(@REM);
+	    my(%INCD) = map { $INC{$_} => 1 } (grep { $_ eq "sys/fcntl.ph" } keys(%INC));
+	    @REM = map { "$_/sys/fcntl.ph" } (grep { not exists($INCD{"$_/sys/fcntl.ph"}) and -f "$_/sys/fcntl.ph" } @INC);
+	    require "$REM[0]" if @REM;
+	};
+	warn($@) if $@;
+    }
     eval("sub sun () { 0; }") unless defined(&sun);
     eval("sub mon () { 1; }") unless defined(&mon);
     eval("sub tue () { 2; }") unless defined(&tue);
