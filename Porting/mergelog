@@ -237,7 +237,7 @@ M  62a1a1efb4 2008/01/05 32860
 R  d2f13c598f 2008/01/05 32861 Make REGEXP a type distinct from SV.
 R  a11c868346 2008/01/05 32862 bleed-only
 R  fd44068c47 2008/01/06 32863 uses SVt_REGEXP
-m  92905b42ad 2008/01/06 32864 Filter::Util::Call bits awaiting new CPAN release
+M  92905b42ad 2008/01/06 32864
 M  5186cc1225 2008/01/06 32865
 M  ecd6c0a032 2008/01/06 32866
 M  9cddf794fc 2008/01/06 32867
@@ -589,7 +589,7 @@ M  1518d620d8 2008/02/20 33337
 R  9784f5f42a 2008/02/20 33338 Eliminate Perl_ck_lengthconst. Not BinCompat
 M  69587ea4eb 2008/02/21 33339
 M  ba889e8f21 2008/02/21 33340
-!  ce2ea237c5 2008/02/21 33341 Filter::Util::Call awaiting new CPAN release
+M  ce2ea237c5 2008/02/21 33341
 M  50edf520be 2008/02/22 33342
 M  9ec7171b93 2008/02/22 33343
 M  3caf316a13 2008/02/22 33344
@@ -600,7 +600,7 @@ M  76febb1c61 2008/02/22 33349
 M  ec6c7eee5f 2008/02/22 33350
 M  a93e78e3a0 2008/02/22 33352
 M  27c6397cde 2008/02/22 33353
-R  c2f6176938 2008/02/22 33354 (unknown reason)
+R  c2f6176938 2008/02/22 33354 update embed.h: done manually at some point
 R  910e06714a 2008/02/22 33355 stops a couple of PL_ vars being volatile.
 	    I Don't know if it breaks BinCompat, but better safe than sorry...
 R  996c9baa63 2008/02/23 33356 adds a new op, so probably not BinCompat
@@ -618,7 +618,7 @@ M  0a3a8dc0cd 2008/02/25 33366
 M  5fa9f95182 2008/02/25 33367
 M  553e7bb0c8 2008/02/25 33368
 M  c427f4d2d4 2008/02/25 33369
-m  0934c9d92d 2008/02/25 33370 a config change that had a Time::Piece hack too, awaiting CPAN
+M  0934c9d92d 2008/02/25 33370
 M  721e227587 2008/02/25 33371
 M  03f3e794d7 2008/02/26 33372
 M  9ac1cbc083 2008/02/26 33373
@@ -687,8 +687,8 @@ M  8964cfe010 2008/03/10 33462
 M  77e217c696 2008/03/10 33463
 M  58a97135f4 2008/03/10 33466
 M  27aaedc17a 2008/03/10 33467
-!  124e6c8489 2008/03/10 33468 Time::Piece: C=1.13, bleed has local hacks (up to 1.13_02)
-!  0db9c0cf00 2008/03/10 33469 Time::Piece: C=1.13, bleed has local hacks (up to 1.13_02)
+M  124e6c8489 2008/03/10 33468
+M  0db9c0cf00 2008/03/10 33469
 M  1842fafe88 2008/03/10 33470
 R  23f13727cc 2008/03/11 33471 consting
 R  12964ddd5d 2008/03/11 33473 consting
@@ -980,7 +980,7 @@ M  68c65ec0ad 2008/05/23 33911
 M  b27284eed0 2008/05/23 33912
 M  b8e1b25f6a 2008/05/23 33914
 R  32d6804057 2008/05/23 33916 (unknown reason)
-!  3df1a9e2cb 2008/05/24 33918 Time::Piece: C=1.13, bleed has local hacks (up to 1.13_02)
+M  3df1a9e2cb 2008/05/24 33918
 M  e08926902e 2008/05/24 33919
 M  4f923b5674 2008/05/25 33927
 M  d49025b75d 2008/05/25 33936
@@ -1434,6 +1434,10 @@ M  b8082b6e76 2008/10/28 34628
 M  85fbaab29c 2008/10/28 34629
 m  df00ff3bee 2008/10/29 34630 skipped dual-life modules for now
     (they were actually backed out by 0b9295fd2a2a3ba86b0db1bc39ec1a37be80ac61)
+    still remaining to be merged:
+	    MANIFEST
+	    lib/CPANPLUS/Internals/Constants/Report.pm
+	    lib/ExtUtils/MM_Haiku.pm
 M  4b0b5bad69 2008/10/29 34631
 !  1c1947d58d 2008/10/29 34634 MM_Haiku.pm: waiting for ExtUtils::MakeMaker CPAN to include it
 M  2f9d49b43d 2008/10/29 34637
@@ -1505,7 +1509,7 @@ M  d0da4e620e 2008/11/08 34772
 M  3ff3a8b6a3 2008/11/08 34773
 M  5fae6dc1d2 2008/11/08 34774
 M  2556f95e0f 2008/11/08 34775
-m  414bf5ae08 2008/11/08 34776 the Filter/Util/Call bits not yet merged; awaiting new CPAN release 
+M  414bf5ae08 2008/11/08 34776
 M  622e1e49fb 2008/11/08 34777
 M  2376d97dd5 2008/11/08 34778
 M  8d06e08c4f 2008/11/08 34779
@@ -1603,7 +1607,7 @@ R  ed4173efcf 2008/11/26 34932 make pidgone() private: not BinCompat
 R  0d86688dc4 2008/11/26 34933 make pmtrans() and refkids() private: not BinCompat
 R  1f676739c0 2008/11/26 34934 add static to the recent changes: not BinCompat
 R  9c105995f0 2008/11/26 34935 make rxres_free() and rxres_restore() private: not BinCompat
-!  aec08fdf1c 2008/11/26 34936 IPC::SysV 2.00_01: still _02 to be merged (34953)
+M  aec08fdf1c 2008/11/26 34936 
 R  b429380fd7 2008/11/26 34937 remove Perl_oopsCV: not BinCompat
 R  d2bd4e7f98 2008/11/26 34938 make sv_add_arena() private: not BinCompat
 R  90f7771ac0 2008/11/26 34939 update perlintern.pod from 34931
@@ -1620,7 +1624,7 @@ M  a76803d012 2008/11/28 34949
 M  1be1b388c1 2008/11/28 34950
 R  c8d90063b6 2008/11/28 34951 (empty patch)
 M  580410d244 2008/11/28 34952
-!  503ba33a32 2008/11/29 34953 IPC::SysV 2.00_02 - waiting for mhx reply
+M  503ba33a32 2008/11/29 34953
 M  13d4578c5c 2008/11/30 34954
 M  c6ae76470e 2008/11/30 34955
 M  2fd8beea01 2008/11/30 34956
@@ -1730,7 +1734,7 @@ M  b1fccde5a5 2008/12/19 In the patch section, show how to work on a tempor
 M  7df2e4bc09 2008/12/19 Add a section on applying a patch
 M  2bbc8d558d 2008/12/19 Subject: PATCH 5.10 documentation
 M  75fb765136 2008/12/19 after applying, committers should push
-!  4adc95e616 2008/12/19 awaiting MM > 6.48, CBuilder > 0.24
+M  4adc95e616 2008/12/19
 R  60bc01042e 2008/12/19 parents of merge individually committed
 				MERGE: 2bbc8d558d 4adc95e616
 M  985dc10ab3 2008/12/20 Subject: [perl #61418] perlthanks isn't documented
@@ -1747,7 +1751,7 @@ M  39219fd358 2008/12/20 explain git status and stuff about remotes
 M  7f6effc75c 2008/12/20 explain more stuff about status
 M  23f8d33e69 2008/12/20 trim trailing spaces
 M  d98474738f 2008/12/20 Various corrections and formatting nits to perlrep
-!  fdea92759c 2008/12/20 point fix to MM_Unix.pm; waiting for new MM on CPAN
+M  fdea92759c 2008/12/20 point fix to MM_Unix.pm; waiting for new MM on CPAN
 M  184487f090 2008/12/20 Note how to set user name and e-mail address.
 M  99eeb6ff4a 2008/12/20 Re-sort the MANIFEST in the preferred order.
 R  ca046c5bd0 2008/12/20 I regenerated pod/perltoc.pod rather than merging
@@ -1794,7 +1798,7 @@ M  9ae51f7f1f 2008/12/25 Some source files and documentation files need not
 M  d4222de008 2008/12/25 Lies, damn lies and end-of-block comments
 M  0147cd53fa 2008/12/25 Use the F formatting codes for filenames in pod/pe
 R  ccb8f6a64f 2008/12/25 -Ilib on #! line now prepends rather than appends to
-			@INC. Even thoughb its a bug-fix, it's not backwards
+			@INC. Even though its a bug-fix, it's not backwards
 			compatible
 R  54ad55c59e 2008/12/25 follows on from ccb8f6a64f being rejected
 M  8be3533f72 2008/12/26 autodie information added to Maintainers.pl
@@ -1803,10 +1807,11 @@ M  b16c2e4a25 2008/12/26 Remove mentions of the old way of rsync'ing the so
 R  e9c9f4ae5f 2008/12/26 Individual commits merged instead
 				MERGE: 4e32d3ada0 b16c2e4a25
 R  e7049783a8 2008/12/26 follows on from ccb8f6a64f being rejected
-R  20189146be 2008/12/26 not BackCompat (see also ccb8f6a64f, e7049783a8)
+R  20189146be 2008/12/26 not BackCompat (see also ccb8f6a64f, e7049783a8,
+			    3a9a9ba7ba, e28f3139a6)
 R  7e9bdbacf6 2008/12/26 Individual commits merged instead
 				MERGE: e9c9f4ae5f 20189146be
-R  580f5bb24e 2008/12/26 part of 20189146be
+R  580f5bb24e 2008/12/26 part of @INC order stuff
 M  eccdc4d715 2008/12/26 Upgrade to podlators 2.2.1
 M  fe749c9aa8 2008/12/26 Update comments and documentation dealing with utf
 M  42bde815c4 2008/12/26 Fix two pod links
@@ -1967,9 +1972,8 @@ R  ef3b26468f 2009/01/03 skip merge; 4ba0c7624a applied instead
 M  105ae85463 2009/01/03 Remove duplicate return in S_mro_get_linear_isa_c3
 M  bd2db5df3c 2009/01/04 make Dumper.xs work with 5.10.x
 M  c012444fd8 2009/01/04 Another regexp failure with utf8-flagged string an
-!  6bb0de4e5b 2009/01/04 waiting for Errno to be updated on CPAN
-!  7b1668ed3d 2009/01/04 bump ExtUtils/MM.pm version number after change 34
-			    wait for newer MM
+M  6bb0de4e5b 2009/01/04
+M  7b1668ed3d 2009/01/04 bump ExtUtils/MM.pm version number after change 34
 M  166a466fb1 2009/01/04 modified make_patchnum.sh script
 M  8ed12dca53 2009/01/04 prepare for refactoring to perl
 M  786aaa2520 2009/01/04 Almost a literal conversion of make_patchnum.sh
@@ -2126,9 +2130,11 @@ M  6fb6c61459 2009/01/15 vms rmsexpand refactor
 M  98c7875d34 2009/01/15 Fix handling of DECC$DISABLE_POSIX_ROOT feature on
 M  4e759823f6 2009/01/15 Fix t/uni/lex_utf8.t entry in MANIFEST
 M  8f718e95d9 2009/01/16 use F<> in perlrepository.pod consistently and rem
-R  609122bd05 2009/01/16 Add warning about octal > 377 in some regexes
+P  609122bd05 2009/01/16 Add warning about octal > 377 in some regexes
 			    skip, as it adds a new warning to possibly
 			    working code
+			    (a dummy version of the test was added to maint
+			    to keep test count in sync with blead)
 M  c53941b4d2 2009/01/16 Fix deparsing of readpipe() ([perl #62428])
 M  3319632a10 2009/01/17 Need even more stack for VMS_IA64-ithread.
 M  b1b1ee3cbf 2009/01/18 UPSTREAM => blead; because CPAN => 0
@@ -2276,7 +2282,7 @@ M  312ac60b38 2009/02/01 vms stat patches (take 2)
 M  cbbb00c6b5 2009/02/01 Cast result to character size before array indexed
 M  22901f3092 2009/02/01 Put parentheses around macro arguments
 M  d8bf0b8cc0 2009/02/02 Upgrade DB_File to 1.818.
-.  a37eaad4a1 2009/02/02 Upgrade to Encode-2.29.
+M  a37eaad4a1 2009/02/02 Upgrade to Encode-2.29.
 M  a7f1e69b4b 2009/02/02 Update CPAN.pm to 1.93_03
 M  421926c2f2 2009/02/02 Restore broken clean target in win32/makefile.mk
 R  a681c2f143 2009/02/02 When loading a PerlIO::via layer, first look in th
@@ -2289,210 +2295,263 @@ M  440530af1a 2009/02/02 ext/DB_File needs a ppport.h
 M  767c16ab36 2009/02/02 Make t/pod/pod2usage2.t work on case insensitive f
 M  286d62c215 2009/02/02 Fold win32/buildext.pl into make_ext.pl
 M  d1b150139f 2009/02/02 Convert the last few references from buildext.pl t
-!  200cbd6aa5 2009/02/03 awaiting MM > 6.48, CBuilder > 0.24
-.  3ddd48aab4 2009/02/03 Oops. Missed these two files from commit 200cbd6aa
+M  200cbd6aa5 2009/02/03
+M  3ddd48aab4 2009/02/03 Oops. Missed these two files from commit 200cbd6aa
+
 M  d57db09df2 2009/02/03 Refactor to avoid changing directory, and avoid ne
-.  d94c5a782e 2009/02/04 vms kill_file / rmdir updates
-.  b94a8c495f 2009/02/04 vms rename Unix mode fixes
-.  21afb10428 2009/02/04 long-ago h2xs changes
-.  1f200948c4 2009/02/04 setpgrp() should extend the stack before modifying
+M  d94c5a782e 2009/02/04 vms kill_file / rmdir updates
+M  b94a8c495f 2009/02/04 vms rename Unix mode fixes
+M  21afb10428 2009/02/04 long-ago h2xs changes
+M  1f200948c4 2009/02/04 setpgrp() should extend the stack before modifying
 M  0598b5ab36 2009/02/04 A test for FindExt, not run by make test. (Useful 
 M  3380c781dc 2009/02/04 Clearer variable names. Add a mode line coda.
 M  f44bdceebe 2009/02/04 Also cope with extension directory names of the fo
-.  8b2bdce690 2009/02/04 Upgrade to Pod-Parser-1.37.
+M  8b2bdce690 2009/02/04 Upgrade to Pod-Parser-1.37.
 M  e08c66ce39 2009/02/04 Some refactoring in the loop that constructs param
 M  c5aac6ab21 2009/02/04 Remove the / from the end of the extension directo
 M  7ad017a880 2009/02/04 When normalising @extspec, use the result of s/// 
-.  e2c1c280e8 2009/02/05 Move XSSymSet.pm to lib/ExtUtils/, but only instal
-.  aefe3e7eb5 2009/02/05 Exclude VMS extensions on non-VMS.
-.  c8f794576f 2009/02/05 "wide character" warnings are severe
-.  3f2c382a9c 2009/02/06 Use an ordinary paragraph to reference sv.h.
-.  238a6851e1 2009/02/06 Cope with new-style ext/Data-Dumper as well as old
-.  099c20a12a 2009/02/06 Rename ext/IPC/SysV to ext/IPC-SysV
-.  18bdacd6ec 2009/02/06 Rename ext/Sys/Syslog to ext/Sys-Syslog
-.  d2a6e61ca1 2009/02/06 Rename ext/Sys/Syslog to ext/Sys-Syslog and ext/IP
-.  030a108e79 2009/02/07 FindExt matches on extension name, not directory n
-.  442749d5ef 2009/02/07 Remove duplicate code from dynamic_ext(), static_e
-.  c05a5c573c 2009/02/07 The correct name of PERL_UTF8_magic is PERL_MAGIC_
-.  26f467e271 2009/02/07 Update Module::Load to 0.16
-.  7fee2b4cbf 2009/02/07 ext/Sys-Syslog/t/constants.t needs to find macros.
-.  003db2bd2e 2009/02/07 pare down docs of UNIVERSAL in perlobj
-.  ba593fa967 2009/02/07 relocate "warnings" section of UNIVERSAL man page
-.  7607398696 2009/02/07 Skip the 0oX... mode copying tests when chmod fail
-.  1d9f57de15 2009/02/07 deprecate UNIVERSAL->import
-.  cd477a63b7 2009/02/07 Add test for previous patch (deprecation of UNIVER
-.  9b6474b65b 2009/02/07 pp_send() doesn't need to allocate 1000 stack slot
-.  b3f1e0ca82 2009/02/07 require warnings; as late as possible, to avoid a 
-.  2770a1ce29 2009/02/07 Carp 1.05 shipped with 5.8.8. Remove work-around f
-.  86627c6ade 2009/02/07 Fix Exporter test for 2770a1ce2934f4277de13f4f795b
-.  902aaf3efe 2009/02/07 Port make_ext.pl to VMS.
-.  1f29050e2e 2009/02/08 Data-Dumper --> Data/Dumper for VMS extension list
-.  c091f99a22 2009/02/08 Use make_ext.pl on VMS to build, clean, and realcl
-.  6ebb060182 2009/02/08 Skip tests for flattened extensions that weren't b
-.  46c0537469 2009/02/08 Fix some thread context mistakes that snuck in wit
-.  caf82a0113 2009/02/08 add link for those who look at overload for overri
-.  4282a474dc 2009/02/08 Rename ext/Win32API/File to ext/Win32API-File
-.  062138d82f 2009/02/09 Goodbye, make_ext.com; make_ext.pl will take over 
-.  dc539f3db6 2009/02/09 Rename ext/Compress/Raw/Zlib to ext/Compress-Raw-Z
-.  3259204198 2009/02/09 Rename ext/Compress/Zlib to ext/Compress-Zlib
-.  8255effd11 2009/02/09 Rename ext/Data/Dumper to ext/Data-Dumper
-.  d8b931c930 2009/02/09 In The Grand Trek, Filter::Util::Call's call.t did
-.  9d3a1c7447 2009/02/09 Rename ext/Devel/DProf to ext/Devel-DProf
-.  0ff33da805 2009/02/09 Rename ext/Devel/PPPort to ext/Devel-PPPort
-.  f930745250 2009/02/09 Rename ext/Devel/Peek to ext/Devel-Peek
-.  ec46a77bc6 2009/02/09 Rename ext/Digest/MD5 to ext/Digest-MD5
-.  12fc04c96e 2009/02/09 Rename ext/Digest/SHA to ext/Digest-SHA
-.  005c4f26b0 2009/02/09 Rename ext/File/Glob to ext/File-Glob
-.  e602752717 2009/02/09 Rename ext/Filter/Util/Call to ext/Filter-Util-Cal
-.  c3d8257849 2009/02/09 Rename ext/Hash/Util/FieldHash to ext/Hash-Util-Fi
-.  48e8cb2025 2009/02/09 Rename ext/Hash/Util to ext/Hash-Util
-.  2c864a0811 2009/02/09 Rename ext/I18N/Langinfo to ext/I18N-Langinfo
-.  e505b8249f 2009/02/09 Rename ext/List/Util as ext/List-Util
-.  384674d352 2009/02/09 Rename ext/MIME/Base64 to ext/MIME-Base64
-.  f43b80dabc 2009/02/09 Rename ext/Math/BigInt/FastCalc to ext/Math-BigInt
-.  d91320e42f 2009/02/09 Rename ext/Module/Pluggable to ext/Module-Pluggabl
-.  9df1f84527 2009/02/09 Move 3 tests from ext/PerlIO/t to their relevant P
-.  a47facf7a1 2009/02/09 Move the 4 tests of core PerlIO functionality to t
-.  d730472d2f 2009/02/09 Rename ext/PerlIO/encoding to ext/PerlIO-encoding
-.  b4bd6dcd45 2009/02/09 Rename ext/PerlIO/scalar to ext/PerlIO-scalar
-.  e5db20f449 2009/02/09 Rename ext/PerlIO/via to ext/PerlIO-via
-.  0450807c0b 2009/02/09 Rename ext/Sys/Hostname to ext/Sys-Hostname
-.  f715bbfb20 2009/02/09 Rename ext/Test/Harness to ext/Test-Harness
-.  d119459be9 2009/02/09 correct typo, replacing "complement" with "complim
-.  9bdb6db8a6 2009/02/09 Rename ext/Text/Soundex to ext/Text-Soundex
-.  40d04ec442 2009/02/09 Rename ext/Time/HiRes to ext/Time-HiRes
-.  50acc947dd 2009/02/09 Rename ext/Time/Piece to ext/Time-Piece
-.  b3cfe24873 2009/02/09 Rename ext/Unicode/Normalize to ext/Unicode-Normal
-.  4455f5a681 2009/02/09 Rename ext/XS/APItest to ext/XS-APItest
-.  2336398ced 2009/02/09 Rename ext/XS/Typemap to ext/XS-Typemap
-.  3831a78769 2009/02/09 Rename ext/threads/shared to ext/threads-shared
-.  abd7186c67 2009/02/09 Remove special casing for extensions nested inside
-.  4d9538c1f3 2009/02/10 Logic changes for the VMS-specific mkdir/chdir/chm
-.  a0373bf6e1 2009/02/10 Sys-Syslog I18N-Langinfo have long names now.
-.  3dd13b2022 2009/02/10 Move Safe.pm into ext/Safe, and temporarily give i
-.  abf03c67be 2009/02/10 Adjust name of Test-Harness directory in .gitignor
-.  1f8a0b3863 2009/02/10 All extensions are at the top level, so no longer 
-.  a04d4598ad 2009/02/10 lib/Config_git.pl mustn't be built concurrently wi
-.  6ed34527c3 2009/02/10 metaconfig needs these two symlinks
-.  38fddf8b5d 2009/02/10 Restore old behavior for perl builds with (still) 
-.  2dac21aa16 2009/02/10 Comment inside evaluated shell string causes havoc
-.  8e08999f3b 2009/02/10 mention English name of %+ in perlvar.pod
-.  43239f9092 2009/02/10 Fix previous patch. Actually it's written PAREN, n
-.  37d29c6f34 2009/02/11 Update makerel to make a release from a git checko
-.  c6f023287f 2009/02/11 Fix previous patch. Actually it's written PAREN, n
-.  8098e75c0b 2009/02/11 avoid confusing gcc with -2147483648
-.  bf8d1304d5 2009/02/11 vms fgetname wrapper.
-.  f9916dde00 2009/02/12 Update CPAN.pm to 1.93_51
-.  7f9994e0a5 2009/02/12 Fix MANIFEST for CPAN 1.93_51 inclusion
-.  142f6a0dad 2009/02/12 Skip tests for flattened extensions that weren't b
-.  cdaa314533 2009/02/12 Update .gitignore with new flat extension path
-.  32d85a01d8 2009/02/12 Ignore some temporary files created by ext/DB_File
-.  e469bedac8 2009/02/12 win32/ext doesn't exist any more, so no need to lo
-.  8a3df56c4f 2009/02/12 win32/ext doesn't exist any more, so no need to lo
-.  e7deb4af6a 2009/02/12 Upgrade to Math-Complex-1.56
-.  a95b6808ef 2009/02/12 Unigue test file names in t/lib/warnings/9enabled
-.  619cec6d45 2009/02/12 Find extensions on VMS even when they don't have a
-.  e74f76b27b 2009/02/12 make_ext.pl now generates a Makefile.PL if needed.
-.  261f6fe66f 2009/02/12 Move Attribute::Handlers from lib to ext. The layo
-.  d9acc78d35 2009/02/12 Remove double slash in MANIFEST
-.  50615ac827 2009/02/13 More gitignore adjustments
-.  565e63af02 2009/02/13 Remove one of the two definitions of the a_const c
-.  25a0c96dcc 2009/02/13 More tests for array-ref smart match
-.  e5de85fa00 2009/02/13 Remove obsolete comment; document test format
-.  229c18ce2b 2009/02/13 Document error "Smart matching a non-overloaded ob
-.  161d997670 2009/02/13 Add tests for undef smart-matching
-.  33570f8ba0 2009/02/13 $object ~~ undef should always test for definednes
-.  43a65c285f 2009/02/13 Handle uninitialized interpreter when performing v
-.  911225b602 2009/02/13 Remove code that has never been used in any test
-.  18d11902f6 2009/02/13 More tests for coderefs and smart match
-.  11baf631ab 2009/02/14 Forbid to use "foreach" as an attribute
-.  f3b6b452d5 2009/02/14 Make git-find-p4-change only find changes done und
-.  aeda4cd8e5 2009/02/14 Ignore lib/NDBM_File.pm
-.  89b2b9f7f6 2009/02/14 Ignore the OS X GNUmakefile*s, and t/test_state.
-.  9f937944c5 2009/02/14 Add git_version.h to private so that make distclea
-.  cd5cc49dbc 2009/02/14 Clear Module::Build smoke on VMS while waiting for
-.  3a9a9ba7ba 2009/02/15 For -I, need to also unshift version and architect
-.  e28f3139a6 2009/02/15 Refactor S_incpush() to take 1 flags parameter, in
-.  3d55b451d9 2009/02/15 ExtUtils::Install VMS extended character set suppo
-.  20ce4c1139 2009/02/15 In S_incpush(), rename the parameter from dir to p
-.  55b4bc1cac 2009/02/15 Refactor the separator splitting loop of S_incpush
-.  a26c0e281c 2009/02/15 Loop in S_init_perllib(), only calling S_incpush*(
-.  b9ba2fadb1 2009/02/15 In @INC, move ARCHLIB and PRIVLIB after the curren
-.  4705144da6 2009/02/15 Ensure that the pointer to S_incpush_use_sep() is 
-.  bf63da66ae 2009/02/16 Yves states that patches to ExtUtils::Install shou
-.  e120390b47 2009/02/16 Extra regex tests
-.  40bed538bd 2009/02/16 Upgrade to Encode 2.31
-.  2b93ed3263 2009/02/16 [perl #63234] [DOC PATCH] fix some missing parts o
-.  95bb830374 2009/02/16 Don't add PRIVLIB_EXP to @INC twice.
-.  1ab9acc5e0 2009/02/16 Use tempfile() in tests
-.  cf2a733d64 2009/02/16 add missing perforce-era entry to Changes files
-.  eb3b8c7b72 2009/02/16 Update copyright years. 2008 sneaks in because of 
-.  e8e3635e32 2009/02/16 Replace *printf "%d.%d.%d", PERL_REVISION, PERL_VE
-.  e50b42d3b9 2009/02/16 Abolish PERL_AV_SUFFIX_FMT, which was rendered obs
-.  b79b76e09d 2009/02/16 PERL_FS_VER_FMT is only used with the current perl
-.  bdb1cbf7b5 2009/02/16 As PERL_ARCH_FMT_PATH is a compile time constant, 
-.  96e4a95712 2009/02/16 By spliting PERL_ARCH_FMT into PERL_ARCH_FMT_PREFI
-.  1fa74d9f24 2009/02/16 As WIN32 is already using different flags to incpu
-.  a89d24b9fe 2009/02/16 Ignore #defines in in patchlevel.h that end the li
-.  d942165649 2009/02/16 Move PERL_VERSION_STRING from patchlevel.h to perl
-.  6434436b0d 2009/02/17 In S_incpush(), avoid "possible loss of data" warn
-.  104393a727 2009/02/17 Get $ENV{PERL5LIB} into a known consistent state u
-.  d5226c4c8f 2009/02/17 In runenv.t, break apart running perl and testing 
-.  72533a49cb 2009/02/17 Tests for S_incpush_use_sep() splitting on : (or p
-.  50d61629dc 2009/02/17 Pass the length of the string to S_incpush_use_sep
-.  12865a2da0 2009/02/18 Remove the stub nw_get_sitelib(), and undefine SIT
-.  4300f93b02 2009/02/19 [PATCH] DB_File 1.819
-.  7e8acedc1c 2009/02/20 Fixed missing word in Text::Wrap POD
-.  c26da522aa 2009/02/20 Add a section on merging from a branch via GitHub
-.  5c9c28c679 2009/02/20 Remove an extra space
-.  9e079acef3 2009/02/20 Better diagnostics for the ~~ test
-.  fceebc475d 2009/02/20 Fix {%hash} ~~ %hash test
-.  4cbab0e90c 2009/02/20 Reorder and complete tests for smart matching with
-.  2bab0636fd 2009/02/20 Remove the -x from the cherry pick and show how to
-.  70b6a84e97 2009/02/20 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+M  e2c1c280e8 2009/02/05 Move XSSymSet.pm to lib/ExtUtils/, but only instal
+M  aefe3e7eb5 2009/02/05 Exclude VMS extensions on non-VMS.
+M  c8f794576f 2009/02/05 "wide character" warnings are severe
+M  3f2c382a9c 2009/02/06 Use an ordinary paragraph to reference sv.h.
+M  238a6851e1 2009/02/06 Cope with new-style ext/Data-Dumper as well as old
+M  099c20a12a 2009/02/06 Rename ext/IPC/SysV to ext/IPC-SysV
+M  18bdacd6ec 2009/02/06 Rename ext/Sys/Syslog to ext/Sys-Syslog
+M  d2a6e61ca1 2009/02/06 Rename ext/Sys/Syslog to ext/Sys-Syslog and ext/IP
+M  030a108e79 2009/02/07 FindExt matches on extension name, not directory n
+M  442749d5ef 2009/02/07 Remove duplicate code from dynamic_ext(), static_e
+M  c05a5c573c 2009/02/07 The correct name of PERL_UTF8_magic is PERL_MAGIC_
+M  26f467e271 2009/02/07 Update Module::Load to 0.16
+M  7fee2b4cbf 2009/02/07 ext/Sys-Syslog/t/constants.t needs to find macros.
+M  003db2bd2e 2009/02/07 pare down docs of UNIVERSAL in perlobj
+M  ba593fa967 2009/02/07 relocate "warnings" section of UNIVERSAL man page
+!  7607398696 2009/02/07 Skip the 0oX... mode copying tests when chmod fail
+			    more File/Copy.pm perms stuff
+R  1d9f57de15 2009/02/07 deprecate UNIVERSAL->import
+			    makes UNIVERSAL::import produce a new warning
+R  cd477a63b7 2009/02/07 Add test for previous patch (deprecation of UNIVER
+			    see 1d9f57de15
+M  9b6474b65b 2009/02/07 pp_send() doesn't need to allocate 1000 stack slot
+R  b3f1e0ca82 2009/02/07 require warnings; as late as possible, to avoid a 
+			    see 1d9f57de15
+!  2770a1ce29 2009/02/07 Carp 1.05 shipped with 5.8.8. Remove work-around f
+			    wait for Exporter 5.64 to be backported to CPAN
+!  86627c6ade 2009/02/07 Fix Exporter test for 2770a1ce2934f4277de13f4f795b
+M  902aaf3efe 2009/02/07 Port make_ext.pl to VMS.
+M  1f29050e2e 2009/02/08 Data-Dumper --> Data/Dumper for VMS extension list
+M  c091f99a22 2009/02/08 Use make_ext.pl on VMS to build, clean, and realcl
+M  6ebb060182 2009/02/08 Skip tests for flattened extensions that weren't b
+M  46c0537469 2009/02/08 Fix some thread context mistakes that snuck in wit
+M  caf82a0113 2009/02/08 add link for those who look at overload for overri
+M  4282a474dc 2009/02/08 Rename ext/Win32API/File to ext/Win32API-File
+M  062138d82f 2009/02/09 Goodbye, make_ext.com; make_ext.pl will take over 
+M  dc539f3db6 2009/02/09 Rename ext/Compress/Raw/Zlib to ext/Compress-Raw-Z
+M  3259204198 2009/02/09 Rename ext/Compress/Zlib to ext/Compress-Zlib
+M  8255effd11 2009/02/09 Rename ext/Data/Dumper to ext/Data-Dumper
+M  d8b931c930 2009/02/09 In The Grand Trek, Filter::Util::Call's call.t did
+M  9d3a1c7447 2009/02/09 Rename ext/Devel/DProf to ext/Devel-DProf
+M  0ff33da805 2009/02/09 Rename ext/Devel/PPPort to ext/Devel-PPPort
+M  f930745250 2009/02/09 Rename ext/Devel/Peek to ext/Devel-Peek
+M  ec46a77bc6 2009/02/09 Rename ext/Digest/MD5 to ext/Digest-MD5
+M  12fc04c96e 2009/02/09 Rename ext/Digest/SHA to ext/Digest-SHA
+M  005c4f26b0 2009/02/09 Rename ext/File/Glob to ext/File-Glob
+M  e602752717 2009/02/09 Rename ext/Filter/Util/Call to ext/Filter-Util-Cal
+M  c3d8257849 2009/02/09 Rename ext/Hash/Util/FieldHash to ext/Hash-Util-Fi
+M  48e8cb2025 2009/02/09 Rename ext/Hash/Util to ext/Hash-Util
+M  2c864a0811 2009/02/09 Rename ext/I18N/Langinfo to ext/I18N-Langinfo
+M  e505b8249f 2009/02/09 Rename ext/List/Util as ext/List-Util
+M  384674d352 2009/02/09 Rename ext/MIME/Base64 to ext/MIME-Base64
+M  f43b80dabc 2009/02/09 Rename ext/Math/BigInt/FastCalc to ext/Math-BigInt
+M  d91320e42f 2009/02/09 Rename ext/Module/Pluggable to ext/Module-Pluggabl
+M  9df1f84527 2009/02/09 Move 3 tests from ext/PerlIO/t to their relevant P
+M  a47facf7a1 2009/02/09 Move the 4 tests of core PerlIO functionality to t
+M  d730472d2f 2009/02/09 Rename ext/PerlIO/encoding to ext/PerlIO-encoding
+M  b4bd6dcd45 2009/02/09 Rename ext/PerlIO/scalar to ext/PerlIO-scalar
+M  e5db20f449 2009/02/09 Rename ext/PerlIO/via to ext/PerlIO-via
+M  0450807c0b 2009/02/09 Rename ext/Sys/Hostname to ext/Sys-Hostname
+M  f715bbfb20 2009/02/09 Rename ext/Test/Harness to ext/Test-Harness
+!  d119459be9 2009/02/09 correct typo, replacing "complement" with "complim
+			    quiet update to Storable.pm not yet in CPAN
+M  9bdb6db8a6 2009/02/09 Rename ext/Text/Soundex to ext/Text-Soundex
+M  40d04ec442 2009/02/09 Rename ext/Time/HiRes to ext/Time-HiRes
+M  50acc947dd 2009/02/09 Rename ext/Time/Piece to ext/Time-Piece
+M  b3cfe24873 2009/02/09 Rename ext/Unicode/Normalize to ext/Unicode-Normal
+M  4455f5a681 2009/02/09 Rename ext/XS/APItest to ext/XS-APItest
+M  2336398ced 2009/02/09 Rename ext/XS/Typemap to ext/XS-Typemap
+M  3831a78769 2009/02/09 Rename ext/threads/shared to ext/threads-shared
+M  abd7186c67 2009/02/09 Remove special casing for extensions nested inside
+M  4d9538c1f3 2009/02/10 Logic changes for the VMS-specific mkdir/chdir/chm
+M  a0373bf6e1 2009/02/10 Sys-Syslog I18N-Langinfo have long names now.
+M  3dd13b2022 2009/02/10 Move Safe.pm into ext/Safe, and temporarily give i
+M  abf03c67be 2009/02/10 Adjust name of Test-Harness directory in .gitignor
+M  1f8a0b3863 2009/02/10 All extensions are at the top level, so no longer 
+M  a04d4598ad 2009/02/10 lib/Config_git.pl mustn't be built concurrently wi
+M  6ed34527c3 2009/02/10 metaconfig needs these two symlinks
+M  38fddf8b5d 2009/02/10 Restore old behavior for perl builds with (still) 
+M  2dac21aa16 2009/02/10 Comment inside evaluated shell string causes havoc
+M  8e08999f3b 2009/02/10 mention English name of %+ in perlvar.pod
+M  43239f9092 2009/02/10 Fix previous patch. Actually it's written PAREN, n
+M  37d29c6f34 2009/02/11 Update makerel to make a release from a git checko
+M  c6f023287f 2009/02/11 Fix previous patch. Actually it's written PAREN, n
+!  8098e75c0b 2009/02/11 avoid confusing gcc with -2147483648
+			    y2038
+M  bf8d1304d5 2009/02/11 vms fgetname wrapper.
+!  f9916dde00 2009/02/12 Update CPAN.pm to 1.93_51
+			    Andreas doesn't recommend it for 5.10.1
+!  7f9994e0a5 2009/02/12 Fix MANIFEST for CPAN 1.93_51 inclusion
+			    fix for f9916dde00
+M  142f6a0dad 2009/02/12 Skip tests for flattened extensions that weren't b
+M  cdaa314533 2009/02/12 Update .gitignore with new flat extension path
+M  32d85a01d8 2009/02/12 Ignore some temporary files created by ext/DB_File
+M  e469bedac8 2009/02/12 win32/ext doesn't exist any more, so no need to lo
+M  8a3df56c4f 2009/02/12 win32/ext doesn't exist any more, so no need to lo
+M  e7deb4af6a 2009/02/12 Upgrade to Math-Complex-1.56
+M  a95b6808ef 2009/02/12 Unigue test file names in t/lib/warnings/9enabled
+M  619cec6d45 2009/02/12 Find extensions on VMS even when they don't have a
+M  e74f76b27b 2009/02/12 make_ext.pl now generates a Makefile.PL if needed.
+M  261f6fe66f 2009/02/12 Move Attribute::Handlers from lib to ext. The layo
+M  d9acc78d35 2009/02/12 Remove double slash in MANIFEST
+M  50615ac827 2009/02/13 More gitignore adjustments
+M  565e63af02 2009/02/13 Remove one of the two definitions of the a_const c
+M  25a0c96dcc 2009/02/13 More tests for array-ref smart match
+M  e5de85fa00 2009/02/13 Remove obsolete comment; document test format
+M  229c18ce2b 2009/02/13 Document error "Smart matching a non-overloaded ob
+M  161d997670 2009/02/13 Add tests for undef smart-matching
+M  33570f8ba0 2009/02/13 $object ~~ undef should always test for definednes
+M  43a65c285f 2009/02/13 Handle uninitialized interpreter when performing v
+M  911225b602 2009/02/13 Remove code that has never been used in any test
+M  18d11902f6 2009/02/13 More tests for coderefs and smart match
+R  11baf631ab 2009/02/14 Forbid to use "foreach" as an attribute
+			    not BackCompat
+M  f3b6b452d5 2009/02/14 Make git-find-p4-change only find changes done und
+M  aeda4cd8e5 2009/02/14 Ignore lib/NDBM_File.pm
+M  89b2b9f7f6 2009/02/14 Ignore the OS X GNUmakefile*s, and t/test_state.
+M  9f937944c5 2009/02/14 Add git_version.h to private so that make distclea
+M  cd5cc49dbc 2009/02/14 Clear Module::Build smoke on VMS while waiting for
+R  3a9a9ba7ba 2009/02/15 For -I, need to also unshift version and architect
+			    part of @INC order stuff
+R  e28f3139a6 2009/02/15 Refactor S_incpush() to take 1 flags parameter, in
+			    part of @INC order stuff
+R  3d55b451d9 2009/02/15 ExtUtils::Install VMS extended character set suppo
+			    1.52 -> 1.52_01; wait for CPAN to sync
+R  20ce4c1139 2009/02/15 In S_incpush(), rename the parameter from dir to p
+			    part of @INC order stuff
+R  55b4bc1cac 2009/02/15 Refactor the separator splitting loop of S_incpush
+			    part of @INC order stuff
+R  a26c0e281c 2009/02/15 Loop in S_init_perllib(), only calling S_incpush*(
+			    part of @INC order stuff
+R  b9ba2fadb1 2009/02/15 In @INC, move ARCHLIB and PRIVLIB after the curren
+			    part of @INC order stuff
+R  4705144da6 2009/02/15 Ensure that the pointer to S_incpush_use_sep() is 
+			    part of @INC order stuff
+M  bf63da66ae 2009/02/16 Yves states that patches to ExtUtils::Install shou
+M  e120390b47 2009/02/16 Extra regex tests
+M  40bed538bd 2009/02/16 Upgrade to Encode 2.31
+!  2b93ed3263 2009/02/16 [perl #63234] [DOC PATCH] fix some missing parts o
+			    IO::Handle 1.27_02 - wait for CPAN sync
+R  95bb830374 2009/02/16 Don't add PRIVLIB_EXP to @INC twice.
+			    part of @INC order stuff
+M  1ab9acc5e0 2009/02/16 Use tempfile() in tests
+R  cf2a733d64 2009/02/16 add missing perforce-era entry to Changes files
+			    blead-specifc
+M  eb3b8c7b72 2009/02/16 Update copyright years. 2008 sneaks in because of 
+M  e8e3635e32 2009/02/16 Replace *printf "%d.%d.%d", PERL_REVISION, PERL_VE
+M  e50b42d3b9 2009/02/16 Abolish PERL_AV_SUFFIX_FMT, which was rendered obs
+M  b79b76e09d 2009/02/16 PERL_FS_VER_FMT is only used with the current perl
+M  bdb1cbf7b5 2009/02/16 As PERL_ARCH_FMT_PATH is a compile time constant, 
+M  96e4a95712 2009/02/16 By spliting PERL_ARCH_FMT into PERL_ARCH_FMT_PREFI
+R  1fa74d9f24 2009/02/16 As WIN32 is already using different flags to incpu
+			    part of @INC order stuff
+M  a89d24b9fe 2009/02/16 Ignore #defines in in patchlevel.h that end the li
+M  d942165649 2009/02/16 Move PERL_VERSION_STRING from patchlevel.h to perl
+R  6434436b0d 2009/02/17 In S_incpush(), avoid "possible loss of data" warn
+			    part of @INC order stuff
+M  104393a727 2009/02/17 Get $ENV{PERL5LIB} into a known consistent state u
+M  d5226c4c8f 2009/02/17 In runenv.t, break apart running perl and testing 
+R  72533a49cb 2009/02/17 Tests for S_incpush_use_sep() splitting on : (or p
+			    part of @INC order stuff
+R  50d61629dc 2009/02/17 Pass the length of the string to S_incpush_use_sep
+			    part of @INC order stuff
+R  12865a2da0 2009/02/18 Remove the stub nw_get_sitelib(), and undefine SIT
+			    trival patch thats fiddly to merge
+M  4300f93b02 2009/02/19 [PATCH] DB_File 1.819
+M  7e8acedc1c 2009/02/20 Fixed missing word in Text::Wrap POD
+M  c26da522aa 2009/02/20 Add a section on merging from a branch via GitHub
+M  5c9c28c679 2009/02/20 Remove an extra space
+M  9e079acef3 2009/02/20 Better diagnostics for the ~~ test
+M  fceebc475d 2009/02/20 Fix {%hash} ~~ %hash test
+M  4cbab0e90c 2009/02/20 Reorder and complete tests for smart matching with
+M  2bab0636fd 2009/02/20 Remove the -x from the cherry pick and show how to
+R  70b6a84e97 2009/02/20 Merge branch 'blead' of ssh://perl5.git.perl.org/g
 				MERGE: 2bab0636fd 4cbab0e90c
-.  9732edbb48 2009/02/20 Wonky example in perlthrtut
-.  e42f52dd7f 2009/02/20 Silence a casting warning with memchr()
-.  db6dbf6ec9 2009/02/20 Check for thread failure in prime number example
-.  fd2c5c6c39 2009/02/20 Text::Wrap maintained via the CPAN release
-.  e6a0bbf8b4 2009/02/20 Add a parameter to win32_get_{priv,site,vendor}lib
-.  73aec0b1ca 2009/02/20 More smartmatch tests
-.  58472d87a6 2009/02/20 Move redefinition of lstat above its first use in 
-.  778e045f83 2009/02/20 Avoid VMS long filename support on older systems t
-.  7f336194cf 2009/02/21 Skip time64 when there is no 64-bit integer type a
-.  1487aac67a 2009/02/21 Upgrade to ExtUtils::MakeMaker 6.49_01
-.  2f30d0d0af 2009/02/21 Re-apply changes 4adc95e616bac7ee and 200cbd6aa595
-.  3aaf6557bb 2009/02/21 In S_init_perllib(), correct errors in the MACOS_T
-.  ec4d613228 2009/02/21 Use "system" gmtime in time64 on VMS so C<vmsish '
-.  04c9eeccd3 2009/02/21 NetWare has PRIVLIB_EXP as something other than a 
-.  3964fe451c 2009/02/21 Change the value passed into S_init_perllib() to a
-.  2cace6acdf 2009/02/22 Unwind the implicit loop in S_init_perllib(), by w
-.  32910c7adf 2009/02/22 In S_init_perllib(), only call PerlEnv_getenv("PER
-.  35ba5ce91a 2009/02/22 In S_init_perllib(), s can be const char*
-.  7fc7310782 2009/02/22 In S_incpush(), replace (addsubdirs || addoldvers)
-.  929e5b34a4 2009/02/22 In S_init_perllib(), initialise perl5lib to NULL, 
-.  c992324bfe 2009/02/22 In S_incpush(), move push @INC, ".../$archname" if
-.  a8f9c4338a 2009/02/22 In S_init_perllib(), push the bare SITELIB_STEM on
-.  21110102bd 2009/02/22 In S_init_perllib(), push the bare VENDORLIB_STEM 
-.  ee80e7be00 2009/02/22 7fc731078209e8c26ed8bba477edfd90724c7146 missed on
-.  1e3208d822 2009/02/22 Move unversioned directories in PERL_OTHERLIBDIRS 
-.  be71fc8f64 2009/02/22 Tidy up incpush. Re-order the macros, and re-inden
-.  10cc20f60c 2009/02/22 In S_incpush, move the declaration of subdir insid
-.  7ffdaae673 2009/02/22 Optimise S_incpush() by avoiding repeatedly copyin
-.  08d0d8ab11 2009/02/22 For S_incpush(), dir is never NULL, and len is alw
-.  d83484c23e 2009/02/23 time_t is unsigned 32-bit on VMS; pick sGMTIME_max
-.  f05b5874ed 2009/02/23 VMS-specific nit in S_init_perllib after 2cace6acd
-.  f785e3a13b 2009/02/23 vms.c - Remove .DIR; in UNIX mode.
+				individual commits merged
+M  9732edbb48 2009/02/20 Wonky example in perlthrtut
+R  e42f52dd7f 2009/02/20 Silence a casting warning with memchr()
+			    part of @INC order stuff
+M  db6dbf6ec9 2009/02/20 Check for thread failure in prime number example
+M  fd2c5c6c39 2009/02/20 Text::Wrap maintained via the CPAN release
+R  e6a0bbf8b4 2009/02/20 Add a parameter to win32_get_{priv,site,vendor}lib
+			    part of @INC order stuff
+M  73aec0b1ca 2009/02/20 More smartmatch tests
+M  58472d87a6 2009/02/20 Move redefinition of lstat above its first use in 
+M  778e045f83 2009/02/20 Avoid VMS long filename support on older systems t
+!  7f336194cf 2009/02/21 Skip time64 when there is no 64-bit integer type a
+			    y2038
+M  1487aac67a 2009/02/21 Upgrade to ExtUtils::MakeMaker 6.49_01
+M  2f30d0d0af 2009/02/21 Re-apply changes 4adc95e616bac7ee and 200cbd6aa595
+R  3aaf6557bb 2009/02/21 In S_init_perllib(), correct errors in the MACOS_T
+			    part of @INC order stuff
+!  ec4d613228 2009/02/21 Use "system" gmtime in time64 on VMS so C<vmsish '
+			    y2038
+R  04c9eeccd3 2009/02/21 NetWare has PRIVLIB_EXP as something other than a 
+			    part of @INC order stuff
+R  3964fe451c 2009/02/21 Change the value passed into S_init_perllib() to a
+			    part of @INC order stuff
+R  2cace6acdf 2009/02/22 Unwind the implicit loop in S_init_perllib(), by w
+			    part of @INC order stuff
+R  32910c7adf 2009/02/22 In S_init_perllib(), only call PerlEnv_getenv("PER
+			    part of @INC order stuff
+R  35ba5ce91a 2009/02/22 In S_init_perllib(), s can be const char*
+			    part of @INC order stuff
+R  7fc7310782 2009/02/22 In S_incpush(), replace (addsubdirs || addoldvers)
+			    part of @INC order stuff
+R  929e5b34a4 2009/02/22 In S_init_perllib(), initialise perl5lib to NULL, 
+			    part of @INC order stuff
+R  c992324bfe 2009/02/22 In S_incpush(), move push @INC, ".../$archname" if
+			    part of @INC order stuff
+R  a8f9c4338a 2009/02/22 In S_init_perllib(), push the bare SITELIB_STEM on
+			    part of @INC order stuff
+R  21110102bd 2009/02/22 In S_init_perllib(), push the bare VENDORLIB_STEM 
+			    part of @INC order stuff
+R  ee80e7be00 2009/02/22 7fc731078209e8c26ed8bba477edfd90724c7146 missed on
+			    part of @INC order stuff
+R  1e3208d822 2009/02/22 Move unversioned directories in PERL_OTHERLIBDIRS 
+			    part of @INC order stuff
+R  be71fc8f64 2009/02/22 Tidy up incpush. Re-order the macros, and re-inden
+			    part of @INC order stuff
+R  10cc20f60c 2009/02/22 In S_incpush, move the declaration of subdir insid
+			    part of @INC order stuff
+R  7ffdaae673 2009/02/22 Optimise S_incpush() by avoiding repeatedly copyin
+			    part of @INC order stuff
+R  08d0d8ab11 2009/02/22 For S_incpush(), dir is never NULL, and len is alw
+			    part of @INC order stuff
+M  d83484c23e 2009/02/23 time_t is unsigned 32-bit on VMS; pick sGMTIME_max
+R  f05b5874ed 2009/02/23 VMS-specific nit in S_init_perllib after 2cace6acd
+			    part of @INC order stuff
+M  f785e3a13b 2009/02/23 vms.c - Remove .DIR; in UNIX mode.
 .  e76b2c0c0a 2009/02/23 Add deprecate.pm. Deprecate shipping Switch.pm in 
-.  4cdcc1f2a1 2009/02/23 Module::Build Changes from 0.31012, which hadn't b
-.  97b85144d8 2009/02/23 Temporarily reverse out change cd5cc49dbc0e5ee7482
-.  66e531b6b2 2009/02/23 Update to Module::Build 0.31_04 (with a tweak to M
-.  86bddcbfaf 2009/02/23 Re-apply cd5cc49dbc0e5ee748252c2da8b435855908e6d2 
-.  6df20272fc 2009/02/23 Fix unused variable warning
-.  40596bc538 2009/02/23 fileno() was failing when passed a NULL.  I'm gues
-.  5e99c35995 2009/02/23 Merge branch 'blead' of ssh://stevep@perl5.git.per
+M  4cdcc1f2a1 2009/02/23 Module::Build Changes from 0.31012, which hadn't b
+M  97b85144d8 2009/02/23 Temporarily reverse out change cd5cc49dbc0e5ee7482
+M  66e531b6b2 2009/02/23 Update to Module::Build 0.31_04 (with a tweak to M
+M  86bddcbfaf 2009/02/23 Re-apply cd5cc49dbc0e5ee748252c2da8b435855908e6d2 
+R  6df20272fc 2009/02/23 Fix unused variable warning
+			    part of @INC order stuff
+M  40596bc538 2009/02/23 fileno() was failing when passed a NULL.  I'm gues
+R  5e99c35995 2009/02/23 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: 40596bc538 6df20272fc
-.  ad3a6de0a2 2009/02/24 In S_parse_body(), sv hasn't been needed since -P 
+				individual commits merged
+R  ad3a6de0a2 2009/02/24 In S_parse_body(), sv hasn't been needed since -P 
+			    fix to 32954
 .  e301958b4a 2009/02/24 Upgrade to threads 1.72
 .  c6cab44f03 2009/02/24 Upgrade to threads::shared 1.28
 .  b925ea3bf3 2009/02/24 Fix to installing non-xs ext's in priv lib
