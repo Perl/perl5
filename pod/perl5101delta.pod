@@ -39,11 +39,13 @@ of the output of C<perl -V>. See L<perlrepository> for more information.
 
 The internal structure of the C<ext/> directory in the perl source has
 been reorganised. In general, a module C<Foo::Bar> who's source was
-stored under F<ext/Foo/Bar/> is now located under F<ext/Foo-Bar/>. This
-should make no difference to the compilation or installation of perl,
-unless you have a very customised build process that explicitly relies on
-this structure, or which hard-codes the C<nonxs_ext> F<Configure>
-parameter.
+stored under F<ext/Foo/Bar/> is now located under F<ext/Foo-Bar/>. Also,
+some modules have been moved from F<lib/> to F<ext/>. This is purely a
+source tarball change, and should make no difference to the compilation or
+installation of perl, unless you have a very customised build process that
+explicitly relies on this structure, or which hard-codes the C<nonxs_ext>
+F<Configure> parameter. Specifically, this change does not alter the
+location of any files in the final installation.
 
 =back
 
@@ -87,8 +89,16 @@ See L</"The C<overloading> pragma"> above.
 
 =item *
 
-C<autodie> is a lexically-scoped replacement for the C<Fatal> module.
-The bundled version is 1.998.
+C<autodie> is a new lexically-scoped alternative for the C<Fatal> module.
+The bundled version is 1.999.
+
+=item *
+
+C<Compress::Raw::Bzip2> has been added to the core (version 2.015).
+
+=item *
+
+C<Parse::CPAN::Meta> has been added to the core (version 0.05).
 
 =back
 
@@ -107,7 +117,7 @@ have identical effect. This is a change to the behaviour documented for
 
 =item *
 
-C<Attribute::Handlers> upgraded from version 0.79 to 0.81
+C<Attribute::Handlers> upgraded from version 0.79 to 0.83
 
 =item *
 
@@ -115,7 +125,7 @@ C<Archive::Extract> upgraded from version 0.24 to 0.30
 
 =item *
 
-C<Archive::Tar> upgraded from version 1.38 to 1.44
+C<Archive::Tar> upgraded from version 1.38 to 1.46
 
 =item *
 
@@ -132,6 +142,10 @@ C<B::Deparse> upgraded from version 0.83 to 0.87
 =item *
 
 C<CPAN> upgraded from version 1.9205 to 1.93_03 
+
+=item *
+
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.14
 
 =item *
 
@@ -152,7 +166,7 @@ bleed/maint
 
 =item *
 
-C<Encode> upgraded from version 2.23 to 2.31
+C<Encode> upgraded from version 2.23 to 2.32
 
 =item *
 
@@ -186,8 +200,23 @@ C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
 
 =item *
 
-C<Fatal> upgraded from version 1.05 to 1.998. See also the new pragma
+C<Filter::Util::Call> upgraded from version 1.07 to 1.08
+
+=item *
+
+C<Fatal> upgraded from version 1.05 to 1.999. See also the new pragma
 C<autodie>.
+
+=item *
+
+C<Hash::Util::FieldHash> upgraded from version 1.03 to 1.03_01. XXX
+This fixes a memory leak.
+
+=item *
+
+C<IO> upgraded from version 1.23_01 to 1.23_02 XXX
+
+This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
 
 =item *
 
@@ -199,7 +228,7 @@ C<Math::Complex> upgraded from version 1.37 to 1.56
 
 =item *
 
-C<Module::Build> upgraded from version 0.2808_01 to 0.31_04
+C<Module::Build> upgraded from version 0.2808_01 to 0.32
 
 =item *
 
@@ -252,7 +281,32 @@ C<Symbol> upgraded from version 1.06 to 1.07
 
 =item *
 
+C<threads> upgraded from version 1.67 to 1.72
+
+=item *
+
+C<threads::shared> upgraded from version 1.14 to 1.28
+
+=item *
+
+C<Term::ANSIColor> upgraded from version 1.12 to 2.00
+
+=item *
+
+C<Test::Harness> upgraded from version 2.64 to 3.16
+XXX major upgrade - add some blurb ???
+
+=item *
+
 C<Test::Simple> upgraded from version 0.80 to 0.86_01 XXX not a CPAN release
+
+=item *
+
+C<Text::Tabs> upgraded from version 2007.1117 to 2009.0305
+
+=item *
+
+C<Text::Wrap> upgraded from version 2006.1117 to 2009.0305
 
 =item *
 
@@ -414,6 +468,15 @@ their values.
 
 Using C<setpgrp()> with no arguments could corrupt the perl stack.
 
+=item *
+
+The block form of C<eval> is now specifically trappable by C<Safe> and
+C<ops>.  Previously it was erroneously treated like string C<eval>.
+
+=item *
+
+In 5.10.0, the two characters C<[~> were sometimes parsed as the smart
+match operator (C<~~>) [RT #63854].
 
 =back
 
@@ -448,6 +511,13 @@ C<Perl_croak>.
 The following items are now deprecated.
 
 =over
+
+=item *
+
+C<Switch> is buggy and should be avoided where possible. From perl 5.11.0
+onwards it is intended that any use of the core version of this module
+will emit a warning, and that the module will eventually be removed from
+the core (probably in perl 5.14.0).
 
 =item *
 

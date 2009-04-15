@@ -474,6 +474,7 @@ M  bb9fb6628b 2008/02/01 33170
 M  437d3b4e2c 2008/02/01 33178
 M  fb632ce3b9 2008/02/02 33181 
 R  92e45a3e6a 2008/02/02 33182 minor optimisation with breakage risk
+				    see also 96ccaf5388
 M  357244ac7b 2008/02/02 33193
 M  349133794f 2008/02/02 33206
 M  98deaf8b6f 2008/02/02 33208
@@ -1734,7 +1735,7 @@ M  b1fccde5a5 2008/12/19 In the patch section, show how to work on a tempor
 M  7df2e4bc09 2008/12/19 Add a section on applying a patch
 M  2bbc8d558d 2008/12/19 Subject: PATCH 5.10 documentation
 M  75fb765136 2008/12/19 after applying, committers should push
-M  4adc95e616 2008/12/19
+M  4adc95e616 2008/12/19 
 R  60bc01042e 2008/12/19 parents of merge individually committed
 				MERGE: 2bbc8d558d 4adc95e616
 M  985dc10ab3 2008/12/20 Subject: [perl #61418] perlthanks isn't documented
@@ -1792,8 +1793,8 @@ M  64ab118f07 2008/12/25 Move 'make check' in pods/ to using Pod::Checker
 M  f4084e3915 2008/12/25 Minor pod fixes to make Pod::Checker happy with th
 M  94442a1e23 2008/12/25 Remove all mention of checkpods
 M  7a21560e6d 2008/12/25 Remove completed perltodo entry
-M  caa547d451 2008/12/25
-M  4df4f5d097 2008/12/25
+M  caa547d451 2008/12/25 
+M  4df4f5d097 2008/12/25 
 M  9ae51f7f1f 2008/12/25 Some source files and documentation files need not
 M  d4222de008 2008/12/25 Lies, damn lies and end-of-block comments
 M  0147cd53fa 2008/12/25 Use the F formatting codes for filenames in pod/pe
@@ -1972,7 +1973,7 @@ R  ef3b26468f 2009/01/03 skip merge; 4ba0c7624a applied instead
 M  105ae85463 2009/01/03 Remove duplicate return in S_mro_get_linear_isa_c3
 M  bd2db5df3c 2009/01/04 make Dumper.xs work with 5.10.x
 M  c012444fd8 2009/01/04 Another regexp failure with utf8-flagged string an
-M  6bb0de4e5b 2009/01/04
+M  6bb0de4e5b 2009/01/04 
 M  7b1668ed3d 2009/01/04 bump ExtUtils/MM.pm version number after change 34
 M  166a466fb1 2009/01/04 modified make_patchnum.sh script
 M  8ed12dca53 2009/01/04 prepare for refactoring to perl
@@ -2295,7 +2296,7 @@ M  440530af1a 2009/02/02 ext/DB_File needs a ppport.h
 M  767c16ab36 2009/02/02 Make t/pod/pod2usage2.t work on case insensitive f
 M  286d62c215 2009/02/02 Fold win32/buildext.pl into make_ext.pl
 M  d1b150139f 2009/02/02 Convert the last few references from buildext.pl t
-M  200cbd6aa5 2009/02/03
+M  200cbd6aa5 2009/02/03 
 M  3ddd48aab4 2009/02/03 Oops. Missed these two files from commit 200cbd6aa
 
 M  d57db09df2 2009/02/03 Refactor to avoid changing directory, and avoid ne
@@ -2539,7 +2540,9 @@ M  d83484c23e 2009/02/23 time_t is unsigned 32-bit on VMS; pick sGMTIME_max
 R  f05b5874ed 2009/02/23 VMS-specific nit in S_init_perllib after 2cace6acd
 			    part of @INC order stuff
 M  f785e3a13b 2009/02/23 vms.c - Remove .DIR; in UNIX mode.
-.  e76b2c0c0a 2009/02/23 Add deprecate.pm. Deprecate shipping Switch.pm in 
+!  e76b2c0c0a 2009/02/23 Add deprecate.pm. Deprecate shipping Switch.pm in 
+			    maybe add this if there are CPAN updates to Switch,
+			    or if other things need deprecate.pm.
 M  4cdcc1f2a1 2009/02/23 Module::Build Changes from 0.31012, which hadn't b
 M  97b85144d8 2009/02/23 Temporarily reverse out change cd5cc49dbc0e5ee7482
 M  66e531b6b2 2009/02/23 Update to Module::Build 0.31_04 (with a tweak to M
@@ -2552,79 +2555,92 @@ R  5e99c35995 2009/02/23 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				individual commits merged
 R  ad3a6de0a2 2009/02/24 In S_parse_body(), sv hasn't been needed since -P 
 			    fix to 32954
-.  e301958b4a 2009/02/24 Upgrade to threads 1.72
-.  c6cab44f03 2009/02/24 Upgrade to threads::shared 1.28
-.  b925ea3bf3 2009/02/24 Fix to installing non-xs ext's in priv lib
-.  7ffb779818 2009/02/24 Fix line number test for scalar attribute handlers
-.  d4be36a8ea 2009/02/24 remove explicit caller depth in deprecate.pm by se
-.  15e5e8668b 2009/02/25 add-package.pl fixup
-.  c0f08d2c3a 2009/02/25 test script for deprecate.pm
-.  851e29585b 2009/02/25 MakeMaker is first-come in Maintainers.pl.
-.  e4866e2e9b 2009/02/25 fix typo in pod/perlperf.pod
-.  d9e167fc3a 2009/02/25 Update Filter::Util::Call to 1.08
-.  20caf59dc5 2009/02/26 Make non-blocking mode work on Windows in IO::Sock
-.  3aa396043e 2009/02/26 Remove needless sed line added with 4318d5a0158916
-.  6c0ec79a2e 2009/02/26 Correct the paths for the nonxs_ext targets, follo
-.  ac62bc6fc9 2009/02/26 Remove spurious TODO indicators
-.  57df1c468e 2009/02/26 6c0ec79a2e9c445ac9999df2 failed to build from dist
-.  04fd187ebc 2009/02/27 add standard documentation to deprecate
-.  6b913759a0 2009/02/27 rewrote deprecate test using File::Spec
-.  b032e88887 2009/02/27 NAME section must fit on one line
-.  f72763ca64 2009/02/28 Hash::Util::FieldHash 1.03 leaks SVs which are use
-.  096fcbb836 2009/02/28 Make deprecate.pm work on VMS.
-.  c23d817369 2009/03/01 Update to Term::ANSIColor 2.00
-.  e83ba0bd96 2009/03/01 Update CPANPLUS::Dist::Build to 0.08
-.  223ddb2fc0 2009/03/01 Mark modules upgraded today as "upstream from CPAN
-.  bdb7fd9ff2 2009/03/01 Add Compress-Raw-Bzip2, by Paul Marquess
-.  1c058b48fe 2009/03/01 Better gitignore file for Compress-Raw-Bzip2
-.  f56ed502c9 2009/03/01 Make util.c compile on systems without getcwd()
-.  b6be863a9c 2009/03/02 Bump versions to 0.10 for CPAN sync
-.  4443dd534c 2009/03/02 Update CPANPLUS to 0.85_06
-.  be96f5c3c1 2009/03/02 Integrate Parse::CPAN::Meta 0.04 into core
-.  4ec613fc9e 2009/03/02 Bump versions to 0.12 to sync with CPAN version
-.  985e6bb7f5 2009/03/03 Remove the MANIFEST from Compress-Raw-Bzip2
-.  8d4c519e13 2009/03/03 Add contact info for Simon Wistow in Porting/Maint
-.  32a618150c 2009/03/03 Add Parse::CPAN::Meta to Porting/Maintainers.pl
-.  c59d1bfa19 2009/03/03 Update Parse::CPAN::Meta to 0.04_01
-.  8f42c23d28 2009/03/04 Add a failing test for stack corruption with MULTI
-.  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
-.  cad0fd6e0f 2009/03/05 Fix installation of 'autodie'
-.  db4e6d0949 2009/03/05 Merge of autodie 1.999 into blead.
-.  86840a9d37 2009/03/05 Updated MANIFEST for autodie 1.999
-.  bef46b70a2 2009/03/05 Update Archive::Tar to 1.46
-.  ec6cc21dee 2009/03/05 In dl_vms.xs, treat dl_last_error like the SV that
-.  3e8320ccc2 2009/03/06 fix a couple of comments that annoyingly look like
-.  2645075aa0 2009/03/06 Upgrade to Module-Build-0.32
-.  69e34dac30 2009/03/06 Upgrade Text::Tabs+Text::Wrap to version 2009.0305
-.  bdaf8c65d3 2009/03/06 Upgrade to Test-Harness-3.16
-.  3f8c823a28 2009/03/07 Add a bunch of missing files to the MANIFEST
-.  f325df1b45 2009/03/07 Fixing the cast for the result of (getgrent())->gr
-.  9f5407a9b9 2009/03/07 Fix test failure with t/TEST
-.  4e71788c75 2009/03/07 Update to Encode 2.32
-.  8c472fc1d4 2009/03/07 Make DynaLoader clone its private data under threa
-.  96ccaf5388 2009/03/07 Make PerlIO::get_layers really test flgok before r
-.  1bbbfc5065 2009/03/07 Fix MULTICALL in List-Util
-.  7cae69c7f0 2009/03/08 Cwd and File::Spec are maintained as part of PathT
-.  6b3d80d96d 2009/03/08 synchronize Getopt::Long CHANGES file to the corre
-.  a4876a67e7 2009/03/08 Fix synchronization of Getopt::Long CHANGES file t
-.  e8fb11d7f7 2009/03/08 Update t/harness to reflect behaviour changes in T
-.  a5e72d97a7 2009/03/08 Need to -I../lib explicitly, as TAP::Parser no lon
-.  e276a45bf1 2009/03/08 Remove declaration of XS_Internals_inc_sub_generat
-.  af6492bf9e 2009/03/08 lib/Text/TabsWrap/t/dnsparks.t should skip under T
-.  edd52d85e4 2009/03/10 Fix a printf compilation warning
-.  b92436812d 2009/03/11 Merge Attribute::Handlers 0.82 into core
-.  7cc1b246ee 2009/03/11 Merge Parse::CPAN::Meta 0.05 into core
-.  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
-.  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
-.  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
-.  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
-.  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
-.  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
-.  4d9f3eeb6f 2009/03/13 Ilya M. is no longer maintaining Data::Dumper. Ass
-.  5a7ebd3db9 2009/03/13 Add -E in the command-line usage in perl.pod
-.  43eb98159e 2009/03/13 Tests for floating point args to localtime and gmt
-.  df3467db16 2009/03/14 Return OPERATOR('[') for '[' without falling throu
-.  f50fa36f2a 2009/03/14 Better test case for [perl #63854] Error parsing "
+M  e301958b4a 2009/02/24 Upgrade to threads 1.72
+M  c6cab44f03 2009/02/24 Upgrade to threads::shared 1.28
+M  b925ea3bf3 2009/02/24 Fix to installing non-xs ext's in priv lib
+M  7ffb779818 2009/02/24 Fix line number test for scalar attribute handlers
+!  d4be36a8ea 2009/02/24 remove explicit caller depth in deprecate.pm by se
+			    skip deprecate.pm for now
+M  15e5e8668b 2009/02/25 add-package.pl fixup
+!  c0f08d2c3a 2009/02/25 test script for deprecate.pm
+			    skip deprecate.pm for now
+M  851e29585b 2009/02/25 MakeMaker is first-come in Maintainers.pl.
+M  e4866e2e9b 2009/02/25 fix typo in pod/perlperf.pod
+M  d9e167fc3a 2009/02/25 Update Filter::Util::Call to 1.08
+M  20caf59dc5 2009/02/26 Make non-blocking mode work on Windows in IO::Sock
+M  3aa396043e 2009/02/26 Remove needless sed line added with 4318d5a0158916
+M  6c0ec79a2e 2009/02/26 Correct the paths for the nonxs_ext targets, follo
+M  ac62bc6fc9 2009/02/26 Remove spurious TODO indicators
+M  57df1c468e 2009/02/26 6c0ec79a2e9c445ac9999df2 failed to build from dist
+!  04fd187ebc 2009/02/27 add standard documentation to deprecate
+			    skip deprecate.pm for now
+!  6b913759a0 2009/02/27 rewrote deprecate test using File::Spec
+			    skip deprecate.pm for now
+!  b032e88887 2009/02/27 NAME section must fit on one line
+			    skip deprecate.pm for now
+M  f72763ca64 2009/02/28 Hash::Util::FieldHash 1.03 leaks SVs which are use
+!  096fcbb836 2009/02/28 Make deprecate.pm work on VMS.
+			    skip deprecate.pm for now
+M  c23d817369 2009/03/01 Update to Term::ANSIColor 2.00
+M  e83ba0bd96 2009/03/01 Update CPANPLUS::Dist::Build to 0.08
+M  223ddb2fc0 2009/03/01 Mark modules upgraded today as "upstream from CPAN
+M  bdb7fd9ff2 2009/03/01 Add Compress-Raw-Bzip2, by Paul Marquess
+M  1c058b48fe 2009/03/01 Better gitignore file for Compress-Raw-Bzip2
+M  f56ed502c9 2009/03/01 Make util.c compile on systems without getcwd()
+M  b6be863a9c 2009/03/02 Bump versions to 0.10 for CPAN sync
+!  4443dd534c 2009/03/02 Update CPANPLUS to 0.85_06
+			    awaiting CPAN sync
+M  be96f5c3c1 2009/03/02 Integrate Parse::CPAN::Meta 0.04 into core
+M  4ec613fc9e 2009/03/02 Bump versions to 0.12 to sync with CPAN version
+M  985e6bb7f5 2009/03/03 Remove the MANIFEST from Compress-Raw-Bzip2
+M  8d4c519e13 2009/03/03 Add contact info for Simon Wistow in Porting/Maint
+M  32a618150c 2009/03/03 Add Parse::CPAN::Meta to Porting/Maintainers.pl
+M  c59d1bfa19 2009/03/03 Update Parse::CPAN::Meta to 0.04_01
+M  8f42c23d28 2009/03/04 Add a failing test for stack corruption with MULTI
+!  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
+			    waiting for CPAN sync
+M  cad0fd6e0f 2009/03/05 Fix installation of 'autodie'
+M  db4e6d0949 2009/03/05 Merge of autodie 1.999 into blead.
+M  86840a9d37 2009/03/05 Updated MANIFEST for autodie 1.999
+M  bef46b70a2 2009/03/05 Update Archive::Tar to 1.46
+M  ec6cc21dee 2009/03/05 In dl_vms.xs, treat dl_last_error like the SV that
+M  3e8320ccc2 2009/03/06 fix a couple of comments that annoyingly look like
+M  2645075aa0 2009/03/06 Upgrade to Module-Build-0.32
+M  69e34dac30 2009/03/06 Upgrade Text::Tabs+Text::Wrap to version 2009.0305
+M  bdaf8c65d3 2009/03/06 Upgrade to Test-Harness-3.16
+M  3f8c823a28 2009/03/07 Add a bunch of missing files to the MANIFEST
+M  f325df1b45 2009/03/07 Fixing the cast for the result of (getgrent())->gr
+M  9f5407a9b9 2009/03/07 Fix test failure with t/TEST
+M  4e71788c75 2009/03/07 Update to Encode 2.32
+M  8c472fc1d4 2009/03/07 Make DynaLoader clone its private data under threa
+R  96ccaf5388 2009/03/07 Make PerlIO::get_layers really test flgok before r
+			    fix to 92e45a3e6a
+M  1bbbfc5065 2009/03/07 Fix MULTICALL in List-Util
+M  7cae69c7f0 2009/03/08 Cwd and File::Spec are maintained as part of PathT
+M  6b3d80d96d 2009/03/08 synchronize Getopt::Long CHANGES file to the corre
+M  a4876a67e7 2009/03/08 Fix synchronization of Getopt::Long CHANGES file t
+M  e8fb11d7f7 2009/03/08 Update t/harness to reflect behaviour changes in T
+M  a5e72d97a7 2009/03/08 Need to -I../lib explicitly, as TAP::Parser no lon
+M  e276a45bf1 2009/03/08 Remove declaration of XS_Internals_inc_sub_generat
+M  af6492bf9e 2009/03/08 lib/Text/TabsWrap/t/dnsparks.t should skip under T
+M  edd52d85e4 2009/03/10 Fix a printf compilation warning
+M  b92436812d 2009/03/11 Merge Attribute::Handlers 0.82 into core
+M  7cc1b246ee 2009/03/11 Merge Parse::CPAN::Meta 0.05 into core
+M  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
+!  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
+			    wait for CPAN sync
+M  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
+M  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
+!  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
+			    y2038
+!  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
+			    y2038
+M  4d9f3eeb6f 2009/03/13 Ilya M. is no longer maintaining Data::Dumper. Ass
+M  5a7ebd3db9 2009/03/13 Add -E in the command-line usage in perl.pod
+!  43eb98159e 2009/03/13 Tests for floating point args to localtime and gmt
+			    y2038
+M  df3467db16 2009/03/14 Return OPERATOR('[') for '[' without falling throu
+M  f50fa36f2a 2009/03/14 Better test case for [perl #63854] Error parsing "
 .  319fab5061 2009/03/14 Create IO-Compress
 .  cee5ec9732 2009/03/14 Remove directories from manifest
 .  eb1dd64e3e 2009/03/14 Disambiguate mention of -E in perl.pod and in perl
@@ -2635,7 +2651,7 @@ R  ad3a6de0a2 2009/02/24 In S_parse_body(), sv hasn't been needed since -P
 .  6210e03fb1 2009/03/18 Fix typo in English name of $&
 .  245490700b 2009/03/18 Doc fix: the /k regexp modifier should really be w
 .  a0df7637f6 2009/03/19 Upgrade to Module-Pluggable-3.9
-.  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
+M  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
 .  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
 .  53102b2bf3 2009/03/19 Bump Module-Pluggable VERSION following 4a28828fc8
 .  de9b652d38 2009/03/19 pod/perlreftut.pod: keep example in tune with the 
@@ -2647,6 +2663,7 @@ R  ad3a6de0a2 2009/02/24 In S_parse_body(), sv hasn't been needed since -P
 .  ac56ae2e85 2009/03/22 update MANIFEST for file removed by 16bf6aa6d68d98
 .  c966426a3b 2009/03/22 fix [RT #60034]. An equivalent fix was already in 
 .  7efcbeefb3 2009/03/22 Fixes for ext/compress
+# XXX BRANCH
 .  76467b2a65 2009/03/23 Upgrade to ExtUtils-MakeMaker-6.50
 .  18a10db9e0 2009/03/24 Mark Florian Ragwitz as the NEXT maintainer. NEXT 
 .  d5fe29ea03 2009/03/24 Mark upstream as blead for Net::Ping.
@@ -2784,3 +2801,33 @@ M  cf3f0ffbff 2009/03/29 provide minimal documentation for the MUTABLE_*()
 .  5a8cf36709 2009/04/09 Fix declaration-after-statement in ext/Socket/Sock
 .  ee6d2783b2 2009/04/09 Don't SEGV while warning about redefining the form
 .  f1a7681278 2009/04/10 Upgrade to NEXT-0.63.
+.  d62c72f641 2009/04/12 Remove attrs, which has been deprecated since 1999
+.  674e4532c9 2009/04/12 Sort the MANIFEST.
+.  718f7b5acf 2009/04/12 Rebuild pod/perltoc.pod.
+.  cee202b7be 2009/04/12 Eliminate "Old Perl threads tutorial", which descr
+.  8e5dadda1c 2009/04/12 Deprecate use of the attribute :locked on subrouti
+.  42f6aa011a 2009/04/12 Remove #ifdef CVf_LVALUE/#endif - LVALUE subs aren
+.  48462a74af 2009/04/12 Convert xsutils.c and lib/attributes.pm to a regul
+.  c32124fea7 2009/04/12 Deprecate using "locked" with the attributes pragm
+.  f1a3ce43fb 2009/04/12 Deprecate using "unique" with the attributes pragm
+.  6db6f3536f 2009/04/12 s/locked/lvalue/ in the examples, and remove menti
+.  009f650f63 2009/04/12 Remove a link to the attrs pragma, which has now b
+.  d32faaf3b4 2009/04/13 GvUNIQUE* have been defined as 0 since 2005/06/30 
+.  e95ab0c0d2 2009/04/13 Remove CVf_LOCKED and CvLOCKED*(), now that nothin
+.  b871937fe0 2009/04/13 Refactor the SKIP parser to also handle TODOs. TOD
+.  6ee4ed1065 2009/04/13 Propagate the upgraded TODO/SKIP parser from ext/B
+.  f9cd5d9f11 2009/04/13 Tweak t/lib/common.pl to use test.pl's (better) te
+.  aa381260d0 2009/04/13 A perl-version portable fix for B coping with CVf_
+.  ac0f141316 2009/04/13 Correct two other tests that apparently should be 
+.  4a4b8592c1 2009/04/13 our $TODO should be local $::TODO, revealing a bug
+.  79289e05b8 2009/04/13 TODO tests for deparsing strict, warnings as strin
+.  6e0da8f3ff 2009/04/13 Restore prototypes to XS code in attributes, accid
+.  c14f59c3c1 2009/04/13 [PATCH] Compress-Raw-Bzip2 2.018 (was RE: Compress
+.  f996b9a332 2009/04/13 Remove Makefile.PLs that make_ext.pl can automatic
+.  5dfb71230e 2009/04/13 Remove an unnecessary use Config;
+.  ad6402bdb9 2009/04/13 Upgrade to CGI.pm-3.43
+.  3915ffe07a 2009/04/13 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				MERGE: ad6402bdb9 5dfb71230e
+.  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
+.  512e1353c9 2009/04/14 Add file missed in previous commit.
+.  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
