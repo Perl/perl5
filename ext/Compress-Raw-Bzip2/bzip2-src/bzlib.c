@@ -98,6 +98,11 @@ int bz_config_ok ( void )
 
 
 /*---------------------------------------------------*/
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 static
 void* default_bzalloc ( void* opaque, Int32 items, Int32 size )
 {
@@ -111,6 +116,9 @@ void default_bzfree ( void* opaque, void* addr )
    if (addr != NULL) free ( addr );
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 /*---------------------------------------------------*/
 static
