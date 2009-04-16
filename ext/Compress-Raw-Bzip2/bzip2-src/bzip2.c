@@ -800,6 +800,11 @@ void ioError ( void )
 }
 
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /*---------------------------------------------*/
 static 
 void mySignalCatcher ( IntNative n )
@@ -866,6 +871,9 @@ void mySIGSEGVorSIGBUScatcher ( IntNative n )
       { cadvise(); cleanUpAndFail( 2 ); }
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 /*---------------------------------------------*/
 static 
