@@ -1,22 +1,12 @@
 #!/usr/bin/perl -w
 use strict;
-use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write $Verbose
-	    @Changed);
-use Config; # Remember, this is running using an existing perl
+use vars qw($Needs_Write $Verbose @Changed);
 use File::Compare;
 use Symbol;
 
 # Common functions needed by the regen scripts
 
-$Is_W32 = $^O eq 'MSWin32';
-$Is_OS2 = $^O eq 'os2';
-$Is_Cygwin = $^O eq 'cygwin';
-$Is_NetWare = $Config{osname} eq 'NetWare';
-if ($Is_NetWare) {
-  $Is_W32 = 0;
-}
-
-$Needs_Write = $Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare;
+$Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
 
 $Verbose = 0;
 @ARGV = grep { not($_ eq '-q' and $Verbose = -1) }
