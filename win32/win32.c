@@ -1762,7 +1762,8 @@ win32_putenv(const char *name)
              *    environment (like in UNIX).
              *  * we don't have to deal with RTL globals, bugs and leaks.
              *  * Much faster.
-             * Why you may want to enable USE_WIN32_RTL_ENV:
+             * Why you may want to use the RTL environment handling
+             * (previously enabled by USE_WIN32_RTL_ENV):
              *  * environ[] and RTL functions will not reflect changes,
              *    which might be an issue if extensions want to access
              *    the env. via RTL.  This cuts both ways, since RTL will
