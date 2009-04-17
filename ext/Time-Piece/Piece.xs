@@ -68,6 +68,80 @@ my_init_tm(struct tm *ptm)        /* see mktime, strftime and asctime    */
 # define my_init_tm init_tm
 #endif 
 
+#ifdef WIN32
+
+/*
+ * (1) The CRT maintains its own copy of the environment, separate from
+ * the Win32API copy.
+ *
+ * (2) CRT getenv() retrieves from this copy. CRT putenv() updates this
+ * copy, and then calls SetEnvironmentVariableA() to update the Win32API
+ * copy.
+ *
+ * (3) win32_getenv() and win32_putenv() call GetEnvironmentVariableA() and
+ * SetEnvironmentVariableA() directly, bypassing the CRT copy of the
+ * environment.
+ *
+ * (4) The CRT strftime() "%Z" implementation calls __tzset(). That
+ * calls CRT tzset(), but only the first time it is called, and in turn
+ * that uses CRT getenv("TZ") to retrieve the timezone info from the CRT
+ * local copy of the environment and hence gets the original setting as
+ * perl never updates the CRT copy when assigning to $ENV{TZ}.
+ *
+ * Therefore, we need to retrieve the value of $ENV{TZ} and call CRT
+ * putenv() to update the CRT copy of the environment whenever we're about
+ * to call tzset().
+ */
+
+static const char*
+win32_crt_getenv(const char* name)
+{
+#undef getenv
+    const char* value = getenv(name);
+#define getenv win32_getenv
+    return value;
+}
+
+static void
+win32_crt_putenv(const char* name, const char* value)
+{
+    char* envstr =
+        (char*)malloc((strlen(name) + strlen(value) + 2) * sizeof(char));
+    if (envstr != NULL) {
+        sprintf(envstr, "%s=%s", name, value);
+#undef putenv
+        putenv(envstr);
+#define putenv win32_putenv
+        free(envstr);
+    }
+}
+
+static void
+fix_win32_tzenv(void)
+{
+    const char* perl_tz_env = getenv("TZ");
+    const char* crt_tz_env = win32_crt_getenv("TZ");
+    if (perl_tz_env != NULL && crt_tz_env != NULL) {
+        if (strcmp(perl_tz_env, crt_tz_env) != 0)
+            win32_crt_putenv("TZ", perl_tz_env);
+    }
+    else if (perl_tz_env != NULL && crt_tz_env == NULL)
+        win32_crt_putenv("TZ", perl_tz_env);
+    else if (perl_tz_env == NULL && crt_tz_env != NULL)
+        win32_crt_putenv("TZ", "");
+}
+
+#endif
+
+static void
+my_tzset(void)
+{
+#ifdef WIN32
+    fix_win32_tzenv();
+#endif
+    tzset();
+}
+
 /*
  * my_mini_mktime - normalise struct tm values without the localtime()
  * semantics (and overhead) of mktime(). Stolen shamelessly from Perl's
@@ -760,7 +834,7 @@ label:
 				zonestr = (char *)alloca(cp - buf + 1);
 				strncpy(zonestr, buf, cp - buf);
 				zonestr[cp - buf] = '\0';
-				tzset();
+				my_tzset();
 				if (0 == strcmp(zonestr, "GMT")) {
 				    got_GMT = 1;
 				} else {
@@ -880,7 +954,7 @@ _strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1
 void
 _tzset()
   PPCODE:
-    tzset();
+    my_tzset();
 
 
 void
