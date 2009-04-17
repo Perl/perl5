@@ -1765,7 +1765,8 @@ win32_putenv(const char *name)
              * Has these advantages over putenv() & co.:
              *  * enables us to store a truly empty value in the
              *    environment (like in UNIX).
-             *  * we don't have to deal with RTL globals, bugs and leaks.
+             *  * we don't have to deal with RTL globals, bugs and leaks
+             *    (specifically, see http://support.microsoft.com/kb/235601).
              *  * Much faster.
              * Why you may want to use the RTL environment handling
              * (previously enabled by USE_WIN32_RTL_ENV):
