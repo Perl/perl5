@@ -17,33 +17,6 @@ use strict;
 # implicit interpreter context argument.
 #
 
-open IN, "embed.fnc" or die $!;
-
-# walk table providing an array of components in each line to
-# subroutine, printing the result
-sub walk_table (&@) {
-    my $function = shift;
-    seek IN, 0, 0;		# so we may restart
-    while (<IN>) {
-	chomp;
-	next if /^:/;
-	while (s|\\\s*$||) {
-	    $_ .= <IN>;
-	    chomp;
-	}
-	s/\s+$//;
-	my @args;
-	if (/^\s*(#|$)/) {
-	    @args = $_;
-	}
-	else {
-	    @args = split /\s*\|\s*/, $_;
-	}
-	s/\b(NN|NULLOK)\b\s+//g for @args;
-	$function->(@args);
-    }
-}
-
 my %apidocs;
 my %gutsdocs;
 my %docfuncs;
@@ -166,30 +139,47 @@ for $file (($MANIFEST =~ /^(\S+\.c)\t/gm), ($MANIFEST =~ /^(\S+\.h)\t/gm)) {
 safer_unlink "pod/perlapi.pod";
 my $doc = safer_open("pod/perlapi.pod");
 
-walk_table {	# load documented functions into appropriate hash
-    if (@_ > 1) {
-	my($flags, $retval, $func, @args) = @_;
-	return "" unless $flags =~ /d/;
-	$func =~ s/\t//g; $flags =~ s/p//; # clean up fields from embed.pl
-	$retval =~ s/\t//;
-	my $docref = delete $docfuncs{$func};
-	$seenfuncs{$func} = 1;
-	if ($docref and @$docref) {
-	    if ($flags =~ /A/) {
-		$docref->[0].="x" if $flags =~ /M/;
-		$apidocs{$docref->[4]}{$func} =
-		    [$docref->[0] . 'A', $docref->[1], $retval, $docref->[3],
-			@args];
-	    } else {
-		$gutsdocs{$docref->[4]}{$func} =
-		    [$docref->[0], $docref->[1], $retval, $docref->[3], @args];
-	    }
-	}
-	else {
-	    warn "no docs for $func\n" unless $seenfuncs{$func};
+open IN, "embed.fnc" or die $!;
+
+# walk table providing an array of components in each line to
+# subroutine, printing the result
+
+while (<IN>) {
+    chomp;
+    next if /^:/;
+    while (s|\\\s*$||) {
+	$_ .= <IN>;
+	chomp;
+    }
+    s/\s+$//;
+    next if /^\s*(#|$)/;
+
+    my ($flags, $retval, $func, @args) = split /\s*\|\s*/, $_;
+
+    next unless $flags =~ /d/;
+    next unless $func;
+
+    s/\b(NN|NULLOK)\b\s+//g for @args;
+    $func =~ s/\t//g; # clean up fields from embed.pl
+    $retval =~ s/\t//;
+
+    my $docref = delete $docfuncs{$func};
+    $seenfuncs{$func} = 1;
+    if ($docref and @$docref) {
+	if ($flags =~ /A/) {
+	    $docref->[0].="x" if $flags =~ /M/;
+	    $apidocs{$docref->[4]}{$func} =
+		[$docref->[0] . 'A', $docref->[1], $retval, $docref->[3],
+		 @args];
+	} else {
+	    $gutsdocs{$docref->[4]}{$func} =
+		[$docref->[0], $docref->[1], $retval, $docref->[3], @args];
 	}
     }
-};
+    else {
+	warn "no docs for $func\n" unless $seenfuncs{$func};
+    }
+}
 
 for (sort keys %docfuncs) {
     # Have you used a full for apidoc or just a func name?
