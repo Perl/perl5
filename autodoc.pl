@@ -23,21 +23,6 @@ open IN, "embed.fnc" or die $!;
 # subroutine, printing the result
 sub walk_table (&@) {
     my $function = shift;
-    my $filename = shift || '-';
-    my $leader = shift;
-    my $trailer = shift;
-    my $F;
-    local *F;
-    if (ref $filename) {	# filehandle
-	$F = $filename;
-    }
-    else {
-	safer_unlink $filename;
-	$F = safer_open($filename);
-	binmode F;
-	$F = \*F;
-    }
-    print $F $leader if $leader;
     seek IN, 0, 0;		# so we may restart
     while (<IN>) {
 	chomp;
@@ -55,11 +40,7 @@ sub walk_table (&@) {
 	    @args = split /\s*\|\s*/, $_;
 	}
 	s/\b(NN|NULLOK)\b\s+//g for @args;
-	print $F $function->(@args);
-    }
-    print $F $trailer if $trailer;
-    unless (ref $filename) {
-	close $F or die "Error closing $filename: $!";
+	$function->(@args);
     }
 }
 
@@ -208,8 +189,7 @@ walk_table {	# load documented functions into appropriate hash
 	    warn "no docs for $func\n" unless $seenfuncs{$func};
 	}
     }
-    return "";
-} $doc;
+};
 
 for (sort keys %docfuncs) {
     # Have you used a full for apidoc or just a func name?
