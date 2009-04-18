@@ -1461,6 +1461,7 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
+	cd .. && $(PERLEXE) autodoc.pl
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
@@ -1534,6 +1535,7 @@ distclean: realclean
 	    perltw.pod perluts.pod perlvmesa.pod perlvms.pod perlvms.pod \
 	    perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
+	    perlapi.pod perlintern.pod \
 	    podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
