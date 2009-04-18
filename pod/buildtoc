@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw($masterpodfile %Build %Targets $Verbose $Up %Ignore
+use vars qw($masterpodfile %Build %Targets $Verbose $Quiet $Up %Ignore
 	    @Master %Readmes %Pods %Aux %Readmepods %Pragmata %Modules
 	    %Copies %Generated);
 use File::Spec;
@@ -18,6 +18,7 @@ $masterpodfile = File::Spec->catdir($Up, "pod.lst");
 
 # Generate any/all of these files
 # --verbose gives slightly more output
+# --quiet suppresses routine warnings
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
@@ -45,6 +46,7 @@ $0: Usage: $0 [--verbose] [--showfiles] $filesopts
 __USAGE__
   unless @ARGV
 	&& GetOptions (verbose => \$Verbose,
+		       quiet => \$Quiet,
 		       showfiles => \$showfiles,
 		       map {+"build-$_", \$Build{$_}} @files, 'all');
   # Set them all to true
@@ -254,7 +256,7 @@ close MASTER;
 	    return;
 	  }
 	}
-	warn "$0: $file: cannot find =head1 NAME\n";
+	warn "$0: $file: cannot find =head1 NAME\n" unless $Quiet;
       }
     }
   }
