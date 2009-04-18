@@ -429,7 +429,7 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 [.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl
-	$(MINIPERL) autodoc.pl
+	$(MINIPERL) -"I[-.lib]" autodoc.pl
 
 perlpods : $(pod)
 	@ $(NOOP)
