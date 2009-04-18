@@ -289,6 +289,7 @@ my %METHOD_MAP =
     abs_path		=> 'fast_abs_path',
    },
 
+   # QNX4.  QNX6 has a $os of 'nto'.
    qnx =>
    {
     cwd			=> '_qnx_cwd',
@@ -327,7 +328,6 @@ my %METHOD_MAP =
   );
 
 $METHOD_MAP{NT} = $METHOD_MAP{MSWin32};
-$METHOD_MAP{nto} = $METHOD_MAP{qnx};
 
 
 # Find the pwd command in the expected locations.  We assume these
