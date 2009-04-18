@@ -972,7 +972,7 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	touch uni.data
 
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
-	$(RUN) ./miniperl$(EXE_EXT) autodoc.pl
+	$(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
 
 extra.pods: miniperl$(EXE_EXT)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
