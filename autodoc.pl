@@ -126,6 +126,12 @@ _EOF_
     close $fh or die "Can't close $filename: $!";
 }
 
+if (@ARGV) {
+    my $workdir = shift;
+    chdir $workdir
+        or die "Couldn't chdir to '$workdir': $!";
+}
+
 my $file;
 # glob() picks up docs from extra .c or .h files that may be in unclean
 # development trees.
