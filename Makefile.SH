@@ -454,6 +454,8 @@ mini_obj =  $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 ndt_obj = $(obj0) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 obj = $(ndt_obj) $(DTRACE_O)
 
+generated_pods = extra.pods pod/perlapi.pod pod/perlintern.pod
+
 lintflags = \
     -b \
     -n \
@@ -521,7 +523,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -969,6 +971,9 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib mktables -w
 	touch uni.data
 
+pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
+	$(RUN) ./miniperl$(EXE_EXT) autodoc.pl
+
 extra.pods: miniperl$(EXE_EXT)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
 	-@rm -f extra.pods
@@ -1174,7 +1179,7 @@ _mopup:
 	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
-	-rm -f perl.exp ext.libs extra.pods uni.data opmini.o perlmini.o
+	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
