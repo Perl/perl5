@@ -1460,7 +1460,7 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
-	cd .. && $(PERLEXE) autodoc.pl
+	$(PERLEXE) ..\autodoc.pl ..
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
