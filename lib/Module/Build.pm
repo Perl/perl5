@@ -54,6 +54,7 @@ my %OSTYPES = qw(
 		 interix   Unix
 		 gnu       Unix
 		 gnukfreebsd Unix
+		 nto       Unix
 
 		 dos       Windows
 		 MSWin32   Windows
