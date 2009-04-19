@@ -706,14 +706,14 @@ sub do_unix {
 
   $makefile_SH =~ s!(
 pod/perl[a-z0-9_]+\.pod: pod/perl[a-z0-9_]+\.pod
-	cd pod && \$\(LNS\) perl[a-z0-9_]+\.pod perl[a-z0-9_]+\.pod
+	\$\(LNS\) perl[a-z0-9_]+\.pod pod/perl[a-z0-9_]+\.pod
 )+!\0!gm;
 
   verify_contiguous($name, $makefile_SH, 'copy rules');
 
   my @copy_rules = map "
 pod/$_: pod/$Copies{$_}
-	cd pod && \$(LNS) $Copies{$_} $_
+	\$(LNS) $Copies{$_} pod/$_
 ", keys %Copies;
 
   $makefile_SH =~ s/\0+/join '', @copy_rules/se;
