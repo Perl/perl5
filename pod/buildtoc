@@ -698,14 +698,25 @@ sub do_unix {
   my $makefile_SH = join '', @_;
   die "$0: $name contains NUL bytes" if $makefile_SH =~ /\0/;
 
-  $makefile_SH =~ s/\n\s+-\@test -f \S+ && cd pod && \$\(LNS\) \S+ \S+ && cd \.\. && echo "\S+" >> extra.pods \# See buildtoc\n/\0/gm;
+  $makefile_SH =~ s{^(generated_pods = extra.pods).*}
+		   {join ' ', $1, map "pod/$_", sort keys %Generated, keys %Copies}mge;
+
+# pod/perldelta.pod: pod/perl511delta.pod
+# 	cd pod && $(LNS) perl511delta.pod perldelta.pod
+
+  $makefile_SH =~ s!(
+pod/perl[a-z0-9_]+\.pod: pod/perl[a-z0-9_]+\.pod
+	cd pod && \$\(LNS\) perl[a-z0-9_]+\.pod perl[a-z0-9_]+\.pod
+)+!\0!gm;
 
   verify_contiguous($name, $makefile_SH, 'copy rules');
 
-  my @copy_rules = map "\t-\@test -f pod/$Copies{$_} && cd pod && \$(LNS) $Copies{$_} $_ && cd .. && echo \"pod/$_\" >> extra.pods # See buildtoc",
-    keys %Copies;
+  my @copy_rules = map "
+pod/$_: pod/$Copies{$_}
+	cd pod && \$(LNS) $Copies{$_} $_
+", keys %Copies;
 
-  $makefile_SH =~ s/\0+/join "\n", '', @copy_rules, ''/se;
+  $makefile_SH =~ s/\0+/join '', @copy_rules/se;
   $makefile_SH;
 
 }
