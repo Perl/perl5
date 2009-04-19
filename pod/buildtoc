@@ -579,7 +579,7 @@ sub generate_nmake_2 {
   # Spot the special case
   local $Text::Wrap::columns = 76;
   my $line = wrap ("\t    ", "\t    ",
-		   join " ", sort keys %Copies,
+		   join " ", sort keys %Copies, keys %Generated,
 				  map {"perl$_.pod"} "vms", keys %Readmes);
   $line =~ s/$/ \\/mg;
   $line;
