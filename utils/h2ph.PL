@@ -809,6 +809,7 @@ sub build_preamble_if_necessary
 		    quotemeta($define{$_}), "\" } }\n\n";
 	    }
 	}
+	print PREAMBLE "\n1;\n";  # avoid 'did not return a true value' when empty
     close PREAMBLE               or die "Cannot close $preamble:  $!";
 }
 
