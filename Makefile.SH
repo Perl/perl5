@@ -454,7 +454,7 @@ mini_obj =  $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 ndt_obj = $(obj0) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 obj = $(ndt_obj) $(DTRACE_O)
 
-generated_pods = extra.pods pod/perlapi.pod pod/perlintern.pod
+generated_pods = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod
 
 lintflags = \
     -b \
@@ -974,6 +974,9 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
 	$(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
 
+pod/perldelta.pod: pod/perl5110delta.pod
+	cd pod && $(LNS) perl5110delta.pod perldelta.pod
+
 extra.pods: miniperl$(EXE_EXT)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
 	-@rm -f extra.pods
@@ -984,8 +987,6 @@ extra.pods: miniperl$(EXE_EXT)
 	done
 	-@rm -f pod/perlvms.pod
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
-	-@rm -f pod/perldelta.pod
-	-@test -f pod/perl5110delta.pod && cd pod && $(LNS) perl5110delta.pod perldelta.pod && cd .. && echo "pod/perldelta.pod" >> extra.pods # See buildtoc
 
 extras.make: perl$(EXE_EXT)
 	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) $(RUN) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
