@@ -2641,53 +2641,57 @@ M  5a7ebd3db9 2009/03/13 Add -E in the command-line usage in perl.pod
 			    y2038
 M  df3467db16 2009/03/14 Return OPERATOR('[') for '[' without falling throu
 M  f50fa36f2a 2009/03/14 Better test case for [perl #63854] Error parsing "
-.  319fab5061 2009/03/14 Create IO-Compress
-.  cee5ec9732 2009/03/14 Remove directories from manifest
-.  eb1dd64e3e 2009/03/14 Disambiguate mention of -E in perl.pod and in perl
-.  8f11c4a440 2009/03/15 Upgrade to IPC::SysV 2.01
-.  17c79f4337 2009/03/15 Add IPC::SysV to Porting/Maintainers.pl
-.  78b3516b6c 2009/03/15 Update UPSTREAM for Devel::PPPort
-.  7bb03b244e 2009/03/15 Upgrade to Devel::PPPort 3.17
-.  6210e03fb1 2009/03/18 Fix typo in English name of $&
-.  245490700b 2009/03/18 Doc fix: the /k regexp modifier should really be w
-.  a0df7637f6 2009/03/19 Upgrade to Module-Pluggable-3.9
+M  319fab5061 2009/03/14 Create IO-Compress
+M  cee5ec9732 2009/03/14 Remove directories from manifest
+M  eb1dd64e3e 2009/03/14 Disambiguate mention of -E in perl.pod and in perl
+M  8f11c4a440 2009/03/15 Upgrade to IPC::SysV 2.01
+M  17c79f4337 2009/03/15 Add IPC::SysV to Porting/Maintainers.pl
+M  78b3516b6c 2009/03/15 Update UPSTREAM for Devel::PPPort
+M  7bb03b244e 2009/03/15 Upgrade to Devel::PPPort 3.17
+M  6210e03fb1 2009/03/18 Fix typo in English name of $&
+M  245490700b 2009/03/18 Doc fix: the /k regexp modifier should really be w
+M  a0df7637f6 2009/03/19 Upgrade to Module-Pluggable-3.9
 M  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
-.  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
-.  53102b2bf3 2009/03/19 Bump Module-Pluggable VERSION following 4a28828fc8
-.  de9b652d38 2009/03/19 pod/perlreftut.pod: keep example in tune with the 
-.  38bb37b9aa 2009/03/20 Revert the op.c part of 3049cdab to enable shared 
-.  16bf6aa6d6 2009/03/20 Remove unnecessary MANIFEST file for IO-Compress
-.  baddfc4720 2009/03/21 Update CPANPLUS::Dist::Build to 0.16
-.  07abd197a8 2009/03/21 Correct a few file references in README files
-.  e57a4e52f2 2009/03/21 fix typo - s/was/what/ is to be ignored
-.  ac56ae2e85 2009/03/22 update MANIFEST for file removed by 16bf6aa6d68d98
-.  c966426a3b 2009/03/22 fix [RT #60034]. An equivalent fix was already in 
-.  7efcbeefb3 2009/03/22 Fixes for ext/compress
-# XXX BRANCH
-.  76467b2a65 2009/03/23 Upgrade to ExtUtils-MakeMaker-6.50
-.  18a10db9e0 2009/03/24 Mark Florian Ragwitz as the NEXT maintainer. NEXT 
-.  d5fe29ea03 2009/03/24 Mark upstream as blead for Net::Ping.
-.  3dae3b3445 2009/03/24 Merge branch 'blead' of ssh://stevep@perl5.git.per
+M  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
+M  53102b2bf3 2009/03/19 Bump Module-Pluggable VERSION following 4a28828fc8
+M  de9b652d38 2009/03/19 pod/perlreftut.pod: keep example in tune with the 
+!  38bb37b9aa 2009/03/20 Revert the op.c part of 3049cdab to enable shared 
+			    need to think about it some more
+M  16bf6aa6d6 2009/03/20 Remove unnecessary MANIFEST file for IO-Compress
+M  baddfc4720 2009/03/21 Update CPANPLUS::Dist::Build to 0.16
+M  07abd197a8 2009/03/21 Correct a few file references in README files
+M  e57a4e52f2 2009/03/21 fix typo - s/was/what/ is to be ignored
+M  ac56ae2e85 2009/03/22 update MANIFEST for file removed by 16bf6aa6d68d98
+M  c966426a3b 2009/03/22 fix [RT #60034]. An equivalent fix was already in 
+M  7efcbeefb3 2009/03/22 Fixes for ext/compress
+M  76467b2a65 2009/03/23 Upgrade to ExtUtils-MakeMaker-6.50
+M  18a10db9e0 2009/03/24 Mark Florian Ragwitz as the NEXT maintainer. NEXT 
+M  d5fe29ea03 2009/03/24 Mark upstream as blead for Net::Ping.
+R  3dae3b3445 2009/03/24 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: d5fe29ea03 18a10db9e0
-.  373b131131 2009/03/24 Add a SEE ALSO section based on suggestions from D
-.  6f63574e65 2009/03/24 Fix for regular expressions for RFC2822.
-.  2d373db117 2009/03/24 For some reason, the core version and the cpan ver
-.  c331296618 2009/03/24 Fix perl #63924: shmget limited to 32 bit segment 
-.  f14bcc5683 2009/03/24 Merge branch 'blead' of ssh://perl5.git.perl.org/g
+				individual commits merged
+M  373b131131 2009/03/24 Add a SEE ALSO section based on suggestions from D
+M  6f63574e65 2009/03/24 Fix for regular expressions for RFC2822.
+M  2d373db117 2009/03/24 For some reason, the core version and the cpan ver
+M  c331296618 2009/03/24 Fix perl #63924: shmget limited to 32 bit segment 
+R  f14bcc5683 2009/03/24 Merge branch 'blead' of ssh://perl5.git.perl.org/g
 				MERGE: c331296618 2d373db117
-.  ce1534abac 2009/03/24 Make regen_perly.pl compatible with bison 2.4
-.  aae7e7b3d1 2009/03/24 Update the version requirement message in regen_pe
-.  86247f3d60 2009/03/25 Upgrade to Encode-2.33.
-.  3d43828503 2009/03/25 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				individual commits merged
+M  ce1534abac 2009/03/24 Make regen_perly.pl compatible with bison 2.4
+M  aae7e7b3d1 2009/03/24 Update the version requirement message in regen_pe
+M  86247f3d60 2009/03/25 Upgrade to Encode-2.33.
+R  3d43828503 2009/03/25 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: 86247f3d60 aae7e7b3d1
-.  9b33fb8e6c 2009/03/25 Add SEE ALSO's to find2perl and File::Find.
-.  036055ae9a 2009/03/25 [perl #63914] Time::Piece reports timezone incorre
+				individual commits merged
+M  9b33fb8e6c 2009/03/25 Add SEE ALSO's to find2perl and File::Find.
+M  036055ae9a 2009/03/25 [perl #63914] Time::Piece reports timezone incorre
 .  06b0438142 2009/03/25 find2perl (was Re: help unblock me from *@perl.org
 .  281206e6bb 2009/03/25 One more to ignore for metaconfig
 .  5086dff9f4 2009/03/25 Detection of IPv6 clueful functions by Configure (
 .  d7fba2bf7c 2009/03/25 IPv6 config variables for the other OS's
 .  d002ef56a2 2009/03/25 Move Module:Pluggable tests from t/Module_Pluggabl
 .  83c6af6020 2009/03/25 d002ef56a2861d99 didn't fix the Makefile.PL to ref
+# XXX BRANCH
 .  8c8d0d995d 2009/03/25 Add new overloading type.
 .  9846fe2208 2009/03/25 Run overload.pl.
 .  d89f1457dd 2009/03/25 Tests for -X overloading.
@@ -2744,7 +2748,7 @@ M  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
 .  7536ed5788 2009/03/28 In Perl_sv_setsv_cow(), dstr can be NULL.
 .  4b1c7d9edb 2009/03/28 Don't COW PVFMs, as the IVX is now used for FmLINE
 .  a214957f7e 2009/03/29 Don't call SvPV_const() on the method name at the 
-.  d4d72fe625 2009/03/29 Make Time::Piece use the init_tm() in util.c, bump
+M  d4d72fe625 2009/03/29 Make Time::Piece use the init_tm() in util.c, bump
 .  a773d2c778 2009/03/29 DB_File 1.820: Remove MAN3PODS => {}
 .  51683ce6d9 2009/03/29 Update to Unicode::Normalize 1.03
 .  9340c80aae 2009/03/29 In Perl_newCONSTSUB(), sv should not be NULL.
@@ -2831,3 +2835,17 @@ M  cf3f0ffbff 2009/03/29 provide minimal documentation for the MUTABLE_*()
 .  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
 .  512e1353c9 2009/04/14 Add file missed in previous commit.
 .  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
+.  edd0a813ce 2009/04/16 Update CPANPLUS::Dist::Build to 0.22
+.  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
+.  c1a2df7619 2009/04/16 Add tests to verify that h2ph output compiles and 
+.  c0cc52e96e 2009/04/16 Squelch 'Constant subroutine ... undefined' warnin
+.  b36d99fa00 2009/04/16 Data::Dumper hash iterator needs to be reset on al
+.  ea6189f6ad 2009/04/16 Bump VERSION of Data::Dumper
+.  4acdd4cdd4 2009/04/16 Ignore attributes.pm in lib since it's now an XS m
+.  bb21036d6b 2009/04/16 Avoid loading Config, as we don't need to distingu
+.  f1aeb07864 2009/04/16 Ignore some autogenerated makefiles
+.  d0fc6d8d26 2009/04/17 Remove last vestiges of USE_WIN32_RTL_ENV
+.  8d0cd07e60 2009/04/17 Add reference to MS KB article describing leak in 
+.  848ad75c71 2009/04/17 In autodoc.pl, remove the unused parameters and fu
+.  bc35008162 2009/04/17 In autodoc.pl, inline and hence eliminate walk_tab
+.  6e0733998e 2009/04/17 Fix failing Time-Piece tests on Win32

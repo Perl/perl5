@@ -44,8 +44,8 @@ some modules have been moved from F<lib/> to F<ext/>. This is purely a
 source tarball change, and should make no difference to the compilation or
 installation of perl, unless you have a very customised build process that
 explicitly relies on this structure, or which hard-codes the C<nonxs_ext>
-F<Configure> parameter. Specifically, this change does not alter the
-location of any files in the final installation.
+F<Configure> parameter. Specifically, this change does not by default
+alter the location of any files in the final installation.
 
 =back
 
@@ -145,11 +145,11 @@ C<CPAN> upgraded from version 1.9205 to 1.93_03
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.14
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.16
 
 =item *
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.16
+C<Devel::PPPort> upgraded from version 3.13 to 3.17
 
 =item *
 
@@ -166,7 +166,7 @@ bleed/maint
 
 =item *
 
-C<Encode> upgraded from version 2.23 to 2.32
+C<Encode> upgraded from version 2.23 to 2.33
 
 =item *
 
@@ -174,7 +174,7 @@ C<Filter::Simple> upgraded from version 0.82 to 0.84
 
 =item *
 
-C<IPC::SysV> upgraded from version 1.05 to 2.00_02 XXX
+C<IPC::SysV> upgraded from version 1.05 to 2.01
 
 =item *
 
@@ -191,7 +191,7 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.49_01
+C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.50
 
 
 =item *
@@ -245,6 +245,10 @@ C<Module::Load::Conditional> upgraded from version 0.22 to 0.30
 =item *
 
 C<Module::Loaded> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<Module::Pluggable> upgraded from version 3.6 to 3.9_01 XXX
 
 =item *
 
@@ -314,7 +318,7 @@ C<Time::HiRes> upgraded from version 1.9711 to 1.9719
 
 =item *
 
-C<Time::Piece> upgraded from version 1.12 to 1.13_02
+C<Time::Piece> upgraded from version 1.12 to 1.13_03 XXX
 
 =item *
 
@@ -478,6 +482,18 @@ C<ops>.  Previously it was erroneously treated like string C<eval>.
 In 5.10.0, the two characters C<[~> were sometimes parsed as the smart
 match operator (C<~~>) [RT #63854].
 
+=item *
+
+In 5.10.0, the C<*> quantifier in patterns was sometimes treated as
+C<{0,32767}> [RT #60034]. For example, this match would fail:
+
+    ("ab" x 32768) =~ /^(ab)*$/
+
+=item *
+
+C<shmget> was limited to a 32 bit segment size on a 64 bit OS [RT #63924].
+
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -514,10 +530,11 @@ The following items are now deprecated.
 
 =item *
 
-C<Switch> is buggy and should be avoided where possible. From perl 5.11.0
-onwards it is intended that any use of the core version of this module
-will emit a warning, and that the module will eventually be removed from
-the core (probably in perl 5.14.0).
+C<Switch> is buggy and should be avoided. From perl 5.11.0 onwards it is
+intended that any use of the core version of this module will emit a
+warning, and that the module will eventually be removed from the core
+(probably in perl 5.14.0). See L<perlsyn/"Switch statements"> for its
+replacement.
 
 =item *
 
