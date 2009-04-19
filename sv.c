@@ -3889,12 +3889,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             }
 #ifdef PERL_OLD_COPY_ON_WRITE
             if (!isSwipe) {
-                /* I believe I should acquire a global SV mutex if
-                   it's a COW sv (not a shared hash key) to stop
-                   it going un copy-on-write.
-                   If the source SV has gone un copy on write between up there
-                   and down here, then (assert() that) it is of the correct
-                   form to make it copy on write again */
                 if ((sflags & (SVf_FAKE | SVf_READONLY))
                     != (SVf_FAKE | SVf_READONLY)) {
                     SvREADONLY_on(sstr);
@@ -3937,7 +3931,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 SvCUR_set(dstr, cur);
                 SvREADONLY_on(dstr);
                 SvFAKE_on(dstr);
-                /* Relesase a global SV mutex.  */
             }
             else
                 {	/* Passes the swipe test.  */
@@ -4342,7 +4335,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
-        /* At this point I believe I should acquire a global SV mutex.  */
 	if (SvFAKE(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
@@ -4383,7 +4375,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	}
 	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ "%s", PL_no_modify);
-        /* At this point I believe that I can drop the global SV mutex.  */
     }
 #else
     if (SvREADONLY(sv)) {
@@ -5568,8 +5559,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	else if (SvPVX_const(sv)) {
             if (SvIsCOW(sv)) {
-                /* I believe I need to grab the global SV mutex here and
-                   then recheck the COW status.  */
                 if (DEBUG_C_TEST) {
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
                     sv_dump(sv);
@@ -5580,7 +5569,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		}
 
-                /* And drop it here.  */
                 SvFAKE_off(sv);
             } else if (SvLEN(sv)) {
                 Safefree(SvPVX_const(sv));
