@@ -10,6 +10,7 @@ use FindBin;
 use Text::Tabs;
 use Text::Wrap;
 use Getopt::Long;
+use Carp;
 
 no locale;
 
@@ -595,6 +596,13 @@ sub generate_pod_mak {
   $line;
 }
 
+sub verify_contiguous {
+  my ($name, $content, $what) = @_;
+  my $sections = () = $content =~ m/\0+/g;
+  croak("$0: $name contains no $what") if $sections < 1;
+  croak("$0: $name contains discontiguous $what") if $sections > 1;
+}
+
 sub do_manifest {
   my $name = shift;
   my @manifest =
@@ -614,9 +622,7 @@ sub do_nmake {
   my $makefile = join '', @_;
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/^\tcopy \.\.\\README.*\n/\0/gm;
-  my $sections = () = $makefile =~ m/\0+/g;
-  die "$0: $name contains no README copies" if $sections < 1;
-  die "$0: $name contains discontiguous README copies" if $sections > 1;
+  verify_contiguous($name, $makefile, 'README copies');
   # Now remove the other copies that follow
   1 while $makefile =~ s/\0\tcopy .*\n/\0/gm;
   $makefile =~ s/\0+/join ("", &generate_nmake_1)/se;
@@ -661,10 +667,7 @@ sub do_vms {
   my $makefile = join '', @_;
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/\npod\d* =[^\n]*/\0/gs;
-  my $sections = () = $makefile =~ m/\0+/g;
-  die "$0: $name contains no pod assignments" if $sections < 1;
-  die "$0: $name contains $sections discontigous pod assignments"
-    if $sections > 1;
+  verify_contiguous($name, $makefile, 'pod assignments');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_1/se;
 
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
@@ -678,19 +681,13 @@ sub do_vms {
 		 [^\n]+\n	# Another line
 		 [^\n]+\Q[.lib.pods]\E\n		# ends [.lib.pods]
 		    /\0/gsx;
-  $sections = () = $makefile =~ m/\0+/g;
-  die "$0: $name contains no copy rules" if $sections < 1;
-  die "$0: $name contains $sections discontigous copy rules"
-    if $sections > 1;
+  verify_contiguous($name, $makefile, 'copy rules');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_2/se;
 
 # Looking for rules like this:
 #	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
   $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E[a-z]+\.pod;\*\n)+!\0!sg;
-  $sections = () = $makefile =~ m/\0+/g;
-  die "$0: $name contains no delete rules" if $sections < 1;
-  die "$0: $name contains $sections discontigous delete rules"
-    if $sections > 1;
+  verify_contiguous($name, $makefile, 'delete rules');
   $makefile =~ s/\0+/join "\n", &generate_descrip_mms_3, ''/se;
 
   $makefile;
@@ -703,11 +700,7 @@ sub do_unix {
 
   $makefile_SH =~ s/\n\s+-\@test -f \S+ && cd pod && \$\(LNS\) \S+ \S+ && cd \.\. && echo "\S+" >> extra.pods \# See buildtoc\n/\0/gm;
 
-  my $sections = () = $makefile_SH =~ m/\0+/g;
-
-  die "$0: $name contains no copy rules" if $sections < 1;
-  die "$0: $name contains $sections discontigous copy rules"
-    if $sections > 1;
+  verify_contiguous($name, $makefile_SH, 'copy rules');
 
   my @copy_rules = map "\t-\@test -f pod/$Copies{$_} && cd pod && \$(LNS) $Copies{$_} $_ && cd .. && echo \"pod/$_\" >> extra.pods # See buildtoc",
     keys %Copies;
