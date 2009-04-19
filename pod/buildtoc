@@ -562,6 +562,11 @@ SNIP
    sort keys %Pods, keys %Readmepods;
 }
 
+sub generate_descrip_mms_3 {
+  map qq{\t- If F\$Search("[.pod]$_").nes."" Then Delete/NoConfirm/Log [.pod]$_;*},
+    sort keys %Generated, keys %Copies;
+}
+
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
   (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
@@ -678,6 +683,16 @@ sub do_vms {
   die "$0: $name contains $sections discontigous copy rules"
     if $sections > 1;
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_2/se;
+
+# Looking for rules like this:
+#	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
+  $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E[a-z]+\.pod;\*\n)+!\0!sg;
+  $sections = () = $makefile =~ m/\0+/g;
+  die "$0: $name contains no delete rules" if $sections < 1;
+  die "$0: $name contains $sections discontigous delete rules"
+    if $sections > 1;
+  $makefile =~ s/\0+/join "\n", &generate_descrip_mms_3, ''/se;
+
   $makefile;
 }
 
