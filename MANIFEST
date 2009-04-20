@@ -3603,6 +3603,7 @@ pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
+pod/perlvms.pod			Perl notes for VMS
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
@@ -3714,7 +3715,7 @@ README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
 README.uts			Perl notes for UTS
 README.vmesa			Perl notes for VM/ESA
-README.vms			Perl notes for VMS
+README.vms			Notes about installing the VMS port
 README.vos			Perl notes for Stratus VOS
 README.win32			Perl notes for Windows
 reentr.c			Reentrant interfaces
@@ -4386,7 +4387,6 @@ vms/make_command.com		record MM[SK] command used to build Perl
 vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
 vms/myconfig.com		record local configuration info for bug report
-vms/perlvms.pod			VMS-specific additions to Perl documentation
 vms/sockadapt.c			glue for SockshShr socket support
 vms/sockadapt.h			glue for SockshShr socket support
 vms/test.com			DCL driver for regression tests

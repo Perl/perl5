@@ -134,6 +134,7 @@ POD = \
 	perlunitut.pod	\
 	perlutil.pod	\
 	perlvar.pod	\
+	perlvms.pod	\
 	perlxs.pod	\
 	perlxstut.pod	
 
@@ -257,6 +258,7 @@ MAN = \
 	perlunitut.man	\
 	perlutil.man	\
 	perlvar.man	\
+	perlvms.man	\
 	perlxs.man	\
 	perlxstut.man	
 
@@ -379,6 +381,7 @@ HTML = \
 	perlunitut.html	\
 	perlutil.html	\
 	perlvar.html	\
+	perlvms.html	\
 	perlxs.html	\
 	perlxstut.html	
 # not perltoc.html
@@ -503,6 +506,7 @@ TEX = \
 	perlunitut.tex	\
 	perlutil.tex	\
 	perlvar.tex	\
+	perlvms.tex	\
 	perlxs.tex	\
 	perlxstut.tex	
 

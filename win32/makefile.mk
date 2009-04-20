@@ -1454,7 +1454,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.uts      ..\pod\perluts.pod
 	copy ..\README.vmesa    ..\pod\perlvmesa.pod
-	copy ..\README.vms      ..\pod\perlvms.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perl5101delta.pod ..\pod\perldelta.pod
@@ -1532,8 +1531,8 @@ distclean: realclean
 	    perlmint.pod perlmpeix.pod perlnetware.pod perlopenbsd.pod \
 	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
 	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \
-	    perltru64.pod perltw.pod perluts.pod perlvmesa.pod perlvms.pod \
-	    perlvms.pod perlvos.pod perlwin32.pod \
+	    perltru64.pod perltw.pod perluts.pod perlvmesa.pod perlvos.pod \
+	    perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \

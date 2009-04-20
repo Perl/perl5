@@ -142,8 +142,7 @@ if (defined $delta_source) {
   if (defined $delta_target) {
     # This way round so that keys can act as a MANIFEST skip list
     # Targets will aways be in the pod directory. Currently we can only cope
-    # with sources being in the same directory. Fix this and do perlvms.pod
-    # with this?
+    # with sources being in the same directory.
     $Copies{$delta_target} = $delta_source;
   } else {
     die "$0: delta source defined but not target";
@@ -531,7 +530,9 @@ sub generate_manifest_pod {
     sort grep {!$Copies{"$_.pod"}} grep {!$Generated{"$_.pod"}} keys %Pods;
 }
 sub generate_manifest_readme {
-  generate_manifest map {["README.$_", $Readmes{$_}]} sort keys %Readmes;
+  generate_manifest sort {$a->[0] cmp $b->[0]}
+    ["README.vms", "Notes about installing the VMS port"],
+      map {["README.$_", $Readmes{$_}]} keys %Readmes;
 }
 
 sub generate_roffitall {
@@ -555,10 +556,10 @@ sub generate_descrip_mms_1 {
 }
 
 sub generate_descrip_mms_2 {
-  map {sprintf <<'SNIP', $_, $_ eq 'perlvms' ? 'vms' : 'pod', $_}
-[.lib.pods]%s.pod : [.%s]%s.pod
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
+  map {<<"SNIP"}
+[.lib.pods]$_.pod : [.pod]$_.pod
+	\@ If F\$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
+	Copy/NoConfirm/Log \$(MMS\$SOURCE) [.lib.pods]
 SNIP
    sort keys %Pods, keys %Readmepods;
 }
@@ -581,7 +582,7 @@ sub generate_nmake_2 {
   local $Text::Wrap::columns = 76;
   my $line = wrap ("\t    ", "\t    ",
 		   join " ", sort keys %Copies, keys %Generated,
-				  map {"perl$_.pod"} "vms", keys %Readmes);
+				  map {"perl$_.pod"} keys %Readmes);
   $line =~ s/$/ \\/mg;
   $line;
 }
