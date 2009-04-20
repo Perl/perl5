@@ -1090,7 +1090,6 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
-	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.aix      ..\pod\perlaix.pod
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.apollo   ..\pod\perlapollo.pod
