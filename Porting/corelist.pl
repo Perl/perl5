@@ -33,16 +33,18 @@ find(sub {
 	    );
     $module =~ s{/}{::}g;
     $module =~ s/(\.pm|_pm\.PL)$//;
-    $lines{sprintf "\t%-24s=> $version,\n", "'$module'"}++;
+    $lines{$module} = $version;
 }, 'lib', 'ext', 'vms/ext', 'symbian/ext');
 
--e 'configpm' and $lines{sprintf "\t%-24s=> undef,\n", "'Config'"}++;
+-e 'configpm' and $lines{Config} = 'undef';
 
 if (open my $ucdv, "<", "lib/unicore/version") {
     chomp (my $ucd = <$ucdv>);
-    $lines{sprintf "\t%-24s=> '$ucd',\n", "'Unicode'"}++;
+    $lines{Unicode} = "'$ucd'";
     close $ucdv;
     }
 print "    $] => {\n";
-print sort keys %lines;
+foreach (sort keys %lines) {
+    printf "\t%-24s=> $lines{$_},\n", "'$_'";
+}
 print "    },\n";
