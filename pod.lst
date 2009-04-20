@@ -205,7 +205,7 @@ r perlsymbian		Perl notes for Symbian
 r perltru64		Perl notes for Tru64
 r perluts		Perl notes for UTS
 r perlvmesa		Perl notes for VM/ESA
-r perlvms		Perl notes for VMS
+  perlvms		Perl notes for VMS
 r perlvos		Perl notes for Stratus VOS
 r perlwin32		Perl notes for Windows
 

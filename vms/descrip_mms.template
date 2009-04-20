@@ -1359,7 +1359,7 @@ makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
-[.lib.pods]perlvms.pod : [.vms]perlvms.pod
+[.lib.pods]perlvms.pod : [.pod]perlvms.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
