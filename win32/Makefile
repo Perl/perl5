@@ -1136,7 +1136,7 @@ utils: $(PERLEXE) $(X2P)
 	$(PERLEXE) lib_pm.PL
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
-	$(PERLEXE) autodoc.pl ..
+	$(PERLEXE) ..\autodoc.pl ..
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
