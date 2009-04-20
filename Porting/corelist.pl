@@ -22,16 +22,15 @@ find(sub {
 	and ( $module =~ s{^(.*)/lib/\1\b}{$1},
 	      $module =~ s{(\w+)/\1\b}{$1},
 	      $module =~ s{^B/O}{O},
-	      $module =~ s{^IO_Compress_Base/lib/}{},
-	      $module =~ s{^IO_Compress_Zlib/(?:lib/)?}{},
-	      $module =~ s{^Devel/PPPort}{Devel},
+	      $module =~ s{^Devel-PPPort}{Devel},
 	      $module =~ s{^Encode/encoding}{encoding},
-	      $module =~ s{^IPC/SysV/}{IPC/},
-	      $module =~ s{^List/Util/lib/Scalar}{Scalar},
-	      $module =~ s{^MIME/Base64/QuotedPrint}{MIME/QuotedPrint},
+	      $module =~ s{^IPC-SysV/}{IPC/},
+	      $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
 	      $module =~ s{^(?:DynaLoader|Errno|Opcode)/}{},
 	    );
     $module =~ s{/}{::}g;
+    $module =~ s{-}{::}g;
+    $module =~ s{^.*::lib::}{};
     $module =~ s/(\.pm|_pm\.PL)$//;
     $lines{$module} = $version;
 }, 'lib', 'ext', 'vms/ext', 'symbian/ext');
