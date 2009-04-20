@@ -681,7 +681,7 @@ entries apply in those cases.
     ======  =====     =====================    =============
     Any     undef     undefined                !defined $a
 
-    (overloading trumps everything below)
+    Any     Object   invokes ~~ overloading on $object, or dies
 
     Hash    CodeRef   sub truth for each key[1] !grep { !$b->($_) } keys %$a
     Array   CodeRef   sub truth for each elt[1] !grep { !$b->($_) } @$a
@@ -730,12 +730,13 @@ C<grep>, the smart match operator will short-circuit whenever it can.
 
 You can change the way that an object is matched by overloading
 the C<~~> operator. This trumps the usual smart match semantics.
-See L<overload>.
+See L<overload>. Since smart matching dispatch is driven by the
+right hand side argument, overloading applies only when the object
+is on the right of C<~~>.
 
 It should be noted that C<~~> will refuse to work on objects that
 don't overload it (in order to avoid relying on the object's
-underlying structure). The only exception is when testing for
-definedness with C<$object ~~ undef>.
+underlying structure).
 
 =head3 Differences from Perl 6
 
