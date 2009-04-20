@@ -145,7 +145,7 @@ C<CPAN> upgraded from version 1.9205 to 1.93_03
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.16
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.20
 
 =item *
 
@@ -153,7 +153,7 @@ C<Devel::PPPort> upgraded from version 3.13 to 3.17
 
 =item *
 
-C<DB_File> upgraded from version 1.816_1 to 1.819
+C<DB_File> upgraded from version 1.816_1 to 1.820
 
 =item *
 
@@ -209,6 +209,10 @@ C<autodie>.
 
 =item *
 
+C<Getopt::Long> upgraded from version 2.37 to 2.38
+
+=item *
+
 C<Hash::Util::FieldHash> upgraded from version 1.03 to 1.03_01. XXX
 This fixes a memory leak.
 
@@ -249,6 +253,10 @@ C<Module::Loaded> upgraded from version 0.01 to 0.02
 =item *
 
 C<Module::Pluggable> upgraded from version 3.6 to 3.9_01 XXX
+
+=item *
+
+C<NEXT> upgraded from version 0.60_01 to 0.63
 
 =item *
 
@@ -322,6 +330,10 @@ C<Time::Piece> upgraded from version 1.12 to 1.13_03 XXX
 
 =item *
 
+C<Unicode::Normalize> upgraded from version 1.02 to 1.03
+
+=item *
+
 C<Unicode::UCD> upgraded from version 0.25 to 0.27
 
 =item *
@@ -336,7 +348,15 @@ C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
 
 =head1 Utility Changes
 
+=head2 F<h2ph>
+
+Now looks in C<include-fixed> too, which is a recent addition to gcc's
+search path.
+
+
 =head2 F<h2xs>
+
+No longer incorrectly treats enum values like macros.
 
 Now handles C++ style constants (C<//>) properly in enums.
 
