@@ -516,24 +516,19 @@ This construct is very flexible and powerful. For example:
 	when (undef) {
 	    say '$foo is undefined';
 	}
-	
 	when ("foo") {
 	    say '$foo is the string "foo"';
 	}
-	
 	when ([1,3,5,7,9]) {
 	    say '$foo is an odd digit';
 	    continue; # Fall through
 	}
-	
 	when ($_ < 100) {
 	    say '$foo is numerically less than 100';
 	}
-	
 	when (\&complicated_check) {
 	    say 'a complicated check for $foo is true';
 	}
-	
 	default {
 	    die q(I don't know what to do with $foo);
 	}
