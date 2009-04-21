@@ -432,8 +432,8 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perldelta.pod : [.pod]perl5100delta.pod
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-[.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl
-	$(MINIPERL) -"I[-.lib]" autodoc.pl
+[.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl $(MINIPERL_EXE)
+	$(MINIPERL) autodoc.pl
 
 [.pod]perltoc.pod: [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE) EXT
 	$(PERL) [.pod]perltoc "-q" "--build-toc"
