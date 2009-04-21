@@ -249,6 +249,10 @@ XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # in the distribution, so it's OK if this doesn't work; it's here to make
 # life easier for those who modify Perl and rebuild it.
 INSTPERL = perl
+# Macros to invoke a copy of perl during the build.  Targets which
+# are built using these macros should depend on $(PERL_EXE) EXT
+PERL_EXE = Sys$Disk:[]perl$(E)
+PERL = MCR $(PERL_EXE) "-I[.lib]"
 
 # Space-separated list of "static" extensions to build into perlshr (case counts).
 MYEXT = DynaLoader
@@ -431,8 +435,8 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl
 	$(MINIPERL) -"I[-.lib]" autodoc.pl
 
-perlpods : $(pod)
-	@ $(NOOP)
+[.pod]perltoc.pod: [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE) EXT
+	$(PERL) [.pod]perltoc "-q" "--build-toc"
 
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
@@ -1861,6 +1865,7 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("[.pod]perlapi.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlapi.pod;*
 	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
 	- If F$Search("[.pod]perlintern.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlintern.pod;*
+	- If F$Search("[.pod]perltoc.pod").nes."" Then Delete/NoConfirm/Log [.pod]perltoc.pod;*
 	- @extra_pods CLEAN
 	- If F$Search("unpushed.h").nes."" Then Delete/NoConfirm/Log unpushed.h;*
 	- If F$Search("[.lib]Config_git.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_git.pl;*
