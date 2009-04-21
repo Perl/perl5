@@ -768,7 +768,7 @@ Vmsperl pages on the web include:
 =head1 SEE ALSO
 
 Perl information for users and programmers about the port of perl to VMS is
-available from the [.VMS]PERLVMS.POD file that gets installed as L<perlvms>.
+available from the [.POD]PERLVMS.POD file that gets installed as L<perlvms>.
 For administrators the perlvms document also includes a detailed discussion 
 of extending vmsperl with CPAN modules after Perl has been installed.
 
