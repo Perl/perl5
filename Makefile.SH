@@ -975,7 +975,7 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 # perl$(EXE_EXT) and ext because buildtoc uses Text::Wrap uses re
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
-pod/perltoc.pod: $(perltoc_pod_prereqs) perl$(EXE_EXT) ext pod/buildtoc
+pod/perltoc.pod: $(perltoc_pod_prereqs) perl$(EXE_EXT) $(ext) pod/buildtoc
 	$(RUN) ./perl$(EXE_EXT) -Ilib pod/buildtoc --build-toc -q
 
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
