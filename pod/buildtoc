@@ -699,8 +699,10 @@ sub do_unix {
   my $makefile_SH = join '', @_;
   die "$0: $name contains NUL bytes" if $makefile_SH =~ /\0/;
 
-  $makefile_SH =~ s{^(generated_pods = extra.pods).*}
-		   {join ' ', $1, map "pod/$_", sort keys %Generated, keys %Copies}mge;
+  $makefile_SH =~ s{^(perltoc_pod_prereqs = extra.pods).*}
+		   {join ' ', $1, map "pod/$_",
+			sort keys %Copies, grep {!/perltoc/} keys %Generated
+		    }mge;
 
 # pod/perldelta.pod: pod/perl511delta.pod
 # 	cd pod && $(LNS) perl511delta.pod perldelta.pod

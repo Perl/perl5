@@ -454,7 +454,8 @@ mini_obj =  $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 ndt_obj = $(obj0) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 obj = $(ndt_obj) $(DTRACE_O)
 
-generated_pods = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod
+perltoc_pod_prereqs = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod
+generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 
 lintflags = \
     -b \
@@ -970,6 +971,12 @@ unidatafiles $(unidatafiles): uni.data
 uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib mktables -w
 	touch uni.data
+
+# perl$(EXE_EXT) and ext because buildtoc uses Text::Wrap uses re
+# But also this ensures that all extensions are built before we try to scan
+# them, which picks up Devel::PPPort's documentation.
+pod/perltoc.pod: $(perltoc_pod_prereqs) perl$(EXE_EXT) ext pod/buildtoc
+	$(RUN) ./perl$(EXE_EXT) -Ilib pod/buildtoc --build-toc -q
 
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
 	$(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
