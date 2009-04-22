@@ -47,6 +47,12 @@ explicitly relies on this structure, or which hard-codes the C<nonxs_ext>
 F<Configure> parameter. Specifically, this change does not by default
 alter the location of any files in the final installation.
 
+=item *
+
+As part of the C<Test::Harness> 2.x to 3.x upgrade, the experimental
+C<Test::Harness::Straps> module has been removed. See 
+See L</"Updated Modules"> for more details.
+
 =back
 
 
@@ -94,7 +100,7 @@ The bundled version is 1.999.
 
 =item *
 
-C<Compress::Raw::Bzip2> has been added to the core (version 2.015).
+C<Compress::Raw::Bzip2> has been added to the core (version 2.018).
 
 =item *
 
@@ -141,11 +147,19 @@ C<B::Deparse> upgraded from version 0.83 to 0.87
 
 =item *
 
+C<CGI> upgraded from version 3.29 to 1.93_03 
+
+=item *
+
 C<CPAN> upgraded from version 1.9205 to 1.93_03 
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.20
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.22
+
+=item *
+
+C<Data::Dumper> upgraded from version 2.121_14 to 2.121_19
 
 =item *
 
@@ -307,6 +321,12 @@ C<Term::ANSIColor> upgraded from version 1.12 to 2.00
 
 C<Test::Harness> upgraded from version 2.64 to 3.16
 XXX major upgrade - add some blurb ???
+
+Note that one side-effect of the 2.x to 3.x upgrade is that the
+experimental C<Test::Harness::Straps> module (and its supporting
+C<Assert>, C<Iterator>, C<Point> and C<Results> modules) have been
+removed. If you still need this, then they are available in the
+(unmaintained) C<Test-Harness-Straps> distribution on CPAN.
 
 =item *
 

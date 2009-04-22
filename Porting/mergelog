@@ -1775,9 +1775,9 @@ M  f6c12373ef 2008/12/21 Document how commiters can keep 'origin' as a git
 R  453f08842f 2008/12/21 Individual commits merged instead
 				MERGE: 6051489bf3 f6c12373ef
 M  d82a90c178 2008/12/21 A short introduction to git bisect.
-m  3b46207fed 2008/12/22 lib/CGI.pm and lib/Text/Balanced.pm part of these
+m  3b46207fed 2008/12/22 lib/Text/Balanced.pm part of these
 				pod fixes temporarily removed (c4f43d3);
-				with until they've been merged upstream
+				wait until they've been merged upstream
 M  09645c26bf 2008/12/22 Note the --author option of git commit, and theref
 M  9d68b7edc4 2008/12/23 Add a section on committing to maintenance version
 M  8002990476 2008/12/23 Add a new Porting/podtidy to reformat pod using Po
@@ -2838,57 +2838,96 @@ M  0e4fe7cb8f 2009/04/09 Update CPANPLUS::Dist::Build to 0.20
 			    see 036d8bd42e
 M  ee6d2783b2 2009/04/09 Don't SEGV while warning about redefining the form
 M  f1a7681278 2009/04/10 Upgrade to NEXT-0.63.
-.  d62c72f641 2009/04/12 Remove attrs, which has been deprecated since 1999
-.  674e4532c9 2009/04/12 Sort the MANIFEST.
-.  718f7b5acf 2009/04/12 Rebuild pod/perltoc.pod.
-.  cee202b7be 2009/04/12 Eliminate "Old Perl threads tutorial", which descr
-.  8e5dadda1c 2009/04/12 Deprecate use of the attribute :locked on subrouti
-.  42f6aa011a 2009/04/12 Remove #ifdef CVf_LVALUE/#endif - LVALUE subs aren
-.  48462a74af 2009/04/12 Convert xsutils.c and lib/attributes.pm to a regul
-.  c32124fea7 2009/04/12 Deprecate using "locked" with the attributes pragm
-.  f1a3ce43fb 2009/04/12 Deprecate using "unique" with the attributes pragm
-.  6db6f3536f 2009/04/12 s/locked/lvalue/ in the examples, and remove menti
-.  009f650f63 2009/04/12 Remove a link to the attrs pragma, which has now b
-.  d32faaf3b4 2009/04/13 GvUNIQUE* have been defined as 0 since 2005/06/30 
-.  e95ab0c0d2 2009/04/13 Remove CVf_LOCKED and CvLOCKED*(), now that nothin
-.  b871937fe0 2009/04/13 Refactor the SKIP parser to also handle TODOs. TOD
-.  6ee4ed1065 2009/04/13 Propagate the upgraded TODO/SKIP parser from ext/B
-.  f9cd5d9f11 2009/04/13 Tweak t/lib/common.pl to use test.pl's (better) te
-.  aa381260d0 2009/04/13 A perl-version portable fix for B coping with CVf_
-.  ac0f141316 2009/04/13 Correct two other tests that apparently should be 
-.  4a4b8592c1 2009/04/13 our $TODO should be local $::TODO, revealing a bug
-.  79289e05b8 2009/04/13 TODO tests for deparsing strict, warnings as strin
-.  6e0da8f3ff 2009/04/13 Restore prototypes to XS code in attributes, accid
-.  c14f59c3c1 2009/04/13 [PATCH] Compress-Raw-Bzip2 2.018 (was RE: Compress
-.  f996b9a332 2009/04/13 Remove Makefile.PLs that make_ext.pl can automatic
-.  5dfb71230e 2009/04/13 Remove an unnecessary use Config;
-.  ad6402bdb9 2009/04/13 Upgrade to CGI.pm-3.43
-.  3915ffe07a 2009/04/13 Merge branch 'blead' of ssh://stevep@perl5.git.per
+R  d62c72f641 2009/04/12 Remove attrs, which has been deprecated since 1999
+			    lets not in maint!
+R  674e4532c9 2009/04/12 Sort the MANIFEST.
+			    done manually instead
+R  718f7b5acf 2009/04/12 Rebuild pod/perltoc.pod.
+			    done manually instead
+R  cee202b7be 2009/04/12 Eliminate "Old Perl threads tutorial", which descr
+			    harmless to keep it for now
+R  8e5dadda1c 2009/04/12 Deprecate use of the attribute :locked on subrouti
+			    don't want new warnings in maint
+M  42f6aa011a 2009/04/12 Remove #ifdef CVf_LVALUE/#endif - LVALUE subs aren
+R  48462a74af 2009/04/12 Convert xsutils.c and lib/attributes.pm to a regul
+			    too hard to merge
+R  c32124fea7 2009/04/12 Deprecate using "locked" with the attributes pragm
+			    don't want new warnings in maint
+R  f1a3ce43fb 2009/04/12 Deprecate using "unique" with the attributes pragm
+			    don't want new warnings in maint
+R  6db6f3536f 2009/04/12 s/locked/lvalue/ in the examples, and remove menti
+			    needs c32124fea7 and onwards 
+R  009f650f63 2009/04/12 Remove a link to the attrs pragma, which has now b
+			    attrs hasn't been removed
+R  d32faaf3b4 2009/04/13 GvUNIQUE* have been defined as 0 since 2005/06/30 
+			    BackCompat
+P  e95ab0c0d2 2009/04/13 Remove CVf_LOCKED and CvLOCKED*(), now that nothin
+			    BackCompat
+			    (just grab the concise-xs.t part)
+M  b871937fe0 2009/04/13 Refactor the SKIP parser to also handle TODOs. TOD
+M  6ee4ed1065 2009/04/13 Propagate the upgraded TODO/SKIP parser from ext/B
+M  f9cd5d9f11 2009/04/13 Tweak t/lib/common.pl to use test.pl's (better) te
+M  aa381260d0 2009/04/13 A perl-version portable fix for B coping with CVf_
+M  ac0f141316 2009/04/13 Correct two other tests that apparently should be 
+M  4a4b8592c1 2009/04/13 our $TODO should be local $::TODO, revealing a bug
+M  79289e05b8 2009/04/13 TODO tests for deparsing strict, warnings as strin
+R  6e0da8f3ff 2009/04/13 Restore prototypes to XS code in attributes, accid
+			    see 48462a74af
+M  c14f59c3c1 2009/04/13 [PATCH] Compress-Raw-Bzip2 2.018 (was RE: Compress
+M  f996b9a332 2009/04/13 Remove Makefile.PLs that make_ext.pl can automatic
+M  5dfb71230e 2009/04/13 Remove an unnecessary use Config;
+M  ad6402bdb9 2009/04/13 Upgrade to CGI.pm-3.43
+R  3915ffe07a 2009/04/13 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: ad6402bdb9 5dfb71230e
-.  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
-.  512e1353c9 2009/04/14 Add file missed in previous commit.
-.  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
-.  edd0a813ce 2009/04/16 Update CPANPLUS::Dist::Build to 0.22
-.  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
-.  c1a2df7619 2009/04/16 Add tests to verify that h2ph output compiles and 
-.  c0cc52e96e 2009/04/16 Squelch 'Constant subroutine ... undefined' warnin
-.  b36d99fa00 2009/04/16 Data::Dumper hash iterator needs to be reset on al
-.  ea6189f6ad 2009/04/16 Bump VERSION of Data::Dumper
-.  4acdd4cdd4 2009/04/16 Ignore attributes.pm in lib since it's now an XS m
-.  bb21036d6b 2009/04/16 Avoid loading Config, as we don't need to distingu
-.  f1aeb07864 2009/04/16 Ignore some autogenerated makefiles
-.  d0fc6d8d26 2009/04/17 Remove last vestiges of USE_WIN32_RTL_ENV
-.  8d0cd07e60 2009/04/17 Add reference to MS KB article describing leak in 
-.  848ad75c71 2009/04/17 In autodoc.pl, remove the unused parameters and fu
-.  bc35008162 2009/04/17 In autodoc.pl, inline and hence eliminate walk_tab
-.  6e0733998e 2009/04/17 Fix failing Time-Piece tests on Win32
-.  344af494c3 2009/04/18 Generate perlapi.pod and perlintern.pod at build t
-.  d092c3cd1c 2009/04/18 Add a --quiet option, to suppress all the routine 
-.  3dc608da20 2009/04/18 grep then sort, as it's more efficient to sort a s
-.  7b73ff9889 2009/04/18 As autodoc.pl no longer rebuilds repository files,
-.  ce75ce2a31 2009/04/18 fix trivial typo in MANIFEST
-.  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
-.  2d871820ee 2009/04/18 autodoc.pl needs -Ilib. I had been testing with a 
-.  cd09325492 2009/04/18 Make autodoc.pl accept the root dir in @ARGV
+				individual commits merged
+!  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
+			    Andreas says not suitable for 5.10.1.
+!  512e1353c9 2009/04/14 Add file missed in previous commit.
+			    see 2f2071b189
+M  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
+M  edd0a813ce 2009/04/16 Update CPANPLUS::Dist::Build to 0.22
+!  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
+			    wait for CPAN sync
+M  c1a2df7619 2009/04/16 Add tests to verify that h2ph output compiles and 
+M  c0cc52e96e 2009/04/16 Squelch 'Constant subroutine ... undefined' warnin
+M  b36d99fa00 2009/04/16 Data::Dumper hash iterator needs to be reset on al
+M  ea6189f6ad 2009/04/16 Bump VERSION of Data::Dumper
+R  4acdd4cdd4 2009/04/16 Ignore attributes.pm in lib since it's now an XS m
+			    see 48462a74af
+M  bb21036d6b 2009/04/16 Avoid loading Config, as we don't need to distingu
+M  f1aeb07864 2009/04/16 Ignore some autogenerated makefiles
+M  d0fc6d8d26 2009/04/17 Remove last vestiges of USE_WIN32_RTL_ENV
+M  8d0cd07e60 2009/04/17 Add reference to MS KB article describing leak in 
+M  848ad75c71 2009/04/17 In autodoc.pl, remove the unused parameters and fu
+M  bc35008162 2009/04/17 In autodoc.pl, inline and hence eliminate walk_tab
+M  6e0733998e 2009/04/17 Fix failing Time-Piece tests on Win32
+M  344af494c3 2009/04/18 Generate perlapi.pod and perlintern.pod at build t
+M  d092c3cd1c 2009/04/18 Add a --quiet option, to suppress all the routine 
+M  3dc608da20 2009/04/18 grep then sort, as it's more efficient to sort a s
+M  7b73ff9889 2009/04/18 As autodoc.pl no longer rebuilds repository files,
+M  ce75ce2a31 2009/04/18 fix trivial typo in MANIFEST
+!  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
+			    wait for Module::Build and Cwd to sync with CPAN
+M  2d871820ee 2009/04/18 autodoc.pl needs -Ilib. I had been testing with a 
+M  cd09325492 2009/04/18 Make autodoc.pl accept the root dir in @ARGV
 R  6fea91d48c 2009/04/18 Remove ExtUtils::MM_Haiku
 			    see 1c1947d58d
+M  db34a22aed 2009/04/19 For VMS, generate the delete rules for generated a
+M  9e64a65643 2009/04/19 For Win32, add the generated files to the delete l
+M  6d664f0724 2009/04/19 In buildtoc, refactor all the duplicated checking 
+M  8e7bc40f98 2009/04/19 Move the symlink fo perl51110delta.pod to perldelt
+M  327014894c 2009/04/19 In the context of PERL_OLD_COPY_ON_WRITE, remove c
+M  ddea3ea7e3 2009/04/19 Simpify logic in Perl_pad_free(): SvIsCOW() has th
+M  e0be038f12 2009/04/19 In the Makefile, no need to change into pod/ to cr
+M  dc1ddadda0 2009/04/19 Make lib/h2ph.t use t/test.pl.
+M  2543619455 2009/04/19 Make h2ph's generated preamble require-able when e
+M  dd0cfdaa8f 2009/04/20 Move vms/perlvms.pod to pod/ and update the Makfil
+M  31f6f5aa00 2009/04/20 Clarify PERL_SYS_INIT3() usage.
+M  b9b2d9df6a 2009/04/20 Remove leftover copying of perlvms.pod on Win32
+M  08115d9c48 2009/04/20 Fix calling of autodoc.pl in Win32 nmake Makefile
+M  0fdd9e5c24 2009/04/20 In corelist.pl, refactor to avoid repeating the fi
+M  da09dfe31d 2009/04/20 Tweak corelist.pl's heuristics to cope with the re
+M  7eb47696de 2009/04/21 Build perltoc.pod, rather than shipping it. This w
+M  b0f0014b9a 2009/04/21 We need $(MINIPERL_EXE) before we can run autodoc.
+M  3bc8f799d8 2009/04/21 Fix reference to perlvms.pod after move to new loc
+M  3e21d4f037 2009/04/21 7eb47696deb9a7343fb4847f7342919a6df59e21 should be
