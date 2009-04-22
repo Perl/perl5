@@ -1198,6 +1198,7 @@ _clobber:
 	-@rm -f Cross/run-* Cross/to-* Cross/from-*
 	rm -f t/test_state
 	rm -f config.sh cppstdin Policy.sh extras.lst
+	rm -f ext/Test-Harness/t/ext/Test-Harness/t/source_tests/harness
 
 clobber:	cleanup_unpacked_files _realcleaner _mopup _clobber
 
