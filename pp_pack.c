@@ -69,13 +69,13 @@ typedef struct tempsym {
 	(symptr)->previous = NULL;	\
    } STMT_END
 
+#ifndef CHAR_BIT
+# define CHAR_BIT	8
+#endif
+
 #if PERL_VERSION >= 9
 # define PERL_PACK_CAN_BYTEORDER
 # define PERL_PACK_CAN_SHRIEKSIGN
-#endif
-
-#ifndef CHAR_BIT
-# define CHAR_BIT	8
 #define PERL_PACK_CAN_W
 #define PERL_PACK_CAN_DOT
 #else
