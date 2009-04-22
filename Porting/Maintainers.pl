@@ -494,12 +494,14 @@ package Maintainers;
 		'UPSTREAM'	=> 'cpan',
 		},
 
+	# Sean has donated it to us.
+	# Nothing has changed since his last CPAN release.
 	'I18N::LangTags' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'if' =>
