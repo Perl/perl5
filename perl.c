@@ -4237,9 +4237,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #    endif
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
-				     (int)PERL_REVISION, (int)PERL_VERSION,
-				     (int)PERL_SUBVERSION), PL_origargv);
+	    PerlProc_execv(BIN_EXP "/sperl" PERL_FS_VERSION, PL_origargv);
 	    PERL_FPU_POST_EXEC
 #  endif /* IAMSUID */
 	    Perl_croak(aTHX_ "Can't do setuid (cannot exec sperl)\n");
@@ -4360,9 +4358,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #  endif
     PERL_FPU_PRE_EXEC
-    PerlProc_execv(Perl_form(aTHX_ "%s/perl"PERL_FS_VER_FMT, BIN_EXP,
-			     (int)PERL_REVISION, (int)PERL_VERSION,
-			     (int)PERL_SUBVERSION), PL_origargv);/* try again */
+    PerlProc_execv(BIN_EXP "/perl" PERL_FS_VERSION, PL_origargv);/* try again */
     PERL_FPU_POST_EXEC
     Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
 #  endif /* IAMSUID */
