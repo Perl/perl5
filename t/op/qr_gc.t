@@ -9,7 +9,9 @@ BEGIN {
 
 plan tests => 2;
 
-$TODO = "leaking since 32751";
+if ($] >= 5.011) { # doesn't leak on 5.10.x
+    $TODO = "leaking since 32751";
+}
 
 my $destroyed;
 {
