@@ -400,6 +400,20 @@ C<$Config{link}> and institute a fall-back plan if it weren't found."
 Although I can see that as confusing, given that C<$Config{d_link}> is true
 when (hard) links are available.
 
+=head2 Configure Windows using PowerShell
+
+Currently, Windows uses hard-coded config files based to build the
+config.h for compiling Perl.  Makefiles are also hard-coded and need to be 
+hand edited prior to building Perl. While this makes it easy to create a perl.exe 
+that works across multiple Windows versions, being able to accurately
+configure a perl.exe for a specific Windows versions and VS C++ would be
+a nice enhancement.  With PowerShell available on Windows XP and up, this 
+may now be possible.  Step 1 might be to investigate whether this is possible
+and use this to clean up our current makefile situation.  Step 2 would be to 
+see if there would be a way to use our existing metaconfig units to configure a
+Windows Perl or whether we go in a separate direction and make it so.  Of 
+course, we all know what step 3 is.
+
 =head1 Tasks that need a little C knowledge
 
 These tasks would need a little C knowledge, but don't need any specific
