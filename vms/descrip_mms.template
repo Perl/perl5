@@ -435,7 +435,7 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
-[.pod]perltoc.pod: [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE) $(EXT)
+[.pod]perltoc.pod : [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE) $(EXT)
 	$(PERL) [.pod]perltoc "-q" "--build-toc"
 
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
