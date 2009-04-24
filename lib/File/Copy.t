@@ -14,7 +14,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 451;
+plan tests => 459;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -393,6 +393,43 @@ SKIP: {
 		qr/'$object' and '$object' are identical \(not copied\)/,
 		    'with the text we expect';
 	}
+    }
+}
+
+# On Unix systems, File::Copy always returns 0 to signal failure,
+# even when in list context!  On Windows, it always returns "" to signal
+# failure.
+#
+# While returning a list containing a false value is arguably a bad
+# API design, at the very least we can make sure it always returns
+# the same false value.
+
+my $NO_SUCH_FILE       = "this_file_had_better_not_exist";
+my $NO_SUCH_OTHER_FILE = "my_goodness_im_sick_of_airports";
+
+use constant EXPECTED_SCALAR => 0;
+use constant EXPECTED_LIST   => [ EXPECTED_SCALAR ];
+
+my %subs = (
+    copy    =>  \&File::Copy::copy,
+    cp      =>  \&File::Copy::cp,
+    move    =>  \&File::Copy::move,
+    mv      =>  \&File::Copy::mv,
+);
+
+SKIP: {
+    skip( "Test can't run with $NO_SUCH_FILE existing", 2 * keys %subs)
+        if (-e $NO_SUCH_FILE);
+
+    foreach my $name (keys %subs) {
+
+        my $sub = $subs{$name};
+
+        my $scalar = $sub->( $NO_SUCH_FILE, $NO_SUCH_OTHER_FILE );
+        is( $scalar, EXPECTED_SCALAR, "$name in scalar context");
+
+        my @array  = $sub->( $NO_SUCH_FILE, $NO_SUCH_OTHER_FILE );
+        is_deeply( \@array, EXPECTED_LIST, "$name in list context");
     }
 }
 

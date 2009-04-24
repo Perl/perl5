@@ -213,7 +213,7 @@ sub copy {
             }
         }
 
-        return syscopy($from, $copy_to);
+        return syscopy($from, $copy_to) || 0;
     }
 
     my $closefrom = 0;
