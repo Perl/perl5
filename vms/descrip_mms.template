@@ -251,7 +251,11 @@ XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 INSTPERL = perl
 # Macros to invoke a copy of perl during the build.  Targets which
 # are built using these macros should depend on $(PERL_EXE) EXT
+.IFDEF __DEBUG__
+PERL_EXE = Sys$Disk:[]n$(DBG)perl$(E)
+.ELSE
 PERL_EXE = Sys$Disk:[]perl$(E)
+.ENDIF
 PERL = MCR $(PERL_EXE) "-I[.lib]"
 
 # Space-separated list of "static" extensions to build into perlshr (case counts).
@@ -365,13 +369,13 @@ utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.co
 utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]cpanp.com [.utils]cpan2dist.com [.utils]cpanp-run-perl.com
 
 .ifdef NOX2P
-all : base extras archcorefiles preplibrary perlpods
+all : base extras archcorefiles preplibrary [.pod]perltoc.pod
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
 	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .else
-all : base extras x2p archcorefiles preplibrary perlpods
+all : base extras x2p archcorefiles preplibrary [.pod]perltoc.pod
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
@@ -435,8 +439,9 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
-[.pod]perltoc.pod : [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE) $(EXT)
-	$(PERL) [.pod]perltoc "-q" "--build-toc"
+[.pod]perltoc.pod : [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE)
+	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
+	$(PERL) [.pod]buildtoc "-q" "--build-toc"
 
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
@@ -1383,7 +1388,7 @@ makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
-install.html : $(perlpods)
+install.html : [.pod]perltoc.pod
 	@ @perl_setup.com
 	@ If F$Search("perl_root:[lib]html.dir").eqs."" Then Create/Directory perl_root:[lib.html]
 	$(MINIPERL) installhtml. "--podroot=. --recurse --htmldir=/perl_root/lib/html --htmlroot=.. --verbose"
