@@ -15,7 +15,7 @@ use Carp;
 no locale;
 
 $Up = File::Spec->updir;
-$masterpodfile = File::Spec->catdir($Up, "pod.lst");
+$masterpodfile = File::Spec->catfile($Up, "pod.lst");
 
 # Generate any/all of these files
 # --verbose gives slightly more output
@@ -29,12 +29,12 @@ $masterpodfile = File::Spec->catdir($Up, "pod.lst");
      toc => "perltoc.pod",
      manifest => File::Spec->catdir($Up, "MANIFEST"),
      perlpod => "perl.pod",
-     vms => File::Spec->catdir($Up, "vms", "descrip_mms.template"),
-     nmake => File::Spec->catdir($Up, "win32", "Makefile"),
-     dmake => File::Spec->catdir($Up, "win32", "makefile.mk"),
-     podmak => File::Spec->catdir($Up, "win32", "pod.mak"),
+     vms => File::Spec->catfile($Up, "vms", "descrip_mms.template"),
+     nmake => File::Spec->catfile($Up, "win32", "Makefile"),
+     dmake => File::Spec->catfile($Up, "win32", "makefile.mk"),
+     podmak => File::Spec->catfile($Up, "win32", "pod.mak"),
      # plan9 =>  File::Spec->catdir($Up, "plan9", "mkfile"),
-     unix => File::Spec->catdir($Up, "Makefile.SH"),
+     unix => File::Spec->catfile($Up, "Makefile.SH"),
      # TODO: add roffitall
     );
 
@@ -225,7 +225,7 @@ close MASTER;
   }
 }
 
-# Find all the mdoules
+# Find all the modules
 {
   my @modpods;
   find \&getpods => qw(../lib ../ext);
@@ -253,9 +253,11 @@ close MASTER;
 	  if ($line =~ /^=head1\s+NAME\b/) {
 	    push @modpods, $file;
 	    #warn "GOOD $file\n";
+	    close F;
 	    return;
 	  }
 	}
+	close F;
 	warn "$0: $file: cannot find =head1 NAME\n" unless $Quiet;
       }
     }
@@ -371,6 +373,7 @@ EOPOD2B
   s/^\t//gm;
   output $_;
   output "\n";                    # flush $LINE
+  close OUT;
 }
 
 # Below are all the auxiliary routines for generating perltoc.pod
@@ -380,6 +383,8 @@ my ($inhead1, $inhead2, $initem);
 sub podset {
     local @ARGV = @_;
     my $pod;
+
+    return unless scalar(@ARGV);
 
     while(<>) {
 	tr/\015//d;
