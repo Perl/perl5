@@ -436,10 +436,13 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perldelta.pod : [.pod]perl5100delta.pod
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-[.pod]perlapi.pod [.pod]perlintern.pod : miniperl embed.fnc autodoc.pl $(MINIPERL_EXE)
+[.pod]perlapi.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
-[.pod]perltoc.pod : [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE)
+[.pod]perlintern.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
+	$(MINIPERL) autodoc.pl
+
+[.pod]perltoc.pod : [.pod]perldelta.pod [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE)
 	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
 	$(PERL) [.pod]buildtoc "-q" "--build-toc"
 
