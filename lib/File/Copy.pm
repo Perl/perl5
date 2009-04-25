@@ -13,7 +13,7 @@ use warnings;
 use File::Spec;
 use Config;
 # During perl build, we need File::Copy but Fcntl might not be built yet
-# *** not needed for 2.13, only 2.14
+# *** not needed for 2.14, only 2.15
 # *** my $Fcntl_loaded = eval q{ use Fcntl qw [O_CREAT O_WRONLY O_TRUNC]; 1 };
 # Similarly Scalar::Util
 # And then we need these games to avoid loading overload, as that will
@@ -25,7 +25,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.13';
+$VERSION = '2.14';
 
 require Exporter;
 @ISA = qw(Exporter);
