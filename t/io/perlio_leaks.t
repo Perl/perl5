@@ -15,11 +15,14 @@ TODO: {
         my $base_fd = do{ open my $in, '<', $0 or die $!; fileno $in };
 
         for(1 .. 3){
-	    local $TODO = "[perl #56644] PerlIO resource leaks on open() and then :pop in :unix and :stdio" if $_ > 1;
-                open my $fh, "<$layer", $0 or die $!;
+	    local $TODO;
+	    if ($_ > 1 && $layer =~ /^:(unix|stdio)$/) {
+		$TODO = "[perl #56644] PerlIO resource leaks on open() and then :pop in :unix and :stdio"
+	    }
+	    open my $fh, "<$layer", $0 or die $!;
 
-                is fileno($fh), $base_fd, $layer;
-                binmode $fh, ':pop';
+	    is fileno($fh), $base_fd, $layer;
+	    binmode $fh, ':pop';
         }
     }
 }
