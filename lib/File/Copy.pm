@@ -520,7 +520,7 @@ upon the file, but will generally be the whole file (up to 2MB), or
 
 You may use the syntax C<use File::Copy "cp"> to get at the C<cp>
 alias for this function. The syntax is I<exactly> the same.  The
-behavior is nearly the same as well: as of version 2.14, <cp> will
+behavior is nearly the same as well: as of version 2.15, <cp> will
 preserve the source file's permission bits like the shell utility
 C<cp(1)> would do, while C<copy> uses the default permissions for the
 target file (which may depend on the process' C<umask>, file
