@@ -53,6 +53,18 @@ As part of the C<Test::Harness> 2.x to 3.x upgrade, the experimental
 C<Test::Harness::Straps> module has been removed. See 
 See L</"Updated Modules"> for more details.
 
+=item *
+
+This one is actually a change introduced in 5.10.0, but it was missed
+from that release's perldelta, so it is mentioned here instead.
+
+A bugfix related to the handling of the C</m> modifier and C<qr> resulted
+in a change of behaviour between 5.8.x and 5.10.0:
+
+    # matches in 5.8.x, doesn't match in 5.10.0
+    $re = qr/^bar/; "foo\nbar" =~ /$re/m;
+
+
 =back
 
 
@@ -211,6 +223,10 @@ C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.50
 =item *
 
 C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
+
+=item *
+
+C<File::Copy> upgraded from version 2.11 to 2.14
 
 =item *
 
@@ -525,7 +541,7 @@ match operator (C<~~>) [RT #63854].
 =item *
 
 In 5.10.0, the C<*> quantifier in patterns was sometimes treated as
-C<{0,32767}> [RT #60034]. For example, this match would fail:
+C<{0,32767}> [RT #60034, #60464]. For example, this match would fail:
 
     ("ab" x 32768) =~ /^(ab)*$/
 

@@ -904,14 +904,14 @@ M  02c1405339 2008/05/08 33790
 M  bd1c7bd234 2008/05/08 33791
 M  b1d302cbe7 2008/05/08 33792
 M  cfa308ca48 2008/05/08 33793
-P  81ec4fbc83 2008/05/08 33794 Just the 'make Copy.t strict-safe' part
-R  9c76cba290 2008/05/08 33795 (the version bump of this change appears in maint via #34522)
-R  91ca337ee7 2008/05/08 33796 (unknown reason)
+m  81ec4fbc83 2008/05/08 33794 Just the 'make Copy.t strict-safe' part
+!  9c76cba290 2008/05/08 33795 (the version bump of this change appears in maint via #34522)
+!  91ca337ee7 2008/05/08 33796 Copy.pm stuff
 M  8a3f7e956e 2008/05/09 33797
 M  e4911a48a0 2008/05/09 33798
 M  a94e4597e1 2008/05/10 33799
 M  0263186c5d 2008/05/10 33800
-R  c4e1003e21 2008/05/10 33804 (unknown reason)
+!  c4e1003e21 2008/05/10 33804 File::Copy
 M  56b24bb689 2008/05/10 33807
 M  ac9d3a9d44 2008/05/10 33808
 M  f6d55995ce 2008/05/10 33809
@@ -980,7 +980,7 @@ M  93c512172a 2008/05/23 33910
 M  68c65ec0ad 2008/05/23 33911
 M  b27284eed0 2008/05/23 33912
 M  b8e1b25f6a 2008/05/23 33914
-R  32d6804057 2008/05/23 33916 (unknown reason)
+!  32d6804057 2008/05/23 33916 File::Copy
 M  3df1a9e2cb 2008/05/24 33918
 M  e08926902e 2008/05/24 33919
 M  4f923b5674 2008/05/25 33927
@@ -1005,7 +1005,7 @@ M  d685c22b7f 2008/06/01 33982
 !  bc3f1c14f9 2008/06/01 33983 ext/IO/lib/IO/Dir.pm 1.06_01, awaiting new CPAN release
 !  6f86311fbd 2008/06/01 33984 ext/IO/lib/IO/Dir.pm 1.06_01, awaiting new CPAN release
 M  a911a0f814 2008/06/01 33985
-R  7029ff3723 2008/06/02 33986 (unknown reason)
+!  7029ff3723 2008/06/02 33986 File::Copy
 M  55595e835e 2008/06/02 33987
 M  af638b876e 2008/06/02 33988
 M  04636146cb 2008/06/02 33989
@@ -1365,7 +1365,7 @@ R  14297b8f35 2008/10/18 34509 makemeta
 M  dbcf044e38 2008/10/18 34510
 M  444c2e40cd 2008/10/18 34513
 M  486bcc50ba 2008/10/19 34514
-M  e55c0a828f 2008/10/19 34519
+!  e55c0a828f 2008/10/19 34519
 !  15baf0c4b0 2008/10/20 34521 lib/File/Copy.pm - skipping new perms stuff
 M  5f259b1a7b 2008/10/20 34526
 M  afe79e7bf0 2008/10/20 34528
@@ -1776,8 +1776,8 @@ R  453f08842f 2008/12/21 Individual commits merged instead
 				MERGE: 6051489bf3 f6c12373ef
 M  d82a90c178 2008/12/21 A short introduction to git bisect.
 m  3b46207fed 2008/12/22 lib/Text/Balanced.pm part of these
-				pod fixes temporarily removed (c4f43d3);
-				wait until they've been merged upstream
+				pod still temporarily removed (c4f43d3);
+				wait until its been merged upstream
 M  09645c26bf 2008/12/22 Note the --author option of git commit, and theref
 M  9d68b7edc4 2008/12/23 Add a section on committing to maintenance version
 M  8002990476 2008/12/23 Add a new Porting/podtidy to reformat pod using Po
@@ -1905,10 +1905,10 @@ M  f4b6e4b303 2009/01/02 Bump copyright year after previous change
 R  797f6e9fa6 2009/01/02 Merge branch 'yuval/overloading' into blead
 				MERGE: f4b6e4b303 1839a85047
 			    individual commits on both branches merged
-R  b3ab6785f6 2009/01/02 Faster sv_utf8_upgrade()
+!  b3ab6785f6 2009/01/02 Faster sv_utf8_upgrade()
 			    as-is, it needs a mathom version of
 			    sv_utf8_upgrade_flags added, which is too much
-			    like hard work
+			    like hard work. Maybe revists some other time
 M  effb3d1176 2009/01/02 Factorize numeric constant for "overloading" lexic
 M  83706693c6 2009/01/02 Bump coopyright year in embed.pl and various files
 M  d87d3eede5 2009/01/02 Fix overload index mismatch in overloading logic.
@@ -2931,3 +2931,19 @@ M  7eb47696de 2009/04/21 Build perltoc.pod, rather than shipping it. This w
 M  b0f0014b9a 2009/04/21 We need $(MINIPERL_EXE) before we can run autodoc.
 M  3bc8f799d8 2009/04/21 Fix reference to perlvms.pod after move to new loc
 M  3e21d4f037 2009/04/21 7eb47696deb9a7343fb4847f7342919a6df59e21 should be
+M  706b232f0e 2009/04/22 Sean would like to pass on his maintainership of I
+M  c98623cf8b 2009/04/23 Space between target and colon is not optional in 
+M  75585ce3d6 2009/04/23 Add an idea to perltodo
+M  15a429282c 2009/04/23 qr_gc.t is only TODO on 5.11.x+
+M  e1ae7bac59 2009/04/23 Break out the logic that maps file names to module
+M  fb237dfd6e 2009/04/23 Use files_to_modules() and a CPAN mirror to map mo
+!  29cab1c7c7 2009/04/23 Add %upstream and %bug_tracker data to Module::Cor
+			    its a 2.17_01 version. Wait for proper release?
+!  0accdd48ba 2009/04/23 Use %Module::CoreList::bug_tracker to print out up
+			    see 29cab1c7c7
+M  bfeb82207b 2009/04/24 Run buildtoc on VMS.
+M  0b01631df0 2009/04/24 Clean up pod/buildtoc so it will run on VMS.
+M  8fd7046754 2009/04/25 Flag that perltoc.pod should be omitted from perlt
+M  776e8d8cea 2009/04/25 [perl #56644] TODO was too severe. Only :unix :std
+!  4efe685a06 2009/04/25 make the File::Copy permission change from 2.15 on
+			    awaiting any other File::Copy merging
