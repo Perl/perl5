@@ -371,19 +371,19 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
     p->tm_zone   = "UTC";
 #endif
 
-    v_tm_sec =  (int)(time % 60);
-    time /= 60;
-    v_tm_min =  (int)(time % 60);
-    time /= 60;
-    v_tm_hour = (int)(time % 24);
-    time /= 24;
-    v_tm_tday = time;
+    v_tm_sec  = (int)fmod(time, 60.0);
+    time      = time >= 0 ? floor(time / 60.0) : ceil(time / 60.0);
+    v_tm_min  = (int)fmod(time, 60.0);
+    time      = time >= 0 ? floor(time / 60.0) : ceil(time / 60.0);
+    v_tm_hour = (int)fmod(time, 24.0);
+    time      = time >= 0 ? floor(time / 24.0) : ceil(time / 24.0);
+    v_tm_tday = (int)time;
 
     WRAP (v_tm_sec, v_tm_min, 60);
     WRAP (v_tm_min, v_tm_hour, 60);
     WRAP (v_tm_hour, v_tm_tday, 24);
 
-    v_tm_wday = (int)((v_tm_tday + 4) % 7);
+    v_tm_wday = (int)fmod((v_tm_tday + 4.0), 7.0);
     if (v_tm_wday < 0)
         v_tm_wday += 7;
     m = v_tm_tday;
@@ -395,7 +395,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
 
     if (m >= 0) {
         /* Gregorian cycles, this is huge optimization for distant times */
-        cycles = (int)(m / (Time64_T) days_in_gregorian_cycle);
+        cycles = (int)floor(m / (Time64_T) days_in_gregorian_cycle);
         if( cycles ) {
             m -= (cycles * (Time64_T) days_in_gregorian_cycle);
             year += (cycles * years_in_gregorian_cycle);
@@ -419,7 +419,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
         year--;
 
         /* Gregorian cycles */
-        cycles = (int)((m / (Time64_T) days_in_gregorian_cycle) + 1);
+        cycles = (int)ceil((m / (Time64_T) days_in_gregorian_cycle) + 1);
         if( cycles ) {
             m -= (cycles * (Time64_T) days_in_gregorian_cycle);
             year += (cycles * years_in_gregorian_cycle);

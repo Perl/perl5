@@ -29,10 +29,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
-#if !defined(PERL_MICRO) && defined(Quad_t)
-#  include "time64.h"
-#  include "time64.c"
-#endif
+#include "time64.h"
+#include "time64.c"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -4469,15 +4467,9 @@ PP(pp_gmtime)
 {
     dVAR;
     dSP;
-#if defined(PERL_MICRO) || !defined(Quad_t)
-    Time_t when;
-    const struct tm *err;
-    struct tm tmbuf;
-#else
     Time64_T when;
     struct TM tmbuf;
     struct TM *err;
-#endif
     const char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -4485,30 +4477,12 @@ PP(pp_gmtime)
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-#if defined(PERL_MICRO) || !defined(Quad_t)
-    if (MAXARG < 1)
-	(void)time(&when);
-    else
-	when = (Time_t)SvIVx(POPs);
-
-    if (PL_op->op_type == OP_LOCALTIME)
-	err = localtime(&when);
-    else
-	err = gmtime(&when);
-
-    if (!err)
-	tmbuf = *err;
-#else
     if (MAXARG < 1) {
 	time_t now;
 	(void)time(&now);
 	when = (Time64_T)now;
     }
     else {
-	/* XXX POPq uses an SvIV so it won't work with 32 bit integer scalars
-	   using a double causes an unfortunate loss of accuracy on high numbers.
-	   What we really need is an SvQV.
-	*/
 	double input = Perl_floor(POPn);
 	when = (Time64_T)input;
 	if (when != input && ckWARN(WARN_OVERFLOW)) {
@@ -4521,7 +4495,6 @@ PP(pp_gmtime)
         err = S_localtime64_r(&when, &tmbuf);
     else
 	err = S_gmtime64_r(&when, &tmbuf);
-#endif
 
     if (err == NULL && ckWARN(WARN_OVERFLOW)) {
 	/* XXX %lld broken for quads */

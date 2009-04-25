@@ -8,7 +8,7 @@
 /* Set our custom types */
 typedef INT_64_T        Int64;
 typedef Int64           Time64_T;
-typedef Int64           Year;
+typedef I32             Year;
 
 
 /* A copy of the tm struct but with a 64 bit year */

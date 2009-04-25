@@ -81,8 +81,9 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 
 # Test gmtime over a range of times.
 {
-    # gm/localtime should go all the way from -2**63 to 2**63-1
-    # but floating point hacks mean it gets unreliable for large numbers.
+    # The range should be limited only by the 53-bit mantissa of an IEEE double (or 
+    # whatever kind of double you've got).  Here we just prove that we're comfortably 
+    # beyond the range possible with 32-bit time_t.
     my %tests = (
         # time_t         gmtime list                          scalar
         -2**35  => [52, 13, 20, 7, 2, -1019, 5, 65, 0, "Fri Mar  7 20:13:52 881"],
