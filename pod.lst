@@ -11,7 +11,7 @@ h Overview
 
   perl			Perl overview (this section)
   perlintro		Perl introduction for beginners
-g perltoc		Perl documentation table of contents
+go perltoc		Perl documentation table of contents
 
 h Tutorials
 
