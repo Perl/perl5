@@ -82,6 +82,7 @@ static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    define	MAXPATHLEN	PATH_MAX
+#  else
 #    ifdef MACOS_TRADITIONAL
 #      define	MAXPATHLEN	255
 #    else
