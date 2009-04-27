@@ -5,7 +5,6 @@ use warnings;
 use vars    qw[@ISA $STATUS $VERSION];
 @ISA =      qw[CPANPLUS::Dist];
 
-use CPANPLUS::inc;
 use CPANPLUS::Internals::Constants;
 
 ### these constants were exported by CPANPLUS::Internals::Constants
@@ -31,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.22';
+$VERSION = '0.24';
 
 =pod
 
@@ -264,7 +263,7 @@ sub prepare {
     ### to reset the @INC
     #local $ENV{PERL5OPT} = CPANPLUS::inc->original_perl5opt;
     #local $ENV{PERL5LIB} = CPANPLUS::inc->original_perl5lib;
-    local @INC           = CPANPLUS::inc->original_inc;
+    #local @INC           = CPANPLUS::inc->original_inc;
 
     ### this will generate warnings under anything lower than M::B 0.2606
     my @buildflags = $dist->_buildflags_as_list( $buildflags );
@@ -535,7 +534,7 @@ sub create {
     ### to reset the @INC
     #local $ENV{PERL5OPT} = CPANPLUS::inc->original_perl5opt;
     #local $ENV{PERL5LIB} = CPANPLUS::inc->original_perl5lib;
-    local @INC           = CPANPLUS::inc->original_inc;
+    #local @INC           = CPANPLUS::inc->original_inc;
 
     ### but do it *before* the new_from_context, as M::B seems
     ### to be actually running the file...
