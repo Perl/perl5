@@ -4401,16 +4401,12 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    subdir = newSVsv(libdir);
 
 	    if (add_versioned_sub_dirs) {
-#define PERL_ARCH_FMT_PREFIX	"/"
-#define PERL_ARCH_FMT_SUFFIX	""
-#define PERL_ARCH_FMT_PATH	"/" PERL_FS_VERSION
 		/* .../version/archname if -d .../version/archname */
-		sv_catpvs(subdir, PERL_ARCH_FMT_PATH \
-			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
+		sv_catpvs(subdir, "/" PERL_FS_VERSION "/" ARCHNAME);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 
 		/* .../version if -d .../version */
-		sv_catpvs(subdir, PERL_ARCH_FMT_PATH);
+		sv_catpvs(subdir, "/" PERL_FS_VERSION);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 	    }
 
@@ -4418,8 +4414,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
-		    Perl_sv_catpvf(aTHX_ subdir, PERL_ARCH_FMT_PREFIX \
-				   "%s" PERL_ARCH_FMT_SUFFIX, *incver);
+		    Perl_sv_catpvf(aTHX_ subdir, "/%s", *incver);
 		    subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 		}
 	    }
@@ -4427,8 +4422,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 
 	    if (add_archonly_sub_dirs) {
 		/* .../archname if -d .../archname */
-		sv_catpvs(subdir,
-			  PERL_ARCH_FMT_PREFIX ARCHNAME PERL_ARCH_FMT_SUFFIX);
+		sv_catpvs(subdir, "/" ARCHNAME);
 		subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
 
 	    }
