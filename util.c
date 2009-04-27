@@ -2255,7 +2255,7 @@ Perl_my_swabn(void *ptr, int n)
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__)
     dVAR;
     int p[2];
     register I32 This, that;
@@ -2395,7 +2395,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 }
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) && !defined(__LIBCATAMOUNT__)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(__LIBCATAMOUNT__)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
@@ -2700,11 +2700,6 @@ dup2(int oldfd, int newfd)
 #ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
-#ifdef MACOS_TRADITIONAL
-/* We don't want restart behavior on MacOS */
-#undef SA_RESTART
-#endif
-
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
@@ -2855,7 +2850,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) && !defined(__LIBCATAMOUNT__)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(__LIBCATAMOUNT__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
@@ -2913,7 +2908,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 #endif /* !DOSISH */
 
-#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(MACOS_TRADITIONAL) && !defined(__LIBCATAMOUNT__)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -3231,26 +3226,16 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     }
 #endif
 
-#ifdef MACOS_TRADITIONAL
-    if (dosearch && !strchr(scriptname, ':') &&
-	(s = PerlEnv_getenv("Commands")))
-#else
     if (dosearch && !strchr(scriptname, '/')
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
 		 && (s = PerlEnv_getenv("PATH")))
-#endif
     {
 	bool seen_dot = 0;
 
 	bufend = s + strlen(s);
 	while (s < bufend) {
-#ifdef MACOS_TRADITIONAL
-	    s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf, s, bufend,
-			',',
-			&len);
-#else
 #if defined(atarist) || defined(DOSISH)
 	    for (len = 0; *s
 #  ifdef atarist
@@ -3267,15 +3252,10 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 			':',
 			&len);
 #endif /* ! (atarist || DOSISH) */
-#endif /* MACOS_TRADITIONAL */
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
-#ifdef MACOS_TRADITIONAL
-	    if (len && tmpbuf[len - 1] != ':')
-	    	tmpbuf[len++] = ':';
-#else
 	    if (len
 #  if defined(atarist) || defined(__MINT__) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
@@ -3285,7 +3265,6 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		tmpbuf[len++] = '/';
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
-#endif
 	    (void)my_strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
 #endif  /* !VMS */
 
@@ -3310,7 +3289,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		continue;
 	    if (S_ISREG(PL_statbuf.st_mode)
 		&& cando(S_IRUSR,TRUE,&PL_statbuf)
-#if !defined(DOSISH) && !defined(MACOS_TRADITIONAL)
+#if !defined(DOSISH)
 		&& cando(S_IXUSR,TRUE,&PL_statbuf)
 #endif
 		)

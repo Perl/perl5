@@ -9670,12 +9670,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    if (args) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
-#ifdef MACOS_TRADITIONAL
-		  /* On MacOS, %#s format is used for Pascal strings */
-		  if (alt)
-		    elen = *eptr++;
-		  else
-#endif
 		    elen = strlen(eptr);
 		else {
 		    eptr = (char *)nullstr;

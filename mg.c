@@ -772,14 +772,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 	 if (nextchar == '\0') {
-#if defined(MACOS_TRADITIONAL)
-	     {
-		  char msg[256];
-
-		  sv_setnv(sv,(double)gMacPerl_OSErr);
-		  sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");
-	     }
-#elif defined(VMS)
+#if defined(VMS)
 	     {
 #	          include <descrip.h>
 #	          include <starlet.h>
@@ -1075,10 +1068,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */
 #endif
 	break;
-#ifndef MACOS_TRADITIONAL
     case '0':
 	break;
-#endif
     }
     return 0;
 }
@@ -2385,21 +2376,17 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 	if (*(mg->mg_ptr+1) == '\0') {
-#ifdef MACOS_TRADITIONAL
-	    gMacPerl_OSErr = SvIV(sv);
-#else
-#  ifdef VMS
+#ifdef VMS
 	    set_vaxc_errno(SvIV(sv));
-#  else
-#    ifdef WIN32
+#else
+#  ifdef WIN32
 	    SetLastError( SvIV(sv) );
-#    else
-#      ifdef OS2
+#  else
+#    ifdef OS2
 	    os2_setsyserrno(SvIV(sv));
-#      else
+#    else
 	    /* will anyone ever use this? */
 	    SETERRNO(SvIV(sv), 4);
-#      endif
 #    endif
 #  endif
 #endif
@@ -2774,7 +2761,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case ':':
 	PL_chopset = SvPV_force(sv,len);
 	break;
-#ifndef MACOS_TRADITIONAL
     case '0':
 	LOCK_DOLLARZERO_MUTEX;
 #ifdef HAS_SETPROCTITLE
@@ -2840,7 +2826,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;
-#endif
     }
     return 0;
 }

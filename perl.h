@@ -943,7 +943,7 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -2502,7 +2502,7 @@ typedef struct clone_params CLONE_PARAMS;
 #   endif
 #endif
 
-#if defined(OS2) || defined(MACOS_TRADITIONAL)
+#if defined(OS2)
 #  include "iperlsys.h"
 #endif
 
@@ -2564,13 +2564,6 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "symbian"
 #endif
 
-#if defined(MACOS_TRADITIONAL)
-#   include "macos/macish.h"
-#   ifndef NO_ENVIRON_ARRAY
-#       define NO_ENVIRON_ARRAY
-#   endif
-#   define ISHISH "macos classic"
-#endif
 
 #if defined(__HAIKU__)
 #   include "haiku/haikuish.h"
@@ -3340,7 +3333,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #endif /* threading */
 #endif /* AIX */
 
-#if !defined(OS2) && !defined(MACOS_TRADITIONAL)
+#if !defined(OS2)
 #  include "iperlsys.h"
 #endif
 

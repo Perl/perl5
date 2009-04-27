@@ -1395,7 +1395,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 {
     dVAR;
     PERL_ARGS_ASSERT_DO_AEXEC5;
-#if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
+#if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
@@ -1943,10 +1943,6 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
-#ifdef MACOS_TRADITIONAL
-    /* This is simply not correct for AppleShare, but fix it yerself. */
-    return TRUE;
-#else
     dVAR;
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
@@ -1970,7 +1966,6 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
     }
 #else
     return FALSE;
-#endif
 #endif
 }
 
@@ -2352,11 +2347,6 @@ Perl_vms_start_glob
     fp = Perl_vms_start_glob(aTHX_ tmpglob, io);
 
 #else /* !VMS */
-#ifdef MACOS_TRADITIONAL
-    sv_setpv(tmpcmd, "glob ");
-    sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, " |");
-#else
 #ifdef DOSISH
 #ifdef OS2
     sv_setpv(tmpcmd, "for a in ");
@@ -2388,7 +2378,6 @@ Perl_vms_start_glob
 #endif
 #endif /* !CSH */
 #endif /* !DOSISH */
-#endif /* MACOS_TRADITIONAL */
     (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
 		  FALSE, O_RDONLY, 0, NULL);
     fp = IoIFP(io);
