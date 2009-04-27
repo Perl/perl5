@@ -982,7 +982,7 @@ X<decrypt> X<cryptography> X<passwd> X<encrypt>
 
 Creates a digest string exactly like the crypt(3) function in the C
 library (assuming that you actually have a version there that has not
-been extirpated as a potential munitions).
+been extirpated as a potential munition).
 
 crypt() is a one-way hash function.  The PLAINTEXT and SALT is turned
 into a short string, called a digest, which is returned.  The same
@@ -1012,7 +1012,7 @@ digest matter.
 
 Traditionally the result is a string of 13 bytes: two first bytes of
 the salt, followed by 11 bytes from the set C<[./0-9A-Za-z]>, and only
-the first eight bytes of the digest string mattered, but alternative
+the first eight bytes of PLAINTEXT mattered. But alternative
 hashing schemes (like MD5), higher level security schemes (like C2),
 and implementations on non-UNIX platforms may produce different
 strings.
