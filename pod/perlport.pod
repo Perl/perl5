@@ -1600,8 +1600,10 @@ C<-x>, C<-o>. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 C<-b>, C<-c>, C<-k>, C<-g>, C<-p>, C<-u>, C<-A> are not implemented.
 (S<Mac OS>)
 
-C<-g>, C<-k>, C<-l>, C<-p>, C<-u>, C<-A> are not particularly meaningful.
+C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 (Win32, VMS, S<RISC OS>)
+
+C<-p> is not particularly meaningful. (VMS, S<RISC OS>)
 
 C<-d> is true if passed a device spec without an explicit directory.
 (VMS)

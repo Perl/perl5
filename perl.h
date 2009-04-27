@@ -1143,6 +1143,13 @@ EXTERN_C int usleep(unsigned int);
 #   include <sys/stat.h>
 #endif
 
+/* Microsoft VC's sys/stat.h defines all S_Ixxx macros except S_IFIFO.
+   This definition should ideally go into win32/win32.h, but S_IFIFO is
+   used later here in perl.h before win32/win32.h is being included. */
+#if !defined(S_IFIFO) && defined(_S_IFIFO)
+#   define S_IFIFO _S_IFIFO
+#endif
+
 /* The stat macros for Amdahl UTS, Unisoft System V/88 (and derivatives
    like UTekV) are broken, sometimes giving false positives.  Undefine
    them here and let the code below set them to proper values.
