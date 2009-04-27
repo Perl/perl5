@@ -1944,7 +1944,6 @@ lib/CPANPLUS/Dist/Sample.pm	CPANPLUS
 lib/CPANPLUS/Error.pm	CPANPLUS
 lib/CPANPLUS/FAQ.pod	CPANPLUS
 lib/CPANPLUS/Hacking.pod	CPANPLUS
-lib/CPANPLUS/inc.pm	CPANPLUS
 lib/CPANPLUS/Internals/Constants.pm	CPANPLUS
 lib/CPANPLUS/Internals/Constants/Report.pm	CPANPLUS
 lib/CPANPLUS/Internals/Extract.pm	CPANPLUS
@@ -1973,7 +1972,6 @@ lib/CPANPLUS/Shell/Default/Plugins/Remote.pm	CPANPLUS
 lib/CPANPLUS/Shell/Default/Plugins/Source.pm	CPANPLUS
 lib/CPANPLUS/Shell/Default.pm	CPANPLUS
 lib/CPANPLUS/Shell.pm	CPANPLUS
-lib/CPANPLUS/t/00_CPANPLUS-Inc.t	CPANPLUS tests
 lib/CPANPLUS/t/00_CPANPLUS-Internals-Utils.t	CPANPLUS tests
 lib/CPANPLUS/t/01_CPANPLUS-Configure.t	CPANPLUS tests
 lib/CPANPLUS/t/02_CPANPLUS-Internals.t	CPANPLUS tests

@@ -102,41 +102,7 @@ use constant TEST_CONF_INSTALL_DIR      => File::Spec->rel2abs(
                                                     TEST_CONF_CPANPLUS_DIR,
                                                     'install'
                                                 )
-                                            );       
-
-### we might need this Some Day when we're installing into
-### our own sandbox. see t/20.t for details
-# use constant TEST_INSTALL_DIR       => do {
-#     my $dir = File::Spec->rel2abs( 'dummy-perl' );
-# 
-#     ### clean up paths if we are on win32    
-#     ### dirs with spaces will be.. bad :(
-#     $^O eq 'MSWin32'
-#         ? Win32::GetShortPathName( $dir )
-#         : $dir;
-# };        
-
-# use constant TEST_INSTALL_DIR_LIB 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'lib' );
-# use constant TEST_INSTALL_DIR_BIN 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'bin' );
-# use constant TEST_INSTALL_DIR_MAN1 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'man', 'man1' );
-# use constant TEST_INSTALL_DIR_MAN3
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'man', 'man3' );
-# use constant TEST_INSTALL_DIR_ARCH
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'arch' );
-# 
-# use constant TEST_INSTALL_EU_MM_FLAGS =>
-#     ' INSTALLDIRS=site' .
-#     ' INSTALLSITELIB='     . TEST_INSTALL_DIR_LIB .
-#     ' INSTALLSITEARCH='    . TEST_INSTALL_DIR_ARCH .    # .packlist
-#     ' INSTALLARCHLIB='     . TEST_INSTALL_DIR_ARCH .    # perllocal.pod
-#     ' INSTALLSITEBIN='     . TEST_INSTALL_DIR_BIN .
-#     ' INSTALLSCRIPT='      . TEST_INSTALL_DIR_BIN .
-#     ' INSTALLSITEMAN1DIR=' . TEST_INSTALL_DIR_MAN1 .
-#     ' INSTALLSITEMAN3DIR=' . TEST_INSTALL_DIR_MAN3;
-
+                                            );
 
 sub dummy_cpan_dir {
     ### VMS needs this in directory format for rel2abs
