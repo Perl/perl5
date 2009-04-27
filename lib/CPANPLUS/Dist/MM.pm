@@ -222,7 +222,7 @@ sub prepare {
         my $tmpl = {
             perl            => {    default => $^X, store => \$perl },
             makemakerflags  => {    default =>
-                                        $conf->get_conf('makemakerflags'),
+                                        $conf->get_conf('makemakerflags') || '',
                                     store => \$mmflags },                 
             force           => {    default => $conf->get_conf('force'), 
                                     store   => \$force },
@@ -565,9 +565,14 @@ sub create {
         $args = check( $tmpl, \%hash ) or return;
     }
     
-    ### maybe we already ran a create on this object? ###
-    return 1 if $dist->status->created && !$force;
-        
+    ### maybe we already ran a create on this object?
+    ### make sure we add to include path again, just in case we came from
+    ### ->save_state, at which point we need to restore @INC/$PERL5LIB
+    if( $dist->status->created && !$force ) {
+        $self->add_to_includepath;
+        return 1;
+    }        
+    
     ### store the arguments, so ->install can use them in recursive loops ###
     $dist->status->_create_args( $args );
     
