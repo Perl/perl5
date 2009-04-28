@@ -676,15 +676,19 @@ sub get_installer_type {
     }
 
     ### ok, so it's a 'build' installer, but you don't /have/ module build
-    if( $type eq INSTALLER_BUILD and 
+    ### XXX duplicated from CPANPLUS::Selfupdate. fix somehow?
+    if( $type eq INSTALLER_BUILD and (
         not CPANPLUS::Dist->has_dist_type( INSTALLER_BUILD )
-    ) {
+        or not $cb->module_tree( INSTALLER_BUILD )
+                    ->is_uptodate( version => '0.24' )
+    ) ) {
     
         ### XXX this is for recording purposes only. We *have* to install
         ### these before even creating a dist object, or we'll get an error
         ### saying 'no such dist type';
+        ### XXX duplicated from CPANPLUS::Selfupdate. fix somehow?
         my $href = $self->status->configure_requires || {};
-        my $deps = { INSTALLER_BUILD, 0, %$href };
+        my $deps = { INSTALLER_BUILD, '0.24', %$href };
         
         $self->status->configure_requires( $deps );
         
