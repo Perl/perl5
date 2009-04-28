@@ -49,6 +49,8 @@ ok( not grep { $_ eq $Inst } CPANPLUS::Dist->dist_types,
     ok( scalar(keys(%$href)),   "   Dependencies recorded" );
     
     ok( defined $href->{$Inst}, "       Dependency on $Inst" );
+    cmp_ok( $href->{$Inst}, '>', 0,
+                                "           Minimum version: $href->{$Inst}" );
 
     my $err = CPANPLUS::Error->stack_as_string;
     like( $err, qr/$Inst/,      "   Message mentions $Inst" );
