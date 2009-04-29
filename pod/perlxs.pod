@@ -1211,6 +1211,12 @@ To disable version checking:
 
     VERSIONCHECK: DISABLE
 
+Note that if the version of the PM module is an NV (a floating point
+number), it will be stringified with a possible loss of precision
+(currently chopping to nine decimal places) so that it may not match
+the version of the XS module anymore. Quoting the $VERSION declaration
+to make it a string is recommended if long version numbers are used.
+
 =head2 The PROTOTYPES: Keyword
 
 The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
