@@ -467,7 +467,7 @@ LIBFILES	= $(CRYPT_LIB) \
 		kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
-		version.lib odbc32.lib odbccp32.lib \
+		version.lib odbc32.lib odbccp32.lib comctl32.lib \
 		import32.lib $(LIBC)
 
 .IF  "$(CFG)" == "Debug"
@@ -535,7 +535,7 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lmoldname -lkernel32 -luser32 -lgdi32 \
 		  -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 \
 		  -loleaut32 -lnetapi32 -luuid -lws2_32 -lmpr \
-		  -lwinmm -lversion -lodbc32 -lodbccp32
+		  -lwinmm -lversion -lodbc32 -lodbccp32 -lcomctl32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 -DDEBUGGING
@@ -661,6 +661,14 @@ LIBOUT_FLAG	= /out:
 
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+LINK_FLAGS	= $(LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
+.ELSE
+RSC_FLAGS	= -DINCLUDE_MANIFEST
+.ENDIF
+
+
 # used to allow local linking flags that are not propogated into Config.pm,
 # currently unused
 #   -- BKS, 12-12-1999
@@ -717,9 +725,9 @@ $(o).dll:
 
 .rc.res:
 .IF "$(CCTYPE)" == "GCC"
-	$(RSC) --use-temp-file --include-dir=. --include-dir=.. -O COFF -i $< -o $@
+	$(RSC) --use-temp-file --include-dir=. --include-dir=.. -O COFF -D INCLUDE_MANIFEST -i $< -o $@
 .ELSE
-	$(RSC) -i.. $<
+	$(RSC) -i.. -DINCLUDE_MANIFEST $<
 .ENDIF
 
 #
@@ -750,6 +758,7 @@ UNIDATAFILES	 = ..\lib\unicore\Canonical.pl ..\lib\unicore\Exact.pl \
 UNIDATADIR1	= ..\lib\unicore\To
 UNIDATADIR2	= ..\lib\unicore\lib
 
+PERLEXE_MANIFEST= .\perlexe.manifest
 PERLEXE_ICO	= .\perlexe.ico
 PERLEXE_RES	= .\perlexe.res
 PERLDLL_RES	=
@@ -1298,7 +1307,7 @@ $(PERLSTATICLIB): Extensions_static
 .ENDIF
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
-$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
+$(PERLEXE_RES): perlexe.rc $(PERLEXE_MANIFEST) $(PERLEXE_ICO)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
@@ -1568,7 +1577,7 @@ distclean: realclean
 	-del /f ..\lib\Config_git.pl
 	-del /f bin\*.bat
 	-del /f perllibst.h
-	-del /f perl.base
+	-del /f $(PERLEXE_RES) perl.base
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib ppport.h
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-cd $(DISTDIR) && del /s *.def Makefile Makefile.old

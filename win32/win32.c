@@ -22,6 +22,7 @@
 #  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
 #endif
 #include <winnt.h>
+#include <commctrl.h>
 #include <tlhelp32.h>
 #include <io.h>
 #include <signal.h>
@@ -4799,6 +4800,16 @@ void
 Perl_win32_init(int *argcp, char ***argvp)
 {
     HMODULE module;
+
+    /* When the manifest resource requests Common-Controls v6 then
+     * user32.dll no longer registers all the Windows classes used for
+     * standard controls but leaves some of them to be registered by
+     * comctl32.dll.  InitCommonControls() doesn't do anything but calling
+     * it makes sure comctl32.dll gets loaded into the process and registers
+     * the standard control classes.  Without this even normal Windows APIs
+     * like MessageBox() can fail under some versions of Windows XP.
+     */
+    InitCommonControls();
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
     _invalid_parameter_handler oldHandler, newHandler;

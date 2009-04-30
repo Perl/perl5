@@ -4699,6 +4699,7 @@ win32/Makefile.ce		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/mdelete.bat		multifile delete
 win32/perlexe.ico		perlexe.ico image file
+win32/perlexe.manifest		Assembly manifest file
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation

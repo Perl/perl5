@@ -489,7 +489,7 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
-		version.lib odbc32.lib odbccp32.lib
+		version.lib odbc32.lib odbccp32.lib comctl32.lib
 
 # The 64 bit Platform SDK compilers contain a runtime library that doesn't
 # include the buffer overrun verification code used by the /GS switch.
@@ -515,6 +515,14 @@ EXEOUT_FLAG	= -Fe
 
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
+!IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+LINK_FLAGS	= $(LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
+!ELSE
+RSC_FLAGS	= -DINCLUDE_MANIFEST
+!ENDIF
+
+
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
@@ -538,7 +546,7 @@ $(o).dll:
 	$(EMBED_DLL_MANI)
 
 .rc.res:
-	$(RSC) -i.. $<
+	$(RSC) -i.. $(RSC_FLAGS) $<
 
 #
 # various targets
@@ -576,6 +584,7 @@ UNIDATAFILES	 = ..\lib\unicore\Canonical.pl ..\lib\unicore\Exact.pl \
 UNIDATADIR1	= ..\lib\unicore\To
 UNIDATADIR2	= ..\lib\unicore\lib
 
+PERLEXE_MANIFEST= .\perlexe.manifest
 PERLEXE_ICO	= .\perlexe.ico
 PERLEXE_RES	= .\perlexe.res
 PERLDLL_RES	=
@@ -955,7 +964,7 @@ $(PERLSTATICLIB): Extensions_static
 <<
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
-$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
+$(PERLEXE_RES): perlexe.rc $(PERLEXE_MANIFEST) $(PERLEXE_ICO)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd ..
@@ -1195,7 +1204,7 @@ distclean: realclean
 	-del /f ..\lib\Config_git.pl
 	-del /f bin\*.bat
 	-del /f perllibst.h
-	-del /f perl.base
+	-del /f $(PERLEXE_RES) perl.base
 	-cd .. && del /s *.lib *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib ppport.h
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-cd $(DISTDIR) && del /s *.def Makefile Makefile.old
