@@ -167,3 +167,27 @@ use_ok( $FileClass );
         ok( $file->validate,    "           File validates" );
     }        
 }
+
+### return error properly on corrupted archives
+### Addresses RT #44680: Improve error reporting on short corrupted archives
+{   ok( 1,                      "Testing bug 44680" );
+
+    {   ### XXX whitebox test -- resetting the error string
+        no warnings 'once'; 
+        $Archive::Tar::error = "";
+    }
+
+    my $src = File::Spec->catfile( qw[src short b] );
+    my $tar = $Class->new;
+    
+    isa_ok( $tar, $Class,       "   Object" );
+    
+    
+    ### we quell the error on STDERR
+    local $Archive::Tar::WARN = 0;
+
+    ok( !$tar->read( $src ),    "   No files in the corrupted archive" );
+    like( $tar->error, qr/enough bytes/,
+                                "       Expected error reported" );
+}
+
