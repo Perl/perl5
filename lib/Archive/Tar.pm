@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.46";
+$VERSION                = "1.48";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $DO_NOT_USE_PREFIX      = 0;
@@ -321,6 +321,13 @@ sub _read_tar {
             my $gzip = GZIP_MAGIC_NUM;
             if( $chunk =~ /$gzip/ ) {
                 $self->_error( qq[Cannot read compressed format in tar-mode] );
+                return;
+            }
+            
+            ### size is < HEAD, which means a corrupted file, as the minimum
+            ### length is _at least_ HEAD
+            if (length $chunk != HEAD) {
+                $self->_error( qq[Cannot read enough bytes from the tarfile] );
                 return;
             }
         }
