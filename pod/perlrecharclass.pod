@@ -471,7 +471,7 @@ Some examples:
 
 Perl will recognize the POSIX character classes C<[=class=]>, and
 C<[.class.]>, but does not (yet?) support this construct. Use of
-such a constructs will lead to an error.
+such a construct will lead to an error.
 
 
 =head4 Examples
