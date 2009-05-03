@@ -6,22 +6,22 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.017 qw(createSelfTiedObject);
+use IO::Compress::Base::Common  2.018 qw(createSelfTiedObject);
 
-use IO::Uncompress::Adapter::Inflate  2.017 ();
+use IO::Uncompress::Adapter::Inflate  2.018 ();
 
 
-use IO::Uncompress::Base  2.017 ;
-use IO::Uncompress::Gunzip  2.017 ;
-use IO::Uncompress::Inflate  2.017 ;
-use IO::Uncompress::RawInflate  2.017 ;
-use IO::Uncompress::Unzip  2.017 ;
+use IO::Uncompress::Base  2.018 ;
+use IO::Uncompress::Gunzip  2.018 ;
+use IO::Uncompress::Inflate  2.018 ;
+use IO::Uncompress::RawInflate  2.018 ;
+use IO::Uncompress::Unzip  2.018 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyInflateError);
 
-$VERSION = '2.017';
+$VERSION = '2.018';
 $AnyInflateError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -48,7 +48,7 @@ sub anyinflate
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.017 qw(:Parse);
+    use IO::Compress::Base::Common  2.018 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 

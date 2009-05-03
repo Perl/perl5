@@ -4,26 +4,26 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.017 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.017 ;
-use IO::Compress::Adapter::Deflate 2.017 ;
-use IO::Compress::Adapter::Identity 2.017 ;
-use IO::Compress::Zlib::Extra 2.017 ;
-use IO::Compress::Zip::Constants 2.017 ;
+use IO::Compress::Base::Common  2.018 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.018 ;
+use IO::Compress::Adapter::Deflate 2.018 ;
+use IO::Compress::Adapter::Identity 2.018 ;
+use IO::Compress::Zlib::Extra 2.018 ;
+use IO::Compress::Zip::Constants 2.018 ;
 
 
-use Compress::Raw::Zlib  2.017 qw(crc32) ;
+use Compress::Raw::Zlib  2.018 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.017 ; 
+           import  IO::Compress::Adapter::Bzip2 2.018 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.017 ; 
+           import  IO::Compress::Bzip2 2.018 ; 
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
-#           import  IO::Compress::Adapter::Lzma 2.017 ; 
+#           import  IO::Compress::Adapter::Lzma 2.018 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.017 ; 
+#           import  IO::Compress::Lzma 2.018 ; 
 #         } ;
 }
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.017';
+$VERSION = '2.018';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -71,6 +71,7 @@ sub mkComp
                                                  $got->value('Level'),
                                                  $got->value('Strategy')
                                                  );
+        *$self->{ZipData}{CRC32} = crc32(undef);
     }
     elsif (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
         ($obj, $errstr, $errno) = IO::Compress::Adapter::Deflate::mkCompObject(
@@ -390,7 +391,7 @@ sub ckParams
         $got->value('Time' => time) ;
     }
 
-    if (! $got->parsed('exTime') ) {
+    if ($got->parsed('exTime') ) {
         my $timeRef = $got->value('exTime');
         if ( defined $timeRef) {
             return $self->saveErrorString(undef, "exTime not a 3-element array ref")   
@@ -403,7 +404,7 @@ sub ckParams
     }
     
     # Unix2 Extended Attribute
-    if (! $got->parsed('exUnix2') ) {
+    if ($got->parsed('exUnix2') ) {
         my $timeRef = $got->value('exUnix2');
         if ( defined $timeRef) {
             return $self->saveErrorString(undef, "exUnix2 not a 2-element array ref")   
@@ -466,8 +467,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.017 qw(:Parse);
-    use Compress::Raw::Zlib  2.017 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.018 qw(:Parse);
+    use Compress::Raw::Zlib  2.018 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -528,6 +529,7 @@ sub getFileInfo
         $params->value('MTime' => $mtime) ;
         $params->value('ATime' => $atime) ;
         $params->value('CTime' => undef) ; # No Creation time
+        $params->value("exTime", [$mtime, $atime, undef]);
     }
 
     # NOTE - Unix specific code alert

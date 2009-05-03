@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.017 qw(:Status);
+use IO::Compress::Base::Common 2.018 qw(:Status);
 
 #use Compress::Bzip2 ;
-use Compress::Raw::Bzip2 2.017 ;
+use Compress::Raw::Bzip2 2.018 ;
 
 our ($VERSION, @ISA);
-$VERSION = '2.017';
+$VERSION = '2.018';
 
 #@ISA = qw( Compress::Raw::Bunzip2 );
 
@@ -22,7 +22,7 @@ sub mkUncompObject
 
     #my ($inflate, $status) = bzinflateInit;
                                 #Small        => $params->value('Small');
-    my ($inflate, $status) = new Compress::Raw::Bunzip2(1, 1, $small, $verbosity);
+    my ($inflate, $status) = new Compress::Raw::Bunzip2(1, 1, $small, $verbosity, 1);
 
     return (undef, "Could not create Inflation object: $status", $status)
         if $status != BZ_OK ;

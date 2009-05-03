@@ -158,6 +158,7 @@ ext/Compress-Raw-Bzip2/private/MakeUtil.pm
 ext/Compress-Raw-Bzip2/README
 ext/Compress-Raw-Bzip2/t/000prereq.t
 ext/Compress-Raw-Bzip2/t/01bzip2.t
+ext/Compress-Raw-Bzip2/t/09limitoutput.t
 ext/Compress-Raw-Bzip2/t/99pod.t
 ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
@@ -174,6 +175,7 @@ ext/Compress-Raw-Zlib/README		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/01version.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/02zlib.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/07bufsize.t	Compress::Raw::Zlib
+ext/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/18lvalue.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/typemap		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib

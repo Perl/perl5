@@ -1,7 +1,9 @@
 CHANGES
 -------
 
-  2.018 11 April 2009
+  2.018 3 May 2009
+
+      * added linitOutput option
 
       * Changes to bzip2 source to get the module to build using a C++
         compiler

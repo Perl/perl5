@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.017';
+$VERSION = '2.018';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.017 ;
+use IO::Compress::Base::Common 2.018 ;
 #use Parse::Parameters ;
 
 use IO::File ;
