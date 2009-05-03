@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 118;
+use Test::More tests => 122;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -900,6 +900,49 @@ SKIP: {
 SKIP: {
     skip "placeholder for tests not merged from f20dcd76e7", 7;
 }
+
+# Tests for last and next in when clauses
+my $letter;
+
+$letter = '';
+for ("a".."e") {
+    given ($_) {
+	$letter = $_;
+	when ("b") { last }
+    }
+    $letter = "z";
+}
+is($letter, "b", "last in when");
+
+$letter = '';
+LETTER1: for ("a".."e") {
+    given ($_) {
+	$letter = $_;
+	when ("b") { last LETTER1 }
+    }
+    $letter = "z";
+}
+is($letter, "b", "last LABEL in when");
+
+$letter = '';
+for ("a".."e") {
+    given ($_) {
+	when (/b|d/) { next }
+	$letter .= $_;
+    }
+    $letter .= ',';
+}
+is($letter, "a,c,e,", "next in when");
+
+$letter = '';
+LETTER2: for ("a".."e") {
+    given ($_) {
+	when (/b|d/) { next LETTER2 }
+	$letter .= $_;
+    }
+    $letter .= ',';
+}
+is($letter, "a,c,e,", "next LABEL in when");
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t
