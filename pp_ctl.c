@@ -1265,8 +1265,6 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
-	case CXt_GIVEN:
-	case CXt_WHEN:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			context_name[CxTYPE(cx)], OP_NAME(PL_op));
