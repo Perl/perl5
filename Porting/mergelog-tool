@@ -19,6 +19,7 @@ my %STATUS = (
     'P' => 'Partally merged, the rest rejected',
     'R' => 'Fully rejected',
     'A' => 'part of branch merged in single Aggregate merge',
+    'd' => 'Defer until a later release',
     'm' => 'Partally merged, the rest pending',
     '!' => 'Reviewed but awaiting action',
     '.' => 'Unreviewed',
@@ -91,7 +92,7 @@ sub read_merge_record_file {
 	    my ($flag, $commit, $date, $rest) = split ' ', $_, 4;
 	    defined $rest
 		or die "$0: malformed line at $file:$.:\n$_";
-	    $flag =~ /^[AMPRm!\.]$/
+	    $flag =~ /^[AMPRdm!\.]$/
 		or die "$0: unrecognised flag '$flag' at $file:$.\n";
 	    $commit =~ /^[0-9a-f]{$SHA_LEN}$/
 		or die "$0: badly-formed commit '$commit' at $file:$.\n";
@@ -212,7 +213,7 @@ sub generate_mailboxes {
 	    $fh = $mboxes{accepted};
 	    $counts{accepted}++;
 	}
-	elsif ($record->[0] =~ /^[R]$/) {
+	elsif ($record->[0] =~ /^[dR]$/) {
 	    $fh = $mboxes{rejected};
 	    $counts{rejected}++;
 	}
