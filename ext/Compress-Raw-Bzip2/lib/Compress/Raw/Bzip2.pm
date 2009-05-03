@@ -220,7 +220,7 @@ Returns C<BZ_STREAM_END> on success and a C<bzip2> error code on failure.
 
 =head1 Uncompression
 
-=head2 ($z, $status) = new Compress::Raw::Bunzip2 $appendOutput, $consumeInput, $small;
+=head2 ($z, $status) = new Compress::Raw::Bunzip2 $appendOutput, $consumeInput, $small, $limitOutput;
 
 If successful, it will return the initialised uncompression object, C<$z>
 and a C<$status> of C<BZ_OK> in a list context. In scalar context it
@@ -252,6 +252,26 @@ To quote the bzip2 documentation
     requirement drops to around 2300k). 
 
 Defaults to 0.
+
+=item B<$limitOutput>
+
+The C<LimitOutput> option changes the behavior of the C<< $i->bzinflate >>
+method so that the amount of memory used by the output buffer can be
+limited. 
+
+When C<LimitOutput> is used the size of the output buffer used will either
+be the 16k or the amount of memory already allocated to C<$output>,
+whichever is larger. Predicting the output size available is tricky, so
+don't rely on getting an exact output buffer size.
+
+When C<LimitOutout> is not specified C<< $i->bzinflate >> will use as much
+memory as it takes to write all the uncompressed data it creates by
+uncompressing the input buffer.
+
+If C<LimitOutput> is enabled, the C<ConsumeInput> option will also be
+enabled.
+
+This option defaults to false.
 
 =back
 

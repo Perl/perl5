@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.018 3 May 2009
+
+      * IO::Unompress::Bunzip2
+        - The interface to Compress-Raw-Bzip2 now uses the new LimitOutput
+          feature. This will make all of the bzip2-related IO-Compress modules
+          less greedy in their memory consumption. 
+
+      * IO::Compress::Zip
+        - Fixed exTime & exUnix2
+
+        - Fixed 'Use of uninitialized value in pack' warning when using
+          ZIP_CM_STORE.
+
   2.017 30 March 2009
 
       * Merged IO-Compress-Base, IO-Compress-Bzip2, IO-Compress-Zlib &

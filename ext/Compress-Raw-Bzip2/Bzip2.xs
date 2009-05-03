@@ -50,6 +50,7 @@ typedef struct di_stream {
     int      flags ;
 #define FLAG_APPEND_OUTPUT      1
 #define FLAG_CONSUME_INPUT      8
+#define FLAG_LIMIT_OUTPUT       16
     bz_stream stream;
     uInt     bufsize; 
     int      last_error ;
@@ -182,7 +183,7 @@ DispStream(s, message)
 
     printf("DispStream 0x%p", s) ;
     if (message)
-        printf("- %s \n", message) ;
+        printf(" - %s \n", message) ;
     printf("\n") ;
 
     if (!s)  {
@@ -191,6 +192,7 @@ DispStream(s, message)
     else     {
         printf("    stream           0x%p\n", &(s->stream));
         printf("           opaque    0x%p\n", s->stream.opaque);
+        printf("           state     0x%p\n", s->stream.state );
         printf("           next_in   0x%p", s->stream.next_in);
         if (s->stream.next_in){
             printf(" =>");
@@ -208,9 +210,14 @@ DispStream(s, message)
         printf("           avail_in  %lu\n",  (unsigned long)s->stream.avail_in);
         printf("           avail_out %lu\n",  (unsigned long)s->stream.avail_out);
         printf("    bufsize          %lu\n",  (unsigned long)s->bufsize);
+        printf("      total_in_lo32  %u\n",  s->stream.total_in_lo32);
+        printf("      total_in_hi32  %u\n",  s->stream.total_in_hi32);
+        printf("      total_out_lo32 %u\n",  s->stream.total_out_lo32);
+        printf("      total_out_hi32 %u\n",  s->stream.total_out_hi32);
         printf("    flags            0x%x\n", s->flags);
         printf("           APPEND    %s\n",   EnDis(FLAG_APPEND_OUTPUT));
         printf("           CONSUME   %s\n",   EnDis(FLAG_CONSUME_INPUT));
+        printf("           LIMIT     %s\n",   EnDis(FLAG_LIMIT_OUTPUT));
 
         printf("\n");
 
@@ -408,12 +415,13 @@ new(className, appendOut=1, blockSize100k=1, workfactor=0, verbosity=0)
 MODULE = Compress::Raw::Bunzip2 PACKAGE = Compress::Raw::Bunzip2
 
 void
-new(className, appendOut=1 , consume=1, small=0, verbosity=0)
+new(className, appendOut=1 , consume=1, small=0, verbosity=0, limitOutput=0)
     const char* className
     int appendOut
     int consume
     int small
     int verbosity
+    int limitOutput
   PPCODE:
   {
     int err = BZ_OK ;
@@ -436,6 +444,8 @@ new(className, appendOut=1 , consume=1, small=0, verbosity=0)
                 flags |= FLAG_APPEND_OUTPUT;
             if (consume)
                 flags |= FLAG_CONSUME_INPUT;
+            if (limitOutput)
+                flags |= (FLAG_LIMIT_OUTPUT|FLAG_CONSUME_INPUT);
 	    PostInitStream(s, flags) ;
         }
     }
@@ -723,7 +733,7 @@ bzinflate (s, buf, output)
   CODE:
     bufinc = s->bufsize;
     /* If the buffer is a reference, dereference it */
-    buf = deRef(buf, "inflate") ;
+    buf = deRef(buf, "bzinflate") ;
 
     if (s->flags & FLAG_CONSUME_INPUT && SvREADONLY(buf))
         croak(UNCOMPRESS_CLASS "::bzinflate input parameter cannot be read-only when ConsumeInput is specified");
@@ -737,7 +747,7 @@ bzinflate (s, buf, output)
     s->stream.avail_in = SvCUR(buf);
 	
     /* and retrieve the output buffer */
-    output = deRef_l(output, "inflate") ;
+    output = deRef_l(output, "bzinflate") ;
 #ifdef UTF8_AVAILABLE    
     if (DO_UTF8(output))
          out_utf8 = TRUE ;
@@ -747,6 +757,34 @@ bzinflate (s, buf, output)
     if((s->flags & FLAG_APPEND_OUTPUT) != FLAG_APPEND_OUTPUT) {
         SvCUR_set(output, 0);
     }
+#if 1
+    /* Assume no output buffer - the code below will update if there is any available */
+    s->stream.avail_out = 0;
+
+    if (SvLEN(output)) {
+        prefix_length = cur_length =  SvCUR(output) ;
+    
+        if (s->flags & FLAG_LIMIT_OUTPUT && SvLEN(output) - cur_length - 1 < bufinc)
+        {
+            Sv_Grow(output, bufinc + cur_length + 1) ;
+        }
+    
+        /* Only setup the stream output pointers if there is spare 
+           capacity in the outout SV
+        */
+        if (SvLEN(output) > cur_length + 1)
+        {
+            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
+            increment = SvLEN(output) -  cur_length - 1;
+            s->stream.avail_out = increment;
+        }
+    }
+
+    s->bytesInflated = 0;
+    
+    RETVAL = BZ_OK;
+#else
+
     if (SvLEN(output)) {
         prefix_length = cur_length =  SvCUR(output) ;
         s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
@@ -757,12 +795,13 @@ bzinflate (s, buf, output)
         s->stream.avail_out = 0;
     }
     s->bytesInflated = 0;
+#endif
     
     while (1) {
 
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            Sv_Grow(output, SvLEN(output) + bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc + 1) ;
             cur_length += increment ;
             s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length ;
             increment = bufinc ;
@@ -770,9 +809,11 @@ bzinflate (s, buf, output)
             bufinc *= 2 ;
         }
 
+        //DispStream(s, "pre");
         RETVAL = BZ2_bzDecompress (&(s->stream));
 
-        if (RETVAL != BZ_OK) 
+        //DispStream(s, "apres");
+        if (RETVAL != BZ_OK || s->flags & FLAG_LIMIT_OUTPUT) 
             break ;
 
         if (s->stream.avail_out == 0)
