@@ -10495,7 +10495,8 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
     ptr_table_store(PL_ptr_table, gp, ret);
 
     /* clone */
-    ret->gp_refcnt	= 0;			/* must be before any other dups! */
+    /* ret->gp_refcnt must be 0 before any other dups are called. We're relying
+       on Newxz() to do this for us.  */
     ret->gp_sv		= sv_dup_inc(gp->gp_sv, param);
     ret->gp_io		= io_dup_inc(gp->gp_io, param);
     ret->gp_form	= cv_dup_inc(gp->gp_form, param);
