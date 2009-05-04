@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.019 4 May 2009
+
+      * IO::Uncompress::Adapter::Bunzip2
+        - Fixed problem with EOF check. 
+
   2.018 3 May 2009
 
       * IO::Unompress::Bunzip2
