@@ -652,10 +652,15 @@ sub available_version {
 #-> sub CPAN::Module::parse_version ;
 sub parse_version {
     my($self,$parsefile) = @_;
-    my $have = eval { MM->parse_version($parsefile); };
+    alarm(10);
+    my $have = eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+        MM->parse_version($parsefile);
+    };
     if ($@) {
         $CPAN::Frontend->mywarn("Error while parsing version number in file '$parsefile'\n");
     }
+    alarm(0);
     my $leastsanity = eval { defined $have && length $have; };
     $have = "undef" unless $leastsanity;
     $have =~ s/^ //; # since the %vd hack these two lines here are needed
