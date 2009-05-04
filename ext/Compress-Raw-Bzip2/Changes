@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.019 4 May 2009
+
+      * tidied up Bzip2.xs
+
   2.018 3 May 2009
 
       * added linitOutput option

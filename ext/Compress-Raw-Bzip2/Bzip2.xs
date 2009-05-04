@@ -757,7 +757,7 @@ bzinflate (s, buf, output)
     if((s->flags & FLAG_APPEND_OUTPUT) != FLAG_APPEND_OUTPUT) {
         SvCUR_set(output, 0);
     }
-#if 1
+
     /* Assume no output buffer - the code below will update if there is any available */
     s->stream.avail_out = 0;
 
@@ -783,19 +783,6 @@ bzinflate (s, buf, output)
     s->bytesInflated = 0;
     
     RETVAL = BZ_OK;
-#else
-
-    if (SvLEN(output)) {
-        prefix_length = cur_length =  SvCUR(output) ;
-        s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
-        increment = SvLEN(output) -  cur_length - 1;
-        s->stream.avail_out = increment;
-    }
-    else {
-        s->stream.avail_out = 0;
-    }
-    s->bytesInflated = 0;
-#endif
     
     while (1) {
 
@@ -809,10 +796,10 @@ bzinflate (s, buf, output)
             bufinc *= 2 ;
         }
 
-        //DispStream(s, "pre");
+        /*DispStream(s, "pre"); */
         RETVAL = BZ2_bzDecompress (&(s->stream));
 
-        //DispStream(s, "apres");
+        /*DispStream(s, "apres");*/
         if (RETVAL != BZ_OK || s->flags & FLAG_LIMIT_OUTPUT) 
             break ;
 
