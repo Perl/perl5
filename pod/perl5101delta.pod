@@ -143,7 +143,7 @@ C<Archive::Extract> upgraded from version 0.24 to 0.30
 
 =item *
 
-C<Archive::Tar> upgraded from version 1.38 to 1.46
+C<Archive::Tar> upgraded from version 1.38 to 1.48
 
 =item *
 
@@ -163,11 +163,19 @@ C<CGI> upgraded from version 3.29 to 1.93_03
 
 =item *
 
+C<Compress::Zlib> upgraded from version 2.008 to 2.018
+
+=item *
+
 C<CPAN> upgraded from version 1.9205 to 1.93_03 
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.22
+C<CPANPLUS> upgraded from version 0.84 to 0.8601
+
+=item *
+
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.24
 
 =item *
 
@@ -266,7 +274,7 @@ C<Module::Build> upgraded from version 0.2808_01 to 0.32
 
 =item *
 
-C<Module::CoreList> upgraded from version 2.13 to 2.17
+C<Module::CoreList> upgraded from version 2.13 to 2.17_01 XXX
 
 =item *
 
@@ -332,6 +340,10 @@ C<threads::shared> upgraded from version 1.14 to 1.28
 =item *
 
 C<Term::ANSIColor> upgraded from version 1.12 to 2.00
+
+=item *
+
+C<Term::UI> upgraded from version 0.18 to 0.20
 
 =item *
 
@@ -549,6 +561,12 @@ C<{0,32767}> [RT #60034, #60464]. For example, this match would fail:
 
 C<shmget> was limited to a 32 bit segment size on a 64 bit OS [RT #63924].
 
+=item *
+
+Using C<next> or C<last> to exit a C<given> block no longer produces a
+spurious warning like the following:
+
+    Exiting given via last at foo.pl line 123
 
 =back
 

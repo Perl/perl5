@@ -21,6 +21,7 @@
 #
 # Not fully processed (lower case or symbols):
 #
+#    d  defer until a later release
 #    m  partially merged, awaiting further action
 #    .  not yet reviewed
 #    !  reviewed but not yet merged; awaiting something else
@@ -74,6 +75,8 @@ M  c826f41b69 2007/12/21 32686
 M  644741fd20 2007/12/21 32687
 M  22883ac550 2007/12/21 32688
 M  3f5211dd25 2007/12/21 32689
+				this was backed out in maint by 555150c249,
+				then re-merged by 85152dbe94
 M  aab391487e 2007/12/21 32690
 M  f05ddbb84c 2007/12/21 32691
 R  aeedbbed67 2007/12/21 32692 more each @array (see 32680)
@@ -1433,11 +1436,10 @@ M  1d1936752b 2008/10/28 34626
 R  6c1b357c76 2008/10/28 34627 consting
 M  b8082b6e76 2008/10/28 34628
 M  85fbaab29c 2008/10/28 34629
-m  df00ff3bee 2008/10/29 34630 still to merge:
-		lib/CPANPLUS/Internals/Constants/Report.pm
-		    (it was actually backed out by
-		    0b9295fd2a2a3ba86b0db1bc39ec1a37be80ac61)
-		    waiting for CPANPLUS to sync with that on CPAN
+M  df00ff3bee 2008/10/29 34630
+		    (bits of this were backed out by 0b9295f, then
+		    reapplied bit by bit as CPAN modules synced with
+		    blead)
 M  4b0b5bad69 2008/10/29 34631
 R  1c1947d58d 2008/10/29 34634 MM_Haiku.pm: later deleted by 6fea91d48c
 M  2f9d49b43d 2008/10/29 34637
@@ -1702,7 +1704,7 @@ R  a23fa242b3 2008/12/15 35102 sort MANIFEST: did it manually instead
 M  8328529578 2008/12/15 35105
 M  29c6b3372e 2008/12/15 35106
 !  bdd3a62baa 2008/12/16 35118 IPC::Cmd 0.42; waiting for 0.42_01 to be backported to CPAN
-!  74ae847926 2008/12/16 35119 CPANPLUS 0.84_01; waiting for it to be backported to CPAN
+M  74ae847926 2008/12/16 35119 CPANPLUS 0.84_01
 M  4dbf56a072 2008/12/16 35120
 M  fb063f91dc 2008/12/19 [admin] set up .gitignore files
 M  1a95a0fc1d 2008/12/19 Porting: add a little script to find a perforce ch
@@ -1933,36 +1935,36 @@ M  2547c837a7 2009/01/03 add -d option to Porting/cmpVERSION.pl to display
 #
 # start of y2038 block; not yet applied as possibly not stable
 #
-!  a272e669f4 2009/01/03 Patch in a 64 bit clean gmtime_r() and localtime_r
-!  9af245219b 2009/01/03 Update to the latest version of the y2038 code.
-!  a64acb403a 2009/01/03 Update from the latest y2038.
-!  767e26d7c8 2009/01/03 Remove all of localtime64's own includes. Perl's a
-!  af9b2bf51b 2009/01/03 Change the way the check_tm assertion function is 
-!  769448c3ca 2009/01/03 Cleaning up the Time::gmtime and Time::localtime t
-!  9b3ca67b76 2009/01/03 Write down the logic behind the localtime vs gmtim
-!  7bda3dfccb 2009/01/03 Update from y2038.
-!  5b6366c2b2 2009/01/03 Fix the overflow warning to just check for an erro
-!  af8328142f 2009/01/03 Update from y2038 project.
-!  c07fe26c2b 2009/01/03 Pull in changes from y2038
-!  ea722b766b 2009/01/03 Update from y2038
-!  003c3b95c2 2009/01/03 Update from y2038 project.
-!  65a38213a5 2009/01/03 We are no longer slaves to the vagaries of time_t.
-!  b9020a0ae3 2009/01/03 Fix the test plan on gmtime
-!  750c447b41 2009/01/03 Update from y2038
-!  948ea7a98b 2009/01/03 Update from y2038
-!  dc164757d6 2009/01/03 Update some docs to explain that Perl no longer ha
-!  4c91ace1ab 2009/01/03 Everything should now work with negative times, so
-!  7643e68fdb 2009/01/03 Rename localtime64.[ch] to time64.[ch] to mirror c
-!  806a119aef 2009/01/03 Remove the AIX work around code. Instead it should
-!  7315c673ba 2009/01/03 Fix pulling a large time off the stack by using a 
-!  0fb7f756cb 2009/01/03 We are no longer bound by the limits of the tm str
-!  8efababc2f 2009/01/03 Fix gmtime() and localtime() so they can pop times
-!  b86b480f73 2009/01/03 Update from y2038
-!  461d5a49bc 2009/01/03 Update from y2038.
-!  0e3c5d8bc7 2009/01/03 Turn quads on in the VC configurations.
-!  1821818801 2009/01/03 Apply bleadperl@34470 by hand while waiting for th
-!  d4fb0a1f15 2009/01/03 Update from y2038
-!  f433f45e72 2009/01/03 Merge branch 'schwern/y2038' into blead
+d  a272e669f4 2009/01/03 Patch in a 64 bit clean gmtime_r() and localtime_r
+d  9af245219b 2009/01/03 Update to the latest version of the y2038 code.
+d  a64acb403a 2009/01/03 Update from the latest y2038.
+d  767e26d7c8 2009/01/03 Remove all of localtime64's own includes. Perl's a
+d  af9b2bf51b 2009/01/03 Change the way the check_tm assertion function is 
+d  769448c3ca 2009/01/03 Cleaning up the Time::gmtime and Time::localtime t
+d  9b3ca67b76 2009/01/03 Write down the logic behind the localtime vs gmtim
+d  7bda3dfccb 2009/01/03 Update from y2038.
+d  5b6366c2b2 2009/01/03 Fix the overflow warning to just check for an erro
+d  af8328142f 2009/01/03 Update from y2038 project.
+d  c07fe26c2b 2009/01/03 Pull in changes from y2038
+d  ea722b766b 2009/01/03 Update from y2038
+d  003c3b95c2 2009/01/03 Update from y2038 project.
+d  65a38213a5 2009/01/03 We are no longer slaves to the vagaries of time_t.
+d  b9020a0ae3 2009/01/03 Fix the test plan on gmtime
+d  750c447b41 2009/01/03 Update from y2038
+d  948ea7a98b 2009/01/03 Update from y2038
+d  dc164757d6 2009/01/03 Update some docs to explain that Perl no longer ha
+d  4c91ace1ab 2009/01/03 Everything should now work with negative times, so
+d  7643e68fdb 2009/01/03 Rename localtime64.[ch] to time64.[ch] to mirror c
+d  806a119aef 2009/01/03 Remove the AIX work around code. Instead it should
+d  7315c673ba 2009/01/03 Fix pulling a large time off the stack by using a 
+d  0fb7f756cb 2009/01/03 We are no longer bound by the limits of the tm str
+d  8efababc2f 2009/01/03 Fix gmtime() and localtime() so they can pop times
+d  b86b480f73 2009/01/03 Update from y2038
+d  461d5a49bc 2009/01/03 Update from y2038.
+d  0e3c5d8bc7 2009/01/03 Turn quads on in the VC configurations.
+d  1821818801 2009/01/03 Apply bleadperl@34470 by hand while waiting for th
+d  d4fb0a1f15 2009/01/03 Update from y2038
+d  f433f45e72 2009/01/03 Merge branch 'schwern/y2038' into blead
 #
 # end of y2038 block
 #
@@ -1990,17 +1992,14 @@ M  12d7e04de3 2009/01/04 this seems to work, still not using the perl versi
 M  eb5c076f82 2009/01/04 eliminate make_patchnum.sh, and make the build pro
 M  505afc734e 2009/01/04 add better pod and headers, and clean up some whit
 M  a49f3ea332 2009/01/04 eliminate double stringification, the defines as d
-!  ef3a38ffad 2009/01/05 y2038
+d  ef3a38ffad 2009/01/05 y2038
 M  e08e1e1d05 2009/01/05 VMS posix exit fixes
 M  17a5646396 2009/01/05 UNKNOWN should not have been a bareword at e9be352
 M  20231e4a0b 2009/01/05 Typo fix in stock PERL_PATCHNUM definition
 M  91c3081c67 2009/01/05 Correct vim modeline
 M  737f445947 2009/01/05 Update copyright year to 2009.
 M  1702870677 2009/01/05 Adjustments to POSIX for the Haiku port
-m  e5c8c22050 2009/01/05 Bump two module versions after Haiku port
-			this is merged: lib/Module/Build.pm -> 0.30_01
-			not yet: lib/CPANPLUS/Internals/Constants/Report.pm;
-			waiting for CPANPLUS to sync with that on CPAN
+M  e5c8c22050 2009/01/05 Bump two module versions after Haiku port
 M  e5620114d8 2009/01/05 Upgrade to Time::HiRes 1.9719
 M  ff34631365 2009/01/05 "rm -f" better in "make clean" targets
 M  aa4ca55799 2009/01/05 Emit less PERL_ARGS_ASSERT_* macros
@@ -2059,7 +2058,7 @@ M  9a2f2e6b8d 2009/01/09 Fix typo in pod/perltodo.pod
 R  9948897efc 2009/01/09 Typo fix in pod/perl5110delta.pod
 				blead-specific
 M  b8486b9d23 2009/01/09 simple_trnlnm needs an actual length as its last a
-!  478780ab3d 2009/01/09 fake_localtime_r and fake_gmtime_r may need thread
+d  478780ab3d 2009/01/09 fake_localtime_r and fake_gmtime_r may need thread
 			    y2038
 M  6c981e149c 2009/01/09 Capitalize "latin"
 M  80983d2147 2009/01/09 Fix typo
@@ -2108,7 +2107,7 @@ M  a148edb68f 2009/01/13 Restore Win32 build by creating git_version.h.
 M  049aabcba3 2009/01/13 Give the git file browser URL as the most up to da
 !  cd1759d8c2 2009/01/13 Silence Win32 compiler warnings.
 			    fixes to: 1e9bd1186a (mro code moving), y2038
-!  554fcfb9c5 2009/01/13 Silence time64.c build warning
+d  554fcfb9c5 2009/01/13 Silence time64.c build warning
 			    y2038
 M  550428fe48 2009/01/13 ext/Hash/Util/Makefile.PL should not recurse to Fi
 M  fdd40f9619 2009/01/13 chomp the output from git ls-files. Display a help
@@ -2139,7 +2138,7 @@ P  609122bd05 2009/01/16 Add warning about octal > 377 in some regexes
 M  c53941b4d2 2009/01/16 Fix deparsing of readpipe() ([perl #62428])
 M  3319632a10 2009/01/17 Need even more stack for VMS_IA64-ithread.
 M  b1b1ee3cbf 2009/01/18 UPSTREAM => blead; because CPAN => 0
-!  a8cb02613d 2009/01/18 consting goodness for time64
+d  a8cb02613d 2009/01/18 consting goodness for time64
 			    y2038
 M  6db37112cd 2009/01/18 Add 5.8.9 to list of versions known to Module::Cor
 M  65395b02d2 2009/01/18 Add ExtUtils::Miniperl to the list of core modules
@@ -2148,12 +2147,12 @@ M  51d6c659b2 2009/01/18 Upgrade to Devel::PPPort 3.15
 M  ca05901bcd 2009/01/18 Jarkko says: Upstream for Math::Complex is the CPA
 M  deb20ba305 2009/01/18 [perl #62488] B::Deparse fails on 'CORE::require(S
 M  21b5215870 2009/01/18 Make B::Deparse handle the _ prototype
-!  b02dc803f4 2009/01/18 Not everybody (hardly anybody?) uses const for tm.
+d  b02dc803f4 2009/01/18 Not everybody (hardly anybody?) uses const for tm.
 			    y2038
 M  642d3d283b 2009/01/19 ignore realclean.sh
 R  7bf7986364 2009/01/19 Combine sv_utf8_upgrade with a following grow
 			 needs b3ab6785f6
-!  4c6e94b1e7 2009/01/19 Be sure to call L_R_TZSET before localtime_r()
+d  4c6e94b1e7 2009/01/19 Be sure to call L_R_TZSET before localtime_r()
 			    y2038
 R  b3647a3612 2009/01/19 about warnings if forks fail in Perl_my_popen
 			    new warnings - possible BackCompat issues
@@ -2209,7 +2208,7 @@ M  16ad9bfac1 2009/01/24 The exit code of make_patchnum.pl is no longer use
 M  8c4561fbb4 2009/01/24 Add -DPERL_IS_MINIPERL when building the object fi
 M  931482b7d6 2009/01/25 Port 486cd780047ff22471c5cbe417911a042ae23962 to w
 M  ec47230bf7 2009/01/25 microperl also needs a canned git config.
-!  5d09c1ed83 2009/01/25 microperl has no idea about 64 bit types, so don't
+d  5d09c1ed83 2009/01/25 microperl has no idea about 64 bit types, so don't
 			    y2038
 M  0639114fb4 2009/01/25 Regenerate uconfig.h
 M  a90aae4c56 2009/01/25 Remove stock_git_version.h as nothing uses it any 
@@ -2371,8 +2370,7 @@ M  b4bd6dcd45 2009/02/09 Rename ext/PerlIO/scalar to ext/PerlIO-scalar
 M  e5db20f449 2009/02/09 Rename ext/PerlIO/via to ext/PerlIO-via
 M  0450807c0b 2009/02/09 Rename ext/Sys/Hostname to ext/Sys-Hostname
 M  f715bbfb20 2009/02/09 Rename ext/Test/Harness to ext/Test-Harness
-!  d119459be9 2009/02/09 correct typo, replacing "complement" with "complim
-			    quiet update to Storable.pm not yet in CPAN
+M  d119459be9 2009/02/09 correct typo, replacing "complement" with "complim
 M  9bdb6db8a6 2009/02/09 Rename ext/Text/Soundex to ext/Text-Soundex
 M  40d04ec442 2009/02/09 Rename ext/Time/HiRes to ext/Time-HiRes
 M  50acc947dd 2009/02/09 Rename ext/Time/Piece to ext/Time-Piece
@@ -2394,7 +2392,7 @@ M  8e08999f3b 2009/02/10 mention English name of %+ in perlvar.pod
 M  43239f9092 2009/02/10 Fix previous patch. Actually it's written PAREN, n
 M  37d29c6f34 2009/02/11 Update makerel to make a release from a git checko
 M  c6f023287f 2009/02/11 Fix previous patch. Actually it's written PAREN, n
-!  8098e75c0b 2009/02/11 avoid confusing gcc with -2147483648
+d  8098e75c0b 2009/02/11 avoid confusing gcc with -2147483648
 			    y2038
 M  bf8d1304d5 2009/02/11 vms fgetname wrapper.
 !  f9916dde00 2009/02/12 Update CPAN.pm to 1.93_51
@@ -2496,13 +2494,13 @@ R  e6a0bbf8b4 2009/02/20 Add a parameter to win32_get_{priv,site,vendor}lib
 M  73aec0b1ca 2009/02/20 More smartmatch tests
 M  58472d87a6 2009/02/20 Move redefinition of lstat above its first use in 
 M  778e045f83 2009/02/20 Avoid VMS long filename support on older systems t
-!  7f336194cf 2009/02/21 Skip time64 when there is no 64-bit integer type a
+d  7f336194cf 2009/02/21 Skip time64 when there is no 64-bit integer type a
 			    y2038
 M  1487aac67a 2009/02/21 Upgrade to ExtUtils::MakeMaker 6.49_01
 M  2f30d0d0af 2009/02/21 Re-apply changes 4adc95e616bac7ee and 200cbd6aa595
 R  3aaf6557bb 2009/02/21 In S_init_perllib(), correct errors in the MACOS_T
 			    part of @INC order stuff
-!  ec4d613228 2009/02/21 Use "system" gmtime in time64 on VMS so C<vmsish '
+d  ec4d613228 2009/02/21 Use "system" gmtime in time64 on VMS so C<vmsish '
 			    y2038
 R  04c9eeccd3 2009/02/21 NetWare has PRIVLIB_EXP as something other than a 
 			    part of @INC order stuff
@@ -2588,8 +2586,7 @@ M  bdb7fd9ff2 2009/03/01 Add Compress-Raw-Bzip2, by Paul Marquess
 M  1c058b48fe 2009/03/01 Better gitignore file for Compress-Raw-Bzip2
 M  f56ed502c9 2009/03/01 Make util.c compile on systems without getcwd()
 M  b6be863a9c 2009/03/02 Bump versions to 0.10 for CPAN sync
-!  4443dd534c 2009/03/02 Update CPANPLUS to 0.85_06
-			    awaiting CPAN sync
+M  4443dd534c 2009/03/02 Update CPANPLUS to 0.85_06
 M  be96f5c3c1 2009/03/02 Integrate Parse::CPAN::Meta 0.04 into core
 M  4ec613fc9e 2009/03/02 Bump versions to 0.12 to sync with CPAN version
 M  985e6bb7f5 2009/03/03 Remove the MANIFEST from Compress-Raw-Bzip2
@@ -2631,13 +2628,13 @@ M  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
 			    wait for CPAN sync
 M  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
 M  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
-!  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
+d  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
 			    y2038
-!  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
+d  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
 			    y2038
 M  4d9f3eeb6f 2009/03/13 Ilya M. is no longer maintaining Data::Dumper. Ass
 M  5a7ebd3db9 2009/03/13 Add -E in the command-line usage in perl.pod
-!  43eb98159e 2009/03/13 Tests for floating point args to localtime and gmt
+d  43eb98159e 2009/03/13 Tests for floating point args to localtime and gmt
 			    y2038
 M  df3467db16 2009/03/14 Return OPERATOR('[') for '[' without falling throu
 M  f50fa36f2a 2009/03/14 Better test case for [perl #63854] Error parsing "
@@ -2655,8 +2652,10 @@ M  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
 M  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
 M  53102b2bf3 2009/03/19 Bump Module-Pluggable VERSION following 4a28828fc8
 M  de9b652d38 2009/03/19 pod/perlreftut.pod: keep example in tune with the 
-!  38bb37b9aa 2009/03/20 Revert the op.c part of 3049cdab to enable shared 
-			    need to think about it some more
+R  38bb37b9aa 2009/03/20 Revert the op.c part of 3049cdab to enable shared 
+			    it fixes an optimisation bug that been around
+			    for years; and the fix might introduce some
+			    new bugs
 M  16bf6aa6d6 2009/03/20 Remove unnecessary MANIFEST file for IO-Compress
 M  baddfc4720 2009/03/21 Update CPANPLUS::Dist::Build to 0.16
 M  07abd197a8 2009/03/21 Correct a few file references in README files
@@ -2736,9 +2735,9 @@ M  5c1e544edd 2009/03/26 Ignore Makefile.PLs that are now autogenerated.
 R  fa7f7498c3 2009/03/26 -ugk don't call string overload when S_IXXX isn't 
 R  0e985b6b12 2009/03/26 The DOSish branch of File::stat->cando had its arg
 # back to main
-!  7430375d19 2009/03/26 Namespace clean-up for time64.
+d  7430375d19 2009/03/26 Namespace clean-up for time64.
 			    y2038
-!  c8269701e1 2009/03/26 Remove unused function S_copy_big_TM_to_little_tm 
+d  c8269701e1 2009/03/26 Remove unused function S_copy_big_TM_to_little_tm 
 			    y2038
 !  036d8bd42e 2009/03/27 Add inet_pton() and inet_ntop() to Socket.
 			    some preliminary support for IPv6 - perhaps
@@ -2756,7 +2755,7 @@ R  40b195f125 2009/03/27 Merge commit 'mauzo/over-X' into blead
 M  d82dd1bcff 2009/03/27 Some standards compliance for the new Time::Piece 
 !  37fa5116bc 2009/03/27 Fix concise-xs.t after recent changes to Socket.pm
 			    see 036d8bd42e
-!  673062a98a 2009/03/27 Forgot one "static" in 7430375d1909c2b62c1fb3f9c6e
+d  673062a98a 2009/03/27 Forgot one "static" in 7430375d1909c2b62c1fb3f9c6e
 			    y2038
 !  d21dfdd8f2 2009/03/27 Also skip test 20 in t/Socket.t when no IPv6 is av
 			    see 036d8bd42e
@@ -2886,8 +2885,7 @@ R  3915ffe07a 2009/04/13 Merge branch 'blead' of ssh://stevep@perl5.git.per
 			    see 2f2071b189
 M  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
 M  edd0a813ce 2009/04/16 Update CPANPLUS::Dist::Build to 0.22
-!  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
-			    wait for CPAN sync
+M  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
 M  c1a2df7619 2009/04/16 Add tests to verify that h2ph output compiles and 
 M  c0cc52e96e 2009/04/16 Squelch 'Constant subroutine ... undefined' warnin
 M  b36d99fa00 2009/04/16 Data::Dumper hash iterator needs to be reset on al
@@ -2937,13 +2935,37 @@ M  75585ce3d6 2009/04/23 Add an idea to perltodo
 M  15a429282c 2009/04/23 qr_gc.t is only TODO on 5.11.x+
 M  e1ae7bac59 2009/04/23 Break out the logic that maps file names to module
 M  fb237dfd6e 2009/04/23 Use files_to_modules() and a CPAN mirror to map mo
-!  29cab1c7c7 2009/04/23 Add %upstream and %bug_tracker data to Module::Cor
+M  29cab1c7c7 2009/04/23 Add %upstream and %bug_tracker data to Module::Cor
 			    its a 2.17_01 version. Wait for proper release?
-!  0accdd48ba 2009/04/23 Use %Module::CoreList::bug_tracker to print out up
-			    see 29cab1c7c7
+d  0accdd48ba 2009/04/23 Use %Module::CoreList::bug_tracker to print out up
+			    wait till its more tested and stable
 M  bfeb82207b 2009/04/24 Run buildtoc on VMS.
 M  0b01631df0 2009/04/24 Clean up pod/buildtoc so it will run on VMS.
 M  8fd7046754 2009/04/25 Flag that perltoc.pod should be omitted from perlt
 M  776e8d8cea 2009/04/25 [perl #56644] TODO was too severe. Only :unix :std
 !  4efe685a06 2009/04/25 make the File::Copy permission change from 2.15 on
 			    awaiting any other File::Copy merging
+d  d95a2ea538 2009/04/25 Make time64 use NV for time_t, I32 for year, not Q
+			    y2038
+M  30a06a3af1 2009/04/25 perltoc.pod depends on perldelta.pod.
+d  2b622f1ab9 2009/04/26 [PATCH] Allow PERL5OPT=-W
+M  46ad78bae1 2009/04/26 [PATCH] Update Term::UI to 0.20
+R  f21000970a 2009/04/26 Fix #if/#else bug introduced with MACOS_TRADITIONA
+			    leave MACOS_TRADITIONAL stuff broken as-is
+R  e37778c28b 2009/04/27 Remove all #ifdef MACOS_TRADITIONAL code in core a
+			    leave MACOS_TRADITIONAL stuff broken as-is
+R  e51b748d59 2009/04/27 Simplifications to S_incpush() now possible withou
+			    depends on MACOS_TRADITIONAL removal
+M  20afcebf45 2009/04/27 Update CPANPLUS to 0.86
+M  39a48622bc 2009/04/27 Update CPANPLUS::Dist::Build to version 0.24
+M  bb23f8d160 2009/04/27 Minor fixups for the documentation for crypt.
+d  287a962e68 2009/04/28 Fix -p function and Fcntl::S_IFIFO constant under 
+M  02f445e176 2009/04/28 Update CPANPLUS to 0.8601
+M  15cfc26182 2009/05/01 Add generated perltoc to git ignore list
+M  615b7a35f0 2009/05/02 t/test - Hack for VMS pipe bug.
+M  4feb3b7200 2009/05/02 Update Archive::Tar to 1.48
+M  740bae8797 2009/05/02 fix POD typo
+M  b017ed2380 2009/05/02 Document that XS_VERSION_BOOTCHECK may break if $V
+M  f31522f37e 2009/05/03 Remove warnings "Exiting given/when via next/last"
+M  1ebfab3267 2009/05/03 Add tests for last and next in when()
+M  ea6efd2c81 2009/05/03 RE: [PATCH] compress 2.018
