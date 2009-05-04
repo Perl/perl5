@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 111;
+use Test::More tests => 118;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -897,6 +897,10 @@ SKIP: {
 	ok($obj->{reversed}, "$test: reversed");
     }
 }
+SKIP: {
+    skip "placeholder for tests not merged from f20dcd76e7", 7;
+}
+
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t
 __END__
