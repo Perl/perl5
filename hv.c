@@ -134,11 +134,15 @@ Perl_free_tied_hv_pool(pTHX)
 HEK *
 Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 {
-    HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
+    HEK *shared;
 
     PERL_ARGS_ASSERT_HEK_DUP;
     PERL_UNUSED_ARG(param);
 
+    if (!source)
+	return NULL;
+
+    shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
     if (shared) {
 	/* We already shared this hash key.  */
 	(void)share_hek_hek(shared);

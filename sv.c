@@ -10246,7 +10246,7 @@ Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
     ret->gp_cv		= cv_dup_inc(gp->gp_cv, param);
     ret->gp_cvgen	= gp->gp_cvgen;
     ret->gp_line	= gp->gp_line;
-    ret->gp_file_hek	= gp->gp_file_hek ? hek_dup(gp->gp_file_hek, param) : NULL;
+    ret->gp_file_hek	= hek_dup(gp->gp_file_hek, param);
     return ret;
 }
 
@@ -10693,8 +10693,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 	    case SVt_PVGV:
 		if(isGV_with_GP(sstr)) {
-		    if (GvNAME_HEK(dstr))
-			GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
+		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
 		    /* Don't call sv_add_backref here as it's going to be
 		       created as part of the magic cloning of the symbol
 		       table.  */
@@ -10792,7 +10791,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			SvFLAGS(dstr) |= SVf_OOK;
 
 			hvname = saux->xhv_name;
-			daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+			daux->xhv_name = hek_dup(hvname, param);
 
 			daux->xhv_riter = saux->xhv_riter;
 			daux->xhv_eiter = saux->xhv_eiter
