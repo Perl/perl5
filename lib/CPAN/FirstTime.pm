@@ -1409,7 +1409,7 @@ Shall I use the local database in $mby?};
     }
     local $urllist = $CPAN::Config->{urllist};
     my $better_mby;
-    while () { # multiple errors possible
+ LOOP: while () { # multiple errors possible
         if ($use_mby
             or (defined $CPAN::Config->{connect_to_internet_ok}
                 and $CPAN::Config->{connect_to_internet_ok})){
@@ -1432,12 +1432,12 @@ Shall I use the local database in $mby?};
                 $better_mby = CPAN::FTP->localize($m,$mby,3);
                 $use_mby=1 if $mby;
             } else {
-                last;
+                last LOOP;
             }
             if ($better_mby) {
                 $mby = $better_mby;
             }
-        } elsif (not @$urllist
+        } elsif (not @{$urllist||[]}
                  and (not defined $CPAN::Config->{connect_to_internet_ok}
                       or not $CPAN::Config->{connect_to_internet_ok})) {
             $CPAN::Frontend->myprint(qq{CPAN needs access to at least one CPAN mirror.
@@ -1449,10 +1449,10 @@ a valid CPAN URL now.\n\n});
             my $ans = prompt("Please enter the URL of your CPAN mirror",shift @default);
             if ($ans) {
                 push @$urllist, $ans;
-                next;
+                next LOOP;
             }
         } else {
-            last;
+            last LOOP;
         }
     }
     if ($use_mby){

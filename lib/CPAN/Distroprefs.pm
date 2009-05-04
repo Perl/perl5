@@ -326,7 +326,7 @@ CPAN::Distroprefs -- read and match distroprefs
 
         die $result->as_string if $result->is_fatal;
 
-        warn $result->as_string, next if $result->is_warning;
+        warn($result->as_string), next if $result->is_warning;
 
         for my $pref (@{ $result->prefs }) {
             if ($pref->matches(\%info)) {

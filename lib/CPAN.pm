@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.93_52';
+$CPAN::VERSION = '1.93_53';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -3455,8 +3455,7 @@ You will most probably also want to configure something like this:
                     INSTALLSCRIPT=~/myperl/bin \
                     INSTALLBIN=~/myperl/bin"
 
-and then (oh joy) the equivalent command for Module::Build. That would
-be
+and then the equivalent command for Module::Build, which is
 
   o conf mbuildpl_arg "--lib=~/myperl/lib \
                     --installman1dir=~/myperl/man/man1 \
