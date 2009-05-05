@@ -976,10 +976,10 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs) perl$(EXE_EXT) $(ext) pod/buildtoc
-	$(RUN) ./perl$(EXE_EXT) -Ilib pod/buildtoc --build-toc -q
+	$(LDLIBPTH) $(RUN) ./perl$(EXE_EXT) -Ilib pod/buildtoc --build-toc -q
 
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
-	$(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
 
 pod/perldelta.pod: pod/perl5110delta.pod
 	$(LNS) perl5110delta.pod pod/perldelta.pod
