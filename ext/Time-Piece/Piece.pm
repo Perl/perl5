@@ -820,6 +820,21 @@ including the ':override' tag in the import list:
 
     use Time::Piece ':override';
 
+=head1 CAVEATS
+
+=head2 Setting $ENV{TZ} in Threads on Win32
+
+Note that when using perl in the default build configuration on Win32
+(specifically, when perl is built with PERL_IMPLICIT_SYS), each perl
+interpreter maintains its own copy of the environment and only the main
+interpreter will update the process environment seen by strftime.
+
+Therefore, if you make changes to $ENV{TZ} from inside a thread other than
+the main thread then those changes will not be seen by strftime if you
+subsequently call that with the %Z formatting code. You must change $ENV{TZ}
+in the main thread to have the desired effect in this case (and you must
+also call _tzset() in the main thread to register the environment change).
+
 =head1 AUTHOR
 
 Matt Sergeant, matt@sergeant.org
