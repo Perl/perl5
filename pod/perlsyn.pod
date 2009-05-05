@@ -708,8 +708,8 @@ entries apply in those cases.
 
 
  1 - empty hashes or arrays will match.
- 2 - that is, each element matches the element of same index in the other
-     array. [3]
+ 2 - that is, each element smart-matches the element of same index in the
+     other array. [3]
  3 - If a circular reference is found, we fall back to referential equality.
  4 - a range is written EXPR..EXPR (using the C<..> range operator, but
      NOT the three-dot version C<...>, which will be treated as a boolean
