@@ -112,7 +112,7 @@ The bundled version is 1.999.
 
 =item *
 
-C<Compress::Raw::Bzip2> has been added to the core (version 2.018).
+C<Compress::Raw::Bzip2> has been added to the core (version 2.019).
 
 =item *
 
@@ -163,7 +163,7 @@ C<CGI> upgraded from version 3.29 to 1.93_03
 
 =item *
 
-C<Compress::Zlib> upgraded from version 2.008 to 2.018
+C<Compress::Zlib> upgraded from version 2.008 to 2.019
 
 =item *
 
@@ -238,6 +238,14 @@ C<File::Copy> upgraded from version 2.11 to 2.14
 
 =item *
 
+C<File::Fetch> upgraded from version 0.14 to 0.18
+
+=item *
+
+C<FileCache> upgraded from version 1.07 to 1.08
+
+=item *
+
 C<Filter::Util::Call> upgraded from version 1.07 to 1.08
 
 =item *
@@ -259,6 +267,10 @@ This fixes a memory leak.
 C<IO> upgraded from version 1.23_01 to 1.23_02 XXX
 
 This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
+
+=item *
+
+C<IPC::Cmd> upgraded from version 0.40_1 to 0.44
 
 =item *
 
