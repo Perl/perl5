@@ -307,8 +307,10 @@ __DATA__
 !	12345		qr/7/
 
 # array against string
-	@fooormore	"@fooormore"
-!	@keyandmore	"@fooormore"
+	@fooormore	"".\@fooormore
+!	@keyandmore	"".\@fooormore
+	%fooormore	"".\%fooormore
+!	%keyandmore	"".\%fooormore
 
 # Test the implicit referencing
 	7		@nums
