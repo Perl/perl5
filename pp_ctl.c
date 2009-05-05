@@ -1251,9 +1251,9 @@ PP(pp_flop)
 
 static const char * const context_name[] = {
     "pseudo-block",
-    "when",
+    NULL, /* CXt_WHEN never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
-    "given",
+    NULL, /* CXt_GIVEN never actually needs "block" */
     NULL, /* CXt_LOOP_FOR never actually needs "loop" */
     NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
@@ -1280,8 +1280,6 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
-	case CXt_GIVEN:
-	case CXt_WHEN:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			context_name[CxTYPE(cx)], OP_NAME(PL_op));
@@ -3304,17 +3302,6 @@ PP(pp_require)
 	tryname = name;
 	tryrsfp = doopen_pm(name, len);
     }
-#ifdef MACOS_TRADITIONAL
-    if (!tryrsfp) {
-	char newname[256];
-
-	MacPerl_CanonDir(name, newname, 1);
-	if (path_is_absolute(newname)) {
-	    tryname = newname;
-	    tryrsfp = doopen_pm(newname, strlen(newname));
-	}
-    }
-#endif
     if (!tryrsfp) {
 	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
@@ -3445,12 +3432,6 @@ PP(pp_require)
 		}
 		else {
 		  if (!path_is_absolute(name)
-#ifdef MACOS_TRADITIONAL
-			/* We consider paths of the form :a:b ambiguous and interpret them first
-			   as global then as local
-			*/
-			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
-#endif
 		  ) {
 		    const char *dir;
 		    STRLEN dirlen;
@@ -3462,21 +3443,14 @@ PP(pp_require)
 			dirlen = 0;
 		    }
 
-#ifdef MACOS_TRADITIONAL
-		    char buf1[256];
-		    char buf2[256];
-
-		    MacPerl_CanonDir(name, buf2, 1);
-		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf1, 0), buf2+(buf2[0] == ':'));
-#else
-#  ifdef VMS
+#ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, NULL)) == NULL)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
-#  else
-#    ifdef __SYMBIAN32__
+#else
+#  ifdef __SYMBIAN32__
 		    if (PL_origfilename[0] &&
 			PL_origfilename[1] == ':' &&
 			!(dir[0] && dir[1] == ':'))
@@ -3488,7 +3462,7 @@ PP(pp_require)
 		        Perl_sv_setpvf(aTHX_ namesv,
 				       "%s\\%s",
 				       dir, name);
-#    else
+#  else
 		    /* The equivalent of		    
 		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 		       but without the need to parse the format string, or
@@ -3509,7 +3483,6 @@ PP(pp_require)
 			/* Don't even actually have to turn SvPOK_on() as we
 			   access it directly with SvPVX() below.  */
 		    }
-#    endif
 #  endif
 #endif
 		    TAINT_PROPER("require");
@@ -4942,12 +4915,8 @@ S_path_is_absolute(const char *name)
     PERL_ARGS_ASSERT_PATH_IS_ABSOLUTE;
 
     if (PERL_FILE_IS_ABSOLUTE(name)
-#ifdef MACOS_TRADITIONAL
-	|| (*name == ':')
-#else
 	|| (*name == '.' && (name[1] == '/' ||
 			     (name[1] == '.' && name[2] == '/')))
-#endif
 	 )
     {
 	return TRUE;

@@ -15,7 +15,7 @@ BEGIN {
     require './test.pl'
 }
 
-plan tests => 75;
+plan tests => 76;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -156,6 +156,15 @@ try({PERL5OPT => '-t'},
     ['-e', 'print ${^TAINT}'],
     '-1',
     '');
+
+try({PERL5OPT => '-W'},
+    ['-e', 'local $^W = 0;  no warnings;  print $x'],
+    '',
+    <<ERROR
+Name "main::x" used only once: possible typo at -e line 1.
+Use of uninitialized value \$x in print at -e line 1.
+ERROR
+);
 
 try({PERLLIB => "foobar$Config{path_sep}42"},
     ['-e', 'print grep { $_ eq "foobar" } @INC'],

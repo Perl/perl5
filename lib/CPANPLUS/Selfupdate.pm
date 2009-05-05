@@ -79,7 +79,7 @@ CPANPLUS::Selfupdate
                     my $cb = shift;
                     $cb->configure_object->get_conf('prefer_makefile') 
                         ? { }
-                        : { 'CPANPLUS::Dist::Build' => '0.04'  };
+                        : { 'CPANPLUS::Dist::Build' => '0.24'  };
                 },
                 sub { return 1 },   # always enabled
             ],            

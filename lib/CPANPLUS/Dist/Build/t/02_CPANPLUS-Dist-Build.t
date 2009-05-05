@@ -195,7 +195,8 @@ while( my($path,$need_cc) = each %Map ) {
 }
 
 ### test ENV setting while running Build.PL code
-{   ### use print() not die() -- we're redirecting STDERR in tests!
+SKIP: {   ### use print() not die() -- we're redirecting STDERR in tests!
+    skip("Known issues due to capturing with this test and MSWin32") if ON_WIN32;
     my $env     = 'ENV_CPANPLUS_IS_EXECUTING';
     my $clone   = $Mod->clone;
     

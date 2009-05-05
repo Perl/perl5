@@ -893,8 +893,6 @@ win32_longpath(char *path)
   return path;
 }
 
-#ifndef USE_WIN32_RTL_ENV
-
 DllExport char *
 win32_getenv(const char *name)
 {
@@ -906,8 +904,6 @@ win32_putenv(const char *name)
 {
   return xceputenv(name);
 }
-
-#endif
 
 static long
 filetime_to_clock(PFILETIME ft)

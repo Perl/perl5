@@ -1,6 +1,27 @@
 CHANGES
 -------
 
+  2.019 4 May 2009
+
+      * No Changes
+
+  2.018 3 May 2009
+
+      * No Changes
+
+  2.017 28 March 2009
+
+      * Added 'LimitOutput' option
+
+      * Removed MAN3PODS from Makefile.PL
+
+      * Fixed coring issue when LimitOutput was used.
+
+      * Documented Compress::Raw::Zlib::zlib_version()
+
+      * Documented Compress::Raw::Zlib::deflateReset()
+        [RT #40566]
+
   2.015 3 September 2008
 
       * Makefile.PL

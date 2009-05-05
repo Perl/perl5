@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.260 2008/09/08 14:13:23 lstein Exp $';
-$CGI::VERSION='3.42';
+$CGI::revision = '$Id: CGI.pm,v 1.263 2009/02/11 16:56:37 lstein Exp $';
+$CGI::VERSION='3.43';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -294,10 +294,10 @@ sub import {
     # To allow overriding, search through the packages
     # Till we find one in which the correct subroutine is defined.
     my @packages = ($self,@{"$self\:\:ISA"});
-    foreach $sym (keys %EXPORT) {
+    for $sym (keys %EXPORT) {
 	my $pck;
 	my $def = ${"$self\:\:AutoloadClass"} || $DefaultClass;
-	foreach $pck (@packages) {
+	for $pck (@packages) {
 	    if (defined(&{"$pck\:\:$sym"})) {
 		$def = $pck;
 		last;
@@ -317,7 +317,7 @@ sub expand_tags {
     return ("start_$1","end_$1") if $tag=~/^(?:\*|start_|end_)(.+)/;
     my(@r);
     return ($tag) unless $EXPORT_TAGS{$tag};
-    foreach (@{$EXPORT_TAGS{$tag}}) {
+    for (@{$EXPORT_TAGS{$tag}}) {
 	push(@r,&expand_tags($_));
     }
     return @r;
@@ -381,7 +381,7 @@ sub new {
 sub DESTROY {
   my $self = shift;
   if ($OS eq 'WINDOWS') {
-    foreach my $href (values %{$self->{'.tmpfiles'}}) {
+    for my $href (values %{$self->{'.tmpfiles'}}) {
       $href->{hndl}->DESTROY if defined $href->{hndl};
       $href->{name}->DESTROY if defined $href->{name};
     }
@@ -433,7 +433,7 @@ sub param {
 	if (substr($p[0],0,1) eq '-') {
 	    @values = defined($value) ? (ref($value) && ref($value) eq 'ARRAY' ? @{$value} : $value) : ();
 	} else {
-	    foreach ($value,@other) {
+	    for ($value,@other) {
 		push(@values,$_) if defined($_);
 	    }
 	}
@@ -488,7 +488,7 @@ sub self_or_CGI {
 
 # Initialize the query object from the environment.
 # If a parameter list is found, this object will be set
-# to an associative array in which parameter names are keys
+# to a hash in which parameter names are keys
 # and the values are stored as lists
 # If a keyword list is found, this method creates a bogus
 # parameter list with the single parameter 'keywords'.
@@ -603,7 +603,7 @@ sub init {
 	      last METHOD;
 	  }
 	  if (ref($initializer) && ref($initializer) eq 'HASH') {
-	      foreach (keys %$initializer) {
+	      for (keys %$initializer) {
 		  $self->param('-name'=>$_,'-value'=>$initializer->{$_});
 	      }
 	      last METHOD;
@@ -697,9 +697,9 @@ sub init {
       $self->delete_all();
     }
 
-    # Associative array containing our defined fieldnames
+    # hash containing our defined fieldnames
     $self->{'.fieldnames'} = {};
-    foreach ($self->param('.cgifields')) {
+    for ($self->param('.cgifields')) {
 	$self->{'.fieldnames'}->{$_}++;
     }
     
@@ -752,7 +752,7 @@ sub save_request {
     # again, we initialize ourselves in exactly the same way.  This allows
     # us to have several of these objects.
     @QUERY_PARAM = $self->param; # save list of parameters
-    foreach (@QUERY_PARAM) {
+    for (@QUERY_PARAM) {
       next unless defined $_;
       $QUERY_PARAM{$_}=$self->{param}{$_};
     }
@@ -765,7 +765,7 @@ sub parse_params {
     my($self,$tosplit) = @_;
     my(@pairs) = split(/[&;]/,$tosplit);
     my($param,$value);
-    foreach (@pairs) {
+    for (@pairs) {
 	($param,$value) = split('=',$_,2);
 	next unless defined $param;
 	next if $NO_UNDEF_PARAMS and not defined $value;
@@ -899,7 +899,7 @@ sub _setup_symbols {
     # to avoid reexporting unwanted variables
     undef %EXPORT;
 
-    foreach (@_) {
+    for (@_) {
 	$HEADERS_ONCE++,         next if /^[:-]unique_headers$/;
 	$NPH++,                  next if /^[:-]nph$/;
 	$NOSTICKY++,             next if /^[:-]nosticky$/;
@@ -928,7 +928,7 @@ sub _setup_symbols {
 	    next;
 	}
 
-	foreach (&expand_tags($_)) {
+	for (&expand_tags($_)) {
 	    tr/a-zA-Z0-9_//cd;  # don't allow weird function names
 	    $EXPORT{$_}++;
 	}
@@ -1006,7 +1006,7 @@ sub delete {
     my(@names) = rearrange([NAME],@p);
     my @to_delete = ref($names[0]) eq 'ARRAY' ? @$names[0] : @names;
     my %to_delete;
-    foreach my $name (@to_delete)
+    for my $name (@to_delete)
     {
         CORE::delete $self->{param}{$name};
         CORE::delete $self->{'.fieldnames'}->{$name};
@@ -1028,7 +1028,7 @@ sub import_names {
     die "Can't import names into \"main\"\n" if \%{"${namespace}::"} == \%::;
     if ($delete || $MOD_PERL || exists $ENV{'FCGI_ROLE'}) {
 	# can anyone find an easier way to do this?
-	foreach (keys %{"${namespace}::"}) {
+	for (keys %{"${namespace}::"}) {
 	    local *symbol = "${namespace}::${_}";
 	    undef $symbol;
 	    undef @symbol;
@@ -1036,7 +1036,7 @@ sub import_names {
 	}
     }
     my($param,@value,$var);
-    foreach $param ($self->param) {
+    for $param ($self->param) {
 	# protect against silly names
 	($var = $param)=~tr/a-zA-Z0-9_/_/c;
 	$var =~ s/^(?=\d)/_/;
@@ -1270,7 +1270,7 @@ sub url_param {
 	if ($ENV{QUERY_STRING} =~ /=/) {
 	    my(@pairs) = split(/[&;]/,$ENV{QUERY_STRING});
 	    my($param,$value);
-	    foreach (@pairs) {
+	    for (@pairs) {
 		($param,$value) = split('=',$_,2);
 		$param = unescape($param);
 		$value = unescape($value);
@@ -1298,11 +1298,11 @@ sub Dump {
     my($param,$value,@result);
     return '<ul></ul>' unless $self->param;
     push(@result,"<ul>");
-    foreach $param ($self->param) {
+    for $param ($self->param) {
 	my($name)=$self->escapeHTML($param);
 	push(@result,"<li><strong>$param</strong></li>");
 	push(@result,"<ul>");
-	foreach $value ($self->param($param)) {
+	for $value ($self->param($param)) {
 	    $value = $self->escapeHTML($value);
             $value =~ s/\n/<br \/>\n/g;
 	    push(@result,"<li>$value</li>");
@@ -1335,14 +1335,14 @@ sub save {
     my($param);
     local($,) = '';  # set print field separator back to a sane value
     local($\) = '';  # set output line separator to a sane value
-    foreach $param ($self->param) {
+    for $param ($self->param) {
 	my($escaped_param) = escape($param);
 	my($value);
-	foreach $value ($self->param($param)) {
+	for $value ($self->param($param)) {
 	    print $filehandle "$escaped_param=",escape("$value"),"\n";
 	}
     }
-    foreach (keys %{$self->{'.fieldnames'}}) {
+    for (keys %{$self->{'.fieldnames'}}) {
           print $filehandle ".cgifields=",escape("$_"),"\n";
     }
     print $filehandle "=\n";    # end of record
@@ -1411,7 +1411,7 @@ sub multipart_start {
 
     # rearrange() was designed for the HTML portion, so we
     # need to fix it up a little.
-    foreach (@other) {
+    for (@other) {
         # Don't use \s because of perl bug 21951
         next unless my($header,$value) = /([^ \r\n\t=]+)=\"?(.+?)\"?$/;
 	($_ = $header) =~ s/^(\w)(.*)/$1 . lc ($2) . ': '.$self->unescapeHTML($value)/e;
@@ -1480,7 +1480,7 @@ sub header {
 
     # rearrange() was designed for the HTML portion, so we
     # need to fix it up a little.
-    foreach (@other) {
+    for (@other) {
         # Don't use \s because of perl bug 21951
         next unless my($header,$value) = /([^ \r\n\t=]+)=\"?(.+?)\"?$/;
         ($_ = $header) =~ s/^(\w)(.*)/"\u$1\L$2" . ': '.$self->unescapeHTML($value)/e;
@@ -1506,7 +1506,7 @@ sub header {
     # push all the cookies -- there may be several
     if ($cookie) {
 	my(@cookie) = ref($cookie) && ref($cookie) eq 'ARRAY' ? @{$cookie} : $cookie;
-	foreach (@cookie) {
+	for (@cookie) {
             my $cs = UNIVERSAL::isa($_,'CGI::Cookie') ? $_->as_string : $_;
 	    push(@header,"Set-Cookie: $cs") if $cs ne '';
 	}
@@ -1559,7 +1559,7 @@ sub redirect {
     $status = '302 Found' unless defined $status;
     $url ||= $self->self_url;
     my(@o);
-    foreach (@other) { tr/\"//d; push(@o,split("=",$_,2)); }
+    for (@other) { tr/\"//d; push(@o,split("=",$_,2)); }
     unshift(@o,
 	 '-Status'  => $status,
 	 '-Location'=> $url,
@@ -1662,7 +1662,7 @@ sub start_html {
     }
 
     if ($meta && ref($meta) && (ref($meta) eq 'HASH')) {
-	foreach (keys %$meta) { push(@result,$XHTML ? qq(<meta name="$_" content="$meta->{$_}" />) 
+	for (keys %$meta) { push(@result,$XHTML ? qq(<meta name="$_" content="$meta->{$_}" />) 
 			: qq(<meta name="$_" content="$meta->{$_}">)); }
     }
 
@@ -1726,7 +1726,7 @@ sub _style {
 
        if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
        { # If it is, push a LINK tag for each one
-           foreach $src (@$src)
+           for $src (@$src)
          {
            push(@result,$XHTML ? qq(<link rel="$rel" type="$type" href="$src" $other/>)
                              : qq(<link rel="$rel" type="$type" href="$src"$other>)) if $src;
@@ -1740,10 +1740,10 @@ sub _style {
         }
      if ($verbatim) {
            my @v = ref($verbatim) eq 'ARRAY' ? @$verbatim : $verbatim;
-           push(@result, "<style type=\"text/css\">\n$_\n</style>") foreach @v;
+           push(@result, "<style type=\"text/css\">\n$_\n</style>") for @v;
       }
       my @c = ref($code) eq 'ARRAY' ? @$code : $code if $code;
-      push(@result,style({'type'=>$type},"$cdata_start\n$_\n$cdata_end")) foreach @c;
+      push(@result,style({'type'=>$type},"$cdata_start\n$_\n$cdata_end")) for @c;
 
       } else {
            my $src = $s;
@@ -1761,7 +1761,7 @@ sub _script {
     my (@result);
 
     my (@scripts) = ref($script) eq 'ARRAY' ? @$script : ($script);
-    foreach $script (@scripts) {
+    for $script (@scripts) {
 	my($src,$code,$language);
 	if (ref($script)) { # script is a hash
 	    ($src,$code,$type) =
@@ -2269,7 +2269,7 @@ sub _tableize {
     my($row,$column);
     unshift(@colheaders,'') if @colheaders && @rowheaders;
     $result .= "<tr>" if @colheaders;
-    foreach (@colheaders) {
+    for (@colheaders) {
 	$result .= "<th>$_</th>";
     }
     for ($row=0;$row<$rows;$row++) {
@@ -2298,7 +2298,7 @@ END_OF_FUNC
 #   $linebreak -> (optional) Set to true to place linebreaks
 #             between the buttons.
 #   $labels -> (optional)
-#             A pointer to an associative array of labels to print next to each checkbox
+#             A pointer to a hash of labels to print next to each checkbox
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
@@ -2326,7 +2326,7 @@ END_OF_FUNC
 #   $linebreak -> (optional) Set to true to place linebreaks
 #             between the buttons.
 #   $labels -> (optional)
-#             A pointer to an associative array of labels to print next to each checkbox
+#             A pointer to a hash of labels to print next to each checkbox
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
@@ -2380,11 +2380,11 @@ sub _box_group {
 
     # for disabling groups of radio/checkbox buttons
     my %disabled;
-    foreach (@{$disabled}) {
+    for (@{$disabled}) {
    	$disabled{$_}=1;
     }
 
-    foreach (@values) {
+    for (@values) {
     	 my $disable="";
 	 if ($disabled{$_}) {
 		$disable="disabled='1'";
@@ -2434,7 +2434,7 @@ END_OF_FUNC
 #             text of each menu item.
 #   $default -> (optional) Default item to display
 #   $labels -> (optional)
-#             A pointer to an associative array of labels to print next to each checkbox
+#             A pointer to a hash of labels to print next to each checkbox
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
@@ -2463,7 +2463,7 @@ sub popup_menu {
     @values = $self->_set_values_and_labels($values,\$labels,$name);
     $tabindex = $self->element_tab($tabindex);
     $result = qq/<select name="$name" $tabindex$other>\n/;
-    foreach (@values) {
+    for (@values) {
         if (/<optgroup/) {
             for my $v (split(/\n/)) {
                 my $selectit = $XHTML ? 'selected="selected"' : 'selected';
@@ -2497,7 +2497,7 @@ END_OF_FUNC
 #   $values -> A pointer to a regular array containing the
 #              values for each option line in the group.
 #   $labels -> (optional)
-#              A pointer to an associative array of labels to print next to each item
+#              A pointer to a hash of labels to print next to each item
 #              in the form $label{'value'}="Long explanatory label".
 #              Otherwise the provided values are used as the labels.
 #   $labeled -> (optional)
@@ -2524,9 +2524,9 @@ sub optgroup {
 
     $name=$self->escapeHTML($name);
     $result = qq/<optgroup label="$name"$other>\n/;
-    foreach (@values) {
+    for (@values) {
         if (/<optgroup/) {
-            foreach (split(/\n/)) {
+            for (split(/\n/)) {
                 my $selectit = $XHTML ? 'selected="selected"' : 'selected';
                 s/(value="$selected")/$selectit $1/ if defined $selected;
                 $result .= "$_\n";
@@ -2564,7 +2564,7 @@ END_OF_FUNC
 #   $size -> (optional) Size of the list.
 #   $multiple -> (optional) If set, allow multiple selections.
 #   $labels -> (optional)
-#             A pointer to an associative array of labels to print next to each checkbox
+#             A pointer to a hash of labels to print next to each checkbox
 #             in the form $label{'value'}="Long explanatory label".
 #             Otherwise the provided values are used as the labels.
 # Returns:
@@ -2591,7 +2591,7 @@ sub scrolling_list {
     $name=$self->escapeHTML($name);
     $tabindex = $self->element_tab($tabindex);
     $result = qq/<select name="$name" $tabindex$has_size$is_multiple$other>\n/;
-    foreach (@values) {
+    for (@values) {
 	my($selectit) = $self->_selected($selected{$_});
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
@@ -2631,7 +2631,7 @@ sub hidden {
 	@value = ref($default) ? @{$default} : $default;
 	$do_override = $override;
     } else {
-	foreach ($default,$override,@other) {
+	for ($default,$override,@other) {
 	    push(@value,$_) if defined($_);
 	}
     }
@@ -2641,7 +2641,7 @@ sub hidden {
     @value = @prev if !$do_override && @prev;
 
     $name=$self->escapeHTML($name);
-    foreach (@value) {
+    for (@value) {
 	$_ = defined($_) ? $self->escapeHTML($_,1) : '';
 	push @result,$XHTML ? qq(<input type="hidden" name="$name" value="$_" @other />)
                             : qq(<input type="hidden" name="$name" value="$_" @other>);
@@ -2953,15 +2953,15 @@ END_OF_FUNC
 sub query_string {
     my($self) = self_or_default(@_);
     my($param,$value,@pairs);
-    foreach $param ($self->param) {
+    for $param ($self->param) {
 	my($eparam) = escape($param);
-	foreach $value ($self->param($param)) {
+	for $value ($self->param($param)) {
 	    $value = escape($value);
             next unless defined $value;
 	    push(@pairs,"$eparam=$value");
 	}
     }
-    foreach (keys %{$self->{'.fieldnames'}}) {
+    for (keys %{$self->{'.fieldnames'}}) {
       push(@pairs,".cgifields=".escape("$_"));
     }
     return join($USE_PARAM_SEMICOLONS ? ';' : '&',@pairs);
@@ -2989,7 +2989,7 @@ sub Accept {
                 ? split(',',$self->http('accept'))
                 : ();
 
-    foreach (@accept) {
+    for (@accept) {
 	($pref) = /q=(\d\.\d+|\d+)/;
 	($type) = m#(\S+/[^;]+)#;
 	next unless $type;
@@ -3008,7 +3008,7 @@ sub Accept {
     return $prefs{$search} if $prefs{$search};
 
     # Didn't get it, so try pattern matching.
-    foreach (keys %prefs) {
+    for (keys %prefs) {
 	next unless /\*/;       # not a pattern match
 	($pat = $_) =~ s/([^\w*])/\\$1/g; # escape meta characters
 	$pat =~ s/\*/.*/g; # turn it into a pattern
@@ -3189,7 +3189,7 @@ sub http {
     $parameter =~ tr/-/_/;
     return $ENV{"HTTP_\U$parameter\E"} if $parameter;
     my(@p);
-    foreach (keys %ENV) {
+    for (keys %ENV) {
 	push(@p,$_) if /^HTTP/;
     }
     return @p;
@@ -3208,7 +3208,7 @@ sub https {
     $parameter =~ tr/-/_/;
     return $ENV{"HTTPS_\U$parameter\E"} if $parameter;
     my(@p);
-    foreach (keys %ENV) {
+    for (keys %ENV) {
 	push(@p,$_) if /^HTTPS/;
     }
     return @p;
@@ -3382,7 +3382,7 @@ sub read_from_cmdline {
 	$input = join(" ",@lines);
 	@words = &shellwords($input);    
     }
-    foreach (@words) {
+    for (@words) {
 	s/\\=/%3D/g;
 	s/\\&/%26/g;	    
     }
@@ -3488,7 +3488,7 @@ sub read_multipart {
 	  # together with the body for later parsing with an external
 	  # MIME parser module
 	  if ( $multipart ) {
-	      foreach ( keys %header ) {
+	      for ( keys %header ) {
 		  print $filehandle "$_: $header{$_}${CRLF}";
 	      }
 	      print $filehandle "${CRLF}";
@@ -3681,7 +3681,7 @@ sub _set_attributes {
     my($element, $attributes) = @_;
     return '' unless defined($attributes->{$element});
     $attribs = ' ';
-    foreach my $attrib (keys %{$attributes->{$element}}) {
+    for my $attrib (keys %{$attributes->{$element}}) {
         (my $clean_attrib = $attrib) =~ s/^-//;
         $attribs .= "@{[lc($clean_attrib)]}=\"$attributes->{$element}{$attrib}\" ";
     }
@@ -3692,7 +3692,7 @@ END_OF_FUNC
 
 '_compile_all' => <<'END_OF_FUNC',
 sub _compile_all {
-    foreach (@_) {
+    for (@_) {
 	next if defined(&$_);
 	$AUTOLOAD = "CGI::$_";
 	_compile();
@@ -4079,7 +4079,7 @@ sub find_tempdir {
     #    : Refer to getpwuid() only at run-time if we're fortunate and have  UNIX.
     # unshift(@TEMP,(eval {(getpwuid($>))[7]}).'/tmp') if $CGI::OS eq 'UNIX' and $> != 0;
 
-    foreach (@TEMP) {
+    for (@TEMP) {
       do {$TMPDIRECTORY = $_; last} if -d $_ && -w _;
     }
   }
@@ -4157,65 +4157,51 @@ __END__
 
 =head1 NAME
 
-CGI - Simple Common Gateway Interface Class
+CGI - Handle Common Gateway Interface requests and responses
 
 =head1 SYNOPSIS
 
-  # CGI script that creates a fill-out form
-  # and echoes back its values.
+    use CGI;
 
-  use CGI qw/:standard/;
-  print header,
-        start_html('A Simple Example'),
-        h1('A Simple Example'),
-        start_form,
-        "What's your name? ",textfield('name'),p,
-        "What's the combination?", p,
-        checkbox_group(-name=>'words',
-		       -values=>['eenie','meenie','minie','moe'],
-		       -defaults=>['eenie','minie']), p,
-        "What's your favorite color? ",
-        popup_menu(-name=>'color',
-	           -values=>['red','green','blue','chartreuse']),p,
-        submit,
-        end_form,
-        hr;
+    my $q = CGI->new;
 
-   if (param()) {
-       my $name      = param('name');
-       my $keywords  = join ', ',param('words');
-       my $color     = param('color');
-       print "Your name is",em(escapeHTML($name)),p,
-	     "The keywords are: ",em(escapeHTML($keywords)),p,
-	     "Your favorite color is ",em(escapeHTML($color)),
-	     hr;
-   }
+    # Process an HTTP request
+     @values  = $q->param('form_field');
 
-   print end_html;
+     $fh      = $q->upload('file_field');
 
-=head1 ABSTRACT
+     $riddle  = $query->cookie('riddle_name');
+     %answers = $query->cookie('answers');
 
-This perl library uses perl5 objects to make it easy to create Web
-fill-out forms and parse their contents.  This package defines CGI
-objects, entities that contain the values of the current query string
-and other state variables.  Using a CGI object's methods, you can
-examine keywords and parameters passed to your script, and create
-forms whose initial values are taken from the current query (thereby
-preserving state information).  The module provides shortcut functions
-that produce boilerplate HTML, reducing typing and coding errors. It
-also provides functionality for some of the more advanced features of
-CGI scripting, including support for file uploads, cookies, cascading
-style sheets, server push, and frames.
+    # Prepare various HTTP responses
+    print $q->header();
+    print $q->header('application/json');
 
-CGI.pm also provides a simple function-oriented programming style for
-those who don't need its object-oriented features.
+	$cookie1 = $q->cookie(-name=>'riddle_name', -value=>"The Sphynx's Question");
+	$cookie2 = $q->cookie(-name=>'answers', -value=>\%answers);
+    print $q->header(
+        -type    => 'image/gif',
+        -expires => '+3d',
+        -cookie  => [$cookie1,$cookie2]
+        );
 
-The current version of CGI.pm is available at
-
-  http://www.genome.wi.mit.edu/ftp/pub/software/WWW/cgi_docs.html
-  ftp://ftp-genome.wi.mit.edu/pub/software/WWW/
+   print  $q->redirect('http://somewhere.else/in/movie/land');
 
 =head1 DESCRIPTION
+
+CGI.pm is a stable, complete and mature solution for processing and preparing
+HTTP requests and responses.  Major features including processing form
+submissions, file uploads, reading and writing cookies, query string generation
+and manipulation, and processing and preparing HTTP headers. Some HTML
+generation utilities are included as well.
+
+CGI.pm performs very well in in a vanilla CGI.pm environment and also comes
+with built-in support for mod_perl and mod_perl2 as well as FastCGI.
+
+It has the benefit of having developed and refined over 10 years with input
+from dozens of contributors and being deployed on thousands of websites.
+CGI.pm has been included in the Perl distribution since Perl 5.4, and has
+become a de-facto standard.
 
 =head2 PROGRAMMING STYLE
 
@@ -4411,7 +4397,7 @@ default CGI object from the indicated file handle.
     restore_parameters(IN);
     close IN;
 
-You can also initialize the query object from an associative array
+You can also initialize the query object from a hash
 reference:
 
     $query = new CGI( {'dinosaur'=>'barney',
@@ -4641,7 +4627,7 @@ a short example of creating multiple session records:
 
    open (OUT,">>test.out") || die;
    $records = 5;
-   foreach (0..$records) {
+   for (0..$records) {
        my $q = new CGI;
        $q->param(-name=>'counter',-value=>$_);
        $q->save(\*OUT);
@@ -5226,7 +5212,7 @@ manipulate this.
 
 All relative links will be interpreted relative to this tag.
 You add arbitrary meta information to the header with the B<-meta>
-argument.  This argument expects a reference to an associative array
+argument.  This argument expects a reference to a hash
 containing name/value pairs of meta information.  These will be turned
 into a series of header <meta> tags that look something like this:
 
@@ -5565,8 +5551,8 @@ together with spaces and placed between opening and closing tags:
 
    print h1("Chapter","1"); # <h1>Chapter 1</h1>"
 
-If the first argument is an associative array reference, then the keys
-and values of the associative array become the HTML tag's attributes:
+If the first argument is a hash reference, then the keys
+and values of the hash become the HTML tag's attributes:
 
    print a({-href=>'fred.html',-target=>'_new'},
       "Open a new frame");
@@ -6111,7 +6097,7 @@ information along with it in the format of headers.  The information
 usually includes the MIME content type.  Future browsers may send
 other information as well (such as modification date and size). To
 retrieve this information, call uploadInfo().  It returns a reference to
-an associative array containing all the document headers.
+a hash containing all the document headers.
 
        $filename = param('uploaded_file');
        $type = uploadInfo($filename)->{'Content-Type'};
@@ -6233,7 +6219,7 @@ queries. Pass an array reference to select multiple defaults.
 The optional fourth parameter (-labels) is provided for people who
 want to use different values for the user-visible label inside the
 popup menu and the value returned to your script.  It's a pointer to an
-associative array relating menu values to user-visible labels.  If you
+hash relating menu values to user-visible labels.  If you
 leave this parameter blank, the menu values will be displayed by
 default.  (You can also leave a label undefined if you want to).
 
@@ -6241,8 +6227,8 @@ default.  (You can also leave a label undefined if you want to).
 
 The optional fifth parameter (-attributes) is provided to assign
 any of the common HTML attributes to an individual menu item. It's
-a pointer to an associative array relating menu values to another
-associative array with the attribute's name as the key and the
+a pointer to a hash relating menu values to another
+hash with the attribute's name as the key and the
 attribute's value as the value.
 
 =back
@@ -6294,7 +6280,7 @@ used for the menu labels (see -labels below).
 =item 3.
 
 The optional third parameter (B<-labels>) allows you to pass a reference
-to an associative array containing user-visible labels for one or more
+to a hash containing user-visible labels for one or more
 of the menu items.  You can use this when you want the user to see one
 menu string, but have the browser return your program a different one.
 If you don't specify this, the value string will be used instead
@@ -6321,8 +6307,8 @@ for details.
 
 An optional sixth parameter (-attributes) is provided to assign
 any of the common HTML attributes to an individual menu item. It's
-a pointer to an associative array relating menu values to another
-associative array with the attribute's name as the key and the
+a pointer to a hash relating menu values to another
+hash with the attribute's name as the key and the
 attribute's value as the value.
 
 =back
@@ -6382,7 +6368,7 @@ will be allowed at a time.
 
 =item 5.
 
-The optional sixth argument is a pointer to an associative array
+The optional sixth argument is a pointer to a hash
 containing long user-visible labels for the list items (-labels).
 If not provided, the values will be displayed.
 
@@ -6390,8 +6376,8 @@ If not provided, the values will be displayed.
 
 The optional sixth parameter (-attributes) is provided to assign
 any of the common HTML attributes to an individual menu item. It's
-a pointer to an associative array relating menu values to another
-associative array with the attribute's name as the key and the
+a pointer to a hash relating menu values to another
+hash with the attribute's name as the key and the
 attribute's value as the value.
 
 When this form is processed, all selected list items will be returned as
@@ -6455,7 +6441,7 @@ list.  Otherwise, they will be strung together on a horizontal line.
 =back
 
 
-The optional B<-labels> argument is a pointer to an associative array
+The optional B<-labels> argument is a pointer to a hash
 relating the checkbox values to the user-visible labels that will be
 printed next to them.  If not provided, the values will be used as the
 default.
@@ -6472,7 +6458,7 @@ them by greying them out (this may not be supported by all browsers).
 
 The optional B<-attributes> argument is provided to assign any of the
 common HTML attributes to an individual menu item. It's a pointer to
-an associative array relating menu values to another associative array
+a hash relating menu values to another hash
 with the attribute's name as the key and the attribute's value as the
 value.
 
@@ -6646,7 +6632,7 @@ are the tab indexes of each button.  Examples:
 
 The optional B<-attributes> argument is provided to assign any of the
 common HTML attributes to an individual menu item. It's a pointer to
-an associative array relating menu values to another associative array
+a hash relating menu values to another hash
 with the attribute's name as the key and the attribute's value as the
 value.
 
@@ -6816,16 +6802,13 @@ Fetch the value of the button this way:
 
 button() produces a button that is compatible with Netscape 2.0's
 JavaScript.  When it's pressed the fragment of JavaScript code
-pointed to by the B<-onClick> parameter will be executed.  On
-non-Netscape browsers this form element will probably not even
-display.
+pointed to by the B<-onClick> parameter will be executed.
 
 =head1 HTTP COOKIES
 
-Netscape browsers versions 1.1 and higher, and all versions of
-Internet Explorer, support a so-called "cookie" designed to help
-maintain state within a browser session.  CGI.pm has several methods
-that support cookies.
+Browsers support a so-called "cookie" designed to help maintain state
+within a browser session.  CGI.pm has several methods that support
+cookies.
 
 A cookie is a name=value pair much like the named parameters in a CGI
 query string.  CGI scripts create one or more cookies and send
@@ -6900,8 +6883,8 @@ and unescaping cookies behind the scenes.
 =item B<-value>
 
 The value of the cookie.  This can be any scalar value,
-array reference, or even associative array reference.  For example,
-you can store an entire associative array into a cookie this way:
+array reference, or even hash reference.  For example,
+you can store an entire hash into a cookie this way:
 
 	$cookie=cookie(-name=>'family information',
 			       -value=>\%childrens_ages);
@@ -7027,19 +7010,6 @@ create pages in which the fill-out form and the response live in
 side-by-side frames.
 
 =head1 SUPPORT FOR JAVASCRIPT
-
-Netscape versions 2.0 and higher incorporate an interpreted language
-called JavaScript. Internet Explorer, 3.0 and higher, supports a
-closely-related dialect called JScript. JavaScript isn't the same as
-Java, and certainly isn't at all the same as Perl, which is a great
-pity. JavaScript allows you to programmatically change the contents of
-fill-out forms, create new windows, and pop up dialog box from within
-Netscape itself. From the point of view of CGI scripting, JavaScript
-is quite useful for validating fill-out forms prior to submitting
-them.
-
-You'll need to know JavaScript in order to use it. There are many good
-sources in bookstores and on the web.
 
 The usual way to use JavaScript is to define a set of functions in a
 <SCRIPT> block inside the HTML header and then to register event
@@ -7382,11 +7352,9 @@ order to avoid conflict with Perl's accept() function.
 
 =item B<raw_cookie()>
 
-Returns the HTTP_COOKIE variable, an HTTP extension implemented by
-Netscape browsers version 1.1 and higher, and all versions of Internet
-Explorer.  Cookies have a special format, and this method call just
-returns the raw form (?cookie dough).  See cookie() for ways of
-setting and retrieving cooked cookies.
+Returns the HTTP_COOKIE variable.  Cookies have a special format, and
+this method call just returns the raw form (?cookie dough).  See
+cookie() for ways of setting and retrieving cooked cookies.
 
 Called with no parameters, raw_cookie() returns the packed cookie
 structure.  You can separate it into individual cookies by splitting
@@ -7400,7 +7368,7 @@ method from the CGI::Cookie module.
 Returns the HTTP_USER_AGENT variable.  If you give
 this method a single argument, it will attempt to
 pattern match on it, allowing you to do something
-like user_agent(netscape);
+like user_agent(Mozilla);
 
 =item B<path_info()>
 
@@ -7583,7 +7551,7 @@ Here is a simple script that demonstrates server push:
   use CGI qw/:push -nph/;
   $| = 1;
   print multipart_init(-boundary=>'----here we go!');
-  foreach (0 .. 4) {
+  for (0 .. 4) {
       print multipart_start(-type=>'text/plain'),
             "The current time is ",scalar(localtime),"\n";
       if ($_ < 4) {
@@ -7638,9 +7606,6 @@ multipart_end() at the end of the last part of the multipart document.
 
 Users interested in server push applications should also have a look
 at the CGI::Push module.
-
-Only Netscape Navigator supports server push.  Internet Explorer
-browsers do not.
 
 =head1 Avoiding Denial of Service Attacks
 
@@ -7893,7 +7858,7 @@ for suggestions and bug fixes.
 
 	   print "<h2>Here are the current settings in this form</h2>";
 
-	   foreach $key (param) {
+	   for $key (param) {
 	      print "<strong>$key</strong> -> ";
 	      @values = param($key);
 	      print join(", ",@values),"<br>\n";

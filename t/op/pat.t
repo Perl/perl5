@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 3965;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 4061;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -494,7 +494,6 @@ sub run_tests {
             nok "b$a="  =~ /a$a=/;
              ok "b$a="  =~ /ba+=/;
 
-            local $TODO = "See bug 60464" if $l > 32767;
              ok "ba$a=" =~ /b(?:a|b)+=/;
         }
     }
@@ -4021,14 +4020,12 @@ sub run_tests {
 
     {
         local $BugId =  '60034';
-        local $TODO  = "See bug 60034";
         my $a = "xyzt" x 8192;
         ok $a =~ /\A(?>[a-z])*\z/,
                 '(?>) does not cause wrongness on long string';
         my $b = $a . chr 256;
         chop $b;
         {
-            local $TODO;
             iseq $a, $b;
         }
         ok $b =~ /\A(?>[a-z])*\z/,
@@ -4122,6 +4119,222 @@ sub run_tests {
 	ok "A1B" =~ m/^((??{ $re }))((??{"B"}))$/;
 	ok $1 eq "A1";
 	ok $2 eq "B";
+    }
+
+
+    {
+        use re 'eval';
+        local $Message = 'Test if $^N and $+ work in (?{{})';
+        our @ctl_n = ();
+        our @plus = ();
+        our $nested_tags;
+        $nested_tags = qr{
+            <
+               ((\w)+)
+               (?{
+                       push @ctl_n, (defined $^N ? $^N : "undef");
+                       push @plus, (defined $+ ? $+ : "undef");
+               })
+            >
+            (??{$nested_tags})*
+            </\s* \w+ \s*>
+        }x;
+
+
+        my $c = 0;
+        for my $test (
+            [ 1, qr#^$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^($nested_tags)$#, "bla blubb <bla><blubb></blubb></bla>", "a b a" ],
+            [ 1, qr#^(|)$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^(?:|)$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^<(bl|bla)>$nested_tags<(/\1)>$#, "blubb /bla", "b /bla" ],
+            [ 1, qr#(??{"(|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^(??{"(bla|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^(??{"(|)"})(??{$nested_tags})$#, "bla blubb undef", "a b undef" ],
+            [ 1, qr#^(??{"(?:|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
+            [ 1, qr#^((??{"(?:bla|)"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
+            [ 1, qr#^((??{"(?!)?"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
+            [ 1, qr#^((??{"(?:|<(/?bla)>)"}))((??{$nested_tags}))\1$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
+            [ 0, qr#^((??{"(?!)"}))?((??{$nested_tags}))(?!)$#, "bla blubb undef", "a b undef" ],
+
+        ) {
+            $c++;
+            @ctl_n = ();
+            @plus = ();
+            my $match = (("<bla><blubb></blubb></bla>" =~ $test->[1]) ? 1 : 0);
+            push @ctl_n, (defined $^N ? $^N : "undef");
+            push @plus, (defined $+ ? $+ : "undef");
+            ok($test->[0] == $match, "match $c");
+            if ($test->[0] != $match) {
+              # unset @ctl_n and @plus
+              @ctl_n = @plus = ();
+            }
+            iseq("@ctl_n", $test->[2], "ctl_n $c");
+            iseq("@plus", $test->[3], "plus $c");
+        }
+    }
+
+    {
+        use re 'eval';
+        local $BugId = '56194';
+
+	our $f;
+	local $f;
+	$f = sub {
+            defined $_[0] ? $_[0] : "undef";
+        };
+
+        ok("123" =~ m/^(\d)(((??{1 + $^N})))+$/);
+
+        our @ctl_n;
+        our @plus;
+
+        my $re  = qr#(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))*(?{$^N})#;
+        my $re2 = qr#(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))*(?{$^N})(|a(b)c|def)(??{"$^R"})#;
+        my $re3 = qr#(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1})){2}(?{$^N})(|a(b)c|def)(??{"$^R"})#;
+        our $re5;
+        local $re5 = qr#(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1})){2}(?{$^N})#;
+        my $re6 = qr#(??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1})#;
+        my $re7 = qr#(??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1})#;
+        my $re8 = qr/(\d+)/;
+        my $c = 0;
+        for my $test (
+             [
+                  "1233",
+                  qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(??{$^N})$#,
+                  "1 2 3 3",
+                  "1 2 3 3",
+                  "\$1 = 1, \$2 = 3, \$3 = undef, \$4 = undef, \$5 = undef",
+             ],
+             [
+                  "1233",
+                  qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(abc|def|)?(??{$+})$#,
+                  "1 2 3 3",
+                  "1 2 3 3",
+                  "\$1 = 1, \$2 = 3, \$3 = undef, \$4 = undef, \$5 = undef",
+             ],
+             [
+                  "1233",
+                  qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(|abc|def)?(??{$+})$#,
+                  "1 2 3 3",
+                  "1 2 3 3",
+                  "\$1 = 1, \$2 = 3, \$3 = undef, \$4 = undef, \$5 = undef",
+             ],
+             [
+                  "1233",
+                  qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(abc|def|)?(??{$^N})$#,
+                  "1 2 3 3",
+                  "1 2 3 3",
+                  "\$1 = 1, \$2 = 3, \$3 = undef, \$4 = undef, \$5 = undef",
+             ],
+             [
+                  "1233",
+                  qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(|abc|def)?(??{$^N})$#,
+                  "1 2 3 3",
+                  "1 2 3 3",
+                  "\$1 = 1, \$2 = 3, \$3 = undef, \$4 = undef, \$5 = undef",
+              ],
+              [
+                  "123abc3",
+                   qr#^($re)(|a(b)c|def)(??{$^R})$#,
+                   "1 2 3 abc",
+                   "1 2 3 b",
+                   "\$1 = 123, \$2 = 1, \$3 = 3, \$4 = abc, \$5 = b",
+              ],
+              [
+                  "123abc3",
+                   qr#^($re2)$#,
+                   "1 2 3 123abc3",
+                   "1 2 3 b",
+                   "\$1 = 123abc3, \$2 = 1, \$3 = 3, \$4 = abc, \$5 = b",
+              ],
+              [
+                  "123abc3",
+                   qr#^($re3)$#,
+                   "1 2 123abc3",
+                   "1 2 b",
+                   "\$1 = 123abc3, \$2 = 1, \$3 = 3, \$4 = abc, \$5 = b",
+              ],
+              [
+                  "123abc3",
+                   qr#^(??{$re5})(|abc|def)(??{"$^R"})$#,
+                   "1 2 abc",
+                   "1 2 abc",
+                   "\$1 = abc, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef",
+              ],
+              [
+                  "123abc3",
+                   qr#^(??{$re5})(|a(b)c|def)(??{"$^R"})$#,
+                   "1 2 abc",
+                   "1 2 b",
+                   "\$1 = abc, \$2 = b, \$3 = undef, \$4 = undef, \$5 = undef",
+              ],
+              [
+                  "1234",
+                   qr#^((\d+)((??{push @ctl_n, $f->($^N); push @plus, $f->($+);$^N + 1}))((??{push @ctl_n, $f->($^N); push @plus, $f->($+);$^N + 1}))((??{push @ctl_n, $f->($^N); push @plus, $f->($+);$^N + 1})))$#,
+                   "1234 123 12 1 2 3 1234",
+                   "1234 123 12 1 2 3 4",
+                   "\$1 = 1234, \$2 = 1, \$3 = 2, \$4 = 3, \$5 = 4",
+              ],
+              [
+                   "1234556",
+                   qr#^(\d+)($re6)($re6)($re6)$re6(($re6)$re6)$#,
+                   "1234556 123455 12345 1234 123 12 1 2 3 4 4 5 56",
+                   "1234556 123455 12345 1234 123 12 1 2 3 4 4 5 5",
+                   "\$1 = 1, \$2 = 2, \$3 = 3, \$4 = 4, \$5 = 56",
+              ],
+              [
+                  "12345562",
+                   qr#^((??{$re8}))($re7)($re7)($re7)$re7($re7)($re7(\2))$#,
+                   "12345562 1234556 123455 12345 1234 123 12 1 2 3 4 4 5 62",
+                   "12345562 1234556 123455 12345 1234 123 12 1 2 3 4 4 5 2",
+                   "\$1 = 1, \$2 = 2, \$3 = 3, \$4 = 4, \$5 = 5",
+              ],
+        ) {
+            $c++;
+            @ctl_n = ();
+            @plus = ();
+            undef $^R;
+            my $match = $test->[0] =~ $test->[1];
+            my $str = join(", ", '$1 = '.$f->($1), '$2 = '.$f->($2), '$3 = '.$f->($3), '$4 = '.$f->($4),'$5 = '.$f->($5));
+            push @ctl_n, $f->($^N);
+            push @plus, $f->($+);
+            ok($match, "match $c");
+            if (not $match) {
+                # unset $str, @ctl_n and @plus
+                $str = "";
+                @ctl_n = @plus = ();
+            }
+            iseq("@ctl_n", $test->[2], "ctl_n $c");
+            iseq("@plus", $test->[3], "plus $c");
+            iseq($str, $test->[4], "str $c");
+        }
+        SKIP: {
+            if ($] le '5.010') {
+                skip "test segfaults on perl < 5.10", 4;
+            }
+
+            @ctl_n = ();
+            @plus = ();
+
+            our $re4;
+            local $re4 = qr#(1)((??{push @ctl_n, $f->($^N); push @plus, $f->($+);$^N + 1})){2}(?{$^N})(|abc|def)(??{"$^R"})#;
+            undef $^R;
+            my $match = "123abc3" =~ m/^(??{$re4})$/;
+            my $str = join(", ", '$1 = '.$f->($1), '$2 = '.$f->($2), '$3 = '.$f->($3), '$4 = '.$f->($4),'$5 = '.$f->($5),'$^R = '.$f->($^R));
+            push @ctl_n, $f->($^N);
+            push @plus, $f->($+);
+            ok($match);
+            if (not $match) {
+                # unset $str
+                @ctl_n = ();
+                @plus = ();
+                $str = "";
+            }
+            iseq("@ctl_n", "1 2 undef");
+            iseq("@plus", "1 2 undef");
+            iseq($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef");
+       }
     }
     #
     # This should be the last test.

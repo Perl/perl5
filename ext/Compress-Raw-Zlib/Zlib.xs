@@ -3,7 +3,7 @@
  * Created : 22nd January 1996
  * Version : 2.000
  *
- *   Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
+ *   Copyright (c) 1995-2009 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
  *   modify it under the same terms as Perl itself.
  *
@@ -541,6 +541,8 @@ char * string;
             case SVt_PVHV:
             case SVt_PVCV:
                 croak("%s: buffer parameter is not a SCALAR reference", string);
+            default:
+                break;
         }
         if (SvROK(sv))
             croak("%s: buffer parameter is a reference to a reference", string) ;
@@ -578,6 +580,8 @@ char * string ;
             case SVt_PVHV:
             case SVt_PVCV:
                 croak("%s: buffer parameter is not a SCALAR reference", string);
+            default:
+                break;
         }
         if (SvROK(sv))
             croak("%s: buffer parameter is a reference to a reference", string) ;
@@ -1272,7 +1276,7 @@ inflate (s, buf, output, eof=FALSE)
     bool 	eof 
     uInt	cur_length = 0;
     uInt	prefix_length = 0;
-    uInt	increment = 0;
+    int	    increment = 0;
     STRLEN  stmp    = NO_INIT
     uLong     bufinc = NO_INIT
   PREINIT:
@@ -1306,23 +1310,39 @@ inflate (s, buf, output, eof=FALSE)
     if((s->flags & FLAG_APPEND) != FLAG_APPEND) {
         SvCUR_set(output, 0);
     }
+   
+    /* Assume no output buffer - the code below will update if there is any available */
+    s->stream.avail_out = 0;
+
+
     if (SvLEN(output)) {
         prefix_length = cur_length =  SvCUR(output) ;
-        s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
-        increment = SvLEN(output) -  cur_length - 1;
-        s->stream.avail_out = increment;
+    
+        if (s->flags & FLAG_LIMIT_OUTPUT && SvLEN(output) - cur_length - 1 < bufinc)
+        {
+            Sv_Grow(output, bufinc + cur_length + 1) ;
+        }
+    
+        /* Only setup the stream output pointers if there is spare 
+           capacity in the outout SV
+        */
+        if (SvLEN(output) > cur_length + 1)
+        {
+            s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
+            increment = SvLEN(output) -  cur_length - 1;
+            s->stream.avail_out = increment;
+        }
     }
-    else {
-        s->stream.avail_out = 0;
-    }
+    
+
     s->bytesInflated = 0;
     
     RETVAL = Z_OK;
 
     while (RETVAL == Z_OK) {
-        if (s->stream.avail_out == 0 ) {
+        if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            Sv_Grow(output, SvLEN(output) + bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc +1) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
             increment = bufinc ;
@@ -1330,7 +1350,13 @@ inflate (s, buf, output, eof=FALSE)
             bufinc *= 2 ; 
         }
 
+        /* printf("INFLATE Availl In %d, Out %d\n", s->stream.avail_in,
+ s->stream.avail_out); 
+DispStream(s, "BEFORE");
+Perl_sv_dump(output); */
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
+        /* printf("INFLATE returned %d %s, avail in %d, out %d\n", RETVAL,
+ GetErrorString(RETVAL), s->stream.avail_in, s->stream.avail_out); */
 
     
         if (RETVAL == Z_NEED_DICT && s->dictionary) {
@@ -1338,11 +1364,16 @@ inflate (s, buf, output, eof=FALSE)
             RETVAL = inflateSetDictionary(&(s->stream), 
             (const Bytef*)SvPVbyte_nolen(s->dictionary),
             SvCUR(s->dictionary));
+            if (RETVAL == Z_OK)
+                continue;
         }
         
-        if (s->flags & FLAG_LIMIT_OUTPUT ||
-            RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
-            RETVAL == Z_DATA_ERROR  || RETVAL == Z_STREAM_END )
+        if (s->flags & FLAG_LIMIT_OUTPUT && 
+                (RETVAL == Z_OK || RETVAL == Z_BUF_ERROR ))
+            break;
+
+        if (RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
+            RETVAL == Z_DATA_ERROR   || RETVAL == Z_STREAM_END )
             break ;
 
         if (RETVAL == Z_BUF_ERROR) {
@@ -1376,8 +1407,8 @@ inflate (s, buf, output, eof=FALSE)
 #endif
     
     s->last_error = RETVAL ;
-    if (RETVAL == Z_OK || RETVAL == Z_STREAM_END || RETVAL == Z_DATA_ERROR) {
-	unsigned in ;
+    if (RETVAL == Z_OK || RETVAL == Z_STREAM_END || RETVAL == Z_BUF_ERROR || RETVAL == Z_DATA_ERROR) {
+	   unsigned in ;
 
         s->bytesInflated = cur_length + increment - s->stream.avail_out - prefix_length;
         s->uncompressedBytes += s->bytesInflated ;
@@ -1411,6 +1442,7 @@ inflate (s, buf, output, eof=FALSE)
             *SvEND(buf) = '\0';
             SvSETMAGIC(buf);
 	}
+
     }
     OUTPUT:
 	RETVAL

@@ -5,7 +5,6 @@ use warnings;
 use vars    qw[@ISA $STATUS $VERSION];
 @ISA =      qw[CPANPLUS::Dist];
 
-use CPANPLUS::inc;
 use CPANPLUS::Internals::Constants;
 
 ### these constants were exported by CPANPLUS::Internals::Constants
@@ -31,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.12';
+$VERSION = '0.24';
 
 =pod
 
@@ -222,7 +221,8 @@ sub prepare {
     }
 
     my $args;
-    my( $force, $verbose, $buildflags, $perl);
+    my( $force, $verbose, $buildflags, $perl, $prereq_target, $prereq_format,
+        $prereq_build );
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             force           => {    default => $conf->get_conf('force'),
@@ -232,6 +232,10 @@ sub prepare {
             perl            => {    default => $^X, store => \$perl },
             buildflags      => {    default => $conf->get_conf('buildflags'),
                                     store   => \$buildflags },
+            prereq_target   => {    default => '', store => \$prereq_target }, 
+            prereq_format   => {    default => '',
+                                    store   => \$prereq_format },   
+            prereq_build    => {    default => 0, store => \$prereq_build },
         };
 
         $args = check( $tmpl, \%hash ) or return;
@@ -259,14 +263,47 @@ sub prepare {
     ### to reset the @INC
     #local $ENV{PERL5OPT} = CPANPLUS::inc->original_perl5opt;
     #local $ENV{PERL5LIB} = CPANPLUS::inc->original_perl5lib;
-    local @INC           = CPANPLUS::inc->original_inc;
+    #local @INC           = CPANPLUS::inc->original_inc;
 
     ### this will generate warnings under anything lower than M::B 0.2606
-    my %buildflags = $dist->_buildflags_as_hash( $buildflags );
+    my @buildflags = $dist->_buildflags_as_list( $buildflags );
     $dist->status->_buildflags( $buildflags );
 
     my $fail;
     RUN: {
+        # 0.85_01
+        ### we resolve 'configure requires' here, so we can run the 'perl
+        ### Makefile.PL' command
+        ### XXX for tests: mock f_c_r to something that *can* resolve and
+        ### something that *doesnt* resolve. Check the error log for ok
+        ### on this step or failure
+        ### XXX make a seperate tarball to test for this scenario: simply
+        ### containing a makefile.pl/build.pl for test purposes?
+        my $safe_ver = version->new('0.85_01');
+        if ( version->new($CPANPLUS::Internals::VERSION) >= $safe_ver )
+        {   my $configure_requires = $dist->find_configure_requires;     
+            my $ok = $dist->_resolve_prereqs(
+                            format          => $prereq_format,
+                            verbose         => $verbose,
+                            prereqs         => $configure_requires,
+                            target          => $prereq_target,
+                            force           => $force,
+                            prereq_build    => $prereq_build,
+                    );    
+    
+            unless( $ok ) {
+           
+                #### use $dist->flush to reset the cache ###
+                error( loc( "Unable to satisfy '%1' for '%2' " .
+                            "-- aborting install", 
+                            'configure_requires', $self->module ) );    
+                $dist->status->prepared(0);
+                $fail++; 
+                last RUN;
+            } 
+            ### end of prereq resolving ###
+        }
+
         # Wrap the exception that may be thrown here (should likely be
         # done at a much higher level).
         my $prep_output;
@@ -274,7 +311,7 @@ sub prepare {
         my $env = 'ENV_CPANPLUS_IS_EXECUTING';
         local $ENV{$env} = BUILD_PL->( $dir );
 
-        unless ( scalar run(    command => [$perl, BUILD_PL->($dir), $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD_PL->($dir), @buildflags],
                                 buffer  => \$prep_output,
                                 verbose => $verbose ) 
         ) {
@@ -284,10 +321,12 @@ sub prepare {
 
         msg( $prep_output, 0 );
 
-        $self->status->prereqs( $dist->_find_prereqs( verbose => $verbose, 
-                                                      dir => $dir, 
-                                                      perl => $perl,
-                                                      buildflags => $buildflags ) );
+        my $prereqs = $self->status->prereqs;
+
+        $prereqs ||= $dist->_find_prereqs( verbose => $verbose, 
+                                           dir => $dir, 
+                                           perl => $perl,
+                                           buildflags => $buildflags );
 
     }
     
@@ -338,10 +377,12 @@ sub _find_prereqs {
 
     my $content;
 
-    if ( version->new( $Module::Build::VERSION ) >= $safe_ver ) {
+    if ( version->new( $Module::Build::VERSION ) >= $safe_ver and ! ON_WIN32 ) {
+        my @buildflags = $dist->_buildflags_as_list( $buildflags );
+
         # Use the new Build action 'prereq_data'
         
-        unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', @buildflags],
                                 buffer  => \$content,
                                 verbose => 0 ) 
         ) {
@@ -364,6 +405,7 @@ sub _find_prereqs {
         $content = do { local $/; <$fh> };
     }
 
+    return unless $content;
     my $bphash = eval $content;
     return unless $bphash and ref $bphash eq 'HASH';
     foreach my $type ('requires', 'build_requires') {
@@ -458,7 +500,12 @@ sub create {
         $args = check( $tmpl, \%hash ) or return;
     }
 
-    return 1 if $dist->status->created && !$force;
+    # restore the state as we have created this already.
+    if ( $dist->status->created && !$force ) {
+        ### add this directory to your lib ###
+        $self->add_to_includepath();
+        return 1;
+    }
 
     $dist->status->_create_args( $args );
 
@@ -487,7 +534,7 @@ sub create {
     ### to reset the @INC
     #local $ENV{PERL5OPT} = CPANPLUS::inc->original_perl5opt;
     #local $ENV{PERL5LIB} = CPANPLUS::inc->original_perl5lib;
-    local @INC           = CPANPLUS::inc->original_inc;
+    #local @INC           = CPANPLUS::inc->original_inc;
 
     ### but do it *before* the new_from_context, as M::B seems
     ### to be actually running the file...
@@ -499,7 +546,7 @@ sub create {
                 if $self->best_path_to_module_build;
 
     ### this will generate warnings under anything lower than M::B 0.2606
-    my %buildflags = $dist->_buildflags_as_hash( $buildflags );
+    my @buildflags = $dist->_buildflags_as_list( $buildflags );
     $dist->status->_buildflags( $buildflags );
 
     my $fail; my $prereq_fail; my $test_fail;
@@ -532,7 +579,7 @@ sub create {
 
         my $captured;
 
-        unless ( scalar run(    command => [$perl, BUILD->($dir), $buildflags],
+        unless ( scalar run(    command => [$perl, BUILD->($dir), @buildflags],
                                 buffer  => \$captured,
                                 verbose => $verbose ) 
         ) {
@@ -554,7 +601,7 @@ sub create {
         unless( $skiptest ) {
             my $test_output;
             my $flag    = ON_VMS ? '"test"' : 'test';
-            my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+            my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
             unless ( scalar run(    command => $cmd,
                                     buffer  => \$test_output,
                                     verbose => $verbose ) 
@@ -663,7 +710,8 @@ sub install {
     }
 
     my $fail;
-    my $buildflags = $dist->status->_buildflags;
+    my @buildflags = $dist->_buildflags_as_list( $dist->status->_buildflags );
+
     ### hmm, how is this going to deal with sudo?
     ### for now, check effective uid, if it's not root,
     ### shell out, otherwise use the method
@@ -674,7 +722,7 @@ sub install {
         ### M::B at the top of the build.pl
         ### On VMS, flags need to be quoted
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
         my $sudo    = $conf->get_program('sudo');
         unshift @$cmd, $sudo if $sudo;
 
@@ -688,11 +736,9 @@ sub install {
             $fail++;
         }
     } else {
-        my %buildflags = $dist->_buildflags_as_hash($buildflags);
-
         my $install_output;
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
+        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
         unless( scalar run( command => $cmd,
                             buffer  => \$install_output,
                             verbose => $verbose )
@@ -713,15 +759,13 @@ sub install {
     return $dist->status->installed( $fail ? 0 : 1 );
 }
 
-### returns the string 'foo=bar zot=quux' as (foo => bar, zot => quux)
-sub _buildflags_as_hash {
+### returns the string 'foo=bar --zot quux'
+###        as the list 'foo=bar', '--zot', 'qux'
+sub _buildflags_as_list {
     my $self    = shift;
     my $flags   = shift or return;
 
-    my @argv    = Module::Build->split_like_shell($flags);
-    my ($argv)  = Module::Build->read_args(@argv);
-
-    return %$argv;
+    return Module::Build->split_like_shell($flags);
 }
 
 =head1 AUTHOR

@@ -3044,17 +3044,16 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     SV* ob;
     GV* gv;
     HV* stash;
-    STRLEN namelen;
     const char* packname = NULL;
     SV *packsv = NULL;
     STRLEN packlen;
-    const char * const name = SvPV_const(meth, namelen);
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     PERL_ARGS_ASSERT_METHOD_COMMON;
 
     if (!sv)
-	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);
+	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value",
+		   SVfARG(meth));
 
     SvGETMAGIC(sv);
     if (SvROK(sv))
@@ -3083,7 +3082,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		    : !isIDFIRST(*packname)
 		))
 	    {
-		Perl_croak(aTHX_ "Can't call method \"%s\" %s", name,
+		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" %s",
+			   SVfARG(meth),
 			   SvOK(sv) ? "without a package or object reference"
 				    : "on an undefined value");
 	    }
@@ -3108,6 +3108,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
 		     && SvOBJECT(ob))))
     {
+	const char * const name = SvPV_nolen_const(meth);
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
 		   (SvSCREAM(meth) && strEQ(name,"isa")) ? "DOES" :
 		   name);
@@ -3131,7 +3132,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod_flags(stash ? stash : MUTABLE_HV(packsv), name,
+    gv = gv_fetchmethod_flags(stash ? stash : MUTABLE_HV(packsv),
+			      SvPV_nolen_const(meth),
 			      GV_AUTOLOAD | GV_CROAK);
 
     assert(gv);

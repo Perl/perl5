@@ -136,6 +136,7 @@ sub mycan {				# Real can would leave stubs.
 	 func		  => "atan2 cos sin exp abs log sqrt int",
 	 conversion	  => 'bool "" 0+',
 	 iterators	  => '<>',
+         filetest         => "-X",
 	 dereferencing	  => '${} @{} %{} &{} *{}',
 	 special	  => 'nomethod fallback =');
 
@@ -424,6 +425,29 @@ I<globbing> syntax C<E<lt>${var}E<gt>>.
 B<BUGS> Even in list context, the iterator is currently called only
 once and with scalar context.
 
+=item * I<File tests>
+
+    "-X"
+
+This overload is used for all the filetest operators (C<-f>, C<-x> and
+so on: see L<perlfunc/-X> for the full list). Even though these are
+unary operators, the method will be called with a second argument which
+is a single letter indicating which test was performed. Note that the
+overload key is the literal string C<"-X">: you can't provide separate
+overloads for the different tests.
+
+Calling an overloaded filetest operator does not affect the stat value
+associated with the special filehandle C<_>. It still refers to the
+result of the last C<stat>, C<lstat> or unoverloaded filetest.
+
+If not overloaded, these operators will fall back to the default
+behaviour even without C<< fallback => 1 >>. This means that if the
+object is a blessed glob or blessed IO ref it will be treated as a
+filehandle, otherwise string overloading will be invoked and the result
+treated as a filename.
+
+This overload was introduced in perl 5.12.
+
 =item * I<Dereferencing>
 
     '${}', '@{}', '%{}', '&{}', '*{}'.
@@ -463,6 +487,7 @@ A computer-readable form of the above table is available in the hash
  func		  => 'atan2 cos sin exp abs log sqrt',
  conversion	  => 'bool "" 0+',
  iterators	  => '<>',
+ filetest         => '-X',
  dereferencing	  => '${} @{} %{} &{} *{}',
  special	  => 'nomethod fallback ='
 

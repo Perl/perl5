@@ -31,7 +31,7 @@ use constant ERROR_FATAL_CONFLICT => q{"use Fatal '%s'" is not allowed while "no
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '1.998';
+our $VERSION = '1.999';
 
 our $Debug ||= 0;
 
@@ -84,6 +84,7 @@ my %TAGS = (
     ':1.996' => [qw(:default)],
     ':1.997' => [qw(:default)],
     ':1.998' => [qw(:default)],
+    ':1.999' => [qw(:default)],
 
 );
 
@@ -759,6 +760,7 @@ sub _make_fatal {
 
         $call = 'CORE::system';
         $name = 'system';
+        $core = 1;
 
     } elsif ($name eq 'exec') {
         # Exec doesn't have a prototype.  We don't care.  This
@@ -861,9 +863,19 @@ sub _make_fatal {
 
             sub$real_proto {
 
+                # If we're inside a string eval, we can end up with a
+                # whacky filename.  The following code allows autodie
+                # to propagate correctly into string evals.
+
+                my \$caller_level = 0;
+
+                while ( (caller \$caller_level)[1] =~ m{^\\(eval \\d+\\)\$} ) {
+                    \$caller_level++;
+                }
+
                 # If we're called from the correct file, then use the
                 # autodying code.
-                goto &\$code if ((caller)[1] eq \$filename);
+                goto &\$code if ((caller \$caller_level)[1] eq \$filename);
 
                 # Oh bother, we've leaked into another file.  Call the
                 # original code.  Note that \$sref may actually be a

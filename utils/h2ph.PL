@@ -123,7 +123,7 @@ while (defined (my $file = next_file())) {
 
     print OUT
         "require '_h2ph_pre.ph';\n\n",
-        "no warnings 'redefine';\n\n";
+        "no warnings qw(redefine misc);\n\n";
 
     while (defined (local $_ = next_line($file))) {
 	if (s/^\s*\#\s*//) {
@@ -743,7 +743,7 @@ sub queue_includes_from
 
 
 # Determine include directories; $Config{usrinc} should be enough for (all
-# non-GCC?) C compilers, but gcc uses an additional include directory.
+# non-GCC?) C compilers, but gcc uses additional include directories.
 sub inc_dirs
 {
     my $from_gcc    = `LC_ALL=C $Config{cc} -v 2>&1`;
@@ -755,7 +755,7 @@ sub inc_dirs
            $from_gcc = '';
        };
     };
-    length($from_gcc) ? ($from_gcc, $Config{usrinc}) : ($Config{usrinc});
+    length($from_gcc) ? ($from_gcc, $from_gcc . "-fixed", $Config{usrinc}) : ($Config{usrinc});
 }
 
 
@@ -809,6 +809,7 @@ sub build_preamble_if_necessary
 		    quotemeta($define{$_}), "\" } }\n\n";
 	    }
 	}
+	print PREAMBLE "\n1;\n";  # avoid 'did not return a true value' when empty
     close PREAMBLE               or die "Cannot close $preamble:  $!";
 }
 

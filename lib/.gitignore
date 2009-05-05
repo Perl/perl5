@@ -74,7 +74,7 @@
 /Unicode/Normalize.pm
 /XS
 /XSLoader.pm
-/attrs.pm
+/attributes.pm
 /auto
 /encoding.pm
 /lib.pm

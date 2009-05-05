@@ -103,11 +103,6 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
     }
 
     if (!GvIOp(gv)) {
-#ifdef GV_UNIQUE_CHECK
-        if (GvUNIQUE(gv)) {
-            Perl_croak(aTHX_ "Bad symbol for filehandle (GV is unique)");
-        }
-#endif
 	GvIOp(gv) = newIO();
     }
     return gv;
@@ -1983,6 +1978,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   break;
 	 case int_amg:
 	 case iter_amg:			/* XXXX Eventually should do to_gv. */
+	 case ftest_amg:		/* XXXX Eventually should do to_gv. */
 	     /* FAIL safe */
 	     return NULL;	/* Delegate operation to standard mechanisms. */
 	     break;

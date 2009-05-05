@@ -8,5 +8,4 @@ WriteMakefile(
 	      		     SUFFIX	=> 'gz',
 	      		     DIST_DEFAULT => 'all tardist',
 			   },
-	MAN3PODS	=> {},
 );

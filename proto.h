@@ -4028,7 +4028,6 @@ PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 #define PERL_ARGS_ASSERT_MY_ATTRS	\
 	assert(o)
 
-PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__
@@ -5968,10 +5967,9 @@ PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[
 PERL_CALLCONV int	Perl_my_dirfd(pTHX_ DIR* dir);
 #ifdef PERL_OLD_COPY_ON_WRITE
 PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_SETSV_COW	\
-	assert(dstr); assert(sstr)
+	assert(sstr)
 
 #endif
 

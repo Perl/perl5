@@ -148,7 +148,7 @@ else {
     for my $dist (sort keys %results) {
 	print "Module $dist...\n";
 	for my $file (sort keys %{$results{$dist}}) {
-	    my ($vcpan, $vcore) = @{$results{$dist}{$file}}{@labels};
+	    my ($vcore, $vcpan) = @{$results{$dist}{$file}}{@labels};
 	    if (our $opt_v or $vcore ne $vcpan) {
 		print "    $file: core=$vcore, cpan=$vcpan\n";
 	    }

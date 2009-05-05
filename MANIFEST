@@ -88,10 +88,8 @@ ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
 ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
 ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
-ext/attrs/attrs.pm		attrs extension Perl module
-ext/attrs/attrs.xs		attrs extension external subroutines
-ext/attrs/Makefile.PL		attrs extension makefile writer
-ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
+ext/attributes/attributes.pm		For "sub foo : attrlist"
+ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
@@ -133,35 +131,36 @@ ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/Compress-Raw-Bzip2/README
-ext/Compress-Raw-Bzip2/Makefile.PL
-ext/Compress-Raw-Bzip2/Bzip2.xs
-ext/Compress-Raw-Bzip2/typemap
-ext/Compress-Raw-Bzip2/fallback/constants.h
-ext/Compress-Raw-Bzip2/fallback/constants.xs
-ext/Compress-Raw-Bzip2/private/MakeUtil.pm
-ext/Compress-Raw-Bzip2/t/000prereq.t
-ext/Compress-Raw-Bzip2/t/01bzip2.t
-ext/Compress-Raw-Bzip2/t/99pod.t
-ext/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
 ext/Compress-Raw-Bzip2/bzip2-src/blocksort.c
-ext/Compress-Raw-Bzip2/bzip2-src/huffman.c
-ext/Compress-Raw-Bzip2/bzip2-src/crctable.c
-ext/Compress-Raw-Bzip2/bzip2-src/randtable.c
-ext/Compress-Raw-Bzip2/bzip2-src/compress.c
-ext/Compress-Raw-Bzip2/bzip2-src/decompress.c
-ext/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
+ext/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzlib.h
 ext/Compress-Raw-Bzip2/bzip2-src/bzlib_private.h
+ext/Compress-Raw-Bzip2/bzip2-src/compress.c
+ext/Compress-Raw-Bzip2/bzip2-src/crctable.c
+ext/Compress-Raw-Bzip2/bzip2-src/decompress.c
 ext/Compress-Raw-Bzip2/bzip2-src/dlltest.c
-ext/Compress-Raw-Bzip2/bzip2-src/unzcrash.c
-ext/Compress-Raw-Bzip2/bzip2-src/spewG.c
-ext/Compress-Raw-Bzip2/bzip2-src/mk251.c
+ext/Compress-Raw-Bzip2/bzip2-src/huffman.c
 ext/Compress-Raw-Bzip2/bzip2-src/LICENSE
+ext/Compress-Raw-Bzip2/bzip2-src/mk251.c
+ext/Compress-Raw-Bzip2/bzip2-src/randtable.c
+ext/Compress-Raw-Bzip2/bzip2-src/spewG.c
+ext/Compress-Raw-Bzip2/bzip2-src/unzcrash.c
+ext/Compress-Raw-Bzip2/Bzip2.xs
 ext/Compress-Raw-Bzip2/Changes
+ext/Compress-Raw-Bzip2/fallback/constants.h
+ext/Compress-Raw-Bzip2/fallback/constants.xs
+ext/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
+ext/Compress-Raw-Bzip2/Makefile.PL
 ext/Compress-Raw-Bzip2/pod/FAQ.pod
+ext/Compress-Raw-Bzip2/private/MakeUtil.pm
+ext/Compress-Raw-Bzip2/README
+ext/Compress-Raw-Bzip2/t/000prereq.t
+ext/Compress-Raw-Bzip2/t/01bzip2.t
+ext/Compress-Raw-Bzip2/t/09limitoutput.t
+ext/Compress-Raw-Bzip2/t/99pod.t
+ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/examples/filtdef	Compress::Raw::Zlib
@@ -176,6 +175,7 @@ ext/Compress-Raw-Zlib/README		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/01version.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/02zlib.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/07bufsize.t	Compress::Raw::Zlib
+ext/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/18lvalue.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/typemap		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
@@ -200,23 +200,6 @@ ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
-ext/Compress-Zlib/Changes		Compress::Zlib
-ext/Compress-Zlib/examples/filtdef	Compress::Zlib
-ext/Compress-Zlib/examples/filtinf	Compress::Zlib
-ext/Compress-Zlib/examples/gzcat	Compress::Zlib
-ext/Compress-Zlib/examples/gzgrep	Compress::Zlib
-ext/Compress-Zlib/examples/gzstream	Compress::Zlib
-ext/Compress-Zlib/lib/Compress/Zlib.pm	Compress::Zlib
-ext/Compress-Zlib/Makefile.PL		Compress::Zlib
-ext/Compress-Zlib/pod/FAQ.pod	Compress::Zlib
-ext/Compress-Zlib/private/MakeUtil.pm	Compress::Zlib
-ext/Compress-Zlib/README		Compress::Zlib
-ext/Compress-Zlib/t/01version.t		Compress::Zlib
-ext/Compress-Zlib/t/03zlib-v1.t		Compress::Zlib
-ext/Compress-Zlib/t/05examples.t	Compress::Zlib
-ext/Compress-Zlib/t/06gzsetp.t		Compress::Zlib
-ext/Compress-Zlib/t/08encoding.t	Compress::Zlib
-ext/Compress-Zlib/t/14gzopen.t		Compress::Zlib
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
@@ -226,7 +209,6 @@ ext/Cwd/t/win32.t		See if Cwd works on Win32
 ext/Data-Dumper/Changes		Data pretty printer, changelog
 ext/Data-Dumper/Dumper.pm	Data pretty printer, module
 ext/Data-Dumper/Dumper.xs	Data pretty printer, externals
-ext/Data-Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data-Dumper/t/bless.t	See if Data::Dumper works
 ext/Data-Dumper/t/bugs.t	See if Data::Dumper works
 ext/Data-Dumper/t/dumper.t	See if Data::Dumper works
@@ -722,7 +704,6 @@ ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
 ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
-ext/Filter-Util-Call/Makefile.PL	Filter::Util::Call extension makefile writer
 ext/Filter-Util-Call/t/call.t	See if Filter::Util::Call works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
@@ -734,7 +715,6 @@ ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util-FieldHash/Changes			Changes for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/FieldHash.xs		XS portion
 ext/Hash-Util-FieldHash/lib/Hash/Util/FieldHash.pm	Perl portion and documentation
-ext/Hash-Util-FieldHash/Makefile.PL		Makefile for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/t/01_load.t		Test script
 ext/Hash-Util-FieldHash/t/02_function.t		Test script
 ext/Hash-Util-FieldHash/t/03_class.t		Test script
@@ -754,107 +734,137 @@ ext/I18N-Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
 ext/IO/ChangeLog		IO perl module change log
-ext/IO_Compress_Base/Changes	IO::Compress::Base
-ext/IO_Compress_Base/lib/File/GlobMapper.pm	IO::Compress::Base
-ext/IO_Compress_Base/lib/IO/Compress/Base/Common.pm	IO::Compress::Base
-ext/IO_Compress_Base/lib/IO/Compress/Base.pm	IO::Compress::Base
-ext/IO_Compress_Base/lib/IO/Uncompress/AnyUncompress.pm	IO::Compress::Base
-ext/IO_Compress_Base/lib/IO/Uncompress/Base.pm	IO::Compress::Base
-ext/IO_Compress_Base/Makefile.PL	IO::Compress::Base
-ext/IO_Compress_Base/pod/FAQ.pod	IO::Compress::Base
-ext/IO_Compress_Base/private/MakeUtil.pm	IO::Compress::Base
-ext/IO_Compress_Base/README	IO::Compress::Base
-ext/IO_Compress_Base/t/01misc.t	IO::Compress::Base
-ext/IO_Compress_Base/t/globmapper.t	IO::Compress::Base
-ext/IO_Compress_Zlib/Changes	IO::Compress::Zlib
-ext/IO_Compress_Zlib/examples/gzappend	IO::Compress::Zlib
-ext/IO_Compress_Zlib/examples/gzcat	IO::Compress::Zlib
-ext/IO_Compress_Zlib/examples/gzgrep	IO::Compress::Zlib
-ext/IO_Compress_Zlib/examples/gzstream	IO::Compress::Zlib
-ext/IO_Compress_Zlib/examples/unzip	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Adapter/Identity.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Deflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Gzip/Constants.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Gzip.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/RawDeflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Zip/Constants.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Zip.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Zlib/Constants.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Compress/Zlib/Extra.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/Adapter/Identity.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/Adapter/Inflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/AnyInflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/Gunzip.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/Inflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/RawInflate.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/lib/IO/Uncompress/Unzip.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/Makefile.PL	IO::Compress::Zlib
-ext/IO_Compress_Zlib/pod/FAQ.pod	IO::Compress::Zlib
-ext/IO_Compress_Zlib/private/MakeUtil.pm	IO::Compress::Zlib
-ext/IO_Compress_Zlib/README	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/001zlib-generic-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/001zlib-generic-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/001zlib-generic-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/001zlib-generic-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/002any-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/002any-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/002any-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/002any-transparent.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/002any-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/004gziphdr.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/005defhdr.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/006zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/010examples.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/020isize.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/050interop-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/100generic-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/100generic-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/100generic-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/100generic-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/101truncate-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/101truncate-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/101truncate-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/101truncate-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/102tied-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/102tied-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/102tied-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/102tied-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/103newtied-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/103newtied-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/103newtied-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/103newtied-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/104destroy-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/104destroy-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/104destroy-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/104destroy-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-gzip-only.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-zip-only.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/105oneshot-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/106prime-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/106prime-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/106prime-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/106prime-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/107multi-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/107multi-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/107multi-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/107multi-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/108anyunc-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/108anyunc-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/108anyunc-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/108anyunc-transparent.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/108anyunc-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/109merge-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/109merge-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/109merge-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/109merge-zip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/110encode-deflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/110encode-gzip.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/110encode-rawdeflate.t	IO::Compress::Zlib
-ext/IO_Compress_Zlib/t/110encode-zip.t	IO::Compress::Zlib
+ext/IO-Compress/Changes	IO::Compress
+ext/IO-Compress/examples/compress-zlib/filtdef	IO::Compress
+ext/IO-Compress/examples/compress-zlib/filtinf	IO::Compress
+ext/IO-Compress/examples/compress-zlib/gzcat	IO::Compress
+ext/IO-Compress/examples/compress-zlib/gzgrep	IO::Compress
+ext/IO-Compress/examples/compress-zlib/gzstream	IO::Compress
+ext/IO-Compress/examples/io/anycat	IO::Compress
+ext/IO-Compress/examples/io/bzip2/bzcat	IO::Compress
+ext/IO-Compress/examples/io/bzip2/bzgrep	IO::Compress
+ext/IO-Compress/examples/io/bzip2/bzstream	IO::Compress
+ext/IO-Compress/examples/io/gzip/gzappend	IO::Compress
+ext/IO-Compress/examples/io/gzip/gzcat	IO::Compress
+ext/IO-Compress/examples/io/gzip/gzgrep	IO::Compress
+ext/IO-Compress/examples/io/gzip/gzstream	IO::Compress
+ext/IO-Compress/lib/Compress/Zlib.pm	IO::Compress
+ext/IO-Compress/lib/File/GlobMapper.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Adapter/Bzip2.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Adapter/Identity.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Base/Common.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Base.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Bzip2.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Deflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Gzip/Constants.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Gzip.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/RawDeflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Zip/Constants.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Zip.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Zlib/Constants.pm	IO::Compress
+ext/IO-Compress/lib/IO/Compress/Zlib/Extra.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Adapter/Bunzip2.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Adapter/Identity.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Adapter/Inflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/AnyInflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/AnyUncompress.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Base.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Bunzip2.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Gunzip.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Inflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/RawInflate.pm	IO::Compress
+ext/IO-Compress/lib/IO/Uncompress/Unzip.pm	IO::Compress
+ext/IO-Compress/Makefile.PL	IO::Compress
+ext/IO-Compress/pod/FAQ.pod	IO::Compress
+ext/IO-Compress/private/MakeUtil.pm	IO::Compress
+ext/IO-Compress/README	IO::Compress
+ext/IO-Compress/t/000prereq.t	IO::Compress
+ext/IO-Compress/t/001bzip2.t	IO::Compress
+ext/IO-Compress/t/001zlib-generic-deflate.t	IO::Compress
+ext/IO-Compress/t/001zlib-generic-gzip.t	IO::Compress
+ext/IO-Compress/t/001zlib-generic-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/001zlib-generic-zip.t	IO::Compress
+ext/IO-Compress/t/002any-deflate.t	IO::Compress
+ext/IO-Compress/t/002any-gzip.t	IO::Compress
+ext/IO-Compress/t/002any-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/002any-transparent.t	IO::Compress
+ext/IO-Compress/t/002any-zip.t	IO::Compress
+ext/IO-Compress/t/004gziphdr.t	IO::Compress
+ext/IO-Compress/t/005defhdr.t	IO::Compress
+ext/IO-Compress/t/006zip.t	IO::Compress
+ext/IO-Compress/t/010examples-bzip2.t	IO::Compress
+ext/IO-Compress/t/010examples-zlib.t	IO::Compress
+ext/IO-Compress/t/01misc.t	IO::Compress
+ext/IO-Compress/t/020isize.t	IO::Compress
+ext/IO-Compress/t/050interop-gzip.t	IO::Compress
+ext/IO-Compress/t/100generic-bzip2.t	IO::Compress
+ext/IO-Compress/t/100generic-deflate.t	IO::Compress
+ext/IO-Compress/t/100generic-gzip.t	IO::Compress
+ext/IO-Compress/t/100generic-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/100generic-zip.t	IO::Compress
+ext/IO-Compress/t/101truncate-bzip2.t	IO::Compress
+ext/IO-Compress/t/101truncate-deflate.t	IO::Compress
+ext/IO-Compress/t/101truncate-gzip.t	IO::Compress
+ext/IO-Compress/t/101truncate-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/101truncate-zip.t	IO::Compress
+ext/IO-Compress/t/102tied-bzip2.t	IO::Compress
+ext/IO-Compress/t/102tied-deflate.t	IO::Compress
+ext/IO-Compress/t/102tied-gzip.t	IO::Compress
+ext/IO-Compress/t/102tied-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/102tied-zip.t	IO::Compress
+ext/IO-Compress/t/103newtied-bzip2.t	IO::Compress
+ext/IO-Compress/t/103newtied-deflate.t	IO::Compress
+ext/IO-Compress/t/103newtied-gzip.t	IO::Compress
+ext/IO-Compress/t/103newtied-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/103newtied-zip.t	IO::Compress
+ext/IO-Compress/t/104destroy-bzip2.t	IO::Compress
+ext/IO-Compress/t/104destroy-deflate.t	IO::Compress
+ext/IO-Compress/t/104destroy-gzip.t	IO::Compress
+ext/IO-Compress/t/104destroy-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/104destroy-zip.t	IO::Compress
+ext/IO-Compress/t/105oneshot-bzip2.t	IO::Compress
+ext/IO-Compress/t/105oneshot-deflate.t	IO::Compress
+ext/IO-Compress/t/105oneshot-gzip-only.t	IO::Compress
+ext/IO-Compress/t/105oneshot-gzip.t	IO::Compress
+ext/IO-Compress/t/105oneshot-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/105oneshot-zip-bzip2-only.t	IO::Compress
+ext/IO-Compress/t/105oneshot-zip-only.t	IO::Compress
+ext/IO-Compress/t/105oneshot-zip.t	IO::Compress
+ext/IO-Compress/t/106prime-bzip2.t	IO::Compress
+ext/IO-Compress/t/106prime-deflate.t	IO::Compress
+ext/IO-Compress/t/106prime-gzip.t	IO::Compress
+ext/IO-Compress/t/106prime-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/106prime-zip.t	IO::Compress
+ext/IO-Compress/t/107multi-bzip2.t	IO::Compress
+ext/IO-Compress/t/107multi-deflate.t	IO::Compress
+ext/IO-Compress/t/107multi-gzip.t	IO::Compress
+ext/IO-Compress/t/107multi-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/107multi-zip.t	IO::Compress
+ext/IO-Compress/t/108anyunc-bzip2.t	IO::Compress
+ext/IO-Compress/t/108anyunc-deflate.t	IO::Compress
+ext/IO-Compress/t/108anyunc-gzip.t	IO::Compress
+ext/IO-Compress/t/108anyunc-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/108anyunc-transparent.t	IO::Compress
+ext/IO-Compress/t/108anyunc-zip.t	IO::Compress
+ext/IO-Compress/t/109merge-deflate.t	IO::Compress
+ext/IO-Compress/t/109merge-gzip.t	IO::Compress
+ext/IO-Compress/t/109merge-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/109merge-zip.t	IO::Compress
+ext/IO-Compress/t/110encode-bzip2.t	IO::Compress
+ext/IO-Compress/t/110encode-deflate.t	IO::Compress
+ext/IO-Compress/t/110encode-gzip.t	IO::Compress
+ext/IO-Compress/t/110encode-rawdeflate.t	IO::Compress
+ext/IO-Compress/t/110encode-zip.t	IO::Compress
+ext/IO-Compress/t/999pod.t	IO::Compress
+ext/IO-Compress/t/99pod.t	IO::Compress
+ext/IO-Compress/t/cz-01version.t	IO::Compress
+ext/IO-Compress/t/cz-05examples.t	IO::Compress
+ext/IO-Compress/t/cz-06gzsetp.t	IO::Compress
+ext/IO-Compress/t/cz-08encoding.t	IO::Compress
+ext/IO-Compress/t/cz-14gzopen.t	IO::Compress
+ext/IO-Compress/t/cz-99pod.t	IO::Compress
+ext/IO-Compress/t/globmapper.t	IO::Compress
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
@@ -947,13 +957,13 @@ ext/List-Util/t/reduce.t	List::Util
 ext/List-Util/t/refaddr.t	Scalar::Util
 ext/List-Util/t/reftype.t	Scalar::Util
 ext/List-Util/t/shuffle.t	List::Util
+ext/List-Util/t/stack-corruption.t	List::Util
 ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/Util.xs		Util extension
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
-ext/Math-BigInt-FastCalc/Makefile.PL	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
@@ -972,8 +982,67 @@ ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
 ext/Module-Pluggable/Makefile.PL			Module::Pluggable
+ext/Module-Pluggable/t/01use.t	Module::Pluggable tests
+ext/Module-Pluggable/t/02alsoworks.t	Module::Pluggable tests
+ext/Module-Pluggable/t/02works.t	Module::Pluggable tests
+ext/Module-Pluggable/t/02works_taint.t	Module::Pluggable tests
+ext/Module-Pluggable/t/03diffname.t	Module::Pluggable tests
+ext/Module-Pluggable/t/04acmedir_single.t	Module::Pluggable tests
+ext/Module-Pluggable/t/04acmedir.t	Module::Pluggable tests
+ext/Module-Pluggable/t/04acmepath_single.t	Module::Pluggable tests
+ext/Module-Pluggable/t/04acmepath.t	Module::Pluggable tests
+ext/Module-Pluggable/t/05postpath.t	Module::Pluggable tests
+ext/Module-Pluggable/t/06multipath.t	Module::Pluggable tests
+ext/Module-Pluggable/t/07instantiate.t	Module::Pluggable tests
+ext/Module-Pluggable/t/08nothing.t	Module::Pluggable tests
+ext/Module-Pluggable/t/09require.t	Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack_inner.t	Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack_noinner.t	Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack_onefile.t	Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack_override.t	Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack_super.t		Module::Pluggable tests
+ext/Module-Pluggable/t/10innerpack.t	Module::Pluggable tests
+ext/Module-Pluggable/t/11usetwice.t	Module::Pluggable tests
+ext/Module-Pluggable/t/12onlyarray.t	Module::Pluggable tests
+ext/Module-Pluggable/t/12onlyregex.t	Module::Pluggable tests
+ext/Module-Pluggable/t/12onlyrequire.t	Module::Pluggable tests
+ext/Module-Pluggable/t/12only.t	Module::Pluggable tests
+ext/Module-Pluggable/t/13exceptarray.t	Module::Pluggable tests
+ext/Module-Pluggable/t/13exceptregex.t	Module::Pluggable tests
+ext/Module-Pluggable/t/13except.t	Module::Pluggable tests
+ext/Module-Pluggable/t/14package.t	Module::Pluggable tests
+ext/Module-Pluggable/t/15topicsafe.t	Module::Pluggable tests
+ext/Module-Pluggable/t/16different_extension.t	Module::Pluggable tests
+ext/Module-Pluggable/t/17devel_inner_package.t	Module::Pluggable tests
+ext/Module-Pluggable/t/18skipped_package.t	Module::Pluggable tests
+ext/Module-Pluggable/t/19can_ok_clobber.t	Module::Pluggable tests
+ext/Module-Pluggable/t/20dodgy_files.t	Module::Pluggable tests
+ext/Module-Pluggable/t/21editor_junk.t			Module::Pluggable tests
+ext/Module-Pluggable/t/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/Acme/Foo-Bar.pm			Module::Pluggable tests
+ext/Module-Pluggable/t/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
+ext/Module-Pluggable/t/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/InnerTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Bar.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyTest/Extend/Plugin/Bar.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/No/Middle.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/TA/C/A/I.pm	Module::Pluggable tests
+ext/Module-Pluggable/t/lib/Zot/.Zork.pm	Module::Pluggable tests
 ext/mro/Changes			mro extension
-ext/mro/Makefile.PL		mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
@@ -1005,7 +1074,6 @@ ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
 ext/ODBM_File/t/odbm.t		See if ODBM_File works
 ext/ODBM_File/typemap		ODBM extension interface types
-ext/Opcode/Makefile.PL		Opcode extension makefile writer
 ext/Opcode/Opcode.pm		Opcode extension Perl module
 ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
@@ -1013,18 +1081,15 @@ ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
-ext/PerlIO-encoding/Makefile.PL	PerlIO::encoding makefile writer
 ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO-encoding/t/encoding.t	See if PerlIO encoding conversion works
 ext/PerlIO-encoding/t/fallback.t	See if PerlIO fallbacks work
 ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
-ext/PerlIO-scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO-scalar/scalar.pm	PerlIO layer for scalars
 ext/PerlIO-scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO-scalar/t/scalar.t	See if PerlIO::scalar works
 ext/PerlIO-scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
 ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
-ext/PerlIO-via/Makefile.PL	PerlIO layer for layers in perl
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
@@ -1160,7 +1225,6 @@ ext/Storable/t/utf8.t		See if Storable works
 ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
-ext/Sys-Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Sys-Syslog/Changes		Changlog for Sys::Syslog
 ext/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
@@ -1186,10 +1250,14 @@ ext/Test-Harness/lib/App/Prove/State.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/App/Prove/State/Result.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/App/Prove/State/Result/Test.pm	Gubbins for the prove utility
 ext/Test-Harness/lib/TAP/Base.pm			A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/Base.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Color.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console/ParallelSession.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Formatter/Console/Session.pm	A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/File.pm		A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/File/Session.pm	A parser for Test Anything Protocol
+ext/Test-Harness/lib/TAP/Formatter/Session.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Harness.pm			A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Object.pm			A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
@@ -1220,7 +1288,6 @@ ext/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
 ext/Test-Harness/lib/Test/Harness.pm			A test harness
-ext/Test-Harness/Makefile.PL				Makefile.PL for Test::Harness
 ext/Test-Harness/t/000-load.t				Test::Harness test
 ext/Test-Harness/t/aggregator.t				Test::Harness test
 ext/Test-Harness/t/bailout.t				Test::Harness test
@@ -1239,11 +1306,14 @@ ext/Test-Harness/t/data/catme.1				Test data for Test::Harness
 ext/Test-Harness/t/data/proverc				Test data for Test::Harness
 ext/Test-Harness/t/data/sample.yml			Test data for Test::Harness
 ext/Test-Harness/t/errors.t				Test::Harness test
+ext/Test-Harness/t/file.t				Test::Harness test
 ext/Test-Harness/t/glob-to-regexp.t			Test::Harness test
 ext/Test-Harness/t/grammar.t				Test::Harness test
+ext/Test-Harness/t/harness-bailout.t			Test::Harness test
 ext/Test-Harness/t/harness-subclass.t			Test::Harness test
 ext/Test-Harness/t/harness.t				Test::Harness test
 ext/Test-Harness/t/iterators.t				Test::Harness test
+ext/Test-Harness/t/lib/App/Prove/Plugin/Dummy2.pm	Module for testing Test::Harness
 ext/Test-Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
 ext/Test-Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
 ext/Test-Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
@@ -1266,6 +1336,7 @@ ext/Test-Harness/t/object.t				Test::Harness test
 ext/Test-Harness/t/parser-config.t			Test::Harness test
 ext/Test-Harness/t/parser-subclass.t			Test::Harness test
 ext/Test-Harness/t/parse.t				Test::Harness test
+ext/Test-Harness/t/perl5lib.t				Test::Harness test
 ext/Test-Harness/t/premature-bailout.t			Test::Harness test
 ext/Test-Harness/t/process.t				Test::Harness test
 ext/Test-Harness/t/proveenv.t				Test::Harness test
@@ -1350,7 +1421,6 @@ ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
-ext/Text-Soundex/Makefile.PL	Text::Soundex extension makefile writer
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
@@ -1684,6 +1754,7 @@ lib/Archive/Tar/t/04_resolved_issues.t	Archive::Tar tests
 lib/Archive/Tar/t/05_iter.t	Archive::Tar tests
 lib/Archive/Tar/t/90_symlink.t	Archive::Tar tests
 lib/Archive/Tar/t/99_pod.t	Archive::Tar tests
+lib/Archive/Tar/t/src/header/signed.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/linktest/linktest_missing_dir.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/linktest/linktest_with_dir.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/long/b	Archive::Tar tests
@@ -1695,7 +1766,6 @@ lib/Archive/Tar/t/src/short/bar.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tbz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tgz.packed	Archive::Tar tests
 lib/assert.pl			assertion and panic with stack trace
-lib/attributes.pm		For "sub foo : attrlist"
 lib/autodie/exception.pm	Exception class for autodie
 lib/autodie/exception/system.pm	Exception class for autodying system()
 lib/autodie.pm			Functions suceed or die with lexical scope
@@ -1830,11 +1900,11 @@ lib/CPAN/Bundle.pm		helper package for CPAN.pm
 lib/CPAN/CacheMgr.pm		helper package for CPAN.pm
 lib/CPAN/Complete.pm		helper package for CPAN.pm
 lib/CPAN/Debug.pm		helper package for CPAN.pm
-lib/CPAN/DeferedCode.pm		helper package for CPAN.pm
 lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
 lib/CPAN/Distribution.pm	helper package for CPAN.pm
 lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
 lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
+lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
 lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
@@ -1876,7 +1946,6 @@ lib/CPANPLUS/Dist/Sample.pm	CPANPLUS
 lib/CPANPLUS/Error.pm	CPANPLUS
 lib/CPANPLUS/FAQ.pod	CPANPLUS
 lib/CPANPLUS/Hacking.pod	CPANPLUS
-lib/CPANPLUS/inc.pm	CPANPLUS
 lib/CPANPLUS/Internals/Constants.pm	CPANPLUS
 lib/CPANPLUS/Internals/Constants/Report.pm	CPANPLUS
 lib/CPANPLUS/Internals/Extract.pm	CPANPLUS
@@ -1905,7 +1974,6 @@ lib/CPANPLUS/Shell/Default/Plugins/Remote.pm	CPANPLUS
 lib/CPANPLUS/Shell/Default/Plugins/Source.pm	CPANPLUS
 lib/CPANPLUS/Shell/Default.pm	CPANPLUS
 lib/CPANPLUS/Shell.pm	CPANPLUS
-lib/CPANPLUS/t/00_CPANPLUS-Inc.t	CPANPLUS tests
 lib/CPANPLUS/t/00_CPANPLUS-Internals-Utils.t	CPANPLUS tests
 lib/CPANPLUS/t/01_CPANPLUS-Configure.t	CPANPLUS tests
 lib/CPANPLUS/t/02_CPANPLUS-Internals.t	CPANPLUS tests
@@ -2055,7 +2123,6 @@ lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_Darwin.pm	MakeMaker methods for Darwin
 lib/ExtUtils/MM_DOS.pm		MakeMaker methods for DOS
-lib/ExtUtils/MM_Haiku.pm	MakeMaker methods for Haiku
 lib/ExtUtils/MM_MacOS.pm	MakeMaker methods for MacOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
@@ -2122,7 +2189,7 @@ lib/ExtUtils/t/oneliner.t	See if MM can generate perl one-liners
 lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
-lib/ExtUtils/t/pm.t		See if Makemaker can handle PM
+lib/ExtUtils/t/pm.t		See if MakeMaker can handle PM
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
@@ -2613,25 +2680,6 @@ lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
 lib/Params/Check/t/01_Params-Check.t	Params::Check tests
-lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/Changes					Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/01_compile.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/02_basic.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/03_regression.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/04_scalar.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/11_meta_yml.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/12_plagger.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/13_perl_smith.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/14_yaml_org.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/15_multibyte.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/16_nullrefs.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/17_toolbar.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/multibyte.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/sample.yml				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/toolbar.yml				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/vanilla.yml				Parse::CPAN::Meta
 lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
 lib/parent/t/compile-time.t	tests for parent.pm
@@ -2645,6 +2693,26 @@ lib/parent/t/parent-classfromfile.t	tests for parent.pm
 lib/parent/t/parent-pmc.t	tests for parent.pm
 lib/parent/t/parent-returns-false.t	tests for parent.pm
 lib/parent/t/parent.t	tests for parent.pm
+lib/Parse/CPAN/Meta/Changes					Parse::CPAN::Meta
+lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/01_compile.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/02_basic.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/03_regression.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/04_scalar.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/11_meta_yml.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/12_plagger.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/13_perl_smith.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/14_yaml_org.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/15_multibyte.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/16_nullrefs.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/17_toolbar.t				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/multibyte.yml			Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/sample.yml				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/toolbar.yml				Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/utf_16_le_bom.yml			Parse::CPAN::Meta
+lib/Parse/CPAN/Meta/t/data/vanilla.yml				Parse::CPAN::Meta
 lib/perl5db.pl			Perl debugging routines
 lib/perl5db.t			Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
@@ -3069,6 +3137,7 @@ lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/dandv.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
 lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
@@ -3076,6 +3145,7 @@ lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
+lib/Text/TabsWrap/t/wrap_separator2.t	See if Text::Wrap::wrap works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
@@ -3468,7 +3538,6 @@ pod/perl593delta.pod		Perl changes in version 5.9.3
 pod/perl594delta.pod		Perl changes in version 5.9.4
 pod/perl595delta.pod		Perl changes in version 5.9.5
 pod/perlapio.pod		Perl internal IO abstraction interface
-pod/perlapi.pod			Perl API listing (autogenerated)
 pod/perlartistic.pod		Perl Artistic License
 pod/perlbook.pod		Perl book information
 pod/perlboot.pod		Perl OO tutorial for beginners
@@ -3507,7 +3576,6 @@ pod/perlgpl.pod			GNU General Public License
 pod/perlguts.pod		Perl internal functions for those doing extensions
 pod/perlhack.pod		Perl hackers guide
 pod/perlhist.pod		Perl history records
-pod/perlintern.pod		Perl internal functions (autogenerated)
 pod/perlintro.pod		Perl introduction for beginners
 pod/perliol.pod			C API for Perl's implementation of IO in Layers
 pod/perlipc.pod			Perl interprocess communication
@@ -3524,7 +3592,6 @@ pod/perlnumber.pod		Perl number semantics
 pod/perlobj.pod			Perl objects
 pod/perlopentut.pod		Perl open() tutorial
 pod/perlop.pod			Perl operators and precedence
-pod/perlothrtut.pod		Old Perl threads tutorial
 pod/perlpacktut.pod		Perl pack() and unpack() tutorial
 pod/perlperf.pod		Perl Performance and Optimization Techniques
 pod/perl.pod			Perl overview (this section)
@@ -3550,7 +3617,6 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
-pod/perltoc.pod			Perl documentation table of contents
 pod/perltodo.pod		Perl things to do
 pod/perltooc.pod		Perl OO tutorial, part 2
 pod/perltoot.pod		Perl OO tutorial, part 1
@@ -3561,6 +3627,7 @@ pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
+pod/perlvms.pod			Perl notes for VMS
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
@@ -3670,7 +3737,7 @@ README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
 README.uts			Perl notes for UTS
 README.vmesa			Perl notes for VM/ESA
-README.vms			Perl notes for VMS
+README.vms			Notes about installing the VMS port
 README.vos			Perl notes for Stratus VOS
 README.win32			Perl notes for Windows
 reentr.c			Reentrant interfaces
@@ -3814,6 +3881,7 @@ t/lib/autodie/autodie_test_module.pm	autodie - test helper
 t/lib/autodie/backcompat.t		autodie - More Fatal backcompat
 t/lib/autodie/basic_exceptions.t	autodie - Basic exception tests
 t/lib/autodie/binmode.t			autodie - Binmode testing
+t/lib/autodie/caller.t			autodie - Caller diagnostics
 t/lib/autodie/context_lexical.t		autodie - Context clobbering lexically
 t/lib/autodie/context.t			autodie - Context clobbering tests
 t/lib/autodie/crickey.t			autodie - Like an Australian
@@ -3831,6 +3899,7 @@ t/lib/autodie/lib/autodie/test/au/exception.pm	autodie - Australian helper
 t/lib/autodie/lib/autodie/test/au.pm		autodie - Austrlaian helper
 t/lib/autodie/lib/autodie/test/badname.pm	autodie - Bad exception class
 t/lib/autodie/lib/autodie/test/missing.pm	autodie - Missing exception class
+t/lib/autodie/lib/Caller_helper.pm	autodie - Caller helper
 t/lib/autodie/lib/lethal.pm		autodie - with a better name
 t/lib/autodie/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 t/lib/autodie/lib/pujHa/ghach.pm	autodie - Like a Klingon
@@ -3842,6 +3911,7 @@ t/lib/autodie/scope_leak.t		autodie - file scope leak tests
 t/lib/autodie/sysopen.t			autodie - sysopen tests
 t/lib/autodie/truncate.t		autodie - File truncation tests
 t/lib/autodie/unlink.t			autodie - Unlink system tests.
+t/lib/autodie/user-context.t		autodie - Context changes for usersubs
 t/lib/autodie/usersub.t			autodie - user subroutine tests
 t/lib/autodie/version.t			autodie - versioning tests
 t/lib/autodie/version_tag.t
@@ -3866,9 +3936,9 @@ t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
-t/lib/deprecate.t		Test deprecate.pm
 t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
 t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
+t/lib/deprecate.t		Test deprecate.pm
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Test::More test module
 t/lib/dprof/test1_t		Perl code profiler tests
@@ -3977,62 +4047,6 @@ t/lib/warnings/toke		Tests for toke.c for warnings.t
 t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
-t/Module_Pluggable/01use.t	Module::Pluggable tests
-t/Module_Pluggable/02alsoworks.t	Module::Pluggable tests
-t/Module_Pluggable/02works.t	Module::Pluggable tests
-t/Module_Pluggable/02works_taint.t	Module::Pluggable tests
-t/Module_Pluggable/03diffname.t	Module::Pluggable tests
-t/Module_Pluggable/04acmedir_single.t	Module::Pluggable tests
-t/Module_Pluggable/04acmedir.t	Module::Pluggable tests
-t/Module_Pluggable/04acmepath_single.t	Module::Pluggable tests
-t/Module_Pluggable/04acmepath.t	Module::Pluggable tests
-t/Module_Pluggable/05postpath.t	Module::Pluggable tests
-t/Module_Pluggable/06multipath.t	Module::Pluggable tests
-t/Module_Pluggable/07instantiate.t	Module::Pluggable tests
-t/Module_Pluggable/08nothing.t	Module::Pluggable tests
-t/Module_Pluggable/09require.t	Module::Pluggable tests
-t/Module_Pluggable/10innerpack_inner.t	Module::Pluggable tests
-t/Module_Pluggable/10innerpack_noinner.t	Module::Pluggable tests
-t/Module_Pluggable/10innerpack_override.t	Module::Pluggable tests
-t/Module_Pluggable/10innerpack_super.t		Module::Pluggable tests
-t/Module_Pluggable/10innerpack.t	Module::Pluggable tests
-t/Module_Pluggable/11usetwice.t	Module::Pluggable tests
-t/Module_Pluggable/12onlyarray.t	Module::Pluggable tests
-t/Module_Pluggable/12onlyregex.t	Module::Pluggable tests
-t/Module_Pluggable/12only.t	Module::Pluggable tests
-t/Module_Pluggable/13exceptarray.t	Module::Pluggable tests
-t/Module_Pluggable/13exceptregex.t	Module::Pluggable tests
-t/Module_Pluggable/13except.t	Module::Pluggable tests
-t/Module_Pluggable/14package.t	Module::Pluggable tests
-t/Module_Pluggable/15topicsafe.t	Module::Pluggable tests
-t/Module_Pluggable/16different_extension.t	Module::Pluggable tests
-t/Module_Pluggable/17devel_inner_package.t	Module::Pluggable tests
-t/Module_Pluggable/18skipped_package.t	Module::Pluggable tests
-t/Module_Pluggable/19can_ok_clobber.t	Module::Pluggable tests
-t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
-t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
-t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
-t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
-t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
-t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
-t/Module_Pluggable/lib/InnerTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyOtherTest/Plugin/Bar.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyOtherTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyOtherTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyOtherTest/Plugin/Quux.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyTest/Extend/Plugin/Bar.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/No/Middle.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/TA/C/A/I.pm	Module::Pluggable tests
 t/mro/basic_01_c3.t		mro tests
 t/mro/basic_01_dfs.t		mro tests
 t/mro/basic_02_c3.t		mro tests
@@ -4399,7 +4413,6 @@ vms/make_command.com		record MM[SK] command used to build Perl
 vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
 vms/myconfig.com		record local configuration info for bug report
-vms/perlvms.pod			VMS-specific additions to Perl documentation
 vms/sockadapt.c			glue for SockshShr socket support
 vms/sockadapt.h			glue for SockshShr socket support
 vms/test.com			DCL driver for regression tests
@@ -4500,4 +4513,3 @@ x2p/util.c			Utility routines
 x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
 XSUB.h				Include file for extension subroutines
-xsutils.c			Additional bundled package methods not in UNIVERSAL::

@@ -84,8 +84,14 @@ sub cpl {
         @return = grep /^\Q$word\E/, @CPAN::Complete::COMMANDS;
     } elsif ( $line !~ /^[\!abcdghimorutl]/ ) {
         @return = ();
-    } elsif ($line =~ /^(a|ls)\s/) {
+    } elsif ($line =~ /^a\s/) {
         @return = cplx('CPAN::Author',uc($word));
+    } elsif ($line =~ /^ls\s/) {
+        my($author,$rest) = $word =~ m|([^/]+)/?(.*)|;
+        @return = $rest ? () : map {"$_/"} cplx('CPAN::Author',uc($author||""));
+        if (0 && 1==@return) { # XXX too slow and even wrong when there is a * already
+            @return = grep /^\Q$word\E/, map {"$author/$_->[2]"} CPAN::Shell->expand("Author",$author)->ls("$rest*","2");
+        }
     } elsif ($line =~ /^b\s/) {
         CPAN::Shell->local_bundles;
         @return = cplx('CPAN::Bundle',$word);
@@ -119,7 +125,9 @@ sub cplx {
     if (CPAN::_sqlite_running()) {
         $CPAN::SQLite->search($class, "^\Q$word\E");
     }
-    sort grep /^\Q$word\E/, map { $_->id } $CPAN::META->all_objects($class);
+    my $method = "id";
+    $method = "pretty_id" if $class eq "CPAN::Distribution";
+    sort grep /^\Q$word\E/, map { $_->$method() } $CPAN::META->all_objects($class);
 }
 
 #-> sub CPAN::Complete::cpl_any ;

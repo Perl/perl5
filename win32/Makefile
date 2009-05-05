@@ -688,8 +688,7 @@ MICROCORE_SRC	=		\
 		..\toke.c	\
 		..\universal.c	\
 		..\utf8.c	\
-		..\util.c	\
-		..\xsutils.c
+		..\util.c
 
 EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
 
@@ -1091,7 +1090,6 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
-	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.aix      ..\pod\perlaix.pod
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.apollo   ..\pod\perlapollo.pod
@@ -1130,7 +1128,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.uts      ..\pod\perluts.pod
 	copy ..\README.vmesa    ..\pod\perlvmesa.pod
-	copy ..\README.vms      ..\pod\perlvms.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perl5110delta.pod ..\pod\perldelta.pod
@@ -1139,6 +1136,8 @@ utils: $(PERLEXE) $(X2P)
 	$(PERLEXE) lib_pm.PL
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
+	$(PERLEXE) ..\autodoc.pl ..
+	$(PERLEXE) ..\pod\buildtoc --build-toc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
@@ -1154,7 +1153,7 @@ distclean: realclean
 	-del /f $(EXTDIR)\DynaLoader\XSLoader.pm
 	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
 	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
-	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f $(LIBDIR)\.exists $(LIBDIR)\attributes.pm $(LIBDIR)\DynaLoader.pm
 	-del /f $(LIBDIR)\XSLoader.pm $(LIBDIR)\lib.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
@@ -1200,16 +1199,16 @@ distclean: realclean
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat podchecker \
-	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
-	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
-	    perldelta.pod perldgux.pod perldos.pod perlepoc.pod \
-	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
-	    perlirix.pod perljp.pod perlko.pod perllinux.pod \
-	    perlmachten.pod perlmacos.pod perlmacosx.pod perlmint.pod \
-	    perlmpeix.pod perlnetware.pod perlopenbsd.pod perlos2.pod \
-	    perlos390.pod perlos400.pod perlplan9.pod perlqnx.pod \
-	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltru64.pod \
-	    perltw.pod perluts.pod perlvmesa.pod perlvms.pod perlvms.pod \
+	    perlaix.pod perlamiga.pod perlapi.pod perlapollo.pod \
+	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
+	    perlcygwin.pod perldelta.pod perldgux.pod perldos.pod \
+	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
+	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
+	    perllinux.pod perlmachten.pod perlmacos.pod perlmacosx.pod \
+	    perlmint.pod perlmpeix.pod perlnetware.pod perlopenbsd.pod \
+	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
+	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \
+	    perltoc.pod perltru64.pod perltw.pod perluts.pod perlvmesa.pod \
 	    perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect

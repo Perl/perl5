@@ -2841,6 +2841,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	state_num = OP(scan);
 
       reenter_switch:
+
+	assert(PL_reglastparen == &rex->lastparen);
+	assert(PL_reglastcloseparen == &rex->lastcloseparen);
+	assert(PL_regoffs == rex->offs);
+
 	switch (state_num) {
 	case BOL:
 	    if (locinput == PL_bostr)
@@ -3889,9 +3894,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    regcpblow(ST.cp);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
-	    
+
+	    /* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
 	    PL_reglastparen = &rex->lastparen;
 	    PL_reglastcloseparen = &rex->lastcloseparen;
+	    /* also update PL_regoffs */
+	    PL_regoffs = rex->offs;
 	    
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
@@ -3907,6 +3915,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    SETREX(rex_sv,ST.prev_rex);
 	    rex = (struct regexp *)SvANY(rex_sv);
 	    rexi = RXi_GET(rex); 
+	    /* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
 	    PL_reglastparen = &rex->lastparen;
 	    PL_reglastcloseparen = &rex->lastcloseparen;
 
@@ -4469,8 +4478,11 @@ NULL
 	        cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
 	        goto fake_end;
 	        
-	    if ( ST.count < (ST.minmod ? ARG1(ST.me) : ARG2(ST.me)) )
-		goto curlym_do_A; /* try to match another A */
+	    {
+		I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
+		if ( max == REG_INFTY || ST.count < max )
+		    goto curlym_do_A; /* try to match another A */
+	    }
 	    goto curlym_do_B; /* try to match B */
 
 	case CURLYM_A_fail: /* just failed to match an A */
@@ -4909,6 +4921,11 @@ NULL
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
 		ReREFCNT_inc(rex_sv);
 		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
+
+		/* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
+		PL_reglastparen = &rex->lastparen;
+		PL_reglastcloseparen = &rex->lastcloseparen;
+
 		REGCP_SET(st->u.eval.lastcp);
 		PL_reginput = locinput;
 

@@ -13,7 +13,8 @@ my $IsSymbian = exists $ENV{SDK} && -d "$ENV{SDK}\\epoc32";
 my $IsMSWin32 = $^O eq 'MSWin32' && !$IsSymbian;
 
 unlink "Errno.pm" if -f "Errno.pm";
-open OUT, ">Errno.pm" or die "Cannot open Errno.pm: $!";
+unlink "Errno.tmp" if -f "Errno.tmp";
+open OUT, ">Errno.tmp" or die "Cannot open Errno.tmp: $!";
 select OUT;
 my $file;
 my @files = get_files();
@@ -39,6 +40,9 @@ else {
 }
 write_errno_pm();
 unlink "errno.c" if -f "errno.c";
+close OUT or die "Error closing Errno.tmp: $!";
+select STDOUT;
+rename "Errno.tmp", "Errno.pm" or die "Cannot rename Errno.tmp to Errno.pm: $!";
 
 sub process_file {
     my($file) = @_;

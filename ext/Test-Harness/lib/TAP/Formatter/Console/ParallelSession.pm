@@ -42,11 +42,11 @@ TAP::Formatter::Console::ParallelSession - Harness output delegate for parallel 
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
@@ -78,11 +78,11 @@ sub _clear_ruler {
 my $now = 0;
 my $start;
 
-my $trailer = '... )===';
+my $trailer     = '... )===';
 my $chop_length = WIDTH - length $trailer;
 
 sub _output_ruler {
-    my ($self, $refresh) = @_;
+    my ( $self, $refresh ) = @_;
     my $new_now = time;
     return if $new_now == $now and !$refresh;
     $now = $new_now;
@@ -94,23 +94,23 @@ sub _output_ruler {
 
     my $ruler = sprintf '===( %7d;%d  ', $context->{tests}, $now - $start;
 
-    foreach my $active ( @{$context->{active}} ) {
-	my $parser = $active->parser;
-	my $tests = $parser->tests_run;
-	my $planned = $parser->tests_planned || '?';
+    foreach my $active ( @{ $context->{active} } ) {
+        my $parser  = $active->parser;
+        my $tests   = $parser->tests_run;
+        my $planned = $parser->tests_planned || '?';
 
-	$ruler .= sprintf '%' . length ($planned) . "d/$planned  ", $tests;
+        $ruler .= sprintf '%' . length($planned) . "d/$planned  ", $tests;
     }
-    chop $ruler; # Remove a trailing space
+    chop $ruler;    # Remove a trailing space
     $ruler .= ')===';
 
     if ( length $ruler > WIDTH ) {
-	$ruler =~ s/(.{$chop_length}).*/$1$trailer/o;
+        $ruler =~ s/(.{$chop_length}).*/$1$trailer/o;
     }
     else {
-	$ruler .= '=' x ( WIDTH - length( $ruler ) );
+        $ruler .= '=' x ( WIDTH - length($ruler) );
     }
-    $formatter->_output( "\r$ruler");
+    $formatter->_output("\r$ruler");
 }
 
 =head3 C<result>
@@ -130,13 +130,14 @@ sub result {
         my $context = $shared{$formatter};
         $context->{tests}++;
 
-	my $active = $context->{active};
-	if ( @$active == 1 ) {
+        my $active = $context->{active};
+        if ( @$active == 1 ) {
+
             # There is only one test, so use the serial output format.
-            return $self->SUPER::result( $result );
+            return $self->SUPER::result($result);
         }
 
-	$self->_output_ruler( $self->parser->tests_run == 1 );
+        $self->_output_ruler( $self->parser->tests_run == 1 );
     }
     elsif ( $result->is_bailout ) {
         $formatter->_failure_output(
@@ -154,12 +155,12 @@ sub clear_for_close {
     my $self      = shift;
     my $formatter = $self->formatter;
     return if $formatter->really_quiet;
-    my $context   = $shared{$formatter};
+    my $context = $shared{$formatter};
     if ( @{ $context->{active} } == 1 ) {
-	$self->SUPER::clear_for_close;
+        $self->SUPER::clear_for_close;
     }
     else {
-	$self->_clear_ruler;
+        $self->_clear_ruler;
     }
 }
 
@@ -183,14 +184,16 @@ sub close_test {
     die "Can't find myself" unless @pos;
     splice @$active, $pos[0], 1;
 
-    if (@$active > 1) {
-        $self->_output_ruler( 1 );
+    if ( @$active > 1 ) {
+        $self->_output_ruler(1);
     }
-    elsif (@$active == 1) {
+    elsif ( @$active == 1 ) {
+
         # Print out "test/name.t ...."
         $active->[0]->SUPER::header;
     }
     else {
+
         # $self->formatter->_output("\n");
         delete $shared{$formatter};
     }

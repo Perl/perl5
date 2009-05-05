@@ -8,7 +8,7 @@ our @ISA = qw(Fatal);
 our $VERSION;
 
 BEGIN {
-    $VERSION = "1.998";
+    $VERSION = "1.999";
 }
 
 use constant ERROR_WRONG_FATAL => q{
@@ -306,6 +306,11 @@ See also L<Fatal/DIAGNOSTICS>.
 "Used only once" warnings can be generated when C<autodie> or C<Fatal>
 is used with package filehandles (eg, C<FILE>).  It's strongly recommended
 you use scalar filehandles instead.
+
+Under Perl 5.8 only, C<autodie> I<does not> propagate into string C<eval>
+statements, although it can be explicitly enabled inside a string
+C<eval>.  This bug does not affect block C<eval> statements in
+any version of Perl.
 
 When using C<autodie> or C<Fatal> with user subroutines, the
 declaration of those subroutines must appear before the first use of

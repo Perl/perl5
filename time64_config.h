@@ -15,10 +15,10 @@
 
 
 /* INT_64_T
-   A 64 bit integer type to use to store time and others.
+   A numeric type to store time and others. 
    Must be defined.
 */
-#define INT_64_T                Quad_t
+#define INT_64_T                NV
 
 
 /* USE_TM64
@@ -77,9 +77,9 @@
    can handle.  We will use your system functions if the time falls
    inside these ranges.
 */
-#define SYSTEM_LOCALTIME_MAX    CAT2(LOCALTIME_MAX,UL)
-#define SYSTEM_LOCALTIME_MIN    CAT2(LOCALTIME_MIN,UL)
-#define SYSTEM_GMTIME_MAX       CAT2(GMTIME_MAX,UL)
-#define SYSTEM_GMTIME_MIN       CAT2(GMTIME_MIN,UL)
+#define SYSTEM_LOCALTIME_MAX    CAT2(LOCALTIME_MAX,.0)
+#define SYSTEM_LOCALTIME_MIN    CAT2(LOCALTIME_MIN,.0)
+#define SYSTEM_GMTIME_MAX       CAT2(GMTIME_MAX,.0)
+#define SYSTEM_GMTIME_MIN       CAT2(GMTIME_MIN,.0)
 
 #endif /* TIME64_CONFIG_H */

@@ -8195,7 +8195,6 @@ my @pods = qw(
     os2
     os390
     os400
-    othrtut
     packtut
     plan9
     pod

@@ -604,6 +604,12 @@ for $entry on http://rt.cpan.org, and report your issue there.
 EOF
 
             $entry = '';
+	} elsif (my $bug_tracker = $Module::CoreList::bug_tracker{$entry}) {
+		paraprint <<"EOF";
+$entry included with core Perl is copied directly from the CPAN distribution.
+Please report bugs in $entry directly to its maintainers using $bug_tracker
+EOF
+            $entry = '';
         } elsif ($entry) {
 	        $category ||= 'library';
 	        $report_about_module = $entry;

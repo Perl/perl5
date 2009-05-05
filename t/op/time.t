@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 42;
+plan tests => 44;
 
 ($beguser,$begsys) = times;
 
@@ -81,8 +81,9 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 
 # Test gmtime over a range of times.
 {
-    # gm/localtime should go all the way from -2**63 to 2**63-1
-    # but floating point hacks mean it gets unreliable for large numbers.
+    # The range should be limited only by the 53-bit mantissa of an IEEE double (or 
+    # whatever kind of double you've got).  Here we just prove that we're comfortably 
+    # beyond the range possible with 32-bit time_t.
     my %tests = (
         # time_t         gmtime list                          scalar
         -2**35  => [52, 13, 20, 7, 2, -1019, 5, 65, 0, "Fri Mar  7 20:13:52 881"],
@@ -129,4 +130,18 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
           or diag("@time");
         like scalar localtime($time), $scalar,       "  scalar";
     }
+}
+
+# Test floating point args
+{
+    eval {
+        $SIG{__WARN__} = sub { die @_; };
+        localtime(1.23);
+    };
+    is($@, '', 'Ignore fractional time');
+    eval {
+        $SIG{__WARN__} = sub { die @_; };
+        gmtime(1.23);
+    };
+    is($@, '', 'Ignore fractional time');
 }

@@ -12,18 +12,14 @@ my %dodgy_files = (
     catfile(qw(EditorJunk Plugin .#Bar.pm)) => 'EditorJunk::Bar',
 );
 
-my $core = grep { $_ eq 'PERL_CORE=1' } @ARGV;
-my @path = $core ? (File::Spec->updir, File::Spec->updir, File::Spec->updir,
-                   "t", "Module_Pluggable") : ($FindBin::Bin,"t");
-
 my @files;
-if ($^O ne 'VMS' && $^O ne 'VOS') {
+unless (grep { lc($^O) eq $_ } qw(vms vos)) {
     foreach my $test (keys %dodgy_files) {
-        my ($file) = (catfile(@path, "lib", $test)=~/^(.*)$/);
-        if (open(my $fh, ">", $file)) {
+        my ($file) = (catfile($FindBin::Bin, "t", "lib", $test)=~/^(.*)$/);
+        if (open(FH, ">$file")) {
             my $name = $dodgy_files{$test};
-            print $fh "package $name;\nsub new {}\n1;";
-            close($fh);
+            print FH "package $name;\nsub new {}\n1;";
+            close(FH);
             push @files, $file;
         }
     }
@@ -43,7 +39,5 @@ WriteMakefile
           'INSTALLDIRS'  => ($] >= 5.008009) ? "perl" : "site",
           'PL_FILES'     => {},
           'realclean'    => {FILES=> join ' ', @files},
-          # In the core pods will be built by installman.
-          $core ? (MAN3PODS => {}) : (),
         )
 ;

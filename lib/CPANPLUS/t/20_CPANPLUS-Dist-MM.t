@@ -22,7 +22,6 @@ use File::Spec ();
 my $conf    = gimme_conf();
 my $cb      = CPANPLUS::Backend->new( $conf );
 my $File    = 'Bar.pm';
-my $Verbose = @ARGV ? 1 : 0;
 
 ### if we need sudo that's no guarantee we can actually run it
 ### so set $noperms if sudo is required, as that may mean tests
@@ -45,14 +44,13 @@ $cb->_callbacks->send_test_report( sub { 0 } );
 $conf->set_conf( cpantest => 0 );
 
 ### Redirect errors to file ###
-*STDERR                          = output_handle() unless $Verbose;
+*STDERR = output_handle() unless $conf->get_conf('verbose');
 
 ### dont uncomment this, it screws up where STDOUT goes and makes
 ### test::harness create test counter mismatches
 #*STDOUT                          = output_handle() unless @ARGV;
 ### for the same test-output counter mismatch, we disable verbose
 ### mode
-$conf->set_conf( verbose => $Verbose );
 $conf->set_conf( allow_build_interactivity => 0 );
 
 ### start with fresh sources ###

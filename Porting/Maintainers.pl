@@ -18,6 +18,7 @@ package Maintainers;
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
+	'bingos'	=> 'Chris Williams <chris@bingosnet.co.uk>',
 	'chorny'	=> "Alexandr Ciornii <alexchorny\100gmail.com>",
 	'corion'	=> 'Max Maischein <corion@corion.net>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
@@ -62,6 +63,7 @@ package Maintainers;
 	'pjf'		=> 'Paul Fenwick <pjf@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
+	'rafl'		=> 'Florian Ragwitz <flora@cpan.org>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
 	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
@@ -270,7 +272,7 @@ package Maintainers;
 
 	'CPANPLUS::Dist::Build' =>
 		{
-		'MAINTAINER'	=> 'kwilliams',
+		'MAINTAINER'	=> 'bingos',
 		'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm lib/CPANPLUS/Dist/Build],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'cpan',
@@ -281,15 +283,15 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[ext/Cwd lib/Cwd.pm],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Data::Dumper' =>
 		{
-		'MAINTAINER'	=> 'ilyam', # Not gsar.
+		'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam
 		'FILES'		=> q[ext/Data-Dumper],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'DB::File' =>
@@ -305,7 +307,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mhx',
 		'FILES'		=> q[ext/Devel-PPPort],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Digest' =>
@@ -456,7 +458,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> "cpan",
 		},
 
 	'File::Temp' =>
@@ -489,15 +491,17 @@ package Maintainers;
 		'MAINTAINER'	=> 'jv',
 		'FILES'		=> q[lib/Getopt/Long.pm lib/Getopt/Long],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
+	# Sean has donated it to us.
+	# Nothing has changed since his last CPAN release.
 	'I18N::LangTags' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'if' =>
@@ -511,7 +515,7 @@ package Maintainers;
 	'IO' =>
 		{
 		'MAINTAINER'	=> 'gbarr',
-		'FILES'		=> q[ext/IO],
+		'FILES'		=> q[ext/IO/],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -544,6 +548,14 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> 'cpan',
+		},
+
+	'IPC::SysV' =>
+		{
+		'MAINTAINER'	=> 'mhx',
+		'FILES'		=> q[ext/IPC-SysV],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'cpan',
 		},
@@ -727,7 +739,7 @@ package Maintainers;
 	'Module::Pluggable' =>
 		{
 		'MAINTAINER'	=> 'simonw',
-		'FILES'		=> q[ext/Module-Pluggable t/Module_Pluggable],
+		'FILES'		=> q[ext/Module-Pluggable],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -737,15 +749,15 @@ package Maintainers;
 		'MAINTAINER'	=> 'smpeters',
 		'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'blead',
 		},
 
 	'NEXT' =>
 		{
-		'MAINTAINER'	=> 'dconway',
+		'MAINTAINER'	=> 'rafl',
 		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'cpan',
 		},
 
 	'Object::Accessor' =>
@@ -1069,8 +1081,7 @@ package Maintainers;
 	'threads' =>
 		{
 		'MAINTAINER'	=> 'jdhedden',
-		'FILES'		=> q[ext/threads/hints ext/threads/t
-				     ext/threads/threads.{pm,xs}],
+		'FILES'		=> q[ext/threads],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'blead',
 		},
@@ -1129,7 +1140,7 @@ package Maintainers;
 		'FILES'		=> q[lib/Unicode/Collate.pm
 				     lib/Unicode/Collate],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'first-come',
 		},
 
 	'Unicode::Normalize' =>
@@ -1137,7 +1148,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'sadahiro',
 		'FILES'		=> q[ext/Unicode-Normalize],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
+		'UPSTREAM'	=> 'first-come',
 		},
 
 	'version' =>

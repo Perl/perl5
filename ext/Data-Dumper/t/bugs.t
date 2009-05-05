@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Data::Dumper;
 
 {
@@ -57,7 +57,22 @@ ok(1, "[perl #38612]"); # Still no core dump? We are fine.
     my $txt = $d->Dump();
     my $VAR1;
     eval $txt;
-    is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator');
+    is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator'); 
+}
+
+# [perl #64744] Data::Dumper each() bad interaction
+{
+    local $Data::Dumper::Useqq = 1;
+    my $a = {foo => 1, bar => 1};
+    each %$a;
+    $a = {x => $a};
+
+    my $d = Data::Dumper->new([$a]);
+    $d->Useqq(1);
+    my $txt = $d->Dump();
+    my $VAR1;
+    eval $txt;
+    is_deeply($VAR1, $a, '[perl #64744] Reset hash iterator'); 
 }
 
 # [perl #56766] Segfaults on bad syntax - fixed with version 2.121_17

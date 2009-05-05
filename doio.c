@@ -1395,7 +1395,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 {
     dVAR;
     PERL_ARGS_ASSERT_DO_AEXEC5;
-#if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
+#if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
@@ -1943,10 +1943,6 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
-#ifdef MACOS_TRADITIONAL
-    /* This is simply not correct for AppleShare, but fix it yerself. */
-    return TRUE;
-#else
     dVAR;
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
@@ -1971,7 +1967,6 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
 #else
     return FALSE;
 #endif
-#endif
 }
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -1981,7 +1976,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dVAR;
     const key_t key = (key_t)SvNVx(*++mark);
-    const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
+    SV *nsv = optype == OP_MSGGET ? NULL : *++mark;
     const I32 flags = SvIVx(*++mark);
 
     PERL_ARGS_ASSERT_DO_IPCGET;
@@ -1996,11 +1991,11 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMGET:
-	return semget(key, n, flags);
+	return semget(key, (int) SvIV(nsv), flags);
 #endif
 #ifdef HAS_SHM
     case OP_SHMGET:
-	return shmget(key, n, flags);
+	return shmget(key, (size_t) SvUV(nsv), flags);
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
@@ -2352,11 +2347,6 @@ Perl_vms_start_glob
     fp = Perl_vms_start_glob(aTHX_ tmpglob, io);
 
 #else /* !VMS */
-#ifdef MACOS_TRADITIONAL
-    sv_setpv(tmpcmd, "glob ");
-    sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, " |");
-#else
 #ifdef DOSISH
 #ifdef OS2
     sv_setpv(tmpcmd, "for a in ");
@@ -2388,7 +2378,6 @@ Perl_vms_start_glob
 #endif
 #endif /* !CSH */
 #endif /* !DOSISH */
-#endif /* MACOS_TRADITIONAL */
     (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
 		  FALSE, O_RDONLY, 0, NULL);
     fp = IoIFP(io);

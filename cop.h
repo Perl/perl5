@@ -232,11 +232,7 @@ struct cop {
 #define CopLINE_set(c,l)	(CopLINE(c) = (l))
 
 /* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
-#ifdef MACOS_TRADITIONAL
-#  define OutCopFILE(c) MacPerl_MPWFileName(CopFILE(c))
-#else
-#  define OutCopFILE(c) CopFILE(c)
-#endif
+#define OutCopFILE(c) CopFILE(c)
 
 /* If $[ is non-zero, it's stored in cop_hints under the key "$[", and
    HINT_ARYBASE is set to indicate this.
@@ -883,6 +879,7 @@ See L<perlcall/Lightweight Callbacks>.
  	multicall_oldcatch = CATCH_GET;					\
 	SAVETMPS; SAVEVPTR(PL_op);					\
 	CATCH_SET(TRUE);						\
+	PUSHSTACKi(PERLSI_SORT);					\
 	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
 	PUSHSUB(cx);							\
 	if (++CvDEPTH(cv) >= 2) {					\
@@ -906,8 +903,10 @@ See L<perlcall/Lightweight Callbacks>.
 	LEAVESUB(multicall_cv);						\
 	CvDEPTH(multicall_cv)--;					\
 	POPBLOCK(cx,PL_curpm);						\
+	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\
+	SPAGAIN;							\
     } STMT_END
 
 /*

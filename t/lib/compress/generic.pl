@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 670 + $extra) ;
+    plan(tests => 666 + $extra) ;
 }
 
 sub myGZreadFile
@@ -57,13 +57,6 @@ sub run
         like $@, mkEvalErr("^$CompressClass: output buffer is read-only") ;
             
         my($out, $gz);
-        $out = "" ;
-        eval qq[\$a = new $CompressClass ] . '$out ;' ;
-        like $@, mkEvalErr("^$CompressClass: output filename is undef or null string");
-            
-        $out = undef ;
-        eval qq[\$a = new $CompressClass \$out ;] ;
-        like $@, mkEvalErr("^$CompressClass: output filename is undef or null string");
             
         my $x ;
         $gz = new $CompressClass(\$x); 
@@ -76,7 +69,6 @@ sub run
 
         eval ' $gz->write({})' ;
         like $@, mkEvalErr("^${CompressClass}::write: not a scalar reference");
-        #like $@, mkEvalErr("^${CompressClass}::write: input parameter not a filename, filehandle, array ref or scalar ref");
 
         eval ' $gz->syswrite("abc", 1, 5)' ;
         like $@, mkEvalErr("^${CompressClass}::write: offset outside string");
@@ -90,18 +82,13 @@ sub run
         title "Testing $UncompressClass Errors";
 
         my $out = "" ;
-        eval qq[\$a = new $UncompressClass \$out ;] ;
-        like $@, mkEvalErr("^$UncompressClass: input filename is undef or null string");
-        $out = undef ;
-        eval qq[\$a = new $UncompressClass \$out ;] ;
-        like $@, mkEvalErr("^$UncompressClass: input filename is undef or null string");
 
         my $lex = new LexFile my $name ;
 
         ok ! -e $name, "  $name does not exist";
         
-        eval qq[\$a = new $UncompressClass "$name" ;] ;
-        is $$UnError, "input file '$name' does not exist";
+        $a = new $UncompressClass "$name" ;
+        is $a, undef;
 
         my $gc ;
         my $guz = new $CompressClass(\$gc); 

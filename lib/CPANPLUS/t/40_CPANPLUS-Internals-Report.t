@@ -25,9 +25,12 @@ my $CB          = CPANPLUS::Backend->new( $conf );
 my $ModName     = TEST_CONF_MODULE;
 my $ModPrereq   = TEST_CONF_PREREQ;
 
-### divide by many -- possibly ~0 is unsigned, and we cause an overflow,
-### as happens to version.pm 0.7203 among others.
-my $HighVersion = ~0/1000;
+### pick a high number, but not ~0 as possibly ~0 is unsigned, and we cause 
+### an overflow, as happens to version.pm 0.7203 among others.
+### ANOTHER bug in version.pm, this time for 64bit:
+### https://rt.cpan.org/Ticket/Display.html?id=45241
+### so just use a 'big number'(tm) and go from there.
+my $HighVersion = 1234567890;
 my $Mod         = $CB->module_tree($ModName);
 my $int_ver     = $CPANPLUS::Internals::VERSION;
 

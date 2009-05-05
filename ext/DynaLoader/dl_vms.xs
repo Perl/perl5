@@ -99,20 +99,10 @@ copy_errmsg(msg,unused)
     dTHX;
     dMY_CXT;
     if (*(msg->dsc$a_pointer) == '%') { /* first line */
-      if (dl_last_error)
-        strncpy((dl_last_error = saferealloc(dl_last_error,msg->dsc$w_length+1)),
-                 msg->dsc$a_pointer, msg->dsc$w_length);
-      else
-        strncpy((dl_last_error = safemalloc(msg->dsc$w_length+1)),
-                 msg->dsc$a_pointer, msg->dsc$w_length);
-      dl_last_error[msg->dsc$w_length] = '\0';
+        sv_setpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
     }
     else { /* continuation line */
-      int errlen = strlen(dl_last_error);
-      dl_last_error = saferealloc(dl_last_error, errlen + msg->dsc$w_length + 2);
-      dl_last_error[errlen] = '\n';  dl_last_error[errlen+1] = '\0';
-      strncat(dl_last_error, msg->dsc$a_pointer, msg->dsc$w_length);
-      dl_last_error[errlen+msg->dsc$w_length+1] = '\0';
+        sv_catpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
     }
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "Saved error message: %s\n", dl_last_error));
     return 0;
@@ -153,7 +143,7 @@ dl_private_init(pTHX)
     dl_generic_private_init(aTHX);
     {
 	dMY_CXT;
-	dl_require_symbols = get_av("DynaLoader::dl_require_symbols", 0x4);
+	dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
 	/* Set up the static control blocks for dl_expand_filespec() */
 	dl_fab = cc$rms_fab;
 	dl_nam = cc$rms_nam;
@@ -367,5 +357,21 @@ dl_error()
     RETVAL = dl_last_error ;
     OUTPUT:
       RETVAL
+
+#if defined(USE_ITHREADS)
+
+void
+CLONE(...)
+    CODE:
+    MY_CXT_CLONE;
+
+    /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
+     * using Perl variables that belong to another thread, we create our 
+     * own for this thread.
+     */
+    MY_CXT.x_dl_last_error = newSVpvn("", 0);
+    dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
+
+#endif
 
 # end.

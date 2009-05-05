@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -606,6 +606,23 @@ $= = 10;
 }
 select $oldfh;
 close STDOUT_DUP;
+
+fresh_perl_like(<<'EOP', qr/^Format STDOUT redefined at/, {stderr => 1}, '#64562 - Segmentation fault with redefined formats and warnings');
+#!./perl
+
+use strict;
+use warnings; # crashes!
+
+format =
+.
+
+write;
+
+format =
+.
+
+write;
+EOP
 
 #############################
 ## Section 4

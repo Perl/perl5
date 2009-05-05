@@ -166,7 +166,6 @@ unless (@ARGV) {
 	warn "$0: cannot open $mani: $!\n";
     }
     unless ($::core) {
-	_find_tests('Module_Pluggable');
 	_find_tests('pod');
 	_find_tests('x2p');
 	_find_tests('japh') if $::torture;
@@ -339,6 +338,14 @@ EOT
 	my %todo;
 	while (<RESULTS>) {
 	    next if /^\s*$/; # skip blank lines
+	    if (/^1..$/ && ($^O eq 'VMS')) {
+		# VMS pipe bug inserts blank lines.
+		my $l2 = <RESULTS>;
+		if ($l2 =~ /^\s*$/) {
+		    $l2 = <RESULTS>;
+		}
+		$_ = '1..' . $l2;
+	    }
 	    if ($::verbose) {
 		print $_;
 	    }

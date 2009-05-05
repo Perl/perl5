@@ -42,7 +42,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.86_06";
+$VERSION = "0.8601";
 
 =pod
 
@@ -422,13 +422,16 @@ sub _add_to_includepath {
 
     check( $tmpl, \%hash ) or return;
 
+    my $s = $Config{'path_sep'};
+    
+    ### only add if it's not added yet
     for my $lib (@$dirs) {
         push @INC, $lib unless grep { $_ eq $lib } @INC;
-    }
-
-    {   local $^W;  ### it will be complaining if $ENV{PERL5LIB]
-                    ### is not defined (yet).
-        $ENV{'PERL5LIB'} .= join '', map { $Config{'path_sep'} . $_ } @$dirs;
+        #
+        ### it will be complaining if $ENV{PERL5LIB] is not defined (yet).   
+        local $^W;  
+        $ENV{'PERL5LIB'} .= $s . $lib 
+            unless $ENV{'PERL5LIB'} =~ qr|\Q$s$lib\E|;
     }
 
     return 1;

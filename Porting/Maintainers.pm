@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(%Modules %Maintainers
 		get_module_files get_module_pat
-		show_results process_options);
+		show_results process_options files_to_modules);
 $VERSION = 0.02;
 require Exporter;
 
@@ -135,6 +135,71 @@ sub process_options {
     return ($Maintainer, $Module, $Files, @Files);
 }
 
+sub files_to_modules {
+    my @Files = @_;
+    my %ModuleByFile;
+
+    for (@Files) { s:^\./:: }
+
+    @ModuleByFile{@Files} = ();
+
+    # First try fast match.
+
+    my %ModuleByPat;
+    for my $module (keys %Modules) {
+	for my $pat (get_module_pat($module)) {
+	    $ModuleByPat{$pat} = $module;
+	}
+    }
+    # Expand any globs.
+    my %ExpModuleByPat;
+    for my $pat (keys %ModuleByPat) {
+	if (-e $pat) {
+	    $ExpModuleByPat{$pat} = $ModuleByPat{$pat};
+	} else {
+	    for my $exp (glob($pat)) {
+		$ExpModuleByPat{$exp} = $ModuleByPat{$pat};
+	    }
+	}
+    }
+    %ModuleByPat = %ExpModuleByPat;
+    for my $file (@Files) {
+	$ModuleByFile{$file} = $ModuleByPat{$file}
+	    if exists $ModuleByPat{$file};
+    }
+
+    # If still unresolved files...
+    if (my @ToDo = grep { !defined $ModuleByFile{$_} } keys %ModuleByFile) {
+
+	# Cannot match what isn't there.
+	@ToDo = grep { -e $_ } @ToDo;
+
+	if (@ToDo) {
+	    # Try prefix matching.
+
+	    # Remove trailing slashes.
+	    for (@ToDo) { s|/$|| }
+
+	    my %ToDo;
+	    @ToDo{@ToDo} = ();
+
+	    for my $pat (keys %ModuleByPat) {
+		last unless keys %ToDo;
+		if (-d $pat) {
+		    my @Done;
+		    for my $file (keys %ToDo) {
+			if ($file =~ m|^$pat|i) {
+			    $ModuleByFile{$file} = $ModuleByPat{$pat};
+			    push @Done, $file;
+			}
+		    }
+		    delete @ToDo{@Done};
+		}
+	    }
+	}
+    }
+    \%ModuleByFile;
+}
 sub show_results {
     my ($Maintainer, $Module, $Files, @Files) = @_;
 
@@ -179,72 +244,11 @@ sub show_results {
 	    duplicated_maintainers();
 	}
     } elsif (@Files) {
-	my %ModuleByFile;
-
-	for (@Files) { s:^\./:: }
-
-	@ModuleByFile{@Files} = ();
-
-	# First try fast match.
-
-	my %ModuleByPat;
-	for my $module (keys %Modules) {
-	    for my $pat (get_module_pat($module)) {
-		$ModuleByPat{$pat} = $module;
-	    }
-	}
-	# Expand any globs.
-	my %ExpModuleByPat;
-	for my $pat (keys %ModuleByPat) {
-	    if (-e $pat) {
-		$ExpModuleByPat{$pat} = $ModuleByPat{$pat};
-	    } else {
-		for my $exp (glob($pat)) {
-		    $ExpModuleByPat{$exp} = $ModuleByPat{$pat};
-		}
-	    }
-	}
-	%ModuleByPat = %ExpModuleByPat;
+	my $ModuleByFile = files_to_modules(@Files);
 	for my $file (@Files) {
-	    $ModuleByFile{$file} = $ModuleByPat{$file}
-	        if exists $ModuleByPat{$file};
-	}
-
-	# If still unresolved files...
-	if (my @ToDo = grep { !defined $ModuleByFile{$_} } keys %ModuleByFile) {
-
-	    # Cannot match what isn't there.
-	    @ToDo = grep { -e $_ } @ToDo;
-
-	    if (@ToDo) {
-		# Try prefix matching.
-
-		# Remove trailing slashes.
-		for (@ToDo) { s|/$|| }
-
-		my %ToDo;
-		@ToDo{@ToDo} = ();
-
-		for my $pat (keys %ModuleByPat) {
-		    last unless keys %ToDo;
-		    if (-d $pat) {
-			my @Done;
-			for my $file (keys %ToDo) {
-			    if ($file =~ m|^$pat|i) {
-				$ModuleByFile{$file} = $ModuleByPat{$pat};
-				push @Done, $file;
-			    }
-			}
-			delete @ToDo{@Done};
-		    }
-		}
-	    }
-	}
-
-	for my $file (@Files) {
-	    if (defined $ModuleByFile{$file}) {
-		my $module     = $ModuleByFile{$file};
-		my $maintainer = $Modules{$ModuleByFile{$file}}{MAINTAINER};
+	    if (defined $ModuleByFile->{$file}) {
+		my $module     = $ModuleByFile->{$file};
+		my $maintainer = $Modules{$ModuleByFile->{$file}}{MAINTAINER};
 		my $upstream   = $Modules{$module}{UPSTREAM}||'unknown';
 		printf "%-15s [%-7s] $module $maintainer $Maintainers{$maintainer}\n", $file, $upstream;
 	    } else {

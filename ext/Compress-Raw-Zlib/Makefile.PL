@@ -77,24 +77,11 @@ WriteMakefile(
                     },
 
     (
-      $ENV{SKIP_FOR_CORE}
-        ? (MAN3PODS    => {})
-        : ()
-    ),
-       
-    (
       $BUILD_ZLIB
         ? zlib_files($ZLIB_LIB)
         : (LIBS => [ "-L$ZLIB_LIB -lz " ])
     ),
       
-    (
-      $] >= 5.005
-        ? (ABSTRACT_FROM => 'lib/Compress/Raw/Zlib.pm',
-            AUTHOR       => 'Paul Marquess <pmqs@cpan.org>')
-        : ()
-    ),
-
     INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
 
     ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?

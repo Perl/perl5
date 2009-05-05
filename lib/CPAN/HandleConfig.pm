@@ -524,6 +524,7 @@ sub load {
     use Carp;
     require_myconfig_or_config;
     my @miss = $self->missing_config_data;
+    CPAN->debug("doit[$doit]loading[$loading]miss[@miss]") if $CPAN::DEBUG;
     return unless $doit || @miss;
     return if $loading;
     $loading++;

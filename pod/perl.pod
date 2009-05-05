@@ -13,7 +13,7 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-S> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
-	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
+	S<[ [B<-e>|B<-E>] I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
 If you're new to Perl, you should start with L<perlintro>, which is a 
 general intro for beginners and provides some background to help you
@@ -91,7 +91,6 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnumber		Perl number semantics
 
     perlthrtut		Perl threads tutorial
-      perlothrtut	Old Perl threads tutorial
 
     perlport		Perl portability guide
     perllocale		Perl locale support

@@ -533,4 +533,9 @@ EOF
 	;;
     esac
 
+# remove libbsd.a from wanted libraries
+libswanted=`echo " $libswanted " | sed -e 's/ bsd / /'`
+libswanted=`echo " $libswanted " | sed -e 's/ BSD / /'`
+d_flock='undef'
+
 # EOF

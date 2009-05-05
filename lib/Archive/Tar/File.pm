@@ -492,7 +492,14 @@ sub validate {
 
     ### don't know why this one is different from the one we /write/ ###
     substr ($raw, 148, 8) = "        ";
-	return unpack ("%16C*", $raw) == $self->chksum ? 1 : 0;
+
+    ### bug #43513: [PATCH] Accept wrong checksums from SunOS and HP-UX tar
+    ### like GNU tar does. See here for details:
+    ### http://www.gnu.org/software/tar/manual/tar.html#SEC139
+    ### so we do both a signed AND unsigned validate. if one succeeds, that's
+    ### good enough
+	return (   (unpack ("%16C*", $raw) == $self->chksum)
+	        or (unpack ("%16c*", $raw) == $self->chksum)) ? 1 : 0;
 }
 
 =head2 $bool = $file->has_content

@@ -196,7 +196,7 @@ been deleted):
     %
 
 You can safely ignore the line about "prototyping behavior" - it is
-explained in the section "The PROTOTYPES: Keyword" in L<perlxs>.
+explained in L<perlxs/"The PROTOTYPES: Keyword">.
 
 If you are on a Win32 system, and the build process fails with linker
 errors for functions in the C library, check if your Perl is configured
@@ -428,7 +428,7 @@ line starts with optional whitespace, and may have an optional terminating
 semicolon.
 
 The list of output parameters occurs at the very end of the function, just
-before after the OUTPUT: directive.  The use of RETVAL tells Perl that you
+after the OUTPUT: directive.  The use of RETVAL tells Perl that you
 wish to send this value back as the return value of the XSUB function.  In
 Example 3, we wanted the "return value" placed in the original variable
 which we passed in, so we listed it (and not RETVAL) in the OUTPUT: section.

@@ -214,7 +214,12 @@ sub has_valid_subkeys {
 
 sub _pattern {
     my $re = shift;
-    return eval sprintf 'qr{%s}', $re;
+    my $p = eval sprintf 'qr{%s}', $re;
+    if ($@) {
+        $@ =~ s/\n$//;
+        die "Error in Distroprefs pattern qr{$re}\n$@";
+    }
+    return $p;
 }
 
 sub _match_scalar {
@@ -321,7 +326,7 @@ CPAN::Distroprefs -- read and match distroprefs
 
         die $result->as_string if $result->is_fatal;
 
-        warn $result->as_string, next if $result->is_warning;
+        warn($result->as_string), next if $result->is_warning;
 
         for my $pref (@{ $result->prefs }) {
             if ($pref->matches(\%info)) {

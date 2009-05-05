@@ -149,6 +149,45 @@ use_ok( $FileClass );
         ### and clean up
         unless( $NO_UNLINK ) { 1 while unlink $out_file };
     }    
-    
-
 }
+
+### bug #43513: [PATCH] Accept wrong checksums from SunOS and HP-UX tar
+### like GNU tar does. See here for details:
+### http://www.gnu.org/software/tar/manual/tar.html#SEC139
+{   ok( 1,                      "Testing bug 43513" );
+    
+    my $src = File::Spec->catfile( qw[src header signed.tar] );
+    my $tar = $Class->new;
+    
+    isa_ok( $tar, $Class,       "   Object" );
+    ok( $tar->read( $src ),     "   Read non-Posix file with signed Checksum" );
+        
+    for my $file ( $tar->get_files ) {
+        ok( $file,              "       File object retrieved" );
+        ok( $file->validate,    "           File validates" );
+    }        
+}
+
+### return error properly on corrupted archives
+### Addresses RT #44680: Improve error reporting on short corrupted archives
+{   ok( 1,                      "Testing bug 44680" );
+
+    {   ### XXX whitebox test -- resetting the error string
+        no warnings 'once'; 
+        $Archive::Tar::error = "";
+    }
+
+    my $src = File::Spec->catfile( qw[src short b] );
+    my $tar = $Class->new;
+    
+    isa_ok( $tar, $Class,       "   Object" );
+    
+    
+    ### we quell the error on STDERR
+    local $Archive::Tar::WARN = 0;
+
+    ok( !$tar->read( $src ),    "   No files in the corrupted archive" );
+    like( $tar->error, qr/enough bytes/,
+                                "       Expected error reported" );
+}
+

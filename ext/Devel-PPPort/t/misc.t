@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (38) {
+  if (39) {
     load();
-    plan(tests => 38);
+    plan(tests => 39);
   }
 }
 
@@ -122,4 +122,6 @@ ok(Devel::PPPort::SVf(42), $] >= 5.004 ? '[42]' : '42');
 ok(Devel::PPPort::SVf('abc'), $] >= 5.004 ? '[abc]' : 'abc');
 
 ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
+
+ok(&Devel::PPPort::ptrtests(), 63);
 

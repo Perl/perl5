@@ -291,7 +291,8 @@ EOM
 	    my $libd = VMS::Filespec::vmspath($lib_dir);
 	    push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
 	} else {
-	    push @args, 'INSTALLDIRS=perl', 'INSTALLMAN3DIR=none';
+	    push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
+		'INSTALLMAN3DIR=none';
 	}
 	push @args, @$pass_through;
 	_quote_args(\@args) if $is_VMS;

@@ -153,7 +153,7 @@ typedef
 /*---------------------------------------------*/
 static BitStream* bsOpenReadStream ( FILE* stream )
 {
-   BitStream *bs = malloc ( sizeof(BitStream) );
+   BitStream *bs = (BitStream*) malloc ( sizeof(BitStream) );
    if (bs == NULL) mallocFail ( sizeof(BitStream) );
    bs->handle = stream;
    bs->buffer = 0;
@@ -166,7 +166,7 @@ static BitStream* bsOpenReadStream ( FILE* stream )
 /*---------------------------------------------*/
 static BitStream* bsOpenWriteStream ( FILE* stream )
 {
-   BitStream *bs = malloc ( sizeof(BitStream) );
+   BitStream *bs = (BitStream*) malloc ( sizeof(BitStream) );
    if (bs == NULL) mallocFail ( sizeof(BitStream) );
    bs->handle = stream;
    bs->buffer = 0;

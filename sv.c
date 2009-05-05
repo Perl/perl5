@@ -157,7 +157,7 @@ Public API:
 
 =cut
 
-============================================================================ */
+ * ========================================================================= */
 
 /*
  * "A time to plant, and a time to uproot what was planted..."
@@ -3621,12 +3621,6 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
-#ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ "%s", PL_no_modify);
-    }
-#endif
-
     if(GvGP(MUTABLE_GV(sstr))) {
         /* If source has method cache entry, clear it */
         if(GvCVGEN(sstr)) {
@@ -3679,12 +3673,6 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     const U32 stype = SvTYPE(sref);
 
     PERL_ARGS_ASSERT_GLOB_ASSIGN_REF;
-
-#ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ "%s", PL_no_modify);
-    }
-#endif
 
     if (intro) {
 	GvINTRO_off(dstr);	/* one-shot flag */
@@ -4074,7 +4062,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV))
+		     && SvTYPE(sstr) >= SVt_PVIV && SvTYPE(sstr) != SVt_PVFM))
 		: 1)
 #endif
             ) {
@@ -4097,12 +4085,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
             }
 #ifdef PERL_OLD_COPY_ON_WRITE
             if (!isSwipe) {
-                /* I believe I should acquire a global SV mutex if
-                   it's a COW sv (not a shared hash key) to stop
-                   it going un copy-on-write.
-                   If the source SV has gone un copy on write between up there
-                   and down here, then (assert() that) it is of the correct
-                   form to make it copy on write again */
                 if ((sflags & (SVf_FAKE | SVf_READONLY))
                     != (SVf_FAKE | SVf_READONLY)) {
                     SvREADONLY_on(sstr);
@@ -4145,7 +4127,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
                 SvCUR_set(dstr, cur);
                 SvREADONLY_on(dstr);
                 SvFAKE_on(dstr);
-                /* Relesase a global SV mutex.  */
             }
             else
                 {	/* Passes the swipe test.  */
@@ -4549,7 +4530,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
-        /* At this point I believe I should acquire a global SV mutex.  */
 	if (SvFAKE(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
@@ -4590,7 +4570,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	}
 	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ "%s", PL_no_modify);
-        /* At this point I believe that I can drop the global SV mutex.  */
     }
 #else
     if (SvREADONLY(sv)) {
@@ -5656,6 +5635,9 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor
+			/* A constant subroutine can have no side effects, so
+			   don't bother calling it.  */
+			&& !CvCONST(destructor)
 			/* Don't bother calling an empty destructor */
 			&& (CvISXSUB(destructor)
 			|| CvSTART(destructor)->op_next->op_type != OP_LEAVESUB))
@@ -5796,8 +5778,6 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	else if (SvPVX_const(sv)) {
             if (SvIsCOW(sv)) {
-                /* I believe I need to grab the global SV mutex here and
-                   then recheck the COW status.  */
                 if (DEBUG_C_TEST) {
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
                     sv_dump(sv);
@@ -5808,7 +5788,6 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		}
 
-                /* And drop it here.  */
                 SvFAKE_off(sv);
             } else if (SvLEN(sv)) {
                 Safefree(SvPVX_const(sv));
@@ -9691,12 +9670,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    if (args) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
-#ifdef MACOS_TRADITIONAL
-		  /* On MacOS, %#s format is used for Pascal strings */
-		  if (alt)
-		    elen = *eptr++;
-		  else
-#endif
 		    elen = strlen(eptr);
 		else {
 		    eptr = (char *)nullstr;
@@ -10317,7 +10290,7 @@ ptr_table_* functions.
 
 =cut
 
-============================================================================*/
+ * =========================================================================*/
 
 
 #if defined(USE_ITHREADS)
@@ -10522,7 +10495,8 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
     ptr_table_store(PL_ptr_table, gp, ret);
 
     /* clone */
-    ret->gp_refcnt	= 0;			/* must be before any other dups! */
+    /* ret->gp_refcnt must be 0 before any other dups are called. We're relying
+       on Newxz() to do this for us.  */
     ret->gp_sv		= sv_dup_inc(gp->gp_sv, param);
     ret->gp_io		= io_dup_inc(gp->gp_io, param);
     ret->gp_form	= cv_dup_inc(gp->gp_form, param);
@@ -10906,9 +10880,6 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		break;
 
 	    case SVt_PVGV:
-		if (GvUNIQUE((const GV *)sstr)) {
-		    NOOP;   /* Do sharing here, and fall through */
-		}
 	    case SVt_PVIO:
 	    case SVt_PVFM:
 	    case SVt_PVHV:
@@ -10984,8 +10955,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 	    case SVt_PVGV:
 		if(isGV_with_GP(sstr)) {
-		    if (GvNAME_HEK(dstr))
-			GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
+		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
 		    /* Don't call sv_add_backref here as it's going to be
 		       created as part of the magic cloning of the symbol
 		       table.  */
@@ -11083,7 +11053,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			SvFLAGS(dstr) |= SVf_OOK;
 
 			hvname = saux->xhv_name;
-			daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+			daux->xhv_name = hek_dup(hvname, param);
 
 			daux->xhv_riter = saux->xhv_riter;
 			daux->xhv_eiter = saux->xhv_eiter
@@ -11120,8 +11090,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));
 		OP_REFCNT_UNLOCK;
 		if (CvCONST(dstr) && CvISXSUB(dstr)) {
-		    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(dstr)) ?
-			SvREFCNT_inc(CvXSUBANY(dstr).any_ptr) :
+		    CvXSUBANY(dstr).any_ptr =
 			sv_dup_inc((const SV *)CvXSUBANY(dstr).any_ptr, param);
 		}
 		/* don't dup if copying back - CvGV isn't refcounted, so the

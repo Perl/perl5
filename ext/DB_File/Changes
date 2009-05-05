@@ -1,5 +1,9 @@
 
 
+1.820 28 March 2009
+
+   * remove MAN3PODS from Makefile.PL to match core.
+
 1.819 18 February 2009
 
    * t/db-recno.t fails if run in a path that contains spaces

@@ -1278,8 +1278,6 @@ Apr	|void	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NU
 #endif
 : Used in perly.y
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs
-: Only used in perl.c
-p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
 ApR	|PERL_CONTEXT*|cx_dup	|NULLOK PERL_CONTEXT* cx|I32 ix|I32 max|NN CLONE_PARAMS* param
 ApR	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
@@ -1866,7 +1864,7 @@ Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 Ap	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_OLD_COPY_ON_WRITE
 : Used in pp_hot.c and regexec.c
-pMXE	|SV*	|sv_setsv_cow	|NN SV* dstr|NN SV* sstr
+pMXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 #endif
 
 Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode

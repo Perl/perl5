@@ -12,7 +12,10 @@ use TAP::Parser::YAMLish::Reader ();
 use TAP::Parser::YAMLish::Writer ();
 use TAP::Base;
 
-@ISA = qw( TAP::Base );
+BEGIN {
+    @ISA = qw( TAP::Base );
+    __PACKAGE__->mk_methods('result_class');
+}
 
 use constant IS_WIN32 => ( $^O =~ /^(MS)?Win32$/ );
 use constant NEED_GLOB => IS_WIN32;
@@ -23,11 +26,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
@@ -48,6 +51,24 @@ and the operations that may be performed on it.
 
 =head3 C<new>
 
+Accepts a hashref with the following key/value pairs:
+
+=over 4
+
+=item * C<store>
+
+The filename of the data store holding the data that App::Prove::State reads.
+
+=item * C<extension> (optional)
+
+The test name extension.  Defaults to C<.t>.
+
+=item * C<result_class> (optional)
+
+The name of the C<result_class>.  Defaults to C<App::Prove::State::Result>.
+
+=back
+
 =cut
 
 # override TAP::Base::new:
@@ -56,17 +77,19 @@ sub new {
     my %args = %{ shift || {} };
 
     my $self = bless {
-        _ => $class->result_class->new(
-            {   tests      => {},
-                generation => 1,
-            }
-        ),
         select    => [],
         seq       => 1,
         store     => delete $args{store},
-        extension => delete $args{extension} || '.t',
+        extension => ( delete $args{extension} || '.t' ),
+        result_class =>
+          ( delete $args{result_class} || 'App::Prove::State::Result' ),
     }, $class;
 
+    $self->{_} = $self->result_class->new(
+        {   tests      => {},
+            generation => 1,
+        }
+    );
     my $store = $self->{store};
     $self->load($store)
       if defined $store && -f $store;
@@ -76,15 +99,11 @@ sub new {
 
 =head2 C<result_class>
 
-Returns the name of the class used for tracking test results.  This class
-should either subclass from C<App::Prove::State::Result> or provide an
+Getter/setter for the name of the class used for tracking test results.  This
+class should either subclass from C<App::Prove::State::Result> or provide an
 identical interface.
 
 =cut
-
-sub result_class {
-    return 'App::Prove::State::Result';
-}
 
 =head2 C<extension>
 
@@ -107,7 +126,7 @@ Get the results of the last test run.  Returns a C<result_class()> instance.
 
 sub results {
     my $self = shift;
-    $self->{_} || $self->result_class->new 
+    $self->{_} || $self->result_class->new;
 }
 
 =head2 C<commit>
@@ -118,8 +137,8 @@ Save the test results. Should be called after all tests have run.
 
 sub commit {
     my $self = shift;
-    if ( $self->{should_save} && defined( my $store = $self->{store} ) ) {
-        $self->save($store);
+    if ( $self->{should_save} ) {
+        $self->save;
     }
 }
 
@@ -373,15 +392,6 @@ Store the results of a test.
 
 =cut
 
-sub observe_test {
-    my ( $self, $test, $parser ) = @_;
-    $self->_record_test(
-        $test->[0],
-        scalar( $parser->failed ) + ( $parser->has_problems ? 1 : 0 ),
-        scalar( $parser->todo ), $parser->start_time, $parser->end_time,
-    );
-}
-
 # Store:
 #     last fail time
 #     last pass time
@@ -391,10 +401,18 @@ sub observe_test {
 #     total failures
 #     total passes
 #     state generation
+#     parser
 
-sub _record_test {
-    my ( $self, $name, $fail, $todo, $start_time, $end_time ) = @_;
-    my $test = $self->results->test($name);
+sub observe_test {
+
+    my ( $self, $test_info, $parser ) = @_;
+    my $name = $test_info->[0];
+    my $fail = scalar( $parser->failed ) + ( $parser->has_problems ? 1 : 0 );
+    my $todo = scalar( $parser->todo );
+    my $start_time = $parser->start_time;
+    my $end_time   = $parser->end_time,
+
+      my $test = $self->results->test($name);
 
     $test->sequence( $self->{seq}++ );
     $test->generation( $self->results->generation );
@@ -403,6 +421,8 @@ sub _record_test {
     $test->result($fail);
     $test->num_todo($todo);
     $test->elapsed( $end_time - $start_time );
+
+    $test->parser($parser);
 
     if ($fail) {
         $test->total_failures( $test->total_failures + 1 );
@@ -421,13 +441,14 @@ Write the state to a file.
 =cut
 
 sub save {
-    my ( $self, $name ) = @_;
+    my ($self) = @_;
 
+    my $store = $self->{store} or return;
     $self->results->last_run_time( $self->get_time );
 
     my $writer = TAP::Parser::YAMLish::Writer->new;
     local *FH;
-    open FH, ">$name" or croak "Can't write $name ($!)";
+    open FH, ">$store" or croak "Can't write $store ($!)";
     $writer->write( $self->results->raw, \*FH );
     close FH;
 }

@@ -20,7 +20,6 @@ foreach my $const (qw(
 		      CVf_CLONE
 		      CVf_CLONED
 		      CVf_CONST
-		      CVf_LOCKED
 		      CVf_LVALUE
 		      CVf_METHOD
 		      CVf_NODEBUG
@@ -67,6 +66,11 @@ if ($] >= 5.009) {
     # Constant not present after 5.8.x
     doconst(AVf_REAL);
 }  
+
+if ($] < 5.011) {
+    # Constant not present after 5.10.x
+    doconst(CVf_LOCKED);
+}
 
 foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
  {

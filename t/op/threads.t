@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(13);
+     plan(14);
 }
 
 use strict;
@@ -185,5 +185,10 @@ threads->new(\&safe_re)->join();
 # tests in threads don't get counted, so
 curr_test(curr_test() + 1);
 
+# This used to crash in 5.10.0 [perl #64954]
+
+undef *a;
+threads->new(sub {})->join;
+pass("undefing a typeglob doesn't cause a crash during cloning");
 
 # EOF

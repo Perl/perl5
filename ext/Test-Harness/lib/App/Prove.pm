@@ -11,19 +11,17 @@ use Getopt::Long;
 use App::Prove::State;
 use Carp;
 
-@ISA = qw(TAP::Object);
-
 =head1 NAME
 
 App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 =head1 DESCRIPTION
 
@@ -53,21 +51,16 @@ use constant PLUGINS => 'App::Prove::Plugin';
 my @ATTR;
 
 BEGIN {
+    @ISA = qw(TAP::Object);
+
     @ATTR = qw(
       archive argv blib show_count color directives exec failures fork
       formatter harness includes modules plugins jobs lib merge parse quiet
       really_quiet recurse backwards shuffle taint_fail taint_warn timer
       verbose warnings_fail warnings_warn show_help show_man show_version
-      test_args state dry extension ignore_exit rules state_manager
+      state_class test_args state dry extension ignore_exit rules state_manager
     );
-    for my $attr (@ATTR) {
-        no strict 'refs';
-        *$attr = sub {
-            my $self = shift;
-            $self->{$attr} = shift if @_;
-            return $self->{$attr};
-        };
-    }
+    __PACKAGE__->mk_methods(@ATTR);
 }
 
 =head1 METHODS
@@ -108,26 +101,21 @@ sub _initialize {
     while ( my ( $env, $attr ) = each %env_provides_default ) {
         $self->{$attr} = 1 if $ENV{$env};
     }
-    $self->state_manager(
-        $self->state_class->new( { store => STATE_FILE } ) );
-
+    $self->state_class('App::Prove::State');
     return $self;
 }
 
 =head3 C<state_class>
 
-Returns the name of the class used for maintaining state.  This class should
-either subclass from C<App::Prove::State> or provide an identical interface.
+Getter/setter for the name of the class used for maintaining state.  This
+class should either subclass from C<App::Prove::State> or provide an identical
+interface.
 
 =head3 C<state_manager>
 
-Getter/setter for the an instane of the C<state_class>.
+Getter/setter for the instance of the C<state_class>.
 
 =cut
-
-sub state_class {
-    return 'App::Prove::State';
-}
 
 =head3 C<add_rc_file>
 
@@ -400,19 +388,22 @@ sub _find_module {
 }
 
 sub _load_extension {
-    my ( $self, $class, @search ) = @_;
+    my ( $self, $name, @search ) = @_;
 
     my @args = ();
-    if ( $class =~ /^(.*?)=(.*)/ ) {
-        $class = $1;
+    if ( $name =~ /^(.*?)=(.*)/ ) {
+        $name = $1;
         @args = split( /,/, $2 );
     }
 
-    if ( my $name = $self->_find_module( $class, @search ) ) {
-        $name->import(@args);
+    if ( my $class = $self->_find_module( $name, @search ) ) {
+        $class->import(@args);
+        if ( $class->can('load') ) {
+            $class->load( { app_prove => $self, args => [@args] } );
+        }
     }
     else {
-        croak "Can't load module $class";
+        croak "Can't load module $name";
     }
 }
 
@@ -436,6 +427,11 @@ command line tool consists of the following code:
 
 sub run {
     my $self = shift;
+
+    unless ( $self->state_manager ) {
+        $self->state_manager(
+            $self->state_class->new( { store => STATE_FILE } ) );
+    }
 
     if ( $self->show_help ) {
         $self->_help(1);
@@ -675,6 +671,8 @@ calling C<run>.
 
 =item C<state>
 
+=item C<state_class>
+
 =item C<taint_fail>
 
 =item C<taint_warn>
@@ -690,3 +688,88 @@ calling C<run>.
 =item C<warnings_warn>
 
 =back
+
+=head1 PLUGINS
+
+C<App::Prove> provides support for 3rd-party plugins.  These are currently
+loaded at run-time, I<after> arguments have been parsed (so you can not
+change the way arguments are processed, sorry), typically with the
+C<< -PI<plugin> >> switch, eg:
+
+  prove -PMyPlugin
+
+This will search for a module named C<App::Prove::Plugin::MyPlugin>, or failing
+that, C<MyPlugin>.  If the plugin can't be found, C<prove> will complain & exit.
+
+You can pass an argument to your plugin by appending an C<=> after the plugin
+name, eg C<-PMyPlugin=foo>.  You can pass multiple arguments using commas:
+
+  prove -PMyPlugin=foo,bar,baz
+
+These are passed in to your plugin's C<load()> class method (if it has one),
+along with a reference to the C<App::Prove> object that is invoking your plugin:
+
+  sub load {
+      my ($class, $p) = @_;
+
+      my @args = @{ $p->{args} };
+      # @args will contain ( 'foo', 'bar', 'baz' )
+      $p->{app_prove}->do_something;
+      ...
+  }
+
+Note that the user's arguments are also passed to your plugin's C<import()>
+function as a list, eg:
+
+  sub import {
+      my ($class, @args) = @_;
+      # @args will contain ( 'foo', 'bar', 'baz' )
+      ...
+  }
+
+This is for backwards compatibility, and may be deprecated in the future.
+
+=head2 Sample Plugin
+
+Here's a sample plugin, for your reference:
+
+  package App::Prove::Plugin::Foo;
+
+  # Sample plugin, try running with:
+  # prove -PFoo=bar -r -j3
+  # prove -PFoo -Q
+  # prove -PFoo=bar,My::Formatter
+
+  use strict;
+  use warnings;
+
+  sub load {
+      my ($class, $p) = @_;
+      my @args = @{ $p->{args} };
+      my $app  = $p->{app_prove};
+
+      print "loading plugin: $class, args: ", join(', ', @args ), "\n";
+
+      # turn on verbosity
+      $app->verbose( 1 );
+
+      # set the formatter?
+      $app->formatter( $args[1] ) if @args > 1;
+
+      # print some of App::Prove's state:
+      for my $attr (qw( jobs quiet really_quiet recurse verbose )) {
+          my $val = $app->$attr;
+          $val    = 'undef' unless defined( $val );
+          print "$attr: $val\n";
+      }
+
+      return 1;
+  }
+
+  1;
+
+=head1 SEE ALSO
+
+L<prove>, L<TAP::Harness>
+
+=cut

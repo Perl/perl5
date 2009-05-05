@@ -7,7 +7,6 @@
 /perlce.pod
 /perlcn.pod
 /perlcygwin.pod
-/perldelta.pod
 /perldgux.pod
 /perldos.pod
 /perlepoc.pod
@@ -34,6 +33,7 @@
 /perlriscos.pod
 /perlsolaris.pod
 /perlsymbian.pod
+/perltoc.pod
 /perltru64.pod
 /perltw.pod
 /perluts.pod
@@ -57,3 +57,8 @@
 /podchecker.bat
 /podselect
 /podselect.bat
+
+# generated
+/perldelta.pod
+/perlapi.pod
+/perlintern.pod

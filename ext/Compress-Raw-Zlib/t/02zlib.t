@@ -24,13 +24,13 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 229 ;
+        $count = 230 ;
     }
     elsif ($] >= 5.006) {
-        $count = 283 ;
+        $count = 284 ;
     }
     else {
-        $count = 241 ;
+        $count = 242 ;
     }
 
     plan tests => $count + $extra;
@@ -443,10 +443,13 @@ for my $consume ( 0 .. 1)
     
     # create a flush point
     cmp_ok $x->flush($Answer, Z_FULL_FLUSH), '==', Z_OK ;
+    
+    my $len1 = length $Answer;
      
     cmp_ok $x->deflate($goodbye, $Answer), '==', Z_OK;
     
     cmp_ok $x->flush($Answer), '==', Z_OK ;
+    my $len2 = length($Answer) - $len1 ;
      
     my ($first, @Answer) = split('', $Answer) ;
      
@@ -475,7 +478,6 @@ for my $consume ( 0 .. 1)
         $GOT .= $Z if defined $Z ;
         # print "x $status\n";
         last if $status == Z_STREAM_END or $status != Z_OK ;
-     
     }
      
     cmp_ok $status, '==', Z_DATA_ERROR ;
@@ -488,7 +490,7 @@ for my $consume ( 0 .. 1)
     my $initial = $1 ;
 
     
-    ok(($k, $err) = new Compress::Raw::Zlib::Inflate(-ConsumeInput => 0)) ;
+    ok(($k, $err) = new Compress::Raw::Zlib::Inflate(ConsumeInput => 0)) ;
     ok $k ;
     cmp_ok $err, '==', Z_OK ;
      
@@ -499,8 +501,11 @@ for my $consume ( 0 .. 1)
     cmp_ok $status, '==', Z_OK
      or diag "status '$status'\nlength rest is " . length($rest) . "\n" ;
      
-    cmp_ok $k->inflate($rest, $GOT), '==', Z_DATA_ERROR;
-    is $Z . $GOT, $goodbye ;
+    is length($rest), $len2, "expected compressed output";
+    
+    $GOT = ''; 
+    cmp_ok $k->inflate($rest, $GOT), '==', Z_DATA_ERROR, "inflate returns Z_DATA_ERROR";
+    is $GOT, $goodbye ;
 }
 
 {

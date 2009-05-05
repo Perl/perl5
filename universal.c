@@ -233,11 +233,9 @@ XS(XS_Internals_SvREADONLY);
 XS(XS_Internals_SvREFCNT);
 XS(XS_Internals_hv_clear_placehold);
 XS(XS_PerlIO_get_layers);
-XS(XS_Regexp_DESTROY);
 XS(XS_Internals_hash_seed);
 XS(XS_Internals_rehash_seed);
 XS(XS_Internals_HvREHASH);
-XS(XS_Internals_inc_sub_generation);
 XS(XS_re_is_regexp); 
 XS(XS_re_regname);
 XS(XS_re_regnames);
@@ -298,7 +296,9 @@ Perl_boot_core_UNIVERSAL(pTHX)
                XS_Internals_hv_clear_placehold, file, "\\%");
     newXSproto("PerlIO::get_layers",
                XS_PerlIO_get_layers, file, "*;@");
-    newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
+    /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
+    CvFILE(newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL))
+	= (char *)file;
     newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
     newXSproto("Internals::rehash_seed",XS_Internals_rehash_seed, file, "");
     newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, file, "\\%");
@@ -927,12 +927,6 @@ XS(XS_Internals_hv_clear_placehold)
     }
 }
 
-XS(XS_Regexp_DESTROY)
-{
-    PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(cv);
-}
-
 XS(XS_PerlIO_get_layers)
 {
     dVAR;
@@ -1025,7 +1019,7 @@ XS(XS_PerlIO_get_layers)
 					       (SvUTF8(*argsvp) ? SVf_UTF8 : 0)
 					       | SVs_TEMP)
 			      : &PL_sv_undef);
-		       XPUSHs(namok
+		       XPUSHs(flgok
 			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*flgsvp))
 			      : &PL_sv_undef);
 		       nitem += 3;

@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_18';
+$VERSION = '2.121_19';
 
 #$| = 1;
 
@@ -231,11 +231,6 @@ sub Dumpperl {
       $name = "\$" . $s->{varname} . $i;
     }
 
-    # Ensure hash iterator is reset
-    if (ref($val) eq 'HASH') {
-        keys(%$val);
-    }
-
     my $valstr;
     {
       local($s->{apad}) = $s->{apad};
@@ -429,6 +424,10 @@ sub _dump {
 	  $keys = [ sort keys %$val ];
 	}
       }
+
+      # Ensure hash iterator is reset
+      keys(%$val);
+
       while (($k, $v) = ! $sortkeys ? (each %$val) :
 	     @$keys ? ($key = shift(@$keys), $val->{$key}) :
 	     () ) 

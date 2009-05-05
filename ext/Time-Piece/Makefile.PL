@@ -7,5 +7,4 @@ WriteMakefile(
     'VERSION_FROM' => 'Piece.pm', # finds $VERSION
     'AUTHOR' => 'Matt Sergeant',
     'ABSTRACT_FROM' => 'Piece.pm',
-    'MAN3PODS'        => {},  # Pods will be built by installman.
 );

@@ -848,10 +848,23 @@ EXPECT
 ########
 # toke.c
 our $foo :unique;
+sub pam :locked;
+sub glipp :locked {
+}
+sub whack_eth ($) : locked {
+}
 use warnings 'deprecated';
 our $bar :unique;
+sub zapeth :locked;
+sub ker_plop :locked {
+}
+sub swa_a_p ($) : locked {
+}
 EXPECT
-Use of :unique is deprecated at - line 4.
+Use of :unique is deprecated at - line 9.
+Use of :locked is deprecated at - line 10.
+Use of :locked is deprecated at - line 11.
+Use of :locked is deprecated at - line 13.
 ########
 # toke.c
 use warnings "syntax";

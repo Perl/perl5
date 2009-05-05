@@ -5,7 +5,7 @@ use warnings;
 use base 'autodie::exception';
 use Carp qw(croak);
 
-our $VERSION = '1.998';
+our $VERSION = '1.999';
 
 my $PACKAGE = __PACKAGE__;
 
@@ -16,7 +16,7 @@ autodie::exception::system - Exceptions from autodying system().
 =head1 SYNOPSIS
 
     eval {
-        use autodie;
+        use autodie qw(system);
 
         system($cmd, @args);
 

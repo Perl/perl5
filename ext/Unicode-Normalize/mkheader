@@ -83,6 +83,30 @@ sub decomposeHangul {
     return @ret;
 }
 
+########## length of a character ##########
+
+sub utf8len {
+  my $uv = shift;
+  return $uv < 0x80 ? 1 :
+        $uv < 0x800 ? 2 :
+      $uv < 0x10000 ? 3 :
+     $uv < 0x110000 ? 4 :
+  croak "$PACKAGE: illegal char in the composite. codepoint max is 0x10ffff.";
+}
+
+sub utfelen {
+  my $uv = shift;
+  return $uv < 0xA0 ? 1 :
+        $uv < 0x400 ? 2 :
+       $uv < 0x4000 ? 3 :
+      $uv < 0x40000 ? 4 :
+     $uv < 0x110000 ? 5 :
+  croak "$PACKAGE: illegal char in the composite. codepoint max is 0x10ffff.";
+}
+
+my $errExpand = "$PACKAGE: Composition to U+%04X (from U+%04X and U+%04X) " .
+    "needs growing the string in %s! Quit. Please inform the author...";
+
 ########## getting full decomposion ##########
 {
     my($f, $fh);
@@ -113,9 +137,9 @@ while ($Combin =~ /(.+)/g) {
     my @tab = split /\t/, $1;
     my $ini = hex $tab[0];
     if ($tab[1] eq '') {
-	$Combin{ $ini } = $tab[2];
+	$Combin{$ini} = $tab[2];
     } else {
-	$Combin{ $_ } = $tab[2] foreach $ini .. hex($tab[1]);
+	$Combin{$_} = $tab[2] foreach $ini .. hex($tab[1]);
     }
 }
 
@@ -123,52 +147,41 @@ while ($Decomp =~ /(.+)/g) {
     my @tab = split /\t/, $1;
     my $compat = $tab[2] =~ s/<[^>]+>//;
     my $dec = [ _getHexArray($tab[2]) ]; # decomposition
-    my $ini = hex($tab[0]); # initial decomposable character
+    my $ini = hex($tab[0]);
+    my $end = $tab[1] eq '' ? $ini : hex($tab[1]);
+    # ($ini .. $end) is the range of decomposable characters.
 
     my $listname =
 	@$dec == 2 ? sprintf("${structname}_%06x", $dec->[0]) : 'USELESS';
 		# %04x is bad since it'd place _3046 after _1d157.
 
-    if ($tab[1] eq '') {
-	$Compat{ $ini } = $dec;
+    foreach my $u ($ini .. $end) {
+	$Compat{$u} = $dec;
 
 	if (! $compat) {
-	    $Canon{ $ini } = $dec;
+	    $Canon{$u} = $dec;
 
 	    if (@$dec == 2) {
+		if (utf8len($dec->[0]) + utf8len($dec->[1]) < utf8len($u)) {
+		    croak sprintf $errExpand, $u, $dec->[0], $dec->[1],
+				  "utf-8";
+		}
+		if (utfelen($dec->[0]) + utfelen($dec->[1]) < utfelen($u)) {
+		    croak sprintf $errExpand, $u, $dec->[0], $dec->[1],
+				  "utf-ebcdic";
+		}
+
 		if ($Combin{ $dec->[0] }) {
-		    $NonStD{ $ini } = 1;
+		    $NonStD{$u} = 1;
 		} else {
-		    $CompList{ $listname }{ $dec->[1] } = $ini;
+		    $CompList{ $listname }{ $dec->[1] } = $u;
 		    $Comp1st{ $dec->[0] } = $listname;
-		    $Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$ini};
+		    $Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$u};
 		}
 	    } elsif (@$dec == 1) {
-		$Single{ $ini } = 1;
+		$Single{$u} = 1;
 	    } else {
 		croak("Weird Canonical Decomposition of U+$tab[0]");
-	    }
-	}
-    } else {
-	foreach my $u ($ini .. hex($tab[1])) {
-	    $Compat{ $u } = $dec;
-
-	    if (! $compat) {
-		$Canon{ $u } = $dec;
-
-		if (@$dec == 2) {
-		    if ($Combin{ $dec->[0] }) {
-			$NonStD{ $u } = 1;
-		    } else {
-			$CompList{ $listname }{ $dec->[1] } = $u;
-			$Comp1st{ $dec->[0] } = $listname;
-			$Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$u};
-		    }
-		} elsif (@$dec == 1) {
-		    $Single{ $u } = 1;
-		} else {
-		    croak("Weird Canonical Decomposition of U+$tab[0]");
-		}
 	    }
 	}
     }

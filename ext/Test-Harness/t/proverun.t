@@ -31,7 +31,7 @@ BEGIN {
         },
     );
     foreach my $test (@tests) {
-        
+
         # let's fully expand that filename
         $test->{file} = File::Spec->catfile(
             (   $ENV{PERL_CORE}

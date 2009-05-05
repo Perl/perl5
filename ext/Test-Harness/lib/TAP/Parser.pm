@@ -14,19 +14,17 @@ use TAP::Parser::IteratorFactory ();
 
 use Carp qw( confess );
 
-@ISA = qw(TAP::Base);
-
 =head1 NAME
 
 TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -40,37 +38,31 @@ END {
 }
 
 BEGIN {    # making accessors
-    foreach my $method (
+    @ISA = qw(TAP::Base);
+
+    __PACKAGE__->mk_methods(
         qw(
-        _stream
-        _spool
-        exec
-        exit
-        is_good_plan
-        plan
-        tests_planned
-        tests_run
-        wait
-        version
-        in_todo
-        start_time
-        end_time
-        skip_all
-        source_class
-        perl_source_class
-        grammar_class
-        iterator_factory_class
-        result_factory_class
-        )
-      )
-    {
-        no strict 'refs';
-        *$method = sub {
-            my $self = shift;
-            return $self->{$method} unless @_;
-            $self->{$method} = shift;
-        };
-    }
+          _stream
+          _spool
+          exec
+          exit
+          is_good_plan
+          plan
+          tests_planned
+          tests_run
+          wait
+          version
+          in_todo
+          start_time
+          end_time
+          skip_all
+          source_class
+          perl_source_class
+          grammar_class
+          iterator_factory_class
+          result_factory_class
+          )
+    );
 }    # done making accessors
 
 =head1 SYNOPSIS

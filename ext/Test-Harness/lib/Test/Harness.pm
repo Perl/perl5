@@ -44,11 +44,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.14
+Version 3.16
 
 =cut
 
-$VERSION = '3.14';
+$VERSION = '3.16';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -128,40 +128,20 @@ sub _aggregate {
     # Don't propagate to our children
     local $ENV{HARNESS_OPTIONS};
 
-    if (IS_VMS) {
+    _apply_extra_INC($harness);
+    _aggregate_tests( $harness, $aggregate, @tests );
+}
 
-        # Jiggery pokery doesn't appear to work on VMS - so disable it
-        # pending investigation.
-        _aggregate_tests( $harness, $aggregate, @tests );
-    }
-    else {
-        my $path_sep  = $Config{path_sep};
-        my $path_pat  = qr{$path_sep};
-        my @extra_inc = _filtered_inc();
+# Make sure the child seens all the extra junk in @INC
+sub _apply_extra_INC {
+    my $harness = shift;
 
-        # Supply -I switches in taint mode
-        $harness->callback(
-            parser_args => sub {
-                my ( $args, $test ) = @_;
-                if ( _has_taint( $test->[0] ) ) {
-                    push @{ $args->{switches} }, map {"-I$_"} _filtered_inc();
-                }
-            }
-        );
-
-        my $previous = $ENV{PERL5LIB};
-        local $ENV{PERL5LIB};
-
-        if ($previous) {
-            push @extra_inc, split( $path_pat, $previous );
+    $harness->callback(
+        parser_args => sub {
+            my ( $args, $test ) = @_;
+            push @{ $args->{switches} }, map {"-I$_"} _filtered_inc();
         }
-
-        if (@extra_inc) {
-            $ENV{PERL5LIB} = join( $path_sep, @extra_inc );
-        }
-
-        _aggregate_tests( $harness, $aggregate, @tests );
-    }
+    );
 }
 
 sub _aggregate_tests {
@@ -320,8 +300,14 @@ sub _filtered_inc {
 
     sub _default_inc {
         return @inc if @inc;
+
+        local $ENV{PERL5LIB};
+        local $ENV{PERLLIB};
+
         my $perl = $ENV{HARNESS_PERL} || $^X;
-        chomp( @inc = `$perl -le "print join qq[\\n], \@INC"` );
+
+        # Avoid using -l for the benefit of Perl 6
+        chomp( @inc = `$perl -e "print join qq[\\n], \@INC, q[]"` );
         return @inc;
     }
 }

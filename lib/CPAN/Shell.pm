@@ -17,16 +17,32 @@ use vars qw(
            );
 @relo =     (
              "CPAN.pm",
+             "CPAN/Author.pm",
+             "CPAN/CacheMgr.pm",
+             "CPAN/Complete.pm",
              "CPAN/Debug.pm",
+             "CPAN/DeferredCode.pm",
+             "CPAN/Distribution.pm",
              "CPAN/Distroprefs.pm",
+             "CPAN/Distrostatus.pm",
+             "CPAN/Exception/RecursiveDependency.pm",
+             "CPAN/Exception/yaml_not_installed.pm",
              "CPAN/FirstTime.pm",
+             "CPAN/FTP.pm",
+             "CPAN/FTP/netrc.pm",
              "CPAN/HandleConfig.pm",
+             "CPAN/Index.pm",
+             "CPAN/InfoObj.pm",
              "CPAN/Kwalify.pm",
+             "CPAN/LWP/UserAgent.pm",
+             "CPAN/Module.pm",
+             "CPAN/Prompt.pm",
              "CPAN/Queue.pm",
              "CPAN/Reporter/Config.pm",
              "CPAN/Reporter/History.pm",
              "CPAN/Reporter/PrereqCheck.pm",
              "CPAN/Reporter.pm",
+             "CPAN/Shell.pm",
              "CPAN/SQLite.pm",
              "CPAN/Tarzip.pm",
              "CPAN/Version.pm",
@@ -255,6 +271,7 @@ sub globls {
                 $author->$pragma();
             }
         }
+        CPAN->debug("author[$author]pathglob[$pathglob]silent[$silent]") if $CPAN::DEBUG;
         push @results, $author->ls($pathglob,$silent); # silent if
                                                        # more than one
                                                        # author
