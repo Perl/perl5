@@ -89,55 +89,86 @@ my_init_tm(struct tm *ptm)        /* see mktime, strftime and asctime    */
  * perl never updates the CRT copy when assigning to $ENV{TZ}.
  *
  * Therefore, we need to retrieve the value of $ENV{TZ} and call CRT
- * putenv() to update the CRT copy of the environment whenever we're about
- * to call tzset().
+ * putenv() to update the CRT copy of the environment (if it is different)
+ * whenever we're about to call tzset().
+ *
+ * In addition to all that, when perl is built with PERL_IMPLICIT_SYS
+ * defined:
+ *
+ * (a) Each interpreter has its own copy of the environment inside the
+ * perlhost structure. That allows applications that host multiple
+ * independent Perl interpreters to isolate environment changes from
+ * each other. (This is similar to how the perlhost mechanism keeps a
+ * separate working directory for each Perl interpreter, so that calling
+ * chdir() will not affect other interpreters.)
+ *
+ * (b) Only the first Perl interpreter instantiated within a process will
+ * "write through" environment changes to the process environment.
+ *
+ * (c) Even the primary Perl interpreter won't update the CRT copy of the
+ * the environment, only the Win32API copy (it calls win32_putenv()).
+ *
+ * As with CPerlHost::Getenv() and CPerlHost::Putenv() themselves, it makes
+ * sense to only update the process environment when inside the main
+ * interpreter, but we don't have access to CPerlHost's m_bTopLevel member
+ * from here so we'll just have to check PL_curinterp instead.
+ *
+ * Therefore, we can simply #undef getenv() and putenv() so that those names
+ * always refer to the CRT functions, and explicitly call win32_getenv() to
+ * access perl's %ENV.
+ *
+ * We also #undef malloc() and free() to be sure we are using the CRT
+ * functions otherwise under PERL_IMPLICIT_SYS they are redefined to calls
+ * into VMem::Malloc() and VMem::Free() and all allocations will be freed
+ * when the Perl interpreter is being destroyed so we'd end up with a pointer
+ * into deallocated memory in environ[] if a program embedding a Perl
+ * interpreter continues to operate even after the main Perl interpreter has
+ * been destroyed.
+ *
+ * Note that we don't free() the malloc()ed memory unless and until we call
+ * malloc() again ourselves because the CRT putenv() function simply puts its
+ * pointer argument into the environ[] arrary (it doesn't make a copy of it)
+ * so this memory must otherwise be leaked.
  */
 
-static const char*
-win32_crt_getenv(const char* name)
-{
 #undef getenv
-    const char* value = getenv(name);
-#define getenv win32_getenv
-    return value;
-}
-
-static void
-win32_crt_putenv(const char* name, const char* value)
-{
-    char* envstr =
-        (char*)malloc((strlen(name) + strlen(value) + 2) * sizeof(char));
-    if (envstr != NULL) {
-        sprintf(envstr, "%s=%s", name, value);
 #undef putenv
-        putenv(envstr);
-#define putenv win32_putenv
-        free(envstr);
-    }
-}
+#undef malloc
+#undef free
 
 static void
 fix_win32_tzenv(void)
 {
-    const char* perl_tz_env = getenv("TZ");
-    const char* crt_tz_env = win32_crt_getenv("TZ");
-    if (perl_tz_env != NULL && crt_tz_env != NULL) {
-        if (strcmp(perl_tz_env, crt_tz_env) != 0)
-            win32_crt_putenv("TZ", perl_tz_env);
+    static char* oldenv = NULL;
+    char* newenv;
+    const char* perl_tz_env = win32_getenv("TZ");
+    const char* crt_tz_env = getenv("TZ");
+    if (perl_tz_env == NULL)
+        perl_tz_env = "";
+    if (crt_tz_env == NULL)
+        crt_tz_env = "";
+    if (strcmp(perl_tz_env, crt_tz_env) != 0) {
+        newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
+        if (newenv != NULL) {
+            sprintf(newenv, "TZ=%s", perl_tz_env);
+            putenv(newenv);
+            if (oldenv != NULL)
+                free(oldenv);
+            oldenv = newenv;
+        }
     }
-    else if (perl_tz_env != NULL && crt_tz_env == NULL)
-        win32_crt_putenv("TZ", perl_tz_env);
-    else if (perl_tz_env == NULL && crt_tz_env != NULL)
-        win32_crt_putenv("TZ", "");
 }
 
 #endif
 
 static void
-my_tzset(void)
+my_tzset(pTHX)
 {
 #ifdef WIN32
-    fix_win32_tzenv();
+#if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    if (PL_curinterp == aTHX)
+#endif
+        fix_win32_tzenv();
 #endif
     tzset();
 }
@@ -267,8 +298,15 @@ my_mini_mktime(struct tm *ptm)
     ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
-/* No strptime on Win32 or QNX4 */
-#if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
+#ifndef HAS_STRPTIME
+    /* Assume everyone has strptime except Win32 and QNX4 */
+#   define HAS_STRPTIME 1
+#   if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
+#       undef HAS_STRPTIME
+#   endif
+#endif
+
+#ifndef HAS_STRPTIME
 #define strncasecmp(x,y,n) strnicmp(x,y,n)
 
 #if defined(WIN32)
@@ -328,7 +366,7 @@ static char sccsid[] = "@(#)strptime.c	0.1 (Powerdog) 94/03/27";
 #include "pthread_private.h"
 #endif /* _THREAD_SAFE */
 
-static char * _strptime(const char *, const char *, struct tm *);
+static char * _strptime(pTHX_ const char *, const char *, struct tm *);
 
 #ifdef _THREAD_SAFE
 static struct pthread_mutex	_gotgmt_mutexd = PTHREAD_MUTEX_STATIC_INITIALIZER;
@@ -418,7 +456,7 @@ const struct lc_time_T	_C_time_locale = {
 #define Locale (&_C_time_locale)
 
 static char *
-_strptime(const char *buf, const char *fmt, struct tm *tm)
+_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
 {
 	char c;
 	const char *ptr;
@@ -454,7 +492,7 @@ label:
 			break;
 
 		case '+':
-			buf = _strptime(buf, Locale->date_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->date_fmt, tm);
 			if (buf == 0)
 				return 0;
 			break;
@@ -478,13 +516,13 @@ label:
 
 		case 'c':
 			/* NOTE: c_fmt is intentionally ignored */
-                        buf = _strptime(buf, "%a %Ef %T %Y", tm);
+                        buf = _strptime(aTHX_ buf, "%a %Ef %T %Y", tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'D':
-			buf = _strptime(buf, "%m/%d/%y", tm);
+			buf = _strptime(aTHX_ buf, "%m/%d/%y", tm);
 			if (buf == 0)
 				return 0;
 			break;
@@ -505,37 +543,37 @@ label:
 		case 'f':
 			if (!Ealternative)
 				break;
-			buf = _strptime(buf, (c == 'f') ? Locale->Ef_fmt : Locale->EF_fmt, tm);
+			buf = _strptime(aTHX_ buf, (c == 'f') ? Locale->Ef_fmt : Locale->EF_fmt, tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'R':
-			buf = _strptime(buf, "%H:%M", tm);
+			buf = _strptime(aTHX_ buf, "%H:%M", tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'r':
-			buf = _strptime(buf, "%I:%M:%S %p", tm);
+			buf = _strptime(aTHX_ buf, "%I:%M:%S %p", tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'T':
-			buf = _strptime(buf, "%H:%M:%S", tm);
+			buf = _strptime(aTHX_ buf, "%H:%M:%S", tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'X':
-			buf = _strptime(buf, Locale->X_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->X_fmt, tm);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'x':
-			buf = _strptime(buf, Locale->x_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->x_fmt, tm);
 			if (buf == 0)
 				return 0;
 			break;
@@ -834,7 +872,7 @@ label:
 				zonestr = (char *)alloca(cp - buf + 1);
 				strncpy(zonestr, buf, cp - buf);
 				zonestr[cp - buf] = '\0';
-				my_tzset();
+				my_tzset(aTHX);
 				if (0 == strcmp(zonestr, "GMT")) {
 				    got_GMT = 1;
 				} else {
@@ -851,7 +889,7 @@ label:
 
 
 char *
-strptime(const char *buf, const char *fmt, struct tm *tm)
+strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
 {
 	char *ret;
 
@@ -860,7 +898,7 @@ pthread_mutex_lock(&gotgmt_mutex);
 #endif
 
         got_GMT = 0;
-	ret = _strptime(buf, fmt, tm);
+	ret = _strptime(aTHX_ buf, fmt, tm);
 
 #ifdef _THREAD_SAFE
 	pthread_mutex_unlock(&gotgmt_mutex);
@@ -869,7 +907,7 @@ pthread_mutex_lock(&gotgmt_mutex);
 	return ret;
 }
 
-#endif /* Mac OS X */
+#endif /* !HAS_STRPTIME */
 
 MODULE = Time::Piece     PACKAGE = Time::Piece
 
@@ -954,7 +992,7 @@ _strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1
 void
 _tzset()
   PPCODE:
-    my_tzset();
+    my_tzset(aTHX);
 
 
 void
@@ -968,13 +1006,14 @@ _strptime ( string, format )
   PPCODE:
        t = 0;
        mytm = *gmtime(&t);
-       
+#ifdef HAS_STRPTIME
        remainder = (char *)strptime(string, format, &mytm);
-       
+#else
+       remainder = (char *)strptime(aTHX_ string, format, &mytm);
+#endif
        if (remainder == NULL) {
 	  croak("Error parsing time");
        }
-
        if (*remainder != '\0') {
            warn("garbage at end of string in strptime: %s", remainder);
        }
