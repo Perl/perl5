@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Mar 25 17:28:24 CET 2009 [metaconfig 3.5 PL0]
+# Generated on Wed May  6 14:01:08 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8189,6 +8189,13 @@ esac
 
 case "$useshrplib" in
 true)
+	case "$userelocatableinc" in
+	true|define)
+		echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
+		echo "See INSTALL for an explanation why that won't work." >&4
+		exit 4
+		;;
+	esac
 	case "$libperl" in
 	'')
 		# Figure out a good name for libperl.so.  Since it gets stored in
