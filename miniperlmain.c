@@ -67,7 +67,7 @@ main(int argc, char **argv, char **env)
 #endif
 {
     dVAR;
-    int exitstatus;
+    int exitstatus, i;
 #ifdef PERL_GLOBAL_STRUCT
     struct perl_vars *plvarsp = init_global_struct();
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
@@ -115,6 +115,13 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
     if (!exitstatus)
         perl_run(my_perl);
+
+    /* Unregister our signal handler before destroying my_perl */
+    for (i = 0; PL_sig_name[i]; i++) {
+	if (rsignal_state(PL_sig_num[i]) == (Sighandler_t) PL_csighandlerp) {
+	    rsignal(PL_sig_num[i], (Sighandler_t) SIG_DFL);
+	}
+    }
 
     exitstatus = perl_destruct(my_perl);
 
