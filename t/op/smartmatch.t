@@ -114,7 +114,7 @@ sub NOT_DEF() { undef }
 #   Values returned by a sub call
 __DATA__
 # Any ~~ undef
-!=	$ov_obj		undef
+!	$ov_obj		undef
 !	$obj		undef
 !	sub {}		undef
 !	%hash		undef
@@ -139,27 +139,31 @@ __DATA__
 	&NOT_DEF	undef
 
 # Any ~~ object overloaded
-# object overloaded ~~ Any
-=!	$ov_obj		\&fatal
-=	$ov_obj		'magic'
-=!	$ov_obj		'not magic'
-=!	$ov_obj		$obj
+!	\&fatal		$ov_obj
+	'magic'		$ov_obj
+!	'not magic'	$ov_obj
+!	$obj		$ov_obj
+!	undef		$ov_obj
 
 # regular object
-@	$obj	$obj
-=@	$obj	\&fatal
-=@	$obj	\&FALSE
-=@	$obj	\&foo
-=@	$obj	sub { 1 }
-=@	$obj	sub { 0 }
-=@	$obj	%keyandmore
-=@	$obj	{"key" => 1}
-=@	$obj	@fooormore
-=@	$obj	["key" => 1]
-=@	$obj	/key/
-=@	$obj	qr/key/
-=@	$obj	"key"
-=@	$obj	FALSE
+@	$obj		$obj
+@	$ov_obj		$obj	TODO
+@	\&fatal		$obj
+@	\&FALSE		$obj
+@	\&foo		$obj
+@	sub { 1 }	$obj
+@	sub { 0 }	$obj
+@	%keyandmore	$obj
+@	{"key" => 1}	$obj
+@	@fooormore	$obj
+@	["key" => 1]	$obj
+@	/key/		$obj
+@	qr/key/		$obj
+@	"key"		$obj
+@	FALSE		$obj
+
+# object (overloaded or not) ~~ Any
+# TODO
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }
