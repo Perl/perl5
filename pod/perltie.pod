@@ -1168,7 +1168,7 @@ tie methods for slice operations.
 You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems
-with how references are to be represented on disk.  One experimental
+with how references are to be represented on disk.  One
 module that does attempt to address this need is DBM::Deep.  Check your
 nearest CPAN site as described in L<perlmodlib> for source code.  Note
 that despite its name, DBM::Deep does not use dbm.  Another earlier attempt
