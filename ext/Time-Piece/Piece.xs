@@ -161,6 +161,11 @@ fix_win32_tzenv(void)
 
 #endif
 
+/*
+ * my_tzset - wrapper to tzset() with a fix to make it work (better) on Win32.
+ * This code is duplicated in the POSIX module, so any changes made here
+ * should be made there too.
+ */
 static void
 my_tzset(pTHX)
 {

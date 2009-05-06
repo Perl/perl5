@@ -408,6 +408,116 @@ restore_sigmask(pTHX_ SV *osset_sv)
      (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
 
+#ifdef WIN32
+
+/*
+ * (1) The CRT maintains its own copy of the environment, separate from
+ * the Win32API copy.
+ *
+ * (2) CRT getenv() retrieves from this copy. CRT putenv() updates this
+ * copy, and then calls SetEnvironmentVariableA() to update the Win32API
+ * copy.
+ *
+ * (3) win32_getenv() and win32_putenv() call GetEnvironmentVariableA() and
+ * SetEnvironmentVariableA() directly, bypassing the CRT copy of the
+ * environment.
+ *
+ * (4) The CRT strftime() "%Z" implementation calls __tzset(). That
+ * calls CRT tzset(), but only the first time it is called, and in turn
+ * that uses CRT getenv("TZ") to retrieve the timezone info from the CRT
+ * local copy of the environment and hence gets the original setting as
+ * perl never updates the CRT copy when assigning to $ENV{TZ}.
+ *
+ * Therefore, we need to retrieve the value of $ENV{TZ} and call CRT
+ * putenv() to update the CRT copy of the environment (if it is different)
+ * whenever we're about to call tzset().
+ *
+ * In addition to all that, when perl is built with PERL_IMPLICIT_SYS
+ * defined:
+ *
+ * (a) Each interpreter has its own copy of the environment inside the
+ * perlhost structure. That allows applications that host multiple
+ * independent Perl interpreters to isolate environment changes from
+ * each other. (This is similar to how the perlhost mechanism keeps a
+ * separate working directory for each Perl interpreter, so that calling
+ * chdir() will not affect other interpreters.)
+ *
+ * (b) Only the first Perl interpreter instantiated within a process will
+ * "write through" environment changes to the process environment.
+ *
+ * (c) Even the primary Perl interpreter won't update the CRT copy of the
+ * the environment, only the Win32API copy (it calls win32_putenv()).
+ *
+ * As with CPerlHost::Getenv() and CPerlHost::Putenv() themselves, it makes
+ * sense to only update the process environment when inside the main
+ * interpreter, but we don't have access to CPerlHost's m_bTopLevel member
+ * from here so we'll just have to check PL_curinterp instead.
+ *
+ * Therefore, we can simply #undef getenv() and putenv() so that those names
+ * always refer to the CRT functions, and explicitly call win32_getenv() to
+ * access perl's %ENV.
+ *
+ * We also #undef malloc() and free() to be sure we are using the CRT
+ * functions otherwise under PERL_IMPLICIT_SYS they are redefined to calls
+ * into VMem::Malloc() and VMem::Free() and all allocations will be freed
+ * when the Perl interpreter is being destroyed so we'd end up with a pointer
+ * into deallocated memory in environ[] if a program embedding a Perl
+ * interpreter continues to operate even after the main Perl interpreter has
+ * been destroyed.
+ *
+ * Note that we don't free() the malloc()ed memory unless and until we call
+ * malloc() again ourselves because the CRT putenv() function simply puts its
+ * pointer argument into the environ[] arrary (it doesn't make a copy of it)
+ * so this memory must otherwise be leaked.
+ */
+
+#undef getenv
+#undef putenv
+#undef malloc
+#undef free
+
+static void
+fix_win32_tzenv(void)
+{
+    static char* oldenv = NULL;
+    char* newenv;
+    const char* perl_tz_env = win32_getenv("TZ");
+    const char* crt_tz_env = getenv("TZ");
+    if (perl_tz_env == NULL)
+        perl_tz_env = "";
+    if (crt_tz_env == NULL)
+        crt_tz_env = "";
+    if (strcmp(perl_tz_env, crt_tz_env) != 0) {
+        newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
+        if (newenv != NULL) {
+            sprintf(newenv, "TZ=%s", perl_tz_env);
+            putenv(newenv);
+            if (oldenv != NULL)
+                free(oldenv);
+            oldenv = newenv;
+        }
+    }
+}
+
+#endif
+
+/*
+ * my_tzset - wrapper to tzset() with a fix to make it work (better) on Win32.
+ * This code is duplicated in the Time-Piece module, so any changes made here
+ * should be made there too.
+ */
+static void
+my_tzset(pTHX)
+{
+#ifdef WIN32
+#if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    if (PL_curinterp == aTHX)
+#endif
+        fix_win32_tzenv();
+#endif
+    tzset();
+}
+
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
 
 POSIX::SigSet
@@ -1696,6 +1806,8 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 
 void
 tzset()
+  PPCODE:
+    my_tzset(aTHX);
 
 void
 tzname()
