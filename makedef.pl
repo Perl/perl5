@@ -1013,8 +1013,10 @@ my @layer_syms = qw(
 		    PerlIO_arg_fetch
 		    PerlIO_debug
 		    PerlIO_define_layer
+		    PerlIO_find_layer
 		    PerlIO_isutf8
 		    PerlIO_layer_fetch
+		    PerlIO_list_alloc
 		    PerlIO_list_free
 		    PerlIO_modestr
 		    PerlIO_parse_layers
