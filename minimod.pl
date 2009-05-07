@@ -37,6 +37,7 @@ open MINI, "miniperlmain.c";
 while (<MINI>) {
     last if /Do not delete this line--writemain depends on it/;
     print;
+    /#include "perl.h"/ and print qq/#include "XSUB.h"\n/;
 }
 
 print <<'END';
