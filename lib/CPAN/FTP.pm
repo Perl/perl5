@@ -526,7 +526,7 @@ sub _set_attempt {
 }
 
 # package CPAN::FTP;
-sub hostdleasy {
+sub hostdleasy { #called from hostdlxxx
     my($self,$host_seq,$file,$aslocal,$stats) = @_;
     my($ro_url);
   HOSTEASY: for $ro_url (@$host_seq) {
@@ -871,7 +871,7 @@ sub hostdlhardest {
         return;
     }
     $CPAN::Frontend->mywarn(qq{
-As a last ressort we now switch to the external ftp command '$ftpbin'
+As a last resort we now switch to the external ftp command '$ftpbin'
 to get '$aslocal'.
 
 Doing so often leads to problems that are hard to diagnose.
