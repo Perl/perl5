@@ -1,0 +1,26 @@
+#########################################################################
+This is a binary file that was packed with the 'uupacktool.pl' which
+is included in the Perl distribution.
+
+To unpack this file use the following command:
+
+     uupacktool.pl -u 02packages.details.txt.gz.packed 02packages.details.txt.gz
+
+To recreate it use the following command:
+
+     uupacktool.pl -p 02packages.details.txt.gz 02packages.details.txt.gz.packed
+
+Created at Thu May  7 17:19:10 2009
+#########################################################################
+__UU__
+M'XL("-3:`DH``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`G=-!;]L@%`?P<_PI
+MWF&'30J8.K(J<5J<)E6W)(V66>UMHH8F:#98\%PO^_2#9%W;:-G6(4N6X,^/
+M!X*9KA6'Q\:R5E1?Q49Y*A4*77N*WS`I/\V?,K!%;'F:]GU/6^5J6MDFG:S&
+MR[2QLJN53T\H%\I73K>HK0G:ZA`!(QKEX=YV1H(V(+53%5JW@S=[4W2XM<ZG
+M6J;)Q-9=8_S/4MIGP!`>E/,!'H9NW"97!I612I*9=1S&'=I&H))PK[#:@K,=
+M:J/\\+!X@!1(6W6-,BAB>32Y<1H#08I=7*VII?;8BSCY[0-D=,2R=W"W@[&1
+M3@E//UIE].:],+H18<_)//!D$O:$<?H9.\_S9"X\DK*5L1`.-TH.8<3@@S"0
+M,98!RWD6OG.X7'Q.DIFUG!?"<3XM.;]=PU%CE)W%_[2\7:<A3$*6Q$Z*PM'-
+M]V?`HO@3L"C^"5A>'Q-/0!S["Q$W<9J8EJ\@.%]W=_]#')_`*X@B7,[P3/@I
+MZH@XQ,GOI$DO3]6Q;]E+*;ZOG#*6?V&C7T1X%JMY&0[B(ES*4$^G:SD8Q%4&
+9Q=7R\GJ=/D9(3)!]X$45/P`_H+;"]0,`````
