@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.24';
+$VERSION = '0.26';
 
 =pod
 
@@ -773,7 +773,7 @@ sub _buildflags_as_list {
 Originally by Jos Boumans E<lt>kane@cpan.orgE<gt>.  Brought to working
 condition by Ken Williams E<lt>kwilliams@cpan.orgE<gt>.
 
-Other hackery and currently maintained by Chris 'BinGOs' Williams ( no relation ). E<lt>bingos@cpan.orgE<gt>.
+Other hackery and currently maintained by Chris C<BinGOs> Williams ( no relation ). E<lt>bingos@cpan.orgE<gt>.
 
 =head1 LICENSE
 

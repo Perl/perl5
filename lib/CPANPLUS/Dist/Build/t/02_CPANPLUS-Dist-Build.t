@@ -34,9 +34,15 @@ my $Lib     = File::Spec->rel2abs(File::Spec->catdir( qw[dummy-perl] ));
 my $Src     = File::Spec->rel2abs(File::Spec->catdir( qw[src] ));
 
 my $Verbose = @ARGV ? 1 : 0;
-my $CB      = CPANPLUS::Backend->new;
-my $Conf    = $CB->configure_object;
+my $Conf    = gimme_conf();
+my $CB      = CPANPLUS::Backend->new( $Conf );
 
+#$Conf->set_conf( base       => 'dummy-cpanplus' );
+#$Conf->set_conf( dist_type  => '' );
+#$Conf->set_conf( verbose    => $Verbose );
+#$Conf->set_conf( signature  => 0 );
+### running tests will mess with the test output so skip 'm
+#$Conf->set_conf( skiptest   => 1 );
 
 ### create a fake object, so we don't use the actual module tree
 ### make sure to add dslip data, so CPANPLUS doesn't try to find
@@ -49,13 +55,6 @@ my $Mod = CPANPLUS::Module::Fake->new(
                 package => 'Foo-Bar-0.01.tar.gz',
                 dslip   => 'RdpO?',
             );
-
-$Conf->set_conf( base       => 'dummy-cpanplus' );
-$Conf->set_conf( dist_type  => '' );
-$Conf->set_conf( verbose    => $Verbose );
-$Conf->set_conf( signature  => 0 );
-### running tests will mess with the test output so skip 'm
-$Conf->set_conf( skiptest   => 1 );
 
 ### dmq tells us that we should run with /nologo
 ### if using nmake, as it's very noise otherwise.
