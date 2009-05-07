@@ -226,14 +226,17 @@ sub untar {
     if (0) { # makes changing order easier
     } elsif ($BUGHUNTING) {
         $prefer=2;
-    } elsif ($exttar && $extgzip) {
-        # should be default until Archive::Tar handles bzip2
+    } elsif ($exttar && $extgzip && $file =~ /\.bz2$/i) {
+        # until Archive::Tar handles bzip2
         $prefer = 1;
     } elsif (
              $CPAN::META->has_usable("Archive::Tar")
              &&
              $CPAN::META->has_inst("Compress::Zlib") ) {
         $prefer = 2;
+    } elsif ($exttar && $extgzip) {
+        # no modules and not bz2
+        $prefer = 1;
     } else {
         my $foundtar = $exttar ? "'$exttar'" : "nothing";
         my $foundzip = $extgzip ? "'$extgzip'" : $foundtar ? "nothing" : "also nothing";
