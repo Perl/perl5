@@ -11,6 +11,9 @@ use Tie::Array;
 use Tie::Hash;
 
 # Predeclare vars used in the tests:
+my @empty;
+my %empty;
+
 my $deep1 = []; push @$deep1, \$deep1;
 my $deep2 = []; push @$deep2, \$deep2;
 
@@ -189,6 +192,8 @@ __DATA__
 !	0		sub{shift}
 !	undef		sub{shift}
 	undef		sub{not shift}
+	NOT_DEF		sub{not shift}
+	&NOT_DEF	sub{not shift}
 	FALSE		sub{not shift}
 	[1]		\&bar
 	{a=>1}		\&bar
@@ -198,6 +203,8 @@ __DATA__
 # empty stuff matches, because the sub is never called:
 	[]		\&foo
 	{}		\&foo
+	@empty		\&foo
+	%empty		\&foo
 !	qr//		\&foo
 !	undef		\&foo
 	undef		\&bar
@@ -210,6 +217,8 @@ __DATA__
 # sub is not called on empty hashes / arrays
 	[]		\&fatal
 	+{}		\&fatal
+	@empty		\&fatal
+	%empty		\&fatal
 
 # HASH ref against:
 #   - another hash ref
@@ -217,36 +226,63 @@ __DATA__
 =!	{}		{1 => 2}
 	{1 => 2}	{1 => 2}
 	{1 => 2}	{1 => 3}
-!	{1 => 2}	{2 => 3}
-	\%main::	{map {$_ => 'x'} keys %main::}
+=!	{1 => 2}	{2 => 3}
+=	\%main::	{map {$_ => 'x'} keys %main::}
 
 #  - tied hash ref
 =	\%hash		\%tied_hash
 	\%tied_hash	\%tied_hash
+!=	{"a"=>"b"}	\%tied_hash
+=	%hash		%tied_hash
+	%tied_hash	%tied_hash
+!=	{"a"=>"b"}	%tied_hash
 
 #  - an array ref
-	[keys %main::]	\%::
-!	[]		\%::
-!	[""]		{}
-!	[]		{}
-	[undef]		{"" => 1}
-	[""]		{"" => 1}
-	["foo"]		{ foo => 1 }
-	["foo", "bar"]	{ foo => 1 }
-	["foo", "bar"]	\%hash
-	["foo"]		\%hash
-!	["quux"]	\%hash
-	[qw(foo quux)]	\%hash
+#  (since this is symmetrical, tests as well hash~~array)
+=	[keys %main::]	\%::
+=	[qw[STDIN STDOUT]]	\%::
+=!	[]		\%::
+=!	[""]		{}
+=!	[]		{}
+=!	@empty		{}
+=	[undef]		{"" => 1}
+=	[""]		{"" => 1}
+=	["foo"]		{ foo => 1 }
+=	["foo", "bar"]	{ foo => 1 }
+=	["foo", "bar"]	\%hash
+=	["foo"]		\%hash
+=!	["quux"]	\%hash
+=	[qw(foo quux)]	\%hash
+=	@fooormore	{ foo => 1, or => 2, more => 3 }
+=	@fooormore	%fooormore
+=	@fooormore	\%fooormore
+=	\@fooormore	%fooormore
 
 #  - a regex
+# TODO those should be symmetrical
 	qr/^(fo[ox])$/		{foo => 1}
-!	qr/[13579]$/		+{0..99}
+	/^(fo[ox])$/		%fooormore
+=!	qr/[13579]$/		+{0..99}
 !	qr/a*/			{}
-	qr/a*/			{b=>2}
+=	qr/a*/			{b=>2}
+	qr/B/i			{b=>2}
+	/B/i			{b=>2}
+!	qr/a+/			{b=>2}
+	qr/^à/			{"à"=>2}
 
-#  - a string
+#  - a scalar
 	"foo"		+{foo => 1, bar => 2}
+	"foo"		%fooormore
 !	"baz"		+{foo => 1, bar => 2}
+!	"boz"		%fooormore
+!	1		+{foo => 1, bar => 2}
+!	1		%fooormore
+	1		{ 1 => 3 }
+	1.0		{ 1 => 3 }
+!	"1.0"		{ 1 => 3 }
+!	"1.0"		{ 1.0 => 3 }
+	"1.0"		{ "1.0" => 3 }
+	"à"		{ "à" => "À" }
 
 #  - undef
 !	undef		{ hop => 'zouu' }
@@ -261,21 +297,32 @@ __DATA__
 !	[["foo"], ["bar"]]	[qr/o/, qr/a/]
 	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
 	["foo", "bar"]		[qr/o/, qr/a/]
+!	[qr/o/, qr/a/]		["foo", "bar"]
 	["foo", "bar"]		[["foo"], ["bar"]]
 !	["foo", "bar"]		[qr/o/, "foo"]
 	["foo", undef, "bar"]	[qr/o/, undef, "bar"]
 	["foo", undef, "bar"]	[qr/o/, "",    "bar"]
 !	["foo", "", "bar"]	[qr/o/, undef, "bar"]
 	$deep1			$deep1
+	@$deep1			@$deep1
 !	$deep1			$deep2
 
-	\@nums			\@tied_nums
+=	\@nums			\@tied_nums
+=	@nums			\@tied_nums
+=	\@nums			@tied_nums
+=	@nums			@tied_nums
+
+#  - works with lists instead of arrays
+	"foo"			qw(foo bar)	TODO
+	"foo"			('foo','bar')	TODO
 
 #  - a regex
 	qr/x/		[qw(foo bar baz quux)]
 !	qr/y/		[qw(foo bar baz quux)]
 	/x/		[qw(foo bar baz quux)]
 !	/y/		[qw(foo bar baz quux)]
+	/FOO/i		@fooormore
+!	/bar/		@fooormore
 
 # - a number
 	2		[qw(1foo 2bar)]
@@ -310,7 +357,9 @@ __DATA__
 	12345		qr/3/
 !	12345		qr/7/
 
-# array against string
+# TODO ranges
+
+# array/hash against string
 	@fooormore	"".\@fooormore
 !	@keyandmore	"".\@fooormore
 	%fooormore	"".\%fooormore
