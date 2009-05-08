@@ -4000,12 +4000,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
 
-#   define SM_SEEN_THIS(sv) hv_exists_ent(seen_this, \
-	sv_2mortal(newSViv(PTR2IV(sv))), 0)
-
-#   define SM_SEEN_OTHER(sv) hv_exists_ent(seen_other, \
-	sv_2mortal(newSViv(PTR2IV(sv))), 0)
-
     if (SvAMAGIC(e)) {
 	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
 	if (tmpsv) {
@@ -4265,8 +4259,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 			if (this_elem || other_elem)
 			    RETPUSHNO;
 		    }
-		    else if (SM_SEEN_THIS(*this_elem)
-			 || SM_SEEN_OTHER(*other_elem))
+		    else if (hv_exists_ent(seen_this,
+				sv_2mortal(newSViv(PTR2IV(*this_elem))), 0) ||
+			    hv_exists_ent(seen_other,
+				sv_2mortal(newSViv(PTR2IV(*other_elem))), 0))
 		    {
 			if (*this_elem != *other_elem)
 			    RETPUSHNO;
