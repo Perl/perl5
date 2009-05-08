@@ -150,7 +150,7 @@ __DATA__
 
 # regular object
 @	$obj		$obj
-@	$ov_obj		$obj	TODO
+@	$ov_obj		$obj
 @	\&fatal		$obj
 @	\&FALSE		$obj
 @	\&foo		$obj

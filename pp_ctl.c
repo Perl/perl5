@@ -4006,7 +4006,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 #   define SM_SEEN_OTHER(sv) hv_exists_ent(seen_other, \
 	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
-    if (SvAMAGIC(d) || SvAMAGIC(e)) {
+    if (SvAMAGIC(e)) {
 	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
 	if (tmpsv) {
 	    SPAGAIN;
@@ -4039,8 +4039,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHYES;
     }
 
-    if ((sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
-	    || (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)))
+    if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP))
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
 
     /* ~~ sub */

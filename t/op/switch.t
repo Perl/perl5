@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 124;
+use Test::More tests => 118;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -772,6 +772,7 @@ SKIP: {
     { package OverloadTest;
 
       use overload '""' => sub{"string value of obj"};
+      use overload 'eq' => sub{"$_[0]" eq "$_[1]"};
 
       use overload "~~" => sub {
 	  my ($self, $other, $reversed) = @_;
@@ -806,11 +807,8 @@ SKIP: {
 	    default {$matched = 0}
 	}
     
-	is($obj->{called},  1, "$test: called");
-	ok($matched, "$test: matched");
-	is($obj->{left}, "string value of obj", "$test: left");
-	is($obj->{right}, "other arg", "$test: right");
-	ok(!$obj->{reversed}, "$test: not reversed");
+	is($obj->{called}, 0, "$test: called");
+	ok(!$matched, "$test: not matched");
     }
 
     {
@@ -821,11 +819,8 @@ SKIP: {
 	    when ("other arg") {$matched = 1}
 	}
     
-	is($obj->{called},  1, "$test: called");
+	is($obj->{called}, 0, "$test: called");
 	ok(!$matched, "$test: not matched");
-	is($obj->{left}, "string value of obj", "$test: left");
-	is($obj->{right}, "other arg", "$test: right");
-	ok(!$obj->{reversed}, "$test: not reversed");
     }
 
     {
