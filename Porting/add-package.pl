@@ -55,7 +55,7 @@ else {
     unless ( $status =~ /nothing to commit/ims ) {
       die "\nWorking directory not clean. Stopping.\n";
     }
-    system( "git co -b $BranchName blead" )
+    system( "git checkout -b $BranchName blead" )
             and die "Could not create branch '$BranchName': $?";
 
     print "done\n" if $Verbose;
