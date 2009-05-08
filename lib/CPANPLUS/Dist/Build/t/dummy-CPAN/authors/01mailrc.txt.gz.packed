@@ -4,13 +4,13 @@ is included in the Perl distribution.
 
 To unpack this file use the following command:
 
-     uupacktool.pl -u 01mailrc.txt.gz.packed 01mailrc.txt.gz
+     uupacktool.pl -u lib/CPANPLUS/Dist/Build/t/dummy-CPAN/authors/01mailrc.txt.gz.packed lib/CPANPLUS/Dist/Build/t/dummy-CPAN/authors/01mailrc.txt.gz
 
 To recreate it use the following command:
 
-     uupacktool.pl -p 01mailrc.txt.gz 01mailrc.txt.gz.packed
+     uupacktool.pl -p lib/CPANPLUS/Dist/Build/t/dummy-CPAN/authors/01mailrc.txt.gz lib/CPANPLUS/Dist/Build/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
 
-Created at Thu May  7 17:18:27 2009
+Created at Fri May  8 11:07:40 2009
 #########################################################################
 __UU__
 M'XL("*':`DH``S`Q;6%I;')C+G1X=`!+S,E,+%9P#8T(5@`#)=>*DM"2S)QB

@@ -1940,6 +1940,7 @@ lib/CPANPLUS/Dist/Build/t/02_CPANPLUS-Dist-Build.t	CPANPLUS::Dist::Build tests
 lib/CPANPLUS/Dist/Build/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
 lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/02packages.details.txt.gz.packed
 lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/03modlist.data.gz.packed
+lib/CPANPLUS/Dist/Build/t/dummy-perl/.hidden	CPANPLUS::Dist::Build tests
 lib/CPANPLUS/Dist/Build/t/inc/conf.pl	CPANPLUS::Dist::Build tests
 lib/CPANPLUS/Dist/Build/t/src/noxs/Foo-Bar-0.01.tar.gz.packed	CPANPLUS::Dist::Build tests
 lib/CPANPLUS/Dist/Build/t/src/xs/Foo-Bar-0.01.tar.gz.packed	CPANPLUS::Dist::Build tests

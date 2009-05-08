@@ -4,39 +4,25 @@ is included in the Perl distribution.
 
 To unpack this file use the following command:
 
-     uupacktool.pl -u 03modlist.data.gz.packed 03modlist.data.gz
+     uupacktool.pl -u lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/03modlist.data.gz.packed lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/03modlist.data.gz
 
 To recreate it use the following command:
 
-     uupacktool.pl -p 03modlist.data.gz 03modlist.data.gz.packed
+     uupacktool.pl -p lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/03modlist.data.gz lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/03modlist.data.gz.packed
 
-Created at Thu May  7 17:19:15 2009
+Created at Fri May  8 11:07:41 2009
 #########################################################################
 __UU__
-M(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C
-M(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(PI4:&ES(&ES(&$@8FEN87)Y
-M(&9I;&4@=&AA="!W87,@<&%C:V5D('=I=&@@=&AE("=U=7!A8VMT;V]L+G!L
-M)R!W:&EC:`II<R!I;F-L=61E9"!I;B!T:&4@4&5R;"!D:7-T<FEB=71I;VXN
-M"@I4;R!U;G!A8VL@=&AI<R!F:6QE('5S92!T:&4@9F]L;&]W:6YG(&-O;6UA
-M;F0Z"@H@("`@('5U<&%C:W1O;VPN<&P@+74@,#-M;V1L:7-T+F1A=&$N9WH@
-M,#)P86-K86=E<RYD971A:6QS+G1X="YG>@H*5&\@<F5C<F5A=&4@:70@=7-E
-M('1H92!F;VQL;W=I;F<@8V]M;6%N9#H*"B`@("`@=75P86-K=&]O;"YP;"`M
-M<"`P,G!A8VMA9V5S+F1E=&%I;',N='AT+F=Z(#`S;6]D;&ES="YD871A+F=Z
-M"@I#<F5A=&5D(&%T(%1H=2!-87D@(#<@,3<Z,3@Z-3@@,C`P.0HC(R,C(R,C
-M(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C
-M(R,C(R,C(R,C(R,C(R,C(R,C(R,C"E]?555?7PI-)UA,*"(M,SI@1$A@8%-@
-M4CPF)4,Z5B5'.3<L3CDF-50X-D5,/%)95#XG,&!'/2TA.UU,0"5@/U`\7U!)
-M"DU71B8G,S!*."Y+*$H\-4H\*44V5RDH5C8V/E5-2$@X1CHC.3A<)5!/7E\R
-M(SDE5SLZ+4<V*#1.-E@L7B\*32%8*CE+038G45PZ4C5%,3]1-#E9*D$T*C<W
-M3BI74V!)+UQ6/RQ+(24[)T8Z74=5+S9>-4HV341&1SI3)@I-4ELR44Q*3C4S
-M5%Q()5Q)-S-+/DA+,$<Z6D%@(2A12T58/5E6,4@H5B@K-3,E-4I70%,]6S17
-M,EA-/%I'"DTV2CLI42TY/3A?4R\T34E'4"%@/D4O+"$G2#E.5R(Y-R%)-C$R
-M22HY/3%3)B<]229(*2E02ULC.D!++#T*33I*+UQ<*R%80"$Q*#97-BTL0D%"
-M/C,R63PQ2",P.$D]-RI624D_.SA"4T-96S`M1#TL,E(]5R)70%LF,0I-,T!%
-M+R]5245=+CI=+"M(,3@\7RDO+R%$)$\Z)#P_2#DN7%]3.2)87$1+*C5,,6`N
-M+51(+C@\,T!`4R(P"DTL.3@A4E=$-D]'+E@W)U$N1$E&54<A/R(\,UA-+CM=
-M/5!5)4-%*5<E7ULR7#<Z/$$S)"HV421:*E!-)RT*35U6/V!(3T`S3")#7B(U
-M03XG42TO,"%36R)1)%<\.4HX14I<0"XE75<]7UTC)RE?8"I80$(W+%M0,R]`
-M20I-6DA`6%$L1T]))$1/,UTV43M=12LJ.UI/1R,J-C]6)D,W5#%8)4I-628P
-M6T(H15,J-"1>1SI31#A1)30F"CE1/3=27$=*/2]$.2@S*2%=6"0T-2]08%](
-,*SLB73`L8&!@8&`*
+M'XL("#'FO$4``S`S;6]D;&ES="YD871A`%U3_6O;,!#].?HKCBXC"20A=<@&
+M"@OIYV!;/Z`-&V1E*/:U%I4M(\D-)N1_WTFVFVS&H.=W>N^>SO:U5,BAN2;3
+M3"=*6C=.A!/L$FUL9.&DSCD\IF@1A$%P*8*O$Q`N,$6Y(56*"<@\E,FF5,@Z
+MWFL(F])YMH),5+#Q5=(8C#'WO*@E2CBT#@IM'2:L4SN$+'#WA@:<S!"VV%.*
+M;%X1;!FBB&!MZT2L$Y,;=2@M97$:"B-##U*F6E%08>AQJT$_>_;?-A>E,11)
+M5522%NC.=2V.A<4QN]%)K,O<A7%%T]F,_332.<Q'YQ5QF4K(9BM<G$+_#:+Q
+M=!(-8%/!69X8%';\76,N7Y8BEYD8)\@NZ<3OH[\V<@C1#+[1`:+))(+))QY]
+MYI,I?+UY9,QO*43\*EX0+N[/;CF_>4\^#]4/L+)4Y<V9R5QP?EEF!9K1(L=M
+M?_V_;K3P,WL:C!9^&V@#5F92"1/\;+FIW_*.U0FS"KH&;:D<?('=?GY$4\M,
+MF(KX$QJH3$[:XC.9]I==[S/8T;0K^)@*F\Y99^G7W;(;:V7W)%QV_Q#;-!@M
+M=MU0;YWW?LOO1EM;[YNUD<SK&>T9"Y:T?4U$+\3I#3VT3K@C:`]0':`\P**&
+MR>$GJ`GZMDSK&:>B<.&1/5&"<-"F]3KDZ5UKS?FY,)Q?K3B_O?OU$)1>VX*D
+K!44+[EK0KO[5W?]8/<"C_T?NZP^A+5ZMCFU/3WL$GH8^T%]3O>X%W0,`````
