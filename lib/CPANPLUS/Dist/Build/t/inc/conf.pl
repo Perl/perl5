@@ -27,11 +27,14 @@ BEGIN {
     $ENV{'PERL5LIB'}  = join $Config{'path_sep'}, 
                         grep { defined } $ENV{'PERL5LIB'}, @paths, @rel2abs;
     
-    ### add our own path to the front of $ENV{PATH}, so that cpanp-run-perl
-    ### and friends get picked up
-    $old_env_path = $ENV{PATH};
-    $ENV{'PATH'}  = join $Config{'path_sep'}, 
-                    grep { defined } "$FindBin::Bin/../bin", $ENV{'PATH'};
+    ### add CPANPLUS' bin dir to the front of $ENV{PATH}, so that cpanp-run-perl
+    ### and friends get picked up, only under PERL_CORE though.
+    if ( $ENV{PERL_CORE} ) {
+       $old_env_path = $ENV{PATH};
+       $ENV{'PATH'}  = join $Config{'path_sep'}, 
+                    grep { defined } "$FindBin::Bin/../../../bin", $ENV{'PATH'};
+
+    }
 
     ### Fix up the path to perl, as we're about to chdir
     ### but only under perlcore, or if the path contains delimiters,

@@ -4,13 +4,13 @@ is included in the Perl distribution.
 
 To unpack this file use the following command:
 
-     uupacktool.pl -u 02packages.details.txt.gz.packed 02packages.details.txt.gz
+     uupacktool.pl -u lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/02packages.details.txt.gz.packed lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/02packages.details.txt.gz
 
 To recreate it use the following command:
 
-     uupacktool.pl -p 02packages.details.txt.gz 02packages.details.txt.gz.packed
+     uupacktool.pl -p lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/02packages.details.txt.gz lib/CPANPLUS/Dist/Build/t/dummy-CPAN/modules/02packages.details.txt.gz.packed
 
-Created at Thu May  7 17:19:10 2009
+Created at Fri May  8 11:07:41 2009
 #########################################################################
 __UU__
 M'XL("-3:`DH``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`G=-!;]L@%`?P<_PI
