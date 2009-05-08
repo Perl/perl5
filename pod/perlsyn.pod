@@ -687,8 +687,9 @@ The behaviour of a smart match depends on what type of thing its arguments
 are. The behaviour is determined by the following table: the first row
 that applies determines the match behaviour (which is thus mostly
 determined by the type of the right operand). Note that the smart match
-implicitly dereferences any hash or array ref, so the "Hash" and "Array"
-entries apply in those cases.
+implicitly dereferences any non-blessed hash or array ref, so the "Hash"
+and "Array" entries apply in those cases. (For blessed references, the
+"Any" entry apply.)
 
     $a      $b        Type of Match Implied    Matching Code
     ======  =====     =====================    =============
