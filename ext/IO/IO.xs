@@ -122,7 +122,7 @@ io_blocking(pTHX_ InputStream f, int block)
     return RETVAL;
 #else
 #   ifdef WIN32
-    unsigned long flags = block;
+    char flags = (char)block;
     return ioctl(PerlIO_fileno(f), FIONBIO, &flags);
 #   else
     return -1;
