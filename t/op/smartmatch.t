@@ -201,8 +201,8 @@ __DATA__
 	qr//		\&bar
 !	[1]		\&foo
 !	{a=>1}		\&foo
-	$obj		sub { ref $_[0] =~ /NoOverload/ }	TODO
-	$ov_obj		sub { ref $_[0] =~ /CopyOverload/ }	TODO
+	$obj		sub { ref($_[0]) =~ /NoOverload/ }
+	$ov_obj		sub { ref($_[0]) =~ /CopyOverload/ }
 # empty stuff matches, because the sub is never called:
 	[]		\&foo
 	{}		\&foo
@@ -317,7 +317,7 @@ __DATA__
 
 #  - an object
 !	$obj		@fooormore
-	$obj		[sub{ref shift}]	TODO
+	$obj		[sub{ref shift}]
 
 #  - works with lists instead of arrays
 	"foo"			qw(foo bar)	TODO

@@ -3997,6 +3997,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     dVAR;
     dSP;
     
+    bool object_on_left = FALSE;
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
 
@@ -4035,11 +4036,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
     if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP))
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+    if (sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
+	object_on_left = TRUE;
 
     /* ~~ sub */
     if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVCV) {
 	I32 c;
-	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
+	if (object_on_left) {
+	    goto sm_any_sub; /* Treat objects like scalars */
+	}
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    /* Test sub truth for each key */
 	    HE *he;
 	    bool andedresults = TRUE;
@@ -4098,6 +4104,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHNO;
 	}
 	else {
+	  sm_any_sub:
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
@@ -4116,7 +4123,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     /* ~~ %hash */
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVHV) {
-	if (!SvOK(d)) {
+	if (object_on_left) {
+	    goto sm_any_hash; /* Treat objects like scalars */
+	}
+	else if (!SvOK(d)) {
 	    RETPUSHNO;
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
@@ -4209,6 +4219,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else {
+	  sm_any_hash:
 	    if (hv_exists_ent(MUTABLE_HV(SvRV(e)), d, 0))
 		RETPUSHYES;
 	    else
@@ -4217,7 +4228,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     /* ~~ @array */
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVAV) {
-	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
+	if (object_on_left) {
+	    goto sm_any_array; /* Treat objects like scalars */
+	}
+	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(e));
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
@@ -4316,24 +4330,27 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else {
-	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
-	    I32 i;
+	  sm_any_array:
+	    {
+		I32 i;
+		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 
-	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		if (!svp)
-		    continue;
+		for (i = 0; i <= this_len; ++i) {
+		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+		    if (!svp)
+			continue;
 
-		PUSHs(d);
-		PUSHs(*svp);
-		PUTBACK;
-		/* infinite recursion isn't supposed to happen here */
-		(void) do_smartmatch(NULL, NULL);
-		SPAGAIN;
-		if (SvTRUEx(POPs))
-		    RETPUSHYES;
+		    PUSHs(d);
+		    PUSHs(*svp);
+		    PUTBACK;
+		    /* infinite recursion isn't supposed to happen here */
+		    (void) do_smartmatch(NULL, NULL);
+		    SPAGAIN;
+		    if (SvTRUEx(POPs))
+			RETPUSHYES;
+		}
+		RETPUSHNO;
 	    }
-	    RETPUSHNO;
 	}
     }
     /* ~~ qr// */
