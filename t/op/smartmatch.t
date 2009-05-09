@@ -32,13 +32,14 @@ tie my %tied_hash, 'Tie::StdHash';
 }
 
 {
-    package Test::Object::CopyOverload;
+    package Test::Object::WithOverload;
     sub new { bless { key => 'magic' } }
     use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] eq $hash{key} };
     use overload '""' => sub { "stringified" };
+    use overload 'eq' => sub {"$_[0]" eq "$_[1]"};
 }
 
-our $ov_obj = Test::Object::CopyOverload->new;
+our $ov_obj = Test::Object::WithOverload->new;
 our $obj = Test::Object::NoOverload->new;
 
 my @keyandmore = qw(key and more);
@@ -170,6 +171,7 @@ __DATA__
 # object (overloaded or not) ~~ Any
 	$obj		qr/NoOverload/
 	$ov_obj		qr/^stringified$/
+	$ov_obj		"stringified"
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }
@@ -204,7 +206,7 @@ __DATA__
 !	[1]		\&foo
 !	{a=>1}		\&foo
 	$obj		sub { ref($_[0]) =~ /NoOverload/ }
-	$ov_obj		sub { ref($_[0]) =~ /CopyOverload/ }
+	$ov_obj		sub { ref($_[0]) =~ /WithOverload/ }
 # empty stuff matches, because the sub is never called:
 	[]		\&foo
 	{}		\&foo
