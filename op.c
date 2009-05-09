@@ -399,14 +399,6 @@ Perl_allocmy(pTHX_ const char *const name)
     /* check for duplicate declaration */
     pad_check_dup(name, is_our, (PL_curstash ? PL_curstash : PL_defstash));
 
-    if (PL_parser->in_my_stash && *name != '$') {
-	yyerror(Perl_form(aTHX_
-		    "Can't declare class for non-scalar %s in \"%s\"",
- 		     name,
- 		     is_our ? "our"
-			    : PL_parser->in_my == KEY_state ? "state" : "my"));
-    }
-
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name,

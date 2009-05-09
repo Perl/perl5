@@ -7,6 +7,10 @@ BEGIN {
     }
 }
 
+# This test file contains 57 tests.
+# You need to number them manually. Don't forget to update this line for the
+# next kind hacker.
+
 END {print "not ok 1\n" unless $loaded;}
 use v5.6.0;
 use Attribute::Handlers;
@@ -55,6 +59,22 @@ my %x1 :Lastly(1,43);
 sub x1 :Lastly(1,44) {}
 
 my Test $x2 :Dokay(1,5);
+
+if ($] < 5.011) {
+ ::ok(1, $_, '# skip : invalid before 5.11') for 55 .. 57;
+} else {
+ my $c = $::count;
+ eval '
+  my Test @x2 :Dokay(1,55);
+  my Test %x2 :Dokay(1,56);
+ ';
+ $c = $c + 2 - $::count;
+ while ($c > 0) {
+  ::ok(0, 57 - $c);
+  --$c;
+ }
+ ::ok(!$@, 57);
+}
 
 package Test;
 my $x3 :Dokay(1,6);

@@ -10,7 +10,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 83;
+plan 84;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -82,7 +82,10 @@ eval 'my A $x : plugh;';
 is $@, '';
 
 eval 'package Cat; my Cat @socks;';
-like $@, qr/^Can't declare class for non-scalar \@socks in "my"/;
+like $@, '';
+
+eval 'my Cat %nap;';
+like $@, '';
 
 sub X::MODIFY_CODE_ATTRIBUTES { die "$_[0]" }
 sub X::foo { 1 }
