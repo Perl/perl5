@@ -35,6 +35,7 @@ tie my %tied_hash, 'Tie::StdHash';
     package Test::Object::CopyOverload;
     sub new { bless { key => 'magic' } }
     use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] eq $hash{key} };
+    use overload '""' => sub { "stringified" };
 }
 
 our $ov_obj = Test::Object::CopyOverload->new;
@@ -167,7 +168,8 @@ __DATA__
 @	FALSE		$obj
 
 # object (overloaded or not) ~~ Any
-# TODO
+	$obj		qr/NoOverload/
+	$ov_obj		qr/^stringified$/
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }
