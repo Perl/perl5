@@ -4303,28 +4303,19 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    destroy_matcher(matcher);
 	    RETPUSHNO;
 	}
-	else if (SvNIOK(d)) {
+	else if (!SvOK(d)) {
+	    /* undef ~~ array */
+	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
-	    for(i = 0; i <= AvFILL(MUTABLE_AV(SvRV(e))); ++i) {
+	    for (i = 0; i <= this_len; ++i) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		if (!svp)
-		    continue;
-		
-		PUSHs(d);
-		PUSHs(*svp);
-		PUTBACK;
-		if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-		    (void) pp_i_eq();
-		else
-		    (void) pp_eq();
-		SPAGAIN;
-		if (SvTRUEx(POPs))
+		if (!svp || !SvOK(*svp))
 		    RETPUSHYES;
 	    }
 	    RETPUSHNO;
 	}
-	else if (SvPOK(d)) {
+	else {
 	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
@@ -4332,11 +4323,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		if (!svp)
 		    continue;
-		
+
 		PUSHs(d);
 		PUSHs(*svp);
 		PUTBACK;
-		(void) pp_seq();
+		/* infinite recursion isn't supposed to happen here */
+		(void) do_smartmatch(NULL, NULL);
 		SPAGAIN;
 		if (SvTRUEx(POPs))
 		    RETPUSHYES;

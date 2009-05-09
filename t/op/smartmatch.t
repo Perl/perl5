@@ -13,6 +13,7 @@ use Tie::Hash;
 # Predeclare vars used in the tests:
 my @empty;
 my %empty;
+my @sparse; $sparse[2] = 2;
 
 my $deep1 = []; push @$deep1, \$deep1;
 my $deep2 = []; push @$deep2, \$deep2;
@@ -331,7 +332,7 @@ __DATA__
 !	/bar/		@fooormore
 
 # - a number
-	2		[qw(1foo 2bar)]
+	2		[qw(1.00 2.00)]
 	2		[qw(foo 2)]
 	2.0_0e+0	[qw(foo 2)]
 !	2		[qw(1foo bar2)]
@@ -339,6 +340,18 @@ __DATA__
 # - a string
 !	"2"		[qw(1foo 2bar)]
 	"2bar"		[qw(1foo 2bar)]
+
+# - undef
+	undef		[1, 2, undef, 4]
+!	undef		[1, 2, [undef], 4]
+!	undef		@fooormore
+	undef		@sparse
+
+# - nested arrays and ~~ distributivity
+	11		[[11]]
+!	11		[[12]]
+	"foo"		[{foo => "bar"}]
+!	"bar"		[{foo => "bar"}]
 
 # Number against number
 	2		2
