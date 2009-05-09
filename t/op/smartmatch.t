@@ -266,16 +266,15 @@ __DATA__
 =	\@fooormore	%fooormore
 
 #  - a regex
-# TODO those should be symmetrical
-	qr/^(fo[ox])$/		{foo => 1}
-	/^(fo[ox])$/		%fooormore
+=	qr/^(fo[ox])$/		{foo => 1}
+=	/^(fo[ox])$/		%fooormore
 =!	qr/[13579]$/		+{0..99}
-!	qr/a*/			{}
+=!	qr/a*/			{}
 =	qr/a*/			{b=>2}
-	qr/B/i			{b=>2}
-	/B/i			{b=>2}
-!	qr/a+/			{b=>2}
-	qr/^à/			{"à"=>2}
+=	qr/B/i			{b=>2}
+=	/B/i			{b=>2}
+=!	qr/a+/			{b=>2}
+=	qr/^à/			{"à"=>2}
 
 #  - a scalar
 	"foo"		+{foo => 1, bar => 2}
@@ -301,8 +300,8 @@ __DATA__
 #  - another array ref
 	[]			[]
 =!	[]			[1]
-!	[["foo"], ["bar"]]	[qr/o/, qr/a/]
-	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
+	[["foo"], ["bar"]]	[qr/o/, qr/a/]
+!	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
 	["foo", "bar"]		[qr/o/, qr/a/]
 !	[qr/o/, qr/a/]		["foo", "bar"]
 	["foo", "bar"]		[["foo"], ["bar"]]
@@ -328,12 +327,12 @@ __DATA__
 	"foo"			('foo','bar')	TODO
 
 #  - a regex
-	qr/x/		[qw(foo bar baz quux)]
-!	qr/y/		[qw(foo bar baz quux)]
-	/x/		[qw(foo bar baz quux)]
-!	/y/		[qw(foo bar baz quux)]
-	/FOO/i		@fooormore
-!	/bar/		@fooormore
+=	qr/x/		[qw(foo bar baz quux)]
+=!	qr/y/		[qw(foo bar baz quux)]
+=	/x/		[qw(foo bar baz quux)]
+=!	/y/		[qw(foo bar baz quux)]
+=	/FOO/i		@fooormore
+=!	/bar/		@fooormore
 
 # - a number
 	2		[qw(1.00 2.00)]

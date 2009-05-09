@@ -4203,20 +4203,23 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-	    HE *he;
-	    HV *hv = MUTABLE_HV(SvRV(e));
+	  sm_regex_hash:
+	    {
+		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
+		HE *he;
+		HV *hv = MUTABLE_HV(SvRV(e));
 
-	    (void) hv_iterinit(hv);
-	    while ( (he = hv_iternext(hv)) ) {
-		if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
-		    (void) hv_iterinit(hv);
-		    destroy_matcher(matcher);
-		    RETPUSHYES;
+		(void) hv_iterinit(hv);
+		while ( (he = hv_iternext(hv)) ) {
+		    if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
+			(void) hv_iterinit(hv);
+			destroy_matcher(matcher);
+			RETPUSHYES;
+		    }
 		}
+		destroy_matcher(matcher);
+		RETPUSHNO;
 	    }
-	    destroy_matcher(matcher);
-	    RETPUSHNO;
 	}
 	else {
 	  sm_any_hash:
@@ -4303,19 +4306,22 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
-	    I32 i;
+	  sm_regex_array:
+	    {
+		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
+		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
+		I32 i;
 
-	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		if (svp && matcher_matches_sv(matcher, *svp)) {
-		    destroy_matcher(matcher);
-		    RETPUSHYES;
+		for(i = 0; i <= this_len; ++i) {
+		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+		    if (svp && matcher_matches_sv(matcher, *svp)) {
+			destroy_matcher(matcher);
+			RETPUSHYES;
+		    }
 		}
+		destroy_matcher(matcher);
+		RETPUSHNO;
 	    }
-	    destroy_matcher(matcher);
-	    RETPUSHNO;
 	}
 	else if (!SvOK(d)) {
 	    /* undef ~~ array */
@@ -4355,14 +4361,24 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     /* ~~ qr// */
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
-	PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
+	if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
+	    SV *t = d; d = e; e = t;
+	    goto sm_regex_hash;
+	}
+	else if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
+	    SV *t = d; d = e; e = t;
+	    goto sm_regex_array;
+	}
+	else {
+	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
 
-	PUTBACK;
-	PUSHs(matcher_matches_sv(matcher, d)
-	    ? &PL_sv_yes
-	    : &PL_sv_no);
-	destroy_matcher(matcher);
-	RETURN;
+	    PUTBACK;
+	    PUSHs(matcher_matches_sv(matcher, d)
+		    ? &PL_sv_yes
+		    : &PL_sv_no);
+	    destroy_matcher(matcher);
+	    RETURN;
+	}
     }
     /* ~~ X..Y TODO */
     /* ~~ scalar */
