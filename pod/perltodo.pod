@@ -94,6 +94,18 @@ is needed to improve the cross-linking.
 The addition of C<Pod::Simple> and its related modules may make this task
 easier to complete.
 
+=head2 Make ExtUtils::ParseXS use strict;
+
+F<lib/ExtUtils/ParseXS.pm> contains this line
+
+    # use strict;  # One of these days...
+
+Simply uncomment it, and fix all the resulting issues :-)
+
+The more practical approach, to break the task down into manageable chunks, is
+to work your way though the code from bottom to top, or if necessary adding
+extra C<{ ... }> blocks, and turning on strict within them.
+
 =head2 Parallel testing
 
 (This probably impacts much more than the core: also the Test::Harness
