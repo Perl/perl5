@@ -985,9 +985,9 @@ routine types:
 
 
 This MGVTBL structure is set at compile-time in F<perl.h> and there are
-currently 19 types (or 21 with overloading turned on).  These different
-structures contain pointers to various routines that perform additional
-actions depending on which function is being called.
+currently 32 types.  These different structures contain pointers to various
+routines that perform additional actions depending on which function is
+being called.
 
     Function pointer    Action taken
     ----------------    ------------
