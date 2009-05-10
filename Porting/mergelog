@@ -2064,10 +2064,8 @@ d  478780ab3d 2009/01/09 fake_localtime_r and fake_gmtime_r may need thread
 M  6c981e149c 2009/01/09 Capitalize "latin"
 M  80983d2147 2009/01/09 Fix typo
 M  c1e3149410 2009/01/09 Be consistent in writing deobfuscator
-!  53e80d0bfa 2009/01/09 Merge changes from PathTools: 'Update to support V
-			    bumps PathTools to 3.29_01. Wait for CPAN to sync
-!  ae5a807c7d 2009/01/09 'VMS support for Unix and extended file specificat
-			    see 53e80d0bfa
+M  53e80d0bfa 2009/01/09 Merge changes from PathTools: 'Update to support V
+M  ae5a807c7d 2009/01/09 'VMS support for Unix and extended file specificat
 R  8ddb446c41 2009/01/10 Typo fix in pod/perldiag.pod
 			    fix for 777723442a
 A  0fb8cc817d 2009/01/10 move ext/utils/make_ext to ext/utils/make_ext.pl
@@ -2905,8 +2903,9 @@ M  d092c3cd1c 2009/04/18 Add a --quiet option, to suppress all the routine
 M  3dc608da20 2009/04/18 grep then sort, as it's more efficient to sort a s
 M  7b73ff9889 2009/04/18 As autodoc.pl no longer rebuilds repository files,
 M  ce75ce2a31 2009/04/18 fix trivial typo in MANIFEST
-!  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
-			    wait for Module::Build and Cwd to sync with CPAN
+m  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
+			    lib/Module/Build.pm skipped for now;
+			    wait for Module::Build to sync with CPAN
 M  2d871820ee 2009/04/18 autodoc.pl needs -Ilib. I had been testing with a 
 M  cd09325492 2009/04/18 Make autodoc.pl accept the root dir in @ARGV
 R  6fea91d48c 2009/04/18 Remove ExtUtils::MM_Haiku
@@ -2993,10 +2992,16 @@ d  df31f9b1de 2009/05/06 -Duserelocatableinc and -Duseshrplib don't work to
 M  81ab4c4438 2009/05/06 Fix POSIX::tzset() as per Time::Piece::_tzset().
 M  3ecadf9633 2009/05/07 Fix ExtUtils::Miniperl on Win32
 M  4320d0941c 2009/05/07 Upgrade to CPANPLUS-Dist-Build-0.26
-!  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
-			    awaiting pathtools CPAN sync
+M  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
 !  c1413a7f3f 2009/05/08 Update CPAN.pm to 1.93_54
 			    wait for CPAN sync
 M  1e3c652eb4 2009/05/08 git checkout in add-package.pl, not git co
 M  52f75a8770 2009/05/08 Upgrade CPANPLUS::Dist::Build to 0.28
 M  5f1c709273 2009/05/08 Silence Win32 compiler warning in IO.xs
+!  f4388f027b 2009/05/09 Revert "Bump version of File::Copy"
+			    more File::Copy stuff
+M  6c34c32116 2009/05/10 Pull PathTools 3.30 (which was just a blead sync.)
+M  b7a0f54ced 2009/05/10 Update info on number of magic types\n\nRemove men
+M  0befdfba7e 2009/05/10 Making ExtUtils::ParseXS use strict; is TODO.
+M  318bf70858 2009/05/10 Replacing dump.c's use of SVs as temporaries is TO
+M  4477f4efa6 2009/05/10 bump Storage version to 2.20 to distinguish it fro

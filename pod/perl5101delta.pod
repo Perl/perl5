@@ -179,6 +179,10 @@ C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.28
 
 =item *
 
+C<Cwd> upgraded from version 3.25_01 to 3.30
+
+=item *
+
 C<Data::Dumper> upgraded from version 2.121_14 to 2.121_19
 
 =item *
@@ -239,6 +243,10 @@ C<File::Copy> upgraded from version 2.11 to 2.14
 =item *
 
 C<File::Fetch> upgraded from version 0.14 to 0.18
+
+=item *
+
+C<File::Spec> upgraded from version 3.2501 to 3.30
 
 =item *
 
