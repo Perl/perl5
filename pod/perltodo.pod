@@ -601,6 +601,27 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
+=head2 Remove the use of SVs as temporaries in dump.c
+
+F<dump.c> contains debugging routines to dump out the contains of perl data
+structures, such as C<SV>s, C<AV>s and C<HV>s. Currently, the dumping code
+B<uses> C<SV>s for its temporary buffers, which was a logical initial
+implementation choice, as they provide ready made memory handling.
+
+However, they also lead to a lot of confusion when it happens that what you're
+trying to debug is seen by the code in F<dump.c>, correctly or incorrectly, as
+a temporary scalar it can use for a temporary buffer. It's also not possible
+to dump scalars before the interpreter is properly set up, such as during
+ithreads cloning. It would be good to progressively replace the use of scalars
+as string accumulation buffers with something much simpler, directly allocated
+by C<malloc>. The F<dump.c> code is (or should be) only producing 7 bit
+US-ASCII, so output character sets are not an issue.
+
+Producing and proving an internal simple buffer allocation would make it easier
+to re-write the internals of the PerlIO subsystem to avoid using C<SV>s for
+B<its> buffers, use of which can cause problems similar to those of F<dump.c>,
+at similar times.
+
 =head2 safely supporting POSIX SA_SIGINFO
 
 Some years ago Jarkko supplied patches to provide support for the POSIX
