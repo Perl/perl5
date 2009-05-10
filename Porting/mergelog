@@ -2986,3 +2986,17 @@ M  12016aadb5 2009/05/05 Fix Time-Piece tests on Win32 with PERL_IMPLICIT_S
 M  46f1a616f5 2009/05/05 Document that FileCache uses symbolic references
 M  045cad9882 2009/05/05 Bump $VERSION of FileCache
 M  41881f2581 2009/05/05 Add $(LDLIBPTH) to the documentation generation co
+M  4dcdb34ab7 2009/05/06 Export two more PerlIO symbols.
+M  bebf870e6d 2009/05/06 perltie.pod docpatch
+M  938cfd5cbc 2009/05/06 Fix code before declaration compile error on Win32
+d  df31f9b1de 2009/05/06 -Duserelocatableinc and -Duseshrplib don't work to
+M  81ab4c4438 2009/05/06 Fix POSIX::tzset() as per Time::Piece::_tzset().
+M  3ecadf9633 2009/05/07 Fix ExtUtils::Miniperl on Win32
+M  4320d0941c 2009/05/07 Upgrade to CPANPLUS-Dist-Build-0.26
+!  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
+			    awaiting pathtools CPAN sync
+!  c1413a7f3f 2009/05/08 Update CPAN.pm to 1.93_54
+			    wait for CPAN sync
+M  1e3c652eb4 2009/05/08 git checkout in add-package.pl, not git co
+M  52f75a8770 2009/05/08 Upgrade CPANPLUS::Dist::Build to 0.28
+M  5f1c709273 2009/05/08 Silence Win32 compiler warning in IO.xs

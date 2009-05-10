@@ -175,7 +175,7 @@ C<CPANPLUS> upgraded from version 0.84 to 0.8601
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.24
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.28
 
 =item *
 
@@ -326,7 +326,7 @@ C<Pod::Text> upgraded from version 3.08 to 3.13
 
 =item *
 
-C<Posix> upgraded from version 1.13 to 1.17
+C<POSIX> upgraded from version 1.13 to 1.17
 
 =item *
 
@@ -592,17 +592,35 @@ optimisation to be added.
 
 =head1 Changed Internals
 
+=over
+
+=item *
+
 C<vcroak()> now accepts a null first argument.
+
+=item *
 
 New macros C<dSAVEDERRNO>, C<dSAVE_ERRNO>, C<SAVE_ERRNO>, C<RESTORE_ERRNO>
 have been added to formalise the temporary saving of the C<errno>
 variable.
 
+=item *
+
 The function C<Perl_sv_insert_flags> has been added to augment
 C<Perl_sv_insert>.
 
+=item *
+
 The function C<Perl_croak_xs_usage> has been added as a wrapper to
 C<Perl_croak>.
+
+=item *
+
+The functions C<PerlIO_find_layer> and C<PerlIO_list_alloc> are now
+exported.
+
+
+=back
 
 =head1 Known Problems
 
