@@ -1,5 +1,11 @@
 Revision history for Perl distribution PathTools.
 
+3.30 - Sun May 10 10:55:00 2009
+
+- Promote to stable release.
+
+3.29_01 - Thu May  7 20:22:00 2009
+
 - Minor fixes for QNX6. [Sean Boudreau]
 
 - Update to support VMS in Unix compatible mode and/or file names using
