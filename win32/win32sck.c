@@ -279,13 +279,18 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     FD_ZERO(&nwr);
     FD_ZERO(&nex);
     for (i = 0; i < nfds; i++) {
-	fd = TO_SOCKET(i);
-	if (rd && PERL_FD_ISSET(i,rd))
+	if (rd && PERL_FD_ISSET(i,rd)) {
+	    fd = TO_SOCKET(i);
 	    FD_SET((unsigned)fd, &nrd);
-	if (wr && PERL_FD_ISSET(i,wr))
+	}
+	if (wr && PERL_FD_ISSET(i,wr)) {
+	    fd = TO_SOCKET(i);
 	    FD_SET((unsigned)fd, &nwr);
-	if (ex && PERL_FD_ISSET(i,ex))
+	}
+	if (ex && PERL_FD_ISSET(i,ex)) {
+	    fd = TO_SOCKET(i);
 	    FD_SET((unsigned)fd, &nex);
+	}
     }
 
     errno = save_errno;
@@ -293,13 +298,21 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     save_errno = errno;
 
     for (i = 0; i < nfds; i++) {
-	fd = TO_SOCKET(i);
-	if (rd && PERL_FD_ISSET(i,rd) && !FD_ISSET(fd, &nrd))
-	    PERL_FD_CLR(i,rd);
-	if (wr && PERL_FD_ISSET(i,wr) && !FD_ISSET(fd, &nwr))
-	    PERL_FD_CLR(i,wr);
-	if (ex && PERL_FD_ISSET(i,ex) && !FD_ISSET(fd, &nex))
-	    PERL_FD_CLR(i,ex);
+	if (rd && PERL_FD_ISSET(i,rd)) {
+	    fd = TO_SOCKET(i);
+	    if (!FD_ISSET(fd, &nrd))
+		PERL_FD_CLR(i,rd);
+	}
+	if (wr && PERL_FD_ISSET(i,wr)) {
+	    fd = TO_SOCKET(i);
+	    if (!FD_ISSET(fd, &nwr))
+		PERL_FD_CLR(i,wr);
+	}
+	if (ex && PERL_FD_ISSET(i,ex)) {
+	    fd = TO_SOCKET(i);
+	    if (!FD_ISSET(fd, &nex))
+		PERL_FD_CLR(i,ex);
+	}
     }
     errno = save_errno;
 #else
