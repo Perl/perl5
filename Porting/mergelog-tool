@@ -265,6 +265,12 @@ sub generate_mailboxes {
 	$files_and_diff =~ s/^( \d+ files changed,)/\n$1/m;
 	$files_and_diff =~ s/^diff /$linesep\n\ndiff /m;
 
+	# truncate long bodies
+
+	if (length($files_and_diff) > 100_000) {
+	    substr($files_and_diff, 100_000) =
+				    "\n\n***TRUNCATED at 100Kbytes\n";
+	}
 
 	my $body = <<EOF;
 From: $c->[1] <$c->[2]>
