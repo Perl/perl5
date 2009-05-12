@@ -864,7 +864,6 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define glob_2number		S_glob_2number
-#define glob_2pv		S_glob_2pv
 #endif
 #endif
 #define sv_2iv_flags		Perl_sv_2iv_flags
@@ -3201,7 +3200,6 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define glob_2number(a)		S_glob_2number(aTHX_ a)
-#define glob_2pv(a,b)		S_glob_2pv(aTHX_ a,b)
 #endif
 #endif
 #define sv_2iv_flags(a,b)	Perl_sv_2iv_flags(aTHX_ a,b)

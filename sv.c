@@ -1859,27 +1859,6 @@ S_glob_2number(pTHX_ GV * const gv)
     return TRUE;
 }
 
-STATIC char *
-S_glob_2pv(pTHX_ GV * const gv, STRLEN * const len)
-{
-    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
-    SV *const buffer = sv_newmortal();
-
-    PERL_ARGS_ASSERT_GLOB_2PV;
-
-    /* FAKE globs can get coerced, so need to turn this off temporarily if it
-       is on.  */
-    SvFAKE_off(gv);
-    gv_efullname3(buffer, gv, "*");
-    SvFLAGS(gv) |= wasfake;
-
-    assert(SvPOK(buffer));
-    if (len) {
-	*len = SvCUR(buffer);
-    }
-    return SvPVX(buffer);
-}
-
 /* Actually, ISO C leaves conversion of UV to IV undefined, but
    until proven guilty, assume that things are not that bad... */
 
@@ -2987,8 +2966,23 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 #endif
     }
     else {
-	if (isGV_with_GP(sv))
-	    return glob_2pv(MUTABLE_GV(sv), lp);
+	if (isGV_with_GP(sv)) {
+	    GV *const gv = MUTABLE_GV(sv);
+	    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
+	    SV *const buffer = sv_newmortal();
+
+	    /* FAKE globs can get coerced, so need to turn this off temporarily
+	       if it is on.  */
+	    SvFAKE_off(gv);
+	    gv_efullname3(buffer, gv, "*");
+	    SvFLAGS(gv) |= wasfake;
+
+	    assert(SvPOK(buffer));
+	    if (lp) {
+		*lp = SvCUR(buffer);
+	    }
+	    return SvPVX(buffer);
+	}
 
 	if (lp)
 	    *lp = 0;

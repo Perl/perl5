@@ -3012,11 +3012,6 @@ STATIC bool	S_glob_2number(pTHX_ GV* const gv)
 #define PERL_ARGS_ASSERT_GLOB_2NUMBER	\
 	assert(gv)
 
-STATIC char*	S_glob_2pv(pTHX_ GV* const gv, STRLEN * const len)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GLOB_2PV	\
-	assert(gv)
-
 #endif
 /* PERL_CALLCONV IV	Perl_sv_2iv(pTHX_ SV *sv); */
 PERL_CALLCONV IV	Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags);
