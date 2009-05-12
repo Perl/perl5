@@ -603,8 +603,7 @@ that return numerical values, not boolean ones.
 
 =item *
 
-the C<...> flip-flop operator (but B<not> the two-dot version C<..>, which
-is used to construct and test against numerical or string ranges).
+the C<..> and C<...> flip-flop operators.
 
 =back
 
@@ -718,11 +717,8 @@ and "Array" entries apply in those cases. (For blessed references, the
     Array   Regex     array grep               grep /$b/, @$a
     Any     Regex     pattern match            $a =~ /$b/
 
-    undef   Range[4]  always false
-    Any     Range[4]  in range
-
     Any     Num       numeric equality         $a == $b
-    Num     numish[5] numeric equality         $a == $b
+    Num     numish[4] numeric equality         $a == $b
     Any     Any       string equality          $a eq $b
 
 
@@ -730,11 +726,7 @@ and "Array" entries apply in those cases. (For blessed references, the
  2 - that is, each element smart-matches the element of same index in the
      other array. [3]
  3 - If a circular reference is found, we fall back to referential equality.
- 4 - a range is written EXPR..EXPR (using the C<..> range operator, but
-     NOT the three-dot version C<...>, which will be treated as a boolean
-     operator). Numeric ranges will use numeric comparison: that is,
-     "4.5 ~~ 3..5" will be true.
- 5 - either a real number, or a string that looks like a number
+ 4 - either a real number, or a string that looks like a number
 
 The "matching code" doesn't represent the I<real> matching code,
 of course: it's just there to explain the intended meaning. Unlike

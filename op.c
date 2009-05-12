@@ -5224,6 +5224,8 @@ S_looks_like_bool(pTHX_ const OP *o)
 	case OP_DEFINED: case OP_EXISTS:
 	case OP_MATCH:	 case OP_EOF:
 
+	case OP_FLOP:
+
 	    return TRUE;
 	
 	case OP_CONST:
@@ -5234,11 +5236,6 @@ S_looks_like_bool(pTHX_ const OP *o)
 		return TRUE;
 	    else
 		return FALSE;
-		
-	case OP_FLOP:
-	    /* Detect "..." flip-flop operator */
-	    if (cUNOPo->op_first->op_flags & OPf_SPECIAL)
-		return TRUE;
 
 	/* FALL THROUGH */
 	default:

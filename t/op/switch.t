@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 118;
+use Test::More tests => 122;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -511,6 +511,17 @@ sub notfoo {"bar"}
 	}
     }
     is($ok, 2, "((1 == 1) && \"bar\") not smartmatched");
+}
+
+{
+    my $n = 0;
+    for my $l qw(a b c d) {
+	given ($l) {
+	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
+	    default { $n = 0 }
+	}
+	ok(($n xor $l =~ /[ad]/), 'when(E1..E2) evaluates in boolean context');
+    }
 }
 
 {

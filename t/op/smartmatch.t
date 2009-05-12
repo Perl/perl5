@@ -379,8 +379,6 @@ __DATA__
 	12345		qr/3/
 !	12345		qr/7/
 
-# TODO ranges
-
 # array/hash against string
 	@fooormore	"".\@fooormore
 !	@keyandmore	"".\@fooormore
