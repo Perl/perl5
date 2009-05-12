@@ -1,11 +1,11 @@
 # To give due honour to those who have made Perl 5 what it is today,
 # here are easily-from-changelogs-extractable people and their
-# (hopefully) current and preferred email addresses (as of 2002, if known)
-# from the Changes files.  These people have either submitted
-# patches or suggestions, or their bug reports or comments have inspired
-# the appropriate patches.  Corrections, additions, deletions welcome;
-# send them to perl5-porters@perl.org, preferably as the output of diff(1),
-# diff -u or diff -c between the original and a corrected version of this file.
+# (hopefully) current and preferred email addresses from the commits.
+# These people have either submitted patches or suggestions, or their bug
+# reports or comments have inspired the appropriate patches.  Corrections,
+# additions, deletions welcome; send them to perl5-porters@perl.org,
+# preferably as the output of diff(1), diff -u or diff -c between the
+# original and a corrected version of this file.
 #
 # The use of this database for anything else than Perl development
 # is strictly forbidden.  (Passive distribution with the Perl source

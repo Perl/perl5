@@ -558,7 +558,6 @@ be kept as clean as possible.
 =item Documentation
 
   INSTALL README.cygwin README.win32 MANIFEST
-  Changes Changes5.004 Changes5.005 Changes5.6 Changes5.8
   pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
   pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
   pod/perl561delta.pod pod/perl570delta.pod pod/perl572delta.pod
