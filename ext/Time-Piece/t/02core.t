@@ -47,7 +47,13 @@ cmp_ok($t->datetime, 'eq','2000-02-29T12:34:56');
 cmp_ok($t->daylight_savings, '==', 0);
 
 # ->tzoffset?
-{
+my $is_pseudo_fork = 0;
+if (defined &Win32::GetCurrentProcessId
+    ? $$ != Win32::GetCurrentProcessId() : $^O eq "MSWin32" && $$ < 0) {
+    $is_pseudo_fork = 1;
+}
+SKIP: {
+    skip "can't register TZ changes in a pseudo-fork", 2 if $is_pseudo_fork;
     local $ENV{TZ} = "EST5";
     Time::Piece::_tzset();  # register the environment change
     my $lt = localtime;
