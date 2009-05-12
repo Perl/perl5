@@ -138,6 +138,7 @@ sub mycan {				# Real can would leave stubs.
 	 iterators	  => '<>',
          filetest         => "-X",
 	 dereferencing	  => '${} @{} %{} &{} *{}',
+	 matching	  => '~~',
 	 special	  => 'nomethod fallback =');
 
 use warnings::register;
@@ -448,6 +449,11 @@ treated as a filename.
 
 This overload was introduced in perl 5.12.
 
+=item * I<Matching>
+
+The key C<"~~"> allows you to override the smart matching used by
+the switch construct. See L<feature>.
+
 =item * I<Dereferencing>
 
     '${}', '@{}', '%{}', '&{}', '*{}'.
@@ -464,7 +470,7 @@ The dereference operators must be specified explicitly they will not be passed t
 
 =item * I<Special>
 
-    "nomethod", "fallback", "=", "~~",
+    "nomethod", "fallback", "=".
 
 see L<SPECIAL SYMBOLS FOR C<use overload>>.
 
@@ -489,6 +495,7 @@ A computer-readable form of the above table is available in the hash
  iterators	  => '<>',
  filetest         => '-X',
  dereferencing	  => '${} @{} %{} &{} *{}',
+ matching	  => '~~',
  special	  => 'nomethod fallback ='
 
 =head2 Inheritance and overloading
@@ -584,11 +591,6 @@ C<"nomethod"> value, and if this is missing, raises an exception.
 
 B<Note.> C<"fallback"> inheritance via @ISA is not carved in stone
 yet, see L<"Inheritance and overloading">.
-
-=head2 Smart Match
-
-The key C<"~~"> allows you to override the smart matching used by
-the switch construct. See L<feature>.
 
 =head2 Copy Constructor
 
