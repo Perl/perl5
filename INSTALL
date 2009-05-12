@@ -42,8 +42,8 @@ If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
-pod/perl5100delta.pod file.  For more detailed information about specific
-changes, see the Changes file.
+pod/perl5101delta.pod file.  For more information about how to find more
+specific detail about changes, see the Changes file.
 
 =head1 DESCRIPTION
 
