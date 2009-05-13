@@ -1800,7 +1800,7 @@ Use of uninitialized value in addition (+) at - line 4.
 use warnings 'uninitialized';
 my $v;
 my $fn = sub {};
-$v = 1 + ($fn ~~ 1);
+$v = 1 + (1 ~~ $fn);
 EXPECT
 Use of uninitialized value in addition (+) at - line 4.
 ########

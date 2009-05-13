@@ -133,6 +133,7 @@ sub mycan {				# Real can would leave stubs.
 	 conversion	  => 'bool "" 0+',
 	 iterators	  => '<>',
 	 dereferencing	  => '${} @{} %{} &{} *{}',
+	 matching	  => '~~',
 	 special	  => 'nomethod fallback =');
 
 use warnings::register;
@@ -420,6 +421,11 @@ I<globbing> syntax C<E<lt>${var}E<gt>>.
 B<BUGS> Even in list context, the iterator is currently called only
 once and with scalar context.
 
+=item * I<Matching>
+
+The key C<"~~"> allows you to override the smart matching used by
+the switch construct. See L<feature>.
+
 =item * I<Dereferencing>
 
     '${}', '@{}', '%{}', '&{}', '*{}'.
@@ -436,7 +442,7 @@ The dereference operators must be specified explicitly they will not be passed t
 
 =item * I<Special>
 
-    "nomethod", "fallback", "=", "~~",
+    "nomethod", "fallback", "=".
 
 see L<SPECIAL SYMBOLS FOR C<use overload>>.
 
@@ -460,6 +466,7 @@ A computer-readable form of the above table is available in the hash
  conversion	  => 'bool "" 0+',
  iterators	  => '<>',
  dereferencing	  => '${} @{} %{} &{} *{}',
+ matching	  => '~~',
  special	  => 'nomethod fallback ='
 
 =head2 Inheritance and overloading
@@ -555,11 +562,6 @@ C<"nomethod"> value, and if this is missing, raises an exception.
 
 B<Note.> C<"fallback"> inheritance via @ISA is not carved in stone
 yet, see L<"Inheritance and overloading">.
-
-=head2 Smart Match
-
-The key C<"~~"> allows you to override the smart matching used by
-the switch construct. See L<feature>.
 
 =head2 Copy Constructor
 

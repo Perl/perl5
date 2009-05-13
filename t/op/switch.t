@@ -16,7 +16,6 @@ use Test::More tests => 122;
               
 
 use feature 'switch';
-no warnings "numeric";
 
 eval { continue };
 like($@, qr/^Can't "continue" outside/, "continue outside");
@@ -133,14 +132,16 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
     is($ok, 1, "Given(0) when($undef++)");
 }
 {
-    my $ok = 1;
-    given (undef) { when(0) {$ok = 0} }
+    no warnings "uninitialized";
+    my $ok = 0;
+    given (undef) { when(0) {$ok = 1} }
     is($ok, 1, "Given(undef) when(0)");
 }
 {
+    no warnings "uninitialized";
     my $undef;
-    my $ok = 1;
-    given ($undef) { when(0) {$ok = 0} }
+    my $ok = 0;
+    given ($undef) { when(0) {$ok = 1} }
     is($ok, 1, 'Given($undef) when(0)');
 }
 ########
@@ -156,14 +157,16 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
     is($ok, 1, 'Given("") when($undef)');
 }
 {
-    my $ok = 1;
-    given (undef) { when("") {$ok = 0} }
+    no warnings "uninitialized";
+    my $ok = 0;
+    given (undef) { when("") {$ok = 1} }
     is($ok, 1, 'Given(undef) when("")');
 }
 {
+    no warnings "uninitialized";
     my $undef;
-    my $ok = 1;
-    given ($undef) { when("") {$ok = 0} }
+    my $ok = 0;
+    given ($undef) { when("") {$ok = 1} }
     is($ok, 1, 'Given($undef) when("")');
 }
 ########
@@ -428,11 +431,11 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 }
 
 # Sub and method calls
-sub bar {"bar"}
+sub notfoo {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(bar()) {$ok = 1}
+	when(notfoo()) {$ok = 1}
     }
     ok($ok, "Sub call acts as boolean")
 }
@@ -440,7 +443,7 @@ sub bar {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(main->bar()) {$ok = 1}
+	when(main->notfoo()) {$ok = 1}
     }
     ok($ok, "Class-method call acts as boolean")
 }
@@ -449,7 +452,7 @@ sub bar {"bar"}
     my $ok = 0;
     my $obj = bless [];
     given("foo") {
-	when($obj->bar()) {$ok = 1}
+	when($obj->notfoo()) {$ok = 1}
     }
     ok($ok, "Object-method call acts as boolean")
 }
@@ -510,6 +513,28 @@ sub bar {"bar"}
 }
 
 {
+    my $n = 0;
+    for my $l qw(a b c d) {
+	given ($l) {
+	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
+	    default { $n = 0 }
+	}
+	ok(($n xor $l =~ /[ad]/), 'when(E1..E2) evaluates in boolean context');
+    }
+}
+
+{
+    my $n = 0;
+    for my $l qw(a b c d) {
+	given ($l) {
+	    when ($_ eq "b" ... $_ eq "c") { $n = 1 }
+	    default { $n = 0 }
+	}
+	ok(($n xor $l =~ /[ad]/), 'when(E1...E2) evaluates in boolean context');
+    }
+}
+
+{
     my $ok = 0;
     given("foo") {
 	when((1 == $ok) || "foo") {
@@ -519,67 +544,14 @@ sub bar {"bar"}
     ok($ok, '((1 == $ok) || "foo") smartmatched');
 }
 
-TODO: {
-    local $TODO = "RT #50538: when( \@n && \%n ) fails to smart match";
-    { # this should smart match on each side of &&
- 	my @n = qw(fred barney betty);
-	my @m = @n;
-	
-	my $ok = 0;
-	given( "fred" ) {
-	when( @n ) {
-		$ok++; continue;
+{
+    my $ok = 0;
+    given("foo") {
+	when((1 == $ok || undef) // "foo") {
+	    $ok = 1;
 	}
-	when( @m ) {
-		$ok++; continue;
-	}
-	when( @m && @n ) {
-		$ok++;
-	}
-	}
-
-	is($ok, 3, '(@n && @m) smart-matched');	
     }
-
-    { # this should smart match on each side of &&
-	my @n = qw(fred barney betty);
-	my %n = map { $_, 1 } @n;
-	
-	my $ok = 0;
-	given( "fred" ) {
-	when( @n ) {
-		$ok++; continue;
-	}
-	when( %n ) {
-		$ok++; continue;
-	}
-	when( @n && %n ) {
-		$ok++;
-	}
-	}
-
-	is($ok, 3, '(@n && %n) smart-matched');	
-    }
-
-    { # this should smart match on each side of &&
-	my %n = map { $_, 1 } qw(fred barney betty);
-	my %m = %n;
-	
-	my $ok = 0;
-	given( "fred" ) {
-	when( %m ) {
-		$ok++; continue;
-	}
-	when( %n ) {
-		$ok++; continue;
-	}
-	when( %m && %n ) {
-		$ok++;
-	}
-	}
-
-	is($ok, 3, '(%m && %n) smart-matched');	
-    }
+    ok($ok, '((1 == $ok || undef) // "foo") smartmatched');
 }
 
 # Make sure we aren't invoking the get-magic more than once
@@ -659,6 +631,7 @@ my $f = tie my $v, "FetchCounter";
     my $ok;
     $v = undef;
     is($f->count(), 0, "Sanity check: $test_name");
+    no warnings "uninitialized";
     given(my $undef) {
     	when(sub{0}->()) {}
 	when("21")  {}
@@ -761,20 +734,19 @@ my $f = tie my $v, "FetchCounter";
 
 # Code references
 {
-    no warnings "redefine";
     my $called_foo = 0;
-    sub foo {$called_foo = 1}
+    sub foo {$called_foo = 1; "@_" eq "foo"}
     my $called_bar = 0;
-    sub bar {$called_bar = 1}
+    sub bar {$called_bar = 1; "@_" eq "bar"}
     my ($matched_foo, $matched_bar) = (0, 0);
-    given(\&foo) {
+    given("foo") {
 	when(\&bar) {$matched_bar = 1}
 	when(\&foo) {$matched_foo = 1}
     }
-    is($called_foo, 0,  "Code ref comparison: foo not called");
-    is($called_bar, 0,  "Code ref comparison: bar not called");
-    is($matched_bar, 0, "Code ref didn't match different one");
-    is($matched_foo, 1, "Code ref did match itself");
+    is($called_foo, 1,  "foo() was called");
+    is($called_bar, 1,  "bar() was called");
+    is($matched_bar, 0, "bar didn't match");
+    is($matched_foo, 1, "foo did match");
 }
 
 sub contains_x {
@@ -809,6 +781,7 @@ SKIP: {
     { package OverloadTest;
 
       use overload '""' => sub{"string value of obj"};
+      use overload 'eq' => sub{"$_[0]" eq "$_[1]"};
 
       use overload "~~" => sub {
 	  my ($self, $other, $reversed) = @_;
@@ -843,11 +816,8 @@ SKIP: {
 	    default {$matched = 0}
 	}
     
-	is($obj->{called},  1, "$test: called");
-	ok($matched, "$test: matched");
-	is($obj->{left}, "string value of obj", "$test: left");
-	is($obj->{right}, "other arg", "$test: right");
-	ok(!$obj->{reversed}, "$test: not reversed");
+	is($obj->{called}, 0, "$test: called");
+	ok(!$matched, "$test: not matched");
     }
 
     {
@@ -858,11 +828,8 @@ SKIP: {
 	    when ("other arg") {$matched = 1}
 	}
     
-	is($obj->{called},  1, "$test: called");
+	is($obj->{called}, 0, "$test: called");
 	ok(!$matched, "$test: not matched");
-	is($obj->{left}, "string value of obj", "$test: left");
-	is($obj->{right}, "other arg", "$test: right");
-	ok(!$obj->{reversed}, "$test: not reversed");
     }
 
     {
