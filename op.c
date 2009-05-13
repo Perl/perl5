@@ -5176,6 +5176,7 @@ S_looks_like_bool(pTHX_ const OP *o)
 
     switch(o->op_type) {
 	case OP_OR:
+	case OP_DOR:
 	    return looks_like_bool(cLOGOPo->op_first);
 
 	case OP_AND:
@@ -5191,7 +5192,6 @@ S_looks_like_bool(pTHX_ const OP *o)
 	case OP_ENTERSUB:
 
 	case OP_NOT:	case OP_XOR:
-	/* Note that OP_DOR is not here */
 
 	case OP_EQ:	case OP_NE:	case OP_LT:
 	case OP_GT:	case OP_LE:	case OP_GE:
@@ -5216,6 +5216,8 @@ S_looks_like_bool(pTHX_ const OP *o)
 	case OP_DEFINED: case OP_EXISTS:
 	case OP_MATCH:	 case OP_EOF:
 
+	case OP_FLOP:
+
 	    return TRUE;
 	
 	case OP_CONST:
@@ -5224,7 +5226,9 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    ||  cSVOPo->op_sv == &PL_sv_no)
 	    
 		return TRUE;
-		
+	    else
+		return FALSE;
+
 	/* FALL THROUGH */
 	default:
 	    return FALSE;
