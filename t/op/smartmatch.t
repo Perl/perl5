@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 use strict;
+use warnings;
+no warnings 'uninitialized';
 
 use Tie::Array;
 use Tie::Hash;
@@ -62,7 +64,13 @@ while (<DATA>) {
     my $tstr = "$left ~~ $right";
 
     test_again:
-    my $res = eval $tstr;
+    my $res;
+    if ($note =~ /NOWARNINGS/) {
+	$res = eval "no warnings; $tstr";
+    }
+    else {
+	$res = eval $tstr;
+    }
 
     chomp $@;
 
@@ -322,10 +330,6 @@ __DATA__
 !	$obj		@fooormore
 	$obj		[sub{ref shift}]
 
-#  - works with lists instead of arrays
-	"foo"			qw(foo bar)	TODO
-	"foo"			('foo','bar')	TODO
-
 #  - a regex
 =	qr/x/		[qw(foo bar baz quux)]
 =!	qr/y/		[qw(foo bar baz quux)]
@@ -368,7 +372,7 @@ __DATA__
 =	2		"2"
 =	2		"2.0"
 !	2		"2bananas"
-!=	2_3		"2_3"
+!=	2_3		"2_3"		NOWARNINGS
 	FALSE		"0"
 
 # Regex against string

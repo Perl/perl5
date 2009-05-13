@@ -16,7 +16,6 @@ use Test::More tests => 122;
               
 
 use feature 'switch';
-no warnings "numeric";
 
 eval { continue };
 like($@, qr/^Can't "continue" outside/, "continue outside");
@@ -735,7 +734,6 @@ my $f = tie my $v, "FetchCounter";
 
 # Code references
 {
-    no warnings "redefine";
     my $called_foo = 0;
     sub foo {$called_foo = 1; "@_" eq "foo"}
     my $called_bar = 0;
