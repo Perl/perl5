@@ -4878,6 +4878,7 @@ S_path_is_absolute(const char *name)
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL
 	|| (*name == ':')
+#endif
 #ifdef WIN32
  || (*name == '.' && ((name[1] == '/' ||
  (name[1] == '.' && name[2] == '/'))
