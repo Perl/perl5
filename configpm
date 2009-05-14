@@ -938,6 +938,21 @@ print CONFIG_POD <<'ENDOFTAIL';
 
 =back
 
+=head1 GIT DATA
+
+Information on the git commit from which the current perl binary was compiled
+can be found in the variable C<$Config::Git_Data>.  The variable is a
+structured string that looks something like this:
+
+  git_commit_id='ea0c2dbd5f5ac6845ecc7ec6696415bf8e27bd52'
+  git_describe='GitLive-blead-1076-gea0c2db'
+  git_branch='smartmatch'
+  git_uncommitted_changes=''
+  git_commit_id_title='Commit id:'
+  git_commit_date='2009-05-09 17:47:31 +0200'
+
+Its format is not guaranteed not to change over time.
+
 =head1 NOTE
 
 This module contains a good example of how to use tie to implement a
