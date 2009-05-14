@@ -42,9 +42,12 @@ $var = dualvar($numstr, "");
 
 ok( $var == $numstr,	'NV');
 
-$var = dualvar(1<<31, "");
-ok( $var == (1<<31),	'UV 1');
-ok( $var > 0,		'UV 2');
+SKIP: {
+  skip("dualvar with UV value known to fail with $]",2) if $] < 5.006_001;
+  $var = dualvar(1<<31, "");
+  ok( $var == (1<<31),	'UV 1');
+  ok( $var > 0,		'UV 2');
+}
 
 tie my $tied, 'Tied';
 $var = dualvar($tied, "ok");

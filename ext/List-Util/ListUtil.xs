@@ -147,18 +147,38 @@ CODE:
     int index;
     NV retval;
     SV *retsv;
+    int magic;
     if(!items) {
 	XSRETURN_UNDEF;
     }
     retsv = ST(0);
-    retval = slu_sv_value(retsv);
+    magic = SvAMAGIC(retsv);
+    if (!magic) {
+      retval = slu_sv_value(retsv);
+    }
     for(index = 1 ; index < items ; index++) {
 	SV *stacksv = ST(index);
-	NV val = slu_sv_value(stacksv);
-	if(val < retval ? !ix : ix) {
-	    retsv = stacksv;
-	    retval = val;
-	}
+        SV *tmpsv;
+        if ((magic || SvAMAGIC(stacksv)) && (tmpsv = amagic_call(retsv, stacksv, gt_amg, 0))) {
+             if (SvTRUE(tmpsv) ? !ix : ix) {
+                  retsv = stacksv;
+                  magic = SvAMAGIC(retsv);
+                  if (!magic) {
+                      retval = slu_sv_value(retsv);
+                  }
+             }
+        }
+        else {
+            NV val = slu_sv_value(stacksv);
+            if (magic) {
+                retval = slu_sv_value(retsv);
+                magic = 0;
+            }
+            if(val < retval ? !ix : ix) {
+                retsv = stacksv;
+                retval = val;
+            }
+        }
     }
     ST(0) = retsv;
     XSRETURN(1);
@@ -166,25 +186,49 @@ CODE:
 
 
 
-NV
+void
 sum(...)
 PROTOTYPE: @
 CODE:
 {
     SV *sv;
+    SV *retsv = NULL;
     int index;
+    int magic;
+    NV retval = 0;
     if(!items) {
 	XSRETURN_UNDEF;
     }
     sv = ST(0);
-    RETVAL = slu_sv_value(sv);
+    if (SvAMAGIC(sv)) {
+        retsv = sv_newmortal();
+        sv_setsv(retsv, sv);
+    }
+    else {
+        retval = slu_sv_value(sv);
+    }
     for(index = 1 ; index < items ; index++) {
 	sv = ST(index);
-	RETVAL += slu_sv_value(sv);
+        if (retsv || SvAMAGIC(sv)) {
+            if (!retsv) {
+                retsv = sv_newmortal();
+                sv_setnv(retsv,retval);
+            }
+            if (!amagic_call(retsv, sv, add_amg, AMGf_assign)) {
+                sv_setnv(retsv, SvNV(retsv) + SvNV(sv));
+            }
+        }
+        else {
+          retval += slu_sv_value(sv);
+        }
     }
+    if (!retsv) {
+        retsv = sv_newmortal();
+        sv_setnv(retsv,retval);
+    }
+    ST(0) = retsv;
+    XSRETURN(1);
 }
-OUTPUT:
-    RETVAL
 
 
 void
@@ -252,6 +296,9 @@ CODE:
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("Not a subroutine reference");
+    }
     PUSH_MULTICALL(cv);
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -485,6 +532,13 @@ looks_like_number(sv)
 	SV *sv
 PROTOTYPE: $
 CODE:
+  SV *tempsv;
+  if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
+    sv = tempsv;
+  }
+  else if (SvMAGICAL(sv)) {
+      SvGETMAGIC(sv);
+  }
 #if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <5)
   if (SvPOK(sv) || SvPOKp(sv)) {
     RETVAL = looks_like_number(sv);

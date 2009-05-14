@@ -14,7 +14,7 @@ BEGIN {
 }
 
 
-use Test::More tests => 29;
+use Test::More tests => 32;
 
 use Scalar::Util qw(refaddr);
 use vars qw($t $y $x *F $v $r);
@@ -58,11 +58,22 @@ foreach $r ({}, \$t, [], \*F, sub {}) {
   ok(refaddr($x{$y}));
   ok(refaddr($x{$b}));
 }
+{
+  my $z = bless {}, '0';
+  ok(refaddr($z));
+  @{"0::ISA"} = qw(FooBar);
+  my $a = {};
+  my $r = refaddr($a);
+  $z = bless $a, '0';
+  ok(refaddr($z) > 10);
+  is(refaddr($z),$r,"foo");
+}
 
 package FooBar;
 
 use overload  '0+' => sub { 10 },
-		'+' => sub { 10 + $_[1] };
+		'+' => sub { 10 + $_[1] },
+		'"' => sub { "10" };
 
 package MyTie;
 

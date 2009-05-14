@@ -13,7 +13,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 23;
+use Test::More tests => 29;
 
 use Scalar::Util qw(reftype);
 use vars qw($t $y $x *F);
@@ -21,6 +21,7 @@ use Symbol qw(gensym);
 
 # Ensure we do not trigger and tied methods
 tie *F, 'MyTie';
+my $RE = $] < 5.011 ? 'SCALAR' : 'REGEXP';
 
 @test = (
  [ undef, 1,		'number'	],
@@ -32,7 +33,8 @@ tie *F, 'MyTie';
  [ GLOB   => \*F,	'tied GLOB ref'	],
  [ GLOB   => gensym,	'GLOB ref'	],
  [ CODE   => sub {},	'CODE ref'	],
-# [ IO => *STDIN{IO} ] the internal sv_reftype returns UNKNOWN
+ [ IO     => *STDIN{IO},'IO ref'        ],
+ [ $RE    => qr/x/,     'REGEEXP'       ],
 );
 
 foreach $test (@test) {
