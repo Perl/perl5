@@ -1,8 +1,10 @@
 # List::Util.pm
 #
-# Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2009 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
+#
+# This module is normally only loaded if the XS module is not available
 
 package List::Util;
 
@@ -12,7 +14,7 @@ require Exporter;
 
 @ISA        = qw(Exporter);
 @EXPORT_OK  = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION    = "1.19";
+$VERSION    = "1.21";
 $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -32,72 +34,10 @@ eval {
 } unless $TESTING_PERL_ONLY;
 
 
-# This code is only compiled if the XS did not load
-# of for perl < 5.6.0
-
-if (!defined &reduce) {
-eval <<'ESQ' 
-
-sub reduce (&@) {
-  my $code = shift;
-  no strict 'refs';
-
-  return shift unless @_ > 1;
-
-  use vars qw($a $b);
-
-  my $caller = caller;
-  local(*{$caller."::a"}) = \my $a;
-  local(*{$caller."::b"}) = \my $b;
-
-  $a = shift;
-  foreach (@_) {
-    $b = $_;
-    $a = &{$code}();
-  }
-
-  $a;
+if (!defined &sum) {
+  require List::Util::PP;
+  List::Util::PP->import;
 }
-
-sub first (&@) {
-  my $code = shift;
-
-  foreach (@_) {
-    return $_ if &{$code}();
-  }
-
-  undef;
-}
-
-ESQ
-}
-
-# This code is only compiled if the XS did not load
-eval <<'ESQ' if !defined &sum;
-
-use vars qw($a $b);
-
-sub sum (@) { reduce { $a + $b } @_ }
-
-sub min (@) { reduce { $a < $b ? $a : $b } @_ }
-
-sub max (@) { reduce { $a > $b ? $a : $b } @_ }
-
-sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
-
-sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
-
-sub shuffle (@) {
-  my @a=\(@_);
-  my $n;
-  my $i=@_;
-  map {
-    $n = rand($i--);
-    (${$a[$n]}, $a[$n] = $a[$i])[0];
-  } @_;
-}
-
-ESQ
 
 1;
 
@@ -212,6 +152,12 @@ element is returned and BLOCK is not executed.
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
 
+If your algorithm requires that C<reduce> produce an identity value, then
+make sure that you always pass that identity value as the first argument to prevent
+C<undef> being returned
+
+  $foo = reduce { $a + $b } 0, @values;             # sum with 0 identity value
+
 =item shuffle LIST
 
 Returns the elements of LIST in a random order
@@ -230,6 +176,12 @@ C<undef> is returned.
 This function could be implemented using C<reduce> like this
 
     $foo = reduce { $a + $b } 1..10
+
+If your algorithm requires that C<sum> produce an identity of 0, then
+make sure that you always pass C<0> as the first argument to prevent
+C<undef> being returned
+
+  $foo = sum 0, @values;
 
 =back
 
@@ -274,7 +226,7 @@ L<Scalar::Util>, L<List::MoreUtils>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

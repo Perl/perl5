@@ -16,7 +16,7 @@ BEGIN {
 
 use List::Util qw(reduce min);
 use Test::More;
-plan tests => ($::PERL_ONLY ? 21 : 23);
+plan tests => ($::PERL_ONLY ? 23 : 25);
 
 my $v = reduce {};
 
@@ -120,6 +120,16 @@ SKIP: {
     my $refcnt = &Internals::SvREFCNT(\&mult);
     $v = reduce \&mult, 1..6;
     is(&Internals::SvREFCNT(\&mult), $refcnt, "Refcount unchanged");
+}
+
+{
+  my $ok = 'failed';
+  local $SIG{__DIE__} = sub { $ok = $_[0] =~ /Not a (subroutine|CODE) reference/ ? '' : $_[0] };
+  eval { &reduce('foo',1,2) };
+  is($ok, '', 'Not a subroutine reference');
+  $ok = 'failed';
+  eval { &reduce({},1,2) };
+  is($ok, '', 'Not a subroutine reference');
 }
 
 # The remainder of the tests are only relevant for the XS

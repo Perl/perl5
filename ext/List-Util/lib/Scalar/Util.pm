@@ -1,33 +1,45 @@
 # Scalar::Util.pm
 #
-# Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Scalar::Util;
 
 use strict;
-use vars qw(@ISA @EXPORT_OK $VERSION);
+use vars qw(@ISA @EXPORT_OK $VERSION @EXPORT_FAIL);
 require Exporter;
 require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION    = "1.19";
+$VERSION    = "1.21";
 $VERSION   = eval $VERSION;
 
+unless (defined &dualvar) {
+  # Load Pure Perl version if XS not loaded
+  require Scalar::Util::PP;
+  Scalar::Util::PP->import;
+  push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
+}
+
 sub export_fail {
+  if (grep { /dualvar/ } @EXPORT_FAIL) { # no XS loaded
+    my $pat = join("|", @EXPORT_FAIL);
+    if (my ($err) = grep { /^($pat)$/ } @_ ) {
+      require Carp;
+      Carp::croak("$err is only available with the XS version of Scalar::Util");
+    }
+  }
+
   if (grep { /^(weaken|isweak)$/ } @_ ) {
     require Carp;
     Carp::croak("Weak references are not implemented in the version of perl");
   }
+
   if (grep { /^(isvstring)$/ } @_ ) {
     require Carp;
     Carp::croak("Vstrings are not implemented in the version of perl");
-  }
-  if (grep { /^(dualvar|set_prototype)$/ } @_ ) {
-    require Carp;
-    Carp::croak("$1 is only avaliable with the XS version");
   }
 
   @_;
@@ -51,96 +63,6 @@ sub openhandle ($) {
     ? $fh : undef;
 }
 
-eval <<'ESQ' unless defined &dualvar;
-
-use vars qw(@EXPORT_FAIL);
-push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
-
-# The code beyond here is only used if the XS is not installed
-
-# Hope nobody defines a sub by this name
-sub UNIVERSAL::a_sub_not_likely_to_be_here { ref($_[0]) }
-
-sub blessed ($) {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  length(ref($_[0]))
-    ? eval { $_[0]->a_sub_not_likely_to_be_here }
-    : undef
-}
-
-sub refaddr($) {
-  my $pkg = ref($_[0]) or return undef;
-  if (blessed($_[0])) {
-    bless $_[0], 'Scalar::Util::Fake';
-  }
-  else {
-    $pkg = undef;
-  }
-  "$_[0]" =~ /0x(\w+)/;
-  my $i = do { local $^W; hex $1 };
-  bless $_[0], $pkg if defined $pkg;
-  $i;
-}
-
-sub reftype ($) {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  my $r = shift;
-  my $t;
-
-  length($t = ref($r)) or return undef;
-
-  # This eval will fail if the reference is not blessed
-  eval { $r->a_sub_not_likely_to_be_here; 1 }
-    ? do {
-      $t = eval {
-	  # we have a GLOB or an IO. Stringify a GLOB gives it's name
-	  my $q = *$r;
-	  $q =~ /^\*/ ? "GLOB" : "IO";
-	}
-	or do {
-	  # OK, if we don't have a GLOB what parts of
-	  # a glob will it populate.
-	  # NOTE: A glob always has a SCALAR
-	  local *glob = $r;
-	  defined *glob{ARRAY} && "ARRAY"
-	  or defined *glob{HASH} && "HASH"
-	  or defined *glob{CODE} && "CODE"
-	  or length(ref(${$r})) ? "REF" : "SCALAR";
-	}
-    }
-    : $t
-}
-
-sub tainted {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  local $^W = 0;
-  eval { kill 0 * $_[0] };
-  $@ =~ /^Insecure/;
-}
-
-sub readonly {
-  return 0 if tied($_[0]) || (ref(\($_[0])) ne "SCALAR");
-
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  my $tmp = $_[0];
-
-  !eval { $_[0] = $tmp; 1 };
-}
-
-sub looks_like_number {
-  local $_ = shift;
-
-  # checks from perlfaq4
-  return 0 if !defined($_) or ref($_);
-  return 1 if (/^[+-]?\d+$/); # is a +/- integer
-  return 1 if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/); # a C float
-  return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
-
-  0;
-}
-
-ESQ
-
 1;
 
 __END__
@@ -153,6 +75,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
     use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted
                         weaken isvstring looks_like_number set_prototype);
+                        # and other useful utils appearing below
 
 =head1 DESCRIPTION
 
@@ -209,7 +132,7 @@ If EXPR is a scalar which is a weak reference the result is true.
 B<NOTE>: Copying a weak reference creates a normal, strong, reference.
 
     $copy = $ref;
-    $weak = isweak($ref);               # false
+    $weak = isweak($copy);              # false
 
 =item looks_like_number EXPR
 
@@ -310,6 +233,32 @@ be destroyed because there is now always a strong reference to them in the
 
 =back
 
+=head1 DIAGNOSTICS
+
+Module use may give one of the following errors during import.
+
+=over
+
+=item Weak references are not implemented in the version of perl
+
+The version of perl that you are using does not implement weak references, to use
+C<isweak> or C<weaken> you will need to use a newer release of perl.
+
+=item Vstrings are not implemented in the version of perl
+
+The version of perl that you are using does not implement Vstrings, to use
+C<isvstring> you will need to use a newer release of perl.
+
+=item C<NAME> is only available with the XS version of Scalar::Util
+
+C<Scalar::Util> contains both perl and C implementations of many of its functions
+so that those without access to a C compiler may still use it. However some of the functions
+are only available when a C compiler was available to compile the XS version of the extension.
+
+At present that list is: weaken, isweak, dualvar, isvstring, set_prototype
+
+=back
+
 =head1 KNOWN BUGS
 
 There is a bug in perl5.6.0 with UV's that are >= 1<<31. This will
@@ -321,7 +270,7 @@ L<List::Util>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

@@ -1,3 +1,25 @@
+1.21 -- Mon May 18 10:32:14 CDT 2009
+
+  * Change build system for perl-only install not to need to modify blib
+  * When building inside perl, tests for weaken should be always run (Alexandr Ciornii)
+
+1.20 -- Wed May 13 16:42:53 CDT 2009
+
+*** NOTE***
+This distribution now requires perl 5.6 or greater
+
+Bug Fixes
+  * Fixed stack pop issue in POP_MULTICALL
+  * Fixed error reporting in import when XS not compiled
+  * Check first argument to reduce is a CODE reference to avoid segfault
+  * Handle overloaded and tied values
+  * Fix tainted test to run on Win32
+
+Enhancements
+  * Added List::Util::XS so authors can depend on XS version
+  * Removed need for dummy methods in UNIVERSAL for perl-only code
+
+
 1.19 -- Sun Dec 10 09:58:03 CST 2006
 
 Bug Fixes

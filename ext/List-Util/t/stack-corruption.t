@@ -11,6 +11,10 @@ BEGIN {
 	    exit 0;
 	}
     }
+    if ($] eq "5.008009" or $] eq "5.010000" or $] le "5.006002") {
+        print "1..0 # Skip: known to fail on $]\n";
+        exit 0;
+    }
 }
 
 use List::Util qw(reduce);
