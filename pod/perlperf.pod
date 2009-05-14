@@ -1117,18 +1117,17 @@ Further reading can be found using the modules and links below.
 
 =head2 PERLDOCS
 
-For example: perldoc -f sort
+For example: C<perldoc -f sort>.
 
-    L<perlfaq4>
-    L<perlfork>
-    L<perlfunc>
-    L<perlretut>
-    L<perlthrtut>
-    L<threads>
+L<perlfaq4>.
+
+L<perlfork>, L<perlfunc>, L<perlretut>, L<perlthrtut>.
+
+L<threads>.
 
 =head2 MAN PAGES
 
-    L<time>
+C<time>.
 
 =head2 MODULES
 
@@ -1136,25 +1135,25 @@ It's not possible to individually showcase all the performance related code for
 Perl here, naturally, but here's a short list of modules from the CPAN which
 deserve further attention.
 
-    L<Apache::DProf>
-    L<Apache::SmallProf>
-    L<Benchmark>
-    L<DBIx::Profiler>
-    L<Devel::AutoProfiler>
-    L<Devel::DProf>
-    L<Devel::DProfLB>
-    L<Devel::FastProf>
-    L<Devel::GraphVizProf>
-    L<Devel::NYTProf>
-    L<Devel::NYTProf::Apache>
-    L<Devel::Profiler>
-    L<Devel::Profile>
-    L<Devel::Profit>
-    L<Devel::SmallProf>
-    L<Devel::WxProf>
-    L<POE::Devel::Profiler>
-    L<Sort::Key>
-    L<Sort::Maker>
+    Apache::DProf
+    Apache::SmallProf
+    Benchmark
+    DBIx::Profiler
+    Devel::AutoProfiler
+    Devel::DProf
+    Devel::DProfLB
+    Devel::FastProf
+    Devel::GraphVizProf
+    Devel::NYTProf
+    Devel::NYTProf::Apache
+    Devel::Profiler
+    Devel::Profile
+    Devel::Profit
+    Devel::SmallProf
+    Devel::WxProf
+    POE::Devel::Profiler
+    Sort::Key
+    Sort::Maker
 
 =head2 URLS
 

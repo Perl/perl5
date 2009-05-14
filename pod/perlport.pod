@@ -1248,12 +1248,12 @@ Perl on VOS is discussed in F<README.vos> in the perl distribution
 (installed as L<perlvos>).  Perl on VOS can accept either VOS- or
 Unix-style file specifications as in either of the following:
 
-    C<< $ perl -ne "print if /perl_setup/i" >system>notices >>
-    C<< $ perl -ne "print if /perl_setup/i" /system/notices >>
+    $ perl -ne "print if /perl_setup/i" >system>notices
+    $ perl -ne "print if /perl_setup/i" /system/notices
 
 or even a mixture of both as in:
 
-    C<< $ perl -ne "print if /perl_setup/i" >system/notices >>
+    $ perl -ne "print if /perl_setup/i" >system/notices
 
 Even though VOS allows the slash character to appear in object
 names, because the VOS port of Perl interprets it as a pathname

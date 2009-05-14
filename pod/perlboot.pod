@@ -538,7 +538,7 @@ the name:
 
 Inside C<Horse::name>, the C<@_> array contains:
 
-    (C<$horse>, "some", "unnecessary", "args")
+    ($horse, "some", "unnecessary", "args")
 
 so the C<shift> stores C<$horse> into C<$self>. Then, C<$self> gets
 de-referenced with C<$$self> as normal, yielding C<"Mr. Ed">.
