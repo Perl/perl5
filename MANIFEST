@@ -1764,6 +1764,46 @@ lib/attributes.pm		For "sub foo : attrlist"
 lib/autodie/exception.pm	Exception class for autodie
 lib/autodie/exception/system.pm	Exception class for autodying system()
 lib/autodie.pm			Functions suceed or die with lexical scope
+lib/autodie/t/00-load.t			autodie - basic load
+lib/autodie/t/autodie.t			autodie - Basic functionality
+lib/autodie/t/autodie_test_module.pm	autodie - test helper
+lib/autodie/t/backcompat.t		autodie - More Fatal backcompat
+lib/autodie/t/basic_exceptions.t	autodie - Basic exception tests
+lib/autodie/t/binmode.t			autodie - Binmode testing
+lib/autodie/t/caller.t			autodie - Caller diagnostics
+lib/autodie/t/context_lexical.t		autodie - Context clobbering lexically
+lib/autodie/t/context.t			autodie - Context clobbering tests
+lib/autodie/t/crickey.t			autodie - Like an Australian
+lib/autodie/t/dbmopen.t			autodie - dbm tests
+lib/autodie/t/exception_class.t		autodie - Exception class subclasses
+lib/autodie/t/exceptions.t		autodie - 5.10 exception tests.
+lib/autodie/t/exec.t			autodie - exec tests.
+lib/autodie/t/Fatal.t			autodie - Fatal backcompatibility
+lib/autodie/t/filehandles.t		autodie - filehandle tests
+lib/autodie/t/fileno.t			autodie - fileno tests
+lib/autodie/t/flock.t			autodie - File locking tests
+lib/autodie/t/internal.t		autodie - internal interface tests
+lib/autodie/t/lethal.t			autodie - lethal is the one true name
+lib/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
+lib/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
+lib/autodie/t/lib/autodie/test/badname.pm	autodie - Bad exception class
+lib/autodie/t/lib/autodie/test/missing.pm	autodie - Missing exception class
+lib/autodie/t/lib/Caller_helper.pm	autodie - Caller helper
+lib/autodie/t/lib/lethal.pm		autodie - with a better name
+lib/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
+lib/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
+lib/autodie/t/mkdir.t			autodie - filesystem tests
+lib/autodie/t/open.t			autodie - Testing open
+lib/autodie/t/recv.t			autodie - send/recv tests
+lib/autodie/t/repeat.t			autodie - repeat autodie leak tests
+lib/autodie/t/scope_leak.t		autodie - file scope leak tests
+lib/autodie/t/sysopen.t			autodie - sysopen tests
+lib/autodie/t/truncate.t		autodie - File truncation tests
+lib/autodie/t/unlink.t			autodie - Unlink system tests.
+lib/autodie/t/user-context.t		autodie - Context changes for usersubs
+lib/autodie/t/usersub.t			autodie - user subroutine tests
+lib/autodie/t/version.t			autodie - versioning tests
+lib/autodie/t/version_tag.t
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
@@ -3858,46 +3898,6 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/autodie/00-load.t			autodie - basic load
-t/lib/autodie/autodie.t			autodie - Basic functionality
-t/lib/autodie/autodie_test_module.pm	autodie - test helper
-t/lib/autodie/backcompat.t		autodie - More Fatal backcompat
-t/lib/autodie/basic_exceptions.t	autodie - Basic exception tests
-t/lib/autodie/binmode.t			autodie - Binmode testing
-t/lib/autodie/caller.t			autodie - Caller diagnostics
-t/lib/autodie/context_lexical.t		autodie - Context clobbering lexically
-t/lib/autodie/context.t			autodie - Context clobbering tests
-t/lib/autodie/crickey.t			autodie - Like an Australian
-t/lib/autodie/dbmopen.t			autodie - dbm tests
-t/lib/autodie/exception_class.t		autodie - Exception class subclasses
-t/lib/autodie/exceptions.t		autodie - 5.10 exception tests.
-t/lib/autodie/exec.t			autodie - exec tests.
-t/lib/autodie/Fatal.t			autodie - Fatal backcompatibility
-t/lib/autodie/filehandles.t		autodie - filehandle tests
-t/lib/autodie/fileno.t			autodie - fileno tests
-t/lib/autodie/flock.t			autodie - File locking tests
-t/lib/autodie/internal.t		autodie - internal interface tests
-t/lib/autodie/lethal.t			autodie - lethal is the one true name
-t/lib/autodie/lib/autodie/test/au/exception.pm	autodie - Australian helper
-t/lib/autodie/lib/autodie/test/au.pm		autodie - Austrlaian helper
-t/lib/autodie/lib/autodie/test/badname.pm	autodie - Bad exception class
-t/lib/autodie/lib/autodie/test/missing.pm	autodie - Missing exception class
-t/lib/autodie/lib/Caller_helper.pm	autodie - Caller helper
-t/lib/autodie/lib/lethal.pm		autodie - with a better name
-t/lib/autodie/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
-t/lib/autodie/lib/pujHa/ghach.pm	autodie - Like a Klingon
-t/lib/autodie/mkdir.t			autodie - filesystem tests
-t/lib/autodie/open.t			autodie - Testing open
-t/lib/autodie/recv.t			autodie - send/recv tests
-t/lib/autodie/repeat.t			autodie - repeat autodie leak tests
-t/lib/autodie/scope_leak.t		autodie - file scope leak tests
-t/lib/autodie/sysopen.t			autodie - sysopen tests
-t/lib/autodie/truncate.t		autodie - File truncation tests
-t/lib/autodie/unlink.t			autodie - Unlink system tests.
-t/lib/autodie/user-context.t		autodie - Context changes for usersubs
-t/lib/autodie/usersub.t			autodie - user subroutine tests
-t/lib/autodie/version.t			autodie - versioning tests
-t/lib/autodie/version_tag.t
 t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
