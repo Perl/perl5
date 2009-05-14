@@ -941,7 +941,7 @@ Level 1 - Basic Unicode Support
              Alphabetic, Lowercase, Uppercase, WhiteSpace,
              NoncharacterCodePoint, DefaultIgnorableCodePoint, Any,
              ASCII, Assigned), but also bidirectional types, blocks, etc.
-             (see L</"Unicode Character Properties">)
+             (see "Unicode Character Properties")
         [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
         [5]  can use regular expression look-ahead [a] or
              user-defined character properties [b] to emulate set operations
