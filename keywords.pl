@@ -1,4 +1,15 @@
 #!/usr/bin/perl -w
+# 
+# Regenerate (overwriting only if changed):
+#
+#    keywords.h
+#
+# from information stored in the DATA section of this file.
+#
+# Accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
+
 use strict;
 
 require 'regen_lib.pl';

@@ -1,9 +1,20 @@
 #!/usr/bin/perl -w
-
-#
-# Generate the reentr.c and reentr.h,
-# and optionally also the relevant metaconfig units (-U option).
 # 
+# Regenerate (overwriting only if changed):
+#
+#    reentr.h
+#    reentr.c
+#
+# from information stored in the DATA section of this file.
+#
+# With the -U option, it also unconditionally regenerates the relevant
+# metaconfig units:
+#
+#    d_${func}_r.U
+#
+# Also accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
 
 BEGIN {
     # Get function prototypes
