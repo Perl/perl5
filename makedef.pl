@@ -6,8 +6,32 @@
 # and by AIX for creating libperl.a when -Dusershrplib is in effect,
 # and by MacOS Classic.
 #
-# reads global.sym, pp.sym, perlvars.h, intrpvar.h, config.h
-# On OS/2 reads miniperl.map and the previous version of perl5.def as well
+# Reads from information stored in
+#
+#    config.h
+#    config.sh
+#    global.sym
+#    globvar.sym
+#    intrpvar.h
+#    macperl.sym  (on MacOS)
+#    miniperl.map (on OS/2)
+#    perl5.def    (on OS/2; this is the old version of the file being made)
+#    perlio.sym
+#    perlvars.h
+#
+# plus long lists of function names hard-coded directly in this script and
+# in the DATA section.
+#
+# Writes the result to STDOUT.
+#
+# Normally this script is invoked from a makefile (e.g. win32/Makefile),
+# which redirects STDOUT to a suitable file, such as:
+#
+#    perl5.def   OS/2
+#    perldll.def Windows
+#    perl.exp    AIX
+#    perl.imp    NetWare
+
 
 BEGIN { unshift @INC, "lib" }
 use strict;
