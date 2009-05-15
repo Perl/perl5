@@ -79,7 +79,7 @@ close DESC;
 die "Too many regexp/state opcodes! Maximum is 256, but there are $lastregop in file!"
     if $lastregop>256;
 
-my $tmp_h = 'tmp_reg.h';
+my $tmp_h = 'regnodes.h-new';
 
 unlink $tmp_h if -f $tmp_h;
 
