@@ -47,7 +47,7 @@ my %gen = (
 	   'regcomp.pl'  => [qw[regnodes.h]],
 	   'warnings.pl' => [qw[warnings.h lib/warnings.pm]],
 	   'reentr.pl'   => [qw[reentr.c reentr.h]],
-	   'overload.pl' => [qw[overload.c overload.h]],
+	   'overload.pl' => [qw[overload.c overload.h lib/overload/numbers.pm]],
 	   );
 
 sub do_cksum {
