@@ -1,3 +1,18 @@
+#!/usr/bin/perl
+# 
+# Regenerate (overwriting only if changed):
+#
+#    regnodes.h
+#
+# from information stored in
+#
+#    regcomp.sym
+#    regexp.h
+#
+# Accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
+
 BEGIN {
     # Get function prototypes
     require 'regen_lib.pl';

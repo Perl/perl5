@@ -1,4 +1,17 @@
 #!/usr/bin/perl
+# 
+# Regenerate (overwriting only if changed):
+#
+#    lib/warnings.pm
+#    warnings.h
+#
+# from information hardcoded into this script (the $tree hash), plus the
+# template for warnings.pm in the DATA section.
+#
+# With an argument of 'tree', just dump the contents of $tree and exits.
+# Also accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
 
 $VERSION = '1.02_02';
 

@@ -1,9 +1,18 @@
 #!/usr/bin/perl -w
-
 #
-# Generate overload.h
+# Unconditionally regenerate:
+#
+#    overload.h
+#    overload.c
+#    lib/overload/numbers.pm
+#
+# from information stored in the DATA section of this file.
+#
 # This allows the order of overloading constants to be changed.
-# 
+#
+# Accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
 
 BEGIN {
     # Get function prototypes

@@ -1,4 +1,19 @@
 #!/usr/bin/perl -w
+# 
+# Regenerate (overwriting only if changed):
+#
+#    opcode.h
+#    opnames.h
+#    pp_proto.h
+#    pp.sym
+#
+# from information stored in the DATA section of this file, plus the
+# values hardcoded into this script in @raw_alias.
+#
+# Accepts the standard regen_lib -q and -v args.
+#
+# This script is normally invoked from regen.pl.
+
 use strict;
 
 BEGIN {

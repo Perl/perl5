@@ -1,4 +1,20 @@
 #!/usr/bin/perl -w
+# 
+# Unconditionally regenerate:
+#
+#    pod/perlintern.pod
+#    pod/perlapi.pod
+#
+# from information stored in
+#
+#    embed.fnc
+#    plus all the .c and .h files listed in MANIFEST
+#
+# Has an optional arg, which is the directory to chdir to before reading
+# MANIFEST and *.[ch].
+#
+# This script is normally invoked as part of 'make all', but is also
+# called from from regen.pl.
 
 use strict;
 
