@@ -2595,6 +2595,10 @@ M  c59d1bfa19 2009/03/03 Update Parse::CPAN::Meta to 0.04_01
 M  8f42c23d28 2009/03/04 Add a failing test for stack corruption with MULTI
 !  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
 			    waiting for CPAN sync
+.  f92e1a16ee 2009/03/04 Make // behave like || in when clauses
+.  516817b472 2009/03/04 Document that when() treats specially most of the 
+.  aa2407c5c4 2009/03/04 Remove TODO tests about && in when() clauses
+.  202d7cbdf6 2009/03/04 The new smart match dispatch table for 5.10.1 onwa
 M  cad0fd6e0f 2009/03/05 Fix installation of 'autodie'
 M  db4e6d0949 2009/03/05 Merge of autodie 1.999 into blead.
 M  86840a9d37 2009/03/05 Updated MANIFEST for autodie 1.999
@@ -2603,7 +2607,9 @@ M  ec6cc21dee 2009/03/05 In dl_vms.xs, treat dl_last_error like the SV that
 M  3e8320ccc2 2009/03/06 fix a couple of comments that annoyingly look like
 M  2645075aa0 2009/03/06 Upgrade to Module-Build-0.32
 M  69e34dac30 2009/03/06 Upgrade Text::Tabs+Text::Wrap to version 2009.0305
+.  6e03d74383 2009/03/06 Make the "..." flip-flop operator work in scalar c
 M  bdaf8c65d3 2009/03/06 Upgrade to Test-Harness-3.16
+.  84c82fbf77 2009/03/06 Remove special case for coderefs with empty protot
 M  3f8c823a28 2009/03/07 Add a bunch of missing files to the MANIFEST
 M  f325df1b45 2009/03/07 Fixing the cast for the result of (getgrent())->gr
 M  9f5407a9b9 2009/03/07 Fix test failure with t/TEST
@@ -2625,8 +2631,10 @@ M  7cc1b246ee 2009/03/11 Merge Parse::CPAN::Meta 0.05 into core
 M  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
 !  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
 			    wait for CPAN sync
+.  85af77a509 2009/03/12 Some tests reorgarnisation for ~~ against undef an
 M  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
 M  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
+.  62ec5f5862 2009/03/13 Make smart matching ~~ undef dispatch only on the 
 d  05fe29fd3b 2009/03/13 Make overflow warnings in gmtime/localtime only oc
 			    y2038
 d  7a67abdf14 2009/03/13 Ignore the decimal part of any floating point argu
@@ -2644,8 +2652,15 @@ M  8f11c4a440 2009/03/15 Upgrade to IPC::SysV 2.01
 M  17c79f4337 2009/03/15 Add IPC::SysV to Porting/Maintainers.pl
 M  78b3516b6c 2009/03/15 Update UPSTREAM for Devel::PPPort
 M  7bb03b244e 2009/03/15 Upgrade to Devel::PPPort 3.17
+.  a4a197da79 2009/03/17 Iterative smart match over keys/elements when a co
+.  6ac83b6344 2009/03/17 Fix a warnings test that was failing due to smart 
+.  203d1e8938 2009/03/17 Test that in "~~ sub", the sub is not called on em
+.  168ff81826 2009/03/17 Document that empty sets don't smart-match
 M  6210e03fb1 2009/03/18 Fix typo in English name of $&
 M  245490700b 2009/03/18 Doc fix: the /k regexp modifier should really be w
+.  0cfbf1eaba 2009/03/18 Remove obsolete or redundant tests
+.  2e0e16c9a7 2009/03/18 Reverse the order of operands for several "~~ hash
+.  61a621c635 2009/03/18 Smart match when a hash is on the RHS
 M  a0df7637f6 2009/03/19 Upgrade to Module-Pluggable-3.9
 M  5bc8ef5059 2009/03/19 Upgrade to Attribute-Handlers-0.83
 M  4a28828fc8 2009/03/19 Undo the INST_LIB change from the Module-Pluggable
@@ -2662,13 +2677,24 @@ M  e57a4e52f2 2009/03/21 fix typo - s/was/what/ is to be ignored
 M  ac56ae2e85 2009/03/22 update MANIFEST for file removed by 16bf6aa6d68d98
 M  c966426a3b 2009/03/22 fix [RT #60034]. An equivalent fix was already in 
 M  7efcbeefb3 2009/03/22 Fixes for ext/compress
+.  2a37c5e731 2009/03/23 Add more tests with an empty hash on the right of 
 M  76467b2a65 2009/03/23 Upgrade to ExtUtils-MakeMaker-6.50
+.  b38a9f03cc 2009/03/23 Revert order of ~~ in definition of smart matching
+.  b0138e9991 2009/03/23 Refactoring work on '~~ @array' implementation
+.  a566f585de 2009/03/23 Make ~~ qr// non-commutative
+.  33ed63a220 2009/03/23 Implement "~~ $scalar" for numbers and strings
+.  ecf7aef391 2009/03/24 Fix tests for ~~ overloading
 M  18a10db9e0 2009/03/24 Mark Florian Ragwitz as the NEXT maintainer. NEXT 
+.  07edf49764 2009/03/24 Make []~~\&f and {}~~\&f match
+.  da9849c509 2009/03/24 Specify that the behaviour of $foo ~~ Range should
+.  fc83907687 2009/03/24 Fix equivalent code in perlsyn for Array~~Hash
 M  d5fe29ea03 2009/03/24 Mark upstream as blead for Net::Ping.
 R  3dae3b3445 2009/03/24 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: d5fe29ea03 18a10db9e0
 				individual commits merged
 M  373b131131 2009/03/24 Add a SEE ALSO section based on suggestions from D
+.  2522c35a14 2009/03/24 More tests. Simplify tests for ~~ overloading
+.  7c41e62ef6 2009/03/24 Inline macro tryAMAGICbinSET() in smart match rout
 M  6f63574e65 2009/03/24 Fix for regular expressions for RFC2822.
 M  2d373db117 2009/03/24 For some reason, the core version and the cpan ver
 M  c331296618 2009/03/24 Fix perl #63924: shmget limited to 32 bit segment 
@@ -2708,6 +2734,7 @@ R  4d57d24f51 2009/03/25 Test stacked overloaded -X.
 R  7fb13887d7 2009/03/25 Stacked overloaded -X.
 R  709edd5bfa 2009/03/25 I missed a s/stat_cando/cando/ in File::stat.
 R  cd22a09c8c 2009/03/25 Tests for -X overload on File::stat.
+			    this also introduces unfixed bug #65368
 R  e22107918e 2009/03/25 Docs for -X overloading.
 R  4f9e790296 2009/03/25 Reinstate File::stat::stat_cando.
 R  b7c4737f31 2009/03/25 Warnings for File::stat deficiencies.
@@ -2718,6 +2745,7 @@ R  d0c91b6afc 2009/03/25 Test -X overloads on GLOB and IO refs.
 R  52f7f5abcb 2009/03/25 IO refs always stringify for -t, -T and -B.
 R  500ff13f18 2009/03/25 -l was missing an SPAGAIN.
 # back to main
+.  c3886e8b36 2009/03/25 Adjustments to the ~~ dispatch table
 M  776304fb74 2009/03/25 fix smoke issues with the compression modules
 M  df4bc1f3db 2009/03/26 make_ext.pl's automatic Makefile.PL generation can
 M  b81ac31e6a 2009/03/26 No need to set MAN3PODS now that make_ext.pl takes
@@ -2919,6 +2947,8 @@ M  ddea3ea7e3 2009/04/19 Simpify logic in Perl_pad_free(): SvIsCOW() has th
 M  e0be038f12 2009/04/19 In the Makefile, no need to change into pod/ to cr
 M  dc1ddadda0 2009/04/19 Make lib/h2ph.t use t/test.pl.
 M  2543619455 2009/04/19 Make h2ph's generated preamble require-able when e
+.  2da5311b94 2009/04/20 Document that ~~ overload will only work on the RH
+.  f008545ed2 2009/04/20 Remove some empty lines in a code example
 M  dd0cfdaa8f 2009/04/20 Move vms/perlvms.pod to pod/ and update the Makfil
 M  31f6f5aa00 2009/04/20 Clarify PERL_SYS_INIT3() usage.
 M  b9b2d9df6a 2009/04/20 Remove leftover copying of perlvms.pod on Win32
@@ -2981,7 +3011,12 @@ M  46d6503777 2009/05/04 In Perl_gp_dup(), no need to explicitly zero ret->
 			    more File::Copy stuff
 !  216e7dec10 2009/05/05 Bump version of File::Copy
 			    more File::Copy stuff
+.  329802ba97 2009/05/05 Clarify that @a ~~ @b recursively smart matches
+.  f1bef09e91 2009/05/05 Add tests for @array ~~ $string
+.  9de654f174 2009/05/05 Merge branch 'blead' into smartmatch
+				MERGE: f1bef09e91 216e7dec10
 M  12016aadb5 2009/05/05 Fix Time-Piece tests on Win32 with PERL_IMPLICIT_S
+.  d444f7e3a3 2009/05/05 Fix test for stringification of arrays.
 M  46f1a616f5 2009/05/05 Document that FileCache uses symbolic references
 M  045cad9882 2009/05/05 Bump $VERSION of FileCache
 M  41881f2581 2009/05/05 Add $(LDLIBPTH) to the documentation generation co
@@ -2990,6 +3025,7 @@ M  bebf870e6d 2009/05/06 perltie.pod docpatch
 M  938cfd5cbc 2009/05/06 Fix code before declaration compile error on Win32
 d  df31f9b1de 2009/05/06 -Duserelocatableinc and -Duseshrplib don't work to
 M  81ab4c4438 2009/05/06 Fix POSIX::tzset() as per Time::Piece::_tzset().
+.  ad0781bc8e 2009/05/06 Rewrite tests for objects and ~~
 M  3ecadf9633 2009/05/07 Fix ExtUtils::Miniperl on Win32
 M  4320d0941c 2009/05/07 Upgrade to CPANPLUS-Dist-Build-0.26
 M  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
@@ -2998,6 +3034,15 @@ M  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
 M  1e3c652eb4 2009/05/08 git checkout in add-package.pl, not git co
 M  52f75a8770 2009/05/08 Upgrade CPANPLUS::Dist::Build to 0.28
 M  5f1c709273 2009/05/08 Silence Win32 compiler warning in IO.xs
+.  031a44ed33 2009/05/08 More tests for ~~
+.  6d743019f3 2009/05/08 Make ~~ overloading only be invoked on the right a
+.  365c4e3d76 2009/05/08 Inline macros used only once
+.  d0b243e39c 2009/05/08 Document what to do with object on the left and ad
+.  015eb7b967 2009/05/09 Implement distributivity in $scalar ~~ @array
+.  41e726ac82 2009/05/09 Treat blessed references on the left of C<~~> as s
+.  0483c67272 2009/05/09 Add tests for object ~~ regexp
+.  90a32bcb5e 2009/05/09 Add a test for object ~~ string, with stringificat
+.  ea0c2dbd5f 2009/05/09 Implement Hash/Array ~~ Regex (with tests)
 !  f4388f027b 2009/05/09 Revert "Bump version of File::Copy"
 			    more File::Copy stuff
 M  6c34c32116 2009/05/10 Pull PathTools 3.30 (which was just a blead sync.)
@@ -3005,3 +3050,40 @@ M  b7a0f54ced 2009/05/10 Update info on number of magic types\n\nRemove men
 M  0befdfba7e 2009/05/10 Making ExtUtils::ParseXS use strict; is TODO.
 M  318bf70858 2009/05/10 Replacing dump.c's use of SVs as temporaries is TO
 M  4477f4efa6 2009/05/10 bump Storage version to 2.20 to distinguish it fro
+d  d5e98372e6 2009/05/11 Allow typed arrays and hashes
+			    (maybe merge just the tests at some point?)
+!  eb1c4873a4 2009/05/11 Update IO to CPAN 1.24 release
+			    some smoking issues
+.  f118ea0d48 2009/05/12 Remove proposed (but unimplemented) $foo ~~ Range 
+M  9c53f8ae1a 2009/05/12 remove all Changes* files
+M  9519d2ec68 2009/05/12 Resurrect the Changes file as a simple guide to fi
+.  054b75b0ac 2009/05/12 Smart matching is to-done.
+.  ae20c3aa7c 2009/05/12 Register ~~ operator overloading in its own catego
+M  7214e7c31c 2009/05/12 add perl589delta.pod to blead
+!  5f320ac744 2009/05/12 Upgrade to Time-Piece-1.14
+			    wait for CPAN sync
+!  8177d4d97c 2009/05/12 Skip test for changing TZ if running in a pseudo-f
+			    wait for CPAN sync
+R  fc5be80860 2009/05/12 Add perl589delta.pod to pod.lst, and run pod/build
+			    done manually instead of merging
+d  8d1c3e263b 2009/05/12 Inline S_glob_2pv() into Perl_sv_2pv_flags(). (Exi
+M  f7bbabd3de 2009/05/13 select() generates "Invalid parameter" messages on
+.  289d21b27f 2009/05/13 Enable more warnings in smart match tests
+.  56d86adf5b 2009/05/13 Merge branch 'smartmatch' into blead
+				MERGE: f7bbabd3de 289d21b27f
+M  36f064bc37 2009/05/13 do/require don't treat '.\foo' or '..\foo' as "abs
+M  ea8b8ad24d 2009/05/14 Remove remaining POD tags in verbatim paragraphs
+M  58ab674396 2009/05/14 document Git_Data
+d  233b59f5c8 2009/05/14 pp.c and time64.c don't need to be executable
+			    y2038
+M  8024b5df24 2009/05/14 Move autodie tests in lib/autodie/t, so they are p
+M  7fecd077a7 2009/05/14 Fix failing autodie test with new smartmatch seman
+d  b1fc363696 2009/05/14 Amelioration of the error message "Unrecognized ch
+R  3f66cd9441 2009/05/14 WIN32 preprocessor symbols is usually tested with 
+			    blead-specific fix to 36f064bc37
+M  6294c16100 2009/05/15 Add some documentation to the heads of the various
+M  266db279d4 2009/05/15 make regcomp.pl use the standard foo.h-new naming 
+M  f014cfc264 2009/05/15 tidy up regen.pl (no functional changes)
+M  e2bcdfc01b 2009/05/15 add lib/overload/numbers.pm to (unused) output fil
+d  07d48c2ab5 2009/05/15 make script execution order in regen.pl mostly alp
+M  3523994b04 2009/05/15 update the head comments in makedef.pl

@@ -94,6 +94,14 @@ for some or all operations. (Yuval Kogman)
 
 =over 4
 
+=item C<charnames>
+
+The Unicode NameAliases.txt database file has been added. This has the
+effect of adding some extra C<\N> character names that formerly wouldn't
+have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
+
+=over 4
+
 =item C<overloading>
 
 See L</"The C<overloading> pragma"> above.
@@ -436,6 +444,11 @@ reference to perl programs.
 
 L<perlrepository> describes how to access the perl source using git.
 
+The various large C<Changes*> files (which listed every change made to perl
+over the last 18 years) have been removed, and replaced by a small file,
+also called C<Changes>, which just explains how that same information may
+be extracted from the git version control system.
+
 =head1 Performance Enhancements
 
 =over
@@ -588,6 +601,12 @@ spurious warning like the following:
 
     Exiting given via last at foo.pl line 123
 
+=item *
+
+On windows, C<'.\foo'> and C<'..\foo'>  were treated differently than
+C<'./foo'> and C<'../foo'> by C<do> and C<require> [RT #63492].
+
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -676,7 +695,8 @@ analysed by the Perl porting team.
 
 =head1 SEE ALSO
 
-The F<Changes> file for exhaustive details on what changed.
+The F<Changes> file for an axplanation of how to view exhaustive details
+on what changed.
 
 The F<INSTALL> file for how to build Perl.
 
