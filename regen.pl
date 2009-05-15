@@ -24,12 +24,13 @@ my $perl = $^X;
 # scripts (eg reentr.c)
 
 my @scripts = qw(
-warnings.pl
-regcomp.pl
-reentr.pl
-overload.pl
-opcode.pl
 keywords.pl
+opcode.pl
+overload.pl
+reentr.pl
+regcomp.pl
+warnings.pl
+
 embed.pl
 autodoc.pl
 );
