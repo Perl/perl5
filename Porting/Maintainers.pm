@@ -18,24 +18,37 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(%Modules %Maintainers
 		get_module_files get_module_pat
-		show_results process_options files_to_modules);
-$VERSION = 0.02;
+		show_results process_options files_to_modules
+		reload_manifest);
+$VERSION = 0.03;
 require Exporter;
 
 use File::Find;
 use Getopt::Long;
 
 my %MANIFEST;
-if (open(MANIFEST, "MANIFEST")) {
-    while (<MANIFEST>) {
-	if (/^(\S+)\t+(.+)$/) {
-	    $MANIFEST{$1}++;
+
+# (re)read the MANIFEST file, blowing away any previous effort
+
+sub reload_manifest {
+    %MANIFEST = ();
+    if (open(MANIFEST, "MANIFEST")) {
+	while (<MANIFEST>) {
+	    if (/^(\S+)/) {
+		$MANIFEST{$1}++;
+	    }
+	    else {
+		warn "MANIFEST:$.: malformed line: $_\n";
+	    }
 	}
+	close MANIFEST;
+    } else {
+	die "$0: Failed to open MANIFEST for reading: $!\n";
     }
-    close MANIFEST;
-} else {
-    die "$0: Failed to open MANIFEST for reading: $!\n";
 }
+
+reload_manifest;
+
 
 sub get_module_pat {
     my $m = shift;
