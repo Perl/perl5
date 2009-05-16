@@ -109,7 +109,7 @@ my @labels = ((map $_->[1], @sources), 'CPAN' );
 if ($opt_t) {
     my %changed;
     my @fields;
-    for my $dist (sort keys %results) {
+    for my $dist (sort { lc $a cmp lc $b } keys %results) {
 	for my $file (sort keys %{$results{$dist}}) {
 	    my @versions = @{$results{$dist}{$file}}{@labels};
 	    for (0..$#versions) {
@@ -132,7 +132,7 @@ if ($opt_t) {
     my $field_total;
     $field_total += $_ + 1 for @fields;
 
-    for my $dist (sort keys %results) {
+    for my $dist (sort { lc $a cmp lc $b } keys %results) {
 	next unless $changed{$dist};
 	print " " x $field_total, " $dist\n";
 	for my $file (sort keys %{$results{$dist}}) {
@@ -145,7 +145,7 @@ if ($opt_t) {
     }
 }
 else {
-    for my $dist (sort keys %results) {
+    for my $dist (sort { lc $a cmp lc $b } keys %results) {
 	print "Module $dist...\n";
 	for my $file (sort keys %{$results{$dist}}) {
 	    my ($vcore, $vcpan) = @{$results{$dist}{$file}}{@labels};
