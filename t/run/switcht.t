@@ -46,21 +46,21 @@ ok( !-e $file,  'unlink worked' );
 ok( !$^W,   "-t doesn't enable regular warnings" );
 
 
-mkdir('tt');
-open(FH,'>','tt/ttest.pl')or DIE $!;
+mkdir('ttdir');
+open(FH,'>','ttdir/ttest.pl')or DIE $!;
 print FH 'return 42';
 close FH or DIE $!;
 
 SKIP: {
-    ($^O eq 'MSWin32') || skip('skip tainted do test with \ seperator');
+    ($^O eq 'MSWin32') || skip('skip tainted do test with \ separator');
     my $test = 0;
-    $test =  do '.\tt/ttest.pl';
-    is($test, 42, 'Could "do" .\tt/ttest.pl');
+    $test =  do '.\ttdir/ttest.pl';
+    is($test, 42, 'Could "do" .\ttdir/ttest.pl');
 }
 {
     my $test = 0;
-    $test =  do './tt/ttest.pl';
-    is($test, 42, 'Could "do" ./tt/ttest.pl');
+    $test =  do './ttdir/ttest.pl';
+    is($test, 42, 'Could "do" ./ttdir/ttest.pl');
 }
-unlink ('./tt/ttest.pl');
-rmdir ('tt');
+unlink ('./ttdir/ttest.pl');
+rmdir ('ttdir');
