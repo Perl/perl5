@@ -117,14 +117,6 @@ package Maintainers;
 		'UPSTREAM'	=> 'cpan',
 		},
 
-	'AutoLoader' =>
-		{
-		'MAINTAINER'	=> 'smueller',
-		'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> "cpan",
-		},
-
 	'Attribute::Handlers' =>
 		{
 		'MAINTAINER'	=> 'rgarcia',
@@ -139,6 +131,14 @@ package Maintainers;
 		'FILES'         => q[lib/Fatal.pm lib/autodie.pm lib/autodie],
 		'CPAN'          => 1,
 		'UPSTREAM'      => 'cpan',
+		},
+
+	'AutoLoader' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> "cpan",
 		},
 
 	'B::Concise' =>
@@ -190,6 +190,22 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
+	'CGI' =>
+		{
+		'MAINTAINER'	=> 'lstein',
+		'FILES'		=> q[lib/CGI.pm lib/CGI],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
+	'Class::ISA' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[lib/Class/ISA.pm lib/Class/ISA],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
 	'Compress::Raw::Bzip2' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
@@ -218,22 +234,6 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/Compress-Zlib],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'CGI' =>
-		{
-		'MAINTAINER'	=> 'lstein',
-		'FILES'		=> q[lib/CGI.pm lib/CGI],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'Class::ISA' =>
-		{
-		'MAINTAINER'	=> 'sburke',
-		'FILES'		=> q[lib/Class/ISA.pm lib/Class/ISA],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -578,14 +578,6 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'Scalar-List-Utils' =>
-		{
-		'MAINTAINER'	=> 'gbarr',
-		'FILES'		=> q[ext/List-Util],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
 	'Locale::Codes' =>
 		{
 		'MAINTAINER'	=> 'neilb',
@@ -825,6 +817,22 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
+	'perlpacktut' =>
+		{
+		'MAINTAINER'	=> 'laun',
+		'FILES'		=> q[pod/perlpacktut.pod],
+		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
+		},
+
+	'perlpodspec' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[pod/perlpodspec.pod],
+		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
+		},
+
 	'perlre' =>
 		{
 		'MAINTAINER'	=> 'abigail',
@@ -851,22 +859,6 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'perlpacktut' =>
-		{
-		'MAINTAINER'	=> 'laun',
-		'FILES'		=> q[pod/perlpacktut.pod],
-		'CPAN'		=> 0,
-		'UPSTREAM'	=> undef,
-		},
-
-	'perlpodspec' =>
-		{
-		'MAINTAINER'	=> 'sburke',
-		'FILES'		=> q[pod/perlpodspec.pod],
-		'CPAN'		=> 0,
-		'UPSTREAM'	=> undef,
-		},
-
 	'perlthrtut' =>
 		{
 		'MAINTAINER'	=> 'elizabeth',
@@ -883,21 +875,6 @@ package Maintainers;
                 'UPSTREAM'      => undef,
                 },
 
-        'Pod::Parser' => {
-		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/{Checker,Find,InputObjects,Parser,ParseUtils,PlainText,Select,Usage}.pm lib/Pod/t/contains_pod.t pod/pod{2usage,checker,select}.PL t/lib/contains_bad_pod.xr t/lib/contains_pod.xr t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/pod2usage.* t/pod/podchkenc.* t/pod/poderrs.* t/pod/podselect.* t/pod/special_seqs.* t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/usage*.pod],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-        'Pod::Simple' =>
-                {
-		'MAINTAINER'	=> 'arandal',
-		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
 	'Pod::LaTeX' =>
 		{
 		'MAINTAINER'	=> 'tjenness',
@@ -906,12 +883,11 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'podlators' =>
-		{
-		'MAINTAINER'	=> 'rra',
-		'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{color,filehandle,man*,parselink,pod-parser,pod-spelling,pod,termcap,text*}.t}],
+        'Pod::Parser' => {
+		'MAINTAINER'	=> 'marekr',
+		'FILES' => q[lib/Pod/{Checker,Find,InputObjects,Parser,ParseUtils,PlainText,Select,Usage}.pm lib/Pod/t/contains_pod.t pod/pod{2usage,checker,select}.PL t/lib/contains_bad_pod.xr t/lib/contains_pod.xr t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/pod2usage.* t/pod/podchkenc.* t/pod/poderrs.* t/pod/podselect.* t/pod/special_seqs.* t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/usage*.pod],
 		'CPAN'		=> 1,
-		'UPSTREAM'	=> 'cpan',
+		'UPSTREAM'	=> undef,
 		},
 
 	'Pod::Perldoc' =>
@@ -930,12 +906,36 @@ package Maintainers;
 		'UPSTREAM'	=> 'blead',
 		},
 
+        'Pod::Simple' =>
+                {
+		'MAINTAINER'	=> 'arandal',
+		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
+	'podlators' =>
+		{
+		'MAINTAINER'	=> 'rra',
+		'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{color,filehandle,man*,parselink,pod-parser,pod-spelling,pod,termcap,text*}.t}],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> 'cpan',
+		},
+
 	'Safe' =>
 		{
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[ext/Safe],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> "blead",
+		},
+
+	'Scalar-List-Utils' =>
+		{
+		'MAINTAINER'	=> 'gbarr',
+		'FILES'		=> q[ext/List-Util],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'SelfLoader' =>
@@ -987,36 +987,20 @@ package Maintainers;
 		'UPSTREAM'	=> 'cpan',
 		},
 
-	'Text::Balanced' =>
-		{
-		'MAINTAINER'	=> 'dmanura',
-		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'Text::ParseWords' =>
-		{
-		'MAINTAINER'	=> 'chorny',
-		'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'Text::Soundex' =>
-		{
-		'MAINTAINER'	=> 'markm',
-		'FILES'		=> q[ext/Text-Soundex],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
 	'Term::ANSIColor' =>
 		{
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'cpan',
+		},
+
+	'Term::Cap' =>
+		{
+		'MAINTAINER'	=> 'jstowe',
+		'FILES'		=> q[lib/Term/Cap.{pm,t}],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
 		},
 
 	'Term::UI' =>
@@ -1054,10 +1038,26 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'Term::Cap' =>
+	'Text::Balanced' =>
 		{
-		'MAINTAINER'	=> 'jstowe',
-		'FILES'		=> q[lib/Term/Cap.{pm,t}],
+		'MAINTAINER'	=> 'dmanura',
+		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
+	'Text::ParseWords' =>
+		{
+		'MAINTAINER'	=> 'chorny',
+		'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> undef,
+		},
+
+	'Text::Soundex' =>
+		{
+		'MAINTAINER'	=> 'markm',
+		'FILES'		=> q[ext/Text-Soundex],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
