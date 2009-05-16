@@ -8,7 +8,7 @@ use strict;
 use Getopt::Std;
 use ExtUtils::MM_Unix;
 use lib 'Porting';
-use Maintainers qw(get_module_files %Modules);
+use Maintainers qw(get_module_files reload_manifest %Modules);
 use Cwd;
 
 use List::Util qw(max);
@@ -74,6 +74,9 @@ foreach my $source (@sources) {
     my ($srcdir, $label) = @$source;
     my $olddir = getcwd();
     chdir $srcdir or die "chdir $srcdir: $!\n";
+
+    # load the MANIFEST file in the new directory
+    reload_manifest;
 
     for my $dist (sort keys %Modules) {
 	next unless $Modules{$dist}{CPAN};
