@@ -89,11 +89,13 @@ foreach my $source (@sources) {
 	    # some heuristics to figure out the module name from the file name
 	    $module =~ s{^(lib|ext)/}{}
 		and $1 eq 'ext'
-		and ( $module =~ s{^(.*)/lib/\1\b}{$1},
-		      $module =~ s{(\w+)/\1\b}{$1},
-		      $module =~ s{^Encode/encoding}{encoding},
-		      $module =~ s{^MIME/Base64/QuotedPrint}{MIME/QuotedPrint},
-		      $module =~ s{^List/Util/lib/Scalar}{Scalar},
+		and (
+		      # ext/Foo-Bar/Bar.pm
+		      $module =~ s{^(\w+)-(\w+)/\2$}{$1/lib/$1/$2},
+		      # ext/Encode/Foo/Foo.pm
+		      $module =~ s{^(Encode)/(\w+)/\2$}{$1/lib/$1/$2},
+		      $module =~ s{^[^/]+/}{},
+		      $module =~ s{^lib/}{},
 		    );
 	    $module =~ s{/}{::}g;
 	    my $vcpan = $cpanversions{$module} // 'undef';
