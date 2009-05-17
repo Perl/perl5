@@ -230,14 +230,6 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'Compress::Zlib' =>
-		{
-		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress-Zlib],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
 	'CPAN' =>
 		{
 		'MAINTAINER'	=> 'andk',
@@ -520,18 +512,10 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'IO::Compress::Base' =>
+	'IO::Compress' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/IO_Compress_Base],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
-	'IO::Compress::Zlib' =>
-		{
-		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/IO_Compress_Zlib],
+		'FILES'		=> q[ext/IO-Compress],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
