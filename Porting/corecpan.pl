@@ -81,10 +81,14 @@ foreach my $source (@sources) {
     for my $dist (sort keys %Modules) {
 	next unless $Modules{$dist}{CPAN};
 	for my $file (get_module_files($dist)) {
-	    next if $file !~ /\.pm\z/ or $file =~ m{^t/} or $file =~ m{/t/};
+	    next if $file !~ /(\.pm|_pm.PL)\z/
+			or $file =~ m{^t/} or $file =~ m{/t/};
 	    my $vcore = '!EXIST';
 	    $vcore = MM->parse_version($file) // 'undef' if -f $file;
+
+	    # get module name from filename to lookup CPAN version
 	    my $module = $file;
+	    $module =~ s/\_pm.PL\z//;
 	    $module =~ s/\.pm\z//;
 	    # some heuristics to figure out the module name from the file name
 	    $module =~ s{^(lib|ext)/}{}
