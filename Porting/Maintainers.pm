@@ -92,6 +92,8 @@ $0: Usage: $0 [[--maintainer M --module M --files]|[--check] [commit] | [file ..
 			with a file	checks if it has a maintainer
 			with a dir	checks all files have a maintainer
 			otherwise	checks for multiple maintainers
+--checkmani	like --check, but only reports on unclaimed files if they
+		    are in MANIFEST
 --opened	list all modules of modified files
 Matching is case-ignoring regexp, author matching is both by
 the short id and by the full name and email.  A "module" may
@@ -105,6 +107,7 @@ my $Maintainer;
 my $Module;
 my $Files;
 my $Check;
+my $Checkmani;
 my $Opened;
 
 sub process_options {
@@ -115,6 +118,7 @@ sub process_options {
 		       'module=s'	=> \$Module,
 		       'files'		=> \$Files,
 		       'check'		=> \$Check,
+		       'checkmani'	=> \$Checkmani,
 		       'opened'		=> \$Opened,
 		      );
 
@@ -249,9 +253,14 @@ sub show_results {
 		}
 	    }
 	}
-    } elsif ($Check) {
+    } elsif ($Check or $Checkmani) {
         if( @Files ) {
-	    missing_maintainers( qr{\.(?:[chty]|p[lm]|xs)\z}msx, @Files)
+	    missing_maintainers(
+		$Checkmani
+		    ? sub { -f $_ and exists $MANIFEST{$File::Find::name} }
+		    : sub { /\.(?:[chty]|p[lm]|xs)\z/msx },
+		@Files
+	    );
 	}
 	else { 
 	    duplicated_maintainers();
@@ -309,7 +318,7 @@ sub missing_maintainers {
     for my $d (@path) {
 	if( -d $d ) { push @dir, $d } else { warn_maintainer($d) }
     }
-    find sub { warn_maintainer($File::Find::name) if /$check/; }, @dir
+    find sub { warn_maintainer($File::Find::name) if $check->() }, @dir
 	if @dir;
 }
 
