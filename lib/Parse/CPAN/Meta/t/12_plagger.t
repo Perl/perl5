@@ -101,8 +101,8 @@ plugins:
      nickname: plaggerbot
      server_host: chat.freenode.net
      server_channels:
-       - #plagger-ja
-       - #plagger
+       - '#plagger-ja'
+       - '#plagger'
 
    
 END_YAML

@@ -51,6 +51,3 @@ SKIP: {
 	skip "no utf8 support", 1 unless Parse::CPAN::Meta::HAVE_UTF8();
 	ok( utf8::is_utf8($yaml[0]->{author}), "utf8 decoded" );
 }
-
-exit(0);
-
