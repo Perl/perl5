@@ -55,25 +55,44 @@ sub get_module_pat {
     split ' ', $Modules{$m}{FILES};
 }
 
+# exand dir/ or foo* into a full list of files
+#
+sub expand_glob {
+    sort { lc $a cmp lc $b }
+	map {
+	    -f $_ ? # File as-is.
+		$_ :
+		-d _ ? # Recurse into directories.
+		do {
+		    my @files;
+		    find(
+			 sub {
+			     push @files, $File::Find::name
+				 if -f $_ && exists $MANIFEST{$File::Find::name};
+			 }, $_);
+		    @files;
+		}
+	    # The rest are globbable patterns; expand the glob, then
+	    # recurively perform directory expansion on any results
+	    : expand_glob(grep -e $_,glob($_))
+	    } @_;
+}
+
 sub get_module_files {
     my $m = shift;
-    sort { lc $a cmp lc $b }
-    map {
-	-f $_ ? # Files as-is.
-	    $_ :
-	    -d _ ? # Recurse into directories.
-	    do {
-		my @files;
-		find(
-		     sub {
-			 push @files, $File::Find::name
-			     if -f $_ && exists $MANIFEST{$File::Find::name};
-		     }, $_);
-		@files;
-	    }
-	: glob($_) # The rest are globbable patterns.
-	} get_module_pat($m);
+    my %exclude;
+    my @files;
+    for (get_module_pat($m)) {
+	if (s/^!//) {
+	    $exclude{$_}=1 for expand_glob($_);
+	}
+	else {
+	    push @files, expand_glob($_);
+	}
+    }
+    return grep !$exclude{$_}, @files;
 }
+
 
 sub get_maintainer_modules {
     my $m = shift;
