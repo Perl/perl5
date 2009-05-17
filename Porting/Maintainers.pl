@@ -169,6 +169,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'jjore',
 		'FILES'		=> q[ext/B/B/Lint.pm ext/B/t/lint.t
+				    ext/B/B/Lint/Debug.pm
 				     ext/B/t/pluglib/B/Lint/Plugin/Test.pm],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
@@ -255,6 +256,7 @@ package Maintainers;
 				     lib/CPANPLUS/Selfupdate.pm
 				     lib/CPANPLUS/Shell lib/CPANPLUS/Shell.pm
 				     lib/CPANPLUS/Dist.pm lib/CPANPLUS/Dist/Base.pm
+				     lib/CPANPLUS/Dist/Autobundle.pm
 				     lib/CPANPLUS/Dist/MM.pm lib/CPANPLUS/Dist/Sample.pm
 				     lib/CPANPLUS/t
 				    ],
@@ -389,6 +391,9 @@ package Maintainers;
 		'MAINTAINER' => 'yves',
 		# MakeMaker has a basic.t too, and we use that.
 		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm
+			     lib/ExtUtils/Changes_EU-Install
+			     lib/ExtUtils/t/Installed.t
+			     lib/ExtUtils/t/basic.pl
 			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
 		'CPAN' => 1,
 		'UPSTREAM' => 'blead',
@@ -400,6 +405,9 @@ package Maintainers;
 		'FILES'	=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
 			lib/ExtUtils/{Command,Liblist,MakeMaker}
 			lib/ExtUtils/t/{[0-9FLV-Zabdf-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
+			lib/ExtUtils/Changes
+			lib/ExtUtils/{NOTES,PATCHING,README,TODO}
+			lib/ExtUtils/instmodsh
 			t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> 'first-come',
@@ -557,7 +565,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=>
-			q[lib/Net/{Cmd,Config,Domain,FTP,Netrc,NNTP,POP3,SMTP,Time}.pm lib/Net/ChangeLog lib/Net/FTP lib/Net/*.eg lib/Net/libnetFAQ.pod lib/Net/README lib/Net/t],
+			q[lib/Net/{Cmd,Config,Domain,FTP,Netrc,NNTP,POP3,SMTP,Time}.pm lib/Net/Changes lib/Net/FTP lib/Net/demos/ lib/Net/*.eg lib/Net/libnetFAQ.pod lib/Net/README lib/Net/t],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -862,7 +870,7 @@ package Maintainers;
 	'Pod::LaTeX' =>
 		{
 		'MAINTAINER'	=> 'tjenness',
-		'FILES'		=> q[lib/Pod/LaTeX.pm lib/Pod/t/pod2latex.t],
+		'FILES'		=> q[lib/Pod/LaTeX.pm lib/Pod/t/{pod2latex,user}.t],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -1196,6 +1204,225 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'laun',
 		'FILES'		=> q[x2p/s2p.PL],
+		'CPAN'		=> 0,
+		'UPSTREAM'	=> undef,
+		},
+
+
+	# this pseudo-module represents all the files under ext/ and lib/
+	# that aren't otherwise claimed. This means that two following two
+	# commands will check that every file under ext/ and lib/ is
+	# accounted for, and that there are no duplicates:
+	#
+	#    perl Porting/Maintainers --checkmani lib ext
+	#    perl Porting/Maintainers --checkmani 
+
+	'_PERLLIB' =>
+		{
+		'MAINTAINER'	=> 'p5p',
+		'FILES'		=> q[
+					ext/B/B.pm
+					ext/B/typemap
+					ext/B/Makefile.PL
+					ext/B/defsubs_h.PL
+					ext/B/O.pm
+					ext/B/B.xs
+					ext/B/B/Terse.pm
+					ext/B/B/Showlex.pm
+					ext/B/B/Xref.pm
+					ext/B/t/f_map
+					ext/B/t/showlex.t
+					ext/B/t/o.t
+					ext/B/t/optree_varinit.t
+					ext/B/t/concise-xs.t
+					ext/B/t/optree_check.t
+					ext/B/t/OptreeCheck.pm
+					ext/B/t/optree_specials.t
+					ext/B/t/f_sort.t
+					ext/B/t/pragma.t
+					ext/B/t/f_sort
+					ext/B/t/b.t
+					ext/B/t/optree_samples.t
+					ext/B/t/optree_concise.t
+					ext/B/t/optree_constants.t
+					ext/B/t/optree_sort.t
+					ext/B/t/terse.t
+					ext/B/t/xref.t
+					ext/B/t/f_map.t
+					ext/B/t/optree_misc.t
+					ext/B/hints/openbsd.pl
+					ext/B/hints/darwin.pl
+
+					ext/Devel-DProf/
+					ext/Devel-Peek/
+					ext/DynaLoader/
+					    !ext/DynaLoader/t/XSLoader.t
+					    !ext/DynaLoader/XSLoader_pm.PL
+					ext/Fcntl/
+					ext/File-Glob/
+					ext/GDBM_File/
+					ext/Hash-Util-FieldHash/
+					ext/Hash-Util/
+					ext/I18N-Langinfo/
+					ext/NDBM_File/
+					ext/ODBM_File/
+					ext/Opcode/
+					ext/POSIX/
+					ext/PerlIO-encoding/
+					ext/PerlIO-scalar/
+					ext/PerlIO-via/
+					ext/SDBM_File/
+					ext/Socket/
+					ext/Sys-Hostname/
+					ext/XS-APItest/
+					ext/XS-Typemap/
+					ext/attributes/
+					ext/mro/
+					ext/re/
+					lib/AnyDBM_File.{pm,t}
+					lib/Benchmark.{pm,t}
+					lib/CORE.pod
+					lib/Carp.{pm,t}
+					lib/Carp/Heavy.pm
+					lib/Class/Struct.{pm,t}
+					lib/Config.t
+					lib/Config/Extensions.{pm,t}
+					lib/DB.{pm,t}
+					lib/DBM_Filter.pm
+					lib/DBM_Filter/
+					lib/Devel/SelfStubber.{pm,t}
+					lib/DirHandle.{pm,t}
+					lib/Dumpvalue.{pm,t}
+					lib/English.{pm,t}
+					lib/Env.pm
+					lib/Env/t/
+					lib/ExtUtils/Embed.pm
+					lib/ExtUtils/XSSymSet.pm
+					lib/ExtUtils/t/Embed.t
+					lib/ExtUtils/t/basic_finish.pl
+					lib/ExtUtils/typemap
+					lib/ExtUtils/xsubpp
+					lib/Fatal.t
+					lib/File/Basename.{pm,t}
+					lib/File/CheckTree.{pm,t}
+					lib/File/Compare.{pm,t}
+					lib/File/Copy.{pm,t}
+					lib/File/DosGlob.{pm,t}
+					lib/File/Find.pm
+					lib/File/Find/
+					lib/File/stat.{pm,t}
+					lib/FileCache.pm
+					lib/FileCache/
+					lib/FileHandle.{pm,t}
+					lib/FindBin.{pm,t}
+					lib/Getopt/Std.{pm,t}
+					lib/I18N/Collate.{pm,t}
+					lib/IPC/Open2.{pm,t}
+					lib/IPC/Open3.{pm,t}
+					lib/Internals.t
+					lib/Net/hostent.{pm,t}
+					lib/Net/netent.{pm,t}
+					lib/Net/protoent.{pm,t}
+					lib/Net/servent.{pm,t}
+					lib/PerlIO.pm
+					lib/Pod/Functions.pm
+					lib/Pod/Html.pm
+					lib/Pod/t/Functions.t
+					lib/Pod/t/InputObjects.t
+					lib/Pod/t/Select.t
+					lib/Pod/t/Usage.t
+					lib/Pod/t/eol.t
+					lib/Pod/t/html*
+					lib/Pod/t/pod2html-lib.pl
+					lib/Pod/t/utils.t
+					lib/Search/Dict.{pm,t}
+					lib/SelectSaver.{pm,t}
+					lib/Symbol.{pm,t}
+					lib/Term/Complete.{pm,t}
+					lib/Term/ReadLine.{pm,t}
+					lib/Text/Abbrev.{pm,t}
+					lib/Thread.{pm,t}
+					lib/Tie/Array.pm
+					lib/Tie/Array/
+					lib/Tie/Handle.pm
+					lib/Tie/Handle/
+					lib/Tie/Hash.pm
+					lib/Tie/Hash/NamedCapture.pm
+					lib/Tie/Memoize.{pm,t}
+					lib/Tie/Scalar.{pm,t}
+					lib/Tie/StdHandle.pm
+					lib/Tie/SubstrHash.{pm,t}
+					lib/Time/gmtime.{pm,t}
+					lib/Time/localtime.{pm,t}
+					lib/Time/tm.pm
+					lib/UNIVERSAL.pm
+					lib/Unicode/README
+					lib/Unicode/UCD.{pm,t}
+					lib/User/grent.{pm,t}
+					lib/User/pwent.{pm,t}
+					lib/abbrev.pl
+					lib/assert.pl
+					lib/autouse.{pm,t}
+					lib/bigfloat{.pl,pl.t}
+					lib/bigint{.pl,pl.t}
+					lib/bigrat.pl
+					lib/blib.{pm,t}
+					lib/bytes.{pm,t}
+					lib/bytes_heavy.pl
+					lib/cacheout.pl
+					lib/charnames.{pm,t}
+					lib/complete.pl
+					lib/ctime.pl
+					lib/dbm_filter_util.pl
+					lib/deprecate.pm
+					lib/diagnostics.{pm,t}
+					lib/dotsh.pl
+					lib/dumpvar.{pl,t}
+					lib/exceptions.pl
+					lib/fastcwd.pl
+					lib/feature.{pm,t}
+					lib/filetest.{pm,t}
+					lib/find.pl
+					lib/finddepth.pl
+					lib/flush.pl
+					lib/getcwd.pl
+					lib/getopt.pl
+					lib/getopts.pl
+					lib/h2ph.t
+					lib/h2xs.t
+					lib/hostname.pl
+					lib/importenv.pl
+					lib/integer.{pm,t}
+					lib/less.{pm,t}
+					lib/locale.{pm,t}
+					lib/look.pl
+					lib/newgetopt.pl
+					lib/open.{pm,t}
+					lib/open2.pl
+					lib/open3.pl
+					lib/overload{.pm,.t,64.t}
+					lib/overload/numbers.pm
+					lib/overloading.{pm,t}
+					lib/perl5db.{pl,t}
+					lib/perl5db/
+					lib/pwd.pl
+					lib/shellwords.pl
+					lib/sigtrap.{pm,t}
+					lib/sort.{pm,t}
+					lib/stat.pl
+					lib/strict.{pm,t}
+					lib/subs.{pm,t}
+					lib/syslog.pl
+					lib/tainted.pl
+					lib/termcap.pl
+					lib/timelocal.pl
+					lib/unicore/
+					lib/utf8.{pm,t}
+					lib/utf8_heavy.pl
+					lib/validate.pl
+					lib/vars{.pm,.t,_carp.t}
+					lib/vmsish.{pm,t}
+				    ],
 		'CPAN'		=> 0,
 		'UPSTREAM'	=> undef,
 		},
