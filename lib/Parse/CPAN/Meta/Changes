@@ -1,5 +1,13 @@
 Revision history for Perl extension Parse-CPAN-Meta
 
+1.38 Sat 16 May 2009
+	- Synchorised version numbers with YAML::Tiny
+	- Code shrinkages to the bloaty Unicode/BOM code
+	- Merging a ton more tests from YAML::Tiny
+	- Added back some pointless options to yaml_ok that keep our
+	  codebase closer to YAML::Tiny (which should help with syncing)
+	- Changed exceptions to be closer to YAML::Tiny
+
 0.05 Wed 11 Mar 2009
 	- Upgrade previous release to a stable release.
 

@@ -20,14 +20,14 @@ BEGIN {
 
 use File::Spec::Functions ':ALL';
 use Parse::CPAN::Meta::Test;
-use Test::More tests(8, 2);
+use Test::More tests(8, 3);
 
 
 
 
 
 #####################################################################
-# Testing YAML::Tiny's META.yml file
+# Testing YAML::Tiny's own META.yml file
 
 yaml_ok(
 	<<'END_YAML',
@@ -198,6 +198,7 @@ END_YAML
 		generated_by => 'ExtUtils::MakeMaker version 6.17',
 	} ],
 	'Acme-Time-Baby',
+	noyamlperl => 1,
 );
 
 
@@ -206,30 +207,6 @@ END_YAML
 
 #####################################################################
 # File with a YAML header
-
-yaml_ok(
-	<<'END_YAML',
---- %YAML:1.0
-name:     Data-Swap
-version:  0.05
-license:  perl
-distribution_type: module
-requires:
-   perl:  5.6.0
-dynamic_config: 0
-END_YAML
-	[ {
-		name => 'Data-Swap',
-		version => '0.05',
-		license => 'perl',
-		distribution_type => 'module',
-		requires => {
-			perl => '5.6.0',
-		},
-		dynamic_config => '0',
-	} ],
-	'Data-Swap',
-);
 
 yaml_ok(
 	<<'END_YAML',
@@ -253,6 +230,7 @@ END_YAML
 		dynamic_config => '0',
 	} ],
 	'Data-Swap',
+	nosyck => 1,
 );
 
 
@@ -293,6 +271,7 @@ SCOPE: {
 			version => '1.2.1',
 		} ],
 		'Template-Provider-Unicode-Japanese',
+		noyamlperl => 1,
 	);
 }
 
@@ -314,5 +293,113 @@ SCOPE: {
 			version  => '0.04',
 		} ],
 		'HTML-WebDAO',
+		nosyck => 1,
+	);
+}
+
+SCOPE: {
+	my $content = load_ok(
+		'Spreadsheet-Read.yml',
+		catfile( test_data_directory(), 'Spreadsheet-Read.yml' ),
+		100
+	);
+	yaml_ok(
+		$content,
+		[ {
+			'resources' => {
+				'license' => 'http://dev.perl.org/licenses/'
+			},
+			'meta-spec' => {
+				'version' => '1.4',
+				'url' => 'http://module-build.sourceforge.net/META-spec-v1.4.html'
+			},
+			'distribution_type' => 'module',
+			'generated_by' => 'Author',
+			'version' => 'VERSION',
+			'name' => 'Read',
+			'author' => [
+				'H.Merijn Brand <h.m.brand@xs4all.nl>'
+			],
+			'license' => 'perl',
+			'build_requires' => {
+				'Test::More' => '0',
+				'Test::Harness' => '0',
+				'perl' => '5.006'
+			},
+			'provides' => {
+				'Spreadsheet::Read' => {
+					'version' => 'VERSION',
+					'file' => 'Read.pm'
+				}
+			},
+			'optional_features' => [
+				{
+					'opt_csv' => {
+						'requires' => {
+							'Text::CSV_XS' => '0.23'
+						},
+						'recommends' => {
+							'Text::CSV_PP' => '1.10',
+							'Text::CSV_XS' => '0.58',
+							'Text::CSV' => '1.10'
+						},
+						'description' => 'Provides parsing of CSV streams'
+					}
+				},
+				{
+					'opt_excel' => {
+						'requires' => {
+							'Spreadsheet::ParseExcel' => '0.26',
+							'Spreadsheet::ParseExcel::FmtDefault' => '0'
+						},
+						'recommends' => {
+							'Spreadsheet::ParseExcel' => '0.42'
+						},
+						'description' => 'Provides parsing of Microsoft Excel files'
+					}
+				},
+				{
+					'opt_excelx' => {
+						'requires' => {
+							'Spreadsheet::XLSX' => '0.07'
+						},
+						'description' => 'Provides parsing of Microsoft Excel 2007 files'
+					}
+				},
+				{
+					'opt_oo' => {
+						'requires' => {
+							'Spreadsheet::ReadSXC' => '0.2'
+						},
+						'description' => 'Provides parsing of OpenOffice spreadsheets'
+					}
+				},
+				{
+					'opt_tools' => {
+						'recommends' => {
+							'Tk::TableMatrix::Spreadsheet' => '0',
+							'Tk::NoteBook' => '0',
+							'Tk' => '0'
+						},
+						'description' => 'Spreadsheet tools'
+					}
+				}
+			],
+			'requires' => {
+				'perl' => '5.006',
+				'Data::Dumper' => '0',
+				'Exporter' => '0',
+				'Carp' => '0'
+			},
+			'recommends' => {
+				'perl' => '5.008005',
+				'IO::Scalar' => '0',
+				'File::Temp' => '0.14'
+			},
+			'abstract' => 'Meta-Wrapper for reading spreadsheet data'
+		} ],
+		'Spreadsheet-Read',
+		noyamlpm   => 1,
+		noyamlperl => 1,
 	);
 }
