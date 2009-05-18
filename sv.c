@@ -10509,18 +10509,17 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 MAGIC *
 Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 {
-    MAGIC *mgprev = (MAGIC*)NULL;
     MAGIC *mgret = NULL;
+    MAGIC **mgprev_p = &mgret;
 
     PERL_ARGS_ASSERT_MG_DUP;
 
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
 	Newxz(nmg, 1, MAGIC);
-	if (mgprev)
-	    mgprev->mg_moremagic = nmg;
-	else
-	    mgret = nmg;
+	*mgprev_p = nmg;
+	mgprev_p = &(nmg->mg_moremagic);
+
 	nmg->mg_virtual	= mg->mg_virtual;	/* XXX copy dynamic vtable? */
 	nmg->mg_private	= mg->mg_private;
 	nmg->mg_type	= mg->mg_type;
@@ -10564,7 +10563,6 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 	if ((mg->mg_flags & MGf_DUP) && mg->mg_virtual && mg->mg_virtual->svt_dup) {
 	    CALL_FPTR(nmg->mg_virtual->svt_dup)(aTHX_ nmg, param);
 	}
-	mgprev = nmg;
     }
     return mgret;
 }
