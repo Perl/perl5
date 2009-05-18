@@ -1303,7 +1303,6 @@ package Maintainers;
 					lib/ExtUtils/t/basic_finish.pl
 					lib/ExtUtils/typemap
 					lib/ExtUtils/xsubpp
-					lib/Fatal.t
 					lib/File/Basename.{pm,t}
 					lib/File/CheckTree.{pm,t}
 					lib/File/Compare.{pm,t}
