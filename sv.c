@@ -12173,8 +12173,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     if (proto_perl->Ipsig_ptr) {
-	Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
-	Newxz(PL_psig_name, SIG_SIZE, SV*);
+	Newx(PL_psig_ptr,  SIG_SIZE, SV*);
+	Newx(PL_psig_name, SIG_SIZE, SV*);
 	for (i = 1; i < SIG_SIZE; i++) {
 	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i], param);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i], param);
