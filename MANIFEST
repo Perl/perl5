@@ -2245,7 +2245,6 @@ lib/ExtUtils/XSSymSet.pm	on VMS, manage linker symbols when building extensions
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
-lib/Fatal.t			See if Fatal works
 lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work
 lib/fields.pm			Set up object field names for pseudo-hash-using classes
