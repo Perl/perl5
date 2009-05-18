@@ -10516,10 +10516,6 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 
     if (!mg)
 	return (MAGIC*)NULL;
-    /* look for it in the table first */
-    mgret = (MAGIC*)ptr_table_fetch(PL_ptr_table, mg);
-    if (mgret)
-	return mgret;
 
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
