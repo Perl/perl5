@@ -10510,12 +10510,9 @@ MAGIC *
 Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 {
     MAGIC *mgprev = (MAGIC*)NULL;
-    MAGIC *mgret;
+    MAGIC *mgret = NULL;
 
     PERL_ARGS_ASSERT_MG_DUP;
-
-    if (!mg)
-	return (MAGIC*)NULL;
 
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
