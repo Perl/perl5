@@ -4089,6 +4089,15 @@ PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 #define PERL_ARGS_ASSERT_MG_DUP	\
 	assert(param)
 
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+STATIC SV **	S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest, SSize_t items, CLONE_PARAMS *const param)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_SV_DUP_INC_MULTIPLE	\
+	assert(source); assert(dest); assert(param)
+
+#endif
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);

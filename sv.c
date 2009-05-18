@@ -10297,7 +10297,8 @@ ptr_table_* functions.
 
 /* Certain cases in Perl_ss_dup have been merged, by relying on the fact
    that currently av_dup, gv_dup and hv_dup are the same as sv_dup.
-   If this changes, please unmerge ss_dup.  */
+   If this changes, please unmerge ss_dup.
+   Likewise, sv_dup_inc_multiple() relies on this fact.  */
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
 #define av_dup(s,t)	MUTABLE_AV(sv_dup((const SV *)s,t))
@@ -10552,10 +10553,8 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 			AMT_AMAGIC((AMT*)nmg->mg_ptr))
 		{
 		    AMT * const namtp = (AMT*)nmg->mg_ptr;
-		    I32 i;
-		    for (i = 1; i < NofAMmeth; i++) {
-			namtp->table[i] = cv_dup_inc(namtp->table[i], param);
-		    }
+		    sv_dup_inc_multiple((SV**)(namtp->table),
+					(SV**)(namtp->table), NofAMmeth, param);
 		}
 	    }
 	    else if (nmg->mg_len == HEf_SVKEY)
@@ -10769,6 +10768,20 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	/* Copy the NULL */
 	SvPV_set(dstr, NULL);
     }
+}
+
+/* duplicate a list of SVs. source and dest may point to the same memory.  */
+static SV **
+S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
+		      SSize_t items, CLONE_PARAMS *const param)
+{
+    PERL_ARGS_ASSERT_SV_DUP_INC_MULTIPLE;
+
+    while (items-- > 0) {
+	*dest++ = sv_dup_inc(*source++, param);
+    }
+
+    return dest;
 }
 
 /* duplicate an SV of any type (including AV, HV etc) */
@@ -10994,8 +11007,8 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    AvARRAY(MUTABLE_AV(dstr)) = dst_ary;
 		    AvALLOC((const AV *)dstr) = dst_ary;
 		    if (AvREAL((const AV *)sstr)) {
-			while (items-- > 0)
-			    *dst_ary++ = sv_dup_inc(*src_ary++, param);
+			dst_ary = sv_dup_inc_multiple(src_ary, dst_ary, items,
+						      param);
 		    }
 		    else {
 			while (items-- > 0)
@@ -12175,10 +12188,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (proto_perl->Ipsig_ptr) {
 	Newx(PL_psig_ptr,  SIG_SIZE, SV*);
 	Newx(PL_psig_name, SIG_SIZE, SV*);
-	for (i = 1; i < SIG_SIZE; i++) {
-	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i], param);
-	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i], param);
-	}
+	sv_dup_inc_multiple(proto_perl->Ipsig_ptr, PL_psig_ptr, SIG_SIZE,
+			    param);
+	sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, SIG_SIZE,
+			    param);
     }
     else {
 	PL_psig_ptr	= (SV**)NULL;

@@ -1125,6 +1125,11 @@
 #define dirp_dup		Perl_dirp_dup
 #define gp_dup			Perl_gp_dup
 #define mg_dup			Perl_mg_dup
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_dup_inc_multiple	S_sv_dup_inc_multiple
+#endif
+#endif
 #define sv_dup			Perl_sv_dup
 #define rvpv_dup		Perl_rvpv_dup
 #define parser_dup		Perl_parser_dup
@@ -3454,6 +3459,11 @@
 #define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)
 #define gp_dup(a,b)		Perl_gp_dup(aTHX_ a,b)
 #define mg_dup(a,b)		Perl_mg_dup(aTHX_ a,b)
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_dup_inc_multiple(a,b,c,d)	S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
+#endif
+#endif
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
 #define parser_dup(a,b)		Perl_parser_dup(aTHX_ a,b)

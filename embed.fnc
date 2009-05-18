@@ -1290,6 +1290,10 @@ Ap	|PerlIO*|fp_dup		|NULLOK PerlIO *const fp|const char type|NN CLONE_PARAMS *co
 ApR	|DIR*	|dirp_dup	|NULLOK DIR *const dp
 ApR	|GP*	|gp_dup		|NULLOK GP *const gp|NN CLONE_PARAMS *const param
 ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC *mg|NN CLONE_PARAMS *const param
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+s	|SV **	|sv_dup_inc_multiple|NN SV *const *source|NN SV **dest \
+				|SSize_t items|NN CLONE_PARAMS *const param
+#endif
 ApR	|SV*	|sv_dup		|NULLOK const SV *const sstr|NN CLONE_PARAMS *const param
 Ap	|void	|rvpv_dup	|NN SV *const dstr|NN const SV *const sstr|NN CLONE_PARAMS *const param
 Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *const proto|NN CLONE_PARAMS *const param
