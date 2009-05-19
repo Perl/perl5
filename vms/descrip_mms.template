@@ -503,8 +503,7 @@ perlmini$(O) : perlmini.c
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 uudmap.h : generate_uudmap$(E)
-	DEFINE/USER_MODE SYS$OUTPUT uudmap.h
-	MCR SYS$DISK:[]generate_uudmap$(E)
+	MCR SYS$DISK:[]generate_uudmap$(E) uudmap.h
 
 generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)

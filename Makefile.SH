@@ -575,7 +575,7 @@ perlmini\$(OBJ_EXT): perlmini.c
 globals\$(OBJ_EXT): uudmap.h
 
 uudmap.h: generate_uudmap\$(HOST_EXE_EXT)
-	\$(RUN) ./generate_uudmap\$(HOST_EXE_EXT) >uudmap.h
+	\$(RUN) ./generate_uudmap\$(HOST_EXE_EXT) uudmap.h
 
 generate_uudmap\$(HOST_EXE_EXT): generate_uudmap\$(OBJ_EXT)
 	\$(CC) -o generate_uudmap\$(EXE_EXT) \$(LDFLAGS) generate_uudmap\$(OBJ_EXT) \$(libs)

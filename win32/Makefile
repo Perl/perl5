@@ -1000,7 +1000,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 $(MINIDIR)\globals$(o) : $(UUDMAP_H)
 
 $(UUDMAP_H) : $(GENUUDMAP)
-	$(GENUUDMAP) >$(UUDMAP_H)
+	$(GENUUDMAP) $(UUDMAP_H)
 
 $(GENUUDMAP) : $(GENUUDMAP_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
