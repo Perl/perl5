@@ -15,7 +15,6 @@ use Config;
 use Test::More      'no_plan';
 use File::Basename  qw[basename];
 use Data::Dumper;
-use Config;
 use IPC::Cmd        'can_run';
 
 $SIG{__WARN__} = sub {warn @_ unless @_ && $_[0] =~ /redefined|isn't numeric/};
@@ -28,6 +27,7 @@ use ExtUtils::Installed;
 my $Class   = 'CPANPLUS::Dist::Build';
 my $Utils   = 'CPANPLUS::Internals::Utils';
 my $Have_CC =  can_run($Config{'cc'} )? 1 : 0;
+my $Usedl   = $Config{usedl} ? 1 : 0;
 
 
 my $Lib     = File::Spec->rel2abs(File::Spec->catdir( qw[dummy-perl] ));
@@ -128,6 +128,8 @@ while( my($path,$need_cc) = each %Map ) {
 
     ### we might not have a C compiler
     SKIP: {
+        skip("Perl wasn't built with support for dynamic loading " .
+             "-- skipping compile tests", 5) unless $Usedl;
         skip("The CC compiler listed in Config.pm is not available " .
              "-- skipping compile tests", 5) if $need_cc && !$Have_CC;
         skip("Module::Build is not compiled with C support ".
