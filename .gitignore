@@ -92,6 +92,7 @@ t/rantests
 t/tmp*
 t/perl
 t/test_state
+*.output
 
 # make_ext.pl cleanup scripts
 realclean.sh
