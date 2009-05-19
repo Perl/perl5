@@ -1519,15 +1519,14 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	}
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
-	if (i)
+	if (i) {
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
-	  {
 	    PL_sig_defaulting[i] = 1;
 	    (void)rsignal(i, PL_csighandlerp);
-	  }
 #else
 	    (void)rsignal(i, (Sighandler_t) SIG_DFL);
 #endif
+	}
     }
     else {
 	/*
