@@ -166,7 +166,7 @@ you can wrap the import in an eval like this:
         I18N::Langinfo->import(qw(langinfo CODESET));
         $codeset = langinfo(CODESET()); # note the ()
     };
-    if (!$@) { ... failed ... }
+    if ($@) { ... failed ... }
 
 =head2 EXPORT
 
