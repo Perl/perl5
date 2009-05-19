@@ -12205,12 +12205,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_tmps_ix		= proto_perl->Itmps_ix;
 	PL_tmps_max		= proto_perl->Itmps_max;
 	PL_tmps_floor		= proto_perl->Itmps_floor;
-	Newxz(PL_tmps_stack, PL_tmps_max, SV*);
-	i = 0;
-	while (i <= PL_tmps_ix) {
-	    PL_tmps_stack[i]	= sv_dup_inc(proto_perl->Itmps_stack[i], param);
-	    ++i;
-	}
+	Newx(PL_tmps_stack, PL_tmps_max, SV*);
+	sv_dup_inc_multiple(proto_perl->Itmps_stack, PL_tmps_stack, PL_tmps_ix,
+			    param);
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
 	i = proto_perl->Imarkstack_max - proto_perl->Imarkstack;
