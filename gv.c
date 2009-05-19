@@ -1236,6 +1236,19 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
 			Newxz(PL_psig_name, SIG_SIZE, SV*);
 			Newxz(PL_psig_pend, SIG_SIZE, int);
+		    } else {
+			/* I think that the only way to get here is to re-use an
+			   embedded perl interpreter, where the previous
+			   use didn't clean up fully because
+			   PL_perl_destruct_level was 0. I'm not sure that we
+			   "support" that, in that I suspect in that scenario
+			   there are sufficient other garbage values left in the
+			   interpreter structure that something else will crash
+			   before we get here. I suspect that this is one of
+			   those "doctor, it hurts when I do this" bugs.  */
+			Zero(PL_psig_ptr,  SIG_SIZE, SV*);
+			Zero(PL_psig_name, SIG_SIZE, SV*);
+			Zero(PL_psig_pend, SIG_SIZE, int);
 		    }
 		    GvMULTI_on(gv);
 		    hv = GvHVn(gv);
@@ -1244,9 +1257,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			SV * const * const init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
 			if (init)
 			    sv_setsv(*init, &PL_sv_undef);
-			PL_psig_ptr[i] = 0;
-			PL_psig_name[i] = 0;
-			PL_psig_pend[i] = 0;
 		    }
 		}
 		break;
