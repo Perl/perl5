@@ -202,46 +202,11 @@ sub gimme_conf {
     return $conf;
 };
 
-{
-    my $fh;
-    my $file = ".".basename($0).".output";
-    sub output_handle {
-        return $fh if $fh;
-        
-        $fh = FileHandle->new(">$file")
-                    or warn "Could not open output file '$file': $!";
-       
-        $fh->autoflush(1);
-        return $fh;
-    }
-    
-    sub output_file { return $file }
-    
-    
-    
-    ### redirect output from msg() and error() output to file
-    unless( $ENV{$Env} ) {
-    
-        print "# To run tests in verbose mode, set ".
-              "\$ENV{$Env} = 1\n" unless $ENV{PERL_CORE};
-    
-        1 while unlink $file;   # just in case
-    
-        $CPANPLUS::Error::ERROR_FH  =
-        $CPANPLUS::Error::ERROR_FH  = output_handle();
-        
-        $CPANPLUS::Error::MSG_FH    =
-        $CPANPLUS::Error::MSG_FH    = output_handle();
-        
-    }        
-}
-
+# placeholder
 
 ### clean these files if we're under perl core
 END { 
     if ( $ENV{PERL_CORE} ) {
-        close output_handle(); 1 while unlink output_file();
-
         _clean_test_dir( [
             gimme_conf->get_conf('base'),   
             TEST_CONF_MIRROR_DIR,
