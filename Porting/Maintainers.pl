@@ -1276,6 +1276,7 @@ package Maintainers;
 					ext/Sys-Hostname/
 					ext/XS-APItest/
 					ext/XS-Typemap/
+					ext/attrs/
 					ext/attributes/
 					ext/mro/
 					ext/re/
@@ -1362,6 +1363,7 @@ package Maintainers;
 					lib/User/pwent.{pm,t}
 					lib/abbrev.pl
 					lib/assert.pl
+					lib/attributes.pm
 					lib/autouse.{pm,t}
 					lib/bigfloat{.pl,pl.t}
 					lib/bigint{.pl,pl.t}
