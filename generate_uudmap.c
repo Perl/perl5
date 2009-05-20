@@ -7,6 +7,37 @@
    "hello world" won't port easily to it.  */
 #include <errno.h>
 
+void output_block_to_file(const char *progname, const char *filename,
+			  const char *block, size_t count) {
+  FILE *const out = fopen(filename, "w");
+
+  if (!out) {
+    fprintf(stderr, "%s: Could not open '%s': %s\n", progname, filename,
+	    strerror(errno));
+    exit(1);
+  }
+
+  fputs("{\n    ", out);
+  while (count--) {
+    fprintf(out, "%d", *block);
+    block++;
+    if (count) {
+      fputs(", ", out);
+      if (!(count & 15)) {
+	fputs("\n    ", out);
+      }
+    }
+  }
+  fputs("\n}\n", out);
+
+  if (fclose(out)) {
+    fprintf(stderr, "%s: Could not close '%s': %s\n", progname, filename,
+	    strerror(errno));
+    exit(1);
+  }
+}
+
+
 static const char PL_uuemap[]
 = "`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 
@@ -17,17 +48,9 @@ static char PL_uudmap[256];
 
 int main(int argc, char **argv) {
   size_t i;
-  char *p;
-  FILE *uudmap_out;
 
   if (argc < 2 || argv[1][0] == '\0') {
     fprintf(stderr, "Usage: %s uudemap.h\n", argv[0]);
-    return 1;
-  }
-
-  if (!(uudmap_out = fopen(argv[1], "w"))) {
-    fprintf(stderr, "%s: Could not open '%s': %s\n", argv[0], argv[1],
-	    strerror(errno));
     return 1;
   }
 
@@ -39,27 +62,7 @@ int main(int argc, char **argv) {
    */
   PL_uudmap[(U8)' '] = 0;
 
-  i = sizeof(PL_uudmap);
-  p = PL_uudmap;
-
-  fputs("{\n    ", uudmap_out);
-  while (i--) {
-    fprintf(uudmap_out, "%d", *p);
-    p++;
-    if (i) {
-      fputs(", ", uudmap_out);
-      if (!(i & 15)) {
-	fputs("\n    ", uudmap_out);
-      }
-    }
-  }
-  fputs("\n}\n", uudmap_out);
-
-  if (fclose(uudmap_out)) {
-    fprintf(stderr, "%s: Could not close '%s': %s\n", argv[0], argv[1],
-	    strerror(errno));
-    return 1;
-  }
+  output_block_to_file(argv[0], argv[1], PL_uudmap, sizeof(PL_uudmap));
 
   return 0;
 }
