@@ -124,7 +124,7 @@ C<Compress::Raw::Bzip2> has been added to the core (version 2.019).
 
 =item *
 
-C<Parse::CPAN::Meta> has been added to the core (version 0.05).
+C<Parse::CPAN::Meta> has been added to the core (version 1.38).
 
 =back
 
@@ -183,7 +183,7 @@ C<CPANPLUS> upgraded from version 0.84 to 0.8601
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.28
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.30
 
 =item *
 
@@ -607,6 +607,12 @@ On windows, C<'.\foo'> and C<'..\foo'>  were treated differently than
 C<'./foo'> and C<'../foo'> by C<do> and C<require> [RT #63492].
 
 
+=item *
+
+Assigning a format to a glob could corrupt the format; e.g.:
+
+     *bar=*foo{FORMAT}; # foo format now bad
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -695,7 +701,7 @@ analysed by the Perl porting team.
 
 =head1 SEE ALSO
 
-The F<Changes> file for an axplanation of how to view exhaustive details
+The F<Changes> file for an explanation of how to view exhaustive details
 on what changed.
 
 The F<INSTALL> file for how to build Perl.
