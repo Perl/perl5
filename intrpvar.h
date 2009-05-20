@@ -533,7 +533,15 @@ PERLVARI(Iglob_index,	int,	0)
 
 PERLVAR(Iparser,	yy_parser *)	/* current parser state */
 
+#ifdef MULTIPLICITY
+/* For binary compatibility, keep the interpreter structure the same.
+   However, we no longer use this entry.  */
 PERLVAR(Ibitcount,	char *)
+#else
+/* For binary compatibility, need to retain an extern char *PL_bitcount.
+   So make it point to the compile time generated array.  */
+PERLVARI(Ibitcount,	char *, (char *)PL_bitcount_array)
+#endif
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */

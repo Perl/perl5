@@ -71,7 +71,6 @@
 #define PL_basetime		(vTHX->Ibasetime)
 #define PL_beginav		(vTHX->Ibeginav)
 #define PL_beginav_save		(vTHX->Ibeginav_save)
-#define PL_bitcount		(vTHX->Ibitcount)
 #define PL_body_arenas		(vTHX->Ibody_arenas)
 #define PL_body_roots		(vTHX->Ibody_roots)
 #define PL_bodytarget		(vTHX->Ibodytarget)

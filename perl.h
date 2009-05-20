@@ -4240,10 +4240,29 @@ EXTCONST char PL_uuemap[65]
 EXTCONST char PL_uudmap[256] =
 #include "uudmap.h"
 ;
+#  ifdef MULTIPLICITY
+/* There's no binary compatibility issue with adding a new global PL_bitcount,
+   because before this change, under MULTIPLICITY the pre-processor would have
+   been replacing the token PL_bitcount with an expression to access the
+   interpreter struct.  */
+EXTCONST char PL_bitcount[256] =
+#  else
+/* For binary compatibility, we can't replace the existing pointer PL_bitcount
+   with an array PL_bitcount.  So keep the existing variable, but make it point
+   to our compile-time generated array instead.  */
+EXTCONST char PL_bitcount_array[256] =
+#  endif
+#  include "bitcount.h"
+;
 EXTCONST char* const PL_sig_name[] = { SIG_NAME };
 EXTCONST int         PL_sig_num[]  = { SIG_NUM };
 #else
 EXTCONST char PL_uudmap[256];
+#  ifdef MULTIPLICITY
+EXTCONST char PL_bitcount[256];
+#  else
+EXTCONST char PL_bitcount_array[256];
+#  endif
 EXTCONST char* const PL_sig_name[];
 EXTCONST int         PL_sig_num[];
 #endif

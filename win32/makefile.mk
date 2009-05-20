@@ -923,6 +923,7 @@ CORE_NOCFG_H	=		\
 CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
 
 UUDMAP_H	= ..\uudmap.h
+BITCOUNT_H	= ..\bitcount.h
 
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
@@ -1298,10 +1299,10 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(EMBED_EXE_MANI)
 .ENDIF
 
-$(MINIDIR)\globals$(o) : $(UUDMAP_H)
+$(MINIDIR)\globals$(o) : $(UUDMAP_H) $(BITCOUNT_H)
 
-$(UUDMAP_H) : $(GENUUDMAP)
-	$(GENUUDMAP) $(UUDMAP_H)
+$(UUDMAP_H) $(BITCOUNT_H) : $(GENUUDMAP)
+	$(GENUUDMAP) $(UUDMAP_H) $(BITCOUNT_H)
 
 $(GENUUDMAP) : $(GENUUDMAP_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -1649,7 +1650,7 @@ _clean :
 	-@erase $(PERLSTATICLIB)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
-	-@erase $(GENUUDMAP) $(GENUUDMAP_OBJ) $(UUDMAP_H)
+	-@erase $(GENUUDMAP) $(GENUUDMAP_OBJ) $(UUDMAP_H) $(BITCOUNT_H)
 	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
 	-if exist $(UNIDATADIR1) rmdir /s /q $(UNIDATADIR1)
 	-if exist $(UNIDATADIR2) rmdir /s /q $(UNIDATADIR2)
