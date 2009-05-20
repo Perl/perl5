@@ -1439,14 +1439,23 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 	PL_sig_defaulting[i] = 0;
 #endif
-	SvREFCNT_dec(PL_psig_name[i]);
 	to_dec = PL_psig_ptr[i];
 	if (sv) {
 	    PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
 	    SvTEMP_off(sv); /* Make sure it doesn't go away on us */
-	    PL_psig_name[i] = newSVpvn(s, len);
-	    SvREADONLY_on(PL_psig_name[i]);
+
+	    /* Signals don't change name during the program's execution, so once
+	       they're cached in the appropriate slot of PL_psig_name, they can
+	       stay there.
+
+	       Ideally we'd find some way of making SVs at (C) compile time, or
+	       at least, doing most of the work.  */
+	    if (!PL_psig_name[i]) {
+		PL_psig_name[i] = newSVpvn(s, len);
+		SvREADONLY_on(PL_psig_name[i]);
+	    }
 	} else {
+	    SvREFCNT_dec(PL_psig_name[i]);
 	    PL_psig_name[i] = NULL;
 	    PL_psig_ptr[i] = NULL;
 	}
