@@ -383,14 +383,17 @@ Perl_mg_clear(pTHX_ SV *sv)
 {
     const I32 mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
+    MAGIC *nextmg;
 
     PERL_ARGS_ASSERT_MG_CLEAR;
 
     save_magic(mgs_ix, sv);
 
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+    for (mg = SvMAGIC(sv); mg; mg = nextmg) {
         const MGVTBL* const vtbl = mg->mg_virtual;
 	/* omit GSKIP -- never set here */
+
+	nextmg = mg->mg_moremagic; /* it may delete itself */
 
 	if (vtbl && vtbl->svt_clear)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
