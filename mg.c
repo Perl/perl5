@@ -1328,7 +1328,8 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	}
     }
-    return 0;
+
+    return sv_unmagic(sv, mg->mg_type);
 }
 
 Signal_t

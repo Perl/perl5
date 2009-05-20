@@ -11,8 +11,7 @@ BEGIN {
 use warnings;
 use Config;
 
-
-plan (tests => 59);
+plan (tests => 79);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -469,4 +468,29 @@ SKIP: {
     eval { my %h = qw(A B); %ENV = (PATH => (keys %h)[0]) };
     is $@, '', 'Assign a shared key to a magic hash';
     $@ and print "# $@";
+}
+
+# Tests for Perl_magic_clearsig
+foreach my $sig (qw(__WARN__ INT)) {
+    $SIG{$sig} = lc $sig;
+    is $SIG{$sig}, 'main::' . lc $sig, "Can assign to $sig";
+    is delete $SIG{$sig}, 'main::' . lc $sig, "Can delete from $sig";
+    is $SIG{$sig}, undef, "$sig is now gone";
+    is delete $SIG{$sig}, undef, "$sig remains gone";
+}
+
+# And now one which doesn't exist;
+{
+    no warnings 'signal';
+    $SIG{HUNGRY} = 'mmm, pie';
+}
+is $SIG{HUNGRY}, 'mmm, pie', 'Can assign to HUNGRY';
+is delete $SIG{HUNGRY}, 'mmm, pie', 'Can delete from HUNGRY';
+is $SIG{HUNGRY}, undef, "HUNGRY is now gone";
+is delete $SIG{HUNGRY}, undef, "HUNGRY remains gone";
+
+# Test deleting signals that we never set
+foreach my $sig (qw(__DIE__ _BOGUS_HOOK PIPE THIRSTY)) {
+    is $SIG{$sig}, undef, "$sig is not present";
+    is delete $SIG{$sig}, undef, "delete of $sig returns undef";
 }
