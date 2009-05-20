@@ -384,7 +384,6 @@
 #define PL_Ibasetime		PL_basetime
 #define PL_Ibeginav		PL_beginav
 #define PL_Ibeginav_save	PL_beginav_save
-#define PL_Ibitcount		PL_bitcount
 #define PL_Ibody_arenas		PL_body_arenas
 #define PL_Ibody_roots		PL_body_roots
 #define PL_Ibodytarget		PL_bodytarget
