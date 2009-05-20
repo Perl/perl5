@@ -1317,11 +1317,15 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     	    if(PL_psig_ptr[i]) {
 		SV * const to_dec=PL_psig_ptr[i];
     		PL_psig_ptr[i]=0;
+#ifdef HAS_SIGPROCMASK
 		LEAVE;
+#endif
     		SvREFCNT_dec(to_dec);
     	    }
+#ifdef HAS_SIGPROCMASK
 	    else
 		LEAVE;
+#endif
 	}
     }
     return 0;
