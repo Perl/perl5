@@ -3503,6 +3503,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 	goto common;
     case SVt_PVFM:
 	location = (SV **) &GvFORM(dstr);
+	goto common;
     default:
 	location = &GvSV(dstr);
 	import_flag = GVf_IMPORTED_SV;
