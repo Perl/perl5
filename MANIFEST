@@ -3930,6 +3930,7 @@ t/lib/compress/truncate.pl	Compress::Zlib
 t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
+t/lib/croak.t			Test calls to Perl_croak() in the C source.
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
 t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
