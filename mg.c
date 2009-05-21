@@ -975,6 +975,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
+	    SvUPGRADE(sv, SVt_PVLV);
 	    LvTARGOFF(sv) = PL_statusvalue;
 	    LvTARGLEN(sv) = PL_statusvalue_vms;
 #endif
@@ -2625,6 +2626,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '?':
 #ifdef COMPLEX_STATUS
 	if (PL_localizing == 2) {
+	    SvUPGRADE(sv, SVt_PVLV);
 	    PL_statusvalue = LvTARGOFF(sv);
 	    PL_statusvalue_vms = LvTARGLEN(sv);
 	}
