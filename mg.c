@@ -1532,8 +1532,6 @@ int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    HV* stash;
-
     PERL_ARGS_ASSERT_MAGIC_SETISA;
     PERL_UNUSED_ARG(sv);
 
@@ -1541,29 +1539,10 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     if (PL_delaymagic & DM_ARRAY && mg->mg_type == PERL_MAGIC_isaelem)
 	return 0;
 
-    /* Bail out if destruction is going on */
-    if(PL_dirty) return 0;
-
-    /* XXX Once it's possible, we need to
-       detect that our @ISA is aliased in
-       other stashes, and act on the stashes
-       of all of the aliases */
-
-    /* The first case occurs via setisa,
-       the second via setisa_elem, which
-       calls this same magic */
-    stash = GvSTASH(
-        SvTYPE(mg->mg_obj) == SVt_PVGV
-            ? (const GV *)mg->mg_obj
-            : (const GV *)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
-    );
-
-    if (stash)
-	mro_isa_changed_in(stash);
-
-    return 0;
+    return magic_clearisa(NULL, mg);
 }
 
+/* sv of NULL signifies that we're acting as magic_setisa.  */
 int
 Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1575,9 +1554,17 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     /* Bail out if destruction is going on */
     if(PL_dirty) return 0;
 
-    av_clear(MUTABLE_AV(sv));
+    if (sv)
+	av_clear(MUTABLE_AV(sv));
 
-    /* XXX see comments in magic_setisa */
+    /* XXX Once it's possible, we need to
+       detect that our @ISA is aliased in
+       other stashes, and act on the stashes
+       of all of the aliases */
+
+    /* The first case occurs via setisa,
+       the second via setisa_elem, which
+       calls this same magic */
     stash = GvSTASH(
         SvTYPE(mg->mg_obj) == SVt_PVGV
             ? (const GV *)mg->mg_obj
