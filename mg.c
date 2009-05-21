@@ -1237,9 +1237,13 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     /* Are we fetching a signal entry? */
-    const I32 i = whichsig(MgPV_nolen_const(mg));
+    int i = (I16)mg->mg_private;
 
     PERL_ARGS_ASSERT_MAGIC_GETSIG;
+
+    if (!i) {
+	mg->mg_private = i = whichsig(MgPV_nolen_const(mg));
+    }
 
     if (i > 0) {
     	if(PL_psig_ptr[i])
@@ -1416,7 +1420,10 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	}
     }
     else {
-	i = whichsig(s);	/* ...no, a brick */
+	i = (I16)mg->mg_private;
+	if (!i) {
+	    mg->mg_private = i = whichsig(s);	/* ...no, a brick */
+	}
 	if (i <= 0) {
 	    if (sv && ckWARN(WARN_SIGNAL))
 		Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
