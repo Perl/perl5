@@ -12185,13 +12185,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_psig_pend	= (int*)NULL;
     }
 
-    if (proto_perl->Ipsig_ptr) {
-	Newx(PL_psig_ptr,  SIG_SIZE, SV*);
-	Newx(PL_psig_name, SIG_SIZE, SV*);
-	sv_dup_inc_multiple(proto_perl->Ipsig_ptr, PL_psig_ptr, SIG_SIZE,
+    if (proto_perl->Ipsig_name) {
+	Newx(PL_psig_name, 2 * SIG_SIZE, SV*);
+	sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, 2 * SIG_SIZE,
 			    param);
-	sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, SIG_SIZE,
-			    param);
+	PL_psig_ptr = PL_psig_name + SIG_SIZE;
     }
     else {
 	PL_psig_ptr	= (SV**)NULL;

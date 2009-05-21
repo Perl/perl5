@@ -1228,10 +1228,9 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();
     Safefree(PL_op_mask);
-    Safefree(PL_psig_ptr);
-    PL_psig_ptr = (SV**)NULL;
     Safefree(PL_psig_name);
     PL_psig_name = (SV**)NULL;
+    PL_psig_ptr = (SV**)NULL;
     Safefree(PL_psig_pend);
     PL_psig_pend = (int*)NULL;
     PL_formfeed = NULL;

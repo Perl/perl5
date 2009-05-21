@@ -537,7 +537,8 @@ PERLVAR(Iparser,	yy_parser *)	/* current parser state */
    signal handler dispatches.  */
 PERLVAR(Ipsig_ptr, SV**)
 /* Array of names of signals, indexed by signal number, for (re)use as the first
-   argument to a signal handler.   */
+   argument to a signal handler.   Only one block of memory is allocated for
+   both psig_name and psig_ptr.  */
 PERLVAR(Ipsig_name, SV**)		
 
 #if defined(PERL_IMPLICIT_SYS)

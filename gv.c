@@ -1232,10 +1232,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "IG")) {
 		    HV *hv;
 		    I32 i;
-		    if (!PL_psig_ptr) {
-			Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
-			Newxz(PL_psig_name, SIG_SIZE, SV*);
+		    if (!PL_psig_name) {
+			Newxz(PL_psig_name, 2 * SIG_SIZE, SV*);
 			Newxz(PL_psig_pend, SIG_SIZE, int);
+			PL_psig_ptr = PL_psig_name + SIG_SIZE;
 		    } else {
 			/* I think that the only way to get here is to re-use an
 			   embedded perl interpreter, where the previous
@@ -1246,8 +1246,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			   interpreter structure that something else will crash
 			   before we get here. I suspect that this is one of
 			   those "doctor, it hurts when I do this" bugs.  */
-			Zero(PL_psig_ptr,  SIG_SIZE, SV*);
-			Zero(PL_psig_name, SIG_SIZE, SV*);
+			Zero(PL_psig_name, 2 * SIG_SIZE, SV*);
 			Zero(PL_psig_pend, SIG_SIZE, int);
 		    }
 		    GvMULTI_on(gv);
