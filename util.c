@@ -2347,9 +2347,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     else
 	PerlLIO_close(p[that]);		/* close child's end of pipe */
 
-    LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
-    UNLOCK_FDPID_MUTEX;
     SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, pid);
     PL_forkprocess = pid;
@@ -2517,9 +2515,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     else
 	PerlLIO_close(p[that]);
 
-    LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
-    UNLOCK_FDPID_MUTEX;
     SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, pid);
     PL_forkprocess = pid;
@@ -2863,9 +2859,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     bool close_failed;
     dSAVEDERRNO;
 
-    LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
-    UNLOCK_FDPID_MUTEX;
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;

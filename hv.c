@@ -2324,13 +2324,10 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 	   shared hek  */
 	assert (he->shared_he_he.hent_hek == hek);
 
-	LOCK_STRTAB_MUTEX;
 	if (he->shared_he_he.he_valu.hent_refcount - 1) {
 	    --he->shared_he_he.he_valu.hent_refcount;
-	    UNLOCK_STRTAB_MUTEX;
 	    return;
 	}
-	UNLOCK_STRTAB_MUTEX;
 
         hash = HEK_HASH(hek);
     } else if (len < 0) {
@@ -2352,7 +2349,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
-    LOCK_STRTAB_MUTEX;
     first = oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (he) {
 	const HE *const he_he = &(he->shared_he_he);
@@ -2387,7 +2383,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         }
     }
 
-    UNLOCK_STRTAB_MUTEX;
     if (!entry && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
                     "Attempt to free non-existent shared string '%s'%s"
@@ -2452,7 +2447,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     */
 
     /* assert(xhv_array != 0) */
-    LOCK_STRTAB_MUTEX;
     entry = (HvARRAY(PL_strtab))[hindex];
     for (;entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -2510,7 +2504,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     }
 
     ++entry->he_valu.hent_refcount;
-    UNLOCK_STRTAB_MUTEX;
 
     if (flags & HVhek_FREEKEY)
 	Safefree(str);

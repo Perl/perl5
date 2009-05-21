@@ -626,7 +626,6 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
                 Pid_t pid;
                 SV *sv;
 
-                LOCK_FDPID_MUTEX;
                 sv = *av_fetch(PL_fdpid,fd,TRUE);
                 SvUPGRADE(sv, SVt_IV);
                 pid = SvIVX(sv);
@@ -634,7 +633,6 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
                 sv = *av_fetch(PL_fdpid,savefd,TRUE);
                 SvUPGRADE(sv, SVt_IV);
                 SvIV_set(sv, pid);
-                UNLOCK_FDPID_MUTEX;
             }
 #endif
 

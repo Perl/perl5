@@ -242,7 +242,6 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     const Gid_t egid = getegid();
     int res;
 
-    LOCK_CRED_MUTEX;
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
     Perl_croak(aTHX_ "switching effective uid is not implemented");
 #else
@@ -288,7 +287,6 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #endif
 #endif
 	Perl_croak(aTHX_ "leaving effective gid failed");
-    UNLOCK_CRED_MUTEX;
 
     return res;
 }
