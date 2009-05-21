@@ -1537,12 +1537,12 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETISA;
     PERL_UNUSED_ARG(sv);
 
-    /* Bail out if destruction is going on */
-    if(PL_dirty) return 0;
-
     /* Skip _isaelem because _isa will handle it shortly */
     if (PL_delaymagic & DM_ARRAY && mg->mg_type == PERL_MAGIC_isaelem)
 	return 0;
+
+    /* Bail out if destruction is going on */
+    if(PL_dirty) return 0;
 
     /* XXX Once it's possible, we need to
        detect that our @ISA is aliased in
