@@ -1423,7 +1423,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     else {
 	i = (I16)mg->mg_private;
 	if (!i) {
-	    mg->mg_private = i = whichsig(s);	/* ...no, a brick */
+	    i = whichsig(s);	/* ...no, a brick */
+	    mg->mg_private = (U16)i;
 	}
 	if (i <= 0) {
 	    if (sv && ckWARN(WARN_SIGNAL))
