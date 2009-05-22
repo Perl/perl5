@@ -354,7 +354,7 @@ SKIP: {
 {
     my $ok = 1;
     my $warn = '';
-    local $SIG{'__WARN__'} = sub { $ok = 0; $warn = join '', @_; };
+    local $SIG{'__WARN__'} = sub { $ok = 0; $warn = join '', @_; $warn =~ s/\n$//; };
     $! = undef;
     local $TODO = $Is_VMS ? "'\$!=undef' does throw a warning" : '';
     ok($ok, $warn);
