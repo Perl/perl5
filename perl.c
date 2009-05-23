@@ -3935,11 +3935,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     if ((tmpgv = gv_fetchpvs("0", GV_ADD|GV_NOTQUAL, SVt_PV))) {
 	sv_setpv(GvSV(tmpgv),PL_origfilename);
-	{
-	    GV * const gv = gv_fetchpv("0", GV_ADD, SVt_PV);
-	    if (gv)
-		sv_magic(GvSV(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, "0", 1);
-	}
     }
     if ((PL_envgv = gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV))) {
 	HV *hv;
