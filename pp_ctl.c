@@ -4159,12 +4159,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	       to check that one is a subset of the other. */
 	    (void) hv_iterinit(hv);
 	    while ( (he = hv_iternext(hv)) ) {
-	    	I32 key_len;
-		char * const key = hv_iterkey(he, &key_len);
+		SV *key = hv_iterkeysv(he);
 	    	
 	    	++ this_key_count;
 	    	
-	    	if(!hv_exists(other_hv, key, key_len)) {
+	    	if(!hv_exists_ent(other_hv, key, 0)) {
 	    	    (void) hv_iterinit(hv);	/* reset iterator */
 		    RETPUSHNO;
 	    	}
@@ -4191,12 +4190,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
-		char *key;
-		STRLEN key_len;
-
 		if (svp) {	/* ??? When can this not happen? */
-		    key = SvPV(*svp, key_len);
-		    if (hv_exists(hv, key, key_len))
+		    if (hv_exists_ent(hv, *svp, 0))
 		        RETPUSHYES;
 		}
 	    }
@@ -4241,12 +4236,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
-		char *key;
-		STRLEN key_len;
-
 		if (svp) {	/* ??? When can this not happen? */
-		    key = SvPV(*svp, key_len);
-		    if (hv_exists(MUTABLE_HV(SvRV(d)), key, key_len))
+		    if (hv_exists_ent(MUTABLE_HV(SvRV(d)), *svp, 0))
 		        RETPUSHYES;
 		}
 	    }
