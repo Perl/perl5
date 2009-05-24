@@ -37,7 +37,15 @@ tie my %tied_hash, 'Tie::StdHash';
 {
     package Test::Object::WithOverload;
     sub new { bless { key => 'magic' } }
-    use overload '~~' => sub { my %hash = %{ $_[0] }; $_[1] eq $hash{key} };
+    use overload '~~' => sub {
+	my %hash = %{ $_[0] };
+	if ($_[2]) { # arguments reversed ?
+	    return $_[1] eq reverse $hash{key};
+	}
+	else {
+	    return $_[1] eq $hash{key};
+	}
+    };
     use overload '""' => sub { "stringified" };
     use overload 'eq' => sub {"$_[0]" eq "$_[1]"};
 }
@@ -158,15 +166,15 @@ __DATA__
 
 # Any ~~ object overloaded
 !	\&fatal		$ov_obj
-	'magic'		$ov_obj
-!	'not magic'	$ov_obj
+	'cigam'		$ov_obj
+!	'cigam on'	$ov_obj
 !	$obj		$ov_obj
 !	undef		$ov_obj
 
 # regular object
 @	$obj		$obj
 @	$ov_obj		$obj
-@	\&fatal		$obj
+=@	\&fatal		$obj
 @	\&FALSE		$obj
 @	\&foo		$obj
 @	sub { 1 }	$obj
@@ -183,7 +191,9 @@ __DATA__
 # object (overloaded or not) ~~ Any
 	$obj		qr/NoOverload/
 	$ov_obj		qr/^stringified$/
-	$ov_obj		"stringified"
+	"$ov_obj"	"stringified"
+	$ov_obj		'magic'
+!	$ov_obj		'not magic'
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }

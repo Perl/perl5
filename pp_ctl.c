@@ -4001,6 +4001,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
 
+    /* First of all, handle overload magic of the rightmost argument */
     if (SvAMAGIC(e)) {
 	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
 	if (tmpsv) {
@@ -4371,9 +4372,25 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETURN;
 	}
     }
-    /* ~~ X..Y TODO */
     /* ~~ scalar */
-    else if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
+    /* See if there is overload magic on left */
+    else if (object_on_left && SvAMAGIC(d)) {
+	SV *tmpsv;
+	PUSHs(d); PUSHs(e);
+	PUTBACK;
+	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
+	if (tmpsv) {
+	    SPAGAIN;
+	    (void)POPs;
+	    SETs(tmpsv);
+	    RETURN;
+	}
+	SP -= 2;
+	goto sm_any_scalar;
+    }
+    else
+  sm_any_scalar:
+    if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
 	/* numeric comparison */
 	PUSHs(d); PUSHs(e);
 	PUTBACK;

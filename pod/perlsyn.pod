@@ -717,6 +717,7 @@ and "Array" entries apply in those cases. (For blessed references, the
     Array   Regex     array grep               grep /$b/, @$a
     Any     Regex     pattern match            $a =~ /$b/
 
+    Object  Any       invokes ~~ overloading on $object, or falls back:
     Any     Num       numeric equality         $a == $b
     Num     numish[4] numeric equality         $a == $b
     Any     Any       string equality          $a eq $b
