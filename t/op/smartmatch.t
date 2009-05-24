@@ -11,6 +11,7 @@ no warnings 'uninitialized';
 
 use Tie::Array;
 use Tie::Hash;
+use Tie::RefHash;
 
 # Predeclare vars used in the tests:
 my @empty;
@@ -43,6 +44,9 @@ tie my %tied_hash, 'Tie::StdHash';
 
 our $ov_obj = Test::Object::WithOverload->new;
 our $obj = Test::Object::NoOverload->new;
+
+tie my %refh, 'Tie::RefHash';
+$refh{$ov_obj} = 1;
 
 my @keyandmore = qw(key and more);
 my @fooormore = qw(foo or more);
@@ -251,6 +255,11 @@ __DATA__
 =	%hash		%tied_hash
 	%tied_hash	%tied_hash
 !=	{"a"=>"b"}	%tied_hash
+	$ov_obj		%refh
+!	"$ov_obj"	%refh
+	[$ov_obj]	%refh
+!	["$ov_obj"]	%refh
+	%refh		%refh
 
 #  - an array ref
 #  (since this is symmetrical, tests as well hash~~array)
