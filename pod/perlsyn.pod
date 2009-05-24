@@ -682,7 +682,7 @@ and "Array" entries apply in those cases. (For blessed references, the
     Array   CodeRef   sub truth for each elt[1] !grep { !$b->($_) } @$a
     Any     CodeRef   scalar sub truth          $b->($a)
 
-    Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
+    Hash    Hash      hash keys identical (every key is found in both hashes)
     Array   Hash      hash slice existence     grep { exists $b->{$_} } @$a
     Regex   Hash      hash key grep            grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
