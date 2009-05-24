@@ -816,8 +816,8 @@ SKIP: {
 	    default {$matched = 0}
 	}
     
-	is($obj->{called}, 0, "$test: called");
-	ok(!$matched, "$test: not matched");
+	is($obj->{called}, 1, "$test: called");
+	ok($matched, "$test: matched");
     }
 
     {
@@ -828,7 +828,7 @@ SKIP: {
 	    when ("other arg") {$matched = 1}
 	}
     
-	is($obj->{called}, 0, "$test: called");
+	is($obj->{called}, 1, "$test: called");
 	ok(!$matched, "$test: not matched");
     }
 
