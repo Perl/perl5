@@ -25,3 +25,7 @@ ppport.h
 /Sys-Hostname/Makefile.PL
 /Test-Harness/Makefile.PL
 /Text-Soundex/Makefile.PL
+
+# ignore all vim swap files but the one bundled in Module::Pluggable for testing
+*.swp
+!/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swp
