@@ -1,11 +1,12 @@
 #!./perl
 
-use strict;
-use warnings;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    if ($ENV{PERL_CORE_MINITEST}) {
+	print "1..0 # Skip: no Fcntl under miniperl\n";
+	exit 0;
+    }
     unless (find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
@@ -16,6 +17,9 @@ BEGIN {
 	exit 0;
     }
 }
+
+use strict;
+use warnings;
 
 use Test::More tests => 6;
 
