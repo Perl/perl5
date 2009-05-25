@@ -737,9 +737,7 @@ C<grep>, the smart match operator will short-circuit whenever it can.
 
 You can change the way that an object is matched by overloading
 the C<~~> operator. This trumps the usual smart match semantics.
-See L<overload>. Since smart matching dispatch is driven by the
-right hand side argument, overloading applies only when the object
-is on the right of C<~~>.
+See L<overload>.
 
 It should be noted that C<~~> will refuse to work on objects that
 don't overload it (in order to avoid relying on the object's
