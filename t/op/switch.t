@@ -3,17 +3,17 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use strict;
 use warnings;
 
-use Test::More tests => 122;
+plan tests => 122;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
 # the switch ops themselves.
-              
 
 use feature 'switch';
 
