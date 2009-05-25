@@ -143,7 +143,8 @@ open my $io, "<", "TEST";
 $io = *{$io}{IO};
 bless $io, "OverString";
 
-eval { require Fcntl };
+my $fcntl_not_available;
+eval { require Fcntl } or $fcntl_not_available = 1;
 
 for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     $over = [];
@@ -155,9 +156,11 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
     my ($exp, $is) = (1, "is");
     if (
+	!$fcntl_not_available and (
         $op eq "u" and not eval { Fcntl::S_ISUID() } or
         $op eq "g" and not eval { Fcntl::S_ISGID() } or
         $op eq "k" and not eval { Fcntl::S_ISVTX() }
+	)
     ) {
         ($exp, $is) = (0, "not");
     }
