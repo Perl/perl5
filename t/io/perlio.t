@@ -92,7 +92,11 @@ ok(close($utffh));
 }
 
 # in-memory open
-{
+SKIP: {
+    eval { require PerlIO::scalar };
+    unless (find PerlIO::Layer 'scalar') {
+	skip("PerlIO::scalar not found", 8);
+    }
     my $var;
     ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
     ok( defined fileno($x),     '       fileno' );
