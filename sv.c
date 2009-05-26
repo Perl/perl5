@@ -12984,6 +12984,14 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	  Need a better fix at dome point. DAPM 11/2007 */
 	break;
 
+    case OP_FLIP:
+    case OP_FLOP:
+    {
+	GV * const gv = gv_fetchpvs(".", GV_NOTQUAL, SVt_PV);
+	if (gv && GvSV(gv) == uninit_sv)
+	    return newSVpvs_flags("$.", SVs_TEMP);
+	goto do_op;
+    }
 
     case OP_POS:
 	/* def-ness of rval pos() is independent of the def-ness of its arg */
