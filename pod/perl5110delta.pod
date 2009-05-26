@@ -56,7 +56,7 @@ choose to ignore it).
 =item *
 
 C<%hash ~~ sub {}> and C<@array ~~ sub {}> now test that the subroutine
-returns a true value for each key of the hash (resp. element of the
+returns a true value for each key of the hash (or element of the
 array), instead of passing the whole hash or array as a reference to
 the subroutine.
 
@@ -85,7 +85,7 @@ when an object overloading C<~~> appears on the right side of the
 operator, the overload routine will always be called (with a 3rd argument
 set to a true value, see L<overload>.) However, when the object will
 appear on the left, the overload routine will be called only when the
-rightmost argument is a scalar. This way distributivity of smart match
+rightmost argument is a simple scalar. This way distributivity of smart match
 across arrays is not broken, as well as the other behaviours with complex
 types (coderefs, hashes, regexes). Thus, writers of overloading routines
 for smart match need to worry only with comparing against a scalar, and
