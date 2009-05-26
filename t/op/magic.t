@@ -30,6 +30,11 @@ $PERL = $ENV{PERL}
        $Is_MSWin32            ? '.\perl' :
        './perl');
 
+END {
+    # On VMS, environment variable changes are peristent after perl exits
+    delete $ENV{'FOO'} if $Is_VMS;
+}
+
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
