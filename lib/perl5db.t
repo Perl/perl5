@@ -85,5 +85,5 @@ like($contents, qr/sub factorial/,
 # clean up.
 
 END {
-    unlink qw(.perldb db.out);
+    1 while unlink qw(.perldb db.out);
 }
