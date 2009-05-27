@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib); require 'test.pl';
 }
 use warnings;
-plan( tests => 143 );
+plan( tests => 144 );
 
 # these shouldn't hang
 {
@@ -394,6 +394,10 @@ sub ok { main::cmp_ok($_[0],'eq',$_[1],$_[2]);
     ok "@a", "x c b a", "un-inplace sort with function of lexical";
     @a = qw(b c a); @a = ((sort mysort @a),'x');
     ok "@a", "c b a x", "un-inplace sort with function of lexical 2";
+
+    # RT#54758. Git 62b40d2474e7487e6909e1872b6bccdf812c6818
+    my @m; push @m, 0 for 1 .. 1024; $#m; @m = sort @m;
+    main::pass("in-place sorting segfault");
 }
 
 # Test optimisations of reversed sorts. As we now guarantee stability by
