@@ -2397,10 +2397,8 @@ M  c6f023287f 2009/02/11 Fix previous patch. Actually it's written PAREN, n
 d  8098e75c0b 2009/02/11 avoid confusing gcc with -2147483648
 			    y2038
 M  bf8d1304d5 2009/02/11 vms fgetname wrapper.
-!  f9916dde00 2009/02/12 Update CPAN.pm to 1.93_51
-			    wait for CPAN sync
-!  7f9994e0a5 2009/02/12 Fix MANIFEST for CPAN 1.93_51 inclusion
-			    fix for f9916dde00
+M  f9916dde00 2009/02/12 Update CPAN.pm to 1.93_51
+M  7f9994e0a5 2009/02/12 Fix MANIFEST for CPAN 1.93_51 inclusion
 M  142f6a0dad 2009/02/12 Skip tests for flattened extensions that weren't b
 M  cdaa314533 2009/02/12 Update .gitignore with new flat extension path
 M  32d85a01d8 2009/02/12 Ignore some temporary files created by ext/DB_File
@@ -2910,10 +2908,8 @@ M  ad6402bdb9 2009/04/13 Upgrade to CGI.pm-3.43
 R  3915ffe07a 2009/04/13 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: ad6402bdb9 5dfb71230e
 				individual commits merged
-!  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
-			    wait for CPAN synwait for CPAN sync
-!  512e1353c9 2009/04/14 Add file missed in previous commit.
-			    see 2f2071b189
+M  2f2071b189 2009/04/13 [PATCH] Update CPAN.pm to 1.93_52
+M  512e1353c9 2009/04/14 Add file missed in previous commit.
 M  5a7d111884 2009/04/14 Documentation Patch: perlxs.pod
 M  edd0a813ce 2009/04/16 Update CPANPLUS::Dist::Build to 0.22
 M  76c8ecbc54 2009/04/16 Build bzip2 witha C++ compiler
@@ -3003,8 +2999,7 @@ M  b017ed2380 2009/05/02 Document that XS_VERSION_BOOTCHECK may break if $V
 M  f31522f37e 2009/05/03 Remove warnings "Exiting given/when via next/last"
 M  1ebfab3267 2009/05/03 Add tests for last and next in when()
 M  ea6efd2c81 2009/05/03 RE: [PATCH] compress 2.018
-!  94fe740e5e 2009/05/04 Update CPAN.pm to 1.93_53
-			    wait for CPAN sync
+M  94fe740e5e 2009/05/04 Update CPAN.pm to 1.93_53
 M  7a9a6fa18c 2009/05/04 Clarify that =encoding is global in POD
 M  80b215cbdd 2009/05/04 Patch to fix the problem enclosed.
 M  2b78b7715e 2009/05/04 Update IPC::Cmd to 0.44
@@ -3033,8 +3028,7 @@ M  81ab4c4438 2009/05/06 Fix POSIX::tzset() as per Time::Piece::_tzset().
 M  3ecadf9633 2009/05/07 Fix ExtUtils::Miniperl on Win32
 M  4320d0941c 2009/05/07 Upgrade to CPANPLUS-Dist-Build-0.26
 M  2d96a87905 2009/05/07 Bring PathTools changes file in sync with... PathT
-!  c1413a7f3f 2009/05/08 Update CPAN.pm to 1.93_54
-			    wait for CPAN sync
+M  c1413a7f3f 2009/05/08 Update CPAN.pm to 1.93_54
 M  1e3c652eb4 2009/05/08 git checkout in add-package.pl, not git co
 M  52f75a8770 2009/05/08 Upgrade CPANPLUS::Dist::Build to 0.28
 M  5f1c709273 2009/05/08 Silence Win32 compiler warning in IO.xs
@@ -3136,3 +3130,38 @@ d  9dfa190b44 2009/05/20 Refactor Perl_magic_setsig() to remove duplication
 d  79fd38228c 2009/05/20 In Perl_magic_setsig(), don't discard and then rec
 M  f0ba5af609 2009/05/20 Add new files from Parse::CPAN::Meta 1.38 to the M
 M  35df902d51 2009/05/20 run dos2unix on lib/Parse/CPAN/Meta.pm
+d  8ac77ac96d 2009/05/20 Perl_mg_clear() did not cope with the called magic
+d  d525a7b208 2009/05/21 Use only one block of memory for both PL_psig_name
+d  b14647bbef 2009/05/21 Remove all the 5005threads specific mutex macros, 
+d  2243c3b251 2009/05/21 In Perl_magic_setisa(), re-order two independant r
+d  0e44608102 2009/05/21 Merge Perl_magic_setisa() and Perl_magic_clearisa(
+M  41cb7b2bbf 2009/05/21 $? needs upgrade to PVLV when COMPLEX_STATUS is de
+M  4400b3fbcd 2009/05/22 Smoke failing on longdouble
+d  58a26b1261 2009/05/22 In Perl_magic_setsig(), silence a "possible loss o
+M  ae8ade6528 2009/05/22 TODO must be on same line as message for TAP.
+d  e69c155ade 2009/05/23 Move the code to add magic to $0 into Perl_gv_fetc
+M  6fbdb1ccd2 2009/05/24 perlpodspec corrections
+M  59c5d19941 2009/05/24 Remove vim swap file
+M  4d87b51d90 2009/05/24 Ignore vim swap files
+.  b15feb55e4 2009/05/24 In the ~~ implementation, consistently use the SV-
+.  6f76d139d7 2009/05/24 Change the specs of %h~~%h to avoid mentioning ~~ 
+.  2c9d2554ad 2009/05/24 Allow ~~ overloading on the left side, when the ri
+.  2cb9bde746 2009/05/24 Fix test for overload in given() with smart match 
+M  e21a6cc6e2 2009/05/24 Update CPAN.pm to 1.94
+.  035fa39eee 2009/05/25 Revert "Fix failing autodie test with new smartmat
+.  37e07c4054 2009/05/25 Avoid using Test::More in given/when tests
+M  0cb48d0073 2009/05/25 Skip tests if PerlIO::scalar is not available
+M  3484683b77 2009/05/25 Skip under miniperl (cannot load Fcntl)
+R  822146ea06 2009/05/25 Fix test if Fcntl couldn't be loaded (for example 
+			fix to Filetest stuff which has already been rejected
+M  98d0ccc7b4 2009/05/25 Skip tests that use attributes.pm under miniperl
+M  751caec9e6 2009/05/25 Don't run mro/* tests under miniperl
+.  0a690b6aaf 2009/05/25 Remove now-obsolete note on ~~ overloading working
+.  8b8da387fd 2009/05/25 Describe smart match and switch changes in perldel
+M  7dda6b54f0 2009/05/26 patch@2009-05-25.21:50:08 text-options.t file clea
+M  7cd487314b 2009/05/26 patch@2009-05-25.21:50:08 perl5db.t leaves db.out 
+M  8df0e0edf4 2009/05/26 patch@2009-05-25.21:50:08 magic.t leaves $ENV{foo}
+.  1710b4c094 2009/05/26 File tests were already treated as boolean in when
+d  4f187fc917 2009/05/26 Explicitely point to $. when it causes an uninitia
+d  933981904d 2009/05/26 More tests for uninitialized warnings in ranges
+M  54f7170d62 2009/05/26 Catch interdependencies for static builds too

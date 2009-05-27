@@ -175,7 +175,7 @@ C<Compress::Zlib> upgraded from version 2.008 to 2.019
 
 =item *
 
-C<CPAN> upgraded from version 1.9205 to 1.93_03 
+C<CPAN> upgraded from version 1.9205 to 1.94
 
 =item *
 
