@@ -4325,7 +4325,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		      ((LISTOP*)right)->op_last->op_type == OP_CONST)
 		    {
 			SV *sv = ((SVOP*)((LISTOP*)right)->op_last)->op_sv;
-			if (SvIVX(sv) == 0)
+			if (SvIOK(sv) && SvIVX(sv) == 0)
 			    sv_setiv(sv, PL_modcount+1);
 		    }
 		}
