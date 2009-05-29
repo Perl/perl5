@@ -600,9 +600,9 @@ struct loop {
 #endif
 
 /* flags used by Perl_load_module() */
-#define PERL_LOADMOD_DENY		0x1
-#define PERL_LOADMOD_NOIMPORT		0x2
-#define PERL_LOADMOD_IMPORT_OPS		0x4
+#define PERL_LOADMOD_DENY		0x1	/* no Module */
+#define PERL_LOADMOD_NOIMPORT		0x2	/* use Module () */
+#define PERL_LOADMOD_IMPORT_OPS		0x4	/* use Module (...) */
 
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C)
 #define ref(o, type) doref(o, type, TRUE)
