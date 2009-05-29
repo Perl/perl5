@@ -23,6 +23,7 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
 		    'some cmd and args', 'optarg', ...);
 
     my($wtr, $rdr, $err);
+    use Symbol 'gensym'; $err = gensym;
     $pid = open3($wtr, $rdr, $err,
 		    'some cmd and args', 'optarg', ...);
 
@@ -35,8 +36,9 @@ Extremely similar to open2(), open3() spawns the given $cmd and
 connects CHLD_OUT for reading from the child, CHLD_IN for writing to
 the child, and CHLD_ERR for errors.  If CHLD_ERR is false, or the
 same file descriptor as CHLD_OUT, then STDOUT and STDERR of the child
-are on the same filehandle.  The CHLD_IN will have autoflush turned
-on.
+are on the same filehandle (this means that an autovivified lexical
+cannot be used for the STDERR filehandle, see SYNOPSIS).  The CHLD_IN
+will have autoflush turned on.
 
 If CHLD_IN begins with C<< <& >>, then CHLD_IN will be closed in the
 parent, and the child will read from it directly.  If CHLD_OUT or
