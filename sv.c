@@ -9444,7 +9444,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (DO_UTF8(argsv)) {
 		    I32 old_precis = precis;
 		    if (has_precis && precis < elen) {
-			I32 p = precis;
+			I32 ulen = sv_len_utf8(argsv);
+			I32 p = precis > ulen ? ulen : precis;
 			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
 			precis = p;
 		    }
@@ -9459,7 +9460,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 
 	string:
-	    if (has_precis && elen > precis)
+	    if (has_precis && precis < elen)
 		elen = precis;
 	    break;
 
