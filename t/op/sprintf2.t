@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1319;
+plan tests => 1368;
 
 use strict;
 use Config;
@@ -165,3 +165,18 @@ for my $t (@tests) {
   }
 }
 
+# Check unicode vs byte length
+for my $width (1,2,3,4,5,6,7) {
+    for my $precis (1,2,3,4,5,6,7) {
+        my $v = "\x{20ac}\x{20ac}";
+        my $format = "%" . $width . "." . $precis . "s";
+        my $chars = ($precis > 2 ? 2 : $precis);
+        my $space = ($width < 2 ? 0 : $width - $chars);
+        fresh_perl_is(
+            'my $v = "\x{20ac}\x{20ac}"; my $x = sprintf "'.$format.'", $v; $x =~ /^(\s*)(\S*)$/; print "$_" for map {length} $1, $2',
+            "$space$chars",
+            {},
+            q(sprintf ").$format.q(", "\x{20ac}\x{20ac}"),
+        );
+    }
+}
