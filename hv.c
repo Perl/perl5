@@ -1443,8 +1443,10 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
 	    SV *const sv = newSVsv(HeVAL(entry));
+	    SV *heksv = newSVhek(HeKEY_hek(entry));
 	    sv_magic(sv, NULL, PERL_MAGIC_hintselem,
-		     (char *)sv_2mortal(newSVhek (HeKEY_hek(entry))), HEf_SVKEY);
+		     (char *)heksv, HEf_SVKEY);
+	    SvREFCNT_dec(heksv);
 	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
 				 sv, HeHASH(entry), HeKFLAGS(entry));
 	}
