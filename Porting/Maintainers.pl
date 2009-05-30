@@ -472,7 +472,8 @@ package Maintainers;
 	'Filter::Simple' =>
 		{
 		'MAINTAINER'	=> 'smueller',
-		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple],
+		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple
+				    t/lib/Filter/Simple/ ],
 		'CPAN'		=> 1,
                 'UPSTREAM'      => "blead",
 		},
