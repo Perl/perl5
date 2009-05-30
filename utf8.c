@@ -682,7 +682,6 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
     dVAR;
     STRLEN len = 0;
-    U8 t = 0;
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
 
@@ -693,20 +692,23 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
     if (e < s)
 	goto warn_and_return;
     while (s < e) {
-	t = UTF8SKIP(s);
-	if (e - s < t) {
-	    warn_and_return:
-	    if (ckWARN_d(WARN_UTF8)) {
-	        if (PL_op)
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			    "%s in %s", unees, OP_DESC(PL_op));
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
-	    }
-	    return len;
-	}
-	s += t;
+	if (!UTF8_IS_INVARIANT(*s))
+	    s += UTF8SKIP(s);
+	else
+	    s++;
 	len++;
+    }
+
+    if (e != s) {
+	len--;
+        warn_and_return:
+	if (ckWARN_d(WARN_UTF8)) {
+	    if (PL_op)
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+			    "%s in %s", unees, OP_DESC(PL_op));
+	    else
+		Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
+	}
     }
 
     return len;
