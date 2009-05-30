@@ -3668,8 +3668,11 @@ PP(pp_entereval)
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
-    if (saved_hh)
+    if (saved_hh) {
+	/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
+	SvREFCNT_dec(GvHV(PL_hintgv));
 	GvHV(PL_hintgv) = saved_hh;
+    }
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     if (PL_compiling.cop_hints_hash) {
