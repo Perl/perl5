@@ -87,9 +87,24 @@ package Maintainers;
 	'zefram'	=> 'Andrew Main <zefram@cpan.org>',
 	);
 
-# The FILES is either filenames, or glob patterns, or directory
-# names to be recursed down.  The CPAN can be either 1 (get the
-# latest one from CPAN) or 0 (there is no valid CPAN release).
+# Each entry in the  %Modules hash roughly represents a distribution,
+# except in the case of CPAN=1, where it *exactly* represents a single
+# CPAN distribution.
+
+# The keys of %Modules are human descriptions of the distributions, and
+# may not exactly match a module or distribution name. Distributions
+# which have an obvious top-level module associated with them will usually
+# have a key named for that module, e.g. 'Archive::Extract' for
+# Archive-Extract-N.NN.tar.gz; the remaining keys are likely to be based
+# on the name of the distribution, e.g. 'Locale-Codes' for
+# Locale-Codes-N.NN.tar.gz'.
+#
+# FILES is a list of filenames, glob patterns, and directory
+# names to be recursed down, which collectively generate a complete list
+# of the files associated with the distribution.
+
+# CPAN can be either 1 (this distribution is also available on CPAN),
+# or 0 (there is no # valid CPAN release).
 
 # UPSTREAM indicates where patches should go. undef implies
 # that this hasn't been discussed for the module at hand.
@@ -551,7 +566,7 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'IO::Compress' =>
+	'IO-Compress' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
 		'DISTRIBUTION'  => 'PMQS/IO-Compress-2.019.tar.gz',
@@ -607,7 +622,7 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'Locale::Codes' =>
+	'Locale-Codes' =>
 		{
 		'MAINTAINER'	=> 'neilb',
 		'DISTRIBUTION'  => 'NEILB/Locale-Codes-2.07.tar.gz',
