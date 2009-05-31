@@ -2143,26 +2143,32 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             }
 	}
     }
-    while (!entry) {
-	/* OK. Come to the end of the current list.  Grab the next one.  */
 
-	iter->xhv_riter++; /* HvRITER(hv)++ */
-	if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
-	    /* There is no next one.  End of the hash.  */
-	    iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
-	    break;
-	}
-	entry = (HvARRAY(hv))[iter->xhv_riter];
+    /* Quick bailout if the hash is empty anyway.
+       I don't know if placeholders are included in the KEYS count, so a defensive check
+    */
+    if (HvKEYS(hv) || (flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
+	while (!entry) {
+	    /* OK. Come to the end of the current list.  Grab the next one.  */
 
-        if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
-            /* If we have an entry, but it's a placeholder, don't count it.
-	       Try the next.  */
-	    while (entry && HeVAL(entry) == &PL_sv_placeholder)
-		entry = HeNEXT(entry);
+	    iter->xhv_riter++; /* HvRITER(hv)++ */
+	    if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+		/* There is no next one.  End of the hash.  */
+		iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
+		break;
+	    }
+	    entry = (HvARRAY(hv))[iter->xhv_riter];
+
+	    if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
+		/* If we have an entry, but it's a placeholder, don't count it.
+		   Try the next.  */
+		while (entry && HeVAL(entry) == &PL_sv_placeholder)
+		    entry = HeNEXT(entry);
+	    }
+	    /* Will loop again if this linked list starts NULL
+	       (for HV_ITERNEXT_WANTPLACEHOLDERS)
+	       or if we run through it and find only placeholders.  */
 	}
-	/* Will loop again if this linked list starts NULL
-	   (for HV_ITERNEXT_WANTPLACEHOLDERS)
-	   or if we run through it and find only placeholders.  */
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
