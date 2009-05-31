@@ -9674,9 +9674,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    else {
 		eptr = SvPV_const(argsv, elen);
 		if (DO_UTF8(argsv)) {
-		    I32 old_precis = precis;
+		    STRLEN old_precis = precis;
 		    if (has_precis && precis < elen) {
-			I32 ulen = sv_len_utf8(argsv);
+			STRLEN ulen = sv_len_utf8(argsv);
 			I32 p = precis > ulen ? ulen : precis;
 			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
 			precis = p;
