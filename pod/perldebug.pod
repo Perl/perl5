@@ -1066,9 +1066,9 @@ have full editing capabilities much like GNU I<readline>(3) provides.
 Look for these in the F<modules/by-module/Term> directory on CPAN.
 These do not support normal B<vi> command-line editing, however.
 
-A rudimentary command-line completion is also available.
-Unfortunately, the names of lexical variables are not available for
-completion.
+A rudimentary command-line completion is also available, including
+lexical variables in the current scope if the C<PadWalker> module
+is installed.
 
 Without Readline support you may see the symbols "^[[A", "^[[C", "^[[B",
 "^[[D"", "^H", ... when using the arrow keys and/or the backspace key.

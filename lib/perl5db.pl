@@ -8610,7 +8610,6 @@ If there's only one hit, and it's a package qualifier, and it's not equal to the
 =cut
 
     if ( $text =~ /^[\$@%]/ ) {    # symbols (in $package + packages in main)
-
 =pod
 
 =over 4
@@ -8634,6 +8633,32 @@ We set the prefix to the item's sigil, and trim off the sigil to get the text to
         $prefix = substr $text, 0, 1;
         $text   = substr $text, 1;
 
+        my @out;
+
+=pod
+
+=item *
+
+We look for the lexical scope above DB::DB and auto-complete lexical variables
+if PadWalker could be loaded.
+
+=cut
+
+        if (not $text =~ /::/ and eval "require PadWalker; 1" and not $@ ) {
+            my $level = 1;
+            while (1) {
+                my @info = caller($level);
+                $level++;
+                $level = -1, last
+                  if not @info;
+                last if $info[3] eq 'DB::DB';
+            }
+            if ($level > 0) {
+                my $lexicals = PadWalker::peek_my($level);
+                push @out, grep /^\Q$prefix$text/, keys %$lexicals;
+            }
+        }
+
 =pod
 
 =item *
@@ -8642,7 +8667,7 @@ If the package is C<::> (C<main>), create an empty list; if it's something else,
 
 =cut
 
-        my @out = map "$prefix$_", grep /^\Q$text/,
+        push @out, map "$prefix$_", grep /^\Q$text/,
           ( grep /^_?[a-zA-Z]/, keys %$pack ),
           ( $pack eq '::' ? () : ( grep /::$/, keys %:: ) );
 
