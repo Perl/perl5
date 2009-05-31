@@ -272,14 +272,6 @@ package Maintainers;
 		'UPSTREAM'	=> 'cpan',
 		},
 
-	'Cwd' =>
-		{
-		'MAINTAINER'	=> 'kwilliams',
-		'FILES'		=> q[ext/Cwd lib/Cwd.pm],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> 'cpan',
-		},
-
 	'Data::Dumper' =>
 		{
 		'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam
@@ -453,14 +445,6 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'File::Spec' =>
-		{
-		'MAINTAINER'	=> 'kwilliams',
-		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> "cpan",
-		},
-
 	'File::Temp' =>
 		{
 		'MAINTAINER'	=> 'tjenness',
@@ -619,19 +603,12 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'Math::BigFloat' =>
-		{
-		'MAINTAINER'	=> 'tels',
-		'FILES'		=> q[lib/Math/BigFloat.pm lib/Math/BigFloat],
-		'CPAN'		=> 1,
-		'UPSTREAM'	=> undef,
-		},
-
 	'Math::BigInt' =>
 		{
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt
-				     t/lib/Math],
+				     t/lib/Math
+		'FILES'		=> lib/Math/BigFloat.pm lib/Math/BigFloat],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
 		},
@@ -781,6 +758,15 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'smueller',
 		'FILES'		=> q[lib/Parse/CPAN/Meta.pm t/lib/Parse/CPAN/Meta/Test.pm lib/Parse/CPAN/Meta],
+		'CPAN'		=> 1,
+		'UPSTREAM'	=> "cpan",
+		},
+
+	'PathTools' =>
+		{
+		'MAINTAINER'	=> 'kwilliams',
+		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec,
+		                    ext/Cwd lib/Cwd.pm],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> "cpan",
 		},
