@@ -681,7 +681,7 @@ package Maintainers;
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigInt-1.89.tar.gz',
 	'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt
 			     t/lib/Math
-	'FILES'		=> lib/Math/BigFloat.pm lib/Math/BigFloat],
+			     lib/Math/BigFloat.pm lib/Math/BigFloat],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -857,7 +857,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kwilliams',
 	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30.tar.gz',
-	'FILES'		=> q[lib/File/Spec.pm lib/File/Spec,
+	'FILES'		=> q[lib/File/Spec.pm lib/File/Spec
 			    ext/Cwd lib/Cwd.pm],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
