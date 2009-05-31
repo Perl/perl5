@@ -288,7 +288,7 @@ package Maintainers;
 		'UPSTREAM'	=> 'blead',
 		},
 
-	'DB::File' =>
+	'DB_File' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/DB_File],
@@ -971,7 +971,7 @@ package Maintainers;
 		'UPSTREAM'	=> undef,
 		},
 
-	'TabsWrap' =>
+	'Text-Tabs+Wrap' =>
 		{
 		'MAINTAINER'	=> 'muir',
 		'FILES'		=>
