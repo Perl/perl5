@@ -4145,6 +4145,8 @@ sub run_tests {
 
         my $c = 0;
         for my $test (
+            # Test structure:
+            #  [ Expected result, Regex, Expected value(s) of $^N, Expected value(s) of $+ ]
             [ 1, qr#^$nested_tags$#, "bla blubb bla", "a b a" ],
             [ 1, qr#^($nested_tags)$#, "bla blubb <bla><blubb></blubb></bla>", "a b a" ],
             [ 1, qr#^(|)$nested_tags$#, "bla blubb bla", "a b a" ],
@@ -4201,6 +4203,14 @@ sub run_tests {
         my $re8 = qr/(\d+)/;
         my $c = 0;
         for my $test (
+             # Test structure:
+             #  [
+             #    String to match
+             #    Regex too match
+             #    Expected values of $^N
+             #    Expected values of $+
+             #    Expected values of $1, $2, $3, $4 and $5
+             #  ]
              [
                   "1233",
                   qr#^(1)((??{ push @ctl_n, $f->($^N); push @plus, $f->($+); $^N + 1}))+(??{$^N})$#,
