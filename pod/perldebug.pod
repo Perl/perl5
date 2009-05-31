@@ -1056,11 +1056,12 @@ Note that any variables and functions that are not documented in
 this document (or in L<perldebguts>) are considered for internal
 use only, and as such are subject to change without notice.
 
-=head2 Readline Support
+=head2 Readline Support / History in the debugger
 
 As shipped, the only command-line history supplied is a simplistic one
 that checks for leading exclamation points.  However, if you install
-the Term::ReadKey and Term::ReadLine modules from CPAN, you will
+the Term::ReadKey and Term::ReadLine modules from CPAN (such as
+Term::ReadLine::Gnu, Term::ReadLine::Perl, ...) you will
 have full editing capabilities much like GNU I<readline>(3) provides.
 Look for these in the F<modules/by-module/Term> directory on CPAN.
 These do not support normal B<vi> command-line editing, however.
@@ -1068,6 +1069,9 @@ These do not support normal B<vi> command-line editing, however.
 A rudimentary command-line completion is also available.
 Unfortunately, the names of lexical variables are not available for
 completion.
+
+Without Readline support you may see the symbols "^[[A", "^[[C", "^[[B",
+"^[[D"", "^H", ... when using the arrow keys and/or the backspace key.
 
 =head2 Editor Support for Debugging
 
