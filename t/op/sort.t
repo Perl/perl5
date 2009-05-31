@@ -396,6 +396,7 @@ sub ok { main::cmp_ok($_[0],'eq',$_[1],$_[2]);
     ok "@a", "c b a x", "un-inplace sort with function of lexical 2";
 
     # RT#54758. Git 62b40d2474e7487e6909e1872b6bccdf812c6818
+    no warnings 'void';
     my @m; push @m, 0 for 1 .. 1024; $#m; @m = sort @m;
     main::pass("in-place sorting segfault");
 }
