@@ -1104,7 +1104,7 @@ X<profile> X<profiling> X<profiler>
 If you wish to supply an alternative debugger for Perl to run, just
 invoke your script with a colon and a package argument given to the
 B<-d> flag.  The most popular alternative debuggers for Perl is the
-Perl profiler.  Devel::DProf is now included with the standard Perl
+Perl profiler.  Devel::DProf is included with the standard Perl
 distribution.  To profile your Perl program in the file F<mycode.pl>,
 just type:
 
@@ -1113,7 +1113,8 @@ just type:
 When the script terminates the profiler will dump the profile
 information to a file called F<tmon.out>.  A tool like B<dprofpp>,
 also supplied with the standard Perl distribution, can be used to
-interpret the information in that profile.
+interpret the information in that profile.  More powerful profilers,
+such as C<Devel::NYTProf> are available from the CPAN.
 
 =head1 Debugging regular expressions
 X<regular expression, debugging>
