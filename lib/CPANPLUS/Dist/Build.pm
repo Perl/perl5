@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.30';
+$VERSION = '0.32';
 
 =pod
 
@@ -308,10 +308,11 @@ sub prepare {
         # done at a much higher level).
         my $prep_output;
 
-        my $env = 'ENV_CPANPLUS_IS_EXECUTING';
+        my $env = ENV_CPANPLUS_IS_EXECUTING;
         local $ENV{$env} = BUILD_PL->( $dir );
+        my $run_perl    = $conf->get_program('perlwrapper');
 
-        unless ( scalar run(    command => [$perl, BUILD_PL->($dir), @buildflags],
+        unless ( scalar run(    command => [$perl, $run_perl, BUILD_PL->($dir), @buildflags],
                                 buffer  => \$prep_output,
                                 verbose => $verbose ) 
         ) {
@@ -381,8 +382,9 @@ sub _find_prereqs {
         my @buildflags = $dist->_buildflags_as_list( $buildflags );
 
         # Use the new Build action 'prereq_data'
-        
-        unless ( scalar run(    command => [$perl, BUILD->($dir), 'prereq_data', @buildflags],
+        my $run_perl    = $conf->get_program('perlwrapper');
+
+        unless ( scalar run(    command => [$perl, $run_perl, BUILD->($dir), 'prereq_data', @buildflags],
                                 buffer  => \$content,
                                 verbose => 0 ) 
         ) {
@@ -552,6 +554,8 @@ sub create {
     my $fail; my $prereq_fail; my $test_fail;
     RUN: {
 
+        my $run_perl    = $conf->get_program('perlwrapper');
+
         ### this will set the directory back to the start
         ### dir, so we must chdir /again/
         my $ok = $dist->_resolve_prereqs(
@@ -579,7 +583,7 @@ sub create {
 
         my $captured;
 
-        unless ( scalar run(    command => [$perl, BUILD->($dir), @buildflags],
+        unless ( scalar run(    command => [$perl, $run_perl, BUILD->($dir), @buildflags],
                                 buffer  => \$captured,
                                 verbose => $verbose ) 
         ) {
@@ -601,7 +605,7 @@ sub create {
         unless( $skiptest ) {
             my $test_output;
             my $flag    = ON_VMS ? '"test"' : 'test';
-            my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
+            my $cmd     = [$perl, $run_perl, BUILD->($dir), $flag, @buildflags];
             unless ( scalar run(    command => $cmd,
                                     buffer  => \$test_output,
                                     verbose => $verbose ) 
@@ -711,6 +715,7 @@ sub install {
 
     my $fail;
     my @buildflags = $dist->_buildflags_as_list( $dist->status->_buildflags );
+    my $run_perl    = $conf->get_program('perlwrapper');
 
     ### hmm, how is this going to deal with sudo?
     ### for now, check effective uid, if it's not root,
@@ -722,7 +727,7 @@ sub install {
         ### M::B at the top of the build.pl
         ### On VMS, flags need to be quoted
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
+        my $cmd     = [$perl, $run_perl, BUILD->($dir), $flag, @buildflags];
         my $sudo    = $conf->get_program('sudo');
         unshift @$cmd, $sudo if $sudo;
 
@@ -738,7 +743,7 @@ sub install {
     } else {
         my $install_output;
         my $flag    = ON_VMS ? '"install"' : 'install';
-        my $cmd     = [$perl, BUILD->($dir), $flag, @buildflags];
+        my $cmd     = [$perl, $run_perl, BUILD->($dir), $flag, @buildflags];
         unless( scalar run( command => $cmd,
                             buffer  => \$install_output,
                             verbose => $verbose )
