@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 use Data::Dumper;
 
@@ -232,4 +232,44 @@ my $new_mm = sub {
             version     => 1.4
         },
     ];
+}
+
+# Test CONFIGURE_REQUIRES
+{
+    my $mm = $new_mm->(
+        DISTNAME        => 'Foo-Bar',
+        VERSION         => 1.23,
+        CONFIGURE_REQUIRES => {
+            "Fake::Module1" => 1.01,
+        },
+        PM              => {
+            "Foo::Bar"          => 'lib/Foo/Bar.pm',
+        },
+    );
+
+    is_deeply [$mm->metafile_data], [
+        name            => 'Foo-Bar',
+        version         => 1.23,
+        abstract        => undef,
+        author          => [],
+        license         => 'unknown',
+        distribution_type       => 'module',
+
+        configure_requires      => {
+            'Fake::Module1'       => 1.01,
+        },
+        build_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+
+        no_index        => {
+            directory           => [qw(t inc)],
+        },
+
+        generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
+        'meta-spec'  => {
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            version     => 1.4
+        },
+    ],'CONFIGURE_REQUIRES';
 }

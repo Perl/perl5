@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '6.50';
+our $VERSION = '6.52';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -372,7 +372,7 @@ sub init_DEST {
     # Expand DEST variables.
     foreach my $var ($self->installvars) {
         my $destvar = 'DESTINSTALL'.$var;
-        $self->{$destvar} = File::Spec->eliminate_macros($self->{$destvar});
+        $self->{$destvar} = $self->eliminate_macros($self->{$destvar});
     }
 }
 
@@ -450,7 +450,7 @@ sub init_others {
     $self->{NOOP}               = 'Continue';
     $self->{NOECHO}             ||= '@ ';
 
-    $self->{MAKEFILE}		||= $self->{FIRST_MAKEFILE} || 'Descrip.MMS';
+    $self->{MAKEFILE}           ||= $self->{FIRST_MAKEFILE} || 'Descrip.MMS';
     $self->{FIRST_MAKEFILE}     ||= $self->{MAKEFILE};
     $self->{MAKE_APERL_FILE}    ||= 'Makeaperl.MMS';
     $self->{MAKEFILE_OLD}       ||= $self->eliminate_macros('$(FIRST_MAKEFILE)_old');
@@ -469,27 +469,16 @@ sub init_others {
     $self->{MACROEND}           ||= ')';
     $self->{USEMAKEFILE}        ||= '/Descrip=';
 
-    $self->{ECHO}     ||= '$(ABSPERLRUN) -le "print qq{@ARGV}"';
-    $self->{ECHO_N}   ||= '$(ABSPERLRUN) -e  "print qq{@ARGV}"';
-    $self->{TOUCH}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e touch';
-    $self->{CHMOD}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e chmod'; 
-    $self->{RM_F}     ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e rm_f';
-    $self->{RM_RF}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e rm_rf';
-    $self->{TEST_F}   ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e test_f';
     $self->{EQUALIZE_TIMESTAMP} ||= '$(ABSPERLRUN) -we "open F,qq{>>$ARGV[1]};close F;utime(0,(stat($ARGV[0]))[9]+1,$ARGV[1])"';
 
     $self->{MOD_INSTALL} ||= 
       $self->oneliner(<<'CODE', ['-MExtUtils::Install']);
-install({split(' ',<STDIN>)}, '$(VERBINST)', 0, '$(UNINST)');
+install([ from_to => {split(' ', <STDIN>)}, verbose => '$(VERBINST)', uninstall_shadows => '$(UNINST)', dir_mode => '$(PERM_DIR)' ]);
 CODE
-
-    $self->{SHELL}    ||= 'Posix';
 
     $self->SUPER::init_others;
 
-    # So we can copy files into directories with less fuss
-    $self->{CP}         = '$(ABSPERLRUN) "-MExtUtils::Command" -e cp';
-    $self->{MV}         = '$(ABSPERLRUN) "-MExtUtils::Command" -e mv';
+    $self->{SHELL}    ||= 'Posix';
 
     $self->{UMASK_NULL} = '! ';  
 
@@ -852,7 +841,10 @@ sub init_dist {
 
     $self->SUPER::init_dist;
 
-    $self->{DISTVNAME}    = "$self->{DISTNAME}-$self->{VERSION_SYM}";
+    $self->{DISTVNAME} = "$self->{DISTNAME}-$self->{VERSION_SYM}"
+      unless $self->{ARGS}{DISTVNAME};
+
+    return;
 }
 
 =item c_o (override)
@@ -1572,6 +1564,20 @@ map_clean :
     join '', @m;
 }
 
+
+=item arch_check (override)
+
+vmsify all arguments for consistency
+
+=cut
+
+sub arch_check {
+    my $self = shift;
+
+    return $self->SUPER::arch_check(map { vmsify($_) } @_);
+}
+
+
 # --- Output postprocessing section ---
 
 =item maketext_filter (override)
@@ -1611,10 +1617,10 @@ sub prefixify {
 
     # Translate $(PERLPREFIX) to a real path.
     $rprefix = $self->eliminate_macros($rprefix);
-    $rprefix = VMS::Filespec::vmspath($rprefix) if $rprefix;
-    $sprefix = VMS::Filespec::vmspath($sprefix) if $sprefix;
+    $rprefix = vmspath($rprefix) if $rprefix;
+    $sprefix = vmspath($sprefix) if $sprefix;
 
-    $default = VMS::Filespec::vmsify($default) 
+    $default = vmsify($default) 
       unless $default =~ /\[.*\]/;
 
     (my $var_no_install = $var) =~ s/^install//;
@@ -1813,6 +1819,45 @@ sub init_linker {
 
     $self->{PERL_ARCHIVE_AFTER} ||= '';
 }
+
+
+=item catdir (override)
+
+=item catfile (override)
+
+Eliminate the macros in the output to the MMS/MMK file.
+
+(File::Spec::VMS used to do this for us, but it's being removed)
+
+=cut
+
+sub catdir {
+    my $self = shift;
+
+    # Process the macros on VMS MMS/MMK
+    my @args = map { m{\$\(} ? $self->eliminate_macros($_) : $_  } @_;
+
+    my $dir = $self->SUPER::catdir(@args);
+
+    # Fix up the directory and force it to VMS format.
+    $dir = $self->fixpath($dir, 1);
+
+    return $dir;
+}
+
+sub catfile {
+    my $self = shift;
+
+    # Process the macros on VMS MMS/MMK
+    my @args = map { m{\$\(} ? $self->eliminate_macros($_) : $_  } @_;
+
+    my $file = $self->SUPER::catfile(@args);
+
+    $file = vmsify($file);
+
+    return $file
+}
+
 
 =item eliminate_macros
 

@@ -17,7 +17,7 @@ use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
-use Test::More tests => 81;
+use Test::More tests => 79;
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
 use File::Find;
@@ -32,7 +32,7 @@ my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
 
 # GNV logical interferes with testing
-$ENV{'bin'} = '[.bin]' if $Is_VMS;
+local $ENV{'bin'} = '[.bin]' if $Is_VMS;
 
 chdir 't';
 
@@ -93,21 +93,21 @@ ok( open(PPD, 'Big-Dummy.ppd'), '  .ppd file generated' );
 my $ppd_html;
 { local $/; $ppd_html = <PPD> }
 close PPD;
-like( $ppd_html, qr{^<SOFTPKG NAME="Big-Dummy" VERSION="0,01,0,0">}m, 
+like( $ppd_html, qr{^<SOFTPKG NAME="Big-Dummy" VERSION="0.01">}m, 
                                                            '  <SOFTPKG>' );
-like( $ppd_html, qr{^\s*<TITLE>Big-Dummy</TITLE>}m,        '  <TITLE>'   );
 like( $ppd_html, qr{^\s*<ABSTRACT>Try "our" hot dog's</ABSTRACT>}m,         
                                                            '  <ABSTRACT>');
 like( $ppd_html, 
       qr{^\s*<AUTHOR>Michael G Schwern &lt;schwern\@pobox.com&gt;</AUTHOR>}m,
                                                            '  <AUTHOR>'  );
 like( $ppd_html, qr{^\s*<IMPLEMENTATION>}m,          '  <IMPLEMENTATION>');
-like( $ppd_html, qr{^\s*<DEPENDENCY NAME="strict" VERSION="0,0,0,0" />}m,
-                                                           '  <DEPENDENCY>' );
-like( $ppd_html, qr{^\s*<OS NAME="$Config{osname}" />}m,
-                                                           '  <OS>'      );
+like( $ppd_html, qr{^\s*<REQUIRE NAME="strict::" />}m,  '  <REQUIRE>' );
+
 my $archname = $Config{archname};
-$archname .= "-". substr($Config{version},0,3) if $] >= 5.008;
+if( $] >= 5.008 ) {
+    # XXX This is a copy of the internal logic, so it's not a great test
+    $archname .= "-$Config{PERL_REVISION}.$Config{PERL_VERSION}";
+}
 like( $ppd_html, qr{^\s*<ARCHITECTURE NAME="$archname" />}m,
                                                            '  <ARCHITECTURE>');
 like( $ppd_html, qr{^\s*<CODEBASE HREF="" />}m,            '  <CODEBASE>');
@@ -153,7 +153,7 @@ ok( $files{'perllocal.pod'},'  perllocal.pod created' );
 
 
 SKIP: {
-    skip 'VMS install targets do not preserve $(PREFIX)', 9 if $Is_VMS;
+    skip 'VMS install targets do not preserve $(PREFIX)', 8 if $Is_VMS;
 
     $install_out = run("$make install PREFIX=elsewhere");
     is( $?, 0, 'install with PREFIX override' ) || diag $install_out;
@@ -172,7 +172,7 @@ SKIP: {
 
 
 SKIP: {
-    skip 'VMS install targets do not preserve $(DESTDIR)', 11 if $Is_VMS;
+    skip 'VMS install targets do not preserve $(DESTDIR)', 10 if $Is_VMS;
 
     $install_out = run("$make install PREFIX= DESTDIR=other");
     is( $?, 0, 'install with DESTDIR' ) || 
@@ -212,7 +212,7 @@ SKIP: {
 
 
 SKIP: {
-    skip 'VMS install targets do not preserve $(PREFIX)', 10 if $Is_VMS;
+    skip 'VMS install targets do not preserve $(PREFIX)', 9 if $Is_VMS;
 
     $install_out = run("$make install PREFIX=elsewhere DESTDIR=other/");
     is( $?, 0, 'install with PREFIX override and DESTDIR' ) || 
@@ -313,7 +313,7 @@ ok( grep(/^Writing $makefile for Big::Dummy/, @mpl_out) == 1,
 # I know we'll get ignored errors from make here, that's ok.
 # Send STDERR off to oblivion.
 open(SAVERR, ">&STDERR") or die $!;
-open(STDERR, ">".File::Spec->devnull) or die $!;
+open(STDERR, ">",File::Spec->devnull) or die $!;
 
 my $realclean_out = run("$make realclean");
 is( $?, 0, 'realclean' ) || diag($realclean_out);

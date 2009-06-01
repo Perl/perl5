@@ -11,6 +11,8 @@ BEGIN {
 }
 chdir 't';
 
+use strict;
+
 use Test::More;
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::XS;
@@ -18,10 +20,12 @@ use File::Find;
 use File::Spec;
 use File::Path;
 
+my $Skipped = 0;
 if( have_compiler() ) {
     plan tests => 5;
 }
 else {
+    $Skipped = 1;
     plan skip_all => "ExtUtils::CBuilder not installed or couldn't find a compiler";
 }
 
@@ -39,8 +43,10 @@ $| = 1;
 
 ok( setup_xs(), 'setup' );
 END {
-    chdir File::Spec->updir or die;
-    teardown_xs(), 'teardown' or die;
+    unless( $Skipped ) {
+        chdir File::Spec->updir or die;
+        teardown_xs(), 'teardown' or die;
+    }
 }
 
 ok( chdir('XS-Test'), "chdir'd to XS-Test" ) ||

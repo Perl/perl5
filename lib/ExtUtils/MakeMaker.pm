@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.50';
+our $VERSION = '6.52';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -88,6 +88,7 @@ my %Special_Sigs = (
  PMLIBDIRS          => 'ARRAY',
  PMLIBPARENTDIRS    => 'ARRAY',
  PREREQ_PM          => 'HASH',
+ CONFIGURE_REQUIRES => 'HASH',
  SKIP               => 'ARRAY',
  TYPEMAPS           => 'ARRAY',
  XS                 => 'HASH',
@@ -219,7 +220,8 @@ sub full_setup {
     my @attrib_help = qw/
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
-    C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
+    C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DISTVNAME
+    DL_FUNCS DL_VARS
     EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
@@ -240,10 +242,10 @@ sub full_setup {
 
     INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
     LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET
-    META_ADD META_MERGE MIN_PERL_VERSION
+    META_ADD META_MERGE MIN_PERL_VERSION CONFIGURE_REQUIRES
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
     PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
-    PERL_SRC PERM_RW PERM_RWX
+    PERL_SRC PERM_DIR PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
@@ -293,7 +295,7 @@ sub full_setup {
     @Overridable = @MM_Sections;
     push @Overridable, qw[
 
- libscan makeaperl needs_linking perm_rw perm_rwx
+ libscan makeaperl needs_linking
  subdir_x test_via_harness test_via_script 
 
  init_VERSION init_dist init_INST init_INSTALL init_DEST init_dirscan
@@ -442,18 +444,22 @@ END
 
     my(%unsatisfied) = ();
     foreach my $prereq (sort keys %{$self->{PREREQ_PM}}) {
-        # 5.8.0 has a bug with require Foo::Bar alone in an eval, so an
-        # extra statement is a workaround.
         my $file = "$prereq.pm";
         $file =~ s{::}{/}g;
-        eval { require $file };
-
-        my $pr_version = $prereq->VERSION || 0;
+        my $path;
+        for my $dir (@INC) {
+            my $tmp = File::Spec->catfile($dir, $file);
+            if( -r $tmp ) {
+                $path = $tmp;
+                last;
+            }
+        }
+        my $pr_version = defined $path ? MM->parse_version($path) : 0;
 
         # convert X.Y_Z alpha version #s to X.YZ for easier comparisons
         $pr_version =~ s/(\d+)\.(\d+)_(\d+)/$1.$2$3/;
 
-        if ($@) {
+        if (!defined $path) {
             warn sprintf "Warning: prerequisite %s %s not found.\n", 
               $prereq, $self->{PREREQ_PM}{$prereq} 
                    unless $self->{PREREQ_FATAL};
@@ -570,30 +576,10 @@ END
     $self->init_linker;
     $self->init_ABSTRACT;
 
-    if (! $self->{PERL_SRC} ) {
-        require VMS::Filespec if $Is_VMS;
-        my($pthinks) = $self->canonpath($INC{'Config.pm'});
-        my($cthinks) = $self->catfile($Config{'archlibexp'},'Config.pm');
-        $pthinks = VMS::Filespec::vmsify($pthinks) if $Is_VMS;
-        if ($pthinks ne $cthinks &&
-            !($Is_Win32 and lc($pthinks) eq lc($cthinks))) {
-            print "Have $pthinks expected $cthinks\n";
-            if ($Is_Win32) {
-                $pthinks =~ s![/\\]Config\.pm$!!i; $pthinks =~ s!.*[/\\]!!;
-            }
-            else {
-                $pthinks =~ s!/Config\.pm$!!; $pthinks =~ s!.*/!!;
-            }
-            print STDOUT <<END unless $self->{UNINSTALLED_PERL};
-Your perl and your Config.pm seem to have different ideas about the 
-architecture they are running on.
-Perl thinks: [$pthinks]
-Config says: [$Config{archname}]
-This may or may not cause problems. Please check your installation of perl 
-if you have problems building this extension.
-END
-        }
-    }
+    $self->arch_check(
+        $INC{'Config.pm'},
+        $self->catfile($Config{'archlibexp'}, "Config.pm")
+    );
 
     $self->init_others();
     $self->init_platform();
@@ -1469,6 +1455,17 @@ CODE reference. The subroutine should return a hash reference. The
 hash may contain further attributes, e.g. {LIBS =E<gt> ...}, that have to
 be determined by some evaluation method.
 
+=item CONFIGURE_REQUIRES
+
+A hash of modules that are required to run Makefile.PL itself, but not
+to run your distribution.
+
+This will go into the C<configure_requires> field of your F<META.yml>.
+
+Defaults to C<{ "ExtUtils::MakeMaker" => 0 }>
+
+The format is the same as PREREQ_PM.
+
 =item DEFINE
 
 Something like C<"-DHAVE_UNISTD_H">
@@ -1487,8 +1484,8 @@ slash on your DESTDIR.  F<~/tmp/> not F<~/tmp>.
 
 =item DIR
 
-Ref to array of subdirectories containing Makefile.PLs e.g. [ 'sdbm'
-] in ext/SDBM_File
+Ref to array of subdirectories containing Makefile.PLs e.g. ['sdbm']
+in ext/SDBM_File
 
 =item DISTNAME
 
@@ -1842,6 +1839,15 @@ EXE_FILES files that include POD directives. The files listed
 here will be converted to man pages and installed as was requested
 at Configure time.
 
+This hash should map POD files (or scripts containing POD) to the
+man file names under the C<blib/man1/> directory, as in the following
+example:
+
+  MAN1PODS            => {
+    'doc/command.pod'    => 'blib/man1/command.1',
+    'scripts/script.pl'  => 'blib/man1/script.1',
+  }
+
 =item MAN3PODS
 
 Hashref that assigns to *.pm and *.pod files the files into which the
@@ -1849,6 +1855,8 @@ manpages are to be written. MakeMaker parses all *.pod and *.pm files
 for POD directives. Files that contain POD will be the default keys of
 the MAN3PODS hashref. These will then be converted to man pages during
 C<make> and will be installed during C<make install>.
+
+Example similar to MAN1PODS.
 
 =item MAP_TARGET
 
@@ -2016,15 +2024,17 @@ flags so perl can see the modules you're about to install.
 Directory containing the Perl source code (use of this should be
 avoided, it may be undefined)
 
+=item PERM_DIR
+
+Desired permission for directories. Defaults to C<755>.
+
 =item PERM_RW
 
 Desired permission for read/writable files. Defaults to C<644>.
-See also L<MM_Unix/perm_rw>.
 
 =item PERM_RWX
 
 Desired permission for executable files. Defaults to C<755>.
-See also L<MM_Unix/perm_rwx>.
 
 =item PL_FILES
 
@@ -2160,10 +2170,19 @@ use your module with an incomplete environment.
 
 =item PREREQ_PM
 
-Hashref: Names of modules that need to be available to run this
-extension (e.g. Fcntl for SDBM_File) are the keys of the hash and the
-desired version is the value. If the required version number is 0, we
-only check if any version is installed already.
+A hash of modules that are needed to run your module.  The keys are
+the module names ie. Test::More, and the minimum version is the
+value. If the required version number is 0 any version will do.
+
+This will go into the C<requires> field of your F<META.yml>.
+
+    PREREQ_PM => {
+        # Require Test::More at least 0.47
+        "Test::More" => "0.47",
+
+        # Require any version of Acme::Buffy
+        "Acme::Buffy" => 0,
+    }
 
 =item PREREQ_PRINT
 

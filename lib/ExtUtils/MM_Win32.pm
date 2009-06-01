@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.50';
+our $VERSION = '6.52';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -149,26 +149,15 @@ Adjustments are made for Borland's quirks needing -L to come first.
 sub init_others {
     my ($self) = @_;
 
-    # Used in favor of echo because echo won't strip quotes. :(
-    $self->{ECHO}     ||= $self->oneliner('print qq{@ARGV}', ['-l']);
-    $self->{ECHO_N}   ||= $self->oneliner('print qq{@ARGV}');
-
-    $self->{TOUCH}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e touch';
-    $self->{CHMOD}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e chmod'; 
-    $self->{CP}       ||= '$(ABSPERLRUN) -MExtUtils::Command -e cp';
-    $self->{RM_F}     ||= '$(ABSPERLRUN) -MExtUtils::Command -e rm_f';
-    $self->{RM_RF}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e rm_rf';
-    $self->{MV}       ||= '$(ABSPERLRUN) -MExtUtils::Command -e mv';
     $self->{NOOP}     ||= 'rem';
-    $self->{TEST_F}   ||= '$(ABSPERLRUN) -MExtUtils::Command -e test_f';
     $self->{DEV_NULL} ||= '> NUL';
 
     $self->{FIXIN}    ||= $self->{PERL_CORE} ? 
       "\$(PERLRUN) $self->{PERL_SRC}/win32/bin/pl2bat.pl" : 
       'pl2bat.bat';
 
-    $self->{LD}     ||= $Config{ld} || 'link';
-    $self->{AR}     ||= $Config{ar} || 'lib';
+    $self->{LD}     ||= 'link';
+    $self->{AR}     ||= 'lib';
 
     $self->SUPER::init_others;
 
@@ -340,8 +329,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
 
       # Embed the manifest file if it exists
       push(@m, q{
-	if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
-	if exist $@.manifest del $@.manifest});
+       if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
+       if exist $@.manifest del $@.manifest});
     }
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
@@ -416,6 +405,20 @@ sub pasthru {
 }
 
 
+=item arch_check (override)
+
+Normalize all arguments for consistency of comparison.
+
+=cut
+
+sub arch_check {
+    my $self = shift;
+
+    require Win32;
+    return $self->SUPER::arch_check( map { lc Win32::GetShortPathName($_) } @_);
+}
+
+
 =item oneliner
 
 These are based on what command.com does on Win98.  They may be wrong
@@ -475,12 +478,10 @@ sub escape_newlines {
 dmake can handle Unix style cd'ing but nmake (at least 1.5) cannot.  It
 wants:
 
-    cd dir
+    cd dir1\dir2
     command
     another_command
-    cd ..
-
-NOTE: This only works with simple relative directories.  Throw it an absolute dir or something with .. in it and things will go wrong.
+    cd ..\..
 
 =cut
 
