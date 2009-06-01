@@ -541,7 +541,7 @@ END_EVAL_TEST
    print "ok $test # eval { 1 } completly resets \$@\n";
 }
 else {
-  print "ok $test # skipped - eval { 1 } completly resets \$@";
+  print "ok $test # skipped - eval { 1 } completly resets \$@\n";
 }
 $test++;
 
