@@ -5,11 +5,11 @@ use strict;
 use ExtUtils::MakeMaker::Config;
 use File::Spec;
 
-require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
-our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
+require ExtUtils::MM_Win32;
+our @ISA = qw( ExtUtils::MM_Unix );
 
-our $VERSION = '6.50';
+our $VERSION = '6.52';
 
 
 =head1 NAME
@@ -96,6 +96,24 @@ sub init_linker {
 
     $self->{PERL_ARCHIVE_AFTER} ||= '';
     $self->{EXPORT_LIST}  ||= '';
+}
+
+=item maybe_command
+
+If our path begins with F</cygdrive/> then we use C<ExtUtils::MM_Win32>
+to determine if it may be a command.  Otherwise we use the tests
+from C<ExtUtils::MM_Unix>.
+
+=cut
+
+sub maybe_command {
+    my ($self, $file) = @_;
+
+    if ($file =~ m{^/cygdrive/}i) {
+        return ExtUtils::MM_Win32->maybe_command($file);
+    }
+
+    return $self->SUPER::maybe_command($file);
 }
 
 =back

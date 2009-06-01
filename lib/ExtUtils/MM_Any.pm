@@ -1,10 +1,11 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.50';
+our $VERSION = '6.52';
 
 use Carp;
 use File::Spec;
+use File::Basename;
 BEGIN { our @ISA = qw(File::Spec); }
 
 # We need $Verbose
@@ -545,7 +546,7 @@ CODE
     my $make_frag = $mm->dir_target(@directories);
 
 Generates targets to create the specified directories and set its
-permission to 0755.
+permission to PERM_DIR.
 
 Because depending on a directory to just ensure it exists doesn't work
 too well (the modified time changes too often) dir_target() creates a
@@ -565,7 +566,7 @@ sub dir_target {
         $make .= sprintf <<'MAKE', ($dir) x 7;
 %s$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) %s
-	$(NOECHO) $(CHMOD) 755 %s
+	$(NOECHO) $(CHMOD) $(PERM_DIR) %s
 	$(NOECHO) $(TOUCH) %s$(DFSEP).exists
 
 MAKE
@@ -821,6 +822,15 @@ sub metafile_data {
         meta-spec
     );
 
+    my $configure_requires;
+    if( $self->{CONFIGURE_REQUIRES} and ref($self->{CONFIGURE_REQUIRES}) eq 'HASH' ) {
+        $configure_requires = $self->{CONFIGURE_REQUIRES};
+    } else {
+        $configure_requires = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+
     my %meta = (
         name         => $self->{DISTNAME},
         version      => $self->{VERSION},
@@ -828,9 +838,7 @@ sub metafile_data {
         license      => $self->{LICENSE} || 'unknown',
         distribution_type => $self->{PM} ? 'module' : 'script',
 
-        configure_requires => {
-            'ExtUtils::MakeMaker'       => 0
-        },
+        configure_requires => $configure_requires,
 
         build_requires => {
             'ExtUtils::MakeMaker'       => 0
@@ -1665,7 +1673,7 @@ sub init_VERSION {
 }
 
 
-=head3 init_others  I<Abstract>
+=head3 init_others
 
     $MM->init_others();
 
@@ -1696,11 +1704,156 @@ Defines at least these macros.
   TEST_F            Test for a file's existence 
   CP                Copy a file                 
   MV                Move a file                 
-  CHMOD             Change permissions on a     
-                    file
+  CHMOD             Change permissions on a file
+  FALSE             Exit with non-zero
+  TRUE              Exit with zero
 
   UMASK_NULL        Nullify umask
   DEV_NULL          Suppress all command output
+
+=cut
+
+sub init_others {
+    my $self = shift;
+
+    $self->{ECHO}     ||= $self->oneliner('print qq{@ARGV}', ['-l']);
+    $self->{ECHO_N}   ||= $self->oneliner('print qq{@ARGV}');
+
+    $self->{TOUCH}    ||= $self->oneliner('touch', ["-MExtUtils::Command"]);
+    $self->{CHMOD}    ||= $self->oneliner('chmod', ["-MExtUtils::Command"]);
+    $self->{RM_F}     ||= $self->oneliner('rm_f',  ["-MExtUtils::Command"]);
+    $self->{RM_RF}    ||= $self->oneliner('rm_rf', ["-MExtUtils::Command"]);
+    $self->{TEST_F}   ||= $self->oneliner('test_f', ["-MExtUtils::Command"]);
+    $self->{FALSE}    ||= $self->oneliner('exit 1');
+    $self->{TRUE}     ||= $self->oneliner('exit 0');
+
+    $self->{MKPATH}   ||= $self->oneliner('mkpath', ["-MExtUtils::Command"]);
+
+    $self->{CP}       ||= $self->oneliner('cp', ["-MExtUtils::Command"]);
+    $self->{MV}       ||= $self->oneliner('mv', ["-MExtUtils::Command"]);
+
+    $self->{MOD_INSTALL} ||= 
+      $self->oneliner(<<'CODE', ['-MExtUtils::Install']);
+install([ from_to => {@ARGV}, verbose => '$(VERBINST)', uninstall_shadows => '$(UNINST)', dir_mode => '$(PERM_DIR)' ]);
+CODE
+    $self->{DOC_INSTALL} ||= $self->oneliner('perllocal_install', ["-MExtUtils::Command::MM"]);
+    $self->{UNINSTALL}   ||= $self->oneliner('uninstall', ["-MExtUtils::Command::MM"]);
+    $self->{WARN_IF_OLD_PACKLIST} ||= 
+      $self->oneliner('warn_if_old_packlist', ["-MExtUtils::Command::MM"]);
+    $self->{FIXIN}       ||= $self->oneliner('MY->fixin(shift)', ["-MExtUtils::MY"]);
+    $self->{EQUALIZE_TIMESTAMP} ||= $self->oneliner('eqtime', ["-MExtUtils::Command"]);
+
+    $self->{UNINST}     ||= 0;
+    $self->{VERBINST}   ||= 0;
+
+    $self->{FIRST_MAKEFILE}     ||= $self->{MAKEFILE} || 'Makefile';
+    $self->{MAKEFILE}           ||= $self->{FIRST_MAKEFILE};
+    $self->{MAKEFILE_OLD}       ||= $self->{MAKEFILE}.'.old';
+    $self->{MAKE_APERL_FILE}    ||= $self->{MAKEFILE}.'.aperl';
+
+    # Not everybody uses -f to indicate "use this Makefile instead"
+    $self->{USEMAKEFILE}        ||= '-f';
+
+    # Some makes require a wrapper around macros passed in on the command 
+    # line.
+    $self->{MACROSTART}         ||= '';
+    $self->{MACROEND}           ||= '';
+
+    $self->{SHELL}              ||= $Config{sh};
+
+    # UMASK_NULL is not used by MakeMaker but some CPAN modules
+    # make use of it.
+    $self->{UMASK_NULL}         ||= "umask 0";
+
+    # Not the greatest default, but its something.
+    $self->{DEV_NULL}           ||= "> /dev/null 2>&1";
+
+    $self->{NOOP}               ||= '$(TRUE)';
+    $self->{NOECHO}             = '@' unless defined $self->{NOECHO};
+
+    $self->{LD_RUN_PATH} = "";
+
+    # Compute EXTRALIBS, BSLOADLIBS and LDLOADLIBS from $self->{LIBS}
+    # Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
+    # undefined. In any case we turn it into an anon array:
+
+    # May check $Config{libs} too, thus not empty.
+    $self->{LIBS} = !defined $self->{LIBS} ? ['']               : 
+                    !ref $self->{LIBS}     ? [$self->{LIBS}]    :
+                                             $self->{LIBS}      ;
+
+    foreach my $libs ( @{$self->{LIBS}} ){
+        $libs =~ s/^\s*(.*\S)\s*$/$1/; # remove leading and trailing whitespace
+        my(@libs) = $self->extliblist($libs);
+        if ($libs[0] or $libs[1] or $libs[2]){
+            # LD_RUN_PATH now computed by ExtUtils::Liblist
+            ($self->{EXTRALIBS},  $self->{BSLOADLIBS}, 
+             $self->{LDLOADLIBS}, $self->{LD_RUN_PATH}) = @libs;
+            last;
+        }
+    }
+
+    if ( $self->{OBJECT} ) {
+        $self->{OBJECT} =~ s!\.o(bj)?\b!\$(OBJ_EXT)!g;
+    } else {
+        # init_dirscan should have found out, if we have C files
+        $self->{OBJECT} = "";
+        $self->{OBJECT} = '$(BASEEXT)$(OBJ_EXT)' if @{$self->{C}||[]};
+    }
+    $self->{OBJECT} =~ s/\n+/ \\\n\t/g;
+
+    $self->{BOOTDEP}  = (-f "$self->{BASEEXT}_BS") ? "$self->{BASEEXT}_BS" : "";
+    $self->{PERLMAINCC} ||= '$(CC)';
+    $self->{LDFROM} = '$(OBJECT)' unless $self->{LDFROM};
+
+    # Sanity check: don't define LINKTYPE = dynamic if we're skipping
+    # the 'dynamic' section of MM.  We don't have this problem with
+    # 'static', since we either must use it (%Config says we can't
+    # use dynamic loading) or the caller asked for it explicitly.
+    if (!$self->{LINKTYPE}) {
+       $self->{LINKTYPE} = $self->{SKIPHASH}{'dynamic'}
+                        ? 'static'
+                        : ($Config{usedl} ? 'dynamic' : 'static');
+    }
+
+    return 1;
+}
+
+
+=head3 tools_other
+
+    my $make_frag = $MM->tools_other;
+
+Returns a make fragment containing definitions for the macros init_others() 
+initializes.
+
+=cut
+
+sub tools_other {
+    my($self) = shift;
+    my @m;
+
+    # We set PM_FILTER as late as possible so it can see all the earlier
+    # on macro-order sensitive makes such as nmake.
+    for my $tool (qw{ SHELL CHMOD CP MV NOOP NOECHO RM_F RM_RF TEST_F TOUCH 
+                      UMASK_NULL DEV_NULL MKPATH EQUALIZE_TIMESTAMP
+                      FALSE TRUE
+                      ECHO ECHO_N
+                      UNINST VERBINST
+                      MOD_INSTALL DOC_INSTALL UNINSTALL
+                      WARN_IF_OLD_PACKLIST
+                      MACROSTART MACROEND
+                      USEMAKEFILE
+                      PM_FILTER
+                      FIXIN
+                    } ) 
+    {
+        next unless defined $self->{$tool};
+        push @m, "$tool = $self->{$tool}\n";
+    }
+
+    return join "", @m;
+}
 
 
 =head3 init_DIRFILESEP  I<Abstract>
@@ -1893,6 +2046,59 @@ MAKE_FRAG
 
 }
 
+
+=head3 arch_check
+
+    my $arch_ok = $mm->arch_check(
+        $INC{"Config.pm"},
+        File::Spec->catfile($Config{archlibexp}, "Config.pm")
+    );
+
+A sanity check that what Perl thinks the architecture is and what
+Config thinks the architecture is are the same.  If they're not it
+will return false and show a diagnostic message.
+
+When building Perl it will always return true, as nothing is installed
+yet.
+
+The interface is a bit odd because this is the result of a
+quick refactoring.  Don't rely on it.
+
+=cut
+
+sub arch_check {
+    my $self = shift;
+    my($pconfig, $cconfig) = @_;
+
+    return 1 if $self->{PERL_SRC};
+
+    my($pvol, $pthinks) = $self->splitpath($pconfig);
+    my($cvol, $cthinks) = $self->splitpath($cconfig);
+
+    $pthinks = $self->canonpath($pthinks);
+    $cthinks = $self->canonpath($cthinks);
+
+    my $ret = 1;
+    if ($pthinks ne $cthinks) {
+        print "Have $pthinks\n";
+        print "Want $cthinks\n";
+
+        $ret = 0;
+
+        my $arch = (grep length, $self->splitdir($pthinks))[-1];
+
+        print STDOUT <<END unless $self->{UNINSTALLED_PERL};
+Your perl and your Config.pm seem to have different ideas about the 
+architecture they are running on.
+Perl thinks: [$arch]
+Config says: [$Config{archname}]
+This may or may not cause problems. Please check your installation of perl 
+if you have problems building this extension.
+END
+    }
+
+    return $ret;
+}
 
 
 

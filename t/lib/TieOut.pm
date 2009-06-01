@@ -1,14 +1,13 @@
 package TieOut;
-# $Id: /mirror/googlecode/test-more-trunk/t/lib/TieOut.pm 67132 2008-10-01T01:11:04.501643Z schwern  $
 
 sub TIEHANDLE {
     my $scalar = '';
-    bless( \$scalar, $_[0] );
+    bless( \$scalar, $_[0]);
 }
 
 sub PRINT {
     my $self = shift;
-    $$self .= join( '', @_ );
+    $$self .= join('', @_);
 }
 
 sub PRINTF {
@@ -17,7 +16,7 @@ sub PRINTF {
     $$self .= sprintf $fmt, @_;
 }
 
-sub FILENO { }
+sub FILENO {}
 
 sub read {
     my $self = shift;

@@ -267,6 +267,11 @@ do that.  Use at your own risk.  Have fun blowing holes in your foot.
     );
 
 
+=item Which zip should I use on Windows for '[nd]make zipdist'?
+
+We recommend InfoZIP: L<http://www.info-zip.org/Zip.html>
+
+
 =back
 
 =head2 XS
