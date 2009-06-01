@@ -42,8 +42,9 @@ of the switch statements where smart matching is implicitly used.
 
 The smart match operator C<~~> is no longer commutative. The behaviour of
 a smart match now depends primarily on the type of its right hand
-argument. While the general backwards compatibility is maintained,
-several changes must be noted:
+argument. Moreover, its semantics has been adjusted for greater
+consistency or usefulness in several cases. While the general backwards
+compatibility is maintained, several changes must be noted:
 
 =over 4
 
@@ -59,6 +60,12 @@ C<%hash ~~ sub {}> and C<@array ~~ sub {}> now test that the subroutine
 returns a true value for each key of the hash (or element of the
 array), instead of passing the whole hash or array as a reference to
 the subroutine.
+
+=item *
+
+Due to the commutativity breakage, code references are no longer
+treated specially when appearing on the left of the C<~~> operator,
+but like any vulgar scalar.
 
 =item *
 
@@ -88,9 +95,9 @@ appear on the left, the overload routine will be called only when the
 rightmost argument is a simple scalar. This way distributivity of smart match
 across arrays is not broken, as well as the other behaviours with complex
 types (coderefs, hashes, regexes). Thus, writers of overloading routines
-for smart match need to worry only with comparing against a scalar, and
-possibly with stringification overloading; the other cases will be
-automatically handled consistently.
+for smart match mostly need to worry only with comparing against a scalar,
+and possibly with stringification overloading; the other common cases
+will be automatically handled consistently.
 
 C<~~> will now refuse to work on objects that do not overload it (in order
 to avoid relying on the object's underlying structure).
