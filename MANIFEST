@@ -3858,6 +3858,7 @@ t/base/num.t			See if numbers work
 t/base/pat.t			See if pattern matching works
 t/base/rs.t			See if record-read works
 t/base/term.t			See if various terms work
+t/benchmark/rt26188-speed-up-keys-on-empty-hash.t	Benchmark if keys on empty hashes is fast enough
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
 t/cmd/mod.t			See if statement modifiers work
