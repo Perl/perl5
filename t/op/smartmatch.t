@@ -62,7 +62,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan "no_plan";
+plan tests => 294;
 
 while (<DATA>) {
     next if /^#/ || !/\S/;
@@ -168,6 +168,10 @@ __DATA__
 !	\&fatal		$ov_obj
 	'cigam'		$ov_obj
 !	'cigam on'	$ov_obj
+!	['cigam']	$ov_obj
+!	['stringified']	$ov_obj
+!	{ cigam => 1 }	$ov_obj
+!	{ stringified => 1 }	$ov_obj
 !	$obj		$ov_obj
 !	undef		$ov_obj
 
@@ -191,7 +195,8 @@ __DATA__
 # object (overloaded or not) ~~ Any
 	$obj		qr/NoOverload/
 	$ov_obj		qr/^stringified$/
-	"$ov_obj"	"stringified"
+=	"$ov_obj"	"stringified"
+!=	$ov_obj		"stringified"
 	$ov_obj		'magic'
 !	$ov_obj		'not magic'
 
@@ -248,6 +253,9 @@ __DATA__
 	+{}		\&fatal
 	@empty		\&fatal
 	%empty		\&fatal
+# sub is not special on the left
+	sub {0}		qr/^CODE/
+	sub {0}		sub { ref shift eq "CODE" }
 
 # HASH ref against:
 #   - another hash ref
