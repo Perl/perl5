@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 109;
+        plan tests => 110;
     }
 }
 
@@ -189,11 +189,13 @@ my $self_name = $ENV{PERL_CORE} ? '../lib/ExtUtils/t/MM_Unix.t'
 is ($t->perl_script($self_name),$self_name, 'we pass as a perl_script()');
 
 ###############################################################################
-# perm_rw perm_rwx
+# PERM_RW and PERM_RWX
 
 $t->init_PERM;
-is ($t->perm_rw(),'644', 'perm_rw() is 644');
-is ($t->perm_rwx(),'755', 'perm_rwx() is 755');
+is ($t->{PERM_RW},'644', 'PERM_RW is 644');
+is ($t->{PERM_RWX},'755', 'PERM_RWX is 755');
+is ($t->{PERM_DIR},'755', 'PERM_DIR is 755');
+
 
 ###############################################################################
 # post_constants, postamble, post_initialize

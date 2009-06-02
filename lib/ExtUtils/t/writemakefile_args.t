@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 35;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -191,4 +191,31 @@ VERIFY
         isa_ok( $mm->{VERSION}, 'version' );
         is( $mm->{VERSION}, $version );
     }
+
+
+    # DISTNAME
+    $warnings = '';
+    eval {
+        $mm = WriteMakefile(
+            NAME       => 'Big::Dummy',
+            VERSION    => '1.00',
+            DISTNAME   => "Hooballa",
+        );
+    };
+    is( $warnings, '' );
+    is( $mm->{DISTNAME},  "Hooballa" );
+    is( $mm->{DISTVNAME}, $Is_VMS ? "Hooballa-1_00" : "Hooballa-1.00" );
+
+
+    # DISTVNAME (rt.cpan.org 43217)
+    $warnings = '';
+    eval {
+        $mm = WriteMakefile(
+            NAME       => 'Big::Dummy',
+            VERSION    => 1.00,
+            DISTVNAME  => "Hooballoo",
+        );
+    };
+    is( $warnings, '' );
+    is( $mm->{DISTVNAME}, 'Hooballoo' );
 }
