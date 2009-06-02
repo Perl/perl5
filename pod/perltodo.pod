@@ -377,6 +377,15 @@ see if there would be a way to use our existing metaconfig units to configure a
 Windows Perl or whether we go in a separate direction and make it so.  Of 
 course, we all know what step 3 is.
 
+=head2 decouple -g and -DDEBUGGING
+
+Currently F<Configure> automatically adds C<-DDEBUGGING> to the C compiler
+flags if it spots C<-g> in the optimiser flags. The pre-processor directive
+C<DEBUGGING> enables F<perl>'s command line <-D> options, but in the process
+makes F<perl> slower. It would be good to disentangle this logic, so that
+C-level debugging with C<-g> and Perl level debugging with C<-D> can easily
+be enabled independently.
+
 =head1 Tasks that need a little C knowledge
 
 These tasks would need a little C knowledge, but don't need any specific
