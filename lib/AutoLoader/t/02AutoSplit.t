@@ -43,7 +43,7 @@ if ($Is_VMS) {
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
         $vms_case = $efs_case =~ /^[ET1]/i;
     }
     $Is_VMS_lc = 0 if ($vms_case);
