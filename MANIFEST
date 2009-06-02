@@ -2220,6 +2220,7 @@ lib/ExtUtils/ParseXS/t/XSUsage.xs	ExtUtils::ParseXS tests
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
+lib/ExtUtils/t/arch_check.t	Test MakeMaker's arch_check()
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic_finish.pl	See if MakeMaker can build a module (part 2)
 lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
@@ -2266,6 +2267,7 @@ lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
 lib/ExtUtils/t/pm.t		See if MakeMaker can handle PM
+lib/ExtUtils/t/pod2man.t	See if MakeMaker can handle no pod2man
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
@@ -2275,6 +2277,8 @@ lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
 lib/ExtUtils/t/recurs.t		See if recursive builds work
 lib/ExtUtils/t/revision.t	See if $Revision is correct
 lib/ExtUtils/t/split_command.t	See if MM's xargs-like function works
+lib/ExtUtils/t/testdata/reallylongdirectoryname/arch1/Config.pm		test data for MakeMaker
+lib/ExtUtils/t/testdata/reallylongdirectoryname/arch2/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
 lib/ExtUtils/t/vmsish.t	Test ExtUtils::MakeMaker::vmsish
