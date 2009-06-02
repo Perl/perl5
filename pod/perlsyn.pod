@@ -688,13 +688,13 @@ that applies determines the match behaviour (which is thus mostly
 determined by the type of the right operand). Note that the smart match
 implicitly dereferences any non-blessed hash or array ref, so the "Hash"
 and "Array" entries apply in those cases. (For blessed references, the
-"Any" entry apply.)
+"Object" entries apply.)
 
     $a      $b        Type of Match Implied    Matching Code
     ======  =====     =====================    =============
     Any     undef     undefined                !defined $a
 
-    Any     Object   invokes ~~ overloading on $object, or dies
+    Any     Object    invokes ~~ overloading on $object, or dies
 
     Hash    CodeRef   sub truth for each key[1] !grep { !$b->($_) } keys %$a
     Array   CodeRef   sub truth for each elt[1] !grep { !$b->($_) } @$a
@@ -721,7 +721,6 @@ and "Array" entries apply in those cases. (For blessed references, the
     Any     Num       numeric equality         $a == $b
     Num     numish[4] numeric equality         $a == $b
     Any     Any       string equality          $a eq $b
-
 
  1 - empty hashes or arrays will match.
  2 - that is, each element smart-matches the element of same index in the
