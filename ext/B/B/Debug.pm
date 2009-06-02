@@ -354,7 +354,7 @@ otherwise in basic order.
   1.10 2008-06-28 rurban
 	require 5.006; Test::More not possible in 5.00505
 	our => my
-
+	
   1.09 2008-06-18 rurban
 	minor META.yml syntax fix
 	5.8.0 ending nextstate test failure: be more tolerant

@@ -1,3 +1,7 @@
+  Version 3.43
+  1. Documentation patch from MARKSTOS@cpan.org to replace all occurrences of
+  "new CGI" with CGI->new()" to reflect best perl practices.
+  2. Patch from Stepan Kasal to fix utf-8 related problems in perl 5.10
 
   Version 3.42
   1. Added patch from Renee Baecker that makes it possible to subclass
