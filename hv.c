@@ -2144,10 +2144,9 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	}
     }
 
-    /* Quick bailout if the hash is empty anyway.
-       I don't know if placeholders are included in the KEYS count, so a defensive check
-    */
-    if (HvKEYS(hv) || (flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
+    /* Skip the entire loop if the hash is empty.   */
+    if ((flags & HV_ITERNEXT_WANTPLACEHOLDERS)
+	? HvTOTALKEYS(hv) : HvUSEDKEYS(hv)) {
 	while (!entry) {
 	    /* OK. Come to the end of the current list.  Grab the next one.  */
 
