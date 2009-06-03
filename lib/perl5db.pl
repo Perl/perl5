@@ -1054,7 +1054,7 @@ warn(               # Do not ;-)
   if 0;
 
 foreach my $k (keys (%INC)) {
-	&share(\$main::{'_<'.$filename});
+	&share(\$main::{'_<'.$filename}) if defined $filename;
 };
 
 # Command-line + PERLLIB:
