@@ -1056,7 +1056,7 @@ warn(               # Do not ;-)
   )
   if 0;
 
-# without threads, $filename is not defined until DB::sub is called
+# without threads, $filename is not defined until DB::DB is called
 foreach my $k (keys (%INC)) {
 	&share(\$main::{'_<'.$filename}) if defined $filename;
 };
