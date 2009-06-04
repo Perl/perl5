@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!./perl
 
 BEGIN {
     chdir 't' if -d 't';
@@ -26,7 +26,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(2);
+plan(3);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -80,6 +80,12 @@ like($contents, qr/sub factorial/,
     local $ENV{PERLDB_OPTS} = "ReadLine=0";
     my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/lvalue-bug');
     like($output, qr/foo is defined/, 'lvalue subs work in the debugger');
+}
+
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
+    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
+    like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
 }
 
 # clean up.
