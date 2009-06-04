@@ -291,8 +291,10 @@ SKIP: {
 	    # Slightly convoluted, because some operating systems will let us
 	    # set a directory, but not a file. These should all work:
 	    mkdir $copy1 or die "Can't mkdir $copy1: $!";
-	    chmod $s_perm, $copy1 or die "Can't chmod %o $copy1: $!", $s_perm;
-	    rmdir $copy1 or die "Can't rmdir $copy1: $!";
+	    chmod $s_perm, $copy1
+		or die sprintf "Can't chmod %o $copy1: $!", $s_perm;
+	    rmdir $copy1
+		or die sprintf "Can't rmdir $copy1: $!";
 	    open my $fh0, '>', $copy1 or die "Can't open $copy1: $!";
 	    close $fh0 or die "Can't close $copy1: $!";
 	    unless (chmod $s_perm, $copy1) {
