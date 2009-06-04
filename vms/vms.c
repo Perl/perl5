@@ -8231,7 +8231,7 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 	 * special device files.
          */
 
-	if ((add_6zero == 0) && (*nextslash == '/') &&
+	if (!islnm && (add_6zero == 0) && (*nextslash == '/') &&
 	    (&nextslash[1] == unixend)) {
 	  /* No real directory present */
 	  add_6zero = 1;
@@ -8491,7 +8491,7 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
     vmsptr2 = vmsptr - 1;
     if ((vmslen > 1) &&
 	(*vmsptr2 != ']') && (*vmsptr2 != '*') && (*vmsptr2 != '%') &&
- 	(*vmsptr2 != ')') && (*lastdot != '.')) {
+	(*vmsptr2 != ')') && (*lastdot != '.') && (*vmsptr2 != ':')) {
 	*vmsptr++ = '.';
         vmslen++;
     }
@@ -8677,7 +8677,7 @@ static char *int_tovmsspec
       }
   }
 
-/* If POSIX mode active, handle the conversion */
+/* If EFS charset mode active, handle the conversion */
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   if (decc_efs_charset) {
     posix_to_vmsspec_hardway(rslt, rslt_len, path, dir_flag, utf8_flag);
