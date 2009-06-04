@@ -1778,9 +1778,9 @@ CODE
     # undefined. In any case we turn it into an anon array:
 
     # May check $Config{libs} too, thus not empty.
-    $self->{LIBS} = !defined $self->{LIBS} ? ['']               : 
-                    !ref $self->{LIBS}     ? [$self->{LIBS}]    :
-                                             $self->{LIBS}      ;
+    $self->{LIBS} = [$self->{LIBS}] unless ref $self->{LIBS};
+
+    $self->{LIBS} = [''] unless @{$self->{LIBS}} && defined $self->{LIBS}[0];
 
     foreach my $libs ( @{$self->{LIBS}} ){
         $libs =~ s/^\s*(.*\S)\s*$/$1/; # remove leading and trailing whitespace
