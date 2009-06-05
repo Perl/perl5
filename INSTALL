@@ -970,34 +970,36 @@ Again, this should all happen automatically.  This should also work if
 you have gdbm installed in any of (/usr/local, /opt/local, /usr/gnu,
 /opt/gnu, /usr/GNU, or /opt/GNU).
 
-=item gdbm in /usr/you
+=item BerkeleyDB in /usr/local/BerkeleyDB
 
-Suppose you have gdbm installed in some place other than /usr/local,
-but you still want Configure to find it.  To be specific, assume you
-have /usr/you/include/gdbm.h and /usr/you/lib/libgdbm.a.  You
-still have to add -I/usr/you/include to cc flags, but you have to take
-an extra step to help Configure find libgdbm.a.  Specifically, when
-Configure prompts you for library directories, you have to add
-/usr/you/lib to the list.
+The version of BerkeleyDB distributed by sleepycat.com installs in a
+version-specific directory by default, typically something like
+/usr/local/BerkeleyDB.4.7.  To have Configure find that, you need to add
+-I/usr/local/BerkeleyDB.4.7/include to cc flags, as in the previous example,
+and you will also have to take extra steps to help Configure find -ldb.
+Specifically, when Configure prompts you for library directories,
+add /usr/local/BerkeleyDB.4.7/lib to the list.  Also, you will need to
+add appropriate linker flags to tell the runtime linker where to find the
+BerkeleyDB shared libraries.
 
-It is possible to specify this from the command line too (all on one
+It is possible to specify this from the command line (all on one
 line):
 
     sh Configure -de \
-        -Dlocincpth="/usr/you/include" \
-        -Dloclibpth="/usr/you/lib"
+        -Dlocincpth='/usr/local/BerkeleyDB.4.7/include /usr/local/include' \
+        -Dloclibpth='/usr/local/BerkeleyDB.4.7/lib /usr/local/lib' \
+        -Aldflags='-R/usr/local/BerkeleyDB.4.7/lib'
 
 locincpth is a space-separated list of include directories to search.
 Configure will automatically add the appropriate -I directives.
 
 loclibpth is a space-separated list of library directories to search.
-Configure will automatically add the appropriate -L directives.  If
-you have some libraries under /usr/local/ and others under
-/usr/you, then you have to include both, namely
+Configure will automatically add the appropriate -L directives.
 
-    sh Configure -de \
-        -Dlocincpth="/usr/you/include /usr/local/include" \
-        -Dloclibpth="/usr/you/lib /usr/local/lib"
+The addition to ldflags is so that the dynamic linker knows where to find
+the BerkeleyDB libraries.  For Linux and Solaris, the -R option does that.
+Other systems may use different flags.  Use the appropriate flag for your
+system.
 
 =back
 
