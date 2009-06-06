@@ -8,7 +8,7 @@
 #  include "ppport.h"
 #endif
 
-#if PERL_VERSION < 6
+#if PERL_VERSION < 8
 #  define DD_USE_OLD_ID_FORMAT
 #endif
 
