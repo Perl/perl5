@@ -4,6 +4,7 @@
 #include "XSUB.h"
 #ifdef USE_PPPORT_H
 #  define NEED_my_snprintf
+#  define NEED_sv_2pv_flags
 #  include "ppport.h"
 #endif
 
