@@ -1086,7 +1086,7 @@ package Maintainers;
 			     lib/Math/Trig.t
 			     lib/Math/underbar.t
 			    ],
-	'EXCLUDED'	=> [ 
+	'EXCLUDED'	=> [
 			     qw{
 				t/pod.t
 				t/pod-coverage.t
@@ -1102,7 +1102,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'mjd',
 	'DISTRIBUTION'	=> 'MJD/Memoize-1.01.tar.gz',
 	'FILES'		=> q[lib/Memoize.pm lib/Memoize],
-	'EXCLUDED'	=> [ 
+	'EXCLUDED'	=> [
 			     qw{
 				article.html
 				Memoize/Saves.pm
@@ -1520,8 +1520,13 @@ package Maintainers;
     'Scalar-List-Utils' =>
 	{
 	'MAINTAINER'	=> 'gbarr',
-	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.21.tar.gz',
+	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.19.tar.gz',
+	# Note that perl uses its own version of Makefile.PL
 	'FILES'		=> q[ext/List-Util],
+	'EXCLUDED'	=> [ qr{^inc/Module/},
+			     qr{^inc/Test/},
+			     qw{ mytypemap },
+			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1531,6 +1536,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/SelfLoader-1.17.tar.gz',
 	'FILES'		=> q[lib/SelfLoader.pm lib/SelfLoader],
+	'EXCLUDED'	=> [ qw{ t/00pod.t } ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1540,6 +1546,10 @@ package Maintainers;
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72.tar.gz',
 	'FILES'		=> q[lib/Shell.pm lib/Shell.t],
+	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
+	'MAP'		=> { ''	 => 'lib/',
+			     't/'=> 'lib/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1549,6 +1559,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'ams',
 	'DISTRIBUTION'	=> 'AMS/Storable-2.20.tar.gz',
 	'FILES'		=> q[ext/Storable],
+	'EXCLUDED'	=> [ qr{^t/Test/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1558,6 +1569,9 @@ package Maintainers;
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.14.tar.gz',
 	'FILES'		=> q[lib/Switch.pm lib/Switch],
+	'MAP'		=> { ''	 => 'lib/',
+			     't/'=> 'lib/Switch/t/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1567,6 +1581,16 @@ package Maintainers;
 	'MAINTAINER'	=> 'saper',
 	'DISTRIBUTION'	=> 'SAPER/Sys-Syslog-0.27.tar.gz',
 	'FILES'		=> q[ext/Sys-Syslog],
+	'EXCLUDED'	=> [ qr{^eg/},
+			     qw{t/data-validation.t
+			        t/distchk.t
+				t/pod.t
+				t/podcover.t
+				t/podspell.t
+				t/portfs.t
+				win32/PerlLog.RES
+			       },
+			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1576,6 +1600,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'muir',
 	'DISTRIBUTION'	=> 'MUIR/modules/Text-Tabs+Wrap-2009.0305.tar.gz',
 	'FILES'		=> q[lib/Text/{Tabs,Wrap}.pm lib/Text/TabsWrap],
+	'EXCLUDED'	=> [ qw( t/dnsparks.t ) ], # see af6492bf9e
+	'MAP'		=> {
+			     ''    => 'lib/Text/TabsWrap/',
+			     'lib/'=> 'lib/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1584,7 +1613,14 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.00.tar.gz',
-	'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
+	'FILES'		=> q{lib/Term/ANSIColor.pm lib/Term/ANSIColor},
+	'EXCLUDED'	=> [ qr{^tests/},
+			     qw(t/pod-spelling.t t/pod.t)
+			   ],
+	'MAP'		=> {
+			     ''            => 'lib/Term/ANSIColor/',
+			     'ANSIColor.pm'=> 'lib/Term/ANSIColor.pm',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1593,7 +1629,11 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jstowe',
 	'DISTRIBUTION'	=> 'JSTOWE/Term-Cap-1.12.tar.gz',
-	'FILES'		=> q[lib/Term/Cap.{pm,t}],
+	'FILES'		=> q{lib/Term/Cap.{pm,t}},
+	'MAP'		=> {
+			     ''        => 'lib/Term/',
+			     'test.pl' => 'lib/Term/Cap.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1602,7 +1642,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Term-UI-0.20.tar.gz',
-	'FILES'		=> q[lib/Term/UI.pm lib/Term/UI],
+	'FILES'		=> q{lib/Term/UI.pm lib/Term/UI},
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1619,8 +1659,18 @@ package Maintainers;
     'Test::Harness' =>
 	{
 	'MAINTAINER'	=> 'andya',
-	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.17.tar.gz',
+	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.16.tar.gz',
 	'FILES'		=> q[ext/Test-Harness],
+	'EXCLUDED'	=> [ qr{^examples/},
+			     qr{^inc/},
+			     qr{^t/lib/Test/},
+			     qr{^xt/},
+			     qw{Changes-2.64
+				HACKING.pod
+				perlcriticrc
+				t/lib/if.pm
+			       }
+			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1628,7 +1678,7 @@ package Maintainers;
     'Test::Simple' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.88.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.86.tar.gz',
 	'FILES'		=> q[lib/Test/Simple.pm
 			     lib/Test/Simple
 			     lib/Test/Builder.pm
@@ -1638,6 +1688,41 @@ package Maintainers;
 			     t/lib/Test/Simple
 			     t/lib/Dev/Null.pm
 			    ],
+	'EXCLUDED'	=> [
+			     # NB - TieOut.pm comes with more than one
+			     # distro. We use the MM one
+			     # XXX should all these actually be excluded
+			     # from blead ???? - DAPM
+			     qw{.perlcriticrc
+				.perltidyrc
+				t/pod.t
+				t/pod-coverage.t
+				t/versions.t
+				t/Builder/current_test.t
+				t/Builder/current_test_without_plan.t
+				t/Builder/done_testing.t
+				t/Builder/done_testing_double.t
+				t/Builder/done_testing_plan_mismatch.t
+				t/Builder/done_testing_with_no_plan.t
+				t/Builder/done_testing_with_number.t
+				t/Builder/done_testing_with_plan.t
+				t/Builder/fork_with_new_stdout.t
+				t/Builder/no_plan_at_all.t
+				t/Builder/reset_outputs.t
+
+				lib/Test/Builder/IO/Scalar.pm
+				t/lib/Test/Builder/NoOutput.pm
+
+				t/lib/TieOut.pm
+			       }
+			   ],
+	'MAP'		=> {
+			     'lib/'        => 'lib/',
+			     't/lib/'      => 'lib/Test/Simple/t/lib/',
+			     't/lib/Test/' => 't/lib/Test/',
+			     't/lib/Dev/' =>  't/lib/Dev/',
+			     ''            => 'lib/Test/Simple/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1647,6 +1732,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'dmanura',
 	'DISTRIBUTION'	=> 'DCONWAY/Text-Balanced-v2.0.0.tar.gz',
 	'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+	'EXCLUDED'	=> [ qw( t/pod-coverage.t t/pod.t ) ],
+	'MAP'		=> { ''            => 'lib/Text/Balanced/',
+	                     'lib/'        => 'lib/',
+	                     't/00.load.t' => 'lib/Text/Balanced/t/00-load.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1656,6 +1746,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'chorny',
 	'DISTRIBUTION'	=> 'CHORNY/Text-ParseWords-3.27.zip',
 	'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
+	'EXCLUDED'	=> [ qw( t/pod.t ) ],
+	'MAP'		=> { ''               => 'lib/Text/',
+	                     't/ParseWords.t' => 'lib/Text/ParseWords.t',
+	                     't/taint.t'      => 'lib/Text/ParseWords/taint.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1665,6 +1760,12 @@ package Maintainers;
 	'MAINTAINER'	=> 'markm',
 	'DISTRIBUTION'	=> 'MARKM/Text-Soundex-3.03.tar.gz',
 	'FILES'		=> q[ext/Text-Soundex],
+	'MAP'		=> { ''               => 'ext/Text-Soundex/',
+			     # XXX these two files are clearly related,
+			     # but they appear to have diverged
+			     # considerably over the years
+	                     'test.pl'        => 'ext/Text-Soundex/t/Soundex.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1674,6 +1775,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/Thread-Queue-2.11.tar.gz',
 	'FILES'		=> q[lib/Thread/Queue.pm lib/Thread/Queue],
+	'EXCLUDED'	=> [ qw(examples/queue.pl
+				t/00_load.t
+				t/99_pod.t
+				t/test.pl
+			       ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1683,6 +1789,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/Thread-Semaphore-2.09.tar.gz',
 	'FILES'		=> q[lib/Thread/Semaphore.pm lib/Thread/Semaphore],
+	'EXCLUDED'	=> [ qw(examples/semaphore.pl
+				t/00_load.t
+				t/99_pod.t
+				t/test.pl
+			       ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1692,6 +1803,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.72.tar.gz',
 	'FILES'		=> q[ext/threads],
+	'EXCLUDED'	=> [ qw(examples/pool.pl
+				t/pod.t
+				t/test.pl
+				threads.h
+			       ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1701,6 +1817,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/threads-shared-1.28.tar.gz',
 	'FILES'		=> q[ext/threads-shared],
+	'EXCLUDED'	=> [ qw(examples/class.pl
+				shared.h
+				t/pod.t
+				t/test.pl
+			       ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1719,6 +1840,9 @@ package Maintainers;
 	'MAINTAINER'	=> 'nuffin',
 	'DISTRIBUTION'	=> 'NUFFIN/Tie-RefHash-1.38.tar.gz',
 	'FILES'		=> q[lib/Tie/RefHash.pm lib/Tie/RefHash],
+	'MAP'		=> { 'lib/' => 'lib/',
+	                     't/'   => 'lib/Tie/RefHash/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1851,7 +1975,7 @@ package Maintainers;
     # accounted for, and that there are no duplicates:
     #
     #    perl Porting/Maintainers --checkmani lib ext
-    #    perl Porting/Maintainers --checkmani 
+    #    perl Porting/Maintainers --checkmani
 
     '_PERLLIB' =>
 	{
