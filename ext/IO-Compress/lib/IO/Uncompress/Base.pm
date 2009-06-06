@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.019';
+$VERSION = '2.020';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.019 ;
+use IO::Compress::Base::Common 2.020 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -854,11 +854,9 @@ sub _raw_read
                                     defined *$self->{CompressedInputLengthDone} ||
                                                 $self->smartEof(), $outSize);
                                                 
-        $self->pushBack($temp_buf) if $beforeC_len != length $temp_buf;
+        # Remember the input buffer if it wasn't consumed completely
+        $self->pushBack($temp_buf) if *$self->{Uncomp}{ConsumesInput};
 
-#return $self->saveErrorString(G_ERR, "unexpected end of file", STATUS_ERROR)
-#           if $self->smartEof() && $status != STATUS_ENDSTREAM;     
-                        
         return $self->saveErrorString(G_ERR, *$self->{Uncomp}{Error}, *$self->{Uncomp}{ErrorNo})
             if $self->saveStatus($status) == STATUS_ERROR;    
 
