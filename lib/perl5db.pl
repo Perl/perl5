@@ -511,7 +511,7 @@ package DB;
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.32;
+$VERSION = '1.33';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -949,6 +949,9 @@ sub eval {
 #   + [perl #57016] debugger: o warn=0 die=0 ignored
 #   + Note, but don't use, PERLDBf_SAVESRC
 #   + Fix #7013: lvalue subs not working inside debugger
+# Changes: 1.32: Jun 03, 2009 Jonathan Leto <jonathan@leto.net>
+#   + Fix bug where a key _< with undefined value was put into the symbol table
+#   +   when the $filename variable is not set
 ########################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -1053,8 +1056,9 @@ warn(               # Do not ;-)
   )
   if 0;
 
+# without threads, $filename is not defined until DB::DB is called
 foreach my $k (keys (%INC)) {
-	&share(\$main::{'_<'.$filename});
+	&share(\$main::{'_<'.$filename}) if defined $filename;
 };
 
 # Command-line + PERLLIB:
@@ -1846,7 +1850,7 @@ $I_m_init = 1;
 This gigantic subroutine is the heart of the debugger. Called before every
 statement, its job is to determine if a breakpoint has been reached, and
 stop if so; read commands from the user, parse them, and execute
-them, and hen send execution off to the next statement.
+them, and then send execution off to the next statement.
 
 Note that the order in which the commands are processed is very important;
 some commands earlier in the loop will actually alter the C<$cmd> variable
