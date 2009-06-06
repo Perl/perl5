@@ -312,6 +312,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		else {
 		    PerlIO *that_fp = NULL;
 		    if (num_svs > 1) {
+			/* diag_listed_as: More than one argument to '%s' open */
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
 		    while (isSPACE(*type))
@@ -398,6 +399,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = IoTYPE_STD;
 		    if (num_svs > 1) {
+			/* diag_listed_as: More than one argument to '%s' open */
 			Perl_croak(aTHX_ "More than one argument to '>%c' open",IoTYPE_STD);
 		    }
 		}
@@ -431,6 +433,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 		if (num_svs > 1) {
+		    /* diag_listed_as: More than one argument to '%s' open */
 		    Perl_croak(aTHX_ "More than one argument to '<%c' open",IoTYPE_STD);
 		}
 	    }
@@ -1997,6 +2000,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
+        /* diag_listed_as: msg%s not implemented */
 	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
     }
@@ -2057,12 +2061,14 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 		   than guessing about u_?short(_t)? */
 	}
 #else
+        /* diag_listed_as: sem%s not implemented */
 	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
 	break;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
+        /* diag_listed_as: shm%s not implemented */
 	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
     }
@@ -2110,6 +2116,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
 	    ret = Semctl(id, n, cmd, unsemds);
 #else
+	    /* diag_listed_as: sem%s not implemented */
 	    Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
         }
@@ -2151,6 +2158,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 #else
     PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
+    /* diag_listed_as: msg%s not implemented */
     Perl_croak(aTHX_ "msgsnd not implemented");
 #endif
 }
@@ -2192,6 +2200,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 #else
     PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
+    /* diag_listed_as: msg%s not implemented */
     Perl_croak(aTHX_ "msgrcv not implemented");
 #endif
 }
@@ -2246,6 +2255,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
         return result;
     }
 #else
+    /* diag_listed_as: sem%s not implemented */
     Perl_croak(aTHX_ "semop not implemented");
 #endif
 }
@@ -2304,6 +2314,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     }
     return shmdt(shm);
 #else
+    /* diag_listed_as: shm%s not implemented */
     Perl_croak(aTHX_ "shm I/O not implemented");
 #endif
 }

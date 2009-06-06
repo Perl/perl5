@@ -5518,8 +5518,8 @@ Perl_sv_replace(pTHX_ register SV *const sv, register SV *const nsv)
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (SvREFCNT(nsv) != 1) {
-	Perl_croak(aTHX_ "panic: reference miscount on nsv in sv_replace() (%"
-		   UVuf " != 1)", (UV) SvREFCNT(nsv));
+	Perl_croak(aTHX_ "panic: reference miscount on nsv in sv_replace()"
+		   " (%" UVuf " != 1)", (UV) SvREFCNT(nsv));
     }
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))

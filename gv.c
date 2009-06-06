@@ -99,6 +99,7 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
                          PL_op->op_type ==  OP_REWINDDIR ||
                          PL_op->op_type ==  OP_CLOSEDIR ?
                          "dirhandle" : "filehandle";
+	/* diag_listed_as: Bad symbol for filehandle */
         Perl_croak(aTHX_ "Bad symbol for %s", fh);
     }
 
@@ -1087,6 +1088,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
 			     (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
 		    {
+			/* diag_listed_as: Variable "%s" is not imported%s */
 			Perl_warn(aTHX_ "Variable \"%c%s\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',

@@ -3857,7 +3857,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    SV *meth;
 
 	    if (version->op_type != OP_CONST || !SvNIOKp(vesv))
-		Perl_croak(aTHX_ "Version number must be constant number");
+		Perl_croak(aTHX_ "Version number must be a constant number");
 
 	    /* Make copy of idop so we don't free it twice */
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
@@ -8961,6 +8961,7 @@ const_sv_xsub(pTHX_ CV* cv)
     if (items != 0) {
 	NOOP;
 #if 0
+	/* diag_listed_as: SKIPME */
         Perl_croak(aTHX_ "usage: %s::%s()",
                    HvNAME_get(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
 #endif

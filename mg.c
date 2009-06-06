@@ -1331,7 +1331,7 @@ Perl_csighandler(int sig)
 #ifndef SIG_PENDING_DIE_COUNT
 #  define SIG_PENDING_DIE_COUNT 120
 #endif
-	/* And one to say _a_ signal is pending */
+	/* Add one to say _a_ signal is pending */
 	if (++PL_sig_pending >= SIG_PENDING_DIE_COUNT)
 	    Perl_croak(aTHX_ "Maximal count of pending signals (%lu) exceeded",
 		       (unsigned long)SIG_PENDING_DIE_COUNT);
