@@ -1,5 +1,5 @@
 package Overloaded;
-# $Id: /mirror/googlecode/test-more-trunk/t/lib/MyOverload.pm 67132 2008-10-01T01:11:04.501643Z schwern  $
+# $Id$
 
 sub new {
     my $class = shift;

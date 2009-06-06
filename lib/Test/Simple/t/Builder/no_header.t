@@ -1,4 +1,4 @@
-# $Id: /mirror/googlecode/test-more/t/Builder/no_header.t 60332 2008-09-09T12:24:03.060291Z schwern  $
+# $Id$
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';

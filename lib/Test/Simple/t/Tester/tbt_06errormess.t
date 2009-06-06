@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: /mirror/googlecode/test-more/t/Tester/tbt_06errormess.t 60331 2008-09-09T12:17:12.607612Z schwern  $
+# $Id$
 
 use Test::More tests => 8;
 use Symbol;
