@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: /mirror/googlecode/test-more/t/Tester/tbt_03die.t 60331 2008-09-09T12:17:12.607612Z schwern  $
+# $Id$
 
 use Test::Builder::Tester tests => 1;
 use Test::More;

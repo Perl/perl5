@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: /mirror/googlecode/test-more/t/BEGIN_use_ok.t 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
+# $Id$
 
 # [rt.cpan.org 28345]
 #

@@ -1,5 +1,5 @@
 package Test::Builder;
-# $Id: /mirror/googlecode/test-more-trunk/lib/Test/Builder.pm 67223 2008-10-15T03:08:18.888155Z schwern  $
+# $Id$
 
 use 5.006;
 use strict;

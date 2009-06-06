@@ -1,5 +1,5 @@
 require Test::Simple;
-# $Id: /mirror/googlecode/test-more/t/lib/Test/Simple/sample_tests/death_in_eval.plx 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
+# $Id$
 use Carp;
 
 push @INC, 't/lib';

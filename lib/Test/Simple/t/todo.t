@@ -1,5 +1,5 @@
 #!perl -w
-# $Id: /mirror/googlecode/test-more-trunk/t/todo.t 62094 2008-09-19T07:21:50.720642Z schwern  $
+# $Id$
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

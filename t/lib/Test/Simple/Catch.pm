@@ -1,5 +1,5 @@
 # For testing Test::Simple;
-# $Id: /mirror/googlecode/test-more-trunk/t/lib/Test/Simple/Catch.pm 67132 2008-10-01T01:11:04.501643Z schwern  $
+# $Id$
 package Test::Simple::Catch;
 
 use Symbol;
