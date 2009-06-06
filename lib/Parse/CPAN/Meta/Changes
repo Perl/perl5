@@ -1,4 +1,8 @@
-Revision history for Perl extension Parse-CPAN-Meta
+Changes for Perl programming language extension Parse-CPAN-Meta
+
+1.39 Thu 21 May 2009
+	- Even though utf8 starts at 5.7+ there's no is_utf till
+	  5.8.1 so skip in the tests if needed (ADAMK)
 
 1.38 Sat 16 May 2009
 	- Synchorised version numbers with YAML::Tiny
