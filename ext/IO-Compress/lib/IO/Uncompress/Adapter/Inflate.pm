@@ -4,11 +4,11 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.019 qw(:Status);
-use Compress::Raw::Zlib  2.019 qw(Z_OK Z_BUF_ERROR Z_STREAM_END Z_FINISH MAX_WBITS);
+use IO::Compress::Base::Common  2.020 qw(:Status);
+use Compress::Raw::Zlib  2.020 qw(Z_OK Z_BUF_ERROR Z_STREAM_END Z_FINISH MAX_WBITS);
 
 our ($VERSION);
-$VERSION = '2.019';
+$VERSION = '2.020';
 
 
 
@@ -46,6 +46,7 @@ sub mkUncompObject
                   'CompSize'   => 0,
                   'UnCompSize' => 0,
                   'Error'      => '',
+                  'ConsumesInput' => 1,
                  } ;     
     
 }

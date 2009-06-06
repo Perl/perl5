@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.020 3 June 2009
+
+      * IO::Uncompress::Base.pm
+        - Fixed problem with LimitOutput where a call to uncompress
+          created more uncompressed output, but didn't consume any of
+          the input buffer. The symptom is the underlying compression
+          library (zlib or bzip2) thinks the input stream is corrupt.
+          [RT #46582]
+
   2.019 4 May 2009
 
       * IO::Uncompress::Adapter::Bunzip2

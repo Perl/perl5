@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.019';
+$VERSION = '2.020';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -1369,11 +1369,10 @@ C<$input>.
 
 =head1 ACCESSING ZIP FILES
 
-Although it is possible (with some effort on your part) to use this
-module to access .zip files, there is a module on CPAN that will do all
-the hard work for you. Check out the C<Archive::Zip> module on CPAN at
-
-    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
+Although it is possible (with some effort on your part) to use this module
+to access .zip files, there are other perl modules available that will
+do all the hard work for you. Check out C<Archive::Zip>,
+C<IO::Compress::Zip> and C<IO::Uncompress::Unzip>.
 
 =head1 CONSTANTS
 

@@ -4,13 +4,13 @@ use warnings;
 use strict;
 use bytes;
 
-use IO::Compress::Base::Common  2.019 qw(:Status);
+use IO::Compress::Base::Common  2.020 qw(:Status);
 
 our ($VERSION);
 
-$VERSION = '2.019';
+$VERSION = '2.020';
 
-use Compress::Raw::Zlib  2.019 ();
+use Compress::Raw::Zlib  2.020 ();
 
 sub mkUncompObject
 {
@@ -23,6 +23,8 @@ sub mkUncompObject
             'CRC32'      => Compress::Raw::Zlib::crc32(''),
             'wantADLER32'=> $adler32,
             'ADLER32'    => Compress::Raw::Zlib::adler32(''),
+            'ConsumesInput' => 1,
+
           } ;
 }
 
@@ -96,6 +98,7 @@ sub adler32
     my $self = shift ;
     return $self->{ADLER32};
 }
+
 
 1;
 
