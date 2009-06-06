@@ -1175,7 +1175,7 @@ TEST q(Data::Dumper->new(\@strings_ni)->Dump), 'Strings NV,IV';
 TEST q(Data::Dumper->new(\@strings_nis)->Dump), 'Strings NV,IV,PV';
 if ($XS) {
  my $nv_preserves_uv = defined $Config{d_nv_preserves_uv};
- my $nv_preserves_uv_4bits = $Config{nv_preserves_uv_bits} >= 4;
+ my $nv_preserves_uv_4bits = exists($Config{nv_preserves_uv_bits}) && $Config{nv_preserves_uv_bits} >= 4;
   $WANT=$WANT_XS_N;
   TEST q(Data::Dumper->new(\@numbers)->Dumpxs), 'XS Numbers';
   TEST q(Data::Dumper->new(\@numbers_s)->Dumpxs), 'XS Numbers PV';
