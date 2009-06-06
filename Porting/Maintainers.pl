@@ -1129,8 +1129,9 @@ package Maintainers;
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'EWILHELM/Module-Build-0.33.tar.gz',
+	'DISTRIBUTION'	=> 'EWILHELM/Module-Build-0.32.tar.gz',
 	'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
+	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t }, ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1140,6 +1141,11 @@ package Maintainers;
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.17.tar.gz',
 	'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
+	'EXCLUDED'	=> [ qw{ identify-dependencies t/pod.t} ],
+	'MAP'		=> { 'corelist' => 'lib/Module/CoreList/bin/corelist',
+			     'lib/'     => 'lib/',
+			     ''         => 'lib/Module/CoreList/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1198,6 +1204,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/NEXT-0.63.tar.gz',
 	'FILES'		=> q[lib/NEXT.pm lib/NEXT],
+	'EXCLUDED'	=> [ qr{^demo/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1224,6 +1231,9 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Params-Check-0.26.tar.gz',
+	# For some reason a file of this name appears within
+	# the tarball. Russell's Paradox eat your heart out.
+	'EXCLUDED'	=> [ qw( Params-Check-0.26.tar.gz ) ],
 	'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -1241,11 +1251,16 @@ package Maintainers;
     'Parse::CPAN::Meta' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'ADAMK/Parse-CPAN-Meta-1.39.tar.gz',
+	'DISTRIBUTION'	=> 'ADAMK/Parse-CPAN-Meta-1.38.tar.gz',
 	'FILES'		=> q[lib/Parse/CPAN/Meta.pm
-			     t/lib/Parse/CPAN/Meta/Test.pm
 			     lib/Parse/CPAN/Meta
+			     t/lib/Parse/CPAN/Meta/Test.pm
 			    ],
+	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
+	'MAP'		=> { 'lib/'     => 'lib/',
+			     't/lib/'   => 't/lib/',
+			     ''         => 'lib/Parse/CPAN/Meta/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
 	},
@@ -1259,6 +1274,20 @@ package Maintainers;
 			     ext/Cwd
 			     lib/Cwd.pm
 			    ],
+	# XXX note that the CPAN and blead Makefile.PL are totally
+	# unrelated. The blead one is described as 'core-only'.
+	# Perhaps after the big lib/ => ext/ migration it will be possible
+	# to harmonize them?
+	
+	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
+	'MAP'		=> { 'lib/'      => 'lib/',
+			     'Cwd.pm'    => 'lib/Cwd.pm',
+			     ''          => 'ext/Cwd/',
+			     't/'        => 'lib/File/Spec/t/',
+			     't/cwd.t'   => 'ext/Cwd/t/cwd.t',
+			     't/taint.t' => 'ext/Cwd/t/taint.t',
+			     't/win32.t' => 'ext/Cwd/t/win32.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
 	},
@@ -1285,6 +1314,9 @@ package Maintainers;
 	'DISTRIBUTION'	=> 'ELIZABETH/PerlIO-via-QuotedPrint-0.06.tar.gz',
 	'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
 			     lib/PerlIO/via/t/QuotedPrint.t],
+	'MAP'		=> { 'lib/'      => 'lib/',
+			     ''        => 'lib/PerlIO/via/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1352,13 +1384,24 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'tjenness',
 	'DISTRIBUTION'	=> 'TJENNESS/Pod-LaTeX-0.58.tar.gz',
-	'FILES'		=> q[lib/Pod/LaTeX.pm lib/Pod/t/{pod2latex,user}.t],
+	'FILES'		=> q[lib/Pod/LaTeX.pm
+			     lib/Pod/t/{pod2latex,user}.t
+			     pod/pod2latex.PL
+			    ],
+	'EXCLUDED'	=> [ qw( t/require.t ) ],
+	'MAP'		=> { '' => 'lib/Pod/',
+			     'pod2latex.PL' => 'pod/pod2latex.PL',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
 
     'Pod::Parser'	=> {
 	'MAINTAINER'	=> 'marekr',
+
+	# XXX Parser.pm in the 1.38 distribution identifies itself as
+	# version 1.37!
+
 	'DISTRIBUTION'	=> 'MAREKR/Pod-Parser-1.38.tar.gz',
 	'FILES'		=> q[lib/Pod/{Checker,Find,InputObjects,Parser,ParseUtils,PlainText,Select,Usage}.pm
 			     lib/Pod/t/contains_pod.t
@@ -1376,7 +1419,9 @@ package Maintainers;
 			     t/pod/nested_items.*
 			     t/pod/nested_seqs.*
 			     t/pod/oneline_cmds.*
+			     t/pod/p2u_data.pl
 			     t/pod/pod2usage.*
+			     t/pod/pod2usage2.t
 			     t/pod/podchkenc.*
 			     t/pod/poderrs.*
 			     t/pod/podselect.*
@@ -1384,8 +1429,21 @@ package Maintainers;
 			     t/pod/testcmp.pl
 			     t/pod/testp2pt.pl
 			     t/pod/testpchk.pl
+			     t/pod/testpods/
+			     t/pod/twice.t
 			     t/pod/usage*.pod
 			    ],
+	'MAP'		=> { 't/pod/'   => 't/pod/',
+			     'scripts/' => 'pod/',
+				't/pod/contains_pod.t'
+				=> 'lib/Pod/t/contains_pod.t',
+			     # XXX these two dislocations have required
+			     # t/pod/contains_pod.t to be edited to match
+			     
+			     't/pod/contains_pod.xr' => 't/lib/contains_pod.xr',
+			     't/pod/contains_bad_pod.xr'
+				=> 't/lib/contains_bad_pod.xr',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1394,7 +1452,17 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Pod-Perldoc-3.15.tar.gz',
-	'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
+	'FILES'		=> q[lib/Pod/Perldoc.pm
+			     lib/Pod/Perldoc
+			     pod/perldoc.pod
+			    ],
+	# in blead, the perldoc executable is generated by perldoc.PL
+	# instead
+	
+	'EXCLUDED'	=> [ qw( perldoc ) ],
+	'MAP'		=> { 'lib/perldoc.pod' => 'pod/perldoc.pod',
+			     't/'              => 'lib/Pod/Perldoc/t/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1415,6 +1483,11 @@ package Maintainers;
 			     lib/Pod/Simple.pod
 			     lib/Pod/Simple
 			    ],
+	# XXX these two files correspond to similar ones in bleed under
+	# pod/, but the bleed ones have newer changes, and also seem to
+	# have been in blead a long time. I'm going to assume then that
+	# the blead versions of these two files are authoritative - DAPM
+	'EXCLUDED'	=> [ qw( lib/perlpod.pod lib/perlpodspec.pod ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1428,6 +1501,9 @@ package Maintainers;
 			     pod/pod2text.PL
 			     lib/Pod/t/{basic.*,{color,filehandle,man*,parselink,pod-parser,pod-spelling,pod,termcap,text*}.t}
 			    ],
+	'MAP'		=> { 'scripts/' => 'pod/',
+			     't/'       => 'lib/Pod/t/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
