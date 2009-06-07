@@ -26,7 +26,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(3);
+plan(4);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -86,6 +86,12 @@ like($contents, qr/sub factorial/,
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
     like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
+}
+
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
+    my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
+    like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table when running with thread support');
 }
 
 # clean up.
