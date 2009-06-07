@@ -17,11 +17,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 DESCRIPTION
 
@@ -54,11 +54,12 @@ BEGIN {
     @ISA = qw(TAP::Object);
 
     @ATTR = qw(
-      archive argv blib show_count color directives exec failures fork
+      archive argv blib show_count color directives exec failures comments
       formatter harness includes modules plugins jobs lib merge parse quiet
       really_quiet recurse backwards shuffle taint_fail taint_warn timer
       verbose warnings_fail warnings_warn show_help show_man show_version
       state_class test_args state dry extension ignore_exit rules state_manager
+      normalize
     );
     __PACKAGE__->mk_methods(@ATTR);
 }
@@ -132,8 +133,9 @@ sub add_rc_file {
     local *RC;
     open RC, "<$rc_file" or croak "Can't read $rc_file ($!)";
     while ( defined( my $line = <RC> ) ) {
-        push @{ $self->{rc_opts} }, grep $_ && $_ !~ /^#/,
-          $line =~ m{ ' ([^']*) ' | " ([^"]*) " | (\#.*) | (\S*) }xg;
+        push @{ $self->{rc_opts} },
+          grep { defined and not /^#/ }
+          $line =~ m{ ' ([^']*) ' | " ([^"]*) " | (\#.*) | (\S+) }xg;
     }
     close RC;
 }
@@ -201,6 +203,7 @@ sub process_args {
         GetOptions(
             'v|verbose'   => \$self->{verbose},
             'f|failures'  => \$self->{failures},
+            'o|comments'  => \$self->{comments},
             'l|lib'       => \$self->{lib},
             'b|blib'      => \$self->{blib},
             's|shuffle'   => \$self->{shuffle},
@@ -215,7 +218,6 @@ sub process_args {
             'formatter=s' => \$self->{formatter},
             'r|recurse'   => \$self->{recurse},
             'reverse'     => \$self->{backwards},
-            'fork'        => \$self->{fork},
             'p|parse'     => \$self->{parse},
             'q|quiet'     => \$self->{quiet},
             'Q|QUIET'     => \$self->{really_quiet},
@@ -236,6 +238,7 @@ sub process_args {
             't'           => \$self->{taint_warn},
             'W'           => \$self->{warnings_fail},
             'w'           => \$self->{warnings_warn},
+            'normalize'   => \$self->{normalize},
             'rules=s@'    => $self->{rules},
         ) or croak('Unable to continue');
 
@@ -272,7 +275,7 @@ sub _help {
 sub _color_default {
     my $self = shift;
 
-    return -t STDOUT && !IS_WIN32;
+    return -t STDOUT && !$ENV{HARNESS_NOTTY} && !IS_WIN32;
 }
 
 sub _get_args {
@@ -297,10 +300,6 @@ sub _get_args {
 
     if ( my $jobs = $self->jobs ) {
         $args{jobs} = $jobs;
-    }
-
-    if ( my $fork = $self->fork ) {
-        $args{fork} = $fork;
     }
 
     if ( my $harness_opt = $self->harness ) {
@@ -340,7 +339,7 @@ sub _get_args {
 
     $args{verbosity} = shift @verb_adj || 0;
 
-    for my $a (qw( merge failures timer directives )) {
+    for my $a (qw( merge failures comments timer directives normalize )) {
         $args{$a} = 1 if $self->$a();
     }
 
@@ -629,7 +628,7 @@ calling C<run>.
 
 =item C<failures>
 
-=item C<fork>
+=item C<comments>
 
 =item C<formatter>
 

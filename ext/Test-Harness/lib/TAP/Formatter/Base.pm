@@ -15,8 +15,10 @@ BEGIN {
     %VALIDATION_FOR = (
         directives => sub { shift; shift },
         verbosity  => sub { shift; shift },
+        normalize  => sub { shift; shift },
         timer      => sub { shift; shift },
         failures   => sub { shift; shift },
+        comments   => sub { shift; shift },
         errors     => sub { shift; shift },
         color      => sub { shift; shift },
         jobs       => sub { shift; shift },
@@ -45,11 +47,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 DESCRIPTION
 
@@ -132,7 +134,11 @@ Append run time for each test to output. Uses L<Time::HiRes> if available.
 
 =item * C<failures>
 
-Only show test failures (this is a no-op if C<verbose> is selected).
+Show test failures (this is a no-op if C<verbose> is selected).
+
+=item * C<comments>
+
+Show test comments (this is a no-op if C<verbose> is selected).
 
 =item * C<quiet>
 
@@ -157,7 +163,7 @@ true:
 =item * C<directives>
 
 If set to a true value, only test results with directives will be displayed.
-This overrides other settings such as C<verbose> or C<failures>.
+This overrides other settings such as C<verbose>, C<failures>, or C<comments>.
 
 =item * C<stdout>
 
@@ -242,6 +248,11 @@ sub open_test {
     die "Unimplemented.";
 }
 
+sub _output_success {
+    my ( $self, $msg ) = @_;
+    $self->_output($msg);
+}
+
 =head3 C<summary>
 
   $harness->summary( $aggregate );
@@ -272,7 +283,7 @@ sub summary {
     # the exit status is nonzero
 
     if ( $aggregate->all_passed ) {
-        $self->_output("All tests successful.\n");
+        $self->_output_success("All tests successful.\n");
     }
 
     # ~TODO option where $aggregate->skipped generates reports

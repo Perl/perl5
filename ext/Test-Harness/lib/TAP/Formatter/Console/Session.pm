@@ -28,11 +28,11 @@ TAP::Formatter::Console::Session - Harness output delegate for default console o
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 DESCRIPTION
 
@@ -71,11 +71,11 @@ sub _get_output_result {
                 last;
             }
         }
-        $formatter->_output( $result->as_string );
+        $formatter->_output( $self->_format_for_output($result) );
         $formatter->_set_colors('reset');
       }
       : sub {
-        $formatter->_output( shift->as_string );
+        $formatter->_output( $self->_format_for_output(shift) );
       };
 }
 
@@ -92,6 +92,7 @@ sub _closures {
     my $verbose      = $formatter->verbose;
     my $directives   = $formatter->directives;
     my $failures     = $formatter->failures;
+    my $comments     = $formatter->comments;
 
     my $output_result = $self->_get_output_result;
 
@@ -146,9 +147,10 @@ sub _closures {
             }
 
             if (!$quiet
-                && (   ( $verbose && !$failures )
+                && (   $verbose
                     || ( $is_test && $failures && !$result->is_ok )
-                    || ( $result->has_directive && $directives ) )
+                    || ( $comments   && $result->is_comment )
+                    || ( $directives && $result->has_directive ) )
               )
             {
                 unless ($newline_printed) {

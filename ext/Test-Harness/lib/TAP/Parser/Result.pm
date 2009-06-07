@@ -26,11 +26,11 @@ TAP::Parser::Result - Base class for TAP::Parser output objects
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 SYNOPSIS
 

@@ -25,11 +25,11 @@ TAP::Formatter::Session - Abstract base class for harness output delegate
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 METHODS
 
@@ -113,7 +113,15 @@ sub clear_for_close { }
 
 sub _should_show_count {
     my $self = shift;
-    return !$self->formatter->verbose && -t $self->formatter->stdout;
+    return
+         !$self->formatter->verbose
+      && -t $self->formatter->stdout
+      && !$ENV{HARNESS_NOTTY};
+}
+
+sub _format_for_output {
+    my ( $self, $result ) = @_;
+    return $self->formatter->normalize ? $result->as_string : $result->raw;
 }
 
 sub _output_test_failure {

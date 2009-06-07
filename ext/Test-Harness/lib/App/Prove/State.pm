@@ -26,11 +26,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 DESCRIPTION
 
@@ -146,7 +146,13 @@ sub commit {
 
 =head3 C<apply_switch>
 
-Apply a list of switch options to the state.
+ $self->apply_switch('failed,save');
+
+Apply a list of switch options to the state, updating the internal
+object state as a result. Nothing is returned.
+
+Diagnostics:
+    - "Illegal state option: %s"
 
 =over
 
@@ -271,6 +277,7 @@ sub apply_switch {
           || croak "Illegal state option: $opt";
         $code->($arg);
     }
+    return;
 }
 
 sub _select {
