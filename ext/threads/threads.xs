@@ -137,6 +137,9 @@ S_block_most_signals(sigset_t *oldmask)
 #ifdef WIN32
     /* XXX: How to do this on win32? */
     return 0;
+#elif defined(VMS)
+    /* no per-thread blocking available */
+    return sigprocmask(SIG_BLOCK, &newmask, oldmask);
 #else
     return pthread_sigmask(SIG_BLOCK, &newmask, oldmask);
 #endif /* WIN32 */
@@ -149,6 +152,8 @@ S_set_sigmask(sigset_t *newmask)
 #ifdef WIN32
     /* XXX: How to do this on win32? */
     return 0;
+#elif defined(VMS)
+    return sigprocmask(SIG_SETMASK, newmask, NULL);
 #else
     return pthread_sigmask(SIG_SETMASK, newmask, NULL);
 #endif /* WIN32 */
