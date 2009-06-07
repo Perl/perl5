@@ -14,11 +14,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 DESCRIPTION
 
@@ -68,6 +68,13 @@ sub _set_colors {
         };
         $colorizer->set_color( $output_func, $_ ) for @colors;
     }
+}
+
+sub _output_success {
+    my ( $self, $msg ) = @_;
+    $self->_set_colors('green');
+    $self->_output($msg);
+    $self->_set_colors('reset');
 }
 
 sub _failure_output {

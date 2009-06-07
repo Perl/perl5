@@ -14,18 +14,16 @@ and L<TAP::Harness>
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
-my $GOT_TIME_HIRES;
-
-BEGIN {
+use constant GOT_TIME_HIRES => do {
     eval 'use Time::HiRes qw(time);';
-    $GOT_TIME_HIRES = $@ ? 0 : 1;
-}
+    $@ ? 0 : 1;
+};
 
 =head1 SYNOPSIS
 
@@ -126,6 +124,6 @@ Return true if the time returned by get_time is high resolution (i.e. if Time::H
 
 =cut
 
-sub time_is_hires { return $GOT_TIME_HIRES }
+sub time_is_hires { return GOT_TIME_HIRES }
 
 1;

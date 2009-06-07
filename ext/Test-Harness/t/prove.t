@@ -1009,6 +1009,26 @@ BEGIN {    # START PLAN
             ],
         },
 
+        # .proverc
+        {   name => 'Empty exec in .proverc',
+            args => {
+                argv => [qw( one two three )],
+            },
+            proverc  => $ENV{PERL_CORE} ? '../ext/Test-Harness/t/proverc/emptyexec' : 't/proverc/emptyexec',
+            switches => [$dummy_test],
+            expect   => { exec => '' },
+            runlog   => [
+                [   '_runtests',
+                    {   exec       => [],
+                        verbosity  => 0,
+                        show_count => 1,
+                    },
+                    'TAP::Harness',
+                    $dummy_test
+                ]
+            ],
+        },
+
         # Executing one word (why would it be a -s though?)
         {   name => 'Switch --exec -s',
             args => {
@@ -1442,6 +1462,9 @@ for my $test (@SCHEDULE) {
 
     # Optionally parse command args
     if ( my $switches = $test->{switches} ) {
+        if ( my $proverc = $test->{proverc} ) {
+            $app->add_rc_file( File::Spec->catfile( split /\//, $proverc ) );
+        }
         eval { $app->process_args( '--norc', @$switches ) };
         if ( my $err_pattern = $test->{parse_error} ) {
             like $@, $err_pattern, "$name: expected parse error";
@@ -1453,9 +1476,12 @@ for my $test (@SCHEDULE) {
 
     my $expect = $test->{expect} || {};
     for my $attr ( sort @ATTR ) {
-        my $val       = $app->$attr();
-        my $assertion = $expect->{$attr} || $DEFAULT_ASSERTION{$attr};
-        my $is_ok     = undef;
+        my $val = $app->$attr();
+        my $assertion
+          = exists $expect->{$attr}
+          ? $expect->{$attr}
+          : $DEFAULT_ASSERTION{$attr};
+        my $is_ok = undef;
 
         if ( 'CODE' eq ref $assertion ) {
             $is_ok = ok $assertion->( $val, $attr ),

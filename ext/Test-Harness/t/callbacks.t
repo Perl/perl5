@@ -68,7 +68,8 @@ my $end  = 0;
         $plan_output = $plan->as_string;
     },
     EOF => sub {
-        $end = 1 if $all == 8;
+        my $p = shift;
+        $end = 1 if $all == 8 and $p->isa('TAP::Parser');
     },
     ELSE => sub {
         $else++;

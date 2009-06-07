@@ -15,11 +15,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 SYNOPSIS
 
@@ -105,7 +105,7 @@ my %language_for;
                     $skip = 'SKIP';
 
                     # If we can't match # SKIP the directive should be undef.
-                    ($explanation) = $tail =~ /^#\s*SKIP\s+(.*)/i;
+                    ($explanation) = $tail =~ /^#\s*SKIP\S*\s+(.*)/i;
                 }
                 elsif ( $tail !~ /^\s*$/ ) {
                     return $self->_make_unknown_token($line);

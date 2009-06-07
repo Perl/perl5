@@ -9,11 +9,11 @@ TAP::Object - Base class that provides common functionality to all C<TAP::*> mod
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 =head1 SYNOPSIS
 

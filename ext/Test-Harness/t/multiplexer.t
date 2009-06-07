@@ -84,7 +84,7 @@ my @schedule = (
                         {   source => File::Spec->catfile(
                                 (   $ENV{PERL_CORE}
                                     ? ( File::Spec->updir(), 'ext',
-                                	'Test-Harness'
+                                        'Test-Harness'
                                       )
                                     : ()
                                 ),

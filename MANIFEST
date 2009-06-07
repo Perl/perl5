@@ -1290,6 +1290,7 @@ ext/Test-Harness/t/compat/inc-propagation.t		Test::Harness test
 ext/Test-Harness/t/compat/inc_taint.t			Test::Harness test
 ext/Test-Harness/t/compat/nonumbers.t			Test::Harness test
 ext/Test-Harness/t/compat/regression.t			Test::Harness test
+ext/Test-Harness/t/compat/switches.t			Test::Harness test
 ext/Test-Harness/t/compat/test-harness-compat.t		Test::Harness test
 ext/Test-Harness/t/compat/version.t			Test::Harness test
 ext/Test-Harness/t/console.t				Test::Harness test
@@ -1331,6 +1332,7 @@ ext/Test-Harness/t/perl5lib.t				Test::Harness test
 ext/Test-Harness/t/premature-bailout.t			Test::Harness test
 ext/Test-Harness/t/process.t				Test::Harness test
 ext/Test-Harness/t/proveenv.t				Test::Harness test
+ext/Test-Harness/t/proverc/emptyexec			Test data for Test::Harness
 ext/Test-Harness/t/proverc.t				Test::Harness test
 ext/Test-Harness/t/proverun.t				Test::Harness test
 ext/Test-Harness/t/prove.t				Test::Harness test
@@ -1390,6 +1392,7 @@ ext/Test-Harness/t/sample-tests/version_late		Test data for Test::Harness
 ext/Test-Harness/t/sample-tests/version_old		Test data for Test::Harness
 ext/Test-Harness/t/sample-tests/vms_nit			Test data for Test::Harness
 ext/Test-Harness/t/sample-tests/with_comments		Test data for Test::Harness
+ext/Test-Harness/t/sample-tests/zero_valid		Test data for Test::Harness
 ext/Test-Harness/t/scheduler.t				Test::Harness test
 ext/Test-Harness/t/source.t				Test::Harness test
 ext/Test-Harness/t/source_tests/harness			Test data for Test::Harness
