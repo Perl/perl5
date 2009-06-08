@@ -284,7 +284,7 @@ package Maintainers;
     'Compress::Raw::Bzip2' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Bzip2-2.019.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Bzip2-2.020.tar.gz',
 	'FILES'		=> q[ext/Compress-Raw-Bzip2],
 	'EXCLUDED'	=> [ qr{^t/Test/},
 			     # NB: we use the CompTestUtils.pm
@@ -300,7 +300,7 @@ package Maintainers;
     'Compress::Raw::Zlib' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Zlib-2.019.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Zlib-2.020.tar.gz',
 
 	'FILES'		=> q[ext/Compress-Raw-Zlib],
 			     # NB: we use the CompTestUtils.pm
@@ -427,7 +427,7 @@ package Maintainers;
     'CPANPLUS::Dist::Build' =>
 	{
 	'MAINTAINER'	=> 'bingos',
-	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.30.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.32.tar.gz',
 	'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm
 			     lib/CPANPLUS/Dist/Build
 			    ],
@@ -639,7 +639,7 @@ package Maintainers;
     'ExtUtils::MakeMaker' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.52.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.53_02.tar.gz',
 			    # note that t/lib/TieOut.pm is included in
 			    # more than one distro
 	'FILES'		=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
@@ -847,7 +847,7 @@ package Maintainers;
     'IO-Compress' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.019.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.020.tar.gz',
 	'FILES'		=> q[ext/IO-Compress t/lib/compress ],
 	'EXCLUDED'	=> [ qr{t/Test/},
 			     qw{t/cz-03zlib-v1.t},
@@ -1251,7 +1251,7 @@ package Maintainers;
     'Parse::CPAN::Meta' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'ADAMK/Parse-CPAN-Meta-1.38.tar.gz',
+	'DISTRIBUTION'	=> 'ADAMK/Parse-CPAN-Meta-1.39.tar.gz',
 	'FILES'		=> q[lib/Parse/CPAN/Meta.pm
 			     lib/Parse/CPAN/Meta
 			     t/lib/Parse/CPAN/Meta/Test.pm
@@ -1659,7 +1659,7 @@ package Maintainers;
     'Test::Harness' =>
 	{
 	'MAINTAINER'	=> 'andya',
-	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.16.tar.gz',
+	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.17.tar.gz',
 	'FILES'		=> q[ext/Test-Harness],
 	'EXCLUDED'	=> [ qr{^examples/},
 			     qr{^inc/},
@@ -1735,6 +1735,7 @@ package Maintainers;
 	'EXCLUDED'	=> [ qw( t/pod-coverage.t t/pod.t ) ],
 	'MAP'		=> { ''            => 'lib/Text/Balanced/',
 	                     'lib/'        => 'lib/',
+			     # VMS doesn't like multiple dots?
 	                     't/00.load.t' => 'lib/Text/Balanced/t/00-load.t',
 			   },
 	'CPAN'		=> 1,
@@ -1861,6 +1862,10 @@ package Maintainers;
 	'MAINTAINER'	=> 'drolsky',
 	'DISTRIBUTION'	=> 'DROLSKY/Time-Local-1.1901.tar.gz',
 	'FILES'		=> q[lib/Time/Local.{pm,t}],
+	'EXCLUDED'	=> [ qw(t/pod-coverage.t t/pod.t) ],
+	'MAP'		=> { 'lib/' => 'lib/',
+	                     't/'   => 'lib/Time/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1881,6 +1886,14 @@ package Maintainers;
 	'FILES'		=> q[lib/Unicode/Collate.pm
 			     lib/Unicode/Collate
 			    ],
+			    # ignore experimental XS version
+	'EXCLUDED'	=> [ qr{X$},
+			     qw{disableXS enableXS }
+			   ],
+	'MAP'		=> { ''           => 'lib/Unicode/Collate/',
+	                     'Collate.pm' => 'lib/Unicode/Collate.pm',
+	                     'Collate/'   => 'lib/Unicode/Collate/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'first-come',
 	},
@@ -1888,8 +1901,9 @@ package Maintainers;
     'Unicode::Normalize' =>
 	{
 	'MAINTAINER'	=> 'sadahiro',
-	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Normalize-1.02.tar.gz',
+	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Normalize-1.03.tar.gz',
 	'FILES'		=> q[ext/Unicode-Normalize],
+	'EXCLUDED'	=> [ qw{MANIFEST.N Normalize.pmN disableXS enableXS }],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'first-come',
 	},
@@ -1899,6 +1913,13 @@ package Maintainers;
 	'MAINTAINER'	=> 'jpeacock',
 	'DISTRIBUTION'	=> 'JPEACOCK/version-0.76.tar.gz',
 	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t],
+	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qr{^vutil/},
+			     qw{lib/version/typemap},
+			     qw{vperl/vpp.pm},
+			   ],
+	'MAP'		=> { 'lib/'	      => 'lib/',
+			     't/coretests.pm' => 'lib/version.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1945,6 +1966,9 @@ package Maintainers;
 	'MAINTAINER'	=> 'tyemq',
 	'DISTRIBUTION'	=> 'CHORNY/Win32API-File-0.1101.zip',
 	'FILES'		=> q[ext/Win32API-File],
+	'EXCLUDED'	=> [ qr{^ex/},
+			     qw{t/pod.t},
+			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1956,6 +1980,12 @@ package Maintainers;
 	'FILES'		=> q[ext/DynaLoader/t/XSLoader.t
 			     ext/DynaLoader/XSLoader_pm.PL
 			    ],
+	'EXCLUDED'	=> [ qr{^eg/},
+			     qw{t/pod.t
+			        t/podcover.t
+				t/portfs.t
+				XSLoader.pm}, # we use XSLoader_pm.PL
+			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
