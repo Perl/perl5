@@ -3,6 +3,13 @@
 # Test that we can build modules as miniperl.
 # This mostly means no XS modules.
 
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+        chdir 't' if -d 't';
+        @INC = qw(../lib lib);
+    }
+}
+
 use strict;
 use lib 't/lib';
 
