@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.52';
+our $VERSION = '6.53_02';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -413,6 +413,10 @@ Normalize all arguments for consistency of comparison.
 
 sub arch_check {
     my $self = shift;
+
+    # Win32 is an XS module, minperl won't have it.
+    # arch_check() is not critical, so just fake it.
+    return 1 unless $self->can_load_xs;
 
     require Win32;
     return $self->SUPER::arch_check( map { lc Win32::GetShortPathName($_) } @_);

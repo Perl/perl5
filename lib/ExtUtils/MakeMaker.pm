@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.52';
+our $VERSION = '6.53_02';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -123,7 +123,7 @@ sub _verify_att {
 
         my @sigs   = ref $sig ? @$sig : $sig;
         my $given  = ref $val;
-        unless( grep { $given eq $_ || ($_ && eval{$val->isa($_)}) } @sigs ) {
+        unless( grep { _is_of_type($val, $_) } @sigs ) {
             my $takes = join " or ", map { _format_att($_) } @sigs;
 
             my $has = _format_att($given);
@@ -131,6 +131,19 @@ sub _verify_att {
                  "         Please inform the author.\n";
         }
     }
+}
+
+
+# Check if a given thing is a reference or instance of $type
+sub _is_of_type {
+    my($thing, $type) = @_;
+
+    return 1 if ref $thing eq $type;
+
+    local $SIG{__DIE__};
+    return 1 if eval{ $thing->isa($type) };
+
+    return 0;
 }
 
 

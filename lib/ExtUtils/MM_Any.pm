@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.52';
+our $VERSION = '6.53_02';
 
 use Carp;
 use File::Spec;
@@ -106,6 +106,22 @@ sub os_flavor_is {
     my $self = shift;
     my %flavors = map { ($_ => 1) } $self->os_flavor;
     return (grep { $flavors{$_} } @_) ? 1 : 0;
+}
+
+
+=head3 can_load_xs
+
+    my $can_load_xs = $self->can_load_xs;
+
+Returns true if we have the ability to load XS.
+
+This is important because miniperl, used to build XS modules in the
+core, can not load XS.
+
+=cut
+
+sub can_load_xs {
+    return defined &DynaLoader::boot_DynaLoader ? 1 : 0;
 }
 
 
@@ -1773,15 +1789,9 @@ CODE
 
     $self->{LD_RUN_PATH} = "";
 
+    $self->{LIBS} = $self->_fix_libs($self->{LIBS});
+
     # Compute EXTRALIBS, BSLOADLIBS and LDLOADLIBS from $self->{LIBS}
-    # Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
-    # undefined. In any case we turn it into an anon array:
-
-    # May check $Config{libs} too, thus not empty.
-    $self->{LIBS} = [$self->{LIBS}] unless ref $self->{LIBS};
-
-    $self->{LIBS} = [''] unless @{$self->{LIBS}} && defined $self->{LIBS}[0];
-
     foreach my $libs ( @{$self->{LIBS}} ){
         $libs =~ s/^\s*(.*\S)\s*$/$1/; # remove leading and trailing whitespace
         my(@libs) = $self->extliblist($libs);
@@ -1817,6 +1827,18 @@ CODE
     }
 
     return 1;
+}
+
+
+# Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
+# undefined. In any case we turn it into an anon array
+sub _fix_libs {
+    my($self, $libs) = @_;
+
+    return !defined $libs       ? ['']          : 
+           !ref $libs           ? [$libs]       :
+           !defined $libs->[0]  ? ['']          :
+                                  $libs         ;
 }
 
 

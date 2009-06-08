@@ -1,12 +1,5 @@
 #!/usr/bin/perl -w
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = qw(../lib lib);
-    }
-}
-
 use strict;
 use lib 't/lib';
 
@@ -52,8 +45,9 @@ if you have problems building this extension.
 
 # Different file path separators [rt.cpan.org 46416]
 SKIP: {
-    skip "Can't load File::Spec::Win32" unless eval "require File::Spec::Win32";
-    local @File::Spec::ISA = qw(File::Spec::Win32);
+    require File::Spec;
+    skip "Win32 test", 1 unless File::Spec->isa("File::Spec::Win32");
+
     ok $mm->arch_check(
         "/_64/perl1004/lib/Config.pm",
         '\\_64\\perl1004\\lib\\Config.pm',
@@ -63,6 +57,9 @@ SKIP: {
 
 # PERL_SRC is set, no check is done
 {
+    # Clear our log
+    $stdout->read;
+
     local $mm->{PERL_SRC} = 1;
     ok $mm->arch_check(
       $rel2abs->(qw(. t testdata reallylongdirectoryname arch1 Config.pm)),

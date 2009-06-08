@@ -1,7 +1,49 @@
+6.53_02  Sun Jun  7 19:24:56 PDT 2009
+    Test Fixes
+    * Stray use of Shell::Command broke older perls
+
+    Other
+    * MakeMaker will now automatically test itself with multiple
+      perl versions before releasing.
+
+
+6.53_01  Sun Jun  7 19:02:20 PDT 2009
+    Bug Fixes
+    * blib will now be rebuilt if the Makefile is changed
+      [rt.cpan.org 46658]
+    * 6.52 broke the setting of EXTRALIBS, LDLOADLIBS and BSLOADLIBS
+      when $self->{LIBS}[0] is undefined.
+      [rt.cpan.org 46633] (Craig Berry)
+
+    Cygwin
+    * Fixed MM_Cygwin.t when the path prefix (ie. cygdrive) has been
+      changed by the user. [rt.cpan.org 46585] (JDHEDDEN)
+
+    VMS
+    * Removed attempts to compensate for the "bin" logical added
+      by some versions of GNV, Craig says they're futile.
+      Put a warning into the Makefile.PL instead.
+      [rt.cpan.org 46679] (Craig Berry)
+    * Removed the arch_check() special case for VMS.
+      [rt.cpan.org 46678] (Craig Berry)
+
+    Win32
+    * Restore building the core by not trying to load the Win32
+      module in arch_check() with miniperl.
+      [rt.cpan.org 46667] (Max Maischein)
+
+    Tests
+    * Forgot to get rid of the tests for bytes and vmsish
+      which were removed in 6.51_01.
+    * Stopped running a Windows specific arch_check.t test
+      on non-Windows. (Craig Berry)
+      [rt.cpan.org 46678]
+
+
 6.52  Sat May 30 11:22:04 PDT 2009
     Docs
     * Documented CONFIGURE_REQUIRES (Alexandr Ciornii)
-    * Modnerized the docs for PREREQ_PM
+    * Modernized the docs for PREREQ_PM
 
 
 6.51_04  Sun May 24 14:04:11 PDT 2009
