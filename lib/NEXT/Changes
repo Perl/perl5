@@ -1,5 +1,9 @@
 Revision history for Perl extension NEXT.pm.
 
+0.64    Mon Jun  8 14:36:00 2009
+    - Fixed overwriting dynamically scoped regex vars (Norbert Buchmuller,
+      Closes RT#36956).
+
 0.63    Fri Apr 10 16:52:44 2009
     - Specify plans for all tests (Jarkko Hietaniemi). Merged from blead
       perl (Florian Ragwitz).
