@@ -532,14 +532,6 @@ package Maintainers;
 	'UPSTREAM'	=> undef,
 	},
 
-    'Errno' =>
-	{
-	'MAINTAINER'	=> 'p5p', # Not gbarr.
-	'FILES'		=> q[ext/Errno],
-	'CPAN'		=> 0,
-	'UPSTREAM'	=> undef,
-	},
-
     'Exporter' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
@@ -2048,6 +2040,7 @@ package Maintainers;
 				ext/DynaLoader/
 				    !ext/DynaLoader/t/XSLoader.t
 				    !ext/DynaLoader/XSLoader_pm.PL
+				ext/Errno
 				ext/Fcntl/
 				ext/File-Glob/
 				ext/GDBM_File/
