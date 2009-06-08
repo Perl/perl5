@@ -36,7 +36,7 @@ package Maintainers;
     'ilyaz'	=> 'Ilya Zakharevich <ilyaz@cpan.org>',
     'jand'	=> 'Jan Dubois <jand@activestate.com>',
     'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
-    'jesse'   	=> 'Jesse Vincent <jesse@cpan.org>',
+    'jesse'   	=> 'Jesse Vincent <jesse@bestpractical.com>',
     'jhi'	=> 'Jarkko Hietaniemi <jhi@cpan.org>',
     'jjore'	=> 'Joshua ben Jore <jjore@cpan.org>',
     'jpeacock'	=> 'John Peacock <jpeacock@rowman.com>',
@@ -1366,7 +1366,7 @@ package Maintainers;
 
     'Pod::Escapes' =>
 	{
-	'MAINTAINER'	=> 'sburke',
+	'MAINTAINER'	=> 'arandal',
 	'DISTRIBUTION'	=> 'SBURKE/Pod-Escapes-1.04.tar.gz',
 	'FILES'		=> q[lib/Pod/Escapes.pm lib/Pod/Escapes],
 	'CPAN'		=> 1,
@@ -1643,10 +1643,10 @@ package Maintainers;
     'Test' =>
 	{
 	'MAINTAINER'	=> 'jesse',
-	'DISTRIBUTION'	=> 'SBURKE/Test-1.25.tar.gz',
+	'DISTRIBUTION'	=> 'JESSE/Test-1.25_02.tar.gz',
 	'FILES'		=> q[lib/Test.pm lib/Test/t],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Test::Harness' =>
