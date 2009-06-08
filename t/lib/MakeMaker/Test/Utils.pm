@@ -7,8 +7,6 @@ use Config;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = 0.04;
-
 our $Is_VMS   = $^O eq 'VMS';
 our $Is_MacOS = $^O eq 'MacOS';
 
@@ -17,6 +15,7 @@ our @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
                  setup_mm_test_root
                  have_compiler slurp
                  $Is_VMS $Is_MacOS
+                 run_ok
                 );
 
 
@@ -29,6 +28,9 @@ our @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
         HARNESS_TIMER
         HARNESS_OPTIONS
         HARNESS_VERBOSE
+        PREFIX
+        LIB
+        MAKEFLAGS
     );
 
     # Remember the ENV values because on VMS %ENV is global
@@ -299,6 +301,27 @@ sub run {
     else {
         return `$cmd`;
     }
+}
+
+
+=item B<run_ok>
+
+  my @out = run_ok($cmd);
+
+Like run() but it tests that the result exited normally.
+
+The output from run() will be used as a diagnostic if it fails.
+
+=cut
+
+sub run_ok {
+    my $tb = Test::Builder->new;
+
+    my @out = run(@_);
+
+    $tb->cmp_ok( $?, '==', 0, "run(@_)" ) || $tb->diag(@out);
+
+    return wantarray ? @out : join "", @out;
 }
 
 =item B<setup_mm_test_root>

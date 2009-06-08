@@ -2238,6 +2238,7 @@ lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
+lib/ExtUtils/t/fix_libs.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/hints.t		See if hint files are honored.
 lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
@@ -2245,6 +2246,7 @@ lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
+lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
@@ -2252,6 +2254,7 @@ lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
 lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
 lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
+lib/ExtUtils/t/miniperl.t	Test MakeMaker with miniperl
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -2267,6 +2270,7 @@ lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
 lib/ExtUtils/t/pm.t		See if MakeMaker can handle PM
+lib/ExtUtils/t/pm_to_blib.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/pod2man.t	See if MakeMaker can handle no pod2man
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
@@ -4033,6 +4037,7 @@ t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/MPV.pm	MakeMaker test utilities
+t/lib/MakeMaker/Test/NoXS.pm		MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities

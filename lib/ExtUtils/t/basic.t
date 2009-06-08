@@ -24,15 +24,8 @@ use File::Find;
 use File::Spec;
 use File::Path;
 
-# 'make disttest' sets a bunch of environment variables which interfere
-# with our testing.
-delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
-
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
-
-# GNV logical interferes with testing
-local $ENV{'bin'} = '[.bin]' if $Is_VMS;
 
 chdir 't';
 
