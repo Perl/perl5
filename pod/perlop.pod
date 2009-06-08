@@ -783,10 +783,17 @@ In list context, it's just the list argument separator, and inserts
 both its arguments into the list.  These arguments are also evaluated
 from left to right.
 
-The C<< => >> operator is a synonym for the comma, but forces any word
-(consisting entirely of word characters) to its left to be interpreted
-as a string (as of 5.001).  This includes words that might otherwise be
-considered a constant or function call.
+The C<< => >> operator is a synonym for the comma except that it causes
+its left operand to be interpreted as a string if it begins with a letter
+or underscore and is composed only of letters, digits and underscores.
+This includes operands that might otherwise be interpreted as operators,
+constants, single number v-strings or function calls. If in doubt about
+this behaviour, the left operand can be quoted explicitly.
+
+Otherwise, the C<< => >> operator behaves exactly as the comma operator
+or list argument separator, according to context.
+
+For example:
 
     use constant FOO => "something";
 
@@ -799,9 +806,6 @@ is equivalent to:
 It is I<NOT>:
 
     my %h = ("something", 23);
-
-If the argument on the left is not a word, it is first interpreted as
-an expression, and then the string value of that is used.
 
 The C<< => >> operator is helpful in documenting the correspondence
 between keys and values in hashes, and other paired elements in lists.
