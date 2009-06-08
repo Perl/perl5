@@ -36,6 +36,7 @@ package Maintainers;
     'ilyaz'	=> 'Ilya Zakharevich <ilyaz@cpan.org>',
     'jand'	=> 'Jan Dubois <jand@activestate.com>',
     'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
+    'jesse'   	=> 'Jesse Vincent <jesse@cpan.org>',
     'jhi'	=> 'Jarkko Hietaniemi <jhi@cpan.org>',
     'jjore'	=> 'Joshua ben Jore <jjore@cpan.org>',
     'jpeacock'	=> 'John Peacock <jpeacock@rowman.com>',
@@ -1641,7 +1642,7 @@ package Maintainers;
 
     'Test' =>
 	{
-	'MAINTAINER'	=> 'sburke',
+	'MAINTAINER'	=> 'jesse',
 	'DISTRIBUTION'	=> 'SBURKE/Test-1.25.tar.gz',
 	'FILES'		=> q[lib/Test.pm lib/Test/t],
 	'CPAN'		=> 1,
