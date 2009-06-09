@@ -6,6 +6,10 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.122 (Jun  9 2009)
+
+Promote previous developer release to stable release.
+
 =item 2.121_20 (Jun  6 2009)
 
 - A host of bug fixes and improvements that have
