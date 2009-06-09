@@ -142,7 +142,7 @@ S_block_most_signals(sigset_t *oldmask)
     return sigprocmask(SIG_BLOCK, &newmask, oldmask);
 #else
     return pthread_sigmask(SIG_BLOCK, &newmask, oldmask);
-#endif /* WIN32 */
+#endif /* VMS */
 }
 
 /* Set the signal mask for this thread to newmask */
@@ -153,9 +153,9 @@ S_set_sigmask(sigset_t *newmask)
     return sigprocmask(SIG_SETMASK, newmask, NULL);
 #else
     return pthread_sigmask(SIG_SETMASK, newmask, NULL);
-#endif /* WIN32 */
+#endif /* VMS */
 }
-#endif
+#endif /* WIN32 */
 
 /* Used by Perl interpreter for thread context switching */
 STATIC void
@@ -184,7 +184,9 @@ STATIC void
 S_ithread_clear(pTHX_ ithread *thread)
 {
     PerlInterpreter *interp;
+#ifndef WIN32
     sigset_t origmask;
+#endif
 
     assert(((thread->state & PERL_ITHR_FINISHED) &&
             (thread->state & PERL_ITHR_UNCALLABLE))
