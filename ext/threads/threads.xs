@@ -75,7 +75,9 @@ typedef struct _ithread {
     IV stack_size;
     SV *err;                    /* Error from abnormally terminated thread */
     char *err_class;            /* Error object's classname if applicable */
+#ifndef WIN32
     sigset_t initial_sigmask;   /* Thread wakes up with signals blocked */
+#endif
 } ithread;
 
 
@@ -115,6 +117,7 @@ typedef struct {
 
 #define MY_POOL (*my_poolp)
 
+#ifndef WIN32
 /* Block most signals for calling thread, setting the old signal mask to
  * oldmask, if it is not NULL */
 STATIC int
@@ -134,10 +137,7 @@ S_block_most_signals(sigset_t *oldmask)
     sigdelset(&newmask, SIGSEGV);
 #endif
 
-#ifdef WIN32
-    /* XXX: How to do this on win32? */
-    return 0;
-#elif defined(VMS)
+#if defined(VMS)
     /* no per-thread blocking available */
     return sigprocmask(SIG_BLOCK, &newmask, oldmask);
 #else
@@ -149,15 +149,13 @@ S_block_most_signals(sigset_t *oldmask)
 STATIC int
 S_set_sigmask(sigset_t *newmask)
 {
-#ifdef WIN32
-    /* XXX: How to do this on win32? */
-    return 0;
-#elif defined(VMS)
+#if defined(VMS)
     return sigprocmask(SIG_SETMASK, newmask, NULL);
 #else
     return pthread_sigmask(SIG_SETMASK, newmask, NULL);
 #endif /* WIN32 */
 }
+#endif
 
 /* Used by Perl interpreter for thread context switching */
 STATIC void
@@ -193,11 +191,13 @@ S_ithread_clear(pTHX_ ithread *thread)
                 ||
            (thread->state & PERL_ITHR_NONVIABLE));
 
+#ifndef WIN32
     /* We temporarily set the interpreter context to the interpreter being
      * destroyed.  It's in no condition to handle signals while it's being
      * taken apart.
      */
     S_block_most_signals(&origmask);
+#endif
 
     interp = thread->interp;
     if (interp) {
@@ -220,7 +220,9 @@ S_ithread_clear(pTHX_ ithread *thread)
     }
 
     PERL_SET_CONTEXT(aTHX);
+#ifndef WIN32
     S_set_sigmask(&origmask);
+#endif
 }
 
 
@@ -467,10 +469,12 @@ S_ithread_run(void * arg)
     PERL_SET_CONTEXT(thread->interp);
     S_ithread_set(aTHX_ thread);
 
+#ifndef WIN32
     /* Thread starts with most signals blocked - restore the signal mask from
      * the ithread struct.
      */
     S_set_sigmask(&thread->initial_sigmask);
+#endif
 
     PL_perl_destruct_level = 2;
 
@@ -505,11 +509,13 @@ S_ithread_run(void * arg)
         }
         JMPENV_POP;
 
+#ifndef WIN32
         /* The interpreter is finished, so this thread can stop receiving
          * signals.  This way, our signal handler doesn't get called in the
          * middle of our parent thread calling perl_destruct()...
          */
         S_block_most_signals(NULL);
+#endif
 
         /* Remove args from stack and put back in params array */
         SPAGAIN;
@@ -723,6 +729,7 @@ S_ithread_create(
     PL_srand_called = FALSE;   /* Set it to false so we can detect if it gets
                                   set during the clone */
 
+#ifndef WIN32
     /* perl_clone() will leave us the new interpreter's context.  This poses
      * two problems for our signal handler.  First, it sets the new context
      * before the new interpreter struct is fully initialized, so our signal
@@ -741,6 +748,7 @@ S_ithread_create(
      * the original mask.
      */
     S_block_most_signals(&thread->initial_sigmask);
+#endif
 
 #ifdef WIN32
     thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE | CLONEf_CLONE_HOST);
@@ -856,10 +864,12 @@ S_ithread_create(
 #  endif
         }
 
+#ifndef WIN32
     /* Now it's safe to accept signals, since we're in our own interpreter's
      * context and we have created the thread.
      */
     S_set_sigmask(&thread->initial_sigmask);
+#endif
 
 #  ifdef _POSIX_THREAD_ATTR_STACKSIZE
         /* Try to get thread's actual stack size */
