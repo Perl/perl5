@@ -1,3 +1,15 @@
+2009-06-09   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.08
+
+   Jarkko Hietaniemi (1):
+      EBCDIC changes from core
+
+   Nicholas Clark (1):
+      Get rid of the PERL_CORE hacks
+
+
+
 2005-11-30   Gisle Aas <gisle@ActiveState.com>
 
    Release 3.07
