@@ -3965,6 +3965,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
     MAGIC *mg;
 
+#   define SM_ISREGEX(x) \
+	(SvROK(x) && SvMAGICAL(SvRV(x)) \
+	&& (mg = mg_find(SvRV(x), PERL_MAGIC_qr)))
+
     if (SvAMAGIC(e)) {
 	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
 	if (tmpsv) {
@@ -3998,9 +4002,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHYES;
     }
 
-    if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP))
+    if (sv_isobject(e) && !SM_ISREGEX(e))
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
-    if (sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
+    if (sv_isobject(d) && !SM_ISREGEX(d))
 	object_on_left = TRUE;
 
     /* ~~ sub */
@@ -4166,10 +4170,17 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	else if (SM_ISREGEX(d)) {
 	  sm_regex_hash:
 	    {
-		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
+#ifdef DEBUGGING
+		/* if arrive via goto, no guarantee mg is from d */
+		MAGIC* old_mg = mg;
+		assert(SM_ISREGEX(d) && old_mg == mg);
+		{
+#endif
+		PMOP * const matcher = make_matcher((REGEXP*) mg->mg_obj);
+
 		HE *he;
 		HV *hv = MUTABLE_HV(SvRV(e));
 
@@ -4183,6 +4194,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		}
 		destroy_matcher(matcher);
 		RETPUSHNO;
+#ifdef DEBUGGING
+		}
+#endif
 	    }
 	}
 	else {
@@ -4269,10 +4283,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	    }
 	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	else if (SM_ISREGEX(d)) {
 	  sm_regex_array:
 	    {
-		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
+#ifdef DEBUGGING
+		/* if arrive via goto, no guarantee mg is from d */
+		MAGIC* old_mg = mg;
+		assert(SM_ISREGEX(d) && old_mg == mg);
+		{
+#endif
+		PMOP * const matcher = make_matcher((REGEXP*) mg->mg_obj);
 		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 		I32 i;
 
@@ -4285,6 +4305,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		}
 		destroy_matcher(matcher);
 		RETPUSHNO;
+#ifdef DEBUGGING
+		}
+#endif
 	    }
 	}
 	else if (!SvOK(d)) {
@@ -4324,7 +4347,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
     }
     /* ~~ qr// */
-    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
+    else if (SM_ISREGEX(e)) {
 	if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    SV *t = d; d = e; e = t;
 	    goto sm_regex_hash;
@@ -4334,7 +4357,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    goto sm_regex_array;
 	}
 	else {
-	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
+	    PMOP * const matcher = make_matcher((REGEXP*) mg->mg_obj);
 
 	    PUTBACK;
 	    PUSHs(matcher_matches_sv(matcher, d)
@@ -4366,6 +4389,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     PUTBACK;
     return pp_seq();
 }
+#undef SM_ISREGEX
 
 PP(pp_enterwhen)
 {
