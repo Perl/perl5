@@ -1,13 +1,19 @@
 BEGIN {
-    chdir('t') if -d 't';    
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ m{\bFilter/Util/Call\b}) {
-        print "1..0 # Skip: Filter::Util::Call was not built\n";
-        exit 0;
+    if ($ENV{PERL_CORE}){
+        chdir('t') if -d 't';
+        @INC = ('.', '../lib');
+    
+        require Config; import Config;
+        %Config=%Config if 0; # cease -w
+        if ($Config{'extensions'} !~ m{\bFilter/Util/Call\b}) {
+            print "1..0 # Skip: Filter::Util::Call was not built\n";
+            exit 0;
+        }
+        require 'lib/filter-util.pl';
     }
-    require 'lib/filter-util.pl';
+    else {
+        require 'filter-util.pl';
+    }
 }
 
 use strict;
