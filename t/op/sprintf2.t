@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1295;
+plan tests => 1319;
 
 is(
     sprintf("%.40g ",0.01),
@@ -139,3 +139,9 @@ foreach my $n (2**1e100, -2**1e100, 2**1e100/2**1e100) { # +Inf, -Inf, NaN
     eval { my $f = sprintf("%f", $n); };
     is $@, "", "sprintf(\"%f\", $n)";
 }
+
+SKIP: {
+    skip "placeholder for tests not merged from 53f65a9ef4", 24;
+}
+
+
