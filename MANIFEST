@@ -2180,12 +2180,10 @@ lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist/Kid.pm	Does the real work of the above
 lib/ExtUtils/Liblist.pm		Locates libraries
-lib/ExtUtils/MakeMaker/bytes.pm	Version agnostic bytes.pm
 lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for Config
 lib/ExtUtils/MakeMaker/FAQ.pod	MakeMaker FAQ
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
-lib/ExtUtils/MakeMaker/vmsish.pm	Platform agnostic vmsish.pm
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
@@ -2226,7 +2224,6 @@ lib/ExtUtils/t/basic_finish.pl	See if MakeMaker can build a module (part 2)
 lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
-lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
@@ -2285,7 +2282,6 @@ lib/ExtUtils/t/testdata/reallylongdirectoryname/arch1/Config.pm		test data for M
 lib/ExtUtils/t/testdata/reallylongdirectoryname/arch2/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
-lib/ExtUtils/t/vmsish.t	Test ExtUtils::MakeMaker::vmsish
 lib/ExtUtils/t/WriteEmptyMakefile.t	See if WriteEmptyMakefile works
 lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
 lib/ExtUtils/t/xs.t		Part of MakeMaker's test suite
