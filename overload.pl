@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Unconditionally regenerate:
+# Regenerate (overwriting only if changed):
 #
 #    overload.h
 #    overload.c
