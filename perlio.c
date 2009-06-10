@@ -5174,7 +5174,9 @@ PerlIO_tmpfile(void)
 	  f = PerlIO_fdopen(fd, "w+b");
 #else /* WIN32 */
 #    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
-     SV * const sv = newSVpvs("/tmp/PerlIO_XXXXXX");
+     const char * const tmpdir = PerlEnv_getenv("TMPDIR");
+     SV * const sv = newSVpv(tmpdir ? tmpdir : "/tmp", 0);
+     sv_catpv(sv, "/PerlIO_XXXXXX");
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
