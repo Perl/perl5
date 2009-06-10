@@ -2088,7 +2088,7 @@ algorithm.
     while( $command = <> ){
         $command =~ s/^\s+|\s+$//g;  # trim leading and trailing spaces
         if( ( @matches = $kwds =~ /\b$command\w*/g ) == 1 ){
-            print "command: '$matches'\n";
+            print "command: '@matches'\n";
         } elsif( @matches == 0 ){
             print "no such command: '$command'\n";
         } else {
