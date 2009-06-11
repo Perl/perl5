@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = '0.84'; # remember to update version in POD!
+$VERSION = '0.85'; # remember to update version in POD!
 # $DB::single=1;
 
 my %symcache;
@@ -12,7 +12,6 @@ sub findsym {
 	my ($pkg, $ref, $type) = @_;
 	return $symcache{$pkg,$ref} if $symcache{$pkg,$ref};
 	$type ||= ref($ref);
-	my $found;
 	no strict 'refs';
         foreach my $sym ( values %{$pkg."::"} ) {
 	    use strict;
@@ -234,8 +233,8 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.84 of Attribute::Handlers,
-released June 10, 2009.
+This document describes version 0.85 of Attribute::Handlers,
+released June 11, 2009.
 
 =head1 SYNOPSIS
 
@@ -811,6 +810,24 @@ Let's you write:
 
         # etc.
 
+=head1 UTILITY FUNCTIONS
+
+This module offers a single utility function, C<findsym()>.
+
+=over 4
+
+=item findsym
+
+  my $symbol = Attribute::Handlers::findsym($package, $referent);
+
+The function looks in the symbol table of C<$package> for the typeglob for
+C<$referent>, which is a reference to a variable or subroutine (SCALAR, ARRAY,
+HASH, or CODE). If it finds the typeglob, it returns it. Otherwise, it returns
+undef. Note that C<findsym> memoizes the typeglobs it has previously
+successfully found, so subsequent calls with the same arguments should be
+must faster.
+
+=back
 
 =head1 DIAGNOSTICS
 

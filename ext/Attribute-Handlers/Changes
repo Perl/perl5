@@ -124,3 +124,7 @@ Revision history for Perl extension Attribute-Handlers
 
 0.84	Wed Jun 10 15:14:00 CET 2009
         - Core-CPAN synchronization
+
+0.85	Thu Jun 11 09:31:00 CET 2009
+        - Document findsym for the sake of mod_perl. (David Wheeler)
+        - Remove unused variable. (David Wheeler)
