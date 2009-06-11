@@ -1834,7 +1834,7 @@ s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
 				|I32 utf8|bool warn
 sr	|char *	|write_no_mem
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
 				|NN const char *type_name|NULLOK const SV *sv \
 				|Malloc_t oldalloc|Malloc_t newalloc \
