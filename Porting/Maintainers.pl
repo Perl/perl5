@@ -1795,7 +1795,7 @@ package Maintainers;
     'threads' =>
 	{
 	'MAINTAINER'	=> 'jdhedden',
-	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.72.tar.gz',
+	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.73.tar.gz',
 	'FILES'		=> q[ext/threads],
 	'EXCLUDED'	=> [ qw(examples/pool.pl
 				t/pod.t
