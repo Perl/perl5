@@ -321,10 +321,12 @@ might start to make sense - don't worry if it doesn't yet, because the
 best way to study it is to read it in conjunction with poking at Perl
 source, and we'll do that later on.
 
-You might also want to look at Gisle Aas's illustrated perlguts -
-there's no guarantee that this will be absolutely up-to-date with the
-latest documentation in the Perl core, but the fundamentals will be
-right. ( http://gisle.aas.no/perl/illguts/ )
+Gisle Aas's illustrated perlguts (aka: illguts) is wonderful, although
+a little out of date wrt some size details; the various SV structures
+have since been reworked for smaller memory footprint.  The
+fundamentals are right however, and the pictures are very helpful.
+
+http://www.perl.org/tpc/1998/Perl_Language_and_Modules/Perl%20Illustrated/ 
 
 =item L<perlxstut> and L<perlxs>
 
