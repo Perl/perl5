@@ -142,7 +142,7 @@ package Maintainers;
     'Attribute::Handlers' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.83.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.85.tar.gz',
 	'FILES'		=> q[ext/Attribute-Handlers],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
@@ -468,7 +468,7 @@ package Maintainers;
     'Devel::PPPort' =>
 	{
 	'MAINTAINER'	=> 'mhx',
-	'DISTRIBUTION'	=> 'MHX/Devel-PPPort-3.17.tar.gz',
+	'DISTRIBUTION'	=> 'MHX/Devel-PPPort-3.18.tar.gz',
 	'FILES'		=> q[ext/Devel-PPPort],
 	'EXCLUDED'	=> [ qw{PPPort.pm} ], # we use PPPort_pm.PL instead
 	'CPAN'		=> 1,
@@ -756,7 +756,7 @@ package Maintainers;
     'Filter::Util::Call' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/Filter-1.36.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/Filter-1.37.tar.gz',
 	'FILES'		=> q[ext/Filter-Util-Call
 			     t/lib/filter-util.pl
 			     pod/perlfilter.pod
