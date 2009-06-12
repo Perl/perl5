@@ -207,6 +207,7 @@ sub gimme_conf {
 ### clean these files if we're under perl core
 END { 
     if ( $ENV{PERL_CORE} ) {
+
         _clean_test_dir( [
             gimme_conf->get_conf('base'),   
             TEST_CONF_MIRROR_DIR,
