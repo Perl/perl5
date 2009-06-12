@@ -13,7 +13,7 @@ BEGIN {
     exit;
   }
   unless (getservbyname('echo', 'udp')) {
-    print "1..0 \# Skip: no echo port\n";
+    print "1..0 \# Skip: no udp echo port\n";
     exit;
   }
 
