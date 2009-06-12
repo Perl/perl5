@@ -227,6 +227,7 @@ use_ok('Pod::Find', qw(pod_where));
 my @NO_CURDIR = ($^O eq 'cygwin' && $ENV{PERL_CORE})
                     ? ('-dirs' => [])
                     : ();
+
 ($exit, $text) = getoutput( sub { pod2usage( -input => pod_where({-inc => 1, @NO_CURDIR}, 'Pod::Usage'),
                                              -exitval => 0, -verbose => 0) } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
