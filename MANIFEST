@@ -1171,7 +1171,6 @@ ext/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 ext/Storable/hints/hpux.pl	Hint for Storable for named architecture
 ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
-ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
