@@ -854,13 +854,11 @@ ext/IO-Compress/t/110encode-gzip.t	IO::Compress
 ext/IO-Compress/t/110encode-rawdeflate.t	IO::Compress
 ext/IO-Compress/t/110encode-zip.t	IO::Compress
 ext/IO-Compress/t/999pod.t	IO::Compress
-ext/IO-Compress/t/99pod.t	IO::Compress
 ext/IO-Compress/t/cz-01version.t	IO::Compress
 ext/IO-Compress/t/cz-05examples.t	IO::Compress
 ext/IO-Compress/t/cz-06gzsetp.t	IO::Compress
 ext/IO-Compress/t/cz-08encoding.t	IO::Compress
 ext/IO-Compress/t/cz-14gzopen.t	IO::Compress
-ext/IO-Compress/t/cz-99pod.t	IO::Compress
 ext/IO-Compress/t/globmapper.t	IO::Compress
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
