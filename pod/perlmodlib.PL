@@ -71,6 +71,7 @@ for (@MANIFEST) {
      $perlname =~ s!\.p(m|od)$!!;
      $perlname =~ s!\b(\w+)/\1\b!$1!;
      $perlname =~ s!/!::!g;
+     $perlname =~ s!-!::!g;
 
      # modules with non standard locations
      $perlname =~ s{Base64::QuotedPrint}{QuotedPrint};
