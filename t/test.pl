@@ -793,8 +793,8 @@ sub _fresh_perl {
     # it feels like the least-worse thing is to assume that auto-vivification
     # works. At least, this is only going to be a run-time failure, so won't
     # affect tests using this file but not this function.
-    $runperl_args->{progfile} = $tmpfile;
-    $runperl_args->{stderr} = 1;
+    $runperl_args->{progfile} ||= $tmpfile;
+    $runperl_args->{stderr}     = 1 unless exists $runperl_args->{stderr};
 
     open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
 
