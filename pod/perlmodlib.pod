@@ -51,13 +51,17 @@ The following pragmas are defined (and have their own documentation).
 
 Get/set subroutine or variable attributes
 
-=item attrs
-
-Set/get attributes of a subroutine (deprecated)
-
 =item autodie
 
 Replace functions with ones that succeed or die with lexical scope
+
+=item autodie::exception
+
+Exceptions from autodying functions.
+
+=item autodie::exception::system
+
+Exceptions from autodying system().
 
 =item autouse
 
@@ -94,6 +98,10 @@ Define character names for C<\N{named}> string literal escapes
 =item constant
 
 Declare constants
+
+=item deprecate
+
+Perl pragma for deprecating the core version of a module
 
 =item diagnostics
 
@@ -154,6 +162,10 @@ Restrict unsafe operations when compiling
 =item overload
 
 Package for overloading Perl operations
+
+=item overloading
+
+Lexically control overloading
 
 =item parent
 
@@ -237,6 +249,14 @@ Implements the C<prove> command.
 
 State storage for the C<prove> command.
 
+=item App::Prove::State::Result
+
+Individual test suite results.
+
+=item App::Prove::State::Result::Test
+
+Individual test results.
+
 =item Archive::Extract
 
 A generic archive extracting mechanism
@@ -303,7 +323,7 @@ Benchmark running times of Perl code
 
 =item CGI
 
-Simple Common Gateway Interface Class
+Handle Common Gateway Interface requests and responses
 
 =item CGI::Apache
 
@@ -349,6 +369,10 @@ Query, download and build perl modules from CPAN sites
 
 A recipe book for programming with CPAN.pm
 
+=item CPAN::Distroprefs
+
+Read and match distroprefs
+
 =item CPAN::FirstTime
 
 Utility for CPAN::Config file Initialization
@@ -373,9 +397,25 @@ API & CLI access to the CPAN mirrors
 
 Base class for custom distribution classes
 
+=item CPANPLUS::Dist::Build
+
+CPANPLUS plugin to install packages that use Build.PL
+
+=item CPANPLUS::Dist::Build::Constants
+
+Constants for CPANPLUS::Dist::Build
+
 =item CPANPLUS::Dist::Sample
 
 Sample code to create your own Dist::* plugin
+
+=item CPANPLUS::Internals::Source::Memory
+
+In memory implementation
+
+=item CPANPLUS::Internals::Source::SQLite
+
+SQLite implementation
 
 =item CPANPLUS::Shell::Classic
 
@@ -401,9 +441,21 @@ Report the search path for a class's ISA tree
 
 Declare struct-like datatypes as Perl classes
 
+=item Compress::Raw::Bzip2
+
+Low-Level Interface to bzip2 compression library
+
+=item Compress::Raw::Bzip2::pod::FAQ
+
+Frequently Asked Questions about Compress::Raw::Bzip2
+
 =item Compress::Raw::Zlib
 
 Low-Level Interface to zlib compression library
+
+=item Compress::Raw::Zlib::pod::FAQ
+
+Frequently Asked Questions about Compress::Raw::Zlib
 
 =item Compress::Zlib
 
@@ -757,14 +809,6 @@ Frequently Asked Questions About MakeMaker
 
 Writing a module with MakeMaker
 
-=item ExtUtils::MakeMaker::bytes
-
-Version-agnostic bytes.pm
-
-=item ExtUtils::MakeMaker::vmsish
-
-Platform-agnostic vmsish.pm
-
 =item ExtUtils::Manifest
 
 Utilities to write and check a MANIFEST file
@@ -784,6 +828,10 @@ Manage .packlist files
 =item ExtUtils::ParseXS
 
 Converts Perl XS code into C code
+
+=item ExtUtils::XSSymSet
+
+Keep sets of symbol names palatable to the VMS linker
 
 =item ExtUtils::testlib
 
@@ -949,6 +997,10 @@ Load various IO modules
 
 Base Class for IO::Compress modules 
 
+=item IO::Compress::Bzip2
+
+Write bzip2 files/buffers
+
 =item IO::Compress::Deflate
 
 Write RFC 1950 files/buffers
@@ -964,6 +1016,10 @@ Write RFC 1951 files/buffers
 =item IO::Compress::Zip
 
 Write zip files/buffers
+
+=item IO::Compress::pod::FAQ
+
+Frequently Asked Questions about IO::Compress
 
 =item IO::Dir
 
@@ -1016,6 +1072,10 @@ Uncompress gzip, zip, bzip2 or lzop file/buffer
 =item IO::Uncompress::Base
 
 Base Class for IO::Uncompress modules 
+
+=item IO::Uncompress::Bunzip2
+
+Read bzip2 files/buffers
 
 =item IO::Uncompress::Gunzip
 
@@ -1405,6 +1465,10 @@ List all constants declared in a package
 
 A generic input parsing/checking mechanism.
 
+=item Parse::CPAN::Meta
+
+Parse META.yml and other similar CPAN metadata files
+
 =item PerlIO
 
 On demand loader for PerlIO layers and root of PerlIO::* name space
@@ -1468,6 +1532,18 @@ Helpers for POD parsing and conversion
 =item Pod::Parser
 
 Base class for creating POD filters and translators
+
+=item Pod::Perldoc
+
+Look up Perl documentation in Pod format.
+
+=item Pod::Perldoc::BaseTo
+
+Base for Pod::Perldoc formatters
+
+=item Pod::Perldoc::GetOptsOO
+
+Customized option parser for Pod::Perldoc
 
 =item Pod::Perldoc::ToChecker
 
@@ -1593,6 +1669,10 @@ Format Pod as plaintext
 
 Get the text content of Pod
 
+=item Pod::Simple::XHTML
+
+Format Pod as validating XHTML
+
 =item Pod::Simple::XMLOutStream
 
 Turn Pod into XML
@@ -1604,10 +1684,6 @@ Convert POD data to formatted ASCII text
 =item Pod::Text::Color
 
 Convert POD data to formatted color ASCII text
-
-=item Pod::Text::Overstrike
-
-Convert POD data to formatted overstrike text
 
 =item Pod::Text::Termcap
 
@@ -1675,7 +1751,11 @@ Win32 support for Sys::Syslog
 
 =item TAP::Base
 
-Base class that provides common functionality to L<TAP::Parser> and L<TAP::Harness>
+Base class that provides common functionality to L<TAP::Parser>
+
+=item TAP::Formatter::Base
+
+Harness output delegate for default console output
 
 =item TAP::Formatter::Color
 
@@ -1693,9 +1773,25 @@ Harness output delegate for parallel console output
 
 Harness output delegate for default console output
 
+=item TAP::Formatter::File
+
+Harness output delegate for file output
+
+=item TAP::Formatter::File::Session
+
+Harness output delegate for file output
+
+=item TAP::Formatter::Session
+
+Abstract base class for harness output delegate 
+
 =item TAP::Harness
 
 Run test scripts with statistics
+
+=item TAP::Object
+
+Base class that provides common functionality to all C<TAP::*> modules
 
 =item TAP::Parser
 
@@ -1711,11 +1807,11 @@ A grammar for the Test Anything Protocol.
 
 =item TAP::Parser::Iterator
 
-Internal TAP::Parser Iterator
+Internal base class for TAP::Parser Iterators
 
 =item TAP::Parser::Iterator::Array
 
-Internal TAP::Parser Iterator
+Internal TAP::Parser array Iterator
 
 =item TAP::Parser::Iterator::Process
 
@@ -1725,13 +1821,17 @@ Internal TAP::Parser Iterator
 
 Internal TAP::Parser Iterator
 
+=item TAP::Parser::IteratorFactory
+
+Internal TAP::Parser Iterator
+
 =item TAP::Parser::Multiplexer
 
 Multiplex multiple TAP::Parsers
 
 =item TAP::Parser::Result
 
-TAP::Parser output
+Base class for TAP::Parser output objects
 
 =item TAP::Parser::Result::Bailout
 
@@ -1764,6 +1864,22 @@ TAP syntax version token.
 =item TAP::Parser::Result::YAML
 
 YAML result token.
+
+=item TAP::Parser::ResultFactory
+
+Factory for creating TAP::Parser output objects
+
+=item TAP::Parser::Scheduler
+
+Schedule tests during parallel testing
+
+=item TAP::Parser::Scheduler::Job
+
+A single testing job.
+
+=item TAP::Parser::Scheduler::Spinner
+
+A no-op job.
 
 =item TAP::Parser::Source
 
@@ -1837,10 +1953,6 @@ Yet another framework for writing test scripts
 
 Basic utilities for writing tests.
 
-=item Test::Tutorial
-
-A tutorial about writing really basic tests
-
 =item Text::Abbrev
 
 Create an abbreviation table from a list
@@ -1908,6 +2020,10 @@ Use references as hash keys
 =item Tie::Scalar
 
 Base class definitions for tied scalars
+
+=item Tie::StdHandle
+
+Base class definitions for tied handles
 
 =item Tie::SubstrHash
 
