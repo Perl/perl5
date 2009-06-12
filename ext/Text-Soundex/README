@@ -1,22 +1,4 @@
-Text::Soundex Version 3.02
-
-NOTE: Users of Text::Soundex Version 2.x should consult the 'History'
-      section at the end of this document before installing this module.
-      The interface has been simplified, and existing code that takes
-      advantages of Version 2.x features may need to be altered to function
-      properly.
-
-This is a perl 5 module implementing the Soundex algorithm described by 
-Knuth. The algorithm is used quite often for locating a person by name
-where the actual spelling of the name is not known.
-
-This version directly supercedes the version of Text::Soundex that can be
-found in the core from Perl 5.8.0 and down. (This version is a drop-in
-replacement)
-
-The algorithm used by soundex() is NOT fully compatible with the
-algorithm used to index names for US Censuses. Use the soundex_nara()
-subroutine to return codes for this purpose.
+Text::Soundex - Implementation of the soundex algorithm.
 
 Basic Usage:
 
@@ -75,9 +57,16 @@ Installation:
 
 History:
 
+ Version 3.03:
+     Updated to allow the XS implementation to work properly under an
+     EBCDIC/EBCDIC-UTF8 character set environment.
+
+     Updated documentation to better describe the history of the
+     soundex algorithm and how it applies to this module.
+
  Version 3.02:
      3.01 and 3.00 used the 'U8' type incorrectly causing some strict
-     compilers to complain or refuse to compile the XS code. Also, unicode
+     compilers to complain or refuse to compile the XS code. Also, Unicode
      support did not work properly for Perl 5.6.x. Both of these problems
      are now fixed.
 
@@ -127,24 +116,8 @@ History:
      NARA can be found at:
           http://www.nara.gov/genealogy/
 
-     The algorithm requested by NARA can be found at:
+     The algorithm used by NARA can be found at:
           http://home.utah-inter.net/kinsearch/Soundex.html
-
-     Ways to use it in your code:
-
-          Transparently change existing code like this:
-          =============================================
-          use Text::Soundex qw(:NARA-Ruleset);
-
-          ... soundex(...) ...
-
-                                     --
-
-          Make the change visibly distinct like this:
-          ===========================================
-          use Text::Soundex qw(soundex_nara);
-
-          ... soundex_nara(...) ...
 
  Version 2.00:
      This version is a full re-write of the 1.0 engine by Mark Mielke.
