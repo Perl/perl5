@@ -17,7 +17,7 @@ the L<perl5100delta>, which describes differences between 5.8.8 and
 
 The handling of complex expressions by the C<given>/C<when> switch
 statement has been enhanced. There are two new cases where C<when> now
-inteprets its argument as a boolean, instead of an expression to be used
+interprets its argument as a boolean, instead of an expression to be used
 in a smart match:
 
 =over 4
