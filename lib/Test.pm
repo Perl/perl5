@@ -936,7 +936,7 @@ L<Test::Inline> and L<SelfTest> let you embed tests in code.
 
 =head1 AUTHOR
 
-Copyright (c) 1998-2000 Joshua Nathaniel Pritikin.
+Copyright (c) 1998-2000 Joshua Nathaniel Pritikin. 
 
 Copyright (c) 2001-2002 Michael G. Schwern.
 
