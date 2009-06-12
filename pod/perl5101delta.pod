@@ -13,6 +13,102 @@ the L<perl5100delta>, which describes differences between 5.8.8 and
 
 =head1 Incompatible Changes
 
+=head2 Switch statement changes
+
+The handling of complex expressions by the C<given>/C<when> switch
+statement has been enhanced. There are two new cases where C<when> now
+inteprets its argument as a boolean, instead of an expression to be used
+in a smart match:
+
+=over 4
+
+=item flip-flop operators
+
+The C<..> and C<...> flip-flop operators are evaluated in boolean context,
+following their usual semantics; see L<perlop/"Range Operators">.
+
+=item defined-or operator
+
+A compound expression involving the defined-or operator, as in
+C<when (expr1 // expr2)>, will be treated as boolean if the first
+expression is boolean. (This just extends the existing rule that applies
+to the regular or operator, as in C<when (expr1 || expr2)>.)
+
+=back
+
+The next paragraph details more changes brought to the semantics to
+the smart match operator, that naturally also modify the behaviour
+of the switch statements where smart matching is implicitly used.
+
+=head2 Smart match changes
+
+=head3 Changes to type-based dispatch
+
+The smart match operator C<~~> is no longer commutative. The behaviour of
+a smart match now depends primarily on the type of its right hand
+argument. Moreover, its semantics has been adjusted for greater
+consistency or usefulness in several cases. While the general backwards
+compatibility is maintained, several changes must be noted:
+
+=over 4
+
+=item *
+
+Code references with an empty prototype are no longer treated specially.
+They are passed an argument like the other code references (even if they
+choose to ignore it).
+
+=item *
+
+C<%hash ~~ sub {}> and C<@array ~~ sub {}> now test that the subroutine
+returns a true value for each key of the hash (or element of the
+array), instead of passing the whole hash or array as a reference to
+the subroutine.
+
+=item *
+
+Due to the commutativity breakage, code references are no longer
+treated specially when appearing on the left of the C<~~> operator,
+but like any vulgar scalar.
+
+=item *
+
+C<undef ~~ %hash> is always false (since C<undef> can't be a key in a
+hash). No implicit conversion to C<""> is done (as was the case in perl
+5.10.0).
+
+=item *
+
+C<$scalar ~~ @array> now always distributes the smart match across the
+elements of the array. It's true if one element in @array verifies
+C<$scalar ~~ $element>. This is a generalization of the old behaviour
+that tested whether the array contained the scalar.
+
+=back
+
+The full dispatch table for the smart match operator is given in
+L<perlsyn/"Smart matching in detail">.
+
+=head3 Smart match and overloading
+
+According to the rule of dispatch based on the rightmost argument type,
+when an object overloading C<~~> appears on the right side of the
+operator, the overload routine will always be called (with a 3rd argument
+set to a true value, see L<overload>.) However, when the object will
+appear on the left, the overload routine will be called only when the
+rightmost argument is a simple scalar. This way distributivity of smart match
+across arrays is not broken, as well as the other behaviours with complex
+types (coderefs, hashes, regexes). Thus, writers of overloading routines
+for smart match mostly need to worry only with comparing against a scalar,
+and possibly with stringification overloading; the other common cases
+will be automatically handled consistently.
+
+
+C<~~> will now refuse to work on objects that do not overload it (in order
+to avoid relying on the object's underlying structure).
+
+=head2 Other incompatible changes
+
 =over
 
 =item *
@@ -120,11 +216,11 @@ The bundled version is 1.999.
 
 =item *
 
-C<Compress::Raw::Bzip2> has been added to the core (version 2.019).
+C<Compress::Raw::Bzip2> has been added to the core (version 2.020).
 
 =item *
 
-C<Parse::CPAN::Meta> has been added to the core (version 1.38).
+C<Parse::CPAN::Meta> has been added to the core (version 1.39).
 
 =back
 
@@ -171,7 +267,7 @@ C<CGI> upgraded from version 3.29 to 1.93_03
 
 =item *
 
-C<Compress::Zlib> upgraded from version 2.008 to 2.019
+C<Compress::Zlib> upgraded from version 2.008 to 2.020
 
 =item *
 
@@ -183,7 +279,7 @@ C<CPANPLUS> upgraded from version 0.84 to 0.8601
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.30
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.32
 
 =item *
 
@@ -191,7 +287,7 @@ C<Cwd> upgraded from version 3.25_01 to 3.30
 
 =item *
 
-C<Data::Dumper> upgraded from version 2.121_14 to 2.121_19
+C<Data::Dumper> upgraded from version 2.121_14 to 2.121_20
 
 =item *
 
@@ -217,10 +313,6 @@ C<Encode> upgraded from version 2.23 to 2.33
 =item *
 
 C<Filter::Simple> upgraded from version 0.82 to 0.84
-
-=item *
-
-C<IPC::SysV> upgraded from version 1.05 to 2.01
 
 =item *
 
@@ -286,7 +378,19 @@ This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
 
 =item *
 
+C<IO::Compress::*> upgraded from version 2.008 to 2.020
+
+=item *
+
 C<IPC::Cmd> upgraded from version 0.40_1 to 0.44
+
+=item *
+
+C<IPC::Open3> upgraded from version 1.02 to 1.04
+
+=item *
+
+C<IPC::SysV> upgraded from version 1.05 to 2.01
 
 =item *
 
