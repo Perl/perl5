@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 52 $
+##  $Revision: 53 $
 ##  $Author: mhx $
-##  $Date: 2009/03/15 06:51:00 +0100 $
+##  $Date: 2009/03/31 23:05:55 +0200 $
 ##
 ################################################################################
 ##
@@ -209,6 +209,9 @@ __UNDEFINED__  XSprePUSH       (sp = PL_stack_base + ax - 1)
       } STMT_END
 #endif
 
+__UNDEFINED__  XSPROTO(name)   void name(pTHX_ CV* cv)
+__UNDEFINED__  SVfARG(p)       ((void*)(p))
+
 __UNDEFINED__  PERL_ABS(x)     ((x) < 0 ? -(x) : (x))
 
 __UNDEFINED__  dVAR            dNOOP
@@ -282,6 +285,9 @@ __UNDEFINED__ isXDIGIT(c)	(isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= '
 
 =xsmisc
 
+typedef XSPROTO(XSPROTO_test_t);
+typedef XSPROTO_test_t *XSPROTO_test_t_ptr;
+
 XS(XS_Devel__PPPort_dXSTARG);  /* prototype */
 XS(XS_Devel__PPPort_dXSTARG)
 {
@@ -309,7 +315,10 @@ XS(XS_Devel__PPPort_dAXMARK)
 
 =xsboot
 
-newXS("Devel::PPPort::dXSTARG", XS_Devel__PPPort_dXSTARG, file);
+{
+  XSPROTO_test_t_ptr p = &XS_Devel__PPPort_dXSTARG;
+  newXS("Devel::PPPort::dXSTARG", *p, file);
+}
 newXS("Devel::PPPort::dAXMARK", XS_Devel__PPPort_dAXMARK, file);
 
 =xsubs
@@ -454,7 +463,7 @@ SVf(x)
 	SV *x
 	PPCODE:
 #if { VERSION >= 5.004 }
-		x = sv_2mortal(newSVpvf("[%"SVf"]", x));
+		x = sv_2mortal(newSVpvf("[%"SVf"]", SVfARG(x)));
 #endif
 		XPUSHs(x);
 		XSRETURN(1);

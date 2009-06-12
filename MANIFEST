@@ -290,6 +290,8 @@ ext/Devel-PPPort/parts/inc/cop	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/exception	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/format	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/grok	Devel::PPPort include
+ext/Devel-PPPort/parts/inc/gv	Devel::PPPort include
+ext/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/limits	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/magic	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/memory	Devel::PPPort include
@@ -298,6 +300,7 @@ ext/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
+ext/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
@@ -366,6 +369,8 @@ ext/Devel-PPPort/t/cop.t	Devel::PPPort test file
 ext/Devel-PPPort/t/exception.t	Devel::PPPort test file
 ext/Devel-PPPort/t/format.t	Devel::PPPort test file
 ext/Devel-PPPort/t/grok.t	Devel::PPPort test file
+ext/Devel-PPPort/t/gv.t	Devel::PPPort test file
+ext/Devel-PPPort/t/HvNAME.t	Devel::PPPort test file
 ext/Devel-PPPort/t/limits.t	Devel::PPPort test file
 ext/Devel-PPPort/t/magic.t	Devel::PPPort test file
 ext/Devel-PPPort/t/memory.t	Devel::PPPort test file
@@ -374,6 +379,7 @@ ext/Devel-PPPort/t/mPUSH.t	Devel::PPPort test file
 ext/Devel-PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newRV.t	Devel::PPPort test file
+ext/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newSVpv.t	Devel::PPPort test file
 ext/Devel-PPPort/TODO		Devel::PPPort Todo
 ext/Devel-PPPort/t/podtest.t	Devel::PPPort test file

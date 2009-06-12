@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 34 $
+#  $Revision: 35 $
 #  $Author: mhx $
-#  $Date: 2009/01/18 14:10:51 +0100 $
+#  $Date: 2009/06/12 12:29:35 +0200 $
 #
 ################################################################################
 #
@@ -156,6 +156,7 @@ print OUT <<HEAD;
 #define NEED_my_strlcpy
 #define NEED_newCONSTSUB
 #define NEED_newRV_noinc
+#define NEED_newSV_type
 #define NEED_newSVpvn_share
 #define NEED_pv_display
 #define NEED_pv_escape

@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 19 $
+##  $Revision: 20 $
 ##  $Author: mhx $
-##  $Date: 2009/01/18 14:10:53 +0100 $
+##  $Date: 2009/06/12 04:10:50 +0200 $
 ##
 ################################################################################
 ##
@@ -36,9 +36,12 @@ PL_diehook
 PL_dirty
 PL_dowarn
 PL_errgv
+PL_error_count
 PL_expect
 PL_hexdigit
 PL_hints
+PL_in_my
+PL_in_my_stash
 PL_laststatval
 PL_lex_state
 PL_lex_stuff
@@ -112,9 +115,11 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_dirty                  dirty
 #  define PL_dowarn                 dowarn
 #  define PL_errgv                  errgv
+#  define PL_error_count            error_count
 #  define PL_expect                 expect
 #  define PL_hexdigit               hexdigit
 #  define PL_hints                  hints
+#  define PL_in_my                  in_my
 #  define PL_laststatval            laststatval
 #  define PL_lex_state              lex_state
 #  define PL_lex_stuff              lex_stuff
@@ -190,6 +195,10 @@ __NEED_DUMMY_VAR__ yy_parser PL_parser;
 # define PL_lex_state      D_PPP_my_PL_parser_var(lex_state)
 # define PL_lex_stuff      D_PPP_my_PL_parser_var(lex_stuff)
 # define PL_tokenbuf       D_PPP_my_PL_parser_var(tokenbuf)
+# define PL_in_my          D_PPP_my_PL_parser_var(in_my)
+# define PL_in_my_stash    D_PPP_my_PL_parser_var(in_my_stash)
+# define PL_error_count    D_PPP_my_PL_parser_var(error_count)
+
 
 #else
 
@@ -229,6 +238,11 @@ int dummy_parser_warning(void);
                                     count++;                     \
                                   } STMT_END
 
+#define ppp_PARSERVAR_dummy       STMT_START {                   \
+                                    mXPUSHi(1);                  \
+                                    count++;                     \
+                                  } STMT_END
+
 #if { VERSION < 5.004 }
 # define ppp_rsfp_t FILE *
 #else
@@ -247,6 +261,20 @@ int dummy_parser_warning(void);
 # define ppp_lex_state_t U32
 #else
 # define ppp_lex_state_t U8
+#endif
+
+#if { VERSION < 5.6.0 }
+# define ppp_in_my_t bool
+#elif { VERSION < 5.9.5 }
+# define ppp_in_my_t I32
+#else
+# define ppp_in_my_t U16
+#endif
+
+#if { VERSION < 5.9.5 }
+# define ppp_error_count_t I32
+#else
+# define ppp_error_count_t U8
 #endif
 
 =xsubs
@@ -379,7 +407,13 @@ other_variables()
 		ppp_PARSERVAR(char *, PL_bufend);
 		ppp_PARSERVAR(ppp_lex_state_t, PL_lex_state);
 		ppp_PARSERVAR(SV *, PL_lex_stuff);
-
+		ppp_PARSERVAR(ppp_error_count_t, PL_error_count);
+		ppp_PARSERVAR(ppp_in_my_t, PL_in_my);
+#if { VERSION >= 5.5.0 }
+		ppp_PARSERVAR(HV*, PL_in_my_stash);
+#else
+		ppp_PARSERVAR_dummy;
+#endif
 		XSRETURN(count);
 
 int
@@ -389,7 +423,7 @@ no_dummy_parser_vars(check)
 int
 dummy_parser_warning()
 
-=tests plan => 49
+=tests plan => 52
 
 ok(Devel::PPPort::compare_PL_signals());
 

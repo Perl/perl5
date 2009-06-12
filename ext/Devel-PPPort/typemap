@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 8 $
+#  $Revision: 9 $
 #  $Author: mhx $
-#  $Date: 2009/01/18 14:10:48 +0100 $
+#  $Date: 2009/06/12 04:07:19 +0200 $
 #
 ################################################################################
 #
@@ -21,12 +21,18 @@
 
 UV			T_UV
 NV                      T_NV
+HV *			T_HVREF
 
 INPUT
 T_UV
 	$var = ($type)SvUV($arg)
 T_NV
 	$var = ($type)SvNV($arg)
+T_HVREF
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVHV)
+	    $var = (HV*)SvRV($arg);
+	else
+	    Perl_croak(aTHX_ \"$var is not a hash reference\")
 
 OUTPUT
 T_UV
