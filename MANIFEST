@@ -4304,7 +4304,7 @@ t/pod/special_seqs.xr		Expected results for special_seqs.t
 t/pod/testcmp.pl		Module to compare output against expected results
 t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
-t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
+t/pod/testpods/lib/Pod/Stuff.pm		Sample data for t/pod/find.t
 t/pod/twice.t			Test Pod::Parser
 t/pod/usage2.pod		Test POD for pod2usage tests
 t/pod/usage.pod			Test POD for pod2usage tests
