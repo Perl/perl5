@@ -24,7 +24,7 @@ $|  = 1;
 use warnings;
 use strict;
 use Config;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use B;
 use B::Debug;
 
@@ -51,6 +51,7 @@ $a =~ s/\s+/ /g;
 $a =~ s/\b(s|foo|bar|ullsv)\b\s?//g;
 $a =~ s/^\s+//;
 $a =~ s/\s+$//;
+$a =~ s/\s+nextstate$//; # if $] < 5.008001; # 5.8.0 adds it. 5.8.8 not anymore
 my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
 if ($is_thread) {
     $b=<<EOF;
@@ -59,12 +60,13 @@ threadsv readline gv lineseq nextstate aassign null pushmark split pushre
 threadsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 } else {
-    $b=<<EOF;
-leave enter nextstate label leaveloop enterloop null and defined null
-null gvsv readline gv lineseq nextstate aassign null pushmark split pushre
-null gvsv const null pushmark rvav gv nextstate subst const unstack
+  $b=<<EOF;
+leave enter nextstate label leaveloop enterloop null and defined null null
+gvsv readline gv lineseq nextstate aassign null pushmark split pushre null
+gvsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 }
+#$b .= " nextstate" if $] < 5.008001; # ??
 $b=~s/\n/ /g;$b=~s/\s+/ /g;
 $b =~ s/\s+$//;
 is($a, $b);
@@ -76,3 +78,13 @@ $a = `$^X $path "-MO=Debug" -e "B::main_root->debug" $redir`;
 like($a, qr/op_next\s+0x0/m);
 $a = `$^X $path "-MO=Debug" -e "B::main_start->debug" $redir`;
 like($a, qr/PL_ppaddr\[OP_ENTER\]/m);
+
+# pass missing FETCHSIZE, fixed with 1.06
+my $tmp = "tmp.pl";
+open TMP, "> $tmp";
+print TMP 'BEGIN{tie @a, __PACKAGE__;sub TIEARRAY {bless{}} sub FETCH{1}};
+print $a[1]';
+close TMP;
+$a = `$^X $path "-MO=Debug" $tmp $redir`;
+unlink $tmp;
+unlike($a, qr/locate object method "FETCHSIZE"/m);
