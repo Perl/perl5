@@ -2,8 +2,16 @@
 
 $ENV{LC_ALL} = 'C';
 
+use FindBin;
+chdir $FindBin::Bin or die "$0: Can't chdir $FindBin::Bin: $!";
+
+my $Quiet = @ARGV && $ARGV[0] eq '-q';
+
 open (OUT, ">perlmodlib.pod") or die $!;
 my (@pragma, @mod, @MANIFEST);
+
+# MANIFEST itself is Unix style filenames, so we have to assume that Unix style
+# filenames will work.
 
 open (MANIFEST, "../MANIFEST") or die $!;
 @MANIFEST = grep !m</(?:t|demo)/>, <MANIFEST>;
@@ -55,7 +63,8 @@ for (@MANIFEST) {
          }
      }
      unless ($foundit) {
-         warn "$filename missing =head1 NAME (OK if respective .pod exists)\n";
+         warn "$filename missing =head1 NAME (OK if respective .pod exists)\n"
+	     unless $Quiet;
          next;
      }
      my $title = <MOD>;
@@ -76,7 +85,7 @@ for (@MANIFEST) {
 
      unless ($name and $thing) {
          warn "$filename missing name\n"  unless $name;
-         warn "$filename missing thing\n" unless $thing;
+         warn "$filename missing thing\n" unless $thing or $Quiet;
          next;
      }
 
