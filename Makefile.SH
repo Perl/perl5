@@ -685,11 +685,9 @@ perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
 	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
 
 !NO!SUBS!
-# XXX for 5.10.x, if merging #34200, s/Makefile/\$Makefile/ in the
-# chunk that goes below (dropped from #34306)
 	;;
 cygwin)
-	$spitshell >>Makefile <<'!NO!SUBS!'
+	$spitshell >>$Makefile <<'!NO!SUBS!'
 cygwin.c: cygwin/cygwin.c
 	$(LNS) cygwin/cygwin.c
 
@@ -939,14 +937,14 @@ microperl:
 
 case "${osname}" in
 aix*)
-$spitshell >>Makefile <<'!NO!SUBS!'
+$spitshell >>$Makefile <<'!NO!SUBS!'
 suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL_NONSHR) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 ;;
 *)
-$spitshell >>Makefile <<'!NO!SUBS!'
+$spitshell >>$Makefile <<'!NO!SUBS!'
 suidperl$(EXE_EXT): $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
