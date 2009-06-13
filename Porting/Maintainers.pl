@@ -124,7 +124,7 @@ package Maintainers;
     'Archive::Extract' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.31_03.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.32.tar.gz',
 	'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -133,7 +133,7 @@ package Maintainers;
     'Archive::Tar' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Archive-Tar-1.48.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/Archive-Tar-1.52.tar.gz',
 	'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -390,7 +390,7 @@ package Maintainers;
     'CPANPLUS' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.8601.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.87_02.tar.gz',
 	'FILES'		=> q[lib/CPANPLUS.pm
 			     lib/CPANPLUS/Backend
 			     lib/CPANPLUS/Backend.pm
@@ -830,7 +830,7 @@ package Maintainers;
     'IO' =>
 	{
 	'MAINTAINER'	=> 'gbarr',
-	'DISTRIBUTION'	=> 'GBARR/IO-1.24.tar.gz',
+	'DISTRIBUTION'	=> 'GBARR/IO-1.25.tar.gz',
 	'FILES'		=> q[ext/IO/],
 	'EXCLUDED'	=> [ qw{t/test.pl}, ],
 	'CPAN'		=> 1,
