@@ -187,6 +187,11 @@ ok( IS_CONFOBJ->(conf => $conf_obj),    "Configure object found" );
             'IO-Stty',
             '.02',
         ],            
+        '.' => [
+            'CPANPLUS',
+            't',
+            '',
+        ],            
     );       
 
     while ( my($guess, $attr) = splice @map, 0, 2 ) {
