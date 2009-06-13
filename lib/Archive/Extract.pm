@@ -41,7 +41,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL
          ];
 
-$VERSION            = '0.31_03';
+$VERSION            = '0.32';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -672,8 +672,10 @@ sub have_old_bunzip2 {
                                                 \s+ [\d,.]+ \s tape \s blocks
                                             |x ? $1 : $_);
     
-                        ### only STDOUT, see above
-                        } map { split $/, $_ } @{$out[3]};     
+                        ### only STDOUT, see above. Sometims, extra whitespace
+                        ### is present, so make sure we only pick lines with
+                        ### a length
+                        } grep { length } map { split $/, $_ } @{$out[3]};     
     
                 ### store the files that are in the archive ###
                 $self->files(\@files);
@@ -1429,7 +1431,7 @@ Set to C<true> to have C<Archive::Extract> prefer commandline tools.
 
 Defaults to C<false>.
 
-=head1 TODO
+=head1 TODO / CAVEATS
 
 =over 4
 
@@ -1437,6 +1439,12 @@ Defaults to C<false>.
 
 Maybe this module should use something like C<File::Type> to determine
 the type, rather than blindly trust the suffix.
+
+=item Thread safety
+
+Currently, C<Archive::Extract> does a C<chdir> to the extraction dir before
+extraction, and a C<chdir> back again after. This is not necessarily 
+thread safe. See C<rt.cpan.org> bug C<#45671> for details.
 
 =back
 
