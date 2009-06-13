@@ -440,10 +440,13 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perlapi.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
+[.pod]perlmodlib.pod : [.pod]perlmodlib.pl MANIFEST $(MINIPERL_EXE)
+	$(MINIPERL) [.pod]perlmodlib.pl "-q"
+
 [.pod]perlintern.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
-[.pod]perltoc.pod : [.pod]perldelta.pod [.pod]perlapi.pod [.pod]perlintern.pod extra.pods $(PERL_EXE)
+[.pod]perltoc.pod : [.pod]perldelta.pod [.pod]perlapi.pod [.pod]perlintern.pod  [.pod]perlmodlib.pod extra.pods $(PERL_EXE)
 	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
 	$(PERL) [.pod]buildtoc "-q" "--build-toc"
 
@@ -1873,6 +1876,7 @@ clean : tidy cleantest cleanup_unpacked_files
 	- If F$Search("[.pod]perlapi.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlapi.pod;*
 	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
 	- If F$Search("[.pod]perlintern.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlintern.pod;*
+	- If F$Search("[.pod]perlmodlib.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlmodlib.pod;*
 	- If F$Search("[.pod]perltoc.pod").nes."" Then Delete/NoConfirm/Log [.pod]perltoc.pod;*
 	- @extra_pods CLEAN
 	- If F$Search("unpushed.h").nes."" Then Delete/NoConfirm/Log unpushed.h;*
