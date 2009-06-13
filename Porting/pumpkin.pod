@@ -505,7 +505,8 @@ Note that in the old days, you had to do C<make run_byacc> instead.
 
 =head2 make regen_all
 
-This target takes care of the regen_headers, and regen_pods targets.
+This target takes care of the regen_headers target.
+(It used to also call the regen_pods target, but that has been eliminated.)
 
 =head2 make regen_headers
 
@@ -531,10 +532,6 @@ command failed.  I eventually decided that I would save myself time
 and effort by manually running C<make regen_headers> myself rather
 than answering all the questions and complaints about the failing
 command.
-
-=head2 make regen_pods
-
-Will run `make regen_pods` in the pod directory for indexing. 
 
 =head2 global.sym, interp.sym and perlio.sym
 

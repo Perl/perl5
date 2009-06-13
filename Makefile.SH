@@ -1112,7 +1112,7 @@ AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 		perlapi.h perlapi.c regnodes.h \
 		warnings.h lib/warnings.pm
 
-.PHONY: regen_headers regen_pods regen_all
+.PHONY: regen_headers regen_all
 
 regen:	FORCE
 	-perl regen.pl
@@ -1120,10 +1120,7 @@ regen:	FORCE
 regen_headers:	FORCE
 	-perl regen.pl -v
 
-regen_pods:	FORCE
-	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods
-
-regen_all: regen regen_pods
+regen_all: regen
 
 .PHONY:	manisort manicheck
 
