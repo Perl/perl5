@@ -350,9 +350,11 @@ sub __memory_storable_file {
         File::Spec->catfile(
             $path,                          #base dir
             $conf->_get_source('stored')    #file
-            . '.' .
+            . '.s' .
             $Storable::VERSION              #the version of storable 
-            . '.stored'                     #append a suffix
+            . '.c' .
+            $self->VERSION                  #the version of CPANPLUS
+            . STORABLE_EXT                  #append a suffix
         )
     );
 

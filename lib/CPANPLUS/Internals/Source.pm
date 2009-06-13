@@ -191,14 +191,14 @@ sub _build_trees {
                 uptodate    => $uptodate,
                 path        => $path,
                 verbose     => $verbose, 
-        );
+        ) or return;
 
         ### and now the module tree
         $self->_create_mod_tree(
                 uptodate    => $uptodate,
                 path        => $path,
                 verbose     => $verbose, 
-        );
+        ) or return;
     }
     
     ### XXX unpleasant hack. since custom sources uses ->parse_module, we
@@ -628,20 +628,43 @@ sub _create_mod_tree {
         $ae->extract( to => $out )                              or return;
     }
 
-    my $cont    = $self->_get_file_contents( file => $out ) or return;
+    my $content = $self->_get_file_contents( file => $out ) or return;
+    my $lines   = $content =~ tr/\n/\n/;
 
     ### don't need it anymore ###
     unlink $out;
 
-    my $flag;
-
-    for ( split /\n/, $cont ) {
+    my($past_header, $count);
+    for ( split /\n/, $content ) {
 
         ### quick hack to read past the header of the file ###
         ### this is still rather evil... fix some time - Kane
-        $flag = 1 if m|^\s*$|;
-        next unless $flag;
-
+        if( m|^\s*$| ) {
+            unless( $count ) {
+                error(loc("Could not determine line count from %1", $file));
+                return;
+            }
+            $past_header = 1;
+        }            
+        
+        ### we're still in the header -- find the amount of lines we expect
+        unless( $past_header ) {
+            
+            ### if the line count doesn't match what we expect, bail out
+            ### this should address: #45644: detect broken index
+            $count = $1 if /^Line-Count:\s+(\d+)/;
+            if( $count ) {
+                if( $lines < $count ) {
+                    error(loc("Expected to read at least %1 lines, but %2 ".
+                              "contains only %3 lines!",
+                              $count, $file, $lines ));
+                    return;
+                }  
+            }
+            ### still in the header, keep moving
+            next;
+        }
+        
         ### skip empty lines ###
         next unless /\S/;
         chomp;

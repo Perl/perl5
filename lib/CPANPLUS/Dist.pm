@@ -319,7 +319,7 @@ sub find_configure_requires {
   
         unless( $doc ) {
             error(loc( "Could not read %1: '%2'", $meta, $@ ));
-            return;
+            return $configure_requires; # Causes problems if we don't return a hashref
         }
 
         ### read the configure_requires key, make sure not to throw

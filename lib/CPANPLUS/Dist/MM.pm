@@ -1,5 +1,6 @@
 package CPANPLUS::Dist::MM;
 
+use warnings;
 use strict;
 use vars    qw[@ISA $STATUS];
 use base    'CPANPLUS::Dist::Base';
@@ -216,14 +217,14 @@ sub prepare {
     }
     
     my $args;
-    my( $force, $verbose, $perl, $mmflags, $prereq_target, $prereq_format,
+    my( $force, $verbose, $perl, @mmflags, $prereq_target, $prereq_format,
         $prereq_build );
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             perl            => {    default => $^X, store => \$perl },
             makemakerflags  => {    default =>
                                         $conf->get_conf('makemakerflags') || '',
-                                    store => \$mmflags },                 
+                                    store => \$mmflags[0] },
             force           => {    default => $conf->get_conf('force'), 
                                     store   => \$force },
             verbose         => {    default => $conf->get_conf('verbose'), 
@@ -361,7 +362,7 @@ sub prepare {
             # my $cmd     = "$perl $flush $makefile_pl $mmflags";
 
             my $run_perl    = $conf->get_program('perlwrapper');
-            my $cmd         = "$perl $run_perl $makefile_pl $mmflags";
+            my $cmd         = [$perl, $run_perl, $makefile_pl, @mmflags];
 
             ### set ENV var to tell underlying code this is what we're
             ### executing.
@@ -540,7 +541,7 @@ sub create {
     
     my $args;
     my( $force, $verbose, $make, $makeflags, $skiptest, $prereq_target, $perl, 
-        $mmflags, $prereq_format, $prereq_build);
+        @mmflags, $prereq_format, $prereq_build);
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             perl            => {    default => $^X, store => \$perl },

@@ -152,6 +152,12 @@ SKIP: {
 
 
     SKIP: {   ### EU::Installed tests ###
+        ### EU::I sometimes fails. See:
+        ### #43292: ~/CPANPLUS-0.85_04 fails t/20_CPANPLUS-Dist-MM.t
+        ### #46890: ExtUtils::Installed + EU::MM PREFIX= don't always work
+        ### well together
+        skip( "ExtUtils::Installed issue #46890 prevents these tests from running reliably", 8 );
+    
     
         skip( "Old perl on cygwin detected " .
               "-- tests will fail due to known bugs", 8

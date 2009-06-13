@@ -14,6 +14,7 @@ use CPANPLUS::Backend::RV;
 use FileHandle;
 use File::Spec                  ();
 use File::Spec::Unix            ();
+use File::Basename              ();
 use Params::Check               qw[check];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
@@ -405,7 +406,7 @@ for my $func (qw[fetch extract install readme files distributions]) {
 
 =pod
 
-=head2 $mod_obj = $cb->parse_module( module => $modname|$distname|$modobj|URI )
+=head2 $mod_obj = $cb->parse_module( module => $modname|$distname|$modobj|URI|PATH )
 
 C<parse_module> tries to find a C<CPANPLUS::Module> object that
 matches your query. Here's a list of examples you could give to
@@ -429,12 +430,23 @@ C<parse_module>;
 
 =item file:///tmp/Text-Bastardize-1.06.tar.gz
 
+=item /tmp/Text-Bastardize-1.06
+
+=item ./Text-Bastardize-1.06
+
+=item .
+
 =back
 
 These items would all come up with a C<CPANPLUS::Module> object for
 C<Text::Bastardize>. The ones marked explicitly as being version 1.06
 would give back a C<CPANPLUS::Module> object of that version.
 Even if the version on CPAN is currently higher.
+
+The last three are examples of PATH resolution. In the first, we supply
+an absolute path to the unwrapped distribution. In the second the 
+distribution is relative to the current working directory.
+In the third, we will use the current working directory.
 
 If C<parse_module> is unable to actually find the module you are looking
 for in its module tree, but you supplied it with an author, module
@@ -478,6 +490,42 @@ sub parse_module {
         ### perhaps we can find it in the module tree?
         my $maybe = $self->module_tree($mod);
         return $maybe if IS_MODOBJ->( module => $maybe );
+    }
+
+    ### Special case arbitary file paths such as '.' etc.
+    if (-d File::Spec->rel2abs($mod) ) {
+        my $dir    = File::Spec->rel2abs($mod);
+        my $parent = File::Spec->rel2abs( File::Spec->catdir( $dir, '..' ) );
+
+        my $dist   = $mod = File::Basename::basename($dir);
+        $dist     .= '-0'      unless $dist =~ /\-[0-9._]+$/;
+        $dist     .= '.tar.gz' unless $dist =~ /\.[A-Za-z]+$/;
+
+        my $modobj = CPANPLUS::Module::Fake->new(
+                        module  => $mod,
+                        version => 0,
+                        package => $dist,
+                        path    => $parent,
+                        author  => CPANPLUS::Module::Author::Fake->new
+                    );
+
+        ### better guess for the version
+        $modobj->version( $modobj->package_version ) 
+            if defined $modobj->package_version;
+        
+        ### better guess at module name, if possible
+        if ( my $pkgname = $modobj->package_name ) {
+            $pkgname =~ s/-/::/g;
+        
+            ### no sense replacing it unless we changed something
+            $modobj->module( $pkgname ) 
+                if ($pkgname ne $modobj->package_name) || $pkgname !~ /-/;
+        }                
+
+        $modobj->status->fetch( $parent );
+        $modobj->status->extract( $dir );
+        $modobj->get_installer_type;
+        return $modobj;
     }
 
     ### ok, so it looks like a distribution then?

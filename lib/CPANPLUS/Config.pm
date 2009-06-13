@@ -487,7 +487,7 @@ set it to:
 =item editor
 
 A string holding the path to your editor of choice. Defaults to your
-$ENV{EDITOR}, $ENV{VISIUAL}, 'vi' or 'pico' programs, in that order.
+$ENV{EDITOR}, $ENV{VISUAL}, 'vi' or 'pico' programs, in that order.
 
 =cut
 
