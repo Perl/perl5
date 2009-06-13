@@ -239,7 +239,7 @@ have identical effect. This is a change to the behaviour documented for
 
 =item *
 
-C<Attribute::Handlers> upgraded from version 0.79 to 0.83
+C<Attribute::Handlers> upgraded from version 0.79 to 0.85
 
 =item *
 
@@ -291,7 +291,7 @@ C<Data::Dumper> upgraded from version 2.121_14 to 2.121_20
 
 =item *
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.17
+C<Devel::PPPort> upgraded from version 3.13 to 3.18
 
 =item *
 
@@ -394,6 +394,10 @@ C<IPC::SysV> upgraded from version 1.05 to 2.01
 
 =item *
 
+C<lib> upgraded from version 0.5565 to 0.62
+
+=item *
+
 C<Log::Message> upgraded from version 0.01 to 0.02
 
 =item *
@@ -426,7 +430,11 @@ C<Module::Pluggable> upgraded from version 3.6 to 3.9_01 XXX
 
 =item *
 
-C<NEXT> upgraded from version 0.60_01 to 0.63
+C<Net::Ping> upgraded from version 2.33 to 2.36
+
+=item *
+
+C<NEXT> upgraded from version 0.60_01 to 0.64
 
 =item *
 
@@ -479,7 +487,7 @@ C<Term::UI> upgraded from version 0.18 to 0.20
 
 =item *
 
-C<Test::Harness> upgraded from version 2.64 to 3.16
+C<Test::Harness> upgraded from version 2.64 to 3.17
 XXX major upgrade - add some blurb ???
 
 Note that one side-effect of the 2.x to 3.x upgrade is that the
@@ -506,7 +514,7 @@ C<Time::HiRes> upgraded from version 1.9711 to 1.9719
 
 =item *
 
-C<Time::Piece> upgraded from version 1.12 to 1.13_03 XXX
+C<Time::Piece> upgraded from version 1.12 to 1.14
 
 =item *
 

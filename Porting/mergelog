@@ -3060,8 +3060,7 @@ M  9519d2ec68 2009/05/12 Resurrect the Changes file as a simple guide to fi
 A  054b75b0ac 2009/05/12 Smart matching is to-done.
 A  ae20c3aa7c 2009/05/12 Register ~~ operator overloading in its own catego
 M  7214e7c31c 2009/05/12 add perl589delta.pod to blead
-!  5f320ac744 2009/05/12 Upgrade to Time-Piece-1.14
-			    wait for CPAN sync
+M  5f320ac744 2009/05/12 Upgrade to Time-Piece-1.14
 !  8177d4d97c 2009/05/12 Skip test for changing TZ if running in a pseudo-f
 			    wait for CPAN sync
 R  fc5be80860 2009/05/12 Add perl589delta.pod to pod.lst, and run pod/build
@@ -3290,26 +3289,69 @@ M  d9f203a523 2009/06/06 Mark all .t and .pm files as non executable
 M  04fe7e4318 2009/06/06 Synchronize with Data::Dumper 2.121_20 on CPAN
 M  3c4bf43449 2009/06/06 sync a bunch of files with Test::Simple 0.86
 M  d8ada404a5 2009/06/06 add more Maintianers.pl EXCLUDED and MAP fields
-.  01be072998 2009/06/07 main: Unregister signal handler before destroying 
-.  b762d86673 2009/06/07 Mask signals in thread creation and destruction to
-.  26618b64e8 2009/06/07 Bump version of threads.pm
-.  a39e16d8bc 2009/06/07 Upgrade to Test-Harness-3.17
-.  d2aa556d1d 2009/06/07 There is no pthread_sigmask on VMS, so use sigproc
+d  01be072998 2009/06/07 main: Unregister signal handler before destroying 
+		    see <1242849212-19840-1-git-send-email-john.wright@hp.com>
+d  b762d86673 2009/06/07 Mask signals in thread creation and destruction to
+d  26618b64e8 2009/06/07 Bump version of threads.pm
+M  a39e16d8bc 2009/06/07 Upgrade to Test-Harness-3.17
+d  d2aa556d1d 2009/06/07 There is no pthread_sigmask on VMS, so use sigproc
 !  c095625522 2009/06/08 Upgrade to MakeMaker 6.53_02
 !  e39d780342 2009/06/08 Add missing test boilerplates to new MakeMaker tes
 d  d7dfc388e0 2009/06/08 fix RT 39060, errno incorrectly set in perlio
-.  3c2847f4f8 2009/06/08 Upgrade NEXT to 0.64.
+			    see also fcac5cf149
+M  3c2847f4f8 2009/06/08 Upgrade NEXT to 0.64.
 M  2654429ed6 2009/06/08 add remaining Maintainers.pl EXCLUDED and MAP fiel
-.  c081cc94ad 2009/06/08 Bump lib.pm version to match CPAN release
-.  7083d81af9 2009/06/08 Errno is no longer dual-lived
-.  983ed8e949 2009/06/08 Jesse Vincent now maintains Test.pm
-.  59ea7c6d8e 2009/06/08 Sync bleadperl and Net-Ping with the release of Ne
-.  6283f212c4 2009/06/08 Update Maintainers.pl: Pod-Escapes and Test
-.  8e6b08e459 2009/06/08 Update Test.pm to CPAN's 1.25_02.
-.  9758931364 2009/06/08 t/op/my_stash.t should use test.pl instead of Test
-.  e8ee98b8d6 2009/06/08 Make h2xs add a dependency on Test.pm for < 5.6.2
-.  242a51a422 2009/06/09 Upgrade to threads 1.73
-.  e8514a9ea0 2009/06/09 Fix regression test for RT 63110 when running with
-.  344f2c40b1 2009/06/09 Revised description of => operator
-.  8264cf3272 2009/06/09 Mask thread signal handling fix on Win32
-.  fb22f0eaa0 2009/06/09 Add lib/NEXT/t/dynamically_scoped_regex_vars.t to 
+M  c081cc94ad 2009/06/08 Bump lib.pm version to match CPAN release
+M  7083d81af9 2009/06/08 Errno is no longer dual-lived
+M  983ed8e949 2009/06/08 Jesse Vincent now maintains Test.pm
+M  59ea7c6d8e 2009/06/08 Sync bleadperl and Net-Ping with the release of Ne
+M  6283f212c4 2009/06/08 Update Maintainers.pl: Pod-Escapes and Test
+M  8e6b08e459 2009/06/08 Update Test.pm to CPAN's 1.25_02.
+M  9758931364 2009/06/08 t/op/my_stash.t should use test.pl instead of Test
+d  e8ee98b8d6 2009/06/08 Make h2xs add a dependency on Test.pm for < 5.6.2
+d  242a51a422 2009/06/09 Upgrade to threads 1.73
+M  e8514a9ea0 2009/06/09 Fix regression test for RT 63110 when running with
+M  344f2c40b1 2009/06/09 Revised description of => operator
+d  8264cf3272 2009/06/09 Mask thread signal handling fix on Win32
+M  fb22f0eaa0 2009/06/09 Add lib/NEXT/t/dynamically_scoped_regex_vars.t to 
+d  bcbea5d217 2009/06/09 Fix threads build on Win32
+M  f6085ff72b 2009/06/09 Upgrade to Data::Dumper stable release 2.122
+M  23be15b77e 2009/06/09 Upgrade to Digest-1.16
+M  c8780a7366 2009/06/09 Upgrade to Digest-MD5-2.39
+M  dfed8d3771 2009/06/09 Upgrade to MIME-Base64-3.08
+M  af6a0f9e3d 2009/06/10 [PATCH] Filter-Util-Call (was RE: pmqs: dual life 
+M  12c541f435 2009/06/10 Upgrade Attribute::Handlers to 0.84
+d  26e8050aaf 2009/06/10 [perl #66452] TMPDIR not honored when opening an a
+			    see also 0b99e9860e
+R  454dbe4084 2009/06/10 Merge branch 'blead' of ssh://stevep@perl5.git.per
+				MERGE: 26e8050aaf 12c541f435
+!  75b0fd110a 2009/06/10 remove from blead, some files already removed from
+M  8bc7f08e00 2009/06/10 update comment in overload.pl following 813720522f
+M  92a24ac3df 2009/06/10 Small typo in example.
+d  0b99e9860e 2009/06/10 Do not honor TMPDIR for anonymous temporary files 
+M  f2e81f84c3 2009/06/11 Document findsym in Attribute::Handlers
+M  cc650b8bbb 2009/06/11 Sync to Data::Dumper 2.123
+d  7019aa1126 2009/06/11 Add t/benchmark to tests run if $ENV{PERL_BENCHMAR
+d  29b39dde48 2009/06/11 It's not necessary to hardcode skipping of benchma
+d  fcac5cf149 2009/06/11 Some portability and clean-up for errno.t.
+M  937f2ad5ba 2009/06/11 Make Compare.t work when filenames can't have whit
+M  55ae25dcfe 2009/06/12 Upgrade to Devel::PPPort 3.18
+!  8565c31a57 2009/06/12 Upgrade to Devel::PPPort 3.18_01
+			    wait for 3.19
+M  412304fbe6 2009/06/12 fix trivial typo in perldelta
+M  71605646f0 2009/06/12 bump lib/ExtUtils/Constant.pm version to 0.22 sinc
+M  7ac0cca805 2009/06/12 further sync blead with Net-Ping-2.36
+M  46ea7543fc 2009/06/12 trivial whitspace syncup between blead and CPAN Te
+M  d11aa99931 2009/06/12 update Porting/Maintainers.pl with recent module v
+M  85da676d83 2009/06/12 fully sync blead with B::Debug 1.11 (debug.t was o
+M  756b13bcb9 2009/06/12 sync lib/CPAN/SIGNATURE with its equivalent in the
+M  a8ac7c450a 2009/06/12 sync CPANPLUS-Dist-Build with CPAN (trivial whites
+M  622d33709f 2009/06/12 remove two files not part of the IO-Compress CPAN 
+M  cd4199a7a7 2009/06/12 sync lib/Locale/Maketext/ChangeLog from CPAN distr
+M  dc0ab4fe1a 2009/06/12 remove typo fix from LaTex.pm, to keep it in sync 
+M  5ffe72f324 2009/06/12 Improve the description of Pod/Stuff.pm in MANIFES
+M  66c0721227 2009/06/12 sync t/pod/pod2usage2.t with CPAN (trivial whitesp
+M  bf5dc52173 2009/06/12 sync lib/Pod/Simple/ChangeLog with CPAN
+M  e2868e4853 2009/06/12 remove ext/Storable/MANIFEST; its out of date rela
+M  b866c0be7f 2009/06/12 in Maintainers.pl, move Text-Tabs+Wrap to its corr
+M  1edf8e51d7 2009/06/12 sync ext/Text-Soundex/README with the CPAN version
