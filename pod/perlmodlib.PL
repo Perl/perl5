@@ -1,5 +1,8 @@
 #!../miniperl
 
+use strict;
+use warnings;
+
 $ENV{LC_ALL} = 'C';
 
 use FindBin;
@@ -34,46 +37,44 @@ for my $filename (@files) {
 	next;
     }
 
+    my ($name, $thing);
+    my $foundit = 0;
+    {
+	local $/ = "";
+	while (<MOD>) {
+	    next unless /^=head1 NAME/;
+	    $foundit++;
+	    last;
+	}
+    }
+    unless ($foundit) {
+	warn "$filename missing =head1 NAME (OK if respective .pod exists)\n"
+	    unless $Quiet;
+	next;
+    }
+    my $title = <MOD>;
+    chomp $title;
+    close MOD;
 
-     my ($name, $thing);
-     my $foundit=0;
-     {
-         local $/="";
-         while (<MOD>) {
-             next unless /^=head1 NAME/;
-             $foundit++;
-             last;
-         }
-     }
-     unless ($foundit) {
-         warn "$filename missing =head1 NAME (OK if respective .pod exists)\n"
-	     unless $Quiet;
-         next;
-     }
-     my $title = <MOD>;
-     chomp($title);
-     close MOD;
+    ($name, $thing) = split / --? /, $title, 2;
 
-     ($name, $thing) = split / --? /, $title, 2;
+    unless ($name and $thing) {
+	warn "$filename missing name\n"  unless $name;
+	warn "$filename missing thing\n" unless $thing or $Quiet;
+	next;
+    }
 
-     unless ($name and $thing) {
-         warn "$filename missing name\n"  unless $name;
-         warn "$filename missing thing\n" unless $thing or $Quiet;
-         next;
-     }
+    $name =~ s/[^A-Za-z0-9_:\$<>].*//;
+    $name = $exceptions{$name} || $name;
+    $thing =~ s/^perl pragma to //i;
+    $thing = ucfirst $thing;
+    $title = "=item $name\n\n$thing\n\n";
 
-     $name =~ s/[^A-Za-z0-9_:\$<>].*//;
-     $name = $exceptions{$name} || $name;
-     $thing =~ s/^perl pragma to //i;
-     $thing = ucfirst($thing);
-     $title = "=item $name\n\n$thing\n\n";
-
-     if ($name =~ /[A-Z]/) {
-          push @mod, $title;
-     } else {
-          push @pragma, $title;
-     }
-
+    if ($name =~ /[A-Z]/) {
+	push @mod, $title;
+    } else {
+	push @pragma, $title;
+    }
 }
 
 # Much easier to special case it like this than special case the depending on
