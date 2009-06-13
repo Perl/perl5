@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.50";
+$VERSION                = "1.52";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -2038,6 +2038,30 @@ encoded in a different way.
 
 =back
 
+=head1 CAVEATS
+
+The AIX tar does not fill all unused space in the tar archive with 0x00. 
+This sometimes leads to warning messages from C<Archive::Tar>.
+
+  Invalid header block at offset nnn
+
+A fix for that problem is scheduled to be released in the following levels
+of AIX, all of which should be coming out in the 4th quarter of 2009:
+
+ AIX 5.3 TL7 SP10
+ AIX 5.3 TL8 SP8
+ AIX 5.3 TL9 SP5
+ AIX 5.3 TL10 SP2
+ 
+ AIX 6.1 TL0 SP11
+ AIX 6.1 TL1 SP7
+ AIX 6.1 TL2 SP6
+ AIX 6.1 TL3 SP3
+
+The IBM APAR number for this problem is IZ50240 (Reported component ID: 
+5765G0300 / AIX 5.3). It is possible to get an ifix for that problem. 
+If you need an ifix please contact your local IBM AIX support.
+
 =head1 TODO
 
 =over 4
@@ -2094,12 +2118,12 @@ Please reports bugs to E<lt>bug-archive-tar@rt.cpan.orgE<gt>.
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to Sean Burke, Chris Nandor, Chip Salzenberg, Tim Heaney, Gisle Aas
-and especially Andrew Savige for their help and suggestions.
+Thanks to Sean Burke, Chris Nandor, Chip Salzenberg, Tim Heaney, Gisle Aas,
+Rainer Tammer and especially Andrew Savige for their help and suggestions.
 
 =head1 COPYRIGHT
 
-This module is copyright (c) 2002 - 2008 Jos Boumans
+This module is copyright (c) 2002 - 2009 Jos Boumans
 E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
 This library is free software; you may redistribute and/or modify
