@@ -16,7 +16,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $WARN
                     ];
 
-    $VERSION        = '0.44';
+    $VERSION        = '0.46';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -344,6 +344,8 @@ sub run {
                          Params::Check->last_error ) );
         return;
     };        
+
+    $cmd = _quote_args_vms( $cmd ) if IS_VMS;
 
     ### strip any empty elements from $cmd if present
     $cmd = [ grep { length && defined } @$cmd ] if ref $cmd;
@@ -743,6 +745,41 @@ sub _system_run {
 
         return $cmd;
     }
+}
+
+### Command-line arguments (but not the command itself) must be quoted
+### to ensure case preservation. Borrowed from Module::Build with adaptations.
+### Patch for this supplied by Craig Berry, see RT #46288: [PATCH] Add argument
+### quoting for run() on VMS
+sub _quote_args_vms {
+  ### Returns a command string with proper quoting so that the subprocess
+  ### sees this same list of args, or if we get a single arg that is an
+  ### array reference, quote the elements of it (except for the first)
+  ### and return the reference.
+  my @args = @_;
+  my $got_arrayref = (scalar(@args) == 1
+                      && UNIVERSAL::isa($args[0], 'ARRAY'))
+                   ? 1
+                   : 0;
+
+  @args = split(/\s+/, $args[0]) unless $got_arrayref || scalar(@args) > 1;
+
+  my $cmd = $got_arrayref ? shift @{$args[0]} : shift @args;
+
+  ### Do not quote qualifiers that begin with '/' or previously quoted args.
+  map { if (/^[^\/\"]/) {
+          $_ =~ s/\"/""/g;     # escape C<"> by doubling
+          $_ = q(").$_.q(");
+        }
+  }
+    ($got_arrayref ? @{$args[0]}
+                   : @args
+    );
+
+  $got_arrayref ? unshift(@{$args[0]}, $cmd) : unshift(@args, $cmd);
+
+  return $got_arrayref ? $args[0]
+                       : join(' ', @args);
 }
 
 
