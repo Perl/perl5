@@ -35,16 +35,12 @@ my %suppressed = map {$_ => 1} qw(
 
 for (@MANIFEST) {
     my $filename;
-    next unless s|^lib/|| or m|^ext/|;
-    my ($origfilename) = ($filename) = m|^(\S+)|;
-    $filename =~ s|^[^/]+/|| if $filename =~ s|^ext/||;
+    next unless m|^lib/| or m|^ext/|;
+    my ($filename) = m|^(\S+)|;
     next unless $filename =~ m!\.p(m|od)$!;
-    unless (open (MOD, "../lib/$filename")) {
-        unless (open (MOD, "../$origfilename")) {
-            warn "Couldn't open ../$origfilename: $!";
-            next;
-        }
-        $filename = $origfilename;
+    unless (open MOD, '<', "../$filename") {
+	warn "Couldn't open ../$filename: $!";
+	next;
     }
 
 
