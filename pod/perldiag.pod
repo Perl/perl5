@@ -2421,7 +2421,7 @@ can vary from one line to the next.
 
 =item Missing right brace on %s
 
-(F) Missing right brace in C<\p{...}> or C<\P{...}>.
+(F) Missing right brace in C<\x{...}>, C<\p{...}> or C<\P{...}>.
 
 =item Missing right curly or square bracket
 
