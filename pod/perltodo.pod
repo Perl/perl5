@@ -1101,6 +1101,12 @@ combines the code in pp_entersub, pp_leavesub.  This should probably
 be done 1st in XS, and using B::Generate to patch the new OP into the
 optrees.
 
+=head2 C<\N>
+
+It should be possible to add a C<\N> regex assertion, meaning "every
+character except C<\n>° independently of the context. That would
+of course imply that C<\N> couldn't be followed by an opening C<{>.
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
