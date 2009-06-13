@@ -777,8 +777,8 @@ double.  Checks the B<private> setting.  Use C<SvNIOK> instead.
 Unsets the NV/IV status of an SV.
 
 =for apidoc Am|U32|SvOK|SV* sv
-Returns a U32 value indicating whether the value is an SV. It also tells
-whether the value is defined or not.
+Returns a U32 value indicating whether the value is defined. This is
+only meaningful for scalars.
 
 =for apidoc Am|U32|SvIOKp|SV* sv
 Returns a U32 value indicating whether the SV contains an integer.  Checks
@@ -1643,7 +1643,7 @@ otherwise use the more efficient C<SvUV>.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
-false, defined or undefined.  Does not handle 'get' magic.
+false.  See SvOK() for a defined/undefined test.  Does not handle 'get' magic.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts sv to utf8 first if necessary.
