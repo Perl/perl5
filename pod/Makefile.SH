@@ -71,10 +71,6 @@ all: $(CONVERTERS) man
 
 converters: $(CONVERTERS)
 
-regen_pods: perlmodlib.pod toc
-
-perltoc.pod:	buildtoc
-
 man:	pod2man $(MAN)
 
 html:	pod2html $(HTML)
@@ -150,9 +146,5 @@ podchecker:	podchecker.PL ../lib/Config.pm
 
 podselect:	podselect.PL ../lib/Config.pm
 	$(PERL) -I ../lib podselect.PL
-
-perlmodlib.pod:	$(PERL) perlmodlib.PL ../MANIFEST
-	rm -f perlmodlib.pod
-	$(PERL) -I ../lib perlmodlib.PL
 
 !NO!SUBS!
