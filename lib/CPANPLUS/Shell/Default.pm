@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.87_01";
+    $VERSION = "0.87_02";
 }
 
 load CPANPLUS::Shell;
@@ -538,7 +538,7 @@ loc('[Operations]'                                                              
 loc('    i MODULE | NUMBER ...  # install module(s), by name or by search number'   ),
 loc('    i URI | ...            # install module(s), by URI (ie http://foo.com/X.tgz)'   ),
 loc('    i DIR | ...            # install module(s), by path (ie ./Module-1.0)'   ),
-\loc('    t MODULE | NUMBER ...  # test module(s), by name or by search number'      ),
+loc('    t MODULE | NUMBER ...  # test module(s), by name or by search number'      ),
 loc('    u MODULE | NUMBER ...  # uninstall module(s), by name or by search number' ),
 loc('    d MODULE | NUMBER ...  # download module(s)'                               ),
 loc('    l MODULE | NUMBER ...  # display detailed information about module(s)'     ),
