@@ -39,7 +39,7 @@ package Maintainers;
     'jesse'   	=> 'Jesse Vincent <jesse@bestpractical.com>',
     'jhi'	=> 'Jarkko Hietaniemi <jhi@cpan.org>',
     'jjore'	=> 'Joshua ben Jore <jjore@cpan.org>',
-    'jpeacock'	=> 'John Peacock <jpeacock@rowman.com>',
+    'jpeacock'	=> 'John Peacock <jpeacock@cpan.org>',
     'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
     'jv'	=> 'Johan Vromans <jv@cpan.org>',
     'kane'	=> 'Jos Boumans <kane@cpan.org>',
@@ -478,7 +478,7 @@ package Maintainers;
     'Digest' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/Digest-1.15.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/Digest-1.16.tar.gz',
 	'FILES'		=> q[lib/Digest.pm lib/Digest],
 	'EXCLUDED'	=> [ qw{digest-bench} ],
 	'MAP'		=> { 'Digest/'	=> 'lib/Digest/',
@@ -492,7 +492,7 @@ package Maintainers;
     'Digest::MD5' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/Digest-MD5-2.38.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/Digest-MD5-2.39.tar.gz',
 	'FILES'		=> q[ext/Digest-MD5],
 	'EXCLUDED'	=> [ qw{rfc1321.txt} ],
 	'CPAN'		=> 1,
@@ -1112,7 +1112,7 @@ package Maintainers;
     'MIME::Base64' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.07.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.08.tar.gz',
 	'FILES'		=> q[ext/MIME-Base64],
 	'EXCLUDED'	=> [ qw{ t/bad-sv.t }, ],
 	'CPAN'		=> 1,
