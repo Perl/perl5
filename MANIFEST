@@ -2692,8 +2692,8 @@ lib/NEXT.pm			Pseudo-class NEXT for method redispatch
 lib/NEXT/README			NEXT
 lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
-lib/NEXT/t/next.t		NEXT
 lib/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
+lib/NEXT/t/next.t		NEXT
 lib/NEXT/t/stringify.t	NEXT
 lib/NEXT/t/unseen.t		NEXT
 lib/Object/Accessor.pm	Object::Accessor
