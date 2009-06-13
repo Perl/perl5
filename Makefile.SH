@@ -467,7 +467,7 @@ mini_obj =  $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 ndt_obj = $(obj0) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 obj = $(ndt_obj) $(DTRACE_O)
 
-perltoc_pod_prereqs = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod
+perltoc_pod_prereqs = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod pod/perlmodlib.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 
 lintflags = \
@@ -1025,6 +1025,9 @@ pod/perltoc.pod: $(perltoc_pod_prereqs) perl$(EXE_EXT) $(ext) pod/buildtoc
 
 pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
+
+pod/perlmodlib.pod: miniperl$(EXE_EXT) pod/perlmodlib.PL MANIFEST
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib pod/perlmodlib.PL -q
 
 pod/perldelta.pod: pod/perl5101delta.pod
 	$(LNS) perl5101delta.pod pod/perldelta.pod

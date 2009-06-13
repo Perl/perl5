@@ -1460,6 +1460,7 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(PERLEXE) ..\autodoc.pl ..
+	$(PERLEXE) ..\pod\perlmodlib.pl -q
 	$(PERLEXE) ..\pod\buildtoc --build-toc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
@@ -1528,11 +1529,11 @@ distclean: realclean
 	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmachten.pod perlmacos.pod perlmacosx.pod \
-	    perlmint.pod perlmpeix.pod perlnetware.pod perlopenbsd.pod \
-	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
-	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \
-	    perltoc.pod perltru64.pod perltw.pod perluts.pod perlvmesa.pod \
-	    perlvos.pod perlwin32.pod \
+	    perlmint.pod perlmodlib.pod perlmpeix.pod perlnetware.pod \
+	    perlopenbsd.pod perlos2.pod perlos390.pod perlos400.pod \
+	    perlplan9.pod perlqnx.pod perlriscos.pod perlsolaris.pod \
+	    perlsymbian.pod perltoc.pod perltru64.pod perltw.pod \
+	    perluts.pod perlvmesa.pod perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \

@@ -3628,7 +3628,6 @@ pod/perllocale.pod		Perl locale support
 pod/perllol.pod			Perl data structures: arrays of arrays
 pod/perlmodinstall.pod		Perl modules: how to install from CPAN
 pod/perlmodlib.PL		Generate pod/perlmodlib.pod
-pod/perlmodlib.pod		Perl modules: how to write and use
 pod/perlmod.pod			Perl modules: how they work
 pod/perlmodstyle.pod		Perl modules: how to write modules with style
 pod/perlnewmod.pod		Perl modules: preparing a new module for distribution
