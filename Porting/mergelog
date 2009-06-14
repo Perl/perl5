@@ -1256,7 +1256,7 @@ M  ea581a515b 2008/09/07 34312
 M  cd1b270f96 2008/09/07 34314
 M  3551ef6f06 2008/09/08 34315
 M  c1c45e367d 2008/09/08 34316
-M  5a20539ce2 2008/09/08 34317
+M  5a20539ce2 2008/09/08 34317 see also 54d0eb3cfc
 M  f0cb210418 2008/09/08 34318
 M  2234743e59 2008/09/08 34319
 M  f8a128a908 2008/09/08 34320
@@ -2596,8 +2596,7 @@ M  8d4c519e13 2009/03/03 Add contact info for Simon Wistow in Porting/Maint
 M  32a618150c 2009/03/03 Add Parse::CPAN::Meta to Porting/Maintainers.pl
 M  c59d1bfa19 2009/03/03 Update Parse::CPAN::Meta to 0.04_01
 M  8f42c23d28 2009/03/04 Add a failing test for stack corruption with MULTI
-!  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
-			    waiting for CPAN sync
+M  e74f3fd4b4 2009/03/04 Update Archive::Extract to 0.31_02
 A  f92e1a16ee 2009/03/04 Make // behave like || in when clauses
 A  516817b472 2009/03/04 Document that when() treats specially most of the 
 A  aa2407c5c4 2009/03/04 Remove TODO tests about && in when() clauses
@@ -2632,8 +2631,7 @@ M  edd52d85e4 2009/03/10 Fix a printf compilation warning
 M  b92436812d 2009/03/11 Merge Attribute::Handlers 0.82 into core
 M  7cc1b246ee 2009/03/11 Merge Parse::CPAN::Meta 0.05 into core
 M  701602e6f2 2009/03/11 [PATCH] Update CPANPLUS::Dist::Build to 0.14
-!  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
-			    wait for CPAN sync
+M  7bb74d351e 2009/03/11 [PATCH] Update Archive::Extract to 0.31_03
 A  85af77a509 2009/03/12 Some tests reorgarnisation for ~~ against undef an
 M  34a81e2b89 2009/03/12 Fix #56194 Regex: (((??{1 + $^N}))) behaves differ
 M  3a7a94e274 2009/03/13 Make eval{} (entertry) trappable by Safe
@@ -3355,3 +3353,17 @@ M  bf5dc52173 2009/06/12 sync lib/Pod/Simple/ChangeLog with CPAN
 M  e2868e4853 2009/06/12 remove ext/Storable/MANIFEST; its out of date rela
 M  b866c0be7f 2009/06/12 in Maintainers.pl, move Text-Tabs+Wrap to its corr
 M  1edf8e51d7 2009/06/12 sync ext/Text-Soundex/README with the CPAN version
+M  f46c322273 2009/06/12 Update perlmodlib.PL to accomodate the re-arrangin
+R  176cb5a0e1 2009/06/12 Regenerated perlmodlib.pod
+			    now done at build time
+.  5abfb2931e 2009/06/13 FindBin doesn't need to use Config;
+R  a9df907534 2009/06/13 Resort MANIFEST.
+			    did manually instead
+M  c0b6140e88 2009/06/13 Make SvOK and SvTRUE API docs slightly less utterl
+M  0228b1bbd4 2009/06/13 Update to Archive::Extract 0.32
+.  1c82faa772 2009/06/13 Update to Archive::Tar 1.50
+.  a0995fd479 2009/06/13 Update to CPANPLUS 0.87_01
+.  26ad458aeb 2009/06/13 Update CPANPLUS::Dist::Build to CPAN version 0.34
+M  e8041d9b83 2009/06/13 In perlmodlib.PL, just open files in their origina
+M  291c64f4c0 2009/06/13 Make perlmodlib.PL chdir into pod. Add a -q flag t
+M  6e2c892858 2009/06/13 Generate perlmodlib.pod at build time, instead of 

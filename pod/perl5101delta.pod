@@ -243,7 +243,7 @@ C<Attribute::Handlers> upgraded from version 0.79 to 0.85
 
 =item *
 
-C<Archive::Extract> upgraded from version 0.24 to 0.30
+C<Archive::Extract> upgraded from version 0.24 to 0.32
 
 =item *
 
