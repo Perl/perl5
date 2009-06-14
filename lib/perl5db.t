@@ -27,7 +27,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(4);
+plan(5);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -89,6 +89,16 @@ like($contents, qr/sub factorial/,
     like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
 }
 
+{
+    if ( $Config{usethreads} ) {
+        skip('This perl has threads, skipping non-threaded debugger tests');
+    } else {
+        my $error = 'This Perl not built to support threads';
+        my $output = runperl( switches => [ '-dt' ] );
+        like($output, qr/$error/, 'Perl debugger correctly complains that it was not built with threads');
+    }
+
+}
 {
     if ( $Config{usethreads} ) {
         local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
