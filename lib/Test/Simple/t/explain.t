@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: /mirror/googlecode/test-more/t/explain.t 60308 2008-09-07T22:36:18.175234Z schwern  $
+# $Id$
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

@@ -2,7 +2,6 @@
 use strict;
 use Benchmark;
 require './test.pl';
-skip_all("Benchmark tests not enabled") unless $ENV{PERL_BENCHMARK};
 plan(tests => 6);
 
 =head1 NAME

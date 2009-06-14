@@ -19,11 +19,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -60,7 +60,8 @@ sub _error {
 BEGIN {
 
     @FORMATTER_ARGS = qw(
-      directives verbosity timer failures errors stdout color show_count
+      directives verbosity timer failures comments errors stdout color
+      show_count normalize
     );
 
     %VALIDATION_FOR = (
@@ -80,7 +81,6 @@ BEGIN {
         scheduler_class   => sub { shift; shift },
         formatter         => sub { shift; shift },
         jobs              => sub { shift; shift },
-        fork              => sub { shift; shift },
         test_args         => sub { shift; shift },
         ignore_exit       => sub { shift; shift },
         rules             => sub { shift; shift },
@@ -133,7 +133,7 @@ BEGIN {
 
  my %args = (
     verbosity => 1,
-    lib     => [ 'lib', 'blib/lib' ],
+    lib     => [ 'lib', 'blib/lib', 'blib/arch' ],
  )
  my $harness = TAP::Harness->new( \%args );
 
@@ -160,11 +160,19 @@ available.
 
 =item * C<failures>
 
-Only show test failures (this is a no-op if C<verbose> is selected).
+Show test failures (this is a no-op if C<verbose> is selected).
+
+=item * C<comments>
+
+Show test comments (this is a no-op if C<verbose> is selected).
 
 =item * C<show_count>
 
 Update the running test count during testing.
+
+=item * C<normalize>
+
+Set to a true value to normalize the TAP that is emitted in verbose modes.
 
 =item * C<lib>
 
@@ -212,6 +220,9 @@ TAP::Harness will fall back on executing the test script in Perl:
         return [ qw( /usr/bin/ruby -w ), $test_file ]
           if $test_file =~ /[.]rb$/;
       }
+
+If the subroutine returns a scalar with a newline or a filehandle, it
+will be interpreted as raw TAP or as a TAP stream, respectively.
 
 =item * C<merge>
 
@@ -273,12 +284,6 @@ status from test scripts.
 The maximum number of parallel tests to run at any time.  Which tests
 can be run in parallel is controlled by C<rules>.  The default is to
 run only one test at a time.
-
-=item * C<fork>
-
-If true the harness will attempt to fork and run the parser for each
-test in a separate process. Currently this option requires
-L<Parallel::Iterator> to be installed.
 
 =item * C<rules>
 
@@ -349,7 +354,7 @@ Any keys for which the value is C<undef> will be ignored.
         $self->jobs(1) unless defined $self->jobs;
 
         local $default_class{formatter_class} = 'TAP::Formatter::File'
-          unless -t ( $arg_for{stdout} || \*STDOUT );
+          unless -t ( $arg_for{stdout} || \*STDOUT ) && !$ENV{HARNESS_NOTTY};
 
         while ( my ( $attr, $class ) = each %default_class ) {
             $self->$attr( $self->$attr() || $class );
@@ -446,47 +451,6 @@ sub _after_test {
 
     $self->_make_callback( 'after_test', $job->as_array_ref, $parser );
     $aggregate->add( $job->description, $parser );
-}
-
-sub _aggregate_forked {
-    my ( $self, $aggregate, $scheduler ) = @_;
-
-    eval { require Parallel::Iterator };
-
-    croak "Parallel::Iterator required for --fork option ($@)"
-      if $@;
-
-    my $iter = Parallel::Iterator::iterate(
-        { workers => $self->jobs || 0 },
-        sub {
-            my $job = shift;
-
-            return if $job->is_spinner;
-
-            my ( $parser, $session ) = $self->make_parser($job);
-
-            while ( defined( my $result = $parser->next ) ) {
-                $self->_bailout($result) if $result->is_bailout;
-            }
-
-            $self->finish_parser( $parser, $session );
-
-            # Can't serialise coderefs...
-            delete $parser->{_iter};
-            delete $parser->{_stream};
-            delete $parser->{_grammar};
-            return $parser;
-        },
-        sub { $scheduler->get_job }
-    );
-
-    while ( my ( $job, $parser ) = $iter->() ) {
-        next if $job->is_spinner;
-        $self->_after_test( $aggregate, $job, $parser );
-        $job->finish;
-    }
-
-    return;
 }
 
 sub _bailout {
@@ -629,12 +593,7 @@ sub aggregate_tests {
     $self->formatter->prepare( map { $_->description } $scheduler->get_all );
 
     if ( $self->jobs > 1 ) {
-        if ( $self->fork ) {
-            $self->_aggregate_forked( $aggregate, $scheduler );
-        }
-        else {
-            $self->_aggregate_parallel( $aggregate, $scheduler );
-        }
+        $self->_aggregate_parallel( $aggregate, $scheduler );
     }
     else {
         $self->_aggregate_single( $aggregate, $scheduler );
@@ -675,12 +634,6 @@ sub make_scheduler {
 Gets or sets the number of concurrent test runs the harness is
 handling.  By default, this value is 1 -- for parallel testing, this
 should be set higher.
-
-=head3 C<fork>
-
-If true the harness will attempt to fork and run the parser for each
-test in a separate process. Currently this option requires
-L<Parallel::Iterator> to be installed.
 
 =cut
 
@@ -752,7 +705,12 @@ sub _get_parser_args {
           = ref $exec eq 'CODE'
           ? $exec->( $self, $test_prog )
           : [ @$exec, $test_prog ];
-        $args{source} = $test_prog unless $args{exec};
+        if ( not defined $args{exec} ) {
+            $args{source} = $test_prog;
+        }
+        elsif ( ( ref( $args{exec} ) || "" ) ne "ARRAY" ) {
+            $args{source} = delete $args{exec};
+        }
     }
     else {
         $args{source} = $test_prog;

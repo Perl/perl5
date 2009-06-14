@@ -44,11 +44,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -207,9 +207,10 @@ sub _new_harness {
     my $sub_args = shift || {};
 
     my ( @lib, @switches );
-    for my $opt ( split_shell( $Switches, $ENV{HARNESS_PERL_SWITCHES} ) ) {
+    my @opt = split_shell( $Switches, $ENV{HARNESS_PERL_SWITCHES} );
+    while ( my $opt = shift @opt ) {
         if ( $opt =~ /^ -I (.*) $ /x ) {
-            push @lib, $1;
+            push @lib, length($1) ? $1 : shift @opt;
         }
         else {
             push @switches, $opt;
@@ -239,9 +240,6 @@ sub _new_harness {
         for my $opt ( split /:/, $env_opt ) {
             if ( $opt =~ /^j(\d*)$/ ) {
                 $args->{jobs} = $1 || 9;
-            }
-            elsif ( $opt eq 'f' ) {
-                $args->{fork} = 1;
             }
             elsif ( $opt eq 'c' ) {
                 $args->{color} = 1;

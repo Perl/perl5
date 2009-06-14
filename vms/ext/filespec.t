@@ -156,6 +156,7 @@ __down_:[__the_.__garden_.__path_...]  unixpath        /__down_/__the_/__garden_
 __down_/__the_/__garden_/__path_       vmspath [.__down_.__the_.__garden_.__path_] ^
 __path_        vmspath [.__path_] ^
 /	vmspath	sys$disk:[000000] ^*
+/sys$scratch	vmspath	sys$scratch: ^
 
 # Redundant characters in Unix paths
 //__some_/__where_//__over_/../__the_.__rainbow_       vmsify  __some_:[__where_]__the_.__rainbow_ __some_:[__where_.__over_.-]__the_.__rainbow_

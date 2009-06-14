@@ -1,5 +1,5 @@
 package NEXT;
-$VERSION = '0.63';
+$VERSION = '0.64';
 use Carp;
 use strict;
 use overload ();
@@ -42,8 +42,8 @@ sub NEXT::ELSEWHERE::buildAUTOLOAD
         my $caller = (caller($depth))[3];
         my $wanted = $NEXT::AUTOLOAD || $autoload_name;
         undef $NEXT::AUTOLOAD;
-        my ($caller_class, $caller_method) = $caller =~ m{(.*)::(.*)}g;
-        my ($wanted_class, $wanted_method) = $wanted =~ m{(.*)::(.*)}g;
+        my ($caller_class, $caller_method) = do { $caller =~ m{(.*)::(.*)}g };
+        my ($wanted_class, $wanted_method) = do { $wanted =~ m{(.*)::(.*)}g };
         croak "Can't call $wanted from $caller"
             unless $caller_method eq $wanted_method;
 
@@ -78,20 +78,20 @@ sub NEXT::ELSEWHERE::buildAUTOLOAD
             $NEXT::SEEN->{$key,*{$caller}{CODE}}++;
         }
         my $call_method = shift @{$NEXT::NEXT{$key,$wanted_method}};
-        while ($wanted_class =~ /^NEXT\b.*\b(UNSEEN|DISTINCT)\b/
+        while (do { $wanted_class =~ /^NEXT\b.*\b(UNSEEN|DISTINCT)\b/ }
             && defined $call_method
             && $NEXT::SEEN->{$key,$call_method}++) {
             $call_method = shift @{$NEXT::NEXT{$key,$wanted_method}};
         }
         unless (defined $call_method) {
-            return unless $wanted_class =~ /^NEXT:.*:ACTUAL/;
+            return unless do { $wanted_class =~ /^NEXT:.*:ACTUAL/ };
             (local $Carp::CarpLevel)++;
             croak qq(Can't locate object method "$wanted_method" ),
                 qq(via package "$caller_class");
         };
         return $self->$call_method(@_[1..$#_]) if ref $call_method eq 'CODE';
         no strict 'refs';
-        ($wanted_method=${$caller_class."::AUTOLOAD"}) =~ s/.*:://
+        do { ($wanted_method=${$caller_class."::AUTOLOAD"}) =~ s/.*::// }
             if $wanted_method eq 'AUTOLOAD';
         $$call_method = $caller_class."::NEXT::".$wanted_method;
         return $call_method->(@_);
@@ -121,7 +121,7 @@ sub EVERY::ELSEWHERE::buildAUTOLOAD {
         my $caller = (caller($depth))[3];
         my $wanted = $EVERY::AUTOLOAD || $autoload_name;
         undef $EVERY::AUTOLOAD;
-        my ($wanted_class, $wanted_method) = $wanted =~ m{(.*)::(.*)}g;
+        my ($wanted_class, $wanted_method) = do { $wanted =~ m{(.*)::(.*)}g };
 
         my $key = ref($self) && overload::Overloaded($self)
             ? overload::StrVal($self) : $self;
@@ -133,7 +133,7 @@ sub EVERY::ELSEWHERE::buildAUTOLOAD {
 
         my @forebears = NEXT::ELSEWHERE::ordered_ancestors ref $self || $self,
                                         $wanted_class;
-        @forebears = reverse @forebears if $wanted_class =~ /\bLAST\b/;
+        @forebears = reverse @forebears if do { $wanted_class =~ /\bLAST\b/ };
         no strict 'refs';
         my %seen;
         my @every = map { my $sub = "${_}::$wanted_method";

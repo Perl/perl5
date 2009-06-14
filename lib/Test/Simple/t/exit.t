@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: /mirror/googlecode/test-more/t/exit.t 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
+# $Id$
 
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;

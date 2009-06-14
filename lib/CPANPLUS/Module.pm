@@ -677,7 +677,7 @@ sub get_installer_type {
 
     ### ok, so it's a 'build' installer, but you don't /have/ module build
     ### XXX duplicated from CPANPLUS::Selfupdate. fix somehow?
-    if( $type eq INSTALLER_BUILD and (
+    if( $type and $type eq INSTALLER_BUILD and (
         not CPANPLUS::Dist->has_dist_type( INSTALLER_BUILD )
         or not $cb->module_tree( INSTALLER_BUILD )
                     ->is_uptodate( version => '0.24' )

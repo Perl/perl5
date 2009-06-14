@@ -1784,12 +1784,14 @@ PerlIO_has_base(PerlIO *f)
 int
 PerlIO_fast_gets(PerlIO *f)
 {
-    if (PerlIOValid(f) && (PerlIOBase(f)->flags & PERLIO_F_FASTGETS)) {
-	 const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
+    if (PerlIOValid(f)) {
+	 if (PerlIOBase(f)->flags & PERLIO_F_FASTGETS) {
+	     const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 
-	 if (tab)
-	      return (tab->Set_ptrcnt != NULL);
-	 SETERRNO(EINVAL, LIB_INVARG);
+	     if (tab)
+		  return (tab->Set_ptrcnt != NULL);
+	     SETERRNO(EINVAL, LIB_INVARG);
+	 }
     }
     else
 	 SETERRNO(EBADF, SS_IVCHAN);
@@ -5172,18 +5174,30 @@ PerlIO_tmpfile(void)
 	  f = PerlIO_fdopen(fd, "w+b");
 #else /* WIN32 */
 #    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
-     SV * const sv = newSVpvs("/tmp/PerlIO_XXXXXX");
+     int fd = -1;
+     char tempname[] = "/tmp/PerlIO_XXXXXX";
+     const char * const tmpdir = PL_tainting ? NULL : PerlEnv_getenv("TMPDIR");
+     SV * const sv = tmpdir && *tmpdir ? newSVpv(tmpdir, 0) : NULL;
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
-     const int fd = mkstemp(SvPVX(sv));
+     if (sv) {
+	 /* if TMPDIR is set and not empty, we try that first */
+	 sv_catpv(sv, tempname + 4);
+	 fd = mkstemp(SvPVX(sv));
+     }
+     if (fd < 0) {
+	 /* else we try /tmp */
+	 fd = mkstemp(tempname);
+     }
      if (fd >= 0) {
 	  f = PerlIO_fdopen(fd, "w+");
 	  if (f)
 	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-	  PerlLIO_unlink(SvPVX_const(sv));
+	  PerlLIO_unlink(sv ? SvPVX_const(sv) : tempname);
      }
-     SvREFCNT_dec(sv);
+     if (sv)
+	 SvREFCNT_dec(sv);
 #    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
      FILE * const stdio = PerlSIO_tmpfile();
 

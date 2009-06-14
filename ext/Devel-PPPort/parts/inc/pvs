@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 9 $
+##  $Revision: 11 $
 ##  $Author: mhx $
-##  $Date: 2009/01/18 14:10:52 +0100 $
+##  $Date: 2009/06/12 12:19:15 +0200 $
 ##
 ################################################################################
 ##
@@ -34,6 +34,10 @@ __UNDEFINED__  sv_catpvs(sv, str)          sv_catpvn(sv, str "", sizeof(str) - 1
 __UNDEFINED__  sv_setpvs(sv, str)          sv_setpvn(sv, str "", sizeof(str) - 1)
 __UNDEFINED__  hv_fetchs(hv, key, lval)    hv_fetch(hv, key "", sizeof(key) - 1, lval)
 __UNDEFINED__  hv_stores(hv, key, val)     hv_store(hv, key "", sizeof(key) - 1, val, 0)
+
+__UNDEFINED__  gv_fetchpvn_flags(name, len, flags, svt) gv_fetchpv(name, flags, svt)
+__UNDEFINED__  gv_fetchpvs(name, flags, svt)            gv_fetchpvn_flags(name "", sizeof(name) - 1, flags, svt)
+__UNDEFINED__  gv_stashpvs(name, flags)                 gv_stashpvn(name "", sizeof(name) - 1, flags)
 
 =xsubs
 
@@ -78,7 +82,29 @@ hv_stores(hv, sv)
 	PPCODE:
 		(void) hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc_simple(sv));
 
-=tests plan => 8
+SV*
+gv_fetchpvn_flags()
+	CODE:
+		RETVAL = newRV_inc((SV*)gv_fetchpvn_flags("Devel::PPPort::VERSION", sizeof("Devel::PPPort::VERSION")-1, 0, SVt_PV));
+	OUTPUT:
+		RETVAL
+
+SV*
+gv_fetchpvs()
+	CODE:
+		RETVAL = newRV_inc((SV*)gv_fetchpvs("Devel::PPPort::VERSION", 0, SVt_PV));
+	OUTPUT:
+		RETVAL
+
+SV*
+gv_stashpvs()
+	CODE:
+		RETVAL = newRV_inc((SV*)gv_stashpvs("Devel::PPPort", 0));
+	OUTPUT:
+		RETVAL
+
+
+=tests plan => 11
 
 my $x = 'foo';
 
@@ -97,3 +123,6 @@ ok(scalar keys %h, 2);
 ok(exists $h{'hv_stores'});
 ok($h{'hv_stores'}, 4711);
 ok(Devel::PPPort::hv_fetchs(\%h), 42);
+ok(Devel::PPPort::gv_fetchpvn_flags(), \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_fetchpvs(),       \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_stashpvs(),       \%Devel::PPPort::);

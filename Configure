@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed May  6 14:01:08 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Thu Jun  4 09:30:45 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -824,6 +824,7 @@ d_wcstombs=''
 d_wctomb=''
 d_writev=''
 dlext=''
+bin_ELF=''
 cccdlflags=''
 ccdlflags=''
 dlsrc=''
@@ -7925,6 +7926,7 @@ esac
 rp="Do you wish to use dynamic loading?"
 . ./myread
 usedl="$ans"
+bin_ELF="$undef"
 case "$ans" in
 y*) usedl="$define"
 	case "$dlsrc" in
@@ -8021,6 +8023,7 @@ EOM
 You appear to have ELF support.  I'll use $cc to build dynamic libraries.
 EOM
 			dflt="$cc"
+			bin_ELF="$define"
 		else
 			echo "I'll use ld to build dynamic libraries."
 			dflt='ld'
@@ -22160,6 +22163,7 @@ awk='$awk'
 baserev='$baserev'
 bash='$bash'
 bin='$bin'
+bin_ELF='$bin_ELF'
 binexp='$binexp'
 bison='$bison'
 byacc='$byacc'

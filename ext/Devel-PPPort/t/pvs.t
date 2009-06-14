@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (8) {
+  if (11) {
     load();
-    plan(tests => 8);
+    plan(tests => 11);
   }
 }
 
@@ -65,4 +65,7 @@ ok(scalar keys %h, 2);
 ok(exists $h{'hv_stores'});
 ok($h{'hv_stores'}, 4711);
 ok(Devel::PPPort::hv_fetchs(\%h), 42);
+ok(Devel::PPPort::gv_fetchpvn_flags(), \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_fetchpvs(),       \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_stashpvs(),       \%Devel::PPPort::);
 

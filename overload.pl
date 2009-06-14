@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Unconditionally regenerate:
+# Regenerate (overwriting only if changed):
 #
 #    overload.h
 #    overload.c
@@ -32,9 +32,9 @@ while (<DATA>) {
   push @names, $name;
 }
 
-safer_unlink ('overload.h', 'overload.c', catfile(qw(lib overload numbers.pm)));
-my $c = safer_open("overload.c");
-my $h = safer_open("overload.h");
+safer_unlink (catfile(qw(lib overload numbers.pm)));
+my $c = safer_open("overload.c-new");
+my $h = safer_open("overload.h-new");
 mkdir("lib/overload") unless -d catdir(qw(lib overload));
 my $p = safer_open(catfile(qw(lib overload numbers.pm)));
 
@@ -150,6 +150,8 @@ EOT
 safer_close($h);
 safer_close($c);
 safer_close($p);
+rename_if_different("overload.c-new", "overload.c");
+rename_if_different("overload.h-new","overload.h");
 
 __DATA__
 # Fallback should be the first

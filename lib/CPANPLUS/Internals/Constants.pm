@@ -316,6 +316,7 @@ use constant CALLING_FUNCTION
                                      return join '::', (caller(2+$lvl))[3] 
                                 };
 use constant PERL_CORE      => 'perl';
+use constant STORABLE_EXT   => '.stored';
 
 use constant GET_XS_FILES   => sub { my $dir = $_[0] or return;
                                      require File::Find;

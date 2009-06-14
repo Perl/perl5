@@ -495,7 +495,7 @@ is $SIG{HUNGRY}, undef, "HUNGRY is now gone";
 is delete $SIG{HUNGRY}, undef, "HUNGRY remains gone";
 
 # Test deleting signals that we never set
-foreach my $sig (qw(__DIE__ _BOGUS_HOOK PIPE THIRSTY)) {
+foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
     is $SIG{$sig}, undef, "$sig is not present";
     is delete $SIG{$sig}, undef, "delete of $sig returns undef";
 }

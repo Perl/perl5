@@ -31,7 +31,8 @@ Boolean options:
       --nocount     Disable the X/Y test count.
  -D   --dry         Dry run. Show test that would have run.
       --ext         Set the extension for tests (default '.t')
- -f,  --failures    Only show failed tests.
+ -f,  --failures    Show failed tests.
+ -o,  --comments    Show comments.
       --fork        Fork to run harness in multiple processes.
       --ignore-exit Ignore exit status from test scripts.
  -m,  --merge       Merge test scripts' STDERR with their STDOUT.
@@ -42,6 +43,7 @@ Boolean options:
  -p,  --parse       Show full list of TAP parse errors, if any.
       --directives  Only show results with TODO or SKIP directives.
       --timer       Print elapsed time after each test.
+      --normalize   Normalize TAP output in verbose output
  -T                 Enable tainting checks.
  -t                 Enable tainting warnings.
  -W                 Enable fatal warnings.
@@ -105,6 +107,10 @@ C<--color> switch.
 Color support requires L<Term::ANSIColor> on Unix-like platforms and
 L<Win32::Console> windows. If the necessary module is not installed
 colored output will not be available.
+
+=head2 Exit Code
+
+If the tests fail C<prove> will exit with non-zero status.
 
 =head2 Arguments to Tests
 
@@ -247,6 +253,15 @@ Save the state on exit. The state is stored in a file called F<.prove>
 The C<--state> switch may be used more than once.
 
     $ prove -b --state=hot --state=all,save
+
+=head2 @INC
+
+prove introduces a separation between "options passed to the perl which
+runs prove" and "options passed to the perl which runs tests"; this
+distinction is by design. Thus the perl which is running a test starts
+with the default C<@INC>. Additional library directories can be added
+via the C<PERL5LIB> environment variable, via -Ifoo in C<PERL5OPT> or
+via the C<-Ilib> option to F<prove>.
 
 =head2 Taint Mode
 

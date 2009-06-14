@@ -796,10 +796,10 @@ bzinflate (s, buf, output)
             bufinc *= 2 ;
         }
 
-        /*DispStream(s, "pre"); */
+        /* DispStream(s, "pre"); */
         RETVAL = BZ2_bzDecompress (&(s->stream));
 
-        /*DispStream(s, "apres");*/
+        /* DispStream(s, "apres"); */
         if (RETVAL != BZ_OK || s->flags & FLAG_LIMIT_OUTPUT) 
             break ;
 

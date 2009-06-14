@@ -2,7 +2,7 @@ package ExtUtils::MakeMaker::Config;
 
 use strict;
 
-our $VERSION = '6.52';
+our $VERSION = '6.53_02';
 
 use Config ();
 

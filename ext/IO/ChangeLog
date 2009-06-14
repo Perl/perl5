@@ -1,3 +1,7 @@
+IO 1.25 -- Wed May 13 18:37:33 CDT 2009
+  * Fix test warnings in io_dir
+  * skip tests known to cause a segfault 5.10.0
+
 IO 1.24 -- Mon May 11 14:15:51 CDT 2009
 
   * Make Makefile.PL usable by core and CPAN

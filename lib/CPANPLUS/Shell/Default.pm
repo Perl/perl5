@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.8601";
+    $VERSION = "0.87_02";
 }
 
 load CPANPLUS::Shell;
@@ -104,6 +104,7 @@ CPANPLUS::Shell::Default
     cpanp> i Acme::Foo       # install Acme::Foo
     cpanp> i Acme-Foo-1.3    # install version 1.3 of Acme::Foo
     cpanp> i <URI>           # install from URI, like ftp://foo.com/X.tgz
+    cpanp> i <DIR>           # install from an absolute or relative directory
     cpanp> i 1 3..5          # install search results 1, 3, 4 and 5
     cpanp> i *               # install all search results
     cpanp> a KANE; i *;      # find modules by kane, install all results
@@ -536,6 +537,7 @@ loc('    w                      # display the result of your last search again' 
 loc('[Operations]'                                                                  ),
 loc('    i MODULE | NUMBER ...  # install module(s), by name or by search number'   ),
 loc('    i URI | ...            # install module(s), by URI (ie http://foo.com/X.tgz)'   ),
+loc('    i DIR | ...            # install module(s), by path (ie ./Module-1.0)'   ),
 loc('    t MODULE | NUMBER ...  # test module(s), by name or by search number'      ),
 loc('    u MODULE | NUMBER ...  # uninstall module(s), by name or by search number' ),
 loc('    d MODULE | NUMBER ...  # download module(s)'                               ),

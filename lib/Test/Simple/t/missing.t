@@ -1,4 +1,4 @@
-# $Id: /mirror/googlecode/test-more/t/missing.t 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
+# $Id$
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';

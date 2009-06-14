@@ -1,5 +1,5 @@
 #!perl -w
-# $Id: /mirror/googlecode/test-more/t/fail-more.t 60310 2008-09-07T23:47:22.837229Z schwern  $
+# $Id$
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

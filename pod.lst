@@ -89,7 +89,7 @@ h Reference Manual
   perlsec		Perl security
 
   perlmod		Perl modules: how they work
-  perlmodlib		Perl modules: how to write and use
+g perlmodlib		Perl modules: how to write and use
   perlmodstyle		Perl modules: how to write modules with style
   perlmodinstall	Perl modules: how to install from CPAN
   perlnewmod		Perl modules: preparing a new module for distribution

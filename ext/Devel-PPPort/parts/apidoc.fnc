@@ -209,6 +209,9 @@ Am|void|mXPUSHu|UV uv
 Am|void|Newxc|void* ptr|int nitems|type|cast
 Am|void|Newx|void* ptr|int nitems|type
 Am|void|Newxz|void* ptr|int nitems|type
+Am|void|PERL_SYS_INIT3|int argc|char** argv|char** env
+Am|void|PERL_SYS_INIT|int argc|char** argv
+Am|void|PERL_SYS_TERM|
 Am|void|PoisonFree|void* dest|int nitems|type
 Am|void|PoisonNew|void* dest|int nitems|type
 Am|void|Poison|void* dest|int nitems|type

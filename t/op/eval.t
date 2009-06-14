@@ -549,10 +549,11 @@ $test++;
 # don't leak memory
 {
     use feature qw(:5.10);
+    my $count_expected = ($^H & 0x20000) ? 2 : 1;
     my $t;
     my $s = "a";
     $s =~ s/a/$t = \%^H;  qq( qq() );/ee;
-    print "not " if Internals::SvREFCNT(%$t) != 1;
+    print "not " if Internals::SvREFCNT(%$t) != $count_expected;
     print "ok $test - RT 63110\n";
     $test++;
 }

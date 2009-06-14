@@ -1,3 +1,36 @@
+3.19 - 2009-06-14
+
+    * updated base/todo files
+
+3.18_01 - 2009-06-12
+
+    * fix CPAN #44614: Please support XSBODY
+    * fix CPAN #44655: Please support SVfARG
+    * added support for the following API
+        gv_fetchpvn_flags
+        gv_fetchpvs
+        gv_stashpvs
+        GvSVn
+        HvNAME_get
+        HvNAMELEN_get
+        isGV_with_GP
+        newSV_type
+        PL_error_count
+        PL_in_my
+        PL_in_my_stash
+        SVfARG
+        XSPROTO
+      (thanks to Goro Fuji for providing a patch to
+      implement almost all of these, fixes CPAN #44087)
+
+3.18 - 2009-06-12
+
+    * remove MAN3PODS option from Makefile.PL, which is
+      no longer needed (thanks to Nicholas Clark for
+      providing a patch)
+    * adapt mktests.PL for new layout of ext modules in
+      the core
+
 3.17 - 2009-03-15
 
     * rework PTR macros, fixing PTR2ul for 5.6.1

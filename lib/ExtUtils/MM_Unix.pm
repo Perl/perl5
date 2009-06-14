@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.52';
+$VERSION = '6.53_02';
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -2800,7 +2800,7 @@ sub pm_to_blib {
     my $self = shift;
     my($autodir) = $self->catdir('$(INST_LIB)','auto');
     my $r = q{
-pm_to_blib : $(TO_INST_PM)
+pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 };
 
     # VMS will swallow '' and PM_FILTER is often empty.  So use q[]

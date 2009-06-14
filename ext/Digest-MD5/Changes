@@ -1,3 +1,16 @@
+2009-06-09   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.39
+
+   Nicholas Clark (2):
+      Get rid of the PERL_CORE hacks
+      Sync core: Rename ext/Digest/MD5 to ext/Digest-MD5
+
+   Jerry Hedden (1):
+      Handle non-numeric version numbers in ext/Digest/MD5/Makefile.PL
+
+
+
 2008-11-14   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.38
@@ -294,7 +307,7 @@
    
    The fallback code introduced in 2.10 did only work for
    perl-5.6.0.  It should now for for perl5.004 and 5.005
-   as well.  Patch by Ville Skytt‰ <ville@office.popsystems.com>.
+   as well.  Patch by Ville Skytt√§ <ville@office.popsystems.com>.
 
 
 

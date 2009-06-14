@@ -24,7 +24,7 @@ my $source_tests
 my $sample_tests
   = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
 
-plan tests => 113;
+plan tests => 119;
 
 # note that this test will always pass when run through 'prove'
 ok $ENV{HARNESS_ACTIVE},  'HARNESS_ACTIVE env variable should be set';
@@ -123,7 +123,9 @@ foreach my $test_args ( get_arg_sets() ) {
         'ok 1 - this is a test',
         '[[reset]]',
         'ok',
+        '[[green]]',
         'All tests successful.',
+        '[[reset]]',
     );
     my $status           = pop @output;
     my $expected_status  = qr{^Result: PASS$};
@@ -154,7 +156,9 @@ foreach my $test_args ( get_arg_sets() ) {
         'ok 1 - this is a test',
         '[[reset]]',
         'ok',
+        '[[green]]',
         'All tests successful.',
+        '[[reset]]',
     );
     $status           = pop @output;
     $expected_status  = qr{^Result: PASS$};
@@ -193,7 +197,9 @@ foreach my $test_args ( get_arg_sets() ) {
         'ok 1 - this is a test',
         '[[reset]]',
         'ok',
+        '[[green]]',
         'All tests successful.',
+        '[[reset]]',
     );
     $status           = pop @output;
     $expected_status  = qr{^Result: PASS$};
@@ -261,8 +267,8 @@ foreach my $test_args ( get_arg_sets() ) {
     like $status, qr{^Result: FAIL$},
       '... and the status line should be correct';
 
-    my @summary = @output[ 10 .. $#output ];
-    @output = @output[ 0 .. 9 ];
+    my @summary = @output[ 18 .. $#output ];
+    @output = @output[ 0 .. 17 ];
 
     @expected = (
         "$source_tests/harness_failure ..",
@@ -272,6 +278,14 @@ foreach my $test_args ( get_arg_sets() ) {
         '[[reset]]',
         '[[red]]',
         'not ok 2 - this is another test',
+        '[[reset]]',
+        q{#   Failed test 'this is another test'},
+        '[[reset]]',
+        '#   in harness_failure.t at line 5.',
+        '[[reset]]',
+        q{#          got: 'waffle'},
+        '[[reset]]',
+        q{#     expected: 'yarblokos'},
         '[[reset]]',
         '[[red]]',
         'Failed 1/2 subtests',
@@ -551,6 +565,89 @@ SKIP: {
         {   verbosity => -2,
             stdout    => $capture,
             exec      => sub {undef},
+        }
+    );
+
+    _runtests( $harness, "$source_tests/harness" );
+
+    my @output = tied($$capture)->dump;
+    my $status = pop @output;
+    like $status, qr{^Result: PASS$},
+      '... and the status line should be correct';
+    pop @output;    # get rid of summary line
+    my $answer = pop @output;
+    is( $answer, "All tests successful.\n", 'cat meows' );
+}
+
+# Exec with a coderef that returns an arrayref
+SKIP: {
+    my $cat = '/bin/cat';
+    unless ( -e $cat ) {
+        skip "no '$cat'", 2;
+    }
+
+    my $capture = IO::c55Capture->new_handle;
+    my $harness = TAP::Harness->new(
+        {   verbosity => -2,
+            stdout    => $capture,
+            exec      => sub {
+                return [
+                    $cat,
+                    $ENV{PERL_CORE}
+                    ? '../ext/Test-Harness/t/data/catme.1'
+                    : 't/data/catme.1'
+                ];
+            },
+        }
+    );
+
+    _runtests( $harness, "$source_tests/harness" );
+
+    my @output = tied($$capture)->dump;
+    my $status = pop @output;
+    like $status, qr{^Result: PASS$},
+      '... and the status line should be correct';
+    pop @output;    # get rid of summary line
+    my $answer = pop @output;
+    is( $answer, "All tests successful.\n", 'cat meows' );
+}
+
+# Exec with a coderef that returns raw TAP
+{
+    my $capture = IO::c55Capture->new_handle;
+    my $harness = TAP::Harness->new(
+        {   verbosity => -2,
+            stdout    => $capture,
+            exec      => sub {
+                return "1..1\nok 1 - raw TAP\n";
+            },
+        }
+    );
+
+    _runtests( $harness, "$source_tests/harness" );
+
+    my @output = tied($$capture)->dump;
+    my $status = pop @output;
+    like $status, qr{^Result: PASS$},
+      '... and the status line should be correct';
+    pop @output;    # get rid of summary line
+    my $answer = pop @output;
+    is( $answer, "All tests successful.\n", 'cat meows' );
+}
+
+# Exec with a coderef that returns a filehandle
+{
+    my $capture = IO::c55Capture->new_handle;
+    my $harness = TAP::Harness->new(
+        {   verbosity => -2,
+            stdout    => $capture,
+            exec      => sub {
+                open my $fh,
+                  $ENV{PERL_CORE}
+                  ? '../ext/Test-Harness/t/data/catme.1'
+                  : 't/data/catme.1';
+                return $fh;
+            },
         }
     );
 

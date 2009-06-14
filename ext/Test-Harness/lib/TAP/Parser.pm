@@ -20,11 +20,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =cut
 
-$VERSION = '3.16';
+$VERSION = '3.17';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -448,7 +448,11 @@ sub _iterator_for_source {
             $stream = $source->get_stream($self);
         }
         elsif ($source) {
-            if ( ref $source ) {
+            if ( $source =~ /\n/ ) {
+                $stream
+                  = $self->_iterator_for_source( [ split "\n" => $source ] );
+            }
+            elsif ( ref $source ) {
                 $stream = $self->_iterator_for_source($source);
             }
             elsif ( -e $source ) {
@@ -1197,7 +1201,7 @@ sub _make_state_table {
                     }
                 }
 
-                if ($number) {
+                if ( defined $number ) {
                     if ( $number != $tests_run ) {
                         my $count = $tests_run;
                         $self->_add_error( "Tests out of sequence.  Found "
@@ -1421,7 +1425,7 @@ sub _iter {
             }
             else {
                 $result = $end_handler->();
-                $self->_make_callback( 'EOF', $result )
+                $self->_make_callback( 'EOF', $self )
                   unless defined $result;
             }
 

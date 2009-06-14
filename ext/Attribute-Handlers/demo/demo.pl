@@ -1,6 +1,6 @@
 #! /usr/local/bin/perl -w
 
-use v5.6.0;
+use 5.006;
 use base Demo;
 
 my $y : Demo :This($this) = sub : Demo(1,2,3) {};

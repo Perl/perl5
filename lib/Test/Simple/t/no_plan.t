@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: /mirror/googlecode/test-more/t/no_plan.t 60319 2008-09-08T21:16:57.125001Z schwern  $
+# $Id$
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

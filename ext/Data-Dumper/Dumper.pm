@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_19';
+$VERSION = '2.124'; # Don't forget to set version and release date in POD!
 
 #$| = 1;
 
@@ -101,7 +101,7 @@ sub new {
   return bless($s, $c);
 }
 
-if ($] >= 5.006) {
+if ($] >= 5.008) {
   # Packed numeric addresses take less memory. Plus pack is faster than sprintf
   *init_refaddr_format = sub {};
 
@@ -1297,7 +1297,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.121  (Aug 24 2003)
+Version 2.124  (Jun 13 2009)
 
 =head1 SEE ALSO
 
