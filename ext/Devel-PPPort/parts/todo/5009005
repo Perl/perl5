@@ -9,7 +9,6 @@ gv_fetchfile_flags             # U
 mro_get_linear_isa             # U
 mro_method_changed_in          # U
 my_dirfd                       # U
-newSV_type                     # U
 pregcomp                       # E (Perl_pregcomp)
 ptr_table_clear                # U
 ptr_table_fetch                # U

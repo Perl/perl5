@@ -32,3 +32,4 @@ upg_version                    # E (Perl_upg_version)
 PERL_PV_ESCAPE_RE              # added by devel/scanprov
 PL_parser                      # added by devel/scanprov
 SV_COW_SHARED_HASH_KEYS        # added by devel/scanprov
+SVfARG                         # added by devel/scanprov
