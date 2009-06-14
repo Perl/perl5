@@ -1,4 +1,5 @@
 5.006000
+PERL_SYS_INIT3                 # U
 POPn                           # E
 PUSHn                          # E
 SvIOK_UV                       # U

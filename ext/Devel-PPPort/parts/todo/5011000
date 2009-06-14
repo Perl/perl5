@@ -1,6 +1,7 @@
 5.011000
 HeUTF8                         # U
 MULTICALL                      # E
+PERL_SYS_TERM                  # E
 POP_MULTICALL                  # E
 PUSH_MULTICALL                 # E
 SvOOK_offset                   # U

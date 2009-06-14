@@ -1,4 +1,5 @@
 5.006000
+PERL_SYS_INIT3                 # U
 SvIOK_UV                       # U
 SvIOK_notUV                    # U
 SvIOK_only_UV                  # U
