@@ -1773,10 +1773,7 @@ PerlIO_has_base(PerlIO *f)
 
 	  if (tab)
 	       return (tab->Get_base != NULL);
-	  SETERRNO(EINVAL, LIB_INVARG);
      }
-     else
-	  SETERRNO(EBADF, SS_IVCHAN);
 
      return 0;
 }
@@ -1790,11 +1787,8 @@ PerlIO_fast_gets(PerlIO *f)
 
 	     if (tab)
 		  return (tab->Set_ptrcnt != NULL);
-	     SETERRNO(EINVAL, LIB_INVARG);
 	 }
     }
-    else
-	 SETERRNO(EBADF, SS_IVCHAN);
 
     return 0;
 }
@@ -1807,10 +1801,7 @@ PerlIO_has_cntptr(PerlIO *f)
 
 	if (tab)
 	     return (tab->Get_ptr != NULL && tab->Get_cnt != NULL);
-	  SETERRNO(EINVAL, LIB_INVARG);
     }
-    else
-	 SETERRNO(EBADF, SS_IVCHAN);
 
     return 0;
 }
@@ -1823,10 +1814,7 @@ PerlIO_canset_cnt(PerlIO *f)
 
 	  if (tab)
 	       return (tab->Set_ptrcnt != NULL);
-	  SETERRNO(EINVAL, LIB_INVARG);
     }
-    else
-	 SETERRNO(EBADF, SS_IVCHAN);
 
     return 0;
 }
