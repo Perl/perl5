@@ -4349,8 +4349,8 @@ steps to ensure that C<readline> was successful.
     for (;;) {
         undef $!;
         unless (defined( $line = <> )) {
+            last if eof;
             die $! if $!;
-            last; # reached EOF
         }
         # ...
     }
