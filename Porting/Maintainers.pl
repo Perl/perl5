@@ -1195,7 +1195,7 @@ package Maintainers;
     'NEXT' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/NEXT-0.63.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/NEXT-0.64.tar.gz',
 	'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 	'EXCLUDED'	=> [ qr{^demo/} ],
 	'CPAN'		=> 1,
