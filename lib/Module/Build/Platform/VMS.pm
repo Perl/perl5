@@ -2,7 +2,7 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.32_01';
+$VERSION = '0.33_02';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
@@ -229,8 +229,9 @@ sub _infer_xs_spec {
 
 =item rscan_dir
 
-Inherit the standard version but remove dots at end of name.  This may not be 
-necessary if File::Find has been fixed or DECC$FILENAME_UNIX_REPORT is in effect.
+Inherit the standard version but remove dots at end of name.
+If the extended character set is in effect, do not remove dots from filenames
+with Unix path delimiters.
 
 =cut
 
@@ -239,7 +240,11 @@ sub rscan_dir {
 
   my $result = $self->SUPER::rscan_dir( $dir, $pattern );
 
-  for my $file (@$result) { $file =~ s/\.$//; }
+  for my $file (@$result) {
+      if (!_efs() && ($file =~ m#/#)) {
+          $file =~ s/\.$//;
+      }
+  }
   return $result;
 }
 
@@ -254,7 +259,7 @@ sub dist_dir {
   my $self = shift;
 
   my $dist_dir = $self->SUPER::dist_dir;
-  $dist_dir =~ s/\./_/g;
+  $dist_dir =~ s/\./_/g unless _efs();
   return $dist_dir;
 }
 
@@ -322,6 +327,11 @@ sub _detildefy {
         # break up the paths for the merge
         my $home = VMS::Filespec::unixify($ENV{HOME});
 
+        # In the default VMS mode, the trailing slash is present.
+        # In Unix report mode it is not.  The parsing logic assumes that
+        # it is present.
+        $home .= '/' unless $home =~ m#/$#;
+
         # Trivial case of just ~ by it self
         if ($spec eq '') {
             $home =~ s#/$##;
@@ -361,9 +371,8 @@ sub _detildefy {
         # Now put the two cases back together
         $arg = File::Spec::Unix->catpath($hvol, $newdirs, $file);
 
-    } else {
-        return $arg;
     }
+    return $arg;
 
 }
 
@@ -376,7 +385,9 @@ lossy.
 
 =cut
 
-sub find_perl_interpreter { return $^X; }
+sub find_perl_interpreter {
+    return VMS::Filespec::vmsify($^X);
+}
 
 =item localize_file_path
 
@@ -386,8 +397,9 @@ Convert the file path to the local syntax
 
 sub localize_file_path {
   my ($self, $path) = @_;
+  $path = VMS::Filespec::vmsify($path);
   $path =~ s/\.\z//;
-  return VMS::Filespec::vmsify($path);
+  return $path;
 }
 
 =item localize_dir_path
@@ -413,6 +425,43 @@ sub ACTION_clean {
   foreach my $item (map glob(VMS::Filespec::rmsexpand($_, '.;0')), $self->cleanup) {
     $self->delete_filetree($item);
   }
+}
+
+
+# Need to look up the feature settings.  The preferred way is to use the
+# VMS::Feature module, but that may not be available to dual life modules.
+
+my $use_feature;
+BEGIN {
+    if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+        $use_feature = 1;
+    }
+}
+
+# Need to look up the UNIX report mode.  This may become a dynamic mode
+# in the future.
+sub _unix_rpt {
+    my $unix_rpt;
+    if ($use_feature) {
+        $unix_rpt = VMS::Feature::current("filename_unix_report");
+    } else {
+        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+    }
+    return $unix_rpt;
+}
+
+# Need to look up the EFS character set mode.  This may become a dynamic
+# mode in the future.
+sub _efs {
+    my $efs;
+    if ($use_feature) {
+        $efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
+        $efs = $env_efs =~ /^[ET1]/i; 
+    }
+    return $efs;
 }
 
 =back

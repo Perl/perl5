@@ -1178,11 +1178,11 @@ package Maintainers;
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'EWILHELM/Module-Build-0.32.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.33_02.tar.gz',
 	'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
-	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t }, ],
+	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t scripts/bundle.pl}, ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Module::CoreList' =>

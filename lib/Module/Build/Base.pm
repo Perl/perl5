@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.32_01';
+$VERSION = '0.33_02';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -129,6 +129,7 @@ sub _construct {
 				   %input,
 				  },
 		    phash => {},
+                    stash => {}, # temporary caching, not stored in _build
 		   }, $package;
 
   $self->_set_defaults;
@@ -1039,7 +1040,7 @@ sub dist_version {
     my $version_from = File::Spec->catfile( split( qr{/}, $dist_version_from ) );
     my $pm_info = Module::Build::ModuleInfo->new_from_file( $version_from )
       or die "Can't find file $version_from to determine version";
-    $p->{dist_version} = $pm_info->version();
+    $p->{dist_version} = $self->normalize_version( $pm_info->version() );
   }
 
   die ("Can't determine distribution version, must supply either 'dist_version',\n".
@@ -3424,7 +3425,7 @@ sub file_qr {
 
 sub dist_dir {
   my ($self) = @_;
-  return "$self->{properties}{dist_name}-$self->{properties}{dist_version}";
+  return join "-", $self->dist_name, $self->dist_version;
 }
 
 sub ppm_name {
@@ -3566,34 +3567,71 @@ sub do_create_metafile {
     push @INC, File::Spec->catdir($self->blib, 'lib');
   }
 
-  $self->write_metafile;
+  if ( $self->write_metafile( $self->metafile, $self->generate_metadata ) ) {
+    $self->{wrote_metadata} = 1;
+    $self->_add_to_manifest('MANIFEST', $metafile);
+  }
+
+  return 1;
 }
 
-sub write_metafile {
+sub generate_metadata {
   my $self = shift;
-  my $metafile = $self->metafile;
+  my $node = {};
 
   if ($self->_mb_feature('YAML_support')) {
     require YAML;
     require YAML::Node;
-
     # We use YAML::Node to get the order nice in the YAML file.
-    $self->prepare_metadata( my $node = YAML::Node->new({}) );
-    
-    # YAML API changed after version 0.30
-    my $yaml_sub = $YAML::VERSION le '0.30' ? \&YAML::StoreFile : \&YAML::DumpFile;
-    $self->{wrote_metadata} = $yaml_sub->($metafile, $node );
-
+    $self->prepare_metadata( $node = YAML::Node->new({}) );
   } else {
     require Module::Build::YAML;
-    my (%node, @order_keys);
-    $self->prepare_metadata(\%node, \@order_keys);
-    $node{_order} = \@order_keys;
-    &Module::Build::YAML::DumpFile($metafile, \%node);
-    $self->{wrote_metadata} = 1;
+    my @order_keys;
+    $self->prepare_metadata($node, \@order_keys);
+    $node->{_order} = \@order_keys;
   }
+  return $node;
+}
 
-  $self->_add_to_manifest('MANIFEST', $metafile);
+sub write_metafile {
+  my $self = shift;
+  my ($metafile, $node) = @_;
+
+  if ($self->_mb_feature('YAML_support')) {
+    # XXX this is probably redundant, but stick with it
+    require YAML;
+    require YAML::Node;
+    delete $node->{_order}; # XXX also probably redundant, but for safety
+    # YAML API changed after version 0.30
+    my $yaml_sub = $YAML::VERSION le '0.30' ? \&YAML::StoreFile : \&YAML::DumpFile;
+    $yaml_sub->( $metafile, $node );
+  } else {
+    # XXX probably redundant
+    require Module::Build::YAML;
+    &Module::Build::YAML::DumpFile($metafile, $node);
+  }
+  return 1;
+}
+
+sub normalize_version {
+  my ($self, $version) = @_;
+  if ( $version =~ /[=<>!,]/ ) { # logic, not just version
+    # take as is without modification
+  }
+  elsif ( ref $version eq 'version' || 
+          ref $version eq 'Module::Build::Version' ) { # version objects
+    my $string = $version->stringify;
+    # normalize leading-v: "v1.2" -> "v1.2.0"
+    $version = substr($string,0,1) eq 'v' ? $version->normal : $string;
+  }
+  elsif ( $version =~ /^[^v][^.]*\.[^.]+\./ ) { # no leading v, multiple dots
+    # normalize string tuples without "v": "1.2.3" -> "v1.2.3"
+    $version = "v$version";
+  }
+  else {
+    # leave alone
+  }
+  return $version;
 }
 
 sub prepare_metadata {
@@ -3613,36 +3651,55 @@ sub prepare_metadata {
     die "ERROR: Missing required field '$_' for META.yml\n"
       unless defined($node->{$name}) && length($node->{$name});
   }
-  $node->{version} = '' . $node->{version}; # Stringify version objects
+  $node->{version} = $self->normalize_version($node->{version}); 
 
   if (defined( my $l = $self->license )) {
     die "Unknown license string '$l'"
-      unless exists $self->valid_licenses->{ $self->license };
+      unless exists $self->valid_licenses->{ $l };
 
-    if (my $key = $self->valid_licenses->{ $self->license }) {
+    if (my $key = $self->valid_licenses->{ $l }) {
       my $class = "Software::License::$key";
       if (eval "use $class; 1") {
         # S::L requires a 'holder' key
         $node->{resources}{license} = $class->new({holder=>"nobody"})->url;
-      } else {
-        $node->{resources}{license} = $self->_license_url($key);
+      }
+      else {
+        $node->{resources}{license} = $self->_license_url($l);
       }
     }
+    # XXX we are silently omitting the url for any unknown license
   }
 
   if (exists $p->{configure_requires}) {
     foreach my $spec (keys %{$p->{configure_requires}}) {
       warn ("Warning: $spec is listed in 'configure_requires', but ".
-	    "it is not found in any of the other prereq fields.\n")
-	unless grep exists $p->{$_}{$spec}, 
-	       grep !/conflicts$/, @{$self->prereq_action_types};
+            "it is not found in any of the other prereq fields.\n")
+        unless grep exists $p->{$_}{$spec}, 
+              grep !/conflicts$/, @{$self->prereq_action_types};
     }
   }
 
-  foreach ( 'configure_requires', @{$self->prereq_action_types} ) {
-    if (exists $p->{$_} and keys %{ $p->{$_} }) {
-      $add_node->($_, $p->{$_});
+  # copy prereq data structures so we can modify them before writing to META
+  my %prereq_types;
+  for my $type ( 'configure_requires', @{$self->prereq_action_types} ) {
+    if (exists $p->{$type}) {  
+      for my $mod ( keys %{ $p->{$type} } ) {
+        $prereq_types{$type}{$mod} = 
+          $self->normalize_version($p->{$type}{$mod});
+      }
     }
+  }
+
+  # add current Module::Build to configure_requires if there 
+  # isn't a configure_requires already specified
+  if ( ! $prereq_types{'configure_requires'} ) {
+    for my $t ('configure_requires', 'build_requires') {
+      $prereq_types{$t}{'Module::Build'} = $VERSION;
+    }
+  }
+
+  for my $t ( keys %prereq_types ) {
+      $add_node->($t, $prereq_types{$t});
   }
 
   if (exists $p->{dynamic_config}) {
@@ -3663,8 +3720,8 @@ sub prepare_metadata {
   $add_node->('generated_by', "Module::Build version $Module::Build::VERSION");
 
   $add_node->('meta-spec', 
-	      {version => '1.2',
-	       url     => 'http://module-build.sourceforge.net/META-spec-v1.2.html',
+	      {version => '1.4',
+	       url     => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
 	      });
 
   while (my($k, $v) = each %{$self->meta_add}) {
@@ -3801,9 +3858,10 @@ sub find_dist_packages {
     }
   }
 
-  # Stringify versions.  Can't use exists() here because of bug in YAML::Node.
+  # Normalize versions.  Can't use exists() here because of bug in YAML::Node.
+  # XXX "bug in YAML::Node" comment seems irrelvant -- dagolden, 2009-05-18
   for (grep defined $_->{version}, values %prime) {
-    $_->{version} = '' . $_->{version};
+    $_->{version} = $self->normalize_version( $_->{version} );
   }
 
   return \%prime;
@@ -4144,13 +4202,13 @@ sub cbuilder {
   # Returns a CBuilder object
 
   my $self = shift;
-  my $p = $self->{properties};
-  return $p->{_cbuilder} if $p->{_cbuilder};
+  my $s = $self->{stash};
+  return $s->{_cbuilder} if $s->{_cbuilder};
   die "Module::Build is not configured with C_support"
 	  unless $self->_mb_feature('C_support');
 
   require ExtUtils::CBuilder;
-  return $p->{_cbuilder} = ExtUtils::CBuilder->new(
+  return $s->{_cbuilder} = ExtUtils::CBuilder->new(
     config => $self->config,
     ($self->quiet ? (quiet => 1 ) : ()),
   );

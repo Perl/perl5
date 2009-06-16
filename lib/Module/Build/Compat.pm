@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.32_01';
+$VERSION = '0.33_02';
 
 use File::Spec;
 use IO::File;
@@ -143,7 +143,9 @@ EOF
     eval "use Module::Build::Compat 0.02; 1" or die $@;
     %s
     Module::Build::Compat->run_build_pl(args => \@ARGV);
-    exit(0) unless(-e 'Build'); # cpantesters convention
+    my $build_script = 'Build';  
+    $build_script .= '.com' if $^O eq 'VMS';
+    exit(0) unless(-e $build_script); # cpantesters convention
     require %s;
     Module::Build::Compat->write_makefile(build_class => '%s');
 EOF
@@ -176,7 +178,7 @@ EOF
     
     $MM_Args{EXE_FILES} = [ sort keys %{$build->script_files} ] if $build->script_files;
     
-    $MM_Args{PL_FILES} = $build->PL_files if $build->PL_files;
+    $MM_Args{PL_FILES} = $build->PL_files || {};
     
     local $Data::Dumper::Terse = 1;
     my $args = Data::Dumper::Dumper(\%MM_Args);
@@ -288,13 +290,17 @@ all : force_do_it
 realclean : force_do_it
 	$perl $Build realclean
 	$unlink
+distclean : force_do_it
+	$perl $Build distclean
+	$unlink
+
 
 force_do_it :
 	@ $noop
 EOF
 
   foreach my $action ($class->known_actions) {
-    next if $action =~ /^(all|realclean|force_do_it)$/;  # Don't double-define
+    next if $action =~ /^(all|distclean|realclean|force_do_it)$/;  # Don't double-define
     $maketext .= <<"EOF";
 $action : force_do_it
 	$perl $Build $action
@@ -501,11 +507,7 @@ ever have to install Module::Build if they use the Makefile.PL, but
 they won't get to take advantage of Module::Build's extra features
 either.
 
-If you go this route, make sure you explicitly set C<PL_FILES> in the
-call to C<WriteMakefile()> (probably to an empty hash reference), or
-else MakeMaker will mistakenly run the Build.PL and you'll get an
-error message about "Too early to run Build script" or something.  For
-good measure, of course, test both the F<Makefile.PL> and the
+For good measure, of course, test both the F<Makefile.PL> and the
 F<Build.PL> before shipping.
 
 =item 3.

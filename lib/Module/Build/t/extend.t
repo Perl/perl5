@@ -50,7 +50,9 @@ print "Hello, World!\n";
   $mb->test_files('*t*');
   my $files = $mb->test_files;
   ok  grep {$_ eq 'script'}    @$files;
-  ok  grep {$_ eq File::Spec->catfile('t', 'basic.t')} @$files;
+  my $t_basic_t = File::Spec->catfile('t', 'basic.t');
+  $t_basic_t = VMS::Filespec::vmsify($t_basic_t) if $^O eq 'VMS';
+  ok  grep {$_ eq $t_basic_t} @$files;
   ok !grep {$_ eq 'Build.PL' } @$files;
 
   # Make sure order is preserved

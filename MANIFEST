@@ -2602,7 +2602,6 @@ lib/Module/Build/Platform/Windows.pm	Module::Build
 lib/Module/Build.pm		Module::Build
 lib/Module/Build/PodParser.pm	Module::Build
 lib/Module/Build/PPMMaker.pm	Module::Build
-lib/Module/Build/scripts/bundle.pl	Module::Build
 lib/Module/Build/scripts/config_data	Module::Build
 lib/Module/Build/t/add_property.t	Module::Build
 lib/Module/Build/t/basic.t	Module::Build

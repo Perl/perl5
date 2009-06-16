@@ -73,11 +73,22 @@ ok -e $mb->build_script;
 
 my $dist_dir = 'Simple-0.01';
 
-# VMS may or may not need to modify the name, vmsify will do this if
-# the name looks like a UNIX directory.
+# VMS in traditional mode needs the $dist_dir name to not have a '.' in it
+# as this is a directory delimiter.  In extended character set mode the dot
+# is permitted for Unix format file specifications.
 if ($^O eq 'VMS') {
-   my @dist_dirs = File::Spec->splitdir(VMS::Filespec::vmsify($dist_dir.'/'));
-   $dist_dir = $dist_dirs[0];
+    my $Is_VMS_noefs = 1;
+    my $vms_efs = 0;
+    if (eval 'require VMS::Feature') {
+        $vms_efs = VMS::Feature::current("efs_charset");
+    } else {
+        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
+        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+    }
+    $Is_VMS_noefs = 0 if $vms_efs;
+    if ($Is_VMS_noefs) {
+        $dist_dir = 'Simple-0_01';
+    }
 }
 
 is $mb->dist_dir, $dist_dir;

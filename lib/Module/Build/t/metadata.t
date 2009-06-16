@@ -33,14 +33,24 @@ $dist->regen;
 my $simple_file = 'lib/Simple.pm';
 my $simple2_file = 'lib/Simple2.pm';
 
-   #TODO:
    # Traditional VMS will return the file in in lower case, and is_deeply
    # does exact case comparisons.
-   # When ODS-5 support is active for preserved case file names, this will
-   # need to be changed.
+   # When ODS-5 support is active for preserved case file names we do not
+   # change the case.
    if ($^O eq 'VMS') {
-       $simple_file = lc($simple_file);
-       $simple2_file = lc($simple2_file);
+       my $lower_case_expect = 1;
+       my $vms_efs_case = 0;
+       if (eval 'require VMS::Feature') {
+           $vms_efs_case = VMS::Feature::current("efs_case_preserve");
+       } else {
+           my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
+           $vms_efs_case = $efs_case =~ /^[ET1]/i;
+       }
+       $lower_case_expect = 0 if $vms_efs_case;
+       if ($lower_case_expect) {
+           $simple_file = lc($simple_file);
+           $simple2_file = lc($simple2_file);
+       }
    }
 
 

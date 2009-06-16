@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.32_01';
+$VERSION = '0.33_02';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -312,10 +312,9 @@ module for source distribution through a medium like CPAN.  It will create a
 tarball of the files listed in F<MANIFEST> and compress the tarball using
 GZIP compression.
 
-By default, this action will use the external C<tar> and C<gzip>
-executables on Unix-like platforms, and the C<Archive::Tar> module
-elsewhere.  However, you can force it to use whatever executable you
-want by supplying an explicit C<tar> (and optional C<gzip>) parameter:
+By default, this action will use the C<Archive::Tar> module. However, you can
+force it to use binary "tar" and "gzip" executables by supplying an explicit 
+C<tar> (and optional C<gzip>) parameter:
 
   ./Build dist --tar C:\path\to\tar.exe --gzip C:\path\to\zip.exe
 
