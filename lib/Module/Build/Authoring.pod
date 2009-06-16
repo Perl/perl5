@@ -159,7 +159,8 @@ or C<CPANPLUS> will be expected to pick C<configure_requires> out of the
 F<META.yml> file and install these items before running the
 C<Build.PL>.
 
-*TODO* auto-add M::B?  In what circumstances?
+If no configure_requires is specified, the current version of Module::Build
+is automatically added to configure_requires.
 
 =item build_requires
 

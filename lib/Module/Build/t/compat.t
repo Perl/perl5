@@ -135,8 +135,7 @@ ok $mb, "Module::Build->new_from_context";
     $foo_builder = Foo::Builder->new_from_context;
   });
   foreach my $style ('passthrough', 'small') {
-    Module::Build::Compat->create_makefile_pl($style, $foo_builder);
-    ok -e 'Makefile.PL', "$style Makefile.PL created";
+    create_makefile_pl($style, $foo_builder);
     
     # Should fail with "can't find Foo/Builder.pm"
     my $result;
@@ -153,8 +152,7 @@ ok $mb, "Module::Build->new_from_context";
     $bar_builder = Module::Build->subclass( class => 'Bar::Builder' )->new_from_context;
   });
   foreach my $style ('passthrough', 'small') {
-    Module::Build::Compat->create_makefile_pl($style, $bar_builder);
-    ok -e 'Makefile.PL', "$style Makefile.PL created via subclass";
+    create_makefile_pl($style, $bar_builder);
     my $result;
     stdout_of( sub {
       $result = $mb->run_perl_script('Makefile.PL');
@@ -165,7 +163,7 @@ ok $mb, "Module::Build->new_from_context";
 
 {
   # Make sure various Makefile.PL arguments are supported
-  Module::Build::Compat->create_makefile_pl('passthrough', $mb);
+  create_makefile_pl('passthrough', $mb);
 
   my $libdir = File::Spec->catdir( $tmp, 'libdir' );
   my $result;
@@ -255,7 +253,7 @@ ok $mb, "Module::Build->new_from_context";
   # C<glob> on MSWin32 uses $ENV{HOME} if defined to do tilde-expansion
   local $ENV{HOME} = 'C:/' if $^O =~ /MSWin/ && !exists( $ENV{HOME} );
 
-  Module::Build::Compat->create_makefile_pl('passthrough', $mb);
+  create_makefile_pl('passthrough', $mb);
 
   stdout_of( sub {
     $mb->run_perl_script('Makefile.PL', [], ['INSTALL_BASE=~/foo']);
@@ -290,8 +288,8 @@ sub test_makefile_types {
     ok $mb, "Module::Build->new_from_context";
 
     # Create and test Makefile.PL
-    Module::Build::Compat->create_makefile_pl($type, $mb);
-    ok -e 'Makefile.PL', "$type Makefile.PL created";
+    create_makefile_pl($type, $mb);
+
     test_makefile_pl_requires_perl( $opts{requires}{perl} );
     test_makefile_creation($mb);
     test_makefile_prereq_pm( $opts{requires} );
@@ -321,8 +319,11 @@ sub test_makefile_types {
     ok $success, "make realclean ran without error";
 
     # Try again with some Makefile.PL arguments
-    test_makefile_creation($mb, [], 'INSTALLDIRS=vendor', 1);
+    test_makefile_creation($mb, [], 'INSTALLDIRS=vendor', 'realclean');
     
+    # Try again using distclean
+    test_makefile_creation($mb, [], '', 'distclean');
+
     1 while unlink 'Makefile.PL';
     ok ! -e 'Makefile.PL', "cleaned up Makefile";
   }
@@ -344,10 +345,12 @@ sub test_makefile_creation {
   ok -e $makefile, "$makefile exists";
   
   if ($cleanup) {
-    $output = stdout_of( sub {
-      $build->do_system(@make, 'realclean');
+    # default to 'realclean' unless we recognize the clean method
+    $cleanup = 'realclean' unless $cleanup =~ /^(dist|real)clean$/;
+    my ($stdout, $stderr ) = stdout_stderr_of (sub {
+      $build->do_system(@make, $cleanup);
     });
-    ok ! -e '$makefile', "$makefile cleaned up";
+    ok ! -e $makefile, "$makefile cleaned up with $cleanup";
   }
   else {
     pass '(skipping cleanup)'; # keep test count constant
@@ -369,17 +372,17 @@ sub test_makefile_pl_files {
   my $expected = shift;
 
   SKIP: {
-    skip "$makefile not found", 1 unless -e $makefile;
-    my $pl_files = find_params_in_makefile()->{PL_FILES} || {};
-    is_deeply $pl_files, $expected,
-      "$makefile has correct PL_FILES line";
+    skip 1, 'Makefile.PL not found' unless -e 'Makefile.PL';
+    my $args = extract_writemakefile_args() || {};
+    is_deeply $args->{PL_FILES}, $expected,
+      "Makefile.PL has correct PL_FILES line";
   }
 }
 
 sub test_makefile_pl_requires_perl {
   my $perl_version = shift || q{};
   SKIP: {
-    skip 'Makefile.PL not found', 1 unless -e 'Makefile.PL';
+    skip 1, 'Makefile.PL not found' unless -e 'Makefile.PL';
     my $file_contents = slurp 'Makefile.PL';
     my $found_requires = $file_contents =~ m{^require $perl_version;}ms;
     if (length $perl_version) {
@@ -416,4 +419,30 @@ sub find_params_in_makefile {
   }
 
   return \%params;
+}
+
+sub extract_writemakefile_args {
+  SKIP: {
+    skip 1, 'Makefile.PL not found' unless -e 'Makefile.PL';
+    my $file_contents = slurp 'Makefile.PL';
+    my ($args) = $file_contents =~ m{^WriteMakefile\n\((.*)\).*;}ms;
+    ok $args, "Found WriteMakefile arguments"
+        or diag "Makefile.PL:\n$file_contents";
+    my %args = eval $args or diag $args; ## no critic
+    return \%args;
+  }
+}
+
+sub create_makefile_pl {
+    Module::Build::Compat->create_makefile_pl(@_);
+    my $ok = ok -e 'Makefile.PL', "$_[0] Makefile.PL created";
+
+    # Some really conservative make's, like HP/UX, assume files with the same
+    # timestamp are out of date.  Send the Makefile.PL one second into the past
+    # so its older than the Makefile it will generate.
+    # See [rt.cpan.org 45700]
+    my $mtime = (stat("Makefile.PL"))[9];
+    utime $mtime, $mtime - 1, "Makefile.PL";
+
+    return $ok;
 }

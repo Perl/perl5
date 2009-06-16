@@ -182,6 +182,16 @@ installed.
 See the documentation for L<Module::Build::Authoring/"PREREQUISITES">
 for the details of how requirements can be specified.
 
+=item create_license
+
+[version 0.31]
+
+This parameter tells Module::Build to automatically create a
+F<LICENSE> file at the top level of your distribution, containing the
+full text of the author's chosen license.  This requires
+C<Software::License> on the author's machine, and further requires
+that the C<license> parameter specifies a license that it knows about.
+
 =item create_makefile_pl
 
 [version 0.19]

@@ -2,19 +2,12 @@ package Module::Build::Platform::Unix;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.32';
+$VERSION = '0.33_02';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
 use vars qw(@ISA);
 @ISA = qw(Module::Build::Base);
-
-sub make_tarball {
-  my $self = shift;
-  $self->{args}{tar}  ||= ['tar'];
-  $self->{args}{gzip} ||= ['gzip'];
-  $self->SUPER::make_tarball(@_);
-}
 
 sub is_executable {
   # We consider the owner bit to be authoritative on a file, because
