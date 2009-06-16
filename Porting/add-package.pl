@@ -80,7 +80,7 @@ my @LibFiles;
                                 undef
                             }
                         : 1
-                     } `find lib -type f`
+                     } `find $Repo/lib -type f`
         or die "Could not detect library files\n";
       
     print "done\n" if $Verbose;
