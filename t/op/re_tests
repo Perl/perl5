@@ -31,6 +31,12 @@ ab*bc	abbbbc	y	$+[0]	6
 .{3,4}	abbbbc	y	$&	abbb
 .{3,4}	abbbbc	y	$-[0]	0
 .{3,4}	abbbbc	y	$+[0]	4
+\N{1}	abbbbc	y	$&	a
+\N{1}	abbbbc	y	$-[0]	0
+\N{1}	abbbbc	y	$+[0]	1
+\N{3,4}	abbbbc	y	$&	abbb
+\N{3,4}	abbbbc	y	$-[0]	0
+\N{3,4}	abbbbc	y	$+[0]	4
 ab{0,}bc	abbbbc	y	$&	abbbbc
 ab{0,}bc	abbbbc	y	$-[0]	0
 ab{0,}bc	abbbbc	y	$+[0]	6
@@ -69,8 +75,10 @@ abc$	aabcd	n	-	-
 $	abc	y	$&	
 a.c	abc	y	$&	abc
 a.c	axc	y	$&	axc
+a\Nc	abc	y	$&	abc
 a.*c	axyzc	y	$&	axyzc
 a.*c	axyzd	n	-	-
+a\N*c	axyzd	n	-	-
 a[bc]d	abc	n	-	-
 a[bc]d	abd	y	$&	abd
 a[b]d	abd	y	$&	abd
@@ -78,6 +86,7 @@ a[b]d	abd	y	$&	abd
 .[b].	abd	y	$&	abd
 .[b].	aBd	n	-	-
 (?i:.[b].)	abd	y	$&	abd
+(?i:\N[b]\N)	abd	y	$&	abd
 a[b-d]e	abd	n	-	-
 a[b-d]e	ace	y	$&	ace
 a[b-d]	aac	y	$&	ac
@@ -315,6 +324,7 @@ a[-]?c	ac	y	$&	ac
 '$'i	ABC	y	$&	
 'a.c'i	ABC	y	$&	ABC
 'a.c'i	AXC	y	$&	AXC
+'a\Nc'i	ABC	y	$&	ABC
 'a.*?c'i	AXYZC	y	$&	AXYZC
 'a.*c'i	AXYZD	n	-	-
 'a[bc]d'i	ABC	n	-	-
@@ -497,8 +507,11 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(?-i:a)b'i	AB	n	-	-
 '((?-i:a))b'i	AB	n	-	-
 '((?-i:a.))b'i	a\nB	n	-	-
+'((?-i:a\N))b'i	a\nB	n	-	-
 '((?s-i:a.))b'i	a\nB	y	$1	a\n
+'((?s-i:a\N))b'i	a\nB	n	-	-
 '((?s-i:a.))b'i	B\nB	n	-	-
+'((?s-i:a\N))b'i	B\nB	n	-	-
 (?:c|d)(?:)(?:a(?:)(?:b)(?:b(?:))(?:b(?:)(?:b)))	cabbbb	y	$&	cabbbb
 (?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))	caaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb	y	$&	caaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 '(ab)\d\1'i	Ab4ab	y	$1	Ab
