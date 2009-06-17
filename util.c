@@ -5471,34 +5471,29 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 
 #ifdef PERL_MEM_LOG
 
-/*
- * -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including the
+/* -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including the
  * the default implementation, unless -DPERL_MEM_LOG_NOIMPL is also
  * given, and you supply your own implementation.
  *
- * -DPERL_MEM_LOG_ENV: if compiled in, at run time the environment
- * variables PERL_MEM_LOG and PERL_SV_LOG are checked (repeatedly).
- * If the integer values are true, the respective logging is done.
- * (Without this also defined, logging is voluminous)
+ * The default implementation reads a single envar; PERL_MEM_LOG,
+ * expecting one or more of the following:
  *
- * -DPERL_MEM_LOG_TIMESTAMP: if compiled, a timestamp will be logged
- * before every memory logging entry. This can be turned off at run
- * time by setting the environment variable PERL_MEM_LOG_TIMESTAMP
- * to zero.
+ *    \d+ - fd		fd to write to		: must be 1st (atoi)
+ *    'm' - memlog	was PERL_MEM_LOG=1	
+ *    's' - svlog	was PERL_SV_LOG=1
+ *    't' - timestamp	was PERL_MEM_LOG_TIMESTAMP=1
+ *
+ * This makes the logger controllable enough that it can reasonably be
+ * added to the system perl.
  */
 
-/*
- * -DPERL_MEM_LOG_SPRINTF_BUF_SIZE=X: size of a (stack-allocated) buffer
+/* -DPERL_MEM_LOG_SPRINTF_BUF_SIZE=X: size of a (stack-allocated) buffer
  * the Perl_mem_log_...() will use (either via sprintf or snprintf).
  */
 #define PERL_MEM_LOG_SPRINTF_BUF_SIZE 128
 
-/*
- * -DPERL_MEM_LOG_FD=2: the file descriptor the Perl_mem_log_...()
- * writes to.  You can also define in compile time
- * PERL_MEM_LOG_ENV_FD, in which case the environment variable
- * PERL_MEM_LOG_FD will be consulted for the file descriptor number to
- * use.
+/* -DPERL_MEM_LOG_FD=N: the file descriptor the Perl_mem_log_...()
+ * writes to.  In the default logger, this is settable at runtime.
  */
 #ifndef PERL_MEM_LOG_FD
 #  define PERL_MEM_LOG_FD 2 /* If STDERR is too boring for you. */
@@ -5521,21 +5516,19 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 		 const char *filename, const int linenumber,
 		 const char *funcname)
 {
-# if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
-    const char *s;
-# endif
+    const char *pmlenv;
 
-    /* PERL_ARGS_ASSERT_MEM_LOG_COMMON; */
+    PERL_ARGS_ASSERT_MEM_LOG_COMMON;
 
-# ifdef PERL_MEM_LOG_ENV
-    s = PerlEnv_getenv(mlt < MLT_NEW_SV ? "PERL_MEM_LOG" : "PERL_SV_LOG");
-    if (s ? atoi(s) : 0)
-# endif
+    pmlenv = PerlEnv_getenv("PERL_MEM_LOG");
+    if (!pmlenv)
+	return;
+    if (mlt < MLT_NEW_SV ? strchr(pmlenv,'m') : strchr(pmlenv,'s'))
     {
 	/* We can't use SVs or PerlIO for obvious reasons,
 	 * so we'll use stdio and low-level IO instead. */
 	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-# ifdef PERL_MEM_LOG_TIMESTAMP
+
 #   ifdef HAS_GETTIMEOFDAY
 #     define MEM_LOG_TIME_FMT	"%10d.%06d: "
 #     define MEM_LOG_TIME_ARG	(int)tv.tv_sec, (int)tv.tv_usec
@@ -5551,24 +5544,17 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	 * gettimeofday() (see ext/Time-HiRes), the easiest way is
 	 * probably that they would be used to fill in the struct
 	 * timeval. */
-# endif
 	{
-	    int fd = PERL_MEM_LOG_FD;
 	    STRLEN len;
+	    int fd = atoi(pmlenv);
+	    if (!fd)
+		fd = PERL_MEM_LOG_FD;
 
-# ifdef PERL_MEM_LOG_ENV_FD
-	    if ((s = PerlEnv_getenv("PERL_MEM_LOG_FD"))) {
-		fd = atoi(s);
-	    }
-# endif
-# ifdef PERL_MEM_LOG_TIMESTAMP
-	    s = PerlEnv_getenv("PERL_MEM_LOG_TIMESTAMP");
-	    if (!s || atoi(s)) {
+	    if (strchr(pmlenv, 't')) {
 		len = my_snprintf(buf, sizeof(buf),
 				MEM_LOG_TIME_FMT, MEM_LOG_TIME_ARG);
 		PerlLIO_write(fd, buf, len);
 	    }
-# endif
 	    switch (mlt) {
 	    case MLT_ALLOC:
 		len = my_snprintf(buf, sizeof(buf),
