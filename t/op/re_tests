@@ -77,6 +77,7 @@ a.c	abc	y	$&	abc
 a.c	axc	y	$&	axc
 a\Nc	abc	y	$&	abc
 a.*c	axyzc	y	$&	axyzc
+a\N*c	axyzc	y	$&	axyzc
 a.*c	axyzd	n	-	-
 a\N*c	axyzd	n	-	-
 a[bc]d	abc	n	-	-
@@ -544,6 +545,8 @@ x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ((?s).)c(?!.)	a\nb\nc\n	y	$1:$&	\n:\nc
 ((?s)b.)c(?!.)	a\nb\nc\n	y	$1	b\n
 ((?s)b.)c(?!.)	a\nb\nc\n	y	$1:$&	b\n:b\nc
+((?s)b.)c(?!\N)	a\nb\nc\n	y	$1:$&	b\n:b\nc
+'(b.)c(?!\N)'s	a\nb\nc\n	y	$1:$&	b\n:b\nc
 ^b	a\nb\nc\n	n	-	-
 ()^b	a\nb\nc\n	n	-	-
 ((?m)^b)	a\nb\nc\n	y	$1	b
@@ -1307,6 +1310,7 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?|(?|(a)|(b))|(?|(c)|(d)))	c	y	$1	c
 (?|(?|(a)|(b))|(?|(c)|(d)))	d	y	$1	d
 (.)(?|(.)(.)x|(.)d)(.)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
+(\N)(?|(\N)(\N)x|(\N)d)(\N)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
 #Bug #41492
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	aa	y	$&	aa
@@ -1353,7 +1357,10 @@ foo(\h)bar	foo\tbar	y	$1	\t
 (\H)(\h)	foo\tbar	y	$1-$2	o-\t
 (\h)(\H)	foo\tbar	y	$1-$2	\t-b
 
-.*\z	foo\n	y	-	-
+.*\z	foo\n	y	-$&-	--
+\N*\z	foo\n	y	-$&-	--
+.*\Z	foo\n	y	-$&-	-foo-
+\N*\Z	foo\n	y	-$&-	-foo-
 ^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0	
 .*?(?:(\w)|(\w))x	abx	y	$1-$2	b-
 
