@@ -32,6 +32,7 @@ if (!(@ARGV = @headers)) {
     while (<$fh>) {
 	push @ARGV, $1 if m!^([^/]+\.h)\t!;
     }
+    push @ARGV, 'config.h' if -f 'config.h';
 }
 
 my $header;
