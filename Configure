@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Jun  4 09:30:45 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Thu Jun 18 16:33:35 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21384,7 +21384,7 @@ $eunicefix Cppsym.try
 ./Cppsym < Cppsym.know > Cppsym.true
 : Add in any linux cpp "predefined macros":
 case "$osname::$gccversion" in
-  *linux*::*.*)
+  *linux*::*.*|*gnukfreebsd*::*.*)
     tHdrH=_tmpHdr
     rm -f $tHdrH'.h' $tHdrH
     touch $tHdrH'.h'
