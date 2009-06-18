@@ -419,6 +419,8 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
 			     qw{ bin/cpanp-boxed
+				 t/031_CPANPLUS-Internals-Source-SQLite.t
+				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
 			   ],
 	'CPAN'		=> 1,

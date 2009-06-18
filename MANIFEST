@@ -2018,8 +2018,6 @@ lib/CPANPLUS/Shell.pm	CPANPLUS
 lib/CPANPLUS/t/00_CPANPLUS-Internals-Utils.t	CPANPLUS tests
 lib/CPANPLUS/t/01_CPANPLUS-Configure.t	CPANPLUS tests
 lib/CPANPLUS/t/02_CPANPLUS-Internals.t	CPANPLUS tests
-lib/CPANPLUS/t/031_CPANPLUS-Internals-Source-SQLite.t	CPANPLUS tests
-lib/CPANPLUS/t/032_CPANPLUS-Internals-Source-via-sqlite.t	CPANPLUS tests
 lib/CPANPLUS/t/03_CPANPLUS-Internals-Source.t	CPANPLUS tests
 lib/CPANPLUS/t/04_CPANPLUS-Module.t	CPANPLUS tests
 lib/CPANPLUS/t/05_CPANPLUS-Internals-Fetch.t	CPANPLUS tests
