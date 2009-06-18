@@ -6553,7 +6553,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 /* reg_namedseq(pRExC_state,UVp)
    
    This is expected to be called by a parser routine that has 
-   recognized'\N' and needs to handle the rest. RExC_parse is 
+   recognized '\N' and needs to handle the rest. RExC_parse is
    expected to point at the first char following the N at the time
    of the call.
    
@@ -6567,11 +6567,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
    be returned to indicate failure. (This will NOT be a valid pointer 
    to a regnode.)
    
-   If value is null then it is assumed that we are parsing normal text
+   If valuep is null then it is assumed that we are parsing normal text
    and inserts a new EXACT node into the program containing the resolved
    string and returns a pointer to the new node. If the string is 
    zerolength a NOTHING node is emitted.
-   
+
    On success RExC_parse is set to the char following the endbrace.
    Parsing failures will generate a fatal errorvia vFAIL(...)
    
@@ -6585,7 +6585,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
    
  */
 STATIC regnode *
-S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep) 
+S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 {
     char * name;        /* start of the content of the name */
     char * endbrace;    /* endbrace following the name */
@@ -6597,8 +6597,22 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
  
     PERL_ARGS_ASSERT_REG_NAMEDSEQ;
    
-    if (*RExC_parse != '{') {
-        vFAIL("Missing braces on \\N{}");
+    if (*RExC_parse != '{' ||
+	    (*RExC_parse == '{' && RExC_parse[1]
+	     && strchr("0123456789", RExC_parse[1])))
+    {
+	GET_RE_DEBUG_FLAGS_DECL;
+	if (valuep)
+	    /* no bare \N in a charclass */
+	    vFAIL("Missing braces on \\N{}");
+	GET_RE_DEBUG_FLAGS;
+	nextchar(pRExC_state);
+	ret = reg_node(pRExC_state, REG_ANY);
+	*flagp |= HASWIDTH|SIMPLE;
+	RExC_naughty++;
+	RExC_parse--;
+        Set_Node_Length(ret, 1); /* MJD */
+	return ret;
     }
     name = RExC_parse+1;
     endbrace = strchr(RExC_parse, '}');
@@ -7159,12 +7173,12 @@ tryagain:
 	    }
 	    break;
         case 'N': 
-            /* Handle \N{NAME} here and not below because it can be 
+            /* Handle \N and \N{NAME} here and not below because it can be
             multicharacter. join_exact() will join them up later on. 
             Also this makes sure that things like /\N{BLAH}+/ and 
             \N{BLAH} being multi char Just Happen. dmq*/
             ++RExC_parse;
-            ret= reg_namedseq(pRExC_state, NULL); 
+            ret= reg_namedseq(pRExC_state, NULL, flagp); 
             break;
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
 	parse_named_seq:
@@ -7964,7 +7978,7 @@ parseit:
                     from earlier versions, OTOH that behaviour was broken
                     as well. */
                     UV v; /* value is register so we cant & it /grrr */
-                    if (reg_namedseq(pRExC_state, &v)) {
+                    if (reg_namedseq(pRExC_state, &v, NULL)) {
                         goto parseit;
                     }
                     value= v; 
