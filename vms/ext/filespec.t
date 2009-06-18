@@ -83,6 +83,7 @@ __DATA__
 
 # Basic VMS to Unix filespecs
 __some_:[__where_.__over_]__the_.__rainbow_    unixify /__some_/__where_/__over_/__the_.__rainbow_ ^
+__some_:<__where_.__over_>__the_.__rainbow_    unixify /__some_/__where_/__over_/__the_.__rainbow_ ^
 [.__some_.__where_.__over_]__the_.__rainbow_   unixify __some_/__where_/__over_/__the_.__rainbow_ ^
 [-.__some_.__where_.__over_]__the_.__rainbow_  unixify ../__some_/__where_/__over_/__the_.__rainbow_ ^
 [.__some_.--.__where_.__over_]__the_.__rainbow_        unixify __some_/../../__where_/__over_/__the_.__rainbow_ ^

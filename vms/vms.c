@@ -7346,7 +7346,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
     }
     if (*cp2 == ':') {
       *(cp1++) = '/';
-      if (*(cp2+1) == '[') cp2++;
+      if (*(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
     }
     else if (*cp2 == ']' || *cp2 == '>') {
       if (*(cp1-1) != '/') *(cp1++) = '/'; /* Don't double after ellipsis */
