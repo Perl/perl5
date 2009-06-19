@@ -62,7 +62,7 @@ if (not grep { $_ eq 'PERL_CORE=1' } @ARGV) {
                                     'Carp'              => 0,
                                     'XSLoader'          => 0,
                                     'Scalar::Util'      => 0,
-                                    'threads'           => 1.71,
+                                    'threads'           => 1.73,
 
                                     'Test'              => 0,
                                     'Test::More'        => 0,

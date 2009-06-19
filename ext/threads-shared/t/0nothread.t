@@ -1,13 +1,6 @@
 use strict;
 use warnings;
 
-BEGIN {
-    if ($ENV{'PERL_CORE'}){
-        chdir 't';
-        unshift @INC, '../lib';
-    }
-}
-
 use Test::More (tests => 53);
 
 ### Start of Testing ###
@@ -65,7 +58,7 @@ sub array
 
 ok((require threads::shared),"Require module");
 
-if ($threads::shared::VERSION && ! exists($ENV{'PERL_CORE'})) {
+if ($threads::shared::VERSION && ! $ENV{'PERL_CORE'}) {
     diag('Testing threads::shared ' . $threads::shared::VERSION);
 }
 
