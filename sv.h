@@ -1078,7 +1078,7 @@ in gv.h: */
 #endif
 
 /*
-=for apidoc Am|char*|SvGAMAGIC|SV* sv
+=for apidoc Am|U32|SvGAMAGIC|SV* sv
 
 Returns true if the SV has get magic or overloading. If either is true then
 the scalar is active data, and has the potential to return a new value every
