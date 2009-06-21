@@ -784,7 +784,7 @@ PoisonWith(0xEF) for catching access to freed memory.
  *   through reallocs and frees, but how to do that without
  *   any News() happening...?
  * - lots of -Ddefines to get useful/controllable output
- * - lots of ENV reads when you get control -DPERL_MEM_LOG_ENV*
+ * - lots of ENV reads
  */
 
 PERL_EXPORT_C Malloc_t Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
