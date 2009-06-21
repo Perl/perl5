@@ -1778,8 +1778,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_MEM_LOG_ENV_FD
 			     " PERL_MEM_LOG_ENV_FD"
 #  endif
-#  ifdef PERL_MEM_LOG_STDERR
-			     " PERL_MEM_LOG_STDERR"
+#  ifdef PERL_MEM_LOG_NOIMPL
+			     " PERL_MEM_LOG_NOIMPL"
 #  endif
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			     " PERL_MEM_LOG_TIMESTAMP"
