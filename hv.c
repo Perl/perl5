@@ -1483,7 +1483,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 }
 
 static I32
-S_anonymise_cv(const char *stash, SV *val)
+S_anonymise_cv(pTHX_ const char *stash, SV *val)
 {
     CV *cv;
 
@@ -1494,7 +1494,7 @@ S_anonymise_cv(const char *stash, SV *val)
 	    SV *gvname;
 	    GV *anongv;
 
-	    gvname = newSVpvf("%s::__ANON__", stash ? stash : "__ANON__");
+	    gvname = Perl_newSVpvf(aTHX_ "%s::__ANON__", stash ? stash : "__ANON__");
 	    anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
 	    SvREFCNT_dec(gvname);
 	    CvGV(cv) = anongv;

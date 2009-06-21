@@ -1179,6 +1179,7 @@
 #ifdef PERL_CORE
 #define hsplit			S_hsplit
 #define hfreeentries		S_hfreeentries
+#define anonymise_cv		S_anonymise_cv
 #define new_he			S_new_he
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
@@ -3515,6 +3516,7 @@
 #ifdef PERL_CORE
 #define hsplit(a)		S_hsplit(aTHX_ a)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
+#define anonymise_cv(a,b)	S_anonymise_cv(aTHX_ a,b)
 #define new_he()		S_new_he(aTHX)
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
