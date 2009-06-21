@@ -5475,11 +5475,11 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
  * the default implementation, unless -DPERL_MEM_LOG_NOIMPL is also
  * given, and you supply your own implementation.
  *
- * The default implementation reads a single envar; PERL_MEM_LOG,
+ * The default implementation reads a single env var, PERL_MEM_LOG,
  * expecting one or more of the following:
  *
  *    \d+ - fd		fd to write to		: must be 1st (atoi)
- *    'm' - memlog	was PERL_MEM_LOG=1	
+ *    'm' - memlog	was PERL_MEM_LOG=1
  *    's' - svlog	was PERL_SV_LOG=1
  *    't' - timestamp	was PERL_MEM_LOG_TIMESTAMP=1
  *
