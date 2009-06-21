@@ -5889,7 +5889,7 @@ STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bo
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 			__attribute__nonnull__(4)
 			__attribute__nonnull__(8)
