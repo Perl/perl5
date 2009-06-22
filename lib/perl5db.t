@@ -89,7 +89,7 @@ like($contents, qr/sub factorial/,
     like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
 }
 
-{
+SKIP: {
     if ( $Config{usethreads} ) {
         skip('This perl has threads, skipping non-threaded debugger tests');
     } else {
@@ -99,7 +99,7 @@ like($contents, qr/sub factorial/,
     }
 
 }
-{
+SKIP: {
     if ( $Config{usethreads} ) {
         local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
         my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
