@@ -627,11 +627,11 @@ regression fixed.
 
 =item *
 
-Fixed memory leak on C<while (1) { map 1, 1 }> [RT # 53038].
+Fixed memory leak on C<while (1) { map 1, 1 }> [RT #53038].
 
 =item *
 
-Some potential coredumps in PerlIO fixed [RT # 57322,54828].
+Some potential coredumps in PerlIO fixed [RT #57322,54828].
 
 =item *
 
@@ -642,11 +642,10 @@ The debugger now works with lvalue subroutines
 The debugger's C<m> command was broken on modules that defined constants
 [RT #61222].
 
-
 =item *
 
 C<crypt()> and string complement could return tainted values for untainted
-arguments [RT # 59998].
+arguments [RT #59998].
 
 =item *
 
@@ -662,7 +661,7 @@ On some UNIX systems, the value in C<$?> would not have the top bit set
 =item *
 
 Under some circumstances, $^R could incorrectly become undefined
-[RT # 57042].
+[RT #57042].
 
 =item *
 
