@@ -5471,38 +5471,35 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 
 #ifdef PERL_MEM_LOG
 
-/*
- * PERL_MEM_LOG: the Perl_mem_log_..() will be compiled.
+/* -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including the
+ * the default implementation, unless -DPERL_MEM_LOG_NOIMPL is also
+ * given, and you supply your own implementation.
  *
- * PERL_MEM_LOG_ENV: if defined, during run time the environment
- * variables PERL_MEM_LOG and PERL_SV_LOG will be consulted, and
- * if the integer value of that is true, the logging will happen.
- * (The default is to always log if the PERL_MEM_LOG define was
- * in effect.)
+ * The default implementation reads a single env var, PERL_MEM_LOG,
+ * expecting one or more of the following:
  *
- * PERL_MEM_LOG_TIMESTAMP: if defined, a timestamp will be logged
- * before every memory logging entry. This can be turned off at run
- * time by setting the environment variable PERL_MEM_LOG_TIMESTAMP
- * to zero.
+ *    \d+ - fd		fd to write to		: must be 1st (atoi)
+ *    'm' - memlog	was PERL_MEM_LOG=1
+ *    's' - svlog	was PERL_SV_LOG=1
+ *    't' - timestamp	was PERL_MEM_LOG_TIMESTAMP=1
+ *
+ * This makes the logger controllable enough that it can reasonably be
+ * added to the system perl.
  */
 
-/*
- * PERL_MEM_LOG_SPRINTF_BUF_SIZE: size of a (stack-allocated) buffer
+/* -DPERL_MEM_LOG_SPRINTF_BUF_SIZE=X: size of a (stack-allocated) buffer
  * the Perl_mem_log_...() will use (either via sprintf or snprintf).
  */
 #define PERL_MEM_LOG_SPRINTF_BUF_SIZE 128
 
-/*
- * PERL_MEM_LOG_FD: the file descriptor the Perl_mem_log_...() will
- * log to.  You can also define in compile time PERL_MEM_LOG_ENV_FD,
- * in which case the environment variable PERL_MEM_LOG_FD will be
- * consulted for the file descriptor number to use.
+/* -DPERL_MEM_LOG_FD=N: the file descriptor the Perl_mem_log_...()
+ * writes to.  In the default logger, this is settable at runtime.
  */
 #ifndef PERL_MEM_LOG_FD
 #  define PERL_MEM_LOG_FD 2 /* If STDERR is too boring for you. */
 #endif
 
-#ifdef PERL_MEM_LOG_STDERR
+#ifndef PERL_MEM_LOG_NOIMPL
 
 # ifdef DEBUG_LEAKING_SCALARS
 #   define SV_LOG_SERIAL_FMT	    " [%lu]"
@@ -5513,23 +5510,25 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 # endif
 
 static void
-S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+S_mem_log_common(enum mem_log_type mlt, const UV n, 
+		 const UV typesize, const char *type_name, const SV *sv,
+		 Malloc_t oldalloc, Malloc_t newalloc,
+		 const char *filename, const int linenumber,
+		 const char *funcname)
 {
-# if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
-    const char *s;
-# endif
+    const char *pmlenv;
 
     PERL_ARGS_ASSERT_MEM_LOG_COMMON;
 
-# ifdef PERL_MEM_LOG_ENV
-    s = PerlEnv_getenv(mlt < MLT_NEW_SV ? "PERL_MEM_LOG" : "PERL_SV_LOG");
-    if (s ? atoi(s) : 0)
-# endif
+    pmlenv = PerlEnv_getenv("PERL_MEM_LOG");
+    if (!pmlenv)
+	return;
+    if (mlt < MLT_NEW_SV ? strchr(pmlenv,'m') : strchr(pmlenv,'s'))
     {
 	/* We can't use SVs or PerlIO for obvious reasons,
 	 * so we'll use stdio and low-level IO instead. */
 	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-# ifdef PERL_MEM_LOG_TIMESTAMP
+
 #   ifdef HAS_GETTIMEOFDAY
 #     define MEM_LOG_TIME_FMT	"%10d.%06d: "
 #     define MEM_LOG_TIME_ARG	(int)tv.tv_sec, (int)tv.tv_usec
@@ -5545,24 +5544,17 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 	 * gettimeofday() (see ext/Time-HiRes), the easiest way is
 	 * probably that they would be used to fill in the struct
 	 * timeval. */
-# endif
 	{
-	    int fd = PERL_MEM_LOG_FD;
 	    STRLEN len;
+	    int fd = atoi(pmlenv);
+	    if (!fd)
+		fd = PERL_MEM_LOG_FD;
 
-# ifdef PERL_MEM_LOG_ENV_FD
-	    if ((s = PerlEnv_getenv("PERL_MEM_LOG_FD"))) {
-		fd = atoi(s);
-	    }
-# endif
-# ifdef PERL_MEM_LOG_TIMESTAMP
-	    s = PerlEnv_getenv("PERL_MEM_LOG_TIMESTAMP");
-	    if (!s || atoi(s)) {
+	    if (strchr(pmlenv, 't')) {
 		len = my_snprintf(buf, sizeof(buf),
 				MEM_LOG_TIME_FMT, MEM_LOG_TIME_ARG);
 		PerlLIO_write(fd, buf, len);
 	    }
-# endif
 	    switch (mlt) {
 	    case MLT_ALLOC:
 		len = my_snprintf(buf, sizeof(buf),
@@ -5593,54 +5585,78 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 			filename, linenumber, funcname,
 			PTR2UV(sv) _SV_LOG_SERIAL_ARG(sv));
 		break;
+	    default:
+		len = 0;
 	    }
 	    PerlLIO_write(fd, buf, len);
 	}
     }
 }
+#endif /* !PERL_MEM_LOG_NOIMPL */
+
+#ifndef PERL_MEM_LOG_NOIMPL
+# define \
+    mem_log_common_if(alty, num, tysz, tynm, sv, oal, nal, flnm, ln, fnnm) \
+    mem_log_common   (alty, num, tysz, tynm, sv, oal, nal, flnm, ln, fnnm)
+#else
+/* this is suboptimal, but bug compatible.  User is providing their
+   own implemenation, but is getting these functions anyway, and they
+   do nothing. But _NOIMPL users should be able to cope or fix */
+# define \
+    mem_log_common_if(alty, num, tysz, tynm, u, oal, nal, flnm, ln, fnnm) \
+    /* mem_log_common_if_PERL_MEM_LOG_NOIMPL */
 #endif
 
 Malloc_t
-Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name,
+		   Malloc_t newalloc, 
+		   const char *filename, const int linenumber,
+		   const char *funcname)
 {
-#ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_ALLOC, n, typesize, type_name, NULL, NULL, newalloc, filename, linenumber, funcname);
-#endif
+    mem_log_common_if(MLT_ALLOC, n, typesize, type_name,
+		      NULL, NULL, newalloc,
+		      filename, linenumber, funcname);
     return newalloc;
 }
 
 Malloc_t
-Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name,
+		     Malloc_t oldalloc, Malloc_t newalloc, 
+		     const char *filename, const int linenumber, 
+		     const char *funcname)
 {
-#ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_REALLOC, n, typesize, type_name, NULL, oldalloc, newalloc, filename, linenumber, funcname);
-#endif
+    mem_log_common_if(MLT_REALLOC, n, typesize, type_name,
+		      NULL, oldalloc, newalloc, 
+		      filename, linenumber, funcname);
     return newalloc;
 }
 
 Malloc_t
-Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_free(Malloc_t oldalloc, 
+		  const char *filename, const int linenumber, 
+		  const char *funcname)
 {
-#ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL, filename, linenumber, funcname);
-#endif
+    mem_log_common_if(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL, 
+		      filename, linenumber, funcname);
     return oldalloc;
 }
 
 void
-Perl_mem_log_new_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_new_sv(const SV *sv, 
+		    const char *filename, const int linenumber,
+		    const char *funcname)
 {
-#ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_NEW_SV, 0, 0, "", sv, NULL, NULL, filename, linenumber, funcname);
-#endif
+    mem_log_common_if(MLT_NEW_SV, 0, 0, "", sv, NULL, NULL,
+		      filename, linenumber, funcname);
 }
 
 void
-Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_del_sv(const SV *sv,
+		    const char *filename, const int linenumber, 
+		    const char *funcname)
 {
-#ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_DEL_SV, 0, 0, "", sv, NULL, NULL, filename, linenumber, funcname);
-#endif
+    mem_log_common_if(MLT_DEL_SV, 0, 0, "", sv, NULL, NULL, 
+		      filename, linenumber, funcname);
 }
 
 #endif /* PERL_MEM_LOG */

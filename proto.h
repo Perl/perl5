@@ -4254,6 +4254,11 @@ STATIC void	S_hfreeentries(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HFREEENTRIES	\
 	assert(hv)
 
+STATIC I32	S_anonymise_cv(pTHX_ const char *stash, SV *val)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ANONYMISE_CV	\
+	assert(val)
+
 STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
@@ -5178,7 +5183,7 @@ STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_reg_namedseq(pTHX_ struct RExC_state_t *pRExC_state, UV *valuep)
+STATIC regnode*	S_reg_namedseq(pTHX_ struct RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NAMEDSEQ	\
 	assert(pRExC_state)
@@ -5884,7 +5889,7 @@ STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bo
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 			__attribute__nonnull__(4)
 			__attribute__nonnull__(8)

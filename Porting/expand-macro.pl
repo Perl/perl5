@@ -32,6 +32,7 @@ if (!(@ARGV = @headers)) {
     while (<$fh>) {
 	push @ARGV, $1 if m!^([^/]+\.h)\t!;
     }
+    push @ARGV, 'config.h' if -f 'config.h';
 }
 
 my $header;
@@ -56,7 +57,12 @@ my $sentinel = "$macro expands to";
 print $out <<"EOF";
 #include "EXTERN.h"
 #include "perl.h"
-#include "$header"
+EOF
+
+print qq{#include "$header"\n}
+    unless $header eq 'perl.h' or $header eq 'EXTERN.h';
+
+print $out <<"EOF";
 #line 4 "$sentinel"
 $macro$args
 EOF

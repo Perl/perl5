@@ -1354,6 +1354,7 @@ paRxo	|void*	|get_arena	|const size_t svtype|const U32 misc
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|NN HV *hv
+s	|I32	|anonymise_cv	|NULLOK const char *stash|NN SV *val
 sa	|HE*	|new_he
 sanR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 sn	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
@@ -1593,7 +1594,7 @@ Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|regnode*|reg_namedseq	|NN struct RExC_state_t *pRExC_state \
-				|NULLOK UV *valuep
+				|NULLOK UV *valuep|NULLOK I32 *flagp
 Es	|void	|reginsert	|NN struct RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth
 Es	|void	|regtail	|NN struct RExC_state_t *pRExC_state \
@@ -1833,7 +1834,7 @@ s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
 				|I32 utf8|bool warn
 sr	|char *	|write_no_mem
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
 				|NN const char *type_name|NULLOK const SV *sv \
 				|Malloc_t oldalloc|Malloc_t newalloc \

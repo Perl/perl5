@@ -75,12 +75,12 @@ my @LibFiles;
     @LibFiles =    map { chomp; $_ }
                     ### should we get rid of this file?
                     grep { $ExcludeRe && $_ =~ $ExcludeRe
-                        ? do {  warn "Removing $_\n";
-                                system("rm $_") and die "rm '$_' failed: $?";
+                        ? do {  warn "Removing $Repo/$_\n";
+                                system("rm $Repo/$_") and die "rm '$Repo/$_' failed: $?";
                                 undef
                             }
                         : 1
-                     } `find lib -type f`
+                     } `find $Repo/lib -type f`
         or die "Could not detect library files\n";
       
     print "done\n" if $Verbose;

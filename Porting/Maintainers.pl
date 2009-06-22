@@ -88,6 +88,21 @@ package Maintainers;
     'zefram'	=> 'Andrew Main <zefram@cpan.org>',
     );
 
+
+# IGNORABLE: files which, if they appear in the root of a CPAN
+# distribution, need not appear in core (i.e. core-cpan-diff won't
+# complain if it can't find them)
+
+@IGNORABLE = qw(
+    .cvsignore .dualLivedDiffConfig .gitignore
+    ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
+    CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS
+    GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
+    MANIFEST MANIFEST.SKIP META.yml NEW NOTES ppport.h README
+    SIGNATURE THANKS TODO Todo VERSION WHATSNEW
+);
+
+ 
 # Each entry in the  %Modules hash roughly represents a distribution,
 # except in the case of CPAN=1, where it *exactly* represents a single
 # CPAN distribution.
@@ -118,6 +133,37 @@ package Maintainers;
 # DISTRIBUTION names the tarball on CPAN which (allegedly) the files
 # included in core are derived from. Note that the file's version may not
 # necessarily match the newest version on CPAN.
+
+# EXCLUDED is a list of files to be excluded from a CPAN tarball before
+# comparing the remaining contents with core. Each item can either be a
+# full pathname (eg 't/foo.t') or a pattern (e.g. qr{^t/}).
+# It defaults to the empty list.
+
+# MAP is a hash that maps CPAN paths to their core equivalents.
+# Each key reprepresents a string prefix, with longest prefixes checked
+# first. The first match causes that prefix to be replaced with the
+# corresponding key. For example, with the following MAP:
+#   { 
+#     'lib/'	 => 'lib/',
+#     ''	 => 'lib/Foo/',
+#   },
+#
+# these files are mapped as shown:
+#
+#    README     becomes lib/Foo/README
+#    lib/Foo.pm becomes lib/Foo.pm 
+#
+# The default is dependent on the type of module.
+# For distributions which appear to be stored under ext/, it defaults to:
+#
+#   { '' => 'ext/Foo-Bar/' }
+#
+# otherwise, it's
+#
+#   { 
+#     'lib/'	 => 'lib/',
+#     ''	 => 'lib/Foo/Bar/',
+#   }
 
 %Modules = (
 
@@ -419,6 +465,8 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
 			     qw{ bin/cpanp-boxed
+				 t/031_CPANPLUS-Internals-Source-SQLite.t
+				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
 			   ],
 	'CPAN'		=> 1,
@@ -1122,11 +1170,11 @@ package Maintainers;
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'EWILHELM/Module-Build-0.32.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.33_02.tar.gz',
 	'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
-	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t }, ],
+	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t scripts/bundle.pl}, ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Module::CoreList' =>
@@ -1195,7 +1243,7 @@ package Maintainers;
     'NEXT' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/NEXT-0.63.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/NEXT-0.64.tar.gz',
 	'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 	'EXCLUDED'	=> [ qr{^demo/} ],
 	'CPAN'		=> 1,
@@ -1795,7 +1843,7 @@ package Maintainers;
     'threads' =>
 	{
 	'MAINTAINER'	=> 'jdhedden',
-	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.72.tar.gz',
+	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.73.tar.gz',
 	'FILES'		=> q[ext/threads],
 	'EXCLUDED'	=> [ qw(examples/pool.pl
 				t/pod.t

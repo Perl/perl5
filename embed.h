@@ -1179,6 +1179,7 @@
 #ifdef PERL_CORE
 #define hsplit			S_hsplit
 #define hfreeentries		S_hfreeentries
+#define anonymise_cv		S_anonymise_cv
 #define new_he			S_new_he
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
@@ -1621,7 +1622,7 @@
 #define vdie_common		S_vdie_common
 #define write_no_mem		S_write_no_mem
 #endif
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 #ifdef PERL_CORE
 #define mem_log_common		S_mem_log_common
 #endif
@@ -3515,6 +3516,7 @@
 #ifdef PERL_CORE
 #define hsplit(a)		S_hsplit(aTHX_ a)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
+#define anonymise_cv(a,b)	S_anonymise_cv(aTHX_ a,b)
 #define new_he()		S_new_he(aTHX)
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
@@ -3756,7 +3758,7 @@
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define reg_recode(a,b)		S_reg_recode(aTHX_ a,b)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
-#define reg_namedseq(a,b)	S_reg_namedseq(aTHX_ a,b)
+#define reg_namedseq(a,b,c)	S_reg_namedseq(aTHX_ a,b,c)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define reg_scan_name(a,b)	S_reg_scan_name(aTHX_ a,b)
@@ -3968,7 +3970,7 @@
 #define vdie_common(a,b,c,d)	S_vdie_common(aTHX_ a,b,c,d)
 #define write_no_mem()		S_write_no_mem(aTHX)
 #endif
-#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+#if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 #ifdef PERL_CORE
 #define mem_log_common		S_mem_log_common
 #endif

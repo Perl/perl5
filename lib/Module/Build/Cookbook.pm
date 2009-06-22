@@ -1,13 +1,12 @@
 package Module::Build::Cookbook;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.32';
+$VERSION = '0.33_02';
 
 
 =head1 NAME
 
 Module::Build::Cookbook - Examples of Module::Build Usage
-
 
 =head1 DESCRIPTION
 
