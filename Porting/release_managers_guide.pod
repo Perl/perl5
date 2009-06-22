@@ -7,7 +7,7 @@ release_managers_guide - Releasing a new version of perl 5.x
 
 The release process is primarily executed by the current pumpking.
 
-This documents both helps as a check-list for the pumpking and is
+This document both helps as a check-list for the pumpking and is
 a base for ideas on how the various tasks could be automated or 
 distributed.
 
@@ -20,7 +20,7 @@ and packaging process.
 
 =head2 Is it ready?
 
-In this step we need to make sure that 
+In this step we need to make sure that:
 
 =over 4
 
@@ -37,7 +37,7 @@ which comes down to:
 
     for each module that fails its regression tests on $current
       did it fail identically on $previous?
-      if yes, "SEP"
+      if yes, "SEP" (Somebody Else's Problem)
       else work out why it failed (a bisect is useful for this)
 
     attempt to group failure causes
@@ -52,6 +52,8 @@ which comes down to:
           yes - goto "regression"
           no - note it in perldelta as a significant bugfix
           (also, try to inform the module's author)
+
+( TBD based on http://www.nntp.perl.org/group/perl.perl5.porters/2009/05/msg146680.html )
 
 =back
 
