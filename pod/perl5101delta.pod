@@ -196,8 +196,6 @@ The Unicode NameAliases.txt database file has been added. This has the
 effect of adding some extra C<\N> character names that formerly wouldn't
 have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
 
-=over 4
-
 =item C<overloading>
 
 See L</"The C<overloading> pragma"> above.
