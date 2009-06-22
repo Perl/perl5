@@ -226,7 +226,9 @@ C<Parse::CPAN::Meta> has been added to the core (version 1.39).
 
 =over
 
-=item C<feature>
+=item *
+
+C<feature>
 
 The meaning of the C<:5.10> and C<:5.10.X> feature bundles has
 changed slightly. The last component, if any (ie C<X>) is simply ignored.
