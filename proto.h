@@ -4254,7 +4254,7 @@ STATIC void	S_hfreeentries(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HFREEENTRIES	\
 	assert(hv)
 
-STATIC I32	S_anonymise_cv(pTHX_ const char *stash, SV *val)
+STATIC I32	S_anonymise_cv(pTHX_ HEK *stash, SV *val)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_ANONYMISE_CV	\
 	assert(val)

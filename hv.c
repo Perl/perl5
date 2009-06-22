@@ -1468,7 +1468,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (HvNAME(hv) && anonymise_cv(HvNAME(hv), val) && GvCVu(val))
+    if (HvNAME(hv) && anonymise_cv(HvNAME_HEK(hv), val) && GvCVu(val))
 	mro_method_changed_in(hv);
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1483,7 +1483,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 }
 
 static I32
-S_anonymise_cv(pTHX_ const char *stash, SV *val)
+S_anonymise_cv(pTHX_ HEK *stash, SV *val)
 {
     CV *cv;
 
@@ -1491,12 +1491,17 @@ S_anonymise_cv(pTHX_ const char *stash, SV *val)
 
     if (val && isGV(val) && isGV_with_GP(val) && (cv = GvCV(val))) {
 	if ((SV *)CvGV(cv) == val) {
-	    SV *gvname;
 	    GV *anongv;
 
-	    gvname = Perl_newSVpvf(aTHX_ "%s::__ANON__", stash ? stash : "__ANON__");
-	    anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
-	    SvREFCNT_dec(gvname);
+	    if (stash) {
+		SV *gvname = newSVhek(stash);
+		sv_catpvs(gvname, "::__ANON__");
+		anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
+		SvREFCNT_dec(gvname);
+	    } else {
+		anongv = gv_fetchpvs("__ANON__::__ANON__", GV_ADDMULTI,
+				     SVt_PVCV);
+	    }
 	    CvGV(cv) = anongv;
 	    CvANON_on(cv);
 	    return 1;
