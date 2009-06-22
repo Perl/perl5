@@ -94,7 +94,7 @@ SKIP: {
         skip('This perl has threads, skipping non-threaded debugger tests');
     } else {
         my $error = 'This Perl not built to support threads';
-        my $output = runperl( switches => [ '-dt' ] );
+        my $output = runperl( switches => [ '-dt' ], stderr => 1 );
         like($output, qr/$error/, 'Perl debugger correctly complains that it was not built with threads');
     }
 
