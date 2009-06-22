@@ -569,6 +569,12 @@ be extracted from the git version control system.
 
 A new internal cache means that C<isa()> will often be faster.
 
+=item *
+
+Under C<use locale>, the locale-relevant information is now cached on read-only
+values, such as the list returned by C<keys %hash>. This makes operations such
+as <sort keys %hash> in the scope of C<use locale> much faster.
+
 =back
 
 =head1 Installation and Configuration Improvements
@@ -591,9 +597,29 @@ perl is built with  C<-Dusedevel>.
 
 hints now supports versions 5.*.
 
+=head3 Win32
 
+XXX: Don't know how to summarise
+"Give Win32 message windows proper window procedures"
+http://perl5.git.perl.org/perl.git/commit/099b16d3b50ccbb639491fa8bd48153ec3225450
+
+=head3 VMS
+
+Reads from C<PerlIO::Scalar>'s in-memory temporary files used to fail if C<$/>
+was set to a numeric reference, to signal record-style reads. This is now fixed.
 
 =head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+5.10.0 inadvertently disabled an optimisation, causing a measurable performance
+drop in list assignment, such as is often used to assign function parameters
+from C<@_>. The optimisation has been re-instated, and the performance
+regression fixed.
+
+=back
 
 =head2 Other fixes
 
@@ -626,7 +652,7 @@ arguments [RT # 59998].
 
 The C<-i.sufffix> command-line switch now recreates the file using
 restricted permissions, before changing its mode to match the original
-file. This eliminates a potential race condition.
+file. This eliminates a potential race condition. [RT #60904]
 
 =item *
 
@@ -652,6 +678,9 @@ key is utf8 might result in an incorrect lookup.
 
 C<$object->isa('Foo')> would report false if the package C<Foo> didn't
 exist, even if the object's C<@ISA> contained C<Foo>.
+
+Various bugs in the new-to 5.10.0 mro code, triggered by manipulating C<@ISA>,
+have been found and fixed.
 
 =item *
 
@@ -725,9 +754,86 @@ Assigning a format to a glob could corrupt the format; e.g.:
 
      *bar=*foo{FORMAT}; # foo format now bad
 
+=item *
+
+Attempting to coerce a typeglob to a string or number could cause an assertion
+failure. The correct error message is now generated, "Can't coerce GLOB to
+I<$type>".
+
+=item *
+
+Under C<use filetest 'access'> C<-x> was using the wrong access mode. This
+has been fixed [RT #49003].
+
+=item *
+
+C<length> on a tied scalar that returned a Unicode value would not be correct
+the first time. This has been fixed.
+
+=item *
+
+Using an array C<tie> inside in array C<tie> could SEGV. This has been fixed.
+[RT #51636]
+
+=item *
+
+A race condition inside C<PerlIOStdio_close()> has been identified and fixed.
+This used to cause various threading issues, including SEGVs.
+
+=item *
+
+In C<unpack>, C<()> groups in scalar context was internally placing a list on
+the interpreter's stack, which manifested in various ways, including SEGVs.
+This is now fixed. [RT #50256]
+
+=item *
+
+Magic was called twice in C<substr>, C<\&$x>, C<tie $x, $m> and C<chop>.
+These have all been fixed.
+
+=item *
+
+An optimisation to clear the temporary stack within the implicit loop of
+C<s///ge> has been reverted, as it turned out to be the cause of obscure
+bugs in seemingly unrelated parts of the interpreter. [Change ef0d4e17921ee3de]
+
+=item *
+
+The line numbers for warnings inside C<elsif> are now correct.
+
+=item *
+
+The C<..> operator now works correctly with ranges whose ends are at or close
+to the values of the smallest and largest integers.
+
+=item *
+
+C<binmode STDIN, ':raw'> could lead to segmentation faults on some platforms.
+This has been fixed [RT #54828]
+
+=item *
+
+An off-by-one error meant that C<index $str, ...> was effectively being executed
+as C<index "$str\0", ...>. This has been fixed [RT #53746]
+
+=item *
+
+Various leaks associated with named captures in regexs have been fixed.
+[RT #57024]
+
+=item *
+
+A weak reference to a hash would leak. This was affecting C<DBI>. [RT #56908]
+
 =back
 
 =head1 New or Changed Diagnostics
+
+=head2 panic: sv_chop %s
+
+This new fatal error occurs when the C routine C<Perl_sv_chop()> was passed a
+position that is not within the scalar's string buffer. This is caused by
+buggy XS code, and at this point recovery is not possible.
 
 =head2 Can't locate package %s for the parents of %s
 
@@ -741,7 +847,9 @@ optimisation to be added.
 
 =item *
 
-C<vcroak()> now accepts a null first argument.
+C<vcroak()> now accepts a null first argument. A full audit was made of
+the "not NULL" compiler annotations, and those for several other internal
+functions were corrected.
 
 =item *
 
@@ -756,6 +864,11 @@ C<Perl_sv_insert>.
 
 =item *
 
+The function C<Perl_newSV_type(type)> has been added, equivalent to
+C<Perl_newSV()> followed by C<Perl_sv_upgrade(type)>.
+
+=item *
+
 The function C<Perl_croak_xs_usage> has been added as a wrapper to
 C<Perl_croak>.
 
@@ -764,6 +877,35 @@ C<Perl_croak>.
 The functions C<PerlIO_find_layer> and C<PerlIO_list_alloc> are now
 exported.
 
+=item *
+
+C<PL_na> has been exterminated from the core code, replaced by local STRLEN
+temporaries, or C<*_nolen()> calls. Either approach is faster than C<PL_na>,
+which is a pointer deference into the interpreter structure under ithreads,
+and a global variable otherwise.
+
+=item *
+
+C<Perl_mg_free()> used to leave freed memory accessible via SvMAGIC() on the
+scalar. It now updates the linked list to remove each piece of magic as it is
+freed.
+
+=item *
+
+Under ithreads, the regex in C<PL_reg_curpm> is now reference counted. This
+eliminates a lot of hackish work-arounds to cope with it not being reference
+counted.
+
+=item *
+
+C<Perl_mg_magical()> would sometimes incorrectly turn on C<SvRMAGICAL()>
+This has been fixed.
+
+=item *
+
+The B<public> IV and NV flags are now not set if the string value has trailing
+"garbage". This behaviour is consistent with not setting the public IV or NV
+flags if the value is out of range for the type.
 
 =back
 
