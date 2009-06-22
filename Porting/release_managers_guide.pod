@@ -1,0 +1,173 @@
+
+=head1 NAME
+
+release_managers_guide - Releasing a new version of perl 5.x
+
+=head1 SYNOPSIS
+
+The release process is primarily executed by the current pumpking.
+
+This document both helps as a check-list for the pumpking and is
+a base for ideas on how the various tasks could be automated or 
+distributed.
+
+The process has two major parts. In the first part 
+the pumpking needs to determine if the current head revision in Git
+is ready for shipment. The second part is the actual release 
+and packaging process.
+
+=head1 DETAILS
+
+=head2 Is it ready?
+
+In this step we need to make sure that:
+
+=over 4
+
+=item 1
+
+perl passes its own test suite and 
+
+=item 2
+
+CPAN works
+
+
+which comes down to:
+
+    for each module that fails its regression tests on $current
+      did it fail identically on $previous?
+      if yes, "SEP" (Somebody Else's Problem)
+      else work out why it failed (a bisect is useful for this)
+
+    attempt to group failure causes
+
+    for each failure cause
+      is that a regression?
+      if yes, figure out how to fix it
+        (more code? revert the code that broke it)
+      else
+        (presumably) it's relying on something un-or-under-documented
+        should the existing behaviour stay?
+          yes - goto "regression"
+          no - note it in perldelta as a significant bugfix
+          (also, try to inform the module's author)
+
+( TBD based on http://www.nntp.perl.org/group/perl.perl5.porters/2009/05/msg146680.html )
+
+=back
+
+
+=head2 The Actual release process
+
+The set of tasks that can be "scripted" for Perl 5
+
+=over 4
+
+=item 0
+
+so you think you have a source control in a state that won't break CPAN,
+at least not in "surprising" ways.
+
+=item 1
+
+As there are no regular smokes (yet - please fix?) find out about the state
+of VMS. If it's bad, think again.
+
+=item 2
+
+Re-read the perldelta to try to find any embarrassing typos
+
+=item 3
+
+Run Porting/makemeta
+
+=item 4
+
+[used to be run autodoc.pl, but I eliminated that]
+
+=item 5
+
+[used to be run pod/buildtoc, but I eliminated that]
+
+=item 6
+
+update module corelist, but we need to fix that
+
+[it has been holding perforce revisions for releases, but we can't know
+hashes in advance for git. We need to agree a plan to move to git tags]
+
+=item 7
+
+[update changes, but Dave has eliminated that]
+
+=item 8
+
+update patchlevel.h to remove all local patches
+
+=item 9
+
+make tarball with Porting/makerel
+
+=item 10
+
+copy tarball to some other machine x 2 [or more - IRC is good for this]
+
+=item 11
+
+check that ./Configure -des && make all test works in one place
+
+=item 12
+
+check that ./Configure ... && make all test_harness install works
+
+
+=item 13
+
+bootstrap the CPAN client on the clean install
+
+=item 14
+
+install CPANPLUS
+
+=item 15
+
+bootstrap the CPANPLUS client
+
+=item 16
+
+install an XS module
+
+=item 17
+
+if this is good, commit this.
+sit, and wait.
+
+=item 18
+
+do the smoke tests pass (particularly Win32)
+
+=item 19
+
+if yes, upload it to PAUSE. This is the point of no return
+
+=item 20
+
+mail p5p to announce it, with a quote I prepared earlier
+
+=item 21
+
+wait 24 hours or so
+
+=item 22
+
+post the announcement to use.perl.org
+
+=back
+
+=head1 SOURCE
+
+Based on http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html
+
+=cut
+
