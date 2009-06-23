@@ -915,7 +915,7 @@ package Maintainers;
     'IPC::Cmd' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/IPC-Cmd-0.44.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/IPC-Cmd-0.46.tar.gz',
 	'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
