@@ -2812,6 +2812,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    }
 	    memset(cur, datumtype == 'A' ? ' ' : '\0', len);
 	    cur += len;
+	    SvTAINT(cat);
 	    break;
 	}
 	case 'B':

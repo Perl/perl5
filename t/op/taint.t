@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 298;
+plan tests => 301;
 
 $| = 1;
 
@@ -1301,6 +1301,19 @@ foreach my $ord (78, 163, 256) {
 	ok(tainted($got[$i]), "tainted result $i");
 	is($got[$i], $data[$i], "correct content $i");
     }
+}
+
+# Bug RT #52552 - broken by change at git commit id f337b08
+{
+    my $x = $TAINT. q{print "Hello world\n"};
+    my $y = pack "a*", $x;
+    ok(tainted($y), "pack a* preserves tainting");
+
+    my $z = pack "A*", q{print "Hello world\n"}.$TAINT;
+    ok(tainted($z), "pack A* preserves tainting");
+
+    my $zz = pack "a*a*", q{print "Hello world\n"}, $TAINT;
+    ok(tainted($zz), "pack a*a* preserves tainting");
 }
 
 # This may bomb out with the alarm signal so keep it last
