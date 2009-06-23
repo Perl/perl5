@@ -857,6 +857,12 @@ optimisation to be added.
 
 This warning has been removed.
 
+=item Deep recursion on subroutine "%s"
+
+It is now possible to change the depth threshold for this warning from the
+default of 100, by recompiling the F<perl> binary, setting the C pre-processor
+macro C<PERL_SUB_DEPTH_WARN> to the desired value.
+
 =head1 Changed Internals
 
 =over
@@ -928,6 +934,26 @@ The B<public> IV and NV flags are now not set if the string value has trailing
 "garbage". This behaviour is consistent with not setting the public IV or NV
 flags if the value is out of range for the type.
 
+=item *
+
+SV allocation tracing has been added to the diagnostics enabled by C<-Dm>.
+The tracing can alternatively output via the C<PERL_MEM_LOG> mechanism, if that
+was enabled when the F<perl> binary was compiled.
+
+=item *
+
+Uses of C<Nullav>, C<Nullcv>, C<Nullhv>, C<Nullop>, C<Nullsv> etc have been
+replaced by C<NULL> in the core code, and non-dual-life modules, as C<NULL>
+is clearer to those unfamilar with the core code.
+
+=item *
+
+A macro C<MUTABLE_PTR(p)> has been added, which on (non-pedantic) gcc will not
+cast away C<const>, returning a C<void *>. Macros C<MUTABLE_SV(av)>,
+C<MUTABLE_SV(cv)> etc build on this, casting to C<AV *> etc without casting
+away C<const>. This allows proper compile-time auditing of C<const> correctness
+in the core, and helped picked up some errors (now fixed).
+
 =back
 
 =head1 Known Problems
@@ -986,3 +1012,6 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+XXX Don't know where to put a description of F<Porting/expand-macro.pl>
+But I think it should get a mention.
