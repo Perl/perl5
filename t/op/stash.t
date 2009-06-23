@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 30 );
+plan( tests => 31 );
 
 # Used to segfault (bug #15479)
 fresh_perl_is(
@@ -109,25 +109,49 @@ SKIP: {
     TODO: {
         local $TODO = "anon CVs not accounted for yet";
 
-        $sub = do {
-            package four;
-            sub { 1 };
-        };
-        %four:: = ();
-        $gv = b($sub)->GV;
+        my @results = split "\n", runperl
+            switches    => [ "-MB", "-l" ],
+            prog        => q{
+                my $sub = do {
+                    package four;
+                    sub { 1 };
+                };
+                %four:: = ();
 
-        isa_ok( $gv, "B::GV", "cleared stash leaves anon CV with valid GV");
-        is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
+                my $gv = B::svref_2object($sub)->GV;
+                print $gv->isa(q/B::GV/) ? q/ok/ : q/not ok/;
 
-        $sub = do {
-            package five;
-            sub { 1 };
-        };
-        undef %five::;
-        $gv = b($sub)->GV;
+                my $st = eval { $gv->STASH->NAME };
+                print $st eq q/__ANON__/ ? q/ok/ : q/not ok/;
 
-        isa_ok( $gv, "B::GV", "undefed stash leaves anon CV with valid GV");
-        is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
+                my $sub = do {
+                    package five;
+                    sub { 1 };
+                };
+                undef %five::;
+
+                $gv = B::svref_2object($sub)->GV;
+                print $gv->isa(q/B::GV/) ? q/ok/ : q/not ok/;
+
+                $st = eval { $gv->STASH->NAME };
+                print $st eq q/__ANON__/ ? q/ok/ : q/not ok/;
+
+                print q/done/;
+            };
+
+        ok( @results == 5 && $results[4] eq "done",
+            "anon CVs in undefed stash don't segfault" )
+            or todo_skip $TODO, 4;
+
+        ok( $results[0] eq "ok", 
+            "cleared stash leaves anon CV with valid GV");
+        ok( $results[1] eq "ok",
+            "...and an __ANON__ stash");
+            
+        ok( $results[2] eq "ok", 
+            "undefed stash leaves anon CV with valid GV");
+        ok( $results[3] eq "ok",
+            "...and an __ANON__ stash");
     }
     
     # [perl #58530]
