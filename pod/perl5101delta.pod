@@ -103,7 +103,6 @@ for smart match mostly need to worry only with comparing against a scalar,
 and possibly with stringification overloading; the other common cases
 will be automatically handled consistently.
 
-
 C<~~> will now refuse to work on objects that do not overload it (in order
 to avoid relying on the object's underlying structure).
 
@@ -160,9 +159,7 @@ in a change of behaviour between 5.8.x and 5.10.0:
     # matches in 5.8.x, doesn't match in 5.10.0
     $re = qr/^bar/; "foo\nbar" =~ /$re/m;
 
-
 =back
-
 
 =head1 Core Enhancements
 
@@ -202,7 +199,6 @@ have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
 See L</"The C<overloading> pragma"> above.
 
 =back
-
 
 =head2 New Modules
 
@@ -331,7 +327,6 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 =item *
 
 C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.50
-
 
 =item *
 
@@ -541,7 +536,6 @@ C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
 
 Now looks in C<include-fixed> too, which is a recent addition to gcc's
 search path.
-
 
 =head2 F<h2xs>
 
@@ -765,7 +759,6 @@ spurious warning like the following:
 
 On windows, C<'.\foo'> and C<'..\foo'>  were treated differently than
 C<'./foo'> and C<'../foo'> by C<do> and C<require> [RT #63492].
-
 
 =item *
 
