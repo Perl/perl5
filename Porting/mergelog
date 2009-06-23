@@ -513,7 +513,7 @@ M  039698bb08 2008/02/08 33254
 M  099b16d3b5 2008/02/08 33255
 R  3468c7eaa8 2008/02/08 33256 changes sig of mg_copy() fns: not BinCompat
 M  f88ee2835d 2008/02/08 33257
-!  7b0f711abd 2008/02/08 33258 IO::Handle awaiting CPAN sync
+M  7b0f711abd 2008/02/08 33258 IO::Handle
 M  3722f0dc40 2008/02/08 33259
 M  7e8c2d18d3 2008/02/08 33260
 M  f8a4dbc572 2008/02/08 33261
@@ -1006,8 +1006,8 @@ M  ac0638ad05 2008/06/01 33979
 M  a811a5cf5b 2008/06/01 33980
 R  1e21d011cd 2008/06/01 33981 (unknown reason)
 M  d685c22b7f 2008/06/01 33982
-!  bc3f1c14f9 2008/06/01 33983 ext/IO/lib/IO/Dir.pm 1.06_01, awaiting new CPAN release
-!  6f86311fbd 2008/06/01 33984 ext/IO/lib/IO/Dir.pm 1.06_01, awaiting new CPAN release
+M  bc3f1c14f9 2008/06/01 33983 ext/IO/lib/IO/Dir.pm 1.06_01
+M  6f86311fbd 2008/06/01 33984 ext/IO/lib/IO/Dir.pm 1.06_01
 M  a911a0f814 2008/06/01 33985
 !  7029ff3723 2008/06/02 33986 File::Copy
 M  55595e835e 2008/06/02 33987
@@ -1298,7 +1298,7 @@ R  c33269f7cc 2008/09/20 34381 make 2 fns static:
 			    S_get_aux_mg was added by 32680, which isn't merged
 R  1da83c398c 2008/09/20 34383 fix for S_refcounted_he_new_common,
 				which is only in blead
-!  5eb30066fe 2008/09/20 34384 IO::Handle awaiting CPAN sync
+M  5eb30066fe 2008/09/20 34384 IO::Handle
 M  d3383c7531 2008/09/21 34385
 M  592b6146ab 2008/09/21 34386
 M  df6b13cea9 2008/09/21 34387
@@ -2448,8 +2448,7 @@ R  4705144da6 2009/02/15 Ensure that the pointer to S_incpush_use_sep() is
 M  bf63da66ae 2009/02/16 Yves states that patches to ExtUtils::Install shou
 M  e120390b47 2009/02/16 Extra regex tests
 M  40bed538bd 2009/02/16 Upgrade to Encode 2.31
-!  2b93ed3263 2009/02/16 [perl #63234] [DOC PATCH] fix some missing parts o
-			    IO::Handle 1.27_02 - wait for CPAN sync
+M  2b93ed3263 2009/02/16 [perl #63234] [DOC PATCH] fix some missing parts o
 R  95bb830374 2009/02/16 Don't add PRIVLIB_EXP to @INC twice.
 			    part of @INC order stuff
 M  1ab9acc5e0 2009/02/16 Use tempfile() in tests
@@ -3050,8 +3049,7 @@ M  318bf70858 2009/05/10 Replacing dump.c's use of SVs as temporaries is TO
 M  4477f4efa6 2009/05/10 bump Storage version to 2.20 to distinguish it fro
 d  d5e98372e6 2009/05/11 Allow typed arrays and hashes
 			    (maybe merge just the tests at some point?)
-!  eb1c4873a4 2009/05/11 Update IO to CPAN 1.24 release
-			    some smoking issues
+M  eb1c4873a4 2009/05/11 Update IO to CPAN 1.24 release
 A  f118ea0d48 2009/05/12 Remove proposed (but unimplemented) $foo ~~ Range 
 M  9c53f8ae1a 2009/05/12 remove all Changes* files
 M  9519d2ec68 2009/05/12 Resurrect the Changes file as a simple guide to fi
@@ -3291,6 +3289,7 @@ d  01be072998 2009/06/07 main: Unregister signal handler before destroying
 		    see <1242849212-19840-1-git-send-email-john.wright@hp.com>
 d  b762d86673 2009/06/07 Mask signals in thread creation and destruction to
 d  26618b64e8 2009/06/07 Bump version of threads.pm
+d  7dcc656fa9 2009/06/07 Add a test for a thread-enabled debugger
 M  a39e16d8bc 2009/06/07 Upgrade to Test-Harness-3.17
 d  d2aa556d1d 2009/06/07 There is no pthread_sigmask on VMS, so use sigproc
 !  c095625522 2009/06/08 Upgrade to MakeMaker 6.53_02
@@ -3334,8 +3333,7 @@ d  29b39dde48 2009/06/11 It's not necessary to hardcode skipping of benchma
 d  fcac5cf149 2009/06/11 Some portability and clean-up for errno.t.
 M  937f2ad5ba 2009/06/11 Make Compare.t work when filenames can't have whit
 M  55ae25dcfe 2009/06/12 Upgrade to Devel::PPPort 3.18
-!  8565c31a57 2009/06/12 Upgrade to Devel::PPPort 3.18_01
-			    wait for 3.19
+M  8565c31a57 2009/06/12 Upgrade to Devel::PPPort 3.18_01
 M  412304fbe6 2009/06/12 fix trivial typo in perldelta
 M  71605646f0 2009/06/12 bump lib/ExtUtils/Constant.pm version to 0.22 sinc
 M  7ac0cca805 2009/06/12 further sync blead with Net-Ping-2.36
@@ -3356,14 +3354,95 @@ M  1edf8e51d7 2009/06/12 sync ext/Text-Soundex/README with the CPAN version
 M  f46c322273 2009/06/12 Update perlmodlib.PL to accomodate the re-arrangin
 R  176cb5a0e1 2009/06/12 Regenerated perlmodlib.pod
 			    now done at build time
-.  5abfb2931e 2009/06/13 FindBin doesn't need to use Config;
+M  5abfb2931e 2009/06/13 FindBin doesn't need to use Config;
 R  a9df907534 2009/06/13 Resort MANIFEST.
 			    did manually instead
 M  c0b6140e88 2009/06/13 Make SvOK and SvTRUE API docs slightly less utterl
 M  0228b1bbd4 2009/06/13 Update to Archive::Extract 0.32
-.  1c82faa772 2009/06/13 Update to Archive::Tar 1.50
-.  a0995fd479 2009/06/13 Update to CPANPLUS 0.87_01
-.  26ad458aeb 2009/06/13 Update CPANPLUS::Dist::Build to CPAN version 0.34
+M  1c82faa772 2009/06/13 Update to Archive::Tar 1.50
+d  a0995fd479 2009/06/13 Update to CPANPLUS 0.87_01
+			    stick with 0.8601 for 5.10.1
+!  26ad458aeb 2009/06/13 Update CPANPLUS::Dist::Build to CPAN version 0.34
+			    appears to be a VMS issue
 M  e8041d9b83 2009/06/13 In perlmodlib.PL, just open files in their origina
 M  291c64f4c0 2009/06/13 Make perlmodlib.PL chdir into pod. Add a -q flag t
 M  6e2c892858 2009/06/13 Generate perlmodlib.pod at build time, instead of 
+d  19be90356d 2009/06/13 Update CPANPLUS to 0.87_02
+			    stick with 0.8601 for 5.10.1
+M  f475b4a222 2009/06/13 Update Archive::Tar to 1.52
+M  1e2f36ef3d 2009/06/13 Eliminate the regen_pods target from pod/Makefile,
+M  22b7b87b20 2009/06/13 Remove autodoc.pl from regen.pl and the lists of r
+M  8861d6254f 2009/06/13 minor updates to Maintainers.pl
+M  7475ca45e9 2009/06/13 Update to IO-1.25 from CPAN
+M  6f5e54b9db 2009/06/13 Nit for the "Missing right brace" error message de
+M  3fd1d62e36 2009/06/13 More updates for Porting/Maintainers.pl
+M  a1e6383bbc 2009/06/13 Add perlmodlib.pod in .gitignore, since it's now g
+R  aac81c6486 2009/06/13 Merge branch 'blead' of camel:/gitroot/perl into b
+				MERGE: a1e6383bbc 3fd1d62e36
+M  6e7200087b 2009/06/13 Add \N idea from Perl 6 to perltodo
+M  760f623a76 2009/06/13 synchronise lib/Log/Message/t/02_Log-Message.t wit
+M  20fc10417a 2009/06/13 Update to Data::Dumper 2.124
+M  0ec3513818 2009/06/13 Upgrade IPC::Cmd to 0.46
+M  439578a8cd 2009/06/13 Correct the NAME in the Pod of ExtUtils::Constant:
+M  cf9cbb1fcb 2009/06/13 Improve perlmodlib.PL. Reduce the amount of specia
+M  5b5041827e 2009/06/13 Bring the joy of strict (and warnings) to perlmodl
+M  4231740464 2009/06/14 Upgrade to Devel::PPPort 3.19
+d  f63574b540 2009/06/14 Skip threaded debugger tests unless $Config{usethr
+d  9c955c4d43 2009/06/14 Add a test to the debugger about not having thread
+d  eb78bf8f0d 2009/06/14 Merge branch 'blead' into debugger_symbols
+				MERGE: 9c955c4d43 4231740464
+d  c6757210fa 2009/06/15 The attached patch to perlio.c fixes the problem o
+M  d947e7a211 2009/06/15 Fix readline example in perlfunc
+d  65269dc7d2 2009/06/15 Update 'threads' version in Maintainers.pl
+M  91490fbe11 2009/06/15 Update 'NEXT' version in Maintainers.pl
+d  afefe6bfcf 2009/06/16 Implement new regex escape \N
+M  17633433c1 2009/06/16 add-package.pl lib exclude fixed
+!  9441003632 2009/06/16 [PATCH] Updating Module::Build to 0.33_02
+			    wait for non-devel CPAN release
+d  c741660aac 2009/06/17 Basic docs for \N
+d  cbf4a12974 2009/06/17 Some more tests for \N
+d  71e9c5323d 2009/06/17 Add perldelta entry for \N
+M  5ad5b34cb2 2009/06/18 Handle the rare but legal angle bracket in unixify
+d  e061ec81dc 2009/06/18 Merge branch 'backslash-N' into blead
+				MERGE: 5ad5b34cb2 71e9c5323d
+M  906a0c07e3 2009/06/18 Remove CPANPLUS's SQLite tests from the core.
+d  3b910a0663 2009/06/18 Add gcc predefined macros to $Config{cppsymbols} o
+M  ed690650a4 2009/06/18 Make expand-macro.pl scan config.h, if it exists.
+M  4784c5e80c 2009/06/18 Allow expand-macro.pl to expand macros in perl.h w
+M  458b44e7bc 2009/06/19 Fix API docs:SvGAMAGIC returns a U32, not a char*
+M  2c95b6e4c4 2009/06/19 Maintainers.pl: add @IGNORABLE and document EXCLUD
+M  cb097e7a7e 2009/06/19 add Porting/core-cpan-diff
+M  6379002239 2009/06/21 Upgrade to threads::shared 1.29
+M  a51040a0e9 2009/06/21 add-package.pl lib exclude fixed
+M  3f1788e11f 2009/06/21 make_patchnum.pl now works in -Dmksymlink target d
+.  d018fae575 2009/06/21 Tests for deleting stash entries.
+.  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
+.  4fec321675 2009/06/21 Regenerate headers and fix compilation with thread
+.  de10be12cd 2009/06/21 point illguts at perl.org
+.  73d1d97336 2009/06/21 invert and rename PERL_MEM_LOG_STDERR to PERL_MEM_
+.  1cd8acb500 2009/06/21 simplify PERL_MEM_LOG
+.  10a879f5b1 2009/06/21 update PERL_MEM_LOG in perlhack.pod
+.  fd5aa6c359 2009/06/21 Regenerate headers
+.  4bd8fafa9f 2009/06/21 Also replace PERL_MEM_LOG_STDERR by PERL_MEM_LOG_N
+.  2e5b50041f 2009/06/21 A few docs nits after the few last commits
+.  b953482e2d 2009/06/21 drop remaining mentions of PERL_MEM_LOG_FOO envars
+.  ad6656ab32 2009/06/22 Merge branch 'blead' into debugger_symbols
+				MERGE: eb78bf8f0d b953482e2d
+.  9b76ae71c6 2009/06/22 Fix skipping tests with threads in last commit
+.  53409900a7 2009/06/22 Fix test with non-threaded perls
+.  7277a900f7 2009/06/22 add release_managers_guide.pod
+.  1aff535472 2009/06/22 typos, link to thread with ideas about testing sta
+.  6eb667c676 2009/06/22 Instead of a const char *, pass a HEK * to anonymi
+.  38b3c827d8 2009/06/22 Merge commit 'szabgab/release_process' into blead
+				MERGE: 6eb667c676 1aff535472
+.  aeeb13907a 2009/06/22 avoid trying to load packages that are in the same
+.  68f62fdf7f 2009/06/23 Add Porting/release_managers_guide.pod to MANIFEST
+.  d2651550ea 2009/06/23 Added new required fields to makesis.pl
+.  ab9c44463c 2009/06/23 Fix blead segfault on Cygwin for t/op/stash.t
+.  3c4fb04a91 2009/06/23 Fix for RT #52552.
+.  9c3cb3e150 2009/06/23 version bumps in Maintainers.pl
+.  3eccaf6d20 2009/06/23 Update threads::shared in Porting/Maintainers.pl t
+.  8a9741846a 2009/06/23 Ammend unhelpful description of debugger watch com
+.  ddb418268d 2009/06/23 another Maintainers.pl version update
+!  16fb65535f 2009/06/23 sync lib/Module/Build/Changes with CPAN equivalent
+			    wait for non-devel CPAN release

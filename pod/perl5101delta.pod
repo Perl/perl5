@@ -244,7 +244,7 @@ C<Archive::Extract> upgraded from version 0.24 to 0.32
 
 =item *
 
-C<Archive::Tar> upgraded from version 1.38 to 1.48
+C<Archive::Tar> upgraded from version 1.38 to 1.52
 
 =item *
 
@@ -284,11 +284,11 @@ C<Cwd> upgraded from version 3.25_01 to 3.30
 
 =item *
 
-C<Data::Dumper> upgraded from version 2.121_14 to 2.121_20
+C<Data::Dumper> upgraded from version 2.121_14 to 2.124
 
 =item *
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.18
+C<Devel::PPPort> upgraded from version 3.13 to 3.19
 
 =item *
 
@@ -311,14 +311,19 @@ C<Encode> upgraded from version 2.23 to 2.33
 
 C<Filter::Simple> upgraded from version 0.82 to 0.84
 
+
+=item *
+
+C<FindBin> upgraded from version 1.49 to 1.50 
+
 =item *
 
 C<ExtUtils::Command> upgraded from version 1.13 to 1.16
 
 =item *
 
-C<ExtUtils::Constant> XXX various .pms from this have newer versions than
-CPAN, both in 5.10.0 and 5.10.x
+C<ExtUtils::Constant> upgraded from 0.20 to 0.22 (note that neither of
+these versions are available on CPAN).
 
 =item *
 
@@ -368,9 +373,21 @@ This fixes a memory leak.
 
 =item *
 
-C<IO> upgraded from version 1.23_01 to 1.23_02 XXX
+C<IO> upgraded from version 1.23_01 to 1.25
 
 This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
+
+=item *
+
+C<IO::Dir> upgraded from version 1.06 to 1.07
+
+=item *
+
+C<IO::Handle> upgraded from version 1.27 to 1.28
+
+=item *
+
+C<IO::Socket> upgraded from version 1.30_01 to 1.31
 
 =item *
 
@@ -378,7 +395,7 @@ C<IO::Compress::*> upgraded from version 2.008 to 2.020
 
 =item *
 
-C<IPC::Cmd> upgraded from version 0.40_1 to 0.44
+C<IPC::Cmd> upgraded from version 0.40_1 to 0.46
 
 =item *
 
@@ -471,7 +488,7 @@ C<threads> upgraded from version 1.67 to 1.72
 
 =item *
 
-C<threads::shared> upgraded from version 1.14 to 1.28
+C<threads::shared> upgraded from version 1.14 to 1.29
 
 =item *
 
