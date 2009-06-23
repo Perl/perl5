@@ -557,10 +557,16 @@ reference to perl programs.
 
 L<perlrepository> describes how to access the perl source using git.
 
+=head1 Changes to Existing Documentation
+
 The various large C<Changes*> files (which listed every change made to perl
 over the last 18 years) have been removed, and replaced by a small file,
 also called C<Changes>, which just explains how that same information may
 be extracted from the git version control system.
+
+The file F<Porting/patching.pod> has been deleted, as it mainly described
+interacting with the old Perforce-based repository, which is now obsolete.
+Information still relevant has been moved to L<perlrepository>.
 
 =head1 Performance Enhancements
 
@@ -861,6 +867,11 @@ This warning has been removed.
 =head1 Changed Internals
 
 =over
+
+=item *
+
+The J.R.R. Tolkien quotes at the head of C source file have been checked and
+proper citations added, thanks to a patch from Tom Christiansen.
 
 =item *
 
