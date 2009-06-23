@@ -49,7 +49,8 @@ C<Debian bug #379463>
 Be consistent.
 
 In a list, either make every item a note, or a full sentence. Either end
-every item with a full stop, or ensure that no item ends with one.
+every item with a full stop, or ensure that no item ends with one. I<regex>
+B<xor> I<regexp> - choose exactly one, and stick to it.
 
 =head2 Sections
 
