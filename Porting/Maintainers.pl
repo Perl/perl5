@@ -492,7 +492,7 @@ package Maintainers;
     'Data::Dumper' =>
 	{
 	'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam
-	'DISTRIBUTION'	=> 'ILYAM/Data-Dumper-2.121.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Data-Dumper-2.124.tar.gz',
 	'FILES'		=> q[ext/Data-Dumper],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
@@ -516,7 +516,7 @@ package Maintainers;
     'Devel::PPPort' =>
 	{
 	'MAINTAINER'	=> 'mhx',
-	'DISTRIBUTION'	=> 'MHX/Devel-PPPort-3.18.tar.gz',
+	'DISTRIBUTION'	=> 'MHX/Devel-PPPort-3.19.tar.gz',
 	'FILES'		=> q[ext/Devel-PPPort],
 	'EXCLUDED'	=> [ qw{PPPort.pm} ], # we use PPPort_pm.PL instead
 	'CPAN'		=> 1,
