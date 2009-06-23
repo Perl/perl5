@@ -183,6 +183,7 @@ point update this entry (b2685f0c86 2008/12/27)
 This pragma allows you to lexically disable or enable overloading
 for some or all operations. (Yuval Kogman)
 
+XXX do we now have dtrace?
 
 =head1 Modules and Pragmata
 
@@ -586,6 +587,19 @@ C<@INC> once.
 
 C<$Config{usedevel}> and the C-level C<PERL_USE_DEVEL> are now defined if
 perl is built with  C<-Dusedevel>.
+
+F<Configure> will enable use of C<-fstack-protector>, to provide protection
+against stack-smashing attacks, if the compiler supports it.
+
+F<Configure> will now determine the correct prototypes for re-entrant functions,
+and for C<gconvert>, if you are using a C++ compiler rather than a C compiler.
+
+XXX This description isn't quite right, is it? Yves?
+
+On Unix, if you build from a git tree, the configuration process will
+note the commit hash you have checked out, for display in the output of
+C<perl -v> and C<perl -V>. Unpushed local commits are automatically added to
+the list of local patches displayed by C<perl -V>
 
 =head2 Compilation improvements
 
