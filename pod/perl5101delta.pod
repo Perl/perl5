@@ -562,6 +562,9 @@ The file F<Porting/patching.pod> has been deleted, as it mainly described
 interacting with the old Perforce-based repository, which is now obsolete.
 Information still relevant has been moved to L<perlrepository>.
 
+L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all generated
+at build time, rather than being shipped as part of the release.
+
 =head1 Performance Enhancements
 
 =over
