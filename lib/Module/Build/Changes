@@ -1,5 +1,54 @@
 Revision history for Perl extension Module::Build.
 
+0.33_02 - Mon Jun 15 12:23:55 EDT 2009
+
+ Bug-fixes:
+ - Fixed tests for bleadperl
+
+0.33_01 - Sat Jun 13 20:24:42 EDT 2009
+
+ Bug-fixes:
+ - Fixed RT#42724: consolidated VMS fixes [patch by CBERRY]
+ - Fixed RT#46338: passthrough Makefile.PL cleans Makefile during distclean
+ - Fixed RT#45700: t/compat.t for HP/UX make
+
+ Other:
+ - Adds current Module::Build to configure_requires (and build_requires) 
+   if no configure_requires is specified
+ - Always normalizes version number tuples in META.yml (e.g. 'v1.2.0')
+   (Partially addresses RT#46150) 
+ - Normalizes a generated dist_version (e.g. from a .pm file) -- 
+   dist_version set manually in Build.PL is not normalized
+ - Documentation update for create_license
+ - Minor POD cleanup
+
+0.33 - Sun May  3 20:16:34 PDT 2009
+
+ Bug-fixes:
+ - Fixed RT#45462: Compat.pm needs to reference 'Build.com' on VMS
+   [patch from John Malmberg]
+ - Fixed RT#45461: ext.t on VMS [patch from John Malmberg]
+ - Fixed RT#43861: Module::Build::PPMMaker has broken PPD name
+   versioning for v5.10+
+
+0.32_01 - Tue Apr 14 17:14:22 PDT 2009
+
+ Bug-fixes:
+ - Module::Build::Compat had stopped adding "PL_FILES => {}" when no
+   PL_files property was set in Build.PL; restored old behavior and fixed
+   tests and documentation related to this issue [David Golden]
+ - Caches ExtUtils::CBuilder object in a temporary stash instead of properties 
+ - Fixed undef resources->license in META.yml (RT #44453).
+ - Use $^X instead of 'perl' in t/ext.t [David Golden] (RT #43485)
+
+ Other:
+ - Generated META.yml will indicate version 1.4 of the specification
+   (RT #37478) [patch from Alexandr Ciornii]
+ - Archive::Tar now the default for generating tarballs on all platforms
+   (avoids problems with incompatible tar binaries)
+ - dist_dir() now uses dist_name() and dist_version() accessors rather
+   than using its properties directly. [brian d foy] (RT #45038)
+   
 0.32 - Wed Feb 25 17:40:02 PST 2009
 
  No changes since 0.31_04.
@@ -91,7 +140,7 @@ Revision history for Perl extension Module::Build.
  - We now support a 'create_license' parameter to new() that will
    create a LICENSE file during the 'dist' phase with the full text of
    the license.  This requires Software::License on the author's
-   machine.  THIS ALSO STILL NEEDS DOCS.
+   machine.
  - Added lgpl2/lgpl3 entries to the supported licenses (RT#40532).
  - Support for validating properties with a check subref. [David
    Wheeler]
