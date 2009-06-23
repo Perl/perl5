@@ -372,8 +372,8 @@ Delete all installed actions.
 =item w expr
 X<debugger command, w>
 
-Add a global watch-expression.  We hope you know what one of these
-is, because they're supposed to be obvious.
+Add a global watch-expression. Whenever a watched global changes the
+debugger will stop and display the old and new values.
 
 =item W expr
 X<debugger command, W>
