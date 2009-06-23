@@ -1857,7 +1857,7 @@ package Maintainers;
     'threads::shared' =>
 	{
 	'MAINTAINER'	=> 'jdhedden',
-	'DISTRIBUTION'	=> 'JDHEDDEN/threads-shared-1.28.tar.gz',
+	'DISTRIBUTION'	=> 'JDHEDDEN/threads-shared-1.29.tar.gz',
 	'FILES'		=> q[ext/threads-shared],
 	'EXCLUDED'	=> [ qw(examples/class.pl
 				shared.h
