@@ -1408,6 +1408,9 @@ L<perlfunc/pack>.
 infinite recursion, unless you're writing strange benchmark programs, in
 which case it indicates something else.
 
+This threshold can be changed from 100, by recompiling the F<perl> binary,
+setting the C pre-processor macro C<PERL_SUB_DEPTH_WARN> to the desired value.
+
 =item defined(@array) is deprecated
 
 (D deprecated) defined() is not usually useful on arrays because it
