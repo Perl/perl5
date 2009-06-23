@@ -854,6 +854,10 @@ This warning has been removed. In general, it only got produced in
 conjunction with other warnings, and removing it allowed an isa lookup
 optimisation to be added.
 
+=head2 v-string in use/require is non-portable
+
+This warning has been removed.
+
 =head1 Changed Internals
 
 =over
