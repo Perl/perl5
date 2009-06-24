@@ -1055,8 +1055,14 @@ the core should be accessing this directly anyway.
 
 =head1 New Tests
 
-Many modules updated from CPAN incorporate new tests. Some core specific
-tests have been added:
+Many modules updated from CPAN incorporate new tests.
+
+Several tests that have the potential to hang forever if they fail now
+incorporate a "watchdog" functionality that will kill them after a timeout,
+which helps ensure that C<make test> and C<make test_harness> run to
+completion automatically. (Jerry Hedden)
+
+Some core specific tests have been added:
 
 =over 4
 
