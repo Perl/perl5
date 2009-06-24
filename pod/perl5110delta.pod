@@ -104,7 +104,7 @@ to avoid relying on the object's underlying structure).
 
 =head1 Core Enhancements
 
-=head1 The C<overloading> pragma
+=head2 The C<overloading> pragma
 
 This pragma allows you to lexically disable or enable overloading
 for some or all operations. (Yuval Kogman)
