@@ -35,8 +35,14 @@ tie my %tied_hash, 'Tie::StdHash';
 }
 
 {
+    package Test::Object::StringOverload;
+    use overload '""' => sub { "object" }, fallback => 1;
+    sub new { bless { key => 1 } }
+}
+
+{
     package Test::Object::WithOverload;
-    sub new { bless { key => 'magic' } }
+    sub new { bless { key => ($_[1] // 'magic') } }
     use overload '~~' => sub {
 	my %hash = %{ $_[0] };
 	if ($_[2]) { # arguments reversed ?
@@ -51,7 +57,9 @@ tie my %tied_hash, 'Tie::StdHash';
 }
 
 our $ov_obj = Test::Object::WithOverload->new;
+our $ov_obj_2 = Test::Object::WithOverload->new("object");
 our $obj = Test::Object::NoOverload->new;
+our $str_obj = Test::Object::StringOverload->new;
 
 tie my %refh, 'Tie::RefHash';
 $refh{$ov_obj} = 1;
@@ -62,7 +70,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 294;
+plan tests => 314;
 
 while (<DATA>) {
     next if /^#/ || !/\S/;
@@ -192,11 +200,32 @@ __DATA__
 @	"key"		$obj
 @	FALSE		$obj
 
+# regular object with "" overload
+@	$obj		$str_obj
+=@	\&fatal		$str_obj
+@	\&FALSE		$str_obj
+@	\&foo		$str_obj
+@	sub { 1 }	$str_obj
+@	sub { 0 }	$str_obj
+@	%keyandmore	$str_obj
+@	{"object" => 1}	$str_obj
+@	@fooormore	$str_obj
+@	["object" => 1]	$str_obj
+@	/object/	$str_obj
+@	qr/object/	$str_obj
+@	"object"	$str_obj
+@	FALSE		$str_obj
+# Those will treat the $str_obj as a string because of fallback:
+!	$ov_obj		$str_obj
+	$ov_obj_2	$str_obj
+
 # object (overloaded or not) ~~ Any
 	$obj		qr/NoOverload/
 	$ov_obj		qr/^stringified$/
 =	"$ov_obj"	"stringified"
+=	"$str_obj"	"object"
 !=	$ov_obj		"stringified"
+	$str_obj	"object"
 	$ov_obj		'magic'
 !	$ov_obj		'not magic'
 
