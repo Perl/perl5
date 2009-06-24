@@ -615,6 +615,21 @@ as <sort keys %hash> in the scope of C<use locale> much faster.
 
 =head1 Installation and Configuration Improvements
 
+The layout of directories in F<ext> has been revised. Specifically, all
+extensions are now flat, and at the top level, with C</> in pathnames replaced
+by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper>, etc.
+The names of the extensions as specified to F<Configure>, and as reported
+by <%Config::Config> under the keys C<dynamic_ext>, C<known_extensions>,
+C<nonxs_ext> and C<static_ext> have not changed, and still use C</>. Hence
+this change will not have any affect once perl is installed. However,
+C<Attributes::Handlers> and C<Safe> have now become extensions in their
+own right, so if you run F<Configure> with options to specify an exact list
+of extensions to build, you will need to change it to account for this.
+
+In 5.10.2 many dual-life modules will have been moved from F<lib> to F<ext> -
+again this will have no effect on an installed perl, but will matter if you
+invoke F<Configure> with a pre-canned list of extensions to build.
+
 =head2 Configuration improvements
 
 if C<vendorlib> and C<vendorarch> are the same, then they are only added to
@@ -637,6 +652,10 @@ C<perl -v> and C<perl -V>. Unpushed local commits are automatically added to
 the list of local patches displayed by C<perl -V>
 
 =head2 Compilation improvements
+
+As part of the flattening of F<ext>, all extensions on all platforms are built
+by F<make_ext.pl>. This replaces the Unix specific F<ext/util/make_ext>,
+VMS specific F<make_ext.com> and Win32 specific F<win32/buildext.pl>.
 
 =head2 Installation improvements.
 
