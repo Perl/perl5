@@ -1945,6 +1945,18 @@ about the various security aspects of temporary files.
 
 =back
 
+The core distribution can now run its regression tests in parallel on
+Unix-like platforms. Instead of running C<make test>, set C<TEST_JOBS> in
+your environment to the number of tests to run in parallel, and run
+C<make test_harness>. On a Bourne-like shell, this can be done as
+
+    TEST_JOBS=3 make test_harness  # Run 3 tests in parallel
+
+An environment variable is used, rather than parallel make itself, because
+L<TAP::Harness> needs to be able to schedule individual non-conflicting test
+scripts itself, and there is no standard interface to C<make> utilities to
+interact with their job schedulers.
+
 =head1 make install
 
 This will put perl into the public directory you specified to
