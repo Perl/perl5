@@ -156,7 +156,7 @@ sub run {
 	do_crosscheck($outfh, $cache_dir, $force, \@modules);
     }
     else {
-	do_compare(\@modules, $outfh, $cache_dir, $verbose, $use_diff,
+	do_compare(\@modules, $outfh, $output_file, $cache_dir, $verbose, $use_diff,
 	    $reverse, $diff_opts);
     }
 }
@@ -166,7 +166,7 @@ sub run {
 # compare a list of modules against their CPAN equivalents
 
 sub do_compare {
-    my ($modules, $outfh, $cache_dir, $verbose,
+    my ($modules, $outfh, $output_file, $cache_dir, $verbose,
 		$use_diff, $reverse, $diff_opts) = @_;
 
 
@@ -190,6 +190,7 @@ sub do_compare {
 
     my %seen_dist;
     for my $module (@$modules) {
+	warn "Processing $module ...\n" if defined $output_file;
 	print $outfh "\n$module\n" unless $use_diff;
 
 	my $m = $Maintainers::Modules{$module} 
@@ -363,12 +364,13 @@ sub do_crosscheck {
 	    warn "WARNING: $file:$.: line doesn't have three fields (skipping)\n";
 	    next;
 	}
-	$modules{$f[0]} = $f[2];
-
 	my $distro = $f[2];
-	$distro =~ s{^.*/}{};
+	$distro =~ s{^[A-Z]/[A-Z]{2}/}{}; # strip leading A/AB/
+	$modules{$f[0]} = $distro;
 
-	$distros{distro_base($distro)}{$distro} = 1;
+	(my $short_distro = $distro) =~ s{^.*/}{};
+
+	$distros{distro_base($short_distro)}{$distro} = 1;
     }
 
     for my $module (@$modules) {
@@ -380,23 +382,19 @@ sub do_crosscheck {
 	    next;
 	}
 
-
-	# given an try like
+	# given an entry like
 	#   Foo::Bar 1.23 foo-bar-1.23.tar.gz,
 	# first compare the module name against Foo::Bar, and failing that,
 	# against foo-bar
 
 	my $pdist = $m->{DISTRIBUTION};
 	die "ERROR: $module has no DISTRIBUTION entry\n" unless defined $pdist;
-	$pdist =~ s{^.*/}{};
 
 	my $cdist = $modules{$module};
+	(my $short_pdist = $pdist) =~ s{^.*/}{};
 
-	if (defined $cdist) {
-	    $cdist =~ s{^.*/}{};
-	}
-	else {
-	    my $d = $distros{distro_base($pdist)};
+	unless (defined $cdist) {
+	    my $d = $distros{distro_base($short_pdist)};
 	    unless (defined $d) {
 	        print $outfh "\n$module: Can't determine current CPAN entry\n";
 	        next;
