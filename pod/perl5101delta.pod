@@ -1053,6 +1053,108 @@ the core should be accessing this directly anyway.
 
 =back
 
+=head1 New Tests
+
+Many modules updated from CPAN incorporate new tests. Some core specific
+tests have been added:
+
+=over 4
+
+=item t/comp/retainedlines.t
+
+Check that the debugger can retain source lines from C<eval>.
+
+=item t/io/perlio_fail.t
+
+Check that bad layers fail.
+
+=item t/io/perlio_leaks.t
+
+Check that PerlIO layers are not leaking.
+
+=item t/io/perlio_open.t
+
+Check that certain special forms of open work.
+
+=item t/io/perlio.t
+
+General PerlIO tests.
+
+=item t/io/pvbm.t
+
+Check that there is no unexpected interaction between the internal types
+C<PVBM> and C<PVGV>.
+
+=item t/mro/package_aliases.t
+
+Check that mro works properly in the presence of aliased packages.
+
+=item t/op/dbm.t
+
+Tests for C<dbmopen> and C<dbmclose>.
+
+=item t/op/index_thr.t
+
+Tests for the interaction of C<index> and threads.
+
+=item t/op/pat_thr.t
+
+Tests for the interaction of esoteric patterns and threads.
+
+=item t/op/qr_gc.t
+
+Test that C<qr> doesn't leak.
+
+=item t/op/reg_email_thr.t
+
+Tests for the interaction of regex recursion and threads.
+
+=item t/op/regexp_qr_embed_thr.t
+
+Tests for the interaction of regex with embedded C<qr//> and threads.
+
+=item t/op/regexp_unicode_prop.t
+
+Tests for Unicode properties in regular expressions.
+
+=item t/op/regexp_unicode_prop_thr.t
+
+Tests for the interaction of Unicode properties and threads.
+
+=item t/op/reg_nc_tie.t
+
+Test the tied methods of C<Tie::Hash::NamedCapture>.
+
+=item t/op/reg_posixcc.t 
+
+Check that POSIX character classes behave consistently.
+
+=item t/op/re.t
+
+Check that exportable C<re> functions in F<universal.c> work.
+
+=item t/op/setpgrpstack.t
+
+Check that C<setpgrp> works.
+
+=item t/op/substr_thr.t
+
+Tests for the interaction of C<substr> and threads.
+
+=item t/op/upgrade.t
+
+Check that upgrading and assigning scalars works.
+
+=item t/uni/lex_utf8.t
+
+Check that Unicode in the lexer works.
+
+=item t/uni/tie.t
+
+Check that Unicode and C<tie> work.
+
+=back
+
 =head1 Known Problems
 
 =head2 Platform Specific Problems
