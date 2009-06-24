@@ -916,6 +916,29 @@ C<Perl_newSV()> followed by C<Perl_sv_upgrade(type)>.
 
 =item *
 
+The function C<Perl_newSVpvn_flags()> has been added, equivalent to
+C<Perl_newSVpvn()> and then performing the action relevant to the flag.
+
+Two flag bits are currently supported
+
+=over 4
+
+=item C<SVf_UTF8>
+
+This will call C<SvUTF8_on()> for you. (Note that this does not convert an
+sequence of ISO 8859-1 characters to UTF-8). A wrapper, C<newSVpvn_utf8()> is
+available for this.
+
+=item C<SVs_TEMP>
+
+Call C<sv_2mortal()> on the new SV.
+
+=back
+
+There is also a wrapper that takes constant strings, C<newSVpvs_flags()>.
+
+=item *
+
 The function C<Perl_croak_xs_usage> has been added as a wrapper to
 C<Perl_croak>.
 
@@ -973,6 +996,16 @@ cast away C<const>, returning a C<void *>. Macros C<MUTABLE_SV(av)>,
 C<MUTABLE_SV(cv)> etc build on this, casting to C<AV *> etc without casting
 away C<const>. This allows proper compile-time auditing of C<const> correctness
 in the core, and helped picked up some errors (now fixed).
+
+=item *
+
+Macros C<mPUSHs()> and C<mXPUSHs()> have been added, for pushing SVs on the
+stack and mortalizing them.
+
+=item *
+
+Use of the private structure C<mro_meta> has changed slightly. Nothing outside
+the core should be accessing this directly anyway.
 
 =back
 
