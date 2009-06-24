@@ -727,7 +727,7 @@ arguments [RT #59998].
 
 =item *
 
-The C<-i.sufffix> command-line switch now recreates the file using
+The C<-i.suffix> command-line switch now recreates the file using
 restricted permissions, before changing its mode to match the original
 file. This eliminates a potential race condition. [RT #60904]
 
@@ -921,7 +921,7 @@ optimisation to be added.
 
 This warning has been removed.
 
-=item Deep recursion on subroutine "%s"
+=head2 Deep recursion on subroutine "%s"
 
 It is now possible to change the depth threshold for this warning from the
 default of 100, by recompiling the F<perl> binary, setting the C pre-processor
@@ -1031,7 +1031,7 @@ was enabled when the F<perl> binary was compiled.
 
 Uses of C<Nullav>, C<Nullcv>, C<Nullhv>, C<Nullop>, C<Nullsv> etc have been
 replaced by C<NULL> in the core code, and non-dual-life modules, as C<NULL>
-is clearer to those unfamilar with the core code.
+is clearer to those unfamiliar with the core code.
 
 =item *
 
