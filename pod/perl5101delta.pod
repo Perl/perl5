@@ -627,9 +627,42 @@ the list of local patches displayed by C<perl -V>
 
 =head2 Platform Specific Changes
 
+=head3 AIX
+
+hints changes mean that AIX 4.2 should work again.
+
+=head3 Cygwin
+
+On Cygwin we now strip the last number from the DLL. This has been the
+behaviour in the cygwin.com build for years. The hints files have been
+updated.
+
+=head3 FreeBSD
+
+The hints files now identify the correct threading libraries on FreeBSD 7
+and later.
+
+=head3 Irix
+
+We now work around a bizarre preprocessor bug in the Irix 6.5 compiler:
+C<cc -E -> unfortunately goes into K&R mode, but C<cc -E file.c> doesn't.
+
+=head3 Haiku
+
+Patches from the Haiku maintainers have been merged in. Perl should now build
+on Haiku.
+
+=head3 MirOS BSD
+
+Perl should now build on MirOS BSD.
+
 =head3 NetBSD
 
 hints now supports versions 5.*.
+
+=head3 Stratus VOS
+
+Various changes from Stratus have been merged in.
 
 =head3 Win32
 
@@ -637,10 +670,21 @@ XXX: Don't know how to summarise
 "Give Win32 message windows proper window procedures"
 http://perl5.git.perl.org/perl.git/commit/099b16d3b50ccbb639491fa8bd48153ec3225450
 
+Nor 33254: [PATCH] win32_async_check() doesn't loop enough.
+
 =head3 VMS
 
 Reads from C<PerlIO::Scalar>'s in-memory temporary files used to fail if C<$/>
 was set to a numeric reference, to signal record-style reads. This is now fixed.
+
+VMS now supports C<getgrgid>.
+
+Many improvements and cleanups have been made to the VMS file name handling
+and conversion code.
+
+=for comment
+
+I'd mention PERL_VMS_POSIX_EXIT but it doesn't seem to be documented anywhere.
 
 =head1 Selected Bug Fixes
 
