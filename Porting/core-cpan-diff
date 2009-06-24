@@ -141,11 +141,11 @@ sub run {
     my $outfh;
     if (defined $output_file) {
 	open $outfh, '>', $output_file
-	    or die "ERROR: could not open file '$output_file' for writing: $!";
+	    or die "ERROR: could not open file '$output_file' for writing: $!\n";
     }
     else {
 	open $outfh, ">&STDOUT"
-			    or die "ERROR: can't dup STDOUT: $!";
+			    or die "ERROR: can't dup STDOUT: $!\n";
     }
 
     if (defined $cache_dir) {
@@ -208,8 +208,15 @@ sub do_compare {
 	}
 	$seen_dist{$dist}++;
 
-	my $cpan_dir = get_distribution($cache_dir, $untar_dir, $module, $dist);
-
+	my $cpan_dir;
+	eval {
+	    $cpan_dir = get_distribution($cache_dir, $untar_dir, $module, $dist)
+	};
+	if ($@) {
+	    print $outfh "  ", $@;
+	    print $outfh "  (skipping)\n";
+	    next;
+	}
 
 	my @perl_files = Maintainers::get_module_files($module);
 
@@ -520,7 +527,7 @@ sub get_distribution {
     my ($cache_dir, $untar_dir, $module, $dist) = @_;
 
     $dist =~ m{.+/([^/]+)$}
-	or die "ERROR: $module: invalid DISTRIBUTION name (no AUTHOR/ prefix): $dist";
+	or die "ERROR: $module: invalid DISTRIBUTION name (no AUTHOR/ prefix): $dist\n";
     my $filename = $1;
 
     my $download_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
@@ -536,18 +543,18 @@ sub get_distribution {
     unless (-f $download_file) {
 	# not cached
 	$dist =~ /^([A-Z])([A-Z])/
-	    or die "ERROR: $module: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $dist";
+	    or die "ERROR: $module: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $dist\n";
 
 	my $url = "http://www.cpan.org/modules/by-authors/id/$1/$1$2/$dist";
 	my_getstore($url, $download_file)
-	    or die "ERROR: Could not fetch '$url'";
+	    or die "ERROR: Could not fetch '$url'\n";
     }
 
     # extract distribution
 
     my $ae = Archive::Extract->new( archive => $download_file);
     $ae->extract( to => $untar_dir )
-	or die "ERROR: failed to extract distribution '$download_file to temp. dir: " . $ae->error();
+	or die "ERROR: failed to extract distribution '$download_file to temp. dir: " . $ae->error() . "\n";
 
     # get the name of the extracted distribution dir
 
