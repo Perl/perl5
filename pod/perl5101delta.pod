@@ -611,6 +611,10 @@ Under C<use locale>, the locale-relevant information is now cached on read-only
 values, such as the list returned by C<keys %hash>. This makes operations such
 as <sort keys %hash> in the scope of C<use locale> much faster.
 
+=item *
+
+Empty C<DESTROY> methods are no longer called.
+
 =back
 
 =head1 Installation and Configuration Improvements
