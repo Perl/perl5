@@ -556,9 +556,24 @@ search path.
 
 =head2 F<h2xs>
 
-No longer incorrectly treats enum values like macros.
+No longer incorrectly treats enum values like macros. (Daniel Burr)
 
-Now handles C++ style constants (C<//>) properly in enums.
+Now handles C++ style constants (C<//>) properly in enums. (A patch from
+Rainer Weikusat was used; Daniel Burr also proposed a similar fix)
+
+=head2 F<perl5db.pl>
+
+C<LVALUE> subroutines now work under the debugger.
+
+The debugger now correctly handles proxy constant subroutines, and subroutine
+stubs.
+
+=head2 F<perlthanks>
+
+Perl 5.10.1 adds a new utility F<perlthanks>, which is a variant of F<perlbug>,
+but for sending non-bug-reports to the authors and maintainers of Perl.
+Getting nothing but bug reports can become a bit demoralising - we'll see if
+this changes things.
 
 =head1 New Documentation
 
