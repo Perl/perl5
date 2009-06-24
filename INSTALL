@@ -772,6 +772,21 @@ simply do:
 
 =back
 
+=head2 Relocatable @INC
+
+To create a relocatable perl tree, use the following command line:
+
+    sh Configure -Duserelocatableinc
+
+Then the paths in @INC (and everything else in %Config) can be
+optionally located via the path of the perl executable.
+
+That means that, if the string ".../" is found at the start of any
+path, it's substituted with the directory of $^X. So, the relocation
+can be configured on a per-directory basis, although the default with
+"-Duserelocatableinc" is that everything is relocated. The initial
+install is done to the original configured prefix.
+
 =head2 Site-wide Policy settings
 
 After Configure runs, it stores a number of common site-wide "policy"
