@@ -172,8 +172,11 @@ notable changes.
 
 =head2 A proper interface for pluggable Method Resolution Orders
 
-XXX Nicholas said he needs to document the following change, at which
-point update this entry (b2685f0c86 2008/12/27)
+As of Perl 5.10.1 there is a new interface for plugging and using method
+resolution orders other than the default (linear depth first search).
+The C3 method resolution order added in 5.10.0 has been re-implemented as
+a plugin, without changing its Perl-space interface. See L<perlmroapi> for
+more information.
 
 =head2 The C<overloading> pragma
 
