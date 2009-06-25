@@ -442,8 +442,11 @@ be treated as if it were a quoted string.  These are known as
 "barewords".  As with filehandles and labels, a bareword that consists
 entirely of lowercase letters risks conflict with future reserved
 words, and if you use the C<use warnings> pragma or the B<-w> switch, 
-Perl will warn you about any
-such words.  Some people may wish to outlaw barewords entirely.  If you
+Perl will warn you about any such words.  Perl limits barewords (like
+identifiers) to about 250 characters.  Future versions of Perl are likely
+to eliminate these arbitrary limitations.
+
+Some people may wish to outlaw barewords entirely.  If you
 say
 
     use strict 'subs';
