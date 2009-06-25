@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.07_02';
+$VERSION   = '2.07_03';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
@@ -28,6 +28,10 @@ my $Is_MacOS   = $^O eq 'MacOS';
 # These OSes complain if you want to remove a file that you have no
 # write permission to:
 my $Force_Writeable = grep {$^O eq $_} qw(amigaos dos epoc MSWin32 MacOS os2);
+
+# Unix-like systems need to stat each directory in order to detect
+# race condition. MS-Windows is immune to this particular attack.
+my $Need_Stat_Check = !($^O eq 'MSWin32');
 
 sub _carp {
     require Carp;
@@ -242,6 +246,7 @@ sub _rmtree {
 
         if ( -d _ ) {
             $root = VMS::Filespec::pathify($root) if $Is_VMS;
+
             if (!chdir($root)) {
                 # see if we can escalate privileges to get in
                 # (e.g. funny protection mask such as -w- instead of rwx)
@@ -262,8 +267,10 @@ sub _rmtree {
                 next ROOT_DIR;
             };
 
-            ($ldev eq $cur_dev and $lino eq $cur_inode)
-                or _croak("directory $canon changed before chdir, expected dev=$ldev ino=$lino, actual dev=$cur_dev ino=$cur_inode, aborting.");
+            if ($Need_Stat_Check) {
+                ($ldev eq $cur_dev and $lino eq $cur_inode)
+                    or _croak("directory $canon changed before chdir, expected dev=$ldev ino=$lino, actual dev=$cur_dev ino=$cur_inode, aborting.");
+            }
 
             $perm &= 07777; # don't forget setuid, setgid, sticky bits
             my $nperm = $perm | 0700;
@@ -304,6 +311,7 @@ sub _rmtree {
                 @files = map {$_ eq '.' ? '.;' : $_} reverse @files;
                 ($root = VMS::Filespec::unixify($root)) =~ s/\.dir\z//;
             }
+
             @files = grep {$_ ne $updir and $_ ne $curdir} @files;
 
             if (@files) {
@@ -330,8 +338,10 @@ sub _rmtree {
             ($cur_dev, $cur_inode) = (stat $curdir)[0,1]
                 or _croak("cannot stat prior working directory $arg->{cwd}: $!, aborting.");
 
-            ($arg->{device} eq $cur_dev and $arg->{inode} eq $cur_inode)
-                or _croak("previous directory $arg->{cwd} changed before entering $canon, expected dev=$ldev ino=$lino, actual dev=$cur_dev ino=$cur_inode, aborting.");
+            if ($Need_Stat_Check) {
+                ($arg->{device} eq $cur_dev and $arg->{inode} eq $cur_inode)
+                    or _croak("previous directory $arg->{cwd} changed before entering $canon, expected dev=$ldev ino=$lino, actual dev=$cur_dev ino=$cur_inode, aborting.");
+            }
 
             if ($arg->{depth} or !$arg->{keep_root}) {
                 if ($arg->{safe} &&
