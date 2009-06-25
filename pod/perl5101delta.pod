@@ -184,22 +184,6 @@ XXX do we now have dtrace?
 
 =head1 Modules and Pragmata
 
-=head2 Pragmata Changes
-
-=over 4
-
-=item C<charnames>
-
-The Unicode NameAliases.txt database file has been added. This has the
-effect of adding some extra C<\N> character names that formerly wouldn't
-have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
-
-=item C<overloading>
-
-See L</"The C<overloading> pragma"> above.
-
-=back
-
 =head2 New Modules
 
 =over
@@ -215,7 +199,57 @@ C<Compress::Raw::Bzip2> has been added to the core (version 2.020).
 
 =item *
 
+C<parent> establishes an ISA relationship with base classes at compile time.
+It provides the key feature of C<base> without the feature creep.
+
+=item *
+
 C<Parse::CPAN::Meta> has been added to the core (version 1.39).
+
+=back
+
+=head2 Pragmata Changes
+
+=over 4
+
+=item C<attributes>
+
+upgraded from version 0.08 to 0.09.
+
+=item C<base>
+
+upgraded from version 2.13 to 2.14. See L<parent> for a replacement.
+
+=item C<bigint>
+
+upgraded from version 0.22 to 0.23
+
+=item C<bignum>
+
+upgraded from version 0.22 to 0.23
+
+=item C<bigrat>
+
+upgraded from version 0.22 to 0.23
+
+=item C<charnames>
+
+The Unicode NameAliases.txt database file has been added. This has the
+effect of adding some extra C<\N> character names that formerly wouldn't
+have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
+
+=item C<constant>
+
+upgraded from version 1.13 to 1.17
+
+=item C<overloading>
+
+See L</"The C<overloading> pragma"> above.
+
+=item C<version>
+
+upgraded from version 0.74 to 0.76
+
 
 =back
 
@@ -236,7 +270,7 @@ have identical effect. This is a change to the behaviour documented for
 
 =item *
 
-C<Attribute::Handlers> upgraded from version 0.79 to 0.85
+C<lib> upgraded from version 0.5565 to 0.62
 
 =item *
 
@@ -248,7 +282,15 @@ C<Archive::Tar> upgraded from version 1.38 to 1.52
 
 =item *
 
-C<Autoloader> upgraded from version 5.63 to 5.68
+C<Attribute::Handlers> upgraded from version 0.79 to 0.85
+
+=item *
+
+C<AutoLoader> upgraded from version 5.63 to 5.68
+
+=item *
+
+C<AutoSplit> upgraded from version 1.05 to 1.06
 
 =item *
 
@@ -256,7 +298,19 @@ C<B> upgraded from version 1.17 to 1.22
 
 =item *
 
+C<B::Debug> upgraded from version 1.05 to 1.11
+
+=item *
+
 C<B::Deparse> upgraded from version 0.83 to 0.87
+
+=item *
+
+C<B::Lint> upgraded from version 1.09 to 1.11
+
+=item *
+
+C<Carp> upgraded from version 1.08 to 1.10
 
 =item *
 
@@ -300,6 +354,14 @@ C<Digest::MD5> upgraded from version 2.36_01 to 2.38
 
 =item *
 
+C<Digest::SHA> upgraded from version 5.45 to 5.47
+
+=item *
+
+C<DirHandle> upgraded from version 1.01 to 1.02
+
+=item *
+
 C<Dynaloader> XXX the "1.09" in 5.8.9 is probably different from that in
 bleed/maint
 
@@ -309,12 +371,15 @@ C<Encode> upgraded from version 2.23 to 2.33
 
 =item *
 
-C<Filter::Simple> upgraded from version 0.82 to 0.84
-
+C<Errno> upgraded from version 1.10 to 1.10_01
 
 =item *
 
-C<FindBin> upgraded from version 1.49 to 1.50 
+C<Exporter> upgraded from version 5.62 to 5.63
+
+=item *
+
+C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.24_01
 
 =item *
 
@@ -324,6 +389,10 @@ C<ExtUtils::Command> upgraded from version 1.13 to 1.16
 
 C<ExtUtils::Constant> upgraded from 0.20 to 0.22 (note that neither of
 these versions are available on CPAN).
+
+=item *
+
+C<ExtUtils::Embed> upgraded from version 1.27 to 1.28
 
 =item *
 
@@ -339,6 +408,19 @@ C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
 
 =item *
 
+C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.19_01
+
+=item *
+
+C<Fatal> upgraded from version 1.05 to 1.999. See also the new pragma
+C<autodie>.
+
+=item *
+
+C<File::Basename> upgraded from version 2.76 to 2.77
+
+=item *
+
 C<File::Copy> upgraded from version 2.11 to 2.14
 
 =item *
@@ -347,7 +429,19 @@ C<File::Fetch> upgraded from version 0.14 to 0.18
 
 =item *
 
+C<File::Find> upgraded from version 1.12 to 1.14
+
+=item *
+
+C<File::Path> upgraded from version 2.04 to 2.07_02
+
+=item *
+
 C<File::Spec> upgraded from version 3.2501 to 3.30
+
+=item *
+
+C<File::Temp> upgraded from version 0.18 to 0.21
 
 =item *
 
@@ -355,12 +449,19 @@ C<FileCache> upgraded from version 1.07 to 1.08
 
 =item *
 
+C<Filter::Simple> upgraded from version 0.82 to 0.84
+
+=item *
+
 C<Filter::Util::Call> upgraded from version 1.07 to 1.08
 
 =item *
 
-C<Fatal> upgraded from version 1.05 to 1.999. See also the new pragma
-C<autodie>.
+C<FindBin> upgraded from version 1.49 to 1.50 
+
+=item *
+
+C<GDBM_File> upgraded from version 1.08 to 1.09
 
 =item *
 
@@ -395,6 +496,10 @@ C<IO::Compress::*> upgraded from version 2.008 to 2.020
 
 =item *
 
+C<IO::Zlib> upgraded from version 1.07 to 1.09
+
+=item *
+
 C<IPC::Cmd> upgraded from version 0.40_1 to 0.46
 
 =item *
@@ -411,11 +516,34 @@ C<lib> upgraded from version 0.5565 to 0.62
 
 =item *
 
+C<Locale::MakeText> upgraded from version 1.12 to 1.13
+
+=item *
+
 C<Log::Message> upgraded from version 0.01 to 0.02
 
 =item *
 
+C<Math::BigInt> upgraded from version 1.88 to 1.89
+
+=item *
+
+C<Math::BigInt::FastCalc> upgraded from version 0.16 to 0.19
+=item *
+
 C<Math::Complex> upgraded from version 1.37 to 1.56
+
+=item *
+
+C<Math::BigFloat> upgraded from version 1.59 to 1.60
+
+=item *
+
+C<Math::BigRat> upgraded from version 0.21 to 0.22
+
+=item *
+
+C<Math::Trig> upgraded from version 1.36 to 1.56
 
 =item *
 
@@ -451,7 +579,19 @@ C<NEXT> upgraded from version 0.60_01 to 0.64
 
 =item *
 
+C<Object::Accessor> upgraded from version 0.32 to 0.34
+
+=item *
+
+C<OS2::REXX> upgraded from version 1.03 to 1.04
+
+=item *
+
 C<Package::Constants> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<PerlIO::via> upgraded from version 0.04 to 0.07
 
 =item *
 
@@ -459,7 +599,11 @@ C<Pod::Parser> upgraded from version 1.35 to 1.37
 
 =item *
 
-C<Pod::MAN> upgraded from version 2.16 to 2.22
+C<Pod::Man> upgraded from version 2.16 to 2.22
+
+=item *
+
+C<Pod::Simple> upgraded from version 3.05 to 3.07
 
 =item *
 
@@ -471,16 +615,28 @@ C<POSIX> upgraded from version 1.13 to 1.17
 
 =item *
 
+C<Safe> upgraded from 2.12 to 2.16
+
+=item *
+
+C<SelfLoader> upgraded from 1.11 to 1.17
+
+=item *
+
 C<Storable> XXX the "2.19" in 5.8.9 is probably different from that in
 bleed/maint
 
 =item *
 
-C<Switch> upgraded from version 2.13 to 2.14
+C<Switch> upgraded from version 2.13 to 2.14. Please see L</Deprecations>
 
 =item *
 
 C<Symbol> upgraded from version 1.06 to 1.07
+
+=item *
+
+C<Sys::Syslog> upgraded from version 0.22 to 0.27
 
 =item *
 
@@ -511,7 +667,11 @@ removed. If you still need this, then they are available in the
 
 =item *
 
-C<Test::Simple> upgraded from version 0.80 to 0.86_01 XXX not a CPAN release
+C<Test::Simple> upgraded from version 0.72 to 0.86_01 XXX not a CPAN release
+
+=item *
+
+C<Text::ParseWords> upgraded from version 3.26 to 3.27
 
 =item *
 
@@ -523,7 +683,28 @@ C<Text::Wrap> upgraded from version 2006.1117 to 2009.0305
 
 =item *
 
+C<Thread::Queue> upgraded from version 2.00 to 2.11
+
+=item *
+
+C<Thread::Semaphore> upgraded from version 2.01 to 2.09
+
+=item *
+
+C<Tie::RefHash> upgraded from version 1.37 to 1.38
+
+=item *
+
+C<Tie::StdHandle> has documentation changes, and has been assigned a version
+for the first time - version 4.2.
+
+=item *
+
 C<Time::HiRes> upgraded from version 1.9711 to 1.9719
+
+=item *
+
+C<Time::Local> upgraded from version 1.18 to 1.1901
 
 =item *
 
@@ -544,6 +725,10 @@ C<Win32> upgraded from version 0.34 to version 0.39
 =item *
 
 C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
+
+=item *
+
+C<XSLoader> upgraded from version 0.08 to 0.10
 
 =back
 
@@ -712,7 +897,7 @@ Nor 33254: [PATCH] win32_async_check() doesn't loop enough.
 
 =head3 VMS
 
-Reads from C<PerlIO::Scalar>'s in-memory temporary files used to fail if C<$/>
+Reads from C<PerlIO::scalar>'s in-memory temporary files used to fail if C<$/>
 was set to a numeric reference, to signal record-style reads. This is now fixed.
 
 VMS now supports C<getgrgid>.
