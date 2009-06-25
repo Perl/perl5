@@ -317,7 +317,7 @@ C<Carp> upgraded from version 1.08 to 1.10
 
 =item *
 
-C<CGI> upgraded from version 3.29 to 1.93_03 
+C<CGI> upgraded from version 3.29 to 3.43 
 
 =item *
 
