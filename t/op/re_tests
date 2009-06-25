@@ -1294,6 +1294,11 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?|(?|(a)|(b))|(?|(c)|(d)))	c	y	$1	c
 (?|(?|(a)|(b))|(?|(c)|(d)))	d	y	$1	d
 (.)(?|(.)(.)x|(.)d)(.)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
+(?|(?<foo>x))	x	y	$+{foo}	x
+(?|(?<foo>x)|(?<bar>y))	x	y	$+{foo}	x
+(?|(?<bar>y)|(?<foo>x))	x	y	$+{foo}	x
+(?<bar>)(?|(?<foo>x))	x	y	$+{foo}	x
+
 #Bug #41492
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	aa	y	$&	aa
