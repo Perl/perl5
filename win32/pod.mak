@@ -94,6 +94,7 @@ POD = \
 	perlmodinstall.pod	\
 	perlmodlib.pod	\
 	perlmodstyle.pod	\
+	perlmroapi.pod	\
 	perlnewmod.pod	\
 	perlnumber.pod	\
 	perlobj.pod	\
@@ -219,6 +220,7 @@ MAN = \
 	perlmodinstall.man	\
 	perlmodlib.man	\
 	perlmodstyle.man	\
+	perlmroapi.man	\
 	perlnewmod.man	\
 	perlnumber.man	\
 	perlobj.man	\
@@ -344,6 +346,7 @@ HTML = \
 	perlmodinstall.html	\
 	perlmodlib.html	\
 	perlmodstyle.html	\
+	perlmroapi.html	\
 	perlnewmod.html	\
 	perlnumber.html	\
 	perlobj.html	\
@@ -469,6 +472,7 @@ TEX = \
 	perlmodinstall.tex	\
 	perlmodlib.tex	\
 	perlmodstyle.tex	\
+	perlmroapi.tex	\
 	perlnewmod.tex	\
 	perlnumber.tex	\
 	perlobj.tex	\
