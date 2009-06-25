@@ -358,7 +358,11 @@ notices the otherwise useless setuid/gid bits on Perl scripts.  It does
 this via a special executable called F<suidperl> that is automatically
 invoked for you if it's needed.
 
-However, if the kernel set-id script feature isn't disabled, Perl will
+B<The use of suidperl is considered deprecated>, and will removed
+in Perl 5.12.0.  It is I<strongly> recommended that all code uses
+the simplier and more secure C-wrappers described below.
+
+If the kernel set-id script feature isn't disabled, Perl will
 complain loudly that your set-id script is insecure.  You'll need to
 either disable the kernel set-id script feature, or put a C wrapper around
 the script.  A C wrapper is just a compiled program that does nothing
@@ -388,7 +392,8 @@ should never have to specify this yourself.  Most modern releases of
 SysVr4 and BSD 4.4 use this approach to avoid the kernel race condition.
 
 Prior to release 5.6.1 of Perl, bugs in the code of F<suidperl> could
-introduce a security hole.
+introduce a security hole.  The use of F<suidperl> is considered
+deprecated, and will be removed in Perl 5.12.0.
 
 =head2 Protecting Your Programs
 
