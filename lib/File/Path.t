@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 120;
+use Test::More tests => 121;
 use Config;
 
 BEGIN {
@@ -303,6 +303,23 @@ else {
 }
 
 SKIP: {
+    skip "This is not a MSWin32 platform", 1
+        unless $^O eq 'MSWin32';
+
+    my $UNC_path_taint = $ENV{PERL_FILE_PATH_UNC_TESTDIR};
+    skip "PERL_FILE_PATH_UNC_TESTDIR environment variable not set", 1
+        unless defined($UNC_path_taint);
+
+    my ($UNC_path) = ($UNC_path_taint =~ m{^([/\\]{2}\w+[/\\]\w+[/\\]\w+)$});
+    
+    skip "PERL_FILE_PATH_UNC_TESTDIR environment variable does not point to a directory", 1
+        unless -d $UNC_path;
+    
+    my $removed = rmtree($UNC_path);
+    cmp_ok($removed, '>', 0, "removed $removed entries from $UNC_path");
+}
+
+SKIP: {
     # test bug http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487319
     skip "Don't need Force_Writeable semantics on $^O", 4
         if grep {$^O eq $_} qw(amigaos dos epoc MSWin32 MacOS os2);
@@ -453,8 +470,7 @@ cannot remove directory for [^:]+: .* at \1 line \2
 cannot unlink file for [^:]+: .* at \1 line \2
 cannot restore permissions to \d+ for [^:]+: .* at \1 line \2
 cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
-cannot remove directory for [^:]+: .* at \1 line \2
-cannot restore permissions to \d+ for [^:]+: .* at \1 line \2},
+cannot remove directory for [^:]+: .* at \1 line \2},
             'rmtree with insufficient privileges'
         );
     }
@@ -529,7 +545,7 @@ SKIP: {
         unless -d catdir(qw(EXTRA 1));
 
     rmtree 'EXTRA', {safe => 0, error => \$error};
-    is( scalar(@$error), 11, 'seven deadly sins' ); # well there used to be 7
+    is( scalar(@$error), 10, 'seven deadly sins' ); # well there used to be 7
 
     rmtree 'EXTRA', {safe => 1, error => \$error};
     is( scalar(@$error), 9, 'safe is better' );
