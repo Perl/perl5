@@ -3635,6 +3635,7 @@ pod/perlmodinstall.pod		Perl modules: how to install from CPAN
 pod/perlmodlib.PL		Generate pod/perlmodlib.pod
 pod/perlmod.pod			Perl modules: how they work
 pod/perlmodstyle.pod		Perl modules: how to write modules with style
+pod/perlmroapi.pod		Perl method resolution plugin interface
 pod/perlnewmod.pod		Perl modules: preparing a new module for distribution
 pod/perlnumber.pod		Perl number semantics
 pod/perlobj.pod			Perl objects
