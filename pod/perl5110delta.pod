@@ -20,8 +20,18 @@ in a smart match:
 
 =item flip-flop operators
 
-The C<..> and C<...> flip-flop operators are evaluated in boolean context,
-following their usual semantics; see L<perlop/"Range Operators">.
+The C<..> and C<...> flip-flop operators are now evaluated in boolean
+context, following their usual semantics; see L<perlop/"Range Operators">.
+
+Note that, as in perl 5.10.0, C<when (1..10)> will not work to test
+whether a given value is an integer between 1 and 10; you should use
+C<when ([1..10])> instead (note the array reference).
+
+However, contrary to 5.10.0, evaluating the flip-flop operators in boolean
+context ensures it can now be useful in a C<when()>, notably for
+implementing bistable conditions, like in:
+
+    when (/^=begin/ .. /^=end/) { ... }
 
 =item defined-or operator
 
@@ -32,7 +42,7 @@ to the regular or operator, as in C<when (expr1 || expr2)>.)
 
 =back
 
-The next paragraph details more changes brought to the semantics to
+The next section details more changes brought to the semantics to
 the smart match operator, that naturally also modify the behaviour
 of the switch statements where smart matching is implicitly used.
 
