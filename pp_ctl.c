@@ -3489,8 +3489,10 @@ PP(pp_require)
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = doopen_pm(tryname, SvCUR(namesv));
 		    if (tryrsfp) {
-			if (tryname[0] == '.' && tryname[1] == '/')
-			    tryname += 2;
+			if (tryname[0] == '.' && tryname[1] == '/') {
+			    ++tryname;
+			    while (*++tryname == '/');
+			}
 			break;
 		    }
 		    else if (errno == EMFILE)

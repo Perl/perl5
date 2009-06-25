@@ -15,7 +15,7 @@ BEGIN {
     require './test.pl'
 }
 
-plan tests => 76;
+plan tests => 78;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -144,6 +144,21 @@ try({PERL5OPT => '-MExporter -MExporter'}, ['-e0'],
 
 try({PERL5OPT => '-Mstrict -Mwarnings'}, 
     ['-e', 'print "ok" if $INC{"strict.pm"} and $INC{"warnings.pm"}'],
+    "ok",
+    "");
+
+open F, ">", "Oooof.pm" or die "Can't write Oooof.pm: $!";
+print F "package Oooof; 1;\n";
+close F;
+END { 1 while unlink "Oooof.pm" }
+
+try({PERL5OPT => '-I. -MOooof'}, 
+    ['-e', 'print "ok" if $INC{"Oooof.pm"} eq "Oooof.pm"'],
+    "ok",
+    "");
+
+try({PERL5OPT => '-I./ -MOooof'}, 
+    ['-e', 'print "ok" if $INC{"Oooof.pm"} eq "Oooof.pm"'],
     "ok",
     "");
 
