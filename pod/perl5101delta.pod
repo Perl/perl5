@@ -245,24 +245,7 @@ have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
 
 upgraded from version 1.13 to 1.17
 
-=item C<overloading>
-
-See L</"The C<overloading> pragma"> above.
-
-=item C<version>
-
-upgraded from version 0.74 to 0.76
-
-
-=back
-
-=head2 Updated Modules
-
-=over
-
-=item *
-
-C<feature>
+=item C<feature>
 
 The meaning of the C<:5.10> and C<:5.10.X> feature bundles has
 changed slightly. The last component, if any (ie C<X>) is simply ignored.
@@ -271,9 +254,23 @@ general, be added to maintenance releases. So  C<:5.10> and C<:5.10.X>
 have identical effect. This is a change to the behaviour documented for
 5.10.0.
 
-=item *
+=item C<lib>
 
-C<lib> upgraded from version 0.5565 to 0.62
+upgraded from version 0.5565 to 0.62
+
+=item C<overloading>
+
+See L</"The C<overloading> pragma"> above.
+
+=item C<version>
+
+upgraded from version 0.74 to 0.76
+
+=back
+
+=head2 Updated Modules
+
+=over
 
 =item *
 
