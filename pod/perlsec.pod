@@ -358,7 +358,7 @@ notices the otherwise useless setuid/gid bits on Perl scripts.  It does
 this via a special executable called F<suidperl> that is automatically
 invoked for you if it's needed.
 
-B<The use of suidperl is considered deprecated>, and will removed
+B<The use of suidperl is considered deprecated>, and will be removed
 in Perl 5.12.0.  It is I<strongly> recommended that all code uses
 the simplier and more secure C-wrappers described below.
 
