@@ -31,6 +31,9 @@ Unicode::UCD - Unicode character database
     use Unicode::UCD 'charinfo';
     my $charinfo   = charinfo($codepoint);
 
+    use Unicode::UCD 'casefold';
+    my $casefold = casefold(0xFB00);
+
     use Unicode::UCD 'casespec';
     my $casespec = casespec(0xFB00);
 
@@ -1110,7 +1113,8 @@ sub casespec {
 If used with a single argument in a scalar context, returns the string
 consisting of the code points of the named sequence, or B<undef> if no
 named sequence by that name exists.  If used with a single argument in
-a list context, it returns the list of the code points.  If used with no
+a list context, it returns the list of the ordinals of the code points.  If used
+with no
 arguments in a list context, returns a hash with the names of the
 named sequences as the keys and the named sequences as strings as
 the values.  Otherwise, it returns B<undef> or an empty list depending
