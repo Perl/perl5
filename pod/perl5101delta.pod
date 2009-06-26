@@ -717,6 +717,15 @@ C<Unicode::Normalize> upgraded from version 1.02 to 1.03
 
 C<Unicode::UCD> upgraded from version 0.25 to 0.27
 
+C<charinfo()> now works on Unified CJK code points added to later versions of
+Unicode.
+
+C<casefold()> has new fields returned to provide both a simpler interface and
+previously missing information.  The old fields are retained for backwards
+compatibility. Information about Turkic-specific code points is now returned.
+
+The documentation has been corrected and expanded.
+
 =item *
 
 C<Win32> upgraded from version 0.34 to version 0.39
