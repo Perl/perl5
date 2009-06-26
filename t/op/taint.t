@@ -1253,6 +1253,21 @@ foreach my $ord (78, 163, 256) {
 }
 
 {
+    # 59998
+    sub cr { my $x = crypt($_[0], $_[1]); $x }
+    sub co { my $x = ~$_[0]; $x }
+    my ($a, $b);
+    $a = cr('hello', 'foo' . $TAINT);
+    $b = cr('hello', 'foo');
+    ok(tainted($a),  "tainted crypt");
+    ok(!tainted($b), "untainted crypt");
+    $a = co('foo' . $TAINT);
+    $b = co('foo');
+    ok(tainted($a),  "tainted complement");
+    ok(!tainted($b), "untainted complement");
+}
+
+{
     my @data = qw(bonk zam zlonk qunckkk);
     # Clearly some sort of usenet bang-path
     my $string = $TAINT . join "!", @data;
@@ -1286,21 +1301,6 @@ foreach my $ord (78, 163, 256) {
 	ok(tainted($got[$i]), "tainted result $i");
 	is($got[$i], $data[$i], "correct content $i");
     }
-}
-
-{
-    # 59998
-    sub cr { my $x = crypt($_[0], $_[1]); $x }
-    sub co { my $x = ~$_[0]; $x }
-    my ($a, $b);
-    $a = cr('hello', 'foo' . $TAINT);
-    $b = cr('hello', 'foo');
-    ok(tainted($a),  "tainted crypt");
-    ok(!tainted($b), "untainted crypt");
-    $a = co('foo' . $TAINT);
-    $b = co('foo');
-    ok(tainted($a),  "tainted complement");
-    ok(!tainted($b), "untainted complement");
 }
 
 # This may bomb out with the alarm signal so keep it last
