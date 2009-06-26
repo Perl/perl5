@@ -1286,6 +1286,7 @@ a*(*F)	aaaab	n	-	-
 X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 
 #check that branch reset works ok.
+(?|(a))	a	y	$1-$+-$^N	a-a-a
 (?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	d!o!da	y	$1-$2-$3	!o!-o-a
 (?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	aabc	y	$1-$2-$3	a--c
 (?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	ixyjp	y	$1-$2-$3	x-y-p
