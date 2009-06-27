@@ -600,7 +600,7 @@ package Maintainers;
     'ExtUtils::CBuilder' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'KWILLIAMS/ExtUtils-CBuilder-0.24.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.25.tar.gz',
 	'FILES'		=> q[lib/ExtUtils/CBuilder.pm lib/ExtUtils/CBuilder],
 	'EXCLUDED'	=> [ qw{bleadcheck.pl}, ],
 	'CPAN'		=> 1,

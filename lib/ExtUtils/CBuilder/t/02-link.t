@@ -49,7 +49,7 @@ ok $object_file = $b->compile(source => $source_file);
 # Link
 my ($exe_file, @temps);
 ($exe_file, @temps) = $b->link_executable(objects => $object_file);
-ok $exe_file;
+ok -e $exe_file;
 
 if ($^O eq 'os2') {		# Analogue of LDLOADPATH...
 	# Actually, not needed now, since we do not link with the generated DLL
@@ -60,7 +60,10 @@ if ($^O eq 'os2') {		# Analogue of LDLOADPATH...
 }
 
 # Try the executable
-ok my_system($exe_file), 11;
+my $ec = my_system($exe_file);
+ok $ec, 11
+  or print( $? == -1 ? "# Could not run '$exe_file'\n" 
+                     : "# Unexpected exit code '$ec'\n");
 
 # Clean up
 for ($source_file, $object_file, $exe_file) {
