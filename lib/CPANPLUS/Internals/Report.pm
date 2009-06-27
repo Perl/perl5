@@ -214,8 +214,8 @@ sub _query_report {
         $href->{'details'}  = $details;
         
         ### backwards compatibility :(
-        $href->{'dist'}     = delete $href->{'distversion'};
-        $href->{'grade'}    = delete $href->{'action'};
+        $href->{'dist'}     ||= $href->{'distversion'};
+        $href->{'grade'}    ||= $href->{'action'} || $href->{'status'};
 
         push @rv, $href;
     }

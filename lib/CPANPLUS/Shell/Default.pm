@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.87_02";
+    $VERSION = "0.87_03";
 }
 
 load CPANPLUS::Shell;
@@ -279,7 +279,9 @@ sub dispatch_on_input {
     ### prompt after the command has finished.
     $self->noninteractive($noninteractive) if defined $noninteractive;
 
-    my @cmds =  split ';', $string;
+    my $rv = 1;
+    
+    my @cmds = split ';', $string;
     while( my $input = shift @cmds ) {
 
         ### to send over the socket ###
@@ -325,8 +327,11 @@ sub dispatch_on_input {
         my $method = $map->{$key};
 
         ### dispatch meta locally at all times ###
-        $self->$method(input => $input, options => $options), next
-            if $key eq '/';
+        if( $key eq '/' ) {
+            ### keep track of failures
+            $rv *= length $self->$method(input => $input, options => $options);
+            next;
+        }
 
         ### flush unless we're trying to print the stack
         CPANPLUS::Error->flush unless $key eq 'p';
@@ -349,6 +354,9 @@ sub dispatch_on_input {
                 $self->__print( "\n", loc("Command failed!"), "\n\n" )
                     unless $status;
 
+                ### keep track of failures
+                $rv *= length $status;
+
                 $self->_pager_open if $buff =~ tr/\n// > $self->_term_rowcount;
                 $self->__print( $buff );
                 $self->_pager_close;
@@ -368,7 +376,9 @@ sub dispatch_on_input {
                 @mods = $self->_select_modules($input)
                         unless grep {$key eq $_} qw[! m a v w x p s b / ? h];
 
-                eval { $self->$method(  modules => \@mods,
+                ### keep track of failures
+                $rv *= defined eval { $self->$method(   
+                                        modules => \@mods,
                                         options => $options,
                                         input   => $input,
                                         choice  => $key )
@@ -377,6 +387,9 @@ sub dispatch_on_input {
             }
         }
     }
+
+    ### outside the shell loop, we can return the actual return value;
+    return $rv if $self->noninteractive;
 
     return;
 }
@@ -489,6 +502,8 @@ sub __display_results {
     } else {
         $self->__print( loc("No results to display"), "\n" );
     }
+    
+    return 1;
 }
 
 
@@ -499,6 +514,8 @@ sub _quit {
             if defined $rc->{'logout'};
 
     $self->__print( loc("Exiting CPANPLUS shell"), "\n" );
+    
+    return 1;
 }
 
 ###########################
@@ -575,6 +592,8 @@ loc('   /? [PLUGIN NAME]        # show usage for (a particular) plugin(s)'  ),
         $self->__print( map {"$_\n"} @help );
         $self->__print( $/ );
         $self->_pager_close;
+    
+        return 1;
     }
 }
 
@@ -599,7 +618,9 @@ sub _bang {
     eval $input;
     error( $@ ) if $@;
     $self->__print( "\n" );
-    return;
+
+    return if $@;
+    return 1;
 }
 
 sub _search_module {
@@ -724,8 +745,11 @@ sub _fetch {
     }
 
     $self->_pager_open if @$mods >= $self->_term_rowcount;
+    my $rv = 1;
     for my $mod (@$mods) {
         my $where = $mod->fetch( %$opts );
+
+        $rv *= length $where;
 
         $self->__print(
             $where
@@ -736,7 +760,9 @@ sub _fetch {
         $self->__print( "\n" );
     }
     $self->_pager_close;
-
+    
+    return 1 if $rv;
+    return;
 }
 
 sub _shell {
@@ -815,7 +841,7 @@ sub _distributions {
     $self->cache([undef,@rv]);
     $self->__display_results;
 
-    return; 1;
+    return 1;
 }
 
 sub _reload_indices {
@@ -1602,7 +1628,6 @@ sub _reports {
     return 1;
 }
 
-
 ### Load plugins
 {   my @PluginModules;
     my %Dispatch = ( 
@@ -1616,6 +1641,7 @@ sub _reports {
     
     my $init_done;
     sub _plugins_init {
+
         ### only initialize once
         return if $init_done++;
         
