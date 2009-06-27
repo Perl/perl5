@@ -4,7 +4,7 @@ use strict;
 use Test::More 'no_plan';
 $|=1;
 
-my $make_exceptions_list = $ARGV[0]||'' eq '--make-exceptions-list';
+my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
 open my $diagfh, "<:raw", "../pod/perldiag.pod"
   or die "Can't open ../pod/perldiag.pod: $!";
@@ -44,7 +44,7 @@ while (@todo) {
 sub check_file {
   my ($codefn) = @_;
 
-  diag($codefn);
+  print "# $codefn\n";
 
   open my $codefh, "<:raw", $codefn
     or die "Can't open $codefn: $!";
@@ -171,7 +171,7 @@ sub check_file {
     }
   }
 }
-# Lists all missing things as of the inaguation of this script, so we
+# Lists all missing things as of the inaguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
 __DATA__
 Ambiguous call resolved as CORE::%s(), %s
