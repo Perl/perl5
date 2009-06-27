@@ -1,5 +1,25 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.25 - Fri Jun 26 16:18:13 EDT 2009
+
+ - Slight diagnostic improvements in link.t
+
+0.24_01 - Sun Mar  8 14:50:10 2009
+
+ - On Windows, don't generate "mt" command when CRT is statically
+   linked. [Jan Dubois]
+
+ - On Cygwin, examine $Config{useshrplib} to see whether we're
+   supposed to be linking with a shared perl library or not. [Reini
+   Urban]
+
+ - In link_executable() on Cygwin, trust $Config{ld} rather than using
+   $Config{cc} for linking. [Reini Urban]
+
+ - Add 'haiku' as a Unix-like platform. [Ingo Weinhold]
+
+0.24 - Fri Aug 15 22:01:48 2008
+
  - Added 'gnu' and 'gnukfreebsd' as Unix variants. [Niko Tyni]
 
  - Brought in some VMS fixes from bleadperl: "Correct and complete
