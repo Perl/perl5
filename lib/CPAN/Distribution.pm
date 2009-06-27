@@ -3809,15 +3809,18 @@ sub reports {
             unless ($this_version_seen++) {
                 $CPAN::Frontend->myprint ("$rep->{version}:\n");
             }
+            my $arch = $rep->{archname} || $rep->{platform}        || '????';
+            my $grade = $rep->{action}  || $rep->{status}          || '????';
+            my $ostext = $rep->{ostext} || ucfirst($rep->{osname}) || '????';
             $CPAN::Frontend->myprint
                 (sprintf("%1s%1s%-4s %s on %s %s (%s)\n",
-                         $rep->{archname} eq $Config::Config{archname}?"*":"",
-                         $rep->{action}eq"PASS"?"+":$rep->{action}eq"FAIL"?"-":"",
-                         $rep->{action},
+                         $arch eq $Config::Config{archname}?"*":"",
+                         $grade eq "PASS"?"+":$grade eq"FAIL"?"-":"",
+                         $grade,
                          $rep->{perl},
-                         ucfirst $rep->{osname},
+                         $ostext,
                          $rep->{osvers},
-                         $rep->{archname},
+                         $arch,
                         ));
         } else {
             $other_versions{$rep->{version}}++;

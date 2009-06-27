@@ -20,7 +20,7 @@ sub as_string {
     if ($CPAN::Config->{connect_to_internet_ok}) {
         return qq{
 
-You have not configured a urllist. Please consider to set it with
+You have not configured a urllist for CPAN mirrors. Configure it with
 
     o conf init urllist
 
@@ -28,10 +28,16 @@ You have not configured a urllist. Please consider to set it with
     } else {
         return qq{
 
-You have not configured a urllist and did not allow to connect to the
-internet. Please consider to call
+You have not configured a urllist and do not allow connections to the
+internet to get a list of mirrors.  If you wish to get a list of CPAN
+mirrors to pick from, use this command
 
     o conf init connect_to_internet_ok urllist
+
+If you do not wish to get a list of mirrors and would prefer to set
+your urllist manually, use just this command instead
+
+    o conf init urllist
 
 };
     }

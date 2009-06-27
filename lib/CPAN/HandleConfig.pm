@@ -123,8 +123,10 @@ sub edit {
     my($o,$str,$func,$args,$key_exists);
     $o = shift @args;
     if($can{$o}) {
-        $self->$o(args => \@args); # o conf init => sub init => sub load
-        return 1;
+        my $success = $self->$o(args => \@args); # o conf init => sub init => sub load
+        unless ($success) {
+            die "Panic: could not configure CPAN.pm for args [@args]. Giving up.";
+        }
     } else {
         CPAN->debug("o[$o]") if $CPAN::DEBUG;
         unless (exists $keys{$o}) {
@@ -572,9 +574,9 @@ some missing parameters...
 END
         $args{args} = \@miss;
     }
-    CPAN::FirstTime::init($configpm, %args);
+    my $initialized = CPAN::FirstTime::init($configpm, %args);
     $loading--;
-    return;
+    return $initialized;
 }
 
 

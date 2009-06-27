@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename qw(basename);
-$VERSION = "5.5";
+$VERSION = "5.501";
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug); ## no critic
@@ -311,9 +311,12 @@ Can't continue cutting file '$file'.
         unless ($CPAN::META->has_usable("Archive::Tar")) {
             $CPAN::Frontend->mydie("Archive::Tar not installed, please install it to continue");
         }
-        # Make sure AT does not use permissions in the archive
+        # Make sure AT does not use uid/gid/permissions in the archive
         # This leaves it to the user's umask instead
-        local $Archive::Tar::CHMOD = 0;
+        local $Archive::Tar::CHMOD = 1;
+        local $Archive::Tar::SAME_PERMISSIONS = 0;
+        # Make sure AT leaves current user as owner
+        local $Archive::Tar::CHOWN = 0;
         my $tar = Archive::Tar->new($file,1);
         my $af; # archive file
         my @af;

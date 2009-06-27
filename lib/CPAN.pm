@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94';
+$CPAN::VERSION = '1.9402';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -313,7 +313,7 @@ sub shell {
         $CPAN::Frontend->myprint(
                                  sprintf qq{
 cpan shell -- CPAN exploration and modules installation (v%s)
-ReadLine support %s
+Enter 'h' for help.
 
 },
                                  $CPAN::VERSION,
@@ -374,10 +374,11 @@ ReadLine support %s
                 @line = _redirect(@line);
                 CPAN::Shell->$command(@line)
               };
+            my $command_error = $@;
             _unredirect;
             my $reported_error;
-            if ($@) {
-                my $err = $@;
+            if ($command_error) {
+                my $err = $command_error;
                 if (ref $err and $err->isa('CPAN::Exception::blocked_urllist')) {
                     $CPAN::Frontend->mywarn("Client not fully configured, please proceed with configuring.$err");
                     $reported_error = ref $err;
@@ -1006,11 +1007,15 @@ sub has_usable {
                                   ],
                'Archive::Tar' => [
                                   sub {require Archive::Tar;
-                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.00)) {
+                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.50)) {
                                             for ("Will not use Archive::Tar, need 1.00\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
                                             }
+                                       }
+                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.50)) {
+                                            my $atv = Archive::Tar->VERSION;
+                                            $CPAN::Frontend->mywarn("You have Archive::Tar $atv, but 1.50 or later is recommended. Please upgrade.\n");
                                        }
                                   },
                                  ],
@@ -2111,7 +2116,7 @@ C<ask/no>, CPAN.pm asks the user and sets the default accordingly.
 still considered beta quality)
 
 Distributions on CPAN usually behave according to what we call the
-CPAN mantra. Or since the event of Module::Build, we should talk about
+CPAN mantra. Or since the advent of Module::Build we should talk about
 two mantras:
 
     perl Makefile.PL     perl Build.PL
