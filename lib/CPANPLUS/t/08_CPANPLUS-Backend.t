@@ -209,7 +209,9 @@ ok( IS_CONFOBJ->(conf => $conf_obj),    "Configure object found" );
                                 "   Proper version found: $version" );
         is( $obj->package_version, $version,
                                 "       Found in package_version as well" );
-        is( $obj->package_name, $pkg_name,
+
+        ### VMS doesn't preserve case, so match them after normalizing case
+        is( uc($obj->package_name), uc($pkg_name),
                                 "   Proper package_name found: $pkg_name" );
         unlike( $obj->package_name, qr/\d/,
                                 "       No digits in package name" );
