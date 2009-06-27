@@ -38,15 +38,16 @@ use constant Z              => 'Z';
 use constant LZMA           => 'lzma';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG 
-            $_ALLOW_BIN $_ALLOW_PURE_PERL
+            $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.32';
+$VERSION            = '0.34';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
 $_ALLOW_PURE_PERL   = 1;    # allow pure perl extractors
 $_ALLOW_BIN         = 1;    # allow binary extractors
+$_ALLOW_TAR_ITER        = 1;    # try to use Archive::Tar->iter if available
 
 # same as all constants
 my @Types           = ( TGZ, TAR, GZ, ZIP, BZ2, TBZ, Z, LZMA ); 
@@ -782,43 +783,72 @@ sub _untar_at {
         $fh_to_read = $bz;
     }
 
-    ### $Archive::Tar::WARN is 1 by default in Archive::Tar, but we've
-    ### localized $Archive::Tar::WARN already.
-    $Archive::Tar::WARN = $Archive::Extract::WARN;
+    my @files;
+    {
+        ### $Archive::Tar::WARN is 1 by default in Archive::Tar, but we've
+        ### localized $Archive::Tar::WARN already.
+        $Archive::Tar::WARN = $Archive::Extract::WARN;
 
-    my $tar = Archive::Tar->new();
+        ### only tell it it's compressed if it's a .tgz, as we give it a file
+        ### handle if it's a .tbz
+        my @read = ( $fh_to_read, ( $self->is_tgz ? 1 : 0 ) );
 
-    ### only tell it it's compressed if it's a .tgz, as we give it a file
-    ### handle if it's a .tbz
-    unless( $tar->read( $fh_to_read, ( $self->is_tgz ? 1 : 0 ) ) ) {
-        return $self->_error(loc("Unable to read '%1': %2", $self->archive,
-                                    $Archive::Tar::error));
+        ### for version of Archive::Tar > 1.04
+        local $Archive::Tar::CHOWN = 0;
+
+        ### use the iterator if we can. it's a feature of A::T 1.40 and up
+        if ( $_ALLOW_TAR_ITER && Archive::Tar->can( 'iter' ) ) {
+
+            my $next;
+            unless ( $next = Archive::Tar->iter( @read ) ) {
+                return $self->_error(loc(
+                            "Unable to read '%1': %2", $self->archive,
+                            $Archive::Tar::error));
+            }
+
+            while ( my $file = $next->() ) {
+                push @files, $file->full_path;
+
+                $file->extract or return $self->_error(loc(
+                        "Unable to read '%1': %2",
+                        $self->archive,
+                        $Archive::Tar::error));
+            }
+
+        ### older version, read the archive into memory
+        } else {
+
+            my $tar = Archive::Tar->new();
+
+            unless( $tar->read( @read ) ) {
+                return $self->_error(loc("Unable to read '%1': %2",
+                            $self->archive, $Archive::Tar::error));
+            }
+
+            ### workaround to prevent Archive::Tar from setting uid, which
+            ### is a potential security hole. -autrijus
+            ### have to do it here, since A::T needs to be /loaded/ first ###
+            {   no strict 'refs'; local $^W;
+
+                ### older versions of archive::tar <= 0.23
+                *Archive::Tar::chown = sub {};
+            }
+
+            {   local $^W;  # quell 'splice() offset past end of array' warnings
+                            # on older versions of A::T
+
+                ### older archive::tar always returns $self, return value
+                ### slightly fux0r3d because of it.
+                $tar->extract or return $self->_error(loc(
+                        "Unable to extract '%1': %2",
+                        $self->archive, $Archive::Tar::error ));
+            }
+
+            @files = $tar->list_files;
+        }
     }
 
-    ### workaround to prevent Archive::Tar from setting uid, which
-    ### is a potential security hole. -autrijus
-    ### have to do it here, since A::T needs to be /loaded/ first ###
-    {   no strict 'refs'; local $^W;
-
-        ### older versions of archive::tar <= 0.23
-        *Archive::Tar::chown = sub {};
-    }
-
-    ### for version of Archive::Tar > 1.04
-    local $Archive::Tar::CHOWN = 0;
-
-    {   local $^W;  # quell 'splice() offset past end of array' warnings
-                    # on older versions of A::T
-
-        ### older archive::tar always returns $self, return value slightly
-        ### fux0r3d because of it.
-        $tar->extract()
-            or return $self->_error(loc("Unable to extract '%1': %2",
-                                    $self->archive, $Archive::Tar::error ));
-    }
-
-    my @files   = $tar->list_files;
-    my $dir     = $self->__get_extract_dir( \@files );
+    my $dir = $self->__get_extract_dir( \@files );
 
     ### store the files that are in the archive ###
     $self->files(\@files);
