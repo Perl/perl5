@@ -436,7 +436,7 @@ package Maintainers;
     'CPANPLUS' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.87_02.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.87_03.tar.gz',
 	'FILES'		=> q[lib/CPANPLUS.pm
 			     lib/CPANPLUS/Backend
 			     lib/CPANPLUS/Backend.pm
@@ -743,7 +743,7 @@ package Maintainers;
     'File::Fetch' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/File-Fetch-0.18.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/File-Fetch-0.20.tar.gz',
 	'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -752,7 +752,7 @@ package Maintainers;
     'File::Path' =>
 	{
 	'MAINTAINER'	=> 'dland',
-	'DISTRIBUTION'	=> 'DLAND/File-Path-2.07.tar.gz',
+	'DISTRIBUTION'	=> 'DLAND/File-Path-2.07_03.tar.gz',
 	'FILES'		=> q[lib/File/Path.pm lib/File/Path.t],
 	'EXCLUDED'	=> [ qw{eg/setup-extra-tests
 				t/pod.t
