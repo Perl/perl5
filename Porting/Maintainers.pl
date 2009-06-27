@@ -130,6 +130,12 @@ package Maintainers;
 # that blead can be patched freely if it is in sync with the
 # latest release on CPAN.
 
+# BUGS is an email or url to post bug reports.  For modules with
+# UPSTREAM => 'blead', use perl5-porters@perl.org.  rt.cpan.org
+# appears to automatically provide a URL for CPAN modules; any value
+# given here overrides the default:
+# http://rt.cpan.org/Public/Dist/Display.html?Name=$ModuleName
+
 # DISTRIBUTION names the tarball on CPAN which (allegedly) the files
 # included in core are derived from. Note that the file's version may not
 # necessarily match the newest version on CPAN.
@@ -174,6 +180,7 @@ package Maintainers;
 	'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
+	'BUGS'		=> 'bug-archive-extract@rt.cpan.org',
 	},
 
     'Archive::Tar' =>
@@ -183,6 +190,7 @@ package Maintainers;
 	'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
+	'BUGS'		=> 'bug-archive-tar@rt.cpan.org',
 	},
 
     'Attribute::Handlers' =>
@@ -231,7 +239,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'smccam',
 	'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 	'CPAN'		=> 0,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'B::Debug' =>
@@ -245,6 +253,7 @@ package Maintainers;
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'B::Deparse' =>
@@ -469,6 +478,7 @@ package Maintainers;
 			   ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
+	'BUGS'		=> 'bug-cpanplus@rt.cpan.org',
 	},
 
     'CPANPLUS::Dist::Build' =>
