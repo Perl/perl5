@@ -146,7 +146,7 @@ sub reanimate_build_dir {
             next DISTRO;
         }
         my $c = $y->[0];
-        if ($c && CPAN->_perl_fingerprint($c->{perl})) {
+        if ($c && $c->{perl} && $c->{distribution} && CPAN->_perl_fingerprint($c->{perl})) {
             my $key = $c->{distribution}{ID};
             for my $k (keys %{$c->{distribution}}) {
                 if ($c->{distribution}{$k}
@@ -177,8 +177,12 @@ sub reanimate_build_dir {
                                )) {
                 delete $do->{$skipper};
             }
-            if ($do->tested_ok_but_not_installed) {
-                $CPAN::META->is_tested($do->{build_dir},$do->{make_test}{TIME});
+            if ($do->can("tested_ok_but_not_installed")) {
+                if ($do->tested_ok_but_not_installed) {
+                    $CPAN::META->is_tested($do->{build_dir},$do->{make_test}{TIME});
+                } else {
+                    next DISTRO;
+                }
             }
             $restored++;
         }

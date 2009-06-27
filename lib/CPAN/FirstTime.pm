@@ -771,6 +771,7 @@ sub init {
         } else {
             $fastread = 1;
             $CPAN::Config->{urllist} ||= [];
+            $CPAN::Config->{connect_to_internet_ok} ||= 1;
 
             local $^W = 0;
             # prototype should match that of &MakeMaker::prompt
@@ -1509,7 +1510,10 @@ sub picklist {
         }
         my $i = scalar @$items;
         unrangify(\@nums);
-        if (grep (/\D/ || $_ < 1 || $_ > $i, @nums)) {
+        if (0 == @nums) {
+            # cannot allow nothing because nothing means paging!
+            # return;
+        } elsif (grep (/\D/ || $_ < 1 || $_ > $i, @nums)) {
             $CPAN::Frontend->mywarn("invalid items entered, try again\n");
             if ("@nums" =~ /\D/) {
                 $CPAN::Frontend->mywarn("(we are expecting only numbers between 1 and $i)\n");
@@ -1522,7 +1526,10 @@ sub picklist {
         $CPAN::Frontend->myprint("\n");
 
         # a blank line continues...
-        next SELECTION unless @nums;
+        unless (@nums){
+            $CPAN::Frontend->mysleep(0.1); # prevent hot spinning process on the next bug
+            next SELECTION;
+        }
         last;
     }
     for (@nums) { $_-- }
@@ -1597,13 +1604,17 @@ sub read_mirrored_by {
     if (@previous_urls) {
         push @$offer_cont, "(edit previous picks)";
         $default = @$offer_cont;
+    } else {
+        # cannot allow nothing because nothing means paging!
+        # push @$offer_cont, "(none of the above)";
     }
     @cont = picklist($offer_cont,
                      "Select your continent (or several nearby continents)",
                      $default,
                      ! @previous_urls,
                      $no_previous_warn);
-
+    # cannot allow nothing because nothing means paging!
+    # return unless @cont;
 
     foreach $cont (@cont) {
         my @c = sort keys %{$all{$cont}};
@@ -1646,7 +1657,11 @@ put them on one line, separated by blanks, hyphenated ranges allowed
 
     @urls = picklist (\@urls, $prompt, $default);
     foreach (@urls) { s/ \(.*\)//; }
-    push @$urllist, @urls;
+    if (@urls) {
+        $urllist = \@urls;
+    } else {
+        push @$urllist, @urls;
+    }
 }
 
 sub bring_your_own {
@@ -1692,7 +1707,7 @@ later if you\'re sure it\'s right.\n},
     @$urllist = CPAN::_uniq(@$urllist, @urls);
     $CPAN::Config->{urllist} = $urllist;
     # xxx delete or comment these out when you're happy that it works
-    $CPAN::Frontend->myprint("New set of picks:\n");
+    $CPAN::Frontend->myprint("New urllist\n");
     for ( @$urllist ) { $CPAN::Frontend->myprint("  $_\n") };
 }
 

@@ -485,8 +485,7 @@ I would like to connect to one of the following sites to get '%s':
         push @mess, qq{The urllist can be edited.},
             qq{E.g. with 'o conf urllist push ftp://myurl/'};
         $CPAN::Frontend->mywarn(Text::Wrap::wrap("","","@mess"). "\n\n");
-        $CPAN::Frontend->mywarn("Could not fetch $file\n");
-        $CPAN::Frontend->mysleep(2);
+        $CPAN::Frontend->mydie("Could not fetch $file\n");
     }
     if ($maybe_restore) {
         rename "$aslocal.bak$$", $aslocal;
@@ -682,7 +681,8 @@ sub hostdlhard {
     # < /dev/null ";
     my($aslocal_dir) = dirname($aslocal);
     mkpath($aslocal_dir);
-  HOSTHARD: for $ro_url (@$host_seq) {
+    my $some_dl_success = 0;
+ HOSTHARD: for $ro_url (@$host_seq) {
         $self->_set_attempt($stats,"dlhard",$ro_url);
         my $url = "$ro_url$file";
         my($proto,$host,$dir,$getfile);
@@ -706,8 +706,8 @@ sub hostdlhard {
         my $proxy_vars = $self->_proxy_vars($ro_url);
       DLPRG: for my $f (qw(curl wget lynx ncftpget ncftp)) {
             my $funkyftp = CPAN::HandleConfig->safe_quote($CPAN::Config->{$f});
-            next unless defined $funkyftp;
-            next if $funkyftp =~ /^\s*$/;
+            next DLPRG unless defined $funkyftp;
+            next DLPRG if $funkyftp =~ /^\s*$/;
 
             my($asl_ungz, $asl_gz);
             ($asl_ungz = $aslocal) =~ s/\.gz//;
@@ -758,6 +758,7 @@ $content
                         $CPAN::Frontend->mysleep(1);
                         next DLPRG;
                     }
+                    $some_dl_success++;
                 } else {
                     $CPAN::Frontend->myprint(qq{
 No success, the file that lynx has downloaded is an empty file.
@@ -768,13 +769,20 @@ No success, the file that lynx has downloaded is an empty file.
             if ($wstatus == 0) {
                 if (-s $aslocal) {
                     # Looks good
+                    $some_dl_success++;
                 } elsif ($asl_ungz ne $aslocal) {
                     # test gzip integrity
                     if (eval{CPAN::Tarzip->new($asl_ungz)->gtest}) {
                         # e.g. foo.tar is gzipped --> foo.tar.gz
                         rename $asl_ungz, $aslocal;
+                        $some_dl_success++;
                     } else {
                         eval{CPAN::Tarzip->new($asl_gz)->gzip($asl_ungz)};
+                        if ($@) {
+                            warn "Warning: $@";
+                        } else {
+                            $some_dl_success++;
+                        }
                     }
                 }
                 $ThesiteURL = $ro_url;
@@ -820,8 +828,16 @@ No success, the file that lynx has downloaded is an empty file.
     });
             }
             return if $CPAN::Signal;
-        } # transfer programs
+        } # download/transfer programs (DLPRG)
     } # host
+    require Carp;
+    if ($some_dl_success) {
+        Carp::cluck("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
+    } else {
+        Carp::cluck("Warning: no success downloading '$aslocal'. Giving up on it.");
+    }
+    $CPAN::Frontend->mysleep(5);
+    return;
 }
 
 #-> CPAN::FTP::_proxy_vars
