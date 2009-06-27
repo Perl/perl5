@@ -1,6 +1,10 @@
 
 Time::Piece Changes
 
+1.15
+    - Skip a test on Win32 that there's just no way of passing
+    - Document the above failure
+
 1.14
 	- rework add_months() to not rely on strptime being able to parse illegal
 	  dates (Gisle Aas).

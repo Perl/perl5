@@ -1914,7 +1914,7 @@ package Maintainers;
     'Time::Piece' =>
 	{
 	'MAINTAINER'	=> 'msergeant',
-	'DISTRIBUTION'	=> 'MSERGEANT/Time-Piece-1.14.tar.gz',
+	'DISTRIBUTION'	=> 'MSERGEANT/Time-Piece-1.15.tar.gz',
 	'FILES'		=> q[ext/Time-Piece],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
