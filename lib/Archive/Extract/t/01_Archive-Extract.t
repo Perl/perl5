@@ -318,8 +318,8 @@ for my $switch ( [0,1], [1,0] ) {
         for my $tar_iter (@with_tar_iter) { SKIP: {
 
             ### Doesn't matter unless .tar, .tbz, .tgz
-            local $Archive::Extract::_ALLOW_TAR_ITER = $tar_iter;
-
+            local $Archive::Extract::_ALLOW_TAR_ITER = $tar_iter; 
+        
             diag("Archive::Tar->iter: $tar_iter") if $Debug;
 
             isa_ok( $ae, $Class );
@@ -327,12 +327,12 @@ for my $switch ( [0,1], [1,0] ) {
             my $method = $tmpl->{$archive}->{method};
             ok( $ae->$method(),         "Archive type recognized properly" );
 
-
+        
             my $file        = $tmpl->{$archive}->{outfile};
             my $dir         = $tmpl->{$archive}->{outdir};  # can be undef
             my $rel_path    = File::Spec->catfile( grep { defined } $dir, $file );
             my $abs_path    = File::Spec->catfile( $OutDir, $rel_path );
-            my $abs_dir     = File::Spec->catdir(
+            my $abs_dir     = File::Spec->catdir( 
                                 grep { defined } $OutDir, $dir );
             my $nix_path    = File::Spec::Unix->catfile(
                                 grep { defined } $dir, $file );
@@ -361,15 +361,15 @@ for my $switch ( [0,1], [1,0] ) {
             ### XXX test me!
             #my @outs = $ae->is_gz ? ($abs_path, $OutDir) : ($OutDir);
             my @outs = $ae->is_gz || $ae->is_bz2 || $ae->is_Z || $ae->is_lzma
-                            ? ($abs_path)
+                            ? ($abs_path) 
                             : ($OutDir);
 
             ### 10 tests from here on down ###
             if( ($mod_fail && ($pgm_fail || !$Archive::Extract::_ALLOW_BIN))
                 ||
                 ($pgm_fail && ($mod_fail || !$Archive::Extract::_ALLOW_PURE_PERL))
-            ) {
-                skip "No binaries or modules to extract ".$archive,
+            ) {                
+                skip "No binaries or modules to extract ".$archive, 
                     (10 * scalar @outs);
             }
 
@@ -377,7 +377,7 @@ for my $switch ( [0,1], [1,0] ) {
             ### be a problem...
             local $IPC::Cmd::WARN = 0;
             local $IPC::Cmd::WARN = 0;
-
+            
             for my $use_buffer ( IPC::Cmd->can_capture_buffer , 0 ) {
 
                 ### test buffers ###
@@ -397,13 +397,13 @@ for my $switch ( [0,1], [1,0] ) {
 
                     diag("Extracting to: $to")                  if $Debug;
                     diag("Buffers enabled: ".!$turn_off)        if $Debug;
-
+      
                     my $rv = $ae->extract( to => $to );
         
                     SKIP: {
                         my $re  = qr/^No buffer captured/;
                         my $err = $ae->error || '';
-
+                  
                         ### skip buffer tests if we dont have buffers or
                         ### explicitly turned them off
                         skip "No buffers available", 8
@@ -411,29 +411,29 @@ for my $switch ( [0,1], [1,0] ) {
                                 && $err =~ $re;
 
                         ### skip tests if we dont have an extractor
-                        skip "No extractor available", 8
+                        skip "No extractor available", 8 
                             if $err =~ /Extract failed; no extractors available/;
-
+                            
                         ### win32 + bin utils is notorious, and none of them are
-                        ### officially supported by strawberry. So if we
-                        ### encounter an error while extracting whlie running
+                        ### officially supported by strawberry. So if we 
+                        ### encounter an error while extracting whlie running 
                         ### with $PREFER_BIN on win32, just skip the tests.
                         ### See rt#46948: unable to install install on win32
                         ### for details on the pain
                         skip "Binary tools on Win32 are very unreliable", 8
-                            if $err and $Archive::Extract::_ALLOW_BIN
+                            if $err and $Archive::Extract::_ALLOW_BIN 
                                     and IS_WIN32;
         
                         ok( $rv, "extract() for '$archive' reports success ($cfg)");
-
+        
                         diag("Extractor was: " . $ae->_extractor)   if $Debug;
-
+        
                         ### if we /should/ have buffers, there should be
                         ### no errors complaining we dont have them...
                         unlike( $err, $re,
                                         "No errors capturing buffers" );
-
-                        ### might be 1 or 2, depending wether we extracted
+        
+                        ### might be 1 or 2, depending wether we extracted 
                         ### a dir too
                         my $files    = $ae->files || [];
                         my $file_cnt = grep { defined } $file, $dir;
@@ -446,7 +446,7 @@ for my $switch ( [0,1], [1,0] ) {
                         ### subscript -1 at -e line 1." So wrap it in do { }
                         is( do { $files->[-1] }, $nix_path,
                                         "Found correct output file '$nix_path'" );
-
+        
                         ok( -e $abs_path,
                                         "Output file '$abs_path' exists" );
                         ok( $ae->extract_path,
@@ -462,15 +462,15 @@ for my $switch ( [0,1], [1,0] ) {
 
                         1 while unlink $abs_path;
                         ok( !(-e $abs_path), "Output file successfully removed" );
-
+            
                         SKIP: {
                             skip "No extract path captured, can't remove paths", 2
                                 unless $ae->extract_path;
-
+            
                             ### if something went wrong with determining the out
                             ### path, don't go deleting stuff.. might be Really Bad
                             my $out_re = quotemeta( $OutDir );
-
+                            
                             ### VMS directory layout is different. Craig Berry
                             ### explains:
                             ### the test is trying to determine if C</disk1/foo/bar>
@@ -478,22 +478,22 @@ for my $switch ( [0,1], [1,0] ) {
                             ### syntax, that would mean trying to determine whether
                             ### C<disk1:[foo.bar]> is part of C<disk1:[foo.bar.baz]>
                             ### Because we have both a directory delimiter
-                            ### (dot) and a directory spec terminator (right
-                            ### bracket), we have to trim the right bracket from
+                            ### (dot) and a directory spec terminator (right 
+                            ### bracket), we have to trim the right bracket from 
                             ### the first one to make it successfully match the
                             ### second one.  Since we're asserting the same truth --
                             ### that one path spec is the leading part of the other
                             ### -- it seems to me ok to have this in the test only.
-                            ###
+                            ### 
                             ### so we strip the ']' of the back of the regex
-                            $out_re =~ s/\\\]// if IS_VMS;
-
-                            if( $ae->extract_path !~ /^$out_re/ ) {
-                                ok( 0, "Extractpath WRONG (".$ae->extract_path.")");
+                            $out_re =~ s/\\\]// if IS_VMS; 
+                            
+                            if( $ae->extract_path !~ /^$out_re/ ) {   
+                                ok( 0, "Extractpath WRONG (".$ae->extract_path.")"); 
                                 skip(  "Unsafe operation -- skip cleanup!!!" ), 1;
-                            }
-
-                            eval { rmtree( $ae->extract_path ) };
+                            }                    
+            
+                            eval { rmtree( $ae->extract_path ) }; 
                             ok( !$@,        "   rmtree gave no error" );
                             ok( !(-d $ae->extract_path ),
                                             "   Extract dir succesfully removed" );
