@@ -111,6 +111,7 @@ SKIP: {
 
         my @results = split "\n", runperl
             switches    => [ "-MB", "-l" ],
+            stderr      => 1,
             prog        => q{
                 my $sub = do {
                     package four;
