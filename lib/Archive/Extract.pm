@@ -802,26 +802,26 @@ sub _untar_at {
             my $next;
             unless ( $next = Archive::Tar->iter( @read ) ) {
                 return $self->_error(loc(
-                            "Unable to read '%1': %2", $self->archive,
+                            "Unable to read '%1': %2", $self->archive, 
                             $Archive::Tar::error));
             }
 
             while ( my $file = $next->() ) {
                 push @files, $file->full_path;
-
+ 
                 $file->extract or return $self->_error(loc(
-                        "Unable to read '%1': %2",
+                        "Unable to read '%1': %2", 
                         $self->archive,
                         $Archive::Tar::error));
             }
-
-        ### older version, read the archive into memory
+            
+        ### older version, read the archive into memory    
         } else {
 
             my $tar = Archive::Tar->new();
 
             unless( $tar->read( @read ) ) {
-                return $self->_error(loc("Unable to read '%1': %2",
+                return $self->_error(loc("Unable to read '%1': %2", 
                             $self->archive, $Archive::Tar::error));
             }
 
@@ -837,7 +837,7 @@ sub _untar_at {
             {   local $^W;  # quell 'splice() offset past end of array' warnings
                             # on older versions of A::T
 
-                ### older archive::tar always returns $self, return value
+                ### older archive::tar always returns $self, return value 
                 ### slightly fux0r3d because of it.
                 $tar->extract or return $self->_error(loc(
                         "Unable to extract '%1': %2",

@@ -170,7 +170,7 @@ package Maintainers;
     'Archive::Extract' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.32.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.34.tar.gz',
 	'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
