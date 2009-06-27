@@ -3415,34 +3415,66 @@ M  cb097e7a7e 2009/06/19 add Porting/core-cpan-diff
 M  6379002239 2009/06/21 Upgrade to threads::shared 1.29
 M  a51040a0e9 2009/06/21 add-package.pl lib exclude fixed
 M  3f1788e11f 2009/06/21 make_patchnum.pl now works in -Dmksymlink target d
-.  d018fae575 2009/06/21 Tests for deleting stash entries.
-.  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
-.  4fec321675 2009/06/21 Regenerate headers and fix compilation with thread
-.  de10be12cd 2009/06/21 point illguts at perl.org
-.  73d1d97336 2009/06/21 invert and rename PERL_MEM_LOG_STDERR to PERL_MEM_
-.  1cd8acb500 2009/06/21 simplify PERL_MEM_LOG
-.  10a879f5b1 2009/06/21 update PERL_MEM_LOG in perlhack.pod
-.  fd5aa6c359 2009/06/21 Regenerate headers
-.  4bd8fafa9f 2009/06/21 Also replace PERL_MEM_LOG_STDERR by PERL_MEM_LOG_N
-.  2e5b50041f 2009/06/21 A few docs nits after the few last commits
-.  b953482e2d 2009/06/21 drop remaining mentions of PERL_MEM_LOG_FOO envars
-.  ad6656ab32 2009/06/22 Merge branch 'blead' into debugger_symbols
+
+			these three commits (fix for #58530)
+			convert a CV in a deleted glob to ANON,
+			which makes me twitch. See also 6eb667c676,
+			ab9c44463c.
+
+d  d018fae575 2009/06/21 Tests for deleting stash entries.
+d  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
+d  4fec321675 2009/06/21 Regenerate headers and fix compilation with thread
+
+M  de10be12cd 2009/06/21 point illguts at perl.org
+
+		PERL_MEM_LOG changes:
+		<cfe85dfa0906121048q47ad85e6s8e10579bd3764a43@mail.gmail.com>
+d  73d1d97336 2009/06/21 invert and rename PERL_MEM_LOG_STDERR to PERL_MEM_
+d  1cd8acb500 2009/06/21 simplify PERL_MEM_LOG
+d  10a879f5b1 2009/06/21 update PERL_MEM_LOG in perlhack.pod
+d  fd5aa6c359 2009/06/21 Regenerate headers
+d  4bd8fafa9f 2009/06/21 Also replace PERL_MEM_LOG_STDERR by PERL_MEM_LOG_N
+d  2e5b50041f 2009/06/21 A few docs nits after the few last commits
+d  b953482e2d 2009/06/21 drop remaining mentions of PERL_MEM_LOG_FOO envars
+
+d  ad6656ab32 2009/06/22 Merge branch 'blead' into debugger_symbols
 				MERGE: eb78bf8f0d b953482e2d
-.  9b76ae71c6 2009/06/22 Fix skipping tests with threads in last commit
-.  53409900a7 2009/06/22 Fix test with non-threaded perls
-.  7277a900f7 2009/06/22 add release_managers_guide.pod
-.  1aff535472 2009/06/22 typos, link to thread with ideas about testing sta
-.  6eb667c676 2009/06/22 Instead of a const char *, pass a HEK * to anonymi
-.  38b3c827d8 2009/06/22 Merge commit 'szabgab/release_process' into blead
+d  9b76ae71c6 2009/06/22 Fix skipping tests with threads in last commit
+d  53409900a7 2009/06/22 Fix test with non-threaded perls
+M  7277a900f7 2009/06/22 add release_managers_guide.pod
+M  1aff535472 2009/06/22 typos, link to thread with ideas about testing sta
+d  6eb667c676 2009/06/22 Instead of a const char *, pass a HEK * to anonymi
+R  38b3c827d8 2009/06/22 Merge commit 'szabgab/release_process' into blead
 				MERGE: 6eb667c676 1aff535472
-.  aeeb13907a 2009/06/22 avoid trying to load packages that are in the same
-.  68f62fdf7f 2009/06/23 Add Porting/release_managers_guide.pod to MANIFEST
-.  d2651550ea 2009/06/23 Added new required fields to makesis.pl
-.  ab9c44463c 2009/06/23 Fix blead segfault on Cygwin for t/op/stash.t
-.  3c4fb04a91 2009/06/23 Fix for RT #52552.
-.  9c3cb3e150 2009/06/23 version bumps in Maintainers.pl
-.  3eccaf6d20 2009/06/23 Update threads::shared in Porting/Maintainers.pl t
-.  8a9741846a 2009/06/23 Ammend unhelpful description of debugger watch com
-.  ddb418268d 2009/06/23 another Maintainers.pl version update
+d  aeeb13907a 2009/06/22 avoid trying to load packages that are in the same
+M  68f62fdf7f 2009/06/23 Add Porting/release_managers_guide.pod to MANIFEST
+M  d2651550ea 2009/06/23 Added new required fields to makesis.pl
+d  ab9c44463c 2009/06/23 Fix blead segfault on Cygwin for t/op/stash.t
+M  3c4fb04a91 2009/06/23 Fix for RT #52552.
+M  9c3cb3e150 2009/06/23 version bumps in Maintainers.pl
+M  3eccaf6d20 2009/06/23 Update threads::shared in Porting/Maintainers.pl t
+M  8a9741846a 2009/06/23 Ammend unhelpful description of debugger watch com
+M  ddb418268d 2009/06/23 another Maintainers.pl version update
 !  16fb65535f 2009/06/23 sync lib/Module/Build/Changes with CPAN equivalent
 			    wait for non-devel CPAN release
+.  49f8307ec5 2009/06/23 Add a paragraph noting that perl5-security-report@
+.  f337e9820d 2009/06/23 When writing a perldelta, choose either "regex" or
+.  aad1d01f81 2009/06/23 Note that the "Deep recursion" depth warning thres
+.  0b179affb5 2009/06/23 sync lib/CPANPLUS/Backend.pm with CPAN
+.  627cd18c09 2009/06/24 Update CPANPLUS::Dist::Build to CPAN version 0.35_
+.  8bca5c8a8b 2009/06/24 Update Maintainers.pl accordingly
+.  8c814d1a54 2009/06/24 core-cpan-diff: continue with next distro on downl
+.  f0ce33d74d 2009/06/24 core-cpan-diff: include author path in distro vers
+.  d4fb20eeed 2009/06/24 Fix some typos and grammar infelicities in core te
+.  ef55af2a5a 2009/06/24 Fix a semantic error in the Pod. (wrong heading le
+.  5ee651a9b9 2009/06/24 Mention parallel testing in INSTALL and perl5110de
+.  6fbc735bab 2009/06/24 Add tests for smart match overload fallback
+.  665f5e9843 2009/06/24 Clarifications to the perldelta notes on smart mat
+.  27abe0f194 2009/06/25 As Errno is formally no longer dual-lived, give it
+.  839bc55ad6 2009/06/25 Upgrade to File::Path 2.07_03
+.  15932acc61 2009/06/25 Add documentation for the method resolution plugin
+.  e63be7465b 2009/06/25 Trim all trailing / from "." in @INC when filling 
+.  05b4f1ece2 2009/06/25 document the maximum length of barewords
+.  31c91b4357 2009/06/25 Don't enqueue pending signals during global destru
+.  98814a2b07 2009/06/25 Better description for the changes about the range
+.  d00c6acb56 2009/06/26 pod/perlfilter.pod: two POD typos
