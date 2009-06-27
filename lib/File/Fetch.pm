@@ -12,6 +12,7 @@ use Cwd                         qw[cwd];
 use Carp                        qw[carp];
 use IPC::Cmd                    qw[can_run run QUOTE];
 use File::Path                  qw[mkpath];
+use File::Temp                  qw[tempdir];
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Style => 'gettext';
@@ -21,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.18';
+$VERSION        = '0.20';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -397,10 +398,19 @@ sub _parse_uri {
     return $href;
 }
 
-=head2 $ff->fetch( [to => /my/output/dir/] )
+=head2 $where = $ff->fetch( [to => /my/output/dir/ | \$scalar] )
 
-Fetches the file you requested. By default it writes to C<cwd()>,
-but you can override that by specifying the C<to> argument.
+Fetches the file you requested and returns the full path to the file.
+
+By default it writes to C<cwd()>, but you can override that by specifying 
+the C<to> argument:
+
+    ### file fetch to /tmp, full path to the file in $where
+    $where = $ff->fetch( to => '/tmp' );
+
+    ### file slurped into $scalar, full path to the file in $where
+    ### file is downloaded to a temp directory and cleaned up at exit time
+    $where = $ff->fetch( to => \$scalar );
 
 Returns the full path to the downloaded file on success, and false
 on failure.
@@ -411,21 +421,31 @@ sub fetch {
     my $self = shift or return;
     my %hash = @_;
 
-    my $to;
+    my $target;
     my $tmpl = {
-        to  => { default => cwd(), store => \$to },
+        to  => { default => cwd(), store => \$target },
     };
 
     check( $tmpl, \%hash ) or return;
 
-    ### On VMS force to VMS format so File::Spec will work.
-    $to = VMS::Filespec::vmspath($to) if ON_VMS;
+    my ($to, $fh);
+    ### you want us to slurp the contents
+    if( ref $target and UNIVERSAL::isa( $target, 'SCALAR' ) ) {
+        $to = tempdir( 'FileFetch.XXXXXX', CLEANUP => 1 );
 
-    ### create the path if it doesn't exist yet ###
-    unless( -d $to ) {
-        eval { mkpath( $to ) };
+    ### plain old fetch
+    } else {
+        $to = $target;
 
-        return $self->_error(loc("Could not create path '%1'",$to)) if $@;
+        ### On VMS force to VMS format so File::Spec will work.
+        $to = VMS::Filespec::vmspath($to) if ON_VMS;
+
+        ### create the path if it doesn't exist yet ###
+        unless( -d $to ) {
+            eval { mkpath( $to ) };
+    
+            return $self->_error(loc("Could not create path '%1'",$to)) if $@;
+        }
     }
 
     ### set passive ftp if required ###
@@ -474,8 +494,24 @@ sub fetch {
 
             } else {
 
+                ### slurp mode?
+                if( ref $target and UNIVERSAL::isa( $target, 'SCALAR' ) ) {
+                    
+                    ### open the file
+                    open my $fh, $file or do {
+                        $self->_error(
+                            loc("Could not open '%1': %2", $file, $!));
+                        return;                            
+                    };
+                    
+                    ### slurp
+                    $$target = do { local $/; <$fh> };
+                
+                } 
+
                 my $abs = File::Spec->rel2abs( $file );
                 return $abs;
+
             }
         }
     }

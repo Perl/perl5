@@ -204,29 +204,43 @@ sub _fetch_uri {
         $File::Fetch::METHODS =
         $File::Fetch::METHODS = { $type => [$method] };
     
+        ### fetch regularly
         my $ff  = File::Fetch->new( uri => $uri );
-    
+        
         ok( $ff,                "FF object for $uri (fetch with $method)" );
-    
-        my $file = $ff->fetch( to => 'tmp' );
-    
-        SKIP: {
-            skip "You do not have '$method' installed/available", 3
+        
+        for my $to ( 'tmp', do { \my $o } ) { SKIP: {
+        
+            
+            my $how     = ref $to ? 'slurp' : 'file';
+            my $skip    = ref $to ? 4       : 3;
+        
+            ok( 1,              "   Fetching '$uri' in $how mode" );
+         
+            my $file = $ff->fetch( to => $to );
+        
+            skip "You do not have '$method' installed/available", $skip
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
                 
             ### if the file wasn't fetched, it may be a network/firewall issue                
-            skip "Fetch failed; no network connectivity for '$type'?", 3 
+            skip "Fetch failed; no network connectivity for '$type'?", $skip 
                 unless $file;
                 
             ok( $file,          "   File ($file) fetched with $method ($uri)" );
+
+            ### check we got some contents if we were meant to slurp
+            if( ref $to ) {
+                ok( $$to,       "   Contents slurped" );
+            }
+
             ok( $file && -s $file,   
                                 "   File has size" );
             is( $file && basename($file), $ff->output_file,
                                 "   File has expected name" );
     
             unlink $file;
-        }
+        }}
     }
 }
 
