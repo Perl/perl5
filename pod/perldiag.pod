@@ -2181,8 +2181,12 @@ neither as a system call or an ioctl call (SIOCATMARK).
 =item $* is no longer supported
 
 (S deprecated, syntax) The special variable C<$*>, deprecated in older perls, has
-been removed as of 5.9.0 and is no longer supported. You should use the
-C<//m> and C<//s> regexp modifiers instead.
+been removed as of 5.9.0 and is no longer supported. In previous versions of perl the use of
+C<$*> enabled or disabled multi-line matching within a string.
+
+Instead of using C<$*> you should use the C</m> (and maybe C</s>) regexp
+modifiers. (In older versions: when C<$*> was set to a true value then all regular
+expressions behaved as if they were written using C</m>.)
 
 =item $# is no longer supported
 
