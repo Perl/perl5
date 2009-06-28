@@ -4229,7 +4229,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     pos = s;
 
     /* pre-scan the input string to check for decimals/underbars */
-    while ( *pos == '.' || *pos == '_' || isDIGIT(*pos) )
+    while ( *pos == '.' || *pos == '_' || *pos == ',' || isDIGIT(*pos) )
     {
 	if ( *pos == '.' )
 	{
@@ -4245,6 +4245,12 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	    alpha = 1;
 	    width = pos - last - 1; /* natural width of sub-version */
 	}
+	else if ( *pos == ',' && isDIGIT(pos[1]) )
+	{
+	    saw_period++ ;
+	    last = pos;
+	}
+
 	pos++;
     }
 
@@ -4331,6 +4337,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	    else if ( *pos == '.' )
 		s = ++pos;
 	    else if ( *pos == '_' && isDIGIT(pos[1]) )
+		s = ++pos;
+	    else if ( *pos == ',' && isDIGIT(pos[1]) )
 		s = ++pos;
 	    else if ( isDIGIT(*pos) )
 		s = pos;

@@ -221,6 +221,7 @@ XS(XS_version_noop);
 #endif
 XS(XS_version_is_alpha);
 XS(XS_version_qv);
+XS(XS_version_is_qv);
 XS(XS_utf8_is_utf8);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
@@ -267,6 +268,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	/* Make it findable via fetchmethod */
 	newXS("version::()", XS_version_noop, file);
 	newXS("version::new", XS_version_new, file);
+	newXS("version::parse", XS_version_new, file);
 	newXS("version::(\"\"", XS_version_stringify, file);
 	newXS("version::stringify", XS_version_stringify, file);
 	newXS("version::(0+", XS_version_numify, file);
@@ -281,6 +283,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	newXS("version::noop", XS_version_noop, file);
 	newXS("version::is_alpha", XS_version_is_alpha, file);
 	newXS("version::qv", XS_version_qv, file);
+	newXS("version::declare", XS_version_qv, file);
+	newXS("version::is_qv", XS_version_is_qv, file);
     }
     newXS("utf8::is_utf8", XS_utf8_is_utf8, file);
     newXS("utf8::valid", XS_utf8_valid, file);
@@ -729,25 +733,53 @@ XS(XS_version_qv)
 {
     dVAR;
     dXSARGS;
-    if (items != 1)
-	croak_xs_usage(cv, "ver");
     SP -= items;
     {
-	SV *	ver = ST(0);
-	if ( !SvVOK(ver) ) { /* only need to do with if not already v-string */
-	    SV * const rv = sv_newmortal();
+	SV * ver = ST(0);
+	SV * rv;
+	const char * classname = "";
+	if ( items == 2 && (ST(1)) != &PL_sv_undef ) {
+	    /* getting called as object or class method */
+	    ver = ST(1);
+	    classname = 
+		sv_isobject(ST(0)) /* class called as an object method */
+		    ? HvNAME_get(SvSTASH(SvRV(ST(0))))
+		    : (char *)SvPV_nolen(ST(0));
+	}
+	if ( !SvVOK(ver) ) { /* not already a v-string */
+	    rv = sv_newmortal();
 	    sv_setsv(rv,ver); /* make a duplicate */
 	    upg_version(rv, TRUE);
-	    PUSHs(rv);
+	} else {
+	    rv = sv_2mortal(new_version(ver));
 	}
-	else
-	{
-	    mPUSHs(new_version(ver));
+	if ( items == 2 && strcmp(classname,"version") ) { /* inherited new() */
+	    sv_bless(rv, gv_stashpv(classname, GV_ADD));
 	}
+	PUSHs(rv);
+    }
+    PUTBACK;
+    return;
+}
 
+XS(XS_version_is_qv)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1)
+	croak_xs_usage(cv, "lobj");
+    SP -= items;
+    if (sv_derived_from(ST(0), "version")) {
+	SV * const lobj = ST(0);
+	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "qv", 2 ) )
+	    XSRETURN_YES;
+	else
+	    XSRETURN_NO;
 	PUTBACK;
 	return;
     }
+    else
+	Perl_croak(aTHX_ "lobj is not of type version");
 }
 
 XS(XS_utf8_is_utf8)
