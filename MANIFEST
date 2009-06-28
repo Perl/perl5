@@ -1815,7 +1815,10 @@ lib/autouse.t			See if autouse works
 lib/base/Changes		base.pm changelog
 lib/base.pm			Establish IS-A relationship at compile time
 lib/base/t/base.t		See if base works
+lib/base/t/compile-time.t	See if base works
 lib/base/t/fields-base.t	See if fields work
+lib/base/t/fields-5.6.0.t	See if fields work
+lib/base/t/fields-5.8.0.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/base/t/isa.t		See if base's behaviour doesn't change
 lib/base/t/lib/Dummy.pm		Test module for base.pm
