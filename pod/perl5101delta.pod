@@ -24,8 +24,18 @@ in a smart match:
 
 =item flip-flop operators
 
-The C<..> and C<...> flip-flop operators are evaluated in boolean context,
-following their usual semantics; see L<perlop/"Range Operators">.
+The C<..> and C<...> flip-flop operators are now evaluated in boolean
+context, following their usual semantics; see L<perlop/"Range Operators">.
+
+Note that, as in perl 5.10.0, C<when (1..10)> will not work to test
+whether a given value is an integer between 1 and 10; you should use
+C<when ([1..10])> instead (note the array reference).
+
+However, contrary to 5.10.0, evaluating the flip-flop operators in boolean
+context ensures it can now be useful in a C<when()>, notably for
+implementing bistable conditions, like in:
+
+    when (/^=begin/ .. /^=end/) { ... }
 
 =item defined-or operator
 
@@ -104,7 +114,9 @@ and possibly with stringification overloading; the other common cases
 will be automatically handled consistently.
 
 C<~~> will now refuse to work on objects that do not overload it (in order
-to avoid relying on the object's underlying structure).
+to avoid relying on the object's underlying structure). (However, if the
+object overloads the stringification or the numification operators, and
+if overload fallback is active, it will be used instead, as usual.)
 
 =head2 Other incompatible changes
 
@@ -288,7 +300,7 @@ upgraded from version 0.74 to 0.76
 
 =item *
 
-C<Archive::Extract> upgraded from version 0.24 to 0.32
+C<Archive::Extract> upgraded from version 0.24 to 0.34
 
 =item *
 
@@ -336,7 +348,7 @@ C<Compress::Zlib> upgraded from version 2.008 to 2.020
 
 =item *
 
-C<CPAN> upgraded from version 1.9205 to 1.94
+C<CPAN> upgraded from version 1.9205 to 1.9402
 
 =item *
 
@@ -376,7 +388,7 @@ C<DirHandle> upgraded from version 1.01 to 1.02
 
 =item *
 
-C<Dynaloader> XXX the "1.09" in 5.8.9 is probably different from that in
+C<Dynaloader> upgraded from version 1.09 to 1.10
 bleed/maint
 
 =item *
@@ -385,7 +397,7 @@ C<Encode> upgraded from version 2.23 to 2.33
 
 =item *
 
-C<Errno> upgraded from version 1.10 to 1.10_01
+C<Errno> upgraded from version 1.10 to 1.11
 
 =item *
 
@@ -393,7 +405,7 @@ C<Exporter> upgraded from version 5.62 to 5.63
 
 =item *
 
-C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.24_01
+C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.25
 
 =item *
 
@@ -439,7 +451,7 @@ C<File::Copy> upgraded from version 2.11 to 2.14
 
 =item *
 
-C<File::Fetch> upgraded from version 0.14 to 0.18
+C<File::Fetch> upgraded from version 0.14 to 0.20
 
 =item *
 
@@ -447,7 +459,7 @@ C<File::Find> upgraded from version 1.12 to 1.14
 
 =item *
 
-C<File::Path> upgraded from version 2.04 to 2.07_02
+C<File::Path> upgraded from version 2.04 to 2.07_03
 
 =item *
 
@@ -456,6 +468,10 @@ C<File::Spec> upgraded from version 3.2501 to 3.30
 =item *
 
 C<File::Temp> upgraded from version 0.18 to 0.21
+
+=item *
+
+C<File::stat> upgraded from version 1.00 to 1.01
 
 =item *
 
@@ -721,7 +737,7 @@ C<Time::Local> upgraded from version 1.18 to 1.1901
 
 =item *
 
-C<Time::Piece> upgraded from version 1.12 to 1.14
+C<Time::Piece> upgraded from version 1.12 to 1.15
 
 =item *
 
@@ -1146,6 +1162,11 @@ Various leaks associated with named captures in regexs have been fixed.
 
 A weak reference to a hash would leak. This was affecting C<DBI>. [RT #56908]
 
+=item *
+
+Segfault when using (?|) in regexp [RT #59734]
+
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -1449,6 +1470,16 @@ program included with your release.  Be sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for security
+issues in the Perl core, not for modules independently distributed on CPAN.
+
 
 =head1 SEE ALSO
 

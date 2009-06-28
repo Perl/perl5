@@ -3057,8 +3057,7 @@ A  054b75b0ac 2009/05/12 Smart matching is to-done.
 A  ae20c3aa7c 2009/05/12 Register ~~ operator overloading in its own catego
 M  7214e7c31c 2009/05/12 add perl589delta.pod to blead
 M  5f320ac744 2009/05/12 Upgrade to Time-Piece-1.14
-!  8177d4d97c 2009/05/12 Skip test for changing TZ if running in a pseudo-f
-			    wait for CPAN sync
+M  8177d4d97c 2009/05/12 Skip test for changing TZ if running in a pseudo-f
 R  fc5be80860 2009/05/12 Add perl589delta.pod to pod.lst, and run pod/build
 			    done manually instead of merging
 d  8d1c3e263b 2009/05/12 Inline S_glob_2pv() into Perl_sv_2pv_flags(). (Exi
@@ -3419,7 +3418,7 @@ M  3f1788e11f 2009/06/21 make_patchnum.pl now works in -Dmksymlink target d
 			these three commits (fix for #58530)
 			convert a CV in a deleted glob to ANON,
 			which makes me twitch. See also 6eb667c676,
-			ab9c44463c.
+			ab9c44463c, fbad106ea7
 
 d  d018fae575 2009/06/21 Tests for deleting stash entries.
 d  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
@@ -3457,24 +3456,52 @@ M  8a9741846a 2009/06/23 Ammend unhelpful description of debugger watch com
 M  ddb418268d 2009/06/23 another Maintainers.pl version update
 !  16fb65535f 2009/06/23 sync lib/Module/Build/Changes with CPAN equivalent
 			    wait for non-devel CPAN release
-.  49f8307ec5 2009/06/23 Add a paragraph noting that perl5-security-report@
-.  f337e9820d 2009/06/23 When writing a perldelta, choose either "regex" or
-.  aad1d01f81 2009/06/23 Note that the "Deep recursion" depth warning thres
-.  0b179affb5 2009/06/23 sync lib/CPANPLUS/Backend.pm with CPAN
-.  627cd18c09 2009/06/24 Update CPANPLUS::Dist::Build to CPAN version 0.35_
-.  8bca5c8a8b 2009/06/24 Update Maintainers.pl accordingly
-.  8c814d1a54 2009/06/24 core-cpan-diff: continue with next distro on downl
-.  f0ce33d74d 2009/06/24 core-cpan-diff: include author path in distro vers
-.  d4fb20eeed 2009/06/24 Fix some typos and grammar infelicities in core te
-.  ef55af2a5a 2009/06/24 Fix a semantic error in the Pod. (wrong heading le
-.  5ee651a9b9 2009/06/24 Mention parallel testing in INSTALL and perl5110de
-.  6fbc735bab 2009/06/24 Add tests for smart match overload fallback
-.  665f5e9843 2009/06/24 Clarifications to the perldelta notes on smart mat
-.  27abe0f194 2009/06/25 As Errno is formally no longer dual-lived, give it
-.  839bc55ad6 2009/06/25 Upgrade to File::Path 2.07_03
-.  15932acc61 2009/06/25 Add documentation for the method resolution plugin
-.  e63be7465b 2009/06/25 Trim all trailing / from "." in @INC when filling 
-.  05b4f1ece2 2009/06/25 document the maximum length of barewords
-.  31c91b4357 2009/06/25 Don't enqueue pending signals during global destru
-.  98814a2b07 2009/06/25 Better description for the changes about the range
-.  d00c6acb56 2009/06/26 pod/perlfilter.pod: two POD typos
+M  49f8307ec5 2009/06/23 Add a paragraph noting that perl5-security-report@
+			    (added by hand to perl5101delta.pod)
+M  f337e9820d 2009/06/23 When writing a perldelta, choose either "regex" or
+M  aad1d01f81 2009/06/23 Note that the "Deep recursion" depth warning thres
+!  0b179affb5 2009/06/23 sync lib/CPANPLUS/Backend.pm with CPAN
+			    wait for 0.88
+!  627cd18c09 2009/06/24 Update CPANPLUS::Dist::Build to CPAN version 0.35_
+			    wait for 0.36?
+!  8bca5c8a8b 2009/06/24 Update Maintainers.pl accordingly
+			    wait for CPANPLUS::Dist::Build 0.36
+M  8c814d1a54 2009/06/24 core-cpan-diff: continue with next distro on downl
+M  f0ce33d74d 2009/06/24 core-cpan-diff: include author path in distro vers
+M  d4fb20eeed 2009/06/24 Fix some typos and grammar infelicities in core te
+R  ef55af2a5a 2009/06/24 Fix a semantic error in the Pod. (wrong heading le
+			    blead-specific
+M  5ee651a9b9 2009/06/24 Mention parallel testing in INSTALL and perl5110de
+M  6fbc735bab 2009/06/24 Add tests for smart match overload fallback
+M  665f5e9843 2009/06/24 Clarifications to the perldelta notes on smart mat
+			    (added by hand to perl5101delta.pod)
+M  27abe0f194 2009/06/25 As Errno is formally no longer dual-lived, give it
+M  839bc55ad6 2009/06/25 Upgrade to File::Path 2.07_03
+M  15932acc61 2009/06/25 Add documentation for the method resolution plugin
+d  e63be7465b 2009/06/25 Trim all trailing / from "." in @INC when filling 
+M  05b4f1ece2 2009/06/25 document the maximum length of barewords
+d  31c91b4357 2009/06/25 Don't enqueue pending signals during global destru
+M  98814a2b07 2009/06/25 Better description for the changes about the range
+			    (added by hand to perl5101delta.pod)
+M  d00c6acb56 2009/06/26 pod/perlfilter.pod: two POD typos
+M  ee91d26e06 2009/06/26 Update RExC_npar and after_freeze correctly after 
+M  956cae9a39 2009/06/26 PATCH small documentation change for UCD.pm
+M  3bce050656 2009/06/26 One more regression test for RT #59734
+!  ef25d9aae6 2009/06/27 Update CPANPLUS::Dist::Build to CPAN version 0.35_
+			    wait for 0.36?
+M  198e857cc6 2009/06/27 Update Archive::Extract to 0.34
+M  6b1bef9ae6 2009/06/27 Update CPAN.pm to 1.9402
+!  0e637710e6 2009/06/27 Changed to incorporate latest SDKs.
+			    waiting for reply from Adam Russell
+d  fe13d51d64 2009/06/27 Add test to make sure everything that outputs an e
+d  87a63fff81 2009/06/27 Add support for TODO diag tests -- a list in DATA 
+d  f7223e8e1a 2009/06/27 Adjustments to t/pod/diag.t
+M  8d16e270aa 2009/06/27 Upgrade to File::Fetch 0.20
+!  a3de5d0b2a 2009/06/27 Update CPANPLUS to 0.87_03
+			    wait for 0.88
+d  fbad106ea7 2009/06/27 Make stash.t redirect stderr.
+M  ea0799344c 2009/06/27 sync blead with Update Archive::Extract 0.34
+M  c51ff80d06 2009/06/27 update Maintainers.pl
+M  4e390bd81a 2009/06/27 bump Dynaloader to 1.10 to distinguish it from the
+M  6653081c26 2009/06/27 upgrade to Time::Piece 1.15
+M  673223b5b2 2009/06/27 upgrade to ExtUtils::CBuilder 0.25
