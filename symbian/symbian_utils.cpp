@@ -76,6 +76,8 @@ extern "C" {
 #ifdef PERL_GLOBAL_STRUCT /* Avoid unused variable warning. */
         dVAR;
 #endif
+        if(!PL_appctx)
+        	((CPerlBase*)PL_appctx) = CPerlBase::NewInterpreter();
         return ((CPerlBase*)PL_appctx)->ConsoleRead(fd, b, n);
     }
     EXPORT_C SSize_t symbian_write_stdout(const int fd, const char *b, int n)
@@ -83,6 +85,8 @@ extern "C" {
 #ifdef PERL_GLOBAL_STRUCT /* Avoid unused variable warning. */
         dVAR;
 #endif
+        if(!PL_appctx)
+        	((CPerlBase*)PL_appctx) = CPerlBase::NewInterpreter();
         return ((CPerlBase*)PL_appctx)->ConsoleWrite(fd, b, n);
     }
     static const char NullErr[] = "";
@@ -171,7 +175,7 @@ extern "C" {
 	} else {
 	  buf8.Format(_L8("Symbian error %d"), error);
 	}
-        SV* sv = Perl_get_sv(aTHX_ "\005", GV_ADD); /* $^E or ${^OS_ERROR} */
+        SV* sv = Perl_get_sv(aTHX_ "\005", TRUE); /* $^E or ${^OS_ERROR} */
         if (!sv)
             return (char*)NullErr;
         sv_setpv(sv, (const char *)buf8.PtrZ());
@@ -195,13 +199,13 @@ extern "C" {
         TUint  tick   = User::TickCount();
         if (PL_timesbase.tms_utime == 0) {
             PL_timesbase.tms_utime = tick;
-            PL_clocktick = PERL_SYMBIAN_CLK_TCK;
+            //PL_clocktick = PERL_SYMBIAN_CLK_TCK;
         }
         tick -= PL_timesbase.tms_utime;
         TInt64 tickus = TInt64(tick) * TInt64(periodus);
         TInt64 tmps   = tickus / 1000000;
-        if (sec)  *sec  = tmps.Low();
-        if (usec) *usec = tickus.Low() - tmps.Low() * 1000000;
+        if (sec)  *sec  = I64LOW(tmps);
+        if (usec) *usec = I64LOW(tickus) - I64LOW(tmps) * 1000000;
         return 0;
     }
     EXPORT_C int symbian_usleep(unsigned int usec)
@@ -284,15 +288,16 @@ extern "C" {
         if (error == KErrNone) {
             TThreadFunction func = (TThreadFunction)(lib.Lookup(1));
             if (func)
-                error = proc.Create(aFilename,
-                                    func,
-                                    KStackSize,
-                                    (TAny*)command,
-                                    &lib,
-                                    RThread().Heap(),
-                                    KHeapMin,
-                                    KHeapMax,
-                                    EOwnerProcess);
+            	error = proc.Create(aFilename,
+            	                                    func,
+            	                                    KStackSize,
+            	                                  //  (TAny*)command,
+            	                                  //  &lib,
+            	                                  //  RThread().Heap(),
+            	                                    KHeapMin,
+            	                                    KHeapMax,
+            	                                    (TAny*)command,
+            	                                    EOwnerProcess);
             else
                 error = KErrNotFound;
             lib.Close();
