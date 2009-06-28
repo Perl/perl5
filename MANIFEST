@@ -2176,8 +2176,11 @@ lib/ExtUtils/NOTES		Notes about MakeMaker internals
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
+lib/ExtUtils/ParseXS/t/usage.t	ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.xs	Test file for ExtUtils::ParseXS tests
+lib/ExtUtils/ParseXS/t/XSUsage.pm	ExtUtils::ParseXS tests
+lib/ExtUtils/ParseXS/t/XSUsage.xs	ExtUtils::ParseXS tests
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile

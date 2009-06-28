@@ -10,7 +10,7 @@ BEGIN {
 }
 use strict;
 use Test;
-BEGIN { plan tests => 10 };
+BEGIN { plan tests => 24 };
 use DynaLoader;
 use ExtUtils::ParseXS qw(process_file);
 use ExtUtils::CBuilder;
@@ -22,15 +22,10 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
 #########################
 
-# Try sending to filehandle
-tie *FH, 'Foo';
-process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
-ok tied(*FH)->content, '/is_even/', "Test that output contains some text";
-
-my $source_file = 'XSTest.c';
+my $source_file = 'XSUsage.c';
 
 # Try sending to file
-process_file(filename => 'XSTest.xs', output => $source_file, prototypes => 0);
+process_file(filename => 'XSUsage.xs', output => $source_file);
 ok -e $source_file, 1, "Create an output file";
 
 # TEST doesn't like extraneous output
@@ -39,7 +34,7 @@ my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 # Try to compile the file!  Don't get too fancy, though.
 my $b = ExtUtils::CBuilder->new(quiet => $quiet);
 if ($b->have_compiler) {
-  my $module = 'XSTest';
+  my $module = 'XSUsage';
 
   my $obj_file = $b->compile( source => $source_file );
   ok $obj_file;
@@ -49,10 +44,48 @@ if ($b->have_compiler) {
   ok $lib_file;
   ok -e $lib_file, 1, "Make sure $lib_file exists";
 
-  eval {require XSTest};
+  eval {require XSUsage};
   ok $@, '';
-  ok  XSTest::is_even(8);
-  ok !XSTest::is_even(9);
+
+  # The real tests here - for each way of calling the functions, call with the
+  # wrong number of arguments and check the Usage line is what we expect
+
+  eval { XSUsage::one(1) };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::one/;
+
+  eval { XSUsage::two(1) };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::two/;
+
+  eval { XSUsage::two_x(1) };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::two_x/;
+
+  eval { FOO::two(1) };
+  ok $@;
+  ok $@ =~ /^Usage: FOO::two/;
+
+  eval { XSUsage::three(1) };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::three/;
+
+  eval { XSUsage::four(1) };
+  ok !$@;
+
+  eval { XSUsage::five() };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::five/;
+
+  eval { XSUsage::six() };
+  ok !$@;
+
+  eval { XSUsage::six(1) };
+  ok !$@;
+
+  eval { XSUsage::six(1,2) };
+  ok $@;
+  ok $@ =~ /^Usage: XSUsage::six/;
 
   # Win32 needs to close the DLL before it can unlink it, but unfortunately
   # dl_unload_file was missing on Win32 prior to perl change #24679!
@@ -64,20 +97,10 @@ if ($b->have_compiler) {
       }
     }
   }
-  unless ($ENV{PERL_NO_CLEANUP}) {
-    1 while unlink $obj_file;
-    1 while unlink $lib_file;
-  }
+  1 while unlink $obj_file;
+  1 while unlink $lib_file;
 } else {
-  skip "Skipped can't find a C compiler & linker", 1 for 1..7;
+  skip "Skipped can't find a C compiler & linker", 1 for 3 .. 24;
 }
 
-unless ($ENV{PERL_NO_CLEANUP}) {
-  1 while unlink $source_file;
-}
-
-#####################################################################
-
-sub Foo::TIEHANDLE { bless {}, 'Foo' }
-sub Foo::PRINT { shift->{buf} .= join '', @_ }
-sub Foo::content { shift->{buf} }
+1 while unlink $source_file;
