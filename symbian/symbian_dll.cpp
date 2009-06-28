@@ -10,8 +10,6 @@
 #include <e32base.h>
 #include "PerlBase.h"
 
-EXPORT_C GLDEF_C TInt E32Dll(TDllReason /*aReason*/) { return KErrNone; }
-
 extern "C" {
     EXPORT_C void* symbian_get_vars(void)	   { return Dll::Tls(); }
     EXPORT_C void  symbian_set_vars(const void *p) { Dll::SetTls((TAny*)p); }
