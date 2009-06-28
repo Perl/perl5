@@ -5356,6 +5356,24 @@ Examples:
     use sort '_mergesort';  # note discouraging _
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
 
+
+Warning: Care is required when sorting the list returned from a function.
+
+If you want to sort returned by the function call: find_records(@key) then
+you can use:
+    @contact = sort { $a cmp $b } find_records @key;
+    @contact = sort +find_records(@key);
+    @contact = sort &find_records(@key);
+    @contact = sort(find_records(@key));
+
+If instead you want to sort the array @key with the comparison routine
+find_records then you can use:
+    @contact = sort { find_records() } @key;
+    @contact = sort find_records(@key);
+    @contact = sort(find_records @key);
+    @contact = sort(find_records (@key));
+
+
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
 if you're in the C<main> package and type
