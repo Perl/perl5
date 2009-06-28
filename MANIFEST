@@ -4286,6 +4286,7 @@ t/op/wantarray.t		See if wantarray works
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ..., !!! and ??? work
 t/perl.supp			Perl valgrind suppressions
+t/pod/diag.t			Test completeness of perldiag.pod
 t/pod/emptycmd.t		Test empty pod directives
 t/pod/emptycmd.xr		Expected results for emptycmd.t
 t/pod/find.t			See if Pod::Find works
