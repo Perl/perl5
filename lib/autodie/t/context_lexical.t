@@ -9,9 +9,13 @@ plan 'no_plan';
 # undef if given a list of a single undef.  This mimics the
 # behaviour of many user-defined subs and built-ins (eg: open) that
 # always return undef regardless of context.
+#
+# We also do an 'empty return' if no arguments are passed.  This
+# mimics the PBP guideline for returning nothing.
 
 sub list_mirror {
     return undef if (@_ == 1 and not defined $_[0]);
+    return if not @_;
     return @_;
 
 }

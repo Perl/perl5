@@ -29,11 +29,7 @@ eval {
     my @x = copy(NO_SUCH_FILE, 'xyzzy');
 };
 
-TODO: {
-    local $TODO = "Fixed in 'hints' branch";
-
-    isa_ok($@,EXCEPTION,"This shouldn't change with array context");
-}
+isa_ok($@,EXCEPTION,"This shouldn't change with array context");
 
 # For good measure, test with built-ins.
 
