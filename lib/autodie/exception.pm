@@ -14,7 +14,7 @@ use overload
 
 use if ($] >= 5.010), overload => '~~'  => "matches";
 
-our $VERSION = '1.999';
+our $VERSION = '2.00';
 
 my $PACKAGE = __PACKAGE__;  # Useful to have a scalar for hash keys.
 
@@ -185,7 +185,7 @@ See L<autodie/CATEGORIES> for futher information.
     sub matches {
         my ($this, $that) = @_;
 
-        # XXX - Handle references
+        # TODO - Handle references
         croak "UNIMPLEMENTED" if ref $that;
 
         my $sub = $this->function;
@@ -644,7 +644,7 @@ sub _init {
 
     # If we end up falling out the bottom of our stack, then our
     # __ANON__ guess is the best we can get.  This includes situations
-    # where we were called from thetop level of a program.
+    # where we were called from the top level of a program.
 
     if (not defined $sub) {
         $sub = $first_guess_subroutine;

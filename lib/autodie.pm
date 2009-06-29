@@ -8,7 +8,7 @@ our @ISA = qw(Fatal);
 our $VERSION;
 
 BEGIN {
-    $VERSION = "1.999";
+    $VERSION = '2.00';
 }
 
 use constant ERROR_WRONG_FATAL => q{
@@ -73,7 +73,9 @@ autodie - Replace functions with ones that succeed or die with lexical scope
 
 =head1 SYNOPSIS
 
-    use autodie;    # Recommended, implies 'use autodie qw(:default)'
+    use autodie;            # Recommended: implies 'use autodie qw(:default)'
+
+    use autodie qw(:all);   # Recommended more: defaults and system/exec.
 
     use autodie qw(open close);   # open/close succeed or die
 
@@ -248,9 +250,14 @@ The syntax:
     use autodie qw(:1.994);
 
 allows the C<:default> list from a particular version to be used.  This
-provides the convenience of using the default methods, but the surity
+provides the convenience of using the default methods, but the surety
 that no behavorial changes will occur if the C<autodie> module is
 upgraded.
+
+You can enable C<autodie> for all of Perl's built-ins, including
+C<system> and C<exec> with:
+
+    use autodie qw(:all);
 
 =head1 FUNCTION SPECIFIC NOTES
 
@@ -271,6 +278,36 @@ Autodying C<flock> will generate an exception if C<flock> returns
 false with any other error.
 
 =head2 system/exec
+
+The C<system> built-in is considered to have failed in the following
+circumstances:
+
+=over 4
+
+=item *
+
+The command does not start.
+
+=item *
+
+The command is killed by a signal.
+
+=item *
+
+The command returns a non-zero exit value (but see below).
+
+=back
+
+On success, the autodying form of C<system> returns the I<exit value>
+rather than the contents of C<$?>.
+
+Additional allowable exit values can be supplied as an optional first
+argument to autodying C<system>:
+
+    system( [ 0, 1, 2 ], $cmd, @args);  # 0,1,2 are good exit values
+
+C<autodie> uses the L<IPC::System::Simple> module to change C<system>.
+See its documentation for further information.
 
 Applying C<autodie> to C<system> or C<exec> causes the exotic
 forms C<system { $cmd } @args > or C<exec { $cmd } @args>
@@ -295,7 +332,14 @@ The C<:void> option is supported in L<Fatal>, but not
 C<autodie>.  However you can explicitly disable autodie
 end the end of the current block with C<no autodie>.
 To disable autodie for only a single function (eg, open)
-use or C<no autodie qw(open)>.
+use C<no autodie qw(open)>.
+
+=item No user hints defined for %s
+
+You've insisted on hints for user-subroutines, either by pre-pending
+a C<!> to the subroutine name itself, or earlier in the list of arguments
+to C<autodie>.  However the subroutine in question does not have
+any hints available.
 
 =back
 
@@ -315,8 +359,11 @@ any version of Perl.
 When using C<autodie> or C<Fatal> with user subroutines, the
 declaration of those subroutines must appear before the first use of
 C<Fatal> or C<autodie>, or have been exported from a module.
-Attempting to ue C<Fatal> or C<autodie> on other user subroutines will
+Attempting to use C<Fatal> or C<autodie> on other user subroutines will
 result in a compile-time error.
+
+Due to a bug in Perl, C<autodie> may "lose" any format which has the
+same name as an autodying built-in or function.
 
 =head2 REPORTING BUGS
 
@@ -335,7 +382,7 @@ E<lt>pjf@perltraining.com.auE<gt>.
 
 =head1 AUTHOR
 
-Copyright 2008, Paul Fenwick E<lt>pjf@perltraining.com.auE<gt>
+Copyright 2008-2009, Paul Fenwick E<lt>pjf@perltraining.com.auE<gt>
 
 =head1 LICENSE
 
@@ -344,7 +391,7 @@ same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Fatal>, L<autodie::exception>, L<IPC::System::Simple>
+L<Fatal>, L<autodie::exception>, L<autodie::hints>, L<IPC::System::Simple>
 
 I<Perl tips, autodie> at
 L<http://perltraining.com.au/tips/2008-08-20.html>
@@ -355,6 +402,6 @@ Mark Reed and Roland Giersig -- Klingon translators.
 
 See the F<AUTHORS> file for full credits.  The latest version of this
 file can be found at
-L<http://github.com/pfenwick/autodie/tree/AUTHORS> .
+L<http://github.com/pfenwick/autodie/tree/master/AUTHORS> .
 
 =cut

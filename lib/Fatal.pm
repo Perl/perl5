@@ -4,9 +4,13 @@ use 5.008;  # 5.8.x needed for autodie
 use Carp;
 use strict;
 use warnings;
+use Tie::RefHash;   # To cache subroutine refs
+
+use constant PERL510     => ( $] >= 5.010 );
 
 use constant LEXICAL_TAG => q{:lexical};
 use constant VOID_TAG    => q{:void};
+use constant INSIST_TAG  => q{!};
 
 use constant ERROR_NOARGS    => 'Cannot use lexical %s with no arguments';
 use constant ERROR_VOID_LEX  => VOID_TAG.' cannot be used with lexical scope';
@@ -15,6 +19,8 @@ use constant ERROR_NO_LEX    => "no %s can only start with ".LEXICAL_TAG;
 use constant ERROR_BADNAME   => "Bad subroutine name for %s: %s";
 use constant ERROR_NOTSUB    => "%s is not a Perl subroutine";
 use constant ERROR_NOT_BUILT => "%s is neither a builtin, nor a Perl subroutine";
+use constant ERROR_NOHINTS   => "No user hints defined for %s";
+
 use constant ERROR_CANT_OVERRIDE => "Cannot make the non-overridable builtin %s fatal";
 
 use constant ERROR_NO_IPC_SYS_SIMPLE => "IPC::System::Simple required for Fatalised/autodying system()";
@@ -25,13 +31,15 @@ use constant ERROR_AUTODIE_CONFLICT => q{"no autodie '%s'" is not allowed while 
 
 use constant ERROR_FATAL_CONFLICT => q{"use Fatal '%s'" is not allowed while "no autodie '%s'" is in effect};
 
+use constant ERROR_58_HINTS => q{Non-subroutine %s hints for %s are not supported under Perl 5.8.x};
+
 # Older versions of IPC::System::Simple don't support all the
 # features we need.
 
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '1.999';
+our $VERSION = '2.00';
 
 our $Debug ||= 0;
 
@@ -63,7 +71,7 @@ my %TAGS = (
     ':system'  => [qw(system exec)],
 
     # Can we use qw(getpeername getsockname)? What do they do on failure?
-    # XXX - Can socket return false?
+    # TODO - Can socket return false?
     ':socket'  => [qw(accept bind connect getsockopt listen recv send
                    setsockopt shutdown socketpair)],
 
@@ -85,6 +93,8 @@ my %TAGS = (
     ':1.997' => [qw(:default)],
     ':1.998' => [qw(:default)],
     ':1.999' => [qw(:default)],
+    ':1.999_01' => [qw(:default)],
+    ':2.00'  => [qw(:default)],
 
 );
 
@@ -132,6 +142,13 @@ my %Package_Fatal = ();
 
 my %Original_user_sub = ();
 
+# Is_fatalised_sub simply records a big map of fatalised subroutine
+# refs.  It means we can avoid repeating work, or fatalising something
+# we've already processed.
+
+my  %Is_fatalised_sub = ();
+tie %Is_fatalised_sub, 'Tie::RefHash';
+
 # We use our package in a few hash-keys.  Having it in a scalar is
 # convenient.  The "guard $PACKAGE" string is used as a key when
 # setting up lexical guards.
@@ -144,9 +161,10 @@ my $NO_PACKAGE    = "no $PACKAGE";      # Used to detect 'no autodie'
 # or 'use autodie'.
 
 sub import {
-    my $class   = shift(@_);
-    my $void    = 0;
-    my $lexical = 0;
+    my $class        = shift(@_);
+    my $void         = 0;
+    my $lexical      = 0;
+    my $insist_hints = 0;
 
     my ($pkg, $filename) = caller();
 
@@ -195,6 +213,10 @@ sub import {
             # When we see :void, set the void flag.
             $void = 1;
 
+        } elsif ($func eq INSIST_TAG) {
+
+            $insist_hints = 1;
+
         } elsif (exists $TAGS{$func}) {
 
             # When it's a tag, expand it.
@@ -203,6 +225,17 @@ sub import {
         } else {
 
             # Otherwise, fatalise it.
+
+            # Check to see if there's an insist flag at the front.
+            # If so, remove it, and insist we have hints for this sub.
+            my $insist_this;
+
+            if ($func =~ s/^!//) {
+                $insist_this = 1;
+            }
+
+            # TODO: Even if we've already fatalised, we should
+            # check we've done it with hints (if $insist_hints).
 
             # If we've already made something fatal this call,
             # then don't do it twice.
@@ -233,7 +266,8 @@ sub import {
             # built-ins.
 
             my $sub_ref = $class->_make_fatal(
-                $func, $pkg, $void, $lexical, $filename
+                $func, $pkg, $void, $lexical, $filename,
+                ( $insist_this || $insist_hints )
             );
 
             $done_this{$func}++;
@@ -301,9 +335,12 @@ sub _install_subs {
         # Nuke the old glob.
         { no strict; delete $pkg_sym->{$sub_name}; }    ## no critic
 
-        # Copy innocent bystanders back.
+        # Copy innocent bystanders back.  Note that we lose
+        # formats; it seems that Perl versions up to 5.10.0
+        # have a bug which causes copying formats to end up in
+        # the scalar slot.  Thanks to Ben Morrow for spotting this.
 
-        foreach my $slot (qw( SCALAR ARRAY HASH IO FORMAT ) ) {
+        foreach my $slot (qw( SCALAR ARRAY HASH IO ) ) {
             next unless defined *__tmp{ $slot };
             *{ $full_path } = *__tmp{ $slot };
         }
@@ -421,6 +458,8 @@ sub unimport {
 }
 
 # This code is from the original Fatal.  It scares me.
+# It is 100% compatible with the 5.10.0 Fatal module, right down
+# to the scary 'XXXX' comment.  ;)
 
 sub fill_protos {
     my $proto = shift;
@@ -438,17 +477,35 @@ sub fill_protos {
     return @out1;
 }
 
-# This generates the code that will become our fatalised subroutine.
+# This is a backwards compatible version of _write_invocation.  It's
+# recommended you don't use it.
 
 sub write_invocation {
-    my ($class, $core, $call, $name, $void, $lexical, $sub, @argvs) = @_;
+    my ($core, $call, $name, $void, @args) = @_;
+
+    return Fatal->_write_invocation(
+        $core, $call, $name, $void,
+        0,      # Lexical flag
+        undef,  # Sub, unused in legacy mode
+        undef,  # Subref, unused in legacy mode.
+        @args
+    );
+}
+
+# This version of _write_invocation is used internally.  It's not
+# recommended you call it from external code, as the interface WILL
+# change in the future.
+
+sub _write_invocation {
+
+    my ($class, $core, $call, $name, $void, $lexical, $sub, $sref, @argvs) = @_;
 
     if (@argvs == 1) {        # No optional arguments
 
         my @argv = @{$argvs[0]};
         shift @argv;
 
-        return $class->one_invocation($core,$call,$name,$void,$sub,! $lexical,@argv);
+        return $class->_one_invocation($core,$call,$name,$void,$sub,! $lexical, $sref, @argv);
 
     } else {
         my $else = "\t";
@@ -460,19 +517,44 @@ sub write_invocation {
             push @out, "${else}if (\@_ == $n) {\n";
             $else = "\t} els";
 
-        push @out, $class->one_invocation($core,$call,$name,$void,$sub,! $lexical,@argv);
+        push @out, $class->_one_invocation($core,$call,$name,$void,$sub,! $lexical, $sref, @argv);
         }
-        push @out, q[
+        push @out, qq[
             }
-            die "Internal error: $name(\@_): Do not expect to get ", scalar \@_, " arguments";
+            die "Internal error: $name(\@_): Do not expect to get ", scalar(\@_), " arguments";
     ];
 
         return join '', @out;
     }
 }
 
+
+# This is a slim interface to ensure backward compatibility with
+# anyone doing very foolish things with old versions of Fatal.
+
 sub one_invocation {
-    my ($class, $core, $call, $name, $void, $sub, $back_compat, @argv) = @_;
+    my ($core, $call, $name, $void, @argv) = @_;
+
+    return Fatal->_one_invocation(
+        $core, $call, $name, $void,
+        undef,   # Sub.  Unused in back-compat mode.
+        1,       # Back-compat flag
+        undef,   # Subref, unused in back-compat mode.
+        @argv
+    );
+
+}
+
+# This is the internal interface that generates code.
+# NOTE: This interface WILL change in the future.  Please do not
+# call this subroutine directly.
+
+# TODO: Whatever's calling this code has already looked up hints.  Pass
+# them in, rather than look them up a second time.
+
+sub _one_invocation {
+    my ($class, $core, $call, $name, $void, $sub, $back_compat, $sref, @argv) = @_;
+
 
     # If someone is calling us directly (a child class perhaps?) then
     # they could try to mix void without enabling backwards
@@ -492,11 +574,13 @@ sub one_invocation {
 
     if ($back_compat) {
 
-        # TODO - Use Fatal qw(system) is not yet supported.  It should be!
+        # Use Fatal qw(system) will never be supported.  It generated
+        # a compile-time error with legacy Fatal, and there's no reason
+        # to support it when autodie does a better job.
 
         if ($call eq 'CORE::system') {
             return q{
-                croak("UNIMPLEMENTED: use Fatal qw(system) not yet supported.");
+                croak("UNIMPLEMENTED: use Fatal qw(system) not supported.");
             };
         }
 
@@ -522,14 +606,33 @@ sub one_invocation {
     # replace whatever it is that we're calling; as such, we actually
     # calling a subroutine ref.
 
-    # Unfortunately, none of this tells us the *ultimate* name.
-    # For example, if I export 'copy' from File::Copy, I'd like my
-    # ultimate name to be File::Copy::copy.
-    #
-    # TODO - Is there any way to find the ultimate name of a sub, as
-    # described above?
+    my $human_sub_name = $core ? $call : $sub;
 
-    my $true_sub_name = $core ? $call : $sub;
+    # Should we be testing to see if our result is defined, or
+    # just true?
+
+    my $use_defined_or;
+
+    my $hints;      # All user-sub hints, including list hints.
+
+    if ( $core ) {
+
+        # Core hints are built into autodie.
+
+        $use_defined_or = exists ( $Use_defined_or{$call} );
+
+    }
+    else {
+
+        # User sub hints are looked up using autodie::hints,
+        # since users may wish to add their own hints.
+
+        require autodie::hints;
+
+        $hints = autodie::hints->get_hints_for( $sref );
+    }
+
+    # Checks for special core subs.
 
     if ($call eq 'CORE::system') {
 
@@ -561,7 +664,7 @@ sub one_invocation {
 
             if (\$E) {
 
-                # XXX - TODO - This can't be overridden in child
+                # TODO - This can't be overridden in child
                 # classes!
 
                 die autodie::exception::system->new(
@@ -575,16 +678,12 @@ sub one_invocation {
 
     }
 
-    # Should we be testing to see if our result is defined, or
-    # just true?
-    my $use_defined_or = exists ( $Use_defined_or{$call} );
-
     local $" = ', ';
 
     # If we're going to throw an exception, here's the code to use.
     my $die = qq{
         die $class->throw(
-            function => q{$true_sub_name}, args => [ @argv ],
+            function => q{$human_sub_name}, args => [ @argv ],
             pragma => q{$class}, errno => \$!,
         )
     };
@@ -635,26 +734,83 @@ sub one_invocation {
     # the 'unopened' warning class here.  Especially since they
     # then report the wrong line number.
 
-    return qq{
+    my $code = qq[
         no warnings qw(unopened);
 
         if (wantarray) {
             my \@results = $call(@argv);
-            # If we got back nothing, or we got back a single
-            # undef, we die.
+
+    ];
+
+    if ( $hints and ( ref($hints->{list} ) || "" ) eq 'CODE' ) {
+
+        # NB: Subroutine hints are passed as a full list.
+        # This differs from the 5.10.0 smart-match behaviour,
+        # but means that context unaware subroutines can use
+        # the same hints in both list and scalar context.
+
+        $code .= qq{
+            if ( \$hints->{list}->(\@results) ) { $die };
+        };
+    }
+    elsif ( PERL510 and $hints ) {
+        $code .= qq{
+            if ( \@results ~~ \$hints->{list} ) { $die };
+        };
+    }
+    elsif ( $hints ) {
+        croak sprintf(ERROR_58_HINTS, 'list', $sub);
+    }
+    else {
+        $code .= qq{
+            # An empty list, or a single undef is failure
             if (! \@results or (\@results == 1 and ! defined \$results[0])) {
                 $die;
-            };
+            }
+        }
+    }
+
+    # Tidy up the end of our wantarray call.
+
+    $code .= qq[
             return \@results;
         }
+    ];
 
-        # Otherwise, we're in scalar context.
-        # We're never in a void context, since we have to look
-        # at the result.
 
+    # Otherwise, we're in scalar context.
+    # We're never in a void context, since we have to look
+    # at the result.
+
+    $code .= qq{
         my \$result = $call(@argv);
+    };
 
-    } . ( $use_defined_or ? qq{
+    if ( $hints and ( ref($hints->{scalar} ) || "" ) eq 'CODE' ) {
+
+        # We always call code refs directly, since that always
+        # works in 5.8.x, and always works in 5.10.1
+
+        return $code .= qq{
+            if ( \$hints->{scalar}->(\$result) ) { $die };
+            return \$result;
+        };
+
+    }
+    elsif (PERL510 and $hints) {
+        return $code . qq{
+
+            if ( \$result ~~ \$hints->{scalar} ) { $die };
+
+            return \$result;
+        };
+    }
+    elsif ( $hints ) {
+        croak sprintf(ERROR_58_HINTS, 'scalar', $sub);
+    }
+
+    return $code .
+    ( $use_defined_or ? qq{
 
         $die if not defined \$result;
 
@@ -676,9 +832,11 @@ sub one_invocation {
 # TODO: Taking a huge list of arguments is awful.  Rewriting to
 #       take a hash would be lovely.
 
+# TODO - BACKCOMPAT - This is not yet compatible with 5.10.0
+
 sub _make_fatal {
-    my($class, $sub, $pkg, $void, $lexical, $filename) = @_;
-    my($name, $code, $sref, $real_proto, $proto, $core, $call);
+    my($class, $sub, $pkg, $void, $lexical, $filename, $insist) = @_;
+    my($name, $code, $sref, $real_proto, $proto, $core, $call, $hints);
     my $ini = $sub;
 
     $sub = "${pkg}::$sub" unless $sub =~ /::/;
@@ -701,12 +859,15 @@ sub _make_fatal {
 
     if (defined(&$sub)) {   # user subroutine
 
+        # NOTE: Previously we would localise $@ at this point, so
+        # the following calls to eval {} wouldn't interfere with anything
+        # that's already in $@.  Unfortunately, it would also stop
+        # any of our croaks from triggering(!), which is even worse.
+
         # This could be something that we've fatalised that
         # was in core.
 
-        local $@; # Don't clobber anyone else's $@
-
-        if ( $Package_Fatal{$sub} and eval { prototype "CORE::$name" } ) {
+        if ( $Package_Fatal{$sub} and do { local $@; eval { prototype "CORE::$name" } } ) {
 
             # Something we previously made Fatal that was core.
             # This is safe to replace with an autodying to core
@@ -724,12 +885,33 @@ sub _make_fatal {
 
         } else {
 
+            # If this is something we've already fatalised or played with,
+            # then look-up the name of the original sub for the rest of
+            # our processing.
+
+            $sub = $Is_fatalised_sub{\&$sub} || $sub;
+
             # A regular user sub, or a user sub wrapping a
             # core sub.
 
             $sref = \&$sub;
             $proto = prototype $sref;
             $call = '&$sref';
+            require autodie::hints;
+
+            $hints = autodie::hints->get_hints_for( $sref );
+
+            # If we've insisted on hints, but don't have them, then
+            # bail out!
+
+            if ($insist and not $hints) {
+                croak(sprintf(ERROR_NOHINTS, $name));
+            }
+
+            # Otherwise, use the default hints if we don't have
+            # any.
+
+            $hints ||= autodie::hints::DEFAULT_HINTS();
 
         }
 
@@ -742,21 +924,31 @@ sub _make_fatal {
         # If we're fatalising system, then we need to load
         # helper code.
 
-        eval {
-            require IPC::System::Simple; # Only load it if we need it.
-            require autodie::exception::system;
-        };
+        # The business with $E is to avoid clobbering our caller's
+        # $@, and to avoid $@ being localised when we croak.
 
-        if ($@) { croak ERROR_NO_IPC_SYS_SIMPLE; }
+        my $E;
 
-            # Make sure we're using a recent version of ISS that actually
-            # support fatalised system.
-            if ($IPC::System::Simple::VERSION < MIN_IPC_SYS_SIMPLE_VER) {
-                croak sprintf(
-                ERROR_IPC_SYS_SIMPLE_OLD, MIN_IPC_SYS_SIMPLE_VER,
-                $IPC::System::Simple::VERSION
-                );
-            }
+        {
+            local $@;
+
+            eval {
+                require IPC::System::Simple; # Only load it if we need it.
+                require autodie::exception::system;
+            };
+            $E = $@;
+        }
+
+        if ($E) { croak ERROR_NO_IPC_SYS_SIMPLE; }
+
+        # Make sure we're using a recent version of ISS that actually
+        # support fatalised system.
+        if ($IPC::System::Simple::VERSION < MIN_IPC_SYS_SIMPLE_VER) {
+            croak sprintf(
+            ERROR_IPC_SYS_SIMPLE_OLD, MIN_IPC_SYS_SIMPLE_VER,
+            $IPC::System::Simple::VERSION
+            );
+        }
 
         $call = 'CORE::system';
         $name = 'system';
@@ -772,8 +964,13 @@ sub _make_fatal {
         $core = 1;
 
     } else {            # CORE subroutine
-        $proto = eval { prototype "CORE::$name" };
-        croak(sprintf(ERROR_NOT_BUILT,$name)) if $@;
+        my $E;
+        {
+            local $@;
+            $proto = eval { prototype "CORE::$name" };
+            $E = $@;
+        }
+        croak(sprintf(ERROR_NOT_BUILT,$name)) if $E;
         croak(sprintf(ERROR_CANT_OVERRIDE,$name)) if not defined $proto;
         $core = 1;
         $call = "CORE::$name";
@@ -813,7 +1010,7 @@ sub _make_fatal {
     $code .= "no warnings qw(exec);\n" if $call eq "CORE::exec";
 
     my @protos = fill_protos($proto);
-    $code .= $class->write_invocation($core, $call, $name, $void, $lexical, $sub, @protos);
+    $code .= $class->_write_invocation($core, $call, $name, $void, $lexical, $sub, $sref, @protos);
     $code .= "}\n";
     warn $code if $Debug;
 
@@ -827,18 +1024,18 @@ sub _make_fatal {
     # and filehandles.
 
     {
-        local $@;
         no strict 'refs'; ## no critic # to avoid: Can't use string (...) as a symbol ref ...
-        $code = eval("package $pkg; use Carp; $code");  ## no critic
+
+        my $E;
+
+        {
+            local $@;
+            $code = eval("package $pkg; use Carp; $code");  ## no critic
+            $E = $@;
+        }
+
         if (not $code) {
-
-            # For some reason, using a die, croak, or confess in here
-            # results in the error being completely surpressed. As such,
-            # we need to do our own reporting.
-            #
-            # TODO: Fix the above.
-
-            _autocroak("Internal error in autodie/Fatal processing $true_name: $@");
+            croak("Internal error in autodie/Fatal processing $true_name: $E");
 
         }
     }
@@ -906,16 +1103,28 @@ sub _make_fatal {
 
         # warn "$leak_guard\n";
 
-        local $@;
+        my $E;
+        {
+            local $@;
 
-        $leak_guard = eval $leak_guard;  ## no critic
+            $leak_guard = eval $leak_guard;  ## no critic
 
-        die "Internal error in $class: Leak-guard installation failure: $@" if $@;
+            $E = $@;
+        }
+
+        die "Internal error in $class: Leak-guard installation failure: $E" if $E;
     }
 
-    $class->_install_subs($pkg, { $name => $leak_guard || $code });
+    my $installed_sub = $leak_guard || $code;
 
-    $Cached_fatalised_sub{$class}{$sub}{$void}{$lexical} = $leak_guard || $code;
+    $class->_install_subs($pkg, { $name => $installed_sub });
+
+    $Cached_fatalised_sub{$class}{$sub}{$void}{$lexical} = $installed_sub;
+
+    # Cache that we've now overriddent this sub.  If we get called
+    # again, we may need to find that find subroutine again (eg, for hints).
+
+    $Is_fatalised_sub{$installed_sub} = $sref;
 
     return $sref;
 
@@ -1052,7 +1261,7 @@ values are ignored.  For example
     use Fatal qw/:void open close/;
 
     # properly checked, so no exception raised on error
-    if (not open(my $fh, '<' '/bogotic') {
+    if (not open(my $fh, '<', '/bogotic') {
         warn "Can't open /bogotic: $!";
     }
 
