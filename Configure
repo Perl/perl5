@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Jun 18 16:33:35 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Tue Jun 30 00:49:36 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21652,11 +21652,15 @@ find_extensions='
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
 	    if $test -d File-Glob; then
-		if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
+		$ls -1 $xxx > $$.tmp;
+		if $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $contains "\.c$" $$.tmp; then
 		    known_extensions="$known_extensions $this_ext";
 		elif $test -d $xxx; then
 		    nonxs_extensions="$nonxs_extensions $this_ext";
-		fi
+		fi;
+		$rm -f $$.tmp;
 	    else
 		if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
 		    known_extensions="$known_extensions $1$this_ext";
