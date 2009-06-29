@@ -732,6 +732,7 @@ XS(XS_version_qv)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     SP -= items;
     {
 	SV * ver = ST(0);
