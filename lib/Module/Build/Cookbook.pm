@@ -1,7 +1,7 @@
 package Module::Build::Cookbook;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 
 
 =head1 NAME
@@ -147,15 +147,15 @@ discussion of how installation paths are determined.
 =head2 Installing in the same location as ExtUtils::MakeMaker
 
 With the introduction of C<--prefix> in Module::Build 0.28 and
-C<INSTALL_BASE> in ExtUtils::MakeMaker 6.31 its easy to get them both
+C<INSTALL_BASE> in C<ExtUtils::MakeMaker> 6.31 its easy to get them both
 to install to the same locations.
 
 First, ensure you have at least version 0.28 of Module::Build
-installed and 6.31 of ExtUtils::MakeMaker.  Prior versions have
+installed and 6.31 of C<ExtUtils::MakeMaker>.  Prior versions have
 differing (and in some cases quite strange) installation behaviors.
 
 The following installation flags are equivalent between
-ExtUtils::MakeMaker and Module::Build.
+C<ExtUtils::MakeMaker> and C<Module::Build>.
 
     MakeMaker             Module::Build
     PREFIX=...            --prefix ...
@@ -168,7 +168,7 @@ ExtUtils::MakeMaker and Module::Build.
     INC=...               --extra_compiler_flags ...
     POLLUTE=1             --extra_compiler_flags -DPERL_POLLUTE
 
-For example, if you are currently installing MakeMaker modules with
+For example, if you are currently installing C<MakeMaker> modules with
 this command:
 
     perl Makefile.PL PREFIX=~
@@ -190,7 +190,7 @@ Perl on the same machine.  Because of this, it's difficult to document
 where C<prefix> will place your modules.
 
 In contrast, C<install_base> has predictable, easy to explain
-installation locations.  Now that Module::Build and MakeMaker both
+installation locations.  Now that C<Module::Build> and C<MakeMaker> both
 have C<install_base> there is little reason to use C<prefix> other
 than to preserve your existing installation locations.  If you are
 starting a fresh Perl installation we encourage you to use
@@ -381,7 +381,7 @@ John Peacock, author of the C<SVN-Notify-Mirror> distribution, says:
 modules are available - SVN::Notify::Config and Net::SSH;
 
 =item 2. If the S::N::Config module is loaded, I automatically
-generate testfiles for it during Build (using the C<PL_files>
+generate test files for it during Build (using the C<PL_files>
 property).
 
 =item 3. If the C<ssh_feature> is available, I ask if the user wishes
@@ -457,7 +457,7 @@ commit> to test your code and commit it to Subversion.
 =head2 Bundling Module::Build
 
 Note: This section probably needs an update as the technology improves
-(see scripts/bundle.pl in the distribution).
+(see contrib/bundle.pl in the distribution).
 
 Suppose you want to use some new-ish features of Module::Build,
 e.g. newer than the version of Module::Build your users are likely to

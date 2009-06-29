@@ -2,8 +2,9 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 
+use File::Basename ();
 use File::Spec;
 use IO::File;
 use Config;
@@ -38,14 +39,21 @@ my %makefile_to_build =
    # Convert INSTALLVENDORLIB and friends.
    (
        map {
-           my $name = "INSTALL".$_."LIB";
+           my $name = $_;
            $name => sub {
-                 my @ret = (config => { lc $name => shift });
+                 my @ret = (config => lc($name) . "=" . shift );
                  print STDERR "# Converted to @ret\n";
 
                  return @ret;
            }
-       } keys %convert_installdirs
+       } qw(
+         INSTALLARCHLIB  INSTALLSITEARCH     INSTALLVENDORARCH
+         INSTALLPRIVLIB  INSTALLSITELIB      INSTALLVENDORLIB
+         INSTALLBIN      INSTALLSITEBIN      INSTALLVENDORBIN
+         INSTALLSCRIPT   INSTALLSITESCRIPT   INSTALLVENDORSCRIPT
+         INSTALLMAN1DIR  INSTALLSITEMAN1DIR  INSTALLVENDORMAN1DIR
+         INSTALLMAN3DIR  INSTALLSITEMAN3DIR  INSTALLVENDORMAN3DIR
+       )
    ),
 
    # Some names they have in common
@@ -171,7 +179,7 @@ EOF
     %prereq = ( %{$build->requires}, %{$build->build_requires} );
     %prereq = map {$_, $prereq{$_}} sort keys %prereq;
     
-    delete $prereq{perl};
+     delete $prereq{perl};
     $MM_Args{PREREQ_PM} = \%prereq;
     
     $MM_Args{INSTALLDIRS} = $build->installdirs eq 'core' ? 'perl' : $build->installdirs;
@@ -179,7 +187,11 @@ EOF
     $MM_Args{EXE_FILES} = [ sort keys %{$build->script_files} ] if $build->script_files;
     
     $MM_Args{PL_FILES} = $build->PL_files || {};
-    
+
+    if ($build->recursive_test_files) {
+        $MM_Args{TESTS} = join q{ }, $package->_test_globs($build);
+    }
+
     local $Data::Dumper::Terse = 1;
     my $args = Data::Dumper::Dumper(\%MM_Args);
     $args =~ s/\{(.*)\}/($1)/s;
@@ -192,6 +204,12 @@ EOF
   }
 }
 
+sub _test_globs {
+  my ($self, $build) = @_;
+
+  return map { File::Spec->catfile($_, '*.t') }
+         @{$build->rscan_dir('t', sub { -d $File::Find::name })};
+}
 
 sub subclass_dir {
   my ($self, $build) = @_;
@@ -242,14 +260,30 @@ sub _argvify {
 
 sub makefile_to_build_macros {
   my @out;
+  my %config; # must accumulate and return as a hashref
   while (my ($macro, $trans) = each %macro_to_build) {
     # On some platforms (e.g. Cygwin with 'make'), the mere presence
     # of "EXPORT: FOO" in the Makefile will make $ENV{FOO} defined.
     # Therefore we check length() too.
     next unless exists $ENV{$macro} && length $ENV{$macro};
     my $val = $ENV{$macro};
-    push @out, ref($trans) ? $trans->($val) : ($trans => $val);
+    my @args = ref($trans) ? $trans->($val) : ($trans => $val);
+    while (@args) {
+      my ($k, $v) = splice(@args, 0, 2);
+      if ( $k eq 'config' ) {
+        if ( $v =~ /^([^=]+)=(.*)$/ ) {
+          $config{$1} = $2;
+        }
+        else {
+          warn "Couldn't parse config '$v'\n";
+        }
+      }
+      else {
+        push @out, ($k => $v);
+      }
+    }
   }
+  push @out, (config => \%config) if %config; 
   return @out;
 }
 
@@ -364,6 +398,7 @@ sub _is_vms_mms {
 1;
 __END__
 
+=for :stopwords passthrough
 
 =head1 NAME
 
@@ -383,15 +418,15 @@ Module::Build::Compat - Compatibility with ExtUtils::MakeMaker
 
 =head1 DESCRIPTION
 
-Because ExtUtils::MakeMaker has been the standard way to distribute
+Because C<ExtUtils::MakeMaker> has been the standard way to distribute
 modules for a long time, many tools (CPAN.pm, or your system
-administrator) may expect to find a working Makefile.PL in every
+administrator) may expect to find a working F<Makefile.PL> in every
 distribution they download from CPAN.  If you want to throw them a
-bone, you can use Module::Build::Compat to automatically generate a
-Makefile.PL for you, in one of several different styles.
+bone, you can use C<Module::Build::Compat> to automatically generate a
+F<Makefile.PL> for you, in one of several different styles.
 
-Module::Build::Compat also provides some code that helps out the
-Makefile.PL at runtime.
+C<Module::Build::Compat> also provides some code that helps out the
+F<Makefile.PL> at runtime.
 
 
 =head1 METHODS
@@ -400,11 +435,11 @@ Makefile.PL at runtime.
 
 =item create_makefile_pl($style, $build)
 
-Creates a Makefile.PL in the current directory in one of several
-styles, based on the supplied Module::Build object C<$build>.  This is
+Creates a F<Makefile.PL> in the current directory in one of several
+styles, based on the supplied C<Module::Build> object C<$build>.  This is
 typically controlled by passing the desired style as the
-C<create_makefile_pl> parameter to Module::Build's C<new()> method;
-the Makefile.PL will then be automatically created during the
+C<create_makefile_pl> parameter to C<Module::Build>'s C<new()> method;
+the F<Makefile.PL> will then be automatically created during the
 C<distdir> action.
 
 The currently supported styles are:
@@ -413,37 +448,37 @@ The currently supported styles are:
 
 =item small
 
-A small Makefile.PL will be created that passes all functionality
-through to the Build.PL script in the same directory.  The user must
-already have Module::Build installed in order to use this, or else
+A small F<Makefile.PL> will be created that passes all functionality
+through to the F<Build.PL> script in the same directory.  The user must
+already have C<Module::Build> installed in order to use this, or else
 they'll get a module-not-found error.
 
 =item passthrough
 
-This is just like the C<small> option above, but if Module::Build is
+This is just like the C<small> option above, but if C<Module::Build> is
 not already installed on the user's system, the script will offer to
 use C<CPAN.pm> to download it and install it before continuing with
 the build.
 
 =item traditional
 
-A Makefile.PL will be created in the "traditional" style, i.e. it will
+A F<Makefile.PL> will be created in the "traditional" style, i.e. it will
 use C<ExtUtils::MakeMaker> and won't rely on C<Module::Build> at all.
-In order to create the Makefile.PL, we'll include the C<requires> and
+In order to create the F<Makefile.PL>, we'll include the C<requires> and
 C<build_requires> dependencies as the C<PREREQ_PM> parameter.
 
 You don't want to use this style if during the C<perl Build.PL> stage
 you ask the user questions, or do some auto-sensing about the user's
-environment, or if you subclass Module::Build to do some
-customization, because the vanilla Makefile.PL won't do any of that.
+environment, or if you subclass C<Module::Build> to do some
+customization, because the vanilla F<Makefile.PL> won't do any of that.
 
 =back
 
 =item run_build_pl(args => \@ARGV)
 
-This method runs the Build.PL script, passing it any arguments the
+This method runs the F<Build.PL> script, passing it any arguments the
 user may have supplied to the C<perl Makefile.PL> command.  Because
-ExtUtils::MakeMaker and Module::Build accept different arguments, this
+C<ExtUtils::MakeMaker> and C<Module::Build> accept different arguments, this
 method also performs some translation between the two.
 
 C<run_build_pl()> accepts the following named parameters:
@@ -464,8 +499,8 @@ This is the filename of the script to run - it defaults to C<Build.PL>.
 
 =item write_makefile()
 
-This method writes a 'dummy' Makefile that will pass all commands
-through to the corresponding Module::Build actions.
+This method writes a 'dummy' F<Makefile> that will pass all commands
+through to the corresponding C<Module::Build> actions.
 
 C<write_makefile()> accepts the following named parameters:
 
@@ -488,10 +523,10 @@ So, some common scenarios are:
 
 =item 1.
 
-Just include a Build.PL script (without a Makefile.PL
-script), and give installation directions in a README or INSTALL
+Just include a F<Build.PL> script (without a F<Makefile.PL>
+script), and give installation directions in a F<README> or F<INSTALL>
 document explaining how to install the module.  In particular, explain
-that the user must install Module::Build before installing your
+that the user must install C<Module::Build> before installing your
 module.
 
 Note that if you do this, you may make things easier for yourself, but
@@ -501,10 +536,10 @@ F<Makefile.PL>/C<ExtUtils::MakeMaker> way of doing things.
 
 =item 2.
 
-Include a Build.PL script and a "traditional" Makefile.PL,
+Include a F<Build.PL> script and a "traditional" F<Makefile.PL>,
 created either manually or with C<create_makefile_pl()>.  Users won't
-ever have to install Module::Build if they use the Makefile.PL, but
-they won't get to take advantage of Module::Build's extra features
+ever have to install C<Module::Build> if they use the F<Makefile.PL>, but
+they won't get to take advantage of C<Module::Build>'s extra features
 either.
 
 For good measure, of course, test both the F<Makefile.PL> and the
@@ -512,8 +547,8 @@ F<Build.PL> before shipping.
 
 =item 3.
 
-Include a Build.PL script and a "pass-through" Makefile.PL
-built using Module::Build::Compat.  This will mean that people can
+Include a F<Build.PL> script and a "pass-through" F<Makefile.PL>
+built using C<Module::Build::Compat>.  This will mean that people can
 continue to use the "old" installation commands, and they may never
 notice that it's actually doing something else behind the scenes.  It
 will also mean that your installation process is compatible with older

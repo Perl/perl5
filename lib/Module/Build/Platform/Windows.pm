@@ -2,7 +2,7 @@ package Module::Build::Platform::Windows;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 $VERSION = eval $VERSION;
 
 use Config;
@@ -37,12 +37,13 @@ sub ACTION_realclean {
   my $basename = basename($0);
   $basename =~ s/(?:\.bat)?$//i;
 
-  if ( $basename eq $self->build_script ) {
+  if ( lc $basename eq lc $self->build_script ) {
     if ( $self->build_bat ) {
+      $self->log_info("Deleting $basename.bat\n");
       my $full_progname = $0;
       $full_progname =~ s/(?:\.bat)?$/.bat/i;
 
-      # Vodoo required to have a batch file delete itself without error;
+      # Voodoo required to have a batch file delete itself without error;
       # Syntax differs between 9x & NT: the later requires a null arg (???)
       require Win32;
       my $null_arg = (Win32::IsWinNT()) ? '""' : '';
@@ -89,7 +90,7 @@ sub make_executable {
 }
 
 # This routine was copied almost verbatim from the 'pl2bat' utility
-# distributed with perl. It requires too much vodoo with shell quoting
+# distributed with perl. It requires too much voodoo with shell quoting
 # differences and shortcomings between the various flavors of Windows
 # to reliably shell out
 sub pl2bat {

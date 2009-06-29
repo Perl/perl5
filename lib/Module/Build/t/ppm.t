@@ -6,6 +6,7 @@ use MBTest;
 
 use Module::Build;
 use Module::Build::ConfigData;
+use Config;
 
 my $manpage_support = Module::Build::ConfigData->feature('manpage_support');
 my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
@@ -16,6 +17,8 @@ my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
     plan skip_all => 'C_support not enabled';
   } elsif ( ! $have_c_compiler ) {
     plan skip_all => 'C_support enabled, but no compiler found';
+  } elsif ( !$Config{usedl} ) {
+    plan skip_all => 'Perl not compiled for dynamic loading'
   } elsif ( ! eval {require Archive::Tar} ) {
     plan skip_all => "Archive::Tar not installed to read archives.";
   } elsif ( ! eval {IO::Zlib->VERSION(1.01)} ) {

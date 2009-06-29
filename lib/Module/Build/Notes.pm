@@ -4,7 +4,7 @@ package Module::Build::Notes;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 $VERSION = eval $VERSION;
 use Data::Dumper;
 use IO::File;
@@ -186,6 +186,7 @@ sub feature {
     while (my ($modname, $spec) = each %%p) {
       my $status = Module::Build->check_installed_status($modname, $spec);
       if ((!$status->{ok}) xor ($type =~ /conflicts$/)) { return 0; }
+      if ( ! eval "require $modname; 1" ) { return 0; }
     }
   }
   return 1;

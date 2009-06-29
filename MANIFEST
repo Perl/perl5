@@ -2624,6 +2624,7 @@ lib/Module/Build/t/moduleinfo.t	Module::Build
 lib/Module/Build/t/new_from_context.t	Module::Build
 lib/Module/Build/t/notes.t	Module::Build
 lib/Module/Build/t/parents.t	Module::Build
+lib/Module/Build/t/PL_files.t	Module::Build tests
 lib/Module/Build/t/pod_parser.t	Module::Build
 lib/Module/Build/t/ppm.t	Module::Build
 lib/Module/Build/t/runthrough.t	Module::Build
@@ -2634,6 +2635,7 @@ lib/Module/Build/t/test_type.t	Module::Build
 lib/Module/Build/t/tilde.t	Module::Build
 lib/Module/Build/t/use_tap_harness.t	Module::Build
 lib/Module/Build/t/versions.t	Module::Build
+lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
 lib/Module/Build/t/xs.t		Module::Build
 lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build

@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 51;
+use MBTest tests => 53;
 
 use_ok 'Module::Build';
 ensure_blib('Module::Build');
@@ -64,6 +64,7 @@ my $mb = Module::Build->new_from_context;
 # Test for valid META.yml
 
 {
+  my $mb_prereq = { 'Module::Build' => $Module::Build::VERSION };
   my $node = $mb->prepare_metadata( {} );
 
   # exists() doesn't seem to work here
@@ -72,6 +73,7 @@ my $mb = Module::Build->new_from_context;
   is $node->{abstract}, $metadata{dist_abstract};
   is_deeply $node->{author}, $metadata{dist_author};
   is $node->{license}, $metadata{license};
+  is_deeply $node->{configure_requires}, $mb_prereq, 'Add M::B to configure_requires';
   like $node->{generated_by}, qr{Module::Build};
   ok defined( $node->{'meta-spec'}{version} ),
       "'meta-spec' -> 'version' field present in META.yml";
@@ -79,6 +81,16 @@ my $mb = Module::Build->new_from_context;
       "'meta-spec' -> 'url' field present in META.yml";
   is_deeply $node->{keywords}, $metadata{meta_add}{keywords};
   is_deeply $node->{resources}, $metadata{meta_add}{resources};
+}
+
+{
+  my $mb_prereq = { 'Module::Build' => 0 };
+  $mb->configure_requires( $mb_prereq );
+  my $node = $mb->prepare_metadata( {} );
+
+
+  # exists() doesn't seem to work here
+  is_deeply $node->{configure_requires}, $mb_prereq, 'Add M::B to configure_requires';
 }
 
 $dist->clean;
@@ -165,8 +177,8 @@ $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 ---
   $dist->regen;
   my $provides = new_build()->prepare_metadata()->{provides};
-  is $provides->{'Simple'}{version}, '0.60.128', "Check version";
-  is $provides->{'Simple::Simon'}{version}, '0.61.129', "Check version";
+  is $provides->{'Simple'}{version}, 'v0.60.128', "Check version";
+  is $provides->{'Simple::Simon'}{version}, 'v0.61.129', "Check version";
   is ref($provides->{'Simple'}{version}), '', "Versions from prepare_metadata() aren't refs";
   is ref($provides->{'Simple::Simon'}{version}), '', "Versions from prepare_metadata() aren't refs";
 }

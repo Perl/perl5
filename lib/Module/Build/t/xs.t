@@ -4,6 +4,7 @@ use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
 use MBTest;
 use Module::Build;
+use Config;
 
 {
   my ($have_c_compiler, $C_support_feature) = check_compiler();
@@ -14,6 +15,8 @@ use Module::Build;
     plan skip_all => 'C_support enabled, but no compiler found';
   } elsif ( $^O eq 'VMS' ) {
     plan skip_all => 'Child test output confuses harness';
+  } elsif ( !$Config{usedl} ) {
+    plan skip_all => 'Perl not compiled for dynamic loading'
   } else {
     plan tests => 23;
   }
