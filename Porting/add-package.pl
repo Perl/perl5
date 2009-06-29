@@ -12,7 +12,7 @@ getopts( 'r:p:e:vudn', $Opts );
 
 my $Cwd         = cwd(); 
 my $Verbose     = 1;
-my $ExcludeRe   = $Opts->{e} ? qr/$Opts->{e}/ : undef;
+my $ExcludeRe   = $Opts->{e} ? qr/$Opts->{e}/i : undef;
 my $Debug       = $Opts->{v} || 0;
 my $RunDiff     = $Opts->{d} || 0;
 my $PkgDir      = $Opts->{p} || cwd();
@@ -439,7 +439,7 @@ my @ChangedFiles;
 
     push @manifest, values %pkg_files;
 
-    {   chmod 0755, $file;
+    {   chmod 0644, $file;
         open my $fh, ">$file" or die "Could not open $file for writing: $!";
         #print $fh sort { lc $a cmp lc $b } @manifest;
         ### XXX stolen from pod/buildtoc:sub do_manifest
