@@ -9,12 +9,22 @@ BEGIN {
   }
 }
 use strict;
-use Test;
-BEGIN { plan tests => 24 };
+use Test::More;
+use Config;
 use DynaLoader;
-use ExtUtils::ParseXS qw(process_file);
 use ExtUtils::CBuilder;
-ok(1); # If we made it this far, we're loaded.
+
+if ( $] < 5.008 ) {
+  plan skip_all => "INTERFACE keyword support broken before 5.8";
+}
+else {
+  plan tests => 24;
+}
+
+my ($source_file, $obj_file, $lib_file, $module);
+
+require_ok( 'ExtUtils::ParseXS' );
+ExtUtils::ParseXS->import('process_file');
 
 chdir 't' or die "Can't chdir to t/, $!";
 
@@ -22,30 +32,37 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
 #########################
 
-my $source_file = 'XSUsage.c';
+$source_file = 'XSUsage.c';
 
 # Try sending to file
 process_file(filename => 'XSUsage.xs', output => $source_file);
-ok -e $source_file, 1, "Create an output file";
+ok -e $source_file, "Create an output file";
 
 # TEST doesn't like extraneous output
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 
 # Try to compile the file!  Don't get too fancy, though.
 my $b = ExtUtils::CBuilder->new(quiet => $quiet);
-if ($b->have_compiler) {
-  my $module = 'XSUsage';
 
-  my $obj_file = $b->compile( source => $source_file );
+SKIP: {
+  skip "no compiler available", 2
+    if ! $b->have_compiler;
+  $module = 'XSUsage';
+
+  $obj_file = $b->compile( source => $source_file );
   ok $obj_file;
-  ok -e $obj_file, 1, "Make sure $obj_file exists";
+  ok -e $obj_file, "Make sure $obj_file exists";
+}
+SKIP: {
+  skip "no dynamic loading", 20 
+    if !$b->have_compiler || !$Config{usedl};
 
-  my $lib_file = $b->link( objects => $obj_file, module_name => $module );
+  $lib_file = $b->link( objects => $obj_file, module_name => $module );
   ok $lib_file;
-  ok -e $lib_file, 1, "Make sure $lib_file exists";
+  ok -e $lib_file, "Make sure $lib_file exists";
 
   eval {require XSUsage};
-  ok $@, '';
+  is $@, '';
 
   # The real tests here - for each way of calling the functions, call with the
   # wrong number of arguments and check the Usage line is what we expect
@@ -97,10 +114,12 @@ if ($b->have_compiler) {
       }
     }
   }
-  1 while unlink $obj_file;
-  1 while unlink $lib_file;
-} else {
-  skip "Skipped can't find a C compiler & linker", 1 for 3 .. 24;
 }
 
-1 while unlink $source_file;
+unless ($ENV{PERL_NO_CLEANUP}) {
+  for ( $obj_file, $lib_file, $source_file) {
+    next unless defined $_;
+    1 while unlink $_;
+  }
+}
+

@@ -731,7 +731,7 @@ package Maintainers;
     'ExtUtils::ParseXS' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.19_03.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.19_04.tar.gz',
 	'FILES'		=> q[lib/ExtUtils/ParseXS.pm
 			     lib/ExtUtils/ParseXS
 			     lib/ExtUtils/xsubpp
