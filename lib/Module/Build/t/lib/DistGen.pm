@@ -19,11 +19,31 @@ use IO::File ();
 use Tie::CPHash;
 use Data::Dumper;
 
+my $vms_mode;
+my $vms_lower_case;
+
 BEGIN {
+  $vms_mode = 0;
+  $vms_lower_case = 0;
   if( $^O eq 'VMS' ) {
     # For things like vmsify()
     require VMS::Filespec;
     VMS::Filespec->import;
+    $vms_mode = 1;
+    $vms_lower_case = 1;
+    my $vms_efs_case = 0;
+    my $unix_rpt = 0;
+    if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+        $unix_rpt = VMS::Feature::current("filename_unix_report");
+        $vms_efs_case = VMS::Feature::current("efs_case_preserve");
+    } else {
+        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
+        $vms_efs_case = $efs_case =~ /^[ET1]/i;
+    }
+    $vms_mode = 0 if $unix_rpt;
+    $vms_lower_case = 0 if $vms_efs_case;
   }
 }
 BEGIN {
@@ -258,8 +278,8 @@ sub regen {
   if ( $opts{clean} ) {
     $self->clean() if -d $dist_dirname;
   } else {
-    # TODO: This might leave dangling directories. Eg if the removed file
-    # is 'lib/Simple/Simon.pm', The directory 'lib/Simple' will be left
+    # TODO: This might leave dangling directories; e.g. if the removed file
+    # is 'lib/Simple/Simon.pm', the directory 'lib/Simple' will be left
     # even if there are no files left in it. However, clean() will remove it.
     my @files = keys %{$self->{pending}{remove}};
     foreach my $file ( @files ) {
@@ -330,6 +350,7 @@ sub clean {
   tie %names, 'Tie::CPHash';
   foreach my $file ( keys %{$self->{filedata}} ) {
     my $filename = $self->_real_filename( $file );
+    $filename = lc($filename) if $vms_lower_case;
     my $dirname = File::Basename::dirname( $filename );
 
     $names{$filename} = 0;
@@ -351,9 +372,13 @@ sub clean {
   File::Find::finddepth( sub {
     my $name = File::Spec->canonpath( $File::Find::name );
 
+    if ($vms_mode) {
+        if ($name ne '.') {
+            $name =~ s/\.\z//;
+            $name = vmspath($name) if -d $name;
+        }
+    }
     if ($^O eq 'VMS') {
-        $name =~ s/\.\z//;
-        $name = vmspath($name) if -d $name;
         $name = File::Spec->rel2abs($name) if $name eq File::Spec->curdir();
     }
 
@@ -361,7 +386,7 @@ sub clean {
       print "Removing '$name'\n" if $VERBOSE;
       File::Path::rmtree( $_ );
     }
-  }, ($^O eq "VMS" ? './' : File::Spec->curdir) );
+  }, ($^O eq 'VMS' ? './' : File::Spec->curdir) );
 
   chdir( $here );
 }
@@ -573,7 +598,7 @@ Removes the entire distribution directory.
 =head2 Editing Files
 
 Note that C<$filename> should always be specified with unix-style paths,
-and are relative to the distribution root directory. Eg 'lib/Module.pm'
+and are relative to the distribution root directory, e.g. C<lib/Module.pm>.
 
 No filesystem action is performed until the distribution is regenerated.
 

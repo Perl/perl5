@@ -213,13 +213,14 @@ ok $mb, "Module::Build->new_from_context";
        'Should be non-verbose';
 
   (my $libdir2 = $libdir) =~ s/libdir/lbiidr/;
+  my $libarch2 = File::Spec->catdir($libdir2, 'arch');
 
   SKIP: {
     require ExtUtils::Install;
     skip "Needs ExtUtils::Install 1.32 or later", 2
       if ExtUtils::Install->VERSION < 1.32;
 
-    my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2");
+    my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2", "INSTALLVENDORARCH=$libarch2");
 
     if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
       $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
@@ -267,6 +268,25 @@ ok $mb, "Module::Build->new_from_context";
 
   1 while unlink 'Makefile.PL';
   ok ! -e 'Makefile.PL', "Makefile.PL cleaned up";
+}
+
+{
+  $dist->add_file('t/deep/foo.t', q{});
+  $dist->regen;
+
+  my $mb;
+  stdout_of( sub {
+      $mb = Module::Build->new_from_context( recursive_test_files => 1 );
+  });
+
+  create_makefile_pl('traditional', $mb);
+  my $args = extract_writemakefile_args() || {};
+  is $args->{TESTS}, 
+    join( q{ }, 
+      File::Spec->catfile(qw(t *.t)),
+      File::Spec->catfile(qw(t deep *.t))
+    ),
+    'Makefile.PL has correct TESTS line for recursive test files';
 }
 
 # cleanup

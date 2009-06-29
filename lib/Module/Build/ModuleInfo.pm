@@ -8,7 +8,7 @@ package Module::Build::ModuleInfo;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -29,7 +29,7 @@ my $VARNAME_REGEXP = qr{ # match fully-qualified VERSION name
   ([\$*])         # sigil - $ or *
   (
     (             # optional leading package name
-      (?:::|\')?  # possibly starting like just :: (ala $::VERSION)
+      (?:::|\')?  # possibly starting like just :: (Ì  la $::VERSION)
       (?:\w+(?:::|\'))*  # Foo::Bar:: ...
     )?
     VERSION
@@ -252,7 +252,7 @@ EOM
 	$vers{$pkg} = $v;
 	push( @pkgs, 'main' );
 
-      # first non-comement line in undeclared packge defines package main
+      # first non-comment line in undeclared package defines package main
       } elsif ( !exists($vers{main}) && $pkg eq 'main' && $line =~ /\w+/ ) {
 	$need_vers = 1;
 	$vers{main} = '';
@@ -371,9 +371,11 @@ sub pod {
 
 __END__
 
+=for :stopwords ModuleInfo
+
 =head1 NAME
 
-ModuleInfo - Gather package and POD information from a perl module files
+ModuleInfo - Gather package and POD information from a perl module file
 
 
 =head1 DESCRIPTION
@@ -382,16 +384,16 @@ ModuleInfo - Gather package and POD information from a perl module files
 
 =item new_from_file($filename, collect_pod => 1)
 
-Construct a ModuleInfo object given the path to a file. Takes an optional
-arguement C<collect_pod> which is a boolean that determines whether
+Construct a C<ModuleInfo> object given the path to a file. Takes an optional
+argument C<collect_pod> which is a boolean that determines whether
 POD data is collected and stored for reference. POD data is not
 collected by default. POD headings are always collected.
 
 =item new_from_module($module, collect_pod => 1, inc => \@dirs)
 
-Construct a ModuleInfo object given a module or package name. In addition
+Construct a C<ModuleInfo> object given a module or package name. In addition
 to accepting the C<collect_pod> argument as described above, this
-method accepts a C<inc> arguemnt which is a reference to an array of
+method accepts a C<inc> argument which is a reference to an array of
 of directories to search for the module. If none are given, the
 default is @INC.
 
@@ -432,7 +434,7 @@ Returns the POD data in the given section.
 =item find_module_by_name($module, \@dirs)
 
 Returns the path to a module given the module or package name. A list
-of directories can be passed in as an optional paramater, otherwise
+of directories can be passed in as an optional parameter, otherwise
 @INC is searched.
 
 Can be called as either an object or a class method.
@@ -441,7 +443,7 @@ Can be called as either an object or a class method.
 
 Returns the entry in C<@dirs> (or C<@INC> by default) that contains
 the module C<$module>. A list of directories can be passed in as an
-optional paramater, otherwise @INC is searched.
+optional parameter, otherwise @INC is searched.
 
 Can be called as either an object or a class method.
 

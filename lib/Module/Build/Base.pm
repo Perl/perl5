@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -165,9 +165,14 @@ sub _construct {
   $p->{requires} = delete $p->{prereq} if defined $p->{prereq};
   $p->{script_files} = delete $p->{scripts} if defined $p->{scripts};
 
-  # Convert to arrays
+  # Convert to from shell strings to arrays
   for ('extra_compiler_flags', 'extra_linker_flags') {
     $p->{$_} = [ $self->split_like_shell($p->{$_}) ] if exists $p->{$_};
+  }
+
+  # Convert to arrays
+  for ('include_dirs') {
+    $p->{$_} = [ $p->{$_} ] if exists $p->{$_} && !ref $p->{$_}
   }
 
   $self->add_to_cleanup( @{delete $p->{add_to_cleanup}} )
@@ -409,7 +414,7 @@ sub _perl_is_same {
   }
 }
 
-# Returns the absolute path of the perl interperter used to invoke
+# Returns the absolute path of the perl interpreter used to invoke
 # this process. The path is derived from $^X or $Config{perlpath}. On
 # some platforms $^X contains the complete absolute path of the
 # interpreter, on other it may contain a relative path, or simply
@@ -819,6 +824,7 @@ sub _make_accessor {
 ########################################################################
 
 # Add the default properties.
+__PACKAGE__->add_property(auto_configure_requires => 1);
 __PACKAGE__->add_property(blib => 'blib');
 __PACKAGE__->add_property(build_class => 'Module::Build');
 __PACKAGE__->add_property(build_elements => [qw(PL support pm xs pod script)]);
@@ -1070,11 +1076,11 @@ sub _pod_parse {
   return $p->{$member} = $parser->$method();
 }
 
-sub version_from_file { # Method provided for backwards compatability
+sub version_from_file { # Method provided for backwards compatibility
   return Module::Build::ModuleInfo->new_from_file($_[1])->version();
 }
 
-sub find_module_by_name { # Method provided for backwards compatability
+sub find_module_by_name { # Method provided for backwards compatibility
   return Module::Build::ModuleInfo->find_module_by_name(@_[1,2]);
 }
 
@@ -1585,9 +1591,14 @@ sub _call_action {
   return if $self->{_completed_actions}{$action}++;
 
   local $self->{action} = $action;
-  my $method = "ACTION_$action";
-  die "No action '$action' defined, try running the 'help' action.\n" unless $self->can($method);
+  my $method = $self->can_action( $action );
+  die "No action '$action' defined, try running the 'help' action.\n" unless $method;
   return $self->$method();
+}
+
+sub can_action {
+  my ($self, $action) = @_;
+  return $self->can( "ACTION_$action" );
 }
 
 # cuts the user-specified options out of the command-line args
@@ -1691,7 +1702,7 @@ sub _read_arg {
   }
 }
 
-# decide whether or not an option requires/has an opterand
+# decide whether or not an option requires/has an operand
 sub _optional_arg {
   my $self = shift;
   my $opt  = shift;
@@ -1760,6 +1771,11 @@ sub read_args {
     $args{$_} = [ $self->split_like_shell($args{$_}) ] if exists $args{$_};
   }
 
+  # Convert to arrays
+  for ('include_dirs') {
+    $args{$_} = [ $args{$_} ] if exists $args{$_} && !ref $args{$_}
+  }
+
   # Hashify these parameters
   for ($self->hash_properties, 'config') {
     next unless exists $args{$_};
@@ -1786,7 +1802,7 @@ sub read_args {
     for my $subkey (keys %{$args{$key}}) {
       next if !defined $args{$key}{$subkey};
       my $subkey_ext = $self->_detildefy($args{$key}{$subkey});
-      if ( $subkey eq 'html' ) { # translate for compatability
+      if ( $subkey eq 'html' ) { # translate for compatibility
 	$args{$key}{binhtml} = $subkey_ext;
 	$args{$key}{libhtml} = $subkey_ext;
       } else {
@@ -2062,7 +2078,7 @@ sub ACTION_prereq_data {
 
 sub prereq_data {
   my $self = shift;
-  my @types = @{ $self->prereq_action_types };
+  my @types = ('configure_requires', @{ $self->prereq_action_types } );
   my $info = { map { $_ => $self->$_() } grep { %{$self->$_()} } @types };
   return $info;
 }
@@ -2617,7 +2633,8 @@ sub ACTION_testpod {
                               exclude => [ file_qr('\.bat$') ])}
     or die "Couldn't find any POD files to test\n";
 
-  { package Module::Build::PodTester;  # Don't want to pollute the main namespace
+  { package # hide from PAUSE
+      Module::Build::PodTester;  # Don't want to pollute the main namespace
     Test::Pod->import( tests => scalar @files );
     pod_file_ok($_) foreach @files;
   }
@@ -2869,7 +2886,8 @@ sub htmlify_pods {
 
     $self->log_info("HTMLifying $infile -> $outfile\n");
     $self->log_verbose("pod2html @opts\n");
-    Pod::Html::pod2html(@opts);	# or warn "pod2html @opts failed: $!";
+    eval { Pod::Html::pod2html(@opts); 1 } 
+      or $self->log_warn("pod2html @opts failed: $@");
   }
 
 }
@@ -3202,7 +3220,7 @@ sub do_create_makefile_pl {
 
 sub do_create_license {
   my $self = shift;
-  $self->log_info("Creating LICENSE file");
+  $self->log_info("Creating LICENSE file\n");
 
   my $l = $self->license
     or die "No license specified";
@@ -3340,35 +3358,81 @@ sub ACTION_disttest {
       });
 }
 
+
+=begin private
+
+  my $has_include = $build->_eumanifest_has_include;
+
+Returns true if the installed version of ExtUtils::Manifest supports
+#include and #include_default directives.  False otherwise.
+
+=end private
+
+=cut
+
+# #!include and #!include_default were added in 1.50
+sub _eumanifest_has_include {
+    my $self = shift;
+
+    require ExtUtils::Manifest;
+    return ExtUtils::Manifest->VERSION >= 1.50 ? 1 : 0;
+    return 0;
+}
+
+
+=begin private
+
+  my $maniskip_file = $build->_default_maniskip;
+
+Returns the location of the installed MANIFEST.SKIP file used by
+default.
+
+=end private
+
+=cut
+
+sub _default_maniskip {
+    my $self = shift;
+
+    my $default_maniskip;
+    for my $dir (@INC) {
+        $default_maniskip = File::Spec->catfile($dir, "ExtUtils", "MANIFEST.SKIP");
+        last if -r $default_maniskip;
+    }
+
+    return $default_maniskip;
+}
+
+
+=begin private
+
+  my $content = $build->_slurp($file);
+
+Reads $file and returns the $content.
+
+=end private
+
+=cut
+
+sub _slurp {
+    my $self = shift;
+    my $file = shift;
+    open my $fh, "<", $file or croak "Can't open $file: $!";
+    local $/;
+    return <$fh>;
+}
+
+
 sub _write_default_maniskip {
   my $self = shift;
   my $file = shift || 'MANIFEST.SKIP';
   my $fh = IO::File->new("> $file")
     or die "Can't open $file: $!";
 
-  # This is derived from MakeMaker's default MANIFEST.SKIP file with
-  # some new entries
+  my $content = $self->_eumanifest_has_include ? "#!include_default\n"
+                                               : $self->_slurp( $self->_default_maniskip );
 
-  print $fh <<'EOF';
-# Avoid version control files.
-\bRCS\b
-\bCVS\b
-,v$
-\B\.svn\b
-\B\.cvsignore$
-
-# Avoid Makemaker generated and utility files.
-\bMakefile$
-\bblib
-\bMakeMaker-\d
-\bpm_to_blib$
-\bblibdirs$
-^MANIFEST\.SKIP$
-
-# Avoid VMS specific Makmaker generated files
-\bDescrip.MMS$
-\bDESCRIP.MMS$
-\bdescrip.mms$
+  $content .= <<'EOF';
 
 # Avoid Module::Build generated and utility files.
 \bBuild$
@@ -3378,30 +3442,15 @@ sub _write_default_maniskip {
 \bBUILD.COM$
 \bbuild.com$
 
-# Avoid Devel::Cover generated files
-\bcover_db
-
-# Avoid temp and backup files.
-~$
-\.tmp$
-\.old$
-\.bak$
-\#$
-\.#
-\.rej$
-
-# Avoid OS-specific files/dirs
-#   Mac OSX metadata
-\B\.DS_Store
-#   Mac OSX SMB mount metadata files
-\B\._
 # Avoid archives of this distribution
 EOF
 
   # Skip, for example, 'Module-Build-0.27.tar.gz'
-  print $fh '\b'.$self->dist_name.'-[\d\.\_]+'."\n";
+  $content .= '\b'.$self->dist_name.'-[\d\.\_]+'."\n";
 
-  $fh->close();
+  print $fh $content;
+
+  return;
 }
 
 sub ACTION_manifest {
@@ -3418,7 +3467,7 @@ sub ACTION_manifest {
   ExtUtils::Manifest::mkmanifest();
 }
 
-# Case insenstive regex for files
+# Case insensitive regex for files
 sub file_qr {
     return File::Spec->case_tolerant ? qr($_[0])i : qr($_[0]);
 }
@@ -3466,7 +3515,9 @@ sub script_files {
     return $_ = {$_ => 1};
   }
   
-  return $_ = { map {$_,1} $self->_files_in('bin') };
+  my %pl_files = map { File::Spec->canonpath($_) => 1 }
+                 keys %{ $self->PL_files || {} };
+  return $_ = { map {$_ => 1} grep !$pl_files{$_}, $self->_files_in('bin') };
 }
 BEGIN { *scripts = \&script_files; }
 
@@ -3620,9 +3671,7 @@ sub normalize_version {
   }
   elsif ( ref $version eq 'version' || 
           ref $version eq 'Module::Build::Version' ) { # version objects
-    my $string = $version->stringify;
-    # normalize leading-v: "v1.2" -> "v1.2.0"
-    $version = substr($string,0,1) eq 'v' ? $version->normal : $string;
+    $version = $version->is_qv ? $version->normal : $version->stringify;
   }
   elsif ( $version =~ /^[^v][^.]*\.[^.]+\./ ) { # no leading v, multiple dots
     # normalize string tuples without "v": "1.2.3" -> "v1.2.3"
@@ -3670,15 +3719,6 @@ sub prepare_metadata {
     # XXX we are silently omitting the url for any unknown license
   }
 
-  if (exists $p->{configure_requires}) {
-    foreach my $spec (keys %{$p->{configure_requires}}) {
-      warn ("Warning: $spec is listed in 'configure_requires', but ".
-            "it is not found in any of the other prereq fields.\n")
-        unless grep exists $p->{$_}{$spec}, 
-              grep !/conflicts$/, @{$self->prereq_action_types};
-    }
-  }
-
   # copy prereq data structures so we can modify them before writing to META
   my %prereq_types;
   for my $type ( 'configure_requires', @{$self->prereq_action_types} ) {
@@ -3691,11 +3731,12 @@ sub prepare_metadata {
   }
 
   # add current Module::Build to configure_requires if there 
-  # isn't a configure_requires already specified
-  if ( ! $prereq_types{'configure_requires'} ) {
-    for my $t ('configure_requires', 'build_requires') {
-      $prereq_types{$t}{'Module::Build'} = $VERSION;
-    }
+  # isn't one already specified (but not ourself, so we're not circular)
+  if ( $self->dist_name ne 'Module-Build' 
+    && $self->auto_configure_requires
+    && ! exists $prereq_types{'configure_requires'}{'Module::Build'}
+  ) {
+    $prereq_types{configure_requires}{'Module::Build'} = $VERSION;
   }
 
   for my $t ( keys %prereq_types ) {
@@ -3761,7 +3802,7 @@ sub find_dist_packages {
   my @pm_files = grep {exists $dist_files{$_}} keys %{ $self->find_pm_files };
 
   # First, we enumerate all packages & versions,
-  # seperating into primary & alternative candidates
+  # separating into primary & alternative candidates
   my( %prime, %alt );
   foreach my $file (@pm_files) {
     next if $dist_files{$file} =~ m{^t/};  # Skip things in t/
@@ -3804,7 +3845,7 @@ sub find_dist_packages {
 
       if ( $result->{err} ) {
 	# Use the selected primary package, but there are conflicting
-	# errors amoung multiple alternative packages that need to be
+	# errors among multiple alternative packages that need to be
 	# reported
         $self->log_warn(
 	  "Found conflicting versions for package '$package'\n" .
@@ -3867,7 +3908,7 @@ sub find_dist_packages {
   return \%prime;
 }
 
-# seperate out some of the conflict resolution logic from
+# separate out some of the conflict resolution logic from
 # $self->find_dist_packages(), above, into a helper function.
 #
 sub _resolve_module_versions {
@@ -4246,10 +4287,8 @@ sub compile_c {
 }
 
 sub link_c {
-  my ($self, $to, $file_base) = @_;
+  my ($self, $spec) = @_;
   my $p = $self->{properties}; # For convenience
-
-  my $spec = $self->_infer_xs_spec($file_base);
 
   $self->add_to_cleanup($spec->{lib_file});
 
@@ -4259,8 +4298,7 @@ sub link_c {
     if $self->up_to_date([$spec->{obj_file}, @$objects],
 			 $spec->{lib_file});
 
-  my $module_name = $self->module_name;
-  $module_name  ||= $spec->{module_name};
+  my $module_name = $spec->{module_name} || $self->module_name;
 
   $self->cbuilder->link(
     module_name => $module_name,
@@ -4440,7 +4478,7 @@ sub process_xs {
   }
 
   # .o -> .(a|bundle)
-  $self->link_c($spec->{archdir}, $file_base);
+  $self->link_c($spec);
 }
 
 sub do_system {
@@ -4525,7 +4563,8 @@ sub up_to_date {
   $source  = [$source]  unless ref $source;
   $derived = [$derived] unless ref $derived;
 
-  return 0 if grep {not -e} @$derived;
+  # empty $derived means $source should always run
+  return 0 if @$source && !@$derived || grep {not -e} @$derived;
 
   my $most_recent_source = time / (24*60*60);
   foreach my $file (@$source) {

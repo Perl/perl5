@@ -2,7 +2,7 @@ package Module::Build::Platform::os2;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_05';
 $VERSION = eval $VERSION;
 use Module::Build::Platform::Unix;
 

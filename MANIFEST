@@ -1816,9 +1816,9 @@ lib/base/Changes		base.pm changelog
 lib/base.pm			Establish IS-A relationship at compile time
 lib/base/t/base.t		See if base works
 lib/base/t/compile-time.t	See if base works
-lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields-5.6.0.t	See if fields work
 lib/base/t/fields-5.8.0.t	See if fields work
+lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/base/t/isa.t		See if base's behaviour doesn't change
 lib/base/t/lib/Dummy.pm		Test module for base.pm
@@ -2600,6 +2600,7 @@ lib/Module/Build/t/moduleinfo.t	Module::Build
 lib/Module/Build/t/new_from_context.t	Module::Build
 lib/Module/Build/t/notes.t	Module::Build
 lib/Module/Build/t/parents.t	Module::Build
+lib/Module/Build/t/PL_files.t	Module::Build tests
 lib/Module/Build/t/pod_parser.t	Module::Build
 lib/Module/Build/t/ppm.t	Module::Build
 lib/Module/Build/t/runthrough.t	Module::Build
@@ -2610,6 +2611,7 @@ lib/Module/Build/t/test_type.t	Module::Build
 lib/Module/Build/t/tilde.t	Module::Build
 lib/Module/Build/t/use_tap_harness.t	Module::Build
 lib/Module/Build/t/versions.t	Module::Build
+lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
 lib/Module/Build/t/xs.t		Module::Build
 lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build

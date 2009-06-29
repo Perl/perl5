@@ -54,7 +54,7 @@ my @modules = (
 package Simple;
 our $VERSION = '1.23';
 ---
-  <<'---', # declared & defined on seperate lines with 'our'
+  <<'---', # declared & defined on separate lines with 'our'
 package Simple;
 our $VERSION;
 $VERSION = '1.23';
