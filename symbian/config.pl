@@ -28,7 +28,7 @@ if ($SYMBIAN_ROOT eq 'C:\Symbian\Series60_1_2_CW') {
 }
 
 my $WIN = $ENV{WIN} ; # 'wins', 'winscw' (from sdk.pl)
-my $ARM = 'thumb';    # 'thumb', 'armv5'
+my $ARM = 'armv5';    # 'thumb', 'armv5' # Configuration for S60 5th Edition SDK v0.9
 my $S60SDK = $ENV{S60SDK}; # qw(1.2 2.0 2.1 2.6) (from sdk.pl)
 my $S80SDK = $ENV{S80SDK}; # qw(2.0) (from sdk.pl)
 my $S90SDK = $ENV{S90SDK}; # qw(1.1) (from sdk.pl)
