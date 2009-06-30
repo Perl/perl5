@@ -2148,6 +2148,7 @@ lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
 lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
 lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
 lib/ExtUtils/CBuilder.pm	Compile and link C code for Perl modules
+lib/ExtUtils/CBuilder/t/00-have-compiler.t	ExtUtils::CBuilder tests
 lib/ExtUtils/CBuilder/t/01-basic.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/Changes		MakeMaker change log
