@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.35_02';
+$VERSION = '0.35_03';
 
 =pod
 
@@ -311,13 +311,7 @@ sub prepare {
         my $env = ENV_CPANPLUS_IS_EXECUTING;
         local $ENV{$env} = BUILD_PL->( $dir );
         my $run_perl    = $conf->get_program('perlwrapper');
-        my $cmd;
-        if ( ON_VMS ) {
-            $cmd = [$perl, BUILD_PL->($dir), @buildflags]
-        }
-        else {
-            $cmd = [$perl, $run_perl, BUILD_PL->($dir), @buildflags]
-        }
+        my $cmd = [$perl, $run_perl, BUILD_PL->($dir), @buildflags];
 
         unless ( scalar run(    command => $cmd,
                                 buffer  => \$prep_output,
@@ -385,7 +379,7 @@ sub _find_prereqs {
 
     my $content;
 
-    if ( version->new( $Module::Build::VERSION ) >= $safe_ver and ! ON_WIN32 and ! ON_VMS ) {
+    if ( version->new( $Module::Build::VERSION ) >= $safe_ver and IPC::Cmd->can_capture_buffer ) {
         my @buildflags = $dist->_buildflags_as_list( $buildflags );
 
         # Use the new Build action 'prereq_data'

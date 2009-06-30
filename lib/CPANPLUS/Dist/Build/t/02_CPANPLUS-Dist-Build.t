@@ -197,8 +197,9 @@ while( my($path,$need_cc) = each %Map ) {
 
 ### test ENV setting while running Build.PL code
 SKIP: {   ### use print() not die() -- we're redirecting STDERR in tests!
-    skip("Known issues due to capturing with this test and MSWin32/VMS") if ON_WIN32 or ON_VMS;
     my $env     = ENV_CPANPLUS_IS_EXECUTING;
+    skip("Can't test ENV{$env} -- no buffers available")
+      unless IPC::Cmd->can_capture_buffer;
     my $clone   = $Mod->clone;
     
     ok( $clone,                 'Testing ENV settings $dist->prepare' );
