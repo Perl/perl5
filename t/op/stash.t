@@ -109,9 +109,8 @@ SKIP: {
     TODO: {
         local $TODO = "anon CVs not accounted for yet";
 
-        my @results = split "\n", runperl
+        my @results = split "\n", runperl(
             switches    => [ "-MB", "-l" ],
-            stderr      => 1,
             prog        => q{
                 my $sub = do {
                     package four;
@@ -138,7 +137,9 @@ SKIP: {
                 print $st eq q/__ANON__/ ? q/ok/ : q/not ok/;
 
                 print q/done/;
-            };
+            },
+            ($^O eq 'VMS') ? (stderr => 1) : ()
+        );
 
         ok( @results == 5 && $results[4] eq "done",
             "anon CVs in undefed stash don't segfault" )
