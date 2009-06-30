@@ -205,7 +205,7 @@ package Maintainers;
     'autodie' =>
 	{
 	'MAINTAINER'	=> 'pjf',
-	'DISTRIBUTION'	=> 'PJF/autodie-1.999.tar.gz',
+	'DISTRIBUTION'	=> 'PJF/autodie-2.00.tar.gz',
 	'FILES' 	=> q[lib/Fatal.pm lib/autodie.pm lib/autodie],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 			     qw(
@@ -777,7 +777,7 @@ package Maintainers;
     'File::Temp' =>
 	{
 	'MAINTAINER'	=> 'tjenness',
-	'DISTRIBUTION'	=> 'TJENNESS/File-Temp-0.21.tar.gz',
+	'DISTRIBUTION'	=> 'TJENNESS/File-Temp-0.22.tar.gz',
 	'FILES'		=> q[lib/File/Temp.pm lib/File/Temp],
 	'EXCLUDED'	=> [ qw{misc/benchmark.pl
 				misc/results.txt
