@@ -1214,9 +1214,7 @@ M  56e771c1bc 2008/08/22 34218
 M  b5920ff0f6 2008/08/24 34219
 M  990198f075 2008/08/24 34220
 M  8c44bff1ac 2008/08/24 34221
-!  fd8ebd06d0 2008/08/24 34222 Safe.pm - C=2.16 B=2.16_01; awaiting CPAN sync
-				NB - this file has been moved to
-				/ext/safe/Safe.pm in the meantime
+M  fd8ebd06d0 2008/08/24 34222
 M  228ee848f0 2008/08/24 34223
 R  777723442a 2008/08/24 34224 (unknown reason)
 M  9d27dca99b 2008/08/24 34225
@@ -3491,7 +3489,7 @@ M  3bce050656 2009/06/26 One more regression test for RT #59734
 			    wait for 0.36?
 M  198e857cc6 2009/06/27 Update Archive::Extract to 0.34
 M  6b1bef9ae6 2009/06/27 Update CPAN.pm to 1.9402
-!  0e637710e6 2009/06/27 Changed to incorporate latest SDKs.
+M  0e637710e6 2009/06/27 Changed to incorporate latest SDKs.
 			    waiting for reply from Adam Russell
 d  fe13d51d64 2009/06/27 Add test to make sure everything that outputs an e
 d  87a63fff81 2009/06/27 Add support for TODO diag tests -- a list in DATA 
@@ -3505,3 +3503,31 @@ M  c51ff80d06 2009/06/27 update Maintainers.pl
 M  4e390bd81a 2009/06/27 bump Dynaloader to 1.10 to distinguish it from the
 M  6653081c26 2009/06/27 upgrade to Time::Piece 1.15
 M  673223b5b2 2009/06/27 upgrade to ExtUtils::CBuilder 0.25
+!  708f9ca6cd 2009/06/28 Update ExtUtils::ParseXS to 2.19_03
+			    wait for 2.20 ???
+M  4fd19576a6 2009/06/28 Document what $* used to do on older versions
+M  a9320c62d9 2009/06/28 Extra examples for 'sort'
+M  1cb246e8dc 2009/06/28 Small pod/wording fixes
+M  03dbc343c8 2009/06/28 Bump Safe version to 2.17 for CPAN release
+M  40b9d4d925 2009/06/28 Silence warnings in test with 5.10.0
+M  439e01810c 2009/06/28 Move module part of the base.pm test suite in base
+M  d19d8ad381 2009/06/28 Add base.pm tests from the CPAN distribution
+M  956e881e4f 2009/06/28 Bump version of fields.pm to 2.14 to match the ver
+d  7f6de3fd9c 2009/06/28 Add t/pod/diag.t to the MANIFEST
+M  0ee0837e8d 2009/06/28 Removed obsolete E32Dll dll entry point which was 
+M  f941e6586d 2009/06/28 Integrate version.pm-0.77 into bleadperl
+!  23837600fa 2009/06/29 Update Module::Build to 0.33_05
+			    wait for stable release
+!  9b657a623c 2009/06/29 pjf: dual life modules
+			    autodie 2.00 - some smoking issues
+M  74182dbd45 2009/06/29 fix MANIFEST perms & add case-insensitive exclude
+M  c3624cb8d7 2009/06/29 tjenness: dual life modules
+M  43639bac1f 2009/06/29 patch submission(symbian/PerlBase.cpp)
+M  515fe3bd5a 2009/06/29 patch submission(symbian/symbian_utils.dll)
+M  e1466347d2 2009/06/29 add some BUGS items to Porting/Maintainers
+M  78fb583c05 2009/06/29 Stop buildtoc warning that perltoc.pod is missing 
+!  6986f47f54 2009/06/29 Update ExtUtils::ParseXS to 2.19_04
+			    wait for 2.20 ???
+M  75cdbdc152 2009/06/29 Subject: Re: dual-life: IO 1.25 and Scalar-List-Ut
+M  9015f106ca 2009/06/30 Updating ExtUtils::CBuilder to 0.26
+M  3eff6cdadf 2009/06/30 sync base with CPAN and update Maintainers.pl
