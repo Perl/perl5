@@ -284,11 +284,9 @@ package Maintainers;
     'base' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/base-2.12.tar.gz',
+	'DISTRIBUTION'	=> 'RGARCIA/base-2.14.tar.gz',
 	'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
-	'EXCLUDED'	=> [ qw( t/Dummy.pm t/compile-time.t t/fields-5.6.0.t
-				t/fields-5.8.0.t t/lib/HasSigDie.pm )
-			   ],
+	'EXCLUDED'	=> [ qw( t/Dummy.pm ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1562,7 +1560,7 @@ package Maintainers;
     'Safe' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.16.tar.gz',
+	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.17.tar.gz',
 	'FILES'		=> q[ext/Safe],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
