@@ -1569,7 +1569,7 @@ package Maintainers;
     'Scalar-List-Utils' =>
 	{
 	'MAINTAINER'	=> 'gbarr',
-	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.19.tar.gz',
+	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.21.tar.gz',
 	# Note that perl uses its own version of Makefile.PL
 	'FILES'		=> q[ext/List-Util],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
