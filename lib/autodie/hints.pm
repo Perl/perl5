@@ -3,7 +3,9 @@ package autodie::hints;
 use strict;
 use warnings;
 
-our $VERSION = '2.00';
+use constant PERL58 => ( $] < 5.009 );
+
+our $VERSION = '2.03';
 
 =head1 NAME
 
@@ -79,7 +81,7 @@ A list containing a single undef, in list context
 All other return values (including the list of the single zero, and the
 list containing a single empty string) are considered successful.  However,
 real-world code isn't always that easy.  Perhaps the code you're working
-with returns a string containing the word "FAIL" in it upon failure, or a
+with returns a string containing the word "FAIL" upon failure, or a
 two element list containing C<(undef, "human error message")>.  To make
 autodie work with these sorts of subroutines, we have
 the I<hinting interface>.
@@ -94,15 +96,15 @@ of C<autodie> itself.
 
 A I<hint> is a subroutine or value that is checked against the
 return value of an autodying subroutine.  If the match returns true,
-C<autodie> considers the subroutine have failed.
+C<autodie> considers the subroutine to have failed.
 
 If the hint provided is a subroutine, then C<autodie> will pass
 the complete return value to that subroutine.  If the hint is
 any other value, then C<autodie> will smart-match against the
-value provided.  In Perl 5.8.x, there is no smart-match operator, and as such
+value provided.  In Perl 5.8.x there is no smart-match operator, and as such
 only subroutine hints are supported in these versions.
 
-Hints can be provided for both scalar context and list context.  Note
+Hints can be provided for both scalar and list contexts.  Note
 that an autodying subroutine will never see a void context, as
 C<autodie> always needs to capture the return value for examination.
 Autodying subroutines called in void context act as if they're called
@@ -129,7 +131,7 @@ The most common context-specific hints are:
         # Scalar failures always return zero explicitly:
             {  scalar => '0'  }
 
-        # List failures always return empty list:
+        # List failures always return an empty list:
             {  list => []  }
 
         # List failures return () or (undef) [default expectation]:
@@ -158,7 +160,7 @@ The most common context-specific hints are:
                 scalar => 0,
                 list   => [0],
             }
-	);
+        );
 
 This "in all contexts" construction is very common, and can be
 abbreviated, using the 'fail' key.  This sets both the C<scalar>
@@ -256,7 +258,7 @@ CPAN to allow it.
 In addition, you must define a C<AUTODIE_HINTS> subroutine that returns
 a hash-reference containing the hints for your subroutines:
 
-	package Your::Module;
+        package Your::Module;
 
         # We can use the Class::DOES from the CPAN to declare adherence
         # to a role.
@@ -333,10 +335,13 @@ use constant EMPTY_OR_FALSE => sub {
     @_==1 && !$_[0]
 };
 
+use constant SINGLE_TRUE => sub { @_ == 1 and not $_[0] };
+
 use constant DEFAULT_HINTS => {
     scalar => UNDEF_ONLY,
     list   => EMPTY_OR_UNDEF,
 };
+
 
 use constant HINTS_PROVIDER => 'autodie::hints::provider';
 
@@ -347,18 +352,11 @@ our $DEBUG = 0;
 # Only ( undef ) is a strange but possible situation for very
 # badly written code.  It's not supported yet.
 
-# TODO: Ugh, those sub refs look awful!  Give them proper
-# names!
-
 my %Hints = (
-    'File::Copy::copy' => {
-        scalar => sub { not $_[0] },
-        list   => sub { @_ == 1 and not $_[0] }
-    },
-    'File::Copy::move' => {
-        scalar => sub { not $_[0] },
-        list   => sub { @_ == 1 and not $_[0] }
-    },
+    'File::Copy::copy' => { scalar => SINGLE_TRUE, list => SINGLE_TRUE },
+    'File::Copy::move' => { scalar => SINGLE_TRUE, list => SINGLE_TRUE },
+    'File::Copy::cp'   => { scalar => SINGLE_TRUE, list => SINGLE_TRUE },
+    'File::Copy::mv'   => { scalar => SINGLE_TRUE, list => SINGLE_TRUE },
 );
 
 # Start by using Sub::Identify if it exists on this system.
@@ -416,6 +414,9 @@ sub load_hints {
         no strict 'refs';   ## no critic
 
         if ($package->can('DOES') and $package->DOES(HINTS_PROVIDER) ) {
+            $hints_available = 1;
+        }
+        elsif ( PERL58 and $package->isa(HINTS_PROVIDER) ) {
             $hints_available = 1;
         }
         elsif ( ${"${package}::DOES"}{HINTS_PROVIDER.""} ) {

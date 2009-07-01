@@ -8,7 +8,7 @@ our @ISA = qw(Fatal);
 our $VERSION;
 
 BEGIN {
-    $VERSION = '2.00';
+    $VERSION = '2.03';
 }
 
 use constant ERROR_WRONG_FATAL => q{
@@ -254,7 +254,7 @@ provides the convenience of using the default methods, but the surety
 that no behavorial changes will occur if the C<autodie> module is
 upgraded.
 
-You can enable C<autodie> for all of Perl's built-ins, including
+C<autodie> can be enabled for all of Perl's built-ins, including
 C<system> and C<exec> with:
 
     use autodie qw(:all);
@@ -329,8 +329,8 @@ element.
 =item :void cannot be used with lexical scope
 
 The C<:void> option is supported in L<Fatal>, but not
-C<autodie>.  However you can explicitly disable autodie
-end the end of the current block with C<no autodie>.
+C<autodie>.  To workaround this, C<autodie> may be explicitly disabled until
+the end of the current block with C<no autodie>.
 To disable autodie for only a single function (eg, open)
 use C<no autodie qw(open)>.
 
@@ -348,8 +348,8 @@ See also L<Fatal/DIAGNOSTICS>.
 =head1 BUGS
 
 "Used only once" warnings can be generated when C<autodie> or C<Fatal>
-is used with package filehandles (eg, C<FILE>).  It's strongly recommended
-you use scalar filehandles instead.
+is used with package filehandles (eg, C<FILE>).  Scalar filehandles are
+strongly recommended instead.
 
 Under Perl 5.8 only, C<autodie> I<does not> propagate into string C<eval>
 statements, although it can be explicitly enabled inside a string
