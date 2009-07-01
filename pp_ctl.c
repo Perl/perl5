@@ -4378,6 +4378,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	SP -= 2;
 	goto sm_any_scalar;
     }
+    else if (!SvOK(d)) {
+	/* undef ~~ scalar ; we already know that the scalar is SvOK */
+	RETPUSHNO;
+    }
     else
   sm_any_scalar:
     if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {

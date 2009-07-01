@@ -133,15 +133,15 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 }
 {
     no warnings "uninitialized";
-    my $ok = 0;
-    given (undef) { when(0) {$ok = 1} }
+    my $ok = 1;
+    given (undef) { when(0) {$ok = 0} }
     is($ok, 1, "Given(undef) when(0)");
 }
 {
     no warnings "uninitialized";
     my $undef;
-    my $ok = 0;
-    given ($undef) { when(0) {$ok = 1} }
+    my $ok = 1;
+    given ($undef) { when(0) {$ok = 0} }
     is($ok, 1, 'Given($undef) when(0)');
 }
 ########
@@ -158,15 +158,15 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 }
 {
     no warnings "uninitialized";
-    my $ok = 0;
-    given (undef) { when("") {$ok = 1} }
+    my $ok = 1;
+    given (undef) { when("") {$ok = 0} }
     is($ok, 1, 'Given(undef) when("")');
 }
 {
     no warnings "uninitialized";
     my $undef;
-    my $ok = 0;
-    given ($undef) { when("") {$ok = 1} }
+    my $ok = 1;
+    given ($undef) { when("") {$ok = 0} }
     is($ok, 1, 'Given($undef) when("")');
 }
 ########
