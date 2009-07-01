@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 use constant NO_SUCH_FILE => "this_file_had_better_not_exist";
 
@@ -28,6 +28,8 @@ is($@->args->[1], '<', 'Correct mode arg');
 is($@->args->[2], NO_SUCH_FILE, 'Correct filename arg');
 ok($@->matches('open'), 'Looks like an error from open');
 ok($@->matches(':io'),  'Looks like an error from :io');
+is($@->context, 'scalar', 'Open called in scalar/void context');
+is($@->return,undef,'Open should return undef on failure');
 
 # Testing of caller info with a real subroutine.
 
