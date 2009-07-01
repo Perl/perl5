@@ -1793,14 +1793,14 @@ lib/autodie/t/filehandles.t		autodie - filehandle tests
 lib/autodie/t/fileno.t			autodie - fileno tests
 lib/autodie/t/flock.t			autodie - File locking tests
 lib/autodie/t/format-clobber.t		autodie - Don't clobber scalars
-lib/autodie/t/hints.t			autodie - Test hints interface
 lib/autodie/t/hints_insist.t		autodie - Test hints insistance
 lib/autodie/t/hints_pod_examples.t	autodie - Test hints POD examples
 lib/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
 lib/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
 lib/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
-lib/autodie/t/internal.t		autodie - internal interface tests
+lib/autodie/t/hints.t			autodie - Test hints interface
 lib/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
+lib/autodie/t/internal.t		autodie - internal interface tests
 lib/autodie/t/lethal.t			autodie - lethal is the one true name
 lib/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
 lib/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
