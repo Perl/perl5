@@ -21655,7 +21655,7 @@ find_extensions='
 		$ls -1 $xxx > $$.tmp;
 		if $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
-		elif $contains "\.c$" $$.tmp; then
+		elif $contains "\.c$" $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
 		elif $test -d $xxx; then
 		    nonxs_extensions="$nonxs_extensions $this_ext";
