@@ -66,6 +66,11 @@ for ($source_file, $object_file, $lib_file) {
   1 while unlink;
 }
 
+if ($^O eq 'VMS') {
+   1 while unlink 'COMPILET.LIS';
+   1 while unlink 'COMPILET.OPT';
+}
+
 my @words = $b->split_like_shell(' foo bar');
 
 SKIP: {
