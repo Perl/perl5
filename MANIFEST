@@ -962,7 +962,7 @@ ext/List-Util/t/stack-corruption.t	List::Util
 ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
-ext/List-Util/XS.pp             List::Util
+ext/List-Util/XS.pp		List::Util
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
@@ -1797,7 +1797,7 @@ lib/autodie/t/hints.t			autodie - Test hints interface
 lib/autodie/t/hints_insist.t		autodie - Test hints insistance
 lib/autodie/t/hints_pod_examples.t	autodie - Test hints POD examples
 lib/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
-lib/autodie/t/hints_provider_easy_does_it.t autodie - Test easy hints/does
+lib/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
 lib/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
 lib/autodie/t/internal.t		autodie - internal interface tests
 lib/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
@@ -1808,8 +1808,8 @@ lib/autodie/t/lib/autodie/test/badname.pm	autodie - Bad exception class
 lib/autodie/t/lib/autodie/test/missing.pm	autodie - Missing exception class
 lib/autodie/t/lib/Caller_helper.pm	autodie - Caller helper
 lib/autodie/t/lib/Hints_pod_examples.pm	autodie - Hints/pod helper
-lib/autodie/t/lib/Hints_provider_does.pm    autodie - Hints/does helper
-lib/autodie/t/lib/Hints_provider_easy_does_it.pm    autodie - Hints/easy helper
+lib/autodie/t/lib/Hints_provider_does.pm	autodie - Hints/does helper
+lib/autodie/t/lib/Hints_provider_easy_does_it.pm	autodie - Hints/easy helper
 lib/autodie/t/lib/Hints_provider_isa.pm	autodie - Hints/inherit helper
 lib/autodie/t/lib/Hints_test.pm		autodie - Hints test helper
 lib/autodie/t/lib/lethal.pm		autodie - with a better name
