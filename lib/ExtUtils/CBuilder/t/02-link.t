@@ -85,6 +85,11 @@ for ($source_file, $object_file, $exe_file) {
   1 while unlink;
 }
 
+if ($^O eq 'VMS') {
+   1 while unlink 'COMPILET.LIS';
+   1 while unlink 'COMPILET.OPT';
+}
+
 sub my_system {
   my $cmd = shift;
   if ($^O eq 'VMS') {
