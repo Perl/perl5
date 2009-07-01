@@ -70,7 +70,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 314;
+plan tests => 322;
 
 while (<DATA>) {
     next if /^#/ || !/\S/;
@@ -371,7 +371,7 @@ __DATA__
 	["foo", "bar"]		[["foo"], ["bar"]]
 !	["foo", "bar"]		[qr/o/, "foo"]
 	["foo", undef, "bar"]	[qr/o/, undef, "bar"]
-	["foo", undef, "bar"]	[qr/o/, "",    "bar"]
+!	["foo", undef, "bar"]	[qr/o/, "",    "bar"]
 !	["foo", "", "bar"]	[qr/o/, undef, "bar"]
 	$deep1			$deep1
 	@$deep1			@$deep1
@@ -409,6 +409,11 @@ __DATA__
 !	undef		[1, 2, [undef], 4]
 !	undef		@fooormore
 	undef		@sparse
+	undef		[undef]
+!	0		[undef]
+!	""		[undef]
+!	undef		[0]
+!	undef		[""]
 
 # - nested arrays and ~~ distributivity
 	11		[[11]]
@@ -422,7 +427,8 @@ __DATA__
 !	2		3
 	0		FALSE
 	3-2		TRUE
-	undef		0
+!	undef		0
+!	(my $u)		0
 
 # Number against string
 =	2		"2"
@@ -430,6 +436,8 @@ __DATA__
 !	2		"2bananas"
 !=	2_3		"2_3"		NOWARNINGS
 	FALSE		"0"
+!	undef		"0"
+!	undef		""
 
 # Regex against string
 	"x"		qr/x/

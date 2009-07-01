@@ -720,6 +720,7 @@ and "Array" entries apply in those cases. (For blessed references, the
     Object  Any       invokes ~~ overloading on $object, or falls back:
     Any     Num       numeric equality         $a == $b
     Num     numish[4] numeric equality         $a == $b
+    undef   Any       undefined                !defined($b)
     Any     Any       string equality          $a eq $b
 
  1 - empty hashes or arrays will match.
