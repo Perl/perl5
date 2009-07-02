@@ -23,7 +23,7 @@ use Hints_test qw(
 use autodie qw(fail_on_empty fail_on_false fail_on_undef);
 
 diag("Sub::Identify ", exists( $INC{'Sub/Identify.pm'} ) ? "is" : "is not",
-     " loaded");
+     " loaded") if (! $ENV{PERL_CORE});
 
 my $hints = "autodie::hints";
 
@@ -61,7 +61,14 @@ isnt("$@", "", "Copying in scalar context should throw an error.");
 isa_ok($@, "autodie::exception");
 
 is($@->function, "File::Copy::copy", "Function should be original name");
-is($@->return, 0, "File::Copy returns zero on failure");
+
+SKIP: {
+    skip("File::Copy is weird on Win32 before 5.10.1", 1)
+        if ( ! PERL5101 and $^O eq "MSWin32" );
+
+    is($@->return, 0, "File::Copy returns zero on failure");
+}
+
 is($@->context, "scalar", "File::Copy called in scalar context");
 
 # List context test.
@@ -76,7 +83,13 @@ isnt("$@", "", "Copying in list context should throw an error.");
 isa_ok($@, "autodie::exception");
 
 is($@->function, "File::Copy::copy", "Function should be original name");
-is_deeply($@->return, [0], "File::Copy returns zero on failure");
+
+SKIP: {
+    skip("File::Copy is weird on Win32 before 5.10.1", 1)
+        if ( ! PERL5101 and $^O eq "MSWin32" );
+
+    is_deeply($@->return, [0], "File::Copy returns zero on failure");
+}
 is($@->context, "list", "File::Copy called in list context");
 
 # Tests on loaded funcs.

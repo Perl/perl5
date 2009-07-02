@@ -5,7 +5,7 @@ use warnings;
 
 use constant PERL58 => ( $] < 5.009 );
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 =head1 NAME
 
