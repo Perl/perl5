@@ -3727,11 +3727,22 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     data->whilem_c = data_fake.whilem_c;
                 }
                 if (f & SCF_DO_STCLASS_AND) {
-                    const int was = (data->start_class->flags & ANYOF_EOS);
+		    if (flags & SCF_DO_STCLASS_OR) {
+			/* OR before, AND after: ideally we would recurse with
+			 * data_fake to get the AND applied by study of the
+			 * remainder of the pattern, and then derecurse;
+			 * *** HACK *** for now just treat as "no information".
+			 * See [perl #56690].
+			 */
+			cl_init(pRExC_state, data->start_class);
+		    }  else {
+			/* AND before and after: combine and continue */
+			const int was = (data->start_class->flags & ANYOF_EOS);
 
-                    cl_and(data->start_class, &intrnl);
-                    if (was)
-                        data->start_class->flags |= ANYOF_EOS;
+			cl_and(data->start_class, &intrnl);
+			if (was)
+			    data->start_class->flags |= ANYOF_EOS;
+		    }
                 }
 	    }
 #if PERL_ENABLE_POSITIVE_ASSERTION_STUDY
