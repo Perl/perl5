@@ -1058,7 +1058,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 #if defined(PERL_IMPLICIT_CONTEXT)
             if (aTHX == NULL) {
                 fprintf(stderr,
-                    "%%PERL-W-VMS_INIT Can't read CRTL environ\n");
+                    "Can't read CRTL environ\n");
             } else
 #endif
                 Perl_warn(aTHX_ "Can't read CRTL environ\n");
@@ -1098,7 +1098,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 #if defined(PERL_IMPLICIT_CONTEXT)
               if (aTHX == NULL) {
                   fprintf(stderr,
-                     "%Perl-VMS-Init, Value of CLI symbol \"%s\" too long",lnm);
+                     "Value of CLI symbol \"%s\" too long",lnm);
               } else
 #endif
 		if (ckWARN(WARN_MISC)) {
