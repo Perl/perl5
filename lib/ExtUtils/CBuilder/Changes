@@ -1,5 +1,26 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.2601 - Wed Jul  1 09:37:39 EDT 2009
+
+ Bugs fixed:
+ - On VMS, cleans up extra files generated during testing
+   [John E. Malmberg, Craig Berry]
+
+0.26 - Mon Jun 29 20:11:52 EDT 2009
+
+ - No changes from 0.25_01
+
+0.25_01 - Sat Jun 27 23:13:20 EDT 2009
+
+ - Changed test library to Test::More
+
+ - Added tests for have_compiler
+
+ - Skips tests that need a compiler if have_compiler is false
+
+ - have_compiler will try to compile in the current directory
+   if compiling in tmpdir fails for whatever reason
+
 0.25 - Fri Jun 26 16:18:13 EDT 2009
 
  - Slight diagnostic improvements in link.t
