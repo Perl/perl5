@@ -205,7 +205,7 @@ package Maintainers;
     'autodie' =>
 	{
 	'MAINTAINER'	=> 'pjf',
-	'DISTRIBUTION'	=> 'PJF/autodie-2.00.tar.gz',
+	'DISTRIBUTION'	=> 'PJF/autodie-2.04.tar.gz',
 	'FILES' 	=> q[lib/Fatal.pm lib/autodie.pm lib/autodie],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 			     qw(
@@ -395,7 +395,7 @@ package Maintainers;
     'CPAN' =>
 	{
 	'MAINTAINER'	=> 'andk',
-	'DISTRIBUTION'	=> 'ANDK/CPAN-1.94.tar.gz',
+	'DISTRIBUTION'	=> 'ANDK/CPAN-1.9402.tar.gz',
 	'FILES'		=> q[lib/CPAN.pm lib/CPAN],
 	'EXCLUDED'	=> [ qr{^distroprefs/},
 			     qr{^inc/Test/},
