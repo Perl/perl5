@@ -867,7 +867,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'SBURKE/I18N-LangTags-0.35.tar.gz',
 	'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
-	'CPAN'		=> 1,
+	'CPAN'		=> 0,
 	'UPSTREAM'	=> 'blead',
 	},
 
