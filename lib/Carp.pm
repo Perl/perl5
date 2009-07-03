@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 # this file is an utra-lightweight stub. The first time a function is
 # called, Carp::Heavy is loaded, and the real short/longmessmess_jmp
 # subs are installed

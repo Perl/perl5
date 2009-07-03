@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.06';
+our $VERSION = '1.08';
 
 sub nil {}
 
