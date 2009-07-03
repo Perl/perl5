@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 use bytes ();		# for $bytes::hint_bits
 
