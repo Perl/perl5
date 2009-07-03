@@ -1,5 +1,70 @@
 Revision history for Perl extension Module::Build.
 
+0.33_05 - Sun Jun 28 22:06:49 EDT 2009
+
+ Enhancements:
+ - New 'auto_configure_requires' parameter (default 1) controls
+   whether Module::Build should add itself to configure_requires
+   in META.yml if not specified in Build.PL [David Golden]
+
+ Bug-fixes:
+ - The default MANIFEST.SKIP created by the "manifest" action
+   was out of date.  It will now use the installed MANIFEST.SKIP
+   and add some Module::Build and distribution specific items
+   to it. [Michael Schwern]
+
+ Other:
+ - configure_requires do not necessarily need to be in requires
+   or build_requires; warning to that effect has been removed
+   [David Golden]
+
+0.33_04 - Fri Jun 26 07:09:06 EDT 2009
+
+ Bug-fixes:
+ - Don't try utf8 YAML I/O on Perl 5.6 [David Golden]
+
+ Other:
+ - configure_requires added to prereq report (RT#47254) [Curtis Jewell]
+ - updated Module::Build::Version to match forthcoming version.pm 0.77
+   (RT#47256) [John Peacock]
+ - skips xs.t and ppm.t when perl was not compiled with dynamic loading
+   since Module::Buld does not support static linking (RT#46178) 
+   [David Golden]
+ - skip failing test in par.t if Archive::Zip is broken [David Golden]
+ - Added YAML utf8 patch in 0.33_03 changes list
+ - Added attribution for patches in 0.33_03 changes list
+
+0.33_03 - Mon Jun 22 17:22:56 EDT 2009
+
+ Bug-fixes:
+ - Removes Module::Build from its own configure/build_requires 
+   [David Golden]
+ - ConfigData->feature() confirms that modules actually load successfully,
+   not just that they are present. (RT#43557) [David Golden]
+ - Module::Build::Compat handling of INSTALL*LIB (RT#43827) 
+   [Tony Payne, David Golden]
+ - Module::Build::Compat and recursive test files (RT#39171) [Dave Rolsky]
+ - Fixed bug linking non-standard XS names on Windows (RT#38065) ["snaury"]
+ - Run PL files that don't generate any file (RT#39365) 
+   [Matisse Enzer, David Golden]
+ - HTML generation failure no longer fatal (RT#36660) [David Golden]
+ - realclean might not delete Build.bat on Windows (RT#43863) 
+   [Roy Ivy, David Golden]
+ - include_dirs parameter now works correctly when given a single
+   string argument (RT#40177) [David Wheeler]
+ - Lots of spelling fixes in the POD (RT#45528r) [Lars Dieckow]
+ - On Unix-like systems, tilde expansion is more liberal in username
+   characters accepted (RT#33492) [Jon Jensen]
+
+ Other
+ - On MSWin32, bumped File::Spec prereq to 3.30 for a variety of fixes
+ - Add support for VMS in Unix compatibility mode (RT#42157)
+   [John E. Malmberg
+ - Added a can_action($name) method (RT#45172) [brian d foy] 
+ - Documented that subclass methods should not permanently change
+   current directory (RT#46919) [David Wheeler]
+ - META.yml encoded in UTF-8 (RT#43765) [Olivier Mengue]
+
 0.33_02 - Mon Jun 15 12:23:55 EDT 2009
 
  Bug-fixes:
@@ -8,7 +73,7 @@ Revision history for Perl extension Module::Build.
 0.33_01 - Sat Jun 13 20:24:42 EDT 2009
 
  Bug-fixes:
- - Fixed RT#42724: consolidated VMS fixes [patch by CBERRY]
+ - Fixed RT#42724: consolidated VMS fixes [patch by Craig Berry]
  - Fixed RT#46338: passthrough Makefile.PL cleans Makefile during distclean
  - Fixed RT#45700: t/compat.t for HP/UX make
 
