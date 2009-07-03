@@ -157,7 +157,7 @@ alter the location of any files in the final installation.
 =item *
 
 As part of the C<Test::Harness> 2.x to 3.x upgrade, the experimental
-C<Test::Harness::Straps> module has been removed. See 
+C<Test::Harness::Straps> module has been removed.
 See L</"Updated Modules"> for more details.
 
 =item *
