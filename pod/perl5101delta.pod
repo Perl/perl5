@@ -230,7 +230,7 @@ on how to specify C<configure_requires> when creating a distribution for CPAN.
 =item *
 
 C<autodie> is a new lexically-scoped alternative for the C<Fatal> module.
-The bundled version is 1.999.
+The bundled version is 2.04.
 
 =item *
 
@@ -449,11 +449,11 @@ C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
 
 =item *
 
-C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.19_01
+C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.20
 
 =item *
 
-C<Fatal> upgraded from version 1.05 to 1.999. See also the new pragma
+C<Fatal> upgraded from version 1.05 to 2.04. See also the new pragma
 C<autodie>.
 
 =item *
@@ -561,6 +561,10 @@ C<lib> upgraded from version 0.5565 to 0.62
 
 =item *
 
+C<List::Util> upgraded from version 1.19 to 1.21
+
+=item *
+
 C<Locale::MakeText> upgraded from version 1.12 to 1.13
 
 =item *
@@ -592,6 +596,11 @@ C<Math::Trig> upgraded from version 1.36 to 1.56
 
 =item *
 
+C<Memoize> upgraded from version 1.01_02 to 1.01_03 (just a minor
+documentation change)
+
+=item *
+
 C<Module::Build> upgraded from version 0.2808_01 to 0.32
 
 =item *
@@ -612,7 +621,7 @@ C<Module::Loaded> upgraded from version 0.01 to 0.02
 
 =item *
 
-C<Module::Pluggable> upgraded from version 3.6 to 3.9_01 XXX
+C<Module::Pluggable> upgraded from version 3.6 to 3.9
 
 =item *
 
@@ -661,6 +670,10 @@ C<POSIX> upgraded from version 1.13 to 1.17
 =item *
 
 C<Safe> upgraded from 2.12 to 2.17
+
+=item *
+
+C<Scalar::Util> upgraded from version 1.19 to 1.21
 
 =item *
 

@@ -3047,6 +3047,8 @@ M  318bf70858 2009/05/10 Replacing dump.c's use of SVs as temporaries is TO
 M  4477f4efa6 2009/05/10 bump Storage version to 2.20 to distinguish it fro
 d  d5e98372e6 2009/05/11 Allow typed arrays and hashes
 			    (maybe merge just the tests at some point?)
+			    (just Attribute-Handlers/t/multi.t was
+			     cherry-picked as 46e4e78b24)
 M  eb1c4873a4 2009/05/11 Update IO to CPAN 1.24 release
 A  f118ea0d48 2009/05/12 Remove proposed (but unimplemented) $foo ~~ Range 
 M  9c53f8ae1a 2009/05/12 remove all Changes* files
@@ -3416,7 +3418,7 @@ M  3f1788e11f 2009/06/21 make_patchnum.pl now works in -Dmksymlink target d
 			these three commits (fix for #58530)
 			convert a CV in a deleted glob to ANON,
 			which makes me twitch. See also 6eb667c676,
-			ab9c44463c, fbad106ea7
+			ab9c44463c, fbad106ea7 2221b6e72e
 
 d  d018fae575 2009/06/21 Tests for deleting stash entries.
 d  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
@@ -3503,8 +3505,7 @@ M  c51ff80d06 2009/06/27 update Maintainers.pl
 M  4e390bd81a 2009/06/27 bump Dynaloader to 1.10 to distinguish it from the
 M  6653081c26 2009/06/27 upgrade to Time::Piece 1.15
 M  673223b5b2 2009/06/27 upgrade to ExtUtils::CBuilder 0.25
-!  708f9ca6cd 2009/06/28 Update ExtUtils::ParseXS to 2.19_03
-			    wait for 2.20 ???
+M  708f9ca6cd 2009/06/28 Update ExtUtils::ParseXS to 2.19_03
 M  4fd19576a6 2009/06/28 Document what $* used to do on older versions
 M  a9320c62d9 2009/06/28 Extra examples for 'sort'
 M  1cb246e8dc 2009/06/28 Small pod/wording fixes
@@ -3518,16 +3519,52 @@ M  0ee0837e8d 2009/06/28 Removed obsolete E32Dll dll entry point which was
 M  f941e6586d 2009/06/28 Integrate version.pm-0.77 into bleadperl
 !  23837600fa 2009/06/29 Update Module::Build to 0.33_05
 			    wait for stable release
-!  9b657a623c 2009/06/29 pjf: dual life modules
-			    autodie 2.00 - some smoking issues
+M  9b657a623c 2009/06/29 pjf: dual life modules
 M  74182dbd45 2009/06/29 fix MANIFEST perms & add case-insensitive exclude
 M  c3624cb8d7 2009/06/29 tjenness: dual life modules
 M  43639bac1f 2009/06/29 patch submission(symbian/PerlBase.cpp)
 M  515fe3bd5a 2009/06/29 patch submission(symbian/symbian_utils.dll)
 M  e1466347d2 2009/06/29 add some BUGS items to Porting/Maintainers
 M  78fb583c05 2009/06/29 Stop buildtoc warning that perltoc.pod is missing 
-!  6986f47f54 2009/06/29 Update ExtUtils::ParseXS to 2.19_04
-			    wait for 2.20 ???
+M  6986f47f54 2009/06/29 Update ExtUtils::ParseXS to 2.19_04
 M  75cdbdc152 2009/06/29 Subject: Re: dual-life: IO 1.25 and Scalar-List-Ut
 M  9015f106ca 2009/06/30 Updating ExtUtils::CBuilder to 0.26
 M  3eff6cdadf 2009/06/30 sync base with CPAN and update Maintainers.pl
+M  205b02ff96 2009/06/30 more Maintainers.pl version tweaks
+M  2ff286160a 2009/06/30 Update to Scalar-List-Utils-1.21 from CPAN
+M  1460e873ec 2009/06/30 bump Scalar-List-Utils version in Maintainers.pl
+d  2221b6e72e 2009/07/01 Quiet t/op/stash.t output
+!  36392a5f57 2009/07/01 Update CPANPLUS::Dist::Build to CPAN version 0.35_
+			    wait for 0.36
+M  9b5b006ca2 2009/07/01 patch submission(symbian/config.pl)
+M  fb51372e8e 2009/07/01 Make C<undef ~~ 0> and C<undef ~~ ""> not match (l
+M  f235159a74 2009/07/01 patch submission(symbian/PerlBase.h)
+!  100ba29750 2009/07/01 Update ExtUtils::CBuilder to 0.2601
+			    craig reports smoking issues
+			    see also 2ffb8fb7bd
+M  eb8d423fed 2009/07/01 autodie 2.03
+M  9cf72a4efb 2009/07/01 [Configure]: avoid leaking Win32CORE.c into output
+M  bf79bdf5e2 2009/07/01 Tabs, not spaces, in MANIFEST.
+M  55ec0dff63 2009/07/01 Updating ExtUtils-ParseXS to 2.20
+R  24054a13bb 2009/07/01 make manisort.
+			   ran it manually instead
+M  aa51dd4123 2009/07/02 Added docs from Wolfgang Laun to perlpacktut about
+M  6c4f9c520f 2009/07/02 Upgrade autodie to 2.04
+M  4ed3fda49b 2009/07/02 Unused 'cv'
+M  873f5ddf07 2009/07/02 Remove fake facility strings from VMS start-up war
+M  906cdd2b28 2009/07/02 Some bugs in Perl regexp (core Perl issues)
+M  7df6222977 2009/07/03 Changes made by Osvaldo Villalon.
+M  3f16acfd45 2009/07/03 Osvaldo Villalon's changes to symbian_dll.cpp.=0A=
+M  2f2424c095 2009/07/03 Osvaldo Villalon's changes to sdk.pl.
+M  1f003618ae 2009/07/03 bump memoize version to distinguish it from 5.8.9
+M  d0eaab344a 2009/07/03 Revert "Bump Module-Pluggable VERSION following
+M  47dd4b73b9 2009/07/03 upate Maintainers.pl versions
+M  dfe582519f 2009/07/03 sync CPAN with, er..., CPAN
+!  2ffb8fb7bd 2009/07/03 sync ExtUtils::CBuilder with CPAN
+			    wait for new release
+!  ededf8dc60 2009/07/03 sync Module::Build with CPAN
+			    wait for stable release
+M  ce2c78aa98 2009/07/03 mark I18N::LangTags as no longer dual-life
+M  2fb8ff88df 2009/07/03 add -x option to Porting/cmpVERSION.pl
+M  7536d87983 2009/07/03 make cmpVERSION.pl ignore Config.pm
+M  af048c1888 2009/07/03 bump versions of non-dual-life modules that
