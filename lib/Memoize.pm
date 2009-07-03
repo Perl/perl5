@@ -11,7 +11,7 @@
 # Version 1.01 $Revision: 1.18 $ $Date: 2001/06/24 17:16:47 $
 
 package Memoize;
-$VERSION = '1.01_02';
+$VERSION = '1.01_03';
 
 # Compile-time constants
 sub SCALAR () { 0 } 
