@@ -302,8 +302,8 @@ ext/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
-ext/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
+ext/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel-PPPort/parts/inc/ppphdoc	Devel::PPPort include
@@ -381,8 +381,8 @@ ext/Devel-PPPort/t/mPUSH.t	Devel::PPPort test file
 ext/Devel-PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newRV.t	Devel::PPPort test file
-ext/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
 ext/Devel-PPPort/t/newSVpv.t	Devel::PPPort test file
+ext/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
 ext/Devel-PPPort/TODO		Devel::PPPort Todo
 ext/Devel-PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel-PPPort/t/ppphtest.t	Devel::PPPort test file
@@ -1797,14 +1797,14 @@ lib/autodie/t/filehandles.t		autodie - filehandle tests
 lib/autodie/t/fileno.t			autodie - fileno tests
 lib/autodie/t/flock.t			autodie - File locking tests
 lib/autodie/t/format-clobber.t		autodie - Don't clobber scalars
-lib/autodie/t/hints.t			autodie - Test hints interface
 lib/autodie/t/hints_insist.t		autodie - Test hints insistance
 lib/autodie/t/hints_pod_examples.t	autodie - Test hints POD examples
 lib/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
 lib/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
 lib/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
-lib/autodie/t/internal.t		autodie - internal interface tests
+lib/autodie/t/hints.t			autodie - Test hints interface
 lib/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
+lib/autodie/t/internal.t		autodie - internal interface tests
 lib/autodie/t/lethal.t			autodie - lethal is the one true name
 lib/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
 lib/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
@@ -1844,9 +1844,9 @@ lib/base/Changes		base.pm changelog
 lib/base.pm			Establish IS-A relationship at compile time
 lib/base/t/base.t		See if base works
 lib/base/t/compile-time.t	See if base works
-lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields-5.6.0.t	See if fields work
 lib/base/t/fields-5.8.0.t	See if fields work
+lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/base/t/isa.t		See if base's behaviour doesn't change
 lib/base/t/lib/Dummy.pm		Test module for base.pm
