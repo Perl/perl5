@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.35_03';
+$VERSION = '0.36';
 
 =pod
 
@@ -688,13 +688,15 @@ sub install {
     my %hash = @_;
 
     
-    my $verbose; my $perl; my $force;
+    my $verbose; my $perl; my $force; my $buildflags;
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
         my $tmpl = {
             verbose => { default => $conf->get_conf('verbose'),
                          store   => \$verbose },
             force   => { default => $conf->get_conf('force'),
                          store   => \$force },
+            buildflags => { default => $conf->get_conf('buildflags'),
+                            store   => \$buildflags },
             perl    => { default => $^X, store   => \$perl },
         };
     
@@ -725,7 +727,7 @@ sub install {
     }
 
     my $fail;
-    my @buildflags = $dist->_buildflags_as_list( $dist->status->_buildflags );
+    my @buildflags = $dist->_buildflags_as_list( $buildflags );
     my $run_perl    = $conf->get_program('perlwrapper');
 
     ### hmm, how is this going to deal with sudo?
@@ -811,7 +813,7 @@ terms as Perl itself.
 
 =cut
 
-1;
+qq[Putting the Module::Build into CPANPLUS];
 
 
 # Local variables:
