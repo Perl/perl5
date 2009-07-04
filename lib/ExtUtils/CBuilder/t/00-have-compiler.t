@@ -1,6 +1,9 @@
 #! perl -w
 
+use File::Spec;
+my $perl;
 BEGIN {
+  $perl = File::Spec->rel2abs($^X);
   if ($ENV{PERL_CORE}) {
     chdir 't' if -d 't';
     chdir '../lib/ExtUtils/CBuilder'
@@ -11,7 +14,6 @@ BEGIN {
 
 use strict;
 use Test::More;
-use File::Spec;
 BEGIN { 
   if ($^O eq 'VMS') {
     # So we can get the return value of system()
@@ -34,8 +36,8 @@ is( $b->have_compiler, 0, "have_compiler: fake missing cc" );
 
 # test found compiler
 $b->{have_compiler} = undef;
-$b->{config}{cc} = "$^X -e1 --";
-$b->{config}{ld} = "$^X -e1 --";
+$b->{config}{cc} = "$perl -e1 --";
+$b->{config}{ld} = "$perl -e1 --";
 is( $b->have_compiler, 1, "have_compiler: fake present cc" );
 
 
