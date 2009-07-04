@@ -218,7 +218,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
 #define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
 #define SSNEWa(size,align)	Perl_save_alloc(aTHX_ (size), \
-    (align - ((int)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
+    (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
 #define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
