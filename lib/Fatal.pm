@@ -39,7 +39,7 @@ use constant ERROR_58_HINTS => q{Non-subroutine %s hints for %s are not supporte
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 
 our $Debug ||= 0;
 
@@ -99,6 +99,7 @@ my %TAGS = (
     ':2.02'  => [qw(:default)],
     ':2.03'  => [qw(:default)],
     ':2.04'  => [qw(:default)],
+    ':2.05'  => [qw(:default)],
 );
 
 $TAGS{':all'}  = [ keys %TAGS ];

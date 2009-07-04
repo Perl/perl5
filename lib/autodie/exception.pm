@@ -14,7 +14,7 @@ use overload
 
 use if ($] >= 5.010), overload => '~~'  => "matches";
 
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 
 my $PACKAGE = __PACKAGE__;  # Useful to have a scalar for hash keys.
 
@@ -417,8 +417,20 @@ sub _format_open {
             [^&]                # Not an ampersand (which means a dup)
         }x;
 
-        # Have a funny mode?  Use the default format.
-        return $this->format_default if not defined $mode;
+        if (not $mode) {
+            # Maybe it's a 2-arg open without any mode at all?
+            # Detect the most simple case for this, where our
+            # file consists only of word characters.
+
+            if ( $file =~ m{^\s*\w+\s*$} ) {
+                $mode = '<'
+            }
+            else {
+                # Otherwise, we've got no idea what's going on.
+                # Use the default.
+                return $this->format_default;
+            }
+        }
 
         # Localising $! means perl make make it a pretty error for us.
         local $! = $this->errno;
@@ -517,7 +529,7 @@ sub stringify {
         return $sub->($this) . $this->add_file_and_line;
     }
 
-    return $this->format_default;
+    return $this->format_default . $this->add_file_and_line;
 
 }
 
@@ -568,8 +580,7 @@ sub format_default {
 
     # Format our beautiful error.
 
-    return "Can't $call(".  join(q{, }, @args) . "): $!" .
-        $this->add_file_and_line;
+    return "Can't $call(".  join(q{, }, @args) . "): $!" ;
 
     # TODO - Handle user-defined errors from hash.
 
