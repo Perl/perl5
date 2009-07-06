@@ -367,11 +367,11 @@ C<CPAN> upgraded from version 1.9205 to 1.9402
 
 =item *
 
-C<CPANPLUS> upgraded from version 0.84 to 0.8601
+C<CPANPLUS> upgraded from version 0.84 to 0.87_03
 
 =item *
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.32
+C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.36
 
 =item *
 
@@ -420,7 +420,7 @@ C<Exporter> upgraded from version 5.62 to 5.63
 
 =item *
 
-C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.26
+C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.2602
 
 =item *
 
@@ -453,7 +453,7 @@ C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.20
 
 =item *
 
-C<Fatal> upgraded from version 1.05 to 2.04. See also the new pragma
+C<Fatal> upgraded from version 1.05 to 2.05. See also the new pragma
 C<autodie>.
 
 =item *

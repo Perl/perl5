@@ -2928,9 +2928,7 @@ M  d092c3cd1c 2009/04/18 Add a --quiet option, to suppress all the routine
 M  3dc608da20 2009/04/18 grep then sort, as it's more efficient to sort a s
 M  7b73ff9889 2009/04/18 As autodoc.pl no longer rebuilds repository files,
 M  ce75ce2a31 2009/04/18 fix trivial typo in MANIFEST
-m  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
-			    lib/Module/Build.pm skipped for now;
-			    wait for Module::Build to sync with CPAN
+M  58ccccf697 2009/04/18 Here are some patches for QNX6 against 5.10.x. Unp
 M  2d871820ee 2009/04/18 autodoc.pl needs -Ilib. I had been testing with a 
 M  cd09325492 2009/04/18 Make autodoc.pl accept the root dir in @ARGV
 R  6fea91d48c 2009/04/18 Remove ExtUtils::MM_Haiku
@@ -3359,15 +3357,12 @@ R  a9df907534 2009/06/13 Resort MANIFEST.
 M  c0b6140e88 2009/06/13 Make SvOK and SvTRUE API docs slightly less utterl
 M  0228b1bbd4 2009/06/13 Update to Archive::Extract 0.32
 M  1c82faa772 2009/06/13 Update to Archive::Tar 1.50
-d  a0995fd479 2009/06/13 Update to CPANPLUS 0.87_01
-			    stick with 0.8601 for 5.10.1
-!  26ad458aeb 2009/06/13 Update CPANPLUS::Dist::Build to CPAN version 0.34
-			    appears to be a VMS issue
+M  a0995fd479 2009/06/13 Update to CPANPLUS 0.87_01
+M  26ad458aeb 2009/06/13 Update CPANPLUS::Dist::Build to CPAN version 0.34
 M  e8041d9b83 2009/06/13 In perlmodlib.PL, just open files in their origina
 M  291c64f4c0 2009/06/13 Make perlmodlib.PL chdir into pod. Add a -q flag t
 M  6e2c892858 2009/06/13 Generate perlmodlib.pod at build time, instead of 
-d  19be90356d 2009/06/13 Update CPANPLUS to 0.87_02
-			    stick with 0.8601 for 5.10.1
+M  19be90356d 2009/06/13 Update CPANPLUS to 0.87_02
 M  f475b4a222 2009/06/13 Update Archive::Tar to 1.52
 M  1e2f36ef3d 2009/06/13 Eliminate the regen_pods target from pod/Makefile,
 M  22b7b87b20 2009/06/13 Remove autodoc.pl from regen.pl and the lists of r
@@ -3396,8 +3391,7 @@ d  65269dc7d2 2009/06/15 Update 'threads' version in Maintainers.pl
 M  91490fbe11 2009/06/15 Update 'NEXT' version in Maintainers.pl
 d  afefe6bfcf 2009/06/16 Implement new regex escape \N
 M  17633433c1 2009/06/16 add-package.pl lib exclude fixed
-!  9441003632 2009/06/16 [PATCH] Updating Module::Build to 0.33_02
-			    wait for non-devel CPAN release
+M  9441003632 2009/06/16 [PATCH] Updating Module::Build to 0.33_02
 d  c741660aac 2009/06/17 Basic docs for \N
 d  cbf4a12974 2009/06/17 Some more tests for \N
 d  71e9c5323d 2009/06/17 Add perldelta entry for \N
@@ -3454,18 +3448,14 @@ M  9c3cb3e150 2009/06/23 version bumps in Maintainers.pl
 M  3eccaf6d20 2009/06/23 Update threads::shared in Porting/Maintainers.pl t
 M  8a9741846a 2009/06/23 Ammend unhelpful description of debugger watch com
 M  ddb418268d 2009/06/23 another Maintainers.pl version update
-!  16fb65535f 2009/06/23 sync lib/Module/Build/Changes with CPAN equivalent
-			    wait for non-devel CPAN release
+M  16fb65535f 2009/06/23 sync lib/Module/Build/Changes with CPAN equivalent
 M  49f8307ec5 2009/06/23 Add a paragraph noting that perl5-security-report@
 			    (added by hand to perl5101delta.pod)
 M  f337e9820d 2009/06/23 When writing a perldelta, choose either "regex" or
 M  aad1d01f81 2009/06/23 Note that the "Deep recursion" depth warning thres
-!  0b179affb5 2009/06/23 sync lib/CPANPLUS/Backend.pm with CPAN
-			    wait for 0.88
-!  627cd18c09 2009/06/24 Update CPANPLUS::Dist::Build to CPAN version 0.35_
-			    wait for 0.36?
-!  8bca5c8a8b 2009/06/24 Update Maintainers.pl accordingly
-			    wait for CPANPLUS::Dist::Build 0.36
+M  0b179affb5 2009/06/23 sync lib/CPANPLUS/Backend.pm with CPAN
+M  627cd18c09 2009/06/24 Update CPANPLUS::Dist::Build to CPAN version 0.35_
+M  8bca5c8a8b 2009/06/24 Update Maintainers.pl accordingly
 M  8c814d1a54 2009/06/24 core-cpan-diff: continue with next distro on downl
 M  f0ce33d74d 2009/06/24 core-cpan-diff: include author path in distro vers
 M  d4fb20eeed 2009/06/24 Fix some typos and grammar infelicities in core te
@@ -3487,8 +3477,7 @@ M  d00c6acb56 2009/06/26 pod/perlfilter.pod: two POD typos
 M  ee91d26e06 2009/06/26 Update RExC_npar and after_freeze correctly after 
 M  956cae9a39 2009/06/26 PATCH small documentation change for UCD.pm
 M  3bce050656 2009/06/26 One more regression test for RT #59734
-!  ef25d9aae6 2009/06/27 Update CPANPLUS::Dist::Build to CPAN version 0.35_
-			    wait for 0.36?
+M  ef25d9aae6 2009/06/27 Update CPANPLUS::Dist::Build to CPAN version 0.35_
 M  198e857cc6 2009/06/27 Update Archive::Extract to 0.34
 M  6b1bef9ae6 2009/06/27 Update CPAN.pm to 1.9402
 M  0e637710e6 2009/06/27 Changed to incorporate latest SDKs.
@@ -3497,8 +3486,7 @@ d  fe13d51d64 2009/06/27 Add test to make sure everything that outputs an e
 d  87a63fff81 2009/06/27 Add support for TODO diag tests -- a list in DATA 
 d  f7223e8e1a 2009/06/27 Adjustments to t/pod/diag.t
 M  8d16e270aa 2009/06/27 Upgrade to File::Fetch 0.20
-!  a3de5d0b2a 2009/06/27 Update CPANPLUS to 0.87_03
-			    wait for 0.88
+M  a3de5d0b2a 2009/06/27 Update CPANPLUS to 0.87_03
 d  fbad106ea7 2009/06/27 Make stash.t redirect stderr.
 M  ea0799344c 2009/06/27 sync blead with Update Archive::Extract 0.34
 M  c51ff80d06 2009/06/27 update Maintainers.pl
@@ -3517,8 +3505,7 @@ M  956e881e4f 2009/06/28 Bump version of fields.pm to 2.14 to match the ver
 d  7f6de3fd9c 2009/06/28 Add t/pod/diag.t to the MANIFEST
 M  0ee0837e8d 2009/06/28 Removed obsolete E32Dll dll entry point which was 
 M  f941e6586d 2009/06/28 Integrate version.pm-0.77 into bleadperl
-!  23837600fa 2009/06/29 Update Module::Build to 0.33_05
-			    wait for stable release
+M  23837600fa 2009/06/29 Update Module::Build to 0.33_05
 M  9b657a623c 2009/06/29 pjf: dual life modules
 M  74182dbd45 2009/06/29 fix MANIFEST perms & add case-insensitive exclude
 M  c3624cb8d7 2009/06/29 tjenness: dual life modules
@@ -3534,14 +3521,11 @@ M  205b02ff96 2009/06/30 more Maintainers.pl version tweaks
 M  2ff286160a 2009/06/30 Update to Scalar-List-Utils-1.21 from CPAN
 M  1460e873ec 2009/06/30 bump Scalar-List-Utils version in Maintainers.pl
 d  2221b6e72e 2009/07/01 Quiet t/op/stash.t output
-!  36392a5f57 2009/07/01 Update CPANPLUS::Dist::Build to CPAN version 0.35_
-			    wait for 0.36
+M  36392a5f57 2009/07/01 Update CPANPLUS::Dist::Build to CPAN version 0.35_
 M  9b5b006ca2 2009/07/01 patch submission(symbian/config.pl)
 M  fb51372e8e 2009/07/01 Make C<undef ~~ 0> and C<undef ~~ ""> not match (l
 M  f235159a74 2009/07/01 patch submission(symbian/PerlBase.h)
-!  100ba29750 2009/07/01 Update ExtUtils::CBuilder to 0.2601
-			    craig reports smoking issues
-			    see also 2ffb8fb7bd
+M  100ba29750 2009/07/01 Update ExtUtils::CBuilder to 0.2601
 M  eb8d423fed 2009/07/01 autodie 2.03
 M  9cf72a4efb 2009/07/01 [Configure]: avoid leaking Win32CORE.c into output
 M  bf79bdf5e2 2009/07/01 Tabs, not spaces, in MANIFEST.
@@ -3560,11 +3544,24 @@ M  1f003618ae 2009/07/03 bump memoize version to distinguish it from 5.8.9
 M  d0eaab344a 2009/07/03 Revert "Bump Module-Pluggable VERSION following
 M  47dd4b73b9 2009/07/03 upate Maintainers.pl versions
 M  dfe582519f 2009/07/03 sync CPAN with, er..., CPAN
-!  2ffb8fb7bd 2009/07/03 sync ExtUtils::CBuilder with CPAN
-			    wait for new release
-!  ededf8dc60 2009/07/03 sync Module::Build with CPAN
-			    wait for stable release
+M  2ffb8fb7bd 2009/07/03 sync ExtUtils::CBuilder with CPAN
+M  ededf8dc60 2009/07/03 sync Module::Build with CPAN
 M  ce2c78aa98 2009/07/03 mark I18N::LangTags as no longer dual-life
 M  2fb8ff88df 2009/07/03 add -x option to Porting/cmpVERSION.pl
 M  7536d87983 2009/07/03 make cmpVERSION.pl ignore Config.pm
 M  af048c1888 2009/07/03 bump versions of non-dual-life modules that
+M  6b99f28a36 2009/07/04 The 2nd arg to save_alloc() must be cast to I32 to
+M  02b13d1d54 2009/07/04 Merge autodie 2.05 into core.
+M  0183efc542 2009/07/04 Update CPANPLUS::Dist::Build to CPAN version 0.36
+M  9ef43512fc 2009/07/04 Updated ExtUtils::CBuilder to 0.2602
+M  752ce16633 2009/07/06 Update Module::Build to 0.33_06
+M  5cd3f21a9a 2009/07/06 Added missing 2009 to perl.h copyright header
+M  ab6722ad2c 2009/07/06 sync ExtUtils::CBuilder with CPAM
+M  e7d8bd5654 2009/07/06 sync Module::Build with CPAN
+M  95e016b968 2009/07/06 bump autodie veresion in Maintainers.pl
+M  cceec05296 2009/07/06 Maintainers.pl: Explanation as to why autodie test
+.  3e887aae38 2009/07/06 update to Test::Simple 0.92
+.  45d8b36ec0 2009/07/06 add core boilerplate to three new Test::Simple tes
+M  b7bed276c4 2009/07/06 clarify usage of Porting/Maintainers
+.  b36de39969 2009/07/06 re-add Test::Simple exclude accidentally removed d
+.  b074547015 2009/07/06 Don't dump autodie from core (was Re: Coring Varia
