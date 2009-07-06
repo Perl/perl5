@@ -449,7 +449,7 @@ package Maintainers;
     'CPANPLUS' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.8601.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.87_03.tar.gz',
 	'FILES'		=> q[lib/CPANPLUS.pm
 			     lib/CPANPLUS/Backend
 			     lib/CPANPLUS/Backend.pm
