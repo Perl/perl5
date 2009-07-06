@@ -102,18 +102,24 @@ sub get_maintainer_modules {
 }
 
 sub usage {
-    print <<__EOF__;
-$0: Usage: $0 [[--maintainer M --module M --files]|[--check] [commit] | [file ...]
---maintainer M	list all maintainers matching M
---module M	list all modules matching M
---files		list all files
---check		check consistency of Maintainers.pl
+    warn <<__EOF__;
+$0: Usage:
+    --maintainer M | --module M [--files]
+		List modules or maintainers matching the pattern M.
+		With --files, list all the files associated with them
+or
+    --check | --checkmani [commit | file ... | dir ... ]
+		Check consistency of Maintainers.pl
 			with a file	checks if it has a maintainer
 			with a dir	checks all files have a maintainer
-			otherwise	checks for multiple maintainers
---checkmani	like --check, but only reports on unclaimed files if they
-		    are in MANIFEST
---opened	list all modules of modified files
+			with a commit   checks files modified by that commit
+			no arg		checks for multiple maintainers
+	       --checkmani is like --check, but only reports on unclaimed
+	       files if they are in MANIFEST
+or
+    --opened  | file ....
+		List the module ownership of modified or the listed files
+
 Matching is case-ignoring regexp, author matching is both by
 the short id and by the full name and email.  A "module" may
 not be just a module, it may be a file or files or a subdirectory.
@@ -144,6 +150,7 @@ sub process_options {
     my @Files;
 
     if ($Opened) {
+	usage if @ARGV;
 	chomp (@Files = `git ls-files -m --full-name`);
 	die if $?;
     } elsif (@ARGV == 1 &&
