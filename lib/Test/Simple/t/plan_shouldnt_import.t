@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id$
 
 # plan() used to export functions by mistake [rt.cpan.org 8385]
 

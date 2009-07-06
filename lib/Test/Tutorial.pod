@@ -1,4 +1,3 @@
-# $Id$
 =head1 NAME
 
 Test::Tutorial - A tutorial about writing really basic tests

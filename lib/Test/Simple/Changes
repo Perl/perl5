@@ -1,3 +1,64 @@
+0.92  Fri Jul  3 11:08:56 PDT 2009
+    Test Fixes
+    * Silence noise on VMS in exit.t (Craig Berry)
+    * Skip Builder/fork_with_new_stdout.t on systems without fork (Craig Berry)
+    
+
+0.90  Thu Jul  2 13:18:25 PDT 2009
+    Docs
+    * Finally added a note about the "Wide character in print" warning and
+      how to work around it.
+    * Note the IO::Stringy license in our copy of it.
+      [test-more.googlecode.com 47]
+
+    Test Fixes
+    * Small fixes for integration with the Perl core
+      [bleadperl eaa0815147e13cd4ab5b3d6ca8f26544a9f0c3b4]
+    * exit code tests could be effected by errno when PERLIO=stdio
+      [bleadperl c76230386fc5e6fba9fdbeab473abbf4f4adcbe3]
+
+    Other
+    * This is a stable release for 5.10.1.  It does not include
+      the subtest() work in 0.89_01.
+
+
+0.88  Sat May 30 12:31:24 PDT 2009
+    Turing 0.87_03 into a stable release.
+
+
+0.87_03  Sun May 24 13:41:40 PDT 2009
+    New Features
+    * isa_ok() now works on classes. (Peter Scott)
+
+
+0.87_02  Sat Apr 11 12:54:14 PDT 2009
+    Test Fixes
+    * Some filesystems don't like it when you open a file for writing multiple
+      times.  Fixes t/Builder/reset.t. [rt.cpan.org 17298]
+    * Check how an operating system is going to map exit codes.  Some OS'
+      will map them... sometimes.  [rt.cpan.org 42148]
+    * Fix Test::Builder::NoOutput on 5.6.2.
+
+
+0.87_01  Sun Mar 29 09:56:52 BST 2009
+    New Features
+    * done_testing() allows you to declare that you have finished running tests,
+      and how many you ran.  It is a safer no_plan and effectively replaces it.
+    * output() now supports scalar references.
+
+    Feature Changes
+    * You can now run a test without first declaring a plan.  This allows
+      done_testing() to work.
+    * You can now call current_test() without first declaring a plan.
+
+    Bug Fixes
+    * skip_all() with no reason would output "1..0" which is invalid TAP.  It will
+      now always include the SKIP directive.
+
+    Other
+    * Repository moved to github.
+
+
 0.86  Sun Nov  9 01:09:05 PST 2008
     Same as 0.85_01
 

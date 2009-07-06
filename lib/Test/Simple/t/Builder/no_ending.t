@@ -1,4 +1,3 @@
-# $Id$
 use Test::Builder;
 
 BEGIN {

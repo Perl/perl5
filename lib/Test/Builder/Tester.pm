@@ -1,5 +1,4 @@
 package Test::Builder::Tester;
-# $Id$
 
 use strict;
 our $VERSION = "1.18";
