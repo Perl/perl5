@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 4061;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 4065;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -4347,6 +4347,21 @@ sub run_tests {
             iseq("@plus", "1 2 undef");
             iseq($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef");
        }
+    }
+
+    {
+	local $BugId = 65372;	# minimal CURLYM limited to 32767 matches
+	my @pat = (
+	    qr{a(x|y)*b},	# CURLYM
+	    qr{a(x|y)*?b},	# .. with minmod
+	    qr{a([wx]|[yz])*b},	# .. and without tries
+	    qr{a([wx]|[yz])*?b},
+	);
+	my $len = 32768;
+	my $s = join '', 'a', 'x' x $len, 'b';
+	for my $pat (@pat) {
+	    ok($s =~ $pat, $pat);
+	}
     }
     #
     # This should be the last test.

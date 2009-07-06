@@ -4363,7 +4363,7 @@ NULL
 	case CURLYM:	/* /A{m,n}B/ where A is fixed-length */
 
 	    /* This is an optimisation of CURLYX that enables us to push
-	     * only a single backtracking state, no matter now many matches
+	     * only a single backtracking state, no matter how many matches
 	     * there are in {m,n}. It relies on the pattern being constant
 	     * length, with no parens to influence future backrefs
 	     */
@@ -4526,7 +4526,8 @@ NULL
 	case CURLYM_B_fail: /* just failed to match a B */
 	    REGCP_UNWIND(ST.cp);
 	    if (ST.minmod) {
-		if (ST.count == ARG2(ST.me) /* max */)
+		I32 max = ARG2(ST.me);
+		if (max != REG_INFTY && ST.count == max)
 		    sayNO;
 		goto curlym_do_A; /* try to match a further A */
 	    }
