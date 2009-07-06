@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id$
 
 # Dave Rolsky found a bug where if current_test() is used and no
 # tests are run via Test::Builder it will blow up.

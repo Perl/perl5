@@ -3112,8 +3112,16 @@ lib/Test/Simple/t/buffer.t	Test::Builder buffering test
 lib/Test/Simple/t/Builder/Builder.t	Test::Builder tests
 lib/Test/Simple/t/Builder/carp.t	Test::Builder test
 lib/Test/Simple/t/Builder/create.t	Test::Builder test 
-lib/Test/Simple/t/Builder/curr_test.t	Test::Builder->curr_test tests
+lib/Test/Simple/t/Builder/current_test.t	Test::Builder tests
+lib/Test/Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/details.t	Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing_double.t	Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing_plan_mismatch.t	Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing.t		Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing_with_no_plan.t	Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing_with_number.t	Test::Builder tests
+lib/Test/Simple/t/Builder/done_testing_with_plan.t	Test::Builder tests
+lib/Test/Simple/t/Builder/fork_with_new_stdout.t	Test::Builder tests
 lib/Test/Simple/t/Builder/has_plan2.t	Test::Builder tests
 lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
 lib/Test/Simple/t/Builder/is_fh.t	Test::Builder tests
@@ -3121,6 +3129,7 @@ lib/Test/Simple/t/Builder/maybe_regex.t	Test::Builder tests
 lib/Test/Simple/t/Builder/no_diag.t	Test::Builder tests
 lib/Test/Simple/t/Builder/no_ending.t	Test::Builder tests
 lib/Test/Simple/t/Builder/no_header.t	Test::Builder tests
+lib/Test/Simple/t/Builder/no_plan_at_all.t	Test::Builder tests
 lib/Test/Simple/t/Builder/ok_obj.t	Test::Builder tests
 lib/Test/Simple/t/Builder/output.t	Test::Builder tests
 lib/Test/Simple/t/Builder/reset.t	Test::Builder tests
@@ -3185,6 +3194,7 @@ lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t	Test::More test, compile test
 lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
 lib/Test/Simple/t/utf8.t	Test::More test
+lib/Test/Simple/t/versions.t	Test::More test
 lib/Test/t/05_about_verbose.t	See if Test works
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
@@ -4036,6 +4046,7 @@ t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/Test/Builder/NoOutput.pm	Utility module for testing Test::Builder
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death.plx		for exit.t

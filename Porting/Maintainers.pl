@@ -1719,40 +1719,25 @@ package Maintainers;
     'Test::Simple' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.86.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.92.tar.gz',
 	'FILES'		=> q[lib/Test/Simple.pm
 			     lib/Test/Simple
 			     lib/Test/Builder.pm
 			     lib/Test/Builder
 			     lib/Test/More.pm
 			     lib/Test/Tutorial.pod
-			     t/lib/Test/Simple
+			     t/lib/Test/
 			     t/lib/Dev/Null.pm
 			    ],
 	'EXCLUDED'	=> [
 			     # NB - TieOut.pm comes with more than one
 			     # distro. We use the MM one
-			     # XXX should all these actually be excluded
-			     # from blead ???? - DAPM
 			     qw{.perlcriticrc
 				.perltidyrc
 				t/pod.t
 				t/pod-coverage.t
-				t/versions.t
-				t/Builder/current_test.t
-				t/Builder/current_test_without_plan.t
-				t/Builder/done_testing.t
-				t/Builder/done_testing_double.t
-				t/Builder/done_testing_plan_mismatch.t
-				t/Builder/done_testing_with_no_plan.t
-				t/Builder/done_testing_with_number.t
-				t/Builder/done_testing_with_plan.t
-				t/Builder/fork_with_new_stdout.t
-				t/Builder/no_plan_at_all.t
-				t/Builder/reset_outputs.t
 
 				lib/Test/Builder/IO/Scalar.pm
-				t/lib/Test/Builder/NoOutput.pm
 
 				t/lib/TieOut.pm
 			       }

@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id$
 
 # Testing to make sure Test::Builder doesn't accidentally store objects
 # passed in as test arguments.

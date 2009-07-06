@@ -1,5 +1,4 @@
 # ID 20020716.013, the exit code would become 0 if the test died
-# $Id$
 # before a plan.
 
 require Test::Simple;

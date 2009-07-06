@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id$
 
 # Test is_deeply and friends with circular data structures [rt.cpan.org 7289]
 

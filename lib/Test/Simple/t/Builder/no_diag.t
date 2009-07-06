@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id$
 
 use Test::More 'no_diag', tests => 2;
 
