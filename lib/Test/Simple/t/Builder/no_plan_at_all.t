@@ -3,7 +3,15 @@
 # Test what happens when no plan is delcared and done_testing() is not seen
 
 use strict;
-use lib 't/lib';
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
 
 use Test::Builder;
 use Test::Builder::NoOutput;

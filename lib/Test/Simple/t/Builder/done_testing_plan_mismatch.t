@@ -3,7 +3,15 @@
 # What if there's a plan and done_testing but they don't match?
 
 use strict;
-use lib 't/lib';
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
 
 use Test::Builder;
 use Test::Builder::NoOutput;
