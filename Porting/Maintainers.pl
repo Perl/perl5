@@ -1736,6 +1736,7 @@ package Maintainers;
 				.perltidyrc
 				t/pod.t
 				t/pod-coverage.t
+				t/Builder/reset_outputs.t
 
 				lib/Test/Builder/IO/Scalar.pm
 
