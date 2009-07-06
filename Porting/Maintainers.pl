@@ -205,7 +205,7 @@ package Maintainers;
     'autodie' =>
 	{
 	'MAINTAINER'	=> 'pjf',
-	'DISTRIBUTION'	=> 'PJF/autodie-2.04.tar.gz',
+	'DISTRIBUTION'	=> 'PJF/autodie-2.05.tar.gz',
 	'FILES' 	=> q[lib/Fatal.pm lib/autodie.pm lib/autodie],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 			     qw(
