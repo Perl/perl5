@@ -1827,6 +1827,8 @@ lib/autodie/t/open.t			autodie - Testing open
 lib/autodie/t/recv.t			autodie - send/recv tests
 lib/autodie/t/repeat.t			autodie - repeat autodie leak tests
 lib/autodie/t/scope_leak.t		autodie - file scope leak tests
+lib/autodie/t/string-eval-basic.t       autodie - Basic string eval test
+lib/autodie/t/string-eval-leak.t        autodie - String eval leak test
 lib/autodie/t/sysopen.t			autodie - sysopen tests
 lib/autodie/t/truncate.t		autodie - File truncation tests
 lib/autodie/t/unlink.t			autodie - Unlink system tests.
