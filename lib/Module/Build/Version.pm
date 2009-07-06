@@ -48,7 +48,7 @@ use strict;
 
 use vars qw(@ISA $VERSION $CLASS *declare *qv);
 
-$VERSION = 0;
+$VERSION = 0.77;
 
 $CLASS = 'version';
 
@@ -61,6 +61,7 @@ if ($] > 5.009001 && $] <= 5.010000) {
     no strict 'refs';
     *{'version::stringify'} = \*version::vpp::stringify;
     *{'version::(""'} = \*version::vpp::stringify;
+    *{'version::new'} = \*version::vpp::new;
 }
 
 # Preloaded methods go here.
@@ -121,6 +122,7 @@ use POSIX qw/locale_h/;
 use locale;
 use vars qw ($VERSION @ISA @REGEXS);
 $VERSION = '0.77';
+$VERSION = eval $VERSION;
 
 push @REGEXS, qr/
 	^v?	# optional leading 'v'

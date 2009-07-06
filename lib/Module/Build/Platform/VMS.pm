@@ -2,48 +2,12 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_05';
+$VERSION = '0.33_06';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
 use vars qw(@ISA);
 @ISA = qw(Module::Build::Base);
-
-# Need to look up the feature settings.  The preferred way is to use the
-# VMS::Feature module, but that may not be available to dual life modules.
-
-my $use_feature;
-BEGIN {
-    if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
-        $use_feature = 1;
-    }
-}
-
-# Need to look up the UNIX report mode.  This may become a dynamic mode
-# in the future.
-sub _unix_rpt {
-    my $unix_rpt;
-    if ($use_feature) {
-        $unix_rpt = VMS::Feature::current("filename_unix_report");
-    } else {
-        my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
-    }
-    return $unix_rpt;
-}
-
-# Need to look up the EFS character set mode.  This may become a dynamic
-# mode in the future.
-sub _efs {
-    my $efs;
-    if ($use_feature) {
-        $efs = VMS::Feature::current("efs_charset");
-    } else {
-        my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ET1]/i; 
-    }
-    return $efs;
-}
 
 
 
