@@ -208,6 +208,12 @@ package Maintainers;
 	'DISTRIBUTION'	=> 'PJF/autodie-2.05.tar.gz',
 	'FILES' 	=> q[lib/Fatal.pm lib/autodie.pm lib/autodie],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
+
+                             # All these tests depend upon external
+                             # modules that don't exist when we're
+                             # building the core.  Hence, they can
+                             # never run, and should not be merged.
+
 			     qw(
 				t/boilerplate.t
 				t/critic.t
