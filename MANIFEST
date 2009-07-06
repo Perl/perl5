@@ -2239,6 +2239,7 @@ lib/ExtUtils/t/fix_libs.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/hints.t		See if hint files are honored.
 lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
+lib/ExtUtils/t/installed_file.t Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs

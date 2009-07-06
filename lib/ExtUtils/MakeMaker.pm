@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.53_02';
+our $VERSION = '6.53_03';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -457,22 +457,15 @@ END
 
     my(%unsatisfied) = ();
     foreach my $prereq (sort keys %{$self->{PREREQ_PM}}) {
-        my $file = "$prereq.pm";
-        $file =~ s{::}{/}g;
-        my $path;
-        for my $dir (@INC) {
-            my $tmp = File::Spec->catfile($dir, $file);
-            if( -r $tmp ) {
-                $path = $tmp;
-                last;
-            }
-        }
-        my $pr_version = defined $path ? MM->parse_version($path) : 0;
+        my $installed_file = MM->_installed_file_for_module($prereq);
+        my $pr_version = 0;
+        $pr_version = MM->parse_version($installed_file) if $installed_file;
+        $pr_version = 0 if $pr_version eq 'undef';
 
         # convert X.Y_Z alpha version #s to X.YZ for easier comparisons
         $pr_version =~ s/(\d+)\.(\d+)_(\d+)/$1.$2$3/;
 
-        if (!defined $path) {
+        if (!$installed_file) {
             warn sprintf "Warning: prerequisite %s %s not found.\n", 
               $prereq, $self->{PREREQ_PM}{$prereq} 
                    unless $self->{PREREQ_FATAL};
@@ -717,6 +710,42 @@ test :
 EOP
     close $mfh or die "close $new for write: $!";
 }
+
+
+=begin private
+
+=head3 _installed_file_for_module
+
+  my $file = MM->_installed_file_for_module($module);
+
+Return the first installed .pm $file associated with the $module.  The
+one which will show up when you C<use $module>.
+
+$module is something like "strict" or "Test::More".
+
+=end private
+
+=cut
+
+sub _installed_file_for_module {
+    my $class  = shift;
+    my $prereq = shift;
+
+    my $file = "$prereq.pm";
+    $file =~ s{::}{/}g;
+
+    my $path;
+    for my $dir (@INC) {
+        my $tmp = File::Spec->catfile($dir, $file);
+        if ( -r $tmp ) {
+            $path = $tmp;
+            last;
+        }
+    }
+
+    return $path;
+}
+
 
 sub check_manifest {
     print STDOUT "Checking if your kit is complete...\n";
