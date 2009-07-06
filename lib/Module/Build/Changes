@@ -1,5 +1,15 @@
 Revision history for Perl extension Module::Build.
 
+0.33_06 - Sun Jul  5 10:11:40 EDT 2009
+
+ Bug-fixes:
+ - Bundled version code will use pure Perl on 5.10.0 to work around
+   a corner case involving eval and locale [John Peacock]
+ - Reversed VMS patch from 0.33_03 [Craig Berry]
+ - PL_files in Build.PL that are in the bin/scripts directory should not be
+   installed as if they are scripts (fixed for case-tolerant systems). 
+   [David Golden, reported by Craig Berry]
+
 0.33_05 - Sun Jun 28 22:06:49 EDT 2009
 
  Enhancements:
