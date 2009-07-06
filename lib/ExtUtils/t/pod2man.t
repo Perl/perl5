@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 
+# Test our simulation of pod2man
+
 BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir 't' if -d 't';
-        @INC = qw(../lib);
+        @INC = qw(../lib lib);
     }
 }
-
-# Test our simulation of pod2man
 
 use strict;
 use lib 't/lib';

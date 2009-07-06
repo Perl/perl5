@@ -1,3 +1,20 @@
+6.53_03  Thu Jul  2 14:47:45 PDT 2009
+    Bug Fixes
+    * You'd get a warning if you had a PREREQ_PM on a module with no $VERSION
+      like Config (broken in 6.51_01) [rt.cpan.org 47448]
+
+    Test Fixes
+    * Upgrade the version of Test::More we ship with to 0.88.
+    * Fix MM_Cygwin.t for older Perls missing Cygwin::win_to_posix_path()
+      broken in 6.53_01.
+    * Fix miniperl.t for Windows.  Our method of shutting off XS didn't
+      work for Win32.pm
+    * Old versions of version.pm, like what ships with OS X, dent Foo->VERSION
+      causing prereq.t to fail.  [rt.cpan.org 47296]
+    * Add missing core test boilerplates
+      [blead e39d780342f3e91579069fdc80eda72bfe639ae7]
+
+
 6.53_02  Sun Jun  7 19:24:56 PDT 2009
     Test Fixes
     * Stray use of Shell::Command broke older perls
