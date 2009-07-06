@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_05';
+$VERSION = '0.33_06';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -3500,24 +3500,32 @@ sub _files_in {
 
 sub script_files {
   my $self = shift;
-  
+
   for ($self->{properties}{script_files}) {
     $_ = shift if @_;
     next unless $_;
-    
+
     # Always coerce into a hash
     return $_ if UNIVERSAL::isa($_, 'HASH');
     return $_ = { map {$_,1} @$_ } if UNIVERSAL::isa($_, 'ARRAY');
-    
+
     die "'script_files' must be a hashref, arrayref, or string" if ref();
-    
+
     return $_ = { map {$_,1} $self->_files_in( $_ ) } if -d $_;
     return $_ = {$_ => 1};
   }
-  
-  my %pl_files = map { File::Spec->canonpath($_) => 1 }
-                 keys %{ $self->PL_files || {} };
-  return $_ = { map {$_ => 1} grep !$pl_files{$_}, $self->_files_in('bin') };
+
+  my %pl_files = map {
+    File::Spec->canonpath( File::Spec->case_tolerant ? uc $_ : $_ ) => 1 
+  } keys %{ $self->PL_files || {} };
+
+  my @bin_files = $self->_files_in('bin');
+
+  my %bin_map = map {
+    $_ => File::Spec->canonpath( File::Spec->case_tolerant ? uc $_ : $_ ) 
+  } @bin_files;
+
+  return $_ = { map {$_ => 1} grep !$pl_files{$bin_map{$_}}, @bin_files };
 }
 BEGIN { *scripts = \&script_files; }
 

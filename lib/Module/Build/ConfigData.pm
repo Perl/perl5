@@ -67,6 +67,7 @@ sub feature {
     while (my ($modname, $spec) = each %p) {
       my $status = Module::Build->check_installed_status($modname, $spec);
       if ((!$status->{ok}) xor ($type =~ /conflicts$/)) { return 0; }
+      if ( ! eval "require $modname; 1" ) { return 0; }
     }
   }
   return 1;
