@@ -8,7 +8,7 @@ our @ISA = qw(Fatal);
 our $VERSION;
 
 BEGIN {
-    $VERSION = '2.05';
+    $VERSION = '2.06';
 }
 
 use constant ERROR_WRONG_FATAL => q{
@@ -351,11 +351,6 @@ See also L<Fatal/DIAGNOSTICS>.
 is used with package filehandles (eg, C<FILE>).  Scalar filehandles are
 strongly recommended instead.
 
-Under Perl 5.8 only, C<autodie> I<does not> propagate into string C<eval>
-statements, although it can be explicitly enabled inside a string
-C<eval>.  This bug does not affect block C<eval> statements in
-any version of Perl.
-
 When using C<autodie> or C<Fatal> with user subroutines, the
 declaration of those subroutines must appear before the first use of
 C<Fatal> or C<autodie>, or have been exported from a module.
@@ -364,6 +359,28 @@ result in a compile-time error.
 
 Due to a bug in Perl, C<autodie> may "lose" any format which has the
 same name as an autodying built-in or function.
+
+C<autodie> may not work correctly if used inside a file with a
+name that looks like a string eval, such as F<eval (3)>.
+
+=head2 autodie and string eval
+
+Due to the current implementation of C<autodie>, unexpected results
+may be seen when used near or with the string version of eval.
+I<None of these bugs exist when using block eval>.
+
+Under Perl 5.8 only, C<autodie> I<does not> propagate into string C<eval>
+statements, although it can be explicitly enabled inside a string
+C<eval>.
+
+Under Perl 5.10 only, using a string eval when C<autodie> is in
+effect can cause the autodie behaviour to leak into the surrounding
+scope.  This can be worked around by using a C<no autodie> at the
+end of the scope to explicitly remove autodie's effects, or by
+avoiding the use of string eval.
+
+I<None of these bugs exist when using block eval>.  The use of
+C<autodie> with block eval is considered good practice.
 
 =head2 REPORTING BUGS
 
