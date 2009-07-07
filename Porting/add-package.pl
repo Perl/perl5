@@ -80,7 +80,7 @@ my @LibFiles;
                                 undef
                             }
                         : 1
-                     } `find $Repo/lib -type f`
+                     } `find lib -type f`
         or die "Could not detect library files\n";
       
     print "done\n" if $Verbose;
@@ -141,11 +141,11 @@ my @TestFiles;
                     ### should we get rid of this file?
                     grep { $ExcludeRe && $_ =~ $ExcludeRe
                         ? do {  warn "Removing $_\n";
-                                system("rm $_") and die "rm '$_' failed: $?";
+                                system("rm $TopDir/$_") and die "rm '$_' failed: $?";
                                 undef
                             }
                         : 1
-                     } `find $TopDir/t -type f`
+                     } `find t -type f`
         or die "Could not detect testfiles\n";
 
     print "done\n" if $Verbose;
@@ -173,11 +173,11 @@ BIN: {
                 ### should we get rid of this file?
                 grep { $ExcludeRe && $_ =~ $ExcludeRe
                     ? do {  warn "Removing $_\n";
-                            system("rm $_") and die "rm '$_' failed: $?";
+                            system("rm $TopDir/$_") and die "rm '$_' failed: $?";
                             undef
                         }
                     : 1
-                 } `find $TopBinDir -type f`
+                 } `find $BinDir -type f`
         or die "Could not detect binfiles\n";
 
     print "done\n" if $Verbose;
