@@ -98,6 +98,13 @@ ok( $Mod,                       "Loaded object for: " . $InstMod->name );
 ok( $Mod->fetch,                "Fetching module to ".$Mod->status->fetch );
 ok( $Mod->extract,              "Extracting module to ".$Mod->status->extract );
 
+### test target => 'init'
+{   my $dist = $Mod->dist( target => TARGET_INIT );
+    ok( $dist,                  "Dist created with target => " . TARGET_INIT );
+    ok( !$dist->status->prepared,
+                                "   Prepare was not run" );
+}                                
+
 ok( $Mod->test,                 "Testing module" );
 
 ok( $Mod->status->dist_cpan->status->test,

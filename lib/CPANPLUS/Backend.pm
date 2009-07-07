@@ -1103,7 +1103,9 @@ $name - Snapshot of your installation at $now
 
 $head SYNOPSIS
 
-perl -MCPANPLUS -e "install file://full/path/to/$name"
+To install the modules from this snapshot, run:
+
+  cpanp -i file://full/path/to/${name}.pm
 
 $head CONTENTS
 
