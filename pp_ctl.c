@@ -3258,11 +3258,8 @@ PP(pp_require)
 	/* If a version >= 5.11.0 is requested, strictures are on by default! */
 	if (PL_compcv &&
 		vcmp(sv, sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
-	    ENTER;
-	    Perl_load_module(aTHX_ 0, newSVpvs("strict"), NULL, NULL, NULL);
-	    LEAVE;
+	    PL_hints |= (HINT_STRICT_REFS | HINT_STRICT_SUBS | HINT_STRICT_VARS);
 	}
-
 
 	RETPUSHYES;
     }

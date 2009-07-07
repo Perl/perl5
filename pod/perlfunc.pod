@@ -6948,7 +6948,8 @@ Also, if the specified perl version is greater than or equal to 5.9.5,
 C<use VERSION> will also load the C<feature> pragma and enable all
 features available in the requested version.  See L<feature>.
 Similarly, if the specified perl version is greater than or equal to
-5.11.0, strictures are enabled lexically as with C<use strict;>.
+5.11.0, strictures are enabled lexically as with C<use strict> (except
+that the F<strict.pm> file is not actually loaded).
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been
