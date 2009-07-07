@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 70);
+plan(tests => 71);
 
 use Config;
 
@@ -351,6 +351,11 @@ $r = runperl(
     stdin       => 'zomtek',
 );
 is( $r, "affe\n", '-E works outside of the block created by -n' );
+
+$r = runperl(
+    switches	=> [ '-E', q("*{'bar'} = sub{}; print 'Hello, world!',qq|\n|;")]
+);
+is( $r, "Hello, world!\n", "-E does not enable strictures" );
 
 # RT #30660
 
