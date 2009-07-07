@@ -31,8 +31,7 @@ WriteMakefile(
     'PREREQ_PM'	=> {
         'IO::File' => 0, #build
         'File::Spec' => 0, #build
-        # XXX tmp ignore to stop build failures
-	# 'Math::BigInt' => 0,
+        'Math::BigInt' => 0,
         'Win32' => 0,
     }
 );
