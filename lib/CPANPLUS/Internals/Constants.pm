@@ -39,6 +39,7 @@ use constant CONFIG_BOXED   => 'CPANPLUS::Config::Boxed';
 use constant DEFAULT_SOURCE_ENGINE
                             => 'CPANPLUS::Internals::Source::Memory';
 
+use constant TARGET_INIT    => 'init';
 use constant TARGET_CREATE  => 'create';
 use constant TARGET_PREPARE => 'prepare';
 use constant TARGET_INSTALL => 'install';
