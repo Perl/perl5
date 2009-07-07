@@ -3205,14 +3205,8 @@ M  abba722db5 2009/05/31 wrap some long FILES fields in Maintainers.pl
 M  c494f1f448 2009/05/31 Fix casting warning
 d  d22862789d 2009/05/31 Auto-complete lexicals in the debugger shell
 M  20f91e418d 2009/05/31 Mention Devel::NYTProf in perldebug
-!  5bdf71cc92 2009/06/01 Upgrade to ExtUtils::MakeMaker 6.52
-				wait for MM 6.54 ??
-				    then also merge:
-					5bc8648cf6
-					9a7d94ef19
-					ee0ea5142b
-!  5bc8648cf6 2009/06/01 Add test boilerplate to the new MakeMaker tests
-				wait for MM 6.54 ??
+M  5bdf71cc92 2009/06/01 Upgrade to ExtUtils::MakeMaker 6.52
+M  5bc8648cf6 2009/06/01 Add test boilerplate to the new MakeMaker tests
 M  c6ebb5120d 2009/06/01 Minor doc fix for the smart table legend (clarify 
 M  ee18cc6c23 2009/06/01 Smart-match perldelta adjustments
 			    (merged by hand into perl5101delta.pod rather
@@ -3225,12 +3219,12 @@ d  58da6fbcb8 2009/06/01 Add benchmark test for keys() on empty hashes (RT2
 M  0106d5186f 2009/06/02 resync some files with their CPAN equivalents (jus
 M  f09dbad6e7 2009/06/02 start adding new EXCLUDED and MAP entries to Maint
 M  0e945d0082 2009/06/02 stop git whining about trailing whitespace (picky 
-!  9a7d94ef19 2009/06/02 Merge branch 'eumm652' into blead
+R  9a7d94ef19 2009/06/02 Merge branch 'eumm652' into blead
 				MERGE: 0e945d0082 5bc8648cf6
-				wait for MM 6.54 ??
+				individual components cherry-picked
 R  abf6c2ea23 2009/06/02 Merge branch 'smartmatch' into blead
 				MERGE: 9a7d94ef19 532217f118
-!  ee0ea5142b 2009/06/02 Adjust MANIFEST
+M  ee0ea5142b 2009/06/02 Adjust MANIFEST
 d  9eb4ebd161 2009/06/02 In Perl_hv_iternext_flags(), clarify and generalis
 M  ab45a0fa26 2009/06/02 Disentangling -g and -DDEBUGGING is a TODO.
 M  5988ef3d51 2009/06/02 parenthesize check for a flag
@@ -3263,7 +3257,7 @@ d  c8be058c40 2009/06/04 Assuming that $SIG{PIPE} is not set can be bogus w
 !  1be14c39f7 2009/06/04 Correctly interpolate the attempted permissions as
 			    more File::Copy stuff
 M  30e682852b 2009/06/04 vms.c EFS logical name fix.
-!  8415bfe009 2009/06/04 MakeMaker must handle an empty $self->{LIBS} array
+M  8415bfe009 2009/06/04 MakeMaker must handle an empty $self->{LIBS} array
 M  50255d58c0 2009/06/04 Test case to go with 30e682852bf42358156ed62e06e91
 d  422c59bf48 2009/06/04 Fix my comment about DB::sub and make it DB::DB
 M  e8b9ce6006 2009/06/05 [perl #9328] Update INSTALL example for BerkeleyDB
@@ -3289,8 +3283,8 @@ d  26618b64e8 2009/06/07 Bump version of threads.pm
 d  7dcc656fa9 2009/06/07 Add a test for a thread-enabled debugger
 M  a39e16d8bc 2009/06/07 Upgrade to Test-Harness-3.17
 d  d2aa556d1d 2009/06/07 There is no pthread_sigmask on VMS, so use sigproc
-!  c095625522 2009/06/08 Upgrade to MakeMaker 6.53_02
-!  e39d780342 2009/06/08 Add missing test boilerplates to new MakeMaker tes
+M  c095625522 2009/06/08 Upgrade to MakeMaker 6.53_02
+M  e39d780342 2009/06/08 Add missing test boilerplates to new MakeMaker tes
 d  d7dfc388e0 2009/06/08 fix RT 39060, errno incorrectly set in perlio
 			    see also fcac5cf149
 M  3c2847f4f8 2009/06/08 Upgrade NEXT to 0.64.
@@ -3319,7 +3313,7 @@ d  26e8050aaf 2009/06/10 [perl #66452] TMPDIR not honored when opening an a
 			    see also 0b99e9860e
 R  454dbe4084 2009/06/10 Merge branch 'blead' of ssh://stevep@perl5.git.per
 				MERGE: 26e8050aaf 12c541f435
-!  75b0fd110a 2009/06/10 remove from blead, some files already removed from
+M  75b0fd110a 2009/06/10 remove from blead, some files already removed from
 M  8bc7f08e00 2009/06/10 update comment in overload.pl following 813720522f
 M  92a24ac3df 2009/06/10 Small typo in example.
 d  0b99e9860e 2009/06/10 Do not honor TMPDIR for anonymous temporary files 
@@ -3560,8 +3554,14 @@ M  ab6722ad2c 2009/07/06 sync ExtUtils::CBuilder with CPAM
 M  e7d8bd5654 2009/07/06 sync Module::Build with CPAN
 M  95e016b968 2009/07/06 bump autodie veresion in Maintainers.pl
 M  cceec05296 2009/07/06 Maintainers.pl: Explanation as to why autodie test
-.  3e887aae38 2009/07/06 update to Test::Simple 0.92
-.  45d8b36ec0 2009/07/06 add core boilerplate to three new Test::Simple tes
+M  3e887aae38 2009/07/06 update to Test::Simple 0.92
+M  45d8b36ec0 2009/07/06 add core boilerplate to three new Test::Simple tes
 M  b7bed276c4 2009/07/06 clarify usage of Porting/Maintainers
-.  b36de39969 2009/07/06 re-add Test::Simple exclude accidentally removed d
-.  b074547015 2009/07/06 Don't dump autodie from core (was Re: Coring Varia
+M  b36de39969 2009/07/06 re-add Test::Simple exclude accidentally removed d
+M  b074547015 2009/07/06 Don't dump autodie from core (was Re: Coring Varia
+M  84d2fa142c 2009/07/06 Regex fails when string is too long
+M  75e3c8a32e 2009/07/06 upgrade to ExtUtils::MakeMaker 6.53_03
+M  58118e0c79 2009/07/07 limit what add-package.pl might try to delete
+M  56bfbabc02 2009/07/07 rebump Hash::Util::FieldHash from 1.03_01 to 1.04
+M  8bc57f96f9 2009/07/07 update to CPANPLUS 0.88
+M  5f244db984 2009/07/07 some fixes to makerel:

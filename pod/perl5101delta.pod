@@ -209,6 +209,10 @@ L<TAP::Harness> needs to be able to schedule individual non-conflicting test
 scripts itself, and there is no standard interface to C<make> utilities to
 interact with their job schedulers.
 
+Note that currently some test scripts may fail when run in parallel (most
+notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
+again sequentially and see if the failures go away.
+
 XXX do we now have dtrace?
 
 =head2 Support for C<configure_requires> in CPAN module metadata
@@ -255,6 +259,10 @@ C<Parse::CPAN::Meta> has been added to the core (version 1.39).
 
 upgraded from version 0.08 to 0.09.
 
+=item C<attrs>
+
+upgraded from version 1.02 to 1.03.
+
 =item C<base>
 
 upgraded from version 2.13 to 2.14. See L<parent> for a replacement.
@@ -272,6 +280,8 @@ upgraded from version 0.22 to 0.23
 upgraded from version 0.22 to 0.23
 
 =item C<charnames>
+
+upgraded from version 1.06 to 1.07
 
 The Unicode NameAliases.txt database file has been added. This has the
 effect of adding some extra C<\N> character names that formerly wouldn't
@@ -298,6 +308,14 @@ were no functional changes)
 =item C<lib>
 
 upgraded from version 0.5565 to 0.62
+
+=item C<open>
+
+upgraded from version 1.06 to 1.07
+
+=item C<overload>
+
+upgraded from version 1.06 to 1.07
 
 =item C<overloading>
 
@@ -351,7 +369,15 @@ C<B::Lint> upgraded from version 1.09 to 1.11
 
 =item *
 
-C<Carp> upgraded from version 1.08 to 1.10
+C<B::Xref> upgraded from version 1.01 to 1.02
+
+=item *
+
+C<Benchmark> upgraded from version 1.10 to 1.11
+
+=item *
+
+C<Carp> upgraded from version 1.08 to 1.11
 
 =item *
 
@@ -367,7 +393,7 @@ C<CPAN> upgraded from version 1.9205 to 1.9402
 
 =item *
 
-C<CPANPLUS> upgraded from version 0.84 to 0.87_03
+C<CPANPLUS> upgraded from version 0.84 to 0.88
 
 =item *
 
@@ -387,6 +413,10 @@ C<Devel::PPPort> upgraded from version 3.13 to 3.19
 
 =item *
 
+C<DB> upgraded from version 1.01 to 1.02
+
+=item *
+
 C<DB_File> upgraded from version 1.816_1 to 1.820
 
 =item *
@@ -399,12 +429,15 @@ C<Digest::SHA> upgraded from version 5.45 to 5.47
 
 =item *
 
-C<DirHandle> upgraded from version 1.01 to 1.02
+C<DirHandle> upgraded from version 1.01 to 1.03
+
+=item *
+
+C<Dumpvalue> upgraded from version 1.12 to 1.13
 
 =item *
 
 C<Dynaloader> upgraded from version 1.09 to 1.10
-bleed/maint
 
 =item *
 
@@ -441,7 +474,10 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.50
+C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.53_03
+
+Note that C<ExtUtils::MakeMaker::bytes> and C<ExtUtils::MakeMaker::vmsish>
+have been removed from this distribution.
 
 =item *
 
@@ -459,6 +495,10 @@ C<autodie>.
 =item *
 
 C<File::Basename> upgraded from version 2.76 to 2.77
+
+=item *
+
+C<File::Compare> upgraded from version 1.1005 to 1.1006
 
 =item *
 
@@ -494,6 +534,10 @@ C<FileCache> upgraded from version 1.07 to 1.08
 
 =item *
 
+C<FileHandle> upgraded from version 2.01 to 2.02
+
+=item *
+
 C<Filter::Simple> upgraded from version 0.82 to 0.84
 
 =item *
@@ -514,8 +558,12 @@ C<Getopt::Long> upgraded from version 2.37 to 2.38
 
 =item *
 
-C<Hash::Util::FieldHash> upgraded from version 1.03 to 1.03_01. XXX
+C<Hash::Util::FieldHash> upgraded from version 1.03 to 1.04.
 This fixes a memory leak.
+
+=item *
+
+C<I18N::Collate> upgraded from version 1.00 to 1.01
 
 =item *
 
@@ -625,6 +673,10 @@ C<Module::Pluggable> upgraded from version 3.6 to 3.9
 
 =item *
 
+C<NDBM_File> upgraded from version 1.07 to 1.08
+
+=item *
+
 C<Net::Ping> upgraded from version 2.33 to 2.36
 
 =item *
@@ -642,6 +694,10 @@ C<OS2::REXX> upgraded from version 1.03 to 1.04
 =item *
 
 C<Package::Constants> upgraded from version 0.01 to 0.02
+
+=item *
+
+C<PerlIO> upgraded from version 1.04 to 1.06
 
 =item *
 
@@ -677,7 +733,15 @@ C<Scalar::Util> upgraded from version 1.19 to 1.21
 
 =item *
 
+C<SelectSaver> upgraded from 1.01 to 1.02
+
+=item *
+
 C<SelfLoader> upgraded from 1.11 to 1.17
+
+=item *
+
+C<Socket> upgraded from 1.80 to 1.82
 
 =item *
 
@@ -709,6 +773,10 @@ C<Term::ANSIColor> upgraded from version 1.12 to 2.00
 
 =item *
 
+C<Term::ReadLine> upgraded from version 1.03 to 1.04
+
+=item *
+
 C<Term::UI> upgraded from version 0.18 to 0.20
 
 =item *
@@ -724,7 +792,7 @@ removed. If you still need this, then they are available in the
 
 =item *
 
-C<Test::Simple> upgraded from version 0.72 to 0.86_01 XXX not a CPAN release
+C<Test::Simple> upgraded from version 0.72 to 0.92
 
 =item *
 
@@ -783,6 +851,10 @@ previously missing information.  The old fields are retained for backwards
 compatibility. Information about Turkic-specific code points is now returned.
 
 The documentation has been corrected and expanded.
+
+=item *
+
+C</UNIVERSAL> upgraded from version 1.04 to version 1.05
 
 =item *
 
