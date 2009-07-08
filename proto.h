@@ -131,7 +131,7 @@ PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int di
 #define PERL_ARGS_ASSERT_AMAGIC_CALL	\
 	assert(left); assert(right)
 
-PERL_CALLCONV bool	Perl_Gv_AMupdate(pTHX_ HV* stash)
+PERL_CALLCONV bool	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_AMUPDATE	\
 	assert(stash)

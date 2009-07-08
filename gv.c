@@ -1666,7 +1666,7 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 /* Updates and caches the CV's */
 
 bool
-Perl_Gv_AMupdate(pTHX_ HV *stash)
+Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 {
   dVAR;
   MAGIC* const mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
@@ -1757,12 +1757,17 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by "can"). */
-		    const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
-		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
-				"in package \"%.256s\"",
-			       (GvCVGEN(gv) ? "Stub found while resolving"
-				: "Can't resolve"),
-			       name, cp, hvname);
+		    if (destructing) {
+			return FALSE;
+		    }
+		    else {
+			const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
+			Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
+				    "in package \"%.256s\"",
+				   (GvCVGEN(gv) ? "Stub found while resolving"
+				    : "Can't resolve"),
+				   name, cp, hvname);
+		    }
 		}
 		cv = GvCV(gv = ngv);
 	    }
@@ -1814,7 +1819,19 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     if (!mg) {
       do_update:
-	Gv_AMupdate(stash);
+	/* If we're looking up a destructor to invoke, we must avoid
+	 * that Gv_AMupdate croaks, because we might be dying already */
+	if (!Gv_AMupdate(stash, id == DESTROY_amg)) {
+	    /* and if it didn't found a destructor, we fall back
+	     * to a simpler method that will only look for the
+	     * destructor instead of the whole magic */
+	    if (id == DESTROY_amg) {
+		GV * const gv = gv_fetchmethod(stash, "DESTROY");
+		if (gv)
+		    return GvCV(gv);
+	    }
+	    return NULL;
+	}
 	mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     }
     assert(mg);
