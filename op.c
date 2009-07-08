@@ -103,6 +103,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "keywords.h"
 
 #define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
+#define CALL_OPFREEHOOK(o) if (PL_opfreehook) CALL_FPTR(PL_opfreehook)(aTHX_ o)
 
 #if defined(PL_OP_SLAB_ALLOC)
 
@@ -481,6 +482,11 @@ Perl_op_free(pTHX_ OP *o)
 	    break;
 	}
     }
+
+    /* Call the op_free hook if it has been set. Do it now so that it's called
+     * at the right time for refcounted ops, but still before all of the kids
+     * are freed. */
+    CALL_OPFREEHOOK(o);
 
     if (o->op_flags & OPf_KIDS) {
         register OP *kid, *nextkid;

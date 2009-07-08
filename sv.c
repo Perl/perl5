@@ -12326,6 +12326,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Ipeepp;
+    /* op_free() hook */
+    PL_opfreehook	= proto_perl->Iopfreehook;
 
     PL_stashcache       = newHV();
 

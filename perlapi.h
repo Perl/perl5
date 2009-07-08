@@ -466,6 +466,8 @@ END_EXTERN_C
 #define PL_op			(*Perl_Iop_ptr(aTHX))
 #undef  PL_op_mask
 #define PL_op_mask		(*Perl_Iop_mask_ptr(aTHX))
+#undef  PL_opfreehook
+#define PL_opfreehook		(*Perl_Iopfreehook_ptr(aTHX))
 #undef  PL_opsave
 #define PL_opsave		(*Perl_Iopsave_ptr(aTHX))
 #undef  PL_origalen

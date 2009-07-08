@@ -215,6 +215,7 @@
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_op			(vTHX->Iop)
 #define PL_op_mask		(vTHX->Iop_mask)
+#define PL_opfreehook		(vTHX->Iopfreehook)
 #define PL_opsave		(vTHX->Iopsave)
 #define PL_origalen		(vTHX->Iorigalen)
 #define PL_origargc		(vTHX->Iorigargc)
@@ -528,6 +529,7 @@
 #define PL_Ioldname		PL_oldname
 #define PL_Iop			PL_op
 #define PL_Iop_mask		PL_op_mask
+#define PL_Iopfreehook		PL_opfreehook
 #define PL_Iopsave		PL_opsave
 #define PL_Iorigalen		PL_origalen
 #define PL_Iorigargc		PL_origargc
