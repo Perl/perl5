@@ -1664,8 +1664,13 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 }
 
 /* Updates and caches the CV's */
+/* Returns:
+ * 1 on success and there is some overload
+ * 0 if there is no overload
+ * -1 if some error occurred and it couldn't croak
+ */
 
-bool
+int
 Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 {
   dVAR;
@@ -1681,7 +1686,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
       const AMT * const amtp = (AMT*)mg->mg_ptr;
       if (amtp->was_ok_am == PL_amagic_generation
 	  && amtp->was_ok_sub == newgen) {
-	  return (bool)AMT_OVERLOADED(amtp);
+	  return AMT_OVERLOADED(amtp) ? 1 : 0;
       }
       sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
   }
@@ -1758,7 +1763,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 		{
 		    /* Can be an import stub (created by "can"). */
 		    if (destructing) {
-			return FALSE;
+			return -1;
 		    }
 		    else {
 			const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
@@ -1797,7 +1802,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   AMT_AMAGIC_off(&amt);
   sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
 						(char*)&amt, sizeof(AMTS));
-  return FALSE;
+  return 0;
 }
 
 
@@ -1821,7 +1826,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
       do_update:
 	/* If we're looking up a destructor to invoke, we must avoid
 	 * that Gv_AMupdate croaks, because we might be dying already */
-	if (!Gv_AMupdate(stash, id == DESTROY_amg)) {
+	if (Gv_AMupdate(stash, id == DESTROY_amg) == -1) {
 	    /* and if it didn't found a destructor, we fall back
 	     * to a simpler method that will only look for the
 	     * destructor instead of the whole magic */

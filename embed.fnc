@@ -99,7 +99,7 @@ END_EXTERN_C
 START_EXTERN_C
 #  include "pp_proto.h"
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
-Ap	|bool	|Gv_AMupdate	|NN HV* stash|bool destructing
+Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
 : Used in perly.y
 p	|OP*	|append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
