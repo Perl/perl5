@@ -2631,11 +2631,13 @@ the super-user).  This is a useful way to check that a child process is
 alive (even if only as a zombie) and hasn't changed its UID.  See
 L<perlport> for notes on the portability of this construct.
 
-Unlike in the shell, if SIGNAL is negative, it kills
-process groups instead of processes.  (On System V, a negative I<PROCESS>
-number will also kill process groups, but that's not portable.)  That
-means you usually want to use positive not negative signals.  You may also
-use a signal name in quotes.
+Unlike in the shell, if SIGNAL is negative, it kills process groups instead
+of processes. That means you usually want to use positive not negative signals.
+You may also use a signal name in quotes.
+
+The behavior of kill when a I<PROCESS> number is zero or negative depends on
+the operating system.  For example, on POSIX-conforming systems, zero will
+signal the current process group and -1 will signal all processes.
 
 See L<perlipc/"Signals"> for more details.
 

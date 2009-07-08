@@ -830,6 +830,12 @@ processes, Perl has reset the signal to its default value.  This
 situation typically indicates that the parent program under which Perl
 may be running (e.g. cron) is being very careless.
 
+=item Can't kill a non-numeric process ID
+
+(F) Process identifiers must be (signed) integers.  It is a fatal error to
+attempt to kill() an undefined, empty-string or otherwise non-numeric
+process identifier.
+
 =item Can't "last" outside a loop block
 
 (F) A "last" statement was executed to break out of the current block,

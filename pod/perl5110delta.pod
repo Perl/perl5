@@ -185,6 +185,13 @@ See L</"The C<overloading> pragma"> above.
 as documented, and as does C<-I> when specified on the command-line.
 (Renée Bäcker)
 
+=item C<kill> is now fatal when called on non-numeric process identifiers
+
+Previously, an 'undef' process identifier would be interpreted as a request to
+kill process "0", which would terminate the current process group on POSIX
+systems.  Since process identifiers are always integers, killing a non-numeric
+process is now fatal.
+
 =back
 
 =head1 New or Changed Diagnostics

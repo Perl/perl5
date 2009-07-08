@@ -1726,6 +1726,8 @@ nothing in the core.
 	     * CRTL's emulation of Unix-style signals and kill()
 	     */
 	    while (++mark <= sp) {
+		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
+		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
 		I32 proc = SvIV(*mark);
 		register unsigned long int __vmssts;
 		APPLY_TAINT_PROPER();
@@ -1750,6 +1752,8 @@ nothing in the core.
 	if (val < 0) {
 	    val = -val;
 	    while (++mark <= sp) {
+		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
+		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
 		const I32 proc = SvIV(*mark);
 		APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
@@ -1762,6 +1766,8 @@ nothing in the core.
 	}
 	else {
 	    while (++mark <= sp) {
+		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
+		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
 		const I32 proc = SvIV(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlProc_kill(proc, val))
