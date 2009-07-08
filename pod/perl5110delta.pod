@@ -129,6 +129,19 @@ line match modifier C</s>. (If C<\N> is followed by an opening brace and
 by a letter, perl will still assume that a Unicode character name is
 coming, so compatibility is preserved.) (Rafael Garcia-Suarez)
 
+=head2 Implicit strictures
+
+Using the C<use VERSION> syntax with a version number greater or equal
+to 5.11.0 will also lexically enable strictures just like C<use strict>
+would do (in addition to enabling features.) So, the following:
+
+    use 5.11.0;
+
+will now imply:
+
+    use strict;
+    use feature ':5.11';
+
 =head2 Parallel tests
 
 The core distribution can now run its regression tests in parallel on
