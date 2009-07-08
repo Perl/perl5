@@ -41,6 +41,7 @@ Makefile.old
 # general build products
 *.o
 *.a
+*.so
 
 # general build products (Win32)
 *.def
