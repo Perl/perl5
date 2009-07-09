@@ -15,6 +15,16 @@ use constant NO_SUCH_FILE2 => "this_file_had_better_not_exist_xyzzy";
 
 use constant PERL510  => ( $] >= 5.0100 );
 use constant PERL5101 => ( $] >= 5.0101 );
+use constant PERL5102 => ( $] >= 5.0102 );
+
+# File::Copy states that all subroutines return '0' on failure.
+# However both Windows and VMS may return other false values
+# (notably empty-string) on failure.  This constant indicates
+# whether we should skip some tests because the return values
+# from File::Copy may not be what's in the documentation.
+
+use constant WEIRDO_FILE_COPY =>
+    ( ! PERL5102 and ( $^O eq "MSWin32" or $^O eq "VMS" ));
 
 use Hints_test qw(
     fail_on_empty fail_on_false fail_on_undef
@@ -63,8 +73,8 @@ isa_ok($@, "autodie::exception");
 is($@->function, "File::Copy::copy", "Function should be original name");
 
 SKIP: {
-    skip("File::Copy is weird on Win32 before 5.10.1", 1)
-        if ( ! PERL5101 and $^O eq "MSWin32" );
+    skip("File::Copy is weird on Win32/VMS before 5.10.1", 1)
+        if WEIRDO_FILE_COPY;
 
     is($@->return, 0, "File::Copy returns zero on failure");
 }
@@ -85,8 +95,8 @@ isa_ok($@, "autodie::exception");
 is($@->function, "File::Copy::copy", "Function should be original name");
 
 SKIP: {
-    skip("File::Copy is weird on Win32 before 5.10.1", 1)
-        if ( ! PERL5101 and $^O eq "MSWin32" );
+    skip("File::Copy is weird on Win32/VMS before 5.10.1", 1)
+        if WEIRDO_FILE_COPY;
 
     is_deeply($@->return, [0], "File::Copy returns zero on failure");
 }
