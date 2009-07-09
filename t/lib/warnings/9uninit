@@ -1842,6 +1842,7 @@ Use of uninitialized value in addition (+) at - line 5.
 ########
 use warnings 'uninitialized';
 my $v;
-{ my $x = -1; $v = 1 + sysseek(STDIN, $x, 0); }
+{ my $x = -1; $v = 1 + sysseek(DATA, $x, 0); }
+__END__
 EXPECT
 Use of uninitialized value in addition (+) at - line 3.
