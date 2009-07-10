@@ -2206,6 +2206,7 @@ lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
+lib/ExtUtils/ParseXS/Changes	ExtUtils::ParseXS change log
 lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
 lib/ExtUtils/ParseXS/t/usage.t	ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
