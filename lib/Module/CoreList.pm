@@ -1,8 +1,8 @@
 package Module::CoreList;
 use strict;
-use vars qw/$VERSION %released %patchlevel %version %families %upstream
+use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker/;
-$VERSION = '2.17_01';
+$VERSION = '2.17_02';
 
 =head1 NAME
 
@@ -26,9 +26,6 @@ Module::CoreList - what modules shipped with versions of perl
  print join ", ", @{ $Module::CoreList::families{5.005} };
     # prints "5.005, 5.00503, 5.00504"
 
- print join " ", @{ $Module::CoreList::patchlevel{5.008001} };
-    # prints "maint-5.8 21377"
-
 =head1 DESCRIPTION
 
 Module::CoreList contains the hash of hashes
@@ -44,10 +41,6 @@ formatted versions of the release dates, as gleaned from L<perlhist>.
 
 New, in 1.96 is also the %Module::CoreList::families hash, which
 clusters known perl releases by their major versions.
-
-In 2.01 %Module::CoreList::patchlevel contains the branch and patchlevel
-corresponding to the specified perl version in the Perforce repository where
-the perl sources are kept.
 
 Starting with 2.10, the special module name C<Unicode> refers to the version of
 the Unicode Character Database bundled with Perl.
@@ -178,35 +171,6 @@ sub find_version {
     5.010000 => '2007-12-18',
     5.008009 => '2008-12-14',
    );
-
-# perforce branches and patch levels
-%patchlevel = (
-    5.005    => [perl => 1647],
-    5.00503  => ['maint-5.005' => 3198],
-    5.00405  => ['maint-5.004' => 3296],
-    5.006    => [perl => 5899],
-    5.006001 => ['maint-5.6' => 9654],
-    5.006002 => ['maint-5.6' => 21727],
-    5.007003 => [perl => 15039],
-    5.008    => [perl => 17637],
-    5.008001 => ['maint-5.8' => 21377],
-    5.008002 => ['maint-5.8' => 21670],
-    5.009    => [perl => 21539],
-    5.008003 => ['maint-5.8' => 22151],
-    5.00504  => ['maint-5.005' => 22270],
-    5.009001 => [perl => 22506],
-    5.008004 => ['maint-5.8' => 22729],
-    5.008005 => ['maint-5.8' => 23139],
-    5.008006 => ['maint-5.8' => 23552],
-    5.009002 => [perl => 24131],
-    5.008007 => ['maint-5.8' => 24641],
-    5.009003 => [perl => 26975],
-    5.008008 => ['maint-5.8' => 27040],
-    5.009004 => [perl => 28727],
-    5.009005 => [perl => 31562],
-    5.010000 => [perl => 32642],
-    5.008009 => ['maint-5.8' => 35095],
-);
 
 for my $version ( sort { $a <=> $b } keys %released ) {
     my $family = int ($version * 1000) / 1000;
@@ -10001,9 +9965,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 
 $released{'5.000'} = $released{5};
 $released{'5.010000'} = $released{5.01};
-
-$patchlevel{'5.000'} = $patchlevel{5};
-$patchlevel{'5.010000'} = $patchlevel{5.01};
 
 $version{'5.000'} = $version{5};
 $version{'5.010000'} = $version{5.01};
