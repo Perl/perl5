@@ -2,6 +2,15 @@
 
 # Test _is_of_type()
 
+BEGIN {
+    chdir 't' if -d 't';
+
+    if( $ENV{PERL_CORE} ) {
+        @INC = '../lib';
+    }
+}
+
+use lib './lib';
 use strict;
 use ExtUtils::MakeMaker;
 

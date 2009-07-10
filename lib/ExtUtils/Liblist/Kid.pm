@@ -9,7 +9,7 @@ use 5.006;
 # Broken out of MakeMaker from version 4.11
 
 use strict;
-our $VERSION = 6.53_03;
+our $VERSION = 6.54;
 
 use Config;
 use Cwd 'cwd';

@@ -2,10 +2,18 @@
 
 # Test MM->_installed_file_for_module()
 
+BEGIN {
+    chdir 't' if -d 't';
+
+    if( $ENV{PERL_CORE} ) {
+        @INC = '../lib';
+    }
+}
+
 use strict;
 use warnings;
 
-use lib 't/lib';
+use lib './lib';
 use ExtUtils::MakeMaker;
 use Test::More;
 use File::Spec;

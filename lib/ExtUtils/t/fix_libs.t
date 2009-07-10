@@ -2,8 +2,16 @@
 
 # Unit test the code which fixes up $self->{LIBS}
 
+BEGIN {
+    chdir 't' if -d 't';
+
+    if( $ENV{PERL_CORE} ) {
+        @INC = '../lib';
+    }
+}
+
 use strict;
-use lib 't/lib';
+use lib './lib';
 use Test::More 'no_plan';
 
 use ExtUtils::MakeMaker;
