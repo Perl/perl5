@@ -1653,7 +1653,7 @@ package Maintainers;
     'Term::ANSIColor' =>
 	{
 	'MAINTAINER'	=> 'rra',
-	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.00.tar.gz',
+	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.01.tar.gz',
 	'FILES'		=> q{lib/Term/ANSIColor.pm lib/Term/ANSIColor},
 	'EXCLUDED'	=> [ qr{^tests/},
 			     qw(t/pod-spelling.t t/pod.t)
