@@ -16,7 +16,7 @@ my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 require VMS::Filespec if $Is_VMS;
 
 use vars qw($VERSION);
-$VERSION = '1.43';
+$VERSION = '1.43_1';
 $VERSION = eval $VERSION;
 
 sub _is_prefix {
@@ -28,9 +28,8 @@ sub _is_prefix {
         $path   = VMS::Filespec::unixify($path);
     }
 
-    # Sloppy Unix path normalization.
-    $prefix =~ s{/+}{/}g;
-    $path   =~ s{/+}{/}g;
+    # Unix path normalization.
+    $prefix = File::Spec->canonpath($prefix);
 
     return 1 if substr($path, 0, length($prefix)) eq $prefix;
 
