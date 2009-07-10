@@ -567,6 +567,7 @@ ext/Encode/t/mime-header.t	test script
 ext/Encode/t/mime-name.t	test script
 ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
+ext/Encode/t/piconv.t		test script
 ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
 ext/Encode/t/Unicode.t		test script

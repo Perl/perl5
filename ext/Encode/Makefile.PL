@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.7 2008/07/01 20:56:17 dankogai Exp $
+# $Id: Makefile.PL,v 2.8 2009/07/08 13:34:15 dankogai Exp $
 #
 use 5.007003;
 use strict;
@@ -31,8 +31,6 @@ my @pmlibdirs = qw(lib Encode);
 
 $ARGV{MORE_SCRIPTS} and push @exe_files, @more_exe_files;
 $ARGV{INSTALL_UCM}   and push @pmlibdirs, "ucm";
-my @man =  ();
-@man = ( MAN1PODS => {}, MAN3PODS => {} ) if $ENV{PERL_CORE};
 
 WriteMakefile(
     NAME         => "Encode",
@@ -44,7 +42,6 @@ WriteMakefile(
         SUFFIX       => 'gz',
         DIST_DEFAULT => 'all tardist',
     },
-    @man,
     INC         => '-I' . File::Spec->catfile( '.', 'Encode' ),
     PMLIBDIRS   => \@pmlibdirs,
     INSTALLDIRS => 'perl',

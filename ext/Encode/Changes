@@ -1,12 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.33 2009/03/25 07:55:57 dankogai Exp dankogai $
-#
-$Revision: 2.33 $ $Date: 2009/03/25 07:55:57 $
+# $Id: Changes,v 2.34 2009/07/08 13:34:15 dankogai Exp $
+$Revision: 2.34 $ $Date: 2009/07/08 13:34:15 $
+! bin/piconv
+  duplicate-BOM problem now fixed.
+  Message-Id: <10ECB9B7-006E-4570-9EB6-51C49F04ADCF@dan.co.jp>
+! bin/piconv
++ t/piconv.t
+  patches and tests by SREZIC
+  Message-Id: <4A5366DA.8050801@iconmobile.com>
+! Makefile.PL
+  man* removed on behalf of blead
+  Message-Id: <20090326135219.GU18164@plum.flirble.org>
+
+2.33 2009/03/25 07:55:57
 ! lib/Encode/MIME/Header.pm
   Decontaminated $& which sneaked in on 2.31.
-  <67FC9F3A39C746DA95AAB6BB01539099@robmhp>
-  <693254b90903242352x2dc26ba6p5e68deb871fa88ae@mail.gmail.com>
+  Message-Id: <67FC9F3A39C746DA95AAB6BB01539099@robmhp>
+  Message-Id: <693254b90903242352x2dc26ba6p5e68deb871fa88ae@mail.gmail.com>
   http://coderepos.org/share/changeset/31542
 
 2.32 2009/03/07 07:32:37
