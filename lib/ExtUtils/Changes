@@ -1,3 +1,9 @@
+6.54  Tue Jul  7 16:48:22 PDT 2009
+    Test Fixes
+    * Added perl core boilerplate code to a few new tests which were missing
+      them.
+
+
 6.53_03  Thu Jul  2 14:47:45 PDT 2009
     Bug Fixes
     * You'd get a warning if you had a PREREQ_PM on a module with no $VERSION
