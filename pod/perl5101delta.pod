@@ -474,7 +474,7 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.53_03
+C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.54
 
 Note that C<ExtUtils::MakeMaker::bytes> and C<ExtUtils::MakeMaker::vmsish>
 have been removed from this distribution.
@@ -485,11 +485,11 @@ C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
 
 =item *
 
-C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.20
+C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.20_01
 
 =item *
 
-C<Fatal> upgraded from version 1.05 to 2.05. See also the new pragma
+C<Fatal> upgraded from version 1.05 to 2.06. See also the new pragma
 C<autodie>.
 
 =item *
@@ -649,7 +649,7 @@ documentation change)
 
 =item *
 
-C<Module::Build> upgraded from version 0.2808_01 to 0.32
+C<Module::Build> upgraded from version 0.2808_01 to 0.34
 
 =item *
 

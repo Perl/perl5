@@ -3562,6 +3562,37 @@ M  b074547015 2009/07/06 Don't dump autodie from core (was Re: Coring Varia
 M  84d2fa142c 2009/07/06 Regex fails when string is too long
 M  75e3c8a32e 2009/07/06 upgrade to ExtUtils::MakeMaker 6.53_03
 M  58118e0c79 2009/07/07 limit what add-package.pl might try to delete
+R  53eb19dd57 2009/07/07 use strict by default if "use 5.011" is in effect!
+R  5cc917d61a 2009/07/07 Fast enabling of strictures when version 5.11.0 is
 M  56bfbabc02 2009/07/07 rebump Hash::Util::FieldHash from 1.03_01 to 1.04
 M  8bc57f96f9 2009/07/07 update to CPANPLUS 0.88
 M  5f244db984 2009/07/07 some fixes to makerel:
+R  01851bb732 2009/07/07 Merge branch 'strict-by-default' into blead
+				MERGE: 5f244db984 5cc917d61a
+!  fd18815927 2009/07/08 Make File::Copy::rmscopy return the documented val
+M  718192e995 2009/07/08 Updating Module::Build to 0.34
+M  56f4542c02 2009/07/08 Fix compiler warning when cuserid is absent and si
+M  82fefbc11a 2009/07/08 Ignore libperl.so.
+R  4b3db487f2 2009/07/08 Mention in perldelta that "use 5.011" enables stri
+d  f37b8c3fdc 2009/07/08 Add a pluggable hook in op_free()
+M  e5b34a7678 2009/07/08 Update ExtUtils::ParseXS to 2.20_01
+R  242f8760e6 2009/07/08 Add a parameter "destructing" to Gv_AMupdate()
+			    not bincompat
+R  c3a9a7905d 2009/07/08 Modify the return value of Gv_AMupdate to indicate
+			    see 242f8760e6
+M  14564ebe90 2009/07/09 Skip File::Copy return tests on Windows and VMS
+M  1640e9f0f3 2009/07/09 fix segfault in -Dx without threads
+R  37f2ccb85a 2009/07/09 Merge commit '1640e9f0f39bf8108370c2f5d99bb100fe6c
+				MERGE: 14564ebe90 1640e9f0f3
+M  32878f30ba 2009/07/09 Make INSTALL -Duserelocatableinc aware
+R  e2c0f81f62 2009/07/09 Make kill() fatal for non-numeric pids
+			    it's a change in behaviour
+d  b5b25974c1 2009/07/09 Upgrade to Term::ANSIColor 2.01
+M  4d6e9c138f 2009/07/09 Avoid test failure on Linux when STDIN is /dev/nul
+R  5f52195583 2009/07/09 Fix compiler warning in doio.c
+			    see e2c0f81f62
+M  ac7d481af7 2009/07/10 add lib/ExtUtils/ParseXS/Changes to MANIFEST
+!  1a1e8f7d43 2009/07/10 Encode 2.34
+			    wait to see if its needed for 5.10.1
+M  f4fe2a3055 2009/07/10 Remove %patchlevel hash
+M  d00e3d8a41 2009/07/10 ExtUtils::MakeMaker 6.54
