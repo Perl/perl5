@@ -3345,6 +3345,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
 	PAD_SETSV(cPADOPo->op_padix, swash);
 	SvPADTMP_on(swash);
+	SvREADONLY_on(swash);
 #else
 	cSVOPo->op_sv = swash;
 #endif
