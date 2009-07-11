@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 118;
+plan tests => 119;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -468,3 +468,19 @@ my $wasro = Internals::SvREADONLY($s);
     $s =~ tr/i//;
     ok( Internals::SvREADONLY($s), "count-only tr doesn't deCOW COWs" );
 }
+
+# [ RT #61520 ]
+#
+# under threads, unicode tr within a cloned closure would SEGV or assert
+# fail, since the pointer in the pad to the swash was getting zeroed out
+# in the proto-CV
+
+{
+    my $x = "\x{142}";
+    sub {
+	$x =~ tr[\x{142}][\x{143}];
+    }->();
+    is($x,"\x{143}", "utf8 + closure");
+}
+
+
