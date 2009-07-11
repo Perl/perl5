@@ -8,15 +8,16 @@ use File::Basename;
 use FindBin;
 
 my $Opts = {};
-getopts( 'r:p:e:vudn', $Opts );
+getopts( 'r:p:e:c:vudn', $Opts );
 
-my $Cwd         = cwd(); 
+my $Cwd         = cwd();
 my $Verbose     = 1;
 my $ExcludeRe   = $Opts->{e} ? qr/$Opts->{e}/i : undef;
 my $Debug       = $Opts->{v} || 0;
 my $RunDiff     = $Opts->{d} || 0;
 my $PkgDir      = $Opts->{p} || cwd();
 my $Repo        = $Opts->{r} or die "Need repository!\n". usage();
+my $Changes     = $Opts->{c} || 'Changes ChangeLog';
 my $NoBranch    = $Opts->{n} || 0;
 
 ### strip trailing slashes;
@@ -33,7 +34,7 @@ if ( $NoBranch ) {
     ### create a copy of the repo directory
     my $RepoCopy = "$Repo-$BranchName";
     print "Copying repository to $RepoCopy ..." if $Verbose;
-    
+
     ### --archive == -dPpR, but --archive is not portable, and neither
     ### is -d, so settling for -PpR
     system( "cp -PpR -f $Repo $RepoCopy" )
@@ -71,7 +72,7 @@ my @LibFiles;
         if -d '.git' || -d '.svn';
     die "No lib/ directory found\n" unless -d 'lib';
     system( "cp -fR $CPV lib $Repo" ) and die "Copy of lib/ failed: $?";
-    
+
     @LibFiles =    map { chomp; $_ }
                     ### should we get rid of this file?
                     grep { $ExcludeRe && $_ =~ $ExcludeRe
@@ -82,7 +83,7 @@ my @LibFiles;
                         : 1
                      } `find lib -type f`
         or die "Could not detect library files\n";
-      
+
     print "done\n" if $Verbose;
 }
 
@@ -153,7 +154,7 @@ my @TestFiles;
 
 my $BinDir;
 my @BinFiles;
-my $TopBinDir; 
+my $TopBinDir;
 BIN: {
     $BinDir = -d 'bin'      ? 'bin' :
               -d 'scripts'  ? 'scripts' : undef ;
@@ -182,6 +183,18 @@ BIN: {
 
     print "done\n" if $Verbose;
 }
+
+### copy over change log
+my @Changes;
+foreach my $cl (split m/\s+/ => $Changes) {
+    -f $cl or next;
+    push @Changes, $cl;
+    print "Copying $cl files to $TopDir..." if $Verbose;
+
+    system( "cp -f $CPV $cl $TopDir" )
+        and die "Copy of $cl failed: $?";
+}
+
 
 ### add files where they are required
 my @NewFiles;
@@ -424,6 +437,10 @@ my @ChangedFiles;
                                             basename($_) ." utility\n";
     }
 
+    for ( @Changes ) {
+        $pkg_files{"$RelTopDir/$_"} = "$RelTopDir/$_\t$ModName change log\n";
+    }
+
     for ( @NewFiles ) {
         $pkg_files{$_}              = "$_\tthe ".
                                         do { m/(.+?)\.PL$/; basename($1) } .
@@ -503,9 +520,9 @@ if( $RunDiff ) {
 # add files to git index
 unless ( $NoBranch ) {
     chdir $Repo;
-    system( "git add $CPV $_" ) 
-        for ( @LibFiles, @NewFiles, @ChangedFiles, 
-              map { "$RelTopDir/$_" } @TestFiles, @BinFiles );
+    system( "git add $CPV $_" )
+        for ( @LibFiles, @NewFiles, @ChangedFiles,
+              map { "$RelTopDir/$_" } @TestFiles, @BinFiles, @Changes );
 }
 
 # return to original directory
@@ -520,6 +537,7 @@ Usage: $me -r PERL_REPO_DIR [-p PACKAGE_DIR] [-v] [-d] [-e REGEX]
 Options:
   -r    Path to perl-core git repository
   -v    Run verbosely
+  -c    File containing changelog (default 'Changes' or 'ChangeLog')
   -e    Perl regex matching files that shouldn't be included
   -d    Create a diff as patch file
   -p    Path to the package to add. Defaults to cwd()
