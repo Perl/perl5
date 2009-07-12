@@ -1677,7 +1677,6 @@ ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
 #endif
 ERsn	|U8*	|reghopmaybe3	|NN U8 *s|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK regmatch_info *reginfo
-Es	|void	|swap_match_buff|NN regexp * prog
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog
 ERs	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \

@@ -5434,11 +5434,6 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 #define PERL_ARGS_ASSERT_FIND_BYCLASS	\
 	assert(prog); assert(c); assert(s); assert(strend)
 
-STATIC void	S_swap_match_buff(pTHX_ regexp * prog)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SWAP_MATCH_BUFF	\
-	assert(prog)
-
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_TO_UTF8_SUBSTR	\

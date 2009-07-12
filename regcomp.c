@@ -9414,7 +9414,6 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     if (r->saved_copy)
         SvREFCNT_dec(r->saved_copy);
 #endif
-    Safefree(r->swap);
     Safefree(r->offs);
 }
 
@@ -9474,7 +9473,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *rx)
     ret->saved_copy = NULL;
 #endif
     ret->mother_re = rx;
-    ret->swap = NULL;
     
     return ret_x;
 }

@@ -13,7 +13,7 @@ sub run_tests;
 
 $| = 1;
 
-my $EXPECTED_TESTS = 4065;  # Update this when adding/deleting tests.
+my $EXPECTED_TESTS = 4066;  # Update this when adding/deleting tests.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -4346,6 +4346,24 @@ sub run_tests {
             iseq($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef");
        }
     }
+
+    # This only works under -DEBUGGING because it relies on an assert().
+    {
+        local $BugId = '60508';
+	local $Message = "Check capture offset re-entrancy of utf8 code.";
+
+        sub fswash { $_[0] =~ s/([>X])//g; }
+
+        my $k1 = "." x 4 . ">>";
+        fswash($k1);
+
+        my $k2 = "\x{f1}\x{2022}";
+        $k2 =~ s/([\360-\362])/>/g;
+        fswash($k2);
+
+        iseq($k2, "\x{2022}", "utf8::SWASHNEW doesn't cause capture leaks");
+    }
+
 
     {
 	local $BugId = 65372;	# minimal CURLYM limited to 32767 matches
