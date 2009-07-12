@@ -1900,7 +1900,7 @@ realclean : clean
 	- If F$Search("config.h").nes."" Then Delete/NoConfirm/Log config.h;*
 	- If F$Search("config.sh").nes."" Then Delete/NoConfirm/Log config.sh;*
 	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" config
-	- If F$Search("[.lib.unicore]*.pl").nes."" Then Delete/NoConfirm/Log [.lib.unicore]*.pl;*
+	- If F$Search("[.lib.unicore...]*.pl").nes."" Then Delete/NoConfirm/Log [.lib.unicore...]*.pl;*
 	- If F$Search("[.lib.unicore]Properties.").nes."" Then Delete/NoConfirm/Log [.lib.unicore]Properties.;*
 	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" $(unidatadirs)
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
@@ -1932,6 +1932,7 @@ realclean : clean
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
 	- If F$Search("[.t.lib]vms_dclsym.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_dclsym.t;*
 	- If F$Search("[.t.lib]vms_stdio.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_stdio.t;*
+	- If F$Search("vmspipe.com").nes."" Then Delete/NoConfirm/Log vmspipe.com;*
 
 cleansrc : clean
 	- If F$Search("*.c;-1").nes."" Then Purge/NoConfirm/Log *.c
