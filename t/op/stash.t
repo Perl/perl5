@@ -65,7 +65,7 @@ ok( !eval q{ defined %schoenmaker:: }, 'works in eval("")' );
 }
 
 SKIP: {
-    eval { require B; 1 } or skip "no B", 12;
+    eval { require B; 1 } or skip "no B", 18;
 
     *b = \&B::svref_2object;
     my $CVf_ANON = B::CVf_ANON();
