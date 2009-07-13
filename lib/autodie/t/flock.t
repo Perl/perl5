@@ -23,7 +23,7 @@ if ($@) {
     plan skip_all => "Cannot lock this test on this system.";
 }
 
-my $flock_return = flock($self_fh, LOCK_EX | LOCK_NB);
+my $flock_return = eval { flock($self_fh, LOCK_EX | LOCK_NB); };
 
 if (not $flock_return) {
     plan skip_all => "flock on my own test not supported on this system.";
