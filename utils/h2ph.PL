@@ -509,8 +509,7 @@ sub expr {
 		s/^\s*\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
 		$new .= " &$id";
 	    } elsif ($isatype{$id}) {
-		if ($new =~ /{\s*$/ # } for vi
-			) {
+		if ($new =~ /\{\s*$/) {
 		    $new .= "'$id'";
 		} elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
 		    $new =~ s/\(\s*$//;
