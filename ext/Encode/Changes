@@ -1,7 +1,17 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.34 2009/07/08 13:34:15 dankogai Exp $
-$Revision: 2.34 $ $Date: 2009/07/08 13:34:15 $
+# $Id: Changes,v 2.35 2009/07/13 02:06:30 dankogai Exp dankogai $
+$Revision: 2.35 $ $Date: 2009/07/13 02:06:30 $
+! lib/Encode/MIME/Header.pm
+  Addressed RT #40027:
+   decode of MIME-Header removes too much whitespace
+  http://rt.cpan.org/Ticket/Display.html?id=40027
+  http://rt.cpan.org/Ticket/Display.html?id=42902
+! t/piconv.t
+  Addressed by CSJEWELL: t/piconv.t loops infinitely on Win32
+  http://rt.cpan.org/Ticket/Display.html?id=47760
+
+2.34 2009/07/08 13:34:15
 ! bin/piconv
   duplicate-BOM problem now fixed.
   Message-Id: <10ECB9B7-006E-4570-9EB6-51C49F04ADCF@dan.co.jp>
