@@ -3,7 +3,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.11 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use Encode qw(find_encoding encode_utf8 decode_utf8);
 use MIME::Base64;
 use Carp;
@@ -44,7 +44,7 @@ sub decode($$;$) {
     $str =~ s/\?=\s+=\?/\?==\?/gos;
 
     # multi-line header to single line
-    $str =~ s/(?:\r\n|[\r\n])[ \t]+//gos;
+    $str =~ s/(?:\r\n|[\r\n])[ \t]//gos;
 
     1 while ( $str =~
         s/(=\?[-0-9A-Za-z_]+\?[Qq]\?)(.*?)\?=\1(.*?\?=)/$1$2$3/ )
