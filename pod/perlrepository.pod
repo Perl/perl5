@@ -98,6 +98,14 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
+The committers have access to 2 servers that serve perl5.git.perl.org. One is
+camel.booking.com, which is the 'master' repository. The perl5.git.perl.org IP
+address also lives on this machine. The second one is dromedary.booking.com,
+which can be used for general testing and development. Dromedary syncs the git
+tree from camel every few minutes, you should not push there. Both machines
+also have a full CPAN mirror. To share files with the general public, dromedary
+serves your ~/public_html/ as http://users.perl5.git.perl.org/~yourlogin/
+
 =head1 OVERVIEW OF THE REPOSITORY
 
 Once you have changed into the repository directory, you can inspect
