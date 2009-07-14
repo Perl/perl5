@@ -465,8 +465,8 @@ for example:
 There is also an potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
 with and without -DDEBUGGING).  For example, suppose you build and
-install a standard Perl 5.10.0 with a shared library.  Then, suppose you
-try to build Perl 5.10.0 with -DDEBUGGING enabled, but everything else
+install a standard Perl 5.10.1 with a shared library.  Then, suppose you
+try to build Perl 5.10.1 with -DDEBUGGING enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
 libperl.so.8 rather with the installed libperl.so.8?  The answer is
@@ -525,9 +525,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.10.0.
+By default, Configure will use the following directories for 5.10.1.
 $version is the full perl version number, including subversion, e.g.
-5.10.0 or 5.9.5, and $archname is a string like sun4-sunos,
+5.10.1 or 5.9.5, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -2294,14 +2294,14 @@ but will not interfere with the 5.8.7 version.
 The last entry, /usr/local/lib/perl5/site_perl/, is there so that
 5.6.0 and above will look for 5.004-era pure perl modules.
 
-Lastly, suppose you now install 5.10.0, which is not binary compatible
-with 5.8.x.  The directories searched by 5.10.0 (if you don't change the
+Lastly, suppose you now install 5.10.1, which is not binary compatible
+with 5.8.x.  The directories searched by 5.10.1 (if you don't change the
 Configure defaults) will be:
 
-	/usr/local/lib/perl5/5.10.0/$archname
-	/usr/local/lib/perl5/5.10.0
-	/usr/local/lib/perl5/site_perl/5.10.0/$archname
-	/usr/local/lib/perl5/site_perl/5.10.0
+	/usr/local/lib/perl5/5.10.1/$archname
+	/usr/local/lib/perl5/5.10.1
+	/usr/local/lib/perl5/site_perl/5.10.1/$archname
+	/usr/local/lib/perl5/site_perl/5.10.1
 
 	/usr/local/lib/perl5/site_perl/5.8.8
 
@@ -2341,11 +2341,11 @@ yet.
 
 =head2 Upgrading from 5.8.x or earlier
 
-B<Perl 5.10.0 is binary incompatible with Perl 5.8.x and any earlier
+B<Perl 5.10.1 is binary incompatible with Perl 5.8.x and any earlier
 Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.10.0.  If you find you do need to rebuild an extension with
-5.10.0, you may safely do so without disturbing the older
+used with 5.10.1.  If you find you do need to rebuild an extension with
+5.10.1, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
