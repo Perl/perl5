@@ -234,7 +234,7 @@ on how to specify C<configure_requires> when creating a distribution for CPAN.
 =item *
 
 C<autodie> is a new lexically-scoped alternative for the C<Fatal> module.
-The bundled version is 2.04.
+The bundled version is 2.06.
 
 =item *
 
@@ -441,7 +441,7 @@ C<Dynaloader> upgraded from version 1.09 to 1.10
 
 =item *
 
-C<Encode> upgraded from version 2.23 to 2.33
+C<Encode> upgraded from version 2.23 to 2.35
 
 =item *
 
@@ -1045,7 +1045,7 @@ and conversion code.
 
 =for comment
 
-I'd mention PERL_VMS_POSIX_EXIT but it doesn't seem to be documented anywhere.
+XXX I'd mention PERL_VMS_POSIX_EXIT but it doesn't seem to be documented anywhere.
 
 =head1 Selected Bug Fixes
 
@@ -1057,12 +1057,6 @@ I'd mention PERL_VMS_POSIX_EXIT but it doesn't seem to be documented anywhere.
 drop in list assignment, such as is often used to assign function parameters
 from C<@_>. The optimisation has been re-instated, and the performance
 regression fixed.
-
-=back
-
-=head2 Other fixes
-
-=over
 
 =item *
 
@@ -1265,6 +1259,10 @@ A weak reference to a hash would leak. This was affecting C<DBI>. [RT #56908]
 =item *
 
 Segfault when using (?|) in regexp [RT #59734]
+
+=item *
+
+Segfault when using utf-8 tr// within a closure [RT #61520]
 
 
 =back

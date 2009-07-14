@@ -3406,7 +3406,7 @@ M  3f1788e11f 2009/06/21 make_patchnum.pl now works in -Dmksymlink target d
 			these three commits (fix for #58530)
 			convert a CV in a deleted glob to ANON,
 			which makes me twitch. See also 6eb667c676,
-			ab9c44463c, fbad106ea7 2221b6e72e
+			ab9c44463c, fbad106ea7 2221b6e72e, fb6e4a4e45
 
 d  d018fae575 2009/06/21 Tests for deleting stash entries.
 d  f1c32fec87 2009/06/21 When a glob is deleted, mark its sub as ANON.
@@ -3592,7 +3592,20 @@ M  4d6e9c138f 2009/07/09 Avoid test failure on Linux when STDIN is /dev/nul
 R  5f52195583 2009/07/09 Fix compiler warning in doio.c
 			    see e2c0f81f62
 M  ac7d481af7 2009/07/10 add lib/ExtUtils/ParseXS/Changes to MANIFEST
-!  1a1e8f7d43 2009/07/10 Encode 2.34
-			    wait to see if its needed for 5.10.1
+M  1a1e8f7d43 2009/07/10 Encode 2.34
 M  f4fe2a3055 2009/07/10 Remove %patchlevel hash
 M  d00e3d8a41 2009/07/10 ExtUtils::MakeMaker 6.54
+M  0b4f5b79b7 2009/07/10 Maintainers.pl: bump Term::ANSIColor version
+M  d55aad059d 2009/07/11 Subject: [PATCH] Have add-package.pl include the C
+M  a5446a64ab 2009/07/11 [perl #61520] Segfault in debugger with tr// and U
+d  fb6e4a4e45 2009/07/12 Wrong skip count in t/op/stash.t
+M  d6521b5650 2009/07/12 Some missing realclean items for VMS.
+d  3983eafb40 2009/07/12 h2ph: handle "#if defined SYMBOL" better
+			    see also 9a108c6c20
+M  5472f9ed71 2009/07/13 Better flock detection for autodie tests
+M  5823dc9fae 2009/07/13 Clean up t/op/sort.t to constrain tests which use 
+M  03c97657d9 2009/07/13 Upgrade to Encode 2.35
+d  9a108c6c20 2009/07/13 Cosmetic change
+M  7de6a4226c 2009/07/13 upate pumpking list
+d  ba7a454966 2009/07/14 Merge Carp::Heavy into Carp
+d  4dd71923a4 2009/07/14 Don't preload Carp::Heavy in warnings.pm
