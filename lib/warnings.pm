@@ -302,7 +302,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
 sub Croaker
 {
-    require Carp::Heavy; # this initializes %CarpInternal
+    require Carp; # this initializes %CarpInternal
     local $Carp::CarpInternal{'warnings'};
     delete $Carp::CarpInternal{'warnings'};
     Carp::croak(@_);
@@ -453,7 +453,7 @@ sub __chk
 }
 
 sub _error_loc {
-    require Carp::Heavy;
+    require Carp;
     goto &Carp::short_error_loc; # don't introduce another stack frame
 }                                                             
 
