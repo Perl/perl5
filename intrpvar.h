@@ -170,7 +170,7 @@ PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
 PERLVARI(Ipeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
 					/* Pointer to peephole optimizer */
 
-PERLVARI(Iopfreehook,	Perl_check_t, 0) /* op_free() hook */
+PERLVARI(Iopfreehook,	Perl_ophook_t, 0) /* op_free() hook */
 
 PERLVARI(Imaxscream,	I32,	-1)
 PERLVARI(Ireginterp_cnt,I32,	 0)	/* Whether "Regexp" was interpolated. */

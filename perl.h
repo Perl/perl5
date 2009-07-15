@@ -4732,6 +4732,7 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 
 typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
 typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
+typedef void(CPERLscope(*Perl_ophook_t))(pTHX_ OP*);
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
