@@ -3,7 +3,13 @@
 
 release_managers_guide - Releasing a new version of perl 5.x
 
+XXX as of Jul 2009, this file is still a work-in-progress - DAPM
+
 =head1 SYNOPSIS
+
+This document describes the series of tasks required - some automatic, some
+manual - to produce a perl release of some description, be that a snaphot,
+release candidate, or final release.
 
 The release process is primarily executed by the current pumpking.
 
@@ -11,163 +17,468 @@ This document both helps as a check-list for the pumpking and is
 a base for ideas on how the various tasks could be automated or 
 distributed.
 
-The process has two major parts. In the first part 
-the pumpking needs to determine if the current head revision in Git
-is ready for shipment. The second part is the actual release 
-and packaging process.
+The outline of a release cycle is as follows:
+
+    (5.10.1 is released, and post-release action have been done)
+
+    ...time passes...
+
+    an occasional snapshot is released, that still identifies itself as
+	5.10.1
+
+    ...time passes...
+
+    a few weeks before the release, a number of steps are performed,
+	including bumping the version to 5.10.2
+    
+    perl-5.10.2-RC1 is released
+
+    perl-5.10.2 is released
+
+    post-release actions are performed, including creating new
+	perl5103delta.pod
+
+    ... the cycle continues ...
 
 =head1 DETAILS
 
-=head2 Is it ready?
 
-In this step we need to make sure that:
+=head2 Building a snapshot
+
+A snapshot is intended to encourage in-depth testing from time-to-time,
+for example after a key point in the stabilisation of a branch. It
+requires less steps than a full release, and the version number of perl in
+the tarball will usually still be the old one.
 
 =over 4
 
-=item 1
+=item *
 
-perl passes its own test suite and 
+As there are no regular smokes [ XXX yet - please fix?] find out about the
+state of VMS. If it's bad, think again.
 
-=item 2
+=item *
 
-CPAN works
+Rebuild META.yml:
 
+    $ rm META.yml
+    $ make META.yml
 
-which comes down to:
+and commit it if it's changed.
+
+=item *
+
+Check that the manifest is sorted and correct:
+
+    $ make distclean 
+    $ perl Porting/manisort
+    $ perl Porting/manicheck
+
+=item *
+
+If this is a release candidate or final release, add an entry to
+F<pod/perlhist.pod> with the current date, e.g.
+
+          5.8.9-RC1     2008-Nov-10
+
+Make sure the correct pumpking is listed, and if this your first time,
+append your name to C<THE KEEPERS OF THE PUMPKIN>.
+
+=item *
+
+Build perl, then make sure it passes its own test suite, and installs.
+
+=item *
+
+Create a tarball. Use the C<-s> option to specify a suitable suffix for
+the tarball and directory name:
+
+    $ cd root/of/perl/tree
+    $ git clean -xdf		#  make sure perl and git agree on files
+
+    $ perl Porting/makerel -s `git describe` # for a snapshot
+    $ perl Porting/makerel -s RC1	     # for a release candidate
+    $ perl Porting/makerel 		     # for a final release
+
+This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
+the MANIFEST files into it, sets the correct permissions on them,
+adds DOS line endings to some, then tars it up as
+F<../perl-x.y.z-RC1.tar.gz>.
+
+XXX if we go for extra tags and branches stuff, then add the extra details
+here
+
+=item *
+
+Copy the tarball to a web server somewhere you have access to.
+
+=item *
+
+Download the tarball to some other machine (for a release candidate, to two or
+more servers: IRC is good for this).
+
+=item *
+
+Check that C<./Configure -des && make all test> works in one place.
+
+=item *
+
+Check that C<./Configure ... && make all test_harness install> works.
+
+=item *
+
+Check that the output of C<perl -v> and C<perl -V> are as expected,
+especially as regards version numbers, patch and/or RC levels, and @INC
+paths. Note that the results may be different without a F<.git/> directory,
+which is why you should test from the tarball.
+
+=item *
+
+Bootstrap the CPAN client on the clean install.
+
+=item *
+
+Install CPANPLUS.
+XXX pick something new; this is now bundled
+
+=item *
+
+Bootstrap the CPANPLUS client.
+
+=item *
+
+Install an XS module.
+
+=item *
+
+If all is well, announce the snaphot to p5p. (For a release candidate,
+instead follow the further steps described later.)
+
+=back
+
+=head2  Actions prior to the first release candidate
+
+A week or two before the first release candidate, there are some additional
+tasks you should perform (actually, some of these should be done regularly
+anyway, but they definitely need doing now):
+
+=over 4
+
+=item *
+
+Check F<Maintainers.pl> for consistency; both these commands should
+produce no output:
+
+    perl Porting/Maintainers --checkmani
+    perl Porting/Maintainers --checkmani lib/ ext/
+
+=item *
+
+Ensure that dual-life CPAN modules are synchronised with CPAN.  Basically,
+run the following:
+
+    ./perl -Ilib Porting/core-cpan-diff -a -o /tmp/corediffs
+
+to see any inconsistencies between the core and CPAN versions of distros,
+then fix the core, or cajole CPAN authors as appropriate. See also the
+C<-d> and C<-v> options for more detail.  You'll probably want to use the
+C<-c cachedir> option to avoid repeated CPAN downloads.
+
+To see which core distro versions differ from the current CPAN versions:
+
+    ./perl -Ilib Porting/core-cpan-diff -x -a
+
+=item *
+
+Ensure dual-life CPAN modules are stable, which comes down to:
 
     for each module that fails its regression tests on $current
-      did it fail identically on $previous?
-      if yes, "SEP" (Somebody Else's Problem)
-      else work out why it failed (a bisect is useful for this)
+        did it fail identically on $previous?
+        if yes, "SEP" (Somebody Else's Problem)
+        else work out why it failed (a bisect is useful for this)
 
     attempt to group failure causes
 
     for each failure cause
-      is that a regression?
-      if yes, figure out how to fix it
-        (more code? revert the code that broke it)
-      else
-        (presumably) it's relying on something un-or-under-documented
-        should the existing behaviour stay?
-          yes - goto "regression"
-          no - note it in perldelta as a significant bugfix
-          (also, try to inform the module's author)
+        is that a regression?
+        if yes, figure out how to fix it
+            (more code? revert the code that broke it)
+        else
+            (presumably) it's relying on something un-or-under-documented
+            should the existing behaviour stay?
+                yes - goto "regression"
+                no - note it in perldelta as a significant bugfix
+                (also, try to inform the module's author)
 
-( TBD based on http://www.nntp.perl.org/group/perl.perl5.porters/2009/05/msg146680.html )
+=item *
+
+Similarly, monitor the smoking of core tests, and try to fix.
+
+=item *
+
+Run F<Porting/cmpVERSION.pl> to compare the current source tree with the
+previous version to check for for modules that have identical version
+numbers but different contents, e.g.:
+
+     $ cd ~/some-perl-root
+     $ ./perl -Ilib Porting/cmpVERSION.pl -xd ~/my_perl-tarballs/perl-5.10.0 .
+
+then bump the version numbers of any non-dual-life modules that have
+changed since the previous release, but which still have the old version
+number. If there is more than one maintenance branch (e.g. 5.8.x, 5.10.x),
+then compare against both.
+
+Note that some of the files listed may be generated (e.g. copied from ext/
+to lib/, or a script like lib/lib_pm.PL is run to produce lib/lib.pm);
+make sure you edit the correct file!
+
+Once all version numbers have been bumped, re-run the checks.
+
+Then run again without the -x option, to check that dual-life modules are
+also sensible.
+
+
+=item *
+
+Get perldelta in a mostly finished state.
+XXX expand
+
+=item *
+
+Bump the perl version number (e.g. from 5.10.0 to 5.10.1).
+
+There is a tool to semi-automate this process. It works in two stages.
+First, it generates a list of suggested changes, which you review and
+edit; then you feed this list back and it applies the edits. So, first
+scan the source dir looking for likely  candidates:
+
+    $ Porting/bump-perl-version -s 5.10.0 5.10.1 > /tmp/scan
+
+This produces a file containing a list of suggested edits, eg:
+
+    NetWare/Makefile
+
+       89: -MODULE_DESC     = "Perl 5.10.0 for NetWare"
+	   +MODULE_DESC     = "Perl 5.10.1 for NetWare"
+
+i.e. in the file F<NetWare/Makefile>, line 89 would be changed as shown.
+Review the file carefully, and delete any -/+ line pairs that you don't
+want changing. Remember that this tool is largely just grepping for '5.10.0'
+or whatever, so it will generate false positives. Be careful not change
+text like "this was fixed in 5.10.0"! Then run:
+
+    $ Porting/bump-perl-version -u < /tmp/scan
+
+which will update all the files shown; then commit the changes.
+
+Be particularly careful with F<INSTALL>, which contains a mixture of
+C<5.10.0>-type strings, some of which need bumping on every release, and
+some of which need to be left. Also note that this tool currently only
+performs a single change per line, so in particular, this line in
+README.vms needs special handling:
+
+    rename perl-5^.10^.1.dir perl-5_10_1.dir
+
+=item *
+
+Update the F<Changes> file to contain the git log command which would show
+all the changes in this release. You will need assume the existence of a
+not-yet created tag for the forthcoming release; e.g.
+
+    git log ... perl-5.10.0..perl5.12.0
+
+Due to warts in the perforce-to-git migration, some branches require extra
+exclusions to avoid other branches being pulled in. Make sure you have the
+correct incantation: replace the not-yet-created tag with C<HEAD> and see
+if git log produces roughly the right number of commits across roughly the
+right time period.
+
+=item *
+
+Check some more build configurations, e.g.
+
+     -Duseshrplib -Dd_dosuid
+     make suidperl
+
+Check that setuid installs works (for < 5.11.0 only).
+XXX any other configs?
+
+=item *
+
+Make sure you have a PAUSE account suitable for uploading a perl release.
+If you don't have a PAUSE account, then request one:
+
+    https://pause.perl.org/pause/query?ACTION=request_id
+
+Check that your account is allowed to upload perl distros: goto
+https://pause.perl.org/, login, then select 'upload file to CPAN'; there
+should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
+to add your ID to the list of people allowed to upload something called
+perl.
+
+=item *
+
+Update F<AUTHORS>, using the C<Porting/checkAUTHORS.pl> script, and if
+necessary, update the script to include new alias mappings.
+
+XXX This script is currently broken (7/2009). It needs updating to work
+with git and a lack of Changes files.
+
+=back
+
+=head2  Building a release candidate
+
+(At this point you should already have performed the actions described in
+L</"Actions prior to the first release candidate">.)
+
+=over 4
+
+=item *
+
+Re-read the perldelta to try to find any embarrassing typos and thinkos;
+remove any C<TODO> or C<XXX> flags; and run through pod and spell
+checkers.   [XXX show how]
+
+=item *
+
+Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
+final release, remove it.  [ XXX how now?? see 34813 for old way ]
+
+=item *
+
+Update C<Module::Corelist>.
+[XXX add how: presumably Porting/corelist.pl ]
+but we need to fix that: 
+it has been holding perforce revisions for releases, but we can't know
+hashes in advance for git. We need to agree a plan to move to git tags]
+
+=item *
+
+Follow the instructions in the section L</"Building a snapshot">, then
+carry on with the extra steps that follow here.
+
+=item *
+
+Wait for the smoke tests to catch up with the commit which this release is
+based on (or at least the last commit of any consequence).
+
+Then check that the smoke tests pass (particularly on Win32). If not, go
+back and fix things.
+
+
+=item *
+
+Once smoking is okay, upload it to PAUSE. This is the point of no return.
+
+XXX check whether need to upload .bz2,.meta, .readme too?
+
+
+=item *
+
+Mail p5p to announce it, with a quote you prepared earlier.
+
+=item *
+
+Wait 24 hours or so, then post the announcement to use.perl.org.
 
 =back
 
 
-=head2 The Actual release process
+=head2  Making a final release
 
-The set of tasks that can be "scripted" for Perl 5
+At this point you should have a working release candidate with few or no
+changes since.
+
+It's essentially the same procedure as for making a release candidate, but
+with a whole bunch of extra post-release steps.
 
 =over 4
 
-=item 0
+=item *
 
-so you think you have a source control in a state that won't break CPAN,
-at least not in "surprising" ways.
+Follow the same steps as for making a release candidate, then
 
-=item 1
+=item *
 
-As there are no regular smokes (yet - please fix?) find out about the state
-of VMS. If it's bad, think again.
-
-=item 2
-
-Re-read the perldelta to try to find any embarrassing typos
-
-=item 3
-
-Run Porting/makemeta
-
-=item 4
-
-[used to be run autodoc.pl, but I eliminated that]
-
-=item 5
-
-[used to be run pod/buildtoc, but I eliminated that]
-
-=item 6
-
-update module corelist, but we need to fix that
-
-[it has been holding perforce revisions for releases, but we can't know
-hashes in advance for git. We need to agree a plan to move to git tags]
-
-=item 7
-
-[update changes, but Dave has eliminated that]
-
-=item 8
-
-update patchlevel.h to remove all local patches
-
-=item 9
-
-make tarball with Porting/makerel
-
-=item 10
-
-copy tarball to some other machine x 2 [or more - IRC is good for this]
-
-=item 11
-
-check that ./Configure -des && make all test works in one place
-
-=item 12
-
-check that ./Configure ... && make all test_harness install works
+Ask Jarkko to update http://www.cpan.org/src/README.html and
+Rafael to update http://dev.perl.org/perl5/
 
 
-=item 13
+=item *
 
-bootstrap the CPAN client on the clean install
+create a tag [XXX and branches and stuff?]
+[ XXX expand this ]
 
-=item 14
+=item *
 
-install CPANPLUS
+[ XXX disarm any patchlevel.h stuff ??? ]
 
-=item 15
+=item *
 
-bootstrap the CPANPLUS client
+Create a new empty perlNNNdelta.pod file for the current release + 1;
+see F<Porting/how_to_write_a_perldelta.pod>.
+[ XXX Perhaps we should have an empty template file we can copy in. ]
 
-=item 16
+In addition, add entries to the following files:
 
-install an XS module
+    MANIFEST
+    pod.lst         (add new entry as 'D', and unmark previous entry as 'D')
+    pod/perl.pod
+    win32/pod.mak   (add entries for .pod, .man, .html, .tex)
+    vms/descrip_mms.template (also bump the perldelta.pod: entry)
 
-=item 17
+and change perlNNNdelta references to the new version in these files
 
-if this is good, commit this.
-sit, and wait.
+    INSTALL
+    win32/Makefile.mk
+    win32/Makefile
+    Makefile.SH
+    README
 
-=item 18
+Also, edit the previous delta file to change the C<NAME> from C<perldelta>
+to C<perlNNNdelta>.
 
-do the smoke tests pass (particularly Win32)
+These two lists of files probably aren't exhaustive; do a recursive grep
+on the previous filename to look for suitable candidates.
 
-=item 19
+(see 16410843ea for an example).
 
-if yes, upload it to PAUSE. This is the point of no return
+=item *
 
-=item 20
+If this was  major release, bump the version, e.g. 5.12.0 to 5.13.0
+[ XXX probably more complex stuff to do, including perldelta,
+C<lib/feature.pm> ]
 
-mail p5p to announce it, with a quote I prepared earlier
+=item *
 
-=item 21
+Copy the perlNNNdelta.pod for this release into the other branches, and
+remember to update these files on those branches too:
 
-wait 24 hours or so
+    MANIFEST
+    pod.lst
+    pod/perl.pod
+    vms/descrip_mms.template
+    win32/pod.mak
 
-=item 22
+(see fc5be80860 for an example).
 
-post the announcement to use.perl.org
+=item *
+
+Make sure any recent F<pod/perlhist.pod> entries are copied to
+F<perlhist.pod> on other branches; typically the RC* and final entries,
+e.g.
+
+          5.8.9-RC1     2008-Nov-10
+          5.8.9-RC2     2008-Dec-06
+          5.8.9         2008-Dec-14
 
 =back
 
 =head1 SOURCE
 
-Based on http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html
+Based on
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html,
+plus a whole bunch of other sources, including private correspondence.
 
 =cut
 
