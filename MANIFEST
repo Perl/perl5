@@ -3742,6 +3742,7 @@ pod/splitman			Splits perlfunc into multiple man pages
 pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/add-package.pl	Add/Update CPAN modules that are part of Core
+Porting/bump-perl-version	bump the perl version in relevant files
 Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkansi.pl	Check source code for ANSI-C violations
 Porting/checkARGS_ASSERT.pl	Check we use every PERL_ARGS_ASSERT* macro
