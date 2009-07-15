@@ -199,13 +199,18 @@ extern "C" {
         TUint  tick   = User::TickCount();
         if (PL_timesbase.tms_utime == 0) {
             PL_timesbase.tms_utime = tick;
-            //PL_clocktick = PERL_SYMBIAN_CLK_TCK;
+            PL_clocktick = PERL_SYMBIAN_CLK_TCK;
         }
         tick -= PL_timesbase.tms_utime;
         TInt64 tickus = TInt64(tick) * TInt64(periodus);
         TInt64 tmps   = tickus / 1000000;
+#ifdef __SERIES60_3X__
         if (sec)  *sec  = I64LOW(tmps);
         if (usec) *usec = I64LOW(tickus) - I64LOW(tmps) * 1000000;
+#else
+        if (sec)  *sec  = tmps.Low();
+        if (usec) *usec = tickus.Low() - tmps.Low() * 1000000;
+#endif //__SERIES60_3X__
         return 0;
     }
     EXPORT_C int symbian_usleep(unsigned int usec)
@@ -288,16 +293,21 @@ extern "C" {
         if (error == KErrNone) {
             TThreadFunction func = (TThreadFunction)(lib.Lookup(1));
             if (func)
-            	error = proc.Create(aFilename,
-            	                                    func,
-            	                                    KStackSize,
-            	                                  //  (TAny*)command,
-            	                                  //  &lib,
-            	                                  //  RThread().Heap(),
-            	                                    KHeapMin,
-            	                                    KHeapMax,
-            	                                    (TAny*)command,
-            	                                    EOwnerProcess);
+                error = proc.Create(aFilename,
+                                    func,
+                                    KStackSize,
+#ifdef __SERIES60_3X__                                    
+                                    KHeapMin,
+                                    KHeapMax,
+                                    (TAny*)command,
+#else
+                                    (TAny*)command,
+                                    &lib,
+                                    RThread().Heap(),
+                                    KHeapMin,
+                                    KHeapMax,
+#endif                                    
+                                    EOwnerProcess);
             else
                 error = KErrNotFound;
             lib.Close();
