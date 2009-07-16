@@ -744,7 +744,7 @@ sub _MakeMaker_Parameters_section {
     my $att  = shift;
 
     my @result = <<'END';
-    #   MakeMaker Parameters:
+#   MakeMaker Parameters:
 END
 
     # CPAN.pm takes prereqs from this field in 'Makefile'
