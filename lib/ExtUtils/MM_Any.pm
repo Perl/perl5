@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.54';
+our $VERSION = '6.55_01';
 
 use Carp;
 use File::Spec;
@@ -74,7 +74,7 @@ Windows, VMS, OS/2, etc...) and the rest are sub families.
 Some examples:
 
     Cygwin98       ('Unix',  'Cygwin', 'Cygwin9x')
-    Windows NT     ('Win32', 'WinNT')
+    Windows        ('Win32')
     Win98          ('Win32', 'Win9x')
     Linux          ('Unix',  'Linux')
     MacOS X        ('Unix',  'Darwin', 'MacOS', 'MacOS X')
@@ -838,11 +838,21 @@ sub metafile_data {
         meta-spec
     );
 
+    # Check the original args so we can tell between the user setting it
+    # to an empty hash and it just being initialized.
     my $configure_requires;
-    if( $self->{CONFIGURE_REQUIRES} and ref($self->{CONFIGURE_REQUIRES}) eq 'HASH' ) {
+    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
         $configure_requires = $self->{CONFIGURE_REQUIRES};
     } else {
         $configure_requires = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+    my $build_requires;
+    if( $self->{ARGS}{BUILD_REQUIRES} ) {
+        $build_requires = $self->{BUILD_REQUIRES};
+    } else {
+        $build_requires = {
             'ExtUtils::MakeMaker'       => 0,
         };
     }
@@ -856,9 +866,7 @@ sub metafile_data {
 
         configure_requires => $configure_requires,
 
-        build_requires => {
-            'ExtUtils::MakeMaker'       => 0
-        },
+        build_requires => $build_requires,
 
         no_index     => {
             directory   => [qw(t inc)]
@@ -2234,6 +2242,81 @@ init_platform() rather than put them in constants().
 
 sub platform_constants {
     return '';
+}
+
+=begin private
+
+=head3 _PREREQ_PRINT
+
+    $self->_PREREQ_PRINT;
+
+Implements PREREQ_PRINT.
+
+Refactored out of MakeMaker->new().
+
+=end private
+
+=cut
+
+sub _PREREQ_PRINT {
+    my $self = shift;
+
+    require Data::Dumper;
+    my @what = ('PREREQ_PM');
+    push @what, 'MIN_PERL_VERSION' if $self->{MIN_PERL_VERSION};
+    push @what, 'BUILD_REQUIRES'   if $self->{BUILD_REQUIRES};
+    print Data::Dumper->Dump([@{$self}{@what}], \@what);
+    exit 0;
+}
+
+
+=begin private
+
+=head3 _PRINT_PREREQ
+
+  $mm->_PRINT_PREREQ;
+
+Implements PRINT_PREREQ, a slightly different version of PREREQ_PRINT
+added by Redhat to, I think, support generating RPMs from Perl modules.
+
+Refactored out of MakeMaker->new().
+
+=end private
+
+=cut
+
+sub _PRINT_PREREQ {
+    my $self = shift;
+
+    my $prereqs= $self->_all_prereqs;
+    my @prereq = map { [$_, $prereqs->{$_}] } keys %$prereqs;
+
+    if ( $self->{MIN_PERL_VERSION} ) {
+        push @prereq, ['perl' => $self->{MIN_PERL_VERSION}];
+    }
+
+    print join(" ", map { "perl($_->[0])>=$_->[1] " }
+                 sort { $a->[0] cmp $b->[0] } @prereq), "\n";
+    exit 0;
+}
+
+
+=begin private
+
+=head3 _all_prereqs
+
+  my $prereqs = $self->_all_prereqs;
+
+Returns a hash ref of both PREREQ_PM and BUILD_REQUIRES.
+
+=end private
+
+=cut
+
+sub _all_prereqs {
+    my $self = shift;
+
+    return { %{$self->{PREREQ_PM}}, %{$self->{BUILD_REQUIRES}} };
 }
 
 

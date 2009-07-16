@@ -1,3 +1,16 @@
+6.55_01  Tue Jul 14 15:53:30 PDT 2009
+    Test Fixes
+    * The tests got a bit overzealous and removed the LIB environment variable
+      while is necessary for some compilers to work. [rt.cpan.org 47722]
+      (Jan Dubois)
+    * Another fix for arch_check() on Windows changing how we normalize
+      long and short filenames. [rt.cpan.org 47723] (Jan Dubois)
+
+    New Features
+    * BUILD_REQUIRES is added, similar to PREREQ_PM but for modules which
+      are necessary to build, but not run, your module. (Alexandr Ciornii)
+
+
 6.54  Tue Jul  7 16:48:22 PDT 2009
     Test Fixes
     * Added perl core boilerplate code to a few new tests which were missing

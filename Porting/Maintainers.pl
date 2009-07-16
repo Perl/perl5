@@ -694,13 +694,14 @@ package Maintainers;
     'ExtUtils::MakeMaker' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.54.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.55_01.tar.gz',
 			    # note that t/lib/TieOut.pm is included in
 			    # more than one distro
 	'FILES'		=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
 			     lib/ExtUtils/{Command,Liblist,MakeMaker}
 			     lib/ExtUtils/t/{[0-9FLV-Zabdf-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
 			     lib/ExtUtils/t/testdata/
+			     lib/ExtUtils/t/MakeMaker_Parameters.t
 			     lib/ExtUtils/Changes
 			     lib/ExtUtils/{NOTES,PATCHING,README,TODO}
 			     lib/ExtUtils/instmodsh
