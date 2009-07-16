@@ -678,7 +678,7 @@ if neither of the $! or $? status values are ones that would cause
 the native status to be interpreted as being what VMS classifies as
 SEVERE_ERROR severity for DCL error handling.
 
-When the future POSIX_EXIT mode is active, C<die>, the native VMS exit
+When C<PERL_VMS_POSIX_EXIT> is active (see L</"$?"> below), the native VMS exit
 status value will have either one of the C<$!> or C<$?> or C<$^E> or
 the UNIX value 255 encoded into it in a way that the effective original
 value can be decoded by other programs written in C, including Perl
@@ -691,21 +691,18 @@ If none of the above apply, the UNIX value of 255 will be encoded into
 a native VMS exit status value.
 
 Please note a significant difference in the behavior of C<die> in
-the future POSIX_EXIT mode is that it does not force a VMS
+the C<PERL_VMS_POSIX_EXIT> mode is that it does not force a VMS
 SEVERE_ERROR status on exit.  The UNIX exit values of 2 through
 255 will be encoded in VMS status values with severity levels of
 SUCCESS.  The UNIX exit value of 1 will be encoded in a VMS status
 value with a severity level of ERROR.  This is to be compatible with
 how the VMS C library encodes these values.
 
-The minimum severity level set by C<die> in a future POSIX_EXIT mode
-may be changed to be ERROR or higher before that mode becomes fully active
-depending on the results of testing and further review.  If this is
-done, the behavior of c<DIE> in the future POSIX_EXIT will close enough
-to the default mode that most DCL shell scripts will probably not notice
-a difference.
+The minimum severity level set by C<die> in C<PERL_VMS_POSIX_EXIT> mode
+may be changed to be ERROR or higher in the future depending on the 
+results of testing and further review.
 
-See C<$?> for a description of the encoding of the UNIX value to
+See L</"$?"> for a description of the encoding of the UNIX value to
 produce a native VMS status containing it.
 
 
@@ -1168,16 +1165,16 @@ SS$_NORMAL, and setting C<$?> to a non-zero value results in the
 generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
 With the C<PERL_VMS_POSIX_EXIT> logical name defined as "ENABLE",
-setting C<$?> will cause the new value to also be encoded into C<$^E>
-so that the either the original parent or child exit status values o
+setting C<$?> will cause the new value to be encoded into C<$^E>
+so that either the original parent or child exit status values 
  0 to 255 can be automatically recovered by C programs expecting
 _POSIX_EXIT behavior.  If both a parent and a child exit value are
 non-zero, then it will be assumed that this is actually a VMS native
 status value to be passed through.  The special value of 0xFFFF is
 almost a NOOP as it will cause the current native VMS status in the
 C library to become the current native Perl VMS status, and is handled
-this way as a it is known to not be a valid native VMS status value.
-It is recommend that only values in range of normal UNIX parent or
+this way as it is known to not be a valid native VMS status value.
+It is recommend that only values in the range of normal UNIX parent or
 child status numbers, 0 to 255 are used.
 
 The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 
@@ -1191,10 +1188,13 @@ enabled, as they are at times requesting conflicting actions and the
 consequence of ignoring this advice will be undefined to allow future
 improvements in the POSIX exit handling.
 
-In general, with the <PERL_VMS_POSIX_EXIT> enabled, more detailed information
+In general, with C<PERL_VMS_POSIX_EXIT> enabled, more detailed information
 will be availble in the exit status for DCL scripts or other native VMS tools,
 and will give the expected information for Posix programs.  It has not been
-made the default for backward compatibility.
+made the default in order to preserve backward compatibility.
+
+N.B. Setting C<DECC$FILENAME_UNIX_REPORT> implicitly enables 
+C<PERL_VMS_POSIX_EXIT>.
 
 =item $|
 
@@ -1217,8 +1217,7 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 3-Dec-2007, for Perl 5,
-patchlevel 10.
+Please see the git repository for revision history.
 
 =head1 AUTHOR
 
