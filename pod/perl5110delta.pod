@@ -168,6 +168,17 @@ See L</"The C<overloading> pragma"> above.
 
 =back
 
+=head2 Selected Changes to Core Modules
+
+=over 4
+
+L<Carp> now includes all the necessary code to function. Previously, it
+used to be a lightweight placeholder that loaded the actual code from
+C<Carp::Heavy> on demand. C<Carp::Heavy> is now a simple, empty module
+kept for backwards compatibility for programs that used to pre-load it.
+
+=back
+
 =head1 Utility Changes
 
 =head1 Documentation
