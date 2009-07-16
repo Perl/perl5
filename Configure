@@ -6529,6 +6529,7 @@ if (-d $stem) {
     chdir($stem);
     ;@candidates = map {
 	[ $_, pack "sss", split m/[._]/, "$_.0.0" ] } glob("5.*");
+    ;@candidates = sort { $a->[1] cmp $b->[1]} @candidates;
 }
 else {
     ;@candidates = ();
