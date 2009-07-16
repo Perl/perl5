@@ -7,7 +7,7 @@ our $VERSION = '0.01';
 
 my $HINT_NO_AMAGIC = 0x01000000; # see perl.h
 
-require 5.011000;
+require 5.010001;
 
 sub _ops_to_nums {
     require overload::numbers;
