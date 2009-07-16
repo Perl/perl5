@@ -43,7 +43,7 @@ sub test_round_trip {
 }
 
 is join("", $mm->_MakeMaker_Parameters_section()), <<'EXPECT', "nothing";
-    #   MakeMaker Parameters:
+#   MakeMaker Parameters:
 EXPECT
 
 test_round_trip({ NAME => "Foo" });
