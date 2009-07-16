@@ -2266,8 +2266,9 @@ http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.10 is not binary compatible with earlier versions of Perl.
-In other words, you will have to recompile your XS modules.
+This version is not binary compatible with releases of Perl prior
+to 5.10.0.  In other words, you will have to recompile any XS modules
+installed under version 5.8.9 (or earlier).
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
 5.X.Y) to another similar minor version (e.g. 5.X.(Y+1))) without
@@ -2278,59 +2279,37 @@ Usually, most extensions will probably not need to be recompiled to be
 used with a newer version of Perl.  Here is how it is supposed to work.
 (These examples assume you accept all the Configure defaults.)
 
-Suppose you already have version 5.8.7 installed.  The directories
-searched by 5.8.7 are typically like:
+Suppose you already have versions 5.8.9 and 5.10.0 installed, and you
+are now installing 5.10.1.  The directories searched by version 5.10.1
+will be:
 
-	/usr/local/lib/perl5/5.8.7/$archname
-	/usr/local/lib/perl5/5.8.7
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
+    /usr/local/lib/perl5/5.10.1/$archname
+    /usr/local/lib/perl5/5.10.1
+    /usr/local/lib/perl5/site_perl/5.10.1/$archname
+    /usr/local/lib/perl5/site_perl/5.10.1
 
-Now, suppose you install version 5.8.8.  The directories
-searched by version 5.8.8 will be:
+    /usr/local/lib/perl5/site_perl/5.10.0/$archname
+    /usr/local/lib/perl5/site_perl/5.10.0
+    /usr/local/lib/perl5/site_perl/5.8.9
+    /usr/local/lib/perl5/site_perl
 
-	/usr/local/lib/perl5/5.8.8/$archname
-	/usr/local/lib/perl5/5.8.8
-	/usr/local/lib/perl5/site_perl/5.8.8/$archname
-	/usr/local/lib/perl5/site_perl/5.8.8
-
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
-	/usr/local/lib/perl5/site_perl/
-
-Notice the last three entries -- Perl understands the default structure
+Notice the last four entries -- Perl understands the default structure
 of the $sitelib directories and will look back in older, compatible
-directories.  This way, modules installed under 5.8.7 will continue
-to be usable by 5.8.7 but will also accessible to 5.8.8.  Further,
-suppose that you upgrade a module to one which requires features
-present only in 5.8.8.  That new module will get installed into
-/usr/local/lib/perl5/site_perl/5.8.8 and will be available to 5.8.8,
-but will not interfere with the 5.8.7 version.
+directories.  It will load up architecture-dependent modules from your
+5.10.0 installation, and pure perl modules from either your 5.10.0 or
+5.8.9 installations.  The last entry, /usr/local/lib/perl5/site_perl/,
+is there for 5.004-era pure perl modules.
 
-The last entry, /usr/local/lib/perl5/site_perl/, is there so that
-5.6.0 and above will look for 5.004-era pure perl modules.
-
-Lastly, suppose you now install 5.10.1, which is not binary compatible
-with 5.8.x.  The directories searched by 5.10.1 (if you don't change the
-Configure defaults) will be:
-
-	/usr/local/lib/perl5/5.10.1/$archname
-	/usr/local/lib/perl5/5.10.1
-	/usr/local/lib/perl5/site_perl/5.10.1/$archname
-	/usr/local/lib/perl5/site_perl/5.10.1
-
-	/usr/local/lib/perl5/site_perl/5.8.8
-
-	/usr/local/lib/perl5/site_perl/5.8.7
-
-	/usr/local/lib/perl5/site_perl/
-
-Note that the earlier $archname entries are now gone, but pure perl
-modules from earlier versions will still be found.
+Next, suppose that you now upgrade a module to one which requires
+features present only in 5.10.1.  That new module will get installed into
+/usr/local/lib/perl5/site_perl/5.10.1 and will be available to 5.10.1,
+but will not interfere with the 5.10.0 version.
 
 This way, you can choose to share compatible extensions, but also upgrade
 to a newer version of an extension that may be incompatible with earlier
 versions, without breaking the earlier versions' installations.
+
+This search order is scheduled for revision starting in version 5.11.0.
 
 =head2 Maintaining completely separate versions
 
@@ -2340,9 +2319,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.10.0
+	sh Configure -Dprefix=/opt/perl5.10.1
 
-and adding /opt/perl5.10.0/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.10.1/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
