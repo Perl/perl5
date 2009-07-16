@@ -577,7 +577,7 @@ package Maintainers;
     'Encode' =>
 	{
 	'MAINTAINER'	=> 'dankogai',
-	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.34.tar.gz',
+	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.35.tar.gz',
 	'FILES'		=> q[ext/Encode],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
