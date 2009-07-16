@@ -130,7 +130,7 @@ END
         skip 'not going to evaluate rubbish', 3 if !$prereq_out_sane;
 
         package _Prereq::Print::WithMPV;          ## no critic
-        use vars qw($PREREQ_PM $MIN_PERL_VERSION $ERR);
+        our($PREREQ_PM, $BUILD_REQUIRES, $MIN_PERL_VERSION, $ERR);
         $ERR = '';
         eval {
             eval $prereq_out;                     ## no critic

@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.54';
+our $VERSION = '6.55_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -417,9 +417,16 @@ sub arch_check {
     # Win32 is an XS module, minperl won't have it.
     # arch_check() is not critical, so just fake it.
     return 1 unless $self->can_load_xs;
+    return $self->SUPER::arch_check( map { $self->_normalize_path_name($_) } @_);
+}
+
+sub _normalize_path_name {
+    my $self = shift;
+    my $file = shift;
 
     require Win32;
-    return $self->SUPER::arch_check( map { lc Win32::GetShortPathName($_) } @_);
+    my $short = Win32::GetShortPathName($file);
+    return defined $short ? lc $short : lc $file;
 }
 
 

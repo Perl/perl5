@@ -2250,6 +2250,7 @@ lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
+lib/ExtUtils/t/MakeMaker_Parameters.t  test "MakeMaker Parameters" section
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works

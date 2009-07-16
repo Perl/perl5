@@ -29,7 +29,6 @@ our @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
         HARNESS_OPTIONS
         HARNESS_VERBOSE
         PREFIX
-        LIB
         MAKEFLAGS
     );
 
@@ -291,9 +290,10 @@ sub run {
 
     use ExtUtils::MM;
 
-    # Unix can handle 2>&1 and OS/2 from 5.005_54 up.
+    # Unix, modern Windows and OS/2 from 5.005_54 up can handle can handle 2>&1 
     # This makes our failure diagnostics nicer to read.
-    if( MM->os_flavor_is('Unix') or
+    if( MM->os_flavor_is('Unix')                                   or
+        (MM->os_flavor_is('Win32') and !MM->os_flavor_is('Win9x')) or
         ($] > 5.00554 and MM->os_flavor_is('OS/2'))
       ) {
         return `$cmd 2>&1`;
