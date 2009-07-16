@@ -1167,16 +1167,16 @@ is that setting C<$?> to zero results in the generic success value
 SS$_NORMAL, and setting C<$?> to a non-zero value results in the
 generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
-With the future POSIX_EXIT mode set, setting C<$?> will cause the
-new value to also be encoded into C<$^E> so that the either the
-original parent or child exit status values of 0 to 255
-can be automatically recovered by C programs expecting _POSIX_EXIT
-behavior.  If both a parent and a child exit value are non-zero, then it
-will be assumed that this is actually a VMS native status value to
-be passed through.  The special value of 0xFFFF is almost a NOOP as
-it will cause the current native VMS status in the C library to
-become the current native Perl VMS status, and is handled this way
-as consequence of it known to not be a valid native VMS status value.
+With the C<PERL_VMS_POSIX_EXIT> logical name defined as "ENABLE",
+setting C<$?> will cause the new value to also be encoded into C<$^E>
+so that the either the original parent or child exit status values o
+ 0 to 255 can be automatically recovered by C programs expecting
+_POSIX_EXIT behavior.  If both a parent and a child exit value are
+non-zero, then it will be assumed that this is actually a VMS native
+status value to be passed through.  The special value of 0xFFFF is
+almost a NOOP as it will cause the current native VMS status in the
+C library to become the current native Perl VMS status, and is handled
+this way as a it is known to not be a valid native VMS status value.
 It is recommend that only values in range of normal UNIX parent or
 child status numbers, 0 to 255 are used.
 
@@ -1186,10 +1186,15 @@ described above.  This pragma also disables the conversion of
 non-zero values to SS$_ABORT when setting C<$?> in an END
 block (but zero will still be converted to SS$_NORMAL).
 
-Do not use the pragma C<use vmsish 'status'> with the future
-POSIX_EXIT mode, as they are at times requesting conflicting
-actions and the consequence of ignoring this advice will be
-undefined to allow future improvements in the POSIX exit handling.
+Do not use the pragma C<use vmsish 'status'> with C<PERL_VMS_POSIX_EXIT>
+enabled, as they are at times requesting conflicting actions and the
+consequence of ignoring this advice will be undefined to allow future
+improvements in the POSIX exit handling.
+
+In general, with the <PERL_VMS_POSIX_EXIT> enabled, more detailed information
+will be availble in the exit status for DCL scripts or other native VMS tools,
+and will give the expected information for Posix programs.  It has not been
+made the default for backward compatibility.
 
 =item $|
 
