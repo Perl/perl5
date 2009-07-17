@@ -3609,3 +3609,29 @@ d  9a108c6c20 2009/07/13 Cosmetic change
 M  7de6a4226c 2009/07/13 upate pumpking list
 d  ba7a454966 2009/07/14 Merge Carp::Heavy into Carp
 d  4dd71923a4 2009/07/14 Don't preload Carp::Heavy in warnings.pm
+M  b47aa4955a 2009/07/14 Explain camel and dromedary repository servers
+M  d3319df775 2009/07/14 Update my address.
+R  fa7a1c653b 2009/07/14 fix some perl version numbers
+			    blead-specific
+M  ae1b7029e5 2009/07/14 add Porting/bump-perl-version
+M  7ae6965a19 2009/07/14 test_harness, not just test, needs unpack_files on
+M  32a73b0d97 2009/07/15 add Porting/bump-perl-version to MANIFEST
+M  cabc01fc4a 2009/07/15 document given/when in perltrap
+d  799dfa8f13 2009/07/15 The op_free() hook doesn't need to return an OP*, 
+d  2f175318a4 2009/07/15 Document PL_opfreehook
+M  f6af439460 2009/07/15 expand Porting/release_managers_guide.pod
+M  d9ac7b6b66 2009/07/16 An update to the pod is in order for the PERL_VMS_
+M  b6d6132c15 2009/07/16 ExtUtils::MakeMaker 6.55_01
+M  d3efbeccdc 2009/07/16 patch submisson(symbian/symbian_utils.cpp)
+M  89ad885892 2009/07/16 patch submission(AUTHORS)
+M  a2cba4bc78 2009/07/16 Note that editing pod.list then running pod/buildt
+M  5538866cd3 2009/07/16 overloading.pm will work with 5.10.1
+M  b34f6083b4 2009/07/16 bump Encode version in Maintainers.pl
+M  ec55d5e404 2009/07/16 URL and other fix-ups for README.vms
+M  90dc4aa576 2009/07/16 Additional perlvms.pod updates related to POSIX ex
+M  4facedc50e 2009/07/16 No whitespace before comment allowed in VMS make u
+!  0010debf16 2009/07/16 Add a version number to B::Lint::Debug
+				wait for CPAN sync
+d  02569b8398 2009/07/16 Describe changes to Carp and Carp::Heavy
+M  e3c125ffa5 2009/07/17 README.aix for Perl 5.10.1
+M  c533d96e5f 2009/07/17 hints/aix.sh remove libgdbm from wanted libs - dbm

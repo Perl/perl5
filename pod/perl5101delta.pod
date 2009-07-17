@@ -474,7 +474,7 @@ C<ExtUtils::Install> upgraded from version 1.44 to 1.52
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.54
+C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.55_01
 
 Note that C<ExtUtils::MakeMaker::bytes> and C<ExtUtils::MakeMaker::vmsish>
 have been removed from this distribution.
