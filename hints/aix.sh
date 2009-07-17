@@ -538,4 +538,11 @@ libswanted=`echo " $libswanted " | sed -e 's/ bsd / /'`
 libswanted=`echo " $libswanted " | sed -e 's/ BSD / /'`
 d_flock='undef'
 
+# remove libgdbm from wanted libraries
+# The libgdbm 1.8.3 from the AIX Toolbox is not working 
+# (the dbm_store() function is defective)
+libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
+i_gdbm='undef'
+i_gdbmndbm='undef'
+
 # EOF
