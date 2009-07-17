@@ -783,25 +783,29 @@ type.  Most body types use the former pair, the latter pair is used to
 allocate body types with "ghost fields".
 
 "ghost fields" are fields that are unused in certain types, and
-consequently dont need to actually exist.  They are declared because
+consequently don't need to actually exist.  They are declared because
 they're part of a "base type", which allows use of functions as
 methods.  The simplest examples are AVs and HVs, 2 aggregate types
 which don't use the fields which support SCALAR semantics.
 
-For these types, the arenas are carved up into *_allocated size
+For these types, the arenas are carved up into appropriately sized
 chunks, we thus avoid wasted memory for those unaccessed members.
 When bodies are allocated, we adjust the pointer back in memory by the
-size of the bit not allocated, so it's as if we allocated the full
+size of the part not allocated, so it's as if we allocated the full
 structure.  (But things will all go boom if you write to the part that
 is "not there", because you'll be overwriting the last members of the
 preceding structure in memory.)
 
-We calculate the correction using the STRUCT_OFFSET macro. For
-example, if xpv_allocated is the same structure as XPV then the two
-OFFSETs sum to zero, and the pointer is unchanged. If the allocated
-structure is smaller (no initial NV actually allocated) then the net
-effect is to subtract the size of the NV from the pointer, to return a
-new pointer as if an initial NV were actually allocated.
+We calculate the correction using the STRUCT_OFFSET macro on the first
+member present. If the allocated structure is smaller (no initial NV
+actually allocated) then the net effect is to subtract the size of the NV
+from the pointer, to return a new pointer as if an initial NV were actually
+allocated. (We were using structures named *_allocated for this, but
+this turned out to be a subtle bug, because a structure without an NV
+could have a lower alignment constraint, but the compiler is allowed to
+optimised accesses based on the alignment constraint of the actual pointer
+to the full structure, for example, using a single 64 bit load instruction
+because it "knows" that two adjacent 32 bit members will be 8-byte aligned.)
 
 This is the same trick as was used for NV and IV bodies. Ironically it
 doesn't need to be used for NV bodies any more, because NV is now at
@@ -835,11 +839,11 @@ zero, forcing individual mallocs and frees.
 
 Body_size determines how big a body is, and therefore how many fit into
 each arena.  Offset carries the body-pointer adjustment needed for
-*_allocated body types, and is used in *_allocated macros.
+"ghost fields", and is used in *_allocated macros.
 
 But its main purpose is to parameterize info needed in
 Perl_sv_upgrade().  The info here dramatically simplifies the function
-vs the implementation in 5.8.7, making it table-driven.  All fields
+vs the implementation in 5.8.8, making it table-driven.  All fields
 are used for this, except for arena_size.
 
 For the sv-types that have no bodies, arenas are not used, so those
@@ -901,26 +905,6 @@ struct body_details {
     ? FIT_ARENAn (count, body_size)			\
     : FIT_ARENA0 (body_size)
 
-/* A macro to work out the offset needed to subtract from a pointer to (say)
-
-typedef struct {
-    STRLEN	xpv_cur;
-    STRLEN	xpv_len;
-} xpv_allocated;
-
-to make its members accessible via a pointer to (say)
-
-struct xpv {
-    NV		xnv_nv;
-    STRLEN	xpv_cur;
-    STRLEN	xpv_len;
-};
-
-*/
-
-#define relative_STRUCT_OFFSET(longer, shorter, member) \
-    (STRUCT_OFFSET(shorter, member) - STRUCT_OFFSET(longer, member))
-
 /* Calculate the length to copy. Specifically work out the length less any
    final padding the compiler needed to add.  See the comment in sv_upgrade
    for why copying the padding proved to be a bug.  */
@@ -953,18 +937,18 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(NV)) },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
-    { sizeof(xpv_allocated),
-      copy_length(XPV, xpv_len)
-      - relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
-      + relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
-      SVt_PV, FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpv_allocated)) },
+    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
     /* 12 */
-    { sizeof(xpviv_allocated),
-      copy_length(XPVIV, xiv_u)
-      - relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
-      + relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
-      SVt_PVIV, FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpviv_allocated)) },
+    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPVIV, xpv_cur),
+      SVt_PVIV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
     /* 20 */
     { sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, SVt_PVNV, FALSE, HADNV,
@@ -990,26 +974,30 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
 
-    { sizeof(xpvav_allocated),
-      copy_length(XPVAV, xmg_stash)
-      - relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
-      + relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
-      SVt_PVAV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvav_allocated)) },
+    { sizeof(XPVAV) - STRUCT_OFFSET(XPVAV, xav_fill),
+      copy_length(XPVAV, xmg_stash) - STRUCT_OFFSET(XPVAV, xav_fill),
+      + STRUCT_OFFSET(XPVAV, xav_fill),
+      SVt_PVAV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVAV) - STRUCT_OFFSET(XPVAV, xav_fill)) },
 
-    { sizeof(xpvhv_allocated),
-      copy_length(XPVHV, xmg_stash)
-      - relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
-      + relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
-      SVt_PVHV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
+    { sizeof(XPVHV) - STRUCT_OFFSET(XPVHV, xhv_fill),
+      copy_length(XPVHV, xmg_stash) - STRUCT_OFFSET(XPVHV, xhv_fill),
+      + STRUCT_OFFSET(XPVHV, xhv_fill),
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVHV) - STRUCT_OFFSET(XPVHV, xhv_fill)) },
 
     /* 56 */
-    { sizeof(xpvcv_allocated), sizeof(xpvcv_allocated),
-      + relative_STRUCT_OFFSET(xpvcv_allocated, XPVCV, xpv_cur),
-      SVt_PVCV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvcv_allocated)) },
+    { sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur),
+      sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur),
+      + STRUCT_OFFSET(XPVCV, xpv_cur),
+      SVt_PVCV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur)) },
 
-    { sizeof(xpvfm_allocated), sizeof(xpvfm_allocated),
-      + relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
-      SVt_PVFM, TRUE, NONV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
+    { sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur),
+      sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur),
+      + STRUCT_OFFSET(XPVFM, xpv_cur),
+      SVt_PVFM, TRUE, NONV, NOARENA,
+      FIT_ARENA(20, sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur)) },
 
     /* XPVIO is 84 bytes, fits 48x */
     { sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur),
