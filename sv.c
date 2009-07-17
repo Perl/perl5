@@ -975,10 +975,11 @@ static const struct body_details bodies_by_type[] = {
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
     /* something big */
-    { sizeof(struct regexp_allocated), sizeof(struct regexp_allocated),
-      + relative_STRUCT_OFFSET(struct regexp_allocated, regexp, xpv_cur),
+    { sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur),
+      sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur),
+      + STRUCT_OFFSET(regexp, xpv_cur),
       SVt_REGEXP, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(struct regexp_allocated))
+      FIT_ARENA(0, sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur))
     },
 
     /* 48 */
@@ -1011,9 +1012,11 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVFM, TRUE, NONV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
 
     /* XPVIO is 84 bytes, fits 48x */
-    { sizeof(xpvio_allocated), sizeof(xpvio_allocated),
-      + relative_STRUCT_OFFSET(xpvio_allocated, XPVIO, xpv_cur),
-      SVt_PVIO, TRUE, NONV, HASARENA, FIT_ARENA(24, sizeof(xpvio_allocated)) },
+    { sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur),
+      sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur),
+      + STRUCT_OFFSET(XPVIO, xpv_cur),
+      SVt_PVIO, TRUE, NONV, HASARENA,
+      FIT_ARENA(24, sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur)) },
 };
 
 #define new_body_type(sv_type)		\

@@ -107,12 +107,6 @@ typedef struct regexp {
 	_REGEXP_COMMON;
 } regexp;
 
-struct regexp_allocated {
-	_XPV_ALLOCATED_HEAD;
-	_XPVMG_HEAD;
-	_REGEXP_COMMON;
-};
-
 /*        HV *paren_names;	 Optional hash of paren names
 	  now stored in the IV union */
 
