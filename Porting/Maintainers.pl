@@ -477,7 +477,10 @@ package Maintainers;
 			    ],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
-			     qw{ bin/cpanp-boxed
+			     qw{ bin/cpanp-boxed },
+			     # SQLite tests would be skipped in core, and
+			     # the filenames are too long for VMS!
+			     qw{
 				 t/031_CPANPLUS-Internals-Source-SQLite.t
 				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
