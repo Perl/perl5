@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 40);
+require q(./test.pl); plan(tests => 42);
 
 require mro;
 
@@ -233,3 +233,18 @@ is(eval { MRO_N->testfunc() }, 123);
     is($stk_obj->foo(3), 6);
 }
 
+{ 
+  {
+    # assigning @ISA via arrayref to globref RT 60220
+    package P1;
+    sub new { bless {}, shift }
+    
+    package P2;
+  }
+  *{P2::ISA} = [ 'P1' ];
+  my $foo = P2->new;
+  ok(!eval { $foo->bark }, "no bark method");
+  no warnings 'once';  # otherwise it'll bark about P1::bark used only once
+  *{P1::bark} = sub { "[bark]" };
+  is(scalar eval { $foo->bark }, "[bark]", "can bark now");
+}
