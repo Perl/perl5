@@ -223,8 +223,9 @@ EOT
 
 # test with pod_where
 use_ok('Pod::Find', qw(pod_where));
-# Exclude current dir when testing in CORE under Cygwin
-my @NO_CURDIR = ($^O eq 'cygwin' && $ENV{PERL_CORE})
++# Exclude current dir when testing in CORE; otherwise on case-insensitive
++# systems, when in t/ we find pod/usage.pod rather than # ../lib/Pod/Usage.pm
++my @NO_CURDIR = ($ENV{PERL_CORE})
                     ? ('-dirs' => [])
                     : ();
 
