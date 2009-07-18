@@ -46,7 +46,7 @@ to the regular or operator, as in C<when (expr1 || expr2)>.)
 
 =back
 
-The next paragraph details more changes brought to the semantics to
+The next section details more changes brought to the semantics to
 the smart match operator, that naturally also modify the behaviour
 of the switch statements where smart matching is implicitly used.
 
@@ -653,7 +653,8 @@ C<Module::Build> upgraded from version 0.2808_01 to 0.34
 
 =item *
 
-C<Module::CoreList> upgraded from version 2.13 to 2.17_01 XXX
+C<Module::CoreList> upgraded from version 2.13 to 2.18. This release no
+longer contains the <%Module::CoreList::patchlevel> hash.
 
 =item *
 
@@ -1025,6 +1026,10 @@ hints now supports versions 5.*.
 
 Various changes from Stratus have been merged in.
 
+=head3 Symbian
+
+There is now support for Symbian S60 3.2 SDK and S60 5.0 SDK.
+
 =head3 Win32
 
 XXX: Don't know how to summarise
@@ -1043,9 +1048,10 @@ VMS now supports C<getgrgid>.
 Many improvements and cleanups have been made to the VMS file name handling
 and conversion code.
 
-=for comment
-
-XXX I'd mention PERL_VMS_POSIX_EXIT but it doesn't seem to be documented anywhere.
+Enabling the C<PERL_VMS_POSIX_EXIT> logical name now encodes a POSIX exit
+status in a VMS condition value for better interaction with GNV's bash
+shell and other utilities that depend on POSIX exit values.  See
+L<perlvms/"$?"> for details.
 
 =head1 Selected Bug Fixes
 
@@ -1263,6 +1269,16 @@ Segfault when using (?|) in regexp [RT #59734]
 =item *
 
 Segfault when using utf-8 tr// within a closure [RT #61520]
+
+=item *
+
+Calling sv_chop() or otherwise upgrading an SV can result in an unaligned
+64-bit access on the SPARC architecture [RT #60574]
+
+=item *
+
+In the 5.10.0 release, C<inc_version_list> would incorrectly list
+C<5.10.*> after C<5.8.*> [RT #67628]
 
 
 =back

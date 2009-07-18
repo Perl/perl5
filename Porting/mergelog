@@ -237,6 +237,7 @@ M  9d6c4c89d7 2008/01/05 32856
 M  0357f1fd55 2008/01/05 32857
 M  d0a30c4343 2008/01/05 32858
 P  08e4474067 2008/01/05 32859 only Peek.t from SVt_REGEXP stuff
+				see also b6f6091627
 M  62a1a1efb4 2008/01/05 32860
 R  d2f13c598f 2008/01/05 32861 Make REGEXP a type distinct from SV.
 R  a11c868346 2008/01/05 32862 bleed-only
@@ -3635,3 +3636,16 @@ M  4facedc50e 2009/07/16 No whitespace before comment allowed in VMS make u
 d  02569b8398 2009/07/16 Describe changes to Carp and Carp::Heavy
 M  e3c125ffa5 2009/07/17 README.aix for Perl 5.10.1
 M  c533d96e5f 2009/07/17 hints/aix.sh remove libgdbm from wanted libs - dbm
+R  b6f6091627 2009/07/17 Eliminate struct regexp_allocated and xpvio_alloca
+			    remove stuff added by already-rejected 08e4474067
+M  69ba284b5e 2009/07/17 Allocate XPV* memory using sizeof() and the offset
+M  557305a74c 2009/07/17 document why SQLite tests are exlcuded
+!  69a4390734 2009/07/17 Fix ExtUtils::Installed failure with -Duserelocata
+			    awaiting CPAN sync
+M  c456aab3e6 2009/07/18 fix pod2usage2 test for all case-insensitive syste
+M  3012b81707 2009/07/18 Some of the TODOs in switches.t actually work on V
+M  a71f1801ba 2009/07/18 Configure should sort inc_version_list
+M  e1018a69a6 2009/07/18 add basic usage info to Porting/corelist.pl
+M  781ea95a92 2009/07/18 Provisional update of CoreList for 5.10.1
+M  210de33e13 2009/07/18 add info on updating CoreList and tags to release_
+M  6e40fbf9a5 2009/07/18 add extra note about CoreList to release_managers_
