@@ -531,6 +531,11 @@ e.g.
           5.8.9-RC2     2008-Dec-06
           5.8.9         2008-Dec-14
 
+=item *
+
+Remind the current maintainer of C<Module::CoreList> to push a new release
+to CPAN.
+
 =back
 
 =head1 SOURCE
