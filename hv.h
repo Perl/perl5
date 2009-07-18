@@ -97,11 +97,6 @@ struct xpvhv {
 
 #define xhv_keys xiv_u.xivu_iv
 
-typedef struct {
-    _XPVHV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-} xpvhv_allocated;
-
 #undef _XPVHV_ALLOCATED_HEAD
 #undef _XPVHV_HEAD
 

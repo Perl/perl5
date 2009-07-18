@@ -21,11 +21,6 @@ struct xpvav {
     _XPVMG_HEAD;
 };
 
-typedef struct {
-    _XPVAV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-} xpvav_allocated;
-
 #undef _XPVAV_ALLOCATED_HEAD
 #undef _XPVAV_HEAD
 

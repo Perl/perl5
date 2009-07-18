@@ -439,19 +439,10 @@ struct xpv {
     _XPV_HEAD;
 };
 
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-} xpv_allocated;
-
 struct xpviv {
     _XPV_HEAD;
     union _xivu xiv_u;
 };
-
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    union _xivu xiv_u;
-} xpviv_allocated;
 
 #define xiv_iv xiv_u.xivu_iv
 
@@ -524,12 +515,6 @@ struct xpvfm {
     _XPVMG_HEAD;
     _XPVCV_COMMON;
 };
-
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-    _XPVCV_COMMON;
-} xpvfm_allocated;
 
 #define _XPVIO_TAIL							\
     PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */	\
