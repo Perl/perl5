@@ -1,6 +1,13 @@
 #!perl
 # Generates info for Module::CoreList from this perl tree
-# run this from the root of a clean perl tree
+# run this from the root of a perl tree, using the perl built in that tree.
+#
+# Data is on STDOUT.
+#
+# With an optional arg specifying the root of a CPAN mirror, outputs the
+# %upstream and %bug_tracker hashes too.
+
+use 5.010001; # needs Parse::CPAN::Meta
 
 use strict;
 use warnings;
@@ -10,10 +17,17 @@ use lib "Porting";
 use Maintainers qw(%Modules files_to_modules);
 use File::Spec;
 
+
 my %lines;
 my %module_to_file;
 my %modlist;
+
+die "usage: $0 [ cpan-mirror/ ]\n" unless @ARGV <= 1;
 my $cpan = shift;
+
+if (! -f 'MANIFEST') {
+    die "Must be run from the root of a clean perl tree\n"
+}
 
 if ($cpan) {
     my $modlistfile
