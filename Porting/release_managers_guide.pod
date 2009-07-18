@@ -81,7 +81,7 @@ F<pod/perlhist.pod> with the current date, e.g.
 
           5.8.9-RC1     2008-Nov-10
 
-Make sure the correct pumpking is listed, and if this your first time,
+Make sure the correct pumpking is listed, and if this is your first time,
 append your name to C<THE KEEPERS OF THE PUMPKIN>.
 
 =item *
@@ -348,7 +348,7 @@ final release, remove it.  [ XXX how now?? see 34813 for old way ]
 
 Update C<Module::Corelist>.
 
-Note that is this is a maint release, you should run the following actions
+Note that if this is a maint release, you should run the following actions
 from the maint directory, but edit the C<Corelist.pm> in I<blead> and
 subsequently cherry-pick it.
 
@@ -389,15 +389,13 @@ This creates a file that looks something like
 	...
     );
 
-No
-
 Cut and paste these tables into F<lib/Module/CoreList.pm>: the module
 version list should be appended as the last entry in the C<%version> hash
 (or replaced, if we've already added it for an earlier release candidate),
 while the existing C<%upstream> and C<%bug_tracker> hashes should be
 replaced with the new versions.
 
-Edit the version number in the new C<<'Module::CoreList' => 'X.YZ'>>
+Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
 entry, as that is likely to reflect the previous version number.
 
 Then, add the current perl version to the C<CAVEATS> paragraph.
@@ -504,7 +502,7 @@ on the previous filename to look for suitable candidates.
 
 =item *
 
-If this was  major release, bump the version, e.g. 5.12.0 to 5.13.0
+If this was a major release, bump the version, e.g. 5.12.0 to 5.13.0
 [ XXX probably more complex stuff to do, including perldelta,
 C<lib/feature.pm> ]
 
