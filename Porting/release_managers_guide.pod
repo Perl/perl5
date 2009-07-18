@@ -347,10 +347,64 @@ final release, remove it.  [ XXX how now?? see 34813 for old way ]
 =item *
 
 Update C<Module::Corelist>.
-[XXX add how: presumably Porting/corelist.pl ]
-but we need to fix that: 
-it has been holding perforce revisions for releases, but we can't know
-hashes in advance for git. We need to agree a plan to move to git tags]
+
+Note that is this is a maint release, you should run the following actions
+from the maint directory, but edit the C<Corelist.pm> in I<blead> and
+subsequently cherry-pick it.
+
+First, in order to update the C<%upstream> and C<%bug_tracker> hashes,
+the C<Porting/corelist.pl> script requires you to have a local CPAN
+mirror.  See http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN for
+more details, but basically:
+
+    $ mkdir ~/cpan-mirror
+    $ rsync -av --delete ftp.funet.fi::CPAN ~/cpan-mirror/
+
+(and re-run the rsync each time you need it to be up-to-date).
+[XXX this really needs fixing to not require a whole CPAN mirror]
+
+If necessary, bump C<$VERSION> (there's no need to do this for
+every RC; in RC1, bump the version to a new clean number that will
+appear in the final release, and leave as-is for the later RCs and final).
+
+Then do
+
+    $ cd ~/perl/root; make perl
+    $ ./perl -Ilib Porting/corelist.pl ~/cpan-mirror/ > /tmp/corelist
+
+This creates a file that looks something like
+
+    5.010001 => {
+	'AnyDBM_File'           => '1.00',
+	...
+    },
+
+    %upstream = (
+	'App::Prove'            => undef,
+	...
+    );
+
+    %bug_tracker = (
+	'App::Prove'            => 'http://rt.cpan.org/...',
+	...
+    );
+
+No
+
+Cut and paste these tables into F<lib/Module/CoreList.pm>: the module
+version list should be appended as the last entry in the C<%version> hash
+(or replaced, if we've already added it for an earlier release candidate),
+while the existing C<%upstream> and C<%bug_tracker> hashes should be
+replaced with the new versions.
+
+Edit the version number in the new C<<'Module::CoreList' => 'X.YZ'>>
+entry, as that is likely to reflect the previous version number.
+
+Then, add the current perl version to the C<CAVEATS> paragraph.
+
+Add or update an entry to the C<%released> hash, including today's date
+(if this is just a release candidate, set the date to '????-??-??').
+
 
 =item *
 
@@ -372,6 +426,12 @@ Once smoking is okay, upload it to PAUSE. This is the point of no return.
 
 XXX check whether need to upload .bz2,.meta, .readme too?
 
+=item *
+
+create a tag [XXX and branches and stuff ????], e.g.:
+
+    $ git tag perl-5.10.1-RC1 -m'Release Candidate 1 of Perl 5.10.1'
+    $ git push origin tag perl-5.10.1-RC1
 
 =item *
 
@@ -403,11 +463,6 @@ Follow the same steps as for making a release candidate, then
 Ask Jarkko to update http://www.cpan.org/src/README.html and
 Rafael to update http://dev.perl.org/perl5/
 
-
-=item *
-
-create a tag [XXX and branches and stuff?]
-[ XXX expand this ]
 
 =item *
 
