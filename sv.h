@@ -398,13 +398,10 @@ perform the upgrade if necessary.  See C<svtype>.
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 
-#define _XPV_ALLOCATED_HEAD						\
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
-    STRLEN	xpv_len 	/* allocated size */
-
 #define _XPV_HEAD	\
     union _xnvu xnv_u;	\
-    _XPV_ALLOCATED_HEAD
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    STRLEN	xpv_len 	/* allocated size */
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
