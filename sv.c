@@ -3458,6 +3458,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
     SV **location;
     U8 import_flag = 0;
     const U32 stype = SvTYPE(sref);
+    bool mro_changes = FALSE;
 
     PERL_ARGS_ASSERT_GLOB_ASSIGN_REF;
 
@@ -3484,6 +3485,8 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 	goto common;
     case SVt_PVAV:
 	location = (SV **) &GvAV(dstr);
+        if (strEQ(GvNAME((GV*)dstr), "ISA"))
+	    mro_changes = TRUE;
 	import_flag = GVf_IMPORTED_AV;
 	goto common;
     case SVt_PVIO:
@@ -3560,6 +3563,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
     SvREFCNT_dec(dref);
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
+    if (mro_changes) mro_isa_changed_in(GvSTASH(dstr));
     return;
 }
 
