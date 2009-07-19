@@ -1,5 +1,10 @@
 Revision history for ExtUtils-Install
 
+1.52_03
+
+Missed the t/Installed.t test from core. Bumped version number to allow
+a new distro to be released.
+
 1.52_02
 
 Make _chmod verbose message use octal modes, thanks to BDFOY

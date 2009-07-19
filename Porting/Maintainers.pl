@@ -667,7 +667,7 @@ package Maintainers;
     'ExtUtils::Install' =>
 	{
 	'MAINTAINER'	=> 'yves',
-	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.52_02.tar.gz',
+	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.52_03.tar.gz',
 	# MakeMaker has a basic.t too, and we use that.
 	'FILES' 	=> q[lib/ExtUtils/{Install,Installed,Packlist}.pm
                              lib/ExtUtils/Changes_EU-Install
