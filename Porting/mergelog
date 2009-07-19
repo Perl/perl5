@@ -2432,8 +2432,7 @@ R  3a9a9ba7ba 2009/02/15 For -I, need to also unshift version and architect
 			    part of @INC order stuff
 R  e28f3139a6 2009/02/15 Refactor S_incpush() to take 1 flags parameter, in
 			    part of @INC order stuff
-R  3d55b451d9 2009/02/15 ExtUtils::Install VMS extended character set suppo
-			    1.52 -> 1.52_01; wait for CPAN to sync
+M  3d55b451d9 2009/02/15 ExtUtils::Install VMS extended character set suppo
 R  20ce4c1139 2009/02/15 In S_incpush(), rename the parameter from dir to p
 			    part of @INC order stuff
 R  55b4bc1cac 2009/02/15 Refactor the separator splitting loop of S_incpush
@@ -3640,8 +3639,7 @@ R  b6f6091627 2009/07/17 Eliminate struct regexp_allocated and xpvio_alloca
 			    remove stuff added by already-rejected 08e4474067
 M  69ba284b5e 2009/07/17 Allocate XPV* memory using sizeof() and the offset
 M  557305a74c 2009/07/17 document why SQLite tests are exlcuded
-!  69a4390734 2009/07/17 Fix ExtUtils::Installed failure with -Duserelocata
-			    awaiting CPAN sync
+M  69a4390734 2009/07/17 Fix ExtUtils::Installed failure with -Duserelocata
 M  c456aab3e6 2009/07/18 fix pod2usage2 test for all case-insensitive syste
 M  3012b81707 2009/07/18 Some of the TODOs in switches.t actually work on V
 M  a71f1801ba 2009/07/18 Configure should sort inc_version_list
@@ -3649,3 +3647,8 @@ M  e1018a69a6 2009/07/18 add basic usage info to Porting/corelist.pl
 M  781ea95a92 2009/07/18 Provisional update of CoreList for 5.10.1
 M  210de33e13 2009/07/18 add info on updating CoreList and tags to release_
 M  6e40fbf9a5 2009/07/18 add extra note about CoreList to release_managers_
+M  ce4f4fe213 2009/07/18 Fix some nits in release_managers_guide.pod
+M  26d68d86a3 2009/07/18 mro::method_changed_in(..) ignores AUTOLOAD (RT #6
+M  dcd43ceb79 2009/07/19 bring up to date with ExtUtils-Install v1.52_02
+M  80be973138 2009/07/19 Be sure to find the vmsish pragma for one-liners i
+M  9271ca568a 2009/07/19 (mostly) sync blead with ExtUtils::Install 1.52_02

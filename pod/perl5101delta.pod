@@ -470,7 +470,7 @@ C<ExtUtils::Embed> upgraded from version 1.27 to 1.28
 
 =item *
 
-C<ExtUtils::Install> upgraded from version 1.44 to 1.52
+C<ExtUtils::Install> upgraded from version 1.44 to 1.52_02
 
 =item *
 
@@ -1279,6 +1279,17 @@ Calling sv_chop() or otherwise upgrading an SV can result in an unaligned
 
 In the 5.10.0 release, C<inc_version_list> would incorrectly list
 C<5.10.*> after C<5.8.*> [RT #67628]
+
+=item *
+
+In 5.10.0, C<pack "a*", $tainted_value> returned a non-tainted value
+[RT 52552]
+
+=item *
+
+In 5.10.0, C<printf> and C<sprintf> could produce
+C<panic: utf8_mg_pos_cache_update> when prints UTF-8 strings [RT 62666]
+
 
 
 =back
