@@ -42,7 +42,7 @@ ExtUtils::Install - install files from here to there
 
 =cut
 
-$VERSION = '1.52_01';
+$VERSION = '1.52_02';
 $VERSION = eval $VERSION;
 
 =pod
@@ -158,10 +158,11 @@ sub _chmod($$;$) {
     my ( $mode, $item, $verbose )=@_;
     $verbose ||= 0;
     if (chmod $mode, $item) {
-        print "chmod($mode, $item)\n" if $verbose > 1;
+        printf "chmod(0%o, %s)\n",$mode, $item if $verbose > 1;
     } else {
         my $err="$!";
-        _warnonce "WARNING: Failed chmod($mode, $item): $err\n"
+        _warnonce sprintf "WARNING: Failed chmod(0%o, %s): %s\n",
+                  $mode, $item, $err
             if -e $item;
     }
 }
