@@ -6394,6 +6394,7 @@ Perl_yylex(pTHX)
 
 	case KEY_package:
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    s = force_version(s, FALSE);
 	    OPERATOR(PACKAGE);
 
 	case KEY_pipe:

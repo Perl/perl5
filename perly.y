@@ -633,16 +633,10 @@ subbody	:	block	{ $$ = $1; }
 			}
 	;
 
-package :	PACKAGE WORD ';'
+package :	PACKAGE WORD WORD ';'
 			{
-#ifdef MAD
-			  $$ = package($2);
-			  token_getmad($1,$$,'o');
-			  token_getmad($3,$$,';');
-#else
-			  package($2);
+			  package($3);
 			  $$ = (OP*)NULL;
-#endif
 			}
 	;
 
