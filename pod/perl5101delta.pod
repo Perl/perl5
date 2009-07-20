@@ -361,7 +361,7 @@ C<B::Debug> upgraded from version 1.05 to 1.11
 
 =item *
 
-C<B::Deparse> upgraded from version 0.83 to 0.87
+C<B::Deparse> upgraded from version 0.83 to 0.89
 
 =item *
 
@@ -409,10 +409,6 @@ C<Data::Dumper> upgraded from version 2.121_14 to 2.124
 
 =item *
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.19
-
-=item *
-
 C<DB> upgraded from version 1.01 to 1.02
 
 =item *
@@ -421,7 +417,11 @@ C<DB_File> upgraded from version 1.816_1 to 1.820
 
 =item *
 
-C<Digest::MD5> upgraded from version 2.36_01 to 2.38
+C<Devel::PPPort> upgraded from version 3.13 to 3.19
+
+=item *
+
+C<Digest::MD5> upgraded from version 2.36_01 to 2.39
 
 =item *
 
@@ -437,7 +437,7 @@ C<Dumpvalue> upgraded from version 1.12 to 1.13
 
 =item *
 
-C<Dynaloader> upgraded from version 1.09 to 1.10
+C<DynaLoader> upgraded from version 1.08 to 1.10
 
 =item *
 
@@ -470,7 +470,7 @@ C<ExtUtils::Embed> upgraded from version 1.27 to 1.28
 
 =item *
 
-C<ExtUtils::Install> upgraded from version 1.44 to 1.52_02
+C<ExtUtils::Install> upgraded from version 1.44 to 1.52_03
 
 =item *
 
@@ -522,11 +522,11 @@ C<File::Spec> upgraded from version 3.2501 to 3.30
 
 =item *
 
-C<File::Temp> upgraded from version 0.18 to 0.22
+C<File::stat> upgraded from version 1.00 to 1.01
 
 =item *
 
-C<File::stat> upgraded from version 1.00 to 1.01
+C<File::Temp> upgraded from version 0.18 to 0.22
 
 =item *
 
@@ -573,6 +573,10 @@ This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
 
 =item *
 
+C<IO::Compress::*> upgraded from version 2.008 to 2.020
+
+=item *
+
 C<IO::Dir> upgraded from version 1.06 to 1.07
 
 =item *
@@ -582,10 +586,6 @@ C<IO::Handle> upgraded from version 1.27 to 1.28
 =item *
 
 C<IO::Socket> upgraded from version 1.30_01 to 1.31
-
-=item *
-
-C<IO::Compress::*> upgraded from version 2.008 to 2.020
 
 =item *
 
@@ -621,18 +621,15 @@ C<Log::Message> upgraded from version 0.01 to 0.02
 
 =item *
 
+C<Math::BigFloat> upgraded from version 1.59 to 1.60
+
+=item *
+
 C<Math::BigInt> upgraded from version 1.88 to 1.89
 
 =item *
 
 C<Math::BigInt::FastCalc> upgraded from version 0.16 to 0.19
-=item *
-
-C<Math::Complex> upgraded from version 1.37 to 1.56
-
-=item *
-
-C<Math::BigFloat> upgraded from version 1.59 to 1.60
 
 =item *
 
@@ -640,7 +637,11 @@ C<Math::BigRat> upgraded from version 0.21 to 0.22
 
 =item *
 
-C<Math::Trig> upgraded from version 1.36 to 1.56
+C<Math::Complex> upgraded from version 1.37 to 1.56
+
+=item *
+
+C<Math::Trig> upgraded from version 1.04 to 1.20
 
 =item *
 
@@ -706,11 +707,11 @@ C<PerlIO::via> upgraded from version 0.04 to 0.07
 
 =item *
 
-C<Pod::Parser> upgraded from version 1.35 to 1.37
+C<Pod::Man> upgraded from version 2.16 to 2.22
 
 =item *
 
-C<Pod::Man> upgraded from version 2.16 to 2.22
+C<Pod::Parser> upgraded from version 1.35 to 1.37
 
 =item *
 
@@ -762,14 +763,6 @@ C<Sys::Syslog> upgraded from version 0.22 to 0.27
 
 =item *
 
-C<threads> upgraded from version 1.67 to 1.72
-
-=item *
-
-C<threads::shared> upgraded from version 1.14 to 1.29
-
-=item *
-
 C<Term::ANSIColor> upgraded from version 1.12 to 2.00
 
 =item *
@@ -817,6 +810,14 @@ C<Thread::Semaphore> upgraded from version 2.01 to 2.09
 
 =item *
 
+C<threads> upgraded from version 1.67 to 1.72
+
+=item *
+
+C<threads::shared> upgraded from version 1.14 to 1.29
+
+=item *
+
 C<Tie::RefHash> upgraded from version 1.37 to 1.38
 
 =item *
@@ -855,11 +856,11 @@ The documentation has been corrected and expanded.
 
 =item *
 
-C</UNIVERSAL> upgraded from version 1.04 to version 1.05
+C<UNIVERSAL> upgraded from version 1.04 to 1.05
 
 =item *
 
-C<Win32> upgraded from version 0.34 to version 0.39
+C<Win32> upgraded from version 0.34 to 0.39
 
 =item *
 
