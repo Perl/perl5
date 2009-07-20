@@ -411,6 +411,10 @@ carry on with the extra steps that follow here.
 
 =item *
 
+Disarm the patchlevel.h change [ XXX expand ]
+
+=item *
+
 Wait for the smoke tests to catch up with the commit which this release is
 based on (or at least the last commit of any consequence).
 
@@ -421,8 +425,7 @@ back and fix things.
 =item *
 
 Once smoking is okay, upload it to PAUSE. This is the point of no return.
-
-XXX check whether need to upload .bz2,.meta, .readme too?
+You may wish to create a .bz2 version of the tarball and upload that too.
 
 =item *
 
@@ -438,6 +441,8 @@ Mail p5p to announce it, with a quote you prepared earlier.
 =item *
 
 Wait 24 hours or so, then post the announcement to use.perl.org.
+(if you don't have access rights to post news, ask someone like Rafael to
+do it for you.)
 
 =back
 
@@ -460,11 +465,6 @@ Follow the same steps as for making a release candidate, then
 
 Ask Jarkko to update http://www.cpan.org/src/README.html and
 Rafael to update http://dev.perl.org/perl5/
-
-
-=item *
-
-[ XXX disarm any patchlevel.h stuff ??? ]
 
 =item *
 
@@ -502,9 +502,25 @@ on the previous filename to look for suitable candidates.
 
 =item *
 
-If this was a major release, bump the version, e.g. 5.12.0 to 5.13.0
-[ XXX probably more complex stuff to do, including perldelta,
+If this was a major release, then
+
+=over
+
+=item *
+
+bump the version, e.g. 5.12.0 to 5.13.0;
+
+=item * 
+
+[ XXX probably lots more stuff to do, including perldelta,
 C<lib/feature.pm> ]
+
+=item *
+
+Create a new maint branch with an empty Porting/mergelog file
+[ XXX and lots of other stuff too, probably ]
+
+=back
 
 =item *
 
