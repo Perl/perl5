@@ -1,0 +1,12 @@
+Check that 'use feature' does not leak
+
+__END__
+# RT 63110 - Check that s///ee does not leak a hints variable
+use feature qw(:5.10);
+my $t;
+my $s = "a";
+$s =~ s/a/$t = \%^H;  qq( qq() );/ee;
+print Internals::SvREFCNT(%$t);
+
+EXPECT
+1
