@@ -905,6 +905,22 @@ Removes -g from optimize, and -DDEBUGGING from ccflags.
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared Perl library>.
 
+Note that a perl built with -DDEBUGGING will be bigger and will run more
+slowly than a standard perl.
+
+=head2 DTrace support
+
+On platforms where DTrace is available, it may be enabled by 
+using the -Dusedtrace option to Configure. DTrace probes are available for
+subroutine entry (sub-entry) and subroutine exit (sub-exit). Here's a
+simple D script that uses them:
+
+  perl$target:::sub-entry, perl$target:::sub-return {
+    printf("%s %s (%s:%d)\n", probename == "sub-entry" ? "->" : "<-",
+              copyinstr(arg0), copyinstr(arg1), arg2);
+  }
+
+
 =head2 Extensions
 
 Perl ships with a number of standard extensions.  These are contained
