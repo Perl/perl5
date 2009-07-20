@@ -4027,7 +4027,6 @@ t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
-t/lib/feature/leak		Tests for memory leaks
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/say		Tests for enabling/disabling say feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
