@@ -832,6 +832,11 @@ Currently C<goto keyword> "computes" the label value:
 
 It would be nice to forbid labels with keyword names, to avoid confusion.
 
+=head2 truncate() prototype
+
+The prototype of truncate() is currently C<$$>. It should probably
+be C<*$> instead. (This is changed in F<opcode.pl>)
+
 =head2 error reporting of [$a ; $b]
 
 Using C<;> inside brackets is a syntax error, and we don't propose to change
