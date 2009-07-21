@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..21\n";
+print "1..18\n";
 
 $blurfl = 123;
 $foo = 3;
@@ -79,15 +79,12 @@ my @variations = (
   '1.00_01',
   'v1.2.3',
   'v1.2_3',
-  '1.00 stable',
-  '1.00 testing',
-  '1.00 unstable',
 );
 
 my $test_count = 15;
 
 for my $v ( @variations ) {
-  my $ok = eval "package withversion $v; 1";
+  my $ok = eval "package withversion $v; $v eq \$withversion::VERSION";
   print $ok ? "ok $test_count\n" : "not ok $test_count\n";
   $test_count++;
 }
