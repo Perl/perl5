@@ -636,6 +636,9 @@ subbody	:	block	{ $$ = $1; }
 package :	PACKAGE WORD WORD ';'
 			{
 			  package($3);
+                          if ($2) {
+                              package_version($2);
+                          }
 			  $$ = (OP*)NULL;
 			}
 	;

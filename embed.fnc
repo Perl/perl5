@@ -732,6 +732,8 @@ p	|OP*	|package	|NN OP* o
 #else
 p	|void	|package	|NN OP* o
 #endif
+: Used in perly.y
+p	|void	|package_version|NN OP* v
 : Used in op.c
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 : Used in toke.c and perly.y
