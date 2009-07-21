@@ -3911,13 +3911,7 @@ PP(pp_entergiven)
     ENTER;
     SAVETMPS;
 
-    if (PL_op->op_targ == 0) {
-	SV ** const defsv_p = &GvSV(PL_defgv);
-	*defsv_p = newSVsv(POPs);
-	SAVECLEARSV(*defsv_p);
-    }
-    else
-    	sv_setsv(PAD_SV(PL_op->op_targ), POPs);
+    sv_setsv(PAD_SV(PL_op->op_targ), POPs);
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
     PUSHGIVEN(cx);
