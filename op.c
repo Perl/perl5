@@ -3834,6 +3834,7 @@ Perl_package_version( pTHX_ OP *v )
     SV *const pkgname = sv_mortalcopy(PL_curstname);
     sv_catpv(pkgname, "::VERSION");
     sv_setsv( get_sv(SvPV_nolen(pkgname),TRUE), version );
+    op_free(v);
 }
 
 #ifdef PERL_MAD
