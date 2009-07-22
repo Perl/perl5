@@ -4161,7 +4161,7 @@ sub run_tests {
             [ 1, qr#^((??{"(?:|<(/?bla)>)"}))((??{$nested_tags}))\1$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
             [ 0, qr#^((??{"(?!)"}))?((??{$nested_tags}))(?!)$#, "bla blubb undef", "a b undef" ],
 
-        ) {
+        ) { #"#silence vim highlighting
             $c++;
             @ctl_n = ();
             @plus = ();
