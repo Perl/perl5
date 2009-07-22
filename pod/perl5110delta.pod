@@ -156,6 +156,12 @@ L<TAP::Harness> needs to be able to schedule individual non-conflicting test
 scripts itself, and there is no standard interface to C<make> utilities to
 interact with their job schedulers.
 
+=head2 The C<...> operator
+
+A new operator, C<...>, nicknamed the Yada Yada operator, has been added.
+It is intended to mark placeholder code, that is not yet implemented.
+See L<perlop/"Yada Yada Operator">. (chromatic)
+
 =head1 Modules and Pragmata
 
 =head2 Pragmata Changes
