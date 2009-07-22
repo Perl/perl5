@@ -4805,10 +4805,6 @@ Perl_yylex(pTHX)
 	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
     case '!':
-	if (PL_expect == XSTATE && s[1] == '!' && s[2] == '!') {
-	    s += 3;
-	    LOP(OP_DIE,XTERM);
-	}
 	s++;
 	{
 	    const char tmp = *s++;
@@ -5060,10 +5056,6 @@ Perl_yylex(pTHX)
 	    AOPERATOR(DORDOR);
 	}
      case '?':			/* may either be conditional or pattern */
-	if (PL_expect == XSTATE && s[1] == '?' && s[2] == '?') {
-	    s += 3;
-	    LOP(OP_WARN,XTERM);
-	}
 	if (PL_expect == XOPERATOR) {
 	     char tmp = *s++;
 	     if(tmp == '?') {

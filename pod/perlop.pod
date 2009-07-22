@@ -813,14 +813,11 @@ between keys and values in hashes, and other paired elements in lists.
         %hash = ( $key => $value );
         login( $username => $password );
 
-=head2 Yada Yada Operators
-X<...> X<... operator> X<!!!> X<!!! operator> X<???> X<??? operator>
-X<yada yada operator>
+=head2 Yada Yada Operator
+X<...> X<... operator> X<yada yada operator>
 
-The yada yada operators are placeholders for code.  They parse without error,
-but when executed either throw an exception or a warning.
-
-The C<...> operator takes no arguments.  When executed, it throws an exception
+The yada yada operator (noted C<...>) is a placeholder for code.
+It parses without error, but when executed it throws an exception
 with the text C<Unimplemented>:
 
     sub foo { ... }
@@ -828,23 +825,7 @@ with the text C<Unimplemented>:
 
     Unimplemented at <file> line <line number>.
 
-The C<!!!> operator is similar, but it takes one argument, a string to use as
-the text of the exception:
-
-    sub bar { !!! "Don't call me, Ishmael!" }
-    bar();
-
-    Don't call me, Ishmael! at <file> line <line number>.
-
-The C<???> operator also takes one argument, but it emits a warning instead of
-throwing an exception:
-
-    sub baz { ??? "Who are you?  What do you want?" }
-    baz();
-    say "Why are you here?";
-
-    Who are you?  What do you want? at <file> line <line number>.
-    Why are you here?
+It takes no argument.
 
 =head2 List Operators (Rightward)
 X<operator, list, rightward> X<list operator>
