@@ -2624,6 +2624,8 @@ PP(pp_goto)
 	    case CXt_LOOP_LAZYSV:
 	    case CXt_LOOP_FOR:
 	    case CXt_LOOP_PLAIN:
+	    case CXt_GIVEN:
+	    case CXt_WHEN:
 		gotoprobe = cx->blk_oldcop->op_sibling;
 		break;
 	    case CXt_SUBST:
