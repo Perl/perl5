@@ -96,6 +96,17 @@ t/perl
 t/test_state
 *.output
 
+# t/op/require.t byproducts
+t/bleah.pm
+t/bleah.do
+t/bleah.flg
+t/urkkk.pm
+t/urkkk.pmc
+t/krunch.pm
+t/krunch.pmc
+t/whap.pm
+t/whap.pmc
+
 # make_ext.pl cleanup scripts
 realclean.sh
 veryclean.sh
