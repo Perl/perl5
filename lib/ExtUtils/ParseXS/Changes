@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+2.2002 - Sat Jul 18 17:22:27 EDT 2009
+
+ Bug fixes:
+ - Fix Makefile.PL installdirs for older perls
+
 2.20_01 - Wed Jul  8 12:12:47 EDT 2009
 
  - Fix XSUsage prototypes for testing [Jan Dubois]
