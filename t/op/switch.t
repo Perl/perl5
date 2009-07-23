@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 122;
+plan tests => 127;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -964,6 +964,56 @@ LETTER2: for ("a".."e") {
     $letter .= ',';
 }
 is($letter, "a,c,e,", "next LABEL in when");
+
+# Test goto with given/when
+{
+    my $flag = 0;
+    goto GIVEN1;
+    $flag = 1;
+    GIVEN1: given ($flag) {
+	when (0) { break; }
+	$flag = 2;
+    }
+    is($flag, 0, "goto GIVEN1");
+}
+{
+    my $flag = 0;
+    given ($flag) {
+	when (0) { $flag = 1; }
+	goto GIVEN2;
+	$flag = 2;
+    }
+GIVEN2:
+    is($flag, 1, "goto inside given");
+}
+{
+    my $flag = 0;
+    given ($flag) {
+	when (0) { $flag = 1; goto GIVEN3; $flag = 2; }
+	$flag = 3;
+    }
+GIVEN3:
+    is($flag, 1, "goto inside given and when");
+}
+{
+    my $flag = 0;
+    for ($flag) {
+	when (0) { $flag = 1; goto GIVEN4; $flag = 2; }
+	$flag = 3;
+    }
+GIVEN4:
+    is($flag, 1, "goto inside for and when");
+}
+{
+    my $flag = 0;
+GIVEN5:
+    given ($flag) {
+	when (0) { $flag = 1; goto GIVEN5; $flag = 2; }
+	when (1) { break; }
+	$flag = 3;
+    }
+    is($flag, 1, "goto inside given and when to the given stmt");
+}
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t

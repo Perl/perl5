@@ -9452,7 +9452,8 @@ Perl_reg_temp_copy (pTHX_ REGEXP *rx)
        a case of zero-ing that, rather than copying the current length.  */
     SvPV_set(ret_x, RX_WRAPPED(rx));
     SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
-    StructCopy(&(r->xpv_cur), &(ret->xpv_cur), struct regexp_allocated);
+    memcpy(&(ret->xpv_cur), &(r->xpv_cur),
+	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
     SvLEN_set(ret_x, 0);
     Newx(ret->offs, npar, regexp_paren_pair);
     Copy(r->offs, ret->offs, npar, regexp_paren_pair);

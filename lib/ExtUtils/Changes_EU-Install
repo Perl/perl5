@@ -1,9 +1,39 @@
 Revision history for ExtUtils-Install
 
+1.52_03
+
+Missed the t/Installed.t test from core. Bumped version number to allow
+a new distro to be released.
+
+1.52_02
+
+Make _chmod verbose message use octal modes, thanks to BDFOY
+
+Further changes from core, including lastest test file infrastructure
+from EUMM.
+
+Fixed a number of problems in ExtUtils::Installed, for various reasons
+this includes a version bump to 1.999_001, which will eventually become
+version 2.0. These problems related to finding modules that were installed
+with either INSTALL_BASE or PREFIX. Hopefully this resolves these issues.
+
+1.52_01 (core only release)
+
+Changes from Core:
+
+commit 3d55b451d9544fbd4c27c33287b76bee30328830
+Author: John Malmberg
+Date:   Sun Feb 15 09:25:10 2009 -0600
+
+    ExtUtils::Install VMS extended character set support
+
+    Preview from https://rt.cpan.org/Ticket/Display.html?id=42149
+
+
 1.52
 
-Production rerelease of 1.51 to make the CPAN indexer happy about permissions 
-(hopefully). 
+Production rerelease of 1.51 to make the CPAN indexer happy about permissions
+(hopefully).
 
 SVN Revision 44.
 

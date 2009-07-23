@@ -193,6 +193,9 @@ SWTESTPM
     is( $r, "<$package><foo><bar>", '-m with import parameters' );
     push @tmpfiles, $filename;
 
+  {
+    local $TODO = '';  # these work on VMS
+
     is( runperl( switches => [ '-MTie::Hash' ], stderr => 1, prog => 1 ),
 	  '', "-MFoo::Bar allowed" );
 
@@ -220,6 +223,7 @@ SWTESTPM
 		   prog => 'die "oops"' ),
 	  qr/Module name required with -M option\b/,
   	  "-M- not allowed" );
+  }  # disable TODO on VMS
 }
 
 # Tests for -V
@@ -329,6 +333,8 @@ __EOF__
 }
 
 # Tests for -E
+
+$TODO = '';  # the -E tests work on VMS
 
 $r = runperl(
     switches	=> [ '-E', '"say q(Hello, world!)"']

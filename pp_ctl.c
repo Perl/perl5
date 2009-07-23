@@ -2624,6 +2624,8 @@ PP(pp_goto)
 	    case CXt_LOOP_LAZYSV:
 	    case CXt_LOOP_FOR:
 	    case CXt_LOOP_PLAIN:
+	    case CXt_GIVEN:
+	    case CXt_WHEN:
 		gotoprobe = cx->blk_oldcop->op_sibling;
 		break;
 	    case CXt_SUBST:
@@ -3911,13 +3913,7 @@ PP(pp_entergiven)
     ENTER;
     SAVETMPS;
 
-    if (PL_op->op_targ == 0) {
-	SV ** const defsv_p = &GvSV(PL_defgv);
-	*defsv_p = newSVsv(POPs);
-	SAVECLEARSV(*defsv_p);
-    }
-    else
-    	sv_setsv(PAD_SV(PL_op->op_targ), POPs);
+    sv_setsv(PAD_SV(PL_op->op_targ), POPs);
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
     PUSHGIVEN(cx);

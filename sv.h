@@ -567,12 +567,6 @@ struct xpvio {
     _XPVIO_TAIL;
 };
 
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-    _XPVIO_TAIL;
-} xpvio_allocated;
-
 #define xio_dirp	xio_dirpu.xiou_dirp
 #define xio_any		xio_dirpu.xiou_any
 

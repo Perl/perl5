@@ -477,7 +477,10 @@ package Maintainers;
 			    ],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
-			     qw{ bin/cpanp-boxed
+			     qw{ bin/cpanp-boxed },
+			     # SQLite tests would be skipped in core, and
+			     # the filenames are too long for VMS!
+			     qw{
 				 t/031_CPANPLUS-Internals-Source-SQLite.t
 				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
@@ -664,7 +667,7 @@ package Maintainers;
     'ExtUtils::Install' =>
 	{
 	'MAINTAINER'	=> 'yves',
-	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.52.tar.gz',
+	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.52_03.tar.gz',
 	# MakeMaker has a basic.t too, and we use that.
 	'FILES' 	=> q[lib/ExtUtils/{Install,Installed,Packlist}.pm
                              lib/ExtUtils/Changes_EU-Install
@@ -738,7 +741,7 @@ package Maintainers;
     'ExtUtils::ParseXS' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.20_01.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.2002.tar.gz',
 	'FILES'		=> q[lib/ExtUtils/ParseXS.pm
 			     lib/ExtUtils/ParseXS
 			     lib/ExtUtils/xsubpp

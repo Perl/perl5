@@ -28,6 +28,7 @@ if( $^O eq 'VMS' ) {
     $Perl = "MCR $^X" if $] < 5.007003;
 
     # Quiet noisy 'SYS$ABORT'
+    $Perl .= q{ -"I../lib"} if $ENV{PERL_CORE};
     $Perl .= q{ -"Mvmsish=hushed"};
 }
 

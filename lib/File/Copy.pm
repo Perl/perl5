@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.15';
+$VERSION = '2.16';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -150,7 +150,7 @@ sub copy {
 	my @fs = stat($from);
 	if (@fs) {
 	    my @ts = stat($to);
-	    if (@ts && $fs[0] == $ts[0] && $fs[1] == $ts[1]) {
+	    if (@ts && $fs[0] == $ts[0] && $fs[1] == $ts[1] && !-p $from) {
 		carp("'$from' and '$to' are identical (not copied)");
                 return 0;
 	    }
