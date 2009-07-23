@@ -2206,8 +2206,8 @@ lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
-lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/Changes	ExtUtils::ParseXS change log
+lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
 lib/ExtUtils/ParseXS/t/usage.t	ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
@@ -2230,7 +2230,6 @@ lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/cp.t		See if ExtUtils::Command works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/test_boilerplate.t MakeMaker test
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
@@ -2246,8 +2245,8 @@ lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
-lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/MakeMaker_Parameters.t  test "MakeMaker Parameters" section
+lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
@@ -2280,6 +2279,7 @@ lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
 lib/ExtUtils/t/recurs.t		See if recursive builds work
 lib/ExtUtils/t/revision.t	See if $Revision is correct
 lib/ExtUtils/t/split_command.t	See if MM's xargs-like function works
+lib/ExtUtils/t/test_boilerplate.t MakeMaker test
 lib/ExtUtils/t/testdata/reallylongdirectoryname/arch1/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testdata/reallylongdirectoryname/arch2/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
@@ -4260,6 +4260,7 @@ t/op/readline.t			See if <> / readline / rcatline work
 t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
+t/op/reg_60508.t		See if bug #60508 is fixed
 t/op/reg_email.t		See if regex recursion works by parsing email addresses
 t/op/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
