@@ -15,9 +15,9 @@ system we were using previously. This repository is accessible in
 different ways.
 
 The full repository takes up about 80MB of disk space. A check out of
-the blead branch (that is, the master branch, which contains bleadperl,
-the development version of perl 5) takes up about 160MB of disk space
-(including the repository). A build of bleadperl takes up about 200MB
+the blead branch (that is, the main development branch, which contains
+bleadperl, the development version of perl 5) takes up about 160MB of disk
+space (including the repository). A build of bleadperl takes up about 200MB
 (including the repository and the check out).
 
 =head1 GETTING ACCESS TO THE REPOSITORY
@@ -256,10 +256,11 @@ that you're on the I<blead> branch, and your repository is up to date:
   % git checkout blead
   % git pull
 
-(It's preferable to patch against the latest blead version, since
-patches are usually integrated from blead to the maintenance branches.
-This does not apply, obviously, in the rare case where your patch is
-specific to a maintaince release.)
+It's preferable to patch against the latest blead version, since
+this is where new development occurs for all changes other than critical
+bug fixes.  Critical bug fix patches should be made against the relevant
+maint branches, or should be submitted with a note indicating all the
+branches where the fix should be applied.
 
 Now that we have everything up to date, we need to create a temporary
 new branch for these changes and switch into it:
@@ -664,6 +665,8 @@ And then push back to the repository:
   % git push
 
 =head1 COMMITTING TO MAINTENANCE VERSIONS
+
+Maintenance versions should only be altered to add critical bug fixes.
 
 To commit to a maintenance version of perl, you need to create a local
 tracking branch:
