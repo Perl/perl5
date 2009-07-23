@@ -386,7 +386,7 @@ mro_is_universal(...)
 
 
 void
-mro_invalidate_method_caches(...)
+mro_invalidate_all_method_caches(...)
   PROTOTYPE: 
   PPCODE:
     if (items != 0)
