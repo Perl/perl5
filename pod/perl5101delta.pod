@@ -56,7 +56,7 @@ of the switch statements where smart matching is implicitly used.
 
 The smart match operator C<~~> is no longer commutative. The behaviour of
 a smart match now depends primarily on the type of its right hand
-argument. Moreover, its semantics has been adjusted for greater
+argument. Moreover, its semantics have been adjusted for greater
 consistency or usefulness in several cases. While the general backwards
 compatibility is maintained, several changes must be noted:
 
@@ -120,7 +120,7 @@ if overload fallback is active, it will be used instead, as usual.)
 
 =head2 Other incompatible changes
 
-=over
+=over 4
 
 =item *
 
@@ -145,7 +145,7 @@ of the output of C<perl -V>. See L<perlrepository> for more information.
 =item *
 
 The internal structure of the C<ext/> directory in the perl source has
-been reorganised. In general, a module C<Foo::Bar> who's source was
+been reorganised. In general, a module C<Foo::Bar> whose source was
 stored under F<ext/Foo/Bar/> is now located under F<ext/Foo-Bar/>. Also,
 some modules have been moved from F<lib/> to F<ext/>. This is purely a
 source tarball change, and should make no difference to the compilation or
@@ -159,6 +159,16 @@ alter the location of any files in the final installation.
 As part of the C<Test::Harness> 2.x to 3.x upgrade, the experimental
 C<Test::Harness::Straps> module has been removed.
 See L</"Updated Modules"> for more details.
+
+=item *
+
+As part of the C<ExtUtils::MakeMaker> upgrade, the
+C<ExtUtils::MakeMaker::bytes> and C<ExtUtils::MakeMaker::vmsish> modules
+have been removed from this distribution.
+
+=item *
+
+C<Module::CoreList> no longer contains the C<%:patchlevel> hash.
 
 =item *
 
@@ -213,41 +223,45 @@ Note that currently some test scripts may fail when run in parallel (most
 notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
 again sequentially and see if the failures go away.
 
-XXX do we now have dtrace?
+=head2 DTrace support
+
+Some support for DTrace has been added. See L<INSTALL/"DTrace support">.
 
 =head2 Support for C<configure_requires> in CPAN module metadata
 
-Both C<CPAN.pm> and C<CPANPLUS> now support the C<configure_requires> keyword
+Both C<CPAN> and C<CPANPLUS> now support the C<configure_requires> keyword
 in the C<META.yml> metadata file included in most recent CPAN distributions.
 This allows distribution authors to specify configuration prerequisites that
-must be installed before running Makefile.PL or Build.PL.
+must be installed before running F<Makefile.PL> or F<Build.PL>.
 
 See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for more
 on how to specify C<configure_requires> when creating a distribution for CPAN.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules
+=head2 New Modules and Pragmata
 
-=over
+=over 4
 
-=item *
+=item C<autodie>
 
-C<autodie> is a new lexically-scoped alternative for the C<Fatal> module.
-The bundled version is 2.06.
+This is a new lexically-scoped alternative for the C<Fatal> module.
+The bundled version is 2.06. Note that in this release, using a string
+eval when C<autodie> is in effect can cause the autodie behaviour to leak
+into the surrounding scope. See L<autodie/"BUGS"> for more details.
 
-=item *
+=item C<Compress::Raw::Bzip2>
 
-C<Compress::Raw::Bzip2> has been added to the core (version 2.020).
+This has been added to the core (version 2.020).
 
-=item *
+=item C<parent>
 
-C<parent> establishes an ISA relationship with base classes at compile time.
-It provides the key feature of C<base> without the feature creep.
+This pragma establishes an ISA relationship with base classes at compile
+time. It provides the key feature of C<base> without the feature creep.
 
-=item *
+=item C<Parse::CPAN::Meta>
 
-C<Parse::CPAN::Meta> has been added to the core (version 1.39).
+This has been added to the core (version 1.39).
 
 =back
 
@@ -257,65 +271,65 @@ C<Parse::CPAN::Meta> has been added to the core (version 1.39).
 
 =item C<attributes>
 
-upgraded from version 0.08 to 0.09.
+Upgraded from version 0.08 to 0.09.
 
 =item C<attrs>
 
-upgraded from version 1.02 to 1.03.
+Upgraded from version 1.02 to 1.03.
 
 =item C<base>
 
-upgraded from version 2.13 to 2.14. See L<parent> for a replacement.
+Upgraded from version 2.13 to 2.14. See L<parent> for a replacement.
 
 =item C<bigint>
 
-upgraded from version 0.22 to 0.23
+Upgraded from version 0.22 to 0.23.
 
 =item C<bignum>
 
-upgraded from version 0.22 to 0.23
+Upgraded from version 0.22 to 0.23.
 
 =item C<bigrat>
 
-upgraded from version 0.22 to 0.23
+Upgraded from version 0.22 to 0.23.
 
 =item C<charnames>
 
-upgraded from version 1.06 to 1.07
+Upgraded from version 1.06 to 1.07.
 
-The Unicode NameAliases.txt database file has been added. This has the
+The Unicode F<NameAliases.txt> database file has been added. This has the
 effect of adding some extra C<\N> character names that formerly wouldn't
 have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
 
 =item C<constant>
 
-upgraded from version 1.13 to 1.17
+Upgraded from version 1.13 to 1.17.
 
 =item C<feature>
 
 The meaning of the C<:5.10> and C<:5.10.X> feature bundles has
-changed slightly. The last component, if any (ie C<X>) is simply ignored.
+changed slightly. The last component, if any (i.e. C<X>) is simply ignored.
 This is predicated on the assumption that new features will not, in
-general, be added to maintenance releases. So  C<:5.10> and C<:5.10.X>
+general, be added to maintenance releases. So C<:5.10> and C<:5.10.X>
 have identical effect. This is a change to the behaviour documented for
 5.10.0.
 
 =item C<fields>
 
-upgraded from version 2.13 to 2.14 (this was just a version bump; there
-were no functional changes)
+Upgraded from version 2.13 to 2.14 (this was just a version bump; there
+were no functional changes).
 
 =item C<lib>
 
-upgraded from version 0.5565 to 0.62
+Upgraded from version 0.5565 to 0.62.
 
 =item C<open>
 
-upgraded from version 1.06 to 1.07
+Upgraded from version 1.06 to 1.07.
 
 =item C<overload>
 
-upgraded from version 1.06 to 1.07
+Upgraded from version 1.06 to 1.07.
 
 =item C<overloading>
 
@@ -323,460 +337,458 @@ See L</"The C<overloading> pragma"> above.
 
 =item C<version>
 
-upgraded from version 0.74 to 0.77
+Upgraded from version 0.74 to 0.77.
 
 =back
 
 =head2 Updated Modules
 
-=over
+=over 4
 
-=item *
+=item C<Archive::Extract>
 
-C<Archive::Extract> upgraded from version 0.24 to 0.34
+Upgraded from version 0.24 to 0.34.
 
-=item *
+=item C<Archive::Tar>
 
-C<Archive::Tar> upgraded from version 1.38 to 1.52
+Upgraded from version 1.38 to 1.52.
 
-=item *
+=item C<Attribute::Handlers>
 
-C<Attribute::Handlers> upgraded from version 0.79 to 0.85
+Upgraded from version 0.79 to 0.85.
 
-=item *
+=item C<AutoLoader>
 
-C<AutoLoader> upgraded from version 5.63 to 5.68
+Upgraded from version 5.63 to 5.68.
 
-=item *
+=item C<AutoSplit>
 
-C<AutoSplit> upgraded from version 1.05 to 1.06
+Upgraded from version 1.05 to 1.06.
 
-=item *
+=item C<B>
 
-C<B> upgraded from version 1.17 to 1.22
+Upgraded from version 1.17 to 1.22.
 
-=item *
+=item C<B::Debug>
 
-C<B::Debug> upgraded from version 1.05 to 1.11
+Upgraded from version 1.05 to 1.11.
 
-=item *
+=item C<B::Deparse>
 
-C<B::Deparse> upgraded from version 0.83 to 0.89
+Upgraded from version 0.83 to 0.89.
 
-=item *
+=item C<B::Lint>
 
-C<B::Lint> upgraded from version 1.09 to 1.11
+Upgraded from version 1.09 to 1.11.
 
-=item *
+=item C<B::Xref>
 
-C<B::Xref> upgraded from version 1.01 to 1.02
+Upgraded from version 1.01 to 1.02.
 
-=item *
+=item C<Benchmark>
 
-C<Benchmark> upgraded from version 1.10 to 1.11
+Upgraded from version 1.10 to 1.11.
 
-=item *
+=item C<Carp>
 
-C<Carp> upgraded from version 1.08 to 1.11
+Upgraded from version 1.08 to 1.11.
 
-=item *
+=item C<CGI>
 
-C<CGI> upgraded from version 3.29 to 3.43 
+Upgraded from version 3.29 to 3.43.
 
-=item *
+=item C<Compress::Zlib>
 
-C<Compress::Zlib> upgraded from version 2.008 to 2.020
+Upgraded from version 2.008 to 2.020.
 
-=item *
+=item C<CPAN>
 
-C<CPAN> upgraded from version 1.9205 to 1.9402
+Upgraded from version 1.9205 to 1.9402.
 
-=item *
+=item C<CPANPLUS>
 
-C<CPANPLUS> upgraded from version 0.84 to 0.88
+Upgraded from version 0.84 to 0.88.
 
-=item *
+=item C<CPANPLUS::Dist::Build>
 
-C<CPANPLUS::Dist::Build> upgraded from version 0.06_02 to 0.36
+Upgraded from version 0.06_02 to 0.36.
 
-=item *
+=item C<Cwd>
 
-C<Cwd> upgraded from version 3.25_01 to 3.30
+Upgraded from version 3.25_01 to 3.30.
 
-=item *
+=item C<Data::Dumper>
 
-C<Data::Dumper> upgraded from version 2.121_14 to 2.124
+Upgraded from version 2.121_14 to 2.124.
 
-=item *
+=item C<DB>
 
-C<DB> upgraded from version 1.01 to 1.02
+Upgraded from version 1.01 to 1.02.
 
-=item *
+=item C<DB_File>
 
-C<DB_File> upgraded from version 1.816_1 to 1.820
+Upgraded from version 1.816_1 to 1.820.
 
-=item *
+=item C<Devel::PPPort>
 
-C<Devel::PPPort> upgraded from version 3.13 to 3.19
+Upgraded from version 3.13 to 3.19.
 
-=item *
+=item C<Digest::MD5>
 
-C<Digest::MD5> upgraded from version 2.36_01 to 2.39
+Upgraded from version 2.36_01 to 2.39.
 
-=item *
+=item C<Digest::SHA>
 
-C<Digest::SHA> upgraded from version 5.45 to 5.47
+Upgraded from version 5.45 to 5.47.
 
-=item *
+=item C<DirHandle>
 
-C<DirHandle> upgraded from version 1.01 to 1.03
+Upgraded from version 1.01 to 1.03.
 
-=item *
+=item C<Dumpvalue>
 
-C<Dumpvalue> upgraded from version 1.12 to 1.13
+Upgraded from version 1.12 to 1.13.
 
-=item *
+=item C<DynaLoader>
 
-C<DynaLoader> upgraded from version 1.08 to 1.10
+Upgraded from version 1.08 to 1.10.
 
-=item *
+=item C<Encode>
 
-C<Encode> upgraded from version 2.23 to 2.35
+Upgraded from version 2.23 to 2.35.
 
-=item *
+=item C<Errno>
 
-C<Errno> upgraded from version 1.10 to 1.11
+Upgraded from version 1.10 to 1.11.
 
-=item *
+=item C<Exporter>
 
-C<Exporter> upgraded from version 5.62 to 5.63
+Upgraded from version 5.62 to 5.63.
 
-=item *
+=item C<ExtUtils::CBuilder>
 
-C<ExtUtils::CBuilder> upgraded from version 0.21 to 0.2602
+Upgraded from version 0.21 to 0.2602.
 
-=item *
+=item C<ExtUtils::Command>
 
-C<ExtUtils::Command> upgraded from version 1.13 to 1.16
+Upgraded from version 1.13 to 1.16.
 
-=item *
+=item C<ExtUtils::Constant>
 
-C<ExtUtils::Constant> upgraded from 0.20 to 0.22 (note that neither of
-these versions are available on CPAN).
+Upgraded from 0.20 to 0.22. (Note that neither of these versions are
+available on CPAN.)
 
-=item *
+=item C<ExtUtils::Embed>
 
-C<ExtUtils::Embed> upgraded from version 1.27 to 1.28
+Upgraded from version 1.27 to 1.28.
 
-=item *
+=item C<ExtUtils::Install>
 
-C<ExtUtils::Install> upgraded from version 1.44 to 1.52_03
+Upgraded from version 1.44 to 1.52_03.
 
-=item *
+=item C<ExtUtils::MakeMaker>
 
-C<ExtUtils::MakeMaker> upgraded from version 6.42 to 6.55_01
+Upgraded from version 6.42 to 6.55_01.
 
 Note that C<ExtUtils::MakeMaker::bytes> and C<ExtUtils::MakeMaker::vmsish>
 have been removed from this distribution.
 
-=item *
+=item C<ExtUtils::Manifest>
 
-C<ExtUtils::Manifest> upgraded from version 1.51_01 to 1.56
+Upgraded from version 1.51_01 to 1.56.
 
-=item *
+=item C<ExtUtils::ParseXS>
 
-C<ExtUtils::ParseXS> upgraded from version 2.18_02 to 2.20_01
+Upgraded from version 2.18_02 to 2.2002.
 
-=item *
+=item C<Fatal>
 
-C<Fatal> upgraded from version 1.05 to 2.06. See also the new pragma
-C<autodie>.
+Upgraded from version 1.05 to 2.06. See also the new pragma C<autodie>.
 
-=item *
+=item C<File::Basename>
 
-C<File::Basename> upgraded from version 2.76 to 2.77
+Upgraded from version 2.76 to 2.77.
 
-=item *
+=item C<File::Compare>
 
-C<File::Compare> upgraded from version 1.1005 to 1.1006
+Upgraded from version 1.1005 to 1.1006.
 
-=item *
+=item C<File::Copy>
 
-C<File::Copy> upgraded from version 2.11 to 2.14
+Upgraded from version 2.11 to 2.14.
 
-=item *
+=item C<File::Fetch>
 
-C<File::Fetch> upgraded from version 0.14 to 0.20
+Upgraded from version 0.14 to 0.20.
 
-=item *
+=item C<File::Find>
 
-C<File::Find> upgraded from version 1.12 to 1.14
+Upgraded from version 1.12 to 1.14.
 
-=item *
+=item C<File::Path>
 
-C<File::Path> upgraded from version 2.04 to 2.07_03
+Upgraded from version 2.04 to 2.07_03.
 
-=item *
+=item C<File::Spec>
 
-C<File::Spec> upgraded from version 3.2501 to 3.30
+Upgraded from version 3.2501 to 3.30.
 
-=item *
+=item C<File::stat>
 
-C<File::stat> upgraded from version 1.00 to 1.01
+Upgraded from version 1.00 to 1.01.
 
-=item *
+=item C<File::Temp>
 
-C<File::Temp> upgraded from version 0.18 to 0.22
+Upgraded from version 0.18 to 0.22.
 
-=item *
+=item C<FileCache>
 
-C<FileCache> upgraded from version 1.07 to 1.08
+Upgraded from version 1.07 to 1.08.
 
-=item *
+=item C<FileHandle>
 
-C<FileHandle> upgraded from version 2.01 to 2.02
+Upgraded from version 2.01 to 2.02.
 
-=item *
+=item C<Filter::Simple>
 
-C<Filter::Simple> upgraded from version 0.82 to 0.84
+Upgraded from version 0.82 to 0.84.
 
-=item *
+=item C<Filter::Util::Call>
 
-C<Filter::Util::Call> upgraded from version 1.07 to 1.08
+Upgraded from version 1.07 to 1.08.
 
-=item *
+=item C<FindBin>
 
-C<FindBin> upgraded from version 1.49 to 1.50 
+Upgraded from version 1.49 to 1.50.
 
-=item *
+=item C<GDBM_File>
 
-C<GDBM_File> upgraded from version 1.08 to 1.09
+Upgraded from version 1.08 to 1.09.
 
-=item *
+=item C<Getopt::Long>
 
-C<Getopt::Long> upgraded from version 2.37 to 2.38
+Upgraded from version 2.37 to 2.38.
 
-=item *
+=item C<Hash::Util::FieldHash>
 
-C<Hash::Util::FieldHash> upgraded from version 1.03 to 1.04.
-This fixes a memory leak.
+Upgraded from version 1.03 to 1.04. This fixes a memory leak.
 
-=item *
+=item C<I18N::Collate>
 
-C<I18N::Collate> upgraded from version 1.00 to 1.01
+Upgraded from version 1.00 to 1.01.
 
-=item *
+=item C<IO>
 
-C<IO> upgraded from version 1.23_01 to 1.25
+Upgraded from version 1.23_01 to 1.25.
 
-This makes non-blocking mode work on Windows in IO::Socket::INET [CPAN #43573].
+This makes non-blocking mode work on Windows in C<IO::Socket::INET>
+[CPAN #43573].
 
-=item *
+=item C<IO::Compress::*>
 
-C<IO::Compress::*> upgraded from version 2.008 to 2.020
+Upgraded from version 2.008 to 2.020.
 
-=item *
+=item C<IO::Dir>
 
-C<IO::Dir> upgraded from version 1.06 to 1.07
+Upgraded from version 1.06 to 1.07.
 
-=item *
+=item C<IO::Handle>
 
-C<IO::Handle> upgraded from version 1.27 to 1.28
+Upgraded from version 1.27 to 1.28.
 
-=item *
+=item C<IO::Socket>
 
-C<IO::Socket> upgraded from version 1.30_01 to 1.31
+Upgraded from version 1.30_01 to 1.31.
 
-=item *
+=item C<IO::Zlib>
 
-C<IO::Zlib> upgraded from version 1.07 to 1.09
+Upgraded from version 1.07 to 1.09.
 
-=item *
+=item C<IPC::Cmd>
 
-C<IPC::Cmd> upgraded from version 0.40_1 to 0.46
+Upgraded from version 0.40_1 to 0.46.
 
-=item *
+=item C<IPC::Open3>
 
-C<IPC::Open3> upgraded from version 1.02 to 1.04
+Upgraded from version 1.02 to 1.04.
 
-=item *
+=item C<IPC::SysV>
 
-C<IPC::SysV> upgraded from version 1.05 to 2.01
+Upgraded from version 1.05 to 2.01.
 
-=item *
+=item C<lib>
 
-C<lib> upgraded from version 0.5565 to 0.62
+Upgraded from version 0.5565 to 0.62.
 
-=item *
+=item C<List::Util>
 
-C<List::Util> upgraded from version 1.19 to 1.21
+Upgraded from version 1.19 to 1.21.
 
-=item *
+=item C<Locale::MakeText>
 
-C<Locale::MakeText> upgraded from version 1.12 to 1.13
+Upgraded from version 1.12 to 1.13.
 
-=item *
+=item C<Log::Message>
 
-C<Log::Message> upgraded from version 0.01 to 0.02
+Upgraded from version 0.01 to 0.02.
 
-=item *
+=item C<Math::BigFloat>
 
-C<Math::BigFloat> upgraded from version 1.59 to 1.60
+Upgraded from version 1.59 to 1.60.
 
-=item *
+=item C<Math::BigInt>
 
-C<Math::BigInt> upgraded from version 1.88 to 1.89
+Upgraded from version 1.88 to 1.89.
 
-=item *
+=item C<Math::BigInt::FastCalc>
 
-C<Math::BigInt::FastCalc> upgraded from version 0.16 to 0.19
+Upgraded from version 0.16 to 0.19.
 
-=item *
+=item C<Math::BigRat>
 
-C<Math::BigRat> upgraded from version 0.21 to 0.22
+Upgraded from version 0.21 to 0.22.
 
-=item *
+=item C<Math::Complex>
 
-C<Math::Complex> upgraded from version 1.37 to 1.56
+Upgraded from version 1.37 to 1.56.
 
-=item *
+=item C<Math::Trig>
 
-C<Math::Trig> upgraded from version 1.04 to 1.20
+Upgraded from version 1.04 to 1.20.
 
-=item *
+=item C<Memoize>
 
-C<Memoize> upgraded from version 1.01_02 to 1.01_03 (just a minor
-documentation change)
+Upgraded from version 1.01_02 to 1.01_03 (just a minor documentation
+change).
 
-=item *
+=item C<Module::Build>
 
-C<Module::Build> upgraded from version 0.2808_01 to 0.34
+Upgraded from version 0.2808_01 to 0.34.
 
-=item *
+=item C<Module::CoreList>
 
-C<Module::CoreList> upgraded from version 2.13 to 2.18. This release no
-longer contains the <%Module::CoreList::patchlevel> hash.
+Upgraded from version 2.13 to 2.18. This release no longer contains the
+C<%Module::CoreList::patchlevel> hash.
 
-=item *
+=item C<Module::Load>
 
-C<Module::Load> upgraded from version 0.12 to 0.16
+Upgraded from version 0.12 to 0.16.
 
-=item *
+=item C<Module::Load::Conditional>
 
-C<Module::Load::Conditional> upgraded from version 0.22 to 0.30
+Upgraded from version 0.22 to 0.30.
 
-=item *
+=item C<Module::Loaded>
 
-C<Module::Loaded> upgraded from version 0.01 to 0.02
+Upgraded from version 0.01 to 0.02.
 
-=item *
+=item C<Module::Pluggable>
 
-C<Module::Pluggable> upgraded from version 3.6 to 3.9
+Upgraded from version 3.6 to 3.9.
 
-=item *
+=item C<NDBM_File>
 
-C<NDBM_File> upgraded from version 1.07 to 1.08
+Upgraded from version 1.07 to 1.08.
 
-=item *
+=item C<Net::Ping>
 
-C<Net::Ping> upgraded from version 2.33 to 2.36
+Upgraded from version 2.33 to 2.36.
 
-=item *
+=item C<NEXT>
 
-C<NEXT> upgraded from version 0.60_01 to 0.64
+Upgraded from version 0.60_01 to 0.64.
 
-=item *
+=item C<Object::Accessor>
 
-C<Object::Accessor> upgraded from version 0.32 to 0.34
+Upgraded from version 0.32 to 0.34.
 
-=item *
+=item C<OS2::REXX>
 
-C<OS2::REXX> upgraded from version 1.03 to 1.04
+Upgraded from version 1.03 to 1.04.
 
-=item *
+=item C<Package::Constants>
 
-C<Package::Constants> upgraded from version 0.01 to 0.02
+Upgraded from version 0.01 to 0.02.
 
-=item *
+=item C<PerlIO>
 
-C<PerlIO> upgraded from version 1.04 to 1.06
+Upgraded from version 1.04 to 1.06.
 
-=item *
+=item C<PerlIO::via>
 
-C<PerlIO::via> upgraded from version 0.04 to 0.07
+Upgraded from version 0.04 to 0.07.
 
-=item *
+=item C<Pod::Man>
 
-C<Pod::Man> upgraded from version 2.16 to 2.22
+Upgraded from version 2.16 to 2.22.
 
-=item *
+=item C<Pod::Parser>
 
-C<Pod::Parser> upgraded from version 1.35 to 1.37
+Upgraded from version 1.35 to 1.37.
 
-=item *
+=item C<Pod::Simple>
 
-C<Pod::Simple> upgraded from version 3.05 to 3.07
+Upgraded from version 3.05 to 3.07.
 
-=item *
+=item C<Pod::Text>
 
-C<Pod::Text> upgraded from version 3.08 to 3.13
+Upgraded from version 3.08 to 3.13.
 
-=item *
+=item C<POSIX>
 
-C<POSIX> upgraded from version 1.13 to 1.17
+Upgraded from version 1.13 to 1.17.
 
-=item *
+=item C<Safe>
 
-C<Safe> upgraded from 2.12 to 2.17
+Upgraded from 2.12 to 2.17.
 
-=item *
+=item C<Scalar::Util>
 
-C<Scalar::Util> upgraded from version 1.19 to 1.21
+Upgraded from version 1.19 to 1.21.
 
-=item *
+=item C<SelectSaver>
 
-C<SelectSaver> upgraded from 1.01 to 1.02
+Upgraded from 1.01 to 1.02.
 
-=item *
+=item C<SelfLoader>
 
-C<SelfLoader> upgraded from 1.11 to 1.17
+Upgraded from 1.11 to 1.17.
 
-=item *
+=item C<Socket>
 
-C<Socket> upgraded from 1.80 to 1.82
+Upgraded from 1.80 to 1.82.
 
-=item *
+=item C<Storable>
 
-C<Storable> upgraded from 2.18 to 2.20
+Upgraded from 2.18 to 2.20.
 
-=item *
+=item C<Switch>
 
-C<Switch> upgraded from version 2.13 to 2.14. Please see L</Deprecations>
+Upgraded from version 2.13 to 2.14. Please see L</Deprecations>.
 
-=item *
+=item C<Symbol>
 
-C<Symbol> upgraded from version 1.06 to 1.07
+Upgraded from version 1.06 to 1.07.
 
-=item *
+=item C<Sys::Syslog>
 
-C<Sys::Syslog> upgraded from version 0.22 to 0.27
+Upgraded from version 0.22 to 0.27.
 
-=item *
+=item C<Term::ANSIColor>
 
-C<Term::ANSIColor> upgraded from version 1.12 to 2.00
+Upgraded from version 1.12 to 2.00.
 
-=item *
+=item C<Term::ReadLine>
 
-C<Term::ReadLine> upgraded from version 1.03 to 1.04
+Upgraded from version 1.03 to 1.04.
 
-=item *
+=item C<Term::UI>
 
-C<Term::UI> upgraded from version 0.18 to 0.20
+Upgraded from version 0.18 to 0.20.
 
-=item *
+=item C<Test::Harness>
 
-C<Test::Harness> upgraded from version 2.64 to 3.17
-XXX major upgrade - add some blurb ???
+Upgraded from version 2.64 to 3.17.
 
 Note that one side-effect of the 2.x to 3.x upgrade is that the
 experimental C<Test::Harness::Straps> module (and its supporting
@@ -784,129 +796,155 @@ C<Assert>, C<Iterator>, C<Point> and C<Results> modules) have been
 removed. If you still need this, then they are available in the
 (unmaintained) C<Test-Harness-Straps> distribution on CPAN.
 
-=item *
+=item C<Test::Simple>
 
-C<Test::Simple> upgraded from version 0.72 to 0.92
+Upgraded from version 0.72 to 0.92.
 
-=item *
+=item C<Text::ParseWords>
 
-C<Text::ParseWords> upgraded from version 3.26 to 3.27
+Upgraded from version 3.26 to 3.27.
 
-=item *
+=item C<Text::Tabs>
 
-C<Text::Tabs> upgraded from version 2007.1117 to 2009.0305
+Upgraded from version 2007.1117 to 2009.0305.
 
-=item *
+=item C<Text::Wrap>
 
-C<Text::Wrap> upgraded from version 2006.1117 to 2009.0305
+Upgraded from version 2006.1117 to 2009.0305.
 
-=item *
+=item C<Thread::Queue>
 
-C<Thread::Queue> upgraded from version 2.00 to 2.11
+Upgraded from version 2.00 to 2.11.
 
-=item *
+=item C<Thread::Semaphore>
 
-C<Thread::Semaphore> upgraded from version 2.01 to 2.09
+Upgraded from version 2.01 to 2.09.
 
-=item *
+=item C<threads>
 
-C<threads> upgraded from version 1.67 to 1.72
+Upgraded from version 1.67 to 1.72.
 
-=item *
+=item C<threads::shared>
 
-C<threads::shared> upgraded from version 1.14 to 1.29
+Upgraded from version 1.14 to 1.29.
 
-=item *
+=item C<Tie::RefHash>
 
-C<Tie::RefHash> upgraded from version 1.37 to 1.38
+Upgraded from version 1.37 to 1.38.
 
-=item *
+=item C<Tie::StdHandle>
 
-C<Tie::StdHandle> has documentation changes, and has been assigned a version
-for the first time - version 4.2.
+This has documentation changes, and has been assigned a version for the
+first time: version 4.2.
 
-=item *
+=item C<Time::HiRes>
 
-C<Time::HiRes> upgraded from version 1.9711 to 1.9719
+Upgraded from version 1.9711 to 1.9719.
 
-=item *
+=item C<Time::Local>
 
-C<Time::Local> upgraded from version 1.18 to 1.1901
+Upgraded from version 1.18 to 1.1901.
 
-=item *
+=item C<Time::Piece>
 
-C<Time::Piece> upgraded from version 1.12 to 1.15
+Upgraded from version 1.12 to 1.15.
 
-=item *
+=item C<Unicode::Normalize>
 
-C<Unicode::Normalize> upgraded from version 1.02 to 1.03
+Upgraded from version 1.02 to 1.03.
 
-=item *
+=item C<Unicode::UCD>
 
-C<Unicode::UCD> upgraded from version 0.25 to 0.27
+Upgraded from version 0.25 to 0.27.
 
-C<charinfo()> now works on Unified CJK code points added to later versions of
-Unicode.
+C<charinfo()> now works on Unified CJK code points added to later versions
+of Unicode.
 
-C<casefold()> has new fields returned to provide both a simpler interface and
-previously missing information.  The old fields are retained for backwards
-compatibility. Information about Turkic-specific code points is now returned.
+C<casefold()> has new fields returned to provide both a simpler interface
+and previously missing information. The old fields are retained for
+backwards compatibility. Information about Turkic-specific code points is
+now returned.
 
 The documentation has been corrected and expanded.
 
-=item *
+=item C<UNIVERSAL>
 
-C<UNIVERSAL> upgraded from version 1.04 to 1.05
+Upgraded from version 1.04 to 1.05.
 
-=item *
+=item C<Win32>
 
-C<Win32> upgraded from version 0.34 to 0.39
+Upgraded from version 0.34 to 0.39.
 
-=item *
+=item C<Win32API::File>
 
-C<Win32API::File> upgraded from version 0.1001_01 to 0.1101
+Upgraded from version 0.1001_01 to 0.1101.
 
-=item *
+=item C<XSLoader>
 
-C<XSLoader> upgraded from version 0.08 to 0.10
+Upgraded from version 0.08 to 0.10.
 
 =back
 
 =head1 Utility Changes
 
-=head2 F<h2ph>
+=over 4
+
+=item F<h2ph>
 
 Now looks in C<include-fixed> too, which is a recent addition to gcc's
 search path.
 
-=head2 F<h2xs>
+=item F<h2xs>
 
-No longer incorrectly treats enum values like macros. (Daniel Burr)
+No longer incorrectly treats enum values like macros (Daniel Burr).
 
 Now handles C++ style constants (C<//>) properly in enums. (A patch from
-Rainer Weikusat was used; Daniel Burr also proposed a similar fix)
+Rainer Weikusat was used; Daniel Burr also proposed a similar fix).
 
-=head2 F<perl5db.pl>
+=item F<perl5db.pl>
 
 C<LVALUE> subroutines now work under the debugger.
 
-The debugger now correctly handles proxy constant subroutines, and subroutine
-stubs.
+The debugger now correctly handles proxy constant subroutines, and
+subroutine stubs.
 
-=head2 F<perlthanks>
+=item F<perlthanks>
 
-Perl 5.10.1 adds a new utility F<perlthanks>, which is a variant of F<perlbug>,
-but for sending non-bug-reports to the authors and maintainers of Perl.
-Getting nothing but bug reports can become a bit demoralising - we'll see if
-this changes things.
+Perl 5.10.1 adds a new utility F<perlthanks>, which is a variant of
+F<perlbug>, but for sending non-bug-reports to the authors and maintainers
+of Perl. Getting nothing but bug reports can become a bit demoralising:
+we'll see if this changes things.
+
+=back
 
 =head1 New Documentation
 
-L<perlperf> by Richard Foley, provides an introduction to the use of
+=over 4
+
+=item L<perlhaiku>
+
+This contains instructions on how to build perl for the Haiku platform.
+
+=item L<perlmroapi>
+
+This describes the new interface for pluggable Method Resolution Orders.
+
+=item L<perlperf>
+
+This document, by Richard Foley, provides an introduction to the use of
 performance and optimization techniques which can be used with particular
 reference to perl programs.
 
-L<perlrepository> describes how to access the perl source using git.
+=item L<perlrepository>
+
+This describes how to access the perl source using the I<git> version
+control system.
+
+=item L<perlthanks>
+
+This describes the new F<perlthanks> utility.
+
+=back
 
 =head1 Changes to Existing Documentation
 
@@ -919,12 +957,12 @@ The file F<Porting/patching.pod> has been deleted, as it mainly described
 interacting with the old Perforce-based repository, which is now obsolete.
 Information still relevant has been moved to L<perlrepository>.
 
-L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all generated
-at build time, rather than being shipped as part of the release.
+L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all
+generated at build time, rather than being shipped as part of the release.
 
 =head1 Performance Enhancements
 
-=over
+=over 4
 
 =item *
 
@@ -932,9 +970,10 @@ A new internal cache means that C<isa()> will often be faster.
 
 =item *
 
-Under C<use locale>, the locale-relevant information is now cached on read-only
-values, such as the list returned by C<keys %hash>. This makes operations such
-as <sort keys %hash> in the scope of C<use locale> much faster.
+Under C<use locale>, the locale-relevant information is now cached on
+read-only values, such as the list returned by C<keys %hash>. This makes
+operations such as C<sort keys %hash> in the scope of C<use locale> much
+faster.
 
 =item *
 
@@ -944,20 +983,24 @@ Empty C<DESTROY> methods are no longer called.
 
 =head1 Installation and Configuration Improvements
 
-The layout of directories in F<ext> has been revised. Specifically, all
-extensions are now flat, and at the top level, with C</> in pathnames replaced
-by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper>, etc.
-The names of the extensions as specified to F<Configure>, and as reported
-by <%Config::Config> under the keys C<dynamic_ext>, C<known_extensions>,
-C<nonxs_ext> and C<static_ext> have not changed, and still use C</>. Hence
-this change will not have any affect once perl is installed. However,
-C<Attributes::Handlers>, C<Safe> and C<mro> have now become extensions in their
-own right, so if you run F<Configure> with options to specify an exact list
-of extensions to build, you will need to change it to account for this.
+=head2 F<ext/> reorganisation
 
-In 5.10.2 many dual-life modules will have been moved from F<lib> to F<ext> -
-again this will have no effect on an installed perl, but will matter if you
-invoke F<Configure> with a pre-canned list of extensions to build.
+The layout of directories in F<ext> has been revised. Specifically, all
+extensions are now flat, and at the top level, with C</> in pathnames
+replaced by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper>,
+etc.  The names of the extensions as specified to F<Configure>, and as
+reported by C<%Config::Config> under the keys C<dynamic_ext>,
+C<known_extensions>, C<nonxs_ext> and C<static_ext> have not changed, and
+still use C</>. Hence this change will not have any affect once perl is
+installed. However, C<Attributes::Handlers>, C<Safe> and C<mro> have now
+become extensions in their own right, so if you run F<Configure> with
+options to specify an exact list of extensions to build, you will need to
+change it to account for this.
+
+For 5.10.2, it is planned that many dual-life modules will have been moved
+from F<lib> to F<ext>; again this will have no effect on an installed
+perl, but will matter if you invoke F<Configure> with a pre-canned list of
+extensions to build.
 
 =head2 Configuration improvements
 
@@ -970,79 +1013,78 @@ perl is built with  C<-Dusedevel>.
 F<Configure> will enable use of C<-fstack-protector>, to provide protection
 against stack-smashing attacks, if the compiler supports it.
 
-F<Configure> will now determine the correct prototypes for re-entrant functions,
-and for C<gconvert>, if you are using a C++ compiler rather than a C compiler.
+F<Configure> will now determine the correct prototypes for re-entrant
+functions, and for C<gconvert>, if you are using a C++ compiler rather
+than a C compiler.
 
-XXX This description isn't quite right, is it? Yves?
-
-On Unix, if you build from a git tree, the configuration process will
-note the commit hash you have checked out, for display in the output of
-C<perl -v> and C<perl -V>. Unpushed local commits are automatically added to
-the list of local patches displayed by C<perl -V>
+On Unix, if you build from a tree containing a git repository, the
+configuration process will note the commit hash you have checked out, for
+display in the output of C<perl -v> and C<perl -V>. Unpushed local commits
+are automatically added to the list of local patches displayed by
+C<perl -V>.
 
 =head2 Compilation improvements
 
-As part of the flattening of F<ext>, all extensions on all platforms are built
-by F<make_ext.pl>. This replaces the Unix specific F<ext/util/make_ext>,
-VMS specific F<make_ext.com> and Win32 specific F<win32/buildext.pl>.
-
-=head2 Installation improvements.
+As part of the flattening of F<ext>, all extensions on all platforms are
+built by F<make_ext.pl>. This replaces the Unix-specific
+F<ext/util/make_ext>, VMS-specific F<make_ext.com> and Win32-specific
+F<win32/buildext.pl>.
 
 =head2 Platform Specific Changes
 
-=head3 AIX
+=over 4
 
-hints changes mean that AIX 4.2 should work again.
+=item AIX
 
-=head3 Cygwin
+Hints changes mean that AIX 4.2 should work again.
+
+=item Cygwin
 
 On Cygwin we now strip the last number from the DLL. This has been the
 behaviour in the cygwin.com build for years. The hints files have been
 updated.
 
-=head3 FreeBSD
+=item FreeBSD
 
 The hints files now identify the correct threading libraries on FreeBSD 7
 and later.
 
-=head3 Irix
+=item Irix
 
 We now work around a bizarre preprocessor bug in the Irix 6.5 compiler:
 C<cc -E -> unfortunately goes into K&R mode, but C<cc -E file.c> doesn't.
 
-=head3 Haiku
+=item Haiku
 
-Patches from the Haiku maintainers have been merged in. Perl should now build
-on Haiku.
+Patches from the Haiku maintainers have been merged in. Perl should now
+build on Haiku.
 
-=head3 MirOS BSD
+=item MirOS BSD
 
 Perl should now build on MirOS BSD.
 
-=head3 NetBSD
+=item NetBSD
 
-hints now supports versions 5.*.
+Hints now supports versions 5.*.
 
-=head3 Stratus VOS
+=item Stratus VOS
 
 Various changes from Stratus have been merged in.
 
-=head3 Symbian
+=item Symbian
 
 There is now support for Symbian S60 3.2 SDK and S60 5.0 SDK.
 
-=head3 Win32
+=item Win32
 
-XXX: Don't know how to summarise
-"Give Win32 message windows proper window procedures"
-http://perl5.git.perl.org/perl.git/commit/099b16d3b50ccbb639491fa8bd48153ec3225450
+Improved message window handling means that C<alarm> and C<kill> messages
+will no longer be dropped under race conditions.
 
-Nor 33254: [PATCH] win32_async_check() doesn't loop enough.
+=item VMS
 
-=head3 VMS
-
-Reads from C<PerlIO::scalar>'s in-memory temporary files used to fail if C<$/>
-was set to a numeric reference, to signal record-style reads. This is now fixed.
+Reads from the in-memory temporary files of C<PerlIO::scalar> used to fail
+if C<$/> was set to a numeric reference (to indicate record-style reads).
+This is now fixed.
 
 VMS now supports C<getgrgid>.
 
@@ -1054,16 +1096,18 @@ status in a VMS condition value for better interaction with GNV's bash
 shell and other utilities that depend on POSIX exit values.  See
 L<perlvms/"$?"> for details.
 
+=back
+
 =head1 Selected Bug Fixes
 
 =over 4
 
 =item *
 
-5.10.0 inadvertently disabled an optimisation, causing a measurable performance
-drop in list assignment, such as is often used to assign function parameters
-from C<@_>. The optimisation has been re-instated, and the performance
-regression fixed.
+5.10.0 inadvertently disabled an optimisation, which caused a measurable
+performance drop in list assignment, such as is often used to assign
+function parameters from C<@_>. The optimisation has been re-instated, and
+the performance regression fixed.
 
 =item *
 
@@ -1075,7 +1119,7 @@ Some potential coredumps in PerlIO fixed [RT #57322,54828].
 
 =item *
 
-The debugger now works with lvalue subroutines
+The debugger now works with lvalue subroutines.
 
 =item *
 
@@ -1091,7 +1135,7 @@ arguments [RT #59998].
 
 The C<-i.suffix> command-line switch now recreates the file using
 restricted permissions, before changing its mode to match the original
-file. This eliminates a potential race condition. [RT #60904]
+file. This eliminates a potential race condition [RT #60904].
 
 =item *
 
@@ -1106,7 +1150,7 @@ Under some circumstances, $^R could incorrectly become undefined
 =item *
 
 (XS) In various hash functions, passing a pre-computed hash to when the
-key is utf8 might result in an incorrect lookup.
+key is UTF-8 might result in an incorrect lookup.
 
 =item *
 
@@ -1115,11 +1159,13 @@ key is utf8 might result in an incorrect lookup.
 
 =item *
 
-C<$object->isa('Foo')> would report false if the package C<Foo> didn't
+C<< $object->isa('Foo') >> would report false if the package C<Foo> didn't
 exist, even if the object's C<@ISA> contained C<Foo>.
 
-Various bugs in the new-to 5.10.0 mro code, triggered by manipulating C<@ISA>,
-have been found and fixed.
+=item *
+
+Various bugs in the new-to 5.10.0 mro code, triggered by manipulating
+C<@ISA>, have been found and fixed.
 
 =item *
 
@@ -1128,7 +1174,7 @@ C<$x=\$y; $x |= "foo"> [RT #54956].
 
 =item *
 
-Patterns including alternation might be sensitive to the internal UTF8
+Patterns including alternation might be sensitive to the internal UTF-8
 representation, e.g.
 
     my $byte = chr(192);
@@ -1137,7 +1183,7 @@ representation, e.g.
 
 =item *
 
-Within utf8-encoded Perl source files (i.e. where C<use utf8> is in
+Within UTF8-encoded Perl source files (i.e. where C<use utf8> is in
 effect), double-quoted literal strings could be corrupted where a C<\xNN>,
 C<\0NNN> or C<\N{}> is followed by a literal character with ordinal value
 greater than 255 [RT #59908].
@@ -1183,7 +1229,7 @@ spurious warning like the following:
 
 =item *
 
-On windows, C<'.\foo'> and C<'..\foo'>  were treated differently than
+On Windows, C<'.\foo'> and C<'..\foo'>  were treated differently than
 C<'./foo'> and C<'../foo'> by C<do> and C<require> [RT #63492].
 
 =item *
@@ -1194,35 +1240,35 @@ Assigning a format to a glob could corrupt the format; e.g.:
 
 =item *
 
-Attempting to coerce a typeglob to a string or number could cause an assertion
-failure. The correct error message is now generated, "Can't coerce GLOB to
-I<$type>".
+Attempting to coerce a typeglob to a string or number could cause an
+assertion failure. The correct error message is now generated,
+C<Can't coerce GLOB to I<$type>>.
 
 =item *
 
-Under C<use filetest 'access'> C<-x> was using the wrong access mode. This
+Under C<use filetest 'access'>, C<-x> was using the wrong access mode. This
 has been fixed [RT #49003].
 
 =item *
 
-C<length> on a tied scalar that returned a Unicode value would not be correct
-the first time. This has been fixed.
+C<length> on a tied scalar that returned a Unicode value would not be
+correct the first time. This has been fixed.
 
 =item *
 
-Using an array C<tie> inside in array C<tie> could SEGV. This has been fixed.
-[RT #51636]
+Using an array C<tie> inside in array C<tie> could SEGV. This has been
+fixed. [RT #51636]
 
 =item *
 
-A race condition inside C<PerlIOStdio_close()> has been identified and fixed.
-This used to cause various threading issues, including SEGVs.
+A race condition inside C<PerlIOStdio_close()> has been identified and
+fixed. This used to cause various threading issues, including SEGVs.
 
 =item *
 
-In C<unpack>, C<()> groups in scalar context was internally placing a list on
-the interpreter's stack, which manifested in various ways, including SEGVs.
-This is now fixed. [RT #50256]
+In C<unpack>, the use of C<()> groups in scalar context was internally
+placing a list on the interpreter's stack, which manifested in various
+ways, including SEGVs.  This is now fixed [RT #50256].
 
 =item *
 
@@ -1231,9 +1277,10 @@ These have all been fixed.
 
 =item *
 
-An optimisation to clear the temporary stack within the implicit loop of
-C<s///ge> has been reverted, as it turned out to be the cause of obscure
-bugs in seemingly unrelated parts of the interpreter. [Change ef0d4e17921ee3de]
+A 5.10.0 optimisation to clear the temporary stack within the implicit
+loop of C<s///ge> has been reverted, as it turned out to be the cause of
+obscure bugs in seemingly unrelated parts of the interpreter [commit 
+ef0d4e17921ee3de].
 
 =item *
 
@@ -1241,87 +1288,103 @@ The line numbers for warnings inside C<elsif> are now correct.
 
 =item *
 
-The C<..> operator now works correctly with ranges whose ends are at or close
-to the values of the smallest and largest integers.
+The C<..> operator now works correctly with ranges whose ends are at or
+close to the values of the smallest and largest integers.
 
 =item *
 
 C<binmode STDIN, ':raw'> could lead to segmentation faults on some platforms.
-This has been fixed [RT #54828]
+This has been fixed [RT #54828].
 
 =item *
 
-An off-by-one error meant that C<index $str, ...> was effectively being executed
-as C<index "$str\0", ...>. This has been fixed [RT #53746]
+An off-by-one error meant that C<index $str, ...> was effectively being
+executed as C<index "$str\0", ...>. This has been fixed [RT #53746].
 
 =item *
 
-Various leaks associated with named captures in regexs have been fixed.
-[RT #57024]
+Various leaks associated with named captures in regexes have been fixed
+[RT #57024].
 
 =item *
 
-A weak reference to a hash would leak. This was affecting C<DBI>. [RT #56908]
+A weak reference to a hash would leak. This was affecting C<DBI>
+[RT #56908].
 
 =item *
 
-Segfault when using (?|) in regexp [RT #59734]
+Using (?|) in a regex could cause a segfault [RT #59734].
 
 =item *
 
-Segfault when using utf-8 tr// within a closure [RT #61520]
+Use of a UTF-8 C<tr//> within a closure could cause a segfault [RT #61520].
 
 =item *
 
-Calling sv_chop() or otherwise upgrading an SV can result in an unaligned
-64-bit access on the SPARC architecture [RT #60574]
+Calling C<sv_chop()> or otherwise upgrading an SV could result in an
+unaligned 64-bit access on the SPARC architecture [RT #60574].
 
 =item *
 
 In the 5.10.0 release, C<inc_version_list> would incorrectly list
-C<5.10.*> after C<5.8.*> [RT #67628]
+C<5.10.*> after C<5.8.*>; this affected the C<@INC> search order
+[RT #67628].
 
 =item *
 
 In 5.10.0, C<pack "a*", $tainted_value> returned a non-tainted value
-[RT 52552]
+[RT #52552].
 
 =item *
 
-In 5.10.0, C<printf> and C<sprintf> could produce
-C<panic: utf8_mg_pos_cache_update> when prints UTF-8 strings [RT 62666]
+In 5.10.0, C<printf> and C<sprintf> could produce the fatal error
+C<panic: utf8_mg_pos_cache_update> when printing UTF-8 strings
+[RT #62666].
 
+=item *
 
+In the 5.10.0 release, a dynamically created C<AUTOLOAD> method might be
+missed (method cache issue) [RT #60220,60232].
+
+=item *
+
+In the 5.10.0 release, a combination of C<use feature> and C<//ee> could
+cause a memory leak [RT #63110].
 
 =back
 
 =head1 New or Changed Diagnostics
 
-=head2 panic: sv_chop %s
+=over 4
 
-This new fatal error occurs when the C routine C<Perl_sv_chop()> was passed a
-position that is not within the scalar's string buffer. This is caused by
-buggy XS code, and at this point recovery is not possible.
+=item C<panic: sv_chop %s>
 
-=head2 Can't locate package %s for the parents of %s
+This new fatal error occurs when the C routine C<Perl_sv_chop()> was
+passed a position that is not within the scalar's string buffer. This
+could be caused by buggy XS code, and at this point recovery is not
+possible.
+
+=item C<Can't locate package %s for the parents of %s>
 
 This warning has been removed. In general, it only got produced in
-conjunction with other warnings, and removing it allowed an isa lookup
+conjunction with other warnings, and removing it allowed an ISA lookup
 optimisation to be added.
 
-=head2 v-string in use/require is non-portable
+=item C<v-string in use/require is non-portable>
 
 This warning has been removed.
 
-=head2 Deep recursion on subroutine "%s"
+=item C<Deep recursion on subroutine "%s">
 
 It is now possible to change the depth threshold for this warning from the
-default of 100, by recompiling the F<perl> binary, setting the C pre-processor
-macro C<PERL_SUB_DEPTH_WARN> to the desired value.
+default of 100, by recompiling the F<perl> binary, setting the C
+pre-processor macro C<PERL_SUB_DEPTH_WARN> to the desired value.
+
+=back
 
 =head1 Changed Internals
 
-=over
+=over 4
 
 =item *
 
@@ -1330,9 +1393,9 @@ proper citations added, thanks to a patch from Tom Christiansen.
 
 =item *
 
-C<vcroak()> now accepts a null first argument. A full audit was made of
-the "not NULL" compiler annotations, and those for several other internal
-functions were corrected.
+C<vcroak()> now accepts a null first argument. In addition, a full audit
+was made of the "not NULL" compiler annotations, and those for several
+other internal functions were corrected.
 
 =item *
 
@@ -1355,15 +1418,15 @@ C<Perl_newSV()> followed by C<Perl_sv_upgrade(type)>.
 The function C<Perl_newSVpvn_flags()> has been added, equivalent to
 C<Perl_newSVpvn()> and then performing the action relevant to the flag.
 
-Two flag bits are currently supported
+Two flag bits are currently supported.
 
 =over 4
 
 =item C<SVf_UTF8>
 
 This will call C<SvUTF8_on()> for you. (Note that this does not convert an
-sequence of ISO 8859-1 characters to UTF-8). A wrapper, C<newSVpvn_utf8()> is
-available for this.
+sequence of ISO 8859-1 characters to UTF-8). A wrapper, C<newSVpvn_utf8()>
+is available for this.
 
 =item C<SVs_TEMP>
 
@@ -1392,9 +1455,9 @@ and a global variable otherwise.
 
 =item *
 
-C<Perl_mg_free()> used to leave freed memory accessible via SvMAGIC() on the
-scalar. It now updates the linked list to remove each piece of magic as it is
-freed.
+C<Perl_mg_free()> used to leave freed memory accessible via SvMAGIC() on
+the scalar. It now updates the linked list to remove each piece of magic
+as it is freed.
 
 =item *
 
@@ -1404,20 +1467,20 @@ counted.
 
 =item *
 
-C<Perl_mg_magical()> would sometimes incorrectly turn on C<SvRMAGICAL()>
+C<Perl_mg_magical()> would sometimes incorrectly turn on C<SvRMAGICAL()>.
 This has been fixed.
 
 =item *
 
-The B<public> IV and NV flags are now not set if the string value has trailing
-"garbage". This behaviour is consistent with not setting the public IV or NV
-flags if the value is out of range for the type.
+The B<public> IV and NV flags are now not set if the string value has
+trailing "garbage". This behaviour is consistent with not setting the
+public IV or NV flags if the value is out of range for the type.
 
 =item *
 
 SV allocation tracing has been added to the diagnostics enabled by C<-Dm>.
-The tracing can alternatively output via the C<PERL_MEM_LOG> mechanism, if that
-was enabled when the F<perl> binary was compiled.
+The tracing can alternatively output via the C<PERL_MEM_LOG> mechanism, if
+that was enabled when the F<perl> binary was compiled.
 
 =item *
 
@@ -1427,11 +1490,12 @@ is clearer to those unfamiliar with the core code.
 
 =item *
 
-A macro C<MUTABLE_PTR(p)> has been added, which on (non-pedantic) gcc will not
-cast away C<const>, returning a C<void *>. Macros C<MUTABLE_SV(av)>,
-C<MUTABLE_SV(cv)> etc build on this, casting to C<AV *> etc without casting
-away C<const>. This allows proper compile-time auditing of C<const> correctness
-in the core, and helped picked up some errors (now fixed).
+A macro C<MUTABLE_PTR(p)> has been added, which on (non-pedantic) gcc will
+not cast away C<const>, returning a C<void *>. Macros C<MUTABLE_SV(av)>,
+C<MUTABLE_SV(cv)> etc build on this, casting to C<AV *> etc without
+casting away C<const>. This allows proper compile-time auditing of
+C<const> correctness in the core, and helped picked up some errors (now
+fixed).
 
 =item *
 
@@ -1440,8 +1504,15 @@ stack and mortalizing them.
 
 =item *
 
-Use of the private structure C<mro_meta> has changed slightly. Nothing outside
-the core should be accessing this directly anyway.
+Use of the private structure C<mro_meta> has changed slightly. Nothing
+outside the core should be accessing this directly anyway.
+
+=item *
+
+A new tool, C<Porting/expand-macro.pl> has been added, that allows you
+to view how a C preprocessor macro would be expanded when compiled.
+This is handy when trying to decode the macro hell that is the perl
+guts.
 
 =back
 
@@ -1452,9 +1523,9 @@ Many modules updated from CPAN incorporate new tests.
 Several tests that have the potential to hang forever if they fail now
 incorporate a "watchdog" functionality that will kill them after a timeout,
 which helps ensure that C<make test> and C<make test_harness> run to
-completion automatically. (Jerry Hedden)
+completion automatically. (Jerry Hedden).
 
-Some core specific tests have been added:
+Some core-specific tests have been added:
 
 =over 4
 
@@ -1509,7 +1580,7 @@ Tests for the interaction of regex recursion and threads.
 
 =item t/op/regexp_qr_embed_thr.t
 
-Tests for the interaction of regex with embedded C<qr//> and threads.
+Tests for the interaction of patterns with embedded C<qr//> and threads.
 
 =item t/op/regexp_unicode_prop.t
 
@@ -1555,17 +1626,17 @@ Check that Unicode and C<tie> work.
 
 =head1 Known Problems
 
-=head2 Platform Specific Problems
+XXX
 
 =head1 Deprecations
 
 The following items are now deprecated.
 
-=over
+=over 4
 
 =item *
 
-C<Switch> is buggy and should be avoided. From perl 5.11.0 onwards it is
+C<Switch> is buggy and should be avoided. From perl 5.11.0 onwards, it is
 intended that any use of the core version of this module will emit a
 warning, and that the module will eventually be removed from the core
 (probably in perl 5.14.0). See L<perlsyn/"Switch statements"> for its
@@ -1582,13 +1653,30 @@ emulate setuid permission bits on systems that don't support it properly.
 
 Some of the work in this release was funded by a TPF grant.
 
-XXX more to come
+Nicholas Clark officially retired from maintenance pumpking duty at the
+end of 2008; however in reality he has put much effort in since then to
+help get 5.10.1 into a fit state to be released, including writing a
+considerable chunk of this perldelta.
+
+Steffen Mueller and David Golden in particular helped getting CPAN modules
+polished and synchronised with their in-core equivalents.
+
+Craig Berry was tireless in getting maint to run under VMS, no matter how
+many times we broke it for him.
+
+The other core committers contributed most of the changes, and applied most
+of the patches sent in by the hundreds of contributors listed in F<AUTHORS>.
+
+(Sorry to all the people I haven't mentioned by name).
+
+Finally, thanks to Larry Wall, without whom none of this would be
+necessary.
 
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org/ .  There may also be
+bug database at http://rt.perl.org/perlbug/ .  There may also be
 information at http://www.perl.org/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
@@ -1603,9 +1691,9 @@ it to perl5-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who be able
 to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all
-platforms on which Perl is supported. Please only use this address for security
-issues in the Perl core, not for modules independently distributed on CPAN.
-
+platforms on which Perl is supported. Please only use this address for
+security issues in the Perl core, not for modules independently
+distributed on CPAN.
 
 =head1 SEE ALSO
 
@@ -1619,6 +1707,3 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
-
-XXX Don't know where to put a description of F<Porting/expand-macro.pl>
-But I think it should get a mention.
