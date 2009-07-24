@@ -818,6 +818,13 @@ It would be nice to forbid labels with keyword names, to avoid confusion.
 The prototype of truncate() is currently C<$$>. It should probably
 be C<*$> instead. (This is changed in F<opcode.pl>)
 
+=head2 decapsulation of smart match argument
+
+Currently C<$foo ~~ $object> will die with the message "Smart matching a
+non-overloaded object breaks encapsulation". It would be nice to allow
+to bypass this by using explictly the syntax C<$foo ~~ %$object> or
+C<$foo ~~ @$object>.
+
 =head2 error reporting of [$a ; $b]
 
 Using C<;> inside brackets is a syntax error, and we don't propose to change
