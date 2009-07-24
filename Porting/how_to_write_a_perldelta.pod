@@ -174,6 +174,10 @@ Descriptions of platform agnostic bugs we know we can't fix go here. Any
 tests that had to be C<TODO>ed for the release would be noted here, unless
 they were specific to a particular platform (see below).
 
+=item Deprecations
+
+Add any new known deprecations here.
+
 =item Platform Specific Notes
 
 Any changes specific to a particular platform. VMS and Win32 are the usual
