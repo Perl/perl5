@@ -24,8 +24,6 @@ use File::Spec;
 use TieOut;
 use Config;
 
-my $Is_VMS = $^O eq 'VMS';
-
 chdir 't';
 
 perl_lib;
@@ -76,7 +74,6 @@ is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
 my($perl_src, $mm_perl_src);
 if( $ENV{PERL_CORE} ) {
     $perl_src = File::Spec->catdir($Updir, $Updir);
-    $perl_src = VMS::Filespec::vmsify($perl_src) if $Is_VMS;
     $perl_src = File::Spec->canonpath($perl_src);
     $mm_perl_src = File::Spec->canonpath($mm->{PERL_SRC});
 }
@@ -93,28 +90,22 @@ is( $mm->{PERM_RWX}, 755,    'PERM_RWX' );
 
 
 # INST_*
-my $expect = File::Spec->catdir($Curdir, 'blib', 'arch');
-$expect = VMS::Filespec::vmspath($expect) if $Is_VMS;
 is( $mm->{INST_ARCHLIB}, 
     $mm->{PERL_CORE} ? $mm->{PERL_ARCHLIB}
-                     : $expect,
-                          'INST_ARCHLIB');
-$expect = File::Spec->catdir($Curdir, 'blib', 'bin');
-$expect = VMS::Filespec::vmspath($expect) if $Is_VMS;
-is( $mm->{INST_BIN}, $expect, 'INST_BIN' );
+                     : File::Spec->catdir($Curdir, 'blib', 'arch'),
+                                     'INST_ARCHLIB');
+is( $mm->{INST_BIN},     File::Spec->catdir($Curdir, 'blib', 'bin'),
+                                     'INST_BIN' );
 
 is( keys %{$mm->{CHILDREN}}, 1 );
 my($child_pack) = keys %{$mm->{CHILDREN}};
 my $c_mm = $mm->{CHILDREN}{$child_pack};
-$expect = File::Spec->catdir($Updir, 'blib', 'arch');
-$expect = VMS::Filespec::vmspath($expect) if $Is_VMS;
 is( $c_mm->{INST_ARCHLIB}, 
     $c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
-                       : $expect,
-                             'CHILD INST_ARCHLIB');
-$expect = File::Spec->catdir($Updir, 'blib', 'bin');
-$expect = VMS::Filespec::vmspath($expect) if $Is_VMS;
-is( $c_mm->{INST_BIN}, $expect, 'CHILD INST_BIN' );
+                       : File::Spec->catdir($Updir, 'blib', 'arch'),
+                                     'CHILD INST_ARCHLIB');
+is( $c_mm->{INST_BIN},     File::Spec->catdir($Updir, 'blib', 'bin'),
+                                     'CHILD INST_BIN' );
 
 
 my $inst_lib = File::Spec->catdir($Curdir, 'blib', 'lib');
