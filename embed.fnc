@@ -882,7 +882,8 @@ Apda	|char*	|savesharedpvn	|NN const char *const pv|const STRLEN len
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Ap	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
+Amp	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
+Ap	|void	|save_aelem_flags|NN AV* av|I32 idx|NN SV **sptr|const U32 flags
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|NN AV** aptr
 Ap	|AV*	|save_ary	|NN GV* gv

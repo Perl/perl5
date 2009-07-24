@@ -572,12 +572,12 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
 }
 
 void
-Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
+Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
 {
     dVAR;
     SV *sv;
 
-    PERL_ARGS_ASSERT_SAVE_AELEM;
+    PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS;
 
     SvGETMAGIC(*sptr);
     save_pushptri32ptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
@@ -585,7 +585,7 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
 	SvREFCNT_inc_void(*sptr);
-    save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
+    save_scalar_at(sptr, flags); /* XXX - FIXME - see #60360 */
     sv = *sptr;
     /* If we're localizing a tied array element, this new sv
      * won't actually be stored in the array - so it won't get
