@@ -1,6 +1,6 @@
 #!./perl
 
-# This is a test for rt.cpan.org 60508 which I can't figure out where else
+# This is a test for [perl #60508] which I can't figure out where else
 # to put it or what the underlying problem is, but it has to go somewhere.
 # --Schwern
 
@@ -21,7 +21,7 @@ k2.2 = \x{2022}
 EXPECT
     utf8::encode($expect);
 
-    local $TODO = "rt.cpan.org 60508";
+    local $TODO = "[perl #60508]";
 
     fresh_perl_is(<<'CODE', $expect, {});
 binmode STDOUT, ":utf8";
