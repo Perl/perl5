@@ -279,6 +279,12 @@ README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
+
+=item *
+
+Review and update INSTALL to account for the change in version number;
+in particular, the "Coexistence with earlier versions of perl 5" section.
+
 =item *
 
 Update the F<Changes> file to contain the git log command which would show
@@ -292,6 +298,7 @@ exclusions to avoid other branches being pulled in. Make sure you have the
 correct incantation: replace the not-yet-created tag with C<HEAD> and see
 if git log produces roughly the right number of commits across roughly the
 right time period.
+
 
 =item *
 
@@ -329,7 +336,9 @@ with git and a lack of Changes files.
 =head2  Building a release candidate
 
 (At this point you should already have performed the actions described in
-L</"Actions prior to the first release candidate">.)
+L</"Actions prior to the first release candidate">.) You should review
+that section to ensure that everything there has done, and to see whether
+any of those actions (such as consistency checks) need to be repeated.
 
 =over 4
 
@@ -499,6 +508,12 @@ These two lists of files probably aren't exhaustive; do a recursive grep
 on the previous filename to look for suitable candidates.
 
 (see 16410843ea for an example).
+
+=item *
+
+If this was a maintenance release, then edit F<Porting/mergelog> to change
+all the C<d> (deferred) flags to C<.> (needs review).
+
 
 =item *
 
