@@ -954,7 +954,8 @@ M  03b22f1b10 2008/05/18 33851
 M  e9d89077a6 2008/05/18 33852
 M  8233f60648 2008/05/18 33853
 M  e385c3bfc8 2008/05/18 33854
-R  be25f60935 2008/05/18 33858 (unknown reason)
+R  be25f60935 2008/05/18 33858 Add ..., !!!, and ??? operators
+				probably not BackCompat
 M  68006eeaf2 2008/05/19 33859
 M  a8f3d2d7ed 2008/05/19 33860
 M  2227e2d5ff 2008/05/19 33861
@@ -1864,7 +1865,7 @@ R  9953ff723f 2008/12/27 not BinCompat
 R  1e9bd1186a 2008/12/27 Move all mro:: XS functions from mro.c to ext/mro/
 			    Nicholas thinks this is probably not BackCompat
 			    If this is ever merged, see also fbb5a95cd7,
-			    cd1759d8c2
+			    cd1759d8c2, a4133167b5
 M  a44093a96f 2008/12/28 Fix typo in code not yet used.
 M  527df579b2 2008/12/28 Precomputing the hash value for a string represent
 M  58ca560a9a 2008/12/28 Also test Perl_hv_common() and pre-computed hashes
@@ -3588,6 +3589,7 @@ M  32878f30ba 2009/07/09 Make INSTALL -Duserelocatableinc aware
 R  e2c0f81f62 2009/07/09 Make kill() fatal for non-numeric pids
 			    it's a change in behaviour
 d  b5b25974c1 2009/07/09 Upgrade to Term::ANSIColor 2.01
+			    see also 0b4f5b79b7
 M  4d6e9c138f 2009/07/09 Avoid test failure on Linux when STDIN is /dev/nul
 R  5f52195583 2009/07/09 Fix compiler warning in doio.c
 			    see e2c0f81f62
@@ -3595,7 +3597,7 @@ M  ac7d481af7 2009/07/10 add lib/ExtUtils/ParseXS/Changes to MANIFEST
 M  1a1e8f7d43 2009/07/10 Encode 2.34
 M  f4fe2a3055 2009/07/10 Remove %patchlevel hash
 M  d00e3d8a41 2009/07/10 ExtUtils::MakeMaker 6.54
-M  0b4f5b79b7 2009/07/10 Maintainers.pl: bump Term::ANSIColor version
+d  0b4f5b79b7 2009/07/10 Maintainers.pl: bump Term::ANSIColor version
 M  d55aad059d 2009/07/11 Subject: [PATCH] Have add-package.pl include the C
 M  a5446a64ab 2009/07/11 [perl #61520] Segfault in debugger with tr// and U
 d  fb6e4a4e45 2009/07/12 Wrong skip count in t/op/stash.t
@@ -3652,3 +3654,46 @@ M  26d68d86a3 2009/07/18 mro::method_changed_in(..) ignores AUTOLOAD (RT #6
 M  dcd43ceb79 2009/07/19 bring up to date with ExtUtils-Install v1.52_02
 M  80be973138 2009/07/19 Be sure to find the vmsish pragma for one-liners i
 M  9271ca568a 2009/07/19 (mostly) sync blead with ExtUtils::Install 1.52_02
+M  f0fb50b599 2009/07/19 sync to 1.52_03 (hopefully properly this time)
+M  7d48cb41fd 2009/07/19 forgot the version Bump - sigh
+M  1db12997af 2009/07/20 Mention DTrace in INSTALL.
+M  addebd58fe 2009/07/20 minor updates to release_managers_guide.pod
+R  cda5e2ec34 2009/07/20 Test that `use feature' doesn't leak a scalar duri
+R  a5326e85f7 2009/07/20 Revert "Test that `use feature' doesn't leak a sca
+R  259976bd43 2009/07/20 Typo Fixes in Diagnostic
+			    see f1a3ce43fb
+R  b7a2910fd6 2009/07/20 Another typo, as spotted by Offer Kaye <offer.kaye
+			    see f1a3ce43fb
+R  dee8984cba 2009/07/21 perltodo: forbid labels with keyword names
+R  de6375e332 2009/07/21 perltodo: truncate() prototype
+d  bb74b0ee4e 2009/07/21 Simplify the code that sets $_ in given()
+d  16f708c9bc 2009/07/22 Fix File::Copy::copy with pipes on GNU/kFreeBSD
+R  678ae90b5b 2009/07/22 Remove !!! and ??? operators
+			    see be25f60935
+R  044c880baa 2009/07/22 Document the yada yada operator in perldelta
+			    see be25f60935
+M  13f7636463 2009/07/22 Ignore t/op/require.t byproducts
+R  4fffee8e5b 2009/07/22 Merge branch 'nobangs' into blead
+				MERGE: 13f7636463 044c880baa
+			    see be25f60935
+d  bb5aedc13f 2009/07/22 Teach goto how to cross given/when blocks
+M  d17935ef19 2009/07/22 ExtUtils::ParseXS 2.2002
+d  50f17f89e3 2009/07/22 Make fresh_perl_is() strip newlines off the expect
+d  76856ab861 2009/07/22 This is a test for rt.cpan.org 60508 which I can't
+			    see also 5945e41e91
+d  95266a8888 2009/07/22 v-strings are not deprecated
+d  7f4ffa9dba 2009/07/23 [rjbs] very minor tweaks to description of maint/b
+R  28271a2356 2009/07/23 Merge branch 'blead' of ssh://perl5.git.perl.org/p
+				MERGE: 7f4ffa9dba 95266a8888
+R  a4133167b5 2009/07/23 Restore full name of mro::mro_invalidate_all_metho
+			    see 1e9bd1186a
+d  5945e41e91 2009/07/23 Add file to the MANIFEST and sort
+M  2d0587d880 2009/07/24 Todo: decapsulation of smart match argument
+M  107bd1173c 2009/07/24 Thinko in given() description, found by chromatic
+M  98107fc726 2009/07/24 Rephrase note about CHECK and INIT in eval("") in 
+d  aa5e9df811 2009/07/24 This test is for [perl #60508] (it's in rt.perl.or
+d  4283ec8b81 2009/07/24 Add a test for mro::method_changed_in() and mro::i
+M  dc0a62a1fb 2009/07/24 minor tweaks to release_managers_guide.pod
+M  8b8cdb3af1 2009/07/24 bump-perl-version missed "perl5.10.0" style string
+M  87b6d2691f 2009/07/24 mention Deprecations in how_to_write_a_perldelta.p
+M  636a19183a 2009/07/24 tweaks to release_managers_guide.pod
