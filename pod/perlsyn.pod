@@ -633,7 +633,7 @@ you want. For example you could write:
     when (/^\d+$/ && $_ < 75) { ... }
 
 Another useful shortcut is that, if you use a literal array
-or hash as the argument to C<when>, it is turned into a
+or hash as the argument to C<given>, it is turned into a
 reference. So C<given(@foo)> is the same as C<given(\@foo)>,
 for example.
 
