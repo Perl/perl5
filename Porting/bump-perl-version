@@ -162,14 +162,14 @@ my @maps =  (
     ],
     # 5.8.9
     [
-	qr{\b $oldx\.$oldy\.$oldz \b}x,
+	qr{ $oldx\.$oldy\.$oldz \b}x,
 	sub {"", "$newx.$newy.$newz"},
 	undef,
     ],
 
     # 5.008009
     [
-	qr{\b $old_decimal \b}x,
+	qr{ $old_decimal \b}x,
 	sub {"", sprintf "%d.%03d%03d", $newx, $newy, $newz },
 	undef,
     ],
@@ -183,6 +183,7 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     Changes
     MANIFEST
     Porting/how_to_write_a_perldelta.pod
+    Porting/bump-perl-version
     Porting/mergelog
     Porting/mergelog-tool
     pod.lst
