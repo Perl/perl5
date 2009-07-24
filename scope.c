@@ -167,10 +167,13 @@ STATIC SV *
 S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
     dVAR;
-    SV * const osv = *sptr;
-    register SV * const sv = *sptr = newSV(0);
+    SV * osv;
+    register SV *sv;
 
     PERL_ARGS_ASSERT_SAVE_SCALAR_AT;
+
+    osv = *sptr;
+    sv  = (flags & SAVEf_KEEPOLDELEM) ? osv : (*sptr = newSV(0));
 
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	if (SvGMAGICAL(osv)) {
@@ -179,8 +182,10 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
-	mg_localize(osv, sv, (flags & SAVEf_SETMAGIC) != 0);
+	if (!(flags & SAVEf_KEEPOLDELEM))
+	    mg_localize(osv, sv, (flags & SAVEf_SETMAGIC) != 0);
     }
+
     return sv;
 }
 
@@ -586,6 +591,8 @@ Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
     if (!AvREAL(av) && AvREIFY(av))
 	SvREFCNT_inc_void(*sptr);
     save_scalar_at(sptr, flags); /* XXX - FIXME - see #60360 */
+    if (flags & SAVEf_KEEPOLDELEM)
+	return;
     sv = *sptr;
     /* If we're localizing a tied array element, this new sv
      * won't actually be stored in the array - so it won't get
@@ -610,6 +617,8 @@ Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_HELEM);
     save_scalar_at(sptr, flags);
+    if (flags & SAVEf_KEEPOLDELEM)
+	return;
     sv = *sptr;
     /* If we're localizing a tied hash element, this new sv
      * won't actually be stored in the hash - so it won't get

@@ -57,6 +57,7 @@
 #define SAVEt_ADELETE		46
 
 #define SAVEf_SETMAGIC		1
+#define SAVEf_KEEPOLDELEM	2
 
 #define save_aelem(av,idx,sptr)	save_aelem_flags(av,idx,sptr,SAVEf_SETMAGIC)
 #define save_helem(hv,key,sptr)	save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
