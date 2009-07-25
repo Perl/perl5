@@ -3716,6 +3716,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		OP_4tree * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad;
+		char *saved_regeol = PL_regeol;
 	    
 		n = ARG(scan);
 		PL_op = (OP_4tree*)rexi->data->data[n];
@@ -3741,6 +3742,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
 		PL_curcop = ocurcop;
+		PL_regeol = saved_regeol;
 		if (!logical) {
 		    /* /(?{...})/ */
 		    sv_setsv(save_scalar(PL_replgv), ret);
