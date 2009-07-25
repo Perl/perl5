@@ -890,6 +890,7 @@ Ap	|AV*	|save_ary	|NN GV* gv
 Ap	|void	|save_bool	|NN bool* boolp
 Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
+Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
 Ap	|void	|save_adelete	|NN AV *av|I32 key
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p

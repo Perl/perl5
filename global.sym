@@ -440,6 +440,7 @@ Perl_save_ary
 Perl_save_bool
 Perl_save_clearsv
 Perl_save_delete
+Perl_save_hdelete
 Perl_save_adelete
 Perl_save_destructor
 Perl_save_destructor_x

@@ -780,6 +780,7 @@
 #define save_bool		Perl_save_bool
 #define save_clearsv		Perl_save_clearsv
 #define save_delete		Perl_save_delete
+#define save_hdelete		Perl_save_hdelete
 #define save_adelete		Perl_save_adelete
 #define save_destructor		Perl_save_destructor
 #define save_destructor_x	Perl_save_destructor_x
@@ -3118,6 +3119,7 @@
 #define save_bool(a)		Perl_save_bool(aTHX_ a)
 #define save_clearsv(a)		Perl_save_clearsv(aTHX_ a)
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
+#define save_hdelete(a,b)	Perl_save_hdelete(aTHX_ a,b)
 #define save_adelete(a,b)	Perl_save_adelete(aTHX_ a,b)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)
 #define save_destructor_x(a,b)	Perl_save_destructor_x(aTHX_ a,b)

@@ -2783,6 +2783,12 @@ PERL_CALLCONV void	Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 #define PERL_ARGS_ASSERT_SAVE_DELETE	\
 	assert(hv); assert(key)
 
+PERL_CALLCONV void	Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SAVE_HDELETE	\
+	assert(hv); assert(keysv)
+
 PERL_CALLCONV void	Perl_save_adelete(pTHX_ AV *av, I32 key)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_ADELETE	\

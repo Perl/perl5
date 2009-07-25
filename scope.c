@@ -514,6 +514,21 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 }
 
 void
+Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
+{
+    STRLEN len;
+    I32 klen;
+    const char *key;
+
+    PERL_ARGS_ASSERT_SAVE_HDELETE;
+
+    key  = SvPV_const(keysv, len);
+    klen = SvUTF8(keysv) ? -(I32)len : (I32)len;
+    SvREFCNT_inc_simple_void_NN(hv);
+    save_pushptri32ptr(savepvn(key, len), klen, hv, SAVEt_DELETE);
+}
+
+void
 Perl_save_adelete(pTHX_ AV *av, I32 key)
 {
     dVAR;
