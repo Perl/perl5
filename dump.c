@@ -1750,11 +1750,47 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvOOK(sv)) {
 	    AV * const backrefs
 		= *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(sv));
+	    struct mro_meta * const meta = HvAUX(sv)->xhv_mro_meta;
 	    if (backrefs) {
 		Perl_dump_indent(aTHX_ level, file, "  BACKREFS = 0x%"UVxf"\n",
 				 PTR2UV(backrefs));
 		do_sv_dump(level+1, file, MUTABLE_SV(backrefs), nest+1, maxnest,
 			   dumpops, pvlim);
+	    }
+	    if (meta) {
+		/* FIXME - mro_algs kflags can signal a UTF-8 name.  */
+		Perl_dump_indent(aTHX_ level, file, "  MRO_WHICH = \"%.*s\" (0x%"UVxf")\n",
+				 (int)meta->mro_which->length,
+				 meta->mro_which->name,
+				 PTR2UV(meta->mro_which));
+		Perl_dump_indent(aTHX_ level, file, "  CACHE_GEN = 0x%"UVxf"\n",
+				 (UV)meta->cache_gen);
+		Perl_dump_indent(aTHX_ level, file, "  PKG_GEN = 0x%"UVxf"\n",
+				 (UV)meta->pkg_gen);
+		if (meta->mro_linear_all) {
+		    Perl_dump_indent(aTHX_ level, file, "  MRO_LINEAR_ALL = 0x%"UVxf"\n",
+				 PTR2UV(meta->mro_linear_all));
+		do_sv_dump(level+1, file, MUTABLE_SV(meta->mro_linear_all), nest+1, maxnest,
+			   dumpops, pvlim);
+		}
+		if (meta->mro_linear_current) {
+		    Perl_dump_indent(aTHX_ level, file, "  MRO_LINEAR_CURRENT = 0x%"UVxf"\n",
+				 PTR2UV(meta->mro_linear_current));
+		do_sv_dump(level+1, file, MUTABLE_SV(meta->mro_linear_current), nest+1, maxnest,
+			   dumpops, pvlim);
+		}
+		if (meta->mro_nextmethod) {
+		    Perl_dump_indent(aTHX_ level, file, "  MRO_NEXTMETHOD = 0x%"UVxf"\n",
+				 PTR2UV(meta->mro_nextmethod));
+		do_sv_dump(level+1, file, MUTABLE_SV(meta->mro_nextmethod), nest+1, maxnest,
+			   dumpops, pvlim);
+		}
+		if (meta->isa) {
+		    Perl_dump_indent(aTHX_ level, file, "  ISA = 0x%"UVxf"\n",
+				 PTR2UV(meta->isa));
+		do_sv_dump(level+1, file, MUTABLE_SV(meta->isa), nest+1, maxnest,
+			   dumpops, pvlim);
+		}
 	    }
 	}
 	if (nest < maxnest && !HvEITER_get(sv)) { /* Try to preserve iterator */
