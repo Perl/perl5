@@ -437,7 +437,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     if(meta->mro_nextmethod) hv_clear(meta->mro_nextmethod);
 
     /* Iterate the isarev (classes that are our children),
-       wiping out their linearization and method caches */
+       wiping out their linearization, method and isa caches */
     if(isarev) {
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev))) {
@@ -462,6 +462,10 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                 revmeta->cache_gen++;
             if(revmeta->mro_nextmethod)
                 hv_clear(revmeta->mro_nextmethod);
+	    if (revmeta->isa) {
+		SvREFCNT_dec(revmeta->isa);
+		revmeta->isa = NULL;
+	    }
         }
     }
 
