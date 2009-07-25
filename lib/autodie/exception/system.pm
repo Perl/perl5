@@ -5,7 +5,7 @@ use warnings;
 use base 'autodie::exception';
 use Carp qw(croak);
 
-our $VERSION = '2.06';
+our $VERSION = '2.06_01';
 
 my $PACKAGE = __PACKAGE__;
 
