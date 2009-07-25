@@ -102,26 +102,27 @@ the tarball and directory name:
     $ cd root/of/perl/tree
     $ git clean -xdf		#  make sure perl and git agree on files
 
-    $ perl Porting/makerel -s `git describe` # for a snapshot
-    $ perl Porting/makerel -s RC1	     # for a release candidate
-    $ perl Porting/makerel 		     # for a final release
+    $ perl Porting/makerel -b -s `git describe` # for a snapshot
+    $ perl Porting/makerel -b -s RC1            # for a release candidate
+    $ perl Porting/makerel -b                   # for a final release
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them,
 adds DOS line endings to some, then tars it up as
-F<../perl-x.y.z-RC1.tar.gz>.
+F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a C<tar.bz2> file.
 
 XXX if we go for extra tags and branches stuff, then add the extra details
 here
 
 =item *
 
-Copy the tarball to a web server somewhere you have access to.
+Copy the tarballs (.gz and possibly .bz2) to a web server somewhere you
+have access to.
 
 =item *
 
-Download the tarball to some other machine (for a release candidate, to two or
-more servers: IRC is good for this).
+Download the tarball to some other machine (for a release candidate, to
+two or more servers: IRC is good for this).
 
 =item *
 
@@ -157,7 +158,7 @@ Install an XS module.
 
 =item *
 
-If all is well, announce the snaphot to p5p. (For a release candidate,
+If all is well, announce the snapshot to p5p. (For a release candidate,
 instead follow the further steps described later.)
 
 =back
