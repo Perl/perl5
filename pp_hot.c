@@ -1823,16 +1823,11 @@ PP(pp_helem)
 	if (localizing) {
 	    if (HvNAME_get(hv) && isGV(*svp))
 		save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
-	    else {
-		if (!preeminent) {
-		    STRLEN keylen;
-		    const char * const key = SvPV_const(keysv, keylen);
-		    SAVEDELETE(hv, savepvn(key,keylen),
-			       SvUTF8(keysv) ? -(I32)keylen : (I32)keylen);
-		} else
-		    save_helem_flags(hv, keysv, svp,
-				     (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
-            }
+	    else if (preeminent)
+		save_helem_flags(hv, keysv, svp,
+		     (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
+	    else
+		SAVEHDELETE(hv, keysv);
 	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);

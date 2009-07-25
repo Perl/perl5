@@ -4201,17 +4201,11 @@ PP(pp_hslice)
             if (localizing) {
 		if (HvNAME_get(hv) && isGV(*svp))
 		    save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
-		else {
-		    if (preeminent)
-			save_helem_flags(hv, keysv, svp,
-					 (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
-		    else {
-			STRLEN keylen;
-			const char * const key = SvPV_const(keysv, keylen);
-			SAVEDELETE(hv, savepvn(key,keylen),
-				   SvUTF8(keysv) ? -(I32)keylen : (I32)keylen);
-		    }
-		}
+		else if (preeminent)
+		    save_helem_flags(hv, keysv, svp,
+			 (PL_op->op_flags & OPf_SPECIAL) ? 0 : SAVEf_SETMAGIC);
+		else
+		    SAVEHDELETE(hv, keysv);
             }
         }
         *MARK = svp ? *svp : &PL_sv_undef;
