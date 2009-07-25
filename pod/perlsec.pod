@@ -12,6 +12,18 @@ with fewer hidden snags.  Additionally, because the language has more
 builtin functionality, it can rely less upon external (and possibly
 untrustworthy) programs to accomplish its purposes.
 
+=head1 SECURITY VULNERABILITY CONTACT INFORMATION
+
+If you believe you have found a security vulnerability in Perl, please email
+perl5-security-report@perl.org with details.  This points to a closed
+subscription, unarchived mailing list.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SECURITY MECHANISMS AND CONCERNS
+
+=head2 Taint mode
+
 Perl automatically enables a set of special security checks, called I<taint
 mode>, when it detects its program running with differing real and effective
 user or group IDs.  The setuid bit in Unix permissions is mode 04000, the
