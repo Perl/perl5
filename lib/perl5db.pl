@@ -3639,6 +3639,8 @@ arguments with which the subroutine was invoked
 =cut
 
 sub sub {
+	# Do not use a regex in this subroutine -> results in corrupted memory
+	# See: [perl #66110]
 
 	# lock ourselves under threads
 	lock($DBGR);
@@ -3647,7 +3649,7 @@ sub sub {
     # sub's return value in (if needed), and an array to put the sub's
     # return value in (if needed).
     my ( $al, $ret, @ret ) = "";
-	if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+	if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
 		print "creating new thread\n"; 
 	}
 

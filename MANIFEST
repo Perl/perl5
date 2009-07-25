@@ -2807,6 +2807,7 @@ lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
 lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
 lib/perl5db/t/proxy-constants	Tests for the Perl debugger
 lib/perl5db/t/rt-61222		Tests for the Perl debugger
+lib/perl5db/t/rt-66110		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint

@@ -27,7 +27,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(7);
+plan(8);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -157,6 +157,14 @@ SKIP: {
 
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/proxy-constants');
     is($output, "", "proxy constant subroutines");
+}
+
+
+# [perl #66110] Call a subroutine inside a regex
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
+    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
+    like($output, "All tests successful.", "[perl #66110]");
 }
 
 
