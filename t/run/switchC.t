@@ -13,7 +13,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 7);
+plan(tests => 9);
 
 my $r;
 
@@ -63,3 +63,15 @@ $r = runperl( switches => [ '-CS', '-w' ],
 	      prog     => "#!perl -CS\nprint chr(256)",
               stderr   => 1, );
 like( $r, qr/^$b(?:\r?\n)?$/s, '#!perl -C' );
+
+$r = runperl( switches => [ '-CA', '-w' ],
+	      prog     => "#!perl -CS\nprint chr(256)",
+              stderr   => 1, );
+like( $r, qr/^Too late for "-CS" option at -e line 1\.$/s,
+      '#!perl -C with different -C on command line' );
+
+$r = runperl( switches => [ '-w' ],
+	      prog     => "#!perl -CS\nprint chr(256)",
+              stderr   => 1, );
+like( $r, qr/^Too late for "-CS" option at -e line 1\.$/s,
+      '#!perl -C but not command line' );
