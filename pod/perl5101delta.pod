@@ -1036,7 +1036,17 @@ F<win32/buildext.pl>.
 
 =item AIX
 
+=over 0
+
+Removed F<libbsd> for AIX 5L and 6.1. Only flock() was used from F<libbsd>.
+
+Removed F<libgdbm> for AIX 5L and 6.1. The F<libgdbm> is delivered as an
+optional package with the AIX Toolbox. Unfortunately the 64 bit version 
+is broken.
+
 Hints changes mean that AIX 4.2 should work again.
+
+=back
 
 =item Cygwin
 
@@ -1082,6 +1092,8 @@ will no longer be dropped under race conditions.
 
 =item VMS
 
+=over 0
+
 Reads from the in-memory temporary files of C<PerlIO::scalar> used to fail
 if C<$/> was set to a numeric reference (to indicate record-style reads).
 This is now fixed.
@@ -1095,6 +1107,8 @@ Enabling the C<PERL_VMS_POSIX_EXIT> logical name now encodes a POSIX exit
 status in a VMS condition value for better interaction with GNV's bash
 shell and other utilities that depend on POSIX exit values.  See
 L<perlvms/"$?"> for details.
+
+=back
 
 =back
 
