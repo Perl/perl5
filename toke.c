@@ -3999,11 +3999,10 @@ Perl_yylex(pTHX)
 			do {
 			    bool baduni = FALSE;
 			    if (*d1 == 'C') {
-				const char *d2 = d1;
-				d2++;
-				parse_unicode_opts( (const char **)&d2 )
-				     == PL_unicode
-				    || (baduni = TRUE);
+				const char *d2 = d1 + 1;
+				if (parse_unicode_opts((const char **)&d2)
+				    != PL_unicode)
+				    baduni = TRUE;
 			    }
 			    if (baduni || *d1 == 'M' || *d1 == 'm') {
 				const char * const m = d1;
