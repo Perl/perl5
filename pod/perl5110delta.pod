@@ -209,6 +209,13 @@ kill process "0", which would terminate the current process group on POSIX
 systems.  Since process identifiers are always integers, killing a non-numeric
 process is now fatal.
 
+=item C<-C> on the shebang line is once more permitted
+
+if it is also specified on the command line. C<-C> on the shebang line used
+to be a silent no-op I<if> it was not also on the command line, so perl 
+5.10.0 disallowed it, which broke some scripts. Now perl checks whether it 
+is also on the command line and only dies if it is not.
+
 =back
 
 =head1 New or Changed Diagnostics
