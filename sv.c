@@ -10426,6 +10426,10 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     Copy(proto->nexttype, parser->nexttype, 5,	I32);
     parser->nexttoke	= proto->nexttoke;
 #endif
+
+    /* XXX should clone saved_curcop here, but we aren't passed
+     * proto_perl; so do it in perl_clone_using instead */
+
     return parser;
 }
 
@@ -12083,6 +12087,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_runops		= proto_perl->Irunops;
 
     PL_parser		= parser_dup(proto_perl->Iparser, param);
+
+    /* XXX this only works if the saved cop has already been cloned */
+    if (proto_perl->Iparser) {
+	PL_parser->saved_curcop = (COP*)any_dup(
+				    proto_perl->Iparser->saved_curcop,
+				    proto_perl);
+    }
 
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
