@@ -13,7 +13,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 6);
+plan(tests => 7);
 
 my $r;
 
@@ -59,3 +59,7 @@ $r = runperl( switches => [ '-CA', '-w' ],
               args     => [ chr(256) ] );
 like( $r, qr/^256(?:\r?\n)?$/s, '-CA: @ARGV' );
 
+$r = runperl( switches => [ '-CS', '-w' ],
+	      prog     => "#!perl -CS\nprint chr(256)",
+              stderr   => 1, );
+like( $r, qr/^$b(?:\r?\n)?$/s, '#!perl -C' );

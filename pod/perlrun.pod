@@ -342,10 +342,10 @@ that enabled the use of Unicode-aware "wide system call" Win32 APIs.
 This feature was practically unused, however, and the command line
 switch was therefore "recycled".)
 
-B<Note:> Since perl 5.10.0, the -C option can no longer be used
-on the #! line. It wasn't working there anyway, since the standard streams
+B<Note:> Since perl 5.10.1, if the -C option is used on the #! line, it
+must be specified on the command line as well, since the standard streams
 are already set up at this point in the execution of the perl interpreter.
-You can use binmode() instead to get the desired behaviour.
+You can also use binmode() to set the encoding of an I/O stream.
 
 =item B<-c>
 X<-c>

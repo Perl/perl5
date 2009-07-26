@@ -3999,7 +3999,15 @@ Perl_yylex(pTHX)
 			const char *d1 = d;
 
 			do {
-			    if (*d1 == 'M' || *d1 == 'm' || *d1 == 'C') {
+			    bool baduni = FALSE;
+			    if (*d1 == 'C') {
+				const char *d2 = d1;
+				d2++;
+				parse_unicode_opts( (const char **)&d2 )
+				     == PL_unicode
+				    || (baduni = TRUE);
+			    }
+			    if (baduni || *d1 == 'M' || *d1 == 'm') {
 				const char * const m = d1;
 				while (*d1 && !isSPACE(*d1))
 				    d1++;

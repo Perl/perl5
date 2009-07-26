@@ -4196,8 +4196,15 @@ system call to call, silly dilly.
 =item Too late for "-%s" option
 
 (X) The #! line (or local equivalent) in a Perl script contains the
-B<-M>, B<-m> or B<-C> option.  This is an error because those options
-are not intended for use inside scripts.  Use the C<use> pragma instead.
+B<-M>, B<-m> or B<-C> option.
+
+In the case of B<-M> and B<-m>, this is an error because those options are
+not intended for use inside scripts.  Use the C<use> pragma instead.
+
+The B<-C> option only works if it is specified on the command line as well
+(with the same sequence of letters or numbers following). Either specify
+this option on the command line, or, if your system supports it, make your
+script executable and run it directly instead of passing it to perl. 
 
 =item Too late to run %s block
 
