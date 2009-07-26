@@ -148,6 +148,13 @@ Bootstrap the CPAN client on the clean install.
 Install CPANPLUS.
 XXX pick something new; this is now bundled
 
+=begin suggestion
+
+How about Inline. Install it, and then check that your perl can run this:
+  perl -lwe 'use Inline C => "int answer() { return 42;} "; print answer'
+
+=end
+
 =item *
 
 Bootstrap the CPANPLUS client.
