@@ -2852,9 +2852,7 @@ M  9014bf7fb4 2009/04/07 Docs: Update summary and add copyright
 M  9fd5bac037 2009/04/07 Docs: Fixed a couple of [my] typos
 M  082b74eb74 2009/04/08 Upgrade to NEXT-0.62.
 M  36d7a91d20 2009/04/08 h2xs incorrectly treats enum values like macros
-!  a8ba03fb20 2009/04/08 Use of freed comppad array during clear_yystack()
-			    I need to think about htis mand maybe fix it
-			    fully sometime
+M  a8ba03fb20 2009/04/08 Use of freed comppad array during clear_yystack()
 M  932dfdf14c 2009/04/08 Net::hostent fails make test if can't resolve loca
 R  5929274fd6 2009/04/09 Merge commit 'rafl/blead' into blead
 				MERGE: 932dfdf14c 082b74eb74
@@ -3697,3 +3695,46 @@ M  dc0a62a1fb 2009/07/24 minor tweaks to release_managers_guide.pod
 M  8b8cdb3af1 2009/07/24 bump-perl-version missed "perl5.10.0" style string
 M  87b6d2691f 2009/07/24 mention Deprecations in how_to_write_a_perldelta.p
 M  636a19183a 2009/07/24 tweaks to release_managers_guide.pod
+M  7840a289bf 2009/07/25 autodie 2.06_01
+M  85bdf03b25 2009/07/25 add -b option to makerel to make a .bz2 file
+d  7eedc5ec65 2009/07/25 Add test case for [perl #61222] + a test case for 
+d  8ad0ee873e 2009/07/25 Add the new db tests to the MANIFEST
+d  7d88e6c43c 2009/07/25 When dumping a hash, display the mro_meta structur
+M  1375cf1cf2 2009/07/25 When resetting our children, wipe out the isa cach
+d  b7bfa855cd 2009/07/25 Do not use a regex in DB::sub
+			    perl5db.pl has been merged; the tests
+			    deferred till after 5.10.1
+d  d80618d264 2009/07/25 Save and restore PL_regeol for op inside of regex 
+d  2788925507 2009/07/25 Tests for commit 1375cf1cf2085f851bb176047d5e60248
+M  f0c5aa00ee 2009/07/26 dup saved_curcop in PL_parser
+d  4ba71d51f7 2009/07/26 Allow -C on the #! line when it is identical to -C
+			    add but the t/run/switchC.t have been merged;
+			    at the test back (and ff19758235) post-5.10.1
+M  fc46f0f6ac 2009/07/26 perldelta entry noting when -C is now allowed on t
+			    (merged by hand into 5.10.1 perldelats)
+M  bd0ab00df4 2009/07/26 Tidy code added in 4ba71d51f72efb2af8dc9748dd62219
+d  74b2b4b178 2009/07/26 Add tests for where -C differs between then #! and
+M  9db5571e8d 2009/07/26 Suggest using Inline as a pre-uploading test for a
+M  bd54d59dd6 2009/07/26 fix vim highlighting problem
+M  e9105d30ed 2009/07/26 much better swap logic to support reentrancy and f
+M  1784bd3e6b 2009/07/26 needed something to change to test patch mailing l
+M  89f530a6b8 2009/07/27 Add security contact information to perlsec
+M  4085a37725 2009/07/27 Update Module::Build to 0.34_02
+d  ff19758235 2009/07/27 Avoid using embedded newlines in the "one"liners p
+.  82151c42dd 2009/07/27 Make cxinc member of the public API
+M  174830c759 2009/07/27 missing "to" in perlxs
+d  6100a0a495 2009/07/27 syswrite prints garbage if called with empty scala
+d  e41cc77942 2009/07/27 Regression test for [perl #67912]
+d  0214bff6a3 2009/07/27 Replace Test::More by test.pl
+d  c1d4704a25 2009/07/27 Make test pass with miniperl
+d  c5836baf9b 2009/07/27 Make test pass with miniperl
+d  8e2e2108bd 2009/07/27 Add core test boilerplate to some base.pm tests
+d  304efdcbf5 2009/07/27 Add core test boilerplates
+d  a5c2649359 2009/07/27 Add support for new flag D in embed.fnc (deprecate
+d  dfeca2c828 2009/07/27 Port t/op/sysio.t to test.pl
+d  dd61358a03 2009/07/27 Really check that sysread(I, $x, 1, -4) dies with 
+d  031cefa092 2009/07/27 add a simple utility to Porting/ which knows how t
+.  16f0d0fcc4 2009/07/27 cleanup the EUI/EUMM test mess, and bump Install.p
+.  41377f6490 2009/07/27 remove Devel-PPPort part change included in e9105d
+M  692a467c73 2009/07/27 Final release of version-0.77 for inclusion in 5.1
+M  05b3708e8e 2009/07/27 bump 'version' to 0.77 in Maintainers.pl

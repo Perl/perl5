@@ -246,7 +246,7 @@ on how to specify C<configure_requires> when creating a distribution for CPAN.
 =item C<autodie>
 
 This is a new lexically-scoped alternative for the C<Fatal> module.
-The bundled version is 2.06. Note that in this release, using a string
+The bundled version is 2.06_01. Note that in this release, using a string
 eval when C<autodie> is in effect can cause the autodie behaviour to leak
 into the surrounding scope. See L<autodie/"BUGS"> for more details.
 
@@ -503,7 +503,7 @@ Upgraded from version 2.18_02 to 2.2002.
 
 =item C<Fatal>
 
-Upgraded from version 1.05 to 2.06. See also the new pragma C<autodie>.
+Upgraded from version 1.05 to 2.06_01. See also the new pragma C<autodie>.
 
 =item C<File::Basename>
 
@@ -663,7 +663,7 @@ change).
 
 =item C<Module::Build>
 
-Upgraded from version 0.2808_01 to 0.34.
+Upgraded from version 0.2808_01 to 0.34_02.
 
 =item C<Module::CoreList>
 
@@ -1364,6 +1364,22 @@ missed (method cache issue) [RT #60220,60232].
 
 In the 5.10.0 release, a combination of C<use feature> and C<//ee> could
 cause a memory leak [RT #63110].
+
+=item *
+
+C<-C> on the shebang (C<#!>) line is once more permitted if it is also
+specified on the command line. C<-C> on the shebang line used to be a
+silent no-op I<if> it was not also on the command line, so perl 5.10.0
+disallowed it, which broke some scripts. Now perl checks whether it is
+also on the command line and only dies if it is not [RT #67880].
+
+=item *
+
+In 5.10.0, certain types of re-entrant regular expression could crash,
+or cause the following assertion failure [RT #60508]:
+
+    Assertion rx->sublen >= (s - rx->subbeg) + i failed
+
 
 =back
 
