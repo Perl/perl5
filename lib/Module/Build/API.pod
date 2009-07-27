@@ -1795,6 +1795,8 @@ accessor methods for the following properties:
 
 =item create_readme()
 
+=item debug()
+
 =item debugger()
 
 =item destdir()

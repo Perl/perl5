@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.34';
+$VERSION = '0.34_02';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -191,6 +191,11 @@ sub log_verbose {
   my $self = shift;
   $self->log_info(@_) if(ref($self) and $self->verbose);
 }
+sub log_debug {
+  my $self = shift;
+  print @_ if ref $self && $self->debug;
+}
+
 sub log_warn {
   # Try to make our call stack invisible
   shift;
@@ -920,6 +925,7 @@ __PACKAGE__->add_property($_) for qw(
   sign
   test_files
   verbose
+  debug
   xs_files
 );
 
@@ -1593,7 +1599,10 @@ sub _call_action {
   local $self->{action} = $action;
   my $method = $self->can_action( $action );
   die "No action '$action' defined, try running the 'help' action.\n" unless $method;
-  return $self->$method();
+  $self->log_debug("Starting ACTION_$action\n");
+  my $rc = $self->$method();
+  $self->log_debug("Finished ACTION_$action\n");
+  return $rc;
 }
 
 sub can_action {
@@ -1719,6 +1728,7 @@ sub _optional_arg {
     uninst
     use_rcfile
     verbose
+    debug
     sign
     use_tap_harness
   );
