@@ -101,8 +101,9 @@ my $over;
     package OverFtest;
 
     use overload 
+	fallback => 1,
         -X => sub { 
-            $over = [overload::StrVal($_[0]), $_[1]];
+            $over = [qq($_[0]), $_[1]];
             "-$_[1]"; 
         };
 }
@@ -131,11 +132,11 @@ my $over;
 }
 
 my $ft = bless [], "OverFtest";
-my $ftstr = overload::StrVal($ft);
+my $ftstr = qq($ft);
 my $str = bless [], "OverString";
 my $both = bless [], "OverBoth";
 my $neither = bless [], "OverNeither";
-my $nstr = overload::StrVal($neither);
+my $nstr = qq($neither);
 
 open my $gv, "<", "TEST";
 bless $gv, "OverString";
