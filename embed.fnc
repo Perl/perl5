@@ -11,6 +11,7 @@
 :	m		Implemented as a macro - no export, no
 :			proto, no #define
 :	d		function has documentation with its source
+:	D		function is deprecated
 :	s		static function, should have an S_ prefix in
 :			source file; for macros (m), suffix the usage
 :			example with a semicolon
