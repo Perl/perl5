@@ -1956,7 +1956,7 @@ package Maintainers;
     'version' =>
 	{
 	'MAINTAINER'	=> 'jpeacock',
-	'DISTRIBUTION'	=> 'JPEACOCK/version-0.76.tar.gz',
+	'DISTRIBUTION'	=> 'JPEACOCK/version-0.77.tar.gz',
 	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t],
 	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qr{^vutil/},
 			     qw{lib/version/typemap},
