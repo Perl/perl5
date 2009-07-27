@@ -20,7 +20,7 @@ use File::Spec;
 @ISA = ('Exporter');
 @EXPORT = ('install','uninstall','pm_to_blib', 'install_default');
 
-=pod 
+=pod
 
 =head1 NAME
 
@@ -35,14 +35,14 @@ ExtUtils::Install - install files from here to there
   uninstall($packlist);
 
   pm_to_blib({ 'lib/Foo/Bar.pm' => 'blib/lib/Foo/Bar.pm' });
-    
+
 =head1 VERSION
 
-1.52
+1.54
 
 =cut
 
-$VERSION = '1.52_03';
+$VERSION = '1.54';  # <---- dont forget to update the POD section just above this line!
 $VERSION = eval $VERSION;
 
 =pod
@@ -111,11 +111,11 @@ my $CanMoveAtBoot = ($Is_Win32 || $Is_cygwin);
             my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
             my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
             my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
-            $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+            $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
             $vms_efs = $efs_charset =~ /^[ET1]/i;
             $vms_case = $efs_case =~ /^[ET1]/i;
         }
-        $Is_VMS_noefs = 0 if ($vms_efs); 
+        $Is_VMS_noefs = 0 if ($vms_efs);
     }
 
 
@@ -384,7 +384,7 @@ Abstract a -w check that tries to use POSIX::access() if possible.
         my $dir=shift;
         unless (defined $has_posix) {
             $has_posix= (!$Is_cygwin && !$Is_Win32
-			 && eval 'local $^W; require POSIX; 1') || 0;
+             && eval 'local $^W; require POSIX; 1') || 0;
         }
         if ($has_posix) {
             return POSIX::access($dir, POSIX::W_OK());
@@ -500,7 +500,7 @@ sub _mkpath {
     } elsif ($show and $dry_run) {
         print "$_\n" for @make;
     }
-    
+
 }
 
 =pod
@@ -562,20 +562,20 @@ sub _chdir {
 
     # deprecated forms
     install(\%from_to);
-    install(\%from_to, $verbose, $dry_run, $uninstall_shadows, 
+    install(\%from_to, $verbose, $dry_run, $uninstall_shadows,
                 $skip, $always_copy, \%result);
 
-    # recommended form as of 1.47                
-    install([ 
+    # recommended form as of 1.47
+    install([
         from_to => \%from_to,
-        verbose => 1, 
+        verbose => 1,
         dry_run => 0,
         uninstall_shadows => 1,
         skip => undef,
         always_copy => 1,
         result => \%install_results,
     ]);
-    
+
 
 Copies each directory tree of %from_to to its corresponding value
 preserving timestamps and permissions.
@@ -598,22 +598,22 @@ without actually doing it.  Default is false.
 If $uninstall_shadows is true any differing versions throughout @INC
 will be uninstalled.  This is "make install UNINST=1"
 
-As of 1.37_02 install() supports the use of a list of patterns to filter out 
-files that shouldn't be installed. If $skip is omitted or undefined then 
-install will try to read the list from INSTALL.SKIP in the CWD. This file is 
-a list of regular expressions and is just like the MANIFEST.SKIP file used 
+As of 1.37_02 install() supports the use of a list of patterns to filter out
+files that shouldn't be installed. If $skip is omitted or undefined then
+install will try to read the list from INSTALL.SKIP in the CWD. This file is
+a list of regular expressions and is just like the MANIFEST.SKIP file used
 by L<ExtUtils::Manifest>.
 
-A default site INSTALL.SKIP may be provided by setting then environment 
-variable EU_INSTALL_SITE_SKIPFILE, this will only be used when there isn't a 
-distribution specific INSTALL.SKIP. If the environment variable 
-EU_INSTALL_IGNORE_SKIP is true then no install file filtering will be 
+A default site INSTALL.SKIP may be provided by setting then environment
+variable EU_INSTALL_SITE_SKIPFILE, this will only be used when there isn't a
+distribution specific INSTALL.SKIP. If the environment variable
+EU_INSTALL_IGNORE_SKIP is true then no install file filtering will be
 performed.
 
-If $skip is undefined then the skip file will be autodetected and used if it 
-is found. If $skip is a reference to an array then it is assumed the array 
-contains the list of patterns, if $skip is a true non reference it is 
-assumed to be the filename holding the list of patterns, any other value of 
+If $skip is undefined then the skip file will be autodetected and used if it
+is found. If $skip is a reference to an array then it is assumed the array
+contains the list of patterns, if $skip is a true non reference it is
+assumed to be the filename holding the list of patterns, any other value of
 $skip is taken to mean that no install filtering should occur.
 
 B<Changes As of Version 1.47>
@@ -621,32 +621,32 @@ B<Changes As of Version 1.47>
 As of version 1.47 the following additions were made to the install interface.
 Note that the new argument style and use of the %result hash is recommended.
 
-The $always_copy parameter which when true causes files to be updated 
-regardles as to whether they have changed, if it is defined but false then 
-copies are made only if the files have changed, if it is undefined then the 
+The $always_copy parameter which when true causes files to be updated
+regardles as to whether they have changed, if it is defined but false then
+copies are made only if the files have changed, if it is undefined then the
 value of the environment variable EU_INSTALL_ALWAYS_COPY is used as default.
 
-The %result hash will be populated with the various keys/subhashes reflecting 
+The %result hash will be populated with the various keys/subhashes reflecting
 the install. Currently these keys and their structure are:
 
     install             => { $target    => $source },
     install_fail        => { $target    => $source },
     install_unchanged   => { $target    => $source },
-        
+
     install_filtered    => { $source    => $pattern },
-    
+
     uninstall           => { $uninstalled => $source },
     uninstall_fail      => { $uninstalled => $source },
-        
+
 where C<$source> is the filespec of the file being installed. C<$target> is where
 it is being installed to, and C<$uninstalled> is any shadow file that is in C<@INC>
 or C<$ENV{PERL5LIB}> or other standard locations, and C<$pattern> is the pattern that
 caused a source file to be skipped. In future more keys will be added, such as to
-show created directories, however this requires changes in other modules and must 
+show created directories, however this requires changes in other modules and must
 therefore wait.
-        
-These keys will be populated before any exceptions are thrown should there be an 
-error. 
+
+These keys will be populated before any exceptions are thrown should there be an
+error.
 
 Note that all updates of the %result are additive, the hash will not be
 cleared before use, thus allowing status results of many installs to be easily
@@ -655,7 +655,7 @@ aggregated.
 B<NEW ARGUMENT STYLE>
 
 If there is only one argument and it is a reference to an array then
-the array is assumed to contain a list of key-value pairs specifying 
+the array is assumed to contain a list of key-value pairs specifying
 the options. In this case the option "from_to" is mandatory. This style
 means that you dont have to supply a cryptic list of arguments and can
 use a self documenting argument list that is easier to understand.
@@ -664,10 +664,10 @@ This is now the recommended interface to install().
 
 B<RETURN>
 
-If all actions were successful install will return a hashref of the results 
-as described above for the $result parameter. If any action is a failure 
-then install will die, therefore it is recommended to pass in the $result 
-parameter instead of using the return value. If the result parameter is 
+If all actions were successful install will return a hashref of the results
+as described above for the $result parameter. If any action is a failure
+then install will die, therefore it is recommended to pass in the $result
+parameter instead of using the return value. If the result parameter is
 provided then the returned hashref will be the passed in hashref.
 
 =cut
@@ -676,7 +676,7 @@ sub install { #XXX OS-SPECIFIC
     my($from_to,$verbose,$dry_run,$uninstall_shadows,$skip,$always_copy,$result) = @_;
     if (@_==1 and eval { 1+@$from_to }) {
         my %opts        = @$from_to;
-        $from_to        = $opts{from_to} 
+        $from_to        = $opts{from_to}
                             or Carp::confess("from_to is a mandatory parameter");
         $verbose        = $opts{verbose};
         $dry_run        = $opts{dry_run};
@@ -685,14 +685,14 @@ sub install { #XXX OS-SPECIFIC
         $always_copy    = $opts{always_copy};
         $result         = $opts{result};
     }
-    
+
     $result ||= {};
     $verbose ||= 0;
     $dry_run  ||= 0;
 
     $skip= _get_install_skip($skip,$verbose);
     $always_copy =  $ENV{EU_INSTALL_ALWAYS_COPY}
-                 || $ENV{EU_ALWAYS_COPY} 
+                 || $ENV{EU_ALWAYS_COPY}
                  || 0
         unless defined $always_copy;
 
@@ -710,7 +710,7 @@ sub install { #XXX OS-SPECIFIC
     my $cwd = cwd();
     my @found_files;
     my %check_dirs;
-    
+
     MOD_INSTALL: foreach my $source (sort keys %from_to) {
         #copy the tree to the target directory without altering
         #timestamp and permission and remember for the .packlist
@@ -762,7 +762,7 @@ sub install { #XXX OS-SPECIFIC
             }
             # we have to do this for back compat with old File::Finds
             # and because the target is relative
-            my $save_cwd = _chdir($cwd); 
+            my $save_cwd = _chdir($cwd);
             my $diff = 0;
             # XXX: I wonder how useful this logic is actually -- demerphq
             if ( $always_copy or !-f $targetfile or -s $targetfile != $size) {
@@ -771,28 +771,28 @@ sub install { #XXX OS-SPECIFIC
                 # we might not need to copy this file
                 $diff = compare($sourcefile, $targetfile);
             }
-            $check_dirs{$targetdir}++ 
+            $check_dirs{$targetdir}++
                 unless -w $targetfile;
-            
+
             push @found_files,
                 [ $diff, $File::Find::dir, $origfile,
                   $mode, $size, $atime, $mtime,
                   $targetdir, $targetfile, $sourcedir, $sourcefile,
-                  
-                ];  
+
+                ];
             #restore the original directory we were in when File::Find
             #called us so that it doesnt get horribly confused.
-            _chdir($save_cwd);                
-        }, $current_directory ); 
+            _chdir($save_cwd);
+        }, $current_directory );
         _chdir($cwd);
-    }   
+    }
     foreach my $targetdir (sort keys %check_dirs) {
         _mkpath( $targetdir, 0, 0755, $verbose, $dry_run );
     }
     foreach my $found (@found_files) {
         my ($diff, $ffd, $origfile, $mode, $size, $atime, $mtime,
             $targetdir, $targetfile, $sourcedir, $sourcefile)= @$found;
-        
+
         my $realtarget= $targetfile;
         if ($diff) {
             eval {
@@ -804,15 +804,15 @@ sub install { #XXX OS-SPECIFIC
                     _mkpath( $targetdir, 0, 0755, $verbose, $dry_run );
                 }
                 print "Installing $targetfile\n";
-            
+
                 _copy( $sourcefile, $targetfile, $verbose, $dry_run, );
-                
-            
+
+
                 #XXX OS-SPECIFIC
                 print "utime($atime,$mtime,$targetfile)\n" if $verbose>1;
                 utime($atime,$mtime + $Is_VMS,$targetfile) unless $dry_run>1;
-    
-    
+
+
                 $mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
                 $mode = $mode | 0222
                     if $realtarget ne $targetfile;
@@ -1001,7 +1001,7 @@ sub install_default {
            $INST_SCRIPT => $Config{installscript},
            $INST_MAN1DIR => $Config{installman1dir},
            $INST_MAN3DIR => $Config{installman3dir},
-	   @INST_HTML,
+       @INST_HTML,
           },1,0,0);
 }
 
@@ -1066,17 +1066,17 @@ sub inc_uninstall {
     $ignore||="";
     my $file = (File::Spec->splitpath($filepath))[2];
     my %seen_dir = ();
-    
+
     my @PERL_ENV_LIB = split $Config{path_sep}, defined $ENV{'PERL5LIB'}
       ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
-        
-    my @dirs=( @PERL_ENV_LIB, 
-               @INC, 
+
+    my @dirs=( @PERL_ENV_LIB,
+               @INC,
                @Config{qw(archlibexp
                           privlibexp
                           sitearchexp
-                          sitelibexp)});        
-    
+                          sitelibexp)});
+
     #warn join "\n","---",@dirs,"---";
     my $seen_ours;
     foreach $dir ( @dirs ) {
@@ -1116,7 +1116,7 @@ sub inc_uninstall {
         } else {
             print "Unlinking $targetfile (shadowing?)\n" if $verbose;
             eval {
-                die "Fake die for testing" 
+                die "Fake die for testing"
                     if $ExtUtils::Install::Testing and
                        ucase(File::Spec->canonpath($ExtUtils::Install::Testing)) eq ucase($targetfile);
                 forceunlink($targetfile,'tryhard');
@@ -1124,7 +1124,7 @@ sub inc_uninstall {
                 1;
             } or do {
                 $results->{fail_uninstall}{$targetfile} = $filepath;
-                if ($seen_ours) { 
+                if ($seen_ours) {
                     warn "Failed to remove probably harmless shadow file '$targetfile'\n";
                 } else {
                     die "$@\n";
@@ -1329,7 +1329,7 @@ always overwrite older identical files during the install process.
 
 Note that the alias EU_ALWAYS_COPY will be supported if EU_INSTALL_ALWAYS_COPY
 is not defined until at least the 1.50 release. Please ensure you use the
-correct EU_INSTALL_ALWAYS_COPY. 
+correct EU_INSTALL_ALWAYS_COPY.
 
 =back
 
