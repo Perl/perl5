@@ -2219,9 +2219,7 @@ lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/arch_check.t	Test MakeMaker's arch_check()
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
-lib/ExtUtils/t/basic_finish.pl	See if MakeMaker can build a module (part 2)
-lib/ExtUtils/t/basic.pl		See if MakeMaker can build a module (part 1)
-lib/ExtUtils/t/basic.t		See if MakeMaker can build a module (wrapper for basic.pl and basic_finish.pl)
+lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
@@ -2241,6 +2239,7 @@ lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/installed_file.t Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
+lib/ExtUtils/t/InstallWithMM.t	See if ExtUtils::Install works (related to EUMM/t/basic.t)
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
