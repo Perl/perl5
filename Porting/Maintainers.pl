@@ -1188,7 +1188,7 @@ package Maintainers;
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.34.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.34_02.tar.gz',
 	'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
 	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t scripts/bundle.pl}, ],
 	'CPAN'		=> 1,

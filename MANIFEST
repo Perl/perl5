@@ -2616,6 +2616,7 @@ lib/Module/Build/t/basic.t	Module::Build
 lib/Module/Build/t/bundled/Tie/CPHash.pm	Module::Build.pm
 lib/Module/Build/t/compat/exit.t	Module::Build
 lib/Module/Build/t/compat.t	Module::Build
+lib/Module/Build/t/debug.t	Module::Build tests
 lib/Module/Build/t/destinations.t	Module::Build
 lib/Module/Build/t/extend.t	Module::Build
 lib/Module/Build/t/ext.t	Module::Build

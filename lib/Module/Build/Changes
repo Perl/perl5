@@ -1,5 +1,21 @@
 Revision history for Perl extension Module::Build.
 
+0.34_02 - Sun Jul 26 22:50:40 EDT 2009
+
+ Bug-fixes:
+ - Bundled Module::Build::Version updated to bring into sync with CPAN
+   version.pm 0.77
+
+0.34_01 - Sat Jul 18 16:32:09 EDT 2009
+
+ Enhancements:
+ - Added --debug flag to trace Build action execution (RT#47933)
+   [David Golden]
+
+ Bug-fixes:
+ - Bundled Module::Build::Version version code updated to fix unsafe use 
+   of $@ (RT#47980) [John Peacock]
+
 0.34 - Tue Jul  7 16:56:47 EDT 2009
 
  No changes from 0.33_06
