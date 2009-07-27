@@ -319,7 +319,7 @@ CPAN modules) in the typemap file, the reference count of the C<AV *>
 is not properly decremented. Thus, the above XSUB would leak memory
 whenever it is being called. The same problem exists for C<HV *>.
 
-When you're returning an C<AV *> or a C<HV *>, you have make sure
+When you're returning an C<AV *> or a C<HV *>, you have to make sure
 their reference count is decremented by making the AV or HV mortal:
 
   AV *
