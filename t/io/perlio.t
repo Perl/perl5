@@ -6,9 +6,10 @@ BEGIN {
 	    print "1..0 # Skip: PerlIO not used\n";
 	    exit 0;
 	}
+	require './test.pl';
 }
 
-use Test::More tests => 39;
+plan tests => 39;
 
 use_ok('PerlIO');
 
