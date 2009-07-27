@@ -28,7 +28,7 @@ is($x, 'abc');
 
 # should not be able to read before the buffer
 eval { sysread(I, $x, 1, -4) };
-is($x, 'abc');
+like($@, qr/^Offset outside string /);
 
 # $x should be intact
 is($x, 'abc');
