@@ -1234,6 +1234,10 @@ lookup:
     delete $ref->[$x][$y][$index];
     delete @{$ref->[$x][$y]}[$index1, $index2, @moreindices];
 
+The C<delete local EXPR> construct can also be used to localize the deletion
+of array/hash elements to the current block.
+See L<perlsub/"Localized deletion of elements of composite types">.
+
 =item die LIST
 X<die> X<throw> X<exception> X<raise> X<$@> X<abort>
 
@@ -2735,6 +2739,10 @@ A local modifies the listed variables to be local to the enclosing
 block, file, or eval.  If more than one value is listed, the list must
 be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
+
+The C<delete local EXPR> construct can also be used to localize the deletion
+of array/hash elements to the current block.
+See L<perlsub/"Localized deletion of elements of composite types">.
 
 =item localtime EXPR
 X<localtime> X<ctime>
