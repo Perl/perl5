@@ -71,6 +71,7 @@ if (!-e "$path/$gz_file") {
         close $fh;
     }
     system("tar -f $tar_file --transform='s,^$$,$prefix,g' --owner=root --group=root --mode=664 --append $$.patch");
+    unlink "$$.patch";
     system("gzip -S .gz -9 $tar_file");
     rename "$tar_file.gz", "$gz_file";
 }
