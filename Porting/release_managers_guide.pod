@@ -36,7 +36,7 @@ The outline of a typical release cycle is as follows:
 	including bumping the version to 5.10.2
 
     ...a few weeks passes...
-    
+
     perl-5.10.2-RC1 is released
 
     perl-5.10.2 is released
@@ -65,20 +65,36 @@ state of VMS. If it's bad, think again.
 
 =item *
 
+Configure and build perl so that you have a Makefile and porting tools:
+
+    $ ./Configure -Dusedevel -des
+    $ make
+
+=item *
+
 Rebuild META.yml:
 
     $ rm META.yml
     $ make META.yml
 
-and commit it if it's changed.
+Commit META.yml if it has changed:
+
+    $ git commit -m 'Updating META.yml in preparation for release of 5.x.y' META.yml
 
 =item *
 
 Check that the manifest is sorted and correct:
 
+    $ make manisort
     $ make distclean 
-    $ perl Porting/manisort
     $ perl Porting/manicheck
+
+
+Commit MANIFEST if it has changed:
+
+    $ git commit -m 'Updating MANIFEST in preparation for release of 5.x.y' MANIFEST
+
+
 
 =item *
 
@@ -94,12 +110,16 @@ append your name to C<THE KEEPERS OF THE PUMPKIN>.
 
 Build perl, then make sure it passes its own test suite, and installs.
 
+    $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.x.y-pretest
+    $ make test install
+
 =item *
 
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
     $ cd root/of/perl/tree
+    $ make distclean
     $ git clean -xdf		#  make sure perl and git agree on files
 
     $ perl Porting/makerel -b -s `git describe` # for a snapshot
@@ -121,12 +141,15 @@ have access to.
 
 =item *
 
-Download the tarball to some other machine (for a release candidate, to
-two or more servers: IRC is good for this).
+Download the tarball to some other machine. For a release candidate, 
+you really want to test your tarball on two or more different platforms
+and architectures. The #p5p IRC channel on irc.perl.org is a good place
+to find willing victims.
 
 =item *
 
-Check that C<./Configure -des && make all test> works in one place.
+Check that C<./Configure -des && make all test> works on each test
+machine.
 
 =item *
 
@@ -136,7 +159,9 @@ Check that C<./Configure ... && make all test_harness install> works.
 
 Check that the output of C<perl -v> and C<perl -V> are as expected,
 especially as regards version numbers, patch and/or RC levels, and @INC
-paths. Note that the results may be different without a F<.git/> directory,
+paths. 
+
+Note that the results may be different without a F<.git/> directory,
 which is why you should test from the tarball.
 
 =item *
@@ -145,15 +170,13 @@ Bootstrap the CPAN client on the clean install.
 
 =item *
 
-Install CPANPLUS.
-XXX pick something new; this is now bundled
+Install Inline.pm 
 
-=begin suggestion
+  perl -MCPAN -e'install Inline'
 
-How about Inline. Install it, and then check that your perl can run this:
+Check that your perl can run this:
+
   perl -lwe 'use Inline C => "int answer() { return 42;} "; print answer'
-
-=end
 
 =item *
 
