@@ -4,6 +4,7 @@ BEGIN {
     $| = 1;
     chdir 't' if -d 't';
     @INC = '../lib';
+    $ENV{PATH} = '/bin' if ${^TAINT};
     $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
     require './test.pl';
 }
@@ -186,6 +187,7 @@ like ($@, qr/^Modification of a read-only value attempted/);
        # Cygwin turns the symlink into the real file
        chomp($wd = `pwd`);
        $wd =~ s#/t$##;
+       $wd =~ /(.*)/; $wd = $1; # untaint
        if ($Is_Cygwin) {
 	   $wd = Cygwin::win_to_posix_path(Cygwin::posix_to_win_path($wd, 1));
        }
@@ -244,7 +246,7 @@ EOX
 EOH
     }
     $s1 = "\$^X is $perl, \$0 is $script\n";
-    ok open(SCRIPT, ">$script") or diag $!;
+    ok open(SCRIPT, ">$script") or diag "Can't write to $script: $!";
     ok print(SCRIPT $headmaybe . <<EOB . $middlemaybe . <<'EOF' . $tailmaybe) or diag $!;
 #!$wd/perl
 EOB
@@ -412,9 +414,10 @@ eval { is $^S,1 };
 eval " BEGIN { ok ! defined \$^S } ";
 is $^S, 0;
 
-is ${^TAINT}, 0;
+my $taint = ${^TAINT};
+is ${^TAINT}, $taint;
 eval { ${^TAINT} = 1 };
-is ${^TAINT}, 0;
+is ${^TAINT}, $taint;
 
 # 5.6.1 had a bug: @+ and @- were not properly interpolated
 # into double-quoted strings
