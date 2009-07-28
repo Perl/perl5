@@ -64,8 +64,15 @@ print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
 @$missentry
     = grep {$_ !~ m!^\.git/! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
-warn "Can't make a release with MANIFEST files missing.\n" if @$missfile;
-warn "Can't make a release with files not listed in MANIFEST.\n" if @$missentry;
+if (@$missfile ) {
+    warn "Can't make a release with MANIFEST files missing:\n";
+    warn "\t".$_."\n" for (@$missfile);
+}
+if (@$missentry ) {
+    warn "Can't make a release with files not listed in MANIFEST\n";
+    warn "\t".$_."\n" for (@$missentry);
+
+}
 if ("@$missentry" =~ m/\.orig\b/) {
     # Handy listing of find command and .orig files from patching work.
     # I tend to run 'xargs rm' and copy and paste the file list.
@@ -200,4 +207,11 @@ if ($opts{b}) {
 }
 
 print "\n";
-system("ls -ld $perl*");
+
+if (`which sha1`) {
+    system("sha1 $perl*.tar.*");
+} elsif (`which shasum`) {
+    system("shasum $perl*.tar.*");
+} else {
+    system("ls -ld $perl*");
+}
