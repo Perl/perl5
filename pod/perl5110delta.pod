@@ -114,6 +114,18 @@ to avoid relying on the object's underlying structure). (However, if the
 object overloads the stringification or the numification operators, and
 if overload fallback is active, it will be used instead, as usual.)
 
+=head2 Labels can't be keywords
+
+Labels used as targets for the C<goto>, C<last>, C<next> or C<redo>
+statements cannot be keywords anymore. This restriction will prevent
+potential confusion between the C<goto LABEL> and C<goto EXPR> syntaxes:
+for example, a statement like C<goto print> would jump to a label whose
+name would be the return value of print(), (usually 1), instead of a
+label named C<print>. Moreover, the other control flow statements
+would just ignore any keyword passed to them as a label name. Since
+such labels cannot be defined anymore, this kind of error will be
+avoided.
+
 =head1 Core Enhancements
 
 =head2 The C<overloading> pragma

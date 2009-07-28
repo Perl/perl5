@@ -5275,6 +5275,9 @@ Perl_yylex(pTHX)
 	while (d < PL_bufend && isSPACE(*d))
 		d++;	/* no comments skipped here, or s### is misparsed */
 
+	/* Check for keywords */
+	tmp = keyword(PL_tokenbuf, len, 0);
+
 	/* Is this a label? */
 	if (!tmp && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
@@ -5283,9 +5286,6 @@ Perl_yylex(pTHX)
 	    CLINE;
 	    TOKEN(LABEL);
 	}
-
-	/* Check for keywords */
-	tmp = keyword(PL_tokenbuf, len, 0);
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {

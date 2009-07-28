@@ -804,15 +804,6 @@ also the warning messages (see L<perllexwarn>, C<warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
-=head2 forbid labels with keyword names
-
-Currently C<goto keyword> "computes" the label value:
-
-    $ perl -e 'goto print'
-    Can't find label 1 at -e line 1.
-
-It would be nice to forbid labels with keyword names, to avoid confusion.
-
 =head2 truncate() prototype
 
 The prototype of truncate() is currently C<$$>. It should probably
