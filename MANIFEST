@@ -3779,6 +3779,8 @@ Porting/Maintainers.pl	Information about maintainers
 Porting/Maintainers.pm	Library to pretty print info in Maintainers.pl
 Porting/makemeta	Create the top-level META.yml
 Porting/makerel		Release making utility
+Porting/make_dot_patch.pl	Make a .patch file from a git WD
+Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck	Check against MANIFEST
 Porting/podtidy		Reformat pod using Pod::Tidy
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
