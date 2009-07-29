@@ -53,7 +53,7 @@ sub gen_dot_patch {
         s![~^].*\z!!;               # strip off how far we are from the item
     }
     my $tstamp= iso_time_with_dot(`git log -1 --pretty="format:%ct" $sha1`);
-    chomp(my $describe= `git describe`);
+    chomp(my $describe= `git describe $sha1`);
     join(" ", $branch, $tstamp, $sha1, $describe);
 }
 
