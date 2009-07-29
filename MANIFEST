@@ -1780,7 +1780,7 @@ lib/autodie/t/autodie_test_module.pm	autodie - test helper
 lib/autodie/t/backcompat.t		autodie - More Fatal backcompat
 lib/autodie/t/basic_exceptions.t	autodie - Basic exception tests
 lib/autodie/t/binmode.t			autodie - Binmode testing
-lib/autodie/t/blog_hints.t              autodie - Tests fro PJF's blog
+lib/autodie/t/blog_hints.t		autodie - Tests fro PJF's blog
 lib/autodie/t/caller.t			autodie - Caller diagnostics
 lib/autodie/t/context_lexical.t		autodie - Context clobbering lexically
 lib/autodie/t/context.t			autodie - Context clobbering tests
@@ -1814,18 +1814,18 @@ lib/autodie/t/lib/Hints_provider_easy_does_it.pm	autodie - Hints/easy helper
 lib/autodie/t/lib/Hints_provider_isa.pm	autodie - Hints/inherit helper
 lib/autodie/t/lib/Hints_test.pm		autodie - Hints test helper
 lib/autodie/t/lib/lethal.pm		autodie - with a better name
-lib/autodie/t/lib/my/autodie.pm         autodie - blog_hints.t helper
+lib/autodie/t/lib/my/autodie.pm		autodie - blog_hints.t helper
 lib/autodie/t/lib/OtherTypes.pm		autodie - Format clobberer helper.
 lib/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 lib/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
-lib/autodie/t/lib/Some/Module.pm        autodie - blog_hints.t helper
+lib/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
 lib/autodie/t/mkdir.t			autodie - filesystem tests
 lib/autodie/t/open.t			autodie - Testing open
 lib/autodie/t/recv.t			autodie - send/recv tests
 lib/autodie/t/repeat.t			autodie - repeat autodie leak tests
 lib/autodie/t/scope_leak.t		autodie - file scope leak tests
-lib/autodie/t/string-eval-basic.t       autodie - Basic string eval test
-lib/autodie/t/string-eval-leak.t        autodie - String eval leak test
+lib/autodie/t/string-eval-basic.t	autodie - Basic string eval test
+lib/autodie/t/string-eval-leak.t	autodie - String eval leak test
 lib/autodie/t/sysopen.t			autodie - sysopen tests
 lib/autodie/t/truncate.t		autodie - File truncation tests
 lib/autodie/t/unlink.t			autodie - Unlink system tests.
@@ -2236,7 +2236,7 @@ lib/ExtUtils/t/fix_libs.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/hints.t		See if hint files are honored.
 lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
-lib/ExtUtils/t/installed_file.t Test for ExtUtils::MakeMaker
+lib/ExtUtils/t/installed_file.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
 lib/ExtUtils/t/InstallWithMM.t	See if ExtUtils::Install works (related to EUMM/t/basic.t)
@@ -2244,7 +2244,7 @@ lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
-lib/ExtUtils/t/MakeMaker_Parameters.t  test "MakeMaker Parameters" section
+lib/ExtUtils/t/MakeMaker_Parameters.t	test "MakeMaker Parameters" section
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
@@ -2278,7 +2278,7 @@ lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
 lib/ExtUtils/t/recurs.t		See if recursive builds work
 lib/ExtUtils/t/revision.t	See if $Revision is correct
 lib/ExtUtils/t/split_command.t	See if MM's xargs-like function works
-lib/ExtUtils/t/test_boilerplate.t MakeMaker test
+lib/ExtUtils/t/test_boilerplate.t	MakeMaker test
 lib/ExtUtils/t/testdata/reallylongdirectoryname/arch1/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testdata/reallylongdirectoryname/arch2/Config.pm		test data for MakeMaker
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
