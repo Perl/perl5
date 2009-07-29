@@ -3777,9 +3777,9 @@ Porting/how_to_write_a_perldelta.pod	Bluffer's guide to writing a perldelta.
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
 Porting/Maintainers.pl	Information about maintainers
 Porting/Maintainers.pm	Library to pretty print info in Maintainers.pl
+Porting/make_dot_patch.pl	Make a .patch file from a git WD
 Porting/makemeta	Create the top-level META.yml
 Porting/makerel		Release making utility
-Porting/make_dot_patch.pl	Make a .patch file from a git WD
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck	Check against MANIFEST
 Porting/mergelog	log of merges from bleed to maint
