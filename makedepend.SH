@@ -214,7 +214,7 @@ if $test -s .deptmp; then
     $echo "# If this runs make out of memory, delete /usr/include lines." \
 	>> $mf.new
     if [ "$osname" = vos ]; then
-        $sed 's|.incl.c|.h|' .deptmp >.deptmp.vos
+        $sed 's|\.incl\.c|.h|' .deptmp >.deptmp.vos
         mv -f .deptmp.vos .deptmp
     fi
     $sed 's|^\(.*\$(OBJ_EXT):\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
