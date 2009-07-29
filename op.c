@@ -6463,6 +6463,8 @@ Perl_ck_delete(pTHX_ OP *o)
 	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
 		  OP_DESC(o));
 	}
+	if (kid->op_private & OPpLVAL_INTRO)
+	    o->op_private |= OPpLVAL_INTRO;
 	op_null(kid);
     }
     return o;

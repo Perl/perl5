@@ -771,13 +771,14 @@
 #define savesvpv		Perl_savesvpv
 #define savestack_grow		Perl_savestack_grow
 #define savestack_grow_cnt	Perl_savestack_grow_cnt
-#define save_aelem		Perl_save_aelem
+#define save_aelem_flags	Perl_save_aelem_flags
 #define save_alloc		Perl_save_alloc
 #define save_aptr		Perl_save_aptr
 #define save_ary		Perl_save_ary
 #define save_bool		Perl_save_bool
 #define save_clearsv		Perl_save_clearsv
 #define save_delete		Perl_save_delete
+#define save_hdelete		Perl_save_hdelete
 #define save_adelete		Perl_save_adelete
 #define save_destructor		Perl_save_destructor
 #define save_destructor_x	Perl_save_destructor_x
@@ -1312,6 +1313,7 @@
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define do_delete_local		S_do_delete_local
 #define refto			S_refto
 #endif
 #endif
@@ -3106,13 +3108,14 @@
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
 #define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)
-#define save_aelem(a,b,c)	Perl_save_aelem(aTHX_ a,b,c)
+#define save_aelem_flags(a,b,c,d)	Perl_save_aelem_flags(aTHX_ a,b,c,d)
 #define save_alloc(a,b)		Perl_save_alloc(aTHX_ a,b)
 #define save_aptr(a)		Perl_save_aptr(aTHX_ a)
 #define save_ary(a)		Perl_save_ary(aTHX_ a)
 #define save_bool(a)		Perl_save_bool(aTHX_ a)
 #define save_clearsv(a)		Perl_save_clearsv(aTHX_ a)
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
+#define save_hdelete(a,b)	Perl_save_hdelete(aTHX_ a,b)
 #define save_adelete(a,b)	Perl_save_adelete(aTHX_ a,b)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)
 #define save_destructor_x(a,b)	Perl_save_destructor_x(aTHX_ a,b)
@@ -3654,6 +3657,7 @@
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define do_delete_local()	S_do_delete_local(aTHX)
 #define refto(a)		S_refto(aTHX_ a)
 #endif
 #endif

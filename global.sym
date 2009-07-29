@@ -433,13 +433,14 @@ Perl_savesharedpvn
 Perl_savesvpv
 Perl_savestack_grow
 Perl_savestack_grow_cnt
-Perl_save_aelem
+Perl_save_aelem_flags
 Perl_save_alloc
 Perl_save_aptr
 Perl_save_ary
 Perl_save_bool
 Perl_save_clearsv
 Perl_save_delete
+Perl_save_hdelete
 Perl_save_adelete
 Perl_save_destructor
 Perl_save_destructor_x

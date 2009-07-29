@@ -57,7 +57,9 @@
 #define SAVEt_ADELETE		46
 
 #define SAVEf_SETMAGIC		1
+#define SAVEf_KEEPOLDELEM	2
 
+#define save_aelem(av,idx,sptr)	save_aelem_flags(av,idx,sptr,SAVEf_SETMAGIC)
 #define save_helem(hv,key,sptr)	save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
@@ -143,6 +145,8 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
 #define SAVEDELETE(h,k,l) \
 	  save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
+#define SAVEHDELETE(h,s) \
+	  save_hdelete(MUTABLE_HV(h), (s))
 #define SAVEADELETE(a,k) \
 	  save_adelete(MUTABLE_AV(a), (I32)(k))
 #define SAVEDESTRUCTOR(f,p) \

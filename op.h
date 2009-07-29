@@ -244,6 +244,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_DELETE */
 #define OPpSLICE		64	/* Operating on a list of keys */
+/* Also OPpLVAL_INTRO (128) */
 
 /* Private for OP_EXISTS */
 #define OPpEXISTS_SUB		64	/* Checking for &sub, not {} or [].  */
