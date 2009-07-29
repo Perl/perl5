@@ -183,10 +183,14 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     Changes
     MANIFEST
     Porting/how_to_write_a_perldelta.pod
+    Porting/release_managers_guide.pod
     Porting/bump-perl-version
     Porting/mergelog
     Porting/mergelog-tool
     pod.lst
+    pp_ctl.c
+    README.haiku
+    README.vms
 );
 my @SKIP_DIRS = qw(
     ext
