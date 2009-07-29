@@ -23,24 +23,29 @@ use warnings;
 use POSIX qw(strftime);
 sub isotime { strftime "%Y-%m-%d.%H:%M:%S",gmtime(shift||time) }
 
-my $sha1= shift || `git rev-parse HEAD`;
-chomp($sha1);
+my $target= shift || 'HEAD';
+chomp(my ($git_dir, $is_bare, $sha1)=`git rev-parse --git-dir --is-bare-repository $target`);
+die "Not in a git repository!" if !$git_dir;
+$is_bare= "" if $is_bare and $is_bare eq 'false';
 my @branches=(
-          'origin/blead',
-          'origin/maint-5.10',
-          'origin/maint-5.8',
-          'origin/maint-5.8-dor',
-          'origin/maint-5.6',
-          'origin/maint-5.005',
-          'origin/maint-5.004',
+          'blead',
+          'maint-5.10',
+          'maint-5.8',
+          'maint-5.8-dor',
+          'maint-5.6',
+          'maint-5.005',
+          'maint-5.004',
 );
+my $reftype= $is_bare ? "heads" : "remotes/origin";
 my $branch;
-foreach my $b (@branches) {
-    $branch= $b and last 
-        if `git log --pretty='format:%H' $b | grep $sha1`;
+foreach my $name (@branches) {
+    my $cmd= "git name-rev --name-only --refs=refs/$reftype/$name $sha1";
+    chomp($branch= `$cmd`);
+    last if $branch ne 'undefined';
 }
-
-$branch ||= "unknown-branch";
+$branch ||= "error";
+$branch =~ s!^\Q$reftype\E/!!;
+$branch =~ s![~^].*\z!!;
 my $tstamp= isotime(`git log -1 --pretty="format:%ct" $sha1`);
 chomp(my $describe= `git describe`);
 print join(" ", $branch, $tstamp, $sha1, $describe) . "\n";
