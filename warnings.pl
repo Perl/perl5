@@ -13,7 +13,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.02_02';
+$VERSION = '1.02_03';
 
 BEGIN {
     require 'regen_lib.pl';
@@ -449,7 +449,7 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
