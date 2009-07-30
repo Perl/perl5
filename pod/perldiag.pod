@@ -1147,6 +1147,11 @@ that is already inside a group with a byte-order modifier.
 For example you cannot force little-endianness on a type that
 is inside a big-endian group.
 
+=item Can't use keyword '%s' as a label
+
+(F) You attempted to use a reserved keyword, such as C<print> or C<BEGIN>,
+as a statement label. This is disallowed since Perl 5.11.0.
+
 =item Can't use "my %s" in sort comparison
 
 (F) The global variables $a and $b are reserved for sort comparisons.
