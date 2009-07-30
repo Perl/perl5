@@ -220,13 +220,19 @@ sub files_to_modules {
 	if (@ToDo) {
 	    # Try prefix matching.
 
+	    # Need to try longst prefixes first, else lib/CPAN may match
+	    # lib/CPANPLUS/... and similar
+
+	    my @OrderedModuleByPat
+		= sort {length $b <=> length $a} keys %ModuleByPat;
+
 	    # Remove trailing slashes.
 	    for (@ToDo) { s|/$|| }
 
 	    my %ToDo;
 	    @ToDo{@ToDo} = ();
 
-	    for my $pat (keys %ModuleByPat) {
+	    for my $pat (@OrderedModuleByPat) {
 		last unless keys %ToDo;
 		if (-d $pat) {
 		    my @Done;
