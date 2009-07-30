@@ -291,10 +291,10 @@ Check that files managed by F<regen.pl> and friends are up to date. From
 within your working directory:
 
 
-    $ git st
+    $ git status
     $ make regen
     $ make regen_perly
-    $ git st
+    $ git status
 
 If any of the files managed by regen.pl have changed, then you should commit
 the updated versions:
