@@ -1123,8 +1123,8 @@ regen_all: regen
 .PHONY:	manisort manicheck
 
 manisort:	FORCE
-	LC_ALL=C sort -fdc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
-		LC_ALL=C sort -fdo MANIFEST MANIFEST)
+	@perl Porting/manisort -q || (echo "WARNING: re-sorting MANIFEST"; \
+		perl Porting/manisort -q -o MANIFEST; sh -c true)
 
 manicheck:	FORCE
 	perl Porting/manicheck
