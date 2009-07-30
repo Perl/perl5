@@ -3782,6 +3782,7 @@ Porting/makemeta	Create the top-level META.yml
 Porting/makerel		Release making utility
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck	Check against MANIFEST
+Porting/manisort	Sort the MANIFEST
 Porting/mergelog	log of merges from bleed to maint
 Porting/mergelog-tool	tool to process mergelog
 Porting/podtidy		Reformat pod using Pod::Tidy

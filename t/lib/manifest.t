@@ -17,30 +17,13 @@ my $manifest = File::Spec->catfile(File::Spec->updir(), 'MANIFEST');
 
 open my $m, '<', $manifest or die "Can't open '$manifest': $!";
 
-my $last_seen = '';
-my $sorted = 1;
-
 # Test that MANIFEST uses tabs - not spaces - after the name of the file.
 while (<$m>) {
     chomp;
-
-    my ($file, $separator) = /^(\S+)(\s*)/;
+    next unless /\s/;   # Ignore lines without whitespace (i.e., filename only)
+    my ($file, $separator) = /^(\S+)(\s+)/;
     isnt($file, undef, "Line $. doesn't start with a blank") or next;
-
-    # Manifest order is "dictionary order, lowercase" for ASCII:
-    my $normalised = $_;
-    $normalised =~ tr/A-Z/a-z/;
-    $normalised =~ s/[^a-z0-9\s]//g;
-
-    if ($normalised le $last_seen) {
-	fail("Sort order broken by $file");
-	undef $sorted;
-    }
-    $last_seen = $normalised;
-
-    if (!$separator) {
-	# Ignore lines without whitespace (i.e., filename only)
-    } elsif ($separator !~ tr/\t//c) {
+    if ($separator !~ tr/\t//c) {
 	# It's all tabs
 	next;
     } elsif ($separator !~ tr/ //c) {
@@ -55,6 +38,15 @@ while (<$m>) {
 
 close $m or die $!;
 
-ok($sorted, 'MANIFEST properly sorted');
+# Test that MANIFEST is properly sorted
+SKIP: {
+    skip("'Porting/manisort' not found", 1) if (! -f '../Porting/manisort');
+
+    my $result = runperl('progfile' => '../Porting/manisort',
+                         'args'     => [ '-c', '../MANIFEST' ],
+                         'stderr'   => 1);
+
+    like($result, qr/is sorted properly/, 'MANIFEST sorted properly');
+}
 
 # EOF
