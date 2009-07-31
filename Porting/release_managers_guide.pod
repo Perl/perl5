@@ -89,15 +89,16 @@ resolve the issue.
 
 A snapshot is intended to encourage in-depth testing from time-to-time,
 for example after a key point in the stabilisation of a branch. It
-requires less steps than a full release, and the version number of perl in
-the tarball will usually still be the old one.
+requires fewer steps than a full release, and the version number of perl in
+the tarball will usually be the same as that of the previous release.
 
 =over 4
 
 =item *
 
 As there are no regular smokes [ XXX yet - please fix?] find out about the
-state of VMS. If it's bad, think again.
+state of the current branch on VMS. If the branch you're releasing on
+is failing tests on VMS, you may not want to do a release.
 
 =item *
 
@@ -144,7 +145,7 @@ append your name to C<THE KEEPERS OF THE PUMPKIN>.
 
 =item *
 
-Build perl, then make sure it passes its own test suite, and installs.
+Build perl, then make sure it passes its own test suite, and installs:
 
     $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.x.y-pretest
     $ make test install
@@ -184,12 +185,15 @@ to find willing victims.
 
 =item *
 
-Check that C<./Configure -des && make all test> works on each test
-machine.
+Check that basic configuration and tests work on each test machine:
+
+    $ ./Configure -des && make all test
 
 =item *
 
-Check that C<./Configure ... && make all test_harness install> works.
+Check that the test harness and install work on each test machine:
+
+    $ ./Configure -des -Dprefix=/install/path && make all test_harness install
 
 =item *
 
@@ -202,21 +206,26 @@ which is why you should test from the tarball.
 
 =item *
 
-Bootstrap the CPAN client on the clean install.
+Bootstrap the CPAN client on the clean install:
+
+    $ ./bin/perl -MCPAN -e'shell' 
 
 =item *
 
 Install Inline.pm 
 
-  perl -MCPAN -e'install Inline'
+    $ ./bin/perl -MCPAN -e'install Inline'
 
 Check that your perl can run this:
 
-  perl -lwe 'use Inline C => "int answer() { return 42;} "; print answer'
+    $ ./bin/perl -lwe 'use Inline C => "int answer() { return 42;} "; print answer'
 
 =item *
 
-Bootstrap the CPANPLUS client.
+Bootstrap the CPANPLUS client on the clean install:
+
+    $ ./bin/cpanp
+
 
 =item *
 
@@ -242,15 +251,15 @@ anyway, but they definitely need doing now):
 Check F<Maintainers.pl> for consistency; both these commands should
 produce no output:
 
-    perl Porting/Maintainers --checkmani
-    perl Porting/Maintainers --checkmani lib/ ext/
+    $ perl Porting/Maintainers --checkmani
+    $ perl Porting/Maintainers --checkmani lib/ ext/
 
 =item *
 
 Ensure that dual-life CPAN modules are synchronised with CPAN.  Basically,
 run the following:
 
-    ./perl -Ilib Porting/core-cpan-diff -a -o /tmp/corediffs
+    $ ./perl -Ilib Porting/core-cpan-diff -a -o /tmp/corediffs
 
 to see any inconsistencies between the core and CPAN versions of distros,
 then fix the core, or cajole CPAN authors as appropriate. See also the
@@ -259,7 +268,7 @@ C<-c cachedir> option to avoid repeated CPAN downloads.
 
 To see which core distro versions differ from the current CPAN versions:
 
-    ./perl -Ilib Porting/core-cpan-diff -x -a
+    $ ./perl -Ilib Porting/core-cpan-diff -x -a
 
 if you are making a maint release, run C<core-cpan-diff> on both blead and
 maint, then diff the two outputs. Compare this with what you expect, and if
@@ -341,6 +350,7 @@ the updated versions:
 =item *
 
 Get perldelta in a mostly finished state.
+
 Peruse  F<Porting/how_to_write_a_perldelta.pod>, and try to make sure that
 every section it lists is, if necessary, populated and complete. Copy
 edit the whole document.
@@ -520,18 +530,21 @@ back and fix things.
 =item *
 
 Once smoking is okay, upload it to PAUSE. This is the point of no return.
+If anything goes wrong after this point, you will need to re-prepare
+a new release with a new minor version or RC number.
+
 You may wish to create a .bz2 version of the tarball and upload that too.
 
 =item *
 
-create a tag [XXX and branches and stuff ????], e.g.:
+Create a tag for the exact git revsion you built the release from:
 
     $ git tag perl-5.10.1-RC1 -m'Release Candidate 1 of Perl 5.10.1'
     $ git push origin tag perl-5.10.1-RC1
 
 =item *
 
-Mail p5p to announce it, with a quote you prepared earlier.
+Mail p5p to announce your new release, with a quote you prepared earlier.
 
 =item *
 
