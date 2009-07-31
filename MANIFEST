@@ -3773,6 +3773,7 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/git-find-p4-change	Find the change for a p4 change number
 Porting/git-make-p4-refs	Output git refs for each p4 change number, suitable for appending to .git/packed-refs
+Porting/GitUtils.pm	Generate the contents of a .patch file
 Porting/Glossary	Glossary of config.sh variables
 Porting/how_to_write_a_perldelta.pod	Bluffer's guide to writing a perldelta.
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
