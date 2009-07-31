@@ -673,6 +673,7 @@ package Maintainers;
                              lib/ExtUtils/Changes_EU-Install
 			     lib/ExtUtils/t/Installed.t
 			     lib/ExtUtils/t/basic.pl
+			     lib/ExtUtils/t/InstallWithMM.t
 			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
 	'EXCLUDED'	=> [ qw{ t/basic.t
 				 t/lib/MakeMaker/Test/Setup/BFD.pm
