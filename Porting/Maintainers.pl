@@ -1957,7 +1957,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jpeacock',
 	'DISTRIBUTION'	=> 'JPEACOCK/version-0.77.tar.gz',
-	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t],
+	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t
+			     lib/version],
 	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qr{^vutil/},
 			     qw{lib/version/typemap},
 			     qw{vperl/vpp.pm},
