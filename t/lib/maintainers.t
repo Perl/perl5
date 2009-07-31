@@ -1,0 +1,30 @@
+#!./perl -w
+
+# Test that there are no missing Maintainers in Maintainers.PL 
+
+
+BEGIN {
+        chdir 't' if -d 't';
+        @INC = qw(../lib ../Porting);
+}
+
+use strict;
+use warnings;
+use Maintainers qw(show_results process_options finish_tap_output);
+
+chdir(".."); # The existing porting tools all expect to be run from the root
+# XXX that should be fixed
+
+{
+    local @ARGV = qw|--tap-output --checkmani|;
+    show_results(process_options());
+}
+
+{
+    local @ARGV = qw|--tap-output --checkmani lib/ ext/|;
+    show_results(process_options());
+}
+
+finish_tap_output();
+
+# EOF
