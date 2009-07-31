@@ -527,7 +527,8 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 =for apidoc av_push
 
 Pushes an SV onto the end of the array.  The array will grow automatically
-to accommodate the addition.
+to accommodate the addition. Like C<av_store>, this takes ownership of one
+reference count.
 
 =cut
 */
