@@ -49,6 +49,42 @@ The outline of a typical release cycle is as follows:
 =head1 DETAILS
 
 
+=head2 Prerequisites
+
+Before you can make an official release of perl, there are a few
+hoops you need to jump through:
+
+=over 4
+
+=item *
+
+Make sure you have a PAUSE account suitable for uploading a perl release.
+If you don't have a PAUSE account, then request one:
+
+    https://pause.perl.org/pause/query?ACTION=request_id
+
+Check that your account is allowed to upload perl distros: goto
+https://pause.perl.org/, login, then select 'upload file to CPAN'; there
+should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
+König to add your ID to the list of people allowed to upload something
+called perl.  You can find Andreas' email address at:
+    
+    https://pause.perl.org/pause/query?ACTION=pause_04imprint
+
+=item *
+
+You will need a working C<git> installation, checkout of the perl
+git repository and perl commit bit.  For information about working
+with perl and git, see F<pod/perlrepository.pod>.
+
+If you are not yet a perl committer, you won't be able to make a
+release.  Have a chat with whichever evil perl porter tried to talk
+you into the idea in the first place to figure out the best way to
+resolve the issue.
+
+=back
+
+
 =head2 Building a snapshot
 
 A snapshot is intended to encourage in-depth testing from time-to-time,
@@ -376,18 +412,6 @@ Check some more build configurations, e.g.
 Check that setuid installs works (for < 5.11.0 only).
 XXX any other configs?
 
-=item *
-
-Make sure you have a PAUSE account suitable for uploading a perl release.
-If you don't have a PAUSE account, then request one:
-
-    https://pause.perl.org/pause/query?ACTION=request_id
-
-Check that your account is allowed to upload perl distros: goto
-https://pause.perl.org/, login, then select 'upload file to CPAN'; there
-should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
-to add your ID to the list of people allowed to upload something called
-perl.
 
 =item *
 
