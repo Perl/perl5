@@ -3398,6 +3398,7 @@ lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars_carp.t			See if "use vars" doesn't load Carp.pm per default
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" works
+lib/version/Internals.pod	Description of the internals of version objects
 lib/version.pm			Support for version objects
 lib/version.pod			Documentation of the version module
 lib/version.t			Tests for version objects
