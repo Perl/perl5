@@ -1,3 +1,7 @@
+/* A helper tool for perl's 2038 support.
+ *	See Porting/README.y2038 for details
+ */
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>

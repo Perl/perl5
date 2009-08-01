@@ -1,4 +1,6 @@
-/* A little program to test the limits of your system's time functions */
+/* A little program to test the limits of your system's time functions
+ * See Porting/README.y2038 for details
+ */
 
 #include <time.h>
 #include <stdio.h>
