@@ -626,24 +626,14 @@ Rafael to update http://dev.perl.org/perl5/
 
 I<You MUST SKIP this step for SNAPSHOT, RC>
 
-
 Create a new empty perlNNNdelta.pod file for the current release + 1;
 see F<Porting/how_to_write_a_perldelta.pod>.
 [ XXX Perhaps we should have an empty template file we can copy in. ]
 
 In addition, edit F<pod.lst>, adding the new entry as 'D', and unmark previous
-entry as 'D', then run C<perl pod/buildtoc --build-all> to update the
-following files:
+entry as 'D',
 
-    MANIFEST
-    pod/perl.pod
-    win32/pod.mak
-    vms/descrip_mms.template
-
-(F<vms/descrip_mms.template> still needs a manual edit to bump the
-C<perldelta.pod> entry - it would be good for someone to figure out the fix.)
-
-and change perlNNNdelta references to the new version in these files
+Change perlNNNdelta references to the new version in these files
 
     INSTALL
     win32/Makefile.mk
@@ -658,6 +648,19 @@ These two lists of files probably aren't exhaustive; do a recursive grep
 on the previous filename to look for suitable candidates.
 
 (see 16410843ea for an example).
+
+=item *
+
+Run C<perl pod/buildtoc --build-all> to update the following files:
+
+    MANIFEST
+    pod/perl.pod
+    win32/pod.mak
+    vms/descrip_mms.template
+
+If you modified perldelta.pod, (F<vms/descrip_mms.template> will
+needs a manual edit to bump the C<perldelta.pod> entry - it would
+be good for someone to figure out the fix.)
 
 =item *
 
