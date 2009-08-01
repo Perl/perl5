@@ -1376,7 +1376,6 @@ utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
 	copy ..\README.cygwin .\perlcygwin.pod
 	copy ..\README.dos .\perldos.pod
 	copy ..\README.hpux .\perlhpux.pod
-#	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.win32 .\perlwin32.pod

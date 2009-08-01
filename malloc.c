@@ -264,7 +264,7 @@
 #define MIN_BUC_POW2 (sizeof(void*) > 4 ? 3 : 2) /* Allow for 4-byte arena. */
 #define MIN_BUCKET (MIN_BUC_POW2 * BUCKETS_PER_POW2)
 
-#if !(defined(I286) || defined(atarist)
+#if !(defined(I286) || defined(atarist))
 	/* take 2k unless the block is bigger than that */
 #  define LOG_OF_MIN_ARENA 11
 #else
@@ -552,7 +552,7 @@
 #define u_short unsigned short
 
 /* 286 and atarist like big chunks, which gives too much overhead. */
-#if (defined(RCHECK) || defined(I286) || defined(atarist) && defined(PACK_MALLOC)
+#if (defined(RCHECK) || defined(I286) || defined(atarist)) && defined(PACK_MALLOC)
 #  undef PACK_MALLOC
 #endif 
 
@@ -2536,7 +2536,7 @@ Perl_dump_mstats(pTHX_ const char *s)
 
 #ifdef USE_PERL_SBRK
 
-#   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
+#   if defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
 #      define PERL_SBRK_VIA_MALLOC
 #   endif
 

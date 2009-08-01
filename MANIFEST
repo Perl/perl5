@@ -1658,8 +1658,6 @@ hints/isc_2.sh			Hints for named architecture
 hints/isc.sh			Hints for named architecture
 hints/linux.sh			Hints for named architecture
 hints/lynxos.sh			Hints for named architecture
-hints/machten_2.sh		Hints for named architecture
-hints/machten.sh		Hints for named architecture
 hints/midnightbsd.sh		Hints for named architecture
 hints/mips.sh			Hints for named architecture
 hints/mirbsd.sh			Hints for named architecture
