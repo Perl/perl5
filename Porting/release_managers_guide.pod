@@ -152,16 +152,6 @@ runup to a release.
 
 I<You MAY SKIP this step for SNAPSHOT>
 
-Check F<Maintainers.pl> for consistency; both these commands should
-produce no output:
-
-    $ perl Porting/Maintainers --checkmani
-    $ perl Porting/Maintainers --checkmani lib/ ext/
-
-=item *
-
-I<You MAY SKIP this step for SNAPSHOT>
-
 Ensure that dual-life CPAN modules are synchronised with CPAN.  Basically,
 run the following:
 
