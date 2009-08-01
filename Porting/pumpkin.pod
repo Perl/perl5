@@ -1323,10 +1323,6 @@ a nice malloc that is well-tuned for the system.)
 
 =over 4
 
-=item MacPerl
-
-Get some of the Macintosh stuff folded back into the main distribution.
-
 =item gconvert replacement
 
 Maybe include a replacement function that doesn't lose data in rare
@@ -1440,5 +1436,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-27-04-2007 H.Merijn Brand
-$Id: pumpkin.pod,v 1.23 2000/01/13 19:45:13 doughera Released $
+2009-07-08-01 Jesse Vincent
