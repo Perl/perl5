@@ -3752,7 +3752,6 @@ Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkansi.pl	Check source code for ANSI-C violations
 Porting/checkARGS_ASSERT.pl	Check we use every PERL_ARGS_ASSERT* macro
 Porting/checkAUTHORS.pl	Check that the AUTHORS file is complete
-Porting/checkcase.pl	Check whether we are case-insensitive-fs-friendly
 Porting/checkcfgvar.pl	Check that config scripts define all symbols
 Porting/checkURL.pl	Check whether we have working URLs
 Porting/checkVERSION.pl	Check whether we have $VERSIONs
@@ -4385,6 +4384,7 @@ t/pod/testpods/lib/Pod/Stuff.pm		Sample data for t/pod/find.t
 t/pod/twice.t			Test Pod::Parser
 t/pod/usage2.pod		Test POD for pod2usage tests
 t/pod/usage.pod			Test POD for pod2usage tests
+t/porting/checkcase.t	Check whether we are case-insensitive-fs-friendly
 t/README			Instructions for regression tests
 t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.
