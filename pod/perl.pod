@@ -205,7 +205,6 @@ For ease of access, the Perl manual has been split up into several sections.
     perlmachten 	Perl notes for Power MachTen
     perlmacos		Perl notes for Mac OS (Classic)
     perlmacosx		Perl notes for Mac OS X
-    perlmint		Perl notes for MiNT
     perlmpeix		Perl notes for MPE/iX
     perlnetware 	Perl notes for NetWare
     perlopenbsd 	Perl notes for OpenBSD

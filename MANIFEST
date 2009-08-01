@@ -1661,7 +1661,6 @@ hints/lynxos.sh			Hints for named architecture
 hints/machten_2.sh		Hints for named architecture
 hints/machten.sh		Hints for named architecture
 hints/midnightbsd.sh		Hints for named architecture
-hints/mint.sh			Hints for named architecture
 hints/mips.sh			Hints for named architecture
 hints/mirbsd.sh			Hints for named architecture
 hints/mpc.sh			Hints for named architecture
@@ -3433,13 +3432,6 @@ mg.c				Magic code
 mg.h				Magic header
 minimod.pl			Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
-mint/errno.h			MiNT port
-mint/Makefile			MiNT port
-mint/pwd.c			MiNT port
-mint/README			MiNT port
-mint/stdio.h			MiNT port
-mint/sys/time.h			MiNT port
-mint/time.h			MiNT port
 mkppport			A script that distributes ppport.h
 mkppport.lst			List of extensions that need a ppport.h
 mpeix/mpeix.c			MPE/iX port
@@ -3832,7 +3824,6 @@ README.machten			Perl notes for Power MachTen
 README.macos			Perl notes for Mac OS (Classic)
 README.macosx			Perl notes for Mac OS X
 README.micro			Notes about microperl
-README.mint			Perl notes for MiNT
 README.mpeix			Perl notes for MPE/iX
 README.netware			Perl notes for NetWare
 README.openbsd			Perl notes for OpenBSD

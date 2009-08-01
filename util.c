@@ -3251,7 +3251,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#  if defined(atarist) || defined(__MINT__) || defined(DOSISH)
+#  if defined(atarist) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
 		&& tmpbuf[len - 1] != '\\'
 #  endif

@@ -1437,7 +1437,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.machten  ..\pod\perlmachten.pod
 	copy ..\README.macos    ..\pod\perlmacos.pod
 	copy ..\README.macosx   ..\pod\perlmacosx.pod
-	copy ..\README.mint     ..\pod\perlmint.pod
 	copy ..\README.mpeix    ..\pod\perlmpeix.pod
 	copy ..\README.netware  ..\pod\perlnetware.pod
 	copy ..\README.openbsd  ..\pod\perlopenbsd.pod
@@ -1529,7 +1528,7 @@ distclean: realclean
 	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmachten.pod perlmacos.pod perlmacosx.pod \
-	    perlmint.pod perlmodlib.pod perlmpeix.pod perlnetware.pod \
+	    perlmodlib.pod perlmpeix.pod perlnetware.pod \
 	    perlopenbsd.pod perlos2.pod perlos390.pod perlos400.pod \
 	    perlplan9.pod perlqnx.pod perlriscos.pod perlsolaris.pod \
 	    perlsymbian.pod perltoc.pod perltru64.pod perltw.pod \

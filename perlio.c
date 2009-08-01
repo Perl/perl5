@@ -135,7 +135,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
      * This used to be contents of do_binmode in doio.c
      */
 #ifdef DOSISH
-#  if defined(atarist) || defined(__MINT__)
+#  if defined(atarist)
     PERL_UNUSED_ARG(iotype);
     if (!fflush(fp)) {
         if (mode & O_BINARY)

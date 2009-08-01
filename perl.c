@@ -3271,10 +3271,6 @@ Perl_moreswitches(pTHX_ const char *s)
 	PerlIO_printf(PerlIO_stdout(),
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
-#ifdef __MINT__
-	PerlIO_printf(PerlIO_stdout(),
-		      "MiNT port by Guido Flohr, 1997-1999\n");
-#endif
 #ifdef EPOC
 	PerlIO_printf(PerlIO_stdout(),
 		      "EPOC port by Olaf Flebbe, 1999-2002\n");
