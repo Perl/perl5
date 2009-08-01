@@ -9,7 +9,7 @@ require './test.pl';
 
 plan( tests => 16 );
 
-my $test_prog = 'while(<>){print}; print $!';
+my $test_prog = 'undef $!;while(<>){print}; print $!';
 my $saved_perlio;
 
 BEGIN {
