@@ -1149,3 +1149,24 @@ This will allow the use of a regex from inside (?{ }), (??{ }) and
 Apparently these are quite useful. Anyway, Jeffery Friedl wants them.
 
 demerphq has this on his todo list, but right at the bottom.  
+
+
+=head1 Tasks for microperl
+
+
+[ Each and every one of these may be obsolete, but they were listed
+  in the old Todo.micro file]
+
+
+=head2 make creating uconfig.sh automatic 
+
+=head2 make creating Makefile.micro automatic
+
+=head2 do away with fork/exec/wait?
+
+(system, popen should be enough?)
+
+=head2 some of the uconfig.sh really needs to be probed (using cc) in buildtime:
+
+(uConfigure? :-) native datatype widths and endianness come to mind
+

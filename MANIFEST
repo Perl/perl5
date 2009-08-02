@@ -4157,7 +4157,6 @@ t/mro/recursion_c3.t		mro tests
 t/mro/recursion_dfs.t		mro tests
 t/mro/vulcan_c3.t		mro tests
 t/mro/vulcan_dfs.t		mro tests
-Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
 t/op/alarm.t			See if alarm works
