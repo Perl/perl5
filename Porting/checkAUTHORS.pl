@@ -78,7 +78,6 @@ $map {$_} = "?" for
     "kvr\100centrum.cz",
     "lemkemch\100t-online.de",
     "mauzo\100csv.warwick.ac.uk",
-    "merijnb\100ms.com",
     "mlelstv\100serpens.de",
     "p.boven\100sara.nl",
     "padre\100elte.hu",
@@ -104,6 +103,7 @@ $map {$_} = '!' for
      "nik\100tiuk.ti.com",
      "nick.ing-simmons\100elixent.com",
      "nick\100ni-s.u-net.com",
+	 "nick.ing-simmons\100tiuk.ti.com",
 
      # Iain Truskett has passed away (2003-12-29).
      "perl\100dellah.anu.edu.au",
@@ -324,6 +324,7 @@ jhi                                     jhi\100iki.fi
 +                                       jhi\100kosh.hut.fi
 +                                       jhi\100alpha.hut.fi
 +                                       jhi\100cc.hut.fi
++                                       jhi\100hut.fi
 +                                       jarkko.hietaniemi\100nokia.com
 +                                       jarkko.hietaniemi\100cc.hut.fi
 jesse                                   jesse\100bestpractical.com
@@ -332,13 +333,19 @@ jesse                                   jesse\100bestpractical.com
 merijn                                  h.m.brand\100xs4all.nl
 +                                       h.m.brand\100hccnet.nl
 +                                       merijn\100l1.procura.nl
++										merijn\100a5.(none)
++										merijnb\100ms.com
++										merijnb\100iloquent.nl
++										merijnb\100iloquent.com
 mhx                                     mhx-perl\100gmx.net
++										mhx\100r2d2.(none)
 nicholas                                nick\100unfortu.net
 +                                       nick\100ccl4.org
 +                                       nick\100talking.bollo.cx
 +                                       nick\100plum.flirble.org
 +                                       nick\100babyhippo.co.uk
 +                                       nick\100bagpuss.unfortu.net
++										Nicholas Clark (sans From field in mail header)
 pudge                                   pudge\100pobox.com
 rgs                                     rgarciasuarez\100free.fr
 +                                       rgarciasuarez\100mandrakesoft.com
@@ -384,6 +391,7 @@ alexmv\100mit.edu                       alex\100chmrr.net
 alian\100cpan.org                       alian\100alianwebserver.com
 allen\100grumman.com                    allen\100gateway.grumman.com
 allen\100huarp.harvard.edu              nort\100bottesini.harvard.edu
++										nort\100qnx.com
 allens\100cpan.org                      easmith\100beatrice.rutgers.edu
 andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind.de
 +                                       andreas.koenig.7os6vvqr\100franz.ak.mind.de
@@ -392,6 +400,11 @@ andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind
 +                                       andk\100cpan.org
 +                                       koenig\100anna.mind.de
 +                                       k\100anna.mind.de
++										root\100ak-71.mind.de
++										root\100ak-75.mind.de
++										k\100sissy.in-berlin.de
++										a.koenig\100kulturbox.de
++										k\100sissy.in-berlin.de
 anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
 ash\100cpan.org                         ash_cpan\100firemirror.com
@@ -399,11 +412,14 @@ avarab\100gmail.com                     avar\100cpan.org
 
 bailey\100newman.upenn.edu              bailey\100hmivax.humgen.upenn.edu
 +                                       bailey\100genetics.upenn.edu
++										bailey.charles\100gmail.com
 bah\100ecnvantage.com                   bholzman\100longitude.com
 bcarter\100gumdrop.flyinganvil.org      q.eibcartereio.=~m-b.{6}-cgimosx\100gumdrop.flyinganvil.org
 ben_tilly\100operamail.com              btilly\100gmail.com
+BQW10602\100nifty.com					sadahiro\100cpan.org
 
 chromatic\100wgz.org                    chromatic\100rmci.net
+clintp\100geeksalad.org					cpierce1\100ford.com
 clkao\100clkao.org                      clkao\100bestpractical.com
 corion\100corion.net                    corion\100cpan.org
 cp\100onsitetech.com                    publiustemp-p5p\100yahoo.com
@@ -414,13 +430,17 @@ cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       autrijus\100ossf.iis.sinica.edu.tw
 +                                       autrijus\100autrijus.org
 +                                       audreyt\100audreyt.org
+crt\100kiski.net						perl\100ctweten.amsite.com
 
-damian\100cs.monash.edu.au              damian\100conway.org
+damian\100conway.org					damian\100cs.monash.edu.au
+dagolden\100cpan.org                    xdaveg\100gmail.com
 dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
+david\100wheeler.com					david\100kineticode.com
 domo\100computer.org                    shouldbedomo\100mac.com
 +                                       domo\100slipper.ip.lu
++										domo\100tcp.ip.lu
 dougm\100covalent.net                   dougm\100opengroup.org
 +                                       dougm\100osf.org
 
@@ -428,32 +448,52 @@ egf7\100columbia.edu                    efifer\100sanwaint.com
 epeschko\100den-mdev1                   esp5\100pge.com
 
 fugazi\100zyx.net                       larrysh\100cpan.org
++										lshatzer\100islanddata.com
 
-jns\100integration-house.com            jns\100gellyfish.com
-+                                       gellyfish\100gellyfish.com
-
+gbacon\100itsc.uah.edu						gbacon\100adtrn-srv4.adtran.com
+gfuji\100cpan.org						g.psy.va\100gmail.com
+gibreel\100pobox.com                    stephen.zander\100interlock.mckesson.com
++                                       srz\100loopback
 gnat\100frii.com                        gnat\100prometheus.frii.com
 gp\100familiehaase.de                   gerrit\100familiehaase.de
 grazz\100pobox.com                      grazz\100nyc.rr.com
-
+gward\100ase.com						greg\100bic.mni.mcgill.ca
 hansmu\100xs4all.nl                     hansm\100icgroup.nl
 +                                       hansm\100icgned.nl
 +                                       hans\100icgned.nl
 +                                       hansm\100euronet.nl
 hio\100ymir.co.jp                       hio\100hio.jp
+hops\100sco.com							hops\100scoot.pdev.sco.com
 
+james\100mastros.biz						theorb\100desert-island.me.uk
+jand\100activestate.com					jan.dubois\100ibm.net
 japhy\100pobox.com                      japhy\100pobox.org
 +                                       japhy\100perlmonk.org
 +                                       japhy\100cpan.org
 jari.aalto\100poboxes.com               jari.aalto\100cante.net
 jcromie\100divsol.com                   jcromie\100cpan.org
 +                                       jim.cromie\100gmail.com
+jdanni\100jdanni.org					jidanni\100hoffa.dreamhost.com
 jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\1001979.usna.com
 +                                       jdhedden\100gmail.com
 +                                       jdhedden\100yahoo.com
++										jhedden\100pn100-02-2-356p.corp.bloomberg.com
+jeremy\100zawodny.com					jzawodn\100wcnet.org
+jesse\100sig.bsh.com					jesse\100ginger
 jfriedl\100yahoo.com                    jfriedl\100yahoo-inc.com
+jhannah\100omnihotels.com					jay\100jays.net
 jjore\100cpan.org                       twists\100gmail.com
+jns\100integration-house.com            jns\100gellyfish.com
++                                       gellyfish\100gellyfish.com
+john\100atlantech.com					john\100titanic.atlantech.com
+john\100johnwright.org					john.wright\100hp.com
+joseph\100cscaper.com					joseph\1005sigma.com
+joshua\100rodd.us							jrodd\100pbs.org
+jtobey\100john-edwin-tobey.org				jtobey\100user1.channel1.com
+jpeacock\100rowman.com                  john.peacock\100havurah-software.org
++                                       jpeacock\100havurah-software.org
+jsm28\100hermes.cam.ac.uk					jsm28\100cam.ac.uk
 
 kane\100dwim.org                        kane\100xs4all.net
 +                                       kane\100cpan.org
@@ -464,24 +504,37 @@ ken\100mathforum.org                    kenahoo\100gmail.com
 kroepke\100dolphin-services.de          kay\100dolphin-services.de
 kstar\100wolfetech.com                  kstar\100cpan.org
 +                                       kurt_starsinic\100ml.com
++										kstar\100www.chapin.edu
 larry\100wall.org                       lwall\100jpl-devvax.jpl.nasa.gov
 +                                       lwall\100netlabs.com
 +                                       larry\100netlabs.com
 +                                       lwall\100sems.com
 +                                       lwall\100scalpel.netlabs.com
+laszlo.molnar\100eth.ericsson.se			molnarl\100cdata.tvnet.hu
 lewart\100uiuc.edu                      lewart\100vadds.cvm.uiuc.edu    
 +                                       d-lewart\100uiuc.edu
-
+lstein\100cshl.org						lstein\100formaggio.cshl.org
++										lstein\100genome.wi.mit.edu
+lupe\100lupe-christoph.de					lupe\100alanya.m.isar.de
+lutherh\100stratcom.com					lutherh\100infinet.com
+mab\100wdl.loral.com						markb\100rdcf.sm.unisys.com
 marcel\100codewerk.com                  gr\100univie.ac.at
+mark.p.lutz\100boeing.com					tecmpl1\100triton.ca.boeing.com
 mats\100sm6sxl.net                      mats\100sm5sxl.net
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
-merijnb\100iloquent.nl                  merijnb\100iloquent.com
+merlyn\100stonehenge.com				merlyn\100gadget.cscaper.com
 mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
+mlh\100swl.msd.ray.com						webtools\100uewrhp03.msd.ray.com
 michael.schroeder\100informatik.uni-erlangen.de mls\100suse.de
 mike\100stok.co.uk                      mike\100exegenix.com
 mjtg\100cam.ac.uk                       mjtg\100cus.cam.ac.uk
+moritz\100casella.verplant.org          moritz\100faui2k3.org
++										moritz lenz
 
+
+neeracher\100mac.com					neeri\100iis.ee.ethz.ch
+neil\100bowers.com						neilb\100cre.canon.co.uk
 nospam-abuse\100bloodgate.com           tels\100bloodgate.com
 +                                       perl_dummy\100bloodgate.com
 
@@ -490,7 +543,7 @@ ilya\100math.berkeley.edu               ilya\100math.ohio-state.edu
 +                                       nospam-abuse\100ilyaz.org
 
 okamoto\100corp.hp.com                  okamoto\100hpcc123.corp.hp.com
-
+orwant\100oreilly.com					orwant\100media.mit.edu
 
 p5-authors\100crystalflame.net          perl\100crystalflame.net
 +                                       rs\100crystalflame.net
@@ -498,6 +551,7 @@ p5-authors\100crystalflame.net          perl\100crystalflame.net
 +                                       coral\100moonlight.crystalflame.net
 +                                       rs\100oregonnet.com
 paul.green\100stratus.com               paul_greenvos\100vos.stratus.com
++										pgreen\100seussnt.stratus.com
 paul.marquess\100btinternet.com         paul_marquess\100yahoo.co.uk
 +                                       paul.marquess\100ntlworld.com
 +                                       paul.marquess\100openwave.com
@@ -505,14 +559,19 @@ paul.marquess\100btinternet.com         paul_marquess\100yahoo.co.uk
 +                                       pmqs\100cpan.org
 pcg\100goof.com                         schmorp\100schmorp.de
 perl\100cadop.com                       cdp\100hpescdp.fc.hp.com
+perl\100greerga.m-l.org					greerga\100m-l.org
 perl\100profvince.com                   vince\100profvince.com
 perl-rt\100wizbit.be                    p5p\100perl.wizbit.be
 # Maybe we should special case this to get real names out?
 perlbug\100perl.org                     perlbug-followup\100perl.org
 +                                       bugs-perl5\100bugs6.perl.org
+Peter.Dintelmann\100Dresdner-Bank.com	peter.dintelmann\100dresdner-bank.com 
+# NOTE: There is an intentional trailing space in the line above
 pfeifer\100wait.de                      pfeifer\100charly.informatik.uni-dortmund.de
++										upf\100de.uu.net
 phil\100perkpartners.com                phil\100finchcomputer.com
 pimlott\100idiomtech.com                andrew\100pimlott.net
++										pimlott\100abel.math.harvard.edu
 pne\100cpan.org                         philip.newton\100gmx.net
 +                                       philip.newton\100datenrevision.de
 +                                       pnewton\100gmx.de
@@ -521,6 +580,7 @@ public\100khwilliamson.com              khw\100karl.(none)
 
 radu\100netsoft.ro                      rgreab\100fx.ro
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
+renee.baecker\100smart-websolutions.de		reneeb\100reneeb-desktop.(none)
 richard.foley\100ubsw.com               richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
 +                                       richard.foley\100rfi.net
@@ -533,14 +593,17 @@ rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
 rjray\100redhat.com                        rjray\100uswest.com
 rmgiroux\100acm.org                     rmgiroux\100hotmail.com
++										mgiroux\100bear.com
 rmbarker\100cpan.org                    rmb1\100cise.npl.co.uk
 +                                       robin.barker\100npl.co.uk
 +                                       rmb\100cise.npl.co.uk
 robertmay\100cpan.org                   rob\100themayfamily.me.uk
+roberto\100keltia.freenix.fr			roberto\100eurocontrol.fr
 robin\100cpan.org                       robin\100kitsite.com
 roderick\100argon.org                   roderick\100gate.net
++										roderick\100ibcinc.com
 rootbeer\100teleport.com                rootbeer\100redcat.com
-
++										tomphoenix\100unknown
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
 +                                       schubiger\100gmail.com
@@ -548,6 +611,8 @@ schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100athens.arena-i.com
 +                                       schwern\100blackrider.aocn.com
 +                                       schwern\100ool-18b93024.dyn.optonline.net
+schwab\100suse.de						schwab\100issan.informatik.uni-dortmund.de
++										schwab\100ls5.informatik.uni-dortmund.de
 sebastien\100aperghis.net               maddingue\100free.fr
 +                                       saper\100cpan.org
 shlomif\100vipe.technion.ac.il          shlomif\100iglu.org.il
@@ -559,17 +624,25 @@ simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 slaven\100rezic.de                      slaven.rezic\100berlin.de
 +                                       srezic\100iconmobile.com
 +                                       srezic\100cpan.org
++										eserte\100cs.tu-berlin.de
 smcc\100mit.edu                         smcc\100ocf.berkeley.edu
 +                                       smcc\100csua.berkeley.edu
 +                                       alias\100mcs.com
-+                                       smccam@uclink4.berkeley.edu
++                                       smccam\100uclink4.berkeley.edu
 spider\100orb.nashua.nh.us              spider\100web.zk3.dec.com
 +                                       spider\100leggy.zk3.dec.com
 +                                       spider-perl\100orb.nashua.nh.us
 +                                       spider\100peano.zk3.dec.com
++                                       spider.boardman\100orb.nashua.nh.us>
++                                       spidb\100cpan.org
++										spider.boardman\100orb.nashua.nh.us
 spp\100ds.net                           spp\100psa.pencom.com
++                                       spp\100psasolar.colltech.com
++                                       spp\100spotter.yi.org
 stef\100mongueurs.net                   stef\100payrard.net
 +                                       s.payrard\100wanadoo.fr
++										properler\100freesurf.fr
++										stef\100francenet.fr
 
 tassilo.parseval\100post.rwth-aachen.de tassilo.von.parseval\100rwth-aachen.de
 tchrist\100perl.com                      tchrist\100mox.perl.com
