@@ -667,16 +667,13 @@ package Maintainers;
     'ExtUtils::Install' =>
 	{
 	'MAINTAINER'	=> 'yves',
-	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.52_03.tar.gz',
-	# MakeMaker has a basic.t too, and we use that.
+	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.54.tar.gz',
 	'FILES' 	=> q[lib/ExtUtils/{Install,Installed,Packlist}.pm
                              lib/ExtUtils/Changes_EU-Install
 			     lib/ExtUtils/t/Installed.t
-			     lib/ExtUtils/t/basic.pl
 			     lib/ExtUtils/t/InstallWithMM.t
 			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
-	'EXCLUDED'	=> [ qw{ t/basic.t
-				 t/lib/MakeMaker/Test/Setup/BFD.pm
+	'EXCLUDED'	=> [ qw{ t/lib/MakeMaker/Test/Setup/BFD.pm
 				 t/lib/MakeMaker/Test/Utils.pm
 				 t/lib/Test/Builder.pm
 				 t/lib/Test/Builder/Module.pm
@@ -2138,7 +2135,6 @@ package Maintainers;
 				lib/ExtUtils/Embed.pm
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
-				lib/ExtUtils/t/basic_finish.pl
 				lib/ExtUtils/typemap
 				lib/File/Basename.{pm,t}
 				lib/File/CheckTree.{pm,t}
