@@ -6455,6 +6455,9 @@ C<qx//>, as described in L<perlop/"`STRING`">.  Return value of -1
 indicates a failure to start the program or an error of the wait(2) system
 call (inspect $! for the reason).
 
+If you'd like to make C<system> (and many other bits of Perl) die on error,
+have a look at the L<autodie> pragma.
+
 Like C<exec>, C<system> allows you to lie to a program about its name if
 you use the C<system PROGRAM LIST> syntax.  Again, see L</exec>.
 
@@ -6467,8 +6470,8 @@ value.
     system(@args) == 0
 	 or die "system @args failed: $?"
 
-You can check all the failure possibilities by inspecting
-C<$?> like this:
+If you'd like to manually inspect C<system>'s failure, u can check all
+possible failure modes by inspecting C<$?> like this:
 
     if ($? == -1) {
 	print "failed to execute: $!\n";
