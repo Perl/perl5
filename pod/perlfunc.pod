@@ -6470,7 +6470,7 @@ value.
     system(@args) == 0
 	 or die "system @args failed: $?"
 
-If you'd like to manually inspect C<system>'s failure, u can check all
+If you'd like to manually inspect C<system>'s failure, you can check all
 possible failure modes by inspecting C<$?> like this:
 
     if ($? == -1) {
