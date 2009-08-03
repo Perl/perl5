@@ -2209,8 +2209,8 @@ lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
-lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/Changes	ExtUtils::ParseXS change log
+lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
 lib/ExtUtils/ParseXS/t/usage.t	ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
@@ -2253,8 +2253,8 @@ lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
 lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
-lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
 lib/ExtUtils/t/miniperl.t	Test MakeMaker with miniperl
+lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -4040,9 +4040,9 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/MakeMaker/Test/NoXS.pm		MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/MPV.pm	MakeMaker test utilities
-t/lib/MakeMaker/Test/NoXS.pm		MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
