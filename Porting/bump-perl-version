@@ -189,8 +189,6 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     Porting/mergelog-tool
     pod.lst
     pp_ctl.c
-    README.haiku
-    README.vms
 );
 my @SKIP_DIRS = qw(
     ext
