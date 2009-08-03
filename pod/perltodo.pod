@@ -26,6 +26,10 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Remove macperl references from tests
+
+MacPerl is gone. The tests don't need to be there.
+
 =head2 Remove duplication of test setup.
 
 Schwern notes, that there's duplication of code - lots and lots of tests have
