@@ -121,9 +121,6 @@ $map {$_} = '!' for
      # Randy W. Sims 
      "ml-perl\100thepierianspring.org",
 
-     # Yuval Kogman
-     "nothingmuch\100woobling.org",
-
      # perl internal addresses
      #
      "perl5-porters\100africa.nicoh.com",
