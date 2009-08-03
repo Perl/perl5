@@ -319,6 +319,7 @@ gbarr                                   gbarr\100pobox.com
 +                                       bodg\100tiuk.ti.com
 +                                       gbarr\100ti.com
 +                                       graham.barr\100tiuk.ti.com
++										gbarr\100monty.mutatus.co.uk
 gisle                                   gisle\100activestate.com
 +                                       gisle\100aas.no
 +                                       aas\100aas.no
@@ -419,6 +420,8 @@ andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind
 +										k\100sissy.in-berlin.de
 anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
+arnold\100gnu.ai.mit.edu					arnold\100emoryu2.arpa
++										gatech!skeeve!arnold
 ash\100cpan.org                         ash_cpan\100firemirror.com
 avarab\100gmail.com                     avar\100cpan.org
 
@@ -430,6 +433,7 @@ bcarter\100gumdrop.flyinganvil.org      q.eibcartereio.=~m-b.{6}-cgimosx\100gumd
 ben_tilly\100operamail.com              btilly\100gmail.com
 +										ben_tilly\100hotmail.com
 ben\100morrow.me.uk						mauzo\100csv.warwick.ac.uk
++										mauzo\100.(none)
 BQW10602\100nifty.com					sadahiro\100cpan.org
 
 chromatic\100wgz.org                    chromatic\100rmci.net
@@ -479,6 +483,7 @@ gward\100ase.com						greg\100bic.mni.mcgill.ca
 hansmu\100xs4all.nl                     hansm\100icgroup.nl
 +                                       hansm\100icgned.nl
 +                                       hans\100icgned.nl
++                                       hans\100icgroup.nl
 +                                       hansm\100euronet.nl
 hio\100ymir.co.jp                       hio\100hio.jp
 hops\100sco.com							hops\100scoot.pdev.sco.com
@@ -543,7 +548,6 @@ mab\100wdl.loral.com						markb\100rdcf.sm.unisys.com
 marcel\100codewerk.com                  gr\100univie.ac.at
 mark.p.lutz\100boeing.com					tecmpl1\100triton.ca.boeing.com
 mats\100sm6sxl.net                      mats\100sm5sxl.net
-mauzo\100csv.warwick.ac.uk				mauzo\100.(none)
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
 merlyn\100stonehenge.com				merlyn\100gadget.cscaper.com
@@ -566,6 +570,7 @@ ian.phillipps\100iname.com				ian_phillipps\100yahoo.co.uk
 ignasi.roca\100fujitsu-siemens.com      ignasi.roca\100fujitsu.siemens.es
 ilya\100math.berkeley.edu               ilya\100math.ohio-state.edu
 +                                       nospam-abuse\100ilyaz.org
++										[9]ilya\100math.ohio-state.edu
 
 okamoto\100corp.hp.com                  okamoto\100hpcc123.corp.hp.com
 orwant\100oreilly.com					orwant\100media.mit.edu
@@ -595,6 +600,7 @@ pfeifer\100wait.de                      pfeifer\100charly.informatik.uni-dortmun
 phil\100perkpartners.com                phil\100finchcomputer.com
 pimlott\100idiomtech.com                andrew\100pimlott.net
 +										pimlott\100abel.math.harvard.edu
+pixel\100mandriva.com						pixel\100mandrakesoft.com
 pne\100cpan.org                         philip.newton\100gmx.net
 +                                       philip.newton\100datenrevision.de
 +                                       pnewton\100gmx.de
