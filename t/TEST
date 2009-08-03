@@ -169,6 +169,7 @@ unless (@ARGV) {
     unless ($::core) {
 	_find_tests('pod');
 	_find_tests('x2p');
+	_find_tests('porting');
 	_find_tests('japh') if $::torture;
 	_find_tests('t/benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
     }
