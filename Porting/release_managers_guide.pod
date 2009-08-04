@@ -405,6 +405,94 @@ Be sure to commit your changes:
 
 =item *
 
+
+I<You MAY SKIP this step for SNAPSHOT>
+
+Re-read the perldelta to try to find any embarrassing typos and thinkos;
+remove any C<TODO> or C<XXX> flags; and run through pod and spell
+checkers, e.g.
+
+    podchecker -warnings -warnings pod/perl5101delta.pod
+    spell pod/perl5101delta.pod
+
+=item *
+
+I<You MUST SKIP this step for SNAPSHOT>
+
+Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
+final release, remove it.  [ XXX how now?? see 34813 for old way ]
+
+=item *
+
+I<You MUST SKIP this step for SNAPSHOT>
+
+Update C<Module::Corelist>.
+
+Note that if this is a maint release, you should run the following actions
+from the maint directory, but edit the C<Corelist.pm> in I<blead> and
+subsequently cherry-pick it.
+
+corelist.pl uses ftp.funet.fi to verify information about dual-lifed
+modules on CPAN. It can use a full, local CPAN mirror or fall back
+to C<wget> or C<curl> to fetch only package metadata remotely.
+
+(If you'd prefer to have a full CPAN mirror, see 
+http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
+
+
+Then change to your perl checkout.
+
+If you have a local CPAN mirror, run:
+
+    $ make perl
+    $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
+
+Otherwise, run:
+
+    $ make perl
+    $ ./perl -Ilib Porting/corelist.pl cpan
+
+This will chug for a while. Assuming all goes well, it will
+update lib/Module/CoreList.pm. 
+
+Check that file over carefully:
+
+    $ git diff lib/Module/CoreList.pm
+
+
+If necessary, bump C<$VERSION> (there's no need to do this for
+every RC; in RC1, bump the version to a new clean number that will
+appear in the final release, and leave as-is for the later RCs and final).
+
+Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
+entry, as that is likely to reflect the previous version number.
+
+If this is a final release (rather than a release candidate):
+
+=over 4 
+
+=item *
+
+Update this version's entry in the C<%released> hash with today's date.
+
+=item *
+
+Make sure that the script has correctly updated the C<CAVEATS> section
+
+=back
+
+Finally, commit the new version of Module::CoreList:
+
+    $ git commit -m 'Updated Module::CoreList for the 5.x.y release' \
+     lib/Module/Corelist.pm
+
+
+=item *
+
+Disarm the patchlevel.h change [ XXX expand ]
+
+=item *
+
 Build perl, then make sure it passes its own test suite, and installs:
 
     $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.x.y-pretest
@@ -496,94 +584,6 @@ Install an XS module.
 If all is well, announce the snapshot to p5p. (For a release candidate,
 instead follow the further steps described later.)
 
-
-=item *
-
-
-I<You MAY SKIP this step for SNAPSHOT>
-
-Re-read the perldelta to try to find any embarrassing typos and thinkos;
-remove any C<TODO> or C<XXX> flags; and run through pod and spell
-checkers, e.g.
-
-    podchecker -warnings -warnings pod/perl5101delta.pod
-    spell pod/perl5101delta.pod
-
-=item *
-
-I<You MUST SKIP this step for SNAPSHOT>
-
-Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
-final release, remove it.  [ XXX how now?? see 34813 for old way ]
-
-=item *
-
-I<You MUST SKIP this step for SNAPSHOT>
-
-Update C<Module::Corelist>.
-
-Note that if this is a maint release, you should run the following actions
-from the maint directory, but edit the C<Corelist.pm> in I<blead> and
-subsequently cherry-pick it.
-
-corelist.pl uses ftp.funet.fi to verify information about dual-lifed
-modules on CPAN. It can use a full, local CPAN mirror or fall back
-to C<wget> or C<curl> to fetch only package metadata remotely.
-
-(If you'd prefer to have a full CPAN mirror, see 
-http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
-
-
-Then change to your perl checkout.
-
-If you have a local CPAN mirror, run:
-
-    $ make perl
-    $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
-
-Otherwise, run:
-
-    $ make perl
-    $ ./perl -Ilib Porting/corelist.pl cpan
-
-This will chug for a while. Assuming all goes well, it will
-update lib/Module/CoreList.pm. 
-
-Check that file over carefully:
-
-    $ git diff lib/Module/CoreList.pm
-
-
-If necessary, bump C<$VERSION> (there's no need to do this for
-every RC; in RC1, bump the version to a new clean number that will
-appear in the final release, and leave as-is for the later RCs and final).
-
-Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
-entry, as that is likely to reflect the previous version number.
-
-If this is a final release (rather than a release candidate):
-
-=over 4 
-
-=item *
-
-Update this version's entry in the C<%released> hash with today's date.
-
-=item *
-
-Make sure that the script has correctly updated the C<CAVEATS> section
-
-=back
-
-Finally, commit the new version of Module::CoreList:
-
-    $ git commit -m 'Updated Module::CoreList for the 5.x.y release' \
-     lib/Module/Corelist.pm
-
-
-=item *
-
-Disarm the patchlevel.h change [ XXX expand ]
 
 =item *
 
