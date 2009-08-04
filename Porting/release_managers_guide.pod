@@ -681,9 +681,6 @@ I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
 If this was a maint release, then edit F<Porting/mergelog> to change
 all the C<d> (deferred) flags to C<.> (needs review).
 
-XXX - we should be able to use git to automate much of the role
-previously filled by the mergelog.
-
 =item *
 
 I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
