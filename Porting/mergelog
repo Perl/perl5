@@ -3825,3 +3825,12 @@ M  91fb030ae1 2009/08/03 Maintainers.pl: update for ExtUtils::Install
 M  d10dbbde5a 2009/08/03 bump-perl-version: over-keen false-positive remova
 M  38711ea604 2009/08/03 Continued work to get Porting/checkAUTHORS.pl to a
 M  b5e2dde18e 2009/08/03 Now down to 50 addresses in the git logs who aren'
+M  4d2c8158ba 2009/08/04 Fix corelist generation section of the release man
+M  bfadf2baa9 2009/08/04 Improve the broken order of the release_managers_g
+M  c2615aa941 2009/08/04 Removed bald-faced lies I inserted about the merge
+M  d781deb654 2009/08/04 WIFEXITED() cygwin regression
+d  dd3e51dc8a 2009/08/04 Promote blocks resulting from constant folding to 
+M  2e831dfd27 2009/08/04 release_managers_guide: make into two logical sect
+M  20b15ed1ed 2009/08/04 The AUTHORS file is now short only about thirty 'r
+M  dd0e54ba0e 2009/08/04 minor tweaks to release_managers_guide.pod
+M  d7eb1120ad 2009/08/04 release_managers_guide: add patchlevel.h stuff
