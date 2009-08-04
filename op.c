@@ -4552,6 +4552,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		return newop;
 	    }
 	    op_free(first);
+	    if (other->op_type == OP_LEAVE)
+		other = newUNOP(OP_NULL, OPf_SPECIAL, other);
 	    return other;
 	}
 	else {

@@ -29,7 +29,7 @@ sub ok {
     return $ok;
 }
 
-print "1..38\n";
+print "1..44\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -139,6 +139,26 @@ $x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
 ok(defined $x && $x == 4, 'return do { do { ; } } receives caller scalar context');
 @x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
 ok("@x" eq "7 8 9 10", 'return do { do { ; } } receives caller list context');
+
+# Do blocks created by constant folding
+# [perl #68108]
+$x = sub { if (1) { 20 } }->();
+ok($x == 20, 'if (1) { $x } receives caller scalar context');
+
+@a = (21 .. 23);
+$x = sub { if (1) { @a } }->();
+ok($x == 3, 'if (1) { @a } receives caller scalar context');
+@x = sub { if (1) { @a } }->();
+ok("@x" eq "21 22 23", 'if (1) { @a } receives caller list context');
+
+$x = sub { if (1) { 0; 20 } }->();
+ok($x == 20, 'if (1) { ...; $x } receives caller scalar context');
+
+@a = (24 .. 27);
+$x = sub { if (1) { 0; @a } }->();
+ok($x == 4, 'if (1) { ...; @a } receives caller scalar context');
+@x = sub { if (1) { 0; @a } }->();
+ok("@x" eq "24 25 26 27", 'if (1) { ...; @a } receives caller list context');
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
