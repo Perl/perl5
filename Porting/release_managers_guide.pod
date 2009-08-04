@@ -421,7 +421,7 @@ is listed in the section entitled C<THE KEEPERS OF THE PUMPKIN>.
 
 Be sure to commit your changes:
 
-    $ git commit -m 'Updating perlhist in preparation for release of 5.x.y pod/perlhist.pod
+    $ git commit -m 'Updating perlhist in preparation for release of 5.x.y' pod/perlhist.pod
 
 
 =item *
@@ -440,13 +440,6 @@ Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
     perl pod/pod2html pod/perl5101delta.pod > /tmp/perl5101delta.html
-
-=item *
-
-I<You MUST SKIP this step for SNAPSHOT>
-
-Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
-final release, remove it.  [ XXX how now?? see 34813 for old way ]
 
 =item *
 
@@ -518,6 +511,22 @@ Build perl, then make sure it passes its own test suite, and installs:
 
     $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.x.y-pretest
     $ make test install
+
+=item *
+
+I<You MUST SKIP this step for SNAPSHOT>
+
+Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
+final release, remove it. For example:
+
+     static const char * const local_patches[] = {
+             NULL
+    +        ,"RC1"
+             PERL_GIT_UNPUSHED_COMMITS /* do not remove this line */
+
+Be sure to commit your change:
+
+    $ git commit -m 'bump version to RCnnn' patchlevel.h
 
 =item *
 
@@ -643,7 +652,17 @@ created.
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Disarm the patchlevel.h change [ XXX expand ]
+Disarm the patchlevel.h change; for example,
+
+     static const char * const local_patches[] = {
+             NULL
+    -        ,"RC1"
+             PERL_GIT_UNPUSHED_COMMITS /* do not remove this line */
+
+Be sure to commit your change:
+
+    $ git commit -m 'disarm RCnnn bump' patchlevel.h
+
 
 =item *
 
