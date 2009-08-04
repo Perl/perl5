@@ -106,7 +106,7 @@ https://pause.perl.org/, login, then select 'upload file to CPAN'; there
 should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
 König to add your ID to the list of people allowed to upload something
 called perl.  You can find Andreas' email address at:
-    
+
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
 =item CPAN mirror
@@ -538,14 +538,16 @@ Then change to your perl checkout.
 
 If you have a local CPAN mirror, run:
 
-    $ perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
+    $ make perl
+    $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
 
 Otherwise, run:
 
-    $ perl -Ilib Porting/corelist.pl cpan
+    $ make perl
+    $ ./perl -Ilib Porting/corelist.pl cpan
 
 This will chug for a while. Assuming all goes well, it will
- update lib/Module/CoreList.pm. 
+update lib/Module/CoreList.pm. 
 
 Check that file over carefully:
 
@@ -561,7 +563,17 @@ entry, as that is likely to reflect the previous version number.
 
 If this is a final release (rather than a release candidate):
 
-    Update this version's entry in the C<%released> hash with today's date.
+=over 4 
+
+=item *
+
+Update this version's entry in the C<%released> hash with today's date.
+
+=item *
+
+Make sure that the script has correctly updated the C<CAVEATS> section
+
+=back
 
 Finally, commit the new version of Module::CoreList:
 
