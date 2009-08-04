@@ -484,7 +484,7 @@ Upgraded from version 1.27 to 1.28.
 
 =item C<ExtUtils::Install>
 
-Upgraded from version 1.44 to 1.52_03.
+Upgraded from version 1.44 to 1.54.
 
 =item C<ExtUtils::MakeMaker>
 
