@@ -426,15 +426,20 @@ Be sure to commit your changes:
 
 =item *
 
-
 I<You MAY SKIP this step for SNAPSHOT>
 
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
-remove any C<TODO> or C<XXX> flags; and run through pod and spell
-checkers, e.g.
+remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
+with any serious issues for which fixes are not going to happen now; and
+run through pod and spell checkers, e.g.
 
     podchecker -warnings -warnings pod/perl5101delta.pod
     spell pod/perl5101delta.pod
+
+Also, you may want to generate and view an HTML version of it to check
+formatting, e.g.
+
+    perl pod/pod2html pod/perl5101delta.pod > /tmp/perl5101delta.html
 
 =item *
 
@@ -450,8 +455,8 @@ I<You MUST SKIP this step for SNAPSHOT>
 Update C<Module::Corelist>.
 
 Note that if this is a maint release, you should run the following actions
-from the maint directory, but edit the C<Corelist.pm> in I<blead> and
-subsequently cherry-pick it.
+from the maint directory, but commit the C<Corelist.pm> changes in
+I<blead> and subsequently cherry-pick it.
 
 corelist.pl uses ftp.funet.fi to verify information about dual-lifed
 modules on CPAN. It can use a full, local CPAN mirror or fall back
