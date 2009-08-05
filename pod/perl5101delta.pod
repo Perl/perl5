@@ -403,7 +403,8 @@ Upgraded from version 2.008 to 2.020.
 
 =item C<CPAN>
 
-Upgraded from version 1.9205 to 1.9402.
+Upgraded from version 1.9205 to 1.9402. C<CPAN::FTP> has a local fix to
+stop it being too verbose on download failure.
 
 =item C<CPANPLUS>
 
