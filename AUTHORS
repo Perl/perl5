@@ -350,6 +350,7 @@ Gerrit P. Haase			<gp@familiehaase.de>
 Giles Lean			<giles@nemeton.com.au>
 Gisle Aas			<gisle@aas.no>
 Glenn Linderman			<perl@nevcal.com>
+Gordon Lack				<gml4410@ggr.co.uk>
 Gordon J. Miller		<gjm@cray.com>
 Goro Fuji			<gfuji@cpan.org>
 Grace Lee			<grace@hal.com>
@@ -685,10 +686,12 @@ Michael Carman			<mjcarman@home.com>
 Michael Cook			<mcook@cognex.com>
 Michael Cummings		<mcummings@gentoo.org>
 Michael De La Rue		<mikedlr@tardis.ed.ac.uk>
+Michael van Elst		<mlelstv@serpens.de>
 Michael Engel			<engel@nms1.cc.huji.ac.il>
 Michael G Schwern		<schwern@pobox.com>
 Michael H. Moran		<mhm@austin.ibm.com>
 Michael King			<mike808@users.sourceforge.net>
+Michael Lemke			<lemkemch@t-online.de>
 Michael Mahan			<mahanm@nextwork.rose-hulman.edu>
 Michael Schroeder		<Michael.Schroeder@informatik.uni-erlangen.de>
 Michael Somos			<somos@grail.cba.csuohio.edu>
@@ -711,6 +714,7 @@ Mikhail Zabaluev		<mhz@alt-linux.org>
 Milosz Tanski			<mtanski@gridapp.com>
 Milton L. Hankins		<mlh@swl.msd.ray.com>
 Moritz Lenz			<moritz@casella.verplant.org>
+Moshe Kaminsky			<kaminsky@math.huji.ac.il>
 Mr. Nobody			<mrnobo1024@yahoo.com>
 Murray Nesbitt			<murray@nesbitt.ca>
 Nathan Kurz			<nate@valleytel.net>
@@ -737,13 +741,14 @@ Norton T. Allen			<allen@huarp.harvard.edu>
 Offer Kaye			<offer.kaye@gmail.com>
 Olaf Flebbe			<o.flebbe@science-computing.de>
 Olaf Titz			<olaf@bigred.inka.de>
+Olivier Blin			<blino@mandriva.com>
 Olli Savia
 Ollivier Robert			<roberto@keltia.freenix.fr>
 Olivier Thauvin			<olivier.thauvin@aerov.jussieu.fr>
 Osvaldo Villalon	        <ovillalon@dextratech.com>
 Owen Taylor			<owt1@cornell.edu>
 parv				<parv@pair.com>
-Papp Zoltan				<padre@elte.hu>
+Papp Zoltan			<padre@elte.hu>
 Pascal Rigaux			<pixel@mandriva.com>
 Patrick Donelan			<pat@patspam.com>
 Patrick Dugnolle		<patrick.dugnolle@bnpparibas.com>
@@ -766,8 +771,9 @@ Paul Rogers			<Paul.Rogers@Central.Sun.COM>
 Paul Saab			<ps@yahoo-inc.com>
 Paul Schinder			<schinder@pobox.com>
 Paul Szabo			<psz@maths.usyd.edu.au>
+Pavel Ka¿kovský			<kan@dcit.cz>
 Pavel Zakouril			<Pavel.Zakouril@mff.cuni.cz>
-Pedro Felipe Horrillo Guerra <pancho@pancho.name>
+Pedro Felipe Horrillo Guerra	<pancho@pancho.name>
 Per Einar Ellefsen		<per.einar@skynet.be>
 Peter BARABAS
 Pete Peterson			<petersonp@genrad.com>
@@ -872,6 +878,7 @@ Scott Gifford			<sgifford@tir.com>
 Scott Henry			<scotth@sgi.com>
 Scott Lanning			<lannings@who.int>
 Scott L. Miller			<Scott.L.Miller@Compaq.com>
+Scott Wiersdorf			<scott@perlcode.org>
 Sean Boudreau			<seanb@qnx.com>
 Sean Dague			<sean@dague.net>
 Sean Davis			<dive@ender.com>
@@ -881,6 +888,7 @@ Sean Sheedy			<seans@ncube.com>
 Sebastian Wittmeier		<Sebastian.Wittmeier@ginko.de>
 Sébastien Aperghis-Tramoni	<sebastien@aperghis.net>
 Sebastien Barre			<Sebastien.Barre@utc.fr>
+Sebastian Schmidt		<yath@yath.de>
 Sebastian Steinlechner		<steinlechner@gmx.net>
 Sérgio Durigan Júnior		<sergiodj@linux.vnet.ibm.com>
 Shawn				<svicalifornia@gmail.com>
@@ -1011,6 +1019,7 @@ William Middleton	        <wmiddlet@adobe.com>
 William R Ward			<hermit@BayView.COM>
 William Setzer			<William_Setzer@ncsu.edu>
 William Williams		<biwillia@cisco.com>
+William Yardley			<perlbug@veggiechinese.net>
 Winfried König			<win@in.rhein-main.de>
 Wolfgang Laun			<Wolfgang.Laun@alcatel.at>
 Xavier Noria			<fxn@hashref.com>
@@ -1025,4 +1034,5 @@ Yuval Kogman			<nothingmuch@woobling.org>
 Yves J. Orton			<demerphq@gmail.com>
 Zachary Miller			<zcmiller@simon.er.usgs.gov>
 Zefram				<zefram@fysh.org>
+Zbynek Vyskovsky		<kvr@centrum.cz>
 Ævar Arnfjörð Bjarmason		<avar@cpan.org>
