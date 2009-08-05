@@ -49,28 +49,16 @@ $map {$_} = "?" for
     "bah\100longitude.com",
     "bbucklan\100jpl-devvax.jpl.nasa.gov",
     "bilbo\100ua.fm",
-    "blino\100mandriva.com",
     "bob\100starlabs.net",
-    "bonefish\100cs.tu-berlin.de",
     "cygwin\100cygwin.com",
     "david\100dhaller.de",
     "erik\100cs.uni-jena.de",
-    "gml4410\100ggr.co.uk",
-    "info\100lingo.kiev.ua",
+    "info\100lingo.kiev.ua", # Lingo Translation agency
     "jms\100mathras.comcast.net",
-    "kan\100dcit.cz",
-    "kaminsky\100math.huji.ac.il",
-    "kvr\100centrum.cz",
-    "lemkemch\100t-online.de",
-    "mlelstv\100serpens.de",
-    "perlbug\100veggiechinese.net",
     "premchai21\100yahoo.com",
     "pxm\100nubz.org",
     "raf\100tradingpost.com.au",
-    "scott\100perlcode.org",
     "smoketst\100hp46t243.cup.hp.com",
-    "yath-perlbug\100yath.de",
-
 		"oracle\100pcr8.pcr.com". # Probably Ed Eddington ed@pcr.com
 		"root\100chronos.fi.muni.cz", # no clue - jrv 20090803
 		"gomar\100md.media-web.de", # no clue - jrv 20090803
@@ -490,6 +478,8 @@ hansmu\100xs4all.nl                     hansm\100icgroup.nl
 hio\100ymir.co.jp                       hio\100hio.jp
 hops\100sco.com							hops\100scoot.pdev.sco.com
 
+ingo_weinhold\100gmx.de					bonefish\100cs.tu-berlin.de
+
 james\100mastros.biz						theorb\100desert-island.me.uk
 jand\100activestate.com					jan.dubois\100ibm.net
 japhy\100pobox.com                      japhy\100pobox.org
@@ -719,3 +709,4 @@ whatever\100davidnicol.com                davidnicol\100gmail.com
 wolfgang.laun\100alcatel.at               wolfgang.laun\100chello.at
 +                                         wolfgang.laun\100thalesgroup.com
 +                                         wolfgang.laun\100gmail.com
+yath\100yath.de							  yath-perlbug\100yath.de
