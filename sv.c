@@ -12349,11 +12349,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_registered_mros  = hv_dup_inc(proto_perl->Iregistered_mros, param);
 
-    if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
-        ptr_table_free(PL_ptr_table);
-        PL_ptr_table = NULL;
-    }
-
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */
@@ -12372,6 +12367,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    LEAVE;
 	}
     }
+
+    if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
+        ptr_table_free(PL_ptr_table);
+        PL_ptr_table = NULL;
+    }
+
 
     SvREFCNT_dec(param->stashes);
 
