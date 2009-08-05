@@ -129,6 +129,8 @@ hunk.
 #  endif
 static const char * const local_patches[] = {
 	NULL
+	,"RC1"
+
 	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
         PERL_GIT_UNCOMMITTED_CHANGES	/* do not remove this line */
 	,NULL
