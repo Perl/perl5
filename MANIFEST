@@ -4224,6 +4224,7 @@ t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
+t/lib/overload_fallback.t	Test that using overload 2x in a scope doesn't clobber fallback
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm		Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
