@@ -1836,7 +1836,8 @@ PerlProcFork(struct IPerlProc* piPerl)
     }
     h = new CPerlHost(*(CPerlHost*)w32_internal_host);
     PerlInterpreter *new_perl = perl_clone_using((PerlInterpreter*)aTHX,
-						 CLONEf_COPY_STACKS,
+						   CLONEf_COPY_STACKS
+						 | CLONEf_KEEP_PTR_TABLE,
 						 h->m_pHostperlMem,
 						 h->m_pHostperlMemShared,
 						 h->m_pHostperlMemParse,
