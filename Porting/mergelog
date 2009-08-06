@@ -3834,3 +3834,14 @@ M  2e831dfd27 2009/08/04 release_managers_guide: make into two logical sect
 M  20b15ed1ed 2009/08/04 The AUTHORS file is now short only about thirty 'r
 M  dd0e54ba0e 2009/08/04 minor tweaks to release_managers_guide.pod
 M  d7eb1120ad 2009/08/04 release_managers_guide: add patchlevel.h stuff
+d  46a76da79a 2009/08/05 win32/perlhost.h: use symbolic constant
+R  240bfeb992 2009/08/05 add CLONEf_KEEP_PTR_TABLE to win fork emulation.
+			    (see 682bcedc3e)
+M  c07671d743 2009/08/05 Now down to 17 unknown addresses which "should" be
+M  b0b93b3c77 2009/08/05 in perl_clone_using, free the prt_table
+R  682bcedc3e 2009/08/05 Revert "add CLONEf_KEEP_PTR_TABLE to win fork emul
+M  039dab9882 2009/08/05 The current CPAN is very noisy on download failure
+M  cb06ebec41 2009/08/05 ExtUtils::MakeMaker 6.55_02
+M  3ed7368117 2009/08/05 fix for EU:MM 6.55_02 failing test,
+M  909fb0b7fb 2009/08/05 Updated Module::CoreList for the 5.10.1 release
+M  a0db33fef5 2009/08/06 release_managers_guide: tweak ordering of 'on-the-
