@@ -523,8 +523,8 @@ Be sure to commit your changes:
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Update patchlevel.h to add a C<-RC1>-or-whatever string; or, if this is a
-final release, remove it. For example:
+Update F<patchlevel.h> to add a C<-RC1>-or-whatever string; or, if this is
+a final release, remove it. For example:
 
      static const char * const local_patches[] = {
              NULL
@@ -540,7 +540,11 @@ Be sure to commit your change:
 Build perl, then make sure it passes its own test suite, and installs:
 
     $ git clean -xdf
+    $ ./Configure -des -Dprefix=/tmp/perl-5.x.y-pretest
+
+    # or if it's an odd-numbered version:
     $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.x.y-pretest
+
     $ make test install
 
 =item *
@@ -579,6 +583,12 @@ here
 
 =item *
 
+Clean up the temporary directory, e.g.
+
+    $ rm -rf ../perl-x.y.z-RC1
+
+=item *
+
 Copy the tarballs (.gz and possibly .bz2) to a web server somewhere you
 have access to.
 
@@ -599,7 +609,9 @@ Check that basic configuration and tests work on each test machine:
 
 Check that the test harness and install work on each test machine:
 
+    $ make distclean
     $ ./Configure -des -Dprefix=/install/path && make all test_harness install
+    $ cd /install/path
 
 =item *
 
@@ -618,13 +630,17 @@ Bootstrap the CPAN client on the clean install:
 
 =item *
 
-Install Inline.pm 
+Try installing a popular CPAN module that's reasonably complex and that
+has dependencies; for example:
 
-    $ ./bin/perl -MCPAN -e'install Inline'
+    CPAN> install Inline
+    CPAN> quit
 
 Check that your perl can run this:
 
-    $ ./bin/perl -lwe 'use Inline C => "int answer() { return 42;} "; print answer'
+    $ ./bin/perl -lwe 'use Inline C => "int f() { return 42;} "; print f'
+    42
+    $
 
 =item *
 
@@ -632,15 +648,13 @@ Bootstrap the CPANPLUS client on the clean install:
 
     $ ./bin/cpanp
 
-
 =item *
 
-Install an XS module.
+Install an XS module, for example:
 
-=item *
-
-If all is well, announce the snapshot to p5p. (For a release candidate,
-instead follow the further steps described later.)
+    CPAN Terminal> i DBI
+    CPAN Terminal> quit
+    $ bin/perl -MDBI -e 1
 
 
 =item *
@@ -662,7 +676,7 @@ Once smoking is okay, upload it to PAUSE. This is the point of no return.
 If anything goes wrong after this point, you will need to re-prepare
 a new release with a new minor version or RC number.
 
-You may wish to create a .bz2 version of the tarball and upload that too.
+Upload both the .gz and .bz2 versions of the tarball.
 
 =item *
 
@@ -680,7 +694,7 @@ created.
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Disarm the patchlevel.h change; for example,
+Disarm the F<patchlevel.h> change; for example,
 
      static const char * const local_patches[] = {
              NULL
