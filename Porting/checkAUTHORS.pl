@@ -320,9 +320,6 @@ merijn                                  h.m.brand\100xs4all.nl
 +                                       h.m.brand\100hccnet.nl
 +                                       merijn\100l1.procura.nl
 +										merijn\100a5.(none)
-+										merijnb\100ms.com
-+										merijnb\100iloquent.nl
-+										merijnb\100iloquent.com
 mhx                                     mhx-perl\100gmx.net
 +										mhx\100r2d2.(none)
 nicholas                                nick\100unfortu.net
@@ -549,6 +546,8 @@ mats\100sm6sxl.net                      mats\100sm5sxl.net
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
 me\100davidglasser.net					glasser\100tang-eleven-seventy-nine.mit.edu
+merijnb\100iloquent.nl					merijnb\100ms.com
++										merijnb\100iloquent.com
 merlyn\100stonehenge.com				merlyn\100gadget.cscaper.com
 mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
 mlh\100swl.msd.ray.com						webtools\100uewrhp03.msd.ray.com
