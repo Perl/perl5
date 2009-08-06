@@ -842,11 +842,7 @@ PERL_CALLCONV GV*	Perl_gv_HVadd(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_GV_HVADD	\
 	assert(gv)
 
-PERL_CALLCONV GV*	Perl_gv_IOadd(pTHX_ GV* gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_IOADD	\
-	assert(gv)
-
+PERL_CALLCONV GV*	Perl_gv_IOadd(pTHX_ GV* gv);
 PERL_CALLCONV GV*	Perl_gv_autoload4(pTHX_ HV* stash, const char* name, STRLEN len, I32 method)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);

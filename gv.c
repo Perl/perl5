@@ -84,8 +84,6 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_GV_IOADD;
-
     if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV) {
 
         /*
