@@ -364,13 +364,13 @@ remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
 with any serious issues for which fixes are not going to happen now; and
 run through pod and spell checkers, e.g.
 
-    podchecker -warnings -warnings pod/perl5101delta.pod
-    spell pod/perl5101delta.pod
+    $ podchecker -warnings -warnings pod/perl5101delta.pod
+    $ spell pod/perl5101delta.pod
 
 Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
-    perl pod/pod2html pod/perl5101delta.pod > /tmp/perl5101delta.html
+    $ perl pod/pod2html pod/perl5101delta.pod > /tmp/perl5101delta.html
 
 =item *
 
@@ -439,7 +439,7 @@ Then change to your perl checkout, and if necessary,
 
     $ make perl
 
-Thenn, If you have a local CPAN mirror, run:
+Then, If you have a local CPAN mirror, run:
 
     $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
 
