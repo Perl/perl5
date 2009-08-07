@@ -926,6 +926,15 @@ L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-03/msg00481.html>
 There is no method on tied filehandles to allow them to be called back by
 formats.
 
+=head2 Propagate compilation hints to the debugger
+
+Currently a debugger started with -dE on the command-line doesn't see the
+features enabled by -E. More generally hints (C<$^H> and C<%^H>) aren't
+propagated to the debugger. Probably it would be a good thing to propagate
+hints from the innermost non-C<DB::> scope: this would make code eval'ed
+in the debugger see the features (and strictures, etc.) currently in
+scope.
+
 =head2 Attach/detach debugger from running program
 
 The old perltodo notes "With C<gdb>, you can attach the debugger to a running
