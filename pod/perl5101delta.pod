@@ -35,7 +35,9 @@ However, contrary to 5.10.0, evaluating the flip-flop operators in boolean
 context ensures it can now be useful in a C<when()>, notably for
 implementing bistable conditions, like in:
 
-    when (/^=begin/ .. /^=end/) { ... }
+    when (/^=begin/ .. /^=end/) {
+      # do something
+    }
 
 =item defined-or operator
 
