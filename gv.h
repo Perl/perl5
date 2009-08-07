@@ -95,9 +95,6 @@ Return the SV from the GV.
 #define GvFORM(gv)	(GvGP(gv)->gp_form)
 #define GvAV(gv)	(GvGP(gv)->gp_av)
 
-/* This macro is deprecated.  Do not use! */
-#define GvREFCNT_inc(gv) ((GV*)SvREFCNT_inc(gv))	/* DO NOT USE */
-
 #define GvAVn(gv)	(GvGP(gv)->gp_av ? \
 			 GvGP(gv)->gp_av : \
 			 GvGP(gv_AVadd(gv))->gp_av)
