@@ -57,7 +57,7 @@ context is, either upward in the syntax tree, or either forward or
 backward in the execution order.  (The bottom-up parser builds that
 part of the execution order it knows about, but if you follow the "next"
 links around, you'll find it's actually a closed loop through the
-top level node.
+top level node.)
 
 Whenever the bottom-up parser gets to a node that supplies context to
 its components, it invokes that portion of the top-down pass that applies
@@ -4691,6 +4691,8 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	    op_free(first);
 	    op_free(dead);
 	}
+	if (live->op_type == OP_LEAVE)
+	    live = newUNOP(OP_NULL, OPf_SPECIAL, live);
 	return live;
     }
     NewOp(1101, logop, 1, LOGOP);

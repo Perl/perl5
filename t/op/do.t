@@ -29,7 +29,7 @@ sub ok {
     return $ok;
 }
 
-print "1..44\n";
+print "1..50\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -159,6 +159,25 @@ $x = sub { if (1) { 0; @a } }->();
 ok($x == 4, 'if (1) { ...; @a } receives caller scalar context');
 @x = sub { if (1) { 0; @a } }->();
 ok("@x" eq "24 25 26 27", 'if (1) { ...; @a } receives caller list context');
+
+$x = sub { if (1) { 0; 20 } else{} }->();
+ok($x == 20, 'if (1) { ...; $x } else{} receives caller scalar context');
+
+@a = (24 .. 27);
+$x = sub { if (1) { 0; @a } else{} }->();
+ok($x == 4, 'if (1) { ...; @a } else{} receives caller scalar context');
+@x = sub { if (1) { 0; @a } else{} }->();
+ok("@x" eq "24 25 26 27", 'if (1) { ...; @a } else{} receives caller list context');
+
+$x = sub { if (0){} else { 0; 20 } }->();
+ok($x == 20, 'if (0){} else { ...; $x } receives caller scalar context');
+
+@a = (24 .. 27);
+$x = sub { if (0){} else { 0; @a } }->();
+ok($x == 4, 'if (0){} else { ...; @a } receives caller scalar context');
+@x = sub { if (0){} else { 0; @a } }->();
+ok("@x" eq "24 25 26 27", 'if (0){} else { ...; @a } receives caller list context');
+
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
