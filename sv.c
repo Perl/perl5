@@ -1185,12 +1185,21 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 
     PERL_ARGS_ASSERT_SV_UPGRADE;
 
+    if (old_type == new_type)
+	return;
+
+    /* This clause was purposefully added ahead of the early return above to
+       the shared string hackery for (sort {$a <=> $b} keys %hash), with the
+       inference by Nick I-S that it would fix other troublesome cases. See
+       changes 7162, 7163 (f130fd4589cf5fbb24149cd4db4137c8326f49c1 and parent)
+
+       Given that shared hash key scalars are no longer PVIV, but PV, there is
+       no longer need to unshare so as to free up the IVX slot for its proper
+       purpose. So it's safe to move the early return earlier.  */
+
     if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
     }
-
-    if (old_type == new_type)
-	return;
 
     old_body = SvANY(sv);
 
