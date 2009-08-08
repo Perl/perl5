@@ -196,7 +196,7 @@ package Maintainers;
     'Attribute::Handlers' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.85.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.86.tar.gz',
 	'FILES'		=> q[ext/Attribute-Handlers],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
@@ -233,7 +233,7 @@ package Maintainers;
     'AutoLoader' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/AutoLoader-5.68.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/AutoLoader-5.69.tar.gz',
 	'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
 	'EXCLUDED'	=> [ qw( t/00pod.t ) ],
 	'CPAN'		=> 1,
@@ -509,7 +509,7 @@ package Maintainers;
     'Data::Dumper' =>
 	{
 	'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam
-	'DISTRIBUTION'	=> 'SMUELLER/Data-Dumper-2.124.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Data-Dumper-2.125.tar.gz',
 	'FILES'		=> q[ext/Data-Dumper],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
