@@ -2016,6 +2016,9 @@ Evaluates I<sv> more than once. Sets I<len> to 0 if C<SvOOK(sv)> is false.
 	}								\
     } STMT_END
 #endif
+
+#define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
+
 /*
  * Local variables:
  * c-indentation-style: bsd

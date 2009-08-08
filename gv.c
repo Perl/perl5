@@ -1485,27 +1485,6 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
     gv_fullname4(sv, egv ? egv : gv, prefix, keepmain);
 }
 
-IO *
-Perl_newIO(pTHX)
-{
-    dVAR;
-    GV *iogv;
-    IO * const io = MUTABLE_IO(newSV_type(SVt_PVIO));
-    /* This used to read SvREFCNT(io) = 1;
-       It's not clear why the reference count needed an explicit reset. NWC
-    */
-    assert (SvREFCNT(io) == 1);
-    SvOBJECT_on(io);
-    /* Clear the stashcache because a new IO could overrule a package name */
-    hv_clear(PL_stashcache);
-    iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
-    /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
-    if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-      iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
-    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
-    return io;
-}
-
 void
 Perl_gv_check(pTHX_ const HV *stash)
 {

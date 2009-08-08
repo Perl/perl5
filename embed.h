@@ -570,7 +570,6 @@
 #define newGVREF		Perl_newGVREF
 #define newHVREF		Perl_newHVREF
 #define newHVhv			Perl_newHVhv
-#define newIO			Perl_newIO
 #define newLISTOP		Perl_newLISTOP
 #ifdef USE_ITHREADS
 #define newPADOP		Perl_newPADOP
@@ -2907,7 +2906,6 @@
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
-#define newIO()			Perl_newIO(aTHX)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
 #ifdef USE_ITHREADS
 #define newPADOP(a,b,c)		Perl_newPADOP(aTHX_ a,b,c)
