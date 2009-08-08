@@ -1473,6 +1473,32 @@ Perl_save_op(pTHX)
     save_op();
 }
 
+#ifdef PERL_DONT_CREATE_GVSV
+GV *
+Perl_gv_SVadd(pTHX_ GV *gv)
+{
+    PERL_ARGS_ASSERT_GV_SVADD;
+
+    return gv_SVadd(gv);
+}
+#endif
+
+GV *
+Perl_gv_AVadd(pTHX_ GV *gv)
+{
+    PERL_ARGS_ASSERT_GV_AVADD;
+
+    return gv_AVadd(gv);
+}
+
+GV *
+Perl_gv_HVadd(pTHX_ register GV *gv)
+{
+    PERL_ARGS_ASSERT_GV_HVADD;
+
+    return gv_HVadd(gv);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

@@ -339,8 +339,9 @@ p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
-Ap	|GV*	|gv_AVadd	|NN GV* gv
-Ap	|GV*	|gv_HVadd	|NN GV* gv
+Ap	|GV*	|gv_add_by_type	|NN GV *gv|svtype type
+Apmb	|GV*	|gv_AVadd	|NN GV *gv
+Apmb	|GV*	|gv_HVadd	|NN GV *gv
 Ap	|GV*	|gv_IOadd	|NULLOK GV* gv
 ApR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 method
 Ap	|void	|gv_check	|NN const HV* stash
@@ -2081,7 +2082,7 @@ p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
 #ifdef PERL_DONT_CREATE_GVSV
-Ap	|GV*	|gv_SVadd	|NN GV* gv
+Apbm	|GV*	|gv_SVadd	|NN GV *gv
 #endif
 Apo	|bool	|ckwarn		|U32 w
 Apo	|bool	|ckwarn_d	|U32 w

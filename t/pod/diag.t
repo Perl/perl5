@@ -191,7 +191,7 @@ Attempt to free unreferenced scalar: SV 0x%x
 Attempt to reload %s aborted. Compilation failed in require
 av_reify called on tied array
 Bad name after %s%s
-Bad symbol for scalar
+Bad symbol for %s
 bad top format reference
 Bizarre copy of %s
 Bizarre SvTYPE [%d]

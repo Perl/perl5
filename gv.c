@@ -40,42 +40,26 @@ Perl stores its global variables.
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
 
-
-#ifdef PERL_DONT_CREATE_GVSV
 GV *
-Perl_gv_SVadd(pTHX_ GV *gv)
+Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
-    PERL_ARGS_ASSERT_GV_SVADD;
+    SV **where;
+
+    PERL_ARGS_ASSERT_GV_ADD_BY_TYPE;
 
     if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for scalar");
-    if (!GvSV(gv))
-	GvSV(gv) = newSV(0);
-    return gv;
-}
-#endif
+	Perl_croak(aTHX_ "Bad symbol for %s", type == SVt_PVAV ? "array" : type == SVt_PVHV ? "hash" : "scalar");
 
-GV *
-Perl_gv_AVadd(pTHX_ register GV *gv)
-{
-    PERL_ARGS_ASSERT_GV_AVADD;
+    if (type == SVt_PVHV) {
+	where = (SV **)&GvHV(gv);
+    } else if (type == SVt_PVAV) {
+	where = (SV **)&GvAV(gv);
+    } else {
+	where = &GvSV(gv);
+    }
 
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for array");
-    if (!GvAV(gv))
-	GvAV(gv) = newAV();
-    return gv;
-}
-
-GV *
-Perl_gv_HVadd(pTHX_ register GV *gv)
-{
-    PERL_ARGS_ASSERT_GV_HVADD;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for hash");
-    if (!GvHV(gv))
-	GvHV(gv) = newHV();
+    if (!*where)
+	*where = newSV_type(type);
     return gv;
 }
 
