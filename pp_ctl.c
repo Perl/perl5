@@ -1749,9 +1749,8 @@ PP(pp_caller)
 	const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
-	    GV* const tmpgv = gv_fetchpvs("DB::args", GV_ADD, SVt_PVAV);
-	    PL_dbargs = GvAV(gv_AVadd(tmpgv));
-	    GvMULTI_on(tmpgv);
+	    PL_dbargs = GvAV(gv_AVadd(gv_fetchpvs("DB::args", GV_ADDMULTI,
+						  SVt_PVAV)));
 	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
 	}
 
