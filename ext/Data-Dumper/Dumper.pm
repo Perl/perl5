@@ -754,7 +754,7 @@ Data::Dumper - stringified perl data structures, suitable for both printing and 
 =head1 DESCRIPTION
 
 Given a list of scalars or reference variables, writes out their contents in
-perl syntax. The references can also be objects.  The contents of each
+perl syntax. The references can also be objects.  The content of each
 variable is output in a single Perl statement.  Handles self-referential
 structures correctly.
 
@@ -1017,7 +1017,7 @@ Default is: C< =E<gt> >.
 $Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
 
 Can be set to a positive integer that specifies the depth beyond which
-which we don't venture into a structure.  Has no effect when
+we don't venture into a structure.  Has no effect when
 C<Data::Dumper::Purity> is set.  (Useful in debugger when we often don't
 want to see more than enough).  Default is 0, which means there is 
 no maximum depth. 
