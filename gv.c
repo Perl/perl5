@@ -45,49 +45,40 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
     SV **where;
 
-    PERL_ARGS_ASSERT_GV_ADD_BY_TYPE;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for %s", type == SVt_PVAV ? "array" : type == SVt_PVHV ? "hash" : "scalar");
+    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV) {
+	const char *what;
+	if (type == SVt_PVIO) {
+	    /*
+	     * if it walks like a dirhandle, then let's assume that
+	     * this is a dirhandle.
+	     */
+	    what = PL_op->op_type ==  OP_READDIR ||
+		PL_op->op_type ==  OP_TELLDIR ||
+		PL_op->op_type ==  OP_SEEKDIR ||
+		PL_op->op_type ==  OP_REWINDDIR ||
+		PL_op->op_type ==  OP_CLOSEDIR ?
+		"dirhandle" : "filehandle";
+	    /* diag_listed_as: Bad symbol for filehandle */
+	} else if (type == SVt_PVHV) {
+	    what = "hash";
+	} else {
+	    what = type == SVt_PVAV ? "array" : "scalar";
+	}
+	Perl_croak(aTHX_ "Bad symbol for %s", what);
+    }
 
     if (type == SVt_PVHV) {
 	where = (SV **)&GvHV(gv);
     } else if (type == SVt_PVAV) {
 	where = (SV **)&GvAV(gv);
+    } else if (type == SVt_PVIO) {
+	where = (SV **)&GvIOp(gv);
     } else {
 	where = &GvSV(gv);
     }
 
     if (!*where)
 	*where = newSV_type(type);
-    return gv;
-}
-
-GV *
-Perl_gv_IOadd(pTHX_ register GV *gv)
-{
-    dVAR;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV) {
-
-        /*
-         * if it walks like a dirhandle, then let's assume that
-         * this is a dirhandle.
-         */
-	const char * const fh =
-			 PL_op->op_type ==  OP_READDIR ||
-                         PL_op->op_type ==  OP_TELLDIR ||
-                         PL_op->op_type ==  OP_SEEKDIR ||
-                         PL_op->op_type ==  OP_REWINDDIR ||
-                         PL_op->op_type ==  OP_CLOSEDIR ?
-                         "dirhandle" : "filehandle";
-	/* diag_listed_as: Bad symbol for filehandle */
-        Perl_croak(aTHX_ "Bad symbol for %s", fh);
-    }
-
-    if (!GvIOp(gv)) {
-	GvIOp(gv) = newIO();
-    }
     return gv;
 }
 

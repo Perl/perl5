@@ -209,6 +209,7 @@ Return the SV from the GV.
 
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
+#define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
 #define gv_SVadd(gv) gv_add_by_type((gv), SVt_NULL)
 
 /*

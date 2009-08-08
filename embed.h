@@ -269,7 +269,6 @@
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
 #define gv_add_by_type		Perl_gv_add_by_type
-#define gv_IOadd		Perl_gv_IOadd
 #define gv_autoload4		Perl_gv_autoload4
 #define gv_check		Perl_gv_check
 #define gv_efullname		Perl_gv_efullname
@@ -2597,7 +2596,6 @@
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
 #define gv_add_by_type(a,b)	Perl_gv_add_by_type(aTHX_ a,b)
-#define gv_IOadd(a)		Perl_gv_IOadd(aTHX_ a)
 #define gv_autoload4(a,b,c,d)	Perl_gv_autoload4(aTHX_ a,b,c,d)
 #define gv_check(a)		Perl_gv_check(aTHX_ a)
 #define gv_efullname(a,b)	Perl_gv_efullname(aTHX_ a,b)
