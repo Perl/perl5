@@ -382,7 +382,7 @@ sub _dump {
 	$out .= '\\' . $s->_dump($$val, "*{$name}");
     }
     elsif ($realtype eq 'ARRAY') {
-      my($v, $pad, $mname);
+      my($pad, $mname);
       my($i) = 0;
       $out .= ($name =~ /^\@/) ? '(' : '[';
       $pad = $s->{sep} . $s->{pad} . $s->{apad};
@@ -391,7 +391,7 @@ sub _dump {
 	($name =~ /^\\?[\%\@\*\$][^{].*[]}]$/) ? ($mname = $name) :
 	  ($mname = $name . '->');
       $mname .= '->' if $mname =~ /^\*.+\{[A-Z]+\}$/;
-      for $v (@$val) {
+      for my $v (@$val) {
 	$sname = $mname . '[' . $i . ']';
 	$out .= $pad . $ipad . '#' . $i if $s->{indent} >= 3;
 	$out .= $pad . $ipad . $s->_dump($v, $sname);
