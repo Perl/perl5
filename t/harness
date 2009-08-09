@@ -55,19 +55,6 @@ sub _populate_hash {
     return map {$_, 1} split /\s+/, $_[0];
 }
 
-# Generate T::H schedule rules that run the contents of each directory
-# sequentially.
-sub _seq_dir_rules {
-    my @tests = @_;
-    my %dir;
-    for (@tests) {
-        s{[^/]+$}{\*};
-        $dir{$_}++;
-    }
-
-    return { par => [ map { { seq => $_ } } sort keys %dir ] };
-}
-
 sub _extract_tests;
 sub _extract_tests {
     # This can probably be done more tersely with a map, but I doubt that it
@@ -215,7 +202,17 @@ if (@ARGV) {
 
 	push @tests, @last;
 
-	push @seq, _seq_dir_rules @last;
+	# Generate T::H schedule rules that run the contents of each directory
+	# sequentially.
+	{
+	    my %dir;
+	    for (@last) {
+		s{[^/]+$}{\*};
+		$dir{$_}++;
+	    }
+
+	    push @seq, { par => [ map { { seq => $_ } } sort keys %dir ] };
+	}
 
 	$rules = { seq => \@seq };
     }
