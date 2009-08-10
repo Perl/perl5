@@ -1468,6 +1468,7 @@ ext/threads/t/join.t		Testing the join function
 ext/threads/t/kill.t		Tests thread signalling
 ext/threads/t/libc.t		testing libc functions for threadsafety
 ext/threads/t/list.t		Test threads->list()
+ext/threads/t/no_threads.t	threads test for non-threaded Perls
 ext/threads/t/problems.t	Test various memory problems
 ext/threads/t/stack_env.t	Tests for stack limits
 ext/threads/t/stack.t		Tests for stack limits
