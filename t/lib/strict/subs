@@ -408,3 +408,17 @@ system(FOO . "\n");
 EXPECT
 Bareword "FOO" not allowed while "strict subs" in use at - line 4.
 Execution of - aborted due to compilation errors.
+########
+# commit 984f9f66477bc722578262ae8520584e44e881af broke this parsing
+use strict 'subs';
+my @players;
+sub _rankCompare { }
+@players = sort(_rankCompare @players);
+EXPECT
+
+########
+# commit 984f9f66477bc722578262ae8520584e44e881af broke this parsing
+use strict;
+readline(STDIN);
+EXPECT
+
