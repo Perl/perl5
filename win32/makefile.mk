@@ -493,7 +493,10 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -xc++
 
-LIBC		= -lmsvcrt
+# Current releases of MinGW 5.1.4 (as of 11-Aug-2009) will fail to link
+# correctly if -lmsvcrt is specified explicitly.
+LIBC		=
+#LIBC		= -lmsvcrt
 
 # same libs as MSVC
 LIBFILES	= $(CRYPT_LIB) $(LIBC) \
