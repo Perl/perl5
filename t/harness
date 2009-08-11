@@ -212,7 +212,10 @@ if (@ARGV) {
 	my %total_time;
 
 	for (@last) {
-	    m!(.*/)! or die "'$_'";
+	    if ($^O eq 'MSWin32') {
+		s,\\,/,g; # canonicalize path
+	    };
+	    m!(.*[/])! or die "'$_'";
 	    push @{$dir{$1}}, $_;
 	    $total_time{$1} += $times{$_} || 0;
 	}
