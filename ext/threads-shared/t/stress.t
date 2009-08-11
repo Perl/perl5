@@ -32,7 +32,7 @@ use threads::shared;
 #
 #####
 {
-    my $cnt = 200;
+    my $cnt = 50;
 
     my $TIMEOUT = 60;
 
