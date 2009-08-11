@@ -83,20 +83,17 @@ for (@prgs){
     $expected =~ s|(\./)?abc\.pm|:abc.pm|g if $^O eq 'MacOS';
     $expected =~ s|./abc|:abc|g if $^O eq 'MacOS';
     my $prefix = ($results =~ s/^PREFIX\n//) ;
-    my $TODO = $prog =~ m/^#\s*TODO:/;
     if ( $results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
     }
     elsif (($prefix and $results !~ /^\Q$expected/) or
 	   (!$prefix and $results ne $expected)){
-        if (! $TODO) {
-            print STDERR "PROG: $switch\n$prog\n";
-            print STDERR "EXPECTED:\n$expected\n";
-            print STDERR "GOT:\n$results\n";
-        }
+        print STDERR "PROG: $switch\n$prog\n";
+        print STDERR "EXPECTED:\n$expected\n";
+        print STDERR "GOT:\n$results\n";
         print "not ";
     }
-    print "ok " . ++$i . ($TODO ? " # TODO" : "") . "\n";
+    print "ok " . ++$i . "\n";
     foreach (@temps) 
 	{ unlink $_ if $_ } 
 }
