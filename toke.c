@@ -5697,10 +5697,10 @@ Perl_yylex(pTHX)
 
 		/* Call it a bare word */
 
-		bareword:
 		if (PL_hints & HINT_STRICT_SUBS)
 		    pl_yylval.opval->op_private |= OPpCONST_STRICT;
 		else {
+		bareword:
 		    if (lastchar != '-') {
 			if (ckWARN(WARN_RESERVED)) {
 			    d = PL_tokenbuf;
