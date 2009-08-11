@@ -602,10 +602,10 @@ Examples:
 As a scalar operator:
 
     if (101 .. 200) { print; } # print 2nd hundred lines, short for
-                               #   if ($. == 101 .. $. == 200) ...
+                               #   if ($. == 101 .. $. == 200) { print; }
 
     next LINE if (1 .. /^$/);  # skip header lines, short for
-                               #   ... if ($. == 1 .. /^$/);
+                               #   next LINE if ($. == 1 .. /^$/);
                                # (typically in a loop labeled LINE)
 
     s/^/> / if (/^$/ .. eof());  # quote body
@@ -615,9 +615,9 @@ As a scalar operator:
         $in_header =   1  .. /^$/;
         $in_body   = /^$/ .. eof;
         if ($in_header) {
-            # ...
+            # do something
         } else { # in body
-            # ...
+            # do something else
         }
     } continue {
         close ARGV if eof;             # reset $. each file
