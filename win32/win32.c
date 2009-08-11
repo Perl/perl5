@@ -225,11 +225,23 @@ set_w32_module_name(void)
         WCHAR fullname[MAX_PATH];
         char *ansi;
 
+        DWORD (__stdcall *pfnGetLongPathNameW)(LPCWSTR, LPWSTR, DWORD) =
+            (DWORD (__stdcall *)(LPCWSTR, LPWSTR, DWORD))
+            GetProcAddress(GetModuleHandle("kernel32.dll"), "GetLongPathNameW");
+
         GetModuleFileNameW(module, modulename, sizeof(modulename)/sizeof(WCHAR));
 
         /* Make sure we get an absolute pathname in case the module was loaded
          * explicitly by LoadLibrary() with a relative path. */
         GetFullPathNameW(modulename, sizeof(fullname)/sizeof(WCHAR), fullname, NULL);
+
+        /* Make sure we start with the long path name of the module because we
+         * later scan for pathname components to match "5.xx" to locate
+         * compatible sitelib directories, and the short pathname might mangle
+         * this path segment (e.g. by removing the dot on NTFS to something
+         * like "5xx~1.yy") */
+        if (pfnGetLongPathNameW)
+            pfnGetLongPathNameW(fullname, fullname, sizeof(fullname)/sizeof(WCHAR));
 
         /* remove \\?\ prefix */
         if (memcmp(fullname, L"\\\\?\\", 4*sizeof(WCHAR)) == 0)
