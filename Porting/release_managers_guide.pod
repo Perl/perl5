@@ -720,10 +720,17 @@ do it for you.)
 
 =item *
 
+I<You MUST SKIP this step for SNAPSHOT>
+
+Ask Jarkko to add the tarball to http://www.cpan.org/src/
+
+=item *
+
 I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
 
-Ask Jarkko to update http://www.cpan.org/src/README.html and
-Rafael to update http://dev.perl.org/perl5/
+Ask Jarkko to update the descriptions of which tarballs are current in
+http://www.cpan.org/src/README.html, and Rafael to update
+http://dev.perl.org/perl5/
 
 =item *
 
