@@ -1409,7 +1409,7 @@ OBJECT_MODE on AIX determines the way the compiler and linker deal with
 their objects, but this is a variable that only influences build-time
 behaviour, and should not affect the perl scripts that are eventually
 executed by the perl binary. Other variables, like PERL_UNICODE,
-PERL5LIB, and PERL5OPTS will influence the behaviour of the test suite.
+PERL5LIB, and PERL5OPT will influence the behaviour of the test suite.
 So if you are getting strange test failures, you may want to try
 retesting with the various PERL variables unset.
 
