@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Jun 30 00:49:36 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Wed Aug 12 09:30:48 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21644,9 +21644,9 @@ find_extensions='
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
 	    if $test -d File-Glob; then
 		$ls -1 $xxx > $$.tmp;
-		if $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
+		if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
-		elif $contains "\.c$" $$.tmp > /dev/null 2>&1; then
+		elif $contains "\.c$"  $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
 		elif $test -d $xxx; then
 		    nonxs_extensions="$nonxs_extensions $this_ext";
@@ -22122,7 +22122,9 @@ $startsh
 # Target system     : $myuname
 
 EOT
+: Add in command line options if available
 $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
+
 $spitshell <<EOT >>config.sh
 
 Author='$Author'
@@ -23190,9 +23192,6 @@ yaccflags='$yaccflags'
 zcat='$zcat'
 zip='$zip'
 EOT
-
-: Add in command line options if available
-$test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 
 : add special variables
 $test -f $src/patchlevel.h && \
