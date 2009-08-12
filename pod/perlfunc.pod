@@ -5454,9 +5454,10 @@ Splits the string EXPR into a list of strings and returns that list.  By
 default, empty leading fields are preserved, and empty trailing ones are
 deleted.  (If all fields are empty, they are considered to be trailing.)
 
-In scalar context, returns the number of fields found and splits into
-the C<@_> array.  Use of split in scalar context is deprecated, however,
-because it clobbers your subroutine arguments.
+In scalar context, returns the number of fields found. In scalar and void
+context it splits into the C<@_> array.  Use of split in scalar and void
+context is deprecated, however, because it clobbers your subroutine
+arguments.
 
 If EXPR is omitted, splits the C<$_> string.  If PATTERN is also omitted,
 splits on whitespace (after skipping any leading whitespace).  Anything
