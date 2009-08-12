@@ -762,7 +762,7 @@ sub installlib {
     if ($dir =~ /^auto\// ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
 	  ($name =~ /^(.*)\.(?:h|lib)$/i && ($Is_W32 || $Is_NetWare)) ||
-	  $name=~/^Config_(heavy\|git)\.pl\z/
+	  $name=~/^Config_(heavy|git)\.pl\z/
        ) {
 	$installlib = $installarchlib;
 	return unless $do_installarchlib;
