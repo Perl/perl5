@@ -661,6 +661,30 @@ Install an XS module, for example:
 
 I<You MAY SKIP this step for SNAPSHOT>
 
+Check that the C<perlbug> utility works. Try the following:
+
+    $ /path/to/perl/perlbug 
+    ...
+    Subject: test bug report
+    Local perl administrator [yourself]: 
+    Editor [vi]: 
+    Module: 
+    Category [core]: 
+    Severity [low]: 
+    (edit report)
+    Action (Send/Display/Edit/Subject/Save to File): f
+    Name of file to save message in [perlbug.rep]: 
+    Action (Send/Display/Edit/Subject/Save to File): q
+
+and carefully examine the output (in F<perlbug.rep]>), especially
+the "Locally applied patches" section. If everything appears okay, then
+try it again, this time actually submitting the bug report. Check that it
+shows up, then remember to close it!
+
+=item *
+
+I<You MAY SKIP this step for SNAPSHOT>
+
 Wait for the smoke tests to catch up with the commit which this release is
 based on (or at least the last commit of any consequence).
 
