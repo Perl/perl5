@@ -966,10 +966,10 @@ M  91d0cbf6b4 2008/05/19 33865
 M  bcb8f0e81f 2008/05/19 33869
 R  d3c2e0214a 2008/05/19 33870 (unknown reason)
 M  3182b11b46 2008/05/19 33871
-M  984f9f6647 2008/05/20 33874
-M  ace56ae504 2008/05/20 33876
+R  984f9f6647 2008/05/20 33874 was merged, then later reverted by be5c7c66a6
+R  ace56ae504 2008/05/20 33876 was merged, then later reverted by 384dc2341d
 M  b2f871edc3 2008/05/20 33887
-M  9453289ade 2008/05/20 33890
+R  9453289ade 2008/05/20 33890 was merged, then later reverted by 749f7a5348
 M  99978bb4f6 2008/05/20 33891
 M  e99d581a4a 2008/05/21 33896
 M  72bfe1b2b3 2008/05/21 33897
@@ -3845,3 +3845,44 @@ M  cb06ebec41 2009/08/05 ExtUtils::MakeMaker 6.55_02
 M  3ed7368117 2009/08/05 fix for EU:MM 6.55_02 failing test,
 M  909fb0b7fb 2009/08/05 Updated Module::CoreList for the 5.10.1 release
 M  a0db33fef5 2009/08/06 release_managers_guide: tweak ordering of 'on-the-
+M  ecc9c9d9c3 2009/08/06 Porting/makerel: handle more sha1 variants,
+M  a42352eec1 2009/08/06 more release_managers_guide.pod tweaking
+M  bf8ea21502 2009/08/06 Minor typo and formatting fixes to the release man
+M  9c1f068a70 2009/08/06 broke out checkAUTHORS aliasing for our two "merij
+d  be4a20f47d 2009/08/06 Make gv_IOadd accept a NULL argument
+M  c40e8e9bf4 2009/08/06 pod/perlipc.pod: add some hints on avoiding pipe d
+d  ef9da979fc 2009/08/07 [perl #68108] : also fix if/else constant folding
+M  53967bb90f 2009/08/07 perltodo: Propagate compilation hints to the debug
+M  e37e7c833e 2009/08/07 5.10.1-RC1 is released
+R  cc4a32e9b8 2009/08/07 Remove GvREFCNT_inc(), which is deprecated and unu
+d  af3885a078 2009/08/08 In pp_caller, remove a GvMULTI_on() by adding GV_A
+d  9a0c975abc 2009/08/08 Update some distributions in Porting/Maintainers.p
+d  70abb3320b 2009/08/08 Synchronize AutoLoader with CPAN's 5.69
+d  552b942743 2009/08/08 Synchronize with CPAN's Attribute::Handlers 0.86
+d  5e60330210 2009/08/08 Spellcheck
+d  a36ee16f61 2009/08/08 Move variable declaration to where it's used
+d  4d0a25002d 2009/08/08 Synchronize with CPAN's Data::Dumper 2.125
+d  1776cbe852 2009/08/08 Move the "types are equal" early return ahead of t
+d  d5713896ec 2009/08/08 Merge gv_AVadd(), gv_HVadd() and gv_SVadd() into g
+d  85dca89a8f 2009/08/08 Perl_newIO() can become a mathom by making newIO()
+d  bb85b28a6d 2009/08/08 Merge gv_IOadd() into gv_add_by_type().
+d  fc279e463d 2009/08/09 Inline _seq_dir_rules(), as it is now used in only
+d  226de47957 2009/08/09 Run the main tests "slowest first" by ordering the
+R  7989172bfe 2009/08/09 Add 5.10.1-RC1 release to perlhist
+M  1a7f3fa0f2 2009/08/10 Bump Module::Build version to 0.340201
+M  249829ce66 2009/08/10 bump Module::Build in Maintainers.pl
+d  3350824ec1 2009/08/10 Upgrade to 'threads' 1.74
+d  891f9d0e20 2009/08/10 Update threads to 1.74
+d  66ce101fb6 2009/08/10 MANIFEST and Porting/Maintainers.pl update
+d  5b48f78c51 2009/08/10 Upgrade to threads::shared 1.31
+d  ba2d061b7a 2009/08/11 Reduce thread count in threads::shared stress test
+d  133fac12ff 2009/08/11 Restore t/harness path checks on Win32
+M  4cd37d19e1 2009/08/11 PERL_DONT_CREATE_GVSV was documented in perl589del
+M  746c0b3537 2009/08/11 release_managers_guide: mention updating http://ww
+M  06aa495b2e 2009/08/11 INSTALL: mention that env vars can affect tests
+M  f343f96080 2009/08/11 Removed '...' ellipses from docs about '...' flip-
+M  adbb55c01a 2009/08/11 s/PERL5OPTS/PERL5OPTS/ in INSTALL
+M  ad2561310d 2009/08/11 On Windows normalize $^X using GetLongPathName()
+M  805b101128 2009/08/12 ameliorate B::Deparse slowdown
+.  679b67fee6 2009/08/12 Don't explicitly link against msvcrt when using Mi
+M  d62d5a537d 2009/08/12 install Config_heavy.pl in archlib
