@@ -2,11 +2,10 @@
 
 release_managers_guide - Releasing a new version of perl 5.x
 
-XXX as of Jul 2009, this file is still a work-in-progress. I think it
-contains all the actions needed to build a release, but things may have
-got skipped, and some things could do with polishing. Note that things
-change each release, there may be new things not covered here, or
-tools may need updating. DAPM
+As of August 2009, this fule is mostly complete, although it is missing
+some detail on doing a mjor release (e.g. 5.10.0 -> 5.12.0). Note that
+things change at each release, so there may be new things not covered
+here, or tools may need updating.
 
 =head1 SYNOPSIS
 
@@ -68,7 +67,13 @@ the tarball will usually be the same as that of the previous release.
 
 =item Release Candidate (RC)
 
-XXX Describe me
+A release candidate is an attempt to produce a tarball that is a close as
+possible to the final release. Indeed, unless critical faults are found
+during the RC testing, the final release will be identical to the RC
+barring a few minor fixups (updating the release date in F<perlhist.pod>,
+removing the RC status from F<patchlevel.h>, etc). If faults are found,
+then the fixes should be put into a new release candidate, never directly
+into a final release.
 
 =item Stable/Maint release
 
@@ -621,6 +626,21 @@ paths.
 
 Note that the results may be different without a F<.git/> directory,
 which is why you should test from the tarball.
+
+=item *
+
+Compare the pathnames of all installed files with those of the previous
+release (i.e. against the last installed tarball on this branch which you
+have previously verified using this same procedure). In particular, look
+for files in the wrong place, or files no longer included which should be.
+For example, suppose the about-to-be-released version is 5.10.1 and the
+previous is 5.10.0:
+
+    cd installdir-5.10.0/
+    find . -type f | perl -pe's/5\.10\.0/5.10.1/g' | sort > /tmp/f1
+    cd installdir-5.10.1/
+    find . -type f | sort > /tmp/f2
+    diff -u /tmp/f[12]
 
 =item *
 
