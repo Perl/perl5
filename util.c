@@ -1397,7 +1397,6 @@ Perl_die_nocontext(const char* pat, ...)
     dTHX;
     OP *o;
     va_list args;
-    PERL_ARGS_ASSERT_DIE_NOCONTEXT;
     va_start(args, pat);
     o = vdie(pat, &args);
     va_end(args);

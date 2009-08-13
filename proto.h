@@ -329,10 +329,7 @@ PERL_CALLCONV void	Perl_croak_nocontext(const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV OP*	Perl_die_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_DIE_NOCONTEXT	\
-	assert(pat)
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_deb_nocontext(const char* pat, ...)
 			__attribute__format__(__printf__,1,2)
