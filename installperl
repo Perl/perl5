@@ -163,6 +163,10 @@ find(sub {
     {
 	my($path, $modname) = ($1,$2);
 
+	# Change hypenated name like Filter-Util-Call to nested
+	# directory name Filter/Util/Call
+	$path =~ s{-}{/}g;
+
 	# strip to optional "/lib", or remove trailing component
 	$path =~ s{.*/lib\b}{} or $path =~ s{/[^/]*$}{};
 
