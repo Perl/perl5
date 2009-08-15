@@ -2,8 +2,8 @@
 
 release_managers_guide - Releasing a new version of perl 5.x
 
-As of August 2009, this fule is mostly complete, although it is missing
-some detail on doing a mjor release (e.g. 5.10.0 -> 5.12.0). Note that
+As of August 2009, this file is mostly complete, although it is missing
+some detail on doing a major release (e.g. 5.10.0 -> 5.12.0). Note that
 things change at each release, so there may be new things not covered
 here, or tools may need updating.
 
