@@ -743,7 +743,7 @@ Upgraded from version 1.13 to 1.17.
 
 =item C<Safe>
 
-Upgraded from 2.12 to 2.17.
+Upgraded from 2.12 to 2.17_01.
 
 =item C<Scalar::Util>
 
