@@ -516,8 +516,8 @@ if (do { $a++; GLIPP }) { x() }
 >>>>
 x() if $a;
 if ($a == 1) { x(); } elsif ($b == 2) { z(); }
-if (do { foo(); GLIPP }) { x(); }
-if (do { ++$a; GLIPP }) { x(); }
+if (do { foo(); 'glipp' }) { x(); }
+if (do { ++$a; 'glipp' }) { x(); }
 ####
 # TODO Only strict 'refs' currently supported
 # 68 strict
