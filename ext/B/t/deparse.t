@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 77;
+use Test::More tests => 71;
 use Config ();
 
 use B::Deparse;
@@ -518,29 +518,6 @@ x() if $a;
 if ($a == 1) { x(); } elsif ($b == 2) { z(); }
 if (do { foo(); GLIPP }) { x(); }
 if (do { ++$a; GLIPP }) { x(); }
-####
-# 62 tests for deparsing constants
-warn PI;
-####
-# 63 tests for deparsing imported constants
-warn O_TRUNC;
-####
-# 64 tests for deparsing re-exported constants
-warn O_CREAT;
-####
-# 65 tests for deparsing imported constants that got deleted from the original namespace
-warn O_APPEND;
-####
-# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
-# 66 tests for deparsing constants which got turned into full typeglobs
-# It might be fundamentally impossible to make this work on ithreads, in which
-# case the TODO should become a SKIP
-warn O_EXCL;
-eval '@Fcntl::O_EXCL = qw/affe tiger/;';
-warn O_EXCL;
-####
-# 67 tests for deparsing of blessed constant with overloaded numification
-warn OVERLOADED_NUMIFICATION;
 ####
 # TODO Only strict 'refs' currently supported
 # 68 strict
