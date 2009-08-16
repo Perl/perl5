@@ -17,6 +17,10 @@ use strict;
 use warnings;
 use Maintainers qw(show_results process_options finish_tap_output);
 
+if ($^O eq 'VMS') {
+    print "1..0 # Skip: home-grown glob doesn't handle fancy patterns\n";
+    exit 0;
+}
 
 {
     local @ARGV = qw|--tap-output --checkmani|;
