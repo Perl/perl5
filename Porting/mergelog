@@ -3884,5 +3884,33 @@ M  f343f96080 2009/08/11 Removed '...' ellipses from docs about '...' flip-
 M  adbb55c01a 2009/08/11 s/PERL5OPTS/PERL5OPTS/ in INSTALL
 M  ad2561310d 2009/08/11 On Windows normalize $^X using GetLongPathName()
 M  805b101128 2009/08/12 ameliorate B::Deparse slowdown
-.  679b67fee6 2009/08/12 Don't explicitly link against msvcrt when using Mi
+M  679b67fee6 2009/08/12 Don't explicitly link against msvcrt when using Mi
 M  d62d5a537d 2009/08/12 install Config_heavy.pl in archlib
+M  94a9a4bc91 2009/08/12 Remove duplicate entry (from config_heavy.pl)
+M  521fe6911c 2009/08/12 document split in void context in perlfunc.pod
+M  47b1f09620 2009/08/12 release_managers_guide: mention testing perlbug
+M  8a00c8caf7 2009/08/12 perlbug.PL assumes patchlevel.h has simple patch l
+M  7acb6aa6c2 2009/08/12 Typos in perlbug.PL
+d  cb4bdfcf96 2009/08/12 Added a failing test for a bareword parsing regres
+d  972ee0bb66 2009/08/13 Mark as TODO the failing tests added in cb4bdfcf f
+R  9af20c7fc2 2009/08/13 Mention the unit of time
+R  e64d4d0a20 2009/08/13 Revert "Mention the unit of time"
+M  cf284a245b 2009/08/13 Perl_die_nocontext() is also called with NULL from
+M  109f04419a 2009/08/13 Merge the updated perlfaq from the perlfaq reposit
+M  ac1205a52f 2009/08/13 Updated Maintainers.pl to note that p5p/blead is r
+R  303def5230 2009/08/13 Merge commit 'dromedary/blead' into blead
+				MERGE: ac1205a52f cf284a245b
+d  00d2151d81 2009/08/13 Revert "Revert "Mention the unit of time""
+M  4cc80fc4cb 2009/08/13 Install arch-dependent files into $archlib.
+M  d60a104409 2009/08/13 release_managers_guide: add release compare item,
+M  4a2c3333c5 2009/08/14 Add Bob Wilkinson's email address to AUTHORS
+R  d1cddda8a7 2009/08/14 Fix PROCESSOR_ARCHITECTURE in dmake builds.
+M  9b1007c4e4 2009/08/14 Import WIN64 environment variable into makefile.mk
+R  e99480546c 2009/08/15 Revert bogus PROCESSOR_ARCHITECTURE fix.
+M  76f108ac8c 2009/08/15 Explain that the load_module() import list must be
+M  c67d51c392 2009/08/15 release_managers_guide: typo fixes
+M  e13751452f 2009/08/15 quick fix cpan -r
+M  54c717c313 2009/08/15 Suppress system messages when op/ref.t calls die o
+R  5115136b5a 2009/08/16 sv_peek(): SvOOK offset is no longer in IVX
+			    maint still stores OOK in IVX
+M  a930c511fc 2009/08/16 [perl #68530] "version::CLASS" warning in Safe.pm
