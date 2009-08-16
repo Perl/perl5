@@ -1201,8 +1201,7 @@ greater than 255 [RT #59908].
 
 C<B::Deparse> failed to correctly deparse various constructs:
 C<readpipe STRING> [RT #62428], C<CORE::require(STRING)> [RT #62488],
-C<sub foo(_)> [RT #62484]. Also, constant subroutines were deparsed as
-their values.
+C<sub foo(_)> [RT #62484].
 
 =item *
 
