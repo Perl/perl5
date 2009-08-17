@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 71;
+use Test::More tests => 70;
 use Config ();
 
 use B::Deparse;
@@ -504,20 +504,6 @@ do {
 };
 '???';
 !1;
-####
-# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
-# 61 tests that shouldn't be constant folded
-# It might be fundamentally impossible to make this work on ithreads, in which
-# case the TODO should become a SKIP
-x() if $a;
-if ($a == 1) { x() } elsif ($b == 2) { z() }
-if (do { foo(); GLIPP }) { x() }
-if (do { $a++; GLIPP }) { x() }
->>>>
-x() if $a;
-if ($a == 1) { x(); } elsif ($b == 2) { z(); }
-if (do { foo(); 'glipp' }) { x(); }
-if (do { ++$a; 'glipp' }) { x(); }
 ####
 # TODO Only strict 'refs' currently supported
 # 68 strict
