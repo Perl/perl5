@@ -395,7 +395,7 @@ package Maintainers;
 			     't/'   => 'lib/',
 			   },
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'CPAN' =>
@@ -1649,7 +1649,7 @@ package Maintainers;
 			       },
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Term::ANSIColor' =>
@@ -2031,7 +2031,7 @@ package Maintainers;
 				XSLoader.pm}, # we use XSLoader_pm.PL
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     's2p' =>
