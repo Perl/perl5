@@ -22,6 +22,15 @@ my $normal_constant_name = qr/^_?[^\W_0-9]\w*$str_end/;
 my $tolerable = qr/^[A-Za-z_]\w*$str_end/;
 my $boolean = qr/^[01]?$str_end/;
 
+BEGIN {
+    # We'd like to do use constant _CAN_PCS => $] > 5.009002
+    # but that's a bit tricky before we load the constant module :-)
+    # By doing this, we save 1 run time check for *every* call to import.
+    no strict 'refs';
+    my $const = $] > 5.009002;
+    *_CAN_PCS = sub () {$const};
+}
+
 #=======================================================================
 # import() - import symbols into user's namespace
 #
@@ -38,7 +47,7 @@ sub import {
     my $pkg = caller;
     my $symtab;
 
-    if ($] > 5.009002) {
+    if (_CAN_PCS) {
 	no strict 'refs';
 	$symtab = \%{$pkg . '::'};
     };
