@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 #=======================================================================
 
@@ -16,6 +16,11 @@ my %forced_into_main = map +($_, 1),
     qw{ STDIN STDOUT STDERR ARGV ARGVOUT ENV INC SIG };
 
 my %forbidden = (%keywords, %forced_into_main);
+
+my $str_end = $] >= 5.006 ? "\\z" : "\\Z";
+my $normal_constant_name = qr/^_?[^\W_0-9]\w*$str_end/;
+my $tolerable = qr/^[A-Za-z_]\w*$str_end/;
+my $boolean = qr/^[01]?$str_end/;
 
 #=======================================================================
 # import() - import symbols into user's namespace
@@ -32,7 +37,6 @@ sub import {
     my $multiple  = ref $_[0];
     my $pkg = caller;
     my $symtab;
-    my $str_end = $] >= 5.006 ? "\\z" : "\\Z";
 
     if ($] > 5.009002) {
 	no strict 'refs';
@@ -56,7 +60,7 @@ sub import {
 	}
 
 	# Normal constant name
-	if ($name =~ /^_?[^\W_0-9]\w*$str_end/ and !$forbidden{$name}) {
+	if ($name =~ $normal_constant_name and !$forbidden{$name}) {
 	    # Everything is okay
 
 	# Name forced into main, but we're not in main. Fatal.
@@ -70,7 +74,7 @@ sub import {
 	    Carp::croak("Constant name '$name' begins with '__'");
 
 	# Maybe the name is tolerable
-	} elsif ($name =~ /^[A-Za-z_]\w*$str_end/) {
+	} elsif ($name =~ $tolerable) {
 	    # Then we'll warn only if you've asked for warnings
 	    if (warnings::enabled()) {
 		if ($keywords{$name}) {
@@ -83,7 +87,7 @@ sub import {
 
 	# Looks like a boolean
 	# use constant FRED == fred;
-	} elsif ($name =~ /^[01]?$str_end/) {
+	} elsif ($name =~ $boolean) {
             require Carp;
 	    if (@_) {
 		Carp::croak("Constant name '$name' is invalid");
