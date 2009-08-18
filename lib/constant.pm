@@ -45,7 +45,7 @@ sub import {
     my $constants;
     my $multiple  = ref $_[0];
     my $pkg = caller;
-    my $done_mro;
+    my $flush_mro;
     my $symtab;
 
     if (_CAN_PCS) {
@@ -124,8 +124,7 @@ sub import {
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
 		    $symtab->{$name} = \$scalar;
-		    # No need to flush the cache if we've just flushed it.
-		    mro::method_changed_in($pkg) unless $done_mro++;
+		    ++$flush_mro;
 		} else {
 		    *$full_name = sub () { $scalar };
 		}
@@ -137,6 +136,8 @@ sub import {
 	    }
 	}
     }
+    # Flush the cache exactly once if we make any direct symbol table changes.
+    mro::method_changed_in($pkg) if $flush_mro++;
 }
 
 1;
