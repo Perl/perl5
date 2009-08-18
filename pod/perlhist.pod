@@ -400,6 +400,7 @@ the strings?).
           5.10.0-RC2    2007-Nov-25
           5.10.0        2007-Dec-18
  David    5.10.1-RC1    2009-Aug-06
+          5.10.1-RC2    2009-Aug-18
 
 =head2 SELECTED RELEASE SIZES
 
