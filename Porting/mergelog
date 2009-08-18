@@ -3914,3 +3914,10 @@ M  54c717c313 2009/08/15 Suppress system messages when op/ref.t calls die o
 R  5115136b5a 2009/08/16 sv_peek(): SvOOK offset is no longer in IVX
 			    maint still stores OOK in IVX
 M  a930c511fc 2009/08/16 [perl #68530] "version::CLASS" warning in Safe.pm
+d  663b33b066 2009/08/16 Skip maintainers.t on VMS.
+M  27d8d4f034 2009/08/17 Sebastien decided what was the UPSTREAM for his mo
+d  672c0ce9f4 2009/08/18 Generate perl version-dependent regexps once, rath
+d  c5764f7084 2009/08/18 Convert perl version check in import() from run ti
+d  7064c127dd 2009/08/18 No need to flush the package's MRO cache if we've 
+d  f7fd2659b1 2009/08/18 Flush the MRO cache at the end, rather than the st
+M  7894ad662a 2009/08/18 Correctly detect NDBM_File availability
