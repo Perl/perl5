@@ -683,7 +683,7 @@ I<You MAY SKIP this step for SNAPSHOT>
 
 Check that the C<perlbug> utility works. Try the following:
 
-    $ /path/to/perl/perlbug 
+    $ bin/perlbug
     ...
     Subject: test bug report
     Local perl administrator [yourself]: 
@@ -720,6 +720,10 @@ Once smoking is okay, upload it to PAUSE. This is the point of no return.
 If anything goes wrong after this point, you will need to re-prepare
 a new release with a new minor version or RC number.
 
+    https://pause.perl.org/
+
+(Login, then select 'Upload a file to CPAN')
+
 Upload both the .gz and .bz2 versions of the tarball.
 
 =item *
@@ -748,6 +752,7 @@ Disarm the F<patchlevel.h> change; for example,
 Be sure to commit your change:
 
     $ git commit -m 'disarm RCnnn bump' patchlevel.h
+    $ git push origin ....
 
 
 =item *
