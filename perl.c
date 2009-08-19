@@ -1770,6 +1770,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef NO_MATHOMS
                             " NO_MATHOMS"
 #  endif
+#  ifdef PERL_DISABLE_PMC
+			     " PERL_DISABLE_PMC"
+#  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
