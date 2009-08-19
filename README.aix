@@ -41,28 +41,29 @@ XL C and XL C/C++ V7, V8, V9, V10
 
 The XL C for AIX is integrated in the XL C/C++ for AIX compiler.
 
-If you choose XL C/C++ V9 you need APAR IZ35785 installed 
-otherwise the integrated SDBM_File do not compile correctly due 
-to an optimization bug. You can circumvent this problem by 
-adding -qipa to the optimization flags (-Doptimize='-O -qipa'). 
-The PTF for APAR IZ35785 which solves this problem is available 
+If you choose XL C/C++ V9 you need APAR IZ35785 installed
+otherwise the integrated SDBM_File do not compile correctly due
+to an optimization bug. You can circumvent this problem by
+adding -qipa to the optimization flags (-Doptimize='-O -qipa').
+The PTF for APAR IZ35785 which solves this problem is available
 from IBM (April 2009 PTF for XL C/C++ Enterprise Edition for AIX, V9.0).
 
-Perl can be compiled with either IBM's ANSI C compiler or with gcc. 
-The former is recommended, as not only it can compile Perl with no 
-difficulty, but also can take advantage of features listed later 
+Perl can be compiled with either IBM's ANSI C compiler or with gcc.
+The former is recommended, as not only it can compile Perl with no
+difficulty, but also can take advantage of features listed later
 that require the use of IBM compiler-specific command-line flags.
 
-If you decide to use gcc, make sure your installation is recent and 
-complete, and be sure to read the Perl INSTALL file for more gcc-specific 
-details. Please report any hoops you had to jump through to the 
+If you decide to use gcc, make sure your installation is recent and
+complete, and be sure to read the Perl INSTALL file for more gcc-specific
+details. Please report any hoops you had to jump through to the
 development team.
 
 =head2 Incompatibility with AIX Toolbox lib gdbm
 
-If the AIX Toolbox version of lib gdbm 1.8.x is installed on the 
-system then Perl will not work. This library contains a defect version 
-of the dbm_store() function.
+If the AIX Toolbox version of lib gdbm 1.8.x is installed on the
+system then Perl will not work. This library contains a defect version
+of the dbm_store() function. The lib gdbm will be automatically removed
+from the wanted libraries.
 
 =head2 Perl 5.10 was successfully compiled and tested on:
 
