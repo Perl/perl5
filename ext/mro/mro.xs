@@ -66,7 +66,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     if(isa && AvFILLp(isa) >= 0) {
         SV** seqs_ptr;
         I32 seqs_items;
-        HV* const tails = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+        HV *tails;
         AV *const seqs = MUTABLE_AV(sv_2mortal(MUTABLE_SV(newAV())));
         I32* heads;
 
@@ -90,10 +90,49 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 /* recursion */
                 AV* const isa_lin
 		  = S_mro_get_linear_isa_c3(aTHX_ isa_item_stash, level + 1);
+
+		if(items == 0 && AvFILLp(seqs) == -1 && AvARRAY(isa_lin)) {
+		    /* Only one parent class. For this case, the C3
+		       linearisation is this class followed by the parent's
+		       inearisation, so don't bother with the expensive
+		       calculation.  */
+		    SV **svp;
+		    I32 subrv_items = AvFILLp(isa_lin) + 1;
+		    SV *const *subrv_p = AvARRAY(isa_lin);
+
+		    /* Hijack the allocated but unused array seqs to be the
+		       return value. It's currently mortalised.  */
+
+		    retval = seqs;
+
+		    av_extend(retval, subrv_items);
+		    AvFILLp(retval) = subrv_items;
+		    svp = AvARRAY(retval);
+
+		    /* First entry is this class.  We happen to make a shared
+		       hash key scalar because it's the cheapest and fastest
+		       way to do it.  */
+		    *svp++ = newSVhek(stashhek);
+
+		    while(subrv_items--) {
+			/* These values are unlikely to be shared hash key
+			   scalars, so no point in adding code to optimising
+			   for a case that is unlikely to be true.
+			   (Or prove me wrong and do it.)  */
+
+			SV *const val = *subrv_p++;
+			*svp++ = newSVsv(val);
+		    }
+
+		    SvREFCNT_inc(retval);
+
+		    goto done;
+		}
                 av_push(seqs, SvREFCNT_inc_simple_NN(MUTABLE_SV(isa_lin)));
             }
         }
         av_push(seqs, SvREFCNT_inc_simple_NN(MUTABLE_SV(isa)));
+	tails = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
 
         /* This builds "heads", which as an array of integer array
            indices, one per seq, which point at the virtual "head"
@@ -228,6 +267,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
         av_push(retval, newSVhek(stashhek));
     }
 
+ done:
     /* we don't want anyone modifying the cache entry but us,
        and we do so by replacing it completely */
     SvREADONLY_on(retval);

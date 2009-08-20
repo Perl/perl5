@@ -4130,6 +4130,7 @@ t/mro/complex_dfs.t		mro tests
 t/mro/dbic_c3.t			mro tests
 t/mro/dbic_dfs.t		mro tests
 t/mro/inconsistent_c3.t		mro tests
+t/mro/isa_c3.t			test for optimisatised mro_get_linear_isa_c3
 t/mro/isa_dfs.t			test for optimisatised mro_get_linear_isa_dfs
 t/mro/method_caching.t		mro tests
 t/mro/next_edgecases.t		mro tests
