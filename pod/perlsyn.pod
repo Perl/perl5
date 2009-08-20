@@ -568,8 +568,10 @@ is exactly equivalent to
 
 	when($_ ~~ $foo)
 
-In fact C<when(EXPR)> is treated as an implicit smart match most of the
-time. The exceptions are that when EXPR is:
+Most of the time, C<when(EXPR)> is treated as an implicit smart match of
+C<$_>, i.e. C<$_ ~~ EXPR>. (See L</"Smart matching in detail"> for more
+information on smart matching.) But when EXPR is one of the below
+exceptional cases, it is used directly as a boolean:
 
 =over 4
 
@@ -640,9 +642,6 @@ for example.
 C<default> behaves exactly like C<when(1 == 1)>, which is
 to say that it always matches.
 
-See L</"Smart matching in detail"> for more information
-on smart matching.
-
 =head3 Breaking out
 
 You can use the C<break> keyword to break out of the enclosing
@@ -690,6 +689,10 @@ implicitly dereferences any non-blessed hash or array ref, so the "Hash"
 and "Array" entries apply in those cases. (For blessed references, the
 "Object" entries apply.)
 
+Note that the "Matching Code" column is not always an exact rendition.  For
+example, the smart match operator short-circuits whenever possible, but
+C<grep> does not.
+
     $a      $b        Type of Match Implied    Matching Code
     ======  =====     =====================    =============
     Any     undef     undefined                !defined $a
@@ -728,10 +731,6 @@ and "Array" entries apply in those cases. (For blessed references, the
      other array. [3]
  3 - If a circular reference is found, we fall back to referential equality.
  4 - either a real number, or a string that looks like a number
-
-The "matching code" doesn't represent the I<real> matching code,
-of course: it's just there to explain the intended meaning. Unlike
-C<grep>, the smart match operator will short-circuit whenever it can.
 
 =head3 Custom matching via overloading
 
