@@ -2391,31 +2391,23 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    const char *const start = SvPV(sv, len);
 	    const char *out = (const char*)memchr(start, '\0', len);
 	    SV *tmp;
-	    struct refcounted_he *tmp_he;
 
 
 	    PL_compiling.cop_hints |= HINT_LEXICAL_IO_IN | HINT_LEXICAL_IO_OUT;
-	    PL_hints
-		|= HINT_LOCALIZE_HH | HINT_LEXICAL_IO_IN | HINT_LEXICAL_IO_OUT;
+	    PL_hints |= HINT_LEXICAL_IO_IN | HINT_LEXICAL_IO_OUT;
 
 	    /* Opening for input is more common than opening for output, so
 	       ensure that hints for input are sooner on linked list.  */
 	    tmp = out ? newSVpvn_flags(out + 1, start + len - out - 1,
-				       SVs_TEMP | SvUTF8(sv))
-		: newSVpvs_flags("", SVs_TEMP | SvUTF8(sv));
+				       SvUTF8(sv))
+		: newSVpvs_flags("", SvUTF8(sv));
+	    (void)hv_stores(GvHV(PL_hintgv), "open>", tmp);
+	    mg_set(tmp);
 
-	    tmp_he
-		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, 
-					 newSVpvs_flags("open>", SVs_TEMP),
-					 tmp);
-
-	    /* The UTF-8 setting is carried over  */
-	    sv_setpvn(tmp, start, out ? (STRLEN)(out - start) : len);
-
-	    PL_compiling.cop_hints_hash
-		= Perl_refcounted_he_new(aTHX_ tmp_he,
-					 newSVpvs_flags("open<", SVs_TEMP),
-					 tmp);
+	    tmp = newSVpvn_flags(start, out ? (STRLEN)(out - start) : len,
+				        SvUTF8(sv));
+	    (void)hv_stores(GvHV(PL_hintgv), "open<", tmp);
+	    mg_set(tmp);
 	}
 	break;
     case '\020':	/* ^P */
@@ -3092,6 +3084,26 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     PL_compiling.cop_hints_hash
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
 				 MUTABLE_SV(mg->mg_ptr), &PL_sv_placeholder);
+    return 0;
+}
+
+/*
+=for apidoc magic_clearhints
+
+Triggered by clearing %^H, resets C<PL_compiling.cop_hints_hash>.
+
+=cut
+*/
+int
+Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_CLEARHINTS;
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(mg);
+    if (PL_compiling.cop_hints_hash) {
+	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
+	PL_compiling.cop_hints_hash = NULL;
+    }
     return 0;
 }
 

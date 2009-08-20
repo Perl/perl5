@@ -5096,8 +5096,6 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     case PERL_MAGIC_qr:
 	vtable = &PL_vtbl_regexp;
 	break;
-    case PERL_MAGIC_hints:
-	/* As this vtable is all NULL, we can reuse it.  */
     case PERL_MAGIC_sig:
 	vtable = &PL_vtbl_sig;
 	break;
@@ -5139,6 +5137,9 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	break;
     case PERL_MAGIC_hintselem:
 	vtable = &PL_vtbl_hintselem;
+	break;
+    case PERL_MAGIC_hints:
+	vtable = &PL_vtbl_hints;
 	break;
     case PERL_MAGIC_ext:
 	/* Reserved for use by extensions not perl internals.	        */

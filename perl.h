@@ -4645,7 +4645,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_utf8,
     want_vtbl_symtab,
     want_vtbl_arylen_p,
-    want_vtbl_hintselem
+    want_vtbl_hintselem,
+    want_vtbl_hints
 };
 
 
@@ -4950,7 +4951,6 @@ MGVTBL_SET(
     0
 );
 
-/* For now, hints magic will also use vtbl_sig, because it is all 0  */
 MGVTBL_SET(
     PL_vtbl_sig,
     0,
@@ -5309,6 +5309,18 @@ MGVTBL_SET(
     MEMBER_TO_FPTR(Perl_magic_sethint),
     0,
     MEMBER_TO_FPTR(Perl_magic_clearhint),
+    0,
+    0,
+    0,
+    0
+);
+
+MGVTBL_SET(
+    PL_vtbl_hints,
+    0,
+    0,
+    0,
+    MEMBER_TO_FPTR(Perl_magic_clearhints),
     0,
     0,
     0,
