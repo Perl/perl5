@@ -43,9 +43,21 @@ package main;
 
 require mro;
 
+my %expect =
+    (
+     klonk => [qw(klonk)],
+     urkkk => [qw(urkkk klonk kapow)],
+     kapow => [qw(kapow)],
+     kayo => [qw(kayo)],
+     thwacke => [qw(thwacke)],
+     zzzzzwap => [qw(zzzzzwap thwacke kapow)],
+     whamm => [qw(whamm kapow thwacke)],
+    );
+
 foreach my $package (qw(klonk urkkk kapow kayo thwacke zzzzzwap whamm)) {
     my $ref = bless [], $package;
-    my $isa = mro::get_linear_isa($package);
+    my $isa = $expect{$package};
+    is("@{mro::get_linear_isa($package)}", "@$isa", "\@ISA for $package");
 
     foreach my $class ($package, @$isa, 'UNIVERSAL') {
 	isa_ok($ref, $class, $package);
