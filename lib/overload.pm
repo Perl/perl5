@@ -423,8 +423,9 @@ once and with scalar context.
 
 =item * I<Matching>
 
-The key C<"~~"> allows you to override the smart matching used by
-the switch construct. See L<feature>.
+The key C<"~~"> allows you to override the smart matching logic used by
+the C<~~> operator and the switch construct (C<given>/C<when>).  See
+L<perlsyn/switch> and L<feature>.
 
 =item * I<Dereferencing>
 
