@@ -137,7 +137,7 @@ sub import {
 	}
     }
     # Flush the cache exactly once if we make any direct symbol table changes.
-    mro::method_changed_in($pkg) if $flush_mro++;
+    mro::method_changed_in($pkg) if $flush_mro;
 }
 
 1;
