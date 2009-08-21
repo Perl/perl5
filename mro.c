@@ -324,7 +324,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 		   with it.  */
 		if (basestash) {
 		    SV **svp;
-		    stored = MUTABLE_HV(sv_2mortal(newHVhv(HvMROMETA(basestash)->isa)));
+		    stored = MUTABLE_HV(sv_2mortal((SV*)newHVhv(HvMROMETA(basestash)->isa)));
 		    av_extend(retval, subrv_items);
 		    AvFILLp(retval) = subrv_items;
 		    svp = AvARRAY(retval);
