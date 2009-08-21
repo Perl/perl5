@@ -91,7 +91,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 AV* const isa_lin
 		  = S_mro_get_linear_isa_c3(aTHX_ isa_item_stash, level + 1);
 
-		if(items == 0 && AvFILLp(seqs) == -1 && AvARRAY(isa_lin)) {
+		if(items == 0 && AvFILLp(seqs) == -1) {
 		    /* Only one parent class. For this case, the C3
 		       linearisation is this class followed by the parent's
 		       inearisation, so don't bother with the expensive
