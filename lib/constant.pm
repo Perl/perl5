@@ -117,7 +117,9 @@ sub import {
 	    $declared{$full_name}++;
 	    if ($multiple || @_ == 1) {
 		my $scalar = $multiple ? $constants->{$name} : $_[0];
-		if ($symtab && !exists $symtab->{$name}) {
+		# The constant serves to optimise this entire block out on
+		# 5.8 and earlier.
+		if (_CAN_PCS && $symtab && !exists $symtab->{$name}) {
 		    # No typeglob yet, so we can use a reference as space-
 		    # efficient proxy for a constant subroutine
 		    # The check in Perl_ck_rvconst knows that inlinable
@@ -137,7 +139,7 @@ sub import {
 	}
     }
     # Flush the cache exactly once if we make any direct symbol table changes.
-    mro::method_changed_in($pkg) if $flush_mro;
+    mro::method_changed_in($pkg) if _CAN_PCS && $flush_mro;
 }
 
 1;
