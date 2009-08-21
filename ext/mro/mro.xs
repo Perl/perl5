@@ -537,10 +537,15 @@ mro__nextcan(...)
 
             gv_efullname3(sv, cvgv, NULL);
 
-            fq_subname = SvPVX(sv);
-            fq_subname_len = SvCUR(sv);
+	    if(SvPOK(sv)) {
+		fq_subname = SvPVX(sv);
+		fq_subname_len = SvCUR(sv);
 
-            subname = strrchr(fq_subname, ':');
+		subname = strrchr(fq_subname, ':');
+	    } else {
+		subname = NULL;
+	    }
+
             if(!subname)
                 Perl_croak(aTHX_ "next::method/next::can/maybe::next::method cannot find enclosing method");
 
