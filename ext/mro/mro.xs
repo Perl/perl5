@@ -633,14 +633,14 @@ mro__nextcan(...)
                valid for the child */
             if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
                 SvREFCNT_inc_simple_void_NN(MUTABLE_SV(cand_cv));
-                (void)hv_store_ent(nmcache, newSVsv(sv), MUTABLE_SV(cand_cv), 0);
+                (void)hv_store_ent(nmcache, sv, MUTABLE_SV(cand_cv), 0);
                 mXPUSHs(newRV_inc(MUTABLE_SV(cand_cv)));
                 XSRETURN(1);
             }
         }
     }
 
-    (void)hv_store_ent(nmcache, newSVsv(sv), &PL_sv_undef, 0);
+    (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);
     if(throw_nomethod)
         Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
     XSRETURN_EMPTY;
