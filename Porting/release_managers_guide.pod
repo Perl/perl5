@@ -629,6 +629,15 @@ which is why you should test from the tarball.
 
 =item *
 
+Run the Installation Verification Procedure utility:
+
+    $ bin/perlivp
+    ...
+    All tests successful.
+    $
+
+=item *
+
 Compare the pathnames of all installed files with those of the previous
 release (i.e. against the last installed tarball on this branch which you
 have previously verified using this same procedure). In particular, look
