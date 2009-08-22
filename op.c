@@ -5528,8 +5528,6 @@ CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;
-    const char *aname;
-    STRLEN aname_len;
     GV *gv;
     const char *ps;
     STRLEN ps_len;
@@ -5545,6 +5543,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
+    bool has_name;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -5553,25 +5552,22 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else
 	ps = NULL;
 
-    if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
+    if (name) {
+	gv = gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV);
+	has_name = TRUE;
+    } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	aname = SvPVX_const(sv);
-	aname_len = SvCUR(sv);
-    }
-    else
-	aname = NULL;
-
-    if (name) {
-	gv = gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV);
-    } else if (aname) {
-	gv = gv_fetchpvn_flags(aname, aname_len, gv_fetch_flags, SVt_PVCV);
+	gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
+	has_name = TRUE;
     } else if (PL_curstash) {
 	gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV);
+	has_name = FALSE;
     } else {
 	gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
+	has_name = FALSE;
     }
 
     if (!PL_madskills) {
@@ -5846,7 +5842,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvCONST_on(cv);
     }
 
-    if (name || aname) {
+    if (has_name) {
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();
