@@ -170,7 +170,7 @@ sub find_version {
     5.009005 => '2007-07-07',
     5.010000 => '2007-12-18',
     5.008009 => '2008-12-14',
-    5.010001 => '????-??-??',
+    5.010001 => '2009-08-22',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -9500,7 +9500,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Pod::Text::Termcap'    => '2.05',
 	'Pod::Usage'            => '1.36',
 	'SDBM_File'             => '1.06',
-	'Safe'                  => '2.17_01',
+	'Safe'                  => '2.18',
 	'Scalar::Util'          => '1.21',
 	'Scalar::Util::PP'      => '1.21',
 	'Search::Dict'          => '1.02',
