@@ -227,7 +227,7 @@ again sequentially and see if the failures go away.
 
 =head2 DTrace support
 
-Some support for DTrace has been added. See L<INSTALL/"DTrace support">.
+Some support for DTrace has been added. See "DTrace support" in F<INSTALL>.
 
 =head2 Support for C<configure_requires> in CPAN module metadata
 
