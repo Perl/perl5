@@ -314,7 +314,7 @@ package Maintainers;
     'CGI' =>
 	{
 	'MAINTAINER'	=> 'lstein',
-	'DISTRIBUTION'	=> 'LDS/CGI.pm-3.43.tar.gz',
+	'DISTRIBUTION'	=> 'LDS/CGI.pm-3.45.tar.gz',
 	'FILES'		=> q[lib/CGI.pm lib/CGI],
 	'EXCLUDED'	=> [ qr{^t/lib/Test},
 				qw( cgi-lib_porting.html
@@ -324,8 +324,7 @@ package Maintainers;
 				)
 			   ],
 	'MAP'		=> { 'examples/' => 'lib/CGI/eg/',
-			     'CGI/'	 => 'lib/CGI/',
-			     'CGI.pm'	 => 'lib/CGI.pm',
+			     'lib/'	 => 'lib/',
 			     ''		 => 'lib/CGI/',
 			   },
 	'CPAN'		=> 1,

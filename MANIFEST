@@ -1926,21 +1926,26 @@ lib/CGI/t/apache.t		See if CGI::Apache still loads
 lib/CGI/t/can.t			See if CGI.pm works
 lib/CGI/t/carp.t		See if CGI::Carp works
 lib/CGI/t/cookie.t		See if CGI::Cookie works
+lib/CGI/t/Dump.t		See if CGI->Dump works
 lib/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
 lib/CGI/t/no_tabindex.t	See if CGI.pm works
+lib/CGI/t/popup_menu.t		See if CGI pop menus work
 lib/CGI/t/pretty.t		See if CGI.pm works
 lib/CGI/t/push.t		See if CGI::Push works
+lib/CGI/t/query_string.t	See if CGI->query_string() works
 lib/CGI/t/request.t		See if CGI.pm works
 lib/CGI/t/start_end_asterisk.t	See if CGI.pm works
 lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
+lib/CGI/t/unescapeHTML.t	See if CGI::unescapeHTML() works
 lib/CGI/t/uploadInfo.t		See if CGI.pm works
 lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
 lib/CGI/t/upload.t		See if CGI.pm works
+lib/CGI/t/user_agent.t		See if CGI->user_agent() works
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
