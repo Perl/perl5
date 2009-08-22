@@ -5529,6 +5529,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;
     const char *aname;
+    STRLEN aname_len;
     GV *gv;
     const char *ps;
     STRLEN ps_len;
@@ -5558,14 +5559,20 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	aname = SvPVX_const(sv);
+	aname_len = SvCUR(sv);
     }
     else
 	aname = NULL;
 
-    gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
-	: gv_fetchpv(aname ? aname
-		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
-		     gv_fetch_flags, SVt_PVCV);
+    if (name) {
+	gv = gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV);
+    } else if (aname) {
+	gv = gv_fetchpvn_flags(aname, aname_len, gv_fetch_flags, SVt_PVCV);
+    } else if (PL_curstash) {
+	gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV);
+    } else {
+	gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
+    }
 
     if (!PL_madskills) {
 	if (o)
