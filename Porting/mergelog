@@ -3921,3 +3921,37 @@ d  c5764f7084 2009/08/18 Convert perl version check in import() from run ti
 d  7064c127dd 2009/08/18 No need to flush the package's MRO cache if we've 
 d  f7fd2659b1 2009/08/18 Flush the MRO cache at the end, rather than the st
 M  7894ad662a 2009/08/18 Correctly detect NDBM_File availability
+M  a47a8f3cfe 2009/08/18 Updated Module::CoreList for 5.10.1-RC2
+M  a14438df21 2009/08/19 release_managers_guide: minor tweaks
+M  e9d2e818e0 2009/08/19 bleed and 5.10.1 - documentation fix - README.aix 
+M  6bc0591006 2009/08/19 bump Safe version to 2.18
+d  f89a1e08e6 2009/08/19 Add PERL_DISABLE_PMC to the list of -V's compile-t
+M  e7598a06d7 2009/08/20 Teach perlivp about the new stucture of the IO::Co
+d  c3acb9e076 2009/08/20 Perl_newHVhv() should copy immortal values as-is, 
+d  73519bd018 2009/08/20 Optimise S_mro_get_linear_isa_dfs() when dealing w
+d  d7c0d2821c 2009/08/20 add -DM flag to track smartmatch resolution
+d  b0413f463e 2009/08/20 Optimise mro_get_linear_isa_c3() when there is a s
+d  04e5ac63d9 2009/08/20 Instead of trusting mro::get_linear_isa(), test it
+M  b3ed409dee 2009/08/20 incremental improvement in ~~ documentation, alrea
+			    (this was actally applied separately to
+			    blead and maint rather than cherry-picked)
+d  a18d9f20d1 2009/08/21 In mro_get_linear_isa_c3() optimise even if AvARRA
+d  81a8de77c9 2009/08/21 Remove a refactoring typo - don't post-increment $
+d  a8ae8fee10 2009/08/21 Use the constant _CAN_PCS to optimise out things t
+d  f747ebd621 2009/08/21 Add clear magic to %^H so that the HE chain is res
+d  17eef65c2f 2009/08/21 Fix build warning in mro.c
+d  59d8e2ce29 2009/08/21 Eliminate SV leak in mro::_nextcan - hv_store_ent(
+d  8e234d892c 2009/08/21 sv_newmortal() is faster than sv_2mortal(newSV(0))
+d  9c1314f0ea 2009/08/21 gv_efullname3() could return NULL, so mro::_nextca
+d  c1754fcef4 2009/08/22 In Perl_newATTRSUB(), we know the lengths, so can 
+d  ed4a8a9b7d 2009/08/22 In Perl_newATTRSUB(), refactor the calls to gv_fet
+d  ae5c1e95b5 2009/08/22 In pp_entersub, replace gv_fetchpv() with gv_fetch
+M  74d3927541 2009/08/22 add the CGI "default_value for popup_menu()" fix f
+d  68a4c8b9f2 2009/08/22 upgrade GCI from 3.43 to 3.45
+d  0e44158ce9 2009/08/22 re-apply boilerplate to CGI test files
+M  0de1c906c3 2009/08/22 better document smart match overloading
+M  459fc3ca45 2009/08/22 mention perlivp in release_managers_guide
+d  828dad175c 2009/08/22 Eliminate the remaining definitions for *_allocate
+d  c8e503bfe4 2009/08/22 Eliminate *_ALLOCATED_HEAD and *_HEAD macros which
+M  6c1a81b03e 2009/08/22 Update Module::CoreList for 5.10.1
+M  52a66c2cc3 2009/08/22 more release_managers_guide tweaks
