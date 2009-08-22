@@ -717,12 +717,22 @@ C<grep> does not.
 =head3 Custom matching via overloading
 
 You can change the way that an object is matched by overloading
-the C<~~> operator. This trumps the usual smart match semantics.
-See L<overload>.
+the C<~~> operator. This may alter the usual smart match semantics.
 
 It should be noted that C<~~> will refuse to work on objects that
 don't overload it (in order to avoid relying on the object's
 underlying structure).
+
+Note also that smart match's matching rules take precedence over
+overloading, so if C<$obj> has smart match overloading, then
+
+    $obj ~~ X
+
+will not automatically invoke the overload method with X as an argument;
+instead the table above is consulted as normal, and based in the type of X,
+overloading may or may not be invoked.
+
+See L<overload>.
 
 =head3 Differences from Perl 6
 
