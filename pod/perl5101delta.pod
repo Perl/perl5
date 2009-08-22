@@ -398,6 +398,7 @@ Upgraded from version 1.08 to 1.11.
 =item C<CGI>
 
 Upgraded from version 3.29 to 3.43.
+(also includes the "default_value for popup_menu()" fix from 3.45).
 
 =item C<Compress::Zlib>
 
