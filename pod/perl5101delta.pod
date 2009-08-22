@@ -991,7 +991,7 @@ Empty C<DESTROY> methods are no longer called.
 
 The layout of directories in F<ext> has been revised. Specifically, all
 extensions are now flat, and at the top level, with C</> in pathnames
-replaced by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper>,
+replaced by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper/>,
 etc.  The names of the extensions as specified to F<Configure>, and as
 reported by C<%Config::Config> under the keys C<dynamic_ext>,
 C<known_extensions>, C<nonxs_ext> and C<static_ext> have not changed, and
@@ -1008,7 +1008,7 @@ extensions to build.
 
 =head2 Configuration improvements
 
-if C<vendorlib> and C<vendorarch> are the same, then they are only added to
+If C<vendorlib> and C<vendorarch> are the same, then they are only added to
 C<@INC> once.
 
 C<$Config{usedevel}> and the C-level C<PERL_USE_DEVEL> are now defined if
@@ -1497,7 +1497,7 @@ This has been fixed.
 
 =item *
 
-The B<public> IV and NV flags are now not set if the string value has
+The I<public> IV and NV flags are now not set if the string value has
 trailing "garbage". This behaviour is consistent with not setting the
 public IV or NV flags if the value is out of range for the type.
 
