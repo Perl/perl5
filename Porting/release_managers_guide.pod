@@ -575,7 +575,6 @@ Push all your recent commits:
 
     $ git push origin ....
 
-
 =item *
 
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
@@ -583,7 +582,8 @@ the tarball and directory name:
 
     $ cd root/of/perl/tree
     $ make distclean
-    $ git clean -xdf		#  make sure perl and git agree on files
+    $ git clean -xdf		# make sure perl and git agree on files
+    $ git status		# and there's nothing lying around
 
     $ perl Porting/makerel -b -s `git describe` # for a snapshot
     $ perl Porting/makerel -b -s RC1            # for a release candidate
@@ -666,7 +666,7 @@ previous is 5.10.0:
 
 Bootstrap the CPAN client on the clean install:
 
-    $ ./bin/perl -MCPAN -e'shell' 
+    $ bin/perl -MCPAN -e'shell' 
 
 =item *
 
@@ -678,7 +678,7 @@ has dependencies; for example:
 
 Check that your perl can run this:
 
-    $ ./bin/perl -lwe 'use Inline C => "int f() { return 42;} "; print f'
+    $ bin/perl -lwe 'use Inline C => "int f() { return 42;} "; print f'
     42
     $
 
@@ -686,7 +686,7 @@ Check that your perl can run this:
 
 Bootstrap the CPANPLUS client on the clean install:
 
-    $ ./bin/cpanp
+    $ bin/cpanp
 
 =item *
 
@@ -695,7 +695,7 @@ Install an XS module, for example:
     CPAN Terminal> i DBI
     CPAN Terminal> quit
     $ bin/perl -MDBI -e 1
-
+    $
 
 =item *
 
@@ -718,8 +718,8 @@ Check that the C<perlbug> utility works. Try the following:
 
 and carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section. If everything appears okay, then
-try it again, this time actually submitting the bug report. Check that it
-shows up, then remember to close it!
+delete the file, and try it again, this time actually submitting the bug
+report. Check that it shows up, then remember to close it!
 
 =item *
 
@@ -753,7 +753,7 @@ I<You MUST SKIP this step for SNAPSHOT>
 Create a tag for the exact git revision you built the release from.
 C<commit> below is the commit corresponding to the tarball. It can be
 omitted if there have been no further commits since the tarball was
-created.
+created, for example:
 
     $ git tag perl-5.10.1-RC1 -m'Release Candidate 1 of Perl 5.10.1' <commit>
     $ git push origin tag perl-5.10.1-RC1
@@ -805,41 +805,70 @@ http://dev.perl.org/perl5/
 
 I<You MUST SKIP this step for SNAPSHOT, RC>
 
-Create a new empty perlNNNdelta.pod file for the current release + 1;
-see F<Porting/how_to_write_a_perldelta.pod>.
-[ XXX Perhaps we should have an empty template file we can copy in. ]
-
-In addition, edit F<pod.lst>, adding the new entry as 'D', and unmark previous
-entry as 'D',
-
-Change perlNNNdelta references to the new version in these files
-
-    INSTALL
-    win32/Makefile.mk
-    win32/Makefile
-    Makefile.SH
-    README
-
-Also, edit the previous delta file to change the C<NAME> from C<perldelta>
-to C<perlNNNdelta>.
-
-These two lists of files probably aren't exhaustive; do a recursive grep
-on the previous filename to look for suitable candidates.
-
-(see 16410843ea for an example).
+Remind the current maintainer of C<Module::CoreList> to push a new release
+to CPAN.
 
 =item *
 
-Run C<perl pod/buildtoc --build-all> to update the following files:
+I<You MUST SKIP this step for SNAPSHOT, RC>
+
+Bump the perlXYZ version number.
+
+First, create a new empty perlNNNdelta.pod file for the current release + 1;
+see F<Porting/how_to_write_a_perldelta.pod>.
+
+You should be able to do this by just copying in a skeleton template and
+then doing a quick fix up of the version numbers, e.g.
+
+    $ cp -i Porting/perldelta_template pod/perl5102delta.pod
+    $ (edit it)
+    $ git add pod/perl5102delta.pod
+
+Edit F<pod.lst>: add the new entry, flagged as 'D', and unflag the previous
+entry from being 'D'; for example:
+
+    -D perl5101delta                Perl changes in version 5.10.1
+    +D perl5102delta                Perl changes in version 5.10.2
+    +  perl5101delta                Perl changes in version 5.10.1
+
+Run C<perl pod/buildtoc --build-all> to update the F<perldelta> version in
+the following files:
 
     MANIFEST
+    Makefile.SH
+    pod.lst
     pod/perl.pod
-    win32/pod.mak
     vms/descrip_mms.template
+    win32/Makefile
+    win32/makefile.mk
+    win32/pod.mak
 
-If you modified perldelta.pod, (F<vms/descrip_mms.template> will
-needs a manual edit to bump the C<perldelta.pod> entry - it would
-be good for someone to figure out the fix.)
+Then manually edit (F<vms/descrip_mms.template> to bump the version
+in the following entry:
+
+    [.pod]perldelta.pod : [.pod]perl5101delta.pod
+
+XXX this previous step needs to fixed to automate it in pod/buildtoc.
+
+Manually update references to the perlNNNdelta version in these files:
+
+    INSTALL
+    README
+
+Edit the previous delta file to change the C<NAME> from C<perldelta>
+to C<perlNNNdelta>.
+
+These two lists of files probably aren't exhaustive; do a recursive grep
+on the previous filename to look for suitable candidates that may have
+been missed.
+
+Finally, commit:
+
+    $ git commit -a -m 'create perlXXXdelta'
+
+At this point you may want  to compare the commit with a previous bump to
+see if they look similar. See commit ca8de22071 for an example of a
+previous version bump.
 
 =item *
 
@@ -865,16 +894,23 @@ XXX need a git recipe
 
 I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
 
-Copy the perlNNNdelta.pod for this release into the other branches, and
-remember to update these files on those branches too:
+Copy the perlNNNdelta.pod for this release into the other branches; for
+example:
 
-    MANIFEST
-    pod.lst
-    pod/perl.pod
-    vms/descrip_mms.template
-    win32/pod.mak
+    $ cp -i ../5.10.x/pod/perl5101delta.pod pod/    # for example
+    $ git add pod/perl5101delta.pod
 
-(see fc5be80860 for an example).
+Edit F<pod.lst> to add an entry for the file, e.g.:
+
+    perl5101delta		Perl changes in version 5.10.1
+    
+Then rebuild various files:
+
+    $ perl pod/buildtoc --build-all
+
+Finally, commit:
+
+    $ git commit -a -m 'add perlXXXdelta'
 
 =item *
 
@@ -887,13 +923,6 @@ e.g.
           5.8.9-RC1     2008-Nov-10
           5.8.9-RC2     2008-Dec-06
           5.8.9         2008-Dec-14
-
-=item *
-
-I<You MUST SKIP this step for SNAPSHOT, RC>
-
-Remind the current maintainer of C<Module::CoreList> to push a new release
-to CPAN.
 
 =item *
 
