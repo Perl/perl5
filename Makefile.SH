@@ -1029,8 +1029,8 @@ pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
 pod/perlmodlib.pod: miniperl$(EXE_EXT) pod/perlmodlib.PL MANIFEST
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib pod/perlmodlib.PL -q
 
-pod/perldelta.pod: pod/perl5101delta.pod
-	$(LNS) perl5101delta.pod pod/perldelta.pod
+pod/perldelta.pod: pod/perl5102delta.pod
+	$(LNS) perl5102delta.pod pod/perldelta.pod
 
 extra.pods: miniperl$(EXE_EXT)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
