@@ -1529,12 +1529,12 @@ distclean: realclean
 	    perlcygwin.pod perldelta.pod perldgux.pod perldos.pod \
 	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
-	    perllinux.pod perlmacos.pod perlmacosx.pod \
-	    perlmodlib.pod perlmpeix.pod perlnetware.pod perlopenbsd.pod \
-	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
-	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \
-	    perltoc.pod perltru64.pod perltw.pod perluts.pod perlvmesa.pod \
-	    perlvos.pod perlwin32.pod \
+	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \
+	    perlmpeix.pod perlnetware.pod perlopenbsd.pod perlos2.pod \
+	    perlos390.pod perlos400.pod perlplan9.pod perlqnx.pod \
+	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltoc.pod \
+	    perltru64.pod perltw.pod perluts.pod perlvmesa.pod perlvos.pod \
+	    perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
