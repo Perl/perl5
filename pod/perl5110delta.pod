@@ -15,7 +15,8 @@ the 5.11.0 development release.
 =head2 Switch statement changes
 
 The handling of complex expressions by the C<given>/C<when> switch
-statement has been enhanced. There are two new cases where C<when> now
+statement has been enhanced. These enhancements are also available in
+5.10.1 and subsequent 5.10 releases. There are two new cases where C<when> now
 interprets its argument as a boolean, instead of an expression to be used
 in a smart match:
 
@@ -50,6 +51,8 @@ to the regular or operator, as in C<when (expr1 || expr2)>.)
 The next section details more changes brought to the semantics to
 the smart match operator, that naturally also modify the behaviour
 of the switch statements where smart matching is implicitly used.
+These changers were also made for the 5.10.1 release, and will remain in
+subsequent 5.10 releases.
 
 =head2 Smart match changes
 
