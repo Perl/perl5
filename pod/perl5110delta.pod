@@ -1178,6 +1178,10 @@ On Cygwin we now strip the last number from the DLL. This has been the
 behaviour in the cygwin.com build for years. The hints files have been
 updated.
 
+=item DomainOS
+
+Support for Apollo DomainOS was removed in Perl 5.11.0
+
 =item FreeBSD
 
 The hints files now identify the correct threading libraries on FreeBSD 7
@@ -1192,6 +1196,10 @@ C<cc -E -> unfortunately goes into K&R mode, but C<cc -E file.c> doesn't.
 
 Patches from the Haiku maintainers have been merged in. Perl should now
 build on Haiku.
+
+=item MiNT
+
+Support for Atari MiNT was removed in Perl 5.11.0.
 
 =item MirOS BSD
 
