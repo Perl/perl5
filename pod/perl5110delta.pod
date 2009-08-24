@@ -9,6 +9,9 @@ the 5.11.0 development release.
 
 =head1 Incompatible Changes
 
+=head2 In @INC, move ARCHLIB and PRIVLIB after the current version's site_perl and vendor_perl.
+
+
 =head2 Switch statement changes
 
 The handling of complex expressions by the C<given>/C<when> switch
@@ -191,6 +194,10 @@ in a change of behaviour between 5.8.x and 5.10.0:
     # matches in 5.8.x, doesn't match in 5.10.0
     $re = qr/^bar/; "foo\nbar" =~ /$re/m;
 
+=item *
+
+C<length undef> now returns undef.
+
 =back
 
 =head1 Core Enhancements
@@ -273,6 +280,18 @@ must be installed before running F<Makefile.PL> or F<Build.PL>.
 
 See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for more
 on how to specify C<configure_requires> when creating a distribution for CPAN.
+
+=head2 The C<each> function can now operate on arrays
+
+=head2 Perl's core time-related functions are now Y2038 compliand
+
+=head2 The variable C<$,> may now be tied
+
+=head2 // now behaves like || in when clauses
+
+=head2 You can now set C<-W> from the C<PERL5OPT> environment varialbe
+
+
 
 =head1 Modules and Pragmata
 
@@ -566,6 +585,8 @@ Upgraded from version 1.1005 to 1.1006.
 
 Upgraded from version 2.11 to 2.14.
 
+File::Copy now always return 0 (not "") on failure.
+
 =item C<File::Fetch>
 
 Upgraded from version 0.14 to 0.20.
@@ -585,6 +606,8 @@ Upgraded from version 3.2501 to 3.30.
 =item C<File::stat>
 
 Upgraded from version 1.00 to 1.01.
+
+Added -X overloading, -M, -C and -A.
 
 =item C<File::Temp>
 
@@ -775,6 +798,10 @@ Upgraded from version 2.16 to 2.22.
 
 Upgraded from version 1.35 to 1.37.
 
+=item Pod::Perldoc
+
+Upgrade from version 3.14_02 to 3.15.
+
 =item C<Pod::Simple>
 
 Upgraded from version 3.05 to 3.07.
@@ -825,7 +852,7 @@ Upgraded from version 0.22 to 0.27.
 
 =item C<Term::ANSIColor>
 
-Upgraded from version 1.12 to 2.00.
+Upgraded from version 1.12 to 2.01.
 
 =item C<Term::ReadLine>
 
@@ -871,7 +898,7 @@ Upgraded from version 2.01 to 2.09.
 
 =item C<threads>
 
-Upgraded from version 1.67 to 1.72.
+Upgraded from version 1.67 to 1.73.
 
 =item C<threads::shared>
 
@@ -920,6 +947,9 @@ The documentation has been corrected and expanded.
 
 Upgraded from version 1.04 to 1.05.
 
+UNIVERSAL->import() is now deprecated.
+
+
 =item C<Win32>
 
 Upgraded from version 0.34 to 0.39.
@@ -957,9 +987,19 @@ C<LVALUE> subroutines now work under the debugger.
 The debugger now correctly handles proxy constant subroutines, and
 subroutine stubs.
 
+
+=item F<perlbug>
+
+ Perlbug now uses %Module::CoreList::bug_tracker to print out upstream bug tracker URLs.
+
+Where the user names a module that their bug report is about, and we know the
+URL for its upstream bug tracker, provide a message to the user explaining
+that the core copies the CPAN version directly, and provide the URL for
+reporting the bug directly to upstream.
+
 =item F<perlthanks>
 
-Perl 5.10.1 adds a new utility F<perlthanks>, which is a variant of
+Perl 5.10.1 added a new utility F<perlthanks>, which is a variant of
 F<perlbug>, but for sending non-bug-reports to the authors and maintainers
 of Perl. Getting nothing but bug reports can become a bit demoralising:
 we'll see if this changes things.
@@ -1009,6 +1049,28 @@ Information still relevant has been moved to L<perlrepository>.
 L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all
 generated at build time, rather than being shipped as part of the release.
 
+=head2 Documented -X overloading.
+
+=head2 Documented that when() treats specially most of the filetest operators
+
+=head2 Documented that DESTROY is subject to AUTOLOAD, and the related optimisations.
+
+=head2 Documented when as a syntax modifier
+
+=head2 Eliminated "Old Perl threads tutorial", which describes 5005 threads.
+
+pod/perlthrtut.pod is the same material reworked for ithreads.
+
+=head2 Removed a link to the attrs pragma, which has now been removed.
+
+=head2 update PERL_MEM_LOG in perlhack.pod
+
+=head2 Correct previous documentation: v-strings are not deprecated
+
+With version objects, we need them to use MODULE VERSION syntax.  This
+patch removes the deprecation note.
+
+
 =head1 Performance Enhancements
 
 =over 4
@@ -1027,6 +1089,14 @@ faster.
 =item *
 
 Empty C<DESTROY> methods are no longer called.
+
+=item *
+
+Faster sv_utf8_upgrade()
+
+=item *
+
+Speed up keys() on empty hash
 
 =back
 
@@ -1150,6 +1220,8 @@ Enabling the C<PERL_VMS_POSIX_EXIT> logical name now encodes a POSIX exit
 status in a VMS condition value for better interaction with GNV's bash
 shell and other utilities that depend on POSIX exit values.  See
 L<perlvms/"$?"> for details.
+
+File::Copy now detects Unix compatibility mode on VMS.
 
 =back
 
@@ -1433,7 +1505,6 @@ In 5.10.0, certain types of re-entrant regular expression could crash,
 or cause the following assertion failure [RT #60508]:
 
     Assertion rx->sublen >= (s - rx->subbeg) + i failed
-
 
 =back
 
@@ -1766,8 +1837,81 @@ replacement.
 
 =item *
 
-C<suidperl> will be removed in 5.12.0. This provides a mechanism to
+C<suidperl> has been removed. It used to provide a mechanism to
 emulate setuid permission bits on systems that don't support it properly.
+
+=item *
+
+Deprecate assignment to $[
+
+=item *
+
+Remove attrs, which has been deprecated since 1999/10/02.
+
+=item *
+
+Deprecate use of the attribute :locked on subroutines.
+
+=item *
+
+Deprecate using "locked" with the attributes pragma.
+
+=item *
+
+Deprecate using "unique" with the attributes pragma.
+
+=item *
+
+warn if ++ or -- are unable to change the value because it's beyond the limit of representation 
+
+This uses a new warnings category: "imprecision".
+
+
+=item *
+
+Make lc/uc/lcfirst/ucfirst warn when passed undef.
+
+=item *
+
+Show constant in "Useless use of a constant in void context"
+
+=item *
+
+Make the new warning report undef constants as undef
+
+=item *
+
+Add a new warning, "Prototype after '%s'"
+
+=item *
+
+Tweak the "Illegal character in prototype" warning so it's more precise when reporting illegal characters after _
+
+=item *
+
+Unintented interpolation of $\ in regex
+
+=item *
+
+Make overflow warnings in gmtime/localtime only occur when warnings are on
+
+=item *
+
+Improve mro merging error messages.
+
+They are now very similar to those produced by Algorithm::C3.
+
+=item *
+
+Amelioration of the error message "Unrecognized character %s in column %d"
+
+Changes the error message to "Unrecognized character %s; marked by <--
+HERE after %s<-- HERE near column %d". This should make it a little
+simpler to spot and correct the suspicious character.
+
+=item *
+
+Explicitely point to $. when it causes an uninitialized warning for ranges in scalar context
 
 =back
 
@@ -1788,6 +1932,14 @@ many times we broke it for him.
 
 The other core committers contributed most of the changes, and applied most
 of the patches sent in by the hundreds of contributors listed in F<AUTHORS>.
+
+Much of the work of categorizing changes in this perldelta file was contributed
+by the following porters using changelogger.bestpractical.com:
+
+Nicholas Clark, leon, shawn, alexm, rjbs, rafl, Pedro Melo, brunorc,
+anonymous, ☄, Tom Hukins, anonymous, Jesse, dagolden, Moritz Onken,
+Mark Fowler, chorny, anonymous, tmtm
+
 
 Finally, thanks to Larry Wall, without whom none of this would be
 necessary.
@@ -1827,3 +1979,307 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+
+=head1 TODO
+
+The following changes are a filtered list of changes which weren't backported
+to 5.10.1. They were run through changelogger.bestpractical.com and triaged
+by a set of Perl 5 Porters. Changes to blead after 5945e41e have not yet
+been triaged or integrated.
+
+The following changes need to be 
+
+1) deleted if they don't merit inclusion
+
+	OR
+
+2) lightly copyedited and integrated into the perldelta above. Unfortunately, many of our
+commit messages are somewhat terse and require a bit more help to turn into something readable
+
+
+
+
+=head1 API
+
+=head2 Move the reg_stringify logic to Perl_sv_2pv_flags
+
+=head2 mg_copy ought to take an I32
+
+=head2 Perl_store_cop_label() isn't meant to be part of the public API.
+
+=head2 Perl_gv_fetchmethod{,_autoload,_flags} are actually never* called with a non-NULL stash. 
+So change the parameter to NN.
+
+
+=head2 Promote Perl_setdefout() to the public API.
+
+=head2 Add get_cvs() as a shortcut for STR_WITH_LEN() and Perl_get_cvn_flags()
+
+=head2 In Perl_newCONSTSUB(), sv should not be NULL.
+
+=head2 GvUNIQUE* have been defined as 0 since 2005/06/30 - high time to remove them.
+
+=head2 invert and rename PERL_MEM_LOG_STDERR to PERL_MEM_LOG_NOIMPL
+
+Most users who want PERL_MEM_LOG want the default implementation,
+give it to them.  Users providing their own implementation can
+obtain current behavior by adding -DPERL_MEM_LOG_NOIMPL.
+Frankly, the average user probably wants _ENV by default too.
+
+=head2 simplify PERL_MEM_LOG
+
+This combines multiple environment variable reads into 1,
+where it looks for values like "2mst"
+-2 leading digits are atoi()d to get FD
+-m memory logging please
+-s sv logging also
+-t timestamp those please.
+
+Combining these reduces overhead such that it seemed
+worthwhile to drop all the ifdefs.  TBD whether this works
+in the environment that drove the original tradeoffs.
+
+If it isnt enough, Id be tempted by a global static ptr,
+and on 1st use, is read, seen 0, a lock is taken, and getenvar
+run to populate it, unlocked, proceed.  This would remove
+iterative overheads.
+
+=head2 Add a parameter "destructing" to Gv_AMupdate()
+
+This boolean parameter indicates if the function has been called
+to update the overload magic table while looking up the DESTROY
+method. In this case, it's probably best to avoid croaking if
+those tables could not be updated (for example due to a method
+that could not be loaded.)
+
+=head2 Modify the return value of Gv_AMupdate to indicate a compilation error
+
+This way we'll restore most of the performance on object desctruction
+lost by the previous commit
+
+
+=head2 local $SIG{FOO} = sub {...}; sets signal handler to SIG_DFL
+
+Re: [perl #60360] [PATCH] UPDATED: local $SIG{FOO} = sub {...}; sets signal handler to SIG_DFL
+Message-ID: <20081112234504.GI2062@tytlal.topaz.cx>
+
+Updated patch to retain source compatibility.
+
+Plus using the correct PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS
+macro and running make regen.
+
+=head2 Respecting inc_version_list while processing PERL_VENDORLIB_STEM
+
+Respecting inc_version_list while processing PERL_VENDORLIB_STEM
+From: "Mandalemula, Rajesh" <Rajesh.Mandalemula@deshaw.com>
+
+=head2 Change PL_debug behaviour 
+
+
+String eval lines are now saved whenever
+a subroutine is defined, even if the eval'd string has subsequent
+syntax errors. This allows the debugger to single step into these
+subroutines.
+
+
+=head2 Tied filehandles now have an additional method EOF which provides the EOF type
+
+=head2 Perl is now smarter about adding a -I dir to the beginning or end of @INC
+
+=head2 On scope end, delete localized array elements that should not exist anymore, so that the array recovers its previous length. Honour EXISTS and DELETE for tied arrays.
+
+=head2 When a glob is deleted, mark its sub as ANON.
+
+=head2 Require a space or a newline after a "#line XXX" directive
+
+=head2 Forbid using "foreach" as an attribute
+
+(like all other control flow statements)
+
+
+=head2 Unregister signal handlers before destroying my_perl
+
+If the signal handler runs after perl_destruct() has been called, it
+will get an invalid (or NULL) my_perl when it asks for the
+thread-specific interpreter struct.  This patch resets the signal
+handler for any signal previously handled by PL_csighandlerp to SIG_DFL
+before calling perl_destruct().
+
+=head2 Perl_magic_clearsig() needs to remove magic, else delete $SIG{INT} returns undef
+
+Perl_magic_clearsig() needs to remove magic, else delete $SIG{INT} returns undef
+instead of the now-removed INT handler.
+
+=head2 [perl #66452] TMPDIR not honored when opening an anonymous temporary file
+
+[perl #66452] TMPDIR not honored when opening an anonymous temporary file
+
+=head2 The attached patch to perlio.c fixes the problem of errno getting set.
+
+While I am firmly in the school of "do not look at $! except immediately
+after a failure", I also agree that spuriously setting it is messy.  But
+there is just no way of knowing where your errno might have been.
+
+The problem was that PerlIO_fast_gets() (and other nearby similar
+capability-checking PerlIO routines) set the errno (and it was being
+called a lot, from sv_gets()).  I think setting the errno here was
+a mistake: checking for "can has FOO" should not set external state,
+such as the errno.  The patch removes that errno trashing from all those
+routines.
+
+=head2 Trim all trailing / from "." in @INC when filling %INC
+
+This fixes bug #66942 : as a / was left in the directory name,
+$INC{"Foo.pm"} for a file loaded from the current directory
+was given the incorrect value "/Foo.pm".
+
+=head2 Don't enqueue pending signals during global destruction
+
+Global destruction is not signal-safe. PL_psig_pend may already
+be gone when the signal handler is called (with destruct_level > 0).
+NULL it before freeing it to prevent a race condition.
+
+=head2 Eliminate struct regexp_allocated and xpvio_allocated.
+
+Calculate memory allocation using regexp and XPVIO, and the offset of the first
+real structure member. This avoids tripping over alignment differences between
+X* and x*_allocated, because x*_allocated doesn't have a double in it.
+
+
+=head1 internals
+
+=head2 [perl #47047] Use of inherited AUTOLOAD for non-method is deprecated
+
+=head2 Remove the definitions of Null(), Nullch, Nullfp, Nullsv and PL_na when code is within the perl source tree
+
+=head2 Replace our assert-which-can-be-caught-by-eval with the real deal from the standard C library.
+
+=head2 Tweak Perl_sv_upgrade() so that references can upgrade to SVt_PV
+
+=head2 Eliminate prelen from struct regexp. 
+
+=head2 Change Perl_av_iter_p() to return IV* rather than I32* (which means
+
+=head2 Reorder the external regexp flags to get RXf_PMf_STD_PMMOD into the
+
+lowest 4 bits (which saves a shift), and the "flags indicating special
+patterns" into contiguous bits. This makes everything a little tidier,
+and saves 88 bytes (woohoo!) of object file with -Os on x86 FreeBSD.
+
+
+=head2 Re-implement the SvOOK() hack to store the offset as a BER encoded number in the part of the PVX that is being released. 
+(It will always
+fit, as chopping off 1 byte gives just enough space for recording a
+delta of up to 127). This allows SvOOK() to co-exist with SvIOK_on(),
+which means all the calls to SvOOK_off() [with the possibility of a
+call to sv_backoff()] in SvIOK_on() can be removed. This ought to make
+a lot of straight line code a little bit simpler.
+OOK()d scalars can now be SVt_PV, as the IVX isn't needed.
+
+=head2 Abolish wraplen from struct regexp. We're already storing it in SvCUR.
+
+=head2 Make Perl_pregcomp() use SvUTF8() of the pattern, rather than the flag bit in pmflags, to decide whether the pattern is UTF-8.
+
+=head2 Abolish RXf_UTF8. Store the UTF-8-ness of the pattern with SvUTF8().
+
+=head2 In struct regexp move the member paren_names to the IV union.
+
+=head2 Make REGEXP a type distinct from SV. (Much like AV, CV, GV, HV).
+
+=head2 Allow sv_setsv_flags() to copy SVt_REGEXP much like it copies SVt_FORMAT - the just string buffer.
+
+
+=head2 Correct a long-standing ithreads reference counting anonamly
+
+The reference count only needs "doubling" when the scalar is pushed onto
+PL_regex_padav for the second time.
+
+
+=head2 In PL_regexp_padav, store regexps via real references, rather than hiding them within IVs. 
+
+We can do this now that they are real SV pointers.
+
+=head2 With regexps stored as real RVs, we can eliminate SvREPADTMP().
+
+=head2 REGEXPs are now stored directly in PL_regex_padav, rather than indirectly via RVs.
+
+=head2 Remove code that protected pp_qr against REGEXPs going away during global destruction whilst they were stored via true references in PL_regex_padav. 
+
+=head2 Remove PM_GETRE_SAFE and PM_SETRE_SAFE as nothing uses them.
+
+=head2 Note the U8 sized space created by removing -P, and check that it is now an illegal command line flag.
+
+=head2 Pack the recycled pad offsets into an SV at PL_regex_pad[0]. 
+
+=head2 Re-order so that the !SvOK() case is last (which should be rare)
+
+=head2 Extend PUSHFORMAT() to take a second parameter to set retop, to save NULLing it and then reassigning.
+
+=head2 Split struct block_sub into struct block_sub and struct block_format.
+
+Split struct block_sub into struct block_sub and struct block_format.
+(CXt_SUB and CXt_FORMAT were using some comon members, but some members
+were only for one or the other.)
+
+=head2 Change the wantarray result from caller from IV to bool for the SCALAR/ARRAY case. 
+
+This doesn't contradict the documentation, as there isn't any. Oops.
+
+
+=head2 Give G_VOID, G_SCALAR and G_ARRAY the same numeric values as OPf_WANT_VOID, OPf_WANT_SCALAR and OPf_WANT_LIST.
+
+
+=head2 Squeeze the context type down to 4 bits, and move the private flags to fit within the next 4 bits.
+
+
+=head2 In struct block change blku_type from U8 to U16, and the "spare" U8 to U16, with the lockstep changes in struct subst. 
+Eliminate lval from
+struct block_sub, and instead store it in the U16 in struct block.
+
+
+=head2 In struct block_eval, eliminate old_in_eval and old_op_type by storing the data in blk_u16.
+
+
+=head2 The layout for struct block_loop under ithreads can be simplified.
+
+Instead of wedging the pad offset into a void* iterdata, and always
+storing PL_comppad even when it isn't used, instead do this:
+
+PAD        *oldcomppad; /* Also used for the GV, if targoffset is 0 */
+/* This is also accesible via cx->blk_loop.my_op->op_targ */
+PADOFFSET  targoffset;
+
+and store the GV pointer in oldcompad. Pointers to pointers seems
+cleaner. This also allows us to eliminate the flag bit CXp_PADVAR.
+
+
+=head2 In XS_PerlIO_get_layers() take advantage of the implementation of
+
+In XS_PerlIO_get_layers() take advantage of the implementation of
+PerlIO_get_layers(), by co-opting the new SVs it creates, rather than
+copying them.
+
+
+=head2 Micro-optimise the order of the context types. [Because I can :-)]
+
+=head2 [patch] optimize OP_IS_(FILETEST|SOCKET) macros
+
+=head2 Eliminate ck_lengthconst.
+
+=head2 Chainsaw DEBUG_S out, as suggested by Vincent Pit.
+
+=head2 Unsupported private API functions are now declared "static" to prevent leakage to the public API
+
+=head2 Perl_cv_ckproto() is not part of the public API, and not used anywhere. It has been removed
+
+=head2 Remove all the 5005threads specific mutex macros, which are now vestigial.
+
+=head2 Do not honor TMPDIR for anonymous temporary files when tainting
+
+Use a default of /tmp on Unixes when TMPDIR is unset or empty, or
+when creation of a temporary file in it fails
+
+=head2 Add a pluggable hook in op_free()
+
+
