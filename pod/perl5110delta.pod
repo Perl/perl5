@@ -367,7 +367,8 @@ have been recognised; for example, C<"\N{LATIN CAPITAL LETTER GHA}">.
 
 =item C<constant>
 
-Upgraded from version 1.13 to 1.17.
+Upgraded from version 1.13 to 1.19. Some code has been shifted from run time to
+compile time, and the amount of MRO cache flushing has been minimised.
 
 =item C<feature>
 
