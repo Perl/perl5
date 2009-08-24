@@ -11,7 +11,6 @@ the 5.11.0 development release.
 
 =head2 In @INC, move ARCHLIB and PRIVLIB after the current version's site_perl and vendor_perl.
 
-
 =head2 Switch statement changes
 
 The handling of complex expressions by the C<given>/C<when> switch
@@ -294,8 +293,6 @@ on how to specify C<configure_requires> when creating a distribution for CPAN.
 
 =head2 You can now set C<-W> from the C<PERL5OPT> environment varialbe
 
-
-
 =head1 Modules and Pragmata
 
 =head2 New Modules and Pragmata
@@ -462,7 +459,6 @@ L<Carp> now includes all the necessary code to function. Previously, it
 used to be a lightweight placeholder that loaded the actual code from
 C<Carp::Heavy> on demand. C<Carp::Heavy> is now a simple, empty module
 kept for backwards compatibility for programs that used to pre-load it.
-
 
 =item C<CGI>
 
@@ -956,7 +952,6 @@ Upgraded from version 1.04 to 1.05.
 
 UNIVERSAL->import() is now deprecated.
 
-
 =item C<Win32>
 
 Upgraded from version 0.34 to 0.39.
@@ -994,10 +989,10 @@ C<LVALUE> subroutines now work under the debugger.
 The debugger now correctly handles proxy constant subroutines, and
 subroutine stubs.
 
-
 =item F<perlbug>
 
- Perlbug now uses %Module::CoreList::bug_tracker to print out upstream bug tracker URLs.
+F<perlbug> now uses %Module::CoreList::bug_tracker to print out upstream bug
+tracker URLs.
 
 Where the user names a module that their bug report is about, and we know the
 URL for its upstream bug tracker, provide a message to the user explaining
@@ -1044,9 +1039,9 @@ This describes the new F<perlthanks> utility.
 
 =head1 Changes to Existing Documentation
 
-The various large C<Changes*> files (which listed every change made to perl
+The various large F<Changes*> files (which listed every change made to perl
 over the last 18 years) have been removed, and replaced by a small file,
-also called C<Changes>, which just explains how that same information may
+also called F<Changes>, which just explains how that same information may
 be extracted from the git version control system.
 
 The file F<Porting/patching.pod> has been deleted, as it mainly described
@@ -1076,7 +1071,6 @@ pod/perlthrtut.pod is the same material reworked for ithreads.
 
 With version objects, we need them to use MODULE VERSION syntax.  This
 patch removes the deprecation note.
-
 
 =head1 Performance Enhancements
 
@@ -1234,7 +1228,7 @@ status in a VMS condition value for better interaction with GNV's bash
 shell and other utilities that depend on POSIX exit values.  See
 L<perlvms/"$?"> for details.
 
-File::Copy now detects Unix compatibility mode on VMS.
+C<File::Copy> now detects Unix compatibility mode on VMS.
 
 =back
 
@@ -1248,9 +1242,9 @@ File::Copy now detects Unix compatibility mode on VMS.
 as documented, and as does C<-I> when specified on the command-line.
 (Renée Bäcker)
 
-=item 
+=item *
 
-* C<kill> is now fatal when called on non-numeric process identifiers.
+C<kill> is now fatal when called on non-numeric process identifiers.
 Previously, an 'undef' process identifier would be interpreted as a request to
 kill process "0", which would terminate the current process group on POSIX
 systems.  Since process identifiers are always integers, killing a non-numeric
@@ -1677,7 +1671,7 @@ outside the core should be accessing this directly anyway.
 
 =item *
 
-A new tool, C<Porting/expand-macro.pl> has been added, that allows you
+A new tool, F<Porting/expand-macro.pl> has been added, that allows you
 to view how a C preprocessor macro would be expanded when compiled.
 This is handy when trying to decode the macro hell that is the perl
 guts.
@@ -1831,7 +1825,6 @@ A workaround is to generate the character outside of the regex:
 Some regexes may run much more slowly when run in a child thread compared
 with the thread the pattern was compiled into [RT #55600].
 
-
 =back
 
 =head1 Deprecations
@@ -1878,7 +1871,6 @@ Deprecate using "unique" with the attributes pragma.
 warn if ++ or -- are unable to change the value because it's beyond the limit of representation 
 
 This uses a new warnings category: "imprecision".
-
 
 =item *
 
@@ -1952,7 +1944,6 @@ by the following porters using changelogger.bestpractical.com:
 Nicholas Clark, leon, shawn, alexm, rjbs, rafl, Pedro Melo, brunorc,
 anonymous, ☄, Tom Hukins, anonymous, Jesse, dagolden, Moritz Onken,
 Mark Fowler, chorny, anonymous, tmtm
-
 
 Finally, thanks to Larry Wall, without whom none of this would be
 necessary.
