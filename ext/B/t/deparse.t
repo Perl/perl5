@@ -3,12 +3,8 @@
 BEGIN {
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
-	if ($^O eq 'MacOS') {
-	    @INC = qw(: ::lib ::macos:lib);
-	} else {
-	    @INC = '.';
-	    push @INC, '../lib';
-	}
+	@INC = '.';
+	push @INC, '../lib';
     } else {
 	unshift @INC, 't';
     }
@@ -112,14 +108,9 @@ my $val = (eval $string)->() or diag $string;
 is(ref($val), 'ARRAY');
 is($val->[0], 'hello');
 
-my $Is_VMS = $^O eq 'VMS';
-my $Is_MacOS = $^O eq 'MacOS';
-
 my $path = join " ", map { qq["-I$_"] } @INC;
-$path .= " -MMac::err=unix" if $Is_MacOS;
-my $redir = $Is_MacOS ? "" : "2>&1";
 
-$a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 $redir`;
+$a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 $a =~ s/.*possible typo.*\n//;	   # Remove warning line
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
@@ -134,12 +125,6 @@ LINE: while (defined($_ = <ARGV>)) {
     '???';
 }
 EOF
-$b =~ s/(LINE:)/sub BEGIN {
-    'MacPerl'->bootstrap;
-    'OSA'->bootstrap;
-    'XL'->bootstrap;
-}
-$1/ if $Is_MacOS;
 is($a, $b);
 
 #Re: perlbug #35857, patch #24505
