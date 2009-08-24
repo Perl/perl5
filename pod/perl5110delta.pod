@@ -1019,6 +1019,12 @@ A new internal cache means that C<isa()> will often be faster.
 
 =item *
 
+The implementation of C<C3> Method Resolution Order has been optimised -
+linearisation for classes with single inheritance is 40% faster. Performance 
+for multiple inheritance is unchanged.
+
+=item *
+
 Under C<use locale>, the locale-relevant information is now cached on
 read-only values, such as the list returned by C<keys %hash>. This makes
 operations such as C<sort keys %hash> in the scope of C<use locale> much
