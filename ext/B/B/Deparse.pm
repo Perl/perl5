@@ -22,7 +22,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.89;
+$VERSION = 0.90;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -487,8 +487,11 @@ sub stash_subs {
 		next unless $AF eq $0 || exists $self->{'files'}{$AF};
 	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, $val->PV];
-	} elsif ($class eq "IV") {
+	} elsif ($class eq "IV" && !($val->FLAGS & SVf_ROK)) {
 	    # Just a name. As above.
+	    # But skip proxy constant subroutines, as some form of perl-space
+	    # visible code must have created them, be it a use statement, or
+	    # some direct symbol-table manipulation code that we will Deparse
 	    my $A = $stash{"AUTOLOAD"};
 	    if (defined ($A) && class($A) eq "GV" && defined($A->CV)
 		&& class($A->CV) eq "CV") {

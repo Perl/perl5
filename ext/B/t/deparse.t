@@ -23,7 +23,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 77;
+use Test::More tests => 78;
 use Config ();
 
 use B::Deparse;
@@ -126,6 +126,11 @@ LINE: while (defined($_ = <ARGV>)) {
 }
 EOF
 is($a, $b);
+
+$a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, "use constant ('PI', 4);\n",
+   "Proxy Constant Subroutines must not show up as (incorrect) prototypes");
 
 #Re: perlbug #35857, patch #24505
 #handle warnings::register-ed packages properly.
