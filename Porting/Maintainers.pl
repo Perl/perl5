@@ -492,7 +492,7 @@ package Maintainers;
     'CPANPLUS::Dist::Build' =>
 	{
 	'MAINTAINER'	=> 'bingos',
-	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.36.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.38.tar.gz',
 	'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm
 			     lib/CPANPLUS/Dist/Build
 			    ],
