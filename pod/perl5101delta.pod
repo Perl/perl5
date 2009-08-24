@@ -191,7 +191,7 @@ in a change of behaviour between 5.8.x and 5.10.0:
 
 The copy of the Unicode Character Database included in Perl 5.10.1 has
 been updated to 5.1.0 from 5.0.0. See
-L<http://www.unicode.org/versions/Unicode5.1.0/#NotableChanges> for the
+L<http://www.unicode.org/versions/Unicode5.1.0/#Notable_Changes> for the
 notable changes.
 
 =head2 A proper interface for pluggable Method Resolution Orders
