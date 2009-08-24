@@ -588,9 +588,11 @@ Upgraded from version 1.1005 to 1.1006.
 
 =item C<File::Copy>
 
-Upgraded from version 2.11 to 2.14.
+Upgraded from version 2.11 to 2.16.
 
 File::Copy now always return 0 (not "") on failure.
+
+FIXME - describe C<cp>
 
 =item C<File::Fetch>
 
