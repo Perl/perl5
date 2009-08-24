@@ -207,14 +207,14 @@ C<length undef> now returns undef.
 
 =head2 Unicode Character Database 5.1.0
 
-The copy of the Unicode Character Database included in Perl 5.10.1 has
+The copy of the Unicode Character Database included in Perl 5.11.0 has
 been updated to 5.1.0 from 5.0.0. See
 L<http://www.unicode.org/versions/Unicode5.1.0/#Notable_Changes> for the
 notable changes.
 
 =head2 A proper interface for pluggable Method Resolution Orders
 
-As of Perl 5.10.1 there is a new interface for plugging and using method
+As of Perl 5.11.0 there is a new interface for plugging and using method
 resolution orders other than the default (linear depth first search).
 The C3 method resolution order added in 5.10.0 has been re-implemented as
 a plugin, without changing its Perl-space interface. See L<perlmroapi> for
@@ -1002,7 +1002,7 @@ reporting the bug directly to upstream.
 
 =item F<perlthanks>
 
-Perl 5.10.1 added a new utility F<perlthanks>, which is a variant of
+Perl 5.11.0 added a new utility F<perlthanks>, which is a variant of
 F<perlbug>, but for sending non-bug-reports to the authors and maintainers
 of Perl. Getting nothing but bug reports can become a bit demoralising:
 we'll see if this changes things.
@@ -1125,7 +1125,7 @@ become extensions in their own right, so if you run F<Configure> with
 options to specify an exact list of extensions to build, you will need to
 change it to account for this.
 
-For 5.10.2, it is planned that many dual-life modules will have been moved
+For 5.11.1, it is planned that many dual-life modules will have been moved
 from F<lib> to F<ext>; again this will have no effect on an installed
 perl, but will matter if you invoke F<Configure> with a pre-canned list of
 extensions to build.
