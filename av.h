@@ -8,26 +8,12 @@
  *
  */
 
-#define _XPVAV_ALLOCATED_HEAD						\
-    SSize_t	xav_fill;       /* Index of last element present */	\
-    SSize_t	xav_max         /* max index for which array has space */
-
-#define _XPVAV_HEAD	\
-    union _xnvu xnv_u;	\
-    _XPVAV_ALLOCATED_HEAD
-
 struct xpvav {
-    _XPVAV_HEAD;
+    union _xnvu xnv_u;
+    SSize_t	xav_fill;       /* Index of last element present */
+    SSize_t	xav_max;        /* max index for which array has space */
     _XPVMG_HEAD;
 };
-
-typedef struct {
-    _XPVAV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-} xpvav_allocated;
-
-#undef _XPVAV_ALLOCATED_HEAD
-#undef _XPVAV_HEAD
 
 /* SV**	xav_alloc; */
 #define xav_alloc xiv_u.xivu_p1

@@ -3962,7 +3962,11 @@ PERL_LOADMOD_DENY, PERL_LOADMOD_NOIMPORT, or PERL_LOADMOD_IMPORT_OPS
 (or 0 for no flags). ver, if specified, provides version semantics
 similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
 arguments can be used to specify arguments to the module's import()
-method, similar to C<use Foo::Bar VERSION LIST>.
+method, similar to C<use Foo::Bar VERSION LIST>.  They must be
+terminated with a final NULL pointer.  Note that this list can only
+be omitted when the PERL_LOADMOD_NOIMPORT flag has been used.
+Otherwise at least a single NULL pointer to designate the default
+import list is required.
 
 =cut */
 
@@ -5524,7 +5528,6 @@ CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;
-    const char *aname;
     GV *gv;
     const char *ps;
     STRLEN ps_len;
@@ -5540,6 +5543,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
+    bool has_name;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -5548,20 +5552,23 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else
 	ps = NULL;
 
-    if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
+    if (name) {
+	gv = gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV);
+	has_name = TRUE;
+    } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	aname = SvPVX_const(sv);
+	gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
+	has_name = TRUE;
+    } else if (PL_curstash) {
+	gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV);
+	has_name = FALSE;
+    } else {
+	gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
+	has_name = FALSE;
     }
-    else
-	aname = NULL;
-
-    gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
-	: gv_fetchpv(aname ? aname
-		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
-		     gv_fetch_flags, SVt_PVCV);
 
     if (!PL_madskills) {
 	if (o)
@@ -5835,7 +5842,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvCONST_on(cv);
     }
 
-    if (name || aname) {
+    if (has_name) {
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();

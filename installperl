@@ -163,6 +163,10 @@ find(sub {
     {
 	my($path, $modname) = ($1,$2);
 
+	# Change hypenated name like Filter-Util-Call to nested
+	# directory name Filter/Util/Call
+	$path =~ s{-}{/}g;
+
 	# strip to optional "/lib", or remove trailing component
 	$path =~ s{.*/lib\b}{} or $path =~ s{/[^/]*$}{};
 
@@ -749,7 +753,7 @@ sub installlib {
     if ($dir =~ /^auto\// ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
 	  ($name =~ /^(.*)\.(?:h|lib)$/i && ($Is_W32 || $Is_NetWare)) ||
-	  $name=~/^Config_(heavy\|git)\.pl\z/
+	  $name=~/^Config_(heavy|git)\.pl\z/
        ) {
 	$installlib = $installarchlib;
 	return unless $do_installarchlib;

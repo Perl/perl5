@@ -211,7 +211,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     const HEK* stashhek;
     struct mro_meta* meta;
     SV *our_name;
-    HV *stored;
+    HV *stored = NULL;
 
     PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS;
     assert(HvAUX(stash));
@@ -249,8 +249,6 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
        It's then retained to be re-used as a fast lookup for ->isa(), by adding
        our own name and "UNIVERSAL" to it.  */
 
-    stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
-
     if(av && AvFILLp(av) >= 0) {
 
         SV **svp = AvARRAY(av);
@@ -281,41 +279,79 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 		subrv_p = AvARRAY(subrv);
 		subrv_items = AvFILLp(subrv) + 1;
 	    }
-	    while(subrv_items--) {
-		SV *const subsv = *subrv_p++;
-		/* LVALUE fetch will create a new undefined SV if necessary
-		 */
-		HE *const he = hv_fetch_ent(stored, subsv, 1, 0);
-		assert(he);
-		if(HeVAL(he) != &PL_sv_undef) {
-		    /* It was newly created.  Steal it for our new SV, and
-		       replace it in the hash with the "real" thing.  */
-		    SV *const val = HeVAL(he);
-		    HEK *const key = HeKEY_hek(he);
+	    if (stored) {
+		while(subrv_items--) {
+		    SV *const subsv = *subrv_p++;
+		    /* LVALUE fetch will create a new undefined SV if necessary
+		     */
+		    HE *const he = hv_fetch_ent(stored, subsv, 1, 0);
+		    assert(he);
+		    if(HeVAL(he) != &PL_sv_undef) {
+			/* It was newly created.  Steal it for our new SV, and
+			   replace it in the hash with the "real" thing.  */
+			SV *const val = HeVAL(he);
+			HEK *const key = HeKEY_hek(he);
 
-		    HeVAL(he) = &PL_sv_undef;
-		    /* Save copying by making a shared hash key scalar. We
-		       inline this here rather than calling Perl_newSVpvn_share
-		       because we already have the scalar, and we already have
-		       the hash key.  */
-		    assert(SvTYPE(val) == SVt_NULL);
-		    sv_upgrade(val, SVt_PV);
-		    SvPV_set(val, HEK_KEY(share_hek_hek(key)));
-		    SvCUR_set(val, HEK_LEN(key));
-		    SvREADONLY_on(val);
-		    SvFAKE_on(val);
-		    SvPOK_on(val);
-		    if (HEK_UTF8(key))
-			SvUTF8_on(val);
+			HeVAL(he) = &PL_sv_undef;
+			/* Save copying by making a shared hash key scalar. We
+			   inline this here rather than calling
+			   Perl_newSVpvn_share because we already have the
+			   scalar, and we already have the hash key.  */
+			assert(SvTYPE(val) == SVt_NULL);
+			sv_upgrade(val, SVt_PV);
+			SvPV_set(val, HEK_KEY(share_hek_hek(key)));
+			SvCUR_set(val, HEK_LEN(key));
+			SvREADONLY_on(val);
+			SvFAKE_on(val);
+			SvPOK_on(val);
+			if (HEK_UTF8(key))
+			    SvUTF8_on(val);
 
-		    av_push(retval, val);
+			av_push(retval, val);
+		    }
 		}
-            }
+            } else {
+		/* We are the first (or only) parent. We can short cut the
+		   complexity above, because our @ISA is simply us prepended
+		   to our parent's @ISA, and our ->isa cache is simply our
+		   parent's, with our name added.  */
+		/* newSVsv() is slow. This code is only faster if we can avoid
+		   it by ensuring that SVs in the arrays are shared hash key
+		   scalar SVs, because we can "copy" them very efficiently.
+		   Although to be fair, we can't *ensure* this, as a reference
+		   to the internal array is returned by mro::get_linear_isa(),
+		   so we'll have to be defensive just in case someone faffed
+		   with it.  */
+		if (basestash) {
+		    SV **svp;
+		    stored = MUTABLE_HV(sv_2mortal((SV*)newHVhv(HvMROMETA(basestash)->isa)));
+		    av_extend(retval, subrv_items);
+		    AvFILLp(retval) = subrv_items;
+		    svp = AvARRAY(retval);
+		    while(subrv_items--) {
+			SV *const val = *subrv_p++;
+			*++svp = SvIsCOW_shared_hash(val)
+			    ? newSVhek(SvSHARED_HEK_FROM_PV(SvPVX(val)))
+			    : newSVsv(val);
+		    }
+		} else {
+		    /* They have no stash.  So create ourselves an ->isa cache
+		       as if we'd copied it from what theirs should be.  */
+		    stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+		    (void) hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
+		    av_push(retval,
+			    newSVhek(HeKEY_hek(hv_store_ent(stored, sv,
+							    &PL_sv_undef, 0))));
+		}
+	    }
         }
+    } else {
+	/* We have no parents.  */
+	stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+	(void) hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
     }
 
     (void) hv_store_ent(stored, our_name, &PL_sv_undef, 0);
-    (void) hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
 
     SvREFCNT_inc_simple_void_NN(stored);
     SvTEMP_off(stored);

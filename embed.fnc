@@ -165,7 +165,7 @@ Aprd	|void	|croak_xs_usage	|NN const CV *const cv \
 
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NULLOK const char* pat|...
-Afnp	|OP*	|die_nocontext	|NN const char* pat|...
+Afnp	|OP*	|die_nocontext	|NULLOK const char* pat|...
 Afnp	|void	|deb_nocontext	|NN const char* pat|...
 Afnp	|char*	|form_nocontext	|NN const char* pat|...
 Anp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
@@ -339,9 +339,10 @@ p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
-Ap	|GV*	|gv_AVadd	|NN GV* gv
-Ap	|GV*	|gv_HVadd	|NN GV* gv
-Ap	|GV*	|gv_IOadd	|NULLOK GV* gv
+Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
+Apmb	|GV*	|gv_AVadd	|NULLOK GV *gv
+Apmb	|GV*	|gv_HVadd	|NULLOK GV *gv
+Apmb	|GV*	|gv_IOadd	|NULLOK GV* gv
 ApR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 method
 Ap	|void	|gv_check	|NN const HV* stash
 Ap	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
@@ -534,6 +535,7 @@ Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg
 dp	|int	|magic_clearhint|NN SV* sv|NN MAGIC* mg
+dp	|int	|magic_clearhints|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearisa	|NULLOK SV* sv|NN MAGIC* mg
 p	|int	|magic_clearpack|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearsig	|NN SV* sv|NN MAGIC* mg
@@ -681,7 +683,7 @@ Apa	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApaR	|OP*	|newHVREF	|NN OP* o
 AmdbR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV *hv
-Apa	|IO*	|newIO
+Apabm	|IO*	|newIO
 Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 #ifdef USE_ITHREADS
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
@@ -2081,7 +2083,7 @@ p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
 #ifdef PERL_DONT_CREATE_GVSV
-Ap	|GV*	|gv_SVadd	|NN GV* gv
+Apbm	|GV*	|gv_SVadd	|NULLOK GV *gv
 #endif
 Apo	|bool	|ckwarn		|U32 w
 Apo	|bool	|ckwarn_d	|U32 w

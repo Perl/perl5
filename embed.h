@@ -268,9 +268,7 @@
 #endif
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
-#define gv_AVadd		Perl_gv_AVadd
-#define gv_HVadd		Perl_gv_HVadd
-#define gv_IOadd		Perl_gv_IOadd
+#define gv_add_by_type		Perl_gv_add_by_type
 #define gv_autoload4		Perl_gv_autoload4
 #define gv_check		Perl_gv_check
 #define gv_efullname		Perl_gv_efullname
@@ -425,6 +423,7 @@
 #define magic_clearenv		Perl_magic_clearenv
 #define magic_clear_all_env	Perl_magic_clear_all_env
 #define magic_clearhint		Perl_magic_clearhint
+#define magic_clearhints	Perl_magic_clearhints
 #define magic_clearisa		Perl_magic_clearisa
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
@@ -571,7 +570,6 @@
 #define newGVREF		Perl_newGVREF
 #define newHVREF		Perl_newHVREF
 #define newHVhv			Perl_newHVhv
-#define newIO			Perl_newIO
 #define newLISTOP		Perl_newLISTOP
 #ifdef USE_ITHREADS
 #define newPADOP		Perl_newPADOP
@@ -1877,7 +1875,6 @@
 #endif
 #endif
 #ifdef PERL_DONT_CREATE_GVSV
-#define gv_SVadd		Perl_gv_SVadd
 #endif
 #ifdef PERL_CORE
 #define offer_nice_chunk	Perl_offer_nice_chunk
@@ -2599,9 +2596,7 @@
 #endif
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
-#define gv_AVadd(a)		Perl_gv_AVadd(aTHX_ a)
-#define gv_HVadd(a)		Perl_gv_HVadd(aTHX_ a)
-#define gv_IOadd(a)		Perl_gv_IOadd(aTHX_ a)
+#define gv_add_by_type(a,b)	Perl_gv_add_by_type(aTHX_ a,b)
 #define gv_autoload4(a,b,c,d)	Perl_gv_autoload4(aTHX_ a,b,c,d)
 #define gv_check(a)		Perl_gv_check(aTHX_ a)
 #define gv_efullname(a,b)	Perl_gv_efullname(aTHX_ a,b)
@@ -2765,6 +2760,7 @@
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
 #define magic_clear_all_env(a,b)	Perl_magic_clear_all_env(aTHX_ a,b)
 #define magic_clearhint(a,b)	Perl_magic_clearhint(aTHX_ a,b)
+#define magic_clearhints(a,b)	Perl_magic_clearhints(aTHX_ a,b)
 #define magic_clearisa(a,b)	Perl_magic_clearisa(aTHX_ a,b)
 #define magic_clearpack(a,b)	Perl_magic_clearpack(aTHX_ a,b)
 #define magic_clearsig(a,b)	Perl_magic_clearsig(aTHX_ a,b)
@@ -2910,7 +2906,6 @@
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
-#define newIO()			Perl_newIO(aTHX)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
 #ifdef USE_ITHREADS
 #define newPADOP(a,b,c)		Perl_newPADOP(aTHX_ a,b,c)
@@ -4228,7 +4223,6 @@
 #endif
 #endif
 #ifdef PERL_DONT_CREATE_GVSV
-#define gv_SVadd(a)		Perl_gv_SVadd(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #endif

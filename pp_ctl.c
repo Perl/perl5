@@ -1749,9 +1749,8 @@ PP(pp_caller)
 	const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
-	    GV* const tmpgv = gv_fetchpvs("DB::args", GV_ADD, SVt_PVAV);
-	    PL_dbargs = GvAV(gv_AVadd(tmpgv));
-	    GvMULTI_on(tmpgv);
+	    PL_dbargs = GvAV(gv_AVadd(gv_fetchpvs("DB::args", GV_ADDMULTI,
+						  SVt_PVAV)));
 	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
 	}
 
@@ -3569,10 +3568,7 @@ PP(pp_require)
 
     SAVEHINTS();
     PL_hints = 0;
-    if (PL_compiling.cop_hints_hash) {
-	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
-	PL_compiling.cop_hints_hash = NULL;
-    }
+    hv_clear(GvHV(PL_hintgv));
 
     SAVECOMPILEWARNINGS();
     if (PL_dowarn & G_WARN_ALL_ON)
@@ -3991,6 +3987,7 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
 /* Do a smart match */
 PP(pp_smartmatch)
 {
+    DEBUG_M(Perl_deb(aTHX_ "Starting smart match resolution\n"));
     return do_smartmatch(NULL, NULL);
 }
 
@@ -4009,13 +4006,18 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
     /* First of all, handle overload magic of the rightmost argument */
     if (SvAMAGIC(e)) {
-	SV * const tmpsv = amagic_call(d, e, smart_amg, 0);
+	SV * tmpsv;
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
+	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+
+	tmpsv = amagic_call(d, e, smart_amg, 0);
 	if (tmpsv) {
 	    SPAGAIN;
 	    (void)POPs;
 	    SETs(tmpsv);
 	    RETURN;
 	}
+	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
     }
 
     SP -= 2;	/* Pop the values */
@@ -4035,14 +4037,17 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
     /* ~~ undef */
     if (!SvOK(e)) {
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-undef\n"));
 	if (SvOK(d))
 	    RETPUSHNO;
 	else
 	    RETPUSHYES;
     }
 
-    if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP))
+    if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+    }
     if (sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
 	object_on_left = TRUE;
 
@@ -4058,9 +4063,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    bool andedresults = TRUE;
 	    HV *hv = (HV*) SvRV(d);
 	    I32 numkeys = hv_iterinit(hv);
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-CodeRef\n"));
 	    if (numkeys == 0)
 		RETPUSHYES;
 	    while ( (he = hv_iternext(hv)) ) {
+		DEBUG_M(Perl_deb(aTHX_ "        testing hash key...\n"));
 		ENTER;
 		SAVETMPS;
 		PUSHMARK(SP);
@@ -4086,10 +4093,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    bool andedresults = TRUE;
 	    AV *av = (AV*) SvRV(d);
 	    const I32 len = av_len(av);
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-CodeRef\n"));
 	    if (len == -1)
 		RETPUSHYES;
 	    for (i = 0; i <= len; ++i) {
 		SV * const * const svp = av_fetch(av, i, FALSE);
+		DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
 		ENTER;
 		SAVETMPS;
 		PUSHMARK(SP);
@@ -4112,6 +4121,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
 	else {
 	  sm_any_sub:
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
@@ -4134,6 +4144,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    goto sm_any_hash; /* Treat objects like scalars */
 	}
 	else if (!SvOK(d)) {
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash ($a undef)\n"));
 	    RETPUSHNO;
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
@@ -4145,7 +4156,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    U32 this_key_count  = 0,
 	        other_key_count = 0;
 	    HV *hv = MUTABLE_HV(SvRV(e));
-	    
+
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Hash\n"));
 	    /* Tied hashes don't know how many keys they have. */
 	    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
 		tied = TRUE;
@@ -4167,7 +4179,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    (void) hv_iterinit(hv);
 	    while ( (he = hv_iternext(hv)) ) {
 		SV *key = hv_iterkeysv(he);
-	    	
+
+		DEBUG_M(Perl_deb(aTHX_ "        comparing hash key...\n"));
 	    	++ this_key_count;
 	    	
 	    	if(!hv_exists_ent(other_hv, key, 0)) {
@@ -4195,8 +4208,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    I32 i;
 	    HV *hv = MUTABLE_HV(SvRV(e));
 
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Hash\n"));
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
+		DEBUG_M(Perl_deb(aTHX_ "        checking for key existence...\n"));
 		if (svp) {	/* ??? When can this not happen? */
 		    if (hv_exists_ent(hv, *svp, 0))
 		        RETPUSHYES;
@@ -4205,6 +4220,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Hash\n"));
 	  sm_regex_hash:
 	    {
 		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
@@ -4213,6 +4229,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 		(void) hv_iterinit(hv);
 		while ( (he = hv_iternext(hv)) ) {
+		    DEBUG_M(Perl_deb(aTHX_ "        testing key against pattern...\n"));
 		    if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
 			(void) hv_iterinit(hv);
 			destroy_matcher(matcher);
@@ -4225,6 +4242,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
 	else {
 	  sm_any_hash:
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash\n"));
 	    if (hv_exists_ent(MUTABLE_HV(SvRV(e)), d, 0))
 		RETPUSHYES;
 	    else
@@ -4241,8 +4259,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
 
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Array\n"));
 	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
+
+		DEBUG_M(Perl_deb(aTHX_ "        testing for key existence...\n"));
 		if (svp) {	/* ??? When can this not happen? */
 		    if (hv_exists_ent(MUTABLE_HV(SvRV(d)), *svp, 0))
 		        RETPUSHYES;
@@ -4252,6 +4273,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
 	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
 	    AV *other_av = MUTABLE_AV(SvRV(d));
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Array\n"));
 	    if (av_len(MUTABLE_AV(SvRV(e))) != av_len(other_av))
 		RETPUSHNO;
 	    else {
@@ -4293,8 +4315,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 			PUSHs(*this_elem);
 			
 			PUTBACK;
+			DEBUG_M(Perl_deb(aTHX_ "        recursively comparing array element...\n"));
 			(void) do_smartmatch(seen_this, seen_other);
 			SPAGAIN;
+			DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
 			
 			if (!SvTRUEx(POPs))
 			    RETPUSHNO;
@@ -4304,6 +4328,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Array\n"));
 	  sm_regex_array:
 	    {
 		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
@@ -4312,6 +4337,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 		for(i = 0; i <= this_len; ++i) {
 		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+		    DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
 		    if (svp && matcher_matches_sv(matcher, *svp)) {
 			destroy_matcher(matcher);
 			RETPUSHYES;
@@ -4326,8 +4352,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Undef-Array\n"));
 	    for (i = 0; i <= this_len; ++i) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+		DEBUG_M(Perl_deb(aTHX_ "        testing for undef element...\n"));
 		if (!svp || !SvOK(*svp))
 		    RETPUSHYES;
 	    }
@@ -4339,6 +4367,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		I32 i;
 		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
 
+		DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Array\n"));
 		for (i = 0; i <= this_len; ++i) {
 		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    if (!svp)
@@ -4348,8 +4377,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    PUSHs(*svp);
 		    PUTBACK;
 		    /* infinite recursion isn't supposed to happen here */
+		    DEBUG_M(Perl_deb(aTHX_ "        recursively testing array element...\n"));
 		    (void) do_smartmatch(NULL, NULL);
 		    SPAGAIN;
+		    DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
 		    if (SvTRUEx(POPs))
 			RETPUSHYES;
 		}
@@ -4361,15 +4392,18 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
 	if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    SV *t = d; d = e; e = t;
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Regex\n"));
 	    goto sm_regex_hash;
 	}
 	else if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
 	    SV *t = d; d = e; e = t;
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Regex\n"));
 	    goto sm_regex_array;
 	}
 	else {
 	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
 
+	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Regex\n"));
 	    PUTBACK;
 	    PUSHs(matcher_matches_sv(matcher, d)
 		    ? &PL_sv_yes
@@ -4382,6 +4416,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     /* See if there is overload magic on left */
     else if (object_on_left && SvAMAGIC(d)) {
 	SV *tmpsv;
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule Object-Any\n"));
+	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
@@ -4392,15 +4428,22 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETURN;
 	}
 	SP -= 2;
+	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; falling back...\n"));
 	goto sm_any_scalar;
     }
     else if (!SvOK(d)) {
 	/* undef ~~ scalar ; we already know that the scalar is SvOK */
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule undef-Any\n"));
 	RETPUSHNO;
     }
     else
   sm_any_scalar:
     if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
+	DEBUG_M(if (SvNIOK(e))
+		    Perl_deb(aTHX_ "    applying rule Any-Num\n");
+		else
+		    Perl_deb(aTHX_ "    applying rule Num-numish\n");
+	);
 	/* numeric comparison */
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
@@ -4416,6 +4459,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     
     /* As a last resort, use string comparison */
+    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
     PUTBACK;
     return pp_seq();

@@ -246,12 +246,17 @@ struct cop {
 #define CopARYBASE_set(c, b) STMT_START { \
 	if (b || ((c)->cop_hints & HINT_ARYBASE)) {			\
 	    (c)->cop_hints |= HINT_ARYBASE;				\
-	    if ((c) == &PL_compiling)					\
-		PL_hints |= HINT_LOCALIZE_HH | HINT_ARYBASE;		\
-	    (c)->cop_hints_hash						\
-	       = Perl_refcounted_he_new(aTHX_ (c)->cop_hints_hash,	\
+	    if ((c) == &PL_compiling) {					\
+		SV *val = newSViv(b);					\
+		(void)hv_stores(GvHV(PL_hintgv), "$[", val);		\
+		mg_set(val);						\
+		PL_hints |= HINT_ARYBASE;				\
+	    } else {							\
+		(c)->cop_hints_hash					\
+		   = Perl_refcounted_he_new(aTHX_ (c)->cop_hints_hash,	\
 					newSVpvs_flags("$[", SVs_TEMP),	\
 					sv_2mortal(newSViv(b)));	\
+	    }								\
 	}								\
     } STMT_END
 

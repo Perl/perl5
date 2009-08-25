@@ -40,70 +40,45 @@ Perl stores its global variables.
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
 
-
-#ifdef PERL_DONT_CREATE_GVSV
 GV *
-Perl_gv_SVadd(pTHX_ GV *gv)
+Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
-    PERL_ARGS_ASSERT_GV_SVADD;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for scalar");
-    if (!GvSV(gv))
-	GvSV(gv) = newSV(0);
-    return gv;
-}
-#endif
-
-GV *
-Perl_gv_AVadd(pTHX_ register GV *gv)
-{
-    PERL_ARGS_ASSERT_GV_AVADD;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for array");
-    if (!GvAV(gv))
-	GvAV(gv) = newAV();
-    return gv;
-}
-
-GV *
-Perl_gv_HVadd(pTHX_ register GV *gv)
-{
-    PERL_ARGS_ASSERT_GV_HVADD;
-
-    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for hash");
-    if (!GvHV(gv))
-	GvHV(gv) = newHV();
-    return gv;
-}
-
-GV *
-Perl_gv_IOadd(pTHX_ register GV *gv)
-{
-    dVAR;
+    SV **where;
 
     if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV) {
-
-        /*
-         * if it walks like a dirhandle, then let's assume that
-         * this is a dirhandle.
-         */
-	const char * const fh =
-			 PL_op->op_type ==  OP_READDIR ||
-                         PL_op->op_type ==  OP_TELLDIR ||
-                         PL_op->op_type ==  OP_SEEKDIR ||
-                         PL_op->op_type ==  OP_REWINDDIR ||
-                         PL_op->op_type ==  OP_CLOSEDIR ?
-                         "dirhandle" : "filehandle";
-	/* diag_listed_as: Bad symbol for filehandle */
-        Perl_croak(aTHX_ "Bad symbol for %s", fh);
+	const char *what;
+	if (type == SVt_PVIO) {
+	    /*
+	     * if it walks like a dirhandle, then let's assume that
+	     * this is a dirhandle.
+	     */
+	    what = PL_op->op_type ==  OP_READDIR ||
+		PL_op->op_type ==  OP_TELLDIR ||
+		PL_op->op_type ==  OP_SEEKDIR ||
+		PL_op->op_type ==  OP_REWINDDIR ||
+		PL_op->op_type ==  OP_CLOSEDIR ?
+		"dirhandle" : "filehandle";
+	    /* diag_listed_as: Bad symbol for filehandle */
+	} else if (type == SVt_PVHV) {
+	    what = "hash";
+	} else {
+	    what = type == SVt_PVAV ? "array" : "scalar";
+	}
+	Perl_croak(aTHX_ "Bad symbol for %s", what);
     }
 
-    if (!GvIOp(gv)) {
-	GvIOp(gv) = newIO();
+    if (type == SVt_PVHV) {
+	where = (SV **)&GvHV(gv);
+    } else if (type == SVt_PVAV) {
+	where = (SV **)&GvAV(gv);
+    } else if (type == SVt_PVIO) {
+	where = (SV **)&GvIOp(gv);
+    } else {
+	where = &GvSV(gv);
     }
+
+    if (!*where)
+	*where = newSV_type(type);
     return gv;
 }
 
@@ -1499,27 +1474,6 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
     PERL_ARGS_ASSERT_GV_EFULLNAME4;
 
     gv_fullname4(sv, egv ? egv : gv, prefix, keepmain);
-}
-
-IO *
-Perl_newIO(pTHX)
-{
-    dVAR;
-    GV *iogv;
-    IO * const io = MUTABLE_IO(newSV_type(SVt_PVIO));
-    /* This used to read SvREFCNT(io) = 1;
-       It's not clear why the reference count needed an explicit reset. NWC
-    */
-    assert (SvREFCNT(io) == 1);
-    SvOBJECT_on(io);
-    /* Clear the stashcache because a new IO could overrule a package name */
-    hv_clear(PL_stashcache);
-    iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
-    /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
-    if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-      iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
-    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
-    return io;
 }
 
 void

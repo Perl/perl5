@@ -80,30 +80,16 @@ struct xpvhv_aux {
     struct mro_meta *xhv_mro_meta;
 };
 
-#define _XPVHV_ALLOCATED_HEAD						    \
-    STRLEN	xhv_fill;	/* how full xhv_array currently is */	    \
-    STRLEN	xhv_max		/* subscript of last element of xhv_array */
-
-#define _XPVHV_HEAD	\
-    union _xnvu xnv_u;	\
-    _XPVHV_ALLOCATED_HEAD
-
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    _XPVHV_HEAD;
+    union _xnvu xnv_u;
+    STRLEN      xhv_fill;       /* how full xhv_array currently is */
+    STRLEN      xhv_max;        /* subscript of last element of xhv_array */
     _XPVMG_HEAD;
 };
 
 #define xhv_keys xiv_u.xivu_iv
-
-typedef struct {
-    _XPVHV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-} xpvhv_allocated;
-
-#undef _XPVHV_ALLOCATED_HEAD
-#undef _XPVHV_HEAD
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins

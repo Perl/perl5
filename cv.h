@@ -16,12 +16,6 @@ struct xpvcv {
     _XPVCV_COMMON;
 };
 
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-    _XPVCV_COMMON;
-} xpvcv_allocated;
-
 /*
 =head1 Handy Values
 

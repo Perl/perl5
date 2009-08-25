@@ -398,13 +398,10 @@ perform the upgrade if necessary.  See C<svtype>.
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 
-#define _XPV_ALLOCATED_HEAD						\
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
-    STRLEN	xpv_len 	/* allocated size */
-
 #define _XPV_HEAD	\
     union _xnvu xnv_u;	\
-    _XPV_ALLOCATED_HEAD
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    STRLEN	xpv_len 	/* allocated size */
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
@@ -439,19 +436,10 @@ struct xpv {
     _XPV_HEAD;
 };
 
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-} xpv_allocated;
-
 struct xpviv {
     _XPV_HEAD;
     union _xivu xiv_u;
 };
-
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    union _xivu xiv_u;
-} xpviv_allocated;
 
 #define xiv_iv xiv_u.xivu_iv
 
@@ -524,12 +512,6 @@ struct xpvfm {
     _XPVMG_HEAD;
     _XPVCV_COMMON;
 };
-
-typedef struct {
-    _XPV_ALLOCATED_HEAD;
-    _XPVMG_HEAD;
-    _XPVCV_COMMON;
-} xpvfm_allocated;
 
 #define _XPVIO_TAIL							\
     PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */	\
@@ -2016,6 +1998,9 @@ Evaluates I<sv> more than once. Sets I<len> to 0 if C<SvOOK(sv)> is false.
 	}								\
     } STMT_END
 #endif
+
+#define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
+
 /*
  * Local variables:
  * c-indentation-style: bsd

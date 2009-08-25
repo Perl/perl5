@@ -451,8 +451,34 @@ This overload was introduced in perl 5.12.
 
 =item * I<Matching>
 
-The key C<"~~"> allows you to override the smart matching used by
-the switch construct. See L<feature>.
+The key C<"~~"> allows you to override the smart matching logic used by
+the C<~~> operator and the switch construct (C<given>/C<when>).  See
+L<perlsyn/switch> and L<feature>.
+
+Unusually, overloading of the smart match operator does not automatically
+take precedence over normal smart match behaviour. In particular, in the
+following code:
+
+    package Foo;
+    use overload '~~' => 'match';
+
+    my $obj =  Foo->new();
+    $obj ~~ [ 1,2,3 ];
+
+the smart match does I<not> invoke the method call like this:
+
+    $obj->match([1,2,3],0);
+
+rather, the smart match distributive rule takes precedence, so $obj is
+smart matched against each array element in turn until a match is found,
+so you may see between one and three of these calls instead:
+
+    $obj->match(1,0);
+    $obj->match(2,0);
+    $obj->match(3,0);
+
+Consult the match table in  L<perlsyn/"Smart matching in detail"> for
+details of when overloading is invoked.
 
 =item * I<Dereferencing>
 

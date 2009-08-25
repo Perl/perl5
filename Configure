@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Jun 30 00:49:36 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Tue Aug 18 19:22:01 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21645,6 +21645,10 @@ nonxs_extensions=''
 
 : Function to recursively find available extensions, ignoring DynaLoader
 : NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
+: In 5.10.1 and later, extensions are stored in directories
+: like File-Glob instead of the older File/Glob/.  In this scheme,
+: IO-Compress does not appear to be an XS extension, but we want
+: to install it as one.  A.D.  8/2009.
 find_extensions='
     for xxx in *; do
 	case "$xxx" in
@@ -21654,9 +21658,11 @@ find_extensions='
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
 	    if $test -d File-Glob; then
 		$ls -1 $xxx > $$.tmp;
-		if $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
+		if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
-		elif $contains "\.c$" $$.tmp > /dev/null 2>&1; then
+		elif $contains "\.c$"  $$.tmp > /dev/null 2>&1; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $test "$this_ext" = "IO/Compress"; then
 		    known_extensions="$known_extensions $this_ext";
 		elif $test -d $xxx; then
 		    nonxs_extensions="$nonxs_extensions $this_ext";
@@ -21729,7 +21735,7 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	NDBM_File|ndbm_fil)
-		case "$i_ndbm" in
+		case "$d_ndbm" in
 		$define)
 		    case "$osname-$use64bitint" in
 		    hpux-define)
@@ -22132,7 +22138,9 @@ $startsh
 # Target system     : $myuname
 
 EOT
+: Add in command line options if available
 $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
+
 $spitshell <<EOT >>config.sh
 
 Author='$Author'
@@ -23201,9 +23209,6 @@ yaccflags='$yaccflags'
 zcat='$zcat'
 zip='$zip'
 EOT
-
-: Add in command line options if available
-$test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 
 : add special variables
 $test -f $src/patchlevel.h && \

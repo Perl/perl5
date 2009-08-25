@@ -1770,6 +1770,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef NO_MATHOMS
                             " NO_MATHOMS"
 #  endif
+#  ifdef PERL_DISABLE_PMC
+			     " PERL_DISABLE_PMC"
+#  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
@@ -2860,6 +2863,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  C  Copy On Write",
       "  A  Consistency checks on internal structures",
       "  q  quiet - currently only suppresses the 'EXECUTING' message",
+      "  M  trace smart match resolution",
       NULL
     };
     int i = 0;
@@ -2868,7 +2872,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAq";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqM";
 
 	for (; isALNUM(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);

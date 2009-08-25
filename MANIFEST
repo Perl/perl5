@@ -1468,6 +1468,7 @@ ext/threads/t/join.t		Testing the join function
 ext/threads/t/kill.t		Tests thread signalling
 ext/threads/t/libc.t		testing libc functions for threadsafety
 ext/threads/t/list.t		Test threads->list()
+ext/threads/t/no_threads.t	threads test for non-threaded Perls
 ext/threads/t/problems.t	Test various memory problems
 ext/threads/t/stack_env.t	Tests for stack limits
 ext/threads/t/stack.t		Tests for stack limits
@@ -1925,21 +1926,26 @@ lib/CGI/t/apache.t		See if CGI::Apache still loads
 lib/CGI/t/can.t			See if CGI.pm works
 lib/CGI/t/carp.t		See if CGI::Carp works
 lib/CGI/t/cookie.t		See if CGI::Cookie works
+lib/CGI/t/Dump.t		See if CGI->Dump works
 lib/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
 lib/CGI/t/no_tabindex.t	See if CGI.pm works
+lib/CGI/t/popup_menu.t		See if CGI pop menus work
 lib/CGI/t/pretty.t		See if CGI.pm works
 lib/CGI/t/push.t		See if CGI::Push works
+lib/CGI/t/query_string.t	See if CGI->query_string() works
 lib/CGI/t/request.t		See if CGI.pm works
 lib/CGI/t/start_end_asterisk.t	See if CGI.pm works
 lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
+lib/CGI/t/unescapeHTML.t	See if CGI::unescapeHTML() works
 lib/CGI/t/uploadInfo.t		See if CGI.pm works
 lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
 lib/CGI/t/upload.t		See if CGI.pm works
+lib/CGI/t/user_agent.t		See if CGI->user_agent() works
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
@@ -3608,6 +3614,7 @@ pod/Makefile.SH			generate Makefile which makes pods into something else
 pod/perl5004delta.pod		Perl changes in version 5.004
 pod/perl5005delta.pod		Perl changes in version 5.005
 pod/perl5100delta.pod		Perl changes in version 5.10.0
+pod/perl5101delta.pod		Perl changes in version 5.10.1
 pod/perl5110delta.pod		Perl changes in version 5.11.0
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
@@ -3774,6 +3781,7 @@ Porting/makerel		Release making utility
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck	Check against MANIFEST
 Porting/manisort	Sort the MANIFEST
+Porting/perldelta_template	Template for creating new perldelta.pod files
 Porting/podtidy		Reformat pod using Pod::Tidy
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/README.y2038	Perl notes for the 2038 fix
@@ -3928,6 +3936,7 @@ t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
 t/comp/decl.t			See if declarations work
 t/comp/fold.t			See if constant folding works
+t/comp/hints.aux		Auxillary file for %^H test
 t/comp/hints.t			See if %^H works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
@@ -4129,6 +4138,8 @@ t/mro/complex_dfs.t		mro tests
 t/mro/dbic_c3.t			mro tests
 t/mro/dbic_dfs.t		mro tests
 t/mro/inconsistent_c3.t		mro tests
+t/mro/isa_c3.t			test for optimisatised mro_get_linear_isa_c3
+t/mro/isa_dfs.t			test for optimisatised mro_get_linear_isa_dfs
 t/mro/method_caching.t		mro tests
 t/mro/next_edgecases.t		mro tests
 t/mro/next_goto.t		mro tests
