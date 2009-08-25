@@ -1307,12 +1307,12 @@ Under some circumstances, C<$^R> could incorrectly become undefined
 
 =item *
 
-(XS) In various hash functions, passing a pre-computed hash to when the
-key is UTF-8 might result in an incorrect lookup.
+In the XS API, various hash functions, when passed a pre-computed hash where
+the key is UTF-8, might result in an incorrect lookup.
 
 =item *
 
-(XS) Including F<XSUB.h> before F<perl.h> gave a compile-time error
+XS code including F<XSUB.h> before F<perl.h> gave a compile-time error
 [RT #57176].
 
 =item *
