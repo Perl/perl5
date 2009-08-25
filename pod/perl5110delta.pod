@@ -278,7 +278,7 @@ Some support for DTrace has been added. See "DTrace support" in F<INSTALL>.
 =head2 Support for C<configure_requires> in CPAN module metadata
 
 Both C<CPAN> and C<CPANPLUS> now support the C<configure_requires> keyword
-in the C<META.yml> metadata file included in most recent CPAN distributions.
+in the F<META.yml> metadata file included in most recent CPAN distributions.
 This allows distribution authors to specify configuration prerequisites that
 must be installed before running F<Makefile.PL> or F<Build.PL>.
 
@@ -993,7 +993,7 @@ subroutine stubs.
 
 =item F<perlbug>
 
-F<perlbug> now uses %Module::CoreList::bug_tracker to print out upstream bug
+F<perlbug> now uses C<%Module::CoreList::bug_tracker> to print out upstream bug
 tracker URLs.
 
 Where the user names a module that their bug report is about, and we know the
@@ -1246,9 +1246,9 @@ C<File::Copy> now detects Unix compatibility mode on VMS.
 
 =over 4
 
-=item 
+=item *
 
-=item C<-I> on shebang line now adds directories in front of @INC.
+C<-I> on shebang line now adds directories in front of @INC.
 as documented, and as does C<-I> when specified on the command-line.
 (Renée Bäcker)
 
@@ -1291,7 +1291,7 @@ arguments [RT #59998].
 
 =item *
 
-The C<-i.suffix> command-line switch now recreates the file using
+The C<-i>I<.suffix> command-line switch now recreates the file using
 restricted permissions, before changing its mode to match the original
 file. This eliminates a potential race condition [RT #60904].
 
@@ -1302,7 +1302,7 @@ On some UNIX systems, the value in C<$?> would not have the top bit set
 
 =item *
 
-Under some circumstances, $^R could incorrectly become undefined
+Under some circumstances, C<$^R> could incorrectly become undefined
 [RT #57042].
 
 =item *
