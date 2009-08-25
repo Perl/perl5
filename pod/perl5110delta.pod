@@ -1057,17 +1057,11 @@ generated at build time, rather than being shipped as part of the release.
 
 =head2 Documented that when() treats specially most of the filetest operators
 
-=head2 Documented that DESTROY is subject to AUTOLOAD, and the related optimisations.
-
 =head2 Documented when as a syntax modifier
 
 =head2 Eliminated "Old Perl threads tutorial", which describes 5005 threads.
 
 pod/perlthrtut.pod is the same material reworked for ithreads.
-
-=head2 Removed a link to the attrs pragma, which has now been removed.
-
-=head2 update PERL_MEM_LOG in perlhack.pod
 
 =head2 Correct previous documentation: v-strings are not deprecated
 
