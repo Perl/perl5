@@ -1567,7 +1567,7 @@ package Maintainers;
     'Safe' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.17.tar.gz',
+	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.19.tar.gz',
 	'FILES'		=> q[ext/Safe],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",

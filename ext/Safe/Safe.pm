@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 
-$Safe::VERSION = "2.18";
+$Safe::VERSION = "2.19";
 
 # *** Don't declare any lexicals above this point ***
 #
