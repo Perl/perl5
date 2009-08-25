@@ -113,7 +113,11 @@ sub _populate_hash {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op uni mro)) {
+    # base first, as TEST bails out if that can't run
+    # then comp, to validate that require works
+    # then run, to validate that -M works
+    # then we know we can -MTestInit for everything else, making life simpler
+    foreach my $dir (qw(base comp run cmd io op uni mro)) {
 	_find_tests($dir);
     }
     _find_tests("lib") unless $::core;
