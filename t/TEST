@@ -68,23 +68,30 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 # Roll your own File::Find!
 use TestInit;
-use File::Spec;
 if ($show_elapsed_time) { require Time::HiRes }
-my $curdir = File::Spec->curdir;
-my $updir  = File::Spec->updir;
+
+my %skip = (
+	    '.' => 1,
+	    '..' => 1,
+	    'CVS' => 1,
+	    'RCS' => 1,
+	    'SCCS' => 1,
+	    '.svn' => 1,
+	   );
 
 sub _find_tests {
     my($dir) = @_;
     opendir DIR, $dir or die "Trouble opening $dir: $!";
     foreach my $f (sort { $a cmp $b } readdir DIR) {
-	next if $f eq $curdir or $f eq $updir or
-	    $f =~ /^(?:CVS|RCS|SCCS|\.svn)$/;
+	next if $skip{$f};
 
-	my $fullpath = File::Spec->catfile($dir, $f);
+	my $fullpath = "$dir/$f";
 
-	_find_tests($fullpath) if -d $fullpath;
-	$fullpath = VMS::Filespec::unixify($fullpath) if $^O eq 'VMS';
-	push @ARGV, $fullpath if $f =~ /\.t$/;
+	if (-d $fullpath) {
+	    _find_tests($fullpath);
+	} elsif ($f =~ /\.t$/) {
+	    push @ARGV, $fullpath;
+	}
     }
 }
 
@@ -113,7 +120,7 @@ unless (@ARGV) {
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
     # What we want to to is make a list of extensions which we did not build.
-    my $configsh = File::Spec->catfile($updir, "config.sh");
+    my $configsh = '../config.sh';
     my %skip;
     if (-f $configsh) {
 	my (%extensions, %known_extensions);
@@ -140,7 +147,7 @@ unless (@ARGV) {
 	    warn "No extensions line found in $configsh";
 	}
     }
-    my $mani = File::Spec->catfile($updir, "MANIFEST");
+    my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
 	while (<MANI>) { # similar code in t/harness
 	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
@@ -156,7 +163,7 @@ unless (@ARGV) {
 			$flat_extension =~ s!-!/!g;
 			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
 		    }
-		    my $path = File::Spec->catfile($updir, $t);
+		    my $path = "../$t";
 		    push @ARGV, $path;
 		    $::path_to_name{$path} = $t;
 		}
@@ -221,8 +228,7 @@ EOT
 
     foreach my $t (@tests) {
       unless (exists $::path_to_name{$t}) {
-	my $tname = File::Spec->catfile('t',$t);
-	$tname = VMS::Filespec::unixify($tname) if $^O eq 'VMS';
+	my $tname = "t/$t";
 	$::path_to_name{$t} = $tname;
       }
     }
