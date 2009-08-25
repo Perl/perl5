@@ -241,25 +241,25 @@ my $h = TAP::Harness->new({
     jobs        => $jobs,
     verbosity   => $Verbose,
 });
-if ($jobs) {
-    if ($state) {
-	$h->callback(
-		     after_test => sub {
-			 $state->observe_test(@_);
-		     }
-		    );
-	$h->callback(
-		     after_runtests => sub {
-			 $state->commit(@_);
-		     }
-		    );
-    }
+
+if ($state) {
     $h->callback(
-		 parser_args => sub {
-		     my ( $args, $test ) = @_;
-		     push @{ $args->{switches} }, '-I../lib';
+		 after_test => sub {
+		     $state->observe_test(@_);
 		 }
-		);
+		 );
+    $h->callback(
+		 after_runtests => sub {
+		     $state->commit(@_);
+		 }
+		 );
 }
+
+$h->callback(
+	     parser_args => sub {
+		 my ( $args, $test ) = @_;
+		 push @{ $args->{switches} }, '-I../lib';
+	     }
+	     );
 $h->runtests(@tests);
 exit(0);
