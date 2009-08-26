@@ -114,9 +114,7 @@ sub _tests_from_manifest {
     }
 
     my @results;
-    use File::Spec;
-    my $updir = File::Spec->updir;
-    my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");
+    my $mani  = '../MANIFEST';
     if (open(MANI, $mani)) {
 	while (<MANI>) { # similar code in t/TEST
 	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
@@ -129,7 +127,7 @@ sub _tests_from_manifest {
 		    $flat_extension =~ s!-!/!g;
 		    next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
 		}
-		push @results, File::Spec->catfile($updir, $test);
+		push @results, "../$test";
 	    }
 	}
 	close MANI;
