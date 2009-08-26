@@ -185,10 +185,10 @@ static const yytype_uint16 yyrline[] =
     1079,  1080,  1085,  1089,  1091,  1095,  1100,  1105,  1107,  1109,
     1111,  1113,  1115,  1117,  1126,  1137,  1139,  1141,  1146,  1159,
     1164,  1169,  1173,  1177,  1181,  1185,  1189,  1193,  1197,  1199,
-    1202,  1206,  1212,  1215,  1224,  1230,  1235,  1236,  1237,  1245,
-    1253,  1260,  1265,  1270,  1272,  1274,  1279,  1281,  1286,  1287,
-    1289,  1304,  1308,  1314,  1320,  1326,  1332,  1338,  1345,  1347,
-    1349,  1352
+    1202,  1206,  1212,  1215,  1224,  1230,  1235,  1236,  1237,  1246,
+    1254,  1261,  1266,  1271,  1273,  1275,  1280,  1282,  1287,  1288,
+    1290,  1305,  1309,  1315,  1321,  1327,  1333,  1339,  1346,  1348,
+    1350,  1353
 };
 #endif
 
@@ -214,7 +214,7 @@ static const char *const yytname[] =
   "loop", "switch", "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr",
   "miexpr", "label", "decl", "peg", "format", "formname", "mysubrout",
   "subrout", "startsub", "startanonsub", "startformsub", "subname",
-  "proto", "subattrlist", "myattrlist", "subbody", "package", "use", "$@1",
+  "proto", "subattrlist", "myattrlist", "subbody", "package", "use", "@1",
   "expr", "argexpr", "listop", "@2", "method", "subscripted", "termbinop",
   "termunop", "anonymous", "termdo", "term", "myattrterm", "myterm",
   "listexpr", "listexprcom", "my_scalar", "amper", "scalar", "ary", "hsh",

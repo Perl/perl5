@@ -1238,6 +1238,7 @@ term	:	termbinop
 			{
 			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
 				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+			  TOKEN_GETMAD($1,$$,'X');
 			}
 	;
 
