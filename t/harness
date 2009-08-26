@@ -103,6 +103,42 @@ if ($ENV{HARNESS_OPTIONS}) {
     }
 }
 
+sub _tests_from_manifest {
+    my ($extensions, $known_extensions) = @_;
+    my %skip;
+    my %extensions = _populate_hash($extensions);
+    my %known_extensions = _populate_hash($known_extensions);
+
+    foreach (keys %known_extensions) {
+	$skip{$_}++ unless $extensions{$_};
+    }
+
+    my @results;
+    use File::Spec;
+    my $updir = File::Spec->updir;
+    my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");
+    if (open(MANI, $mani)) {
+	while (<MANI>) { # similar code in t/TEST
+	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+		my ($test, $extension) = ($1, $2);
+		if (defined $extension) {
+		    $extension =~ s!/t$!!;
+		    # XXX Do I want to warn that I'm skipping these?
+		    next if $skip{$extension};
+		    my $flat_extension = $extension;
+		    $flat_extension =~ s!-!/!g;
+		    next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
+		}
+		push @results, File::Spec->catfile($updir, $test);
+	    }
+	}
+	close MANI;
+    } else {
+	warn "$0: cannot open $mani: $!\n";
+    }
+    return @results;
+}
+
 if (@ARGV) {
     # If you want these run in speed order, just use prove
     if ($^O eq 'MSWin32') {
@@ -160,40 +196,8 @@ if (@ARGV) {
 
 	my @last;
 	use Config;
-	my %skip;
-	{
-	    my %extensions = _populate_hash $Config{'extensions'};
-	    my %known_extensions = _populate_hash $Config{'known_extensions'};
-	    foreach (keys %known_extensions) {
-		$skip{$_}++ unless $extensions{$_};
-	    }
-	}
-	use File::Spec;
-	my $updir = File::Spec->updir;
-	my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");
-	if (open(MANI, $mani)) {
-	    my @manitests = ();
-	    while (<MANI>) { # similar code in t/TEST
-		if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
-		    my ($test, $extension) = ($1, $2);
-		    if (defined $extension) {
-			$extension =~ s!/t$!!;
-			# XXX Do I want to warn that I'm skipping these?
-			next if $skip{$extension};
-			my $flat_extension = $extension;
-			$flat_extension =~ s!-!/!g;
-			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
-		    }
-		    push @manitests, File::Spec->catfile($updir, $test);
-		}
-	    }
-	    close MANI;
-	    # Sort the list of test files read from MANIFEST into a sensible
-	    # order instead of using the order in which they are listed there
-	    push @last, sort { lc $a cmp lc $b } @manitests;
-	} else {
-	    warn "$0: cannot open $mani: $!\n";
-	}
+	push @last,  sort { lc $a cmp lc $b }
+	    _tests_from_manifest($Config{extensions}, $Config{known_extensions});
 	push @last, <pod/*.t>;
 	push @last, <x2p/*.t>;
 

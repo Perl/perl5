@@ -204,7 +204,47 @@ sub _quote_args {
 }
 
 sub _populate_hash {
+    return unless defined $_[0];
     return map {$_, 1} split /\s+/, $_[0];
+}
+
+sub _tests_from_manifest {
+    my ($extensions, $known_extensions) = @_;
+    my %skip;
+    my %extensions = _populate_hash($extensions);
+    my %known_extensions = _populate_hash($known_extensions);
+
+    foreach (keys %known_extensions) {
+	$skip{$_}++ unless $extensions{$_};
+    }
+
+    my @results;
+    my $mani = '../MANIFEST';
+    if (open(MANI, $mani)) {
+	while (<MANI>) { # similar code in t/harness
+	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+		my $t = $1;
+		my $extension = $2;
+		if (!$::core || $t =~ m!^lib/[a-z]!) {
+		    if (defined $extension) {
+			$extension =~ s!/t$!!;
+			# XXX Do I want to warn that I'm skipping these?
+			next if $skip{$extension};
+			my $flat_extension = $extension;
+			$flat_extension =~ s!-!/!g;
+			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
+		    }
+		    my $path = "../$t";
+		    push @results, $path;
+		    $::path_to_name{$path} = $t;
+		}
+	    }
+	}
+	close MANI;
+    } else {
+	warn "$0: cannot open $mani: $!\n";
+    }
+    return @results;
 }
 
 unless (@ARGV) {
@@ -220,58 +260,29 @@ unless (@ARGV) {
     # for skipping tests on non-default builds, so it is allowed to fail.
     # What we want to to is make a list of extensions which we did not build.
     my $configsh = '../config.sh';
-    my %skip;
+    my ($extensions, $known_extensions);
     if (-f $configsh) {
-	my (%extensions, %known_extensions);
 	open FH, $configsh or die "Can't open $configsh: $!";
 	while (<FH>) {
 	    if (/^extensions=['"](.*)['"]$/) {
-		# Deliberate string interpolation to avoid triggering possible
-		# $1 resetting bugs.
-		%extensions = _populate_hash ("$1");
+		$extensions = $1;
 	    }
 	    elsif (/^known_extensions=['"](.*)['"]$/) {
-		%known_extensions = _populate_hash ($1);
+		$known_extensions = $1;
 	    }
 	}
-	if (%extensions) {
-	    if (%known_extensions) {
-		foreach (keys %known_extensions) {
-		    $skip{$_}++ unless $extensions{$_};
-		}
-	    } else {
-		warn "No known_extensions line found in $configsh";
-	    }
-	} else {
+	if (!defined $known_extensions) {
+	    warn "No known_extensions line found in $configsh";
+	}
+	if (!defined $extensions) {
 	    warn "No extensions line found in $configsh";
 	}
     }
-    my $mani = '../MANIFEST';
-    if (open(MANI, $mani)) {
-	while (<MANI>) { # similar code in t/harness
-	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
-		my $t = $1;
-		my $extension = $2;
-		if (!$::core || $t =~ m!^lib/[a-z]!)
-		{
-		    if (defined $extension) {
-			$extension =~ s!/t$!!;
-			# XXX Do I want to warn that I'm skipping these?
-			next if $skip{$extension};
-			my $flat_extension = $extension;
-			$flat_extension =~ s!-!/!g;
-			next if $skip{$flat_extension}; # Foo/Bar may live in Foo-Bar
-		    }
-		    my $path = "../$t";
-		    push @ARGV, $path;
-		    $::path_to_name{$path} = $t;
-		}
-	    }
-	}
-	close MANI;
-    } else {
-	warn "$0: cannot open $mani: $!\n";
-    }
+    # The "complex" constructions of list return from a subroutine, and push of
+    # a list, might fail if perl is really hosed, but they aren't needed for
+    # make minitest, and the building of extensions will likely also fail if
+    # something is that badly wrong.
+    push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
 	_find_tests('pod');
 	_find_tests('x2p');
