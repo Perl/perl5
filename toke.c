@@ -2826,7 +2826,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
       bare_package:
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0,
-						  S_newSV_maybe_utf8(tmpbuf,len));
+						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    if (PL_madskills)
 		curmad('X', newSVpvn(start,SvPVX(PL_linestr) + soff - start));
