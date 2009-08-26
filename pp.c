@@ -4915,8 +4915,6 @@ PP(pp_split)
 	ary = GvAVn(pm->op_pmreplrootu.op_pmtargetgv);
     }
 #endif
-    else if (gimme != G_ARRAY)
-	ary = GvAVn(PL_defgv);
     else
 	ary = NULL;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {

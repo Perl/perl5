@@ -4742,12 +4742,6 @@ to access the filehandle slot within a typeglob.
 operator.  Since C<split> always tries to match the pattern
 repeatedly, the C</g> has no effect.
 
-=item Use of implicit split to @_ is deprecated
-
-(D deprecated, W syntax) It makes a lot of work for the compiler when you
-clobber a subroutine's argument list, so it's better if you assign the results
-of a split() explicitly to an array (or list).
-
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 
 (D deprecated) As an (ahem) accidental feature, C<AUTOLOAD> subroutines

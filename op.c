@@ -872,12 +872,8 @@ Perl_scalar(pTHX_ OP *o)
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    scalar(kid);
 	break;
-    case OP_SPLIT:
-	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
-	    if (!kPMOP->op_pmreplrootu.op_pmreplroot)
-		deprecate_old("implicit split to @_");
-	}
 	/* FALL THROUGH */
+    case OP_SPLIT:
     case OP_MATCH:
     case OP_QR:
     case OP_SUBST:
@@ -1191,12 +1187,6 @@ Perl_scalarvoid(pTHX_ OP *o)
 	/* FALL THROUGH */
     case OP_SCALAR:
 	return scalar(o);
-    case OP_SPLIT:
-	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
-	    if (!kPMOP->op_pmreplrootu.op_pmreplroot)
-		deprecate_old("implicit split to @_");
-	}
-	break;
     }
     if (useless && ckWARN(WARN_VOID))
 	Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %s in void context", useless);

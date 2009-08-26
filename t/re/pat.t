@@ -2386,8 +2386,8 @@ sub run_tests {
         local $Message = "(??{ .. }) in split doesn't corrupt its stack";
         our $i;
         ok '-1-3-5-' eq join '', split /((??{$i++}))/, '-1-3-5-';
-        no warnings 'deprecated', 'syntax';
-        split /(?{'WOW'})/, 'abc';
+        no warnings 'syntax';
+        @_ = split /(?{'WOW'})/, 'abc';
         local $" = "|";
         iseq "@_", "a|b|c";
     }

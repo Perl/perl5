@@ -3,12 +3,6 @@
      Found = in conditional, should be ==
 	1 if $a = 1 ;
 
-     Use of implicit split to @_ is deprecated
-	split ;
-
-     Use of implicit split to @_ is deprecated
-	$a = split ;
-
      Useless use of time in void context
      Useless use of a variable in void context
      Useless use of a constant in void context
@@ -110,22 +104,6 @@ no warnings 'syntax' ;
 1 if $a = 1 ;
 EXPECT
 Found = in conditional, should be == at - line 3.
-########
-# op.c
-use warnings 'deprecated' ;
-split ;
-no warnings 'deprecated' ;
-split ;
-EXPECT
-Use of implicit split to @_ is deprecated at - line 3.
-########
-# op.c
-use warnings 'deprecated' ;
-$a = split ;
-no warnings 'deprecated' ;
-$a = split ;
-EXPECT
-Use of implicit split to @_ is deprecated at - line 3.
 ########
 # op.c
 use warnings 'deprecated';
