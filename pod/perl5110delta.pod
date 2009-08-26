@@ -837,7 +837,10 @@ Upgraded from 1.11 to 1.17.
 
 =item C<Socket>
 
-Upgraded from 1.80 to 1.82.
+Upgraded from 1.80 to 1.84.
+
+As of 1.84, C<Socket> can now handle abstract namespace sockets on Linux.
+(see unix(7)).
 
 =item C<Storable>
 
