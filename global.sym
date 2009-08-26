@@ -220,6 +220,7 @@ Perl_is_uni_lower_lc
 Perl_is_uni_print_lc
 Perl_is_uni_punct_lc
 Perl_is_uni_xdigit_lc
+Perl_is_ascii_string
 Perl_is_utf8_char
 Perl_is_utf8_string
 Perl_is_utf8_string_loc

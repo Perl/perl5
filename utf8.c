@@ -51,6 +51,38 @@ Unicode characters as a variable number of bytes, in such a way that
 characters in the ASCII range are unmodified, and a zero byte never appears
 within non-zero characters.
 
+=cut
+*/
+
+/*
+=for apidoc is_ascii_string
+
+Returns true if first C<len> bytes of the given string are ASCII (i.e. none
+of them even raise the question of UTF-8-ness).
+
+See also is_utf8_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
+
+=cut
+*/
+
+bool
+Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+
+    PERL_ARGS_ASSERT_IS_ASCII_STRING;
+    PERL_UNUSED_CONTEXT;
+
+    for (; x < send; ++x) {
+	if (!UTF8_IS_INVARIANT(*x))
+	    break;
+    }
+
+    return x == send;
+}
+
+/*
 =for apidoc uvuni_to_utf8_flags
 
 Adds the UTF-8 representation of the Unicode codepoint C<uv> to the end
@@ -266,6 +298,7 @@ Perl_is_utf8_char(pTHX_ const U8 *s)
     return is_utf8_char_slow(s, len);
 }
 
+
 /*
 =for apidoc is_utf8_string
 
@@ -274,7 +307,7 @@ UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
 not mean 'a string that contains code points above 0x7F encoded in UTF-8'
 because a valid ASCII string is a valid UTF-8 string.
 
-See also is_utf8_string_loclen() and is_utf8_string_loc().
+See also is_ascii_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
 
 =cut
 */

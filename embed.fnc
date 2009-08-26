@@ -481,6 +481,7 @@ ApPR	|bool	|is_uni_lower_lc|UV c
 ApPR	|bool	|is_uni_print_lc|UV c
 ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
+Apd	|bool	|is_ascii_string|NN const U8 *s|STRLEN len
 Apd	|STRLEN	|is_utf8_char	|NN const U8 *s
 Apd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 Apdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NULLOK const U8 **p

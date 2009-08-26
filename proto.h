@@ -1281,6 +1281,11 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
+PERL_CALLCONV bool	Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_ASCII_STRING	\
+	assert(s)
+
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ const U8 *s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR	\
