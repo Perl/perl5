@@ -14,9 +14,6 @@ $| = 1;
 #BEGIN { require '../lib/strict.pm'; "strict"->import() };
 #BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
-# Let tests know they're running in the perl core.  Useful for modules
-# which live dual lives on CPAN.
-$ENV{PERL_CORE} = 1;
 delete $ENV{PERL5LIB};
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
@@ -132,6 +129,12 @@ sub _scan_test {
     return { file => $file_opts, switch => $switch };
 }
 
+# directories with special sets of test switches
+my %dir_to_switch =
+    (base => '',
+     comp => '',
+     run => '',
+     );
 
 sub _run_test {
     my($test, $type) = @_;
@@ -140,9 +143,14 @@ sub _run_test {
 
     my $perl = './perl';
     my $lib  = '../lib';
+    $test =~ /^([^\/]+)/;
+
+    my $testswitch = $dir_to_switch{$1};
+    if (!defined $testswitch) {
+	$testswitch = '-I. -MTestInit';  # -T will remove . from @INC
+    }
 
     my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
-    my $testswitch = '-I. -MTestInit';  # -T will remove . from @INC
 
     my $results;
     if ($type eq 'deparse') {

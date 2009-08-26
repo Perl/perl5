@@ -35,8 +35,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    use Config;
-    if (!$Config{'d_fcntl'}) {
+    require Config;
+    if (!$Config::Config{'d_fcntl'}) {
         print("1..0 # Skip: fcntl() is not available\n");
         exit(0);
     }

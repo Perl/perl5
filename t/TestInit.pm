@@ -18,15 +18,21 @@
 
 package TestInit;
 
-$VERSION = 1.01;
+$VERSION = 1.02;
 
-chdir 't' if -d 't';
-@INC = '../lib';
+chdir 't' if -f 't/TestInit.pm';
 
+# Let tests know they're running in the perl core.  Useful for modules
+# which live dual lives on CPAN.
 # Don't interfere with the taintedness of %ENV, this could perturbate tests.
 # This feels like a better solution than the original, from
 # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-07/msg00154.html
 $ENV{PERL_CORE} = $^X;
+if (${^TAINT}) {
+    @INC = '../lib';
+} else {
+    @INC = ('../lib', '.');
+}
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
