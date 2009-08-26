@@ -2702,10 +2702,10 @@
 #define is_uni_print_lc(a)	Perl_is_uni_print_lc(aTHX_ a)
 #define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
-#define is_ascii_string(a,b)	Perl_is_ascii_string(aTHX_ a,b)
-#define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
-#define is_utf8_string(a,b)	Perl_is_utf8_string(aTHX_ a,b)
-#define is_utf8_string_loclen(a,b,c,d)	Perl_is_utf8_string_loclen(aTHX_ a,b,c,d)
+#define is_ascii_string		Perl_is_ascii_string
+#define is_utf8_char		Perl_is_utf8_char
+#define is_utf8_string		Perl_is_utf8_string
+#define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)

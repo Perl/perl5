@@ -66,13 +66,12 @@ See also is_utf8_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
 */
 
 bool
-Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
+Perl_is_ascii_string(const U8 *s, STRLEN len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
     PERL_ARGS_ASSERT_IS_ASCII_STRING;
-    PERL_UNUSED_CONTEXT;
 
     for (; x < send; ++x) {
 	if (!UTF8_IS_INVARIANT(*x))
@@ -285,12 +284,11 @@ character will be returned if it is valid, otherwise 0.
 
 =cut */
 STRLEN
-Perl_is_utf8_char(pTHX_ const U8 *s)
+Perl_is_utf8_char(const U8 *s)
 {
     const STRLEN len = UTF8SKIP(s);
 
     PERL_ARGS_ASSERT_IS_UTF8_CHAR;
-    PERL_UNUSED_CONTEXT;
 #ifdef IS_UTF8_CHAR
     if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(s, len) ? len : 0;
@@ -313,13 +311,12 @@ See also is_ascii_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
 */
 
 bool
-Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
+Perl_is_utf8_string(const U8 *s, STRLEN len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING;
-    PERL_UNUSED_CONTEXT;
 
     while (x < send) {
 	STRLEN c;
@@ -378,7 +375,7 @@ See also is_utf8_string_loc() and is_utf8_string().
 */
 
 bool
-Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
@@ -386,7 +383,6 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     STRLEN outlen = 0;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
-    PERL_UNUSED_CONTEXT;
 
     while (x < send) {
 	 /* Inline the easy bits of is_utf8_char() here for speed... */

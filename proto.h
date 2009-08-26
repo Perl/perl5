@@ -1281,28 +1281,28 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
-PERL_CALLCONV bool	Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_ASCII_STRING	\
 	assert(s)
 
-PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ const U8 *s)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV STRLEN	Perl_is_utf8_char(const U8 *s)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR	\
 	assert(s)
 
-PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING	\
 	assert(s)
 
-/* PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
-			__attribute__nonnull__(pTHX_1); */
+/* PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **p)
+			__attribute__nonnull__(1); */
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC	\
 	assert(s)
 
-PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV bool	Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN	\
 	assert(s)
 
