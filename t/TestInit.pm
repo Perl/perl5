@@ -23,8 +23,10 @@ $VERSION = 1.01;
 chdir 't' if -d 't';
 @INC = '../lib';
 
-# Don't interfere with the taintedness of %ENV, this could perturbate tests
-$ENV{PERL_CORE} = 1 unless ${^TAINT};
+# Don't interfere with the taintedness of %ENV, this could perturbate tests.
+# This feels like a better solution than the original, from
+# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-07/msg00154.html
+$ENV{PERL_CORE} = $^X;
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
