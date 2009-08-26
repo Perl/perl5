@@ -418,6 +418,7 @@ B<-D14> is equivalent to B<-Dtls>):
   4194304  A  Consistency checks on internal structures
   8388608  q  quiet - currently only suppresses the "EXECUTING" message
  16777216  M  trace smart match resolution
+ 33554432  B  dump suBroutine definitions, including special Blocks like BEGIN
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see L<Devel::Peek>, L<re> which may change this).

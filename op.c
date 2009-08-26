@@ -5896,7 +5896,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
 
-	    DEBUG_x( dump_sub(gv) );
+	    DEBUG_B( dump_sub(gv) );
 	    Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
@@ -5910,7 +5910,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
     } else {
 	if (*name == 'E') {
 	    if strEQ(name, "END") {
-		DEBUG_x( dump_sub(gv) );
+		DEBUG_B( dump_sub(gv) );
 		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, MUTABLE_SV(cv));
 	    } else
 		return;
@@ -5941,7 +5941,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		return;
 	} else
 	    return;
-	DEBUG_x( dump_sub(gv) );
+	DEBUG_B( dump_sub(gv) );
 	GvCV(gv) = 0;		/* cv has been hijacked */
     }
 }

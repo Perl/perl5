@@ -2864,6 +2864,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  A  Consistency checks on internal structures",
       "  q  quiet - currently only suppresses the 'EXECUTING' message",
       "  M  trace smart match resolution",
+      "  B  dump suBroutine definitions, including special Blocks like BEGIN",
       NULL
     };
     int i = 0;
@@ -2872,7 +2873,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqM";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMB";
 
 	for (; isALNUM(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);
