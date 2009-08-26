@@ -7298,7 +7298,7 @@ Perl_sv_inc(pTHX_ register SV *const sv)
     d = SvPVX(sv);
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
-    if (*d) {
+    if (d < SvEND(sv)) {
 #ifdef PERL_PRESERVE_IVUV
 	/* Got to punt this as an integer if needs be, but we don't issue
 	   warnings. Probably ought to make the sv_iv_please() that does

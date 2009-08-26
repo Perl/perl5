@@ -2770,7 +2770,7 @@ Perl_token_getmad(pTHX_ TOKEN* tk, OP* o, char slot)
     /* faked up qw list? */
     if (slot == '(' &&
 	tm->mad_type == MAD_SV &&
-	SvPVX((const SV *)tm->mad_val)[0] == 'q')
+	SvPVX((SV *)tm->mad_val)[0] == 'q')
 	    slot = 'x';
 
     if (o) {
@@ -2927,7 +2927,7 @@ Perl_newMADsv(pTHX_ char key, SV* sv)
 }
 
 MADPROP *
-Perl_newMADPROP(pTHX_ char key, char type, const void* val, I32 vlen)
+Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen)
 {
     MADPROP *mp;
     Newxz(mp, 1, MADPROP);

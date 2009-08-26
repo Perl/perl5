@@ -646,7 +646,7 @@ struct loop {
 
 struct madprop {
     MADPROP* mad_next;
-    const void *mad_val;
+    void *mad_val;
     U32 mad_vlen;
 /*    short mad_count; */
     char mad_key;

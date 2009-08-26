@@ -3614,6 +3614,7 @@ pod/Makefile.SH			generate Makefile which makes pods into something else
 pod/perl5004delta.pod		Perl changes in version 5.004
 pod/perl5005delta.pod		Perl changes in version 5.005
 pod/perl5100delta.pod		Perl changes in version 5.10.0
+pod/perl5101delta.pod		Perl changes in version 5.10.1
 pod/perl5110delta.pod		Perl changes in version 5.11.0
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
@@ -3780,6 +3781,7 @@ Porting/makerel		Release making utility
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck	Check against MANIFEST
 Porting/manisort	Sort the MANIFEST
+Porting/perldelta_template	Template for creating new perldelta.pod files
 Porting/podtidy		Reformat pod using Pod::Tidy
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/README.y2038	Perl notes for the 2038 fix

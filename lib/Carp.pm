@@ -431,6 +431,45 @@ is implemented internally.
 
 Defaults to C<0>.
 
+=head2 @CARP_NOT
+
+This variable, I<in your package>, says which packages are I<not> to be
+considered as the location of an error. The C<carp()> and C<cluck()>
+functions will skip over callers when reporting where an error occurred.
+
+NB: This variable must be in the package's symbol table, thus:
+
+    # These work
+    our @CARP_NOT; # file scope
+    use vars qw(@CARP_NOT); # package scope
+    @My::Package::CARP_NOT = ... ; # explicit package variable
+
+    # These don't work
+    sub xyz { ... @CARP_NOT = ... } # w/o declarations above
+    my @CARP_NOT; # even at top-level
+
+Example of use:
+
+    package My::Carping::Package;
+    use Carp;
+    our @CARP_NOT;
+    sub bar     { .... or _error('Wrong input') }
+    sub _error  {
+        # temporary control of where'ness, __PACKAGE__ is implicit
+        local @CARP_NOT = qw(My::Friendly::Caller);
+        carp(@_)
+    }
+
+This would make C<Carp> report the error as coming from a caller not
+in C<My::Carping::Package>, nor from C<My::Friendly::Caller>.
+
+Also read the L</"Description"> section above, about how C<Carp> decides
+where the error is reported from.
+
+Use C<@CARP_NOT>, instead of C<$Carp::CarpLevel>.
+
+Overrides C<Carp>'s use of C<@ISA>.
+
 =head2 %Carp::Internal
 
 This says what packages are internal to Perl.  C<Carp> will never

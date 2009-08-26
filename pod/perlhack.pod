@@ -3048,9 +3048,9 @@ formats, see your own local documentation of gprof.
 
 quick hint:
 
-    $ sh Configure -des -Dusedevel -Doptimize='-g' -Accflags='-pg' -Aldflags='-pg' && make
-    $ ./perl someprog # creates gmon.out in current directory
-    $ gprof perl > out
+    $ sh Configure -des -Dusedevel -Doptimize='-pg' && make perl.gprof
+    $ ./perl.gprof someprog # creates gmon.out in current directory
+    $ gprof ./perl.gprof > out
     $ view out
 
 =head2 GCC gcov Profiling

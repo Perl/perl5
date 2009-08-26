@@ -303,6 +303,7 @@ pack_sockaddr_un(pathname)
 	struct sockaddr_un sun_ad; /* fear using sun */
 	STRLEN len;
 	char * pathname_pv;
+	int addr_len;
 
 	Zero( &sun_ad, sizeof sun_ad, char );
 	sun_ad.sun_family = AF_UNIX;
@@ -336,7 +337,17 @@ pack_sockaddr_un(pathname)
 	Copy( pathname_pv, sun_ad.sun_path, len, char );
 #  endif
 	if (0) not_here("dummy");
-	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, sizeof sun_ad));
+	if (len > 1 && sun_ad.sun_path[0] == '\0') {
+		/* Linux-style abstract-namespace socket.
+		 * The name is not a file name, but an array of arbitrary
+		 * character, starting with \0 and possibly including \0s,
+		 * therefore the length of the structure must denote the
+		 * end of that character array */
+		addr_len = (void *)&sun_ad.sun_path - (void *)&sun_ad + len;
+	} else {
+		addr_len = sizeof sun_ad;
+	}
+	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, addr_len));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
 #endif
