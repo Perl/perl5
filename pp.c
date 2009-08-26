@@ -4882,11 +4882,13 @@ PP(pp_split)
     I32 iters = 0;
     const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (STRLEN)(strend - s);
     I32 maxiters = slen + 10;
+    I32 trailing_empty = 0;
     const char *orig;
     const I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
     const I32 gimme = GIMME_V;
+    const bool gimme_scalar = (GIMME_V == G_SCALAR);
     const I32 oldsave = PL_savestack_ix;
     U32 make_mortal = SVs_TEMP;
     bool multiline = 0;
@@ -4985,9 +4987,17 @@ PP(pp_split)
 	    if (m >= strend)
 		break;
 
-	    dstr = newSVpvn_flags(s, m-s,
-				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-	    XPUSHs(dstr);
+	    if (gimme_scalar) {
+		iters++;
+		if (m-s == 0)
+		    trailing_empty++;
+		else
+		    trailing_empty = 0;
+	    } else {
+		dstr = newSVpvn_flags(s, m-s,
+				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		XPUSHs(dstr);
+	    }
 
 	    /* skip the whitespace found last */
 	    if (do_utf8)
@@ -5015,9 +5025,18 @@ PP(pp_split)
 	    m++;
 	    if (m >= strend)
 		break;
-	    dstr = newSVpvn_flags(s, m-s,
-				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-	    XPUSHs(dstr);
+
+	    if (gimme_scalar) {
+		iters++;
+		if (m-s == 0)
+		    trailing_empty++;
+		else
+		    trailing_empty = 0;
+	    } else {
+		dstr = newSVpvn_flags(s, m-s,
+				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		XPUSHs(dstr);
+	    }
 	    s = m;
 	}
     }
@@ -5030,34 +5049,49 @@ PP(pp_split)
             or
           split //, $str, $i;
         */
-        const U32 items = limit - 1; 
-        if (items < slen)
-            EXTEND(SP, items);
-        else
-            EXTEND(SP, slen);
+	if (!gimme_scalar) {
+	    const U32 items = limit - 1;
+	    if (items < slen)
+		EXTEND(SP, items);
+	    else
+		EXTEND(SP, slen);
+	}
 
         if (do_utf8) {
             while (--limit) {
                 /* keep track of how many bytes we skip over */
                 m = s;
                 s += UTF8SKIP(s);
-                dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
+		if (gimme_scalar) {
+		    iters++;
+		    if (s-m == 0)
+			trailing_empty++;
+		    else
+			trailing_empty = 0;
+		} else {
+		    dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
 
-                PUSHs(dstr);
+		    PUSHs(dstr);
+		}
 
                 if (s >= strend)
                     break;
             }
         } else {
             while (--limit) {
-                dstr = newSVpvn(s, 1);
+	        if (gimme_scalar) {
+		    iters++;
+		} else {
+		    dstr = newSVpvn(s, 1);
+
+
+		    if (make_mortal)
+			sv_2mortal(dstr);
+
+		    PUSHs(dstr);
+		}
 
                 s++;
-
-                if (make_mortal)
-                    sv_2mortal(dstr);
-
-                PUSHs(dstr);
 
                 if (s >= strend)
                     break;
@@ -5079,9 +5113,17 @@ PP(pp_split)
 		    ;
 		if (m >= strend)
 		    break;
-		dstr = newSVpvn_flags(s, m-s,
-				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-		XPUSHs(dstr);
+		if (gimme_scalar) {
+		    iters++;
+		    if (m-s == 0)
+			trailing_empty++;
+		    else
+			trailing_empty = 0;
+		} else {
+		    dstr = newSVpvn_flags(s, m-s,
+					  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		    XPUSHs(dstr);
+		}
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
@@ -5095,9 +5137,17 @@ PP(pp_split)
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			     csv, multiline ? FBMrf_MULTILINE : 0)) )
 	    {
-		dstr = newSVpvn_flags(s, m-s,
-				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-		XPUSHs(dstr);
+		if (gimme_scalar) {
+		    iters++;
+		    if (m-s == 0)
+			trailing_empty++;
+		    else
+			trailing_empty = 0;
+		} else {
+		    dstr = newSVpvn_flags(s, m-s,
+					  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		    XPUSHs(dstr);
+		}
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
@@ -5127,9 +5177,18 @@ PP(pp_split)
 		strend = s + (strend - m);
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
-	    dstr = newSVpvn_flags(s, m-s,
-				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-	    XPUSHs(dstr);
+
+	    if (gimme_scalar) {
+		iters++;
+		if (m-s == 0)
+		    trailing_empty++;
+		else
+		    trailing_empty = 0;
+	    } else {
+		dstr = newSVpvn_flags(s, m-s,
+				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		XPUSHs(dstr);
+	    }
 	    if (RX_NPARENS(rx)) {
 		I32 i;
 		for (i = 1; i <= (I32)RX_NPARENS(rx); i++) {
@@ -5139,37 +5198,54 @@ PP(pp_split)
 		    /* japhy (07/27/01) -- the (m && s) test doesn't catch
 		       parens that didn't match -- they should be set to
 		       undef, not the empty string */
-		    if (m >= orig && s >= orig) {
-			dstr = newSVpvn_flags(s, m-s,
-					     (do_utf8 ? SVf_UTF8 : 0)
-					      | make_mortal);
+		    if (gimme_scalar) {
+			iters++;
+			if (m-s == 0)
+			    trailing_empty++;
+			else
+			    trailing_empty = 0;
+		    } else {
+			if (m >= orig && s >= orig) {
+			    dstr = newSVpvn_flags(s, m-s,
+						 (do_utf8 ? SVf_UTF8 : 0)
+						  | make_mortal);
+			}
+			else
+			    dstr = &PL_sv_undef;  /* undef, not "" */
+			XPUSHs(dstr);
 		    }
-		    else
-			dstr = &PL_sv_undef;  /* undef, not "" */
-		    XPUSHs(dstr);
+
 		}
 	    }
 	    s = RX_OFFS(rx)[0].end + orig;
 	}
     }
 
-    iters = (SP - PL_stack_base) - base;
+    if (!gimme_scalar) {
+	iters = (SP - PL_stack_base) - base;
+    }
     if (iters > maxiters)
 	DIE(aTHX_ "Split loop");
 
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
-        const STRLEN l = strend - s;
-	dstr = newSVpvn_flags(s, l, (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
-	XPUSHs(dstr);
+	if (!gimme_scalar) {
+	    const STRLEN l = strend - s;
+	    dstr = newSVpvn_flags(s, l, (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+	    XPUSHs(dstr);
+	}
 	iters++;
     }
     else if (!origlimit) {
-	while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0)) {
-	    if (TOPs && !make_mortal)
-		sv_2mortal(TOPs);
-	    iters--;
-	    *SP-- = &PL_sv_undef;
+	if (gimme_scalar) {
+	    iters -= trailing_empty;
+	} else {
+	    while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0)) {
+		if (TOPs && !make_mortal)
+		    sv_2mortal(TOPs);
+		*SP-- = &PL_sv_undef;
+		iters--;
+	    }
 	}
     }
 
