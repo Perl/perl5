@@ -370,9 +370,6 @@ EOT
 	    $te = '';
 	}
 
-	# XXX DAPM %OVER not defined anywhere
-	# $test = $OVER{$test} if exists $OVER{$test};
-
         my $results = _run_test($test, $type);
 
 	my $failure;
