@@ -71,10 +71,8 @@ our %failing = map { $_, 1 } qw|
 ../t/op/symbolcache.t
 
 ../t/op/exec.t
-../t/io/say.t
 
 ../t/op/state.t
-../t/op/tiehandle.t
 ../t/op/each_array.t
 ../t/lib/cygwin.t
 |;
