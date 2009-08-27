@@ -323,7 +323,7 @@ __END__
 
 =head1 NAME
 
-B - The Perl Compiler
+B - The Perl Compiler Backend
 
 =head1 SYNOPSIS
 
