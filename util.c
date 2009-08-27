@@ -3026,26 +3026,36 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif
 
+#define PERL_REPEATCPY_LINEAR 4
 void
-Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, register I32 count)
+Perl_repeatcpy(register char *to, register const char *from, I32 len, register I32 count)
 {
-    register I32 todo;
-    register const char * const frombase = from;
-    PERL_UNUSED_CONTEXT;
-
     PERL_ARGS_ASSERT_REPEATCPY;
 
-    if (len == 1) {
-	register const char c = *from;
-	while (count-- > 0)
-	    *to++ = c;
-	return;
-    }
-    while (count-- > 0) {
-	for (todo = len; todo > 0; todo--) {
-	    *to++ = *from++;
+    if (len == 1)
+	memset(to, *from, count);
+    else if (count) {
+	register char *p = to;
+	I32 items, linear, half;
+
+	linear = count < PERL_REPEATCPY_LINEAR ? count : PERL_REPEATCPY_LINEAR;
+	for (items = 0; items < linear; ++items) {
+	    register const char *q = from;
+	    I32 todo;
+	    for (todo = len; todo > 0; todo--)
+		*p++ = *q++;
+        }
+
+	half = count / 2;
+	while (items <= half) {
+	    I32 size = items * len;
+	    memcpy(p, to, size);
+	    p     += size;
+	    items *= 2;
 	}
-	from = frombase;
+
+	if (count > items)
+	    memcpy(p, to, (count - items) * len);
     }
 }
 

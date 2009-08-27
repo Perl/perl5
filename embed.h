@@ -3076,7 +3076,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
-#define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)
+#define repeatcpy		Perl_repeatcpy
 #define rninstr			Perl_rninstr
 #define rsignal(a,b)		Perl_rsignal(aTHX_ a,b)
 #ifdef PERL_CORE
