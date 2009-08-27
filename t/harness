@@ -208,6 +208,7 @@ my $h = TAP::Harness->new({
     color       => $color,
     jobs        => $jobs,
     verbosity   => $Verbose,
+    exec        => \&_run_test,
 });
 
 if ($state) {

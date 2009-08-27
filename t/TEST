@@ -150,7 +150,11 @@ my %dir_to_switch =
      );
 
 sub _run_test {
-    my($test, $type) = @_;
+    my($harness, $test, $type) = @_;
+    if (!defined $type) {
+	# To conform to the interface expected by exec in TAP::Harness
+	$type = 'perl';
+    }
 
     my $options = _scan_test($test, $type);
 
@@ -394,7 +398,7 @@ EOT
 	    $te = '';
 	}
 
-        my $results = _run_test($test, $type);
+        my $results = _run_test(undef, $test, $type);
 
 	my $failure;
 	my $next = 0;
