@@ -5,11 +5,14 @@ use warnings;
 
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
 use MBTest 'no_plan';
+use DistGen;
+use Cwd;
 
 use_ok 'Module::Build';
 ensure_blib 'Module::Build';
 
 {
+    my $cwd = Cwd::cwd;
     chdir MBTest->tmpdir();
 
     my $build = Module::Build->new(
@@ -34,4 +37,6 @@ ensure_blib 'Module::Build';
     like $have, qr/^\Q$head\E/, "default MANIFEST.SKIP used";
     like $have, qr/^# Avoid Module::Build generated /ms, "Module::Build specific entries";
     like $have, qr/Foo-Bar-/, "distribution tarball entry";
+
+    DistGen::chdir_all($cwd);
 }

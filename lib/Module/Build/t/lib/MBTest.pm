@@ -123,8 +123,10 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 
 # Setup a temp directory 
 sub tmpdir { 
+  my ($self, $usr_tmp) = @_;
   return File::Temp::tempdir( 'MB-XXXXXXXX', 
-    CLEANUP => 1, DIR => $ENV{PERL_CORE} ? Cwd::cwd : File::Spec->tmpdir
+    CLEANUP => 1, DIR => $ENV{PERL_CORE} ? Cwd::cwd : 
+                         $usr_tmp        ? $usr_tmp : File::Spec->tmpdir 
   );
 }
 
@@ -200,7 +202,20 @@ sub check_compiler {
   my $have_c_compiler;
   stderr_of( sub {$have_c_compiler = $mb->have_c_compiler} );
 
-  return ($have_c_compiler, $mb->feature('C_support'));
+  # check noexec tmpdir
+  my $tmp_exec;
+  if ( $have_c_compiler ) {
+    my $dir = MBTest->tmpdir;
+    my $c_file = File::Spec->catfile($dir,'test.c');
+    open my $fh, ">", $c_file;
+    print {$fh} "int main() { return 0; }\n";
+    close $fh;
+    my $exe = $mb->cbuilder->link_executable(
+      objects => $mb->cbuilder->compile( source => $c_file )
+    );
+    $tmp_exec = 0 == system( $exe );
+  }
+  return ($have_c_compiler, $mb->feature('C_support'), $tmp_exec);
 }
 
 sub have_module {

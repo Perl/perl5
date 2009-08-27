@@ -216,28 +216,46 @@ ok $mb, "Module::Build->new_from_context";
   my $libarch2 = File::Spec->catdir($libdir2, 'arch');
 
   SKIP: {
-    require ExtUtils::Install;
-    skip "Needs ExtUtils::Install 1.32 or later", 2
-      if ExtUtils::Install->VERSION < 1.32;
-
-    my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2", "INSTALLVENDORARCH=$libarch2");
-
-    if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
-      $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
-      pop @make_args while scalar(@make_args) > 1;
-    }
-
-    ($output) = stdout_stderr_of(
-      sub {
-        $ran_ok = $mb->do_system(@make, 'fakeinstall', @make_args);
-      }
+    my @cases = (
+      {
+        label => "INSTALLDIRS=vendor",
+        args => [ 'INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2", "INSTALLVENDORARCH=$libarch2"],
+        check => qr/\Q$libdir2\E .* Simple\.pm/ix,
+      },
+      {
+        label => "PREFIX=\$libdir2",
+        args => [ "PREFIX=$libdir2"],
+        check => qr/\Q$libdir2\E .* Simple\.pm/ix,
+      },
+      {
+        label => "PREFIX=\$libdir2 LIB=mylib",
+        args => [ "PREFIX=$libdir2", "LIB=mylib" ],
+        check => qr{\Q$libdir2\E[/\\]mylib[/\\]Simple\.pm}ix,
+      },
     );
 
-    ok $ran_ok, "make fakeinstall with INSTALLDIRS=vendor ran ok";
-    $output =~ s/^/# /gm;  # Don't confuse our own test output
-    like $output,
-        qr/\Q$libdir2\E .* Simple\.pm/ix,
-        'Should have installdirs=vendor';
+    require ExtUtils::Install;
+    skip "Needs ExtUtils::Install 1.32 or later", 2 * @cases
+      if ExtUtils::Install->VERSION < 1.32;
+
+    for my $c (@cases) {
+      my @make_args = @{$c->{args}}; 
+      if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
+        $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
+        pop @make_args while scalar(@make_args) > 1;
+      }
+      ($output) = stdout_stderr_of(
+        sub {
+          $result = $mb->run_perl_script('Makefile.PL', [], \@make_args);
+          $ran_ok = $mb->do_system(@make, 'fakeinstall');
+        }
+      );
+
+      ok $ran_ok, "fakeinstall $c->{label} ran ok";
+      $output =~ s/^/# /gm;  # Don't confuse our own test output
+      like $output, $c->{check},
+          "Saw destination directory for $c->{label}";
+    }
   }
 
   stdout_of( sub { $mb->do_system(@make, 'realclean'); } );

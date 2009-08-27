@@ -78,7 +78,9 @@ method.
 
 This parameter determines whether Module::Build will add itself
 automatically to configure_requires (and build_requires) if Module::Build
-is not already there.  The default value is true.
+is not already there.  The required version will be the last 'major' release,
+as defined by the decimal version truncated to two decimal places (e.g. 0.34,
+instead of 0.3402).  The default value is true.
 
 =item auto_features
 
@@ -387,23 +389,24 @@ hash returned by C<args()>.  For example:
     (
      module_name => 'Foo::Bar',
      get_options => {
-                     loud =>     { store => \$loud },
-                     dbd  =>     { type  => '=s'   },
-                     quantity => { type  => '+'    },
+                     Loud =>     { store => \$loud },
+                     Dbd  =>     { type  => '=s'   },
+                     Quantity => { type  => '+'    },
                     }
     );
 
   print STDERR "HEY, ARE YOU LISTENING??\n" if $loud;
-  print "We'll use the ", $build->args('dbd'), " DBI driver\n";
+  print "We'll use the ", $build->args('Dbd'), " DBI driver\n";
   print "Are you sure you want that many?\n"
-    if $build->args('quantity') > 2;
+    if $build->args('Quantity') > 2;
 
 The arguments for such a specification can be called like so:
 
-  perl Build.PL --loud --dbd=DBD::pg --quantity --quantity --quantity
+  perl Build.PL --Loud --Dbd=DBD::pg --Quantity --Quantity --Quantity
 
 B<WARNING:> Any option specifications that conflict with Module::Build's own
-options (defined by its properties) will throw an exception.
+options (defined by its properties) will throw an exception.  Use capitalized
+option names to avoid unintended conflicts with future Module::Build options.
 
 Consult the Getopt::Long documentation for details on its usage.
 
@@ -1809,8 +1812,6 @@ accessor methods for the following properties:
 
 =item install_base()
 
-=item install_sets()
-
 =item installdirs()
 
 =item libdoc_dirs()
@@ -1830,8 +1831,6 @@ accessor methods for the following properties:
 =item module_name()
 
 =item orig_dir()
-
-=item original_prefix()
 
 =item perl()
 

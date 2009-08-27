@@ -82,5 +82,5 @@ END
     my %cleanup = map { $_ => 1 } $mb->cleanup;
     is($cleanup{foo}, undef, "generated special file not added to cleanup");
 
-
+    $dist->chdir_original if $dist->did_chdir;
 }

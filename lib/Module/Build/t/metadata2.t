@@ -19,7 +19,7 @@ SKIP: {
   skip( 'YAML_support feature is not enabled', 4 )
       unless Module::Build::ConfigData->feature('YAML_support');
 
-  my $dist = DistGen->new( dir => $tmp, skip_manifest => 1 );
+  my $dist = DistGen->new( dir => $tmp, no_manifest => 1 );
   $dist->regen;
 
   $dist->chdir_in;

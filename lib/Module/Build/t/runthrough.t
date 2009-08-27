@@ -16,7 +16,6 @@ my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
-$dist->remove_file( 't/basic.t' );
 $dist->change_build_pl
 ({
   module_name => 'Simple',
@@ -28,22 +27,6 @@ $dist->change_build_pl
 $dist->add_file( 'script', <<'---' );
 #!perl -w
 print "Hello, World!\n";
----
-$dist->add_file( 'test.pl', <<'---' );
-#!/usr/bin/perl
-
-use Test;
-plan tests => 2;
-
-ok 1;
-
-require Module::Build;
-skip $ENV{PERL_CORE} && "no blib in core",
-  $INC{'Module/Build.pm'}, qr/blib/, 'Module::Build should be loaded from blib';
-
-print "# Cwd: ", Module::Build->cwd, "\n";
-print "# \@INC: (@INC)\n";
-print "Done.\n";  # t/compat.t looks for this
 ---
 $dist->add_file( 'lib/Simple/Script.PL', <<'---' );
 #!perl -w
@@ -116,9 +99,9 @@ ok grep {$_ eq 'save_out'     } $mb->cleanup;
 
   unless ($all_ok) {
     # We use diag() so Test::Harness doesn't get confused.
-    diag("vvvvvvvvvvvvvvvvvvvvv Simple/test.pl output vvvvvvvvvvvvvvvvvvvvv");
+    diag("vvvvvvvvvvvvvvvvvvvvv Simple/t/basic.t output vvvvvvvvvvvvvvvvvvvvv");
     diag($output);
-    diag("^^^^^^^^^^^^^^^^^^^^^ Simple/test.pl output ^^^^^^^^^^^^^^^^^^^^^");
+    diag("^^^^^^^^^^^^^^^^^^^^^ Simple/t/basic.t output ^^^^^^^^^^^^^^^^^^^^^");
   }
 }
 
@@ -150,10 +133,8 @@ SKIP: {
   cmp_ok $1, '==', $mb->VERSION, "Check version used to create META.yml: $1 == " . $mb->VERSION;
 
   SKIP: {
-    skip( "not sure if we can create a tarball on this platform", 1 )
-      unless $mb->check_installed_version('Archive::Tar', 0) ||
-	     $mb->isa('Module::Build::Platform::Unix');
-
+    skip( "Archive::Tar 1.08+ not installed", 1 )
+      unless eval { require Archive::Tar && Archive::Tar->VERSION(1.08); 1 };
     $mb->add_to_cleanup($mb->dist_dir . ".tar.gz");
     eval {$mb->dispatch('dist')};
     is $@, '';

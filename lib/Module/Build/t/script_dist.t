@@ -77,3 +77,4 @@ SKIP: {
   my $yml = YAML::LoadFile('META.yml');
   is_deeply($yml->{provides}, \%meta_provides);
 }
+$dist->chdir_original if $dist->did_chdir;

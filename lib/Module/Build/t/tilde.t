@@ -55,10 +55,6 @@ SKIP: {
 
     is( run_sample( $p => '~/foo' )->$p(),  "$home/foo" );
 
-    is( run_sample( $p => '~~'    )->$p(),  '~~' );
-
-    is( run_sample( $p => '~ foo' )->$p(),  '~ foo' );
-
     is( run_sample( $p => '~/ foo')->$p(),  "$home/ foo" );
       
     is( run_sample( $p => '~/fo o')->$p(),  "$home/fo o" );
@@ -91,6 +87,10 @@ SKIP: {
 
     $mb->$p('~');
     is( $mb->$p(),      '~', 'API does not expand tildes' );
+
+    skip "On OS/2 EMX all users are equal", 2 if $^O eq 'os2';
+    is( run_sample( $p => '~~'    )->$p(),  '~~' );
+    is( run_sample( $p => '~ foo' )->$p(),  '~ foo' );
 }
 
 # Again, with named users

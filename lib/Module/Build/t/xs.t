@@ -6,8 +6,10 @@ use MBTest;
 use Module::Build;
 use Config;
 
+my $tmp;
+
 {
-  my ($have_c_compiler, $C_support_feature) = check_compiler();
+  my ($have_c_compiler, $C_support_feature, $tmp_exec) = check_compiler();
 
   if (! $C_support_feature) {
     plan skip_all => 'C_support not enabled';
@@ -20,15 +22,14 @@ use Config;
   } else {
     plan tests => 23;
   }
+  require Cwd;
+  $tmp = MBTest->tmpdir( $tmp_exec ? undef : Cwd::cwd );
 }
 
 ensure_blib('Module::Build');
 
 
 #########################
-
-
-my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp, xs => 1 );

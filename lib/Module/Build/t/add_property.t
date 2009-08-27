@@ -91,3 +91,5 @@ eval { $build->installdirs('foo') };
 ok $err = $@, 'Should catch exception for invalid "installdirs" value';
 like $err, qr/ERROR: installdirs must be one of "core", "site", or "vendor"/,
   'And it should suggest the proper values in the error message';
+
+$dist->chdir_original if $dist->did_chdir;

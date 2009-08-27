@@ -62,6 +62,13 @@ sub undent {
 
   return($string);
 }
+
+sub chdir_all ($) {
+  # OS/2 has "current directory per disk", undeletable; 
+  # doing chdir() to another disk won't change cur-dir of initial disk...
+  chdir('/') if $^O eq 'os2';
+  chdir shift;
+}
 ########################################################################
 
 sub new {
@@ -72,7 +79,7 @@ sub new {
   $options{dir}  ||= Cwd::cwd();
 
   my %data = (
-    skip_manifest => 0,
+    no_manifest   => 0,
     xs            => 0,
     %options,
   );
@@ -286,7 +293,7 @@ sub regen {
       my $real_filename = $self->_real_filename( $file );
       my $fullname = File::Spec->catfile( $dist_dirname, $real_filename );
       if ( -e $fullname ) {
-	1 while unlink( $fullname );
+        1 while unlink( $fullname );
       }
       print "Unlinking pending file '$file'\n" if $VERBOSE;
       delete( $self->{pending}{remove}{$file} );
@@ -297,8 +304,8 @@ sub regen {
     my $real_filename = $self->_real_filename( $file );
     my $fullname = File::Spec->catfile( $dist_dirname, $real_filename );
 
-    if ( ! -e $fullname ||
-	 ( -e $fullname && $self->{pending}{change}{$file} ) ) {
+    if  ( ! -e $fullname ||
+        (   -e $fullname && $self->{pending}{change}{$file} ) ) {
 
       print "Changed file '$file'.\n" if $VERBOSE;
 
@@ -326,7 +333,7 @@ sub regen {
   }
 
   my $manifest = File::Spec->catfile( $dist_dirname, 'MANIFEST' );
-  unless ( $self->{skip_manifest} ) {
+  unless ( $self->{no_manifest} ) {
     if ( -e $manifest ) {
       1 while unlink( $manifest );
     }
@@ -388,7 +395,7 @@ sub clean {
     }
   }, ($^O eq 'VMS' ? './' : File::Spec->curdir) );
 
-  chdir( $here );
+  chdir_all( $here );
 }
 
 sub remove {
@@ -478,9 +485,22 @@ sub chdir_original {
 
   croak("never called chdir_in()") unless($self->{original_dir});
   my $dir = $self->{original_dir};
-  chdir($dir) or die "Can't chdir to '$dir': $!";
+  chdir_all($dir) or die "Can't chdir to '$dir': $!";
 }
 ########################################################################
+
+sub run_build_pl {
+  my ($self, @args) = @_;
+  require Module::Build;
+  Module::Build->run_perl_script('Build.PL', [], [@args])
+}
+
+sub run_build {
+  my ($self, @args) = @_;
+  require Module::Build;
+  my $build_script = $^O eq 'VMS' ? 'Build.com' : 'Build';
+  Module::Build->run_perl_script($build_script, [], [@args])
+}
 
 1;
 
@@ -495,19 +515,58 @@ DistGen - Creates simple distributions for testing.
 
   use DistGen;
 
-  my $dist = DistGen->new(dir => $tmp);
-  ...
+  # create distribution and prepare to test
+  my $dist = DistGen->new(name => 'Foo::Bar', dir => $tmp);
+  $dist->regen;
+  $dist->chdir_in;
+
+  # change distribution files
   $dist->add_file('t/some_test.t', $contents);
-  ...
+  $dist->change_file('MANIFEST.SKIP', $new_contents);
+  $dist->remove_file('t/some_test.t');
   $dist->regen;
 
-  chdir($dist->dirname) or
-    die "Cannot chdir to '@{[$dist->dirname]}': $!";
-  ...
+  # clean up extraneous files
   $dist->clean;
-  ...
-  chdir($cwd) or die "cannot return to $cwd";
+
+  # exercise the command-line interface
+  $dist->run_build_pl();
+  $dist->run_build('test');
+
+  # finish testing and clean up
+  $dist->chdir_original;
   $dist->remove;
+
+=head1 USAGE
+
+A DistGen object manages a set of files in a distribution directory.
+
+The constructor and some methods only define the target state of the
+distribution.  They do B<not> make any changes to the filesystem:
+
+  new
+  add_file
+  change_file
+  change_build_pl
+  remove_file
+
+Other methods then change the filesystem to match the target state of
+the distribution (or to remove it entirely):
+
+  regen
+  clean
+  remove
+
+Other methods are provided for a convenience during testing. The
+most important are ones that manage the current directory:
+
+  chdir_in
+  chdir_original
+
+Additional methods portably encapsulate running Build.PL and Build:
+
+  run_build_pl
+  run_build
 
 =head1 API
 
@@ -519,9 +578,10 @@ Create a new object.  Does not write its contents (see L</regen()>.)
 
   my $tmp = MBTest->tmpdir;
   my $dist = DistGen->new(
-    name => 'Foo::Bar',
-    dir  => $tmp,
-    xs   => 1,
+    name        => 'Foo::Bar',
+    dir         => $tmp,
+    xs          => 1,
+    no_manifest => 0,
   );
 
 The parameters are as follows.
@@ -544,33 +604,84 @@ under this according to the "dist" form of C<name> (e.g. "Foo-Bar".)
 
 If true, generates an XS based module.
 
+=item no_manifest
+
+If true, C<regen()> will not create a MANIFEST file.
+
 =back
 
-=head2 Manipulating the Distribution
+The following files are added as part of the default distribution:
+
+  Build.PL
+  lib/Simple.pm # based on name parameter
+  t/basic.t
+
+If an XS module is generated, Simple.pm and basic.t are different and
+the following files are also added:
+
+  typemap
+  lib/Simple.xs # based on name parameter
+
+=head2 Adding and editing files
+
+Note that C<$filename> should always be specified with unix-style paths,
+and are relative to the distribution root directory, e.g. C<lib/Module.pm>.
+
+No changes are made to the filesystem until the distribution is regenerated.
+
+=head3 add_file()
+
+Add a $filename containing $content to the distribution.
+
+  $dist->add_file( $filename, $content );
+
+=head3 change_file()
+
+Changes the contents of $filename to $content. No action is performed
+until the distribution is regenerated.
+
+  $dist->change_file( $filename, $content );
+
+=head3 change_build_pl()
+
+A wrapper around change_file specifically for setting Build.PL.  Instead
+of file C<$content>, it takes a hash-ref of Module::Build constructor
+arguments:
+
+  $dist->change_build_pl(
+    {
+      module_name         => $dist->name,
+      dist_version        => '3.14159265',
+      license             => 'perl',
+      create_readme       => 1,
+    }
+  );
+
+=head3 get_file
+
+Retrieves the target contents of C<$filename>.
+
+  $content = $dist->get_file( $filename );
+
+=head3 remove_file()
+
+Removes C<$filename> from the distribution.
+
+  $dist->remove_file( $filename );
+
+=head2 Changing the distribution directory
 
 These methods immediately affect the filesystem.
 
 =head3 regen()
 
-Regenerate all missing or changed files.
+Regenerate all missing or changed files.  Also deletes any files
+flagged for removal with remove_file().
 
   $dist->regen(clean => 1);
 
 If the optional C<clean> argument is given, it also removes any
 extraneous files that do not belong to the distribution.
-
-=head2 chdir_in
-
-Change directory into the dist root.
-
-  $dist->chdir_in;
-
-=head2 chdir_original
-
-Returns to whatever directory you were in before chdir_in() (regardless
-of the cwd.)
-
-  $dist->chdir_original;
 
 =head3 clean()
 
@@ -595,37 +706,49 @@ the built-in files.
 
 Removes the entire distribution directory.
 
-=head2 Editing Files
+=head2 Changing directories
 
-Note that C<$filename> should always be specified with unix-style paths,
-and are relative to the distribution root directory, e.g. C<lib/Module.pm>.
+=head3 chdir_in
 
-No filesystem action is performed until the distribution is regenerated.
+Change directory into the dist root.
 
-=head3 add_file()
+  $dist->chdir_in;
 
-Add a $filename containing $content to the distribution.
+=head3 chdir_original
 
-  $dist->add_file( $filename, $content );
+Returns to whatever directory you were in before chdir_in() (regardless
+of the cwd.)
 
-=head3 remove_file()
+  $dist->chdir_original;
 
-Removes C<$filename> from the distribution.
+=head2 Command-line helpers
 
-  $dist->remove_file( $filename );
+These use Module::Build->run_perl_script() to ensure that Build.PL or Build are
+run in a separate process using the current perl interpreter.  (Module::Build
+is loaded on demand).  They also ensure appropriate naming for operating
+systems that require a suffix for Build.
 
-=head3 change_file()
+=head3 run_build_pl
 
-Changes the contents of $filename to $content. No action is performed
-until the distribution is regenerated.
+Runs Build.PL using the current perl interpreter.  Any arguments are
+passed on the command line.
 
-  $dist->change_file( $filename, $content );
+  $dist->run_build_pl('--quiet');
+
+=head3 run_build
+
+Runs Build using the current perl interpreter.  Any arguments are
+passed on the command line.
+
+  $dist->run_build(qw/test --verbose/);
 
 =head2 Properties
 
 =head3 name()
 
 Returns the name of the distribution.
+
+  $dist->name: # e.g. Foo::Bar
 
 =head3 dirname()
 

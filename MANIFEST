@@ -2624,6 +2624,7 @@ lib/Module/Build/t/extend.t	Module::Build
 lib/Module/Build/t/ext.t	Module::Build
 lib/Module/Build/t/files.t	Module::Build
 lib/Module/Build/t/help.t	Module::Build
+lib/Module/Build/t/install_extra_target.t	Module::Build tests
 lib/Module/Build/t/install.t	Module::Build
 lib/Module/Build/t/lib/DistGen.pm	Module::Build
 lib/Module/Build/t/lib/MBTest.pm	Module::Build

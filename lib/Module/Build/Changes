@@ -1,5 +1,48 @@
 Revision history for Perl extension Module::Build.
 
+0.35 - Thu Aug 27 09:12:02 EDT 2009
+
+ Bug fixes:
+ - Fix t/destinations.t segfault on 5.6.2
+
+0.34_06 - Sat Aug 22 21:58:26 EDT 2009
+
+ Bug fixes:
+ - Multiple test fixes for OS2 [Ilya Zakharevich]
+ - Generated.ppd files use :utf8 if possible (RT#48827) [Olivier Mengue]
+ - Fixed preservation of custom install_paths on resume (RT#41166)
+   [David Golden]
+ - Warn instead of crashing when Pod::Man tries to create files with
+   colons on vfat partitions on unix (RT#45544) [David Golden]
+
+0.34_05 - Sun Aug  9 22:31:37 EDT 2009
+
+ Bug fixes:
+ - When auto_configure_requires is true (the default), Module::Build will 
+   only add last 'major' version of Module:Build (e.g. 0.XX) to
+   configure_requires to avoid specifying a minor development release not
+   available on CPAN [David Golden]
+
+0.34_04 - Sat Aug  8 11:02:24 EDT 2009
+
+ Other:
+ - Added documentation warning that 'get_options' should be capitalized
+   to avoid conflicting with future Module::Build options and changed
+   the examples accordingly.
+
+0.34_03 - Sat Aug  8 07:39:16 EDT 2009
+
+ Bug fixes:
+ - Fixed failing xs.t if /tmp is mounted noexec (RT#47331) [David Golden]
+ - Fixed failing debug.t on VMS (RT#48362) [Craig Berry]
+ - Prevent par.t from dying on error in .zip extraction [David Golden]
+ - Fixed potential runthrough.t failure on 5.6.2 [David Golden]
+
+ Other:
+ - Archive::Tar changed from 'requires' to 'recommends' so non-authors
+   without IO::Zlib can still use Module::Build to install modules
+   [reported by Matt Trout, fix by David Golden]
+
 0.340201 - Sun Aug  9 22:11:04 EDT 2009
 
  Other:
@@ -9,7 +52,7 @@ Revision history for Perl extension Module::Build.
 
  Bug-fixes:
  - Bundled Module::Build::Version updated to bring into sync with CPAN
-   version.pm 0.77
+   version.pm 0.77 [John Peacock]
 
 0.34_01 - Sat Jul 18 16:32:09 EDT 2009
 

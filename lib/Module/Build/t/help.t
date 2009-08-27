@@ -22,7 +22,7 @@ $dist->regen;
 
 my $restart = sub {
   $dist->clean();
-  chdir( $cwd );
+  DistGen::chdir_all( $cwd );
   File::Path::rmtree( $tmp );
   # we're redefining the same package as we go, so...
   delete($::{'MyModuleBuilder::'});
@@ -274,7 +274,7 @@ is($mb->get_action_docs('batz'), undef, 'nothing after uplevel');
 
 # cleanup
 $dist->clean();
-chdir( $cwd );
+DistGen::chdir_all($cwd);
 File::Path::rmtree( $tmp );
 
 # vim:ts=2:sw=2:et:sta

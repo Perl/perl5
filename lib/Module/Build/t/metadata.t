@@ -65,6 +65,9 @@ my $mb = Module::Build->new_from_context;
 
 {
   my $mb_prereq = { 'Module::Build' => $Module::Build::VERSION };
+  my $mb_config_req = { 
+    'Module::Build' => int($Module::Build::VERSION * 100)/100 
+  };
   my $node = $mb->prepare_metadata( {} );
 
   # exists() doesn't seem to work here
@@ -73,7 +76,7 @@ my $mb = Module::Build->new_from_context;
   is $node->{abstract}, $metadata{dist_abstract};
   is_deeply $node->{author}, $metadata{dist_author};
   is $node->{license}, $metadata{license};
-  is_deeply $node->{configure_requires}, $mb_prereq, 'Add M::B to configure_requires';
+  is_deeply $node->{configure_requires}, $mb_config_req, 'Add M::B to configure_requires';
   like $node->{generated_by}, qr{Module::Build};
   ok defined( $node->{'meta-spec'}{version} ),
       "'meta-spec' -> 'version' field present in META.yml";
