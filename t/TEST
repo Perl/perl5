@@ -5,6 +5,19 @@
 # probably obsolete on the avoidance side, though still currrent
 # on the peculiarity side.)
 
+# t/TEST and t/harness need to share code. The logical way to do this would be
+# to have the common code in a file both require or use. However, t/TEST needs
+# to still work, to generate test results, even if require isn't working, so
+# we cannot do that. t/harness has no such restriction, so it is quite
+# acceptable to have it require t/TEST.
+
+# In which case, we need to stop t/TEST actually running tests, as all
+# t/harness needs are its subroutines.
+
+if ($::do_nothing) {
+    return 1;
+}
+
 # Location to put the Valgrind log.
 my $Valgrind_Log = 'current.valgrind';
 
