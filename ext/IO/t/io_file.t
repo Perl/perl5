@@ -1,14 +1,7 @@
 #!./perl -w
 
-BEGIN {
-    unless(grep /blib/, @INC) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-}
-
 use strict;
-require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
+require($ENV{PERL_CORE} ? "../../t/test.pl" : "./t/test.pl");
 plan(tests => ($^O =~ /MSWin32/ ? 9 : 6));
 
 my $Class       = 'IO::File';

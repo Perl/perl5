@@ -1,12 +1,5 @@
 #!./perl
 
-BEGIN {
-    unless(grep /blib/, @INC) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 if ($^O eq 'mpeix') {
     print "1..0 # Skip: broken on MPE/iX\n";
     exit 0;

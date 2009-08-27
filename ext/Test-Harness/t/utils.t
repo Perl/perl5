@@ -1,9 +1,5 @@
 #!/usr/bin/perl -w
 
-BEGIN {
-    chdir 't' and @INC = '../lib' if $ENV{PERL_CORE};
-}
-
 use strict;
 use lib 't/lib';
 

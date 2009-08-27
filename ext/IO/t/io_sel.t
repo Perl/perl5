@@ -1,12 +1,5 @@
 #!./perl -w
 
-BEGIN {
-    unless(grep /blib/, @INC) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 select(STDERR); $| = 1;
 select(STDOUT); $| = 1;
 

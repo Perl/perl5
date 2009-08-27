@@ -143,7 +143,7 @@ RESULT
 
     # Check for Module::Plugin support
     my $res = runperl(
-        switches => [ '-I../ext/B/t/pluglib', '-MO=Lint,none' ],
+        switches => [ '-It/pluglib', '-MO=Lint,none' ],
         prog     => 1,
         stderr   => 1,
     );

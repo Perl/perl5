@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', 'lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+    unshift @INC, 't/lib';
 }
 
 use strict;
@@ -34,10 +28,6 @@ BEGIN {
 
         # let's fully expand that filename
         $test->{file} = File::Spec->catfile(
-            (   $ENV{PERL_CORE}
-                ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-                : ()
-            ),
             't',
             'sample-tests',
             $test->{file}

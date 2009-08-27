@@ -1,10 +1,5 @@
 #!./perl
 
-BEGIN {
-	chdir 't' if -d 't';
-	unshift @INC, '../lib';
-}
-
 BEGIN{
 	# Don't do anything if POSIX is missing, or sigaction missing.
 	use Config;

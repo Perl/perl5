@@ -16,11 +16,6 @@
 #
 #
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 use Text::Soundex;
 
 $test = 0;

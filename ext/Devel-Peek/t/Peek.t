@@ -1,8 +1,6 @@
 #!./perl -T
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
@@ -10,7 +8,7 @@ BEGIN {
     }
 }
 
-BEGIN { require "./test.pl"; }
+BEGIN { require "../../t/test.pl"; }
 
 use Devel::Peek;
 

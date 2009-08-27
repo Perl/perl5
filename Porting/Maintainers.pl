@@ -349,7 +349,6 @@ package Maintainers;
 			     # NB: we use the CompTestUtils.pm
 			     # from IO-Compress instead
 			     qw( bzip2-src/bzip2-cpp.patch
-			         t/compress/CompTestUtils.pm
 			     )
 			   ],
 	'CPAN'		=> 1,
@@ -367,12 +366,9 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{^t/Test/},
 			     qw( t/000prereq.t
 				 t/99pod.t
-			         t/compress/CompTestUtils.pm
 			       )
 			   ],
 	'MAP'		=> { ''	=> 'ext/Compress-Raw-Zlib/',
-			     't/compress/CompTestUtils.pm' =>
-					    't/lib/compress/CompTestUtils.pm',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -581,6 +577,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'dankogai',
 	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.35.tar.gz',
 	'FILES'		=> q[ext/Encode],
+	'EXCLUDED'	=> [ qw{t/piconv.t} ], # FIXME
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -908,8 +905,7 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{t/Test/},
 			     qw{t/cz-03zlib-v1.t},
 			   ],
-	'MAP'		=> { 't/compress' => 't/lib/compress',
-			     ''		  => 'ext/IO-Compress/',
+	'MAP'		=> { ''		  => 'ext/IO-Compress/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

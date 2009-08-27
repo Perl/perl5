@@ -151,6 +151,7 @@ ext/Compress-Raw-Bzip2/t/000prereq.t
 ext/Compress-Raw-Bzip2/t/01bzip2.t
 ext/Compress-Raw-Bzip2/t/09limitoutput.t
 ext/Compress-Raw-Bzip2/t/99pod.t
+ext/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
 ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
@@ -168,6 +169,7 @@ ext/Compress-Raw-Zlib/t/02zlib.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/07bufsize.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/18lvalue.t	Compress::Raw::Zlib
+ext/Compress-Raw-Zlib/t/compress/CompTestUtils.pm
 ext/Compress-Raw-Zlib/typemap		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/compress.c	Compress::Raw::Zlib
@@ -223,6 +225,23 @@ ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
 ext/Devel-DProf/Changes		Perl code profiler changelog
 ext/Devel-DProf/DProf.pm	Perl code profiler
+ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test1_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test2_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test2_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test3_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test3_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test4_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test4_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test5_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test5_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test6_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test6_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test7_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test7_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test8_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test8_v	Perl code profiler tests
+ext/Devel-DProf/dprof/V.pm	Perl code profiler tests
 ext/Devel-DProf/DProf.xs	Perl code profiler
 ext/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
 ext/Devel-DProf/t/DProf.t	Perl code profiler
@@ -565,7 +584,6 @@ ext/Encode/t/mime-header.t	test script
 ext/Encode/t/mime-name.t	test script
 ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
-ext/Encode/t/piconv.t		test script
 ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
 ext/Encode/t/Unicode.t		test script
@@ -702,6 +720,7 @@ ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
 ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
+ext/Filter-Util-Call/filter-util.pl		See if Filter::Util::Call works
 ext/Filter-Util-Call/t/call.t	See if Filter::Util::Call works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
@@ -855,6 +874,20 @@ ext/IO-Compress/t/110encode-gzip.t	IO::Compress
 ext/IO-Compress/t/110encode-rawdeflate.t	IO::Compress
 ext/IO-Compress/t/110encode-zip.t	IO::Compress
 ext/IO-Compress/t/999pod.t	IO::Compress
+ext/IO-Compress/t/compress/any.pl		Compress::Zlib
+ext/IO-Compress/t/compress/anyunc.pl		Compress::Zlib
+ext/IO-Compress/t/compress/CompTestUtils.pm	Compress::Zlib
+ext/IO-Compress/t/compress/destroy.pl		Compress::Zlib
+ext/IO-Compress/t/compress/encode.pl		Compress::Zlib
+ext/IO-Compress/t/compress/generic.pl		Compress::Zlib
+ext/IO-Compress/t/compress/merge.pl		Compress::Zlib
+ext/IO-Compress/t/compress/multi.pl		Compress::Zlib
+ext/IO-Compress/t/compress/newtied.pl		Compress::Zlib
+ext/IO-Compress/t/compress/oneshot.pl		Compress::Zlib
+ext/IO-Compress/t/compress/prime.pl		Compress::Zlib
+ext/IO-Compress/t/compress/tied.pl		Compress::Zlib
+ext/IO-Compress/t/compress/truncate.pl		Compress::Zlib
+ext/IO-Compress/t/compress/zlib-generic.pl	Compress::Zlib
 ext/IO-Compress/t/cz-01version.t	IO::Compress
 ext/IO-Compress/t/cz-05examples.t	IO::Compress
 ext/IO-Compress/t/cz-06gzsetp.t	IO::Compress
@@ -3990,20 +4023,6 @@ t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
-t/lib/compress/any.pl		Compress::Zlib
-t/lib/compress/anyunc.pl	Compress::Zlib
-t/lib/compress/CompTestUtils.pm	Compress::Zlib
-t/lib/compress/destroy.pl	Compress::Zlib
-t/lib/compress/encode.pl	Compress::Zlib
-t/lib/compress/generic.pl	Compress::Zlib
-t/lib/compress/merge.pl		Compress::Zlib
-t/lib/compress/multi.pl		Compress::Zlib
-t/lib/compress/newtied.pl	Compress::Zlib
-t/lib/compress/oneshot.pl	Compress::Zlib
-t/lib/compress/prime.pl		Compress::Zlib
-t/lib/compress/tied.pl		Compress::Zlib
-t/lib/compress/truncate.pl	Compress::Zlib
-t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
@@ -4013,23 +4032,6 @@ t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/deprecate.t		Test deprecate.pm
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Test::More test module
-t/lib/dprof/test1_t		Perl code profiler tests
-t/lib/dprof/test1_v		Perl code profiler tests
-t/lib/dprof/test2_t		Perl code profiler tests
-t/lib/dprof/test2_v		Perl code profiler tests
-t/lib/dprof/test3_t		Perl code profiler tests
-t/lib/dprof/test3_v		Perl code profiler tests
-t/lib/dprof/test4_t		Perl code profiler tests
-t/lib/dprof/test4_v		Perl code profiler tests
-t/lib/dprof/test5_t		Perl code profiler tests
-t/lib/dprof/test5_v		Perl code profiler tests
-t/lib/dprof/test6_t		Perl code profiler tests
-t/lib/dprof/test6_v		Perl code profiler tests
-t/lib/dprof/test7_t		Perl code profiler tests
-t/lib/dprof/test7_v		Perl code profiler tests
-t/lib/dprof/test8_t		Perl code profiler tests
-t/lib/dprof/test8_v		Perl code profiler tests
-t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
@@ -4039,7 +4041,6 @@ t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/ImportTest.pm	Helper file for Filter::Simple tests
-t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1

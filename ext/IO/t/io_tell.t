@@ -1,14 +1,7 @@
 #!./perl
 
 BEGIN {
-    unless(grep /blib/, @INC) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	$tell_file = "TEST";
-    }
-    else {
-	$tell_file = "Makefile";
-    }
+    $tell_file = "Makefile";
 }
 
 use Config;

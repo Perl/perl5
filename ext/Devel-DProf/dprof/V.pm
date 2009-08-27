@@ -12,7 +12,7 @@ require Exporter;
 $num = 0;
 $results = $expected = '';
 $perl = $opt_p || $^X;
-$dpp = $opt_d || '../utils/dprofpp';
+$dpp = $opt_d || '../../utils/dprofpp';
 $dpp .= '.com' if $^O eq 'VMS';
 
 print "\nperl: $perl\n" if $opt_v;

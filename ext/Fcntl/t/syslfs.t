@@ -3,8 +3,6 @@
 # If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
 	require Config; import Config;
 	# Don't bother if there are no quad offsets.
 	if ($Config{lseeksize} < 8) {

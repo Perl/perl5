@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
-    }
-    else {
         unshift @INC, 't/lib';
-    }
 }
 
 use strict;
@@ -23,8 +17,7 @@ use_ok('MyGrammar');
 use_ok('MyIteratorFactory');
 use_ok('MyResultFactory');
 
-my @t_path = $ENV{PERL_CORE} ? ( updir(), 'ext', 'Test-Harness' ) : ();
-my $source = catfile( @t_path, 't', 'source_tests', 'source' );
+my $source = catfile( 't', 'source_tests', 'source' );
 my %customize = (
     source_class           => 'MySource',
     perl_source_class      => 'MyPerlSource',

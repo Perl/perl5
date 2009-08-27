@@ -3,14 +3,7 @@
 my $perl;
 
 BEGIN {
-    unless(grep /blib/, @INC) {
-	$perl = './perl';
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-    else {
-	$perl = $^X;
-    }
+    $perl = $^X;
 }
 
 use Config;

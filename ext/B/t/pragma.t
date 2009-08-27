@@ -6,7 +6,8 @@ BEGIN {    ## no critic strict
 	@INC = qw(../lib . lib);
     }
     else {
-        unshift @INC, 't';
+	unshift @INC, '../../t/lib'; # FIXME when PERL_CORE works again
+        # unshift @INC, 't';
     }
     require Config;
     if ( ( $Config::Config{'extensions'} !~ /\bB\b/ ) ) {

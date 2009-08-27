@@ -14,6 +14,39 @@
 # In which case, we need to stop t/TEST actually running tests, as all
 # t/harness needs are its subroutines.
 
+
+# directories with special sets of test switches
+my %dir_to_switch =
+    (base => '',
+     comp => '',
+     run => '',
+     '../ext/File-Glob/t' => '-I. -MTestInit', # FIXME - tests assume t/
+     );
+
+my %temp_no_core =
+    ('../ext/Attribute-Handlers' => 1,
+     '../ext/B' => 'fixme',
+     '../ext/Compress-Raw-Bzip2' => 1,
+     '../ext/Compress-Raw-Zlib' => 1,
+     '../ext/Data-Dumper' => 'fixme',
+     '../ext/Devel-PPPort' => 1,
+     '../ext/DynaLoader' => 'fixme',
+     '../ext/Encode' => 1,
+     '../ext/Hash-Util' => 'fixme',
+     '../ext/Hash-Util-FieldHash' => 'fixme',
+     '../ext/I18N-Langinfo' => 'fixme',
+     '../ext/IO-Compress' => 1,
+     '../ext/IPC-SysV' => 1,
+     '../ext/MIME-Base64' => 1,
+     '../ext/Safe' => 'fixme',
+     '../ext/Storable' => 'fixme',
+     '../ext/Time-HiRes' => 1,
+     '../ext/Unicode-Normalize' => 1,
+    );
+
+# Fix Text-Soundex
+# Fix Win32
+
 if ($::do_nothing) {
     return 1;
 }
@@ -141,14 +174,7 @@ sub _scan_test {
 
     return { file => $file_opts, switch => $switch };
 }
-
-# directories with special sets of test switches
-my %dir_to_switch =
-    (base => '',
-     comp => '',
-     run => '',
-     );
-
+		  
 sub _run_test {
     my($harness, $test, $type) = @_;
     if (!defined $type) {
@@ -157,14 +183,29 @@ sub _run_test {
     }
 
     my $options = _scan_test($test, $type);
+    my $return_dir;
 
     my $perl = './perl';
     my $lib  = '../lib';
-    $test =~ /^([^\/]+)/;
+    $test =~ /^(.+)\/[^\/]+/;
+    my $dir = $1;
+    my $ext_dir;
 
-    my $testswitch = $dir_to_switch{$1};
+    my $testswitch = $dir_to_switch{$dir};
     if (!defined $testswitch) {
-	$testswitch = '-I. -MTestInit';  # -T will remove . from @INC
+	if ($test =~ s!^(\.\./ext/[^/]+)/t!t!) {
+	    $ext_dir = $1;
+	    $return_dir = '../../t';
+	    $lib = '../../lib';
+	    $perl = '../../perl';
+	    $testswitch = "-I$return_dir -MTestInit=U2T,A";
+	    if ($temp_no_core{$ext_dir}) {
+		$testswitch = $testswitch . ',NC';
+	    }
+	    chdir $ext_dir or die "Can't chdir to '$ext_dir': $!";
+	} else {
+	    $testswitch = '-I. -MTestInit';  # -T will remove . from @INC
+	}
     }
 
     my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
@@ -180,7 +221,6 @@ sub _run_test {
           or print "can't deparse '$deparse_cmd': $!.\n";
     }
     elsif ($type eq 'perl') {
-        my $perl = $ENV{PERL} || $perl;
         my $redir = $^O eq 'VMS' ? '2>&1' : '';
 
         if ($ENV{PERL_VALGRIND}) {
@@ -196,6 +236,11 @@ sub _run_test {
         my $run = $perl . _quote_args("$testswitch $options->{switch} $utf8")
           . " $test $redir|";
         open($results, $run) or print "can't run '$run': $!.\n";
+    }
+
+    if ($return_dir) {
+	chdir $return_dir
+	    or die "Can't chdir from '$ext_dir' to '$return_dir': $!";
     }
 
     # Our environment may force us to use UTF-8, but we can't be sure that

@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', 'lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+    unshift @INC, 't/lib';
 }
 
 # test T::H::_open_spool and _close_spool - these are good examples
@@ -66,7 +60,7 @@ plan tests => 4;
 
     # coverage tests for the basically untested T::H::_open_spool
 
-    my @spool = ( $ENV{PERL_CORE} ? ('spool') : ( 't', 'spool' ) );
+    my @spool = ( 't', 'spool' );
     $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(@spool);
 
 # now given that we're going to be writing stuff to the file system, make sure we have

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    require($ENV{PERL_CORE} ? './test.pl' : './t/test.pl');
+    require($ENV{PERL_CORE} ? '../../t/test.pl' : './t/test.pl');
 
     use Config;
     if (! $Config{'useithreads'}) {

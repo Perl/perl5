@@ -1,12 +1,5 @@
 #!./perl -T
 
-BEGIN {
-    unless(grep /blib/, @INC) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-}
-
 use Config;
 
 BEGIN {
@@ -18,7 +11,7 @@ BEGIN {
 
 use strict;
 if ($ENV{PERL_CORE}) {
-  require("./test.pl");
+  require("../../t/test.pl");
 }
 else {
   require("./t/test.pl");
