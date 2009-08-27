@@ -18,9 +18,15 @@ ok( !-f 'op' );
 ok( !-d 'TEST' );
 ok( -r 'TEST' );
 
-# make sure TEST is r-x
-eval { chmod 0555, 'TEST' or die "chmod 0555, 'TEST' failed: $!" };
-chomp ($bad_chmod = $@);
+# Make a read only file
+my $ro_file = tempfile();
+
+{
+    open my $fh, '>', $ro_file or die "open $fh: $!";
+    close $fh or die "close $fh: $!";
+}
+
+chmod 0555, $ro_file or die "chmod 0555, '$ro_file' failed: $!";
 
 $oldeuid = $>;		# root can read and write anything
 eval '$> = 1';		# so switch uid (may not be implemented)
@@ -31,14 +37,8 @@ SKIP: {
     if (!$Config{d_seteuid}) {
 	skip('no seteuid');
     } 
-    elsif ($Config{config_args} =~/Dmksymlinks/) {
-	skip('we cannot chmod symlinks');
-    }
-    elsif ($bad_chmod) {
-	skip( $bad_chmod );
-    }
     else {
-	ok( !-w 'TEST' );
+	ok( !-w $ro_file );
     }
 }
 
