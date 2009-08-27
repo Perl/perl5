@@ -506,12 +506,12 @@ PERL_CALLCONV I32	Perl_debop(pTHX_ const OP* o)
 
 PERL_CALLCONV I32	Perl_debstack(pTHX);
 PERL_CALLCONV I32	Perl_debstackptrs(pTHX);
-PERL_CALLCONV char*	Perl_delimcpy(pTHX_ char* to, const char* toend, const char* from, const char* fromend, int delim, I32* retlen)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4)
-			__attribute__nonnull__(pTHX_6);
+PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from, const char* fromend, int delim, I32* retlen)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4)
+			__attribute__nonnull__(6);
 #define PERL_ARGS_ASSERT_DELIMCPY	\
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 
@@ -1076,17 +1076,17 @@ STATIC struct refcounted_he *	S_refcounted_he_new_common(pTHX_ struct refcounted
 /* PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash); */
 /* PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags); */
 PERL_CALLCONV void	Perl_hv_undef(pTHX_ HV *hv);
-PERL_CALLCONV I32	Perl_ibcmp(pTHX_ const char* a, const char* b, I32 len)
+PERL_CALLCONV I32	Perl_ibcmp(const char* a, const char* b, I32 len)
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_IBCMP	\
 	assert(a); assert(b)
 
-PERL_CALLCONV I32	Perl_ibcmp_locale(pTHX_ const char* a, const char* b, I32 len)
+PERL_CALLCONV I32	Perl_ibcmp_locale(const char* a, const char* b, I32 len)
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_IBCMP_LOCALE	\
 	assert(a); assert(b)
 
@@ -1114,11 +1114,11 @@ PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm)
 	assert(ptm)
 
 PERL_CALLCONV U32	Perl_intro_my(pTHX);
-PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little)
+PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
 			__attribute__warn_unused_result__
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_INSTR	\
 	assert(big); assert(little)
 
@@ -2309,12 +2309,12 @@ PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_NEXTARGV	\
 	assert(gv)
 
-PERL_CALLCONV char*	Perl_ninstr(pTHX_ const char* big, const char* bigend, const char* little, const char* lend)
+PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char* little, const char* lend)
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4);
 #define PERL_ARGS_ASSERT_NINSTR	\
 	assert(big); assert(bigend); assert(little); assert(lend)
 
@@ -2671,12 +2671,12 @@ PERL_CALLCONV void	Perl_repeatcpy(pTHX_ char* to, const char* from, I32 len, I32
 #define PERL_ARGS_ASSERT_REPEATCPY	\
 	assert(to); assert(from)
 
-PERL_CALLCONV char*	Perl_rninstr(pTHX_ const char* big, const char* bigend, const char* little, const char* lend)
+PERL_CALLCONV char*	Perl_rninstr(const char* big, const char* bigend, const char* little, const char* lend)
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4);
 #define PERL_ARGS_ASSERT_RNINSTR	\
 	assert(big); assert(bigend); assert(little); assert(lend)
 

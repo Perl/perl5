@@ -369,10 +369,9 @@ Free_t   Perl_mfree (Malloc_t where)
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *
-Perl_delimcpy(pTHX_ register char *to, register const char *toend, register const char *from, register const char *fromend, register int delim, I32 *retlen)
+Perl_delimcpy(register char *to, register const char *toend, register const char *from, register const char *fromend, register int delim, I32 *retlen)
 {
     register I32 tolen;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_DELIMCPY;
 
@@ -400,10 +399,9 @@ Perl_delimcpy(pTHX_ register char *to, register const char *toend, register cons
 /* This routine was donated by Corey Satten. */
 
 char *
-Perl_instr(pTHX_ register const char *big, register const char *little)
+Perl_instr(register const char *big, register const char *little)
 {
     register I32 first;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_INSTR;
 
@@ -435,10 +433,9 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 /* same as instr but allow embedded nulls */
 
 char *
-Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const char *lend)
+Perl_ninstr(const char *big, const char *bigend, const char *little, const char *lend)
 {
     PERL_ARGS_ASSERT_NINSTR;
-    PERL_UNUSED_CONTEXT;
     if (little >= lend)
         return (char*)big;
     {
@@ -462,12 +459,11 @@ Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const
 /* reverse of the above--find last substring */
 
 char *
-Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *little, const char *lend)
+Perl_rninstr(register const char *big, const char *bigend, const char *little, const char *lend)
 {
     register const char *bigbeg;
     register const I32 first = *little;
     register const char * const littleend = lend;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_RNINSTR;
 
@@ -883,11 +879,10 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 }
 
 I32
-Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
+Perl_ibcmp(const char *s1, const char *s2, register I32 len)
 {
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_IBCMP;
 
@@ -900,12 +895,11 @@ Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
 }
 
 I32
-Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
+Perl_ibcmp_locale(const char *s1, const char *s2, register I32 len)
 {
     dVAR;
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_IBCMP_LOCALE;
 

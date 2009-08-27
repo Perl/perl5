@@ -209,7 +209,7 @@ Ap	|void	|debprofdump
 Ap	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
-Ap	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
+Anp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 : Used in op.c, perl.c
 pM	|void	|delete_eval_scope
@@ -424,8 +424,8 @@ Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 AbmdM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash|int flags
 Apd	|void	|hv_undef	|NULLOK HV *hv
-ApP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
-ApP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
+AnpP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
+AnpP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 Apd	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
@@ -440,7 +440,7 @@ Ap	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
 pd	|U32	|intro_my
-ApPR	|char*	|instr		|NN const char* big|NN const char* little
+AnpPR	|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
 p	|bool	|io_close	|NN IO* io|bool not_implicit
 : Used in perly.y
@@ -727,7 +727,7 @@ Apd	|SV*	|vstringify	|NN SV *vs
 Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO*|nextargv	|NN GV* gv
-ApP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
+AnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|void	|op_free	|NULLOK OP* arg
 : Used in perly.y
@@ -861,7 +861,7 @@ EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 : FIXME - why the E?
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
-ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
+AnpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 : Used in pp_sys.c

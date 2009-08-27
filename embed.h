@@ -2474,7 +2474,7 @@
 #define debop(a)		Perl_debop(aTHX_ a)
 #define debstack()		Perl_debstack(aTHX)
 #define debstackptrs()		Perl_debstackptrs(aTHX)
-#define delimcpy(a,b,c,d,e,f)	Perl_delimcpy(aTHX_ a,b,c,d,e,f)
+#define delimcpy		Perl_delimcpy
 #ifdef PERL_CORE
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
@@ -2644,8 +2644,8 @@
 #endif
 #endif
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
-#define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
-#define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
+#define ibcmp			Perl_ibcmp
+#define ibcmp_locale		Perl_ibcmp_locale
 #define ibcmp_utf8(a,b,c,d,e,f,g,h)	Perl_ibcmp_utf8(aTHX_ a,b,c,d,e,f,g,h)
 #if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -2661,7 +2661,7 @@
 #ifdef PERL_CORE
 #define intro_my()		Perl_intro_my(aTHX)
 #endif
-#define instr(a,b)		Perl_instr(aTHX_ a,b)
+#define instr			Perl_instr
 #ifdef PERL_CORE
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
 #define invert(a)		Perl_invert(aTHX_ a)
@@ -2947,7 +2947,7 @@
 #ifdef PERL_CORE
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #endif
-#define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
+#define ninstr			Perl_ninstr
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #ifdef PERL_MAD
 #ifdef PERL_CORE
@@ -3077,7 +3077,7 @@
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)
-#define rninstr(a,b,c,d)	Perl_rninstr(aTHX_ a,b,c,d)
+#define rninstr			Perl_rninstr
 #define rsignal(a,b)		Perl_rsignal(aTHX_ a,b)
 #ifdef PERL_CORE
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)
