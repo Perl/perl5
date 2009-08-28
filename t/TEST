@@ -197,7 +197,7 @@ sub _run_test {
 	    $ext_dir = $1;
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
-	    $perl = '../../perl';
+	    $perl = '../../t/perl';
 	    $testswitch = "-I$return_dir -MTestInit=U2T,A";
 	    if ($temp_no_core{$ext_dir}) {
 		$testswitch = $testswitch . ',NC';
