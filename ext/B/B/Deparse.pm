@@ -22,7 +22,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.90;
+$VERSION = 0.91;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2249,7 +2249,7 @@ sub logop {
 
 sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
 sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
-sub pp_dor { logop(@_, "err", 2, "//", 10, "") }
+sub pp_dor { logop(@_, "//", 10) }
 
 # xor is syntactically a logop, but it's really a binop (contrary to
 # old versions of opcode.pl). Syntax is what matters here.
