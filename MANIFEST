@@ -1168,6 +1168,11 @@ ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
+ext/Safe/Changes		Changes for Safe.pm
+ext/Safe/MANIFEST		MANIFEST for Safe.pm
+ext/Safe/META.yml		META.yml for Safe.pm
+ext/Safe/Makefile.PL		Makefile.PL for Safe.pm
+ext/Safe/README			README for Safe.pm
 ext/Safe/Safe.pm		Safe extension Perl module
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
