@@ -1,12 +1,5 @@
 #!./perl
 
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 use Test::More tests => 7;
 
 BEGIN { use_ok('Shell'); }
@@ -40,14 +33,6 @@ xXx_not_there();  # Ok someone could have a program called this :(
 ok(($^O eq 'os2' xor !(-s $tmpfile)), '$Shell::capture_stderr');
 
 $Shell::capture_stderr = 0;
-
-# Trying to do two repeated C<ls>s in t in core and expecting the same output
-# is a race condition when tests are running in parallel, and using it as a
-# temporary directory. So go somewhere quieter.
-if ($ENV{PERL_CORE} && -d 'uni') {
-  chdir 'uni';
-  $chdir++;
-}
 
 # someone will have to fill in the blanks for other platforms
 

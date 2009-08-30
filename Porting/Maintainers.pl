@@ -1597,11 +1597,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72.tar.gz',
-	'FILES'		=> q[lib/Shell.pm lib/Shell.t],
+	'FILES'		=> q[ext/Shell],
 	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
-	'MAP'		=> { ''	 => 'lib/',
-			     't/'=> 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

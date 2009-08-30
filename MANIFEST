@@ -1203,6 +1203,8 @@ ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
+ext/Shell/Shell.pm		Make AUTOLOADed system() calls
+ext/Shell/t/Shell.t		Tests for above
 ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.xs		Socket extension external subroutines
@@ -3111,8 +3113,6 @@ lib/SelectSaver.t		See if SelectSaver works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
-lib/Shell.pm			Make AUTOLOADed system() calls
-lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
 lib/sigtrap.t			See if sigtrap works
