@@ -81,6 +81,21 @@ ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
+ext/base/Changes		base.pm changelog
+ext/base/lib/base.pm		Establish IS-A relationship at compile time
+ext/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
+ext/base/t/base.t		See if base works
+ext/base/t/compile-time.t	See if base works
+ext/base/t/fields-5.6.0.t	See if fields work
+ext/base/t/fields-5.8.0.t	See if fields work
+ext/base/t/fields-base.t	See if fields work
+ext/base/t/fields.t		See if fields work
+ext/base/t/isa.t		See if base's behaviour doesn't change
+ext/base/t/lib/Dummy.pm		Test module for base.pm
+ext/base/t/lib/HasSigDie.pm	Module for testing base.pm
+ext/base/t/sigdie.t		See if base works with SIGDIE
+ext/base/t/version.t		See if base works with versions
+ext/base/t/warnings.t		See if base works with warnings
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
@@ -1897,20 +1912,6 @@ lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 lib/AutoSplit.pm		Split up autoload functions
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
-lib/base/Changes		base.pm changelog
-lib/base.pm			Establish IS-A relationship at compile time
-lib/base/t/base.t		See if base works
-lib/base/t/compile-time.t	See if base works
-lib/base/t/fields-5.6.0.t	See if fields work
-lib/base/t/fields-5.8.0.t	See if fields work
-lib/base/t/fields-base.t	See if fields work
-lib/base/t/fields.t		See if fields work
-lib/base/t/isa.t		See if base's behaviour doesn't change
-lib/base/t/lib/Dummy.pm		Test module for base.pm
-lib/base/t/lib/HasSigDie.pm	Module for testing base.pm
-lib/base/t/sigdie.t		See if base works with SIGDIE
-lib/base/t/version.t		See if base works with versions
-lib/base/t/warnings.t		See if base works with warnings
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
@@ -2356,7 +2357,6 @@ lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
 lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work
-lib/fields.pm			Set up object field names for pseudo-hash-using classes
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
 lib/FileCache.pm		Keep more files open than the system permits

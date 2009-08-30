@@ -82,7 +82,9 @@
 /XSLoader.pm
 /attributes.pm
 /auto
+/base.pm
 /encoding.pm
+/fields.pm
 /lib.pm
 /ops.pm
 /re.pm

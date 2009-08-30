@@ -280,7 +280,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/base-2.14.tar.gz',
-	'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
+	'FILES'		=> q[ext/base],
 	'EXCLUDED'	=> [ qw( t/Dummy.pm ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
