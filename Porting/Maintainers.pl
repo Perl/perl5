@@ -1620,10 +1620,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.14.tar.gz',
-	'FILES'		=> q[lib/Switch.pm lib/Switch],
-	'MAP'		=> { ''	 => 'lib/',
-			     't/'=> 'lib/Switch/t/',
-			   },
+	'FILES'		=> q[ext/Switch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
