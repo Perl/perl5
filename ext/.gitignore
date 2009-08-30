@@ -30,6 +30,7 @@ ppport.h
 /PerlIO-encoding/Makefile.PL
 /PerlIO-scalar/Makefile.PL
 /PerlIO-via/Makefile.PL
+/Pod-Plainer/Makefile.PL
 /Shell/Makefile.PL
 /Switch/Makefile.PL
 /Sys-Hostname/Makefile.PL

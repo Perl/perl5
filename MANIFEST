@@ -1197,6 +1197,8 @@ ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
+ext/Pod-Plainer/Plainer.pm	Pod migration utility module
+ext/Pod-Plainer/t/plainer.t	Test Pod::Plainer
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -2935,7 +2937,6 @@ lib/Pod/Perldoc/ToTk.pm		convert POD via Tk::Pod
 lib/Pod/Perldoc/ToXml.pm	convert POD to XML
 lib/Pod/Perldoc/t/perldocbasic.t	test Pod::Perldoc basic operation
 lib/Pod/Perldoc/t/textbasic.t	test Pod::Perldoc::ToText
-lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 lib/Pod/Simple/BlackBox.pm	Pod::Simple::BlackBox
@@ -4385,7 +4386,6 @@ t/pod/nested_seqs.xr		Expected results for nested_seqs.t
 t/pod/oneline_cmds.t		Test single paragraph ==cmds
 t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
 t/pod/p2u_data.pl		Test Pod::Usage
-t/pod/plainer.t			Test Pod::Plainer
 t/pod/pod2usage2.t		Test Pod::Usage
 t/pod/pod2usage.t		Test Pod::Usage
 t/pod/pod2usage.xr		Expected results for pod2usage.t

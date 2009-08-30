@@ -58,6 +58,7 @@
 /Opcode.pm
 /POSIX.pm
 /POSIX.pod
+/Pod/Plainer.pm
 /PerlIO/encoding.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm

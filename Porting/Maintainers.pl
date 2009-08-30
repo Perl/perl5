@@ -1498,7 +1498,7 @@ package Maintainers;
     'Pod::Plainer' =>
 	{
 	'MAINTAINER'	=> 'rmbarker',
-	'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
+	'FILES'		=> q[ext/Pod-Plainer],
 	'CPAN'		=> 0,
 	'UPSTREAM'	=> 'blead',
 	},
