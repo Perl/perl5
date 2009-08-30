@@ -20,9 +20,6 @@ package TestInit;
 
 $VERSION = 1.02;
 
-# This is incompatible with the import options.
-chdir 't' if -f 't/TestInit.pm';
-
 # Let tests know they're running in the perl core.  Useful for modules
 # which live dual lives on CPAN.
 # Don't interfere with the taintedness of %ENV, this could perturbate tests.
@@ -56,14 +53,32 @@ sub set_opt {
     }
 }
 
-new_inc('../lib');
+my @up_2_t = ('../../lib', '../../t');
+# This is incompatible with the import options.
+if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
+    # We're being run from the top level. Try to change directory, and set
+    # things up correctly. This is a 90% solution, but for hand-running tests,
+    # that's good enough
+    if ($0 =~ s!(ext[\\/][^\\/]+)[\//](.*\.t)$!$2!) {
+	# Looks like a test in ext.
+	chdir $1 or die "Can't chdir '$1': $!";
+	new_inc(@up_2_t);
+	$^X =~ s!^\./!../../perl!;
+	$^X =~ s!^\.\\!..\\..\\perl!;
+    } else {
+	chdir 't' or die "Can't chdir 't': $!";
+	new_inc('../lib');
+    }
+} else {
+    new_inc('../lib');
+}
 
 sub import {
     my $self = shift;
     my $abs;
     foreach (@_) {
 	if ($_ eq 'U2T') {
-	    @new_inc = ('../../lib', '../../t');
+	    @new_inc = @up_2_t;
 	} elsif ($_ eq 'NC') {
 	    delete $ENV{PERL_CORE}
 	} elsif ($_ eq 'A') {
