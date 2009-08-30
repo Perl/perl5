@@ -245,7 +245,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'smccam',
 	'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 	'CPAN'		=> 0,
-	'UPSTREAM'	=> 'blead',
+	'UPSTREAM'	=> undef,
 	},
 
     'B::Debug' =>
@@ -256,7 +256,6 @@ package Maintainers;
 	'EXCLUDED'	=> [ qw( t/coverage.html t/pod.t ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
-	'UPSTREAM'	=> 'blead',
 	},
 
     'B::Deparse' =>
