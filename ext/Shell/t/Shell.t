@@ -63,7 +63,3 @@ if ($Is_VMS) {
 
 }
 open(STDERR, ">&SAVERR") ;
-
-if ($chdir) {
-  chdir "..";
-}
