@@ -1174,12 +1174,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.17.tar.gz',
-	'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
-	'EXCLUDED'	=> [ qw{ identify-dependencies t/pod.t} ],
-	'MAP'		=> { 'corelist' => 'lib/Module/CoreList/bin/corelist',
-			     'lib/'     => 'lib/',
-			     ''         => 'lib/Module/CoreList/',
-			   },
+	'FILES'		=> q[ext/Module-CoreList],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
