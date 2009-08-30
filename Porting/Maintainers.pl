@@ -252,11 +252,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rurban',
 	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.11.tar.gz',
-	'FILES'		=> q[ext/B/B/Debug.pm ext/B/t/debug.t],
+	'FILES'		=> q[ext/B-Debug],
 	'EXCLUDED'	=> [ qw( t/coverage.html t/pod.t ) ],
-	'MAP'		=> { 'Debug.pm'	=> 'ext/B/B/Debug.pm',
-			     't/debug.t'=> 'ext/B/t/debug.t',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	'UPSTREAM'	=> 'blead',
