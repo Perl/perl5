@@ -29,7 +29,6 @@ my %temp_no_core =
      '../ext/Compress-Raw-Bzip2' => 1,
      '../ext/Compress-Raw-Zlib' => 1,
      '../ext/Devel-PPPort' => 1,
-     '../ext/DynaLoader' => 'fixme',
      '../ext/Encode' => 1,
      '../ext/Hash-Util' => 'fixme',
      '../ext/Hash-Util-FieldHash' => 'fixme',
