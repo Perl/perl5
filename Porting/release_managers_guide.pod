@@ -445,9 +445,9 @@ Then change to your perl checkout, and if necessary,
     $ make perl
 
 If this not the first update for this version, first edit
-F<lib/Module/CoreList.pm>to delete the existing entries for this version
-from the C<%released> and C<%version> hashes: they will have a key like
-C<5.010001> for 5.10.1.
+F<ext/Module-CoreList/lib/Module/CoreList.pm> to delete the existing
+entries for this version from the C<%released> and C<%version> hashes:
+they will have a key like C<5.010001> for 5.10.1.
 
 XXX the edit-in-place functionality of Porting/corelist.pl should
 be fixed to handle this automatically.
@@ -462,11 +462,12 @@ Otherwise, run:
 
 This will chug for a while, possibly reporting various warnings about
 badly-indexed CPABN modules unreltaed to the modules actually in core.
-Assuming all goes well, it will update F<lib/Module/CoreList.pm>.
+Assuming all goes well, it will update
+F<ext/Module-CoreList/lib/Module/CoreList.pm>.
 
 Check that file over carefully:
 
-    $ git diff lib/Module/CoreList.pm
+    $ git diff ext/Module-CoreList/lib/Module/CoreList.pm
 
 If necessary, bump C<$VERSION> (there's no need to do this for
 every RC; in RC1, bump the version to a new clean number that will
@@ -493,7 +494,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for maint; in which case commit it blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' lib/Module/CoreList.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' ext/Module-CoreList/lib/Module/CoreList.pm
 
 =item *
 
