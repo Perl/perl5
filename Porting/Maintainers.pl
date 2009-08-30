@@ -1750,12 +1750,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'muir',
 	'DISTRIBUTION'	=> 'MUIR/modules/Text-Tabs+Wrap-2009.0305.tar.gz',
-	'FILES'		=> q[lib/Text/{Tabs,Wrap}.pm lib/Text/TabsWrap],
+	'FILES'		=> q[ext/Text-Tabs],
 	'EXCLUDED'	=> [ qw( t/dnsparks.t ) ], # see af6492bf9e
-	'MAP'		=> {
-			     ''    => 'lib/Text/TabsWrap/',
-			     'lib/'=> 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
