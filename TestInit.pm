@@ -63,8 +63,9 @@ if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
 	# Looks like a test in ext.
 	chdir $1 or die "Can't chdir '$1': $!";
 	new_inc(@up_2_t);
-	$^X =~ s!^\./!../../perl!;
-	$^X =~ s!^\.\\!..\\..\\perl!;
+	set_opt(@up_2_t);
+	$^X =~ s!^\./!../../!;
+	$^X =~ s!^\.\\!..\\..\\!;
     } else {
 	chdir 't' or die "Can't chdir 't': $!";
 	new_inc('../lib');
