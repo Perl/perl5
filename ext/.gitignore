@@ -31,6 +31,7 @@ ppport.h
 /PerlIO-scalar/Makefile.PL
 /PerlIO-via/Makefile.PL
 /Pod-Plainer/Makefile.PL
+/SelfLoader/Makefile.PL
 /Shell/Makefile.PL
 /Switch/Makefile.PL
 /Sys-Hostname/Makefile.PL

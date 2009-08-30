@@ -69,6 +69,7 @@
 /Pod/Simple/t/corpus2/polish_utf16le_bom.txt
 /SDBM_File.pm
 /Safe.pm
+/SelfLoader.pm
 /Scalar
 /Shell.pm
 /Socket.pm

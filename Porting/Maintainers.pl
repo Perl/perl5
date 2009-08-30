@@ -1563,7 +1563,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/SelfLoader-1.17.tar.gz',
-	'FILES'		=> q[lib/SelfLoader.pm lib/SelfLoader],
+	'FILES'		=> q[ext/SelfLoader],
 	'EXCLUDED'	=> [ qw{ t/00pod.t } ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
