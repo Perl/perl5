@@ -739,6 +739,7 @@ PERL_CALLCONV I32	Perl_dowantarray(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_dump_all(pTHX);
+PERL_CALLCONV void	Perl_dump_all_perl(pTHX_ bool justperl);
 PERL_CALLCONV void	Perl_dump_eval(pTHX);
 #if defined(DUMP_FDS)
 PERL_CALLCONV void	Perl_dump_fds(pTHX_ char* s)
@@ -768,9 +769,19 @@ PERL_CALLCONV void	Perl_dump_packsubs(pTHX_ const HV* stash)
 #define PERL_ARGS_ASSERT_DUMP_PACKSUBS	\
 	assert(stash)
 
+PERL_CALLCONV void	Perl_dump_packsubs_perl(pTHX_ const HV* stash, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DUMP_PACKSUBS_PERL	\
+	assert(stash)
+
 PERL_CALLCONV void	Perl_dump_sub(pTHX_ const GV* gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DUMP_SUB	\
+	assert(gv)
+
+PERL_CALLCONV void	Perl_dump_sub_perl(pTHX_ const GV* gv, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DUMP_SUB_PERL	\
 	assert(gv)
 
 PERL_CALLCONV void	Perl_fbm_compile(pTHX_ SV* sv, U32 flags)
@@ -6444,14 +6455,25 @@ PERL_CALLCONV void	Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const cha
 	assert(file); assert(pat)
 
 PERL_CALLCONV void	Perl_xmldump_all(pTHX);
+PERL_CALLCONV void	Perl_xmldump_all_perl(pTHX_ bool justperl);
 PERL_CALLCONV void	Perl_xmldump_packsubs(pTHX_ const HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS	\
 	assert(stash)
 
+PERL_CALLCONV void	Perl_xmldump_packsubs_perl(pTHX_ const HV* stash, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS_PERL	\
+	assert(stash)
+
 PERL_CALLCONV void	Perl_xmldump_sub(pTHX_ const GV* gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_XMLDUMP_SUB	\
+	assert(gv)
+
+PERL_CALLCONV void	xmldump_sub_perl(pTHX_ const GV* gv, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL	\
 	assert(gv)
 
 PERL_CALLCONV void	Perl_xmldump_form(pTHX_ const GV* gv)

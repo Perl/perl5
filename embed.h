@@ -232,6 +232,9 @@
 #endif
 #define dowantarray		Perl_dowantarray
 #define dump_all		Perl_dump_all
+#ifdef PERL_CORE
+#define dump_all_perl		Perl_dump_all_perl
+#endif
 #define dump_eval		Perl_dump_eval
 #if defined(DUMP_FDS)
 #define dump_fds		Perl_dump_fds
@@ -241,7 +244,13 @@
 #define op_dump			Perl_op_dump
 #define pmop_dump		Perl_pmop_dump
 #define dump_packsubs		Perl_dump_packsubs
+#ifdef PERL_CORE
+#define dump_packsubs_perl	Perl_dump_packsubs_perl
+#endif
 #define dump_sub		Perl_dump_sub
+#ifdef PERL_CORE
+#define dump_sub_perl		Perl_dump_sub_perl
+#endif
 #define fbm_compile		Perl_fbm_compile
 #define fbm_instr		Perl_fbm_instr
 #ifdef PERL_CORE
@@ -1907,8 +1916,12 @@
 #define xmldump_indent		Perl_xmldump_indent
 #define xmldump_vindent		Perl_xmldump_vindent
 #define xmldump_all		Perl_xmldump_all
+#define xmldump_all_perl	Perl_xmldump_all_perl
 #define xmldump_packsubs	Perl_xmldump_packsubs
+#define xmldump_packsubs_perl	Perl_xmldump_packsubs_perl
 #define xmldump_sub		Perl_xmldump_sub
+#endif
+#ifdef PERL_CORE
 #define xmldump_form		Perl_xmldump_form
 #define xmldump_eval		Perl_xmldump_eval
 #define sv_catxmlsv		Perl_sv_catxmlsv
@@ -2560,6 +2573,9 @@
 #endif
 #define dowantarray()		Perl_dowantarray(aTHX)
 #define dump_all()		Perl_dump_all(aTHX)
+#ifdef PERL_CORE
+#define dump_all_perl(a)	Perl_dump_all_perl(aTHX_ a)
+#endif
 #define dump_eval()		Perl_dump_eval(aTHX)
 #if defined(DUMP_FDS)
 #define dump_fds(a)		Perl_dump_fds(aTHX_ a)
@@ -2569,7 +2585,13 @@
 #define op_dump(a)		Perl_op_dump(aTHX_ a)
 #define pmop_dump(a)		Perl_pmop_dump(aTHX_ a)
 #define dump_packsubs(a)	Perl_dump_packsubs(aTHX_ a)
+#ifdef PERL_CORE
+#define dump_packsubs_perl(a,b)	Perl_dump_packsubs_perl(aTHX_ a,b)
+#endif
 #define dump_sub(a)		Perl_dump_sub(aTHX_ a)
+#ifdef PERL_CORE
+#define dump_sub_perl(a,b)	Perl_dump_sub_perl(aTHX_ a,b)
+#endif
 #define fbm_compile(a,b)	Perl_fbm_compile(aTHX_ a,b)
 #define fbm_instr(a,b,c,d)	Perl_fbm_instr(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
@@ -4256,8 +4278,11 @@
 #ifdef PERL_CORE
 #define xmldump_vindent(a,b,c,d)	Perl_xmldump_vindent(aTHX_ a,b,c,d)
 #define xmldump_all()		Perl_xmldump_all(aTHX)
+#define xmldump_all_perl(a)	Perl_xmldump_all_perl(aTHX_ a)
 #define xmldump_packsubs(a)	Perl_xmldump_packsubs(aTHX_ a)
+#define xmldump_packsubs_perl(a,b)	Perl_xmldump_packsubs_perl(aTHX_ a,b)
 #define xmldump_sub(a)		Perl_xmldump_sub(aTHX_ a)
+#define xmldump_sub_perl(a,b)	_ a,b)
 #define xmldump_form(a)		Perl_xmldump_form(aTHX_ a)
 #define xmldump_eval()		Perl_xmldump_eval(aTHX)
 #define sv_catxmlsv(a,b)	Perl_sv_catxmlsv(aTHX_ a,b)

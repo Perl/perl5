@@ -304,6 +304,7 @@ p	|void	|do_vop		|I32 optype|NN SV* sv|NN SV* left|NN SV* right
 p	|OP*	|dofile		|NN OP* term|I32 force_builtin
 ApR	|I32	|dowantarray
 Ap	|void	|dump_all
+p	|void	|dump_all_perl	|bool justperl
 Ap	|void	|dump_eval
 #if defined(DUMP_FDS)
 Ap	|void	|dump_fds	|NN char* s
@@ -313,7 +314,9 @@ Ap	|void	|gv_dump	|NN GV* gv
 Ap	|void	|op_dump	|NN const OP *o
 Ap	|void	|pmop_dump	|NULLOK PMOP* pm
 Ap	|void	|dump_packsubs	|NN const HV* stash
+p	|void	|dump_packsubs_perl	|NN const HV* stash|bool justperl
 Ap	|void	|dump_sub	|NN const GV* gv
+p	|void	|dump_sub_perl	|NN const GV* gv|bool justperl
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
@@ -2133,8 +2136,11 @@ Mfp	|void	|xmldump_indent	|I32 level|NN PerlIO *file|NN const char* pat \
 Mp	|void	|xmldump_vindent|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
 Mp	|void	|xmldump_all
+p	|void	|xmldump_all_perl	|bool justperl
 Mp	|void	|xmldump_packsubs	|NN const HV* stash
+p	|void	|xmldump_packsubs_perl	|NN const HV* stash|bool justperl
 Mp	|void	|xmldump_sub	|NN const GV* gv
+M	|void	|xmldump_sub_perl	|NN const GV* gv|bool justperl
 Mp	|void	|xmldump_form	|NN const GV* gv
 Mp	|void	|xmldump_eval
 Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv

@@ -2253,8 +2253,9 @@ S_run_body(pTHX_ I32 oldscope)
 	    exit(0);	/* less likely to core dump than my_exit(0) */
 	}
 #endif
-	DEBUG_x(dump_all());
 #ifdef DEBUGGING
+	if (DEBUG_x_TEST || DEBUG_B_TEST)
+	    dump_all_perl(!DEBUG_B_TEST);
 	if (!DEBUG_q_TEST)
 	  PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
 #endif

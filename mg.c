@@ -2334,7 +2334,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef DEBUGGING
 	s = SvPV_nolen_const(sv);
 	PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
-	DEBUG_x(dump_all());
+	DEBUG_B(dump_all());
 #else
 	PL_debug = (SvIV(sv)) | DEBUG_TOP_FLAG;
 #endif
