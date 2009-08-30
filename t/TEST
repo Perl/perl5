@@ -30,7 +30,6 @@ my %temp_no_core =
      '../ext/Compress-Raw-Zlib' => 1,
      '../ext/Devel-PPPort' => 1,
      '../ext/Encode' => 1,
-     '../ext/I18N-Langinfo' => 'fixme',
      '../ext/IO-Compress' => 1,
      '../ext/IPC-SysV' => 1,
      '../ext/MIME-Base64' => 1,
