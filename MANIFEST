@@ -84,6 +84,8 @@ ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/base/Changes		base.pm changelog
 ext/base/lib/base.pm		Establish IS-A relationship at compile time
 ext/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
+ext/base/MANIFEST		base.pm manifest
+ext/base/META.yml		base.pm META.yml file
 ext/base/t/base.t		See if base works
 ext/base/t/compile-time.t	See if base works
 ext/base/t/fields-5.6.0.t	See if fields work
