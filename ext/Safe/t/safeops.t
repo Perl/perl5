@@ -8,7 +8,7 @@ BEGIN {
     }
     else {
 	# this won't work outside of the core, so exit
-        print "1..0\n"; exit 0;
+        print "1..0 # skipped: PERL_CORE unset\n"; exit 0;
     }
 }
 use Config;
