@@ -26,6 +26,8 @@
 /Filter/Util
 /GDBM_File.pm
 /Hash
+/I18N/LangTags
+/I18N/LangTags.pm
 /I18N/Langinfo.pm
 /IO.pm
 /IO/Compress
