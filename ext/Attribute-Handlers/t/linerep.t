@@ -1,12 +1,5 @@
 #!perl
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-}
-
 use Test::More tests => 18;
 use Attribute::Handlers;
 
@@ -20,7 +13,7 @@ sub Args : ATTR(CODE) {
     is( $data->[0],	'bar',		'data' );
     is( $phase,		'CHECK',	'phase' );
     is( $filename,	__FILE__,	'filename' );
-    is( $linenum,	26,		'linenum' );
+    is( $linenum,	19,		'linenum' );
 }
 
 sub foo :Args(bar) {}

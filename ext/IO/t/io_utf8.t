@@ -1,17 +1,13 @@
 #!./perl
 
 BEGIN {
-    unless(grep /blib/, @INC) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
     unless ($] >= 5.008 and find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
 }
 
-require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
+require($ENV{PERL_CORE} ? "../../t/test.pl" : "./t/test.pl");
 
 plan(tests => 5);
 

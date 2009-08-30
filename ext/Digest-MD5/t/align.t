@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-	        chdir 't' if -d 't';
-	        @INC = '../lib';
-	}
-}
-
 # Test that md5 works on unaligned memory blocks
 
 print "1..1\n";

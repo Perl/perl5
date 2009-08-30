@@ -1,6 +1,4 @@
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bXS\/Typemap\b/) {
         print "1..0 # Skip: XS::Typemap was not built\n";

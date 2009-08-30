@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-        	chdir 't' if -d 't';
-        	@INC = '../lib';
-        }
-}
-
 print "1..3\n";
 
 use strict;
@@ -61,13 +54,6 @@ for (split /^/, $EXPECT) {
 	     print "ok ", ++$testno, " # Skip: PERL_CORE\n";
 	     next;
 	 }
-         use File::Spec;
-	 my @path = qw(ext Digest-MD5);
-	 my $path = File::Spec->updir;
-	 while (@path) {
-	   $path = File::Spec->catdir($path, shift @path);
-	 }
-	 $file = File::Spec->catfile($path, $file);
      }
 #     print "# file = $file\n";
      unless (-f $file) {

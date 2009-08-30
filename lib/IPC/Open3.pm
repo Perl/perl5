@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= 1.04;
+$VERSION	= 1.05;
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -181,7 +181,7 @@ sub xfileno {
     return fileno $_[0];
 }
 
-my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
+use constant DO_SPAWN => $^O eq 'os2' || $^O eq 'MSWin32';
 
 sub _open3 {
     local $Me = shift;
@@ -225,7 +225,7 @@ sub _open3 {
     xpipe $dad_rdr, $kid_wtr if !$dup_rdr;
     xpipe $dad_err, $kid_err if !$dup_err && $dad_err ne $dad_rdr;
 
-    $kidpid = $do_spawn ? -1 : xfork;
+    $kidpid = DO_SPAWN ? -1 : xfork;
     if ($kidpid == 0) {		# Kid
 	# A tie in the parent should not be allowed to cause problems.
 	untie *STDIN;
@@ -272,7 +272,7 @@ sub _open3 {
 	    eval { require POSIX; POSIX::_exit(255); };
 	    exit 255;
 	};
-    } elsif ($do_spawn) {
+    } elsif (DO_SPAWN) {
 	# All the bookkeeping of coincidence between handles is
 	# handled in spawn_with_handles.
 

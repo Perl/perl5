@@ -845,7 +845,7 @@ sub Pick {\n\
 	    for (t = tmp2str->str_ptr, d=tokenbuf; *t; d++,t++) {
 		if (*t == '&')
                    *d++ = '$' + (char)128;
-		else if (*t == '$')
+		else if (*t == '$' || *t == '/')
                    *d++ = '\\' + (char)128;
 		*d = *t + 128;
 	    }

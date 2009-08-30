@@ -1,15 +1,11 @@
 #!./perl -w
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't';
-        @INC = '../lib';
-    }
-}
+use strict;
+
 use Cwd;
+
 chdir 't';
 
-use strict;
 use Config;
 use File::Spec;
 use File::Path;

@@ -1,12 +1,5 @@
 #!/usr/bin/perl -wT
 
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = '../lib';
-    }
-}
-
 use strict;
 use Config;
 use Test::More;
@@ -87,7 +80,7 @@ if ($Config{usedl}) {
 # .. for dl_load_file()
 SKIP: {
     skip "no dl_load_file with dl_none.xs", 2 unless $Config{usedl};
-    eval { DynaLoader::dl_load_file() };
+    eval { &DynaLoader::dl_load_file() };
     like( $@, q{/^Usage: DynaLoader::dl_load_file\(filename, flags=0\)/},
             "calling DynaLoader::dl_load_file() with no argument" );
 

@@ -7,11 +7,6 @@ my $File;
 
 BEGIN {
     $File = __FILE__;
-    unless(grep /blib/, @INC) {
-	chdir 't' if -d 't';
-	$File =~ s/^t\W+//;                                 # Remove first directory
-	@INC = '../lib';
-    }
     require strict; import strict;
 }
 

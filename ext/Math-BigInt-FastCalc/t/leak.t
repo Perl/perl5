@@ -11,7 +11,7 @@ use strict;
 BEGIN
   {
   $| = 1;
-  chdir 't' if -d 't';
+  chdir 't' if -d 't' && !$ENV{PERL_CORE};
   unshift @INC, ('../lib', '../blib/arch');	# for running manually
   plan tests => 22;
   }

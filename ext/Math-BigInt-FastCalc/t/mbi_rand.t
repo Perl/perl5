@@ -13,7 +13,7 @@ BEGIN
   unshift @INC, '../blib/arch';
   my $location = $0; $location =~ s/mbi_rand.t//;
   unshift @INC, $location; # to locate the testing files
-  chdir 't' if -d 't';
+  chdir 't' if -d 't' && !$ENV{PERL_CORE};
   $count = 128;
   plan tests => $count*2;
   }

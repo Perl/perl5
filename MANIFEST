@@ -81,31 +81,49 @@ ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
+ext/base/Changes		base.pm changelog
+ext/base/lib/base.pm		Establish IS-A relationship at compile time
+ext/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
+ext/base/MANIFEST		base.pm manifest
+ext/base/META.yml		base.pm META.yml file
+ext/base/t/base.t		See if base works
+ext/base/t/compile-time.t	See if base works
+ext/base/t/fields-5.6.0.t	See if fields work
+ext/base/t/fields-5.8.0.t	See if fields work
+ext/base/t/fields-base.t	See if fields work
+ext/base/t/fields.t		See if fields work
+ext/base/t/isa.t		See if base's behaviour doesn't change
+ext/base/t/lib/Dummy.pm		Test module for base.pm
+ext/base/t/lib/HasSigDie.pm	Module for testing base.pm
+ext/base/t/sigdie.t		See if base works with SIGDIE
+ext/base/t/version.t		See if base works with versions
+ext/base/t/warnings.t		See if base works with warnings
 ext/B/B/Concise.pm	Compiler Concise backend
-ext/B/B/Debug.pm	Compiler Debug backend
-ext/B/B/Deparse.pm	Compiler Deparse backend
-ext/B/B/Lint/Debug.pm	Adds debugging stringification to B::
-ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/B.xs		Compiler backend external subroutines
+ext/B-Debug/Debug.pm	Compiler Debug backend
+ext/B-Debug/t/debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
+ext/B-Deparse/Deparse.pm	Compiler Deparse backend
+ext/B-Deparse/t/deparse.t	See if B::Deparse works
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
+ext/B-Lint/lib/B/Lint/Debug.pm	Adds debugging stringification to B::
+ext/B-Lint/lib/B/Lint.pm	Compiler Lint backend
+ext/B-Lint/t/lint.t		See if B::Lint works
+ext/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
-ext/B/t/debug.t		See if B::Debug works
-ext/B/t/deparse.t	See if B::Deparse works
 ext/B/t/f_map			code from perldoc -f map
 ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
-ext/B/t/lint.t		See if B::Lint works
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
@@ -116,7 +134,6 @@ ext/B/t/optree_sort.t		inplace sort optimization regression
 ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
-ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
@@ -151,6 +168,7 @@ ext/Compress-Raw-Bzip2/t/000prereq.t
 ext/Compress-Raw-Bzip2/t/01bzip2.t
 ext/Compress-Raw-Bzip2/t/09limitoutput.t
 ext/Compress-Raw-Bzip2/t/99pod.t
+ext/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
 ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
@@ -168,6 +186,7 @@ ext/Compress-Raw-Zlib/t/02zlib.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/07bufsize.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/t/18lvalue.t	Compress::Raw::Zlib
+ext/Compress-Raw-Zlib/t/compress/CompTestUtils.pm
 ext/Compress-Raw-Zlib/typemap		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/compress.c	Compress::Raw::Zlib
@@ -223,6 +242,23 @@ ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
 ext/Devel-DProf/Changes		Perl code profiler changelog
 ext/Devel-DProf/DProf.pm	Perl code profiler
+ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test1_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test2_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test2_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test3_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test3_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test4_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test4_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test5_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test5_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test6_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test6_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test7_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test7_v	Perl code profiler tests
+ext/Devel-DProf/dprof/test8_t	Perl code profiler tests
+ext/Devel-DProf/dprof/test8_v	Perl code profiler tests
+ext/Devel-DProf/dprof/V.pm	Perl code profiler tests
 ext/Devel-DProf/DProf.xs	Perl code profiler
 ext/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
 ext/Devel-DProf/t/DProf.t	Perl code profiler
@@ -565,7 +601,6 @@ ext/Encode/t/mime-header.t	test script
 ext/Encode/t/mime-name.t	test script
 ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
-ext/Encode/t/piconv.t		test script
 ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
 ext/Encode/t/Unicode.t		test script
@@ -700,8 +735,20 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
+ext/Filter-Simple/Changes				Filter::Simple
+ext/Filter-Simple/lib/Filter/Simple.pm			Simple frontend to Filter::Util::Call
+ext/Filter-Simple/t/data.t				See if Filter::Simple works
+ext/Filter-Simple/t/export.t				See if Filter::Simple works
+ext/Filter-Simple/t/filter_only.t			See if Filter::Simple works
+ext/Filter-Simple/t/filter.t				See if Filter::Simple works
+ext/Filter-Simple/t/import.t				See if Filter::Simple works
+ext/Filter-Simple/t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
+ext/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
+ext/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
+ext/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm	Helper file for Filter::Simple tests
 ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
+ext/Filter-Util-Call/filter-util.pl		See if Filter::Util::Call works
 ext/Filter-Util-Call/t/call.t	See if Filter::Util::Call works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
@@ -731,6 +778,19 @@ ext/I18N-Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N-Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
+ext/I18N-LangTags/ChangeLog			I18N::LangTags
+ext/I18N-LangTags/lib/I18N/LangTags/Detect.pm	Detect language preferences
+ext/I18N-LangTags/lib/I18N/LangTags/List.pm	List of tags for human languages
+ext/I18N-LangTags/lib/I18N/LangTags.pm		I18N::LangTags
+ext/I18N-LangTags/README			I18N::LangTags
+ext/I18N-LangTags/t/01_about_verbose.t		See whether I18N::LangTags works
+ext/I18N-LangTags/t/05_main.t			See whether I18N::LangTags works
+ext/I18N-LangTags/t/07_listy.t			See whether I18N::LangTags works
+ext/I18N-LangTags/t/10_http.t			See whether I18N::LangTags works
+ext/I18N-LangTags/t/20_locales.t		See whether I18N::LangTags works
+ext/I18N-LangTags/t/50_super.t			See whether I18N::LangTags works
+ext/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
+ext/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
 ext/IO/ChangeLog		IO perl module change log
 ext/IO-Compress/Changes	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtdef	IO::Compress
@@ -855,6 +915,20 @@ ext/IO-Compress/t/110encode-gzip.t	IO::Compress
 ext/IO-Compress/t/110encode-rawdeflate.t	IO::Compress
 ext/IO-Compress/t/110encode-zip.t	IO::Compress
 ext/IO-Compress/t/999pod.t	IO::Compress
+ext/IO-Compress/t/compress/any.pl		Compress::Zlib
+ext/IO-Compress/t/compress/anyunc.pl		Compress::Zlib
+ext/IO-Compress/t/compress/CompTestUtils.pm	Compress::Zlib
+ext/IO-Compress/t/compress/destroy.pl		Compress::Zlib
+ext/IO-Compress/t/compress/encode.pl		Compress::Zlib
+ext/IO-Compress/t/compress/generic.pl		Compress::Zlib
+ext/IO-Compress/t/compress/merge.pl		Compress::Zlib
+ext/IO-Compress/t/compress/multi.pl		Compress::Zlib
+ext/IO-Compress/t/compress/newtied.pl		Compress::Zlib
+ext/IO-Compress/t/compress/oneshot.pl		Compress::Zlib
+ext/IO-Compress/t/compress/prime.pl		Compress::Zlib
+ext/IO-Compress/t/compress/tied.pl		Compress::Zlib
+ext/IO-Compress/t/compress/truncate.pl		Compress::Zlib
+ext/IO-Compress/t/compress/zlib-generic.pl	Compress::Zlib
 ext/IO-Compress/t/cz-01version.t	IO::Compress
 ext/IO-Compress/t/cz-05examples.t	IO::Compress
 ext/IO-Compress/t/cz-06gzsetp.t	IO::Compress
@@ -980,6 +1054,17 @@ ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
+ext/Module-CoreList/Changes	Module::CoreList Changes
+ext/Module-CoreList/corelist	The corelist command-line utility
+ext/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
+ext/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
+ext/Module-CoreList/Makefile.PL		Module::CoreList
+ext/Module-CoreList/MANIFEST		Module::CoreList
+ext/Module-CoreList/META.yml		Module::CoreList
+ext/Module-CoreList/README		Module::CoreList
+ext/Module-CoreList/t/corelist.t	Module::CoreList tests
+ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
+ext/Module-CoreList/t/pod.t		Module::CoreList tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
@@ -1061,6 +1146,23 @@ ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/t/ndbm.t		See if NDBM_File works
 ext/NDBM_File/typemap		NDBM extension interface types
+ext/Net-Ping/Changes			Net::Ping
+ext/Net-Ping/lib/Net/Ping.pm		Hello, anybody home?
+ext/Net-Ping/t/100_load.t		Ping Net::Ping
+ext/Net-Ping/t/110_icmp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/120_udp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/130_tcp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/140_stream_inst.t	Ping Net::Ping
+ext/Net-Ping/t/150_syn_inst.t		Ping Net::Ping
+ext/Net-Ping/t/190_alarm.t		Ping Net::Ping
+ext/Net-Ping/t/200_ping_tcp.t		Ping Net::Ping
+ext/Net-Ping/t/250_ping_hires.t		Ping Net::Ping
+ext/Net-Ping/t/300_ping_stream.t	Ping Net::Ping
+ext/Net-Ping/t/400_ping_syn.t		Ping Net::Ping
+ext/Net-Ping/t/410_syn_host.t		Ping Net::Ping
+ext/Net-Ping/t/450_service.t		Ping Net::Ping
+ext/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
+ext/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
@@ -1135,6 +1237,11 @@ ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
+ext/Safe/Changes		Changes for Safe.pm
+ext/Safe/Makefile.PL		Makefile.PL for Safe.pm
+ext/Safe/MANIFEST		MANIFEST for Safe.pm
+ext/Safe/META.yml		META.yml for Safe.pm
+ext/Safe/README			README for Safe.pm
 ext/Safe/Safe.pm		Safe extension Perl module
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
@@ -1170,6 +1277,8 @@ ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
+ext/Shell/Shell.pm		Make AUTOLOADed system() calls
+ext/Shell/t/Shell.t		Tests for above
 ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.xs		Socket extension external subroutines
@@ -1224,6 +1333,15 @@ ext/Storable/t/tied.t		See if Storable works
 ext/Storable/t/utf8hash.t	See if Storable works
 ext/Storable/t/utf8.t		See if Storable works
 ext/Storable/t/weak.t		Can Storable store weakrefs
+ext/Switch/Changes		Changes for Switch.pm
+ext/Switch/Makefile.PL		Makefile.PL for Switch.pm
+ext/Switch/MANIFEST		MANIFEST for Switch.pm
+ext/Switch/META.yml		META.yml for Switch.pm
+ext/Switch/README		README for Switch.pm
+ext/Switch/Switch.pm		Switch for Perl
+ext/Switch/t/given.t		See if Perl 6 given (switch) works
+ext/Switch/t/nested.t		See if nested switch works
+ext/Switch/t/switch.t		See if Perl 5 switch works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
@@ -1244,6 +1362,17 @@ ext/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/PerlLog.mc	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/PerlLog_RES.uu	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/Win32.pm	Sys::Syslog extension Win32 related file
+ext/Term-ANSIColor/ANSIColor.pm		Perl module supporting termcap usage
+ext/Term-ANSIColor/ChangeLog		Term::ANSIColor
+ext/Term-ANSIColor/README		Term::ANSIColor
+ext/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
+ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
+ext/Term-Cap/test.pl			See if Term::Cap works
+ext/Term-UI/lib/Term/UI/History.pm	Term::UI
+ext/Term-UI/lib/Term/UI.pm		Term::UI
+ext/Term-UI/t/00_load.t			Term::UI tests
+ext/Term-UI/t/01_history.t		Term::UI tests
+ext/Term-UI/t/02_ui.t			Term::UI tests
 ext/Test-Harness/bin/prove		The prove harness utility
 ext/Test-Harness/Changes		Test::Harness change log
 ext/Test-Harness/lib/App/Prove.pm	Gubbins for the prove utility
@@ -1424,6 +1553,21 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
+ext/Text-Balanced/Changes		Text::Balanced
+ext/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
+ext/Text-Balanced/README		Text::Balanced
+ext/Text-Balanced/t/01_compile.t	See if Text::Balanced works
+ext/Text-Balanced/t/02_extbrk.t		See if Text::Balanced works
+ext/Text-Balanced/t/03_extcbk.t		See if Text::Balanced works
+ext/Text-Balanced/t/04_extdel.t		See if Text::Balanced works
+ext/Text-Balanced/t/05_extmul.t		See if Text::Balanced works
+ext/Text-Balanced/t/06_extqlk.t		See if Text::Balanced works
+ext/Text-Balanced/t/07_exttag.t		See if Text::Balanced works
+ext/Text-Balanced/t/08_extvar.t		See if Text::Balanced works
+ext/Text-Balanced/t/09_gentag.t		See if Text::Balanced works
+ext/Text-ParseWords/ParseWords.pm	Perl module to split words on arbitrary delimiter
+ext/Text-ParseWords/t/ParseWords.t	See if Text::ParseWords works
+ext/Text-ParseWords/t/taint.t		See if Text::ParseWords works with tainting
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
@@ -1837,20 +1981,6 @@ lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 lib/AutoSplit.pm		Split up autoload functions
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
-lib/base/Changes		base.pm changelog
-lib/base.pm			Establish IS-A relationship at compile time
-lib/base/t/base.t		See if base works
-lib/base/t/compile-time.t	See if base works
-lib/base/t/fields-5.6.0.t	See if fields work
-lib/base/t/fields-5.8.0.t	See if fields work
-lib/base/t/fields-base.t	See if fields work
-lib/base/t/fields.t		See if fields work
-lib/base/t/isa.t		See if base's behaviour doesn't change
-lib/base/t/lib/Dummy.pm		Test module for base.pm
-lib/base/t/lib/HasSigDie.pm	Module for testing base.pm
-lib/base/t/sigdie.t		See if base works with SIGDIE
-lib/base/t/version.t		See if base works with versions
-lib/base/t/warnings.t		See if base works with warnings
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
@@ -2296,7 +2426,6 @@ lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
 lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work
-lib/fields.pm			Set up object field names for pseudo-hash-using classes
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
 lib/FileCache.pm		Keep more files open than the system permits
@@ -2352,13 +2481,6 @@ lib/File/Temp/t/seekable.t	See if File::Temp works
 lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/filetest.pm			For "use filetest"
 lib/filetest.t			See if filetest works
-lib/Filter/Simple/Changes	Filter::Simple
-lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
-lib/Filter/Simple/t/data.t	See if Filter::Simple works
-lib/Filter/Simple/t/export.t	See if Filter::Simple works
-lib/Filter/Simple/t/filter_only.t	See if Filter::Simple works
-lib/Filter/Simple/t/filter.t	See if Filter::Simple works
-lib/Filter/Simple/t/import.t	See if Filter::Simple works
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
 lib/finddepth.pl		A depth-first find emulator--used by find2perl
@@ -2383,19 +2505,6 @@ lib/h2xs.t			See if h2xs produces expected lists of files
 lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
-lib/I18N/LangTags/ChangeLog	I18N::LangTags
-lib/I18N/LangTags/Detect.pm	Detect language preferences
-lib/I18N/LangTags/List.pm	List of tags for human languages
-lib/I18N/LangTags.pm		I18N::LangTags
-lib/I18N/LangTags/README	I18N::LangTags
-lib/I18N/LangTags/t/01_about_verbose.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/05_main.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/07_listy.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/10_http.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/20_locales.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/50_super.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/55_supers_strict.t	See whether I18N::LangTags works
-lib/I18N/LangTags/t/80_all_env.t	See whether I18N::LangTags works
 lib/if.pm			For "use if"
 lib/if.t			Tests for "use if"
 lib/importenv.pl		Perl routine to get environment into variables
@@ -2651,10 +2760,6 @@ lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
 lib/Module/Build/t/xs.t		Module::Build
 lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build
-lib/Module/CoreList/bin/corelist	Module::CoreList
-lib/Module/CoreList.pm			Module::CoreList
-lib/Module/CoreList/t/corelist.t	Module::CoreList
-lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Module/Load/Conditional.pm	Module::Conditional
 lib/Module/Load/Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 lib/Module/Load/Conditional/t/02_Parse_Version.t	Module::Load::Conditional tests
@@ -2700,23 +2805,6 @@ lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
 lib/Net/netent.t		See if Net::netent works
 lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
-lib/Net/Ping/Changes		Net::Ping
-lib/Net/Ping.pm			Hello, anybody home?
-lib/Net/Ping/t/100_load.t	Ping Net::Ping
-lib/Net/Ping/t/110_icmp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/130_tcp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/140_stream_inst.t	Ping Net::Ping
-lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
-lib/Net/Ping/t/190_alarm.t	Ping Net::Ping
-lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
-lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
-lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
-lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
-lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
-lib/Net/Ping/t/450_service.t	Ping Net::Ping
-lib/Net/Ping/t/500_ping_icmp.t	Ping Net::Ping
-lib/Net/Ping/t/510_ping_udp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
@@ -3074,8 +3162,6 @@ lib/SelectSaver.t		See if SelectSaver works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
-lib/Shell.pm			Make AUTOLOADed system() calls
-lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
 lib/sigtrap.t			See if sigtrap works
@@ -3086,30 +3172,15 @@ lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
-lib/Switch.pm			Switch for Perl
-lib/Switch/t/given.t		See if Perl 6 given (switch) works
-lib/Switch/t/nested.t		See if nested switch works
-lib/Switch/t/switch.t		See if Perl 5 switch works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
 lib/tainted.pl			Old code for tainting
-lib/Term/ANSIColor/ChangeLog	Term::ANSIColor
-lib/Term/ANSIColor.pm		Perl module supporting termcap usage
-lib/Term/ANSIColor/README	Term::ANSIColor
-lib/Term/ANSIColor/t/basic.t	Tests for Term::ANSIColor
 lib/termcap.pl			Perl library supporting termcap usage
-lib/Term/Cap.pm			Perl module supporting termcap usage
-lib/Term/Cap.t			See if Term::Cap works
 lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
-lib/Term/UI/History.pm	Term::UI
-lib/Term/UI.pm	Term::UI
-lib/Term/UI/t/00_load.t	Term::UI tests
-lib/Term/UI/t/01_history.t	Term::UI tests
-lib/Term/UI/t/02_ui.t	Term::UI tests
 lib/Test/Builder/Module.pm	Base class for test modules
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
@@ -3223,21 +3294,6 @@ lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
-lib/Text/Balanced/Changes	Text::Balanced
-lib/Text/Balanced.pm		Text::Balanced
-lib/Text/Balanced/README	Text::Balanced
-lib/Text/Balanced/t/00-load.t	See if Text::Balanced works
-lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
-lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
-lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
-lib/Text/Balanced/t/extmul.t	See if Text::Balanced works
-lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
-lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
-lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
-lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
-lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
-lib/Text/ParseWords.t		See if Text::ParseWords works
-lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
 lib/Text/Tabs.pm		Do expand and unexpand
 lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
@@ -3953,6 +4009,7 @@ t/comp/term.t			See if more terms work
 t/comp/uproto.t			See if the _ prototype works
 t/comp/use.t			See if pragmata work
 t/comp/utf.t			See if UTFs work
+TestInit.pm			Preamble library for tests
 t/harness			Finer diagnostics from test suite
 thread.h			Threading header
 time64.c			64 bit clean time.h (code)
@@ -3990,20 +4047,6 @@ t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
-t/lib/compress/any.pl		Compress::Zlib
-t/lib/compress/anyunc.pl	Compress::Zlib
-t/lib/compress/CompTestUtils.pm	Compress::Zlib
-t/lib/compress/destroy.pl	Compress::Zlib
-t/lib/compress/encode.pl	Compress::Zlib
-t/lib/compress/generic.pl	Compress::Zlib
-t/lib/compress/merge.pl		Compress::Zlib
-t/lib/compress/multi.pl		Compress::Zlib
-t/lib/compress/newtied.pl	Compress::Zlib
-t/lib/compress/oneshot.pl	Compress::Zlib
-t/lib/compress/prime.pl		Compress::Zlib
-t/lib/compress/tied.pl		Compress::Zlib
-t/lib/compress/truncate.pl	Compress::Zlib
-t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_bad_pod.xr	Pod-Parser test file
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
@@ -4013,33 +4056,11 @@ t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/deprecate.t		Test deprecate.pm
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Test::More test module
-t/lib/dprof/test1_t		Perl code profiler tests
-t/lib/dprof/test1_v		Perl code profiler tests
-t/lib/dprof/test2_t		Perl code profiler tests
-t/lib/dprof/test2_v		Perl code profiler tests
-t/lib/dprof/test3_t		Perl code profiler tests
-t/lib/dprof/test3_v		Perl code profiler tests
-t/lib/dprof/test4_t		Perl code profiler tests
-t/lib/dprof/test4_v		Perl code profiler tests
-t/lib/dprof/test5_t		Perl code profiler tests
-t/lib/dprof/test5_v		Perl code profiler tests
-t/lib/dprof/test6_t		Perl code profiler tests
-t/lib/dprof/test6_v		Perl code profiler tests
-t/lib/dprof/test7_t		Perl code profiler tests
-t/lib/dprof/test7_v		Perl code profiler tests
-t/lib/dprof/test8_t		Perl code profiler tests
-t/lib/dprof/test8_v		Perl code profiler tests
-t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/say		Tests for enabling/disabling say feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
-t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
-t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
-t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
-t/lib/Filter/Simple/ImportTest.pm	Helper file for Filter::Simple tests
-t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
@@ -4405,7 +4426,6 @@ t/run/switchx2.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
-t/TestInit.pm			Preamble library for core tests
 t/test.pl			Simple testing library
 t/thread_it.pl			Run regression tests in a new thread
 t/uni/cache.t			See if Unicode swash caching works

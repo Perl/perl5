@@ -245,27 +245,23 @@ package Maintainers;
 	'MAINTAINER'	=> 'smccam',
 	'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 	'CPAN'		=> 0,
-	'UPSTREAM'	=> 'blead',
+	'UPSTREAM'	=> undef,
 	},
 
     'B::Debug' =>
 	{
 	'MAINTAINER'	=> 'rurban',
 	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.11.tar.gz',
-	'FILES'		=> q[ext/B/B/Debug.pm ext/B/t/debug.t],
+	'FILES'		=> q[ext/B-Debug],
 	'EXCLUDED'	=> [ qw( t/coverage.html t/pod.t ) ],
-	'MAP'		=> { 'Debug.pm'	=> 'ext/B/B/Debug.pm',
-			     't/debug.t'=> 'ext/B/t/debug.t',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
-	'UPSTREAM'	=> 'blead',
 	},
 
     'B::Deparse' =>
 	{
 	'MAINTAINER'	=> 'smccam',
-	'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
+	'FILES'		=> q[ext/B-Deparse],
 	'CPAN'		=> 0,
 	'UPSTREAM'	=> undef,
 	},
@@ -274,15 +270,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jjore',
 	'DISTRIBUTION'	=> 'JJORE/B-Lint-1.11.tar.gz',
-	'FILES'		=> q[ext/B/B/Lint.pm
-			     ext/B/t/lint.t
-			     ext/B/B/Lint/Debug.pm
-			     ext/B/t/pluglib/B/Lint/Plugin/Test.pm
-			    ],
+	'FILES'		=> q[ext/B-Lint],
 	'EXCLUDED'	=> [ qw( t/test.pl ) ],
-	'MAP'		=> { 'lib/B/'	=> 'ext/B/B/',
-			     't/'	=> 'ext/B/t/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -291,8 +280,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/base-2.14.tar.gz',
-	'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
-	'EXCLUDED'	=> [ qw( t/Dummy.pm ) ],
+	'FILES'		=> q[ext/base],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -349,7 +337,6 @@ package Maintainers;
 			     # NB: we use the CompTestUtils.pm
 			     # from IO-Compress instead
 			     qw( bzip2-src/bzip2-cpp.patch
-			         t/compress/CompTestUtils.pm
 			     )
 			   ],
 	'CPAN'		=> 1,
@@ -367,12 +354,9 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{^t/Test/},
 			     qw( t/000prereq.t
 				 t/99pod.t
-			         t/compress/CompTestUtils.pm
 			       )
 			   ],
 	'MAP'		=> { ''	=> 'ext/Compress-Raw-Zlib/',
-			     't/compress/CompTestUtils.pm' =>
-					    't/lib/compress/CompTestUtils.pm',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -581,6 +565,7 @@ package Maintainers;
 	'MAINTAINER'	=> 'dankogai',
 	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.35.tar.gz',
 	'FILES'		=> q[ext/Encode],
+	'EXCLUDED'	=> [ qw{t/piconv.t} ], # FIXME
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -801,17 +786,10 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.84.tar.gz',
-	'FILES'		=> q[lib/Filter/Simple.pm
-			     lib/Filter/Simple
-			     t/lib/Filter/Simple/
-			    ],
+	'FILES'		=> q[ext/Filter-Simple],
 	'EXCLUDED'	=> [ qw(Makefile.PL MANIFEST README META.yml),
 			     qr{^demo/}
 			   ],
-	'MAP'		=> { 't/lib/'	=> 't/lib/',
-			     't/'	=> 'lib/Filter/Simple/t/',
-			     'Changes'	=> 'lib/Filter/Simple/Changes',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -873,7 +851,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'SBURKE/I18N-LangTags-0.35.tar.gz',
-	'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
+	'FILES'		=> q[ext/I18N-LangTags],
 	'CPAN'		=> 0,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -908,8 +886,7 @@ package Maintainers;
 	'EXCLUDED'	=> [ qr{t/Test/},
 			     qw{t/cz-03zlib-v1.t},
 			   ],
-	'MAP'		=> { 't/compress' => 't/lib/compress',
-			     ''		  => 'ext/IO-Compress/',
+	'MAP'		=> { ''		  => 'ext/IO-Compress/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -1196,12 +1173,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.17.tar.gz',
-	'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
-	'EXCLUDED'	=> [ qw{ identify-dependencies t/pod.t} ],
-	'MAP'		=> { 'corelist' => 'lib/Module/CoreList/bin/corelist',
-			     'lib/'     => 'lib/',
-			     ''         => 'lib/Module/CoreList/',
-			   },
+	'FILES'		=> q[ext/Module-CoreList],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1250,7 +1222,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'smpeters',
 	'DISTRIBUTION'	=> 'SMPETERS/Net-Ping-2.36.tar.gz',
-	'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
+	'FILES'		=> q[ext/Net-Ping],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1601,11 +1573,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72.tar.gz',
-	'FILES'		=> q[lib/Shell.pm lib/Shell.t],
+	'FILES'		=> q[ext/Shell],
 	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
-	'MAP'		=> { ''	 => 'lib/',
-			     't/'=> 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1624,10 +1593,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.14.tar.gz',
-	'FILES'		=> q[lib/Switch.pm lib/Switch],
-	'MAP'		=> { ''	 => 'lib/',
-			     't/'=> 'lib/Switch/t/',
-			   },
+	'FILES'		=> q[ext/Switch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},
@@ -1655,14 +1621,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.01.tar.gz',
-	'FILES'		=> q{lib/Term/ANSIColor.pm lib/Term/ANSIColor},
-	'EXCLUDED'	=> [ qr{^tests/},
-			     qw(t/pod-spelling.t t/pod.t)
-			   ],
-	'MAP'		=> {
-			     ''            => 'lib/Term/ANSIColor/',
-			     'ANSIColor.pm'=> 'lib/Term/ANSIColor.pm',
-			   },
+	'FILES'		=> q{ext/Term-ANSIColor},
+	'EXCLUDED'	=> [ qr{^tests/}, qw(t/pod-spelling.t t/pod.t) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1671,11 +1631,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jstowe',
 	'DISTRIBUTION'	=> 'JSTOWE/Term-Cap-1.12.tar.gz',
-	'FILES'		=> q{lib/Term/Cap.{pm,t}},
-	'MAP'		=> {
-			     ''        => 'lib/Term/',
-			     'test.pl' => 'lib/Term/Cap.t',
-			   },
+	'FILES'		=> q{ext/Term-Cap},
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1684,7 +1640,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Term-UI-0.20.tar.gz',
-	'FILES'		=> q{lib/Term/UI.pm lib/Term/UI},
+	'FILES'		=> q{ext/Term-UI},
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -1758,14 +1714,9 @@ package Maintainers;
     'Text::Balanced' =>
 	{
 	'MAINTAINER'	=> 'dmanura',
-	'DISTRIBUTION'	=> 'DCONWAY/Text-Balanced-v2.0.0.tar.gz',
-	'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
-	'EXCLUDED'	=> [ qw( t/pod-coverage.t t/pod.t ) ],
-	'MAP'		=> { ''            => 'lib/Text/Balanced/',
-	                     'lib/'        => 'lib/',
-			     # VMS doesn't like multiple dots?
-	                     't/00.load.t' => 'lib/Text/Balanced/t/00-load.t',
-			   },
+	'DISTRIBUTION'	=> 'ADAMK/Text-Balanced-2.02.tar.gz',
+	'FILES'		=> q[ext/Text-Balanced],
+	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -1774,12 +1725,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'chorny',
 	'DISTRIBUTION'	=> 'CHORNY/Text-ParseWords-3.27.zip',
-	'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
+	'FILES'		=> q[ext/Text-ParseWords],
 	'EXCLUDED'	=> [ qw( t/pod.t ) ],
-	'MAP'		=> { ''               => 'lib/Text/',
-	                     't/ParseWords.t' => 'lib/Text/ParseWords.t',
-	                     't/taint.t'      => 'lib/Text/ParseWords/taint.t',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

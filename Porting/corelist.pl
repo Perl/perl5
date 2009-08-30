@@ -17,7 +17,7 @@ use Maintainers qw(%Modules files_to_modules);
 use File::Spec;
 use Parse::CPAN::Meta;
 
-my $corelist_file = 'lib/Module/CoreList.pm';
+my $corelist_file = 'ext/Module-CoreList/lib/Module/CoreList.pm';
 
 my %lines;
 my %module_to_file;
@@ -228,12 +228,12 @@ unless (
 
 write_corelist($corelist);
 
-warn "All done. Please check over lib/Module/CoreList.pm carefully before committing. Thanks!\n";
+warn "All done. Please check over $corelist_file carefully before committing. Thanks!\n";
 
 
 sub write_corelist {
     my $content = shift;
-    open ( my $clfh, ">", "lib/Module/CoreList.pm") || die "Failed to open lib/Module/CoreList.pm for writing: $!";
+    open (my $clfh, ">", $corelist_file) || die "Failed to open $corelist_file for writing: $!";
     print $clfh $content || die "Failed to write the new CoreList.pm: $!";
     close($clfh);
 }

@@ -5,17 +5,7 @@ sub BEGIN {
 	print "1..0 # Skip: no utf8 hash key support\n";
 	exit 0;
     }
-    if ($ENV{PERL_CORE}){
-	chdir('t') if -d 't';
-	@INC = ('.', '../lib');
-        if ($^O eq 'MacOS') {
-            # Look, I'm using this fully-qualified variable more than once!
-            my $arch = $MacPerl::Architecture;
-            push @INC, "::lib:${MacPerl::Architecture}:";
-        }
-    } else {
-	unshift @INC, 't';
-    }
+    unshift @INC, 't';
     require Config; import Config;
     if ($ENV{PERL_CORE}){
 	if($Config{'extensions'} !~ /\bStorable\b/) {

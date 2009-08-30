@@ -1,12 +1,5 @@
 #!perl
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-}
-
 # This test file contains 57 tests.
 # You need to number them manually. Don't forget to update this line for the
 # next kind hacker.

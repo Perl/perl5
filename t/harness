@@ -8,8 +8,6 @@ BEGIN {
     @INC = '../lib';              # pick up only this build's lib
 }
 
-delete $ENV{PERL5LIB};
-
 my $torture; # torture testing?
 
 use TAP::Harness 3.13;

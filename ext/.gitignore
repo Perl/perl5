@@ -12,18 +12,33 @@ ppport.h
 !/XS-APItest/exception.c
 !/XS-APItest/notcore.c
 !/XS-Typemap/stdio.c
+/Attribute-Handlers/Makefile.PL
 /attributes/Makefile.PL
+/base/Makefile.PL
+/B-Debug/Makefile.PL
+/B-Deparse/Makefile.PL
+/B-Lint/Makefile.PL
 /Data-Dumper/Makefile.PL
+/Filter-Simple/Makefile.PL
 /Filter-Util-Call/Makefile.PL
 /Hash-Util-FieldHash/Makefile.PL
+/I18N-LangTags/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
 /mro/Makefile.PL
+/Net-Ping/Makefile.PL
 /Opcode/Makefile.PL
 /PerlIO-encoding/Makefile.PL
 /PerlIO-scalar/Makefile.PL
 /PerlIO-via/Makefile.PL
+/Shell/Makefile.PL
+/Switch/Makefile.PL
 /Sys-Hostname/Makefile.PL
+/Term-ANSIColor/Makefile.PL
+/Term-Cap/Makefile.PL
+/Term-UI/Makefile.PL
 /Test-Harness/Makefile.PL
+/Text-Balanced/Makefile.PL
+/Text-ParseWords/Makefile.PL
 /Text-Soundex/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing

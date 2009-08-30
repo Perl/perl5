@@ -3,14 +3,8 @@
 
 use strict;
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't';
-        @INC = '../lib';
-    }
-}
 use Cwd;
-chdir 't';
+chdir 't' unless $ENV{PERL_CORE};
 
 use File::Spec;
 use lib File::Spec->catdir('t', 'lib');

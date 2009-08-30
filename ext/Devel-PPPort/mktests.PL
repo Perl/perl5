@@ -77,8 +77,6 @@ __DATA__
 
 BEGIN {
   if ($ENV{'PERL_CORE'}) {
-    chdir 't' if -d 't';
-    @INC = ('../lib', '../ext/Devel-PPPort/t') if -d '../lib' && -d '../ext';
     require Config; import Config;
     use vars '%Config';
     if (" $Config{'extensions'} " !~ m[ Devel/PPPort ]) {

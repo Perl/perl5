@@ -6,10 +6,6 @@
 # In particular, don't use Test; as this covers up the problem.
 
 sub BEGIN {
-    if ($ENV{PERL_CORE}){
-	chdir('t') if -d 't';
-	@INC = ('.', '../lib');
-    }
     if ($ENV{PERL_CORE}) {
 	require Config; import Config;
 	%Config=%Config if 0; # cease -w

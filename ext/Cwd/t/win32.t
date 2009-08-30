@@ -1,11 +1,5 @@
 #!./perl
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        @INC = '../lib';
-    }
-}
-
 use File::Spec;
 use lib File::Spec->catdir('t', 'lib');
 use Test::More;
