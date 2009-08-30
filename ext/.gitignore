@@ -13,6 +13,9 @@ ppport.h
 !/XS-APItest/notcore.c
 !/XS-Typemap/stdio.c
 /attributes/Makefile.PL
+/B-Debug/Makefile.PL
+/B-Deparse/Makefile.PL
+/B-Lint/Makefile.PL
 /Data-Dumper/Makefile.PL
 /Filter-Util-Call/Makefile.PL
 /Hash-Util-FieldHash/Makefile.PL
@@ -22,7 +25,12 @@ ppport.h
 /PerlIO-encoding/Makefile.PL
 /PerlIO-scalar/Makefile.PL
 /PerlIO-via/Makefile.PL
+/Shell/Makefile.PL
+/Switch/Makefile.PL
 /Sys-Hostname/Makefile.PL
+/Term-ANSIColor/Makefile.PL
+/Term-Cap/Makefile.PL
+/Term-UI/Makefile.PL
 /Test-Harness/Makefile.PL
 /Text-Soundex/Makefile.PL
 /B-Debug/Makefile.PL

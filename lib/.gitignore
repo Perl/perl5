@@ -70,6 +70,9 @@
 /Switch.pm
 /Sys
 /Term/ANSIColor.pm
+/Term/Cap.pm
+/Term/UI/History.pm
+/Term/UI.pm
 /Text/Soundex.pm
 /Time/HiRes.pm
 /Time/Piece.pm
