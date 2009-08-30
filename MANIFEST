@@ -1565,6 +1565,9 @@ ext/Text-Balanced/t/06_extqlk.t		See if Text::Balanced works
 ext/Text-Balanced/t/07_exttag.t		See if Text::Balanced works
 ext/Text-Balanced/t/08_extvar.t		See if Text::Balanced works
 ext/Text-Balanced/t/09_gentag.t		See if Text::Balanced works
+ext/Text-ParseWords/ParseWords.pm	Perl module to split words on arbitrary delimiter
+ext/Text-ParseWords/t/ParseWords.t	See if Text::ParseWords works
+ext/Text-ParseWords/t/taint.t		See if Text::ParseWords works with tainting
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
@@ -3291,9 +3294,6 @@ lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
-lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
-lib/Text/ParseWords.t		See if Text::ParseWords works
-lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
 lib/Text/Tabs.pm		Do expand and unexpand
 lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working

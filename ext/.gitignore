@@ -38,6 +38,7 @@ ppport.h
 /Term-UI/Makefile.PL
 /Test-Harness/Makefile.PL
 /Text-Balanced/Makefile.PL
+/Text-ParseWords/Makefile.PL
 /Text-Soundex/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing

@@ -79,6 +79,7 @@
 /Term/UI/History.pm
 /Term/UI.pm
 /Text/Balanced.pm
+/Text/ParseWords.pm
 /Text/Soundex.pm
 /Time/HiRes.pm
 /Time/Piece.pm
