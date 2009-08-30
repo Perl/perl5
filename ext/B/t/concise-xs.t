@@ -95,13 +95,7 @@ Looking at ../foo2, you'll see 34 occurrences of the following error:
 =cut
 
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir('t') if -d 't';
-	@INC = ('.', '../lib');
-    } else {
-	unshift @INC, 't';
-	push @INC, "../../t";
-    }
+    unshift @INC, 't';
     require Config;
     if (($Config::Config{'extensions'} !~ /\bB\b/) ){
         print "1..0 # Skip -- Perl configured without B module\n";

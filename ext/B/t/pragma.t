@@ -2,12 +2,9 @@
 
 BEGIN {    ## no critic strict
     if ( $ENV{PERL_CORE} ) {
-        chdir('t') if -d 't';
-	@INC = qw(../lib . lib);
-    }
-    else {
-	unshift @INC, '../../t/lib'; # FIXME when PERL_CORE works again
-        # unshift @INC, 't';
+	unshift @INC, '../../t/lib';
+    } else {
+        unshift @INC, 't';
     }
     require Config;
     if ( ( $Config::Config{'extensions'} !~ /\bB\b/ ) ) {
