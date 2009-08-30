@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    $tell_file = "Makefile";
+    $tell_file = "Makefile.PL";
 }
 
 use Config;
