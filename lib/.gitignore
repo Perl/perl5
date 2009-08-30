@@ -22,6 +22,7 @@
 /Fcntl.pm
 /File/Glob.pm
 /File/GlobMapper.pm
+/Filter/Simple.pm
 /Filter/Util
 /GDBM_File.pm
 /Hash

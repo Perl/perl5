@@ -787,17 +787,10 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.84.tar.gz',
-	'FILES'		=> q[lib/Filter/Simple.pm
-			     lib/Filter/Simple
-			     t/lib/Filter/Simple/
-			    ],
+	'FILES'		=> q[ext/Filter-Simple],
 	'EXCLUDED'	=> [ qw(Makefile.PL MANIFEST README META.yml),
 			     qr{^demo/}
 			   ],
-	'MAP'		=> { 't/lib/'	=> 't/lib/',
-			     't/'	=> 'lib/Filter/Simple/t/',
-			     'Changes'	=> 'lib/Filter/Simple/Changes',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "blead",
 	},

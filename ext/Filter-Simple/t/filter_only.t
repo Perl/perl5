@@ -1,13 +1,6 @@
 BEGIN {
-    if( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ('../lib', 'lib');
-    }
-    else {
-        unshift @INC, 't/lib/';
-    }
+    unshift @INC, 't/lib/';
 }
-chdir 't';
 
 use Filter::Simple::FilterOnlyTest qr/not ok/ => "ok", 
                                    "bad" => "ok", fail => "die";
