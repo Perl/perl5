@@ -1587,6 +1587,10 @@ ext/Thread-Queue/t/05_extract.t		Thread::Queue tests
 ext/Thread-Queue/t/06_insert.t		Thread::Queue tests
 ext/Thread-Queue/t/07_lock.t		Thread::Queue tests
 ext/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
+ext/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
+ext/Thread-Semaphore/t/01_basic.t		Thread::Semaphore tests
+ext/Thread-Semaphore/t/02_errs.t		Thread::Semaphore tests
+ext/Thread-Semaphore/t/03_nothreads.t		Thread::Semaphore tests
 ext/threads/hints/hpux.pl	Hint file for HPUX
 ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads
@@ -3321,10 +3325,6 @@ lib/Text/TabsWrap/t/wrap_separator2.t	See if Text::Wrap::wrap works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
-lib/Thread/Semaphore.pm		Thread-safe semaphores
-lib/Thread/Semaphore/t/01_basic.t	Thread::Semaphore tests
-lib/Thread/Semaphore/t/02_errs.t	Thread::Semaphore tests
-lib/Thread/Semaphore/t/03_nothreads.t	Thread::Semaphore tests
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array

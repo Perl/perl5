@@ -1778,7 +1778,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/Thread-Semaphore-2.09.tar.gz',
-	'FILES'		=> q[lib/Thread/Semaphore.pm lib/Thread/Semaphore],
+	'FILES'		=> q[ext/Thread-Semaphore],
 	'EXCLUDED'	=> [ qw(examples/semaphore.pl
 				t/00_load.t
 				t/99_pod.t
