@@ -83,13 +83,14 @@ ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
-ext/B/B/Deparse.pm	Compiler Deparse backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/defsubs_h.PL	Generator for constant subroutines
+ext/B-Deparse/Deparse.pm	Compiler Deparse backend
+ext/B-Deparse/t/deparse.t	See if B::Deparse works
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
 ext/B-Lint/lib/B/Lint/Debug.pm	Adds debugging stringification to B::
@@ -102,7 +103,6 @@ ext/B/t/b.t		See if B works
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
 ext/B/t/debug.t		See if B::Debug works
-ext/B/t/deparse.t	See if B::Deparse works
 ext/B/t/f_map			code from perldoc -f map
 ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material

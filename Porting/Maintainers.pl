@@ -265,7 +265,7 @@ package Maintainers;
     'B::Deparse' =>
 	{
 	'MAINTAINER'	=> 'smccam',
-	'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
+	'FILES'		=> q[ext/B-Deparse],
 	'CPAN'		=> 0,
 	'UPSTREAM'	=> undef,
 	},
