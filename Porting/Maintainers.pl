@@ -1228,7 +1228,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'smpeters',
 	'DISTRIBUTION'	=> 'SMPETERS/Net-Ping-2.36.tar.gz',
-	'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
+	'FILES'		=> q[ext/Net-Ping],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},

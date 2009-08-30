@@ -1133,6 +1133,23 @@ ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/t/ndbm.t		See if NDBM_File works
 ext/NDBM_File/typemap		NDBM extension interface types
+ext/Net-Ping/Changes			Net::Ping
+ext/Net-Ping/lib/Net/Ping.pm		Hello, anybody home?
+ext/Net-Ping/t/100_load.t		Ping Net::Ping
+ext/Net-Ping/t/110_icmp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/120_udp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/130_tcp_inst.t		Ping Net::Ping
+ext/Net-Ping/t/140_stream_inst.t	Ping Net::Ping
+ext/Net-Ping/t/150_syn_inst.t		Ping Net::Ping
+ext/Net-Ping/t/190_alarm.t		Ping Net::Ping
+ext/Net-Ping/t/200_ping_tcp.t		Ping Net::Ping
+ext/Net-Ping/t/250_ping_hires.t		Ping Net::Ping
+ext/Net-Ping/t/300_ping_stream.t	Ping Net::Ping
+ext/Net-Ping/t/400_ping_syn.t		Ping Net::Ping
+ext/Net-Ping/t/410_syn_host.t		Ping Net::Ping
+ext/Net-Ping/t/450_service.t		Ping Net::Ping
+ext/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
+ext/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
@@ -2776,23 +2793,6 @@ lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
 lib/Net/netent.t		See if Net::netent works
 lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
-lib/Net/Ping/Changes		Net::Ping
-lib/Net/Ping.pm			Hello, anybody home?
-lib/Net/Ping/t/100_load.t	Ping Net::Ping
-lib/Net/Ping/t/110_icmp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/130_tcp_inst.t	Ping Net::Ping
-lib/Net/Ping/t/140_stream_inst.t	Ping Net::Ping
-lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
-lib/Net/Ping/t/190_alarm.t	Ping Net::Ping
-lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
-lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
-lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
-lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
-lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
-lib/Net/Ping/t/450_service.t	Ping Net::Ping
-lib/Net/Ping/t/500_ping_icmp.t	Ping Net::Ping
-lib/Net/Ping/t/510_ping_udp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works

@@ -1,11 +1,11 @@
+# Same as 400_ping_syn.t but testing ack( $host ) instead of ack( ).
+
 BEGIN {
   if ($ENV{PERL_CORE}) {
     unless ($ENV{PERL_TEST_Net_Ping}) {
       print "1..0 # Skip: network dependent test\n";
         exit;
     }
-    chdir 't' if -d 't';
-    @INC = qw(../lib);
   }
   unless (eval "require Socket") {
     print "1..0 \# Skip: no Socket\n";
@@ -80,22 +80,24 @@ foreach my $host (keys %{ $webs }) {
   # ping() does dns resolution and
   # only sends the SYN at this point
   Alarm(50); # (Plenty for a DNS lookup)
-  if (!ok $p -> ping($host)) {
+  if (!ok($p -> ping($host))) {
     print STDERR "CANNOT RESOLVE $host $p->{bad}->{$host}\n";
   }
 }
 
 Alarm(20);
-while (my $host = $p->ack()) {
-  if (!ok $webs->{$host}) {
-    print STDERR "SUPPOSED TO BE DOWN: http://$host/\n";
+foreach my $host (sort keys %{ $webs }) {
+  my $on = $p->ack($host);
+  if (!ok (($on && $webs->{$host}) ||
+           (!$on && !$webs->{$host}))) {
+    if ($on) {
+      print STDERR "SUPPOSED TO BE DOWN: http://$host/\n";
+    } else {
+      print STDERR "DOWN: http://$host/ [",($p->{bad}->{$host} || ""),"]\n";
+    }
   }
   delete $webs->{$host};
+  Alarm(20);
 }
 
 Alarm(0);
-foreach my $host (keys %{ $webs }) {
-  if (!ok !$webs->{$host}) {
-    print STDERR "DOWN: http://$host/ [",($p->{bad}->{$host} || ""),"]\n";
-  }
-}

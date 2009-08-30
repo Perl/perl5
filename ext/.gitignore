@@ -42,6 +42,7 @@ ppport.h
 /base/Makefile.PL
 /Filter-Simple/Makefile.PL
 /I18N-LangTags/Makefile.PL
+/Net-Ping/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing
 *.swp

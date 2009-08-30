@@ -50,6 +50,7 @@
 /Math/BigInt/FastCalc.pm
 /Module/Pluggable.pm
 /Module/Pluggable
+/Net/Ping.pm
 /NDBM_File.pm
 /O.pm
 /ODBM_File.pm
