@@ -25,6 +25,11 @@ ppport.h
 /Sys-Hostname/Makefile.PL
 /Test-Harness/Makefile.PL
 /Text-Soundex/Makefile.PL
+/B-Debug/Makefile.PL
+/B-Deparse/Makefile.PL
+/B-Lint/Makefile.PL
+/Shell/Makefile.PL
+/Term-ANSIColor/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing
 *.swp

@@ -64,9 +64,12 @@
 /SDBM_File.pm
 /Safe.pm
 /Scalar
+/Shell.pm
 /Socket.pm
 /Storable.pm
+/Switch.pm
 /Sys
+/Term/ANSIColor.pm
 /Text/Soundex.pm
 /Time/HiRes.pm
 /Time/Piece.pm
