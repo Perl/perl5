@@ -1728,10 +1728,9 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'dmanura',
 	'DISTRIBUTION'	=> 'DCONWAY/Text-Balanced-v2.0.0.tar.gz',
-	'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+	'FILES'		=> q[ext/Text-Balanced],
 	'EXCLUDED'	=> [ qw( t/pod-coverage.t t/pod.t ) ],
-	'MAP'		=> { ''            => 'lib/Text/Balanced/',
-	                     'lib/'        => 'lib/',
+	'MAP'		=> {
 			     # VMS doesn't like multiple dots?
 	                     't/00.load.t' => 'lib/Text/Balanced/t/00-load.t',
 			   },

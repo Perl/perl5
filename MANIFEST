@@ -1499,6 +1499,18 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
+ext/Text-Balanced/Changes	Text::Balanced
+ext/Text-Balanced/lib/Text/Balanced.pm		Text::Balanced
+ext/Text-Balanced/README	Text::Balanced
+ext/Text-Balanced/t/00-load.t	See if Text::Balanced works
+ext/Text-Balanced/t/extbrk.t	See if Text::Balanced works
+ext/Text-Balanced/t/extcbk.t	See if Text::Balanced works
+ext/Text-Balanced/t/extdel.t	See if Text::Balanced works
+ext/Text-Balanced/t/extmul.t	See if Text::Balanced works
+ext/Text-Balanced/t/extqlk.t	See if Text::Balanced works
+ext/Text-Balanced/t/exttag.t	See if Text::Balanced works
+ext/Text-Balanced/t/extvar.t	See if Text::Balanced works
+ext/Text-Balanced/t/gentag.t	See if Text::Balanced works
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
@@ -3266,18 +3278,6 @@ lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
-lib/Text/Balanced/Changes	Text::Balanced
-lib/Text/Balanced.pm		Text::Balanced
-lib/Text/Balanced/README	Text::Balanced
-lib/Text/Balanced/t/00-load.t	See if Text::Balanced works
-lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
-lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
-lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
-lib/Text/Balanced/t/extmul.t	See if Text::Balanced works
-lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
-lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
-lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
-lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
