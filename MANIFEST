@@ -1283,6 +1283,10 @@ ext/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/PerlLog.mc	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/PerlLog_RES.uu	Sys::Syslog extension Win32 related file
 ext/Sys-Syslog/win32/Win32.pm	Sys::Syslog extension Win32 related file
+ext/Term-ANSIColor/ANSIColor.pm		Perl module supporting termcap usage
+ext/Term-ANSIColor/ChangeLog		Term::ANSIColor
+ext/Term-ANSIColor/README		Term::ANSIColor
+ext/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
 ext/Test-Harness/bin/prove		The prove harness utility
 ext/Test-Harness/Changes		Test::Harness change log
 ext/Test-Harness/lib/App/Prove.pm	Gubbins for the prove utility
@@ -3127,10 +3131,6 @@ lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
 lib/tainted.pl			Old code for tainting
-lib/Term/ANSIColor/ChangeLog	Term::ANSIColor
-lib/Term/ANSIColor.pm		Perl module supporting termcap usage
-lib/Term/ANSIColor/README	Term::ANSIColor
-lib/Term/ANSIColor/t/basic.t	Tests for Term::ANSIColor
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Term/Cap.pm			Perl module supporting termcap usage
 lib/Term/Cap.t			See if Term::Cap works

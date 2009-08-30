@@ -1645,14 +1645,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.01.tar.gz',
-	'FILES'		=> q{lib/Term/ANSIColor.pm lib/Term/ANSIColor},
-	'EXCLUDED'	=> [ qr{^tests/},
-			     qw(t/pod-spelling.t t/pod.t)
-			   ],
-	'MAP'		=> {
-			     ''            => 'lib/Term/ANSIColor/',
-			     'ANSIColor.pm'=> 'lib/Term/ANSIColor.pm',
-			   },
+	'FILES'		=> q{ext/Term-ANSIColor},
+	'EXCLUDED'	=> [ qr{^tests/}, qw(t/pod-spelling.t t/pod.t) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
