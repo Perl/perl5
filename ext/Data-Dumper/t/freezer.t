@@ -4,15 +4,11 @@
 # test suite yet
 
 BEGIN {
-    if ($ENV{PERL_CORE}){
-        chdir 't' if -d 't';
-        unshift @INC, '../lib';
-        require Config; import Config;
-        no warnings 'once';
-        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-            print "1..0 # Skip: Data::Dumper was not built\n";
-            exit 0;
-        }
+    require Config; import Config;
+    no warnings 'once';
+    if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
+	print "1..0 # Skip: Data::Dumper was not built\n";
+	exit 0;
     }
 }
 

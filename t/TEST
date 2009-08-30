@@ -28,7 +28,6 @@ my %temp_no_core =
      '../ext/B-Debug' => 1,
      '../ext/Compress-Raw-Bzip2' => 1,
      '../ext/Compress-Raw-Zlib' => 1,
-     '../ext/Data-Dumper' => 'fixme',
      '../ext/Devel-PPPort' => 1,
      '../ext/DynaLoader' => 'fixme',
      '../ext/Encode' => 1,

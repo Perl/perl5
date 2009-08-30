@@ -5,8 +5,6 @@
 
 BEGIN {
     if ($ENV{PERL_CORE}){
-        chdir 't' if -d 't';
-        unshift @INC, '../lib';
         require Config; import Config;
         no warnings 'once';
         if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
