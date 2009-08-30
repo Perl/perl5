@@ -61,6 +61,8 @@ $| = 1;
 #BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
 delete $ENV{PERL5LIB};
+delete $ENV{PERLLIB};
+delete $ENV{PERL5OPT};
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
