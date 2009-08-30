@@ -48,6 +48,7 @@
 /List
 /MIME
 /Math/BigInt/FastCalc.pm
+/Module/CoreList.pm
 /Module/Pluggable.pm
 /Module/Pluggable
 /Net/Ping.pm

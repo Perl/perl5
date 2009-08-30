@@ -1054,6 +1054,17 @@ ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
+ext/Module-CoreList/Changes	Module::CoreList Changes
+ext/Module-CoreList/corelist	The corelist command-line utility
+ext/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
+ext/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
+ext/Module-CoreList/Makefile.PL		Module::CoreList
+ext/Module-CoreList/MANIFEST		Module::CoreList
+ext/Module-CoreList/META.yml		Module::CoreList
+ext/Module-CoreList/README		Module::CoreList
+ext/Module-CoreList/t/corelist.t	Module::CoreList tests
+ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
+ext/Module-CoreList/t/pod.t		Module::CoreList tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
@@ -2746,10 +2757,6 @@ lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
 lib/Module/Build/t/xs.t		Module::Build
 lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build
-lib/Module/CoreList/bin/corelist	Module::CoreList
-lib/Module/CoreList.pm			Module::CoreList
-lib/Module/CoreList/t/corelist.t	Module::CoreList
-lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Module/Load/Conditional.pm	Module::Conditional
 lib/Module/Load/Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 lib/Module/Load/Conditional/t/02_Parse_Version.t	Module::Load::Conditional tests
