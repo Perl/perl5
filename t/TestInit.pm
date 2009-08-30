@@ -42,7 +42,7 @@ sub set_opt {
     my $sep;
     if ($^O eq 'VMS') {
 	$sep = '|';
-    } elsif ($^O eq 'Win32') {
+    } elsif ($^O eq 'MSWin32') {
 	$sep = ';';
     } else {
 	$sep = ':';

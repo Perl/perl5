@@ -197,9 +197,7 @@ sub _run_test {
 	    $ext_dir = $1;
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
-	    # Something doesn't quite work correctly when making paths
-	    # that contain /t/ absolute on Win32. \t being interpreted as tab?
-	    $perl = $^O eq 'MSWin32' ? '../../perl' : '../../t/perl';
+	    $perl = '../../t/perl';
 	    $testswitch = "-I$return_dir -MTestInit=U2T,A";
 	    if ($temp_no_core{$ext_dir}) {
 		$testswitch = $testswitch . ',NC';
