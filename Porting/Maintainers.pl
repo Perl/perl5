@@ -274,15 +274,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jjore',
 	'DISTRIBUTION'	=> 'JJORE/B-Lint-1.11.tar.gz',
-	'FILES'		=> q[ext/B/B/Lint.pm
-			     ext/B/t/lint.t
-			     ext/B/B/Lint/Debug.pm
-			     ext/B/t/pluglib/B/Lint/Plugin/Test.pm
-			    ],
+	'FILES'		=> q[ext/B-Lint],
 	'EXCLUDED'	=> [ qw( t/test.pl ) ],
-	'MAP'		=> { 'lib/B/'	=> 'ext/B/B/',
-			     't/'	=> 'ext/B/t/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

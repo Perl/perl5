@@ -84,8 +84,6 @@ ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
-ext/B/B/Lint/Debug.pm	Adds debugging stringification to B::
-ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
@@ -94,6 +92,10 @@ ext/B/B.xs		Compiler backend external subroutines
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
+ext/B-Lint/lib/B/Lint/Debug.pm	Adds debugging stringification to B::
+ext/B-Lint/lib/B/Lint.pm	Compiler Lint backend
+ext/B-Lint/t/lint.t		See if B::Lint works
+ext/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
@@ -105,7 +107,6 @@ ext/B/t/f_map			code from perldoc -f map
 ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
-ext/B/t/lint.t		See if B::Lint works
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
@@ -116,7 +117,6 @@ ext/B/t/optree_sort.t		inplace sort optimization regression
 ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
-ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
