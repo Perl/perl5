@@ -1653,7 +1653,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Term-UI-0.20.tar.gz',
-	'FILES'		=> q{lib/Term/UI.pm lib/Term/UI},
+	'FILES'		=> q{ext/Term-UI},
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

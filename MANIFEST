@@ -1299,6 +1299,11 @@ ext/Term-ANSIColor/README		Term::ANSIColor
 ext/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
 ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
 ext/Term-Cap/test.pl			See if Term::Cap works
+ext/Term-UI/lib/Term/UI/History.pm	Term::UI
+ext/Term-UI/lib/Term/UI.pm		Term::UI
+ext/Term-UI/t/00_load.t			Term::UI tests
+ext/Term-UI/t/01_history.t		Term::UI tests
+ext/Term-UI/t/02_ui.t			Term::UI tests
 ext/Test-Harness/bin/prove		The prove harness utility
 ext/Test-Harness/Changes		Test::Harness change log
 ext/Test-Harness/lib/App/Prove.pm	Gubbins for the prove utility
@@ -3148,11 +3153,6 @@ lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
-lib/Term/UI/History.pm	Term::UI
-lib/Term/UI.pm	Term::UI
-lib/Term/UI/t/00_load.t	Term::UI tests
-lib/Term/UI/t/01_history.t	Term::UI tests
-lib/Term/UI/t/02_ui.t	Term::UI tests
 lib/Test/Builder/Module.pm	Base class for test modules
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
