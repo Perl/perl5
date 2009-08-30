@@ -1727,13 +1727,9 @@ package Maintainers;
     'Text::Balanced' =>
 	{
 	'MAINTAINER'	=> 'dmanura',
-	'DISTRIBUTION'	=> 'DCONWAY/Text-Balanced-v2.0.0.tar.gz',
+	'DISTRIBUTION'	=> 'ADAMK/Text-Balanced-2.02.tar.gz',
 	'FILES'		=> q[ext/Text-Balanced],
-	'EXCLUDED'	=> [ qw( t/pod-coverage.t t/pod.t ) ],
-	'MAP'		=> {
-			     # VMS doesn't like multiple dots?
-	                     't/00.load.t' => 'lib/Text/Balanced/t/00-load.t',
-			   },
+	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

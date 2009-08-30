@@ -1,32 +1,32 @@
+package Text::Balanced;
+
 # EXTRACT VARIOUSLY DELIMITED TEXT SEQUENCES FROM STRINGS.
 # FOR FULL DOCUMENTATION SEE Balanced.pod
 
 use 5.005;
 use strict;
-
-package Text::Balanced;
-
-use Exporter;
+use Exporter ();
 use SelfLoader;
+
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
-
-use version; $VERSION = qv('2.0.0');
-@ISA		= qw ( Exporter );
-		     
-%EXPORT_TAGS	= ( ALL => [ qw(
-				&extract_delimited
-				&extract_bracketed
-				&extract_quotelike
-				&extract_codeblock
-				&extract_variable
-				&extract_tagged
-				&extract_multiple
-
-				&gen_delimited_pat
-				&gen_extract_tagged
-
-				&delimited_pat
-			       ) ] );
+BEGIN {
+	$VERSION     = '2.02';
+	@ISA         = 'Exporter';
+	%EXPORT_TAGS = (
+		ALL => [ qw{
+			&extract_delimited
+			&extract_bracketed
+			&extract_quotelike
+			&extract_codeblock
+			&extract_variable
+			&extract_tagged
+			&extract_multiple
+			&gen_delimited_pat
+			&gen_extract_tagged
+			&delimited_pat
+		} ],
+	);
+}
 
 Exporter::export_ok_tags('ALL');
 
@@ -41,46 +41,44 @@ sub _match_quotelike($$$$);
 
 sub _failmsg {
 	my ($message, $pos) = @_;
-	$@ = bless { error=>$message, pos=>$pos }, "Text::Balanced::ErrorMsg";
+	$@ = bless {
+		error => $message,
+		pos   => $pos,
+	}, 'Text::Balanced::ErrorMsg';
 }
 
-sub _fail
-{
+sub _fail {
 	my ($wantarray, $textref, $message, $pos) = @_;
 	_failmsg $message, $pos if $message;
-	return (undef,$$textref,undef) if $wantarray;
+	return (undef, $$textref, undef) if $wantarray;
 	return undef;
 }
 
-sub _succeed
-{
+sub _succeed {
 	$@ = undef;
 	my ($wantarray,$textref) = splice @_, 0, 2;
-	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
+	my ($extrapos, $extralen) = @_ > 18
+		? splice(@_, -2, 2)
+		: (0, 0);
 	my ($startlen, $oppos) = @_[5,6];
 	my $remainderpos = $_[2];
-	if ($wantarray)
-	{
+	if ( $wantarray ) {
 		my @res;
-		while (my ($from, $len) = splice @_, 0, 2)
-		{
-			push @res, substr($$textref,$from,$len);
+		while (my ($from, $len) = splice @_, 0, 2) {
+			push @res, substr($$textref, $from, $len);
 		}
-		if ($extralen) {	# CORRECT FILLET
+		if ( $extralen ) { # CORRECT FILLET
 			my $extra = substr($res[0], $extrapos-$oppos, $extralen, "\n");
 			$res[1] = "$extra$res[1]";
 			eval { substr($$textref,$remainderpos,0) = $extra;
 			       substr($$textref,$extrapos,$extralen,"\n")} ;
 				#REARRANGE HERE DOC AND FILLET IF POSSIBLE
 			pos($$textref) = $remainderpos-$extralen+1; # RESET \G
-		}
-		else {
+		} else {
 			pos($$textref) = $remainderpos;		    # RESET \G
 		}
 		return @res;
-	}
-	else
-	{
+	} else {
 		my $match = substr($$textref,$_[0],$_[1]);
 		substr($match,$extrapos-$_[0]-$startlen,$extralen,"") if $extralen;
 		my $extra = $extralen
@@ -119,7 +117,6 @@ sub gen_delimited_pat($;$)  # ($delimiters;$escapes)
 }
 
 *delimited_pat = \&gen_delimited_pat;
-
 
 # THE EXTRACTION FUNCTIONS
 
@@ -862,8 +859,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 	       );
 }
 
-my $def_func = 
-[
+my $def_func = [
 	sub { extract_variable($_[0], '') },
 	sub { extract_quotelike($_[0],'') },
 	sub { extract_codeblock($_[0],'{}','') },
@@ -977,7 +973,6 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 	return $fields[0];
 }
 
-
 sub gen_extract_tagged # ($opentag, $closetag, $pre, \%options)
 {
 	my $ldel    = $_[0];
@@ -1029,10 +1024,11 @@ use overload '""' => sub { "$_[0]->{error}, detected at offset $_[0]->{pos}" };
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Text::Balanced - Extract delimited text sequences from strings.
-
 
 =head1 SYNOPSIS
 
@@ -1044,7 +1040,6 @@ Text::Balanced - Extract delimited text sequences from strings.
 			extract_variable
 			extract_tagged
 			extract_multiple
-
 			gen_delimited_pat
 			gen_extract_tagged
 		       );
@@ -1106,7 +1101,6 @@ Text::Balanced - Extract delimited text sequences from strings.
 
 	$patstring = gen_delimited_pat(q{'"`/});
 
-
 # Generate a reference to an anonymous sub that is just like extract_tagged
 # but pre-compiled and optimized for a specific pair of tags, and consequently
 # much faster (i.e. 3 times faster). It uses qr// for better performance on
@@ -1115,7 +1109,6 @@ Text::Balanced - Extract delimited text sequences from strings.
 	$extract_head = gen_extract_tagged('<HEAD>','</HEAD>');
 
 	($extracted, $remainder) = $extract_head->($text);
-
 
 =head1 DESCRIPTION
 
@@ -1134,8 +1127,6 @@ in a string (like an unanchored regex would). Rather,
 they extract an occurrence of the substring appearing
 immediately at the current matching position in the
 string (like a C<\G>-anchored regex would).
-
-
 
 =head2 General behaviour in list contexts
 
@@ -1174,7 +1165,6 @@ subroutines can be used much like regular expressions. For example:
 		# process next quote-like (in $next)
 	}
 
-
 =head2 General behaviour in scalar and void contexts
 
 In a scalar context, the extracted string is returned, having first been
@@ -1203,7 +1193,6 @@ pattern will only succeed if the <H1> tag is on the current line, since
 
 To overcome this limitation, you need to turn on /s matching within
 the prefix pattern, using the C<(?s)> directive: '(?s).*?(?=<H1>)'
-
 
 =head2 C<extract_delimited>
 
@@ -1237,7 +1226,7 @@ pattern C<'\s*'> - optional whitespace - is used. If the delimiter set
 is also not specified, the set C</["'`]/> is used. If the text to be processed
 is not specified either, C<$_> is used.
 
-In list context, C<extract_delimited> returns an array of three
+In list context, C<extract_delimited> returns a array of three
 elements, the extracted substring (I<including the surrounding
 delimiters>), the remainder of the text, and the skipped prefix (if
 any). If a suitable delimited substring is not found, the first
@@ -1267,7 +1256,6 @@ Examples:
 
 		($substring) = extract_delimited $text, q{"'};
 
-
 	# Delete the substring delimited by the first '/' in $text:
 
 		$text = join '', (extract_delimited($text,'/','[^/]*')[2,1];
@@ -1285,9 +1273,7 @@ not:
 
 	"if ('./cmd' =~ ms) { $cmd = $1; }"
 	
-
 See L<"extract_quotelike"> for a (partial) solution to this problem.
-
 
 =head2 C<extract_bracketed>
 
@@ -1391,7 +1377,6 @@ would correctly match something like this:
 	$text = '<leftop: conj /and/ conj>';
 
 See also: C<"extract_quotelike"> and C<"extract_codeblock">.
-
 
 =head2 C<extract_variable>
 
@@ -1511,7 +1496,6 @@ For example, to extract an arbitrary XML tag, but ignore "empty" elements:
 
 (also see L<"gen_delimited_pat"> below).
 
-
 =item C<fail =E<gt> $str>
 
 The C<fail> option indicates the action to be taken if a matching end
@@ -1590,7 +1574,6 @@ text has the returned substring (and any prefix) removed from it.
 
 In a void context, the input text just has the matched substring (and
 any specified prefix) removed.
-
 
 =head2 C<gen_extract_tagged>
 
@@ -1745,7 +1728,6 @@ For each of the fields marked "(if any)" the default value on success is
 an empty string.
 On failure, all of these values (except the remaining text) are C<undef>.
 
-
 In a scalar context, C<extract_quotelike> returns just the complete substring
 that matched a quotelike operation (or C<undef> on failure). In a scalar or
 void context, the input text has the same substring (and any specified
@@ -1774,7 +1756,6 @@ Examples:
                 {
                         print "$op is not a pattern matching operation\n";
                 }
-
 
 =head2 C<extract_quotelike> and "here documents"
 
@@ -1861,7 +1842,6 @@ you can pass the input variable as an interpolated literal:
 
         $quotelike = extract_quotelike("$var");
 
-
 =head2 C<extract_codeblock>
 
 C<extract_codeblock> attempts to recognize and extract a balanced
@@ -1911,7 +1891,6 @@ Unconditionally match a bareword or any other single character, and
 then go back to step 1.
 
 =back
-
 
 Examples:
 
@@ -1996,7 +1975,6 @@ C<undef>) the list:
         ]
 
 is used.
-
 
 =item 3.
 
@@ -2102,7 +2080,6 @@ If you wanted the commas preserved as separate fields (i.e. like split
 does if your split pattern has capturing parentheses), you would
 just make the last parameter undefined (or remove it).
 
-
 =head2 C<gen_delimited_pat>
 
 The C<gen_delimited_pat> subroutine takes a single (string) argument and
@@ -2124,7 +2101,6 @@ for C<extract_tagged>. For example, to properly ignore "empty" XML elements
         my $empty_tag = '<(' . gen_delimited_pat(q{'"}) . '|.)+/>';
 
         extract_tagged($text, undef, undef, undef, {ignore => [$empty_tag]} );
-
 
 C<gen_delimited_pat> may also be called with an optional second argument,
 which specifies the "escape" character(s) to be used for each delimiter.
@@ -2279,16 +2255,11 @@ C<extract_tagged> reached the end of the text without finding a closing tag
 to match the original opening tag (and the failure mode was not
 "MAX" or "PARA").
 
-
-
-
 =back
-
 
 =head1 AUTHOR
 
 Damian Conway (damian@conway.org)
-
 
 =head1 BUGS AND IRRITATIONS
 
@@ -2298,9 +2269,13 @@ more about Perl than they really do.
 
 Bug reports and other feedback are most welcome.
 
-
 =head1 COPYRIGHT
 
- Copyright (c) 1997-2001, Damian Conway. All Rights Reserved.
- This module is free software. It may be used, redistributed
-     and/or modified under the same terms as Perl itself.
+Copyright 1997 - 2001 Damian Conway. All Rights Reserved.
+
+Some (minor) parts copyright 2009 Adam Kennedy.
+
+This module is free software. It may be used, redistributed
+and/or modified under the same terms as Perl itself.
+
+=cut

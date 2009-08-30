@@ -1499,18 +1499,18 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
-ext/Text-Balanced/Changes	Text::Balanced
-ext/Text-Balanced/lib/Text/Balanced.pm		Text::Balanced
-ext/Text-Balanced/README	Text::Balanced
-ext/Text-Balanced/t/00-load.t	See if Text::Balanced works
-ext/Text-Balanced/t/extbrk.t	See if Text::Balanced works
-ext/Text-Balanced/t/extcbk.t	See if Text::Balanced works
-ext/Text-Balanced/t/extdel.t	See if Text::Balanced works
-ext/Text-Balanced/t/extmul.t	See if Text::Balanced works
-ext/Text-Balanced/t/extqlk.t	See if Text::Balanced works
-ext/Text-Balanced/t/exttag.t	See if Text::Balanced works
-ext/Text-Balanced/t/extvar.t	See if Text::Balanced works
-ext/Text-Balanced/t/gentag.t	See if Text::Balanced works
+ext/Text-Balanced/Changes		Text::Balanced
+ext/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
+ext/Text-Balanced/README		Text::Balanced
+ext/Text-Balanced/t/01_compile.t	See if Text::Balanced works
+ext/Text-Balanced/t/02_extbrk.t		See if Text::Balanced works
+ext/Text-Balanced/t/03_extcbk.t		See if Text::Balanced works
+ext/Text-Balanced/t/04_extdel.t		See if Text::Balanced works
+ext/Text-Balanced/t/05_extmul.t		See if Text::Balanced works
+ext/Text-Balanced/t/06_extqlk.t		See if Text::Balanced works
+ext/Text-Balanced/t/07_exttag.t		See if Text::Balanced works
+ext/Text-Balanced/t/08_extvar.t		See if Text::Balanced works
+ext/Text-Balanced/t/09_gentag.t		See if Text::Balanced works
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
