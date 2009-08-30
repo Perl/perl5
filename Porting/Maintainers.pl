@@ -1764,7 +1764,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/Thread-Queue-2.11.tar.gz',
-	'FILES'		=> q[lib/Thread/Queue.pm lib/Thread/Queue],
+	'FILES'		=> q[ext/Thread-Queue],
 	'EXCLUDED'	=> [ qw(examples/queue.pl
 				t/00_load.t
 				t/99_pod.t

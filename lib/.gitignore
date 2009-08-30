@@ -83,6 +83,7 @@
 /Text/Balanced.pm
 /Text/ParseWords.pm
 /Text/Soundex.pm
+/Thread/Queue.pm
 /Time/HiRes.pm
 /Time/Piece.pm
 /Time/Seconds.pm
