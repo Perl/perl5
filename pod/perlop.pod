@@ -1152,11 +1152,13 @@ process modifiers are available:
     c	Do not reset search position on a failed match when /g is in effect.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
-you can use any pair of non-alphanumeric, non-whitespace characters
+you can use any pair of non-whitespace characters
 as delimiters.  This is particularly useful for matching path names
 that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
 the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
 If "'" is the delimiter, no interpolation is performed on the PATTERN.
+When using a character valid in an identifier, whitespace is required
+after the C<m>.
 
 PATTERN may contain variables, which will be interpolated (and the
 pattern recompiled) every time the pattern search is evaluated, except
@@ -1366,13 +1368,13 @@ specific options:
     e	Evaluate the right side as an expression.
     ee  Evaluate the right side as a string then eval the result
 
-Any non-alphanumeric, non-whitespace delimiter may replace the
-slashes.  If single quotes are used, no interpretation is done on the
-replacement string (the C</e> modifier overrides this, however).  Unlike
-Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
-text is not evaluated as a command.  If the
-PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
-pair of quotes, which may or may not be bracketing quotes, e.g.,
+Any non-whitespace delimiter may replace the slashes.  Add space after
+the C<s> when using a character allowed in identifiers.  If single quotes
+are used, no interpretation is done on the replacement string (the C</e>
+modifier overrides this, however).  Unlike Perl 4, Perl 5 treats backticks
+as normal delimiters; the replacement text is not evaluated as a command.
+If the PATTERN is delimited by bracketing quotes, the REPLACEMENT has
+its own pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
 replacement portion to be treated as a full-fledged Perl expression
 and evaluated right then and there.  It is, however, syntax checked at

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 139 );
+plan( tests => 140 );
 
 $x = 'foo';
 $_ = "x";
@@ -262,6 +262,9 @@ ok( $_ eq "foobarfoobbar" && $snum == 1 );
 eval 's{foo} # this is a comment, not a delimiter
        {bar};';
 ok( ! @?, 'parsing of split subst with comment' );
+
+$snum = eval '$_="exactly"; s sxsys;m 3(yactl)3;$1';
+is( $snum, 'yactl', 'alpha delimiters are allowed' );
 
 $_="baacbaa";
 $snum = tr/a/b/s;
