@@ -20,7 +20,7 @@ my %dir_to_switch =
     (base => '',
      comp => '',
      run => '',
-     '../ext/File-Glob/t' => '-I. -MTestInit', # FIXME - tests assume t/
+     '../ext/File-Glob/t' => '-I.. -MTestInit', # FIXME - tests assume t/
      );
 
 my %temp_no_core =
@@ -198,13 +198,13 @@ sub _run_test {
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
 	    $perl = '../../t/perl';
-	    $testswitch = "-I$return_dir -MTestInit=U2T,A";
+	    $testswitch = "-I../.. -MTestInit=U2T,A";
 	    if ($temp_no_core{$ext_dir}) {
 		$testswitch = $testswitch . ',NC';
 	    }
 	    chdir $ext_dir or die "Can't chdir to '$ext_dir': $!";
 	} else {
-	    $testswitch = '-I. -MTestInit';  # -T will remove . from @INC
+	    $testswitch = '-I.. -MTestInit';  # -T will remove . from @INC
 	}
     }
 

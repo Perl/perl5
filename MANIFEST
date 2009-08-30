@@ -3986,6 +3986,7 @@ t/comp/term.t			See if more terms work
 t/comp/uproto.t			See if the _ prototype works
 t/comp/use.t			See if pragmata work
 t/comp/utf.t			See if UTFs work
+TestInit.pm			Preamble library for tests
 t/harness			Finer diagnostics from test suite
 thread.h			Threading header
 time64.c			64 bit clean time.h (code)
@@ -4406,7 +4407,6 @@ t/run/switchx2.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
-t/TestInit.pm			Preamble library for core tests
 t/test.pl			Simple testing library
 t/thread_it.pl			Run regression tests in a new thread
 t/uni/cache.t			See if Unicode swash caching works
