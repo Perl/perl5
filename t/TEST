@@ -39,7 +39,6 @@ my %temp_no_core =
      '../ext/IPC-SysV' => 1,
      '../ext/MIME-Base64' => 1,
      '../ext/Safe' => 'fixme',
-     '../ext/Storable' => 'fixme',
      '../ext/Time-HiRes' => 1,
      '../ext/Unicode-Normalize' => 1,
     );

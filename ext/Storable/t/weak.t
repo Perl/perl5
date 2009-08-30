@@ -7,13 +7,8 @@
 #
 
 sub BEGIN {
-  if ($ENV{PERL_CORE}){
-    chdir('t') if -d 't';
-    @INC = ('.', '../lib', '../ext/Storable/t');
-  } else {
-    # This lets us distribute Test::More in t/
-    unshift @INC, 't';
-  }
+  # This lets us distribute Test::More in t/
+  unshift @INC, 't';
   require Config; import Config;
   if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
     print "1..0 # Skip: Storable was not built\n";
