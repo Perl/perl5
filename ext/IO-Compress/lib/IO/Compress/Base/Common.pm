@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.020';
+$VERSION = '2.021';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -656,7 +656,7 @@ sub IO::Compress::Base::Parameters::parse
  
     if (@Bad) {
         my ($bad) = join(", ", @Bad) ;
-        return $self->setError("unknown key value(s) @Bad") ;
+        return $self->setError("unknown key value(s) $bad") ;
     }
 
     return 1;
@@ -816,6 +816,7 @@ sub IO::Compress::Base::Parameters::clone
 package U64;
 
 use constant MAX32 => 0xFFFFFFFF ;
+use constant HI_1 => MAX32 + 1 ;
 use constant LOW   => 0 ;
 use constant HIGH  => 1;
 
@@ -883,6 +884,14 @@ sub get32bit
     return $self->[LOW];
 }
 
+sub get64bit
+{
+    my $self = shift;
+    # Not using << here because the result will still be
+    # a 32-bit value on systems where int size is 32-bits
+    return $self->[HIGH] * HI_1 + $self->[LOW];
+}
+
 sub add
 {
     my $self = shift;
@@ -902,6 +911,7 @@ sub add
     else {
        $self->[LOW] += $value ;
     }
+
 }
 
 sub equal
@@ -911,6 +921,12 @@ sub equal
 
     return $self->[LOW]  == $other->[LOW] &&
            $self->[HIGH] == $other->[HIGH] ;
+}
+
+sub is64bit
+{
+    my $self = shift;
+    return $self->[HIGH] > 0 ;
 }
 
 sub getPacked_V64

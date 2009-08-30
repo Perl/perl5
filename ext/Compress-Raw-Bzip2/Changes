@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.021 30 August 2009
+
+      * Changed test harness so that it can cope with PERL5OPT=-MCarp=verbose
+        [RT# 47225]
+
   2.020 4 June 2009
 
       * No Changes

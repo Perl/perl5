@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.020 qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.021 qw(createSelfTiedObject);
 
-use IO::Uncompress::Base 2.020 ;
+use IO::Uncompress::Base 2.021 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,20 +27,22 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate 2.020 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.020 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.020 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.020 ;';
-   #eval ' use IO::Uncompress::Adapter::UnLzma 2.018 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.021 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.021 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.021 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.021 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.020 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.020 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.020 ;';
-   eval ' use IO::Uncompress::UnLzop 2.020 ;';
-   eval ' use IO::Uncompress::Gunzip 2.020 ;';
-   eval ' use IO::Uncompress::Inflate 2.020 ;';
-   eval ' use IO::Uncompress::RawInflate 2.020 ;';
-   eval ' use IO::Uncompress::Unzip 2.020 ;';
-   eval ' use IO::Uncompress::UnLzf 2.020 ;';
-   #eval ' use IO::Uncompress::UnLzma 2.018 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.021 ;';
+   eval ' use IO::Uncompress::UnLzop 2.021 ;';
+   eval ' use IO::Uncompress::Gunzip 2.021 ;';
+   eval ' use IO::Uncompress::Inflate 2.021 ;';
+   eval ' use IO::Uncompress::RawInflate 2.021 ;';
+   eval ' use IO::Uncompress::Unzip 2.021 ;';
+   eval ' use IO::Uncompress::UnLzf 2.021 ;';
+   eval ' use IO::Uncompress::UnLzma 2.018 ;';
+   eval ' use IO::Uncompress::UnXz 2.018 ;';
 }
 
 sub new
@@ -58,7 +60,7 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common 2.020 qw(:Parse);
+    use IO::Compress::Base::Common 2.021 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -123,6 +125,21 @@ sub mkUncomp
 #            return 1;
 #        }
 #     }
+
+     if (defined $IO::Uncompress::UnXz::VERSION and
+         $magic = $self->ckMagic('UnXz')) {
+        *$self->{Info} = $self->readHeader($magic)
+            or return undef ;
+
+        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnXz::mkUncompObject();
+
+        return $self->saveErrorString(undef, $errstr, $errno)
+            if ! defined $obj;
+
+        *$self->{Uncomp} = $obj;
+
+         return 1;
+     }
 
      if (defined $IO::Uncompress::Bunzip2::VERSION and
          $magic = $self->ckMagic('Bunzip2')) {
@@ -464,7 +481,7 @@ C<InputLength> option.
 =head2 Examples
 
 To read the contents of the file C<file1.txt.Compressed> and write the
-compressed data to the file C<file1.txt>.
+uncompressed data to the file C<file1.txt>.
 
     use strict ;
     use warnings ;

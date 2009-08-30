@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 88 + $extra ;
+    plan tests => 118 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -209,49 +209,74 @@ My::testParseParameters();
     my $x = new U64();
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0, "  getLow is 0";
+    ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(1,2);
     $x = new U64(1,2);
     is $x->getHigh, 1, "  getHigh is 1";
     is $x->getLow, 2, "  getLow is 2";
+    ok $x->is64bit(), " is64bit";
 
     $x = new U64(0xFFFFFFFF,2);
     is $x->getHigh, 0xFFFFFFFF, "  getHigh is 0xFFFFFFFF";
     is $x->getLow, 2, "  getLow is 2";
+    ok $x->is64bit(), " is64bit";
 
     $x = new U64(7, 0xFFFFFFFF);
     is $x->getHigh, 7, "  getHigh is 7";
     is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
+    ok $x->is64bit(), " is64bit";
 
     $x = new U64(666);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 666, "  getLow is 666";
+    ok ! $x->is64bit(), " ! is64bit";
 
     title "U64 - add" ;
 
     $x = new U64(0, 1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 1, "  getLow is 1";
+    ok ! $x->is64bit(), " ! is64bit";
 
     $x->add(1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 2, "  getLow is 2";
+    ok ! $x->is64bit(), " ! is64bit";
 
     $x = new U64(0, 0xFFFFFFFE);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0xFFFFFFFE, "  getLow is 0xFFFFFFFE";
+    is $x->get32bit(),  0xFFFFFFFE, "  get32bit is 0xFFFFFFFE";
+    is $x->get64bit(),  0xFFFFFFFE, "  get64bit is 0xFFFFFFFE";
+    ok ! $x->is64bit(), " ! is64bit";
 
     $x->add(1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
+    is $x->get32bit(),  0xFFFFFFFF, "  get32bit is 0xFFFFFFFF";
+    is $x->get64bit(),  0xFFFFFFFF, "  get64bit is 0xFFFFFFFF";
+    ok ! $x->is64bit(), " ! is64bit";
 
     $x->add(1);
     is $x->getHigh, 1, "  getHigh is 1";
     is $x->getLow, 0, "  getLow is 0";
+    is $x->get32bit(),  0x0, "  get32bit is 0x0";
+    is $x->get64bit(), 0xFFFFFFFF+1, "  get64bit is 0x100000000";
+    ok $x->is64bit(), " is64bit";
 
     $x->add(1);
     is $x->getHigh, 1, "  getHigh is 1";
     is $x->getLow, 1, "  getLow is 1";
+    is $x->get32bit(),  0x1, "  get32bit is 0x1";
+    is $x->get64bit(),  0xFFFFFFFF+2, "  get64bit is 0x100000001";
+    ok $x->is64bit(), " is64bit";
+
+    $x->add(1);
+    is $x->getHigh, 1, "  getHigh is 1";
+    is $x->getLow, 2, "  getLow is 1";
+    is $x->get32bit(),  0x2, "  get32bit is 0x2";
+    is $x->get64bit(),  0xFFFFFFFF+3, "  get64bit is 0x100000002";
+    ok $x->is64bit(), " is64bit";
 
     $x = new U64(1, 0xFFFFFFFE);
     my $y = new U64(2, 3);
@@ -259,23 +284,31 @@ My::testParseParameters();
     $x->add($y);
     is $x->getHigh, 4, "  getHigh is 4";
     is $x->getLow, 1, "  getLow is 1";
+    ok $x->is64bit(), " is64bit";
 
     title "U64 - equal" ;
 
     $x = new U64(0, 1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 1, "  getLow is 1";
+    ok ! $x->is64bit(), " ! is64bit";
 
     $y = new U64(0, 1);
-    is $x->getHigh, 0, "  getHigh is 0";
-    is $x->getLow, 1, "  getLow is 1";
+    is $y->getHigh, 0, "  getHigh is 0";
+    is $y->getLow, 1, "  getLow is 1";
+    ok ! $y->is64bit(), " ! is64bit";
 
     my $z = new U64(0, 2);
-    is $x->getHigh, 0, "  getHigh is 0";
-    is $x->getLow, 1, "  getLow is 1";
+    is $z->getHigh, 0, "  getHigh is 0";
+    is $z->getLow, 2, "  getLow is 2";
+    ok ! $z->is64bit(), " ! is64bit";
 
     ok $x->equal($y), "  equal";
     ok !$x->equal($z), "  ! equal";
 
-    title "U64 - pack_V" ;
+    title "U64 - clone" ;
+    $x = new U64(21, 77);
+    $z =  U64::clone($x);
+    is $z->getHigh, 21, "  getHigh is 21";
+    is $z->getLow, 77, "  getLow is 77";
 }

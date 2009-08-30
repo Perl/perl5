@@ -3,7 +3,7 @@
 use strict ;
 require 5.004 ;
 
-$::VERSION = '2.020' ;
+$::VERSION = '2.021' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
@@ -25,6 +25,7 @@ WriteMakefile(
         ? ()
 	    : (PREREQ_PM   => { 'Compress::Raw::Bzip2' => $::VERSION,
 		                    'Compress::Raw::Zlib'   => $::VERSION,
+		                    'Scalar::Util'  => 0,
 		                    $] >= 5.005 && $] < 5.006   
                                 ? ('File::BSDGlob' => 0) 
                                 : () }

@@ -8,17 +8,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.020 ;
-use Compress::Raw::Zlib 2.020 ;
-use IO::Compress::Gzip 2.020 ;
-use IO::Uncompress::Gunzip 2.020 ;
+use IO::Compress::Base::Common 2.021 ;
+use Compress::Raw::Zlib 2.021 ;
+use IO::Compress::Gzip 2.021 ;
+use IO::Uncompress::Gunzip 2.021 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -452,7 +452,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.020 ;
+use IO::Compress::Gzip::Constants 2.021 ;
 
 sub memGzip($)
 {
@@ -993,6 +993,11 @@ returns undef.
 
 The C<$buffer> parameter can either be a scalar or a scalar reference. The
 contents of the C<$buffer> parameter are destroyed after calling this function.
+
+If C<$buffer> consists of multiple concatenated gzip data streams only the
+first will be uncompressed. Use C<gunzip> with the C<MultiStream> option in
+the C<IO::Uncompress::Gunzip> module if you need to deal with concatenated
+data streams.
 
 See L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for an alternative way
 to carry out in-memory gzip uncompression.

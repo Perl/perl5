@@ -193,7 +193,7 @@ sub run
 
             eval { $a = $Func->(\$in, \$out, TrailingData => \@x) ;} ;
             like $@, mkErr("^$TopType: Parameter 'TrailingData' not a scalar reference"),
-                '  TrailingData output not scaral reference';
+                '  TrailingData output not scalar reference';
         }
     }
 
@@ -1013,8 +1013,8 @@ sub run
         my $buffer2 = "ABCDE" ;
         my $keep_orig = $buffer;
 
-        my $comp = compressBuffer(getTopFuncName($UncompressClass), $buffer) ;
-        my $comp2 = compressBuffer(getTopFuncName($UncompressClass), $buffer2) ;
+        my $comp = compressBuffer($UncompressClass, $buffer) ;
+        my $comp2 = compressBuffer($UncompressClass, $buffer2) ;
         my $keep_comp = $comp;
 
         my $incumbent = "incumbent data" ;
@@ -1315,9 +1315,9 @@ sub run
         my $buffer = "abcde" ;
         my $keep_orig = $buffer;
 
-        my $null = compressBuffer(getTopFuncName($UncompressClass), "") ;
-        my $undef = compressBuffer(getTopFuncName($UncompressClass), undef) ;
-        my $comp = compressBuffer(getTopFuncName($UncompressClass), $buffer) ;
+        my $null = compressBuffer($UncompressClass, "") ;
+        my $undef = compressBuffer($UncompressClass, undef) ;
+        my $comp = compressBuffer($UncompressClass, $buffer) ;
         my $keep_comp = $comp;
 
         my @opts = ();
@@ -1328,8 +1328,8 @@ sub run
 
         my $lex = new LexFile(my $file1, my $file2) ;
 
-        writeFile($file1, compressBuffer(getTopFuncName($UncompressClass),"data1"));
-        writeFile($file2, compressBuffer(getTopFuncName($UncompressClass),"data2"));
+        writeFile($file1, compressBuffer($UncompressClass,"data1"));
+        writeFile($file2, compressBuffer($UncompressClass,"data2"));
 
         my $of = new IO::File "<$file1" ;
         ok $of, "  Created output filehandle" ;
@@ -1414,7 +1414,7 @@ sub run
         #ok ! -d $tmpDir2, "  Temp Directory $tmpDir2 does not exist";
 
         my @files = map { "$tmpDir1/$_.tmp" } qw( a1 a2 a3) ;
-        foreach (@files) { writeFile($_, compressBuffer(getTopFuncName($UncompressClass), "abc $_")) }
+        foreach (@files) { writeFile($_, compressBuffer($UncompressClass, "abc $_")) }
 
         my @expected = map { "abc $_" } @files ;
         my @outFiles = map { s/$tmpDir1/$tmpDir2/; $_ } @files ;

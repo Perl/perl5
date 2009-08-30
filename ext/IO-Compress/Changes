@@ -1,6 +1,48 @@
 CHANGES
 -------
 
+  2.021 30 August 2009
+
+
+      * IO::Compress::Base.pm
+        - Less warnnings when reading from a closed filehandle.
+          [RT# 48350]
+        - Fixed minor typo in an error message.
+          [RT# 39719]
+
+      * Makefile.PL
+        The PREREQ_PM dependency on Scalar::Util got dropped when
+        IO-Compress was created in 2.017.
+        [RT# 47509]
+
+      * IO::Compress::Zip.pm
+        - Removed restriction that zip64 is only supported in streaming
+          mode.
+        - The "version made by" and "extract" fields in the zip64 end
+          central record were swapped.
+        - In the End Central Header record the "offset to the start of the
+          central directory" will now always be set to 0xFFFFFFFF when
+          zip64 is enabled.
+        - In the End Central Header record the "total entries in the
+          central directory" field will be set to 0xFFFF if zip64 is
+          enabled AND there are more than 0xFFFF entries present.
+
+      * IO::Uncompress::Unzip.pm
+        - Don't consume lots of memory when walking a zip file. This makes
+          life more bearable when dealing with zip64.
+
+      * Compress::Zlib.pm
+        - documented that memGunzip cannot cope with concatenated gzip data
+          streams.
+
+      * Changed test harness so that it can cope with PERL5OPT=-MCarp=verbose
+        [RT# 47225]
+
+      * IO::Compress::Gzip::Constants.pm
+        - GZIP_FEXTRA_MAX_SIZE was set to 0xFF. Should be 0xFFFF.  This
+          issue came up when attempting to unzip a file created by MS
+          Office 2007.
+
   2.020 3 June 2009
 
       * IO::Uncompress::Base.pm

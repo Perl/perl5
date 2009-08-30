@@ -23,7 +23,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 146 + $extra ;
+    plan tests => 162 + $extra ;
 
     #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
     use_ok('IO::Compress::Zip', qw(:all)) ;
@@ -137,7 +137,7 @@ for my $stream (0, 1)
 {
     for my $zip64 (0, 1)
     {
-        next if $zip64 && ! $stream;
+        #next if $zip64 && ! $stream;
 
         for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
         {

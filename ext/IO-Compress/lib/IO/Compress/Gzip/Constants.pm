@@ -9,7 +9,7 @@ require Exporter;
 our ($VERSION, @ISA, @EXPORT, %GZIP_OS_Names);
 our ($GZIP_FNAME_INVALID_CHAR_RE, $GZIP_FCOMMENT_INVALID_CHAR_RE);
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 
 @ISA = qw(Exporter);
 
@@ -84,7 +84,7 @@ use constant GZIP_XFL_DEFAULT                 => 0x00 ;
 use constant GZIP_MTIME_DEFAULT               => 0x00 ;
 
 use constant GZIP_FEXTRA_HEADER_SIZE          => 2 ;
-use constant GZIP_FEXTRA_MAX_SIZE             => 0xFF ;
+use constant GZIP_FEXTRA_MAX_SIZE             => 0xFFFF ;
 use constant GZIP_FEXTRA_SUBFIELD_ID_SIZE     => 2 ;
 use constant GZIP_FEXTRA_SUBFIELD_LEN_SIZE    => 2 ;
 use constant GZIP_FEXTRA_SUBFIELD_HEADER_SIZE => GZIP_FEXTRA_SUBFIELD_ID_SIZE +

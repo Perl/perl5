@@ -11,6 +11,12 @@ use warnings ;
 
 use Test::More ;
 
+sub gotScalarUtilXS
+{
+    eval ' use Scalar::Util "dualvar" ';
+    return $@ ? 0 : 1 ;
+}
+
 BEGIN
 {
     # use Test::NoWarnings, if available
@@ -19,17 +25,46 @@ BEGIN
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    my $VERSION = '2.020';
+    my $VERSION = '2.021';
     my @NAMES = qw(
 			Compress::Raw::Bzip2
 			Compress::Raw::Zlib
+
+			Compress::Zlib
+
+            IO::Compress::Adapter::Bzip2
+            IO::Compress::Adapter::Deflate
+            IO::Compress::Adapter::Identity
+            IO::Compress::Base::Common
+            IO::Compress::Base
+            IO::Compress::Bzip2
+            IO::Compress::Deflate
+            IO::Compress::Gzip::Constants
+            IO::Compress::Gzip
+            IO::Compress::RawDeflate
+            IO::Compress::Zip::Constants
+            IO::Compress::Zip
+            IO::Compress::Zlib::Constants
+            IO::Compress::Zlib::Extra
+            IO::Uncompress::Adapter::Bunzip2
+            IO::Uncompress::Adapter::Identity
+            IO::Uncompress::Adapter::Inflate
+            IO::Uncompress::AnyInflate
+            IO::Uncompress::AnyUncompress
+            IO::Uncompress::Base
+            IO::Uncompress::Bunzip2
+            IO::Uncompress::Gunzip
+            IO::Uncompress::Inflate
+            IO::Uncompress::RawInflate
+            IO::Uncompress::Unzip
+
 			);
 
     my @OPT = qw(
 			
 			);
 
-    plan tests => @NAMES + @OPT + $extra ;
+    plan tests => 2 + @NAMES + @OPT + $extra ;
 
     foreach my $name (@NAMES)
     {
@@ -51,6 +86,13 @@ BEGIN
                 or diag "$name version is $ver, need $VERSION" ;
         }         
     }
-    
+
+    use_ok('Scalar::Util') ;
+
 }
+
+ok gotScalarUtilXS(), "Got XS Version of Scalar::Util"
+    or diag <<EOM;
+You don't have the XS version of Scalar::Util
+EOM
 

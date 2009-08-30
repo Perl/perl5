@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.020 ;
+use IO::Uncompress::RawInflate 2.021 ;
 
-use Compress::Raw::Zlib 2.020 qw( crc32 ) ;
-use IO::Compress::Base::Common 2.020 qw(:Status createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.020 ;
-use IO::Compress::Zlib::Extra 2.020 ;
+use Compress::Raw::Zlib 2.021 qw( crc32 ) ;
+use IO::Compress::Base::Common 2.021 qw(:Status createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.021 ;
+use IO::Compress::Zlib::Extra 2.021 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 
 sub new
 {
@@ -47,7 +47,7 @@ sub gunzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.020 qw(:Parse);
+    use IO::Compress::Base::Common  2.021 qw(:Parse);
     return ( 'ParseExtra' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -514,7 +514,7 @@ C<InputLength> option.
 =head2 Examples
 
 To read the contents of the file C<file1.txt.gz> and write the
-compressed data to the file C<file1.txt>.
+uncompressed data to the file C<file1.txt>.
 
     use strict ;
     use warnings ;

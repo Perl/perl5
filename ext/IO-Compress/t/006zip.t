@@ -48,12 +48,11 @@ sub getContent
 
     for ($status = 1; ! $u->eof(); $status = $u->nextStream())
     {
- 
         my $name = $u->getHeaderInfo()->{Name};
         #warn "Processing member $name\n" ;
 
         my $buff = '';
-        1 while ($status = $u->read($buff)) > 0;
+        1 while ($status = $u->read($buff)) ;
 
         push @content, $buff;
         last unless $status == 0;

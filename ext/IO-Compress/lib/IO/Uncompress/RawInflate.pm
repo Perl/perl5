@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.020 ;
-use IO::Compress::Base::Common  2.020 qw(:Status createSelfTiedObject);
+use Compress::Raw::Zlib  2.021 ;
+use IO::Compress::Base::Common  2.021 qw(:Status createSelfTiedObject);
 
-use IO::Uncompress::Base  2.020 ;
-use IO::Uncompress::Adapter::Inflate  2.020 ;
+use IO::Uncompress::Base  2.021 ;
+use IO::Uncompress::Adapter::Inflate  2.021 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -580,7 +580,7 @@ C<InputLength> option.
 =head2 Examples
 
 To read the contents of the file C<file1.txt.1951> and write the
-compressed data to the file C<file1.txt>.
+uncompressed data to the file C<file1.txt>.
 
     use strict ;
     use warnings ;
