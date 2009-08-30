@@ -44,9 +44,6 @@ my %temp_no_core =
      '../ext/Unicode-Normalize' => 1,
     );
 
-# Fix Text-Soundex
-# Fix Win32
-
 if ($::do_nothing) {
     return 1;
 }
@@ -68,7 +65,8 @@ delete $ENV{PERL5OPT};
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
-# Cheesy version of Getopt::Std.  Maybe we should replace it with that.
+# Cheesy version of Getopt::Std.  We can't replace it with that, because we
+# can't rely on require working.
 {
     my @argv = ();
     foreach my $idx (0..$#ARGV) {
@@ -114,7 +112,6 @@ $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
-# Roll your own File::Find!
 if ($show_elapsed_time) { require Time::HiRes }
 
 my %skip = (
@@ -126,6 +123,7 @@ my %skip = (
 	    '.svn' => 1,
 	   );
 
+# Roll your own File::Find!
 sub _find_tests {
     my($dir) = @_;
     opendir DIR, $dir or die "Trouble opening $dir: $!";
@@ -285,7 +283,7 @@ sub _tests_from_manifest {
     my @results;
     my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
-	while (<MANI>) { # similar code in t/harness
+	while (<MANI>) {
 	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
 		my $t = $1;
 		my $extension = $2;
