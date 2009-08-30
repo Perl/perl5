@@ -24,8 +24,7 @@ my %dir_to_switch =
      );
 
 my %temp_no_core =
-    ('../ext/Attribute-Handlers' => 1,
-     '../ext/B-Debug' => 1,
+    ('../ext/B-Debug' => 1,
      '../ext/Compress-Raw-Bzip2' => 1,
      '../ext/Compress-Raw-Zlib' => 1,
      '../ext/Devel-PPPort' => 1,

@@ -2,13 +2,6 @@
 
 # Test attribute data conversion using examples from the docs
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 use Test::More tests => 8;
 
 package LoudDecl;

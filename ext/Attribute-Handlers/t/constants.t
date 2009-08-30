@@ -1,9 +1,3 @@
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-    }
-}
 use strict;
 use Test::More tests => 1;
 use Attribute::Handlers;
