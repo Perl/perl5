@@ -1297,6 +1297,8 @@ ext/Term-ANSIColor/ANSIColor.pm		Perl module supporting termcap usage
 ext/Term-ANSIColor/ChangeLog		Term::ANSIColor
 ext/Term-ANSIColor/README		Term::ANSIColor
 ext/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
+ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
+ext/Term-Cap/test.pl			See if Term::Cap works
 ext/Test-Harness/bin/prove		The prove harness utility
 ext/Test-Harness/Changes		Test::Harness change log
 ext/Test-Harness/lib/App/Prove.pm	Gubbins for the prove utility
@@ -3142,8 +3144,6 @@ lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
 lib/tainted.pl			Old code for tainting
 lib/termcap.pl			Perl library supporting termcap usage
-lib/Term/Cap.pm			Perl module supporting termcap usage
-lib/Term/Cap.t			See if Term::Cap works
 lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library

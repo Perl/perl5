@@ -5,10 +5,6 @@ my $file;
 BEGIN {
         $file = $0;
         chdir 't' if -d 't';
-
-        if ( $ENV{PERL_CORE} ) {
-           @INC = '../lib';
-        }
 }
 
 END {

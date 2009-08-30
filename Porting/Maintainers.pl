@@ -1644,11 +1644,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'jstowe',
 	'DISTRIBUTION'	=> 'JSTOWE/Term-Cap-1.12.tar.gz',
-	'FILES'		=> q{lib/Term/Cap.{pm,t}},
-	'MAP'		=> {
-			     ''        => 'lib/Term/',
-			     'test.pl' => 'lib/Term/Cap.t',
-			   },
+	'FILES'		=> q{ext/Term-Cap},
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
