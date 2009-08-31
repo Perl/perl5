@@ -9,11 +9,12 @@
 # under the same terms as Perl itself.
 
 use strict;
-use Test::More tests => 43;
+use Test::More tests => 47;
 
 BEGIN {
     delete $ENV{ANSI_COLORS_DISABLED};
-    use_ok ('Term::ANSIColor', qw/:pushpop color colored uncolor colorstrip/);
+    use_ok ('Term::ANSIColor',
+            qw/:pushpop color colored uncolor colorstrip colorvalid/);
 }
 
 # Various basic tests.
@@ -46,6 +47,10 @@ delete $ENV{ANSI_COLORS_DISABLED};
 
 # Make sure DARK is exported.  This was omitted in versions prior to 1.07.
 is ((DARK "testing"), "\e[2mtesting\e[0m", 'DARK');
+
+# Check faint as a synonym for dark.
+is (colored ('test', 'faint'), "\e[2mtest\e[0m", 'colored supports faint');
+is ((FAINT "test"), "\e[2mtest\e[0m", '...and the FAINT constant works');
 
 # Test colored with 0 and EACHLINE.
 $Term::ANSIColor::EACHLINE = "\n";
@@ -95,6 +100,12 @@ is_deeply ([ colorstrip ("\e[1m", 'bold', "\e[0m") ],
 is (colorstrip ("\e[2cSome other code\e and stray [0m stuff"),
     "\e[2cSome other code\e and stray [0m stuff",
     'colorstrip does not remove non-color stuff');
+
+# Test colorvalid.
+is (colorvalid ("blue bold dark", "blink on_green"), 1,
+    'colorvalid returns true for valid attributes');
+is (colorvalid ("green orange"), undef,
+    '...and false for invalid attributes');
 
 # Test error handling.
 my $output = eval { color 'chartreuse' };

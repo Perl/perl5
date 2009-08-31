@@ -1620,7 +1620,7 @@ package Maintainers;
     'Term::ANSIColor' =>
 	{
 	'MAINTAINER'	=> 'rra',
-	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.01.tar.gz',
+	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.02.tar.gz',
 	'FILES'		=> q{ext/Term-ANSIColor},
 	'EXCLUDED'	=> [ qr{^tests/}, qw(t/pod-spelling.t t/pod.t) ],
 	'CPAN'		=> 1,

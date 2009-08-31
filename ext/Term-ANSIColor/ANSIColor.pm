@@ -17,7 +17,7 @@
 package Term::ANSIColor;
 require 5.001;
 
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 use strict;
 use vars qw($AUTOLOAD $AUTOLOCAL $AUTORESET @COLORLIST @COLORSTACK $EACHLINE
@@ -26,13 +26,13 @@ use vars qw($AUTOLOAD $AUTOLOCAL $AUTORESET @COLORLIST @COLORSTACK $EACHLINE
 
 use Exporter ();
 BEGIN {
-    @COLORLIST   = qw(CLEAR RESET BOLD DARK UNDERLINE UNDERSCORE BLINK REVERSE
-                      CONCEALED BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE
-                      ON_BLACK ON_RED ON_GREEN ON_YELLOW ON_BLUE ON_MAGENTA
-                      ON_CYAN ON_WHITE);
+    @COLORLIST   = qw(CLEAR RESET BOLD DARK FAINT UNDERLINE UNDERSCORE BLINK
+                      REVERSE CONCEALED BLACK RED GREEN YELLOW BLUE MAGENTA
+                      CYAN WHITE ON_BLACK ON_RED ON_GREEN ON_YELLOW ON_BLUE
+                      ON_MAGENTA ON_CYAN ON_WHITE);
     @ISA         = qw(Exporter);
     @EXPORT      = qw(color colored);
-    @EXPORT_OK   = qw(uncolor colorstrip);
+    @EXPORT_OK   = qw(uncolor colorstrip colorvalid);
     %EXPORT_TAGS = (constants => \@COLORLIST,
                     pushpop   => [ @COLORLIST,
                                    qw(PUSHCOLOR POPCOLOR LOCALCOLOR) ]);
@@ -235,6 +235,18 @@ sub colorstrip {
     return wantarray ? @string : join ('', @string);
 }
 
+# Given a list of color attributes (arguments for color, for instance), return
+# true if they're all valid or false if any of them are invalid.
+sub colorvalid {
+    my @codes = map { split } @_;
+    for (@codes) {
+        unless (defined $ATTRIBUTES{lc $_}) {
+            return;
+        }
+    }
+    return 1;
+}
+
 ##############################################################################
 # Module return value and documentation
 ##############################################################################
@@ -270,6 +282,10 @@ reimplemented Allbery PUSHCOLOR POPCOLOR LOCALCOLOR openmethods.com
     use Term::ANSIColor qw(colorstrip);
     print colorstrip '\e[1mThis is bold\e[0m', "\n";
 
+    use Term::ANSIColor qw(colorvalid);
+    my $valid = colorvalid ('blue bold', 'on_magenta');
+    print "Color string is ", $valid ? "valid\n" : "invalid\n";
+
     use Term::ANSIColor qw(:constants);
     print BOLD, BLUE, "This text is in bold blue.\n", RESET;
 
@@ -297,9 +313,9 @@ reimplemented Allbery PUSHCOLOR POPCOLOR LOCALCOLOR openmethods.com
 =head1 DESCRIPTION
 
 This module has two interfaces, one through color() and colored() and the
-other through constants.  It also offers the utility functions uncolor()
-and colorstrip(), which have to be explicitly imported to be used (see
-L</SYNOPSIS>).
+other through constants.  It also offers the utility functions uncolor(),
+colorstrip(), and colorvalid(), which have to be explicitly imported to be
+used (see L</SYNOPSIS>).
 
 =head2 Function Interface
 
@@ -308,7 +324,9 @@ space-separated lists of attributes.  It then forms and returns the escape
 sequence to set those attributes.  It doesn't print it out, just returns
 it, so you'll have to print it yourself if you want to (this is so that
 you can save it as a string, pass it to something else, send it to a file
-handle, or do anything else with it that you might care to).
+handle, or do anything else with it that you might care to).  color()
+throws an exception if given an invalid attribute, so you can also use it
+to check attribute names for validity (see L</EXAMPLES>).
 
 uncolor() performs the opposite translation, turning escape sequences
 into a list of strings.
@@ -316,6 +334,9 @@ into a list of strings.
 colorstrip() removes all color escape sequences from the provided strings,
 returning the modified strings separately in array context or joined
 together in scalar context.  Its arguments are not modified.
+
+colorvalid() takes attribute strings the same as color() and returns true
+if all attributes are known and false otherwise.
 
 The recognized non-color attributes are clear, reset, bold, dark, faint,
 underline, underscore, blink, reverse, and concealed.  Clear and reset
@@ -357,11 +378,11 @@ $Term::ANSIColor::EACHLINE to C<"\n"> to use this feature.
 =head2 Constant Interface
 
 Alternately, if you import C<:constants>, you can use the constants CLEAR,
-RESET, BOLD, DARK, UNDERLINE, UNDERSCORE, BLINK, REVERSE, CONCEALED,
-BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, ON_BLACK, ON_RED,
-ON_GREEN, ON_YELLOW, ON_BLUE, ON_MAGENTA, ON_CYAN, and ON_WHITE directly.
-These are the same as color('attribute') and can be used if you prefer
-typing:
+RESET, BOLD, DARK, FAINT, UNDERLINE, UNDERSCORE, BLINK, REVERSE,
+CONCEALED, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE,
+ON_BLACK, ON_RED, ON_GREEN, ON_YELLOW, ON_BLUE, ON_MAGENTA, ON_CYAN, and
+ON_WHITE directly.  These are the same as color('attribute') and can be
+used if you prefer typing:
 
     print BOLD BLUE ON_WHITE "Text", RESET, "\n";
 
@@ -529,7 +550,7 @@ helped me flesh it out:
 
               clear    bold     faint   under    blink   reverse  conceal
  ------------------------------------------------------------------------
- xterm         yes      yes      no      yes     bold      yes      yes
+ xterm         yes      yes      no      yes      yes      yes      yes
  linux         yes      yes      yes    bold      yes      yes      no
  rxvt          yes      yes      no      yes  bold/black   yes      no
  dtterm        yes      yes      yes     yes    reverse    yes      yes

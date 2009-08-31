@@ -1,4 +1,22 @@
+2009-08-30  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Version 2.02 released.
+
+	* ANSIColor.pm: Update compatibility matrix to reflect that xterm
+	now supports blink.
+
+	* ANSIColor.pm (colorvalid): New function to check whether an
+	attribute is known.
+	* t/basic.t: Test colorvalid.
+
 2009-07-04  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Add an example of checking color attributes by
+	catching exceptions from color() to the documentation.
+
+	* ANSIColor.pm: Add FAINT as a synonym for DARK and export it when
+	constants are requested.
+	* t/basic.t: Test faint and FAINT as a synonym for dark/DARK.
 
 	* ANSIColor.pm: Version 2.01 released.
 
