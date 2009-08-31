@@ -92,7 +92,7 @@ Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 void
 Perl_dump_all(pTHX)
 {
-    dump_all_perl(aTHX_ FALSE);
+    dump_all_perl(FALSE);
 }
 
 void
