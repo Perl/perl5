@@ -242,6 +242,29 @@ sub _cmd {
     return $cmd;
 }
 
+sub _before_fork {
+    my ($options) = @_;
+
+    if ($options->{run_dir}) {
+	my $run_dir = $options->{run_dir};
+	chdir $run_dir or die "Can't chdir to '$run_dir': $!";
+    }
+
+    return;
+}
+
+sub _after_fork {
+    my ($options) = @_;
+
+    if ($options->{return_dir}) {
+	my $return_dir = $options->{return_dir};
+	chdir $return_dir
+	   or die "Can't chdir from '$options->{run_dir}' to '$return_dir': $!";
+    }
+
+    return;
+}
+
 sub _run_test {
     my($harness, $test, $type) = @_;
     if (!defined $type) {
@@ -253,20 +276,13 @@ sub _run_test {
 
     $test = $options->{test}; # Might have changed if we're in ext/Foo
 
-    if ($options->{run_dir}) {
-	my $run_dir = $options->{run_dir};
-	chdir $run_dir or die "Can't chdir to '$run_dir': $!";
-    }
+    _before_fork($options);
 
     my $cmd = _cmd($options, $type);
 
     open(my $results, "$cmd |") or print "can't run '$cmd': $!.\n";
 
-    if ($options->{return_dir}) {
-	my $return_dir = $options->{return_dir};
-	chdir $return_dir
-	   or die "Can't chdir from '$options->{run_dir}' to '$return_dir': $!";
-    }
+    _after_fork($options);
 
     # Our environment may force us to use UTF-8, but we can't be sure that
     # anything we're reading from will be generating (well formed) UTF-8
