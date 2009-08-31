@@ -40,7 +40,6 @@ ppport.h
 /Term-UI/Makefile.PL
 /Test-Harness/Makefile.PL
 /Text-Balanced/Makefile.PL
-/Text-ParseWords/Makefile.PL
 /Text-Soundex/Makefile.PL
 /Thread-Queue/Makefile.PL
 /Thread-Semaphore/Makefile.PL

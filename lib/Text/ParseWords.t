@@ -1,5 +1,12 @@
 #!./perl
 
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
+}
+
 use warnings;
 use Text::ParseWords;
 use Test::More tests => 27;

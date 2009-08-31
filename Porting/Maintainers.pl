@@ -1725,8 +1725,12 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'chorny',
 	'DISTRIBUTION'	=> 'CHORNY/Text-ParseWords-3.27.zip',
-	'FILES'		=> q[ext/Text-ParseWords],
+	'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
 	'EXCLUDED'	=> [ qw( t/pod.t ) ],
+	'MAP'		=> { ''               => 'lib/Text/',
+	                     't/ParseWords.t' => 'lib/Text/ParseWords.t',
+	                     't/taint.t'      => 'lib/Text/ParseWords/taint.t',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

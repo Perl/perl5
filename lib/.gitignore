@@ -81,7 +81,6 @@
 /Term/UI/History.pm
 /Term/UI.pm
 /Text/Balanced.pm
-/Text/ParseWords.pm
 /Text/Soundex.pm
 /Thread
 /Time/HiRes.pm
