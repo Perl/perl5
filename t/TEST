@@ -204,6 +204,44 @@ sub _scan_test {
     };
 }
 
+sub _cmd {
+    my($options, $type) = @_;
+
+    my $test = $options->{test};
+
+    my $cmd;
+    if ($type eq 'deparse') {
+        my $perl = "$options->{perl} $options->{testswitch}";
+        my $lib = $options->{lib};
+
+        $cmd = (
+          "$perl $options->{switch} -I$lib -MO=-qq,Deparse,-sv1.,".
+          "-l$::deparse_opts$options->{file} ".
+          "$test > $test.dp ".
+          "&& $perl $options->{switch} -I$lib $test.dp"
+        );
+    }
+    elsif ($type eq 'perl') {
+        my $perl = $options->{perl};
+        my $redir = $^O eq 'VMS' ? '2>&1' : '';
+
+        if ($ENV{PERL_VALGRIND}) {
+            my $valgrind = $ENV{VALGRIND} // 'valgrind';
+            my $vg_opts = $ENV{VG_OPTS}
+              //  "--suppressions=perl.supp --leak-check=yes "
+                . "--leak-resolution=high --show-reachable=yes "
+                  . "--num-callers=50";
+            $perl = "$valgrind --log-fd=3 $vg_opts $perl";
+            $redir = "3>$Valgrind_Log";
+        }
+
+        my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
+        $cmd = $perl . _quote_args($args) . " $test $redir";
+    }
+
+    return $cmd;
+}
+
 sub _run_test {
     my($harness, $test, $type) = @_;
     if (!defined $type) {
@@ -220,36 +258,9 @@ sub _run_test {
 	chdir $run_dir or die "Can't chdir to '$run_dir': $!";
     }
 
-    my $results;
-    if ($type eq 'deparse') {
-        my $perl = "$options->{perl} $options->{testswitch}";
-        my $lib = $options->{lib};
-        my $deparse_cmd =
-          "$perl $options->{switch} -I$lib -MO=-qq,Deparse,-sv1.,".
-          "-l$::deparse_opts$options->{file} ".
-          "$test > $test.dp ".
-          "&& $perl $options->{switch} -I$lib $test.dp |";
-        open($results, $deparse_cmd)
-          or print "can't deparse '$deparse_cmd': $!.\n";
-    }
-    elsif ($type eq 'perl') {
-        my $perl = $options->{perl};
-        my $redir = $^O eq 'VMS' ? '2>&1' : '';
+    my $cmd = _cmd($options, $type);
 
-        if ($ENV{PERL_VALGRIND}) {
-            my $valgrind = $ENV{VALGRIND} // 'valgrind';
-            my $vg_opts = $ENV{VG_OPTS}
-              //  "--suppressions=perl.supp --leak-check=yes "
-                . "--leak-resolution=high --show-reachable=yes "
-                  . "--num-callers=50"; 
-            $perl = "$valgrind --log-fd=3 $vg_opts $perl";
-            $redir = "3>$Valgrind_Log";
-        }
-
-        my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
-        my $run = $perl . _quote_args($args) . " $test $redir|";
-        open($results, $run) or print "can't run '$run': $!.\n";
-    }
+    open(my $results, "$cmd |") or print "can't run '$cmd': $!.\n";
 
     if ($options->{return_dir}) {
 	my $return_dir = $options->{return_dir};
