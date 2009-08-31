@@ -363,7 +363,7 @@ unpack_sockaddr_un(sun_sv)
 	struct sockaddr_un addr;
 	STRLEN sockaddrlen;
 	char * sun_ad = SvPVbyte(sun_sv,sockaddrlen);
-	char * e;
+	int addr_len;
 #   ifndef __linux__
 	/* On Linux sockaddrlen on sockets returned by accept, recvfrom,
 	   getpeername and getsockname is not equal to sizeof(addr). */
@@ -382,13 +382,17 @@ unpack_sockaddr_un(sun_sv)
 			addr.sun_family,
 			AF_UNIX);
 	}
-	e = (char*)addr.sun_path;
-	/* On Linux, the name of abstract unix domain sockets begins
-	 * with a '\0', so allow this. */
-	while ((*e || (e == addr.sun_path && e[1] && sockaddrlen > 1))
-		&& e < (char*)addr.sun_path + sizeof addr.sun_path)
-	    ++e;
-	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - (char*)addr.sun_path));
+
+	if (addr.sun_path[0] == '\0') {
+		/* Linux-style abstract socket address begins with a nul
+		 * and can contain nuls. */
+		addr_len = (void *)&addr - (void *)&addr.sun_path + sockaddrlen;
+	} else {
+		for (addr_len = 0; addr.sun_path[addr_len]
+		     && addr_len < sizeof addr.sun_path; addr_len++);
+	}
+
+	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, addr_len));
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif

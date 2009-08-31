@@ -150,7 +150,7 @@ print (($@ =~ /^Bad arg length for Socket::sockaddr_family, length is 0, should 
 
 if ($^O eq 'linux') {
     # see if we can handle abstract sockets
-    my $test_abstract_socket = chr(0) . '/tmp/test-perl-socket';
+    my $test_abstract_socket = chr(0) . '/org/perl/hello'. chr(0) . 'world';
     my $addr = sockaddr_un ($test_abstract_socket);
     my ($path) = sockaddr_un ($addr);
     if ($test_abstract_socket eq $path) {
