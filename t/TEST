@@ -164,9 +164,46 @@ sub _scan_test {
         }
     }
 
-    return { file => $file_opts, switch => $switch };
+    close $script;
+
+    my $perl = './perl';
+    my $lib  = '../lib';
+    my $run_dir;
+    my $return_dir;
+
+    $test =~ /^(.+)\/[^\/]+/;
+    my $dir = $1;
+    my $testswitch = $dir_to_switch{$dir};
+    if (!defined $testswitch) {
+	if ($test =~ s!^(\.\./ext/[^/]+)/t!t!) {
+	    $run_dir = $1;
+	    $return_dir = '../../t';
+	    $lib = '../../lib';
+	    $perl = '../../t/perl';
+	    $testswitch = "-I../.. -MTestInit=U2T,A";
+	    if ($temp_no_core{$run_dir}) {
+		$testswitch = $testswitch . ',NC';
+	    }
+	} else {
+	    $testswitch = '-I.. -MTestInit';  # -T will remove . from @INC
+	}
+    }
+
+    my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
+
+    return {
+	perl => $perl,
+	lib => $lib,
+	test => $test,
+	run_dir => $run_dir,
+	return_dir => $return_dir,
+	testswitch => $testswitch,
+	utf8 => $utf8,
+	file => $file_opts,
+	switch => $switch,
+    };
 }
-		  
+
 sub _run_test {
     my($harness, $test, $type) = @_;
     if (!defined $type) {
@@ -175,44 +212,28 @@ sub _run_test {
     }
 
     my $options = _scan_test($test, $type);
-    my $return_dir;
 
-    my $perl = './perl';
-    my $lib  = '../lib';
-    $test =~ /^(.+)\/[^\/]+/;
-    my $dir = $1;
-    my $ext_dir;
+    $test = $options->{test}; # Might have changed if we're in ext/Foo
 
-    my $testswitch = $dir_to_switch{$dir};
-    if (!defined $testswitch) {
-	if ($test =~ s!^(\.\./ext/[^/]+)/t!t!) {
-	    $ext_dir = $1;
-	    $return_dir = '../../t';
-	    $lib = '../../lib';
-	    $perl = '../../t/perl';
-	    $testswitch = "-I../.. -MTestInit=U2T,A";
-	    if ($temp_no_core{$ext_dir}) {
-		$testswitch = $testswitch . ',NC';
-	    }
-	    chdir $ext_dir or die "Can't chdir to '$ext_dir': $!";
-	} else {
-	    $testswitch = '-I.. -MTestInit';  # -T will remove . from @INC
-	}
+    if ($options->{run_dir}) {
+	my $run_dir = $options->{run_dir};
+	chdir $run_dir or die "Can't chdir to '$run_dir': $!";
     }
-
-    my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
 
     my $results;
     if ($type eq 'deparse') {
+        my $perl = "$options->{perl} $options->{testswitch}";
+        my $lib = $options->{lib};
         my $deparse_cmd =
-          "$perl $testswitch $options->{switch} -I$lib -MO=-qq,Deparse,-sv1.,".
+          "$perl $options->{switch} -I$lib -MO=-qq,Deparse,-sv1.,".
           "-l$::deparse_opts$options->{file} ".
           "$test > $test.dp ".
-          "&& $perl $testswitch $options->{switch} -I$lib $test.dp |";
+          "&& $perl $options->{switch} -I$lib $test.dp |";
         open($results, $deparse_cmd)
           or print "can't deparse '$deparse_cmd': $!.\n";
     }
     elsif ($type eq 'perl') {
+        my $perl = $options->{perl};
         my $redir = $^O eq 'VMS' ? '2>&1' : '';
 
         if ($ENV{PERL_VALGRIND}) {
@@ -225,14 +246,15 @@ sub _run_test {
             $redir = "3>$Valgrind_Log";
         }
 
-        my $run = $perl . _quote_args("$testswitch $options->{switch} $utf8")
-          . " $test $redir|";
+        my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
+        my $run = $perl . _quote_args($args) . " $test $redir|";
         open($results, $run) or print "can't run '$run': $!.\n";
     }
 
-    if ($return_dir) {
+    if ($options->{return_dir}) {
+	my $return_dir = $options->{return_dir};
 	chdir $return_dir
-	    or die "Can't chdir from '$ext_dir' to '$return_dir': $!";
+	   or die "Can't chdir from '$options->{run_dir}' to '$return_dir': $!";
     }
 
     # Our environment may force us to use UTF-8, but we can't be sure that
