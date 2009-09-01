@@ -201,12 +201,29 @@ if ($^O eq 'MSWin32') {
 @tests=grep /$re/, @tests 
     if $re;
 
+my %options;
+
+my $type = 'perl';
+
+# Load TAP::Parser now as otherwise it could be required in the short time span
+# in which the harness process chdirs into ext/Dist
+require TAP::Parser;
+
 my $h = TAP::Harness->new({
     rules       => $rules,
     color       => $color,
     jobs        => $jobs,
     verbosity   => $Verbose,
-    exec        => \&_run_test,
+    exec        => sub {
+	my ($harness, $test) = @_;
+
+	my $options = $options{$test};
+	if (!defined $options) {
+	    $options = $options{$test} = _scan_test($test, $type);
+	}
+
+	return [ split ' ', _cmd($options, $type) ];
+    },
 });
 
 if ($state) {
@@ -224,9 +241,21 @@ if ($state) {
 
 $h->callback(
 	     parser_args => sub {
-		 my ( $args, $test ) = @_;
-		 push @{ $args->{switches} }, '-I../lib';
+		 my ($args, $job) = @_;
+		 my $test = $job->[0];
+		 _before_fork($options{$test});
+		 push @{ $args->{switches} }, "-I../../lib";
 	     }
 	     );
+
+$h->callback(
+	     made_parser => sub {
+		 my ($parser, $job) = @_;
+		 my $test = $job->[0];
+		 my $options = delete $options{$test};
+		 _after_fork($options);
+	     }
+	     );
+
 $h->runtests(@tests);
 exit(0);
