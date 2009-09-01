@@ -191,7 +191,7 @@ sub _scan_test {
 
     my $utf8 = $::with_utf8 ? '-I$lib -Mutf8' : '';
 
-    return {
+    my %options = (
 	perl => $perl,
 	lib => $lib,
 	test => $test,
@@ -201,7 +201,9 @@ sub _scan_test {
 	utf8 => $utf8,
 	file => $file_opts,
 	switch => $switch,
-    };
+    );
+
+    return \%options;
 }
 
 sub _cmd {
