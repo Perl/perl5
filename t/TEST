@@ -268,15 +268,11 @@ sub _after_fork {
 }
 
 sub _run_test {
-    my($harness, $test, $type) = @_;
-    if (!defined $type) {
-	# To conform to the interface expected by exec in TAP::Harness
-	$type = 'perl';
-    }
+    my ($test, $type) = @_;
 
     my $options = _scan_test($test, $type);
-
-    $test = $options->{test}; # Might have changed if we're in ext/Foo
+    # $test might have changed if we're in ext/Foo, so don't use it anymore
+    # from now on. Use $options->{test} instead.
 
     _before_fork($options);
 
@@ -486,7 +482,7 @@ EOT
 	    $te = '';
 	}
 
-        my $results = _run_test(undef, $test, $type);
+	my $results = _run_test($test, $type);
 
 	my $failure;
 	my $next = 0;
