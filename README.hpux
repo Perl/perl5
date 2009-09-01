@@ -122,12 +122,9 @@ ends as shown in the following table:
  | cores  |                | PA-8900/rp34x0 | 2014            |
  +--------+----------------+----------------+-----------------+
 
-From http://www.hp.com/products1/evolution/9000/eol_announcement.html:
+From http://www.hp.com/products1/evolution/9000/faqs.html:
 
- The last order date for HP9000 PA-RISC systems is planned for
- December 31, 2008 and ship date of April 1, 2009. Operating system
- releases for HP-UX will continue shipping past the HP9000 systems
- last order date.
+ The last order date for HP 9000 systems was December 31, 2008.
 
 A complete list of models at the time the OS was built is in the file
 /usr/sam/lib/mo/sched.models. The first column corresponds to the last

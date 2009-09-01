@@ -1530,7 +1530,7 @@ Be OS, F<README.beos>
 =item *
 
 HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
-http://www.bixby.org/mark/perlix.html
+http://www.bixby.org/mark/porting.html
 
 =item *
 
@@ -2145,7 +2145,7 @@ Not useful. (S<RISC OS>)
 
 As of July 2002 (the Perl release 5.8.0), the following platforms are
 able to build Perl from the standard source code distribution
-available at http://www.cpan.org/src/index.html
+available at http://www.cpan.org/src/
 
         AIX
         BeOS

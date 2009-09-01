@@ -901,8 +901,8 @@ link386 prompts, press C<Ctrl-C> to exit.
 You need to fetch the latest perl source (including developers
 releases). With some probability it is located in 
 
-  http://www.cpan.org/src/5.0
-  http://www.cpan.org/src/5.0/unsupported
+  http://www.cpan.org/src/
+  http://www.cpan.org/src/unsupported
 
 If not, you may need to dig in the indices to find it in the directory
 of the current maintainer.

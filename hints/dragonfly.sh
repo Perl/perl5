@@ -3,7 +3,7 @@
 # This file is mostly copied from hints/freebsd.sh with the OS version
 # information taken out and only the FreeBSD-4 information intact.
 # Please check with Todd Willey <xtoddx@gmail.com> before making
-# modifications to this file. See http://www.dragonflybsd.org/main/
+# modifications to this file. See http://www.dragonflybsd.org/
 
 case "$osvers" in
 *)  usevfork='true'

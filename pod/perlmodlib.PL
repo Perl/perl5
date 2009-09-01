@@ -1342,7 +1342,7 @@ Follow the instructions and links on:
 or upload to one of these sites:
 
    https://pause.kbx.de/pause/
-   http://pause.perl.org/pause/
+   http://pause.perl.org/
 
 and notify <modules@perl.org>.
 
