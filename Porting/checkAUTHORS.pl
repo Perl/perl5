@@ -618,9 +618,9 @@ public\100khwilliamson.com              khw\100karl.(none)
 radu\100netsoft.ro                      rgreab\100fx.ro
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
 renee.baecker\100smart-websolutions.de		reneeb\100reneeb-desktop.(none)
-richard.foley\100ubsw.com               richard.foley\100t-online.de
+richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
-+                                       richard.foley\100rfi.net
++                                       richard.foley\100ubsw.com
 rick\100consumercontact.com             rick\100bort.ca
 +                                       rick.delaney\100rogers.com
 +                                       rick\100bort.ca
