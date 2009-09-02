@@ -5,9 +5,15 @@ package bigint;
 #
 # In particular, this should not be used as an example of modern Perl
 # programming techniques.
+# This legacy library is deprecated and will be removed in a future
+# release of perl.
 #
 # Suggested alternative:  Math::BigInt
-#
+
+warn( "The 'bigint.pl' legacy library is deprecated and will be"
+      . " removed in the next major release of perl. Please use the"
+      . " Math::BigInt module instead." );
+
 # arbitrary size integer math package
 #
 # by Mark Biggar
