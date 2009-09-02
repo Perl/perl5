@@ -41,7 +41,7 @@ my @pats=(
 	    "[:^space:]",
 	    "[:blank:]",
 	    "[:^blank:]" );
-if (not $ENV{REAL_POSIX_CC}) {
+if ($ENV{PERL_TEST_LEGACY_POSIX_CC}) {
     $::TODO = "Only works under PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS = 0";
 }
 

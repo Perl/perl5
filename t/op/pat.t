@@ -2061,11 +2061,11 @@ sub run_tests {
         local $Message = "No SEGV in s/// and UTF-8";
         my $s = "s#\x{100}" x 4;
         ok $s =~ s/[^\w]/ /g;
-        if ($ENV {REAL_POSIX_CC}) {
-            iseq $s, "s  " x 4;
+        if ( $ENV{PERL_TEST_LEGACY_POSIX_CC} ) {
+            iseq $s, "s \x{100}" x 4;
         }
         else {
-            iseq $s, "s \x{100}" x 4;
+            iseq $s, "s  " x 4;
         }
     }
 
@@ -4012,7 +4012,7 @@ sub run_tests {
         };
         skip "Eval failed ($@)", 1 if $@;
         skip "PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS set to 0", 1
-              if $ENV {REAL_POSIX_CC};
+              if !$ENV{PERL_TEST_LEGACY_POSIX_CC};
         iseq join ('', @isPunctLatin1), '', 
             'IsPunct agrees with [:punct:] with explicit Latin1';
     } 
