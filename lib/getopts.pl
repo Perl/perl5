@@ -7,7 +7,11 @@
 # programming techniques.
 #
 # Suggested alternatives: Getopt::Long  or  Getopt::Std
-#
+
+warn( "The 'getopts.pl' legacy library is deprecated and will be"
+      . " removed in the next major release of perl. Please use the"
+      . " Getopt::Long or Getopt::Std module instead." );
+
 ;# Usage:
 ;#      do Getopts('a:bc');  # -a takes arg. -b & -c not. Sets opt_* as a
 ;#                           #  side effect.
