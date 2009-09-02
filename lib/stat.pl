@@ -1,8 +1,15 @@
+;# This legacy library is deprecated and will be removed in a future
+;# release of perl.
+;#
 ;# Usage:
 ;#	require 'stat.pl';
 ;#	@ary = stat(foo);
 ;#	$st_dev = @ary[$ST_DEV];
 ;#
+
+warn( "The 'stat.pl' legacy library is deprecated and will be"
+      . " removed in the next major release of perl." );
+
 $ST_DEV =	0 + $[;
 $ST_INO =	1 + $[;
 $ST_MODE =	2 + $[;
