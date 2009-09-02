@@ -11,6 +11,61 @@ the 5.11.0 development release.
 
 =head1 Incompatible Changes
 
+=head2 Unicode interpretation of \w, \d, \s, and the POSIX character classes redefined.
+
+Previous versions of Perl tried to map POSIX style character class definitions onto
+Unicode property names so that patterns would "dwim" when matches were made against latin-1 or
+unicode strings. This proved to be a mistake, breaking character class negation, causing
+forward compatibility problems (as Unicode keeps updating their property definitions and adding
+new characters), and other problems.
+
+Therefore we have now defined a new set of artificial "unicode" property names which will be
+used to do unicode matching of patterns using POSIX style character classes and perl short-form
+escape character classes like \w and \d.
+
+The key change here is that \d will no longer match every digit in the unicode standard
+(there are thousands) nor will \w match every word character in the standard, instead they
+will match precisely their POSIX or Perl definition.
+
+Those needing to match based on Unicode properties can continue to do so by using the \p{} syntax
+to match whichever property they like, including the new artificial definitions.
+
+B<NOTE:> This is a backwards incompatible no-warning change in behaviour. If you are upgrading
+and you process large volumes of text look for POSIX and Perl style character classes and
+change them to the relevent property name (by removing the word 'Posix' from the current name).
+
+The following table maps the POSIX character class names, the escapes and the old and new
+Unicode property mappings:
+
+    POSIX  Esc  Class               New-Property  ! Old-Property
+    ----------------------------------------------+-------------
+    alnum       [0-9A-Za-z]         IsPosixAlnum  ! IsAlnum
+    alpha       [A-Za-z]            IsPosixAlpha  ! IsAlpha
+    ascii       [\000-\177]         IsASCII       = IsASCII
+    blank       [\011 ]             IsPosixBlank  !
+    cntrl       [\0-\37\177]        IsPosixCntrl  ! IsCntrl
+    digit   \d  [0-9]               IsPosixDigit  ! IsDigit
+    graph       [!-~]               IsPosixGraph  ! IsGraph
+    lower       [a-z]               IsPosixLower  ! IsLower
+    print       [ -~]               IsPosixPrint  ! IsPrint
+    punct       [!-/:-@[-`{-~]      IsPosixPunct  ! IsPunct
+    space       [\11-\15 ]          IsPosixSpace  ! IsSpace
+            \s  [\11\12\14\15 ]     IsPerlSpace   ! IsSpacePerl
+    upper       [A-Z]               IsPosixUpper  ! IsUpper
+    word    \w  [0-9A-Z_a-z]        IsPerlWord    ! IsWord
+    xdigit      [0-9A-Fa-f]         IsXDigit      = IsXDigit
+
+If you wish to build perl with the old mapping you may do so by setting
+
+	#define PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS 1
+
+in regcomp.h, and then setting
+
+	PERL_TEST_LEGACY_POSIX_CC
+
+to true your enviornment when testing.
+
+
 =head2 In @INC, move ARCHLIB and PRIVLIB after the current version's site_perl and vendor_perl.
 
 =head2 Switch statement changes
@@ -2292,5 +2347,8 @@ Use a default of /tmp on Unixes when TMPDIR is unset or empty, or
 when creation of a temporary file in it fails
 
 =head2 Add a pluggable hook in op_free()
+
+
+
 
 
