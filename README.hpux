@@ -41,9 +41,9 @@ of Perl and the updated modules.
 
 The official (threaded) builds from HP, as they are shipped on the
 Application DVD/CD's are available on
-http://www.software.hp.com/cgi-bin/swdepot_parser.cgi/cgi/displayProductInfo.pl?productNumber=PERL
+http://www.software.hp.com/portal/swdepot/displayProductInfo.do?productNumber=PERL
 for both PA-RISC and IPF (Itanium Processor Family). They are built
-with the HP ANSI-C compiler by ActiveState.
+with the HP ANSI-C compiler. Up till 5.8.8 that was done by ActiveState.
 
 To see what version is included on the DVD (assumed here to be mounted
 on /cdrom), issue this command:
