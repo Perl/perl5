@@ -21,7 +21,7 @@ k2.2 = \x{2022}
 EXPECT
     utf8::encode($expect);
 
-    local $TODO = "[perl #60508]";
+    #local $TODO = "[perl #60508]";
 
     fresh_perl_is(<<'CODE', $expect, {});
 binmode STDOUT, ":utf8";
