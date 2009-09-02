@@ -724,6 +724,8 @@ ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
 ext/Fcntl/t/fcntl.t	See if Fcntl works
 ext/Fcntl/t/mode.t	See if S_ISREG() and S_ISDIR() work
 ext/Fcntl/t/syslfs.t	See if large files work for sysio
+ext/File-Fetch/lib/File/Fetch.pm	File::Fetch
+ext/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 ext/File-Glob/bsd_glob.c	File::Glob extension run time code
 ext/File-Glob/bsd_glob.h	File::Glob extension header file
 ext/File-Glob/Changes		File::Glob extension changelog
@@ -2500,8 +2502,6 @@ lib/File/Copy.pm		Emulation of cp command
 lib/File/Copy.t			See if File::Copy works
 lib/File/DosGlob.pm		Win32 DOS-globbing module
 lib/File/DosGlob.t		See if File::DosGlob works
-lib/File/Fetch.pm	File::Fetch
-lib/File/Fetch/t/01_File-Fetch.t	File::Fetch tests
 lib/File/Find.pm		Routines to do a find
 lib/File/Find/t/find.t		See if File::Find works
 lib/File/Find/t/taint.t		See if File::Find works with taint

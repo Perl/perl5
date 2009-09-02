@@ -20,6 +20,7 @@
 /Errno.pm
 /ExtUtils/Miniperl.pm
 /Fcntl.pm
+/File/Fetch.pm
 /File/Glob.pm
 /File/GlobMapper.pm
 /Filter/Simple.pm

@@ -744,7 +744,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/File-Fetch-0.20.tar.gz',
-	'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
+	'FILES'		=> q[ext/File-Fetch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
