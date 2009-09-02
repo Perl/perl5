@@ -80,7 +80,7 @@ my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
 $tests += @years;
-$tests += 23;
+$tests += 21;
 
 plan tests => $tests;
 
@@ -255,22 +255,4 @@ SKIP:
 
     is( ( localtime( timelocal( 0, 0, 2, 27, 2, 2005 ) ) )[2], 2,
         'hour is 2 when given 2:00 AM on Europe/London date change' );
-}
-
-SKIP:
-{
-    skip 'These tests are only run when $ENV{PERL_CORE} is true.', 2
-        unless $ENV{PERL_CORE};
-
-    {
-        package test;
-        require 'timelocal.pl';
-
-        # need to get ok() from main package
-        ::is(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
-             'timegm in timelocal.pl');
-
-        ::is(timelocal(1,2,3,4,5,88), main::timelocal(1,2,3,4,5,88),
-             'timelocal in timelocal.pl');
-    }
 }
