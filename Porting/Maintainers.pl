@@ -1250,7 +1250,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Package-Constants-0.02.tar.gz',
-	'FILES'		=> q[lib/Package/Constants lib/Package/Constants.pm],
+	'FILES'		=> q[ext/Package-Constants],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

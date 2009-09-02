@@ -27,6 +27,7 @@ ppport.h
 /mro/Makefile.PL
 /Net-Ping/Makefile.PL
 /Opcode/Makefile.PL
+/Package-Constants/Makefile.PL
 /PerlIO-encoding/Makefile.PL
 /PerlIO-scalar/Makefile.PL
 /PerlIO-via/Makefile.PL
