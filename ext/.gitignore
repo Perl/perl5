@@ -44,6 +44,7 @@ ppport.h
 /Text-Soundex/Makefile.PL
 /Thread-Queue/Makefile.PL
 /Thread-Semaphore/Makefile.PL
+/Tie-File/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing
 *.swp

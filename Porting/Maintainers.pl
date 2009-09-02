@@ -1824,7 +1824,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'mjd',
 	'DISTRIBUTION'	=> 'MJD/Tie-File-0.96.tar.gz',
-	'FILES'		=> q[lib/Tie/File.pm lib/Tie/File],
+	'FILES'		=> q[ext/Tie-File],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

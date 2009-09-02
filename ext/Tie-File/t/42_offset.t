@@ -12,11 +12,6 @@ my $file = "tf$$.txt";
 BEGIN
   {
   $| = 1;
-  if ($ENV{PERL_CORE})
-    {
-    # testing with the core distribution
-    @INC = ( File::Spec->catdir(File::Spec->updir, 't', 'lib') );
-    }
   unshift @INC, File::Spec->catdir(File::Spec->updir, 'lib');
   chdir 't' if -d 't';
   print "# INC = @INC\n";

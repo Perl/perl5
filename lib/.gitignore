@@ -84,6 +84,7 @@
 /Text/Balanced.pm
 /Text/Soundex.pm
 /Thread
+/Tie/File.pm
 /Time/HiRes.pm
 /Time/Piece.pm
 /Time/Seconds.pm
