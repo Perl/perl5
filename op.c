@@ -7702,20 +7702,15 @@ Perl_ck_shift(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SHIFT;
 
     if (!(o->op_flags & OPf_KIDS)) {
-	OP *argop;
-	/* FIXME - this can be refactored to reduce code in #ifdefs  */
-#ifdef PERL_MAD
-	OP * const oldo = o;
-#else
-	op_free(o);
-#endif
-	argop = newUNOP(OP_RV2AV, 0,
+	OP *argop = newUNOP(OP_RV2AV, 0,
 	    scalar(newGVOP(OP_GV, 0, CvUNIQUE(PL_compcv) ? PL_argvgv : PL_defgv)));
 #ifdef PERL_MAD
+	OP * const oldo = o;
 	o = newUNOP(type, 0, scalar(argop));
 	op_getmad(oldo,o,'O');
 	return o;
 #else
+	op_free(o);
 	return newUNOP(type, 0, scalar(argop));
 #endif
     }
