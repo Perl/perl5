@@ -1,27 +1,11 @@
 #!./perl
 
-BEGIN {
-   if( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = qw(../lib);
-    }
-}
-
-use FileCache maxopen=>2;
-use Test;
+use FileCache maxopen => 2;
 use vars qw(@files);
-BEGIN {
-    @files = qw(foo bar baz quux);
-    chdir 't' if -d 't';
+BEGIN { @files = qw(foo bar baz quux) }
+END { 1 while unlink @files }
 
-    #For tests within the perl distribution
-    @INC = '../lib' if -d '../lib';
-    END;
-    plan tests=>5;
-}
-END{
-  1 while unlink @files;
-}
+use Test::More tests => 5;
 
 {# Test 2: that we actually adhere to maxopen
   for my $path ( @files ){

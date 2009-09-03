@@ -1,27 +1,11 @@
 #!./perl
 
-BEGIN {
-   if( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = qw(../lib);
-    }
-}
-
-use FileCache maxopen=>2;
+use FileCache maxopen => 2;
 use vars qw(@files);
-BEGIN {
-    @files = qw(foo bar baz quux Foo_Bar);
-    chdir 't' if -d 't';
+BEGIN { @files = qw(foo bar baz quux Foo_Bar) }
+END   { 1 while unlink @files }
 
-    #For tests within the perl distribution
-    @INC = '../lib' if -d '../lib';
-    END;
-}
-END{
-  1 while unlink @files;
-}
-
-print "1..2\n";
+use Test::More tests => 2;
 
 {# Test 3: that we open for append on second viewing
      my @cat;
@@ -38,8 +22,9 @@ print "1..2\n";
 	 push @cat, do{ local $/; <$path>};
          close($path);
      }
-     print 'not ' unless scalar grep(/\b3$/m, @cat) == scalar @files;
-     print "ok 1\n";
+
+     ok(scalar(grep/\b3$/m, @cat) == scalar(@files));
+
      @cat = ();
      for my $path ( @files ){
 	 cacheout $path;
@@ -50,6 +35,5 @@ print "1..2\n";
 	 push @cat, do{ local $/; <$path>};
          close($path);
      }
-     print 'not ' unless scalar grep(/\b33$/m, @cat) == scalar @files;
-     print "ok 2\n";
+     ok(scalar(grep /\b33$/m, @cat) == scalar(@files));
 }

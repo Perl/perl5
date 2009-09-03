@@ -726,6 +726,14 @@ ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
 ext/Fcntl/t/fcntl.t	See if Fcntl works
 ext/Fcntl/t/mode.t	See if S_ISREG() and S_ISDIR() work
 ext/Fcntl/t/syslfs.t	See if large files work for sysio
+ext/FileCache/lib/FileCache.pm	Keep more files open than the system permits
+ext/FileCache/t/01open.t	See if FileCache works
+ext/FileCache/t/02maxopen.t	See if FileCache works
+ext/FileCache/t/03append.t	See if FileCache works
+ext/FileCache/t/04twoarg.t	See if FileCache works
+ext/FileCache/t/05override.t	See if FileCache works
+ext/FileCache/t/06export.t	See if FileCache exporting works
+ext/FileCache/t/07noimport.t	See if FileCache works without importing
 ext/File-Fetch/lib/File/Fetch.pm	File::Fetch
 ext/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 ext/File-Glob/bsd_glob.c	File::Glob extension run time code
@@ -2486,14 +2494,6 @@ lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
-lib/FileCache.pm		Keep more files open than the system permits
-lib/FileCache/t/01open.t	See if FileCache works
-lib/FileCache/t/02maxopen.t	See if FileCache works
-lib/FileCache/t/03append.t	See if FileCache works
-lib/FileCache/t/04twoarg.t	See if FileCache works
-lib/FileCache/t/05override.t	See if FileCache works
-lib/FileCache/t/06export.t	See if FileCache exporting works
-lib/FileCache/t/07noimport.t	See if FileCache works without importing
 lib/File/CheckTree.pm		Perl module supporting wholesale file mode validation
 lib/File/CheckTree.t		See if File::CheckTree works
 lib/File/Compare.pm		Emulation of cmp command

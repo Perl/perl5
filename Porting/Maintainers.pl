@@ -2047,6 +2047,8 @@ package Maintainers;
 				ext/Errno
 				ext/Fcntl/
 				ext/File-Glob/
+				ext/FileCache/lib
+				ext/FileCache/t
 				ext/GDBM_File/
 				ext/Hash-Util-FieldHash/
 				ext/Hash-Util/
@@ -2095,8 +2097,6 @@ package Maintainers;
 				lib/File/Find.pm
 				lib/File/Find/
 				lib/File/stat.{pm,t}
-				lib/FileCache.pm
-				lib/FileCache/
 				lib/FileHandle.{pm,t}
 				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}

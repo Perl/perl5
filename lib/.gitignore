@@ -21,6 +21,7 @@
 /Errno.pm
 /ExtUtils/Miniperl.pm
 /Fcntl.pm
+/FileCache.pm
 /File/Fetch.pm
 /File/Glob.pm
 /File/GlobMapper.pm

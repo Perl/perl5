@@ -1,14 +1,6 @@
 #!./perl -w
 
-BEGIN {
-   if( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = qw(../lib);
-    }
-}
-
-require './test.pl';
-plan( tests => 1 );
+use Test::More tests => 1;
 
 # Try using FileCache without importing to make sure everything's 
 # initialized without it.

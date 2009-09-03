@@ -20,6 +20,7 @@ ppport.h
 /B-Deparse/Makefile.PL
 /B-Lint/Makefile.PL
 /Data-Dumper/Makefile.PL
+/FileCache/Makefile.PL
 /File-Fetch/Makefile.PL
 /Filter-Simple/Makefile.PL
 /Filter-Util-Call/Makefile.PL
