@@ -2796,13 +2796,6 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ ! Build this one only for threads without ithreads
-$ IF F$TYPE(useithreads) .EQS. "" .OR. .NOT. use_threads
-$ THEN
-$   dflt = dflt - "Thread"
-$ ELSE
-$   IF useithreads .OR. useithreads .EQS. "define" THEN dflt = dflt - "Thread"
-$ ENDIF
 $ dflt = dflt - "Win32API/File" - "Win32CORE" - "Win32"  ! need Dave Cutler's other project
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
