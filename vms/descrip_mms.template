@@ -1453,12 +1453,6 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsfspec.t : [.vms.ext]filespec.t
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-[.t.lib]vms_dclsym.t : [.vms.ext.DCLsym]test.pl
-	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
-
-[.t.lib]vms_stdio.t : [.vms.ext.Stdio]test.pl
-	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
-
 unpack_files :
 	- $(MINIPERL) uupacktool.pl -u -m
 
@@ -1468,12 +1462,12 @@ cleanup_unpacked_files :
 check : test
 	@ Continue
 
-test : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t unpack_files
+test : all [.t.lib]vmsfspec.t unpack_files
 	@ PERL_TEST_DRIVER == "TEST."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-test_harness : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t unpack_files
+test_harness : all [.t.lib]vmsfspec.t unpack_files
 	@ PERL_TEST_DRIVER == "harness."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
@@ -1922,8 +1916,6 @@ realclean : clean
 	- If F$Search("[.t]test_state.").nes."" Then Delete/NoConfirm/Log [.t]test_state.;*
 	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
-	- If F$Search("[.t.lib]vms_dclsym.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_dclsym.t;*
-	- If F$Search("[.t.lib]vms_stdio.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_stdio.t;*
 	- If F$Search("vmspipe.com").nes."" Then Delete/NoConfirm/Log vmspipe.com;*
 
 cleansrc : clean

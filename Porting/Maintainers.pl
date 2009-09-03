@@ -1926,6 +1926,22 @@ package Maintainers;
 	'UPSTREAM'	=> undef,
 	},
 
+    'VMS::DCLsym' =>
+	{
+	'MAINTAINER'	=> 'craig',
+	'FILES'		=> q[ext/VMS-DCLsym],
+	'CPAN'		=> 0,
+	'UPSTREAM'	=> undef,
+	},
+
+    'VMS::Stdio' =>
+	{
+	'MAINTAINER'	=> 'craig',
+	'FILES'		=> q[ext/VMS-Stdio],
+	'CPAN'		=> 0,
+	'UPSTREAM'	=> undef,
+	},
+
     'warnings' =>
 	{
 	'MAINTAINER'	=> 'pmqs',

@@ -1736,6 +1736,16 @@ ext/Unicode-Normalize/t/proto.t	Unicode::Normalize
 ext/Unicode-Normalize/t/split.t	Unicode::Normalize
 ext/Unicode-Normalize/t/test.t	Unicode::Normalize
 ext/Unicode-Normalize/t/tie.t	Unicode::Normalize
+ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
+ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
+ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols
+ext/VMS-DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
+ext/VMS-DCLsym/t/vms_dclsym.t	regression tests for VMS::DCLsym
+ext/VMS-Stdio/0README.txt	ReadMe file for VMS::Stdio
+ext/VMS-Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
+ext/VMS-Stdio/Stdio.pm		VMS options to stdio routines
+ext/VMS-Stdio/Stdio.xs		VMS options to stdio routines
+ext/VMS-Stdio/t/vms_stdio.t	regression tests for VMS::Stdio
 ext/Win32API-File/buffers.h	Win32API::File extension
 ext/Win32API-File/cFile.h	Win32API::File extension
 ext/Win32API-File/cFile.pc	Win32API::File extension
@@ -4494,18 +4504,8 @@ vmesa/Makefile			VM/ESA Makefile
 vmesa/vmesa.c			VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h		VM/ESA-specific C header for Perl core
 vms/descrip_mms.template	Template MM[SK] description file for build
-vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
-vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
-vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
-vms/ext/DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
-vms/ext/DCLsym/test.pl		regression tests for VMS::DCLsym
 vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
 vms/ext/filespec.t		See if VMS::Filespec functions work
-vms/ext/Stdio/0README.txt	ReadMe file for VMS::Stdio
-vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
-vms/ext/Stdio/Stdio.pm		VMS options to stdio routines
-vms/ext/Stdio/Stdio.xs		VMS options to stdio routines
-vms/ext/Stdio/test.pl		regression tests for VMS::Stdio
 vms/genopt.com			hack to write options files in case of broken makes
 vms/gen_shrfls.pl		generate options files and glue for shareable image
 vms/make_command.com		record MM[SK] command used to build Perl
