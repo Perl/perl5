@@ -81,6 +81,8 @@ ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
+ext/autouse/lib/autouse.pm	Load and call a function only when it's used
+ext/autouse/t/autouse.t		See if autouse works
 ext/base/Changes		base.pm changelog
 ext/base/lib/base.pm		Establish IS-A relationship at compile time
 ext/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
@@ -2037,8 +2039,6 @@ lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 lib/AutoSplit.pm		Split up autoload functions
-lib/autouse.pm			Load and call a function only when it's used
-lib/autouse.t			See if autouse works
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package

@@ -14,6 +14,7 @@ ppport.h
 !/XS-Typemap/stdio.c
 /Attribute-Handlers/Makefile.PL
 /attributes/Makefile.PL
+/autouse/Makefile.PL
 /base/Makefile.PL
 /B-Debug/Makefile.PL
 /B-Deparse/Makefile.PL

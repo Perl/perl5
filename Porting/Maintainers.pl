@@ -2005,6 +2005,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
+				ext/autouse/lib
+				ext/autouse/t
 				ext/B/B.pm
 				ext/B/typemap
 				ext/B/Makefile.PL
@@ -2144,7 +2146,6 @@ package Maintainers;
 				lib/User/pwent.{pm,t}
 				lib/abbrev.pl
 				lib/assert.pl
-				lib/autouse.{pm,t}
 				lib/bigfloat{.pl,pl.t}
 				lib/bigint{.pl,pl.t}
 				lib/bigrat.pl
