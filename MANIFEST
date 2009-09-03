@@ -1689,6 +1689,8 @@ ext/Tie-File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
 ext/Tie-File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
 ext/Tie-File/t/41_heap.t	Unit tests for Tie::File::Heap
 ext/Tie-File/t/42_offset.t	Unit tests for the offset method
+ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
+ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
 ext/Time-HiRes/Changes		Time::HiRes extension
 ext/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
 ext/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
@@ -3375,8 +3377,6 @@ lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards 
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
-lib/Tie/Memoize.pm		Base class for memoized tied hashes
-lib/Tie/Memoize.t		Test for Memoize.t
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 lib/Tie/RefHash/rebless.t	Test for Tie::RefHash with rebless
 lib/Tie/RefHash/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable

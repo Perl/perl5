@@ -2063,6 +2063,7 @@ package Maintainers;
 				ext/SDBM_File/
 				ext/Socket/
 				ext/Sys-Hostname/
+				ext/Tie-Memoize/
 				ext/XS-APItest/
 				ext/XS-Typemap/
 				ext/attributes/
@@ -2132,7 +2133,6 @@ package Maintainers;
 				lib/Tie/Handle/
 				lib/Tie/Hash.pm
 				lib/Tie/Hash/NamedCapture.pm
-				lib/Tie/Memoize.{pm,t}
 				lib/Tie/Scalar.{pm,t}
 				lib/Tie/StdHandle.pm
 				lib/Tie/SubstrHash.{pm,t}

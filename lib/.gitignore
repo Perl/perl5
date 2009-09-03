@@ -88,6 +88,7 @@
 /Text/Soundex.pm
 /Thread
 /Tie/File.pm
+/Tie/Memoize.pm
 /Time/HiRes.pm
 /Time/Piece.pm
 /Time/Seconds.pm
