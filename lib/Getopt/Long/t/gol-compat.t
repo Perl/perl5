@@ -9,7 +9,17 @@ BEGIN {
     }
 }
 
-require "newgetopt.pl";
+{
+    # Silence the deprecation warnings from newgetopt.pl for the purpose
+    # of testing. These tests will be removed along with newgetopt.pl in
+    # the next major release of perl.
+    local $SIG{__WARN__} = sub {
+        if ($_[0] !~ /deprecated/) {
+            print(STDERR @_);
+        }
+    };
+    require "newgetopt.pl";
+}
 
 print "1..9\n";
 
