@@ -45,6 +45,7 @@
 /IO/Socket.pm
 /IO/Socket
 /IO/Uncompress
+/IPC/Cmd.pm
 /IPC/Msg.pm
 /IPC/Open2.pm
 /IPC/Open3.pm

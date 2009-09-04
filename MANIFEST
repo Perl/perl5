@@ -983,6 +983,12 @@ ext/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
 ext/IO/t/io_utf8.t	See if perlio opens work
 ext/IO/t/io_xs.t		See if XSUB methods from IO work
+ext/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
+ext/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
+ext/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
+ext/IPC-Cmd/t/src/child.pl	IPC::Cmd tests
+ext/IPC-Cmd/t/src/output.pl	IPC::Cmd tests
+ext/IPC-Cmd/t/src/x.tgz	IPC::Cmd tests
 ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
@@ -2605,12 +2611,6 @@ lib/IO/Zlib/t/large.t		Tests for IO::Zlib
 lib/IO/Zlib/t/tied.t		Tests for IO::Zlib
 lib/IO/Zlib/t/uncomp1.t		Tests for IO::Zlib
 lib/IO/Zlib/t/uncomp2.t		Tests for IO::Zlib
-lib/IPC/Cmd.pm			IPC::Cmd
-lib/IPC/Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
-lib/IPC/Cmd/t/02_Interactive.t	IPC::Cmd tests
-lib/IPC/Cmd/t/src/child.pl	IPC::Cmd tests
-lib/IPC/Cmd/t/src/output.pl	IPC::Cmd tests
-lib/IPC/Cmd/t/src/x.tgz.packed	IPC::Cmd tests
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
