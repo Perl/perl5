@@ -981,6 +981,8 @@ ext/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
 ext/IO/t/io_utf8.t	See if perlio opens work
 ext/IO/t/io_xs.t		See if XSUB methods from IO work
+ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
+ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-SysV/Changes	IPC::SysV changes
 ext/IPC-SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
 ext/IPC-SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
@@ -2595,8 +2597,6 @@ lib/IPC/Cmd/t/02_Interactive.t	IPC::Cmd tests
 lib/IPC/Cmd/t/src/child.pl	IPC::Cmd tests
 lib/IPC/Cmd/t/src/output.pl	IPC::Cmd tests
 lib/IPC/Cmd/t/src/x.tgz.packed	IPC::Cmd tests
-lib/IPC/Open2.pm		Open a two-ended pipe
-lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
 lib/less.pm			For "use less"

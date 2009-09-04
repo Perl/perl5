@@ -26,6 +26,7 @@ ppport.h
 /Filter-Util-Call/Makefile.PL
 /Hash-Util-FieldHash/Makefile.PL
 /I18N-LangTags/Makefile.PL
+/IPC-Open2/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
 /mro/Makefile.PL
 /Net-Ping/Makefile.PL

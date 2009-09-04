@@ -45,6 +45,7 @@
 /IO/Socket
 /IO/Uncompress
 /IPC/Msg.pm
+/IPC/Open2.pm
 /IPC/Semaphore.pm
 /IPC/SharedMem.pm
 /IPC/SysV.pm
