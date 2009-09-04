@@ -38,8 +38,8 @@ ok($pid = open2 'READ', 'WRITE', $perl, '-e',
 	cmd_line('print scalar <STDIN>'));
 ok(print WRITE "hi kid\n");
 ok(<READ> =~ /^hi kid\r?\n$/);
-ok(close(WRITE), $!);
-ok(close(READ), $!);
+ok(close(WRITE), "closing WRITE: $!");
+ok(close(READ), "closing READ: $!");
 $reaped_pid = waitpid $pid, 0;
-ok($reaped_pid == $pid, $reaped_pid);
-ok($? == 0, $?);
+ok($reaped_pid == $pid, "Reaped PID: $reaped_pid");
+ok($? == 0, "\$? should be zero ($?)");
