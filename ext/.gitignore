@@ -29,6 +29,7 @@ ppport.h
 /I18N-LangTags/Makefile.PL
 /IPC-Open2/Makefile.PL
 /IPC-Open3/Makefile.PL
+/Log-Message-Simple/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
 /mro/Makefile.PL
 /Net-Ping/Makefile.PL

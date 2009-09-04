@@ -1017,9 +1017,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Log-Message-Simple-0.04.tar.gz',
-	'FILES'		=> q[lib/Log/Message/Simple.pm
-			     lib/Log/Message/Simple
-			    ],
+	'FILES'		=> q[ext/Log-Message-Simple],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
