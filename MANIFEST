@@ -1246,6 +1246,8 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
+ext/Params-Check/lib/Params/Check.pm	Params::Check
+ext/Params-Check/t/01_Params-Check.t	Params::Check tests
 ext/Package-Constants/lib/Package/Constants.pm	Package::Constants
 ext/Package-Constants/t/01_list.t		Package::Constants tests
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
@@ -2919,8 +2921,6 @@ lib/overloading.t		Tests for overloading.pm
 lib/overload/numbers.pm		Helper for overloading pragma
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
-lib/Params/Check.pm	Params::Check
-lib/Params/Check/t/01_Params-Check.t	Params::Check tests
 lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
 lib/parent/t/compile-time.t	tests for parent.pm

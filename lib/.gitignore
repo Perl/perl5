@@ -73,6 +73,7 @@
 /Object/Accessor.pm
 /Opcode.pm
 /Package/Constants.pm
+/Params/Check.pm
 /POSIX.pm
 /POSIX.pod
 /Pod/Plainer.pm

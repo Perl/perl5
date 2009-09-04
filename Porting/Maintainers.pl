@@ -1255,7 +1255,7 @@ package Maintainers;
 	# For some reason a file of this name appears within
 	# the tarball. Russell's Paradox eat your heart out.
 	'EXCLUDED'	=> [ qw( Params-Check-0.26.tar.gz ) ],
-	'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
+	'FILES'		=> q[ext/Params-Check],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
