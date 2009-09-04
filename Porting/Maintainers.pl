@@ -1186,9 +1186,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Module-Load-Conditional-0.30.tar.gz',
-	'FILES'		=> q[lib/Module/Load/Conditional
-			     lib/Module/Load/Conditional.pm
-			    ],
+	'FILES'		=> q[ext/Module-Load-Conditional],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

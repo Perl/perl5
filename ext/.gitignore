@@ -33,6 +33,7 @@ ppport.h
 /Log-Message/Makefile.PL
 /Log-Message-Simple/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
+/Module-Load-Conditional/Makefile.PL
 /Module-Loaded/Makefile.PL
 /mro/Makefile.PL
 /Net-Ping/Makefile.PL
