@@ -423,9 +423,12 @@ EXPECT
 
 ########
 use strict 'subs';
-sub sayfoo { print "foo:@_\n" }
-system sayfoo "bar";
-system sayfoo . "bar";
+sub sayfoo { print "foo:@_\n" ; "ret\n" }
+print sayfoo "bar";
+print sayfoo . "bar\n";
 EXPECT
 foo:bar
+ret
 foo:
+ret
+bar
