@@ -4,8 +4,7 @@ use strict;
 use Devel::SelfStubber;
 use File::Spec::Functions;
 
-my $runperl = "$^X \"-I../lib\"";
-$runperl =~ s|../lib|::lib:| if $^O eq 'MacOS';
+my $runperl = $^X;
 
 # ensure correct output ordering for system() calls
 
