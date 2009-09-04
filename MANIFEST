@@ -983,6 +983,16 @@ ext/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
 ext/IO/t/io_utf8.t	See if perlio opens work
 ext/IO/t/io_xs.t		See if XSUB methods from IO work
+ext/IO-Zlib/lib/IO/Zlib.pm			IO::Zlib
+ext/IO-Zlib/t/basic.t		Tests for IO::Zlib
+ext/IO-Zlib/t/external.t	Tests for IO::Zlib
+ext/IO-Zlib/t/getc.t		Tests for IO::Zlib
+ext/IO-Zlib/t/getline.t		Tests for IO::Zlib
+ext/IO-Zlib/t/import.t		Tests for IO::Zlib
+ext/IO-Zlib/t/large.t		Tests for IO::Zlib
+ext/IO-Zlib/t/tied.t		Tests for IO::Zlib
+ext/IO-Zlib/t/uncomp1.t		Tests for IO::Zlib
+ext/IO-Zlib/t/uncomp2.t		Tests for IO::Zlib
 ext/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
 ext/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
 ext/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
@@ -1066,14 +1076,14 @@ ext/Log-Message/lib/Log/Message/Config.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Item.pm	Log::Message
 ext/Log-Message/lib/Log/Message.pm	Log::Message
-ext/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
-ext/Log-Message/t/02_Log-Message.t	Log::Message tests
-ext/Log-Message/t/conf/config_file	Log::Message tests
-ext/Log-Message/t/conf/LoadMe.pl	Log::Message tests
 ext/Log-Message-Simple/lib/Log/Message/Simple.pm	Log::Simple
 ext/Log-Message-Simple/t/01_use.t	Log::Simple tests
 ext/Log-Message-Simple/t/02_imports.t	Log::Simple tests
 ext/Log-Message-Simple/t/03_functions.t	Log::Simple tests
+ext/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
+ext/Log-Message/t/02_Log-Message.t	Log::Message tests
+ext/Log-Message/t/conf/config_file	Log::Message tests
+ext/Log-Message/t/conf/LoadMe.pl	Log::Message tests
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
@@ -1101,14 +1111,6 @@ ext/Module-CoreList/README		Module::CoreList
 ext/Module-CoreList/t/corelist.t	Module::CoreList tests
 ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
 ext/Module-CoreList/t/pod.t		Module::CoreList tests
-ext/Module-Load/lib/Module/Load.pm	Module::Load
-ext/Module-Load/t/01_Module-Load.t	Module::Load tests
-ext/Module-Load/t/to_load/config_file	Module::Load tests
-ext/Module-Load/t/to_load/LoadIt.pm	Module::Load tests
-ext/Module-Load/t/to_load/LoadMe.pl	Module::Load tests
-ext/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
-ext/Module-Load/t/to_load/TestModule.pm	Module::Load tests
-ext/Module-Load/t/to_load/ToBeLoaded	Module::Load tests
 ext/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 ext/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 ext/Module-Load-Conditional/t/02_Parse_Version.t	Module::Load::Conditional tests
@@ -1120,6 +1122,14 @@ ext/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm	Module::Load::Conditional
 ext/Module-Load-Conditional/t/to_load/ToBeLoaded	Module::Conditional tests
 ext/Module-Loaded/lib/Module/Loaded.pm	Module::Loaded
 ext/Module-Loaded/t/01_Module-Loaded.t	Module::Loaded tests
+ext/Module-Load/lib/Module/Load.pm	Module::Load
+ext/Module-Load/t/01_Module-Load.t	Module::Load tests
+ext/Module-Load/t/to_load/config_file	Module::Load tests
+ext/Module-Load/t/to_load/LoadIt.pm	Module::Load tests
+ext/Module-Load/t/to_load/LoadMe.pl	Module::Load tests
+ext/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
+ext/Module-Load/t/to_load/TestModule.pm	Module::Load tests
+ext/Module-Load/t/to_load/ToBeLoaded	Module::Load tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
@@ -1246,10 +1256,10 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
-ext/Params-Check/lib/Params/Check.pm	Params::Check
-ext/Params-Check/t/01_Params-Check.t	Params::Check tests
 ext/Package-Constants/lib/Package/Constants.pm	Package::Constants
 ext/Package-Constants/t/01_list.t		Package::Constants tests
+ext/Params-Check/lib/Params/Check.pm	Params::Check
+ext/Params-Check/t/01_Params-Check.t	Params::Check tests
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
@@ -2630,16 +2640,6 @@ lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
-lib/IO/Zlib.pm			IO::Zlib
-lib/IO/Zlib/t/basic.t		Tests for IO::Zlib
-lib/IO/Zlib/t/external.t	Tests for IO::Zlib
-lib/IO/Zlib/t/getc.t		Tests for IO::Zlib
-lib/IO/Zlib/t/getline.t		Tests for IO::Zlib
-lib/IO/Zlib/t/import.t		Tests for IO::Zlib
-lib/IO/Zlib/t/large.t		Tests for IO::Zlib
-lib/IO/Zlib/t/tied.t		Tests for IO::Zlib
-lib/IO/Zlib/t/uncomp1.t		Tests for IO::Zlib
-lib/IO/Zlib/t/uncomp2.t		Tests for IO::Zlib
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm

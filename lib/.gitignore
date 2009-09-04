@@ -44,6 +44,7 @@
 /IO/Select.pm
 /IO/Socket.pm
 /IO/Socket
+/IO/Zlib.pm
 /IO/Uncompress
 /IPC/Cmd.pm
 /IPC/Msg.pm

@@ -896,7 +896,8 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'tomhughes',
 	'DISTRIBUTION'	=> 'TOMHUGHES/IO-Zlib-1.09.tar.gz',
-	'FILES'		=> q[lib/IO/Zlib.pm lib/IO/Zlib],
+	'FILES'		=> q[ext/IO-Zlib],
+  # Hmmm is this following bit needed now? CW
 	'MAP'		=> { 'Zlib.pm' => 'lib/IO/Zlib.pm',
 			     ''	       => 'lib/IO/Zlib/',
 			   },
