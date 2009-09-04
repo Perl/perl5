@@ -1,12 +1,13 @@
 #!./perl -w
 
+use Config;
 BEGIN {
-    require Config; import Config;
+    require Test::More;
     if (!$Config{'d_fork'}
        # open2/3 supported on win32 (but not Borland due to CRT bugs)
        && (($^O ne 'MSWin32' && $^O ne 'NetWare') || $Config{'cc'} =~ /^bcc/i))
     {
-	print "1..0\n";
+	Test::More->import(skip_all => 'open2/3 not available with MSWin32+Netware+cc=bcc');
 	exit 0;
     }
     # make warnings fatal
@@ -16,20 +17,9 @@ BEGIN {
 use strict;
 use IO::Handle;
 use IPC::Open2;
-#require 'open2.pl'; use subs 'open2';
+use Test::More tests => 7;
 
 my $perl = $^X;
-
-sub ok {
-    my ($n, $result, $info) = @_;
-    if ($result) {
-	print "ok $n\n";
-    }
-    else {
-	print "not ok $n\n";
-	print "# $info\n" if $info;
-    }
-}
 
 sub cmd_line {
 	if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
@@ -44,14 +34,12 @@ my ($pid, $reaped_pid);
 STDOUT->autoflush;
 STDERR->autoflush;
 
-print "1..7\n";
-
-ok 1, $pid = open2 'READ', 'WRITE', $perl, '-e',
-	cmd_line('print scalar <STDIN>');
-ok 2, print WRITE "hi kid\n";
-ok 3, <READ> =~ /^hi kid\r?\n$/;
-ok 4, close(WRITE), $!;
-ok 5, close(READ), $!;
+ok($pid = open2 'READ', 'WRITE', $perl, '-e',
+	cmd_line('print scalar <STDIN>'));
+ok(print WRITE "hi kid\n");
+ok(<READ> =~ /^hi kid\r?\n$/);
+ok(close(WRITE), $!);
+ok(close(READ), $!);
 $reaped_pid = waitpid $pid, 0;
-ok 6, $reaped_pid == $pid, $reaped_pid;
-ok 7, $? == 0, $?;
+ok($reaped_pid == $pid, $reaped_pid);
+ok($? == 0, $?);
