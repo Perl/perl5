@@ -2070,6 +2070,7 @@ package Maintainers;
 				ext/Hash-Util/
 				ext/I18N-Langinfo/
 				ext/IPC-Open2/
+				ext/IPC-Open3/
 				ext/NDBM_File/
 				ext/ODBM_File/
 				ext/Opcode/
@@ -2119,7 +2120,6 @@ package Maintainers;
 				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}
 				lib/I18N/Collate.{pm,t}
-				lib/IPC/Open3.{pm,t}
 				lib/Internals.t
 				lib/Net/hostent.{pm,t}
 				lib/Net/netent.{pm,t}
