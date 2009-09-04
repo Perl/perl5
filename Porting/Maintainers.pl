@@ -2057,6 +2057,7 @@ package Maintainers;
 
 				ext/Devel-DProf/
 				ext/Devel-Peek/
+				ext/Devel-SelfStubber/
 				ext/DynaLoader/
 				    !ext/DynaLoader/t/XSLoader.t
 				    !ext/DynaLoader/XSLoader_pm.PL
@@ -2098,7 +2099,6 @@ package Maintainers;
 				lib/DB.{pm,t}
 				lib/DBM_Filter.pm
 				lib/DBM_Filter/
-				lib/Devel/SelfStubber.{pm,t}
 				lib/DirHandle.{pm,t}
 				lib/Dumpvalue.{pm,t}
 				lib/English.{pm,t}
