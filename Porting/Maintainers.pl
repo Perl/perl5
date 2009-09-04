@@ -1197,7 +1197,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Module-Loaded-0.02.tar.gz',
-	'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
+	'FILES'		=> q[ext/Module-Loaded],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

@@ -1101,6 +1101,8 @@ ext/Module-CoreList/README		Module::CoreList
 ext/Module-CoreList/t/corelist.t	Module::CoreList tests
 ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
 ext/Module-CoreList/t/pod.t		Module::CoreList tests
+ext/Module-Loaded/lib/Module/Loaded.pm	Module::Loaded
+ext/Module-Loaded/t/01_Module-Loaded.t	Module::Loaded tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
@@ -2837,8 +2839,6 @@ lib/Module/Load/Conditional/t/to_load/LoadIt.pm	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadMe.pl	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/MustBe/Loaded.pm	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/ToBeLoaded	Module::Conditional tests
-lib/Module/Loaded.pm	Module::Loaded
-lib/Module/Loaded/t/01_Module-Loaded.t	Module::Loaded tests
 lib/Module/Load.pm	Module::Load
 lib/Module/Load/t/01_Module-Load.t	Module::Load tests
 lib/Module/Load/t/to_load/config_file	Module::Load tests
