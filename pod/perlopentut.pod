@@ -779,7 +779,7 @@ the doctor ordered.  There's no filehandle interface, but
 it's still easy to get the contents of a document:
 
     use LWP::Simple;
-    $doc = get('http://www.linpro.no/lwp/');
+    $doc = get('http://www.cpan.org/');
 
 =head2 Binary Files
 

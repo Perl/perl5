@@ -1296,7 +1296,7 @@ doing different actions depending on which regexp matched.  Each
 regexp tries to match where the previous one leaves off.
 
  $_ = <<'EOL';
-      $url = URI::URL->new( "http://www/" );   die if $url eq "xXx";
+      $url = URI::URL->new( "http://example.com/" ); die if $url eq "xXx";
  EOL
  LOOP:
     {
