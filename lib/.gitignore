@@ -70,6 +70,7 @@
 /NDBM_File.pm
 /O.pm
 /ODBM_File.pm
+/Object/Accessor.pm
 /Opcode.pm
 /Package/Constants.pm
 /POSIX.pm

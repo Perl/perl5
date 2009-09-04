@@ -1234,7 +1234,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Object-Accessor-0.34.tar.gz',
-	'FILES'		=> q[lib/Object/Accessor.pm lib/Object/Accessor],
+	'FILES'		=> q[ext/Object-Accessor],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

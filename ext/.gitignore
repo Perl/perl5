@@ -38,6 +38,7 @@ ppport.h
 /Module-Loaded/Makefile.PL
 /mro/Makefile.PL
 /Net-Ping/Makefile.PL
+/Object-Accessor/Makefile.PL
 /Opcode/Makefile.PL
 /Package-Constants/Makefile.PL
 /PerlIO-encoding/Makefile.PL
