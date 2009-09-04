@@ -61,6 +61,7 @@
 /MIME
 /Math/BigInt/FastCalc.pm
 /Module/CoreList.pm
+/Module/Load.pm
 /Module/Load/Conditional.pm
 /Module/Loaded.pm
 /Module/Pluggable.pm

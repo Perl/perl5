@@ -1101,6 +1101,14 @@ ext/Module-CoreList/README		Module::CoreList
 ext/Module-CoreList/t/corelist.t	Module::CoreList tests
 ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
 ext/Module-CoreList/t/pod.t		Module::CoreList tests
+ext/Module-Load/lib/Module/Load.pm	Module::Load
+ext/Module-Load/t/01_Module-Load.t	Module::Load tests
+ext/Module-Load/t/to_load/config_file	Module::Load tests
+ext/Module-Load/t/to_load/LoadIt.pm	Module::Load tests
+ext/Module-Load/t/to_load/LoadMe.pl	Module::Load tests
+ext/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
+ext/Module-Load/t/to_load/TestModule.pm	Module::Load tests
+ext/Module-Load/t/to_load/ToBeLoaded	Module::Load tests
 ext/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 ext/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 ext/Module-Load-Conditional/t/02_Parse_Version.t	Module::Load::Conditional tests
@@ -2839,14 +2847,6 @@ lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
 lib/Module/Build/t/xs.t		Module::Build
 lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build
-lib/Module/Load.pm	Module::Load
-lib/Module/Load/t/01_Module-Load.t	Module::Load tests
-lib/Module/Load/t/to_load/config_file	Module::Load tests
-lib/Module/Load/t/to_load/LoadIt.pm	Module::Load tests
-lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
-lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
-lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
-lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
 lib/Net/Changes			libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
