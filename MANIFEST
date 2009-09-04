@@ -3584,51 +3584,51 @@ os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2add.sym			Overriding symbols to export
 os2/os2_base.t			Additional tests for builtin methods
 os2/os2.c			Additional code for OS/2
-os2/OS2/ExtAttr/Changes		EA access module
-os2/OS2/ExtAttr/ExtAttr.pm	EA access module
-os2/OS2/ExtAttr/ExtAttr.xs	EA access module
-os2/OS2/ExtAttr/Makefile.PL	EA access module
-os2/OS2/ExtAttr/MANIFEST	EA access module
-os2/OS2/ExtAttr/myea.h		EA access module
-os2/OS2/ExtAttr/t/os2_ea.t	EA access module
-os2/OS2/ExtAttr/typemap		EA access module
 os2/os2ish.h			Header for OS/2
+os2/OS2/OS2-ExtAttr/Changes	EA access module
+os2/OS2/OS2-ExtAttr/ExtAttr.pm	EA access module
+os2/OS2/OS2-ExtAttr/ExtAttr.xs	EA access module
+os2/OS2/OS2-ExtAttr/Makefile.PL	EA access module
+os2/OS2/OS2-ExtAttr/MANIFEST	EA access module
+os2/OS2/OS2-ExtAttr/myea.h	EA access module
+os2/OS2/OS2-ExtAttr/t/os2_ea.t	EA access module
+os2/OS2/OS2-ExtAttr/typemap	EA access module
+os2/OS2/OS2-PrfDB/Changes	System database access module
+os2/OS2/OS2-PrfDB/Makefile.PL	System database access module
+os2/OS2/OS2-PrfDB/MANIFEST	System database access module
+os2/OS2/OS2-PrfDB/PrfDB.pm	System database access module
+os2/OS2/OS2-PrfDB/PrfDB.xs	System database access module
+os2/OS2/OS2-PrfDB/t/os2_prfdb.t	System database access module
+os2/OS2/OS2-Process/Makefile.PL	system() constants in a module
+os2/OS2/OS2-Process/MANIFEST	system() constants in a module
+os2/OS2/OS2-Process/Process.pm	system() constants in a module
+os2/OS2/OS2-Process/Process.xs	system() constants in a module
+os2/OS2/OS2-Process/t/os2_atoms.t	Test for OS2::Process
+os2/OS2/OS2-Process/t/os2_clipboard.t	Test for OS2::Process
+os2/OS2/OS2-Process/t/os2_process_kid.t	Tests
+os2/OS2/OS2-Process/t/os2_process.t	Tests
+os2/OS2/OS2-Process/t/os2_process_text.t	Tests
+os2/OS2/OS2-REXX/Changes		DLL access module
+os2/OS2/OS2-REXX/DLL/Changes	DLL access module
+os2/OS2/OS2-REXX/DLL/DLL.pm	DLL access module
+os2/OS2/OS2-REXX/DLL/DLL.xs	DLL access module
+os2/OS2/OS2-REXX/DLL/Makefile.PL	DLL access module
+os2/OS2/OS2-REXX/DLL/MANIFEST	DLL access module
+os2/OS2/OS2-REXX/Makefile.PL	DLL access module
+os2/OS2/OS2-REXX/MANIFEST	DLL access module
+os2/OS2/OS2-REXX/REXX.pm	DLL access module
+os2/OS2/OS2-REXX/REXX.xs	DLL access module
+os2/OS2/OS2-REXX/t/rx_cmprt.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_dllld.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_emxrv.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_objcall.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_sql.test	DLL access module
+os2/OS2/OS2-REXX/t/rx_tiesql.test	DLL access module
+os2/OS2/OS2-REXX/t/rx_tievar.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_tieydb.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_varset.t	DLL access module
+os2/OS2/OS2-REXX/t/rx_vrexx.t	DLL access module
 os2/os2_pipe.t			Tests for pipe creation logic
-os2/OS2/PrfDB/Changes		System database access module
-os2/OS2/PrfDB/Makefile.PL	System database access module
-os2/OS2/PrfDB/MANIFEST		System database access module
-os2/OS2/PrfDB/PrfDB.pm		System database access module
-os2/OS2/PrfDB/PrfDB.xs		System database access module
-os2/OS2/PrfDB/t/os2_prfdb.t	System database access module
-os2/OS2/Process/Makefile.PL	system() constants in a module
-os2/OS2/Process/MANIFEST	system() constants in a module
-os2/OS2/Process/Process.pm	system() constants in a module
-os2/OS2/Process/Process.xs	system() constants in a module
-os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
-os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
-os2/OS2/Process/t/os2_process_kid.t	Tests
-os2/OS2/Process/t/os2_process.t	Tests
-os2/OS2/Process/t/os2_process_text.t	Tests
-os2/OS2/REXX/Changes		DLL access module
-os2/OS2/REXX/DLL/Changes	DLL access module
-os2/OS2/REXX/DLL/DLL.pm		DLL access module
-os2/OS2/REXX/DLL/DLL.xs		DLL access module
-os2/OS2/REXX/DLL/Makefile.PL	DLL access module
-os2/OS2/REXX/DLL/MANIFEST	DLL access module
-os2/OS2/REXX/Makefile.PL	DLL access module
-os2/OS2/REXX/MANIFEST		DLL access module
-os2/OS2/REXX/REXX.pm		DLL access module
-os2/OS2/REXX/REXX.xs		DLL access module
-os2/OS2/REXX/t/rx_cmprt.t	DLL access module
-os2/OS2/REXX/t/rx_dllld.t	DLL access module
-os2/OS2/REXX/t/rx_emxrv.t	DLL access module
-os2/OS2/REXX/t/rx_objcall.t	DLL access module
-os2/OS2/REXX/t/rx_sql.test	DLL access module
-os2/OS2/REXX/t/rx_tiesql.test	DLL access module
-os2/OS2/REXX/t/rx_tievar.t	DLL access module
-os2/OS2/REXX/t/rx_tieydb.t	DLL access module
-os2/OS2/REXX/t/rx_varset.t	DLL access module
-os2/OS2/REXX/t/rx_vrexx.t	DLL access module
 os2/os2.sym			Additional symbols to export
 os2/os2thread.h			pthread-like typedefs
 os2/OS2/typemap			Common typemap for OS/2 types
