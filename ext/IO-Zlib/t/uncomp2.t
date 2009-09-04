@@ -1,10 +1,3 @@
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-	@INC = '../lib';
-	chdir 't';
-    }
-}
-
 require IO::Zlib; # uncomp2.t is like uncomp1.t but without 'use'
 
 sub ok

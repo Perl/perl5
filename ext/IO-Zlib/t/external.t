@@ -1,10 +1,3 @@
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-	@INC = '../lib';
-	chdir 't';
-    }
-}
-
 # Test this only iff we have an executable /usr/bin/gzip
 # AND we have /usr/bin in our PATH
 # AND we have a useable /usr/bin directory.

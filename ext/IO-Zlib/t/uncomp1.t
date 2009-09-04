@@ -1,10 +1,3 @@
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-	@INC = '../lib';
-	chdir 't';
-    }
-}
-
 use IO::Zlib;
 
 sub ok

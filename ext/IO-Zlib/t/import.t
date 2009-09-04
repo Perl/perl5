@@ -1,10 +1,3 @@
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-	@INC = '../lib';
-	chdir 't';
-    }
-}
-
 print "1..1\n";
 
 sub ok
