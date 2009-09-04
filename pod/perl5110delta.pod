@@ -1984,12 +1984,8 @@ Explicitely point to $. when it causes an uninitialized warning for ranges in sc
 
 =head1 Acknowledgements
 
-Some of the work in this release was funded by a TPF grant.
-
-Nicholas Clark officially retired from maintenance pumpking duty at the
-end of 2008; however in reality he has put much effort in since then to
-help get 5.10.1 into a fit state to be released, including writing a
-considerable chunk of this perldelta.
+Some of the work in this release was funded by a TPF grant funded by
+Dijkmat BV, The Netherlands.
 
 Steffen Mueller and David Golden in particular helped getting CPAN modules
 polished and synchronised with their in-core equivalents.
