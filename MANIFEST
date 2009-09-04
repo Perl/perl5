@@ -1056,6 +1056,14 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
+ext/Log-Message/lib/Log/Message/Config.pm	Log::Message
+ext/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
+ext/Log-Message/lib/Log/Message/Item.pm	Log::Message
+ext/Log-Message/lib/Log/Message.pm	Log::Message
+ext/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
+ext/Log-Message/t/02_Log-Message.t	Log::Message tests
+ext/Log-Message/t/conf/config_file	Log::Message tests
+ext/Log-Message/t/conf/LoadMe.pl	Log::Message tests
 ext/Log-Message-Simple/lib/Log/Message/Simple.pm	Log::Simple
 ext/Log-Message-Simple/t/01_use.t	Log::Simple tests
 ext/Log-Message-Simple/t/02_imports.t	Log::Simple tests
@@ -2647,14 +2655,6 @@ lib/locale.pm			For "use locale"
 lib/Locale/Script.pm		Locale::Codes
 lib/Locale/Script.pod		Locale::Codes documentation
 lib/locale.t			See if locale support works
-lib/Log/Message/Config.pm	Log::Message
-lib/Log/Message/Handlers.pm	Log::Message
-lib/Log/Message/Item.pm	Log::Message
-lib/Log/Message.pm	Log::Message
-lib/Log/Message/t/01_Log-Message-Config.t	Log::Message tests
-lib/Log/Message/t/02_Log-Message.t	Log::Message tests
-lib/Log/Message/t/conf/config_file	Log::Message tests
-lib/Log/Message/t/conf/LoadMe.pl	Log::Message tests
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigFloat/Trace.pm	bignum tracing

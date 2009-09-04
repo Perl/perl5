@@ -52,6 +52,10 @@
 /IPC/SharedMem.pm
 /IPC/SysV.pm
 /List
+/Log/Message.pm
+/Log/Message/Config.pm
+/Log/Message/Handlers.pm
+/Log/Message/Item.pm
 /Log/Message/Simple.pm
 /MIME
 /Math/BigInt/FastCalc.pm

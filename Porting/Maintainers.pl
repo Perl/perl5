@@ -1005,10 +1005,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Log-Message-0.02.tar.gz',
-	'FILES'		=> q[lib/Log/Message.pm
-			     lib/Log/Message/{Config,Handlers,Item}.pm
-			     lib/Log/Message/t
-			    ],
+	'FILES'		=> q[ext/Log-Message],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
