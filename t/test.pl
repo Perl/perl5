@@ -183,8 +183,8 @@ sub is ($$@) {
     }
 
     unless ($pass) {
-	unshift(@mess, "#      got "._q($got)."\n",
-		       "# expected "._q($expected)."\n");
+	unshift(@mess, "#      got "._qq($got)."\n",
+		       "# expected "._qq($expected)."\n");
     }
     _ok($pass, _where(), $name, @mess);
 }
@@ -202,7 +202,7 @@ sub isnt ($$@) {
     }
 
     unless( $pass ) {
-        unshift(@mess, "# it should not be "._q($got)."\n",
+        unshift(@mess, "# it should not be "._qq($got)."\n",
                        "# but it is.\n");
     }
     _ok($pass, _where(), $name, @mess);
@@ -229,8 +229,8 @@ sub cmp_ok ($$$@) {
         if ($got eq $expected and $type !~ tr/a-z//) {
             unshift @mess, "# $got - $expected = " . ($got - $expected) . "\n";
         }
-        unshift(@mess, "#      got "._q($got)."\n",
-                       "# expected $type "._q($expected)."\n");
+        unshift(@mess, "#      got "._qq($got)."\n",
+                       "# expected $type "._qq($expected)."\n");
     }
     _ok($pass, _where(), $name, @mess);
 }
@@ -266,8 +266,8 @@ sub within ($$$@) {
         if ($got eq $expected) {
             unshift @mess, "# $got - $expected = " . ($got - $expected) . "\n";
         }
-	unshift@mess, "#      got "._q($got)."\n",
-		      "# expected "._q($expected)." (within "._q($range).")\n";
+	unshift@mess, "#      got "._qq($got)."\n",
+		      "# expected "._qq($expected)." (within "._qq($range).")\n";
     }
     _ok($pass, _where(), $name, @mess);
 }
