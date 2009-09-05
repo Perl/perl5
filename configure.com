@@ -368,11 +368,20 @@ $!
 $Shut_up:
 $ IF F$Mode() .eqs. "BATCH"
 $ THEN
-$   STDOUT = F$PARSE(F$GETQUI("DISPLAY_ENTRY", "JOB_NAME"), -
-                    F$GETQUI("DISPLAY_ENTRY", "LOG_SPECIFICATION"), ".LOG")
-$   WRITE SYS$OUTPUT "Warning: Executing in batch mode.  To avoid file locking conflicts,"
-$   WRITE SYS$OUTPUT "output intended for SYS$OUTPUT will be sent to a new version"
+$   x = F$GETQUI("CANCEL_OPERATION")        ! clear the deck
+$   x = "THIS_JOB"
+$   bproc_queue = f$getqui("DISPLAY_QUEUE","QUEUE_NAME","*",x)
+$   bproc_entry = f$getqui("DISPLAY_JOB","ENTRY_NUMBER",,x)
+$   bproc_name = f$getqui("DISPLAY_JOB","JOB_NAME",,x)
+$   bproc_log_spec = f$getqui("DISPLAY_JOB","LOG_SPECIFICATION",,x)
+$   STDOUT = F$PARSE(bproc_name, bproc_log_spec, ".LOG")
+$   WRITE SYS$OUTPUT "Writing output of entry ''bproc_entry' in queue ''bproc_queue' to a new version of: "
 $   WRITE SYS$OUTPUT STDOUT
+$   DELETE_/SYMBOL x
+$   DELETE_/SYMBOL bproc_queue
+$   DELETE_/SYMBOL bproc_entry
+$   DELETE_/SYMBOL bproc_name
+$   DELETE_/SYMBOL bproc_log_spec
 $ ELSE
 $   STDOUT = F$TRNLNM("SYS$OUTPUT")
 $ ENDIF
