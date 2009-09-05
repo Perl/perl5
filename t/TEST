@@ -80,6 +80,9 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 }
 
 chdir 't' if -f 't/TEST';
+if (-f 'TEST' && -f 'harness' && -d '../lib') {
+    @INC = '../lib';
+}
 
 die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe' or -e 'perl.pm';
