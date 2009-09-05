@@ -7582,8 +7582,14 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     assert(!(flags & ~(SVf_UTF8|SVs_TEMP)));
     new_SV(sv);
     sv_setpvn(sv,s,len);
-    SvFLAGS(sv) |= (flags & SVf_UTF8);
-    return (flags & SVs_TEMP) ? sv_2mortal(sv) : sv;
+    SvFLAGS(sv) |= flags;
+
+    if(flags & SVs_TEMP){
+        EXTEND_MORTAL(1);
+        PL_tmps_stack[++PL_tmps_ix] = sv;
+    }
+
+    return sv;
 }
 
 /*
