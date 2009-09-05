@@ -7498,6 +7498,16 @@ Perl_sv_dec(pTHX_ register SV *const sv)
     sv_setnv(sv,Atof(SvPVX_const(sv)) - 1.0);	/* punt */
 }
 
+/* this define is used to eliminate a chunk of duplicated but shared logic
+ * it has the suffix __SV_C to signal that it isnt API, and isnt meant to be
+ * used anywhere but here - yves
+ */
+#define PUSH_EXTEND_MORTAL__SV_C(AnSv) \
+    STMT_START {      \
+	EXTEND_MORTAL(1); \
+	PL_tmps_stack[++PL_tmps_ix] = (AnSv); \
+    } STMT_END
+
 /*
 =for apidoc sv_mortalcopy
 
@@ -7522,8 +7532,7 @@ Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
 
     new_SV(sv);
     sv_setsv(sv,oldstr);
-    EXTEND_MORTAL(1);
-    PL_tmps_stack[++PL_tmps_ix] = sv;
+    PUSH_EXTEND_MORTAL__SV_C(sv);
     SvTEMP_on(sv);
     return sv;
 }
@@ -7547,8 +7556,7 @@ Perl_sv_newmortal(pTHX)
 
     new_SV(sv);
     SvFLAGS(sv) = SVs_TEMP;
-    EXTEND_MORTAL(1);
-    PL_tmps_stack[++PL_tmps_ix] = sv;
+    PUSH_EXTEND_MORTAL__SV_C(sv);
     return sv;
 }
 
@@ -7594,8 +7602,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     SvFLAGS(sv) |= flags;
 
     if(flags & SVs_TEMP){
-        EXTEND_MORTAL(1);
-        PL_tmps_stack[++PL_tmps_ix] = sv;
+	PUSH_EXTEND_MORTAL__SV_C(sv);
     }
 
     return sv;
@@ -7621,11 +7628,7 @@ Perl_sv_2mortal(pTHX_ register SV *const sv)
 	return NULL;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
 	return sv;
-    /* Note if you change this you must ALSO change
-     * newSVpvn_flags() which defined immediately above this routine
-     */
-    EXTEND_MORTAL(1);
-    PL_tmps_stack[++PL_tmps_ix] = sv;
+    PUSH_EXTEND_MORTAL__SV_C(sv);
     SvTEMP_on(sv);
     return sv;
 }
@@ -12306,8 +12309,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    SV * const nsv = MUTABLE_SV(ptr_table_fetch(PL_ptr_table,
 		    proto_perl->Itmps_stack[i]));
 	    if (nsv && !SvREFCNT(nsv)) {
-		EXTEND_MORTAL(1);
-		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple(nsv);
+		PUSH_EXTEND_MORTAL__SV_C(SvREFCNT_inc_simple(nsv));
 	    }
 	}
     }
