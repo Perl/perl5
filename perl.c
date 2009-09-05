@@ -2485,9 +2485,13 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
                		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
+    STRLEN len;
     PERL_ARGS_ASSERT_CALL_METHOD;
 
-    return call_sv(sv_2mortal(newSVpv(methname,0)), flags | G_METHOD);
+    len = strlen(methname);
+
+    /* XXX: sv_2mortal(newSVpvn_share(methname, len)) can be faster */
+    return call_sv(newSVpvn_flags(methname, len, SVs_TEMP), flags | G_METHOD);
 }
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
