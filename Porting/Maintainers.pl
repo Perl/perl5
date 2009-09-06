@@ -187,7 +187,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Archive-Tar-1.52.tar.gz',
-	'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
+	'FILES'		=> q[ext/Archive-Tar],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-archive-tar@rt.cpan.org',
