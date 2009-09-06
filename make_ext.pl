@@ -194,8 +194,6 @@ foreach my $spec (@extspec)  {
 	$copy =~ tr!/!-!;
 	$ext_pathname = "ext/$copy";
     }
-    my $up = $ext_pathname;
-    $up =~ s![^/]+!..!g;
 
     if ($Config{osname} eq 'catamount') {
 	# Snowball's chance of building extensions.
@@ -204,14 +202,20 @@ foreach my $spec (@extspec)  {
 
     print "\tMaking $mname ($target)\n";
 
-    build_extension('ext', $ext_pathname, $up, $perl || "$up/miniperl",
-		    "$up/lib", $mname,
+    build_extension($ext_pathname, $perl, $mname,
 		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
 }
 
 sub build_extension {
-    my ($ext, $ext_dir, $return_dir, $perl, $lib_dir, $mname, $pass_through)
-	= @_;
+    my ($ext_dir, $perl, $mname, $pass_through) = @_;
+
+    my $up = $ext_dir;
+    $up =~ s![^/]+!..!g;
+
+    $perl ||= "$up/miniperl";
+    my $return_dir = $up;
+    my $lib_dir = "$up/lib";
+
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
 	return;
