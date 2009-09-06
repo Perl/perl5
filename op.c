@@ -5692,69 +5692,34 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	PL_compcv = NULL;
 	goto done;
     }
-    if (attrs) {
-	HV *stash;
-	SV *rcv;
-
-	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>
-	 * before we clobber PL_compcv.
-	 */
-	if (cv && (!block
+    if (cv) {				/* must reuse cv if autoloaded */
+	/* transfer PL_compcv to cv */
+	if (block
 #ifdef PERL_MAD
-		    || block->op_type == OP_NULL
+                  && block->op_type != OP_NULL
 #endif
-		    )) {
-	    rcv = MUTABLE_SV(cv);
-	    /* Might have had built-in attributes applied -- propagate them. */
-	    CvFLAGS(cv) |= (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS);
-	    if (CvGV(cv) && GvSTASH(CvGV(cv)))
-		stash = GvSTASH(CvGV(cv));
-	    else if (CvSTASH(cv))
-		stash = CvSTASH(cv);
-	    else
-		stash = PL_curstash;
+	) {
+	    cv_undef(cv);
+	    CvFLAGS(cv) = CvFLAGS(PL_compcv);
+	    if (!CvWEAKOUTSIDE(cv))
+		SvREFCNT_dec(CvOUTSIDE(cv));
+	    CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
+	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
+	    CvOUTSIDE(PL_compcv) = 0;
+	    CvPADLIST(cv) = CvPADLIST(PL_compcv);
+	    CvPADLIST(PL_compcv) = 0;
+	    /* inner references to PL_compcv must be fixed up ... */
+	    pad_fixup_inner_anons(CvPADLIST(cv), PL_compcv, cv);
+	    if (PERLDB_INTER)/* Advice debugger on the new sub. */
+	      ++PL_sub_generation;
 	}
 	else {
-	    /* possibly about to re-define existing subr -- ignore old cv */
-	    rcv = MUTABLE_SV(PL_compcv);
-	    if (name && GvSTASH(gv))
-		stash = GvSTASH(gv);
-	    else
-		stash = PL_curstash;
+	    /* Might have had built-in attributes applied -- propagate them. */
+	    CvFLAGS(cv) |= (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS);
 	}
-	apply_attrs(stash, rcv, attrs, FALSE);
-    }
-    if (cv) {				/* must reuse cv if autoloaded */
-	if (
-#ifdef PERL_MAD
-	    (
-#endif
-	     !block
-#ifdef PERL_MAD
-	     || block->op_type == OP_NULL) && !PL_madskills
-#endif
-	     ) {
-	    /* got here with just attrs -- work done, so bug out */
-	    SAVEFREESV(PL_compcv);
-	    goto done;
-	}
-	/* transfer PL_compcv to cv */
-	cv_undef(cv);
-	CvFLAGS(cv) = CvFLAGS(PL_compcv);
-	if (!CvWEAKOUTSIDE(cv))
-	    SvREFCNT_dec(CvOUTSIDE(cv));
-	CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
-	CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
-	CvOUTSIDE(PL_compcv) = 0;
-	CvPADLIST(cv) = CvPADLIST(PL_compcv);
-	CvPADLIST(PL_compcv) = 0;
-	/* inner references to PL_compcv must be fixed up ... */
-	pad_fixup_inner_anons(CvPADLIST(cv), PL_compcv, cv);
 	/* ... before we throw it away */
 	SvREFCNT_dec(PL_compcv);
 	PL_compcv = cv;
-	if (PERLDB_INTER)/* Advice debugger on the new sub. */
-	  ++PL_sub_generation;
     }
     else {
 	cv = PL_compcv;
@@ -5770,9 +5735,16 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar { (shift)+1 } */
 	}
     }
-    CvGV(cv) = gv;
-    CvFILE_set_from_cop(cv, PL_curcop);
-    CvSTASH(cv) = PL_curstash;
+    if (!CvGV(cv)) {
+	CvGV(cv) = gv;
+	CvFILE_set_from_cop(cv, PL_curcop);
+	CvSTASH(cv) = PL_curstash;
+    }
+    if (attrs) {
+	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
+	HV *stash = name && GvSTASH(CvGV(cv)) ? GvSTASH(CvGV(cv)) : PL_curstash;
+	apply_attrs(stash, MUTABLE_SV(cv), attrs, FALSE);
+    }
 
     if (ps)
 	sv_setpvn(MUTABLE_SV(cv), ps, ps_len);

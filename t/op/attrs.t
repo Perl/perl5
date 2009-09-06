@@ -14,7 +14,7 @@ BEGIN {
 
 use warnings;
 
-plan 84;
+plan 90;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -196,3 +196,33 @@ sub PVBM () { 'foo' }
 
 ok !defined(attributes::get(\PVBM)), 
     'PVBMs don\'t segfault attributes::get';
+
+# Test that code attributes always get applied to the same CV that
+# we're left with at the end (bug#66970).
+{
+	package bug66970;
+	our $c;
+	sub MODIFY_CODE_ATTRIBUTES { $c = $_[1]; () }
+	$c=undef; eval 'sub t0 :Foo';
+	main::ok $c == \&{"t0"};
+	$c=undef; eval 'sub t1 :Foo { }';
+	main::ok $c == \&{"t1"};
+	$c=undef; eval 'sub t2';
+	our $t2a = \&{"t2"};
+	$c=undef; eval 'sub t2 :Foo';
+	main::ok $c == \&{"t2"} && $c == $t2a;
+	$c=undef; eval 'sub t3';
+	our $t3a = \&{"t3"};
+	$c=undef; eval 'sub t3 :Foo { }';
+	main::ok $c == \&{"t3"} && $c == $t3a;
+	$c=undef; eval 'sub t4 :Foo';
+	our $t4a = \&{"t4"};
+	our $t4b = $c;
+	$c=undef; eval 'sub t4 :Foo';
+	main::ok $c == \&{"t4"} && $c == $t4b && $c == $t4a;
+	$c=undef; eval 'sub t5 :Foo';
+	our $t5a = \&{"t5"};
+	our $t5b = $c;
+	$c=undef; eval 'sub t5 :Foo { }';
+	main::ok $c == \&{"t5"} && $c == $t5b && $c == $t5a;
+}
