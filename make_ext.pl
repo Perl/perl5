@@ -188,10 +188,6 @@ foreach my $spec (@extspec)  {
     if (-d "ext/$spec") {
 	# Old style ext/Data/Dumper/
 	$ext_pathname = "ext/$spec";
-    } elsif ($is_VMS and -d "vms/ext/" . substr($spec, 4)) {
-	# We could get rid of this by moving everything from
-	# [.vms.ext...] to [.ext.VMS...]
-	$ext_pathname = "vms/ext/" . substr($spec, 4);
     } else {
 	# New style ext/Data-Dumper/
 	my $copy = $spec;
