@@ -58,6 +58,27 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
+ext/Archive-Extract/lib/Archive/Extract.pm	Archive::Extract
+ext/Archive-Extract/t/01_Archive-Extract.t	Archive::Extract tests
+ext/Archive-Extract/t/src/double_dir.zip.packed	Archive::Extract tests
+ext/Archive-Extract/t/src/x.bz2	 Archive::Extract tests
+ext/Archive-Extract/t/src/x.gz	Archive::Extract tests
+ext/Archive-Extract/t/src/x.jar	 Archive::Extract tests
+ext/Archive-Extract/t/src/x.lzma	Archive::Extract tests
+ext/Archive-Extract/t/src/x.par	 Archive::Extract tests
+ext/Archive-Extract/t/src/x.tar	 Archive::Extract tests
+ext/Archive-Extract/t/src/x.tar.gz	Archive::Extract tests
+ext/Archive-Extract/t/src/x.tgz 	Archive::Extract tests
+ext/Archive-Extract/t/src/x.Z	Archive::Extract tests
+ext/Archive-Extract/t/src/x.zip	Archive::Extract tests
+ext/Archive-Extract/t/src/y.jar	Archive::Extract tests
+ext/Archive-Extract/t/src/y.par	Archive::Extract tests
+ext/Archive-Extract/t/src/y.tar	Archive::Extract tests
+ext/Archive-Extract/t/src/y.tar.bz2	Archive::Extract tests
+ext/Archive-Extract/t/src/y.tar.gz	Archive::Extract tests
+ext/Archive-Extract/t/src/y.tbz	Archive::Extract tests
+ext/Archive-Extract/t/src/y.tgz	Archive::Extract tests
+ext/Archive-Extract/t/src/y.zip	Archive::Extract tests
 ext/Attribute-Handlers/Changes			Attribute::Handlers
 ext/Attribute-Handlers/demo/demo2.pl		Attribute::Handlers demo
 ext/Attribute-Handlers/demo/demo3.pl		Attribute::Handlers demo
@@ -2010,27 +2031,6 @@ keywords.pl			Program to write keywords.h
 lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
-lib/Archive/Extract.pm	Archive::Extract
-lib/Archive/Extract/t/01_Archive-Extract.t	Archive::Extract tests
-lib/Archive/Extract/t/src/double_dir.zip.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.bz2.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.gz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.jar.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.lzma.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.par.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.tar.gz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.tar.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.tgz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.zip.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/x.Z.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.jar.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.par.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.tar.bz2.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.tar.gz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.tar.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.tbz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.tgz.packed	Archive::Extract tests
-lib/Archive/Extract/t/src/y.zip.packed	Archive::Extract tests
 lib/Archive/Tar/bin/ptar	the ptar utility
 lib/Archive/Tar/bin/ptardiff	the ptardiff utility
 lib/Archive/Tar/Constant.pm	Archive::Tar

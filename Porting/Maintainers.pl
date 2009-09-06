@@ -177,7 +177,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.34.tar.gz',
-	'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
+	'FILES'		=> q[ext/Archive-Extract],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-archive-extract@rt.cpan.org',

@@ -12,6 +12,7 @@ ppport.h
 !/XS-APItest/exception.c
 !/XS-APItest/notcore.c
 !/XS-Typemap/stdio.c
+/Archive-Extract/Makefile.PL
 /Attribute-Handlers/Makefile.PL
 /attributes/Makefile.PL
 /autouse/Makefile.PL
