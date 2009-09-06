@@ -3432,11 +3432,28 @@ lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabicShaping.txt	Unicode character database
+lib/unicore/auxiliary/GraphemeBreakProperty.txt	Unicode character database
+lib/unicore/auxiliary/SentenceBreakProperty.txt	Unicode character database
+lib/unicore/auxiliary/WordBreakProperty.txt	Unicode character database
 lib/unicore/BidiMirroring.txt	Unicode character database
 lib/unicore/Blocks.txt		Unicode character database
 lib/unicore/CaseFolding.txt	Unicode character database
 lib/unicore/CompositionExclusions.txt	Unicode character database
+lib/unicore/DAge.txt			Unicode character database
+lib/unicore/DCoreProperties.txt		Unicode character database
+lib/unicore/DNormalizationProps.txt	Unicode character database
 lib/unicore/EastAsianWidth.txt	Unicode character database
+lib/unicore/extracted/DBidiClass.txt		Unicode character database
+lib/unicore/extracted/DBinaryProperties.txt	Unicode character database
+lib/unicore/extracted/DCombiningClass.txt	Unicode character database
+lib/unicore/extracted/DDecompositionType.txt	Unicode character database
+lib/unicore/extracted/DEastAsianWidth.txt	Unicode character database
+lib/unicore/extracted/DGeneralCategory.txt	Unicode character database
+lib/unicore/extracted/DJoinGroup.txt	Unicode character database
+lib/unicore/extracted/DJoinType.txt	Unicode character database
+lib/unicore/extracted/DLineBreak.txt	Unicode character database
+lib/unicore/extracted/DNumType.txt	Unicode character database
+lib/unicore/extracted/DNumValues.txt	Unicode character database
 lib/unicore/HangulSyllableType.txt	Unicode character database
 lib/unicore/Index.txt		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
@@ -3452,6 +3469,7 @@ lib/unicore/NormalizationCorrections.txt	Unicode character database
 lib/unicore/PropertyAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
 lib/unicore/PropValueAliases.txt	Unicode character database
+lib/unicore/README.perl			Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
 lib/unicore/Scripts.txt		Unicode character database
