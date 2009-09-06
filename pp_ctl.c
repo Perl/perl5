@@ -3354,7 +3354,7 @@ PP(pp_require)
 		    /* Adjust file name if the hook has set an %INC entry */
 		    svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
 		    if (svp)
-			tryname = SvPVX_const(*svp);
+			tryname = SvPV_nolen_const(*svp);
 
 		    if (count > 0) {
 			int i = 0;
