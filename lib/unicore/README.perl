@@ -1,26 +1,38 @@
 The *.txt files were copied from
 
-
 	http://www.unicode.org/Public/5.1.0/ucd
 
-as of Unicode 5.1.0 (March 2008).
+and subdirectories 'extracted' and 'auxiliary' as of Unicode 5.1.0 (March 2008).
 
-The two big files, NormalizationTest.txt (2 MB) and Unihan.txt (28 MB,
-5.8 MB zip) were not included due to space considerations.  Also NOT
-included were any *.html files and the Derived*.txt files
+The big file, Unihan.txt (28 MB, 5.8 MB zip) was not included due to space
+considerations.  Also NOT included were any *.html files and *Test.txt files.
 
-    DerivedAge.txt
-    DerivedCoreProperties.txt
-    DerivedNormalizationProps.txt
+To be 8.3 filesystem friendly, the names of some of the input files have been
+changed from the values that are in the Unicode DB:
 
-or any files from subdirectories.
+mv PropertyValueAliases.txt PropValueAliases.txt
+mv NamedSequencesProv.txt NamedSqProv.txt
+mv DerivedAge.txt DAge.txt
+mv DerivedCoreProperties.txt DCoreProperties.txt
+mv DerivedNormalizationProps.txt DNormalizationProps.txt
+mv extracted/DerivedBidiClass.txt extracted/DBidiClass.txt
+mv extracted/DerivedBinaryProperties.txt extracted/DBinaryProperties.txt
+mv extracted/DerivedCombiningClass.txt extracted/DCombiningClass.txt
+mv extracted/DerivedDecompositionType.txt extracted/DDecompositionType.txt
+mv extracted/DerivedEastAsianWidth.txt extracted/DEastAsianWidth.txt
+mv extracted/DerivedGeneralCategory.txt extracted/DGeneralCategory.txt
+mv extracted/DerivedJoiningGroup.txt extracted/DJoinGroup.txt
+mv extracted/DerivedJoiningType.txt extracted/DJoinType.txt
+mv extracted/DerivedLineBreak.txt extracted/DLineBreak.txt
+mv extracted/DerivedNumericType.txt extracted/DNumType.txt
+mv extracted/DerivedNumericValues.txt extracted/DNumValues.txt
 
-To be 8.3 filesystem friendly, the lib/unicore/PropertyValueAliases.txt was
-renamed to be lib/unicore/PropValueAliases.txt and the
-lib/unicore/NamedSequencesProv.txt was renamed to be
-lib/unicore/NamedSqProv.txt, since otherwise they would have
-conflicted with lib/unicore/PropertyAliases.txt and
-lib/unicore/NamedSequences.txt.
+The names of files, such as test files, that are not used by mktables are not
+changed, and will not work correctly on 8.3 filesystems.
+
+The file 'version' should exist and be a single line with the Unicode version,
+like
+5.1.0
 
 NOTE: If you modify the input file set you should also run
  
