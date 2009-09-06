@@ -60,7 +60,7 @@ epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
 ext/Archive-Extract/lib/Archive/Extract.pm	Archive::Extract
 ext/Archive-Extract/t/01_Archive-Extract.t	Archive::Extract tests
-ext/Archive-Extract/t/src/double_dir.zip.packed	Archive::Extract tests
+ext/Archive-Extract/t/src/double_dir.zip	Archive::Extract tests
 ext/Archive-Extract/t/src/x.bz2	 Archive::Extract tests
 ext/Archive-Extract/t/src/x.gz	Archive::Extract tests
 ext/Archive-Extract/t/src/x.jar	 Archive::Extract tests
