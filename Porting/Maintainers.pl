@@ -433,31 +433,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.88.tar.gz',
-	'FILES'		=> q[lib/CPANPLUS.pm
-			     lib/CPANPLUS/Backend
-			     lib/CPANPLUS/Backend.pm
-			     lib/CPANPLUS/bin
-			     lib/CPANPLUS/Config.pm
-			     lib/CPANPLUS/Configure
-			     lib/CPANPLUS/Configure.pm
-			     lib/CPANPLUS/Error.pm
-			     lib/CPANPLUS/FAQ.pod
-			     lib/CPANPLUS/Hacking.pod
-			     lib/CPANPLUS/inc.pm
-			     lib/CPANPLUS/Internals
-			     lib/CPANPLUS/Internals.pm
-			     lib/CPANPLUS/Module
-			     lib/CPANPLUS/Module.pm
-			     lib/CPANPLUS/Selfupdate.pm
-			     lib/CPANPLUS/Shell
-			     lib/CPANPLUS/Shell.pm
-			     lib/CPANPLUS/Dist.pm
-			     lib/CPANPLUS/Dist/Base.pm
-			     lib/CPANPLUS/Dist/Autobundle.pm
-			     lib/CPANPLUS/Dist/MM.pm
-			     lib/CPANPLUS/Dist/Sample.pm
-			     lib/CPANPLUS/t
-			    ],
+	'FILES'		=> q[ext/CPANPLUS],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
 			     qw{ bin/cpanp-boxed },
