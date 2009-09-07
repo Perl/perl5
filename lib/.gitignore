@@ -13,6 +13,8 @@
 /Config.pod
 /Config_heavy.pl
 /Config_git.pl
+/CGI
+/CGI.pm
 /CPANPLUS.pm
 /CPANPLUS/Backend.pm
 /CPANPLUS/Backend

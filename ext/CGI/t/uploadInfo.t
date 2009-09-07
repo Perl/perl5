@@ -7,17 +7,7 @@
 
 # Due to a bug in older versions of MakeMaker & Test::Harness, we must
 # ensure the blib's are in @INC, else we might use the core CGI.pm
-
-my $test_file;
-if($ENV{PERL_CORE}) {
-   chdir 't';
-   @INC = '../lib';
-   use File::Spec ();
-   $test_file = File::Spec->catfile(qw(.. lib CGI t), "upload_post_text.txt");
-} else {
-   use lib qw(. ./blib/lib ./blib/arch);
-   $test_file = "t/upload_post_text.txt";
-}
+use lib qw(. ./blib/lib ./blib/arch);
 
 use strict;
 
@@ -78,7 +68,7 @@ my $q;
 
 {
     local *STDIN;
-    open STDIN, "< $test_file"
+    open STDIN, '<t/upload_post_text.txt'
         or die 'missing test file t/upload_post_text.txt';
     binmode STDIN;
     $q = CGI->new;

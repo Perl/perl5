@@ -305,7 +305,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'lstein',
 	'DISTRIBUTION'	=> 'LDS/CGI.pm-3.45.tar.gz',
-	'FILES'		=> q[lib/CGI.pm lib/CGI],
+	'FILES'		=> q[ext/CGI],
 	'EXCLUDED'	=> [ qr{^t/lib/Test},
 				qw( cgi-lib_porting.html
 				    cgi_docs.html
@@ -313,10 +313,6 @@ use File::Glob qw(:case);
 				    t/gen-tests/gen-start-end-tags.pl
 				)
 			   ],
-	'MAP'		=> { 'examples/' => 'lib/CGI/eg/',
-			     'lib/'	 => 'lib/',
-			     ''		 => 'lib/CGI/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

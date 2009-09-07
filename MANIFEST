@@ -250,6 +250,64 @@ ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
+ext/CGI/examples/caution.xbm		CGI example
+ext/CGI/examples/clickable_image.cgi	CGI example
+ext/CGI/examples/cookie.cgi		CGI example
+ext/CGI/examples/crash.cgi		CGI example
+ext/CGI/examples/customize.cgi		CGI example
+ext/CGI/examples/diff_upload.cgi	CGI example
+ext/CGI/examples/dna_small_gif.uu	Small image for CGI examples
+ext/CGI/examples/file_upload.cgi	CGI example
+ext/CGI/examples/frameset.cgi		CGI example
+ext/CGI/examples/index.html		Index page for CGI examples
+ext/CGI/examples/internal_links.cgi	CGI example
+ext/CGI/examples/javascript.cgi		CGI example
+ext/CGI/examples/make_links.pl		CGI example
+ext/CGI/examples/monty.cgi		CGI example
+ext/CGI/examples/multiple_forms.cgi	CGI example
+ext/CGI/examples/nph-clock.cgi		CGI example
+ext/CGI/examples/nph-multipart.cgi	CGI example
+ext/CGI/examples/popup.cgi		CGI example
+ext/CGI/examples/RunMeFirst		Setup script for CGI examples
+ext/CGI/examples/save_state.cgi		CGI example
+ext/CGI/examples/tryit.cgi		CGI example
+ext/CGI/examples/wilogo_gif.uu		CGI example
+ext/CGI/lib/CGI/Apache.pm	Support for Apache's Perl module
+ext/CGI/lib/CGI/Carp.pm		Log server errors with helpful context
+ext/CGI/lib/CGI/Changes		Changelog for CGI.pm
+ext/CGI/lib/CGI/Cookie.pm	Interface to Netscape Cookies
+ext/CGI/lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
+ext/CGI/lib/CGI.pm		Web server interface ("Common Gateway Interface")
+ext/CGI/lib/CGI/Pretty.pm	Output nicely formatted HTML
+ext/CGI/lib/CGI/Push.pm		Support for server push
+ext/CGI/lib/CGI/Switch.pm	Simple interface for multiple server types
+ext/CGI/lib/CGI/Util.pm			Utility functions
+ext/CGI/t/apache.t		See if CGI::Apache still loads
+ext/CGI/t/can.t			See if CGI.pm works
+ext/CGI/t/carp.t		See if CGI::Carp works
+ext/CGI/t/cookie.t		See if CGI::Cookie works
+ext/CGI/t/Dump.t		See if CGI->Dump works
+ext/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
+ext/CGI/t/form.t		See if CGI.pm works
+ext/CGI/t/function.t		See if CGI.pm works
+ext/CGI/t/html.t		See if CGI.pm works
+ext/CGI/t/no_tabindex.t	See if CGI.pm works
+ext/CGI/t/popup_menu.t		See if CGI pop menus work
+ext/CGI/t/pretty.t		See if CGI.pm works
+ext/CGI/t/push.t		See if CGI::Push works
+ext/CGI/t/query_string.t	See if CGI->query_string() works
+ext/CGI/t/request.t		See if CGI.pm works
+ext/CGI/t/start_end_asterisk.t	See if CGI.pm works
+ext/CGI/t/start_end_end.t	See if CGI.pm works
+ext/CGI/t/start_end_start.t	See if CGI.pm works
+ext/CGI/t/switch.t		See if CGI::Switch still loads
+ext/CGI/t/unescapeHTML.t	See if CGI::unescapeHTML() works
+ext/CGI/t/uploadInfo.t		See if CGI.pm works
+ext/CGI/t/upload_post_text.txt	Test data for CGI.pm
+ext/CGI/t/upload.t		See if CGI.pm works
+ext/CGI/t/user_agent.t		See if CGI->user_agent() works
+ext/CGI/t/util-58.t		See if 5.8-dependent features work
+ext/CGI/t/util.t		See if CGI.pm works
 ext/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
@@ -2261,64 +2319,6 @@ lib/cacheout.pl			Manages output filehandles when you need too many
 lib/Carp/Heavy.pm		Error message workhorse
 lib/Carp.pm			Error message base class
 lib/Carp.t			See if Carp works
-lib/CGI/Apache.pm		Support for Apache's Perl module
-lib/CGI/Carp.pm			Log server errors with helpful context
-lib/CGI/Changes			Changelog for CGI.pm
-lib/CGI/Cookie.pm		Interface to Netscape Cookies
-lib/CGI/eg/caution.xbm		CGI example
-lib/CGI/eg/clickable_image.cgi	CGI example
-lib/CGI/eg/cookie.cgi		CGI example
-lib/CGI/eg/crash.cgi		CGI example
-lib/CGI/eg/customize.cgi	CGI example
-lib/CGI/eg/diff_upload.cgi	CGI example
-lib/CGI/eg/dna_small_gif.uu	Small image for CGI examples
-lib/CGI/eg/file_upload.cgi	CGI example
-lib/CGI/eg/frameset.cgi		CGI example
-lib/CGI/eg/index.html		Index page for CGI examples
-lib/CGI/eg/internal_links.cgi	CGI example
-lib/CGI/eg/javascript.cgi	CGI example
-lib/CGI/eg/make_links.pl	CGI example
-lib/CGI/eg/monty.cgi		CGI example
-lib/CGI/eg/multiple_forms.cgi	CGI example
-lib/CGI/eg/nph-clock.cgi	CGI example
-lib/CGI/eg/nph-multipart.cgi	CGI example
-lib/CGI/eg/popup.cgi		CGI example
-lib/CGI/eg/RunMeFirst		Setup script for CGI examples
-lib/CGI/eg/save_state.cgi	CGI example
-lib/CGI/eg/tryit.cgi		CGI example
-lib/CGI/eg/wilogo_gif.uu	CGI example
-lib/CGI/Fast.pm			Support for FastCGI (persistent server process)
-lib/CGI.pm			Web server interface ("Common Gateway Interface")
-lib/CGI/Pretty.pm		Output nicely formatted HTML
-lib/CGI/Push.pm			Support for server push
-lib/CGI/Switch.pm		Simple interface for multiple server types
-lib/CGI/t/apache.t		See if CGI::Apache still loads
-lib/CGI/t/can.t			See if CGI.pm works
-lib/CGI/t/carp.t		See if CGI::Carp works
-lib/CGI/t/cookie.t		See if CGI::Cookie works
-lib/CGI/t/Dump.t		See if CGI->Dump works
-lib/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
-lib/CGI/t/form.t		See if CGI.pm works
-lib/CGI/t/function.t		See if CGI.pm works
-lib/CGI/t/html.t		See if CGI.pm works
-lib/CGI/t/no_tabindex.t	See if CGI.pm works
-lib/CGI/t/popup_menu.t		See if CGI pop menus work
-lib/CGI/t/pretty.t		See if CGI.pm works
-lib/CGI/t/push.t		See if CGI::Push works
-lib/CGI/t/query_string.t	See if CGI->query_string() works
-lib/CGI/t/request.t		See if CGI.pm works
-lib/CGI/t/start_end_asterisk.t	See if CGI.pm works
-lib/CGI/t/start_end_end.t	See if CGI.pm works
-lib/CGI/t/start_end_start.t	See if CGI.pm works
-lib/CGI/t/switch.t		See if CGI::Switch still loads
-lib/CGI/t/unescapeHTML.t	See if CGI::unescapeHTML() works
-lib/CGI/t/uploadInfo.t		See if CGI.pm works
-lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
-lib/CGI/t/upload.t		See if CGI.pm works
-lib/CGI/t/user_agent.t		See if CGI->user_agent() works
-lib/CGI/t/util-58.t		See if 5.8-dependent features work
-lib/CGI/t/util.t		See if CGI.pm works
-lib/CGI/Util.pm			Utility functions
 lib/charnames.pm		Character names
 lib/charnames.t			See if character names work
 lib/Class/ISA/ChangeLog		Changes for Class::ISA
