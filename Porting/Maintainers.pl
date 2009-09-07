@@ -684,7 +684,7 @@ package Maintainers;
 			    # more than one distro
 	'FILES'		=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
 			     lib/ExtUtils/{Command,Liblist,MakeMaker}
-			     lib/ExtUtils/t/{00compile,FIRST_MAKEFILE,INSTALL_BASE,Liblist,VERSION_FROM,WriteEmptyMakefile,arch_check,backwards,basic,build_man,cd,config,dir_target,fix_libs,fixin,hints,installed_file,is_of_type,make,maketext_filter,metafile_data,metafile_file,min_perl_version,miniperl,oneliner,parse_version,pm,pm_to_blib,pod2man,postamble,prefixify,prereq,prereq_print,problems,prompt,recurs,revision,split_command,test_boilerplate,testlib,writemakefile_args,xs,INST{,_PREFIX},Mkbootstrap,MM_{Any,BeOS,Cygwin,NW5,OS2,Unix,VMS,Win32},PL_FILES}.t
+			     lib/ExtUtils/t/{[0-9FLV-Zabdf-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
 			     lib/ExtUtils/t/testdata/
 			     lib/ExtUtils/t/MakeMaker_Parameters.t
 			     lib/ExtUtils/Changes
