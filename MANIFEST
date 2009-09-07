@@ -349,7 +349,7 @@ ext/CPANPLUS/t/dummy-CPAN/authors/id/MBXS/Foo-Bar-0.01.readme	CPANPLUS tests
 ext/CPANPLUS/t/dummy-CPAN/authors/id/MBXS/Foo-Bar-0.01.tar.gz	CPANPLUS tests
 ext/CPANPLUS/t/dummy-CPAN/autobundle/Snapshot.pm	CPANPLUS tests
 ext/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz	CPANPLUS tests
-ext/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz CPANPLUS tests
+ext/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz	CPANPLUS tests
 ext/CPANPLUS/t/inc/conf.pl	CPANPLUS tests
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
