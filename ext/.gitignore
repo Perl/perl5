@@ -20,6 +20,7 @@ ppport.h
 /B-Debug/Makefile.PL
 /B-Deparse/Makefile.PL
 /B-Lint/Makefile.PL
+/CPANPLUS-Dist-Build/Makefile.PL
 /Data-Dumper/Makefile.PL
 /Devel-SelfStubber/Makefile.PL
 /FileCache/Makefile.PL

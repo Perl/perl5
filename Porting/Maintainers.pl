@@ -477,9 +477,7 @@ package Maintainers;
 	{
 	'MAINTAINER'	=> 'bingos',
 	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.38.tar.gz',
-	'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm
-			     lib/CPANPLUS/Dist/Build
-			    ],
+	'FILES'		=> q[ext/CPANPLUS-Dist-Build],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{ t/99_pod.t
 			         t/99_pod_coverage.t
