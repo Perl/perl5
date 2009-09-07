@@ -3,6 +3,8 @@
 /Archive/Tar/Constant.pm
 /Archive/Tar/File.pm
 /Attribute
+/autodie
+/autodie.pm
 /autouse.pm
 /B.pm
 /B
@@ -76,6 +78,7 @@
 /Encode
 /Errno.pm
 /ExtUtils/Miniperl.pm
+/Fatal.pm
 /Fcntl.pm
 /FileCache.pm
 /File/Fetch.pm

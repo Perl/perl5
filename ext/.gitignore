@@ -15,6 +15,7 @@ ppport.h
 /Archive-Extract/Makefile.PL
 /Attribute-Handlers/Makefile.PL
 /attributes/Makefile.PL
+/autodie/Makefile.PL
 /autouse/Makefile.PL
 /base/Makefile.PL
 /B-Debug/Makefile.PL
