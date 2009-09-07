@@ -135,6 +135,7 @@
 /Opcode.pm
 /Package/Constants.pm
 /Params/Check.pm
+/Parse/CPAN/Meta.pm
 /POSIX.pm
 /POSIX.pod
 /Pod/Plainer.pm

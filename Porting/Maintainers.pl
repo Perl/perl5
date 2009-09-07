@@ -1246,10 +1246,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'ADAMK/Parse-CPAN-Meta-1.39.tar.gz',
-	'FILES'		=> q[lib/Parse/CPAN/Meta.pm
-			     lib/Parse/CPAN/Meta
-			     t/lib/Parse/CPAN/Meta/Test.pm
-			    ],
+	'FILES'		=> q[ext/Parse-CPAN-Meta],
 	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
 	'MAP'		=> { 'lib/'     => 'lib/',
 			     't/lib/'   => 't/lib/',

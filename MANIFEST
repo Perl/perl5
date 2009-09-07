@@ -1524,6 +1524,32 @@ ext/Package-Constants/lib/Package/Constants.pm	Package::Constants
 ext/Package-Constants/t/01_list.t		Package::Constants tests
 ext/Params-Check/lib/Params/Check.pm	Params::Check
 ext/Params-Check/t/01_Params-Check.t	Params::Check tests
+ext/Parse-CPAN-Meta/Changes					Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/01_compile.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/02_basic.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/03_regression.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/04_scalar.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/05_export.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/11_meta_yml.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/12_plagger.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/13_perl_smith.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/14_yaml_org.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/15_multibyte.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/16_nullrefs.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/17_toolbar.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/18_tap.t					Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/19_errors.t				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/21_bom.t					Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/multibyte.yml			Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/sample.yml				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/Spreadsheet-Read.yml			Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/toolbar.yml				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml			Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/data/vanilla.yml				Parse::CPAN::Meta
+ext/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
@@ -2939,31 +2965,6 @@ lib/parent/t/parent-classfromfile.t	tests for parent.pm
 lib/parent/t/parent-pmc.t	tests for parent.pm
 lib/parent/t/parent-returns-false.t	tests for parent.pm
 lib/parent/t/parent.t	tests for parent.pm
-lib/Parse/CPAN/Meta/Changes					Parse::CPAN::Meta
-lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/01_compile.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/02_basic.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/03_regression.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/04_scalar.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/05_export.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/11_meta_yml.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/12_plagger.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/13_perl_smith.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/14_yaml_org.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/15_multibyte.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/16_nullrefs.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/17_toolbar.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/18_tap.t					Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/19_errors.t				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/21_bom.t					Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/multibyte.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/sample.yml				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/Spreadsheet-Read.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/toolbar.yml				Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/utf_16_le_bom.yml			Parse::CPAN::Meta
-lib/Parse/CPAN/Meta/t/data/vanilla.yml				Parse::CPAN::Meta
 lib/perl5db.pl			Perl debugging routines
 lib/perl5db.t			Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
@@ -4117,7 +4118,6 @@ t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
-t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
