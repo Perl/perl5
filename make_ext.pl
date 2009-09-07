@@ -215,6 +215,7 @@ sub build_extension {
     $perl ||= "$up/miniperl";
     my $return_dir = $up;
     my $lib_dir = "$up/lib";
+    $ENV{PERL5LIB} = $lib_dir;
 
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
@@ -286,7 +287,7 @@ EOM
 	    @cross = '-MCross';
 	}
 	    
-	my @args = ("-I$lib_dir", @cross, 'Makefile.PL');
+	my @args = (@cross, 'Makefile.PL');
 	if ($is_VMS) {
 	    my $libd = VMS::Filespec::vmspath($lib_dir);
 	    push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
