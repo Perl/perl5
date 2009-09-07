@@ -701,6 +701,10 @@ ext/Devel-PPPort/t/warn.t	Devel::PPPort test file
 ext/Devel-PPPort/typemap	Devel::PPPort Typemap
 ext/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 ext/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
+ext/Digest/Changes	Digest changelog
+ext/Digest/Digest/base.pm	Digest extensions
+ext/Digest/Digest/file.pm	Digest extensions
+ext/Digest/Digest.pm		Digest extensions
 ext/Digest-MD5/Changes		Digest::MD5 extension changes
 ext/Digest-MD5/hints/dec_osf.pl	Hints for named architecture
 ext/Digest-MD5/hints/irix_6.pl	Hints for named architecture
@@ -751,6 +755,9 @@ ext/Digest-SHA/t/sha384.t	See if Digest::SHA works
 ext/Digest-SHA/t/sha512.t	See if Digest::SHA works
 ext/Digest-SHA/t/woodbury.t	See if Digest::SHA works
 ext/Digest-SHA/typemap		Typemap for Digest::SHA
+ext/Digest/t/base.t		See if Digest extensions work
+ext/Digest/t/digest.t		See if Digest extensions work
+ext/Digest/t/file.t		See if Digest extensions work
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
@@ -2425,13 +2432,6 @@ lib/DB.t			See if DB works
 lib/deprecate.pm		A pragma for deprecating modules from the core.
 lib/diagnostics.pm		Print verbose diagnostics
 lib/diagnostics.t		See if diagnostics.pm works
-lib/Digest/base.pm		Digest extensions
-lib/Digest/Changes		Digest changelog
-lib/Digest/file.pm		Digest extensions
-lib/Digest.pm			Digest extensions
-lib/Digest/t/base.t		See if Digest extensions work
-lib/Digest/t/digest.t		See if Digest extensions work
-lib/Digest/t/file.t		See if Digest extensions work
 lib/DirHandle.pm		like FileHandle only for directories
 lib/DirHandle.t			See if DirHandle works
 lib/dotsh.pl			Code to "dot" in a shell script

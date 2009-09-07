@@ -73,6 +73,9 @@
 /Devel/PPPort.pm
 /Devel/Peek.pm
 /Devel/SelfStubber.pm
+/Digest.pm
+/Digest/base.pm
+/Digest/file.pm
 /Digest/MD5.pm
 /Digest/SHA.pm
 /DynaLoader.pm
