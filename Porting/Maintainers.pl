@@ -8,6 +8,8 @@
 
 package Maintainers;
 
+use File::Glob qw(:case);
+
 %Maintainers =
     (
     'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
