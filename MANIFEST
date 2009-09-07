@@ -255,7 +255,7 @@ ext/Compress-Raw-Zlib/zlib-src/uncompr.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zconf.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/zutil.h  Compress::Raw::Zlib
+ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
 ext/CPANPLUS/bin/cpan2dist	the cpan2dist utility
 ext/CPANPLUS/bin/cpanp	the cpanp utility
@@ -267,10 +267,10 @@ ext/CPANPLUS-Dist-Build/t/02_CPANPLUS-Dist-Build.t	CPANPLUS::Dist::Build tests
 ext/CPANPLUS-Dist-Build/t/dummy-CPAN/authors/01mailrc.txt.gz
 ext/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/02packages.details.txt.gz
 ext/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/03modlist.data.gz
-ext/CPANPLUS-Dist-Build/t/dummy-perl/.hidden  CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/inc/conf.pl CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/src/noxs/Foo-Bar-0.01.tar.gz  CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/src/xs/Foo-Bar-0.01.tar.gz  CPANPLUS::Dist::Build tests
+ext/CPANPLUS-Dist-Build/t/dummy-perl/.hidden	CPANPLUS::Dist::Build tests
+ext/CPANPLUS-Dist-Build/t/inc/conf.pl	CPANPLUS::Dist::Build tests
+ext/CPANPLUS-Dist-Build/t/src/noxs/Foo-Bar-0.01.tar.gz	CPANPLUS::Dist::Build tests
+ext/CPANPLUS-Dist-Build/t/src/xs/Foo-Bar-0.01.tar.gz	CPANPLUS::Dist::Build tests
 ext/CPANPLUS/lib/CPANPLUS/Backend.pm	CPANPLUS
 ext/CPANPLUS/lib/CPANPLUS/Backend/RV.pm	CPANPLUS
 ext/CPANPLUS/lib/CPANPLUS/Config.pm	CPANPLUS
