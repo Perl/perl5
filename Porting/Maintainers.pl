@@ -884,7 +884,7 @@ use File::Glob qw(:case);
     'IPC::Cmd' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/IPC-Cmd-0.46.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/IPC-Cmd-0.48.tar.gz',
 	'FILES'		=> q[ext/IPC-Cmd],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -1171,7 +1171,7 @@ use File::Glob qw(:case);
     'Module::Loaded' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Module-Loaded-0.06.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Module-Loaded-0.06.tar.gz',
 	'FILES'		=> q[ext/Module-Loaded],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',

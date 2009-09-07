@@ -16,7 +16,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $WARN
                     ];
 
-    $VERSION        = '0.46';
+    $VERSION        = '0.48';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -348,7 +348,7 @@ sub run {
     $cmd = _quote_args_vms( $cmd ) if IS_VMS;
 
     ### strip any empty elements from $cmd if present
-    $cmd = [ grep { length && defined } @$cmd ] if ref $cmd;
+    $cmd = [ grep { defined && length } @$cmd ] if ref $cmd;
 
     my $pp_cmd = (ref $cmd ? "@$cmd" : $cmd);
     print loc("Running [%1]...\n", $pp_cmd ) if $verbose;
