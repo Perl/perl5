@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.14 2007/05/29 18:15:32 dankogai Exp $
+ $Id: Encode.xs,v 2.16 2009/09/06 14:32:21 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -405,18 +405,23 @@ Method_decode_xs(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check
+PREINIT:
+    STRLEN slen;
+    U8 *s;
+    U8 *e;
+    SV *dst;
+    bool renewed = 0;
 CODE:
 {
-    STRLEN slen;
-    U8 *s = (U8 *) SvPV(src, slen);
-    U8 *e = (U8 *) SvEND(src);
-    SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
+    dSP; ENTER; SAVETMPS;
+    if (src == &PL_sv_undef) src = newSV(0);
+    s = (U8 *) SvPV(src, slen);
+    e = (U8 *) SvEND(src);
+    dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
 
     /* 
      * PerlIO check -- we assume the object is of PerlIO if renewed
      */
-    bool renewed = 0;
-    dSP; ENTER; SAVETMPS;
     PUSHMARK(sp);
     XPUSHs(obj);
     PUTBACK;
@@ -463,12 +468,18 @@ Method_encode_xs(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check
+PREINIT:
+    STRLEN slen;
+    U8 *s;
+    U8 *e;
+    SV *dst;
+    bool renewed = 0;
 CODE:
 {
-    STRLEN slen;
-    U8 *s = (U8 *) SvPV(src, slen);
-    U8 *e = (U8 *) SvEND(src);
-    SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
+    if (src == &PL_sv_undef) src = newSV(0);
+    s = (U8 *) SvPV(src, slen);
+    e = (U8 *) SvEND(src);
+    dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
     if (SvUTF8(src)) {
     /* Already encoded */
     if (strict_utf8(aTHX_ obj)) {
