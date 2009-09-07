@@ -1195,7 +1195,7 @@ package Maintainers;
     'Module::Loaded' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Module-Loaded-0.02.tar.gz',
+	'DISTRIBUTION'	=> 'KANE/Module-Loaded-0.06.tar.gz',
 	'FILES'		=> q[ext/Module-Loaded],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
