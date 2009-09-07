@@ -2,13 +2,6 @@
 # $Id: piconv.t,v 0.2 2009/07/13 00:50:52 dankogai Exp $
 #
 
-BEGIN {
-    if ( $ENV{'PERL_CORE'} ) {
-        print "1..0 # Skip: Don't know how to test this within perl's core\n";
-        exit 0;
-    }
-}
-
 use strict;
 use FindBin;
 use File::Spec;
@@ -29,7 +22,7 @@ my $blib =
   File::Spec->rel2abs(
     File::Spec->catdir( $FindBin::RealBin, File::Spec->updir, 'blib' ) );
 my $script = File::Spec->catdir($blib, 'script', 'piconv');
-my @base_cmd = ( $^X, "-Mblib=$blib", $script );
+my @base_cmd = ( $^X, ($ENV{PERL_CORE} ? () : "-Mblib=$blib"), $script );
 
 plan tests => 5;
 
