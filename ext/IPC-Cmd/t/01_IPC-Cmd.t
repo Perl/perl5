@@ -45,7 +45,7 @@ push @Prefs, [ 0,             0 ],  [ 0,             0 ];
 
 ### can_run tests
 {
-    ok( can_run('perl'),                q[Found 'perl' in your path] );
+    ok( can_run("$^X"),                q[Found 'perl' in your path] );
     ok( !can_run('10283lkjfdalskfjaf'), q[Not found non-existant binary] );
 }
 
