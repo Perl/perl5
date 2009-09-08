@@ -935,7 +935,7 @@ makeppport: miniperl\$(EXE_EXT) \$(CONFIGPM)
 *)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 .PHONY: makeppport
-makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
+makeppport: miniperl$(EXE_EXT) $(CONFIGPM) $(nonxs_ext)
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport
 
 !NO!SUBS!

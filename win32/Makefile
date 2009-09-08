@@ -1051,7 +1051,7 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-MakePPPort: $(MINIPERL) $(CONFIGPM)
+MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
 	$(MINIPERL) -I..\lib ..\mkppport
 
 MakePPPort_clean:
