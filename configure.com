@@ -2738,6 +2738,7 @@ $!
 $! (extspec = xxx) =~ tr!-!/!
 $ extspec = ""
 $ idx = 0
+$ extension_dir_name = xxx
 $ replace_dash_with_slash:
 $   before = F$ELEMENT(idx, "-", xxx)
 $   IF before .EQS. "-" THEN goto end_replace_dash_with_slash
@@ -2752,10 +2753,19 @@ $
 $ end_replace_dash_with_slash:
 $   
 $ xxx = known_extensions
+$ gosub may_already_have_extension
+$ IF $STATUS .EQ. 1
+$ THEN
+$     xxx = nonxs_ext
+$     gosub may_already_have_extension
+$ ENDIF
+$ IF $STATUS .NE. 1 THEN goto ext_loop
+$ goto found_new_extension
+$!
 $ may_already_have_extension:
 $   idx = F$LOCATE(extspec, xxx)
 $   extlen = F$LENGTH(xxx) 
-$   IF idx .EQ. extlen THEN goto found_new_extension
+$   IF idx .EQ. extlen THEN return 1
 $!  But "Flirble" may just be part of "Acme-Flirble"
 $   IF idx .GT. 0 .AND. F$EXTRACT(idx - 1, 1, xxx) .NES. " "
 $   THEN
@@ -2766,14 +2776,19 @@ $!  But "Foo" may just be part of "Foo-Bar" so check for equality.
 $   xxx = F$EXTRACT(idx, extlen - idx, xxx)
 $   IF F$ELEMENT(0, " ", xxx) .EQS. extspec
 $   THEN 
-$	GOTO ext_loop
+$	RETURN 3
 $   ELSE 
 $	xxx = F$EXTRACT(F$LENGTH(extspec) + 1, extlen, xxx)
 	GOTO may_already_have_extension
 $   ENDIF
 $!
 $ found_new_extension:
-$   known_extensions = known_extensions + " ''extspec'"
+$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .NES. ""
+$   THEN
+$       known_extensions = known_extensions + " ''extspec'"
+$   ELSE
+$       nonxs_ext = nonxs_ext + " ''extspec'"
+$   ENDIF
 $   goto ext_loop
 $end_ext:
 $ close CONFIG
@@ -2781,6 +2796,7 @@ $ DELETE/SYMBOL xxx
 $ DELETE/SYMBOL idx
 $ DELETE/SYMBOL extspec
 $ DELETE/SYMBOL extlen
+$ DELETE/SYMBOL extension_dir_name
 $ known_extensions = F$EDIT(known_extensions,"TRIM,COMPRESS")
 $ dflt = known_extensions
 $ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
@@ -2798,8 +2814,10 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ dflt = dflt - "Win32API/File" - "Win32CORE" - "Win32"  ! need Dave Cutler's other project
+$ dflt = dflt - "Win32API/File" - "Win32"  ! need Dave Cutler's other project
+$ nonxs_ext = nonxs_ext - "Win32CORE"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
+$ nonxs_ext = F$EDIT(nonxs_ext,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build
 $ echo ""
@@ -6427,7 +6445,9 @@ $ WC "netdb_hlen_type='" + netdb_hlen_type + "'"
 $ WC "netdb_host_type='" + netdb_host_type + "'"
 $ WC "netdb_name_type='" + netdb_name_type + "'"
 $ WC "netdb_net_type='" + netdb_net_type + "'"
-$ WC "nonxs_ext='" + nonxs_ext + "'"
+$ tmp = "nonxs_ext='" + nonxs_ext + "'"
+$ WC/symbol tmp
+$ DELETE/SYMBOL tmp
 $ WC "nveformat='" + nveformat + "'"
 $ WC "nvfformat='" + nvfformat + "'"
 $ WC "nvgformat='" + nvgformat + "'"

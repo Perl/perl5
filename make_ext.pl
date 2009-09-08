@@ -179,6 +179,7 @@ elsif ($is_VMS) {
     $perl = $^X;
     push @extspec, (split ' ', $Config{static_ext}) if $static;
     push @extspec, (split ' ', $Config{dynamic_ext}) if $dynamic;
+    push @extspec, (split ' ', $Config{nonxs_ext}) if $dynamic;
 }
 
 foreach my $spec (@extspec)  {
