@@ -364,7 +364,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'saper',
 	'DISTRIBUTION'	=> 'SAPER/constant-1.17.tar.gz',
-	'FILES'		=> q[lib/constant.{pm,t}],
+	'FILES'		=> q[ext/constant],
 	'EXCLUDED'	=> [ qw( t/00-load.t
 				 t/more-tests.t
 				 t/pod-coverage.t
@@ -372,9 +372,6 @@ use File::Glob qw(:case);
 				 eg/synopsis.pl
 			       )
 			   ],
-	'MAP'		=> { 'lib/' => 'lib/',
-			     't/'   => 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},

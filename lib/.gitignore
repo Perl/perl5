@@ -246,6 +246,7 @@
 /attributes.pm
 /auto
 /base.pm
+/constant.pm
 /encoding.pm
 /fields.pm
 /lib.pm

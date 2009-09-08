@@ -1,12 +1,5 @@
 #!./perl -T
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 use warnings;
 use vars qw{ @warnings $fagwoosh $putt $kloong};
 BEGIN {				# ...and save 'em for later

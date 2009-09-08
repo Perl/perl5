@@ -379,6 +379,8 @@ ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
+ext/constant/lib/constant.pm	For "use constant"
+ext/constant/t/constant.t	See if compile-time constants work
 ext/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
 ext/CPAN/lib/CPAN/Author.pm		helper package for CPAN.pm
 ext/CPAN/lib/CPAN/Bundle.pm		helper package for CPAN.pm
@@ -2474,8 +2476,6 @@ lib/complete.pl			A command completion subroutine
 lib/Config/Extensions.pm	Convenient hash lookup for built extensions
 lib/Config/Extensions.t		See if Config::Extensions works
 lib/Config.t			See if Config works
-lib/constant.pm			For "use constant"
-lib/constant.t			See if compile-time constants work
 lib/CORE.pod			document the CORE namespace
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)

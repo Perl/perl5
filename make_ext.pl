@@ -4,6 +4,8 @@ use warnings;
 use Config;
 use Cwd;
 
+my @toolchain = qw(ext/constant/lib);
+
 # This script acts as a simple interface for building extensions.
 
 # It's actually a cut and shut of the Unix version ext/utils/makeext and the
@@ -219,7 +221,8 @@ sub build_extension {
     $perl ||= "$up/miniperl";
     my $return_dir = $up;
     my $lib_dir = "$up/lib";
-    $ENV{PERL5LIB} = $lib_dir;
+    $ENV{PERL5LIB}
+	= join $Config{path_sep}, $lib_dir, map {"$up/$_"} @toolchain;
 
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
