@@ -139,13 +139,6 @@ the sources), you may have to modify the Registry yourself.  Note that
 this means you can no longer tell the difference between an executable
 Perl program and a Perl library file.
 
-=item Macintosh
-
-Under "Classic" MacOS, a perl program will have the appropriate Creator and
-Type, so that double-clicking them will invoke the MacPerl application.
-Under Mac OS X, clickable apps can be made from any C<#!> script using Wil
-Sanchez' DropScript utility: http://www.wsanchez.net/software/ .
-
 =item VMS
 
 Put
@@ -181,10 +174,6 @@ For example:
     # MS-DOS, etc.
     perl -e "print \"Hello world\n\""
 
-    # Macintosh
-    print "Hello world\n"
-     (then Run "Myscript" or Shift-Command-R)
-
     # VMS
     perl -e "print ""Hello world\n"""
 
@@ -197,11 +186,6 @@ the command shell, this would probably work better:
 B<CMD.EXE> in Windows NT slipped a lot of standard Unix functionality in
 when nobody was looking, but just try to find documentation for its
 quoting rules.
-
-Under the Macintosh, it depends which environment you are using.  The MacPerl
-shell, or MPW, is much like Unix shells in its support for several
-quoting variants, except that it makes free use of the Macintosh's non-ASCII
-characters as control characters.
 
 There is no general solution to all of this.  It's just a mess.
 
