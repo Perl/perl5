@@ -905,20 +905,8 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'gbarr',
 	'DISTRIBUTION'	=> 'GBARR/libnet-1.22.tar.gz',
-	'FILES'		=> q[lib/Net/{Cmd,Config,Domain,FTP,Netrc,NNTP,POP3,SMTP,Time}.pm
-			     lib/Net/Changes
-			     lib/Net/FTP
-			     lib/Net/demos/
-			     lib/Net/*.eg
-			     lib/Net/libnetFAQ.pod
-			     lib/Net/README
-			     lib/Net/t
-			    ],
+	'FILES'		=> q[ext/libnet],
 	'EXCLUDED'	=> [ qw{Configure install-nomake} ],
-	'MAP'		=> { 'Net/' => 'lib/Net/',
-			     't/'   => 'lib/Net/t/',
-			     ''     => 'lib/Net/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
