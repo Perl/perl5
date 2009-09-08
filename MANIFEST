@@ -379,6 +379,44 @@ ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
+ext/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
+ext/CPAN/lib/CPAN/Author.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Bundle.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/CacheMgr.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Complete.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Debug.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Distribution.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
+ext/CPAN/lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/FTP.pm			helper package for CPAN.pm
+ext/CPAN/lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Index.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/InfoObj.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files
+ext/CPAN/lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
+ext/CPAN/lib/CPAN/Kwalify.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/LWP/UserAgent.pm	helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Module.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
+ext/CPAN/lib/CPAN/PAUSE2003.pub		CPAN public key
+ext/CPAN/lib/CPAN/PAUSE2005.pub		CPAN public key
+ext/CPAN/lib/CPAN/PAUSE2007.pub		CPAN public key
+ext/CPAN/lib/CPAN/PAUSE2009.pub		CPAN public key
+ext/CPAN/lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
+ext/CPAN/lib/CPAN/Prompt.pm
+ext/CPAN/lib/CPAN/Queue.pm		queueing system for CPAN.pm
+ext/CPAN/lib/CPAN/Shell.pm
+ext/CPAN/lib/CPAN/SIGNATURE		CPAN public key
+ext/CPAN/lib/CPAN/Tarzip.pm		helper package for CPAN.pm
+ext/CPAN/lib/CPAN/URL.pm
+ext/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version strings
+ext/CPAN/Makefile.PL
 ext/CPANPLUS/bin/cpan2dist	the cpan2dist utility
 ext/CPANPLUS/bin/cpanp	the cpanp utility
 ext/CPANPLUS/bin/cpanp-run-perl	the cpanp-run-perl utility
@@ -473,6 +511,12 @@ ext/CPANPLUS/t/dummy-CPAN/autobundle/Snapshot.pm	CPANPLUS tests
 ext/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz	CPANPLUS tests
 ext/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz	CPANPLUS tests
 ext/CPANPLUS/t/inc/conf.pl	CPANPLUS tests
+ext/CPAN/scripts/cpan		easily interact with CPAN from the command line
+ext/CPAN/t/01loadme.t		See if CPAN the module works
+ext/CPAN/t/02nox.t		See if CPAN::Nox works
+ext/CPAN/t/03pkgs.t		See if CPAN::Version works
+ext/CPAN/t/10version.t		See if CPAN the module works
+ext/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
@@ -2367,49 +2411,6 @@ lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CORE.pod			document the CORE namespace
-lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
-lib/CPAN/Author.pm		helper package for CPAN.pm
-lib/CPAN/bin/cpan		easily interact with CPAN from the command line
-lib/CPAN/Bundle.pm		helper package for CPAN.pm
-lib/CPAN/CacheMgr.pm		helper package for CPAN.pm
-lib/CPAN/Complete.pm		helper package for CPAN.pm
-lib/CPAN/Debug.pm		helper package for CPAN.pm
-lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
-lib/CPAN/Distribution.pm	helper package for CPAN.pm
-lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
-lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
-lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
-lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
-lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
-lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
-lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
-lib/CPAN/FTP.pm			helper package for CPAN.pm
-lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
-lib/CPAN/Index.pm		helper package for CPAN.pm
-lib/CPAN/InfoObj.pm		helper package for CPAN.pm
-lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files
-lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
-lib/CPAN/Kwalify.pm		helper package for CPAN.pm
-lib/CPAN/LWP/UserAgent.pm	helper package for CPAN.pm
-lib/CPAN/Module.pm		helper package for CPAN.pm
-lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
-lib/CPAN/PAUSE2003.pub		CPAN public key
-lib/CPAN/PAUSE2005.pub		CPAN public key
-lib/CPAN/PAUSE2007.pub		CPAN public key
-lib/CPAN/PAUSE2009.pub		CPAN public key
-lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
-lib/CPAN/Prompt.pm
-lib/CPAN/Queue.pm		queueing system for CPAN.pm
-lib/CPAN/Shell.pm
-lib/CPAN/SIGNATURE		CPAN public key
-lib/CPAN/t/01loadme.t		See if CPAN the module works
-lib/CPAN/t/02nox.t		See if CPAN::Nox works
-lib/CPAN/t/03pkgs.t		See if CPAN::Version works
-lib/CPAN/t/10version.t		See if CPAN the module works
-lib/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
-lib/CPAN/Tarzip.pm		helper package for CPAN.pm
-lib/CPAN/URL.pm
-lib/CPAN/Version.pm		Simple math with different flavors of version strings
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DBM_Filter/Changes		DBM Filter Change history

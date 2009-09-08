@@ -383,7 +383,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'andk',
 	'DISTRIBUTION'	=> 'ANDK/CPAN-1.9402.tar.gz',
-	'FILES'		=> q[lib/CPAN.pm lib/CPAN],
+	'FILES'		=> q[ext/CPAN],
 	'EXCLUDED'	=> [ qr{^distroprefs/},
 			     qr{^inc/Test/},
 			     qr{^t/CPAN/authors/},
@@ -419,10 +419,6 @@ use File::Glob qw(:case);
 				t/yaml_code.yml
 			       },
 			   ],
-	'MAP'		=> { 'lib/'	=> 'lib/',
-			     ''		=> 'lib/CPAN/',
-			     'scripts/'	=> 'lib/CPAN/bin/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'CPAN',
 	},
