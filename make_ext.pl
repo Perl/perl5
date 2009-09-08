@@ -16,7 +16,8 @@ use Cwd;
 #
 # On Windows or VMS,
 # If '--static' is specified, static extensions will be built.
-# If '--dynamic' is specified, dynamic (and nonxs) extensions will be built.
+# If '--dynamic' is specified, dynamic extensions will be built.
+# If '--nonxs' is specified, nonxs extensions will be built.
 # If '--all' is specified, all extensions will be built.
 #
 #    make_ext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
@@ -67,6 +68,7 @@ foreach (@ARGV) {
 
 my $static = $opts{static} || $opts{all};
 my $dynamic = $opts{dynamic} || $opts{all};
+my $nonxs = $opts{nonxs} || $opts{all};
 
 # The Perl Makefile.SH will expand all extensions to
 #	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
@@ -126,7 +128,7 @@ if ($target eq '') {
     die "$0: unknown make target '$target'\n";
 }
 
-if (!@extspec and !$static and !$dynamic)  {
+if (!@extspec and !$static and !$dynamic and !$nonxs)  {
     die "$0: no extension specified\n";
 }
 
@@ -157,7 +159,8 @@ if ($is_Win32) {
 
     my @ext;
     push @ext, FindExt::static_ext() if $static;
-    push @ext, FindExt::dynamic_ext(), FindExt::nonxs_ext() if $dynamic;
+    push @ext, FindExt::dynamic_ext() if $dynamic;
+    push @ext, FindExt::nonxs_ext() if $nonxs;
 
     foreach (sort @ext) {
 	if (%incl and !exists $incl{$_}) {
@@ -179,7 +182,7 @@ elsif ($is_VMS) {
     $perl = $^X;
     push @extspec, (split ' ', $Config{static_ext}) if $static;
     push @extspec, (split ' ', $Config{dynamic_ext}) if $dynamic;
-    push @extspec, (split ' ', $Config{nonxs_ext}) if $dynamic;
+    push @extspec, (split ' ', $Config{nonxs_ext}) if $nonxs;
 }
 
 foreach my $spec (@extspec)  {

@@ -1027,7 +1027,7 @@ ODBCCP32_DLL = $(windir)\system\odbccp32.dll
 
 all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL) $(MK2)	\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort		\
-	$(PERLEXE) $(X2P) Extensions $(PERLSTATIC)
+	$(PERLEXE) $(X2P) Extensions Extensions_nonxs $(PERLSTATIC)
 
 ..\regcharclass.h : ..\Porting\regcharclass.pl
 	cd .. && miniperl Porting\regcharclass.pl && cd win32
@@ -1399,6 +1399,10 @@ Extensions_static : ..\make_ext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
+
+Extensions_nonxs : ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --nonxs
 
 Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=clean
