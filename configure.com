@@ -2725,20 +2725,13 @@ $ xxx = ""
 $ OPEN/READ CONFIG 'manifestfound'
 $ext_loop:
 $   READ/END_OF_FILE=end_ext/ERROR=end_ext CONFIG line
-$   IF F$EXTRACT(0,4,line) .NES. "ext/" .AND. -
-       F$EXTRACT(0,8,line) .NES. "vms/ext/" THEN goto ext_loop
+$   IF F$EXTRACT(0,4,line) .NES. "ext/" THEN goto ext_loop
 $   line = F$EDIT(line,"COMPRESS")
 $   line = F$ELEMENT(0," ",line)
 $   IF F$EXTRACT(0,4,line) .EQS. "ext/"
 $   THEN
 $     xxx = F$ELEMENT(1,"/",line)
 $     IF F$SEARCH("[-.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
-$   ENDIF
-$   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/"
-$   THEN
-$     xxx = F$ELEMENT(2,"/",line)
-$     IF F$SEARCH("[-.vms.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
-$     xxx = "VMS/" + xxx
 $   ENDIF
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $!
