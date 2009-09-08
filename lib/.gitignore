@@ -167,6 +167,15 @@
 /Log/Message/Simple.pm
 /MIME
 /Math/BigInt/FastCalc.pm
+/Memoize.pm
+/Memoize
+/Memoize/AnyDBM_File.pm
+/Memoize/Expire.pm
+/Memoize/ExpireFile.pm
+/Memoize/ExpireTest.pm
+/Memoize/NDBM_File.pm
+/Memoize/SDBM_File.pm
+/Memoize/Storable.pm
 /Module/CoreList.pm
 /Module/Load.pm
 /Module/Load/Conditional.pm
