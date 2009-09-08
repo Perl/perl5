@@ -1036,7 +1036,7 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 
-$(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
+$(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM) Extensions_nonxs
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	cd $(EXTDIR)\$(*B)
 	..\$(MINIPERL) -I..\..\lib $(*B)_pm.PL

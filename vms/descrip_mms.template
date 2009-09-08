@@ -678,7 +678,7 @@ nonxsext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport $(MINIPERL_EXE)
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
-[.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm
+[.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm nonxsext
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 # Rename catches problem with some DECC versions in which object file is
