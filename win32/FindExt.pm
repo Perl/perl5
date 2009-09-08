@@ -78,7 +78,8 @@ sub find_ext
         $this_ext =~ s!-!/!g;
         $leaf =~ s/.*-//;
 
-        if (-f "$ext_dir$item/$leaf.xs" || -f "$ext_dir$item/$leaf.c" ) {
+        my @files = glob "$ext_dir$item/*.{xs,c}";
+        if (@files) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
         } else {
             $ext{$this_ext} = 'nonxs';
