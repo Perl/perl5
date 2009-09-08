@@ -17,7 +17,6 @@ $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
 $Is_Darwin  = $^O eq 'darwin';
 $Is_Dos     = $^O eq 'dos';
-$Is_MacOS   = $^O eq 'MacOS';
 $Is_MPE     = $^O eq 'mpeix';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -64,7 +63,7 @@ SKIP: {
 
 SKIP: {
   skip "mtime and ctime not reliable", 2
-    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos or $Is_MacOS or $Is_Darwin;
+    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos or $Is_Darwin;
 
   ok( $mtime,           'mtime' );
   is( $mtime, $ctime,   'mtime == ctime' );
@@ -188,7 +187,7 @@ ok(-w $tmpfile,     '   -w');
 
 SKIP: {
     skip "-x simply determines if a file ends in an executable suffix", 1
-      if $Is_Dosish || $Is_MacOS;
+      if $Is_Dosish;
 
     ok(-x $tmpfile,     '   -x');
 }

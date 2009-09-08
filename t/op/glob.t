@@ -18,11 +18,6 @@ elsif ($^O eq 'VMS') {
   map { $files{lc($_)}++ } <[.op]*>;
   map { s/;.*$//; delete $files{lc($_)}; } split /[\n]/, `directory/noheading/notrailing/versions=1 [.op]`,
 }
-elsif ($^O eq 'MacOS') {
-  @oops = @ops = <:op:*>;
-  map { $files{$_}++ } <:op:*>;
-  map { delete $files{$_} } split /[\s\n]/, `echo :op:\xc5`;
-}
 else {
   map { $files{$_}++ } <op/*>;
   map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
@@ -32,22 +27,15 @@ ok( !(keys(%files)),'leftover op/* files' ) or diag(join(' ',sort keys %files));
 cmp_ok($/,'eq',"\n",'sane input record separator');
 
 $not = '';
-if ($^O eq 'MacOS') {
-    while (<jskdfjskdfj* :op:* jskdjfjkosvk*>) {
-	$not = "not " unless $_ eq shift @ops;
-	$not = "not at all " if $/ eq "\0";
-    }
-} else {
-    while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
-	$not = "not " unless $_ eq shift @ops;
-	$not = "not at all " if $/ eq "\0";
-    }
+while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
+    $not = "not " unless $_ eq shift @ops;
+    $not = "not at all " if $/ eq "\0";
 }
 ok(!$not,"glob amid garbage [$not]");
 
 cmp_ok($/,'eq',"\n",'input record separator still sane');
 
-$_ = $^O eq 'MacOS' ? ":op:*" : "op/*";
+$_ = "op/*";
 @glops = glob $_;
 cmp_ok("@glops",'eq',"@oops",'glob operator 1');
 

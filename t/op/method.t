@@ -284,7 +284,6 @@ for my $meth (['Bar', 'Foo::Bar'],
 {
     fresh_perl_is(<<EOT,
 package UNIVERSAL; sub AUTOLOAD { my \$c = shift; print "\$c \$AUTOLOAD\\n" }
-sub DESTROY {} # IO object destructor called in MacOS, because of Mac::err
 package Xyz;
 package main; Foo->$meth->[0]();
 EOT

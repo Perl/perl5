@@ -131,35 +131,20 @@ is ($@, '');
 eval "use lib 1.01";
 isnt ($@, '');
 
-
 eval "use lib 0.9 qw(fred)";
 is ($@, '');
 
-if ($^O eq 'MacOS') {
-    is($INC[0], ":fred:");
-} else {
-    is($INC[0], "fred");
-}
+is($INC[0], "fred");
 
 eval "use lib 1.0 qw(joe)";
 is ($@, '');
 
-
-if ($^O eq 'MacOS') {
-    is($INC[0], ":joe:");
-} else {
-    is($INC[0], "joe");
-}
-
+is($INC[0], "joe");
 
 eval "use lib 1.01 qw(freda)";
 isnt($@, '');
 
-if ($^O eq 'MacOS') {
-    isnt($INC[0], ":freda:");
-} else {
-    isnt($INC[0], "freda");
-}
+isnt($INC[0], "freda");
 
 {
     local $lib::VERSION = 35.36;

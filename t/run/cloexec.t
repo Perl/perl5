@@ -48,11 +48,9 @@ use strict;
 $|=1;
 
 my $Is_VMS      = $^O eq 'VMS';
-my $Is_MacOS    = $^O eq 'MacOS';
 my $Is_Win32    = $^O eq 'MSWin32';
 
 # When in doubt, skip.
-skip_all("MacOS")    if $Is_MacOS;
 skip_all("VMS")      if $Is_VMS;
 skip_all("Win32")    if $Is_Win32;
 

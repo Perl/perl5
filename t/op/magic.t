@@ -20,14 +20,13 @@ $Is_VMS      = $^O eq 'VMS';
 $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
-$Is_MacOS    = $^O eq 'MacOS';
 $Is_MPE      = $^O eq 'mpeix';		
 $Is_miniperl = $ENV{PERL_CORE_MINITEST};
 $Is_BeOS     = $^O eq 'beos';
 
 $PERL = $ENV{PERL}
     || ($Is_NetWare           ? 'perl'   :
-       ($Is_MacOS || $Is_VMS) ? $^X      :
+       $Is_VMS                ? $^X      :
        $Is_MSWin32            ? '.\perl' :
        './perl');
 
@@ -40,7 +39,6 @@ eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
 if ($Is_MSWin32)  { like `set FOO`, qr/^(?:FOO=)?hi there$/; }
-elsif ($Is_MacOS) { ok "1 # skipped", 1; }
 elsif ($Is_VMS)   { is `write sys\$output f\$trnlnm("FOO")`, "hi there\n"; }
 else              { is `echo \$FOO`, "hi there\n"; }
 
@@ -52,7 +50,7 @@ close FOO; # just mention it, squelch used-only-once
 
 SKIP: {
     skip('SIGINT not safe on this platform', 5)
-	if $Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS;
+	if $Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE;
   # the next tests are done in a subprocess because sh spits out a
   # newline onto stderr when a child process kills itself with SIGINT.
   # We use a pipe rather than system() because the VMS command buffer
@@ -163,13 +161,10 @@ is((keys %h)[0], "foo\034bar");
 }
 
 # $?, $@, $$
-SKIP:  {
-    skip('$? + system are broken on MacPerl', 2) if $Is_MacOS;
-    system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
-    is $?, 0;
-    system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
-    isnt $?, 0;
-}
+system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
+is $?, 0;
+system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
+isnt $?, 0;
 
 eval { die "foo\n" };
 is $@, "foo\n";
@@ -195,13 +190,10 @@ like ($@, qr/^Modification of a read-only value attempted/);
     elsif($Is_os2) {
        $wd = Cwd::sys_cwd();
     }
-    elsif($Is_MacOS) {
-       $wd = ':';
-    }
     else {
 	$wd = '.';
     }
-    my $perl = ($Is_MacOS || $Is_VMS) ? $^X : "$wd/perl";
+    my $perl = $Is_VMS ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $middlemaybe = '';
     my $tailmaybe = '';
@@ -227,9 +219,6 @@ EOT
     elsif ($Is_os2) {
       $script = "./show-shebang";
     }
-    elsif ($Is_MacOS) {
-      $script = ":show-shebang";
-    }
     elsif ($Is_VMS) {
       $script = "[]show-shebang";
     }
@@ -254,7 +243,7 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok close(SCRIPT) or diag $!;
     ok chmod(0755, $script) or diag $!;
-    $_ = ($Is_MacOS || $Is_VMS) ? `$perl $script` : `$script`;
+    $_ = $Is_VMS ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{./$script}{$script} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
@@ -292,7 +281,7 @@ $^O = $orig_osname;
 
 SKIP: {
     skip("%ENV manipulations fail or aren't safe on $^O", 4)
-	if $Is_VMS || $Is_Dos || $Is_MacOS;
+	if $Is_VMS || $Is_Dos;
 
  SKIP: {
 	skip("clearing \%ENV is not safe when running under valgrind")

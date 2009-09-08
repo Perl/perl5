@@ -44,7 +44,7 @@ ok(localtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 SKIP: {
     # This conditional of "No tzset()" is stolen from ext/POSIX/t/time.t
     skip "No tzset()", 1
-        if $^O eq "MacOS" || $^O eq "VMS" || $^O eq "cygwin" ||
+        if $^O eq "VMS" || $^O eq "cygwin" ||
            $^O eq "djgpp" || $^O eq "MSWin32" || $^O eq "dos" ||
            $^O eq "interix";
 

@@ -405,7 +405,6 @@ USE_OK
 
 my $is_mswin    = $^O eq 'MSWin32';
 my $is_netware  = $^O eq 'NetWare';
-my $is_macos    = $^O eq 'MacOS';
 my $is_vms      = $^O eq 'VMS';
 my $is_cygwin   = $^O eq 'cygwin';
 
@@ -431,14 +430,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
     }
     unless ($args{nolib}) {
-	if ($is_macos) {
-	    $runperl .= ' -I::lib';
-	    # Use UNIX style error messages instead of MPW style.
-	    $runperl .= ' -MMac::err=unix' if $args{stderr};
-	}
-	else {
-	    $runperl .= ' "-I../lib"'; # doublequotes because of VMS
-	}
+	$runperl .= ' "-I../lib"'; # doublequotes because of VMS
     }
     if ($args{switches}) {
 	local $Level = 2;
@@ -481,19 +473,6 @@ sub _create_runperl { # Create the string to qx in runperl().
 	    $runperl = qq{$Perl -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}
-	elsif ($is_macos) {
-	    # MacOS can only do two processes under MPW at once;
-	    # the test itself is one; we can't do two more, so
-	    # write to temp file
-	    my $stdin = qq{$Perl -e 'print qq(} . $args{stdin} . qq{)' > teststdin; };
-	    if ($args{verbose}) {
-		my $stdindisplay = $stdin;
-		$stdindisplay =~ s/\n/\n\#/g;
-		_print_stderr "# $stdindisplay\n";
-	    }
-	    `$stdin`;
-	    $runperl .= q{ < teststdin };
-	}
 	else {
 	    $runperl = qq{$Perl -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
@@ -502,8 +481,7 @@ sub _create_runperl { # Create the string to qx in runperl().
     if (defined $args{args}) {
 	_quote_args(\$runperl, $args{args});
     }
-    $runperl .= ' 2>&1'          if  $args{stderr} && !$is_macos;
-    $runperl .= " \xB3 Dev:Null" if !$args{stderr} &&  $is_macos;
+    $runperl .= ' 2>&1' if $args{stderr};
     if ($args{verbose}) {
 	my $runperldisplay = $runperl;
 	$runperldisplay =~ s/\n/\n\#/g;
