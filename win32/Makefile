@@ -1258,7 +1258,7 @@ inst_lib : $(CONFIGPM)
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
+$(UNIDATAFILES) : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables -check $@ $(FIRSTUNIFILE)
 

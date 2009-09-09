@@ -978,7 +978,7 @@ lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
 
 unidatafiles $(unidatafiles): uni.data
 
-uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
+uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib mktables -w
 	touch uni.data
 

@@ -554,7 +554,7 @@ $(ARCHDIR)Config_heavy.pl : [.lib]Config_heavy.pl
 $(ARCHDIR)vmspipe.com : vmspipe.com
         Copy $(MMS$SOURCE) $(ARCHDIR)
 
-unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables
+unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsext
 	$(MINIPERL) [.lib.unicore]mktables "-C" [.lib.unicore] 
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)

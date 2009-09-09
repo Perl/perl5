@@ -1583,7 +1583,7 @@ inst_lib : $(CONFIGPM)
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
+$(UNIDATAFILES) .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables
 
