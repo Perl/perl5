@@ -6,6 +6,7 @@ require 5.008;	# Needs pack "U". Probably safest to run on 5.8.x
 use strict;
 use Carp;
 use File::Spec;
+use Text::Tabs ();  ## using this makes the files about half the size
 
 ##
 ## mktables -- create the runtime Perl Unicode files (lib/unicore/**/*.pl)
@@ -2006,8 +2007,6 @@ sub WriteAllMappings()
                   );
         WriteIfChanged('Properties', @OUT);
     }
-
-    use Text::Tabs ();  ## using this makes the files about half the size
 
     ## Write Exact.pl
     {
