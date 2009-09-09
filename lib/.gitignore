@@ -234,6 +234,8 @@
 /Term/UI.pm
 /Text/Balanced.pm
 /Text/Soundex.pm
+/Text/Tabs.pm
+/Text/Wrap.pm
 /Thread
 /Tie/File.pm
 /Tie/Memoize.pm

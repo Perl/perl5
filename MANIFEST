@@ -2061,6 +2061,22 @@ ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text-Soundex/t/Soundex.t	test for Text::Soundex
+ext/Text-Tabs/CHANGELOG			ChangeLog for Tabs+Wrap
+ext/Text-Tabs/lib/Text/Tabs.pm		Do expand and unexpand
+ext/Text-Tabs/lib/Text/Wrap.pm		Paragraph formatter
+ext/Text-Tabs/t/37000.t			See if Text::Tabs is working
+ext/Text-Tabs/t/39548.t			See if Text::Tabs is working
+ext/Text-Tabs/t/belg4mit.t		See if Text::Tabs is working
+ext/Text-Tabs/t/dandv.t			See if Text::Tabs is working
+ext/Text-Tabs/t/fill.t			See if Text::Wrap::fill works
+ext/Text-Tabs/t/Jacobson2.t		See if Text::Tabs is working
+ext/Text-Tabs/t/Jacobson.t		See if Text::Tabs is working
+ext/Text-Tabs/t/Jochen.t		See if Text::Tabs is working
+ext/Text-Tabs/t/sep2.t			See if Text::Tabs is working
+ext/Text-Tabs/t/sep.t			See if Text::Tabs is working
+ext/Text-Tabs/t/tabs.t			See if Text::Tabs works
+ext/Text-Tabs/t/wrap_separator2.t	See if Text::Wrap::wrap works
+ext/Text-Tabs/t/wrap.t			See if Text::Wrap::wrap works
 ext/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
 ext/Thread-Queue/t/01_basic.t		Thread::Queue tests
 ext/Thread-Queue/t/02_refs.t		Thread::Queue tests
@@ -3364,25 +3380,6 @@ lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
-lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
-lib/Text/ParseWords.t		See if Text::ParseWords works
-lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
-lib/Text/Tabs.pm		Do expand and unexpand
-lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
-lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/dandv.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
-lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
-lib/Text/TabsWrap/t/wrap_separator2.t	See if Text::Wrap::wrap works
-lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
-lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays

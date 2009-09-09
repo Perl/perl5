@@ -65,6 +65,7 @@ ppport.h
 /Test-Harness/Makefile.PL
 /Text-Balanced/Makefile.PL
 /Text-Soundex/Makefile.PL
+/Text-Tabs/Makefile.PL
 /Thread-Queue/Makefile.PL
 /Thread-Semaphore/Makefile.PL
 /Tie-File/Makefile.PL
