@@ -61,6 +61,7 @@ $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ ccflags = ""
 $ static_ext = ""
+$ dynamic_ext = ""
 $ nonxs_ext = ""
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
@@ -2829,7 +2830,7 @@ $ echo ""
 $ echo "Which modules do you want to build into perl?"
 $ rp = "[''dflt'] "
 $ GOSUB myread
-$ extensions = F$EDIT(ans,"TRIM,COMPRESS")
+$ dynamic_ext = F$EDIT(ans,"TRIM,COMPRESS")
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
 $ echo ""
@@ -6261,9 +6262,9 @@ $ WC "doublesize='" + doublesize + "'"
 $ WC "drand01='" + drand01 + "'"
 $ WC "dtrace='" + "'"
 $!
-$! The extensions symbol may be quite long
+$! The dynamic_ext symbol may be quite long
 $!
-$ tmp = "dynamic_ext='" + extensions + "'"
+$ tmp = "dynamic_ext='" + dynamic_ext + "'"
 $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "eagain=' '"
@@ -6272,9 +6273,9 @@ $ WC "embedmymalloc='" + usemymalloc + "'"
 $ WC "eunicefix=':'"
 $ WC "exe_ext='" + exe_ext + "'"
 $!
-$! The extensions symbol may be quite long
+$! The extensions symbols may be quite long
 $!
-$ tmp = "extensions='" + extensions + "'"
+$ tmp = "extensions='" + nonxs_ext + " " + dynamic_ext + "'"
 $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "fflushNULL='define'"
@@ -7176,7 +7177,7 @@ $ WRITE CONFIG "$ cpan2dist  == """ + perl_setup_perl + " ''vms_prefix':[utils]c
 $! FIXME: "-" is an operator and illegal in a symbol name -- cpanp-run-perl can't work
 $!$ WRITE CONFIG "$ cpanp-run-perl == """ + perl_setup_perl + " ''vms_prefix':[utils]cpanp-run-perl.com"""
 $ WRITE CONFIG "$ cpanp      == """ + perl_setup_perl + " ''vms_prefix':[utils]cpanp.com"""
-$ IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
+$ IF F$LOCATE("Devel::DProf",dynamic_ext) .LT. F$LENGTH(dynamic_ext)
 $ THEN
 $ WRITE CONFIG "$ dprofpp    == """ + perl_setup_perl + " ''vms_prefix':[utils]dprofpp.com"""
 $ ENDIF 
