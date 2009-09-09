@@ -343,7 +343,7 @@ pack_sockaddr_un(pathname)
 		 * character, starting with \0 and possibly including \0s,
 		 * therefore the length of the structure must denote the
 		 * end of that character array */
-		addr_len = (void *)&sun_ad.sun_path - (void *)&sun_ad + len;
+		addr_len = (char *)&(sun_ad.sun_path) - (char *)&sun_ad + len;
 	} else {
 		addr_len = sizeof sun_ad;
 	}
@@ -386,7 +386,7 @@ unpack_sockaddr_un(sun_sv)
 	if (addr.sun_path[0] == '\0') {
 		/* Linux-style abstract socket address begins with a nul
 		 * and can contain nuls. */
-		addr_len = (void *)&addr - (void *)&addr.sun_path + sockaddrlen;
+		addr_len = (char *)&addr - (char *)&(addr.sun_path) + sockaddrlen;
 	} else {
 		for (addr_len = 0; addr.sun_path[addr_len]
 		     && addr_len < sizeof addr.sun_path; addr_len++);
