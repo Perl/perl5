@@ -4,6 +4,13 @@ use warnings;
 use Config;
 use Cwd;
 
+# To clarify, this isn't the entire suite of modules considered "toolchain"
+# It's not even all modules needed to build ext/
+# It's just the source paths of the (minimum complete set of) modules in ext/
+# needed to build the nonxs modules
+# After which, all nonxs modules are in lib, which was always sufficient to
+# allow miniperl to build everything else.
+
 my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib);
 
 # This script acts as a simple interface for building extensions.
