@@ -573,18 +573,12 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rkobes',
 	'DISTRIBUTION'	=> 'RKOBES/ExtUtils-Command-1.16.tar.gz',
-	'FILES'		=> q[lib/ExtUtils/Command.pm
-			     lib/ExtUtils/t/{cp,eu_command}.t
-			    ],
+	'FILES'		=> q[ext/ExtUtils-Command],
 	'EXCLUDED'	=> [ qw{ t/shell_command.t
 				 t/shell_exit.t
-			       	 t/lib/TieOut.pm
 				 lib/Shell/Command.pm
 			       },
 			   ],
-	'MAP'		=> { 't/'	=> 'lib/ExtUtils/t/',
-			     'lib/'	=> 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

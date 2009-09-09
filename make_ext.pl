@@ -4,7 +4,7 @@ use warnings;
 use Config;
 use Cwd;
 
-my @toolchain = qw(ext/constant/lib);
+my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib);
 
 # This script acts as a simple interface for building extensions.
 
