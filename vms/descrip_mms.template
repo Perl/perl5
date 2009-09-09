@@ -586,7 +586,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--dynamic" "--static"
 
-nonxsext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport $(MINIPERL_EXE)
+nonxsext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--nonxs"
 
 [.lib]lib.pm : [.lib]lib_pm.PL
