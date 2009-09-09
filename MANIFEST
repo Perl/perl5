@@ -4590,7 +4590,7 @@ win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/Makefile.ce		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/mdelete.bat		multifile delete
-win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
+win32/perlexe.ico		perlexe.ico image file
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
