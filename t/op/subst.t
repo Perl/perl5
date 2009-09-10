@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 140 );
+plan( tests => 141 );
 
 $x = 'foo';
 $_ = "x";
@@ -594,3 +594,6 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
 	is($_, "012", "RT#52104: $id");
     }
 }
+
+fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo', '[perl #69056] positive GPOS regex segfault' );
+

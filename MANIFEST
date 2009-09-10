@@ -4356,7 +4356,6 @@ t/op/reset.t			See if reset operator works
 t/op/re.t			See if exportable 're' funcs in universal.c work
 t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
-t/op/rt69056.t			Check for segfault reported in #69056
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/rxcode.t			See if /(?{ code })/ works
 t/op/setpgrpstack.t		See if setpgrp works
