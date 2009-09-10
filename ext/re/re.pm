@@ -71,10 +71,11 @@ my %flags = (
     OPTIMISEM       => 0x100000,
     STACK           => 0x280000,
     BUFFERS         => 0x400000,
+    GPOS            => 0x800000,
 );
 $flags{ALL} = -1 & ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS});
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
-$flags{Extra} = $flags{EXECUTE} | $flags{COMPILE};
+$flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
 $flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};

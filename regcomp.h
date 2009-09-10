@@ -729,6 +729,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXTRA_STATE       0x080000
 #define RE_DEBUG_EXTRA_OPTIMISE    0x100000
 #define RE_DEBUG_EXTRA_BUFFERS     0x400000
+#define RE_DEBUG_EXTRA_GPOS        0x800000
 /* combined */
 #define RE_DEBUG_EXTRA_STACK       0x280000
 
@@ -784,6 +785,8 @@ re.pm, especially to the documentation.
 #define DEBUG_TRIE_r(x) DEBUG_r( \
     if (re_debug_flags & (RE_DEBUG_COMPILE_TRIE \
         | RE_DEBUG_EXECUTE_TRIE )) x )
+#define DEBUG_GPOS_r(x) DEBUG_r( \
+    if (re_debug_flags & RE_DEBUG_EXTRA_GPOS) x )
 
 /* initialization */
 /* get_sv() can return NULL during global destruction. */

@@ -233,13 +233,16 @@ PP(pp_substcont)
 	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= 2;
 	sv_catsv(dstr, POPs);
+	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
+	s -= RX_GOFS(rx);
 
 	/* Are we done */
-	if (CxONCE(cx) || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
-				     s == m, cx->sb_targ, NULL,
-				     ((cx->sb_rflags & REXEC_COPY_STR)
-				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
-				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
+	if (CxONCE(cx) || s < orig ||
+		!CALLREGEXEC(rx, s, cx->sb_strend, orig,
+			     (s == m) + RX_GOFS(rx), cx->sb_targ, NULL,
+			     ((cx->sb_rflags & REXEC_COPY_STR)
+			      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
+			      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
 	    SV * const targ = cx->sb_targ;
 
