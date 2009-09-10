@@ -3381,6 +3381,9 @@ lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
+lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
+lib/Text/ParseWords.t		See if Text::ParseWords works
+lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
 lib/Thread.pm			Thread extensions frontend
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays
