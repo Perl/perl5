@@ -125,6 +125,8 @@
 /Encode.pm
 /Encode
 /Errno.pm
+/ExtUtils/CBuilder/
+/ExtUtils/CBuilder.pm
 /ExtUtils/Command.pm
 /ExtUtils/Command/MM.pm
 /ExtUtils/Constant.pm
@@ -163,6 +165,7 @@
 /ExtUtils/ParseXS.pm
 /ExtUtils/MY.pm
 /ExtUtils/testlib.pm
+/ExtUtils/xsubpp
 /Fatal.pm
 /Fcntl.pm
 /FileCache.pm
