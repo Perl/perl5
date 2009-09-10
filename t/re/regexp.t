@@ -1,6 +1,6 @@
 #!./perl
 
-# The tests are in a separate file 't/op/re_tests'.
+# The tests are in a separate file 't/re/re_tests'.
 # Each line in that file is a separate test.
 # There are five columns, separated by tabs.
 #
