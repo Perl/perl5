@@ -131,6 +131,7 @@
 /ExtUtils/Constant
 /ExtUtils/Installed.pm
 /ExtUtils/Install.pm
+/ExtUtils/Manifest.pm
 /ExtUtils/Miniperl.pm
 /ExtUtils/Packlist.pm
 /Fatal.pm
