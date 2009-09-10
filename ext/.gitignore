@@ -27,6 +27,7 @@ ppport.h
 /Data-Dumper/Makefile.PL
 /Digest/Makefile.PL
 /Devel-SelfStubber/Makefile.PL
+/ExtUtils-Command/Makefile.PL
 /ExtUtils-Constant/Makefile.PL
 /ExtUtils-Install/Makefile.PL
 /FileCache/Makefile.PL
