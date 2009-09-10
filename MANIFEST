@@ -1049,6 +1049,19 @@ ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for pr
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
+ext/ExtUtils-Install/Changes				ExtUtils-Install change log
+ext/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
+ext/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions
+ext/ExtUtils-Install/lib/ExtUtils/Packlist.pm		Manipulates .packlist files
+ext/ExtUtils-Install/t/can_write_dir.t			Does the _can_write_dir function of ExtUtils::Install work properly?
+ext/ExtUtils-Install/t/Installapi2.t			See if new api for ExtUtils::Install::install() works
+ext/ExtUtils-Install/t/Installed.t			See if ExtUtils::Installed works
+ext/ExtUtils-Install/t/Install.t			See if ExtUtils::Install works
+ext/ExtUtils-Install/t/InstallWithMM.t			See if ExtUtils::Install works (related to EUMM/t/basic.t)
+ext/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
+ext/ExtUtils-Install/t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
+ext/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
+ext/ExtUtils-Install/t/Packlist.t			See if Packlist works
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
@@ -2564,11 +2577,8 @@ lib/ExtUtils/CBuilder/t/00-have-compiler.t	ExtUtils::CBuilder tests
 lib/ExtUtils/CBuilder/t/01-basic.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/Changes		MakeMaker change log
-lib/ExtUtils/Changes_EU-Install		ExtUtils-Install change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
-lib/ExtUtils/Installed.pm	Information on installed extensions
-lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist/Kid.pm	Does the real work of the above
 lib/ExtUtils/Liblist.pm		Locates libraries
@@ -2599,7 +2609,6 @@ lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
-lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/ParseXS/Changes	ExtUtils::ParseXS change log
 lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
@@ -2615,7 +2624,6 @@ lib/ExtUtils/t/arch_check.t	Test MakeMaker's arch_check()
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
-lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
@@ -2625,12 +2633,8 @@ lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
 lib/ExtUtils/t/fix_libs.t	Test for ExtUtils::MakeMaker
 lib/ExtUtils/t/hints.t		See if hint files are honored.
-lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/installed_file.t	Test for ExtUtils::MakeMaker
-lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
-lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
-lib/ExtUtils/t/InstallWithMM.t	See if ExtUtils::Install works (related to EUMM/t/basic.t)
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/is_of_type.t	Test for ExtUtils::MakeMaker
@@ -2654,7 +2658,6 @@ lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/TODO		Things TODO in MakeMaker
 lib/ExtUtils/t/oneliner.t	See if MM can generate perl one-liners
-lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
 lib/ExtUtils/t/pm.t		See if MakeMaker can handle PM

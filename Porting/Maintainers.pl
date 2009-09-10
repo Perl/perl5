@@ -601,26 +601,15 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'yves',
 	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.54.tar.gz',
-	'FILES' 	=> q[lib/ExtUtils/{Install,Installed,Packlist}.pm
-                             lib/ExtUtils/Changes_EU-Install
-			     lib/ExtUtils/t/Installed.t
-			     lib/ExtUtils/t/InstallWithMM.t
-			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
-	'EXCLUDED'	=> [ qw{ t/lib/MakeMaker/Test/Setup/BFD.pm
-				 t/lib/MakeMaker/Test/Utils.pm
-				 t/lib/Test/Builder.pm
+	'FILES' 	=> q[ext/ExtUtils-Install],
+	'EXCLUDED'	=> [ qw{ t/lib/Test/Builder.pm
 				 t/lib/Test/Builder/Module.pm
 				 t/lib/Test/More.pm
 				 t/lib/Test/Simple.pm
-				 t/lib/TieOut.pm
 				 t/pod-coverage.t
 				 t/pod.t
 			       },
 			   ],
-	'MAP'		=> { 't/'	=> 'lib/ExtUtils/t/',
-			     'lib/'	=> 'lib/',
-			     'Changes'  => 'lib/ExtUtils/Changes_EU-Install',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},

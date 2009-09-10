@@ -127,7 +127,10 @@
 /Errno.pm
 /ExtUtils/Constant.pm
 /ExtUtils/Constant
+/ExtUtils/Installed.pm
+/ExtUtils/Install.pm
 /ExtUtils/Miniperl.pm
+/ExtUtils/Packlist.pm
 /Fatal.pm
 /Fcntl.pm
 /FileCache.pm

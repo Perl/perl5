@@ -12,6 +12,7 @@ use Cwd;
 # allow miniperl to build everything else.
 
 my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib
+		   ext/ExtUtils-Install/lib
 		   ext/Text-ParseWords/lib);
 
 # This script acts as a simple interface for building extensions.
