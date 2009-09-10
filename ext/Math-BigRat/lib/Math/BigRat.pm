@@ -23,7 +23,8 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.22';
+$VERSION = '0.24';
+$VERSION = eval $VERSION;
 
 use overload;			# inherit overload from Math::BigFloat
 
@@ -279,7 +280,7 @@ sub new
     }
 
   # simple string input
-  if (($n =~ /[\.eE]/))
+  if (($n =~ /[\.eE]/) && $n !~ /^0x/)
     {
     # looks like a float, quacks like a float, so probably is a float
     $self->{sign} = 'NaN';
@@ -1686,7 +1687,7 @@ use L<as_int()> or L<as_float()> instead.
 This routine is automatically used whenever a scalar is required:
 
 	my $x = Math::BigRat->new('3/1');
-	@array = (1,2,3);
+	@array = (0,1,2,3);
 	$y = $array[$x];		# set $y to 3
 
 =head2 as_int()/as_number()
@@ -2012,6 +2013,8 @@ may contain more documentation and examples as well as testcases.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> 2001 - 2008.
+(C) by Tels L<http://bloodgate.com/> 2001 - 2009.
+
+Currently maintained by Jonathan "Duke" Leto <jonathan@leto.net> L<http://leto.net>
 
 =cut
