@@ -4083,8 +4083,6 @@ The same template may generally also be used in unpack().
 =item package NAMESPACE
 X<package> X<module> X<namespace>
 
-=item package
-
 Declares the compilation unit as being in the given namespace.  The scope
 of the package declaration is from the declaration itself through the end
 of the enclosing block, file, or eval (the same as the C<my> operator).
