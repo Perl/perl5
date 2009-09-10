@@ -1622,6 +1622,20 @@ ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 ext/Math-BigInt-FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
+ext/Math-BigRat/lib/Math/BigRat.pm		Math::BigRat
+ext/Math-BigRat/t/big_ap.t		Math::BigRat test
+ext/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
+ext/Math-BigRat/t/bigfltrt.t		Math::BigRat test
+ext/Math-BigRat/t/biglog.t		Math::BigRat test
+ext/Math-BigRat/t/bigratpm.inc		Math::BigRat test
+ext/Math-BigRat/t/bigratpm.t		Math::BigRat test
+ext/Math-BigRat/t/bigrat.t		Math::BigRat test
+ext/Math-BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
+ext/Math-BigRat/t/bigroot.t		Math::BigRat test
+ext/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
+ext/Math-BigRat/t/Math/BigRat/Test.pm		Math::BigRat test helper
+ext/Math-BigRat/t/requirer.t	see if require works properly
+ext/Math-BigRat/t/trap.t	see if trap_nan and trap_inf work
 ext/Memoize/lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 ext/Memoize/lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
 ext/Memoize/lib/Memoize/Expire.pm		Memoize expiry manager example
@@ -2876,19 +2890,6 @@ lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_mbfw.t	use BigFloat w/ with and lib at the same time
 lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
-lib/Math/BigRat.pm		Math::BigRat
-lib/Math/BigRat/t/big_ap.t		Math::BigRat test
-lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
-lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test
-lib/Math/BigRat/t/biglog.t		Math::BigRat test
-lib/Math/BigRat/t/bigratpm.inc		Math::BigRat test
-lib/Math/BigRat/t/bigratpm.t		Math::BigRat test
-lib/Math/BigRat/t/bigrat.t		Math::BigRat test
-lib/Math/BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
-lib/Math/BigRat/t/bigroot.t		Math::BigRat test
-lib/Math/BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
-lib/Math/BigRat/t/requirer.t	see if require works properly
-lib/Math/BigRat/t/trap.t	see if trap_nan and trap_inf work
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
@@ -4124,7 +4125,6 @@ t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
-t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others

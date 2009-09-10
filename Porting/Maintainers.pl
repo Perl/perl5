@@ -983,20 +983,13 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigRat-0.22.tar.gz',
-	'FILES'		=> q[lib/Math/BigRat.pm
-			     lib/Math/BigRat
-			     t/lib/Math/BigRat/
-			    ],
+	'FILES'		=> q[ext/Math-BigRat],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
 				t/pod.t
 				t/pod_cov.t
 			       },
 			   ],
-	'MAP'		=> { 't/' => 'lib/Math/BigRat/t/',
-			     't/Math/BigRat/Test.pm'
-						=> 't/lib/Math/BigRat/Test.pm',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

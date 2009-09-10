@@ -47,6 +47,7 @@ ppport.h
 /IPC-Open3/Makefile.PL
 /Log-Message/Makefile.PL
 /Log-Message-Simple/Makefile.PL
+/Math-BigRat/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
 /Memoize/Makefile.PL
 /Module-Load/Makefile.PL

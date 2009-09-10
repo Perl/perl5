@@ -212,6 +212,7 @@
 /Math/BigInt/FastCalc.pm
 /Math/BigInt/Trace.pm
 /Math/BigFloat/Trace.pm
+/Math/BigRat.pm
 /Memoize.pm
 /Memoize
 /Memoize/AnyDBM_File.pm
