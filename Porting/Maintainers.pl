@@ -587,18 +587,12 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'nwclark',
 	'DISTRIBUTION'	=> 'NWCLARK/ExtUtils-Constant-0.16.tar.gz',
-	'FILES'		=> q[lib/ExtUtils/Constant.pm
-			     lib/ExtUtils/Constant
-			     lib/ExtUtils/t/Constant.t
-			    ],
+	'FILES'		=> q[ext/ExtUtils-Constant],
 	'EXCLUDED'	=> [ qw{ lib/ExtUtils/Constant/Aaargh56Hash.pm
 				 examples/perl_keyword.pl
 				 examples/perl_regcomp_posix_keyword.pl
 			       },
 			   ],
-	'MAP'		=> { 't/'	=> 'lib/ExtUtils/t/',
-			     'lib/'	=> 'lib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

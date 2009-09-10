@@ -1043,6 +1043,12 @@ ext/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX plat
 ext/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
 ext/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
 ext/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
+ext/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
+ext/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
+ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
+ext/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
+ext/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
+ext/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
@@ -2560,11 +2566,6 @@ lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/Changes		MakeMaker change log
 lib/ExtUtils/Changes_EU-Install		ExtUtils-Install change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
-lib/ExtUtils/Constant/Base.pm	generate XS code to import C header constants
-lib/ExtUtils/Constant.pm	generate XS code to import C header constants
-lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
-lib/ExtUtils/Constant/Utils.pm	generate XS code to import C header constants
-lib/ExtUtils/Constant/XS.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
@@ -2617,7 +2618,6 @@ lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/can_write_dir.t	Does the _can_write_dir function of ExtUtils::Install work properly?
 lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
-lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension

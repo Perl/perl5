@@ -1,15 +1,9 @@
 #!/usr/bin/perl -w
 
-BEGIN {
-    if( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-    use Config;
-    unless ($Config{usedl}) {
-	print "1..0 # no usedl, skipping\n";
-	exit 0;
-    }
+use Config;
+unless ($Config{usedl}) {
+    print "1..0 # no usedl, skipping\n";
+    exit 0;
 }
 
 # use warnings;

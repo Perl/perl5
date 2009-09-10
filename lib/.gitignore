@@ -125,6 +125,8 @@
 /Encode.pm
 /Encode
 /Errno.pm
+/ExtUtils/Constant.pm
+/ExtUtils/Constant
 /ExtUtils/Miniperl.pm
 /Fatal.pm
 /Fcntl.pm
