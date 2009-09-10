@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.52";
+$VERSION                = "1.54";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -117,7 +117,7 @@ sub new {
 
     ### copying $tmpl here since a shallow copy makes it use the
     ### same aref, causing for files to remain in memory always.
-    my $obj = bless { _data => [ ], _file => 'Unknown' }, $class;
+    my $obj = bless { _data => [ ], _file => 'Unknown', _error => '' }, $class;
 
     if (@_) {
         unless ( $obj->read( @_ ) ) {
@@ -1445,6 +1445,10 @@ method call instead.
         my $self    = shift;
         my $msg     = $error = shift;
         $longmess   = Carp::longmess($error);
+        if (ref $self) {
+            $self->{_error} = $error;
+            $self->{_longmess} = $longmess;
+        }
 
         ### set Archive::Tar::WARN to 0 to disable printing
         ### of errors
@@ -1457,7 +1461,11 @@ method call instead.
 
     sub error {
         my $self = shift;
-        return shift() ? $longmess : $error;
+        if (ref $self) {
+            return shift() ? $self->{_longmess} : $self->{_error};
+        } else {
+            return shift() ? $longmess : $error;
+        }
     }
 }
 
@@ -1561,7 +1569,7 @@ Returns an iterator function that reads the tar file without loading
 it all in memory.  Each time the function is called it will return the
 next file in the tarball. The files are returned as
 C<Archive::Tar::File> objects. The iterator function returns the
-empty list once it has exhausted the the files contained.
+empty list once it has exhausted the files contained.
 
 The second argument can be a hash reference with options, which are
 identical to the arguments passed to C<read()>.
@@ -1600,7 +1608,8 @@ sub iter {
         return                  unless $handle; # handle exhausted?
 
         ### read data, should only return file
-        @data = @{ $class->_read_tar($handle, { %$opts, limit => 1 }) };
+        my $tarfile = $class->_read_tar($handle, { %$opts, limit => 1 });
+        @data = @$tarfile if ref $tarfile && ref $tarfile eq 'ARRAY';
 
         ### return one piece of data
         return shift(@data)     if @data;
@@ -1816,6 +1825,11 @@ Holds the last reported error. Kept for historical reasons, but its
 use is very much discouraged. Use the C<error()> method instead:
 
     warn $tar->error unless $tar->extract;
+
+Note that in older versions of this module, the C<error()> method
+would return an effectively global value even when called an instance
+method as above. This has since been fixed, and multiple instances of
+C<Archive::Tar> now have separate error strings.
 
 =head2 $Archive::Tar::INSECURE_EXTRACT_MODE
 
