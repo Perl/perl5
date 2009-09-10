@@ -4,12 +4,6 @@ use File::Spec;
 my $perl;
 BEGIN {
   $perl = File::Spec->rel2abs($^X);
-  if ($ENV{PERL_CORE}) {
-    chdir 't' if -d 't';
-    chdir '../lib/ExtUtils/CBuilder'
-      or die "Can't chdir to lib/ExtUtils/CBuilder: $!";
-    @INC = qw(../..);
-  }
 }
 
 use strict;
