@@ -34,7 +34,7 @@
 # linked to the test number.
 #
 # If you want to add a regular expression test that can't be expressed
-# in this format, don't add it here: put it in op/pat.t instead.
+# in this format, don't add it here: put it in re/pat.t instead.
 #
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
