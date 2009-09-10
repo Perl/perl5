@@ -11,7 +11,8 @@ use Cwd;
 # After which, all nonxs modules are in lib, which was always sufficient to
 # allow miniperl to build everything else.
 
-my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib);
+my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib
+		   ext/Text-ParseWords);
 
 # This script acts as a simple interface for building extensions.
 
