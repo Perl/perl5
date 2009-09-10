@@ -134,6 +134,7 @@
 /ExtUtils/Manifest.pm
 /ExtUtils/Miniperl.pm
 /ExtUtils/Packlist.pm
+/ExtUtils/ParseXS.pm
 /Fatal.pm
 /Fcntl.pm
 /FileCache.pm

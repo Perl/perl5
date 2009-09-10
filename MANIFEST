@@ -1066,6 +1066,15 @@ ext/ExtUtils-Install/t/Packlist.t			See if Packlist works
 ext/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm		Utilities to write MANIFEST files
 ext/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 ext/ExtUtils-Manifest/t/Manifest.t			See if ExtUtils::Manifest works
+ext/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
+ext/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
+ext/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
+ext/ExtUtils-ParseXS/t/basic.t			See if ExtUtils::ParseXS works
+ext/ExtUtils-ParseXS/t/usage.t			ExtUtils::ParseXS tests
+ext/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
+ext/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
+ext/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
+ext/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
@@ -2611,14 +2620,6 @@ lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
-lib/ExtUtils/ParseXS/Changes	ExtUtils::ParseXS change log
-lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
-lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
-lib/ExtUtils/ParseXS/t/usage.t	ExtUtils::ParseXS tests
-lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
-lib/ExtUtils/ParseXS/t/XSTest.xs	Test file for ExtUtils::ParseXS tests
-lib/ExtUtils/ParseXS/t/XSUsage.pm	ExtUtils::ParseXS tests
-lib/ExtUtils/ParseXS/t/XSUsage.xs	ExtUtils::ParseXS tests
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
@@ -2683,7 +2684,6 @@ lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
 lib/ExtUtils/t/xs.t		Part of MakeMaker's test suite
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/XSSymSet.pm	on VMS, manage linker symbols when building extensions
-lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work

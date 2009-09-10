@@ -1,13 +1,5 @@
 #!/usr/bin/perl
 
-BEGIN {
-  if ($ENV{PERL_CORE}) {
-    chdir 't' if -d 't';
-    chdir '../lib/ExtUtils/ParseXS'
-      or die "Can't chdir to lib/ExtUtils/ParseXS: $!";
-    @INC = qw(../.. ../../.. .);
-  }
-}
 use strict;
 use Test::More;
 use Config;

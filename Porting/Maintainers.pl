@@ -657,10 +657,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kwilliams',
 	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.2002.tar.gz',
-	'FILES'		=> q[lib/ExtUtils/ParseXS.pm
-			     lib/ExtUtils/ParseXS
-			     lib/ExtUtils/xsubpp
-			    ],
+	'FILES'		=> q[ext/ExtUtils-ParseXS],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
