@@ -223,6 +223,32 @@ ext/B-Deparse/Deparse.pm	Compiler Deparse backend
 ext/B-Deparse/t/deparse.t	See if B::Deparse works
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
+ext/bignum/lib/bigint.pm			bigint
+ext/bignum/lib/bignum.pm			bignum
+ext/bignum/lib/bigrat.pm			bigrat
+ext/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
+ext/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
+ext/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
+ext/bignum/t/bigexp.t		See if bignum works
+ext/bignum/t/bigint.t		See if bigint works
+ext/bignum/t/bignum.t		See if bignum works
+ext/bignum/t/bigrat.t		See if bigrat works
+ext/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
+ext/bignum/t/biinfnan.t		See if bignum works
+ext/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
+ext/bignum/t/bninfnan.t		See if bignum works
+ext/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
+ext/bignum/t/brinfnan.t		See if bignum works
+ext/bignum/t/br_lite.t		See if bigrat with Math::BigInt::Lite works
+ext/bignum/t/in_effect.t	See if in_effect() works
+ext/bignum/t/infnan.inc		See if bignum with inf/NaN works
+ext/bignum/t/option_a.t		See if bignum a => X works
+ext/bignum/t/option_l.t		See if bignum l => X works
+ext/bignum/t/option_p.t		See if bignum p => X works
+ext/bignum/t/ratopt_a.t		See if bigrat a => X works
+ext/bignum/t/scope_f.t		See if no bignum works
+ext/bignum/t/scope_i.t		See if no bigint works
+ext/bignum/t/scope_r.t		See if no bigrat works
 ext/B-Lint/lib/B/Lint/Debug.pm	Adds debugging stringification to B::
 ext/B-Lint/lib/B/Lint.pm	Compiler Lint backend
 ext/B-Lint/t/lint.t		See if B::Lint works
@@ -2601,31 +2627,7 @@ lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloatpl.t		See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigintpl.t			See if bigint.pl works
-lib/bigint.pm			bigint
-lib/bignum.pm			bignum
-lib/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
-lib/bignum/t/bigexp.t		See if bignum works
-lib/bignum/t/bigint.t		See if bigint works
-lib/bignum/t/bignum.t		See if bignum works
-lib/bignum/t/bigrat.t		See if bigrat works
-lib/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
-lib/bignum/t/biinfnan.t		See if bignum works
-lib/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
-lib/bignum/t/bninfnan.t		See if bignum works
-lib/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
-lib/bignum/t/brinfnan.t		See if bignum works
-lib/bignum/t/br_lite.t		See if bigrat with Math::BigInt::Lite works
-lib/bignum/t/in_effect.t	See if in_effect() works
-lib/bignum/t/infnan.inc		See if bignum with inf/NaN works
-lib/bignum/t/option_a.t		See if bignum a => X works
-lib/bignum/t/option_l.t		See if bignum l => X works
-lib/bignum/t/option_p.t		See if bignum p => X works
-lib/bignum/t/ratopt_a.t		See if bigrat a => X works
-lib/bignum/t/scope_f.t		See if no bignum works
-lib/bignum/t/scope_i.t		See if no bigint works
-lib/bignum/t/scope_r.t		See if no bigrat works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
-lib/bigrat.pm			bigrat
 lib/blib.pm			For "use blib"
 lib/blib.t			blib.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
@@ -2819,7 +2821,6 @@ lib/Locale/Script.pod		Locale::Codes documentation
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
-lib/Math/BigFloat/Trace.pm	bignum tracing
 lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
@@ -2852,7 +2853,6 @@ lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, rou
 lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
 lib/Math/BigInt/t/nan_cmp.t	overloaded comparision involving *NaN*
 lib/Math/BigInt/t/new_ovld.t	test overloaded numbers in BigFloat's new()
-lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigInt/t/req_mbf0.t	test: require Math::BigFloat; ->bzero();
 lib/Math/BigInt/t/req_mbf1.t	test: require Math::BigFloat; ->bone();
 lib/Math/BigInt/t/req_mbfa.t	test: require Math::BigFloat; ->bnan();

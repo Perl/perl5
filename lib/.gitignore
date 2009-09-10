@@ -8,6 +8,9 @@
 /autouse.pm
 /B.pm
 /B
+/bigint.pm
+/bignum.pm
+/bigrat.pm
 /Compress
 /Config.pm
 /Config.pod
@@ -207,6 +210,8 @@
 /Log/Message/Simple.pm
 /MIME
 /Math/BigInt/FastCalc.pm
+/Math/BigInt/Trace.pm
+/Math/BigFloat/Trace.pm
 /Memoize.pm
 /Memoize
 /Memoize/AnyDBM_File.pm

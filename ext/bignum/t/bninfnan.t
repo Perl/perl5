@@ -11,7 +11,7 @@ BEGIN
   my $location = $0; $location =~ s/bninfnan.t//i;
   if ($ENV{PERL_CORE})
     {
-    @INC = qw(../lib ../lib/bignum/t); # testing with the core distribution
+    #@INC = qw(../lib ../lib/bignum/t); # testing with the core distribution
     }
   else
     {

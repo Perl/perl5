@@ -18,6 +18,7 @@ ppport.h
 /autodie/Makefile.PL
 /autouse/Makefile.PL
 /base/Makefile.PL
+/bignum/Makefile.PL
 /B-Debug/Makefile.PL
 /B-Deparse/Makefile.PL
 /B-Lint/Makefile.PL
