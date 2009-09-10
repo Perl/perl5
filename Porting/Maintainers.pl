@@ -1657,6 +1657,11 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'CHORNY/Text-ParseWords-3.27.zip',
 	'FILES'		=> q[ext/Text-ParseWords],
 	'EXCLUDED'	=> [ qw( t/pod.t ) ],
+	# For the benefit of make_ext.pl, we have to have this accessible:
+	'MAP'		=> {
+			     'ParseWords.pm' => 'ext/Text-ParseWords/lib/Text/ParseWords.pm',
+			     ''              => 'ext/Text-ParseWords/',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

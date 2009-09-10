@@ -2060,7 +2060,7 @@ ext/Text-Balanced/t/06_extqlk.t		See if Text::Balanced works
 ext/Text-Balanced/t/07_exttag.t		See if Text::Balanced works
 ext/Text-Balanced/t/08_extvar.t		See if Text::Balanced works
 ext/Text-Balanced/t/09_gentag.t		See if Text::Balanced works
-ext/Text-ParseWords/ParseWords.pm	Perl module to split words on arbitrary delimiter
+ext/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 ext/Text-ParseWords/t/ParseWords.t	See if Text::ParseWords works
 ext/Text-ParseWords/t/taint.t		See if Text::ParseWords works with tainting
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
