@@ -4314,16 +4314,16 @@ t/op/or.t			See if || works in weird situations
 t/op/overload_integer.t			See if overload::constant for integer works after "use".   
 t/op/override.t			See if operator overriding works
 t/op/pack.t			See if pack and unpack work
-t/op/pat.t			See if esoteric patterns work
-t/op/pat_thr.t			See if esoteric patterns work in another thread
+t/re/pat.t			See if esoteric patterns work
+t/re/pat_thr.t			See if esoteric patterns work in another thread
 t/op/pos.t			See if pos works
 t/op/pow.t			See if ** works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
 t/op/qq.t			See if qq works
-t/op/qr_gc.t			See if qr doesn't leak
-t/op/qrstack.t			See if qr expands the stack properly
-t/op/qr.t			See if qr works
+t/re/qr_gc.t			See if qr doesn't leak
+t/re/qrstack.t			See if qr expands the stack properly
+t/re/qr.t			See if qr works
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
@@ -4332,32 +4332,32 @@ t/op/readline.t			See if <> / readline / rcatline work
 t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
-t/op/reg_60508.t		See if bug #60508 is fixed
-t/op/reg_email.t		See if regex recursion works by parsing email addresses
-t/op/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
-t/op/regexp_noamp.t		See if regular expressions work with optimizations
-t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
-t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
-t/op/regexp_qr_embed_thr.t	See if regular expressions work with embedded qr// in another thread
-t/op/regexp_qr.t		See if regular expressions work as qr//
-t/op/regexp.t			See if regular expressions work
-t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
-t/op/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
-t/op/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
-t/op/reg_fold.t			See if case folding works properly
-t/op/reg_mesg.t			See if one can get regular expression errors
-t/op/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
-t/op/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
-t/op/reg_pmod.t			See if regexp /p modifier works as expected
-t/op/reg_posixcc.t		See if posix character classes behave consistantly
-t/op/reg_unsafe.t		Check for unsafe match vars
+t/re/reg_60508.t		See if bug #60508 is fixed
+t/re/reg_email.t		See if regex recursion works by parsing email addresses
+t/re/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
+t/re/regexp_noamp.t		See if regular expressions work with optimizations
+t/re/regexp_notrie.t		See if regular expressions work without trie optimisation
+t/re/regexp_qr_embed.t		See if regular expressions work with embedded qr//
+t/re/regexp_qr_embed_thr.t	See if regular expressions work with embedded qr// in another thread
+t/re/regexp_qr.t		See if regular expressions work as qr//
+t/re/regexp.t			See if regular expressions work
+t/re/regexp_trielist.t		See if regular expressions work with trie optimisation
+t/re/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
+t/re/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
+t/re/reg_fold.t			See if case folding works properly
+t/re/reg_mesg.t			See if one can get regular expression errors
+t/re/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
+t/re/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
+t/re/reg_pmod.t			See if regexp /p modifier works as expected
+t/re/reg_posixcc.t		See if posix character classes behave consistantly
+t/re/reg_unsafe.t		Check for unsafe match vars
 t/op/repeat.t			See if x operator works
 t/op/reset.t			See if reset operator works
-t/op/re.t			See if exportable 're' funcs in universal.c work
-t/op/re_tests			Regular expressions for regexp.t
+t/re/re.t			See if exportable 're' funcs in universal.c work
+t/re/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
 t/op/runlevel.t			See if die() works from perl_call_*()
-t/op/rxcode.t			See if /(?{ code })/ works
+t/re/rxcode.t			See if /(?{ code })/ works
 t/op/setpgrpstack.t		See if setpgrp works
 t/op/sleep.t			See if sleep works
 t/op/smartmatch.t		See if the ~~ operator works
@@ -4374,12 +4374,12 @@ t/op/stat.t			See if stat works
 t/op/study.t			See if study works
 t/op/studytied.t		See if study works with tied scalars
 t/op/sub_lval.t			See if lvalue subroutines work
-t/op/subst_amp.t		See if $&-related substitution works
-t/op/substr.t			See if substr works
-t/op/substr_thr.t		See if substr works in another thread
-t/op/subst.t			See if substitution works
-t/op/substT.t			See if substitution works with -T
-t/op/subst_wamp.t		See if substitution works with $& present
+t/re/subst_amp.t		See if $&-related substitution works
+t/re/substr.t			See if substr works
+t/re/substr_thr.t		See if substr works in another thread
+t/re/subst.t			See if substitution works
+t/re/substT.t			See if substitution works with -T
+t/re/subst_wamp.t		See if substitution works with $& present
 t/op/sub.t			See if subroutines work
 t/op/switch.t			See if switches (given/when) work
 t/op/symbolcache.t		See if undef/delete works on stashes with functions

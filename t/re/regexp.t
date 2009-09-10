@@ -73,8 +73,8 @@ use vars qw($qr $skip_amp $qr_embed $qr_embed_thr); # set by our callers
 
 
 if (!defined $file) {
-    open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
-	|| open(TESTS,':op:re_tests') || die "Can't open re_tests";
+    open(TESTS,'re/re_tests') || open(TESTS,'t/re/re_tests')
+	|| open(TESTS,':re:re_tests') || die "Can't open re_tests";
 }
 
 my @tests = <TESTS>;

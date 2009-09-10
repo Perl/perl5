@@ -1802,6 +1802,11 @@ other directories.
 Tests for POD directives.  There are still some tests for the Pod
 modules hanging around in here that need to be moved out into F<lib/>.
 
+=item F<t/re/>
+
+Tests for regex related functions or behaviour. (These used to live
+in t/op).
+
 =item F<t/run/>
 
 Testing features of how perl actually runs, including exit codes and

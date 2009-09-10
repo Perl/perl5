@@ -1438,7 +1438,7 @@ minitest.prep:
 # is crashing.
 minitest: miniperl$(EXE_EXT) lib/re.pm minitest.prep
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
-		&& $(LDLIBPTH) $(RUN) ./perl TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
+		&& $(LDLIBPTH) $(RUN) ./perl TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t op/*.t uni/*.t </dev/tty
 
 # Test via harness
 
@@ -1449,7 +1449,7 @@ test_harness_notty: test_prep
 	PERL=./perl HARNESS_NOTTY=1 $(MAKE) TESTFILE=harness _test
 
 test-reonly: test_prep
-	PERL=./perl TEST_ARGS='-re \\bpat\\b \\breg \\bre\b \\bsubst \\brxcode' $(MAKE) TESTFILE=harness _test
+	PERL=./perl TEST_ARGS='-re \\bre\\/' $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

@@ -6,10 +6,10 @@ BEGIN {
 }
 
 $qr = 1;
-for $file ('./op/regexp.t', './t/op/regexp.t', ':op:regexp.t') {
+for $file ('./re/regexp.t', './t/re/regexp.t', ':re:regexp.t') {
     if (-r $file) {
 	do $file or die $@;
 	exit;
     }
 }
-die "Cannot find ./op/regexp.t or ./t/op/regexp.t\n";
+die "Cannot find ./re/regexp.t or ./t/re/regexp.t\n";
