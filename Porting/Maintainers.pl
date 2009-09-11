@@ -679,13 +679,13 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tjenness',
 	'DISTRIBUTION'	=> 'TJENNESS/File-Temp-0.22.tar.gz',
-	'FILES'		=> q[lib/File/Temp.pm lib/File/Temp],
+	'FILES'		=> q[ext/File-Temp],
 	'EXCLUDED'	=> [ qw{misc/benchmark.pl
 				misc/results.txt
 			       }
 			   ],
 	'MAP'		=> { ''		=> 'lib/File/',
-			     't/'	=> 'lib/File/Temp/t/',
+			     't/'	=> 't/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

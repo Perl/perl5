@@ -1250,6 +1250,16 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
+ext/File-Temp/lib/File/Temp.pm		create safe temporary files and file handles
+ext/File-Temp/t/cmp.t		See if File::Temp works
+ext/File-Temp/t/fork.t		See if File::Temp works
+ext/File-Temp/t/lock.t		See if File::Temp works
+ext/File-Temp/t/mktemp.t	See if File::Temp works
+ext/File-Temp/t/object.t	See if File::Temp works
+ext/File-Temp/t/posix.t		See if File::Temp works
+ext/File-Temp/t/security.t	See if File::Temp works
+ext/File-Temp/t/seekable.t	See if File::Temp works
+ext/File-Temp/t/tempfile.t	See if File::Temp works
 ext/Filter-Simple/Changes				Filter::Simple
 ext/Filter-Simple/lib/Filter/Simple.pm			Simple frontend to Filter::Util::Call
 ext/Filter-Simple/t/data.t				See if Filter::Simple works
@@ -2859,16 +2869,6 @@ lib/File/Spec/VMS.pm		portable operations on VMS file names
 lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
 lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
-lib/File/Temp.pm		create safe temporary files and file handles
-lib/File/Temp/t/cmp.t		See if File::Temp works
-lib/File/Temp/t/fork.t		See if File::Temp works
-lib/File/Temp/t/lock.t		See if File::Temp works
-lib/File/Temp/t/mktemp.t	See if File::Temp works
-lib/File/Temp/t/object.t	See if File::Temp works
-lib/File/Temp/t/posix.t		See if File::Temp works
-lib/File/Temp/t/security.t	See if File::Temp works
-lib/File/Temp/t/seekable.t	See if File::Temp works
-lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/filetest.pm			For "use filetest"
 lib/filetest.t			See if filetest works
 lib/FindBin.pm			Find name of currently executing program

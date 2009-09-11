@@ -175,6 +175,7 @@
 /File/Fetch.pm
 /File/Glob.pm
 /File/GlobMapper.pm
+/File/Temp.pm
 /Filter/Simple.pm
 /Filter/Util
 /GDBM_File.pm
