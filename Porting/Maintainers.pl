@@ -890,9 +890,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'audreyt',
 	'DISTRIBUTION'	=> 'AUDREYT/Locale-Maketext-Simple-0.18.tar.gz',
-	'FILES'		=> q[lib/Locale/Maketext/Simple.pm
-			     lib/Locale/Maketext/Simple
-			    ],
+	'FILES'		=> q[ext/Locale-Maketext-Simple],
 	'EXCLUDED'	=> [ qr{^inc/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

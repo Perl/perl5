@@ -1610,6 +1610,9 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
+ext/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
+ext/Locale-Maketext-Simple/t/0-signature.t	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/1-basic.t	Locale::Simple tests
 ext/Log-Message/lib/Log/Message/Config.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Item.pm	Log::Message
@@ -2883,9 +2886,6 @@ lib/Locale/Maketext/Guts.pm	Locale::Maketext
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/Simple.pm	Locale::Simple
-lib/Locale/Maketext/Simple/t/0-signature.t	Locale::Simple tests
-lib/Locale/Maketext/Simple/t/1-basic.t	Locale::Simple tests
 lib/Locale/Maketext/t/01_about_verbose.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/10_make.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/20_get.t	See if Locale::Maketext works

@@ -46,6 +46,7 @@ ppport.h
 /IPC-Cmd/Makefile.PL
 /IPC-Open2/Makefile.PL
 /IPC-Open3/Makefile.PL
+/Locale-Maketext-Simple/Makefile.PL
 /Log-Message/Makefile.PL
 /Log-Message-Simple/Makefile.PL
 /Math-BigInt/Makefile.PL

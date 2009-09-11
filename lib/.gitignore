@@ -203,6 +203,7 @@
 /IPC/SharedMem.pm
 /IPC/SysV.pm
 /List
+/Locale/Maketext/Simple.pm
 /Log/Message.pm
 /Log/Message/Config.pm
 /Log/Message/Handlers.pm
