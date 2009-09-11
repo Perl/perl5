@@ -49,6 +49,7 @@ ppport.h
 /Log-Message-Simple/Makefile.PL
 /Math-BigRat/Makefile.PL
 /Math-BigInt-FastCalc/Makefile.PL
+/Math-Complex/Makefile.PL
 /Memoize/Makefile.PL
 /Module-Load/Makefile.PL
 /Module-Load-Conditional/Makefile.PL

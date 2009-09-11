@@ -998,19 +998,13 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'zefram',
 	'DISTRIBUTION'	=> 'JHI/Math-Complex-1.56.tar.gz',
-	'FILES'		=> q[lib/Math/Complex.pm
-			     lib/Math/Complex.t
-			     lib/Math/Trig.pm
-			     lib/Math/Trig.t
-			     lib/Math/underbar.t
-			    ],
+	'FILES'		=> q[ext/Math-Complex],
 	'EXCLUDED'	=> [
 			     qw{
 				t/pod.t
 				t/pod-coverage.t
 			       },
 			   ],
-	'MAP'		=> { 't/' => 'lib/Math/' },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

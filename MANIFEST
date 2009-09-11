@@ -1636,6 +1636,11 @@ ext/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 ext/Math-BigRat/t/Math/BigRat/Test.pm		Math::BigRat test helper
 ext/Math-BigRat/t/requirer.t	see if require works properly
 ext/Math-BigRat/t/trap.t	see if trap_nan and trap_inf work
+ext/Math-Complex/lib/Math/Complex.pm		A Complex package
+ext/Math-Complex/lib/Math/Trig.pm		A simple interface to complex trigonometry
+ext/Math-Complex/t/Complex.t		See if Math::Complex works
+ext/Math-Complex/t/Trig.t			See if Math::Trig works
+ext/Math-Complex/t/underbar.t		See if Math::Complex works
 ext/Memoize/lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 ext/Memoize/lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
 ext/Memoize/lib/Memoize/Expire.pm		Memoize expiry manager example
@@ -2890,11 +2895,6 @@ lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_mbfw.t	use BigFloat w/ with and lib at the same time
 lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
-lib/Math/Complex.pm		A Complex package
-lib/Math/Complex.t		See if Math::Complex works
-lib/Math/Trig.pm		A simple interface to complex trigonometry
-lib/Math/Trig.t			See if Math::Trig works
-lib/Math/underbar.t		See if Math::Complex works
 lib/Module/Build/API.pod	Module::Build
 lib/Module/Build/Authoring.pod	Module::Build
 lib/Module/Build/Base.pm	Module::Build
