@@ -1,8 +1,8 @@
 package Locale::Maketext::Simple;
-$Locale::Maketext::Simple::VERSION = '0.18';
+$Locale::Maketext::Simple::VERSION = '0.21';
 
 use strict;
-use 5.004;
+use 5.005;
 
 =head1 NAME
 
@@ -45,6 +45,10 @@ More sophisticated example:
 This module is a simple wrapper around B<Locale::Maketext::Lexicon>,
 designed to alleviate the need of creating I<Language Classes> for
 module authors.
+
+The language used is chosen from the loc_lang call. If a lookup is not
+possible, the i-default language will be used. If the lookup is not in the
+i-default language, then the key will be returned.
 
 If B<Locale::Maketext::Lexicon> is not present, it implements a
 minimal localization function by simply interpolating C<[_1]> with
@@ -146,19 +150,19 @@ sub load_loc {
     eval "
 	package $pkg;
 	use base 'Locale::Maketext';
-        %${pkg}::Lexicon = ( '_AUTO' => 1 );
 	Locale::Maketext::Lexicon->import({
 	    'i-default' => [ 'Auto' ],
 	    '*'	=> [ Gettext => \$pattern ],
 	    _decode => \$decode,
 	    _encoding => \$encoding,
 	});
+	*${pkg}::Lexicon = \\%${pkg}::i_default::Lexicon;
 	*tense = sub { \$_[1] . ((\$_[2] eq 'present') ? 'ing' : 'ed') }
 	    unless defined &tense;
 
 	1;
     " or die $@;
-    
+
     my $lh = eval { $pkg->get_handle } or return;
     my $style = lc($args{Style});
     if ($style eq 'maketext') {
@@ -193,7 +197,6 @@ sub load_loc {
 
     return $Loc{$pkg}, sub {
 	$lh = $pkg->get_handle(@_);
-	$lh = $pkg->get_handle(@_);
     };
 }
 
@@ -205,7 +208,7 @@ sub default_loc {
 	    my $str = shift;
             $str =~ s{((?<!~)(?:~~)*)\[_([1-9]\d*|\*)\]}
                      {$1%$2}g;
-            $str =~ s{((?<!~)(?:~~)*)\[([A-Za-z#*]\w*),([^\]]+)\]} 
+            $str =~ s{((?<!~)(?:~~)*)\[([A-Za-z#*]\w*),([^\]]+)\]}
                      {"$1%$2(" . _escape($3) . ')'}eg;
 	    _default_gettext($str, @_);
 	};

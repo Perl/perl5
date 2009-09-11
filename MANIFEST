@@ -1613,6 +1613,13 @@ ext/List-Util/XS.pp		List::Util
 ext/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 ext/Locale-Maketext-Simple/t/0-signature.t	Locale::Simple tests
 ext/Locale-Maketext-Simple/t/1-basic.t	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/2-load_po_without_i_default.t	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/3-load_po_with_i_default.t	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/po_with_i_default/en.po	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/po_with_i_default/fr.po	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
+ext/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 ext/Log-Message/lib/Log/Message/Config.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Item.pm	Log::Message
