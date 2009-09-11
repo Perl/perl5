@@ -38,6 +38,7 @@ ppport.h
 /ExtUtils-ParseXS/Makefile.PL
 /FileCache/Makefile.PL
 /File-Fetch/Makefile.PL
+/File-Path/Makefile.PL
 /File-Temp/Makefile.PL
 /Filter-Simple/Makefile.PL
 /Filter-Util-Call/Makefile.PL

@@ -1250,6 +1250,8 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
+ext/File-Path/lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
+ext/File-Path/t/Path.t			See if File::Path works
 ext/File-Temp/lib/File/Temp.pm		create safe temporary files and file handles
 ext/File-Temp/t/cmp.t		See if File::Temp works
 ext/File-Temp/t/fork.t		See if File::Temp works
@@ -2856,8 +2858,6 @@ lib/File/Find/t/find.t		See if File::Find works
 lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
-lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
-lib/File/Path.t			See if File::Path works
 lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods

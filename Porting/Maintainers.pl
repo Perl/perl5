@@ -662,14 +662,14 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'dland',
 	'DISTRIBUTION'	=> 'DLAND/File-Path-2.07_03.tar.gz',
-	'FILES'		=> q[lib/File/Path.pm lib/File/Path.t],
+	'FILES'		=> q[ext/File-Path],
 	'EXCLUDED'	=> [ qw{eg/setup-extra-tests
 				t/pod.t
 				t/taint.t
 			       }
 			   ],
 	'MAP'		=> { ''		=> 'lib/File/',
-			     't/'	=> 'lib/File/',
+			     't/'	=> 't/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
