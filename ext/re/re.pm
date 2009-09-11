@@ -4,11 +4,9 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.09";
+our $VERSION     = "0.10";
 our @ISA         = qw(Exporter);
-my @XS_FUNCTIONS = qw(regmust);
-my %XS_FUNCTIONS = map { $_ => 1 } @XS_FUNCTIONS;
-our @EXPORT_OK   = (@XS_FUNCTIONS,
+our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
                        regname regnames regnames_count));
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
@@ -80,34 +78,26 @@ $flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $fla
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
-my $installed;
-my $installed_error;
-
-sub _do_install {
-    if ( ! defined($installed) ) {
-        require XSLoader;
-        $installed = eval { XSLoader::load('re', $VERSION) } || 0;
-        $installed_error = $@;
-    }
+if (defined &DynaLoader::boot_DynaLoader) {
+    require XSLoader;
+    XSLoader::load( __PACKAGE__, $VERSION);
 }
+# else we're miniperl
+# We need to work for miniperl, because the XS toolchain uses Text::Wrap, which
+# uses re 'taint'.
 
 sub _load_unload {
     my ($on)= @_;
     if ($on) {
-        _do_install();        
-        if ( ! $installed ) {
-            die "'re' not installed!? ($installed_error)";
-	} else {
-	    # We call install() every time, as if we didn't, we wouldn't
-	    # "see" any changes to the color environment var since
-	    # the last time it was called.
+	# We call install() every time, as if we didn't, we wouldn't
+	# "see" any changes to the color environment var since
+	# the last time it was called.
 
-	    # install() returns an integer, which if casted properly
-	    # in C resolves to a structure containing the regex
-	    # hooks. Setting it to a random integer will guarantee
-	    # segfaults.
-	    $^H{regcomp} = install();
-        }
+	# install() returns an integer, which if casted properly
+	# in C resolves to a structure containing the regex
+	# hooks. Setting it to a random integer will guarantee
+	# segfaults.
+	$^H{regcomp} = install();
     } else {
         delete $^H{regcomp};
     }
@@ -146,14 +136,6 @@ sub bits {
 	    last;
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
-        } elsif ($XS_FUNCTIONS{$s}) {
-            _do_install();
-            if (! $installed) {
-                require Carp;
-                Carp::croak("\"re\" function '$s' not available");
-            }
-            require Exporter;
-            re->export_to_level(2, 're', $s);
 	} elsif ($EXPORT_OK{$s}) {
 	    require Exporter;
 	    re->export_to_level(2, 're', $s);
