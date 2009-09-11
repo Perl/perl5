@@ -415,7 +415,7 @@ private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_vers
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH myconfig.SH writemain.SH pod/Makefile.SH
+	myconfig.SH writemain.SH pod/Makefile.SH
 
 shextract = Makefile cflags config.h makeaperl makedepend \
 	makedir myconfig writemain pod/Makefile
