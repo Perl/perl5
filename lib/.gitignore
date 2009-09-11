@@ -305,6 +305,7 @@
 /auto
 /base.pm
 /constant.pm
+/encoding
 /encoding.pm
 /fields.pm
 /lib.pm

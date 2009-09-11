@@ -1061,6 +1061,12 @@ ext/Encode/ucm/viscii.ucm	Unicode Character Map
 ext/Encode/Unicode/Makefile.PL	Encode extension
 ext/Encode/Unicode/Unicode.pm	Encode extension
 ext/Encode/Unicode/Unicode.xs	Encode extension
+ext/encoding-warnings/Changes		Changelog for encoding::warnings
+ext/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
+ext/encoding-warnings/t/1-warning.t	tests for encoding::warnings
+ext/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
+ext/encoding-warnings/t/3-normal.t	tests for encoding::warnings
+ext/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 EXTERN.h			Included before foreign .h files
 ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
@@ -2758,11 +2764,6 @@ lib/Dumpvalue.pm		Screen dump of perl values
 lib/Dumpvalue.t			See if Dumpvalue works
 lib/dumpvar.pl			A variable dumper
 lib/dumpvar.t			A variable dumper tester
-lib/encoding/warnings.pm	warn on implicit encoding conversions
-lib/encoding/warnings/t/1-warning.t	tests for encoding::warnings
-lib/encoding/warnings/t/2-fatal.t	tests for encoding::warnings
-lib/encoding/warnings/t/3-normal.t	tests for encoding::warnings
-lib/encoding/warnings/t/4-lexical.t	tests for encoding::warnings
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables

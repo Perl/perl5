@@ -28,6 +28,7 @@ ppport.h
 /Data-Dumper/Makefile.PL
 /Digest/Makefile.PL
 /Devel-SelfStubber/Makefile.PL
+/encoding-warnings/Makefile.PL
 /ExtUtils-CBuilder/Makefile.PL
 /ExtUtils-Command/Makefile.PL
 /ExtUtils-Constant/Makefile.PL
