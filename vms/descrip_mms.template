@@ -360,7 +360,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm $(ARCHDIR)vmspipe.com [.lib]re.pm unidatafiles.ts
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm [.lib]lib.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
 utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]dprofpp.com 
@@ -385,9 +385,9 @@ all : base extras x2p archcorefiles preplibrary [.pod]perltoc.pod
 git_version.h : $(MINIPERL_EXE) make_patchnum.pl
         $(MINIPERL) make_patchnum.pl
 
-base : miniperl perl
+base : miniperl git_version.h nonxsext perl
 	@ $(NOOP)
-extras : dynext nonxsext libmods utils podxform extra.pods
+extras : dynext libmods utils podxform extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -583,10 +583,10 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 	$(MINIPERL) $(MMS$SOURCE)
 	@ Rename/Log XSLoader.pm [.ext.DynaLoader]
 
-dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport $(MINIPERL_EXE)
+dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts [.lib]DynaLoader.pm [.lib]XSLoader.pm preplibrary makeppport $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--dynamic" "--static"
 
-nonxsext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary $(MINIPERL_EXE)
+nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--nonxs"
 
 [.lib]lib.pm : [.lib]lib_pm.PL
