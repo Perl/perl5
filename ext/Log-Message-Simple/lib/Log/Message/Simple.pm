@@ -5,7 +5,7 @@ use Log::Message private => 0;;
 
 BEGIN { 
     use vars qw[$VERSION]; 
-    $VERSION = 0.04; 
+    $VERSION = 0.06; 
 }
         
 
@@ -13,7 +13,7 @@ BEGIN {
 
 =head1 NAME
 
-Log::Message::Simple
+Log::Message::Simple - Simplified interface to Log::Message
 
 =head1 SYNOPSIS
 
