@@ -944,16 +944,8 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-# We have to call our ./makedir because Ultrix 4.3 make can't handle the line
-#	test -d lib/auto || mkdir lib/auto
-# We need to autosplit in two steps because VOS can't handle so many args
-#
 .PHONY: preplibrary
-preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
-	@sh ./makedir lib/auto
-	@echo "	AutoSplitting perl library"
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib -MAutoSplit -MFile::Find -e 'find ({no_chdir=>1, wanted => sub {autosplit_lib_modules($$_) if /\.pm$$/}}, "lib")'
-	$(MAKE) lib/re.pm
+preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm lib/re.pm $(PREPLIBRARY_LIBPERL)
 
 $(CONFIGPM_FROM_CONFIG_SH) $(CONFIGPOD): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary lib/Config_git.pl
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib configpm

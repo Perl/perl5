@@ -726,19 +726,8 @@ fi
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-# We have to call our ./makedir because Ultrix 4.3 make can't handle the line
-#	test -d lib/auto || mkdir lib/auto
-# We need to autosplit in two steps because VOS can't handle so many args
-#
 .PHONY: preplibrary
-preplibrary: miniperl $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
-	@sh ./makedir lib/auto
-	@echo "	AutoSplitting perl library"
-	$(LDLIBPTH) ./miniperl -Ilib -MCross -e 'use AutoSplit; \
-		autosplit_lib_modules(@ARGV)' lib/*.pm
-	$(LDLIBPTH) ./miniperl -Ilib -MCross -e 'use AutoSplit; \
-		autosplit_lib_modules(@ARGV)' lib/*/*.pm
-	$(MAKE) lib/re.pm
+preplibrary: miniperl $(CONFIGPM) lib/lib.pm lib/re.pm $(PREPLIBRARY_LIBPERL)
 
 .PHONY: makeppport
 makeppport: miniperl$(EXE_EXT) $(CONFIGPM)

@@ -3546,7 +3546,6 @@ mad/t/p55.t			Test for the Perl 5 to Perl 5 translator
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
-makedir.SH			Precursor to makedir
 make_ext.pl			Used by Makefile to execute extension Makefiles
 Makefile.micro			microperl Makefile
 Makefile.SH			A script that generates Makefile

@@ -746,9 +746,6 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 	Copy/NoConfirm/Log [.pod]podselect.com [.lib.pods]
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
-	@ Write Sys$Output "Autosplitting Perl library . . ."
-	@ Create/Directory [.lib.auto]
-	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm [.lib.*.*]*.pm
 
 makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm nonxsext
 	$(MINIPERL) mkppport
