@@ -1610,6 +1610,27 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
+ext/Locale-Codes/ChangeLog	Locale::Codes
+ext/Locale-Codes/lib/Locale/Constants.pm		Locale::Codes
+ext/Locale-Codes/lib/Locale/Constants.pod	Locale::Codes documentation
+ext/Locale-Codes/lib/Locale/Country.pm		Locale::Codes
+ext/Locale-Codes/lib/Locale/Country.pod		Locale::Codes documentation
+ext/Locale-Codes/lib/Locale/Currency.pm		Locale::Codes
+ext/Locale-Codes/lib/Locale/Currency.pod		Locale::Codes documentation
+ext/Locale-Codes/lib/Locale/Language.pm		Locale::Codes
+ext/Locale-Codes/lib/Locale/Language.pod		Locale::Codes documentation
+ext/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
+ext/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
+ext/Locale-Codes/Makefile.PL
+ext/Locale-Codes/README		Locale::Codes
+ext/Locale-Codes/t/all.t	See if Locale::Codes work
+ext/Locale-Codes/t/constants.t	See if Locale::Codes work
+ext/Locale-Codes/t/country.t	See if Locale::Codes work
+ext/Locale-Codes/t/currency.t	See if Locale::Codes work
+ext/Locale-Codes/t/language.t	See if Locale::Codes work
+ext/Locale-Codes/t/rename.t	See if Locale::Codes work
+ext/Locale-Codes/t/script.t	See if Locale::Codes work
+ext/Locale-Codes/t/uk.t		See if Locale::Codes work
 ext/Locale-Maketext/ChangeLog	Locale::Maketext
 ext/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
 ext/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
@@ -2884,27 +2905,7 @@ lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/lib.t			For "use lib" testing
-lib/Locale/Codes/ChangeLog	Locale::Codes
-lib/Locale/Codes/README		Locale::Codes
-lib/Locale/Codes/t/all.t	See if Locale::Codes work
-lib/Locale/Codes/t/constants.t	See if Locale::Codes work
-lib/Locale/Codes/t/country.t	See if Locale::Codes work
-lib/Locale/Codes/t/currency.t	See if Locale::Codes work
-lib/Locale/Codes/t/languages.t	See if Locale::Codes work
-lib/Locale/Codes/t/rename.t	See if Locale::Codes work
-lib/Locale/Codes/t/script.t	See if Locale::Codes work
-lib/Locale/Codes/t/uk.t		See if Locale::Codes work
-lib/Locale/Constants.pm		Locale::Codes
-lib/Locale/Constants.pod	Locale::Codes documentation
-lib/Locale/Country.pm		Locale::Codes
-lib/Locale/Country.pod		Locale::Codes documentation
-lib/Locale/Currency.pm		Locale::Codes
-lib/Locale/Currency.pod		Locale::Codes documentation
-lib/Locale/Language.pm		Locale::Codes
-lib/Locale/Language.pod		Locale::Codes documentation
 lib/locale.pm			For "use locale"
-lib/Locale/Script.pm		Locale::Codes
-lib/Locale/Script.pod		Locale::Codes documentation
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
 lib/Module/Build/API.pod	Module::Build

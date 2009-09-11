@@ -860,12 +860,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'neilb',
 	'DISTRIBUTION'	=> 'NEILB/Locale-Codes-2.07.tar.gz',
-	'FILES'		=> q[lib/Locale/{Codes,Constants,Country,Currency,Language,Script}*],
-	'MAP'		=> { 'lib/' => 'lib/',
-			     ''     => 'lib/Locale/Codes/',
-			     #XXX why is this file renamed???
-			     't/language.t' => 'lib/Locale/Codes/t/languages.t',
-			   },
+	'FILES'		=> q[ext/Locale-Codes],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

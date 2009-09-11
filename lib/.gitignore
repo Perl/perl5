@@ -203,6 +203,15 @@
 /IPC/SharedMem.pm
 /IPC/SysV.pm
 /List
+/Locale
+/Locale/Constants.pm
+/Locale/Constants.pod
+/Locale/Country.pm
+/Locale/Country.pod
+/Locale/Currency.pm
+/Locale/Currency.pod
+/Locale/Language.pm
+/Locale/Language.pod
 /Locale/Maketext.pm
 /Locale/Maketext.pod
 /Locale/Maketext
@@ -210,6 +219,8 @@
 /Locale/Maketext/Guts.pm
 /Locale/Maketext/GutsLoader.pm
 /Locale/Maketext/Simple.pm
+/Locale/Script.pm
+/Locale/Script.pod
 /Log/Message.pm
 /Log/Message/Config.pm
 /Log/Message/Handlers.pm

@@ -5,7 +5,7 @@
 
 BEGIN {
 	chdir 't' if -d 't';
-	@INC = '../lib';
+	#@INC = '../lib';
 }
 
 use Locale::Language;
