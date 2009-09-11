@@ -209,9 +209,16 @@
 /Log/Message/Item.pm
 /Log/Message/Simple.pm
 /MIME
+/Math
+/Math/BigFloat
+/Math/BigFloat.pm
+/Math/BigFloat/Trace.pm
+/Math/BigInt
+/Math/BigInt.pm
+/Math/BigInt/Calc.pm
+/Math/BigInt/CalcEmu.pm
 /Math/BigInt/FastCalc.pm
 /Math/BigInt/Trace.pm
-/Math/BigFloat/Trace.pm
 /Math/BigRat.pm
 /Math/Complex.pm
 /Math/Trig.pm

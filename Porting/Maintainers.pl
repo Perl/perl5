@@ -928,13 +928,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigInt-1.89.tar.gz',
-	'FILES'		=> q[lib/Math/BigInt.pm
-			     lib/Math/BigInt
-			     !lib/Math/BigInt/Trace.pm
-			     t/lib/Math/BigInt/
-			     t/lib/Math/BigFloat/
-			     lib/Math/BigFloat.pm
-			    ],
+	'FILES'		=> q[ext/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^examples/},
 			     qw{t/pod.t
@@ -942,10 +936,9 @@ use File::Glob qw(:case);
 			       }
 			   ],
 	'MAP'		=> { 'lib/'    => 'lib/',
-			     't/Math/' => 't/lib/Math/',
 			     ''        => 'lib/Math/BigInt/',
 			     't/new_overloaded.t' =>
-					'lib/Math/BigInt/t/new_ovld.t',
+					 't/new_ovld.t',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

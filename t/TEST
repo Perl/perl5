@@ -30,6 +30,7 @@ my %temp_no_core =
      '../ext/Devel-PPPort' => 1,
      '../ext/IO-Compress' => 1,
      '../ext/IPC-SysV' => 1,
+     '../ext/Math-BigInt' => 1,
      '../ext/Math-BigRat' => 1,
      '../ext/MIME-Base64' => 1,
      '../ext/Parse-CPAN-Meta' => 1,
