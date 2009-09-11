@@ -1610,6 +1610,13 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
+ext/Locale-Maketext/ChangeLog	Locale::Maketext
+ext/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
+ext/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
+ext/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
+ext/Locale-Maketext/lib/Locale/Maketext.pod		Locale::Maketext documentation
+ext/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+ext/Locale-Maketext/README	Locale::Maketext
 ext/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 ext/Locale-Maketext-Simple/t/0-signature.t	Locale::Simple tests
 ext/Locale-Maketext-Simple/t/1-basic.t	Locale::Simple tests
@@ -1620,6 +1627,14 @@ ext/Locale-Maketext-Simple/t/po_with_i_default/fr.po	Locale::Simple tests
 ext/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
 ext/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
 ext/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
+ext/Locale-Maketext/t/01_about_verbose.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/10_make.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/20_get.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/30_local.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/40_super.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/50_super.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/60_super.t	See if Locale::Maketext works
+ext/Locale-Maketext/t/90_utf8.t	See if Locale::Maketext works
 ext/Log-Message/lib/Log/Message/Config.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 ext/Log-Message/lib/Log/Message/Item.pm	Log::Message
@@ -2887,21 +2902,6 @@ lib/Locale/Currency.pm		Locale::Codes
 lib/Locale/Currency.pod		Locale::Codes documentation
 lib/Locale/Language.pm		Locale::Codes
 lib/Locale/Language.pod		Locale::Codes documentation
-lib/Locale/Maketext/ChangeLog	Locale::Maketext
-lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
-lib/Locale/Maketext/Guts.pm	Locale::Maketext
-lib/Locale/Maketext.pm		Locale::Maketext
-lib/Locale/Maketext.pod		Locale::Maketext documentation
-lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/t/01_about_verbose.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/10_make.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/20_get.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/30_local.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/40_super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/50_super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/60_super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/90_utf8.t	See if Locale::Maketext works
-lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/locale.pm			For "use locale"
 lib/Locale/Script.pm		Locale::Codes
 lib/Locale/Script.pod		Locale::Codes documentation

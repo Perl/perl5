@@ -203,6 +203,12 @@
 /IPC/SharedMem.pm
 /IPC/SysV.pm
 /List
+/Locale/Maketext.pm
+/Locale/Maketext.pod
+/Locale/Maketext
+/Locale/Maketext/TPJ13.pod
+/Locale/Maketext/Guts.pm
+/Locale/Maketext/GutsLoader.pm
 /Locale/Maketext/Simple.pm
 /Log/Message.pm
 /Log/Message/Config.pm
