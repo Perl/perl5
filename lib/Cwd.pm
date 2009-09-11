@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.30';
+$VERSION = '3.3001';
 my $xs_version = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -748,7 +748,7 @@ sub _os2_cwd {
 }
 
 sub _win32_cwd {
-    if (defined &DynaLoader::boot_DynaLoader) {
+    if (eval 'defined &DynaLoader::boot_DynaLoader') {
 	$ENV{'PWD'} = Win32::GetCwd();
     }
     else { # miniperl
