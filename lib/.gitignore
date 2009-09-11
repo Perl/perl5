@@ -314,6 +314,7 @@
 /Thread
 /Tie/File.pm
 /Tie/Memoize.pm
+/Tie/RefHash.pm
 /Time/HiRes.pm
 /Time/Piece.pm
 /Time/Seconds.pm

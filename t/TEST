@@ -34,6 +34,7 @@ my %temp_no_core =
      '../ext/Math-BigRat' => 1,
      '../ext/MIME-Base64' => 1,
      '../ext/Parse-CPAN-Meta' => 1,
+     '../ext/Tie-RefHash' => 1,
      '../ext/Time-HiRes' => 1,
      '../ext/Unicode-Normalize' => 1,
     );

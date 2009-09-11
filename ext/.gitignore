@@ -86,6 +86,7 @@ ppport.h
 /Thread-Semaphore/Makefile.PL
 /Tie-File/Makefile.PL
 /Tie-Memoize/Makefile.PL
+/Tie-RefHash/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing
 *.swp
