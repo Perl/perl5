@@ -1,12 +1,5 @@
-.gitignore
 bin/instmodsh
 Changes
-inc/ExtUtils/Command.pm
-inc/ExtUtils/Install.pm
-inc/ExtUtils/Installed.pm
-inc/ExtUtils/Manifest.pm
-inc/ExtUtils/MANIFEST.SKIP
-inc/ExtUtils/Packlist.pm
 lib/ExtUtils/Command/MM.pm
 lib/ExtUtils/Liblist.pm
 lib/ExtUtils/Liblist/Kid.pm
@@ -37,7 +30,6 @@ lib/ExtUtils/MY.pm
 lib/ExtUtils/testlib.pm
 Makefile.PL
 MANIFEST			This list of files
-MANIFEST.SKIP
 NOTES
 PATCHING
 README
@@ -66,11 +58,6 @@ t/lib/MakeMaker/Test/Setup/Problem.pm
 t/lib/MakeMaker/Test/Setup/Recurs.pm
 t/lib/MakeMaker/Test/Setup/XS.pm
 t/lib/MakeMaker/Test/Utils.pm
-t/lib/Test/Builder.pm
-t/lib/Test/Builder/IO/Scalar.pm
-t/lib/Test/Builder/Module.pm
-t/lib/Test/More.pm
-t/lib/Test/Simple.pm
 t/lib/TieIn.pm
 t/lib/TieOut.pm
 t/Liblist.t
@@ -114,5 +101,3 @@ t/WriteEmptyMakefile.t
 t/writemakefile_args.t
 t/xs.t
 TODO
-META.yml                                 Module meta-data (added by MakeMaker)
-SIGNATURE                                Public-key signature (added by MakeMaker)
