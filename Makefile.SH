@@ -467,6 +467,8 @@ obj = $(ndt_obj) $(DTRACE_O)
 perltoc_pod_prereqs = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod pod/perlmodlib.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 
+Icwd = -Iext/Cwd
+
 lintflags = \
     -b \
     -n \
@@ -546,7 +548,7 @@ lib/Config_git.pl git_version.h: miniperl$(EXE_EXT) make_patchnum.pl
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
 
-translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
+translators:	miniperl$(EXE_EXT) $(CONFIGPM) $(dynamic_ext) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
 utilities:	miniperl$(EXE_EXT) $(CONFIGPM) $(plextract) lib/lib.pm FORCE
@@ -936,7 +938,7 @@ makeppport: miniperl\$(EXE_EXT) \$(CONFIGPM)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 .PHONY: makeppport
 makeppport: miniperl$(EXE_EXT) $(CONFIGPM) $(nonxs_ext)
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib mkppport
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib $(Icwd) mkppport
 
 !NO!SUBS!
 ;;
@@ -957,16 +959,16 @@ lib/re.pm: ext/re/re.pm
 	@-rm -f $@
 	cp ext/re/re.pm lib/re.pm
 
-$(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
+$(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p $(dynamic_ext)
 	@-rm -f $@
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -I"`pwd`/lib" $@.PL
 
-x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p.PL
+x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) $(dynamic_ext) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
 lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
 	@-rm -f $@
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib lib/lib_pm.PL
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib $(Icwd) lib/lib_pm.PL
 
 unidatafiles $(unidatafiles): uni.data
 
@@ -984,7 +986,7 @@ pod/perlapi.pod pod/perlintern.pod: miniperl$(EXE_EXT) autodoc.pl embed.fnc
 	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib autodoc.pl
 
 pod/perlmodlib.pod: miniperl$(EXE_EXT) pod/perlmodlib.PL MANIFEST
-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib pod/perlmodlib.PL -q
+	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib $(Icwd) pod/perlmodlib.PL -q
 
 pod/perldelta.pod: pod/perl5110delta.pod
 	$(LNS) perl5110delta.pod pod/perldelta.pod

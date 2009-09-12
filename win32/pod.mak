@@ -14,6 +14,8 @@ converters: $(CONVERTERS)
 PERL = ..\miniperl.exe
 REALPERL = ..\perl.exe
 
+ICWD = -I..\ext\Cwd
+
 POD = \
 	perl.pod	\
 	perl5004delta.pod	\
@@ -571,22 +573,22 @@ check:	podchecker
 
 # Dependencies.
 pod2latex:	pod2latex.PL ../lib/Config.pm
-	$(PERL) -I../lib pod2latex.PL
+	$(PERL) -I../lib $(ICWD) pod2latex.PL
 
 pod2html:	pod2html.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2html.PL
+	$(PERL) -I ../lib $(ICWD) pod2html.PL
 
 pod2man:	pod2man.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2man.PL
+	$(PERL) -I ../lib $(ICWD) pod2man.PL
 
 pod2text:	pod2text.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2text.PL
+	$(PERL) -I ../lib $(ICWD) pod2text.PL
 
 pod2usage:	pod2usage.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2usage.PL
+	$(PERL) -I ../lib $(ICWD) pod2usage.PL
 
 podchecker:	podchecker.PL ../lib/Config.pm
-	$(PERL) -I ../lib podchecker.PL
+	$(PERL) -I ../lib $(ICWD) podchecker.PL
 
 podselect:	podselect.PL ../lib/Config.pm
-	$(PERL) -I ../lib podselect.PL
+	$(PERL) -I ../lib $(ICWD) podselect.PL

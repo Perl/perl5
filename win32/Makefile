@@ -831,6 +831,8 @@ CFG_VARS	=					\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 
+ICWD = -I..\ext\Cwd
+
 #
 # Top targets
 #
@@ -987,7 +989,7 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 ..\x2p\walk$(o) : ..\x2p\walk.c
 	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\walk.c
 
-$(X2P) : $(MINIPERL) $(X2P_OBJ)
+$(X2P) : $(MINIPERL) $(X2P_OBJ) Extensions
 	$(MINIPERL) ..\x2p\find2perl.PL
 	$(MINIPERL) ..\x2p\s2p.PL
 	$(LINK32) -subsystem:console -out:$@ @<<
@@ -1049,7 +1051,7 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
 MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
-	$(MINIPERL) -I..\lib ..\mkppport
+	$(MINIPERL) -I..\lib $(ICWD) ..\mkppport
 
 MakePPPort_clean:
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
@@ -1136,11 +1138,11 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\pod\perl5110delta.pod ..\pod\perldelta.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib
-	$(PERLEXE) lib_pm.PL
+	$(PERLEXE) $(ICWD) lib_pm.PL
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
-	$(PERLEXE) ..\autodoc.pl ..
-	$(PERLEXE) ..\pod\perlmodlib.pl -q
+	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
+	$(PERLEXE) $(ICWD) ..\pod\perlmodlib.pl -q
 
 ..\pod\perltoc.pod: $(PERLEXE) Extensions Extensions_nonxs
 	$(PERLEXE) ..\pod\buildtoc --build-toc -q

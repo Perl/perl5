@@ -114,6 +114,7 @@
 /CPANPLUS/Shell/Default/Plugins/HOWTO.pod
 /CPANPLUS/Shell/Default/Plugins/Remote.pm
 /CPANPLUS/Shell/Default/Plugins/Source.pm
+/Cwd.pm
 /DB_File.pm
 /Data
 /Devel/DProf.pm

@@ -1150,7 +1150,6 @@ use File::Glob qw(:case);
 	'FILES'		=> q[lib/File/Spec.pm
 			     lib/File/Spec
 			     ext/Cwd
-			     lib/Cwd.pm
 			    ],
 	# XXX note that the CPAN and blead Makefile.PL are totally
 	# unrelated. The blead one is described as 'core-only'.
@@ -1159,7 +1158,6 @@ use File::Glob qw(:case);
 	
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
 	'MAP'		=> { 'lib/'      => 'lib/',
-			     'Cwd.pm'    => 'lib/Cwd.pm',
 			     ''          => 'ext/Cwd/',
 			     't/'        => 'lib/File/Spec/t/',
 			     't/cwd.t'   => 'ext/Cwd/t/cwd.t',

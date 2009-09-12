@@ -551,8 +551,8 @@ ext/CPAN/t/03pkgs.t		See if CPAN::Version works
 ext/CPAN/t/10version.t		See if CPAN the module works
 ext/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
 ext/Cwd/Changes			Cwd extension Changelog
+ext/Cwd/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
-ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32
@@ -2812,7 +2812,6 @@ lib/Config/Extensions.t		See if Config::Extensions works
 lib/Config.t			See if Config works
 lib/CORE.pod			document the CORE namespace
 lib/ctime.pl			A ctime workalike
-lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DBM_Filter/Changes		DBM Filter Change history
 lib/DBM_Filter/compress.pm	DBM Filter to compress keys/values
 lib/DBM_Filter/encode.pm	DBM Filter for encoding

@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Config;
+use lib 'ext/Cwd';
 use Cwd;
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
@@ -11,7 +12,7 @@ use Cwd;
 # After which, all nonxs modules are in lib, which was always sufficient to
 # allow miniperl to build everything else.
 
-my @toolchain = qw(ext/constant/lib ext/ExtUtils-Command/lib
+my @toolchain = qw(ext/constant/lib ext/Cwd ext/ExtUtils-Command/lib
 		   ext/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
        ext/File-Path/lib ext/AutoLoader/lib);
