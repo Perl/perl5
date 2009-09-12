@@ -11,19 +11,10 @@ our @EXPORT_OK   = ('regmust',
                        regname regnames regnames_count));
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
-# *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
-#
-# If you modify these values see comment below!
-
 my %bitmask = (
     taint   => 0x00100000, # HINT_RE_TAINT
     eval    => 0x00200000, # HINT_RE_EVAL
 );
-
-# - File::Basename contains a literal for 'taint' as a fallback.  If
-# taint is changed here, File::Basename must be updated as well.
-#
-# *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
 
 sub setcolor {
  eval {				# Ignore errors
