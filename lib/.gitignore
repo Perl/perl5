@@ -20,6 +20,7 @@
 /Config_git.pl
 /CGI
 /CGI.pm
+/Class/ISA.pm
 /CPAN.pm
 /CPAN
 /CPAN/API

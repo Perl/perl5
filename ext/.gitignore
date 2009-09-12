@@ -25,6 +25,7 @@ ppport.h
 /B-Lint/Makefile.PL
 /CGI/Makefile.PL
 /constant/Makefile.PL
+/Class-ISA/Makefile.PL
 /CPANPLUS-Dist-Build/Makefile.PL
 /Data-Dumper/Makefile.PL
 /Digest/Makefile.PL

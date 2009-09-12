@@ -339,6 +339,10 @@ ext/CGI/t/upload.t		See if CGI.pm works
 ext/CGI/t/user_agent.t		See if CGI->user_agent() works
 ext/CGI/t/util-58.t		See if 5.8-dependent features work
 ext/CGI/t/util.t		See if CGI.pm works
+ext/Class-ISA/ChangeLog		Changes for Class::ISA
+ext/Class-ISA/lib/Class/ISA.pm		Class::ISA
+ext/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
+ext/Class-ISA/t/01_old_junk.t	Tests for Class::ISA
 ext/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
@@ -2801,10 +2805,6 @@ lib/Carp.pm			Error message base class
 lib/Carp.t			See if Carp works
 lib/charnames.pm		Character names
 lib/charnames.t			See if character names work
-lib/Class/ISA/ChangeLog		Changes for Class::ISA
-lib/Class/ISA.pm		Class::ISA
-lib/Class/ISA/t/00_about_verbose.t	Tests for Class::ISA
-lib/Class/ISA/t/01_old_junk.t	Tests for Class::ISA
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
 lib/Class/Struct.t		See if Class::Struct works
 lib/complete.pl			A command completion subroutine

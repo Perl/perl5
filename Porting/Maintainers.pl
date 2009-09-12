@@ -317,7 +317,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'sburke',
 	'DISTRIBUTION'	=> 'SBURKE/Class-ISA-0.33.tar.gz',
-	'FILES'		=> q[lib/Class/ISA.pm lib/Class/ISA],
+	'FILES'		=> q[ext/Class-ISA],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

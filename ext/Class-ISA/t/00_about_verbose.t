@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    #@INC = '../lib';
 }
 
 require 5;
