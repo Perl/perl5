@@ -2026,6 +2026,21 @@ ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
+ext/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
+ext/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
+ext/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToMan.pm	render POD as man pages
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToNroff.pm	convert POD to nroff
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToPod.pm	convert POD to POD
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToRtf.pm	convert POD to RTF
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToText.pm	convert POD to plain text
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToTk.pm		convert POD via Tk::Pod
+ext/Pod-Perldoc/lib/Pod/Perldoc/ToXml.pm	convert POD to XML
+ext/Pod-Perldoc/t/01_about_verbose.t		test Pod::Perldoc
+ext/Pod-Perldoc/t/checkerbasic.t		test Pod::Perldoc::ToChecker
+ext/Pod-Perldoc/t/perldocbasic.t		test Pod::Perldoc basic operation
+ext/Pod-Perldoc/t/textbasic.t			test Pod::Perldoc::ToText
 ext/Pod-Plainer/Plainer.pm	Pod migration utility module
 ext/Pod-Plainer/t/plainer.t	Test Pod::Plainer
 ext/Pod-Simple/ChangeLog				Pod::Simple ChangeLog
@@ -3222,21 +3237,6 @@ lib/Pod/Man.pm			Convert POD data to *roff
 lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
-lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
-lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
-lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
-lib/Pod/Perldoc/t/01_about_verbose.t	test Pod::Perldoc
-lib/Pod/Perldoc/t/checkerbasic.t	test Pod::Perldoc::ToChecker
-lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
-lib/Pod/Perldoc/ToMan.pm	render POD as man pages
-lib/Pod/Perldoc/ToNroff.pm	convert POD to nroff
-lib/Pod/Perldoc/ToPod.pm	convert POD to POD
-lib/Pod/Perldoc/ToRtf.pm	convert POD to RTF
-lib/Pod/Perldoc/ToText.pm	convert POD to plain text
-lib/Pod/Perldoc/ToTk.pm		convert POD via Tk::Pod
-lib/Pod/Perldoc/ToXml.pm	convert POD to XML
-lib/Pod/Perldoc/t/perldocbasic.t	test Pod::Perldoc basic operation
-lib/Pod/Perldoc/t/textbasic.t	test Pod::Perldoc::ToText
 lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 lib/Pod/t/basic.cap		podlators test
