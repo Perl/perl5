@@ -3,6 +3,8 @@
 /Archive/Tar/Constant.pm
 /Archive/Tar/File.pm
 /Attribute
+/AutoLoader.pm
+/AutoSplit.pl
 /autodie
 /autodie.pm
 /autouse.pm

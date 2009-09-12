@@ -16,6 +16,7 @@ ppport.h
 /Attribute-Handlers/Makefile.PL
 /attributes/Makefile.PL
 /autodie/Makefile.PL
+/AutoLoader/Makefile.PL
 /autouse/Makefile.PL
 /base/Makefile.PL
 /bignum/Makefile.PL

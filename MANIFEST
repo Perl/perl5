@@ -191,6 +191,10 @@ ext/autodie/t/user-context.t		autodie - Context changes for usersubs
 ext/autodie/t/usersub.t			autodie - user subroutine tests
 ext/autodie/t/version.t			autodie - versioning tests
 ext/autodie/t/version_tag.t
+ext/AutoLoader/lib/AutoLoader.pm		Autoloader base class
+ext/AutoLoader/lib/AutoSplit.pm		Split up autoload functions
+ext/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
+ext/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 ext/autouse/lib/autouse.pm	Load and call a function only when it's used
 ext/autouse/t/autouse.t		See if autouse works
 ext/base/Changes		base.pm changelog
@@ -2765,10 +2769,6 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
-lib/AutoLoader.pm		Autoloader base class
-lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
-lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
-lib/AutoSplit.pm		Split up autoload functions
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package

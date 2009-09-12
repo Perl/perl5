@@ -236,7 +236,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/AutoLoader-5.69.tar.gz',
-	'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
+	'FILES'		=> q[ext/AutoLoader.pm],
 	'EXCLUDED'	=> [ qw( t/00pod.t ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
