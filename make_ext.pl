@@ -2,7 +2,9 @@
 use strict;
 use warnings;
 use Config;
-use lib 'ext/Cwd';
+BEGIN {
+    unshift @INC, 'ext/Cwd';
+}
 use Cwd;
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
