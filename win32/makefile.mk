@@ -1402,7 +1402,7 @@ Extensions_static : ..\make_ext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
-Extensions_nonxs : ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
+Extensions_nonxs : ..\make_ext.pl $(PERLDEP) $(CONFIGPM) ..\lib\lib.pm
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --nonxs
 
@@ -1420,9 +1420,12 @@ doc: $(PERLEXE) ..\pod\perltoc.pod
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
+..\lib\lib.pm: $(PERLEXE)
+	cd ..\lib && $(PERLEXE) $(ICWD) lib_pm.PL
+
 # Note that this next section is parsed (and regenerated) by pod/buildtoc
 # so please check that script before making structural changes here
-utils: $(PERLEXE) $(X2P)
+utils: $(PERLEXE) $(X2P) Extensions_nonxs
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	copy ..\README.aix      ..\pod\perlaix.pod
 	copy ..\README.amiga    ..\pod\perlamiga.pod
@@ -1464,7 +1467,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perl5110delta.pod ..\pod\perldelta.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
-	cd ..\lib && $(PERLEXE) $(ICWD) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
 	$(PERLEXE) $(ICWD) ..\pod\perlmodlib.pl -q
