@@ -231,8 +231,11 @@ sub build_extension {
     $perl ||= "$up/miniperl";
     my $return_dir = $up;
     my $lib_dir = "$up/lib";
+    # $lib_dir must be last, as we're copying files into it, and in a parallel
+    # make there's a race condition if one process tries to open a module that
+    # another process has half-written.
     $ENV{PERL5LIB}
-	= join $Config{path_sep}, $lib_dir, map {"$up/$_"} @toolchain;
+	= join $Config{path_sep}, (map {"$up/$_"} @toolchain), $lib_dir;
 
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
