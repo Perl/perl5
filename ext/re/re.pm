@@ -23,11 +23,6 @@ my %bitmask = (
 # - File::Basename contains a literal for 'taint' as a fallback.  If
 # taint is changed here, File::Basename must be updated as well.
 #
-# - ExtUtils::ParseXS uses a hardcoded 
-# BEGIN { $^H |= 0x00200000 } 
-# in it to allow re.xs to be built. So if 'eval' is changed here then
-# ExtUtils::ParseXS must be changed as well.
-#
 # *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
 
 sub setcolor {

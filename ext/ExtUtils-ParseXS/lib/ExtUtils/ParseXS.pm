@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.2002';
+$VERSION = '2.2003';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -210,7 +210,9 @@ sub process_file {
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
   foreach my $key (keys %output_expr) {
-    BEGIN { $^H |= 0x00200000 }; # Equivalent to: use re 'eval', but hardcoded so we can compile re.xs
+    # We can still bootstrap compile 're', because in code re.pm is available to
+    # miniperl, and does not attempt to load the XS code.
+    use re 'eval';
 
     my ($t, $with_size, $arg, $sarg) =
       ($output_expr{$key} =~
