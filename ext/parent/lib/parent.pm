@@ -1,7 +1,7 @@
 package parent;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.221';
+$VERSION = '0.223';
 
 sub import {
     my $class = shift;
@@ -71,7 +71,7 @@ This is equivalent to the following code:
   sub exclaim { "I CAN HAS PERL" }
 
   package DoesNotLoadFooBar;
-  push @DoesNotLoadFooBar::ISA, 'Foo';
+  push @DoesNotLoadFooBar::ISA, 'Foo', 'Bar';
 
 This is also helpful for the case where a package lives within
 a differently named file:
