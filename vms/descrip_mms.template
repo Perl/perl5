@@ -242,6 +242,7 @@ NOOP = continue
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
 MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]"
+MINIPERLUP = MCR $(MINIPERL_EXE) "-I[-.lib]"
 MINIPERLQ = MCR $(MINIPERL_EXE) ""-I[.lib]""
 XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate
@@ -598,88 +599,88 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 
 [.lib.pods]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]perldoc.com [.lib.pods]
 
 [.lib.ExtUtils]Miniperl.pm : Minimod.PL miniperlmain.c $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE) >$(MMS$TARGET)
+	$(MINIPERL_UP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.utils]perlivp.com : [.utils]perlivp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]cpan.com : [.utils]cpan.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]cpanp.com : [.utils]cpanp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]cpan2dist.com : [.utils]cpan2dist.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]cpanp-run-perl.com : [.utils]cpanp-run-perl.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]prove.com : [.utils]prove.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]ptar.com : [.utils]ptar.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]ptardiff.com : [.utils]ptardiff.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]shasum.com : [.utils]shasum.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]config_data.com : [.utils]config_data.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]corelist.com : [.utils]corelist.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]c2ph.com : [.utils]c2ph.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]dprofpp.com : [.utils]dprofpp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]enc2xs.com : [.utils]enc2xs.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]h2ph.com : [.utils]h2ph.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]h2xs.com : [.utils]h2xs.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]instmodsh.com : [.utils]instmodsh.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]libnetcfg.com : [.utils]libnetcfg.PL $(ARCHDIR)Config.pm
-       $(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+       $(MINIPERL_UP) $(MMS$SOURCE)
 
 [.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]perlbug.com [.lib]
 
 [.utils]piconv.com : [.utils]piconv.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.lib]splain.com : [.utils]splain.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]splain.com [.lib]
 
 [.x2p]find2perl.com : [.x2p]find2perl.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 [.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm nonxsext
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 
 # Rename catches problem with some DECC versions in which object file is
 # placed in current default dir, not same one as source file.
@@ -712,37 +713,37 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 
 [.lib.pods]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2html.com [.lib.pods]
 
 [.lib.pods]pod2latex.com : [.pod]pod2latex.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2latex.com [.lib.pods]
 
 [.lib.pods]pod2man.com : [.pod]pod2man.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2man.com [.lib.pods]
 
 [.lib.pods]pod2text.com : [.pod]pod2text.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2text.com [.lib.pods]
 
 [.lib.pods]podchecker.com : [.pod]podchecker.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]podchecker.com [.lib.pods]
 
 [.lib.pods]pod2usage.com : [.pod]pod2usage.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2usage.com [.lib.pods]
 
 [.lib.pods]podselect.com : [.pod]podselect.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+	$(MINIPERL_UP) $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]podselect.com [.lib.pods]
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
