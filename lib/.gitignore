@@ -284,6 +284,7 @@
 /Opcode.pm
 /Package/Constants.pm
 /Params/Check.pm
+/parent.pm
 /Parse/CPAN/Meta.pm
 /POSIX.pm
 /POSIX.pod

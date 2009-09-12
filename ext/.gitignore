@@ -67,6 +67,7 @@ ppport.h
 /Opcode/Makefile.PL
 /Package-Constants/Makefile.PL
 /Params-Check/Makefile.PL
+/parent/Makefile.PL
 /Parse-CPAN-Meta/Makefile.PL
 /PerlIO-encoding/Makefile.PL
 /PerlIO-scalar/Makefile.PL

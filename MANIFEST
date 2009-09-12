@@ -1968,6 +1968,19 @@ ext/Package-Constants/lib/Package/Constants.pm	Package::Constants
 ext/Package-Constants/t/01_list.t		Package::Constants tests
 ext/Params-Check/lib/Params/Check.pm	Params::Check
 ext/Params-Check/t/01_Params-Check.t	Params::Check tests
+ext/parent/lib/parent.pm	Establish an ISA relationship with base classes at compile time
+ext/parent/t/compile-time-file.t	tests for parent.pm
+ext/parent/t/compile-time.t	tests for parent.pm
+ext/parent/t/lib/Dummy2.plugin	test files for parent.pm
+ext/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
+ext/parent/t/lib/Dummy.pm	test files for parent.pm
+ext/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
+ext/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
+ext/parent/t/parent-classfromclassfile.t	tests for parent.pm
+ext/parent/t/parent-classfromfile.t	tests for parent.pm
+ext/parent/t/parent-pmc.t	tests for parent.pm
+ext/parent/t/parent-returns-false.t	tests for parent.pm
+ext/parent/t/parent.t	tests for parent.pm
 ext/Parse-CPAN-Meta/Changes					Parse::CPAN::Meta
 ext/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
 ext/Parse-CPAN-Meta/t/01_compile.t				Parse::CPAN::Meta
@@ -3008,19 +3021,6 @@ lib/overloading.t		Tests for overloading.pm
 lib/overload/numbers.pm		Helper for overloading pragma
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
-lib/parent.pm	Establish an ISA relationship with base classes at compile time
-lib/parent/t/compile-time-file.t	tests for parent.pm
-lib/parent/t/compile-time.t	tests for parent.pm
-lib/parent/t/lib/Dummy2.plugin	test files for parent.pm
-lib/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
-lib/parent/t/lib/Dummy.pm	test files for parent.pm
-lib/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
-lib/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
-lib/parent/t/parent-classfromclassfile.t	tests for parent.pm
-lib/parent/t/parent-classfromfile.t	tests for parent.pm
-lib/parent/t/parent-pmc.t	tests for parent.pm
-lib/parent/t/parent-returns-false.t	tests for parent.pm
-lib/parent/t/parent.t	tests for parent.pm
 lib/perl5db.pl			Perl debugging routines
 lib/perl5db.t			Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
