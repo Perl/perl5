@@ -1454,21 +1454,15 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsfspec.t : [.vms.ext]filespec.t
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-unpack_files :
-	- $(MINIPERL) uupacktool.pl -u -m
-
-cleanup_unpacked_files :
-	- IF F$SEARCH("$(MINIPERL_EXE)") .NES. "" THEN $(MINIPERL) uupacktool.pl -c
-
 check : test
 	@ Continue
 
-test : all [.t.lib]vmsfspec.t unpack_files
+test : all [.t.lib]vmsfspec.t
 	@ PERL_TEST_DRIVER == "TEST."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-test_harness : all [.t.lib]vmsfspec.t unpack_files
+test_harness : all [.t.lib]vmsfspec.t
 	@ PERL_TEST_DRIVER == "harness."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
@@ -1847,7 +1841,7 @@ tidy : cleanlis
 	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
 	- If F$Search("[.lib.pods]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pods]*.com
 
-clean : tidy cleantest cleanup_unpacked_files
+clean : tidy cleantest
       	- $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all" "--target=clean"
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*

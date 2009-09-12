@@ -1601,13 +1601,7 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	cd ..\t && \
 	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
-unpack_files:
-	$(MINIPERL) -I..\lib ..\uupacktool.pl -u -d .. -m
-
-cleanup_unpacked_files:
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
-	
-test-prep : all utils unpack_files
+test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -1678,11 +1672,9 @@ _clean :
 
 
 
-_preclean : cleanup_unpacked_files
-	
-clean : _preclean Extensions_clean _clean
+clean : Extensions_clean _clean
 
-realclean : _preclean Extensions_realclean MakePPPort_clean _clean
+realclean : Extensions_realclean MakePPPort_clean _clean
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
