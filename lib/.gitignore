@@ -291,6 +291,9 @@
 /POSIX.pm
 /POSIX.pod
 /Pod/Plainer.pm
+/Pod/Simple.pm
+/Pod/Simple.pod
+/Pod/Simple
 /PerlIO/encoding.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm
