@@ -1460,7 +1460,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jesse',
 	'DISTRIBUTION'	=> 'JESSE/Test-1.25_02.tar.gz',
-	'FILES'		=> q[lib/Test.pm lib/Test/t],
+	'FILES'		=> q[ext/Test],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

@@ -324,6 +324,7 @@
 /Term/Cap.pm
 /Term/UI.pm
 /Term/UI/History.pm
+/Test.pm
 /Text/Balanced.pm
 /Text/ParseWords.pm
 /Text/Soundex.pm

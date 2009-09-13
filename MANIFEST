@@ -2666,6 +2666,16 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
+ext/Test/lib/Test.pm		A simple framework for writing test scripts
+ext/Test/t/05_about_verbose.t	See if Test works
+ext/Test/t/fail.t		See if Test works
+ext/Test/t/mix.t		See if Test works
+ext/Test/t/multiline.t		See if Test works
+ext/Test/t/onfail.t		See if Test works
+ext/Test/t/qr.t			See if Test works
+ext/Test/t/skip.t		See if Test works
+ext/Test/t/success.t		See if Test works
+ext/Test/t/todo.t		See if Test works
 ext/Text-Balanced/Changes		Text::Balanced
 ext/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
 ext/Text-Balanced/README		Text::Balanced
@@ -3355,7 +3365,6 @@ lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
 lib/Test/Builder/Tester.pm	For testing Test::Builder based classes
 lib/Test/More.pm		More utilities for writing tests
-lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple.pm		Basic utility for writing tests
 lib/Test/Simple/README		Test::Simple README
@@ -3451,15 +3460,6 @@ lib/Test/Simple/t/useing.t	Test::More test, compile test
 lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
 lib/Test/Simple/t/utf8.t	Test::More test
 lib/Test/Simple/t/versions.t	Test::More test
-lib/Test/t/05_about_verbose.t	See if Test works
-lib/Test/t/fail.t		See if Test works
-lib/Test/t/mix.t		See if Test works
-lib/Test/t/multiline.t		See if Test works
-lib/Test/t/onfail.t		See if Test works
-lib/Test/t/qr.t			See if Test works
-lib/Test/t/skip.t		See if Test works
-lib/Test/t/success.t		See if Test works
-lib/Test/t/todo.t		See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev

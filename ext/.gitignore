@@ -87,6 +87,7 @@ ppport.h
 /Term-Cap/Makefile.PL
 /Term-UI/Makefile.PL
 /Test-Harness/Makefile.PL
+/Test/Makefile.PL
 /Text-Balanced/Makefile.PL
 /Text-ParseWords/Makefile.PL
 /Text-Soundex/Makefile.PL
