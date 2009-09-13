@@ -2872,6 +2872,28 @@ ext/Time-Piece/t/04mjd.t	Test for Time::Piece
 ext/Time-Piece/t/05overload.t	Test for Time::Piece
 ext/Time-Piece/t/06subclass.t	Test for Time::Piece
 ext/Time-Piece/t/07arith.t	Test for Time::Piece
+ext/Unicode-Collate/Changes		Unicode::Collate
+ext/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
+ext/Unicode-Collate/Collate/keys.txt	Unicode::Collate
+ext/Unicode-Collate/Collate.pm		Unicode::Collate
+ext/Unicode-Collate/README		Unicode::Collate
+ext/Unicode-Collate/t/altern.t		Unicode::Collate
+ext/Unicode-Collate/t/cjkrange.t	Unicode::Collate
+ext/Unicode-Collate/t/contract.t	Unicode::Collate
+ext/Unicode-Collate/t/hangtype.t	Unicode::Collate
+ext/Unicode-Collate/t/hangul.t		Unicode::Collate
+ext/Unicode-Collate/t/ignor.t		Unicode::Collate
+ext/Unicode-Collate/t/illegalp.t	Unicode::Collate
+ext/Unicode-Collate/t/illegal.t		Unicode::Collate
+ext/Unicode-Collate/t/index.t		Unicode::Collate
+ext/Unicode-Collate/t/normal.t		Unicode::Collate
+ext/Unicode-Collate/t/override.t	Unicode::Collate
+ext/Unicode-Collate/t/rearrang.t	Unicode::Collate
+ext/Unicode-Collate/t/test.t		Unicode::Collate
+ext/Unicode-Collate/t/trailwt.t		Unicode::Collate
+ext/Unicode-Collate/t/variable.t	Unicode::Collate
+ext/Unicode-Collate/t/version.t		Unicode::Collate
+ext/Unicode-Collate/t/view.t		Unicode::Collate
 ext/Unicode-Normalize/Changes	Unicode::Normalize
 ext/Unicode-Normalize/Makefile.PL	Unicode::Normalize
 ext/Unicode-Normalize/mkheader	Unicode::Normalize
@@ -3488,28 +3510,6 @@ lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
 lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
-lib/Unicode/Collate/allkeys.txt	Unicode::Collate
-lib/Unicode/Collate/Changes	Unicode::Collate
-lib/Unicode/Collate/keys.txt	Unicode::Collate
-lib/Unicode/Collate.pm		Unicode::Collate
-lib/Unicode/Collate/README	Unicode::Collate
-lib/Unicode/Collate/t/altern.t	Unicode::Collate
-lib/Unicode/Collate/t/cjkrange.t	Unicode::Collate
-lib/Unicode/Collate/t/contract.t	Unicode::Collate
-lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
-lib/Unicode/Collate/t/hangul.t	Unicode::Collate
-lib/Unicode/Collate/t/ignor.t	Unicode::Collate
-lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
-lib/Unicode/Collate/t/illegal.t	Unicode::Collate
-lib/Unicode/Collate/t/index.t	Unicode::Collate
-lib/Unicode/Collate/t/normal.t	Unicode::Collate
-lib/Unicode/Collate/t/override.t	Unicode::Collate
-lib/Unicode/Collate/t/rearrang.t	Unicode::Collate
-lib/Unicode/Collate/t/test.t	Unicode::Collate
-lib/Unicode/Collate/t/trailwt.t	Unicode::Collate
-lib/Unicode/Collate/t/variable.t	Unicode::Collate
-lib/Unicode/Collate/t/version.t	Unicode::Collate
-lib/Unicode/Collate/t/view.t	Unicode::Collate
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works

@@ -1671,17 +1671,11 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'sadahiro',
 	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.52.tar.gz',
-	'FILES'		=> q[lib/Unicode/Collate.pm
-			     lib/Unicode/Collate
-			    ],
+	'FILES'		=> q[ext/Unicode-Collate],
 			    # ignore experimental XS version
 	'EXCLUDED'	=> [ qr{X$},
 			     qw{disableXS enableXS }
 			   ],
-	'MAP'		=> { ''           => 'lib/Unicode/Collate/',
-	                     'Collate.pm' => 'lib/Unicode/Collate.pm',
-	                     'Collate/'   => 'lib/Unicode/Collate/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'first-come',
 	},

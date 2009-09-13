@@ -46,6 +46,7 @@ my %temp_no_core =
      '../ext/Parse-CPAN-Meta' => 1,
      '../ext/Tie-RefHash' => 1,
      '../ext/Time-HiRes' => 1,
+     '../ext/Unicode-Collate' => 1,
      '../ext/Unicode-Normalize' => 1,
      '../ext/podlators' => 1,
     );

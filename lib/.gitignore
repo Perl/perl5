@@ -340,6 +340,7 @@
 /Time/Local.pm
 /Time/Piece.pm
 /Time/Seconds.pm
+/Unicode/Collate.pm
 /Unicode/Normalize.pm
 /XS
 /XSLoader.pm
