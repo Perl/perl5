@@ -1264,7 +1264,7 @@ use File::Glob qw(:case);
 			     pod/pod2latex.PL
 			    ],
 	'EXCLUDED'	=> [ qw( t/require.t ) ],
-	'MAP'		=> { '' => 'lib/Pod/',
+	'MAP'		=> { '' => 'ext/Pod-LaTeX/',
 			     'pod2latex.PL' => 'pod/pod2latex.PL',
 			   },
 	'CPAN'		=> 1,
@@ -1338,7 +1338,8 @@ use File::Glob qw(:case);
 	# XXX We can and should fix this, but clean up the DRY-failure in utils
 	# first
 	'EXCLUDED'	=> [ qw( perldoc ) ],
-	'MAP'		=> { 'lib/perldoc.pod' => 'pod/perldoc.pod',
+	'MAP'		=> { '' => 'ext/Pod-Perldoc/',
+			     'lib/perldoc.pod' => 'pod/perldoc.pod',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
