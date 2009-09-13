@@ -119,6 +119,11 @@ For maintenance (and branch merging) reasons, it would be useful to move
 some architecture-independent dual-life modules from lib/ to ext/, if this
 has no negative impact on the build of perl itself.
 
+As part of this, we need to move F<pod/*.PL> into their respective directories
+in F<ext/>. They're referenced by (at least) C<plextract> in F<Makefile.SH>
+and C<utils> in F<win32/Makefile> and F<win32/makefile.ml>, and listed
+explicitly in F<win32/pod.mak>, F<vms/descrip_mms.template> and F<utils.lst>
+
 =head2 POSIX memory footprint
 
 Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
