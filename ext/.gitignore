@@ -75,6 +75,7 @@ ppport.h
 /PerlIO-via/Makefile.PL
 /Pod-Escapes/Makefile.PL
 /Pod-LaTeX/Makefile.PL
+/Pod-Parser/Makefile.PL
 /Pod-Perldoc/Makefile.PL
 /Pod-Plainer/Makefile.PL
 /Pod-Simple/Makefile.PL

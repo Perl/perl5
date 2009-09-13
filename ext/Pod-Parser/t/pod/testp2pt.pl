@@ -38,13 +38,19 @@ sub catfile(@) { File::Spec->catfile(@_); }
 my $INSTDIR = abs_path(dirname $0);
 $INSTDIR = VMS::Filespec::unixpath($INSTDIR) if $^O eq 'VMS';
 $INSTDIR =~ s#/$## if $^O eq 'VMS';
+$INSTDIR =~ s#:$## if $^O eq 'MacOS';
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
+$INSTDIR =~ s#:$## if $^O eq 'MacOS';
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
                    catfile($INSTDIR, 'scripts'),
                    catfile($INSTDIR, 'pod'),
                    catfile($INSTDIR, 't', 'pod')
                  );
+
+# FIXME - we should make the core capable of finding utilities built in
+# locations in ext.
+push @PODINCDIRS, catfile((File::Spec->updir()) x 2, 'pod') if $ENV{PERL_CORE};
 
 ## Find the path to the file to =include
 sub findinclude {

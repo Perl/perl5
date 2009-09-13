@@ -23,6 +23,12 @@ my %dir_to_switch =
      '../ext/File-Glob/t' => '-I.. -MTestInit', # FIXME - tests assume t/
      );
 
+# I think in the end I'd like "not absolute" to be the default", as it saves
+# some fakery within TestInit which can peturb tests, and takes CPU.
+my %no_abs =
+    ('../ext/Pod-Parser' => 1,
+    );
+	      
 my %temp_no_core =
     ('../ext/B-Debug' => 1,
      '../ext/Compress-Raw-Bzip2' => 1,
@@ -189,7 +195,10 @@ sub _scan_test {
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
 	    $perl = '../../t/perl';
-	    $testswitch = "-I../.. -MTestInit=U2T,A";
+	    $testswitch = "-I../.. -MTestInit=U2T";
+	    if (!$no_abs{$run_dir}) {
+		$testswitch = $testswitch . ',A';
+	    }
 	    if ($temp_no_core{$run_dir}) {
 		$testswitch = $testswitch . ',NC';
 	    }

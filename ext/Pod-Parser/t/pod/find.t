@@ -1,17 +1,6 @@
 # Testing of Pod::Find
 # Author: Marek Rouchal <marek@saftsack.fs.uni-bayreuth.de>
 
-BEGIN {
-  if($ENV{PERL_CORE}) {
-    chdir 't' if -d 't';
-    # The ../../../../../lib is for finding lib/utf8.pm
-    # when running under all-utf8 settings (pod/find.t)
-    # does not directly require lib/utf8.pm but regular
-    # expressions will need that.
-    @INC = qw(../lib ../../../../../lib);
-  }
-}
-
 $| = 1;
 
 use Test::More tests => 4;
@@ -26,18 +15,14 @@ use File::Spec;
 require Cwd;
 my $THISDIR = Cwd::cwd();
 my $VERBOSE = $ENV{PERL_CORE} ? 0 : ($ENV{TEST_VERBOSE} || 0);
-my $lib_dir = $ENV{PERL_CORE} ? 
-  File::Spec->catdir('pod', 'testpods', 'lib')
-  : File::Spec->catdir($THISDIR,'lib');
+my $lib_dir = File::Spec->catdir($THISDIR,'lib');
 
 my $vms_unix_rpt = 0;
 my $vms_efs = 0;
 my $unix_mode = 1;
 
 if ($^O eq 'VMS') {
-    $lib_dir = $ENV{PERL_CORE} ?
-      VMS::Filespec::unixify(File::Spec->catdir('pod', 'testpods', 'lib'))
-      : VMS::Filespec::unixify(File::Spec->catdir($THISDIR,'-','lib','pod'));
+    $lib_dir = VMS::Filespec::unixify(File::Spec->catdir($THISDIR,'-','lib','pod'));
     $Qlib_dir = $lib_dir;
     $Qlib_dir =~ s#\/#::#g;
 
@@ -60,11 +45,7 @@ print "### 2. searching $lib_dir\n";
 my %pods = pod_find($lib_dir);
 my $result = join(',', sort values %pods);
 print "### found $result\n";
-my $compare = $ENV{PERL_CORE} ? 
-  join(',', sort qw(
-    Pod::Stuff
-))
-  : join(',', sort qw(
+my $compare = join(',', sort qw(
     Pod::Checker
     Pod::Find
     Pod::InputObjects
@@ -114,7 +95,7 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
 }
 else {
     $compare = $ENV{PERL_CORE} ?
-      File::Spec->catfile(File::Spec->updir, 'lib','File','Find.pm')
+      File::Spec->catfile(File::Spec->updir, File::Spec->updir, 'lib','File','Find.pm')
       : File::Spec->catfile($Config::Config{privlibexp},"File","Find.pm");
     my $resfile = _canon($result);
     my $cmpfile = _canon($compare);
@@ -133,15 +114,13 @@ else {
 my $searchpod = 'Stuff';
 print "### 4. searching for $searchpod.pod\n";
 $result = pod_where(
-  { -dirs => [ File::Spec->catdir(
-    $ENV{PERL_CORE} ? () : qw(t), 'pod', 'testpods', 'lib', 'Pod') ],
+  { -dirs => [ File::Spec->catdir( qw(t), 'pod', 'testpods', 'lib', 'Pod') ],
     -verbose => $VERBOSE }, $searchpod)
   || "undef - $searchpod.pod not found!";
 print "### found $result\n";
 
 $compare = File::Spec->catfile(
-    $ENV{PERL_CORE} ? () : qw(t),
-    'pod', 'testpods', 'lib', 'Pod' ,'Stuff.pm');
+    qw(t), 'pod', 'testpods', 'lib', 'Pod' ,'Stuff.pm');
 is(_canon($result),_canon($compare));
 
 

@@ -151,20 +151,16 @@ ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 99, -sections 
 EOT
 
 # does the __DATA__ work ok as input
-my ($blib, $test_script, $pod_file1, , $pod_file2);
-if ($ENV{PERL_CORE}) {
-  $blib = '-I../lib';
-  $test_script = File::Spec->catfile(qw(pod p2u_data.pl));
-  $pod_file1 = File::Spec->catfile(qw(pod usage.pod));
-  $pod_file2 = File::Spec->catfile(qw(pod usage2.pod));
-} else {
-  $blib = '-Mblib';
-  $test_script = File::Spec->catfile(qw(t pod p2u_data.pl));
-  $pod_file1 = File::Spec->catfile(qw(t pod usage.pod));
-  $pod_file2 = File::Spec->catfile(qw(t pod usage2.pod));
+my (@blib, $test_script, $pod_file1, , $pod_file2);
+if (!$ENV{PERL_CORE}) {
+  @blib = '-Mblib';
 }
+$test_script = File::Spec->catfile(qw(t pod p2u_data.pl));
+$pod_file1 = File::Spec->catfile(qw(t pod usage.pod));
+$pod_file2 = File::Spec->catfile(qw(t pod usage2.pod));
 
-($exit, $text) = getoutput( sub { system($^X, $blib, $test_script); exit($?  >> 8); } );
+
+($exit, $text) = getoutput( sub { system($^X, @blib, $test_script); exit($?  >> 8); } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 17,                 "Exit status pod2usage (-verbose => 2, -input => \*DATA)");
 ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 2, -input => \*DATA)") or diag "Got:\n$text\n";
@@ -223,13 +219,8 @@ EOT
 
 # test with pod_where
 use_ok('Pod::Find', qw(pod_where));
-+# Exclude current dir when testing in CORE; otherwise on case-insensitive
-+# systems, when in t/ we find pod/usage.pod rather than # ../lib/Pod/Usage.pm
-+my @NO_CURDIR = ($ENV{PERL_CORE})
-                    ? ('-dirs' => [])
-                    : ();
 
-($exit, $text) = getoutput( sub { pod2usage( -input => pod_where({-inc => 1, @NO_CURDIR}, 'Pod::Usage'),
+($exit, $text) = getoutput( sub { pod2usage( -input => pod_where({-inc => 1}, 'Pod::Usage'),
                                              -exitval => 0, -verbose => 0) } );
 $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with Pod::Find");

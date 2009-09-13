@@ -1278,46 +1278,11 @@ use File::Glob qw(:case);
 	# version 1.37!
 
 	'DISTRIBUTION'	=> 'MAREKR/Pod-Parser-1.38.tar.gz',
-	'FILES'		=> q[lib/Pod/{Checker,Find,InputObjects,Parser,ParseUtils,PlainText,Select,Usage}.pm
-			     lib/Pod/t/contains_pod.t
+	'FILES'		=> q[ext/Pod-Parser
 			     pod/pod{2usage,checker,select}.PL
-			     t/lib/contains_bad_pod.xr
-			     t/lib/contains_pod.xr
-			     t/pod/emptycmd.*
-			     t/pod/find.t
-			     t/pod/for.*
-			     t/pod/headings.*
-			     t/pod/include.*
-			     t/pod/included.*
-			     t/pod/lref.*
-			     t/pod/multiline_items.*
-			     t/pod/nested_items.*
-			     t/pod/nested_seqs.*
-			     t/pod/oneline_cmds.*
-			     t/pod/p2u_data.pl
-			     t/pod/pod2usage.*
-			     t/pod/pod2usage2.t
-			     t/pod/podchkenc.*
-			     t/pod/poderrs.*
-			     t/pod/podselect.*
-			     t/pod/special_seqs.*
-			     t/pod/testcmp.pl
-			     t/pod/testp2pt.pl
-			     t/pod/testpchk.pl
-			     t/pod/testpods/
-			     t/pod/twice.t
-			     t/pod/usage*.pod
 			    ],
-	'MAP'		=> { 't/pod/'   => 't/pod/',
+	'MAP'		=> { '' => 'ext/Pod-Parser/',
 			     'scripts/' => 'pod/',
-				't/pod/contains_pod.t'
-				=> 'lib/Pod/t/contains_pod.t',
-			     # XXX these two dislocations have required
-			     # t/pod/contains_pod.t to be edited to match
-			     
-			     't/pod/contains_pod.xr' => 't/lib/contains_pod.xr',
-			     't/pod/contains_bad_pod.xr'
-				=> 't/lib/contains_bad_pod.xr',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
