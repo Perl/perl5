@@ -2026,6 +2026,12 @@ ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
+ext/Pod-Escapes/ChangeLog		ChangeLog for Pod::Escapes
+ext/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
+ext/Pod-Escapes/README			README for Pod::Escapes
+ext/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
+ext/Pod-Escapes/t/10_main.t		test Pod::Escapes
+ext/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 ext/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
@@ -3222,12 +3228,6 @@ lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
-lib/Pod/Escapes/ChangeLog	ChangeLog for Pod::Escapes
-lib/Pod/Escapes.pm		Pod::Escapes
-lib/Pod/Escapes/README		README for Pod::Escapes
-lib/Pod/Escapes/t/01_about_verbose.t	test Pod::Escapes
-lib/Pod/Escapes/t/10_main.t	test Pod::Escapes
-lib/Pod/Escapes/t/15_name2charnum.t	test Pod::Escapes
 lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML

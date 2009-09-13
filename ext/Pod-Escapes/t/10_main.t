@@ -1,9 +1,3 @@
-BEGIN {
-    if($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
 # Time-stamp: "2004-05-07 15:43:11 ADT"
 
