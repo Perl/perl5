@@ -2043,6 +2043,8 @@ ext/PerlIO-scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO-scalar/t/scalar.t	See if PerlIO::scalar works
 ext/PerlIO-scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
 ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
+ext/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
+ext/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
@@ -3319,8 +3321,6 @@ lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
-lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
-lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML
 lib/Pod/t/eol.t			end of line agnosticism

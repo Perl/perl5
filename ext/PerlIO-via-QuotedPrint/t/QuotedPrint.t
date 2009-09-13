@@ -1,8 +1,4 @@
 BEGIN {				# Magic Perl CORE pragma
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
     unless (find PerlIO::Layer 'perlio') {
         print "1..0 # Skip: PerlIO not used\n";
         exit 0;
