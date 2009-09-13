@@ -1652,11 +1652,8 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'drolsky',
 	'DISTRIBUTION'	=> 'DROLSKY/Time-Local-1.1901.tar.gz',
-	'FILES'		=> q[lib/Time/Local.{pm,t}],
+	'FILES'		=> q[ext/Time-Local],
 	'EXCLUDED'	=> [ qw(t/pod-coverage.t t/pod.t) ],
-	'MAP'		=> { 'lib/' => 'lib/',
-	                     't/'   => 'lib/Time/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

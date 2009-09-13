@@ -2857,6 +2857,8 @@ ext/Time-HiRes/HiRes.xs		Time::HiRes extension
 ext/Time-HiRes/Makefile.PL	Time::HiRes extension
 ext/Time-HiRes/t/HiRes.t	Test for Time::HiRes
 ext/Time-HiRes/typemap		Time::HiRes extension
+ext/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
+ext/Time-Local/t/Local.t		See if Time::Local works
 ext/Time-Piece/Changes		Time::Piece extension
 ext/Time-Piece/Makefile.PL	Time::Piece extension
 ext/Time-Piece/Piece.pm		Time::Piece extension
@@ -3483,8 +3485,6 @@ lib/Tie/SubstrHash.t		Test for Tie::SubstrHash
 lib/Time/gmtime.pm		By-name interface to Perl's builtin gmtime
 lib/Time/gmtime.t		Test for Time::gmtime
 lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
-lib/Time/Local.pm		Reverse translation of localtime, gmtime
-lib/Time/Local.t		See if Time::Local works
 lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time

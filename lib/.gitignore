@@ -337,6 +337,7 @@
 /Tie/Memoize.pm
 /Tie/RefHash.pm
 /Time/HiRes.pm
+/Time/Local.pm
 /Time/Piece.pm
 /Time/Seconds.pm
 /Unicode/Normalize.pm

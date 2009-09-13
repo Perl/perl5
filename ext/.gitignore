@@ -100,6 +100,7 @@ ppport.h
 /Tie-File/Makefile.PL
 /Tie-Memoize/Makefile.PL
 /Tie-RefHash/Makefile.PL
+/Time-Local/Makefile.PL
 
 # ignore all vim swap files but the one bundled in Module::Pluggable for testing
 *.swp
