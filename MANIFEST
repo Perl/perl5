@@ -1952,6 +1952,15 @@ ext/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 ext/Net-Ping/t/450_service.t		Ping Net::Ping
 ext/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 ext/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
+ext/NEXT/Changes		NEXT
+ext/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+ext/NEXT/README			NEXT
+ext/NEXT/t/actual.t		NEXT
+ext/NEXT/t/actuns.t		NEXT
+ext/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
+ext/NEXT/t/next.t		NEXT
+ext/NEXT/t/stringify.t		NEXT
+ext/NEXT/t/unseen.t		NEXT
 ext/Object-Accessor/lib/Object/Accessor.pm	Object::Accessor
 ext/Object-Accessor/t/00_Object-Accessor.t	Object::Accessor tests
 ext/Object-Accessor/t/01_Object-Accessor-Subclassed.t	Object::Accessor tests
@@ -3291,15 +3300,6 @@ lib/Net/protoent.t		See if Net::protoent works
 lib/Net/servent.pm		By-name interface to Perl's builtin getserv*
 lib/Net/servent.t		See if Net::servtent works
 lib/newgetopt.pl		A perl library supporting long option parsing
-lib/NEXT/Changes		NEXT
-lib/NEXT.pm			Pseudo-class NEXT for method redispatch
-lib/NEXT/README			NEXT
-lib/NEXT/t/actual.t		NEXT
-lib/NEXT/t/actuns.t		NEXT
-lib/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
-lib/NEXT/t/next.t		NEXT
-lib/NEXT/t/stringify.t	NEXT
-lib/NEXT/t/unseen.t		NEXT
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
 lib/open.pm			Pragma to specify default I/O layers

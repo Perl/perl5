@@ -40,6 +40,7 @@ my %temp_no_core =
      '../ext/Math-BigInt' => 1,
      '../ext/Math-BigRat' => 1,
      '../ext/MIME-Base64' => 1,
+     '../ext/NEXT' => 1,
      '../ext/parent' => 1,
      '../ext/Pod-Simple' => 1,
      '../ext/Parse-CPAN-Meta' => 1,
