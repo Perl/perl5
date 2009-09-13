@@ -1,9 +1,5 @@
 #!./perl
 
-BEGIN {
-    chdir 't' and @INC = '../lib' if $ENV{PERL_CORE};
-}
-
 my $t = 1;
 print "1..5\n";
 sub ok {

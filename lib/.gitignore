@@ -353,6 +353,7 @@
 /encoding
 /encoding.pm
 /fields.pm
+/if.pm
 /lib.pm
 /ops.pm
 /parent.pm

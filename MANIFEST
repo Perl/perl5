@@ -1336,6 +1336,8 @@ ext/I18N-LangTags/t/20_locales.t		See whether I18N::LangTags works
 ext/I18N-LangTags/t/50_super.t			See whether I18N::LangTags works
 ext/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
 ext/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
+ext/if/if.pm			For "use if"
+ext/if/t/if.t			Tests for "use if"
 ext/IO/ChangeLog		IO perl module change log
 ext/IO-Compress/Changes	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtdef	IO::Compress
@@ -3202,8 +3204,6 @@ lib/h2xs.t			See if h2xs produces expected lists of files
 lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
-lib/if.pm			For "use if"
-lib/if.t			Tests for "use if"
 lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing

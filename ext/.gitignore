@@ -46,6 +46,7 @@ ppport.h
 /Filter-Util-Call/Makefile.PL
 /Hash-Util-FieldHash/Makefile.PL
 /I18N-LangTags/Makefile.PL
+/if/Makefile.PL
 /IO-Zlib/Makefile.PL
 /IPC-Cmd/Makefile.PL
 /IPC-Open2/Makefile.PL
