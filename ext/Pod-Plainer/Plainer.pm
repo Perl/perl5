@@ -1,8 +1,9 @@
 package Pod::Plainer;
 use strict;
+use if $[ >= 5.011, 'deprecate';
 use Pod::Parser;
 our @ISA = qw(Pod::Parser);
-our $VERSION = '0.01';
+our $VERSION = '1.00';
 
 our %E = qw( < lt > gt );
  
@@ -34,7 +35,7 @@ __END__
 
 =head1 NAME
 
-Pod::Plainer - Perl extension for converting Pod to old style Pod.
+Pod::Plainer - Perl extension for converting Pod to old-style Pod.
 
 =head1 SYNOPSIS
 
@@ -59,7 +60,7 @@ None by default.
 
 =head1 AUTHOR
 
-Robin Barker, rmb1@cise.npl.co.uk
+Robin Barker, rmb1@npl.co.uk
 
 =head1 SEE ALSO
 

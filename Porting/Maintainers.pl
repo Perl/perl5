@@ -1310,8 +1310,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rmbarker',
 	'FILES'		=> q[ext/Pod-Plainer],
-	'CPAN'		=> 0,
+	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
+	# DEPRECATED	=> 5.11.0,
 	},
 
     'Pod::Simple' =>
