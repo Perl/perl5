@@ -249,6 +249,9 @@
 /Memoize/NDBM_File.pm
 /Memoize/SDBM_File.pm
 /Memoize/Storable.pm
+/Module/Build
+/Module/Build.pm
+!/Module/Build/ConfigData.pm
 /Module/CoreList.pm
 /Module/Load.pm
 /Module/Load/Conditional.pm

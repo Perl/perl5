@@ -1824,6 +1824,72 @@ ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
+ext/Module-Build/Changes				Module::Build
+ext/Module-Build/lib/Module/Build/API.pod		Module::Build
+ext/Module-Build/lib/Module/Build/Authoring.pod		Module::Build
+ext/Module-Build/lib/Module/Build/Base.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Compat.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Config.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
+ext/Module-Build/lib/Module/Build/ModuleInfo.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Notes.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Platform/aix.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/Amiga.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/cygwin.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/darwin.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/Default.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/EBCDIC.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/MacOS.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/MPEiX.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/os2.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/RiscOS.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/Unix.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/VMS.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/VOS.pm	Module::Build
+ext/Module-Build/lib/Module/Build/Platform/Windows.pm	Module::Build
+ext/Module-Build/lib/Module/Build.pm			Module::Build
+ext/Module-Build/lib/Module/Build/PodParser.pm		Module::Build
+ext/Module-Build/lib/Module/Build/PPMMaker.pm		Module::Build
+ext/Module-Build/lib/Module/Build/Version.pm		Module::Build
+ext/Module-Build/lib/Module/Build/YAML.pm		Module::Build
+ext/Module-Build/scripts/config_data			Module::Build
+ext/Module-Build/t/add_property.t			Module::Build
+ext/Module-Build/t/basic.t				Module::Build
+ext/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build.pm
+ext/Module-Build/t/compat/exit.t			Module::Build
+ext/Module-Build/t/compat.t				Module::Build
+ext/Module-Build/t/debug.t				Module::Build tests
+ext/Module-Build/t/destinations.t			Module::Build
+ext/Module-Build/t/extend.t				Module::Build
+ext/Module-Build/t/ext.t				Module::Build
+ext/Module-Build/t/files.t				Module::Build
+ext/Module-Build/t/help.t				Module::Build
+ext/Module-Build/t/install_extra_target.t		Module::Build tests
+ext/Module-Build/t/install.t				Module::Build
+ext/Module-Build/t/lib/DistGen.pm			Module::Build
+ext/Module-Build/t/lib/MBTest.pm			Module::Build
+ext/Module-Build/t/manifypods.t				Module::Build
+ext/Module-Build/t/mbyaml.t				Module::Build
+ext/Module-Build/t/metadata2.t				Module::Build
+ext/Module-Build/t/metadata.t				Module::Build
+ext/Module-Build/t/moduleinfo.t				Module::Build
+ext/Module-Build/t/new_from_context.t			Module::Build
+ext/Module-Build/t/notes.t				Module::Build
+ext/Module-Build/t/parents.t				Module::Build
+ext/Module-Build/t/PL_files.t				Module::Build tests
+ext/Module-Build/t/pod_parser.t				Module::Build
+ext/Module-Build/t/ppm.t				Module::Build
+ext/Module-Build/t/runthrough.t				Module::Build
+ext/Module-Build/t/script_dist.t			Module::Build
+ext/Module-Build/t/test_file_exts.t			Module::Build
+ext/Module-Build/t/test_types.t				Module::Build
+ext/Module-Build/t/test_type.t				Module::Build
+ext/Module-Build/t/tilde.t				Module::Build
+ext/Module-Build/t/use_tap_harness.t			Module::Build
+ext/Module-Build/t/versions.t				Module::Build
+ext/Module-Build/t/write_default_maniskip.t		Module::Build tests
+ext/Module-Build/t/xs.t					Module::Build
 ext/Module-CoreList/Changes	Module::CoreList Changes
 ext/Module-CoreList/corelist	The corelist command-line utility
 ext/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
@@ -3250,73 +3316,7 @@ lib/lib.t			For "use lib" testing
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
-lib/Module/Build/API.pod	Module::Build
-lib/Module/Build/Authoring.pod	Module::Build
-lib/Module/Build/Base.pm	Module::Build
-lib/Module/Build/Changes	Module::Build
-lib/Module/Build/Compat.pm	Module::Build
-lib/Module/Build/ConfigData.pm	Module::Build
-lib/Module/Build/Config.pm	Module::Build
-lib/Module/Build/Cookbook.pm	Module::Build
-lib/Module/Build/Dumper.pm	Module::Build
-lib/Module/Build/ModuleInfo.pm	Module::Build
-lib/Module/Build/Notes.pm	Module::Build
-lib/Module/Build/Platform/aix.pm	Module::Build
-lib/Module/Build/Platform/Amiga.pm	Module::Build
-lib/Module/Build/Platform/cygwin.pm	Module::Build
-lib/Module/Build/Platform/darwin.pm	Module::Build
-lib/Module/Build/Platform/Default.pm	Module::Build
-lib/Module/Build/Platform/EBCDIC.pm	Module::Build
-lib/Module/Build/Platform/MacOS.pm	Module::Build
-lib/Module/Build/Platform/MPEiX.pm	Module::Build
-lib/Module/Build/Platform/os2.pm	Module::Build
-lib/Module/Build/Platform/RiscOS.pm	Module::Build
-lib/Module/Build/Platform/Unix.pm	Module::Build
-lib/Module/Build/Platform/VMS.pm	Module::Build
-lib/Module/Build/Platform/VOS.pm	Module::Build
-lib/Module/Build/Platform/Windows.pm	Module::Build
-lib/Module/Build.pm		Module::Build
-lib/Module/Build/PodParser.pm	Module::Build
-lib/Module/Build/PPMMaker.pm	Module::Build
-lib/Module/Build/scripts/config_data	Module::Build
-lib/Module/Build/t/add_property.t	Module::Build
-lib/Module/Build/t/basic.t	Module::Build
-lib/Module/Build/t/bundled/Tie/CPHash.pm	Module::Build.pm
-lib/Module/Build/t/compat/exit.t	Module::Build
-lib/Module/Build/t/compat.t	Module::Build
-lib/Module/Build/t/debug.t	Module::Build tests
-lib/Module/Build/t/destinations.t	Module::Build
-lib/Module/Build/t/extend.t	Module::Build
-lib/Module/Build/t/ext.t	Module::Build
-lib/Module/Build/t/files.t	Module::Build
-lib/Module/Build/t/help.t	Module::Build
-lib/Module/Build/t/install_extra_target.t	Module::Build tests
-lib/Module/Build/t/install.t	Module::Build
-lib/Module/Build/t/lib/DistGen.pm	Module::Build
-lib/Module/Build/t/lib/MBTest.pm	Module::Build
-lib/Module/Build/t/manifypods.t	Module::Build
-lib/Module/Build/t/mbyaml.t	Module::Build
-lib/Module/Build/t/metadata2.t	Module::Build
-lib/Module/Build/t/metadata.t	Module::Build
-lib/Module/Build/t/moduleinfo.t	Module::Build
-lib/Module/Build/t/new_from_context.t	Module::Build
-lib/Module/Build/t/notes.t	Module::Build
-lib/Module/Build/t/parents.t	Module::Build
-lib/Module/Build/t/PL_files.t	Module::Build tests
-lib/Module/Build/t/pod_parser.t	Module::Build
-lib/Module/Build/t/ppm.t	Module::Build
-lib/Module/Build/t/runthrough.t	Module::Build
-lib/Module/Build/t/script_dist.t	Module::Build
-lib/Module/Build/t/test_file_exts.t	Module::Build
-lib/Module/Build/t/test_types.t	Module::Build
-lib/Module/Build/t/test_type.t	Module::Build
-lib/Module/Build/t/tilde.t	Module::Build
-lib/Module/Build/t/use_tap_harness.t	Module::Build
-lib/Module/Build/t/versions.t	Module::Build
-lib/Module/Build/t/write_default_maniskip.t	Module::Build tests
-lib/Module/Build/t/xs.t		Module::Build
-lib/Module/Build/Version.pm	Module::Build
-lib/Module/Build/YAML.pm	Module::Build
+lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*

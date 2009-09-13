@@ -1021,7 +1021,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kwilliams',
 	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.35.tar.gz',
-	'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
+	'FILES'		=> q[ext/Module-Build],
 	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t scripts/bundle.pl},
 			     qr!^contrib/! ],
 	'CPAN'		=> 1,
@@ -1911,6 +1911,7 @@ use File::Glob qw(:case);
 				lib/Getopt/Std.{pm,t}
 				lib/I18N/Collate.{pm,t}
 				lib/Internals.t
+				lib/Module/Build/ConfigData.pm
 				lib/Net/hostent.{pm,t}
 				lib/Net/netent.{pm,t}
 				lib/Net/protoent.{pm,t}
