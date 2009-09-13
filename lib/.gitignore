@@ -291,6 +291,7 @@
 /POSIX.pm
 /POSIX.pod
 /Pod/Escapes.pm
+/Pod/LaTeX.pm
 /Pod/Perldoc.pm
 /Pod/Perldoc
 /Pod/Plainer.pm

@@ -2032,6 +2032,9 @@ ext/Pod-Escapes/README			README for Pod::Escapes
 ext/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 ext/Pod-Escapes/t/10_main.t		test Pod::Escapes
 ext/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
+ext/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
+ext/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
+ext/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
 ext/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
@@ -3232,7 +3235,6 @@ lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML
 lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
-lib/Pod/LaTeX.pm		Convert POD data to LaTeX
 lib/Pod/Man.pm			Convert POD data to *roff
 lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
@@ -3267,7 +3269,6 @@ lib/Pod/t/man.t			podlators test
 lib/Pod/t/man-utf8.t		podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
-lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
 lib/Pod/t/pod-parser.t		podlators test
 lib/Pod/t/pod-spelling.t	podlators test
 lib/Pod/t/pod.t			podlators test
@@ -3278,7 +3279,6 @@ lib/Pod/t/text-options.t		podlators test
 lib/Pod/t/text.t		podlators test
 lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
-lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
 lib/pwd.pl			Routines to keep track of PWD environment variable
