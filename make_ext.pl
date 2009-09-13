@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Config;
 BEGIN {
-    unshift @INC, 'ext/Cwd';
+    unshift @INC, $^O eq 'MSWin32' ? '../ext/Cwd' : 'ext/Cwd';
 }
 use Cwd;
 
