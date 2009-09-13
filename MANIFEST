@@ -2755,6 +2755,125 @@ ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
 ext/Test/lib/Test.pm		A simple framework for writing test scripts
+ext/Test-Simple/Changes					Test::Simple changes
+ext/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
+ext/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
+ext/Test-Simple/lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
+ext/Test-Simple/lib/Test/Builder/Tester.pm		For testing Test::Builder based classes
+ext/Test-Simple/lib/Test/More.pm			More utilities for writing tests
+ext/Test-Simple/lib/Test/Simple.pm			Basic utility for writing tests
+ext/Test-Simple/lib/Test/Tutorial.pod			A tutorial on writing tests
+ext/Test-Simple/README					Test::Simple README
+ext/Test-Simple/t/00test_harness_check.t		Test::Simple test
+ext/Test-Simple/t/bad_plan.t				Test::Builder plan() test
+ext/Test-Simple/t/bail_out.t				Test::Builder BAIL_OUT test
+ext/Test-Simple/t/BEGIN_require_ok.t			Test::More require_ok() testing
+ext/Test-Simple/t/BEGIN_use_ok.t			Test::More use_ok() testing
+ext/Test-Simple/t/buffer.t				Test::Builder buffering test
+ext/Test-Simple/t/Builder/Builder.t			Test::Builder tests
+ext/Test-Simple/t/Builder/carp.t			Test::Builder test
+ext/Test-Simple/t/Builder/create.t			Test::Builder test 
+ext/Test-Simple/t/Builder/current_test.t		Test::Builder tests
+ext/Test-Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
+ext/Test-Simple/t/Builder/details.t			Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing_double.t		Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing_plan_mismatch.t	Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing.t		Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing_with_no_plan.t	Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing_with_number.t	Test::Builder tests
+ext/Test-Simple/t/Builder/done_testing_with_plan.t	Test::Builder tests
+ext/Test-Simple/t/Builder/fork_with_new_stdout.t	Test::Builder tests
+ext/Test-Simple/t/Builder/has_plan2.t			Test::Builder tests
+ext/Test-Simple/t/Builder/has_plan.t			Test::Builder tests
+ext/Test-Simple/t/Builder/is_fh.t			Test::Builder tests
+ext/Test-Simple/t/Builder/maybe_regex.t			Test::Builder tests
+ext/Test-Simple/t/Builder/no_diag.t			Test::Builder tests
+ext/Test-Simple/t/Builder/no_ending.t			Test::Builder tests
+ext/Test-Simple/t/Builder/no_header.t			Test::Builder tests
+ext/Test-Simple/t/Builder/no_plan_at_all.t		Test::Builder tests
+ext/Test-Simple/t/Builder/ok_obj.t			Test::Builder tests
+ext/Test-Simple/t/Builder/output.t			Test::Builder tests
+ext/Test-Simple/t/Builder/reset.t			Test::Builder tests
+ext/Test-Simple/t/Builder/try.t				Test::Builder tests
+ext/Test-Simple/t/c_flag.t				Test::Simple test
+ext/Test-Simple/t/circular_data.t			Test::Simple test
+ext/Test-Simple/t/cmp_ok.t				Test::More test
+ext/Test-Simple/t/diag.t				Test::More diag() test
+ext/Test-Simple/t/died.t				Test::Simple test
+ext/Test-Simple/t/dont_overwrite_die_handler.t		Test::More tests
+ext/Test-Simple/t/eq_set.t				Test::Simple test
+ext/Test-Simple/t/exit.t				Test::Simple test, exit codes
+ext/Test-Simple/t/explain.t				Test::Simple test
+ext/Test-Simple/t/extra_one.t				Test::Simple test
+ext/Test-Simple/t/extra.t				Test::Simple test
+ext/Test-Simple/t/fail-like.t				Test::More test, like() failures
+ext/Test-Simple/t/fail-more.t				Test::More test, tests failing
+ext/Test-Simple/t/fail_one.t				Test::Simple test
+ext/Test-Simple/t/fail.t				Test::Simple test, test failures
+ext/Test-Simple/t/filehandles.t				Test::Simple test, STDOUT can be played with
+ext/Test-Simple/t/fork.t				Test::More fork tests
+ext/Test-Simple/t/harness_active.t			Test::Simple test
+ext/Test-Simple/t/import.t				Test::More test, importing functions
+ext/Test-Simple/t/is_deeply_dne_bug.t			Test::More test
+ext/Test-Simple/t/is_deeply_fail.t			Test::More test, is_deeply()
+ext/Test-Simple/t/is_deeply_with_threads.t		Test::More test
+ext/Test-Simple/t/lib/Dev/Null.pm			Test::More test module
+ext/Test-Simple/t/lib/Dummy.pm				Test::More test module
+ext/Test-Simple/t/lib/MyOverload.pm			Test::More test module
+ext/Test-Simple/t/lib/NoExporter.pm			Test::Simple test module
+ext/Test-Simple/t/lib/SigDie.pm				Test module for Test::More
+ext/Test-Simple/t/lib/Test/Builder/NoOutput.pm		Utility module for testing Test::Builder
+ext/Test-Simple/t/lib/Test/Simple/Catch.pm		Utility module for testing Test::Simple
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/pre_plan_death.plx	for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/require.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/success.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/too_few_fail.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
+ext/Test-Simple/t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
+ext/Test-Simple/t/lib/TieOut.pm				Testing library to capture prints
+ext/Test-Simple/t/missing.t				Test::Simple test, missing tests
+ext/Test-Simple/t/More.t				Test::More test, basic stuff
+ext/Test-Simple/t/new_ok.t				Test::More test
+ext/Test-Simple/t/no_plan.t				Test::Simple test, forgot the plan
+ext/Test-Simple/t/no_tests.t				Test::More test
+ext/Test-Simple/t/note.t				Test::More test
+ext/Test-Simple/TODO					Test::Simple TODO
+ext/Test-Simple/t/overload.t				Test::Simple test
+ext/Test-Simple/t/overload_threads.t			Test::Simple test
+ext/Test-Simple/t/plan_bad.t				Test::Simple test
+ext/Test-Simple/t/plan_is_noplan.t			Test::Simple test, no_plan
+ext/Test-Simple/t/plan_no_plan.t			Test::More test, plan() w/no_plan
+ext/Test-Simple/t/plan_shouldnt_import.t		Test::Simple test
+ext/Test-Simple/t/plan_skip_all.t			Test::More test, plan() w/skip_all
+ext/Test-Simple/t/plan.t				Test::More test, plan()
+ext/Test-Simple/t/require_ok.t				Test::Simple test
+ext/Test-Simple/t/simple.t				Test::Simple test, basic stuff
+ext/Test-Simple/t/skipall.t				Test::More test, skip all tests
+ext/Test-Simple/t/skip.t				Test::More test, SKIP tests
+ext/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
+ext/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_02fhrestore.t		Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_03die.t			Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_04line_num.t		Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_05faildiag.t		Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_06errormess.t		Test::Builder::Tester test
+ext/Test-Simple/t/Tester/tbt_07args.t			Test::Builder::Tester test
+ext/Test-Simple/t/threads.t				Test::Builder thread-safe checks
+ext/Test-Simple/t/thread_taint.t			Test::Simple test
+ext/Test-Simple/t/todo.t				Test::More test, TODO tests
+ext/Test-Simple/t/undef.t				Test::More test, undefs don't cause warnings
+ext/Test-Simple/t/useing.t				Test::More test, compile test
+ext/Test-Simple/t/use_ok.t				Test::More test, use_ok()
+ext/Test-Simple/t/utf8.t				Test::More test
+ext/Test-Simple/t/versions.t				Test::More test
 ext/Test/t/05_about_verbose.t	See if Test works
 ext/Test/t/fail.t		See if Test works
 ext/Test/t/mix.t		See if Test works
@@ -3384,107 +3503,6 @@ lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
-lib/Test/Builder/Module.pm	Base class for test modules
-lib/Test/Builder.pm		For writing new test libraries
-lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
-lib/Test/Builder/Tester.pm	For testing Test::Builder based classes
-lib/Test/More.pm		More utilities for writing tests
-lib/Test/Simple/Changes		Test::Simple changes
-lib/Test/Simple.pm		Basic utility for writing tests
-lib/Test/Simple/README		Test::Simple README
-lib/Test/Simple/t/00test_harness_check.t	Test::Simple test
-lib/Test/Simple/t/bad_plan.t	Test::Builder plan() test
-lib/Test/Simple/t/bail_out.t	Test::Builder BAIL_OUT test
-lib/Test/Simple/t/BEGIN_require_ok.t	Test::More require_ok() testing
-lib/Test/Simple/t/BEGIN_use_ok.t	Test::More use_ok() testing
-lib/Test/Simple/t/buffer.t	Test::Builder buffering test
-lib/Test/Simple/t/Builder/Builder.t	Test::Builder tests
-lib/Test/Simple/t/Builder/carp.t	Test::Builder test
-lib/Test/Simple/t/Builder/create.t	Test::Builder test 
-lib/Test/Simple/t/Builder/current_test.t	Test::Builder tests
-lib/Test/Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
-lib/Test/Simple/t/Builder/details.t	Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing_double.t	Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing_plan_mismatch.t	Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing.t		Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing_with_no_plan.t	Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing_with_number.t	Test::Builder tests
-lib/Test/Simple/t/Builder/done_testing_with_plan.t	Test::Builder tests
-lib/Test/Simple/t/Builder/fork_with_new_stdout.t	Test::Builder tests
-lib/Test/Simple/t/Builder/has_plan2.t	Test::Builder tests
-lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
-lib/Test/Simple/t/Builder/is_fh.t	Test::Builder tests
-lib/Test/Simple/t/Builder/maybe_regex.t	Test::Builder tests
-lib/Test/Simple/t/Builder/no_diag.t	Test::Builder tests
-lib/Test/Simple/t/Builder/no_ending.t	Test::Builder tests
-lib/Test/Simple/t/Builder/no_header.t	Test::Builder tests
-lib/Test/Simple/t/Builder/no_plan_at_all.t	Test::Builder tests
-lib/Test/Simple/t/Builder/ok_obj.t	Test::Builder tests
-lib/Test/Simple/t/Builder/output.t	Test::Builder tests
-lib/Test/Simple/t/Builder/reset.t	Test::Builder tests
-lib/Test/Simple/t/Builder/try.t		Test::Builder tests
-lib/Test/Simple/t/c_flag.t	Test::Simple test
-lib/Test/Simple/t/circular_data.t	Test::Simple test
-lib/Test/Simple/t/cmp_ok.t	Test::More test
-lib/Test/Simple/t/diag.t	Test::More diag() test
-lib/Test/Simple/t/died.t	Test::Simple test
-lib/Test/Simple/t/dont_overwrite_die_handler.t	Test::More tests
-lib/Test/Simple/t/eq_set.t	Test::Simple test
-lib/Test/Simple/t/exit.t	Test::Simple test, exit codes
-lib/Test/Simple/t/explain.t	Test::Simple test
-lib/Test/Simple/t/extra_one.t	Test::Simple test
-lib/Test/Simple/t/extra.t	Test::Simple test
-lib/Test/Simple/t/fail-like.t	Test::More test, like() failures
-lib/Test/Simple/t/fail-more.t	Test::More test, tests failing
-lib/Test/Simple/t/fail_one.t	Test::Simple test
-lib/Test/Simple/t/fail.t	Test::Simple test, test failures
-lib/Test/Simple/t/filehandles.t	Test::Simple test, STDOUT can be played with
-lib/Test/Simple/t/fork.t	Test::More fork tests
-lib/Test/Simple/t/harness_active.t	Test::Simple test
-lib/Test/Simple/t/import.t	Test::More test, importing functions
-lib/Test/Simple/t/is_deeply_dne_bug.t	Test::More test
-lib/Test/Simple/t/is_deeply_fail.t	Test::More test, is_deeply()
-lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
-lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
-lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
-lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
-lib/Test/Simple/t/lib/SigDie.pm	Test module for Test::More
-lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
-lib/Test/Simple/t/More.t	Test::More test, basic stuff
-lib/Test/Simple/t/new_ok.t	Test::More test
-lib/Test/Simple/t/no_plan.t	Test::Simple test, forgot the plan
-lib/Test/Simple/t/no_tests.t	Test::More test
-lib/Test/Simple/t/note.t	Test::More test
-lib/Test/Simple/TODO		Test::Simple TODO
-lib/Test/Simple/t/overload.t		Test::Simple test
-lib/Test/Simple/t/overload_threads.t	Test::Simple test
-lib/Test/Simple/t/plan_bad.t		Test::Simple test
-lib/Test/Simple/t/plan_is_noplan.t	Test::Simple test, no_plan
-lib/Test/Simple/t/plan_no_plan.t	Test::More test, plan() w/no_plan
-lib/Test/Simple/t/plan_shouldnt_import.t	Test::Simple test
-lib/Test/Simple/t/plan_skip_all.t	Test::More test, plan() w/skip_all
-lib/Test/Simple/t/plan.t	Test::More test, plan()
-lib/Test/Simple/t/require_ok.t	Test::Simple test
-lib/Test/Simple/t/simple.t	Test::Simple test, basic stuff
-lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
-lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
-lib/Test/Simple/t/tbm_doesnt_set_exported_to.t	Test::Builder::Module test
-lib/Test/Simple/t/Tester/tbt_01basic.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_02fhrestore.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_03die.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_04line_num.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_05faildiag.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_06errormess.t	Test::Builder::Tester test
-lib/Test/Simple/t/Tester/tbt_07args.t	Test::Builder::Tester test
-lib/Test/Simple/t/threads.t	Test::Builder thread-safe checks
-lib/Test/Simple/t/thread_taint.t	Test::Simple test
-lib/Test/Simple/t/todo.t	Test::More test, TODO tests
-lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
-lib/Test/Simple/t/useing.t	Test::More test, compile test
-lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
-lib/Test/Simple/t/utf8.t	Test::More test
-lib/Test/Simple/t/versions.t	Test::More test
-lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Thread.pm			Thread extensions frontend
@@ -4164,7 +4182,6 @@ t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
 t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/deprecate.t		Test deprecate.pm
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
-t/lib/Dev/Null.pm		Test::More test module
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
@@ -4184,23 +4201,6 @@ t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
-t/lib/Test/Builder/NoOutput.pm	Utility module for testing Test::Builder
-t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
-t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
-t/lib/Test/Simple/sample_tests/death.plx		for exit.t
-t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
-t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
-t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
-t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
-t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
-t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
-t/lib/Test/Simple/sample_tests/pre_plan_death.plx		for exit.t
-t/lib/Test/Simple/sample_tests/require.plx		for exit.t
-t/lib/Test/Simple/sample_tests/success.plx		for exit.t
-t/lib/Test/Simple/sample_tests/too_few_fail.plx		for exit.t
-t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
-t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
-t/lib/TieOut.pm			Testing library to capture prints
 t/lib/warnings/1global		Tests of global warnings for warnings.t
 t/lib/warnings/2use		Tests for "use warnings" for warnings.t
 t/lib/warnings/3both		Tests for interaction of $^W and "use warnings"

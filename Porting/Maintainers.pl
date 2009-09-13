@@ -1484,18 +1484,8 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mschwern',
 	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.92.tar.gz',
-	'FILES'		=> q[lib/Test/Simple.pm
-			     lib/Test/Simple
-			     lib/Test/Builder.pm
-			     lib/Test/Builder
-			     lib/Test/More.pm
-			     lib/Test/Tutorial.pod
-			     t/lib/Test/
-			     t/lib/Dev/Null.pm
-			    ],
+	'FILES'		=> q[ext/Test-Simple],
 	'EXCLUDED'	=> [
-			     # NB - TieOut.pm comes with more than one
-			     # distro. We use the MM one
 			     qw{.perlcriticrc
 				.perltidyrc
 				t/pod.t
@@ -1505,13 +1495,6 @@ use File::Glob qw(:case);
 				lib/Test/Builder/IO/Scalar.pm
 			       }
 			   ],
-	'MAP'		=> {
-			     'lib/'        => 'lib/',
-			     't/lib/'      => 'lib/Test/Simple/t/lib/',
-			     't/lib/Test/' => 't/lib/Test/',
-			     't/lib/Dev/' =>  't/lib/Dev/',
-			     ''            => 'lib/Test/Simple/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

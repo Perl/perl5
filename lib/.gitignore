@@ -331,6 +331,11 @@
 /Term/UI.pm
 /Term/UI/History.pm
 /Test.pm
+/Test/Builder
+/Test/Builder.pm
+/Test/More.pm
+/Test/Simple.pm
+/Test/Tutorial.pod
 /Text/Balanced.pm
 /Text/ParseWords.pm
 /Text/Soundex.pm
