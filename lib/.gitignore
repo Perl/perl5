@@ -292,6 +292,8 @@
 /POSIX.pod
 /Pod/Escapes.pm
 /Pod/LaTeX.pm
+/Pod/Man.pm
+/Pod/ParseLink.pm
 /Pod/Perldoc.pm
 /Pod/Perldoc
 /Pod/Plainer.pm
@@ -306,6 +308,8 @@
 /Pod/Simple/t/corpus/2202jpy.txt
 /Pod/Simple/t/corpus2/polish_utf16be_bom.txt
 /Pod/Simple/t/corpus2/polish_utf16le_bom.txt
+/Pod/Text.pm
+/Pod/Text/
 /SDBM_File.pm
 /Safe.pm
 /SelfLoader.pm

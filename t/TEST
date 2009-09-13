@@ -39,6 +39,7 @@ my %temp_no_core =
      '../ext/Tie-RefHash' => 1,
      '../ext/Time-HiRes' => 1,
      '../ext/Unicode-Normalize' => 1,
+     '../ext/podlators' => 1,
     );
 
 if ($::do_nothing) {

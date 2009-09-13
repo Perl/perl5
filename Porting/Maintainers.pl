@@ -1371,13 +1371,12 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/podlators-2.2.2.tar.gz',
-	'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm
+	'FILES'		=> q[ext/podlators
 			     pod/pod2man.PL
 			     pod/pod2text.PL
-			     lib/Pod/t/{basic.*,{color,filehandle,man*,parselink,pod-parser,pod-spelling,pod,termcap,text*}.t}
 			    ],
-	'MAP'		=> { 'scripts/' => 'pod/',
-			     't/'       => 'lib/Pod/t/',
+	'MAP'		=> { '' => 'ext/podlators/',
+			     'scripts/' => 'pod/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',

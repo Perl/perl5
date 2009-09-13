@@ -2035,6 +2035,35 @@ ext/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 ext/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
 ext/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
 ext/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
+ext/podlators/lib/Pod/Man.pm			Convert POD data to *roff
+ext/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
+ext/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
+ext/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
+ext/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
+ext/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
+ext/podlators/t/basic.cap			podlators test
+ext/podlators/t/basic.clr			podlators test
+ext/podlators/t/basic.man			podlators test
+ext/podlators/t/basic.ovr			podlators test
+ext/podlators/t/basic.pod			podlators test
+ext/podlators/t/basic.t				podlators test
+ext/podlators/t/basic.txt			podlators test
+ext/podlators/t/color.t				podlators test
+ext/podlators/t/filehandle.t			podlators test
+ext/podlators/t/man-options.t			podlators test
+ext/podlators/t/man.t				podlators test
+ext/podlators/t/man-utf8.t			podlators test
+ext/podlators/t/parselink.t			podlators test
+ext/podlators/t/pod-parser.t			podlators test
+ext/podlators/t/pod-spelling.t			podlators test
+ext/podlators/t/pod.t				podlators test
+ext/podlators/t/termcap.t			podlators test
+ext/podlators/t/text-encoding.t			podlators test
+ext/podlators/t/text-options.t			podlators test
+ext/podlators/t/text.t				podlators test
+ext/podlators/t/text-utf8.t			podlators test
+ext/podlators/VERSION				podlators custom Makefile.PL
+ext/podlators/VERSION				podlators distribution version
 ext/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 ext/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
@@ -3235,27 +3264,12 @@ lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML
 lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
-lib/Pod/Man.pm			Convert POD data to *roff
-lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
-lib/Pod/t/basic.cap		podlators test
-lib/Pod/t/basic.clr		podlators test
-lib/Pod/t/basic.man		podlators test
-lib/Pod/t/basic.ovr		podlators test
-lib/Pod/t/basic.pod		podlators test
-lib/Pod/t/basic.t		podlators test
-lib/Pod/t/basic.txt		podlators test
-lib/Pod/t/color.t		podlators test
 lib/Pod/t/contains_pod.t	Pod-Parser test
 lib/Pod/t/eol.t			end of line agnosticism
-lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
-lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
-lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
-lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
-lib/Pod/t/filehandle.t		podlators test
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod		pod2html escape test input data
 lib/Pod/t/htmlescp.t		pod2html escape test
@@ -3264,20 +3278,8 @@ lib/Pod/t/htmllink.t		pod2html link test
 lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
-lib/Pod/t/man-options.t		podlators test
-lib/Pod/t/man.t			podlators test
-lib/Pod/t/man-utf8.t		podlators test
-lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
-lib/Pod/t/pod-parser.t		podlators test
-lib/Pod/t/pod-spelling.t	podlators test
-lib/Pod/t/pod.t			podlators test
 lib/Pod/t/Select.t		See if Pod::Select works
-lib/Pod/t/termcap.t		podlators test
-lib/Pod/t/text-encoding.t		podlators test
-lib/Pod/t/text-options.t		podlators test
-lib/Pod/t/text.t		podlators test
-lib/Pod/t/text-utf8.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
