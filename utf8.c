@@ -1042,14 +1042,6 @@ Perl_is_uni_alnum(pTHX_ UV c)
 }
 
 bool
-Perl_is_uni_alnumc(pTHX_ UV c)
-{
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_alnumc(tmpbuf);
-}
-
-bool
 Perl_is_uni_idfirst(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
@@ -1190,12 +1182,6 @@ Perl_is_uni_alnum_lc(pTHX_ UV c)
 }
 
 bool
-Perl_is_uni_alnumc_lc(pTHX_ UV c)
-{
-    return is_uni_alnumc(c);	/* XXX no locale support yet */
-}
-
-bool
 Perl_is_uni_idfirst_lc(pTHX_ UV c)
 {
     return is_uni_idfirst(c);	/* XXX no locale support yet */
@@ -1323,16 +1309,6 @@ Perl_is_utf8_alnum(pTHX_ const U8 *p)
      * descendant of isalnum(3), in other words, it doesn't
      * contain the '_'. --jhi */
     return is_utf8_common(p, &PL_utf8_alnum, "IsWord");
-}
-
-bool
-Perl_is_utf8_alnumc(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_IS_UTF8_ALNUMC;
-
-    return is_utf8_common(p, &PL_utf8_alnumc, "IsAlnumC");
 }
 
 bool
