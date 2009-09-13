@@ -569,7 +569,7 @@ EOT
 
 			    # SKIP is essentially the same as TODO for t/TEST
 			    # this still conforms to TAP:
-			    # http://search.cpan.org/dist/TAP/TAP.pod
+			    # http://search.cpan.org/dist/TAP/TAP.pm
 			    $extra and $istodo = $extra =~ /#\s*(?:TODO|SKIP)\b/;
 			    $istodo = 1 if $todo{$num};
 

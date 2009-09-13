@@ -122,7 +122,7 @@ ends as shown in the following table:
  | cores  |                | PA-8900/rp34x0 | 2014            |
  +--------+----------------+----------------+-----------------+
 
-From http://www.hp.com/products1/evolution/9000/faqs.html:
+From http://www.hp.com/products1/evolution/9000/faqs.html
 
  The last order date for HP 9000 systems was December 31, 2008.
 
@@ -403,12 +403,11 @@ for updates/patches. Enter "ANSI" as keyword.
 When you are going to use the GNU C compiler (gcc), and you don't have
 gcc yet, you can either build it yourself from the sources (available
 from e.g. http://www.gnu.ai.mit.edu/software/gcc/releases.html) or fetch
-a prebuilt binary from the HP porting center. There are two places where
-gcc prebuilds can be fetched; the first and best (for HP-UX 11 only) is
+a prebuilt binary from the HP porting center. gcc prebuilds can be
+fetched from
 http://h21007.www2.hp.com/dspp/tech/tech_TechSoftwareDetailPage_IDX/1,1703,547,00.html
-the second is http://hpux.cs.utah.edu/hppd/hpux/Gnu/ where you can also
-find the GNU binutils package. (Browse through the list, because there
-are often multiple versions of the same package available).
+(Browse through the list, because there are often multiple versions of
+the same package available).
 
 Above mentioned distributions are depots. H.Merijn Brand has made prebuilt
 gcc binaries available on http://mirrors.develooper.com/hpux/ and/or

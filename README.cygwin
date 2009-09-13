@@ -124,14 +124,14 @@ Alternatively, the crypt libraries in GNU libc have been ported to Cygwin.
 
 The DES based Ultra Fast Crypt port was done by Alexey Truhan:
 
-  ftp://ftp.uni-erlangen.de/pub/pc/gnuwin32/cygwin/porters/Okhapkin_Sergey/cw32crypt-dist-0.tgz
+  ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Okhapkin_Sergey/cw32crypt-dist-0.tgz
 
 NOTE: There are various export restrictions on DES implementations,
 see the glibc README for more details.
 
 The MD5 port was done by Andy Piper:
 
-  ftp://ftp.uni-erlangen.de/pub/pc/gnuwin32/cygwin/porters/Okhapkin_Sergey/libcrypt.tgz
+  ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Okhapkin_Sergey/libcrypt.tgz
 
 =item * C<-lgdbm_compat> (C<use GDBM_File>)
 

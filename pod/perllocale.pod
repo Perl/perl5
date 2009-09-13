@@ -977,8 +977,11 @@ structure.
 
 =head2 Freely available locale definitions
 
-There is a large collection of locale definitions at
-ftp://dkuug.dk/i18n/WG15-collection .  You should be aware that it is
+There is a large collection of locale definitions at:
+
+  http://std.dkuug.dk/i18n/WG15-collection/locales/
+
+You should be aware that it is
 unsupported, and is not claimed to be fit for any purpose.  If your
 system allows installation of arbitrary locales, you may find the
 definitions useful as they are, or as a basis for the development of

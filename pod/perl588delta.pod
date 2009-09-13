@@ -429,7 +429,7 @@ C<ExtUtils::MakeMaker> upgraded to version 6.30 (was 6.17)
 
 =item *
 
-Too much to list here;  see L<http://search.cpan.org/src/MSCHWERN/ExtUtils-MakeMaker-6.30/Changes>
+Too much to list here;  see L<http://search.cpan.org/dist/ExtUtils-MakeMaker/Changes>
 
 =back
 

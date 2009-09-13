@@ -1388,7 +1388,7 @@ L<http://www.unicode.org/>
 
 L<http://www.unicode.org/unicode/reports/tr16/>
 
-L<http://www.wps.com/texts/codes/>
+L<http://www.wps.com/projects/codes/>
 B<ASCII: American Standard Code for Information Infiltration> Tom Jennings,
 September 1999.
 
