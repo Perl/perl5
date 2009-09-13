@@ -742,13 +742,15 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jv',
 	'DISTRIBUTION'	=> 'JV/Getopt-Long-2.38.tar.gz',
-	'FILES'		=> q[lib/Getopt/Long.pm
-			     lib/Getopt/Long
+	'FILES'		=> q[ext/Getopt-Long
 			     lib/newgetopt.pl
 			    ],
 	'EXCLUDED'	=> [ qr{^examples/},
 			     qw{perl-Getopt-Long.spec},
 			   ],
+	'MAP'		=> { ''		       => 'ext/Getopt-Long/',
+			     'lib/newgetopt.pl' => 'lib/newgetopt.pl',
+			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
