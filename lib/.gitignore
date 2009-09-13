@@ -202,6 +202,7 @@
 /IPC/Semaphore.pm
 /IPC/SharedMem.pm
 /IPC/SysV.pm
+/Getopt/Long.pm
 /List
 /Locale
 /Locale/Constants.pm
@@ -344,6 +345,7 @@
 /Time/Piece.pm
 /Time/Seconds.pm
 /Unicode/Collate.pm
+/Unicode/Collate/
 /Unicode/Normalize.pm
 /XS
 /XSLoader.pm
