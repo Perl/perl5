@@ -684,8 +684,6 @@ END_EXTERN_C
 #define PL_unsafe		(*Perl_Iunsafe_ptr(aTHX))
 #undef  PL_utf8_alnum
 #define PL_utf8_alnum		(*Perl_Iutf8_alnum_ptr(aTHX))
-#undef  PL_utf8_alnumc
-#define PL_utf8_alnumc		(*Perl_Iutf8_alnumc_ptr(aTHX))
 #undef  PL_utf8_alpha
 #define PL_utf8_alpha		(*Perl_Iutf8_alpha_ptr(aTHX))
 #undef  PL_utf8_ascii

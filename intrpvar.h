@@ -513,7 +513,6 @@ PERLVAR(Inumeric_name,	char *)		/* Name of current numeric locale */
 
 /* utf8 character classes */
 PERLVAR(Iutf8_alnum,	SV *)
-PERLVAR(Iutf8_alnumc,	SV *)
 PERLVAR(Iutf8_ascii,	SV *)
 PERLVAR(Iutf8_alpha,	SV *)
 PERLVAR(Iutf8_space,	SV *)

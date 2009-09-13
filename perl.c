@@ -985,7 +985,6 @@ perl_destruct(pTHXx)
 
     /* clear utf8 character classes */
     SvREFCNT_dec(PL_utf8_alnum);
-    SvREFCNT_dec(PL_utf8_alnumc);
     SvREFCNT_dec(PL_utf8_ascii);
     SvREFCNT_dec(PL_utf8_alpha);
     SvREFCNT_dec(PL_utf8_space);
@@ -1005,7 +1004,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_idstart);
     SvREFCNT_dec(PL_utf8_idcont);
     PL_utf8_alnum	= NULL;
-    PL_utf8_alnumc	= NULL;
     PL_utf8_ascii	= NULL;
     PL_utf8_alpha	= NULL;
     PL_utf8_space	= NULL;

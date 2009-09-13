@@ -324,7 +324,6 @@
 #define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
-#define PL_utf8_alnumc		(vTHX->Iutf8_alnumc)
 #define PL_utf8_alpha		(vTHX->Iutf8_alpha)
 #define PL_utf8_ascii		(vTHX->Iutf8_ascii)
 #define PL_utf8_cntrl		(vTHX->Iutf8_cntrl)
@@ -638,7 +637,6 @@
 #define PL_Iunlockhook		PL_unlockhook
 #define PL_Iunsafe		PL_unsafe
 #define PL_Iutf8_alnum		PL_utf8_alnum
-#define PL_Iutf8_alnumc		PL_utf8_alnumc
 #define PL_Iutf8_alpha		PL_utf8_alpha
 #define PL_Iutf8_ascii		PL_utf8_ascii
 #define PL_Iutf8_cntrl		PL_utf8_cntrl
