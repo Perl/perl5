@@ -184,7 +184,7 @@ Labels used as targets for the C<goto>, C<last>, C<next> or C<redo>
 statements cannot be keywords anymore. This restriction will prevent
 potential confusion between the C<goto LABEL> and C<goto EXPR> syntaxes:
 for example, a statement like C<goto print> would jump to a label whose
-name would be the return value of print(), (usually 1), instead of a
+name would be the return value of C<print()>, (usually 1), instead of a
 label named C<print>. Moreover, the other control flow statements
 would just ignore any keyword passed to them as a label name. Since
 such labels cannot be defined anymore, this kind of error will be
@@ -1010,7 +1010,7 @@ The documentation has been corrected and expanded.
 
 Upgraded from version 1.04 to 1.05.
 
-UNIVERSAL->import() is now deprecated.
+C<UNIVERSAL->import()> is now deprecated.
 
 =item C<Win32>
 
@@ -1113,7 +1113,7 @@ generated at build time, rather than being shipped as part of the release.
 
 =head2 Documented -X overloading.
 
-=head2 Documented that when() treats specially most of the filetest operators
+=head2 Documented that C<when()> treats specially most of the filetest operators
 
 =head2 Documented when as a syntax modifier
 
@@ -1153,11 +1153,11 @@ Empty C<DESTROY> methods are no longer called.
 
 =item *
 
-Faster sv_utf8_upgrade()
+Faster C<Perl_sv_utf8_upgrade()>
 
 =item *
 
-Speed up keys() on empty hash
+Speed up C<keys> on empty hash
 
 =back
 
@@ -1219,7 +1219,7 @@ F<win32/buildext.pl>.
 
 =item AIX
 
-Removed F<libbsd> for AIX 5L and 6.1. Only flock() was used from F<libbsd>.
+Removed F<libbsd> for AIX 5L and 6.1. Only C<flock()> was used from F<libbsd>.
 
 Removed F<libgdbm> for AIX 5L and 6.1. The F<libgdbm> is delivered as an
 optional package with the AIX Toolbox. Unfortunately the 64 bit version 
@@ -1341,7 +1341,7 @@ The debugger's C<m> command was broken on modules that defined constants
 
 =item *
 
-C<crypt()> and string complement could return tainted values for untainted
+C<crypt> and string complement could return tainted values for untainted
 arguments [RT #59998].
 
 =item *
@@ -1409,7 +1409,7 @@ C<sub foo(_)> [RT #62484].
 
 =item *
 
-Using C<setpgrp()> with no arguments could corrupt the perl stack.
+Using C<setpgrp> with no arguments could corrupt the perl stack.
 
 =item *
 
@@ -1533,7 +1533,7 @@ Use of a UTF-8 C<tr//> within a closure could cause a segfault [RT #61520].
 
 =item *
 
-Calling C<sv_chop()> or otherwise upgrading an SV could result in an
+Calling C<Perl_sv_chop()> or otherwise upgrading an SV could result in an
 unaligned 64-bit access on the SPARC architecture [RT #60574].
 
 =item *
@@ -1620,7 +1620,7 @@ proper citations added, thanks to a patch from Tom Christiansen.
 
 =item *
 
-C<vcroak()> now accepts a null first argument. In addition, a full audit
+C<Perl_vcroak()> now accepts a null first argument. In addition, a full audit
 was made of the "not NULL" compiler annotations, and those for several
 other internal functions were corrected.
 
@@ -1657,7 +1657,7 @@ is available for this.
 
 =item C<SVs_TEMP>
 
-Call C<sv_2mortal()> on the new SV.
+Call C<Perl_sv_2mortal()> on the new SV.
 
 =back
 
@@ -1682,7 +1682,7 @@ and a global variable otherwise.
 
 =item *
 
-C<Perl_mg_free()> used to leave freed memory accessible via SvMAGIC() on
+C<Perl_mg_free()> used to leave freed memory accessible via C<SvMAGIC()> on
 the scalar. It now updates the linked list to remove each piece of magic
 as it is freed.
 
