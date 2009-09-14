@@ -454,6 +454,15 @@ Upgraded from version 1.06 to 1.07.
 
 See L</"The C<overloading> pragma"> above.
 
+=item C<mro>
+
+Upgraded from version 1.00 to 1.01. Performance for single inheritance is 40%
+faster - see L</"Performance Enhancements"> below.
+
+C<mro> is now implemented as an XS extension. The documented interface has not
+changed. Code relying on the implementation detail that some C<mro::>
+methods happened to be available at all times gets to "keep both pieces".
+
 =item C<version>
 
 Upgraded from version 0.74 to 0.77.
