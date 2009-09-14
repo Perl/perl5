@@ -26,6 +26,24 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Automate perldelta generation
+
+The perldelta file accompanying each release summaries the major changes.
+It's mostly manually generated currently, but some of that could be
+automated with a bit of perl, specifically the generation of
+
+=over
+
+=item Modules and Pragmata
+
+=item New Documentation
+
+=item New Tests
+
+=back
+
+See F<Porting/how_to_write_a_perldelta.pod> for details.
+
 =head2 Remove macperl references from tests
 
 MacPerl is gone. The tests don't need to be there.
