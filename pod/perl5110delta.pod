@@ -1019,7 +1019,7 @@ The documentation has been corrected and expanded.
 
 Upgraded from version 1.04 to 1.05.
 
-C<UNIVERSAL->import()> is now deprecated.
+C<< UNIVERSAL->import() >> is now deprecated.
 
 =item C<Win32>
 
@@ -1830,7 +1830,7 @@ Tests for the interaction of Unicode properties and threads.
 
 Test the tied methods of C<Tie::Hash::NamedCapture>.
 
-=item t/op/reg_posixcc.t 
+=item t/op/reg_posixcc.t
 
 Check that POSIX character classes behave consistently.
 
@@ -2129,7 +2129,7 @@ that could not be loaded.)
 
 =head2 Modify the return value of Gv_AMupdate to indicate a compilation error
 
-This way we'll restore most of the performance on object desctruction
+This way we'll restore most of the performance on object destruction
 lost by the previous commit
 
 
@@ -2264,7 +2264,7 @@ OOK()d scalars can now be SVt_PV, as the IVX isn't needed.
 =head2 Allow sv_setsv_flags() to copy SVt_REGEXP much like it copies SVt_FORMAT - the just string buffer.
 
 
-=head2 Correct a long-standing ithreads reference counting anonamly
+=head2 Correct a long-standing ithreads reference counting anonmaly
 
 The reference count only needs "doubling" when the scalar is pushed onto
 PL_regex_padav for the second time.
@@ -2320,9 +2320,9 @@ struct block_sub, and instead store it in the U16 in struct block.
 Instead of wedging the pad offset into a void* iterdata, and always
 storing PL_comppad even when it isn't used, instead do this:
 
-PAD        *oldcomppad; /* Also used for the GV, if targoffset is 0 */
-/* This is also accesible via cx->blk_loop.my_op->op_targ */
-PADOFFSET  targoffset;
+    PAD *oldcomppad; /* Also used for the GV, if targoffset is 0 */
+    /* This is also accessible via cx->blk_loop.my_op->op_targ */
+    PADOFFSET  targoffset;
 
 and store the GV pointer in oldcompad. Pointers to pointers seems
 cleaner. This also allows us to eliminate the flag bit CXp_PADVAR.

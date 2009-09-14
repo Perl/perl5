@@ -375,7 +375,7 @@ course, we all know what step 3 is.
 
 Currently F<Configure> automatically adds C<-DDEBUGGING> to the C compiler
 flags if it spots C<-g> in the optimiser flags. The pre-processor directive
-C<DEBUGGING> enables F<perl>'s command line <-D> options, but in the process
+C<DEBUGGING> enables F<perl>'s command line C<-D> options, but in the process
 makes F<perl> slower. It would be good to disentangle this logic, so that
 C-level debugging with C<-g> and Perl level debugging with C<-D> can easily
 be enabled independently.
