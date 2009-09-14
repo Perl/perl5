@@ -1275,14 +1275,14 @@ produce, respectively
 
 See also exit(), warn(), and the Carp module.
 
-If LIST is empty and C<$@> already contains a value (typically from a
+If the output is empty and C<$@> already contains a value (typically from a
 previous eval) that value is reused after appending C<"\t...propagated">.
 This is useful for propagating exceptions:
 
     eval { ... };
     die unless $@ =~ /Expected exception/;
 
-If LIST is empty and C<$@> contains an object reference that has a
+If the output is empty and C<$@> contains an object reference that has a
 C<PROPAGATE> method, that method will be called with additional file
 and line number parameters.  The return value replaces the value in
 C<$@>.  i.e. as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
@@ -7392,7 +7392,7 @@ Prints the value of LIST to STDERR.  If the last element of LIST does
 not end in a newline, it appends the same file/line number text as C<die>
 does.
 
-If LIST is empty and C<$@> already contains a value (typically from a
+If the output is empty and C<$@> already contains a value (typically from a
 previous eval) that value is used after appending C<"\t...caught">
 to C<$@>.  This is useful for staying almost, but not entirely similar to
 C<die>.
