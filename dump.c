@@ -109,6 +109,7 @@ Perl_dump_all_perl(pTHX_ bool justperl)
 void
 Perl_dump_packsubs(pTHX_ const HV *stash)
 {
+    PERL_ARGS_ASSERT_DUMP_PACKSUBS;
     dump_packsubs_perl(stash, FALSE);
 }
 
@@ -118,7 +119,7 @@ Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
     dVAR;
     I32	i;
 
-    PERL_ARGS_ASSERT_DUMP_PACKSUBS;
+    PERL_ARGS_ASSERT_DUMP_PACKSUBS_PERL;
 
     if (!HvARRAY(stash))
 	return;
@@ -144,6 +145,7 @@ Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
 void
 Perl_dump_sub(pTHX_ const GV *gv)
 {
+    PERL_ARGS_ASSERT_DUMP_SUB;
     dump_sub_perl(gv, FALSE);
 }
 
@@ -152,7 +154,7 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
     SV * sv;
 
-    PERL_ARGS_ASSERT_DUMP_SUB;
+    PERL_ARGS_ASSERT_DUMP_SUB_PERL;
 
     if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
 	return;
@@ -2231,6 +2233,7 @@ Perl_xmldump_all_perl(pTHX_ bool justperl)
 void
 Perl_xmldump_packsubs(pTHX_ const HV *stash)
 {
+    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS;
     xmldump_packsubs_perl(stash, FALSE);
 }
 
@@ -2240,7 +2243,7 @@ Perl_xmldump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
     I32	i;
     HE	*entry;
 
-    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS;
+    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS_PERL;
 
     if (!HvARRAY(stash))
 	return;
@@ -2264,6 +2267,7 @@ Perl_xmldump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
 void
 Perl_xmldump_sub(pTHX_ const GV *gv)
 {
+    PERL_ARGS_ASSERT_XMLDUMP_SUB;
     xmldump_sub_perl(gv, FALSE);
 }
 
@@ -2272,7 +2276,7 @@ Perl_xmldump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
     SV * sv;
 
-    PERL_ARGS_ASSERT_XMLDUMP_SUB;
+    PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL;
 
     if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
 	return;
