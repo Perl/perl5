@@ -1917,8 +1917,7 @@
 #define xmldump_packsubs	Perl_xmldump_packsubs
 #define xmldump_packsubs_perl	Perl_xmldump_packsubs_perl
 #define xmldump_sub		Perl_xmldump_sub
-#endif
-#ifdef PERL_CORE
+#define xmldump_sub_perl	Perl_xmldump_sub_perl
 #define xmldump_form		Perl_xmldump_form
 #define xmldump_eval		Perl_xmldump_eval
 #define sv_catxmlsv		Perl_sv_catxmlsv
@@ -4276,7 +4275,7 @@
 #define xmldump_packsubs(a)	Perl_xmldump_packsubs(aTHX_ a)
 #define xmldump_packsubs_perl(a,b)	Perl_xmldump_packsubs_perl(aTHX_ a,b)
 #define xmldump_sub(a)		Perl_xmldump_sub(aTHX_ a)
-#define xmldump_sub_perl(a,b)	_ a,b)
+#define xmldump_sub_perl(a,b)	Perl_xmldump_sub_perl(aTHX_ a,b)
 #define xmldump_form(a)		Perl_xmldump_form(aTHX_ a)
 #define xmldump_eval()		Perl_xmldump_eval(aTHX)
 #define sv_catxmlsv(a,b)	Perl_sv_catxmlsv(aTHX_ a,b)

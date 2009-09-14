@@ -6457,7 +6457,7 @@ PERL_CALLCONV void	Perl_xmldump_sub(pTHX_ const GV* gv)
 #define PERL_ARGS_ASSERT_XMLDUMP_SUB	\
 	assert(gv)
 
-PERL_CALLCONV void	xmldump_sub_perl(pTHX_ const GV* gv, bool justperl)
+PERL_CALLCONV void	Perl_xmldump_sub_perl(pTHX_ const GV* gv, bool justperl)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL	\
 	assert(gv)
