@@ -219,12 +219,12 @@ of the output of C<perl -V>. See L<perlrepository> for more information.
 The internal structure of the C<ext/> directory in the perl source has
 been reorganised. In general, a module C<Foo::Bar> whose source was
 stored under F<ext/Foo/Bar/> is now located under F<ext/Foo-Bar/>. Also,
-some modules have been moved from F<lib/> to F<ext/>. This is purely a
-source tarball change, and should make no difference to the compilation or
-installation of perl, unless you have a very customised build process that
-explicitly relies on this structure, or which hard-codes the C<nonxs_ext>
-F<Configure> parameter. Specifically, this change does not by default
-alter the location of any files in the final installation.
+nearly all dual-life modules have been moved from F<lib/> to F<ext/>. This
+is purely a source tarball change, and should make no difference to the
+compilation or installation of perl, unless you have a very customised build
+process that explicitly relies on this structure, or which hard-codes the
+C<nonxs_ext> F<Configure> parameter. Specifically, this change does not by
+default alter the location of any files in the final installation.
 
 =item *
 
@@ -1172,15 +1172,18 @@ etc.  The names of the extensions as specified to F<Configure>, and as
 reported by C<%Config::Config> under the keys C<dynamic_ext>,
 C<known_extensions>, C<nonxs_ext> and C<static_ext> have not changed, and
 still use C</>. Hence this change will not have any affect once perl is
-installed. However, C<Attribute::Handlers>, C<Safe> and C<mro> have now
-become extensions in their own right, so if you run F<Configure> with
-options to specify an exact list of extensions to build, you will need to
-change it to account for this.
+installed. C<Safe> has been split out from being part of C<Opcode>, and
+C<mro> is now an extension in its own right. 
 
-For 5.11.1, it is planned that many dual-life modules will have been moved
-from F<lib> to F<ext>; again this will have no effect on an installed
-perl, but will matter if you invoke F<Configure> with a pre-canned list of
-extensions to build.
+Nearly all dual-life modules have been moved from F<lib> to F<ext>, and will
+now appear as known C<nonxs_ext>. This will made no difference to the
+structure of an installed perl, nor will the modules installed differ,
+unless you run F<Configure> with options to specify an exact list of
+extensions to build. In this case, you will rapidly become aware that you
+need to add to your list, because various modules needed to complete the
+build, such as C<ExtUtils::ParseXS>, have now become extensions, and
+without them the build will fail well before it attempts to run the
+regression tests.
 
 =head2 Configuration improvements
 
