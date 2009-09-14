@@ -61,18 +61,6 @@ The more practical approach, to break the task down into manageable chunks, is
 to work your way though the code from bottom to top, or if necessary adding
 extra C<{ ... }> blocks, and turning on strict within them.
 
-=head2 Parallel testing
-
-(This probably impacts much more than the core: also the Test::Harness
-and TAP::* modules on CPAN.)
-
-All of the tests in F<t/> can now be run in parallel, if C<$ENV{TEST_JOBS}>
-is set. However, tests within each directory in F<ext> and F<lib> are still
-run in series, with directories run in parallel. This is an adequate
-heuristic, but it might be possible to relax it further, and get more
-throughput. Specifically, it would be good to audit all of F<lib/*.t>, and
-make them use C<File::Temp>.
-
 =head2 Make Schwern poorer
 
 We should have tests for everything. When all the core's modules are tested,
