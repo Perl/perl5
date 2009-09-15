@@ -867,6 +867,14 @@ Upgraded from version 2.16 to 2.22.
 
 Upgraded from version 1.35 to 1.37.
 
+=item C<Pod::Plainer>
+
+Upgraded from version 0.01 to 1.00.
+
+There are no code changes - the version bump is because C<Pod::Plainer> has
+been released to CPAN as a stand alone distribution, and will be removed from
+the core distribution in 5.14.
+
 =item Pod::Perldoc
 
 Upgrade from version 3.14_02 to 3.15.
@@ -1914,6 +1922,21 @@ intended that any use of the core version of this module will emit a
 warning, and that the module will eventually be removed from the core
 (probably in perl 5.14.0). See L<perlsyn/"Switch statements"> for its
 replacement.
+
+=item *
+
+The following modules will be removed from the core distribution in a future
+release, and should be installed from CPAN instead. Distributions on CPAN
+which require these should add them to their prerequisites. The core versions
+of these modules warnings will issue a deprecation warning.
+
+=over
+
+=item *
+
+C<Pod::Plainer>
+
+=back
 
 =item *
 
