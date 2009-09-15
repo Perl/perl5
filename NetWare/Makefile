@@ -1041,8 +1041,6 @@ $(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(NEWTA
 !endif
 ##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "Perl 5.6.1 for NetWare" $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
 	$(LINK) $(LDFLAGS) -desc $(MODULE_DESC) $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
-	copy splittree.pl .. 
-	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	@echo ========Linked $@ ==========
 
 	@echo======= Finished building $(BUILT).
@@ -1419,7 +1417,7 @@ distclean: clean nwclean
 	-del /f /q *.bat *.exe
 	-del /f /q *.obj *.map *.link *.xdc *.err
 	cd ..\netware
-	-del /f /q ..\config.sh ..\splittree.pl dlutils.c config.h.new
+	-del /f /q ..\config.sh dlutils.c config.h.new
 	-del /f /q $(CONFIGPM)
 	-del /f /q bin\*.bat
 	cd $(EXTDIR)
@@ -1465,8 +1463,6 @@ install_tests :
 nwinstall: utils installnw install_tests
 
 inst_lib : $(CONFIGPM)
-	copy ..\win32\splittree.pl .. 
-	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 clean : 

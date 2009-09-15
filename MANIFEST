@@ -3679,7 +3679,6 @@ NetWare/NWUtil.c		NetWare port
 NetWare/nwutil.h		NetWare port
 NetWare/nwvmem.h		NetWare port
 NetWare/perllib.cpp		NetWare port
-NetWare/splittree.pl		NetWare port
 NetWare/sv_nw.c			NetWare port
 NetWare/testnlm/echo/echo.c	NetWare port
 NetWare/testnlm/type/type.c	NetWare port
@@ -4618,7 +4617,6 @@ win32/perlmaince.c		WinCE port
 win32/perl.rc			WinCE port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
-win32/splittree.pl		Win32 port
 win32/sync_ext.pl		Win32 port
 win32/vdir.h			Perl "host" virtual directory manager for CE
 win32/vmem.h			Perl "host" memory manager for CE
