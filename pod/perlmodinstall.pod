@@ -251,7 +251,7 @@ B<If you're on the DJGPP port of DOS,>
 
    A. DECOMPRESS
 
-djtarx ( ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2/ )
+djtarx ( ftp://ftp.delorie.com/pub/djgpp/current/v2/ )
 will both uncompress and unpack.
 
    B. UNPACK

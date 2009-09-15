@@ -92,7 +92,6 @@ of web/ftp sites and is distributed on the OpenVMS Freeware CD-ROM
 from HP.
 
     http://www.hp.com/go/openvms/freeware/
-    http://www.crinoid.com/utils/
 
 =item 2  VMS TAR 
 
@@ -116,8 +115,8 @@ Unzip is available from a number of web/ftp sites.
 
     http://www.info-zip.org/UnZip.html
     http://www.hp.com/go/openvms/freeware/
-    ftp://ftp.hp.com/pub/openvms
-    ftp://ftp.process.com/vms-freeware/fileserv
+    ftp://ftp.hp.com/pub/openvms/
+    ftp://ftp.process.com/vms-freeware/fileserv/
 
 =item 4  MOST
 
@@ -629,7 +628,7 @@ though the call specified that the change should not persist after
 Perl exited.  This is fixed by DEC CSC patch ALPACRT04_061 or later.
 See also:
 
-    http://ftp.support.compaq.com/patches/.new/openvms.shtml
+    http://www.itrc.hp.com/
 
 =back
 
@@ -642,9 +641,7 @@ It has been a while since the GNU utilities such as GCC or GNU make
 were used to build perl on VMS.  Hence they may require a great deal
 of source code modification to work again.
 
-    http://slacvx.slac.stanford.edu/HELP/GCC
     http://www.progis.de/
-    http://www.lp.se/products/gnu.html
 
 =head2 Floating Point Considerations
 
