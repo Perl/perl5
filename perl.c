@@ -1942,8 +1942,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 #ifdef USE_SITECUSTOMIZE
     if (!minus_f) {
+	/* SITELIB_EXP is a function call on Win32.
+	   The games with local $! are to avoid setting errno if there is no
+	   sitecustomize script.  */
+	const char *const sitelib = SITELIB_EXP;
 	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-					     Perl_newSVpvf(aTHX_ "BEGIN { do '%s/sitecustomize.pl' }", SITELIB_EXP));
+					     Perl_newSVpvf(aTHX_
+							   "BEGIN { do {local $!; -f '%s/sitecustomize.pl'} && do '%s/sitecustomize.pl' }", sitelib, sitelib));
     }
 #endif
 
