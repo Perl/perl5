@@ -200,6 +200,20 @@ elsif ($is_VMS) {
     push @extspec, (split ' ', $Config{nonxs_ext}) if $nonxs;
 }
 
+{
+    # Cwd needs to be built before Encode recurses into subdirectories.
+    # This seems to be the simplest way to ensure this ordering:
+    my (@first, @other);
+    foreach (@extspec) {
+	if ($_ eq 'Cwd') {
+	    push @first, $_;
+	} else {
+	    push @other, $_;
+	}
+    }
+    @extspec = (@first, @other);
+}
+
 foreach my $spec (@extspec)  {
     my $mname = $spec;
     $mname =~ s!/!::!g;
