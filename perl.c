@@ -1940,7 +1940,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
     }
 
-#ifdef USE_SITECUSTOMIZE
+#if defined(USE_SITECUSTOMIZE) && !defined(PERL_IS_MINIPERL)
     if (!minus_f) {
 	/* SITELIB_EXP is a function call on Win32.
 	   The games with local $! are to avoid setting errno if there is no

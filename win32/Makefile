@@ -1145,7 +1145,7 @@ utils: $(PERLEXE) $(X2P)
 	$(PERLEXE) $(ICWD) ..\pod\perlmodlib.pl -q
 
 ..\pod\perltoc.pod: $(PERLEXE) Extensions Extensions_nonxs
-	$(PERLEXE) ..\pod\buildtoc --build-toc -q
+	$(PERLEXE) -f ..\pod\buildtoc --build-toc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
