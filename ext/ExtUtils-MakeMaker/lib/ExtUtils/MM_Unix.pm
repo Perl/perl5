@@ -1630,7 +1630,7 @@ sub init_main {
 		or
 		$Is{VMS}
 		&&
-		-s $self->catfile($self->{PERL_SRC},'perlshr_attr.opt')
+		-s $self->catfile($self->{PERL_SRC},'vmsish.h')
 		or
 		$Is{Win32}
 	       ){
