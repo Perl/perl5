@@ -197,6 +197,8 @@ sub SWASHNEW {
 		return $found;
 	    }
 
+	    local $@;
+	    local $!;
 	    $list = do $file; die $@ if $@;
 	}
 
