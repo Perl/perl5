@@ -1742,7 +1742,7 @@ ext/Math-BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fall
 ext/Math-BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, round_mode
 ext/Math-BigInt/t/mbi_rand.t	Test Math::BigInt randomly
 ext/Math-BigInt/t/nan_cmp.t	overloaded comparision involving *NaN*
-ext/Math-BigInt/t/new_ovld.t	test overloaded numbers in BigFloat's new()
+ext/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
 ext/Math-BigInt/t/req_mbf0.t	test: require Math::BigFloat; ->bzero();
 ext/Math-BigInt/t/req_mbf1.t	test: require Math::BigFloat; ->bone();
 ext/Math-BigInt/t/req_mbfa.t	test: require Math::BigFloat; ->bnan();

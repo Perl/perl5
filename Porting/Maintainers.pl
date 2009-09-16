@@ -906,11 +906,6 @@ use File::Glob qw(:case);
 				t/pod_cov.t
 			       }
 			   ],
-	'MAP'		=> { 'lib/'    => 'lib/',
-			     ''        => 'lib/Math/BigInt/',
-			     't/new_overloaded.t' =>
-					 't/new_ovld.t',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
