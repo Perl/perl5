@@ -6,7 +6,7 @@
 
 package IO::Zlib;
 
-$VERSION = "1.09";
+$VERSION = "1.10";
 
 =head1 NAME
 
@@ -300,7 +300,7 @@ sub has_Compress_Zlib {
 
 BEGIN {
     eval { require Compress::Zlib };
-    $has_Compress_Zlib = $@ ? 0 : 1;
+    $has_Compress_Zlib = $@ || $Compress::Zlib::VERSION < 2.000 ? 0 : 1;
 }
 
 use Symbol;

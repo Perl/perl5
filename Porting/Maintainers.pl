@@ -803,7 +803,7 @@ use File::Glob qw(:case);
     'IO::Zlib' =>
 	{
 	'MAINTAINER'	=> 'tomhughes',
-	'DISTRIBUTION'	=> 'TOMHUGHES/IO-Zlib-1.09.tar.gz',
+	'DISTRIBUTION'	=> 'TOMHUGHES/IO-Zlib-1.10.tar.gz',
 	'FILES'		=> q[ext/IO-Zlib],
   # Hmmm is this following bit needed now? CW
 	'MAP'		=> { 'Zlib.pm' => 'lib/IO/Zlib.pm',
