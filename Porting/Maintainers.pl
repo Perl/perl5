@@ -805,10 +805,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'tomhughes',
 	'DISTRIBUTION'	=> 'TOMHUGHES/IO-Zlib-1.10.tar.gz',
 	'FILES'		=> q[ext/IO-Zlib],
-  # Hmmm is this following bit needed now? CW
-	'MAP'		=> { 'Zlib.pm' => 'lib/IO/Zlib.pm',
-			     ''	       => 'lib/IO/Zlib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

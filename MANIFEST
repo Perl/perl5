@@ -1516,7 +1516,6 @@ ext/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
 ext/IO/t/io_utf8.t	See if perlio opens work
 ext/IO/t/io_xs.t		See if XSUB methods from IO work
-ext/IO-Zlib/lib/IO/Zlib.pm			IO::Zlib
 ext/IO-Zlib/t/basic.t		Tests for IO::Zlib
 ext/IO-Zlib/t/external.t	Tests for IO::Zlib
 ext/IO-Zlib/t/getc.t		Tests for IO::Zlib
@@ -1526,6 +1525,7 @@ ext/IO-Zlib/t/large.t		Tests for IO::Zlib
 ext/IO-Zlib/t/tied.t		Tests for IO::Zlib
 ext/IO-Zlib/t/uncomp1.t		Tests for IO::Zlib
 ext/IO-Zlib/t/uncomp2.t		Tests for IO::Zlib
+ext/IO-Zlib/Zlib.pm		IO::Zlib
 ext/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
 ext/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
 ext/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
