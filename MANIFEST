@@ -1785,14 +1785,14 @@ ext/Math-Complex/lib/Math/Trig.pm		A simple interface to complex trigonometry
 ext/Math-Complex/t/Complex.t		See if Math::Complex works
 ext/Math-Complex/t/Trig.t			See if Math::Trig works
 ext/Math-Complex/t/underbar.t		See if Math::Complex works
-ext/Memoize/lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
-ext/Memoize/lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
-ext/Memoize/lib/Memoize/Expire.pm		Memoize expiry manager example
-ext/Memoize/lib/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
-ext/Memoize/lib/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
-ext/Memoize/lib/Memoize.pm			Memoize
-ext/Memoize/lib/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
-ext/Memoize/lib/Memoize/Storable.pm		Memoize glue layer for Storable
+ext/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
+ext/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
+ext/Memoize/Memoize/Expire.pm		Memoize expiry manager example
+ext/Memoize/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
+ext/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
+ext/Memoize/Memoize.pm			Memoize
+ext/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
+ext/Memoize/Memoize/Storable.pm		Memoize glue layer for Storable
 ext/Memoize/README		Memoize release notes
 ext/Memoize/t/array_confusion.t		Memoize ambiguous array return tests
 ext/Memoize/t/array.t		Memoize array context return tests

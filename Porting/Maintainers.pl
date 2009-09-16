@@ -979,10 +979,6 @@ use File::Glob qw(:case);
 				Memoize/Saves.pm
 			       },
 			   ],
-	'MAP'		=> { ''		  => 'lib/Memoize/',
-			     'Memoize/'	  => 'lib/Memoize/',
-			     'Memoize.pm' => 'lib/Memoize.pm',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
