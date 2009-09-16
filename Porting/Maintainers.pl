@@ -325,11 +325,9 @@ use File::Glob qw(:case);
     'Compress::Raw::Bzip2' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Bzip2-2.020.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Bzip2-2.021.tar.gz',
 	'FILES'		=> q[ext/Compress-Raw-Bzip2],
 	'EXCLUDED'	=> [ qr{^t/Test/},
-			     # NB: we use the CompTestUtils.pm
-			     # from IO-Compress instead
 			     qw( bzip2-src/bzip2-cpp.patch
 			     )
 			   ],
@@ -340,18 +338,14 @@ use File::Glob qw(:case);
     'Compress::Raw::Zlib' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Zlib-2.020.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Zlib-2.021.tar.gz',
 
 	'FILES'		=> q[ext/Compress-Raw-Zlib],
-			     # NB: we use the CompTestUtils.pm
-			     # from IO-Compress instead
 	'EXCLUDED'	=> [ qr{^t/Test/},
 			     qw( t/000prereq.t
 				 t/99pod.t
 			       )
 			   ],
-	'MAP'		=> { ''	=> 'ext/Compress-Raw-Zlib/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
@@ -789,13 +783,11 @@ use File::Glob qw(:case);
     'IO-Compress' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.020.tar.gz',
-	'FILES'		=> q[ext/IO-Compress t/lib/compress ],
+	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.021.tar.gz',
+	'FILES'		=> q[ext/IO-Compress],
 	'EXCLUDED'	=> [ qr{t/Test/},
 			     qw{t/cz-03zlib-v1.t},
 			   ],
-	'MAP'		=> { ''		  => 'ext/IO-Compress/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
