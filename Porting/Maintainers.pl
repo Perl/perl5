@@ -678,9 +678,6 @@ use File::Glob qw(:case);
 				misc/results.txt
 			       }
 			   ],
-	'MAP'		=> { ''		=> 'lib/File/',
-			     't/'	=> 't/',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
