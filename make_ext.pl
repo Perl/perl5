@@ -33,6 +33,7 @@ my @toolchain = qw(ext/constant/lib ext/Cwd ext/ExtUtils-Command/lib
 # If '--static' is specified, static extensions will be built.
 # If '--dynamic' is specified, dynamic extensions will be built.
 # If '--nonxs' is specified, nonxs extensions will be built.
+# If '--dynaloader' is specificied, DynaLoader will be built.
 # If '--all' is specified, all extensions will be built.
 #
 #    make_ext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
@@ -84,6 +85,7 @@ foreach (@ARGV) {
 my $static = $opts{static} || $opts{all};
 my $dynamic = $opts{dynamic} || $opts{all};
 my $nonxs = $opts{nonxs} || $opts{all};
+my $dynaloader = $opts{dynaloader} || $opts{all};
 
 # The Perl Makefile.SH will expand all extensions to
 #	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
@@ -143,7 +145,7 @@ if ($target eq '') {
     die "$0: unknown make target '$target'\n";
 }
 
-if (!@extspec and !$static and !$dynamic and !$nonxs)  {
+if (!@extspec and !$static and !$dynamic and !$nonxs and !$dynaloader)  {
     die "$0: no extension specified\n";
 }
 
@@ -176,6 +178,7 @@ if ($is_Win32) {
     push @ext, FindExt::static_ext() if $static;
     push @ext, FindExt::dynamic_ext() if $dynamic;
     push @ext, FindExt::nonxs_ext() if $nonxs;
+    push @ext, 'DynaLoader' if $dynaloader;
 
     foreach (sort @ext) {
 	if (%incl and !exists $incl{$_}) {
@@ -187,7 +190,10 @@ if ($is_Win32) {
 	    next;
 	}
 	push @extspec, $_;
-	if(FindExt::is_static($_)) {
+	if($_ eq 'DynaLoader') {
+	    # No, we don't know why nmake can't work out the dependency chain
+	    push @{$extra_passthrough{$_}}, 'DynaLoader.c';
+	} elsif(FindExt::is_static($_)) {
 	    push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
 	}
     }
@@ -198,6 +204,7 @@ elsif ($is_VMS) {
     push @extspec, (split ' ', $Config{static_ext}) if $static;
     push @extspec, (split ' ', $Config{dynamic_ext}) if $dynamic;
     push @extspec, (split ' ', $Config{nonxs_ext}) if $nonxs;
+    push @extspec, 'DynaLoader' if $dynaloader;
 }
 
 {

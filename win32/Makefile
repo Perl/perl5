@@ -713,8 +713,6 @@ WIN32_SRC	= $(WIN32_SRC) .\win32io.c
 WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
 !ENDIF
 
-DLL_SRC		= $(DYNALOADER).c
-
 X2P_SRC		=		\
 		..\x2p\a2p.c	\
 		..\x2p\hash.c	\
@@ -775,7 +773,7 @@ MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 		  $(MINIDIR)\perlio$(o)
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-DLL_OBJ		= $(DLL_SRC:.c=.obj)
+DLL_OBJ		= $(DYNALOADER)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 GENUUDMAP_OBJ	= $(GENUUDMAP:.exe=.obj)
 
@@ -801,7 +799,7 @@ STATIC_EXT	= * !Win32 !SDBM_File !Encode
 STATIC_EXT	= Win32CORE
 !ENDIF
 
-DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
+DYNALOADER	= ..\DynaLoader$(o)
 
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
@@ -855,8 +853,6 @@ regnodes : ..\regnodes.h
 reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) \
 	$(UNIDATAFILES) $(PERLEXE) $(X2P) Extensions_reonly
 	@echo	Perl and 're' are up to date.
-
-$(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 static: $(PERLEXESTATIC)
 
@@ -1035,21 +1031,6 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 
-$(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM) Extensions_nonxs
-	if not exist $(AUTODIR) mkdir $(AUTODIR)
-	cd $(EXTDIR)\$(*B)
-	..\$(MINIPERL) -I..\..\lib $(*B)_pm.PL
-	..\$(MINIPERL) -I..\..\lib XSLoader_pm.PL
-	cd ..\..\win32
-	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
-	$(XCOPY) $(EXTDIR)\$(*B)\XSLoader.pm $(LIBDIR)\$(NULL)
-	cd $(EXTDIR)\$(*B)
-	$(XSUBPP) dl_win32.xs > $(*B).c
-	cd ..\..\win32
-
-$(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
-	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
-
 MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
 	$(MINIPERL) -I..\lib $(ICWD) ..\mkppport
 
@@ -1057,14 +1038,13 @@ MakePPPort_clean:
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
 
 #-------------------------------------------------------------------------------
-# The rule for $(DYNALOADER).c makes DynaLoader.pm, and that is needed for
-# ExtUtils::Mkbootstrap. There's no direct way to mark a dependency on
+# There's no direct way to mark a dependency on
 # DynaLoader.pm, so this will have to do
-Extensions: ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER).c
+Extensions: ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic
 
-Extensions_reonly: ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER).c
+Extensions_reonly: ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynamic +re
 
@@ -1076,6 +1056,10 @@ Extensions_static : ..\make_ext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 Extensions_nonxs: ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --nonxs
+
+$(DYNALOADER) : ..\make_ext.pl $(PERLDEP) $(CONFIGPM) Extensions_nonxs
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynaloader
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --all --target=clean
@@ -1155,10 +1139,6 @@ distclean: realclean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD) \
 		$(PERLEXESTATIC) $(PERLSTATICLIB)
 	-del /f *.def *.map
-	-del /f $(DYNALOADER).c
-	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
-	-del /f $(EXTDIR)\DynaLoader\DynaLoader.pm
-	-del /f $(EXTDIR)\DynaLoader\XSLoader.pm
 	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
 	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attributes.pm $(LIBDIR)\DynaLoader.pm

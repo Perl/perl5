@@ -855,6 +855,7 @@ ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
+ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/gnukfreebsd.pl	Hint for DynaLoader for named architecture
@@ -4595,7 +4596,6 @@ win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
 win32/create_perllibst_h.pl	creates perllibst.h file for inclusion from perllib.c
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
-win32/dl_win32.xs		Win32 port
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/FindExt.t			Test FindExt.pm
