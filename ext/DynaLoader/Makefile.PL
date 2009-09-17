@@ -50,7 +50,7 @@ sub MY::static {
     if ($is_mswin || $is_netware) {
 	$object = '$(PERL_SRC)\\$(OBJECT)';
     } elsif ($is_vms) {
-	$object = '[$(PERL_SRC)].$(OBJECT)';
+	$object = '$(PERL_SRC)$(OBJECT)';
     } else {
 	$object = '$(PERL_SRC)/$(OBJECT)';
     }
