@@ -263,7 +263,7 @@ MYEXT = DynaLoader
 # object files for these extensions; the trailing comma is required if
 # there are any object files specified
 # These must be built separately, or you must add rules below to build them
-myextobj = [.ext.DynaLoader]dl_vms$(O),
+myextobj = DynaLoader$(O),
 EXT = $(MYEXT)
 extobj = $(myextobj)
 
@@ -559,31 +559,10 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
  
-[.ext.DynaLoader]dl_vms.c : [.ext.DynaLoader]dl_vms.xs $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
-	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
+DynaLoader$(O) : $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
+	$(MINIPERL) make_ext.pl "MAKE=$(MMS)" "DynaLoader"
 
-[.ext.DynaLoader]dl_vms$(O) : [.ext.DynaLoader]dl_vms.c
-	$(CC) $(CFLAGS) /Include=([],[.ext.DynaLoader])/Object=$(MMS$TARGET) $(MMS$SOURCE)
-
-[.lib]DynaLoader.pm : [.ext.DynaLoader]DynaLoader.pm
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
-	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
-	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
-
-[.lib]XSLoader.pm : [.ext.DynaLoader]XSLoader.pm
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
-	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
-	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]XSLoader.pm
-
-[.ext.DynaLoader]DynaLoader.pm : [.ext.DynaLoader]DynaLoader_pm.PL
-	$(MINIPERL) $(MMS$SOURCE)
-	@ Rename/Log DynaLoader.pm [.ext.DynaLoader]
-
-[.ext.DynaLoader]XSLoader.pm : [.ext.DynaLoader]XSLoader_pm.PL
-	$(MINIPERL) $(MMS$SOURCE)
-	@ Rename/Log XSLoader.pm [.ext.DynaLoader]
-
-dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts [.lib]DynaLoader.pm [.lib]XSLoader.pm preplibrary makeppport $(MINIPERL_EXE)
+dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibrary makeppport $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--dynamic" "--static"
 
 nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
@@ -1817,15 +1796,11 @@ tidy : cleanlis
 	- If F$Search("uudmap.h;-1")   .nes."" Then Purge/NoConfirm/Log uudmap.h
 	- If F$Search("bitcount.h;-1")   .nes."" Then Purge/NoConfirm/Log bitcount.h
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
-	- If F$Search("[.ext.DynaLoader]dl_vms$(O);-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]dl_vms$(O)
-	- If F$Search("[.ext.DynaLoader]dl_vms.c;-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]dl_vms.c
 	- If F$Search("[.ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.ext.Opcode]
 	- If F$Search("[.vms.ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*.C
 	- If F$Search("[.vms.ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*$(O)
 	- If F$Search("[.lib.auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.lib.auto...]*.al
 	- If F$Search("[.lib.auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.lib.auto...]autosplit.ix
-	- If F$Search("[.lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.lib]DynaLoader.pm
-	- If F$Search("[.lib]XSLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.lib]XSLoader.pm
 	- If F$Search("[.lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.lib]Config.pm
 	- If F$Search("$(ARCHDIR)Config.pm;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config.pm
 	- If F$Search("[.lib]Config_heavy.pl;-1").nes."" Then Purge/NoConfirm/Log [.lib]Config_heavy.pl
@@ -1854,10 +1829,6 @@ clean : tidy cleantest
 	- If F$Search("bitcount.h")   .nes."" Then Delete/NoConfirm/Log bitcount.h;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
-	- If F$Search("[.ext.DynaLoader]dl_vms$(O)").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]dl_vms$(O);*
-	- If F$Search("[.ext.DynaLoader]dl_vms.c").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]dl_vms.c;*
-	- If F$Search("[.ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]DynaLoader.pm;*
-	- If F$Search("[.ext.DynaLoader]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]XSLoader.pm;*
 	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*
 	- If F$Search("[.vms.ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
@@ -1887,8 +1858,6 @@ realclean : clean
 	- If F$Search("extra.pods").nes."" Then Delete/NoConfirm/Log extra.pods;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
-	- If F$Search("[.lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.lib]DynaLoader.pm;*
-	- If F$Search("[.lib]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.lib]XSLoader.pm;*
 	- If F$Search("[.lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.lib]Config.pm;*
 	- If F$Search("[.lib]Config_heavy.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_heavy.pl;*
 	- If F$Search("[.lib]*.com").nes."" Then Delete/NoConfirm/Log [.lib]*.com;*
