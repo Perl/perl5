@@ -1382,8 +1382,6 @@ utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
 	copy ..\README.netware .\perlnw5.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 
-	cd ..\lib
-	$(MINIPERL) lib_pm.PL
 	cd ..\netware
 	$(MINIPERL) $(PL2BAT) $(UTILS)
 

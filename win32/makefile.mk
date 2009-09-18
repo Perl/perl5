@@ -1449,7 +1449,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perl5110delta.pod ..\pod\perldelta.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
-	cd ..\lib && $(PERLEXE) $(ICWD) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
 	$(PERLEXE) $(ICWD) ..\pod\perlmodlib.pl -q
@@ -1468,7 +1467,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
 	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attributes.pm $(LIBDIR)\DynaLoader.pm
-	-del /f $(LIBDIR)\XSLoader.pm $(LIBDIR)\lib.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm

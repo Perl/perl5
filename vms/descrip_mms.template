@@ -360,7 +360,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm [.lib]lib.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
 utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]dprofpp.com 
@@ -567,9 +567,6 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibra
 
 nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--nonxs"
-
-[.lib]lib.pm : [.lib]lib_pm.PL
-	$(MINIPERL) $(MMS$SOURCE)
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
@@ -1445,7 +1442,7 @@ test_harness : all [.t.lib]vmsfspec.t
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-minitest : $(MINITEST_EXE) [.lib]re.pm [.lib]lib.pm [.lib.VMS]Filespec.pm unidatafiles.ts
+minitest : $(MINITEST_EXE) [.lib]re.pm [.lib.VMS]Filespec.pm unidatafiles.ts
 	@ PERL_TEST_DRIVER == "minitest"
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 

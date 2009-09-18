@@ -1555,6 +1555,8 @@ ext/IPC-SysV/t/pod.t	IPC::SysV test file
 ext/IPC-SysV/t/sem.t		IPC::SysV test file
 ext/IPC-SysV/t/shm.t	IPC::SysV test file
 ext/IPC-SysV/typemap	IPC::SysV typemap
+ext/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
+ext/lib/Makefile.PL
 ext/libnet/Changes			libnet
 ext/libnet/Config.eg		libnet
 ext/libnet/demos/ftp		libnet
@@ -1592,6 +1594,7 @@ ext/libnet/t/nntp.t		libnet
 ext/libnet/t/require.t		libnet
 ext/libnet/t/smtp.t		libnet
 ext/libnet/t/time.t		libnet
+ext/lib/t/01lib.t		For "use lib" testing
 ext/List-Util/Changes		Util extension
 ext/List-Util/lib/List/Util.pm	List::Util
 ext/List-Util/lib/List/Util/PP.pm	List::Util
@@ -3432,8 +3435,6 @@ lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
-lib/lib_pm.PL			For "use lib", produces lib/lib.pm
-lib/lib.t			For "use lib" testing
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
