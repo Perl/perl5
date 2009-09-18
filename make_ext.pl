@@ -260,6 +260,7 @@ sub build_extension {
     # another process has half-written.
     $ENV{PERL5LIB}
 	= join $Config{path_sep}, (map {"$up/$_"} @toolchain), $lib_dir;
+    $ENV{PERL_CORE} = 1;
 
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
