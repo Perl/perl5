@@ -866,8 +866,6 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/t/DynaLoader.t	See if DynaLoader works
-ext/DynaLoader/t/XSLoader.t	See if XSLoader works
-ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
 ext/Encode/bin/enc2xs		Encode module generator
 ext/Encode/bin/piconv		iconv by perl
@@ -3162,6 +3160,9 @@ ext/XS-APItest/t/svpeek.t	XS::APItest extension
 ext/XS-APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
 ext/XS-APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
+ext/XSLoader/Makefile.PL	Dynamic Loader makefile writer
+ext/XSLoader/t/XSLoader.t	See if XSLoader works
+ext/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/XS-Typemap/Makefile.PL	XS::Typemap extension
 ext/XS-Typemap/README		XS::Typemap extension
 ext/XS-Typemap/stdio.c		XS::Typemap extension
