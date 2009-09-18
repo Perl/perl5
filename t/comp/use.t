@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = ('../lib', 'lib');
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
@@ -37,7 +37,7 @@ sub _ok {
 	} else {
 	    print "not ok $test\n";
 	}
-	my @caller = caller(2);
+	my @caller = caller(1);
 	print "# Failed test at $caller[1] line $caller[2]\n";
 	print "# Got      '$got'\n";
 	if ($type eq 'is') {
@@ -118,73 +118,73 @@ is ($@, "");
 eval 'require 5.11.0; ${"foo"} = "bar";';
 is ($@, "");
 
-{ use lib }	# check that subparse saves pending tokens
+{ use test_use }	# check that subparse saves pending tokens
 
-local $lib::VERSION = 1.0;
+local $test_use::VERSION = 1.0;
 
-eval "use lib 0.9";
+eval "use test_use 0.9";
 is ($@, '');
 
-eval "use lib 1.0";
+eval "use test_use 1.0";
 is ($@, '');
 
-eval "use lib 1.01";
+eval "use test_use 1.01";
 isnt ($@, '');
 
-eval "use lib 0.9 qw(fred)";
+eval "use test_use 0.9 qw(fred)";
 is ($@, '');
 
-is($INC[0], "fred");
+is("@test_use::got", "fred");
 
-eval "use lib 1.0 qw(joe)";
+eval "use test_use 1.0 qw(joe)";
 is ($@, '');
 
-is($INC[0], "joe");
+is("@test_use::got", "joe");
 
-eval "use lib 1.01 qw(freda)";
+eval "use test_use 1.01 qw(freda)";
 isnt($@, '');
 
-isnt($INC[0], "freda");
+is("@test_use::got", "joe");
 
 {
-    local $lib::VERSION = 35.36;
-    eval "use lib v33.55";
+    local $test_use::VERSION = 35.36;
+    eval "use test_use v33.55";
     is ($@, '');
 
-    eval "use lib v100.105";
-    like ($@, qr/lib version v100.105.0 required--this is only version v35\.360\.0/);
+    eval "use test_use v100.105";
+    like ($@, qr/test_use version v100.105.0 required--this is only version v35\.360\.0/);
 
-    eval "use lib 33.55";
+    eval "use test_use 33.55";
     is ($@, '');
 
-    eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version 35.36/);
+    eval "use test_use 100.105";
+    like ($@, qr/test_use version 100.105 required--this is only version 35.36/);
 
-    local $lib::VERSION = '35.36';
-    eval "use lib v33.55";
+    local $test_use::VERSION = '35.36';
+    eval "use test_use v33.55";
     like ($@, '');
 
-    eval "use lib v100.105";
-    like ($@, qr/lib version v100.105.0 required--this is only version v35\.360\.0/);
+    eval "use test_use v100.105";
+    like ($@, qr/test_use version v100.105.0 required--this is only version v35\.360\.0/);
 
-    eval "use lib 33.55";
+    eval "use test_use 33.55";
     is ($@, '');
 
-    eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version 35.36/);
+    eval "use test_use 100.105";
+    like ($@, qr/test_use version 100.105 required--this is only version 35.36/);
 
-    local $lib::VERSION = v35.36;
-    eval "use lib v33.55";
+    local $test_use::VERSION = v35.36;
+    eval "use test_use v33.55";
     is ($@, '');
 
-    eval "use lib v100.105";
-    like ($@, qr/lib version v100.105.0 required--this is only version v35\.36\.0/);
+    eval "use test_use v100.105";
+    like ($@, qr/test_use version v100.105.0 required--this is only version v35\.36\.0/);
 
-    eval "use lib 33.55";
+    eval "use test_use 33.55";
     is ($@, '');
 
-    eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version v35.36/);
+    eval "use test_use 100.105";
+    like ($@, qr/test_use version 100.105 required--this is only version v35.36/);
 }
 
 
@@ -194,7 +194,7 @@ isnt($INC[0], "freda");
     open F, ">xxx$$.pm" or die "Cannot open xxx$$.pm: $!\n";
     print F "1;\n";
     close F;
-    eval "use lib '.'; use xxx$$ 3;";
+    eval "BEGIN {unshift \@INC, '.'}; use xxx$$ 3;";
     like ($@, qr/^xxx$$ defines neither package nor VERSION--version check failed at/);
     unlink "xxx$$.pm";
 }

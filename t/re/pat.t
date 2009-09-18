@@ -2877,7 +2877,9 @@ sub run_tests {
 
 
     {
-        use lib 'lib';
+	BEGIN {
+	    unshift @INC, 'lib';
+	}
         use Cname;
         
         ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
