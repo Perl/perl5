@@ -191,12 +191,9 @@ is("@test_use::got", "joe");
 {
     # Regression test for patch 14937: 
     #   Check that a .pm file with no package or VERSION doesn't core.
-    open F, ">xxx$$.pm" or die "Cannot open xxx$$.pm: $!\n";
-    print F "1;\n";
-    close F;
-    eval "BEGIN {unshift \@INC, '.'}; use xxx$$ 3;";
-    like ($@, qr/^xxx$$ defines neither package nor VERSION--version check failed at/);
-    unlink "xxx$$.pm";
+    # (git commit 2658f4d9934aba5f8b23afcc078dc12b3a40223)
+    eval "use test_use_14937 3";
+    like ($@, qr/^test_use_14937 defines neither package nor VERSION--version check failed at/);
 }
 
 my @ver = split /\./, sprintf "%vd", $^V;
