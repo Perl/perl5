@@ -898,7 +898,7 @@ regen_config_h:
 	miniperl configpm
 	cd win32
 	-del /f $(CFGH_TMPL)
-	-$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -910,7 +910,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	-$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL "INST_VER=$(INST_VER)"
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
