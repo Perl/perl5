@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 2525;  # Update this when adding/deleting tests.
+plan tests => 2510;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -254,47 +254,6 @@ sub run_tests {
             }
         }
     }
-
-
-    {
-        our $a = bless qr /foo/ => 'Foo';
-        ok 'goodfood' =~ $a,     "Reblessed qr // matches";
-        iseq $a, '(?-xism:foo)', "Reblessed qr // stringifies";
-        my $x = "\x{3fe}";
-        my $z = my $y = "\317\276";  # Byte representation of $x
-        $a = qr /$x/;
-        ok $x =~ $a, "UTF-8 interpolation in qr //";
-        ok "a$a" =~ $x, "Stringified qr // preserves UTF-8";
-        ok "a$x" =~ /^a$a\z/, "Interpolated qr // preserves UTF-8";
-        ok "a$x" =~ /^a(??{$a})\z/,
-                        "Postponed interpolation of qr // preserves UTF-8";
-        {
-            local $BugId = '17776';
-            iseq length qr /##/x, 12, "## in qr // doesn't corrupt memory";
-        }
-        {
-            use re 'eval';
-            ok "$x$x" =~ /^$x(??{$x})\z/,
-               "Postponed UTF-8 string in UTF-8 re matches UTF-8";
-            ok "$y$x" =~ /^$y(??{$x})\z/, 
-               "Postponed UTF-8 string in non-UTF-8 re matches UTF-8";
-            ok "$y$x" !~ /^$y(??{$y})\z/,
-               "Postponed non-UTF-8 string in non-UTF-8 re doesn't match UTF-8";
-            ok "$x$x" !~ /^$x(??{$y})\z/,
-               "Postponed non-UTF-8 string in UTF-8 re doesn't match UTF-8";
-            ok "$y$y" =~ /^$y(??{$y})\z/,
-               "Postponed non-UTF-8 string in non-UTF-8 re matches non-UTF8";
-            ok "$x$y" =~ /^$x(??{$y})\z/,
-               "Postponed non-UTF-8 string in UTF-8 re matches non-UTF8";
-
-            $y = $z;  # Reset $y after upgrade.
-            ok "$x$y" !~ /^$x(??{$x})\z/,
-               "Postponed UTF-8 string in UTF-8 re doesn't match non-UTF-8";
-            ok "$y$y" !~ /^$y(??{$x})\z/,
-               "Postponed UTF-8 string in non-UTF-8 re doesn't match non-UTF-8";
-        }
-    }
-
 
     {
         local $PatchId = '18179';

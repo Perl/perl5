@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 305;  # Update this when adding/deleting tests.
+plan tests => 293;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -141,14 +141,14 @@ sub run_tests {
     {
         local $Message = q !Check $`, $&, $'!;
         $_ = 'abcdefghi';
-        /def/;		# optimized up to cmd
+        /def/;        # optimized up to cmd
         iseq "$`:$&:$'", 'abc:def:ghi';
 
         no warnings 'void';
-        /cde/ + 0;	# optimized only to spat
+        /cde/ + 0;    # optimized only to spat
         iseq "$`:$&:$'", 'ab:cde:fghi';
 
-        /[d][e][f]/;	# not optimized
+        /[d][e][f]/;    # not optimized
         iseq "$`:$&:$'", 'abc:def:ghi';
     }
 
@@ -348,7 +348,7 @@ sub run_tests {
                     'ax13876y25677mcb' => 0, # not b.
                     'ax13876y35677nbc' => 0, # Num too big
                     'ax13876y25677y21378obc' => 1,
-                    'ax13876y25677y21378zbc' => 0,	# Not followed by [k-o]
+                    'ax13876y25677y21378zbc' => 0,    # Not followed by [k-o]
                     'ax13876y25677y21378y21378kbc' => 1,
                     'ax13876y25677y21378y21378kcb' => 0, # Not b.
                     'ax13876y25677y21378y21378y21378kbc' => 0, # 5 runs
@@ -374,17 +374,17 @@ sub run_tests {
           m/
              (
                \(
-               (?{ $c = 1 })	# Initialize
+               (?{ $c = 1 })    # Initialize
                (?:
                  (?(?{ $c == 0 })   # PREVIOUS iteration was OK, stop the loop
                    (?!
-                   )		# Fail: will unwind one iteration back
-                 )	
+                   )        # Fail: will unwind one iteration back
+                 )
                  (?:
-                   [^()]+		# Match a big chunk
+                   [^()]+        # Match a big chunk
                    (?=
                      [()]
-                   )		# Do not try to match subchunks
+                   )        # Do not try to match subchunks
                  |
                    \(
                    (?{ ++$c })
@@ -392,12 +392,12 @@ sub run_tests {
                    \)
                    (?{ --$c })
                  )
-               )+		# This may not match with different subblocks
+               )+        # This may not match with different subblocks
              )
              (?(?{ $c != 0 })
                (?!
-               )		# Fail
-             )			# Otherwise the chunk 1 may succeed with $c>0
+               )        # Fail
+             )            # Otherwise the chunk 1 may succeed with $c>0
            /xg;
         }
 
@@ -429,7 +429,7 @@ sub run_tests {
     }
 
     {
-        my @ans = ('a/b' =~ m%(.*/)?(.*)%);	# Stack may be bad
+        my @ans = ('a/b' =~ m%(.*/)?(.*)%);    # Stack may be bad
         iseq "@ans", 'a/ b', "Stack may be bad";
     }
 
@@ -546,51 +546,6 @@ sub run_tests {
     }
 
     {
-        local $Message =  "Call code from qr //";
-        $a = qr/(?{++$b})/;
-        $b = 7;
-        ok /$a$a/ && $b eq '9';
-
-        $c="$a";
-        ok /$a$a/ && $b eq '11';
-
-        undef $@;
-        eval {/$c/};
-        ok $@ && $@ =~ /not allowed at runtime/;
-
-        use re "eval";
-        /$a$c$a/;
-        iseq $b, '14';
-
-        our $lex_a = 43;
-        our $lex_b = 17;
-        our $lex_c = 27;
-        my $lex_res = ($lex_b =~ qr/$lex_b(?{ $lex_c = $lex_a++ })/);
-
-        iseq $lex_res, 1;
-        iseq $lex_a, 44;
-        iseq $lex_c, 43;
-
-        no re "eval";
-        undef $@;
-        my $match = eval { /$a$c$a/ };
-        ok $@ && $@ =~ /Eval-group not allowed/ && !$match;
-        iseq $b, '14';
-     
-        $lex_a = 2;
-        $lex_a = 43;
-        $lex_b = 17;
-        $lex_c = 27;
-        $lex_res = ($lex_b =~ qr/17(?{ $lex_c = $lex_a++ })/);
-
-        iseq $lex_res, 1;
-        iseq $lex_a, 44;
-        iseq $lex_c, 43;
-
-    }
-
-
-    {
         no warnings 'closure';
         local $Message = '(?{ $var } refers to package vars';
         package aa;
@@ -600,7 +555,6 @@ sub run_tests {
         main::iseq $c, 4;
         main::iseq $::c, 3;
     }
-
 
     {
         must_die 'q(a:[b]:) =~ /[x[:foo:]]/',
@@ -632,7 +586,7 @@ sub run_tests {
         iseq "@_", "";
     }
 
-    
+
     {
         local $Message = '@- and @+ tests';
 
@@ -969,7 +923,7 @@ sub run_tests {
         package S;
         use overload '""' => sub {'Object S'};
         sub new {bless []}
-     
+
         local $::Message  = "Ref stringification";
       ::ok do { \my $v} =~ /^SCALAR/,   "Scalar ref stringification";
       ::ok do {\\my $v} =~ /^REF/,      "Ref ref stringification";

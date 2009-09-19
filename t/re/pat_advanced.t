@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1185;  # Update this when adding/deleting tests.
+plan tests => 1146;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -123,7 +123,7 @@ sub run_tests {
             ok s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
             ok my ($latin) = /^(.+)(?:\s+\d)/;
             iseq $latin, "stra\337e";
-	    ok $latin =~ s/stra\337e/straße/;
+        ok $latin =~ s/stra\337e/straße/;
             #
             # Previous code follows, but outcommented - there were no tests.
             #
@@ -454,7 +454,7 @@ sub run_tests {
 
         my $lower = "\N{LATIN SMALL LETTER A WITH GRAVE}";
         my $UPPER = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
-        
+
         ok $lower =~ m/$UPPER/i;
         ok $UPPER =~ m/$lower/i;
         ok $lower =~ m/[$UPPER]/i;
@@ -533,7 +533,7 @@ sub run_tests {
         ok $sigma =~ /$SIGMA/i;
         ok $sigma =~ /$Sigma/i;
         ok $sigma =~ /$sigma/i;
-        
+
         ok $SIGMA =~ /[$SIGMA]/i;
         ok $SIGMA =~ /[$Sigma]/i;
         ok $SIGMA =~ /[$sigma]/i;
@@ -641,7 +641,7 @@ sub run_tests {
 
         ok "\N{LATIN SMALL LETTER SHARP S}" =~ /ss/i;
         ok "\N{LATIN SMALL LETTER SHARP S}" =~ /SS/i;
- 
+
         local $Message = "Unoptimized named sequence in class";
         ok "ss" =~ /[\N{LATIN SMALL LETTER SHARP S}x]/i;
         ok "SS" =~ /[\N{LATIN SMALL LETTER SHARP S}x]/i;
@@ -720,13 +720,13 @@ sub run_tests {
         my $t1 = "Q003\n\n\x{e4}\x{f6}\n\nQ004\n\n\x{e7}";
         my $r1 = "";
         while ($t1 =~ / \G ( .+? ) \n\s+ ( .+? ) ( $ | \n\s+ ) /xgcs) {
-	    $r1 .= $1 . $2;
+        $r1 .= $1 . $2;
         }
 
         my $t2 = $t1 . "\x{100}"; # Repeat with a larger char
         my $r2 = "";
         while ($t2 =~ / \G ( .+? ) \n\s+ ( .+? ) ( $ | \n\s+ ) /xgcs) {
-	    $r2 .= $1 . $2;
+        $r2 .= $1 . $2;
         }
         $r2 =~ s/\x{100}//;
 
@@ -836,7 +836,7 @@ sub run_tests {
 
 
 
-    
+
     {
         local $\;
         $_ = 'aaaaaaaaaa';
@@ -858,7 +858,7 @@ sub run_tests {
         # To: perl-unicode@perl.org
 
         local $Message = 'Markus Kuhn 2003-02-26';
-    
+
         my $x = "\x{2019}\nk";
         ok $x =~ s/(\S)\n(\S)/$1 $2/sg;
         ok $x eq "\x{2019} k";
@@ -1018,11 +1018,11 @@ sub run_tests {
 
 
     {
-	BEGIN {
-	    unshift @INC, 'lib';
-	}
+    BEGIN {
+        unshift @INC, 'lib';
+    }
         use Cname;
-        
+
         ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
         my $test   = 1233;
         #
@@ -1046,7 +1046,7 @@ sub run_tests {
                     'Empty string charname produces NOTHING node';
         ok ''    =~ /\N{EMPTY-STR}/,
                     'Empty string charname produces NOTHING node';
-            
+
     }
 
 
@@ -1063,7 +1063,7 @@ sub run_tests {
             'Intermixed named and unicode escapes';
         ok "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}" =~
            /[\N{SPACE}\N{U+0041}][\N{SPACE}\N{U+0042}]/,
-            'Intermixed named and unicode escapes';     
+            'Intermixed named and unicode escapes';
     }
 
 
@@ -1110,7 +1110,7 @@ sub run_tests {
         ok $s eq '123456', 'Named capture (angle brackets) s///';
         $s = '123453456';
         $s =~ s/(?'digits'\d+)\k'digits'/$+{digits}/;
-        ok $s eq '123456', 'Named capture (single quotes) s///';    
+        ok $s eq '123456', 'Named capture (single quotes) s///';
     }
 
 
@@ -1271,7 +1271,7 @@ sub run_tests {
         for my $name ('', ':foo') {
             for my $pat ("(*PRUNE$name)",
                          ($name ? "(*MARK$name)" : "") . "(*SKIP$name)",
-                         "(*COMMIT$name)") {                         
+                         "(*COMMIT$name)") {
                 for my $suffix ('(*FAIL)', '') {
                     'aaaab' =~ /a+b$pat$suffix/;
                     iseq $REGERROR,
@@ -1290,7 +1290,7 @@ sub run_tests {
         for my $name ('', ':foo') {
             for my $pat ("(*PRUNE$name)",
                          ($name ? "(*MARK$name)" : "") . "(*SKIP$name)",
-                         "(*COMMIT$name)") {                         
+                         "(*COMMIT$name)") {
                 for my $suffix ('(*FAIL)','') {
                     'aaaab' =~ /a+b$pat$suffix/;
                   ::iseq $REGERROR,
@@ -1298,8 +1298,8 @@ sub run_tests {
                         "Test $pat and \$REGERROR $suffix";
                 }
             }
-        }      
-    }    
+        }
+    }
 
 
     {
@@ -1311,7 +1311,7 @@ sub run_tests {
             "aaaaa$word" =~
               /a+(?:bar(*COMMIT:bar)|baz(*COMMIT:baz)|bop(*COMMIT:bop))(*FAIL)/;
             iseq $REGERROR, $word;
-        }    
+        }
     }
 
     {
@@ -1374,14 +1374,14 @@ sub run_tests {
         ok "foobarbarxyz" =~ qr/(foo)(bar)\g{-1}xyz/;
         ok "foobarbarxyz" =~ qr/(foo${qr_barR1})xyz/;
         ok "foobarbarxyz" =~ qr/(foo(bar)\g{-1})xyz/;
-    } 
+    }
 
     {
         local $Message = '$REGMARK';
         our @r = ();
         our ($REGMARK, $REGERROR);
         ok 'foofoo' =~ /foo (*MARK:foo) (?{push @r,$REGMARK}) /x;
-        iseq "@r","foo";           
+        iseq "@r","foo";
         iseq $REGMARK, "foo";
         ok 'foofoo' !~ /foo (*MARK:foo) (*FAIL) /x;
         ok !$REGMARK;
@@ -1395,11 +1395,11 @@ sub run_tests {
         $x = "abc.def.ghi.jkl";
         $x =~ s/.*\K\..*//;
         iseq $x, "abc.def.ghi";
-        
+
         $x = "one two three four";
         $x =~ s/o+ \Kthree//g;
         iseq $x, "one two  four";
-        
+
         $x = "abcde";
         $x =~ s/(.)\K/$1/g;
         iseq $x, "aabbccddee";
@@ -1458,7 +1458,7 @@ sub run_tests {
         }
         iseq $res, "1",
             "Check that (?|...) doesnt cause dupe entries in the names array";
-        
+
         $res = "";
         if ('11' =~ /(?|(?<digit>1)|(?<digit>2))(?&digit)/) {
             $res = "@{$- {digit}}";
@@ -1473,10 +1473,10 @@ sub run_tests {
         local $Message = "ASCII pattern that really is UTF-8";
         my @w;
         local $SIG {__WARN__} = sub {push @w, "@_"};
-        my $c = qq (\x{DF}); 
+        my $c = qq (\x{DF});
         ok $c =~ /${c}|\x{100}/;
         ok @w == 0;
-    }    
+    }
 
 
     {
@@ -1486,7 +1486,7 @@ sub run_tests {
         iseq "$1$2", "foobar";
         {
             'foooooobaaaaar' =~ /$qr/;
-            iseq "$1$2", 'foooooobaaaaar';    
+            iseq "$1$2", 'foooooobaaaaar';
         }
         iseq "$1$2", "foobar";
     }
@@ -1503,7 +1503,7 @@ sub run_tests {
         s/\H/H/g;
         s/\h/h/g;
         iseq $_, "hhHHhHhhHH";
-    }    
+    }
 
 
     {
@@ -1650,7 +1650,7 @@ sub run_tests {
     {
         local $_;
         ($_ = 'abc') =~ /(abc)/g;
-        $_ = '123'; 
+        $_ = '123';
         iseq "$1", 'abc', "/g leads to unsafe match vars: $1";
     }
 
@@ -1678,12 +1678,12 @@ sub run_tests {
 
     {
 # more TRIE/AHOCORASICK problems with mixed utf8 / latin-1 and case folding
-	for my $chr (160 .. 255) {
-	    my $chr_byte = chr($chr);
-	    my $chr_utf8 = chr($chr); utf8::upgrade($chr_utf8);
-	    my $rx = qr{$chr_byte|X}i;
-	    ok($chr_utf8 =~ $rx, "utf8/latin, codepoint $chr");
-	}
+    for my $chr (160 .. 255) {
+        my $chr_byte = chr($chr);
+        my $chr_utf8 = chr($chr); utf8::upgrade($chr_utf8);
+        my $rx = qr{$chr_byte|X}i;
+        ok($chr_utf8 =~ $rx, "utf8/latin, codepoint $chr");
+    }
     }
 
     {
@@ -1718,7 +1718,7 @@ sub run_tests {
 
     SKIP: {
         # XXX: This set of tests is essentially broken, POSIX character classes
-        # should not have differing definitions under Unicode. 
+        # should not have differing definitions under Unicode.
         # There are property names for that.
         skip "Tests assume ASCII", 4 unless $IS_ASCII;
 
@@ -1734,7 +1734,7 @@ sub run_tests {
 
         my @isPunct = grep {/[[:punct:]]/ != /\p{IsPunct}/}
                             map {chr} 0x80 .. 0xff;
-        iseq join ('', @isPunct), "\xa1\xab\xb7\xbb\xbf",	# ¡ « · » ¿
+        iseq join ('', @isPunct), "\xa1\xab\xb7\xbb\xbf",    # ¡ « · » ¿
             'IsPunct disagrees with [:punct:] outside ASCII';
 
         my @isPunctLatin1 = eval q {
@@ -1744,9 +1744,9 @@ sub run_tests {
         skip "Eval failed ($@)", 1 if $@;
         skip "PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS set to 0", 1
               if !$ENV{PERL_TEST_LEGACY_POSIX_CC};
-        iseq join ('', @isPunctLatin1), '', 
+        iseq join ('', @isPunctLatin1), '',
             'IsPunct agrees with [:punct:] with explicit Latin1';
-    } 
+    }
 
     #
     # Keep the following tests last -- they may crash perl
@@ -1769,60 +1769,6 @@ sub run_tests {
         $_ = "123";
         s/(?=\d+)|(?<=\d)/!Bang!/g;
         iseq $_, "!Bang!1!Bang!2!Bang!3!Bang!";
-    }
-
-    {
-        use re 'eval';
-        local $Message = 'Test if $^N and $+ work in (?{{})';
-        our @ctl_n = ();
-        our @plus = ();
-        our $nested_tags;
-        $nested_tags = qr{
-            <
-               ((\w)+)
-               (?{
-                       push @ctl_n, (defined $^N ? $^N : "undef");
-                       push @plus, (defined $+ ? $+ : "undef");
-               })
-            >
-            (??{$nested_tags})*
-            </\s* \w+ \s*>
-        }x;
-
-
-        my $c = 0;
-        for my $test (
-            # Test structure:
-            #  [ Expected result, Regex, Expected value(s) of $^N, Expected value(s) of $+ ]
-            [ 1, qr#^$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^($nested_tags)$#, "bla blubb <bla><blubb></blubb></bla>", "a b a" ],
-            [ 1, qr#^(|)$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^(?:|)$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^<(bl|bla)>$nested_tags<(/\1)>$#, "blubb /bla", "b /bla" ],
-            [ 1, qr#(??{"(|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^(??{"(bla|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^(??{"(|)"})(??{$nested_tags})$#, "bla blubb undef", "a b undef" ],
-            [ 1, qr#^(??{"(?:|)"})$nested_tags$#, "bla blubb bla", "a b a" ],
-            [ 1, qr#^((??{"(?:bla|)"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
-            [ 1, qr#^((??{"(?!)?"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
-            [ 1, qr#^((??{"(?:|<(/?bla)>)"}))((??{$nested_tags}))\1$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
-            [ 0, qr#^((??{"(?!)"}))?((??{$nested_tags}))(?!)$#, "bla blubb undef", "a b undef" ],
-
-        ) { #"#silence vim highlighting
-            $c++;
-            @ctl_n = ();
-            @plus = ();
-            my $match = (("<bla><blubb></blubb></bla>" =~ $test->[1]) ? 1 : 0);
-            push @ctl_n, (defined $^N ? $^N : "undef");
-            push @plus, (defined $+ ? $+ : "undef");
-            ok($test->[0] == $match, "match $c");
-            if ($test->[0] != $match) {
-              # unset @ctl_n and @plus
-              @ctl_n = @plus = ();
-            }
-            iseq("@ctl_n", $test->[2], "ctl_n $c");
-            iseq("@plus", $test->[3], "plus $c");
-        }
     }
 
 } # End of sub run_tests
