@@ -4433,6 +4433,12 @@ t/porting/checkcase.t	Check whether we are case-insensitive-fs-friendly
 t/README			Instructions for regression tests
 t/re/pat.t			See if esoteric patterns work
 t/re/pat_thr.t			See if esoteric patterns work in another thread
+t/re/pat_advanced.t			See if advanced esoteric patterns work
+t/re/pat_advanced_thr.t			See if advanced esoteric patterns work in another thread
+t/re/pat_psycho.t			See if insane esoteric and slow patterns work 
+t/re/pat_psycho_thr.t			See if insane esoteric and slow patterns work in another thread
+t/re/pat_rt_report.t			See if esoteric patterns from rt reports work
+t/re/pat_rt_report_thr.t			See if esoteric patterns from rt reports work in another thread
 t/re/qr_gc.t			See if qr doesn't leak
 t/re/qrstack.t			See if qr expands the stack properly
 t/re/qr.t			See if qr works
@@ -4457,6 +4463,7 @@ t/re/reg_posixcc.t		See if posix character classes behave consistantly
 t/re/reg_unsafe.t		Check for unsafe match vars
 t/re/re.t			See if exportable 're' funcs in universal.c work
 t/re/re_tests			Regular expressions for regexp.t
+t/re/ReTest.pl			Test utilities for the t/re/pat*.t tests (used by do)
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works
 t/re/substr.t			See if substr works
