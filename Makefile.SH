@@ -468,7 +468,7 @@ obj = $(ndt_obj) $(DTRACE_O)
 perltoc_pod_prereqs = extra.pods pod/perlapi.pod pod/perldelta.pod pod/perlintern.pod pod/perlmodlib.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 
-Icwd = -Iext/Cwd
+Icwd = -Iext/Cwd -Iext/Cwd/lib
 
 lintflags = \
     -b \

@@ -554,13 +554,27 @@ ext/CPAN/t/02nox.t		See if CPAN::Nox works
 ext/CPAN/t/03pkgs.t		See if CPAN::Version works
 ext/CPAN/t/10version.t		See if CPAN the module works
 ext/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
-ext/Cwd/Changes			Cwd extension Changelog
-ext/Cwd/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
-ext/Cwd/Cwd.xs			Cwd extension external subroutines
-ext/Cwd/Makefile.PL		Cwd extension makefile maker
-ext/Cwd/t/cwd.t			See if Cwd works
-ext/Cwd/t/taint.t		See if Cwd works with taint
-ext/Cwd/t/win32.t		See if Cwd works on Win32
+ext/Cwd/Changes				Cwd extension Changelog
+ext/Cwd/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
+ext/Cwd/Cwd.xs				Cwd extension external subroutines
+ext/Cwd/lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
+ext/Cwd/lib/File/Spec/Epoc.pm		portable operations on EPOC file names
+ext/Cwd/lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
+ext/Cwd/lib/File/Spec/Mac.pm		portable operations on Mac file names
+ext/Cwd/lib/File/Spec/OS2.pm		portable operations on OS2 file names
+ext/Cwd/lib/File/Spec.pm		portable operations on file names
+ext/Cwd/lib/File/Spec/Unix.pm		portable operations on Unix file names
+ext/Cwd/lib/File/Spec/VMS.pm		portable operations on VMS file names
+ext/Cwd/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
+ext/Cwd/Makefile.PL			Cwd extension makefile maker
+ext/Cwd/t/crossplatform.t		See if File::Spec works crossplatform
+ext/Cwd/t/cwd.t				See if Cwd works
+ext/Cwd/t/Functions.t			See if File::Spec::Functions works
+ext/Cwd/t/rel2abs2rel.t			See if File::Spec->rel2abs/abs2rel works
+ext/Cwd/t/Spec.t			See if File::Spec works
+ext/Cwd/t/taint.t			See if Cwd works with taint
+ext/Cwd/t/tmpdir.t			See if File::Spec->tmpdir() works
+ext/Cwd/t/win32.t			See if Cwd works on Win32
 ext/Data-Dumper/Changes		Data pretty printer, changelog
 ext/Data-Dumper/Dumper.pm	Data pretty printer, module
 ext/Data-Dumper/Dumper.xs	Data pretty printer, externals
@@ -3396,20 +3410,6 @@ lib/File/Find/t/find.t		See if File::Find works
 lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
-lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
-lib/File/Spec/Epoc.pm		portable operations on EPOC file names
-lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
-lib/File/Spec/Mac.pm		portable operations on Mac file names
-lib/File/Spec/OS2.pm		portable operations on OS2 file names
-lib/File/Spec.pm		portable operations on file names
-lib/File/Spec/t/crossplatform.t	See if File::Spec works crossplatform
-lib/File/Spec/t/Functions.t	See if File::Spec::Functions works
-lib/File/Spec/t/rel2abs2rel.t	See if File::Spec->rel2abs/abs2rel works
-lib/File/Spec/t/Spec.t		See if File::Spec works
-lib/File/Spec/t/tmpdir.t	See if File::Spec->tmpdir() works
-lib/File/Spec/Unix.pm		portable operations on Unix file names
-lib/File/Spec/VMS.pm		portable operations on VMS file names
-lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
 lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
 lib/filetest.pm			For "use filetest"

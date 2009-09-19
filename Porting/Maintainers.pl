@@ -1120,9 +1120,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kwilliams',
 	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30.tar.gz',
-	'FILES'		=> q[lib/File/Spec.pm
-			     lib/File/Spec
-			     ext/Cwd
+	'FILES'		=> q[ext/Cwd
 			    ],
 	# XXX note that the CPAN and blead Makefile.PL are totally
 	# unrelated. The blead one is described as 'core-only'.
@@ -1130,13 +1128,6 @@ use File::Glob qw(:case);
 	# to harmonize them?
 	
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
-	'MAP'		=> { 'lib/'      => 'lib/',
-			     ''          => 'ext/Cwd/',
-			     't/'        => 'lib/File/Spec/t/',
-			     't/cwd.t'   => 'ext/Cwd/t/cwd.t',
-			     't/taint.t' => 'ext/Cwd/t/taint.t',
-			     't/win32.t' => 'ext/Cwd/t/win32.t',
-			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
 	},
