@@ -1234,7 +1234,7 @@ inst_lib : $(CONFIGPM)
 
 $(UNIDATAFILES) : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. mktables -check $@ $(FIRSTUNIFILE)
+	..\$(MINIPERL) -I.. -I..\..\ext\Cwd\lib mktables -check $@ $(FIRSTUNIFILE)
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils $(UNIDATAFILES)
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)

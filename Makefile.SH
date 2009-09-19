@@ -970,7 +970,7 @@ x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) $(dynamic_ext) x2p/s2p.PL
 unidatafiles $(unidatafiles): uni.data
 
 uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
-	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib mktables -w
+	cd lib/unicore && $(LDLIBPTH) $(RUN) ../../miniperl$(EXE_EXT) -I../../lib -I../../ext/Cwd/lib mktables -w
 	touch uni.data
 
 # perl$(EXE_EXT) and ext because buildtoc uses Text::Wrap uses re

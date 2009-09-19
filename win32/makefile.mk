@@ -1563,7 +1563,7 @@ inst_lib : $(CONFIGPM)
 
 $(UNIDATAFILES) .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. mktables
+	..\$(MINIPERL) -I.. -I..\..\ext\Cwd\lib mktables
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
