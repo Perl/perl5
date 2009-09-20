@@ -65,7 +65,7 @@ deprecate - Perl pragma for deprecating the core version of a module
 
     use deprecate;	# always deprecate the module in which this occurs
 
-    use if $[ > 5.010, 'deprecate';	# conditionally deprecate the module
+    use if $] > 5.010, 'deprecate';	# conditionally deprecate the module
 
 
 =head1 DESCRIPTION

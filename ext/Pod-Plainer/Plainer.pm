@@ -1,6 +1,6 @@
 package Pod::Plainer;
 use strict;
-use if $[ >= 5.011, 'deprecate';
+use if $] >= 5.011, 'deprecate';
 use Pod::Parser;
 our @ISA = qw(Pod::Parser);
 our $VERSION = '1.00';
