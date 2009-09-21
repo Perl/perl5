@@ -28,7 +28,7 @@ case \$# in
 	;;
 esac
 
-if test X"\$PERL" == X; then
+if test X"\$PERL" = X; then
     echo "please supply PERL in the environment"
     exit 1
 fi
@@ -53,7 +53,7 @@ case \$1 in
 	;;
 esac
 
-if test X"\$TESTFILE" == X; then
+if test X"\$TESTFILE" = X; then
     TESTFILE=TEST
 fi
 
@@ -63,7 +63,7 @@ $lns ../\$PERL \$PERL
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
-if test \$tty == Y; then
+if test \$tty = Y; then
     \$PERL \$TESTFILE \$TEST_ARGS \$TEST_FILES </dev/tty
 else
     PERL_SKIP_TTY_TEST=1 \$PERL \$TESTFILE \$TEST_ARGS \$TEST_FILES
