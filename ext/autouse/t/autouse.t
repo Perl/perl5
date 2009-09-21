@@ -64,6 +64,9 @@ ok( $@, qr/^\Qautoused module Env has unique import() method/ );
 # Check that UNIVERSAL.pm doesn't interfere with modules that don't use
 # Exporter and have no import() of their own.
 require UNIVERSAL;
-autouse->import("Class::ISA" => 'self_and_super_versions');
-my %versions = self_and_super_versions("Class::ISA");
-ok( $versions{"Class::ISA"}, $Class::ISA::VERSION );
+require File::Spec;
+unshift @INC, File::Spec->catdir('t', 'lib'), 'lib';
+autouse->import("MyTestModule" => 'test_function');
+my $ret = test_function();
+ok( $ret, 'works' );
+
