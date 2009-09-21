@@ -1119,9 +1119,8 @@ use File::Glob qw(:case);
     'PathTools' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30.tar.gz',
-	'FILES'		=> q[ext/Cwd
-			    ],
+	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30_01.tar.gz',
+	'FILES'		=> q[ext/Cwd],
 	# XXX note that the CPAN and blead Makefile.PL are totally
 	# unrelated. The blead one is described as 'core-only'.
 	# Perhaps after the big lib/ => ext/ migration it will be possible
