@@ -15,7 +15,7 @@ BEGIN {
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
-    $VERSION = '5.69';
+    $VERSION = '5.70';
 }
 
 AUTOLOAD {
