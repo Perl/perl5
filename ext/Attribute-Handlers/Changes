@@ -1,4 +1,4 @@
-Revision history for Perl extension Attribute-Handlers
+t Revision history for Perl extension Attribute-Handlers
 
 0.50  Sat Apr 21 16:09:31 2001
 	- original version; 
@@ -132,3 +132,24 @@ Revision history for Perl extension Attribute-Handlers
 0.86	Sat Aug  8 12:41:00 CET 2009
         - Add resources (bugtracker, ...) section to META.yml
 
+0.86_01	Thu Sep 17 10:01:00 CET 2009
+        - From perl change 09330df80caf214f375fcf0c04857347e3b17c69 (Zefram):
+
+          Fix [perl #66970] Incorrect coderef in MODIFY_CODE_ATTRIBUTES
+
+          Attribute handlers being applied to a temporary CV has actually been
+          reported as a bug, #66970.  The attached patch fixes the bug, by
+          changing the order in which things happen: attributes are now applied
+          after the temporary CV has been merged into the existing CV or has
+          otherwise been added to the appropriate GV.
+
+          The change breaks part of Attribute::Handlers.  Part of A:H searches the
+          package to find the name of the sub to which a :ATTR attribute is being
+          applied, and the correct time at which to launch that search depends
+          crucially on the order in which the CV construction events occur. So
+          this patch also includes a change to A:H, to make it detect which way
+          things happen.  The resulting A:H works either way, which is essential
+          for its dual-life nature.
+
+0.87	Mon Sep 21 15:55:00 CET 2009
+        - Promote to stable release
