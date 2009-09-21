@@ -4835,30 +4835,21 @@ Display the (nested) parentage of the module or object given.
 sub cmd_i {
     my $cmd  = shift;
     my $line = shift;
-    eval { require Class::ISA };
-    if ($@) {
-        &warn( $@ =~ /locate/
-            ? "Class::ISA module not found - please install\n"
-            : $@ );
-    }
-    else {
-      ISA:
-        foreach my $isa ( split( /\s+/, $line ) ) {
-            $evalarg = $isa;
-            ($isa) = &eval;
-            no strict 'refs';
-            print join(
-                ', ',
-                map {    # snaffled unceremoniously from Class::ISA
-                    "$_"
-                      . (
-                        defined( ${"$_\::VERSION"} )
-                        ? ' ' . ${"$_\::VERSION"}
-                        : undef )
-                  } Class::ISA::self_and_super_path(ref($isa) || $isa)
-            );
-            print "\n";
-        }
+    foreach my $isa ( split( /\s+/, $line ) ) {
+        $evalarg = $isa;
+        ($isa) = &eval;
+        no strict 'refs';
+        print join(
+            ', ',
+            map {
+                "$_"
+                  . (
+                    defined( ${"$_\::VERSION"} )
+                    ? ' ' . ${"$_\::VERSION"}
+                    : undef )
+              } @{mro::get_linear_isa(ref($isa) || $isa)}
+        );
+        print "\n";
     }
 } ## end sub cmd_i
 
