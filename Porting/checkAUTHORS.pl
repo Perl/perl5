@@ -336,6 +336,7 @@ rgs                                     rgarciasuarez\100free.fr
 +                                       rgarciasuarez\100mandriva.com
 +                                       rgarciasuarez\100gmail.com
 +                                       raphel.garcia-suarez\100hexaflux.com
++                                       rgs@consttype.org
 sky                                     sky\100nanisky.com
 +                                       artur\100contiller.se
 +                                       arthur\100contiller.se
