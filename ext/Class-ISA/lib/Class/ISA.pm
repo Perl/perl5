@@ -5,8 +5,10 @@ package Class::ISA;
 require 5;
 use strict;
 use vars qw($Debug $VERSION);
-$VERSION = '0.33';
+$VERSION = '0.33_01';
 $Debug = 0 unless defined $Debug;
+
+use if $] >= 5.011, 'deprecate';
 
 =head1 NAME
 
