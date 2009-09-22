@@ -4738,7 +4738,9 @@ PP(pp_push)
 
 	PL_delaymagic = 0;
 	SP = ORIGMARK;
-	PUSHi( AvFILLp(ary) + 1 );
+	if (OP_GIMME(PL_op, 0) != G_VOID) {
+	    PUSHi( AvFILL(ary) + 1 );
+	}
     }
     RETURN;
 }
