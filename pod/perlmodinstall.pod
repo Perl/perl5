@@ -179,9 +179,7 @@ After installing cpan-mac, drop the module archive on the
 B<untarzipme> droplet, which will decompress and unpack for you.
 
 B<Or>, you can either use the shareware B<StuffIt Expander> program
-( http://www.aladdinsys.com/expander/ )
-in combination with B<DropStuff with Expander Enhancer>
-( http://www.aladdinsys.com/dropstuff/ )
+( http://my.smithmicro.com/mac/stuffit/ )
 or the freeware B<MacGzip> program (
 http://persephone.cps.unizar.es/general/gente/spd/gzip/gzip.html ).
 
