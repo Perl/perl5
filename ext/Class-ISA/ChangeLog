@@ -1,6 +1,11 @@
 Revision history for Perl extension Class::ISA
                                         Time-stamp: "2004-12-29 20:00:49 AST"
 
+2009-10-22  Steffen Mueller  smueller@cpan.org
+	
+	* Release 0.34 -- add core deprecation logic,
+	  some distribution shuffling.  No code changes.
+
 2004-12-29  Sean M. Burke  sburke@cpan.org
 	
 	* Release 0.33 -- just rebundling.  No code changes.
