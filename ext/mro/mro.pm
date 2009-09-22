@@ -328,13 +328,7 @@ works (like C<goto &maybe::next::method>);
 
 =back
 
-=head2 The prototype Perl 6 Object Model uses C3
-
-=over 4
-
-=item L<http://svn.openfoundry.org/pugs/perl5/Perl6-MetaModel/>
-
-=back
+=head2 The Pugs prototype Perl 6 Object Model uses C3
 
 =head2 Parrot now uses C3
 
