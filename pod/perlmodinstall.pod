@@ -200,14 +200,6 @@ F<.xs> and F<.c> files, which normally denote that the distribution
 must be compiled, and you cannot install it "out of the box."
 (See L<"PORTABILITY">.)
 
-If a module does not work on MacPerl but should, or needs to be
-compiled, see if the module exists already as a port on the
-MacPerl Module Porters site ( http://pudge.net/mmp/ ).
-For more information on doing XS with MacPerl yourself, see
-Arved Sandstrom's XS tutorial ( http://macperl.com/depts/Tutorials/ ),
-and then consider uploading your binary to the CPAN and
-registering it on the MMP site.
-
 D. INSTALL
 
 If you are using cpan-mac, just drop the folder on the
@@ -306,8 +298,7 @@ or, for zipped modules, type
 
 Executables for gzip, zip, and VMStar:
 
-    http://www.openvms.digital.com/freeware/
-    http://www.crinoid.com/utils/
+    http://www.hp.com/go/openvms/freeware/
 
 and their source code:
 
