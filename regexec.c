@@ -1824,21 +1824,21 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	if (flags & REXEC_IGNOREPOS){	/* Means: check only at start */
 	    reginfo.ganch = startpos + prog->gofs;
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-	      "GPOS IGNOREPOS: reginfo.ganch = startpos + %"UVxf"\n",prog->gofs));
+	      "GPOS IGNOREPOS: reginfo.ganch = startpos + %"UVxf"\n",(UV)prog->gofs));
 	} else if (sv && SvTYPE(sv) >= SVt_PVMG
 		  && SvMAGIC(sv)
 		  && (mg = mg_find(sv, PERL_MAGIC_regex_global))
 		  && mg->mg_len >= 0) {
 	    reginfo.ganch = strbeg + mg->mg_len;	/* Defined pos() */
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		"GPOS MAGIC: reginfo.ganch = strbeg + %"IVdf"\n",mg->mg_len));
+		"GPOS MAGIC: reginfo.ganch = strbeg + %"IVdf"\n",(IV)mg->mg_len));
 
 	    if (prog->extflags & RXf_ANCH_GPOS) {
 	        if (s > reginfo.ganch)
 		    goto phooey;
 		s = reginfo.ganch - prog->gofs;
 	        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		     "GPOS ANCH_GPOS: s = ganch - %"UVxf"\n",prog->gofs));
+		     "GPOS ANCH_GPOS: s = ganch - %"UVxf"\n",(UV)prog->gofs));
 		if (s < strbeg)
 		    goto phooey;
 	    }
