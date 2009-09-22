@@ -1313,21 +1313,22 @@ makedepend: makedepend.SH config.sh
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
 test_prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
 test check: test_prep
-	PERL=./perl ./runtests choose
+	./runtests choose
 
 test_tty: test_prep
-	PERL=./perl ./runtests tty
+	./runtests tty
 
 test_notty: test_prep
-	PERL=./perl ./runtests no-tty
+	./runtests no-tty
 
 utest ucheck test.utf8 check.utf8: test_prep
-	PERL=./perl TEST_ARGS=-utf8 ./runtests choose
+	TEST_ARGS=-utf8 ./runtests choose
 
 coretest: test_prep
-	PERL=./perl TEST_ARGS=-core ./runtests choose
+	TEST_ARGS=-core ./runtests choose
 
 test-prep:	test_prep
 
@@ -1338,7 +1339,7 @@ test-notty:	test_notty
 # Torture testing
 
 test.torture torturetest:	test_prep
-	PERL=./perl TEST_ARGS=-torture ./runtests choose
+	TEST_ARGS=-torture ./runtests choose
 
 # Targets for UTF16 testing:
 
@@ -1347,27 +1348,28 @@ minitest.utf16: minitest.prep
 		&& $(LDLIBPTH) $(RUN) ./perl TEST -minitest -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 
 test.utf16 check.utf16: test_prep
-	PERL=./perl TEST_ARGS=-utf16 ./runtests choose
+	TEST_ARGS=-utf16 ./runtests choose
 
 utest.utf16 ucheck.utf16: test_prep
-	PERL=./perl TEST_ARGS="-utf8 -utf16" ./runtests choose
+	TEST_ARGS="-utf8 -utf16" ./runtests choose
 
 # Targets for valgrind testing:
 
 test_prep.valgrind: test_prep perl.valgrind
 
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
-	PERL=./perl PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' ./runtests choose
+	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' ./runtests choose
 
 utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL=./perl PERL_VALGRIND=1 TEST_ARGS=-utf8 ./runtests choose
+	PERL_VALGRIND=1 TEST_ARGS=-utf8 ./runtests choose
 
 test_notty.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL=./perl PERL_VALGRIND=1 ./runtests no-tty
+	PERL_VALGRIND=1 ./runtests no-tty
 
 # Targets for Third Degree testing.
 
 test_prep.third: test_prep perl.third
+	cd t && (rm -f ./perl.third$(EXE_EXT); $(LNS) ../perl.third$(EXE_EXT) perl.third(EXE_EXT))
 
 test.third check.third:	test_prep.third perl.third
 	PERL=./perl.third PERL_3LOG=1 ./runtests choose
@@ -1381,15 +1383,15 @@ test_notty.third: test_prep.third perl.third
 # Targets for Deparse testing.
 
 test.deparse:	test_prep
-	PERL=./perl TEST_ARGS=-deparse ./runtests choose
+	TEST_ARGS=-deparse ./runtests choose
 
 test_notty.deparse:	test_prep
-	PERL=./perl TEST_ARGS=-deparse ./runtests no-tty
+	TEST_ARGS=-deparse ./runtests no-tty
 
 # Targets to run the test suite with -t
 
 test.taintwarn:	test_prep
-	PERL=./perl TEST_ARGS=-taintwarn ./runtests choose
+	TEST_ARGS=-taintwarn ./runtests choose
 
 minitest.prep:
 	-@test test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
@@ -1407,13 +1409,13 @@ minitest: $(MINIPERL_EXE) lib/re.pm minitest.prep
 # Test via harness
 
 test_harness: test_prep
-	PERL=./perl TESTFILE=harness ./runtests choose
+	TESTFILE=harness ./runtests choose
 
 test_harness_notty: test_prep
-	PERL=./perl HARNESS_NOTTY=1 TESTFILE=harness ./runtests choose
+	HARNESS_NOTTY=1 TESTFILE=harness ./runtests choose
 
 test-reonly: test_prep
-	PERL=./perl TEST_ARGS='-re \bre\/' TESTFILE=harness ./runtests choose
+	TEST_ARGS='-re \bre\/' TESTFILE=harness ./runtests choose
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
