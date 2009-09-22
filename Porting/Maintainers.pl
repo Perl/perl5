@@ -315,11 +315,11 @@ use File::Glob qw(:case);
 
     'Class::ISA' =>
 	{
-	'MAINTAINER'	=> 'sburke',
+	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SBURKE/Class-ISA-0.33.tar.gz',
 	'FILES'		=> q[ext/Class-ISA],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Compress::Raw::Bzip2' =>
