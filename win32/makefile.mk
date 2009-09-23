@@ -1210,7 +1210,7 @@ $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl create_perllibst_h.pl
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
-	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
+	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
@@ -1283,8 +1283,8 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\walk.c
 
 $(X2P) : $(MINIPERL) $(X2P_OBJ) Extensions
-	$(MINIPERL) ..\x2p\find2perl.PL
-	$(MINIPERL) ..\x2p\s2p.PL
+	$(MINIPERL) -I..\lib ..\x2p\find2perl.PL
+	$(MINIPERL) -I..\lib ..\x2p\s2p.PL
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(X2P_OBJ),$@,,$(LIBFILES),)
