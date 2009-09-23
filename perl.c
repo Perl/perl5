@@ -4058,6 +4058,10 @@ S_init_perllib(pTHX)
 #endif /* VMS */
     }
 
+#ifndef PERL_IS_MINIPERL
+    /* miniperl gets just -I..., the split of $ENV{PERL5LIB}, and "." in @INC
+       (and not the architecture specific directories from $ENV{PERL5LIB}) */
+
 /* Use the ~-expanded versions of APPLLIB (undocumented),
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
@@ -4188,6 +4192,7 @@ S_init_perllib(pTHX)
 		      INCPUSH_ADD_OLD_VERS|INCPUSH_ADD_ARCHONLY_SUB_DIRS
 		      |INCPUSH_CAN_RELOCATE);
 #endif
+#endif /* !PERL_IS_MINIPERL */
 
     if (!PL_tainting)
 	S_incpush(aTHX_ STR_WITH_LEN("."), 0);
