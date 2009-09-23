@@ -2055,6 +2055,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(__SYMBIAN32__)
     PL_unicode = PERL_UNICODE_STD_FLAG; /* See PERL_SYMBIAN_CONSOLE_UTF8. */
 #endif
+#  ifndef PERL_IS_MINIPERL
     if (PL_unicode) {
 	 /* Requires init_predump_symbols(). */
 	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
@@ -2093,6 +2094,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	      }
 	 }
     }
+#endif
 
     {
 	const char *s;
