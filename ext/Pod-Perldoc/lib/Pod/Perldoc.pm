@@ -932,6 +932,7 @@ sub search_perlvar {
             ++$inlist;
         }
         elsif (/^=back/) {
+            last if $found && !$inheader && !$inlist;
             --$inlist;
         }
         push @$pod, $_;
@@ -991,6 +992,7 @@ sub search_perlfunc {
             ++$inlist;
         }
         elsif (/^=back/) {
+            last if $found > 1 and not $inlist;
             --$inlist;
         }
         push @$pod, $_;
