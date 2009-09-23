@@ -1774,6 +1774,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
+#  ifdef PERL_IS_MINIPERL
+			     " PERL_IS_MINIPERL"
+#  endif
 #  ifdef PERL_MALLOC_WRAP
 			     " PERL_MALLOC_WRAP"
 #  endif
