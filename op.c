@@ -5194,6 +5194,10 @@ S_looks_like_bool(pTHX_ const OP *o)
 		o->op_flags & OPf_KIDS
 	    && looks_like_bool(cUNOPo->op_first));
 
+        case OP_SCALAR:
+            return looks_like_bool(cUNOPo->op_first);
+
+
 	case OP_ENTERSUB:
 
 	case OP_NOT:	case OP_XOR:

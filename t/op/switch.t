@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 127;
+plan tests => 128;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -411,6 +411,15 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 	when (2 + 2 == 5) { $ok = 'n' }
     }
     is($ok, 'y', "Optimized-away comparison");
+}
+
+{
+    my $ok;
+    given(23) {
+        when (scalar 24) { $ok = 'n'; continue }
+        default { $ok = 'y' }
+    }
+    is($ok,'y','scalar()');
 }
 
 # File tests
