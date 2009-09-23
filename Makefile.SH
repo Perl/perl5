@@ -1303,7 +1303,11 @@ makedepend: makedepend.SH config.sh
 	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
-	minitest coretest test.taintwarn test-reonly
+	minitest coretest test.taintwarn test-reonly _test
+
+_test:
+	echo >&2 The _test target is deprecated. Please upgrade your smoker
+	PERL=./perl ./runtests choose
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
