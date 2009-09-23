@@ -66,6 +66,8 @@ if test \$tty = Y; then
 else
     PERL_SKIP_TTY_TEST=1 \$PERL \$TESTFILE \$TEST_ARGS \$TEST_FILES
 fi
+
+echo "Ran tests" > rantests
 !GROK!THIS!
 $eunicefix runtests
 chmod +x runtests
