@@ -329,8 +329,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
 
       # Embed the manifest file if it exists
       push(@m, q{
-       if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
-       if exist $@.manifest del $@.manifest});
+	if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
+	if exist $@.manifest del $@.manifest});
     }
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
