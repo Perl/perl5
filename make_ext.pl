@@ -116,7 +116,7 @@ foreach (@extspec) {
 my $makecmd  = shift @pass_through; # Should be something like MAKE=make
 unshift @pass_through, 'PERL_CORE=1';
 
-my @dirs  = $opts{dir} || ['ext', 'cpan'];
+my @dirs  = @{$opts{dir} || ['ext', 'cpan']};
 my $target   = $opts{target}[0];
 $target = 'all' unless defined $target;
 
