@@ -170,9 +170,10 @@ if ($is_Win32) {
 	system(@args) unless defined $::Cross::platform;
     }
 
-    print "In ", getcwd();
+    my $build = getcwd();
+    print "In $build";
     foreach my $dir (@dirs) {
-	chdir($dir) || die "Cannot cd to $dir\n";
+	chdir($dir) or die "Cannot cd to $dir: $!\n";
 	(my $ext = getcwd()) =~ s{/}{\\}g;
 	FindExt::scan_ext($ext);
 	FindExt::set_static_extensions(split ' ', $Config{static_ext});
@@ -200,8 +201,11 @@ if ($is_Win32) {
 		push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
 	    }
 	}
-	chdir '..'; # now in the Perl build directory
+	chdir $build
+	    or die "Couldn't chdir to '$build': $!"; # restore our start directory
     }
+    chdir '..'
+	or die "Couldn't chdir to build directory: $!"; # now in the Perl build directory
 }
 elsif ($is_VMS) {
     $perl = $^X;
