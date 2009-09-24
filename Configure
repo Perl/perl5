@@ -21656,19 +21656,7 @@ find_extensions='
 	    *)
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
 	    leaf=`echo $xxx | $sed -e s/.*-//`;
-	    if $test -d File-Glob; then
-		$ls -1 $xxx > $$.tmp;
-		if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
-		    known_extensions="$known_extensions $this_ext";
-		elif $contains "\.c$"  $$.tmp > /dev/null 2>&1; then
-		    known_extensions="$known_extensions $this_ext";
-		elif $test "$this_ext" = "IO/Compress"; then
-		    known_extensions="$known_extensions $this_ext";
-		elif $test -d $xxx; then
-		    nonxs_extensions="$nonxs_extensions $this_ext";
-		fi;
-		$rm -f $$.tmp;
-	    else
+	    if $test -d File; then
 		if $test -f $xxx/$leaf.xs -o -f $xxx/$leaf.c; then
 		    known_extensions="$known_extensions $1$this_ext";
 		elif $test -f $xxx/Makefile.PL; then
@@ -21682,11 +21670,27 @@ find_extensions='
 			shift;
 		    fi;
 		fi;
+	    else
+		$ls -1 $xxx > $$.tmp;
+		if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $contains "\.c$"  $$.tmp > /dev/null 2>&1; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $test "$this_ext" = "IO/Compress"; then
+		    known_extensions="$known_extensions $this_ext";
+		elif $test -d $xxx; then
+		    nonxs_extensions="$nonxs_extensions $this_ext";
+		fi;
+		$rm -f $$.tmp;
 	    fi
 	    ;;
 	esac;
     done'
 tdir=`pwd`
+cd "$rsrc/cpan"
+set X
+shift
+eval $find_extensions
 cd "$rsrc/ext"
 set X
 shift
