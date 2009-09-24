@@ -88,11 +88,11 @@ and S<Mac OS> uses C<\015>.
 
 Perl uses C<\n> to represent the "logical" newline, where what is
 logical may depend on the platform in use.  In MacPerl, C<\n> always
-means C<\015>.  In DOSish perls, C<\n> usually means C<\012>, but
-when accessing a file in "text" mode, STDIO translates it to (or
-from) C<\015\012>, depending on whether you're reading or writing.
-Unix does the same thing on ttys in canonical mode.  C<\015\012>
-is commonly referred to as CRLF.
+means C<\015>.  In DOSish perls, C<\n> usually means C<\012>, but when
+accessing a file in "text" mode, perl uses the C<:crlf> layer that
+translates it to (or from) C<\015\012>, depending on whether you're
+reading or writing. Unix does the same thing on ttys in canonical
+mode.  C<\015\012> is commonly referred to as CRLF.
 
 To trim trailing newlines from text lines use chomp().  With default 
 settings that function looks for a trailing C<\n> character and thus 
