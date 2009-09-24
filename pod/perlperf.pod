@@ -1173,8 +1173,6 @@ Very useful online reference material:
 
     http://www.sysarch.com/Perl/sort_paper.html
 
-    http://www.unix.org.ua/orelly/perl/prog/ch08_03.htm
-
 =head1 AUTHOR
 
 Richard Foley <richard.foley@rfi.net> Copyright (c) 2008
