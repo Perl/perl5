@@ -457,7 +457,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/DB_File-1.820.tar.gz',
-	'FILES'		=> q[ext/DB_File],
+	'FILES'		=> q[cpan/DB_File],
 	'EXCLUDED'	=> [ qr{^patches/},
 			     qw{ t/pod.t
 			         fallback.h
