@@ -76,7 +76,7 @@ foreach (@ARGV) {
     } elsif (/^--([\w\-]+)$/) {
 	$opts{$1} = 1;
     } elsif (/^--([\w\-]+)=(.*)$/) {
-	$opts{$1} = $2;
+	push @{$opts{$1}}, $2;
     } elsif (/=/) {
 	push @pass_through, $_;
     } elsif (length) {
@@ -116,8 +116,8 @@ foreach (@extspec) {
 my $makecmd  = shift @pass_through; # Should be something like MAKE=make
 unshift @pass_through, 'PERL_CORE=1';
 
-my $dir  = $opts{dir} || 'ext';
-my $target   = $opts{target};
+my @dirs  = $opts{dir} || ['ext', 'cpan'];
+my $target   = $opts{target}[0];
 $target = 'all' unless defined $target;
 
 # Previously, $make was taken from config.sh.  However, the user might
@@ -171,35 +171,37 @@ if ($is_Win32) {
     }
 
     print "In ", getcwd();
-    chdir($dir) || die "Cannot cd to $dir\n";
-    (my $ext = getcwd()) =~ s{/}{\\}g;
-    FindExt::scan_ext($ext);
-    FindExt::set_static_extensions(split ' ', $Config{static_ext});
+    foreach my $dir (@dirs) {
+	chdir($dir) || die "Cannot cd to $dir\n";
+	(my $ext = getcwd()) =~ s{/}{\\}g;
+	FindExt::scan_ext($ext);
+	FindExt::set_static_extensions(split ' ', $Config{static_ext});
 
-    my @ext;
-    push @ext, FindExt::static_ext() if $static;
-    push @ext, FindExt::dynamic_ext() if $dynamic;
-    push @ext, FindExt::nonxs_ext() if $nonxs;
-    push @ext, 'DynaLoader' if $dynaloader;
+	my @ext;
+	push @ext, FindExt::static_ext() if $static;
+	push @ext, FindExt::dynamic_ext() if $dynamic;
+	push @ext, FindExt::nonxs_ext() if $nonxs;
+	push @ext, 'DynaLoader' if $dynaloader;
 
-    foreach (sort @ext) {
-	if (%incl and !exists $incl{$_}) {
-	    #warn "Skipping extension $ext\\$_, not in inclusion list\n";
-	    next;
+	foreach (sort @ext) {
+	    if (%incl and !exists $incl{$_}) {
+		#warn "Skipping extension $ext\\$_, not in inclusion list\n";
+		next;
+	    }
+	    if (exists $excl{$_}) {
+		warn "Skipping extension $ext\\$_, not ported to current platform";
+		next;
+	    }
+	    push @extspec, $_;
+	    if($_ eq 'DynaLoader') {
+		# No, we don't know why nmake can't work out the dependency chain
+		push @{$extra_passthrough{$_}}, 'DynaLoader.c';
+	    } elsif(FindExt::is_static($_)) {
+		push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
+	    }
 	}
-	if (exists $excl{$_}) {
-	    warn "Skipping extension $ext\\$_, not ported to current platform";
-	    next;
-	}
-	push @extspec, $_;
-	if($_ eq 'DynaLoader') {
-	    # No, we don't know why nmake can't work out the dependency chain
-	    push @{$extra_passthrough{$_}}, 'DynaLoader.c';
-	} elsif(FindExt::is_static($_)) {
-	    push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
-	}
+	chdir '..'; # now in the Perl build directory
     }
-    chdir '..'; # now in the Perl build directory
 }
 elsif ($is_VMS) {
     $perl = $^X;
