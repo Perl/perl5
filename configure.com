@@ -2726,13 +2726,19 @@ $ xxx = ""
 $ OPEN/READ CONFIG 'manifestfound'
 $ext_loop:
 $   READ/END_OF_FILE=end_ext/ERROR=end_ext CONFIG line
-$   IF F$EXTRACT(0,4,line) .NES. "ext/" THEN goto ext_loop
+$   IF F$EXTRACT(0,4,line) .NES. "ext/" .AND. -
+       F$EXTRACT(0,5,line) .NES. "cpan/" THEN goto ext_loop
 $   line = F$EDIT(line,"COMPRESS")
 $   line = F$ELEMENT(0," ",line)
 $   IF F$EXTRACT(0,4,line) .EQS. "ext/"
 $   THEN
 $     xxx = F$ELEMENT(1,"/",line)
 $     IF F$SEARCH("[-.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
+$   ENDIF
+$   IF F$EXTRACT(0,5,line) .EQS. "cpan/"
+$   THEN
+$     xxx = F$ELEMENT(1,"/",line)
+$     IF F$SEARCH("[-.cpan]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
 $   ENDIF
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $!
@@ -2784,11 +2790,11 @@ $	xxx = F$EXTRACT(F$LENGTH(extspec) + 1, extlen, xxx)
 $   ENDIF
 $!
 $ found_new_extension:
-$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .NES. ""
+$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. ""
 $   THEN
-$       known_extensions = known_extensions + " ''extspec'"
-$   ELSE
 $       nonxs_ext = nonxs_ext + " ''extspec'"
+$   ELSE
+$       known_extensions = known_extensions + " ''extspec'"
 $   ENDIF
 $   goto ext_loop
 $end_ext:
