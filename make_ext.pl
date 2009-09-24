@@ -19,6 +19,8 @@ my @toolchain = qw(ext/constant/lib ext/Cwd ext/Cwd/lib ext/ExtUtils-Command/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
        ext/File-Path/lib ext/AutoLoader/lib);
 
+my @ext_dirs = qw(ext cpan);
+
 # This script acts as a simple interface for building extensions.
 
 # It's actually a cut and shut of the Unix version ext/utils/makeext and the
@@ -232,7 +234,16 @@ foreach my $spec (@extspec)  {
 	# New style ext/Data-Dumper/
 	my $copy = $spec;
 	$copy =~ tr!/!-!;
-	$ext_pathname = "ext/$copy";
+	foreach my $dir (@ext_dirs) {
+	    if (-d "$dir/$copy") {
+		$ext_pathname = "$dir/$copy";
+		last;
+	    }
+	}
+	if (!defined $ext_pathname) {
+	    warn "Can't find extension $spec in any of @ext_dirs";
+	    next;
+	}
     }
 
     if ($Config{osname} eq 'catamount') {
