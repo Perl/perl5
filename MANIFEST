@@ -17,6 +17,26 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 Copying			The GNU General Public License
+cpan/IPC-SysV/Changes			IPC::SysV changes
+cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
+cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
+cpan/IPC-SysV/lib/IPC/Msg.pm		IPC::SysV extension Perl module
+cpan/IPC-SysV/lib/IPC/Semaphore.pm	IPC::SysV extension Perl module
+cpan/IPC-SysV/lib/IPC/SharedMem.pm	IPC::SysV extension Perl module
+cpan/IPC-SysV/lib/IPC/SysV.pm		IPC::SysV extension Perl module
+cpan/IPC-SysV/Makefile.PL		IPC::SysV makefile writer
+cpan/IPC-SysV/MANIFEST.SKIP		IPC::SysV manifest skip specs
+cpan/IPC-SysV/README			IPC::SysV README
+cpan/IPC-SysV/regen.pl			IPC::SysV file regeneration script
+cpan/IPC-SysV/SysV.xs			IPC::SysV extension Perl module
+cpan/IPC-SysV/t/ipcsysv.t		IPC::SysV test file
+cpan/IPC-SysV/t/msg.t			IPC::SysV test file
+cpan/IPC-SysV/TODO			IPC::SysV todo file
+cpan/IPC-SysV/t/podcov.t		IPC::SysV test file
+cpan/IPC-SysV/t/pod.t			IPC::SysV test file
+cpan/IPC-SysV/t/sem.t			IPC::SysV test file
+cpan/IPC-SysV/t/shm.t			IPC::SysV test file
+cpan/IPC-SysV/typemap			IPC::SysV typemap
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -1566,26 +1586,6 @@ ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
-ext/IPC-SysV/Changes	IPC::SysV changes
-ext/IPC-SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
-ext/IPC-SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
-ext/IPC-SysV/lib/IPC/Msg.pm	IPC::SysV extension Perl module
-ext/IPC-SysV/lib/IPC/Semaphore.pm	IPC::SysV extension Perl module
-ext/IPC-SysV/lib/IPC/SharedMem.pm	IPC::SysV extension Perl module
-ext/IPC-SysV/lib/IPC/SysV.pm	IPC::SysV extension Perl module
-ext/IPC-SysV/Makefile.PL	IPC::SysV makefile writer
-ext/IPC-SysV/MANIFEST.SKIP	IPC::SysV manifest skip specs
-ext/IPC-SysV/README		IPC::SysV README
-ext/IPC-SysV/regen.pl	IPC::SysV file regeneration script
-ext/IPC-SysV/SysV.xs		IPC::SysV extension Perl module
-ext/IPC-SysV/t/ipcsysv.t		IPC::SysV test file
-ext/IPC-SysV/t/msg.t		IPC::SysV test file
-ext/IPC-SysV/TODO	IPC::SysV todo file
-ext/IPC-SysV/t/podcov.t	IPC::SysV test file
-ext/IPC-SysV/t/pod.t	IPC::SysV test file
-ext/IPC-SysV/t/sem.t		IPC::SysV test file
-ext/IPC-SysV/t/shm.t	IPC::SysV test file
-ext/IPC-SysV/typemap	IPC::SysV typemap
 ext/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 ext/lib/Makefile.PL
 ext/libnet/Changes			libnet

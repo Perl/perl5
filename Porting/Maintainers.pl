@@ -811,7 +811,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mhx',
 	'DISTRIBUTION'	=> 'MHX/IPC-SysV-2.01.tar.gz',
-	'FILES'		=> q[ext/IPC-SysV],
+	'FILES'		=> q[cpan/IPC-SysV],
 	'EXCLUDED'	=> [ qw{const-c.inc const-xs.inc} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
