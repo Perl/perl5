@@ -1373,7 +1373,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'saper',
 	'DISTRIBUTION'	=> 'SAPER/Sys-Syslog-0.27.tar.gz',
-	'FILES'		=> q[ext/Sys-Syslog],
+	'FILES'		=> q[cpan/Sys-Syslog],
 	'EXCLUDED'	=> [ qr{^eg/},
 			     qw{t/data-validation.t
 			        t/distchk.t
