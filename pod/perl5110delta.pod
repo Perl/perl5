@@ -2082,8 +2082,10 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 The following changes are a filtered list of changes which weren't backported
 to 5.10.1. They were run through changelogger.bestpractical.com and triaged
-by a set of Perl 5 Porters. Changes to blead after 5945e41e have not yet
-been triaged or integrated.
+by a set of Perl 5 Porters. Changes to blead after 
+fafe5ad5a7e57ca14cd0844db173f3a4d6c9e8de
+
+have not yet been triaged or integrated.
 
 The following changes need to be 
 
@@ -2382,4 +2384,291 @@ when creation of a temporary file in it fails
 
 
 
+=head2 Dual-lifed modules moved
+
+Dual-lifed modules maintained primarily in the Perl core now live in ext/.
+Dual-lifed modules maintained primarily on CPAN now live in cpan/
+
+=head2 MAD now builds on C++
+
+    Fix building MAD with C++ - a MAD_PV of "" is illegal, as it will be free()d.
+
+commit 4e73d6a402bc493d66d19c409c41e1e271c6450b
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Wed Sep 23 11:59:31 2009 +0100
+
+    Add a --chdir option to configpm, and use this in the Win32 Makfiles.
+    
+    A slight Makefile simplification, and another move towards Win32 standardising
+    on running miniperl as $(MINIPERL), which currently is ..\miniperl.exe
+
+
+=head2 miniperl no longer builds with UTF-8 support in the regexp engine to support the bootstrapping process
+    
+    This allows a build to complete with PERL_UNICODE set and a UTF-8 locale.
+    Without this there's a bootstrapping problem, as miniperl can't load the UTF-8
+    components of the regexp engine, because they're not yet built.
+
+=head2 miniperl now has a restricted @INC
+
+    Restrict miniperl to just -I..., the split of $ENV{PERL5LIB}, and "." in @INC
+
+=head2 miniperl now identifies itself in the output of miniperl -V
+
+PERL_IS_MINIPERL is now declared in the verbose configuration output.
+
+
+=head2 Upgrade to Class::ISA 0.34
+=head2 Deprecate Class::ISA from core
+
+Whihch of htose is right?
+
+=head2 Upgrade to Attribute::Handlers 0.87 
+=head2 Upgrade to AutoLoader 5.70 
+
+=head2 Upgrade to IO::Zlib 1.10
+
+=head2 Note that Pod::Plainer is upgraded, and deprecated from core.
+
+=head2 Parallel testing is pretty much done.
+
+=head2 Update parent to CPAN version 0.223
+
+=head2 Update Log::Message::Simple to CPAN version 0.06
+=head2 Updated Math::BigRat to CPAN version 0.24
+
+=head2 Update Archive::Tar to CPAN version 1.54
+
+=head2    Update IPC::Cmd to CPAN version 0.50
+
+=head2    Updated CPANPLUS::Dist::Build to CPAN version 0.40
+    
+=head2 Updated Module::Loaded to CPAN version 0.06
+
+=head2   Upgrade to Encode 2.37
+    
+commit d8723a6a74b2c12e9d732728dbe717672ab893f2
+Author: Salvador Ortiz Garcia <sog@msg.com.mx>
+Date:   Sun Sep 6 23:41:57 2009 +0200
+
+    Corrupt filename when setting %INC entry in a @INC hook
+    
+    The code in pp_ctl.c after calling an @INC hook blindly assumes that the
+    SV setted by the user in %INC is an SVPV (SvPOK true) for setting the
+    filename. So when the user uses other scalar types, the output of
+    __FILE__, warn, die, caller, etc. shows random garbage.
+
+Author: Zefram <zefram@fysh.org>
+Date:   Sun Sep 6 17:29:43 2009 +0200
+
+    Fix [perl #66970] Incorrect coderef in MODIFY_CODE_ATTRIBUTES
+    
+    Attribute handlers being applied to a temporary CV has actually been
+    reported as a bug, #66970.  The attached patch fixes the bug, by
+    changing the order in which things happen: attributes are now applied
+    after the temporary CV has been merged into the existing CV or has
+    otherwise been added to the appropriate GV.
+    
+    The change breaks part of Attribute::Handlers.  Part of A:H searches the
+    package to find the name of the sub to which a :ATTR attribute is being
+    applied, and the correct time at which to launch that search depends
+    crucially on the order in which the CV construction events occur. So
+    this patch also includes a change to A:H, to make it detect which way
+    things happen.  The resulting A:H works either way, which is essential
+    for its dual-life nature.
+
+commit 354c724e8ab74f150e14800acc80d505949161f5
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Fri Sep 4 11:04:30 2009 +0100
+
+    OS/2 hadn't been updated to cope with the ext/ restructuring.
+    
+    I don't have OS/2, so I can't test this, but the code in Configure will assume
+    flat directories, because ext/File-Glob is present, and hence not search
+    recursively and not find the OS/2 extensions if they are copied into ext/OS2/*
+    
+    I believe that without this change OS/2 will not have been building since the
+    change to flattened ext. This change may not be sufficient to get OS/2
+    building again, but it is in the right direction.
+
+commit bf6bfb44d9f2e07e4bd25b8eba2d9132fcec637e
+Author: Abhijit Menon-Sen <ams@toroid.org>
+Date:   Fri Sep 4 12:41:56 2009 +0530
+
+    Entity-encode E<0xNNNN> and E<0NNN> correctly
+    
+    Fixes bug #68964 reported by samv, where pod2html encoded E<0x2070> to
+    &0x2070 and not &#x2070. perlpodspec says E<0x2070> should work, but the
+    code in Pod::Html accepted only E<x2070>. The new code accepts both, and
+    processes octal entities correctly as well.
+    
+    Signed-off-by: Abhijit Menon-Sen <ams@toroid.org>
+
+commit 61131c9411631986e27506a8a66b4d43f2f3e4e0
+Author: Karl Williamson <khw@khw-desktop.(none)>
+Date:   Thu Sep 3 11:29:30 2009 -0600
+
+    Add missing files from Unicode 5.1 Character Database
+
+
+=head2 Deprecated numerous Perl 4 era libraries:
+
+    Deprecate termcap.pl with a warning
+    Deprecate tainted.pl with a warning
+    Deprecate stat.pl with a warning
+    Deprecate shellwords.pl with a warning
+    Deprecate pwd.pl with a warning
+    Deprecate open3.pl with a warning
+    Deprecate open2.pl with a warning
+    Deprecate newgetopt.pl with a warning
+    Deprecate look.pl with a warning
+    Deprecate lib/find{,depth}.pl with a warning
+    Deprecate importenv.pl with a warning
+    Deprecate hostname.pl with a warning
+    Deprecate getopts.pl with a warning
+    Deprecate getopt.pl with a warning
+    Deprecate getcwd.pl with a warning
+    Deprecate flush.pl with a warning
+    Deprecate fastcwd.pl with a warning
+    Deprecate exceptions.pl with a warning
+    Deprecate ctime.pl with a warning
+    Deprecate complete.pl with a warning
+    Deprecate cacheout.pl with a warning
+    Deprecate bigrat.pl with a warning
+    Deprecate bigint.pl with a warning
+    Deprecate bigfloat.pl with a warning
+    Deprecate assert.pl with a warning
+    Deprecate abbrev.pl with a warning
+    Deprecate dotsh.pl with a warning
+    Deprecate timelocal.pl with a warning
+
+
+=head2 set PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS to 0 and enable proper POSIX char class matching
+    
+    This also alters which Unicode properties that the POSIX character
+    class and the Perl "special" character classes, like \w and \d map
+    to. At the same time it allows a number of tests for POSIX character
+    class behaviour to be switched from todo to non todo. Legacy testing
+    is still available by changing the define and setting the
+    PERL_TEST_LEGACY_POSIX_CC value to true.
+
+
+commit 89904c08923161afd23c629d5c2c7472a09c16bb
+Author: Lubomir Rintel <lkundrak@v3.sk>
+Date:   Mon Aug 31 11:45:23 2009 +0200
+
+    Fix unpack of abstract socket addrs with nul byte
+    
+    Addresses of Linux abstract namespace sockets are not nul-terminated C
+    strings, but rather an arbitrary character arrays. According to unix(7)
+    documentation from Linux, "Null bytes in the name have  no special
+    significance."
+    
+    unpack_sockaddr_un() was just throwing the initial nul byte away and
+    then treating the rest like ordinary C string when computing the length
+    of the address, which was wrong. This fix utilizes the length of the PV
+    for addresses starting with nul instead.
+    
+    The regression test was extended with check for the problem.
+
+
+=head2    Upgrade Term::ANSIColor to 2.02
+=head2 Update Text::Balanced to 2.02
+=head2  Update Module::Build to 0.35
+
+commit 16fa5c119c4bda5c0396a5f81296bd1ccc128a9c
+Author: Vincent Pit <perl@profvince.com>
+Date:   Thu Aug 27 11:13:09 2009 +0200
+
+    Speed up repeatcpy() by at least 40% for 1-char or numerous repeats
+    
+    And don't make it receive the interpreter anymore.
+    
+    For 1-char repeats, use memset(). Otherwise, use the old implementation up
+    to some (small) length, and then use memcpy() in a binary manner, based on
+    what we previously copied.
+    
+    Note that we use memcpy() so both strings shouldn't overlap. The previous
+    implementation didn't allow this as well. This would be a good place to use
+    the restrict keyword from C99. I'm not sure if Configure has a probe for it.
+
+=head2 set utf8 bit on inferred method names when C<use utf8>
+
+=head2 New debugging flag -DB now dumps subroutine definitions,
+     leaving -Dx for its original purpose of dumping syntax trees.
+
+
+=head2    Make MAD understand the "..." operator
+
+
+=head2 Add support for Abstract namespace sockets
+    
+    Abstract namespace sockets are Linux-specific socket type that live in
+    AF_UNIX family, slightly abusing it to be able to use arbitrary
+    character arrays as addresses: They start with nul byte and are not
+    terminated by nul byte, but with the length passed to the socket()
+    system call.
+    
+    Added regression test for the correct address length computation.
+    
+    Signed-off-by: Lubomir Rintel <lkundrak@fedoraproject.org>
+
+=head2    constant has been upgraded to 1.19. Describe the improvements.
+
+=head2 Note that linearising C3 MRO is now 40% faster for single inheritance.
+
+=head2 Fix a B::Deparse bug - constants and PCSs were appearing as subroutine stubs.
+    
+
+=head2 upgrade CGI from 3.43 to 3.45
+    
+commit d7c0d2821cad1d2e5b6b3d6440e7c22bfaae9559
+Author: David Mitchell <davem@iabyn.com>
+Date:   Thu Aug 20 19:29:35 2009 +0100
+
+    add -DM flag to track smartmatch resolution
+
+
+=head2    bump Safe version to 2.18
+
+=head2 Win32:   Don't explicitly link against msvcrt when using MinGW.
+    
+    The latest releases of MinGW generate hard linker errors
+    when msvcrt is specified explicitly.  It will still link
+    against this library implicitly anyways, so specifying it
+    isn't needed.
+
+=head2 Upgrade to threads::shared 1.31
+    
+
+=head2    Update threads to 1.74
+
+    
+
+=head2    Synchronize with CPAN's Attribute::Handlers 0.86
+=head2   Synchronize AutoLoader with CPAN's 5.69
+=head2 ExtUtils::MakeMaker 6.55_02
+
+=head2    Removed vestigal support for Tenon Intersystems MachTen Unix layer for MacOS Classic.
+    
+=head2    Remove the port to MiNT.  It's a dead platform that hasn't had any love since 5.005
+=head2    Final release of version-0.77 for inclusion in 5.10.1
+
+
+=head2    Add security contact information to perlsec
+    
+    This patch inserts a short paragraph with security contact
+    information near the top of the "Perl Security" documentation
+    page.  This would seem a likely place someone would look for
+    such information (rather than INSTALL or perldelta where it
+    lives today).  I've put it at the top, not the bottom
+    to make it easier to find.
+
+commit 7332a6c406299d5e73836d2410689bd7c3ae4782
+Author: Vincent Pit <perl@profvince.com>
+Date:   Fri Jan 2 10:26:57 2009 +0100
+
+    Introduce "delete local"
+
+=head2    autodie 2.06_01
 
