@@ -79,10 +79,8 @@ if ($PLATFORM eq 'win32' or $PLATFORM eq 'wince' or $PLATFORM eq "aix") {
 
 	$ENV{PERL5LIB} = join $Config{path_sep}, @INC;
 	my $cmd = "$^X $opts -V";
-	my $config = `$cmd`;
-	if (! $config) {
-	    die "Couldn't run [$cmd]: $!";
-        };
+	my $config = `$cmd`
+	    or die "Couldn't run [$cmd]: $!";
 	my($options) = $config =~ /^  Compile-time options: (.*?)\n^  \S/ms;
 	$options =~ s/\s+/ /g;
 	print STDERR "Options: ($options)\n";
