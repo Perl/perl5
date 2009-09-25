@@ -31,6 +31,209 @@ cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
+cpan/Encode/AUTHORS		List of authors
+cpan/Encode/bin/enc2xs		Encode module generator
+cpan/Encode/bin/piconv		iconv by perl
+cpan/Encode/bin/ucm2table	Table Generator for testing
+cpan/Encode/bin/ucmlint		A UCM Lint utility
+cpan/Encode/bin/ucmsort		A UCM sort utility
+cpan/Encode/bin/unidump		Unicode Dump like hexdump(1)
+cpan/Encode/Byte/Byte.pm		Encode extension
+cpan/Encode/Byte/Makefile.PL	Encode extension
+cpan/Encode/Changes		Change Log
+cpan/Encode/CN/CN.pm		Encode extension
+cpan/Encode/CN/Makefile.PL	Encode extension
+cpan/Encode/EBCDIC/EBCDIC.pm	Encode extension
+cpan/Encode/EBCDIC/Makefile.PL	Encode extension
+cpan/Encode/encengine.c		Encode extension
+cpan/Encode/Encode/Changes.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode/encode.h	Encode extension header file
+cpan/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode.pm		Mother of all Encode extensions
+cpan/Encode/Encode/_PM.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode/README.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode/_T.e2x	Skeleton file for enc2xs
+cpan/Encode/Encode.xs		Encode extension
+cpan/Encode/encoding.pm		Perl Pragmatic Module
+cpan/Encode/JP/JP.pm		Encode extension
+cpan/Encode/JP/Makefile.PL	Encode extension
+cpan/Encode/KR/KR.pm		Encode extension
+cpan/Encode/KR/Makefile.PL	Encode extension
+cpan/Encode/lib/Encode/Alias.pm	Encode extension
+cpan/Encode/lib/Encode/CJKConstants.pm	Encode extension
+cpan/Encode/lib/Encode/CN/HZ.pm		Encode extension
+cpan/Encode/lib/Encode/Config.pm	Encode configuration module
+cpan/Encode/lib/Encode/Encoder.pm	OO Encoder
+cpan/Encode/lib/Encode/Encoding.pm	Encode extension
+cpan/Encode/lib/Encode/GSM0338.pm	Encode extension
+cpan/Encode/lib/Encode/Guess.pm	Encode Extension
+cpan/Encode/lib/Encode/JP/H2Z.pm	Encode extension
+cpan/Encode/lib/Encode/JP/JIS7.pm	Encode extension
+cpan/Encode/lib/Encode/KR/2022_KR.pm	Encode extension
+cpan/Encode/lib/Encode/MIME/Header/ISO_2022_JP.pm	Encode extension
+cpan/Encode/lib/Encode/MIME/Header.pm	Encode extension
+cpan/Encode/lib/Encode/MIME/Name.pm	Encode extension
+cpan/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
+cpan/Encode/lib/Encode/Supported.pod	Documents for supported encodings
+cpan/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
+cpan/Encode/Makefile.PL			Encode extension makefile writer
+cpan/Encode/MANIFEST			Encode MANIFEST
+cpan/Encode/META.yml			Encode META.yml
+cpan/Encode/README			Encode extension
+cpan/Encode/Symbol/Makefile.PL		Encode extension
+cpan/Encode/Symbol/Symbol.pm		Encode extension
+cpan/Encode/t/Aliases.t			test script
+cpan/Encode/t/at-cn.t			test script
+cpan/Encode/t/at-tw.t			test script
+cpan/Encode/t/big5-eten.enc		test data
+cpan/Encode/t/big5-eten.utf		test data
+cpan/Encode/t/big5-hkscs.enc		test data
+cpan/Encode/t/big5-hkscs.utf		test data
+cpan/Encode/t/CJKT.t			test script
+cpan/Encode/t/enc_data.t		test script for utf8 DATA
+cpan/Encode/t/enc_eucjp.t		test script
+cpan/Encode/t/enc_module.enc		test data for t/enc_module.t
+cpan/Encode/t/enc_module.t		test script
+cpan/Encode/t/Encoder.t			test script
+cpan/Encode/t/Encode.t			test script
+cpan/Encode/t/encoding.t		test script
+cpan/Encode/t/enc_utf8.t		test script
+cpan/Encode/t/fallback.t		test script
+cpan/Encode/t/from_to.t			test script
+cpan/Encode/t/gb2312.enc		test data
+cpan/Encode/t/gb2312.utf		test data
+cpan/Encode/t/grow.t			test script
+cpan/Encode/t/gsm0338.t			test script
+cpan/Encode/t/guess.t			test script
+cpan/Encode/t/jis7-fallback.t		test script
+cpan/Encode/t/jisx0201.enc		test data
+cpan/Encode/t/jisx0201.utf		test data
+cpan/Encode/t/jisx0208.enc		test data
+cpan/Encode/t/jisx0208.utf		test data
+cpan/Encode/t/jisx0212.enc		test data
+cpan/Encode/t/jisx0212.utf		test data
+cpan/Encode/t/jperl.t			test script
+cpan/Encode/t/ksc5601.enc		test data
+cpan/Encode/t/ksc5601.utf		test data
+cpan/Encode/t/mime_header_iso2022jp.t	test script
+cpan/Encode/t/mime-header.t		test script
+cpan/Encode/t/mime-name.t		test script
+cpan/Encode/t/Mod_EUCJP.pm		module that t/enc_module.enc uses
+cpan/Encode/t/perlio.t			test script
+cpan/Encode/t/piconv.t			Test for piconv.t
+cpan/Encode/t/rt.pl			test script
+cpan/Encode/t/unibench.pl		benchmark script
+cpan/Encode/t/Unicode.t			test script
+cpan/Encode/t/utf8strict.t		test script
+cpan/Encode/TW/Makefile.PL		Encode extension
+cpan/Encode/TW/TW.pm			Encode extension
+cpan/Encode/ucm/8859-10.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-11.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-13.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-14.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-15.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-16.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-1.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-2.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-3.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-4.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-5.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-6.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-7.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-8.ucm		Unicode Character Map
+cpan/Encode/ucm/8859-9.ucm		Unicode Character Map
+cpan/Encode/ucm/adobeStdenc.ucm		Unicode Character Map
+cpan/Encode/ucm/adobeSymbol.ucm		Unicode Character Map
+cpan/Encode/ucm/adobeZdingbat.ucm	Unicode Character Map
+cpan/Encode/ucm/ascii.ucm		Unicode Character Map
+cpan/Encode/ucm/big5-eten.ucm		Unicode Character Map
+cpan/Encode/ucm/big5-hkscs.ucm		Unicode Character Map
+cpan/Encode/ucm/cp037.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1006.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1026.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1047.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1250.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1251.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1252.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1253.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1254.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1255.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1256.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1257.ucm		Unicode Character Map
+cpan/Encode/ucm/cp1258.ucm		Unicode Character Map
+cpan/Encode/ucm/cp424.ucm		Unicode Character Map
+cpan/Encode/ucm/cp437.ucm		Unicode Character Map
+cpan/Encode/ucm/cp500.ucm		Unicode Character Map
+cpan/Encode/ucm/cp737.ucm		Unicode Character Map
+cpan/Encode/ucm/cp775.ucm		Unicode Character Map
+cpan/Encode/ucm/cp850.ucm		Unicode Character Map
+cpan/Encode/ucm/cp852.ucm		Unicode Character Map
+cpan/Encode/ucm/cp855.ucm		Unicode Character Map
+cpan/Encode/ucm/cp856.ucm		Unicode Character Map
+cpan/Encode/ucm/cp857.ucm		Unicode Character Map
+cpan/Encode/ucm/cp858.ucm		Unicode Character Map
+cpan/Encode/ucm/cp860.ucm		Unicode Character Map
+cpan/Encode/ucm/cp861.ucm		Unicode Character Map
+cpan/Encode/ucm/cp862.ucm		Unicode Character Map
+cpan/Encode/ucm/cp863.ucm		Unicode Character Map
+cpan/Encode/ucm/cp864.ucm		Unicode Character Map
+cpan/Encode/ucm/cp865.ucm		Unicode Character Map
+cpan/Encode/ucm/cp866.ucm		Unicode Character Map
+cpan/Encode/ucm/cp869.ucm		Unicode Character Map
+cpan/Encode/ucm/cp874.ucm		Unicode Character Map
+cpan/Encode/ucm/cp875.ucm		Unicode Character Map
+cpan/Encode/ucm/cp932.ucm		Unicode Character Map
+cpan/Encode/ucm/cp936.ucm		Unicode Character Map
+cpan/Encode/ucm/cp949.ucm		Unicode Character Map
+cpan/Encode/ucm/cp950.ucm		Unicode Character Map
+cpan/Encode/ucm/ctrl.ucm		Unicode Character Map
+cpan/Encode/ucm/dingbats.ucm		Unicode Character Map
+cpan/Encode/ucm/euc-cn.ucm		Unicode Character Map
+cpan/Encode/ucm/euc-jp.ucm		Unicode Character Map
+cpan/Encode/ucm/euc-kr.ucm		Unicode Character Map
+cpan/Encode/ucm/gb12345.ucm		Unicode Character Map
+cpan/Encode/ucm/gb2312.ucm		Unicode Character Map
+cpan/Encode/ucm/hp-roman8.ucm		Unicode Character Map
+cpan/Encode/ucm/ir-165.ucm		Unicode Character Map
+cpan/Encode/ucm/jis0201.ucm		Unicode Character Map
+cpan/Encode/ucm/jis0208.ucm		Unicode Character Map
+cpan/Encode/ucm/jis0212.ucm		Unicode Character Map
+cpan/Encode/ucm/johab.ucm		Unicode Character Map
+cpan/Encode/ucm/koi8-f.ucm		Unicode Character Map
+cpan/Encode/ucm/koi8-r.ucm		Unicode Character Map
+cpan/Encode/ucm/koi8-u.ucm		Unicode Character Map
+cpan/Encode/ucm/ksc5601.ucm		Unicode Character Map
+cpan/Encode/ucm/macArabic.ucm		Unicode Character Map
+cpan/Encode/ucm/macCentEuro.ucm		Unicode Character Map
+cpan/Encode/ucm/macChinsimp.ucm		Unicode Character Map
+cpan/Encode/ucm/macChintrad.ucm		Unicode Character Map
+cpan/Encode/ucm/macCroatian.ucm		Unicode Character Map
+cpan/Encode/ucm/macCyrillic.ucm		Unicode Character Map
+cpan/Encode/ucm/macDingbats.ucm		Unicode Character Map
+cpan/Encode/ucm/macFarsi.ucm		Unicode Character Map
+cpan/Encode/ucm/macGreek.ucm		Unicode Character Map
+cpan/Encode/ucm/macHebrew.ucm		Unicode Character Map
+cpan/Encode/ucm/macIceland.ucm		Unicode Character Map
+cpan/Encode/ucm/macJapanese.ucm		Unicode Character Map
+cpan/Encode/ucm/macKorean.ucm		Unicode Character Map
+cpan/Encode/ucm/macRoman.ucm		Unicode Character Map
+cpan/Encode/ucm/macROMnn.ucm		Unicode Character Map
+cpan/Encode/ucm/macRUMnn.ucm		Unicode Character Map
+cpan/Encode/ucm/macSami.ucm		Unicode Character Map
+cpan/Encode/ucm/macSymbol.ucm		Unicode Character Map
+cpan/Encode/ucm/macThai.ucm		Unicode Character Map
+cpan/Encode/ucm/macTurkish.ucm		Unicode Character Map
+cpan/Encode/ucm/macUkraine.ucm		Unicode Character Map
+cpan/Encode/ucm/nextstep.ucm		Unicode Character Map
+cpan/Encode/ucm/null.ucm		Unicode Character Map
+cpan/Encode/ucm/posix-bc.ucm		Unicode Character Map
+cpan/Encode/ucm/shiftjis.ucm		Unicode Character Map
+cpan/Encode/ucm/symbol.ucm		Unicode Character Map
+cpan/Encode/ucm/viscii.ucm		Unicode Character Map
+cpan/Encode/Unicode/Makefile.PL		Encode extension
+cpan/Encode/Unicode/Unicode.pm		Encode extension
+cpan/Encode/Unicode/Unicode.xs		Encode extension
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -918,209 +1121,6 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/t/DynaLoader.t	See if DynaLoader works
-ext/Encode/AUTHORS		List of authors
-ext/Encode/bin/enc2xs		Encode module generator
-ext/Encode/bin/piconv		iconv by perl
-ext/Encode/bin/ucm2table	Table Generator for testing
-ext/Encode/bin/ucmlint		A UCM Lint utility
-ext/Encode/bin/ucmsort		A UCM sort utility
-ext/Encode/bin/unidump		Unicode Dump like hexdump(1)
-ext/Encode/Byte/Byte.pm		Encode extension
-ext/Encode/Byte/Makefile.PL	Encode extension
-ext/Encode/Changes		Change Log
-ext/Encode/CN/CN.pm		Encode extension
-ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/EBCDIC/EBCDIC.pm	Encode extension
-ext/Encode/EBCDIC/Makefile.PL	Encode extension
-ext/Encode/encengine.c		Encode extension
-ext/Encode/Encode/Changes.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/encode.h	Encode extension header file
-ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode.pm		Mother of all Encode extensions
-ext/Encode/Encode/_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x	Skeleton file for enc2xs
-ext/Encode/Encode.xs		Encode extension
-ext/Encode/encoding.pm		Perl Pragmatic Module
-ext/Encode/JP/JP.pm		Encode extension
-ext/Encode/JP/Makefile.PL	Encode extension
-ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL	Encode extension
-ext/Encode/lib/Encode/Alias.pm	Encode extension
-ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
-ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
-ext/Encode/lib/Encode/Config.pm	Encode configuration module
-ext/Encode/lib/Encode/Encoder.pm	OO Encoder
-ext/Encode/lib/Encode/Encoding.pm	Encode extension
-ext/Encode/lib/Encode/GSM0338.pm	Encode extension
-ext/Encode/lib/Encode/Guess.pm	Encode Extension
-ext/Encode/lib/Encode/JP/H2Z.pm	Encode extension
-ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
-ext/Encode/lib/Encode/KR/2022_KR.pm	Encode extension
-ext/Encode/lib/Encode/MIME/Header/ISO_2022_JP.pm	Encode extension
-ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
-ext/Encode/lib/Encode/MIME/Name.pm	Encode extension
-ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
-ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
-ext/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/MANIFEST		Encode MANIFEST
-ext/Encode/META.yml		Encode META.yml
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL	Encode extension
-ext/Encode/Symbol/Symbol.pm	Encode extension
-ext/Encode/t/Aliases.t		test script
-ext/Encode/t/at-cn.t		test script
-ext/Encode/t/at-tw.t		test script
-ext/Encode/t/big5-eten.enc	test data
-ext/Encode/t/big5-eten.utf	test data
-ext/Encode/t/big5-hkscs.enc	test data
-ext/Encode/t/big5-hkscs.utf	test data
-ext/Encode/t/CJKT.t		test script
-ext/Encode/t/enc_data.t		test script for utf8 DATA
-ext/Encode/t/enc_eucjp.t	test script
-ext/Encode/t/enc_module.enc	test data for t/enc_module.t
-ext/Encode/t/enc_module.t	test script
-ext/Encode/t/Encoder.t		test script
-ext/Encode/t/Encode.t		test script
-ext/Encode/t/encoding.t		test script
-ext/Encode/t/enc_utf8.t		test script
-ext/Encode/t/fallback.t		test script
-ext/Encode/t/from_to.t		test script
-ext/Encode/t/gb2312.enc		test data
-ext/Encode/t/gb2312.utf		test data
-ext/Encode/t/grow.t		test script
-ext/Encode/t/gsm0338.t		test script
-ext/Encode/t/guess.t		test script
-ext/Encode/t/jis7-fallback.t	test script
-ext/Encode/t/jisx0201.enc	test data
-ext/Encode/t/jisx0201.utf	test data
-ext/Encode/t/jisx0208.enc	test data
-ext/Encode/t/jisx0208.utf	test data
-ext/Encode/t/jisx0212.enc	test data
-ext/Encode/t/jisx0212.utf	test data
-ext/Encode/t/jperl.t		test script
-ext/Encode/t/ksc5601.enc	test data
-ext/Encode/t/ksc5601.utf	test data
-ext/Encode/t/mime_header_iso2022jp.t	test script
-ext/Encode/t/mime-header.t	test script
-ext/Encode/t/mime-name.t	test script
-ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
-ext/Encode/t/perlio.t		test script
-ext/Encode/t/piconv.t		Test for piconv.t
-ext/Encode/t/rt.pl		test script
-ext/Encode/t/unibench.pl	benchmark script
-ext/Encode/t/Unicode.t		test script
-ext/Encode/t/utf8strict.t	test script
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
-ext/Encode/ucm/8859-10.ucm	Unicode Character Map
-ext/Encode/ucm/8859-11.ucm	Unicode Character Map
-ext/Encode/ucm/8859-13.ucm	Unicode Character Map
-ext/Encode/ucm/8859-14.ucm	Unicode Character Map
-ext/Encode/ucm/8859-15.ucm	Unicode Character Map
-ext/Encode/ucm/8859-16.ucm	Unicode Character Map
-ext/Encode/ucm/8859-1.ucm	Unicode Character Map
-ext/Encode/ucm/8859-2.ucm	Unicode Character Map
-ext/Encode/ucm/8859-3.ucm	Unicode Character Map
-ext/Encode/ucm/8859-4.ucm	Unicode Character Map
-ext/Encode/ucm/8859-5.ucm	Unicode Character Map
-ext/Encode/ucm/8859-6.ucm	Unicode Character Map
-ext/Encode/ucm/8859-7.ucm	Unicode Character Map
-ext/Encode/ucm/8859-8.ucm	Unicode Character Map
-ext/Encode/ucm/8859-9.ucm	Unicode Character Map
-ext/Encode/ucm/adobeStdenc.ucm	Unicode Character Map
-ext/Encode/ucm/adobeSymbol.ucm	Unicode Character Map
-ext/Encode/ucm/adobeZdingbat.ucm	Unicode Character Map
-ext/Encode/ucm/ascii.ucm	Unicode Character Map
-ext/Encode/ucm/big5-eten.ucm	Unicode Character Map
-ext/Encode/ucm/big5-hkscs.ucm	Unicode Character Map
-ext/Encode/ucm/cp037.ucm	Unicode Character Map
-ext/Encode/ucm/cp1006.ucm	Unicode Character Map
-ext/Encode/ucm/cp1026.ucm	Unicode Character Map
-ext/Encode/ucm/cp1047.ucm	Unicode Character Map
-ext/Encode/ucm/cp1250.ucm	Unicode Character Map
-ext/Encode/ucm/cp1251.ucm	Unicode Character Map
-ext/Encode/ucm/cp1252.ucm	Unicode Character Map
-ext/Encode/ucm/cp1253.ucm	Unicode Character Map
-ext/Encode/ucm/cp1254.ucm	Unicode Character Map
-ext/Encode/ucm/cp1255.ucm	Unicode Character Map
-ext/Encode/ucm/cp1256.ucm	Unicode Character Map
-ext/Encode/ucm/cp1257.ucm	Unicode Character Map
-ext/Encode/ucm/cp1258.ucm	Unicode Character Map
-ext/Encode/ucm/cp424.ucm	Unicode Character Map
-ext/Encode/ucm/cp437.ucm	Unicode Character Map
-ext/Encode/ucm/cp500.ucm	Unicode Character Map
-ext/Encode/ucm/cp737.ucm	Unicode Character Map
-ext/Encode/ucm/cp775.ucm	Unicode Character Map
-ext/Encode/ucm/cp850.ucm	Unicode Character Map
-ext/Encode/ucm/cp852.ucm	Unicode Character Map
-ext/Encode/ucm/cp855.ucm	Unicode Character Map
-ext/Encode/ucm/cp856.ucm	Unicode Character Map
-ext/Encode/ucm/cp857.ucm	Unicode Character Map
-ext/Encode/ucm/cp858.ucm	Unicode Character Map
-ext/Encode/ucm/cp860.ucm	Unicode Character Map
-ext/Encode/ucm/cp861.ucm	Unicode Character Map
-ext/Encode/ucm/cp862.ucm	Unicode Character Map
-ext/Encode/ucm/cp863.ucm	Unicode Character Map
-ext/Encode/ucm/cp864.ucm	Unicode Character Map
-ext/Encode/ucm/cp865.ucm	Unicode Character Map
-ext/Encode/ucm/cp866.ucm	Unicode Character Map
-ext/Encode/ucm/cp869.ucm	Unicode Character Map
-ext/Encode/ucm/cp874.ucm	Unicode Character Map
-ext/Encode/ucm/cp875.ucm	Unicode Character Map
-ext/Encode/ucm/cp932.ucm	Unicode Character Map
-ext/Encode/ucm/cp936.ucm	Unicode Character Map
-ext/Encode/ucm/cp949.ucm	Unicode Character Map
-ext/Encode/ucm/cp950.ucm	Unicode Character Map
-ext/Encode/ucm/ctrl.ucm		Unicode Character Map
-ext/Encode/ucm/dingbats.ucm	Unicode Character Map
-ext/Encode/ucm/euc-cn.ucm	Unicode Character Map
-ext/Encode/ucm/euc-jp.ucm	Unicode Character Map
-ext/Encode/ucm/euc-kr.ucm	Unicode Character Map
-ext/Encode/ucm/gb12345.ucm	Unicode Character Map
-ext/Encode/ucm/gb2312.ucm	Unicode Character Map
-ext/Encode/ucm/hp-roman8.ucm	Unicode Character Map
-ext/Encode/ucm/ir-165.ucm	Unicode Character Map
-ext/Encode/ucm/jis0201.ucm	Unicode Character Map
-ext/Encode/ucm/jis0208.ucm	Unicode Character Map
-ext/Encode/ucm/jis0212.ucm	Unicode Character Map
-ext/Encode/ucm/johab.ucm	Unicode Character Map
-ext/Encode/ucm/koi8-f.ucm	Unicode Character Map
-ext/Encode/ucm/koi8-r.ucm	Unicode Character Map
-ext/Encode/ucm/koi8-u.ucm	Unicode Character Map
-ext/Encode/ucm/ksc5601.ucm	Unicode Character Map
-ext/Encode/ucm/macArabic.ucm	Unicode Character Map
-ext/Encode/ucm/macCentEuro.ucm	Unicode Character Map
-ext/Encode/ucm/macChinsimp.ucm	Unicode Character Map
-ext/Encode/ucm/macChintrad.ucm	Unicode Character Map
-ext/Encode/ucm/macCroatian.ucm	Unicode Character Map
-ext/Encode/ucm/macCyrillic.ucm	Unicode Character Map
-ext/Encode/ucm/macDingbats.ucm	Unicode Character Map
-ext/Encode/ucm/macFarsi.ucm	Unicode Character Map
-ext/Encode/ucm/macGreek.ucm	Unicode Character Map
-ext/Encode/ucm/macHebrew.ucm	Unicode Character Map
-ext/Encode/ucm/macIceland.ucm	Unicode Character Map
-ext/Encode/ucm/macJapanese.ucm	Unicode Character Map
-ext/Encode/ucm/macKorean.ucm	Unicode Character Map
-ext/Encode/ucm/macRoman.ucm	Unicode Character Map
-ext/Encode/ucm/macROMnn.ucm	Unicode Character Map
-ext/Encode/ucm/macRUMnn.ucm	Unicode Character Map
-ext/Encode/ucm/macSami.ucm	Unicode Character Map
-ext/Encode/ucm/macSymbol.ucm	Unicode Character Map
-ext/Encode/ucm/macThai.ucm	Unicode Character Map
-ext/Encode/ucm/macTurkish.ucm	Unicode Character Map
-ext/Encode/ucm/macUkraine.ucm	Unicode Character Map
-ext/Encode/ucm/nextstep.ucm	Unicode Character Map
-ext/Encode/ucm/null.ucm		Unicode Character Map
-ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
-ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
-ext/Encode/ucm/symbol.ucm	Unicode Character Map
-ext/Encode/ucm/viscii.ucm	Unicode Character Map
-ext/Encode/Unicode/Makefile.PL	Encode extension
-ext/Encode/Unicode/Unicode.pm	Encode extension
-ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/encoding-warnings/Changes		Changelog for encoding::warnings
 ext/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
 ext/encoding-warnings/t/1-warning.t	tests for encoding::warnings

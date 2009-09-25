@@ -515,7 +515,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'dankogai',
 	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.35.tar.gz',
-	'FILES'		=> q[ext/Encode],
+	'FILES'		=> q[cpan/Encode],
 	'EXCLUDED'	=> [ qw{t/piconv.t} ], # FIXME
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
