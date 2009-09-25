@@ -1373,30 +1373,30 @@ MakePPPort_clean:
 # DynaLoader.pm, so this will have to do
 Extensions : ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --dynamic
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --dynamic
 
 Extensions_reonly : ..\make_ext.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --dynamic +re
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --dynamic +re
 
 Extensions_static : ..\make_ext.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --static
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
 Extensions_nonxs : ..\make_ext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --nonxs
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --nonxs
 
 $(DYNALOADER) : ..\make_ext.pl $(PERLDEP) $(CONFIGPM) Extensions_nonxs
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynaloader
 
 Extensions_clean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --all --target=clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --all --target=clean
 
 Extensions_realclean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dir=$(CPANDIR) --all --target=realclean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(EXTDIR) --all --target=realclean
 
 #-------------------------------------------------------------------------------
 
