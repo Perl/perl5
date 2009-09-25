@@ -20,6 +20,7 @@ my @toolchain = qw(ext/constant/lib ext/Cwd ext/Cwd/lib ext/ExtUtils-Command/lib
        ext/File-Path/lib ext/AutoLoader/lib);
 
 my @ext_dirs = qw(ext cpan);
+my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 
 # This script acts as a simple interface for building extensions.
 
@@ -100,7 +101,7 @@ foreach (@extspec) {
     if (s{^lib/auto/}{}) {
 	# Remove lib/auto prefix and /*.* suffix
 	s{/[^/]+\.[^/]+$}{};
-    } elsif (s{^ext/}{}) {
+    } elsif (s{^$ext_dirs_re/}{}) {
 	# Remove ext/ prefix and /pm_to_blib suffix
 	s{/pm_to_blib$}{};
 	# Targets are given as files on disk, but the extension spec is still
