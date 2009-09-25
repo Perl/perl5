@@ -319,6 +319,9 @@ sub build_extension {
 	    unless ($fromname) {
 		die "For $mname tried @locations in in $ext_dir but can't find source";
 	    }
+            my $pod_name;
+	    ($pod_name = $fromname) =~ s/\.pm\z/.pod/;
+	    $pod_name = $fromname unless -e $pod_name;
 	    open my $fh, '>', 'Makefile.PL'
 		or die "Can't open Makefile.PL for writing: $!";
 	    print $fh <<"EOM";
@@ -333,7 +336,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME          => '$mname',
     VERSION_FROM  => '$fromname',
-    ABSTRACT_FROM => '$fromname',
+    ABSTRACT_FROM => '$pod_name',
     realclean     => {FILES => 'Makefile.PL'},
 );
 
