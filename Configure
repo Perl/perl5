@@ -21707,10 +21707,10 @@ else
 fi
 set X $known_extensions
 shift
-known_extensions="$*"
+known_extensions=`echo "$*" | tr ' ' $trnl | $sort | tr $trnl ' '`
 set X $nonxs_extensions
 shift
-nonxs_extensions="$*"
+nonxs_extensions=`echo "$*" | tr ' ' $trnl | $sort | tr $trnl ' '`
 cd "$tdir"
 
 : Now see which are supported on this system.
