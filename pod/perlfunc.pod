@@ -4332,12 +4332,12 @@ X<readline> X<gets> X<fgets>
 Reads from the filehandle whose typeglob is contained in EXPR (or from
 *ARGV if EXPR is not provided).  In scalar context, each call reads and
 returns the next line, until end-of-file is reached, whereupon the
-subsequent call returns undef.  In list context, reads until end-of-file
+subsequent call returns C<undef>.  In list context, reads until end-of-file
 is reached and returns a list of lines.  Note that the notion of "line"
 used here is however you may have defined it with C<$/> or
 C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
 
-When C<$/> is set to C<undef>, when readline() is in scalar
+When C<$/> is set to C<undef>, when C<readline> is in scalar
 context (i.e. file slurp mode), and when an empty file is read, it
 returns C<''> the first time, followed by C<undef> subsequently.
 
@@ -4348,21 +4348,31 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
     $line = <STDIN>;
     $line = readline(*STDIN);		# same thing
 
-If readline encounters an operating system error, C<$!> will be set with the
-corresponding error message.  It can be helpful to check C<$!> when you are
-reading from filehandles you don't trust, such as a tty or a socket.  The
-following example uses the operator form of C<readline>, and takes the necessary
-steps to ensure that C<readline> was successful.
+If C<readline> encounters an operating system error, C<$!> will be set
+with the corresponding error message.  It can be helpful to check
+C<$!> when you are reading from filehandles you don't trust, such as a
+tty or a socket.  The following example uses the operator form of
+C<readline> and dies if the result is not defined.
 
-    for (;;) {
-        undef $!;
-        unless (defined( $line = <> )) {
-            last if eof;
-            die $! if $!;
+	while ( ! eof($fh) ) {
+		defined( $_ = <$fh> ) or die "readline failed: $!";
+	    ...
+	}
+
+Note that you have can't handle C<readline> errors that way with the
+C<ARGV> filehandle. In that case, you have to open each element of
+C<@ARGV> yourself since C<eof> handles C<ARGV> differently.
+
+    foreach my $arg (@ARGV) {
+        open(my $fh, $arg) or warn "Can't open $arg: $!";
+
+        while ( ! eof($fh) ) {
+            defined( $_ = <$fh> )
+                or die "readline failed for $arg: $!";
+            ...
         }
-        # ...
     }
-
+    
 =item readlink EXPR
 X<readlink>
 
