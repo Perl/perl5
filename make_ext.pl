@@ -234,7 +234,10 @@ foreach my $spec (@extspec)  {
     my $mname = $spec;
     $mname =~ s!/!::!g;
     my $ext_pathname;
-    if (-d "ext/$spec") {
+    if (-d "ext/$spec"
+	# Temporary hack to cope with smokers that are not clearing directories:
+	&& $spec =~ m!/!
+       ) {
 	# Old style ext/Data/Dumper/
 	$ext_pathname = "ext/$spec";
     } else {
