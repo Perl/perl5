@@ -179,7 +179,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Archive-Extract-0.34.tar.gz',
-	'FILES'		=> q[ext/Archive-Extract],
+	'FILES'		=> q[cpan/Archive-Extract],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-archive-extract@rt.cpan.org',

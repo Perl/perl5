@@ -17,6 +17,27 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 Copying			The GNU General Public License
+cpan/Archive-Extract/lib/Archive/Extract.pm	Archive::Extract
+cpan/Archive-Extract/t/01_Archive-Extract.t	Archive::Extract tests
+cpan/Archive-Extract/t/src/double_dir.zip	Archive::Extract tests
+cpan/Archive-Extract/t/src/x.bz2		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.gz			Archive::Extract tests
+cpan/Archive-Extract/t/src/x.jar		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.lzma		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.par		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.tar		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.tar.gz		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.tgz		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.Z			Archive::Extract tests
+cpan/Archive-Extract/t/src/x.zip		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.jar		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.par		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tar		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tar.bz2		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tar.gz		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tbz		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tgz		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.zip		Archive::Extract tests
 cpan/DB_File/Changes		Berkeley DB extension change log
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -312,27 +333,6 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
-ext/Archive-Extract/lib/Archive/Extract.pm	Archive::Extract
-ext/Archive-Extract/t/01_Archive-Extract.t	Archive::Extract tests
-ext/Archive-Extract/t/src/double_dir.zip	Archive::Extract tests
-ext/Archive-Extract/t/src/x.bz2	Archive::Extract tests
-ext/Archive-Extract/t/src/x.gz	Archive::Extract tests
-ext/Archive-Extract/t/src/x.jar	Archive::Extract tests
-ext/Archive-Extract/t/src/x.lzma	Archive::Extract tests
-ext/Archive-Extract/t/src/x.par	Archive::Extract tests
-ext/Archive-Extract/t/src/x.tar	Archive::Extract tests
-ext/Archive-Extract/t/src/x.tar.gz	Archive::Extract tests
-ext/Archive-Extract/t/src/x.tgz	Archive::Extract tests
-ext/Archive-Extract/t/src/x.Z	Archive::Extract tests
-ext/Archive-Extract/t/src/x.zip	Archive::Extract tests
-ext/Archive-Extract/t/src/y.jar	Archive::Extract tests
-ext/Archive-Extract/t/src/y.par	Archive::Extract tests
-ext/Archive-Extract/t/src/y.tar	Archive::Extract tests
-ext/Archive-Extract/t/src/y.tar.bz2	Archive::Extract tests
-ext/Archive-Extract/t/src/y.tar.gz	Archive::Extract tests
-ext/Archive-Extract/t/src/y.tbz	Archive::Extract tests
-ext/Archive-Extract/t/src/y.tgz	Archive::Extract tests
-ext/Archive-Extract/t/src/y.zip	Archive::Extract tests
 ext/Archive-Tar/bin/ptar	the ptar utility
 ext/Archive-Tar/bin/ptardiff	the ptardiff utility
 ext/Archive-Tar/lib/Archive/Tar/Constant.pm	Archive::Tar
