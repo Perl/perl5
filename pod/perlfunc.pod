@@ -4372,7 +4372,7 @@ C<@ARGV> yourself since C<eof> handles C<ARGV> differently.
             ...
         }
     }
-    
+
 =item readlink EXPR
 X<readlink>
 
