@@ -248,6 +248,7 @@ ext/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 ext/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 ext/autouse/lib/autouse.pm	Load and call a function only when it's used
 ext/autouse/t/autouse.t		See if autouse works
+ext/autouse/t/lib/MyTestModule.pm	Test module for autouse
 ext/base/Changes		base.pm changelog
 ext/base/lib/base.pm		Establish IS-A relationship at compile time
 ext/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
