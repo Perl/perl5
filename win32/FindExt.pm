@@ -88,6 +88,9 @@ sub find_ext
         $this_ext =~ s!-!/!g;
         $leaf =~ s/.*-//;
 
+	# Temporary hack to cope with smokers that are not clearing directories:
+        next if $ext{$this_ext};
+
         if (has_xs_or_c("$ext_dir$item")) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
         } else {
