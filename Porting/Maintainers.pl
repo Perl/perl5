@@ -370,7 +370,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'andk',
 	'DISTRIBUTION'	=> 'ANDK/CPAN-1.9402.tar.gz',
-	'FILES'		=> q[ext/CPAN],
+	'FILES'		=> q[cpan/CPAN],
 	'EXCLUDED'	=> [ qr{^distroprefs/},
 			     qr{^inc/Test/},
 			     qr{^t/CPAN/authors/},
@@ -407,7 +407,7 @@ use File::Glob qw(:case);
 			       },
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'CPAN',
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'CPANPLUS' =>
