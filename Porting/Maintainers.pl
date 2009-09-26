@@ -434,7 +434,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'bingos',
 	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.40.tar.gz',
-	'FILES'		=> q[ext/CPANPLUS-Dist-Build],
+	'FILES'		=> q[cpan/CPANPLUS-Dist-Build],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{ t/99_pod.t
 			         t/99_pod_coverage.t

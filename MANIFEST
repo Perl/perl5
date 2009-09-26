@@ -176,6 +176,17 @@ cpan/CPAN/Makefile.PL
 cpan/CPANPLUS/bin/cpan2dist			the cpan2dist utility
 cpan/CPANPLUS/bin/cpanp				the cpanp utility
 cpan/CPANPLUS/bin/cpanp-run-perl		the cpanp-run-perl utility
+cpan/CPANPLUS-Dist-Build/lib/CPANPLUS/Dist/Build/Constants.pm	CPANPLUS::Dist::Build
+cpan/CPANPLUS-Dist-Build/lib/CPANPLUS/Dist/Build.pm		CPANPLUS::Dist::Build
+cpan/CPANPLUS-Dist-Build/t/01_CPANPLUS-Dist-Build-Constants.t	CPANPLUS::Dist::Build tests
+cpan/CPANPLUS-Dist-Build/t/02_CPANPLUS-Dist-Build.t		CPANPLUS::Dist::Build tests
+cpan/CPANPLUS-Dist-Build/t/dummy-CPAN/authors/01mailrc.txt.gz
+cpan/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/02packages.details.txt.gz
+cpan/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/03modlist.data.gz
+cpan/CPANPLUS-Dist-Build/t/dummy-perl/.hidden			CPANPLUS::Dist::Build tests
+cpan/CPANPLUS-Dist-Build/t/inc/conf.pl				CPANPLUS::Dist::Build tests
+cpan/CPANPLUS-Dist-Build/t/src/noxs/Foo-Bar-0.01.tar.gz		CPANPLUS::Dist::Build tests
+cpan/CPANPLUS-Dist-Build/t/src/xs/Foo-Bar-0.01.tar.gz		CPANPLUS::Dist::Build tests
 cpan/CPANPLUS/lib/CPANPLUS/Backend.pm				CPANPLUS
 cpan/CPANPLUS/lib/CPANPLUS/Backend/RV.pm			CPANPLUS
 cpan/CPANPLUS/lib/CPANPLUS/Config.pm				CPANPLUS
@@ -798,17 +809,6 @@ ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
 ext/constant/lib/constant.pm	For "use constant"
 ext/constant/t/constant.t	See if compile-time constants work
-ext/CPANPLUS-Dist-Build/lib/CPANPLUS/Dist/Build/Constants.pm	CPANPLUS::Dist::Build
-ext/CPANPLUS-Dist-Build/lib/CPANPLUS/Dist/Build.pm	CPANPLUS::Dist::Build
-ext/CPANPLUS-Dist-Build/t/01_CPANPLUS-Dist-Build-Constants.t	CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/02_CPANPLUS-Dist-Build.t	CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/dummy-CPAN/authors/01mailrc.txt.gz
-ext/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/02packages.details.txt.gz
-ext/CPANPLUS-Dist-Build/t/dummy-CPAN/modules/03modlist.data.gz
-ext/CPANPLUS-Dist-Build/t/dummy-perl/.hidden	CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/inc/conf.pl	CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/src/noxs/Foo-Bar-0.01.tar.gz	CPANPLUS::Dist::Build tests
-ext/CPANPLUS-Dist-Build/t/src/xs/Foo-Bar-0.01.tar.gz	CPANPLUS::Dist::Build tests
 ext/Cwd/Changes				Cwd extension Changelog
 ext/Cwd/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
 ext/Cwd/Cwd.xs				Cwd extension external subroutines
