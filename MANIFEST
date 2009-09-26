@@ -635,6 +635,14 @@ cpan/Module-Build/t/use_tap_harness.t			Module::Build
 cpan/Module-Build/t/versions.t				Module::Build
 cpan/Module-Build/t/write_default_maniskip.t		Module::Build tests
 cpan/Module-Build/t/xs.t				Module::Build
+cpan/Module-Load/lib/Module/Load.pm		Module::Load
+cpan/Module-Load/t/01_Module-Load.t		Module::Load tests
+cpan/Module-Load/t/to_load/config_file		Module::Load tests
+cpan/Module-Load/t/to_load/LoadIt.pm		Module::Load tests
+cpan/Module-Load/t/to_load/LoadMe.pl		Module::Load tests
+cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
+cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
+cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -1946,14 +1954,6 @@ ext/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm	Module::Load::Conditional
 ext/Module-Load-Conditional/t/to_load/ToBeLoaded	Module::Conditional tests
 ext/Module-Loaded/lib/Module/Loaded.pm	Module::Loaded
 ext/Module-Loaded/t/01_Module-Loaded.t	Module::Loaded tests
-ext/Module-Load/lib/Module/Load.pm	Module::Load
-ext/Module-Load/t/01_Module-Load.t	Module::Load tests
-ext/Module-Load/t/to_load/config_file	Module::Load tests
-ext/Module-Load/t/to_load/LoadIt.pm	Module::Load tests
-ext/Module-Load/t/to_load/LoadMe.pl	Module::Load tests
-ext/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
-ext/Module-Load/t/to_load/TestModule.pm	Module::Load tests
-ext/Module-Load/t/to_load/ToBeLoaded	Module::Load tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable

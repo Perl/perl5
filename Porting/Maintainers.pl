@@ -1014,7 +1014,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Module-Load-0.16.tar.gz',
-	'FILES'		=> q[ext/Module-Load],
+	'FILES'		=> q[cpan/Module-Load],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
