@@ -954,7 +954,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'zefram',
 	'DISTRIBUTION'	=> 'JHI/Math-Complex-1.56.tar.gz',
-	'FILES'		=> q[ext/Math-Complex],
+	'FILES'		=> q[cpan/Math-Complex],
 	'EXCLUDED'	=> [
 			     qw{
 				t/pod.t

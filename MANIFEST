@@ -564,6 +564,11 @@ cpan/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
 cpan/Log-Message/t/02_Log-Message.t		Log::Message tests
 cpan/Log-Message/t/conf/config_file		Log::Message tests
 cpan/Log-Message/t/conf/LoadMe.pl		Log::Message tests
+cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
+cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
+cpan/Math-Complex/t/Complex.t		See if Math::Complex works
+cpan/Math-Complex/t/Trig.t		See if Math::Trig works
+cpan/Math-Complex/t/underbar.t		See if Math::Complex works
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -1814,11 +1819,6 @@ ext/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 ext/Math-BigRat/t/Math/BigRat/Test.pm		Math::BigRat test helper
 ext/Math-BigRat/t/requirer.t	see if require works properly
 ext/Math-BigRat/t/trap.t	see if trap_nan and trap_inf work
-ext/Math-Complex/lib/Math/Complex.pm		A Complex package
-ext/Math-Complex/lib/Math/Trig.pm		A simple interface to complex trigonometry
-ext/Math-Complex/t/Complex.t		See if Math::Complex works
-ext/Math-Complex/t/Trig.t			See if Math::Trig works
-ext/Math-Complex/t/underbar.t		See if Math::Complex works
 ext/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 ext/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
 ext/Memoize/Memoize/Expire.pm		Memoize expiry manager example
