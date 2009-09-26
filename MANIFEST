@@ -663,6 +663,14 @@ cpan/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
 cpan/NEXT/t/next.t		NEXT
 cpan/NEXT/t/stringify.t		NEXT
 cpan/NEXT/t/unseen.t		NEXT
+cpan/Object-Accessor/lib/Object/Accessor.pm		Object::Accessor
+cpan/Object-Accessor/t/00_Object-Accessor.t		Object::Accessor tests
+cpan/Object-Accessor/t/01_Object-Accessor-Subclassed.t	Object::Accessor tests
+cpan/Object-Accessor/t/02_Object-Accessor-allow.t	Object::Accessor tests
+cpan/Object-Accessor/t/03_Object-Accessor-local.t	Object::Accessor tests
+cpan/Object-Accessor/t/04_Object-Accessor-lvalue.t	Object::Accessor tests
+cpan/Object-Accessor/t/05_Object-Accessor-callback.t	Object::Accessor tests
+cpan/Object-Accessor/t/06_Object-Accessor-alias.t	Object::Accessor tests
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2061,14 +2069,6 @@ ext/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 ext/Net-Ping/t/450_service.t		Ping Net::Ping
 ext/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 ext/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
-ext/Object-Accessor/lib/Object/Accessor.pm	Object::Accessor
-ext/Object-Accessor/t/00_Object-Accessor.t	Object::Accessor tests
-ext/Object-Accessor/t/01_Object-Accessor-Subclassed.t	Object::Accessor tests
-ext/Object-Accessor/t/02_Object-Accessor-allow.t	Object::Accessor tests
-ext/Object-Accessor/t/03_Object-Accessor-local.t	Object::Accessor tests
-ext/Object-Accessor/t/04_Object-Accessor-lvalue.t	Object::Accessor tests
-ext/Object-Accessor/t/05_Object-Accessor-callback.t	Object::Accessor tests
-ext/Object-Accessor/t/06_Object-Accessor-alias.t	Object::Accessor tests
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
