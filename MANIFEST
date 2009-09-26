@@ -517,6 +517,15 @@ cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Path/lib/File/Path.pm		Do things like 'mkdir -p' and 'rm -r'
 cpan/File-Path/t/Path.t			See if File::Path works
+cpan/Getopt-Long/CHANGES		Getopt::Long changes
+cpan/Getopt-Long/lib/Getopt/Long.pm	Fetch command options (GetOptions)
+cpan/Getopt-Long/README			Getopt::Long README
+cpan/Getopt-Long/t/gol-basic.t		See if Getopt::Long works
+cpan/Getopt-Long/t/gol-compat.t		See if Getopt::Long works
+cpan/Getopt-Long/t/gol-linkage.t	See if Getopt::Long works
+cpan/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
+cpan/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
+cpan/Getopt-Long/t/gol-xstring.t	See if Getopt::Long works
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -1343,15 +1352,6 @@ ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/typemap		GDBM extension interface types
-ext/Getopt-Long/CHANGES			Getopt::Long changes
-ext/Getopt-Long/lib/Getopt/Long.pm	Fetch command options (GetOptions)
-ext/Getopt-Long/README			Getopt::Long README
-ext/Getopt-Long/t/gol-basic.t		See if Getopt::Long works
-ext/Getopt-Long/t/gol-compat.t		See if Getopt::Long works
-ext/Getopt-Long/t/gol-linkage.t		See if Getopt::Long works
-ext/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
-ext/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
-ext/Getopt-Long/t/gol-xstring.t		See if Getopt::Long works
 ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util-FieldHash/Changes			Changes for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/FieldHash.xs		XS portion

@@ -733,7 +733,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jv',
 	'DISTRIBUTION'	=> 'JV/Getopt-Long-2.38.tar.gz',
-	'FILES'		=> q[ext/Getopt-Long
+	'FILES'		=> q[cpan/Getopt-Long
 			     lib/newgetopt.pl
 			    ],
 	'EXCLUDED'	=> [ qr{^examples/},
