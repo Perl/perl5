@@ -2,7 +2,7 @@ package Class::ISA;
 require 5;
 use strict;
 use vars qw($Debug $VERSION);
-$VERSION = '0.34';
+$VERSION = '0.35';
 $Debug = 0 unless defined $Debug;
 
 use if $] >= 5.011, 'deprecate';
@@ -83,7 +83,7 @@ __END__
 
 =head1 NAME
 
-Class::ISA -- report the search path for a class's ISA tree
+Class::ISA - report the search path for a class's ISA tree
 
 =head1 SYNOPSIS
 

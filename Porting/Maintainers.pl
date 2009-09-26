@@ -316,7 +316,7 @@ use File::Glob qw(:case);
     'Class::ISA' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/Class-ISA-0.34.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Class-ISA-0.35.tar.gz',
 	'FILES'		=> q[cpan/Class-ISA],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
