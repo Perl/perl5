@@ -188,7 +188,7 @@ use File::Glob qw(:case);
     'Archive::Tar' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Archive-Tar-1.52.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Archive-Tar-1.54.tar.gz',
 	'FILES'		=> q[cpan/Archive-Tar],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -801,7 +801,7 @@ use File::Glob qw(:case);
     'IPC::Cmd' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/IPC-Cmd-0.48.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/IPC-Cmd-0.50.tar.gz',
 	'FILES'		=> q[cpan/IPC-Cmd],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -878,7 +878,7 @@ use File::Glob qw(:case);
     'Log::Message::Simple' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Log-Message-Simple-0.04.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Log-Message-Simple-0.06.tar.gz',
 	'FILES'		=> q[cpan/Log-Message-Simple],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
