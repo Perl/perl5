@@ -63,6 +63,70 @@ cpan/Archive-Tar/t/src/short/b				Archive::Tar tests
 cpan/Archive-Tar/t/src/short/bar.tar			Archive::Tar tests
 cpan/Archive-Tar/t/src/short/foo.tbz			Archive::Tar tests
 cpan/Archive-Tar/t/src/short/foo.tgz			Archive::Tar tests
+cpan/autodie/lib/autodie/exception.pm		Exception class for autodie
+cpan/autodie/lib/autodie/exception/system.pm	Exception class for autodying system()
+cpan/autodie/lib/autodie/hints.pm	Hinting interface for autodie
+cpan/autodie/lib/autodie.pm		Functions suceed or die with lexical scope
+cpan/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
+cpan/autodie/t/00-load.t		autodie - basic load
+cpan/autodie/t/autodie.t		autodie - Basic functionality
+cpan/autodie/t/autodie_test_module.pm	autodie - test helper
+cpan/autodie/t/backcompat.t		autodie - More Fatal backcompat
+cpan/autodie/t/basic_exceptions.t	autodie - Basic exception tests
+cpan/autodie/t/binmode.t		autodie - Binmode testing
+cpan/autodie/t/blog_hints.t		autodie - Tests fro PJF's blog
+cpan/autodie/t/caller.t			autodie - Caller diagnostics
+cpan/autodie/t/context_lexical.t	autodie - Context clobbering lexically
+cpan/autodie/t/context.t		autodie - Context clobbering tests
+cpan/autodie/t/crickey.t		autodie - Like an Australian
+cpan/autodie/t/dbmopen.t		autodie - dbm tests
+cpan/autodie/t/exception_class.t	autodie - Exception class subclasses
+cpan/autodie/t/exceptions.t		autodie - 5.10 exception tests.
+cpan/autodie/t/exec.t			autodie - exec tests.
+cpan/autodie/t/Fatal.t			autodie - Fatal backcompatibility
+cpan/autodie/t/filehandles.t		autodie - filehandle tests
+cpan/autodie/t/fileno.t			autodie - fileno tests
+cpan/autodie/t/flock.t			autodie - File locking tests
+cpan/autodie/t/format-clobber.t		autodie - Don't clobber scalars
+cpan/autodie/t/hints_insist.t		autodie - Test hints insistance
+cpan/autodie/t/hints_pod_examples.t	autodie - Test hints POD examples
+cpan/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
+cpan/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
+cpan/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
+cpan/autodie/t/hints.t			autodie - Test hints interface
+cpan/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
+cpan/autodie/t/internal.t		autodie - internal interface tests
+cpan/autodie/t/lethal.t			autodie - lethal is the one true name
+cpan/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
+cpan/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
+cpan/autodie/t/lib/autodie/test/badname.pm	autodie - Bad exception class
+cpan/autodie/t/lib/autodie/test/missing.pm	autodie - Missing exception class
+cpan/autodie/t/lib/Caller_helper.pm		autodie - Caller helper
+cpan/autodie/t/lib/Hints_pod_examples.pm	autodie - Hints/pod helper
+cpan/autodie/t/lib/Hints_provider_does.pm	autodie - Hints/does helper
+cpan/autodie/t/lib/Hints_provider_easy_does_it.pm	autodie - Hints/easy helper
+cpan/autodie/t/lib/Hints_provider_isa.pm	autodie - Hints/inherit helper
+cpan/autodie/t/lib/Hints_test.pm	autodie - Hints test helper
+cpan/autodie/t/lib/lethal.pm		autodie - with a better name
+cpan/autodie/t/lib/my/autodie.pm	autodie - blog_hints.t helper
+cpan/autodie/t/lib/OtherTypes.pm	autodie - Format clobberer helper.
+cpan/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
+cpan/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
+cpan/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
+cpan/autodie/t/mkdir.t			autodie - filesystem tests
+cpan/autodie/t/open.t			autodie - Testing open
+cpan/autodie/t/recv.t			autodie - send/recv tests
+cpan/autodie/t/repeat.t			autodie - repeat autodie leak tests
+cpan/autodie/t/scope_leak.t		autodie - file scope leak tests
+cpan/autodie/t/string-eval-basic.t	autodie - Basic string eval test
+cpan/autodie/t/string-eval-leak.t	autodie - String eval leak test
+cpan/autodie/t/sysopen.t		autodie - sysopen tests
+cpan/autodie/t/truncate.t		autodie - File truncation tests
+cpan/autodie/t/unlink.t			autodie - Unlink system tests.
+cpan/autodie/t/user-context.t		autodie - Context changes for usersubs
+cpan/autodie/t/usersub.t		autodie - user subroutine tests
+cpan/autodie/t/version.t		autodie - versioning tests
+cpan/autodie/t/version_tag.t
 cpan/DB_File/Changes		Berkeley DB extension change log
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -381,70 +445,6 @@ ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
-ext/autodie/lib/autodie/exception.pm		Exception class for autodie
-ext/autodie/lib/autodie/exception/system.pm	Exception class for autodying system()
-ext/autodie/lib/autodie/hints.pm	Hinting interface for autodie
-ext/autodie/lib/autodie.pm		Functions suceed or die with lexical scope
-ext/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
-ext/autodie/t/00-load.t			autodie - basic load
-ext/autodie/t/autodie.t			autodie - Basic functionality
-ext/autodie/t/autodie_test_module.pm	autodie - test helper
-ext/autodie/t/backcompat.t		autodie - More Fatal backcompat
-ext/autodie/t/basic_exceptions.t	autodie - Basic exception tests
-ext/autodie/t/binmode.t			autodie - Binmode testing
-ext/autodie/t/blog_hints.t		autodie - Tests fro PJF's blog
-ext/autodie/t/caller.t			autodie - Caller diagnostics
-ext/autodie/t/context_lexical.t		autodie - Context clobbering lexically
-ext/autodie/t/context.t			autodie - Context clobbering tests
-ext/autodie/t/crickey.t			autodie - Like an Australian
-ext/autodie/t/dbmopen.t			autodie - dbm tests
-ext/autodie/t/exception_class.t		autodie - Exception class subclasses
-ext/autodie/t/exceptions.t		autodie - 5.10 exception tests.
-ext/autodie/t/exec.t			autodie - exec tests.
-ext/autodie/t/Fatal.t			autodie - Fatal backcompatibility
-ext/autodie/t/filehandles.t		autodie - filehandle tests
-ext/autodie/t/fileno.t			autodie - fileno tests
-ext/autodie/t/flock.t			autodie - File locking tests
-ext/autodie/t/format-clobber.t		autodie - Don't clobber scalars
-ext/autodie/t/hints_insist.t		autodie - Test hints insistance
-ext/autodie/t/hints_pod_examples.t	autodie - Test hints POD examples
-ext/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
-ext/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
-ext/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
-ext/autodie/t/hints.t			autodie - Test hints interface
-ext/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
-ext/autodie/t/internal.t		autodie - internal interface tests
-ext/autodie/t/lethal.t			autodie - lethal is the one true name
-ext/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
-ext/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
-ext/autodie/t/lib/autodie/test/badname.pm	autodie - Bad exception class
-ext/autodie/t/lib/autodie/test/missing.pm	autodie - Missing exception class
-ext/autodie/t/lib/Caller_helper.pm		autodie - Caller helper
-ext/autodie/t/lib/Hints_pod_examples.pm		autodie - Hints/pod helper
-ext/autodie/t/lib/Hints_provider_does.pm	autodie - Hints/does helper
-ext/autodie/t/lib/Hints_provider_easy_does_it.pm	autodie - Hints/easy helper
-ext/autodie/t/lib/Hints_provider_isa.pm	autodie - Hints/inherit helper
-ext/autodie/t/lib/Hints_test.pm		autodie - Hints test helper
-ext/autodie/t/lib/lethal.pm		autodie - with a better name
-ext/autodie/t/lib/my/autodie.pm		autodie - blog_hints.t helper
-ext/autodie/t/lib/OtherTypes.pm		autodie - Format clobberer helper.
-ext/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
-ext/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
-ext/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
-ext/autodie/t/mkdir.t			autodie - filesystem tests
-ext/autodie/t/open.t			autodie - Testing open
-ext/autodie/t/recv.t			autodie - send/recv tests
-ext/autodie/t/repeat.t			autodie - repeat autodie leak tests
-ext/autodie/t/scope_leak.t		autodie - file scope leak tests
-ext/autodie/t/string-eval-basic.t	autodie - Basic string eval test
-ext/autodie/t/string-eval-leak.t	autodie - String eval leak test
-ext/autodie/t/sysopen.t			autodie - sysopen tests
-ext/autodie/t/truncate.t		autodie - File truncation tests
-ext/autodie/t/unlink.t			autodie - Unlink system tests.
-ext/autodie/t/user-context.t		autodie - Context changes for usersubs
-ext/autodie/t/usersub.t			autodie - user subroutine tests
-ext/autodie/t/version.t			autodie - versioning tests
-ext/autodie/t/version_tag.t
 ext/AutoLoader/lib/AutoLoader.pm		Autoloader base class
 ext/AutoLoader/lib/AutoSplit.pm		Split up autoload functions
 ext/AutoLoader/t/01AutoLoader.t	See if AutoLoader works

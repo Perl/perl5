@@ -208,7 +208,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'pjf',
 	'DISTRIBUTION'	=> 'PJF/autodie-2.06_01.tar.gz',
-	'FILES' 	=> q[ext/autodie],
+	'FILES' 	=> q[cpan/autodie],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 
                              # All these tests depend upon external
