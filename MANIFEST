@@ -490,6 +490,20 @@ cpan/Encode/ucm/viscii.ucm		Unicode Character Map
 cpan/Encode/Unicode/Makefile.PL		Encode extension
 cpan/Encode/Unicode/Unicode.pm		Encode extension
 cpan/Encode/Unicode/Unicode.xs		Encode extension
+cpan/ExtUtils-CBuilder/Changes					Changes for ExtUtils::CBuilder
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/os2.pm	CBuilder methods for OS/2
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
+cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Perl modules
+cpan/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
+cpan/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
+cpan/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -1132,20 +1146,6 @@ ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Errno/t/Errno.t	See if Errno works
-ext/ExtUtils-CBuilder/Changes					Changes for ExtUtils::CBuilder
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/os2.pm	CBuilder methods for OS/2
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
-ext/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Perl modules
-ext/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
-ext/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
-ext/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
 ext/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 ext/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
 ext/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
