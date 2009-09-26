@@ -748,6 +748,10 @@ cpan/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog.mc	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog_RES.uu	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/Win32.pm		Sys::Syslog extension Win32 related file
+cpan/Term-ANSIColor/ANSIColor.pm	Perl module supporting termcap usage
+cpan/Term-ANSIColor/ChangeLog		Term::ANSIColor
+cpan/Term-ANSIColor/README		Term::ANSIColor
+cpan/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
 Cross/build-arm-n770-sh	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
@@ -2580,10 +2584,6 @@ ext/Switch/t/switch.t		See if Perl 5 switch works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
-ext/Term-ANSIColor/ANSIColor.pm		Perl module supporting termcap usage
-ext/Term-ANSIColor/ChangeLog		Term::ANSIColor
-ext/Term-ANSIColor/README		Term::ANSIColor
-ext/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
 ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
 ext/Term-Cap/test.pl			See if Term::Cap works
 ext/Term-UI/lib/Term/UI/History.pm	Term::UI

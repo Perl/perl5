@@ -1390,7 +1390,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.02.tar.gz',
-	'FILES'		=> q{ext/Term-ANSIColor},
+	'FILES'		=> q{cpan/Term-ANSIColor},
 	'EXCLUDED'	=> [ qr{^tests/}, qw(t/pod-spelling.t t/pod.t) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
