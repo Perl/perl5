@@ -1032,7 +1032,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'BINGOS/Module-Loaded-0.06.tar.gz',
-	'FILES'		=> q[ext/Module-Loaded],
+	'FILES'		=> q[cpan/Module-Loaded],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
