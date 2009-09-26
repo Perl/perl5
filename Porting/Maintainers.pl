@@ -1037,8 +1037,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
-    # NB. tests are located in t/Module_Pluggable to avoid directory
-    # depth issues on VMS
     'Module::Pluggable' =>
 	{
 	'MAINTAINER'	=> 'simonw',
