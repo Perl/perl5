@@ -701,6 +701,36 @@ cpan/Parse-CPAN-Meta/t/data/toolbar.yml			Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml		Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/data/vanilla.yml			Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
+cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
+cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
+cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
+cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
+cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
+cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
+cpan/podlators/Makefile.PL
+cpan/podlators/t/basic.cap			podlators test
+cpan/podlators/t/basic.clr			podlators test
+cpan/podlators/t/basic.man			podlators test
+cpan/podlators/t/basic.ovr			podlators test
+cpan/podlators/t/basic.pod			podlators test
+cpan/podlators/t/basic.t			podlators test
+cpan/podlators/t/basic.txt			podlators test
+cpan/podlators/t/color.t			podlators test
+cpan/podlators/t/filehandle.t			podlators test
+cpan/podlators/t/man-options.t			podlators test
+cpan/podlators/t/man.t				podlators test
+cpan/podlators/t/man-utf8.t			podlators test
+cpan/podlators/t/parselink.t			podlators test
+cpan/podlators/t/pod-parser.t			podlators test
+cpan/podlators/t/pod-spelling.t			podlators test
+cpan/podlators/t/pod.t				podlators test
+cpan/podlators/t/termcap.t			podlators test
+cpan/podlators/t/text-encoding.t		podlators test
+cpan/podlators/t/text-options.t			podlators test
+cpan/podlators/t/text.t				podlators test
+cpan/podlators/t/text-utf8.t			podlators test
+cpan/podlators/VERSION				podlators custom Makefile.PL
+cpan/podlators/VERSION				podlators distribution version
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2157,36 +2187,6 @@ ext/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 ext/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
 ext/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
 ext/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
-ext/podlators/lib/Pod/Man.pm			Convert POD data to *roff
-ext/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
-ext/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
-ext/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
-ext/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
-ext/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
-ext/podlators/Makefile.PL
-ext/podlators/t/basic.cap			podlators test
-ext/podlators/t/basic.clr			podlators test
-ext/podlators/t/basic.man			podlators test
-ext/podlators/t/basic.ovr			podlators test
-ext/podlators/t/basic.pod			podlators test
-ext/podlators/t/basic.t				podlators test
-ext/podlators/t/basic.txt			podlators test
-ext/podlators/t/color.t				podlators test
-ext/podlators/t/filehandle.t			podlators test
-ext/podlators/t/man-options.t			podlators test
-ext/podlators/t/man.t				podlators test
-ext/podlators/t/man-utf8.t			podlators test
-ext/podlators/t/parselink.t			podlators test
-ext/podlators/t/pod-parser.t			podlators test
-ext/podlators/t/pod-spelling.t			podlators test
-ext/podlators/t/pod.t				podlators test
-ext/podlators/t/termcap.t			podlators test
-ext/podlators/t/text-encoding.t			podlators test
-ext/podlators/t/text-options.t			podlators test
-ext/podlators/t/text.t				podlators test
-ext/podlators/t/text-utf8.t			podlators test
-ext/podlators/VERSION				podlators custom Makefile.PL
-ext/podlators/VERSION				podlators distribution version
 ext/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 ext/Pod-Parser/lib/Pod/Find.pm			used by pod/splitpod
 ext/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
