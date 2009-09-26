@@ -656,7 +656,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'dland',
 	'DISTRIBUTION'	=> 'DLAND/File-Path-2.07_03.tar.gz',
-	'FILES'		=> q[ext/File-Path],
+	'FILES'		=> q[cpan/File-Path],
 	'EXCLUDED'	=> [ qw{eg/setup-extra-tests
 				t/pod.t
 				t/taint.t

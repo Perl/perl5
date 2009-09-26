@@ -17,7 +17,7 @@ use Cwd;
 my @toolchain = qw(ext/constant/lib ext/Cwd ext/Cwd/lib ext/ExtUtils-Command/lib
 		   ext/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
-		   ext/File-Path/lib cpan/AutoLoader/lib);
+		   cpan/File-Path/lib cpan/AutoLoader/lib);
 
 my @ext_dirs = qw(cpan ext);
 my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';

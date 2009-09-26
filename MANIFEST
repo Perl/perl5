@@ -515,6 +515,8 @@ cpan/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
 cpan/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
 cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
+cpan/File-Path/lib/File/Path.pm		Do things like 'mkdir -p' and 'rm -r'
+cpan/File-Path/t/Path.t			See if File::Path works
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -1310,8 +1312,6 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
-ext/File-Path/lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
-ext/File-Path/t/Path.t			See if File::Path works
 ext/File-Temp/t/cmp.t		See if File::Temp works
 ext/File-Temp/Temp.pm		create safe temporary files and file handles
 ext/File-Temp/t/fork.t		See if File::Temp works
