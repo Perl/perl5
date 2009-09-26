@@ -31,7 +31,7 @@ while (<$diagfh>) {
 my @todo = ('..');
 while (@todo) {
   my $todo = shift @todo;
-  next if $todo ~~ ['../t', '../lib', '../ext'];
+  next if $todo ~~ ['../t', '../lib', '../ext', '../cpan'];
   # opmini.c is just a copy of op.c, so there's no need to check again.
   next if $todo eq '../opmini.c';
   if (-d $todo) {
