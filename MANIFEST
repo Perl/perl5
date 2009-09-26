@@ -127,6 +127,10 @@ cpan/autodie/t/user-context.t		autodie - Context changes for usersubs
 cpan/autodie/t/usersub.t		autodie - user subroutine tests
 cpan/autodie/t/version.t		autodie - versioning tests
 cpan/autodie/t/version_tag.t
+cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
+cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
+cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
+cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/DB_File/Changes		Berkeley DB extension change log
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -445,10 +449,6 @@ ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
 ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
-ext/AutoLoader/lib/AutoLoader.pm		Autoloader base class
-ext/AutoLoader/lib/AutoSplit.pm		Split up autoload functions
-ext/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
-ext/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 ext/autouse/lib/autouse.pm	Load and call a function only when it's used
 ext/autouse/t/autouse.t		See if autouse works
 ext/autouse/t/lib/MyTestModule.pm	Test module for autouse
