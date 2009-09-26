@@ -757,6 +757,16 @@ cpan/Term-UI/lib/Term/UI.pm		Term::UI
 cpan/Term-UI/t/00_load.t		Term::UI tests
 cpan/Term-UI/t/01_history.t		Term::UI tests
 cpan/Term-UI/t/02_ui.t			Term::UI tests
+cpan/Test/lib/Test.pm		A simple framework for writing test scripts
+cpan/Test/t/05_about_verbose.t	See if Test works
+cpan/Test/t/fail.t		See if Test works
+cpan/Test/t/mix.t		See if Test works
+cpan/Test/t/multiline.t		See if Test works
+cpan/Test/t/onfail.t		See if Test works
+cpan/Test/t/qr.t		See if Test works
+cpan/Test/t/skip.t		See if Test works
+cpan/Test/t/success.t		See if Test works
+cpan/Test/t/todo.t		See if Test works
 Cross/build-arm-n770-sh	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
@@ -2771,7 +2781,6 @@ ext/Test-Harness/t/utils.t				Test::Harness test
 ext/Test-Harness/t/yamlish-output.t			Test::Harness test
 ext/Test-Harness/t/yamlish.t				Test::Harness test
 ext/Test-Harness/t/yamlish-writer.t			Test::Harness test
-ext/Test/lib/Test.pm		A simple framework for writing test scripts
 ext/Test-Simple/Changes					Test::Simple changes
 ext/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
 ext/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
@@ -2891,15 +2900,6 @@ ext/Test-Simple/t/useing.t				Test::More test, compile test
 ext/Test-Simple/t/use_ok.t				Test::More test, use_ok()
 ext/Test-Simple/t/utf8.t				Test::More test
 ext/Test-Simple/t/versions.t				Test::More test
-ext/Test/t/05_about_verbose.t	See if Test works
-ext/Test/t/fail.t		See if Test works
-ext/Test/t/mix.t		See if Test works
-ext/Test/t/multiline.t		See if Test works
-ext/Test/t/onfail.t		See if Test works
-ext/Test/t/qr.t			See if Test works
-ext/Test/t/skip.t		See if Test works
-ext/Test/t/success.t		See if Test works
-ext/Test/t/todo.t		See if Test works
 ext/Text-Balanced/Changes		Text::Balanced
 ext/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
 ext/Text-Balanced/README		Text::Balanced
