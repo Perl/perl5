@@ -148,8 +148,8 @@ my @writables = qw(
     overload.h
     perlapi.h
     perlapi.c
-    ext/Devel-PPPort/module2.c
-    ext/Devel-PPPort/module3.c
+    cpan/Devel-PPPort/module2.c
+    cpan/Devel-PPPort/module3.c
     reentr.c
     reentr.h
     regcharclass.h

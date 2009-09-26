@@ -472,7 +472,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mhx',
 	'DISTRIBUTION'	=> 'MHX/Devel-PPPort-3.19.tar.gz',
-	'FILES'		=> q[ext/Devel-PPPort],
+	'FILES'		=> q[cpan/Devel-PPPort],
 	'EXCLUDED'	=> [ qw{PPPort.pm} ], # we use PPPort_pm.PL instead
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
