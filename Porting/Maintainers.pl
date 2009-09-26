@@ -739,7 +739,7 @@ use File::Glob qw(:case);
 	'EXCLUDED'	=> [ qr{^examples/},
 			     qw{perl-Getopt-Long.spec},
 			   ],
-	'MAP'		=> { ''		       => 'ext/Getopt-Long/',
+	'MAP'		=> { ''		       => 'cpan/Getopt-Long/',
 			     'lib/newgetopt.pl' => 'lib/newgetopt.pl',
 			   },
 	'CPAN'		=> 1,
