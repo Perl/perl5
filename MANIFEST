@@ -131,6 +131,10 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/Class-ISA/ChangeLog		Changes for Class::ISA
+cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
+cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
+cpan/Class-ISA/t/01_old_junk.t		Tests for Class::ISA
 cpan/DB_File/Changes		Berkeley DB extension change log
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -594,10 +598,6 @@ ext/CGI/t/upload.t		See if CGI.pm works
 ext/CGI/t/user_agent.t		See if CGI->user_agent() works
 ext/CGI/t/util-58.t		See if 5.8-dependent features work
 ext/CGI/t/util.t		See if CGI.pm works
-ext/Class-ISA/ChangeLog		Changes for Class::ISA
-ext/Class-ISA/lib/Class/ISA.pm		Class::ISA
-ext/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
-ext/Class-ISA/t/01_old_junk.t	Tests for Class::ISA
 ext/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2.c
 ext/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
