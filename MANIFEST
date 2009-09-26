@@ -752,6 +752,11 @@ cpan/Term-ANSIColor/ANSIColor.pm	Perl module supporting termcap usage
 cpan/Term-ANSIColor/ChangeLog		Term::ANSIColor
 cpan/Term-ANSIColor/README		Term::ANSIColor
 cpan/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
+cpan/Term-UI/lib/Term/UI/History.pm	Term::UI
+cpan/Term-UI/lib/Term/UI.pm		Term::UI
+cpan/Term-UI/t/00_load.t		Term::UI tests
+cpan/Term-UI/t/01_history.t		Term::UI tests
+cpan/Term-UI/t/02_ui.t			Term::UI tests
 Cross/build-arm-n770-sh	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
@@ -2586,11 +2591,6 @@ ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
 ext/Term-Cap/test.pl			See if Term::Cap works
-ext/Term-UI/lib/Term/UI/History.pm	Term::UI
-ext/Term-UI/lib/Term/UI.pm		Term::UI
-ext/Term-UI/t/00_load.t			Term::UI tests
-ext/Term-UI/t/01_history.t		Term::UI tests
-ext/Term-UI/t/02_ui.t			Term::UI tests
 ext/Test-Harness/bin/prove		The prove harness utility
 ext/Test-Harness/Changes		Test::Harness change log
 ext/Test-Harness/lib/App/Prove.pm	Gubbins for the prove utility
