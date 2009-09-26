@@ -504,6 +504,15 @@ cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Pe
 cpan/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
 cpan/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
 cpan/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
+cpan/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
+cpan/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
+cpan/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
+cpan/ExtUtils-ParseXS/t/basic.t			See if ExtUtils::ParseXS works
+cpan/ExtUtils-ParseXS/t/usage.t			ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -1274,15 +1283,6 @@ ext/ExtUtils-MakeMaker/t/xs.t				Part of MakeMaker's test suite
 ext/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm		Utilities to write MANIFEST files
 ext/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 ext/ExtUtils-Manifest/t/Manifest.t			See if ExtUtils::Manifest works
-ext/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
-ext/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
-ext/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
-ext/ExtUtils-ParseXS/t/basic.t			See if ExtUtils::ParseXS works
-ext/ExtUtils-ParseXS/t/usage.t			ExtUtils::ParseXS tests
-ext/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
-ext/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
-ext/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
-ext/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
