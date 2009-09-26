@@ -783,6 +783,11 @@ cpan/Text-Tabs/t/sep.t			See if Text::Tabs is working
 cpan/Text-Tabs/t/tabs.t			See if Text::Tabs works
 cpan/Text-Tabs/t/wrap_separator2.t	See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/wrap.t			See if Text::Wrap::wrap works
+cpan/Tie-RefHash/lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
+cpan/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
+cpan/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
+cpan/Tie-RefHash/t/storable.t	Test for Tie::RefHash with storable
+cpan/Tie-RefHash/t/threaded.t	Test for Tie::RefHash with threads
 Cross/build-arm-n770-sh	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
@@ -3038,11 +3043,6 @@ ext/Tie-File/t/41_heap.t	Unit tests for Tie::File::Heap
 ext/Tie-File/t/42_offset.t	Unit tests for the offset method
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
-ext/Tie-RefHash/lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
-ext/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
-ext/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
-ext/Tie-RefHash/t/storable.t	Test for Tie::RefHash with storable
-ext/Tie-RefHash/t/threaded.t	Test for Tie::RefHash with threads
 ext/Time-HiRes/Changes		Time::HiRes extension
 ext/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
 ext/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
