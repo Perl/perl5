@@ -556,6 +556,10 @@ cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
 cpan/Log-Message/lib/Log/Message.pm		Log::Message
+cpan/Log-Message-Simple/lib/Log/Message/Simple.pm	Log::Simple
+cpan/Log-Message-Simple/t/01_use.t			Log::Simple tests
+cpan/Log-Message-Simple/t/02_imports.t			Log::Simple tests
+cpan/Log-Message-Simple/t/03_functions.t		Log::Simple tests
 cpan/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
 cpan/Log-Message/t/02_Log-Message.t		Log::Message tests
 cpan/Log-Message/t/conf/config_file		Log::Message tests
@@ -1730,10 +1734,6 @@ ext/Locale-Maketext/t/40_super.t	See if Locale::Maketext works
 ext/Locale-Maketext/t/50_super.t	See if Locale::Maketext works
 ext/Locale-Maketext/t/60_super.t	See if Locale::Maketext works
 ext/Locale-Maketext/t/90_utf8.t	See if Locale::Maketext works
-ext/Log-Message-Simple/lib/Log/Message/Simple.pm	Log::Simple
-ext/Log-Message-Simple/t/01_use.t	Log::Simple tests
-ext/Log-Message-Simple/t/02_imports.t	Log::Simple tests
-ext/Log-Message-Simple/t/03_functions.t	Log::Simple tests
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension

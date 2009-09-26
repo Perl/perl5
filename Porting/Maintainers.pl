@@ -879,7 +879,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Log-Message-Simple-0.04.tar.gz',
-	'FILES'		=> q[ext/Log-Message-Simple],
+	'FILES'		=> q[cpan/Log-Message-Simple],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
