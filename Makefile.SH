@@ -218,7 +218,7 @@ done
 nonxs_list=' '
 for f in $nonxs_ext; do
     p=`echo "$f" | tr / -`
-    for d in ext cpan; do
+    for d in ext dist cpan; do
 	if test -d $d/$p; then
 	    nonxs_list="$nonxs_list $d/$p/pm_to_blib"
 	fi

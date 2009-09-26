@@ -2727,6 +2727,7 @@ $ OPEN/READ CONFIG 'manifestfound'
 $ext_loop:
 $   READ/END_OF_FILE=end_ext/ERROR=end_ext CONFIG line
 $   IF F$EXTRACT(0,4,line) .NES. "ext/" .AND. -
+       F$EXTRACT(0,5,line) .NES. "dist/".AND. -
        F$EXTRACT(0,5,line) .NES. "cpan/" THEN goto ext_loop
 $   line = F$EDIT(line,"COMPRESS")
 $   line = F$ELEMENT(0," ",line)
@@ -2734,6 +2735,11 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/"
 $   THEN
 $     xxx = F$ELEMENT(1,"/",line)
 $     IF F$SEARCH("[-.ext]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
+$   ENDIF
+$   IF F$EXTRACT(0,5,line) .EQS. "dist/"
+$   THEN
+$     xxx = F$ELEMENT(1,"/",line)
+$     IF F$SEARCH("[-.dist]''xxx'.DIR;1") .EQS. "" THEN GOTO ext_loop
 $   ENDIF
 $   IF F$EXTRACT(0,5,line) .EQS. "cpan/"
 $   THEN
@@ -2790,7 +2796,7 @@ $	xxx = F$EXTRACT(F$LENGTH(extspec) + 1, extlen, xxx)
 $   ENDIF
 $!
 $ found_new_extension:
-$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. ""
+$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.dist.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. ""
 $   THEN
 $       nonxs_ext = nonxs_ext + " ''extspec'"
 $   ELSE

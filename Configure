@@ -21691,6 +21691,10 @@ cd "$rsrc/cpan"
 set X
 shift
 eval $find_extensions
+cd "$rsrc/dist"
+set X
+shift
+eval $find_extensions
 cd "$rsrc/ext"
 set X
 shift

@@ -194,7 +194,7 @@ sub _scan_test {
     my $dir = $1;
     my $testswitch = $dir_to_switch{$dir};
     if (!defined $testswitch) {
-	if ($test =~ s!^(\.\./(?:cpan|ext)/[^/]+)/t!t!) {
+	if ($test =~ s!^(\.\./(?:cpan|dist|ext)/[^/]+)/t!t!) {
 	    $run_dir = $1;
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
@@ -345,7 +345,7 @@ sub _tests_from_manifest {
     my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
 	while (<MANI>) {
-	    if (m!^((?:cpan|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+	    if (m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
 		my $t = $1;
 		my $extension = $2;
 		if (!$::core || $t =~ m!^lib/[a-z]!) {

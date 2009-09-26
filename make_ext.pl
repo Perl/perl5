@@ -19,7 +19,7 @@ my @toolchain = qw(ext/constant/lib ext/Cwd ext/Cwd/lib ext/ExtUtils-Command/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
 		   cpan/File-Path/lib cpan/AutoLoader/lib);
 
-my @ext_dirs = qw(cpan ext);
+my @ext_dirs = qw(cpan dist ext);
 my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 
 # This script acts as a simple interface for building extensions.

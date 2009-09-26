@@ -432,7 +432,7 @@ sub get_map {
 
     my $ext;
     for (@$perl_files) {
-	if (m{^((?:ext|cpan)/[^/]+/)}) {
+	if (m{^((?:ext|dist|cpan)/[^/]+/)}) {
 	    if (defined $ext and $ext ne $1) {
 	        # more than one ext/$ext/
 	        undef $ext;
