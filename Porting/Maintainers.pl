@@ -1505,7 +1505,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'muir',
 	'DISTRIBUTION'	=> 'MUIR/modules/Text-Tabs+Wrap-2009.0305.tar.gz',
-	'FILES'		=> q[ext/Text-Tabs],
+	'FILES'		=> q[cpan/Text-Tabs],
 	'EXCLUDED'	=> [ qw( t/dnsparks.t ) ], # see af6492bf9e
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
