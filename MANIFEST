@@ -38,6 +38,31 @@ cpan/Archive-Extract/t/src/y.tar.gz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tbz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tgz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.zip		Archive::Extract tests
+cpan/Archive-Tar/bin/ptar				the ptar utility
+cpan/Archive-Tar/bin/ptardiff				the ptardiff utility
+cpan/Archive-Tar/lib/Archive/Tar/Constant.pm		Archive::Tar
+cpan/Archive-Tar/lib/Archive/Tar/File.pm		Archive::Tar
+cpan/Archive-Tar/lib/Archive/Tar.pm			Archive::Tar
+cpan/Archive-Tar/Makefile.PL				Achive::Tar
+cpan/Archive-Tar/t/01_use.t				Archive::Tar tests
+cpan/Archive-Tar/t/02_methods.t				Archive::Tar tests
+cpan/Archive-Tar/t/03_file.t				Archive::Tar tests
+cpan/Archive-Tar/t/04_resolved_issues.t			Archive::Tar tests
+cpan/Archive-Tar/t/05_iter.t				Archive::Tar tests
+cpan/Archive-Tar/t/06_error.t				Archive::Tar tests
+cpan/Archive-Tar/t/90_symlink.t				Archive::Tar tests
+cpan/Archive-Tar/t/99_pod.t				Archive::Tar tests
+cpan/Archive-Tar/t/src/header/signed.tar		Archive::Tar tests
+cpan/Archive-Tar/t/src/linktest/linktest_missing_dir.tar	Archive::Tar tests
+cpan/Archive-Tar/t/src/linktest/linktest_with_dir.tar	Archive::Tar tests
+cpan/Archive-Tar/t/src/long/b				Archive::Tar tests
+cpan/Archive-Tar/t/src/long/bar.tar			Archive::Tar tests
+cpan/Archive-Tar/t/src/long/foo.tbz			Archive::Tar tests
+cpan/Archive-Tar/t/src/long/foo.tgz			Archive::Tar tests
+cpan/Archive-Tar/t/src/short/b				Archive::Tar tests
+cpan/Archive-Tar/t/src/short/bar.tar			Archive::Tar tests
+cpan/Archive-Tar/t/src/short/foo.tbz			Archive::Tar tests
+cpan/Archive-Tar/t/src/short/foo.tgz			Archive::Tar tests
 cpan/DB_File/Changes		Berkeley DB extension change log
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -333,31 +358,6 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
-ext/Archive-Tar/bin/ptar	the ptar utility
-ext/Archive-Tar/bin/ptardiff	the ptardiff utility
-ext/Archive-Tar/lib/Archive/Tar/Constant.pm	Archive::Tar
-ext/Archive-Tar/lib/Archive/Tar/File.pm		Archive::Tar
-ext/Archive-Tar/lib/Archive/Tar.pm		Archive::Tar
-ext/Archive-Tar/Makefile.PL	Achive::Tar
-ext/Archive-Tar/t/01_use.t	Archive::Tar tests
-ext/Archive-Tar/t/02_methods.t	Archive::Tar tests
-ext/Archive-Tar/t/03_file.t	Archive::Tar tests
-ext/Archive-Tar/t/04_resolved_issues.t	Archive::Tar tests
-ext/Archive-Tar/t/05_iter.t	Archive::Tar tests
-ext/Archive-Tar/t/06_error.t	Archive::Tar tests
-ext/Archive-Tar/t/90_symlink.t	Archive::Tar tests
-ext/Archive-Tar/t/99_pod.t	Archive::Tar tests
-ext/Archive-Tar/t/src/header/signed.tar	Archive::Tar tests
-ext/Archive-Tar/t/src/linktest/linktest_missing_dir.tar	Archive::Tar tests
-ext/Archive-Tar/t/src/linktest/linktest_with_dir.tar	Archive::Tar tests
-ext/Archive-Tar/t/src/long/b	Archive::Tar tests
-ext/Archive-Tar/t/src/long/bar.tar	Archive::Tar tests
-ext/Archive-Tar/t/src/long/foo.tbz	Archive::Tar tests
-ext/Archive-Tar/t/src/long/foo.tgz	Archive::Tar tests
-ext/Archive-Tar/t/src/short/b	Archive::Tar tests
-ext/Archive-Tar/t/src/short/bar.tar	Archive::Tar tests
-ext/Archive-Tar/t/src/short/foo.tbz	Archive::Tar tests
-ext/Archive-Tar/t/src/short/foo.tgz	Archive::Tar tests
 ext/Attribute-Handlers/Changes			Attribute::Handlers
 ext/Attribute-Handlers/demo/demo2.pl		Attribute::Handlers demo
 ext/Attribute-Handlers/demo/demo3.pl		Attribute::Handlers demo

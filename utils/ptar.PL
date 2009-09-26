@@ -35,7 +35,7 @@ use File::Spec;
 
 my $script = File::Spec->catfile(
             File::Spec->catdir(
-                File::Spec->updir, qw[ext Archive-Tar bin]
+                File::Spec->updir, qw[cpan Archive-Tar bin]
             ), "ptar");
 
 if (open(IN, $script)) {
