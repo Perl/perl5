@@ -647,7 +647,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/File-Fetch-0.20.tar.gz',
-	'FILES'		=> q[ext/File-Fetch],
+	'FILES'		=> q[cpan/File-Fetch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
