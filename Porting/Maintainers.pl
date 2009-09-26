@@ -1078,7 +1078,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Package-Constants-0.02.tar.gz',
-	'FILES'		=> q[ext/Package-Constants],
+	'FILES'		=> q[cpan/Package-Constants],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
