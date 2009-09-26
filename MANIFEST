@@ -654,6 +654,15 @@ cpan/Module-Load/t/to_load/LoadMe.pl		Module::Load tests
 cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
 cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
+cpan/NEXT/Changes		NEXT
+cpan/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+cpan/NEXT/README		NEXT
+cpan/NEXT/t/actual.t		NEXT
+cpan/NEXT/t/actuns.t		NEXT
+cpan/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
+cpan/NEXT/t/next.t		NEXT
+cpan/NEXT/t/stringify.t		NEXT
+cpan/NEXT/t/unseen.t		NEXT
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2052,15 +2061,6 @@ ext/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 ext/Net-Ping/t/450_service.t		Ping Net::Ping
 ext/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 ext/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
-ext/NEXT/Changes		NEXT
-ext/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
-ext/NEXT/README			NEXT
-ext/NEXT/t/actual.t		NEXT
-ext/NEXT/t/actuns.t		NEXT
-ext/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
-ext/NEXT/t/next.t		NEXT
-ext/NEXT/t/stringify.t		NEXT
-ext/NEXT/t/unseen.t		NEXT
 ext/Object-Accessor/lib/Object/Accessor.pm	Object::Accessor
 ext/Object-Accessor/t/00_Object-Accessor.t	Object::Accessor tests
 ext/Object-Accessor/t/01_Object-Accessor-Subclassed.t	Object::Accessor tests
