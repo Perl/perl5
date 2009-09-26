@@ -675,6 +675,32 @@ cpan/Package-Constants/lib/Package/Constants.pm	Package::Constants
 cpan/Package-Constants/t/01_list.t		Package::Constants tests
 cpan/Params-Check/lib/Params/Check.pm	Params::Check
 cpan/Params-Check/t/01_Params-Check.t	Params::Check tests
+cpan/Parse-CPAN-Meta/Changes				Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm		Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/01_compile.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/02_basic.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/03_regression.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/04_scalar.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/05_export.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/11_meta_yml.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/12_plagger.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/13_perl_smith.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/14_yaml_org.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/15_multibyte.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/16_nullrefs.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/17_toolbar.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/18_tap.t				Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/19_errors.t			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/21_bom.t				Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/HTML-WebDAO.yml		Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/multibyte.yml		Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/sample.yml			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/Spreadsheet-Read.yml	Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/toolbar.yml			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml		Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/vanilla.yml			Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2106,32 +2132,6 @@ ext/parent/t/parent-classfromfile.t	tests for parent.pm
 ext/parent/t/parent-pmc.t	tests for parent.pm
 ext/parent/t/parent-returns-false.t	tests for parent.pm
 ext/parent/t/parent.t	tests for parent.pm
-ext/Parse-CPAN-Meta/Changes					Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm						Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/01_compile.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/02_basic.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/03_regression.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/04_scalar.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/05_export.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/11_meta_yml.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/12_plagger.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/13_perl_smith.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/14_yaml_org.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/15_multibyte.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/16_nullrefs.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/17_toolbar.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/18_tap.t					Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/19_errors.t				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/21_bom.t					Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/HTML-WebDAO.yml			Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/multibyte.yml			Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/sample.yml				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/Spreadsheet-Read.yml			Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/toolbar.yml				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml			Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/data/vanilla.yml				Parse::CPAN::Meta
-ext/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
