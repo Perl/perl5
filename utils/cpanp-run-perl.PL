@@ -35,7 +35,7 @@ use File::Spec;
 
 my $script = File::Spec->catfile(
             File::Spec->catdir(
-                File::Spec->updir, qw[ ext CPANPLUS bin ]
+                File::Spec->updir, qw[ cpan CPANPLUS bin ]
             ), "cpanp-run-perl");
 
 if (open(IN, $script)) {

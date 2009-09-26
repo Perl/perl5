@@ -414,7 +414,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/CPANPLUS-0.88.tar.gz',
-	'FILES'		=> q[ext/CPANPLUS],
+	'FILES'		=> q[cpan/CPANPLUS],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
 			     qw{ bin/cpanp-boxed },
