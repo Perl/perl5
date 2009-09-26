@@ -802,7 +802,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'BINGOS/IPC-Cmd-0.48.tar.gz',
-	'FILES'		=> q[ext/IPC-Cmd],
+	'FILES'		=> q[cpan/IPC-Cmd],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

@@ -526,6 +526,12 @@ cpan/Getopt-Long/t/gol-linkage.t	See if Getopt::Long works
 cpan/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xstring.t	See if Getopt::Long works
+cpan/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
+cpan/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
+cpan/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
+cpan/IPC-Cmd/t/src/child.pl	IPC::Cmd tests
+cpan/IPC-Cmd/t/src/output.pl	IPC::Cmd tests
+cpan/IPC-Cmd/t/src/x.tgz	IPC::Cmd tests
 cpan/IPC-SysV/Changes			IPC::SysV changes
 cpan/IPC-SysV/hints/cygwin.pl		Hint for IPC::SysV for named architecture
 cpan/IPC-SysV/hints/next_3.pl		Hint for IPC::SysV for named architecture
@@ -1577,12 +1583,6 @@ ext/IO-Zlib/t/tied.t		Tests for IO::Zlib
 ext/IO-Zlib/t/uncomp1.t		Tests for IO::Zlib
 ext/IO-Zlib/t/uncomp2.t		Tests for IO::Zlib
 ext/IO-Zlib/Zlib.pm		IO::Zlib
-ext/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
-ext/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
-ext/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
-ext/IPC-Cmd/t/src/child.pl	IPC::Cmd tests
-ext/IPC-Cmd/t/src/output.pl	IPC::Cmd tests
-ext/IPC-Cmd/t/src/x.tgz	IPC::Cmd tests
 ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
