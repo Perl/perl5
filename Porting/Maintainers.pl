@@ -1090,7 +1090,7 @@ use File::Glob qw(:case);
 	# For some reason a file of this name appears within
 	# the tarball. Russell's Paradox eat your heart out.
 	'EXCLUDED'	=> [ qw( Params-Check-0.26.tar.gz ) ],
-	'FILES'		=> q[ext/Params-Check],
+	'FILES'		=> q[cpan/Params-Check],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

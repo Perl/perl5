@@ -673,6 +673,8 @@ cpan/Object-Accessor/t/05_Object-Accessor-callback.t	Object::Accessor tests
 cpan/Object-Accessor/t/06_Object-Accessor-alias.t	Object::Accessor tests
 cpan/Package-Constants/lib/Package/Constants.pm	Package::Constants
 cpan/Package-Constants/t/01_list.t		Package::Constants tests
+cpan/Params-Check/lib/Params/Check.pm	Params::Check
+cpan/Params-Check/t/01_Params-Check.t	Params::Check tests
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2091,8 +2093,6 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
-ext/Params-Check/lib/Params/Check.pm	Params::Check
-ext/Params-Check/t/01_Params-Check.t	Params::Check tests
 ext/parent/lib/parent.pm	Establish an ISA relationship with base classes at compile time
 ext/parent/t/compile-time-file.t	tests for parent.pm
 ext/parent/t/compile-time.t	tests for parent.pm
