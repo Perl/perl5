@@ -137,8 +137,10 @@ elsif (-d "$srcdir/.git") {
     my ($remote,$merge);
     if (length $branch) {
         $merge= backtick("git config branch.$branch.merge");
+        $merge = "" unless $? == 0;
         $merge =~ s!^refs/heads/!!;
         $remote= backtick("git config branch.$branch.remote");
+        $remote = "" unless $? == 0;
     }
     $commit_id = backtick("git rev-parse HEAD");
     $describe = backtick("git describe");
