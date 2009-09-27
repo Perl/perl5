@@ -26,6 +26,7 @@ Makefile.old
 /perlmain.c
 /perlmini.c
 /pod/Makefile
+/runtests
 /writemain
 /x2p/Makefile
 /x2p/cflags

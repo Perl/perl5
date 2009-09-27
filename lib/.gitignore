@@ -173,6 +173,8 @@
 /File/Glob.pm
 /File/GlobMapper.pm
 /File/Path.pm
+/File/Spec/
+/File/Spec.pm
 /File/Temp.pm
 /FileCache.pm
 /Filter/Simple.pm
