@@ -15,11 +15,6 @@
 ################################################################################
 
 BEGIN {
-  if ($ENV{'PERL_CORE'}) {
-    chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib' && -d '../ext';
-  }
-
   require Test::More; import Test::More;
   require Config; import Config;
 
