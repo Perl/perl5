@@ -1757,8 +1757,6 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     CALLRUNOPS(aTHX);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
-    if (!SvNIOKp(*PL_stack_sp))
-	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
     result = SvIV(*PL_stack_sp);
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1799,8 +1797,6 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     CALLRUNOPS(aTHX);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
-    if (!SvNIOKp(*PL_stack_sp))
-	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
     result = SvIV(*PL_stack_sp);
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1829,8 +1825,6 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     (void)(*CvXSUB(cv))(aTHX_ cv);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
-    if (!SvNIOKp(*PL_stack_sp))
-	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
     result = SvIV(*PL_stack_sp);
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;

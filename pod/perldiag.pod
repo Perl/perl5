@@ -3920,12 +3920,6 @@ the smart match.
 (F) An ancient error message that almost nobody ever runs into anymore.
 But before sort was a keyword, people sometimes used it as a filehandle.
 
-=item Sort subroutine didn't return a numeric value
-
-(F) A sort comparison routine must return a number.  You probably blew
-it by not using C<< <=> >> or C<cmp>, or by not using them correctly.
-See L<perlfunc/sort>.
-
 =item Sort subroutine didn't return single value
 
 (F) A sort comparison subroutine may not return a list value with more
