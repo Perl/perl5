@@ -14,7 +14,7 @@ converters: $(CONVERTERS)
 PERL = ..\miniperl.exe
 REALPERL = ..\perl.exe
 
-ICWD = -I..\ext\Cwd
+ICWD = -I..\cpan\Cwd
 
 POD = \
 	perl.pod	\

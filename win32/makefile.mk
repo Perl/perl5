@@ -1015,7 +1015,7 @@ ODBCCP32_DLL = $(SystemRoot)\system32\odbccp32.dll
 ODBCCP32_DLL = $(windir)\system\odbccp32.dll
 .ENDIF
 
-ICWD = -I..\ext\Cwd -I..\ext\Cwd\lib
+ICWD = -I..\cpan\Cwd -I..\cpan\Cwd\lib
 
 #
 # Top targets
@@ -1561,7 +1561,7 @@ inst_lib : $(CONFIGPM)
 
 $(UNIDATAFILES) .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. -I..\..\ext\Cwd\lib mktables
+	..\$(MINIPERL) -I.. -I..\..\cpan\Cwd\lib mktables
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)

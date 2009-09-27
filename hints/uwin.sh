@@ -123,7 +123,7 @@ usevfork=false
 
 #          got: '/E/users/jpl/src/cmd/perl/t'
 #     expected: '/e/users/jpl/src/cmd/perl/t'
-#     Failed test (../ext/Cwd/t/cwd.t at line 88)
+#     Failed test (../cpan/Cwd/t/cwd.t at line 88)
 
 # when running tests under harness, try the simple expedient of
 # changing to directory

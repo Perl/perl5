@@ -241,7 +241,7 @@ NOOP = continue
 # Macros to invoke a copy of miniperl during the build.  Targets which
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
-MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]" "-I[.ext.Cwd]" "-I[.ext.Cwd.lib]"
+MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]" "-I[.cpan.Cwd]" "-I[.cpan.Cwd.lib]"
 MINIPERLQ = MCR $(MINIPERL_EXE) ""-I[.lib]""
 XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate

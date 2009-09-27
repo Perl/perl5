@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Config;
 BEGIN {
-    unshift @INC, $^O eq 'MSWin32' ? '../ext/Cwd' : 'ext/Cwd';
+    unshift @INC, $^O eq 'MSWin32' ? '../cpan/Cwd' : 'cpan/Cwd';
 }
 use Cwd;
 
@@ -14,7 +14,8 @@ use Cwd;
 # After which, all nonxs modules are in lib, which was always sufficient to
 # allow miniperl to build everything else.
 
-my @toolchain = qw(ext/constant/lib ext/Cwd ext/Cwd/lib ext/ExtUtils-Command/lib
+my @toolchain = qw(ext/constant/lib cpan/Cwd cpan/Cwd/lib
+		   ext/ExtUtils-Command/lib
 		   ext/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
 		   cpan/File-Path/lib cpan/AutoLoader/lib);

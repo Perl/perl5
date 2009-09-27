@@ -825,7 +825,7 @@ CFG_VARS	=					\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 
-ICWD = -I..\ext\Cwd -I..\ext\Cwd\lib
+ICWD = -I..\cpan\Cwd -I..\cpan\Cwd\lib
 
 #
 # Top targets
@@ -1228,7 +1228,7 @@ inst_lib : $(CONFIGPM)
 
 $(UNIDATAFILES) : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. -I..\..\ext\Cwd\lib mktables -check $@ $(FIRSTUNIFILE)
+	..\$(MINIPERL) -I.. -I..\..\cpan\Cwd\lib mktables -check $@ $(FIRSTUNIFILE)
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils $(UNIDATAFILES)
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
