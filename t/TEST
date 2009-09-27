@@ -589,7 +589,7 @@ EOT
 		    else {
 			# module tests are allowed extra output,
 			# because Test::Harness allows it
-			next if $test =~ /^\W*(ext|lib)\b/;
+			next if $test =~ /^\W*(cpan|dist|ext|lib)\b/;
 			$failure = "FAILED--unexpected output at test $next";
 			last;
 		    }
