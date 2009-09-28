@@ -771,7 +771,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'GBARR/IO-1.25.tar.gz',
-	'FILES'		=> q[ext/IO/],
+	'FILES'		=> q[dist/IO/],
 	'EXCLUDED'	=> [ qw{t/test.pl}, ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',

@@ -1080,6 +1080,41 @@ dist/I18N-LangTags/t/20_locales.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/50_super.t			See whether I18N::LangTags works
 dist/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
+dist/IO/ChangeLog		IO perl module change log
+dist/IO/hints/sco.pl		Hint for IO for named architecture
+dist/IO/IO.pm			Top-level interface to IO::* classes
+dist/IO/IO.xs			IO extension external subroutines
+dist/IO/lib/IO/Dir.pm		IO directory reading package
+dist/IO/lib/IO/File.pm		IO file handle package
+dist/IO/lib/IO/Handle.pm	IO base handle package
+dist/IO/lib/IO/Pipe.pm		IO pipe package
+dist/IO/lib/IO/Poll.pm		IO system poll() interface
+dist/IO/lib/IO/Seekable.pm	IO methods for seekable handles
+dist/IO/lib/IO/Select.pm	IO system select() interface
+dist/IO/lib/IO/Socket/INET.pm	IO INET specific socket methods
+dist/IO/lib/IO/Socket.pm	IO socket handle package
+dist/IO/lib/IO/Socket/UNIX.pm	IO UNIX specific socket methods
+dist/IO/Makefile.PL		IO extension makefile writer
+dist/IO/poll.c			IO poll() emulation using select()
+dist/IO/poll.h			IO poll() emulation using select()
+dist/IO/README			IO extension maintenance notice
+dist/IO/t/io_const.t		See if constants from IO work
+dist/IO/t/io_dir.t		See if directory-related methods from IO work
+dist/IO/t/io_dup.t		See if dup()-related methods from IO work
+dist/IO/t/io_file.t		See if binmode()-related methods on IO::File work
+dist/IO/t/io_linenum.t		See if I/O line numbers are tracked correctly
+dist/IO/t/io_multihomed.t	See if INET sockets work with multi-homed hosts
+dist/IO/t/io_pipe.t		See if pipe()-related methods from IO work
+dist/IO/t/io_poll.t		See if poll()-related methods from IO work
+dist/IO/t/io_sel.t		See if select()-related methods from IO work
+dist/IO/t/io_sock.t		See if INET socket-related methods from IO work
+dist/IO/t/IO.t			See if IO works
+dist/IO/t/io_taint.t		See if the untaint method from IO works
+dist/IO/t/io_tell.t		See if seek()/tell()-related methods from IO work
+dist/IO/t/io_udp.t		See if UDP socket-related methods from IO work
+dist/IO/t/io_unix.t		See if UNIX socket-related methods from IO work
+dist/IO/t/io_utf8.t		See if perlio opens work
+dist/IO/t/io_xs.t		See if XSUB methods from IO work
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1613,7 +1648,6 @@ ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
 ext/if/if.pm			For "use if"
 ext/if/t/if.t			Tests for "use if"
-ext/IO/ChangeLog		IO perl module change log
 ext/IO-Compress/Changes	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtdef	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtinf	IO::Compress
@@ -1757,40 +1791,6 @@ ext/IO-Compress/t/cz-06gzsetp.t	IO::Compress
 ext/IO-Compress/t/cz-08encoding.t	IO::Compress
 ext/IO-Compress/t/cz-14gzopen.t	IO::Compress
 ext/IO-Compress/t/globmapper.t	IO::Compress
-ext/IO/hints/sco.pl		Hint for IO for named architecture
-ext/IO/IO.pm			Top-level interface to IO::* classes
-ext/IO/IO.xs			IO extension external subroutines
-ext/IO/lib/IO/Dir.pm		IO directory reading package
-ext/IO/lib/IO/File.pm		IO file handle package
-ext/IO/lib/IO/Handle.pm		IO base handle package
-ext/IO/lib/IO/Pipe.pm		IO pipe package
-ext/IO/lib/IO/Poll.pm		IO system poll() interface
-ext/IO/lib/IO/Seekable.pm	IO methods for seekable handles
-ext/IO/lib/IO/Select.pm		IO system select() interface
-ext/IO/lib/IO/Socket/INET.pm	IO INET specific socket methods
-ext/IO/lib/IO/Socket.pm		IO socket handle package
-ext/IO/lib/IO/Socket/UNIX.pm	IO UNIX specific socket methods
-ext/IO/Makefile.PL		IO extension makefile writer
-ext/IO/poll.c			IO poll() emulation using select()
-ext/IO/poll.h			IO poll() emulation using select()
-ext/IO/README			IO extension maintenance notice
-ext/IO/t/io_const.t	See if constants from IO work
-ext/IO/t/io_dir.t	See if directory-related methods from IO work
-ext/IO/t/io_dup.t	See if dup()-related methods from IO work
-ext/IO/t/io_file.t	See if binmode()-related methods on IO::File work
-ext/IO/t/io_linenum.t	See if I/O line numbers are tracked correctly
-ext/IO/t/io_multihomed.t	See if INET sockets work with multi-homed hosts
-ext/IO/t/io_pipe.t	See if pipe()-related methods from IO work
-ext/IO/t/io_poll.t	See if poll()-related methods from IO work
-ext/IO/t/io_sel.t	See if select()-related methods from IO work
-ext/IO/t/io_sock.t	See if INET socket-related methods from IO work
-ext/IO/t/IO.t	See if IO works
-ext/IO/t/io_taint.t	See if the untaint method from IO works
-ext/IO/t/io_tell.t	See if seek()/tell()-related methods from IO work
-ext/IO/t/io_udp.t	See if UDP socket-related methods from IO work
-ext/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
-ext/IO/t/io_utf8.t	See if perlio opens work
-ext/IO/t/io_xs.t		See if XSUB methods from IO work
 ext/IO-Zlib/t/basic.t		Tests for IO::Zlib
 ext/IO-Zlib/t/external.t	Tests for IO::Zlib
 ext/IO-Zlib/t/getc.t		Tests for IO::Zlib
