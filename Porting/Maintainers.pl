@@ -1524,7 +1524,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/Thread-Semaphore-2.09.tar.gz',
-	'FILES'		=> q[ext/Thread-Semaphore],
+	'FILES'		=> q[dist/Thread-Semaphore],
 	'EXCLUDED'	=> [ qw(examples/semaphore.pl
 				t/00_load.t
 				t/99_pod.t
