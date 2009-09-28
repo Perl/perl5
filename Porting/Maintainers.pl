@@ -592,7 +592,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'yves',
 	'DISTRIBUTION'	=> 'YVES/ExtUtils-Install-1.54.tar.gz',
-	'FILES' 	=> q[ext/ExtUtils-Install],
+	'FILES' 	=> q[dist/ExtUtils-Install],
 	'EXCLUDED'	=> [ qw{ t/lib/Test/Builder.pm
 				 t/lib/Test/Builder/Module.pm
 				 t/lib/Test/More.pm

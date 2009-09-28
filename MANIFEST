@@ -1043,6 +1043,19 @@ dist/Data-Dumper/t/freezer.t	See if $Data::Dumper::Freezer works
 dist/Data-Dumper/Todo		Data pretty printer, futures
 dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
+dist/ExtUtils-Install/Changes				ExtUtils-Install change log
+dist/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
+dist/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions
+dist/ExtUtils-Install/lib/ExtUtils/Packlist.pm		Manipulates .packlist files
+dist/ExtUtils-Install/t/can_write_dir.t			Does the _can_write_dir function of ExtUtils::Install work properly?
+dist/ExtUtils-Install/t/Installapi2.t			See if new api for ExtUtils::Install::install() works
+dist/ExtUtils-Install/t/Installed.t			See if ExtUtils::Installed works
+dist/ExtUtils-Install/t/Install.t			See if ExtUtils::Install works
+dist/ExtUtils-Install/t/InstallWithMM.t			See if ExtUtils::Install works (related to EUMM/t/basic.t)
+dist/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
+dist/ExtUtils-Install/t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
+dist/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
+dist/ExtUtils-Install/t/Packlist.t			See if Packlist works
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1402,19 +1415,6 @@ ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for pr
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
-ext/ExtUtils-Install/Changes				ExtUtils-Install change log
-ext/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
-ext/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions
-ext/ExtUtils-Install/lib/ExtUtils/Packlist.pm		Manipulates .packlist files
-ext/ExtUtils-Install/t/can_write_dir.t			Does the _can_write_dir function of ExtUtils::Install work properly?
-ext/ExtUtils-Install/t/Installapi2.t			See if new api for ExtUtils::Install::install() works
-ext/ExtUtils-Install/t/Installed.t			See if ExtUtils::Installed works
-ext/ExtUtils-Install/t/Install.t			See if ExtUtils::Install works
-ext/ExtUtils-Install/t/InstallWithMM.t			See if ExtUtils::Install works (related to EUMM/t/basic.t)
-ext/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
-ext/ExtUtils-Install/t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
-ext/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
-ext/ExtUtils-Install/t/Packlist.t			See if Packlist works
 ext/ExtUtils-MakeMaker/bin/instmodsh			Give information about installed extensions
 ext/ExtUtils-MakeMaker/Changes				MakeMaker change log
 ext/ExtUtils-MakeMaker/lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line

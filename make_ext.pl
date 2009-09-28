@@ -16,7 +16,7 @@ use Cwd;
 
 my @toolchain = qw(ext/constant/lib cpan/Cwd cpan/Cwd/lib
 		   ext/ExtUtils-Command/lib
-		   ext/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
+		   dist/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
 		   cpan/File-Path/lib cpan/AutoLoader/lib);
 
