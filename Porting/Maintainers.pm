@@ -69,9 +69,9 @@ sub get_module_pat {
 sub expand_glob {
     sort { lc $a cmp lc $b }
 	map {
-	    -f $_ ? # File as-is.
+	    -f $_ && $_ !~ /[*?]/ ? # File as-is.
 		$_ :
-		-d _ ? # Recurse into directories.
+		-d _ && $_ !~ /[*?]/ ? # Recurse into directories.
 		do {
 		    my @files;
 		    find(
