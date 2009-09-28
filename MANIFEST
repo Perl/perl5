@@ -1163,6 +1163,15 @@ dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
+dist/Switch/Changes		Changes for Switch.pm
+dist/Switch/Makefile.PL		Makefile.PL for Switch.pm
+dist/Switch/MANIFEST		MANIFEST for Switch.pm
+dist/Switch/META.yml		META.yml for Switch.pm
+dist/Switch/README		README for Switch.pm
+dist/Switch/Switch.pm		Switch for Perl
+dist/Switch/t/given.t		See if Perl 6 given (switch) works
+dist/Switch/t/nested.t		See if nested switch works
+dist/Switch/t/switch.t		See if Perl 5 switch works
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2607,15 +2616,6 @@ ext/Storable/t/tied.t		See if Storable works
 ext/Storable/t/utf8hash.t	See if Storable works
 ext/Storable/t/utf8.t		See if Storable works
 ext/Storable/t/weak.t		Can Storable store weakrefs
-ext/Switch/Changes		Changes for Switch.pm
-ext/Switch/Makefile.PL		Makefile.PL for Switch.pm
-ext/Switch/MANIFEST		MANIFEST for Switch.pm
-ext/Switch/META.yml		META.yml for Switch.pm
-ext/Switch/README		README for Switch.pm
-ext/Switch/Switch.pm		Switch for Perl
-ext/Switch/t/given.t		See if Perl 6 given (switch) works
-ext/Switch/t/nested.t		See if nested switch works
-ext/Switch/t/switch.t		See if Perl 5 switch works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works

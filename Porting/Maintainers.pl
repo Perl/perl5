@@ -1359,7 +1359,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.14.tar.gz',
 	'FILES'		=> q[ext/Switch],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Sys::Syslog' =>
