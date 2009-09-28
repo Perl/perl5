@@ -1233,6 +1233,9 @@ dist/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 dist/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 dist/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 dist/threads/t/thread.t		General ithread tests from thr5005
+dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
+dist/XSLoader/t/XSLoader.t	See if XSLoader works
+dist/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -3177,9 +3180,6 @@ ext/XS-APItest/t/svpeek.t	XS::APItest extension
 ext/XS-APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
 ext/XS-APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
-ext/XSLoader/Makefile.PL	Dynamic Loader makefile writer
-ext/XSLoader/t/XSLoader.t	See if XSLoader works
-ext/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/XS-Typemap/Makefile.PL	XS::Typemap extension
 ext/XS-Typemap/README		XS::Typemap extension
 ext/XS-Typemap/stdio.c		XS::Typemap extension
