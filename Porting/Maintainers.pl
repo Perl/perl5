@@ -686,12 +686,12 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.84.tar.gz',
-	'FILES'		=> q[ext/Filter-Simple],
+	'FILES'		=> q[dist/Filter-Simple],
 	'EXCLUDED'	=> [ qw(Makefile.PL MANIFEST README META.yml),
 			     qr{^demo/}
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Filter::Util::Call' =>

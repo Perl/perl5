@@ -1056,6 +1056,17 @@ dist/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
 dist/ExtUtils-Install/t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
 dist/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
 dist/ExtUtils-Install/t/Packlist.t			See if Packlist works
+dist/Filter-Simple/Changes					Filter::Simple
+dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
+dist/Filter-Simple/t/data.t					See if Filter::Simple works
+dist/Filter-Simple/t/export.t					See if Filter::Simple works
+dist/Filter-Simple/t/filter_only.t				See if Filter::Simple works
+dist/Filter-Simple/t/filter.t					See if Filter::Simple works
+dist/Filter-Simple/t/import.t					See if Filter::Simple works
+dist/Filter-Simple/t/lib/Filter/Simple/ExportTest.pm		Helper file for Filter::Simple tests
+dist/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
+dist/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm		Helper file for Filter::Simple tests
+dist/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm		Helper file for Filter::Simple tests
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1555,17 +1566,6 @@ ext/File-Temp/t/posix.t		See if File::Temp works
 ext/File-Temp/t/security.t	See if File::Temp works
 ext/File-Temp/t/seekable.t	See if File::Temp works
 ext/File-Temp/t/tempfile.t	See if File::Temp works
-ext/Filter-Simple/Changes				Filter::Simple
-ext/Filter-Simple/lib/Filter/Simple.pm			Simple frontend to Filter::Util::Call
-ext/Filter-Simple/t/data.t				See if Filter::Simple works
-ext/Filter-Simple/t/export.t				See if Filter::Simple works
-ext/Filter-Simple/t/filter_only.t			See if Filter::Simple works
-ext/Filter-Simple/t/filter.t				See if Filter::Simple works
-ext/Filter-Simple/t/import.t				See if Filter::Simple works
-ext/Filter-Simple/t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
-ext/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
-ext/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
-ext/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm	Helper file for Filter::Simple tests
 ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
 ext/Filter-Util-Call/filter-util.pl		See if Filter::Util::Call works
