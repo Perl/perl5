@@ -1115,6 +1115,9 @@ dist/IO/t/io_udp.t		See if UDP socket-related methods from IO work
 dist/IO/t/io_unix.t		See if UNIX socket-related methods from IO work
 dist/IO/t/io_utf8.t		See if perlio opens work
 dist/IO/t/io_xs.t		See if XSUB methods from IO work
+dist/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
+dist/lib/Makefile.PL
+dist/lib/t/01lib.t		For "use lib" testing
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1805,8 +1808,6 @@ ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
-ext/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
-ext/lib/Makefile.PL
 ext/libnet/Changes			libnet
 ext/libnet/Config.eg		libnet
 ext/libnet/demos/ftp		libnet
@@ -1844,7 +1845,6 @@ ext/libnet/t/nntp.t		libnet
 ext/libnet/t/require.t		libnet
 ext/libnet/t/smtp.t		libnet
 ext/libnet/t/time.t		libnet
-ext/lib/t/01lib.t		For "use lib" testing
 ext/List-Util/Changes		Util extension
 ext/List-Util/lib/List/Util.pm	List::Util
 ext/List-Util/lib/List/Util/PP.pm	List::Util

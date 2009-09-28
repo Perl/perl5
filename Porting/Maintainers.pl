@@ -821,10 +821,10 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'smueller',
 	'DISTRIBUTION'	=> 'SMUELLER/lib-0.62.tar.gz',
-	'FILES'		=> q[ext/lib/],
+	'FILES'		=> q[dist/lib/],
 	'EXCLUDED'	=> [ qw{forPAUSE/lib.pm t/00pod.t} ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'libnet' =>
