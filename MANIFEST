@@ -1148,6 +1148,18 @@ dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 dist/Pod-Plainer/Plainer.pm	Pod migration utility module
 dist/Pod-Plainer/t/plainer.t	Test Pod::Plainer
+dist/Safe/Changes		Changes for Safe.pm
+dist/Safe/Makefile.PL		Makefile.PL for Safe.pm
+dist/Safe/MANIFEST		MANIFEST for Safe.pm
+dist/Safe/META.yml		META.yml for Safe.pm
+dist/Safe/README		README for Safe.pm
+dist/Safe/Safe.pm		Safe extension Perl module
+dist/Safe/t/safe1.t		See if Safe works
+dist/Safe/t/safe2.t		See if Safe works
+dist/Safe/t/safe3.t		See if Safe works
+dist/Safe/t/safeload.t		Tests that some modules can be loaded by Safe
+dist/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
+dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2508,18 +2520,6 @@ ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
-ext/Safe/Changes		Changes for Safe.pm
-ext/Safe/Makefile.PL		Makefile.PL for Safe.pm
-ext/Safe/MANIFEST		MANIFEST for Safe.pm
-ext/Safe/META.yml		META.yml for Safe.pm
-ext/Safe/README			README for Safe.pm
-ext/Safe/Safe.pm		Safe extension Perl module
-ext/Safe/t/safe1.t		See if Safe works
-ext/Safe/t/safe2.t		See if Safe works
-ext/Safe/t/safe3.t		See if Safe works
-ext/Safe/t/safeload.t		Tests that some modules can be loaded by Safe
-ext/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
-ext/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/CHANGES	SDBM kit

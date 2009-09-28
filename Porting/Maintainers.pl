@@ -1304,9 +1304,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.19.tar.gz',
-	'FILES'		=> q[ext/Safe],
+	'FILES'		=> q[dist/Safe],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Scalar-List-Utils' =>
