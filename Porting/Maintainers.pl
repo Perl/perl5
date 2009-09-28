@@ -753,7 +753,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'SBURKE/I18N-LangTags-0.35.tar.gz',
-	'FILES'		=> q[ext/I18N-LangTags],
+	'FILES'		=> q[dist/I18N-LangTags],
 	'CPAN'		=> 0,
 	'UPSTREAM'	=> 'blead',
 	},
