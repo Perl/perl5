@@ -1146,6 +1146,8 @@ dist/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
+dist/Pod-Plainer/Plainer.pm	Pod migration utility module
+dist/Pod-Plainer/t/plainer.t	Test Pod::Plainer
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2292,8 +2294,6 @@ ext/Pod-Perldoc/t/01_about_verbose.t		test Pod::Perldoc
 ext/Pod-Perldoc/t/checkerbasic.t		test Pod::Perldoc::ToChecker
 ext/Pod-Perldoc/t/perldocbasic.t		test Pod::Perldoc basic operation
 ext/Pod-Perldoc/t/textbasic.t			test Pod::Perldoc::ToText
-ext/Pod-Plainer/Plainer.pm	Pod migration utility module
-ext/Pod-Plainer/t/plainer.t	Test Pod::Plainer
 ext/Pod-Simple/ChangeLog				Pod::Simple ChangeLog
 ext/Pod-Simple/lib/Pod/Simple/BlackBox.pm		Pod::Simple::BlackBox
 ext/Pod-Simple/lib/Pod/Simple/Checker.pm		check the Pod syntax of a document
