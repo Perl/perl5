@@ -199,9 +199,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.87.tar.gz',
-	'FILES'		=> q[ext/Attribute-Handlers],
+	'FILES'		=> q[dist/Attribute-Handlers],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'autodie' =>

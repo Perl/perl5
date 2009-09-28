@@ -973,6 +973,27 @@ Cross/warp		Cross-compilation
 cv.h			Code value header
 cygwin/cygwin.c		Additional code for Cygwin port
 deb.c			Debugging routines
+dist/Attribute-Handlers/Changes				Attribute::Handlers
+dist/Attribute-Handlers/demo/demo2.pl			Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo3.pl			Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo4.pl			Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_call.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_chain.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_cycle.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_hashdir.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_phases.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo.pl			Attribute::Handlers demo
+dist/Attribute-Handlers/demo/Demo.pm			Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_range.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/demo_rawdata.pl		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/Descriptions.pm		Attribute::Handlers demo
+dist/Attribute-Handlers/demo/MyClass.pm			Attribute::Handlers demo
+dist/Attribute-Handlers/lib/Attribute/Handlers.pm	Attribute::Handlers
+dist/Attribute-Handlers/README				Attribute::Handlers
+dist/Attribute-Handlers/t/constants.t			Test constants and Attribute::Handlers
+dist/Attribute-Handlers/t/data_convert.t		Test attribute data conversion
+dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
+dist/Attribute-Handlers/t/multi.t			See if Attribute::Handlers works
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -997,27 +1018,6 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
-ext/Attribute-Handlers/Changes			Attribute::Handlers
-ext/Attribute-Handlers/demo/demo2.pl		Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo3.pl		Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo4.pl		Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_call.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_chain.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_phases.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo.pl		Attribute::Handlers demo
-ext/Attribute-Handlers/demo/Demo.pm		Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_range.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/Descriptions.pm	Attribute::Handlers demo
-ext/Attribute-Handlers/demo/MyClass.pm		Attribute::Handlers demo
-ext/Attribute-Handlers/lib/Attribute/Handlers.pm	Attribute::Handlers
-ext/Attribute-Handlers/README		Attribute::Handlers
-ext/Attribute-Handlers/t/constants.t	Test constants and Attribute::Handlers
-ext/Attribute-Handlers/t/data_convert.t	Test attribute data conversion
-ext/Attribute-Handlers/t/linerep.t	See if Attribute::Handlers works
-ext/Attribute-Handlers/t/multi.t	See if Attribute::Handlers works
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/autouse/lib/autouse.pm	Load and call a function only when it's used
