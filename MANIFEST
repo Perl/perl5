@@ -1033,6 +1033,16 @@ dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
+dist/Data-Dumper/Changes	Data pretty printer, changelog
+dist/Data-Dumper/Dumper.pm	Data pretty printer, module
+dist/Data-Dumper/Dumper.xs	Data pretty printer, externals
+dist/Data-Dumper/t/bless.t	See if Data::Dumper works
+dist/Data-Dumper/t/bugs.t	See if Data::Dumper works
+dist/Data-Dumper/t/dumper.t	See if Data::Dumper works
+dist/Data-Dumper/t/freezer.t	See if $Data::Dumper::Freezer works
+dist/Data-Dumper/Todo		Data pretty printer, futures
+dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
+dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1258,16 +1268,6 @@ ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
-ext/Data-Dumper/Changes		Data pretty printer, changelog
-ext/Data-Dumper/Dumper.pm	Data pretty printer, module
-ext/Data-Dumper/Dumper.xs	Data pretty printer, externals
-ext/Data-Dumper/t/bless.t	See if Data::Dumper works
-ext/Data-Dumper/t/bugs.t	See if Data::Dumper works
-ext/Data-Dumper/t/dumper.t	See if Data::Dumper works
-ext/Data-Dumper/t/freezer.t	See if $Data::Dumper::Freezer works
-ext/Data-Dumper/Todo		Data pretty printer, futures
-ext/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
-ext/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
 ext/Devel-DProf/Changes		Perl code profiler changelog
 ext/Devel-DProf/DProf.pm	Perl code profiler
 ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
