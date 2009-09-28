@@ -1005,9 +1005,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.17.tar.gz',
-	'FILES'		=> q[ext/Module-CoreList],
+	'FILES'		=> q[dist/Module-CoreList],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Module::Load' =>

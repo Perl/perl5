@@ -1118,6 +1118,17 @@ dist/IO/t/io_xs.t		See if XSUB methods from IO work
 dist/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 dist/lib/Makefile.PL
 dist/lib/t/01lib.t		For "use lib" testing
+dist/Module-CoreList/Changes			Module::CoreList Changes
+dist/Module-CoreList/corelist			The corelist command-line utility
+dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
+dist/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
+dist/Module-CoreList/Makefile.PL		Module::CoreList
+dist/Module-CoreList/MANIFEST			Module::CoreList
+dist/Module-CoreList/META.yml			Module::CoreList
+dist/Module-CoreList/README			Module::CoreList
+dist/Module-CoreList/t/corelist.t		Module::CoreList tests
+dist/Module-CoreList/t/find_modules.t		Module::CoreList tests
+dist/Module-CoreList/t/pod.t			Module::CoreList tests
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2059,17 +2070,6 @@ ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
-ext/Module-CoreList/Changes	Module::CoreList Changes
-ext/Module-CoreList/corelist	The corelist command-line utility
-ext/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
-ext/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
-ext/Module-CoreList/Makefile.PL		Module::CoreList
-ext/Module-CoreList/MANIFEST		Module::CoreList
-ext/Module-CoreList/META.yml		Module::CoreList
-ext/Module-CoreList/README		Module::CoreList
-ext/Module-CoreList/t/corelist.t	Module::CoreList tests
-ext/Module-CoreList/t/find_modules.t	Module::CoreList tests
-ext/Module-CoreList/t/pod.t		Module::CoreList tests
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
