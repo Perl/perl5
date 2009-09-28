@@ -1172,6 +1172,15 @@ dist/Switch/Switch.pm		Switch for Perl
 dist/Switch/t/given.t		See if Perl 6 given (switch) works
 dist/Switch/t/nested.t		See if nested switch works
 dist/Switch/t/switch.t		See if Perl 5 switch works
+dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
+dist/Thread-Queue/t/01_basic.t		Thread::Queue tests
+dist/Thread-Queue/t/02_refs.t		Thread::Queue tests
+dist/Thread-Queue/t/03_peek.t		Thread::Queue tests
+dist/Thread-Queue/t/04_errs.t		Thread::Queue tests
+dist/Thread-Queue/t/05_extract.t	Thread::Queue tests
+dist/Thread-Queue/t/06_insert.t		Thread::Queue tests
+dist/Thread-Queue/t/07_lock.t		Thread::Queue tests
+dist/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2940,15 +2949,6 @@ ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text-Soundex/t/Soundex.t	test for Text::Soundex
-ext/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
-ext/Thread-Queue/t/01_basic.t		Thread::Queue tests
-ext/Thread-Queue/t/02_refs.t		Thread::Queue tests
-ext/Thread-Queue/t/03_peek.t		Thread::Queue tests
-ext/Thread-Queue/t/04_errs.t		Thread::Queue tests
-ext/Thread-Queue/t/05_extract.t		Thread::Queue tests
-ext/Thread-Queue/t/06_insert.t		Thread::Queue tests
-ext/Thread-Queue/t/07_lock.t		Thread::Queue tests
-ext/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
 ext/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
 ext/Thread-Semaphore/t/01_basic.t		Thread::Semaphore tests
 ext/Thread-Semaphore/t/02_errs.t		Thread::Semaphore tests
