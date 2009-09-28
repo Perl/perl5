@@ -1185,6 +1185,32 @@ dist/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
 dist/Thread-Semaphore/t/01_basic.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/02_errs.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/03_nothreads.t		Thread::Semaphore tests
+dist/threads/hints/hpux.pl	Hint file for HPUX
+dist/threads/hints/linux.pl	Hint file for Linux
+dist/threads/Makefile.PL	ithreads
+dist/threads/t/basic.t		ithreads
+dist/threads/t/blocks.t		Test threads in special blocks
+dist/threads/t/context.t	Explicit thread context
+dist/threads/t/end.t		Test end functions
+dist/threads/t/err.t		Test $thr->error()
+dist/threads/t/exit.t		Test exit and die in threads
+dist/threads/t/free2.t		More ithread destruction tests
+dist/threads/t/free.t		Test ithread destruction
+dist/threads/threads.pm		ithreads
+dist/threads/threads.xs		ithreads
+dist/threads/t/join.t		Testing the join function
+dist/threads/t/kill.t		Tests thread signalling
+dist/threads/t/libc.t		testing libc functions for threadsafety
+dist/threads/t/list.t		Test threads->list()
+dist/threads/t/no_threads.t	threads test for non-threaded Perls
+dist/threads/t/problems.t	Test various memory problems
+dist/threads/t/stack_env.t	Tests for stack limits
+dist/threads/t/stack.t		Tests for stack limits
+dist/threads/t/state.t		Tests state methods
+dist/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
+dist/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
+dist/threads/t/stress_string.t	Test with multiple threads, string cv argument.
+dist/threads/t/thread.t		General ithread tests from thr5005
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2953,9 +2979,6 @@ ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text-Soundex/t/Soundex.t	test for Text::Soundex
-ext/threads/hints/hpux.pl	Hint file for HPUX
-ext/threads/hints/linux.pl	Hint file for Linux
-ext/threads/Makefile.PL		ithreads
 ext/threads-shared/hints/linux.pl	thread shared variables
 ext/threads-shared/Makefile.PL	thread shared variables
 ext/threads-shared/shared.pm	thread shared variables
@@ -2978,29 +3001,6 @@ ext/threads-shared/t/sv_simple.t	thread shared variables
 ext/threads-shared/t/utf8.t	Test UTF-8 keys in shared hashes
 ext/threads-shared/t/waithires.t	Test sub-second cond_timedwait
 ext/threads-shared/t/wait.t	Test cond_wait and cond_timedwait
-ext/threads/t/basic.t		ithreads
-ext/threads/t/blocks.t		Test threads in special blocks
-ext/threads/t/context.t		Explicit thread context
-ext/threads/t/end.t		Test end functions
-ext/threads/t/err.t		Test $thr->error()
-ext/threads/t/exit.t		Test exit and die in threads
-ext/threads/t/free2.t		More ithread destruction tests
-ext/threads/t/free.t		Test ithread destruction
-ext/threads/threads.pm		ithreads
-ext/threads/threads.xs		ithreads
-ext/threads/t/join.t		Testing the join function
-ext/threads/t/kill.t		Tests thread signalling
-ext/threads/t/libc.t		testing libc functions for threadsafety
-ext/threads/t/list.t		Test threads->list()
-ext/threads/t/no_threads.t	threads test for non-threaded Perls
-ext/threads/t/problems.t	Test various memory problems
-ext/threads/t/stack_env.t	Tests for stack limits
-ext/threads/t/stack.t		Tests for stack limits
-ext/threads/t/state.t		Tests state methods
-ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
-ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
-ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
-ext/threads/t/thread.t		General ithread tests from thr5005
 ext/Tie-File/lib/Tie/File.pm	Files as tied arrays
 ext/Tie-File/t/00_version.t	Trivial test for Tie::File
 ext/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File
