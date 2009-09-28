@@ -1160,6 +1160,9 @@ dist/Safe/t/safe3.t		See if Safe works
 dist/Safe/t/safeload.t		Tests that some modules can be loaded by Safe
 dist/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
 dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
+dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
+dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
+dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -2548,9 +2551,6 @@ ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
-ext/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
-ext/SelfLoader/t/01SelfLoader.t		See if SelfLoader works
-ext/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 ext/Shell/Shell.pm		Make AUTOLOADed system() calls
 ext/Shell/t/Shell.t		Tests for above
 ext/Socket/Makefile.PL		Socket extension makefile writer

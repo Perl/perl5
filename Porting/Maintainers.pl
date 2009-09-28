@@ -1330,7 +1330,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[ext/SelfLoader],
 	'EXCLUDED'	=> [ qw{ t/00pod.t } ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Shell' =>
