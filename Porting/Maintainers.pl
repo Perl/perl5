@@ -282,9 +282,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/base-2.14.tar.gz',
-	'FILES'		=> q[ext/base],
+	'FILES'		=> q[dist/base],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> "blead",
+	'UPSTREAM'	=> 'blead',
 	},
 
     'bignum' =>
