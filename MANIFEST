@@ -1188,6 +1188,28 @@ dist/Thread-Semaphore/t/03_nothreads.t		Thread::Semaphore tests
 dist/threads/hints/hpux.pl	Hint file for HPUX
 dist/threads/hints/linux.pl	Hint file for Linux
 dist/threads/Makefile.PL	ithreads
+dist/threads-shared/hints/linux.pl	thread shared variables
+dist/threads-shared/Makefile.PL		thread shared variables
+dist/threads-shared/shared.pm		thread shared variables
+dist/threads-shared/shared.xs		thread shared variables
+dist/threads-shared/t/0nothread.t	Tests for basic shared array functionality.
+dist/threads-shared/t/av_refs.t		Tests for arrays containing references
+dist/threads-shared/t/av_simple.t	Tests for basic shared array functionality.
+dist/threads-shared/t/blessed.t		Test blessed shared variables
+dist/threads-shared/t/clone.t		Test shared cloning
+dist/threads-shared/t/cond.t		Test condition variables
+dist/threads-shared/t/disabled.t	Test threads::shared when threads are disabled.
+dist/threads-shared/t/hv_refs.t		Test shared hashes containing references
+dist/threads-shared/t/hv_simple.t	Tests for basic shared hash functionality.
+dist/threads-shared/t/no_share.t	Tests for disabled share on variables.
+dist/threads-shared/t/object.t		Shared objects tests
+dist/threads-shared/t/shared_attr.t	Test :shared attribute
+dist/threads-shared/t/stress.t		Stress test
+dist/threads-shared/t/sv_refs.t		thread shared variables
+dist/threads-shared/t/sv_simple.t	thread shared variables
+dist/threads-shared/t/utf8.t		Test UTF-8 keys in shared hashes
+dist/threads-shared/t/waithires.t	Test sub-second cond_timedwait
+dist/threads-shared/t/wait.t		Test cond_wait and cond_timedwait
 dist/threads/t/basic.t		ithreads
 dist/threads/t/blocks.t		Test threads in special blocks
 dist/threads/t/context.t	Explicit thread context
@@ -2979,28 +3001,6 @@ ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text-Soundex/t/Soundex.t	test for Text::Soundex
-ext/threads-shared/hints/linux.pl	thread shared variables
-ext/threads-shared/Makefile.PL	thread shared variables
-ext/threads-shared/shared.pm	thread shared variables
-ext/threads-shared/shared.xs	thread shared variables
-ext/threads-shared/t/0nothread.t	Tests for basic shared array functionality.
-ext/threads-shared/t/av_refs.t	Tests for arrays containing references
-ext/threads-shared/t/av_simple.t	Tests for basic shared array functionality.
-ext/threads-shared/t/blessed.t	Test blessed shared variables
-ext/threads-shared/t/clone.t	Test shared cloning
-ext/threads-shared/t/cond.t	Test condition variables
-ext/threads-shared/t/disabled.t	Test threads::shared when threads are disabled.
-ext/threads-shared/t/hv_refs.t	Test shared hashes containing references
-ext/threads-shared/t/hv_simple.t	Tests for basic shared hash functionality.
-ext/threads-shared/t/no_share.t	Tests for disabled share on variables.
-ext/threads-shared/t/object.t	Shared objects tests
-ext/threads-shared/t/shared_attr.t	Test :shared attribute
-ext/threads-shared/t/stress.t	Stress test
-ext/threads-shared/t/sv_refs.t	thread shared variables
-ext/threads-shared/t/sv_simple.t	thread shared variables
-ext/threads-shared/t/utf8.t	Test UTF-8 keys in shared hashes
-ext/threads-shared/t/waithires.t	Test sub-second cond_timedwait
-ext/threads-shared/t/wait.t	Test cond_wait and cond_timedwait
 ext/Tie-File/lib/Tie/File.pm	Files as tied arrays
 ext/Tie-File/t/00_version.t	Trivial test for Tie::File
 ext/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File

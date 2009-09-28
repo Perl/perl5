@@ -1552,7 +1552,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/threads-shared-1.31.tar.gz',
-	'FILES'		=> q[ext/threads-shared],
+	'FILES'		=> q[dist/threads-shared],
 	'EXCLUDED'	=> [ qw(examples/class.pl
 				shared.h
 				t/pod.t
