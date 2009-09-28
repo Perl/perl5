@@ -1031,6 +1031,8 @@ dist/base/t/lib/HasSigDie.pm	Module for testing base.pm
 dist/base/t/sigdie.t		See if base works with SIGDIE
 dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
+dist/constant/lib/constant.pm	For "use constant"
+dist/constant/t/constant.t	See if compile-time constants work
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
@@ -1256,8 +1258,6 @@ ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
-ext/constant/lib/constant.pm	For "use constant"
-ext/constant/t/constant.t	See if compile-time constants work
 ext/Data-Dumper/Changes		Data pretty printer, changelog
 ext/Data-Dumper/Dumper.pm	Data pretty printer, module
 ext/Data-Dumper/Dumper.xs	Data pretty printer, externals
