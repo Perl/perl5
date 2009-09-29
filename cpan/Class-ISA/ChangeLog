@@ -1,5 +1,9 @@
 Revision history for Perl extension Class::ISA
 
+2009-09-29  Steffen Mueller  smueller@cpan.org
+	
+	* Release 0.36 -- fix installation dirs.
+
 2009-09-26  Steffen Mueller  smueller@cpan.org
 	
 	* Release 0.35 -- minor documentation nit.
