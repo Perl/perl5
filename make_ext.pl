@@ -6,7 +6,6 @@ BEGIN {
     unshift @INC, $^O eq 'MSWin32' ? ('../cpan/Cwd', '../cpan/Cwd/lib') : 'cpan/Cwd';
 }
 use Cwd;
-use File::Spec::Functions qw(rel2abs);
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
 # It's not even all modules needed to build ext/
@@ -289,7 +288,12 @@ sub build_extension {
     # another process has half-written.
     my @new_inc = ((map {"$up/$_"} @toolchain), $lib_dir);
     if ($is_Win32) {
-	@new_inc = map {rel2abs($_)} @new_inc;
+	# It feels somewhat wrong putting this in a loop, but require caches
+	# results, so is fast for subsequent calls. To my mind it's clearer
+	# here than putting the require somewhere far from the code it relates
+	# to.
+	require File::Spec::Functions;
+	@new_inc = map {File::Spec::Functions::rel2abs($_)} @new_inc;
     }
     $ENV{PERL5LIB} = join $Config{path_sep}, @new_inc;
     $ENV{PERL_CORE} = 1;
