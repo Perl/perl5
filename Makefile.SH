@@ -1226,7 +1226,10 @@ _cleaner1:
 	sh $(CLEAN).sh ; \
 	fi
 	rm -f realclean.sh veryclean.sh
-	-@test ! -f ./$(MINIPERL_EXE) || $(MINIPERL) mkppport --clean
+	-for file in `find cpan dist ext -name ppport.h` ; do rm -f $$file; done
+
+# Dear POSIX, thanks for making the default to xargs to be
+# run once if nothhing is passed in. It is such a great help.
 
 # Some systems do not support "?", so keep these files separate.
 _cleaner2:
