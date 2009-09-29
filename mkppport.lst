@@ -5,6 +5,7 @@
 # This file is read by mkppport at build time.
 #
 
+cpan/Cwd
 cpan/DB_File
 cpan/IPC-SysV
 ext/Time-HiRes
