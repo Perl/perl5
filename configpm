@@ -122,6 +122,45 @@ package Config;
 use strict;
 # use warnings; Pulls in Carp
 # use vars pulls in Carp
+
+sub _V {
+    my ($bincompat, $non_bincompat, $date, $osname, @patches) = Internals::V();
+
+    my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
+
+    # wrap at 76 columns.
+
+    $opts =~ s/(?=.{53})(.{1,53}) /$1\n                        /mg;
+
+    print Config::myconfig();
+    if ($^O eq 'VMS') {
+        print "\nCharacteristics of this PERLSHR image: \n";
+    } else {
+        print "\nCharacteristics of this binary (from libperl): \n";
+    }
+
+    print "  Compile-time options: $opts\n";
+
+    if (@patches) {
+        print "  Locally applied patches:\n";
+        print "\t$_\n" foreach @patches;
+    }
+
+    print "  Built under $osname\n";
+
+    print "  $date\n" if defined $date;
+
+    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %ENV;
+    push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $^O eq 'cygwin';
+
+    if (@env) {
+        print "  \%ENV:\n";
+        print "    $_\n" foreach @env;
+    }
+    print "  \@INC:\n";
+    print "    $_\n" foreach @INC;
+}
+
 ENDOFBEG
 
 my $myver = sprintf "%vd", $^V;

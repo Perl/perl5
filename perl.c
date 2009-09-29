@@ -26,6 +26,7 @@
 #define PERL_IN_PERL_C
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
+#include "XSUB.h"
 
 #ifdef NETWARE
 #include "nwutil.h"	
@@ -1626,6 +1627,92 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     return ret;
 }
 
+/* This needs to stay in perl.c, as perl.c is compiled with different flags for
+   miniperl, and we need to see those flags reflected in the values here.  */
+
+/* What this returns is subject to change.  Use the public interface in Config.
+ */
+static void
+S_Internals_V(pTHX_ CV *cv)
+{
+    dXSARGS;
+#ifdef LOCAL_PATCH_COUNT
+    const int local_patch_count = LOCAL_PATCH_COUNT;
+#else
+    const int local_patch_count = 0;
+#endif
+    const int entries = 4 + local_patch_count;
+    int i;
+    static char non_bincompat_options[] = 
+#  ifdef DEBUGGING
+			     " DEBUGGING"
+#  endif
+#  ifdef NO_MATHOMS
+                            " NO_MATHOMS"
+#  endif
+#  ifdef PERL_DISABLE_PMC
+			     " PERL_DISABLE_PMC"
+#  endif
+#  ifdef PERL_DONT_CREATE_GVSV
+			     " PERL_DONT_CREATE_GVSV"
+#  endif
+#  ifdef PERL_IS_MINIPERL
+			     " PERL_IS_MINIPERL"
+#  endif
+#  ifdef PERL_MALLOC_WRAP
+			     " PERL_MALLOC_WRAP"
+#  endif
+#  ifdef PERL_MEM_LOG
+			     " PERL_MEM_LOG"
+#  endif
+#  ifdef PERL_MEM_LOG_NOIMPL
+			     " PERL_MEM_LOG_NOIMPL"
+#  endif
+#  ifdef PERL_USE_DEVEL
+			     " PERL_USE_DEVEL"
+#  endif
+#  ifdef PERL_USE_SAFE_PUTENV
+			     " PERL_USE_SAFE_PUTENV"
+#  endif
+#  ifdef USE_SITECUSTOMIZE
+			     " USE_SITECUSTOMIZE"
+#  endif	       
+#  ifdef USE_FAST_STDIO
+			     " USE_FAST_STDIO"
+#  endif	       
+	;
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_ARG(items);
+
+    EXTEND(SP, entries);
+
+    PUSHs(sv_2mortal(newSVpv(PL_bincompat_options, 0)));
+    PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
+			      sizeof(non_bincompat_options) - 1, SVs_TEMP));
+
+#ifdef __DATE__
+#  ifdef __TIME__
+    PUSHs(Perl_newSVpvn_flags(aTHX_
+			      STR_WITH_LEN("Compiled at " __DATE__ " " __TIME__),
+			      SVs_TEMP));
+#  else
+    PUSHs(Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN("Compiled on " __DATE__),
+			      SVs_TEMP));
+#  endif
+#else
+    PUSHs(&PL_sv_undef);
+#endif
+
+    PUSHs(Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(OSNAME), SVs_TEMP));
+
+    for (i = 1; i <= local_patch_count; i++) {
+	/* This will be an undef, if PL_localpatches[i] is NULL.  */
+	PUSHs(sv_2mortal(newSVpv(PL_localpatches[i], 0)));
+    }
+
+    XSRETURN(entries);
+}
+
 #define INCPUSH_UNSHIFT			0x01
 #define INCPUSH_ADD_OLD_VERS		0x02
 #define INCPUSH_ADD_VERSIONED_SUB_DIRS	0x04
@@ -1759,89 +1846,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 		Perl_av_create_and_push(aTHX_ &PL_preambleav, newSVpvs("use Config;"));
 		if (*++s != ':')  {
-		    /* Can't do newSVpvs() as that would involve pre-processor
-		       condititionals inside a macro expansion.  */
-		    opts_prog = Perl_newSVpv(aTHX_ "$_ = join ' ', sort qw("
-#  ifdef DEBUGGING
-			     " DEBUGGING"
-#  endif
-#  ifdef NO_MATHOMS
-                            " NO_MATHOMS"
-#  endif
-#  ifdef PERL_DISABLE_PMC
-			     " PERL_DISABLE_PMC"
-#  endif
-#  ifdef PERL_DONT_CREATE_GVSV
-			     " PERL_DONT_CREATE_GVSV"
-#  endif
-#  ifdef PERL_IS_MINIPERL
-			     " PERL_IS_MINIPERL"
-#  endif
-#  ifdef PERL_MALLOC_WRAP
-			     " PERL_MALLOC_WRAP"
-#  endif
-#  ifdef PERL_MEM_LOG
-			     " PERL_MEM_LOG"
-#  endif
-#  ifdef PERL_MEM_LOG_NOIMPL
-			     " PERL_MEM_LOG_NOIMPL"
-#  endif
-#  ifdef PERL_USE_DEVEL
-			     " PERL_USE_DEVEL"
-#  endif
-#  ifdef PERL_USE_SAFE_PUTENV
-			     " PERL_USE_SAFE_PUTENV"
-#  endif
-#  ifdef USE_SITECUSTOMIZE
-			     " USE_SITECUSTOMIZE"
-#  endif	       
-#  ifdef USE_FAST_STDIO
-			     " USE_FAST_STDIO"
-#  endif	       
-					     , 0);
-
-		    sv_catpv(opts_prog, PL_bincompat_options);
-		    /* Terminate the qw(, and then wrap at 76 columns.  */
-		    sv_catpvs(opts_prog, "); s/(?=.{53})(.{1,53}) /$1\\n                        /mg;print Config::myconfig(),");
-#ifdef VMS
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n");
-#else
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
-#endif
-		    sv_catpvs(opts_prog,"  Compile-time options: $_\\n\",");
-
-#if defined(LOCAL_PATCH_COUNT)
-		    if (LOCAL_PATCH_COUNT > 0) {
-			int i;
-			sv_catpvs(opts_prog,
-				 "\"  Locally applied patches:\\n\",");
-			for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
-			    if (PL_localpatches[i])
-				Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
-				    0, PL_localpatches[i], 0);
-			}
-		    }
-#endif
-		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   "\"  Built under %s\\n",OSNAME);
-#ifdef __DATE__
-#  ifdef __TIME__
-		    sv_catpvs(opts_prog,
-			      "  Compiled at " __DATE__ " " __TIME__ "\\n\"");
-#  else
-		    sv_catpvs(opts_prog, "  Compiled on " __DATE__ "\\n\"");
-#  endif
-#endif
-		    sv_catpvs(opts_prog, "; $\"=\"\\n    \"; "
-			     "@env = map { \"$_=\\\"$ENV{$_}\\\"\" } "
-			     "sort grep {/^PERL/} keys %ENV; ");
-#ifdef __CYGWIN__
-		    sv_catpvs(opts_prog,
-			     "push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
-#endif
-		    sv_catpvs(opts_prog, 
-			     "print \"  \\%ENV:\\n    @env\\n\" if @env;"
-			     "print \"  \\@INC:\\n    @INC\\n\";");
+		    opts_prog = newSVpvs("Config::_V()");
 		}
 		else {
 		    ++s;
@@ -2024,6 +2029,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
     boot_core_mro();
+    newXS("Internals::V", S_Internals_V, __FILE__);
 
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
