@@ -3,9 +3,10 @@ use strict;
 use warnings;
 use Config;
 BEGIN {
-    unshift @INC, $^O eq 'MSWin32' ? '../cpan/Cwd' : 'cpan/Cwd';
+    unshift @INC, $^O eq 'MSWin32' ? ('../cpan/Cwd', '../cpan/Cwd/lib') : 'cpan/Cwd';
 }
 use Cwd;
+use File::Spec::Functions qw(rel2abs);
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
 # It's not even all modules needed to build ext/
@@ -179,35 +180,36 @@ if ($is_Win32) {
 	(my $ext = getcwd()) =~ s{/}{\\}g;
 	FindExt::scan_ext($ext);
 	FindExt::set_static_extensions(split ' ', $Config{static_ext});
-
-	my @ext;
-	push @ext, FindExt::static_ext() if $static;
-	push @ext, FindExt::dynamic_ext() if $dynamic;
-	push @ext, FindExt::nonxs_ext() if $nonxs;
-	push @ext, 'DynaLoader' if $dynaloader;
-
-	foreach (sort @ext) {
-	    if (%incl and !exists $incl{$_}) {
-		#warn "Skipping extension $ext\\$_, not in inclusion list\n";
-		next;
-	    }
-	    if (exists $excl{$_}) {
-		warn "Skipping extension $ext\\$_, not ported to current platform";
-		next;
-	    }
-	    push @extspec, $_;
-	    if($_ eq 'DynaLoader') {
-		# No, we don't know why nmake can't work out the dependency chain
-		push @{$extra_passthrough{$_}}, 'DynaLoader.c';
-	    } elsif(FindExt::is_static($_)) {
-		push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
-	    }
-	}
 	chdir $build
 	    or die "Couldn't chdir to '$build': $!"; # restore our start directory
     }
+
+    my @ext;
+    push @ext, FindExt::static_ext() if $static;
+    push @ext, FindExt::dynamic_ext() if $dynamic;
+    push @ext, FindExt::nonxs_ext() if $nonxs;
+    push @ext, 'DynaLoader' if $dynaloader;
+
+    foreach (sort @ext) {
+	if (%incl and !exists $incl{$_}) {
+	    #warn "Skipping extension $_, not in inclusion list\n";
+	    next;
+	}
+	if (exists $excl{$_}) {
+	    warn "Skipping extension $_, not ported to current platform";
+	    next;
+	}
+	push @extspec, $_;
+	if($_ eq 'DynaLoader' and $target !~ /clean$/) {
+	    # No, we don't know why nmake can't work out the dependency chain
+	    push @{$extra_passthrough{$_}}, 'DynaLoader.c';
+	} elsif(FindExt::is_static($_)) {
+	    push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
+	}
+    }
+
     chdir '..'
-	or die "Couldn't chdir to build directory: $!"; # now in the Perl build directory
+	or die "Couldn't chdir to build directory: $!"; # now in the Perl build
 }
 elsif ($is_VMS) {
     $perl = $^X;
@@ -271,6 +273,11 @@ foreach my $spec (@extspec)  {
 sub build_extension {
     my ($ext_dir, $perl, $mname, $pass_through) = @_;
 
+    unless (chdir "$ext_dir") {
+	warn "Cannot cd to $ext_dir: $!";
+	return;
+    }
+
     my $up = $ext_dir;
     $up =~ s![^/]+!..!g;
 
@@ -280,14 +287,13 @@ sub build_extension {
     # $lib_dir must be last, as we're copying files into it, and in a parallel
     # make there's a race condition if one process tries to open a module that
     # another process has half-written.
-    $ENV{PERL5LIB}
-	= join $Config{path_sep}, (map {"$up/$_"} @toolchain), $lib_dir;
+    my @new_inc = ((map {"$up/$_"} @toolchain), $lib_dir);
+    if ($is_Win32) {
+	@new_inc = map {rel2abs($_)} @new_inc;
+    }
+    $ENV{PERL5LIB} = join $Config{path_sep}, @new_inc;
     $ENV{PERL_CORE} = 1;
 
-    unless (chdir "$ext_dir") {
-	warn "Cannot cd to $ext_dir: $!";
-	return;
-    }
     my $makefile;
     if ($is_VMS) {
 	$makefile = 'descrip.mms';

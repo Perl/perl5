@@ -1152,6 +1152,7 @@ distclean: realclean
 	-del /f $(LIBDIR)\Win32CORE.pm
 	-del /f $(LIBDIR)\Win32API\File.pm
 	-del /f $(LIBDIR)\Win32API\File\cFile.pc
+	-del /f $(DISTDIR)\XSLoader\XSLoader.pm
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
