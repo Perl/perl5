@@ -285,7 +285,6 @@ cpan/Cwd/lib/File/Spec.pm		portable operations on file names
 cpan/Cwd/lib/File/Spec/Unix.pm		portable operations on Unix file names
 cpan/Cwd/lib/File/Spec/VMS.pm		portable operations on VMS file names
 cpan/Cwd/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
-cpan/Cwd/Makefile.PL			Cwd extension makefile maker
 cpan/Cwd/t/crossplatform.t		See if File::Spec works crossplatform
 cpan/Cwd/t/cwd.t			See if Cwd works
 cpan/Cwd/t/Functions.t			See if File::Spec::Functions works
