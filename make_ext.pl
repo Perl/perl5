@@ -3,7 +3,13 @@ use strict;
 use warnings;
 use Config;
 BEGIN {
-    unshift @INC, $^O eq 'MSWin32' ? ('../cpan/Cwd', '../cpan/Cwd/lib') : 'cpan/Cwd';
+    if ($^O eq 'MSWin32') {
+	unshift @INC, ('../cpan/Cwd', '../cpan/Cwd/lib');
+	require File::Spec::Functions;
+    }
+    else {
+	unshift @INC, 'cpan/Cwd';
+    }
 }
 use Cwd;
 
@@ -288,11 +294,6 @@ sub build_extension {
     # another process has half-written.
     my @new_inc = ((map {"$up/$_"} @toolchain), $lib_dir);
     if ($is_Win32) {
-	# It feels somewhat wrong putting this in a loop, but require caches
-	# results, so is fast for subsequent calls. To my mind it's clearer
-	# here than putting the require somewhere far from the code it relates
-	# to.
-	require File::Spec::Functions;
 	@new_inc = map {File::Spec::Functions::rel2abs($_)} @new_inc;
     }
     $ENV{PERL5LIB} = join $Config{path_sep}, @new_inc;
