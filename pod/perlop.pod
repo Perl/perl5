@@ -2183,7 +2183,7 @@ to terminate the loop, they should be tested for explicitly:
     while (($_ = <STDIN>) ne '0') { ... }
     while (<STDIN>) { last unless $_; ... }
 
-In other boolean contexts, I< C< E<lt>filehandleE<gt> > > without an
+In other boolean contexts, I<C<E<lt>filehandleE<gt>>> without an
 explicit C<defined> test or comparison elicit a warning if the
 C<use warnings> pragma or the B<-w>
 command-line switch (the C<$^W> variable) is in effect.
