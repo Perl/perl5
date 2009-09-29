@@ -1264,6 +1264,7 @@ use File::Glob qw(:case);
 
     'Pod::Plainer' =>
 	{
+	'DISTRIBUTION'	=> 'RMBARKER/Pod-Plainer-1.01.tar.gz',
 	'MAINTAINER'	=> 'rmbarker',
 	'FILES'		=> q[dist/Pod-Plainer],
 	'CPAN'		=> 1,
