@@ -1117,13 +1117,8 @@ use File::Glob qw(:case);
     'PathTools' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30_01.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30_02.tar.gz',
 	'FILES'		=> q[cpan/Cwd],
-	# XXX note that the CPAN and blead Makefile.PL are totally
-	# unrelated. The blead one is described as 'core-only'.
-	# Perhaps after the big lib/ => ext/ migration it will be possible
-	# to harmonize them?
-	
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",

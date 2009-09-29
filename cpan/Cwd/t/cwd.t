@@ -216,11 +216,6 @@ SKIP: {
     1 while unlink $file;
 }
 
-if ($ENV{PERL_CORE}) {
-    chdir '../ext/Cwd/t';
-    unshift @INC, '../../../lib';
-}
-
 # Make sure we can run abs_path() on files, not just directories
 my $path = 'cwd.t';
 path_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
