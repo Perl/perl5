@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15';
+$VERSION = '3.15_01';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -658,8 +658,11 @@ sub options_processing {
     $self->opt_n("nroff") unless $self->opt_n;
     $self->add_formatter_option( '__nroffer' => $self->opt_n );
 
+    # Get language from PERLDOC_POD2 environment variable
+    $self->opt_L || ( $ENV{PERLDOC_POD2} eq '1' ? $self->_elem('opt_L',(split(/\_/, $ENV{LC_ALL} || $ENV{LC_LANG} || $ENV{LANG}))[0] ) : $self->_elem('opt_L', $ENV{PERLDOC_POD2}) );
+
     # Adjust for using translation packages
-    $self->add_translator($self->opt_L) if $self->opt_L;
+    $self->add_translator(split(/\s+/,$self->opt_L)) if $self->opt_L;
 
     return;
 }
@@ -966,7 +969,9 @@ sub search_perlfunc {
      print "Going to perlfunc-scan for $search_re in $perlfunc\n";
 
     my $re = 'Alphabetical Listing of Perl Functions';
-    if ( $self->opt_L ) {
+
+    # Check available translator or backup to default (english)
+    if ( $self->opt_L && defined $self->{'translators'}->[0] ) {
         my $tr = $self->{'translators'}->[0];
         $re =  $tr->search_perlfunc_re if $tr->can('search_perlfunc_re');
     }
