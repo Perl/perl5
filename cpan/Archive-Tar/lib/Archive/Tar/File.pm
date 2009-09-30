@@ -386,7 +386,7 @@ sub _prefix_and_file {
     my @dirs = File::Spec->splitdir( $dirs );
 
     ### so sometimes the last element is '' -- probably when trailing
-    ### dir slashes are encountered... this is is of course pointless,
+    ### dir slashes are encountered... this is of course pointless,
     ### so remove it
     pop @dirs while @dirs and not length $dirs[-1];
 
