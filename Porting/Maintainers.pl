@@ -863,7 +863,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[ext/Locale-Maketext-Simple],
 	'EXCLUDED'	=> [ qr{^inc/} ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'dist',
 	},
 
     'Log::Message' =>

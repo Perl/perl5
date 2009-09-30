@@ -1118,6 +1118,16 @@ dist/IO/t/io_xs.t		See if XSUB methods from IO work
 dist/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 dist/lib/Makefile.PL
 dist/lib/t/01lib.t		For "use lib" testing
+dist/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
+dist/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
+dist/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests
+dist/Locale-Maketext-Simple/t/2-load_po_without_i_default.t	Locale::Simple tests
+dist/Locale-Maketext-Simple/t/3-load_po_with_i_default.t	Locale::Simple tests
+dist/Locale-Maketext-Simple/t/po_with_i_default/en.po		Locale::Simple tests
+dist/Locale-Maketext-Simple/t/po_with_i_default/fr.po		Locale::Simple tests
+dist/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
+dist/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
+dist/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
@@ -2040,16 +2050,6 @@ ext/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
 ext/Locale-Maketext/lib/Locale/Maketext.pod		Locale::Maketext documentation
 ext/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 ext/Locale-Maketext/README	Locale::Maketext
-ext/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
-ext/Locale-Maketext-Simple/t/0-signature.t	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/1-basic.t	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/2-load_po_without_i_default.t	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/3-load_po_with_i_default.t	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/po_with_i_default/en.po	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/po_with_i_default/fr.po	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
-ext/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 ext/Locale-Maketext/t/01_about_verbose.t	See if Locale::Maketext works
 ext/Locale-Maketext/t/10_make.t	See if Locale::Maketext works
 ext/Locale-Maketext/t/20_get.t	See if Locale::Maketext works
