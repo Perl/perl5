@@ -1358,7 +1358,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rgarcia',
 	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.14.tar.gz',
-	'FILES'		=> q[ext/Switch],
+	'FILES'		=> q[dist/Switch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	},
