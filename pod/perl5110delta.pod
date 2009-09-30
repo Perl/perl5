@@ -387,7 +387,7 @@ system call.
 
 =head2 Dual-lifed modules moved
 
-Dual-lifed modules maintained primarily in the Perl core now live in ext/.
+Dual-lifed modules maintained primarily in the Perl core now live in dist/.
 Dual-lifed modules maintained primarily on CPAN now live in cpan/
 
 =head2 New Modules and Pragmata
