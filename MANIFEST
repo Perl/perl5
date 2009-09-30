@@ -4175,7 +4175,6 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
@@ -4195,8 +4194,6 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
-t/lib/maintainers.t		Test that Porting/Maintaners.pl is up to date
-t/lib/manifest.t		Test that this MANIFEST file is well formed
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
@@ -4430,7 +4427,10 @@ t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ..., !!! and ??? work
 t/perl.supp			Perl valgrind suppressions
 t/pod/diag.t			Test completeness of perldiag.pod
+t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/checkcase.t	Check whether we are case-insensitive-fs-friendly
+t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
+t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/README			Instructions for regression tests
 t/re/pat_advanced.t			See if advanced esoteric patterns work
 t/re/pat_advanced_thr.t			See if advanced esoteric patterns work in another thread
