@@ -1740,6 +1740,18 @@ pre-processor macro C<PERL_SUB_DEPTH_WARN> to the desired value.
 
 =item *
 
+TODO: C<SVt_RV> is gone. RVs are now stored in IVs
+
+=item *
+
+TODO: REGEXPs are first class
+
+=item *
+
+TODO: OOK is reworked, such that an OOKed scalar is PV not PVIV
+
+=item *
+
 The J.R.R. Tolkien quotes at the head of C source file have been checked and
 proper citations added, thanks to a patch from Tom Christiansen.
 
