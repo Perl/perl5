@@ -1597,7 +1597,10 @@ use File::Glob qw(:case);
 	'FILES'		=> q[ext/Time-Local],
 	'EXCLUDED'	=> [ qw(t/pod-coverage.t t/pod.t) ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
+	# Currently Time::Local is no longer backwards compatible with Pre-5.11 perls
+	# the version in core has now deviated from the CPAN version. To re-dual-life
+	# this module, we'll need to rewrite a hybrid version
 	},
 
     'Time::Piece' =>
