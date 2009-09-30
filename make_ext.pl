@@ -6,12 +6,17 @@ BEGIN {
     if ($^O eq 'MSWin32') {
 	unshift @INC, ('../cpan/Cwd', '../cpan/Cwd/lib');
 	require File::Spec::Functions;
+	require FindExt;
     }
     else {
 	unshift @INC, 'cpan/Cwd';
     }
 }
 use Cwd;
+
+my $is_Win32 = $^O eq 'MSWin32';
+my $is_VMS = $^O eq 'VMS';
+my $is_Unix = !$is_Win32 && !$is_VMS;
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
 # It's not even all modules needed to build ext/
@@ -20,11 +25,20 @@ use Cwd;
 # After which, all nonxs modules are in lib, which was always sufficient to
 # allow miniperl to build everything else.
 
-my @toolchain = qw(ext/constant/lib cpan/Cwd cpan/Cwd/lib
+# This list cannot get any longer without overflowing the length limit for
+# environment variables on VMS
+my @toolchain = qw(cpan/AutoLoader/lib
+		   ext/constant/lib
+		   cpan/Cwd cpan/Cwd/lib
 		   ext/ExtUtils-Command/lib
-		   dist/ExtUtils-Install/lib ext/ExtUtils-MakeMaker/lib
-		   ext/ExtUtils-Manifest/lib ext/Text-ParseWords/lib
-		   cpan/File-Path/lib cpan/AutoLoader/lib);
+		   dist/ExtUtils-Install/lib
+		   ext/ExtUtils-MakeMaker/lib
+		   ext/ExtUtils-Manifest/lib
+		   cpan/File-Path/lib
+		   );
+
+# Used only in ExtUtils::Liblist::Kid::_win32_ext()
+push @toolchain, 'ext/Text-ParseWords/lib' if $is_Win32;
 
 my @ext_dirs = qw(cpan dist ext);
 my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
@@ -67,12 +81,6 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
-
-my $is_Win32 = $^O eq 'MSWin32';
-my $is_VMS = $^O eq 'VMS';
-my $is_Unix = !$is_Win32 && !$is_VMS;
-
-require FindExt if $is_Win32;
 
 my (%excl, %incl, %opts, @extspec, @pass_through);
 
@@ -238,6 +246,11 @@ elsif ($is_VMS) {
     @extspec = (@first, @other);
 }
 
+if ($Config{osname} eq 'catamount' and @extspec) {
+    # Snowball's chance of building extensions.
+    die "This is $Config{osname}, not building $extspec[0], sorry.\n";
+}
+
 foreach my $spec (@extspec)  {
     my $mname = $spec;
     $mname =~ s!/!::!g;
@@ -261,11 +274,6 @@ foreach my $spec (@extspec)  {
 	    warn "Can't find extension $spec in any of @ext_dirs";
 	    next;
 	}
-    }
-
-    if ($Config{osname} eq 'catamount') {
-	# Snowball's chance of building extensions.
-	die "This is $Config{osname}, not building $mname, sorry.\n";
     }
 
     print "\tMaking $mname ($target)\n";
