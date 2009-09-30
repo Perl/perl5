@@ -1041,6 +1041,56 @@ Upgraded from version 0.1001_01 to 0.1101.
 
 Upgraded from version 0.08 to 0.10.
 
+=item Upgrade to Class::ISA 0.34
+
+=item Upgrade to Attribute::Handlers 0.87 
+
+=item Upgrade to AutoLoader 5.70 
+
+=item Upgrade to IO::Zlib 1.10
+
+=item Update parent to CPAN version 0.223
+
+=item Update Log::Message::Simple to CPAN version 0.06
+
+=item Updated Math::BigRat to CPAN version 0.24
+
+=item Update Archive::Tar to CPAN version 1.54
+
+=item Update IPC::Cmd to CPAN version 0.50
+
+=item Updated CPANPLUS::Dist::Build to CPAN version 0.40
+ 
+=item Updated Module::Loaded to CPAN version 0.06
+
+=item Upgrade Term::ANSIColor to 2.02
+
+=item Update Text::Balanced to 2.02
+
+=item Update Module::Build to 0.35
+
+=item constant has been upgraded to 1.19. 
+
+=item upgrade CGI from 3.43 to 3.45
+
+=item bump Safe version to 2.18
+
+=item Upgrade to threads::shared 1.31
+
+=item Update threads to 1.74
+
+=item autodie 2.06_01
+
+=item Synchronize with CPAN's Attribute::Handlers 0.86
+
+=item Synchronize AutoLoader with CPAN's 5.69
+
+=item ExtUtils::MakeMaker 6.55_02
+
+=item Final release of version-0.77 for inclusion in 5.10.1
+
+=item   Upgrade to Encode 2.37
+    
 =back
 
 =head1 Utility Changes
@@ -1728,6 +1778,11 @@ that was enabled when the F<perl> binary was compiled.
 
 =item *
 
+Smartmatch resolution tracing has been added as a new diagnostic. Use C<-DM> to
+enable it.
+
+=item *
+
 Uses of C<Nullav>, C<Nullcv>, C<Nullhv>, C<Nullop>, C<Nullsv> etc have been
 replaced by C<NULL> in the core code, and non-dual-life modules, as C<NULL>
 is clearer to those unfamiliar with the core code.
@@ -2014,6 +2069,27 @@ simpler to spot and correct the suspicious character.
 =item *
 
 Explicitely point to $. when it causes an uninitialized warning for ranges in scalar context
+
+=item *
+
+Removed vestigal support for Tenon Intersystems MachTen Unix layer for MacOS Classic.
+    
+=item *
+
+Removed the port to Atari MiNT.  It's a dead platform that hasn't had any love since 5.005.
+
+
+=item * 
+
+Deprecated numerous Perl 4-era libraries:
+
+F<termcap.pl>, F<tainted.pl>, F<stat.pl>, F<shellwords.pl>, F<pwd.pl>,
+F<open3.pl>, F<open2.pl>, F<newgetopt.pl>, F<look.pl>, F<find.pl>,
+F<finddepth.pl>, F<importenv.pl>, F<hostname.pl>, F<getopts.pl>,
+F<getopt.pl>, F<getcwd.pl>, F<flush.pl>, F<fastcwd.pl>, F<exceptions.pl>,
+F<ctime.pl>, F<complete.pl>, F<cacheout.pl>, F<bigrat.pl>, F<bigint.pl>,
+F<bigfloat.pl>, F<assert.pl>, F<abbrev.pl>, F<dotsh.pl>, and
+F<timelocal.pl> are all now deprecated. Using them will incur a warning.
 
 =back
 
@@ -2417,36 +2493,8 @@ Date:   Wed Sep 23 11:59:31 2009 +0100
 
 PERL_IS_MINIPERL is now declared in the verbose configuration output.
 
-
-=head2 Upgrade to Class::ISA 0.34
-=head2 Deprecate Class::ISA from core
-
-Whihch of htose is right?
-
-=head2 Upgrade to Attribute::Handlers 0.87 
-=head2 Upgrade to AutoLoader 5.70 
-
-=head2 Upgrade to IO::Zlib 1.10
-
-=head2 Note that Pod::Plainer is upgraded, and deprecated from core.
-
 =head2 Parallel testing is pretty much done.
 
-=head2 Update parent to CPAN version 0.223
-
-=head2 Update Log::Message::Simple to CPAN version 0.06
-=head2 Updated Math::BigRat to CPAN version 0.24
-
-=head2 Update Archive::Tar to CPAN version 1.54
-
-=head2    Update IPC::Cmd to CPAN version 0.50
-
-=head2    Updated CPANPLUS::Dist::Build to CPAN version 0.40
-    
-=head2 Updated Module::Loaded to CPAN version 0.06
-
-=head2   Upgrade to Encode 2.37
-    
 commit d8723a6a74b2c12e9d732728dbe717672ab893f2
 Author: Salvador Ortiz Garcia <sog@msg.com.mx>
 Date:   Sun Sep 6 23:41:57 2009 +0200
@@ -2511,38 +2559,6 @@ Date:   Thu Sep 3 11:29:30 2009 -0600
     Add missing files from Unicode 5.1 Character Database
 
 
-=head2 Deprecated numerous Perl 4 era libraries:
-
-    Deprecate termcap.pl with a warning
-    Deprecate tainted.pl with a warning
-    Deprecate stat.pl with a warning
-    Deprecate shellwords.pl with a warning
-    Deprecate pwd.pl with a warning
-    Deprecate open3.pl with a warning
-    Deprecate open2.pl with a warning
-    Deprecate newgetopt.pl with a warning
-    Deprecate look.pl with a warning
-    Deprecate lib/find{,depth}.pl with a warning
-    Deprecate importenv.pl with a warning
-    Deprecate hostname.pl with a warning
-    Deprecate getopts.pl with a warning
-    Deprecate getopt.pl with a warning
-    Deprecate getcwd.pl with a warning
-    Deprecate flush.pl with a warning
-    Deprecate fastcwd.pl with a warning
-    Deprecate exceptions.pl with a warning
-    Deprecate ctime.pl with a warning
-    Deprecate complete.pl with a warning
-    Deprecate cacheout.pl with a warning
-    Deprecate bigrat.pl with a warning
-    Deprecate bigint.pl with a warning
-    Deprecate bigfloat.pl with a warning
-    Deprecate assert.pl with a warning
-    Deprecate abbrev.pl with a warning
-    Deprecate dotsh.pl with a warning
-    Deprecate timelocal.pl with a warning
-
-
 =head2 set PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS to 0 and enable proper POSIX char class matching
     
     This also alters which Unicode properties that the POSIX character
@@ -2571,10 +2587,6 @@ Date:   Mon Aug 31 11:45:23 2009 +0200
     
     The regression test was extended with check for the problem.
 
-
-=head2    Upgrade Term::ANSIColor to 2.02
-=head2 Update Text::Balanced to 2.02
-=head2  Update Module::Build to 0.35
 
 commit 16fa5c119c4bda5c0396a5f81296bd1ccc128a9c
 Author: Vincent Pit <perl@profvince.com>
@@ -2613,23 +2625,15 @@ Date:   Thu Aug 27 11:13:09 2009 +0200
     
     Signed-off-by: Lubomir Rintel <lkundrak@fedoraproject.org>
 
-=head2    constant has been upgraded to 1.19. Describe the improvements.
 
 =head2 Note that linearising C3 MRO is now 40% faster for single inheritance.
 
 =head2 Fix a B::Deparse bug - constants and PCSs were appearing as subroutine stubs.
     
 
-=head2 upgrade CGI from 3.43 to 3.45
     
-commit d7c0d2821cad1d2e5b6b3d6440e7c22bfaae9559
-Author: David Mitchell <davem@iabyn.com>
-Date:   Thu Aug 20 19:29:35 2009 +0100
-
-    add -DM flag to track smartmatch resolution
 
 
-=head2    bump Safe version to 2.18
 
 =head2 Win32:   Don't explicitly link against msvcrt when using MinGW.
     
@@ -2638,37 +2642,9 @@ Date:   Thu Aug 20 19:29:35 2009 +0100
     against this library implicitly anyways, so specifying it
     isn't needed.
 
-=head2 Upgrade to threads::shared 1.31
-    
-
-=head2    Update threads to 1.74
-
-    
-
-=head2    Synchronize with CPAN's Attribute::Handlers 0.86
-=head2   Synchronize AutoLoader with CPAN's 5.69
-=head2 ExtUtils::MakeMaker 6.55_02
-
-=head2    Removed vestigal support for Tenon Intersystems MachTen Unix layer for MacOS Classic.
-    
-=head2    Remove the port to MiNT.  It's a dead platform that hasn't had any love since 5.005
-=head2    Final release of version-0.77 for inclusion in 5.10.1
-
-
 =head2    Add security contact information to perlsec
     
-    This patch inserts a short paragraph with security contact
-    information near the top of the "Perl Security" documentation
-    page.  This would seem a likely place someone would look for
-    such information (rather than INSTALL or perldelta where it
-    lives today).  I've put it at the top, not the bottom
-    to make it easier to find.
+=item Introduce "delete local"
 
 commit 7332a6c406299d5e73836d2410689bd7c3ae4782
-Author: Vincent Pit <perl@profvince.com>
-Date:   Fri Jan 2 10:26:57 2009 +0100
-
-    Introduce "delete local"
-
-=head2    autodie 2.06_01
 
