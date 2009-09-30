@@ -2218,28 +2218,3 @@ The F<Artistic> and F<Copying> files for copyright information.
 =cut
 
 
-=head1 TODO
-
-The following changes are a filtered list of changes which weren't backported
-to 5.10.1. They were run through changelogger.bestpractical.com and triaged
-by a set of Perl 5 Porters. Changes to blead after 
-fafe5ad5a7e57ca14cd0844db173f3a4d6c9e8de
-
-have not yet been triaged or integrated.
-
-The following changes need to be 
-
-1) deleted if they don't merit inclusion
-
-	OR
-
-2) lightly copyedited and integrated into the perldelta above. Unfortunately, many of our
-commit messages are somewhat terse and require a bit more help to turn into something readable
-
-
-
-
-=head1 API
-
-
-
