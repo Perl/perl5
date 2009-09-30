@@ -1243,7 +1243,7 @@ use File::Glob qw(:case);
     'Pod::Perldoc' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
-	'DISTRIBUTION'	=> 'FERREIRA/Pod-Perldoc-3.15.tar.gz',
+	'DISTRIBUTION'	=> 'FERREIRA/Pod-Perldoc-3.15_01.tar.gz',
 	# I don't know whether it's conceptually cleaner to a rule to copy
 	# ext/Pod-Perldoc/pod/perldoc.pod to pod/perldoc.pod at make time
 	# (in 4 places), or leave it as 1 mapping here.
@@ -1337,7 +1337,7 @@ use File::Glob qw(:case);
     'Shell' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
-	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72.tar.gz',
+	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72_01.tar.gz',
 	'FILES'		=> q[ext/Shell],
 	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
 	'CPAN'		=> 1,
