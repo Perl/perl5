@@ -2065,7 +2065,15 @@ of these modules warnings will issue a deprecation warning.
 
 =item *
 
+C<Class::ISA>
+
+=item *
+
 C<Pod::Plainer>
+
+=item *
+
+C<Shell>
 
 =back
 
