@@ -278,7 +278,13 @@ F<miniperl>'s @INC is now restricted to just -I..., the split of $ENV{PERL5LIB},
 
 A space or a newline is now required after a C<"#line XXX"> directive.
 
-=item * Tied filehandles now have an additional method EOF which provides the EOF type
+=item *
+
+Tied filehandles now have an additional method EOF which provides the EOF type
+
+=item *
+
+To better match all other flow control statements, C<foreach> may no longer be used as an attribute.
 
 =back
 
@@ -382,6 +388,7 @@ terminated by nul byte, but with the length passed to the socket()
 system call.
     
 
+=head2 C<delete local> now allows you to lexically delete a hash entry.
 
 =head1 Modules and Pragmata
 
@@ -1127,8 +1134,12 @@ Upgraded from version 0.08 to 0.10.
 
 =item Final release of version-0.77 for inclusion in 5.10.1
 
-=item   Upgrade to Encode 2.37
-    
+=item Upgrade to Encode 2.37
+
+=item Upgrade to Class::ISA 0.36 (Fixes installation directories only)
+
+=item Upgrade to PathTools 3.30_02 (with only core reorganization fixes)
+
 =back
 
 =head1 Utility Changes
@@ -1693,6 +1704,10 @@ Previously missing files from Unicode 5.1 Character Database are now included.
 
 C<TMPDIR> is now honored when opening an anonymous temporary file
 
+=item *
+
+Perl now more consistent about how it processes C<-I> directives from the shebang line and from the invoking shell
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -2232,60 +2247,4 @@ commit messages are somewhat terse and require a bit more help to turn into some
 =head1 API
 
 
-=head2 local $SIG{FOO} = sub {...}; sets signal handler to SIG_DFL
-
-Re: [perl #60360] [PATCH] UPDATED: local $SIG{FOO} = sub {...}; sets signal handler to SIG_DFL
-Message-ID: <20081112234504.GI2062@tytlal.topaz.cx>
-
-Updated patch to retain source compatibility.
-
-Plus using the correct PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS
-macro and running make regen.
-
-
-=head2 Perl is now smarter about adding a -I dir to the beginning or end of @INC
-
-=head2 On scope end, delete localized array elements that should not exist anymore, so that the array recovers its previous length. Honour EXISTS and DELETE for tied arrays.
-
-
-=head2 Forbid using "foreach" as an attribute
-
-(like all other control flow statements)
-
-
-
-=head2 Don't enqueue pending signals during global destruction
-
-Global destruction is not signal-safe. PL_psig_pend may already
-be gone when the signal handler is called (with destruct_level > 0).
-NULL it before freeing it to prevent a race condition.
-
-=head2 Change the wantarray result from caller from IV to bool for the SCALAR/ARRAY case. 
-
-This doesn't contradict the documentation, as there isn't any. Oops.
-
-
-
-Author: Zefram <zefram@fysh.org>
-Date:   Sun Sep 6 17:29:43 2009 +0200
-
-    Fix [perl #66970] Incorrect coderef in MODIFY_CODE_ATTRIBUTES
-    
-    Attribute handlers being applied to a temporary CV has actually been
-    reported as a bug, #66970.  The attached patch fixes the bug, by
-    changing the order in which things happen: attributes are now applied
-    after the temporary CV has been merged into the existing CV or has
-    otherwise been added to the appropriate GV.
-    
-    The change breaks part of Attribute::Handlers.  Part of A:H searches the
-    package to find the name of the sub to which a :ATTR attribute is being
-    applied, and the correct time at which to launch that search depends
-    crucially on the order in which the CV construction events occur. So
-    this patch also includes a change to A:H, to make it detect which way
-    things happen.  The resulting A:H works either way, which is essential
-    for its dual-life nature.
-
-=item Introduce "delete local"
-
-commit 7332a6c406299d5e73836d2410689bd7c3ae4782
 
