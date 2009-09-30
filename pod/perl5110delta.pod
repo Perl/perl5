@@ -2077,6 +2077,9 @@ C<Shell>
 
 =back
 
+Currently support to install from CPAN without a I<force> is C<TODO> in CPAN
+and CPANPLUS. This will be addressed before 5.12.0 ships.
+
 =item *
 
 C<suidperl> has been removed. It used to provide a mechanism to
