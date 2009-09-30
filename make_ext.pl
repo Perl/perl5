@@ -242,23 +242,22 @@ foreach my $spec (@extspec)  {
     my $mname = $spec;
     $mname =~ s!/!::!g;
     my $ext_pathname;
-    if (-d "ext/$spec"
-	# Temporary hack to cope with smokers that are not clearing directories:
-	&& $spec =~ m!/!
-       ) {
-	# Old style ext/Data/Dumper/
-	$ext_pathname = "ext/$spec";
-    } else {
-	# New style ext/Data-Dumper/
-	my $copy = $spec;
-	$copy =~ tr!/!-!;
-	foreach my $dir (@ext_dirs) {
-	    if (-d "$dir/$copy") {
-		$ext_pathname = "$dir/$copy";
-		last;
-	    }
+
+    # Try new style ext/Data-Dumper/ first
+    my $copy = $spec;
+    $copy =~ tr!/!-!;
+    foreach my $dir (@ext_dirs) {
+	if (-d "$dir/$copy") {
+	    $ext_pathname = "$dir/$copy";
+	    last;
 	}
-	if (!defined $ext_pathname) {
+    }
+
+    if (!defined $ext_pathname) {
+	if (-d "ext/$spec") {
+	    # Old style ext/Data/Dumper/
+	    $ext_pathname = "ext/$spec";
+	} else {
 	    warn "Can't find extension $spec in any of @ext_dirs";
 	    next;
 	}
