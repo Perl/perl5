@@ -38,6 +38,8 @@ END {
     1 while unlink $output;
 }
 
+# $Id: plainer.t 247 2009-09-15 18:33:34Z rmb1 $
+
 __END__
 =head <> now reads in records
 =head E<lt>E<gt> now reads in records
