@@ -850,7 +850,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Locale-Maketext-1.13.tar.gz',
-	'FILES'		=> q[ext/Locale-Maketext],
+	'FILES'		=> q[dist/Locale-Maketext],
 	'EXCLUDED'	=> [ qw{perlcriticrc t/00_load.t t/pod.t} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',

@@ -1156,6 +1156,13 @@ dist/IO/t/io_xs.t		See if XSUB methods from IO work
 dist/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 dist/lib/Makefile.PL
 dist/lib/t/01lib.t		For "use lib" testing
+dist/Locale-Maketext/ChangeLog				Locale::Maketext
+dist/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
+dist/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
+dist/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
+dist/Locale-Maketext/lib/Locale/Maketext.pod		Locale::Maketext documentation
+dist/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+dist/Locale-Maketext/README				Locale::Maketext
 dist/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 dist/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
 dist/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests
@@ -1166,6 +1173,14 @@ dist/Locale-Maketext-Simple/t/po_with_i_default/fr.po		Locale::Simple tests
 dist/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
 dist/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
 dist/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
+dist/Locale-Maketext/t/01_about_verbose.t		See if Locale::Maketext works
+dist/Locale-Maketext/t/10_make.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/20_get.t				See if Locale::Maketext works
+dist/Locale-Maketext/t/30_local.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/40_super.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/50_super.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/60_super.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
@@ -2096,21 +2111,6 @@ ext/Locale-Codes/t/language.t	See if Locale::Codes work
 ext/Locale-Codes/t/rename.t	See if Locale::Codes work
 ext/Locale-Codes/t/script.t	See if Locale::Codes work
 ext/Locale-Codes/t/uk.t		See if Locale::Codes work
-ext/Locale-Maketext/ChangeLog	Locale::Maketext
-ext/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
-ext/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
-ext/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
-ext/Locale-Maketext/lib/Locale/Maketext.pod		Locale::Maketext documentation
-ext/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
-ext/Locale-Maketext/README	Locale::Maketext
-ext/Locale-Maketext/t/01_about_verbose.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/10_make.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/20_get.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/30_local.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/40_super.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/50_super.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/60_super.t	See if Locale::Maketext works
-ext/Locale-Maketext/t/90_utf8.t	See if Locale::Maketext works
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
