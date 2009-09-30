@@ -1844,18 +1844,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    {
 		SV *opts_prog;
 
-		Perl_av_create_and_push(aTHX_ &PL_preambleav, newSVpvs("use Config;"));
 		if (*++s != ':')  {
-		    opts_prog = newSVpvs("Config::_V()");
+		    opts_prog = newSVpvs("use Config; Config::_V()");
 		}
 		else {
 		    ++s;
 		    opts_prog = Perl_newSVpvf(aTHX_
-					      "Config::config_vars(qw%c%s%c)",
+					      "use Config; Config::config_vars(qw%c%s%c)",
 					      0, s, 0);
 		    s += strlen(s);
 		}
-		av_push(PL_preambleav, opts_prog);
+		Perl_av_create_and_push(aTHX_ &PL_preambleav, opts_prog);
 		/* don't look for script or read stdin */
 		scriptname = BIT_BUCKET;
 		goto reswitch;
