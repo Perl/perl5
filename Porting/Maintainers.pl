@@ -547,7 +547,7 @@ use File::Glob qw(:case);
 			     'lib/'	=> 'lib/',
 			   },
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'ExtUtils::CBuilder' =>
@@ -853,7 +853,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[ext/Locale-Maketext],
 	'EXCLUDED'	=> [ qw{perlcriticrc t/00_load.t t/pod.t} ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Locale::Maketext::Simple' =>
@@ -1259,7 +1259,7 @@ use File::Glob qw(:case);
 			     'lib/perldoc.pod' => 'pod/perldoc.pod',
 			   },
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Pod::Plainer' =>
