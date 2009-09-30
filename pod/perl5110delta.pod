@@ -1421,9 +1421,8 @@ C<File::Copy> now detects Unix compatibility mode on VMS.
 
 =item *
 
-C<-I> on shebang line now adds directories in front of @INC.
+C<-I> on shebang line now adds directories in front of @INC
 as documented, and as does C<-I> when specified on the command-line.
-(Renée Bäcker)
 
 =item *
 
@@ -1703,10 +1702,6 @@ Previously missing files from Unicode 5.1 Character Database are now included.
 =item *
 
 C<TMPDIR> is now honored when opening an anonymous temporary file
-
-=item *
-
-Perl now more consistent about how it processes C<-I> directives from the shebang line and from the invoking shell
 
 =back
 
