@@ -460,7 +460,7 @@ struct xpvnv {
     union _xmgu	xmg_u;				    \
     HV*		xmg_stash	/* class package */
 
-/* These structure must match the beginning of struct xpvhv in hv.h. */
+/* This structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
     _XPV_HEAD;
     _XPVMG_HEAD;
