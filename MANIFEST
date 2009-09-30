@@ -976,6 +976,22 @@ cpan/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
 cpan/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 cpan/Tie-RefHash/t/storable.t	Test for Tie::RefHash with storable
 cpan/Tie-RefHash/t/threaded.t	Test for Tie::RefHash with threads
+cpan/Unicode-Normalize/Changes		Unicode::Normalize
+cpan/Unicode-Normalize/Makefile.PL	Unicode::Normalize
+cpan/Unicode-Normalize/mkheader		Unicode::Normalize
+cpan/Unicode-Normalize/Normalize.pm	Unicode::Normalize
+cpan/Unicode-Normalize/Normalize.xs	Unicode::Normalize
+cpan/Unicode-Normalize/README		Unicode::Normalize
+cpan/Unicode-Normalize/t/fcdc.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/form.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/func.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/illegal.t	Unicode::Normalize
+cpan/Unicode-Normalize/t/norm.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/null.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
+cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
+cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
 Cross/build-arm-n770-sh	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
@@ -3098,22 +3114,6 @@ ext/Unicode-Collate/t/trailwt.t		Unicode::Collate
 ext/Unicode-Collate/t/variable.t	Unicode::Collate
 ext/Unicode-Collate/t/version.t		Unicode::Collate
 ext/Unicode-Collate/t/view.t		Unicode::Collate
-ext/Unicode-Normalize/Changes	Unicode::Normalize
-ext/Unicode-Normalize/Makefile.PL	Unicode::Normalize
-ext/Unicode-Normalize/mkheader	Unicode::Normalize
-ext/Unicode-Normalize/Normalize.pm	Unicode::Normalize
-ext/Unicode-Normalize/Normalize.xs	Unicode::Normalize
-ext/Unicode-Normalize/README	Unicode::Normalize
-ext/Unicode-Normalize/t/fcdc.t	Unicode::Normalize
-ext/Unicode-Normalize/t/form.t	Unicode::Normalize
-ext/Unicode-Normalize/t/func.t	Unicode::Normalize
-ext/Unicode-Normalize/t/illegal.t	Unicode::Normalize
-ext/Unicode-Normalize/t/norm.t	Unicode::Normalize
-ext/Unicode-Normalize/t/null.t	Unicode::Normalize
-ext/Unicode-Normalize/t/proto.t	Unicode::Normalize
-ext/Unicode-Normalize/t/split.t	Unicode::Normalize
-ext/Unicode-Normalize/t/test.t	Unicode::Normalize
-ext/Unicode-Normalize/t/tie.t	Unicode::Normalize
 ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
 ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols

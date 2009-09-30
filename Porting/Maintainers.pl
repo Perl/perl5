@@ -1626,7 +1626,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'sadahiro',
 	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Normalize-1.03.tar.gz',
-	'FILES'		=> q[ext/Unicode-Normalize],
+	'FILES'		=> q[cpan/Unicode-Normalize],
 	'EXCLUDED'	=> [ qw{MANIFEST.N Normalize.pmN disableXS enableXS }],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'first-come',
