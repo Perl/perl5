@@ -976,6 +976,28 @@ cpan/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
 cpan/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 cpan/Tie-RefHash/t/storable.t	Test for Tie::RefHash with storable
 cpan/Tie-RefHash/t/threaded.t	Test for Tie::RefHash with threads
+cpan/Unicode-Collate/Changes			Unicode::Collate
+cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
+cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
+cpan/Unicode-Collate/Collate.pm			Unicode::Collate
+cpan/Unicode-Collate/README			Unicode::Collate
+cpan/Unicode-Collate/t/altern.t			Unicode::Collate
+cpan/Unicode-Collate/t/cjkrange.t		Unicode::Collate
+cpan/Unicode-Collate/t/contract.t		Unicode::Collate
+cpan/Unicode-Collate/t/hangtype.t		Unicode::Collate
+cpan/Unicode-Collate/t/hangul.t			Unicode::Collate
+cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
+cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate
+cpan/Unicode-Collate/t/illegal.t		Unicode::Collate
+cpan/Unicode-Collate/t/index.t			Unicode::Collate
+cpan/Unicode-Collate/t/normal.t			Unicode::Collate
+cpan/Unicode-Collate/t/override.t		Unicode::Collate
+cpan/Unicode-Collate/t/rearrang.t		Unicode::Collate
+cpan/Unicode-Collate/t/test.t			Unicode::Collate
+cpan/Unicode-Collate/t/trailwt.t		Unicode::Collate
+cpan/Unicode-Collate/t/variable.t		Unicode::Collate
+cpan/Unicode-Collate/t/version.t		Unicode::Collate
+cpan/Unicode-Collate/t/view.t			Unicode::Collate
 cpan/Unicode-Normalize/Changes		Unicode::Normalize
 cpan/Unicode-Normalize/Makefile.PL	Unicode::Normalize
 cpan/Unicode-Normalize/mkheader		Unicode::Normalize
@@ -3092,28 +3114,6 @@ ext/Time-Piece/t/04mjd.t	Test for Time::Piece
 ext/Time-Piece/t/05overload.t	Test for Time::Piece
 ext/Time-Piece/t/06subclass.t	Test for Time::Piece
 ext/Time-Piece/t/07arith.t	Test for Time::Piece
-ext/Unicode-Collate/Changes		Unicode::Collate
-ext/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
-ext/Unicode-Collate/Collate/keys.txt	Unicode::Collate
-ext/Unicode-Collate/Collate.pm		Unicode::Collate
-ext/Unicode-Collate/README		Unicode::Collate
-ext/Unicode-Collate/t/altern.t		Unicode::Collate
-ext/Unicode-Collate/t/cjkrange.t	Unicode::Collate
-ext/Unicode-Collate/t/contract.t	Unicode::Collate
-ext/Unicode-Collate/t/hangtype.t	Unicode::Collate
-ext/Unicode-Collate/t/hangul.t		Unicode::Collate
-ext/Unicode-Collate/t/ignor.t		Unicode::Collate
-ext/Unicode-Collate/t/illegalp.t	Unicode::Collate
-ext/Unicode-Collate/t/illegal.t		Unicode::Collate
-ext/Unicode-Collate/t/index.t		Unicode::Collate
-ext/Unicode-Collate/t/normal.t		Unicode::Collate
-ext/Unicode-Collate/t/override.t	Unicode::Collate
-ext/Unicode-Collate/t/rearrang.t	Unicode::Collate
-ext/Unicode-Collate/t/test.t		Unicode::Collate
-ext/Unicode-Collate/t/trailwt.t		Unicode::Collate
-ext/Unicode-Collate/t/variable.t	Unicode::Collate
-ext/Unicode-Collate/t/version.t		Unicode::Collate
-ext/Unicode-Collate/t/view.t		Unicode::Collate
 ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
 ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols

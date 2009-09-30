@@ -47,7 +47,7 @@ my %temp_no_core =
      '../ext/Test-Simple' => 1,
      '../cpan/Tie-RefHash' => 1,
      '../ext/Time-HiRes' => 1,
-     '../ext/Unicode-Collate' => 1,
+     '../cpan/Unicode-Collate' => 1,
      '../cpan/Unicode-Normalize' => 1,
     );
 

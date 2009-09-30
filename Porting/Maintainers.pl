@@ -1613,7 +1613,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'sadahiro',
 	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.52.tar.gz',
-	'FILES'		=> q[ext/Unicode-Collate],
+	'FILES'		=> q[cpan/Unicode-Collate],
 			    # ignore experimental XS version
 	'EXCLUDED'	=> [ qr{X$},
 			     qw{disableXS enableXS }
