@@ -1959,6 +1959,23 @@ you can say
     nmake test TEST_FILES="op/*.t"
     nmake test TEST_SWITCHES="-torture" TEST_FILES="op/*.t"
 
+=item Parallel tests
+
+The core distribution can now run its regression tests in parallel on
+Unix-like platforms. Instead of running C<make test>, set C<TEST_JOBS> in
+your environment to the number of tests to run in parallel, and run
+C<make test_harness>. On a Bourne-like shell, this can be done as
+
+    TEST_JOBS=3 make test_harness  # Run 3 tests in parallel
+
+An environment variable is used, rather than parallel make itself, because
+L<TAP::Harness> needs to be able to schedule individual non-conflicting test
+scripts itself, and there is no standard interface to C<make> utilities to
+interact with their job schedulers.
+
+Note that currently some test scripts may fail when run in parallel (most
+notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
+again sequentially and see if the failures go away.
 =item test-notty test_notty
 
 Sets PERL_SKIP_TTY_TEST to true before running normal test.
