@@ -17,7 +17,7 @@ use Maintainers qw(%Modules files_to_modules);
 use File::Spec;
 use Parse::CPAN::Meta;
 
-my $corelist_file = 'ext/Module-CoreList/lib/Module/CoreList.pm';
+my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
 
 my %lines;
 my %module_to_file;
@@ -78,13 +78,14 @@ find(
         /(\.pm|_pm\.PL)$/ or return;
         /PPPort\.pm$/ and return;
         my $module = $File::Find::name;
+		warn $module;
         $module =~ /\b(demo|t|private)\b/ and return;    # demo or test modules
         my $version = MM->parse_version($_);
         defined $version or $version = 'undef';
         $version =~ /\d/ and $version = "'$version'";
 
         # some heuristics to figure out the module name from the file name
-        $module =~ s{^(lib|(win32/|vms/|symbian/)?ext)/}{}
+        $module =~ s{^(lib|dist|(win32/|vms/|symbian/)?ext)/}{}
             and $1 ne 'lib'
             and (
             $module =~ s{\b(\w+)/\1\b}{$1},
@@ -104,6 +105,7 @@ find(
     },
     'lib',
     'ext',
+	'dist',
     'vms/ext',
     'symbian/ext'
 );
