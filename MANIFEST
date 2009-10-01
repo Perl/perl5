@@ -1171,6 +1171,8 @@ dist/base/t/lib/HasSigDie.pm	Module for testing base.pm
 dist/base/t/sigdie.t		See if base works with SIGDIE
 dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
+dist/B-Deparse/Deparse.pm	Compiler Deparse backend
+dist/B-Deparse/t/deparse.t	See if B::Deparse works
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
 dist/Data-Dumper/Changes	Data pretty printer, changelog
@@ -1454,8 +1456,6 @@ ext/B/B.xs		Compiler backend external subroutines
 ext/B-Debug/Debug.pm	Compiler Debug backend
 ext/B-Debug/t/debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
-ext/B-Deparse/Deparse.pm	Compiler Deparse backend
-ext/B-Deparse/t/deparse.t	See if B::Deparse works
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
 ext/bignum/lib/bigint.pm			bigint

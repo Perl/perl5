@@ -263,9 +263,9 @@ use File::Glob qw(:case);
     'B::Deparse' =>
 	{
 	'MAINTAINER'	=> 'smccam',
-	'FILES'		=> q[ext/B-Deparse],
+	'FILES'		=> q[dist/B-Deparse],
 	'CPAN'		=> 0,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'B::Lint' =>
