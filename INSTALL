@@ -244,7 +244,7 @@ Perl used to have two different internal threads implementations.  The current
 model (available internally since 5.6, and as a user-level module since 5.8) is
 called interpreter-based implementation (ithreads), with one interpreter per
 thread, and explicit sharing of data.  The (deprecated) 5.005 version
-(5005threads) has been removed for release 5.10.
+(5005threads) was removed for release 5.10.
 
 The 'threads' module is for use with the ithreads implementation.  The
 'Thread' module emulates the old 5005threads interface on top of the current
@@ -524,9 +524,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.10.0.
+By default, Configure will use the following directories for 5.11.0.
 $version is the full perl version number, including subversion, e.g.
-5.10.0 or 5.9.5, and $archname is a string like sun4-sunos,
+5.11.0 or 5.9.5, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -2277,7 +2277,7 @@ http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.10 is not binary compatible with earlier versions of Perl.
+Perl 5.11 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
@@ -2351,9 +2351,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.10.0
+	sh Configure -Dprefix=/opt/perl5.11.0
 
-and adding /opt/perl5.10.0/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.11.0/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2366,13 +2366,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.8.x or earlier
+=head2 Upgrading from 5.10.x or earlier
 
-B<Perl 5.10.0 is binary incompatible with Perl 5.8.x and any earlier
+B<Perl 5.11.0 is binary incompatible with Perl 5.10.x and any earlier
 Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.10.0.  If you find you do need to rebuild an extension with
-5.10.0, you may safely do so without disturbing the older
+used with 5.11.0.  If you find you do need to rebuild an extension with
+5.11.0, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
