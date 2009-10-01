@@ -1202,7 +1202,7 @@ sub autobundle {
     my($fh) = FileHandle->new(">$to") or Carp::croak "Can't open >$to: $!";
     $fh->print(
                "package Bundle::$me;\n\n",
-               "\$VERSION = '0.01';\n\n",
+               "\$","VERSION = '0.01';\n\n", # hide from perl-reversion
                "1;\n\n",
                "__END__\n\n",
                "=head1 NAME\n\n",

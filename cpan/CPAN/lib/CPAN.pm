@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9402';
+$CPAN::VERSION = '1.94_51';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -983,13 +983,25 @@ sub has_usable {
     return unless $has_inst;
     my $usable;
     $usable = {
+
+               #
+               # these subroutines die if they believe the installed version is unusable;
+               #
+
                LWP => [ # we frequently had "Can't locate object
                         # method "new" via package "LWP::UserAgent" at
                         # (eval 69) line 2006
                        sub {require LWP},
                        sub {require LWP::UserAgent},
                        sub {require HTTP::Request},
-                       sub {require URI::URL},
+                       sub {require URI::URL;
+                            unless (CPAN::Version->vge(URI::URL::->VERSION,0.08)) {
+                                for ("Will not use URI::URL, need 0.08\n") {
+                                    $CPAN::Frontend->mywarn($_);
+                                    die $_;
+                                }
+                            }
+                       },
                       ],
                'Net::FTP' => [
                             sub {require Net::FTP},
@@ -1007,15 +1019,14 @@ sub has_usable {
                                   ],
                'Archive::Tar' => [
                                   sub {require Archive::Tar;
-                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.50)) {
-                                            for ("Will not use Archive::Tar, need 1.00\n") {
+                                       my $demand = "1.50";
+                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, $demand)) {
+                                            my $atv = Archive::Tar->VERSION;
+                                            for ("You have Archive::Tar $atv, but $demand or later is recommended. Please upgrade.\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
                                             }
-                                       }
-                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.50)) {
-                                            my $atv = Archive::Tar->VERSION;
-                                            $CPAN::Frontend->mywarn("You have Archive::Tar $atv, but 1.50 or later is recommended. Please upgrade.\n");
+                                            
                                        }
                                   },
                                  ],

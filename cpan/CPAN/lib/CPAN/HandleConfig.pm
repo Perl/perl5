@@ -503,12 +503,13 @@ sub home () {
     my $old_v = $CPAN::Config->{load_module_verbosity};
     $CPAN::Config->{load_module_verbosity} = q[none];
     if ($CPAN::META->has_usable("File::HomeDir")) {
-        $home = File::HomeDir->can('my_dot_config')
-            ? File::HomeDir->my_dot_config
-                : File::HomeDir->my_data;
-        unless (defined $home) {
-            $home = File::HomeDir->my_home
+        if ($^O eq 'darwin') {
+            $home = File::HomeDir->my_home; # my_data is ~/Library/Application Support on darwin,
+                                            # which causes issues in the toolchain.
         }
+        else {
+            $home = File::HomeDir->my_data || File::HomeDir->my_home;
+       }
     }
     unless (defined $home) {
         $home = $ENV{HOME};
@@ -529,11 +530,10 @@ sub load {
     CPAN->debug("doit[$doit]loading[$loading]miss[@miss]") if $CPAN::DEBUG;
     return unless $doit || @miss;
     return if $loading;
-    $loading++;
+    local $loading = ($loading||0) + 1;
 
     require CPAN::FirstTime;
-    my($configpm,$fh,$redo);
-    $redo ||= "";
+    my($redo,$configpm,$fh);
     if (defined $INC{"CPAN/Config.pm"} && -w $INC{"CPAN/Config.pm"}) {
         $configpm = $INC{"CPAN/Config.pm"};
         $redo++;
@@ -569,13 +569,13 @@ sub load {
     if ($redo && !$doit) {
         $CPAN::Frontend->myprint(<<END);
 Sorry, we have to rerun the configuration dialog for CPAN.pm due to
-some missing parameters...
+some missing parameters...  Will write to
+ <<$configpm>>
 
 END
         $args{args} = \@miss;
     }
     my $initialized = CPAN::FirstTime::init($configpm, %args);
-    $loading--;
     return $initialized;
 }
 

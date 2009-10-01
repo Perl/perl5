@@ -928,7 +928,7 @@ sub init {
         if ($^O eq 'MacOS') {
             $CPAN::Config->{'shell'} = 'not_here';
         } else {
-            $path =~ s,\\,/,g if $^O eq 'os2'; # Cosmetic only
+            $path ||= 'sh', $path =~ s,\\,/,g if $^O eq 'os2'; # Cosmetic only
             my_dflt_prompt(shell => $path, $matcher);
         }
     }

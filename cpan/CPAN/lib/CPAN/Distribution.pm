@@ -5,7 +5,7 @@ use CPAN::Distroprefs;
 use CPAN::InfoObj;
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "1.93";
+$VERSION = "1.94";
 
 # Accessors
 sub cpan_comment {
@@ -2666,6 +2666,7 @@ sub _fulfills_all_version_rqs {
                 $ok++;
                 next RQ;
             } else {
+                $ok=0;
                 last RQ;
             }
         } elsif ($rq =~ m|<=?\s*|) {
@@ -2673,6 +2674,15 @@ sub _fulfills_all_version_rqs {
             $CPAN::Frontend->mywarn("Downgrading not supported (rq[$rq])\n");
             $ok++;
             next RQ;
+        } elsif ($rq =~ s|==\s*||) {
+            # 2009-07: ELLIOTJS/Perl-Critic-1.099_002.tar.gz
+            if (CPAN::Version->vcmp($available_version,$rq)) {
+                $ok=0;
+                last RQ;
+            } else {
+                $ok++;
+                next RQ;
+            }
         }
         if (! CPAN::Version->vgt($rq, $available_version)) {
             $ok++;
@@ -2686,7 +2696,9 @@ sub _fulfills_all_version_rqs {
                             $ok,
                            )) if $CPAN::DEBUG;
     }
-    return $ok == @all_requirements;
+    my $ret = $ok == @all_requirements;
+    CPAN->debug(sprintf("need_module[%s]ok[%s]all_requirements[%d]",$need_module, $ok, scalar @all_requirements)) if $CPAN::DEBUG;
+    return $ret;
 }
 
 #-> sub CPAN::Distribution::read_yaml ;
@@ -2810,16 +2822,21 @@ sub prereq_pm {
                 #  Regexp modified by A.Speer to remember actual version of file
                 #  PREREQ_PM hash key wants, then add to
                 while ( $p =~ m/(?:\s)([\w\:]+)=>(q\[.*?\]|undef),?/g ) {
-                    # In case a prereq is mentioned twice, complain.
-                    if ( defined $req->{$1} ) {
-                        warn "Warning: PREREQ_PM mentions $1 more than once, ".
-                            "last mention wins";
-                    }
                     my($m,$n) = ($1,$2);
+                    # When a prereq is mentioned twice: let the bigger
+                    # win; usual culprit is that they declared
+                    # build_requires separately from requires; see
+                    # rt.cpan.org #47774
+                    my($prevn);
+                    if ( defined $req->{$m} ) {
+                        $prevn = $req->{$m};
+                    }
                     if ($n =~ /^q\[(.*?)\]$/) {
                         $n = $1;
                     }
-                    $req->{$m} = $n;
+                    if (!$prevn || CPAN::Version->vlt($prevn, $n)){
+                        $req->{$m} = $n;
+                    }
                 }
                 last;
             }

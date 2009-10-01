@@ -13,7 +13,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5001";
+$VERSION = "5.5";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -118,7 +118,7 @@ sub _add_to_statistics {
                                ));
         }
         # Win32 cannot rename a file to an existing filename
-        unlink($sfile) if ($^O eq 'MSWin32');
+        unlink($sfile) if ($^O eq 'MSWin32' or $^O eq 'os2');
 	_copy_stat($sfile, "$sfile.$$") if -e $sfile;
         rename "$sfile.$$", $sfile
             or $CPAN::Frontend->mydie("Could not rename '$sfile.$$' to '$sfile': $!\n");
@@ -536,7 +536,7 @@ sub hostdleasy { #called from hostdlxxx
             my $l;
             if ($CPAN::META->has_inst('URI::URL')) {
                 my $u =  URI::URL->new($url);
-                $l = $u->path;
+                $l = $u->dir;
             } else { # works only on Unix, is poorly constructed, but
                 # hopefully better than nothing.
                 # RFC 1738 says fileurl BNF is
@@ -832,9 +832,9 @@ No success, the file that lynx has downloaded is an empty file.
     } # host
     require Carp;
     if ($some_dl_success) {
-        Carp::carp("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
+        Carp::cluck("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
     } else {
-        Carp::carp("Warning: no success downloading '$aslocal'. Giving up on it.");
+        Carp::cluck("Warning: no success downloading '$aslocal'. Giving up on it.");
     }
     $CPAN::Frontend->mysleep(5);
     return;
