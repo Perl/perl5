@@ -66,7 +66,10 @@ in regcomp.h, and then setting
 to true your enviornment when testing.
 
 
-=head2 In @INC, move ARCHLIB and PRIVLIB after the current version's site_perl and vendor_perl.
+=head2 @INC reorganization
+
+In @INC, ARCHLIB and PRIVLIB now occur after after the current version's
+site_perl and vendor_perl.
 
 =head2 Switch statement changes
 
@@ -260,12 +263,13 @@ C<length undef> now returns undef.
 =item *
 
 Unsupported private C API functions are now declared "static" to prevent
-leakage to Perl's public API
+leakage to Perl's public API.
 
 =item *
 
-F<miniperl> no longer builds with UTF-8 support in the regexp engine to support the bootstrapping process
-    
+To support the bootstrapping process, F<miniperl> no longer builds with
+UTF-8 support in the regexp engine.
+
 This allows a build to complete with PERL_UNICODE set and a UTF-8 locale.
 Without this there's a bootstrapping problem, as miniperl can't load the UTF-8
 components of the regexp engine, because they're not yet built.
@@ -369,26 +373,38 @@ must be installed before running F<Makefile.PL> or F<Build.PL>.
 See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for more
 on how to specify C<configure_requires> when creating a distribution for CPAN.
 
-=head2 The C<each> function can now operate on arrays
+=head2 C<each> is now more flexible
 
-=head2 Perl's core time-related functions are now Y2038 compliand
+The C<each> function can now operate on arrays.
 
-=head2 The variable C<$,> may now be tied
+=head2 Y2038 compliance
 
-=head2 // now behaves like || in when clauses
+Perl's core time-related functions are now Y2038 compliant. (With 29
+years to spare!)
 
-=head2 You can now set C<-W> from the C<PERL5OPT> environment variable
+=head2 C<$,> flexibilty
 
-=head2 Add support for Abstract namespace sockets
-    
+The variable C<$,> may now be tied.
+
+=head2 // in where clauses
+
+// now behaves like || in when clauses
+
+=head2 Enabling warnings from your shell environment
+
+You can now set C<-W> from the C<PERL5OPT> environment variable
+
+=head2 C<delete local>
+
+C<delete local> now allows you to lexically delete a hash entry.
+
+=head2 New support for Abstract namespace sockets
+
 Abstract namespace sockets are Linux-specific socket type that live in
 AF_UNIX family, slightly abusing it to be able to use arbitrary
 character arrays as addresses: They start with nul byte and are not
 terminated by nul byte, but with the length passed to the socket()
 system call.
-    
-
-=head2 C<delete local> now allows you to lexically delete a hash entry.
 
 =head1 Modules and Pragmata
 
@@ -1088,9 +1104,9 @@ Upgraded from version 0.08 to 0.10.
 
 =item Upgrade to Class::ISA 0.34
 
-=item Upgrade to Attribute::Handlers 0.87 
+=item Upgrade to Attribute::Handlers 0.87
 
-=item Upgrade to AutoLoader 5.70 
+=item Upgrade to AutoLoader 5.70
 
 =item Upgrade to IO::Zlib 1.10
 
@@ -1105,7 +1121,7 @@ Upgraded from version 0.08 to 0.10.
 =item Update IPC::Cmd to CPAN version 0.50
 
 =item Updated CPANPLUS::Dist::Build to CPAN version 0.40
- 
+
 =item Updated Module::Loaded to CPAN version 0.06
 
 =item Upgrade Term::ANSIColor to 2.02
@@ -1114,7 +1130,7 @@ Upgraded from version 0.08 to 0.10.
 
 =item Update Module::Build to 0.35
 
-=item constant has been upgraded to 1.19. 
+=item constant has been upgraded to 1.19.
 
 =item upgrade CGI from 3.43 to 3.45
 
@@ -1227,24 +1243,41 @@ Information still relevant has been moved to L<perlrepository>.
 L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all
 generated at build time, rather than being shipped as part of the release.
 
-=head2 Documented -X overloading.
+=over
 
-=head2 Documented that C<when()> treats specially most of the filetest operators
+=item *
 
-=head2 Documented when as a syntax modifier
+Documented -X overloading.
 
-=head2 Eliminated "Old Perl threads tutorial", which describes 5005 threads.
+=item *
 
-pod/perlthrtut.pod is the same material reworked for ithreads.
+Documented that C<when()> treats specially most of the filetest operators
 
-=head2 Correct previous documentation: v-strings are not deprecated
+=item *
+
+Documented when as a syntax modifier
+
+=item *
+
+Eliminated "Old Perl threads tutorial", which describes 5005 threads.
+
+F<pod/perlthrtut.pod> is the same material reworked for ithreads.
+
+=item *
+
+Correct previous documentation: v-strings are not deprecated
 
 With version objects, we need them to use MODULE VERSION syntax.  This
 patch removes the deprecation note.
 
-=head2 Added security contact information to L<perlsec>
+=item *
+
+Added security contact information to L<perlsec>
+
+=back
 
 =head1 Performance Enhancements
+
 
 =over 4
 
@@ -1255,7 +1288,7 @@ A new internal cache means that C<isa()> will often be faster.
 =item *
 
 The implementation of C<C3> Method Resolution Order has been optimised -
-linearisation for classes with single inheritance is 40% faster. Performance 
+linearisation for classes with single inheritance is 40% faster. Performance
 for multiple inheritance is unchanged.
 
 =item *
@@ -1291,7 +1324,7 @@ reported by C<%Config::Config> under the keys C<dynamic_ext>,
 C<known_extensions>, C<nonxs_ext> and C<static_ext> have not changed, and
 still use C</>. Hence this change will not have any affect once perl is
 installed. C<Safe> has been split out from being part of C<Opcode>, and
-C<mro> is now an extension in its own right. 
+C<mro> is now an extension in its own right.
 
 Nearly all dual-life modules have been moved from F<lib> to F<ext>, and will
 now appear as known C<nonxs_ext>. This will made no difference to the
@@ -1340,7 +1373,7 @@ F<win32/buildext.pl>.
 Removed F<libbsd> for AIX 5L and 6.1. Only C<flock()> was used from F<libbsd>.
 
 Removed F<libgdbm> for AIX 5L and 6.1. The F<libgdbm> is delivered as an
-optional package with the AIX Toolbox. Unfortunately the 64 bit version 
+optional package with the AIX Toolbox. Unfortunately the 64 bit version
 is broken.
 
 Hints changes mean that AIX 4.2 should work again.
@@ -1608,7 +1641,7 @@ These have all been fixed.
 
 A 5.10.0 optimisation to clear the temporary stack within the implicit
 loop of C<s///ge> has been reverted, as it turned out to be the cause of
-obscure bugs in seemingly unrelated parts of the interpreter [commit 
+obscure bugs in seemingly unrelated parts of the interpreter [commit
 ef0d4e17921ee3de].
 
 =item *
@@ -2107,7 +2140,7 @@ Deprecate using "unique" with the attributes pragma.
 
 =item *
 
-warn if ++ or -- are unable to change the value because it's beyond the limit of representation 
+warn if ++ or -- are unable to change the value because it's beyond the limit of representation
 
 This uses a new warnings category: "imprecision".
 
@@ -2160,13 +2193,13 @@ Explicitely point to $. when it causes an uninitialized warning for ranges in sc
 =item *
 
 Removed vestigal support for Tenon Intersystems MachTen Unix layer for MacOS Classic.
-    
+
 =item *
 
 Removed the port to Atari MiNT.  It's a dead platform that hasn't had any love since 5.005.
 
 
-=item * 
+=item *
 
 Deprecated numerous Perl 4-era libraries:
 
