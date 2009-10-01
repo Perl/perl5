@@ -402,7 +402,7 @@ the strings?).
  David    5.10.1-RC1    2009-Aug-06
           5.10.1-RC2    2009-Aug-18
           5.10.1        2009-Aug-22
-
+ Jesse    5.11.0        2009-Oct-??
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
