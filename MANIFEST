@@ -131,6 +131,8 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/B-Debug/Debug.pm	Compiler Debug backend
+cpan/B-Debug/t/debug.t	See if B::Debug works
 cpan/Class-ISA/ChangeLog		Changes for Class::ISA
 cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
 cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
@@ -1453,8 +1455,6 @@ ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/B.xs		Compiler backend external subroutines
-ext/B-Debug/Debug.pm	Compiler Debug backend
-ext/B-Debug/t/debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture

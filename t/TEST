@@ -30,7 +30,7 @@ my %no_abs =
     );
 	      
 my %temp_no_core =
-    ('../ext/B-Debug' => 1,
+    ('../cpan/B-Debug' => 1,
      '../ext/Compress-Raw-Bzip2' => 1,
      '../ext/Compress-Raw-Zlib' => 1,
      '../cpan/Devel-PPPort' => 1,
