@@ -160,7 +160,6 @@ if (@ARGV) {
 	use Config;
 	push @last,  sort { lc $a cmp lc $b }
 	    _tests_from_manifest($Config{extensions}, $Config{known_extensions});
-	push @last, <pod/*.t>;
 	push @last, <x2p/*.t>;
 
 	my %times;

@@ -406,7 +406,6 @@ unless (@ARGV) {
     # something is that badly wrong.
     push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
-	_find_tests('pod');
 	_find_tests('x2p');
 	_find_tests('porting');
 	_find_tests('japh') if $::torture;

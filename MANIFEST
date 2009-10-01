@@ -4426,9 +4426,9 @@ t/op/wantarray.t		See if wantarray works
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ..., !!! and ??? work
 t/perl.supp			Perl valgrind suppressions
-t/pod/diag.t			Test completeness of perldiag.pod
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/checkcase.t	Check whether we are case-insensitive-fs-friendly
+t/porting/diag.t		Test completeness of perldiag.pod
 t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/README			Instructions for regression tests
