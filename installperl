@@ -156,30 +156,33 @@ if ((-e "testcompile") && (defined($ENV{'COMPILE'}))) {
 # Exclude nonxs extensions that are not architecture dependent
 my @nonxs = grep(!/^Errno$/, split(' ', $Config{'nonxs_ext'}));
 
-find(sub {
-    if (($File::Find::name =~ m{^ext\b(.*)/([^/]+)\.pm$}) &&
-        ! grep { (my $dir = $_) =~ s/\//-/g;
-                 $File::Find::name =~ /^ext\/$dir/ } @nonxs)
-    {
-	my($path, $modname) = ($1,$2);
+my @ext_dirs = qw(cpan dist ext);
+foreach my $ext_dir (@ext_dirs) {
+    find(sub {
+	if (($File::Find::name =~ m{^$ext_dir\b(.*)/([^/]+)\.pm$}) &&
+	    ! grep { (my $dir = $_) =~ s/\//-/g;
+		     $File::Find::name =~ /^$ext_dir\/$dir\// } @nonxs)
+	{
+	    my($path, $modname) = ($1,$2);
 
-	# Change hypenated name like Filter-Util-Call to nested
-	# directory name Filter/Util/Call
-	$path =~ s{-}{/}g;
+	    # Change hypenated name like Filter-Util-Call to nested
+	    # directory name Filter/Util/Call
+	    $path =~ s{-}{/}g;
 
-	# strip to optional "/lib", or remove trailing component
-	$path =~ s{.*/lib\b}{} or $path =~ s{/[^/]*$}{};
+	    # strip to optional "/lib", or remove trailing component
+	    $path =~ s{.*/lib\b}{} or $path =~ s{/[^/]*$}{};
 
-	# strip any leading /
-	$path =~ s{^/}{};
+	    # strip any leading /
+	    $path =~ s{^/}{};
 
-	# reconstitute canonical module name
-	$modname = "$path/$modname" if length $path;
+	    # reconstitute canonical module name
+	    $modname = "$path/$modname" if length $path;
 
-	# remember it
-	$archpms{$modname} = 1;
-    }
-}, 'ext');
+	    # remember it
+	    $archpms{$modname} = 1;
+	}
+    }, $ext_dir);
+}
 
 # print "[$_]\n" for sort keys %archpms;
 
