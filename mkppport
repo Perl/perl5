@@ -12,7 +12,7 @@ sub iterdirs(&);
 
 my $rootdir = dirname($0);
 
-unshift @INC, File::Spec->catdir($rootdir, qw(ext ExtUtils-MakeMaker t lib));
+unshift @INC, File::Spec->catdir($rootdir, qw(cpan ExtUtils-MakeMaker t lib));
 
 eval q{ use MakeMaker::Test::Utils qw( which_perl ) };
 $@ and die $@;

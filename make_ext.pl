@@ -32,7 +32,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 		   cpan/Cwd cpan/Cwd/lib
 		   ext/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
-		   ext/ExtUtils-MakeMaker/lib
+		   cpan/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib
 		   cpan/File-Path/lib
 		   );
@@ -305,6 +305,7 @@ sub build_extension {
     }
     $ENV{PERL5LIB} = join $Config{path_sep}, @new_inc;
     $ENV{PERL_CORE} = 1;
+    warn $ENV{PERL5LIB};
 
     my $makefile;
     if ($is_VMS) {

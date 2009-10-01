@@ -609,7 +609,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mschwern',
 	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.55_02.tar.gz',
-	'FILES'		=> q[ext/ExtUtils-MakeMaker],
+	'FILES'		=> q[cpan/ExtUtils-MakeMaker],
 	'EXCLUDED'	=> [ qr{^t/lib/Test/},
 			     qr{^inc/ExtUtils/},
 			   ],
