@@ -636,6 +636,13 @@ cpan/Devel-PPPort/t/uv.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/variables.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/warn.t		Devel::PPPort test file
 cpan/Devel-PPPort/typemap		Devel::PPPort Typemap
+cpan/Digest/Changes		Digest changelog
+cpan/Digest/Digest/base.pm	Digest extensions
+cpan/Digest/Digest/file.pm	Digest extensions
+cpan/Digest/Digest.pm		Digest extensions
+cpan/Digest/t/base.t		See if Digest extensions work
+cpan/Digest/t/digest.t		See if Digest extensions work
+cpan/Digest/t/file.t		See if Digest extensions work
 cpan/Encode/AUTHORS		List of authors
 cpan/Encode/bin/enc2xs		Encode module generator
 cpan/Encode/bin/piconv		iconv by perl
@@ -1671,10 +1678,6 @@ ext/Devel-Peek/Peek.xs		Data debugging tool, externals
 ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
 ext/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 ext/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
-ext/Digest/Changes	Digest changelog
-ext/Digest/Digest/base.pm	Digest extensions
-ext/Digest/Digest/file.pm	Digest extensions
-ext/Digest/Digest.pm		Digest extensions
 ext/Digest-MD5/Changes		Digest::MD5 extension changes
 ext/Digest-MD5/hints/dec_osf.pl	Hints for named architecture
 ext/Digest-MD5/hints/irix_6.pl	Hints for named architecture
@@ -1725,9 +1728,6 @@ ext/Digest-SHA/t/sha384.t	See if Digest::SHA works
 ext/Digest-SHA/t/sha512.t	See if Digest::SHA works
 ext/Digest-SHA/t/woodbury.t	See if Digest::SHA works
 ext/Digest-SHA/typemap		Typemap for Digest::SHA
-ext/Digest/t/base.t		See if Digest extensions work
-ext/Digest/t/digest.t		See if Digest extensions work
-ext/Digest/t/file.t		See if Digest extensions work
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
