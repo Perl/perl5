@@ -914,10 +914,10 @@ Upgraded from version 1.35 to 1.37.
 
 =item C<Pod::Plainer>
 
-Upgraded from version 0.01 to 1.00.
+Upgraded from version 0.01 to 1.01.
 
 There are no code changes - the version bump is because C<Pod::Plainer> has
-been released to CPAN as a stand alone distribution, and will be removed from
+been released to CPAN as a stand-alone distribution, and will be removed from
 the core distribution in 5.14.
 
 =item Pod::Perldoc

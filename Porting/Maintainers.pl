@@ -1266,6 +1266,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[dist/Pod-Plainer],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
+	'EXCLUDED'	=> [ qw(t/pod.t t/pod-coverage.t) ],
 	# DEPRECATED	=> 5.11.0,
 	},
 
