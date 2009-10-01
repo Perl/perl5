@@ -1022,6 +1022,9 @@ cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
 cpan/ExtUtils-MakeMaker/t/WriteEmptyMakefile.t			See if WriteEmptyMakefile works
 cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
 cpan/ExtUtils-MakeMaker/t/xs.t					Part of MakeMaker's test suite
+cpan/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
+cpan/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
+cpan/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
 cpan/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
 cpan/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
 cpan/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
@@ -1775,9 +1778,6 @@ ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for pr
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
-ext/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
-ext/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
-ext/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer

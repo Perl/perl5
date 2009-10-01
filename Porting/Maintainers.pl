@@ -618,7 +618,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rkobes',
 	'DISTRIBUTION'	=> 'RKOBES/ExtUtils-Manifest-1.56.tar.gz',
-	'FILES'		=> q[ext/ExtUtils-Manifest],
+	'FILES'		=> q[cpan/ExtUtils-Manifest],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
