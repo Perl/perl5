@@ -291,7 +291,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/bignum-0.23.tar.gz',
-	'FILES'		=> q[ext/bignum],
+	'FILES'		=> q[cpan/bignum],
 	'EXCLUDED'	=> [ qr{^inc/Module/}, qw(t/pod.t t/pod_cov.t) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

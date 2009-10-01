@@ -133,6 +133,32 @@ cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/B-Debug/Debug.pm	Compiler Debug backend
 cpan/B-Debug/t/debug.t	See if B::Debug works
+cpan/bignum/lib/bigint.pm		bigint
+cpan/bignum/lib/bignum.pm		bignum
+cpan/bignum/lib/bigrat.pm		bigrat
+cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
+cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
+cpan/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
+cpan/bignum/t/bigexp.t			See if bignum works
+cpan/bignum/t/bigint.t			See if bigint works
+cpan/bignum/t/bignum.t			See if bignum works
+cpan/bignum/t/bigrat.t			See if bigrat works
+cpan/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
+cpan/bignum/t/biinfnan.t		See if bignum works
+cpan/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
+cpan/bignum/t/bninfnan.t		See if bignum works
+cpan/bignum/t/bn_lite.t			See if bignum with Math::BigInt::Lite works
+cpan/bignum/t/brinfnan.t		See if bignum works
+cpan/bignum/t/br_lite.t			See if bigrat with Math::BigInt::Lite works
+cpan/bignum/t/in_effect.t		See if in_effect() works
+cpan/bignum/t/infnan.inc		See if bignum with inf/NaN works
+cpan/bignum/t/option_a.t		See if bignum a => X works
+cpan/bignum/t/option_l.t		See if bignum l => X works
+cpan/bignum/t/option_p.t		See if bignum p => X works
+cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
+cpan/bignum/t/scope_f.t			See if no bignum works
+cpan/bignum/t/scope_i.t			See if no bigint works
+cpan/bignum/t/scope_r.t			See if no bigrat works
 cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
 cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
 cpan/B-Lint/t/lint.t				See if B::Lint works
@@ -1462,32 +1488,6 @@ ext/B/B.xs		Compiler backend external subroutines
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
-ext/bignum/lib/bigint.pm			bigint
-ext/bignum/lib/bignum.pm			bignum
-ext/bignum/lib/bigrat.pm			bigrat
-ext/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
-ext/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
-ext/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
-ext/bignum/t/bigexp.t		See if bignum works
-ext/bignum/t/bigint.t		See if bigint works
-ext/bignum/t/bignum.t		See if bignum works
-ext/bignum/t/bigrat.t		See if bigrat works
-ext/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
-ext/bignum/t/biinfnan.t		See if bignum works
-ext/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
-ext/bignum/t/bninfnan.t		See if bignum works
-ext/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
-ext/bignum/t/brinfnan.t		See if bignum works
-ext/bignum/t/br_lite.t		See if bigrat with Math::BigInt::Lite works
-ext/bignum/t/in_effect.t	See if in_effect() works
-ext/bignum/t/infnan.inc		See if bignum with inf/NaN works
-ext/bignum/t/option_a.t		See if bignum a => X works
-ext/bignum/t/option_l.t		See if bignum l => X works
-ext/bignum/t/option_p.t		See if bignum p => X works
-ext/bignum/t/ratopt_a.t		See if bigrat a => X works
-ext/bignum/t/scope_f.t		See if no bignum works
-ext/bignum/t/scope_i.t		See if no bigint works
-ext/bignum/t/scope_r.t		See if no bigrat works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
