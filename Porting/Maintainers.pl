@@ -522,7 +522,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'audreyt',
 	'DISTRIBUTION'	=> 'AUDREYT/encoding-warnings-0.11.tar.gz',
-	'FILES'		=> q[ext/encoding-warnings],
+	'FILES'		=> q[cpan/encoding-warnings],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 			     qw{t/0-signature.t Makefile.PL MANIFEST META.yml
 			     README SIGNATURE},

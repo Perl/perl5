@@ -896,6 +896,12 @@ cpan/Encode/ucm/viscii.ucm		Unicode Character Map
 cpan/Encode/Unicode/Makefile.PL		Encode extension
 cpan/Encode/Unicode/Unicode.pm		Encode extension
 cpan/Encode/Unicode/Unicode.xs		Encode extension
+cpan/encoding-warnings/Changes		Changelog for encoding::warnings
+cpan/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
+cpan/encoding-warnings/t/1-warning.t	tests for encoding::warnings
+cpan/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
+cpan/encoding-warnings/t/3-normal.t	tests for encoding::warnings
+cpan/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 cpan/ExtUtils-CBuilder/Changes					Changes for ExtUtils::CBuilder
 cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
 cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
@@ -1754,12 +1760,6 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/t/DynaLoader.t	See if DynaLoader works
-ext/encoding-warnings/Changes		Changelog for encoding::warnings
-ext/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
-ext/encoding-warnings/t/1-warning.t	tests for encoding::warnings
-ext/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
-ext/encoding-warnings/t/3-normal.t	tests for encoding::warnings
-ext/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 EXTERN.h			Included before foreign .h files
 ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
