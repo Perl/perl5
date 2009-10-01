@@ -695,7 +695,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/Filter-1.37.tar.gz',
-	'FILES'		=> q[ext/Filter-Util-Call
+	'FILES'		=> q[cpan/Filter-Util-Call
 			     t/lib/filter-util.pl
 			     pod/perlfilter.pod
 			    ],
