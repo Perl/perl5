@@ -225,6 +225,37 @@ cpan/Class-ISA/ChangeLog		Changes for Class::ISA
 cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
 cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
 cpan/Class-ISA/t/01_old_junk.t		Tests for Class::ISA
+cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
+cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.c
+cpan/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
+cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.c
+cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.h
+cpan/Compress-Raw-Bzip2/bzip2-src/bzlib_private.h
+cpan/Compress-Raw-Bzip2/bzip2-src/compress.c
+cpan/Compress-Raw-Bzip2/bzip2-src/crctable.c
+cpan/Compress-Raw-Bzip2/bzip2-src/decompress.c
+cpan/Compress-Raw-Bzip2/bzip2-src/dlltest.c
+cpan/Compress-Raw-Bzip2/bzip2-src/huffman.c
+cpan/Compress-Raw-Bzip2/bzip2-src/LICENSE
+cpan/Compress-Raw-Bzip2/bzip2-src/mk251.c
+cpan/Compress-Raw-Bzip2/bzip2-src/randtable.c
+cpan/Compress-Raw-Bzip2/bzip2-src/spewG.c
+cpan/Compress-Raw-Bzip2/bzip2-src/unzcrash.c
+cpan/Compress-Raw-Bzip2/Bzip2.xs
+cpan/Compress-Raw-Bzip2/Changes
+cpan/Compress-Raw-Bzip2/fallback/constants.h
+cpan/Compress-Raw-Bzip2/fallback/constants.xs
+cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
+cpan/Compress-Raw-Bzip2/Makefile.PL
+cpan/Compress-Raw-Bzip2/pod/FAQ.pod
+cpan/Compress-Raw-Bzip2/private/MakeUtil.pm
+cpan/Compress-Raw-Bzip2/README
+cpan/Compress-Raw-Bzip2/t/000prereq.t
+cpan/Compress-Raw-Bzip2/t/01bzip2.t
+cpan/Compress-Raw-Bzip2/t/09limitoutput.t
+cpan/Compress-Raw-Bzip2/t/99pod.t
+cpan/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
+cpan/Compress-Raw-Bzip2/typemap
 cpan/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
 cpan/CPAN/lib/CPAN/Author.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Bundle.pm		helper package for CPAN.pm
@@ -1570,37 +1601,6 @@ ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/Compress-Raw-Bzip2/bzip2-src/blocksort.c
-ext/Compress-Raw-Bzip2/bzip2-src/bzip2.c
-ext/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
-ext/Compress-Raw-Bzip2/bzip2-src/bzlib.c
-ext/Compress-Raw-Bzip2/bzip2-src/bzlib.h
-ext/Compress-Raw-Bzip2/bzip2-src/bzlib_private.h
-ext/Compress-Raw-Bzip2/bzip2-src/compress.c
-ext/Compress-Raw-Bzip2/bzip2-src/crctable.c
-ext/Compress-Raw-Bzip2/bzip2-src/decompress.c
-ext/Compress-Raw-Bzip2/bzip2-src/dlltest.c
-ext/Compress-Raw-Bzip2/bzip2-src/huffman.c
-ext/Compress-Raw-Bzip2/bzip2-src/LICENSE
-ext/Compress-Raw-Bzip2/bzip2-src/mk251.c
-ext/Compress-Raw-Bzip2/bzip2-src/randtable.c
-ext/Compress-Raw-Bzip2/bzip2-src/spewG.c
-ext/Compress-Raw-Bzip2/bzip2-src/unzcrash.c
-ext/Compress-Raw-Bzip2/Bzip2.xs
-ext/Compress-Raw-Bzip2/Changes
-ext/Compress-Raw-Bzip2/fallback/constants.h
-ext/Compress-Raw-Bzip2/fallback/constants.xs
-ext/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
-ext/Compress-Raw-Bzip2/Makefile.PL
-ext/Compress-Raw-Bzip2/pod/FAQ.pod
-ext/Compress-Raw-Bzip2/private/MakeUtil.pm
-ext/Compress-Raw-Bzip2/README
-ext/Compress-Raw-Bzip2/t/000prereq.t
-ext/Compress-Raw-Bzip2/t/01bzip2.t
-ext/Compress-Raw-Bzip2/t/09limitoutput.t
-ext/Compress-Raw-Bzip2/t/99pod.t
-ext/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
-ext/Compress-Raw-Bzip2/typemap
 ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
 ext/Compress-Raw-Zlib/examples/filtdef	Compress::Raw::Zlib
