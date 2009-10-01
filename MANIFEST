@@ -656,6 +656,40 @@ cpan/Digest-MD5/t/files.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/md5-aaa.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/utf8.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/typemap			Digest::MD5 extension
+cpan/Digest-SHA/Changes			Digest::SHA changes
+cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
+cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
+cpan/Digest-SHA/README			Digest::SHA README
+cpan/Digest-SHA/shasum			shasum script
+cpan/Digest-SHA/SHA.xs			Digest::SHA extension
+cpan/Digest-SHA/src/hmac.c		Digest::SHA extension
+cpan/Digest-SHA/src/hmac.h		Digest::SHA extension
+cpan/Digest-SHA/src/hmacxtra.c		Digest::SHA extension
+cpan/Digest-SHA/src/sha64bit.c		Digest::SHA extension
+cpan/Digest-SHA/src/sha64bit.h		Digest::SHA extension
+cpan/Digest-SHA/src/sha.c		Digest::SHA extension
+cpan/Digest-SHA/src/sha.h		Digest::SHA extension
+cpan/Digest-SHA/src/shaxtra.c		Digest::SHA extension
+cpan/Digest-SHA/t/allfcns.t		See if Digest::SHA works
+cpan/Digest-SHA/t/base64.t		See if Digest::SHA works
+cpan/Digest-SHA/t/bitbuf.t		See if Digest::SHA works
+cpan/Digest-SHA/t/dumpload.t		See if Digest::SHA works
+cpan/Digest-SHA/t/fips198.t		See if Digest::SHA works
+cpan/Digest-SHA/t/gglong.t		See if Digest::SHA works
+cpan/Digest-SHA/t/gg.t			See if Digest::SHA works
+cpan/Digest-SHA/t/hmacsha.t		See if Digest::SHA works
+cpan/Digest-SHA/t/ireland.t		See if Digest::SHA works
+cpan/Digest-SHA/t/methods.t		See if Digest::SHA works
+cpan/Digest-SHA/t/nistbit.t		See if Digest::SHA works
+cpan/Digest-SHA/t/nistbyte.t		See if Digest::SHA works
+cpan/Digest-SHA/t/rfc2202.t		See if Digest::SHA works
+cpan/Digest-SHA/t/sha1.t		See if Digest::SHA works
+cpan/Digest-SHA/t/sha224.t		See if Digest::SHA works
+cpan/Digest-SHA/t/sha256.t		See if Digest::SHA works
+cpan/Digest-SHA/t/sha384.t		See if Digest::SHA works
+cpan/Digest-SHA/t/sha512.t		See if Digest::SHA works
+cpan/Digest-SHA/t/woodbury.t		See if Digest::SHA works
+cpan/Digest-SHA/typemap			Typemap for Digest::SHA
 cpan/Digest/t/base.t		See if Digest extensions work
 cpan/Digest/t/digest.t		See if Digest extensions work
 cpan/Digest/t/file.t		See if Digest extensions work
@@ -1694,40 +1728,6 @@ ext/Devel-Peek/Peek.xs		Data debugging tool, externals
 ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
 ext/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 ext/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
-ext/Digest-SHA/bin/shasum	shasum script
-ext/Digest-SHA/Changes		Digest::SHA changes
-ext/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
-ext/Digest-SHA/Makefile.PL	Digest::SHA Makefile.PL
-ext/Digest-SHA/README		Digest::SHA README
-ext/Digest-SHA/SHA.xs		Digest::SHA extension
-ext/Digest-SHA/src/hmac.c	Digest::SHA extension
-ext/Digest-SHA/src/hmac.h	Digest::SHA extension
-ext/Digest-SHA/src/hmacxtra.c	Digest::SHA extension
-ext/Digest-SHA/src/sha64bit.c	Digest::SHA extension
-ext/Digest-SHA/src/sha64bit.h	Digest::SHA extension
-ext/Digest-SHA/src/sha.c	Digest::SHA extension
-ext/Digest-SHA/src/sha.h	Digest::SHA extension
-ext/Digest-SHA/src/shaxtra.c	Digest::SHA extension
-ext/Digest-SHA/t/allfcns.t	See if Digest::SHA works
-ext/Digest-SHA/t/base64.t	See if Digest::SHA works
-ext/Digest-SHA/t/bitbuf.t	See if Digest::SHA works
-ext/Digest-SHA/t/dumpload.t	See if Digest::SHA works
-ext/Digest-SHA/t/fips198.t	See if Digest::SHA works
-ext/Digest-SHA/t/gglong.t	See if Digest::SHA works
-ext/Digest-SHA/t/gg.t		See if Digest::SHA works
-ext/Digest-SHA/t/hmacsha.t	See if Digest::SHA works
-ext/Digest-SHA/t/ireland.t	See if Digest::SHA works
-ext/Digest-SHA/t/methods.t	See if Digest::SHA works
-ext/Digest-SHA/t/nistbit.t	See if Digest::SHA works
-ext/Digest-SHA/t/nistbyte.t	See if Digest::SHA works
-ext/Digest-SHA/t/rfc2202.t	See if Digest::SHA works
-ext/Digest-SHA/t/sha1.t		See if Digest::SHA works
-ext/Digest-SHA/t/sha224.t	See if Digest::SHA works
-ext/Digest-SHA/t/sha256.t	See if Digest::SHA works
-ext/Digest-SHA/t/sha384.t	See if Digest::SHA works
-ext/Digest-SHA/t/sha512.t	See if Digest::SHA works
-ext/Digest-SHA/t/woodbury.t	See if Digest::SHA works
-ext/Digest-SHA/typemap		Typemap for Digest::SHA
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation

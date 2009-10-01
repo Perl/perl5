@@ -502,11 +502,8 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mshelor',
 	'DISTRIBUTION'	=> 'MSHELOR/Digest-SHA-5.47.tar.gz',
-	'FILES' 	=> q[ext/Digest-SHA],
+	'FILES' 	=> q[cpan/Digest-SHA],
 	'EXCLUDED'	=> [ qw{t/pod.t t/podcover.t examples/dups} ],
-	'MAP'		=> { 'shasum'	=> 'ext/Digest-SHA/bin/shasum',
-			     ''		=> 'ext/Digest-SHA/',
-			   },
 	'CPAN'  	=> 1,
 	'UPSTREAM'	=> undef,
 	},
