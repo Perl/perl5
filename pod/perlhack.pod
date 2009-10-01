@@ -365,9 +365,18 @@ correspond to files or directories in the source kit. Among the areas are:
 
 =item Core modules
 
-Modules shipped as part of the Perl core live in the F<lib/> and F<ext/>
-subdirectories: F<lib/> is for the pure-Perl modules, and F<ext/>
-contains the core XS modules.
+Modules shipped as part of the Perl core live in various subdirectories, where
+two are dedicated to core-only modules, and two are for the dual-life modules
+which live on CPAN and may be maintained separately with respect to the Perl
+core: 
+
+    lib/  is for pure-Perl modules, which exist in the core only.
+
+    ext/  is for XS extensions, and modules with special Makefile.PL requirements, which exist in the core only.
+
+    cpan/ is for dual-life modules, where the CPAN module is canonical (should be patched first).
+
+    dist/ is for dual-life modules, where the blead source is canonical.
 
 =item Tests
 
