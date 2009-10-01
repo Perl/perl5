@@ -340,7 +340,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/Compress-Raw-Zlib-2.021.tar.gz',
 
-	'FILES'		=> q[ext/Compress-Raw-Zlib],
+	'FILES'		=> q[cpan/Compress-Raw-Zlib],
 	'EXCLUDED'	=> [ qr{^t/Test/},
 			     qw( t/000prereq.t
 				 t/99pod.t

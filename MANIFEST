@@ -256,6 +256,46 @@ cpan/Compress-Raw-Bzip2/t/09limitoutput.t
 cpan/Compress-Raw-Bzip2/t/99pod.t
 cpan/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
 cpan/Compress-Raw-Bzip2/typemap
+cpan/Compress-Raw-Zlib/Changes			Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/examples/filtdef		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/examples/filtinf		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/fallback/constants.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/fallback/constants.xs	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/Makefile.PL		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/pod/FAQ.pod		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/private/MakeUtil.pm	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/README			Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/01version.t		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/02zlib.t		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/07bufsize.t		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/18lvalue.t		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/compress/CompTestUtils.pm
+cpan/Compress-Raw-Zlib/typemap			Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/compress.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/crc32.c		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/crc32.h		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/deflate.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/deflate.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/infback.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inffast.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inffast.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inffixed.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inflate.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inflate.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inftrees.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/inftrees.h	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/trees.c		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/trees.h		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/uncompr.c	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/zconf.h		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/zlib.h		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/zutil.c		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/zlib-src/zutil.h		Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/Zlib.xs			Compress::Raw::Zlib
 cpan/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
 cpan/CPAN/lib/CPAN/Author.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Bundle.pm		helper package for CPAN.pm
@@ -1601,46 +1641,6 @@ ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/Compress-Raw-Zlib/Changes		Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/examples/filtdef	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/examples/filtinf	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/fallback/constants.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/fallback/constants.xs	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/Makefile.PL	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/pod/FAQ.pod	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/private/MakeUtil.pm	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/README		Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/01version.t	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/02zlib.t	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/07bufsize.t	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/09limitoutput.t	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/18lvalue.t	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/t/compress/CompTestUtils.pm
-ext/Compress-Raw-Zlib/typemap		Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/compress.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/crc32.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/crc32.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/deflate.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/deflate.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/infback.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inffast.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inffast.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inffixed.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inflate.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inflate.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inftrees.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/inftrees.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/trees.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/trees.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/uncompr.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/zconf.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/zlib.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/zutil.c	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/zlib-src/zutil.h	Compress::Raw::Zlib
-ext/Compress-Raw-Zlib/Zlib.xs		Compress::Raw::Zlib
 ext/Devel-DProf/Changes		Perl code profiler changelog
 ext/Devel-DProf/DProf.pm	Perl code profiler
 ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
