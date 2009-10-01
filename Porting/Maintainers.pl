@@ -272,7 +272,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jjore',
 	'DISTRIBUTION'	=> 'JJORE/B-Lint-1.11.tar.gz',
-	'FILES'		=> q[ext/B-Lint],
+	'FILES'		=> q[cpan/B-Lint],
 	'EXCLUDED'	=> [ qw( t/test.pl ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

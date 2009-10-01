@@ -133,6 +133,10 @@ cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/B-Debug/Debug.pm	Compiler Debug backend
 cpan/B-Debug/t/debug.t	See if B::Debug works
+cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
+cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
+cpan/B-Lint/t/lint.t				See if B::Lint works
+cpan/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 cpan/Class-ISA/ChangeLog		Changes for Class::ISA
 cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
 cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
@@ -1484,10 +1488,6 @@ ext/bignum/t/ratopt_a.t		See if bigrat a => X works
 ext/bignum/t/scope_f.t		See if no bignum works
 ext/bignum/t/scope_i.t		See if no bigint works
 ext/bignum/t/scope_r.t		See if no bigrat works
-ext/B-Lint/lib/B/Lint/Debug.pm	Adds debugging stringification to B::
-ext/B-Lint/lib/B/Lint.pm	Compiler Lint backend
-ext/B-Lint/t/lint.t		See if B::Lint works
-ext/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
