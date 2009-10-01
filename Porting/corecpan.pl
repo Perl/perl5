@@ -91,8 +91,8 @@ foreach my $source (@sources) {
 	    $module =~ s/\_pm.PL\z//;
 	    $module =~ s/\.pm\z//;
 	    # some heuristics to figure out the module name from the file name
-	    $module =~ s{^(lib|ext)/}{}
-		and $1 eq 'ext'
+	    $module =~ s{^(lib|ext|dist|cpan)/}{}
+		and $1 =~ /(?:ext|dist|cpan)/
 		and (
 		      # ext/Foo-Bar/Bar.pm
 		      $module =~ s{^(\w+)-(\w+)/\2$}{$1/lib/$1/$2},
