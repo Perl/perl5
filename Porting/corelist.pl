@@ -78,14 +78,13 @@ find(
         /(\.pm|_pm\.PL)$/ or return;
         /PPPort\.pm$/ and return;
         my $module = $File::Find::name;
-		warn $module;
         $module =~ /\b(demo|t|private)\b/ and return;    # demo or test modules
         my $version = MM->parse_version($_);
         defined $version or $version = 'undef';
         $version =~ /\d/ and $version = "'$version'";
 
         # some heuristics to figure out the module name from the file name
-        $module =~ s{^(lib|cpan|dist|(vms/|symbian/)?ext)/}{}
+        $module =~ s{^(lib|cpan|dist|(?:vms/|symbian/)?ext)/}{}
 			and $1 ne 'lib'
             and (
             $module =~ s{\b(\w+)/\1\b}{$1},
@@ -97,19 +96,20 @@ find(
             $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
             $module =~ s{^(?:DynaLoader|Errno|Opcode)/}{},
             );
+		$module =~ s{^lib/}{}g;
         $module =~ s{/}{::}g;
         $module =~ s{-}{::}g;
-		$module =~ s{^.*::lib::}{};
+		$module =~ s{^.*::lib::}{}; # turns Foo/lib/Foo.pm into Foo.pm
         $module =~ s/(\.pm|_pm\.PL)$//;
         $lines{$module}          = $version;
         $module_to_file{$module} = $File::Find::name;
     },
+    'vms/ext',
+    'symbian/ext',
     'lib',
     'ext',
 	'cpan',
-	'dist',
-    'vms/ext',
-    'symbian/ext'
+	'dist'
 );
 
 -e 'configpm' and $lines{Config} = 'undef';
@@ -206,7 +206,7 @@ foreach my $module ( sort keys %module_to_upstream ) {
         if $dist;
 
     $bug_tracker = defined $bug_tracker ? "'$bug_tracker'" : 'undef';
-    next if $bug_tracker eq "'http://rt.perl.org/perlbug/'";
+	next if $bug_tracker eq "'http://rt.perl.org/perlbug/'";
     $tracker .= sprintf "    %-24s=> %s,\n", "'$module'", $bug_tracker;
 }
 $tracker .= ");";
