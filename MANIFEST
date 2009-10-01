@@ -916,6 +916,10 @@ cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Pe
 cpan/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
 cpan/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
 cpan/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
+cpan/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
+cpan/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
+cpan/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
+cpan/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
 cpan/ExtUtils-MakeMaker/bin/instmodsh				Give information about installed extensions
 cpan/ExtUtils-MakeMaker/Changes					MakeMaker change log
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Command/MM.pm		Calling MM functions from the cmd line
@@ -1765,10 +1769,6 @@ ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Errno/t/Errno.t	See if Errno works
-ext/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
-ext/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
-ext/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
-ext/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 ext/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants

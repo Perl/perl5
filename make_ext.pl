@@ -30,7 +30,7 @@ my $is_Unix = !$is_Win32 && !$is_VMS;
 my @toolchain = qw(cpan/AutoLoader/lib
 		   ext/constant/lib
 		   cpan/Cwd cpan/Cwd/lib
-		   ext/ExtUtils-Command/lib
+		   cpan/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
 		   cpan/ExtUtils-MakeMaker/lib
 		   ext/ExtUtils-Manifest/lib
