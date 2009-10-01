@@ -155,11 +155,12 @@ if ($opt_t) {
 }
 else {
     for my $dist (sort { lc $a cmp lc $b } keys %results) {
-	print "Module $dist...\n";
+	my $distname_printed = 0;
 	for my $file (sort keys %{$results{$dist}}) {
 	    my ($vcore, $vcpan) = @{$results{$dist}{$file}}{@labels};
 	    if (our $opt_v or $vcore ne $vcpan) {
-		print "    $file: core=$vcore, cpan=$vcpan\n";
+		print "\n$dist:\n" unless ($distname_printed++);
+		print "\t$file: core=$vcore, cpan=$vcpan\n";
 	    }
 	}
     }
