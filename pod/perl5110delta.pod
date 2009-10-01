@@ -1403,6 +1403,11 @@ C<cc -E -> unfortunately goes into K&R mode, but C<cc -E file.c> doesn't.
 Patches from the Haiku maintainers have been merged in. Perl should now
 build on Haiku.
 
+=item MachTen
+
+Support for Tenon Intersystems MachTen Unix layer for MacOS Classic was
+removed in Perl 5.11.0
+
 =item MiNT
 
 Support for Atari MiNT was removed in Perl 5.11.0.
@@ -2189,14 +2194,6 @@ simpler to spot and correct the suspicious character.
 =item *
 
 Explicitely point to $. when it causes an uninitialized warning for ranges in scalar context
-
-=item *
-
-Removed vestigal support for Tenon Intersystems MachTen Unix layer for MacOS Classic.
-
-=item *
-
-Removed the port to Atari MiNT.  It's a dead platform that hasn't had any love since 5.005.
 
 
 =item *
