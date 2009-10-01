@@ -1038,6 +1038,16 @@ cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Path/lib/File/Path.pm		Do things like 'mkdir -p' and 'rm -r'
 cpan/File-Path/t/Path.t			See if File::Path works
+cpan/File-Temp/t/cmp.t		See if File::Temp works
+cpan/File-Temp/Temp.pm		create safe temporary files and file handles
+cpan/File-Temp/t/fork.t		See if File::Temp works
+cpan/File-Temp/t/lock.t		See if File::Temp works
+cpan/File-Temp/t/mktemp.t	See if File::Temp works
+cpan/File-Temp/t/object.t	See if File::Temp works
+cpan/File-Temp/t/posix.t	See if File::Temp works
+cpan/File-Temp/t/security.t	See if File::Temp works
+cpan/File-Temp/t/seekable.t	See if File::Temp works
+cpan/File-Temp/t/tempfile.t	See if File::Temp works
 cpan/Getopt-Long/CHANGES		Getopt::Long changes
 cpan/Getopt-Long/lib/Getopt/Long.pm	Fetch command options (GetOptions)
 cpan/Getopt-Long/README			Getopt::Long README
@@ -1803,16 +1813,6 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/taint.t		See if File::Glob works
-ext/File-Temp/t/cmp.t		See if File::Temp works
-ext/File-Temp/Temp.pm		create safe temporary files and file handles
-ext/File-Temp/t/fork.t		See if File::Temp works
-ext/File-Temp/t/lock.t		See if File::Temp works
-ext/File-Temp/t/mktemp.t	See if File::Temp works
-ext/File-Temp/t/object.t	See if File::Temp works
-ext/File-Temp/t/posix.t		See if File::Temp works
-ext/File-Temp/t/security.t	See if File::Temp works
-ext/File-Temp/t/seekable.t	See if File::Temp works
-ext/File-Temp/t/tempfile.t	See if File::Temp works
 ext/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 ext/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
 ext/Filter-Util-Call/filter-util.pl		See if Filter::Util::Call works
