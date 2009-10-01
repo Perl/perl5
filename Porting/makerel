@@ -101,11 +101,14 @@ print "\n";
 
 chdir "$relroot/$reldir" or die $!;
 
+
+my $SEARCH_ROOTS = 't ext lib dist cpan';
+
 print "Setting file permissions...\n";
 system("find . -type f -print     | xargs chmod 0444");
 system("find . -type d -print     | xargs chmod 0755");
-system("find t ext lib -name '*.t'     -print | xargs chmod +x");
-system("find t ext lib -name 'test.pl' -print | xargs chmod +x");
+system("find $SEARCH_ROOTS -name '*.t'     -print | xargs chmod +x");
+system("find $SEARCH_ROOTS -name 'test.pl' -print | xargs chmod +x");
 my @exe = qw(
     Configure
     configpm
@@ -117,7 +120,6 @@ my @exe = qw(
     opcode.pl
     t/TEST
     *.SH
-    vms/ext/Stdio/test.pl
     vms/ext/filespec.t
     x2p/*.SH
     Porting/findrfuncs
