@@ -405,7 +405,7 @@ within your working directory:
 If any of the files managed by F<regen.pl> have changed, then you should
 re-make perl to check that it's okay, then commit the updated versions:
 
-    $ git commit -a -m 'make regn; make regn_perly'
+    $ git commit -a -m 'make regen; make regen_perly'
 
 =item *
 
