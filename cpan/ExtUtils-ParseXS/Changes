@@ -1,5 +1,40 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+2.200403 - Fri Oct  2 02:01:58 EDT 2009
+
+ Other:
+ - Removed PERL_CORE specific @INC manipulation (no longer needed)
+   [Nicholas Clark]
+ - Changed hard-coded $^H manipulation in favor of "use re 'eval'"
+   [Nicholas Clark]
+
+2.200402 - Fri Oct  2 01:26:40 EDT 2009
+
+ Bug fixes:
+ - UNITCHECK subroutines were not being called (detected in ext/XS-APItest
+   in Perl blead) [reported by Jesse Vincent, patched by David Golden]
+
+2.200401 - Mon Sep 14 22:26:03 EDT 2009
+
+ - No changes from 2.20_04.
+
+2.20_04 - Mon Aug 10 11:18:47 EDT 2009
+
+ Bug fixes:
+ - Changed install_dirs to 'core' for 5.8.9 as well (RT#48474)
+ - Removed t/bugs.t until there is better C++ support in ExtUtils::CBuilder
+
+ Other:
+ - Updated repository URL in META file
+
+2.20_03 - Thu Jul 23 23:14:50 EDT 2009
+
+ Bug fixes:
+ - Fixed "const char *" errors for 5.8.8 (and older) (RT#48104)
+   [Vincent Pit]
+ - Added newline before a preprocessor directive (RT#30673)
+   [patch by hjp]
+
 2.2002 - Sat Jul 18 17:22:27 EDT 2009
 
  Bug fixes:
