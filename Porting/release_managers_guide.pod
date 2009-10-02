@@ -494,7 +494,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for maint; in which case commit it blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' ext/Module-CoreList/lib/Module/CoreList.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm
 
 =item *
 
