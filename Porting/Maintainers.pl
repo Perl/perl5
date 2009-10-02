@@ -857,10 +857,10 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'audreyt',
 	'DISTRIBUTION'	=> 'JESSE/Locale-Maketext-Simple-0.21.tar.gz',
-	'FILES'		=> q[dist/Locale-Maketext-Simple],
+	'FILES'		=> q[cpan/Locale-Maketext-Simple],
 	'EXCLUDED'	=> [ qr{^inc/} ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'blead',
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Log::Message' =>

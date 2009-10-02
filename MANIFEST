@@ -1355,6 +1355,16 @@ cpan/Locale-Codes/t/language.t			See if Locale::Codes work
 cpan/Locale-Codes/t/rename.t			See if Locale::Codes work
 cpan/Locale-Codes/t/script.t			See if Locale::Codes work
 cpan/Locale-Codes/t/uk.t			See if Locale::Codes work
+cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
+cpan/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/2-load_po_without_i_default.t	Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/3-load_po_with_i_default.t	Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/po_with_i_default/en.po		Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/po_with_i_default/fr.po		Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
+cpan/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
@@ -2634,16 +2644,6 @@ dist/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext.pod		Locale::Maketext documentation
 dist/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 dist/Locale-Maketext/README				Locale::Maketext
-dist/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
-dist/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
-dist/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests
-dist/Locale-Maketext-Simple/t/2-load_po_without_i_default.t	Locale::Simple tests
-dist/Locale-Maketext-Simple/t/3-load_po_with_i_default.t	Locale::Simple tests
-dist/Locale-Maketext-Simple/t/po_with_i_default/en.po		Locale::Simple tests
-dist/Locale-Maketext-Simple/t/po_with_i_default/fr.po		Locale::Simple tests
-dist/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
-dist/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
-dist/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 dist/Locale-Maketext/t/01_about_verbose.t		See if Locale::Maketext works
 dist/Locale-Maketext/t/10_make.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/20_get.t				See if Locale::Maketext works
