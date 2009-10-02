@@ -1378,6 +1378,20 @@ cpan/Math-BigInt/t/use_lib4.t		Test combinations of Math::BigInt and BigFloat
 cpan/Math-BigInt/t/use_mbfw.t		use BigFloat w/ with and lib at the same time
 cpan/Math-BigInt/t/use.t		Test if use Math::BigInt(); works
 cpan/Math-BigInt/t/with_sub.t		Test use Math::BigFloat with => package
+cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
+cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
+cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
+cpan/Math-BigRat/t/bigfltrt.t		Math::BigRat test
+cpan/Math-BigRat/t/biglog.t		Math::BigRat test
+cpan/Math-BigRat/t/bigratpm.inc		Math::BigRat test
+cpan/Math-BigRat/t/bigratpm.t		Math::BigRat test
+cpan/Math-BigRat/t/bigrat.t		Math::BigRat test
+cpan/Math-BigRat/t/bigratup.t		test under $Math::BigInt::upgrade
+cpan/Math-BigRat/t/bigroot.t		Math::BigRat test
+cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
+cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
+cpan/Math-BigRat/t/requirer.t		see if require works properly
+cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
 cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
 cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
 cpan/Math-Complex/t/Complex.t		See if Math::Complex works
@@ -2177,20 +2191,6 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
-ext/Math-BigRat/lib/Math/BigRat.pm		Math::BigRat
-ext/Math-BigRat/t/big_ap.t		Math::BigRat test
-ext/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
-ext/Math-BigRat/t/bigfltrt.t		Math::BigRat test
-ext/Math-BigRat/t/biglog.t		Math::BigRat test
-ext/Math-BigRat/t/bigratpm.inc		Math::BigRat test
-ext/Math-BigRat/t/bigratpm.t		Math::BigRat test
-ext/Math-BigRat/t/bigrat.t		Math::BigRat test
-ext/Math-BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
-ext/Math-BigRat/t/bigroot.t		Math::BigRat test
-ext/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
-ext/Math-BigRat/t/Math/BigRat/Test.pm		Math::BigRat test helper
-ext/Math-BigRat/t/requirer.t	see if require works properly
-ext/Math-BigRat/t/trap.t	see if trap_nan and trap_inf work
 ext/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 ext/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
 ext/Memoize/Memoize/Expire.pm		Memoize expiry manager example

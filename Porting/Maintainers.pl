@@ -936,7 +936,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'LETO/Math-BigRat-0.24.tar.gz',
-	'FILES'		=> q[ext/Math-BigRat],
+	'FILES'		=> q[cpan/Math-BigRat],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
 				t/pod.t
