@@ -1274,7 +1274,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'arandal',
 	'DISTRIBUTION'	=> 'ARANDAL/Pod-Simple-3.07.tar.gz',
-	'FILES'		=> q[ext/Pod-Simple],
+	'FILES'		=> q[cpan/Pod-Simple],
 	# XXX these two files correspond to similar ones in bleed under
 	# pod/, but the bleed ones have newer changes, and also seem to
 	# have been in blead a long time. I'm going to assume then that
