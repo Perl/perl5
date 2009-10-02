@@ -305,7 +305,7 @@ sub build_extension {
     }
     $ENV{PERL5LIB} = join $Config{path_sep}, @new_inc;
     $ENV{PERL_CORE} = 1;
-    warn $ENV{PERL5LIB};
+    # warn $ENV{PERL5LIB};
 
     my $makefile;
     if ($is_VMS) {
