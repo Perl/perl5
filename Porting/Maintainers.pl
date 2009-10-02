@@ -1141,7 +1141,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'elizabeth',
 	'DISTRIBUTION'	=> 'ELIZABETH/PerlIO-via-QuotedPrint-0.06.tar.gz',
-	'FILES'		=> q[ext/PerlIO-via-QuotedPrint],
+	'FILES'		=> q[cpan/PerlIO-via-QuotedPrint],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
