@@ -428,15 +428,12 @@ cpan/CPANPLUS/t/dummy-CPAN/autobundle/Snapshot.pm		CPANPLUS tests
 cpan/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz	CPANPLUS tests
 cpan/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz		CPANPLUS tests
 cpan/CPANPLUS/t/inc/conf.pl					CPANPLUS tests
-cpan/CPAN/README			CPAN.pm README
 cpan/CPAN/scripts/cpan		easily interact with CPAN from the command line
-cpan/CPAN/SIGNATURE
 cpan/CPAN/t/01loadme.t		See if CPAN the module works
 cpan/CPAN/t/02nox.t		See if CPAN::Nox works
 cpan/CPAN/t/03pkgs.t		See if CPAN::Version works
 cpan/CPAN/t/10version.t		See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
-cpan/CPAN/Todo				CPAN.pm Todo list
 cpan/Cwd/Changes			Cwd extension Changelog
 cpan/Cwd/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
 cpan/Cwd/Cwd.xs				Cwd extension external subroutines
