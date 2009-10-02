@@ -38,7 +38,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 		   );
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()
-push @toolchain, 'ext/Text-ParseWords/lib' if $is_Win32;
+push @toolchain, 'cpan/Text-ParseWords/lib' if $is_Win32;
 
 my @ext_dirs = qw(cpan dist ext);
 my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
