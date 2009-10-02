@@ -1279,6 +1279,55 @@ cpan/libnet/t/nntp.t		libnet
 cpan/libnet/t/require.t		libnet
 cpan/libnet/t/smtp.t		libnet
 cpan/libnet/t/time.t		libnet
+cpan/List-Util/Changes			Util extension
+cpan/List-Util/lib/List/Util.pm		List::Util
+cpan/List-Util/lib/List/Util/PP.pm	List::Util
+cpan/List-Util/lib/List/Util/XS.pm	List::Util
+cpan/List-Util/lib/Scalar/Util.pm	Scalar::Util
+cpan/List-Util/lib/Scalar/Util/PP.pm	Scalar::Util
+cpan/List-Util/ListUtil.xs		Util extension
+cpan/List-Util/Makefile.PL		Util extension
+cpan/List-Util/multicall.h		Util extension
+cpan/List-Util/README			Util extension
+cpan/List-Util/t/00version.t		Scalar::Util
+cpan/List-Util/t/blessed.t		Scalar::Util
+cpan/List-Util/t/dualvar.t		Scalar::Util
+cpan/List-Util/t/expfail.t		List::Util
+cpan/List-Util/t/first.t		List::Util
+cpan/List-Util/t/isvstring.t		Scalar::Util
+cpan/List-Util/t/lln.t			Scalar::Util
+cpan/List-Util/t/maxstr.t		List::Util
+cpan/List-Util/t/max.t			List::Util
+cpan/List-Util/t/minstr.t		List::Util
+cpan/List-Util/t/min.t			List::Util
+cpan/List-Util/t/openhan.t		Scalar::Util
+cpan/List-Util/t/p_00version.t		Scalar::Util
+cpan/List-Util/t/p_blessed.t		Scalar::Util
+cpan/List-Util/t/p_first.t		List::Util
+cpan/List-Util/t/p_lln.t		Scalar::Util
+cpan/List-Util/t/p_maxstr.t		List::Util
+cpan/List-Util/t/p_max.t		List::Util
+cpan/List-Util/t/p_minstr.t		List::Util
+cpan/List-Util/t/p_min.t		List::Util
+cpan/List-Util/t/p_openhan.t		Scalar::Util
+cpan/List-Util/t/p_readonly.t		Scalar::Util
+cpan/List-Util/t/p_reduce.t		List::Util
+cpan/List-Util/t/p_refaddr.t		Scalar::Util
+cpan/List-Util/t/p_reftype.t		Scalar::Util
+cpan/List-Util/t/proto.t		Scalar::Util
+cpan/List-Util/t/p_shuffle.t		List::Util
+cpan/List-Util/t/p_sum.t		List::Util
+cpan/List-Util/t/p_tainted.t		Scalar::Util
+cpan/List-Util/t/readonly.t		Scalar::Util
+cpan/List-Util/t/reduce.t		List::Util
+cpan/List-Util/t/refaddr.t		Scalar::Util
+cpan/List-Util/t/reftype.t		Scalar::Util
+cpan/List-Util/t/shuffle.t		List::Util
+cpan/List-Util/t/stack-corruption.t	List::Util
+cpan/List-Util/t/sum.t			List::Util
+cpan/List-Util/t/tainted.t		Scalar::Util
+cpan/List-Util/t/weak.t			Scalar::Util
+cpan/List-Util/XS.pp			List::Util
 cpan/Locale-Codes/ChangeLog			Locale::Codes
 cpan/Locale-Codes/lib/Locale/Constants.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Constants.pod	Locale::Codes documentation
@@ -2494,55 +2543,6 @@ ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
-ext/List-Util/Changes		Util extension
-ext/List-Util/lib/List/Util.pm	List::Util
-ext/List-Util/lib/List/Util/PP.pm	List::Util
-ext/List-Util/lib/List/Util/XS.pm	List::Util
-ext/List-Util/lib/Scalar/Util.pm	Scalar::Util
-ext/List-Util/lib/Scalar/Util/PP.pm	Scalar::Util
-ext/List-Util/ListUtil.xs		Util extension
-ext/List-Util/Makefile.PL	Util extension
-ext/List-Util/multicall.h	Util extension
-ext/List-Util/README		Util extension
-ext/List-Util/t/00version.t	Scalar::Util
-ext/List-Util/t/blessed.t	Scalar::Util
-ext/List-Util/t/dualvar.t	Scalar::Util
-ext/List-Util/t/expfail.t	List::Util
-ext/List-Util/t/first.t		List::Util
-ext/List-Util/t/isvstring.t	Scalar::Util
-ext/List-Util/t/lln.t		Scalar::Util
-ext/List-Util/t/maxstr.t	List::Util
-ext/List-Util/t/max.t		List::Util
-ext/List-Util/t/minstr.t	List::Util
-ext/List-Util/t/min.t		List::Util
-ext/List-Util/t/openhan.t	Scalar::Util
-ext/List-Util/t/p_00version.t	Scalar::Util
-ext/List-Util/t/p_blessed.t	Scalar::Util
-ext/List-Util/t/p_first.t	List::Util
-ext/List-Util/t/p_lln.t		Scalar::Util
-ext/List-Util/t/p_maxstr.t	List::Util
-ext/List-Util/t/p_max.t		List::Util
-ext/List-Util/t/p_minstr.t	List::Util
-ext/List-Util/t/p_min.t		List::Util
-ext/List-Util/t/p_openhan.t	Scalar::Util
-ext/List-Util/t/p_readonly.t	Scalar::Util
-ext/List-Util/t/p_reduce.t	List::Util
-ext/List-Util/t/p_refaddr.t	Scalar::Util
-ext/List-Util/t/p_reftype.t	Scalar::Util
-ext/List-Util/t/proto.t		Scalar::Util
-ext/List-Util/t/p_shuffle.t	List::Util
-ext/List-Util/t/p_sum.t		List::Util
-ext/List-Util/t/p_tainted.t	Scalar::Util
-ext/List-Util/t/readonly.t	Scalar::Util
-ext/List-Util/t/reduce.t	List::Util
-ext/List-Util/t/refaddr.t	Scalar::Util
-ext/List-Util/t/reftype.t	Scalar::Util
-ext/List-Util/t/shuffle.t	List::Util
-ext/List-Util/t/stack-corruption.t	List::Util
-ext/List-Util/t/sum.t		List::Util
-ext/List-Util/t/tainted.t	Scalar::Util
-ext/List-Util/t/weak.t		Scalar::Util
-ext/List-Util/XS.pp		List::Util
 ext/mro/Changes			mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension

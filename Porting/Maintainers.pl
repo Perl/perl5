@@ -1313,7 +1313,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'gbarr',
 	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.21.tar.gz',
 	# Note that perl uses its own version of Makefile.PL
-	'FILES'		=> q[ext/List-Util],
+	'FILES'		=> q[cpan/List-Util],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
 			     qr{^inc/Test/},
 			     qw{ mytypemap },
