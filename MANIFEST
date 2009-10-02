@@ -1606,6 +1606,19 @@ cpan/Package-Constants/lib/Package/Constants.pm	Package::Constants
 cpan/Package-Constants/t/01_list.t		Package::Constants tests
 cpan/Params-Check/lib/Params/Check.pm	Params::Check
 cpan/Params-Check/t/01_Params-Check.t	Params::Check tests
+cpan/parent/lib/parent.pm			Establish an ISA relationship with base classes at compile time
+cpan/parent/t/compile-time-file.t		tests for parent.pm
+cpan/parent/t/compile-time.t			tests for parent.pm
+cpan/parent/t/lib/Dummy2.plugin			test files for parent.pm
+cpan/parent/t/lib/Dummy/Outside.pm		test files for parent.pm
+cpan/parent/t/lib/Dummy.pm			test files for parent.pm
+cpan/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
+cpan/parent/t/lib/ReturnsFalse.pm		test files for parent.pm
+cpan/parent/t/parent-classfromclassfile.t	tests for parent.pm
+cpan/parent/t/parent-classfromfile.t		tests for parent.pm
+cpan/parent/t/parent-pmc.t			tests for parent.pm
+cpan/parent/t/parent-returns-false.t		tests for parent.pm
+cpan/parent/t/parent.t				tests for parent.pm
 cpan/Parse-CPAN-Meta/Changes				Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm		Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/01_compile.t			Parse::CPAN::Meta
@@ -2331,19 +2344,6 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
-ext/parent/lib/parent.pm	Establish an ISA relationship with base classes at compile time
-ext/parent/t/compile-time-file.t	tests for parent.pm
-ext/parent/t/compile-time.t	tests for parent.pm
-ext/parent/t/lib/Dummy2.plugin	test files for parent.pm
-ext/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
-ext/parent/t/lib/Dummy.pm	test files for parent.pm
-ext/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
-ext/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
-ext/parent/t/parent-classfromclassfile.t	tests for parent.pm
-ext/parent/t/parent-classfromfile.t	tests for parent.pm
-ext/parent/t/parent-pmc.t	tests for parent.pm
-ext/parent/t/parent-returns-false.t	tests for parent.pm
-ext/parent/t/parent.t	tests for parent.pm
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
