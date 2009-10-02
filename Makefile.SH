@@ -1019,7 +1019,7 @@ extras.install: perl$(EXE_EXT)
 	no-install install.perl install.man install.html
 
 META.yml:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
-	$(PERL) Porting/makemeta
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) $(RUN) ./perl -Ilib Porting/makemeta
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
