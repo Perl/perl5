@@ -778,7 +778,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.021.tar.gz',
-	'FILES'		=> q[ext/IO-Compress],
+	'FILES'		=> q[dist/IO-Compress],
 	'EXCLUDED'	=> [ qr{t/Test/},
 			     qw{t/cz-03zlib-v1.t},
 			   ],
