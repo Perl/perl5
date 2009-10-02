@@ -1426,6 +1426,16 @@ cpan/Memoize/t/tie_sdbm.t		Memoize SDBM interface test
 cpan/Memoize/t/tie_storable.t		Memoize Storable interface test
 cpan/Memoize/t/tie.t			Memoize tied file test
 cpan/Memoize/t/unmemoize.t		Memoize 'unmemoize' function test
+cpan/MIME-Base64/Base64.pm		MIME::Base64 extension
+cpan/MIME-Base64/Base64.xs		MIME::Base64 extension
+cpan/MIME-Base64/Changes		MIME::Base64 extension
+cpan/MIME-Base64/Makefile.PL		MIME::Base64 extension
+cpan/MIME-Base64/QuotedPrint.pm		MIME::Base64 extension
+cpan/MIME-Base64/README			README for MIME::Base64
+cpan/MIME-Base64/t/base64.t		See whether MIME::Base64 works
+cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
+cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
+cpan/MIME-Base64/t/warn.t		See whether MIME::Base64 works
 cpan/Module-Build/Changes				Module::Build
 cpan/Module-Build/lib/Module/Build/API.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
@@ -2220,16 +2230,6 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
-ext/MIME-Base64/Base64.pm	MIME::Base64 extension
-ext/MIME-Base64/Base64.xs	MIME::Base64 extension
-ext/MIME-Base64/Changes		MIME::Base64 extension
-ext/MIME-Base64/Makefile.PL	MIME::Base64 extension
-ext/MIME-Base64/QuotedPrint.pm	MIME::Base64 extension
-ext/MIME-Base64/README		README for MIME::Base64
-ext/MIME-Base64/t/base64.t	See whether MIME::Base64 works
-ext/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
-ext/MIME-Base64/t/unicode.t	See whether MIME::Base64 works
-ext/MIME-Base64/t/warn.t	See whether MIME::Base64 works
 ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
