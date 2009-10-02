@@ -2299,6 +2299,18 @@ cpan/Test/t/qr.t		See if Test works
 cpan/Test/t/skip.t		See if Test works
 cpan/Test/t/success.t		See if Test works
 cpan/Test/t/todo.t		See if Test works
+cpan/Text-Balanced/Changes		Text::Balanced
+cpan/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
+cpan/Text-Balanced/README		Text::Balanced
+cpan/Text-Balanced/t/01_compile.t	See if Text::Balanced works
+cpan/Text-Balanced/t/02_extbrk.t	See if Text::Balanced works
+cpan/Text-Balanced/t/03_extcbk.t	See if Text::Balanced works
+cpan/Text-Balanced/t/04_extdel.t	See if Text::Balanced works
+cpan/Text-Balanced/t/05_extmul.t	See if Text::Balanced works
+cpan/Text-Balanced/t/06_extqlk.t	See if Text::Balanced works
+cpan/Text-Balanced/t/07_exttag.t	See if Text::Balanced works
+cpan/Text-Balanced/t/08_extvar.t	See if Text::Balanced works
+cpan/Text-Balanced/t/09_gentag.t	See if Text::Balanced works
 cpan/Text-Tabs/CHANGELOG		ChangeLog for Tabs+Wrap
 cpan/Text-Tabs/lib/Text/Tabs.pm		Do expand and unexpand
 cpan/Text-Tabs/lib/Text/Wrap.pm		Paragraph formatter
@@ -3022,18 +3034,6 @@ ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
-ext/Text-Balanced/Changes		Text::Balanced
-ext/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
-ext/Text-Balanced/README		Text::Balanced
-ext/Text-Balanced/t/01_compile.t	See if Text::Balanced works
-ext/Text-Balanced/t/02_extbrk.t		See if Text::Balanced works
-ext/Text-Balanced/t/03_extcbk.t		See if Text::Balanced works
-ext/Text-Balanced/t/04_extdel.t		See if Text::Balanced works
-ext/Text-Balanced/t/05_extmul.t		See if Text::Balanced works
-ext/Text-Balanced/t/06_extqlk.t		See if Text::Balanced works
-ext/Text-Balanced/t/07_exttag.t		See if Text::Balanced works
-ext/Text-Balanced/t/08_extvar.t		See if Text::Balanced works
-ext/Text-Balanced/t/09_gentag.t		See if Text::Balanced works
 ext/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 ext/Text-ParseWords/t/ParseWords.t	See if Text::ParseWords works
 ext/Text-ParseWords/t/taint.t		See if Text::ParseWords works with tainting
