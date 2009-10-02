@@ -828,7 +828,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'gbarr',
 	'DISTRIBUTION'	=> 'GBARR/libnet-1.22.tar.gz',
-	'FILES'		=> q[ext/libnet],
+	'FILES'		=> q[cpan/libnet],
 	'EXCLUDED'	=> [ qw{Configure install-nomake} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

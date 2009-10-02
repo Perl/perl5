@@ -1245,6 +1245,43 @@ cpan/IPC-SysV/t/pod.t			IPC::SysV test file
 cpan/IPC-SysV/t/sem.t			IPC::SysV test file
 cpan/IPC-SysV/t/shm.t			IPC::SysV test file
 cpan/IPC-SysV/typemap			IPC::SysV typemap
+cpan/libnet/Changes		libnet
+cpan/libnet/Config.eg		libnet
+cpan/libnet/demos/ftp		libnet
+cpan/libnet/demos/inetd		libnet
+cpan/libnet/demos/nntp		libnet
+cpan/libnet/demos/nntp.mirror	libnet
+cpan/libnet/demos/pop3		libnet
+cpan/libnet/demos/smtp.self	libnet
+cpan/libnet/demos/time		libnet
+cpan/libnet/Hostname.pm.eg	libnet
+cpan/libnet/Makefile.PL
+cpan/libnet/Net/Cmd.pm		libnet
+cpan/libnet/Net/Config.pm	libnet
+cpan/libnet/Net/Domain.pm	libnet
+cpan/libnet/Net/FTP/A.pm	libnet
+cpan/libnet/Net/FTP/dataconn.pm	libnet
+cpan/libnet/Net/FTP/E.pm	libnet
+cpan/libnet/Net/FTP/I.pm	libnet
+cpan/libnet/Net/FTP/L.pm	libnet
+cpan/libnet/Net/FTP.pm		libnet
+cpan/libnet/Net/libnetFAQ.pod	libnet
+cpan/libnet/Net/Netrc.pm	libnet
+cpan/libnet/Net/NNTP.pm		libnet
+cpan/libnet/Net/POP3.pm		libnet
+cpan/libnet/Net/SMTP.pm		libnet
+cpan/libnet/Net/Time.pm		libnet
+cpan/libnet/README		libnet
+cpan/libnet/t/config.t		libnet
+cpan/libnet/t/datasend.t	libnet
+cpan/libnet/t/ftp.t		libnet
+cpan/libnet/t/hostname.t	libnet
+cpan/libnet/t/libnet_t.pl	libnet
+cpan/libnet/t/netrc.t		libnet
+cpan/libnet/t/nntp.t		libnet
+cpan/libnet/t/require.t		libnet
+cpan/libnet/t/smtp.t		libnet
+cpan/libnet/t/time.t		libnet
 cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
@@ -2007,43 +2044,6 @@ ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
-ext/libnet/Changes		libnet
-ext/libnet/Config.eg		libnet
-ext/libnet/demos/ftp		libnet
-ext/libnet/demos/inetd		libnet
-ext/libnet/demos/nntp		libnet
-ext/libnet/demos/nntp.mirror	libnet
-ext/libnet/demos/pop3		libnet
-ext/libnet/demos/smtp.self	libnet
-ext/libnet/demos/time		libnet
-ext/libnet/Hostname.pm.eg	libnet
-ext/libnet/Makefile.PL
-ext/libnet/Net/Cmd.pm		libnet
-ext/libnet/Net/Config.pm	libnet
-ext/libnet/Net/Domain.pm	libnet
-ext/libnet/Net/FTP/A.pm		libnet
-ext/libnet/Net/FTP/dataconn.pm	libnet
-ext/libnet/Net/FTP/E.pm		libnet
-ext/libnet/Net/FTP/I.pm		libnet
-ext/libnet/Net/FTP/L.pm		libnet
-ext/libnet/Net/FTP.pm		libnet
-ext/libnet/Net/libnetFAQ.pod	libnet
-ext/libnet/Net/Netrc.pm		libnet
-ext/libnet/Net/NNTP.pm		libnet
-ext/libnet/Net/POP3.pm		libnet
-ext/libnet/Net/SMTP.pm		libnet
-ext/libnet/Net/Time.pm		libnet
-ext/libnet/README		libnet
-ext/libnet/t/config.t		libnet
-ext/libnet/t/datasend.t		libnet
-ext/libnet/t/ftp.t		libnet
-ext/libnet/t/hostname.t		libnet
-ext/libnet/t/libnet_t.pl	libnet
-ext/libnet/t/netrc.t		libnet
-ext/libnet/t/nntp.t		libnet
-ext/libnet/t/require.t		libnet
-ext/libnet/t/smtp.t		libnet
-ext/libnet/t/time.t		libnet
 ext/List-Util/Changes		Util extension
 ext/List-Util/lib/List/Util.pm	List::Util
 ext/List-Util/lib/List/Util/PP.pm	List::Util
