@@ -577,6 +577,15 @@ Push all your recent commits:
 
     $ git push origin ....
 
+
+=item *
+
+I<You MUST SKIP this step for SNAPSHOT>
+
+Tag the release:
+
+    $ git tag v5.11.0 -m'First release of the v5.11 series!'
+
 =item *
 
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
@@ -595,6 +604,7 @@ This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them,
 adds DOS line endings to some, then tars it up as
 F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a C<tar.bz2> file.
+
 
 XXX if we go for extra tags and branches stuff, then add the extra details
 here
