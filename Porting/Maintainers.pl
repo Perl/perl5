@@ -1484,7 +1484,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'markm',
 	'DISTRIBUTION'	=> 'MARKM/Text-Soundex-3.03.tar.gz',
-	'FILES'		=> q[ext/Text-Soundex],
+	'FILES'		=> q[cpan/Text-Soundex],
 	'MAP'		=> { ''               => 'ext/Text-Soundex/',
 			     # XXX these two files are clearly related,
 			     # but they appear to have diverged
