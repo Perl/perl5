@@ -1653,6 +1653,9 @@ cpan/Pod-Escapes/README			README for Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
+cpan/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
+cpan/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
+cpan/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -1683,6 +1686,57 @@ cpan/podlators/t/text.t				podlators test
 cpan/podlators/t/text-utf8.t			podlators test
 cpan/podlators/VERSION				podlators custom Makefile.PL
 cpan/podlators/VERSION				podlators distribution version
+cpan/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
+cpan/Pod-Parser/lib/Pod/Find.pm			used by pod/splitpod
+cpan/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
+cpan/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
+cpan/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
+cpan/Pod-Parser/lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
+cpan/Pod-Parser/lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
+cpan/Pod-Parser/lib/Pod/Usage.pm		Pod-Parser - print usage messages
+cpan/Pod-Parser/t/pod/contains_bad_pod.xr	Pod-Parser test file
+cpan/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
+cpan/Pod-Parser/t/pod/contains_pod.xr		Pod-Parser test file
+cpan/Pod-Parser/t/pod/emptycmd.t		Test empty pod directives
+cpan/Pod-Parser/t/pod/emptycmd.xr		Expected results for emptycmd.t
+cpan/Pod-Parser/t/pod/find.t			See if Pod::Find works
+cpan/Pod-Parser/t/pod/for.t			Test =for directive
+cpan/Pod-Parser/t/pod/for.xr			Expected results for for.t
+cpan/Pod-Parser/t/pod/headings.t		Test =head directives
+cpan/Pod-Parser/t/pod/headings.xr		Expected results for headings.t
+cpan/Pod-Parser/t/pod/included.t		Test =include directive
+cpan/Pod-Parser/t/pod/included.xr		Expected results for included.t
+cpan/Pod-Parser/t/pod/include.t			Test =include directive
+cpan/Pod-Parser/t/pod/include.xr		Expected results for include.t
+cpan/Pod-Parser/t/pod/lref.t			Test L<...> sequences
+cpan/Pod-Parser/t/pod/lref.xr			Expected results for lref.t
+cpan/Pod-Parser/t/pod/multiline_items.t		Test multiline =items
+cpan/Pod-Parser/t/pod/multiline_items.xr	Expected results for multiline_items.t
+cpan/Pod-Parser/t/pod/nested_items.t		Test nested =items
+cpan/Pod-Parser/t/pod/nested_items.xr		Expected results for nested_items.t
+cpan/Pod-Parser/t/pod/nested_seqs.t		Test nested interior sequences
+cpan/Pod-Parser/t/pod/nested_seqs.xr		Expected results for nested_seqs.t
+cpan/Pod-Parser/t/pod/oneline_cmds.t		Test single paragraph ==cmds
+cpan/Pod-Parser/t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
+cpan/Pod-Parser/t/pod/p2u_data.pl		Test Pod::Usage
+cpan/Pod-Parser/t/pod/pod2usage2.t		Test Pod::Usage
+cpan/Pod-Parser/t/pod/pod2usage.t		Test Pod::Usage
+cpan/Pod-Parser/t/pod/pod2usage.xr		Expected results for pod2usage.t
+cpan/Pod-Parser/t/pod/podchkenc.t		Validate =encoding support
+cpan/Pod-Parser/t/pod/podchkenc.xr		Expected results for the above
+cpan/Pod-Parser/t/pod/poderrs.t			Test POD errors
+cpan/Pod-Parser/t/pod/poderrs.xr		Expected results for poderrs.t
+cpan/Pod-Parser/t/pod/podselect.t		Test Pod::Select
+cpan/Pod-Parser/t/pod/podselect.xr		Expected results for podselect.t
+cpan/Pod-Parser/t/pod/special_seqs.t		Test "special" interior sequences
+cpan/Pod-Parser/t/pod/special_seqs.xr		Expected results for special_seqs.t
+cpan/Pod-Parser/t/pod/testcmp.pl		Module to compare output against expected results
+cpan/Pod-Parser/t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
+cpan/Pod-Parser/t/pod/testpchk.pl		Module to test Pod::Checker for a given file
+cpan/Pod-Parser/t/pod/testpods/lib/Pod/Stuff.pm	Sample data for t/pod/find.t
+cpan/Pod-Parser/t/pod/twice.t			Test Pod::Parser
+cpan/Pod-Parser/t/pod/usage2.pod		Test POD for pod2usage tests
+cpan/Pod-Parser/t/pod/usage.pod			Test POD for pod2usage tests
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2366,60 +2420,6 @@ ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
-ext/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
-ext/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
-ext/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
-ext/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
-ext/Pod-Parser/lib/Pod/Find.pm			used by pod/splitpod
-ext/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
-ext/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
-ext/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
-ext/Pod-Parser/lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
-ext/Pod-Parser/lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
-ext/Pod-Parser/lib/Pod/Usage.pm			Pod-Parser - print usage messages
-ext/Pod-Parser/t/pod/contains_bad_pod.xr	Pod-Parser test file
-ext/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
-ext/Pod-Parser/t/pod/contains_pod.xr		Pod-Parser test file
-ext/Pod-Parser/t/pod/emptycmd.t			Test empty pod directives
-ext/Pod-Parser/t/pod/emptycmd.xr		Expected results for emptycmd.t
-ext/Pod-Parser/t/pod/find.t			See if Pod::Find works
-ext/Pod-Parser/t/pod/for.t			Test =for directive
-ext/Pod-Parser/t/pod/for.xr			Expected results for for.t
-ext/Pod-Parser/t/pod/headings.t			Test =head directives
-ext/Pod-Parser/t/pod/headings.xr		Expected results for headings.t
-ext/Pod-Parser/t/pod/included.t			Test =include directive
-ext/Pod-Parser/t/pod/included.xr		Expected results for included.t
-ext/Pod-Parser/t/pod/include.t			Test =include directive
-ext/Pod-Parser/t/pod/include.xr			Expected results for include.t
-ext/Pod-Parser/t/pod/lref.t			Test L<...> sequences
-ext/Pod-Parser/t/pod/lref.xr			Expected results for lref.t
-ext/Pod-Parser/t/pod/multiline_items.t		Test multiline =items
-ext/Pod-Parser/t/pod/multiline_items.xr		Expected results for multiline_items.t
-ext/Pod-Parser/t/pod/nested_items.t		Test nested =items
-ext/Pod-Parser/t/pod/nested_items.xr		Expected results for nested_items.t
-ext/Pod-Parser/t/pod/nested_seqs.t		Test nested interior sequences
-ext/Pod-Parser/t/pod/nested_seqs.xr		Expected results for nested_seqs.t
-ext/Pod-Parser/t/pod/oneline_cmds.t		Test single paragraph ==cmds
-ext/Pod-Parser/t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
-ext/Pod-Parser/t/pod/p2u_data.pl		Test Pod::Usage
-ext/Pod-Parser/t/pod/pod2usage2.t		Test Pod::Usage
-ext/Pod-Parser/t/pod/pod2usage.t		Test Pod::Usage
-ext/Pod-Parser/t/pod/pod2usage.xr		Expected results for pod2usage.t
-ext/Pod-Parser/t/pod/podchkenc.t		Validate =encoding support
-ext/Pod-Parser/t/pod/podchkenc.xr		Expected results for the above
-ext/Pod-Parser/t/pod/poderrs.t			Test POD errors
-ext/Pod-Parser/t/pod/poderrs.xr			Expected results for poderrs.t
-ext/Pod-Parser/t/pod/podselect.t		Test Pod::Select
-ext/Pod-Parser/t/pod/podselect.xr		Expected results for podselect.t
-ext/Pod-Parser/t/pod/special_seqs.t		Test "special" interior sequences
-ext/Pod-Parser/t/pod/special_seqs.xr		Expected results for special_seqs.t
-ext/Pod-Parser/t/pod/testcmp.pl			Module to compare output against expected results
-ext/Pod-Parser/t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
-ext/Pod-Parser/t/pod/testpchk.pl		Module to test Pod::Checker for a given file
-ext/Pod-Parser/t/pod/testpods/lib/Pod/Stuff.pm	Sample data for t/pod/find.t
-ext/Pod-Parser/t/pod/twice.t			Test Pod::Parser
-ext/Pod-Parser/t/pod/usage2.pod			Test POD for pod2usage tests
-ext/Pod-Parser/t/pod/usage.pod			Test POD for pod2usage tests
 ext/Pod-Simple/ChangeLog				Pod::Simple ChangeLog
 ext/Pod-Simple/lib/Pod/Simple/BlackBox.pm		Pod::Simple::BlackBox
 ext/Pod-Simple/lib/Pod/Simple/Checker.pm		check the Pod syntax of a document

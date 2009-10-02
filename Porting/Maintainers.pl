@@ -1209,11 +1209,11 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tjenness',
 	'DISTRIBUTION'	=> 'TJENNESS/Pod-LaTeX-0.58.tar.gz',
-	'FILES'		=> q[ext/Pod-LaTeX
+	'FILES'		=> q[cpan/Pod-LaTeX
 			     pod/pod2latex.PL
 			    ],
 	'EXCLUDED'	=> [ qw( t/require.t ) ],
-	'MAP'		=> { '' => 'ext/Pod-LaTeX/',
+	'MAP'		=> { '' => 'cpan/Pod-LaTeX/',
 			     'pod2latex.PL' => 'pod/pod2latex.PL',
 			   },
 	'CPAN'		=> 1,
@@ -1227,10 +1227,10 @@ use File::Glob qw(:case);
 	# version 1.37!
 
 	'DISTRIBUTION'	=> 'MAREKR/Pod-Parser-1.38.tar.gz',
-	'FILES'		=> q[ext/Pod-Parser
+	'FILES'		=> q[cpan/Pod-Parser
 			     pod/pod{2usage,checker,select}.PL
 			    ],
-	'MAP'		=> { '' => 'ext/Pod-Parser/',
+	'MAP'		=> { '' => 'cpan/Pod-Parser/',
 			     'scripts/' => 'pod/',
 			   },
 	'CPAN'		=> 1,
