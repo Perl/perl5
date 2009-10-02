@@ -1282,6 +1282,27 @@ cpan/libnet/t/nntp.t		libnet
 cpan/libnet/t/require.t		libnet
 cpan/libnet/t/smtp.t		libnet
 cpan/libnet/t/time.t		libnet
+cpan/Locale-Codes/ChangeLog			Locale::Codes
+cpan/Locale-Codes/lib/Locale/Constants.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Constants.pod	Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Country.pm		Locale::Codes
+cpan/Locale-Codes/lib/Locale/Country.pod	Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Currency.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Currency.pod	Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Language.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Language.pod	Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
+cpan/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
+cpan/Locale-Codes/Makefile.PL
+cpan/Locale-Codes/README			Locale::Codes
+cpan/Locale-Codes/t/all.t			See if Locale::Codes work
+cpan/Locale-Codes/t/constants.t			See if Locale::Codes work
+cpan/Locale-Codes/t/country.t			See if Locale::Codes work
+cpan/Locale-Codes/t/currency.t			See if Locale::Codes work
+cpan/Locale-Codes/t/language.t			See if Locale::Codes work
+cpan/Locale-Codes/t/rename.t			See if Locale::Codes work
+cpan/Locale-Codes/t/script.t			See if Locale::Codes work
+cpan/Locale-Codes/t/uk.t			See if Locale::Codes work
 cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
@@ -2093,27 +2114,6 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
-ext/Locale-Codes/ChangeLog	Locale::Codes
-ext/Locale-Codes/lib/Locale/Constants.pm		Locale::Codes
-ext/Locale-Codes/lib/Locale/Constants.pod	Locale::Codes documentation
-ext/Locale-Codes/lib/Locale/Country.pm		Locale::Codes
-ext/Locale-Codes/lib/Locale/Country.pod		Locale::Codes documentation
-ext/Locale-Codes/lib/Locale/Currency.pm		Locale::Codes
-ext/Locale-Codes/lib/Locale/Currency.pod		Locale::Codes documentation
-ext/Locale-Codes/lib/Locale/Language.pm		Locale::Codes
-ext/Locale-Codes/lib/Locale/Language.pod		Locale::Codes documentation
-ext/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
-ext/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
-ext/Locale-Codes/Makefile.PL
-ext/Locale-Codes/README		Locale::Codes
-ext/Locale-Codes/t/all.t	See if Locale::Codes work
-ext/Locale-Codes/t/constants.t	See if Locale::Codes work
-ext/Locale-Codes/t/country.t	See if Locale::Codes work
-ext/Locale-Codes/t/currency.t	See if Locale::Codes work
-ext/Locale-Codes/t/language.t	See if Locale::Codes work
-ext/Locale-Codes/t/rename.t	See if Locale::Codes work
-ext/Locale-Codes/t/script.t	See if Locale::Codes work
-ext/Locale-Codes/t/uk.t		See if Locale::Codes work
 ext/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension

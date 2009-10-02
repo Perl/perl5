@@ -838,7 +838,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'neilb',
 	'DISTRIBUTION'	=> 'NEILB/Locale-Codes-2.07.tar.gz',
-	'FILES'		=> q[ext/Locale-Codes],
+	'FILES'		=> q[cpan/Locale-Codes],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
