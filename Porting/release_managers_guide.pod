@@ -502,6 +502,7 @@ Check that the manifest is sorted and correct:
 
     $ make manisort
     $ make distclean
+    $ git clean -xdf # This shouldn't be necessary if distclean is correct
     $ perl Porting/manicheck
     $ git status
 
