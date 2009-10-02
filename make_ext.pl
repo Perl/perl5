@@ -28,7 +28,6 @@ my $is_Unix = !$is_Win32 && !$is_VMS;
 # This list cannot get any longer without overflowing the length limit for
 # environment variables on VMS
 my @toolchain = qw(cpan/AutoLoader/lib
-		   ext/constant/lib
 		   cpan/Cwd cpan/Cwd/lib
 		   cpan/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
