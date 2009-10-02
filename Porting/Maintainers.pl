@@ -1707,7 +1707,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tyemq',
 	'DISTRIBUTION'	=> 'CHORNY/Win32API-File-0.1101.zip',
-	'FILES'		=> q[ext/Win32API-File],
+	'FILES'		=> q[cpan/Win32API-File],
 	'EXCLUDED'	=> [ qr{^ex/},
 			     qw{t/pod.t},
 			   ],

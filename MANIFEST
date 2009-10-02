@@ -2446,6 +2446,19 @@ cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
+cpan/Win32API-File/buffers.h	Win32API::File extension
+cpan/Win32API-File/cFile.h	Win32API::File extension
+cpan/Win32API-File/cFile.pc	Win32API::File extension
+cpan/Win32API-File/Changes	Win32API::File extension changes
+cpan/Win32API-File/const2perl.h	Win32API::File extension
+cpan/Win32API-File/ExtUtils/Myconst2perl.pm	Win32API::File extension
+cpan/Win32API-File/File.pm	Win32API::File extension
+cpan/Win32API-File/File.xs	Win32API::File extension
+cpan/Win32API-File/Makefile.PL	Win32API::File extension makefile write
+cpan/Win32API-File/README	Win32API::File extension Readme
+cpan/Win32API-File/t/file.t	See if Win32API::File extension works
+cpan/Win32API-File/t/tie.t	See if Win32API::File extension works
+cpan/Win32API-File/typemap	Win32API::File extension interface types
 Cross/build-arm-n770-sh		Cross-compilation
 Cross/cflags-cross-arm		Cross-compilation
 Cross/config			Cross-compilation
@@ -3124,19 +3137,6 @@ ext/VMS-Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 ext/VMS-Stdio/Stdio.pm		VMS options to stdio routines
 ext/VMS-Stdio/Stdio.xs		VMS options to stdio routines
 ext/VMS-Stdio/t/vms_stdio.t	regression tests for VMS::Stdio
-ext/Win32API-File/buffers.h	Win32API::File extension
-ext/Win32API-File/cFile.h	Win32API::File extension
-ext/Win32API-File/cFile.pc	Win32API::File extension
-ext/Win32API-File/Changes	Win32API::File extension changes
-ext/Win32API-File/const2perl.h	Win32API::File extension
-ext/Win32API-File/ExtUtils/Myconst2perl.pm	Win32API::File extension
-ext/Win32API-File/File.pm	Win32API::File extension
-ext/Win32API-File/File.xs	Win32API::File extension
-ext/Win32API-File/Makefile.PL	Win32API::File extension makefile write
-ext/Win32API-File/README	Win32API::File extension Readme
-ext/Win32API-File/t/file.t	See if Win32API::File extension works
-ext/Win32API-File/t/tie.t	See if Win32API::File extension works
-ext/Win32API-File/typemap	Win32API::File extension interface types
 ext/Win32/Changes		Changes for Win32 extension module
 ext/Win32CORE/Makefile.PL	Win32CORE extension
 ext/Win32CORE/t/win32core.t	Win32CORE extension
