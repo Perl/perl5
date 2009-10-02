@@ -1440,7 +1440,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mschwern',
 	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.92.tar.gz',
-	'FILES'		=> q[ext/Test-Simple],
+	'FILES'		=> q[cpan/Test-Simple],
 	'EXCLUDED'	=> [
 			     qw{.perlcriticrc
 				.perltidyrc
