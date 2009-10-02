@@ -2379,6 +2379,22 @@ cpan/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
 cpan/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 cpan/Tie-RefHash/t/storable.t	Test for Tie::RefHash with storable
 cpan/Tie-RefHash/t/threaded.t	Test for Tie::RefHash with threads
+cpan/Time-HiRes/Changes			Time::HiRes extension
+cpan/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
+cpan/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
+cpan/Time-HiRes/hints/aix.pl		Hint for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/dec_osf.pl	Hint for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/irix.pl		Hint for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/linux.pl		Hints for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/sco.pl		Hints for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/solaris.pl	Hints for Time::HiRes for named architecture
+cpan/Time-HiRes/hints/svr4.pl		Hints for Time::HiRes for named architecture
+cpan/Time-HiRes/HiRes.pm		Time::HiRes extension
+cpan/Time-HiRes/HiRes.xs		Time::HiRes extension
+cpan/Time-HiRes/Makefile.PL		Time::HiRes extension
+cpan/Time-HiRes/t/HiRes.t		Test for Time::HiRes
+cpan/Time-HiRes/typemap			Time::HiRes extension
 cpan/Unicode-Collate/Changes			Unicode::Collate
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
@@ -3083,22 +3099,6 @@ ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
-ext/Time-HiRes/Changes		Time::HiRes extension
-ext/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
-ext/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
-ext/Time-HiRes/hints/aix.pl	Hint for Time::HiRes for named architecture
-ext/Time-HiRes/hints/dec_osf.pl		Hint for Time::HiRes for named architecture
-ext/Time-HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
-ext/Time-HiRes/hints/irix.pl	Hint for Time::HiRes for named architecture
-ext/Time-HiRes/hints/linux.pl	Hints for Time::HiRes for named architecture
-ext/Time-HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
-ext/Time-HiRes/hints/solaris.pl	Hints for Time::HiRes for named architecture
-ext/Time-HiRes/hints/svr4.pl	Hints for Time::HiRes for named architecture
-ext/Time-HiRes/HiRes.pm		Time::HiRes extension
-ext/Time-HiRes/HiRes.xs		Time::HiRes extension
-ext/Time-HiRes/Makefile.PL	Time::HiRes extension
-ext/Time-HiRes/t/HiRes.t	Test for Time::HiRes
-ext/Time-HiRes/typemap		Time::HiRes extension
 ext/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
 ext/Time-Local/t/Local.t		See if Time::Local works
 ext/Time-Piece/Changes		Time::Piece extension
