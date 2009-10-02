@@ -908,7 +908,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigInt-FastCalc-0.19.tar.gz',
-	'FILES'		=> q[ext/Math-BigInt-FastCalc],
+	'FILES'		=> q[cpan/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
 				t/pod.t
