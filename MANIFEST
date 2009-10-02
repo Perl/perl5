@@ -2465,6 +2465,24 @@ cpan/Win32API-File/README	Win32API::File extension Readme
 cpan/Win32API-File/t/file.t	See if Win32API::File extension works
 cpan/Win32API-File/t/tie.t	See if Win32API::File extension works
 cpan/Win32API-File/typemap	Win32API::File extension interface types
+cpan/Win32/Changes			Changes for Win32 extension module
+cpan/Win32/longpath.inc			Win32 extension long path support
+cpan/Win32/Makefile.PL			Win32 extension makefile writer
+cpan/Win32/t/CreateFile.t		See if Win32 extension works
+cpan/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
+cpan/Win32/t/GetCurrentThreadId.t	See if Win32 extension works
+cpan/Win32/t/GetFileVersion.t		See if Win32 extension works
+cpan/Win32/t/GetFolderPath.t		See if Win32 extension works
+cpan/Win32/t/GetFullPathName.t		See if Win32 extension works
+cpan/Win32/t/GetLongPathName.t		See if Win32 extension works
+cpan/Win32/t/GetOSName.t		See if Win32 extension works
+cpan/Win32/t/GetOSVersion.t		See if Win32 extension works
+cpan/Win32/t/GetShortPathName.t		See if Win32 extension works
+cpan/Win32/t/GuidGen.t			See if Win32 extension works
+cpan/Win32/t/Names.t			See if Win32 extension works
+cpan/Win32/t/Unicode.t			See if Win32 extension works
+cpan/Win32/Win32.pm			Win32 extension Perl module
+cpan/Win32/Win32.xs			Win32 extension external subroutines
 Cross/build-arm-n770-sh		Cross-compilation
 Cross/cflags-cross-arm		Cross-compilation
 Cross/config			Cross-compilation
@@ -3137,28 +3155,10 @@ ext/VMS-Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 ext/VMS-Stdio/Stdio.pm		VMS options to stdio routines
 ext/VMS-Stdio/Stdio.xs		VMS options to stdio routines
 ext/VMS-Stdio/t/vms_stdio.t	regression tests for VMS::Stdio
-ext/Win32/Changes		Changes for Win32 extension module
 ext/Win32CORE/Makefile.PL	Win32CORE extension
 ext/Win32CORE/t/win32core.t	Win32CORE extension
 ext/Win32CORE/Win32CORE.c	Win32CORE extension
 ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
-ext/Win32/longpath.inc		Win32 extension long path support
-ext/Win32/Makefile.PL		Win32 extension makefile writer
-ext/Win32/t/CreateFile.t	See if Win32 extension works
-ext/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
-ext/Win32/t/GetCurrentThreadId.t	See if Win32 extension works
-ext/Win32/t/GetFileVersion.t	See if Win32 extension works
-ext/Win32/t/GetFolderPath.t	See if Win32 extension works
-ext/Win32/t/GetFullPathName.t	See if Win32 extension works
-ext/Win32/t/GetLongPathName.t	See if Win32 extension works
-ext/Win32/t/GetOSName.t		See if Win32 extension works
-ext/Win32/t/GetOSVersion.t	See if Win32 extension works
-ext/Win32/t/GetShortPathName.t	See if Win32 extension works
-ext/Win32/t/GuidGen.t		See if Win32 extension works
-ext/Win32/t/Names.t		See if Win32 extension works
-ext/Win32/t/Unicode.t		See if Win32 extension works
-ext/Win32/Win32.pm		Win32 extension Perl module
-ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/XS-APItest/APItest.pm	XS::APItest extension
 ext/XS-APItest/APItest.xs	XS::APItest extension
 ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
