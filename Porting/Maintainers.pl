@@ -1346,7 +1346,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'ams',
 	'DISTRIBUTION'	=> 'AMS/Storable-2.20.tar.gz',
-	'FILES'		=> q[ext/Storable],
+	'FILES'		=> q[dist/Storable],
 	'EXCLUDED'	=> [ qr{^t/Test/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
