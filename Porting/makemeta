@@ -17,7 +17,7 @@ use Maintainers qw(%Modules get_module_files get_module_pat);
 
 my @CPAN  = grep { $Modules{$_}{CPAN} } keys %Modules;
 my @files = map { get_module_files($_) } @CPAN;
-my @dirs  = grep { -d $_ } map { get_module_pat($_) } @CPAN;
+my @dirs  = ('cpan', grep { -d $_ && $_  !~ /^cpan/ } map { get_module_pat($_) } @CPAN);
 
 my %dirs;
 @dirs{@dirs} = ();
