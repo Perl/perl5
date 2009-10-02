@@ -2395,6 +2395,19 @@ cpan/Time-HiRes/HiRes.xs		Time::HiRes extension
 cpan/Time-HiRes/Makefile.PL		Time::HiRes extension
 cpan/Time-HiRes/t/HiRes.t		Test for Time::HiRes
 cpan/Time-HiRes/typemap			Time::HiRes extension
+cpan/Time-Piece/Changes		Time::Piece extension
+cpan/Time-Piece/Makefile.PL	Time::Piece extension
+cpan/Time-Piece/Piece.pm	Time::Piece extension
+cpan/Time-Piece/Piece.xs	Time::Piece extension
+cpan/Time-Piece/README		Time::Piece extension
+cpan/Time-Piece/Seconds.pm	Time::Piece extension
+cpan/Time-Piece/t/01base.t	Test for Time::Piece
+cpan/Time-Piece/t/02core.t	Test for Time::Piece
+cpan/Time-Piece/t/03compare.t	Test for Time::Piece
+cpan/Time-Piece/t/04mjd.t	Test for Time::Piece
+cpan/Time-Piece/t/05overload.t	Test for Time::Piece
+cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
+cpan/Time-Piece/t/07arith.t	Test for Time::Piece
 cpan/Unicode-Collate/Changes			Unicode::Collate
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
@@ -3101,19 +3114,6 @@ ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
 ext/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
 ext/Time-Local/t/Local.t		See if Time::Local works
-ext/Time-Piece/Changes		Time::Piece extension
-ext/Time-Piece/Makefile.PL	Time::Piece extension
-ext/Time-Piece/Piece.pm		Time::Piece extension
-ext/Time-Piece/Piece.xs		Time::Piece extension
-ext/Time-Piece/README		Time::Piece extension
-ext/Time-Piece/Seconds.pm	Time::Piece extension
-ext/Time-Piece/t/01base.t	Test for Time::Piece
-ext/Time-Piece/t/02core.t	Test for Time::Piece
-ext/Time-Piece/t/03compare.t	Test for Time::Piece
-ext/Time-Piece/t/04mjd.t	Test for Time::Piece
-ext/Time-Piece/t/05overload.t	Test for Time::Piece
-ext/Time-Piece/t/06subclass.t	Test for Time::Piece
-ext/Time-Piece/t/07arith.t	Test for Time::Piece
 ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
 ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols
