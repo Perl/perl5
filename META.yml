@@ -35,6 +35,7 @@ no_index:
     - cpan/encoding-warnings
     - cpan/ExtUtils-CBuilder
     - cpan/ExtUtils-Command
+    - cpan/ExtUtils-Constant
     - cpan/ExtUtils-MakeMaker
     - cpan/ExtUtils-Manifest
     - cpan/ExtUtils-ParseXS
@@ -43,29 +44,59 @@ no_index:
     - cpan/File-Temp
     - cpan/Filter-Util-Call
     - cpan/Getopt-Long
+    - cpan/if
+    - cpan/IO-Zlib
     - cpan/IPC-Cmd
     - cpan/IPC-SysV
+    - cpan/libnet
+    - cpan/List-Util
+    - cpan/Locale-Codes
+    - cpan/Locale-Maketext-Simple
     - cpan/Log-Message
     - cpan/Log-Message-Simple
+    - cpan/Math-BigInt
+    - cpan/Math-BigInt-FastCalc
+    - cpan/Math-BigRat
     - cpan/Math-Complex
+    - cpan/Memoize
+    - cpan/MIME-Base64
     - cpan/Module-Build
     - cpan/Module-Load
     - cpan/Module-Load-Conditional
     - cpan/Module-Loaded
+    - cpan/Module-Pluggable
     - cpan/NEXT
     - cpan/Object-Accessor
     - cpan/Package-Constants
     - cpan/Params-Check
+    - cpan/parent
     - cpan/Parse-CPAN-Meta
+    - cpan/PerlIO-via-QuotedPrint
+    - cpan/Pod-Escapes
+    - cpan/Pod-LaTeX
+    - cpan/Pod-Parser
+    - cpan/Pod-Simple
     - cpan/podlators
+    - cpan/Shell
     - cpan/Sys-Syslog
     - cpan/Term-ANSIColor
+    - cpan/Term-Cap
     - cpan/Term-UI
     - cpan/Test
+    - cpan/Test-Harness
+    - cpan/Test-Simple
+    - cpan/Text-Balanced
+    - cpan/Text-ParseWords
+    - cpan/Text-Soundex
     - cpan/Text-Tabs
+    - cpan/Tie-File
     - cpan/Tie-RefHash
+    - cpan/Time-HiRes
+    - cpan/Time-Piece
     - cpan/Unicode-Collate
     - cpan/Unicode-Normalize
+    - cpan/Win32
+    - cpan/Win32API-File
     - dist/Attribute-Handlers
     - dist/base
     - dist/constant
@@ -75,51 +106,20 @@ no_index:
     - dist/IO/
     - dist/lib/
     - dist/Locale-Maketext
-    - dist/Locale-Maketext-Simple
     - dist/Module-CoreList
     - dist/Net-Ping
     - dist/Pod-Perldoc
     - dist/Pod-Plainer
     - dist/Safe
+    - dist/SelfLoader
+    - dist/Storable
     - dist/Switch
     - dist/Thread-Queue
     - dist/Thread-Semaphore
     - dist/threads
     - dist/threads-shared
     - dist/XSLoader
-    - ext/ExtUtils-Constant
-    - ext/if
-    - ext/IO-Compress
-    - ext/IO-Zlib
-    - ext/libnet
-    - ext/List-Util
-    - ext/Locale-Codes
-    - ext/Math-BigInt
-    - ext/Math-BigInt-FastCalc
-    - ext/Math-BigRat
-    - ext/Memoize
-    - ext/MIME-Base64
-    - ext/Module-Pluggable
-    - ext/parent
-    - ext/PerlIO-via-QuotedPrint
-    - ext/Pod-Escapes
-    - ext/Pod-LaTeX
-    - ext/Pod-Parser
-    - ext/Pod-Simple
-    - ext/Shell
-    - ext/Storable
-    - ext/Term-Cap
-    - ext/Test-Harness
-    - ext/Test-Simple
-    - ext/Text-Balanced
-    - ext/Text-ParseWords
-    - ext/Text-Soundex
-    - ext/Tie-File
-    - ext/Time-HiRes
     - ext/Time-Local
-    - ext/Time-Piece
-    - ext/Win32
-    - ext/Win32API-File
     - lib/version
 
   file:
