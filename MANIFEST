@@ -2311,6 +2311,9 @@ cpan/Text-Balanced/t/06_extqlk.t	See if Text::Balanced works
 cpan/Text-Balanced/t/07_exttag.t	See if Text::Balanced works
 cpan/Text-Balanced/t/08_extvar.t	See if Text::Balanced works
 cpan/Text-Balanced/t/09_gentag.t	See if Text::Balanced works
+cpan/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
+cpan/Text-ParseWords/t/ParseWords.t		See if Text::ParseWords works
+cpan/Text-ParseWords/t/taint.t			See if Text::ParseWords works with tainting
 cpan/Text-Tabs/CHANGELOG		ChangeLog for Tabs+Wrap
 cpan/Text-Tabs/lib/Text/Tabs.pm		Do expand and unexpand
 cpan/Text-Tabs/lib/Text/Wrap.pm		Paragraph formatter
@@ -3034,9 +3037,6 @@ ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
-ext/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
-ext/Text-ParseWords/t/ParseWords.t	See if Text::ParseWords works
-ext/Text-ParseWords/t/taint.t		See if Text::ParseWords works with tainting
 ext/Text-Soundex/Changes	Changelog for Text::Soundex
 ext/Text-Soundex/README		README for Text::Soundex
 ext/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
