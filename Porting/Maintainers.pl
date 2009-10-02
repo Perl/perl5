@@ -966,7 +966,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mjd',
 	'DISTRIBUTION'	=> 'MJD/Memoize-1.01.tar.gz',
-	'FILES'		=> q[ext/Memoize],
+	'FILES'		=> q[cpan/Memoize],
 	'EXCLUDED'	=> [
 			     qw{
 				article.html

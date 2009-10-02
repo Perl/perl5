@@ -1397,6 +1397,35 @@ cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
 cpan/Math-Complex/t/Complex.t		See if Math::Complex works
 cpan/Math-Complex/t/Trig.t		See if Math::Trig works
 cpan/Math-Complex/t/underbar.t		See if Math::Complex works
+cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
+cpan/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
+cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example
+cpan/Memoize/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
+cpan/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
+cpan/Memoize/Memoize.pm			Memoize
+cpan/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
+cpan/Memoize/Memoize/Storable.pm	Memoize glue layer for Storable
+cpan/Memoize/README			Memoize release notes
+cpan/Memoize/t/array_confusion.t	Memoize ambiguous array return tests
+cpan/Memoize/t/array.t			Memoize array context return tests
+cpan/Memoize/t/correctness.t		Memoize basic correctness tests
+cpan/Memoize/t/errors.t			Memoize PEBKAC detection tests
+cpan/Memoize/t/expfile.t		Memoize expiry manager tests
+cpan/Memoize/t/expire.t			Memoize expiry manager tests
+cpan/Memoize/t/expmod_n.t		Memoize expiry manager tests
+cpan/Memoize/t/expmod_t.t		Memoize expiry manager (timed) tests
+cpan/Memoize/t/flush.t			Memoize 'flush_cache' function tests
+cpan/Memoize/t/normalize.t		Memoize 'normalizer' feature tests
+cpan/Memoize/TODO			Memoize to-do list
+cpan/Memoize/t/prototype.t		Memoize prototyped function handling tests
+cpan/Memoize/t/speed.t			"Makes functions faster" advertisement test
+cpan/Memoize/t/tiefeatures.t		Memoize FAULT / MERGE / HASH options test
+cpan/Memoize/t/tie_gdbm.t		Memoize GDBM interface test
+cpan/Memoize/t/tie_ndbm.t		Memoize NDBM interface test
+cpan/Memoize/t/tie_sdbm.t		Memoize SDBM interface test
+cpan/Memoize/t/tie_storable.t		Memoize Storable interface test
+cpan/Memoize/t/tie.t			Memoize tied file test
+cpan/Memoize/t/unmemoize.t		Memoize 'unmemoize' function test
 cpan/Module-Build/Changes				Module::Build
 cpan/Module-Build/lib/Module/Build/API.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
@@ -2191,35 +2220,6 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
-ext/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
-ext/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
-ext/Memoize/Memoize/Expire.pm		Memoize expiry manager example
-ext/Memoize/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
-ext/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
-ext/Memoize/Memoize.pm			Memoize
-ext/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
-ext/Memoize/Memoize/Storable.pm		Memoize glue layer for Storable
-ext/Memoize/README		Memoize release notes
-ext/Memoize/t/array_confusion.t		Memoize ambiguous array return tests
-ext/Memoize/t/array.t		Memoize array context return tests
-ext/Memoize/t/correctness.t	Memoize basic correctness tests
-ext/Memoize/t/errors.t		Memoize PEBKAC detection tests
-ext/Memoize/t/expfile.t		Memoize expiry manager tests
-ext/Memoize/t/expire.t		Memoize expiry manager tests
-ext/Memoize/t/expmod_n.t	Memoize expiry manager tests
-ext/Memoize/t/expmod_t.t	Memoize expiry manager (timed) tests
-ext/Memoize/t/flush.t		Memoize 'flush_cache' function tests
-ext/Memoize/t/normalize.t	Memoize 'normalizer' feature tests
-ext/Memoize/TODO		Memoize to-do list
-ext/Memoize/t/prototype.t	Memoize prototyped function handling tests
-ext/Memoize/t/speed.t		"Makes functions faster" advertisement test
-ext/Memoize/t/tiefeatures.t	Memoize FAULT / MERGE / HASH options test
-ext/Memoize/t/tie_gdbm.t	Memoize GDBM interface test
-ext/Memoize/t/tie_ndbm.t	Memoize NDBM interface test
-ext/Memoize/t/tie_sdbm.t	Memoize SDBM interface test
-ext/Memoize/t/tie_storable.t	Memoize Storable interface test
-ext/Memoize/t/tie.t		Memoize tied file test
-ext/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
 ext/MIME-Base64/Base64.pm	MIME::Base64 extension
 ext/MIME-Base64/Base64.xs	MIME::Base64 extension
 ext/MIME-Base64/Changes		MIME::Base64 extension
