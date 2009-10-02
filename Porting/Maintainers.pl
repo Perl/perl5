@@ -1336,7 +1336,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'ferreira',
 	'DISTRIBUTION'	=> 'FERREIRA/Shell-0.72_01.tar.gz',
-	'FILES'		=> q[ext/Shell],
+	'FILES'		=> q[cpan/Shell],
 	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,

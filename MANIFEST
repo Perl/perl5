@@ -1960,6 +1960,8 @@ cpan/Pod-Simple/t/verb_fmt.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
+cpan/Shell/Shell.pm		Make AUTOLOADed system() calls
+cpan/Shell/t/Shell.t		Tests for above
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -2662,8 +2664,6 @@ ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
-ext/Shell/Shell.pm		Make AUTOLOADed system() calls
-ext/Shell/t/Shell.t		Tests for above
 ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.xs		Socket extension external subroutines
