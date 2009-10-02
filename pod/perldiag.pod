@@ -2330,7 +2330,7 @@ See also L<Encode/"Handling Malformed Data">.
 
 =item Malformed UTF-16 surrogate
 
-Perl thought it was reading UTF-16 encoded character data but while
+(F) Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
 
 =item Malformed UTF-8 string in pack
