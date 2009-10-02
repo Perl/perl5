@@ -413,10 +413,10 @@ system call.
 Dual-lifed modules maintained primarily in the Perl core now live in dist/.
 Dual-lifed modules maintained primarily on CPAN now live in cpan/
 
-In previous releases of Perl, it was customary to enumerate all module 
+In previous releases of Perl, it was customary to enumerate all module
 changes in this section of the C<perldelta> file.   From 5.11.0 forward
 only notable updates (such as new or deprecated modules ) will be
-listed in this section. For a complete reference to the versions of 
+listed in this section. For a complete reference to the versions of
 modules shipped in a given release of perl, please see L<Module::CoreList>.
 
 =head2 New Modules and Pragmata
@@ -509,7 +509,7 @@ removed. If you still need this, then they are available in the
 
 Upgraded from version 1.04 to 1.05.
 
-C<< UNIVERSAL->import() >> is now deprecated.
+C<< UNIVERSAL-E<gt>import() >> is now deprecated.
 
 =back
 
@@ -577,10 +577,6 @@ reference to perl programs.
 
 This describes how to access the perl source using the I<git> version
 control system.
-
-=item L<perlthanks>
-
-This describes the new F<perlthanks> utility.
 
 =back
 
@@ -882,7 +878,7 @@ XS code including F<XSUB.h> before F<perl.h> gave a compile-time error
 
 =item *
 
-C<< $object->isa('Foo') >> would report false if the package C<Foo> didn't
+C<< $object-E<gt>isa('Foo') >> would report false if the package C<Foo> didn't
 exist, even if the object's C<@ISA> contained C<Foo>.
 
 =item *
@@ -1542,8 +1538,8 @@ They are now very similar to those produced by Algorithm::C3.
 
 Amelioration of the error message "Unrecognized character %s in column %d"
 
-Changes the error message to "Unrecognized character %s; marked by <--
-HERE after %s<-- HERE near column %d". This should make it a little
+Changes the error message to "Unrecognized character %s; marked by E<lt>--
+HERE after %sE<lt>-- HERE near column %d". This should make it a little
 simpler to spot and correct the suspicious character.
 
 =item *
