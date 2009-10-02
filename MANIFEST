@@ -1647,6 +1647,12 @@ cpan/Parse-CPAN-Meta/t/data/vanilla.yml			Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 cpan/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
+cpan/Pod-Escapes/ChangeLog		ChangeLog for Pod::Escapes
+cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
+cpan/Pod-Escapes/README			README for Pod::Escapes
+cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
+cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
+cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -2360,12 +2366,6 @@ ext/PerlIO-via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
-ext/Pod-Escapes/ChangeLog		ChangeLog for Pod::Escapes
-ext/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
-ext/Pod-Escapes/README			README for Pod::Escapes
-ext/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
-ext/Pod-Escapes/t/10_main.t		test Pod::Escapes
-ext/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 ext/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
 ext/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
 ext/Pod-LaTeX/t/user.t		See if Pod::LaTeX works

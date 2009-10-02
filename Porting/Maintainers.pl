@@ -1200,7 +1200,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'arandal',
 	'DISTRIBUTION'	=> 'SBURKE/Pod-Escapes-1.04.tar.gz',
-	'FILES'		=> q[ext/Pod-Escapes],
+	'FILES'		=> q[cpan/Pod-Escapes],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
