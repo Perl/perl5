@@ -13,7 +13,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5";
+$VERSION = "5.5002";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -830,11 +830,10 @@ No success, the file that lynx has downloaded is an empty file.
             return if $CPAN::Signal;
         } # download/transfer programs (DLPRG)
     } # host
-    require Carp;
     if ($some_dl_success) {
-        Carp::cluck("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
+        $CPAN::Frontend->mywarn("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
     } else {
-        Carp::cluck("Warning: no success downloading '$aslocal'. Giving up on it.");
+        $CPAN::Frontend->mywarn("Warning: no success downloading '$aslocal'. Giving up on it.");
     }
     $CPAN::Frontend->mysleep(5);
     return;
