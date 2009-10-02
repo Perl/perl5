@@ -9,4 +9,4 @@ cpan/Cwd
 cpan/DB_File
 cpan/IPC-SysV
 cpan/Time-HiRes
-ext/Win32API-File
+cpan/Win32API-File
