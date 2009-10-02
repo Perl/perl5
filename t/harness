@@ -256,5 +256,5 @@ $h->callback(
 	     }
 	     );
 
-$h->runtests(@tests);
-exit(0);
+my $agg = $h->runtests(@tests);
+exit $agg->has_errors ? 1 : 0;
