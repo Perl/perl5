@@ -1064,6 +1064,8 @@ cpan/Getopt-Long/t/gol-linkage.t	See if Getopt::Long works
 cpan/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xstring.t	See if Getopt::Long works
+cpan/if/if.pm			For "use if"
+cpan/if/t/if.t			Tests for "use if"
 cpan/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
 cpan/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
 cpan/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
@@ -1848,8 +1850,6 @@ ext/I18N-Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N-Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
-ext/if/if.pm			For "use if"
-ext/if/t/if.t			Tests for "use if"
 ext/IO-Compress/Changes	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtdef	IO::Compress
 ext/IO-Compress/examples/compress-zlib/filtinf	IO::Compress
