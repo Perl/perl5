@@ -382,7 +382,7 @@ The C<each> function can now operate on arrays.
 Perl's core time-related functions are now Y2038 compliant. (With 29
 years to spare!)
 
-=head2 C<$,> flexibilty
+=head2 C<$,> flexibility
 
 The variable C<$,> may now be tied.
 
@@ -1522,7 +1522,7 @@ Tweak the "Illegal character in prototype" warning so it's more precise when rep
 
 =item *
 
-Unintented interpolation of $\ in regex
+Unintended interpolation of $\ in regex
 
 =item *
 
