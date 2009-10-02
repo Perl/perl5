@@ -1983,6 +1983,8 @@ cpan/Term-ANSIColor/ANSIColor.pm	Perl module supporting termcap usage
 cpan/Term-ANSIColor/ChangeLog		Term::ANSIColor
 cpan/Term-ANSIColor/README		Term::ANSIColor
 cpan/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
+cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
+cpan/Term-Cap/test.pl			See if Term::Cap works
 cpan/Term-UI/lib/Term/UI/History.pm	Term::UI
 cpan/Term-UI/lib/Term/UI.pm		Term::UI
 cpan/Term-UI/t/00_load.t		Term::UI tests
@@ -2901,8 +2903,6 @@ ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
-ext/Term-Cap/Cap.pm			Perl module supporting termcap usage
-ext/Term-Cap/test.pl			See if Term::Cap works
 ext/Test-Simple/Changes					Test::Simple changes
 ext/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
 ext/Test-Simple/lib/Test/Builder.pm			For writing new test libraries

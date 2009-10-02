@@ -1394,7 +1394,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jstowe',
 	'DISTRIBUTION'	=> 'JSTOWE/Term-Cap-1.12.tar.gz',
-	'FILES'		=> q{ext/Term-Cap},
+	'FILES'		=> q[cpan/Term-Cap],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},
