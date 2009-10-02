@@ -1521,6 +1521,70 @@ cpan/Module-Load/t/to_load/LoadMe.pl		Module::Load tests
 cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
 cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
+cpan/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
+cpan/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
+cpan/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
+cpan/Module-Pluggable/Makefile.PL			Module::Pluggable
+cpan/Module-Pluggable/t/01use.t				Module::Pluggable tests
+cpan/Module-Pluggable/t/02alsoworks.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/02works.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/02works_taint.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/03diffname.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/04acmedir_single.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/04acmedir.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/04acmepath_single.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/04acmepath.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/05postpath.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/06multipath.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/07instantiate.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/08nothing.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/09require.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack_inner.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack_noinner.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack_onefile.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack_override.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack_super.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/10innerpack.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/11usetwice.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/12onlyarray.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/12onlyregex.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/12onlyrequire.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/12only.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/13exceptarray.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/13exceptregex.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/13except.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/14package.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/15topicsafe.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/16different_extension.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/17devel_inner_package.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/18skipped_package.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/19can_ok_clobber.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/20dodgy_files.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/21editor_junk.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/Acme/Foo-Bar.pm		Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/EditorJunk/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/InnerTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyOtherTest/Plugin/Bar.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyOtherTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyTest/Extend/Plugin/Bar.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/No/Middle.pm		Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TA/C/A/I.pm			Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/Zot/.Zork.pm		Module::Pluggable tests
 cpan/NEXT/Changes		NEXT
 cpan/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
 cpan/NEXT/README		NEXT
@@ -2230,70 +2294,6 @@ ext/List-Util/t/sum.t		List::Util
 ext/List-Util/t/tainted.t	Scalar::Util
 ext/List-Util/t/weak.t		Scalar::Util
 ext/List-Util/XS.pp		List::Util
-ext/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
-ext/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
-ext/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
-ext/Module-Pluggable/Makefile.PL			Module::Pluggable
-ext/Module-Pluggable/t/01use.t	Module::Pluggable tests
-ext/Module-Pluggable/t/02alsoworks.t	Module::Pluggable tests
-ext/Module-Pluggable/t/02works.t	Module::Pluggable tests
-ext/Module-Pluggable/t/02works_taint.t	Module::Pluggable tests
-ext/Module-Pluggable/t/03diffname.t	Module::Pluggable tests
-ext/Module-Pluggable/t/04acmedir_single.t	Module::Pluggable tests
-ext/Module-Pluggable/t/04acmedir.t	Module::Pluggable tests
-ext/Module-Pluggable/t/04acmepath_single.t	Module::Pluggable tests
-ext/Module-Pluggable/t/04acmepath.t	Module::Pluggable tests
-ext/Module-Pluggable/t/05postpath.t	Module::Pluggable tests
-ext/Module-Pluggable/t/06multipath.t	Module::Pluggable tests
-ext/Module-Pluggable/t/07instantiate.t	Module::Pluggable tests
-ext/Module-Pluggable/t/08nothing.t	Module::Pluggable tests
-ext/Module-Pluggable/t/09require.t	Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack_inner.t	Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack_noinner.t	Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack_onefile.t	Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack_override.t	Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack_super.t		Module::Pluggable tests
-ext/Module-Pluggable/t/10innerpack.t	Module::Pluggable tests
-ext/Module-Pluggable/t/11usetwice.t	Module::Pluggable tests
-ext/Module-Pluggable/t/12onlyarray.t	Module::Pluggable tests
-ext/Module-Pluggable/t/12onlyregex.t	Module::Pluggable tests
-ext/Module-Pluggable/t/12onlyrequire.t	Module::Pluggable tests
-ext/Module-Pluggable/t/12only.t	Module::Pluggable tests
-ext/Module-Pluggable/t/13exceptarray.t	Module::Pluggable tests
-ext/Module-Pluggable/t/13exceptregex.t	Module::Pluggable tests
-ext/Module-Pluggable/t/13except.t	Module::Pluggable tests
-ext/Module-Pluggable/t/14package.t	Module::Pluggable tests
-ext/Module-Pluggable/t/15topicsafe.t	Module::Pluggable tests
-ext/Module-Pluggable/t/16different_extension.t	Module::Pluggable tests
-ext/Module-Pluggable/t/17devel_inner_package.t	Module::Pluggable tests
-ext/Module-Pluggable/t/18skipped_package.t	Module::Pluggable tests
-ext/Module-Pluggable/t/19can_ok_clobber.t	Module::Pluggable tests
-ext/Module-Pluggable/t/20dodgy_files.t	Module::Pluggable tests
-ext/Module-Pluggable/t/21editor_junk.t			Module::Pluggable tests
-ext/Module-Pluggable/t/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/Acme/Foo-Bar.pm			Module::Pluggable tests
-ext/Module-Pluggable/t/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
-ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
-ext/Module-Pluggable/t/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/InnerTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Bar.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyOtherTest/Plugin/Quux.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyTest/Extend/Plugin/Bar.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/No/Middle.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/TA/C/A/I.pm	Module::Pluggable tests
-ext/Module-Pluggable/t/lib/Zot/.Zork.pm	Module::Pluggable tests
 ext/mro/Changes			mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension
