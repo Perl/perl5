@@ -21,7 +21,7 @@ use File::Glob qw(:case);
     'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
     'avar'	=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
     'bingos'	=> 'Chris Williams <chris@bingosnet.co.uk>',
-    'chorny'	=> "Alexandr Ciornii <alexchorny@gmail.com>",
+    'chorny'	=> 'Alexandr Ciornii <alexchorny@gmail.com>',
     'corion'	=> 'Max Maischein <corion@corion.net>',
     'craig'	=> 'Craig Berry <craigberry@mac.com>',
     'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
