@@ -1565,7 +1565,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mjd',
 	'DISTRIBUTION'	=> 'MJD/Tie-File-0.96.tar.gz',
-	'FILES'		=> q[ext/Tie-File],
+	'FILES'		=> q[cpan/Tie-File],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

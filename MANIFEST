@@ -2335,6 +2335,45 @@ cpan/Text-Tabs/t/sep.t			See if Text::Tabs is working
 cpan/Text-Tabs/t/tabs.t			See if Text::Tabs works
 cpan/Text-Tabs/t/wrap_separator2.t	See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/wrap.t			See if Text::Wrap::wrap works
+cpan/Tie-File/lib/Tie/File.pm		Files as tied arrays
+cpan/Tie-File/t/00_version.t		Trivial test for Tie::File
+cpan/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File
+cpan/Tie-File/t/02_fetchsize.t		File length fetch test for Tie::File
+cpan/Tie-File/t/03_longfetch.t		Past-the-end-of-the-array tests for Tie::File
+cpan/Tie-File/t/04_splice.t		SPLICE method tests for Tie::File
+cpan/Tie-File/t/05_size.t		$#a tests for Tie::File
+cpan/Tie-File/t/06_fixrec.t		'_fixrec' method functional tests for Tie::File
+cpan/Tie-File/t/07_rv_splice.t		SPLICE method return value tests for Tie::File
+cpan/Tie-File/t/08_ro.t			read-only mode tests for Tie::File
+cpan/Tie-File/t/09_gen_rs.t		Like 01_gen.t, with unusual record separator
+cpan/Tie-File/t/10_splice_rs.t		Like 04_splice.t, with unusual record separator
+cpan/Tie-File/t/11_rv_splice_rs.t	Like 07_rv_splice.t, with unusual record separator
+cpan/Tie-File/t/12_longfetch_rs.t	Like 03_longfetch.t, with unusual record separator
+cpan/Tie-File/t/13_size_rs.t		Like 05_size.t, with unusual record separator
+cpan/Tie-File/t/14_lock.t		File locking method tests for Tie::File
+cpan/Tie-File/t/15_pushpop.t		PUSH / POP / SHIFT / UNSHIFT for Tie::File
+cpan/Tie-File/t/16_handle.t		Tying a handle instead of a file for Tie::File
+cpan/Tie-File/t/17_misc_meth.t		CLEAR / EXISTS / DELETE / EXTEND for Tie::File
+cpan/Tie-File/t/18_rs_fixrec.t		Like 06_fixrec.t, with unusual record separator
+cpan/Tie-File/t/19_cache.t		Read cache exercises and regression for Tie::File
+cpan/Tie-File/t/20_cache_full.t		LRU expiry exercises and regression for Tie::File
+cpan/Tie-File/t/21_win32.t		Win32 special behavior of Tie::File
+cpan/Tie-File/t/22_autochomp.t		'autochomp' option of Tie::File
+cpan/Tie-File/t/23_rv_ac_splice.t	Like 07_rv_splice.t, but with autochomp
+cpan/Tie-File/t/24_cache_loop.t		Regression for old Tie::File cache bug
+cpan/Tie-File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
+cpan/Tie-File/t/26_twrite.t		Unit tests for Tie::File::_twrite
+cpan/Tie-File/t/27_iwrite.t		Unit tests for Tie::File::_iwrite
+cpan/Tie-File/t/28_mtwrite.t		Unit tests for Tie::File::_mtwrite
+cpan/Tie-File/t/29a_upcopy.t		Unit tests for Tie::File::_upcopy
+cpan/Tie-File/t/29_downcopy.t		Unit tests for Tie::File::_downcopy
+cpan/Tie-File/t/30_defer.t		deferred writing feature tests for Tie::File
+cpan/Tie-File/t/31_autodefer.t		'autodefer' feature tests for Tie::File
+cpan/Tie-File/t/32_defer_misc.t		Like 17_misc_meth.t, but with deferred writing
+cpan/Tie-File/t/33_defer_vs.t		Like 30_defer.t, but with varying-length records
+cpan/Tie-File/t/40_abs_cache.t		Unit tests for Tie::File::Cache
+cpan/Tie-File/t/41_heap.t		Unit tests for Tie::File::Heap
+cpan/Tie-File/t/42_offset.t		Unit tests for the offset method
 cpan/Tie-RefHash/lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 cpan/Tie-RefHash/t/rebless.t	Test for Tie::RefHash with rebless
 cpan/Tie-RefHash/t/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
@@ -3042,45 +3081,6 @@ ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
-ext/Tie-File/lib/Tie/File.pm	Files as tied arrays
-ext/Tie-File/t/00_version.t	Trivial test for Tie::File
-ext/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File
-ext/Tie-File/t/02_fetchsize.t	File length fetch test for Tie::File
-ext/Tie-File/t/03_longfetch.t	Past-the-end-of-the-array tests for Tie::File
-ext/Tie-File/t/04_splice.t	SPLICE method tests for Tie::File
-ext/Tie-File/t/05_size.t	$#a tests for Tie::File
-ext/Tie-File/t/06_fixrec.t	'_fixrec' method functional tests for Tie::File
-ext/Tie-File/t/07_rv_splice.t	SPLICE method return value tests for Tie::File
-ext/Tie-File/t/08_ro.t		read-only mode tests for Tie::File
-ext/Tie-File/t/09_gen_rs.t	Like 01_gen.t, with unusual record separator
-ext/Tie-File/t/10_splice_rs.t	Like 04_splice.t, with unusual record separator
-ext/Tie-File/t/11_rv_splice_rs.t	Like 07_rv_splice.t, with unusual record separator
-ext/Tie-File/t/12_longfetch_rs.t	Like 03_longfetch.t, with unusual record separator
-ext/Tie-File/t/13_size_rs.t	Like 05_size.t, with unusual record separator
-ext/Tie-File/t/14_lock.t	File locking method tests for Tie::File
-ext/Tie-File/t/15_pushpop.t	PUSH / POP / SHIFT / UNSHIFT for Tie::File
-ext/Tie-File/t/16_handle.t	Tying a handle instead of a file for Tie::File
-ext/Tie-File/t/17_misc_meth.t	CLEAR / EXISTS / DELETE / EXTEND for Tie::File
-ext/Tie-File/t/18_rs_fixrec.t	Like 06_fixrec.t, with unusual record separator
-ext/Tie-File/t/19_cache.t	Read cache exercises and regression for Tie::File
-ext/Tie-File/t/20_cache_full.t	LRU expiry exercises and regression for Tie::File
-ext/Tie-File/t/21_win32.t	Win32 special behavior of Tie::File
-ext/Tie-File/t/22_autochomp.t	'autochomp' option of Tie::File
-ext/Tie-File/t/23_rv_ac_splice.t	Like 07_rv_splice.t, but with autochomp
-ext/Tie-File/t/24_cache_loop.t	Regression for old Tie::File cache bug
-ext/Tie-File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
-ext/Tie-File/t/26_twrite.t	Unit tests for Tie::File::_twrite
-ext/Tie-File/t/27_iwrite.t	Unit tests for Tie::File::_iwrite
-ext/Tie-File/t/28_mtwrite.t	Unit tests for Tie::File::_mtwrite
-ext/Tie-File/t/29a_upcopy.t	Unit tests for Tie::File::_upcopy
-ext/Tie-File/t/29_downcopy.t	Unit tests for Tie::File::_downcopy
-ext/Tie-File/t/30_defer.t	deferred writing feature tests for Tie::File
-ext/Tie-File/t/31_autodefer.t	'autodefer' feature tests for Tie::File
-ext/Tie-File/t/32_defer_misc.t	Like 17_misc_meth.t, but with deferred writing
-ext/Tie-File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
-ext/Tie-File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
-ext/Tie-File/t/41_heap.t	Unit tests for Tie::File::Heap
-ext/Tie-File/t/42_offset.t	Unit tests for the offset method
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
 ext/Time-HiRes/Changes		Time::HiRes extension
