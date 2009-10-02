@@ -920,6 +920,12 @@ cpan/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX pla
 cpan/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
 cpan/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
 cpan/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
+cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
+cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
+cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
+cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
+cpan/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
+cpan/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
 cpan/ExtUtils-MakeMaker/bin/instmodsh				Give information about installed extensions
 cpan/ExtUtils-MakeMaker/Changes					MakeMaker change log
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Command/MM.pm		Calling MM functions from the cmd line
@@ -2884,12 +2890,6 @@ ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Errno/t/Errno.t	See if Errno works
-ext/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
-ext/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
-ext/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
-ext/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
-ext/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
-ext/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer

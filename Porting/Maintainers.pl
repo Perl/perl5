@@ -575,7 +575,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'nwclark',
 	'DISTRIBUTION'	=> 'NWCLARK/ExtUtils-Constant-0.16.tar.gz',
-	'FILES'		=> q[ext/ExtUtils-Constant],
+	'FILES'		=> q[cpan/ExtUtils-Constant],
 	'EXCLUDED'	=> [ qw{ lib/ExtUtils/Constant/Aaargh56Hash.pm
 				 examples/perl_keyword.pl
 				 examples/perl_regcomp_posix_keyword.pl
