@@ -790,7 +790,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tomhughes',
 	'DISTRIBUTION'	=> 'TOMHUGHES/IO-Zlib-1.10.tar.gz',
-	'FILES'		=> q[ext/IO-Zlib],
+	'FILES'		=> q[cpan/IO-Zlib],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
 	},

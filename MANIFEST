@@ -1209,6 +1209,16 @@ cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
+cpan/IO-Zlib/t/basic.t		Tests for IO::Zlib
+cpan/IO-Zlib/t/external.t	Tests for IO::Zlib
+cpan/IO-Zlib/t/getc.t		Tests for IO::Zlib
+cpan/IO-Zlib/t/getline.t	Tests for IO::Zlib
+cpan/IO-Zlib/t/import.t		Tests for IO::Zlib
+cpan/IO-Zlib/t/large.t		Tests for IO::Zlib
+cpan/IO-Zlib/t/tied.t		Tests for IO::Zlib
+cpan/IO-Zlib/t/uncomp1.t	Tests for IO::Zlib
+cpan/IO-Zlib/t/uncomp2.t	Tests for IO::Zlib
+cpan/IO-Zlib/Zlib.pm		IO::Zlib
 cpan/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
 cpan/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
 cpan/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
@@ -1993,16 +2003,6 @@ ext/I18N-Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N-Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N-Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
-ext/IO-Zlib/t/basic.t		Tests for IO::Zlib
-ext/IO-Zlib/t/external.t	Tests for IO::Zlib
-ext/IO-Zlib/t/getc.t		Tests for IO::Zlib
-ext/IO-Zlib/t/getline.t		Tests for IO::Zlib
-ext/IO-Zlib/t/import.t		Tests for IO::Zlib
-ext/IO-Zlib/t/large.t		Tests for IO::Zlib
-ext/IO-Zlib/t/tied.t		Tests for IO::Zlib
-ext/IO-Zlib/t/uncomp1.t		Tests for IO::Zlib
-ext/IO-Zlib/t/uncomp2.t		Tests for IO::Zlib
-ext/IO-Zlib/Zlib.pm		IO::Zlib
 ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
