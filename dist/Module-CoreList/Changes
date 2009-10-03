@@ -1,4 +1,7 @@
-2.19    Sat Oct  3 2009
+2.20    Sat Oct  3 2009
+	- Make Module::Corelist recognise $] as a version number on 5.11.0
+
+2.19    Fri Oct  2 2009
 	- Update for perl 5.11.1
 
 2.18	Mon Aug 24 2009

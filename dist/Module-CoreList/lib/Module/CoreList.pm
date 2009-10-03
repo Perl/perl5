@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker/;
-$VERSION = '2.19';
+$VERSION = '2.20';
 
 =head1 NAME
 
@@ -138,7 +138,10 @@ sub find_version {
     return undef;
 }
 
-# when things escaped
+# When things escaped.
+# NB. If you put version numbers with trailing zeroes here, you
+# should also add an alias for the numerical ($]) version; see
+# just before the __END__ of this module.
 %released = (
     5.000    => '1994-10-17',
     5.001    => '1995-03-14',
@@ -11178,9 +11181,11 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 
 $released{'5.000'} = $released{5};
 $released{'5.010000'} = $released{5.01};
+$released{'5.011000'} = $released{5.011};
 
 $version{'5.000'} = $version{5};
 $version{'5.010000'} = $version{5.01};
+$version{'5.011000'} = $version{5.011};
 
 1;
 __END__
