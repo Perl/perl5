@@ -396,7 +396,7 @@ You can now set C<-W> from the C<PERL5OPT> environment variable
 
 =head2 C<delete local>
 
-C<delete local> now allows you to lexically delete a hash entry.
+C<delete local> now allows you to locally delete a hash entry.
 
 =head2 New support for Abstract namespace sockets
 
