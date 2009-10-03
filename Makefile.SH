@@ -1201,7 +1201,7 @@ _mopup:
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f perl$(EXE_EXT) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
 	-rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
-	-rm -f config.arch config.over $(DTRACE_H)
+	-rm -f config.arch config.over $(DTRACE_H) runtests
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -1264,7 +1264,7 @@ _cleaner2:
 	-rm -f lib/ExtUtils/ParseXS/t/libXSTest.dll.a
 
 _realcleaner:
-	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
+	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
 	@$(LDLIBPTH) $(MAKE) _cleaner2
 
 _verycleaner:

@@ -40,7 +40,7 @@ WriteMakefile(
         'Test::More' => '0.62',
     },
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean           => { FILES => 'XSLoader-*' },
+    clean           => { FILES => 'XSLoader-* XSLoader.pm' },
 );
 
 # Unlink the .pm file included with the distribution
