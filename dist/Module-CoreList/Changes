@@ -1,3 +1,6 @@
+2.19    Sat Oct  3 2009
+	- Update for perl 5.11.1
+
 2.18	Mon Aug 24 2009
 	- Update for perl 5.10.1
 	- Remove %patchlevel hash (now that perl uses git and not perforce)
