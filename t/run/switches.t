@@ -268,7 +268,7 @@ SWTESTPM
     # DG/UX comes to mind. Maybe we should remove these special cases?
     my $v = sprintf "%vd", $^V;
     like( runperl( switches => ['-v'] ),
-	  qr/This is perl, v$v(?:[-\w]+| \([^)]+\))? built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
+	  qr/This is perl, v\Q$v\E(?:[-*\w]+| \([^)]+\))? built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
           '-v looks okay' );
 
 }
