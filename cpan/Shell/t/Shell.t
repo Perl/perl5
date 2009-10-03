@@ -46,10 +46,10 @@ if ($Is_VMS) {
     ok(!$@, '2 methods calls');
 } elsif ($Is_MSWin32) {
     ok(dir(), 'Execute command');
-    my @files = dir('*.*');
+    my @files = grep !/bytes free$/, dir('*.*');
     ok(@files, 'Quoted arguments');
 
-    ok(eq_array(\@files, [$so->dir('*.*')]), 'object method');
+    ok(eq_array(\@files, [grep !/bytes free$/, $so->dir('*.*')]), 'object method');
     eval { $so->dir };
     ok(!$@, '2 methods calls');
 } else {
