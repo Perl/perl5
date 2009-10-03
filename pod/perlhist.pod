@@ -26,7 +26,7 @@ Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
-Leon Brocard, Dave Mitchell.
+Leon Brocard, Dave Mitchell, Jesse Vincent.
 
 =head2 PUMPKIN?
 
