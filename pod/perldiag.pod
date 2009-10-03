@@ -4339,11 +4339,13 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
-=item Unicode character %s is illegal
+=item Unicode non-character %s is illegal for interchange
 
-(W utf8) Certain Unicode characters have been designated off-limits by
-the Unicode standard and should not be generated.  If you really know
-what you are doing you can turn off this warning by C<no warnings 'utf8';>.
+(W utf8) Certain codepoints, such as U+FFFE and U+FFFF, are defined by the
+Unicode standard to be non-characters. Those are legal codepoints, but are
+reserved for internal use; so, applications shouldn't attempt to exchange
+them. If you know what you are doing you can turn off this warning by
+C<no warnings 'utf8';>.
 
 =item Unknown BYTEORDER
 

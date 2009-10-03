@@ -127,7 +127,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 		   !(flags & UNICODE_ALLOW_SUPER))
 		  )
 	      Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			 "Unicode character 0x%04"UVxf" is illegal", uv);
+		      "Unicode non-character 0x%04"UVxf" is illegal for interchange", uv);
     }
     if (UNI_IS_INVARIANT(uv)) {
 	*d++ = (U8)UTF_TO_NATIVE(uv);
