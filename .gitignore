@@ -76,7 +76,6 @@ ext.libs
 /uudmap.h
 /bitcount.h
 
-ext/Win32API-File/cFile_pc_to_blib
 lib/Win32.pm
 lib/Win32API/
 lib/Win32CORE.pm
