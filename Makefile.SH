@@ -181,6 +181,7 @@ esac
 
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
+dynamic_ext_re="lib/auto/re/re.$dlext"
 extra_dep=''
 for f in $dynamic_ext; do
     : the dependency named here will never exist
@@ -313,6 +314,7 @@ MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
 
 #
 dynamic_ext = $dynamic_list
+dynamic_ext_re = $dynamic_ext_re
 static_ext = $static_list
 nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
@@ -1305,7 +1307,7 @@ makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
-	test_tty test-tty test_notty test-notty \
+	test_prep_reonly test_tty test-tty test_notty test-notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
 	test.third check.third utest.third ucheck.third test_notty.third \
@@ -1324,6 +1326,10 @@ _test:
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
 test_prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
+
+test_prep_reonly: $(MINIPERL_EXE) perl$(EXE_EXT) $(dynamic_ext_re) $(TEST_PERL_DLL)
+	$(MINIPERL) make_ext.pl $(dynamic_ext_re) MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
 test check: test_prep
@@ -1425,7 +1431,7 @@ test_harness: test_prep
 test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness ./runtests choose
 
-test-reonly: test_prep
+test-reonly: test_prep_reonly
 	TEST_ARGS='-re \bre\/' TESTFILE=harness ./runtests choose
 
 # Handy way to run perlbug -ok without having to install and run the
