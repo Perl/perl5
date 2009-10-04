@@ -209,7 +209,7 @@ close MASTER;
     warn "$0: $i exists but is unknown by perl.pod\n"
 	if !$perlpods{$i} && !exists $sources{$i};
   }
-  my @BuildTargets = grep {defined} @Targets{keys %Build};
+  my @BuildTargets = grep {defined} @Targets{grep $_ ne 'all', keys %Build};
   my %BuildFiles;
   @BuildFiles{@BuildTargets} = @BuildTargets;
   
