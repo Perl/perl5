@@ -3483,17 +3483,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    nextchr = UCHARAT(locinput);
 		    break;
 		}
-		if (!(OP(scan) == SPACE
-		      ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
-		    sayNO;
-		nextchr = UCHARAT(++locinput);
 	    }
-	    else {
-		if (!(OP(scan) == SPACE
-		      ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
-		    sayNO;
-		nextchr = UCHARAT(++locinput);
-	    }
+	    if (!(OP(scan) == SPACE
+		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NSPACEL:
 	    PL_reg_flags |= RF_tainted;
