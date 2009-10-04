@@ -4720,10 +4720,6 @@ PP(pp_push)
 	call_method("PUSH",G_SCALAR|G_DISCARD);
 	LEAVE;
 	SPAGAIN;
-	SP = ORIGMARK;
-	if (GIMME_V != G_VOID) {
-	    PUSHi( AvFILL(ary) + 1 );
-	}
     }
     else {
 	PL_delaymagic = DM_DELAY;
@@ -4737,10 +4733,10 @@ PP(pp_push)
 	    mg_set(MUTABLE_SV(ary));
 
 	PL_delaymagic = 0;
-	SP = ORIGMARK;
-	if (OP_GIMME(PL_op, 0) != G_VOID) {
-	    PUSHi( AvFILL(ary) + 1 );
-	}
+    }
+    SP = ORIGMARK;
+    if (OP_GIMME(PL_op, 0) != G_VOID) {
+	PUSHi( AvFILL(ary) + 1 );
     }
     RETURN;
 }
@@ -4783,7 +4779,7 @@ PP(pp_unshift)
 	}
     }
     SP = ORIGMARK;
-    if (GIMME_V != G_VOID) {
+    if (OP_GIMME(PL_op, 0) != G_VOID) {
 	PUSHi( AvFILL(ary) + 1 );
     }
     RETURN;
