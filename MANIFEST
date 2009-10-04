@@ -4442,6 +4442,8 @@ t/re/pat_re_eval.t		See if esoteric patterns using re 'eval' work
 t/re/pat_re_eval_thr.t		See if esoteric patterns using re 'eval' work in another thread
 t/re/pat_rt_report.t		See if esoteric patterns from rt reports work
 t/re/pat_rt_report_thr.t	See if esoteric patterns from rt reports work in another thread
+t/re/pat_special_cc.t		See if special charclasses (\s \w \d) work the same as (\s and [\s])
+t/re/pat_special_cc_thr.t	See if special charclasses (\s \w \d) work the same as (\s and [\s]) under threads
 t/re/pat.t			See if esoteric patterns work
 t/re/pat_thr.t			See if esoteric patterns work in another thread
 t/re/qr_gc.t			See if qr doesn't leak
