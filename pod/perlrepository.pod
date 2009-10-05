@@ -692,6 +692,20 @@ using the C<git cherry-pick> command. It is recommended to use the
 B<-x> option to C<git cherry-pick> in order to record the SHA1 of the
 original commit in the new commit message.
 
+=head1 GRAFTS
+
+The perl history contains one mistake which was not caught in the
+conversion -- a merge was recorded in the history between blead and
+maint-5.10 where no merge actually occurred.  Due to the nature of
+git, this is now impossible to fix in the public repository.  You can
+remove this mis-merge locally by adding the following line to your
+C<.git/info/grafts> file:
+
+  296f12bbbbaa06de9be9d09d3dcf8f4528898a49 434946e0cb7a32589ed92d18008aaa1d88515930
+
+It is particularly important to have this graft line if any bisecting
+is done in the area of the "merge" in question.
+
 =head1 SEE ALSO
 
 The git documentation, accessible via C<git help command>.
