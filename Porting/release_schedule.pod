@@ -1,0 +1,49 @@
+=head1
+
+This document lists the release engineers for at least the next
+four months of releases of bleadperl. If there are fewer than 
+four months listed as you make a release, it's important
+that you extend the schedule AND B<identify the next release engineer>.
+
+Before adding a release engineer, you B<must> contact them and they
+B<must> consent to ship the release.
+
+When shipping a release, you should include the schedule for (at least)
+the next four releases. If a stable version of Perl is released,
+you should reset the version numbers to the next blead series.
+
+=head2 2009
+
+ October 2       -  5.11.0  -   Jesse Vincent
+ October 20      -  5.11.1  -   Jesse Vincent
+ November 20     -  5.11.2  -   Yves Orton
+ December 20     -  5.11.3  -   Leon Brocard
+
+=head2 
+
+ January 20      -  5.11.4  -   Ricardo Signes
+
+=head1 VICTIMS
+
+The following porters have all consented to do at least
+one release of bleadperl.  If you can't do a release
+and can't find a substitute amongst this list, mail p5p.
+
+Jesse Vincent <F<jesse@cpan.org>>
+Leon Brocard <F<acme@astray.com>>
+Yves Orton <F<demerphq@gmail.com>>
+Ricardo Signes <F<rjbs@manxome.org>>
+
+=head2 Reticent victims
+
+These folks have said that they'd be willing to release Perl but would
+prefer that others have the opportunity before they pitch in:
+
+David Golden <F<xdave@gmail.com>> 
+
+
+=head1 AUTHOR
+
+Jesse Vincent <F<jesse@cpan.org>>
+
+=cut
