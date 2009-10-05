@@ -391,6 +391,8 @@ perl_construct(pTHXx)
     PL_timesbase.tms_cstime = 0;
 #endif
 
+    PL_osname = Perl_savepvn(aTHX_ STR_WITH_LEN(OSNAME));
+
     PL_registered_mros = newHV();
     /* Start with 1 bucket, for DFS.  It's unlikely we'll need more.  */
     HvMAX(PL_registered_mros) = 0;
@@ -3884,9 +3886,6 @@ S_init_predump_symbols(pTHX)
     GvIOp(tmpgv) = MUTABLE_IO(SvREFCNT_inc_simple(io));
 
     PL_statname = newSV(0);		/* last filename we did stat on */
-
-    Safefree(PL_osname);
-    PL_osname = savepv(OSNAME);
 }
 
 void
