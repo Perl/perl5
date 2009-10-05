@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 121;
+use Test::More tests => 129;
 use Config;
 
 BEGIN {
@@ -323,7 +323,7 @@ SKIP: {
     # test bug http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487319
     skip "Don't need Force_Writeable semantics on $^O", 4
         if grep {$^O eq $_} qw(amigaos dos epoc MSWin32 MacOS os2);
-    skip "Symlinks not available", 4 unless $Config{'d_symlink'};
+    skip "Symlinks not available", 4 unless $Config{d_symlink};
     $dir  = 'bug487319';
     $dir2 = 'bug487319-symlink';
     @created = make_path($dir, {mask => 0700});
@@ -381,7 +381,7 @@ my $extra =  catdir(curdir(), qw(EXTRA 1 a));
 SKIP: {
     skip "extra scenarios not set up, see eg/setup-extra-tests", 14
         unless -e $extra;
-    skip "Symlinks not available", 14 unless $Config{'d_symlink'};
+    skip "Symlinks not available", 14 unless $Config{d_symlink};
 
     my ($list, $err);
     $dir = catdir( 'EXTRA', '1' );
@@ -431,6 +431,78 @@ SKIP: {
     local @ARGV = ($dir);
     rmtree( [grep -e $_, @ARGV], 0, 0 );
     ok(!-e $dir, "blow it away via \@ARGV");
+}
+
+SKIP: {
+    my $skip_count = 8; # DRY
+    skip "getpwent() not implemented on $^O", $skip_count
+        unless $Config{d_getpwent};
+    skip "getgrent() not implemented on $^O", $skip_count
+        unless $Config{d_getgrent};
+    skip 'not running as root', $skip_count
+        unless $< == 0;
+
+    my $dir_stem = $dir = catdir($tmp_base, 'owned-by');
+
+    # find the highest uid ('nobody' or similar)
+    my $max_uid   = 0;
+    my $max_user = undef;
+    while (my @u = getpwent()) {
+        if ($max_uid < $u[2]) {
+            $max_uid  = $u[2];
+            $max_user = $u[0];
+        }
+    }
+    skip 'getpwent() appears to be insane', $skip_count
+        unless $max_uid > 0;
+
+    # find the highest gid ('nogroup' or similar)
+    my $max_gid   = 0;
+    my $max_group = undef;
+    while (my @g = getgrent()) {
+        if ($max_gid < $g[2]) {
+            $max_gid = $g[2];
+            $max_group = $g[0];
+        }
+    }
+    skip 'getgrent() appears to be insane', $skip_count
+        unless $max_gid > 0;
+
+    $dir = catdir($dir_stem, 'aaa');
+    @created = make_path($dir, {owner => $max_user});
+    is(scalar(@created), 2, "created a directory owned by $max_user...");
+    my $dir_uid = (stat $created[0])[4];
+    is($dir_uid, $max_uid, "... owned by $max_uid");
+
+    $dir = catdir($dir_stem, 'aab');
+    @created = make_path($dir, {group => $max_group});
+    is(scalar(@created), 1, "created a directory owned by group $max_group...");
+    my $dir_gid = (stat $created[0])[5];
+    is($dir_gid, $max_gid, "... owned by group $max_gid");
+
+    $dir = catdir($dir_stem, 'aac');
+    @created = make_path($dir, {user => $max_user, group => $max_group});
+    is(scalar(@created), 1, "created a directory owned by $max_user:$max_group...");
+    ($dir_uid, $dir_gid) = (stat $created[0])[4,5];
+    is($dir_uid, $max_uid, "... owned by $max_uid");
+    is($dir_gid, $max_gid, "... owned by group $max_gid");
+
+    SKIP: {
+        skip 'Test::Output not available', 1
+               unless $has_Test_Output;
+
+        # invent a user and group that don't exist
+        do { ++$max_user  } while (getpwnam($max_user));
+        do { ++$max_group } while (getgrnam($max_group));
+
+        $dir = catdir($dir_stem, 'aad');
+        stderr_like(
+            sub {make_path($dir, {user => $max_user, group => $max_group})},
+            qr{\Aunable to map $max_user to a uid, ownership not changed: .* at \S+ line \d+
+unable to map $max_group to a gid, group ownership not changed: .* at \S+ line \d+\b},
+            "created a directory not owned by $max_user:$max_group..."
+        );
+    }
 }
 
 SKIP: {
@@ -574,15 +646,15 @@ SKIP: {
     my $xx = $x . "x";
     
     # setup
-    ok(mkpath($xx));
-    ok(chdir($xx));
+    ok(mkpath($xx), "make $xx");
+    ok(chdir($xx), "... and chdir $xx");
     END {
-         ok(chdir($p));
-         ok(rmtree($xx));
+         ok(chdir($p), "... now chdir $p");
+         ok(rmtree($xx), "... and finally rmtree $xx");
     }
     
     # create and delete directory
     my $px = catdir($p, $x);
-    ok(mkpath($px));
-    ok(rmtree($px), "rmtree");     # fails in File-Path-2.07
+    ok(mkpath($px), 'create and delete directory 2.07');
+    ok(rmtree($px), '.. rmtree fails in File-Path-2.07');
 }
