@@ -3224,9 +3224,8 @@ Perl_moreswitches(pTHX_ const char *s)
  #endif
 	    PerlIO_printf(PerlIO_stdout(),
 		"\nThis is perl, %"SVf
-		" built for %s",
-		level,
-		ARCHNAME);
+		" built for " ARCHNAME,
+		level);
 	    SvREFCNT_dec(level);
 	}
 #else /* DGUX */
