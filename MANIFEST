@@ -1035,7 +1035,11 @@ cpan/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
 cpan/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
 cpan/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
 cpan/ExtUtils-ParseXS/t/basic.t			See if ExtUtils::ParseXS works
+cpan/ExtUtils-ParseXS/t/more.t			Extended ExtUtils::ParseXS testing
+cpan/ExtUtils-ParseXS/t/typemap			Standard typemap for controlled testing
 cpan/ExtUtils-ParseXS/t/usage.t			ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSInclude.xsh		Test file for ExtUtils::ParseXS tests
+cpan/ExtUtils-ParseXS/t/XSMore.xs		Test file for ExtUtils::ParseXS tests
 cpan/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
 cpan/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
 cpan/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests

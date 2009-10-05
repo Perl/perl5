@@ -1,5 +1,36 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+2.21 - Mon Oct  5 11:17:53 EDT 2009
+
+ Bug fixes:
+ - Adds full path in INCLUDE #line directives (RT#50198) [patch by "spb"]
+
+ Other:
+ - Updated copyright and maintainer list
+
+2.20_07 - Sat Oct  3 11:26:55 EDT 2009
+
+ Bug fixes:
+ - Use "char* file" for perl < 5.9, not "char[] file"; fixes mod_perl
+   breakage due to prior attempts to fix RT#48104 [David Golden] 
+
+2.20_06 - Fri Oct  2 23:45:45 EDT 2009
+
+ Bug fixes:
+ - Added t/typemap to fix broken test on perl 5.6.2 [David Golden]
+ - More prototype fixes for older perls [Goro Fuji]
+ - Avoid "const char *" in test files as it breaks on 5.6.2 [Goro Fuji]
+
+ Other:
+ - Merged changes from 2.2004 maintenance branch (see 2.200401 to 2.200403)
+   [David Golden]
+
+2.20_05 - Sat Aug 22 21:46:56 EDT 2009
+
+ Bug fixes:
+ - Fix prototype related bugs [Goro Fuji]
+ - Fix the SCOPE keyword [Goro Fuji]
+
 2.200403 - Fri Oct  2 02:01:58 EDT 2009
 
  Other:
@@ -18,6 +49,7 @@ Revision history for Perl extension ExtUtils::ParseXS.
 
  - No changes from 2.20_04.
 
+
 2.20_04 - Mon Aug 10 11:18:47 EDT 2009
 
  Bug fixes:
@@ -30,8 +62,8 @@ Revision history for Perl extension ExtUtils::ParseXS.
 2.20_03 - Thu Jul 23 23:14:50 EDT 2009
 
  Bug fixes:
- - Fixed "const char *" errors for 5.8.8 (and older) (RT#48104)
-   [Vincent Pit]
+ - Fixed "const char *" errors for 5.8.8 (and older) (RT#48104) 
+   [Vincent Pit] 
  - Added newline before a preprocessor directive (RT#30673)
    [patch by hjp]
 
