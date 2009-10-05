@@ -327,7 +327,8 @@ Now you should create a patch file for all your local changes:
 
 You should now send an email to perl5-porters@perl.org with a
 description of your changes, and include this patch file as an
-attachment.
+attachment.  (See the next section for how to configure and use
+git to send these emails for you.)
 
 If you want to delete your temporary branch, you may do so with:
 
@@ -337,6 +338,29 @@ If you want to delete your temporary branch, you may do so with:
   If you are sure you want to delete it, run 'git branch -D orange'.
   % git branch -D orange
   Deleted branch orange.
+
+=head2 Using git to send patch emails
+
+In your ~/git/perl repository, set the destination email to the perl5-porters
+mailing list.
+
+  $ git config sendemail.to perl5-porters@perl.org
+
+Then you can use git directly to send your patch emails:
+
+  $ git send-email 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+
+You may need to set some configuration variables for your particular email
+service provider. For example, to set your global git config to send email via
+a gmail account:
+
+  $ git config --global sendemail.smtpserver smtp.gmail.com
+  $ git config --global sendemail.smtpssl 1
+  $ git config --global sendemail.smtpuser YOURUSERNAME@gmail.com
+
+With this configuration, you will be prompted for your gmail password when you
+run 'git send-email'.  You can also configure C<sendemail.smtppass> with your
+password if you don't care about having your password in the .gitconfig file.
 
 =head2 A note on derived files
 
