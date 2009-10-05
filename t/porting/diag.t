@@ -6,7 +6,7 @@ $|=1;
 
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
-open my $diagfh, "<:raw", "../pod/perldiag.pod"
+open my $diagfh, "<", "../pod/perldiag.pod"
   or die "Can't open ../pod/perldiag.pod: $!";
 
 my %entries;
@@ -46,7 +46,7 @@ sub check_file {
 
   print "# $codefn\n";
 
-  open my $codefh, "<:raw", $codefn
+  open my $codefh, "<", $codefn
     or die "Can't open $codefn: $!";
 
   my $listed_as;
