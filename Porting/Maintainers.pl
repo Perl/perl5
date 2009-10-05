@@ -1705,14 +1705,14 @@ use File::Glob qw(:case);
 
     'Win32API::File' =>
 	{
-	'MAINTAINER'	=> 'tyemq',
+	'MAINTAINER'	=> 'chorny',
 	'DISTRIBUTION'	=> 'CHORNY/Win32API-File-0.1101.zip',
 	'FILES'		=> q[cpan/Win32API-File],
 	'EXCLUDED'	=> [ qr{^ex/},
 			     qw{t/pod.t},
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'XSLoader' =>
