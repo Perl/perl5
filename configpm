@@ -124,7 +124,7 @@ use strict;
 # use vars pulls in Carp
 
 sub _V {
-    my ($bincompat, $non_bincompat, $date, $osname, @patches) = Internals::V();
+    my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
 
     my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
 
@@ -146,7 +146,7 @@ sub _V {
         print "\t$_\n" foreach @patches;
     }
 
-    print "  Built under $osname\n";
+    print "  Built under $^O\n";
 
     print "  $date\n" if defined $date;
 

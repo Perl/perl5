@@ -1643,7 +1643,7 @@ S_Internals_V(pTHX_ CV *cv)
 #else
     const int local_patch_count = 0;
 #endif
-    const int entries = 4 + local_patch_count;
+    const int entries = 3 + local_patch_count;
     int i;
     static char non_bincompat_options[] = 
 #  ifdef DEBUGGING
@@ -1704,8 +1704,6 @@ S_Internals_V(pTHX_ CV *cv)
 #else
     PUSHs(&PL_sv_undef);
 #endif
-
-    PUSHs(Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(OSNAME), SVs_TEMP));
 
     for (i = 1; i <= local_patch_count; i++) {
 	/* This will be an undef, if PL_localpatches[i] is NULL.  */
