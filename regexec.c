@@ -3344,6 +3344,47 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	    }
+	case BOUNDL:
+	case NBOUNDL:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case BOUND:
+	case NBOUND:
+	    /* was last char in word? */
+	    if (do_utf8) {
+		if (locinput == PL_bostr)
+		    ln = '\n';
+		else {
+		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
+
+		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
+		}
+		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
+		    ln = isALNUM_uni(ln);
+		    LOAD_UTF8_CHARCLASS_ALNUM();
+		    n = swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8);
+		}
+		else {
+		    ln = isALNUM_LC_uvchr(UNI_TO_NATIVE(ln));
+		    n = isALNUM_LC_utf8((U8*)locinput);
+		}
+	    }
+	    else {
+		ln = (locinput != PL_bostr) ?
+		    UCHARAT(locinput - 1) : '\n';
+		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
+		    ln = isALNUM(ln);
+		    n = isALNUM(nextchr);
+		}
+		else {
+		    ln = isALNUM_LC(ln);
+		    n = isALNUM_LC(nextchr);
+		}
+	    }
+	    if (((!ln) == (!n)) == (OP(scan) == BOUND ||
+				    OP(scan) == BOUNDL))
+		    sayNO;
+	    break;
 	case ANYOF:
 	    if (do_utf8) {
 	        STRLEN inclasslen = PL_regeol - locinput;
@@ -3422,47 +3463,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		? isALNUM(nextchr) : isALNUM_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
-	    break;
-	case BOUNDL:
-	case NBOUNDL:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case BOUND:
-	case NBOUND:
-	    /* was last char in word? */
-	    if (do_utf8) {
-		if (locinput == PL_bostr)
-		    ln = '\n';
-		else {
-		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
-		
-		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
-		}
-		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
-		    ln = isALNUM_uni(ln);
-		    LOAD_UTF8_CHARCLASS_ALNUM();
-		    n = swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8);
-		}
-		else {
-		    ln = isALNUM_LC_uvchr(UNI_TO_NATIVE(ln));
-		    n = isALNUM_LC_utf8((U8*)locinput);
-		}
-	    }
-	    else {
-		ln = (locinput != PL_bostr) ?
-		    UCHARAT(locinput - 1) : '\n';
-		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
-		    ln = isALNUM(ln);
-		    n = isALNUM(nextchr);
-		}
-		else {
-		    ln = isALNUM_LC(ln);
-		    n = isALNUM_LC(nextchr);
-		}
-	    }
-	    if (((!ln) == (!n)) == (OP(scan) == BOUND ||
-				    OP(scan) == BOUNDL))
-		    sayNO;
 	    break;
 	case SPACEL:
 	    PL_reg_flags |= RF_tainted;
