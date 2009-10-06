@@ -1,13 +1,12 @@
 #!perl -w
 
 BEGIN {
-    if ($ENV{'PERL_CORE'}){
-        chdir 't';
-        @INC = '../lib';
-    }
+    chdir 't';
+    @INC = '../lib';
+    require './test.pl';
 }
 
-use Test::More tests => 215;
+plan(tests => 215);
 
 package UTF8Toggle;
 use strict;
