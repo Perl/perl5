@@ -577,6 +577,16 @@ extracted from perlguts.) The target audience should be XS novices, who need
 more examples than perlguts but something less overwhelming than perlapi.
 Recipes should provide "one pretty good way to do it" instead of TIMTOWTDI.
 
+Rather than focusing on interfacing Perl to C libraries, such a cookbook
+should probably focus on how to optimize Perl routines by re-writing them
+in XS.  This will likely be more motivating to those who mostly work in
+Perl but are looking to take the next step into XS.
+
+Deconstructing and explaining some simpler XS modules could be one way to
+bootstrap a cookbook.  (List::Util? Class::XSAccessor? Tree::Ternary_XS?)
+Another option could be deconstructing the implementation of some simpler
+functions in op.c.
+
 =head2 Remove the use of SVs as temporaries in dump.c
 
 F<dump.c> contains debugging routines to dump out the contains of perl data
