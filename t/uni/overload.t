@@ -150,7 +150,7 @@ SKIP: {
     }
 }
 
-my $tmpfile = 'overload.tmp';
+my $tmpfile = tempfile();
 
 foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
 		      'syswrite len off') {
@@ -210,7 +210,6 @@ foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
 	is ($line, "\351", "$operator $layer");
 
 	close $fh or die $!;
-	unlink $tmpfile or die $!;
     }
 }
 
@@ -282,8 +281,4 @@ foreach my $value ("\243", UTF8Toggle->new("\243")) {
     my $text = bless { data => "\x{3075}" }, 'RT69422';
     my $p = substr $text, 0, 1;
     is ($p, "\x{3075}");
-}
-
-END {
-    1 while -f $tmpfile and unlink $tmpfile || die "unlink '$tmpfile': $!";
 }
