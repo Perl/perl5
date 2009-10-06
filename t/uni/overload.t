@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 208;
+use Test::More tests => 215;
 
 package UTF8Toggle;
 use strict;
@@ -262,6 +262,27 @@ foreach my $value ("\243", UTF8Toggle->new("\243")) {
 	"pack copes with overloading");
     is (pack ("A/A", $value), pack ("A/A", "\243"));
     is (pack ("A/A", $value), pack ("A/A", "\243"));
+}
+
+foreach my $value ("\243", UTF8Toggle->new("\243")) {
+    my $v;
+    $v = substr $value, 0, 1;
+    is ($v, "\243");
+    $v = substr $value, 0, 1;
+    is ($v, "\243");
+    $v = substr $value, 0, 1;
+    is ($v, "\243");
+}
+
+{
+    package RT69422;
+    use overload '""' => sub { $_[0]->{data} }
+}
+
+{
+    my $text = bless { data => "\x{3075}" }, 'RT69422';
+    my $p = substr $text, 0, 1;
+    is ($p, "\x{3075}");
 }
 
 END {

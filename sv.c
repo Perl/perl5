@@ -6290,7 +6290,13 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
     }
     assert(cache);
 
-    if (PL_utf8cache < 0) {
+    if (PL_utf8cache < 0 && SvPOKp(sv)) {
+	/* SvPOKp() because it's possible that sv has string overloading, and
+	   therefore is a reference, hence SvPVX() is actually a pointer.
+	   This cures the (very real) symptoms of RT 69422, but I'm not actually
+	   sure whether we should even be caching the results of UTF-8
+	   operations on overloading, given that nothing stops overloading
+	   returning a different value every time it's called.  */
 	const U8 *start = (const U8 *) SvPVX_const(sv);
 	const STRLEN realutf8 = utf8_length(start, start + byte);
 
