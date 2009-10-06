@@ -46,7 +46,7 @@ if (! @files) {
     File::Find::find({
         no_chdir => 1,
         wanted   => sub {
-                return unless $File::Find::name =~ /(\.(pod|pm|pl))$/i;
+                return unless $File::Find::name =~ /(\.(pod|pm|pl))$/;
                 push @files, $File::Find::name;
             },
         }, grep { m!/$! } @d );
