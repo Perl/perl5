@@ -36,7 +36,6 @@ BEGIN {
     @INC = ( '../lib' );
 }
 
-### use Test::More;
 use File::Copy;
 use File::Spec;
 require './test.pl';
