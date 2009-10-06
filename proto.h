@@ -2329,6 +2329,11 @@ PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
 	assert(o)
 
 #endif
+PERL_CALLCONV void	Perl_package_version(pTHX_ OP* v)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PACKAGE_VERSION	\
+	assert(v)
+
 PERL_CALLCONV PADOFFSET	Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype);
 PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ const char *const name)
 			__attribute__nonnull__(pTHX_1);

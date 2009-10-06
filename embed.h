@@ -629,6 +629,7 @@
 #endif
 #endif
 #ifdef PERL_CORE
+#define package_version		Perl_package_version
 #define pad_alloc		Perl_pad_alloc
 #define allocmy			Perl_allocmy
 #define pad_findmy		Perl_pad_findmy
@@ -2974,6 +2975,7 @@
 #endif
 #endif
 #ifdef PERL_CORE
+#define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
 #define allocmy(a)		Perl_allocmy(aTHX_ a)
 #define pad_findmy(a)		Perl_pad_findmy(aTHX_ a)

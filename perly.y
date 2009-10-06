@@ -633,16 +633,22 @@ subbody	:	block	{ $$ = $1; }
 			}
 	;
 
-package :	PACKAGE WORD ';'
+package :	PACKAGE WORD WORD ';'
 			{
+/* Since no one seem to understand or use the MAD stuff, but Larry implies
+ * it shouldn't be removed, it's just commented out, and someone who
+ * understands it can come along later and fix it up.
 #ifdef MAD
-			  $$ = package($2);
-			  token_getmad($1,$$,'o');
-			  token_getmad($3,$$,';');
+			  (yyval.opval) = package((ps[(2) - (3)].val.opval));
+			  token_getmad((ps[(1) - (3)].val.i_tkval),(yyval.opval),'o');
+			  token_getmad((ps[(3) - (3)].val.i_tkval),(yyval.opval),';');
 #else
-			  package($2);
+*/
+			  package($3);
+                          if ($2) {
+                              package_version($2);
+                          }
 			  $$ = (OP*)NULL;
-#endif
 			}
 	;
 

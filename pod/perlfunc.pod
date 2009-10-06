@@ -4080,8 +4080,10 @@ Examples:
 
 The same template may generally also be used in unpack().
 
+=item package NAMESPACE VERSION
+X<package> X<module> X<namespace> X<version>
+
 =item package NAMESPACE
-X<package> X<module> X<namespace>
 
 Declares the compilation unit as being in the given namespace.  The scope
 of the package declaration is from the declaration itself through the end
@@ -4098,6 +4100,11 @@ with the package name and a double colon:  C<$Package::Variable>.
 If the package name is null, the C<main> package as assumed.  That is,
 C<$::sail> is equivalent to C<$main::sail> (as well as to C<$main'sail>,
 still seen in older code).
+
+If VERSION is provided, C<package> also sets the C<$VERSION> variable in the
+given namespace.  VERSION must be be a numeric literal or v-string; it is
+parsed exactly the same way as a VERSION argument to C<use MODULE VERSION>.
+C<$VERSION> should only be set once per package.
 
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.

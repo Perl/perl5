@@ -3816,6 +3816,18 @@ Perl_package(pTHX_ OP *o)
 #endif
 }
 
+void
+Perl_package_version( pTHX_ OP *v )
+{
+    dVAR;
+    PERL_ARGS_ASSERT_PACKAGE_VERSION;
+    SV *const version = cSVOPx(v)->op_sv;
+    SV *const pkgname = sv_mortalcopy(PL_curstname);
+    sv_catpv(pkgname, "::VERSION");
+    sv_setsv( get_sv(SvPV_nolen(pkgname),TRUE), version );
+    op_free(v);
+}
+
 #ifdef PERL_MAD
 OP*
 #else
