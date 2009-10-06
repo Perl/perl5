@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
+
+require './test.pl';
 
 use strict;
 
@@ -13,8 +11,6 @@ BEGIN {
     };
     require overload;
 };
-
-use Test::More;
 
 {
     package My::Pod::Checker;
@@ -63,15 +59,15 @@ sub pod_ok {
     $checker->parse_from_file($filename, undef);
     my $error_count = $checker->num_errors();
 
-    if(! ok $error_count <= 0, "POD of $filename") {
+    if(! ok($error_count <= 0, "POD of $filename")) {
         diag( "'$filename' contains POD errors" );
-        diag sprintf "%s %s: %s at line %s",
-             $_->{-severity}, $_->{-file}, $_->{-msg}, $_->{-line}
+        diag(sprintf "%s %s: %s at line %s",
+             $_->{-severity}, $_->{-file}, $_->{-msg}, $_->{-line})
             for @My::Pod::Checker::errors;
     };
 };
 
-plan tests => scalar @files;
+plan (tests => scalar @files);
 
 pod_ok $_
     for @files;

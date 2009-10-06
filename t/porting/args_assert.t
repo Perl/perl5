@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More 'no_plan';
+require './test.pl';
+
+plan('no_plan');
 
 # Fail for every PERL_ARGS_ASSERT* macro that was declared but not used.
 

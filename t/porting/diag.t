@@ -1,7 +1,11 @@
 #!/usr/bin/perl
 use warnings;
 use strict;
-use Test::More 'no_plan';
+
+require './test.pl';
+
+plan('no_plan');
+
 $|=1;
 
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
@@ -147,7 +151,8 @@ sub check_file {
       if (exists $entries{$name}) {
         if ($entries{$name}{todo}) {
         TODO: {
-            local $TODO = 'in DATA';
+	    no warnings 'once';
+            local $::TODO = 'in DATA';
             fail("Presence of '$name' from $codefn line $.");
           }
         } else {
