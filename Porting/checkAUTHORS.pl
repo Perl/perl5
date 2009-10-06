@@ -232,7 +232,8 @@ sub _raw_address {
     }
     $addr = lc $addr;
     $addr = $map{$addr} || $addr;
-    
+    $addr =~ s/\\100/@/g;  # Sometimes, there are encoded @ signs in the git log.
+
     if ($real_name) { $real_names{$addr} = $real_name};
     return $addr;
 }
