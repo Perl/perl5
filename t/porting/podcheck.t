@@ -49,8 +49,8 @@ while (<$m>) {
 	next if $file =~ /^cpan\//;
 	next unless ($file =~ /\.(?:pm|pod|pl)$/);
     push @files, $file;
-    @files = sort @files; # so we get consistent results
 };
+@files = sort @files; # so we get consistent results
 
 sub pod_ok {
     my ($filename) = @_;
