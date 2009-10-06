@@ -1,13 +1,13 @@
+#!perl -w
 use strict;
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = qw(../lib);
+    require './test.pl';
 }
 use File::Copy ();
 use File::Path ();
 use File::Spec ();
-use Test::More tests => 10;
+plan(tests => 10);
 
 my $test_dir = File::Spec->catdir(qw(lib deprecate));
 chdir $test_dir or die "Can't chdir $test_dir";
@@ -31,6 +31,7 @@ our %tests = (
 	sitearchexp	=> 0,
 );
 
+no warnings 'once';
 local %deprecate::Config = (%libdir);
 
 my $module = 'Deprecated.pm';

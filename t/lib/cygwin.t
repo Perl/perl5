@@ -7,9 +7,10 @@ BEGIN {
 	print "1..0 # skipped: cygwin specific test\n";
 	exit 0;
     }
+    require './test.pl';
 }
 
-use Test::More tests => 16;
+plan(tests => 16);
 
 is(Cygwin::winpid_to_pid(Cygwin::pid_to_winpid($$)), $$,
    "perl pid translates to itself");
