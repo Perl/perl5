@@ -1409,8 +1409,6 @@ old behavior if people rely on it.  Document incompatible changes.
 
 =back
 
-=back
-
 =head2 Guidelines for Converting Perl 4 Library Scripts into Modules
 
 =over 4
@@ -1506,6 +1504,8 @@ the application could invoked as:
      % perl -e 'use Module::Name; method(@ARGV)' ...
 or
      % perl -mModule::Name ...    (in perl5.002 or higher)
+
+=back
 
 =back
 

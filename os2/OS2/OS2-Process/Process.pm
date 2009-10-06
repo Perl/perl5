@@ -1070,44 +1070,44 @@ returns a list of the following data:
 
 =over
 
-=item
+=item *
 
 Title of the process (in the C<Ctrl-Esc> list);
 
-=item
+=item *
 
 window handle of switch entry of the process (in the C<Ctrl-Esc> list);
 
-=item
+=item *
 
 window handle of the icon of the process;
 
-=item
+=item *
 
 process handle of the owner of the entry in C<Ctrl-Esc> list;
 
-=item
+=item *
 
 process id of the owner of the entry in C<Ctrl-Esc> list;
 
-=item
+=item *
 
 session id of the owner of the entry in C<Ctrl-Esc> list;
 
-=item
+=item *
 
 whether visible in C<Ctrl-Esc> list;
 
-=item
+=item *
 
 whether item cannot be switched to (note that it is not actually
 grayed in the C<Ctrl-Esc> list));
 
-=item
+=item *
 
 whether participates in jump sequence;
 
-=item
+=item *
 
 program type.  Possible values are:
 
@@ -1127,7 +1127,7 @@ is a windowed WIN-OS/2 program, it runs in a PROG_WINDOWEDVDM
 session. Likewise, if it's a full-screen WIN-OS/2 program, it runs in
 a PROG_VDM session.
 
-=item
+=item *
 
 switch-entry handle.
 
@@ -1225,7 +1225,7 @@ Some of these API's require sending a message to the specified window.
 In such a case the process needs to be a PM process, or to be morphed
 to a PM process via OS2::MorphPM().
 
-For a temporary morphing to PM use L<OS2::localMorphPM class>.
+For a temporary morphing to PM use the L<OS2::localMorphPM> class.
 
 Keep in mind that PM windows are engaged in 2 "orthogonal" window
 trees, as well as in the z-order list.
@@ -1749,7 +1749,7 @@ specifies whether region scan should be interruptable by signals.
 Use class C<OS2::localClipbrd> to ensure that clipboard is closed even if
 the code in the block made a non-local exit.
 
-See L<"OS2::localMorphPM and OS2::localClipbrd classes">.
+See the L<OS2::localMorphPM> and L<OS2::localClipbrd> classes.
 
 =head2 Control of the PM atom tables
 
@@ -2083,7 +2083,7 @@ For direct access, see also the L<"EXPORTS"> section; the latter way
 may also provide some performance advantages, since the value of the
 constant is cached.
 
-=head1 OS2::localMorphPM, OS2::localFlashWindow, and OS2::localClipbrd classes
+=head1 L<OS2::localMorphPM>, OS2::localFlashWindow, and OS2::localClipbrd classes
 
 The class C<OS2::localMorphPM> morphs the process to PM for the duration of
 the given scope.
@@ -2106,7 +2106,7 @@ morph the application into PM:
   }
 
 C<OS2::localFlashWindow> behaves similarly; see
-L<"FlashWindow($hwnd,$doFlash)">.
+L<FlashWindow($hwnd, $doFlash)>.
 
 =head1 EXAMPLES
 

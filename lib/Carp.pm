@@ -463,7 +463,7 @@ Example of use:
 This would make C<Carp> report the error as coming from a caller not
 in C<My::Carping::Package>, nor from C<My::Friendly::Caller>.
 
-Also read the L</"Description"> section above, about how C<Carp> decides
+Also read the L</DESCRIPTION> section above, about how C<Carp> decides
 where the error is reported from.
 
 Use C<@CARP_NOT>, instead of C<$Carp::CarpLevel>.

@@ -11,6 +11,7 @@ the 5.11.1 release.
 
 =head1 Notice
 
+XXX Notice
 
 =head1 Incompatible Changes
 
@@ -227,7 +228,8 @@ XXX Any changes specific to a particular platform. VMS and Win32 are the usual
 stars here. It's probably best to group changes under the same section layout
 as the main perldelta
 
-=item Obituary
+
+=head1 Obituary
 
 XXX If any significant core contributor has died, we've added a short obituary
 here.

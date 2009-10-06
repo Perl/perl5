@@ -131,7 +131,7 @@ Note that C<UNIVERSAL> (and any members of C<UNIVERSAL>'s MRO) are not
 part of the MRO of a class, even though all classes implicitly inherit
 methods from C<UNIVERSAL> and its parents.
 
-=head2 mro::set_mro($classname, $type)
+=head2 mro::set_mro ($classname, $type)
 
 Sets the MRO of the given class to the C<$type> argument (either
 C<c3> or C<dfs>).
@@ -328,9 +328,13 @@ works (like C<goto &maybe::next::method>);
 
 =back
 
-=head2 The Pugs prototype Perl 6 Object Model uses C3
+=head2 Pugs
 
-=head2 Parrot now uses C3
+The Pugs prototype Perl 6 Object Model uses C3
+
+=head2 Parrot
+
+Parrot now uses C3
 
 =over 4
 

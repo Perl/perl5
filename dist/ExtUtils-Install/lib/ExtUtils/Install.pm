@@ -75,6 +75,8 @@ ocurred, but should not impact later operations.
 
 =begin _private
 
+=over
+
 =item _chmod($$;$)
 
 Wrapper to chmod() for debugging and error trapping.
@@ -86,6 +88,8 @@ Warns about something only once.
 =item _choke(@)
 
 Dies with a special message.
+
+=back
 
 =end _private
 
@@ -169,6 +173,8 @@ sub _chmod($$;$) {
 
 =begin _private
 
+=over
+
 =item _move_file_at_boot( $file, $target, $moan  )
 
 OS-Specific, Win32/Cygwin
@@ -235,6 +241,7 @@ sub _move_file_at_boot { #XXX OS-SPECIFIC
 
 =begin _private
 
+
 =item _unlink_or_rename( $file, $tryhard, $installing )
 
 OS-Specific, Win32/Cygwin
@@ -261,6 +268,8 @@ thrown, if it succeeds it returns the temporary file name (which will be
 a derivative of the original in the same directory) so that the caller can
 use it to install under. In all other cases of success returns $file.
 On failure throws a fatal error.
+
+=back
 
 =end _private
 
@@ -312,6 +321,8 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
 =head2 Functions
 
 =begin _private
+
+=over
 
 =item _get_install_skip
 
@@ -555,8 +566,6 @@ sub _chdir {
 =pod
 
 =end _private
-
-=over 4
 
 =item B<install>
 

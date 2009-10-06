@@ -21,14 +21,14 @@ There are actually two distinct kinds of version objects:
 
 =over 4
 
-=item * Decimal Versions
+=item Decimal Versions
 
 Any version which "looks like a number", see L<Decimal Versions>.  This
 also includes versions with a single decimal point and a single embedded
 underscore, see L<Decimal Alpha Versions>, even though these must be quoted
 to preserve the underscore formatting.
 
-=item * Dotted-Decimal Versions
+=item Dotted-Decimal Versions
 
 Also referred to as "Dotted-Integer", these contains more than one decimal
 point and may have an optional embedded underscore, see L<Dotted-Decimal
@@ -291,7 +291,7 @@ object method.
 
 =over 4
 
-=item * New Operator
+=item New Operator
 
 Like all OO interfaces, the new() operator is used to initialize
 version objects.  One way to increment versions when programming is to
@@ -337,7 +337,7 @@ example case, $v2 will be an empty object of the same type as $v1.
 
 =over 4
 
-=item * qv()
+=item qv()
 
 An alternate way to create a new version object is through the exported
 qv() sub.  This is not strictly like other q? operators (like qq, qw),
@@ -377,7 +377,7 @@ For the subsequent examples, the following three objects will be used:
 
 =over 4
 
-=item * Normal Form
+=item Normal Form
 
 For any version object which is initialized with multiple decimal
 places (either quoted or if possible v-string), or initialized using
@@ -402,7 +402,7 @@ In other words, the following is guaranteed to always be true:
 
 =over 4
 
-=item * Numification
+=item Numification
 
 Although all mathematical operations on version objects are forbidden
 by default, it is possible to retrieve a number which corresponds 
@@ -421,7 +421,7 @@ trailing zeros to preserve the correct version value.
 
 =over 4
 
-=item * Stringification
+=item Stringification
 
 The default stringification for version objects returns exactly the same
 string as was used to create it, whether you used C<new()> or C<qv()>,
@@ -472,7 +472,7 @@ down to the same internal representation as well as stringification.
 
 =over 4
 
-=item * Comparison operators
+=item Comparison operators
 
 Both C<cmp> and C<E<lt>=E<gt>> operators perform the same comparison between
 terms (upgrading to a version object automatically).  Perl automatically
@@ -509,7 +509,7 @@ L<Dotted-Decimal Versions> with multiple decimal points.
 
 =over 4
 
-=item * Logical Operators 
+=item Logical Operators
 
 If you need to test whether a version object
 has been initialized, you can simply test it directly:

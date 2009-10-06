@@ -1741,14 +1741,14 @@ This restores one of the standard line-styles: C<terse>, C<concise>,
 C<linenoise>, C<debug>, C<env>, into effect.  It also accepts style
 names previously defined with add_style().
 
-=head2 add_style()
+=head2 add_style ()
 
 This subroutine accepts a new style name and three style arguments as
 above, and creates, registers, and selects the newly named style.  It is
 an error to re-add a style; call set_style_standard() to switch between
 several styles.
 
-=head2 add_callback()
+=head2 add_callback ()
 
 If your newly minted styles refer to any new #variables, you'll need
 to define a callback subroutine that will populate (or modify) those

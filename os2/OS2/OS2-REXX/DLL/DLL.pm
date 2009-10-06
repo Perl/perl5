@@ -152,7 +152,7 @@ See documentation of L<OS2::REXX> module if you need the variable pool.
 
 =head1 DESCRIPTION
 
-=head2 Create a DLL handle
+=head2 L<Create a DLL handle>
 
 	$dll = OS2::DLL->module( NAME [, WHERE] );
 
@@ -166,7 +166,7 @@ The DLL is not unloaded when the return value is destroyed.
 
 	$dll = OS2::DLL->new( NAME [, WHERE] );
 
-Same as L<C<module>|Create a DLL handle>, but in addition to WHERE, looks
+Same as C<module>|L<Create a DLL handle>, but in addition to WHERE, looks
 in environment paths PERL5REXX, PERLREXX, PATH (provided for backward
 compatibility).
 
@@ -174,7 +174,7 @@ compatibility).
 
 	$dll = load OS2::DLL NAME [, WHERE];
 
-Same as L<C<new>|Create a DLL handle (looking in some strange locations)>,
+Same as C<new>|L<Create a DLL handle (looking in some strange locations)>,
 but returns DLL object reference, or undef on failure (in this case one can
 get the reason via C<DynaLoader::dl_error()>) (provided for backward
 compatibility).
