@@ -73,7 +73,7 @@ purposes of comparison with other version objects.  For example:
 
 All of the preceding examples are true whether or not the input value is 
 quoted.  The important feature is that the input value contains only a 
-single decimal.  See also L<Alpha Versions> for how to handle 
+single decimal.  See also L<version/Alpha Versions> for how to handle
 
 IMPORTANT NOTE: As shown above, if your Decimal version contains more 
 than 3 significant digits after the decimal place, it will be split on 
@@ -106,7 +106,7 @@ uniformity.  See also L<New Operator> for an additional method of
 initializing version objects.
 
 Just like L<Decimal Versions>, Dotted-Decimal Versions can be used as 
-L<Alpha Versions>.
+L<version/Alpha Versions>.
 
 =head2 Decimal Alpha Versions
 
@@ -270,8 +270,7 @@ With Perl >= 5.6.2, you can also use a line like this:
   use Example 1.2.3;
 
 and it will again work (i.e. give the error message as above), even with
-releases of Perl which do not normally support v-strings (see L<What about
-v-strings> below).  This has to do with that fact that C<use> only checks
+releases of Perl which do not normally support v-strings (see L<version/What about v-strings> below).  This has to do with that fact that C<use> only checks
 to see if the second term I<looks like a number> and passes that to the
 replacement L<UNIVERSAL::VERSION>.  This is not true in Perl 5.005_04,
 however, so you are B<strongly encouraged> to always use a Decimal version
@@ -312,7 +311,7 @@ In other words, the version will be automatically parsed out of the
 string, and it will be quoted to preserve the meaning CVS normally
 carries for versions.  The CVS $Revision$ increments differently from
 Decimal versions (i.e. 1.10 follows 1.9), so it must be handled as if
-it were a L<Dotted-Decimal Version>.
+it were a Dotted-Decimal Version.
 
 A new version object can be created as a copy of an existing version
 object, either as a class method:
@@ -372,7 +371,7 @@ L<SUBCLASSING> for details.
 For the subsequent examples, the following three objects will be used:
 
   $ver   = version->new("1.2.3.4"); # see "Quoting" below
-  $alpha = version->new("1.2.3_4"); # see "Alpha versions" below
+  $alpha = version->new("1.2.3_4"); # see "<version/Alpha versions" below
   $nver  = version->new(1.002);     # see "Decimal Versions" above
 
 =over 4
@@ -381,7 +380,7 @@ For the subsequent examples, the following three objects will be used:
 
 For any version object which is initialized with multiple decimal
 places (either quoted or if possible v-string), or initialized using
-the L<qv()> operator, the stringified representation is returned in
+the L<qv>() operator, the stringified representation is returned in
 a normalized or reduced form (no extraneous zeros), and with a leading 'v':
 
   print $ver->normal;         # prints as v1.2.3.4
@@ -445,22 +444,22 @@ when used as a class method.
 
 IMPORTANT NOTE: There is one exceptional cases shown in the above table
 where the "initializer" is not stringwise equivalent to the stringified
-representation.  If you use the C<qv()> operator on a version without a
+representation.  If you use the C<qv>() operator on a version without a
 leading 'v' B<and> with only a single decimal place, the stringified output
-will have a leading 'v', to preserve the sense.  See the L<qv()> operator
+will have a leading 'v', to preserve the sense.  See the L<qv>() operator
 for more details.
 
 IMPORTANT NOTE 2: Attempting to bypass the normal stringification rules by
-manually applying L<numify()> and L<normal()> will sometimes yield
+manually applying L<numify>() and L<normal>() will sometimes yield
 surprising results:
 
   print version->new(version->new("v1.0")->numify)->normal; # v1.0.0
 
-The reason for this is that the L<numify()> operator will turn "v1.0"
+The reason for this is that the L<numify>() operator will turn "v1.0"
 into the equivalent string "1.000000".  Forcing the outer version object
-to L<normal()> form will display the mathematically equivalent "v1.0.0".
+to L<normal>() form will display the mathematically equivalent "v1.0.0".
 
-As the example in L<new()> shows, you can always create a copy of an
+As the example in L<new>() shows, you can always create a copy of an
 existing version object with the same value by the very compact:
 
   $v2 = $v1->new($v1);
@@ -517,7 +516,7 @@ has been initialized, you can simply test it directly:
   $vobj = version->new($something);
   if ( $vobj )   # true only if $something was non-blank
 
-You can also test whether a version object is an L<Alpha version>, for
+You can also test whether a version object is an L<version/Alpha version>, for
 example to prevent the use of some feature not present in the main
 release:
 
@@ -531,10 +530,10 @@ release:
 
 Because of the nature of the Perl parsing and tokenizing routines,
 certain initialization values B<must> be quoted in order to correctly
-parse as the intended version, especially when using the L<qv()> operator.
+parse as the intended version, especially when using the L<qv>() operator.
 In all cases, a floating point number passed to version->new() will be
 identically converted whether or not the value itself is quoted.  This is
-not true for L<qv()>, however, when trailing zeros would be stripped on
+not true for L<qv>(), however, when trailing zeros would be stripped on
 an unquoted input, which would result in a very different version object.
 
 In addition, in order to be compatible with earlier Perl version styles,
@@ -547,7 +546,7 @@ The complicating factor is that in bare numbers (i.e. unquoted), the
 underscore is a legal Decimal character and is automatically stripped
 by the Perl tokenizer before the version code is called.  However, if
 a number containing one or more decimals and an underscore is quoted, i.e.
-not bare, that is considered a L<Alpha Version> and the underscore is
+not bare, that is considered an L<version/Alpha version> and the underscore is
 significant.
 
 If you use a mathematic formula that resolves to a floating point number,

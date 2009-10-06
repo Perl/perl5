@@ -19,7 +19,7 @@ This program creates the files holding the information
 about locally applied patches to the source code. The created
 files are  C<git_version.h> and C<lib/Config_git.pl>.
 
-=item C<lib/Config_git.pl>
+=head2 C<lib/Config_git.pl>
 
 Contains status information from git in a form meant to be processed
 by the tied hash logic of Config.pm. It is actually optional,
