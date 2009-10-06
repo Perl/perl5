@@ -4,14 +4,6 @@ require './test.pl';
 
 use strict;
 
-# Somewhere we chdir and can't load any more modules...
-BEGIN {
-    if ($^O eq 'MSWin32') {
-        require Win32;
-    };
-    require overload;
-};
-
 {
     package My::Pod::Checker;
     use strict;
