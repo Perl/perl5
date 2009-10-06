@@ -569,6 +569,14 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
+=head2 Write an XS cookbook
+
+Create pod/perlxscookbook.pod with short, task-focused 'recipes' in XS that
+demonstrate common tasks and good practices.  (Some of these might be
+extracted from perlguts.) The target audience should be XS novices, who need
+more examples than perlguts but something less overwhelming than perlapi.
+Recipes should provide "one pretty good way to do it" instead of TIMTOWTDI.
+
 =head2 Remove the use of SVs as temporaries in dump.c
 
 F<dump.c> contains debugging routines to dump out the contains of perl data
