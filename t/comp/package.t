@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..18\n";
+print "1..22\n";
 
 $blurfl = 123;
 $foo = 3;
@@ -89,4 +89,18 @@ for my $v ( @variations ) {
   $test_count++;
 }
 
+eval q/package Foo Bar/;
+$@ =~ /syntax error/ or print "not ";
+print "ok $test_count\n"; $test_count++;
 
+eval q/package Foo 1a/;
+$@ =~ /syntax error/ or print "not ";
+print "ok $test_count\n"; $test_count++;
+
+eval q/package Foo v/;
+$@ =~ /syntax error/ or print "not ";
+print "ok $test_count\n"; $test_count++;
+
+eval q/package Foo $foo/;
+$@ =~ /syntax error/ or print "not ";
+print "ok $test_count\n"; $test_count++;
