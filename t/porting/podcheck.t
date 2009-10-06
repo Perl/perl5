@@ -15,7 +15,6 @@ BEGIN {
 };
 
 use Test::More;
-use File::Find ();
 
 {
     package My::Pod::Checker;
@@ -38,19 +37,22 @@ use File::Find ();
     };
 }
 
-my @files = @ARGV;
-if (! @files) {
-    chdir '..'
-        or die "Couldn't chdir to ..: $!";
-    chomp( my @d = <DATA> );
-    File::Find::find({
-        no_chdir => 1,
-        wanted   => sub {
-                return unless $File::Find::name =~ /(\.(pod|pm|pl))$/;
-                push @files, $File::Find::name;
-            },
-        }, grep { m!/$! } @d );
-    push @files, map { chomp; glob($_) } grep { ! m!/$! } @d;
+
+use strict;
+use File::Spec;
+chdir '..';
+my @files;
+my $manifest = 'MANIFEST';
+
+open my $m, '<', $manifest or die "Can't open '$manifest': $!";
+
+while (<$m>) {
+    chomp;
+    next unless /\s/;   # Ignore lines without whitespace (i.e., filename only)
+    my ($file, $separator) = /^(\S+)(\s+)/;
+	next if $file =~ /^cpan\//;
+	next unless ($file =~ /\.(?:pm|pod|pl)$/);
+    push @files, $file;
     @files = sort @files; # so we get consistent results
 };
 
