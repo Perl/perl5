@@ -1,4 +1,4 @@
-=head1
+=head1 Release schedule
 
 This document lists the release engineers for at least the next
 four months of releases of bleadperl. If there are fewer than 
@@ -19,7 +19,7 @@ you should reset the version numbers to the next blead series.
  November 20     -  5.11.2  -   Yves Orton
  December 20     -  5.11.3  -   Leon Brocard
 
-=head2 
+=head2 2010
 
  January 20      -  5.11.4  -   Ricardo Signes
 
