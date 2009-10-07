@@ -296,8 +296,8 @@ automatically test Perl source releases on platforms with various
 configurations.  Both efforts welcome volunteers. In order to get
 involved in smoke testing of the perl itself visit
 L<http://search.cpan.org/dist/Test-Smoke>. In order to start smoke
-testing CPAN modules visit L<http://search.cpan.org/dist/CPAN-YACSmoke/>
-or L<http://search.cpan.org/dist/POE-Component-CPAN-YACSmoke/> or
+testing CPAN modules visit L<http://search.cpan.org/dist/CPANPLUS-YACSmoke/>
+or L<http://search.cpan.org/dist/minismokebox/> or
 L<http://search.cpan.org/dist/CPAN-Reporter/>.
 
 It's a good idea to read and lurk for a while before chipping in.
