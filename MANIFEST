@@ -3982,6 +3982,7 @@ Porting/pumpkin.pod		Guidelines and hints for Perl maintainers
 Porting/README.y2038		Perl notes for the 2038 fix
 Porting/regcharclass.pl		Generate regcharclass.h from inline data
 Porting/release_managers_guide.pod	Release Manager's Guide
+Porting/release_schedule.pod	Schedule for future releases
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
