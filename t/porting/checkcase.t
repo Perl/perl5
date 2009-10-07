@@ -13,10 +13,12 @@ find(sub {
 	   my $name = $File::Find::name;
 	   # Assumes that the path separator is exactly one character.
 	   $name =~ s/^\.\..//;
+
+	   # Special exemption for Makefile, makefile
+	   return if $name =~ m!\A(?:x2p/)?[Mm]akefile\z!;
+
 	   push @{$files{lc $name}}, $name;
 	 }, '..');
-
-my $failed;
 
 foreach (values %files) {
     if (@$_ > 1) {
