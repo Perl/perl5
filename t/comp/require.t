@@ -6,6 +6,13 @@ BEGIN {
     push @INC, '../lib';
 }
 
+sub do_require {
+    %INC = ();
+    write_file('bleah.pm',@_);
+    eval { require "bleah.pm" };
+    my @a; # magic guard for scope violations (must be first lexical in file)
+}
+
 # don't make this lexical
 $i = 1;
 
@@ -18,13 +25,6 @@ my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
 my $total_tests = 49;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
-
-sub do_require {
-    %INC = ();
-    write_file('bleah.pm',@_);
-    eval { require "bleah.pm" };
-    my @a; # magic guard for scope violations (must be first lexical in file)
-}
 
 sub write_file {
     my $f = shift;
