@@ -3820,8 +3820,11 @@ void
 Perl_package_version( pTHX_ OP *v )
 {
     dVAR;
+    U32 savehints = PL_hints;
     PERL_ARGS_ASSERT_PACKAGE_VERSION;
+    PL_hints &= ~HINT_STRICT_VARS;
     sv_setsv( GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), cSVOPx(v)->op_sv );
+    PL_hints = savehints;
     op_free(v);
 }
 
