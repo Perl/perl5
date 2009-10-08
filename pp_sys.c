@@ -2090,6 +2090,12 @@ PP(pp_tell)
 	    RETURN;
 	}
     }
+    else {
+	if (!errno)
+	    SETERRNO(EBADF,RMS_IFI);
+	PUSHi(-1);
+	RETURN;
+    }
 
 #if LSEEKSIZE > IVSIZE
     PUSHn( do_tell(gv) );
