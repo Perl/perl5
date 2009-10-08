@@ -3,12 +3,12 @@
 # Check that lines from eval are correctly retained by the debugger
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
     require "./test.pl";
 }
 
-use strict;
+# Uncomment this for testing, but don't leave it in for "production", as
+# we've not yet verified that use works.
+# use strict;
 
 plan (tests => 65);
 
