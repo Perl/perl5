@@ -2090,7 +2090,7 @@ PP(pp_tell)
 	    RETURN;
 	}
     }
-    else {
+    else if (!gv) {
 	if (!errno)
 	    SETERRNO(EBADF,RMS_IFI);
 	PUSHi(-1);
