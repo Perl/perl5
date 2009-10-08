@@ -3816,6 +3816,15 @@ Perl_package(pTHX_ OP *o)
 #endif
 }
 
+void
+Perl_package_version( pTHX_ OP *v )
+{
+    dVAR;
+    PERL_ARGS_ASSERT_PACKAGE_VERSION;
+    sv_setsv( GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), cSVOPx(v)->op_sv );
+    op_free(v);
+}
+
 #ifdef PERL_MAD
 OP*
 #else

@@ -633,14 +633,18 @@ subbody	:	block	{ $$ = $1; }
 			}
 	;
 
-package :	PACKAGE WORD ';'
+package :	PACKAGE WORD WORD ';'
 			{
 #ifdef MAD
-			  $$ = package($2);
+			  $$ = package($3);
 			  token_getmad($1,$$,'o');
-			  token_getmad($3,$$,';');
+			  if ($2)
+			      package_version($2);
+			  token_getmad($4,$$,';');
 #else
-			  package($2);
+			  package($3);
+			  if ($2)
+			      package_version($2);
 			  $$ = (OP*)NULL;
 #endif
 			}
