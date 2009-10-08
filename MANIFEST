@@ -4144,7 +4144,6 @@ t/comp/proto.t			See if function prototypes work
 t/comp/redef.t			See if we get correct warnings on redefined subs
 t/comp/require.t		See if require works
 t/comp/retainedlines.t		See if the debugger can retain eval's lines
-t/comp/script.t			See if script invocation works
 t/comp/term.t			See if more terms work
 t/comp/uproto.t			See if the _ prototype works
 t/comp/use.t			See if pragmata work
@@ -4490,6 +4489,7 @@ t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
+t/run/script.t			See if script invocation works
 t/run/switch0.t			Test the -0 switch
 t/run/switcha.t			Test the -a switch
 t/run/switchC.t			Test the -C switch
