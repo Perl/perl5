@@ -8257,21 +8257,23 @@ OP *
 Perl_ck_each(pTHX_ OP *o)
 {
     dVAR;
-    OP *kid = cLISTOPo->op_first;
+    OP *kid = o->op_flags & OPf_KIDS ? cLISTOPo->op_first : NULL;
 
     PERL_ARGS_ASSERT_CK_EACH;
 
-    if (kid->op_type == OP_PADAV || kid->op_type == OP_RV2AV) {
-	const unsigned new_type = o->op_type == OP_EACH ? OP_AEACH
-	    : o->op_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
-	o->op_type = new_type;
-	o->op_ppaddr = PL_ppaddr[new_type];
-    }
-    else if (!(kid->op_type == OP_PADHV || kid->op_type == OP_RV2HV
-	       || (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE)
-	       )) {
-	bad_type(1, "hash or array", PL_op_desc[o->op_type], kid);
-	return o;
+    if (kid) {
+	if (kid->op_type == OP_PADAV || kid->op_type == OP_RV2AV) {
+	    const unsigned new_type = o->op_type == OP_EACH ? OP_AEACH
+		: o->op_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
+	    o->op_type = new_type;
+	    o->op_ppaddr = PL_ppaddr[new_type];
+	}
+	else if (!(kid->op_type == OP_PADHV || kid->op_type == OP_RV2HV
+		    || (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE)
+		  )) {
+	    bad_type(1, "hash or array", PL_op_desc[o->op_type], kid);
+	    return o;
+	}
     }
     return ck_fun(o);
 }

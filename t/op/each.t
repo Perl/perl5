@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 39;
+plan tests => 42;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -186,4 +186,10 @@ for (keys %u) {
     is($u{$b0}, 2, "U+00C3 U+00BF -> 2");
     is($u{$u1}, 3, "U+0100        -> 3 ");
     is($u{$b1}, 4, "U+00C4 U+0080 -> 4");
+}
+
+# test for syntax errors
+for my $k (qw(each keys values)) {
+    eval $k;
+    like($@, qr/^Not enough arguments for $k/, "$k demands argument");
 }
