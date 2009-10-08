@@ -14,7 +14,7 @@ BEGIN {
 
 use warnings;
 
-plan 90;
+plan 91;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -196,6 +196,18 @@ sub PVBM () { 'foo' }
 
 ok !defined(attributes::get(\PVBM)), 
     'PVBMs don\'t segfault attributes::get';
+
+{
+    #  [perl #49472] Attributes + Unkown Error
+    eval '
+	use strict;
+	sub MODIFY_CODE_ATTRIBUTE{}
+	sub f:Blah {$nosuchvar};
+    ';
+
+    my $err = $@;
+    like ($err, qr/Global symbol "\$nosuchvar" requires /, 'perl #49472');
+}
 
 # Test that code attributes always get applied to the same CV that
 # we're left with at the end (bug#66970).
