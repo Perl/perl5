@@ -10,7 +10,7 @@ use Data::Dumper;
 ### disable string overloading for callbacks
 require overload;
 
-$VERSION    = '0.34';
+$VERSION    = '0.36';
 $FATAL      = 0;
 $DEBUG      = 0;
 
@@ -20,7 +20,7 @@ use constant ALIAS => 2;    # array index in the hash value
 
 =head1 NAME
 
-Object::Accessor
+Object::Accessor - interface to create per object accessors
 
 =head1 SYNOPSIS
 
