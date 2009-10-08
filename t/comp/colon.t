@@ -7,12 +7,9 @@
 #	-- Robin Barker <rmb@cise.npl.co.uk>
 #
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
-use strict;
+# Uncomment this for testing, but don't leave it in for "production", as
+# we've not yet verified that use works.
+# use strict;
 
 $_ = '';	# to avoid undef warning on m// etc.
 
