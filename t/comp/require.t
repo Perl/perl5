@@ -30,7 +30,6 @@ sub write_file {
     my $f = shift;
     open(REQ,">$f") or die "Can't write '$f': $!";
     binmode REQ;
-    use bytes;
     print REQ @_;
     close REQ or die "Could not close $f: $!";
 }
@@ -281,7 +280,7 @@ EOT
 
 if ($Is_EBCDIC || $Is_UTF8) { exit; }
 
-my $utf8 = chr(0xFEFF);
+my $utf8 = pack "C0U", 0xFEFF;
 
 $i++; do_require(qq(${utf8}print "ok $i\n"; 1;\n));
 
