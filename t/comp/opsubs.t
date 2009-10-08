@@ -1,19 +1,14 @@
-#!./perl -T
+#!./perl -Tw
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
+# Uncomment this for testing, but don't leave it in for "production", as
+# we've not yet verified that use works.
+# use strict;
 
-use warnings;
-use strict;
 $|++;
 
 require "./test.pl";
 
 plan(tests => 36);
-
-use vars qw($TODO);
 
 =pod
 
@@ -36,7 +31,7 @@ sub y  { return "y-".shift }
 # m operator
 can_ok( 'main', "m" );
 SILENCE_WARNING: { # Complains because $_ is undef
-    no warnings;
+    local $^W;		       
     isnt( m('unqualified'), "m-unqualified", "m('unqualified') is oper" );
 }
 is( main::m('main'), "m-main", "main::m() is func" );
@@ -73,7 +68,7 @@ eval "qx('unqualified'".
 SKIP: {
     skip("external command not portable on VMS", 1) if $^O eq 'VMS';
     TODO: {
-	local $TODO = $^O eq 'MSWin32' ? "Tainting of PATH not working of Windows" : $TODO;
+	local $::TODO = $^O eq 'MSWin32' ? "Tainting of PATH not working of Windows" : $::TODO;
 	like( $@, qr/^Insecure/, "qx('unqualified') doesn't work" );
     }
 }
