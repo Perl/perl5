@@ -1,8 +1,7 @@
-#!./perl
+#!./perl -w
 
-BEGIN { require "./test.pl"; }
-
-plan(tests => 18);
+print "1..18\n";
+my $test = 0;
 
 my %templates = (
 		 utf8 => 'C0U',
@@ -24,7 +23,14 @@ sub test {
     print $fh bytes_to_utf($enc, "$tag\n", $bom);
     close $fh or die $!;
     my $got = do "./utf$$.pl";
-    is($got, $tag);
+    $test = $test + 1;
+    if (!defined $got) {
+	print "not ok $test # $enc $tag $bom; got undef\n";
+    } elsif ($got ne $tag) {
+	print "not ok $test # $enc $tag $bom; got '$got'\n";
+    } else {
+	print "ok $test\n";
+    }
 }
 
 for my $bom (0, 1) {
