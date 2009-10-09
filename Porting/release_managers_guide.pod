@@ -14,7 +14,9 @@ manual - to produce a perl release of some description, be that a snaphot,
 release candidate, or final, numbered release of maint or blead.
 
 The release process has traditionally been executed by the current
-pumpking.
+pumpking. Blead releases from 5.11.0 forward are made each month on the
+20th by a non-pumpking release engineer.  The release engineer roster
+and schedule can be found in Porting/release_schedule.pod.
 
 This document both helps as a check-list for the release engineer 
 and is a base for ideas on how the various tasks could be automated 
