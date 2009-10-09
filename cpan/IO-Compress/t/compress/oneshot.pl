@@ -276,7 +276,7 @@ sub run
         my $FuncInverse = getTopFuncRef($TopTypeInverse);
 
         my @opts = ();
-        @opts = (RawInflate => 1)
+        @opts = (RawInflate => 1, UnLzma => 1)
             if $CompressClass eq 'IO::Compress::RawInflate';
 
         for my $append ( 1, 0 )
@@ -615,7 +615,7 @@ sub run
             {
                 title "Truncated file";
                 skip '', 7
-                    if $CompressClass =~ /lzop|lzf/i ;
+                    if $CompressClass =~ /lzop|lzf|lzma/i ;
 
                 my @in ;
                 push @in, "abcde" x 10;
@@ -1020,7 +1020,7 @@ sub run
         my $incumbent = "incumbent data" ;
 
         my @opts = (Strict => 1);
-        push @opts,  (RawInflate => 1)
+        push @opts,  (RawInflate => 1, UnLzma => 1)
             if $bit eq 'IO::Uncompress::AnyUncompress';
 
         for my $append (0, 1)
@@ -1321,7 +1321,7 @@ sub run
         my $keep_comp = $comp;
 
         my @opts = ();
-        @opts = (RawInflate => 1)
+        @opts = (RawInflate => 1, UnLzma => 1)
             if $bit eq 'IO::Uncompress::AnyUncompress';
 
         my $incumbent = "incumbent data" ;
@@ -1407,7 +1407,7 @@ sub run
         mkdir $tmpDir2, 0777;
 
         my @opts = ();
-        @opts = (RawInflate => 1)
+        @opts = (RawInflate => 1, UnLzma => 1)
             if $bit eq 'IO::Uncompress::AnyUncompress';
 
         ok   -d $tmpDir1, "  Temp Directory $tmpDir1 exists";

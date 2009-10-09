@@ -86,11 +86,14 @@ sub My::testParseParameters()
     like $@, mkErr("Parameter 'Fred' not a scalar"), 
             "wanted scalar";
 
-    #eval { ParseParameters(1, {'Fred' => [1, 1, Parse_any|Parse_multiple, 0]}, Fred => 1, Fred => 2) ; };
-    #like $@, mkErr("Muliple instances of 'Fred' found"),
-        #"wanted scalar";
+#    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_any, 0]}, Fred => 1, Fred => 2) ; };
+#    like $@, mkErr("Muliple instances of 'Fred' found"),
+#        "wanted scalar";
 
-    ok 1;
+    my $g = ParseParameters(1, {'Fred' => [1, 1, Parse_unsigned|Parse_multiple, 7]}, Fred => 1, Fred => 2) ;
+    is_deeply $g->value('Fred'), [ 1, 2 ] ;
+
+    #ok 1;
 
     my $got = ParseParameters(1, {'Fred' => [1, 1, 0x1000000, 0]}, Fred => 'abc') ;
     is $got->value('Fred'), "abc", "other" ;

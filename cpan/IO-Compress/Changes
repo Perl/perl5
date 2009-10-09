@@ -1,8 +1,12 @@
 CHANGES
 -------
 
-  2.021 30 August 2009
+  2.022 9 October 2009
 
+      * IO::Compress - Makefile.PL
+        Fix for core.
+
+  2.021 30 August 2009
 
       * IO::Compress::Base.pm
         - Less warnnings when reading from a closed filehandle.

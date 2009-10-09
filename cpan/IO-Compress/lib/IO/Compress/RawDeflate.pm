@@ -16,7 +16,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.021';
+$VERSION = '2.022';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
