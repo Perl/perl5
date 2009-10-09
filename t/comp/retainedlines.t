@@ -2,9 +2,7 @@
 
 # Check that lines from eval are correctly retained by the debugger
 
-BEGIN {
-    require "./test.pl";
-}
+require "./test.pl";
 
 # Uncomment this for testing, but don't leave it in for "production", as
 # we've not yet verified that use works.
@@ -16,7 +14,7 @@ $^P = 0xA;
 
 my @before = grep { /eval/ } keys %::;
 
-is (@before, 0, "No evals");
+is ((scalar @before), 0, "No evals");
 
 my %seen;
 
@@ -27,11 +25,12 @@ sub check_retained_lines {
 
     my @keys = grep {!$seen{$_}} grep { /eval/ } keys %::;
 
-    is (@keys, 1, "1 new eval");
+    is ((scalar @keys), 1, "1 new eval");
 
     my @got_lines = @{$::{$keys[0]}};
 
-    is (@got_lines, @expect_lines, "Right number of lines for $name");
+    is ((scalar @got_lines),
+	(scalar @expect_lines), "Right number of lines for $name");
 
     for (0..$#expect_lines) {
 	is ($got_lines[$_], $expect_lines[$_], "Line $_ is correct");
@@ -85,7 +84,7 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
     } else {
 	my @after = grep { /eval/ } keys %::;
 
-	is (@after, 0 + keys %seen,
+	is (scalar @after, 0 + keys %seen,
 	    "evals that don't define subroutines are correctly cleaned up");
     }
 
@@ -96,7 +95,7 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
     } else {
 	my @after = grep { /eval/ } keys %::;
 
-	is (@after, 0 + keys %seen,
+	is (scalar @after, 0 + keys %seen,
 	    "evals that fail are correctly cleaned up");
     }
 }
