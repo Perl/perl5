@@ -2,13 +2,45 @@
 
 # Check that lines from eval are correctly retained by the debugger
 
-require "./test.pl";
-
 # Uncomment this for testing, but don't leave it in for "production", as
 # we've not yet verified that use works.
 # use strict;
 
-plan (tests => 65);
+print "1..65\n";
+my $test = 0;
+
+sub failed {
+    my ($got, $expected, $name) = @_;
+
+    print "not ok $test - $name\n";
+    my @caller = caller(1);
+    print "# Failed test at $caller[1] line $caller[2]\n";
+    if (defined $got) {
+	print "# Got '$got'\n";
+    } else {
+	print "# Got undef\n";
+    }
+    print "# Expected $expected\n";
+    return;
+}
+
+sub is {
+    my ($got, $expect, $name) = @_;
+    $test = $test + 1;
+    if (defined $expect) {
+	if (defined $got && $got eq $expect) {
+	    print "ok $test - $name\n";
+	    return 1;
+	}
+	failed($got, "'$expect'", $name);
+    } else {
+	if (!defined $got) {
+	    print "ok $test - $name\n";
+	    return 1;
+	}
+	failed($got, 'undef', $name);
+    }
+}
 
 $^P = 0xA;
 
@@ -64,7 +96,7 @@ for my $sep (' ', "\0") {
   eval $prog and die;
 
   is (eval "$name()", "This is $name", "Subroutine was compiled, despite error")
-    or diag $@;
+    or print STDERR "# $@\n";
 
   check_retained_lines($prog,
 		       'eval that defines subroutine but has syntax error');
