@@ -35,25 +35,13 @@ sub test {
     is($got, $tag);
 }
 
-test("utf16le",    123,   1);
-test("utf16le",    1234,  1);
-test("utf16le",    12345, 1);
-test("utf16be",    123,   1);
-test("utf16be",    1234,  1);
-test("utf16be",    12345, 1);
-test("utf8",       123,   1);
-test("utf8",       1234,  1);
-test("utf8",       12345, 1);
-
-test("utf16le",    123,   0);
-test("utf16le",    1234,  0);
-test("utf16le",    12345, 0);
-test("utf16be",    123,   0);
-test("utf16be",    1234,  0);
-test("utf16be",    12345, 0);
-test("utf8",       123,   0);
-test("utf8",       1234,  0);
-test("utf8",       12345, 0);
+for my $bom (0, 1) {
+    for my $enc (qw(utf16le utf16be utf8)) {
+	for my $value (123, 1234, 12345) {
+	    test($enc, $value, $bom);
+	}
+    }
+}
 
 END {
     1 while unlink "utf$$.pl";
