@@ -6,9 +6,68 @@
 
 $|++;
 
-require "./test.pl";
+print "1..36\n";
+my $test = 0;
 
-plan(tests => 36);
+sub failed {
+    my ($got, $expected, $name) = @_;
+
+    print "not ok $test - $name\n";
+    my @caller = caller(1);
+    print "# Failed test at $caller[1] line $caller[2]\n";
+    if (defined $got) {
+	print "# Got '$got'\n";
+    } else {
+	print "# Got undef\n";
+    }
+    print "# Expected $expected\n";
+    return;
+}
+
+sub like {
+    my ($got, $pattern, $name) = @_;
+    $test = $test + 1;
+    if (defined $got && $got =~ $pattern) {
+	print "ok $test - $name\n";
+	# Principle of least surprise - maintain the expected interface, even
+	# though we aren't using it here (yet).
+	return 1;
+    }
+    failed($got, $pattern);
+}
+
+sub is {
+    my ($got, $expect, $name) = @_;
+    $test = $test + 1;
+    if (defined $got && $got eq $expect) {
+	print "ok $test - $name\n";
+	return 1;
+    }
+    failed($got, "'$expect'");
+}
+
+sub isnt {
+    my ($got, $expect, $name) = @_;
+    $test = $test + 1;
+    if (defined $got && $got ne $expect) {
+	print "ok $test - $name\n";
+	return 1;
+    }
+    failed($got, "not '$expect'");
+}
+
+sub can_ok {
+    my ($class, $method) = @_;
+    $test = $test + 1;
+    if (eval { $class->can($method) }) {
+	print "ok $test - $class->can('$method')\n";
+	return 1;
+    }
+    my @caller = caller;
+    print "# Failed test at $caller[1] line $caller[2]\n";
+    print "# $class cannot $method\n";
+    return;
+}
 
 =pod
 
