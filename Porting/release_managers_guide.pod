@@ -719,7 +719,9 @@ Install an XS module, for example:
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
+I<If you're building a SNAPSHOT, you should STOP HERE>
+
+=item *
 
 Check that the C<perlbug> utility works. Try the following:
 
@@ -743,8 +745,6 @@ report. Check that it shows up, then remember to close it!
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 Wait for the smoke tests to catch up with the commit which this release is
 based on (or at least the last commit of any consequence).
 
@@ -753,8 +753,6 @@ back and fix things.
 
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Once smoking is okay, upload it to PAUSE. This is the point of no return.
 If anything goes wrong after this point, you will need to re-prepare
@@ -768,17 +766,12 @@ Upload both the .gz and .bz2 versions of the tarball.
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT>
-
-
 Now that you've shipped the new perl release to PAUSE, it's
 time to publish the tag you created earlier to the public git repo:
 
     $ git push origin tag v5.11.0
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Disarm the F<patchlevel.h> change; for example,
 
@@ -799,21 +792,17 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 Wait 24 hours or so, then post the announcement to use.perl.org.
 (if you don't have access rights to post news, ask someone like Rafael to
 do it for you.)
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT>
-
 Ask Jarkko to add the tarball to http://www.cpan.org/src/
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD>
 
 Ask Jarkko to update the descriptions of which tarballs are current in
 http://www.cpan.org/src/README.html, and Rafael to update
@@ -821,14 +810,14 @@ http://dev.perl.org/perl5/
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC>
+I<You MUST SKIP this step for RC>
 
 Remind the current maintainer of C<Module::CoreList> to push a new release
 to CPAN.
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC>
+I<You MUST SKIP this step for RC>
 
 Bump the perlXYZ version number.
 
@@ -890,14 +879,14 @@ previous version bump.
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD>
 
 If this was a maint release, then edit F<Porting/mergelog> to change
 all the C<d> (deferred) flags to C<.> (needs review).
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD>
 
 If this was a major release (5.x.0), then create a new maint branch 
 based on the commit tagged as the current release and bump the version 
@@ -910,7 +899,7 @@ XXX need a git recipe
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT, RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD>
 
 Copy the perlNNNdelta.pod for this release into the other branches; for
 example:
@@ -921,7 +910,7 @@ example:
 Edit F<pod.lst> to add an entry for the file, e.g.:
 
     perl5101delta		Perl changes in version 5.10.1
-    
+
 Then rebuild various files:
 
     $ perl pod/buildtoc --build-all
@@ -931,8 +920,6 @@ Finally, commit:
     $ git commit -a -m 'add perlXXXdelta'
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Make sure any recent F<pod/perlhist.pod> entries are copied to
 F<perlhist.pod> on other branches; typically the RC* and final entries,
@@ -944,8 +931,8 @@ e.g.
 
 =item *
 
-I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some much-needed
-rest and relaxation>. 
+I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some
+much-needed rest and relaxation>.
 
 Thanks for releasing perl!
 
