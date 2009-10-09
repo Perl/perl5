@@ -65,7 +65,11 @@ like( $@, qr/Malformed prototype for main::wrong1/, 'wrong1' );
 eval q{ sub wrong2 ($__); wrong2(1,2) };
 like( $@, qr/Malformed prototype for main::wrong2/, 'wrong2' );
 
-sub opt ($;_) { is($_[0], "seen"); ok(!defined $_[1], "; has precedence over _") }
+sub opt ($;_) {
+    is($_[0], "seen");
+    is($_[1], undef, "; has precedence over _");
+}
+
 opt("seen");
 
 sub unop (_) { is($_[0], 11, "unary op") }
