@@ -1,36 +1,28 @@
 #!./perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
-    if ($ENV{PERL_CORE_MINITEST}) {
-	print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-	exit 0;
-    }
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bEncode\b/) {
-      print "1..0 # Skip: Encode was not built\n";
-      exit 0;
-    }
-}
-
 BEGIN { require "./test.pl"; }
 
 plan(tests => 18);
 
-my $BOM = chr(0xFEFF);
+my %templates = (
+		 utf8 => 'C0U',
+		 utf16be => 'n',
+		 utf16le => 'v',
+		);
+
+sub bytes_to_utf {
+    my ($enc, $content, $do_bom) = @_;
+    my $template = $templates{$enc};
+    die "Unsupported encoding $enc" unless $template;
+    return pack "$template*", ($do_bom ? 0xFEFF : ()), unpack "C*", $content;
+}
 
 sub test {
     my ($enc, $tag, $bom) = @_;
-    open(UTF_PL, ">:raw:encoding($enc)", "utf$$.pl")
-	or die "utf.pl($enc,$tag,$bom): $!";
-    print UTF_PL $BOM if $bom;
-    print UTF_PL "$tag\n";
-    close(UTF_PL);
+    open my $fh, ">", "utf$$.pl" or die "utf.pl: $!";
+    binmode $fh;
+    print $fh bytes_to_utf($enc, "$tag\n", $bom);
+    close $fh or die $!;
     my $got = do "./utf$$.pl";
     is($got, $tag);
 }
