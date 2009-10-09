@@ -1212,6 +1212,7 @@ cpan/IO-Compress/t/compress/tied.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/truncate.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/zlib-generic.pl		Compress::Zlib
 cpan/IO-Compress/t/cz-01version.t			IO::Compress
+cpan/IO-Compress/t/cz-03zlib-v1.t			IO::Compress
 cpan/IO-Compress/t/cz-05examples.t			IO::Compress
 cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress

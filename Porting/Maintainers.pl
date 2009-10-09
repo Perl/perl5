@@ -777,12 +777,10 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.021.tar.gz',
-	'FILES'		=> q[dist/IO-Compress],
-	'EXCLUDED'	=> [ qr{t/Test/},
-			     qw{t/cz-03zlib-v1.t},
-			   ],
+	'FILES'		=> q[cpan/IO-Compress],
+	'EXCLUDED'	=> [ qr{t/Test/} ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'IO::Zlib' =>
@@ -1383,7 +1381,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/ANSIColor-2.02.tar.gz',
-	'FILES'		=> q{cpan/Term-ANSIColor},
+	'FILES'		=> q[cpan/Term-ANSIColor],
 	'EXCLUDED'	=> [ qr{^tests/}, qw(t/pod-spelling.t t/pod.t) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -1402,7 +1400,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'kane',
 	'DISTRIBUTION'	=> 'KANE/Term-UI-0.20.tar.gz',
-	'FILES'		=> q{cpan/Term-UI},
+	'FILES'		=> q[cpan/Term-UI],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
