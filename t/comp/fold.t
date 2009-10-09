@@ -18,22 +18,22 @@ plan (13);
 
 my $a;
 $a = eval '$b = 0/0 if 0; 3';
-is ($a, 3);
-is ($@, "");
+is ($a, 3, 'constants in conditionals don\'t affect constant folding');
+is ($@, '', 'no error');
 
 my $b = 0;
 $a = eval 'if ($b) {return sqrt -3} 3';
-is ($a, 3);
-is ($@, "");
+is ($a, 3, 'variables in conditionals don\'t affect constant folding');
+is ($@, '', 'no error');
 
 $a = eval q{
 	$b = eval q{if ($b) {return log 0} 4};
- 	is ($b, 4);
-	is ($@, "");
+ 	is ($b, 4, 'inner eval folds constant');
+	is ($@, '', 'no error');
 	5;
 };
-is ($a, 5);
-is ($@, "");
+is ($a, 5, 'outer eval folds constant');
+is ($@, '', 'no error');
 
 # warn and die hooks should be disabled during constant folding
 
