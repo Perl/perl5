@@ -26,6 +26,16 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Migrate t/ from custom TAP generation
+
+Many tests below F<t/> still generate TAP by "hand", rather than using library
+functions. As explained in L<perlhack/Writing a test>, tests in F<t/> are
+written in a particular way to test that more complex constructions actually
+work before using them routinely. Hence they don't use C<Test::More>, but
+instead there is an intentionally simpler library, F<t/test.pl>. However,
+quite a few tests in F<t/> have not been refactored to use it. Refactoring
+any of these tests, one at a time, is a useful thing TODO.
+
 =head2 Automate perldelta generation
 
 The perldelta file accompanying each release summaries the major changes.
