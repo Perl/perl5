@@ -177,7 +177,7 @@ sub _scan_test {
     if ($type eq 'deparse') {
         # Look for #line directives which change the filename
         while (<$script>) {
-            $file_opts .= ",-f$3$4"
+            $file_opts = $file_opts . ",-f$3$4"
               if /^#\s*line\s+(\d+)\s+((\w+)|"([^"]+)")/;
         }
     }
@@ -320,7 +320,7 @@ sub _quote_args {
        # In VMS protect with doublequotes because otherwise
        # DCL will lowercase -- unless already doublequoted.
        $_ = q(").$_.q(") if ($^O eq 'VMS') && !/^\"/ && length($_) > 0;
-       $argstring .= ' ' . $_;
+       $argstring = $argstring . ' ' . $_;
     }
     return $argstring;
 }
@@ -337,7 +337,7 @@ sub _tests_from_manifest {
     my %known_extensions = _populate_hash($known_extensions);
 
     foreach (keys %known_extensions) {
-	$skip{$_}++ unless $extensions{$_};
+	$skip{$_} = 1 unless $extensions{$_};
     }
 
     my @results;
@@ -537,8 +537,8 @@ EOT
 		    }
 		    $max = $1;
 		    %todo = map { $_ => 1 } split / /, $3 if $3;
-		    $totmax += $max;
-		    $tested_files++;
+		    $totmax = $totmax + $max;
+		    $tested_files = $tested_files + 1;
 		    if ($seen_ok) {
 			# 1..n appears at end of file
 			$trailing_leader = 1;
@@ -560,7 +560,7 @@ EOT
 			    }
 			}
 			$seen_ok = 1;
-			$next++;
+			$next = $next + 1;
 			my($not, $num, $extra, $istodo) = ($1, $2, $3, 0);
 			$num = $next unless $num;
 
@@ -613,7 +613,7 @@ EOT
 	    }
 	    if ($ENV{VG_OPTS} =~ /cachegrind/) {
 		if (rename $Valgrind_Log, "$test.valgrind") {
-		    $valgrind++;
+		    $valgrind = $valgrind + 1;
 		} else {
 		    warn "$0: Failed to create '$test.valgrind': $!\n";
 		}
@@ -624,19 +624,19 @@ EOT
 		for my $i (0..$#valgrind) {
 		    local $_ = $valgrind[$i];
 		    if (/^==\d+== ERROR SUMMARY: (\d+) errors? /) {
-			$errors += $1;   # there may be multiple error summaries
+			$errors = $errors + $1;   # there may be multiple error summaries
 		    } elsif (/^==\d+== LEAK SUMMARY:/) {
 			for my $off (1 .. 4) {
 			    if ($valgrind[$i+$off] =~
 				/(?:lost|reachable):\s+\d+ bytes in (\d+) blocks/) {
-				$leaks += $1;
+				$leaks = $leaks + $1;
 			    }
 			}
 		    }
 		}
 		if ($errors or $leaks) {
 		    if (rename $Valgrind_Log, "$test.valgrind") {
-			$valgrind++;
+			$valgrind = $valgrind + 1;
 		    } else {
 			warn "$0: Failed to create '$test.valgrind': $!\n";
 		    }
@@ -672,11 +672,11 @@ EOT
 
 	if (defined $failure) {
 	    print "${te}$failure\n";
-	    $::bad_files++;
+	    $::bad_files = $::bad_files + 1;
 	    if ($test =~ /^base/) {
 		die "Failed a basic test ($test) -- cannot continue.\n";
 	    }
-	    ++$failed_tests{$test};
+	    $failed_tests{$test} = 1;
 	}
 	else {
 	    if ($max) {
@@ -688,11 +688,11 @@ EOT
 		    $elapsed = "";
 		}
 		print "${te}ok$elapsed\n";
-		$good_files++;
+		$good_files = $good_files + 1;
 	    }
 	    else {
 		print "${te}skipped\n";
-		$tested_files -= 1;
+		$tested_files = $tested_files - 1;
 	    }
 	}
     } # while tests
