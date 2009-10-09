@@ -272,9 +272,7 @@ sub bytes_to_utf {
 }
 
 foreach (sort keys %templates) {
-    print "# $_\n";
-
-    $i++; do_require(bytes_to_utf($_, qq(print "ok $i\\n"; 1;\n), 1));
+    $i++; do_require(bytes_to_utf($_, qq(print "ok $i # $_\\n"; 1;\n), 1));
 }
 
 END {
