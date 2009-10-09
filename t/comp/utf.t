@@ -20,7 +20,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 15);
+plan(tests => 18);
 
 my $BOM = chr(0xFEFF);
 
@@ -51,6 +51,9 @@ test("utf16le",    12345, 0);
 test("utf16be",    123,   0);
 test("utf16be",    1234,  0);
 test("utf16be",    12345, 0);
+test("utf8",       123,   0);
+test("utf8",       1234,  0);
+test("utf8",       12345, 0);
 
 END {
     1 while unlink "utf$$.pl";
