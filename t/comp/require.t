@@ -258,17 +258,24 @@ EOT
 
 if ($Is_EBCDIC || $Is_UTF8) { exit; }
 
-my $utf8 = pack "C0U", 0xFEFF;
+my %templates = (
+		 utf8 => 'C0U',
+		 utf16be => 'n',
+		 utf16le => 'v',
+		);
 
-$i++; do_require(qq(${utf8}print "ok $i\n"; 1;\n));
-
-sub bytes_to_utf16 {
-    my $utf16 = pack("$_[0]*", unpack("C*", $_[1]));
-    return @_ == 3 && $_[2] ? pack("$_[0]", 0xFEFF) . $utf16 : $utf16;
+sub bytes_to_utf {
+    my ($enc, $content, $do_bom) = @_;
+    my $template = $templates{$enc};
+    die "Unsupported encoding $enc" unless $template;
+    return pack "$template*", ($do_bom ? 0xFEFF : ()), unpack "C*", $content;
 }
 
-$i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
-$i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
+foreach (sort keys %templates) {
+    print "# $_\n";
+
+    $i++; do_require(bytes_to_utf($_, qq(print "ok $i\\n"; 1;\n), 1));
+}
 
 END {
     foreach my $file (@fjles_to_delete) {
