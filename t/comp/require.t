@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 47;
+my $total_tests = 48;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -92,6 +92,12 @@ print "ok ",$i++,"\n";
       unless v1.20.300.4000.50000.600000 eq "\x{1}\x{14}\x{12c}\x{fa0}\x{c350}\x{927c0}";
     print "ok ",$i++,"\n";
 }
+
+# "use 5.11.0" (and higher) loads strictures.
+# check that this doesn't happen with require
+eval 'require 5.11.0; ${"foo"} = "bar";';
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
 
 # interaction with pod (see the eof)
 write_file('bleah.pm', "print 'ok $i\n'; 1;\n");
