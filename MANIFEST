@@ -4440,6 +4440,7 @@ t/porting/diag.t		Test completeness of perldiag.pod
 t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/porting/podcheck.t		Test the POD of shipped modules is well formed
+t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping aren't accidentally overlooked.
 t/README			Instructions for regression tests
 t/re/pat_advanced.t		See if advanced esoteric patterns work
 t/re/pat_advanced_thr.t		See if advanced esoteric patterns work in another thread
