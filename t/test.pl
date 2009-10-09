@@ -415,8 +415,9 @@ sub _quote_args {
 	# In VMS protect with doublequotes because otherwise
 	# DCL will lowercase -- unless already doublequoted.
        $_ = q(").$_.q(") if $is_vms && !/^\"/ && length($_) > 0;
-       $$runperl = $$runperl . ' ' . $_;
+       $runperl = $runperl . ' ' . $_;
     }
+    return $runperl;
 }
 
 sub _create_runperl { # Create the string to qx in runperl().
@@ -436,7 +437,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	local $Level = 2;
 	die "test.pl:runperl(): 'switches' must be an ARRAYREF " . _where()
 	    unless ref $args{switches} eq "ARRAY";
-	_quote_args(\$runperl, $args{switches});
+	$runperl = _quote_args($runperl, $args{switches});
     }
     if (defined $args{prog}) {
 	die "test.pl:runperl(): both 'prog' and 'progs' cannot be used " . _where()
@@ -479,7 +480,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	}
     }
     if (defined $args{args}) {
-	_quote_args(\$runperl, $args{args});
+	$runperl = _quote_args($runperl, $args{args});
     }
     $runperl = $runperl . ' 2>&1' if $args{stderr};
     if ($args{verbose}) {
