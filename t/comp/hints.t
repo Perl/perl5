@@ -2,11 +2,7 @@
 
 # Tests the scoping of $^H and %^H
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = qw(. ../lib);
-}
-
+@INC = '../lib';
 
 BEGIN { print "1..32\n"; }
 BEGIN {
@@ -82,20 +78,9 @@ BEGIN {
     }
 }
 
-require 'test.pl';
-
-# bug #27040: hints hash was being double-freed
-my $result = runperl(
-    prog => '$^H |= 0x20000; eval q{BEGIN { $^H |= 0x20000 }}',
-    stderr => 1
-);
-print "not " if length $result;
-print "ok 15 - double-freeing hints hash\n";
-print "# got: $result\n" if length $result;
-
 {
     BEGIN{$^H{x}=1};
-    for my $tno (16..17) {
+    for my $tno (15..16) {
         eval q(
             print $^H{x}==1 && !$^H{y} ? "ok $tno\n" : "not ok $tno\n";
             $^H{y} = 1;
@@ -109,19 +94,19 @@ print "# got: $result\n" if length $result;
 
 {
     $[ = 11;
-    print +($[ == 11 ? "" : "not "), "ok 18 - setting \$[ affects \$[\n";
+    print +($[ == 11 ? "" : "not "), "ok 17 - setting \$[ affects \$[\n";
     our $t11; BEGIN { $t11 = $^H{'$['} }
-    print +($t11 == 11 ? "" : "not "), "ok 19 - setting \$[ affects \$^H{'\$['}\n";
+    print +($t11 == 11 ? "" : "not "), "ok 18 - setting \$[ affects \$^H{'\$['}\n";
 
     BEGIN { $^H{'$['} = 22 }
-    print +($[ == 22 ? "" : "not "), "ok 20 - setting \$^H{'\$['} affects \$[\n";
+    print +($[ == 22 ? "" : "not "), "ok 19 - setting \$^H{'\$['} affects \$[\n";
     our $t22; BEGIN { $t22 = $^H{'$['} }
-    print +($t22 == 22 ? "" : "not "), "ok 21 - setting \$^H{'\$['} affects \$^H{'\$['}\n";
+    print +($t22 == 22 ? "" : "not "), "ok 20 - setting \$^H{'\$['} affects \$^H{'\$['}\n";
 
     BEGIN { %^H = () }
-    print +($[ == 0 ? "" : "not "), "ok 22 - clearing \%^H affects \$[\n";
+    print +($[ == 0 ? "" : "not "), "ok 21 - clearing \%^H affects \$[\n";
     our $t0; BEGIN { $t0 = $^H{'$['} }
-    print +($t0 == 0 ? "" : "not "), "ok 23 - clearing \%^H affects \$^H{'\$['}\n";
+    print +($t0 == 0 ? "" : "not "), "ok 22 - clearing \%^H affects \$^H{'\$['}\n";
 }
 
 {
@@ -129,18 +114,33 @@ print "# got: $result\n" if length $result;
     BEGIN { $^H |= 0x04000000; $^H{foo} = "z"; }
 
     our($ri0, $rf0); BEGIN { $ri0 = $^H; $rf0 = $^H{foo}; }
-    print +($[ == 13 ? "" : "not "), "ok 24 - \$[ correct before require\n";
-    print +($ri0 & 0x04000000 ? "" : "not "), "ok 25 - \$^H correct before require\n";
-    print +($rf0 eq "z" ? "" : "not "), "ok 26 - \$^H{foo} correct before require\n";
+    print +($[ == 13 ? "" : "not "), "ok 23 - \$[ correct before require\n";
+    print +($ri0 & 0x04000000 ? "" : "not "), "ok 24 - \$^H correct before require\n";
+    print +($rf0 eq "z" ? "" : "not "), "ok 25 - \$^H{foo} correct before require\n";
 
     our($ra1, $ri1, $rf1, $rfe1);
     BEGIN { require "comp/hints.aux"; }
-    print +($ra1 == 0 ? "" : "not "), "ok 27 - \$[ cleared for require\n";
-    print +(!($ri1 & 0x04000000) ? "" : "not "), "ok 28 - \$^H cleared for require\n";
-    print +(!defined($rf1) && !$rfe1 ? "" : "not "), "ok 29 - \$^H{foo} cleared for require\n";
+    print +($ra1 == 0 ? "" : "not "), "ok 26 - \$[ cleared for require\n";
+    print +(!($ri1 & 0x04000000) ? "" : "not "), "ok 27 - \$^H cleared for require\n";
+    print +(!defined($rf1) && !$rfe1 ? "" : "not "), "ok 28 - \$^H{foo} cleared for require\n";
 
     our($ri2, $rf2); BEGIN { $ri2 = $^H; $rf2 = $^H{foo}; }
-    print +($[ == 13 ? "" : "not "), "ok 30 - \$[ correct after require\n";
-    print +($ri2 & 0x04000000 ? "" : "not "), "ok 31 - \$^H correct after require\n";
-    print +($rf2 eq "z" ? "" : "not "), "ok 32 - \$^H{foo} correct after require\n";
+    print +($[ == 13 ? "" : "not "), "ok 29 - \$[ correct after require\n";
+    print +($ri2 & 0x04000000 ? "" : "not "), "ok 30 - \$^H correct after require\n";
+    print +($rf2 eq "z" ? "" : "not "), "ok 31 - \$^H{foo} correct after require\n";
 }
+
+# Add new tests above this require, in case it fails.
+require './test.pl';
+
+# bug #27040: hints hash was being double-freed
+my $result = runperl(
+    prog => '$^H |= 0x20000; eval q{BEGIN { $^H |= 0x20000 }}',
+    stderr => 1
+);
+print "not " if length $result;
+print "ok 32 - double-freeing hints hash\n";
+print "# got: $result\n" if length $result;
+
+__END__
+# Add new tests above require 'test.pl'
