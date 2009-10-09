@@ -1,12 +1,52 @@
 #!perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require "./test.pl";
+print "1..39\n";
+my $test = 0;
+
+sub failed {
+    my ($got, $expected) = @_;
+
+    print "not ok $test\n";
+    my @caller = caller(1);
+    print "# Failed test at $caller[1] line $caller[2]\n";
+    if (defined $got) {
+	print "# Got '$got'\n";
+    } else {
+	print "# Got undef\n";
+    }
+    print "# Expected $expected\n";
+    return;
 }
 
-plan(tests => 39);
+sub like {
+    my ($got, $pattern) = @_;
+    $test = $test + 1;
+    if (defined $got && $got =~ $pattern) {
+	print "ok $test\n";
+	# Principle of least surprise - maintain the expected interface, even
+	# though we aren't using it here (yet).
+	return 1;
+    }
+    failed($got, $pattern);
+}
+
+sub is {
+    my ($got, $expect) = @_;
+    $test = $test + 1;
+    if (defined $expect) {
+	if (defined $got && $got eq $expect) {
+	    print "ok $test\n";
+	    return 1;
+	}
+	failed($got, "'$expect'");
+    } else {
+	if (!defined $got) {
+	    print "ok $test\n";
+	    return 1;
+	}
+	failed($got, 'undef');
+    }
+}
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
