@@ -586,6 +586,12 @@ Tag the release:
 
     $ git tag v5.11.0 -m'First release of the v5.11 series!'
 
+It is VERY important that from this point forward, you not push
+your git changes to the Perl master repository.  If anything goes
+wrong before you publish your newly-created tag, you can delete
+and recreate it.  Once you push your tag, we're stuck with it
+and you'll need to use a new version number for your release.
+
 =item *
 
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
@@ -762,13 +768,11 @@ Upload both the .gz and .bz2 versions of the tarball.
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Create a tag for the exact git revision you built the release from.
-C<commit> below is the commit corresponding to the tarball. It can be
-omitted if there have been no further commits since the tarball was
-created, for example:
 
-    $ git tag perl-5.10.1-RC1 -m'Release Candidate 1 of Perl 5.10.1' <commit>
-    $ git push origin tag perl-5.10.1-RC1
+Now that you've shipped the new perl release to PAUSE, it's
+time to publish the tag you created earlier to the public git repo:
+
+    $ git push origin tag v5.11.0
 
 =item *
 
