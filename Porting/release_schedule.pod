@@ -22,6 +22,8 @@ you should reset the version numbers to the next blead series.
 =head2 2010
 
  January 20      -  5.11.4  -   Ricardo Signes
+ February 20     -  5.11.5  -   Steve Hay
+ March 20        -  5.11.6  -   Ask Bjørn Hansen
 
 =head1 VICTIMS
 
@@ -33,6 +35,9 @@ Jesse Vincent <F<jesse@cpan.org>>
 Leon Brocard <F<acme@astray.com>>
 Yves Orton <F<demerphq@gmail.com>>
 Ricardo Signes <F<rjbs@manxome.org>>
+Steve Hay <F<stevehay@planit.com>>
+Ask Bjørn Hansen <F<ask@perl.org>>
+
 
 =head2 Reticent victims
 
