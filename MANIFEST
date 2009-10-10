@@ -163,6 +163,7 @@ cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
 cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
 cpan/B-Lint/t/lint.t				See if B::Lint works
 cpan/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
+cpan/CGI/Changes		Changelog for CGI.pm
 cpan/CGI/examples/caution.xbm		CGI example
 cpan/CGI/examples/clickable_image.cgi	CGI example
 cpan/CGI/examples/cookie.cgi		CGI example
@@ -187,7 +188,6 @@ cpan/CGI/examples/tryit.cgi		CGI example
 cpan/CGI/examples/wilogo_gif.uu		CGI example
 cpan/CGI/lib/CGI/Apache.pm		Support for Apache's Perl module
 cpan/CGI/lib/CGI/Carp.pm		Log server errors with helpful context
-cpan/CGI/lib/CGI/Changes		Changelog for CGI.pm
 cpan/CGI/lib/CGI/Cookie.pm		Interface to Netscape Cookies
 cpan/CGI/lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
 cpan/CGI/lib/CGI.pm			Web server interface ("Common Gateway Interface")
