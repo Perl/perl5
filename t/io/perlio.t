@@ -9,7 +9,7 @@ BEGIN {
 	require './test.pl';
 }
 
-plan tests => 39;
+plan tests => 40;
 
 use_ok('PerlIO');
 
@@ -142,6 +142,30 @@ SKIP: {
         ok( open(STDERR,">",\$var), '       open STDERR into in-memory var');
         open STDERR,  ">&OLDERR" or die "cannot dup OLDERR: $!";
     }
+}
+
+
+{ local $TODO = 'fails well back into 5.8.x';
+
+	
+sub read_fh_and_return_final_rv {
+	my ($fh) = @_;
+	my $buf = '';
+	my $rv;
+	for (1..3) {
+		$rv = read($fh, $buf, 1, length($buf));
+		next if $rv;
+	}
+	return $rv
+}
+
+open(my $no_perlio, '<', \'ab') or die; 
+open(my $perlio, '<:crlf', \'ab') or die; 
+
+is(read_fh_and_return_final_rv($perlio), read_fh_and_return_final_rv($no_perlio), "RT#69332 - perlio should return the same value as nonperlio after EOF");
+
+close ($perlio);
+close ($no_perlio);
 }
 
 
