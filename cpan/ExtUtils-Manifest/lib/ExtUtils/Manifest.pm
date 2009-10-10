@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS $Is_VMS_mode $Is_VMS_lc $Is_VMS_nodot
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.56';
+$VERSION = '1.57';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -268,7 +268,7 @@ sub skipcheck {
     my @skipped = ();
     foreach my $file (_sort keys %$found){
         if (&$matches($file)){
-            warn "Skipping $file\n";
+            warn "Skipping $file\n" unless $Quiet;
             push @skipped, $file;
             next;
         }
@@ -409,13 +409,17 @@ sub maniskip {
     local(*M, $_);
     open M, "< $mfile" or open M, "< $DEFAULT_MSKIP" or return sub {0};
     while (<M>){
-	chomp;
-	s/\r//;
-	next if /^#/;
-	next if /^\s*$/;
-        s/^'//;
-        s/'$//;
-	push @skip, _macify($_);
+      chomp;
+      s/\r//;
+      $_ =~ qr{^\s*(?:(?:'([^\\']*(?:\\.[^\\']*)*)')|([^#\s]\S*))?(?:(?:\s*)|(?:\s+(.*?)\s*))$};
+      #my $comment = $3;
+      my $filename = $2;
+      if ( defined($1) ) { 
+        $filename = $1; 
+        $filename =~ s/\\(['\\])/$1/g;
+      }
+      next if (not defined($filename) or not $filename);
+      push @skip, _macify($filename);
     }
     close M;
     return sub {0} unless (scalar @skip > 0);
