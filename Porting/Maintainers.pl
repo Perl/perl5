@@ -550,9 +550,8 @@ use File::Glob qw(:case);
     'ExtUtils::CBuilder' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.2602.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.260301.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-CBuilder],
-	'EXCLUDED'	=> [ qw{devtools} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},
