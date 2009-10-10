@@ -1129,7 +1129,7 @@ differ from the system on which it's being run:
 	my $hisiaddr = inet_aton($host)     || die "unknown host";
 	my $hispaddr = sockaddr_in($port, $hisiaddr);
 	socket(SOCKET, PF_INET, SOCK_STREAM, $proto)   || die "socket: $!";
-	connect(SOCKET, $hispaddr)          || die "bind: $!";
+	connect(SOCKET, $hispaddr)          || die "connect: $!";
 	my $rtime = '    ';
 	read(SOCKET, $rtime, 4);
 	close(SOCKET);
