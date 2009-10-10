@@ -8,7 +8,7 @@ print $query->start_html('Popup Window');
 
 if (!$query->param) {
     print "<H1>Ask your Question</H1>\n";
-    print $query->startform(-target=>'_new');
+    print $query->start_form(-target=>'_new');
     print "What's your name? ",$query->textfield('name');
     print "<P>What's the combination?<P>",
     $query->checkbox_group(-name=>'words',

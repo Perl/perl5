@@ -1,16 +1,93 @@
+Version 3.48
+
+  [BUG FIXES]
+  1. <optgroup> default values are now properly escaped.
+     Thanks to #raleigh.pm and Mark Stosberg. (RT#49606)
+  2. The change to exception handling in CGI::Carp introduced in 3.47 has been
+     reverted for now. It caused regressions reported in RT#49630. 
+     Thanks to mkanat for the report.
+
+  [DOCUMENTATION]
+  1. Documentation for upload() has been overhauled, thanks to Mark Stosberg. 
+  2. Documentation for tmpFileName has been added. Thanks to Mark Stosberg and Nathaniel K. Smith.
+  3. URLS were updated, thanks to Leon Brocard and Yanick Champoux. (RT#49770)
+
+  [INTERNALS]
+  1. More tests were added for autoescape, thanks to Bob Kuo. (RT#25485)
+
+Version 3.47
+  Released September 9th, 2009.
+  No code changes. 
+
+  [INTERNALS]
+    Re-release of 3.46, which did not contain a proper MANIFEST
+
+Version 3.46
+  [BUG FIXES]
+  1. In CGI::Pretty, we no longer add line breaks after tags we claim not to format. Thanks to rrt, Bob Kuo and
+     and Mark Stosberg. (RT#42114).
+  2. unescapeHTML() no longer falsely recognizes certain text as entities. Thanks to Pete Gamanche, Mark Stosberg
+     and Bob Kuo. (RT#39122)
+  3. checkbox_group() now correctly includes a space before the "checked" attribute.
+     Thanks to Andrew Speer and Bob Kuo. (RT#36583)
+  4. Fix case-sensitivity in http() and https() according to docs. Make https()
+     return list of keys in list context. Thanks to riQyRoe and Rhesa Rozendaal. (RT#12909)
+  5. XHTML is now automatically disabled for HTML 4, as well as HTML 2 and HTML 3. Thanks to
+     Dan Harkless and Yanick Champoux. (RT#27907)
+  6. Pre-compiling 'end_form' with ':form' switch now works. Thanks to ryochin and Yanick Champoux. (RT#41530)
+  7. Empty name/values pairs are now properly saved and restored from filehandles. Thanks to rlucas and
+     Rhesa Rozendaal (RT#13158)
+  8. Some differences between startform() and start_form() have been fixed. Thanks to Slaven Rezic and
+     Shawn Corey. (RT#22046)
+  9. url_param() has been updated to be more consistent with the documentation and param().
+     Thanks to Britton Kerin and Yanick Campoux. (RT#43587)
+  10.hidden() now correctly supports multiple default values.
+     Thanks to david@dierauer.net and Russell Jenkins. (RT#20436)
+  11.Calling CGI->new() no longer clobbers the value of $_ in the current scope.
+     Thanks to Alexey Tourbin, Bob Kuo and Mark Stosberg. (RT#25131)
+  12.UTF-8 params should not get double-decoded now.
+     Thanks to Yves, Bodo, Burak Gürsoy, and Michael Schout. (RT#19913)
+  13.We now give objects passed to CGI::Carp::die a chance to be stringified.
+     Thanks to teek and Yanick Champoux (RT#41530)
+  14.Turning off autoEscape() now only affects the behavior of built-in HTML
+     generation fuctions. Explicit calls to escapeHTML() always escape HTML regardless
+     of the setting. Thanks to vindex, Bob Kuo and Mark Stosberg (RT#40748)
+  15.In CGI::Fast, preferences set via pragmas are now preserved.
+     Thanks to heinst and Mark Stosberg (RT#32119)
+
+  [DOCUMENTATION]
+  1. remote_addr() is now documented. Thanks to Yanick Champoux. (RT#38884)
+  2. In CGI::Pretty in the list of tags left unformatted was updated to match the code. Thanks to Mark Stosberg. (RT#42114)
+  3. In CGI::Pretty, performance concerns are now documented. Thanks to Jochen, Rhesa Rozendaal and Mark Stosberg (RT#13223)
+  4. A number of outdated Netscape references have been removed. Thanks to Mark Stosberg.
+  5. The documentation has been purged of examples of using indirect object notation. Thanks to Mark Stosberg.
+  6. Some POD formatting was fixed. Thanks to Dave Mitchell (RT#48935).
+  7. Docs and examples were updated to highlight start_form instead of startform.
+     Thanks to Slaven Rezic.
+  8. Note that CGI::Carp::carpout() doesn't work with in-memory filehandles. 
+     Thanks to rhubbell and Mark Stosberg. 
+  9. The documentation for the -newstyle_urls is now less confusing.
+     Thanks to Ryan Tate and Mark Stosberg (RT#49454)
+
+  [INTERNALS]
+  1. Quit bundling an ancient copy of Test::More and and using a custom 'lib' path for the tests. Instead, Test::More
+     is now a dependency. Thanks to Ansgar and Mark Stosberg (RT#48811)
+  2. Automated tests for hidden() have been added, thanks to Russel Jenkins and Mark Stosberg (RT#20436)
+  3. t/util.t has been updated to use Test::More instead of a home-grown test function. Thanks to Bob Kuo.
+
 Version 3.45
   [BUG FIXES]
   1. Prevent warnings about "uninitialized values" for REQUEST_URI, HTTP_USER_AGENT and other environment variables.
      Patches by Callum Gibson, heiko and Mark Stosberg. (RT#24684, RT#29065)
-  2. Avoid death in some cases when running under Taint mode on Windows. 
+  2. Avoid death in some cases when running under Taint mode on Windows.
      Patch by Peter Hancock (RT#43796)
   3. Allow 0 to be used as a default value in popup_menu(). This was broken starting in 3.37.
      Thanks to Haze, who was the first to report this and supply a patch, and pfschill, who pinpointed
      when the bug was introduced. A regression test for this was also added. (RT#37908)
-  4. Allow "+" as a valid character in file names, which fixes temp file creation on OS X Leopard.  
-     Thanks to Andy Armstrong, and alech for patches. (RT#30504) 
+  4. Allow "+" as a valid character in file names, which fixes temp file creation on OS X Leopard.
+     Thanks to Andy Armstrong, and alech for patches. (RT#30504)
   5. Set binmode() on the Netware platform, thanks to Guenter Knauf (RT#27455)
-  6. Don't allow a CGI::Carp error handler to die recursively. Print a warning and exit instead. 
+  6. Don't allow a CGI::Carp error handler to die recursively. Print a warning and exit instead.
      Thanks to Marc Chantreux. (RT#45956)
   7. The Dump() method now is fixed to escape HTML properly. Thanks to Mark Stosberg (RT#21341)
   8. Support for <optgroup> with scrolling_list() now works the same way as it does for popup_menu().
@@ -27,20 +104,20 @@ Version 3.45
   5. The docs for redirect() were updated to reflect that most headers are
      ignored during redirection. Thanks to Mark Stosberg (RT#44911)
 
-  [INTERNALS]  
+  [INTERNALS]
   1. New t/unescapeHTML.t test script has been added. It includes a TODO test for a pre-existing
      bug which could use a patch. Thanks to Pete Gamache and Mark Stosberg (RT#39122)
   2. New test scripts have been added for user_agent(), popup_menu() and query_string(), scrolling_list() and Dump()
      Thanks to Mark Stosberg and Stuart Johnston. (RT#37908, RT#43006, RT#21341, RT#30097)
-  3. CGI::Carp and CGI::Util have been updated to have non-developer version numbers. 
+  3. CGI::Carp and CGI::Util have been updated to have non-developer version numbers.
      Thanks to Slaven Rezic. (RT#48425)
-  4. CGI::Switch and CGI::Apache now properly set their VERSION in their own name space.  
+  4. CGI::Switch and CGI::Apache now properly set their VERSION in their own name space.
      Thanks to Alexey Tourbin (RT#11941,RT#11942)
 
   Version 3.44
   1. Patch from Kurt Jaeger to allow HTTP PUT even if the content length is unknown.
   2. Patch from Pavel merdin to fix a problem for one of the FireFox addons.
-  3. Fixed issue in mod_perl & fastCGI environment of cookies returned from 
+  3. Fixed issue in mod_perl & fastCGI environment of cookies returned from
      CGI->cookie() leaking from one session to another.
 
   Version 3.43
@@ -210,7 +287,7 @@ Version 3.45
 
   Version 3.14 Tue Dec  6 17:12:03 EST 2005
    1. Fixed broken scrolling_list() select attribute.
-	
+
   Version 3.13
     1. Removed extraneous empty "?" from end of self_url().
 
@@ -234,7 +311,7 @@ Version 3.45
   Version 3.11
     1. Killed warning in CGI::Cookie about MOD_PERL_API_VERSION
     2. Fixed append() so that it works in function mode.
-    3. Workaround for a bug that appears in Apache2 versions through 2.0.54 
+    3. Workaround for a bug that appears in Apache2 versions through 2.0.54
        in which SCRIPT_NAME and PATH_INFO are incorrect if the additional path_info
        contains a double slash. This workaround will handle the common case of
        http://mysite.com/cgi-bin/log.cgi/http://www.some.other.site/args, but will
@@ -268,7 +345,7 @@ Version 3.45
     5. Tests for *tag start/end generation from Shlomi Fish.
     6. Support for can() method provided by Ron Savage.
     7. Fix for lang='' when outputting XHTML.
-    8. Added support for chunked transfer encoding, as suggested by 
+    8. Added support for chunked transfer encoding, as suggested by
 	Hakan Ardo
     9. Fixed clobbering of row and column headers in tableized radio
 	and checkbox groups, as reported by Nicolas Thierry-Mieg.
@@ -1109,7 +1186,7 @@ Version 3.45
     4. HTML shortcuts now generate tags in ALL UPPERCASE.
     5. start_html() now generates correct SGML header:
       <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-      
+
     6. CGI::Carp no longer fails "use strict refs" pragma.
 
   Version 2.25

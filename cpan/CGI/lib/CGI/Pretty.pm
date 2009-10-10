@@ -10,7 +10,7 @@ package CGI::Pretty;
 use strict;
 use CGI ();
 
-$CGI::Pretty::VERSION = '3.44';
+$CGI::Pretty::VERSION = '3.46';
 $CGI::DefaultClass = __PACKAGE__;
 $CGI::Pretty::AutoloadClass = 'CGI';
 @CGI::Pretty::ISA = qw( CGI );
@@ -114,9 +114,8 @@ sub _make_tag_func {
 
             my \@result;
             if ( exists \$ASIS{ "\L$tagname\E" } ) {
-		\@result = map { "\$tag\$_\$untag\$CGI::Pretty::LINEBREAK" } 
-		 \@args;
-	    }
+                \@result = map { "\$tag\$_\$untag" } \@args;
+            }
 	    else {
 		\@result = map { 
 		    chomp; 
@@ -173,6 +172,7 @@ sub initialize_globals {
     $CGI::Pretty::LINEBREAK = $/;
 
     # These tags are not prettify'd.
+    # When this list is updated, also update the docs.
     @CGI::Pretty::AS_IS = qw( a pre code script textarea td );
 
     1;
@@ -245,21 +245,29 @@ it.
 now produces the following output:
     <TABLE>
        <TR>
-          <TD>
-             foo
-          </TD>
+          <TD>foo</TD>
        </TR>
     </TABLE>
 
+=head2 Recommendation for when to use CGI::Pretty
+
+CGI::Pretty is far slower than using CGI.pm directly. A benchmark showed that
+it could be about 10 times slower. Adding newslines and spaces may alter the
+rendered appearance of HTML. Also, the extra newlines and spaces also make the
+file size larger, making the files take longer to download.
+
+With all those considerations, it is recommended that CGI::Pretty be used
+primarily for debugging.
 
 =head2 Tags that won't be formatted
 
-The <A> and <PRE> tags are not formatted.  If these tags were formatted, the
+The following tags are not formatted: <a>, <pre>, <code>, <script>, <textarea>, and <td>.
+If these tags were formatted, the
 user would see the extra indentation on the web browser causing the page to
 look different than what would be expected.  If you wish to add more tags to
 the list of tags that are not to be touched, push them onto the C<@AS_IS> array:
 
-    push @CGI::Pretty::AS_IS,qw(CODE XMP);
+    push @CGI::Pretty::AS_IS,qw(XMP);
 
 =head2 Customizing the Indenting
 
@@ -281,10 +289,6 @@ If you decide you want to use the regular CGI indenting, you can easily do
 the following:
 
     $CGI::Pretty::INDENT = $CGI::Pretty::LINEBREAK = "";
-
-=head1 BUGS
-
-This section intentionally left blank.
 
 =head1 AUTHOR
 

@@ -7,7 +7,7 @@ require Exporter;
 @EXPORT_OK = qw(rearrange rearrange_header make_attributes unescape escape 
 		expires ebcdic2ascii ascii2ebcdic);
 
-$VERSION = '3.45';
+$VERSION = '3.48';
 
 $EBCDIC = "\t" ne "\011";
 # (ord('^') == 95) for codepage 1047 as on os390, vmesa
@@ -248,7 +248,7 @@ sub escape {
   shift() if @_ > 1 and ( ref($_[0]) || (defined $_[1] && $_[0] eq $CGI::DefaultClass));
   my $toencode = shift;
   return undef unless defined($toencode);
-  utf8::encode($toencode) if ($] > 5.007 && utf8::is_utf8($toencode));
+  utf8::encode($toencode) if ($] > 5.008001 && utf8::is_utf8($toencode));
     if ($EBCDIC) {
       $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {

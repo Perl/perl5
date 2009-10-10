@@ -54,7 +54,7 @@ sub print_end {
 sub print_query {
     $script_name = $query->script_name;
     print "<H1>Frameset Query</H1>\n";
-    print $query->startform(-action=>"$script_name/response",-TARGET=>"response");
+    print $query->start_form(-action=>"$script_name/response",-TARGET=>"response");
     print "What's your name? ",$query->textfield('name');
     print "<P>What's the combination?<P>",
     $query->checkbox_group(-name=>'words',

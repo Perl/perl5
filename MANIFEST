@@ -195,20 +195,28 @@ cpan/CGI/lib/CGI/Push.pm		Support for server push
 cpan/CGI/lib/CGI/Switch.pm		Simple interface for multiple server types
 cpan/CGI/lib/CGI/Util.pm		Utility functions
 cpan/CGI/t/apache.t			See if CGI::Apache still loads
+cpan/CGI/t/autoescape.t			See if CGI.pm works
 cpan/CGI/t/can.t			See if CGI.pm works
 cpan/CGI/t/carp.t			See if CGI::Carp works
+cpan/CGI/t/checkbox_group.t		See if CGI.pm works
 cpan/CGI/t/cookie.t			See if CGI::Cookie works
 cpan/CGI/t/Dump.t			See if CGI->Dump works
+cpan/CGI/t/end_form.t			See if CGI.pm works
 cpan/CGI/t/fast.t			See if CGI::Fast works (if FCGI is installed)
 cpan/CGI/t/form.t			See if CGI.pm works
 cpan/CGI/t/function.t			See if CGI.pm works
+cpan/CGI/t/hidden.t			See if CGI.pm works
 cpan/CGI/t/html.t			See if CGI.pm works
+cpan/CGI/t/http.t			See if CGI.pm works
+cpan/CGI/t/init.t			See if CGI.pm works
+cpan/CGI/t/init_test.txt		See if CGI.pm works
 cpan/CGI/t/no_tabindex.t		See if CGI.pm works
 cpan/CGI/t/popup_menu.t			See if CGI pop menus work
 cpan/CGI/t/pretty.t			See if CGI.pm works
 cpan/CGI/t/push.t			See if CGI::Push works
 cpan/CGI/t/query_string.t		See if CGI->query_string() works
 cpan/CGI/t/request.t			See if CGI.pm works
+cpan/CGI/t/save_read_roundtrip.t	See if CGI.pm works
 cpan/CGI/t/start_end_asterisk.t		See if CGI.pm works
 cpan/CGI/t/start_end_end.t		See if CGI.pm works
 cpan/CGI/t/start_end_start.t		See if CGI.pm works
@@ -218,6 +226,7 @@ cpan/CGI/t/uploadInfo.t			See if CGI.pm works
 cpan/CGI/t/upload_post_text.txt		Test data for CGI.pm
 cpan/CGI/t/upload.t			See if CGI.pm works
 cpan/CGI/t/user_agent.t			See if CGI->user_agent() works
+cpan/CGI/t/utf8.t			See if CGI.pm works
 cpan/CGI/t/util-58.t			See if 5.8-dependent features work
 cpan/CGI/t/util.t			See if CGI.pm works
 cpan/Class-ISA/ChangeLog		Changes for Class::ISA

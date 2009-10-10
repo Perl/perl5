@@ -5,10 +5,6 @@
 #  Shamelessly stolen from Data::FormValidator and CGI::Upload  #
 #################################################################
 
-# Due to a bug in older versions of MakeMaker & Test::Harness, we must
-# ensure the blib's are in @INC, else we might use the core CGI.pm
-use lib qw(. ./blib/lib ./blib/arch);
-
 use strict;
 
 use Test::More 'no_plan';

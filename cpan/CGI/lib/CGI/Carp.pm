@@ -70,6 +70,8 @@ compiler errors will be caught.  Example:
    }
 
 carpout() does not handle file locking on the log for you at this point.
+Also, note that carpout() does not work with in-memory file handles, although
+a patch would be welcome to address that.
 
 The real STDERR is not closed -- it is moved to CGI::Carp::SAVEERR.  Some
 servers, when dealing with CGI scripts, close their connection to the
@@ -77,7 +79,7 @@ browser when the script closes STDOUT and STDERR.  CGI::Carp::SAVEERR is there t
 prevent this from happening prematurely.
 
 You can pass filehandles to carpout() in a variety of ways.  The "correct"
-way according to Tom Christiansen is to pass a reference to a filehandle 
+way according to Tom Christiansen is to pass a reference to a filehandle
 GLOB:
 
     carpout(\*LOG);

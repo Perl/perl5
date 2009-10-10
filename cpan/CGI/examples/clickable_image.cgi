@@ -10,7 +10,7 @@ print <<END;
 END
 print "Sorry, this isn't very exciting!\n";
 
-print $query->startform;
+print $query->start_form;
 print $query->image_button('picture',"./wilogo.gif");
 print "Give me a: ",$query->popup_menu('letter',['A','B','C','D','E','W']),"\n"; # 
 print "<P>Magnification: ",$query->radio_group('magnification',['1X','2X','4X','20X']),"\n";

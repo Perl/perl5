@@ -1,4 +1,6 @@
 package CGI::Fast;
+use strict;
+$^W=1; # A way to say "use warnings" that's compatible with even older perls.
 
 # See the bottom of this file for the POD documentation.  Search for the
 # string '=head'.
@@ -9,7 +11,7 @@ package CGI::Fast;
 
 # Copyright 1995,1996, Lincoln D. Stein.  All rights reserved.
 # It may be used and modified freely, but I do request that this copyright
-# notice remain attached to the file.  You may modify this module as you 
+# notice remain attached to the file.  You may modify this module as you
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
@@ -17,13 +19,18 @@ $CGI::Fast::VERSION='1.07';
 
 use CGI;
 use FCGI;
+# use vars works like "our", but is compatible with older Perls.
+use vars qw(
+    @ISA
+    $ignore
+);
 @ISA = ('CGI');
 
 # workaround for known bug in libfcgi
 while (($ignore) = each %ENV) { }
 
 # override the initialization behavior so that
-# state is NOT maintained between invocations 
+# state is NOT maintained between invocations
 sub save_request {
     # no-op
 }
@@ -38,7 +45,7 @@ BEGIN {
 	my $path    = $ENV{FCGI_SOCKET_PATH};
 	my $backlog = $ENV{FCGI_LISTEN_QUEUE} || 100;
 	my $socket  = FCGI::OpenSocket( $path, $backlog );
-	$Ext_Request = FCGI::Request( \*STDIN, \*STDOUT, \*STDERR, 
+	$Ext_Request = FCGI::Request( \*STDIN, \*STDOUT, \*STDERR,
 					\%ENV, $socket, 1 );
    }
 }
@@ -55,7 +62,7 @@ sub new {
      }
      }
      CGI->_reset_globals;
-     $self->_setup_symbols(@SAVED_SYMBOLS) if @CGI::SAVED_SYMBOLS;
+     $self->_setup_symbols(@CGI::SAVED_SYMBOLS) if @CGI::SAVED_SYMBOLS;
      return $CGI::Q = $self->SUPER::new($initializer, @param);
 }
 
@@ -96,10 +103,10 @@ http://www.cpan.org/ for details.
 
 =head1 WRITING FASTCGI PERL SCRIPTS
 
-FastCGI scripts are persistent: one or more copies of the script 
+FastCGI scripts are persistent: one or more copies of the script
 are started up when the server initializes, and stay around until
 the server exits or they die a natural death.  After performing
-whatever one-time initialization it needs, the script enters a 
+whatever one-time initialization it needs, the script enters a
 loop waiting for incoming connections, processing the request, and
 waiting some more.
 
@@ -143,7 +150,7 @@ install, you must add something like the following to srm.conf:
 
     FastCgiServer /usr/etc/httpd/fcgi-bin/file_upload.fcgi -processes 2
 
-This instructs Apache to launch two copies of file_upload.fcgi at 
+This instructs Apache to launch two copies of file_upload.fcgi at
 startup time.
 
 =head1 USING FASTCGI SCRIPTS AS CGI SCRIPTS
@@ -174,7 +181,7 @@ script to which bind an listen for incoming connections from the web server.
 
 =item FCGI_LISTEN_QUEUE
 
-Maximum length of the queue of pending connections.  
+Maximum length of the queue of pending connections.
 
 =back
 
@@ -195,7 +202,7 @@ I haven't tested this very much.
 
 =head1 AUTHOR INFORMATION
 
-Copyright 1996-1998, Lincoln D. Stein.  All rights reserved.  
+Copyright 1996-1998, Lincoln D. Stein.  All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

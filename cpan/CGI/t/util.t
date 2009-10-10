@@ -2,24 +2,12 @@
 
 # Test ability to escape() and unescape() punctuation characters
 # except for qw(- . _).
-######################### We start with some black magic to print on failure.
-use lib '../blib/lib','../blib/arch';
 
-BEGIN {$| = 1; print "1..57\n"; }
-END {print "not ok 1\n" unless $loaded;}
+$| = 1;
+
+use Test::More tests => 57;
 use Config;
-use CGI::Util qw(escape unescape);
-$loaded = 1;
-print "ok 1\n";
-
-######################### End of black magic.
-
-# util
-sub test {
-    local($^W) = 0;
-    my($num, $true,$msg) = @_;
-    print($true ? "ok $num\n" : "not ok $num $msg\n");
-}
+use_ok ( 'CGI::Util', qw(escape unescape) );
 
 # ASCII order, ASCII codepoints, ASCII repertoire
 
@@ -42,10 +30,10 @@ foreach(sort(keys(%punct))) {
     $i++;
     my $escape = "AbC\%$punct{$_}dEF";
     my $cgi_escape = escape("AbC$_" . "dEF");
-    test($i, $escape eq $cgi_escape , "# $escape ne $cgi_escape");
+    is($escape, $cgi_escape , "# $escape ne $cgi_escape");
     $i++;
     my $unescape = "AbC$_" . "dEF";
     my $cgi_unescape = unescape("AbC\%$punct{$_}dEF");
-    test($i, $unescape eq $cgi_unescape , "# $unescape ne $cgi_unescape");
+    is($unescape, $cgi_unescape , "# $unescape ne $cgi_unescape");
 }
 

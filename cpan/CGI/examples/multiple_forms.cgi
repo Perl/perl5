@@ -8,7 +8,7 @@ print $query->start_html('Multiple Forms');
 print "<H1>Multiple Forms</H1>\n";
 
 # Print the first form
-print $query->startform;
+print $query->start_form;
 $name = $query->remote_user || 'anonymous@' . $query->remote_host;
 
 print "What's your name? ",$query->textfield('name',$name,50);
@@ -22,7 +22,7 @@ print $query->endform;
 
 # Print the second form
 print "<HR>\n";
-print $query->startform;
+print $query->start_form;
 print "Some radio buttons: ",$query->radio_group('radio buttons',
 						 [qw{one two three four five}],'three'),"\n";
 print "<P>What's the password? ",$query->password_field('pass','secret');

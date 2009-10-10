@@ -1,24 +1,18 @@
-#!/usr/local/bin/perl -w
+#!/usr/local/bin/perl
 
-# Test ability to retrieve HTTP request info
-######################### We start with some black magic to print on failure.
-use lib '.','../blib/lib','../blib/arch';
+use strict;
+use warnings;
 
-BEGIN {$| = 1; print "1..34\n"; }
-END {print "not ok 1\n" unless $loaded;}
+use Test::More tests => 41;
+
 use CGI ();
 use Config;
-$loaded = 1;
-print "ok 1\n";
+
+my $loaded = 1;
+
+$| = 1;
 
 ######################### End of black magic.
-
-# util
-sub test {
-    local($^W) = 0;
-    my($num, $true,$msg) = @_;
-    print($true ? "ok $num\n" : "not ok $num $msg\n");
-}
 
 # Set up a CGI environment
 $ENV{REQUEST_METHOD}  = 'GET';
@@ -32,68 +26,90 @@ $ENV{SERVER_NAME}     = 'the.good.ship.lollypop.com';
 $ENV{REQUEST_URI}     = "$ENV{SCRIPT_NAME}$ENV{PATH_INFO}?$ENV{QUERY_STRING}";
 $ENV{HTTP_LOVE}       = 'true';
 
-$q = new CGI;
-test(2,$q,"CGI::new()");
-test(3,$q->request_method eq 'GET',"CGI::request_method()");
-test(4,$q->query_string eq 'game=chess;game=checkers;weather=dull',"CGI::query_string()");
-test(5,$q->param() == 2,"CGI::param()");
-test(6,join(' ',sort $q->param()) eq 'game weather',"CGI::param()");
-test(7,$q->param('game') eq 'chess',"CGI::param()");
-test(8,$q->param('weather') eq 'dull',"CGI::param()");
-test(9,join(' ',$q->param('game')) eq 'chess checkers',"CGI::param()");
-test(10,$q->param(-name=>'foo',-value=>'bar'),'CGI::param() put');
-test(11,$q->param(-name=>'foo') eq 'bar','CGI::param() get');
-test(12,$q->query_string eq 'game=chess;game=checkers;weather=dull;foo=bar',"CGI::query_string() redux");
-test(13,$q->http('love') eq 'true',"CGI::http()");
-test(14,$q->script_name eq '/cgi-bin/foo.cgi',"CGI::script_name()");
-test(15,$q->url eq 'http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi',"CGI::url()");
-test(16,$q->self_url eq 
+my $q = new CGI;
+ok $q,"CGI::new()";
+is $q->request_method => 'GET',"CGI::request_method()";
+is $q->query_string => 'game=chess;game=checkers;weather=dull',"CGI::query_string()";
+is $q->param(), 2,"CGI::param()";
+is join(' ',sort $q->param()), 'game weather',"CGI::param()";
+is $q->param('game'), 'chess',"CGI::param()";
+is $q->param('weather'), 'dull',"CGI::param()";
+is join(' ',$q->param('game')), 'chess checkers',"CGI::param()";
+ok $q->param(-name=>'foo',-value=>'bar'),'CGI::param() put';
+is $q->param(-name=>'foo'), 'bar','CGI::param() get';
+is $q->query_string, 'game=chess;game=checkers;weather=dull;foo=bar',"CGI::query_string() redux";
+is $q->http('love'), 'true',"CGI::http()";
+is $q->script_name, '/cgi-bin/foo.cgi',"CGI::script_name()";
+is $q->url, 'http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi',"CGI::url()";
+is $q->self_url,
      'http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi/somewhere/else?game=chess;game=checkers;weather=dull;foo=bar',
-     "CGI::url()");
-test(17,$q->url(-absolute=>1) eq '/cgi-bin/foo.cgi','CGI::url(-absolute=>1)');
-test(18,$q->url(-relative=>1) eq 'foo.cgi','CGI::url(-relative=>1)');
-test(19,$q->url(-relative=>1,-path=>1) eq 'foo.cgi/somewhere/else','CGI::url(-relative=>1,-path=>1)');
-test(20,$q->url(-relative=>1,-path=>1,-query=>1) eq 
+     "CGI::url()";
+is $q->url(-absolute=>1), '/cgi-bin/foo.cgi','CGI::url(-absolute=>1)';
+is $q->url(-relative=>1), 'foo.cgi','CGI::url(-relative=>1)';
+is $q->url(-relative=>1,-path=>1), 'foo.cgi/somewhere/else','CGI::url(-relative=>1,-path=>1)';
+is $q->url(-relative=>1,-path=>1,-query=>1), 
      'foo.cgi/somewhere/else?game=chess;game=checkers;weather=dull;foo=bar',
-     'CGI::url(-relative=>1,-path=>1,-query=>1)');
+     'CGI::url(-relative=>1,-path=>1,-query=>1)';
 $q->delete('foo');
-test(21,!$q->param('foo'),'CGI::delete()');
+ok !$q->param('foo'),'CGI::delete()';
 
 $q->_reset_globals;
 $ENV{QUERY_STRING}='mary+had+a+little+lamb';
-test(22,$q=new CGI,"CGI::new() redux");
-test(23,join(' ',$q->keywords) eq 'mary had a little lamb','CGI::keywords');
-test(24,join(' ',$q->param('keywords')) eq 'mary had a little lamb','CGI::keywords');
-test(25,$q=new CGI('foo=bar&foo=baz'),"CGI::new() redux");
-test(26,$q->param('foo') eq 'bar','CGI::param() redux');
-test(27,$q=new CGI({'foo'=>'bar','bar'=>'froz'}),"CGI::new() redux 2");
-test(28,$q->param('bar') eq 'froz',"CGI::param() redux 2");
+ok $q=new CGI,"CGI::new() redux";
+is join(' ',$q->keywords), 'mary had a little lamb','CGI::keywords';
+is join(' ',$q->param('keywords')), 'mary had a little lamb','CGI::keywords';
+ok $q=new CGI('foo=bar&foo=baz'),"CGI::new() redux";
+is $q->param('foo'), 'bar','CGI::param() redux';
+ok $q=new CGI({'foo'=>'bar','bar'=>'froz'}),"CGI::new() redux 2";
+is $q->param('bar'), 'froz',"CGI::param() redux 2";
 
 # test tied interface
 my $p = $q->Vars;
-test(29,$p->{bar} eq 'froz',"tied interface fetch");
+is $p->{bar}, 'froz',"tied interface fetch";
 $p->{bar} = join("\0",qw(foo bar baz));
-test(30,join(' ',$q->param('bar')) eq 'foo bar baz','tied interface store');
-test(31,exists $p->{bar});
+is join(' ',$q->param('bar')), 'foo bar baz','tied interface store';
+ok exists $p->{bar};
 
 # test posting
 $q->_reset_globals;
-if ($Config{d_fork}) {
-  $test_string = 'game=soccer&game=baseball&weather=nice';
-  $ENV{REQUEST_METHOD}='POST';
-  $ENV{CONTENT_LENGTH}=length($test_string);
-  $ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
-  if (open(CHILD,"|-")) {  # cparent
-    print CHILD $test_string;
-    close CHILD;
-    exit 0;
-  }
-  # at this point, we're in a new (child) process
-  test(32,$q=new CGI,"CGI::new() from POST");
-  test(33,$q->param('weather') eq 'nice',"CGI::param() from POST");
-  test(34,$q->url_param('big_balls') eq 'basketball',"CGI::url_param()");
-} else {
-  print "ok 32 # Skip\n";
-  print "ok 33 # Skip\n";
-  print "ok 34 # Skip\n";
+{
+  my $test_string = 'game=soccer&game=baseball&weather=nice';
+  local $ENV{REQUEST_METHOD}='POST';
+  local $ENV{CONTENT_LENGTH}=length($test_string);
+  local $ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
+
+  local *STDIN;
+  open STDIN, '<', \$test_string;
+
+  ok $q=new CGI,"CGI::new() from POST";
+  is $q->param('weather'), 'nice',"CGI::param() from POST";
+  is $q->url_param('big_balls'), 'basketball',"CGI::url_param()";
+}
+
+# test url_param 
+{
+    local $ENV{QUERY_STRING} = 'game=chess&game=checkers&weather=dull';
+
+    CGI::_reset_globals;
+    my $q = CGI->new;
+    # params present, param and url_param should return true
+    ok $q->param,     'param() is true if parameters';
+    ok $q->url_param, 'url_param() is true if parameters';
+
+    $ENV{QUERY_STRING} = '';
+
+    CGI::_reset_globals;
+    $q = CGI->new;
+    ok !$q->param,     'param() is false if no parameters';
+    ok !$q->url_param, 'url_param() is false if no parameters';
+
+    $ENV{QUERY_STRING} = 'tiger dragon';
+    CGI::_reset_globals;
+    $q = CGI->new;
+
+    is_deeply [$q->$_] => [ 'keywords' ], "$_ with QS='$ENV{QUERY_STRING}'" 
+        for qw/ param url_param /;
+
+    is_deeply [ sort $q->$_( 'keywords' ) ], [ qw/ dragon tiger / ],
+        "$_ keywords" for qw/ param url_param /;
 }

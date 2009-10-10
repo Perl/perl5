@@ -1,5 +1,4 @@
 # Test the user_agent method. 
-use lib 't/lib';
 use Test::More 'no_plan';
 use CGI;
 

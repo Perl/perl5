@@ -1,13 +1,8 @@
 #!/bin/perl -w
 
 use strict;
-use lib '.', 't/lib','../blib/lib','./blib/lib';
-use Test::More tests => 18;
-
-BEGIN { use_ok('CGI::Pretty') };
-
-# This is silly use_ok should take arguments
-use CGI::Pretty (':all');
+use Test::More tests => 17;
+use CGI::Pretty ':all';
 
 is(h1(), '<h1 />
 ',"single tag");
@@ -26,8 +21,7 @@ HTML
 
 is(p('hi',pre('there'),'frog'), <<HTML, "<pre> tags");
 <p>
-	hi <pre>there</pre>
-	frog
+	hi <pre>there</pre> frog
 </p>
 HTML
 
@@ -54,8 +48,7 @@ HTML
 
 is(p('hi',a({-href=>'frog'},'there'),'frog'), <<HTML,   "as-is");
 <p>
-	hi <a href="frog">there</a>
-	frog
+	hi <a href="frog">there</a> frog
 </p>
 HTML
 
@@ -100,9 +93,7 @@ is(table(TR(td(table(TR(td( [ qw( hi there frog ) ])))))), <<HTML,   "nested as-
 	<tr>
 		<td><table>
 			<tr>
-				<td>hi</td>
-				<td>there</td>
-				<td>frog</td>
+				<td>hi</td><td>there</td><td>frog</td>
 			</tr>
 		</table></td>
 	</tr>

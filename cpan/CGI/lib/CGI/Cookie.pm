@@ -363,7 +363,7 @@ MS Internet Explorer 6 Service Pack 1 and later.
 
 See this URL for more information:
 
-L<http://msdn.microsoft.com/workshop/author/dhtml/httponly_cookies.asp>
+L<http://msdn.microsoft.com/en-us/library/ms533046%28VS.85%29.aspx>
 
 =back
 

@@ -17,7 +17,7 @@ print "<A NAME=\"start\"></A>\n"; # an anchor point at the top
 # pick a default starting value;
 $query->param('amenu','FOO1') unless $query->param('amenu');
 
-print $query->startform;
+print $query->start_form;
 print $query->popup_menu('amenu',[('FOO1'..'FOO9')]);
 print $query->submit,$query->endform;
 

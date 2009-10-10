@@ -2,7 +2,6 @@
 
 # Tests for the query_string() method.
 
-use lib 't/lib';
 use Test::More 'no_plan';
 use CGI;
 

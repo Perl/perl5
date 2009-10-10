@@ -10,7 +10,7 @@ is(CGI::Util::escape($uri), "pe%F8%ED%E8ko.ogg", "Escape a Latin-2 string");
 # 2) is a valid utf-8 sequence, but not an UTF-8-flagged string
 #    This happens often: people write utf-8 strings to source, but forget
 #    to tell perl about it by "use utf8;"--this is obviously wrong, but we
-#    have to handle it gracefully, for compatibility with GCI.pm under
+#    have to handle it gracefully, for compatibility with CGI.pm under
 #    perl-5.8.x
 #
 $uri = "pe\x{c5}\x{99}\x{c3}\x{ad}\x{c4}\x{8d}ko.ogg";
