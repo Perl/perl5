@@ -1,3 +1,4 @@
+# encoding not error 0
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

@@ -1,4 +1,4 @@
-# t/html-para.t
+# Testing HTML titles
 
 BEGIN {
     if($ENV{PERL_CORE}) {

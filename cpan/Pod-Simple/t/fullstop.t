@@ -1,3 +1,4 @@
+# Testing hardening fullstop spaces
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

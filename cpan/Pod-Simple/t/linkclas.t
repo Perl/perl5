@@ -1,3 +1,4 @@
+# Testing the LinkSection class
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

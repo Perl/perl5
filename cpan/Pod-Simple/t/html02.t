@@ -1,4 +1,4 @@
-# t/html-styles.t
+# Testing HTML text styles
 
 BEGIN {
     if($ENV{PERL_CORE}) {

@@ -1,3 +1,4 @@
+# Testing tied output filehandle
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

@@ -1,3 +1,4 @@
+# Testing extend and accept_codes
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

@@ -1,3 +1,4 @@
+# head ends over
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

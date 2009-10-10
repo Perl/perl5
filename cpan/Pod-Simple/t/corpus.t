@@ -1,3 +1,4 @@
+# Testing a corpus of Pod files
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';

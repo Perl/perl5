@@ -1,3 +1,4 @@
+# fcodes L
 BEGIN {
     if($ENV{PERL_CORE}) {
         chdir 't';
