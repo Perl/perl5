@@ -328,8 +328,8 @@ sub end_Document   {
 sub start_B { $_[0]{'scratch'} .= '<b>' }
 sub end_B   { $_[0]{'scratch'} .= '</b>' }
 
-sub start_C { $_[0]{'scratch'} .= '<code>' }
-sub end_C   { $_[0]{'scratch'} .= '</code>' }
+sub start_C { $_[0]{'scratch'} .= '<code>'; $_[0]{'in_verbatim'} = 1; }
+sub end_C   { $_[0]{'scratch'} .= '</code>'; $_[0]{'in_verbatim'} = 0; }
 
 sub start_E { $_[0]{'scratch'} .= '&' }
 sub end_E   { $_[0]{'scratch'} .= ';' }

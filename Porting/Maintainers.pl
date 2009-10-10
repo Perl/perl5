@@ -1269,15 +1269,15 @@ use File::Glob qw(:case);
     'Pod::Simple' =>
 	{
 	'MAINTAINER'	=> 'arandal',
-	'DISTRIBUTION'	=> 'ARANDAL/Pod-Simple-3.07.tar.gz',
+	'DISTRIBUTION'	=> 'ARANDAL/Pod-Simple-3.08.tar.gz',
 	'FILES'		=> q[cpan/Pod-Simple],
-	# XXX these two files correspond to similar ones in bleed under
-	# pod/, but the bleed ones have newer changes, and also seem to
+	# XXX these two files correspond to similar ones in blead under
+	# pod/, but the blead ones have newer changes, and also seem to
 	# have been in blead a long time. I'm going to assume then that
 	# the blead versions of these two files are authoritative - DAPM
 	'EXCLUDED'	=> [ qw( lib/perlpod.pod lib/perlpodspec.pod ) ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'podlators' =>

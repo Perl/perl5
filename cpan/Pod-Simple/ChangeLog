@@ -1,6 +1,15 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2009-07-16   Allison Randal <allison@perl.org>
+	* Release 3.08
+
+	Fix installdirs for Perl versions where Pod::Simple was core;
+        RT#36446 & RT#39709, thanks to Jerry Hedden.
+
+	Fix encoding handling for code in paragraphs; RT#45829, thanks
+        to David Wheeler.
+
 2008-06-04   Allison Randal <allison@perl.org>
 	* Release 3.07
 
