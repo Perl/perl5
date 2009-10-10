@@ -2315,7 +2315,7 @@ cpan/Test-Simple/t/subtest/basic.t			Test::More test
 cpan/Test-Simple/t/subtest/die.t			Test::More test
 cpan/Test-Simple/t/subtest/do.t				Test::More test
 cpan/Test-Simple/t/subtest/exceptions.t			Test::More test
-cpan/Test-Simple/t/subtest/for_do_t.t			Test::More test
+cpan/Test-Simple/t/subtest/for_do_t.test		Test::More test
 cpan/Test-Simple/t/subtest/singleton.t			Test::More test
 cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
 cpan/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
