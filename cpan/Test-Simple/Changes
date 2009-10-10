@@ -1,25 +1,48 @@
+0.94  Wed Sep  2 11:17:47 PDT 2009
+    Releasing 0.93_01 as stable.
+
+
+0.93_01  Mon Jul 20 09:51:08 PDT 2009
+    Bug Fixes
+    * Make sure that subtest works with Test:: modules which call
+      Test::Builder->new at the top of their code. (Ovid)
+
+    Other
+    * subtest() returns!
+
+
 0.92  Fri Jul  3 11:08:56 PDT 2009
     Test Fixes
     * Silence noise on VMS in exit.t (Craig Berry)
     * Skip Builder/fork_with_new_stdout.t on systems without fork (Craig Berry)
-    
+
 
 0.90  Thu Jul  2 13:18:25 PDT 2009
     Docs
-    * Finally added a note about the "Wide character in print" warning and
-      how to work around it.
     * Note the IO::Stringy license in our copy of it.
       [test-more.googlecode.com 47]
+
+    Other
+    * This is a stable release for 5.10.1.  It does not include
+      the subtest() work in 0.89_01.
+
+
+0.89_01  Tue Jun 23 15:13:16 EDT 2009
+    New Features
+    * subtest() allows you to run more tests in their own plan.
+      (Thanks Ovid!)
+    * Test::Builder->is_passing() will let you check if the test is
+      currently passing.
+
+    Docs
+    * Finally added a note about the "Wide character in print" warning and
+      how to work around it.
 
     Test Fixes
     * Small fixes for integration with the Perl core
       [bleadperl eaa0815147e13cd4ab5b3d6ca8f26544a9f0c3b4]
     * exit code tests could be effected by errno when PERLIO=stdio
       [bleadperl c76230386fc5e6fba9fdbeab473abbf4f4adcbe3]
-
-    Other
-    * This is a stable release for 5.10.1.  It does not include
-      the subtest() work in 0.89_01.
 
 
 0.88  Sat May 30 12:31:24 PDT 2009

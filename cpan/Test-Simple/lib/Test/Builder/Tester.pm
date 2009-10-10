@@ -59,18 +59,6 @@ our @ISA = qw(Exporter);
 
 our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
 
-# _export_to_level and import stolen directly from Test::More.  I am
-# the king of cargo cult programming ;-)
-
-# 5.004's Exporter doesn't have export_to_level.
-sub _export_to_level {
-    my $pkg   = shift;
-    my $level = shift;
-    (undef) = shift;    # XXX redundant arg
-    my $callpkg = caller($level);
-    $pkg->export( $callpkg, @_ );
-}
-
 sub import {
     my $class = shift;
     my(@plan) = @_;
@@ -88,7 +76,7 @@ sub import {
         }
     }
 
-    __PACKAGE__->_export_to_level( 1, __PACKAGE__, @imports );
+    __PACKAGE__->export_to_level( 1, __PACKAGE__, @imports );
 }
 
 ###
@@ -399,13 +387,11 @@ your original tests.  Also, it may be hard to spot things like
 extraneous whitespace at the end of lines that may cause your test to
 fail even though the output looks similar.
 
-To assist you, if you have the B<Term::ANSIColor> module installed
-(which you should do by default from perl 5.005 onwards), C<test_test>
-can colour the background of the debug information to disambiguate the
-different types of output. The debug output will have it's background
-coloured green and red.  The green part represents the text which is
-the same between the executed and actual output, the red shows which
-part differs.
+To assist you C<test_test> can colour the background of the debug
+information to disambiguate the different types of output. The debug
+output will have it's background coloured green and red.  The green
+part represents the text which is the same between the executed and
+actual output, the red shows which part differs.
 
 The C<color> function determines if colouring should occur or not.
 Passing it a true or false value will enable or disable colouring
@@ -438,8 +424,8 @@ This is needed as otherwise it will trip out because we've run more
 tests than we strictly should have and it'll register any failures we
 had that we were testing for as real failures.
 
-The color function doesn't work unless B<Term::ANSIColor> is installed
-and is compatible with your terminal.
+The color function doesn't work unless B<Term::ANSIColor> is
+compatible with your terminal.
 
 Bugs (and requests for new features) can be reported to the author
 though the CPAN RT system:
@@ -458,9 +444,6 @@ This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
 
 =head1 NOTES
-
-This code has been tested explicitly on the following versions
-of perl: 5.7.3, 5.6.1, 5.6.0, 5.005_03, 5.004_05 and 5.004.
 
 Thanks to Richard Clamp E<lt>richardc@unixbeard.netE<gt> for letting
 me use his testing system to try this module out on.

@@ -78,7 +78,7 @@ warnings_like(qr/Use of uninitialized value.* at cmp_ok \[from $Filename line 64
 
 my $tb = Test::More->builder;
 
-my $err;
+my $err = '';
 $tb->failure_output(\$err);
 diag(undef);
 $tb->reset_outputs;

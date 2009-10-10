@@ -11,11 +11,18 @@ require Test::Builder;
 require Test::Builder::Module;
 require Test::Simple;
 
-my $dist_version = $Test::More::VERSION;
+my $dist_version = Test::More->VERSION;
 
 like( $dist_version, qr/^ \d+ \. \d+ $/x );
-is( $dist_version, $Test::Builder::VERSION,             'Test::Builder' );
-is( $dist_version, $Test::Builder::Module::VERSION,     'TB::Module' );
-is( $dist_version, $Test::Simple::VERSION,              'Test::Simple' );
+
+my @modules = qw(
+    Test::Simple
+    Test::Builder
+    Test::Builder::Module
+);
+
+for my $module (@modules) {
+    is( $dist_version, $module->VERSION, $module );
+}
 
 done_testing(4);

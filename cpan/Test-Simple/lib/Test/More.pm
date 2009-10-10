@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '0.92';
+our $VERSION = '0.94';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Builder::Module;
@@ -33,6 +33,7 @@ our @EXPORT = qw(ok use_ok require_ok
   done_testing
   can_ok isa_ok new_ok
   diag note explain
+  subtest
   BAIL_OUT
 );
 
@@ -242,7 +243,6 @@ exponential".
 
 All test functions take a name argument.  It's optional, but highly
 suggested that you use it.
-
 
 =head2 I'm ok, you're not ok.
 
@@ -596,6 +596,7 @@ sub isa_ok ($$;$) {
             }
             elsif( $error =~ /Can't call method "isa" without a package/ ) {
                 # It's something that can't even be a class
+                $obj_name = 'The thing' unless defined $obj_name;
                 $diag = "$obj_name isn't a class or reference";
             }
             else {
@@ -670,6 +671,58 @@ sub new_ok {
     }
 
     return $obj;
+}
+
+=item B<subtest>
+
+    subtest $name => \&code;
+
+subtest() runs the &code as its own little test with its own plan and
+its own result.  The main test counts this as a single test using the
+result of the whole subtest to determine if its ok or not ok.
+
+For example...
+
+  use Test::More tests => 3;
+ 
+  pass("First test");
+
+  subtest 'An example subtest' => sub {
+      plan tests => 2;
+
+      pass("This is a subtest");
+      pass("So is this");
+  };
+
+  pass("Third test");
+
+This would produce.
+
+  1..3
+  ok 1 - First test
+      1..2
+      ok 1 - This is a subtest
+      ok 2 - So is this
+  ok 2 - An example subtest
+  ok 3 - Third test
+
+A subtest may call "skip_all".  No tests will be run, but the subtest is
+considered a skip.
+
+  subtest 'skippy' => sub {
+      plan skip_all => 'cuz I said so';
+      pass('this test will never be run');
+  };
+
+Returns true if the subtest passed, false otherwise.
+
+=cut
+
+sub subtest($&) {
+    my ($name, $subtests) = @_;
+
+    my $tb = Test::More->builder;
+    return $tb->subtest(@_);
 }
 
 =item B<pass>
@@ -1213,9 +1266,6 @@ and you'll know immediately when they're fixed.
 Once a todo test starts succeeding, simply move it outside the block.
 When the block is empty, delete it.
 
-B<NOTE>: TODO tests require a Test::Harness upgrade else it will
-treat it as a normal failure.  See L<CAVEATS and NOTES>).
-
 
 =item B<todo_skip>
 
@@ -1648,17 +1698,6 @@ This may cause problems:
     use threads;
 
 5.8.1 and above are supported.  Anything below that has too many bugs.
-
-
-=item Test::Harness upgrade
-
-no_plan, todo and done_testing() depend on new Test::Harness features
-and fixes.  If you're going to distribute tests that use no_plan or
-todo your end-users will have to upgrade Test::Harness to the latest
-one on CPAN.  If you avoid no_plan and TODO tests, the stock
-Test::Harness will work fine.
-
-Installing Test::More should also upgrade Test::Harness.
 
 =back
 

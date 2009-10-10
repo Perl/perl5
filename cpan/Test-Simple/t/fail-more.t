@@ -24,7 +24,7 @@ package My::Test;
 # Test::Builder's own and the ending diagnostics don't come out right.
 require Test::Builder;
 my $TB = Test::Builder->create;
-$TB->plan(tests => 78);
+$TB->plan(tests => 80);
 
 sub like ($$;$) {
     $TB->like(@_);
@@ -51,7 +51,7 @@ package main;
 
 require Test::More;
 our $TODO;
-my $Total = 37;
+my $Total = 38;
 Test::More->import(tests => $Total);
 $out->read;  # clear the plan from $out
 
@@ -254,6 +254,16 @@ OUT
 #   Failed test 'My Wibble isa Wibble'
 #   at $0 line 248.
 #     My Wibble isn't a class or reference
+ERR
+
+#line 248
+isa_ok(42,    "Wibble");
+out_ok( <<OUT, <<ERR );
+not ok - The thing isa Wibble
+OUT
+#   Failed test 'The thing isa Wibble'
+#   at $0 line 248.
+#     The thing isn't a class or reference
 ERR
 
 #line 258

@@ -266,7 +266,7 @@ or we could set up a little try/expect loop.
     use Date::ICal;
 
     my %ICal_Dates = (
-            # An ICal string     And the year, month, date
+            # An ICal string     And the year, month, day
             #                    hour, minute and second we expect.
             '19971024T120000' =>    # from the docs.
                                 [ 1997, 10, 24, 12,  0,  0 ],
@@ -311,7 +311,9 @@ function.
     );
 
     # For each key in the hash we're running 8 tests.
-    plan tests => keys %ICal_Dates * 8;
+    plan tests => keys(%ICal_Dates) * 8;
+
+    ...and then your tests...
 
 Or to be even more flexible, we use C<no_plan>.  This means we're just
 running some tests, don't know how many. [6]
@@ -376,11 +378,10 @@ F<t/01sanity.t> [7]
     is( $t2->epoch, 0,          "  and back to ICal" );
 
 The beginning of the epoch is different on most non-Unix operating
-systems [8].  Even though Perl smooths out the differences for the most
-part, certain ports do it differently.  MacPerl is one off the top of
-my head. [9] We I<know> this will never work on MacOS.  So rather than
-just putting a comment in the test, we can explicitly say it's never
-going to work and skip the test.
+systems [8].  Even though Perl smooths out the differences for the
+most part, certain ports do it differently.  MacPerl is one off the
+top of my head. [9]  So rather than just putting a comment in the test,
+we can explicitly say it's never going to work and skip the test.
 
     use Test::More tests => 7;
     use Date::ICal;

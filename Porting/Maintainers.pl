@@ -1435,7 +1435,7 @@ use File::Glob qw(:case);
     'Test::Simple' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.92.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.94.tar.gz',
 	'FILES'		=> q[cpan/Test-Simple],
 	'EXCLUDED'	=> [
 			     qw{.perlcriticrc
@@ -1443,12 +1443,11 @@ use File::Glob qw(:case);
 				t/pod.t
 				t/pod-coverage.t
 				t/Builder/reset_outputs.t
-
 				lib/Test/Builder/IO/Scalar.pm
 			       }
 			   ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Text::Balanced' =>

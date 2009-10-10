@@ -2203,6 +2203,8 @@ cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
 cpan/Test/lib/Test.pm		A simple framework for writing test scripts
 cpan/Test-Simple/Changes				Test::Simple changes
+cpan/Test-Simple/examples/indent.pl			Test::Simple examples
+cpan/Test-Simple/examples/subtest.pl			Test::Simple examples
 cpan/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
 cpan/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
 cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
@@ -2211,6 +2213,7 @@ cpan/Test-Simple/lib/Test/More.pm			More utilities for writing tests
 cpan/Test-Simple/lib/Test/Simple.pm			Basic utility for writing tests
 cpan/Test-Simple/lib/Test/Tutorial.pod			A tutorial on writing tests
 cpan/Test-Simple/README					Test::Simple README
+cpan/Test-Simple/t/00compile.t				Test::Simple test
 cpan/Test-Simple/t/00test_harness_check.t		Test::Simple test
 cpan/Test-Simple/t/bad_plan.t				Test::Builder plan() test
 cpan/Test-Simple/t/bail_out.t				Test::Builder BAIL_OUT test
@@ -2233,6 +2236,7 @@ cpan/Test-Simple/t/Builder/fork_with_new_stdout.t	Test::Builder tests
 cpan/Test-Simple/t/Builder/has_plan2.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/has_plan.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/is_fh.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/is_passing.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/maybe_regex.t		Test::Builder tests
 cpan/Test-Simple/t/Builder/no_diag.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/no_ending.t			Test::Builder tests
@@ -2245,6 +2249,7 @@ cpan/Test-Simple/t/Builder/try.t			Test::Builder tests
 cpan/Test-Simple/t/c_flag.t				Test::Simple test
 cpan/Test-Simple/t/circular_data.t			Test::Simple test
 cpan/Test-Simple/t/cmp_ok.t				Test::More test
+cpan/Test-Simple/t/dependents.t				Test::More test
 cpan/Test-Simple/t/diag.t				Test::More diag() test
 cpan/Test-Simple/t/died.t				Test::Simple test
 cpan/Test-Simple/t/dont_overwrite_die_handler.t		Test::More tests
@@ -2305,6 +2310,13 @@ cpan/Test-Simple/t/require_ok.t				Test::Simple test
 cpan/Test-Simple/t/simple.t				Test::Simple test, basic stuff
 cpan/Test-Simple/t/skipall.t				Test::More test, skip all tests
 cpan/Test-Simple/t/skip.t				Test::More test, SKIP tests
+cpan/Test-Simple/t/subtest/args.t			Test::More test
+cpan/Test-Simple/t/subtest/basic.t			Test::More test
+cpan/Test-Simple/t/subtest/die.t			Test::More test
+cpan/Test-Simple/t/subtest/do.t				Test::More test
+cpan/Test-Simple/t/subtest/exceptions.t			Test::More test
+cpan/Test-Simple/t/subtest/for_do_t.t			Test::More test
+cpan/Test-Simple/t/subtest/singleton.t			Test::More test
 cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
 cpan/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_02fhrestore.t		Test::Builder::Tester test
