@@ -1,5 +1,9 @@
 Changes for Perl programming language extension Parse-CPAN-Meta
 
+1.40 Sat 25 Jul 2009
+	- Add core perl 5.10.1's uupacktool.pl
+	- Repackage t/data/utf_16_le_bom.yml as ASCII for https://rt.cpan.org/Ticket/Display.html?id=47844
+
 1.39 Thu 21 May 2009
 	- Even though utf8 starts at 5.7+ there's no is_utf till
 	  5.8.1 so skip in the tests if needed (ADAMK)
