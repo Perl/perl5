@@ -163,14 +163,14 @@ cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
 cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
 cpan/B-Lint/t/lint.t				See if B::Lint works
 cpan/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
-cpan/CGI/Changes		Changelog for CGI.pm
+cpan/CGI/Changes			Changelog for CGI.pm
 cpan/CGI/examples/caution.xbm		CGI example
 cpan/CGI/examples/clickable_image.cgi	CGI example
 cpan/CGI/examples/cookie.cgi		CGI example
 cpan/CGI/examples/crash.cgi		CGI example
 cpan/CGI/examples/customize.cgi		CGI example
 cpan/CGI/examples/diff_upload.cgi	CGI example
-cpan/CGI/examples/dna_small_gif.uu	Small image for CGI examples
+cpan/CGI/examples/dna_small_gif		Small image for CGI examples
 cpan/CGI/examples/file_upload.cgi	CGI example
 cpan/CGI/examples/frameset.cgi		CGI example
 cpan/CGI/examples/index.html		Index page for CGI examples
@@ -182,10 +182,9 @@ cpan/CGI/examples/multiple_forms.cgi	CGI example
 cpan/CGI/examples/nph-clock.cgi		CGI example
 cpan/CGI/examples/nph-multipart.cgi	CGI example
 cpan/CGI/examples/popup.cgi		CGI example
-cpan/CGI/examples/RunMeFirst		Setup script for CGI examples
 cpan/CGI/examples/save_state.cgi	CGI example
 cpan/CGI/examples/tryit.cgi		CGI example
-cpan/CGI/examples/wilogo_gif.uu		CGI example
+cpan/CGI/examples/wilogo_gif		CGI example
 cpan/CGI/lib/CGI/Apache.pm		Support for Apache's Perl module
 cpan/CGI/lib/CGI/Carp.pm		Log server errors with helpful context
 cpan/CGI/lib/CGI/Cookie.pm		Interface to Netscape Cookies
