@@ -27,9 +27,9 @@ delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
     my $perl = which_perl();
     my $Is_VMS = $^O eq 'VMS';
 
-    chdir 't';
-
     perl_lib;
+
+    chdir 't';
 
     my $Touch_Time = calibrate_mtime();
 
