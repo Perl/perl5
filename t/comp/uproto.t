@@ -4,9 +4,9 @@ print "1..39\n";
 my $test = 0;
 
 sub failed {
-    my ($got, $expected) = @_;
+    my ($got, $expected, $name) = @_;
 
-    print "not ok $test\n";
+    print "not ok $test - $name\n";
     my @caller = caller(1);
     print "# Failed test at $caller[1] line $caller[2]\n";
     if (defined $got) {
@@ -27,7 +27,7 @@ sub like {
 	# though we aren't using it here (yet).
 	return 1;
     }
-    failed($got, $pattern);
+    failed($got, $pattern, $name);
 }
 
 sub is {
@@ -38,13 +38,13 @@ sub is {
 	    print "ok $test\n";
 	    return 1;
 	}
-	failed($got, "'$expect'");
+	failed($got, "'$expect'", $name);
     } else {
 	if (!defined $got) {
 	    print "ok $test\n";
 	    return 1;
 	}
-	failed($got, 'undef');
+	failed($got, 'undef', $name);
     }
 }
 

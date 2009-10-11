@@ -33,7 +33,7 @@ sub like {
 	# though we aren't using it here (yet).
 	return 1;
     }
-    failed($got, $pattern);
+    failed($got, $pattern, $name);
 }
 
 sub is {
@@ -43,7 +43,7 @@ sub is {
 	print "ok $test - $name\n";
 	return 1;
     }
-    failed($got, "'$expect'");
+    failed($got, "'$expect'", $name);
 }
 
 sub isnt {
@@ -53,7 +53,7 @@ sub isnt {
 	print "ok $test - $name\n";
 	return 1;
     }
-    failed($got, "not '$expect'");
+    failed($got, "not '$expect'", $name);
 }
 
 sub can_ok {
@@ -125,8 +125,8 @@ can_ok( 'main', "qx" );
 eval "qx('unqualified'".
      ($^O eq 'MSWin32' ? " 2>&1)" : ")");
 TODO: {
-	local $::TODO = $^O eq 'MSWin32' ? "Tainting of PATH not working of Windows" : $::TODO;
-	like( $@, qr/^Insecure/, "qx('unqualified') doesn't work" );
+    local $::TODO = $^O eq 'MSWin32' ? "Tainting of PATH not working of Windows" : $::TODO;
+    like( $@, qr/^Insecure/, "qx('unqualified') doesn't work" );
 }
 is( main::qx('main'), "qx-main", "main::qx() is func" );
 is( &qx('amper'), "qx-amper", "&qx() is func" );

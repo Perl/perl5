@@ -27,7 +27,7 @@ sub like {
 	# though we aren't using it here (yet).
 	return 1;
     }
-    failed($got, $pattern);
+    failed($got, $pattern, $name);
 }
 
 sub is {
@@ -37,7 +37,7 @@ sub is {
 	print "ok $test - $name\n";
 	return 1;
     }
-    failed($got, "'$expect'");
+    failed($got, "'$expect'", $name);
 }
 
 my $filename = "multiline$$";
