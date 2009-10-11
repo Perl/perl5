@@ -124,12 +124,9 @@ is( &qw('amper'), "qw-amper", "&qw() is func" );
 can_ok( 'main', "qx" );
 eval "qx('unqualified'".
      ($^O eq 'MSWin32' ? " 2>&1)" : ")");
-SKIP: {
-    skip("external command not portable on VMS", 1) if $^O eq 'VMS';
-    TODO: {
+TODO: {
 	local $::TODO = $^O eq 'MSWin32' ? "Tainting of PATH not working of Windows" : $::TODO;
 	like( $@, qr/^Insecure/, "qx('unqualified') doesn't work" );
-    }
 }
 is( main::qx('main'), "qx-main", "main::qx() is func" );
 is( &qx('amper'), "qx-amper", "&qx() is func" );
