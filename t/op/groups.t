@@ -137,7 +137,7 @@ for (split(' ', $()) {
 print "# gr = @gr\n";
 
 my %did;
-if ($^O =~ /^(?:uwin|cygwin|interix|solaris|linux)$/) {
+if ($^O =~ /^(?:uwin|cygwin|interix|solaris|linux|darwin)$/) {
 	# Or anybody else who can have spaces in group names.
 	$gr1 = join(' ', grep(!$did{$_}++, sort split(' ', join(' ', @gr))));
 } else {
