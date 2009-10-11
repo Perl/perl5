@@ -12,7 +12,12 @@ my $test = 0;
 sub failed {
     my ($got, $expected, $name) = @_;
 
-    print "not ok $test - $name\n";
+    if ($::TODO) {
+	print "not ok $test - $name # TODO: $::TODO\n";
+    }
+    else {
+	print "not ok $test - $name\n";
+    }
     my @caller = caller(1);
     print "# Failed test at $caller[1] line $caller[2]\n";
     if (defined $got) {
@@ -28,7 +33,12 @@ sub like {
     my ($got, $pattern, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got =~ $pattern) {
-	print "ok $test - $name\n";
+	if ($::TODO) {
+	    print "ok $test - $name # TODO: $::TODO\n";
+	}
+	else {
+	    print "ok $test - $name\n";
+	}
 	# Principle of least surprise - maintain the expected interface, even
 	# though we aren't using it here (yet).
 	return 1;
@@ -40,7 +50,12 @@ sub is {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got eq $expect) {
-	print "ok $test - $name\n";
+	if ($::TODO) {
+	    print "ok $test - $name # TODO: $::TODO\n";
+	}
+	else {
+	    print "ok $test - $name\n";
+	}
 	return 1;
     }
     failed($got, "'$expect'", $name);
@@ -50,7 +65,12 @@ sub isnt {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got ne $expect) {
-	print "ok $test - $name\n";
+	if ($::TODO) {
+	    print "ok $test - $name # TODO: $::TODO\n";
+	}
+	else {
+	    print "ok $test - $name\n";
+	}
 	return 1;
     }
     failed($got, "not '$expect'", $name);
@@ -60,7 +80,12 @@ sub can_ok {
     my ($class, $method) = @_;
     $test = $test + 1;
     if (eval { $class->can($method) }) {
-	print "ok $test - $class->can('$method')\n";
+	if ($::TODO) {
+	    print "ok $test - $class->can('$method') # TODO: $::TODO\n";
+	}
+	else {
+	    print "ok $test - $class->can('$method')\n";
+	}
 	return 1;
     }
     my @caller = caller;
