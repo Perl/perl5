@@ -23,6 +23,8 @@ while (<$m>) {
     next unless /\s/;   # Ignore lines without whitespace (i.e., filename only)
     my ($file, $separator) = /^(\S+)(\s+)/;
     isnt($file, undef, "Line $. doesn't start with a blank") or next;
+    # Remember, we're running from t/
+    ok(-f "../$file", "File $file exists");
     if ($separator !~ tr/\t//c) {
 	# It's all tabs
 	next;
