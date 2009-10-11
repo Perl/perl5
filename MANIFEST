@@ -2204,7 +2204,7 @@ cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
 cpan/Test/lib/Test.pm		A simple framework for writing test scripts
 cpan/Test-Simple/Changes				Test::Simple changes
 cpan/Test-Simple/examples/indent.pl			Test::Simple examples
-cpan/Test-Simple/examples/subtest.pl			Test::Simple examples
+cpan/Test-Simple/examples/subtest.t			Test::Simple examples
 cpan/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
 cpan/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
 cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
