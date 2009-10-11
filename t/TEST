@@ -23,11 +23,45 @@ my %dir_to_switch =
      '../ext/File-Glob/t' => '-I.. -MTestInit', # FIXME - tests assume t/
      );
 
-# I think in the end I'd like "not absolute" to be the default", as it saves
-# some fakery within TestInit which can peturb tests, and takes CPU.
-my %no_abs =
-    ('../cpan/Pod-Parser' => 1,
-    );
+# "not absolute" is the the default, as it saves some fakery within TestInit
+# which can peturb tests, and takes CPU. Working with the upstream author of
+# any of these, to figure out how to remove them from this list, considered
+# "a good thing".
+my %abs = (
+	   '../cpan/Archive-Extract' => 1,
+	   '../cpan/Archive-Tar' => 1,
+	   '../cpan/AutoLoader' => 1,
+	   '../cpan/CPAN' => 1,
+	   '../cpan/Class-ISA' => 1,
+	   '../cpan/Cwd' => 1,
+	   '../cpan/Devel-PPPort' => 1,
+	   '../cpan/Encode' => 1,
+	   '../cpan/ExtUtils-Command' => 1,
+	   '../cpan/ExtUtils-Constant' => 1,
+	   '../cpan/ExtUtils-MakeMaker' => 1,
+	   '../cpan/ExtUtils-Manifest' => 1,
+	   '../cpan/ExtUtils-ParseXS' => 1,
+	   '../cpan/File-Fetch' => 1,
+	   '../cpan/IPC-Cmd' => 1,
+	   '../cpan/IPC-SysV' => 1,
+	   '../cpan/Locale-Codes' => 1,
+	   '../cpan/Log-Message' => 1,
+	   '../cpan/Math-BigInt' => 1,
+	   '../cpan/Math-BigRat' => 1,
+	   '../cpan/Math-Complex' => 1,
+	   '../cpan/Module-Build' => 1,
+	   '../cpan/Module-Load' => 1,
+	   '../cpan/Module-Load-Conditional' => 1,
+	   '../cpan/Object-Accessor' => 1,
+	   '../cpan/Package-Constants' => 1,
+	   '../cpan/Parse-CPAN-Meta' => 1,
+	   '../cpan/Pod-Simple' => 1,
+	   '../cpan/Term-UI' => 1,
+	   '../cpan/Test-Simple' => 1,
+	   '../cpan/Tie-File' => 1,
+	   '../cpan/bignum' => 1,
+	   '../cpan/podlators' => 1,
+	  );
 	      
 my %temp_no_core =
     ('../cpan/B-Debug' => 1,
@@ -200,7 +234,7 @@ sub _scan_test {
 	    $perl = '../../t/perl';
 	    $testswitch = "-I../.. -MTestInit=U2T";
 	    if ($2 eq 'cpan') {
-		if(!$no_abs{$run_dir}) {
+		if($abs{$run_dir}) {
 		    $testswitch = $testswitch . ',A';
 		}
 		if ($temp_no_core{$run_dir}) {
