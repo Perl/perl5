@@ -1,5 +1,4 @@
 BEGIN {
-    chdir 't' if -d 't';
     $dir = "self-$$";
     $sep = "/";
 
@@ -9,7 +8,6 @@ BEGIN {
     }
 
     unshift @INC, $dir;
-    unshift @INC, '../lib';
 
     print "1..20\n";
 
