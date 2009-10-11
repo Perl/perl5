@@ -193,17 +193,19 @@ sub _scan_test {
     my $dir = $1;
     my $testswitch = $dir_to_switch{$dir};
     if (!defined $testswitch) {
-	if ($test =~ s!^(\.\./(?:cpan|dist|ext)/[^/]+)/t!t!) {
+	if ($test =~ s!^(\.\./(cpan|dist|ext)/[^/]+)/t!t!) {
 	    $run_dir = $1;
 	    $return_dir = '../../t';
 	    $lib = '../../lib';
 	    $perl = '../../t/perl';
 	    $testswitch = "-I../.. -MTestInit=U2T";
-	    if (!$no_abs{$run_dir}) {
-		$testswitch = $testswitch . ',A';
-	    }
-	    if ($temp_no_core{$run_dir}) {
-		$testswitch = $testswitch . ',NC';
+	    if ($2 eq 'cpan') {
+		if(!$no_abs{$run_dir}) {
+		    $testswitch = $testswitch . ',A';
+		}
+		if ($temp_no_core{$run_dir}) {
+		    $testswitch = $testswitch . ',NC';
+		}
 	    }
 	} else {
 	    $testswitch = '-I.. -MTestInit';  # -T will remove . from @INC
