@@ -4,7 +4,6 @@ Changes
 examples/indent.pl
 examples/subtest.t
 lib/Test/Builder.pm
-lib/Test/Builder/IO/Scalar.pm
 lib/Test/Builder/Module.pm
 lib/Test/Builder/Tester.pm
 lib/Test/Builder/Tester/Color.pm
