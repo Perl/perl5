@@ -307,6 +307,7 @@ use File::Glob qw(:case);
 				    cgi_docs.html
 				    examples/WORLD_WRITABLE/18.157.1.253.sav
 				    t/gen-tests/gen-start-end-tags.pl
+				    t/fast.t
 				)
 			   ],
 	'CPAN'		=> 1,

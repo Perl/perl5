@@ -202,7 +202,6 @@ cpan/CGI/t/checkbox_group.t		See if CGI.pm works
 cpan/CGI/t/cookie.t			See if CGI::Cookie works
 cpan/CGI/t/Dump.t			See if CGI->Dump works
 cpan/CGI/t/end_form.t			See if CGI.pm works
-cpan/CGI/t/fast.t			See if CGI::Fast works (if FCGI is installed)
 cpan/CGI/t/form.t			See if CGI.pm works
 cpan/CGI/t/function.t			See if CGI.pm works
 cpan/CGI/t/hidden.t			See if CGI.pm works
