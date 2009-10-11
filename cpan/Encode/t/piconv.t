@@ -3,17 +3,18 @@
 #
 
 use strict;
+use Config;
 use FindBin;
 use File::Spec;
 use IPC::Open3 qw(open3);
 use IO::Select;
 use Test::More;
 
-my $WIN = $^O eq 'MSWin32';
+my $nofork = ! $Config{d_fork};
 
-if ($WIN) {
+if ($nofork) {
     eval { require IPC::Run; IPC::Run->VERSION(0.83); 1; } or 
-        plan skip_all => 'Win32 environments require IPC::Run 0.83 to complete this test';
+        plan skip_all => 'Without fork(), we require IPC::Run 0.83 to complete this test';
 }
 
 sub run_cmd (;$$);
@@ -29,7 +30,7 @@ plan tests => 5;
 {
     my ( $st, $out, $err ) = run_cmd;
     is( $st, 0, 'status for usage call' );
-    is( $out, $WIN ? undef : '' );
+    is( $out, $nofork ? undef : '' );
     like( $err, qr{^piconv}, 'usage' );
 }
 
@@ -51,7 +52,7 @@ sub run_cmd (;$$) {
     my $err = "x" x 10_000;
     $err = "";
         
-    if ($WIN) {
+    if ($nofork) {
 		IPC::Run->import(qw(run timeout));
 		my @cmd;
 		if (defined $args) {
