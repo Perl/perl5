@@ -135,21 +135,30 @@ sub which_perl {
   perl_lib;
 
 Sets up environment variables so perl can find its libraries.
+Run this before changing directories.
 
 =cut
 
 my $old5lib = $ENV{PERL5LIB};
 my $had5lib = exists $ENV{PERL5LIB};
 sub perl_lib {
-                               # perl-src/t/
-    my $lib =  $ENV{PERL_CORE} ? qq{../lib}
-                               # ExtUtils-MakeMaker/t/
-                               : qq{../blib/lib};
-    $lib = File::Spec->rel2abs($lib);
-    my @libs = ($lib);
-    push @libs, $ENV{PERL5LIB} if exists $ENV{PERL5LIB};
-    $ENV{PERL5LIB} = join($Config{path_sep}, @libs);
-    unshift @INC, $lib;
+    if ($ENV{PERL_CORE}) {
+	# Whilst we'll be running in perl-src/cpan/$distname/t/
+	# instead of blib, our code will be copied with all the other code to
+	# the top-level library.
+	# $ENV{PERL5LIB} will be set with this, but (by default) it's a relative
+	# path.
+	$ENV{PERL5LIB} = join $Config{path_sep}, map {
+	    File::Spec->rel2abs($_) } split $Config{path_sep}, $ENV{PERL5LIB};
+	@INC = map { File::Spec->rel2abs($_) } @INC;
+    } else {
+	my $lib = 'blib/lib';
+	$lib = File::Spec->rel2abs($lib);
+	my @libs = ($lib);
+	push @libs, $ENV{PERL5LIB} if exists $ENV{PERL5LIB};
+	$ENV{PERL5LIB} = join($Config{path_sep}, @libs);
+	unshift @INC, $lib;
+    }
 }
 
 END { 
