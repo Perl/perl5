@@ -1,13 +1,6 @@
 use strict;
 use warnings;
 
-BEGIN {
-    if ($ENV{'PERL_CORE'}){
-        chdir('t');
-        unshift(@INC, '../lib');
-    }
-}
-
 use Thread::Semaphore;
 
 use Test::More 'tests' => 12;
