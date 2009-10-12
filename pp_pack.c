@@ -678,7 +678,8 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	    }
 	    if (from > end) from = end;
 	}
-	if ((bad & 2) && ckWARN(WARN_UNPACK))
+	if ((bad & 2) && ((datumtype & TYPE_IS_PACK)
+			  ? ckWARN(WARN_PACK) : ckWARN(WARN_UNPACK)))
 	    Perl_warner(aTHX_ packWARN(datumtype & TYPE_IS_PACK ?
 				       WARN_PACK : WARN_UNPACK),
 			"Character(s) in '%c' format wrapped in %s",
