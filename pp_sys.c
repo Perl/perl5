@@ -521,9 +521,9 @@ PP(pp_open)
 	MAGIC *mg;
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-	if (IoDIRP(io) && ckWARN2(WARN_IO, WARN_DEPRECATED))
-	    Perl_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-		    "Opening dirhandle %s also as a file", GvENAME(gv));
+	if (IoDIRP(io))
+	    Perl_ck_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
+			   "Opening dirhandle %s also as a file", GvENAME(gv));
 
 	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
@@ -892,10 +892,10 @@ PP(pp_untie)
 	       LEAVE;
 	       SPAGAIN;
             }
-	    else if (mg && SvREFCNT(obj) > 1 && ckWARN(WARN_UNTIE)) {
-		  Perl_warner(aTHX_ packWARN(WARN_UNTIE),
-		      "untie attempted while %"UVuf" inner references still exist",
-		       (UV)SvREFCNT(obj) - 1 ) ;
+	    else if (mg && SvREFCNT(obj) > 1) {
+		Perl_ck_warner(aTHX_ packWARN(WARN_UNTIE),
+			       "untie attempted while %"UVuf" inner references still exist",
+			       (UV)SvREFCNT(obj) - 1 ) ;
 	    }
         }
     }
@@ -1018,8 +1018,7 @@ PP(pp_sselect)
 		DIE(aTHX_ "%s", PL_no_modify);
 	}
 	if (!SvPOK(sv)) {
-	    if (ckWARN(WARN_MISC))
-                Perl_warner(aTHX_ packWARN(WARN_MISC), "Non-string passed as bitmask");
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Non-string passed as bitmask");
 	    SvPV_force_nolen(sv);	/* force string conversion */
 	}
 	j = SvCUR(sv);
@@ -1417,8 +1416,7 @@ PP(pp_leavewrite)
     }
     else {
 	if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
-	    if (ckWARN(WARN_IO))
-		Perl_warner(aTHX_ packWARN(WARN_IO), "page overflow");
+	    Perl_ck_warner(aTHX_ packWARN(WARN_IO), "page overflow");
 	}
 	if (!do_print(PL_formtarget, fp))
 	    PUSHs(&PL_sv_no);
@@ -2822,9 +2820,8 @@ PP(pp_stat)
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
 	    do_fstat_warning_check:
-		if (ckWARN(WARN_IO))
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-			"lstat() on filehandle %s", gv ? GvENAME(gv) : "");
+		Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+			       "lstat() on filehandle %s", gv ? GvENAME(gv) : "");
 	    } else if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
@@ -3831,9 +3828,9 @@ PP(pp_open_dir)
     if (!io)
 	goto nope;
 
-    if ((IoIFP(io) || IoOFP(io)) && ckWARN2(WARN_IO, WARN_DEPRECATED))
-	Perl_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-		"Opening filehandle %s also as a directory", GvENAME(gv));
+    if ((IoIFP(io) || IoOFP(io)))
+	Perl_ck_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
+		       "Opening filehandle %s also as a directory", GvENAME(gv));
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
     if (!(IoDIRP(io) = PerlDir_open(dirname)))
@@ -3867,10 +3864,8 @@ PP(pp_readdir)
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
-        if(ckWARN(WARN_IO)) {
-            Perl_warner(aTHX_ packWARN(WARN_IO),
-                "readdir() attempted on invalid dirhandle %s", GvENAME(gv));
-        }
+	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+		       "readdir() attempted on invalid dirhandle %s", GvENAME(gv));
         goto nope;
     }
 
@@ -3920,10 +3915,8 @@ PP(pp_telldir)
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
-        if(ckWARN(WARN_IO)) {
-            Perl_warner(aTHX_ packWARN(WARN_IO),
-	        "telldir() attempted on invalid dirhandle %s", GvENAME(gv));
-        }
+	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+		       "telldir() attempted on invalid dirhandle %s", GvENAME(gv));
         goto nope;
     }
 
@@ -3947,10 +3940,8 @@ PP(pp_seekdir)
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
-	if(ckWARN(WARN_IO)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO),
-                "seekdir() attempted on invalid dirhandle %s", GvENAME(gv));
-        }
+	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+		       "seekdir() attempted on invalid dirhandle %s", GvENAME(gv));
         goto nope;
     }
     (void)PerlDir_seek(IoDIRP(io), along);
@@ -3973,10 +3964,8 @@ PP(pp_rewinddir)
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
-	if(ckWARN(WARN_IO)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO),
-	        "rewinddir() attempted on invalid dirhandle %s", GvENAME(gv));
-	}
+	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+		       "rewinddir() attempted on invalid dirhandle %s", GvENAME(gv));
 	goto nope;
     }
     (void)PerlDir_rewind(IoDIRP(io));
@@ -3998,10 +3987,8 @@ PP(pp_closedir)
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
-	if(ckWARN(WARN_IO)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO),
-                "closedir() attempted on invalid dirhandle %s", GvENAME(gv));
-        }
+	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+		       "closedir() attempted on invalid dirhandle %s", GvENAME(gv));
         goto nope;
     }
 #ifdef VOID_CLOSEDIR
@@ -4489,9 +4476,9 @@ PP(pp_gmtime)
     else {
 	double input = Perl_floor(POPn);
 	when = (Time64_T)input;
-	if (when != input && ckWARN(WARN_OVERFLOW)) {
-	    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-			"%s(%.0f) too large", opname, input);
+	if (when != input) {
+	    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+			   "%s(%.0f) too large", opname, input);
 	}
     }
 
@@ -4500,10 +4487,10 @@ PP(pp_gmtime)
     else
 	err = S_gmtime64_r(&when, &tmbuf);
 
-    if (err == NULL && ckWARN(WARN_OVERFLOW)) {
+    if (err == NULL) {
 	/* XXX %lld broken for quads */
-	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		    "%s(%.0f) failed", opname, (double)when);
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		       "%s(%.0f) failed", opname, (double)when);
     }
 
     if (GIMME != G_ARRAY) {	/* scalar context */

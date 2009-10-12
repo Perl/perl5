@@ -807,9 +807,8 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	    }
 #ifdef UV_IS_QUAD
 	    else if (size == 64) {
-		if (ckWARN(WARN_PORTABLE))
-		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
-				"Bit vector size > 32 non-portable");
+		Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
+			       "Bit vector size > 32 non-portable");
 		if (uoffset >= srclen)
 		    retnum = 0;
 		else if (uoffset + 1 >= srclen)
@@ -875,9 +874,8 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		      s[uoffset + 3];
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
-	    if (ckWARN(WARN_PORTABLE))
-		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
-			    "Bit vector size > 32 non-portable");
+	    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
+			   "Bit vector size > 32 non-portable");
 	    retnum =
 		((UV) s[uoffset    ] << 56) +
 		((UV) s[uoffset + 1] << 48) +
@@ -968,9 +966,8 @@ Perl_do_vecset(pTHX_ SV *sv)
 	}
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
-	    if (ckWARN(WARN_PORTABLE))
-		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
-			    "Bit vector size > 32 non-portable");
+	    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
+			   "Bit vector size > 32 non-portable");
 	    s[offset  ] = (U8)((lval >> 56) & 0xff);
 	    s[offset+1] = (U8)((lval >> 48) & 0xff);
 	    s[offset+2] = (U8)((lval >> 40) & 0xff);

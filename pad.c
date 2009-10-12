@@ -781,9 +781,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 			? CvANON(cv) && CvCLONE(cv) && !CvCLONED(cv)
 			: *out_flags & PAD_FAKELEX_ANON)
 		{
-		    if (warn && ckWARN(WARN_CLOSURE))
-			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%s\" is not available", name);
+		    if (warn)
+			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
+				       "Variable \"%s\" is not available", name);
 		    *out_capture = NULL;
 		}
 
@@ -823,9 +823,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		    if (SvPADSTALE(*out_capture)
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
-			if (ckWARN(WARN_CLOSURE))
-			    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-				"Variable \"%s\" is not available", name);
+			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
+				       "Variable \"%s\" is not available", name);
 			*out_capture = NULL;
 		    }
 		}
@@ -1527,9 +1526,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 		   while my $x if $false can leave an active var marked as
 		   stale. And state vars are always available */
 		if (SvPADSTALE(sv) && !SvPAD_STATE(namesv)) {
-		    if (ckWARN(WARN_CLOSURE))
-			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%s\" is not available", SvPVX_const(namesv));
+		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
+				   "Variable \"%s\" is not available", SvPVX_const(namesv));
 		    sv = NULL;
 		}
 		else 

@@ -1996,9 +1996,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  endif
 	    Sighandler_t sigstate = rsignal_state(SIGCHLD);
 	    if (sigstate == (Sighandler_t) SIG_IGN) {
-		if (ckWARN(WARN_SIGNAL))
-		    Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
-				"Can't ignore signal CHLD, forcing to default");
+		Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
+			       "Can't ignore signal CHLD, forcing to default");
 		(void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
 	    }
 	}

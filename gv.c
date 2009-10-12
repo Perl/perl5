@@ -413,9 +413,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
         cstash = gv_stashsv(linear_sv, 0);
 
         if (!cstash) {
-            if (ckWARN(WARN_SYNTAX))
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
-                    SVfARG(linear_sv), hvname);
+	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
+			   SVfARG(linear_sv), hvname);
             continue;
         }
 
@@ -729,11 +728,10 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
     if (!method && (GvCVGEN(gv) || GvSTASH(gv) != stash)
-	&& ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)
     )
-	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
-	     packname, (int)len, name);
+	Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		       "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
+		       packname, (int)len, name);
 
     if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here

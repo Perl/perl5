@@ -576,9 +576,9 @@ PP(pp_bless)
 	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV_const(ssv,len);
-	if (len == 0 && ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC),
-		   "Explicit blessing to '' (assuming package main)");
+	if (len == 0)
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+			   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, GV_ADD);
     }
 
@@ -813,10 +813,10 @@ PP(pp_undef)
 	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVCV:
-	if (cv_const_sv((const CV *)sv) && ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
-		 CvANON((const CV *)sv) ? "(anonymous)"
-			: GvENAME(CvGV((const CV *)sv)));
+	if (cv_const_sv((const CV *)sv))
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
+			   CvANON((const CV *)sv) ? "(anonymous)"
+			   : GvENAME(CvGV((const CV *)sv)));
 	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
@@ -3148,8 +3148,7 @@ PP(pp_substr)
     if (fail < 0) {
 	if (lvalue || repl)
 	    Perl_croak(aTHX_ "substr outside of string");
-	if (ckWARN(WARN_SUBSTR))
-	    Perl_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
+	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
 	RETPUSHUNDEF;
     }
     else {
@@ -3198,9 +3197,8 @@ PP(pp_substr)
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {
 		    SvPV_force_nolen(sv);
-		    if (ckWARN(WARN_SUBSTR))
-			Perl_warner(aTHX_ packWARN(WARN_SUBSTR),
-				"Attempt to use reference as lvalue in substr");
+		    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+				   "Attempt to use reference as lvalue in substr");
 		}
 		if (isGV_with_GP(sv))
 		    SvPV_force_nolen(sv);
@@ -4491,8 +4489,8 @@ PP(pp_anonhash)
 	SV * const val = newSV(0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
-	else if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
+	else
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -4552,8 +4550,7 @@ PP(pp_splice)
 	length = AvMAX(ary) + 1;
     }
     if (offset > AvFILLp(ary) + 1) {
-	if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
 	offset = AvFILLp(ary) + 1;
     }
     after = AvFILLp(ary) + 1 - (offset + length);

@@ -908,8 +908,7 @@ Perl_scalar(pTHX_ OP *o)
 	PL_curcop = &PL_compiling;
 	break;
     case OP_SORT:
-	if (ckWARN(WARN_VOID))
-	    Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
+	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
     }
     return o;
@@ -1188,8 +1187,8 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SCALAR:
 	return scalar(o);
     }
-    if (useless && ckWARN(WARN_VOID))
-	Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %s in void context", useless);
+    if (useless)
+	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %s in void context", useless);
     return o;
 }
 
@@ -1667,10 +1666,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	case 0:
 	    break;
 	case -1:
-	    if (ckWARN(WARN_SYNTAX)) {
-		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		    "Useless localization of %s", OP_DESC(o));
-	    }
+	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+			   "Useless localization of %s", OP_DESC(o));
 	}
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
@@ -3432,12 +3429,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
     }
 
-    if(ckWARN(WARN_MISC)) {
-        if(del && rlen == tlen) {
-            Perl_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
-        } else if(rlen > tlen) {
-            Perl_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
-        } 
+    if(del && rlen == tlen) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
+    } else if(rlen > tlen) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
     }
 
     if (grows)
@@ -4543,8 +4538,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if ((cstop = search_const(first))) {
 	if (cstop->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(cstop);
-	else if ((cstop->op_private & OPpCONST_BARE) && ckWARN(WARN_BAREWORD))
-		Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
+	else if ((cstop->op_private & OPpCONST_BARE))
+		Perl_ck_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
 	if ((type == OP_AND &&  SvTRUE(((SVOP*)cstop)->op_sv)) ||
 	    (type == OP_OR  && !SvTRUE(((SVOP*)cstop)->op_sv)) ||
 	    (type == OP_DOR && !SvOK(((SVOP*)cstop)->op_sv))) {
@@ -4574,11 +4569,10 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    if ((o2->op_type == OP_PADSV || o2->op_type == OP_PADAV
 			|| o2->op_type == OP_PADHV)
 		&& o2->op_private & OPpLVAL_INTRO
-		&& !(o2->op_private & OPpPAD_STATE)
-		&& ckWARN(WARN_DEPRECATED))
+		&& !(o2->op_private & OPpPAD_STATE))
 	    {
-		Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			    "Deprecated use of my() in false conditional");
+		Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+			       "Deprecated use of my() in false conditional");
 	    }
 
 	    *otherp = NULL;
@@ -5901,18 +5895,18 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		return;
 	} else if (*name == 'C') {
 	    if (strEQ(name, "CHECK")) {
-		if (PL_main_start && ckWARN(WARN_VOID))
-		    Perl_warner(aTHX_ packWARN(WARN_VOID),
-				"Too late to run CHECK block");
+		if (PL_main_start)
+		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+				   "Too late to run CHECK block");
 		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
 	    }
 	    else
 		return;
 	} else if (*name == 'I') {
 	    if (strEQ(name, "INIT")) {
-		if (PL_main_start && ckWARN(WARN_VOID))
-		    Perl_warner(aTHX_ packWARN(WARN_VOID),
-				"Too late to run INIT block");
+		if (PL_main_start)
+		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+				   "Too late to run INIT block");
 		Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
 	    }
 	    else
@@ -6273,10 +6267,9 @@ Perl_newAVREF(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return o;
     }
-    else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)
-		&& ckWARN(WARN_DEPRECATED)) {
-	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		"Using an array as a reference is deprecated");
+    else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		       "Using an array as a reference is deprecated");
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
@@ -6301,10 +6294,9 @@ Perl_newHVREF(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_PADHV];
 	return o;
     }
-    else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)
-		&& ckWARN(WARN_DEPRECATED)) {
-	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		"Using a hash as a reference is deprecated");
+    else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		       "Using a hash as a reference is deprecated");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }
@@ -6371,12 +6363,11 @@ Perl_ck_bitop(pTHX_ OP *o)
 		(left->op_flags & OPf_PARENS) == 0) ||
 	    (OP_IS_NUMCOMPARE(right->op_type) &&
 		(right->op_flags & OPf_PARENS) == 0))
-	    if (ckWARN(WARN_PRECEDENCE))
-		Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-			"Possible precedence problem on bitwise %c operator",
-			o->op_type == OP_BIT_OR ? '|'
-			    : o->op_type == OP_BIT_AND ? '&' : '^'
-			);
+	    Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+			   "Possible precedence problem on bitwise %c operator",
+			   o->op_type == OP_BIT_OR ? '|'
+			   : o->op_type == OP_BIT_AND ? '&' : '^'
+			   );
     }
     return o;
 }
@@ -6847,20 +6838,19 @@ Perl_ck_fun(pTHX_ OP *o)
 		break;
 	    case OA_AVREF:
 		if ((type == OP_PUSH || type == OP_UNSHIFT)
-		    && !kid->op_sibling && ckWARN(WARN_SYNTAX))
-		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"Useless use of %s with no values",
-			PL_op_desc[type]);
+		    && !kid->op_sibling)
+		    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+				   "Useless use of %s with no values",
+				   PL_op_desc[type]);
 
 		if (kid->op_type == OP_CONST &&
 		    (kid->op_private & OPpCONST_BARE))
 		{
 		    OP * const newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVAV) ));
-		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
-			    SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
+		    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+				   "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
+				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
 		    op_getmad(kid,newop,'K');
 #else
@@ -6880,10 +6870,9 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVHV) ));
-		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
-			    SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
+		    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+				   "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
+				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
 		    op_getmad(kid,newop,'K');
 #else
@@ -7219,7 +7208,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 {
     PERL_ARGS_ASSERT_CK_DEFINED;
 
-    if ((o->op_flags & OPf_KIDS) && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
+    if ((o->op_flags & OPf_KIDS)) {
 	switch (cUNOPo->op_first->op_type) {
 	case OP_RV2AV:
 	    /* This is needed for
@@ -7229,10 +7218,10 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			"defined(@array) is deprecated");
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			"\t(Maybe you should just omit the defined()?)\n");
+	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			   "defined(@array) is deprecated");
+	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			   "\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
 	    /* This is needed for
@@ -7241,10 +7230,10 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	       */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADHV:
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			"defined(%%hash) is deprecated");
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			"\t(Maybe you should just omit the defined()?)\n");
+	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			   "defined(%%hash) is deprecated");
+	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			   "\t(Maybe you should just omit the defined()?)\n");
 	    break;
 	default:
 	    /* no warning */
@@ -7887,9 +7876,9 @@ Perl_ck_split(pTHX_ OP *o)
     kid->op_type = OP_PUSHRE;
     kid->op_ppaddr = PL_ppaddr[OP_PUSHRE];
     scalar(kid);
-    if (((PMOP *)kid)->op_pmflags & PMf_GLOBAL && ckWARN(WARN_REGEXP)) {
-      Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-                  "Use of /g modifier is meaningless in split");
+    if (((PMOP *)kid)->op_pmflags & PMf_GLOBAL) {
+      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
+		     "Use of /g modifier is meaningless in split");
     }
 
     if (!kid->op_sibling)

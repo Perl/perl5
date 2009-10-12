@@ -1675,11 +1675,11 @@ Perl_do_readline(pTHX)
 		(void)do_close(PL_last_in_gv, FALSE);
 	    }
 	    else if (type == OP_GLOB) {
-		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_GLOB)) {
-		    Perl_warner(aTHX_ packWARN(WARN_GLOB),
-			   "glob failed (child exited with status %d%s)",
-			   (int)(STATUS_CURRENT >> 8),
-			   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
+		if (!do_close(PL_last_in_gv, FALSE)) {
+		    Perl_ck_warner(aTHX_ packWARN(WARN_GLOB),
+				   "glob failed (child exited with status %d%s)",
+				   (int)(STATUS_CURRENT >> 8),
+				   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
 		}
 	    }
 	    if (gimme == G_SCALAR) {

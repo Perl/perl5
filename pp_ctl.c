@@ -535,8 +535,7 @@ PP(pp_formline)
 		sv = *++MARK;
 	    else {
 		sv = &PL_sv_no;
-		if (ckWARN(WARN_SYNTAX))
-		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
+		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
 	    }
 	    break;
 
@@ -1283,9 +1282,8 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
-			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
 	    if (CxTYPE(cx) == CXt_NULL)
 		return -1;
 	    break;
@@ -1404,9 +1402,8 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
-			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
 	    if ((CxTYPE(cx)) == CXt_NULL)
 		return -1;
 	    break;
@@ -1548,14 +1545,13 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 			e = NULL;
 		}
 		if (!e) {
+		    STRLEN start;
 		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
 		    sv_catpvn(err, message, msglen);
-		    if (ckWARN(WARN_MISC)) {
-			const STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ packWARN(WARN_MISC), "%s",
-				SvPVX_const(err)+start);
-		    }
+		    start = SvCUR(err)-msglen-sizeof(prefix)+1;
+		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "%s",
+				   SvPVX_const(err)+start);
 		}
 	    }
 	    else {

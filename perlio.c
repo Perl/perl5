@@ -981,10 +981,9 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		     * seen as an invalid separator character.
 		     */
 		    const char q = ((*s == '\'') ? '"' : '\'');
-		    if (ckWARN(WARN_LAYER))
-			Perl_warner(aTHX_ packWARN(WARN_LAYER),
-			      "Invalid separator character %c%c%c in PerlIO layer specification %s",
-			      q, *s, q, s);
+		    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER),
+				   "Invalid separator character %c%c%c in PerlIO layer specification %s",
+				   q, *s, q, s);
 		    SETERRNO(EINVAL, LIB_INVARG);
 		    return -1;
 		}
@@ -1018,10 +1017,9 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			     */
 			case '\0':
 			    e--;
-			    if (ckWARN(WARN_LAYER))
-				Perl_warner(aTHX_ packWARN(WARN_LAYER),
-				      "Argument list not closed for PerlIO layer \"%.*s\"",
-				      (int) (e - s), s);
+			    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER),
+					   "Argument list not closed for PerlIO layer \"%.*s\"",
+					   (int) (e - s), s);
 			    return -1;
 			default:
 			    /*
@@ -1044,9 +1042,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			    SvREFCNT_dec(arg);
 		    }
 		    else {
-			if (ckWARN(WARN_LAYER))
-			    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
-				  (int) llen, s);
+			Perl_ck_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
+				       (int) llen, s);
 			return -1;
 		    }
 		}
@@ -1460,8 +1457,8 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
 	PerlIO_funcs *f = PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
 	/* This isn't supposed to happen, since PerlIO::scalar is core,
 	 * but could happen anyway in smaller installs or with PAR */
-	if (!f && ckWARN(WARN_LAYER))
-	    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"scalar\"");
+	if (!f)
+	    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"scalar\"");
 	return f;
     }
 

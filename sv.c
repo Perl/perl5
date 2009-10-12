@@ -4005,9 +4005,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     }
     else if (dtype == SVt_PVGV && isGV_with_GP(dstr)) {
 	if (!(sflags & SVf_OK)) {
-	    if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    "Undefined value assigned to typeglob");
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+			   "Undefined value assigned to typeglob");
 	}
 	else {
 	    GV *gv = gv_fetchsv(sstr, GV_ADD, SVt_PVGV);
@@ -5239,8 +5238,7 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     if (!SvROK(sv))
 	Perl_croak(aTHX_ "Can't weaken a nonreference");
     else if (SvWEAKREF(sv)) {
-	if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Reference is already weak");
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is already weak");
 	return sv;
     }
     tsv = SvRV(sv);
@@ -7284,10 +7282,10 @@ Perl_sv_inc(pTHX_ register SV *const sv)
     if (flags & SVp_NOK) {
 	const NV was = SvNVX(sv);
 	if (NV_OVERFLOWS_INTEGERS_AT &&
-	    was >= NV_OVERFLOWS_INTEGERS_AT && ckWARN(WARN_IMPRECISION)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IMPRECISION),
-			"Lost precision when incrementing %" NVff " by 1",
-			was);
+	    was >= NV_OVERFLOWS_INTEGERS_AT) {
+	    Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
+			   "Lost precision when incrementing %" NVff " by 1",
+			   was);
 	}
 	(void)SvNOK_only(sv);
         SvNV_set(sv, was + 1.0);
@@ -7450,10 +7448,10 @@ Perl_sv_dec(pTHX_ register SV *const sv)
 	{
 	    const NV was = SvNVX(sv);
 	    if (NV_OVERFLOWS_INTEGERS_AT &&
-		was <= -NV_OVERFLOWS_INTEGERS_AT && ckWARN(WARN_IMPRECISION)) {
-		Perl_warner(aTHX_ packWARN(WARN_IMPRECISION),
-			    "Lost precision when decrementing %" NVff " by 1",
-			    was);
+		was <= -NV_OVERFLOWS_INTEGERS_AT) {
+		Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
+			       "Lost precision when decrementing %" NVff " by 1",
+			       was);
 	    }
 	    (void)SvNOK_only(sv);
 	    SvNV_set(sv, was - 1.0);

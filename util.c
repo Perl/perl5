@@ -1529,6 +1529,19 @@ Perl_warner_nocontext(U32 err, const char *pat, ...)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 void
+Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
+{
+    PERL_ARGS_ASSERT_CK_WARNER;
+
+    if (Perl_ckwarn(aTHX_ err)) {
+	va_list args;
+	va_start(args, pat);
+	vwarner(err, pat, &args);
+	va_end(args);
+    }
+}
+
+void
 Perl_warner(pTHX_ U32  err, const char* pat,...)
 {
     va_list args;
@@ -2275,8 +2288,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	    }
 	    return NULL;
 	}
-	if (ckWARN(WARN_PIPE))
-	    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
 	sleep(5);
     }
     if (pid == 0) {
@@ -2423,8 +2435,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 		Perl_croak(aTHX_ "Can't fork: %s", Strerror(errno));
 	    return NULL;
 	}
-	if (ckWARN(WARN_PIPE))
-	    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
 	sleep(5);
     }
     if (pid == 0) {
@@ -4295,9 +4306,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
  			mult /= 10;
 			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
 			    || (PERL_ABS(rev) > VERSION_MAX )) {
-			    if(ckWARN(WARN_OVERFLOW))
-				Perl_warner(aTHX_ packWARN(WARN_OVERFLOW), 
-				"Integer overflow in version %d",VERSION_MAX);
+			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+					   "Integer overflow in version %d",VERSION_MAX);
 			    s = end - 1;
 			    rev = VERSION_MAX;
 			    vinf = 1;
@@ -4314,9 +4324,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
  			mult *= 10;
 			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
 			    || (PERL_ABS(rev) > VERSION_MAX )) {
-			    if(ckWARN(WARN_OVERFLOW))
-				Perl_warner(aTHX_ packWARN(WARN_OVERFLOW), 
-				"Integer overflow in version");
+			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+					   "Integer overflow in version");
 			    end = s - 1;
 			    rev = VERSION_MAX;
 			    vinf = 1;
@@ -4564,10 +4573,9 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 
     s = scan_version(version, ver, qv);
     if ( *s != '\0' ) 
-	if(ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), 
-		"Version string '%s' contains invalid data; "
-		"ignoring: '%s'", version, s);
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), 
+		       "Version string '%s' contains invalid data; "
+		       "ignoring: '%s'", version, s);
     Safefree(version);
     return ver;
 }
