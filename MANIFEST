@@ -2211,9 +2211,7 @@ cpan/Test-Simple/lib/Test/Builder/Tester.pm		For testing Test::Builder based cla
 cpan/Test-Simple/lib/Test/More.pm			More utilities for writing tests
 cpan/Test-Simple/lib/Test/Simple.pm			Basic utility for writing tests
 cpan/Test-Simple/lib/Test/Tutorial.pod			A tutorial on writing tests
-cpan/Test-Simple/MANIFEST				Test::Simple MANIFEST
 cpan/Test-Simple/README					Test::Simple README
-cpan/Test-Simple/t/00compile.t				Test::Simple test
 cpan/Test-Simple/t/00test_harness_check.t		Test::Simple test
 cpan/Test-Simple/t/bad_plan.t				Test::Builder plan() test
 cpan/Test-Simple/t/bail_out.t				Test::Builder BAIL_OUT test

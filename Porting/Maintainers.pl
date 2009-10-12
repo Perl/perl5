@@ -1438,13 +1438,10 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'mschwern',
 	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.94.tar.gz',
 	'FILES'		=> q[cpan/Test-Simple],
-	# Note: Test-Simple's MANIFEST file had to be adjusted for
-	# the 00compile.t test due to the omission of lib/Test/
-	# Builder/IO/Scalar.pm. Perhaps it would be better to
-	# exclude that test script and the MANIFEST file instead?
 	'EXCLUDED'	=> [
 			     qw{.perlcriticrc
 				.perltidyrc
+				t/00compile.t
 				t/pod.t
 				t/pod-coverage.t
 				t/Builder/reset_outputs.t
