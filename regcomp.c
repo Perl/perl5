@@ -475,23 +475,22 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
-#define	vWARN(loc,m) STMT_START {					\
+#define	ckWARNreg(loc,m) STMT_START {					\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,	\
+    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,	\
 	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
-#define	vWARNdep(loc,m) STMT_START {					\
+#define	ckWARNregdep(loc,m) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),		\
+    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
 	    "%s" REPORT_LOCATION,					\
 	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
-
-#define	vWARN2(loc, m, a1) STMT_START {					\
+#define	ckWARN2reg(loc, m, a1) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    a1, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
@@ -501,9 +500,21 @@ static const scan_data_t zero_scan_data =
 	    a1, a2, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
+#define	ckWARN3reg(loc, m, a1, a2) STMT_START {				\
+    const IV offset = loc - RExC_precomp;				\
+    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+	    a1, a2, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
+
 #define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+	    a1, a2, a3, (int)offset, RExC_precomp, RExC_precomp + offset); \
+} STMT_END
+
+#define	ckWARN4reg(loc, m, a1, a2, a3) STMT_START {			\
+    const IV offset = loc - RExC_precomp;				\
+    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    a1, a2, a3, (int)offset, RExC_precomp, RExC_precomp + offset); \
 } STMT_END
 
@@ -3179,11 +3190,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    (next_is_eval || !(mincount == 0 && maxcount == 1))
 		    && (minnext == 0) && (deltanext == 0)
 		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
-		    && maxcount <= REG_INFTY/3 /* Complement check for big count */
-		    && ckWARN(WARN_REGEXP))
+		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		{
-		    vWARN(RExC_parse,
-			  "Quantifier unexpected on zero-length expression");
+		    ckWARNreg(RExC_parse,
+			      "Quantifier unexpected on zero-length expression");
 		}
 
 		min += minnext * mincount;
@@ -6076,8 +6086,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			break;
 	            case KEEPCOPY_PAT_MOD: /* 'p' */
                         if (flagsp == &negflags) {
-                            if (SIZE_ONLY && ckWARN(WARN_REGEXP))
-                                vWARN(RExC_parse + 1,"Useless use of (?-p)");
+                            if (SIZE_ONLY)
+                                ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
                         } else {
                             *flagsp |= RXf_PMf_KEEPCOPY;
                         }
@@ -6532,11 +6542,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	goto do_curly;
     }
   nest_check:
-    if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3 && ckWARN(WARN_REGEXP)) {
-	vWARN3(RExC_parse,
-	       "%.*s matches null string many times",
-	       (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
-	       origparse);
+    if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
+	ckWARN3reg(RExC_parse,
+		   "%.*s matches null string many times",
+		   (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
+		   origparse);
     }
 
     if (RExC_parse < RExC_end && *RExC_parse == '?') {
@@ -6763,16 +6773,16 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
                 *valuep = (UV)*p;
                 /* warn if we havent used the whole string? */
             }
-            if (numlen<len && SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-                vWARN2(RExC_parse,
-                    "Ignoring excess chars from \\N{%s} in character class",
-                    SvPVX(sv_name)
+            if (numlen<len && SIZE_ONLY) {
+                ckWARN2reg(RExC_parse,
+			   "Ignoring excess chars from \\N{%s} in character class",
+			   SvPVX(sv_name)
                 );
             }        
-        } else if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-            vWARN2(RExC_parse,
-                    "Ignoring zero length \\N{%s} in character class",
-                    SvPVX(sv_name)
+        } else if (SIZE_ONLY) {
+            ckWARN2reg(RExC_parse,
+		       "Ignoring zero length \\N{%s} in character class",
+		       SvPVX(sv_name)
                 );
         }
         if (sv_name)    
@@ -7471,9 +7481,8 @@ tryagain:
 			     * single-byte range.  For now, warn only when
 			     * it ends up modulo */
 			    if (SIZE_ONLY && ender >= 0x100
-				    && ! UTF && ! PL_encoding
-				    && ckWARN2(WARN_DEPRECATED, WARN_REGEXP)) {
-				vWARNdep(p, "Use of octal value above 377 is deprecated");
+				    && ! UTF && ! PL_encoding) {
+				ckWARNregdep(p, "Use of octal value above 377 is deprecated");
 			    }
 			    p += numlen;
 			}
@@ -7488,8 +7497,8 @@ tryagain:
 			{
 			    SV* enc = PL_encoding;
 			    ender = reg_recode((const char)(U8)ender, &enc);
-			    if (!enc && SIZE_ONLY && ckWARN(WARN_REGEXP))
-				vWARN(p, "Invalid escape in the specified encoding");
+			    if (!enc && SIZE_ONLY)
+				ckWARNreg(p, "Invalid escape in the specified encoding");
 			    RExC_utf8 = 1;
 			}
 			break;
@@ -7498,8 +7507,8 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALPHA(*p) && ckWARN(WARN_REGEXP))
-			    vWARN2(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
+			if (!SIZE_ONLY&& isALPHA(*p))
+			    ckWARN2reg(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
 			goto normal_default;
 		    }
 		    break;
@@ -7791,10 +7800,9 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 	while (isALNUM(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
-	    if (ckWARN(WARN_REGEXP))
-		vWARN3(s+2,
-			"POSIX syntax [%c %c] belongs inside character classes",
-			c, c);
+	    ckWARN3reg(s+2,
+		       "POSIX syntax [%c %c] belongs inside character classes",
+		       c, c);
 
 	    /* [[=foo=]] and [[.foo.]] are still future. */
 	    if (POSIXCC_NOTYET(c)) {
@@ -8090,16 +8098,16 @@ parseit:
 		{
 		    SV* enc = PL_encoding;
 		    value = reg_recode((const char)(U8)value, &enc);
-		    if (!enc && SIZE_ONLY && ckWARN(WARN_REGEXP))
-			vWARN(RExC_parse,
-			      "Invalid escape in the specified encoding");
+		    if (!enc && SIZE_ONLY)
+			ckWARNreg(RExC_parse,
+				  "Invalid escape in the specified encoding");
 		    break;
 		}
 	    default:
-		if (!SIZE_ONLY && isALPHA(value) && ckWARN(WARN_REGEXP))
-		    vWARN2(RExC_parse,
-			   "Unrecognized escape \\%c in character class passed through",
-			   (int)value);
+		if (!SIZE_ONLY && isALPHA(value))
+		    ckWARN2reg(RExC_parse,
+			       "Unrecognized escape \\%c in character class passed through",
+			       (int)value);
 		break;
 	    }
 	} /* end of \blah */
@@ -8118,14 +8126,13 @@ parseit:
 	    /* a bad range like a-\d, a-[:digit:] ? */
 	    if (range) {
 		if (!SIZE_ONLY) {
-		    if (ckWARN(WARN_REGEXP)) {
-			const int w =
-			    RExC_parse >= rangebegin ?
-			    RExC_parse - rangebegin : 0;
-			vWARN4(RExC_parse,
+		    const int w =
+			RExC_parse >= rangebegin ?
+			RExC_parse - rangebegin : 0;
+		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
-		    }
+
 		    if (prevvalue < 256) {
 			ANYOF_BITMAP_SET(ret, prevvalue);
 			ANYOF_BITMAP_SET(ret, '-');
