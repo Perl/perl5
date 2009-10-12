@@ -7172,10 +7172,10 @@ S_pending_ident(pTHX)
         GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1, 0,
 					 SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
-		&& ckWARN(WARN_AMBIGUOUS)
 		/* DO NOT warn for @- and @+ */
 		&& !( PL_tokenbuf[2] == '\0' &&
 		    ( PL_tokenbuf[1] == '-' || PL_tokenbuf[1] == '+' ))
+		&& ckWARN(WARN_AMBIGUOUS)
 	   )
         {
             /* Downgraded from fatal to warning 20000522 mjd */
