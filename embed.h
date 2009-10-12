@@ -151,7 +151,11 @@
 #ifdef PERL_CORE
 #define delete_eval_scope	Perl_delete_eval_scope
 #define deprecate		Perl_deprecate
-#define deprecate_old		Perl_deprecate_old
+#endif
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define deprecate_old		S_deprecate_old
+#endif
 #endif
 #define die			Perl_die
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -2488,7 +2492,11 @@
 #ifdef PERL_CORE
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
-#define deprecate_old(a)	Perl_deprecate_old(aTHX_ a)
+#endif
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define deprecate_old(a)	S_deprecate_old(aTHX_ a)
+#endif
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

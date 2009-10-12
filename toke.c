@@ -597,8 +597,8 @@ Perl_deprecate(pTHX_ const char *const s)
 	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of %s is deprecated", s);
 }
 
-void
-Perl_deprecate_old(pTHX_ const char *const s)
+static void
+S_deprecate_old(pTHX_ const char *const s)
 {
     /* This function should NOT be called for any new deprecated warnings */
     /* Use Perl_deprecate instead                                         */

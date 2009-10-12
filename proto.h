@@ -521,11 +521,13 @@ PERL_CALLCONV void	Perl_deprecate(pTHX_ const char *const s)
 #define PERL_ARGS_ASSERT_DEPRECATE	\
 	assert(s)
 
-PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char *const s)
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+STATIC void	S_deprecate_old(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DEPRECATE_OLD	\
 	assert(s)
 
+#endif
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 

@@ -215,8 +215,9 @@ Anp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 pM	|void	|delete_eval_scope
 : Used in various files
 p	|void	|deprecate	|NN const char *const s
-: Used in various files
-p	|void	|deprecate_old	|NN const char *const s
+#if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+s	|void	|deprecate_old	|NN const char *const s
+#endif
 Afp	|OP*	|die		|NULLOK const char* pat|...
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
