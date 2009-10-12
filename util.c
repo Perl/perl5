@@ -1572,11 +1572,9 @@ bool
 Perl_ckwarn(pTHX_ U32 w)
 {
     dVAR;
-    return
-	(
-	       isLEXWARN_on
-	    && PL_curcop->cop_warnings != pWARN_NONE
-	    && (
+    return isLEXWARN_on
+	? (PL_curcop->cop_warnings != pWARN_NONE
+	   && (
 		   PL_curcop->cop_warnings == pWARN_ALL
 		|| isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
 		|| (unpackWARN2(w) &&
@@ -1586,12 +1584,8 @@ Perl_ckwarn(pTHX_ U32 w)
 		|| (unpackWARN4(w) &&
 		     isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)))
 		)
-	)
-	||
-	(
-	    isLEXWARN_off && PL_dowarn & G_WARN_ON
-	)
-	;
+	   )
+	: (PL_dowarn & G_WARN_ON);
 }
 
 /* implements the ckWARN?_d macro */
