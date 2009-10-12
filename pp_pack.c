@@ -2426,7 +2426,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     if (m != marks + sym_ptr->level+1) {
 	Safefree(marks);
 	Safefree(to_start);
-	Perl_croak(aTHX_ "Assertion: marks beyond string end");
+	Perl_croak(aTHX_ "panic: marks beyond string end");
     }
     for (group=sym_ptr; group; group = group->previous)
 	group->strbeg = marks[group->level] - to_start;
@@ -2760,7 +2760,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		GROWING(0, cat, start, cur, len);
 		if (!uni_to_bytes(aTHX_ &aptr, end, cur, fromlen,
 				  datumtype | TYPE_IS_PACK))
-		    Perl_croak(aTHX_ "Perl bug: predicted utf8 length not available");
+		    Perl_croak(aTHX_ "panic: predicted utf8 length not available");
 		cur += fromlen;
 		len -= fromlen;
 	    } else if (utf8) {
@@ -3549,7 +3549,7 @@ extern const double _double_constants[];
 				      'u' | TYPE_IS_PACK)) {
 			*cur = '\0';
 			SvCUR_set(cat, cur - start);
-			Perl_croak(aTHX_ "Assertion: string is shorter than advertised");
+			Perl_croak(aTHX_ "panic: string is shorter than advertised");
 		    }
 		    end = doencodes(hunk, buffer, todo);
 		} else {

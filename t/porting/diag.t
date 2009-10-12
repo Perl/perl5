@@ -186,8 +186,6 @@ Ambiguous use of %c{%s%s} resolved to %c%s%s
 Ambiguous use of -%s resolved as -&%s()
 Argument "%s" isn't numeric
 Argument "%s" isn't numeric in %s
-Assertion: marks beyond string end
-Assertion: string is shorter than advertised
 Attempt to clear deleted array
 Attempt to free non-arena SV: 0x%x
 Attempt to free non-existent shared string '%s'%s
@@ -301,7 +299,6 @@ Opening dirhandle %s also as a file
 Opening filehandle %s also as a directory
 Operator or semicolon missing before %c%s
 Overloaded dereference did not return a reference
-Perl bug: predicted utf8 length not available
 PERL_SIGNALS illegal: "%s"
 Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
