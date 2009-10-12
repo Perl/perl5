@@ -6696,13 +6696,13 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
         sv_name = newSVpvn(name, endbrace - name);
         
         if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
-            vFAIL2("Constant(\\N{%s}) unknown: "
+            vFAIL2("Constant(\\N{%" SVf "}) unknown: "
                   "(possibly a missing \"use charnames ...\")",
-                  SvPVX(sv_name));
+                  SVfARG(sv_name));
         }
         if (!cvp || !SvOK(*cvp)) { /* when $^H{charnames} = undef; */
-            vFAIL2("Constant(\\N{%s}): "
-                  "$^H{charnames} is not defined",SvPVX(sv_name));
+            vFAIL2("Constant(\\N{%" SVf "}): "
+                  "$^H{charnames} is not defined", SVfARG(sv_name));
         }
         
         
@@ -6741,8 +6741,8 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
             LEAVE ;
             
             if ( !sv_str || !SvOK(sv_str) ) {
-                vFAIL2("Constant(\\N{%s}): Call to &{$^H{charnames}} "
-                      "did not return a defined value",SvPVX(sv_name));
+                vFAIL2("Constant(\\N{%" SVf "}): Call to &{$^H{charnames}} "
+		       "did not return a defined value", SVfARG(sv_name));
             }
             if (hv_store_ent( RExC_charnames, sv_name, sv_str, 0))
                 cached = 1;
@@ -6775,14 +6775,14 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
             }
             if (numlen<len && SIZE_ONLY) {
                 ckWARN2reg(RExC_parse,
-			   "Ignoring excess chars from \\N{%s} in character class",
-			   SvPVX(sv_name)
+			   "Ignoring excess chars from \\N{%" SVf "} in character class",
+			   SVfARG(sv_name)
                 );
             }        
         } else if (SIZE_ONLY) {
             ckWARN2reg(RExC_parse,
-		       "Ignoring zero length \\N{%s} in character class",
-		       SvPVX(sv_name)
+		       "Ignoring zero length \\N{%" SVf "} in character class",
+		       SVfARG(sv_name)
                 );
         }
         if (sv_name)    
