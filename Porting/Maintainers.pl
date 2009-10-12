@@ -1639,7 +1639,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'JPEACOCK/version-0.77.tar.gz',
 	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t
 			     lib/version],
-	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qr{^vutil/},
+	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qw{t/survey_locales}, qr{^vutil/},
 			     qw{lib/version/typemap},
 			     qw{vperl/vpp.pm},
 			   ],
