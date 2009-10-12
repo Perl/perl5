@@ -5583,10 +5583,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
 	    if (!SvPOK((const SV *)gv)
-		&& !(SvIOK((const SV *)gv) && SvIVX((const SV *)gv) == -1)
-		&& ckWARN_d(WARN_PROTOTYPE))
+		&& !(SvIOK((const SV *)gv) && SvIVX((const SV *)gv) == -1))
 	    {
-		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
 	    cv_ckproto_len((const CV *)gv, NULL, ps, ps_len);
 	}
@@ -6219,8 +6218,7 @@ Perl_oopsAV(pTHX_ OP *o)
 	break;
 
     default:
-	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsAV");
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsAV");
 	break;
     }
     return o;
@@ -6248,8 +6246,7 @@ Perl_oopsHV(pTHX_ OP *o)
 	break;
 
     default:
-	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsHV");
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsHV");
 	break;
     }
     return o;

@@ -1041,6 +1041,7 @@
 #define vwarn			Perl_vwarn
 #define warner			Perl_warner
 #define ck_warner		Perl_ck_warner
+#define ck_warner_d		Perl_ck_warner_d
 #define vwarner			Perl_vwarner
 #ifdef PERL_CORE
 #define watch			Perl_watch

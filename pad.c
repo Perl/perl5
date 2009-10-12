@@ -1065,11 +1065,10 @@ Perl_pad_leavemy(pTHX)
     if (PL_min_intro_pending && PL_comppad_name_fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
 	    const SV * const sv = svp[off];
-	    if (sv && sv != &PL_sv_undef
-		    && !SvFAKE(sv) && ckWARN_d(WARN_INTERNAL))
-		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-			    "%"SVf" never introduced",
-			    SVfARG(sv));
+	    if (sv && sv != &PL_sv_undef && !SvFAKE(sv))
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+				 "%"SVf" never introduced",
+				 SVfARG(sv));
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */

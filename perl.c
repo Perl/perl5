@@ -1049,21 +1049,21 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_isarev);
 
     FREETMPS;
-    if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {
+    if (destruct_level >= 2) {
 	if (PL_scopestack_ix != 0)
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-	         "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
-		 (long)PL_scopestack_ix);
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+			     "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
+			     (long)PL_scopestack_ix);
 	if (PL_savestack_ix != 0)
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-		 "Unbalanced saves: %ld more saves than restores\n",
-		 (long)PL_savestack_ix);
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+			     "Unbalanced saves: %ld more saves than restores\n",
+			     (long)PL_savestack_ix);
 	if (PL_tmps_floor != -1)
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced tmps: %ld more allocs than frees\n",
-		 (long)PL_tmps_floor + 1);
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced tmps: %ld more allocs than frees\n",
+			     (long)PL_tmps_floor + 1);
 	if (cxstack_ix != -1)
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
-		 (long)cxstack_ix + 1);
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
+			     (long)cxstack_ix + 1);
     }
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */

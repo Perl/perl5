@@ -731,13 +731,11 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
     if (e != s) {
 	len--;
         warn_and_return:
-	if (ckWARN_d(WARN_UTF8)) {
-	    if (PL_op)
-		Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			    "%s in %s", unees, OP_DESC(PL_op));
-	    else
-		Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
-	}
+	if (PL_op)
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
+			     "%s in %s", unees, OP_DESC(PL_op));
+	else
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), unees);
     }
 
     return len;

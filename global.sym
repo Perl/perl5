@@ -614,6 +614,7 @@ Perl_warn
 Perl_vwarn
 Perl_warner
 Perl_ck_warner
+Perl_ck_warner_d
 Perl_vwarner
 Perl_whichsig
 Perl_yylex

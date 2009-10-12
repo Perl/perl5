@@ -2056,10 +2056,10 @@ Perl_mfree(Malloc_t where)
 #ifdef PERL_CORE
 		{
 		    dTHX;
-		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s free() ignored (RMAGIC, PERL_CORE)",
-				    ovp->ov_rmagic == RMAGIC - 1 ?
-				    "Duplicate" : "Bad");
+		    if (!PERL_IS_ALIVE || !PL_curcop)
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s free() ignored (RMAGIC, PERL_CORE)",
+					 ovp->ov_rmagic == RMAGIC - 1 ?
+					 "Duplicate" : "Bad");
 		}
 #else
 		warn("%s free() ignored (RMAGIC)",
@@ -2069,8 +2069,8 @@ Perl_mfree(Malloc_t where)
 #ifdef PERL_CORE
 		{
 		    dTHX;
-		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s", "Bad free() ignored (PERL_CORE)");
+		    if (!PERL_IS_ALIVE || !PL_curcop)
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s", "Bad free() ignored (PERL_CORE)");
 		}
 #else
 		warn("%s", "Bad free() ignored");
@@ -2163,11 +2163,11 @@ Perl_realloc(void *mp, size_t nbytes)
 #ifdef PERL_CORE
 		{
 		    dTHX;
-		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%srealloc() %signored",
-				    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
-				    ovp->ov_rmagic == RMAGIC - 1
-				    ? "of freed memory " : "");
+		    if (!PERL_IS_ALIVE || !PL_curcop)
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%srealloc() %signored",
+					 (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
+					 ovp->ov_rmagic == RMAGIC - 1
+					 ? "of freed memory " : "");
 		}
 #else
 		warn2("%srealloc() %signored",
@@ -2178,9 +2178,9 @@ Perl_realloc(void *mp, size_t nbytes)
 #ifdef PERL_CORE
 		{
 		    dTHX;
-		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s",
-				    "Bad realloc() ignored");
+		    if (!PERL_IS_ALIVE || !PL_curcop)
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s",
+					 "Bad realloc() ignored");
 		}
 #else
 		warn("%s", "Bad realloc() ignored");

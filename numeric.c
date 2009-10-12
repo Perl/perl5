@@ -176,9 +176,8 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
-                if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                                "Integer overflow in binary number");
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+				 "Integer overflow in binary number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
             }
@@ -294,9 +293,8 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
-                if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                                "Integer overflow in hexadecimal number");
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+				 "Integer overflow in hexadecimal number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
             }
@@ -395,9 +393,8 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
-                if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                                "Integer overflow in octal number");
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+			       "Integer overflow in octal number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
             }
