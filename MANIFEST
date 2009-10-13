@@ -1721,6 +1721,7 @@ cpan/Parse-CPAN-Meta/t/data/Spreadsheet-Read.yml	Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/data/Template-Provider-Unicode-Japanese.yml	Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/data/toolbar.yml			Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml.packed	Parse::CPAN::Meta
+cpan/Parse-CPAN-Meta/t/data/utf_16_le_bom.yml	Parse::CPAN::Meta - manually generated; see Porting/Maintainers.pl
 cpan/Parse-CPAN-Meta/t/data/vanilla.yml			Parse::CPAN::Meta
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing library
 cpan/Parse-CPAN-Meta/uupacktool.pl			Parse::CPAN::Meta

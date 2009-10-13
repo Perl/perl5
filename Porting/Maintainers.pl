@@ -1106,6 +1106,9 @@ use File::Glob qw(:case);
 	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
+	# NOTE: 'perl uupacktool.pl t/data/utf_16_le_bom.yml.packed'
+	# run by hand after import, as the core's test harness doesn't
+	# run dists' "make test" steps
 	},
 
     'PathTools' =>
