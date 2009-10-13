@@ -214,11 +214,11 @@ able to use them in the sort() comparison block or function.
 
 =over 8
 
-=item $<I<digits>>
+=item $<I<digits>> ($1, $2, ...)
 X<$1> X<$2> X<$3>
 
 Contains the subpattern from the corresponding set of capturing
-parentheses from the last pattern match, not counting patterns
+parentheses from the last successful pattern match, not counting patterns
 matched in nested blocks that have been exited already.  (Mnemonic:
 like \digits.)  These variables are all read-only and dynamically
 scoped to the current BLOCK.
