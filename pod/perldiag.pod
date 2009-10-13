@@ -4685,12 +4685,12 @@ is deprecated. See L<perlvar/"$[">.
 
 =item Use of bare << to mean <<"" is deprecated
 
-(D deprecated, W syntax) You are now encouraged to use the explicitly quoted
+(D deprecated) You are now encouraged to use the explicitly quoted
 form if you wish to use an empty line as the terminator of the here-document.
 
 =item Use of comma-less variable list is deprecated
 
-(D deprecated, W syntax) The values you give to a format should be
+(D deprecated) The values you give to a format should be
 separated by commas, not just aligned on a line.
 
 =item Use of chdir('') or chdir(undef) as chdir() deprecated

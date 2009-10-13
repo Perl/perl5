@@ -596,23 +596,6 @@ Perl_deprecate(pTHX_ const char *const s)
     Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of %s is deprecated", s);
 }
 
-static void
-S_deprecate_old(pTHX_ const char *const s)
-{
-    /* This function should NOT be called for any new deprecated warnings */
-    /* Use Perl_deprecate instead                                         */
-    /*                                                                    */
-    /* It is here to maintain backward compatibility with the pre-5.8     */
-    /* warnings category hierarchy. The "deprecated" category used to     */
-    /* live under the "syntax" category. It is now a top-level category   */
-    /* in its own right.                                                  */
-
-    PERL_ARGS_ASSERT_DEPRECATE_OLD;
-
-    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-		   "Use of %s is deprecated", s);
-}
-
 /*
  * experimental text filters for win32 carriage-returns, utf16-to-utf8 and
  * utf16-to-utf8-reversed.
@@ -4878,7 +4861,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	}
@@ -5136,7 +5119,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
@@ -5153,7 +5136,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
@@ -11292,7 +11275,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	else
 	    term = '"';
 	if (!isALNUM_lazy_if(s,UTF))
-	    deprecate_old("bare << to mean <<\"\"");
+	    deprecate("bare << to mean <<\"\"");
 	for (; isALNUM_lazy_if(s,UTF); s++) {
 	    if (d < e)
 		*d++ = *s;
