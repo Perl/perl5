@@ -105,6 +105,8 @@
 #define ckWARN3_d(w1,w2,w3)	Perl_ckwarn_d(aTHX_ packWARN3(w1,w2,w3))
 #define ckWARN4_d(w1,w2,w3,w4)	Perl_ckwarn_d(aTHX_ packWARN4(w1,w2,w3,w4))
 
+#define WARNshift		8
+
 #define packWARN(a)		(a                                      )
 #define packWARN2(a,b)		((a) | ((b)<<8)                         )
 #define packWARN3(a,b,c)	((a) | ((b)<<8) | ((c)<<16)             )
