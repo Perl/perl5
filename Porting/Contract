@@ -1,6 +1,19 @@
+=head1 NAME
 
-                     Contributed Modules in Perl Core
-                 A Social Contract about Artistic Control
+perlpolicy - Various and sundry policies and commitments related to the perl core
+
+=head1 DESCRIPTION
+
+This document is the master document which records all written
+policies about how the Perl 5 Porters collectively develop and maintain
+the Perl core.
+
+
+
+=head1 CONTRIBUTED MODULES
+
+
+=head2 A Social Contract about Artistic Control
 
 What follows is a statement about artistic control, defined as the ability
 of authors of packages to guide the future of their code and maintain
@@ -35,27 +48,35 @@ involved in maintaining Perl should be aware that the module is still the
 property of the original author unless the original author explicitly
 gives up their ownership of it.  In particular:
 
- 1) The version of the module in the core should still be considered the
+=over
+
+=item *  The version of the module in the core should still be considered the
     work of the original author.  All patches, bug reports, and so forth
     should be fed back to them.  Their development directions should be
     respected whenever possible.
 
- 2) Patches may be applied by the pumpkin holder without the explicit
-    cooperation of the module author if and only if they are very minor,
-    time-critical in some fashion (such as urgent security fixes), or if
-    the module author cannot be reached.  Those patches must still be
-    given back to the author when possible, and if the author decides on
-    an alternate fix in their version, that fix should be strongly
-    preferred unless there is a serious problem with it.  Any changes not
-    endorsed by the author should be marked as such, and the contributor
-    of the change acknowledged.
+=item *
 
- 3) The version of the module distributed with Perl should, whenever
-    possible, be the latest version of the module as distributed by the
-    author (the latest non-beta version in the case of public Perl
-    releases), although the pumpkin holder may hold off on upgrading the
-    version of the module distributed with Perl to the latest version
-    until the latest version has had sufficient testing.
+Patches may be applied by the pumpkin holder without the explicit
+cooperation of the module author if and only if they are very minor,
+time-critical in some fashion (such as urgent security fixes), or if
+the module author cannot be reached.  Those patches must still be
+given back to the author when possible, and if the author decides on
+an alternate fix in their version, that fix should be strongly
+preferred unless there is a serious problem with it.  Any changes not
+endorsed by the author should be marked as such, and the contributor
+of the change acknowledged.
+
+=item *
+
+The version of the module distributed with Perl should, whenever
+possible, be the latest version of the module as distributed by the
+author (the latest non-beta version in the case of public Perl
+releases), although the pumpkin holder may hold off on upgrading the
+version of the module distributed with Perl to the latest version
+until the latest version has had sufficient testing.
+
+=back
 
 In other words, the author of a module should be considered to have final
 say on modifications to their module whenever possible (bearing in mind
@@ -64,17 +85,18 @@ reasonable compromises when there are disagreements).
 
 As a last resort, however:
 
- 4) If the author's vision of the future of their module is sufficiently
-    different from the vision of the pumpkin holder and perl5-porters as a
-    whole so as to cause serious problems for Perl, the pumpkin holder may
-    choose to formally fork the version of the module in the core from the
-    one maintained by the author.  This should not be done lightly and
-    should *always* if at all possible be done only after direct input
-    from Larry.  If this is done, it must then be made explicit in the
-    module as distributed with Perl core that it is a forked version and
-    that while it is based on the original author's work, it is no longer
-    maintained by them.  This must be noted in both the documentation and
-    in the comments in the source of the module.
+
+If the author's vision of the future of their module is sufficiently
+different from the vision of the pumpkin holder and perl5-porters as a
+whole so as to cause serious problems for Perl, the pumpkin holder may
+choose to formally fork the version of the module in the core from the
+one maintained by the author.  This should not be done lightly and
+should *always* if at all possible be done only after direct input
+from Larry.  If this is done, it must then be made explicit in the
+module as distributed with Perl core that it is a forked version and
+that while it is based on the original author's work, it is no longer
+maintained by them.  This must be noted in both the documentation and
+in the comments in the source of the module.
 
 Again, this should be a last resort only.  Ideally, this should never
 happen, and every possible effort at cooperation and compromise should be
@@ -103,6 +125,7 @@ at a compromise.  In nearly every circumstance nothing more will be
 necessary, and certainly no more drastic measure should be used until
 every avenue of communication and discussion has failed.
 
--- 
-Version 1.2.  By Russ Allbery (rra@stanford.edu) and the perl5-porters.
+=head1 CREDITS
+
+Social Contract about Contributed Modules originall by Russ Allbery E<lt>rra@stanford.eduE<gt> and the perl5-porters.
 
