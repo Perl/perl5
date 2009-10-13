@@ -33,13 +33,19 @@ print "1..50\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
-$result = do foo1(1);
+{
+    no warnings 'deprecated';
+    $result = do foo1(1);
+}
 
 ok( $result eq 'value',  ":$result: eq :value:" );
 ok( $_[0] == 0 );
 
 $_[0] = 0;
-$result = do foo2(0,1,0);
+{
+    no warnings 'deprecated';
+    $result = do foo2(0,1,0);
+}
 ok( $result eq 'value', ":$result: eq :value:" );
 ok( $_[0] == 0 );
 
@@ -50,10 +56,16 @@ sub blather {
     ok 1 foreach @_;
 }
 
-do blather("ayep","sho nuff");
+{
+    no warnings 'deprecated';
+    do blather("ayep","sho nuff");
+}
 @x = ("jeepers", "okydoke");
 @y = ("uhhuh", "yeppers");
-do blather(@x,"noofie",@y);
+{
+    no warnings 'deprecated';
+    do blather(@x,"noofie",@y);
+}
 
 unshift @INC, '.';
 
