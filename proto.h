@@ -5841,6 +5841,7 @@ STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRL
 #define PERL_ARGS_ASSERT_NEW_CONSTANT	\
 	assert(key); assert(sv)
 
+STATIC int	S_deprecate_commaless_var_list(pTHX);
 STATIC int	S_ao(pTHX_ int toketype);
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);

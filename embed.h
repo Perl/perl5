@@ -1593,6 +1593,7 @@
 #define tokenize_use		S_tokenize_use
 #endif
 #ifdef PERL_CORE
+#define deprecate_commaless_var_list	S_deprecate_commaless_var_list
 #define ao			S_ao
 #endif
 #  if defined(PERL_CR_FILTER)
@@ -3947,6 +3948,7 @@
 #define filter_gets(a,b,c)	S_filter_gets(aTHX_ a,b,c)
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define tokenize_use(a,b)	S_tokenize_use(aTHX_ a,b)
+#define deprecate_commaless_var_list()	S_deprecate_commaless_var_list(aTHX)
 #define ao(a)			S_ao(aTHX_ a)
 #endif
 #  if defined(PERL_CR_FILTER)

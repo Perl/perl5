@@ -100,7 +100,6 @@ static int
 S_pending_ident(pTHX);
 
 static const char ident_too_long[] = "Identifier too long";
-static const char commaless_variable_list[] = "comma-less variable list";
 
 #ifndef PERL_NO_UTF16_FILTER
 static I32 utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
@@ -450,6 +449,13 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 }
 
 #endif
+
+static int
+S_deprecate_commaless_var_list(pTHX) {
+    PL_expect = XTERM;
+    deprecate("comma-less variable list");
+    return REPORT(','); /* grandfather non-comma-format format */
+}
 
 /*
  * S_ao
@@ -4860,9 +4866,7 @@ Perl_yylex(pTHX)
 
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
-		PL_expect = XTERM;
-		deprecate(commaless_variable_list);
-		return REPORT(','); /* grandfather non-comma-format format */
+		return deprecate_commaless_var_list();
 	    }
 	}
 
@@ -5118,9 +5122,7 @@ Perl_yylex(pTHX)
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
-		PL_expect = XTERM;
-		deprecate(commaless_variable_list);
-		return REPORT(','); /* grandfather non-comma-format format */
+		return deprecate_commaless_var_list();
 	    }
 	    else
 		no_op("String",s);
@@ -5135,9 +5137,7 @@ Perl_yylex(pTHX)
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
-		PL_expect = XTERM;
-		deprecate(commaless_variable_list);
-		return REPORT(','); /* grandfather non-comma-format format */
+		return deprecate_commaless_var_list();
 	    }
 	    else
 		no_op("String",s);

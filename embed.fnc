@@ -1812,6 +1812,7 @@ so	|SV*	|new_constant	|NULLOK const char *s|STRLEN len \
 				|NN const char *key|STRLEN keylen|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type \
 				|STRLEN typelen
+s	|int	|deprecate_commaless_var_list
 s	|int	|ao		|int toketype
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
