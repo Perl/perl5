@@ -72,6 +72,7 @@ like $@, qr/^Modification of a read/;
 {
     require Tie::Hash;
     tie my %foo, 'Tie::StdHash';
+    no warnings 'deprecated';
     ok defined %foo;
     %foo = ( a => 1 );
     ok defined %foo;
@@ -80,6 +81,7 @@ like $@, qr/^Modification of a read/;
 {
     require Tie::Array;
     tie my @foo, 'Tie::StdArray';
+    no warnings 'deprecated';
     ok defined @foo;
     @foo = ( a => 1 );
     ok defined @foo;
