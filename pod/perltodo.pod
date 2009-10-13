@@ -36,6 +36,24 @@ instead there is an intentionally simpler library, F<t/test.pl>. However,
 quite a few tests in F<t/> have not been refactored to use it. Refactoring
 any of these tests, one at a time, is a useful thing TODO.
 
+=head2 Test that regen.pl was run
+
+There are various generated files shipped with the perl distribution, for
+things like header files generate from data. The generation scripts are
+written in perl, and all can be run by F<regen.pl>. However, because they're
+written in perl, we can't run them before we've built perl. We can't run them
+as part of the F<Makefile>, because changing files underneath F<make> confuses
+it completely, and we don't want to run them automatically anyway, as they
+change files shipped by the distribution, something we seek not do to.
+
+If someone changes the data, but forgets to re-run F<regen.pl> then the
+generated files are out of sync. It would be good to have a test in
+F<t/porting> that checks that the generated files are in sync, and fails
+otherwise, to alert someone before they make a poor commit. I suspect that this
+would require adapting the scripts run from F<regen.pl> to have dry-run
+options, and invoking them with these, or by refactoring them into a library
+that does the generation, which can be called by the scripts, and by the test.
+
 =head2 Automate perldelta generation
 
 The perldelta file accompanying each release summaries the major changes.
