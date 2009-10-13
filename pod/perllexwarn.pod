@@ -399,7 +399,7 @@ Consider the module C<MyMod::Abc> below.
     1;
 
 The call to C<warnings::register> will create a new warnings category
-called "MyMod::abc", i.e. the new category name matches the current
+called "MyMod::Abc", i.e. the new category name matches the current
 package name. The C<open> function in the module will display a warning
 message if it gets given a relative path as a parameter. This warnings
 will only be displayed if the code that uses C<MyMod::Abc> has actually
