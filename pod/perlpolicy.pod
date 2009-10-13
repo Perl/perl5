@@ -127,5 +127,5 @@ every avenue of communication and discussion has failed.
 
 =head1 CREDITS
 
-Social Contract about Contributed Modules originall by Russ Allbery E<lt>rra@stanford.eduE<gt> and the perl5-porters.
+Social Contract about Contributed Modules originally by Russ Allbery E<lt>rra@stanford.eduE<gt> and the perl5-porters.
 
