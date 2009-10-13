@@ -106,16 +106,22 @@ isnt ($size, (split('/', scalar %hash))[1]);
 
 is (keys(%hash), 10, "keys (%hash)");
 
-is (keys(hash), 10, "keys (hash)");
+{
+    no warnings 'deprecated';
+    is (keys(hash), 10, "keys (hash)");
+}
 
 $i = 0;
 %h = (a => A, b => B, c=> C, d => D, abc => ABC);
-@keys = keys(h);
-@values = values(h);
-while (($key, $value) = each(h)) {
+{
+    no warnings 'deprecated';
+    @keys = keys(h);
+    @values = values(h);
+    while (($key, $value) = each(h)) {
 	if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
 		$i++;
 	}
+    }
 }
 is ($i, 5);
 
