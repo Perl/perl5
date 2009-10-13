@@ -4311,6 +4311,7 @@ t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work
 t/op/arith.t			See if arithmetic works
+t/op/array_base.aux		Auxiliary file for the $[ test
 t/op/array_base.t		Tests for the $[, which is deprecated
 t/op/array.t			See if array operations work
 t/op/assignwarn.t		See if OP= operators warn correctly for undef targets

@@ -4,7 +4,7 @@
 
 @INC = '../lib';
 
-BEGIN { print "1..32\n"; }
+BEGIN { print "1..23\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -93,41 +93,20 @@ BEGIN {
 }
 
 {
-    $[ = 11;
-    print +($[ == 11 ? "" : "not "), "ok 17 - setting \$[ affects \$[\n";
-    our $t11; BEGIN { $t11 = $^H{'$['} }
-    print +($t11 == 11 ? "" : "not "), "ok 18 - setting \$[ affects \$^H{'\$['}\n";
-
-    BEGIN { $^H{'$['} = 22 }
-    print +($[ == 22 ? "" : "not "), "ok 19 - setting \$^H{'\$['} affects \$[\n";
-    our $t22; BEGIN { $t22 = $^H{'$['} }
-    print +($t22 == 22 ? "" : "not "), "ok 20 - setting \$^H{'\$['} affects \$^H{'\$['}\n";
-
-    BEGIN { %^H = () }
-    print +($[ == 0 ? "" : "not "), "ok 21 - clearing \%^H affects \$[\n";
-    our $t0; BEGIN { $t0 = $^H{'$['} }
-    print +($t0 == 0 ? "" : "not "), "ok 22 - clearing \%^H affects \$^H{'\$['}\n";
-}
-
-{
-    $[ = 13;
     BEGIN { $^H |= 0x04000000; $^H{foo} = "z"; }
 
     our($ri0, $rf0); BEGIN { $ri0 = $^H; $rf0 = $^H{foo}; }
-    print +($[ == 13 ? "" : "not "), "ok 23 - \$[ correct before require\n";
-    print +($ri0 & 0x04000000 ? "" : "not "), "ok 24 - \$^H correct before require\n";
-    print +($rf0 eq "z" ? "" : "not "), "ok 25 - \$^H{foo} correct before require\n";
+    print +($ri0 & 0x04000000 ? "" : "not "), "ok 17 - \$^H correct before require\n";
+    print +($rf0 eq "z" ? "" : "not "), "ok 18 - \$^H{foo} correct before require\n";
 
     our($ra1, $ri1, $rf1, $rfe1);
     BEGIN { require "comp/hints.aux"; }
-    print +($ra1 == 0 ? "" : "not "), "ok 26 - \$[ cleared for require\n";
-    print +(!($ri1 & 0x04000000) ? "" : "not "), "ok 27 - \$^H cleared for require\n";
-    print +(!defined($rf1) && !$rfe1 ? "" : "not "), "ok 28 - \$^H{foo} cleared for require\n";
+    print +(!($ri1 & 0x04000000) ? "" : "not "), "ok 19 - \$^H cleared for require\n";
+    print +(!defined($rf1) && !$rfe1 ? "" : "not "), "ok 20 - \$^H{foo} cleared for require\n";
 
     our($ri2, $rf2); BEGIN { $ri2 = $^H; $rf2 = $^H{foo}; }
-    print +($[ == 13 ? "" : "not "), "ok 29 - \$[ correct after require\n";
-    print +($ri2 & 0x04000000 ? "" : "not "), "ok 30 - \$^H correct after require\n";
-    print +($rf2 eq "z" ? "" : "not "), "ok 31 - \$^H{foo} correct after require\n";
+    print +($ri2 & 0x04000000 ? "" : "not "), "ok 21 - \$^H correct after require\n";
+    print +($rf2 eq "z" ? "" : "not "), "ok 22 - \$^H{foo} correct after require\n";
 }
 
 # Add new tests above this require, in case it fails.
@@ -139,7 +118,7 @@ my $result = runperl(
     stderr => 1
 );
 print "not " if length $result;
-print "ok 32 - double-freeing hints hash\n";
+print "ok 23 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
 __END__
