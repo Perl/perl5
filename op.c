@@ -6845,7 +6845,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVAV) ));
-		    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 				   "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
 				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
@@ -6867,7 +6867,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVHV) ));
-		    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 				   "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
 				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
@@ -7215,9 +7215,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
-	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 			   "defined(@array) is deprecated");
-	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 			   "\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
@@ -7227,9 +7227,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	       */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADHV:
-	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 			   "defined(%%hash) is deprecated");
-	    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 			   "\t(Maybe you should just omit the defined()?)\n");
 	    break;
 	default:

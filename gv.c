@@ -729,7 +729,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      */
     if (!method && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
-	Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
 		       "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 		       packname, (int)len, name);
 
