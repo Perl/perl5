@@ -69,10 +69,11 @@ print qq
 print q<ok 17
 >;
 
-print <<;   # Yow!
-ok 18
-
-# previous line intentionally left blank.
+print "ok 18 - was the test for the deprecated use of bare << to mean <<\"\"\n";
+#print <<;   # Yow!
+#ok 18
+#
+## previous line intentionally left blank.
 
 print <<E1 eq "foo\n\n" ? "ok 19\n" : "not ok 19\n";
 @{[ <<E2 ]}
