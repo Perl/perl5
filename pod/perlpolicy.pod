@@ -91,7 +91,7 @@ different from the vision of the pumpkin holder and perl5-porters as a
 whole so as to cause serious problems for Perl, the pumpkin holder may
 choose to formally fork the version of the module in the core from the
 one maintained by the author.  This should not be done lightly and
-should *always* if at all possible be done only after direct input
+should B<always> if at all possible be done only after direct input
 from Larry.  If this is done, it must then be made explicit in the
 module as distributed with Perl core that it is a forked version and
 that while it is based on the original author's work, it is no longer
