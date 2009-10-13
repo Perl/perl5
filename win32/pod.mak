@@ -108,6 +108,7 @@ POD = \
 	perlperf.pod	\
 	perlpod.pod	\
 	perlpodspec.pod	\
+	perlpolicy.pod	\
 	perlport.pod	\
 	perlpragma.pod	\
 	perlre.pod	\
@@ -235,6 +236,7 @@ MAN = \
 	perlperf.man	\
 	perlpod.man	\
 	perlpodspec.man	\
+	perlpolicy.man	\
 	perlport.man	\
 	perlpragma.man	\
 	perlre.man	\
@@ -362,6 +364,7 @@ HTML = \
 	perlperf.html	\
 	perlpod.html	\
 	perlpodspec.html	\
+	perlpolicy.html	\
 	perlport.html	\
 	perlpragma.html	\
 	perlre.html	\
@@ -489,6 +492,7 @@ TEX = \
 	perlperf.tex	\
 	perlpod.tex	\
 	perlpodspec.tex	\
+	perlpolicy.tex	\
 	perlport.tex	\
 	perlpragma.tex	\
 	perlre.tex	\

@@ -136,6 +136,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlapio		Perl internal IO abstraction interface
 
     perlhack		Perl hackers guide
+    perlpolicy		Perl development policies
     perlrepository	Perl source repository
 
 =head2 Miscellaneous
