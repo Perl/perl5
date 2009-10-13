@@ -247,8 +247,8 @@ package Yet::Another::AutoSplit;
 sub testtesttesttest4_1 ($)  { "another test 4"; }
 sub testtesttesttest4_2 ($$) { "another duplicate test 4"; }
 package Yet::More::Attributes;
-sub test_a1 ($) : locked :locked { 1; }
-sub test_a2 : locked { 1; }
+sub test_a1 ($) : lvalue :lvalue { 1; }
+sub test_a2 : lvalue { 1; }
 # And that was all it has. You were expected to manually inspect the output
 ## Get
 Warning: AutoSplit had to create top-level *DIR* unexpectedly.
@@ -280,8 +280,8 @@ sub test2\s*\(\$\$\);
 sub test3\s*\(\$\$\$\);
 sub testtesttesttest4_1\s*\(\$\);
 sub testtesttesttest4_2\s*\(\$\$\);
-sub test_a1\s*\(\$\)\s*:\s*locked\s*:\s*locked\s*;
-sub test_a2\s*:\s*locked\s*;
+sub test_a1\s*\(\$\)\s*:\s*lvalue\s*:\s*lvalue\s*;
+sub test_a2\s*:\s*lvalue\s*;
 ## Tests
 is (*MOD*::test1 (1), 'test 1');
 is (*MOD*::test2 (1,2), 'test 2');
