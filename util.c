@@ -1598,20 +1598,25 @@ bool
 Perl_ckwarn(pTHX_ U32 w)
 {
     dVAR;
-    return isLEXWARN_on
-	? (PL_curcop->cop_warnings != pWARN_NONE
-	   && (
-		   PL_curcop->cop_warnings == pWARN_ALL
-		|| isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
-		|| (unpackWARN2(w) &&
-		     isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
-		|| (unpackWARN3(w) &&
-		     isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
-		|| (unpackWARN4(w) &&
-		     isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)))
-		)
-	   )
-	: (PL_dowarn & G_WARN_ON);
+    /* If lexical warnings have not been set, use $^W.  */
+    if (isLEXWARN_off)
+	return PL_dowarn & G_WARN_ON;
+
+    if (PL_curcop->cop_warnings == pWARN_ALL)
+	return TRUE;
+
+    if (PL_curcop->cop_warnings == pWARN_NONE)
+	return FALSE;
+
+    /* Right, dealt with all the special cases, which are implemented as non-
+       pointers, so there is a pointer to a real warnings mask.  */
+    return isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
+	|| (unpackWARN2(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
+	|| (unpackWARN3(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
+	|| (unpackWARN4(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)));
 }
 
 /* implements the ckWARN?_d macro */
@@ -1620,22 +1625,23 @@ bool
 Perl_ckwarn_d(pTHX_ U32 w)
 {
     dVAR;
-    return
-	   isLEXWARN_off
-	|| PL_curcop->cop_warnings == pWARN_ALL
-	|| (
-	      PL_curcop->cop_warnings != pWARN_NONE 
-	   && (
-		   isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
-	      || (unpackWARN2(w) &&
-		   isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
-	      || (unpackWARN3(w) &&
-		   isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
-	      || (unpackWARN4(w) &&
-		   isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)))
-	      )
-	   )
-	;
+    /* If lexical warnings have not been set then default classes warn.  */
+    if (isLEXWARN_off)
+	return TRUE;
+
+    if (PL_curcop->cop_warnings == pWARN_ALL)
+	return TRUE;
+
+    if (PL_curcop->cop_warnings == pWARN_NONE)
+	return FALSE;
+
+    return isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
+	|| (unpackWARN2(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
+	|| (unpackWARN3(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
+	|| (unpackWARN4(w) &&
+	    isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)));
 }
 
 /* Set buffer=NULL to get a new one.  */
