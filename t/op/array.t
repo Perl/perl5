@@ -21,6 +21,9 @@ is($tmp, 5);
 is($#ary, 3);
 is(join('',@ary), '1234');
 
+{
+    no warnings 'deprecated';
+
 $[ = 1;
 @ary = (1,2,3,4,5);
 is(join('',@ary), '12345');
@@ -69,6 +72,8 @@ is($r, "0,0");
 $bar[2] = '2';
 $r = join(',', $#bar, @bar);
 is($r, "2,0,,2");
+
+}
 
 $foo = 'now is the time';
 ok(scalar (($F1,$F2,$Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/)));
@@ -119,7 +124,10 @@ $foo = ('a','b','c','d','e','f')[1];
 is($foo, 'b');
 
 @foo = ( 'foo', 'bar', 'burbl');
-push(foo, 'blah');
+{
+    no warnings 'deprecated';
+    push(foo, 'blah');
+}
 is($#foo, 3);
 
 # various AASSIGN_COMMON checks (see newASSIGNOP() in op.c)
@@ -252,6 +260,7 @@ is ($foo[1], "a");
 
 
 sub tary {
+  no warnings 'deprecated';
   local $[ = 10;
   my $five = 5;
   is ($tary[5], $tary[$five]);
