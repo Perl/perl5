@@ -483,7 +483,7 @@ static const scan_data_t zero_scan_data =
 
 #define	ckWARNregdep(loc,m) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
+    Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
 	    m REPORT_LOCATION,						\
 	    (int)offset, RExC_precomp, RExC_precomp + offset);		\
 } STMT_END

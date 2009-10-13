@@ -522,8 +522,9 @@ PP(pp_open)
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
 	if (IoDIRP(io))
-	    Perl_ck_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			   "Opening dirhandle %s also as a file", GvENAME(gv));
+	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
+			     "Opening dirhandle %s also as a file",
+			     GvENAME(gv));
 
 	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
@@ -3829,8 +3830,9 @@ PP(pp_open_dir)
 	goto nope;
 
     if ((IoIFP(io) || IoOFP(io)))
-	Perl_ck_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-		       "Opening filehandle %s also as a directory", GvENAME(gv));
+	Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
+			 "Opening filehandle %s also as a directory",
+			 GvENAME(gv));
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
     if (!(IoDIRP(io) = PerlDir_open(dirname)))

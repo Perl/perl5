@@ -8,7 +8,7 @@ These messages are classified as follows (listed in increasing order of
 desperation):
 
     (W) A warning (optional).
-    (D) A deprecation (optional).
+    (D) A deprecation (enabled by default).
     (S) A severe warning (enabled by default).
     (F) A fatal error (trappable).
     (P) An internal error you should never see (trappable).
@@ -2191,7 +2191,7 @@ neither as a system call or an ioctl call (SIOCATMARK).
 
 =item $* is no longer supported
 
-(S deprecated, syntax) The special variable C<$*>, deprecated in older perls, has
+(D deprecated, syntax) The special variable C<$*>, deprecated in older perls, has
 been removed as of 5.9.0 and is no longer supported. In previous versions of perl the use of
 C<$*> enabled or disabled multi-line matching within a string.
 
@@ -2201,7 +2201,7 @@ expressions behaved as if they were written using C</m>.)
 
 =item $# is no longer supported
 
-(S deprecated, syntax) The special variable C<$#>, deprecated in older perls, has
+(D deprecated, syntax) The special variable C<$#>, deprecated in older perls, has
 been removed as of 5.9.3 and is no longer supported. You should use the
 printf/sprintf functions instead.
 

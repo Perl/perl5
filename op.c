@@ -4571,8 +4571,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		&& o2->op_private & OPpLVAL_INTRO
 		&& !(o2->op_private & OPpPAD_STATE))
 	    {
-		Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			       "Deprecated use of my() in false conditional");
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+				 "Deprecated use of my() in false conditional");
 	    }
 
 	    *otherp = NULL;
@@ -6265,7 +6265,7 @@ Perl_newAVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 		       "Using an array as a reference is deprecated");
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
@@ -6292,7 +6292,7 @@ Perl_newHVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 		       "Using a hash as a reference is deprecated");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
@@ -6845,7 +6845,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVAV) ));
-		    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 				   "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
 				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
@@ -6867,7 +6867,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVHV) ));
-		    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 				   "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
 				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
@@ -7215,9 +7215,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
-	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			   "defined(@array) is deprecated");
-	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			   "\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
@@ -7227,9 +7227,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	       */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADHV:
-	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			   "defined(%%hash) is deprecated");
-	    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			   "\t(Maybe you should just omit the defined()?)\n");
 	    break;
 	default:

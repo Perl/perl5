@@ -729,9 +729,9 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      */
     if (!method && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
-	Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		       "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
-		       packname, (int)len, name);
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+			 "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
+			 packname, (int)len, name);
 
     if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here

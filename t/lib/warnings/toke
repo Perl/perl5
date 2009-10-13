@@ -125,7 +125,6 @@ toke.c	AOK
 
 __END__
 # toke.c 
-use warnings 'deprecated' ;
 format STDOUT =
 @<<<  @|||  @>>>  @>>>
 $a    $b    "abc" 'def'
@@ -136,19 +135,18 @@ format STDOUT =
 $a    $b    "abc" 'def'
 .
 EXPECT
-Use of comma-less variable list is deprecated at - line 5.
-Use of comma-less variable list is deprecated at - line 5.
-Use of comma-less variable list is deprecated at - line 5.
+Use of comma-less variable list is deprecated at - line 4.
+Use of comma-less variable list is deprecated at - line 4.
+Use of comma-less variable list is deprecated at - line 4.
 ########
 # toke.c
-use warnings 'deprecated' ;
 $a = <<;
 
 no warnings 'deprecated' ;
 $a = <<;
 
 EXPECT
-Use of bare << to mean <<"" is deprecated at - line 3.
+Use of bare << to mean <<"" is deprecated at - line 2.
 ########
 # toke.c
 use warnings 'syntax' ;
@@ -853,7 +851,7 @@ sub glipp :locked {
 }
 sub whack_eth ($) : locked {
 }
-use warnings 'deprecated';
+no warnings 'deprecated';
 our $bar :unique;
 sub zapeth :locked;
 sub ker_plop :locked {
@@ -861,10 +859,10 @@ sub ker_plop :locked {
 sub swa_a_p ($) : locked {
 }
 EXPECT
-Use of :unique is deprecated at - line 9.
-Use of :locked is deprecated at - line 10.
-Use of :locked is deprecated at - line 11.
-Use of :locked is deprecated at - line 13.
+Use of :unique is deprecated at - line 2.
+Use of :locked is deprecated at - line 3.
+Use of :locked is deprecated at - line 4.
+Use of :locked is deprecated at - line 6.
 ########
 # toke.c
 use warnings "syntax";

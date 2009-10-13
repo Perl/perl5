@@ -106,7 +106,6 @@ EXPECT
 Found = in conditional, should be == at - line 3.
 ########
 # op.c
-use warnings 'deprecated';
 my (@foo, %foo);
 %main::foo->{"bar"};
 %foo->{"bar"};
@@ -126,14 +125,14 @@ $foo = {}; %$foo->{"bar"};
 $main::foo = []; @$main::foo->[34];
 $foo = []; @$foo->[34];
 EXPECT
+Using a hash as a reference is deprecated at - line 3.
 Using a hash as a reference is deprecated at - line 4.
-Using a hash as a reference is deprecated at - line 5.
+Using an array as a reference is deprecated at - line 5.
 Using an array as a reference is deprecated at - line 6.
-Using an array as a reference is deprecated at - line 7.
+Using a hash as a reference is deprecated at - line 7.
 Using a hash as a reference is deprecated at - line 8.
-Using a hash as a reference is deprecated at - line 9.
+Using an array as a reference is deprecated at - line 9.
 Using an array as a reference is deprecated at - line 10.
-Using an array as a reference is deprecated at - line 11.
 ########
 # op.c
 use warnings 'void' ; close STDIN ;
@@ -727,20 +726,18 @@ EXPECT
 Format FRED redefined at - line 5.
 ########
 # op.c
-use warnings 'deprecated' ;
 push FRED;
 no warnings 'deprecated' ;
 push FRED;
 EXPECT
-Array @FRED missing the @ in argument 1 of push() at - line 3.
+Array @FRED missing the @ in argument 1 of push() at - line 2.
 ########
 # op.c
-use warnings 'deprecated' ;
 @a = keys FRED ;
 no warnings 'deprecated' ;
 @a = keys FRED ;
 EXPECT
-Hash %FRED missing the % in argument 1 of keys() at - line 3.
+Hash %FRED missing the % in argument 1 of keys() at - line 2.
 ########
 # op.c
 use warnings 'syntax' ;
@@ -751,24 +748,21 @@ Statement unlikely to be reached at - line 4.
 	(Maybe you meant system() when you said exec()?)
 ########
 # op.c
-use warnings 'deprecated' ;
 my @a; defined(@a);
 EXPECT
-defined(@array) is deprecated at - line 3.
+defined(@array) is deprecated at - line 2.
 	(Maybe you should just omit the defined()?)
 ########
 # op.c
-use warnings 'deprecated' ;
 defined(@a = (1,2,3));
 EXPECT
-defined(@array) is deprecated at - line 3.
+defined(@array) is deprecated at - line 2.
 	(Maybe you should just omit the defined()?)
 ########
 # op.c
-use warnings 'deprecated' ;
 my %h; defined(%h);
 EXPECT
-defined(%hash) is deprecated at - line 3.
+defined(%hash) is deprecated at - line 2.
 	(Maybe you should just omit the defined()?)
 ########
 # op.c
@@ -1031,7 +1025,6 @@ Useless localization of match position at - line 49.
 Useless localization of vec at - line 50.
 ########
 # op.c
-use warnings 'deprecated';
 my $x1 if 0;
 my @x2 if 0;
 my %x3 if 0;
@@ -1047,13 +1040,13 @@ if (my $w2) { $a=1 }
 if ($a && (my $w3 = 1)) {$a = 2}
 
 EXPECT
+Deprecated use of my() in false conditional at - line 2.
 Deprecated use of my() in false conditional at - line 3.
 Deprecated use of my() in false conditional at - line 4.
 Deprecated use of my() in false conditional at - line 5.
 Deprecated use of my() in false conditional at - line 6.
 Deprecated use of my() in false conditional at - line 7.
 Deprecated use of my() in false conditional at - line 8.
-Deprecated use of my() in false conditional at - line 9.
 ########
 # op.c
 $[ = 1;
@@ -1062,4 +1055,5 @@ $[ = 2;
 no warnings 'deprecated';
 $[ = 3;
 EXPECT
+Use of assignment to $[ is deprecated at - line 2.
 Use of assignment to $[ is deprecated at - line 4.
