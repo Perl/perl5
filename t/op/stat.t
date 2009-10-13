@@ -495,8 +495,11 @@ SKIP: {
     ok(-d DIR, "-d on a dirhandle works");
 
     # And now for the ambigious bareword case
-    ok(open(DIR, "TEST"), 'Can open "TEST" dir')
-	|| diag "Can't open 'TEST':  $!";
+    {
+	no warnings 'deprecated';
+	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+	    || diag "Can't open 'TEST':  $!";
+    }
     my $size = (stat(DIR))[7];
     ok(defined $size, "stat() on bareword works");
     is($size, -s "TEST", "size returned by stat of bareword is for the file");
@@ -525,8 +528,11 @@ SKIP: {
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
 
 	# And now for the ambigious bareword case
-	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
-	    || diag "Can't open 'TEST':  $!";
+	{
+	    no warnings 'deprecated';
+	    ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+		|| diag "Can't open 'TEST':  $!";
+	}
 	my $size = (stat(*DIR{IO}))[7];
 	ok(defined $size, "stat() on *THINGY{IO} works");
 	is($size, -s "TEST",
