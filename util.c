@@ -1602,21 +1602,7 @@ Perl_ckwarn(pTHX_ U32 w)
     if (isLEXWARN_off)
 	return PL_dowarn & G_WARN_ON;
 
-    if (PL_curcop->cop_warnings == pWARN_ALL)
-	return TRUE;
-
-    if (PL_curcop->cop_warnings == pWARN_NONE)
-	return FALSE;
-
-    /* Right, dealt with all the special cases, which are implemented as non-
-       pointers, so there is a pointer to a real warnings mask.  */
-    return isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
-	|| (unpackWARN2(w) &&
-	    isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
-	|| (unpackWARN3(w) &&
-	    isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
-	|| (unpackWARN4(w) &&
-	    isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)));
+    return ckwarn_common(w);
 }
 
 /* implements the ckWARN?_d macro */
@@ -1629,12 +1615,20 @@ Perl_ckwarn_d(pTHX_ U32 w)
     if (isLEXWARN_off)
 	return TRUE;
 
+    return ckwarn_common(w);
+}
+
+static bool
+S_ckwarn_common(pTHX_ U32 w)
+{
     if (PL_curcop->cop_warnings == pWARN_ALL)
 	return TRUE;
 
     if (PL_curcop->cop_warnings == pWARN_NONE)
 	return FALSE;
 
+    /* Right, dealt with all the special cases, which are implemented as non-
+       pointers, so there is a pointer to a real warnings mask.  */
     return isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
 	|| (unpackWARN2(w) &&
 	    isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))

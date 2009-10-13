@@ -6350,6 +6350,9 @@ PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv)
 #ifdef PERL_DONT_CREATE_GVSV
 /* PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV *gv); */
 #endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+STATIC bool	S_ckwarn_common(pTHX_ U32 w);
+#endif
 PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
 PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits, STRLEN size)

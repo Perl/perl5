@@ -2087,6 +2087,9 @@ p	|void	|dump_sv_child	|NN SV *sv
 #ifdef PERL_DONT_CREATE_GVSV
 Apbm	|GV*	|gv_SVadd	|NULLOK GV *gv
 #endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+s	|bool	|ckwarn_common	|U32 w
+#endif
 Apo	|bool	|ckwarn		|U32 w
 Apo	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?

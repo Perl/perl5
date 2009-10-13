@@ -1885,6 +1885,11 @@
 #endif
 #ifdef PERL_DONT_CREATE_GVSV
 #endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define ckwarn_common		S_ckwarn_common
+#endif
+#endif
 #ifdef PERL_CORE
 #define offer_nice_chunk	Perl_offer_nice_chunk
 #endif
@@ -4242,6 +4247,11 @@
 #endif
 #endif
 #ifdef PERL_DONT_CREATE_GVSV
+#endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define ckwarn_common(a)	S_ckwarn_common(aTHX_ a)
+#endif
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #endif
