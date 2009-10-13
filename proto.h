@@ -516,11 +516,6 @@ PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from,
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 
 PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
-PERL_CALLCONV void	Perl_deprecate(pTHX_ const char *const s)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_DEPRECATE	\
-	assert(s)
-
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 

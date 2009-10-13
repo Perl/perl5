@@ -902,6 +902,13 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define pTHX__VALUE
 #endif /* USE_ITHREADS */
 
+/* Perl_deprecate was not part of the public API, and did not have a deprecate()
+   shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
+   CPAN::Unpack show any users outside the core.  */
+#ifdef PERL_CORE
+#  define deprecate(s) Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of " s " is deprecated")
+#endif
+
 /*
  * Local variables:
  * c-indentation-style: bsd

@@ -213,8 +213,6 @@ Anp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 : Used in op.c, perl.c
 pM	|void	|delete_eval_scope
-: Used in various files
-p	|void	|deprecate	|NN const char *const s
 Afp	|OP*	|die		|NULLOK const char* pat|...
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args

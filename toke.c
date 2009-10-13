@@ -591,18 +591,6 @@ S_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 }
 
 /*
- * Perl_deprecate
- */
-
-void
-Perl_deprecate(pTHX_ const char *const s)
-{
-    PERL_ARGS_ASSERT_DEPRECATE;
-
-    Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of %s is deprecated", s);
-}
-
-/*
  * experimental text filters for win32 carriage-returns, utf16-to-utf8 and
  * utf16-to-utf8-reversed.
  */

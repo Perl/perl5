@@ -150,7 +150,6 @@
 #define delimcpy		Perl_delimcpy
 #ifdef PERL_CORE
 #define delete_eval_scope	Perl_delete_eval_scope
-#define deprecate		Perl_deprecate
 #endif
 #define die			Perl_die
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -2489,7 +2488,6 @@
 #define delimcpy		Perl_delimcpy
 #ifdef PERL_CORE
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
-#define deprecate(a)		Perl_deprecate(aTHX_ a)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
