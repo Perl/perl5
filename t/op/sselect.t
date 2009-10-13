@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (9);
+plan (11);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
@@ -30,3 +30,14 @@ eval {select $blank, "a", $blank, 0};
 like ($@, qr/^Modification of a read-only value attempted/);
 eval {select $blank, $blank, "a", 0};
 like ($@, qr/^Modification of a read-only value attempted/);
+
+my $sleep = 3;
+my $t = time;
+select(undef, undef, undef, $sleep);
+ok(time-$t >= $sleep, "$sleep seconds have passed");
+
+my $empty = "";
+vec($empty,0,1) = 0;
+$t = time;
+select($empty, undef, undef, $sleep);
+ok(time-$t >= $sleep, "$sleep seconds have passed");
