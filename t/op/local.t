@@ -623,6 +623,7 @@ is($@, "");
 
 # RT #4342 Special local() behavior for $[
 {
+    no warnings 'deprecated';
     local $[ = 1;
     ok(1 == $[, 'lexcical scope of local $[');
     f();
