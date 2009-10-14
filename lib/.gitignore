@@ -289,7 +289,7 @@
 /POSIX.pod
 /Package/Constants.pm
 /Params/Check.pm
-/Parse/CPAN/Meta.pm
+/Parse/CPAN/
 /PerlIO/encoding.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm
