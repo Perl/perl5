@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 
-# A first attempt at some automated support for making a perl release.
+# A tool to build a perl release tarball
 # Very basic but functional - if you're on a unix system.
 #
 # No matter how automated this gets, you'll always need to read
-# and re-read pumpkin.pod checking for things to be done at various
-# stages of the process.
+# and re-read pumpkin.pod and release_managers_guide.pod to
+# check for things to be done at various stages of the process.
 #
 # Tim Bunce, June 1997
 
