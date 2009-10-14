@@ -565,21 +565,6 @@ my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
 if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
     mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
 
-    # If Perl 5.003's perldiag.pod is there, rename it.
-    if (open POD, "${installprivlib}/$pod/perldiag.pod") {
-	read POD, $_, 4000;
-	close POD;
-	# Some of Perl 5.003's diagnostic messages ended with periods.
-	if (/^=.*\.$/m) {
-	    my ($from, $to) = ("${installprivlib}/$pod/perldiag.pod",
-			       "${installprivlib}/$pod/perldiag-5.003.pod");
-	    print "  rename $from $to";
-	    rename($from, $to)
-		or warn "Couldn't rename $from to $to: $!\n"
-		unless $opts{notify};
-	}
-    }
-
     for (@pods) {
 	# $_ is a name like  pod/perl.pod
 	(my $base = $_) =~ s#.*/##;
