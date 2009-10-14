@@ -716,7 +716,7 @@ sub installlib {
 
     # ignore patch backups, RCS files, emacs backup & temp files and the
     # .exists files, .PL files, and test files.
-    return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.plc$|\.t$|^test\.pl$|^dbm_filter_util\.pl$|^filter-util\.pl$|^\.gitignore$} ||
+    return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.plc$|\.t$|^test\.pl$|^dbm_filter_util\.pl$|^filter-util\.pl$|^uupacktool\.pl$|^\.gitignore$} ||
 	      $dir  =~ m{/t(?:/|$)};
     # ignore the cpan script in lib/CPAN/bin, the instmodsh and xsubpp
     # scripts in lib/ExtUtils, the prove script in lib/Test/Harness,
