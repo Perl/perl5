@@ -371,7 +371,8 @@ PPCODE:
 	const U16 bits = bitmap[i];
 	for (j=0; j < 8 && myopcode < PL_maxo; j++, myopcode++) {
 	    if ( bits & (1 << j) )
-		XPUSHs(sv_2mortal(newSVpv(names[myopcode], 0)));
+		XPUSHs(newSVpvn_flags(names[myopcode], strlen(names[myopcode]),
+				      SVs_TEMP));
 	}
     }
     }
@@ -458,7 +459,7 @@ PPCODE:
 
     /* copy args to a scratch area since we may push output values onto	*/
     /* the stack faster than we read values off it if masks are used.	*/
-    args = (SV**)SvPVX(sv_2mortal(newSVpvn((char*)&ST(0), items*sizeof(SV*))));
+    args = (SV**)SvPVX(newSVpvn_flags((char*)&ST(0), items*sizeof(SV*), SVs_TEMP));
     for (i = 0; i < items; i++) {
 	const char * const opname = SvPV(args[i], len);
 	SV *bitspec = get_op_bitspec(aTHX_ opname, len, 1);
@@ -466,7 +467,8 @@ PPCODE:
 	    const int myopcode = SvIV(bitspec);
 	    if (myopcode < 0 || myopcode >= PL_maxo)
 		croak("panic: opcode %d (%s) out of range",myopcode,opname);
-	    XPUSHs(sv_2mortal(newSVpv(op_desc[myopcode], 0)));
+	    XPUSHs(newSVpvn_flags(op_desc[myopcode], strlen(op_desc[myopcode]),
+				  SVs_TEMP));
 	}
 	else if (SvPOK(bitspec) && SvCUR(bitspec) == (STRLEN)opset_len) {
 	    int b, j;
@@ -476,7 +478,9 @@ PPCODE:
 		const U16 bits = bitmap[b];
 		for (j=0; j < 8 && myopcode < PL_maxo; j++, myopcode++)
 		    if (bits & (1 << j))
-			XPUSHs(sv_2mortal(newSVpv(op_desc[myopcode], 0)));
+			XPUSHs(newSVpvn_flags(op_desc[myopcode],
+					      strlen(op_desc[myopcode]),
+					      SVs_TEMP));
 	    }
 	}
 	else

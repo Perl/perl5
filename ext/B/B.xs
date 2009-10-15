@@ -792,7 +792,7 @@ hash(sv)
 	const char *s = SvPV(sv, len);
 	PERL_HASH(hash, s, len);
 	len = my_sprintf(hexhash, "0x%"UVxf, (UV)hash);
-	ST(0) = sv_2mortal(newSVpvn(hexhash, len));
+	ST(0) = newSVpvn_flags(hexhash, len, SVs_TEMP);
 
 #define cast_I32(foo) (I32)foo
 IV
@@ -843,7 +843,7 @@ threadsv_names()
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpvn(&PL_threadsv_names[i], 1)));
+	    PUSHs(newSVpvn_flags(&PL_threadsv_names[i], 1, SVs_TEMP));
 # endif
 #endif
 
@@ -1168,13 +1168,13 @@ PVOP_pv(o)
 	{
 	    const short* const tbl = (short*)o->op_pv;
 	    const short entries = 257 + tbl[256];
-	    ST(0) = sv_2mortal(newSVpvn(o->op_pv, entries * sizeof(short)));
+	    ST(0) = newSVpvn_flags(o->op_pv, entries * sizeof(short), SVs_TEMP);
 	}
 	else if (o->op_type == OP_TRANS) {
-	    ST(0) = sv_2mortal(newSVpvn(o->op_pv, 256 * sizeof(short)));
+	    ST(0) = newSVpvn_flags(o->op_pv, 256 * sizeof(short), SVs_TEMP);
 	}
 	else
-	    ST(0) = sv_2mortal(newSVpv(o->op_pv, 0));
+	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
 
 #define LOOP_redoop(o)	o->op_redoop
 #define LOOP_nextop(o)	o->op_nextop
@@ -1372,10 +1372,10 @@ packiv(sv)
 	    wp[0] = htonl(((U32)iv) >> (sizeof(UV)*4));
 #endif
 	    wp[1] = htonl(iv & 0xffffffff);
-	    ST(0) = sv_2mortal(newSVpvn((char *)wp, 8));
+	    ST(0) = newSVpvn_flags((char *)wp, 8, SVs_TEMP);
 	} else {
 	    U32 w = htonl((U32)SvIVX(sv));
-	    ST(0) = sv_2mortal(newSVpvn((char *)&w, 4));
+	    ST(0) = newSVpvn_flags((char *)&w, 4, SVs_TEMP);
 	}
 
 
@@ -1659,7 +1659,7 @@ BmTABLE(sv)
     CODE:
 	str = SvPV(sv, len);
 	/* Boyer-Moore table is just after string and its safety-margin \0 */
-	ST(0) = sv_2mortal(newSVpvn(str + len + PERL_FBM_TABLE_OFFSET, 256));
+	ST(0) = newSVpvn_flags(str + len + PERL_FBM_TABLE_OFFSET, 256, SVs_TEMP);
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
@@ -1670,7 +1670,7 @@ GvNAME(gv)
 #if PERL_VERSION >= 10
 	ST(0) = sv_2mortal(newSVhek(GvNAME_HEK(gv)));
 #else
-	ST(0) = sv_2mortal(newSVpvn(GvNAME(gv), GvNAMELEN(gv)));
+	ST(0) = newSVpvn_flags(GvNAME(gv), GvNAMELEN(gv), SVs_TEMP);
 #endif
 
 bool

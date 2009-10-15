@@ -1457,7 +1457,7 @@ nice(incr)
 	errno = 0;
 	if ((incr = nice(incr)) != -1 || errno == 0) {
 	    if (incr == 0)
-		XPUSHs(sv_2mortal(newSVpvn("0 but true", 10)));
+		XPUSHs(newSVpvs_flags("0 but true", SVs_TEMP));
 	    else
 		XPUSHs(sv_2mortal(newSViv(incr)));
 	}
@@ -1512,11 +1512,11 @@ uname()
 	struct utsname buf;
 	if (uname(&buf) >= 0) {
 	    EXTEND(SP, 5);
-	    PUSHs(sv_2mortal(newSVpv(buf.sysname, 0)));
-	    PUSHs(sv_2mortal(newSVpv(buf.nodename, 0)));
-	    PUSHs(sv_2mortal(newSVpv(buf.release, 0)));
-	    PUSHs(sv_2mortal(newSVpv(buf.version, 0)));
-	    PUSHs(sv_2mortal(newSVpv(buf.machine, 0)));
+	    PUSHs(newSVpvn_flags(buf.sysname, strlen(buf.sysname), SVs_TEMP));
+	    PUSHs(newSVpvn_flags(buf.nodename, strlen(buf.nodename), SVs_TEMP));
+	    PUSHs(newSVpvn_flags(buf.release, strlen(buf.release), SVs_TEMP));
+	    PUSHs(newSVpvn_flags(buf.version, strlen(buf.version), SVs_TEMP));
+	    PUSHs(newSVpvn_flags(buf.machine, strlen(buf.machine), SVs_TEMP));
 	}
 #else
 	uname((char *) 0); /* A stub to call not_here(). */
@@ -1813,8 +1813,8 @@ void
 tzname()
     PPCODE:
 	EXTEND(SP,2);
-	PUSHs(sv_2mortal(newSVpvn(tzname[0],strlen(tzname[0]))));
-	PUSHs(sv_2mortal(newSVpvn(tzname[1],strlen(tzname[1]))));
+	PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
+	PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
 
 SysRet
 access(filename, mode)

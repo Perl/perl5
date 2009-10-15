@@ -276,7 +276,7 @@ inet_ntoa(ip_address_sv)
 		((addr.s_addr >> 16) & 0xFF),
 		((addr.s_addr >>  8) & 0xFF),
 		( addr.s_addr        & 0xFF));
-	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
+	ST(0) = newSVpvn_flags(addr_str, strlen(addr_str), SVs_TEMP);
 	Safefree(addr_str);
 	}
 
@@ -347,7 +347,7 @@ pack_sockaddr_un(pathname)
 	} else {
 		addr_len = sizeof sun_ad;
 	}
-	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, addr_len));
+	ST(0) = newSVpvn_flags((char *)&sun_ad, addr_len, SVs_TEMP);
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
 #endif
@@ -392,7 +392,7 @@ unpack_sockaddr_un(sun_sv)
 		     && addr_len < sizeof addr.sun_path; addr_len++);
 	}
 
-	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, addr_len));
+	ST(0) = newSVpvn_flags(addr.sun_path, addr_len, SVs_TEMP);
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif
@@ -425,7 +425,7 @@ pack_sockaddr_in(port, ip_address_sv)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(addr.s_addr);
-	ST(0) = sv_2mortal(newSVpvn((char *)&sin, sizeof sin));
+	ST(0) = newSVpvn_flags((char *)&sin, sizeof (sin), SVs_TEMP);
 	}
 
 void
@@ -455,7 +455,7 @@ unpack_sockaddr_in(sin_sv)
 
 	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
-	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address, sizeof ip_address)));
+	PUSHs(newSVpvn_flags((char *)&ip_address, sizeof(ip_address), SVs_TEMP));
 	}
 
 void
@@ -481,7 +481,7 @@ inet_ntop(af, ip_address_sv)
 	Copy( ip_address, &addr, sizeof addr, char );
 	inet_ntop(af, &addr, str, INET6_ADDRSTRLEN);
 
-	ST(0) = sv_2mortal(newSVpv(str, strlen(str)));
+	ST(0) = newSVpvn_flags(str, strlen(str), SVs_TEMP);
 #else
         ST(0) = (SV *)not_here("inet_ntop");
 #endif

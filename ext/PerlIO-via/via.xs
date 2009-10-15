@@ -155,7 +155,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		    /* binmode() passes NULL - so find out what mode is */
 		    mode = PerlIO_modestr(f,lmode);
 		}
-		modesv = sv_2mortal(newSVpvn(mode, strlen(mode)));
+		modesv = newSVpvn_flags(mode, strlen(mode), SVs_TEMP);
 		result = PerlIOVia_method(aTHX_ f, MYMethod(PUSHED), G_SCALAR,
 				     modesv, Nullsv);
 		if (result) {
@@ -395,7 +395,7 @@ SSize_t
 PerlIOVia_unread(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
-    SV *buf = sv_2mortal(newSVpvn((char *) vbuf, count));
+    SV *buf = newSVpvn_flags((char *) vbuf, count, SVs_TEMP);
     SV *result =
 	PerlIOVia_method(aTHX_ f, MYMethod(UNREAD), G_SCALAR, buf, Nullsv);
     if (result)
