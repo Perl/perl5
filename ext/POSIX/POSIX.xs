@@ -1795,8 +1795,12 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	{
 	    char *buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
 	    if (buf) {
-		ST(0) = newSVpvn_flags(buf, strlen(buf), SVs_TEMP | SvUTF8(fmt));
-		Safefree(buf);
+		SV *const sv = sv_newmortal();
+		sv_usepvn_flags(sv, buf, strlen(buf), SV_HAS_TRAILING_NUL);
+		if (SvUTF8(fmt)) {
+		    SvUTF8_on(sv);
+		}
+		ST(0) = sv;
 	    }
 	}
 
