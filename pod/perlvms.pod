@@ -772,7 +772,7 @@ true, a warning message is printed, and C<undef> is returned.
 =item kill
 
 In most cases, C<kill> is implemented via the undocumented system
-service <$SIGPRC>, which has the same calling sequence as <$FORCEX>, but
+service C<$SIGPRC>, which has the same calling sequence as C<$FORCEX>, but
 throws an exception in the target process rather than forcing it to call
 C<$EXIT>.  Generally speaking, C<kill> follows the behavior of the
 CRTL's C<kill()> function, but unlike that function can be called from
