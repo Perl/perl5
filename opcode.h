@@ -174,6 +174,7 @@ EXTCONST char* const PL_op_name[] = {
 	"rv2hv",
 	"helem",
 	"hslice",
+	"boolkeys",
 	"unpack",
 	"pack",
 	"split",
@@ -398,7 +399,6 @@ EXTCONST char* const PL_op_name[] = {
 	"lock",
 	"once",
 	"custom",
-	"boolkeys",
 };
 #endif
 
@@ -547,6 +547,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"hash dereference",
 	"hash element",
 	"hash slice",
+	"boolkeys",
 	"unpack",
 	"pack",
 	"split",
@@ -771,7 +772,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"lock",
 	"once",
 	"unknown custom operator",
-	"boolkeys",
 };
 #endif
 
@@ -934,6 +934,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_rv2av),	/* Perl_pp_rv2hv */
 	MEMBER_TO_FPTR(Perl_pp_helem),
 	MEMBER_TO_FPTR(Perl_pp_hslice),
+	MEMBER_TO_FPTR(Perl_pp_boolkeys),
 	MEMBER_TO_FPTR(Perl_pp_unpack),
 	MEMBER_TO_FPTR(Perl_pp_pack),
 	MEMBER_TO_FPTR(Perl_pp_split),
@@ -1158,7 +1159,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_lock),
 	MEMBER_TO_FPTR(Perl_pp_once),
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
-	MEMBER_TO_FPTR(Perl_pp_boolkeys),
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1318,6 +1318,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2hv */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* helem */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* hslice */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* boolkeys */
 	MEMBER_TO_FPTR(Perl_ck_unpack),	/* unpack */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pack */
 	MEMBER_TO_FPTR(Perl_ck_split),	/* split */
@@ -1542,7 +1543,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* once */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* boolkeys */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1696,6 +1696,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000248,	/* rv2hv */
 	0x00028404,	/* helem */
 	0x00048801,	/* hslice */
+	0x00009600,	/* boolkeys */
 	0x00122800,	/* unpack */
 	0x0004280d,	/* pack */
 	0x00222808,	/* split */
@@ -1920,7 +1921,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000f604,	/* lock */
 	0x00000600,	/* once */
 	0x00000000,	/* custom */
-	0x00009600,	/* boolkeys */
 };
 #endif
 

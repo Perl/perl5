@@ -185,6 +185,7 @@ Perl_pp_exists
 Perl_pp_rv2hv
 Perl_pp_helem
 Perl_pp_hslice
+Perl_pp_boolkeys
 Perl_pp_unpack
 Perl_pp_pack
 Perl_pp_split
@@ -408,6 +409,5 @@ Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
 Perl_pp_once
-Perl_pp_boolkeys
 
 # ex: set ro:

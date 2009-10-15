@@ -810,6 +810,7 @@ exists		exists			ck_exists	is%	S
 rv2hv		hash dereference	ck_rvconst	dt1	
 helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
+boolkeys	boolkeys		ck_fun		%	H
 
 # Explosives and implosives.
 
@@ -1116,5 +1117,3 @@ lock		lock			ck_rfun		s%	R
 once		once			ck_null		|	
 
 custom		unknown custom operator		ck_null		0
-
-boolkeys	boolkeys		ck_fun		%	H
