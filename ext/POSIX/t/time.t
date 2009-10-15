@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -39,6 +39,8 @@ my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 my $jan_16 = 15 * 86400;
 is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", localtime($jan_16)),
         "get ctime() equal to strftime()");
+is(strftime("%Y年%m月%d日", localtime($jan_16)), "1970年01月16日",
+        "strftime() can handle unicode chars in the format string");
 setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 
 # clock() seems to have different definitions of what it does between POSIX
