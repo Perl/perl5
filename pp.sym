@@ -408,5 +408,6 @@ Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
 Perl_pp_once
+Perl_pp_boolkeys
 
 # ex: set ro:

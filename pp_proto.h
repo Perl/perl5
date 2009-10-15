@@ -409,5 +409,6 @@ PERL_PPDEF(Perl_pp_getlogin)
 PERL_PPDEF(Perl_pp_syscall)
 PERL_PPDEF(Perl_pp_lock)
 PERL_PPDEF(Perl_pp_once)
+PERL_PPDEF(Perl_pp_boolkeys)
 
 /* ex: set ro: */

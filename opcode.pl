@@ -1116,3 +1116,5 @@ lock		lock			ck_rfun		s%	R
 once		once			ck_null		|	
 
 custom		unknown custom operator		ck_null		0
+
+boolkeys	boolkeys		ck_fun		%	H

@@ -148,7 +148,7 @@ my $testpkgs = {
 		  ), $] > 5.009 ? ('unitcheck_av') : ()],
     },
 
-    B::Deparse => { dflt => 'perl',	# 235 functions
+    B::Deparse => { dflt => 'perl',	# 236 functions
 
 	XS => [qw( svref_2object perlstring opnumber main_start
 		   main_root main_cv )],

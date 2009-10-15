@@ -506,12 +506,16 @@ package main;
 tie my %h => "TieScalar";
 $h{key1} = "val1";
 $h{key2} = "val2";
-print scalar %h, "\n";
+print scalar %h, "\n"
+    if %h; # this should also call SCALAR but implicitly
 %h = ();
-print scalar %h, "\n";
+print scalar %h, "\n"
+    if !%h; # this should also call SCALAR but implicitly
 EXPECT
 SCALAR
+SCALAR
 2/2
+SCALAR
 SCALAR
 0
 ########

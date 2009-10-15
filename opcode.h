@@ -398,6 +398,7 @@ EXTCONST char* const PL_op_name[] = {
 	"lock",
 	"once",
 	"custom",
+	"boolkeys",
 };
 #endif
 
@@ -770,6 +771,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"lock",
 	"once",
 	"unknown custom operator",
+	"boolkeys",
 };
 #endif
 
@@ -1156,6 +1158,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_lock),
 	MEMBER_TO_FPTR(Perl_pp_once),
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
+	MEMBER_TO_FPTR(Perl_pp_boolkeys),
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1539,6 +1542,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* once */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* boolkeys */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1916,6 +1920,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000f604,	/* lock */
 	0x00000600,	/* once */
 	0x00000000,	/* custom */
+	0x00009600,	/* boolkeys */
 };
 #endif
 

@@ -391,6 +391,11 @@
 #define jmaybe			Perl_jmaybe
 #define keyword			Perl_keyword
 #endif
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define opt_scalarhv		S_opt_scalarhv
+#endif
+#endif
 #define leave_scope		Perl_leave_scope
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define lex_end			Perl_lex_end
@@ -2050,6 +2055,7 @@
 #define pp_bit_or		Perl_pp_bit_or
 #define pp_bit_xor		Perl_pp_bit_xor
 #define pp_bless		Perl_pp_bless
+#define pp_boolkeys		Perl_pp_boolkeys
 #define pp_break		Perl_pp_break
 #define pp_caller		Perl_pp_caller
 #define pp_chdir		Perl_pp_chdir
@@ -2745,6 +2751,11 @@
 #ifdef PERL_CORE
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
+#endif
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define opt_scalarhv(a)		S_opt_scalarhv(aTHX_ a)
+#endif
 #endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -4419,6 +4430,7 @@
 #define pp_bit_or()		Perl_pp_bit_or(aTHX)
 #define pp_bit_xor()		Perl_pp_bit_xor(aTHX)
 #define pp_bless()		Perl_pp_bless(aTHX)
+#define pp_boolkeys()		Perl_pp_boolkeys(aTHX)
 #define pp_break()		Perl_pp_break(aTHX)
 #define pp_caller()		Perl_pp_caller(aTHX)
 #define pp_chdir()		Perl_pp_chdir(aTHX)

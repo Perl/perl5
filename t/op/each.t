@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 42;
+plan tests => 52;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -193,3 +193,38 @@ for my $k (qw(each keys values)) {
     eval $k;
     like($@, qr/^Not enough arguments for $k/, "$k demands argument");
 }
+
+{
+    my %foo=(1..10);
+    my ($k,$v);
+    my $count=keys %foo;
+    my ($k1,$v1)=each(%foo);
+    my $yes = 0;
+    if (%foo) { $yes++ }
+    my ($k2,$v2)=each(%foo);
+    my $rest=0;
+    while (each(%foo)) {$rest++};
+    is($yes,1,"if(%foo) was true");
+    isnt($k1,$k2,"if(%foo) didnt mess with each (key)");
+    isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
+    is($rest,3,"Got the expect number of keys");
+    my $hsv=1 && %foo;
+    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+}    
+{
+    our %foo=(1..10);
+    my ($k,$v);
+    my $count=keys %foo;
+    my ($k1,$v1)=each(%foo);
+    my $yes = 0;
+    if (%foo) { $yes++ }
+    my ($k2,$v2)=each(%foo);
+    my $rest=0;
+    while (each(%foo)) {$rest++};
+    is($yes,1,"if(%foo) was true");
+    isnt($k1,$k2,"if(%foo) didnt mess with each (key)");
+    isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
+    is($rest,3,"Got the expect number of keys");
+    my $hsv=1 && %foo;
+    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+}    

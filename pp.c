@@ -5325,6 +5325,24 @@ PP(unimplemented_op)
 	PL_op->op_type);
 }
 
+PP(pp_boolkeys)
+{
+    dVAR;
+    dSP;
+    HV * const hv = (HV*)POPs;
+    
+    if (SvRMAGICAL(hv)) {
+	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
+	if (mg) {
+            XPUSHs(magic_scalarpack(hv, mg));
+	    RETURN;
+        }	    
+    }
+
+    XPUSHs(boolSV(HvKEYS(hv) != 0));
+    RETURN;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

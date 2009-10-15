@@ -1400,6 +1400,13 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char *name, I32 len, bool all_keyword
 #define PERL_ARGS_ASSERT_KEYWORD	\
 	assert(name)
 
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+STATIC OP*	S_opt_scalarhv(pTHX_ OP* rep_op)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPT_SCALARHV	\
+	assert(rep_op)
+
+#endif
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);
 PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp, bool new_filter);

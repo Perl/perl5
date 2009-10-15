@@ -8276,6 +8276,33 @@ Perl_ck_each(pTHX_ OP *o)
     return ck_fun(o);
 }
 
+/* caller is supposed to assign the return to the 
+   container of the rep_op var */
+OP *
+S_opt_scalarhv(pTHX_ OP *rep_op) {
+    UNOP *unop;
+
+    PERL_ARGS_ASSERT_OPT_SCALARHV;
+
+    NewOp(1101, unop, 1, UNOP);
+    unop->op_type = (OPCODE)OP_BOOLKEYS;
+    unop->op_ppaddr = PL_ppaddr[OP_BOOLKEYS];
+    unop->op_flags = (U8)(OPf_WANT_SCALAR | OPf_KIDS );
+    unop->op_private = (U8)(1 | ((OPf_WANT_SCALAR | OPf_KIDS) >> 8));
+    unop->op_first = rep_op;
+    unop->op_next = rep_op->op_next;
+    rep_op->op_next = (OP*)unop;
+    rep_op->op_flags|=(OPf_REF | OPf_MOD);
+    unop->op_sibling = rep_op->op_sibling;
+    rep_op->op_sibling = NULL;
+    /* unop->op_targ = pad_alloc(OP_BOOLKEYS, SVs_PADTMP); */
+    if (rep_op->op_type == OP_PADHV) { 
+        rep_op->op_flags &= ~OPf_WANT_SCALAR;
+        rep_op->op_flags |= OPf_WANT_LIST;
+    }
+    return (OP*)unop;
+}                        
+
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
  * peep() is called */
@@ -8462,12 +8489,67 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 
 	    break;
+        
+        {
+            OP *fop;
+            OP *sop;
+            
+        case OP_NOT:
+            fop = cUNOP->op_first;
+            sop = NULL;
+            goto stitch_keys;
+            break;
 
-	case OP_MAPWHILE:
-	case OP_GREPWHILE:
-	case OP_AND:
+        case OP_AND:
 	case OP_OR:
 	case OP_DOR:
+            fop = cLOGOP->op_first;
+            sop = fop->op_sibling;
+	    while (cLOGOP->op_other->op_type == OP_NULL)
+		cLOGOP->op_other = cLOGOP->op_other->op_next;
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+          
+          stitch_keys:	    
+	    o->op_opt = 1;
+            if ((fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV)
+                || ( sop && 
+                     (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)
+                    )
+            ){	
+                OP * nop = o;
+                OP * lop = o;
+                if (!(nop->op_flags && OPf_WANT_VOID)) {
+                    while (nop && nop->op_next) {
+                        switch (nop->op_next->op_type) {
+                            case OP_NOT:
+                            case OP_AND:
+                            case OP_OR:
+                            case OP_DOR:
+                                lop = nop = nop->op_next;
+                                break;
+                            case OP_NULL:
+                                nop = nop->op_next;
+                                break;
+                            default:
+                                nop = NULL;
+                                break;
+                        }
+                    }            
+                }
+                if (lop->op_flags && OPf_WANT_VOID) {
+                    if (fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV) 
+                        cLOGOP->op_first = opt_scalarhv(fop);
+                    if (sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)) 
+                        cLOGOP->op_first->op_sibling = opt_scalarhv(sop);
+                }                                        
+            }                  
+            
+	    
+	    break;
+	}    
+	
+	case OP_MAPWHILE:
+	case OP_GREPWHILE:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
