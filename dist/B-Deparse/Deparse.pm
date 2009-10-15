@@ -22,7 +22,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.91;
+$VERSION = 0.92;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1611,6 +1611,10 @@ sub unop {
     my($op, $cx, $name) = @_;
     my $kid;
     if ($op->flags & OPf_KIDS) {
+ 	if (not $name) {
+ 	    # this deals with 'boolkeys' right now
+ 	    return $self->deparse($kid,$cx);
+ 	}
 	$kid = $op->first;
 	my $builtinname = $name;
 	$builtinname =~ /^CORE::/ or $builtinname = "CORE::$name";
@@ -1655,6 +1659,10 @@ sub pp_chr { maybe_targmy(@_, \&unop, "chr") }
 sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
 sub pp_keys { unop(@_, "keys") }
+sub pp_boolkeys { 
+    # no name because its an optimisation op that has no keyword
+    unop(@_,"");
+}
 sub pp_aeach { unop(@_, "each") }
 sub pp_avalues { unop(@_, "values") }
 sub pp_akeys { unop(@_, "keys") }
