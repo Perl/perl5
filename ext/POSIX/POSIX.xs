@@ -1781,7 +1781,7 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 #     ST(0) = sv_2mortal(newSVpv(...))
 void
 strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
-	SV *		fmt
+	char *		fmt
 	int		sec
 	int		min
 	int		hour
@@ -1793,9 +1793,9 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	int		isdst
     CODE:
 	{
-	    char *buf = my_strftime(SvPVutf8_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
+	    char *buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
 	    if (buf) {
-		ST(0) = sv_2mortal(newSVpvn_utf8(buf, strlen(buf), SvUTF8(fmt)));
+		ST(0) = sv_2mortal(newSVpv(buf, 0));
 		Safefree(buf);
 	    }
 	}
