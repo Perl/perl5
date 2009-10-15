@@ -1217,7 +1217,7 @@ sigaction(sig, optaction, oldaction = 0)
 	{
 	    dVAR;
 	    POSIX__SigAction action;
-	    GV *siggv = gv_fetchpv("SIG", TRUE, SVt_PVHV);
+	    GV *siggv = gv_fetchpvs("SIG", GV_ADD, SVt_PVHV);
 	    struct sigaction act;
 	    struct sigaction oact;
 	    sigset_t sset;
@@ -1280,7 +1280,7 @@ sigaction(sig, optaction, oldaction = 0)
                XSRETURN_UNDEF;
 	    ENTER;
 	    /* Restore signal mask no matter how we exit this block. */
-	    osset_sv = newSVpv((char *)(&osset), sizeof(sigset_t));
+	    osset_sv = newSVpvn((char *)(&osset), sizeof(sigset_t));
 	    SAVEFREESV( osset_sv );
 	    SAVEDESTRUCTOR_X(restore_sigmask, osset_sv);
 
@@ -1295,7 +1295,7 @@ sigaction(sig, optaction, oldaction = 0)
 			sv_setsv(*svp, *sigsvp);
 		}
 		else {
-			sv_setpv(*svp, "DEFAULT");
+			sv_setpvs(*svp, "DEFAULT");
 		}
 		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
 		if(RETVAL == -1)
