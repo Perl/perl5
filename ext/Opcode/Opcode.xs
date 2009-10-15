@@ -260,12 +260,12 @@ BOOT:
 
 void
 _safe_pkg_prep(Package)
-    const char *Package
+    SV *Package
 PPCODE:
     HV *hv; 
     ENTER;
    
-    hv = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+    hv = gv_stashsv(Package, GV_ADDWARN); /* should exist already	*/
 
     if (strNE(HvNAME_get(hv),"main")) {
         /* make it think it's in main:: */
@@ -281,7 +281,7 @@ PPCODE:
 
 void
 _safe_call_sv(Package, mask, codesv)
-    char *	Package
+    SV *	Package
     SV *	mask
     SV *	codesv
 PPCODE:
@@ -298,7 +298,7 @@ PPCODE:
 
     save_hptr(&PL_defstash);		/* save current default stash	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
-    PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+    PL_defstash = gv_stashsv(Package, GV_ADDWARN); /* should exist already	*/
 
     save_hptr(&PL_curstash);
     PL_curstash = PL_defstash;
@@ -306,13 +306,13 @@ PPCODE:
     /* defstash must itself contain a main:: so we'll add that now	*/
     /* take care with the ref counts (was cause of long standing bug)	*/
     /* XXX I'm still not sure if this is right, GV_ADDWARN should warn!	*/
-    gv = gv_fetchpv("main::", GV_ADDWARN, SVt_PVHV);
+    gv = gv_fetchpvs("main::", GV_ADDWARN, SVt_PVHV);
     sv_free((SV*)GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
 
     /* %INC must be clean for use/require in compartment */
     dummy_hv = save_hash(PL_incgv);
-    GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
+    GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpvs("INC",GV_ADD,SVt_PVHV))));
 
     /* Invalidate ISA and method caches */
     ++PL_sub_generation;

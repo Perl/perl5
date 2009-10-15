@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.14";
+$VERSION = "1.15";
 
 use Carp;
 use Exporter ();
