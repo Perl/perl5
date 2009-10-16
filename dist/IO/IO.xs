@@ -158,7 +158,11 @@ fgetpos(handle)
 	    if (fgetpos(handle, &pos)) {
 		ST(0) = &PL_sv_undef;
 	    } else {
+#  if PERL_VERSION >= 11
+		ST(0) = newSVpvn_flags((char*)&pos, sizeof(Fpos_t), SVs_TEMP);
+#  else
 		ST(0) = sv_2mortal(newSVpvn((char*)&pos, sizeof(Fpos_t)));
+#  endif
 	    }
 #endif
 	}
