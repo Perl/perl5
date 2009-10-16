@@ -117,12 +117,77 @@
 #define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 
+/* these are unrolled below in the CCC_TRY_XXX defined */
 #define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((const U8*)str); assert(ok); LEAVE; } } STMT_END
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
 #define LOAD_UTF8_CHARCLASS_DIGIT() LOAD_UTF8_CHARCLASS(digit,"0")
 #define LOAD_UTF8_CHARCLASS_SPACE() LOAD_UTF8_CHARCLASS(space," ")
 #define LOAD_UTF8_CHARCLASS_MARK()  LOAD_UTF8_CHARCLASS(mark, "\xcd\x86")
+
+
+#define CCC_TRY_AFF(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)                          \
+        case NAMEL:                                                              \
+            PL_reg_flags |= RF_tainted;                                                 \
+            /* FALL THROUGH */                                                          \
+        case NAME:                                                                     \
+            if (!nextchr)                                                               \
+                sayNO;                                                                  \
+            if (do_utf8 && UTF8_IS_CONTINUED(nextchr)) {                                \
+                if (!CAT2(PL_utf8_,CLASS)) {                                            \
+                    bool ok;                                                            \
+                    ENTER;                                                              \
+                    save_re_context();                                                  \
+                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                            \
+                    assert(ok);                                                         \
+                    LEAVE;                                                              \
+                }                                                                       \
+                if (!(OP(scan) == NAME                                                  \
+                    ? (bool)swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8)   \
+                    : LCFUNC_utf8((U8*)locinput)))                                      \
+                {                                                                       \
+                    sayNO;                                                              \
+                }                                                                       \
+                locinput += PL_utf8skip[nextchr];                                       \
+                nextchr = UCHARAT(locinput);                                            \
+                break;                                                                  \
+            }                                                                           \
+            if (!(OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))                  \
+                sayNO;                                                                  \
+            nextchr = UCHARAT(++locinput);                                              \
+            break
+
+#define CCC_TRY_NEG(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)                        \
+        case NAMEL:                                                              \
+            PL_reg_flags |= RF_tainted;                                                 \
+            /* FALL THROUGH */                                                          \
+        case NAME :                                                                     \
+            if (!nextchr && locinput >= PL_regeol)                                      \
+                sayNO;                                                                  \
+            if (do_utf8 && UTF8_IS_CONTINUED(nextchr)) {                                \
+                if (!CAT2(PL_utf8_,CLASS)) {                                            \
+                    bool ok;                                                            \
+                    ENTER;                                                              \
+                    save_re_context();                                                  \
+                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                            \
+                    assert(ok);                                                         \
+                    LEAVE;                                                              \
+                }                                                                       \
+                if ((OP(scan) == NAME                                                  \
+                    ? (bool)swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8)    \
+                    : LCFUNC_utf8((U8*)locinput)))                                      \
+                {                                                                       \
+                    sayNO;                                                              \
+                }                                                                       \
+                locinput += PL_utf8skip[nextchr];                                       \
+                nextchr = UCHARAT(locinput);                                            \
+                break;                                                                  \
+            }                                                                           \
+            if ((OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))                   \
+                sayNO;                                                                  \
+            nextchr = UCHARAT(++locinput);                                              \
+            break
+
 
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
@@ -3418,146 +3483,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    else
 		 sayNO;
 	    break;
-	case ALNUML:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case ALNUM:
-	    if (!nextchr)
-		sayNO;
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		if (!(OP(scan) == ALNUM
-		      ? (bool)swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
-		      : isALNUM_LC_utf8((U8*)locinput)))
-		{
-		    sayNO;
-		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (!(OP(scan) == ALNUM
-		  ? isALNUM(nextchr) : isALNUM_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NALNUML:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NALNUM:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		if (OP(scan) == NALNUM
-		    ? (bool)swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
-		    : isALNUM_LC_utf8((U8*)locinput))
-		{
-		    sayNO;
-		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (OP(scan) == NALNUM
-		? isALNUM(nextchr) : isALNUM_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case SPACEL:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case SPACE:
-	    if (!nextchr)
-		sayNO;
-	    if (do_utf8) {
-		if (UTF8_IS_CONTINUED(nextchr)) {
-		    LOAD_UTF8_CHARCLASS_SPACE();
-		    if (!(OP(scan) == SPACE
-			  ? (bool)swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
-			  : isSPACE_LC_utf8((U8*)locinput)))
-		    {
-			sayNO;
-		    }
-		    locinput += PL_utf8skip[nextchr];
-		    nextchr = UCHARAT(locinput);
-		    break;
-		}
-	    }
-	    if (!(OP(scan) == SPACE
-		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NSPACEL:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NSPACE:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_SPACE();
-		if (OP(scan) == NSPACE
-		    ? (bool)swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
-		    : isSPACE_LC_utf8((U8*)locinput))
-		{
-		    sayNO;
-		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (OP(scan) == NSPACE
-		? isSPACE(nextchr) : isSPACE_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case DIGITL:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case DIGIT:
-	    if (!nextchr)
-		sayNO;
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_DIGIT();
-		if (!(OP(scan) == DIGIT
-		      ? (bool)swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
-		      : isDIGIT_LC_utf8((U8*)locinput)))
-		{
-		    sayNO;
-		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (!(OP(scan) == DIGIT
-		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NDIGITL:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NDIGIT:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_DIGIT();
-		if (OP(scan) == NDIGIT
-		    ? (bool)swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
-		    : isDIGIT_LC_utf8((U8*)locinput))
-		{
-		    sayNO;
-		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (OP(scan) == NDIGIT
-		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
+	/* Special char classes - The defines start on line 129 or so */
+	CCC_TRY_AFF( ALNUM,  ALNUML, alnum, "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
+	CCC_TRY_NEG(NALNUM, NALNUML, alnum, "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
+
+	CCC_TRY_AFF( SPACE,  SPACEL, space, " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
+	CCC_TRY_NEG(NSPACE, NSPACEL, space, " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
+
+	CCC_TRY_AFF( DIGIT,  DIGITL, digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
+	CCC_TRY_NEG(NDIGIT, NDIGITL, digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
+
 	case CLUMP:
 	    if (locinput >= PL_regeol)
 		sayNO;
