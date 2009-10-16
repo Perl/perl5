@@ -349,7 +349,7 @@ sub setup_mm_test_root {
         open( MMTMP, '>mmtesttmp.com' ) || 
           die "Error creating command file; $!";
         print MMTMP <<'COMMAND';
-$ MM_TEST_ROOT = F$PARSE("SYS$DISK:[-]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
+$ MM_TEST_ROOT = F$PARSE("SYS$DISK:[--]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
 $ DEFINE/JOB/NOLOG/TRANSLATION=CONCEALED MM_TEST_ROOT 'MM_TEST_ROOT'
 COMMAND
         close MMTMP;
