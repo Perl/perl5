@@ -832,10 +832,10 @@ sub watchdog ($)
                     _diag("Watchdog warning: $_[0]");
                 };
                 my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
-                $watchdog = system(1, which_perl(), '-e',
-                                                    "sleep($timeout);" .
-                                                    "warn('# $timeout_msg\n');" .
+                my $cmd = _create_runperl( prog =>  "sleep($timeout);" .
+                                                    "warn qq/# $timeout_msg" . '\n/;' .
                                                     "kill($sig, $pid_to_kill);");
+                $watchdog = system(1, $cmd);
             };
             if ($@ || ($watchdog <= 0)) {
                 _diag('Failed to start watchdog');
