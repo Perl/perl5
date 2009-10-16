@@ -80,7 +80,7 @@ WriteMakefile(
     'PM' => {
         'shared.pm'     => '$(INST_LIBDIR)/shared.pm',
     },
-    'INSTALLDIRS'       => 'perl',
+    'INSTALLDIRS'       => (($] < 5.011) ? 'perl' : 'site'),
 
     ((ExtUtils::MakeMaker->VERSION() lt '6.25') ?
         ('PL_FILES' => { })            : ()),
