@@ -1323,7 +1323,7 @@ FIRSTKEY(SV *obj)
             I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
+            ST(0) = newSVpvn_flags(key, len, SVs_TEMP | (utf8 ? SVf_UTF8 : 0));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
@@ -1350,7 +1350,7 @@ NEXTKEY(SV *obj, SV *oldkey)
             I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
+            ST(0) = newSVpvn_flags(key, len, SVs_TEMP | (utf8 ? SVf_UTF8 : 0));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
