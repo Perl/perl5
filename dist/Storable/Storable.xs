@@ -17,10 +17,11 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #endif
 
-#if !defined(PERL_VERSION) || PERL_VERSION < 8
+#if !defined(PERL_VERSION) || PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 9) || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
 #define NEED_load_module
 #define NEED_vload_module
 #define NEED_newCONSTSUB
+#define NEED_newSVpvn_flags
 #include "ppport.h"             /* handle old perls */
 #endif
 
@@ -2640,7 +2641,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 */
 
 	PUSHMARK(sp);
-	XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
+	XPUSHs(newSVpvs_flags("B::Deparse", SVs_TEMP));
 	PUTBACK;
 	count = call_method("new", G_SCALAR);
 	SPAGAIN;
