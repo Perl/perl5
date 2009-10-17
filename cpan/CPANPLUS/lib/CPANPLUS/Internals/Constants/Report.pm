@@ -306,7 +306,7 @@ managed to load:
                                                 $want
                                               ],
                                         ### might be empty entries in there
-                                        } grep { defined $_ } @prq;   
+                                        } grep { $_ } @prq;   
                                 
                                 return $str;
                             };

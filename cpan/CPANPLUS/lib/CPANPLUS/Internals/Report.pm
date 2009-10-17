@@ -56,9 +56,9 @@ otherwise.
 ### XXX remove this list and move it into selfupdate, somehow..
 ### this is dual administration
 {   my $query_list = {
-        'File::Fetch'   => '0.13_02',
-        'YAML::Tiny'    => '0.0',
-        'File::Temp'    => '0.0',
+        'File::Fetch'          => '0.13_02',
+        'Parse::CPAN::Meta'    => '0.0',
+        'File::Temp'           => '0.0',
     };
 
     my $send_list = {
@@ -196,7 +196,7 @@ sub _query_report {
         do { local $/; <$fh> };
     };
 
-    my ($aref) = eval { YAML::Tiny::Load( $res ) };
+    my ($aref) = eval { Parse::CPAN::Meta::Load( $res ) };
 
     if( $@ ) {
         error(loc("Error reading result: %1", $@));
@@ -358,7 +358,7 @@ sub _send_report {
                 ### version of perl (5.8.6+ and 5.9.2-4 at the time of writing)
                 ### 'Config' is not recognized as a core module. See this bug:
                 ###    http://rt.cpan.org/Ticket/Display.html?id=32155
-                if( not $obj and not $sub->( $prq_name ) ) {
+                if( !$obj and !$sub->( $prq_name ) ) {
                     msg(loc( "Prerequisite '%1' for '%2' could not be obtained".
                              " from CPAN -- sending N/A grade", 
                              $prq_name, $name ), $verbose );
@@ -367,7 +367,20 @@ sub _send_report {
                     last GRADE;        
                 }
 
-                if( $cb->_vcmp( $prq_ver, $obj->installed_version ) > 0 ) {
+                if ( !$obj ) {
+                    my $vcore = $sub->( $prq_name );
+                    if ( $cb->_vcmp( $prq_ver, $vcore ) > 0 ) {
+                      msg(loc( "Version of core module '%1' ('%2') is too low for ".
+                               "'%3' (needs '%4') -- sending N/A grade", 
+                               $prq_name, $vcore, 
+                               $name, $prq_ver ), $verbose );
+                             
+                      $grade = GRADE_NA;
+                      last GRADE;        
+                    }
+                }
+
+                if( $obj and $cb->_vcmp( $prq_ver, $obj->installed_version ) > 0 ) {
                     msg(loc( "Installed version of '%1' ('%2') is too low for ".
                              "'%3' (needs '%4') -- sending N/A grade", 
                              $prq_name, $obj->installed_version, 

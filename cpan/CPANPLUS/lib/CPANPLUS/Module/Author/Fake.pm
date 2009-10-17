@@ -22,7 +22,7 @@ CPANPLUS::Module::Author::Fake
 =head1 SYNOPSIS
 
     my $auth = CPANPLUS::Module::Author::Fake->new(
-                    name    => 'Foo Bar',
+                    author  => 'Foo Bar',
                     email   => 'luser@foo.com',
                     cpanid  => 'FOO',
                     _id     => $cpan->id,

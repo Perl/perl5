@@ -493,7 +493,7 @@ sub parse_module {
     }
 
     ### Special case arbitary file paths such as '.' etc.
-    if (-d File::Spec->rel2abs($mod) ) {
+    if ( $mod and -d File::Spec->rel2abs($mod) ) {
         my $dir    = File::Spec->rel2abs($mod);
         my $parent = File::Spec->rel2abs( File::Spec->catdir( $dir, '..' ) );
 

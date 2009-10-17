@@ -72,7 +72,7 @@ a method call on a C<CPANPLUS::Backend> object.
 
 =item load_configs
 
-Controls wether or not additional user configurations are to be loaded 
+Controls whether or not additional user configurations are to be loaded 
 or not. Defaults to C<true>.
 
 =cut

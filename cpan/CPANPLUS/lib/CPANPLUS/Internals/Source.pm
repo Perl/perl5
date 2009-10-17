@@ -318,8 +318,10 @@ sub _check_trees {
     ### if we're explicitly asked to update the sources, or if the
     ### standard source files are out of date, update the custom sources
     ### as well
+    ### RT #47820: Don't try to update custom sources if they are disabled
+    ### in the configuration.
     $self->__update_custom_module_sources( verbose => $verbose ) 
-        if $update_source or !$uptodate;
+        if $conf->get_conf('enable_custom_sources') and ( $update_source or !$uptodate );
 
     return $uptodate;
 }
