@@ -229,8 +229,11 @@ Perl_is_utf8_idcont
 Perl_is_utf8_alpha
 Perl_is_utf8_ascii
 Perl_is_utf8_space
+Perl_is_utf8_perl_space
+Perl_is_utf8_perl_word
 Perl_is_utf8_cntrl
 Perl_is_utf8_digit
+Perl_is_utf8_posix_digit
 Perl_is_utf8_graph
 Perl_is_utf8_upper
 Perl_is_utf8_lower

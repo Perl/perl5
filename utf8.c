@@ -1375,6 +1375,26 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
 }
 
 bool
+Perl_is_utf8_perl_space(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE;
+
+    return is_utf8_common(p, &PL_utf8_perl_space, "IsPerlSpace");
+}
+
+bool
+Perl_is_utf8_perl_word(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD;
+
+    return is_utf8_common(p, &PL_utf8_perl_word, "IsPerlWord");
+}
+
+bool
 Perl_is_utf8_digit(pTHX_ const U8 *p)
 {
     dVAR;
@@ -1382,6 +1402,16 @@ Perl_is_utf8_digit(pTHX_ const U8 *p)
     PERL_ARGS_ASSERT_IS_UTF8_DIGIT;
 
     return is_utf8_common(p, &PL_utf8_digit, "IsDigit");
+}
+
+bool
+Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT;
+
+    return is_utf8_common(p, &PL_utf8_posix_digit, "IsPosixDigit");
 }
 
 bool
@@ -1451,7 +1481,7 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
 
-    return is_utf8_common(p, &PL_utf8_xdigit, "Isxdigit");
+    return is_utf8_common(p, &PL_utf8_xdigit, "IsXDigit");
 }
 
 bool

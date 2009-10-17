@@ -333,6 +333,9 @@
 #define PL_utf8_idstart		(vTHX->Iutf8_idstart)
 #define PL_utf8_lower		(vTHX->Iutf8_lower)
 #define PL_utf8_mark		(vTHX->Iutf8_mark)
+#define PL_utf8_perl_space	(vTHX->Iutf8_perl_space)
+#define PL_utf8_perl_word	(vTHX->Iutf8_perl_word)
+#define PL_utf8_posix_digit	(vTHX->Iutf8_posix_digit)
 #define PL_utf8_print		(vTHX->Iutf8_print)
 #define PL_utf8_punct		(vTHX->Iutf8_punct)
 #define PL_utf8_space		(vTHX->Iutf8_space)
@@ -646,6 +649,9 @@
 #define PL_Iutf8_idstart	PL_utf8_idstart
 #define PL_Iutf8_lower		PL_utf8_lower
 #define PL_Iutf8_mark		PL_utf8_mark
+#define PL_Iutf8_perl_space	PL_utf8_perl_space
+#define PL_Iutf8_perl_word	PL_utf8_perl_word
+#define PL_Iutf8_posix_digit	PL_utf8_posix_digit
 #define PL_Iutf8_print		PL_utf8_print
 #define PL_Iutf8_punct		PL_utf8_punct
 #define PL_Iutf8_space		PL_utf8_space

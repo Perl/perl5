@@ -126,6 +126,36 @@
 #define LOAD_UTF8_CHARCLASS_MARK()  LOAD_UTF8_CHARCLASS(mark, "\xcd\x86")
 
 
+/* 
+   We dont use PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS as the direct test
+   so that it is possible to override the option here without having to 
+   rebuild the entire core. as we are required to do if we change regcomp.h
+   which is where PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS is defined.
+*/
+#if PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS
+#define BROKEN_UNICODE_CHARCLASS_MAPPINGS
+#endif
+
+#ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
+#define LOAD_UTF8_CHARCLASS_PERL_WORD()   LOAD_UTF8_CHARCLASS_ALNUM()
+#define LOAD_UTF8_CHARCLASS_PERL_SPACE()  LOAD_UTF8_CHARCLASS_SPACE()
+#define LOAD_UTF8_CHARCLASS_POSIX_DIGIT() LOAD_UTF8_CHARCLASS_DIGIT()
+#define RE_utf8_perl_word   PL_utf8_alnum
+#define RE_utf8_perl_space  PL_utf8_space
+#define RE_utf8_posix_digit PL_utf8_digit
+#define perl_word  alnum
+#define perl_space space
+#define posix_digit digit
+#else
+#define LOAD_UTF8_CHARCLASS_PERL_WORD()   LOAD_UTF8_CHARCLASS(perl_word,"a")
+#define LOAD_UTF8_CHARCLASS_PERL_SPACE()  LOAD_UTF8_CHARCLASS(perl_space," ")
+#define LOAD_UTF8_CHARCLASS_POSIX_DIGIT() LOAD_UTF8_CHARCLASS(posix_digit,"0")
+#define RE_utf8_perl_word   PL_utf8_perl_word
+#define RE_utf8_perl_space  PL_utf8_perl_space
+#define RE_utf8_posix_digit PL_utf8_posix_digit
+#endif
+
+
 #define CCC_TRY_AFF(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)                          \
         case NAMEL:                                                              \
             PL_reg_flags |= RF_tainted;                                                 \
@@ -187,6 +217,9 @@
                 sayNO;                                                                  \
             nextchr = UCHARAT(++locinput);                                              \
             break
+
+
+
 
 
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
@@ -1491,8 +1524,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    break;
 	case ALNUM:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_ALNUM(),
-		swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8),
+		LOAD_UTF8_CHARCLASS_PERL_WORD(),
+		swash_fetch(RE_utf8_perl_word, (U8*)s, do_utf8),
 		isALNUM(*s)
 	    );
 	case ALNUML:
@@ -1502,8 +1535,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case NALNUM:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_ALNUM(),
-		!swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8),
+		LOAD_UTF8_CHARCLASS_PERL_WORD(),
+		!swash_fetch(RE_utf8_perl_word, (U8*)s, do_utf8),
 		!isALNUM(*s)
 	    );
 	case NALNUML:
@@ -1513,8 +1546,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case SPACE:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8),
+		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
+		*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, do_utf8),
 		isSPACE(*s)
 	    );
 	case SPACEL:
@@ -1524,8 +1557,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case NSPACE:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8)),
+		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
+		!(*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, do_utf8)),
 		!isSPACE(*s)
 	    );
 	case NSPACEL:
@@ -1535,8 +1568,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case DIGIT:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_DIGIT(),
-		swash_fetch(PL_utf8_digit,(U8*)s, do_utf8),
+		LOAD_UTF8_CHARCLASS_POSIX_DIGIT(),
+		swash_fetch(RE_utf8_posix_digit,(U8*)s, do_utf8),
 		isDIGIT(*s)
 	    );
 	case DIGITL:
@@ -1546,8 +1579,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case NDIGIT:
 	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_DIGIT(),
-		!swash_fetch(PL_utf8_digit,(U8*)s, do_utf8),
+		LOAD_UTF8_CHARCLASS_POSIX_DIGIT(),
+		!swash_fetch(RE_utf8_posix_digit,(U8*)s, do_utf8),
 		!isDIGIT(*s)
 	    );
 	case NDIGITL:
@@ -3484,14 +3517,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		 sayNO;
 	    break;
 	/* Special char classes - The defines start on line 129 or so */
-	CCC_TRY_AFF( ALNUM,  ALNUML, alnum, "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
-	CCC_TRY_NEG(NALNUM, NALNUML, alnum, "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
+	CCC_TRY_AFF( ALNUM,  ALNUML, perl_word,   "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
+	CCC_TRY_NEG(NALNUM, NALNUML, perl_word,   "a", isALNUM_LC_utf8, isALNUM, isALNUM_LC);
 
-	CCC_TRY_AFF( SPACE,  SPACEL, space, " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
-	CCC_TRY_NEG(NSPACE, NSPACEL, space, " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
+	CCC_TRY_AFF( SPACE,  SPACEL, perl_space,  " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
+	CCC_TRY_NEG(NSPACE, NSPACEL, perl_space,  " ", isSPACE_LC_utf8, isSPACE, isSPACE_LC);
 
-	CCC_TRY_AFF( DIGIT,  DIGITL, digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
-	CCC_TRY_NEG(NDIGIT, NDIGITL, digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
+	CCC_TRY_AFF( DIGIT,  DIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
+	CCC_TRY_NEG(NDIGIT, NDIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
 
 	case CLUMP:
 	    if (locinput >= PL_regeol)

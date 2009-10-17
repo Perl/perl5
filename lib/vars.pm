@@ -13,7 +13,7 @@ sub import {
     my ($sym, $ch);
     foreach (@imports) {
         if (($ch, $sym) = /^([\$\@\%\*\&])(.+)/) {
-	    if ($sym =~ /\W/) {
+	    if ($sym =~ /\P{IsWord}/) {
 		# time for a more-detailed check-up
 		if ($sym =~ /^\w+[[{].*[]}]$/) {
 		    require Carp;

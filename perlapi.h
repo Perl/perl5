@@ -702,6 +702,12 @@ END_EXTERN_C
 #define PL_utf8_lower		(*Perl_Iutf8_lower_ptr(aTHX))
 #undef  PL_utf8_mark
 #define PL_utf8_mark		(*Perl_Iutf8_mark_ptr(aTHX))
+#undef  PL_utf8_perl_space
+#define PL_utf8_perl_space	(*Perl_Iutf8_perl_space_ptr(aTHX))
+#undef  PL_utf8_perl_word
+#define PL_utf8_perl_word	(*Perl_Iutf8_perl_word_ptr(aTHX))
+#undef  PL_utf8_posix_digit
+#define PL_utf8_posix_digit	(*Perl_Iutf8_posix_digit_ptr(aTHX))
 #undef  PL_utf8_print
 #define PL_utf8_print		(*Perl_Iutf8_print_ptr(aTHX))
 #undef  PL_utf8_punct

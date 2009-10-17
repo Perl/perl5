@@ -489,8 +489,11 @@ ApR	|bool	|is_utf8_idcont	|NN const U8 *p
 ApR	|bool	|is_utf8_alpha	|NN const U8 *p
 ApR	|bool	|is_utf8_ascii	|NN const U8 *p
 ApR	|bool	|is_utf8_space	|NN const U8 *p
+ApR	|bool	|is_utf8_perl_space	|NN const U8 *p
+ApR	|bool	|is_utf8_perl_word	|NN const U8 *p
 ApR	|bool	|is_utf8_cntrl	|NN const U8 *p
 ApR	|bool	|is_utf8_digit	|NN const U8 *p
+ApR	|bool	|is_utf8_posix_digit	|NN const U8 *p
 ApR	|bool	|is_utf8_graph	|NN const U8 *p
 ApR	|bool	|is_utf8_upper	|NN const U8 *p
 ApR	|bool	|is_utf8_lower	|NN const U8 *p

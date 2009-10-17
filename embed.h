@@ -378,8 +378,11 @@
 #define is_utf8_alpha		Perl_is_utf8_alpha
 #define is_utf8_ascii		Perl_is_utf8_ascii
 #define is_utf8_space		Perl_is_utf8_space
+#define is_utf8_perl_space	Perl_is_utf8_perl_space
+#define is_utf8_perl_word	Perl_is_utf8_perl_word
 #define is_utf8_cntrl		Perl_is_utf8_cntrl
 #define is_utf8_digit		Perl_is_utf8_digit
+#define is_utf8_posix_digit	Perl_is_utf8_posix_digit
 #define is_utf8_graph		Perl_is_utf8_graph
 #define is_utf8_upper		Perl_is_utf8_upper
 #define is_utf8_lower		Perl_is_utf8_lower
@@ -2746,8 +2749,11 @@
 #define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
 #define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
+#define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)
+#define is_utf8_perl_word(a)	Perl_is_utf8_perl_word(aTHX_ a)
 #define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
 #define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
+#define is_utf8_posix_digit(a)	Perl_is_utf8_posix_digit(aTHX_ a)
 #define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
