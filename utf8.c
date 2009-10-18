@@ -1020,6 +1020,10 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 
     PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED;
 
+    if (bytelen & 1)
+	Perl_croak(aTHX_ "panic: utf16_to_utf8_reversed: odd bytelen %"UVuf,
+		   (UV)bytelen);
+
     while (s < send) {
 	const U8 tmp = s[0];
 	s[0] = s[1];

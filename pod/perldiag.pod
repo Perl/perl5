@@ -3220,6 +3220,11 @@ at run time.
 (P) Something tried to call utf16_to_utf8 with an odd (as opposed
 to even) byte length.
 
+=item panic: utf16_to_utf8_reversed: odd bytelen
+
+(P) Something tried to call utf16_to_utf8_reversed with an odd (as opposed
+to even) byte length.
+
 =item panic: yylex
 
 (P) The lexer got into a bad state while processing a case modifier.

@@ -47,3 +47,10 @@ for (["\xD8\0\0\0", 'NULs'],
 	 "Malformed surrogate $name croaks for utf16_to_utf8_reversed");
     is($got, undef, 'hence eval returns undef');
 }
+
+my $in = "NA";
+$got = eval {utf16_to_utf8_reversed($in, 1)};
+like($@, qr/^panic: utf16_to_utf8_reversed: odd bytelen 1 at/,
+     'Odd byte length panics');
+is($got, undef, 'hence eval returns undef');
+is($in, "NA", 'and input unchanged');
