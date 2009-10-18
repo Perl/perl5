@@ -419,6 +419,7 @@ ben_tilly\100operamail.com              btilly\100gmail.com
 ben\100morrow.me.uk                        mauzo\100csv.warwick.ac.uk
 +                                        mauzo\100.(none)
 bepi\100perl.it                        enrico.sorcinelli\100gmail.com
+bert\100alum.mit.edu			bert\100genscan.com
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                    sadahiro\100cpan.org
 
