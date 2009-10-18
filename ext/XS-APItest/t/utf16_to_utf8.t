@@ -34,6 +34,9 @@ is($got, undef, 'hence eval returns undef');
 
 for (["\xD8\0\0\0", 'NULs'],
      ["\xD8\0\xD8\0", '2 Lows'],
+     ["\xDC\0\0\0", 'High NUL'],
+     ["\xDC\0\xD8\0", 'High Low'],
+     ["\xDC\0\xDC\0", 'High High'],
     ) {
     my ($malformed, $name) = @$_;
     $got = eval {utf16_to_utf8($malformed)};

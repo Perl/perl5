@@ -995,6 +995,8 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 		    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 		uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
 	    }
+	} else if (uv >= 0xdc00 && uv <= 0xdfff) {
+	    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	}
 	if (uv < 0x10000) {
 	    *d++ = (U8)(( uv >> 12)         | 0xe0);
