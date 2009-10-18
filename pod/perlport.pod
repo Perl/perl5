@@ -59,7 +59,7 @@ choices you can avail yourself of, and at the same time you can give
 your users lots of platform choices.  On the other hand, when you have to
 take advantage of some unique feature of a particular platform, as is
 often the case with systems programming (whether for Unix, Windows,
-S<Mac OS>, VMS, etc.), consider writing platform-specific code.
+VMS, etc.), consider writing platform-specific code.
 
 When the code will run on only two or three operating systems, you
 may need to consider only the differences of those particular systems.
@@ -260,7 +260,7 @@ as path separator, or in their own idiosyncratic ways (such as having
 several root directories and various "unrooted" device files such NIL:
 and LPT:).
 
-S<Mac OS> uses C<:> as a path separator instead of C</>.
+S<Mac OS> 9 and earlier used C<:> as a path separator instead of C</>.
 
 The filesystem may support neither hard links (C<link>) nor
 symbolic links (C<symlink>, C<readlink>, C<lstat>).
@@ -297,7 +297,7 @@ to be running the program.
     chdir(updir());        # go up one directory
     $file = catfile(curdir(), 'temp', 'file.txt');
     # on Unix and Win32, './temp/file.txt'
-    # on Mac OS, ':temp:file.txt'
+    # on Mac OS Classic, ':temp:file.txt'
     # on VMS, '[.temp]file.txt'
 
 File::Spec is available in the standard distribution as of version
@@ -637,9 +637,9 @@ it may be appropriate to calculate an offset for the epoch.
     require Time::Local;
     $offset = Time::Local::timegm(0, 0, 0, 1, 0, 70);
 
-The value for C<$offset> in Unix will be C<0>, but in Mac OS will be
-some large number.  C<$offset> can then be added to a Unix time value
-to get what should be the proper value on any system.
+The value for C<$offset> in Unix will be C<0>, but in Mac OS Classic
+will be some large number.  C<$offset> can then be added to a Unix time
+value to get what should be the proper value on any system.
 
 =head2 Character sets and character encoding
 
@@ -960,85 +960,6 @@ http://www.research.att.com/sw/tools/uwin/
 =item *
 
 Build instructions for OS/2, L<perlos2>
-
-=back
-
-=head2 S<Mac OS>
-
-Any module requiring XS compilation is right out for most people, because
-MacPerl is built using non-free (and non-cheap!) compilers.  Some XS
-modules that can work with MacPerl are built and distributed in binary
-form on CPAN.
-
-Directories are specified as:
-
-    volume:folder:file              for absolute pathnames
-    volume:folder:                  for absolute pathnames
-    :folder:file                    for relative pathnames
-    :folder:                        for relative pathnames
-    :file                           for relative pathnames
-    file                            for relative pathnames
-
-Files are stored in the directory in alphabetical order.  Filenames are
-limited to 31 characters, and may include any character except for
-null and C<:>, which is reserved as the path separator.
-
-Instead of C<flock>, see C<FSpSetFLock> and C<FSpRstFLock> in the
-Mac::Files module, or C<chmod(0444, ...)> and C<chmod(0666, ...)>.
-
-In the MacPerl application, you can't run a program from the command line;
-programs that expect C<@ARGV> to be populated can be edited with something
-like the following, which brings up a dialog box asking for the command
-line arguments.
-
-    if (!@ARGV) {
-        @ARGV = split /\s+/, MacPerl::Ask('Arguments?');
-    }
-
-A MacPerl script saved as a "droplet" will populate C<@ARGV> with the full
-pathnames of the files dropped onto the script.
-
-Mac users can run programs under a type of command line interface
-under MPW (Macintosh Programmer's Workshop, a free development
-environment from Apple).  MacPerl was first introduced as an MPW
-tool, and MPW can be used like a shell:
-
-    perl myscript.plx some arguments
-
-ToolServer is another app from Apple that provides access to MPW tools
-from MPW and the MacPerl app, which allows MacPerl programs to use
-C<system>, backticks, and piped C<open>.
-
-"S<Mac OS>" is the proper name for the operating system, but the value
-in C<$^O> is "MacOS".  To determine architecture, version, or whether
-the application or MPW tool version is running, check:
-
-    $is_app    = $MacPerl::Version =~ /App/;
-    $is_tool   = $MacPerl::Version =~ /MPW/;
-    ($version) = $MacPerl::Version =~ /^(\S+)/;
-    $is_ppc    = $MacPerl::Architecture eq 'MacPPC';
-    $is_68k    = $MacPerl::Architecture eq 'Mac68K';
-
-S<Mac OS X>, based on NeXT's OpenStep OS, runs MacPerl natively, under the
-"Classic" environment.  There is no "Carbon" version of MacPerl to run
-under the primary Mac OS X environment.  S<Mac OS X> and its Open Source
-version, Darwin, both run Unix perl natively.
-
-Also see:
-
-=over 4
-
-=item *
-
-MacPerl Development, http://dev.macperl.org/ .
-
-=item *
-
-The MacPerl mailing lists, http://lists.perl.org/ .
-
-=item *
-
-MPW, ftp://ftp.apple.com/developer/Tool_Chest/Core_Mac_OS_Tools/
 
 =back
 
@@ -1564,10 +1485,6 @@ L<Config> for a full description of available variables.
 
 =item -X
 
-C<-r>, C<-w>, and C<-x> have a limited meaning only; directories
-and applications are executable, and there are no uid/gid
-considerations.  C<-o> is not supported.  (S<Mac OS>)
-
 C<-w> only inspects the read-only file attribute (FILE_ATTRIBUTE_READONLY),
 which determines whether the directory can be deleted, not whether it can
 be written to. Directories always have read and write access unless denied
@@ -1576,18 +1493,12 @@ by discretionary access control lists (DACLs).  (S<Win32>)
 C<-r>, C<-w>, C<-x>, and C<-o> tell whether the file is accessible,
 which may not reflect UIC-based file protections.  (VMS)
 
-C<-s> returns the size of the data fork, not the total size of data fork
-plus resource fork.  (S<Mac OS>).
-
 C<-s> by name on an open file will return the space reserved on disk,
 rather than the current extent.  C<-s> on an open filehandle returns the
 current size.  (S<RISC OS>)
 
 C<-R>, C<-W>, C<-X>, C<-O> are indistinguishable from C<-r>, C<-w>,
-C<-x>, C<-o>. (S<Mac OS>, Win32, VMS, S<RISC OS>)
-
-C<-b>, C<-c>, C<-k>, C<-g>, C<-p>, C<-u>, C<-A> are not implemented.
-(S<Mac OS>)
+C<-x>, C<-o>. (Win32, VMS, S<RISC OS>)
 
 C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 (Win32, VMS, S<RISC OS>)
@@ -1596,10 +1507,6 @@ C<-p> is not particularly meaningful. (VMS, S<RISC OS>)
 
 C<-d> is true if passed a device spec without an explicit directory.
 (VMS)
-
-C<-T> and C<-B> are implemented, but might misclassify Mac text files
-with foreign characters; this is the case will all platforms, but may
-affect S<Mac OS> often.  (S<Mac OS>)
 
 C<-x> (or C<-X>) determine if a file ends in one of the executable
 suffixes.  C<-S> is meaningless.  (Win32)
@@ -1620,7 +1527,7 @@ L<http://www.opengroup.org/onlinepubs/009695399/functions/atan2.html>.
 
 =item binmode
 
-Meaningless.  (S<Mac OS>, S<RISC OS>)
+Meaningless.  (S<RISC OS>)
 
 Reopens file and restores pointer; if function fails, underlying
 filehandle may be closed, or pointer may be in a different position.
@@ -1630,9 +1537,6 @@ The value returned by C<tell> may be affected after the call, and
 the filehandle may be flushed. (Win32)
 
 =item chmod
-
-Only limited meaning.  Disabling/enabling write permission is mapped to
-locking/unlocking the file. (S<Mac OS>)
 
 Only good for changing "owner" read-write access, "group", and "other"
 bits are meaningless. (Win32)
@@ -1646,7 +1550,7 @@ in the SYSTEM environment settings.  (Cygwin)
 
 =item chown
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented. (Win32, S<Plan 9>, S<RISC OS>)
 
 Does nothing, but won't fail. (Win32)
 
@@ -1654,7 +1558,7 @@ A little funky, because VOS's notion of ownership is a little funky (VOS).
 
 =item chroot
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<Plan 9>, S<RISC OS>, VOS, VM/ESA)
 
 =item crypt
 
@@ -1671,15 +1575,13 @@ Not implemented. (VMS, S<Plan 9>, VOS)
 
 =item dump
 
-Not useful. (S<Mac OS>, S<RISC OS>)
+Not useful. (S<RISC OS>)
 
 Not supported. (Cygwin, Win32)
 
 Invokes VMS debugger. (VMS)
 
 =item exec
-
-Not implemented. (S<Mac OS>)
 
 Implemented via Spawn. (VM/ESA)
 
@@ -1707,13 +1609,13 @@ Some functions available based on the version of VMS. (VMS)
 
 =item flock
 
-Not implemented (S<Mac OS>, VMS, S<RISC OS>, VOS).
+Not implemented (VMS, S<RISC OS>, VOS).
 
 Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VM/ESA, VMS)
+Not implemented. (AmigaOS, S<RISC OS>, VM/ESA, VMS)
 
 Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
 
@@ -1722,80 +1624,76 @@ Does not automatically flush output handles on some platforms.
 
 =item getlogin
 
-Not implemented. (S<Mac OS>, S<RISC OS>)
+Not implemented. (S<RISC OS>)
 
 =item getpgrp
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item getppid
 
-Not implemented. (S<Mac OS>, Win32, S<RISC OS>)
+Not implemented. (Win32, S<RISC OS>)
 
 =item getpriority
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item getpwnam
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (Win32)
 
 Not useful. (S<RISC OS>)
 
 =item getgrnam
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item getnetbyname
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item getpwuid
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (Win32)
 
 Not useful. (S<RISC OS>)
 
 =item getgrgid
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item getnetbyaddr
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item getprotobynumber
 
-Not implemented. (S<Mac OS>)
-
 =item getservbyport
-
-Not implemented. (S<Mac OS>)
 
 =item getpwent
 
-Not implemented. (S<Mac OS>, Win32, VM/ESA)
+Not implemented. (Win32, VM/ESA)
 
 =item getgrent
 
-Not implemented. (S<Mac OS>, Win32, VMS, VM/ESA)
+Not implemented. (Win32, VMS, VM/ESA)
 
 =item gethostbyname
 
 C<gethostbyname('localhost')> does not work everywhere: you may have
-to use C<gethostbyname('127.0.0.1')>. (S<Mac OS>, S<Irix 5>)
+to use C<gethostbyname('127.0.0.1')>. (S<Irix 5>)
 
 =item gethostent
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (Win32)
 
 =item getnetent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item getprotoent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item getservent
 
@@ -1803,15 +1701,15 @@ Not implemented. (Win32, S<Plan 9>)
 
 =item sethostent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented. (Win32, S<Plan 9>, S<RISC OS>)
 
 =item setnetent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented. (Win32, S<Plan 9>, S<RISC OS>)
 
 =item setprotoent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented. (Win32, S<Plan 9>, S<RISC OS>)
 
 =item setservent
 
@@ -1819,23 +1717,23 @@ Not implemented. (S<Plan 9>, Win32, S<RISC OS>)
 
 =item endpwent
 
-Not implemented. (S<Mac OS>, MPE/iX, VM/ESA, Win32)
+Not implemented. (MPE/iX, VM/ESA, Win32)
 
 =item endgrent
 
-Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>, VM/ESA, VMS, Win32)
+Not implemented. (MPE/iX, S<RISC OS>, VM/ESA, VMS, Win32)
 
 =item endhostent
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (Win32)
 
 =item endnetent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item endprotoent
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>)
+Not implemented. (Win32, S<Plan 9>)
 
 =item endservent
 
@@ -1868,9 +1766,6 @@ Available only for socket handles. (S<RISC OS>)
 
 =item kill
 
-C<kill(0, LIST)> is implemented for the sake of taint checking;
-use with other signals is unimplemented. (S<Mac OS>)
-
 Not implemented, hence not useful for taint checking. (S<RISC OS>)
 
 C<kill()> doesn't have the semantics of C<raise()>, i.e. it doesn't send
@@ -1891,7 +1786,7 @@ numbers. (VMS)
 
 =item link
 
-Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>)
+Not implemented. (MPE/iX, S<RISC OS>)
 
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
@@ -1924,14 +1819,11 @@ Return values (especially for device and inode) may be bogus. (Win32)
 
 =item msgrcv
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
 
 =item open
 
-The C<|> variants are supported only if ToolServer is installed.
-(S<Mac OS>)
-
-open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
+open to C<|-> and C<-|> are unsupported. (Win32, S<RISC OS>)
 
 Opening a process does not automatically flush output handles on some
 platforms.  (SunOS, Solaris, HP-UX)
@@ -1958,23 +1850,23 @@ Note that the C<select FILEHANDLE> form is generally portable.
 
 =item semop
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. ( Win32, VMS, S<RISC OS>, VOS)
 
 =item setgrent
 
-Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, S<RISC OS>, VOS)
+Not implemented. (MPE/iX, VMS, Win32, S<RISC OS>, VOS)
 
 =item setpgrp
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item setpriority
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item setpwent
 
-Not implemented. (S<Mac OS>, MPE/iX, Win32, S<RISC OS>, VOS)
+Not implemented. (MPE/iX, Win32, S<RISC OS>, VOS)
 
 =item setsockopt
 
@@ -1988,7 +1880,7 @@ Not implemented. (S<Plan 9>)
 
 =item shmwrite
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item sockatmark
 
@@ -2006,9 +1898,6 @@ Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 Platforms that do not have rdev, blksize, or blocks will return these
 as '', so numeric comparison or manipulation of these fields may cause
 'not numeric' warnings.
-
-mtime and atime are the same thing, and ctime is creation time instead of
-inode change time. (S<Mac OS>).
 
 ctime not supported on UFS (S<Mac OS X>).
 
@@ -2041,7 +1930,7 @@ syntax if it is intended to resolve to a valid path.
 
 =item syscall
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item sysopen
 
@@ -2051,8 +1940,6 @@ numeric values on some systems.  The flags exported by C<Fcntl>
 OS>, OS/390, VM/ESA)
 
 =item system
-
-Only implemented if ToolServer is installed. (S<Mac OS>)
 
 As an optimization, may not call the command shell specified in
 C<$ENV{PERL5SHELL}>.  C<system(1, @args)> spawns an external
@@ -2085,8 +1972,6 @@ For more details see L<perlvms/$?>. (VMS)
 
 =item times
 
-Only the first entry returned is nonzero. (S<Mac OS>)
-
 "cumulative" times will be bogus.  On anything other than Windows NT
 or Windows 2000, "system" time will be bogus, and "user" time is
 actually the time returned by the clock() function in the C runtime
@@ -2114,7 +1999,7 @@ is finally closed. (AmigaOS)
 
 =item utime
 
-Only the modification time is updated. (S<BeOS>, S<Mac OS>, VMS, S<RISC OS>)
+Only the modification time is updated. (S<BeOS>, VMS, S<RISC OS>)
 
 May not behave as expected.  Behavior depends on the C runtime
 library's implementation of utime(), and the filesystem being
@@ -2125,8 +2010,6 @@ two seconds. (Win32)
 =item wait
 
 =item waitpid
-
-Not implemented. (S<Mac OS>)
 
 Can only be applied to process handles returned for processes spawned
 using C<system(1, ...)> or pseudo processes created with C<fork()>. (Win32)
