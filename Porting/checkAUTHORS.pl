@@ -438,8 +438,9 @@ cpan\100audreyt.org                     autrijus\100egb.elixus.org
 cpan\100ton.iguana.be                    me-01\100ton.iguana.be
 crt\100kiski.net                        perl\100ctweten.amsite.com
 
-damian\100conway.org                    damian\100cs.monash.edu.au
+dairiki\100dairiki.org			dairiki at dairiki.org
 dagolden\100cpan.org                    xdaveg\100gmail.com
+damian\100conway.org                    damian\100cs.monash.edu.au
 dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 daniel\100bitpusher.com                    daniel\100biz.bitpusher.com
