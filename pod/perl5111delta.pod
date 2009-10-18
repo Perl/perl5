@@ -177,7 +177,7 @@ XXX
 
 =back
 
-=head1 New Tests
+=head1 Testing
 
 XXX Changes which create B<new> files in F<t/> go here. Changes to
 existing files in F<t/> aren't worth summarising, although the bugs that
@@ -185,7 +185,7 @@ they represent may be.
 
 =over 4
 
-=item F<XXX>
+=item Significant cleanups to core tests to ensure that language and interpreter features are not used before they're tested.
 
 XXX
 
@@ -274,3 +274,364 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+This is all changes through 704e1b1e
+
+
+    Update CPANPLUS to CPAN version 0.89_02
+
+    Upgrade to threads::shared 1.32
+
+    Help ExtUtils::Install's tests find PERL_SRC on VMS.
+
+commit d1d15184c41c6ad4f16829561163cd118e5ae917
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Tue Oct 13 16:04:18 2009 +0100
+
+    Enable deprecation warnings by default.
+
+    locked is deprecated, so use :lvalue instead.
+
+    Can't use C<shift INC> to avoid @ in a commandline now, so use eval and octal.
+
+    shift with barewords is deprecated, so this test from perl 1 needs updating.
+
+    push and pop on barewords are deprecated, so need no warnings 'deprecated';
+
+    Opening dirhandle DIR also as a file needs no warnings 'deprecated';
+
+    defined @array and defined %hash need no warnings 'deprecated';
+
+    localisation of $[ is deprecated, so needs no warnings 'deprecated';
+
+    Tests for barewords and hash operators need no warnings 'deprecated';
+
+    do subname() is deprecated, so tests for it need no warnings 'deprecated';
+
+    Bracket deprecated features with no warnings 'deprecated';
+
+    Move the test for the deprecated feature <<; out of t/base/lext.t
+
+    Tests in base can't utilise pragmata, specifically no warnings 'deprecated';
+
+    Add no warnings 'deprecated' to a test that assigns to $[
+
+commit a44d0896a6c4bfe01ea532694b8c1c073ea6a2f1
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Thu Oct 15 23:37:41 2009 +0100
+
+    Skip testing the be_BY.CP1131 locale on Darwin 10, as it's still buggy.
+
+    Correct infelicities in the regexp used to identify buggy locales on Darwin 8
+    and 9.
+
+    POSIX::strftime() should be able to handle Unicode characters in the format
+    string.
+
+commit 2e0eeeaafce11cb0128a6d1e245f1a5b806e3a87
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Thu Oct 15 15:12:49 2009 +0100
+
+    Move the boolkeys op to the group of hash ops.
+
+    This breaks binary compatibility.
+
+commit 867fa1e2da145229b4db2c6e8d5b51700c15f114
+Author: demerphq <demerphq@gmail.com>
+Date:   Thu Oct 15 14:27:30 2009 +0100
+
+    Optimise if (%foo) to be faster than if(keys %foo)
+
+    Thread was "[PATCH] Make if (%hash) {} act the same as if (keys %hash) {}"
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-11/msg00432.html
+    but the implementation evolved from the approach described in the subject, to
+    instead add a new opcode pp_boolkeys, to exactly preserve the existing
+    behaviour.
+
+    Various conflicts with the passage of time resolved, 'register' removed, and a
+    $VERSION bump.
+
+commit 1c85afcecc8ee030e2780aa5bfa85692c8db64df
+Author: demerphq <demerphq@gmail.com>
+Date:   Thu Oct 15 14:22:47 2009 +0100
+
+    Support for pp_boolkeys in B::Deparse.
+
+    Part of "[PATCH] Make if (%hash) {} act the same as if (keys %hash) {}"
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-11/msg00432.html
+    which evolved from the approach described in the subject, to instead add a new
+    opcode pp_boolkeys, to exactly preserve the existing behaviour.
+
+    Plus a $VERSION bump.
+
+commit 55b77936aef50881a71470fd06e66edffd66d9de
+Author: Sisyphus <sisyphus1@optusnet.com.au>
+Date:   Wed Oct 14 10:02:16 2009 -0400
+
+    Add mingw64 support for win32
+
+commit d4c22fec77d7244882ce42a93a4ad25bdada2519
+Author: Sisyphus <sisyphus1@optusnet.com.au>
+Date:   Wed Oct 14 06:58:49 2009 -0400
+
+    Patch t/win32/system.t for mingw32/64
+
+commit e4d771f5006ebd70b76422437cce60e9ac40c830
+Author: Jan Dubois <jand@activestate.com>
+Date:   Tue Oct 13 16:46:58 2009 -0700
+
+    The winsock select() implementation doesn't support all empty 'fd_set's.
+
+    The code already contained a workaround for the special case
+
+        select(undef, undef, undef, $sleep);
+
+    but didn't handle the case when actual bit vectors were passed in
+    that didn't have any bits set.
+
+    Fixes http://rt.perl.org/rt3/Public/Bug/Display.html?id=54544
+
+
+
+
+
+
+    Podify the social contract about contributed module. Turn it into a policy document.  Move the new "perl policy" document into pod/
+
+
+Author: Smylers <Smylers@stripey.com>
+Date:   Tue Oct 13 14:14:46 2009 +0200
+
+    perlvar $1 clarification
+
+    $1 is currently documented as being set by the "last pattern match".
+    But it is left alone by unsuccessful pattern match attempts (continuing
+    to hold a value from an earlier successful match).
+
+    Saying "last successful pattern match" clarifies this; it's also the
+    phrase used to document $&.
+
+    Second, the entry for $1 in perlvar doesn't actually contain the text
+    "$1" anywhere.  As such, doing man perlvar then using /\$1 to search for
+    it in less doesn't locate it (though does match other places in that
+    file where $1 happens to be used).
+
+
+ =item *
+
+    Replace Perl_deprecate() with a macro that calls Perl_ck_warner()
+    Perl_deprecate was not part of the public API, and did not have a deprecate()
+    shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
+    CPAN::Unpack show any users outside the core.
+
+
+
+ =item *
+    Remove category 'syntax' from 5 warnings that should just be in 'deprecated'.
+
+    None were documented as also being in 'syntax'. Effectively, this completes the
+    reorganisation of commits 12bcd1a617c74d6e and 9014280dc8264580. See
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-10/msg00601.html and
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-03/msg00850.html
+
+
+
+commit c989e6a3e4b89b26d315693449c76cdcb754611f
+Author: Geoffrey T. Dairiki <dairiki at dairiki.org>
+Date:   Tue Aug 4 17:54:34 2009 -0700
+
+    overload no longer implicitly unsets fallback on repeated 'use overload' lines - Fix for RT#68916
+
+
+commit 5f5991a0d6d8ef99d2643b88a7d9285e35277331
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Mon Oct 12 15:54:30 2009 +0100
+
+    Normalise 3 fatal pack/unpack error messages to "panic: %s"
+
+commit 04e82a462b85b3d6265b04aa07a405316616dc66
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Oct 11 18:56:01 2009 +0100
+
+    porting/manifest.t now tests that all files listed in MANIFEST are present.
+
+commit 41239ce77fcd273e18c4017d3d96a5f42e228594
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Oct 11 17:28:02 2009 +0100
+
+    Default to running tests in cpan/ with relative paths for perl and @INC
+
+    Explicitly turn paths absolute for the 33 extensions in cpan/ that fail tests
+    with relative paths.
+
+commit fc5e5837c991d3d3224259ff5c1d728d4e0636e2
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Oct 11 15:05:58 2009 +0100
+
+    MakeMaker::Test::Utils::perl_lib now copes with relative paths for core testing.
+
+    In the core, @INC already contains the moral equivalent of blib/lib. However,
+    it's a relative path (by default), so make it absolute. It's easier to KISS if
+    this is done *before* any change of directory, so document this, and change the
+    non-core case to add the absolute path of 'blib/lib' to @INC, rather than the
+    absolute path of '../blib/lib'.
+
+
+    Upgrade to Test-Simple-0.94
+
+    Upgrade to Storable-2.21
+
+    Upgrade to Pod-Simple-3.08
+
+    Upgrade to Parse-CPAN-Meta-1.40
+
+    Upgrade to ExtUtils-Manifest-1.57
+
+    Upgrade to ExtUtils-CBuilder-0.260301
+
+
+    Upgrade to CGI.pm-3.48
+
+commit 6c1b5ced18901286f16f6d5f6914ba4b5e3db601
+Author: Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
+Date:   Sat Oct 10 17:55:26 2009 +0100
+
+    [perl #69686] Fix DragonFly thread lib selection
+
+
+
+Merge: 8e32470 e92f586
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Thu Oct 8 15:13:18 2009 +0200
+
+    Merge branch 'feature/package-name-version' into blead
+
+commit f03173f2c707a804ec3e9c291d2ab1adb9db4abc
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Thu Oct 8 11:44:21 2009 +0200
+
+    Make tell() fail properly if called without an argument and when no previous file was read
+
+    This makes tell() return -1, and sets errno to EBADF, thus
+    restoring the 5.8.x behaviour
+
+commit a916b30221d5aac718ed67c9a5bc9c0905daddd0
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Thu Oct 8 11:33:06 2009 +0200
+
+    Properly return a syntax error instead of segfaulting if each/keys/values is used without an argument
+
+ =item Updated Object-Accessor to CPAN version 0.36
+
+
+    Add perltodo: write an XS cookbook
+
+    Porting/checkAUTHORS.pl now runs clean
+
+commit 6fa4d285bff5644bebb95aff09143322042282cc
+Author: David Golden <dagolden@cpan.org>
+Date:   Tue Oct 6 06:48:48 2009 -0400
+
+    Add 'package NAME VERSION' syntax
+
+    This patch adds support for setting the $VERSION of a namespace
+    when the namespace is declared with 'package'.  It eliminates the
+    need for 'our $VERSION = ...' and similar constructs.  E.g.
+
+      package Foo::Bar 1.23;
+      # $Foo::Bar::VERSION == 1.23
+
+    There are several advantages to this:
+
+      * VERSION is parsed in *exactly* the same way as 'use NAME VERSION'
+
+      * $VERSION is set at compile time
+
+      * Eliminates '$VERSION = ...' and 'eval $VERSION' clutter
+
+      * As it requires VERSION to be a numeric literal or v-string
+        literal, it can be statically parsed by toolchain modules
+        without 'eval' the way MM->parse_version does for '$VERSION = ...'
+
+      * Alpha versions with underscores do not need to be quoted; static
+        parsing will preserve the underscore, but during compilation, Perl
+        will remove underscores as it does for all numeric literals
+
+    During development of this, there was discussion on #corehackers and
+    elsewhere that this should also allow other metadata to be set such as
+    "status" (stable/alpha) or "author/authority".  On reflection, those
+    metadata are not very well defined yet and likely should never be
+    encoded into Perl core parsing so they can be freely changed in the
+    future.  (They could perhaps be achieved via a comment on the same line
+    as 'package NAME VERSION'.)
+
+    Version numbers, however, already have a very specific definition and
+    use defined in the core through 'use NAME VERSION'.  This patch merely
+    provides appropriate symmetry for setting $VERSION with the exact same
+    parsing and semantics as 'use'.
+
+    It does not break old code with only 'package NAME', but code that
+    uses 'package NAME VERSION' will need to be restricted to perl 5.11.X.
+    This is analogous to the change to open() from two-args to three-args.
+    Users requiring the latest Perl will benefit, and perhaps N years from
+    now it will become standard practice when Perl 5.12 is targeted the
+    way that 5.6 is today.
+
+    The patch does not prevent 'package NAME VERSION' from being used
+    multiple times for the same package with different version numbers, but
+    nothing prevents $VERSION from being modified arbitrarily at runtime,
+    either, so I see no urgen reason to add limitations or warnings so
+    long as Perl uses a global $VERSION variable for package version
+    numbers.
+
+    I am posting this patch to the p5p list for discussion and review.  If
+    there seems to be general assent (or lack of dissent), I will go ahead
+    and commit the patch to blead.
+
+commit a67b1afafddaaed84e79a867acc888c9ccfb6460
+Author: Max Maischein <corion@corion.net>
+Date:   Mon Oct 5 22:49:09 2009 +0200
+
+New porting tests to automatically check POD in lib/, ext/ and pod/
+
+commit 2d5f1d01166a325b29ccc86102d26e68def13786
+Author: David Golden <dagolden@cpan.org>
+Date:   Mon Oct 5 17:46:36 2009 -0400
+
+    Explain using git send-email for patches
+
+ =item Update ExtUtils::ParseXS to 2.21
+
+ =item Upgrade File::Path to 2.08 (and add taint.t test)
+
+commit b2680017d861a93d2d51b07bce2f1731086bc8c3
+Author: Yves Orton <demerphq@gmail.com>
+Date:   Mon Oct 5 09:34:52 2009 +0200
+
+    in regexec.c move the BOUND logic out of the way of the special CC logic
+
+    This is a first step towards macroizing the special CC handler logic so
+    it is easier to maintain them, for instance interestng optimisations are
+    being used in one, but not all, even though the logic is sharable. By
+    moving the BOUND logic out of the way the code repition is much clearer.
+
+commit e74a3e73f5e128a77b691fcfc83214f58419a493
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Sun Oct 4 05:22:17 2009 +0900
+
+    Correcting mistaken description of 'delete local' in perl5110delta
+
+    Reported by nothingmuch++ and rjbs++
+
+ =TODO FOR RELENG GUIDE   Make Module::Corelist recognise $] as a version number on 5.11.0
+
+ =item  Bump version to 2.20
+
+commit 6f6ac1dea8501596050bc974dc468632797d51eb
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Sat Oct 3 09:56:42 2009 +0200
+
+    Change warning "Unicode character is illegal" to more accurate description
+
+    That now reads "Unicode non-character is illegal in interchange" and the
+    perldiag documentation is expanded a bit.
