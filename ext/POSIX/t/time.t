@@ -39,7 +39,7 @@ my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 my $jan_16 = 15 * 86400;
 is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", localtime($jan_16)),
         "get ctime() equal to strftime()");
-is(strftime("%Y\x{5e74}%m\x{6708}%d\x{65e5}", localtime($jan_16)),
+is(strftime("%Y\x{5e74}%m\x{6708}%d\x{65e5}", gmtime($jan_16)),
    "1970\x{5e74}01\x{6708}16\x{65e5}",
    "strftime() can handle unicode chars in the format string");
 
