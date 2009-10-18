@@ -54,3 +54,10 @@ like($@, qr/^panic: utf16_to_utf8_reversed: odd bytelen 1 at/,
      'Odd byte length panics');
 is($got, undef, 'hence eval returns undef');
 is($in, "NA", 'and input unchanged');
+
+$in = "\xD8\0\xDC\0";
+$got = eval {utf16_to_utf8($in, 2)};
+like($@, qr/^Malformed UTF-16 surrogate at/, 'Lone surrogate croaks');
+(ok(!defined $got, 'hence eval returns undef')) or
+    diag(join ', ', map {ord $_} split //, $got);
+
