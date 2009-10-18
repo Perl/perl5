@@ -96,6 +96,8 @@
 #  define PL_nextval		(PL_parser->nextval)
 #endif
 
+/* This can't be done with embed.fnc, because struct yy_parser contains a
+   member named pending_ident, which clashes with the generated #define  */
 static int
 S_pending_ident(pTHX);
 
