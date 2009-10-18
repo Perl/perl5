@@ -6,7 +6,8 @@ use Encode;
 
 use XS::APItest qw(utf16_to_utf8 utf16_to_utf8_reversed);
 
-for my $ord (0, 10, 13, 78, 255, 256, 0xD7FF, 0xE000, 0x10000) {
+for my $ord (0, 10, 13, 78, 255, 256, 0xD7FF, 0xE000, 0xFFFD,
+	     0x10000, 0x10FC00, 0x103FF, 0x10FFFD) {
     my $chr = chr $ord;
     for my $prefix ('', "\0", 'Perl rules') {
 	for my $suffix ('', "\0", "Moo!") {
