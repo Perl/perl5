@@ -101,11 +101,6 @@ S_pending_ident(pTHX);
 
 static const char ident_too_long[] = "Identifier too long";
 
-#ifndef PERL_NO_UTF16_FILTER
-static I32 utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
-static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
-#endif
-
 #ifdef PERL_MAD
 #  define CURMAD(slot,sv) if (PL_madskills) { curmad(slot,sv); sv = 0; }
 #  define NEXTVAL_NEXTTOKE PL_nexttoke[PL_curforce].next_val
@@ -12711,7 +12706,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		U8 *news;
 		I32 newlen;
 
-		filter_add(utf16rev_textfilter, NULL);
+		filter_add(S_utf16rev_textfilter, NULL);
 		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8_reversed(s, news,
 				       PL_bufend - (char*)s - 1,
@@ -12746,7 +12741,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		U8 *news;
 		I32 newlen;
 
-		filter_add(utf16_textfilter, NULL);
+		filter_add(S_utf16_textfilter, NULL);
 		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8(s, news,
 			      PL_bufend - (char*)s,
@@ -12808,14 +12803,14 @@ S_swallow_bom(pTHX_ U8 *s)
 
 #ifndef PERL_NO_UTF16_FILTER
 static I32
-utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
+S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     dVAR;
     const STRLEN old = SvCUR(sv);
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter(%p): %d %d (%d)\n",
-			  FPTR2DPTR(void *, utf16_textfilter),
+			  FPTR2DPTR(void *, S_utf16_textfilter),
 			  idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
@@ -12831,7 +12826,7 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 
 static I32
-utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
+S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     dVAR;
     const STRLEN old = SvCUR(sv);

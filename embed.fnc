@@ -1793,6 +1793,10 @@ s	|void	|update_debugger_info|NULLOK SV *orig_sv \
 				|NULLOK const char *const buf|STRLEN len
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
+#ifndef PERL_NO_UTF16_FILTER
+s	|I32	|utf16_textfilter|int idx|NN SV *sv|int maxlen
+s	|I32	|utf16rev_textfilter|int idx|NN SV *sv|int maxlen
+#endif
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
 s	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
