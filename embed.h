@@ -1584,7 +1584,6 @@
 #ifndef PERL_NO_UTF16_FILTER
 #ifdef PERL_CORE
 #define utf16_textfilter	S_utf16_textfilter
-#define utf16rev_textfilter	S_utf16rev_textfilter
 #endif
 #endif
 #ifdef PERL_CORE
@@ -3959,7 +3958,6 @@
 #ifndef PERL_NO_UTF16_FILTER
 #ifdef PERL_CORE
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
-#define utf16rev_textfilter(a,b,c)	S_utf16rev_textfilter(aTHX_ a,b,c)
 #endif
 #endif
 #ifdef PERL_CORE

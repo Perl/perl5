@@ -12708,7 +12708,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		U8 *news;
 		I32 newlen;
 
-		filter_add(S_utf16rev_textfilter, NULL);
+		IoLINES(filter_add(S_utf16_textfilter, NULL)) = 1;
 		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8_reversed(s, news,
 				       PL_bufend - (char*)s - 1,
@@ -12810,8 +12810,10 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     dVAR;
     const STRLEN old = SvCUR(sv);
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
+    const int reverse = IoLINES(sv);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-			  "utf16_textfilter(%p): %d %d (%d)\n",
+			  "utf16%s_textfilter(%p): %d %d (%d)\n",
+			  reverse ? "rev" : "",
 			  FPTR2DPTR(void *, S_utf16_textfilter),
 			  idx, maxlen, (int) count));
     if (count) {
@@ -12819,35 +12821,21 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	I32 newlen;
 	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	Copy(SvPVX_const(sv), tmps, old, char);
-	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
-		      SvCUR(sv) - old, &newlen);
+	if (reverse) {
+	    /* You would expect this to be utf16_to_utf8_reversed()
+	       It was, prior to 1de9afcdf18cf98bbdecaa782da93e907be6fe4e
+	       Effectively, right now, UTF-16LE is being read in off-by-one
+	       See RT #69678  */
+	    utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
+			  SvCUR(sv) - old, &newlen);
+	} else {
+	    utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
+			  SvCUR(sv) - old, &newlen);
+	}
 	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
     }
     DEBUG_P({sv_dump(sv);});
     return SvCUR(sv);
-}
-
-static I32
-S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
-{
-    dVAR;
-    const STRLEN old = SvCUR(sv);
-    const I32 count = FILTER_READ(idx+1, sv, maxlen);
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-			  "utf16rev_textfilter(%p): %d %d (%d)\n",
-			  FPTR2DPTR(void *, utf16rev_textfilter),
-			  idx, maxlen, (int) count));
-    if (count) {
-	U8* tmps;
-	I32 newlen;
-	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	Copy(SvPVX_const(sv), tmps, old, char);
-	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
-		      SvCUR(sv) - old, &newlen);
-	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
-    }
-    DEBUG_P({ sv_dump(sv); });
-    return count;
 }
 #endif
 
