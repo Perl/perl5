@@ -207,6 +207,9 @@ sub do_compare {
 	if ($seen_dist{$dist}) {
 	    warn "WARNING: duplicate entry for $dist in $module\n"
 	}
+
+	print $outfh "  upstream is: ".($m->{UPSTREAM} || 'UNKNOWN!')."\n";
+
 	$seen_dist{$dist}++;
 
 	my $cpan_dir;
