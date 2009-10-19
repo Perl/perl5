@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Aug 18 19:22:01 CEST 2009 [metaconfig 3.5 PL0]
+# Generated on Mon Oct 19 16:23:09 CEST 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11010,7 +11010,7 @@ int main()
 	signal(SIGFPE, blech);
 
 	/* Don't let compiler optimize the test away.  Store the number
-	   in a writable string for gcc to pass to sscanf under HP/UX.
+	   in a writable string for gcc to pass to sscanf under HP-UX.
 	*/
 	sprintf(str, "2147483647");
 	sscanf(str, "%lf", &f); /* f = (double) 0x7fffffff; */
@@ -11077,7 +11077,7 @@ int main()
 	   optimized the whole file away
 	*/
 	/* Store the number in a writable string for gcc to pass to
-	   sscanf under HP/UX.
+	   sscanf under HP-UX.
 	*/
 	sprintf(str, "-123");
 	sscanf(str, "%lf", &f);  /* f = -123.; */
