@@ -1434,6 +1434,12 @@ test_harness_notty: test_prep
 test-reonly: test_prep_reonly
 	TEST_ARGS='-re \bre\/' TESTFILE=harness ./runtests choose
 
+
+# Porting tests (well-formedness of pod, manifest, etc)
+
+test_porting: test_prep
+	cd t && $(LDLIBPTH) $(RUN) ./perl$(EXE_EXT) harness porting/*.t
+
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
