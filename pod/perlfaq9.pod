@@ -280,7 +280,7 @@ returns the escaped string:
 
 	my $escaped = uri_escape( $original )
 
-	print "$string\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25%20'
+	print "$escaped\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25%20'
 
 To decode the string, use the C<uri_unescape> function:
 

@@ -713,7 +713,7 @@ X<regular expression, efficiency>
 ( contributed by brian d foy )
 
 Avoid asking Perl to compile a regular expression every time
-you want to match it.  In this example, perl must recompile
+you want to match it. In this example, perl must recompile
 the regular expression for every iteration of the C<foreach>
 loop since it has no way to know what $pattern will be.
 
@@ -735,7 +735,7 @@ The C<qr//> operator showed up in perl 5.005.  It compiles a
 regular expression, but doesn't apply it.  When you use the
 pre-compiled version of the regex, perl does less work. In
 this example, I inserted a C<map> to turn each pattern into
-its pre-compiled form.  The rest of the script is the same,
+its pre-compiled form. The rest of the script is the same,
 but faster.
 
 	@patterns = map { qr/\b$_\b/i } qw( foo bar baz );
@@ -753,7 +753,7 @@ but faster.
 		}
 
 In some cases, you may be able to make several patterns into
-a single regular expression.  Beware of situations that require
+a single regular expression. Beware of situations that require
 backtracking though.
 
 	$regex = join '|', qw( foo bar baz );

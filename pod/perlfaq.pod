@@ -12,7 +12,7 @@ into nine major sections outlined in this document.
 
 The perlfaq comes with the standard Perl distribution, so if you have Perl
 you should have the perlfaq. You should also have the C<perldoc> tool
-that lets you read the L<perlfaq>:
+that let's you read the L<perlfaq>:
 
 	$ perldoc perlfaq
 
@@ -28,7 +28,7 @@ https://github.com/briandfoy/perlfaq (which is outside of the
 main Perl source tree).  The git repository notes all changes to the FAQ
 and holds the latest version of the working documents and may vary
 significantly from the version distributed with the latest version of
-Perl. Check the repository before sending your corrections.
+Perl. Check the repository before sending your corrections. 
 
 =head2 How to contribute to the perlfaq
 
@@ -66,8 +66,8 @@ it, try the resources in L<perlfaq2>.
 =head1 CREDITS
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
-help of Nat Torkington.  The perlfaq-workers maintain current document
-and the denizens of comp.lang.perl.misc regularly review and update the
+help of Nat Torkington. The perlfaq-workers maintain current document
+and the dezinens of comp.lang.perl.misc regularly review and update the
 FAQ. Several people have contributed answers, corrections, and comments,
 and the perlfaq notes those contributions wherever appropriate.
 

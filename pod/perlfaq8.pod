@@ -863,10 +863,11 @@ stuck, because Windows does not have an argc/argv-style API.
 
 =head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
 
-Some stdio's set error and eof flags that need clearing.  The
-POSIX module defines clearerr() that you can use.  That is the
-technically correct way to do it.  Here are some less reliable
-workarounds:
+This happens only if your perl is compiled to use stdio instead of
+perlio, which is the default. Some (maybe all?) stdio's set error and
+eof flags that you may need to clear. The POSIX module defines
+clearerr() that you can use.  That is the technically correct way to
+do it.  Here are some less reliable workarounds:
 
 =over 4
 

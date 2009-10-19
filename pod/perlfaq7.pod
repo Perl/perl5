@@ -202,9 +202,6 @@ distributions.
 
 (contributed by brian d foy)
 
-The full answer to this can be found at
-http://cpan.org/modules/04pause.html#takeover
-
 The easiest way to take over a module is to have the current
 module maintainer either make you a co-maintainer or transfer
 the module to you.
@@ -436,37 +433,6 @@ using C<qr//>:
 	return $retval;
 	}
 	$match = compare("old McDonald", qr/d.*D/i);
-
-Notice how C<qr//> allows flags at the end.  That pattern was compiled
-at compile time, although it was executed later.  The nifty C<qr//>
-notation wasn't introduced until the 5.005 release.  Before that, you
-had to approach this problem much less intuitively.  For example, here
-it is again if you don't have C<qr//>:
-
-	sub compare($$) {
-		my ($val1, $regex) = @_;
-		my $retval = eval { $val1 =~ /$regex/ };
-	die if $@;
-	return $retval;
-	}
-
-	$match = compare("old McDonald", q/($?i)d.*D/);
-
-Make sure you never say something like this:
-
-	return eval "\$val =~ /$regex/";   # WRONG
-
-or someone can sneak shell escapes into the regex due to the double
-interpolation of the eval and the double-quoted string.  For example:
-
-	$pattern_of_evil = 'danger ${ system("rm -rf * &") } danger';
-
-	eval "\$string =~ /$pattern_of_evil/";
-
-Those preferring to be very, very clever might see the O'Reilly book,
-I<Mastering Regular Expressions>, by Jeffrey Friedl.  Page 273's
-Build_MatchMany_Function() is particularly interesting.  A complete
-citation of this book is given in L<perlfaq2>.
 
 =item Passing Methods
 

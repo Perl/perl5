@@ -196,7 +196,7 @@ example skips every fifth line:
 		}
 
 If, for some odd reason, you really want to see the whole file at once
-rather than processing line by line, you can slurp it in (as long as
+rather than processing line-by-line, you can slurp it in (as long as
 you can fit the whole thing in memory!):
 
 	open my $in,  '<',  $file      or die "Can't read old file: $!"
@@ -725,10 +725,11 @@ one that doesn't use the shell to do globbing.
 =head2 Is there a leak/bug in glob()?
 X<glob>
 
-Due to the current implementation on some operating systems, when you
-use the glob() function or its angle-bracket alias in a scalar
-context, you may cause a memory leak and/or unpredictable behavior.  It's
-best therefore to use glob() only in list context.
+(conributed by brian d foy)
+
+Starting with Perl 5.6.0, C<glob> is implemented internally rather
+than relying on an external resource. As such, memory issues with 
+C<glob> aren't a problem in modern perls.
 
 =head2 How can I open a file with a leading ">" or trailing blanks?
 X<filename, special characters>
@@ -748,20 +749,18 @@ characters in the filename as special.
 	open FILE, ">", ">file";     # filename is ">file"
 
 =head2 How can I reliably rename a file?
-X<rename> X<mv> X<move> X<file, rename> X<ren>
+X<rename> X<mv> X<move> X<file, rename>
 
 If your operating system supports a proper mv(1) utility or its
 functional equivalent, this works:
 
 	rename($old, $new) or system("mv", $old, $new);
 
-It may be more portable to use the File::Copy module instead.
+It may be more portable to use the C<File::Copy> module instead.
 You just copy to the new file to the new name (checking return
 values), then delete the old one.  This isn't really the same
-semantically as a rename(), which preserves meta-information like
+semantically as a C<rename()>, which preserves meta-information like
 permissions, timestamps, inode info, etc.
-
-Newer versions of File::Copy export a move() function.
 
 =head2 How can I lock a file?
 X<lock> X<file, lock> X<flock>

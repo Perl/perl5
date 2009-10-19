@@ -545,11 +545,12 @@ Can you use your pencil to write a non-Y2K-compliant memo?  Of course
 you can.  Is that the pencil's fault?  Of course it isn't.
 
 The date and time functions supplied with Perl (gmtime and localtime)
-supply adequate information to determine the year well beyond 2000 and
-2038.  The year returned by these functions when used in a list
-context is the year minus 1900.  For years between 1910 and 1999 this
-I<happens> to be a 2-digit decimal number. To avoid the year 2000
-problem simply do not treat the year as a 2-digit number.  It isn't.
+supply adequate information to determine the year well beyond 2000
+(2038 is when trouble strikes for 32-bit machines).  The year returned
+by these functions when used in a list context is the year minus 1900.
+For years between 1910 and 1999 this I<happens> to be a 2-digit decimal
+number. To avoid the year 2000 problem simply do not treat the year as
+a 2-digit number.  It isn't.
 
 When gmtime() and localtime() are used in scalar context they return
 a timestamp string that contains a fully-expanded year.  For example,
@@ -807,15 +808,6 @@ Another version uses a global match in list context, then assigns the
 result to a scalar, producing a count of the number of matches.
 
 	$count = () = $string =~ /-\d+/g;
-
-=head2 Does Perl have a Year 2038 problem?
-
-No, all of Perl's built in date and time functions and modules will
-work to about 2 billion years before and after 1970.
-
-Many systems cannot count time past the year 2038.  Older versions of
-Perl were dependent on the system to do date calculation and thus
-shared their 2038 bug.
 
 =head2 How do I capitalize all the words on one line?
 X<Text::Autoformat> X<capitalize> X<case, title> X<case, sentence>
