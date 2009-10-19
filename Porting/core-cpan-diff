@@ -191,7 +191,6 @@ sub do_compare {
     my %seen_dist;
     for my $module (@$modules) {
 	warn "Processing $module ...\n" if defined $output_file;
-	print $outfh "\n$module\n" unless $use_diff;
 
 	my $m = $Maintainers::Modules{$module} 
 	    or die "ERROR: No such module in Maintainers.pl: '$module'\n";
@@ -208,6 +207,7 @@ sub do_compare {
 	    warn "WARNING: duplicate entry for $dist in $module\n"
 	}
 
+	print $outfh "\n$module - ".$Maintainers::Modules{$module}->{DISTRIBUTION}."\n" unless $use_diff;
 	print $outfh "  upstream is: ".($m->{UPSTREAM} || 'UNKNOWN!')."\n";
 
 	$seen_dist{$dist}++;
@@ -287,27 +287,31 @@ EOF
 	        next;
 	    }
 
+			my $relative_mapped_file = $mapped_file;
+			$relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
 
 	    if (File::Compare::compare($abs_cpan_file, $mapped_file)) {
-	        if ($use_diff) {
+
+
+	         if ($use_diff) {
 	            file_diff($outfh, $abs_cpan_file, $mapped_file,
 	                                $reverse, $diff_opts);
 	        }
 	        else {
-	            if ($cpan_file eq $mapped_file) {
-	                print $outfh "  Modified:  $cpan_file\n";
+	            if ($cpan_file eq $relative_mapped_file) {
+	                print $outfh "  Modified:  $relative_mapped_file\n";
 	            }
 	            else {
-	                print $outfh "  Modified:  $cpan_file $mapped_file\n";
+	                print $outfh "  Modified:  $cpan_file $relative_mapped_file\n";
 	            }
 	        }
 	    }
 	    elsif ($verbose) {
-	            if ($cpan_file eq $mapped_file) {
+	            if ($cpan_file eq $relative_mapped_file) {
 	                print $outfh "  Unchanged: $cpan_file\n";
 	            }
 	            else {
-	                print $outfh "  Unchanged: $cpan_file $mapped_file\n";
+	                print $outfh "  Unchanged: $cpan_file $relative_mapped_file\n";
 	            }
 	    }
 	}
