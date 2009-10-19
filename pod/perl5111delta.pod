@@ -187,7 +187,7 @@ C<tell()> now returns C<-1>, and sets errno to C<EBADF>, thus restoring the 5.8.
 
 =item POSIX::strftime() can now handle Unicode characters in the format string.
 
-=item The winsock select() implementation now supports all empty C<fd_set>s more correctly.
+=item The Windows select() implementation now supports all empty C<fd_set>s more correctly.
 
 =back
 
