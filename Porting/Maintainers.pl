@@ -658,8 +658,8 @@ use File::Glob qw(:case);
 				t/pod.t
 			       }
 			   ],
-	'MAP'		=> { ''		=> 'lib/File/',
-			     't/'	=> 't/',
+	'MAP'		=> { ''		=> 'cpan/File-Path/lib/File/',
+			     't/'	=> 'cpan/File-Path/t/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -716,10 +716,10 @@ use File::Glob qw(:case);
 				 t/tee.t
 			       }
 			   ],
-	'MAP'		=> { 'Call/'	      => 'ext/Filter-Util-Call/',
-			     'filter-util.pl' => 't/lib/filter-util.pl',
+	'MAP'		=> { 'Call/'	      => 'cpan/Filter-Util-Call/',
+			     'filter-util.pl' => 'cpan/Filter-Util-Call/filter-util.pl',
 			     'perlfilter.pod' => 'pod/perlfilter.pod',
-			     ''		      => 'ext/Filter-Util-Call/',
+			     ''		      => 'cpan/Filter-Util-Call/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -921,9 +921,9 @@ use File::Glob qw(:case);
 				t/mbimbf.t
 			       },
 			   ],
-	'MAP'		=> { '' => 'ext/Math-BigInt-FastCalc/',
+	'MAP'		=> { '' => 'cpan/Math-BigInt-FastCalc/',
 			     'lib/Math/BigInt/FastCalc.pm'
-				    => 'ext/Math-BigInt-FastCalc/FastCalc.pm',
+				    => 'cpan/Math-BigInt-FastCalc/FastCalc.pm',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -1473,8 +1473,8 @@ use File::Glob qw(:case);
 	'EXCLUDED'	=> [ qw( t/pod.t ) ],
 	# For the benefit of make_ext.pl, we have to have this accessible:
 	'MAP'		=> {
-			     'ParseWords.pm' => 'ext/Text-ParseWords/lib/Text/ParseWords.pm',
-			     ''              => 'ext/Text-ParseWords/',
+			     'ParseWords.pm' => 'cpan/Text-ParseWords/lib/Text/ParseWords.pm',
+			     ''              => 'cpan/Text-ParseWords/',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
@@ -1485,11 +1485,11 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'markm',
 	'DISTRIBUTION'	=> 'MARKM/Text-Soundex-3.03.tar.gz',
 	'FILES'		=> q[cpan/Text-Soundex],
-	'MAP'		=> { ''               => 'ext/Text-Soundex/',
+	'MAP'		=> { ''               => 'cpan/Text-Soundex/',
 			     # XXX these two files are clearly related,
 			     # but they appear to have diverged
 			     # considerably over the years
-	                     'test.pl'        => 'ext/Text-Soundex/t/Soundex.t',
+	                     'test.pl'        => 'cpan/Text-Soundex/t/Soundex.t',
 			   },
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
