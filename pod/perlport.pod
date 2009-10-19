@@ -2049,6 +2049,8 @@ at http://www.cpan.org/src
 
 =item Windows Server 2008
 
+=item Windows 7
+
 =back
 
 =item Cygwin
