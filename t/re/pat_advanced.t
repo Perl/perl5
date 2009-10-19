@@ -768,7 +768,7 @@ sub run_tests {
         local $Message = "No SEGV in s/// and UTF-8";
         my $s = "s#\x{100}" x 4;
         ok $s =~ s/[^\w]/ /g;
-        if ( $ENV{PERL_TEST_LEGACY_POSIX_CC} ) {
+        if ( 1 or $ENV{PERL_TEST_LEGACY_POSIX_CC} ) {
             iseq $s, "s \x{100}" x 4;
         }
         else {

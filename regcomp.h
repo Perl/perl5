@@ -35,7 +35,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  *
  * -demerphq
  */
-#define PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS 0
+#define PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS 1
 
 /* Should the optimiser take positive assertions into account? */
 #define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 0
