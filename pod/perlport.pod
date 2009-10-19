@@ -2051,6 +2051,8 @@ at http://www.cpan.org/src
 
 =back
 
+=item Cygwin
+
 =item Solaris (x86, SPARC)
 
 =item OpenVMS (which versions?)
