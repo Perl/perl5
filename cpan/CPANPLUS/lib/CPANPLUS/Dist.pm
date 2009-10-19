@@ -464,7 +464,20 @@ sub _resolve_prereqs {
         #### XXX we ignore the version, and just assume that the latest
         #### version from cpan will meet your requirements... dodgy =/
         unless( $modobj ) {
-            error( loc( "No such module '%1' found on CPAN", $mod ) );
+            # Check if it is a core module
+            my $sub = CPANPLUS::Module->can(
+                        'module_is_supplied_with_perl_core' );
+            my $core = $sub->( $mod );
+            unless ( $core ) {
+               error( loc( "No such module '%1' found on CPAN", $mod ) );
+               next;
+            }
+            if ( $cb->_vcmp( $version, $core ) > 0 ) {
+               error(loc( "Version of core module '%1' ('%2') is too low for ".
+                          "'%3' (needs '%4') -- carrying on but this may be a problem", 
+                          $mod, $core, 
+                          $self->module, $version ));
+            }
             next;
         }
 
