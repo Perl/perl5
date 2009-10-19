@@ -2019,9 +2019,112 @@ Not useful. (S<RISC OS>)
 =back
 
 
-=head1 Supported Platforms
+=head1 Supported Platforms (Perl 5.12)
 
-As of July 2002 (the Perl release 5.8.0), the following platforms are
+
+As of _____ 20??, (The release of Perl 5.12), the following platforms are
+known to build Perl from the standard source code distribution available
+at http://www.cpan.org/src
+
+
+=over
+
+=item Linux (x86, ARM, IA64)
+
+=item HP/UX
+
+=item AIX
+
+=item Win32
+
+=over
+
+=item Windows 2000
+
+=item Windows XP
+
+=item Windows Server 2003
+
+=item Windows Vista
+
+=item Windows Server 2008
+
+=back
+
+=item Solaris (x86, SPARC)
+
+=item OpenVMS (which versions?)
+
+=item Symbian
+
+=item NetBSD
+
+=item FreeBSD
+
+=item Haiku
+
+=item Irix (6.5. What else?)
+
+=item OpenBSD
+
+=item Dragonfly BSD
+
+=item MirOS BSD
+
+Caveats:
+
+=over
+
+=item time_t issues that may or may not be fixed
+
+=back
+
+
+=item Symbian (Series 60 v3, 3.2 and 5 - what else?)
+
+=item Stratus VOS
+
+=item AIX
+
+=back
+
+=head1 EOL Platforms (Perl 5.12)
+
+The following platforms were supported by a previous version of
+Perl but have been officially removed from Perl's source code
+as of 5.12:
+
+=over
+
+=item Atari MiNT
+
+=item Apollo Domain/OS
+
+=item Apple Mac OS 8/9
+
+=item Tenon Machten
+
+=back
+
+The following platforms may still work as of Perl 5.12, but Perl's
+developers have made an explicit decision to discontinue support for
+them:
+
+=over
+
+=item Windows 95
+
+=item Windows 98
+
+=item Windows ME
+
+=item Windows NT4
+
+=back
+
+=head1 Supported Platforms (Perl 5.8)
+
+As of July 2002 (the Perl release 5.8.0), the following platforms were
 able to build Perl from the standard source code distribution
 available at http://www.cpan.org/src/
 
