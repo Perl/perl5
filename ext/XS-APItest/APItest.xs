@@ -912,9 +912,9 @@ utf16_to_utf8 (sv, ...)
 	/* Mortalise this right now, as we'll be testing croak()s  */
 	dest = sv_2mortal(newSV(len * 3 / 2 + 1));
 	if (ix) {
-	    utf16_to_utf8_reversed(source, SvPVX(dest), len, &got);
+	    utf16_to_utf8_reversed(source, (U8 *)SvPVX(dest), len, &got);
 	} else {
-	    utf16_to_utf8(source, SvPVX(dest), len, &got);
+	    utf16_to_utf8(source, (U8 *)SvPVX(dest), len, &got);
 	}
 	SvCUR_set(dest, got);
 	SvPVX(dest)[got] = '\0';
