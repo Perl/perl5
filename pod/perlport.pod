@@ -2031,7 +2031,7 @@ at http://www.cpan.org/src
 
 =item Linux (x86, ARM, IA64)
 
-=item HP/UX
+=item HP-UX
 
 =item AIX
 
