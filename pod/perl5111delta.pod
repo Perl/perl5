@@ -255,9 +255,11 @@ XXX
 
 =head1 Errata
 
+=over
 
 =item The Perl 5.11.0 release notes incorrectly described 'delete local'
 
+=back
 
 =head1 Acknowledgements
 
