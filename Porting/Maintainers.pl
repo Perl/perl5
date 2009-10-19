@@ -573,7 +573,10 @@ use File::Glob qw(:case);
     'ExtUtils::Constant' =>
 	{
 	'MAINTAINER'	=> 'nwclark',
-	'DISTRIBUTION'	=> 'NWCLARK/ExtUtils-Constant-0.16.tar.gz',
+	 # Nick has confirmed that while we have diverged from CPAN,
+	 # this package isn't primarily maintained in core
+	 # Another release wll happen "Sometime"
+	 'DISTRIBUTION'	=> '',#'NWCLARK/ExtUtils-Constant-0.16.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-Constant],
 	'EXCLUDED'	=> [ qw{ lib/ExtUtils/Constant/Aaargh56Hash.pm
 				 examples/perl_keyword.pl
@@ -625,7 +628,13 @@ use File::Glob qw(:case);
     'ExtUtils::ParseXS' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-ParseXS-2.21.tar.gz',
+    'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-ParseXS-2.21.tar.gz',
+    'EXCLUDED'  => [ qw{
+	                t/bugs/RT48104.xs
+				    t/bugs/typemap
+					t/include/nsUniversalDetector.h
+					t/include/nscore.h
+				   }],
 	'FILES'		=> q[cpan/ExtUtils-ParseXS],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -997,7 +1006,7 @@ use File::Glob qw(:case);
     'Module::CoreList' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.17.tar.gz',
+	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.20.tar.gz',
 	'FILES'		=> q[dist/Module-CoreList],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
