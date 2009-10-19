@@ -13,13 +13,6 @@ the 5.11.1 release.
 
 =item The boolkeys op moved to the group of hash ops. This breaks binary compatibility.
 
-
-=item C<Perl_deprecate()> was replaced with a macro that calls C<Perl_ck_warner()>
-
-C<Perl_deprecate> was not part of the public API, and did not have a C<deprecate()>
-shortcut macro defined without C<-DPERL_CORE>. Neither codesearch.google.com nor
-CPAN::Unpack show any users outside the Perl core.
-
 =back
 
 =head1 Core Enhancements
