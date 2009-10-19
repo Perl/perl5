@@ -170,30 +170,6 @@ my @writables = qw(
 system("chmod +w @writables") == 0
     or die "system: $!";
 
-print "Adding CRs to DOSish files...\n";
-# This list is also in curliff.pl.
-my @crlf = qw(
-    djgpp/configure.bat
-    README.ce
-    README.dos
-    README.symbian
-    README.win32
-    symbian/config.pl
-    symbian/makesis.pl
-    symbian/README
-    symbian/xsbuild.pl
-    win32/Makefile
-    win32/Makefile.ce
-    win32/ce-helpers/compile-all.bat
-    win32/ce-helpers/compile.bat
-    win32/ce-helpers/registry.bat
-    win32/distclean.bat
-    win32/makefile.mk
-);
-system("perl -pi -e 's/\\015*\\012/\\015\\012/' @crlf") == 0
-    or die "system: $!";
-print "\n";
-
 chdir ".." or die $!;
 
 my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
