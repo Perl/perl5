@@ -31,6 +31,8 @@ for C<our $VERSION = ...> and similar constructs.  E.g.
 
 There are several advantages to this:
 
+=over 
+
 =item *
 
 C<$VERSION> is parsed in I<exactly> the same way as C<use NAME VERSION>
@@ -47,7 +49,7 @@ Eliminates C<$VERSION = ...> and C<eval $VERSION> clutter
 
 As it requires VERSION to be a numeric literal or v-string
 literal, it can be statically parsed by toolchain modules
-without 'eval' the way MM->parse_version does for '$VERSION = ...'
+without C<eval> the way MM-E<gt>parse_version does for C<$VERSION = ...>
 
 =item * 
 
@@ -61,6 +63,8 @@ This is analogous to the change to open() from two-args to three-args.
 Users requiring the latest Perl will benefit, and perhaps N years from
 now it will become standard practice when Perl 5.12 is targeted the way
 that 5.6 is today.
+
+=back
 
 =head1 Modules and Pragmata
 
@@ -150,6 +154,8 @@ on Darwin 8 and 9 (Mac OS X 10.4 and 10.5, respectively).
 
 =item Initial support for mingw64 is now available
 
+=item Various bits of Perl's build infrastructure are no longer converted to win32 line endings at release time. If this hurts you, please speak up.
+
 =back
 
 
@@ -203,6 +209,8 @@ see L<perldiag.pod>
 
 =item Significant cleanups to core tests to ensure that language and
 interpreter features are not used before they're tested.
+
+=item C<make test_porting> now runs a number of important pre-commit checks which might be of use to anyone working on the Perl core.
 
 =item F<t/porting/podcheck.t> automatically checks the well-formedness of
 POD found in all .pl, .pm and .pod files in the F<MANIFEST>, other than in
@@ -275,8 +283,3 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
-
-This is all changes through 6609e0408cfa30e0d5c739e4c818f8591c88c0bc
-
-
-
