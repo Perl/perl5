@@ -61,9 +61,9 @@ Alpha versions with underscores do not need to be quoted; static
 parsing will preserve the underscore, but during compilation, Perl
 will remove underscores as it does for all numeric literals
 
-It does not break old code with only 'package NAME', but code that uses
-'package NAME VERSION' will need to be restricted to perl 5.11.X or newer
-This is analogous to the change to open() from two-args to three-args.
+It does not break old code with only C<package NAME>, but code that uses
+C<package NAME VERSION> will need to be restricted to perl 5.11.X or newer
+This is analogous to the change to C<open> from two-args to three-args.
 Users requiring the latest Perl will benefit, and perhaps N years from
 now it will become standard practice when Perl 5.12 is targeted the way
 that 5.6 is today.
