@@ -2057,7 +2057,15 @@ at http://www.cpan.org/src
 
 =item Solaris (x86, SPARC)
 
-=item OpenVMS (which versions?)
+=item OpenVMS
+
+=over
+
+=item Alpha (7.2 and later)
+
+=item I64 (8.2 and later)
+
+=back
 
 =item Symbian
 
