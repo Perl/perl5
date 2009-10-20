@@ -311,8 +311,19 @@ With luck, that'll be sorted out for 5.11.2
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.11.1 represents approximately 3 weeks development since Perl 5.11.0
+contains 22,000 lines of changes across 396 files from 26 authors and committers:
 
+Abigail, Alex Vandiver, brian d foy, Chris Williams, Craig A. Berry,
+David Fifield, David Golden, demerphq, Eric Brine, Geoffrey T. Dairiki,
+George Greer, H.Merijn Brand, Jan Dubois, Jerry D. Hedden, Jesse Vincent,
+Josh ben Jore, Max Maischein, Nicholas Clark, Rafael Garcia-Suarez,
+Simon Schubert, Sisyphus, Smylers, Steve Hay, Steve Peters, Vincent Pit
+and Yves Orton.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core.  We're grateful to the entire CPAN
+community for helping Perl to flourish.
 
 =head1 Reporting Bugs
 
