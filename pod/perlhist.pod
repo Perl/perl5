@@ -403,6 +403,7 @@ the strings?).
           5.10.1-RC2    2009-Aug-18
           5.10.1        2009-Aug-22
  Jesse    5.11.0        2009-Oct-02
+          5.11.1        2009-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
