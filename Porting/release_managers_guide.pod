@@ -460,7 +460,7 @@ Then change to your perl checkout, and if necessary,
     $ make perl
 
 If this not the first update for this version, first edit
-F<ext/Module-CoreList/lib/Module/CoreList.pm> to delete the existing
+F<dist/Module-CoreList/lib/Module/CoreList.pm> to delete the existing
 entries for this version from the C<%released> and C<%version> hashes:
 they will have a key like C<5.010001> for 5.10.1.
 
@@ -478,11 +478,11 @@ Otherwise, run:
 This will chug for a while, possibly reporting various warnings about
 badly-indexed CPABN modules unreltaed to the modules actually in core.
 Assuming all goes well, it will update
-F<ext/Module-CoreList/lib/Module/CoreList.pm>.
+F<dist/Module-CoreList/lib/Module/CoreList.pm>.
 
 Check that file over carefully:
 
-    $ git diff ext/Module-CoreList/lib/Module/CoreList.pm
+    $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
 
 If necessary, bump C<$VERSION> (there's no need to do this for
 every RC; in RC1, bump the version to a new clean number that will
@@ -520,6 +520,8 @@ Check that the manifest is sorted and correct:
     $ git clean -xdf # This shouldn't be necessary if distclean is correct
     $ perl Porting/manicheck
     $ git status
+
+	XXX manifest _sorting_ is now checked with make test_porting
 
 Commit MANIFEST if it has changed:
 
