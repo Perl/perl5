@@ -184,6 +184,7 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     MANIFEST
     Porting/how_to_write_a_perldelta.pod
     Porting/release_managers_guide.pod
+	Porting/release_schedule.pod
     Porting/bump-perl-version
     Porting/mergelog
     Porting/mergelog-tool
