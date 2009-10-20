@@ -241,6 +241,8 @@ Once all version numbers have been bumped, re-run the checks.
 Then run again without the -x option, to check that dual-life modules are
 also sensible.
 
+     $ ./perl -Ilib Porting/cmpVERSION.pl -d ~/my_perl-tarballs/perl-5.10.0 .
+
 =item *
 
 I<You MAY SKIP this step for SNAPSHOT>
@@ -285,7 +287,7 @@ careful not change text like "this was fixed in 5.10.0"! Then run:
 
     $ Porting/bump-perl-version -u < /tmp/scan
 
-which will update all the files shown; then commit the changes.
+which will update all the files shown.
 
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
@@ -295,6 +297,17 @@ this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
+Have a look a couple lines up from that. You'll see roman numerals.
+Update those too. Find someone with VMS clue if you have to update 
+the Roman numerals for a .0 release.
+
+Commit your changes:
+
+    $ git st
+	$ git diff
+	  B<review the delta carefully>
+
+    $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
 =item *
 
