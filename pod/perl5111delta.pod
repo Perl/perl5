@@ -22,60 +22,45 @@ the 5.11.1 release.
 
 =head2 Add C<package NAME VERSION> syntax
 
-    This patch adds support for setting the $VERSION of a namespace
-    when the namespace is declared with 'package'.  It eliminates the
-    need for 'our $VERSION = ...' and similar constructs.  E.g.
+This new syntax allows a module author to set the $VERSION of a namespace
+when the namespace is declared with 'package'.  It eliminates the need
+for C<our $VERSION = ...> and similar constructs.  E.g.
 
       package Foo::Bar 1.23;
       # $Foo::Bar::VERSION == 1.23
 
-    There are several advantages to this:
+There are several advantages to this:
 
-      * VERSION is parsed in *exactly* the same way as 'use NAME VERSION'
+=item *
 
-      * $VERSION is set at compile time
+C<$VERSION> is parsed in I<exactly> the same way as C<use NAME VERSION>
 
-      * Eliminates '$VERSION = ...' and 'eval $VERSION' clutter
+=item *
 
-      * As it requires VERSION to be a numeric literal or v-string
-        literal, it can be statically parsed by toolchain modules
-        without 'eval' the way MM->parse_version does for '$VERSION = ...'
+C<$VERSION> is set at compile time
 
-      * Alpha versions with underscores do not need to be quoted; static
-        parsing will preserve the underscore, but during compilation, Perl
-        will remove underscores as it does for all numeric literals
+=item *
 
-    During development of this, there was discussion on #corehackers and
-    elsewhere that this should also allow other metadata to be set such as
-    "status" (stable/alpha) or "author/authority".  On reflection, those
-    metadata are not very well defined yet and likely should never be
-    encoded into Perl core parsing so they can be freely changed in the
-    future.  (They could perhaps be achieved via a comment on the same line
-    as 'package NAME VERSION'.)
+Eliminates C<$VERSION = ...> and C<eval $VERSION> clutter
 
-    Version numbers, however, already have a very specific definition and
-    use defined in the core through 'use NAME VERSION'.  This patch merely
-    provides appropriate symmetry for setting $VERSION with the exact same
-    parsing and semantics as 'use'.
+=item *
 
-    It does not break old code with only 'package NAME', but code that
-    uses 'package NAME VERSION' will need to be restricted to perl 5.11.X.
-    This is analogous to the change to open() from two-args to three-args.
-    Users requiring the latest Perl will benefit, and perhaps N years from
-    now it will become standard practice when Perl 5.12 is targeted the
-    way that 5.6 is today.
+As it requires VERSION to be a numeric literal or v-string
+literal, it can be statically parsed by toolchain modules
+without 'eval' the way MM->parse_version does for '$VERSION = ...'
 
-    The patch does not prevent 'package NAME VERSION' from being used
-    multiple times for the same package with different version numbers, but
-    nothing prevents $VERSION from being modified arbitrarily at runtime,
-    either, so I see no urgen reason to add limitations or warnings so
-    long as Perl uses a global $VERSION variable for package version
-    numbers.
+=item * 
 
-    I am posting this patch to the p5p list for discussion and review.  If
-    there seems to be general assent (or lack of dissent), I will go ahead
-    and commit the patch to blead.
+Alpha versions with underscores do not need to be quoted; static
+parsing will preserve the underscore, but during compilation, Perl
+will remove underscores as it does for all numeric literals
 
+It does not break old code with only 'package NAME', but code that uses
+'package NAME VERSION' will need to be restricted to perl 5.11.X or newer
+This is analogous to the change to open() from two-args to three-args.
+Users requiring the latest Perl will benefit, and perhaps N years from
+now it will become standard practice when Perl 5.12 is targeted the way
+that 5.6 is today.
 
 =head1 Modules and Pragmata
 
@@ -97,11 +82,11 @@ the 5.11.1 release.
 
 =item Upgrade to CGI.pm-3.48
 
-=item Update CPANPLUS to CPAN version 0.89_02
+=item Upgrade CPANPLUS to CPAN version 0.89_02
 
 =item Upgrade to threads::shared 1.32
 
-=item Update ExtUtils::ParseXS to 2.21
+=item Upgrade ExtUtils::ParseXS to 2.21
 
 =item Upgrade File::Path to 2.08 (and add taint.t test)
 
@@ -135,12 +120,7 @@ the 5.11.1 release.
 
 =back
 
-=head1 Installation and Configuration Improvements
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.
-
-=head2 Platform Specific Changes
+=head1 Platform Specific Notes
 
 =over 4
 
@@ -247,7 +227,7 @@ With luck, that'll be sorted out for 5.11.2
 
 =back
 
-=head1 Errata
+=head1 Errata for 5.11.0
 
 =over
 
