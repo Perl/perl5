@@ -2687,6 +2687,7 @@ dist/Module-CoreList/MANIFEST			Module::CoreList
 dist/Module-CoreList/META.yml			Module::CoreList
 dist/Module-CoreList/README			Module::CoreList
 dist/Module-CoreList/t/corelist.t		Module::CoreList tests
+dist/Module-CoreList/t/deprecated.t		Module::CoreList tests
 dist/Module-CoreList/t/find_modules.t		Module::CoreList tests
 dist/Module-CoreList/t/pod.t			Module::CoreList tests
 dist/Net-Ping/Changes			Net::Ping

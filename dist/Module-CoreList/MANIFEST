@@ -7,5 +7,6 @@ MANIFEST
 Makefile.PL
 META.yml
 t/corelist.t
+t/deprecated.t
 t/find_modules.t
 t/pod.t

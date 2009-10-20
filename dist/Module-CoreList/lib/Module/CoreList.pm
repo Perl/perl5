@@ -1,8 +1,8 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
-	    %bug_tracker/;
-$VERSION = '2.21';
+	    %bug_tracker %deprecated/;
+$VERSION = '2.22';
 
 =head1 NAME
 
@@ -136,6 +136,14 @@ sub find_version {
     my ($class, $v) = @_;
     return $version{$v} if defined $version{$v};
     return undef;
+}
+
+sub is_deprecated {
+    my ($discard, $module, $perl) = @_;
+    return unless $module and exists $deprecated{ $module };
+    $perl = $] unless $perl and exists $version{ $perl };
+    return $deprecated{ $module } if 
+           $perl >= $deprecated{ $module };
 }
 
 # When things escaped.
@@ -11848,6 +11856,10 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     'version'               => undef,
 );
 
+# Deprecated modules and the version they were deprecated
+%deprecated = (
+    'Switch'                => '5.011',
+);
 
 # Create aliases with trailing zeros for $] use
 
