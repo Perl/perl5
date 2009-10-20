@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker/;
-$VERSION = '2.20';
+$VERSION = '2.21';
 
 =head1 NAME
 
@@ -10637,7 +10637,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Module::Build::PodParser'=> '0.35',
 	'Module::Build::Version'=> '0.77',
 	'Module::Build::YAML'   => '0.50',
-	'Module::CoreList'      => '2.20',
+	'Module::CoreList'      => '2.21',
 	'Module::Load'          => '0.16',
 	'Module::Load::Conditional'=> '0.30',
 	'Module::Loaded'        => '0.06',
