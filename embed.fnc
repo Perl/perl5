@@ -1798,6 +1798,7 @@ sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
 #ifndef PERL_NO_UTF16_FILTER
 s	|I32	|utf16_textfilter|int idx|NN SV *sv|int maxlen
+s	|U8*	|add_utf16_textfilter|NN U8 *const s|bool reversed
 #endif
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what

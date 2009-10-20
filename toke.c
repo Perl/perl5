@@ -12703,21 +12703,8 @@ S_swallow_bom(pTHX_ U8 *s)
 #ifndef PERL_NO_UTF16_FILTER
 	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF16-LE script encoding (BOM)\n");
 	    s += 2;
-	utf16le:
 	    if (PL_bufend > (char*)s) {
-		U8 *news;
-		I32 newlen;
-
-		IoLINES(filter_add(S_utf16_textfilter, NULL)) = 1;
-		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-		utf16_to_utf8_reversed(s, news,
-				       PL_bufend - (char*)s - 1,
-				       &newlen);
-		sv_setpvn(PL_linestr, (const char*)news, newlen);
-		Safefree(news);
-		SvUTF8_on(PL_linestr);
-		s = (U8*)SvPVX(PL_linestr);
-		PL_bufend = SvPVX(PL_linestr) + newlen;
+		s = add_utf16_textfilter(s, TRUE);
 	    }
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding UTF16-LE");
@@ -12729,21 +12716,8 @@ S_swallow_bom(pTHX_ U8 *s)
 #ifndef PERL_NO_UTF16_FILTER
 	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16BE script encoding (BOM)\n");
 	    s += 2;
-	utf16be:
 	    if (PL_bufend > (char *)s) {
-		U8 *news;
-		I32 newlen;
-
-		filter_add(S_utf16_textfilter, NULL);
-		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-		utf16_to_utf8(s, news,
-			      PL_bufend - (char*)s,
-			      &newlen);
-		sv_setpvn(PL_linestr, (const char*)news, newlen);
-		Safefree(news);
-		SvUTF8_on(PL_linestr);
-		s = (U8*)SvPVX(PL_linestr);
-		PL_bufend = SvPVX(PL_linestr) + newlen;
+		s = add_utf16_textfilter(s, FALSE);
 	    }
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding UTF16-BE");
@@ -12769,7 +12743,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		   * 00 xx 00 xx
 		   * are a good indicator of UTF-16BE. */
 		  if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16BE script encoding (no BOM)\n");
-		  goto utf16be;
+		s = add_utf16_textfilter(s, FALSE);
 	     }
 	}
 #ifdef EBCDIC
@@ -12787,7 +12761,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		   * xx 00 xx 00
 		   * are a good indicator of UTF-16LE. */
 	      if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16LE script encoding (no BOM)\n");
-	      goto utf16le;
+	      s = add_utf16_textfilter(s, TRUE);
 	 }
     }
     return (char*)s;
@@ -12801,7 +12775,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     dVAR;
     const STRLEN old = SvCUR(sv);
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
-    const int reverse = IoLINES(sv);
+    const bool reverse = IoLINES(sv);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16%s_textfilter(%p): %d %d (%d)\n",
 			  reverse ? "rev" : "",
@@ -12827,6 +12801,26 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     }
     DEBUG_P({sv_dump(sv);});
     return SvCUR(sv);
+}
+
+static U8 *
+S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
+{
+    U8 *news;
+    I32 newlen;
+
+    IoLINES(filter_add(S_utf16_textfilter, NULL)) = reversed;
+    Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+    if (reversed) {
+	utf16_to_utf8_reversed(s, news, PL_bufend - (char*)s - 1, &newlen);
+    } else {
+	utf16_to_utf8(s, news, PL_bufend - (char*)s, &newlen);
+    }
+    sv_setpvn(PL_linestr, (const char*)news, newlen);
+    Safefree(news);
+    SvUTF8_on(PL_linestr);
+    PL_bufend = SvPVX(PL_linestr) + newlen;
+    return (U8*)SvPVX(PL_linestr);
 }
 #endif
 

@@ -5788,6 +5788,11 @@ STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 #define PERL_ARGS_ASSERT_UTF16_TEXTFILTER	\
 	assert(sv)
 
+STATIC U8*	S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_ADD_UTF16_TEXTFILTER	\
+	assert(s)
+
 #endif
 STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 			__attribute__nonnull__(pTHX_1)
