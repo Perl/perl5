@@ -1,6 +1,6 @@
 package OS2::DLL;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use Carp;
 use XSLoader;
