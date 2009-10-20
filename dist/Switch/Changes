@@ -111,3 +111,7 @@ Revision history for Perl extension Switch.
 
 	- POD nits from Frank Wiegand <frank.wiegand@gmail.com>
 	  (bleadperl commit 3b46207fed7bf69caa32c27c04bd239cfb64cb53)
+
+2.15    Tue Oct 20 2009
+        - Deprecate shipping Switch.pm in the core distribution.
+          (Nicholas Clark)

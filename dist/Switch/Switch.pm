@@ -6,7 +6,7 @@ use Carp;
 
 use if $] >= 5.011, 'deprecate';
 
-$VERSION = '2.14_01';
+$VERSION = '2.15';
   
 
 # LOAD FILTERING MODULE...
@@ -507,11 +507,6 @@ __END__
 =head1 NAME
 
 Switch - A switch statement for Perl
-
-=head1 VERSION
-
-This document describes version 2.14 of Switch,
-released Dec 29, 2008.
 
 =head1 SYNOPSIS
 
