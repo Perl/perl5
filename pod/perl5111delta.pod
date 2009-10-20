@@ -11,9 +11,13 @@ the 5.11.1 release.
 
 =over 
 
-=item The boolkeys op moved to the group of hash ops. This breaks binary compatibility.
+=item * 
 
-=item C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
+The boolkeys op moved to the group of hash ops. This breaks binary compatibility.
+
+=item *
+
+C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
 
 
 =back
@@ -72,31 +76,57 @@ that 5.6 is today.
 
 =over 4 
 
-=item Upgrade to Test-Simple-0.94
+=item *
 
-=item Upgrade to Storable-2.21
+Upgrade to Test-Simple 0.94
 
-=item Upgrade to Pod-Simple-3.08
+=item *
 
-=item Upgrade to Parse-CPAN-Meta-1.40
+Upgrade to Storable 2.21
 
-=item Upgrade to ExtUtils-Manifest-1.57
+=item *
 
-=item Upgrade to ExtUtils-CBuilder-0.260301
+Upgrade to Pod-Simple 3.08
 
-=item Upgrade to CGI.pm-3.48
+=item *
 
-=item Upgrade CPANPLUS to CPAN version 0.89_02
+Upgrade to Parse-CPAN-Meta 1.40
 
-=item Upgrade to threads::shared 1.32
+=item *
 
-=item Upgrade ExtUtils::ParseXS to 2.21
+Upgrade to ExtUtils-Manifest 1.57
 
-=item Upgrade File::Path to 2.08 (and add taint.t test)
+=item *
 
-=item Upgrade Module::CoreList to 2.20
+Upgrade to ExtUtils-CBuilder 0.260301
 
-=item Updated Object-Accessor to CPAN version 0.36
+=item *
+
+Upgrade to CGI.pm-3.48
+
+=item *
+
+Upgrade CPANPLUS to CPAN version 0.89_02
+
+=item *
+
+Upgrade to threads::shared 1.32
+
+=item *
+
+Upgrade ExtUtils::ParseXS to 2.21
+
+=item *
+
+Upgrade File::Path to 2.08 (and add taint.t test)
+
+=item *
+
+Upgrade Module::CoreList to 2.20
+
+=item *
+
+Updated Object::Accessor to0.36
 
 =back
 
@@ -132,10 +162,14 @@ that 5.6 is today.
 
 =over 4
 
-=item Skip testing the be_BY.CP1131 locale on Darwin 10 (Mac OS X 10.6),
+=item *
+
+Skip testing the be_BY.CP1131 locale on Darwin 10 (Mac OS X 10.6),
 as it's still buggy.
 
-=item Correct infelicities in the regexp used to identify buggy locales
+=item *
+
+Correct infelicities in the regexp used to identify buggy locales
 on Darwin 8 and 9 (Mac OS X 10.4 and 10.5, respectively).
 
 =back
@@ -144,7 +178,9 @@ on Darwin 8 and 9 (Mac OS X 10.4 and 10.5, respectively).
 
 =over 4
 
-=item Fix thread library selection [perl #69686]
+=item *
+
+Fix thread library selection [perl #69686]
 
 =back
 
@@ -152,9 +188,13 @@ on Darwin 8 and 9 (Mac OS X 10.4 and 10.5, respectively).
 
 =over 4
 
-=item Initial support for mingw64 is now available
+=item *
 
-=item Various bits of Perl's build infrastructure are no longer converted to win32 line endings at release time. If this hurts you, please speak up.
+Initial support for mingw64 is now available
+
+=item *
+
+Various bits of Perl's build infrastructure are no longer converted to win32 line endings at release time. If this hurts you, please speak up.
 
 =back
 
@@ -165,18 +205,28 @@ on Darwin 8 and 9 (Mac OS X 10.4 and 10.5, respectively).
 
 =over 4
 
-=item Perl now properly returns a syntax error instead of segfaulting
+=item *
+
+Perl now properly returns a syntax error instead of segfaulting
 if C<each>, C<keys> or C<values> is used without an argument
 
-=item C<tell()> now fails properly if called without an argument and when no previous file was read
+=item *
+
+C<tell()> now fails properly if called without an argument and when no previous file was read
 
 C<tell()> now returns C<-1>, and sets errno to C<EBADF>, thus restoring the 5.8.x behaviour
 
-=item overload no longer implicitly unsets fallback on repeated 'use overload' lines
+=item *
 
-=item POSIX::strftime() can now handle Unicode characters in the format string.
+overload no longer implicitly unsets fallback on repeated 'use overload' lines
 
-=item The Windows select() implementation now supports all empty C<fd_set>s more correctly.
+=item *
+
+POSIX::strftime() can now handle Unicode characters in the format string.
+
+=item *
+
+The Windows select() implementation now supports all empty C<fd_set>s more correctly.
 
 =back
 
@@ -185,16 +235,24 @@ C<tell()> now returns C<-1>, and sets errno to C<EBADF>, thus restoring the 5.8.
 =over 4
 
 
-=item The 'syntax' category was removed from 5 warnings that should only be in 'deprecated'.
+=item *
 
-=item Three fatal pack/unpack error messages have been normalized to "panic: %s"
+The 'syntax' category was removed from 5 warnings that should only be in 'deprecated'.
 
-=item "Unicode character is illegal" has been rephrased to be more accurate
+=item *
+
+Three fatal pack/unpack error messages have been normalized to "panic: %s"
+
+=item *
+
+"Unicode character is illegal" has been rephrased to be more accurate
 
 It now reads C<Unicode non-character is illegal in interchange> and the
 perldiag documentation has been expanded a bit.
 
-=item Perl now defaults to issuing a warning if a deprecated language feature is used.
+=item *
+
+Perl now defaults to issuing a warning if a deprecated language feature is used.
 
 To disable this feature in a given lexical scope, you should use C<no
 warnings 'deprecated';> For information about which language features
@@ -207,16 +265,24 @@ see L<perldiag.pod>
 
 =over 4
 
-=item Significant cleanups to core tests to ensure that language and
+=item *
+
+Significant cleanups to core tests to ensure that language and
 interpreter features are not used before they're tested.
 
-=item C<make test_porting> now runs a number of important pre-commit checks which might be of use to anyone working on the Perl core.
+=item *
 
-=item F<t/porting/podcheck.t> automatically checks the well-formedness of
+C<make test_porting> now runs a number of important pre-commit checks which might be of use to anyone working on the Perl core.
+
+=item *
+
+F<t/porting/podcheck.t> automatically checks the well-formedness of
 POD found in all .pl, .pm and .pod files in the F<MANIFEST>, other than in
 dual-lifed modules which are primarily maintained outside the Perl core.
 
-=item F<t/porting/manifest.t> now tests that all files listed in MANIFEST are present.
+=item *
+
+F<t/porting/manifest.t> now tests that all files listed in MANIFEST are present.
 
 =back
 
