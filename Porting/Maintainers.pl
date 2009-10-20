@@ -147,6 +147,14 @@ use File::Glob qw(:case);
 # full pathname (eg 't/foo.t') or a pattern (e.g. qr{^t/}).
 # It defaults to the empty list.
 
+# DEPRECATED contains the *first* version of Perl in which the module
+# was considered deprecated.  It should only be present if the module is
+# actually deprecated.  Such modules should use deprecated.pm to
+# issue a warning if used.  E.g.:
+#
+#     use if $] >= 5.011, 'deprecate';
+#
+
 # MAP is a hash that maps CPAN paths to their core equivalents.
 # Each key reprepresents a string prefix, with longest prefixes checked
 # first. The first match causes that prefix to be replaced with the
@@ -321,6 +329,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[cpan/Class-ISA],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
+	'DEPRECATED'	=> 5.011,
 	},
 
     'Compress::Raw::Bzip2' =>
@@ -1275,7 +1284,7 @@ use File::Glob qw(:case);
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
 	'EXCLUDED'	=> [ qw(t/pod.t t/pod-coverage.t) ],
-	# DEPRECATED	=> 5.11.0,
+	'DEPRECATED'	=> 5.011,
 	},
 
     'Pod::Simple' =>
@@ -1348,6 +1357,7 @@ use File::Glob qw(:case);
 	'EXCLUDED'	=> [ qw{ t/01_use.t t/99_pod.t } ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> undef,
+	'DEPRECATED'	=> 5.011,
 	},
 
     'Storable' =>
@@ -1367,6 +1377,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[dist/Switch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
+	'DEPRECATED'	=> 5.011,
 	},
 
     'Sys::Syslog' =>
