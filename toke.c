@@ -12714,18 +12714,9 @@ S_swallow_bom(pTHX_ U8 *s)
 				       PL_bufend - (char*)s - 1,
 				       &newlen);
 		sv_setpvn(PL_linestr, (const char*)news, newlen);
-#ifdef PERL_MAD
-		s = (U8*)SvPVX(PL_linestr);
-  		Copy(news, s, newlen, U8);
-		s[newlen] = '\0';
-#endif
 		Safefree(news);
 		SvUTF8_on(PL_linestr);
 		s = (U8*)SvPVX(PL_linestr);
-#ifdef PERL_MAD
-		/* FIXME - is this a general bug fix?  */
-		s[newlen] = '\0';
-#endif
 		PL_bufend = SvPVX(PL_linestr) + newlen;
 	    }
 #else
