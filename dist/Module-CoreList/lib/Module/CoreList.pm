@@ -49,6 +49,10 @@ Since 2.11, Module::CoreList::first_release() returns the first release
 in the order of perl version numbers. If you want to get the earliest
 perl release instead, use Module::CoreList::first_release_by_date().
 
+New in 2.22, Module::CoreList::deprecated(MODULE,PERL_VERSION) returns true
+if MODULE is marked as deprecated in PERL_VERSION.  If PERL_VERSION is
+omitted, it defaults to the current version of Perl.
+
 =head1 CAVEATS
 
 Module::CoreList currently covers the 5.000, 5.001, 5.002, 5.003_07, 5.004,
@@ -139,11 +143,10 @@ sub find_version {
 }
 
 sub is_deprecated {
-    my ($discard, $module, $perl) = @_;
-    return unless $module and exists $deprecated{ $module };
-    $perl = $] unless $perl and exists $version{ $perl };
-    return $deprecated{ $module } if 
-           $perl >= $deprecated{ $module };
+    my ($module, $perl_version) = @_;
+    $perl_version ||= $];
+    return unless $module && exists $deprecated{$perl_version}{$module};
+    return $deprecated{$perl_version}{$module};
 }
 
 # When things escaped.
@@ -11869,11 +11872,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     'threads'               => undef,
     'threads::shared'       => undef,
     'version'               => undef,
-);
-
-# Deprecated modules and the version they were deprecated
-%deprecated = (
-    'Switch'                => '5.011',
 );
 
 # Create aliases with trailing zeros for $] use

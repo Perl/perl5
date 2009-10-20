@@ -1,8 +1,27 @@
 #!perl -w
 use strict;
-use Module::CoreList;
-use Test::More tests => 3;
+use Test::More tests => 7;
 
-is(Module::CoreList->is_deprecated('Switch',5.011),'5.011','Switch is deprecated');
-is(Module::CoreList->is_deprecated('Switch',5.011000),'5.011','Switch is deprecated using $]');
-is(Module::CoreList->is_deprecated('Switch',5.010),'','Switch is not deprecated');
+require_ok('Module::CoreList');
+
+ok($Module::CoreList::deprecated{5.011000}, "5.011000 (deprecated list)");
+
+ok(!exists $Module::CoreList::deprecated{5.011000}{'File::Spec'},
+   "File::Spec not deprecated in 5.011000 (hash)"
+);
+
+ok(! Module::CoreList::is_deprecated('File::Spec'),
+   "File::Spec not deprecated in 5.011000 (function)"
+);
+
+ok(exists $Module::CoreList::deprecated{5.011000}{'Switch'},
+   "Switch deprecated in 5.011000 (hash)"
+);
+
+is(!! Module::CoreList::is_deprecated('Switch'), !! $] >= 5.011,
+   "Switch deprecated current perl (function)"
+);
+
+ok(! Module::CoreList::is_deprecated('Switch', 5.010000), 
+   "Switch not deprecated in 5.010000 (function w/ perl version)"
+);
