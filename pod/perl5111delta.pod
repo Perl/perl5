@@ -13,6 +13,9 @@ the 5.11.1 release.
 
 =item The boolkeys op moved to the group of hash ops. This breaks binary compatibility.
 
+=item C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
+
+
 =back
 
 =head1 Core Enhancements
@@ -231,18 +234,16 @@ dual-lifed modules which are primarily maintained outside the Perl core.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.10.1 or 5.11.0.
-
 =over 4
 
-=item *
+=item Untriaged test crashes on Windows 2000
 
-XXX
+Several porters have reported mysterious crashes when Perl's entire test suite is run after a build on certain Windows 2000 systems.  When run by hand, the individual tests reportedly work fine.
+
+=item Known test failures on VMS
+
+Perl 5.11.1 fails a small set of core and CPAN tests as of this release.
+With luck, that'll be sorted out for 5.11.2
 
 =back
 
