@@ -159,7 +159,7 @@ foreach (@processes) {
       # gets it right, providing you don't have side effects of conversion.
 #      local $TODO;
 #      $TODO = "pre 5.6 doesn't have flag to distinguish IV/UV"
-#        if $[ < 5.005_56 and $copy1 > $max_iv;
+#        if $] < 5.005_56 and $copy1 > $max_iv;
       my $sign = ok (($copy_s2 <=> 0) == ($copy2 <=> 0),
                      "$process $copy1 (sign)");
 
