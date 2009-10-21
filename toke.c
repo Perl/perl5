@@ -2917,7 +2917,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    const int old_len = SvCUR(buf_sv);
 
 	    /* ensure buf_sv is large enough */
-	    SvGROW(buf_sv, (STRLEN)(old_len + correct_length)) ;
+	    SvGROW(buf_sv, (STRLEN)(old_len + correct_length + 1)) ;
 	    if ((len = PerlIO_read(PL_rsfp, SvPVX(buf_sv) + old_len,
 				   correct_length)) <= 0) {
 		if (PerlIO_error(PL_rsfp))
@@ -2926,6 +2926,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 		    return 0 ;		/* end of file */
 	    }
 	    SvCUR_set(buf_sv, old_len + len) ;
+	    SvPVX(buf_sv)[old_len + len] = '\0';
 	} else {
 	    /* Want a line */
             if (sv_gets(buf_sv, PL_rsfp, SvCUR(buf_sv)) == NULL) {
