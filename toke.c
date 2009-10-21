@@ -12776,9 +12776,12 @@ static I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     dVAR;
-    const STRLEN old = SvCUR(sv);
-    const I32 count = FILTER_READ(idx+1, sv, maxlen);
-    const bool reverse = IoLINES(FILTER_DATA(idx));
+    /* We re-use this each time round, throwing the contents away before we
+       return.  */
+    SV *const filter = FILTER_DATA(idx);
+    SV *const utf16_buffer = MUTABLE_SV(IoTOP_GV(filter));
+    const I32 count = FILTER_READ(idx+1, utf16_buffer, maxlen);
+    const bool reverse = IoLINES(filter);
 
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
@@ -12792,23 +12795,32 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 			  FPTR2DPTR(void *, S_utf16_textfilter),
 			  idx, maxlen, (int) count));
     if (count > 0) {
-	U8* tmps;
+	const STRLEN old = SvCUR(sv);
 	I32 newlen;
-	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	Copy(SvPVX_const(sv), tmps, old, char);
+	U8 *end;
+
+	SvGROW(sv, old + SvCUR(sv) * 3 / 2 + 1);
 	if (reverse) {
 	    /* You would expect this to be utf16_to_utf8_reversed()
 	       It was, prior to 1de9afcdf18cf98bbdecaa782da93e907be6fe4e
 	       Effectively, right now, UTF-16LE is being read in off-by-one
 	       See RT #69678  */
-	    utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
-			  SvCUR(sv) - old, &newlen);
+	    end = utf16_to_utf8((U8*)SvPVX(utf16_buffer),
+				(U8*)SvPVX_const(sv) + old,
+				SvCUR(utf16_buffer), &newlen);
 	} else {
-	    utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
-			  SvCUR(sv) - old, &newlen);
+	    end = utf16_to_utf8((U8*)SvPVX(utf16_buffer),
+				(U8*)SvPVX_const(sv) + old,
+				SvCUR(utf16_buffer), &newlen);
 	}
-	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
+	SvCUR_set(sv, old + newlen);
+	*end = '\0';
     }
+    SvCUR_set(utf16_buffer, 0);
+    /* This is to be bug-for-bug faithful with the implementation we've just
+       replaced. Without this, ./TEST -utf16 base/lex.t fails, attempting to
+       load utf8.pm  */
+    SvUTF8_off(sv);
     DEBUG_P({sv_dump(sv);});
     return SvCUR(sv);
 }
@@ -12818,8 +12830,10 @@ S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
 {
     U8 *news;
     I32 newlen;
+    SV *filter = filter_add(S_utf16_textfilter, NULL);
 
-    IoLINES(filter_add(S_utf16_textfilter, NULL)) = reversed;
+    IoTOP_GV(filter) = MUTABLE_GV(newSV(160));
+    IoLINES(filter) = reversed;
     Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
     if (reversed) {
 	utf16_to_utf8_reversed(s, news, PL_bufend - (char*)s - 1, &newlen);
