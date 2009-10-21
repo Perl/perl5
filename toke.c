@@ -12789,7 +12789,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 			  reverse ? "rev" : "",
 			  FPTR2DPTR(void *, S_utf16_textfilter),
 			  idx, maxlen, (int) count));
-    if (count) {
+    if (count > 0) {
 	U8* tmps;
 	I32 newlen;
 	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
