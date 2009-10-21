@@ -49,7 +49,7 @@ Since 2.11, Module::CoreList::first_release() returns the first release
 in the order of perl version numbers. If you want to get the earliest
 perl release instead, use Module::CoreList::first_release_by_date().
 
-New in 2.22, Module::CoreList::deprecated(MODULE,PERL_VERSION) returns true
+New in 2.22, Module::CoreList::is_deprecated(MODULE,PERL_VERSION) returns true
 if MODULE is marked as deprecated in PERL_VERSION.  If PERL_VERSION is
 omitted, it defaults to the current version of Perl.
 
