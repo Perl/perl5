@@ -12776,7 +12776,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     dVAR;
     const STRLEN old = SvCUR(sv);
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
-    const bool reverse = IoLINES(sv);
+    const bool reverse = IoLINES(FILTER_DATA(idx));
 
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
