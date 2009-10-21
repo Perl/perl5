@@ -659,7 +659,14 @@ sub options_processing {
     $self->add_formatter_option( '__nroffer' => $self->opt_n );
 
     # Get language from PERLDOC_POD2 environment variable
-    $self->opt_L || ( $ENV{PERLDOC_POD2} eq '1' ? $self->_elem('opt_L',(split(/\_/, $ENV{LC_ALL} || $ENV{LC_LANG} || $ENV{LANG}))[0] ) : $self->_elem('opt_L', $ENV{PERLDOC_POD2}) );
+    if ( ! $self->opt_L && $ENV{PERLDOC_POD2} ) {
+        if ( $ENV{PERLDOC_POD2} eq '1' ) {
+          $self->_elem('opt_L',(split(/\_/, $ENV{LC_ALL} || $ENV{LC_LANG} || $ENV{LANG}))[0] );
+        }
+        else {
+          $self->_elem('opt_L', $ENV{PERLDOC_POD2});
+        }
+    };
 
     # Adjust for using translation packages
     $self->add_translator(split(/\s+/,$self->opt_L)) if $self->opt_L;
