@@ -1054,8 +1054,8 @@ S_skipspace(pTHX_ register char *s)
 	curoff = s - SvPVX(PL_linestr);
 #endif
 
-	if ((s = filter_gets(PL_linestr, PL_rsfp,
-			     (prevlen = SvCUR(PL_linestr)))) == NULL)
+	if ((s = filter_gets(PL_linestr, (prevlen = SvCUR(PL_linestr))))
+	    == NULL)
 	{
 #ifdef PERL_MAD
 	    if (PL_madskills && curoff != startoff) {
@@ -2957,7 +2957,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 }
 
 STATIC char *
-S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
+S_filter_gets(pTHX_ register SV *sv, STRLEN append)
 {
     dVAR;
 
@@ -2977,7 +2977,7 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
 	    return NULL ;
     }
     else
-        return (sv_gets(sv, fp, append));
+        return (sv_gets(sv, PL_rsfp, append));
 }
 
 STATIC HV *
@@ -3740,7 +3740,7 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    bof = PL_rsfp ? TRUE : FALSE;
-	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == NULL) {
+	    if ((s = filter_gets(PL_linestr, 0)) == NULL) {
 	      fake_eof:
 #ifdef PERL_MAD
 		PL_realtokenstart = -1;
@@ -5809,8 +5809,8 @@ Perl_yylex(pTHX)
 			sv_catpvn(PL_endwhite, tstart, PL_bufend - tstart);
 			PL_realtokenstart = -1;
 		    }
-		    while ((s = filter_gets(PL_endwhite, PL_rsfp,
-				 SvCUR(PL_endwhite))) != NULL) ;
+		    while ((s = filter_gets(PL_endwhite, SvCUR(PL_endwhite)))
+			   != NULL) ;
 		}
 #endif
 		PL_rsfp = NULL;
@@ -11422,7 +11422,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 #endif
 	if (!outer ||
-	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = filter_gets(PL_linestr, PL_rsfp, 0))) {
+	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart
+	   = filter_gets(PL_linestr, 0))) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf);
 	}
@@ -11934,7 +11935,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	}
 #endif
 	if (!PL_rsfp ||
-	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = filter_gets(PL_linestr, PL_rsfp, 0))) {
+	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart
+	   = filter_gets(PL_linestr, 0))) {
 	    sv_free(sv);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    return NULL;
@@ -12485,7 +12487,7 @@ S_scan_formline(pTHX_ register char *s)
 		    PL_thistoken = newSVpvn(tokenstart, PL_bufend - tokenstart);
 	    }
 #endif
-	    s = filter_gets(PL_linestr, PL_rsfp, 0);
+	    s = filter_gets(PL_linestr, 0);
 #ifdef PERL_MAD
 	    tokenstart = PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
 #else

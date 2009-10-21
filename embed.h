@@ -3981,7 +3981,7 @@
 #define sublex_done()		S_sublex_done(aTHX)
 #define sublex_push()		S_sublex_push(aTHX)
 #define sublex_start()		S_sublex_start(aTHX)
-#define filter_gets(a,b,c)	S_filter_gets(aTHX_ a,b,c)
+#define filter_gets(a,b)	S_filter_gets(aTHX_ a,b)
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define tokenize_use(a,b)	S_tokenize_use(aTHX_ a,b)
 #define deprecate_commaless_var_list()	S_deprecate_commaless_var_list(aTHX)

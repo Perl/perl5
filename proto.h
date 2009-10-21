@@ -5848,12 +5848,11 @@ STATIC I32	S_sublex_push(pTHX)
 STATIC I32	S_sublex_start(pTHX)
 			__attribute__warn_unused_result__;
 
-STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append)
+STATIC char *	S_filter_gets(pTHX_ SV *sv, STRLEN append)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FILTER_GETS	\
-	assert(sv); assert(fp)
+	assert(sv)
 
 STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 			__attribute__warn_unused_result__
