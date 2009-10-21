@@ -961,7 +961,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     if (bytelen == 1 && p[0] == 0) { /* Be understanding. */
 	 d[0] = 0;
 	 *newlen = 1;
-	 return d;
+	 return d + 1;
     }
 
     if (bytelen & 1)
