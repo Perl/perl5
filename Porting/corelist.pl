@@ -16,6 +16,7 @@ use lib "Porting";
 use Maintainers qw(%Modules files_to_modules);
 use File::Spec;
 use Parse::CPAN::Meta;
+use IPC::Cmd 'can_run';
 
 my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
 
@@ -47,8 +48,9 @@ if ($cpan) {
         warn "Reading the module list from $modlistfile";
         open $fh, '<', $modlistfile or die "Couldn't open $modlistfile: $!";
     } elsif ( -e $modlistfile . ".gz" ) {
+        my $zcat = can_run('gzcat') || can_run('zcat') or die "Can't find gzcat or zcat";
         warn "Reading the module list from $modlistfile.gz";
-        open $fh, '-|', "gzcat $modlistfile.gz" or die "Couldn't zcat $modlistfile.gz: $!";
+        open $fh, '-|', "$zcat $modlistfile.gz" or die "Couldn't zcat $modlistfile.gz: $!";
     } else {
         warn "About to fetch 02packages from ftp.funet.fi. This may take a few minutes\n";
         $content = fetch_url('http://ftp.funet.fi/pub/CPAN/modules/02packages.details.txt');
@@ -137,11 +139,13 @@ my $file_to_M = files_to_modules( values %module_to_file );
 my %module_to_upstream;
 my %module_to_dist;
 my %dist_to_meta_YAML;
+my %module_to_deprecated;
 while ( my ( $module, $file ) = each %module_to_file ) {
     my $M = $file_to_M->{$file};
     next unless $M;
     next if $Modules{$M}{MAINTAINER} eq 'p5p';
     $module_to_upstream{$module} = $Modules{$M}{UPSTREAM};
+    $module_to_deprecated{$module} = 1 if $Modules{$M}{DEPRECATED};
     next
         if defined $module_to_upstream{$module}
             && $module_to_upstream{$module} =~ /^(?:blead|first-come)$/;
@@ -191,6 +195,15 @@ foreach my $module ( sort keys %module_to_upstream ) {
 $upstream_stanza .= ");";
 
 $corelist =~ s/^%upstream .*? ;$/$upstream_stanza/ismx;
+
+# Deprecation generation
+my $deprecated_stanza = "    " . $perl_vnum . " => {\n";
+foreach my $module ( sort keys %module_to_deprecated ) {
+    my $deprecated = defined $module_to_deprecated{$module} ? "'$module_to_deprecated{$module}'" : 'undef';
+    $deprecated_stanza .= sprintf "\t%-24s=> %s,\n", "'$module'", $deprecated;
+}
+$deprecated_stanza .= "    },\n";
+$corelist =~ s/^(%deprecated\s*=\s*.*?)(^\);)$/$1$deprecated_stanza$2/xism;
 
 my $tracker = "%bug_tracker = (\n";
 foreach my $module ( sort keys %module_to_upstream ) {

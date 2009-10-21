@@ -10904,6 +10904,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     },
 );
 
+%deprecated = (
+    5.011 => {
+	'Class::ISA'            => '1',
+	'Pod::Plainer'          => '1',
+	'Shell'                 => '1',
+	'Switch'                => '1',
+    },
+    5.011001 => {
+	'Class::ISA'            => '1',
+	'Pod::Plainer'          => '1',
+	'Shell'                 => '1',
+	'Switch'                => '1',
+    },
+);
+
 %upstream = (
     'App::Prove'            => undef,
     'App::Prove::State'     => undef,
@@ -11870,6 +11885,8 @@ $released{'5.011000'} = $released{5.011};
 $version{'5.000'} = $version{5};
 $version{'5.010000'} = $version{5.01};
 $version{'5.011000'} = $version{5.011};
+
+$deprecated{'5.011000'} = $deprecated{5.011};
 
 1;
 __END__
