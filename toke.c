@@ -12777,6 +12777,13 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const STRLEN old = SvCUR(sv);
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     const bool reverse = IoLINES(sv);
+
+    /* As we're automatically added, at the lowest level, and hence only called
+       from this file, we can be sure that we're not called in block mode. Hence
+       don't bother writing code to deal with block mode.  */
+    if (maxlen) {
+	Perl_croak(aTHX_ "panic: utf16_textfilter called in block mode (for %d characters)", maxlen);
+    }
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16%s_textfilter(%p): %d %d (%d)\n",
 			  reverse ? "rev" : "",
