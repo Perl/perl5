@@ -1,3 +1,6 @@
+2.15
+    - Bump version to 2.15 so base and fields have the same version again
+
 2.14
     - fix problem with SIGDIE on perls < 5.10
     - Make @INC available in base.pm's error message when
