@@ -422,6 +422,10 @@ PP(pp_prototype)
 		    ret = newSVpvs_flags("_;$", SVs_TEMP);
 		    goto set;
 		}
+		if (code == -KEY_keys || code == -KEY_values || code == -KEY_each) {
+		    ret = newSVpvs_flags("\\[@%]", SVs_TEMP);
+		    goto set;
+		}
 		if (code == -KEY_readpipe) {
 		    s = "CORE::backtick";
 		}
