@@ -13,11 +13,21 @@ use re qw(is_regexp regexp_pattern
           regname regnames regnames_count);
 {
     my $qr=qr/foo/pi;
-    ok(is_regexp($qr),'is_regexp($qr)');
+    my $rx = $$qr;
+
+    ok(is_regexp($qr),'is_regexp(REGEXP ref)');
+    ok(is_regexp($rx),'is_regexp(REGEXP)');
     ok(!is_regexp(''),'is_regexp("")');
-    is((regexp_pattern($qr))[0],'foo','regexp_pattern[0]');
-    is((regexp_pattern($qr))[1],'ip','regexp_pattern[1]');
-    is(regexp_pattern($qr),'(?pi-xsm:foo)','scalar regexp_pattern');
+
+    is((regexp_pattern($qr))[0],'foo','regexp_pattern[0] (ref)');
+    is((regexp_pattern($qr))[1],'ip','regexp_pattern[1] (ref)');
+    is(regexp_pattern($qr),'(?pi-xsm:foo)','scalar regexp_pattern (ref)');
+
+    is((regexp_pattern($rx))[0],'foo','regexp_pattern[0] (bare REGEXP)');
+    is((regexp_pattern($rx))[1],'ip','regexp_pattern[1] (bare REGEXP)');
+    is(regexp_pattern($rx),'(?pi-xsm:foo)',
+                                    'scalar regexp_pattern (bare REGEXP)');
+
     ok(!regexp_pattern(''),'!regexp_pattern("")');
 }
 
@@ -42,5 +52,5 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     is(regnames_count(),3);
 }
 # New tests above this line, don't forget to update the test count below!
-BEGIN { plan tests => 14 }
+BEGIN { plan tests => 18 }
 # No tests here!

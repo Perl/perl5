@@ -6054,17 +6054,14 @@ Perl_my_dirfd(pTHX_ DIR * dir) {
 
 REGEXP *
 Perl_get_re_arg(pTHX_ SV *sv) {
-    SV    *tmpsv;
 
     if (sv) {
         if (SvMAGICAL(sv))
             mg_get(sv);
-        if (SvROK(sv) &&
-            (tmpsv = MUTABLE_SV(SvRV(sv))) &&            /* assign deliberate */
-            SvTYPE(tmpsv) == SVt_REGEXP)
-        {
-            return (REGEXP*) tmpsv;
-        }
+        if (SvROK(sv))
+	    sv = MUTABLE_SV(SvRV(sv));
+        if (SvTYPE(sv) == SVt_REGEXP)
+            return (REGEXP*) sv;
     }
  
     return NULL;
