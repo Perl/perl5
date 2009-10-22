@@ -4784,7 +4784,9 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     if (expr) {
 	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
 	    return block;	/* do {} while 0 does once */
-	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
+	if (expr->op_type == OP_READLINE
+	    || expr->op_type == OP_READDIR
+	    || expr->op_type == OP_GLOB
 	    || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
@@ -4793,7 +4795,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	    const OP * const k2 = k1 ? k1->op_sibling : NULL;
 	    switch (expr->op_type) {
 	      case OP_NULL:
-		if (k2 && k2->op_type == OP_READLINE
+		if (k2 && (k2->op_type == OP_READLINE || k2->op_type == OP_READDIR)
 		      && (k2->op_flags & OPf_STACKED)
 		      && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
@@ -4846,7 +4848,9 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
     PERL_UNUSED_ARG(debuggable);
 
     if (expr) {
-	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
+	if (expr->op_type == OP_READLINE
+         || expr->op_type == OP_READDIR
+         || expr->op_type == OP_GLOB
 		     || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
@@ -4855,7 +4859,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 	    const OP * const k2 = (k1) ? k1->op_sibling : NULL;
 	    switch (expr->op_type) {
 	      case OP_NULL:
-		if (k2 && k2->op_type == OP_READLINE
+		if (k2 && (k2->op_type == OP_READLINE || k2->op_type == OP_READDIR)
 		      && (k2->op_flags & OPf_STACKED)
 		      && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
 		    expr = newUNOP(OP_DEFINED, 0, expr);

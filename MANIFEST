@@ -4137,6 +4137,7 @@ symbian/uid.pl			Helper code for config.pl
 symbian/version.pl		Helper code for config.pl
 symbian/xsbuild.pl		Building extensions
 taint.c				Tainting code
+t/0				while(readdir) testing file
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work
@@ -4457,6 +4458,7 @@ t/op/utftaint.t			See if utf8 and taint work together
 t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
+t/op/while_readdir.t		See if while(readdir) works
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works
 t/perl.supp			Perl valgrind suppressions
