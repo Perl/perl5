@@ -1,6 +1,9 @@
 2.22    Thu Oct 22 2009
   - is_deprecated function and %deprecated hash (dagolden)
 
+2.21    <>
+  - Added 5.11.1
+
 2.20    Sat Oct  3 2009
 	- Make Module::Corelist recognise $] as a version number on 5.11.0
 
