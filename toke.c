@@ -12822,13 +12822,32 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	    sv_chop(utf8_buffer, nl);
 	    break;
 	}
+
 	/* OK, not a complete line there, so need to read some more UTF-16.
 	   Read an extra octect if the buffer currently has an odd number. */
+	while (1) {
+	    if (status <= 0)
+		break;
+	    if (SvCUR(utf16_buffer) >= 2) {
+		/* Location of the high octet of the last complete code point.
+		   Gosh, UTF-16 is a pain. All the benefits of variable length,
+		   *coupled* with all the benefits of partial reads and
+		   endianness.  */
+		const U8 *const last_hi = (U8*)SvPVX(utf16_buffer)
+		    + ((SvCUR(utf16_buffer) & ~1) - (reverse ? 1 : 2));
 
-	while(SvCUR(utf16_buffer) < 2 && status > 0) {
+		if (*last_hi < 0xd8 || *last_hi > 0xdb) {
+		    break;
+		}
+
+		/* We have the first half of a surrogate. Read more.  */
+		DEBUG_P(PerlIO_printf(Perl_debug_log, "utf16_textfilter partial surrogate detected at %p\n", last_hi));
+	    }
+
 	    status = FILTER_READ(idx + 1, utf16_buffer,
 				 160 + (SvCUR(utf16_buffer) & 1));
 	    DEBUG_P(PerlIO_printf(Perl_debug_log, "utf16_textfilter status=%"IVdf" SvCUR(sv)=%"UVuf"\n", status, (UV)SvCUR(utf16_buffer)));
+	    DEBUG_P({ sv_dump(utf16_buffer); sv_dump(utf8_buffer);});
 	    if (status < 0) {
 		/* Error */
 		IoPAGE(filter) = status;
