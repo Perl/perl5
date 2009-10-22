@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..76\n";
+print "1..100\n";
 my $test = 0;
 
 my %templates = (
@@ -13,7 +13,23 @@ sub bytes_to_utf {
     my ($enc, $content, $do_bom) = @_;
     my $template = $templates{$enc};
     die "Unsupported encoding $enc" unless $template;
-    return pack "$template*", ($do_bom ? 0xFEFF : ()), unpack "U*", $content;
+    my @chars = unpack "U*", $content;
+    if ($enc ne 'utf8') {
+	# Make surrogate pairs
+	my @remember_that_utf_16_is_variable_length;
+	foreach my $ord (@chars) {
+	    if ($ord < 0x10000) {
+		push @remember_that_utf_16_is_variable_length,
+		    $ord;
+	    } else {
+		$ord -= 0x10000;
+		push @remember_that_utf_16_is_variable_length,
+		    (0xD800 | ($ord >> 10)), (0xDC00 | ($ord & 0x3FF));
+	    }
+	}
+	@chars = @remember_that_utf_16_is_variable_length;
+    }
+    return pack "$template*", ($do_bom ? 0xFEFF : ()), @chars;
 }
 
 sub test {
@@ -45,8 +61,9 @@ for my $bom (0, 1) {
 	    # right now, as here we're testing the input filter itself.
 
 	    for my $expect ("N", "\xFF", "\x{100}", "\x{010a}", "\x{0a23}",
+			    "\x{10000}", "\x{64321}", "\x{10FFFD}",
 			   ) {
-		# A space so that the UTF-16 heuristc triggers - " '" gives two
+		# A space so that the UTF-16 heuristic triggers - " '" gives two
 		# characters of ASCII.
 		my $write = " '$expect'";
 		my $name = 'chrs ' . join ', ', map {ord $_} split '', $expect;
