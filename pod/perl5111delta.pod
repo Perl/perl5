@@ -134,7 +134,10 @@ Updated Object::Accessor to0.36
 
 =over 4
 
-=item L<pod/perlpolicy.pod> extends the "Social contract about contributed modules" into the beginnings of a document on Perl porting policies.
+=item *
+
+L<perlpolicy> extends the "Social contract about contributed modules" into
+the beginnings of a document on Perl porting policies.
 
 =back
 
