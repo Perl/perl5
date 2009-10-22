@@ -246,7 +246,7 @@ sub _scan_test {
 	}
     }
 
-    my $utf8 = $::with_utf8 ? "-I$lib -Mutf8" : '';
+    my $utf8 = ($::with_utf8 || $::with_utf16) ? "-I$lib -Mutf8" : '';
 
     my %options = (
 	perl => $perl,

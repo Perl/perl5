@@ -12817,10 +12817,6 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	*end = '\0';
     }
     SvCUR_set(utf16_buffer, 0);
-    /* This is to be bug-for-bug faithful with the implementation we've just
-       replaced. Without this, ./TEST -utf16 base/lex.t fails, attempting to
-       load utf8.pm  */
-    SvUTF8_off(sv);
     DEBUG_P({sv_dump(sv);});
     return SvCUR(sv);
 }
