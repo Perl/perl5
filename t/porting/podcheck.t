@@ -28,6 +28,7 @@ use strict;
 
 use strict;
 use File::Spec;
+s{^\.\./lib$}{lib} for @INC;
 chdir '..';
 my @files;
 my $manifest = 'MANIFEST';
