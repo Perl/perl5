@@ -23,15 +23,13 @@ for my $ord (0, 10, 13, 78, 255, 256, 0xD7FF, 0xE000, 0xFFFD,
     }
 }
 
-# Currently this is special-cased to work. Should it?
-
-is(utf16_to_utf8("\0"), "\0", 'Short string to utf16_to_utf8');
-
-# But anything else is fatal
-
-my $got = eval {utf16_to_utf8('N')};
-like($@, qr/^panic: utf16_to_utf8: odd bytelen 1 at/, 'Odd byte length panics');
-is($got, undef, 'hence eval returns undef');
+foreach ("\0", 'N', 'Perl rules!') {
+    my $length = length $_;
+    my $got = eval {utf16_to_utf8($_)};
+    like($@, qr/^panic: utf16_to_utf8: odd bytelen $length at/,
+	 "Odd byte length panics for '$_'");
+    is($got, undef, 'hence eval returns undef');
+}
 
 for (["\xD8\0\0\0", 'NULs'],
      ["\xD8\0\xD8\0", '2 Lows'],
@@ -40,7 +38,7 @@ for (["\xD8\0\0\0", 'NULs'],
      ["\xDC\0\xDC\0", 'High High'],
     ) {
     my ($malformed, $name) = @$_;
-    $got = eval {utf16_to_utf8($malformed)};
+    my $got = eval {utf16_to_utf8($malformed)};
     like($@, qr/^Malformed UTF-16 surrogate at/,
 	 "Malformed surrogate $name croaks for utf16_to_utf8");
     is($got, undef, 'hence eval returns undef');
@@ -53,7 +51,7 @@ for (["\xD8\0\0\0", 'NULs'],
 }
 
 my $in = "NA";
-$got = eval {utf16_to_utf8_reversed($in, 1)};
+my $got = eval {utf16_to_utf8_reversed($in, 1)};
 like($@, qr/^panic: utf16_to_utf8_reversed: odd bytelen 1 at/,
      'Odd byte length panics');
 is($got, undef, 'hence eval returns undef');
