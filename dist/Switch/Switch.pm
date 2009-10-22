@@ -6,7 +6,7 @@ use Carp;
 
 use if $] >= 5.011, 'deprecate';
 
-$VERSION = '2.15';
+$VERSION = '2.16';
   
 
 # LOAD FILTERING MODULE...
