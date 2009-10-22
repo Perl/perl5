@@ -12780,7 +12780,8 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
        return.  */
     SV *const filter = FILTER_DATA(idx);
     SV *const utf16_buffer = MUTABLE_SV(IoTOP_GV(filter));
-    const I32 count = FILTER_READ(idx+1, utf16_buffer, maxlen);
+    SV *const utf8_buffer = MUTABLE_SV(IoFMT_GV(filter));
+    IV status = IoPAGE(filter);
     const bool reverse = IoLINES(filter);
 
     /* As we're automatically added, at the lowest level, and hence only called
@@ -12789,57 +12790,97 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     if (maxlen) {
 	Perl_croak(aTHX_ "panic: utf16_textfilter called in block mode (for %d characters)", maxlen);
     }
+    if (status < 0) {
+	Perl_croak(aTHX_ "panic: utf16_textfilter called after error (status=%"IVdf")", status);
+    }
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-			  "utf16%s_textfilter(%p): %d %d (%d)\n",
-			  reverse ? "rev" : "",
+			  "utf16_textfilter(%p,%ce): idx=%d maxlen=%d status=%"IVdf" utf16=%"UVuf" utf8=%"UVuf"\n",
 			  FPTR2DPTR(void *, S_utf16_textfilter),
-			  idx, maxlen, (int) count));
-    if (count > 0) {
-	const STRLEN old = SvCUR(sv);
+			  reverse ? 'l' : 'b', idx, maxlen, status,
+			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
+
+    while (1) {
+	STRLEN chars;
+	STRLEN have;
 	I32 newlen;
 	U8 *end;
+	/* First, look in our buffer of existing UTF-8 data:  */
+	char *nl = (char *)memchr(SvPVX(utf8_buffer), '\n', SvCUR(utf8_buffer));
 
-	SvGROW(sv, old + SvCUR(sv) * 3 / 2 + 1);
+	if (nl) {
+	    ++nl;
+	} else if (status == 0) {
+	    /* EOF */
+	    IoPAGE(filter) = 0;
+	    nl = SvEND(utf8_buffer);
+	}
+	if (nl) {
+	    sv_catpvn(sv, SvPVX(utf8_buffer), nl - SvPVX(utf8_buffer));
+	    /* Everything else in this code works just fine if SVp_POK isn't
+	       set.  This, however, needs it, and we need it to work, else
+	       we loop infinitely because the buffer is never consumed.  */
+	    sv_chop(utf8_buffer, nl);
+	    break;
+	}
+	/* OK, not a complete line there, so need to read some more UTF-16.
+	   Read an extra octect if the buffer currently has an odd number. */
+
+	while(SvCUR(utf16_buffer) < 2 && status > 0) {
+	    status = FILTER_READ(idx + 1, utf16_buffer,
+				 160 + (SvCUR(utf16_buffer) & 1));
+	    DEBUG_P(PerlIO_printf(Perl_debug_log, "utf16_textfilter status=%"IVdf" SvCUR(sv)=%"UVuf"\n", status, (UV)SvCUR(utf16_buffer)));
+	    if (status < 0) {
+		/* Error */
+		IoPAGE(filter) = status;
+		return status;
+	    }
+	}
+
+	chars = SvCUR(utf16_buffer) >> 1;
+	have = SvCUR(utf8_buffer);
+	SvGROW(utf8_buffer, have + chars * 3 + 1);
+
 	if (reverse) {
-	    /* You would expect this to be utf16_to_utf8_reversed()
-	       It was, prior to 1de9afcdf18cf98bbdecaa782da93e907be6fe4e
-	       Effectively, right now, UTF-16LE is being read in off-by-one
-	       See RT #69678  */
-	    end = utf16_to_utf8((U8*)SvPVX(utf16_buffer),
-				(U8*)SvPVX_const(sv) + old,
-				SvCUR(utf16_buffer), &newlen);
+	    end = utf16_to_utf8_reversed((U8*)SvPVX(utf16_buffer),
+					 (U8*)SvPVX_const(utf8_buffer) + have,
+					 chars * 2, &newlen);
 	} else {
 	    end = utf16_to_utf8((U8*)SvPVX(utf16_buffer),
-				(U8*)SvPVX_const(sv) + old,
-				SvCUR(utf16_buffer), &newlen);
+				(U8*)SvPVX_const(utf8_buffer) + have,
+				chars * 2, &newlen);
 	}
-	SvCUR_set(sv, old + newlen);
+	SvCUR_set(utf8_buffer, have + newlen);
 	*end = '\0';
+
+	sv_chop(utf16_buffer, SvPVX(utf16_buffer) + chars * 2);
     }
-    SvCUR_set(utf16_buffer, 0);
-    DEBUG_P({sv_dump(sv);});
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+			  "utf16_textfilter: returns, status=%"IVdf" utf16=%"UVuf" utf8=%"UVuf"\n",
+			  status,
+			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
+    DEBUG_P({ sv_dump(utf8_buffer); sv_dump(sv);});
     return SvCUR(sv);
 }
 
 static U8 *
 S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
 {
-    U8 *news;
-    I32 newlen;
     SV *filter = filter_add(S_utf16_textfilter, NULL);
 
-    IoTOP_GV(filter) = MUTABLE_GV(newSV(160));
+    IoTOP_GV(filter) = MUTABLE_GV(newSVpvn((char *)s, PL_bufend - (char*)s));
+    IoFMT_GV(filter) = MUTABLE_GV(newSVpvs(""));
     IoLINES(filter) = reversed;
-    Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-    if (reversed) {
-	utf16_to_utf8_reversed(s, news, PL_bufend - (char*)s - 1, &newlen);
+    IoPAGE(filter) = 1; /* Not EOF */
+
+    /* Sadly, we have to return a valid pointer, come what may, so we have to
+       ignore any error return from this.  */
+    SvCUR_set(PL_linestr, 0);
+    if (FILTER_READ(0, PL_linestr, 0)) {
+	SvUTF8_on(PL_linestr);
     } else {
-	utf16_to_utf8(s, news, PL_bufend - (char*)s, &newlen);
+	SvUTF8_on(PL_linestr);
     }
-    sv_setpvn(PL_linestr, (const char*)news, newlen);
-    Safefree(news);
-    SvUTF8_on(PL_linestr);
-    PL_bufend = SvPVX(PL_linestr) + newlen;
+    PL_bufend = SvEND(PL_linestr);
     return (U8*)SvPVX(PL_linestr);
 }
 #endif
