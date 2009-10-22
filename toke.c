@@ -12871,7 +12871,15 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	SvCUR_set(utf8_buffer, have + newlen);
 	*end = '\0';
 
-	sv_chop(utf16_buffer, SvPVX(utf16_buffer) + chars * 2);
+	/* No need to keep this SV "well-formed" with a '\0' after the end, as
+	   it's private to us, and utf16_to_utf8{,reversed} take a
+	   (pointer,length) pair, rather than a NUL-terminated string.  */
+	if(SvCUR(utf16_buffer) & 1) {
+	    *SvPVX(utf16_buffer) = SvEND(utf16_buffer)[-1];
+	    SvCUR_set(utf16_buffer, 1);
+	} else {
+	    SvCUR_set(utf16_buffer, 0);
+	}
     }
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter: returns, status=%"IVdf" utf16=%"UVuf" utf8=%"UVuf"\n",
