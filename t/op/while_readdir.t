@@ -9,14 +9,26 @@ BEGIN {
 use strict;
 use warnings;
 
-opendir my $dirhandle, '.' or die "Failed test: unable to open directory\n";
+open my $fh, ">", "0" or die "Can't open '0' for writing: $!\n";
+print $fh <<'FILE0';
+This file is here for testing
+
+while(readdir $dir){...}
+... while readdir $dir
+
+etc
+FILE0
+close $fh;
+
+plan 10;
+
+ok(-f '0', "'0' file is here");
+
+opendir my $dirhandle, '.'
+    or die "Failed test: unable to open directory: $!\n";
 
 my @dir = readdir $dirhandle;
 rewinddir $dirhandle;
-
-plan 9;
-
-
 
 {
     my @list;
@@ -62,54 +74,51 @@ plan 9;
     rewinddir $dirhandle;
 }
 
-SKIP:{
-    skip ('No file named "0"',4) unless (scalar grep{ defined $_ && $_ eq '0' } @dir );
-    
-    {
-	my $works = 0;
-	while(readdir $dirhandle){
-	    if( defined $_ && $_ eq '0'){
-		$works = 1;
-		last;
-	    }
-	}
-	ok( $works, 'while(readdir){} with file named "0"' );
-	rewinddir $dirhandle;
+{
+    my $works = 0;
+    while(readdir $dirhandle){
+        if( defined $_ && $_ eq '0'){
+            $works = 1;
+            last;
+        }
     }
-    
-    {
-	my $works = 0;
-	my $sub = sub{
-	    if( defined $_ && $_ eq '0' ){
-		$works = 1;
-	    }
-	};
-	$sub->($_) while readdir $dirhandle;
-	ok( $works, '$sub->($_) while readdir; with file named "0"' );
-	rewinddir $dirhandle;
-    }
-    
-    {
-	my $works = 0;
-	while( my $dir = readdir $dirhandle ){
-	    if( defined $dir && $dir eq '0'){
-		$works = 1;
-		last;
-	    }
-	}
-	ok( $works, 'while($dir=readdir){} with file named "0"');
-	rewinddir $dirhandle;
-    }
+    ok( $works, 'while(readdir){} with file named "0"' );
+    rewinddir $dirhandle;
+}
 
-    {
-        my $tmp;
-        my $ok;
-        my @list;
-        defined($tmp)&& !$tmp && ($ok=1) while $tmp = readdir $dirhandle;
-        ok( $ok, '$dir while $dir = readdir; with file named "0"'  );
-        rewinddir $dirhandle;
-    }
+{
+    my $works = 0;
+    my $sub = sub{
+        if( defined $_ && $_ eq '0' ){
+            $works = 1;
+        }
+    };
+    $sub->($_) while readdir $dirhandle;
+    ok( $works, '$sub->($_) while readdir; with file named "0"' );
+    rewinddir $dirhandle;
+}
 
+{
+    my $works = 0;
+    while( my $dir = readdir $dirhandle ){
+        if( defined $dir && $dir eq '0'){
+            $works = 1;
+            last;
+        }
+    }
+    ok( $works, 'while($dir=readdir){} with file named "0"');
+    rewinddir $dirhandle;
+}
+
+{
+    my $tmp;
+    my $ok;
+    my @list;
+    defined($tmp)&& !$tmp && ($ok=1) while $tmp = readdir $dirhandle;
+    ok( $ok, '$dir while $dir = readdir; with file named "0"'  );
+    rewinddir $dirhandle;
 }
 
 closedir $dirhandle;
+
+END { 1 while unlink "0" }

@@ -4137,7 +4137,6 @@ symbian/uid.pl			Helper code for config.pl
 symbian/version.pl		Helper code for config.pl
 symbian/xsbuild.pl		Building extensions
 taint.c				Tainting code
-t/0				while(readdir) testing file
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work

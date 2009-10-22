@@ -1,6 +1,0 @@
-This file is here for testing
-
-while(readdir $dir){...}
-... while readdir $dir
-
-etc
