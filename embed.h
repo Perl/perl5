@@ -3089,7 +3089,7 @@
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregfree2(a)		Perl_pregfree2(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg_temp_copy(a)	Perl_reg_temp_copy(aTHX_ a)
+#define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
 #endif
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
 #if defined(USE_ITHREADS)

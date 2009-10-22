@@ -3891,7 +3891,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	}
 	/* Fall through */
 #endif
-    case SVt_REGEXP:
     case SVt_PV:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
@@ -3912,6 +3911,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	else
 	    Perl_croak(aTHX_ "Bizarre copy of %s", type);
 	}
+	break;
+
+    case SVt_REGEXP:
+	if (dtype < SVt_REGEXP)
+	    sv_upgrade(dstr, SVt_REGEXP);
 	break;
 
 	/* case SVt_BIND: */
@@ -4015,6 +4019,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		GvGP(dstr) = gp_ref(GvGP(gv));
 	    }
 	}
+    }
+    else if (dtype == SVt_REGEXP && stype == SVt_REGEXP) {
+	reg_temp_copy((REGEXP*)dstr, (REGEXP*)sstr);
     }
     else if (sflags & SVp_POK) {
         bool isSwipe = 0;

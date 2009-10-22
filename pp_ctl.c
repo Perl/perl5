@@ -122,7 +122,7 @@ PP(pp_regcomp)
 	    re = (REGEXP*) sv;
     }
     if (re) {
-	re = reg_temp_copy(re);
+	re = reg_temp_copy(NULL, re);
 	ReREFCNT_dec(PM_GETRE(pm));
 	PM_SETRE(pm, re);
     }

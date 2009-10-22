@@ -3755,7 +3755,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			assert(rx);
 		    }
 		    if (rx) {
-			rx = reg_temp_copy(rx);
+			rx = reg_temp_copy(NULL, rx);
 		    }
 		    else {
 			U32 pm_flags = 0;

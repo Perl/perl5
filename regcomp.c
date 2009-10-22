@@ -9442,15 +9442,18 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     
     
 REGEXP *
-Perl_reg_temp_copy (pTHX_ REGEXP *rx)
+Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 {
-    REGEXP *ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
-    struct regexp *ret = (struct regexp *)SvANY(ret_x);
+    struct regexp *ret;
     struct regexp *const r = (struct regexp *)SvANY(rx);
     register const I32 npar = r->nparens+1;
 
     PERL_ARGS_ASSERT_REG_TEMP_COPY;
 
+    if (!ret_x)
+	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
+    ret = (struct regexp *)SvANY(ret_x);
+    
     (void)ReREFCNT_inc(rx);
     /* We can take advantage of the existing "copied buffer" mechanism in SVs
        by pointing directly at the buffer, but flagging that the allocated

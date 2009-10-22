@@ -7,8 +7,9 @@ BEGIN {
 
 require 'test.pl';
 use strict qw(refs subs);
+use re ();
 
-plan(189);
+plan(196);
 
 # Test glob operations.
 
@@ -123,6 +124,32 @@ is (join(':',@{$spring2{"foo"}}), "1:2:3:4");
 $subrefref = \\&mysub2;
 is ($$subrefref->("GOOD"), "good");
 sub mysub2 { lc shift }
+
+# Test REGEXP assignment
+
+{
+    my $x = qr/x/;
+    my $str = "$x"; # regex stringification may change
+
+    my $y = $$x;
+    is ($y, $str, "bare REGEXP stringifies correctly");
+    ok (eval { "x" =~ $y }, "bare REGEXP matches correctly");
+    
+    my $z = \$y;
+    ok (re::is_regexp($z), "new ref to REXEXP passes is_regexp");
+    is ($z, $str, "new ref to REGEXP stringifies correctly");
+    ok (eval { "x" =~ $z }, "new ref to REGEXP matches correctly");
+}
+{
+    my ($x, $str);
+    {
+        my $y = qr/x/;
+        $str = "$y";
+        $x = $$y;
+    }
+    is ($x, $str, "REGEXP keeps a ref to its mother_re");
+    ok (eval { "x" =~ $x }, "REGEXP with mother_re still matches");
+}
 
 # Test the ref operator.
 

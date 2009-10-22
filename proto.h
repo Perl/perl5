@@ -2557,10 +2557,10 @@ PERL_CALLCONV void	Perl_pregfree2(pTHX_ REGEXP *rx)
 #define PERL_ARGS_ASSERT_PREGFREE2	\
 	assert(rx)
 
-PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* r)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* ret_x, REGEXP* rx)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REG_TEMP_COPY	\
-	assert(r)
+	assert(rx)
 
 PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP *const rx)
 			__attribute__nonnull__(pTHX_1);
