@@ -3667,14 +3667,6 @@ always comes last, to avoid ambiguity with subsequent unary operators.
 (W io) The dirhandle you tried to do a rewinddir() on is either closed or not
 really a dirhandle.  Check your control flow.
 
-=item Runaway format
-
-(F) Your format contained the ~~ repeat-until-blank sequence, but it
-produced 200 lines at once, and the 200th line looked exactly like the
-199th line.  Apparently you didn't arrange for the arguments to exhaust
-themselves, either by using ^ instead of @ (for scalar variables), or by
-shifting or popping (for array variables).  See L<perlform>.
-
 =item Scalars leaked: %d
 
 (P) Something went wrong in Perl's internal bookkeeping of scalars:

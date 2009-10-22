@@ -903,11 +903,6 @@ PP(pp_formline)
 		    *t = '\0';
 		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		    lines += FmLINES(PL_formtarget);
-		    if (lines == 200) {
-			arg = t - linemark;
-			if (strnEQ(linemark, linemark - arg, arg))
-			    DIE(aTHX_ "Runaway format");
-		    }
 		    if (targ_is_utf8)
 			SvUTF8_on(PL_formtarget);
 		    FmLINES(PL_formtarget) = lines;
