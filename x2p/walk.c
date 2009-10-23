@@ -725,7 +725,7 @@ sub Pick {\n\
 	str_cat(str," =~ ");
 	str_scat(str,fstr=walk(1,level,ops[node+2].ival,&numarg,P_MATCH+1));
 	str_free(fstr);
-	str_cat(str," && ($RLENGTH = length($&), $RSTART = length($`)+1)");
+	str_cat(str," ? scalar($RLENGTH = length($&), $RSTART = length($`)+1) : 0");
 	numeric = 1;
 	break;
     case OUSERDEF:
