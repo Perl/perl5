@@ -8,8 +8,7 @@ BEGIN {
     }
 }
 
-use Test;
-BEGIN { plan tests => 12; }
+use Test::More tests => 12;
 
 BEGIN {
     require autouse;
@@ -27,11 +26,11 @@ BEGIN {
 }
 
 my @a = (1,2,3,4,5.5);
-ok( max(@a), 5.5);
+is( max(@a), 5.5);
 
 
 # first() has a prototype of &@.  Make sure that's preserved.
-ok( (first { $_ > 3 } @a), 4);
+is( (first { $_ > 3 } @a), 4);
 
 
 # Example from the docs.
@@ -41,11 +40,11 @@ use autouse 'Carp' => qw(carp croak);
     my @warning;
     local $SIG{__WARN__} = sub { push @warning, @_ };
     carp "this carp was predeclared and autoused\n";
-    ok( scalar @warning, 1 );
-    ok( $warning[0], qr/^this carp was predeclared and autoused\n/ );
+    is( scalar @warning, 1 );
+    like( $warning[0], qr/^this carp was predeclared and autoused\n/ );
 
     eval { croak "It is but a scratch!" };
-    ok( $@, qr/^It is but a scratch!/);
+    like( $@, qr/^It is but a scratch!/);
 }
 
 
@@ -59,7 +58,7 @@ ok( exists $INC{$mod_file} );
 
 use autouse Env => "something";
 eval { something() };
-ok( $@, qr/^\Qautoused module Env has unique import() method/ );
+like( $@, qr/^\Qautoused module Env has unique import() method/ );
 
 # Check that UNIVERSAL.pm doesn't interfere with modules that don't use
 # Exporter and have no import() of their own.
@@ -68,5 +67,5 @@ require File::Spec;
 unshift @INC, File::Spec->catdir('t', 'lib'), 'lib';
 autouse->import("MyTestModule" => 'test_function');
 my $ret = test_function();
-ok( $ret, 'works' );
+is( $ret, 'works' );
 
