@@ -2,11 +2,10 @@
 
 use strict;
 
-use Test;
-BEGIN { plan tests => 4; }
+use Test::More tests => 4;
 use Locale::Maketext;
 print "# Hi there...\n";
-ok 1;
+pass();
 
 print "# --- Making sure that Perl globals are localized ---\n";
 
@@ -20,13 +19,12 @@ print "# --- Making sure that Perl globals are localized ---\n";
   keys %Lexicon; # dodges the 'used only once' warning
 }
 
-my $lh;
-print "# Basic sanity:\n";
-ok defined( $lh = Woozle->new() ) && ref($lh);
+my $lh = Woozle->new();
+ok(ref $lh, 'Basic sanity');
 
-print "# Make sure \$@ is localized...\n";
 $@ = 'foo';
-ok $lh && $lh->maketext('Eval error: [_1]', $@), 'Eval error: foo';
+is($lh->maketext('Eval error: [_1]', $@), 'Eval error: foo',
+  'Make sure $@ is localized');
 
 print "# Byebye!\n";
-ok 1;
+pass();
