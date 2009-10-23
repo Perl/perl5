@@ -382,7 +382,7 @@ SKIP: {
 
    ok scalar eval q{
       %!;
-      defined %Errno::;
+      scalar %Errno::;
    }, $@;
 }
 
