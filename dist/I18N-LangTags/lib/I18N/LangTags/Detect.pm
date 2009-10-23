@@ -11,7 +11,7 @@ use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.03";
+$VERSION = "1.04";
 @ISA = ();
 use I18N::LangTags qw(alternate_language_tags locale2language_tag);
 
@@ -137,7 +137,7 @@ sub _try_use {   # Basically a wrapper around "require Modulename"
   my $module = $_[0];   # ASSUME sane module name!
   { no strict 'refs';
     return($tried{$module} = 1)
-     if defined(%{$module . "::Lexicon"}) or defined(@{$module . "::ISA"});
+     if %{$module . "::Lexicon"} or @{$module . "::ISA"};
     # weird case: we never use'd it, but there it is!
   }
 
