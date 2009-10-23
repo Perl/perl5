@@ -10,7 +10,7 @@ use I18N::LangTags 0.30 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
 # define the constant 'DEBUG' at compile-time
 
-$VERSION = '1.13';
+$VERSION = '1.14';
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -401,7 +401,7 @@ sub _try_use {   # Basically a wrapper around "require Modulename"
     my $module = $_[0];   # ASSUME sane module name!
     { no strict 'refs';
         return($tried{$module} = 1)
-        if defined(%{$module . '::Lexicon'}) or defined(@{$module . '::ISA'});
+        if %{$module . '::Lexicon'} or @{$module . '::ISA'};
         # weird case: we never use'd it, but there it is!
     }
 
