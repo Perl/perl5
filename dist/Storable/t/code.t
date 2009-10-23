@@ -18,7 +18,7 @@ sub BEGIN {
 use strict;
 BEGIN {
     if (!eval q{
-	use Test;
+	use Test::More;
 	use B::Deparse 0.61;
 	use 5.006;
 	1;
@@ -59,7 +59,7 @@ local *FOO;
       \&Another::Package::foo,  # code in another package
       sub ($$;$) { 0 },         # prototypes
       sub { print "test\n" },
-      \&Test::ok,               # large scalar
+      \&Test::More::ok,               # large scalar
      ],
 
      {"a" => sub { "srt" }, "b" => \&code},
@@ -82,44 +82,44 @@ $Storable::Eval    = 1;
 $freezed = freeze $obj[0];
 $thawed  = thaw $freezed;
 
-ok($thawed->[0]->(), "JAPH");
-ok($thawed->[1]->(), 42);
-ok($thawed->[2]->(), "blessed");
-ok($thawed->[3]->(), "Another::Package");
-ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
+is($thawed->[0]->(), "JAPH");
+is($thawed->[1]->(), 42);
+is($thawed->[2]->(), "blessed");
+is($thawed->[3]->(), "Another::Package");
+is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 ######################################################################
 
 $freezed = freeze $obj[1];
 $thawed  = thaw $freezed;
 
-ok($thawed->{"a"}->(), "srt");
-ok($thawed->{"b"}->(), "JAPH");
+is($thawed->{"a"}->(), "srt");
+is($thawed->{"b"}->(), "JAPH");
 
 ######################################################################
 
 $freezed = freeze $obj[2];
 $thawed  = thaw $freezed;
 
-ok($thawed->(), 42);
+is($thawed->(), 42);
 
 ######################################################################
 
 $freezed = freeze $obj[3];
 $thawed  = thaw $freezed;
 
-ok($thawed->(), "JAPH");
+is($thawed->(), "JAPH");
 
 ######################################################################
 
 eval { $freezed = freeze $obj[4] };
-ok($@, qr/The result of B::Deparse::coderef2text was empty/);
+like($@, qr/The result of B::Deparse::coderef2text was empty/);
 
 ######################################################################
 # Test dclone
 
 my $new_sub = dclone($obj[2]);
-ok($new_sub->(), $obj[2]->());
+is($new_sub->(), $obj[2]->());
 
 ######################################################################
 # Test retrieve & store
@@ -127,11 +127,11 @@ ok($new_sub->(), $obj[2]->());
 store $obj[0], 'store';
 $thawed = retrieve 'store';
 
-ok($thawed->[0]->(), "JAPH");
-ok($thawed->[1]->(), 42);
-ok($thawed->[2]->(), "blessed");
-ok($thawed->[3]->(), "Another::Package");
-ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
+is($thawed->[0]->(), "JAPH");
+is($thawed->[1]->(), 42);
+is($thawed->[2]->(), "blessed");
+is($thawed->[3]->(), "Another::Package");
+is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 ######################################################################
 
@@ -139,11 +139,11 @@ nstore $obj[0], 'store';
 $thawed = retrieve 'store';
 unlink 'store';
 
-ok($thawed->[0]->(), "JAPH");
-ok($thawed->[1]->(), 42);
-ok($thawed->[2]->(), "blessed");
-ok($thawed->[3]->(), "Another::Package");
-ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
+is($thawed->[0]->(), "JAPH");
+is($thawed->[1]->(), 42);
+is($thawed->[2]->(), "blessed");
+is($thawed->[3]->(), "Another::Package");
+is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 ######################################################################
 # Security with
@@ -157,7 +157,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	$freezed = freeze $obj[$i];
 	$@ = "";
 	eval { $thawed  = thaw $freezed };
-	ok($@, qr/Can\'t eval/);
+	like($@, qr/Can\'t eval/);
     }
 }
 
@@ -167,7 +167,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
     for my $i (0 .. 1) {
 	$@ = "";
 	eval { $freezed = freeze $obj[$i] };
-	ok($@, qr/Can\'t store CODE items/);
+	like($@, qr/Can\'t store CODE items/);
     }
 }
 
@@ -178,8 +178,8 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	$freezed = freeze $obj[0]->[$i];
 	$@ = "";
 	eval { $thawed  = thaw $freezed };
-	ok($@, "");
-	ok($$thawed, qr/^sub/);
+	is($@, "");
+	like($$thawed, qr/^sub/);
     }
 }
 
@@ -197,8 +197,8 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
     open(STDERR, ">&SAVEERR");
 
-    ok($@, "");
-    ok($freezed ne '');
+    is($@, "");
+    isnt($freezed, '');
 }
 
 {
@@ -208,13 +208,13 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
     $freezed = freeze $obj[0]->[0];
     $@ = "";
     eval { $thawed = thaw $freezed };
-    ok($@, "");
-    ok($thawed->(), "JAPH");
+    is($@, "");
+    is($thawed->(), "JAPH");
 
     $freezed = freeze $obj[0]->[6];
     eval { $thawed = thaw $freezed };
     # The "Code sub ..." error message only appears if Log::Agent is installed
-    ok($@, qr/(trapped|Code sub)/);
+    like($@, qr/(trapped|Code sub)/);
 
     if (0) {
 	# Disable or fix this test if the internal representation of Storable
@@ -230,7 +230,7 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	substr($freezed, -1, 0, $bad_code);
 	$@ = "";
 	eval { $thawed = thaw $freezed };
-	ok($@, qr/(trapped|Code sub)/);
+	like($@, qr/(trapped|Code sub)/);
     }
 }
 
@@ -243,8 +243,8 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
     $freezed = freeze $obj[0]->[1];
     $@ = "";
     eval { $thawed = thaw $freezed };
-    ok($@, "");
-    ok($thawed->(), 42);
+    is($@, "");
+    is($thawed->(), 42);
 }
 
 {
@@ -265,16 +265,16 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
     $freezed = freeze $obj[0];
     eval { $thawed  = thaw $freezed };
-    ok($@, "");
+    is($@, "");
 
     if ($@ ne "") {
-        ok(0) for (1..5);
+        fail() for (1..5);
     } else {
-	ok($thawed->[0]->(), "JAPH");
-	ok($thawed->[1]->(), 42);
-	ok($thawed->[2]->(), "blessed");
-	ok($thawed->[3]->(), "Another::Package");
-	ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
+	is($thawed->[0]->(), "JAPH");
+	is($thawed->[1]->(), 42);
+	is($thawed->[2]->(), "blessed");
+	is($thawed->[3]->(), "Another::Package");
+	is(prototype($thawed->[4]), prototype($obj[0]->[4]));
     }
 }
 
@@ -293,15 +293,15 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	my $res;
 
 	$res = thaw freeze [$sub, $sub];
-	ok(int($res->[0]), int($res->[1]));
+	is(int($res->[0]), int($res->[1]));
 
 	$res = thaw freeze [$sclr, $sub, $sub, $sclr];
-	ok(int($res->[0]), int($res->[3]));
-	ok(int($res->[1]), int($res->[2]));
+	is(int($res->[0]), int($res->[3]));
+	is(int($res->[1]), int($res->[2]));
 
 	$res = thaw freeze [$sub, $sub, $sclr, $sclr];
-	ok(int($res->[0]), int($res->[1]));
-	ok(int($res->[2]), int($res->[3]));
+	is(int($res->[0]), int($res->[1]));
+	is(int($res->[2]), int($res->[3]));
     }
 
 }
