@@ -61,6 +61,7 @@ my %abs = (
 	   '../cpan/Tie-File' => 1,
 	   '../cpan/bignum' => 1,
 	   '../cpan/podlators' => 1,
+	   '../dist/ExtUtils-Install' => 1,
 	  );
 	      
 my %temp_no_core =
@@ -233,7 +234,7 @@ sub _scan_test {
 	    $lib = '../../lib';
 	    $perl = '../../t/perl';
 	    $testswitch = "-I../.. -MTestInit=U2T";
-	    if ($2 eq 'cpan') {
+	    if ($2 eq 'cpan' || $2 eq 'dist') {
 		if($abs{$run_dir}) {
 		    $testswitch = $testswitch . ',A';
 		}
