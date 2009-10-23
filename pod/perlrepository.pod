@@ -565,6 +565,7 @@ testcase:
   [ -x ./perl ] || exit 125
   ./perl -Ilib ~/testcase.pl
   ret=$?
+  [ $ret -gt 127 ] && ret=127
   git clean -dxf
   exit $ret
 
