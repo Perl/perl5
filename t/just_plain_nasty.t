@@ -17,7 +17,7 @@ sub BEGIN {
 use strict;
 BEGIN {
     if (!eval q{
-        use Test;
+        use Test::More;
         use B::Deparse 0.61;
         use 5.006;
         1;
@@ -64,7 +64,7 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
 
     $a[$dbun]->[0] = $a[0];
 
-    ok(ref($nasty), "ARRAY", "Sanity found (now to play with it :->)");
+    is(ref($nasty), "ARRAY", "Sanity found (now to play with it :->)");
 
     $Storable::Deparse = $Storable::Deparse = 1;
     $Storable::Eval = $Storable::Eval = 1;
@@ -74,16 +74,16 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
     #print $icicle;   # cat -ve recommended :)
     headit("circular overload 1 - thaw");
     my $oh_dear = thaw $icicle;
-    ok(ref($oh_dear), "ARRAY", "dclone - circular overload");
-    ok($oh_dear->[0], "keep it so", "amagic ok 1");
-    ok($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
+    is(ref($oh_dear), "ARRAY", "dclone - circular overload");
+    is($oh_dear->[0], "keep it so", "amagic ok 1");
+    is($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
 
     headit("closure dclone - freeze");
     $icicle = freeze sub { "two" };
     #print $icicle;
     headit("closure dclone - thaw");
     my $sub2 = thaw $icicle;
-    ok($sub2->(), "two", "closures getting dcloned OK");
+    is($sub2->(), "two", "closures getting dcloned OK");
 
     headit("circular overload, after closure - freeze");
     #use Data::Dumper;
@@ -92,9 +92,9 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
     #print $icicle;
     headit("circular overload, after closure - thaw");
     $oh_dear = thaw $icicle;
-    ok(ref($oh_dear), "ARRAY", "dclone - after a closure dclone");
-    ok($oh_dear->[0], "keep it so", "amagic ok 1");
-    ok($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
+    is(ref($oh_dear), "ARRAY", "dclone - after a closure dclone");
+    is($oh_dear->[0], "keep it so", "amagic ok 1");
+    is($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
 
     push @{$nasty}, sub { print "Goodbye, cruel world.\n" };
     headit("closure freeze AFTER circular overload");
@@ -103,9 +103,9 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
     #print $icicle;
     headit("circular thaw AFTER circular overload");
     $oh_dear = thaw $icicle;
-    ok(ref($oh_dear), "ARRAY", "dclone - before a closure dclone");
-    ok($oh_dear->[0], "keep it so", "amagic ok 1");
-    ok($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
+    is(ref($oh_dear), "ARRAY", "dclone - before a closure dclone");
+    is($oh_dear->[0], "keep it so", "amagic ok 1");
+    is($oh_dear->[$dbun]->[0], "keep it so", "amagic ok 2");
 
     @{$nasty} = @{$nasty}[0, 2, 1];
     headit("closure freeze BETWEEN circular overload");
@@ -114,9 +114,9 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
     #print $icicle;
     headit("circular thaw BETWEEN circular overload");
     $oh_dear = thaw $icicle;
-    ok(ref($oh_dear), "ARRAY", "dclone - between a closure dclone");
-    ok($oh_dear->[0], "keep it so", "amagic ok 1");
-    ok($oh_dear->[$dbun?2:0]->[0], "keep it so", "amagic ok 2");
+    is(ref($oh_dear), "ARRAY", "dclone - between a closure dclone");
+    is($oh_dear->[0], "keep it so", "amagic ok 1");
+    is($oh_dear->[$dbun?2:0]->[0], "keep it so", "amagic ok 2");
 
     @{$nasty} = @{$nasty}[1, 0, 2];
     headit("closure freeze BEFORE circular overload");
@@ -125,9 +125,9 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
     #print $icicle;
     headit("circular thaw BEFORE circular overload");
     $oh_dear = thaw $icicle;
-    ok(ref($oh_dear), "ARRAY", "dclone - after a closure dclone");
-    ok($oh_dear->[1], "keep it so", "amagic ok 1");
-    ok($oh_dear->[$dbun+1]->[0], "keep it so", "amagic ok 2");
+    is(ref($oh_dear), "ARRAY", "dclone - after a closure dclone");
+    is($oh_dear->[1], "keep it so", "amagic ok 1");
+    is($oh_dear->[$dbun+1]->[0], "keep it so", "amagic ok 2");
 }
 
 sub headit {
