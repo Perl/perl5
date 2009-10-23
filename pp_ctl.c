@@ -3573,11 +3573,14 @@ PP(pp_require)
         PL_compiling.cop_warnings = pWARN_STD ;
 
     if (filter_sub || filter_cache) {
-	SV * const datasv = filter_add(S_run_user_filter, NULL);
+	/* We can use the SvPV of the filter PVIO itself as our cache, rather
+	   than hanging another SV from it. In turn, filter_add() optionally
+	   takes the SV to use as the filter (or creates a new SV if passed
+	   NULL), so simply pass in whatever value filter_cache has.  */
+	SV * const datasv = filter_add(S_run_user_filter, filter_cache);
 	IoLINES(datasv) = filter_has_file;
 	IoTOP_GV(datasv) = MUTABLE_GV(filter_state);
 	IoBOTTOM_GV(datasv) = MUTABLE_GV(filter_sub);
-	IoFMT_GV(datasv) = MUTABLE_GV(filter_cache);
     }
 
     /* switch to eval mode */
@@ -4830,8 +4833,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        for PL_parser->error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
-    if (IoFMT_GV(datasv)) {
-	SV *const cache = MUTABLE_SV(IoFMT_GV(datasv));
+    {
+	SV *const cache = datasv;
 	if (SvOK(cache)) {
 	    STRLEN cache_len;
 	    const char *cache_p = SvPV(cache, cache_len);
@@ -4930,11 +4933,9 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     if (prune_from) {
 	/* Oh. Too long. Stuff some in our cache.  */
 	STRLEN cached_len = got_p + got_len - prune_from;
-	SV *cache = MUTABLE_SV(IoFMT_GV(datasv));
+	SV *const cache = datasv;
 
-	if (!cache) {
-	    IoFMT_GV(datasv) = MUTABLE_GV((cache = newSV(got_len - umaxlen)));
-	} else if (SvOK(cache)) {
+	if (SvOK(cache)) {
 	    /* Cache should be empty.  */
 	    assert(!SvCUR(cache));
 	}
@@ -4963,7 +4964,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
     if (status <= 0) {
 	IoLINES(datasv) = 0;
-	SvREFCNT_dec(IoFMT_GV(datasv));
 	if (filter_state) {
 	    SvREFCNT_dec(filter_state);
 	    IoTOP_GV(datasv) = NULL;
