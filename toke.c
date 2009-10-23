@@ -12776,11 +12776,11 @@ static I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     dVAR;
+    SV *const filter = FILTER_DATA(idx);
     /* We re-use this each time round, throwing the contents away before we
        return.  */
-    SV *const filter = FILTER_DATA(idx);
     SV *const utf16_buffer = MUTABLE_SV(IoTOP_GV(filter));
-    SV *const utf8_buffer = MUTABLE_SV(IoFMT_GV(filter));
+    SV *const utf8_buffer = filter;
     IV status = IoPAGE(filter);
     const bool reverse = IoLINES(filter);
 
@@ -12895,7 +12895,7 @@ S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
     SV *filter = filter_add(S_utf16_textfilter, NULL);
 
     IoTOP_GV(filter) = MUTABLE_GV(newSVpvn((char *)s, PL_bufend - (char*)s));
-    IoFMT_GV(filter) = MUTABLE_GV(newSVpvs(""));
+    sv_setpvs(filter, "");
     IoLINES(filter) = reversed;
     IoPAGE(filter) = 1; /* Not EOF */
 
