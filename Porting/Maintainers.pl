@@ -1033,7 +1033,7 @@ use File::Glob qw(:case);
     'Module::Load::Conditional' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Module-Load-Conditional-0.30.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Module-Load-Conditional-0.31_01.tar.gz',
 	'FILES'		=> q[cpan/Module-Load-Conditional],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',

@@ -14,12 +14,13 @@ use version;
 use constant ON_VMS  => $^O eq 'VMS';
 
 BEGIN {
-    use vars        qw[ $VERSION @ISA $VERBOSE $CACHE @EXPORT_OK 
+    use vars        qw[ $VERSION @ISA $VERBOSE $CACHE @EXPORT_OK $DEPRECATED
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.30';
+    $VERSION        = '0.31_01';
     $VERBOSE        = 0;
+    $DEPRECATED     = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
     @EXPORT_OK      = qw[check_install can_load requires];
@@ -136,6 +137,9 @@ uptodate will always be true if the module was found.
 If no parsable version was found in the module, uptodate will also be
 true, since C<check_install> had no way to verify clearly.
 
+See also C<$Module::Load::Conditional::DEPRECATED>, which affects 
+the outcome of this value.
+
 =back
 
 =cut
@@ -208,7 +212,7 @@ sub check_install {
                     ($fh) = $dir->[0]->($dir, $file, @{$dir}{1..$#{$dir}})
     
                 } elsif (UNIVERSAL::can($dir, 'INC')) {
-                    ($fh) = $dir->INC->($dir, $file);
+                    ($fh) = $dir->INC($file);
                 }
     
                 if (!UNIVERSAL::isa($fh, 'GLOB')) {
@@ -298,6 +302,16 @@ sub check_install {
             version->new( $args->{version} ) <= version->new( $href->{version} )
                 ? 1 
                 : 0;
+    }
+
+    if ( $DEPRECATED and version->new($]) >= version->new('5.011') ) {
+        require Module::CoreList;
+        require Config;
+
+        $href->{uptodate} = 0 if 
+           exists $Module::CoreList::version{ 0+$] }{ $args->{module} } and
+           Module::CoreList::is_deprecated( $args->{module} ) and
+           $Config::Config{privlibexp} eq $href->{dir};
     }
 
     return $href;
@@ -599,6 +613,15 @@ C<undef>
 This holds a string of the last error that happened during a call to
 C<can_load>. It is useful to inspect this when C<can_load> returns
 C<undef>.
+
+=head2 $Module::Load::Conditional::DEPRECATED
+
+This controls whether C<Module::Load::Conditional> checks if 
+a dual-life core module has been deprecated. If this is set to
+true C<check_install> will return false to C<uptodate>, if 
+a dual-life module is found to be loaded from C<$Config{privlibexp}>
+
+The default is 0;
 
 =head1 See Also
 
