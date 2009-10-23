@@ -155,7 +155,7 @@ print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
    require Exporter ;
    use SDBM_File;
    @ISA=qw(SDBM_File);
-   @EXPORT = @SDBM_File::EXPORT if defined @SDBM_File::EXPORT ;
+   @EXPORT = @SDBM_File::EXPORT if @SDBM_File::EXPORT ;
 
    sub STORE { 
 	my $self = shift ;
