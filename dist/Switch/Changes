@@ -116,6 +116,6 @@ Revision history for Perl extension Switch.
         - Deprecate shipping Switch.pm in the core distribution.
           (Nicholas Clark)
 
-2.16    (in progress)
+2.16    Fri Oct 23 2009
         - For Perl 5.11+, install into 'site', not 'perl'
 
