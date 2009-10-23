@@ -1274,6 +1274,8 @@ Returns a boolean indicating if this module is uptodate or not.
             ### that may contain some of our sneakily loaded modules
             ### that aren't installed as such. -- kane
             local $Module::Load::Conditional::CHECK_INC_HASH = 0;
+            ### this should all that is required for deprecated core modules
+            local $Module::Load::Conditional::DEPRECATED = 1;
             my $href = check_install(
                             module  => $self->module,
                             version => $self->version,

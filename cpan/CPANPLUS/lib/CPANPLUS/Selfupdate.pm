@@ -46,7 +46,7 @@ CPANPLUS::Selfupdate
             'Locale::Maketext::Simple'  => '0.01',
             'Log::Message'              => '0.01',
             'Module::Load'              => '0.10',
-            'Module::Load::Conditional' => '0.28', # returns dir for loaded
+            'Module::Load::Conditional' => '0.31_01', # returns dir for loaded
                                                    # modules
             'version'                   => '0.73', # needed for M::L::C
                                                    # addresses #24630 and 
@@ -62,7 +62,7 @@ CPANPLUS::Selfupdate
             'Archive::Tar'              => '1.23',
             'IO::Zlib'                  => '1.04', # needed for Archive::Tar
             'Object::Accessor'          => '0.34', # mk_aliases support
-            'Module::CoreList'          => '2.09',
+            'Module::CoreList'          => '2.22', # deprecated core modules
             'Module::Pluggable'         => '2.4',
             'Module::Loaded'            => '0.01',
             'Parse::CPAN::Meta'         => '0.02', # config_requires support
@@ -85,7 +85,7 @@ CPANPLUS::Selfupdate
             ],            
             cpantest        => [
                 { 'Test::Reporter'  => '1.34',
-                  'YAML::Tiny'      => '0.0'
+                  'Parse::CPAN::Meta' => '0.0'
                 },
                 sub { 
                     my $cb = shift;
