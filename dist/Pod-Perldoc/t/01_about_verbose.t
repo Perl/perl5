@@ -4,12 +4,11 @@ require 5;
 
 # Summary of, well, things.
 
-use Test;
-BEGIN {plan tests => 2};
+use Test::More tests => 2;
 
-ok 1;
-
-use Pod::Perldoc;
+BEGIN {
+    use_ok 'Pod::Perldoc';
+}
 
 #chdir "t" if -e "t";
 
@@ -83,5 +82,5 @@ foreach my $x (sort {lc($a) cmp lc($b)} keys %INC) {
   print "#   [$x] = [", $INC{$x} || '', "]\n";
 }
 
-ok 1;
+pass();
 
