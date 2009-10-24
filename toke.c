@@ -7129,7 +7129,8 @@ S_pending_ident(pTHX)
        and @foo isn't a variable we can find in the symbol
        table.
     */
-    if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
+    if (ckWARN(WARN_AMBIGUOUS) &&
+	pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
         GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1, 0,
 					 SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
@@ -7139,9 +7140,9 @@ S_pending_ident(pTHX)
 	   )
         {
             /* Downgraded from fatal to warning 20000522 mjd */
-            Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			   "Possible unintended interpolation of %s in string",
-			   PL_tokenbuf);
+            Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
+			"Possible unintended interpolation of %s in string",
+			PL_tokenbuf);
         }
     }
 
