@@ -167,7 +167,10 @@ is (*{*x{GLOB}}, "*main::STDOUT");
     ok(!defined @{$a});
     ok(!defined *{$a});
 
-    ok(!defined %{$a});
+    {
+	no warnings 'deprecated';
+	ok(!defined %{$a});
+    }
     ok(!defined *{$a});
 
     ok(!defined ${$a});

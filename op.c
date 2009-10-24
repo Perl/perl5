@@ -7225,11 +7225,6 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 			   "\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
-	    /* This is needed for
-	       if (defined %stash::)
-	       to work.   Do not break Tk.
-	       */
-	    break;                      /* Globals via GV can be undef */
 	case OP_PADHV:
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			   "defined(%%hash) is deprecated");

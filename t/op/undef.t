@@ -10,7 +10,7 @@ use strict;
 
 use vars qw(@ary %ary %hash);
 
-plan 37;
+plan 40;
 
 ok !defined($a);
 
@@ -45,15 +45,27 @@ undef $ary{'foo'};
 ok !defined($ary{'foo'});
 
 ok defined(@ary);
-ok defined(%ary);
+{
+    no warnings 'deprecated';
+    ok defined(%ary);
+}
+ok %ary;
 undef @ary;
 ok !defined(@ary);
 undef %ary;
-ok !defined(%ary);
+{
+    no warnings 'deprecated';
+    ok !defined(%ary);
+}
+ok !%ary;
 @ary = (1);
 ok defined @ary;
 %ary = (1,1);
-ok defined %ary;
+{
+    no warnings 'deprecated';
+    ok defined %ary;
+}
+ok %ary;
 
 sub foo { pass; 1 }
 
