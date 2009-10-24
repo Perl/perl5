@@ -27,8 +27,8 @@ fresh_perl_is(
 
 {
     no warnings 'deprecated';
-    ok( !defined %oedipa::maas::, q(stashes aren't defined if not used) );
-    ok( !defined %{"oedipa::maas::"}, q(- work with hard refs too) );
+    ok( defined %oedipa::maas::, q(stashes happen to be defined if not used) );
+    ok( defined %{"oedipa::maas::"}, q(- work with hard refs too) );
 
     ok( defined %tyrone::slothrop::, q(stashes are defined if seen at compile time) );
     ok( defined %{"tyrone::slothrop::"}, q(- work with hard refs too) );
@@ -56,15 +56,15 @@ package main;
 
 # now tests in eval
 
-ok( !eval  { no warnings 'deprecated'; defined %achtfaden:: },   'works in eval{}' );
-ok( !eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("")' );
+ok( eval  { no warnings 'deprecated'; defined %achtfaden:: },   'works in eval{}' );
+ok( eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("")' );
 
 # now tests with strictures
 
 {
     use strict;
     no warnings 'deprecated';
-    ok( !defined %pig::, q(referencing a non-existent stash doesn't produce stricture errors) );
+    ok( defined %pig::, q(referencing a non-existent stash doesn't produce stricture errors) );
     ok( !exists $pig::{bodine}, q(referencing a non-existent stash element doesn't produce stricture errors) );
 }
 

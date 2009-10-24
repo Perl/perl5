@@ -8052,28 +8052,10 @@ S_pending_ident(pTHX)
     pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn(PL_tokenbuf + 1,
 						      tokenbuf_len - 1));
     pl_yylval.opval->op_private = OPpCONST_ENTERED;
-    gv_fetchpvn_flags(
-	    PL_tokenbuf + 1, tokenbuf_len - 1,
-	    /* If the identifier refers to a stash, don't autovivify it.
-	     * Change 24660 had the side effect of causing symbol table
-	     * hashes to always be defined, even if they were freshly
-	     * created and the only reference in the entire program was
-	     * the single statement with the defined %foo::bar:: test.
-	     * It appears that all code in the wild doing this actually
-	     * wants to know whether sub-packages have been loaded, so
-	     * by avoiding auto-vivifying symbol tables, we ensure that
-	     * defined %foo::bar:: continues to be false, and the existing
-	     * tests still give the expected answers, even though what
-	     * they're actually testing has now changed subtly.
-	     */
-	    (*PL_tokenbuf == '%'
-	     && *(d = PL_tokenbuf + tokenbuf_len - 1) == ':'
-	     && d[-1] == ':'
-	     ? 0
-	     : PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD),
-	    ((PL_tokenbuf[0] == '$') ? SVt_PV
-	     : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-	     : SVt_PVHV));
+    gv_fetchpv(PL_tokenbuf+1, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
+               ((PL_tokenbuf[0] == '$') ? SVt_PV
+                : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+                : SVt_PVHV));
     return WORD;
 }
 
