@@ -285,7 +285,7 @@ You can see what files are changed:
   # Changes to be committed:
   #   (use "git reset HEAD <file>..." to unstage)
   #
-  #	modified:   AUTHORS
+  #    modified:   AUTHORS
   #
 
 And you can see the changes:
@@ -429,7 +429,7 @@ sources:
 =item Testsuite
 
 When submitting a patch you should make every effort to also include an
-addition to perl's regression tests to properly exercise your patch. 
+addition to perl's regression tests to properly exercise your patch.
 Your testsuite additions should generally follow these guidelines
 (courtesy of Gurusamy Sarathy <gsar@activestate.com>):
 
@@ -693,25 +693,49 @@ Currently the master repository is configured to forbid non-fast-forward
 merges.  This means that the branches within can not be rebased and
 pushed as a single step.
 
-The only way you will ever be allowed to rebase or modify the history of a
-pushed branch is to delete it and push it as a new branch under the same
-name. Please think carefully about this, you may want to sequentially
-name your branches so that it is easier for others working with you to
-cherry-pick their local changes.
+The only way you will ever be allowed to rebase or modify the history of
+a pushed branch is to delete it and push it as a new branch under the same
+name. Please think carefully about doing this. It may be better to sequentially
+rename your branches so that it is easier for others working with you to
+cherry-pick their local changes onto the new version. (XXX: needs
+explanation).
 
 If you want to rebase a personal topic branch, you will have to delete
-your existing topic branch and push as a new version of it.
+your existing topic branch and push as a new version of it. You can do
+this via the following formula (see the explanation about C<refspec>'s
+in the git push documentation for details) after you have rebased your
+branch:
 
-B<DO NOT, UNDER ANY CIRCUMSTANCES, SO MUCH AS THINK ABOUT TRYING THIS 
-ON BLEAD OR MAINT>
+   # first rebase
+   $ git checkout $user/$topic
+   $ git fetch
+   $ git rebase origin/blead
 
-We don't edit the history of the blead and maint-* branches. If a
-typo (or worse) sneaks into a commit to blead or maint-*, we'll fix
-it in another commit. 
+   # then "delete-and-push"
+   $ git push origin :$user/$topic
+   $ git push origin $user/$topic
 
-Tags in the canonical perl.git repository will never be deleted or
-modified. Think long and hard about whether you want to push a local
-tag to perl.git before doing so.
+B<NOTE:> it is forbidden at the repository level to delete any of the
+"primary" branches. That is any branch matching C<m!^(blead|maint|perl)!>.
+Any attempt to do so will result in git producing an error like this:
+
+    $ git push origin :blead
+    *** It is forbidden to delete blead/maint branches in this repository
+    error: hooks/update exited with error code 1
+    error: hook declined to update refs/heads/blead
+    To ssh://camel.booking.com/perl
+     ! [remote rejected] blead (hook declined)
+     error: failed to push some refs to 'ssh://camel.booking.com/perl'
+
+As a matter of policy we do B<not> edit the history of the blead and maint-*
+branches. If a typo (or worse) sneaks into a commit to blead or maint-*, we'll
+fix it in another commit. The only types of updates allowed on these
+branches are "fast-forward's", where all history is preserved.
+
+Annotated tags in the canonical perl.git repository will never be deleted
+or modified. Think long and hard about whether you want to push a local
+tag to perl.git before doing so. (Pushing unannotated tags is
+not allowed.)
 
 =head1 COMMITTING TO MAINTENANCE VERSIONS
 
