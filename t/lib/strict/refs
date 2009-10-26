@@ -19,6 +19,14 @@ EXPECT
 
 # strict refs - error
 use strict ;
+my $str="A::Really::Big::Package::Name::To::Use"; 
+$str->{foo}= 1;
+EXPECT
+Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "strict refs" in use at - line 5.
+########
+
+# strict refs - error
+use strict ;
 my $fred ;
 my $a = ${"fred"} ;
 EXPECT
