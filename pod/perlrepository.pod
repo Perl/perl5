@@ -675,6 +675,44 @@ And then push back to the repository:
 
   % git push
 
+
+=head1 TOPIC BRANCHES AND REWRITING HISTORY
+
+Individual committers should create topic branches under
+B<yourname>/B<some_descriptive_name>. Other committers should check with
+a topic branch's creator before making any change to it.
+
+If you are not the creator of B<yourname>/B<some_descriptive_name>, you
+might sometimes find that the original author has edited the branch's
+history. There are lots of good reasons for this. Sometimes, an author
+might simply be rebasing the branch onto a newer source point. Sometimes,
+an author might have found an error in an early commit which they wanted
+to fix before merging the branch to blead.
+
+Currently the master repository is configured to forbid non-fast-forward
+merges.  This means that the branches within can not be rebased and
+pushed as a single step.
+
+The only way you will ever be allowed to rebase or modify the history of a
+pushed branch is to delete it and push it as a new branch under the same
+name. Please think carefully about this, you may want to sequentially
+name your branches so that it is easier for others working with you to
+cherry-pick their local changes.
+
+If you want to rebase a personal topic branch, you will have to delete
+your existing topic branch and push as a new version of it.
+
+B<DO NOT, UNDER ANY CIRCUMSTANCES, SO MUCH AS THINK ABOUT TRYING THIS 
+ON BLEAD OR MAINT>
+
+We don't edit the history of the blead and maint-* branches. If a
+typo (or worse) sneaks into a commit to blead or maint-*, we'll fix
+it in another commit. 
+
+Tags in the canonical perl.git repository will never be deleted or
+modified. Think long and hard about whether you want to push a local
+tag to perl.git before doing so.
+
 =head1 COMMITTING TO MAINTENANCE VERSIONS
 
 Maintenance versions should only be altered to add critical bug fixes.
