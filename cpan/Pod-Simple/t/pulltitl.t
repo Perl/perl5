@@ -7,7 +7,7 @@ BEGIN {
 
 use strict;
 use Test;
-BEGIN { plan tests => 104 };
+BEGIN { plan tests => 114 };
 
 #use Pod::Simple::Debug (5);
 
@@ -29,6 +29,7 @@ my $p = Pod::Simple::PullParser->new;
 $p->set_source( \qq{\n=head1 NAME\n\nBzorch\n\n=pod\n\nLala\n\n\=cut\n} );
 
 ok $p->get_title(), 'Bzorch';
+
 my $t;
 
 ok( $t = $p->get_token);
@@ -42,6 +43,29 @@ ok( $t && $t->type eq 'start' && $t->tagname, 'head1' );
 ok( $t = $p->get_token);
 ok( $t && $t->type, 'text');
 ok( $t && $t->type eq 'text' && $t->text, 'NAME' );
+
+}
+
+###########################################################################
+
+{
+print "# Testing a set with nocase, at line ", __LINE__, "\n";
+my $p = Pod::Simple::PullParser->new;
+$p->set_source( \qq{\n=head1 Name\n\nShazbot\n\n=pod\n\nLala\n\n\=cut\n} );
+
+ok $p->get_title(nocase => 1), 'Shazbot';
+
+ok( my $t = $p->get_token);
+ok( $t && $t->type, 'start');
+ok( $t && $t->type eq 'start' && $t->tagname, 'Document' );
+
+ok( $t = $p->get_token);
+ok( $t && $t->type, 'start');
+ok( $t && $t->type eq 'start' && $t->tagname, 'head1' );
+
+ok( $t = $p->get_token);
+ok( $t && $t->type, 'text');
+ok( $t && $t->type eq 'text' && $t->text, 'Name' );
 
 }
 

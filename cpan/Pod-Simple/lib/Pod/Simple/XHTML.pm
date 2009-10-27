@@ -28,7 +28,7 @@ L<Pod::Simple::HTML>, but it largely preserves the same interface.
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.04';
+$VERSION = '3.09';
 use Carp ();
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
@@ -137,8 +137,6 @@ to the empty string.
 
 =head2 index
 
-TODO -- Not implemented.
-
 Whether to add a table-of-contents at the top of each page (called an
 index for the sake of tradition).
 
@@ -181,10 +179,14 @@ sub new {
   $new->{'output_fh'} ||= *STDOUT{IO};
   $new->accept_targets( 'html', 'HTML' );
   $new->perldoc_url_prefix('http://search.cpan.org/perldoc?');
-  $new->html_header_tags('<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">');
+  $new->html_header_tags('<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />');
   $new->nix_X_codes(1);
   $new->codes_in_verbatim(1);
   $new->{'scratch'} = '';
+  $new->{'to_index'} = [];
+  $new->{'output'} = [];
+  $new->{'saved'} = [];
+  $new->{'ids'} = {};
   return $new;
 }
 
@@ -214,7 +216,7 @@ something like:
   sub handle_text {
       my ($self, $text) = @_;
       if ($self->{'in_foo'}) {
-          $self->{'scratch'} .= build_foo_html($text); 
+          $self->{'scratch'} .= build_foo_html($text);
       } else {
           $self->{'scratch'} .= $text;
       }
@@ -224,48 +226,84 @@ something like:
 
 sub handle_text {
     # escape special characters in HTML (<, >, &, etc)
-    $_[0]{'scratch'} .= $_[0]{'in_verbatim'} ? encode_entities( $_[1] ) : $_[1]
+    $_[0]{'scratch'} .= encode_entities( $_[1] )
 }
 
 sub start_Para     { $_[0]{'scratch'} = '<p>' }
-sub start_Verbatim { $_[0]{'scratch'} = '<pre><code>'; $_[0]{'in_verbatim'} = 1}
+sub start_Verbatim { $_[0]{'scratch'} = '<pre><code>' }
 
-sub start_head1 {  $_[0]{'scratch'} = '<h1>' }
-sub start_head2 {  $_[0]{'scratch'} = '<h2>' }
-sub start_head3 {  $_[0]{'scratch'} = '<h3>' }
-sub start_head4 {  $_[0]{'scratch'} = '<h4>' }
+sub start_head1 {  $_[0]{'in_head'} = 1 }
+sub start_head2 {  $_[0]{'in_head'} = 2 }
+sub start_head3 {  $_[0]{'in_head'} = 3 }
+sub start_head4 {  $_[0]{'in_head'} = 4 }
 
-sub start_item_bullet { $_[0]{'scratch'} = '<li>' }
-sub start_item_number { $_[0]{'scratch'} = "<li>$_[1]{'number'}. "  }
-sub start_item_text   { $_[0]{'scratch'} = '<li>'   }
+sub start_item_number {
+    $_[0]{'scratch'} = "</li>\n" if $_[0]{'in_li'};
+    $_[0]{'scratch'} .= '<li><p>';
+    $_[0]{'in_li'} = 1
+}
+
+sub start_item_bullet {
+    $_[0]{'scratch'} = "</li>\n" if $_[0]{'in_li'};
+    $_[0]{'scratch'} .= '<li><p>';
+    $_[0]{'in_li'} = 1
+}
+
+sub start_item_text   {
+    $_[0]{'scratch'} = "</dd>\n" if delete $_[0]{'in_dd'};
+    $_[0]{'scratch'} .= '<dt>';
+}
 
 sub start_over_bullet { $_[0]{'scratch'} = '<ul>'; $_[0]->emit }
-sub start_over_text   { $_[0]{'scratch'} = '<ul>'; $_[0]->emit }
+sub start_over_text   { $_[0]{'scratch'} = '<dl>'; $_[0]->emit }
 sub start_over_block  { $_[0]{'scratch'} = '<ul>'; $_[0]->emit }
 sub start_over_number { $_[0]{'scratch'} = '<ol>'; $_[0]->emit }
 
-sub end_over_bullet { $_[0]{'scratch'} .= '</ul>'; $_[0]->emit }
-sub end_over_text   { $_[0]{'scratch'} .= '</ul>'; $_[0]->emit }
 sub end_over_block  { $_[0]{'scratch'} .= '</ul>'; $_[0]->emit }
-sub end_over_number { $_[0]{'scratch'} .= '</ol>'; $_[0]->emit }
+
+sub end_over_number   {
+    $_[0]{'scratch'} = "</li>\n" if delete $_[0]{'in_li'};
+    $_[0]{'scratch'} .= '</ol>';
+    $_[0]->emit;
+}
+
+sub end_over_bullet   {
+    $_[0]{'scratch'} = "</li>\n" if delete $_[0]{'in_li'};
+    $_[0]{'scratch'} .= '</ul>';
+    $_[0]->emit;
+}
+
+sub end_over_text   {
+    $_[0]{'scratch'} = "</dd>\n" if delete $_[0]{'in_dd'};
+    $_[0]{'scratch'} .= '</dl>';
+    $_[0]->emit;
+}
 
 # . . . . . Now the actual formatters:
 
 sub end_Para     { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
 sub end_Verbatim {
     $_[0]{'scratch'}     .= '</code></pre>';
-    $_[0]{'in_verbatim'}  = 0;
     $_[0]->emit;
 }
 
-sub end_head1       { $_[0]{'scratch'} .= '</h1>'; $_[0]->emit }
-sub end_head2       { $_[0]{'scratch'} .= '</h2>'; $_[0]->emit }
-sub end_head3       { $_[0]{'scratch'} .= '</h3>'; $_[0]->emit }
-sub end_head4       { $_[0]{'scratch'} .= '</h4>'; $_[0]->emit }
+sub _end_head {
+    my $h = delete $_[0]{in_head};
+    my $id = $_[0]->idify($_[0]{scratch});
+    my $text = $_[0]{scratch};
+    $_[0]{'scratch'} = qq{<h$h id="$id">$text</h$h>};
+    $_[0]->emit;
+    push @{ $_[0]{'to_index'} }, [$h, $id, $text];
+}
 
-sub end_item_bullet { $_[0]{'scratch'} .= '</li>'; $_[0]->emit }
-sub end_item_number { $_[0]{'scratch'} .= '</li>'; $_[0]->emit }
-sub end_item_text   { $_[0]->emit }
+sub end_head1       { shift->_end_head(@_); }
+sub end_head2       { shift->_end_head(@_); }
+sub end_head3       { shift->_end_head(@_); }
+sub end_head4       { shift->_end_head(@_); }
+
+sub end_item_bullet { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
+sub end_item_number { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
+sub end_item_text   { $_[0]{'scratch'} .= "</dt>\n<dd>"; $_[0]{'in_dd'} = 1; $_[0]->emit }
 
 # This handles =begin and =for blocks of all kinds.
 sub start_for { 
@@ -313,8 +351,49 @@ HTML
   }
 }
 
-sub end_Document   { 
+sub end_Document   {
   my ($self) = @_;
+  my $to_index = $self->{'to_index'};
+  if ($self->index && @{ $to_index } ) {
+      my @out;
+      my $level  = 0;
+      my $indent = -1;
+      my $space  = '';
+      my $id     = ' id="index"';
+
+      for my $h (@{ $to_index }, [0]) {
+          my $target_level = $h->[0];
+          # Get to target_level by opening or closing ULs
+          if ($level == $target_level) {
+              $out[-1] .= '</li>';
+          } elsif ($level > $target_level) {
+              $out[-1] .= '</li>' if $out[-1] =~ /^\s+<li>/;
+              while ($level > $target_level) {
+                  --$level;
+                  push @out, ('  ' x --$indent) . '</li>' if @out && $out[-1] =~ m{^\s+<\/ul};
+                  push @out, ('  ' x --$indent) . '</ul>';
+              }
+              push @out, ('  ' x --$indent) . '</li>' if $level;
+          } else {
+              while ($level < $target_level) {
+                  ++$level;
+                  push @out, ('  ' x ++$indent) . '<li>' if @out && $out[-1]=~ /^\s*<ul/;
+                  push @out, ('  ' x ++$indent) . "<ul$id>";
+                  $id = '';
+              }
+              ++$indent;
+          }
+
+          next unless $level;
+          $space = '  '  x $indent;
+          push @out, sprintf '%s<li><a href="#%s">%s</a>',
+              $space, $h->[1], $h->[2];
+      }
+      # Splice the index in between the HTML headers and the first element.
+      my $offset = defined $self->html_header ? $self->html_header eq '' ? 0 : 1 : 1;
+      splice @{ $self->{'output'} }, $offset, 0, join "\n", @out;
+  }
+
   if (defined $self->html_footer) {
     $self->{'scratch'} .= $self->html_footer;
     $self->emit unless $self->html_footer eq "";
@@ -322,17 +401,45 @@ sub end_Document   {
     $self->{'scratch'} .= "</body>\n</html>";
     $self->emit;
   }
+
+  if ($self->index) {
+      print {$self->{'output_fh'}} join ("\n\n", @{ $self->{'output'} }), "\n\n";
+      @{$self->{'output'}} = ();
+  }
+
 }
 
 # Handling code tags
 sub start_B { $_[0]{'scratch'} .= '<b>' }
 sub end_B   { $_[0]{'scratch'} .= '</b>' }
 
-sub start_C { $_[0]{'scratch'} .= '<code>'; $_[0]{'in_verbatim'} = 1; }
-sub end_C   { $_[0]{'scratch'} .= '</code>'; $_[0]{'in_verbatim'} = 0; }
+sub start_C { $_[0]{'scratch'} .= '<code>' }
+sub end_C   { $_[0]{'scratch'} .= '</code>' }
 
-sub start_E { $_[0]{'scratch'} .= '&' }
-sub end_E   { $_[0]{'scratch'} .= ';' }
+sub start_E {
+  my ($self, $flags) = @_;
+  push @{ $self->{'saved'} }, $self->{'scratch'};
+  $self->{'scratch'} = '';
+}
+sub end_E   {
+  my ($self, $flags) = @_;
+  my $previous = pop @{ $self->{'saved'} };
+  my $entity = $self->{'scratch'};
+
+  if ($entity =~ 'sol' or $entity =~ 'verbar') {
+    my $char = Pod::Escapes::e2char($entity);
+    if (defined($char)) {
+      $self->{'scratch'} = $previous . $char;
+      return;
+    }
+  }
+
+  if ($entity =~ /^[0-9]/) {
+      $entity = '#' . $entity;
+  }
+
+  $self->{'scratch'} = $previous . '&'. $entity . ';'
+}
 
 sub start_F { $_[0]{'scratch'} .= '<i>' }
 sub end_F   { $_[0]{'scratch'} .= '</i>' }
@@ -363,10 +470,62 @@ sub end_S   { $_[0]{'scratch'} .= '</nobr>' }
 
 sub emit {
   my($self) = @_;
-  my $out = $self->{'scratch'} . "\n";
-  print {$self->{'output_fh'}} $out, "\n";
+  if ($self->index) {
+      push @{ $self->{'output'} }, $self->{'scratch'};
+  } else {
+      print {$self->{'output_fh'}} $self->{'scratch'}, "\n\n";
+  }
   $self->{'scratch'} = '';
   return;
+}
+
+=head2 idify
+
+  my $id   = $pod->idify($text);
+  my $hash = $pod->idify($text, 1);
+
+This method turns an arbitrary string into a valid XHTML ID attribute value.
+The rules enforced, following
+L<http://webdesign.about.com/od/htmltags/a/aa031707.htm>, are:
+
+=over
+
+=item *
+
+The id must start with a letter (a-z or A-Z)
+
+=item *
+
+All subsequent characters can be letters, numbers (0-9), hyphens (-),
+underscores (_), colons (:), and periods (.).
+
+=item *
+
+Each id must be unique within the document.
+
+=back
+
+In addition, the returned value will be unique within the context of the
+Pod::Simple::XHTML object unless a second argument is passed a true value. ID
+attributes should always be unique within a single XHTML document, but pass
+the true value if you are creating not an ID but a URL hash to point to
+an ID (i.e., if you need to put the "#foo" in C<< <a href="#foo">foo</a> >>.
+
+=cut
+
+sub idify {
+    my ($self, $t, $not_unique) = @_;
+    for ($t) {
+        s/<[^>]+>//g;            # Strip HTML.
+        s/&[^;]+;//g;            # Strip entities.
+        s/^([^a-zA-Z]+)$/pod$1/; # Prepend "pod" if no valid chars.
+        s/^[^a-zA-Z]+//;         # First char must be a letter.
+        s/[^-a-zA-Z0-9_:.]+/-/g; # All other chars must be valid.
+    }
+    return $t if $not_unique;
+    my $i = '';
+    $i++ while $self->{ids}{"$t$i"}++;
+    return "$t$i";
 }
 
 # Bypass built-in E<> handling to preserve entity encoding
@@ -385,8 +544,7 @@ L<Pod::Simple>, L<Pod::Simple::Methody>
 Copyright (c) 2003-2005 Allison Randal.
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. The full text of the license
-can be found in the LICENSE file included with this module.
+it under the same terms as Perl itself.
 
 This library is distributed in the hope that it will be useful, but
 without any warranty; without even the implied warranty of

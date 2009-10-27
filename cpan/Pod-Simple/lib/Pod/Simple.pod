@@ -151,10 +151,7 @@ If you set this attribute to a true value, it will send reports of
 parsing errors to STDERR. By default, this attribute's value is false,
 meaning that no output is sent to STDERR.
 
-Note that errors can be noted in an errata section, or sent to STDERR,
-or both, or neither. So don't think that turning on C<complain_stderr>
-will turn off C<no_errata_section> or vice versa -- these are
-independent attributes.
+Setting C<complain_stderr> also sets C<no_errata_section>.
 
 
 =item C<< $parser->source_filename >>
@@ -173,8 +170,51 @@ Pod content in it.
 This returns true if C<$parser> has read from a source, and come to the
 end of that source.
 
-=back
+=item C<< $parser->strip_verbatim_indent( I<SOMEVALUE> ) >>
 
+The perlpod spec for a Verbatim paragraph is "It should be reproduced
+exactly...", which means that the whitespace you've used to indent your
+verbatim blocks will be preserved in the output. This can be annoying for
+outputs such as HTML, where that whitespace will remain in front of every
+line. It's an unfortunate case where syntax is turned into semantics.
+
+If the POD your parsing adheres to a consistent indentation policy, you can
+have such indentation stripped from the beginning of every line of your
+verbatim blocks. This method tells Pod::Simple what to strip. For two-space
+indents, you'd use:
+
+  $parser->strip_verbatim_indent('  ');
+
+For tab indents, you'd use a tab character:
+
+  $parser->strip_verbatim_indent("\t");
+
+If the POD is inconsistent about the indentation of verbatim blocks, but you
+have figured out a heuristic to determine how much a particular verbatim block
+is indented, you can pass a code reference instead. The code reference will be
+executed with one argument, an array reference of all the lines in the
+verbatim block, and should return the value to be stripped from each line. For
+example, if you decide that you're fine to use the first line of the verbatim
+block to set the standard for indentation of the rest of the block, you can
+look at the first line and return the appropriate value, like so:
+
+  $new->strip_verbatim_indent(sub {
+      my $lines = shift;
+      (my $indent = $lines->[0]) =~ s/\S.*//;
+      return $indent;
+  });
+
+If you'd rather treat each line individually, you can do that, too, by just
+transforming them in-place in the code reference and returning C<undef>. Say
+that you don't want I<any> lines indented. You can do something like this:
+
+  $new->strip_verbatim_indent(sub {
+      my $lines = shift;
+      sub { s/^\s+// for @{ $lines },
+      return undef;
+  });
+
+=back
 
 =head1 CAVEATS
 

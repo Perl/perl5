@@ -11,7 +11,7 @@ use strict;
 
 use Pod::Simple::Search;
 use Test;
-BEGIN { plan tests => 7 }
+BEGIN { plan tests => 8 }
 
 print "#  Test the scanning of the whole of \@INC ...\n";
 
@@ -45,9 +45,12 @@ $p =~ s/^/#  /mg;
 print $p;
 
 print "# OK, making sure strict and strict.pm were in there...\n";
-ok( ($name2where->{'strict'} || 'huh???'), '/strict\.(pod|pm)$/');
+print "# (On Debian-based distributions Pod is stripped from\n",
+      "# strict.pm, so skip these tests.)\n";
+my $nopod = not exists ($name2where->{'strict'});
+skip($nopod, ($name2where->{'strict'} || 'huh???'), '/strict\.(pod|pm)$/');
 
-ok grep( m/strict\.(pod|pm)/, keys %$where2name );
+skip($nopod, grep( m/strict\.(pod|pm)/, keys %$where2name ));
 
 my  $strictpath = $name2where->{'strict'};
 if( $strictpath ) {
@@ -56,8 +59,27 @@ if( $strictpath ) {
   for(@x) { s{[/\\]}{/}g; }
   print "#        => \"$x[0]\" to \"$x[1]\"\n";
   ok $x[0], $x[1], " find('strict') should match survey's name2where{strict}";
+} elsif ($nopod) {
+  skip "skipping find() for strict.pm"; # skipping find() for 'thatpath/strict.pm
 } else {
-  ok 0;  # no 'thatpath/strict.pm' means can't test find()
+  ok 0;  # an entry without a defined path means can't test find()
+}
+
+print "# Test again on a module we know is present, in case the
+strict.pm tests were skipped...\n";
+
+# Grab the first item in $name2where, since it doesn't matter which we
+# use.
+my $testmod = (keys %$name2where)[0];
+my  $testpath = $name2where->{$testmod};
+if( $testmod ) {
+  my @x = ($x->find($testmod)||'(nil)', $testpath);
+  print "# Comparing \"$x[0]\" to \"$x[1]\"\n";
+  for(@x) { s{[/\\]}{/}g; }
+  print "#        => \"$x[0]\" to \"$x[1]\"\n";
+  ok $x[0], $x[1], " find('$testmod') should match survey's name2where{$testmod}";
+} else {
+  ok 0;  # no 'thatpath/<name>.pm' means can't test find()
 }
 
 ok 1;

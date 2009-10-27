@@ -512,7 +512,7 @@ sub _do_middle_main_loop {
         $stack[-1] = $tagmap->{"/$tagname"};
         if( $tagname eq 'item-text' and defined(my $next = $self->get_token) ) {
           $self->unget_token($next);
-          if( $next->type eq 'start' and $next->tagname !~ m/^item-/s ) {
+          if( $next->type eq 'start' ) {
             print $fh $tagmap->{"/item-text"},$tagmap->{"item-body"};
             $stack[-1] = $tagmap->{"/item-body"};
           }

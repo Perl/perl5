@@ -129,9 +129,7 @@ foreach my $f (@testfiles) {
   
   next if $f =~ /nonesuch/;
 
-  # foo.xml.out is not a portable filename. foo.xml_out may be a bit more portable
-
-  my $outfilename = ($HACK > 1) ? $wouldxml{$f} : "$wouldxml{$f}_out";
+  my $outfilename = ($HACK > 1) ? $wouldxml{$f} : "$wouldxml{$f}\_out";
   if($HACK) {
     open OUT, ">$outfilename" or die "Can't write-open $outfilename: $!\n";
     binmode(OUT);

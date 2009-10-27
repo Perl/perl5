@@ -8,18 +8,19 @@ BEGIN {
 
 # Time-stamp: "2004-05-24 02:07:47 ADT"
 use strict;
+my $DEBUG = 0;
 
 #sub Pod::Simple::HTMLBatch::DEBUG () {5};
 
 use Test;
-BEGIN { plan tests => 8 }
+BEGIN { plan tests => 9 }
 
 require Pod::Simple::HTMLBatch;;
 
 use File::Spec;
 use Cwd;
 my $cwd = cwd();
-print "# CWD: $cwd\n";
+print "# CWD: $cwd\n" if $DEBUG;
 
 my $t_dir;
 my $corpus_dir;
@@ -38,7 +39,7 @@ foreach my $t_maybe (
   next unless -e $corpus_dir;
   last;
 }
-print "# OK, found the test corpus as $corpus_dir\n";
+print "# OK, found the test corpus as $corpus_dir\n" if $DEBUG;
 ok 1;
 
 my $outdir;
@@ -54,16 +55,16 @@ END {
 }
 
 ok 1;
-print "# Output dir: $outdir\n";
+print "# Output dir: $outdir\n" if $DEBUG;
 
 mkdir $outdir, 0777 or die "Can't mkdir $outdir: $!";
 
-print "# Converting $corpus_dir => $outdir\n";
+print "# Converting $corpus_dir => $outdir\n" if $DEBUG;
 my $conv = Pod::Simple::HTMLBatch->new;
 $conv->verbose(0);
 $conv->batch_convert( [$corpus_dir], $outdir );
 ok 1;
-print "# OK, back from converting.\n";
+print "# OK, back from converting.\n" if $DEBUG;
 
 my @files;
 use File::Find;
@@ -79,19 +80,31 @@ find( sub { push @files, $File::Find::name; return }, $outdir );
   }
 }
 
-print "#Produced in $outdir ...\n";
-foreach my $f (sort @files) {
-  print "#   $f\n";
+if ($DEBUG) {
+    print "#Produced in $outdir ...\n";
+    foreach my $f (sort @files) {
+        print "#   $f\n";
+    }
+    print "# (", scalar(@files), " items total)\n";
 }
-print "# (", scalar(@files), " items total)\n";
 
 # Some minimal sanity checks:
 ok scalar(grep m/\.css/i, @files) > 5;
 ok scalar(grep m/\.html?/i, @files) > 5;
 ok scalar grep m{squaa\W+Glunk.html?}i, @files;
 
+if (my @long = grep { /^[^.]{9,}/ } map { s{^[^/]/}{} } @files) {
+    ok 0;
+    print "#    File names too long:\n",
+        map { "#         $_\n" } @long;
+} else {
+    ok 1;
+}
+
+
+
 # use Pod::Simple;
 # *pretty = \&Pod::Simple::BlackBox::pretty;
 
-print "# Bye from ", __FILE__, "\n";
+print "# Bye from ", __FILE__, "\n" if $DEBUG;
 ok 1;

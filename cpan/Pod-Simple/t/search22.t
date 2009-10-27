@@ -71,17 +71,13 @@ print $p;
 {
 print "# won't show any shadows, since we're just looking at the name2where keys\n";
 my $names = join "|", sort keys %$name2where;
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-     $names, 
-     "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
+ok $names, "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
 }
 
 {
 print "# but here we'll see shadowing:\n";
 my $names = join "|", sort values %$where2name;
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-     $names, 
-     "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Glunk|hinkhonk::Vliff|hinkhonk::Vliff|perlflif|perlthng|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo|zikzik";
+ok $names, "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Glunk|hinkhonk::Vliff|hinkhonk::Vliff|perlflif|perlthng|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo|zikzik";
 
 my %count;
 for(values %$where2name) { ++$count{$_} };

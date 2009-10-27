@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 use Test;
-BEGIN { plan tests => 8 };
+BEGIN { plan tests => 9 };
 
 #use Pod::Simple::Debug (10);
 
@@ -69,6 +69,25 @@ ok(x(
 '=head4 This, too, is a heading')
  => q{/\s*<h4><a[^<>]+>This,\s+too,\s+is\s+a\s+heading</a></h4>\s*$/},
   "heading building"
+);
+
+print x("=over 4\n\n=item one\n\n=item two\n\nHello\n\n=back\n");
+ok(
+    x("=over 4\n\n=item one\n\n=item two\n\nHello\n\n=back\n"),
+    q{
+<dl>
+<dt><a name="one"
+>one</a></dt>
+
+<dd>
+<dt><a name="two"
+>two</a></dt>
+
+<dd>
+<p>Hello</p>
+</dd>
+</dl>
+}
 );
 
 

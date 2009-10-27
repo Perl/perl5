@@ -130,7 +130,7 @@ is basically equivalent to this:
 L<Pod::Simple>
 
 The article "Constants in Perl", in I<The Perl Journal> issue
-21.  See L<http://www.sysadminmag.com/tpj/issues/vol5_5/>
+21.  See L<http://interglacial.com/tpj/21/>
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
