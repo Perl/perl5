@@ -5209,12 +5209,14 @@ Perl_sv_unmagic(pTHX_ SV *const sv, const int type)
 	else
 	    mgp = &mg->mg_moremagic;
     }
-    if (!SvMAGIC(sv)) {
+    if (SvMAGIC(sv)) {
+	if (SvMAGICAL(sv))	/* if we're under save_magic, wait for restore_magic; */
+	    mg_magical(sv);	/*    else fix the flags now */
+    }
+    else {
 	SvMAGICAL_off(sv);
 	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-	SvMAGIC_set(sv, NULL);
     }
-
     return 0;
 }
 
