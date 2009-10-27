@@ -298,7 +298,6 @@ Offset outside string
 Opening dirhandle %s also as a file
 Opening filehandle %s also as a directory
 Operator or semicolon missing before %c%s
-Overloaded dereference did not return a reference
 PERL_SIGNALS illegal: "%s"
 Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
