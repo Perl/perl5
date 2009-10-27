@@ -946,13 +946,6 @@ The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
 L<"Backtracking">.
 
-Due to an unfortunate implementation issue, the Perl code contained in these
-blocks is treated as a compile time closure that can have seemingly bizarre
-consequences when used with lexically scoped variables inside of subroutines
-or loops.  There are various workarounds for this, including simply using
-global variables instead.  If you are using this construct and strange results
-occur then check for the use of lexically scoped variables.
-
 For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
@@ -974,9 +967,15 @@ so you should only do so if you are also using taint checking.
 Better yet, use the carefully constrained evaluation within a Safe
 compartment.  See L<perlsec> for details about both these mechanisms.
 
-Because Perl's regex engine is currently not re-entrant, interpolated
-code may not invoke the regex engine either directly with C<m//> or C<s///>),
-or indirectly with functions such as C<split>.
+B<WARNING>: Use of lexical (C<my>) variables in these blocks is
+broken. The result is unpredictable and will make perl unstable. The
+workaround is to use global (C<our>) variables.
+
+B<WARNING>: Because Perl's regex engine is currently not re-entrant,
+interpolated code may not invoke the regex engine either directly with
+C<m//> or C<s///>), or indirectly with functions such as
+C<split>. Invoking the regex engine in these blocks will make perl
+unstable.
 
 =item C<(??{ code })>
 X<(??{})>
