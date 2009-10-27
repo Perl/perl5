@@ -477,6 +477,9 @@ sub _send_report {
         ### add a list of what modules have been loaded of your prereqs list
         $message .= REPORT_LOADED_PREREQS->($mod);
 
+        ### add a list of versions of toolchain modules
+        $message .= REPORT_TOOLCHAIN_VERSIONS->($mod);
+
         ### the footer
         $message .= REPORT_MESSAGE_FOOTER->();
 

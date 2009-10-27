@@ -311,6 +311,58 @@ managed to load:
                                 return $str;
                             };
 
+use constant REPORT_TOOLCHAIN_VERSIONS
+                            => sub {
+                                my $mod = shift;
+                                my $cb  = $mod->parent;
+                                #die unless $cb->isa('CPANPLUS::Backend');
+
+                                my @toolchain_modules= qw(
+                                    CPANPLUS
+                                    CPANPLUS::Dist::Build
+                                    Cwd
+                                    ExtUtils::CBuilder
+                                    ExtUtils::Command
+                                    ExtUtils::Install
+                                    ExtUtils::MakeMaker
+                                    ExtUtils::Manifest
+                                    ExtUtils::ParseXS
+                                    File::Spec
+                                    Module::Build
+                                    Test::Harness
+                                    Test::More
+                                    version
+                                );
+
+                                my @toolchain =
+                                          grep { $_ } #module_tree returns '' when module is not found
+                                          map { $cb->module_tree($_) }
+                                          sort @toolchain_modules;
+
+                                ### no prereqs?
+                                return '' unless @toolchain;
+
+                                ### toolchain modules
+                                my $str = << ".";
+
+Perl module toolchain versions installed:
+.
+                                $str .= join '', 
+                                        map { sprintf "\t%-30s %8s\n", 
+                                              @$_
+                                        
+                                        } ['Module Name', 'Have'],
+                                          map {
+                                              [ $_->name,
+                                                $_->installed_version,
+                                              ],
+                                        ### might be empty entries in there
+                                        } @toolchain;   
+                                
+                                return $str;
+                            };
+
+
 use constant REPORT_TESTS_SKIPPED 
                             => sub {
                                 return << ".";

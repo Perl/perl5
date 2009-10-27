@@ -304,6 +304,16 @@ my $map = {
         like($str, qr/\! $ModPrereq\s+\S+\s+\S+/,
                                         "   Proper content found" );
     }
+
+    {   my $clone   = $Mod->clone;
+
+        my $str = REPORT_TOOLCHAIN_VERSIONS->( $clone );
+        
+        like($str, qr/toolchain/,  "Correct message in report" );
+        use Cwd;
+        like($str, qr/Cwd\s+\Q$Cwd::VERSION\E/,
+                                        "Cwd has correct version in report" );
+    }
 }
 
 ### callback tests
