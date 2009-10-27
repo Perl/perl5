@@ -119,17 +119,21 @@ package Bar;
 my @imports = qw($seatbelt &Above stuff @wailing %left);
 Testing->import(@imports);
 
-::ok( (!grep { eval "!defined $_" } map({ /^\w/ ? "&$_" : $_ } @imports)),
-      'import by symbols' );
+::ok( (! grep { my ($s, $n) = @$_; eval "\\$s$n != \\${s}Testing::$n" }
+         map  { /^(\W)(\w+)/ ? [$1, $2] : ['&', $_] }
+            @imports),
+    'import by symbols' );
 
 
 package Yar;
 my @tags = qw(:This :tray);
 Testing->import(@tags);
 
-::ok( (!grep { eval "!defined $_" } map { /^\w/ ? "&$_" : $_ }
-             map { @$_ } @{$Testing::EXPORT_TAGS{@tags}}),
-      'import by tags' );
+::ok( (! grep { my ($s, $n) = @$_; eval "\\$s$n != \\${s}Testing::$n" }
+         map  { /^(\W)(\w+)/ ? [$1, $2] : ['&', $_] }
+         map  { @$_ }
+            @{$Testing::EXPORT_TAGS{@tags}}),
+    'import by tags' );
 
 
 package Arrr;
@@ -141,17 +145,22 @@ Testing->import(qw(!lifejacket));
 package Mars;
 Testing->import('/e/');
 
-::ok( (!grep { eval "!defined $_" } map { /^\w/ ? "&$_" : $_ }
-            grep { /e/ } @Testing::EXPORT, @Testing::EXPORT_OK),
-      'import by regex');
+::ok( (! grep { my ($s, $n) = @$_; eval "\\$s$n != \\${s}Testing::$n" }
+         map  { /^(\W)(\w+)/ ? [$1, $2] : ['&', $_] }
+         grep { /e/ }
+            @Testing::EXPORT, @Testing::EXPORT_OK),
+    'import by regex');
 
 
 package Venus;
 Testing->import('!/e/');
 
-::ok( (!grep { eval "defined $_" } map { /^\w/ ? "&$_" : $_ }
-            grep { /e/ } @Testing::EXPORT, @Testing::EXPORT_OK),
-      'deny import by regex');
+::ok( (! grep { my ($s, $n) = @$_; eval "\\$s$n == \\${s}Testing::$n" }
+         map  { /^(\W)(\w+)/ ? [$1, $2] : ['&', $_] }
+         grep { /e/ }
+            @Testing::EXPORT, @Testing::EXPORT_OK),
+    'deny import by regex');
+
 ::ok( !defined &lifejacket, 'further denial' );
 
 
