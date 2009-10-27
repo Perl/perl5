@@ -704,12 +704,12 @@ C<grep> does not.
     Any     CodeRef   scalar sub truth          $b->($a)
 
     Hash    Hash      hash keys identical (every key is found in both hashes)
-    Array   Hash      hash slice existence     grep { exists $b->{$_} } @$a
+    Array   Hash      hash keys intersection   grep { exists $b->{$_} } @$a
     Regex   Hash      hash key grep            grep /$a/, keys %$b
     undef   Hash      always false (undef can't be a key)
     Any     Hash      hash entry existence     exists $b->{$a}
 
-    Hash    Array     hash slice existence     grep { exists $a->{$_} } @$b
+    Hash    Array     hash keys intersection   grep { exists $a->{$_} } @$b
     Array   Array     arrays are comparable[2]
     Regex   Array     array grep               grep /$a/, @$b
     undef   Array     array contains undef     grep !defined, @$b
