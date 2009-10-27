@@ -93,34 +93,61 @@ PP(pp_regcomp)
 	RETURN;
     }
 #endif
+
+#define tryAMAGICregexp(rx)			\
+    STMT_START {				\
+	if (SvROK(rx) && SvAMAGIC(rx)) {	\
+	    SV *sv = AMG_CALLun(rx, regexp);	\
+	    if (sv) {				\
+		if (SvROK(sv))			\
+		    sv = SvRV(sv);		\
+		if (SvTYPE(sv) != SVt_REGEXP)	\
+		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP"); \
+		rx = sv;			\
+	    }					\
+	}					\
+    } STMT_END
+	    
+
     if (PL_op->op_flags & OPf_STACKED) {
 	/* multiple args; concatentate them */
 	dMARK; dORIGMARK;
 	tmpstr = PAD_SV(ARGTARG);
 	sv_setpvs(tmpstr, "");
 	while (++MARK <= SP) {
+	    SV *msv = *MARK;
 	    if (PL_amagic_generation) {
 		SV *sv;
-		if ((SvAMAGIC(tmpstr) || SvAMAGIC(*MARK)) &&
-		    (sv = amagic_call(tmpstr, *MARK, concat_amg, AMGf_assign)))
+
+		tryAMAGICregexp(msv);
+
+		if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
+		    (sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
 		{
 		   sv_setsv(tmpstr, sv);
 		   continue;
 		}
 	    }
-	    sv_catsv(tmpstr, *MARK);
+	    sv_catsv(tmpstr, msv);
 	}
     	SvSETMAGIC(tmpstr);
 	SP = ORIGMARK;
     }
-    else
+    else {
 	tmpstr = POPs;
+	tryAMAGICregexp(tmpstr);
+    }
+
+#undef tryAMAGICregexp
 
     if (SvROK(tmpstr)) {
 	SV * const sv = SvRV(tmpstr);
 	if (SvTYPE(sv) == SVt_REGEXP)
 	    re = (REGEXP*) sv;
     }
+    else if (SvTYPE(tmpstr) == SVt_REGEXP)
+	re = (REGEXP*) tmpstr;
+
     if (re) {
 	re = reg_temp_copy(NULL, re);
 	ReREFCNT_dec(PM_GETRE(pm));
