@@ -1540,12 +1540,17 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
+    case OP_AV2ARYLEN:
+	PL_hints |= HINT_BLOCK_SCOPE;
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+	PL_modcount++;
+	break;
     case OP_RV2SV:
 	ref(cUNOPo->op_first, o->op_type);
 	localize = 1;
 	/* FALL THROUGH */
     case OP_GV:
-    case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
     case OP_SASSIGN:
     case OP_ANDASSIGN:
