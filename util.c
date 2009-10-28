@@ -1369,9 +1369,9 @@ S_vdie(pTHX_ const char* pat, va_list *args)
 
     PL_restartop = die_where(message, msglen);
     SvFLAGS(ERRSV) |= utf8;
-    if ((!PL_restartop && was_in_eval) || PL_top_env->je_prev)
-	JMPENV_JUMP(3);
-    return PL_restartop;
+    JMPENV_JUMP(3);
+    /* NOTREACHED */
+    return NULL;
 }
 
 #if defined(PERL_IMPLICIT_CONTEXT)
