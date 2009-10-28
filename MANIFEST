@@ -1876,6 +1876,7 @@ cpan/Pod-Simple/t/corpus2/polish_utf8_bom2.txt		Pod::Simple test file
 cpan/Pod-Simple/t/corpus2/polish_utf8_bom2.xml		Pod::Simple test file
 cpan/Pod-Simple/t/corpus2/polish_utf8_bom.txt		Pod::Simple test file
 cpan/Pod-Simple/t/corpus2/polish_utf8_bom.xml		Pod::Simple test file
+cpan/Pod-Simple/t/corpus2/README			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/8859_7.pod			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/8859_7.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/cp1256.txt			Pod::Simple test file
@@ -1963,6 +1964,7 @@ cpan/Pod-Simple/t/search28.t				Pod::Simple test file
 cpan/Pod-Simple/t/search29.t				Pod::Simple test file
 cpan/Pod-Simple/t/search50.t				Pod::Simple test file
 cpan/Pod-Simple/t/stree.t				Pod::Simple test file
+cpan/Pod-Simple/t/strpvbtm.t				Pod::Simple test file
 cpan/Pod-Simple/t/testlib1/Blorm.pm			Pod::Simple test file
 cpan/Pod-Simple/t/testlib1/hinkhonk/Glunk.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib1/hinkhonk/readme.txt		Pod::Simple test file
@@ -1990,6 +1992,7 @@ cpan/Pod-Simple/t/verbatim.t				Pod::Simple test file
 cpan/Pod-Simple/t/verb_fmt.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Shell/Shell.pm		Make AUTOLOADed system() calls
 cpan/Shell/t/Shell.t		Tests for above
