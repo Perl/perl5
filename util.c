@@ -1361,7 +1361,6 @@ S_vdie(pTHX_ const char* pat, va_list *args)
 {
     dVAR;
     const char *message;
-    const int was_in_eval = PL_in_eval;
     STRLEN msglen;
     I32 utf8 = 0;
 
