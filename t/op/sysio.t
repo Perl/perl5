@@ -70,11 +70,15 @@ is($x, 'abc');
 ok(!-s $outfile);
 
 # should not be able to write from after the buffer
-eval { syswrite(O, $x, 1, 3) };
+eval { syswrite(O, $x, 1, 4) };
 like($@, qr/^Offset outside string /);
 
 # $x still intact
 is($x, 'abc');
+
+# but it should be ok to write from the end of the buffer
+syswrite(O, $x, 0, 3);
+syswrite(O, $x, 1, 3);
 
 # $outfile still intact
 if ($reopen) {  # must close file to update EOF marker for stat
@@ -97,7 +101,7 @@ if ($reopen) {  # must close file to update EOF marker for stat
 ok(!-s $outfile);
 
 # [perl #67912] syswrite prints garbage if called with empty scalar and non-zero offset
-eval { my $buf = ''; syswrite(O, $buf, 1, 0) };
+eval { my $buf = ''; syswrite(O, $buf, 1, 1) };
 like($@, qr/^Offset outside string /);
 
 # $x still intact
@@ -109,7 +113,7 @@ if ($reopen) {  # must close file to update EOF marker for stat
 }
 ok(!-s $outfile);
 
-eval { my $buf = 'x'; syswrite(O, $buf, 1, 1) };
+eval { my $buf = 'x'; syswrite(O, $buf, 1, 2) };
 like($@, qr/^Offset outside string /);
 
 # $x still intact
