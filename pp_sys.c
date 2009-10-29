@@ -497,6 +497,7 @@ PP(pp_die)
 	tmpsv = newSVpvs_flags("Died", SVs_TEMP);
 
     DIE(aTHX_ "%"SVf, SVfARG(tmpsv));
+    RETURN;
 }
 
 /* I/O. */

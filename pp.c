@@ -5333,6 +5333,7 @@ PP(unimplemented_op)
     dVAR;
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
 	PL_op->op_type);
+    return NORMAL;
 }
 
 PP(pp_boolkeys)

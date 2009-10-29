@@ -1543,7 +1543,7 @@ Perl_qerror(pTHX_ SV *err)
 	++PL_parser->error_count;
 }
 
-OP *
+void
 Perl_die_where(pTHX_ SV *msv)
 {
     dVAR;
@@ -1632,14 +1632,15 @@ Perl_die_where(pTHX_ SV *msv)
 		    *msg ? msg : "Unknown error\n");
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
-	    return cx->blk_eval.retop;
+	    PL_restartop = cx->blk_eval.retop;
+	    JMPENV_JUMP(3);
+	    /* NOTREACHED */
 	}
     }
 
     write_to_stderr( msv ? msv : ERRSV );
     my_failure_exit();
     /* NOTREACHED */
-    return 0;
 }
 
 PP(pp_xor)

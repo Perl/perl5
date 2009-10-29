@@ -218,7 +218,7 @@ Afp	|OP*	|die		|NULLOK const char* pat|...
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 #endif
 : Used in util.c
-p	|OP*	|die_where	|NULLOK SV* msv
+pr	|void	|die_where	|NULLOK SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp

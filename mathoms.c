@@ -684,11 +684,13 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
 PP(pp_padany)
 {
     DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
+    return NORMAL;
 }
 
 PP(pp_mapstart)
 {
     DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
+    return NORMAL;
 }
 
 /* These ops all have the same body as pp_null.  */

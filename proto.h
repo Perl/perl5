@@ -522,7 +522,9 @@ PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_vdie(pTHX_ const char* pat, va_list* args);
 #endif
-PERL_CALLCONV OP*	Perl_die_where(pTHX_ SV* msv);
+PERL_CALLCONV void	Perl_die_where(pTHX_ SV* msv)
+			__attribute__noreturn__;
+
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
