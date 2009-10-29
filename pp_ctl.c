@@ -1517,7 +1517,7 @@ Perl_qerror(pTHX_ SV *err)
 }
 
 OP *
-Perl_die_where(pTHX_ const char *message, STRLEN msglen)
+Perl_die_where(pTHX_ SV *msv)
 {
     dVAR;
 
@@ -1525,15 +1525,17 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	I32 cxix;
 	I32 gimme;
 
-	if (message) {
+	if (msv) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
 		SV * const err = ERRSV;
 		const char *e = NULL;
 		if (!SvPOK(err))
 		    sv_setpvs(err,"");
-		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
+		else if (SvCUR(err) >= sizeof(prefix)+SvCUR(msv)-1) {
 		    STRLEN len;
+		    STRLEN msglen;
+		    const char* message = SvPV_const(msv, msglen);
 		    e = SvPV_const(err, len);
 		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
@@ -1541,16 +1543,19 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		}
 		if (!e) {
 		    STRLEN start;
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+SvCUR(msv));
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catpvn(err, message, msglen);
-		    start = SvCUR(err)-msglen-sizeof(prefix)+1;
+		    sv_catsv(err, msv);
+		    start = SvCUR(err)-SvCUR(msv)-sizeof(prefix)+1;
 		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "%s",
 				   SvPVX_const(err)+start);
 		}
 	    }
 	    else {
+		STRLEN msglen;
+		const char* message = SvPV_const(msv, msglen);
 		sv_setpvn(ERRSV, message, msglen);
+		SvFLAGS(ERRSV) |= SvFLAGS(msv) & SVf_UTF8;
 	    }
 	}
 
@@ -1571,8 +1576,8 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
-		if (!message)
-		    message = SvPVx_const(ERRSV, msglen);
+		STRLEN msglen;
+		const char* message = SvPVx_const( msv ? msv : ERRSV, msglen);
 		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1603,10 +1608,8 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	    return cx->blk_eval.retop;
 	}
     }
-    if (!message)
-	message = SvPVx_const(ERRSV, msglen);
 
-    write_to_stderr(message, msglen);
+    write_to_stderr( msv ? msv : ERRSV );
     my_failure_exit();
     /* NOTREACHED */
     return 0;

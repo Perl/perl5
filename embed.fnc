@@ -218,7 +218,7 @@ Afp	|OP*	|die		|NULLOK const char* pat|...
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 #endif
 : Used in util.c
-p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
+p	|OP*	|die_where	|NULLOK SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
@@ -1189,7 +1189,7 @@ Ap	|void	|vwarner	|U32 err|NN const char* pat|NULLOK va_list* args
 p	|void	|watch		|NN char** addr
 Ap	|I32	|whichsig	|NN const char* sig
 : Used in pp_ctl.c
-p	|void	|write_to_stderr|NN const char* message|int msglen
+p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c
 p	|int	|yyerror	|NN const char *const s
 : Used in perly.y, and by Data::Alias
@@ -1846,10 +1846,8 @@ s	|char*	|stdize_locale	|NN char* locs
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
-s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
-				|NULLOK STRLEN *msglen|NULLOK I32* utf8
-s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
-				|I32 utf8|bool warn
+s	|SV *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args
+s	|bool	|vdie_common	|NULLOK SV *message|bool warn
 sr	|char *	|write_no_mem
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \

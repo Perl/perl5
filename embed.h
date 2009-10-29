@@ -2517,7 +2517,7 @@
 #endif
 #endif
 #ifdef PERL_CORE
-#define die_where(a,b)		Perl_die_where(aTHX_ a,b)
+#define die_where(a)		Perl_die_where(aTHX_ a)
 #endif
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #ifdef PERL_CORE
@@ -3416,7 +3416,7 @@
 #endif
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #ifdef PERL_CORE
-#define write_to_stderr(a,b)	Perl_write_to_stderr(aTHX_ a,b)
+#define write_to_stderr(a)	Perl_write_to_stderr(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -4016,8 +4016,8 @@
 #ifdef PERL_CORE
 #define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
-#define vdie_croak_common(a,b,c,d)	S_vdie_croak_common(aTHX_ a,b,c,d)
-#define vdie_common(a,b,c,d)	S_vdie_common(aTHX_ a,b,c,d)
+#define vdie_croak_common(a,b)	S_vdie_croak_common(aTHX_ a,b)
+#define vdie_common(a,b)	S_vdie_common(aTHX_ a,b)
 #define write_no_mem()		S_write_no_mem(aTHX)
 #endif
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
