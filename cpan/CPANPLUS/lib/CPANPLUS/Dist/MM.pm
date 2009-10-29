@@ -480,11 +480,13 @@ sub _find_prereqs {
         
         while( $found =~ m/(?:\s)([\w\:]+)=>(?:q\[(.*?)\],?|undef)/g ) {
             if( defined $p{$1} ) {
-                msg(loc("Warning: PREREQ_PM mentions '%1' more than once. " .
-                        "Last mention wins.", $1 ), $verbose );
+                my $ver = $cb->_version_to_number(version => $2);
+                $p{$1} = $ver
+                  if $cb->_vcmp( $ver, $p{$1} ) > 0;
             }
-            
-            $p{$1} = $cb->_version_to_number(version => $2);                  
+            else {
+                $p{$1} = $cb->_version_to_number(version => $2);                  
+            }
         }
         last;
     }
