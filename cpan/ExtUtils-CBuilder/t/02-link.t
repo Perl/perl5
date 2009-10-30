@@ -2,7 +2,7 @@
 
 use strict;
 use Test::More;
-BEGIN { 
+BEGIN {
   if ($^O eq 'VMS') {
     # So we can get the return value of system()
     require vmsish;
@@ -26,7 +26,7 @@ elsif ( ! $b->have_compiler ) {
   plan skip_all => "no compiler available for testing";
 }
 else {
-  plan tests => 7;
+  plan tests => 8;
 }
 
 ok $b, "created EU::CB object";
@@ -47,13 +47,14 @@ ok -e $object_file, "found object file";
 
 # Link
 SKIP: {
-  skip "error compiling source", 3
+  skip "error compiling source", 4
     unless -e $object_file;
 
   my @temps;
   eval { ($exe_file, @temps) = $b->link_executable(objects => $object_file) };
   is $@, q{}, "no exception from linking";
   ok -e $exe_file, "found executable file";
+  ok -x $exe_file, "executable file appears to be executable";
 
   if ($^O eq 'os2') {		# Analogue of LDLOADPATH...
           # Actually, not needed now, since we do not link with the generated DLL
@@ -65,9 +66,9 @@ SKIP: {
 
   # Try the executable
   my $ec = my_system($exe_file);
-  is $ec, 11, "got expected exit code from executable"
-    or print( $? == -1 ? "# Could not run '$exe_file'\n" 
-                      : "# Unexpected exit code '$ec'\n");
+  is( $ec, 11, "got expected exit code from executable" )
+    or diag( $ec == -1 ? "Could not run '$exe_file': $!\n"
+                       : "Unexpected exit code '$ec'\n");
 }
 
 # Clean up
@@ -83,8 +84,10 @@ if ($^O eq 'VMS') {
 
 sub my_system {
   my $cmd = shift;
+  my $ec;
   if ($^O eq 'VMS') {
-    return system("mcr $cmd");
+    $ec = system("mcr $cmd");
   }
-  return system($cmd) >> 8;
+  $ec = system($cmd);
+  return $ec == -1 ? -1 : $ec >> 8;
 }

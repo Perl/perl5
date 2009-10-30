@@ -1,5 +1,36 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.27 - Thu Oct 29 21:29:56 EDT 2009
+
+ Other:
+ - Removed Build.PL to avoid creating a circular dependency
+ - Added version numbers to Windows compiler driver modules
+
+0.26_05 - Sun Oct 25 17:29:02 EDT 2009
+
+ Bugs fixed:
+ - Fixed t/02link.t failures on cygwin with Perl 5.8 [David Golden]
+
+ Other:
+ - Made have_compiler (and have_cplusplus) quiet without echoing
+   the test command to STDOUT [David Golden]
+
+0.26_04 - Mon Oct 19 21:57:46 EDT 2009
+
+ Enhancements:
+ - Added 'have_cplusplus()' method to check for C++ support
+ - Added patches for building Perl with mingw64 [Sisyphus]
+ - Allow CC environment variable to override $Config{cc}
+
+ Bugs fixed:
+ - Fixed link executable command for Win32 MSVC (RT#40819) [Cosimo
+   Streppone]
+ - Removed MSVC version check when embedding a manifest file
+   (RT #43002) [Steve Hay]
+
+ Other:
+ - Split Windows compiler driver packages into individual *.pm files
+
 0.260301 - Sat Aug 29 11:04:41 EDT 2009
 
  Bugs fixed:

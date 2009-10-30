@@ -5,13 +5,16 @@ use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.260301';
+$VERSION = '0.27';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
+# TODO: If a specific exe_file name is requested, if the exe created
+# doesn't have that name, we might want to rename it.  Apparently asking
+# for an exe of "foo" might result in "foo.exe".  Alternatively, we should
+# make sure the return value is correctly "foo.exe".
+# C.f http://rt.cpan.org/Public/Bug/Display.html?id=41003
 sub link_executable {
   my $self = shift;
-  # $Config{ld} is okay. Circumvent the Unix ld=cc override in the superclass.
-  local $self->{config}{cc} = $self->{config}{ld};
   return $self->SUPER::link_executable(@_);
 }
 
