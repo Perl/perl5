@@ -1710,9 +1710,8 @@ When you write your new code, please be conscious of existing code
 conventions used in the perl source files.  See L<perlstyle> for
 details.  Although most of the guidelines discussed seem to focus on
 Perl code, rather than c, they all apply (except when they don't ;).
-See also I<Porting/patching.pod> file in the Perl source distribution
-for lots of details about both formatting and submitting patches of
-your changes.
+Also see I<perlrepository> for lots of details about both formatting and
+submitting patches of your changes.
 
 Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
 Test on as many platforms as you can find.  Test as many perl
