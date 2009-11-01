@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 2510;  # Update this when adding/deleting tests.
+plan tests => 2511;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1178,6 +1178,18 @@ sub run_tests {
 	    ok($s =~ $pat, $pat);
 	}
     }
+
+    {
+        local $TODO = "[perl #38133]";
+
+        "A" =~ /(((?:A))?)+/;
+        my $first = $2;
+
+        "A" =~ /(((A))?)+/;
+        my $second = $2;
+
+        iseq($first, $second);
+    }    
 } # End of sub run_tests
 
 1;
