@@ -297,26 +297,27 @@ sub check ($$$) {
     is ($got_line, $line, "line of $name");
 }
 
+my $this_file = qr/parser\.t(?:\.[bl]eb?)?$/;
 #line 3
-check(qr/parser\.t$/, 3, "bare line");
+check($this_file, 3, "bare line");
 
 # line 5
-check(qr/parser\.t$/, 5, "bare line with leading space");
+check($this_file, 5, "bare line with leading space");
 
 #line 7 
-check(qr/parser\.t$/, 7, "trailing space still valid");
+check($this_file, 7, "trailing space still valid");
 
 # line 11 
-check(qr/parser\.t$/, 11, "leading and trailing");
+check($this_file, 11, "leading and trailing");
 
 #	line 13
-check(qr/parser\.t$/, 13, "leading tab");
+check($this_file, 13, "leading tab");
 
 #line	17
-check(qr/parser\.t$/, 17, "middle tab");
+check($this_file, 17, "middle tab");
 
 #line                                                                        19
-check(qr/parser\.t$/, 19, "loadsaspaces");
+check($this_file, 19, "loadsaspaces");
 
 #line 23 KASHPRITZA
 check(qr/^KASHPRITZA$/, 23, "bare filename");
