@@ -167,13 +167,15 @@ XXX
 
 =head1 Changed Internals
 
-XXX Changes which affect the interface available to C<XS> code go here.
-
 =over 4
 
 =item *
 
-XXX
+C<Perl_pmflag> has been removed from the public API. Calling it now generates
+a deprecation warning, and it will be removed in a future release. Although
+listed as part of the API, it was never documented, and only ever used in
+F<toke.c>, and prior to 5.10, F<regcomp.c>. In core, it has been replaced by a
+static function.
 
 =back
 

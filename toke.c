@@ -10932,21 +10932,28 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     return s;
 }
 
+static U32
+S_pmflag(U32 pmfl, const char ch) {
+    switch (ch) {
+	CASE_STD_PMMOD_FLAGS_PARSE_SET(&pmfl);
+    case GLOBAL_PAT_MOD:    pmfl |= PMf_GLOBAL; break;
+    case CONTINUE_PAT_MOD:  pmfl |= PMf_CONTINUE; break;
+    case ONCE_PAT_MOD:      pmfl |= PMf_KEEP; break;
+    case KEEPCOPY_PAT_MOD:  pmfl |= PMf_KEEPCOPY; break;
+    }
+    return pmfl;
+}
+
 void
 Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
     PERL_ARGS_ASSERT_PMFLAG;
 
-    PERL_UNUSED_CONTEXT;
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+		     "Perl_pmflag() is deprecated, and will be removed from the XS API");
+
     if (ch<256) {
-        const char c = (char)ch;
-        switch (c) {
-            CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
-            case GLOBAL_PAT_MOD:    *pmfl |= PMf_GLOBAL; break;
-            case CONTINUE_PAT_MOD:  *pmfl |= PMf_CONTINUE; break;
-            case ONCE_PAT_MOD:      *pmfl |= PMf_KEEP; break;
-            case KEEPCOPY_PAT_MOD:  *pmfl |= PMf_KEEPCOPY; break;
-        }
+	*pmfl = S_pmflag(*pmfl, (char)ch);
     }
 }
 
@@ -11000,7 +11007,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     modstart = s;
 #endif
     while (*s && strchr(valid_flags, *s))
-	pmflag(&pm->op_pmflags,*s++);
+	pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {
 	SV* tmptoken = newSVpvn(modstart, s - modstart);
@@ -11080,7 +11087,7 @@ S_scan_subst(pTHX_ char *start)
 	    es++;
 	}
 	else if (strchr(S_PAT_MODS, *s))
-	    pmflag(&pm->op_pmflags,*s++);
+	    pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
 	else
 	    break;
     }

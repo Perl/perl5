@@ -3179,6 +3179,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#if !defined(PERL_CORE) && !defined(PERL_NO_SHORT_NAMES)
+#  if defined(PERL_IMPLICIT_CONTEXT)
+#    define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
+#  else
+#    define pmflag			Perl_pmflag
+#  endif
+#endif
+
 #ifdef HASATTRIBUTE_DEPRECATED
 #  define __attribute__deprecated__         __attribute__((deprecated))
 #endif

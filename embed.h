@@ -695,7 +695,6 @@
 #define pidgone			S_pidgone
 #endif
 #endif
-#define pmflag			Perl_pmflag
 #ifdef PERL_CORE
 #define pmruntime		Perl_pmruntime
 #endif
@@ -3063,7 +3062,6 @@
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)
 #endif
 #endif
-#define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
 #ifdef PERL_CORE
 #define pmruntime(a,b,c)	Perl_pmruntime(aTHX_ a,b,c)
 #endif
