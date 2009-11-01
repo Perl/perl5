@@ -462,7 +462,7 @@ is($cnt, scalar(@ary));
 }
 
 {
-    # Bug #XXXXX
+    # Bug #69875
     # 'Hybrid' scalar-and-array context
     scalar(our @PATH = split /::/, "Font::GlyphNames");
            # 'my' doesn't trigger the bug
