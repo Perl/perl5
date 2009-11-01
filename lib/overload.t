@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 598;
+use Test::More tests => 605;
 
 
 $a = new Oscalar "087";
@@ -1192,15 +1192,18 @@ foreach my $op (qw(<=> == != < <= > >=)) {
         # like tries to be too clever, and decides that $x-stringified
         # doesn't look like a regex
         ok("x" =~ $x, "qr-only matches");
+        ok("y" !~ $x, "qr-only doesn't match what it shouldn't");
         ok("xx" =~ /x$x/, "qr-only matches with concat");
-        like("$x", qr/QRonly=ARRAY/, "qr-only doesn't have string overload");
+        like("$x", qr/^QRonly=ARRAY/, "qr-only doesn't have string overload");
 
         my $qr = bless qr/y/, "QRonly";
         ok("x" =~ $qr, "qr with qr-overload uses overload");
+        ok("y" !~ $qr, "qr with qr-overload uses overload");
         is("$qr", "".qr/y/, "qr with qr-overload stringify");
 
         my $rx = $$qr;
         ok("y" =~ $rx, "bare rx with qr-overload doesn't overload match");
+        ok("x" !~ $rx, "bare rx with qr-overload doesn't overload match");
         is("$rx", "".qr/y/, "bare rx with qr-overload stringify");
     }
     {
@@ -1210,6 +1213,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     {
         my $x = bless [], "QRandSTR";
         ok("x" =~ $x, "qr+str uses qr for match");
+        ok("y" !~ $x, "qr+str uses qr for match");
         ok("xx" =~ /x$x/, "qr+str uses qr for match with concat");
         is("$x", "y", "qr+str uses str for stringify");
 
@@ -1230,18 +1234,19 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     }
     {
         my $rx = bless sub { ${ qr/x/ } }, "QRany";
-        ok(eval { "x" =~ $rx }, "qr overload accepts a bare rx");
+        ok("x" =~ $rx, "qr overload accepts a bare rx");
+        ok("y" !~ $rx, "qr overload accepts a bare rx");
 
         my $str = bless sub { "x" }, "QRany";
         ok(!eval { "x" =~ $str }, "qr overload doesn't accept a string");
-        like($@, qr/^qr overload did not return a REGEXP/, "correct error");
+        like($@, qr/^Overloaded qr did not return a REGEXP/, "correct error");
 
         my $oqr = bless qr/z/, "QRandSTR";
         my $oqro = bless sub { $oqr }, "QRany";
-        ok(eval { "z" =~ $oqro }, "qr overload doesn't recurse");
+        ok("z" =~ $oqro, "qr overload doesn't recurse");
 
         my $qrs = bless qr/z/, "QRself";
-        ok(eval { "z" =~ $qrs }, "qr overload can return self");
+        ok("z" =~ $qrs, "qr overload can return self");
     }
     {
         package STRonly;
@@ -1252,10 +1257,12 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     }
     {
         my $fb = bless [], "STRonlyFB";
-        ok(eval { "x" =~ $fb }, "qr falls back to \"\"");
+        ok("x" =~ $fb, "qr falls back to \"\"");
+        ok("y" !~ $fb, "qr falls back to \"\"");
 
         my $nofb = bless [], "STRonly";
-        ok(eval { "x" =~ $nofb }, "qr falls back even without fallback");
+        ok("x" =~ $nofb, "qr falls back even without fallback");
+        ok("y" !~ $nofb, "qr falls back even without fallback");
     }
 }
 
