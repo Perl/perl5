@@ -12791,6 +12791,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     SV *const utf8_buffer = filter;
     IV status = IoPAGE(filter);
     const bool reverse = IoLINES(filter);
+    I32 retval;
 
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
@@ -12823,7 +12824,10 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	    nl = SvEND(utf8_buffer);
 	}
 	if (nl) {
-	    sv_catpvn(sv, SvPVX(utf8_buffer), nl - SvPVX(utf8_buffer));
+	    STRLEN got = nl - SvPVX(utf8_buffer);
+	    /* Did we have anything to append?  */
+	    retval = got != 0;
+	    sv_catpvn(sv, SvPVX(utf8_buffer), got);
 	    /* Everything else in this code works just fine if SVp_POK isn't
 	       set.  This, however, needs it, and we need it to work, else
 	       we loop infinitely because the buffer is never consumed.  */
@@ -12894,7 +12898,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 			  status,
 			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
     DEBUG_P({ sv_dump(utf8_buffer); sv_dump(sv);});
-    return SvCUR(sv);
+    return retval;
 }
 
 static U8 *

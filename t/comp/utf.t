@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..3980\n";
+print "1..4016\n";
 my $test = 0;
 
 my %templates = (
@@ -54,6 +54,9 @@ for my $bom (0, 1) {
 	for my $nl (1, 0) {
 	    for my $value (123, 1234, 12345) {
 		test($enc, $value, $value, $bom, $nl, $value);
+		# This has the unfortunate side effect of causing an infinite
+		# loop without the bug fix it corresponds to:
+		test($enc, "($value)", $value, $bom, $nl, "($value)");
 	    }
 	    next if $enc eq 'utf8';
 	    # Arguably a bug that currently string literals from UTF-8 file
