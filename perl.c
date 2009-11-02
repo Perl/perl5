@@ -540,6 +540,8 @@ perl_destruct(pTHXx)
     PERL_UNUSED_ARG(my_perl);
 #endif
 
+    assert(PL_scopestack_ix == 1);
+
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
 
@@ -567,6 +569,7 @@ perl_destruct(pTHXx)
     }
     LEAVE;
     FREETMPS;
+    assert(PL_scopestack_ix == 0);
 
     /* Need to flush since END blocks can produce output */
     my_fflush_all();
