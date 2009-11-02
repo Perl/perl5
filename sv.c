@@ -1456,14 +1456,14 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 		   (unsigned long)new_type);
     }
 
-    if (old_type_details->arena) {
-	/* If there was an old body, then we need to free it.
-	   Note that there is an assumption that all bodies of types that
-	   can be upgraded came from arenas. Only the more complex non-
-	   upgradable types are allowed to be directly malloc()ed.  */
+    if (old_type > SVt_IV) { /* SVt_IVs are overloaded for PTEs */
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
+	/* Note that there is an assumption that all bodies of types that
+	   can be upgraded came from arenas. Only the more complex non-
+	   upgradable types are allowed to be directly malloc()ed.  */
+	assert(old_type_details->arena);
 	del_body((void*)((char*)old_body + old_type_details->offset),
 		 &PL_body_roots[old_type]);
 #endif
