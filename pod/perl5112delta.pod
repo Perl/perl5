@@ -15,11 +15,28 @@ XXX Unlikely to need this section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Use of C<:=> to mean an empty attribute list is now deprecated.
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+An accident of Perl's parser means that these constructions are all equivalent:
 
+    my $pi := 4;
+    my $pi : = 4;
+    my $pi :  = 4;
+
+with the C<:> being treated as the start of an attribute list, which ends
+before the C<=>. As whitespace is not significant here, all are parsed as an
+empty attribute list, hence all the above are equivalent to, and better written
+as
+
+    my $pi = 4;
+
+because no attribute processing is done for an empty list.
+
+As is, this means that C<:=> cannot be used as a new token, without silently
+changing the meaning of existing code. Hence that particular form is now
+deprecated, and will become a syntax error. If it is absolutely necessary to
+have empty attribute lists (for example, because of a code generator) the
+avoid the warning by adding a space before the C<=>.
 
 =head1 Core Enhancements
 
