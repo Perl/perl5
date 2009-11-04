@@ -2610,8 +2610,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    PL_curstash = PL_defstash;
 	    FREETMPS;
 	    JMPENV_POP;
-	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
-		Perl_croak(aTHX_ "Callback called exit");
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
@@ -2712,8 +2710,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	PL_curstash = PL_defstash;
 	FREETMPS;
 	JMPENV_POP;
-	if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
-	    Perl_croak(aTHX_ "Callback called exit");
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
@@ -4585,16 +4581,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;
-	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
-		if (paramList == PL_beginav)
-		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
-		else
-		    Perl_croak(aTHX_ "%s failed--call queue aborted",
-			       paramList == PL_checkav ? "CHECK"
-			       : paramList == PL_initav ? "INIT"
-			       : paramList == PL_unitcheckav ? "UNITCHECK"
-			       : "END");
-	    }
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:

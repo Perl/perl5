@@ -931,3 +931,8 @@ pmflag (flag, before = 0)
 	RETVAL = before;
     OUTPUT:
 	RETVAL
+
+void
+my_exit(int exitcode)
+        PPCODE:
+        my_exit(exitcode);
