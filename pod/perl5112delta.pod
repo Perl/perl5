@@ -44,6 +44,14 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 qr overloading
+
+It is now possible to overload the C<qr//> operator, that is, conversion
+to regexp, like it was already possible to overload conversion to
+boolean, string or number of objects. It is invoked when an object
+appears on the right hand side of the C<=~> operator, or when it is
+interpolated into a regexp. See L<overload>.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
