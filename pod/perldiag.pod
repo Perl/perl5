@@ -373,6 +373,11 @@ is not the same as
     $var = 'myvar';
     $sym = "mypack::$var";
 
+=item Bad plugin affecting keyword '%s'
+
+(F) An extension using the keyword plugin mechanism violated the
+plugin API.
+
 =item Bad realloc() ignored
 
 (S malloc) An internal routine called realloc() on something that had

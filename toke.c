@@ -343,6 +343,8 @@ static struct debug_tokens {
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
     { OROR,		TOKENTYPE_NONE,		"OROR" },
     { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
+    { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
+    { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
     { POSTDEC,		TOKENTYPE_NONE,		"POSTDEC" },
     { POSTINC,		TOKENTYPE_NONE,		"POSTINC" },
@@ -5220,6 +5222,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	bool anydelim;
 	I32 tmp;
 
 	orig_keyword = 0;
@@ -5230,33 +5233,18 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	tmp = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
+	anydelim = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
 	       (len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
 			     (PL_tokenbuf[0] == 'q' &&
 			      strchr("qwxr", PL_tokenbuf[1])))));
 
 	/* x::* is just a word, unless x is "CORE" */
-	if (!tmp && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
+	if (!anydelim && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
 	    goto just_a_word;
 
 	d = s;
 	while (d < PL_bufend && isSPACE(*d))
 		d++;	/* no comments skipped here, or s### is misparsed */
-
-	/* Is this a label? */
-	if (!tmp && PL_expect == XSTATE
-	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
-	    tmp = keyword(PL_tokenbuf, len, 0);
-	    if (tmp)
-		Perl_croak(aTHX_ "Can't use keyword '%s' as a label", PL_tokenbuf);
-	    s = d + 1;
-	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
-	    CLINE;
-	    TOKEN(LABEL);
-	}
-	else
-	    /* Check for keywords */
-	    tmp = keyword(PL_tokenbuf, len, 0);
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
@@ -5266,6 +5254,47 @@ Perl_yylex(pTHX)
 			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	    pl_yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(WORD);
+	}
+
+	/* Check for plugged-in keyword */
+	{
+	    OP *o;
+	    int result;
+	    char *saved_bufptr = PL_bufptr;
+	    PL_bufptr = s;
+	    result = CALL_FPTR(PL_keyword_plugin)(aTHX_ PL_tokenbuf, len, &o);
+	    s = PL_bufptr;
+	    if (result == KEYWORD_PLUGIN_DECLINE) {
+		/* not a plugged-in keyword */
+		PL_bufptr = saved_bufptr;
+	    } else if (result == KEYWORD_PLUGIN_STMT) {
+		pl_yylval.opval = o;
+		CLINE;
+		PL_expect = XSTATE;
+		return REPORT(PLUGSTMT);
+	    } else if (result == KEYWORD_PLUGIN_EXPR) {
+		pl_yylval.opval = o;
+		CLINE;
+		PL_expect = XOPERATOR;
+		return REPORT(PLUGEXPR);
+	    } else {
+		Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'",
+					PL_tokenbuf);
+	    }
+	}
+
+	/* Check for built-in keyword */
+	tmp = keyword(PL_tokenbuf, len, 0);
+
+	/* Is this a label? */
+	if (!anydelim && PL_expect == XSTATE
+	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
+	    if (tmp)
+		Perl_croak(aTHX_ "Can't use keyword '%s' as a label", PL_tokenbuf);
+	    s = d + 1;
+	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
+	    CLINE;
+	    TOKEN(LABEL);
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
@@ -13013,6 +13042,18 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 	SvRMAGICAL_on(sv);
     }
     return (char *)s;
+}
+
+int
+Perl_keyword_plugin_standard(pTHX_
+	char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
+{
+    PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD;
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(keyword_ptr);
+    PERL_UNUSED_ARG(keyword_len);
+    PERL_UNUSED_ARG(op_ptr);
+    return KEYWORD_PLUGIN_DECLINE;
 }
 
 /*

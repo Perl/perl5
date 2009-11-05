@@ -3198,6 +3198,11 @@ ext/XS-APItest/APItest.xs	XS::APItest extension
 ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS-APItest/exception.c	XS::APItest extension
+ext/XS-APItest-KeywordRPN/KeywordRPN.pm	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/KeywordRPN.xs	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/Makefile.PL	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/README	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/t/keyword_plugin.t	test keyword plugin mechanism
 ext/XS-APItest/Makefile.PL	XS::APItest extension
 ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined

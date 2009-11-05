@@ -272,6 +272,14 @@ conditional is about to be evaluated again.  Thus it can be used to
 increment a loop variable, even when the loop has been continued via
 the C<next> statement.
 
+Extension modules can also hook into the Perl parser to define new
+kinds of compound statement.  These are introduced by a keyword which
+the extension recognises, and the syntax following the keyword is
+defined entirely by the extension.  If you are an implementor, see
+L<perlapi/PL_keyword_plugin> for the mechanism.  If you are using such
+a module, see the module's documentation for details of the syntax that
+it defines.
+
 =head2 Loop Control
 X<loop control> X<loop, control> X<next> X<last> X<redo> X<continue>
 

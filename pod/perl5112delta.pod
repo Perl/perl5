@@ -52,6 +52,28 @@ boolean, string or number of objects. It is invoked when an object
 appears on the right hand side of the C<=~> operator, or when it is
 interpolated into a regexp. See L<overload>.
 
+=head2 Pluggable keywords
+
+Extension modules can now cleanly hook into the Perl parser to define new
+kinds of keyword-headed expression and compound statement.  The syntax
+following the keyword is defined entirely by the extension.  This allow
+a completely non-Perl sublanguage to be parsed inline, with the right
+ops cleanly generated.
+
+This feature is currently considered experimental, and using it to do
+anything interesting is difficult.  Many necessary supporting facilities,
+such as the lexer and the pad system, can only be accessed through
+unsupported internal interfaces.  It is intended that the Perl 5.13
+development cycle will see the addition of clean, supported interfaces
+for many of these functions.  In Perl 5.12 most uses of pluggable keywords
+will be via L<Devel::Declare>.
+
+See L<perlapi/PL_keyword_plugin> for the mechanism.  The Perl core source
+distribution also includes a new module L<XS::APItest::KeywordRPN>, which
+implements reverse Polish notation arithmetic via pluggable keywords.
+This module is mainly used for test purposes, and is not normally
+installed, but also serves as an example of how to use the new mechanism.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous

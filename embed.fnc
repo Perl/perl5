@@ -2228,6 +2228,8 @@ ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
 
+xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
