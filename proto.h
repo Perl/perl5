@@ -6696,6 +6696,13 @@ PERL_CALLCONV struct refcounted_he *	Perl_store_cop_label(pTHX_ struct refcounte
 	assert(label)
 
 
+PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
+	assert(keyword_ptr); assert(op_ptr)
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

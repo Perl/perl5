@@ -49,66 +49,68 @@
      FUNC0SUB = 264,
      UNIOPSUB = 265,
      LSTOPSUB = 266,
-     LABEL = 267,
-     FORMAT = 268,
-     SUB = 269,
-     ANONSUB = 270,
-     PACKAGE = 271,
-     USE = 272,
-     WHILE = 273,
-     UNTIL = 274,
-     IF = 275,
-     UNLESS = 276,
-     ELSE = 277,
-     ELSIF = 278,
-     CONTINUE = 279,
-     FOR = 280,
-     GIVEN = 281,
-     WHEN = 282,
-     DEFAULT = 283,
-     LOOPEX = 284,
-     DOTDOT = 285,
-     YADAYADA = 286,
-     FUNC0 = 287,
-     FUNC1 = 288,
-     FUNC = 289,
-     UNIOP = 290,
-     LSTOP = 291,
-     RELOP = 292,
-     EQOP = 293,
-     MULOP = 294,
-     ADDOP = 295,
-     DOLSHARP = 296,
-     DO = 297,
-     HASHBRACK = 298,
-     NOAMP = 299,
-     LOCAL = 300,
-     MY = 301,
-     MYSUB = 302,
-     REQUIRE = 303,
-     COLONATTR = 304,
-     PREC_LOW = 305,
-     DOROP = 306,
-     OROP = 307,
-     ANDOP = 308,
-     NOTOP = 309,
-     ASSIGNOP = 310,
-     DORDOR = 311,
-     OROR = 312,
-     ANDAND = 313,
-     BITOROP = 314,
-     BITANDOP = 315,
-     SHIFTOP = 316,
-     MATCHOP = 317,
-     REFGEN = 318,
-     UMINUS = 319,
-     POWOP = 320,
-     POSTDEC = 321,
-     POSTINC = 322,
-     PREDEC = 323,
-     PREINC = 324,
-     ARROW = 325,
-     PEG = 326
+     PLUGEXPR = 267,
+     PLUGSTMT = 268,
+     LABEL = 269,
+     FORMAT = 270,
+     SUB = 271,
+     ANONSUB = 272,
+     PACKAGE = 273,
+     USE = 274,
+     WHILE = 275,
+     UNTIL = 276,
+     IF = 277,
+     UNLESS = 278,
+     ELSE = 279,
+     ELSIF = 280,
+     CONTINUE = 281,
+     FOR = 282,
+     GIVEN = 283,
+     WHEN = 284,
+     DEFAULT = 285,
+     LOOPEX = 286,
+     DOTDOT = 287,
+     YADAYADA = 288,
+     FUNC0 = 289,
+     FUNC1 = 290,
+     FUNC = 291,
+     UNIOP = 292,
+     LSTOP = 293,
+     RELOP = 294,
+     EQOP = 295,
+     MULOP = 296,
+     ADDOP = 297,
+     DOLSHARP = 298,
+     DO = 299,
+     HASHBRACK = 300,
+     NOAMP = 301,
+     LOCAL = 302,
+     MY = 303,
+     MYSUB = 304,
+     REQUIRE = 305,
+     COLONATTR = 306,
+     PREC_LOW = 307,
+     DOROP = 308,
+     OROP = 309,
+     ANDOP = 310,
+     NOTOP = 311,
+     ASSIGNOP = 312,
+     DORDOR = 313,
+     OROR = 314,
+     ANDAND = 315,
+     BITOROP = 316,
+     BITANDOP = 317,
+     SHIFTOP = 318,
+     MATCHOP = 319,
+     REFGEN = 320,
+     UMINUS = 321,
+     POWOP = 322,
+     POSTDEC = 323,
+     POSTINC = 324,
+     PREDEC = 325,
+     PREINC = 326,
+     ARROW = 327,
+     PEG = 328
    };
 #endif
 
@@ -122,66 +124,68 @@
 #define FUNC0SUB 264
 #define UNIOPSUB 265
 #define LSTOPSUB 266
-#define LABEL 267
-#define FORMAT 268
-#define SUB 269
-#define ANONSUB 270
-#define PACKAGE 271
-#define USE 272
-#define WHILE 273
-#define UNTIL 274
-#define IF 275
-#define UNLESS 276
-#define ELSE 277
-#define ELSIF 278
-#define CONTINUE 279
-#define FOR 280
-#define GIVEN 281
-#define WHEN 282
-#define DEFAULT 283
-#define LOOPEX 284
-#define DOTDOT 285
-#define YADAYADA 286
-#define FUNC0 287
-#define FUNC1 288
-#define FUNC 289
-#define UNIOP 290
-#define LSTOP 291
-#define RELOP 292
-#define EQOP 293
-#define MULOP 294
-#define ADDOP 295
-#define DOLSHARP 296
-#define DO 297
-#define HASHBRACK 298
-#define NOAMP 299
-#define LOCAL 300
-#define MY 301
-#define MYSUB 302
-#define REQUIRE 303
-#define COLONATTR 304
-#define PREC_LOW 305
-#define DOROP 306
-#define OROP 307
-#define ANDOP 308
-#define NOTOP 309
-#define ASSIGNOP 310
-#define DORDOR 311
-#define OROR 312
-#define ANDAND 313
-#define BITOROP 314
-#define BITANDOP 315
-#define SHIFTOP 316
-#define MATCHOP 317
-#define REFGEN 318
-#define UMINUS 319
-#define POWOP 320
-#define POSTDEC 321
-#define POSTINC 322
-#define PREDEC 323
-#define PREINC 324
-#define ARROW 325
-#define PEG 326
+#define PLUGEXPR 267
+#define PLUGSTMT 268
+#define LABEL 269
+#define FORMAT 270
+#define SUB 271
+#define ANONSUB 272
+#define PACKAGE 273
+#define USE 274
+#define WHILE 275
+#define UNTIL 276
+#define IF 277
+#define UNLESS 278
+#define ELSE 279
+#define ELSIF 280
+#define CONTINUE 281
+#define FOR 282
+#define GIVEN 283
+#define WHEN 284
+#define DEFAULT 285
+#define LOOPEX 286
+#define DOTDOT 287
+#define YADAYADA 288
+#define FUNC0 289
+#define FUNC1 290
+#define FUNC 291
+#define UNIOP 292
+#define LSTOP 293
+#define RELOP 294
+#define EQOP 295
+#define MULOP 296
+#define ADDOP 297
+#define DOLSHARP 298
+#define DO 299
+#define HASHBRACK 300
+#define NOAMP 301
+#define LOCAL 302
+#define MY 303
+#define MYSUB 304
+#define REQUIRE 305
+#define COLONATTR 306
+#define PREC_LOW 307
+#define DOROP 308
+#define OROP 309
+#define ANDOP 310
+#define NOTOP 311
+#define ASSIGNOP 312
+#define DORDOR 313
+#define OROR 314
+#define ANDAND 315
+#define BITOROP 316
+#define BITANDOP 317
+#define SHIFTOP 318
+#define MATCHOP 319
+#define REFGEN 320
+#define UMINUS 321
+#define POWOP 322
+#define POSTDEC 323
+#define POSTINC 324
+#define PREDEC 325
+#define PREINC 326
+#define ARROW 327
+#define PEG 328
 
 
 
