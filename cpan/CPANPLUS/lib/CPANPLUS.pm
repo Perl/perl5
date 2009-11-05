@@ -13,7 +13,7 @@ BEGIN {
     use vars        qw( @EXPORT @ISA $VERSION );
     @EXPORT     =   qw( shell fetch get install );
     @ISA        =   qw( Exporter );
-    $VERSION = "0.89_06";     #have to hardcode or cpan.org gets unhappy
+    $VERSION = "0.89_07";     #have to hardcode or cpan.org gets unhappy
 }
 
 ### purely for backward compatibility, so we can call it from the commandline:
