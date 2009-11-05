@@ -349,8 +349,7 @@ PP(pp_pos)
 
 	LvTYPE(TARG) = '.';
 	if (LvTARG(TARG) != sv) {
-	    if (LvTARG(TARG))
-		SvREFCNT_dec(LvTARG(TARG));
+	    SvREFCNT_dec(LvTARG(TARG));
 	    LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
@@ -3226,8 +3225,7 @@ PP(pp_substr)
 
 	    LvTYPE(TARG) = 'x';
 	    if (LvTARG(TARG) != sv) {
-		if (LvTARG(TARG))
-		    SvREFCNT_dec(LvTARG(TARG));
+		SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	    }
 	    LvTARGOFF(TARG) = upos;
@@ -3257,8 +3255,7 @@ PP(pp_vec)
 	}
 	LvTYPE(TARG) = 'v';
 	if (LvTARG(TARG) != src) {
-	    if (LvTARG(TARG))
-		SvREFCNT_dec(LvTARG(TARG));
+	    SvREFCNT_dec(LvTARG(TARG));
 	    LvTARG(TARG) = SvREFCNT_inc_simple(src);
 	}
 	LvTARGOFF(TARG) = offset;
