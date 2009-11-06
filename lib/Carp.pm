@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
