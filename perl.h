@@ -4677,6 +4677,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200 /* strict pragma */
 #define HINT_STRICT_VARS	0x00000400 /* strict pragma */
+#define HINT_UNI_8_BIT		0x00000800 /* unicode8bit pragma */
 
 /* The HINT_NEW_* constants are used by the overload pragma */
 #define HINT_NEW_INTEGER	0x00001000

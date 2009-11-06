@@ -3474,6 +3474,7 @@ lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
+lib/legacy.pm			Pragma to preserve legacy behavior
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
