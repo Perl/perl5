@@ -28,7 +28,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Nov  5 21:01:50 CET 2009 [metaconfig 3.5 PL0]
+# Generated on Fri Nov  6 07:43:05 CET 2009 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -351,6 +351,8 @@ optimize=''
 cf_email=''
 cf_by=''
 cf_time=''
+charbits=''
+charsize=''
 contains=''
 cpp_stuff=''
 cpplast=''
@@ -18819,6 +18821,86 @@ esac
 : set the base revision
 baserev=5.0
 
+: check for length of character
+echo " "
+case "$charsize" in
+'')
+	echo "Checking to see how big your characters are (hey, you never know)..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main()
+{
+    printf("%d\n", (int)sizeof(char));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		dflt=`$run ./try`
+	else
+		dflt='1'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+	fi
+	;;
+*)
+	dflt="$charsize"
+	;;
+esac
+rp="What is the size of a character (in bytes)?"
+. ./myread
+charsize="$ans"
+$rm_try
+
+: Check for the number of bits in a character
+case "$charbits" in
+'')	echo "Checking how long a character is (in bits)..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+int main ()
+{
+    int n;
+    unsigned char c;
+    for (c = 1, n = 0; c; c <<= 1, n++) ;
+    printf ("%d\n", n);
+    return (0);
+    }
+EOCP
+	set try
+	if eval $compile_ok; then
+		dflt=`$run ./try`
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+	fi
+	;;
+*)
+	dflt="$charbits"
+	;;
+esac
+rp="What is the length of a character (in bits)?"
+. ./myread
+charbits="$ans"
+$rm_try
+case "$charbits" in
+8)	;;
+*)	cat >&4 << EOM
+Your system has an unsigned character size of $charbits bits, which
+is rather unusual (normally it is 8 bits).  Perl likely will not work
+correctly on your system, with subtle bugs in various places.
+EOM
+	rp='Do you really want to continue?'
+	dflt='n'
+	. ./myread
+	case "$ans" in
+		[yY])	echo >&4 "Okay, continuing."	;;
+		*)	exit 1				;;
+	esac
+esac
+
 : how do we concatenate cpp tokens here?
 echo " "
 echo "Checking to see how your cpp does stuff like concatenate tokens..." >&4
@@ -22213,6 +22295,8 @@ ccversion='$ccversion'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
+charbits='$charbits'
+charsize='$charsize'
 chgrp='$chgrp'
 chmod='$chmod'
 chown='$chown'
