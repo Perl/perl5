@@ -393,16 +393,28 @@ the documentation to the modules in core.
 
 =item Configure
 
-The configure process is the way we make Perl portable across the
+The Configure process is the way we make Perl portable across the
 myriad of operating systems it supports. Responsibility for the
-configure, build and installation process, as well as the overall
-portability of the core code rests with the configure pumpkin - others
-help out with individual operating systems.
+Configure, build and installation process, as well as the overall
+portability of the core code rests with the Configure pumpkin -
+others help out with individual operating systems.
+
+The three files that fall under his/her resposibility are Configure,
+config_h.SH, and Porting/Glossary (and a whole bunch of small related
+files that are less important here). The Configure pumpkin decides how
+patches to these are dealt with. Currently, the Configure pumpkin will
+accept patches in most common formats, even directly to these files.
+Other committers are allowed to commit to these files under the strict
+condition that they will inform the Configure pumpkin, either on IRC
+(if he/she happens to be around) or through (personal) e-mail.
 
 The files involved are the operating system directories, (F<win32/>,
 F<os2/>, F<vms/> and so on) the shell scripts which generate F<config.h>
 and F<Makefile>, as well as the metaconfig files which generate
 F<Configure>. (metaconfig isn't included in the core distribution.)
+
+See http://perl5.git.perl.org/metaconfig.git/blob/HEAD:/README for a
+description of the full process involved.
 
 =item Interpreter
 
