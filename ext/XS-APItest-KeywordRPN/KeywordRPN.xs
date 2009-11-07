@@ -247,7 +247,7 @@ BOOT:
 	PL_keyword_plugin = my_keyword_plugin;
 
 void
-import(SV *class, ...)
+import(SV *classname, ...)
 PREINIT:
 	int i;
 PPCODE:
@@ -265,7 +265,7 @@ PPCODE:
 	}
 
 void
-unimport(SV *class, ...)
+unimport(SV *classname, ...)
 PREINIT:
 	int i;
 PPCODE:
