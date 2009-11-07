@@ -213,6 +213,7 @@ if (defined($Config{'extensions'})) {
         next if $_ eq 'Devel/DProf'; 
         # test modules
         next if $_ eq 'XS/APItest';
+        next if $_ eq 'XS/APItest/KeywordRPN';
         next if $_ eq 'XS/Typemap';
            # VMS$ perl  -e "eval ""require \""Devel/DProf.pm\"";"" print $@"
            # \NT> perl  -e "eval \"require 'Devel/DProf.pm'\"; print $@"

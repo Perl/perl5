@@ -766,6 +766,8 @@ END_EXTERN_C
 #define PL_interp_size		(*Perl_Ginterp_size_ptr(NULL))
 #undef  PL_interp_size_5_10_0
 #define PL_interp_size_5_10_0	(*Perl_Ginterp_size_5_10_0_ptr(NULL))
+#undef  PL_keyword_plugin
+#define PL_keyword_plugin	(*Perl_Gkeyword_plugin_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_mmap_page_size

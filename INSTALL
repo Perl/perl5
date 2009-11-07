@@ -1282,7 +1282,7 @@ various other operating systems.
 
 If you plan to port Perl to a new architecture, study carefully the
 section titled "Philosophical Issues in Patching and Porting Perl"
-in the file Porting/pumpkin.pod and the file Porting/patching.pod.
+in the file Porting/pumpkin.pod and the file pod/perlrepository.pod.
 Study also how other non-UNIX ports have solved problems.
 
 =back

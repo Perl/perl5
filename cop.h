@@ -114,6 +114,7 @@ typedef struct jmpenv JMPENV;
     STMT_START {							\
 	DEBUG_l(Perl_deb(aTHX_ "popping jumplevel was %p, now %p\n",	\
 			 (void*)PL_top_env, (void*)cur_env.je_prev));			\
+	assert(PL_top_env == &cur_env);					\
 	PL_top_env = cur_env.je_prev;					\
     } STMT_END
 

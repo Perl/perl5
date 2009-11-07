@@ -249,6 +249,14 @@ cf_time (cf_who.U):
 	Holds the output of the "date" command when the configuration file was
 	produced. This is used to tag both config.sh and config_h.SH.
 
+charbits (charsize.U):
+	This variable contains the value of the CHARBITS symbol, which
+	indicates to the C program how many bits there are in a character.
+
+charsize (charsize.U):
+	This variable contains the value of the CHARSIZE symbol, which
+	indicates to the C program how many bytes there are in a character.
+
 chgrp (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.

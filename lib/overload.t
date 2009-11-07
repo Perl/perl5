@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 577;
+use Test::More tests => 605;
 
 
 $a = new Oscalar "087";
@@ -1179,6 +1179,91 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     like('x:a:=', qr/x$a=$/);
     like('x:a:a:=', qr/x$a$a=$/);
 
+}
+
+{
+    {
+        package QRonly;
+        use overload qr => sub { qr/x/ }, fallback => 1;
+    }
+    {
+        my $x = bless [], "QRonly";
+
+        # like tries to be too clever, and decides that $x-stringified
+        # doesn't look like a regex
+        ok("x" =~ $x, "qr-only matches");
+        ok("y" !~ $x, "qr-only doesn't match what it shouldn't");
+        ok("xx" =~ /x$x/, "qr-only matches with concat");
+        like("$x", qr/^QRonly=ARRAY/, "qr-only doesn't have string overload");
+
+        my $qr = bless qr/y/, "QRonly";
+        ok("x" =~ $qr, "qr with qr-overload uses overload");
+        ok("y" !~ $qr, "qr with qr-overload uses overload");
+        is("$qr", "".qr/y/, "qr with qr-overload stringify");
+
+        my $rx = $$qr;
+        ok("y" =~ $rx, "bare rx with qr-overload doesn't overload match");
+        ok("x" !~ $rx, "bare rx with qr-overload doesn't overload match");
+        is("$rx", "".qr/y/, "bare rx with qr-overload stringify");
+    }
+    {
+        package QRandSTR;
+        use overload qr => sub { qr/x/ }, q/""/ => sub { "y" };
+    }
+    {
+        my $x = bless [], "QRandSTR";
+        ok("x" =~ $x, "qr+str uses qr for match");
+        ok("y" !~ $x, "qr+str uses qr for match");
+        ok("xx" =~ /x$x/, "qr+str uses qr for match with concat");
+        is("$x", "y", "qr+str uses str for stringify");
+
+        my $qr = bless qr/z/, "QRandSTR";
+        is("$qr", "y", "qr with qr+str uses str for stringify");
+        ok("xx" =~ /x$x/, "qr with qr+str uses qr for match");
+
+        my $rx = $$qr;
+        ok("z" =~ $rx, "bare rx with qr+str doesn't overload match");
+        is("$rx", "".qr/z/, "bare rx with qr+str doesn't overload stringify");
+    }
+    {
+        package QRany;
+        use overload qr => sub { $_[0]->(@_) };
+
+        package QRself;
+        use overload qr => sub { $_[0] };
+    }
+    {
+        my $rx = bless sub { ${ qr/x/ } }, "QRany";
+        ok("x" =~ $rx, "qr overload accepts a bare rx");
+        ok("y" !~ $rx, "qr overload accepts a bare rx");
+
+        my $str = bless sub { "x" }, "QRany";
+        ok(!eval { "x" =~ $str }, "qr overload doesn't accept a string");
+        like($@, qr/^Overloaded qr did not return a REGEXP/, "correct error");
+
+        my $oqr = bless qr/z/, "QRandSTR";
+        my $oqro = bless sub { $oqr }, "QRany";
+        ok("z" =~ $oqro, "qr overload doesn't recurse");
+
+        my $qrs = bless qr/z/, "QRself";
+        ok("z" =~ $qrs, "qr overload can return self");
+    }
+    {
+        package STRonly;
+        use overload q/""/ => sub { "x" };
+
+        package STRonlyFB;
+        use overload q/""/ => sub { "x" }, fallback => 1;
+    }
+    {
+        my $fb = bless [], "STRonlyFB";
+        ok("x" =~ $fb, "qr falls back to \"\"");
+        ok("y" !~ $fb, "qr falls back to \"\"");
+
+        my $nofb = bless [], "STRonly";
+        ok("x" =~ $nofb, "qr falls back even without fallback");
+        ok("y" !~ $nofb, "qr falls back even without fallback");
+    }
 }
 
 {

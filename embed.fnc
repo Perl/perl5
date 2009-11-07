@@ -218,7 +218,7 @@ Afp	|OP*	|die		|NULLOK const char* pat|...
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 #endif
 : Used in util.c
-p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
+pr	|void	|die_where	|NULLOK SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
@@ -745,7 +745,7 @@ pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 : Used in toke.c and perly.y
 p	|PADOFFSET|allocmy	|NN const char *const name
 : Used in op.c and toke.c
-pdR	|PADOFFSET|pad_findmy	|NN const char* name
+EXpdR	|PADOFFSET|pad_findmy	|NN const char* name
 Ap	|PADOFFSET|find_rundefsvoffset	|
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
@@ -800,7 +800,7 @@ Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV 
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 s	|void	|pidgone	|Pid_t pid|int status
 #endif
-Ap	|void	|pmflag		|NN U32* pmfl|int ch
+DUXpo	|void	|pmflag		|NN U32 *pmfl|int ch
 : Used in perly.y
 p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
@@ -1189,7 +1189,7 @@ Ap	|void	|vwarner	|U32 err|NN const char* pat|NULLOK va_list* args
 p	|void	|watch		|NN char** addr
 Ap	|I32	|whichsig	|NN const char* sig
 : Used in pp_ctl.c
-p	|void	|write_to_stderr|NN const char* message|int msglen
+p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c
 p	|int	|yyerror	|NN const char *const s
 : Used in perly.y, and by Data::Alias
@@ -1846,10 +1846,8 @@ s	|char*	|stdize_locale	|NN char* locs
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
-s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
-				|NULLOK STRLEN *msglen|NULLOK I32* utf8
-s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
-				|I32 utf8|bool warn
+s	|SV *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args
+s	|bool	|vdie_common	|NULLOK SV *message|bool warn
 sr	|char *	|write_no_mem
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
@@ -2229,6 +2227,8 @@ ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 : Only used  in op.c
 xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
+
+xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 
 END_EXTERN_C
 /*

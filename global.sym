@@ -363,6 +363,7 @@ Perl_vstringify
 Perl_vcmp
 Perl_ninstr
 Perl_op_free
+Perl_pad_findmy
 Perl_find_rundefsvoffset
 Perl_pad_sv
 Perl_reentrant_size

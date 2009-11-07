@@ -81,6 +81,7 @@ our @names = qw#
     (.=
     (~~
     (-X
+    (qr
     DESTROY
 #;
 
@@ -152,6 +153,7 @@ our @enums = qw#
     concat_ass
     smart
     ftest
+    regexp
     DESTROY
 #;
 

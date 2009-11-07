@@ -3179,6 +3179,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#if !defined(PERL_CORE) && !defined(PERL_NO_SHORT_NAMES)
+#  if defined(PERL_IMPLICIT_CONTEXT)
+#    define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
+#  else
+#    define pmflag			Perl_pmflag
+#  endif
+#endif
+
 #ifdef HASATTRIBUTE_DEPRECATED
 #  define __attribute__deprecated__         __attribute__((deprecated))
 #endif
@@ -4669,6 +4677,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200 /* strict pragma */
 #define HINT_STRICT_VARS	0x00000400 /* strict pragma */
+#define HINT_UNI_8_BIT		0x00000800 /* unicode8bit pragma */
 
 /* The HINT_NEW_* constants are used by the overload pragma */
 #define HINT_NEW_INTEGER	0x00001000
@@ -4745,6 +4754,11 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
 typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
 typedef void(CPERLscope(*Perl_ophook_t))(pTHX_ OP*);
+typedef int (CPERLscope(*Perl_keyword_plugin_t))(pTHX_ char*, STRLEN, OP**);
+
+#define KEYWORD_PLUGIN_DECLINE 0
+#define KEYWORD_PLUGIN_STMT    1
+#define KEYWORD_PLUGIN_EXPR    2
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {

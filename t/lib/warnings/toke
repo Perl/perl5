@@ -901,3 +901,62 @@ my $bar = qr/^foo${\}n/;
 EXPECT
 Possible unintended interpolation of $\ in regex at - line 3.
 Possible unintended interpolation of $\ in regex at - line 5.
+########
+# toke.c
+use feature 'state';
+# This one is fine as an empty attribute list
+my $holy_Einstein : = '';
+# This one is deprecated
+my $krunch := 4;
+our $FWISK_FWISK_FWIZZACH_FWACH_ZACHITTY_ZICH_SHAZZATZ_FWISK := '';
+state $thump := 'Trumpets';
+# Lather rinse repeat in my usual obsessive style
+my @holy_perfect_pitch : = ();
+my @zok := ();
+our @GUKGUK := ();
+# state @widget_mark := ();
+my %holy_seditives : = ();
+my %bang := ();
+our %GIGAZING := ();
+# state %hex := ();
+no warnings 'deprecated';
+my $holy_giveaways : = '';
+my $eee_yow := [];
+our $TWOYYOYYOING_THUK_UGH := 1 == 1;
+state $octothorn := 'Tinky Winky';
+my @holy_Taj_Mahal : = ();
+my @touche := ();
+our @PLAK_DAK_THUK_FRIT := ();
+# state @hash_mark := ();
+my %holy_priceless_collection_of_Etruscan_snoods : = ();
+my %wham_eth := ();
+our %THWUK := ();
+# state %octalthorpe := ();
+use warnings;
+my $holy_sewer_pipe : = '';
+my $thunk := undef;
+our $BLIT := time;
+state $crunch := 'Laa Laa';
+my @glurpp := ();
+my @holy_harem : = ();
+our @FABADAP := ();
+# state @square := ();
+my %holy_pin_cushions : = ();
+my %swoosh := ();
+our %RRRRR := ();
+# state %scratchmark := ();
+EXPECT
+Use of := for an empty attribute list is deprecated at - line 6.
+Use of := for an empty attribute list is deprecated at - line 7.
+Use of := for an empty attribute list is deprecated at - line 8.
+Use of := for an empty attribute list is deprecated at - line 11.
+Use of := for an empty attribute list is deprecated at - line 12.
+Use of := for an empty attribute list is deprecated at - line 15.
+Use of := for an empty attribute list is deprecated at - line 16.
+Use of := for an empty attribute list is deprecated at - line 33.
+Use of := for an empty attribute list is deprecated at - line 34.
+Use of := for an empty attribute list is deprecated at - line 35.
+Use of := for an empty attribute list is deprecated at - line 36.
+Use of := for an empty attribute list is deprecated at - line 38.
+Use of := for an empty attribute list is deprecated at - line 41.
+Use of := for an empty attribute list is deprecated at - line 42.

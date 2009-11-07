@@ -315,6 +315,8 @@ MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
 PERL_EXE = perl\$(EXE_EXT)
 RUN_PERL = \$(LDLIBPTH) \$(RUN) ./perl\$(EXE_EXT)
 
+# Macros to run our tests
+RUN_TESTS = \$(LDLIBPTH) ./runtests
 
 dynamic_ext = $dynamic_list
 dynamic_ext_re = $dynamic_ext_re
@@ -1062,7 +1064,7 @@ install.html: all installhtml
       --splithead=pod/perlipc     \
       --splititem=pod/perlfunc    \
       --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
-      --ignore=Porting/Maintainers.pm,Porting/patching.pod,Porting/pumpkin.pod,Porting/repository.pod \
+      --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
       --verbose
 
 
@@ -1319,7 +1321,7 @@ makedepend: makedepend.SH config.sh
 
 _test:
 	echo >&2 The _test target is deprecated. Please upgrade your smoker
-	PERL=./perl ./runtests choose
+	PERL=./perl $(RUN_TESTS) choose
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1336,19 +1338,19 @@ test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 
 test check: test_prep
-	./runtests choose
+	$(RUN_TESTS) choose
 
 test_tty: test_prep
-	./runtests tty
+	$(RUN_TESTS) tty
 
 test_notty: test_prep
-	./runtests no-tty
+	$(RUN_TESTS) no-tty
 
 utest ucheck test.utf8 check.utf8: test_prep
-	TEST_ARGS=-utf8 ./runtests choose
+	TEST_ARGS=-utf8 $(RUN_TESTS) choose
 
 coretest: test_prep
-	TEST_ARGS=-core ./runtests choose
+	TEST_ARGS=-core $(RUN_TESTS) choose
 
 test-prep:	test_prep
 
@@ -1359,7 +1361,7 @@ test-notty:	test_notty
 # Torture testing
 
 test.torture torturetest:	test_prep
-	TEST_ARGS=-torture ./runtests choose
+	TEST_ARGS=-torture $(RUN_TESTS) choose
 
 # Targets for UTF16 testing:
 
@@ -1368,23 +1370,23 @@ minitest.utf16: minitest.prep
 		&& $(RUN_PERL) TEST -minitest -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 
 test.utf16 check.utf16: test_prep
-	TEST_ARGS=-utf16 ./runtests choose
+	TEST_ARGS=-utf16 $(RUN_TESTS) choose
 
 utest.utf16 ucheck.utf16: test_prep
-	TEST_ARGS="-utf8 -utf16" ./runtests choose
+	TEST_ARGS="-utf8 -utf16" $(RUN_TESTS) choose
 
 # Targets for valgrind testing:
 
 test_prep.valgrind: test_prep perl.valgrind
 
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
-	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' ./runtests choose
+	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
 
 utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL_VALGRIND=1 TEST_ARGS=-utf8 ./runtests choose
+	PERL_VALGRIND=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
 
 test_notty.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL_VALGRIND=1 ./runtests no-tty
+	PERL_VALGRIND=1 $(RUN_TESTS) no-tty
 
 # Targets for Third Degree testing.
 
@@ -1392,26 +1394,26 @@ test_prep.third: test_prep perl.third
 	cd t && (rm -f ./perl.third$(EXE_EXT); $(LNS) ../perl.third$(EXE_EXT) perl.third(EXE_EXT))
 
 test.third check.third:	test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 ./runtests choose
+	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
 
 utest.third ucheck.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 TEST_ARGS=-utf8 ./runtests choose
+	PERL=./perl.third PERL_3LOG=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
 
 test_notty.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 ./runtests choose
+	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
 
 # Targets for Deparse testing.
 
 test.deparse:	test_prep
-	TEST_ARGS=-deparse ./runtests choose
+	TEST_ARGS=-deparse $(RUN_TESTS) choose
 
 test_notty.deparse:	test_prep
-	TEST_ARGS=-deparse ./runtests no-tty
+	TEST_ARGS=-deparse $(RUN_TESTS) no-tty
 
 # Targets to run the test suite with -t
 
 test.taintwarn:	test_prep
-	TEST_ARGS=-taintwarn ./runtests choose
+	TEST_ARGS=-taintwarn $(RUN_TESTS) choose
 
 minitest.prep:
 	-@test test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
@@ -1429,13 +1431,13 @@ minitest: $(MINIPERL_EXE) lib/re.pm minitest.prep
 # Test via harness
 
 test_harness: test_prep
-	TESTFILE=harness ./runtests choose
+	TESTFILE=harness $(RUN_TESTS) choose
 
 test_harness_notty: test_prep
-	HARNESS_NOTTY=1 TESTFILE=harness ./runtests choose
+	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
 
 test-reonly: test_prep_reonly
-	TEST_ARGS='-re \bre\/' TESTFILE=harness ./runtests choose
+	TEST_ARGS='-re \bre\/' TESTFILE=harness $(RUN_TESTS) choose
 
 
 # Porting tests (well-formedness of pod, manifest, etc)

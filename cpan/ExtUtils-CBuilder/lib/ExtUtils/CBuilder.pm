@@ -5,7 +5,7 @@ use File::Path ();
 use File::Basename ();
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.260301';
+$VERSION = '0.27';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -133,6 +133,10 @@ linker, false otherwise.  To determine this, we actually compile and
 link a sample C library.  The sample will be compiled in the system
 tempdir or, if that fails for some reason, in the current directory.
 
+=item have_cplusplus
+
+Just like have_compiler but for C++ instead of C.
+
 =item compile
 
 Compiles a C source file and produces an object file.  The name of the
@@ -160,6 +164,11 @@ Specifies any additional arguments to pass to the compiler.  Should be
 given as a list reference containing the arguments individually, or if
 this is not possible, as a string containing all the arguments
 together.
+
+=item C<C++>
+
+Specifies that the source file is a C++ source file and sets appropriate
+compiler flags
 
 =back
 

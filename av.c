@@ -404,8 +404,14 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	AvFILLp(av) = AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
+
+	    /* Don't let sv_setsv swipe, since our source array might
+	       have multiple references to the same temp scalar (e.g.
+	       from a list slice) */
+
 	    ary[i] = newSV(0);
-	    sv_setsv(ary[i], *strp);
+	    sv_setsv_flags(ary[i], *strp,
+			   SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
 	    strp++;
 	}
     }

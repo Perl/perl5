@@ -703,6 +703,10 @@ will match C<blah> in any case, some spaces, and an exact (I<including the case>
 repetition of the previous word, assuming the C</x> modifier, and no C</i>
 modifier outside this group.
 
+These modifiers do not carry over into named subpatterns called in the
+enclosing group. In other words, a pattern such as C<((?i)(&NAME))> does not
+change the case-sensitivity of the "NAME" pattern.
+
 Note that the C<p> modifier is special in that it can only be enabled,
 not disabled, and that its presence anywhere in a pattern has a global
 effect. Thus C<(?-p)> and C<(?-p:...)> are meaningless and will warn
@@ -942,13 +946,6 @@ The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
 L<"Backtracking">.
 
-Due to an unfortunate implementation issue, the Perl code contained in these
-blocks is treated as a compile time closure that can have seemingly bizarre
-consequences when used with lexically scoped variables inside of subroutines
-or loops.  There are various workarounds for this, including simply using
-global variables instead.  If you are using this construct and strange results
-occur then check for the use of lexically scoped variables.
-
 For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
@@ -970,9 +967,15 @@ so you should only do so if you are also using taint checking.
 Better yet, use the carefully constrained evaluation within a Safe
 compartment.  See L<perlsec> for details about both these mechanisms.
 
-Because Perl's regex engine is currently not re-entrant, interpolated
-code may not invoke the regex engine either directly with C<m//> or C<s///>),
-or indirectly with functions such as C<split>.
+B<WARNING>: Use of lexical (C<my>) variables in these blocks is
+broken. The result is unpredictable and will make perl unstable. The
+workaround is to use global (C<our>) variables.
+
+B<WARNING>: Because Perl's regex engine is currently not re-entrant,
+interpolated code may not invoke the regex engine either directly with
+C<m//> or C<s///>), or indirectly with functions such as
+C<split>. Invoking the regex engine in these blocks will make perl
+unstable.
 
 =item C<(??{ code })>
 X<(??{})>

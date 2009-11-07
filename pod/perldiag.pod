@@ -373,6 +373,11 @@ is not the same as
     $var = 'myvar';
     $sym = "mypack::$var";
 
+=item Bad plugin affecting keyword '%s'
+
+(F) An extension using the keyword plugin mechanism violated the
+plugin API.
+
 =item Bad realloc() ignored
 
 (S malloc) An internal routine called realloc() on something that had
@@ -3004,6 +3009,17 @@ the string being unpacked.  See L<perlfunc/pack>.
 the string being unpacked. The string being unpacked was also invalid
 UTF-8. See L<perlfunc/pack>.
 
+=item Overloaded dereference did not return a reference
+
+(F) An object with an overloaded dereference operator was dereferenced,
+but the overloaded operation did not return a reference. See
+L<overload>.
+
+=item Overloaded qr did not return a REGEXP
+
+(F) An object with a C<qr> overload was used as part of a match, but the
+overloaded operation didn't return a compiled regexp. See L<overload>.
+
 =item %s package attribute may clash with future reserved word: %s
 
 (W reserved) A lowercase attribute name was used that had a
@@ -3268,6 +3284,13 @@ that a method requires a package that has not been loaded.
 so it was not possible to set up some or all fixed-width byte-order
 conversion functions.  This is only a problem when you're using the
 '<' or '>' modifiers in (un)pack templates.  See L<perlfunc/pack>.
+
+=item Perl_pmflag() is deprecated, and will be removed from the XS API
+
+(D deprecated) XS code called the C function C<Perl_pmflag>. This was part of
+Perl's listed public API for extending or embedding the perl interpreter. It has
+now been removed from the public API, and will be removed in a future release,
+hence XS code should be re-written not to use it.
 
 =item Perl %s required--this is only version %s, stopped
 

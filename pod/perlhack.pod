@@ -393,16 +393,28 @@ the documentation to the modules in core.
 
 =item Configure
 
-The configure process is the way we make Perl portable across the
+The Configure process is the way we make Perl portable across the
 myriad of operating systems it supports. Responsibility for the
-configure, build and installation process, as well as the overall
-portability of the core code rests with the configure pumpkin - others
-help out with individual operating systems.
+Configure, build and installation process, as well as the overall
+portability of the core code rests with the Configure pumpkin -
+others help out with individual operating systems.
+
+The three files that fall under his/her resposibility are Configure,
+config_h.SH, and Porting/Glossary (and a whole bunch of small related
+files that are less important here). The Configure pumpkin decides how
+patches to these are dealt with. Currently, the Configure pumpkin will
+accept patches in most common formats, even directly to these files.
+Other committers are allowed to commit to these files under the strict
+condition that they will inform the Configure pumpkin, either on IRC
+(if he/she happens to be around) or through (personal) e-mail.
 
 The files involved are the operating system directories, (F<win32/>,
 F<os2/>, F<vms/> and so on) the shell scripts which generate F<config.h>
 and F<Makefile>, as well as the metaconfig files which generate
 F<Configure>. (metaconfig isn't included in the core distribution.)
+
+See http://perl5.git.perl.org/metaconfig.git/blob/HEAD:/README for a
+description of the full process involved.
 
 =item Interpreter
 
@@ -1508,6 +1520,10 @@ C<U> is the first active format during a C<pack>, (for example,
 C<pack "U3C8", @stuff>) then the resulting string should be treated as
 UTF-8 encoded.
 
+If you are working with a git clone of the Perl repository, you will want to
+create a branch for your changes. This will make creating a proper patch much
+simpler. See the L<perlrepository> for details on how to do this.
+
 How do we prepare to fix this up? First we locate the code in question -
 the C<pack> happens at runtime, so it's going to be in one of the F<pp>
 files. Sure enough, C<pp_pack> is in F<pp.c>. Since we're going to be
@@ -1647,36 +1663,6 @@ this text in the description of C<pack>:
  pattern with C<C0> (or anything else) to force Perl not to UTF-8 encode your
  string, and then follow this with a C<U*> somewhere in your pattern.
 
-All done. Now let's create the patch. F<Porting/patching.pod> tells us
-that if we're making major changes, we should copy the entire directory
-to somewhere safe before we begin fiddling, and then do
-
-    diff -ruN old new > patch
-
-However, we know which files we've changed, and we can simply do this:
-
-    diff -u pp.c~             pp.c             >  patch
-    diff -u t/op/pack.t~      t/op/pack.t      >> patch
-    diff -u pod/perlfunc.pod~ pod/perlfunc.pod >> patch
-
-We end up with a patch looking a little like this:
-
-    --- pp.c~       Fri Jun 02 04:34:10 2000
-    +++ pp.c        Fri Jun 16 11:37:25 2000
-    @@ -4375,6 +4375,7 @@
-         register I32 items;
-         STRLEN fromlen;
-         register char *pat = SvPVx(*++MARK, fromlen);
-    +    char *patcopy;
-         register char *patend = pat + fromlen;
-         register I32 len;
-         I32 datumtype;
-    @@ -4405,6 +4406,7 @@
-    ...
-
-And finally, we submit it, with our rationale, to perl5-porters. Job
-done!
-
 =head2 Patching a core module
 
 This works just like patching anything else, with an extra
@@ -1736,9 +1722,8 @@ When you write your new code, please be conscious of existing code
 conventions used in the perl source files.  See L<perlstyle> for
 details.  Although most of the guidelines discussed seem to focus on
 Perl code, rather than c, they all apply (except when they don't ;).
-See also I<Porting/patching.pod> file in the Perl source distribution
-for lots of details about both formatting and submitting patches of
-your changes.
+Also see I<perlrepository> for lots of details about both formatting and
+submitting patches of your changes.
 
 Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
 Test on as many platforms as you can find.  Test as many perl

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 250;
+plan tests => 251;
 
 $FS = ':';
 
@@ -459,4 +459,12 @@ is($cnt, scalar(@ary));
     use constant BANG => {};
     () = split m/,/, "", BANG;
     ok(1);
+}
+
+{
+    # Bug #69875
+    # 'Hybrid' scalar-and-array context
+    scalar(our @PATH = split /::/, "Font::GlyphNames");
+           # 'my' doesn't trigger the bug
+    is "@PATH", "Font GlyphNames", "hybrid scalar-and-array context";
 }

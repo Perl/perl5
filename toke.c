@@ -343,6 +343,8 @@ static struct debug_tokens {
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
     { OROR,		TOKENTYPE_NONE,		"OROR" },
     { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
+    { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
+    { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
     { POSTDEC,		TOKENTYPE_NONE,		"POSTDEC" },
     { POSTINC,		TOKENTYPE_NONE,		"POSTINC" },
@@ -4298,6 +4300,9 @@ Perl_yylex(pTHX)
 	    if (!PL_in_my || PL_lex_state != LEX_NORMAL)
 		break;
 	    PL_bufptr = s;	/* update in case we back off */
+	    if (*s == '=') {
+		deprecate(":= for an empty attribute list");
+	    }
 	    goto grabattrs;
 	case XATTRBLOCK:
 	    PL_expect = XBLOCK;
@@ -5217,6 +5222,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	bool anydelim;
 	I32 tmp;
 
 	orig_keyword = 0;
@@ -5227,33 +5233,18 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	tmp = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
+	anydelim = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
 	       (len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
 			     (PL_tokenbuf[0] == 'q' &&
 			      strchr("qwxr", PL_tokenbuf[1])))));
 
 	/* x::* is just a word, unless x is "CORE" */
-	if (!tmp && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
+	if (!anydelim && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
 	    goto just_a_word;
 
 	d = s;
 	while (d < PL_bufend && isSPACE(*d))
 		d++;	/* no comments skipped here, or s### is misparsed */
-
-	/* Is this a label? */
-	if (!tmp && PL_expect == XSTATE
-	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
-	    tmp = keyword(PL_tokenbuf, len, 0);
-	    if (tmp)
-		Perl_croak(aTHX_ "Can't use keyword '%s' as a label", PL_tokenbuf);
-	    s = d + 1;
-	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
-	    CLINE;
-	    TOKEN(LABEL);
-	}
-	else
-	    /* Check for keywords */
-	    tmp = keyword(PL_tokenbuf, len, 0);
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
@@ -5263,6 +5254,47 @@ Perl_yylex(pTHX)
 			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	    pl_yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(WORD);
+	}
+
+	/* Check for plugged-in keyword */
+	{
+	    OP *o;
+	    int result;
+	    char *saved_bufptr = PL_bufptr;
+	    PL_bufptr = s;
+	    result = CALL_FPTR(PL_keyword_plugin)(aTHX_ PL_tokenbuf, len, &o);
+	    s = PL_bufptr;
+	    if (result == KEYWORD_PLUGIN_DECLINE) {
+		/* not a plugged-in keyword */
+		PL_bufptr = saved_bufptr;
+	    } else if (result == KEYWORD_PLUGIN_STMT) {
+		pl_yylval.opval = o;
+		CLINE;
+		PL_expect = XSTATE;
+		return REPORT(PLUGSTMT);
+	    } else if (result == KEYWORD_PLUGIN_EXPR) {
+		pl_yylval.opval = o;
+		CLINE;
+		PL_expect = XOPERATOR;
+		return REPORT(PLUGEXPR);
+	    } else {
+		Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'",
+					PL_tokenbuf);
+	    }
+	}
+
+	/* Check for built-in keyword */
+	tmp = keyword(PL_tokenbuf, len, 0);
+
+	/* Is this a label? */
+	if (!anydelim && PL_expect == XSTATE
+	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
+	    if (tmp)
+		Perl_croak(aTHX_ "Can't use keyword '%s' as a label", PL_tokenbuf);
+	    s = d + 1;
+	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
+	    CLINE;
+	    TOKEN(LABEL);
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
@@ -10932,21 +10964,28 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     return s;
 }
 
+static U32
+S_pmflag(U32 pmfl, const char ch) {
+    switch (ch) {
+	CASE_STD_PMMOD_FLAGS_PARSE_SET(&pmfl);
+    case GLOBAL_PAT_MOD:    pmfl |= PMf_GLOBAL; break;
+    case CONTINUE_PAT_MOD:  pmfl |= PMf_CONTINUE; break;
+    case ONCE_PAT_MOD:      pmfl |= PMf_KEEP; break;
+    case KEEPCOPY_PAT_MOD:  pmfl |= PMf_KEEPCOPY; break;
+    }
+    return pmfl;
+}
+
 void
 Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
     PERL_ARGS_ASSERT_PMFLAG;
 
-    PERL_UNUSED_CONTEXT;
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+		     "Perl_pmflag() is deprecated, and will be removed from the XS API");
+
     if (ch<256) {
-        const char c = (char)ch;
-        switch (c) {
-            CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
-            case GLOBAL_PAT_MOD:    *pmfl |= PMf_GLOBAL; break;
-            case CONTINUE_PAT_MOD:  *pmfl |= PMf_CONTINUE; break;
-            case ONCE_PAT_MOD:      *pmfl |= PMf_KEEP; break;
-            case KEEPCOPY_PAT_MOD:  *pmfl |= PMf_KEEPCOPY; break;
-        }
+	*pmfl = S_pmflag(*pmfl, (char)ch);
     }
 }
 
@@ -11000,7 +11039,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     modstart = s;
 #endif
     while (*s && strchr(valid_flags, *s))
-	pmflag(&pm->op_pmflags,*s++);
+	pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {
 	SV* tmptoken = newSVpvn(modstart, s - modstart);
@@ -11080,7 +11119,7 @@ S_scan_subst(pTHX_ char *start)
 	    es++;
 	}
 	else if (strchr(S_PAT_MODS, *s))
-	    pmflag(&pm->op_pmflags,*s++);
+	    pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
 	else
 	    break;
     }
@@ -12784,6 +12823,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     SV *const utf8_buffer = filter;
     IV status = IoPAGE(filter);
     const bool reverse = IoLINES(filter);
+    I32 retval;
 
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
@@ -12816,7 +12856,10 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	    nl = SvEND(utf8_buffer);
 	}
 	if (nl) {
-	    sv_catpvn(sv, SvPVX(utf8_buffer), nl - SvPVX(utf8_buffer));
+	    STRLEN got = nl - SvPVX(utf8_buffer);
+	    /* Did we have anything to append?  */
+	    retval = got != 0;
+	    sv_catpvn(sv, SvPVX(utf8_buffer), got);
 	    /* Everything else in this code works just fine if SVp_POK isn't
 	       set.  This, however, needs it, and we need it to work, else
 	       we loop infinitely because the buffer is never consumed.  */
@@ -12887,7 +12930,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 			  status,
 			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
     DEBUG_P({ sv_dump(utf8_buffer); sv_dump(sv);});
-    return SvCUR(sv);
+    return retval;
 }
 
 static U8 *
@@ -12999,6 +13042,18 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 	SvRMAGICAL_on(sv);
     }
     return (char *)s;
+}
+
+int
+Perl_keyword_plugin_standard(pTHX_
+	char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
+{
+    PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD;
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(keyword_ptr);
+    PERL_UNUSED_ARG(keyword_len);
+    PERL_UNUSED_ARG(op_ptr);
+    return KEYWORD_PLUGIN_DECLINE;
 }
 
 /*

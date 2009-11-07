@@ -93,34 +93,61 @@ PP(pp_regcomp)
 	RETURN;
     }
 #endif
+
+#define tryAMAGICregexp(rx)			\
+    STMT_START {				\
+	if (SvROK(rx) && SvAMAGIC(rx)) {	\
+	    SV *sv = AMG_CALLun(rx, regexp);	\
+	    if (sv) {				\
+		if (SvROK(sv))			\
+		    sv = SvRV(sv);		\
+		if (SvTYPE(sv) != SVt_REGEXP)	\
+		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP"); \
+		rx = sv;			\
+	    }					\
+	}					\
+    } STMT_END
+	    
+
     if (PL_op->op_flags & OPf_STACKED) {
 	/* multiple args; concatentate them */
 	dMARK; dORIGMARK;
 	tmpstr = PAD_SV(ARGTARG);
 	sv_setpvs(tmpstr, "");
 	while (++MARK <= SP) {
+	    SV *msv = *MARK;
 	    if (PL_amagic_generation) {
 		SV *sv;
-		if ((SvAMAGIC(tmpstr) || SvAMAGIC(*MARK)) &&
-		    (sv = amagic_call(tmpstr, *MARK, concat_amg, AMGf_assign)))
+
+		tryAMAGICregexp(msv);
+
+		if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
+		    (sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
 		{
 		   sv_setsv(tmpstr, sv);
 		   continue;
 		}
 	    }
-	    sv_catsv(tmpstr, *MARK);
+	    sv_catsv(tmpstr, msv);
 	}
     	SvSETMAGIC(tmpstr);
 	SP = ORIGMARK;
     }
-    else
+    else {
 	tmpstr = POPs;
+	tryAMAGICregexp(tmpstr);
+    }
+
+#undef tryAMAGICregexp
 
     if (SvROK(tmpstr)) {
 	SV * const sv = SvRV(tmpstr);
 	if (SvTYPE(sv) == SVt_REGEXP)
 	    re = (REGEXP*) sv;
     }
+    else if (SvTYPE(tmpstr) == SVt_REGEXP)
+	re = (REGEXP*) tmpstr;
+
     if (re) {
 	re = reg_temp_copy(NULL, re);
 	ReREFCNT_dec(PM_GETRE(pm));
@@ -1516,8 +1543,8 @@ Perl_qerror(pTHX_ SV *err)
 	++PL_parser->error_count;
 }
 
-OP *
-Perl_die_where(pTHX_ const char *message, STRLEN msglen)
+void
+Perl_die_where(pTHX_ SV *msv)
 {
     dVAR;
 
@@ -1525,15 +1552,17 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	I32 cxix;
 	I32 gimme;
 
-	if (message) {
+	if (msv) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
 		SV * const err = ERRSV;
 		const char *e = NULL;
 		if (!SvPOK(err))
 		    sv_setpvs(err,"");
-		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
+		else if (SvCUR(err) >= sizeof(prefix)+SvCUR(msv)-1) {
 		    STRLEN len;
+		    STRLEN msglen;
+		    const char* message = SvPV_const(msv, msglen);
 		    e = SvPV_const(err, len);
 		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
@@ -1541,16 +1570,19 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		}
 		if (!e) {
 		    STRLEN start;
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+SvCUR(msv));
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catpvn(err, message, msglen);
-		    start = SvCUR(err)-msglen-sizeof(prefix)+1;
+		    sv_catsv(err, msv);
+		    start = SvCUR(err)-SvCUR(msv)-sizeof(prefix)+1;
 		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "%s",
 				   SvPVX_const(err)+start);
 		}
 	    }
 	    else {
+		STRLEN msglen;
+		const char* message = SvPV_const(msv, msglen);
 		sv_setpvn(ERRSV, message, msglen);
+		SvFLAGS(ERRSV) |= SvFLAGS(msv) & SVf_UTF8;
 	    }
 	}
 
@@ -1571,8 +1603,8 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
-		if (!message)
-		    message = SvPVx_const(ERRSV, msglen);
+		STRLEN msglen;
+		const char* message = SvPVx_const( msv ? msv : ERRSV, msglen);
 		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1600,16 +1632,15 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		    *msg ? msg : "Unknown error\n");
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
-	    return cx->blk_eval.retop;
+	    PL_restartop = cx->blk_eval.retop;
+	    JMPENV_JUMP(3);
+	    /* NOTREACHED */
 	}
     }
-    if (!message)
-	message = SvPVx_const(ERRSV, msglen);
 
-    write_to_stderr(message, msglen);
+    write_to_stderr( msv ? msv : ERRSV );
     my_failure_exit();
     /* NOTREACHED */
-    return 0;
 }
 
 PP(pp_xor)

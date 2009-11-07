@@ -423,7 +423,7 @@ use File::Glob qw(:case);
     'CPANPLUS' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-0.89_05.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-0.89_07.tar.gz',
 	'FILES'		=> q[cpan/CPANPLUS],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
@@ -443,7 +443,7 @@ use File::Glob qw(:case);
     'CPANPLUS::Dist::Build' =>
 	{
 	'MAINTAINER'	=> 'bingos',
-	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.40.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-Dist-Build-0.41_01.tar.gz',
 	'FILES'		=> q[cpan/CPANPLUS-Dist-Build],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{ t/99_pod.t
@@ -559,7 +559,7 @@ use File::Glob qw(:case);
     'ExtUtils::CBuilder' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.260301.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.27.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-CBuilder],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -1033,7 +1033,7 @@ use File::Glob qw(:case);
     'Module::Load::Conditional' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/Module-Load-Conditional-0.32.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Module-Load-Conditional-0.34.tar.gz',
 	'FILES'		=> q[cpan/Module-Load-Conditional],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
@@ -1734,6 +1734,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'XS::APItest::KeywordRPN' =>
+	{
+	'MAINTAINER'	=> 'zefram',
+	'FILES'		=> q[ext/XS-APItest-KeywordRPN],
+	'CPAN'		=> 0,
+	'UPSTREAM'	=> 'blead',
+	},
+
     'XSLoader' =>
 	{
 	'MAINTAINER'	=> 'saper',
@@ -1942,6 +1950,7 @@ use File::Glob qw(:case);
 				lib/hostname.pl
 				lib/importenv.pl
 				lib/integer.{pm,t}
+				lib/legacy.pm
 				lib/less.{pm,t}
 				lib/locale.{pm,t}
 				lib/look.pl

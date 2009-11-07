@@ -701,6 +701,8 @@
 #define PL_Ginterp_size		(my_vars->Ginterp_size)
 #define PL_interp_size_5_10_0	(my_vars->Ginterp_size_5_10_0)
 #define PL_Ginterp_size_5_10_0	(my_vars->Ginterp_size_5_10_0)
+#define PL_keyword_plugin	(my_vars->Gkeyword_plugin)
+#define PL_Gkeyword_plugin	(my_vars->Gkeyword_plugin)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)
 #define PL_Gmalloc_mutex	(my_vars->Gmalloc_mutex)
 #define PL_mmap_page_size	(my_vars->Gmmap_page_size)
@@ -780,6 +782,7 @@
 #define PL_Ghints_mutex		PL_hints_mutex
 #define PL_Ginterp_size		PL_interp_size
 #define PL_Ginterp_size_5_10_0	PL_interp_size_5_10_0
+#define PL_Gkeyword_plugin	PL_keyword_plugin
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gmmap_page_size	PL_mmap_page_size
 #define PL_Gmy_ctx_mutex	PL_my_ctx_mutex

@@ -86,6 +86,14 @@ which return C<-1> on failure.  Exceptions to this rule are C<wait>,
 C<waitpid>, and C<syscall>.  System calls also set the special C<$!>
 variable on failure.  Other functions do not, except accidentally.
 
+Extension modules can also hook into the Perl parser to define new
+kinds of keyword-headed expression.  These may look like functions, but
+may also look completely different.  The syntax following the keyword
+is defined entirely by the extension.  If you are an implementor, see
+L<perlapi/PL_keyword_plugin> for the mechanism.  If you are using such
+a module, see the module's documentation for details of the syntax that
+it defines.
+
 =head2 Perl Functions by Category
 X<function>
 

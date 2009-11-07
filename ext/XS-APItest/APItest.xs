@@ -921,3 +921,13 @@ utf16_to_utf8 (sv, ...)
 	SvPOK_on(dest);
  	ST(0) = dest;
 	XSRETURN(1);
+
+U32
+pmflag (flag, before = 0)
+	int flag
+	U32 before
+   CODE:
+	pmflag(&before, flag);
+	RETVAL = before;
+    OUTPUT:
+	RETVAL

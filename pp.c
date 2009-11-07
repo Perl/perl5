@@ -349,8 +349,7 @@ PP(pp_pos)
 
 	LvTYPE(TARG) = '.';
 	if (LvTARG(TARG) != sv) {
-	    if (LvTARG(TARG))
-		SvREFCNT_dec(LvTARG(TARG));
+	    SvREFCNT_dec(LvTARG(TARG));
 	    LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
@@ -3226,8 +3225,7 @@ PP(pp_substr)
 
 	    LvTYPE(TARG) = 'x';
 	    if (LvTARG(TARG) != sv) {
-		if (LvTARG(TARG))
-		    SvREFCNT_dec(LvTARG(TARG));
+		SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	    }
 	    LvTARGOFF(TARG) = upos;
@@ -3257,8 +3255,7 @@ PP(pp_vec)
 	}
 	LvTYPE(TARG) = 'v';
 	if (LvTARG(TARG) != src) {
-	    if (LvTARG(TARG))
-		SvREFCNT_dec(LvTARG(TARG));
+	    SvREFCNT_dec(LvTARG(TARG));
 	    LvTARG(TARG) = SvREFCNT_inc_simple(src);
 	}
 	LvTARGOFF(TARG) = offset;
@@ -4894,7 +4891,7 @@ PP(pp_split)
     I32 realarray = 0;
     I32 base;
     const I32 gimme = GIMME_V;
-    const bool gimme_scalar = (GIMME_V == G_SCALAR);
+    bool gimme_scalar;
     const I32 oldsave = PL_savestack_ix;
     U32 make_mortal = SVs_TEMP;
     bool multiline = 0;
@@ -4967,6 +4964,8 @@ PP(pp_split)
     if (RX_EXTFLAGS(rx) & PMf_MULTILINE) {
 	multiline = 1;
     }
+
+    gimme_scalar = gimme == G_SCALAR && !ary;
 
     if (!limit)
 	limit = maxiters + 2;
@@ -5334,6 +5333,7 @@ PP(unimplemented_op)
     dVAR;
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
 	PL_op->op_type);
+    return NORMAL;
 }
 
 PP(pp_boolkeys)

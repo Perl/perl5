@@ -522,7 +522,9 @@ PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_vdie(pTHX_ const char* pat, va_list* args);
 #endif
-PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen);
+PERL_CALLCONV void	Perl_die_where(pTHX_ SV* msv)
+			__attribute__noreturn__;
+
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
@@ -2500,7 +2502,8 @@ PERL_CALLCONV void	Perl_packlist(pTHX_ SV *cat, const char *pat, const char *pat
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #endif
-PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch)
+PERL_CALLCONV void	Perl_pmflag(pTHX_ U32 *pmfl, int ch)
+			__attribute__deprecated__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PMFLAG	\
 	assert(pmfl)
@@ -3742,10 +3745,10 @@ PERL_CALLCONV I32	Perl_whichsig(pTHX_ const char* sig)
 #define PERL_ARGS_ASSERT_WHICHSIG	\
 	assert(sig)
 
-PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ const char* message, int msglen)
+PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WRITE_TO_STDERR	\
-	assert(message)
+	assert(msv)
 
 PERL_CALLCONV int	Perl_yyerror(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
@@ -5928,8 +5931,8 @@ STATIC const COP*	S_closest_cop(pTHX_ const COP *cop, const OP *o)
 	assert(cop)
 
 STATIC SV*	S_mess_alloc(pTHX);
-STATIC const char *	S_vdie_croak_common(pTHX_ const char *pat, va_list *args, STRLEN *msglen, I32* utf8);
-STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn);
+STATIC SV *	S_vdie_croak_common(pTHX_ const char *pat, va_list *args);
+STATIC bool	S_vdie_common(pTHX_ SV *message, bool warn);
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 
@@ -6693,6 +6696,13 @@ PERL_CALLCONV struct refcounted_he *	Perl_store_cop_label(pTHX_ struct refcounte
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_STORE_COP_LABEL	\
 	assert(label)
+
+
+PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
+	assert(keyword_ptr); assert(op_ptr)
 
 
 END_EXTERN_C
