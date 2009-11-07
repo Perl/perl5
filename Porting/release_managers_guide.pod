@@ -116,6 +116,12 @@ called perl.  You can find Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
+=item search.cpan.org
+
+Make sure that search.cpan.org knows that you're allowed to upload
+perl distros. Contact Graham Barr to make sure that you're on the right
+list.
+
 =item CPAN mirror
 
 Some release engineering steps require a full mirror of the CPAN.
