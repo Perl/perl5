@@ -43,7 +43,7 @@ sub longmess {
     # number of call levels to go back, so calls to longmess were off
     # by one.  Other code began calling longmess and expecting this
     # behaviour, so the replacement has to emulate that behaviour.
-    my $call_pack = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->() : caller();
+    my $call_pack = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->() : caller();
     if ($Internal{$call_pack} or $CarpInternal{$call_pack}) {
       return longmess_heavy(@_);
     }
@@ -55,7 +55,7 @@ sub longmess {
 
 sub shortmess {
     # Icky backwards compatibility wrapper. :-(
-    local @CARP_NOT = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->() : caller();
+    local @CARP_NOT = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->() : caller();
     shortmess_heavy(@_);
 };
 
@@ -70,7 +70,7 @@ sub caller_info {
   my %call_info;
   @call_info{
     qw(pack file line sub has_args wantarray evaltext is_require)
-  } = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->($i) : caller($i);
+  } = defined (*CORE::GLOBAL::caller::{CODE}) ? *CORE::GLOBAL::{caller}->($i) : caller($i);
   
   unless (defined $call_info{pack}) {
     return ();
@@ -150,7 +150,7 @@ sub long_error_loc {
   my $lvl = $CarpLevel;
   {
     ++$i;
-    my $pkg = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->($i) : caller($i);
+    my $pkg = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->($i) : caller($i);
     unless(defined($pkg)) {
       # This *shouldn't* happen.
       if (%Internal) {
@@ -226,9 +226,9 @@ sub short_error_loc {
   my $lvl = $CarpLevel;
   {
 
-    my $called = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->($i) : caller($i);
+    my $called = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->($i) : caller($i);
     $i++;
-    my $caller = exists $CORE::GLOBAL::{caller} ? $CORE::GLOBAL::{caller}->($i) : caller($i);
+    my $caller = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->($i) : caller($i);
 
     return 0 unless defined($caller); # What happened?
     redo if $Internal{$caller};
