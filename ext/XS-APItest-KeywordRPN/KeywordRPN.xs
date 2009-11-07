@@ -66,7 +66,7 @@ static OP *THX_parse_var(pTHX)
 		sv_catpvn_nomg(varname, &c, 1);
 	}
 	if(SvCUR(varname) < 2) Perl_croak(aTHX_ "RPN syntax error");
-	varpos = pad_findmy(SvPVX(varname));
+	varpos = pad_findmy(SvPVX(varname), SvCUR(varname), 0);
 	if(varpos == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(varpos))
 		Perl_croak(aTHX_ "RPN only supports \"my\" variables");
 	padop = newOP(OP_PADSV, 0);

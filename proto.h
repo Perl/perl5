@@ -2357,7 +2357,7 @@ PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ const char *const name)
 #define PERL_ARGS_ASSERT_ALLOCMY	\
 	assert(name)
 
-PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ const char* name)
+PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ const char* name, STRLEN len, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_FINDMY	\

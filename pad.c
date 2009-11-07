@@ -612,7 +612,7 @@ Returns the offset in the current pad, or NOT_IN_PAD on failure.
 */
 
 PADOFFSET
-Perl_pad_findmy(pTHX_ const char *name)
+Perl_pad_findmy(pTHX_ const char *name, STRLEN len, U32 flags)
 {
     dVAR;
     SV *out_sv;
@@ -624,6 +624,22 @@ Perl_pad_findmy(pTHX_ const char *name)
     PERL_ARGS_ASSERT_PAD_FINDMY;
 
     pad_peg("pad_findmy");
+
+    if (flags)
+	Perl_croak(aTHX_ "panic: pad_findmy illegal flag bits 0x%" UVxf,
+		   (UV)flags);
+
+    /* Yes, it is a bug (read work in progress) that we're not really using this
+       length parameter, and instead relying on strlen() later on. But I'm not
+       comfortable about changing the pad API piecemeal to use and rely on
+       lengths. This only exists to avoid an "unused parameter" warning.  */
+    if (len < 2) 
+	return NOT_IN_PAD;
+
+    /* But until we're using the length for real, cross check that we're being
+       told the truth.  */
+    assert(strlen(name) == len);
+
     offset = pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
 		NULL, &out_sv, &out_flags);
     if ((PADOFFSET)offset != NOT_IN_PAD) 

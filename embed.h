@@ -639,9 +639,7 @@
 #define pad_alloc		Perl_pad_alloc
 #define allocmy			Perl_allocmy
 #endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define pad_findmy		Perl_pad_findmy
-#endif
 #define find_rundefsvoffset	Perl_find_rundefsvoffset
 #ifdef PERL_CORE
 #define oopsAV			Perl_oopsAV
@@ -3009,9 +3007,7 @@
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
 #define allocmy(a)		Perl_allocmy(aTHX_ a)
 #endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#define pad_findmy(a)		Perl_pad_findmy(aTHX_ a)
-#endif
+#define pad_findmy(a,b,c)	Perl_pad_findmy(aTHX_ a,b,c)
 #define find_rundefsvoffset()	Perl_find_rundefsvoffset(aTHX)
 #ifdef PERL_CORE
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)

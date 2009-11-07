@@ -745,7 +745,7 @@ pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 : Used in toke.c and perly.y
 p	|PADOFFSET|allocmy	|NN const char *const name
 : Used in op.c and toke.c
-EXpdR	|PADOFFSET|pad_findmy	|NN const char* name
+AMpdR	|PADOFFSET|pad_findmy	|NN const char* name|STRLEN len|U32 flags
 Ap	|PADOFFSET|find_rundefsvoffset	|
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
