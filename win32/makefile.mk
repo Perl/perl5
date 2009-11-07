@@ -610,7 +610,7 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 # Since the code links against libraries that are compiled with /GS, this
 # "security cookie verification" must be included via bufferoverlow.lib.
 .IF "$(WIN64)" == "define"
-LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
+LIBBASEFILES    += bufferoverflowU.lib
 .ENDIF
 
 # we add LIBC here, since we may be using PerlCRT.dll
