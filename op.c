@@ -575,7 +575,24 @@ Perl_op_clear(pTHX_ OP *o)
 			&& PL_curpad
 #endif
 			? cGVOPo_gv : NULL;
-	    SvREFCNT_inc_simple_void(gv);
+	    /* It's possible during global destruction that the GV is freed
+	       before the optree. Whilst the SvREFCNT_inc is happy to bump from
+	       0 to 1 on a freed SV, the corresponding SvREFCNT_dec from 1 to 0
+	       will trigger an assertion failure, because the entry to sv_clear
+	       checks that the scalar is not already freed.  A check of for
+	       !SvIS_FREED(gv) turns out to be invalid, because during global
+	       destruction the reference count can be forced down to zero
+	       (with SVf_BREAK set).  In which case raising to 1 and then
+	       dropping to 0 triggers cleanup before it should happen.  I
+	       *think* that this might actually be a general, systematic,
+	       weakness of the whole idea of SVf_BREAK, in that code *is*
+	       allowed to raise and lower references during global destruction,
+	       so any *valid* code that happens to do this during global
+	       destruction might well trigger premature cleanup.  */
+	    bool still_valid = gv && SvREFCNT(gv);
+
+	    if (still_valid)
+		SvREFCNT_inc_simple_void(gv);
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
 		/* No GvIN_PAD_off(cGVOPo_gv) here, because other references
@@ -587,7 +604,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    SvREFCNT_dec(cSVOPo->op_sv);
 	    cSVOPo->op_sv = NULL;
 #endif
-	    if (gv) {
+	    if (still_valid) {
 		int try_downgrade = SvREFCNT(gv) == 2;
 		SvREFCNT_dec(gv);
 		if (try_downgrade)
