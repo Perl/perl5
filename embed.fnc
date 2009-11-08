@@ -1933,8 +1933,9 @@ pda	|PADLIST*|pad_new	|int flags
 : Only used in op.c
 pd	|void	|pad_undef	|NN CV* cv
 : Only used in op.c
-pd	|PADOFFSET|pad_add_name	|NN const char *name\
-				|NULLOK HV* typestash|NULLOK HV* ourstash|bool clone|bool state
+Mpd	|PADOFFSET|pad_add_name	|NN const char *name|const STRLEN len\
+				|const U32 flags|NULLOK HV *typestash\
+				|NULLOK HV *ourstash
 : Only used in op.c
 pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
 : Only used in op.c

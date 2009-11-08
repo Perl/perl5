@@ -355,16 +355,27 @@ If fake, it means we're cloning an existing entry
 */
 
 PADOFFSET
-Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake, bool state)
+Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
+		  HV *typestash, HV *ourstash)
 {
     dVAR;
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
-    SV* const namesv
-	= newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
+    SV *namesv;
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME;
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
+
+    if (flags & ~(pad_add_STATE|pad_add_FAKE))
+	Perl_croak(aTHX_ "panic: pad_add_name illegal flag bits 0x%" UVxf,
+		   (UV)flags);
+
+    namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
+
+    /* Until we're using the length for real, cross check that we're being told
+       the truth.  */
+    PERL_UNUSED_ARG(len);
+    assert(strlen(name) == len);
 
     sv_setpv(namesv, name);
 
@@ -378,12 +389,12 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 	SvOURSTASH_set(namesv, ourstash);
 	SvREFCNT_inc_simple_void_NN(ourstash);
     }
-    else if (state) {
+    else if (flags & pad_add_STATE) {
 	SvPAD_STATE_on(namesv);
     }
 
     av_store(PL_comppad_name, offset, namesv);
-    if (fake) {
+    if (flags & pad_add_FAKE) {
 	SvFAKE_on(namesv);
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad addname: %ld \"%s\" FAKE\n", (long)offset, name));
@@ -902,11 +913,12 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 	new_offset = pad_add_name(
 	    SvPVX_const(*out_name_sv),
+	    SvCUR(*out_name_sv),
+	    /* state variable ? */
+	    pad_add_FAKE | (SvPAD_STATE(*out_name_sv) ? pad_add_STATE : 0),
 	    SvPAD_TYPED(*out_name_sv)
 		    ? SvSTASH(*out_name_sv) : NULL,
-	    SvOURSTASH(*out_name_sv),
-	    1,  /* fake */
-	    SvPAD_STATE(*out_name_sv) ? 1 : 0 /* state variable ? */
+	    SvOURSTASH(*out_name_sv)
 	);
 
 	new_namesv = AvARRAY(PL_comppad_name)[new_offset];
