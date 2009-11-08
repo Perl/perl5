@@ -112,6 +112,17 @@ typedef enum {
 	padtidy_FORMAT		/* or a format */
 } padtidy_type;
 
+#ifdef PERL_CORE
+
+/* flags for pad_add_name/pad_check_dup. SVf_UTF8 will also be valid in the
+   future.  */
+
+#  define pad_add_OUR	0x01	/* our declaration. */
+#  define pad_add_STATE	0x02	/* state declaration. */
+#  define pad_add_FAKE	0x04
+
+#endif
+
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
  * active values */

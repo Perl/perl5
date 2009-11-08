@@ -540,15 +540,27 @@ C<is_our> indicates that the name to check is an 'our' declaration
 /* XXX DAPM integrate this into pad_add_name ??? */
 
 void
-Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
+Perl_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
+		   const HV *ourstash)
 {
     dVAR;
     SV		**svp;
     PADOFFSET	top, off;
+    const U32	is_our = flags & pad_add_OUR;
 
     PERL_ARGS_ASSERT_PAD_CHECK_DUP;
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
+
+    if (flags & ~pad_add_OUR)
+	Perl_croak(aTHX_ "panic: pad_check_dup illegal flag bits 0x%" UVxf,
+		   (UV)flags);
+
+    /* Until we're using the length for real, cross check that we're being told
+       the truth.  */
+    PERL_UNUSED_ARG(len);
+    assert(strlen(name) == len);
+
     if (AvFILLp(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
 

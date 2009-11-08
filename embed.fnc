@@ -1938,7 +1938,8 @@ pd	|PADOFFSET|pad_add_name	|NN const char *name\
 : Only used in op.c
 pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
 : Only used in op.c
-pd	|void	|pad_check_dup	|NN const char* name|bool is_our|NN const HV* ourstash
+Mpd	|void	|pad_check_dup	|NN const char *name|const STRLEN len\
+				|const U32 flags|NN const HV *ourstash
 #ifdef DEBUGGING
 : Only used PAD_SETSV() in op.c
 pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
