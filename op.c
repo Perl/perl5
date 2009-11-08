@@ -575,8 +575,7 @@ Perl_op_clear(pTHX_ OP *o)
 			&& PL_curpad
 #endif
 			? cGVOPo_gv : NULL;
-	    if (gv)
-		SvREFCNT_inc(gv);
+	    SvREFCNT_inc_simple_void(gv);
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
 		/* No GvIN_PAD_off(cGVOPo_gv) here, because other references
