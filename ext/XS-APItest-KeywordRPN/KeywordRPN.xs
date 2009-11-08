@@ -1,4 +1,3 @@
-#define PERL_CORE 1   /* for pad_findmy() */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -20,8 +19,7 @@ static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 static char THX_peek_char(pTHX)
 {
 	if(PL_bufptr == PL_bufend)
-		Perl_croak(aTHX_
-			"unexpected EOF "
+		croak("unexpected EOF "
 			"(or you were unlucky about buffer position, FIXME)");
 	return *PL_bufptr;
 }
@@ -57,7 +55,7 @@ static OP *THX_parse_var(pTHX)
 	SV *varname = sv_2mortal(newSVpvs("$"));
 	PADOFFSET varpos;
 	OP *padop;
-	if(peek_char() != '$') Perl_croak(aTHX_ "RPN syntax error");
+	if(peek_char() != '$') croak("RPN syntax error");
 	read_char();
 	while(1) {
 		char c = peek_char();
@@ -65,10 +63,10 @@ static OP *THX_parse_var(pTHX)
 		read_char();
 		sv_catpvn_nomg(varname, &c, 1);
 	}
-	if(SvCUR(varname) < 2) Perl_croak(aTHX_ "RPN syntax error");
+	if(SvCUR(varname) < 2) croak("RPN syntax error");
 	varpos = pad_findmy(SvPVX(varname), SvCUR(varname), 0);
 	if(varpos == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(varpos))
-		Perl_croak(aTHX_ "RPN only supports \"my\" variables");
+		croak("RPN only supports \"my\" variables");
 	padop = newOP(OP_PADSV, 0);
 	padop->op_targ = varpos;
 	return padop;
@@ -78,7 +76,7 @@ static OP *THX_parse_var(pTHX)
 #define push_rpn_item(o) \
 	(tmpop = (o), tmpop->op_sibling = stack, stack = tmpop)
 #define pop_rpn_item() \
-	(!stack ? (Perl_croak(aTHX_ "RPN stack underflow"), (OP*)NULL) : \
+	(!stack ? (croak("RPN stack underflow"), (OP*)NULL) : \
 	 (tmpop = stack, stack = stack->op_sibling, \
 	  tmpop->op_sibling = NULL, tmpop))
 
@@ -93,8 +91,7 @@ static OP *THX_parse_rpn_expr(pTHX)
 			case /*(*/')': case /*{*/'}': {
 				OP *result = pop_rpn_item();
 				if(stack)
-					Perl_croak(aTHX_
-						"RPN expression must return "
+					croak("RPN expression must return "
 						"a single value");
 				return result;
 			} break;
@@ -143,7 +140,7 @@ static OP *THX_parse_rpn_expr(pTHX)
 				push_rpn_item(newBINOP(OP_I_MODULO, 0, a, b));
 			} break;
 			default: {
-				Perl_croak(aTHX_ "RPN syntax error");
+				croak("RPN syntax error");
 			} break;
 		}
 	}
@@ -155,11 +152,11 @@ static OP *THX_parse_keyword_rpn(pTHX)
 	OP *op;
 	skip_opt_ws();
 	if(peek_char() != '('/*)*/)
-		Perl_croak(aTHX_ "RPN expression must be parenthesised");
+		croak("RPN expression must be parenthesised");
 	read_char();
 	op = parse_rpn_expr();
 	if(peek_char() != /*(*/')')
-		Perl_croak(aTHX_ "RPN expression must be parenthesised");
+		croak("RPN expression must be parenthesised");
 	read_char();
 	return op;
 }
@@ -172,11 +169,11 @@ static OP *THX_parse_keyword_calcrpn(pTHX)
 	varop = parse_var();
 	skip_opt_ws();
 	if(peek_char() != '{'/*}*/)
-		Perl_croak(aTHX_ "RPN expression must be braced");
+		croak("RPN expression must be braced");
 	read_char();
 	exprop = parse_rpn_expr();
 	if(peek_char() != /*{*/'}')
-		Perl_croak(aTHX_ "RPN expression must be braced");
+		croak("RPN expression must be braced");
 	read_char();
 	return newASSIGNOP(OPf_STACKED, varop, 0, exprop);
 }
@@ -258,8 +255,7 @@ PPCODE:
 		} else if(sv_is_string(item) && strEQ(SvPVX(item), "calcrpn")) {
 			keyword_enable(hintkey_calcrpn_sv);
 		} else {
-			Perl_croak(aTHX_
-				"\"%s\" is not exported by the %s module",
+			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));
 		}
 	}
@@ -276,8 +272,7 @@ PPCODE:
 		} else if(sv_is_string(item) && strEQ(SvPVX(item), "calcrpn")) {
 			keyword_disable(hintkey_calcrpn_sv);
 		} else {
-			Perl_croak(aTHX_
-				"\"%s\" is not exported by the %s module",
+			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));
 		}
 	}
