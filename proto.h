@@ -943,6 +943,11 @@ PERL_CALLCONV void	Perl_gv_name_set(pTHX_ GV* gv, const char *name, U32 len, U32
 #define PERL_ARGS_ASSERT_GV_NAME_SET	\
 	assert(gv); assert(name)
 
+PERL_CALLCONV void	Perl_gv_try_downgrade(pTHX_ GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE	\
+	assert(gv)
+
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_STASHPV	\

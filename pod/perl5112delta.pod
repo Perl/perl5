@@ -74,6 +74,16 @@ implements reverse Polish notation arithmetic via pluggable keywords.
 This module is mainly used for test purposes, and is not normally
 installed, but also serves as an example of how to use the new mechanism.
 
+=head2 Overridable function lookup
+
+Where an extension module hooks the creation of rv2cv ops, to modify
+the subroutine lookup process, this now works correctly for bareword
+subroutine calls.  This means that prototypes on subroutines referenced
+this way will be processed correctly.  (Previously bareword subroutine
+names were initially looked up, for parsing purposes, by an unhookable
+mechanism, so extensions could only properly influence subroutine names
+that appeared with an C<&> sigil.)
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous

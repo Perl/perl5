@@ -148,6 +148,7 @@ Perl_gv_fullname3
 Perl_gv_fullname4
 Perl_gv_init
 Perl_gv_name_set
+Perl_gv_try_downgrade
 Perl_gv_stashpv
 Perl_gv_stashpvn
 Perl_gv_stashsv

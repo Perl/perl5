@@ -570,6 +570,13 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_AELEMFAST:
 	if (! (o->op_type == OP_AELEMFAST && o->op_flags & OPf_SPECIAL)) {
 	    /* not an OP_PADAV replacement */
+	    GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV)
+#ifdef USE_ITHREADS
+			&& PL_curpad
+#endif
+			? cGVOPo_gv : NULL;
+	    if (gv)
+		SvREFCNT_inc(gv);
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
 		/* No GvIN_PAD_off(cGVOPo_gv) here, because other references
@@ -581,6 +588,12 @@ Perl_op_clear(pTHX_ OP *o)
 	    SvREFCNT_dec(cSVOPo->op_sv);
 	    cSVOPo->op_sv = NULL;
 #endif
+	    if (gv) {
+		int try_downgrade = SvREFCNT(gv) == 2;
+		SvREFCNT_dec(gv);
+		if (try_downgrade)
+		    gv_try_downgrade(gv);
+	    }
 	}
 	break;
     case OP_METHOD_NAMED:
@@ -7945,22 +7958,29 @@ Perl_ck_subr(pTHX_ OP *o)
     o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
     if (cvop->op_type == OP_RV2CV) {
-	SVOP* tmpop;
 	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
 	op_null(cvop);		/* disable rv2cv */
-	tmpop = (SVOP*)((UNOP*)cvop)->op_first;
-	if (tmpop->op_type == OP_GV && !(o->op_private & OPpENTERSUB_AMPER)) {
-	    GV *gv = cGVOPx_gv(tmpop);
-	    cv = GvCVu(gv);
-	    if (!cv)
-		tmpop->op_private |= OPpEARLY_CV;
-	    else {
-		if (SvPOK(cv)) {
-		    STRLEN len;
-		    namegv = CvANON(cv) ? gv : CvGV(cv);
-		    proto = SvPV(MUTABLE_SV(cv), len);
-		    proto_end = proto + len;
-		}
+	if (!(o->op_private & OPpENTERSUB_AMPER)) {
+	    SVOP *tmpop = (SVOP*)((UNOP*)cvop)->op_first;
+	    GV *gv = NULL;
+	    switch (tmpop->op_type) {
+		case OP_GV: {
+		    gv = cGVOPx_gv(tmpop);
+		    cv = GvCVu(gv);
+		    if (!cv)
+			tmpop->op_private |= OPpEARLY_CV;
+		} break;
+		case OP_CONST: {
+		    SV *sv = cSVOPx_sv(tmpop);
+		    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
+			cv = (CV*)SvRV(sv);
+		} break;
+	    }
+	    if (cv && SvPOK(cv)) {
+		STRLEN len;
+		namegv = gv && CvANON(cv) ? gv : CvGV(cv);
+		proto = SvPV(MUTABLE_SV(cv), len);
+		proto_end = proto + len;
 	    }
 	}
     }

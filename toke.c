@@ -5361,6 +5361,7 @@ Perl_yylex(pTHX)
 		SV *sv;
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
+		OP *rv2cv_op;
 		CV *cv;
 #ifdef PERL_MAD
 		SV *nextPL_nextwhite = 0;
@@ -5454,19 +5455,29 @@ Perl_yylex(pTHX)
 		if (len)
 		    goto safe_bareword;
 
-		/* Do the explicit type check so that we don't need to force
-		   the initialisation of the symbol table to have a real GV.
-		   Beware - gv may not really be a PVGV, cv may not really be
-		   a PVCV, (because of the space optimisations that gv_init
-		   understands) But they're true if for this symbol there is
-		   respectively a typeglob and a subroutine.
-		*/
-		cv = gv ? ((SvTYPE(gv) == SVt_PVGV)
-		    /* Real typeglob, so get the real subroutine: */
-			   ? GvCVu(gv)
-		    /* A proxy for a subroutine in this package? */
-			   : SvOK(gv) ? MUTABLE_CV(gv) : NULL)
-		    : NULL;
+		cv = NULL;
+		{
+		    OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc(sv));
+		    const_op->op_private = OPpCONST_BARE;
+		    rv2cv_op = newCVREF(0, const_op);
+		}
+		if (rv2cv_op->op_type == OP_RV2CV &&
+			(rv2cv_op->op_flags & OPf_KIDS)) {
+		    OP *rv_op = cUNOPx(rv2cv_op)->op_first;
+		    switch (rv_op->op_type) {
+			case OP_CONST: {
+			    SV *sv = cSVOPx_sv(rv_op);
+			    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
+				cv = (CV*)SvRV(sv);
+			} break;
+			case OP_GV: {
+			    GV *gv = cGVOPx_gv(rv_op);
+			    CV *maybe_cv = GvCVu(gv);
+			    if (maybe_cv && SvTYPE((SV*)maybe_cv) == SVt_PVCV)
+				cv = maybe_cv;
+			} break;
+		    }
+		}
 
 		/* See if it's the indirect object for a list operator. */
 
@@ -5489,8 +5500,10 @@ Perl_yylex(pTHX)
 		    /* Two barewords in a row may indicate method call. */
 
 		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') &&
-			(tmp = intuit_method(s, gv, cv)))
+			(tmp = intuit_method(s, gv, cv))) {
+			op_free(rv2cv_op);
 			return REPORT(tmp);
+		    }
 
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
@@ -5498,7 +5511,7 @@ Perl_yylex(pTHX)
 
 		    if (
 			( !immediate_paren && (PL_last_lop_op == OP_SORT ||
-                         ((!gv || !cv) &&
+                         (!cv &&
                         (PL_last_lop_op != OP_MAPSTART &&
 			 PL_last_lop_op != OP_GREPSTART))))
 		       || (PL_tokenbuf[0] == '_' && PL_tokenbuf[1] == '\0'
@@ -5521,6 +5534,7 @@ Perl_yylex(pTHX)
 
 		/* Is this a word before a => operator? */
 		if (*s == '=' && s[1] == '>' && !pkgname) {
+		    op_free(rv2cv_op);
 		    CLINE;
 		    sv_setpv(((SVOP*)pl_yylval.opval)->op_sv, PL_tokenbuf);
 		    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
@@ -5535,7 +5549,7 @@ Perl_yylex(pTHX)
 			d = s + 1;
 			while (SPACE_OR_TAB(*d))
 			    d++;
-			if (*d == ')' && (sv = gv_const_sv(gv))) {
+			if (*d == ')' && (sv = cv_const_sv(cv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -5556,6 +5570,7 @@ Perl_yylex(pTHX)
 			PL_thistoken = newSVpvs("");
 		    }
 #endif
+		    op_free(rv2cv_op);
 		    force_next(WORD);
 		    pl_yylval.ival = 0;
 		    TOKEN('&');
@@ -5563,7 +5578,8 @@ Perl_yylex(pTHX)
 
 		/* If followed by var or block, call it a method (unless sub) */
 
-		if ((*s == '$' || *s == '{') && (!gv || !cv)) {
+		if ((*s == '$' || *s == '{') && !cv) {
+		    op_free(rv2cv_op);
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_METHOD;
 		    PREBLOCK(METHOD);
@@ -5573,8 +5589,10 @@ Perl_yylex(pTHX)
 
 		if (!orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
-			&& (tmp = intuit_method(s, gv, cv)))
+			&& (tmp = intuit_method(s, gv, cv))) {
+		    op_free(rv2cv_op);
 		    return REPORT(tmp);
+		}
 
 		/* Not a method, so call it a subroutine (if defined) */
 
@@ -5584,25 +5602,17 @@ Perl_yylex(pTHX)
 					 "Ambiguous use of -%s resolved as -&%s()",
 					 PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    if ((sv = gv_const_sv(gv))) {
+		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
+			op_free(rv2cv_op);
 			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
 			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
 			pl_yylval.opval->op_private = 0;
 			TOKEN(WORD);
 		    }
 
-		    /* Resolve to GV now. */
-		    if (SvTYPE(gv) != SVt_PVGV) {
-			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
-			assert (SvTYPE(gv) == SVt_PVGV);
-			/* cv must have been some sort of placeholder, so
-			   now needs replacing with a real code reference.  */
-			cv = GvCV(gv);
-		    }
-
 		    op_free(pl_yylval.opval);
-		    pl_yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    pl_yylval.opval = rv2cv_op;
 		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
@@ -5670,7 +5680,7 @@ Perl_yylex(pTHX)
 		    if (probable_sub) {
 			gv = gv_fetchpv(PL_tokenbuf, GV_ADD, SVt_PVCV);
 			op_free(pl_yylval.opval);
-			pl_yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+			pl_yylval.opval = rv2cv_op;
 			pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 			PL_last_lop = PL_oldbufptr;
 			PL_last_lop_op = OP_ENTERSUB;
@@ -5722,6 +5732,7 @@ Perl_yylex(pTHX)
 			}
 		    }
 		}
+		op_free(rv2cv_op);
 
 	    safe_bareword:
 		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')) {
