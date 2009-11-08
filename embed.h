@@ -3007,7 +3007,7 @@
 #ifdef PERL_CORE
 #define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
-#define allocmy(a)		Perl_allocmy(aTHX_ a)
+#define allocmy(a,b,c)		Perl_allocmy(aTHX_ a,b,c)
 #endif
 #define pad_findmy(a,b,c)	Perl_pad_findmy(aTHX_ a,b,c)
 #define find_rundefsvoffset()	Perl_find_rundefsvoffset(aTHX)

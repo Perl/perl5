@@ -158,7 +158,7 @@ remember:	/* NULL */	/* start a full lexical scope */
 	;
 
 mydefsv:	/* NULL */	/* lexicalize $_ */
-			{ $$ = (I32) allocmy("$_"); }
+			{ $$ = (I32) Perl_allocmy(aTHX_ STR_WITH_LEN("$_"), 0); }
 	;
 
 progstart:

@@ -20,7 +20,7 @@ case 2:
 
   case 5:
 #line 161 "perly.y"
-    { (yyval.ival) = (I32) allocmy("$_"); ;}
+    { (yyval.ival) = (I32) Perl_allocmy(aTHX_ STR_WITH_LEN("$_"), 0); ;}
     break;
 
   case 6:

@@ -372,7 +372,7 @@ S_no_bareword_allowed(pTHX_ const OP *o)
 /* "register" allocation */
 
 PADOFFSET
-Perl_allocmy(pTHX_ const char *const name)
+Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 {
     dVAR;
     PADOFFSET off;
@@ -380,20 +380,28 @@ Perl_allocmy(pTHX_ const char *const name)
 
     PERL_ARGS_ASSERT_ALLOCMY;
 
+    if (flags)
+	Perl_croak(aTHX_ "panic: allocmy illegal flag bits 0x%" UVxf,
+		   (UV)flags);
+
+    /* Until we're using the length for real, cross check that we're being
+       told the truth.  */
+    assert(strlen(name) == len);
+
     /* complain about "my $<special_var>" etc etc */
-    if (*name &&
+    if (len &&
 	!(is_our ||
 	  isALPHA(name[1]) ||
 	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
-	  (name[1] == '_' && (*name == '$' || name[2]))))
+	  (name[1] == '_' && (*name == '$' || len > 2))))
     {
 	/* name[2] is true if strlen(name) > 2  */
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
-	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%s in \"%s\"",
-			      name[0], toCTRL(name[1]), name + 2,
+	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in \"%s\"",
+			      name[0], toCTRL(name[1]), (int)(len - 2), name + 2,
 			      PL_parser->in_my == KEY_state ? "state" : "my"));
 	} else {
-	    yyerror(Perl_form(aTHX_ "Can't use global %s in \"%s\"",name,
+	    yyerror(Perl_form(aTHX_ "Can't use global %.*s in \"%s\"", (int) len, name,
 			      PL_parser->in_my == KEY_state ? "state" : "my"));
 	}
     }

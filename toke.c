@@ -7094,7 +7094,7 @@ S_pending_ident(pTHX)
                 yyerror(Perl_form(aTHX_ "No package name allowed for "
                                   "variable %s in \"our\"",
                                   PL_tokenbuf));
-            tmp = allocmy(PL_tokenbuf);
+            tmp = allocmy(PL_tokenbuf, tokenbuf_len, 0);
         }
         else {
             if (has_colon)
@@ -7102,7 +7102,7 @@ S_pending_ident(pTHX)
 			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf));
 
             pl_yylval.opval = newOP(OP_PADANY, 0);
-            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf);
+            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len, 0);
             return PRIVATEREF;
         }
     }
