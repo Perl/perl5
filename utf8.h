@@ -112,7 +112,7 @@ encoded character.
 
 #define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
 #define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_UTF(c))
-#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_ASCII(c))
+#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE8_TO_UNI(c))
 #define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
 #define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
@@ -235,35 +235,28 @@ encoded character.
 
 #define UTF8_IS_ASCII(c) UTF8_IS_INVARIANT(c)
 
-#define UNICODE_LATIN_SMALL_LETTER_SHARP_S	0x00DF
 #define UNICODE_GREEK_CAPITAL_LETTER_SIGMA	0x03A3
 #define UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA	0x03C2
 #define UNICODE_GREEK_SMALL_LETTER_SIGMA	0x03C3
-
-#define EBCDIC_LATIN_SMALL_LETTER_SHARP_S	0x0059
 
 #define UNI_DISPLAY_ISPRINT	0x0001
 #define UNI_DISPLAY_BACKSLASH	0x0002
 #define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
-#ifdef EBCDIC
-#   define ANYOF_FOLD_SHARP_S(node, input, end)	\
-	(ANYOF_BITMAP_TEST(node, EBCDIC_LATIN_SMALL_LETTER_SHARP_S) && \
-	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
-	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
-	 ((end) > (input) + 1) && \
-	 toLOWER((input)[0]) == 's' && \
-	 toLOWER((input)[1]) == 's')
-#else
-#   define ANYOF_FOLD_SHARP_S(node, input, end)	\
-	(ANYOF_BITMAP_TEST(node, UNICODE_LATIN_SMALL_LETTER_SHARP_S) && \
-	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
-	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
-	 ((end) > (input) + 1) && \
-	 toLOWER((input)[0]) == 's' && \
-	 toLOWER((input)[1]) == 's')
+#ifndef EBCDIC
+#   define LATIN_SMALL_LETTER_SHARP_S	0x00DF
+#   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS 0x00FF
+#   define MICRO_SIGN 0x00B5
 #endif
+
+#define ANYOF_FOLD_SHARP_S(node, input, end)	\
+	(ANYOF_BITMAP_TEST(node, LATIN_SMALL_LETTER_SHARP_S) && \
+	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
+	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
+	 ((end) > (input) + 1) && \
+	 toLOWER((input)[0]) == 's' && \
+	 toLOWER((input)[1]) == 's')
 #define SHARP_S_SKIP 2
 
 #ifdef EBCDIC
