@@ -747,9 +747,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_AV:				/* array reference */
 	    av = MUTABLE_AV(SSPOPPTR);
 	    gv = MUTABLE_GV(SSPOPPTR);
-	    if (GvAV(gv)) {
-		SvREFCNT_dec(GvAV(gv));
-	    }
+	    SvREFCNT_dec(GvAV(gv));
 	    GvAV(gv) = av;
 	    if (SvMAGICAL(av)) {
 		PL_localizing = 2;
@@ -760,9 +758,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_HV:				/* hash reference */
 	    hv = MUTABLE_HV(SSPOPPTR);
 	    gv = MUTABLE_GV(SSPOPPTR);
-	    if (GvHV(gv)) {
-		SvREFCNT_dec(GvHV(gv));
-	    }
+	    SvREFCNT_dec(GvHV(gv));
 	    GvHV(gv) = hv;
 	    if (SvMAGICAL(hv)) {
 		PL_localizing = 2;

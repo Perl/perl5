@@ -1161,8 +1161,7 @@ Perl_setdefout(pTHX_ GV *gv)
 {
     dVAR;
     SvREFCNT_inc_simple_void(gv);
-    if (PL_defoutgv)
-	SvREFCNT_dec(PL_defoutgv);
+    SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
 }
 

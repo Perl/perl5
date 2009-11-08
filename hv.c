@@ -2149,8 +2149,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
                 HeSVKEY_set(entry, SvREFCNT_inc_simple_NN(key));
                 return entry;               /* beware, hent_val is not set */
             }
-            if (HeVAL(entry))
-                SvREFCNT_dec(HeVAL(entry));
+            SvREFCNT_dec(HeVAL(entry));
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
             iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */

@@ -1191,8 +1191,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     }
   nope:
 
-    if (svrecode)
-	 SvREFCNT_dec(svrecode);
+    SvREFCNT_dec(svrecode);
 
     Safefree(temp_buffer);
     return count;

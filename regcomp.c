@@ -6790,8 +6790,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 		       SVfARG(sv_name)
                 );
         }
-        if (sv_name)    
-            SvREFCNT_dec(sv_name);    
+        SvREFCNT_dec(sv_name);
         if (!cached)
             SvREFCNT_dec(sv_str);    
         return len ? NULL : (regnode *)&len;
@@ -6869,12 +6868,9 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
     } else {	/* zero length */
         ret = reg_node(pRExC_state,NOTHING);
     }
-    if (!cached) {
+    SvREFCNT_dec(sv_name);
+    if (!cached)
         SvREFCNT_dec(sv_str);
-    }
-    if (sv_name) {
-        SvREFCNT_dec(sv_name); 
-    }
     return ret;
 
 }
@@ -8442,9 +8438,7 @@ parseit:
         *STRING(ret)= (char)value;
         STR_LEN(ret)= 1;
         RExC_emit += STR_SZ(1);
-	if (listsv) {
-	    SvREFCNT_dec(listsv);
-	}
+	SvREFCNT_dec(listsv);
         return ret;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
@@ -9407,24 +9401,18 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         ReREFCNT_dec(r->mother_re);
     } else {
         CALLREGFREE_PVT(rx); /* free the private data */
-        if (RXp_PAREN_NAMES(r))
-            SvREFCNT_dec(RXp_PAREN_NAMES(r));
+        SvREFCNT_dec(RXp_PAREN_NAMES(r));
     }        
     if (r->substrs) {
-        if (r->anchored_substr)
-            SvREFCNT_dec(r->anchored_substr);
-        if (r->anchored_utf8)
-            SvREFCNT_dec(r->anchored_utf8);
-        if (r->float_substr)
-            SvREFCNT_dec(r->float_substr);
-        if (r->float_utf8)
-            SvREFCNT_dec(r->float_utf8);
+        SvREFCNT_dec(r->anchored_substr);
+        SvREFCNT_dec(r->anchored_utf8);
+        SvREFCNT_dec(r->float_substr);
+        SvREFCNT_dec(r->float_utf8);
 	Safefree(r->substrs);
     }
     RX_MATCH_COPY_FREE(rx);
 #ifdef PERL_OLD_COPY_ON_WRITE
-    if (r->saved_copy)
-        SvREFCNT_dec(r->saved_copy);
+    SvREFCNT_dec(r->saved_copy);
 #endif
     Safefree(r->offs);
 }

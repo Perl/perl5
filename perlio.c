@@ -614,10 +614,8 @@ PerlIO_list_free(pTHX_ PerlIO_list_t *list)
 	if (--list->refcnt == 0) {
 	    if (list->array) {
 		IV i;
-		for (i = 0; i < list->cur; i++) {
-		    if (list->array[i].arg)
-			SvREFCNT_dec(list->array[i].arg);
-		}
+		for (i = 0; i < list->cur; i++)
+		    SvREFCNT_dec(list->array[i].arg);
 		Safefree(list->array);
 	    }
 	    Safefree(list);
@@ -1038,8 +1036,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			    arg = newSVpvn(as, alen);
 			PerlIO_list_push(aTHX_ av, layer,
 					 (arg) ? arg : &PL_sv_undef);
-			if (arg)
-			    SvREFCNT_dec(arg);
+			SvREFCNT_dec(arg);
 		    }
 		    else {
 			Perl_ck_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
@@ -1563,8 +1560,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 		    arg = (*l->tab->Getarg) (aTHX_ &l, NULL, 0);
 		PerlIO_list_push(aTHX_ layera, l->tab,
 				 (arg) ? arg : &PL_sv_undef);
-		if (arg)
-		    SvREFCNT_dec(arg);
+		SvREFCNT_dec(arg);
 		l = *PerlIONext(&l);
 	    }
 	}
@@ -2269,8 +2265,7 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
 	if (PerlIOBase(o)->flags & PERLIO_F_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-	if (arg)
-	    SvREFCNT_dec(arg);
+	SvREFCNT_dec(arg);
     }
     return f;
 }
@@ -5181,8 +5176,7 @@ PerlIO_tmpfile(void)
 	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
 	  PerlLIO_unlink(sv ? SvPVX_const(sv) : tempname);
      }
-     if (sv)
-	 SvREFCNT_dec(sv);
+     SvREFCNT_dec(sv);
 #    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
      FILE * const stdio = PerlSIO_tmpfile();
 

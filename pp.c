@@ -3200,8 +3200,7 @@ PP(pp_substr)
 	    sv_insert_flags(sv, pos, rem, repl, repl_len, 0);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
-	    if (repl_sv_copy)
-		SvREFCNT_dec(repl_sv_copy);
+	    SvREFCNT_dec(repl_sv_copy);
 	}
 	else if (lvalue) {		/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
@@ -3381,8 +3380,7 @@ PP(pp_index)
 	if (retval > 0 && big_utf8)
 	    sv_pos_b2u(big, &retval);
     }
-    if (temp)
-	SvREFCNT_dec(temp);
+    SvREFCNT_dec(temp);
  fail:
     PUSHi(retval + arybase);
     RETURN;

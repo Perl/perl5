@@ -1525,8 +1525,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     if(i)
 	LEAVE;
 #endif
-    if(to_dec)
-	SvREFCNT_dec(to_dec);
+    SvREFCNT_dec(to_dec);
     return 0;
 }
 #endif /* !PERL_MICRO */
@@ -2357,8 +2356,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	}
 	else if (strEQ(mg->mg_ptr+1, "NCODING")) {
-	    if (PL_encoding)
-		SvREFCNT_dec(PL_encoding);
+	    SvREFCNT_dec(PL_encoding);
 	    if (SvOK(sv) || SvGMAGICAL(sv)) {
 		PL_encoding = newSVsv(sv);
 	    }
@@ -2537,8 +2535,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_rs = newSVsv(sv);
 	break;
     case '\\':
-	if (PL_ors_sv)
-	    SvREFCNT_dec(PL_ors_sv);
+	SvREFCNT_dec(PL_ors_sv);
 	if (SvOK(sv) || SvGMAGICAL(sv)) {
 	    PL_ors_sv = newSVsv(sv);
 	}
