@@ -166,8 +166,10 @@ Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 
 =item *
 
-Reversing an array in-place in void context is now several orders of magnitude faster than it used to be.
-It will also preserve non-existent elements whenever possible, i.e. for non magical arrays or tied arrays with C<EXISTS> and C<DELETE> methods.
+Reversing an array to itself (as in C<@a = reverse @a>) in void context now
+happens in-place and is several orders of magnitude faster than it used to be.
+It will also preserve non-existent elements whenever possible, i.e. for non
+magical arrays or tied arrays with C<EXISTS> and C<DELETE> methods.
 
 =back
 

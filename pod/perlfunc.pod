@@ -4782,6 +4782,10 @@ Used without arguments in scalar context, reverse() reverses C<$_>.
     print reverse;                              # No output, list context
     print scalar reverse;                       # Hello, world
 
+Note that reversing an array to itself (as in C<@a = reverse @a>) will
+preserve non-existent elements whenever possible, i.e. for non magical
+arrays or tied arrays with C<EXISTS> and C<DELETE> methods.
+
 This operator is also handy for inverting a hash, although there are some
 caveats.  If a value is duplicated in the original hash, only one of those
 can be represented as a key in the inverted hash.  Also, this has to
