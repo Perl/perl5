@@ -8352,6 +8352,78 @@ S_opt_scalarhv(pTHX_ OP *rep_op) {
     return (OP*)unop;
 }                        
 
+/* Checks if o acts as an in-place operator on an array. oright points to the
+ * beginning of the right-hand side. Returns the left-hand side of the
+ * assignment if o acts in-place, or NULL otherwise. */
+
+OP *
+S_is_inplace_av(pTHX_ OP *o, OP *oright) {
+    OP *o2;
+    OP *oleft = NULL;
+
+    PERL_ARGS_ASSERT_IS_INPLACE_AV;
+
+    if (!oright ||
+	(oright->op_type != OP_RV2AV && oright->op_type != OP_PADAV)
+	|| oright->op_next != o
+	|| (oright->op_private & OPpLVAL_INTRO)
+    )
+	return NULL;
+
+    /* o2 follows the chain of op_nexts through the LHS of the
+     * assign (if any) to the aassign op itself */
+    o2 = o->op_next;
+    if (!o2 || o2->op_type != OP_NULL)
+	return NULL;
+    o2 = o2->op_next;
+    if (!o2 || o2->op_type != OP_PUSHMARK)
+	return NULL;
+    o2 = o2->op_next;
+    if (o2 && o2->op_type == OP_GV)
+	o2 = o2->op_next;
+    if (!o2
+	|| (o2->op_type != OP_PADAV && o2->op_type != OP_RV2AV)
+	|| (o2->op_private & OPpLVAL_INTRO)
+    )
+	return NULL;
+    oleft = o2;
+    o2 = o2->op_next;
+    if (!o2 || o2->op_type != OP_NULL)
+	return NULL;
+    o2 = o2->op_next;
+    if (!o2 || o2->op_type != OP_AASSIGN
+	    || (o2->op_flags & OPf_WANT) != OPf_WANT_VOID)
+	return NULL;
+
+    /* check that the sort is the first arg on RHS of assign */
+
+    o2 = cUNOPx(o2)->op_first;
+    if (!o2 || o2->op_type != OP_NULL)
+	return NULL;
+    o2 = cUNOPx(o2)->op_first;
+    if (!o2 || o2->op_type != OP_PUSHMARK)
+	return NULL;
+    if (o2->op_sibling != o)
+	return NULL;
+
+    /* check the array is the same on both sides */
+    if (oleft->op_type == OP_RV2AV) {
+	if (oright->op_type != OP_RV2AV
+	    || !cUNOPx(oright)->op_first
+	    || cUNOPx(oright)->op_first->op_type != OP_GV
+	    || cGVOPx_gv(cUNOPx(oleft)->op_first) !=
+	       cGVOPx_gv(cUNOPx(oright)->op_first)
+	)
+	    return NULL;
+    }
+    else if (oright->op_type != OP_PADAV
+	|| oright->op_targ != oleft->op_targ
+    )
+	return NULL;
+
+    return oleft;
+}
+
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
  * peep() is called */
@@ -8792,62 +8864,8 @@ Perl_peep(pTHX_ register OP *o)
 		oright = cUNOPx(oright)->op_sibling;
 	    }
 
-	    if (!oright ||
-		(oright->op_type != OP_RV2AV && oright->op_type != OP_PADAV)
-		|| oright->op_next != o
-		|| (oright->op_private & OPpLVAL_INTRO)
-	    )
-		break;
-
-	    /* o2 follows the chain of op_nexts through the LHS of the
-	     * assign (if any) to the aassign op itself */
-	    o2 = o->op_next;
-	    if (!o2 || o2->op_type != OP_NULL)
-		break;
-	    o2 = o2->op_next;
-	    if (!o2 || o2->op_type != OP_PUSHMARK)
-		break;
-	    o2 = o2->op_next;
-	    if (o2 && o2->op_type == OP_GV)
-		o2 = o2->op_next;
-	    if (!o2
-		|| (o2->op_type != OP_PADAV && o2->op_type != OP_RV2AV)
-		|| (o2->op_private & OPpLVAL_INTRO)
-	    )
-		break;
-	    oleft = o2;
-	    o2 = o2->op_next;
-	    if (!o2 || o2->op_type != OP_NULL)
-		break;
-	    o2 = o2->op_next;
-	    if (!o2 || o2->op_type != OP_AASSIGN
-		    || (o2->op_flags & OPf_WANT) != OPf_WANT_VOID)
-		break;
-
-	    /* check that the sort is the first arg on RHS of assign */
-
-	    o2 = cUNOPx(o2)->op_first;
-	    if (!o2 || o2->op_type != OP_NULL)
-		break;
-	    o2 = cUNOPx(o2)->op_first;
-	    if (!o2 || o2->op_type != OP_PUSHMARK)
-		break;
-	    if (o2->op_sibling != o)
-		break;
-
-	    /* check the array is the same on both sides */
-	    if (oleft->op_type == OP_RV2AV) {
-		if (oright->op_type != OP_RV2AV
-		    || !cUNOPx(oright)->op_first
-		    || cUNOPx(oright)->op_first->op_type != OP_GV
-		    ||  cGVOPx_gv(cUNOPx(oleft)->op_first) !=
-		       	cGVOPx_gv(cUNOPx(oright)->op_first)
-		)
-		    break;
-	    }
-	    else if (oright->op_type != OP_PADAV
-		|| oright->op_targ != oleft->op_targ
-	    )
+	    oleft = is_inplace_av(o, oright);
+	    if (!oleft)
 		break;
 
 	    /* transfer MODishness etc from LHS arg to RHS arg */

@@ -1431,6 +1431,11 @@ STATIC OP*	S_opt_scalarhv(pTHX_ OP* rep_op)
 #define PERL_ARGS_ASSERT_OPT_SCALARHV	\
 	assert(rep_op)
 
+STATIC OP*	S_is_inplace_av(pTHX_ OP* o, OP* oright)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_INPLACE_AV	\
+	assert(o)
+
 #endif
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);

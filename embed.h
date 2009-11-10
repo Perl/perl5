@@ -398,6 +398,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define opt_scalarhv		S_opt_scalarhv
+#define is_inplace_av		S_is_inplace_av
 #endif
 #endif
 #define leave_scope		Perl_leave_scope
@@ -2770,6 +2771,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define opt_scalarhv(a)		S_opt_scalarhv(aTHX_ a)
+#define is_inplace_av(a,b)	S_is_inplace_av(aTHX_ a,b)
 #endif
 #endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
