@@ -58,6 +58,23 @@
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+/*
+ * Bug in winbase.h in mingw-w64 4.4.0-1 at least... they
+ * do #define GetEnvironmentStringsA GetEnvironmentStrings and fail
+ * to declare GetEnvironmentStringsA.
+ */
+#if defined(__MINGW64__) && defined(GetEnvironmentStringsA) && !defined(UNICODE)
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef GetEnvironmentStringsA
+WINBASEAPI LPCH WINAPI GetEnvironmentStringsA(VOID);
+#define GetEnvironmentStrings GetEnvironmentStringsA
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 #ifdef   WIN32_LEAN_AND_MEAN		/* C file is NOT a Perl5 original. */
 #define  CONTEXT	PERL_CONTEXT	/* Avoid conflict of CONTEXT defs. */
 #endif /*WIN32_LEAN_AND_MEAN */

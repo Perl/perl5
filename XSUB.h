@@ -478,6 +478,12 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #	undef setservent
 #endif	/* NETWARE */
 
+/* to avoid warnings: "xyz" redefined */
+#ifdef WIN32
+#    undef  popen
+#    undef  pclose
+#endif /* WIN32 */
+
 #    undef  socketpair
 
 #    define mkdir		PerlDir_mkdir

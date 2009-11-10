@@ -190,8 +190,13 @@ typedef U64TYPE U64;
 #               define INT64_C(c)	CAT2(c,L)
 #               define UINT64_C(c)	CAT2(c,UL)
 #           else
-#               define INT64_C(c)	((I64TYPE)(c))
-#               define UINT64_C(c)	((U64TYPE)(c))
+#               if defined(_WIN64) && defined(_MSC_VER)
+#                   define INT64_C(c)	CAT2(c,I64)
+#                   define UINT64_C(c)	CAT2(c,UI64)
+#               else
+#                   define INT64_C(c)	((I64TYPE)(c))
+#                   define UINT64_C(c)	((U64TYPE)(c))
+#               endif
 #           endif
 #       endif
 #   endif

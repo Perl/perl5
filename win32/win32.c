@@ -2014,7 +2014,7 @@ win32_uname(struct utsname *name)
 	GetSystemInfo(&info);
 
 #if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) \
- || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION))
+ || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION) && !defined(__MINGW_EXTENSION))
 	procarch = info.u.s.wProcessorArchitecture;
 #else
 	procarch = info.wProcessorArchitecture;

@@ -5366,7 +5366,7 @@ Perl_get_hash_seed(pTHX)
 	   * help.  Sum in another random number that will
 	   * fill in the low bits. */
 	  myseed +=
-	       (UV)(Drand01() * (NV)((1 << ((UVSIZE * 8 - RANDBITS))) - 1));
+	       (UV)(Drand01() * (NV)((((UV)1) << ((UVSIZE * 8 - RANDBITS))) - 1));
 #endif /* RANDBITS < (UVSIZE * 8) */
 	  if (myseed == 0) { /* Superparanoia. */
 	      myseed = (UV)(Drand01() * (NV)UV_MAX); /* One more chance. */
