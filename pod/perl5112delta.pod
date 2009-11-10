@@ -162,14 +162,12 @@ Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
 =over 4
 
 =item *
 
-XXX
+Reversing an array in-place in void context is now several orders of magnitude faster than it used to be.
+It will also preserve non-existent elements whenever possible, i.e. for non magical arrays or tied arrays with C<EXISTS> and C<DELETE> methods.
 
 =back
 

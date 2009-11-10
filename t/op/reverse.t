@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5;
+plan tests => 21;
 
 is(reverse("abc"), "cba");
 
@@ -19,6 +19,60 @@ is(reverse(), "raboof");
 
     is($b[0], $a[1]);
     is($b[1], $a[0]);
+}
+
+{
+    my @a = (1, 2, 3, 4);
+    @a = reverse @a;
+    is("@a", "4 3 2 1");
+
+    delete $a[1];
+    @a = reverse @a;
+    ok(!exists $a[2]);
+    is($a[0] . $a[1] . $a[3], '124');
+
+    @a = (5, 6, 7, 8, 9);
+    @a = reverse @a;
+    is("@a", "9 8 7 6 5");
+
+    delete $a[3];
+    @a = reverse @a;
+    ok(!exists $a[1]);
+    is($a[0] . $a[2] . $a[3] . $a[4], '5789');
+
+    delete $a[2];
+    @a = reverse @a;
+    ok(!exists $a[2] && !exists $a[3]);
+    is($a[0] . $a[1] . $a[4], '985');
+}
+
+use Tie::Array;
+
+{
+    tie my @a, 'Tie::StdArray';
+
+    @a = (1, 2, 3, 4);
+    @a = reverse @a;
+    is("@a", "4 3 2 1");
+
+    delete $a[1];
+    @a = reverse @a;
+    ok(!exists $a[2]);
+    is($a[0] . $a[1] . $a[3], '124');
+
+    @a = (5, 6, 7, 8, 9);
+    @a = reverse @a;
+    is("@a", "9 8 7 6 5");
+
+    delete $a[3];
+    @a = reverse @a;
+    ok(!exists $a[1]);
+    is($a[0] . $a[2] . $a[3] . $a[4], '5789');
+
+    delete $a[2];
+    @a = reverse @a;
+    ok(!exists $a[2] && !exists $a[3]);
+    is($a[0] . $a[1] . $a[4], '985');
 }
 
 {

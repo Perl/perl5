@@ -8892,7 +8892,35 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_REVERSE: {
 	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark, *rv2av;
 	    OP *gvop = NULL;
+	    OP *oleft, *oright;
 	    LISTOP *enter, *exlist;
+
+	    /* @a = reverse @a */
+	    if ((oright = cLISTOPo->op_first)
+		    && (oright->op_type == OP_PUSHMARK)
+		    && (oright = oright->op_sibling)
+		    && (oleft = is_inplace_av(o, oright))) {
+		OP *o2;
+
+		/* transfer MODishness etc from LHS arg to RHS arg */
+		oright->op_flags = oleft->op_flags;
+		o->op_private |= OPpREVERSE_INPLACE;
+
+		/* excise push->gv->rv2av->null->aassign */
+		o2 = o->op_next->op_next;
+		op_null(o2); /* PUSHMARK */
+		o2 = o2->op_next;
+		if (o2->op_type == OP_GV) {
+		    op_null(o2); /* GV */
+		    o2 = o2->op_next;
+		}
+		op_null(o2); /* RV2AV or PADAV */
+		o2 = o2->op_next->op_next;
+		op_null(o2); /* AASSIGN */
+
+		o->op_next = o2->op_next;
+		break;
+	    }
 
 	    enter = (LISTOP *) o->op_next;
 	    if (!enter)

@@ -4791,17 +4791,76 @@ PP(pp_unshift)
 PP(pp_reverse)
 {
     dVAR; dSP; dMARK;
-    SV ** const oldsp = SP;
 
     if (GIMME == G_ARRAY) {
-	MARK++;
-	while (MARK < SP) {
-	    register SV * const tmp = *MARK;
-	    *MARK++ = *SP;
-	    *SP-- = tmp;
+	if (PL_op->op_private & OPpREVERSE_INPLACE) {
+	    AV *av;
+
+	    /* See pp_sort() */
+	    assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
+	    (void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
+	    av = MUTABLE_AV((*SP));
+	    /* In-place reversing only happens in void context for the array
+	     * assignment. We don't need to push anything on the stack. */
+	    SP = MARK;
+
+	    if (SvMAGICAL(av)) {
+		I32 i, j;
+		register SV *tmp = sv_newmortal();
+		/* For SvCANEXISTDELETE */
+		HV *stash;
+		const MAGIC *mg;
+		bool can_preserve = SvCANEXISTDELETE(av);
+
+		for (i = 0, j = av_len(av); i < j; ++i, --j) {
+		    register SV *begin, *end;
+
+		    if (can_preserve) {
+			if (!av_exists(av, i)) {
+			    if (av_exists(av, j)) {
+				register SV *sv = av_delete(av, j, 0);
+				begin = *av_fetch(av, i, TRUE);
+				sv_setsv_mg(begin, sv);
+			    }
+			    continue;
+			}
+			else if (!av_exists(av, j)) {
+			    register SV *sv = av_delete(av, i, 0);
+			    end = *av_fetch(av, j, TRUE);
+			    sv_setsv_mg(end, sv);
+			    continue;
+			}
+		    }
+
+		    begin = *av_fetch(av, i, TRUE);
+		    end   = *av_fetch(av, j, TRUE);
+		    sv_setsv(tmp,      begin);
+		    sv_setsv_mg(begin, end);
+		    sv_setsv_mg(end,   tmp);
+		}
+	    }
+	    else {
+		SV **begin = AvARRAY(av);
+		SV **end   = begin + AvFILLp(av);
+
+		while (begin < end) {
+		    register SV * const tmp = *begin;
+		    *begin++ = *end;
+		    *end--   = tmp;
+		}
+	    }
 	}
-	/* safe as long as stack cannot get extended in the above */
-	SP = oldsp;
+	else {
+	    SV **oldsp = SP;
+	    MARK++;
+	    while (MARK < SP) {
+		register SV * const tmp = *MARK;
+		*MARK++ = *SP;
+		*SP--   = tmp;
+	    }
+	    /* safe as long as stack cannot get extended in the above */
+	    SP = oldsp;
+	}
     }
     else {
 	register char *up;
