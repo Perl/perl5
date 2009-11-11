@@ -77,6 +77,7 @@ rewinddir $dirhandle;
 {
     my $works = 0;
     while(readdir $dirhandle){
+        $_ =~ s/\.$// if defined $_ && $^O eq 'VMS'; # may have zero-length extension
         if( defined $_ && $_ eq '0'){
             $works = 1;
             last;
@@ -89,6 +90,7 @@ rewinddir $dirhandle;
 {
     my $works = 0;
     my $sub = sub{
+        $_ =~ s/\.$// if defined $_ && $^O eq 'VMS'; # may have zero-length extension
         if( defined $_ && $_ eq '0' ){
             $works = 1;
         }
@@ -101,6 +103,7 @@ rewinddir $dirhandle;
 {
     my $works = 0;
     while( my $dir = readdir $dirhandle ){
+        $dir =~ s/\.$// if defined $dir && $^O eq 'VMS'; # may have zero-length extension
         if( defined $dir && $dir eq '0'){
             $works = 1;
             last;
@@ -114,7 +117,10 @@ rewinddir $dirhandle;
     my $tmp;
     my $ok;
     my @list;
-    defined($tmp)&& !$tmp && ($ok=1) while $tmp = readdir $dirhandle;
+    while( $tmp = readdir $dirhandle ){
+        $tmp =~ s/\.$// if defined $tmp && $^O eq 'VMS'; # may have zero-length extension
+        last if defined($tmp)&& !$tmp && ($ok=1) 
+    }
     ok( $ok, '$dir while $dir = readdir; with file named "0"'  );
     rewinddir $dirhandle;
 }
