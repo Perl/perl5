@@ -28,7 +28,7 @@ L<Pod::Simple::HTML>, but it largely preserves the same interface.
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.09';
+$VERSION = '3.10';
 use Carp ();
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
@@ -250,14 +250,22 @@ sub start_item_bullet {
 }
 
 sub start_item_text   {
-    $_[0]{'scratch'} = "</dd>\n" if delete $_[0]{'in_dd'};
+    if ($_[0]{'in_dd'}[ $_[0]{'dl_level'} ]) {
+        $_[0]{'scratch'} = "</dd>\n";
+        $_[0]{'in_dd'}[ $_[0]{'dl_level'} ] = 0;
+    }
     $_[0]{'scratch'} .= '<dt>';
 }
 
 sub start_over_bullet { $_[0]{'scratch'} = '<ul>'; $_[0]->emit }
-sub start_over_text   { $_[0]{'scratch'} = '<dl>'; $_[0]->emit }
 sub start_over_block  { $_[0]{'scratch'} = '<ul>'; $_[0]->emit }
 sub start_over_number { $_[0]{'scratch'} = '<ol>'; $_[0]->emit }
+sub start_over_text   {
+    $_[0]{'scratch'} = '<dl>';
+    $_[0]{'dl_level'}++;
+    $_[0]{'in_dd'} ||= [];
+    $_[0]->emit
+}
 
 sub end_over_block  { $_[0]{'scratch'} .= '</ul>'; $_[0]->emit }
 
@@ -274,8 +282,12 @@ sub end_over_bullet   {
 }
 
 sub end_over_text   {
-    $_[0]{'scratch'} = "</dd>\n" if delete $_[0]{'in_dd'};
+    if ($_[0]{'in_dd'}[ $_[0]{'dl_level'} ]) {
+        $_[0]{'scratch'} = "</dd>\n";
+        $_[0]{'in_dd'}[ $_[0]{'dl_level'} ] = 0;
+    }
     $_[0]{'scratch'} .= '</dl>';
+    $_[0]{'dl_level'}--;
     $_[0]->emit;
 }
 
@@ -303,7 +315,12 @@ sub end_head4       { shift->_end_head(@_); }
 
 sub end_item_bullet { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
 sub end_item_number { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
-sub end_item_text   { $_[0]{'scratch'} .= "</dt>\n<dd>"; $_[0]{'in_dd'} = 1; $_[0]->emit }
+
+sub end_item_text   {
+    $_[0]{'scratch'} .= "</dt>\n<dd>";
+    $_[0]{'in_dd'}[ $_[0]{'dl_level'} ] = 1;
+    $_[0]->emit;
+}
 
 # This handles =begin and =for blocks of all kinds.
 sub start_for { 
