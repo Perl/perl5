@@ -145,12 +145,13 @@ use constant TEST_FAIL_STAGE
 use constant MISSING_PREREQS_LIST
                             => sub {
                                 my $buffer = shift;
+                                my $last = ( split /\[ERROR\] .+? MAKE TEST/, $buffer )[-1];
                                 my @list = map { s/.pm$//; s|/|::|g; $_ }
-                                    ($buffer =~
+                                    ($last =~
                                         m/\bCan\'t locate (\S+) in \@INC/g);
                                 
                                 ### make sure every missing prereq is only 
-                                ### listed ones
+                                ### listed once
                                 {   my %seen;
                                     @list = grep { !$seen{$_}++ } @list
                                 }
