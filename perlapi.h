@@ -566,6 +566,8 @@ END_EXTERN_C
 #define PL_scopestack_ix	(*Perl_Iscopestack_ix_ptr(aTHX))
 #undef  PL_scopestack_max
 #define PL_scopestack_max	(*Perl_Iscopestack_max_ptr(aTHX))
+#undef  PL_scopestack_name
+#define PL_scopestack_name	(*Perl_Iscopestack_name_ptr(aTHX))
 #undef  PL_screamfirst
 #define PL_screamfirst		(*Perl_Iscreamfirst_ptr(aTHX))
 #undef  PL_screamnext

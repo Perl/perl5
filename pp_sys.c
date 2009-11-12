@@ -318,13 +318,13 @@ PP(pp_backtick)
 		NOOP;
 	}
 	else if (gimme == G_SCALAR) {
-	    ENTER;
+	    ENTER_with_name("backtick");
 	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
 	    sv_setpvs(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
 		NOOP;
-	    LEAVE;
+	    LEAVE_with_name("backtick");
 	    XPUSHs(TARG);
 	    SvTAINTED_on(TARG);
 	}
@@ -364,7 +364,7 @@ PP(pp_glob)
      * without at the same time croaking, for some reason, or if
      * perl was built with PERL_EXTERNAL_GLOB */
 
-    ENTER;
+    ENTER_with_name("glob");
 
 #ifndef VMS
     if (PL_tainting) {
@@ -389,7 +389,7 @@ PP(pp_glob)
 #endif	/* !DOSISH */
 
     result = do_readline();
-    LEAVE;
+    LEAVE_with_name("glob");
     return result;
 }
 
@@ -534,9 +534,9 @@ PP(pp_open)
 	    *MARK-- = SvTIED_obj(MUTABLE_SV(io), mg);
 	    PUSHMARK(MARK);
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_OPEN");
 	    call_method("OPEN", G_SCALAR);
-	    LEAVE;
+	    LEAVE_with_name("call_OPEN");
 	    SPAGAIN;
 	    RETURN;
 	}
@@ -574,9 +574,9 @@ PP(pp_close)
 		PUSHMARK(SP);
 		XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 		PUTBACK;
-		ENTER;
+		ENTER_with_name("call_CLOSE");
 		call_method("CLOSE", G_SCALAR);
-		LEAVE;
+		LEAVE_with_name("call_CLOSE");
 		SPAGAIN;
 		RETURN;
 	    }
@@ -665,9 +665,9 @@ PP(pp_fileno)
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_FILENO");
 	call_method("FILENO", G_SCALAR);
-	LEAVE;
+	LEAVE_with_name("call_FILENO");
 	SPAGAIN;
 	RETURN;
     }
@@ -740,9 +740,9 @@ PP(pp_binmode)
 	    if (discp)
 		XPUSHs(discp);
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_BINMODE");
 	    call_method("BINMODE", G_SCALAR);
-	    LEAVE;
+	    LEAVE_with_name("call_BINMODE");
 	    SPAGAIN;
 	    RETURN;
 	}
@@ -820,7 +820,7 @@ PP(pp_tie)
     }
     items = SP - MARK++;
     if (sv_isobject(*MARK)) { /* Calls GET magic. */
-	ENTER;
+	ENTER_with_name("call_TIE");
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,(I32)items);
@@ -840,7 +840,7 @@ PP(pp_tie)
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
 		 methname, SVfARG(SvOK(*MARK) ? *MARK : &PL_sv_no));
 	}
-	ENTER;
+	ENTER_with_name("call_TIE");
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,(I32)items);
@@ -863,7 +863,7 @@ PP(pp_tie)
 		       "Self-ties of arrays and hashes are not supported");
 	sv_magic(varsv, (SvRV(sv) == varsv ? NULL : sv), how, NULL, 0);
     }
-    LEAVE;
+    LEAVE_with_name("call_TIE");
     SP = PL_stack_base + markoff;
     PUSHs(sv);
     RETURN;
@@ -890,9 +890,9 @@ PP(pp_untie)
 	       XPUSHs(SvTIED_obj(MUTABLE_SV(gv), mg));
 	       mXPUSHi(SvREFCNT(obj) - 1);
 	       PUTBACK;
-	       ENTER;
+	       ENTER_with_name("call_UNTIE");
 	       call_sv(MUTABLE_SV(cv), G_VOID);
-	       LEAVE;
+	       LEAVE_with_name("call_UNTIE");
 	       SPAGAIN;
             }
 	    else if (mg && SvREFCNT(obj) > 1) {

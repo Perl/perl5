@@ -91,7 +91,13 @@ Perl_push_scope(pTHX)
     if (PL_scopestack_ix == PL_scopestack_max) {
 	PL_scopestack_max = GROW(PL_scopestack_max);
 	Renew(PL_scopestack, PL_scopestack_max, I32);
+#ifdef DEBUGGING
+	Renew(PL_scopestack_name, PL_scopestack_max, const char*);
+#endif DEBUGGING
     }
+#ifdef DEBUGGING
+    PL_scopestack_name[PL_scopestack_ix] = "unknown";
+#endif
     PL_scopestack[PL_scopestack_ix++] = PL_savestack_ix;
 
 }

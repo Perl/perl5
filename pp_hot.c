@@ -157,7 +157,7 @@ PP(pp_sassign)
 	    /* We've been returned a constant rather than a full subroutine,
 	       but they expect a subroutine reference to apply.  */
 	    if (SvROK(cv)) {
-		ENTER;
+		ENTER_with_name("sassign_coderef");
 		SvREFCNT_inc_void(SvRV(cv));
 		/* newCONSTSUB takes a reference count on the passed in SV
 		   from us.  We set the name to NULL, otherwise we get into
@@ -167,7 +167,7 @@ PP(pp_sassign)
 		SvRV_set(left, MUTABLE_SV(newCONSTSUB(GvSTASH(right), NULL,
 						      SvRV(cv))));
 		SvREFCNT_dec(cv);
-		LEAVE;
+		LEAVE_with_name("sassign_coderef");
 	    } else {
 		/* What can happen for the corner case *{"BONK"} = \&{"BONK"};
 		   is that
@@ -719,14 +719,14 @@ PP(pp_print)
 	PUSHMARK(MARK - 1);
 	*MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_PRINT");
 	if( PL_op->op_type == OP_SAY ) {
 		/* local $\ = "\n" */
 		SAVEGENERICSV(PL_ors_sv);
 		PL_ors_sv = newSVpvs("\n");
 	}
 	call_method("PRINT", G_SCALAR);
-	LEAVE;
+	LEAVE_with_name("call_PRINT");
 	SPAGAIN;
 	MARK = ORIGMARK + 1;
 	*MARK = *SP;
@@ -1554,9 +1554,9 @@ Perl_do_readline(pTHX)
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_READLINE");
 	    call_method("READLINE", gimme);
-	    LEAVE;
+	    LEAVE_with_name("call_READLINE");
 	    SPAGAIN;
 	    if (gimme == G_SCALAR) {
 		SV* const result = POPs;
@@ -1764,7 +1764,7 @@ PP(pp_enter)
 	    gimme = G_SCALAR;
     }
 
-    ENTER;
+    ENTER_with_name("block");
 
     SAVETMPS;
     PUSHBLOCK(cx, CXt_BLOCK, SP);
@@ -1891,7 +1891,7 @@ PP(pp_leave)
     }
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    LEAVE;
+    LEAVE_with_name("block");
 
     RETURN;
 }
@@ -2378,14 +2378,14 @@ PP(pp_grepwhile)
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
     ++*PL_markstack_ptr;
-    LEAVE;					/* exit inner scope */
+    LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
     if (PL_stack_base + *PL_markstack_ptr > SP) {
 	I32 items;
 	const I32 gimme = GIMME_V;
 
-	LEAVE;					/* exit outer scope */
+	LEAVE_with_name("grep");					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
 	items = --*PL_markstack_ptr - PL_markstack_ptr[-1];
 	(void)POPMARK;				/* pop dst */
@@ -2408,7 +2408,7 @@ PP(pp_grepwhile)
     else {
 	SV *src;
 
-	ENTER;					/* enter inner scope */
+	ENTER_with_name("grep_item");					/* enter inner scope */
 	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
@@ -2474,7 +2474,7 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
-    LEAVE;
+    LEAVE_with_name("sub");
     cxstack_ix--;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -2535,7 +2535,7 @@ PP(pp_leavesublv)
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
 	if (!CvLVALUE(cx->blk_sub.cv)) {
-	    LEAVE;
+	    LEAVE_with_name("sub");
 	    cxstack_ix--;
 	    POPSUB(cx,sv);
 	    PL_curpm = newpm;
@@ -2550,7 +2550,7 @@ PP(pp_leavesublv)
 		 * of a tied hash or array */
 		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY) &&
 		    !(SvRMAGICAL(TOPs) && mg_find(TOPs, PERL_MAGIC_tiedelem))) {
-		    LEAVE;
+		    LEAVE_with_name("sub");
 		    cxstack_ix--;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
@@ -2566,7 +2566,7 @@ PP(pp_leavesublv)
 		}
 	    }
 	    else {			/* Should not happen? */
-		LEAVE;
+		LEAVE_with_name("sub");
 		cxstack_ix--;
 		POPSUB(cx,sv);
 		PL_curpm = newpm;
@@ -2583,7 +2583,7 @@ PP(pp_leavesublv)
 		    && SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
-		    LEAVE;
+		    LEAVE_with_name("sub");
 		    cxstack_ix--;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
@@ -2638,7 +2638,7 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
-    LEAVE;
+    LEAVE_with_name("sub");
     cxstack_ix--;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -2668,7 +2668,7 @@ PP(pp_entersub)
 	    cv = sv_2cv(sv, &stash, &gv, 0);
 	}
 	if (!cv) {
-	    ENTER;
+	    ENTER_with_name("sub");
 	    SAVETMPS;
 	    goto try_autoload;
 	}
@@ -2722,7 +2722,7 @@ PP(pp_entersub)
 	break;
     }
 
-    ENTER;
+    ENTER_with_name("sub");
     SAVETMPS;
 
   retry:
@@ -2882,7 +2882,7 @@ try_autoload:
 		*(PL_stack_base + markix) = *PL_stack_sp;
 	    PL_stack_sp = PL_stack_base + markix;
 	}
-	LEAVE;
+	LEAVE_with_name("sub");
 	return NORMAL;
     }
 }

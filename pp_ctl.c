@@ -996,14 +996,14 @@ PP(pp_grepstart)
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
     pp_pushmark();				/* push dst */
     pp_pushmark();				/* push src */
-    ENTER;					/* enter outer scope */
+    ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
     if (PL_op->op_private & OPpGREP_LEX)
 	SAVESPTR(PAD_SVl(PL_op->op_targ));
     else
 	SAVE_DEFSV;
-    ENTER;					/* enter inner scope */
+    ENTER_with_name("grep_item");					/* enter inner scope */
     SAVEVPTR(PL_curpm);
 
     src = PL_stack_base[*PL_markstack_ptr];
@@ -1084,13 +1084,13 @@ PP(pp_mapwhile)
 	    }
 	}
     }
-    LEAVE;					/* exit inner scope */
+    LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
     if (PL_markstack_ptr[-1] > *PL_markstack_ptr) {
 
 	(void)POPMARK;				/* pop top */
-	LEAVE;					/* exit outer scope */
+	LEAVE_with_name("grep");					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
 	items = --*PL_markstack_ptr - PL_markstack_ptr[-1];
 	(void)POPMARK;				/* pop dst */
@@ -1113,7 +1113,7 @@ PP(pp_mapwhile)
     else {
 	SV *src;
 
-	ENTER;					/* enter inner scope */
+	ENTER_with_name("grep_item");					/* enter inner scope */
 	SAVEVPTR(PL_curpm);
 
 	/* set $_ to the new source item */
@@ -1858,7 +1858,7 @@ PP(pp_dbstate)
 	    /* don't do recursive DB::DB call */
 	    return NORMAL;
 
-	ENTER;
+	ENTER_with_name("sub");
 	SAVETMPS;
 
 	SAVEI32(PL_debug);
@@ -1873,7 +1873,7 @@ PP(pp_dbstate)
 	    (void)(*CvXSUB(cv))(aTHX_ cv);
 	    CvDEPTH(cv)--;
 	    FREETMPS;
-	    LEAVE;
+	    LEAVE_with_name("sub");
 	    return NORMAL;
 	}
 	else {
@@ -1901,7 +1901,7 @@ PP(pp_enteriter)
     PAD *iterdata;
 #endif
 
-    ENTER;
+    ENTER_with_name("loop1");
     SAVETMPS;
 
     if (PL_op->op_targ) {
@@ -1930,7 +1930,7 @@ PP(pp_enteriter)
     if (PL_op->op_private & OPpITER_DEF)
 	cxtype |= CXp_FOR_DEF;
 
-    ENTER;
+    ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
@@ -2027,9 +2027,9 @@ PP(pp_enterloop)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
-    ENTER;
+    ENTER_with_name("loop1");
     SAVETMPS;
-    ENTER;
+    ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
     PUSHLOOP_PLAIN(cx, SP);
@@ -2072,8 +2072,8 @@ PP(pp_leaveloop)
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
-    LEAVE;
+    LEAVE_with_name("loop2");
+    LEAVE_with_name("loop1");
 
     return NORMAL;
 }
@@ -2534,7 +2534,7 @@ PP(pp_goto)
 		PUSHMARK(mark);
 		PUTBACK;
 		(void)(*CvXSUB(cv))(aTHX_ cv);
-		LEAVE;
+		LEAVE_with_name("sub");
 		return retop;
 	    }
 	    else {
@@ -2872,7 +2872,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 
     PERL_ARGS_ASSERT_SV_COMPILE_2OP;
 
-    ENTER;
+    ENTER_with_name("eval");
     lex_start(sv, NULL, FALSE);
     SAVETMPS;
     /* switch to eval mode */
@@ -2933,7 +2933,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     lex_end();
     /* XXX DAPM do this properly one year */
     *padp = MUTABLE_AV(SvREFCNT_inc_simple(PL_comppad));
-    LEAVE;
+    LEAVE_with_name("eval");
     if (IN_PERL_COMPILETIME)
 	CopHINTS_set(&PL_compiling, PL_hints);
 #ifdef OP_IN_REGISTER
@@ -3071,7 +3071,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    POPEVAL(cx);
 	}
 	lex_end();
-	LEAVE; /* pp_entereval knows about this LEAVE.  */
+	LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 
 	msg = SvPVx_nolen_const(ERRSV);
 	if (optype == OP_REQUIRE) {
@@ -3277,9 +3277,9 @@ PP(pp_require)
 		vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
 	    SV *const importsv = vnormal(sv);
 	    *SvPVX_mutable(importsv) = ':';
-	    ENTER;
+	    ENTER_with_name("load_feature");
 	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
-	    LEAVE;
+	    LEAVE_with_name("load_feature");
 	}
 	/* If a version >= 5.11.0 is requested, strictures are on by default! */
 	if (PL_compcv &&
@@ -3362,7 +3362,7 @@ PP(pp_require)
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = NULL;
 
-		    ENTER;
+		    ENTER_with_name("call_INC");
 		    SAVETMPS;
 		    EXTEND(SP, 2);
 
@@ -3440,7 +3440,7 @@ PP(pp_require)
 
 		    PUTBACK;
 		    FREETMPS;
-		    LEAVE;
+		    LEAVE_with_name("call_INC");
 
 		    if (tryrsfp) {
 			hook_sv = dirsv;
@@ -3587,7 +3587,7 @@ PP(pp_require)
 			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
     }
 
-    ENTER;
+    ENTER_with_name("eval");
     SAVETMPS;
     lex_start(NULL, tryrsfp, TRUE);
 
@@ -3674,7 +3674,7 @@ PP(pp_entereval)
     TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");
 
-    ENTER;
+    ENTER_with_name("eval");
     lex_start(sv, NULL, FALSE);
     SAVETMPS;
 
@@ -3818,7 +3818,7 @@ PP(pp_leaveeval)
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
-	LEAVE;
+	LEAVE_with_name("eval");
 	if (!(save_flags & OPf_SPECIAL)) {
 	    CLEAR_ERRSV();
 	}
@@ -3841,7 +3841,7 @@ Perl_delete_eval_scope(pTHX)
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PL_curpm = newpm;
-    LEAVE;
+    LEAVE_with_name("eval_scope");
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);
     PERL_UNUSED_VAR(optype);
@@ -3855,7 +3855,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
-    ENTER;
+    ENTER_with_name("eval_scope");
     SAVETMPS;
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
@@ -3923,7 +3923,7 @@ PP(pp_leavetry)
     }
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    LEAVE;
+    LEAVE_with_name("eval_scope");
     CLEAR_ERRSV();
     RETURN;
 }
@@ -3934,7 +3934,7 @@ PP(pp_entergiven)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     
-    ENTER;
+    ENTER_with_name("given");
     SAVETMPS;
 
     sv_setsv(PAD_SV(PL_op->op_targ), POPs);
@@ -3962,7 +3962,7 @@ PP(pp_leavegiven)
 
     PL_curpm = newpm;   /* pop $1 et al */
 
-    LEAVE;
+    LEAVE_with_name("given");
 
     return NORMAL;
 }
@@ -3979,7 +3979,7 @@ S_make_matcher(pTHX_ REGEXP *re)
     PM_SETRE(matcher, ReREFCNT_inc(re));
 
     SAVEFREEOP((OP *) matcher);
-    ENTER; SAVETMPS;
+    ENTER_with_name("matcher"); SAVETMPS;
     SAVEOP();
     return matcher;
 }
@@ -4009,7 +4009,7 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
     PERL_UNUSED_ARG(matcher);
 
     FREETMPS;
-    LEAVE;
+    LEAVE_with_name("matcher");
 }
 
 /* Do a smart match */
@@ -4096,7 +4096,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	    while ( (he = hv_iternext(hv)) ) {
 		DEBUG_M(Perl_deb(aTHX_ "        testing hash key...\n"));
-		ENTER;
+		ENTER_with_name("smartmatch_hash_key_test");
 		SAVETMPS;
 		PUSHMARK(SP);
 		PUSHs(hv_iterkeysv(he));
@@ -4108,7 +4108,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		else
 		    andedresults = SvTRUEx(POPs) && andedresults;
 		FREETMPS;
-		LEAVE;
+		LEAVE_with_name("smartmatch_hash_key_test");
 	    }
 	    if (andedresults)
 		RETPUSHYES;
@@ -4127,7 +4127,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    for (i = 0; i <= len; ++i) {
 		SV * const * const svp = av_fetch(av, i, FALSE);
 		DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
-		ENTER;
+		ENTER_with_name("smartmatch_array_elem_test");
 		SAVETMPS;
 		PUSHMARK(SP);
 		if (svp)
@@ -4140,7 +4140,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		else
 		    andedresults = SvTRUEx(POPs) && andedresults;
 		FREETMPS;
-		LEAVE;
+		LEAVE_with_name("smartmatch_array_elem_test");
 	    }
 	    if (andedresults)
 		RETPUSHYES;
@@ -4150,7 +4150,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	else {
 	  sm_any_sub:
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
-	    ENTER;
+	    ENTER_with_name("smartmatch_coderef");
 	    SAVETMPS;
 	    PUSHMARK(SP);
 	    PUSHs(d);
@@ -4162,7 +4162,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    else if (SvTEMP(TOPs))
 		SvREFCNT_inc_void(TOPs);
 	    FREETMPS;
-	    LEAVE;
+	    LEAVE_with_name("smartmatch_coderef");
 	    RETURN;
 	}
     }
@@ -4507,7 +4507,7 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	return cLOGOP->op_other->op_next;
 
-    ENTER;
+    ENTER_with_name("eval");
     SAVETMPS;
 
     PUSHBLOCK(cx, CXt_WHEN, SP);
@@ -4532,7 +4532,7 @@ PP(pp_leavewhen)
 
     PL_curpm = newpm;   /* pop $1 et al */
 
-    LEAVE;
+    LEAVE_with_name("eval");
     return NORMAL;
 }
 
@@ -4919,7 +4919,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	dSP;
 	int count;
 
-	ENTER;
+	ENTER_with_name("call_filter_sub");
 	SAVE_DEFSV;
 	SAVETMPS;
 	EXTEND(SP, 2);
@@ -4943,7 +4943,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	PUTBACK;
 	FREETMPS;
-	LEAVE;
+	LEAVE_with_name("call_filter_sub");
     }
 
     if(SvOK(upstream)) {

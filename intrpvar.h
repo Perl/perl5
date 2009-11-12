@@ -43,6 +43,9 @@ PERLVAR(Istack_base,	SV **)
 PERLVAR(Istack_max,	SV **)
 
 PERLVAR(Iscopestack,	I32 *)		/* scopes we've ENTERed */
+#ifdef DEBUGGING
+PERLVAR(Iscopestack_name, const char * *) /* name of the scopes we've ENTERed */
+#endif
 PERLVAR(Iscopestack_ix,	I32)
 PERLVAR(Iscopestack_max,I32)
 

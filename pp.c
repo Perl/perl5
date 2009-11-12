@@ -4523,9 +4523,9 @@ PP(pp_splice)
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_SPLICE");
 	call_method("SPLICE",GIMME_V);
-	LEAVE;
+	LEAVE_with_name("call_SPLICE");
 	SPAGAIN;
 	RETURN;
     }
@@ -4719,9 +4719,9 @@ PP(pp_push)
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_PUSH");
 	call_method("PUSH",G_SCALAR|G_DISCARD);
-	LEAVE;
+	LEAVE_with_name("call_PUSH");
 	SPAGAIN;
     }
     else {
@@ -4768,9 +4768,9 @@ PP(pp_unshift)
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_UNSHIFT");
 	call_method("UNSHIFT",G_SCALAR|G_DISCARD);
-	LEAVE;
+	LEAVE_with_name("call_UNSHIFT");
 	SPAGAIN;
     }
     else {
@@ -5330,9 +5330,9 @@ PP(pp_split)
 	}
 	else {
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_PUSH");
 	    call_method("PUSH",G_SCALAR|G_DISCARD);
-	    LEAVE;
+	    LEAVE_with_name("call_PUSH");
 	    SPAGAIN;
 	    if (gimme == G_ARRAY) {
 		I32 i;

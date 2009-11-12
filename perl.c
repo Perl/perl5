@@ -3813,6 +3813,9 @@ Perl_init_stacks(pTHX)
     SET_MARK_OFFSET;
 
     Newx(PL_scopestack,REASONABLE(32),I32);
+#ifdef DEBUGGING
+    Newx(PL_scopestack_name,REASONABLE(32),const char*);
+#endif
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
