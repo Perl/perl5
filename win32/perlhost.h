@@ -1762,7 +1762,7 @@ win32_start_child(LPVOID arg)
 
     {
 	dJMPENV;
-	volatile int oldscope = PL_scopestack_ix;
+	volatile int oldscope = 1; /* We are responsible for all scopes */
 
 restart:
 	JMPENV_PUSH(status);
