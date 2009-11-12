@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.21_01';
+$VERSION        = '0.21_02';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -619,7 +619,9 @@ sub _iosock_fetch {
                  "Could not open '%1' for writing: %2",$to,$!));
         }
 
-        $sock->send( "GET $self->path HTTP/1.0\x0d\x0aHost: $self->host\x0d\x0a\x0d\x0a" );
+        my $path = File::Spec::Unix->catfile( $self->path, $self->file );
+        my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
+        $sock->send( $req );
 
         my $select = IO::Select->new( $sock );
 
@@ -636,6 +638,20 @@ sub _iosock_fetch {
 
         unless ( $normal ) {
             return $self->_error(loc("Socket timed out after '%1' seconds", ( $TIMEOUT || 60 )));
+        }
+
+        # Check the "response"
+        # Strip preceeding blank lines apparently they are allowed (RFC 2616 4.1)
+        $resp =~ s/^(\x0d?\x0a)+//;
+        # Check it is an HTTP response
+        unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
+            return $self->_error(loc("Did not get a HTTP response from '%1'",$self->host));
+        }
+
+        # Check for OK
+        my ($code) = $resp =~ m!^HTTP/\d+\.\d+\s+(\d+)!i;
+        unless ( $code eq '200' ) {
+            return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
         }
 
         print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
