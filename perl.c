@@ -3222,9 +3222,11 @@ Perl_moreswitches(pTHX_ const char *s)
 	    }
  #endif
 	    PerlIO_printf(PerlIO_stdout(),
-		"\nThis is perl, %"SVf
-		" built for " ARCHNAME,
-		level);
+		"\nThis is perl "	STRINGIFY(PERL_REVISION)
+		", version "		STRINGIFY(PERL_VERSION)
+		", subversion "		STRINGIFY(PERL_SUBVERSION)
+		" (%"SVf") built for "	ARCHNAME, level
+		);
 	    SvREFCNT_dec(level);
 	}
 #else /* DGUX */
