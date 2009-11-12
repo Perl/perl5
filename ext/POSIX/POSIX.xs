@@ -1421,8 +1421,10 @@ sigaction(sig, optaction, oldaction = 0)
 			sv_setpvs(*svp, "DEFAULT");
 		}
 		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
-		if(RETVAL == -1)
+		if(RETVAL == -1) {
+                   LEAVE;
                    XSRETURN_UNDEF;
+                }
 		/* Get back the mask. */
 		svp = hv_fetchs(oldaction, "MASK", TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
@@ -1502,8 +1504,10 @@ sigaction(sig, optaction, oldaction = 0)
 		 * essentially meaningless anyway.
 		 */
 		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
-		if(RETVAL == -1)
+		if(RETVAL == -1) {
+                    LEAVE;
 		    XSRETURN_UNDEF;
+                }
 	    }
 
 	    LEAVE;
