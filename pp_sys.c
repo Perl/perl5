@@ -785,7 +785,7 @@ PP(pp_tie)
 {
     dVAR; dSP; dMARK;
     HV* stash;
-    GV *gv;
+    GV *gv = NULL;
     SV *sv;
     const I32 markoff = MARK - PL_stack_base;
     const char *methname;
@@ -933,7 +933,7 @@ PP(pp_dbmopen)
     dVAR; dSP;
     dPOPPOPssrl;
     HV* stash;
-    GV *gv;
+    GV *gv = NULL;
 
     HV * const hv = MUTABLE_HV(POPs);
     SV * const sv = newSVpvs_flags("AnyDBM_File", SVs_TEMP);
@@ -1271,8 +1271,8 @@ PP(pp_enterwrite)
     register GV *gv;
     register IO *io;
     GV *fgv;
-    CV *cv;
-    SV * tmpsv = NULL;
+    CV *cv = NULL;
+    SV *tmpsv = NULL;
 
     if (MAXARG == 0)
 	gv = PL_defoutgv;
@@ -4708,7 +4708,7 @@ PP(pp_ghostent)
     struct hostent *gethostbyname(Netdb_name_t);
     struct hostent *gethostent(void);
 #endif
-    struct hostent *hent;
+    struct hostent *hent = NULL;
     unsigned long len;
 
     EXTEND(SP, 10);
