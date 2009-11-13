@@ -5579,6 +5579,7 @@ PP(pp_syscall)
 static int
 fcntl_emulate_flock(int fd, int operation)
 {
+    int res;
     struct flock flock;
 
     switch (operation & ~LOCK_NB) {
@@ -5598,7 +5599,10 @@ fcntl_emulate_flock(int fd, int operation)
     flock.l_whence = SEEK_SET;
     flock.l_start = flock.l_len = (Off_t)0;
 
-    return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
+    res = fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
+    if (res == -1 && ((errno == EAGAIN) || (errno == EACCES)))
+	errno = EWOULDBLOCK;
+    return res;
 }
 
 #endif /* FCNTL_EMULATE_FLOCK */
