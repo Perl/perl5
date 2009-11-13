@@ -2089,7 +2089,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
     SV *sv;
-    OP *retop;
+    OP *retop = NULL;
 
     const I32 cxix = dopoptosub(cxstack_ix);
 
@@ -2211,7 +2211,7 @@ PP(pp_last)
     I32 pop2 = 0;
     I32 gimme;
     I32 optype;
-    OP *nextop;
+    OP *nextop = NULL;
     SV **newsp;
     PMOP *newpm;
     SV **mark;
