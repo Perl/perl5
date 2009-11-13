@@ -2505,7 +2505,6 @@ my_open_osfhandle(intptr_t osfhandle, int flags)
 
 /* simulate flock by locking a range on the file */
 
-#define LK_ERR(f,i)	((f) ? (i = 0) : (errno = GetLastError()))
 #define LK_LEN		0xffff0000
 
 DllExport int
@@ -2521,34 +2520,46 @@ win32_flock(int fd, int oper)
 	return -1;
     }
     fh = (HANDLE)_get_osfhandle(fd);
+    if (fh == (HANDLE)-1)  /* _get_osfhandle() already sets errno to EBADF */
+        return -1;
+
     memset(&o, 0, sizeof(o));
 
     switch(oper) {
     case LOCK_SH:		/* shared lock */
-	LK_ERR(LockFileEx(fh, 0, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, 0, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_EX:		/* exclusive lock */
-	LK_ERR(LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_SH|LOCK_NB:	/* non-blocking shared lock */
-	LK_ERR(LockFileEx(fh, LOCKFILE_FAIL_IMMEDIATELY, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_FAIL_IMMEDIATELY, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_EX|LOCK_NB:	/* non-blocking exclusive lock */
-	LK_ERR(LockFileEx(fh,
-		       LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY,
-		       0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY,
+		       0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_UN:		/* unlock lock */
-	LK_ERR(UnlockFileEx(fh, 0, LK_LEN, 0, &o),i);
+	if (UnlockFileEx(fh, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     default:			/* unknown */
 	errno = EINVAL;
-	break;
+	return -1;
+    }
+    if (i == -1) {
+        if (GetLastError() == ERROR_LOCK_VIOLATION)
+            errno = WSAEWOULDBLOCK;
+        else
+            errno = EINVAL;
     }
     return i;
 }
 
-#undef LK_ERR
 #undef LK_LEN
 
 /*
