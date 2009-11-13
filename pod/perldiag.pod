@@ -1842,6 +1842,12 @@ a term, so it's looking for the corresponding right angle bracket, and
 not finding it.  Chances are you left some needed parentheses out
 earlier in the line, and you really meant a "less than".
 
+=item gmtime(%.0f) too large
+
+(W overflow) You called C<gmtime> with an number that was beyond the 64-bit
+range that it accepts, and some rounding resulted. This warning is also
+triggered with nan (the special not-a-number value).
+
 =item Got an error from DosAllocMem
 
 (P) An error peculiar to OS/2.  Most probably you're using an obsolete
@@ -2259,6 +2265,11 @@ an undefined value for the length. See L<perlfunc/pack>.
 (W closed) You tried to do a listen on a closed socket.  Did you forget
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
+
+=item localtime(%.0f) too large
+
+(W overflow) You called C<localtime> with an number that was beyond the
+64-bit range that it accepts, and some rounding resulted. This warning is also triggered with nan (the special not-a-number value).
 
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
