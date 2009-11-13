@@ -4294,7 +4294,7 @@ PP(pp_delete)
     else {
 	SV *keysv = POPs;
 	HV * const hv = MUTABLE_HV(POPs);
-	SV *sv;
+	SV *sv = NULL;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
 	else if (SvTYPE(hv) == SVt_PVAV) {
