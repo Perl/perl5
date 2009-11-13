@@ -93,7 +93,7 @@ Perl_push_scope(pTHX)
 	Renew(PL_scopestack, PL_scopestack_max, I32);
 #ifdef DEBUGGING
 	Renew(PL_scopestack_name, PL_scopestack_max, const char*);
-#endif DEBUGGING
+#endif
     }
 #ifdef DEBUGGING
     PL_scopestack_name[PL_scopestack_ix] = "unknown";
