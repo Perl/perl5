@@ -207,6 +207,7 @@ encoded character.
 
 #define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
+#define IN_UNI_8_BIT (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT && ! IN_LOCALE_RUNTIME && ! IN_BYTES)
 
 #define UTF8_ALLOW_EMPTY		0x0001
 #define UTF8_ALLOW_CONTINUATION		0x0002
