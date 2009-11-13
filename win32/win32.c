@@ -64,7 +64,6 @@ typedef struct {
 #define PERL_NO_GET_CONTEXT
 #include "XSUB.h"
 
-#include "Win32iop.h"
 #include <fcntl.h>
 #ifndef __GNUC__
 /* assert.h conflicts with #define of assert in perl.h */
@@ -2623,21 +2622,24 @@ win32_strerror(int e)
 #if !defined __BORLANDC__ && !defined __MINGW32__      /* compiler intolerance */
     extern int sys_nerr;
 #endif
-    DWORD source = 0;
 
     if (e < 0 || e > sys_nerr) {
         dTHX;
 	if (e < 0)
 	    e = GetLastError();
 
-	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
-			  w32_strerror_buffer,
-			  sizeof(w32_strerror_buffer), NULL) == 0)
+	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+                         |FORMAT_MESSAGE_IGNORE_INSERTS, NULL, e, 0,
+			  w32_strerror_buffer, sizeof(w32_strerror_buffer),
+                          NULL) == 0)
+        {
 	    strcpy(w32_strerror_buffer, "Unknown Error");
-
+        }
 	return w32_strerror_buffer;
     }
+#undef strerror
     return strerror(e);
+#define strerror win32_strerror
 }
 
 DllExport void
