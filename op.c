@@ -5775,7 +5775,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		if (strEQ(name, "import")) {
 		    PL_formfeed = MUTABLE_SV(cv);
 		    /* diag_listed_as: SKIPME */
-		    Perl_warner(aTHX_ packWARN(WARN_VOID), "0x%"UVxf"\n", (UV)cv);
+		    Perl_warner(aTHX_ packWARN(WARN_VOID), "0x%"UVxf"\n", PTR2UV(cv));
 		}
 	    }
 	    GvCVGEN(gv) = 0;
