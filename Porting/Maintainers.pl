@@ -660,7 +660,7 @@ use File::Glob qw(:case);
     'File::Fetch' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/File-Fetch-0.21_02.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/File-Fetch-0.22.tar.gz',
 	'FILES'		=> q[cpan/File-Fetch],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
