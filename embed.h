@@ -1734,6 +1734,7 @@
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_findlex		S_pad_findlex
+#define pad_add_name_sv		S_pad_add_name_sv
 #endif
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
@@ -4111,6 +4112,7 @@
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
+#define pad_add_name_sv(a,b,c,d)	S_pad_add_name_sv(aTHX_ a,b,c,d)
 #endif
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE

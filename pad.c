@@ -339,6 +339,35 @@ Perl_pad_undef(pTHX_ CV* cv)
 
 
 
+static PADOFFSET
+S_pad_add_name_sv(pTHX_ SV *namesv, const U32 flags, HV *typestash,
+		  HV *ourstash)
+{
+    dVAR;
+    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
+
+    PERL_ARGS_ASSERT_PAD_ADD_NAME_SV;
+
+    ASSERT_CURPAD_ACTIVE("pad_add_name");
+
+    if (typestash) {
+	assert(SvTYPE(namesv) == SVt_PVMG);
+	SvPAD_TYPED_on(namesv);
+	SvSTASH_set(namesv, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
+    }
+    if (ourstash) {
+	SvPAD_OUR_on(namesv);
+	SvOURSTASH_set(namesv, ourstash);
+	SvREFCNT_inc_simple_void_NN(ourstash);
+    }
+    else if (flags & pad_add_STATE) {
+	SvPAD_STATE_on(namesv);
+    }
+
+    av_store(PL_comppad_name, offset, namesv);
+    return offset;
+}
+
 /*
 =for apidoc pad_add_name
 
@@ -359,14 +388,12 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 		  HV *typestash, HV *ourstash)
 {
     dVAR;
-    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
+    PADOFFSET offset;
     SV *namesv;
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME;
 
-    ASSERT_CURPAD_ACTIVE("pad_add_name");
-
-    if (flags & ~(pad_add_STATE|pad_add_FAKE))
+    if (flags & ~(pad_add_STATE))
 	Perl_croak(aTHX_ "panic: pad_add_name illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
@@ -379,46 +406,26 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 
     sv_setpv(namesv, name);
 
-    if (typestash) {
-	assert(SvTYPE(namesv) == SVt_PVMG);
-	SvPAD_TYPED_on(namesv);
-	SvSTASH_set(namesv, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
-    }
-    if (ourstash) {
-	SvPAD_OUR_on(namesv);
-	SvOURSTASH_set(namesv, ourstash);
-	SvREFCNT_inc_simple_void_NN(ourstash);
-    }
-    else if (flags & pad_add_STATE) {
-	SvPAD_STATE_on(namesv);
-    }
+    offset = pad_add_name_sv(namesv, flags, typestash, ourstash);
 
-    av_store(PL_comppad_name, offset, namesv);
-    if (flags & pad_add_FAKE) {
-	SvFAKE_on(namesv);
-	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	    "Pad addname: %ld \"%s\" FAKE\n", (long)offset, name));
-    }
-    else {
-	/* not yet introduced */
-	COP_SEQ_RANGE_LOW_set(namesv, PAD_MAX);	/* min */
-	COP_SEQ_RANGE_HIGH_set(namesv, 0);		/* max */
+    /* not yet introduced */
+    COP_SEQ_RANGE_LOW_set(namesv, PAD_MAX);	/* min */
+    COP_SEQ_RANGE_HIGH_set(namesv, 0);		/* max */
 
-	if (!PL_min_intro_pending)
-	    PL_min_intro_pending = offset;
-	PL_max_intro_pending = offset;
-	/* if it's not a simple scalar, replace with an AV or HV */
-	/* XXX DAPM since slot has been allocated, replace
-	 * av_store with PL_curpad[offset] ? */
-	if (*name == '@')
-	    av_store(PL_comppad, offset, MUTABLE_SV(newAV()));
-	else if (*name == '%')
-	    av_store(PL_comppad, offset, MUTABLE_SV(newHV()));
-	SvPADMY_on(PL_curpad[offset]);
-	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	    "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
-	    (long)offset, name, PTR2UV(PL_curpad[offset])));
-    }
+    if (!PL_min_intro_pending)
+	PL_min_intro_pending = offset;
+    PL_max_intro_pending = offset;
+    /* if it's not a simple scalar, replace with an AV or HV */
+    /* XXX DAPM since slot has been allocated, replace
+     * av_store with PL_curpad[offset] ? */
+    if (*name == '@')
+	av_store(PL_comppad, offset, MUTABLE_SV(newAV()));
+    else if (*name == '%')
+	av_store(PL_comppad, offset, MUTABLE_SV(newHV()));
+    SvPADMY_on(PL_curpad[offset]);
+    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
+			   (long)offset, name, PTR2UV(PL_curpad[offset])));
 
     return offset;
 }
@@ -904,24 +911,30 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	return 0; /* this dummy (and invalid) value isnt used by the caller */
 
     {
-	SV *new_namesv;
+	/* This relies on sv_setsv_flags() upgrading the destination to the same
+	   type as the source, independant of the flags set, and on it being
+	   "good" and only copying flag bits and pointers that it understands.
+	*/
+	SV *new_namesv = newSVsv(*out_name_sv);
 	AV *  const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
 	PL_comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
 	PL_comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
 	PL_curpad = AvARRAY(PL_comppad);
 
-	new_offset = pad_add_name(
-	    SvPVX_const(*out_name_sv),
-	    SvCUR(*out_name_sv),
-	    /* state variable ? */
-	    pad_add_FAKE | (SvPAD_STATE(*out_name_sv) ? pad_add_STATE : 0),
-	    SvPAD_TYPED(*out_name_sv)
-		    ? SvSTASH(*out_name_sv) : NULL,
-	    SvOURSTASH(*out_name_sv)
-	);
+	new_offset
+	    = pad_add_name_sv(new_namesv,
+			      (SvPAD_STATE(*out_name_sv) ? pad_add_STATE : 0),
+			      SvPAD_TYPED(*out_name_sv)
+			      ? SvSTASH(*out_name_sv) : NULL,
+			      SvOURSTASH(*out_name_sv)
+			      );
 
-	new_namesv = AvARRAY(PL_comppad_name)[new_offset];
+	SvFAKE_on(new_namesv);
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+			       "Pad addname: %ld \"%.*s\" FAKE\n",
+			       (long)new_offset,
+			       (int) SvCUR(new_namesv), SvPVX(new_namesv)));
 	PARENT_FAKELEX_FLAGS_set(new_namesv, *out_flags);
 
 	PARENT_PAD_INDEX_set(new_namesv, 0);

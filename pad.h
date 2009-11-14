@@ -119,7 +119,6 @@ typedef enum {
 
 #  define pad_add_OUR	0x01	/* our declaration. */
 #  define pad_add_STATE	0x02	/* state declaration. */
-#  define pad_add_FAKE	0x04
 
 #endif
 

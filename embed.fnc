@@ -1964,6 +1964,8 @@ pR	|HV*	|pad_compname_type|const PADOFFSET po
 sd	|PADOFFSET|pad_findlex	|NN const char *name|NN const CV* cv|U32 seq|int warn \
 				|NULLOK SV** out_capture|NN SV** out_name_sv \
 				|NN int *out_flags
+s	|PADOFFSET|pad_add_name_sv|NN SV *namesv|const U32 flags \
+				|NULLOK HV *typestash|NULLOK HV *ourstash
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
