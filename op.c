@@ -406,13 +406,10 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	}
     }
 
-    /* check for duplicate declaration */
-    pad_check_dup(name, len, is_our ? pad_add_OUR : 0,
-		  (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash));
-
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name, len,
+		       is_our ? pad_add_OUR :
 		       PL_parser->in_my == KEY_state ? pad_add_STATE : 0,
 		    PL_parser->in_my_stash,
 		    (is_our

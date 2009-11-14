@@ -393,9 +393,15 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME;
 
-    if (flags & ~(pad_add_STATE))
+    if (flags & ~(pad_add_OUR|pad_add_STATE|pad_add_NO_DUP_CHECK))
 	Perl_croak(aTHX_ "panic: pad_add_name illegal flag bits 0x%" UVxf,
 		   (UV)flags);
+
+
+    if ((flags & pad_add_NO_DUP_CHECK) == 0) {
+	/* check for duplicate declaration */
+	pad_check_dup(name, len, flags & pad_add_OUR, ourstash);
+    }
 
     namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
 
@@ -555,10 +561,8 @@ C<is_our> indicates that the name to check is an 'our' declaration
 =cut
 */
 
-/* XXX DAPM integrate this into pad_add_name ??? */
-
 void
-Perl_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
+S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
 		   const HV *ourstash)
 {
     dVAR;
@@ -570,9 +574,7 @@ Perl_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
 
-    if (flags & ~pad_add_OUR)
-	Perl_croak(aTHX_ "panic: pad_check_dup illegal flag bits 0x%" UVxf,
-		   (UV)flags);
+    assert((flags & ~pad_add_OUR) == 0);
 
     /* Until we're using the length for real, cross check that we're being told
        the truth.  */

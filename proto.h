@@ -6116,12 +6116,13 @@ PERL_CALLCONV PADOFFSET	Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 #define PERL_ARGS_ASSERT_PAD_ADD_ANON	\
 	assert(sv)
 
-PERL_CALLCONV void	Perl_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags, const HV *ourstash)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_4);
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+STATIC void	S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags, const HV *ourstash)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_CHECK_DUP	\
-	assert(name); assert(ourstash)
+	assert(name)
 
+#endif
 #ifdef DEBUGGING
 PERL_CALLCONV void	Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
 			__attribute__nonnull__(pTHX_2);

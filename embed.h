@@ -1714,7 +1714,11 @@
 #define pad_undef		Perl_pad_undef
 #define pad_add_name		Perl_pad_add_name
 #define pad_add_anon		Perl_pad_add_anon
-#define pad_check_dup		Perl_pad_check_dup
+#endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define pad_check_dup		S_pad_check_dup
+#endif
 #endif
 #ifdef DEBUGGING
 #ifdef PERL_CORE
@@ -4092,7 +4096,11 @@
 #define pad_undef(a)		Perl_pad_undef(aTHX_ a)
 #define pad_add_name(a,b,c,d,e)	Perl_pad_add_name(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
-#define pad_check_dup(a,b,c,d)	Perl_pad_check_dup(aTHX_ a,b,c,d)
+#endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define pad_check_dup(a,b,c,d)	S_pad_check_dup(aTHX_ a,b,c,d)
+#endif
 #endif
 #ifdef DEBUGGING
 #ifdef PERL_CORE

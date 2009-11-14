@@ -114,11 +114,11 @@ typedef enum {
 
 #ifdef PERL_CORE
 
-/* flags for pad_add_name/pad_check_dup. SVf_UTF8 will also be valid in the
-   future.  */
+/* flags for pad_add_name. SVf_UTF8 will also be valid in the future.  */
 
 #  define pad_add_OUR	0x01	/* our declaration. */
 #  define pad_add_STATE	0x02	/* state declaration. */
+#  define pad_add_NO_DUP_CHECK	0x04	/* skip warning on dups. */
 
 #endif
 
