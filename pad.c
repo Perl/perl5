@@ -397,12 +397,6 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 	Perl_croak(aTHX_ "panic: pad_add_name illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
-
-    if ((flags & pad_add_NO_DUP_CHECK) == 0) {
-	/* check for duplicate declaration */
-	pad_check_dup(name, len, flags & pad_add_OUR, ourstash);
-    }
-
     namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
 
     /* Until we're using the length for real, cross check that we're being told
@@ -411,6 +405,11 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
     assert(strlen(name) == len);
 
     sv_setpv(namesv, name);
+
+    if ((flags & pad_add_NO_DUP_CHECK) == 0) {
+	/* check for duplicate declaration */
+	pad_check_dup(namesv, flags & pad_add_OUR, ourstash);
+    }
 
     offset = pad_add_name_sv(namesv, flags, typestash, ourstash);
 
@@ -562,8 +561,7 @@ C<is_our> indicates that the name to check is an 'our' declaration
 */
 
 void
-S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
-		   const HV *ourstash)
+S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 {
     dVAR;
     SV		**svp;
@@ -575,11 +573,6 @@ S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
 
     assert((flags & ~pad_add_OUR) == 0);
-
-    /* Until we're using the length for real, cross check that we're being told
-       the truth.  */
-    PERL_UNUSED_ARG(len);
-    assert(strlen(name) == len);
 
     if (AvFILLp(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
@@ -595,7 +588,7 @@ S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
 	    && (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
-	    && strEQ(name, SvPVX_const(sv)))
+	    && sv_eq(name, sv))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
@@ -617,7 +610,7 @@ S_pad_check_dup(pTHX_ const char *name, const STRLEN len, const U32 flags,
 		&& !SvFAKE(sv)
 		&& (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
 		&& SvOURSTASH(sv) == ourstash
-		&& strEQ(name, SvPVX_const(sv)))
+		&& sv_eq(name, sv))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %"SVf" redeclared", sv);

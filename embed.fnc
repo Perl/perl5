@@ -1940,8 +1940,8 @@ Mpd	|PADOFFSET|pad_add_name	|NN const char *name|const STRLEN len\
 : Only used in op.c
 pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-sd	|void	|pad_check_dup	|NN const char *name|const STRLEN len\
-				|const U32 flags|NULLOK const HV *ourstash
+sd	|void	|pad_check_dup	|NN SV *name|const U32 flags \
+				|NULLOK const HV *ourstash
 #endif
 #ifdef DEBUGGING
 : Only used PAD_SETSV() in op.c

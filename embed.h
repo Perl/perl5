@@ -4099,7 +4099,7 @@
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define pad_check_dup(a,b,c,d)	S_pad_check_dup(aTHX_ a,b,c,d)
+#define pad_check_dup(a,b,c)	S_pad_check_dup(aTHX_ a,b,c)
 #endif
 #endif
 #ifdef DEBUGGING
