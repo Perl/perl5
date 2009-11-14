@@ -529,6 +529,27 @@ Return TRUE if that warnings category is enabled in the first scope
 where the object is used.
 Otherwise returns FALSE.
 
+=item warnings::fatal_enabled()
+
+Return TRUE if the warnings category with the same name as the current
+package has been set to FATAL in the calling module.
+Otherwise returns FALSE.
+
+=item warnings::fatal_enabled($category)
+
+Return TRUE if the warnings category C<$category> has been set to FATAL in
+the calling module.
+Otherwise returns FALSE.
+
+=item warnings::fatal_enabled($object)
+
+Use the name of the class for the object reference, C<$object>, as the
+warnings category.
+
+Return TRUE if that warnings category has been set to FATAL in the first
+scope where the object is used.
+Otherwise returns FALSE.
+
 =item warnings::warn($message)
 
 Print C<$message> to STDERR.
@@ -756,6 +777,17 @@ sub enabled
            vec($callers_bitmask, $Offsets{'all'}, 1) ;
 }
 
+sub fatal_enabled
+{
+    Croaker("Usage: warnings::fatal_enabled([category])")
+  unless @_ == 1 || @_ == 0 ;
+
+    my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+
+    return 0 unless defined $callers_bitmask;
+    return vec($callers_bitmask, $offset + 1, 1) ||
+           vec($callers_bitmask, $Offsets{'all'} + 1, 1) ;
+}
 
 sub warn
 {
