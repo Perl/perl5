@@ -16,7 +16,7 @@ BEGIN {
 
 use List::Util qw(reduce min);
 use Test::More;
-plan tests => ($::PERL_ONLY ? 23 : 25);
+plan tests => 27 + ($::PERL_ONLY ? 0 : 2);
 
 my $v = reduce {};
 
@@ -150,3 +150,13 @@ if (!$::PERL_ONLY) { SKIP: {
     like($@, qr/^Can't goto subroutine from a sort sub/, "goto sub");
 
 } }
+
+eval { &reduce(1,2) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &reduce(qw(a b)) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &reduce([],1,2,3) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &reduce(+{},1,2,3) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+

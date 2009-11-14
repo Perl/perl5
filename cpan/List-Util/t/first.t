@@ -15,7 +15,7 @@ BEGIN {
 
 use List::Util qw(first);
 use Test::More;
-plan tests => ($::PERL_ONLY ? 15 : 17);
+plan tests => 19 + ($::PERL_ONLY ? 0 : 2);
 my $v;
 
 ok(defined &first,	'defined');
@@ -113,3 +113,13 @@ if (!$::PERL_ONLY) { SKIP: {
     like($@, qr/^Can't goto subroutine from a sort sub/, "goto sub");
 
 } }
+
+eval { &first(1,2) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &first(qw(a b)) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &first([],1,2,3) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+eval { &first(+{},1,2,3) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
+

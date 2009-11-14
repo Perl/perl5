@@ -1,3 +1,11 @@
+1.22 -- Sat Nov 14 09:26:15 CST 2009
+
+  * silence a compiler warning about an unreferenced local variable [Steve Hay]
+  * RT#51484 Preserve utf8 flag of string passed to dualvar()
+  * RT#51454 Check first argument to first/reduce is a code reference
+  * RT#50528 [PATCH] p_tainted.t fix for VMS [Craig A. Berry]
+  * RT#48550 fix pure perl looks_like_number not to match non-ascii digits
+
 1.21 -- Mon May 18 10:32:14 CDT 2009
 
   * Change build system for perl-only install not to need to modify blib
