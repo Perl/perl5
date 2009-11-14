@@ -13,8 +13,7 @@ my %legacy = ( 'unicode8bit' => '0' );
 
 =head1 NAME
 
-legacy - Perl pragma to preserve legacy behaviors or enable new non-default
-behaviors
+legacy - Perl pragma to preserve legacy behaviors or enable new non-default behaviors
 
 =head1 SYNOPSIS
 
@@ -65,7 +64,7 @@ This behavior stems from when Perl did not support Unicode, and ASCII was the
 only known character set outside of C<S<use locale>>.  In order to not
 possibly break pre_Unicode programs, these characters have retained their old
 non-meanings, except when it is clear to Perl that Unicode is what is meant,
-for example by calling utf::upgrade() on a scalar, or if the scalar also
+for example by calling utf8::upgrade() on a scalar, or if the scalar also
 contains characters that are only available in Unicode.  Then these 128
 characters take on their Unicode meanings.
 
@@ -78,22 +77,20 @@ The behavior is known to have effects on these areas:
 
 =over 4
 
-=item
+=item *
 
-Changing the case of a scalar, that is, using C<uc()>,
-C<ucfirst()>,
-C<lc()>,
+Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
 and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in regular expression substitutions.
 
-=item
+=item *
 
 Using caseless (C</i>) regular expression matching
 
-=item
+=item *
 
 Matching a number of properties in regular expressions, such as C<\w>
 
-=item
+=item *
 
 User-defined case change mappings.  You can create a C<ToUpper()> function, for
 example, which overrides Perl's built-in case mappings.  The scalar must be
