@@ -4218,10 +4218,12 @@ EXTCONST char PL_warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
 EXTCONST char PL_no_wrongref[]
   INIT("Can't use %s ref as %s ref");
+/* The core no longer needs these here. If you require the string constant,
+   please inline a copy into your own code.  */
 EXTCONST char PL_no_symref[] __attribute__deprecated__
   INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
-EXTCONST char PL_no_symref_sv[]
-  INIT("Can't use string (\"%" SVf32 "\"%s) as %s ref while \"strict refs\" in use");
+EXTCONST char PL_no_symref_sv[] __attribute__deprecated__
+  INIT("Can't use string (\"%" SVf32 "\") as %s ref while \"strict refs\" in use");
 EXTCONST char PL_no_usym[]
   INIT("Can't use an undefined value as %s reference");
 EXTCONST char PL_no_aelem[]
