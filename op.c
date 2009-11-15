@@ -409,8 +409,8 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name, len,
-		       is_our ? pad_add_OUR :
-		       PL_parser->in_my == KEY_state ? pad_add_STATE : 0,
+		       is_our ? padadd_OUR :
+		       PL_parser->in_my == KEY_state ? padadd_STATE : 0,
 		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */

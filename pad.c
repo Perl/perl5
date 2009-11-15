@@ -360,7 +360,7 @@ S_pad_add_name_sv(pTHX_ SV *namesv, const U32 flags, HV *typestash,
 	SvOURSTASH_set(namesv, ourstash);
 	SvREFCNT_inc_simple_void_NN(ourstash);
     }
-    else if (flags & pad_add_STATE) {
+    else if (flags & padadd_STATE) {
 	SvPAD_STATE_on(namesv);
     }
 
@@ -393,7 +393,7 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME;
 
-    if (flags & ~(pad_add_OUR|pad_add_STATE|pad_add_NO_DUP_CHECK))
+    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK))
 	Perl_croak(aTHX_ "panic: pad_add_name illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
@@ -406,9 +406,9 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 
     sv_setpv(namesv, name);
 
-    if ((flags & pad_add_NO_DUP_CHECK) == 0) {
+    if ((flags & padadd_NO_DUP_CHECK) == 0) {
 	/* check for duplicate declaration */
-	pad_check_dup(namesv, flags & pad_add_OUR, ourstash);
+	pad_check_dup(namesv, flags & padadd_OUR, ourstash);
     }
 
     offset = pad_add_name_sv(namesv, flags, typestash, ourstash);
@@ -566,13 +566,13 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
     dVAR;
     SV		**svp;
     PADOFFSET	top, off;
-    const U32	is_our = flags & pad_add_OUR;
+    const U32	is_our = flags & padadd_OUR;
 
     PERL_ARGS_ASSERT_PAD_CHECK_DUP;
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
 
-    assert((flags & ~pad_add_OUR) == 0);
+    assert((flags & ~padadd_OUR) == 0);
 
     if (AvFILLp(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
@@ -919,7 +919,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 	new_offset
 	    = pad_add_name_sv(new_namesv,
-			      (SvPAD_STATE(*out_name_sv) ? pad_add_STATE : 0),
+			      (SvPAD_STATE(*out_name_sv) ? padadd_STATE : 0),
 			      SvPAD_TYPED(*out_name_sv)
 			      ? SvSTASH(*out_name_sv) : NULL,
 			      SvOURSTASH(*out_name_sv)
