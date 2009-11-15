@@ -222,6 +222,7 @@ Can't %s %s%s%s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't take %s of %f
 Can't use '%c' after -mname
+Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
 Can't use \\%c to mean $%c in expression
 Can't use when() outside a topicalizer
 \\%c better written as $%c

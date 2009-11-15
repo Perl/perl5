@@ -2700,7 +2700,7 @@ PP(pp_entersub)
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(aTHX_ PL_no_symref, sym, len>32 ? "..." : "", "a subroutine");
+		DIE(aTHX_ "Can't use string (\"%.32s\"%s) as a subroutine ref while \"strict refs\" in use", sym, len>32 ? "..." : "");
 	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
 	    break;
 	}
