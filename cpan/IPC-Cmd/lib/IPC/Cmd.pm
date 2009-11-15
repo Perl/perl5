@@ -16,7 +16,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $CAN_USE_RUN_FORKED $WARN
                     ];
 
-    $VERSION        = '0.52';
+    $VERSION        = '0.54';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -29,9 +29,9 @@ BEGIN {
         require IPC::Open3; IPC::Open3->import();
         require IO::Select; IO::Select->import();
         require IO::Handle; IO::Handle->import();
-        require Time::HiRes; Time::HiRes->import();
         require FileHandle; FileHandle->import();
         require Socket; Socket->import();
+        require Time::HiRes; Time::HiRes->import();
     };
     $CAN_USE_RUN_FORKED = $@ || !IS_VMS && !IS_WIN32;
 
@@ -358,7 +358,7 @@ sub kill_gently {
     }
 
     $wait_cycles = $wait_cycles + 1;
-    usleep(250000); # half a second
+    Time::HiRes::usleep(250000); # half a second
   }
 }
 
@@ -457,7 +457,7 @@ sub open3_run {
       }
     }
 
-    usleep(1);
+    Time::HiRes::usleep(1);
 
     foreach my $fd ($select->can_read(1/100)) {
       my $str = $child_output->{$fd->fileno};
@@ -604,7 +604,6 @@ sub run_forked {
         Carp::carp("run_forked is not available: $CAN_USE_RUN_FORKED");
         return;
     }
-    use Time::HiRes qw/usleep/;
 
     my ($cmd, $opts) = @_;
 
@@ -746,7 +745,7 @@ sub run_forked {
           }
         }
 
-        usleep(1);
+        Time::HiRes::usleep(1);
       }
 
       # $child_pid_pid is not defined in two cases:
