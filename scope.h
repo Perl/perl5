@@ -140,7 +140,9 @@ scope has the given name. Name must be a literal string.
 #define LEAVE_with_name(name)						\
     STMT_START {							\
 	DEBUG_SCOPE("LEAVE \"" name "\"")				\
-	assert(strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));	\
+	assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]		\
+		    == (char*)name)					\
+		|| strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
 	pop_scope();							\
     } STMT_END
 #else
