@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 81;
+use Test::More tests => 83;
 use Config ();
 
 use B::Deparse;
@@ -603,3 +603,15 @@ my $pi = 4;
 my $pi : = 4;
 >>>>
 my $pi = 4;
+####
+our @a;
+my @b;
+@a = sort @a;
+@b = sort @b;
+();
+####
+our @a;
+my @b;
+@a = reverse @a;
+@b = reverse @b;
+();

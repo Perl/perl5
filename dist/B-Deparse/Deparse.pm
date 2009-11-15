@@ -16,13 +16,14 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
+	 OPpREVERSE_INPLACE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.92;
+$VERSION = 0.93;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2307,6 +2308,9 @@ sub listop {
     }
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
+    }
+    if ($name eq "reverse" && ($op->private & OPpREVERSE_INPLACE)) {
+	return "$exprs[0] = $name" . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
     if ($parens) {
 	return "$name(" . join(", ", @exprs) . ")";
