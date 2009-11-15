@@ -6,70 +6,70 @@ use Test::More tests => 13;
 BEGIN { $^H |= 0x20000; }
 no warnings;
 
-my($t, $n);
-$n = 5;
+my($triangle, $num);
+$num = 5;
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN ();
-	$t = rpn($n $n 1 + * 2 /);
+	$triangle = rpn($num $num 1 + * 2 /);
 };
 isnt $@, "";
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(rpn);
-	$t = rpn($n $n 1 + * 2 /);
+	$triangle = rpn($num $num 1 + * 2 /);
 };
 is $@, "";
-is $t, 15;
+is $triangle, 15;
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(rpn);
-	$t = join(":", "x", rpn($n $n 1 + * 2 /), "y");
+	$triangle = join(":", "x", rpn($num $num 1 + * 2 /), "y");
 };
 is $@, "";
-is $t, "x:15:y";
+is $triangle, "x:15:y";
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(rpn);
-	$t = 1 + rpn($n $n 1 + * 2 /) * 10;
+	$triangle = 1 + rpn($num $num 1 + * 2 /) * 10;
 };
 is $@, "";
-is $t, 151;
+is $triangle, 151;
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(rpn);
-	$t = rpn($n $n 1 + * 2 /);
-	$t++;
+	$triangle = rpn($num $num 1 + * 2 /);
+	$triangle++;
 };
 is $@, "";
-is $t, 16;
+is $triangle, 16;
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(rpn);
-	$t = rpn($n $n 1 + * 2 /)
-	$t++;
+	$triangle = rpn($num $num 1 + * 2 /)
+	$triangle++;
 };
 isnt $@, "";
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(calcrpn);
-	calcrpn $t { $n $n 1 + * 2 / }
-	$t++;
+	calcrpn $triangle { $num $num 1 + * 2 / }
+	$triangle++;
 };
 is $@, "";
-is $t, 16;
+is $triangle, 16;
 
-$t = undef;
+$triangle = undef;
 eval q{
 	use XS::APItest::KeywordRPN qw(calcrpn);
-	123 + calcrpn $t { $n $n 1 + * 2 / } ;
+	123 + calcrpn $triangle { $num $num 1 + * 2 / } ;
 };
 isnt $@, "";
 

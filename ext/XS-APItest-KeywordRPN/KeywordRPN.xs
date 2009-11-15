@@ -16,55 +16,26 @@ static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 #define PL_bufptr (PL_parser->bufptr)
 #define PL_bufend (PL_parser->bufend)
 
-static char THX_peek_char(pTHX)
-{
-	if(PL_bufptr == PL_bufend)
-		croak("unexpected EOF "
-			"(or you were unlucky about buffer position, FIXME)");
-	return *PL_bufptr;
-}
-#define peek_char() THX_peek_char(aTHX)
-
-static char THX_read_char(pTHX)
-{
-	char c = peek_char();
-	PL_bufptr++;
-	if(c == '\n') CopLINE_inc(PL_curcop);
-	return c;
-}
-#define read_char() THX_read_char(aTHX)
-
-static void THX_skip_opt_ws(pTHX)
-{
-	while(1) {
-		switch(peek_char()) {
-			case '\t': case '\n': case '\v': case '\f': case ' ':
-				read_char();
-				break;
-			default:
-				return;
-		}
-	}
-}
-#define skip_opt_ws() THX_skip_opt_ws(aTHX)
-
 /* RPN parser */
 
 static OP *THX_parse_var(pTHX)
 {
-	SV *varname = sv_2mortal(newSVpvs("$"));
+	char *s = PL_bufptr;
+	char *start = s;
 	PADOFFSET varpos;
 	OP *padop;
-	if(peek_char() != '$') croak("RPN syntax error");
-	read_char();
+	if(*s != '$') croak("RPN syntax error");
 	while(1) {
-		char c = peek_char();
+		char c = *++s;
 		if(!isALNUM(c)) break;
-		read_char();
-		sv_catpvn_nomg(varname, &c, 1);
 	}
-	if(SvCUR(varname) < 2) croak("RPN syntax error");
-	varpos = pad_findmy(SvPVX(varname), SvCUR(varname), 0);
+	if(s-start < 2) croak("RPN syntax error");
+	lex_read_to(s);
+	{
+		/* because pad_findmy() doesn't really use length yet */
+		SV *namesv = sv_2mortal(newSVpvn(start, s-start));
+		varpos = pad_findmy(SvPVX(namesv), s-start, 0);
+	}
 	if(varpos == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(varpos))
 		croak("RPN only supports \"my\" variables");
 	padop = newOP(OP_PADSV, 0);
@@ -84,9 +55,9 @@ static OP *THX_parse_rpn_expr(pTHX)
 {
 	OP *stack = NULL, *tmpop;
 	while(1) {
-		char c;
-		skip_opt_ws();
-		c = peek_char();
+		I32 c;
+		lex_read_space(0);
+		c = lex_peek_unichar(0);
 		switch(c) {
 			case /*(*/')': case /*{*/'}': {
 				OP *result = pop_rpn_item();
@@ -99,9 +70,9 @@ static OP *THX_parse_rpn_expr(pTHX)
 			case '5': case '6': case '7': case '8': case '9': {
 				UV val = 0;
 				do {
-					read_char();
+					lex_read_unichar(0);
 					val = 10*val + (c - '0');
-					c = peek_char();
+					c = lex_peek_unichar(0);
 				} while(c >= '0' && c <= '9');
 				push_rpn_item(newSVOP(OP_CONST, 0,
 					newSVuv(val)));
@@ -112,31 +83,31 @@ static OP *THX_parse_rpn_expr(pTHX)
 			case '+': {
 				OP *b = pop_rpn_item();
 				OP *a = pop_rpn_item();
-				read_char();
+				lex_read_unichar(0);
 				push_rpn_item(newBINOP(OP_I_ADD, 0, a, b));
 			} break;
 			case '-': {
 				OP *b = pop_rpn_item();
 				OP *a = pop_rpn_item();
-				read_char();
+				lex_read_unichar(0);
 				push_rpn_item(newBINOP(OP_I_SUBTRACT, 0, a, b));
 			} break;
 			case '*': {
 				OP *b = pop_rpn_item();
 				OP *a = pop_rpn_item();
-				read_char();
+				lex_read_unichar(0);
 				push_rpn_item(newBINOP(OP_I_MULTIPLY, 0, a, b));
 			} break;
 			case '/': {
 				OP *b = pop_rpn_item();
 				OP *a = pop_rpn_item();
-				read_char();
+				lex_read_unichar(0);
 				push_rpn_item(newBINOP(OP_I_DIVIDE, 0, a, b));
 			} break;
 			case '%': {
 				OP *b = pop_rpn_item();
 				OP *a = pop_rpn_item();
-				read_char();
+				lex_read_unichar(0);
 				push_rpn_item(newBINOP(OP_I_MODULO, 0, a, b));
 			} break;
 			default: {
@@ -150,14 +121,14 @@ static OP *THX_parse_rpn_expr(pTHX)
 static OP *THX_parse_keyword_rpn(pTHX)
 {
 	OP *op;
-	skip_opt_ws();
-	if(peek_char() != '('/*)*/)
+	lex_read_space(0);
+	if(lex_peek_unichar(0) != '('/*)*/)
 		croak("RPN expression must be parenthesised");
-	read_char();
+	lex_read_unichar(0);
 	op = parse_rpn_expr();
-	if(peek_char() != /*(*/')')
+	if(lex_peek_unichar(0) != /*(*/')')
 		croak("RPN expression must be parenthesised");
-	read_char();
+	lex_read_unichar(0);
 	return op;
 }
 #define parse_keyword_rpn() THX_parse_keyword_rpn(aTHX)
@@ -165,16 +136,16 @@ static OP *THX_parse_keyword_rpn(pTHX)
 static OP *THX_parse_keyword_calcrpn(pTHX)
 {
 	OP *varop, *exprop;
-	skip_opt_ws();
+	lex_read_space(0);
 	varop = parse_var();
-	skip_opt_ws();
-	if(peek_char() != '{'/*}*/)
+	lex_read_space(0);
+	if(lex_peek_unichar(0) != '{'/*}*/)
 		croak("RPN expression must be braced");
-	read_char();
+	lex_read_unichar(0);
 	exprop = parse_rpn_expr();
-	if(peek_char() != /*{*/'}')
+	if(lex_peek_unichar(0) != /*{*/'}')
 		croak("RPN expression must be braced");
-	read_char();
+	lex_read_unichar(0);
 	return newASSIGNOP(OPf_STACKED, varop, 0, exprop);
 }
 #define parse_keyword_calcrpn() THX_parse_keyword_calcrpn(aTHX)

@@ -244,6 +244,17 @@ Perl_is_utf8_xdigit
 Perl_is_utf8_mark
 Perl_leave_scope
 Perl_lex_end
+Perl_lex_bufutf8
+Perl_lex_grow_linestr
+Perl_lex_stuff_pvn
+Perl_lex_stuff_sv
+Perl_lex_unstuff
+Perl_lex_read_to
+Perl_lex_discard_to
+Perl_lex_next_chunk
+Perl_lex_peek_unichar
+Perl_lex_read_unichar
+Perl_lex_read_space
 Perl_op_null
 Perl_op_clear
 Perl_op_refcnt_lock

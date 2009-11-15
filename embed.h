@@ -408,6 +408,17 @@
 #ifdef PERL_CORE
 #define lex_start		Perl_lex_start
 #endif
+#define lex_bufutf8		Perl_lex_bufutf8
+#define lex_grow_linestr	Perl_lex_grow_linestr
+#define lex_stuff_pvn		Perl_lex_stuff_pvn
+#define lex_stuff_sv		Perl_lex_stuff_sv
+#define lex_unstuff		Perl_lex_unstuff
+#define lex_read_to		Perl_lex_read_to
+#define lex_discard_to		Perl_lex_discard_to
+#define lex_next_chunk		Perl_lex_next_chunk
+#define lex_peek_unichar	Perl_lex_peek_unichar
+#define lex_read_unichar	Perl_lex_read_unichar
+#define lex_read_space		Perl_lex_read_space
 #define op_null			Perl_op_null
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear		Perl_op_clear
@@ -2786,6 +2797,17 @@
 #ifdef PERL_CORE
 #define lex_start(a,b,c)	Perl_lex_start(aTHX_ a,b,c)
 #endif
+#define lex_bufutf8()		Perl_lex_bufutf8(aTHX)
+#define lex_grow_linestr(a)	Perl_lex_grow_linestr(aTHX_ a)
+#define lex_stuff_pvn(a,b,c)	Perl_lex_stuff_pvn(aTHX_ a,b,c)
+#define lex_stuff_sv(a,b)	Perl_lex_stuff_sv(aTHX_ a,b)
+#define lex_unstuff(a)		Perl_lex_unstuff(aTHX_ a)
+#define lex_read_to(a)		Perl_lex_read_to(aTHX_ a)
+#define lex_discard_to(a)	Perl_lex_discard_to(aTHX_ a)
+#define lex_next_chunk(a)	Perl_lex_next_chunk(aTHX_ a)
+#define lex_peek_unichar(a)	Perl_lex_peek_unichar(aTHX_ a)
+#define lex_read_unichar(a)	Perl_lex_read_unichar(aTHX_ a)
+#define lex_read_space(a)	Perl_lex_read_space(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)

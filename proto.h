@@ -1440,6 +1440,37 @@ STATIC OP*	S_is_inplace_av(pTHX_ OP* o, OP* oright)
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);
 PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp, bool new_filter);
+PERL_CALLCONV bool	Perl_lex_bufutf8(pTHX);
+PERL_CALLCONV char*	Perl_lex_grow_linestr(pTHX_ STRLEN len);
+PERL_CALLCONV void	Perl_lex_stuff_pvn(pTHX_ char* pv, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_STUFF_PVN	\
+	assert(pv)
+
+PERL_CALLCONV void	Perl_lex_stuff_sv(pTHX_ SV* sv, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_STUFF_SV	\
+	assert(sv)
+
+PERL_CALLCONV void	Perl_lex_unstuff(pTHX_ char* ptr)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_UNSTUFF	\
+	assert(ptr)
+
+PERL_CALLCONV void	Perl_lex_read_to(pTHX_ char* ptr)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_READ_TO	\
+	assert(ptr)
+
+PERL_CALLCONV void	Perl_lex_discard_to(pTHX_ char* ptr)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_DISCARD_TO	\
+	assert(ptr)
+
+PERL_CALLCONV bool	Perl_lex_next_chunk(pTHX_ U32 flags);
+PERL_CALLCONV I32	Perl_lex_peek_unichar(pTHX_ U32 flags);
+PERL_CALLCONV I32	Perl_lex_read_unichar(pTHX_ U32 flags);
+PERL_CALLCONV void	Perl_lex_read_space(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_NULL	\

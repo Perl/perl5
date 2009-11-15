@@ -84,7 +84,7 @@ package XS::APItest::KeywordRPN;
 use warnings;
 use strict;
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 require XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -119,9 +119,6 @@ due to it being intended only for demonstration and test purposes.
 
 The RPN parser is liable to leak memory when a parse error occurs.
 It doesn't leak on success, however.
-
-The linkage with Perl's lexer is liable to fail when an RPN expression
-is spread across multiple lines.
 
 =head1 SEE ALSO
 

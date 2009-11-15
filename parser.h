@@ -107,6 +107,10 @@ typedef struct yy_parser {
 
 } yy_parser;
 
+/* flags for lexer API */
+#define LEX_STUFF_UTF8		0x00000001
+#define LEX_KEEP_PREVIOUS	0x00000002
+
 /*
  * Local variables:
  * c-indentation-style: bsd

@@ -515,6 +515,19 @@ Ap	|void	|leave_scope	|I32 base
 EXp	|void	|lex_end
 : Used in various files
 p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|bool new_filter
+: Public lexer API
+Apd	|bool	|lex_bufutf8
+Apd	|char*	|lex_grow_linestr|STRLEN len
+Apd	|void	|lex_stuff_pvn	|NN char* pv|STRLEN len|U32 flags
+Apd	|void	|lex_stuff_sv	|NN SV* sv|U32 flags
+Apd	|void	|lex_unstuff	|NN char* ptr
+Apd	|void	|lex_read_to	|NN char* ptr
+Apd	|void	|lex_discard_to	|NN char* ptr
+Apd	|bool	|lex_next_chunk	|U32 flags
+Apd	|I32	|lex_peek_unichar|U32 flags
+Apd	|I32	|lex_read_unichar|U32 flags
+Apd	|void	|lex_read_space	|U32 flags
+: Used in various files
 Ap	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
 EXp	|void	|op_clear	|NN OP* o

@@ -207,14 +207,7 @@ C<KEYWORD_PLUGIN_DECLINE>, and the normal parser process will continue.
 
 If the function wants to handle the keyword, it first must
 parse anything following the keyword that is part of the syntax
-introduced by the keyword.  The lexer interface is poorly documented.
-Broadly speaking, parsing needs to look at the buffer that extends
-from C<PL_parser-E<gt>bufptr> to C<PL_parser-E<gt>bufend>, and
-C<PL_parser-E<gt>bufptr> must be advanced across whatever text is
-consumed by the parsing process.  The buffer end is not necessarily the
-real end of the input text, but refilling the buffer is too complicated
-to discuss here.  See L<Devel::Declare> for some parsing experience,
-and hope for more core support in a future version of Perl.
+introduced by the keyword.  See L</Lexer interface> for details.
 
 When a keyword is being handled, the plugin function must build
 a tree of C<OP> structures, representing the code that was parsed.
