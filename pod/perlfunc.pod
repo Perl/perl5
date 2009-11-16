@@ -4197,6 +4197,9 @@ you will have to use a block returning the filehandle value instead:
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
 
+Printing to a closed pipe or socket will generate a SIGPIPE signal.  See
+L<perlipc> for more on signal handling.
+
 =item printf FILEHANDLE FORMAT, LIST
 X<printf>
 
