@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 48;
+my $total_tests = 49;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -166,8 +166,9 @@ print $x;
 # Test that scalar context is forced for require
 
 write_file('bleah.pm', <<'**BLEAH**'
+my $TODO = $i == 38 ? " # TODO " : "";
 print "not " if !defined wantarray || wantarray ne '';
-print "ok $i - require() context\n";
+print "ok $i - require() context $TODO\n";
 1;
 **BLEAH**
 );
@@ -176,6 +177,7 @@ $foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{$_=$_+2;require bleah}; delete $INC{"bleah.pm"}; ++$::i;
+       eval q{return require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval  {require bleah};
