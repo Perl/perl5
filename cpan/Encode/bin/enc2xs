@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -1356,7 +1356,7 @@ L<http://www.icu-project.org/>
 =item *
 
 ICU Character Mapping Tables
-L<http://www.icu-project.org/charset/>
+L<http://site.icu-project.org/charts/charset>
 
 =item *
 

@@ -1,12 +1,33 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.37 2009/09/06 14:32:21 dankogai Exp dankogai $
-$Revision: 2.37 $ $Date: 2009/09/06 14:32:21 $
+# $Id: Changes,v 2.38 2009/11/16 14:08:13 dankogai Exp dankogai $
+$Revision: 2.38 $ $Date: 2009/11/16 14:08:13 $
+! Encode.xs
+  Addressed: Encode memory corruption [perl #70528]
+  Message-Id: <alpine.LFD.2.00.0911152328070.9483@ein.m-l.org>
+! t/Unicode.t Unicode/Unicode.xs
+  Patched: #51263: set magic is not applied when modifying encode arguments
+  http://rt.cpan.org/Ticket/Display.html?id=51263
+! Encode.xs
+  Patched: #51204: Callback CHECK not supported for UTF-8 decoder/encoder
+  http://rt.cpan.org/Ticket/Display.html?id=51204
+! Byte/Byte.pm CN/CN.pm Changes JP/JP.pm KR/KR.pm TW/TW.pm 
+  Unicode/Unicode.pm bin/enc2xs lib/Encode/Supported.pod
+  Fix URLs
+   http://rt.cpan.org/Ticket/Display.html?id=49776
+! t/CJKT.t t/guess.t t/perlio.t t/piconv.t
+  $PERL_CORE trick is now off for perl 5.11 or better.
+  Message-Id: <b77c1dce0909070245s59b294bq8a8a8166e7342793@mail.gmail.com> 
+  Message-Id: <E7FADA6C-D5A7-4ECA-BE4C-85911A97677E@dan.co.jp>
+  Message-Id: <20090907154908.GS60303@plum.flirble.org>
+  Message-Id: <20090907161509.GN8057@iabyn.com>
+
+2.37 2009/09/06 14:32:21
 ! Encode.xs
   fixed: compilation failure on compilers not supporting C99
   http://rt.cpan.org/Ticket/Display.html?id=49466
 
-2.37 2009/09/06 09:03:07
+2.36 2009/09/06 09:03:07
 ! Encode.xs
   fixed: 'find_encoding("utf8")->decode(undef)' causes segmentation fault
   http://rt.cpan.org/Ticket/Display.html?id=49462
@@ -518,7 +539,7 @@ $Revision: 2.37 $ $Date: 2009/09/06 14:32:21 $
 1.99 2003/12/29 02:47:16
 ! Unicode/Unicode.xs
   find_encoding("UTF-16BE")->encode("abc") now null terminates
-  http://www.mail-archive.com/perl5-porters@perl.org/msg69766.html
+  http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-10/threads.html#00258
 ! Encode.pm
   prototype bug in decode_utf8() fixed
   Message-Id: <600A4CDA-F004-11D7-B570-000393AE4244@dan.co.jp>

@@ -2,7 +2,7 @@ package Encode::Byte;
 use strict;
 use warnings;
 use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -55,7 +55,7 @@ supported are as follows.
   viscii
 
   # all cp* are also available as ibm-*, ms-*, and windows-*
-  # also see L<http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset4.asp>
+  # also see L<http://msdn.microsoft.com/en-us/library/aa752010%28VS.85%29.aspx>
 
   cp424  
   cp437  

@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.5 2009/02/01 13:14:41 dankogai Exp $
+ $Id: Unicode.xs,v 2.6 2009/11/16 14:08:13 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -376,6 +376,8 @@ CODE:
 
     if (!temp_result)
 	shrink_buffer(result);
+
+    SvSETMAGIC(utf8);
 
     XSRETURN(1);
 }

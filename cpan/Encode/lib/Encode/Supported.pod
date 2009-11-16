@@ -589,7 +589,7 @@ for example)
 
 it is beyond the power of words to describe the way HTML browsers
 encode non-C<ASCII> form data. To get a general impression, visit
-L<http://ppewww.ph.gla.ac.uk/~flavell/charset/form-i18n.html>.
+L<http://www.alanflavell.org.uk/charset/form-i18n.html>.
 While encoding of form data has stabilized for C<UTF-8> encoded pages
 (at least IE 5/6, NS 6, and Opera 6 behave consistently), be sure to
 expect fun (and cross-browser discrepancies) with C<UTF-16> encoded
@@ -817,7 +817,7 @@ L<http://www.iso.ch/>
 =item RFC
 
 Request For Comments -- need I say more?
-L<http://www.rfc-editor.org/>, L<http://www.rfc.net/>,
+L<http://www.rfc-editor.org/>, L<http://www.ietf.org/rfc.html>,
 L<http://www.faqs.org/rfcs/>
 
 =item UC
@@ -850,7 +850,7 @@ vs. vendor mappings.
 
 =item CJK.inf
 
-L<http://www.oreilly.com/people/authors/lunde/cjk_inf.html>
+L<http://examples.oreilly.com/cjkvinfo/doc/cjk.inf>
 
 Somewhat obsolete (last update in 1996), but still useful.  Also try
 
@@ -893,7 +893,7 @@ to better support CJKV languages/scripts in all the areas of
 information processing.
 
 To purchase this book, visit
-L<http://www.oreilly.com/catalog/cjkvinfo/>
+L<http://oreilly.com/catalog/9780596514471/>
 or your favourite bookstore.
 
 =back
