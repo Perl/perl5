@@ -985,7 +985,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     want = o->op_flags & OPf_WANT;
     if ((want && want != OPf_WANT_SCALAR)
 	 || (PL_parser && PL_parser->error_count)
-	 || o->op_type == OP_RETURN)
+	 || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE)
     {
 	return o;
     }
@@ -1215,10 +1215,6 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_ENTEREVAL:
 	scalarkids(o);
 	break;
-    case OP_REQUIRE:
-	/* all requires must return a boolean value */
-	o->op_flags &= ~OPf_WANT;
-	/* FALL THROUGH */
     case OP_SCALAR:
 	return scalar(o);
     }
@@ -1307,10 +1303,6 @@ Perl_list(pTHX_ OP *o)
 	}
 	PL_curcop = &PL_compiling;
 	break;
-    case OP_REQUIRE:
-	/* all requires must return a boolean value */
-	o->op_flags &= ~OPf_WANT;
-	return scalar(o);
     }
     return o;
 }
@@ -7677,7 +7669,7 @@ Perl_ck_require(pTHX_ OP *o)
 	return newop;
     }
 
-    return ck_fun(o);
+    return scalar(ck_fun(o));
 }
 
 OP *

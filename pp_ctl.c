@@ -3104,14 +3104,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	SAVEFREEOP(PL_eval_root);
 
     /* Set the context for this new optree.
-     * If the last op is an OP_REQUIRE, force scalar context.
-     * Otherwise, propagate the context from the eval(). */
-    if (PL_eval_root->op_type == OP_LEAVEEVAL
-	    && cUNOPx(PL_eval_root)->op_first->op_type == OP_LINESEQ
-	    && cLISTOPx(cUNOPx(PL_eval_root)->op_first)->op_last->op_type
-	    == OP_REQUIRE)
-	scalar(PL_eval_root);
-    else if ((gimme & G_WANT) == G_VOID)
+     * Propagate the context from the eval(). */
+    if ((gimme & G_WANT) == G_VOID)
 	scalarvoid(PL_eval_root);
     else if ((gimme & G_WANT) == G_ARRAY)
 	list(PL_eval_root);

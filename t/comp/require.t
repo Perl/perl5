@@ -166,9 +166,8 @@ print $x;
 # Test that scalar context is forced for require
 
 write_file('bleah.pm', <<'**BLEAH**'
-my $TODO = $i == 38 ? " # TODO " : "";
 print "not " if !defined wantarray || wantarray ne '';
-print "ok $i - require() context $TODO\n";
+print "ok $i - require() context\n";
 1;
 **BLEAH**
 );
