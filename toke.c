@@ -4315,7 +4315,6 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    U32 fake_eof = 0;
-	    bof = PL_rsfp ? TRUE : FALSE;
 	    if (0) {
 	      fake_eof:
 		fake_eof = LEX_FAKE_EOF;
@@ -4332,6 +4331,7 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr;
 	    /* If it looks like the start of a BOM or raw UTF-16,
 	     * check if it in fact is. */
+	    bof = PL_rsfp ? TRUE : FALSE;
 	    if (bof &&
 		     (*s == 0 ||
 		      *(U8*)s == 0xEF ||
