@@ -871,7 +871,7 @@ sub NowWhat {
 You have finished composing your message. At this point, you have 
 a few options. You can:
 
-    * [Se]end the message to $address$andcc, 
+    * [Se]nd the message to $address$andcc, 
     * [D]isplay the message on the screen,
     * [R]e-edit the message
     * Display or change the message's [su]bject
