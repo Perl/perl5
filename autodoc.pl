@@ -69,6 +69,7 @@ DOC:
 	    else {
 		$docfuncs{$name} = [$flags, $docs, $ret, $file, $curheader, @args];
 	    }
+	    $seenfuncs{$name} = 1;
 	    if (defined $doc) {
 		if ($doc =~ /^=(?:for|head)/) {
 		    $in = $doc;
@@ -189,7 +190,6 @@ while (<IN>) {
     $retval =~ s/\t//;
 
     my $docref = delete $docfuncs{$func};
-    $seenfuncs{$func} = 1;
     if ($docref and @$docref) {
 	if ($flags =~ /A/) {
 	    $docref->[0].="x" if $flags =~ /M/;
