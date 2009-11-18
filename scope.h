@@ -134,15 +134,18 @@ scope has the given name. Name must be a literal string.
 #define ENTER_with_name(name)						\
     STMT_START {							\
 	push_scope();							\
-	PL_scopestack_name[PL_scopestack_ix-1] = name;			\
+	if (PL_scopestack_name)						\
+	    PL_scopestack_name[PL_scopestack_ix-1] = name;		\
 	DEBUG_SCOPE("ENTER \"" name "\"")				\
     } STMT_END
 #define LEAVE_with_name(name)						\
     STMT_START {							\
 	DEBUG_SCOPE("LEAVE \"" name "\"")				\
-	assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]		\
-		    == (char*)name)					\
-		|| strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
+	if (PL_scopestack_name)	{					\
+	    assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
+			== (char*)name)					\
+		    || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
+	}								\
 	pop_scope();							\
     } STMT_END
 #else
