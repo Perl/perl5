@@ -1416,7 +1416,7 @@ test.taintwarn:	test_prep
 	TEST_ARGS=-taintwarn $(RUN_TESTS) choose
 
 minitest.prep:
-	-@test test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
+	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm, or the Unicode data files."
