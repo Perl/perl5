@@ -482,7 +482,7 @@ Otherwise, run:
     $ ./perl -Ilib Porting/corelist.pl cpan
 
 This will chug for a while, possibly reporting various warnings about
-badly-indexed CPABN modules unreltaed to the modules actually in core.
+badly-indexed CPAN modules unrelated to the modules actually in core.
 Assuming all goes well, it will update
 F<dist/Module-CoreList/lib/Module/CoreList.pm>.
 
