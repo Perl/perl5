@@ -24,7 +24,7 @@ blib_load('Module::Build');
     plan tests => 20;
   }
   require Cwd;
-  $tmp = MBTest->tmpdir( $tmp_exec ? undef : Cwd::cwd );
+  $tmp = MBTest->tmpdir( $tmp_exec ? () : (DIR => Cwd::cwd) );
 }
 
 
