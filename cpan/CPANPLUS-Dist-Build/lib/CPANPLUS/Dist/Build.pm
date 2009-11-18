@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.42';
+$VERSION = '0.44';
 
 =pod
 
@@ -384,7 +384,8 @@ sub _find_prereqs {
     else {
       my $safe_ver = version->new('0.31_03');
       my $content;
-      if ( version->new( $Module::Build::VERSION ) >= $safe_ver and IPC::Cmd->can_capture_buffer ) {
+      PREREQS: {
+        if ( version->new( $Module::Build::VERSION ) >= $safe_ver and IPC::Cmd->can_capture_buffer ) {
           my @buildflags = $dist->_buildflags_as_list( $buildflags );
 
           # Use the new Build action 'prereq_data'
@@ -395,7 +396,10 @@ sub _find_prereqs {
                                 verbose => 0 ) 
           ) {
             error( loc( "Build 'prereq_data' failed: %1 %2", $!, $content ) );
-            return;
+            #return;
+          }
+          else {
+            last PREREQS;
           }
 
         }
@@ -412,14 +416,15 @@ sub _find_prereqs {
         
           $content = do { local $/; <$fh> };
         }
+      }
 
-        return unless $content;
-        my $bphash = eval $content;
-        return unless $bphash and ref $bphash eq 'HASH';
-        foreach my $type ('requires', 'build_requires') {
-          next unless $bphash->{$type} and ref $bphash->{$type} eq 'HASH';
-          $prereqs->{$_} = $bphash->{$type}->{$_} for keys %{ $bphash->{$type} };
-        }
+      return unless $content;
+      my $bphash = eval $content;
+      return unless $bphash and ref $bphash eq 'HASH';
+      foreach my $type ('requires', 'build_requires') {
+        next unless $bphash->{$type} and ref $bphash->{$type} eq 'HASH';
+        $prereqs->{$_} = $bphash->{$type}->{$_} for keys %{ $bphash->{$type} };
+      }
     }
     # Temporary fix
     delete $prereqs->{'perl'};
