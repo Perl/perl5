@@ -58,21 +58,23 @@ Extension modules can now cleanly hook into the Perl parser to define new
 kinds of keyword-headed expression and compound statement.  The syntax
 following the keyword is defined entirely by the extension.  This allow
 a completely non-Perl sublanguage to be parsed inline, with the right
-ops cleanly generated.
-
-This feature is currently considered experimental, and using it to do
-anything interesting is difficult.  Many necessary supporting facilities,
-such as the lexer and the pad system, can only be accessed through
-unsupported internal interfaces.  It is intended that the Perl 5.13
-development cycle will see the addition of clean, supported interfaces
-for many of these functions.  In Perl 5.12 most uses of pluggable keywords
-will be via L<Devel::Declare>.
+ops cleanly generated.  This feature is currently considered experimental.
 
 See L<perlapi/PL_keyword_plugin> for the mechanism.  The Perl core source
 distribution also includes a new module L<XS::APItest::KeywordRPN>, which
 implements reverse Polish notation arithmetic via pluggable keywords.
 This module is mainly used for test purposes, and is not normally
 installed, but also serves as an example of how to use the new mechanism.
+
+=head2 APIs for more internals
+
+The lowest layers of the lexer and parts of the pad system now have C
+APIs available to XS extensions.  These are necessary to support proper
+use of pluggable keywords, but have other uses too.  The new APIs are
+experimental, and only cover a small proportion of what would be necessary
+to take full advantage of the core's facilities in these areas.  It is
+intended that the Perl 5.13 development cycle will see the addition of
+a full range of clean, supported interfaces.
 
 =head2 Overridable function lookup
 

@@ -1232,6 +1232,8 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     } else if (filter_gets(linestr, old_bufend_pos)) {
 	got_some = 1;
     } else {
+	if (!SvPOK(linestr))   /* can get undefined by filter_gets */
+	    sv_setpvs(linestr, "");
 	eof:
 	/* End of real input.  Close filehandle (unless it was STDIN),
 	 * then add implicit termination.
@@ -3867,6 +3869,7 @@ Perl_yylex(pTHX)
     register char *d;
     STRLEN len;
     bool bof = FALSE;
+    U32 fake_eof = 0;
 
     /* orig_keyword, gvp, and gv are initialized here because
      * jump to the label just_a_word_zero can bypass their
@@ -4314,7 +4317,8 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    U32 fake_eof = 0;
+	    fake_eof = 0;
+	    bof = PL_rsfp ? TRUE : FALSE;
 	    if (0) {
 	      fake_eof:
 		fake_eof = LEX_FAKE_EOF;
@@ -4331,8 +4335,7 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr;
 	    /* If it looks like the start of a BOM or raw UTF-16,
 	     * check if it in fact is. */
-	    bof = PL_rsfp ? TRUE : FALSE;
-	    if (bof &&
+	    if (bof && PL_rsfp &&
 		     (*s == 0 ||
 		      *(U8*)s == 0xEF ||
 		      *(U8*)s >= 0xFE ||
