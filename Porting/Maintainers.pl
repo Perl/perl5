@@ -1015,7 +1015,7 @@ use File::Glob qw(:case);
     'Module::CoreList' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Module-CoreList-2.20.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Module-CoreList-2.22.tar.gz',
 	'FILES'		=> q[dist/Module-CoreList],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
