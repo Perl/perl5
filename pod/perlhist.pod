@@ -404,6 +404,7 @@ the strings?).
           5.10.1        2009-Aug-22
  Jesse    5.11.0        2009-Oct-02
           5.11.1        2009-Oct-20
+ Leon     5.11.2        2009-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
