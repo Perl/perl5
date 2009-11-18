@@ -3,11 +3,10 @@
 use strict;
 use lib 't/lib';
 use MBTest;
-
-use Module::Build;
-use Module::Build::ConfigData;
 use Config;
 
+blib_load('Module::Build');
+blib_load('Module::Build::ConfigData');
 my $manpage_support = Module::Build::ConfigData->feature('manpage_support');
 my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
 
@@ -26,14 +25,12 @@ my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
   } elsif ( $^O eq 'VMS' ) {
     plan skip_all => "Needs porting work on VMS";
   } else {
-    plan tests => 13;
+    plan tests => 12;
   }
 }
-ensure_blib('Module::Build');
 
 
 my $tmp = MBTest->tmpdir;
-
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp, xs => 1 );
@@ -66,7 +63,6 @@ $dist->chdir_in;
 
 use File::Spec::Functions qw(catdir);
 
-use Module::Build;
 my @installstyle = qw(lib perl5);
 my $mb = Module::Build->new_from_context(
   verbose => 0,
@@ -98,13 +94,10 @@ my $varchname = Module::Build::PPMMaker->_varchname($mb->config);
 # do a strict string comparison, but absent an XML parser it's the
 # best we can do.
 is $ppd, <<"---";
-<SOFTPKG NAME="$dist_filename" VERSION="0,01,0,0">
-    <TITLE>@{[$dist->name]}</TITLE>
+<SOFTPKG NAME="$dist_filename" VERSION="0.01">
     <ABSTRACT>Perl extension for blah blah blah</ABSTRACT>
     <AUTHOR>A. U. Thor, a.u.thor\@a.galaxy.far.far.away</AUTHOR>
     <IMPLEMENTATION>
-        <PERLCORE VERSION="$perl_version" />
-        <OS NAME="$^O" />
         <ARCHITECTURE NAME="$varchname" />
         <CODEBASE HREF="/path/to/codebase-xs" />
     </IMPLEMENTATION>
@@ -183,9 +176,6 @@ SKIP: {
   $mb->dispatch('realclean');
   $dist->clean;
 }
-
-
-$dist->remove;
 
 
 ########################################

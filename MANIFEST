@@ -1519,9 +1519,12 @@ cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
 cpan/MIME-Base64/t/warn.t		See whether MIME::Base64 works
 cpan/Module-Build/Changes				Module::Build
+cpan/Module-Build/lib/inc/latest.pm			Module::Build
+cpan/Module-Build/lib/inc/latest/private.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/API.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
 cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
+cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
@@ -1548,33 +1551,42 @@ cpan/Module-Build/lib/Module/Build/PPMMaker.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Version.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/YAML.pm		Module::Build
 cpan/Module-Build/scripts/config_data			Module::Build
+cpan/Module-Build/t/actions/installdeps.t		Module::Build
 cpan/Module-Build/t/add_property.t			Module::Build
 cpan/Module-Build/t/basic.t				Module::Build
-cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build.pm
+cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build
+cpan/Module-Build/t/bundle_inc.t			Module::Build
 cpan/Module-Build/t/compat/exit.t			Module::Build
 cpan/Module-Build/t/compat.t				Module::Build
-cpan/Module-Build/t/debug.t				Module::Build tests
+cpan/Module-Build/t/debug.t				Module::Build
 cpan/Module-Build/t/destinations.t			Module::Build
 cpan/Module-Build/t/extend.t				Module::Build
 cpan/Module-Build/t/ext.t				Module::Build
 cpan/Module-Build/t/files.t				Module::Build
 cpan/Module-Build/t/help.t				Module::Build
-cpan/Module-Build/t/install_extra_target.t		Module::Build tests
+cpan/Module-Build/t/install_extra_target.t		Module::Build
 cpan/Module-Build/t/install.t				Module::Build
 cpan/Module-Build/t/lib/DistGen.pm			Module::Build
 cpan/Module-Build/t/lib/MBTest.pm			Module::Build
 cpan/Module-Build/t/manifypods.t			Module::Build
-cpan/Module-Build/t/mbyaml.t				Module::Build
 cpan/Module-Build/t/metadata2.t				Module::Build
 cpan/Module-Build/t/metadata.t				Module::Build
 cpan/Module-Build/t/moduleinfo.t			Module::Build
+cpan/Module-Build/t/mymeta.t				Module::Build
 cpan/Module-Build/t/new_from_context.t			Module::Build
 cpan/Module-Build/t/notes.t				Module::Build
 cpan/Module-Build/t/parents.t				Module::Build
-cpan/Module-Build/t/PL_files.t				Module::Build tests
+cpan/Module-Build/t/perl_mb_opt.t			Module::Build
+cpan/Module-Build/t/PL_files.t				Module::Build
 cpan/Module-Build/t/pod_parser.t			Module::Build
 cpan/Module-Build/t/ppm.t				Module::Build
+cpan/Module-Build/t/properties/module_name.t		Module::Build
+cpan/Module-Build/t/properties/needs_compiler.t		Module::Build
+cpan/Module-Build/t/properties/share_dir.t		Module::Build
+cpan/Module-Build/t/README.pod				Module::Build
+cpan/Module-Build/t/resume.t				Module::Build
 cpan/Module-Build/t/runthrough.t			Module::Build
+cpan/Module-Build/t/sample.t				Module::Build
 cpan/Module-Build/t/script_dist.t			Module::Build
 cpan/Module-Build/t/test_file_exts.t			Module::Build
 cpan/Module-Build/t/test_types.t			Module::Build
@@ -1582,7 +1594,7 @@ cpan/Module-Build/t/test_type.t				Module::Build
 cpan/Module-Build/t/tilde.t				Module::Build
 cpan/Module-Build/t/use_tap_harness.t			Module::Build
 cpan/Module-Build/t/versions.t				Module::Build
-cpan/Module-Build/t/write_default_maniskip.t		Module::Build tests
+cpan/Module-Build/t/write_default_maniskip.t		Module::Build
 cpan/Module-Build/t/xs.t				Module::Build
 cpan/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 cpan/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests

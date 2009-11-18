@@ -4,10 +4,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 18;
+use MBTest tests => 16;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -111,6 +110,3 @@ SKIP: {
     like( run_sample( $p => "~$me/foo")->$p(),  qr($expected)i );
 }
 
-
-# cleanup
-$dist->remove;

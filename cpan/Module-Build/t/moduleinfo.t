@@ -4,10 +4,158 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 82;
+use MBTest;
 
-use_ok 'Module::Build::ModuleInfo';
-ensure_blib('Module::Build::ModuleInfo');
+# parse various module $VERSION lines
+# these will be reversed later to create %modules
+my @modules = (
+  '1.23' => <<'---', # declared & defined on same line with 'our'
+package Simple;
+our $VERSION = '1.23';
+---
+  '1.23' => <<'---', # declared & defined on separate lines with 'our'
+package Simple;
+our $VERSION;
+$VERSION = '1.23';
+---
+  '1.23' => <<'---', # use vars
+package Simple;
+use vars qw( $VERSION );
+$VERSION = '1.23';
+---
+  '1.23' => <<'---', # choose the right default package based on package/file name
+package Simple::_private;
+$VERSION = '0';
+package Simple;
+$VERSION = '1.23'; # this should be chosen for version
+---
+  '1.23' => <<'---', # just read the first $VERSION line
+package Simple;
+$VERSION = '1.23'; # we should see this line
+$VERSION = eval $VERSION; # and ignore this one
+---
+  '1.23' => <<'---', # just read the first $VERSION line in reopened package (1)
+package Simple;
+$VERSION = '1.23';
+package Error::Simple;
+$VERSION = '2.34';
+package Simple;
+---
+  '1.23' => <<'---', # just read the first $VERSION line in reopened package (2)
+package Simple;
+package Error::Simple;
+$VERSION = '2.34';
+package Simple;
+$VERSION = '1.23';
+---
+  '1.23' => <<'---', # mentions another module's $VERSION
+package Simple;
+$VERSION = '1.23';
+if ( $Other::VERSION ) {
+    # whatever
+}
+---
+  '1.23' => <<'---', # mentions another module's $VERSION in a different package
+package Simple;
+$VERSION = '1.23';
+package Simple2;
+if ( $Simple::VERSION ) {
+    # whatever
+}
+---
+  '1.23' => <<'---', # $VERSION checked only in assignments, not regexp ops
+package Simple;
+$VERSION = '1.23';
+if ( $VERSION =~ /1\.23/ ) {
+    # whatever
+}
+---
+  '1.23' => <<'---', # $VERSION checked only in assignments, not relational ops
+package Simple;
+$VERSION = '1.23';
+if ( $VERSION == 3.45 ) {
+    # whatever
+}
+---
+  '1.23' => <<'---', # $VERSION checked only in assignments, not relational ops
+package Simple;
+$VERSION = '1.23';
+package Simple2;
+if ( $Simple::VERSION == 3.45 ) {
+    # whatever
+}
+---
+  '1.23' => <<'---', # Fully qualified $VERSION declared in package
+package Simple;
+$Simple::VERSION = 1.23;
+---
+  '1.23' => <<'---', # Differentiate fully qualified $VERSION in a package
+package Simple;
+$Simple2::VERSION = '999';
+$Simple::VERSION = 1.23;
+---
+  '1.23' => <<'---', # Differentiate fully qualified $VERSION and unqualified
+package Simple;
+$Simple2::VERSION = '999';
+$VERSION = 1.23;
+---
+  '1.23' => <<'---', # $VERSION declared as package variable from within 'main' package
+$Simple::VERSION = '1.23';
+{
+  package Simple;
+  $x = $y, $cats = $dogs;
+}
+---
+  '1.23' => <<'---', # $VERSION wrapped in parens - space inside
+package Simple;
+( $VERSION ) = '1.23';
+---
+  '1.23' => <<'---', # $VERSION wrapped in parens - no space inside
+package Simple;
+($VERSION) = '1.23';
+---
+  '1.23' => <<'---', # $VERSION follows a spurious 'package' in a quoted construct
+package Simple;
+__PACKAGE__->mk_accessors(qw(
+    program socket proc
+    package filename line codeline subroutine finished));
+
+our $VERSION = "1.23";
+---
+  '1.23' => <<'---', # $VERSION using version.pm
+  package Simple;
+  use version; our $VERSION = version->new('1.23');
+---
+  '1.23' => <<'---', # $VERSION using version.pm and qv()
+  package Simple;
+  use version; our $VERSION = qv('1.230');
+---
+  '1.23' => <<'---', # Two version assignments, should ignore second one
+  $Simple::VERSION = '1.230';
+  $Simple::VERSION = eval $Simple::VERSION;
+---
+  '1.23' => <<'---', # declared & defined on same line with 'our'
+package Simple;
+our $VERSION = '1.23_00_00';
+---
+  '1.23' => <<'---', # package NAME VERSION
+  package Simple 1.23;
+---
+  '1.23_01' => <<'---', # package NAME VERSION
+  package Simple 1.23_01;
+---
+  'v1.2.3' => <<'---', # package NAME VERSION
+  package Simple v1.2.3;
+---
+  'v1.2_3' => <<'---', # package NAME VERSION
+  package Simple v1.2_3;
+---
+);
+my %modules = reverse @modules;
+
+plan tests => 36 + 2 * keys( %modules );
+
+blib_load('Module::Build::ModuleInfo');
 
 my $tmp = MBTest->tmpdir;
 
@@ -48,140 +196,13 @@ $pm_info = Module::Build::ModuleInfo->new_from_module(
 ok( defined( $pm_info ), 'new_from_module() succeeds' );
 
 
-# parse various module $VERSION lines
-my @modules = (
-  <<'---', # declared & defined on same line with 'our'
-package Simple;
-our $VERSION = '1.23';
----
-  <<'---', # declared & defined on separate lines with 'our'
-package Simple;
-our $VERSION;
-$VERSION = '1.23';
----
-  <<'---', # use vars
-package Simple;
-use vars qw( $VERSION );
-$VERSION = '1.23';
----
-  <<'---', # choose the right default package based on package/file name
-package Simple::_private;
-$VERSION = '0';
-package Simple;
-$VERSION = '1.23'; # this should be chosen for version
----
-  <<'---', # just read the first $VERSION line
-package Simple;
-$VERSION = '1.23'; # we should see this line
-$VERSION = eval $VERSION; # and ignore this one
----
-  <<'---', # just read the first $VERSION line in reopened package (1)
-package Simple;
-$VERSION = '1.23';
-package Error::Simple;
-$VERSION = '2.34';
-package Simple;
----
-  <<'---', # just read the first $VERSION line in reopened package (2)
-package Simple;
-package Error::Simple;
-$VERSION = '2.34';
-package Simple;
-$VERSION = '1.23';
----
-  <<'---', # mentions another module's $VERSION
-package Simple;
-$VERSION = '1.23';
-if ( $Other::VERSION ) {
-    # whatever
-}
----
-  <<'---', # mentions another module's $VERSION in a different package
-package Simple;
-$VERSION = '1.23';
-package Simple2;
-if ( $Simple::VERSION ) {
-    # whatever
-}
----
-  <<'---', # $VERSION checked only in assignments, not regexp ops
-package Simple;
-$VERSION = '1.23';
-if ( $VERSION =~ /1\.23/ ) {
-    # whatever
-}
----
-  <<'---', # $VERSION checked only in assignments, not relational ops
-package Simple;
-$VERSION = '1.23';
-if ( $VERSION == 3.45 ) {
-    # whatever
-}
----
-  <<'---', # $VERSION checked only in assignments, not relational ops
-package Simple;
-$VERSION = '1.23';
-package Simple2;
-if ( $Simple::VERSION == 3.45 ) {
-    # whatever
-}
----
-  <<'---', # Fully qualified $VERSION declared in package
-package Simple;
-$Simple::VERSION = 1.23;
----
-  <<'---', # Differentiate fully qualified $VERSION in a package
-package Simple;
-$Simple2::VERSION = '999';
-$Simple::VERSION = 1.23;
----
-  <<'---', # Differentiate fully qualified $VERSION and unqualified
-package Simple;
-$Simple2::VERSION = '999';
-$VERSION = 1.23;
----
-  <<'---', # $VERSION declared as package variable from within 'main' package
-$Simple::VERSION = '1.23';
-{
-  package Simple;
-  $x = $y, $cats = $dogs;
-}
----
-  <<'---', # $VERSION wrapped in parens - space inside
-package Simple;
-( $VERSION ) = '1.23';
----
-  <<'---', # $VERSION wrapped in parens - no space inside
-package Simple;
-($VERSION) = '1.23';
----
-  <<'---', # $VERSION follows a spurious 'package' in a quoted construct
-package Simple;
-__PACKAGE__->mk_accessors(qw(
-    program socket proc
-    package filename line codeline subroutine finished));
-
-our $VERSION = "1.23";
----
-  <<'---', # $VERSION using version.pm
-  package Simple;
-  use version; our $VERSION = version->new('1.23');
----
-  <<'---', # $VERSION using version.pm and qv()
-  package Simple;
-  use version; our $VERSION = qv('1.230');
----
-  <<'---', # Two version assignments, should ignore second one
-  $Simple::VERSION = '1.230';
-  $Simple::VERSION = eval $Simple::VERSION;
----
-);
-
-my( $i, $n ) = ( 1, scalar( @modules ) );
-foreach my $module ( @modules ) {
+foreach my $module ( sort keys %modules ) {
+    my $expected = $modules{$module};
  SKIP: {
     skip( "No our() support until perl 5.6", 2 )
-	if $] < 5.006 && $module =~ /\bour\b/;
+        if $] < 5.006 && $module =~ /\bour\b/;
+    skip( "No package NAME VERSION support until perl 5.11.1", 2 )
+        if $] < 5.011001 && $module =~ /package\s+[\w\:\']+\s+v?[0-9._]+/;
 
     $dist->change_file( 'lib/Simple.pm', $module );
     $dist->regen;
@@ -191,19 +212,17 @@ foreach my $module ( @modules ) {
     my $pm_info = Module::Build::ModuleInfo->new_from_file( $file );
 
     # Test::Builder will prematurely numify objects, so use this form
-    ok( $pm_info->version eq '1.23',
-	"correct module version ($i of $n)" );
-    is( $warnings, '', 'no warnings from parsing' );
-    $i++;
+    my $errs;
+    ok( $pm_info->version eq $expected,
+        "correct module version (expected '$expected')" )
+        or $errs++;
+    is( $warnings, '', 'no warnings from parsing' ) or $errs++;
+    diag "Got: '@{[$pm_info->version]}'\nModule contents:\n$module" if $errs;
   }
 }
 
 # revert to pristine state
-$dist->remove;
-$dist = DistGen->new( dir => $tmp );
-$dist->regen;
-$dist->chdir_in;
-
+$dist->regen( clean => 1 );
 
 # Find each package only once
 $dist->change_file( 'lib/Simple.pm', <<'---' );
@@ -249,19 +268,15 @@ $pm_info = Module::Build::ModuleInfo->new_from_file( $file );
 is( $pm_info->version, '1.23_01', 'alpha version reported');
 
 # NOTE the following test has be done this way because Test::Builder is
-# too smart for our own good and tries to see if the version object is a 
+# too smart for our own good and tries to see if the version object is a
 # dual-var, which breaks with alpha versions:
 #    Argument "1.23_0100" isn't numeric in addition (+) at
-#    /usr/lib/perl5/5.8.7/Test/Builder.pm line 505. 
+#    /usr/lib/perl5/5.8.7/Test/Builder.pm line 505.
 
 ok( $pm_info->version > 1.23, 'alpha version greater than non');
 
 # revert to pristine state
-$dist->remove;
-$dist = DistGen->new( dir => $tmp );
-$dist->regen;
-$dist->chdir_in;
-
+$dist->regen( clean => 1 );
 
 # parse $VERSION lines scripts for package main
 my @scripts = (
@@ -313,7 +328,7 @@ $::VERSION = 0.01;
 ---
 );
 
-( $i, $n ) = ( 1, scalar( @scripts ) );
+my ( $i, $n ) = ( 1, scalar( @scripts ) );
 foreach my $script ( @scripts ) {
   $dist->change_file( 'bin/simple.plx', $script );
   $dist->regen;
@@ -402,7 +417,7 @@ __DATA__
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '0.01', 'version for default package' );
   my @packages = $pm_info->packages_inside;
-  is_deeply(\@packages, ['Simple']);
+  is_deeply(\@packages, ['Simple'], 'packages inside');
 }
 
 {
@@ -419,10 +434,7 @@ $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '0.60.128', 'version for default package' );
   my @packages = $pm_info->packages_inside;
-  is_deeply([sort @packages], ['Simple', 'Simple::Simon']);
+  is_deeply([sort @packages], ['Simple', 'Simple::Simon'], 'packages inside');
   is( $pm_info->version('Simple::Simon'), '0.61.129', 'version for embedded package' );
 }
 
-
-# cleanup
-$dist->remove;

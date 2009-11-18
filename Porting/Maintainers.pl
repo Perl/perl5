@@ -104,7 +104,7 @@ use File::Glob qw(:case);
     SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
 
- 
+
 # Each entry in the  %Modules hash roughly represents a distribution,
 # except in the case of CPAN=1, where it *exactly* represents a single
 # CPAN distribution.
@@ -159,7 +159,7 @@ use File::Glob qw(:case);
 # Each key reprepresents a string prefix, with longest prefixes checked
 # first. The first match causes that prefix to be replaced with the
 # corresponding key. For example, with the following MAP:
-#   { 
+#   {
 #     'lib/'	 => 'lib/',
 #     ''	 => 'lib/Foo/',
 #   },
@@ -167,7 +167,7 @@ use File::Glob qw(:case);
 # these files are mapped as shown:
 #
 #    README     becomes lib/Foo/README
-#    lib/Foo.pm becomes lib/Foo.pm 
+#    lib/Foo.pm becomes lib/Foo.pm
 #
 # The default is dependent on the type of module.
 # For distributions which appear to be stored under ext/, it defaults to:
@@ -176,7 +176,7 @@ use File::Glob qw(:case);
 #
 # otherwise, it's
 #
-#   { 
+#   {
 #     'lib/'	 => 'lib/',
 #     ''	 => 'lib/Foo/Bar/',
 #   }
@@ -1004,10 +1004,10 @@ use File::Glob qw(:case);
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.35.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.35_08.tar.gz',
 	'FILES'		=> q[cpan/Module-Build],
-	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t scripts/bundle.pl},
-			     qr!^contrib/! ],
+	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t },
+			     qr!^contrib/!,  qr!^devtools! ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

@@ -2,7 +2,7 @@ package Module::Build::PodParser;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_08';
 $VERSION = eval $VERSION;
 use vars qw(@ISA);
 
@@ -33,31 +33,31 @@ sub new {
 
 sub _myparse_from_filehandle {
   my ($self, $fh) = @_;
-  
+
   local $_;
   while (<$fh>) {
     next unless /^=(?!cut)/ .. /^=cut/;  # in POD
     last if ($self->{abstract}) = /^  (?:  [a-z:]+  \s+ - \s+  )  (.*\S)  /ix;
   }
-  
+
   my @author;
   while (<$fh>) {
-    next unless /^=head1\s+AUTHORS?/ ... /^=/;
+    next unless /^=head1\s+AUTHORS?/i ... /^=/;
     next if /^=/;
     push @author, $_ if /\@/;
   }
   return unless @author;
   s/^\s+|\s+$//g foreach @author;
-  
+
   $self->{author} = \@author;
-  
+
   return;
 }
 
 sub get_abstract {
   my $self = shift;
   return $self->{abstract} if defined $self->{abstract};
-  
+
   $self->parse_from_filehandle($self->{fh});
 
   return $self->{abstract};
@@ -66,7 +66,7 @@ sub get_abstract {
 sub get_author {
   my $self = shift;
   return $self->{author} if defined $self->{author};
-  
+
   $self->parse_from_filehandle($self->{fh});
 
   return $self->{author} || [];
@@ -92,10 +92,10 @@ sub textblock {
   my ($self, $text) = @_;
   $text =~ s/^\s+//;
   $text =~ s/\s+$//;
-  if ($self->{_head} eq 'NAME') {
+  if (uc $self->{_head} eq 'NAME') {
     my ($name, $abstract) = split( /\s+-\s+/, $text, 2 );
     $self->{abstract} = $abstract;
-  } elsif ($self->{_head} =~ /^AUTHORS?$/) {
+  } elsif ($self->{_head} =~ /^AUTHORS?$/i) {
     push @{$self->{author}}, $text if $text =~ /\@/;
   }
 }

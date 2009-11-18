@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 8;
+use MBTest tests => 9;
 
-use_ok 'Module::Build::PodParser';
-ensure_blib('Module::Build::PodParser');
+blib_load('Module::Build::PodParser');
 
 #########################
 
@@ -66,3 +65,26 @@ EOF
 }
 
 
+{
+    # Try again with mixed-case =head1s.
+  untie *FH;
+  tie *FH, 'IO::StringBased', <<'EOF';
+=head1 Name
+
+Foo::Bar - Perl extension for blah blah blah
+
+=head1 Author
+
+C<Foo::Bar> was written by Engelbert Humperdinck I<E<lt>eh@example.comE<gt>> in 2004.
+
+Home page: http://example.com/~eh/
+
+=cut
+EOF
+
+  my $pp = Module::Build::PodParser->new(fh => \*FH);
+  ok $pp, 'object created';
+
+  is $pp->get_author->[0], 'C<Foo::Bar> was written by Engelbert Humperdinck I<E<lt>eh@example.comE<gt>> in 2004.', 'author';
+  is $pp->get_abstract, 'Perl extension for blah blah blah', 'abstract';
+}

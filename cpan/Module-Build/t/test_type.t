@@ -9,10 +9,9 @@ BEGIN {
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 9;
+use MBTest tests => 7;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -71,7 +70,5 @@ my $output = uc(stdout_of(
 like($output, qr/\.\. ?OK/);
 
 is($::x, 3, "called a third time");
-
-$dist->remove;
 
 # vim:ts=4:sw=4:et:sta

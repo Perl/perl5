@@ -8,13 +8,14 @@ package Module::Build::ModuleInfo;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_08';
 $VERSION = eval $VERSION;
 
 use File::Spec;
 use IO::File;
 use Module::Build::Version;
 
+my $V_NUM_REGEXP = qr{v?[0-9._]+};  # crudely, a v-string or decimal
 
 my $PKG_REGEXP  = qr{   # match a package declaration
   ^[\s\{;]*             # intro chars on a line
@@ -22,6 +23,8 @@ my $PKG_REGEXP  = qr{   # match a package declaration
   \s+                   # whitespace
   ([\w:]+)              # a package name
   \s*                   # optional whitespace
+  ($V_NUM_REGEXP)?        # optional version number
+  \s*                   # optional whitesapce
   ;                     # semicolon line terminator
 }x;
 
@@ -221,10 +224,10 @@ sub _parse_fh {
 	  $self->_parse_version_expression( $line );
 
       if ( $line =~ $PKG_REGEXP ) {
-	$pkg = $1;
-	push( @pkgs, $pkg ) unless grep( $pkg eq $_, @pkgs );
-	$vers{$pkg} = undef unless exists( $vers{$pkg} );
-	$need_vers = 1;
+        $pkg = $1;
+        push( @pkgs, $pkg ) unless grep( $pkg eq $_, @pkgs );
+        $vers{$pkg} = (defined $2 ? $2 : undef)  unless exists( $vers{$pkg} );
+        $need_vers = defined $2 ? 0 : 1;
 
       # VERSION defined with full package spec, i.e. $Module::VERSION
       } elsif ( $vers_fullname && $vers_pkg ) {
@@ -232,7 +235,7 @@ sub _parse_fh {
 	$need_vers = 0 if $vers_pkg eq $pkg;
 
 	unless ( defined $vers{$vers_pkg} && length $vers{$vers_pkg} ) {
-	  $vers{$vers_pkg} = 
+	  $vers{$vers_pkg} =
 	    $self->_evaluate_version_line( $vers_sig, $vers_fullname, $line );
 	} else {
 	  # Warn unless the user is using the "$VERSION = eval
@@ -323,11 +326,22 @@ sub _evaluate_version_line {
   (ref($vsub) eq 'CODE') or
     die "failed to build version sub for $self->{filename}";
   my $result = eval { $vsub->() };
+  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n"
+    if $@;
 
-  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n" if $@;
+  # Activestate apparently creates custom versions like '1.23_45_01', which
+  # cause M::B::Version to think it's an invalid alpha.  So check for that
+  # and strip them
+  my $num_dots = () = $result =~ m{\.}g;
+  my $num_unders = () = $result =~ m{_}g;
+  if ( substr($result,0,1) ne 'v' && $num_dots < 2 && $num_unders > 1 ) {
+    $result =~ s{_}{}g;
+  }
 
   # Bless it into our own version class
-  $result = Module::Build::Version->new($result);
+  eval { $result = Module::Build::Version->new($result) };
+  die "Version '$result' from $self->{filename} does not appear to be valid:\n$eval\n\nThe fatal error was: $@\n"
+    if $@;
 
   return $result;
 }

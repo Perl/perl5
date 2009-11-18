@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 36;
+use MBTest tests => 34;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 use Config;
 use Cwd ();
@@ -225,10 +224,7 @@ Simple Man <simple@example.com>
   is keys %$pms, 0;
 
   # revert to pristine state
-  $dist->remove;
-  $dist = DistGen->new( dir => $tmp );
-  $dist->regen;
-  $dist->chdir_in;
+  $dist->regen( clean => 1 );
 }
 
 sub strip_volume {
@@ -243,6 +239,3 @@ sub file_exists {
   ok -e $file or diag("Expected $file to exist, but it doesn't");
 }
 
-
-# cleanup
-$dist->remove;

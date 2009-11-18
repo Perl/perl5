@@ -2,18 +2,15 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 3;
+use MBTest tests => 1;
 
-require_ok('Module::Build');
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
 $dist->regen;
-END{ $dist->remove }
-
 $dist->chdir_in;
 
 #########################
@@ -28,6 +25,3 @@ $dist->chdir_in;
   );
 }
 
-#########################
-
-# cleanup

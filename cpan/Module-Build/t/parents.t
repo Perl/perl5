@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 28;
+use MBTest tests => 26;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 #########################
 

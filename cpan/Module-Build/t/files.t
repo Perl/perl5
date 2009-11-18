@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 6;
+use MBTest tests => 4;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 use IO::File;
 my $tmp = MBTest->tmpdir;
@@ -46,5 +45,3 @@ my $mb = Module::Build->new_from_context;
   ok( Module::Build->dir_contains($first, $second) );
 }
 
-# cleanup
-$dist->remove;

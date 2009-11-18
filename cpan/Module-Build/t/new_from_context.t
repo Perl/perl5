@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 4;
+use MBTest tests => 2;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 use IO::File;
 my $tmp = MBTest->tmpdir;
@@ -24,8 +23,5 @@ unshift(@INC, $libdir);
 my $mb = eval { Module::Build->new_from_context};
 ok(! $@, 'dodged the bullet') or die;
 ok($mb);
-
-# cleanup
-$dist->remove;
 
 # vim:ts=2:sw=2:et:sta

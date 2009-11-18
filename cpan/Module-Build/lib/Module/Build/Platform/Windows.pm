@@ -2,7 +2,7 @@ package Module::Build::Platform::Windows;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_08';
 $VERSION = eval $VERSION;
 
 use Config;
@@ -39,7 +39,7 @@ sub ACTION_realclean {
 
   if ( lc $basename eq lc $self->build_script ) {
     if ( $self->build_bat ) {
-      $self->log_info("Deleting $basename.bat\n");
+      $self->log_verbose("Deleting $basename.bat\n");
       my $full_progname = $0;
       $full_progname =~ s/(?:\.bat)?$/.bat/i;
 
@@ -207,22 +207,22 @@ sub split_like_shell {
   # into words.  The algorithm below was bashed out by Randy and Ken
   # (mostly Randy), and there are a lot of regression tests, so we
   # should feel free to adjust if desired.
-  
+
   (my $self, local $_) = @_;
-  
+
   return @$_ if defined() && UNIVERSAL::isa($_, 'ARRAY');
-  
+
   my @argv;
   return @argv unless defined() && length();
-  
+
   my $arg = '';
   my( $i, $quote_mode ) = ( 0, 0 );
-  
+
   while ( $i < length() ) {
-    
+
     my $ch      = substr( $_, $i  , 1 );
     my $next_ch = substr( $_, $i+1, 1 );
-    
+
     if ( $ch eq '\\' && $next_ch eq '"' ) {
       $arg .= '"';
       $i++;
@@ -249,10 +249,10 @@ sub split_like_shell {
     } else {
       $arg .= $ch;
     }
-    
+
     $i++;
   }
-  
+
   push( @argv, $arg ) if defined( $arg ) && length( $arg );
   return @argv;
 }
@@ -271,6 +271,27 @@ sub do_system {
     warn "'Argument list' was 'too long', env lengths are $env_entries";
   }
   return !$status;
+}
+
+# Copied from ExtUtils::MM_Win32
+sub _maybe_command {
+    my($self,$file) = @_;
+    my @e = exists($ENV{'PATHEXT'})
+          ? split(/;/, $ENV{PATHEXT})
+	  : qw(.com .exe .bat .cmd);
+    my $e = '';
+    for (@e) { $e .= "\Q$_\E|" }
+    chop $e;
+    # see if file ends in one of the known extensions
+    if ($file =~ /($e)$/i) {
+	return $file if -e $file;
+    }
+    else {
+	for (@e) {
+	    return "$file$_" if -e "$file$_";
+	}
+    }
+    return;
 }
 
 

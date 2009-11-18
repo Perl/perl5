@@ -4,7 +4,7 @@ use strict;
 use lib 't/lib';
 use MBTest tests => 8;
 use DistGen;
-use Module::Build;
+blib_load('Module::Build');
 
 my $dist;
 

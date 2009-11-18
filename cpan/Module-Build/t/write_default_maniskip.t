@@ -8,14 +8,14 @@ use MBTest 'no_plan';
 use DistGen;
 use Cwd;
 
-use_ok 'Module::Build';
-ensure_blib 'Module::Build';
+blib_load('Module::Build');
 
 {
     my $cwd = Cwd::cwd;
     chdir MBTest->tmpdir();
 
     my $build = Module::Build->new(
+        module_name     => "Foo::Bar",
         dist_name       => "Foo-Bar",
         dist_version    => '1.23',
     );

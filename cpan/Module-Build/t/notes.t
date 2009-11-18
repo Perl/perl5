@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 13;
+use MBTest tests => 11;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -65,6 +64,3 @@ $mb = Module::Build->resume;
 ok $mb;
 is $mb->notes('foo'), 'bar';
 
-
-# cleanup
-$dist->remove;

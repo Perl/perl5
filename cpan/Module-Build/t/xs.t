@@ -3,10 +3,11 @@
 use strict;
 use lib 't/lib';
 use MBTest;
-use Module::Build;
 use Config;
 
 my $tmp;
+
+blib_load('Module::Build');
 
 {
   my ($have_c_compiler, $C_support_feature, $tmp_exec) = check_compiler();
@@ -20,24 +21,20 @@ my $tmp;
   } elsif ( !$Config{usedl} ) {
     plan skip_all => 'Perl not compiled for dynamic loading'
   } else {
-    plan tests => 23;
+    plan tests => 20;
   }
   require Cwd;
   $tmp = MBTest->tmpdir( $tmp_exec ? undef : Cwd::cwd );
 }
 
-ensure_blib('Module::Build');
 
 
 #########################
 
 use DistGen;
-my $dist = DistGen->new( dir => $tmp, xs => 1 );
-$dist->regen;
+my $dist = DistGen->new( dir => $tmp, xs => 1 )->chdir_in->regen;
 
-$dist->chdir_in;
-my $mb = Module::Build->new_from_context;
-
+my $mb = $dist->new_from_context;
 
 eval {$mb->dispatch('clean')};
 is $@, '';
@@ -83,7 +80,7 @@ is $@, '';
 
 # We can't be verbose in the sub-test, because Test::Harness will
 # think that the output is for the top-level test.
-eval {$mb->dispatch('test')};
+stdout_stderr_of( sub { eval {$mb->dispatch('test')} });
 is $@, '';
 
 eval {$mb->dispatch('clean')};
@@ -106,42 +103,31 @@ is $@, '';
 # Make sure blib/ is gone after 'realclean'
 ok ! -e 'blib';
 
-
-# cleanup
-$dist->remove;
-
-
 ########################################
 
 # Try a XS distro with a deep namespace
 
-$dist = DistGen->new( name => 'Simple::With::Deep::Name',
-		      dir => $tmp, xs => 1 );
-$dist->regen;
-$dist->chdir_in;
 
-$mb = Module::Build->new_from_context;
+$dist->reset( name => 'Simple::With::Deep::Name', dir => $tmp, xs => 1 );
+$dist->chdir_in->regen;
+
+$mb = $dist->new_from_context;
+
+eval { $mb->dispatch('build') };
 is $@, '';
 
-$mb->dispatch('build');
+stdout_stderr_of( sub { eval { $mb->dispatch('test') } } );
 is $@, '';
 
-$mb->dispatch('test');
+eval { $mb->dispatch('realclean') };
 is $@, '';
-
-$mb->dispatch('realclean');
-is $@, '';
-
-# cleanup
-$dist->remove;
-
 
 ########################################
 
 # Try a XS distro using a flat directory structure
 # and a 'dist_name' instead of a 'module_name'
 
-$dist = DistGen->new( name => 'Dist-Name', dir => $tmp, xs => 1 );
+$dist->reset( name => 'Dist-Name', dir => $tmp, xs => 1 )->chdir_in;
 
 $dist->remove_file('lib/Dist-Name.pm');
 $dist->remove_file('lib/Dist-Name.xs');
@@ -211,20 +197,15 @@ ok( Simple::okay() eq 'ok' );
 ---
 
 $dist->regen;
-$dist->chdir_in;
 
+$mb = $dist->new_from_context;
 
-$mb = Module::Build->new_from_context;
+eval { $mb->dispatch('build') };
 is $@, '';
 
-$mb->dispatch('build');
+stdout_of( sub { eval { $mb->dispatch('test') } } );
 is $@, '';
 
-$mb->dispatch('test');
+eval { $mb->dispatch('realclean') };
 is $@, '';
 
-$mb->dispatch('realclean');
-is $@, '';
-
-# cleanup
-$dist->remove;

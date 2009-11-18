@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 60;
+use MBTest tests => 58;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -28,7 +27,7 @@ $dist->chdir_in;
 
   $mb = Module::Build->new( dist_name => $dist->name, dist_version => 7 );
   ok $mb;
-  ok ! $mb->module_name;  # Make sure it's defined
+  ok $mb->module_name;  # Set via heuristics
   is $mb->dist_name, $dist->name;
 }
 
@@ -163,10 +162,7 @@ $dist->chdir_in;
   is $args{foo}, 1;
 
   # revert test distribution to pristine state because we modified a file
-  $dist->remove;
-  $dist = DistGen->new( dir => $tmp );
-  $dist->regen;
-  $dist->chdir_in;
+  $dist->regen( clean => 1 );
 }
 
 # Test author stuff
@@ -236,5 +232,3 @@ $dist->chdir_in;
   is_deeply $mb->include_dirs, ['/foo'], 'Should have single include dir';
 }
 
-# cleanup
-$dist->remove;

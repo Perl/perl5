@@ -4,8 +4,6 @@ use strict;
 use lib 't/lib';
 use MBTest;
 
-use Module::Build;
-
 my @unix_splits = 
   (
    { q{one t'wo th'ree f"o\"ur " "five" } => [ 'one', 'two three', 'fo"ur ', 'five' ] },
@@ -58,9 +56,11 @@ my @win_splits =
    { 'a " b " c'            => [ 'a', ' b ', 'c' ] },
 );
 
-plan tests => 10 + 4*@unix_splits + 4*@win_splits;
+plan tests => 9 + 4*@unix_splits + 4*@win_splits;
 
-ensure_blib('Module::Build');
+blib_load('Module::Build');
+blib_load('Module::Build::Platform::Unix');
+blib_load('Module::Build::Platform::Windows');
 
 #########################
 
@@ -74,7 +74,6 @@ foreach my $platform ('', '::Platform::Unix', '::Platform::Windows') {
 
 # I think 3.24 isn't actually the majik version, my 3.23 seems to pass...
 my $low_TPW_version = Text::ParseWords->VERSION < 3.24;
-use Module::Build::Platform::Unix;
 foreach my $test (@unix_splits) {
   # Text::ParseWords bug:
   local $TODO = $low_TPW_version && ((keys %$test)[0] =~ m{\\\n});
@@ -82,7 +81,6 @@ foreach my $test (@unix_splits) {
   do_split_tests('Module::Build::Platform::Unix', $test);
 }
 
-use Module::Build::Platform::Windows;
 foreach my $test (@win_splits) {
   do_split_tests('Module::Build::Platform::Windows', $test);
 }

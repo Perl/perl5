@@ -4,7 +4,7 @@ package Module::Build::Notes;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_08';
 $VERSION = eval $VERSION;
 use Data::Dumper;
 use IO::File;
@@ -33,10 +33,10 @@ sub restore {
 sub access {
   my $self = shift;
   return $self->read() unless @_;
-  
+
   my $key = shift;
   return $self->read($key) unless @_;
-  
+
   my $value = shift;
   $self->write({ $key => $value });
   return $self->read($key);
@@ -61,7 +61,7 @@ sub read {
     return $self->{new}{$key} if exists $self->{new}{$key};
     return $self->{disk}{$key};
   }
-   
+
   # Return all data
   my $out = (keys %{$self->{new}}
 	     ? {%{$self->{disk}}, %{$self->{new}}}
@@ -79,7 +79,7 @@ sub _same {
 sub write {
   my ($self, $href) = @_;
   $href ||= {};
-  
+
   @{$self->{new}}{ keys %$href } = values %$href;  # Merge
 
   # Do some optimization to avoid unnecessary writes
@@ -88,17 +88,17 @@ sub write {
     next if ref $self->{disk}{$key} or !exists $self->{disk}{$key};
     delete $self->{new}{$key} if $self->_same($self->{new}{$key}, $self->{disk}{$key});
   }
-  
+
   if (my $file = $self->{file}) {
     my ($vol, $dir, $base) = File::Spec->splitpath($file);
     $dir = File::Spec->catpath($vol, $dir, '');
     return unless -e $dir && -d $dir;  # The user needs to arrange for this
 
     return if -e $file and !keys %{ $self->{new} };  # Nothing to do
-    
-    @{$self->{disk}}{ keys %{$self->{new}} } = values %{$self->{new}};  # Merge 
+
+    @{$self->{disk}}{ keys %{$self->{new}} } = values %{$self->{new}};  # Merge
     $self->_dump($file, $self->{disk});
-   
+
     $self->{new} = {};
   }
   return $self->read;
@@ -106,18 +106,66 @@ sub write {
 
 sub _dump {
   my ($self, $file, $data) = @_;
-  
+
   my $fh = IO::File->new("> $file") or die "Can't create '$file': $!";
   print {$fh} Module::Build::Dumper->_data_dump($data);
 }
 
+my $orig_template = do { local $/; <DATA> };
+close DATA;
+
 sub write_config_data {
   my ($self, %args) = @_;
 
-  my $fh = IO::File->new("> $args{file}") or die "Can't create '$args{file}': $!";
+  my $template = $orig_template;
+  $template =~ s/NOTES_NAME/$args{config_module}/g;
+  $template =~ s/MODULE_NAME/$args{module}/g;
+  $template =~ s/=begin private\n//;
+  $template =~ s/=end private/=cut/;
 
-  printf $fh <<'EOF', $args{config_module};
-package %s;
+  # strip out private POD markers we use to keep pod from being
+  # recognized for *this* source file
+  $template =~ s{$_\n}{} for '=begin private', '=end private';
+
+  my $fh = IO::File->new("> $args{file}") or die "Can't create '$args{file}': $!";
+  print {$fh} $template;
+  print {$fh} "\n__DATA__\n";
+  print {$fh} Module::Build::Dumper->_data_dump([$args{config_data}, $args{feature}, $args{auto_features}]);
+
+}
+
+1;
+
+
+=head1 NAME
+
+Module::Build::Notes - Create persistent distribution configuration modules
+
+=head1 DESCRIPTION
+
+This module is used internally by Module::Build to create persistent
+configuration files that can be installed with a distribution.  See
+L<Module::Build::ConfigData> for an example.
+
+=head1 AUTHOR
+
+Ken Williams <kwilliams@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+perl(1), L<Module::Build>(3)
+
+=cut
+
+__DATA__
+package NOTES_NAME;
 use strict;
 my $arrayref = eval do {local $/; <DATA>}
   or die "Couldn't load ConfigData data: $@";
@@ -129,14 +177,14 @@ sub config { $config->{$_[1]} }
 sub set_config { $config->{$_[1]} = $_[2] }
 sub set_feature { $features->{$_[1]} = 0+!!$_[2] }  # Constrain to 1 or 0
 
-sub auto_feature_names { grep !exists $features->{$_}, keys %%$auto_features }
+sub auto_feature_names { grep !exists $features->{$_}, keys %$auto_features }
 
 sub feature_names {
-  my @features = (keys %%$features, auto_feature_names());
+  my @features = (keys %$features, auto_feature_names());
   @features;
 }
 
-sub config_names  { keys %%$config }
+sub config_names  { keys %$config }
 
 sub write {
   my $me = __FILE__;
@@ -170,20 +218,20 @@ sub write {
 sub feature {
   my ($package, $key) = @_;
   return $features->{$key} if exists $features->{$key};
-  
+
   my $info = $auto_features->{$key} or return 0;
-  
-  # Under perl 5.005, each(%%$foo) isn't working correctly when $foo
+
+  # Under perl 5.005, each(%$foo) isn't working correctly when $foo
   # was reanimated with Data::Dumper and eval().  Not sure why, but
   # copying to a new hash seems to solve it.
-  my %%info = %%$info;
-  
+  my %info = %$info;
+
   require Module::Build;  # XXX should get rid of this
-  while (my ($type, $prereqs) = each %%info) {
+  while (my ($type, $prereqs) = each %info) {
     next if $type eq 'description' || $type eq 'recommends';
-    
-    my %%p = %%$prereqs;  # Ditto here.
-    while (my ($modname, $spec) = each %%p) {
+
+    my %p = %$prereqs;  # Ditto here.
+    while (my ($modname, $spec) = each %p) {
       my $status = Module::Build->check_installed_status($modname, $spec);
       if ((!$status->{ok}) xor ($type =~ /conflicts$/)) { return 0; }
       if ( ! eval "require $modname; 1" ) { return 0; }
@@ -192,36 +240,32 @@ sub feature {
   return 1;
 }
 
-EOF
-
-  my ($module_name, $notes_name) = ($args{module}, $args{config_module});
-  printf $fh <<"EOF", $notes_name, $module_name;
+=begin private
 
 =head1 NAME
 
-$notes_name - Configuration for $module_name
-
+NOTES_NAME - Configuration for MODULE_NAME
 
 =head1 SYNOPSIS
 
-  use $notes_name;
-  \$value = $notes_name->config('foo');
-  \$value = $notes_name->feature('bar');
-  
-  \@names = $notes_name->config_names;
-  \@names = $notes_name->feature_names;
-  
-  $notes_name->set_config(foo => \$new_value);
-  $notes_name->set_feature(bar => \$new_value);
-  $notes_name->write;  # Save changes
+  use NOTES_NAME;
+  $value = NOTES_NAME->config('foo');
+  $value = NOTES_NAME->feature('bar');
+
+  @names = NOTES_NAME->config_names;
+  @names = NOTES_NAME->feature_names;
+
+  NOTES_NAME->set_config(foo => $new_value);
+  NOTES_NAME->set_feature(bar => $new_value);
+  NOTES_NAME->write;  # Save changes
 
 
 =head1 DESCRIPTION
 
-This module holds the configuration data for the C<$module_name>
+This module holds the configuration data for the C<MODULE_NAME>
 module.  It also provides a programmatic interface for getting or
 setting that configuration data.  Note that in order to actually make
-changes, you'll have to have write access to the C<$notes_name>
+changes, you'll have to have write access to the C<NOTES_NAME>
 module, and you should attempt to understand the repercussions of your
 actions.
 
@@ -230,17 +274,17 @@ actions.
 
 =over 4
 
-=item config(\$name)
+=item config($name)
 
 Given a string argument, returns the value of the configuration item
 by that name, or C<undef> if no such item exists.
 
-=item feature(\$name)
+=item feature($name)
 
 Given a string argument, returns the value of the feature by that
 name, or C<undef> if no such feature exists.
 
-=item set_config(\$name, \$value)
+=item set_config($name, $value)
 
 Sets the configuration item with the given name to the given value.
 The value may be any Perl scalar that will serialize correctly using
@@ -248,7 +292,7 @@ C<Data::Dumper>.  This includes references, objects (usually), and
 complex data structures.  It probably does not include transient
 things like filehandles or sockets.
 
-=item set_feature(\$name, \$value)
+=item set_feature($name, $value)
 
 Sets the feature with the given name to the given boolean value.  The
 value will be converted to 0 or 1 automatically.
@@ -256,12 +300,12 @@ value will be converted to 0 or 1 automatically.
 =item config_names()
 
 Returns a list of all the names of config items currently defined in
-C<$notes_name>, or in scalar context the number of items.
+C<NOTES_NAME>, or in scalar context the number of items.
 
 =item feature_names()
 
 Returns a list of all the names of features currently defined in
-C<$notes_name>, or in scalar context the number of features.
+C<NOTES_NAME>, or in scalar context the number of features.
 
 =item auto_feature_names()
 
@@ -273,24 +317,16 @@ a fixed value.
 =item write()
 
 Commits any changes from C<set_config()> and C<set_feature()> to disk.
-Requires write access to the C<$notes_name> module.
+Requires write access to the C<NOTES_NAME> module.
 
 =back
 
 
 =head1 AUTHOR
 
-C<$notes_name> was automatically created using C<Module::Build>.
+C<NOTES_NAME> was automatically created using C<Module::Build>.
 C<Module::Build> was written by Ken Williams, but he holds no
-authorship claim or copyright claim to the contents of C<$notes_name>.
+authorship claim or copyright claim to the contents of C<NOTES_NAME>.
 
-=cut
+=end private
 
-__DATA__
-
-EOF
-
-  print {$fh} Module::Build::Dumper->_data_dump([$args{config_data}, $args{feature}, $args{auto_features}]);
-}
-
-1;

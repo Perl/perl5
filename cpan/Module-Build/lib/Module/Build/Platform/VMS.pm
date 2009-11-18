@@ -2,7 +2,7 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_08';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
@@ -131,22 +131,22 @@ sub _quote_args {
   # or if we get a single arg that is an array reference, quote the
   # elements of it and return the reference.
   my ($self, @args) = @_;
-  my $got_arrayref = (scalar(@args) == 1 
-                      && UNIVERSAL::isa($args[0], 'ARRAY')) 
-                   ? 1 
+  my $got_arrayref = (scalar(@args) == 1
+                      && UNIVERSAL::isa($args[0], 'ARRAY'))
+                   ? 1
                    : 0;
 
   # Do not quote qualifiers that begin with '/'.
-  map { if (!/^\//) { 
+  map { if (!/^\//) {
           $_ =~ s/\"/""/g;     # escape C<"> by doubling
           $_ = q(").$_.q(");
         }
   }
-    ($got_arrayref ? @{$args[0]} 
+    ($got_arrayref ? @{$args[0]}
                    : @args
     );
 
-  return $got_arrayref ? $args[0] 
+  return $got_arrayref ? $args[0]
                        : join(' ', @args);
 }
 
@@ -173,6 +173,62 @@ sub _backticks {
   return `$cmd $args`;
 }
 
+=item find_command
+
+Local an executable program
+
+=cut
+
+sub find_command {
+    my ($self, $command) = @_;
+
+    # a lot of VMS executables have a symbol defined
+    # check those first
+    if ( $^O eq 'VMS' ) {
+        require VMS::DCLsym;
+        my $syms = VMS::DCLsym->new;
+        return $command if scalar $syms->getsym( uc $command );
+    }
+
+    $self->SUPER::find_command($command);
+}
+
+# _maybe_command copied from ExtUtils::MM_VMS::maybe_command
+
+=item _maybe_command (override)
+
+Follows VMS naming conventions for executable files.
+If the name passed in doesn't exactly match an executable file,
+appends F<.Exe> (or equivalent) to check for executable image, and F<.Com>
+to check for DCL procedure.  If this fails, checks directories in DCL$PATH
+and finally F<Sys$System:> for an executable file having the name specified,
+with or without the F<.Exe>-equivalent suffix.
+
+=cut
+
+sub _maybe_command {
+    my($self,$file) = @_;
+    return $file if -x $file && ! -d _;
+    my(@dirs) = ('');
+    my(@exts) = ('',$Config{'exe_ext'},'.exe','.com');
+
+    if ($file !~ m![/:>\]]!) {
+        for (my $i = 0; defined $ENV{"DCL\$PATH;$i"}; $i++) {
+            my $dir = $ENV{"DCL\$PATH;$i"};
+            $dir .= ':' unless $dir =~ m%[\]:]$%;
+            push(@dirs,$dir);
+        }
+        push(@dirs,'Sys$System:');
+        foreach my $dir (@dirs) {
+            my $sysfile = "$dir$file";
+            foreach my $ext (@exts) {
+                return $file if -x "$sysfile$ext" && ! -d _;
+            }
+        }
+    }
+    return;
+}
+
 =item do_system
 
 Override to ensure that we quote the arguments but not the command.
@@ -182,7 +238,7 @@ Override to ensure that we quote the arguments but not the command.
 sub do_system {
   # The command must not be quoted but the arguments to it must be.
   my ($self, @cmd) = @_;
-  $self->log_info("@cmd\n");
+  $self->log_verbose("@cmd\n");
   my $cmd = shift @cmd;
   my $args = $self->_quote_args(@cmd);
   return !system("$cmd $args");
@@ -205,7 +261,7 @@ sub oneliner {
 
 =item _infer_xs_spec
 
-Inherit the standard version but tweak the library file name to be 
+Inherit the standard version but tweak the library file name to be
 something Dynaloader can find.
 
 =cut
@@ -250,7 +306,7 @@ sub rscan_dir {
 
 =item dist_dir
 
-Inherit the standard version but replace embedded dots with underscores because 
+Inherit the standard version but replace embedded dots with underscores because
 a dot is the directory delimiter on VMS.
 
 =cut
@@ -265,7 +321,7 @@ sub dist_dir {
 
 =item man3page_name
 
-Inherit the standard version but chop the extra manpage delimiter off the front if 
+Inherit the standard version but chop the extra manpage delimiter off the front if
 there is one.  The VMS version of splitdir('[.foo]') returns '', 'foo'.
 
 =cut
@@ -367,7 +423,7 @@ sub _detildefy {
             $newdirs = File::Spec::Unix->catdir(@hdirs, @backup, @dirs);
 
         }
-        
+
         # Now put the two cases back together
         $arg = File::Spec::Unix->catpath($hvol, $newdirs, $file);
 
@@ -446,7 +502,7 @@ sub _unix_rpt {
         $unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
     }
     return $unix_rpt;
 }
@@ -459,7 +515,7 @@ sub _efs {
         $efs = VMS::Feature::current("efs_charset");
     } else {
         my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ET1]/i; 
+        $efs = $env_efs =~ /^[ET1]/i;
     }
     return $efs;
 }
