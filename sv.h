@@ -529,7 +529,7 @@ struct xpvfm {
 	DIR *	xiou_dirp;	/* for opendir, readdir, etc */		\
 	void *	xiou_any;	/* for alignment */			\
     } xio_dirpu;							\
-    IV		xio_lines;	/* $. */				\
+    /* IV xio_lines is now in IVX  $. */				\
     IV		xio_page;	/* $% */				\
     IV		xio_page_len;	/* $= */				\
     IV		xio_lines_left;	/* $- */				\
@@ -1317,7 +1317,7 @@ the scalar's value cannot change unless written to.
 #define IoOFP(sv)	((XPVIO*)  SvANY(sv))->xio_ofp
 #define IoDIRP(sv)	((XPVIO*)  SvANY(sv))->xio_dirp
 #define IoANY(sv)	((XPVIO*)  SvANY(sv))->xio_any
-#define IoLINES(sv)	((XPVIO*)  SvANY(sv))->xio_lines
+#define IoLINES(sv)	((XPVIO*)  SvANY(sv))->xiv_u.xivu_iv
 #define IoPAGE(sv)	((XPVIO*)  SvANY(sv))->xio_page
 #define IoPAGE_LEN(sv)	((XPVIO*)  SvANY(sv))->xio_page_len
 #define IoLINES_LEFT(sv)((XPVIO*)  SvANY(sv))->xio_lines_left
