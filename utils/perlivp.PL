@@ -210,7 +210,10 @@ if (defined($Config{'extensions'})) {
         }
         # that's a distribution name, not a module name
         next if $_ eq 'IO/Compress';
-        next if $_ eq 'Devel/DProf'; 
+        next if $_ eq 'Devel/DProf';
+        next if $_ eq 'libnet';
+        next if $_ eq 'Locale/Codes';
+        next if $_ eq 'podlators';
         # test modules
         next if $_ eq 'XS/APItest';
         next if $_ eq 'XS/APItest/KeywordRPN';
