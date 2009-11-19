@@ -17,7 +17,7 @@ XXX Unlikely to need this section.
 
 =head2 Use of C<:=> to mean an empty attribute list is now deprecated.
 
-An accident of Perl's parser means that these constructions are all equivalent:
+An accident of Perl's parser meant that these constructions were all equivalent:
 
     my $pi := 4;
     my $pi : = 4;
@@ -32,10 +32,10 @@ as
 
 because no attribute processing is done for an empty list.
 
-As is, this means that C<:=> cannot be used as a new token, without silently
+As is, this meant that C<:=> cannot be used as a new token, without silently
 changing the meaning of existing code. Hence that particular form is now
 deprecated, and will become a syntax error. If it is absolutely necessary to
-have empty attribute lists (for example, because of a code generator) the
+have empty attribute lists (for example, because of a code generator) then
 avoid the warning by adding a space before the C<=>.
 
 =head1 Core Enhancements
@@ -55,12 +55,12 @@ interpolated into a regexp. See L<overload>.
 =head2 Pluggable keywords
 
 Extension modules can now cleanly hook into the Perl parser to define new
-kinds of keyword-headed expression and compound statement.  The syntax
-following the keyword is defined entirely by the extension.  This allow
+kinds of keyword-headed expression and compound statement. The syntax
+following the keyword is defined entirely by the extension. This allow
 a completely non-Perl sublanguage to be parsed inline, with the right
-ops cleanly generated.  This feature is currently considered experimental.
+ops cleanly generated. This feature is currently considered experimental.
 
-See L<perlapi/PL_keyword_plugin> for the mechanism.  The Perl core source
+See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core source
 distribution also includes a new module L<XS::APItest::KeywordRPN>, which
 implements reverse Polish notation arithmetic via pluggable keywords.
 This module is mainly used for test purposes, and is not normally
@@ -69,19 +69,19 @@ installed, but also serves as an example of how to use the new mechanism.
 =head2 APIs for more internals
 
 The lowest layers of the lexer and parts of the pad system now have C
-APIs available to XS extensions.  These are necessary to support proper
-use of pluggable keywords, but have other uses too.  The new APIs are
+APIs available to XS extensions. These are necessary to support proper
+use of pluggable keywords, but have other uses too. The new APIs are
 experimental, and only cover a small proportion of what would be necessary
-to take full advantage of the core's facilities in these areas.  It is
+to take full advantage of the core's facilities in these areas. It is
 intended that the Perl 5.13 development cycle will see the addition of
 a full range of clean, supported interfaces.
 
 =head2 Overridable function lookup
 
-Where an extension module hooks the creation of rv2cv ops, to modify
+Where an extension module hooks the creation of rv2cv ops to modify
 the subroutine lookup process, this now works correctly for bareword
-subroutine calls.  This means that prototypes on subroutines referenced
-this way will be processed correctly.  (Previously bareword subroutine
+subroutine calls. This means that prototypes on subroutines referenced
+this way will be processed correctly. (Previously bareword subroutine
 names were initially looked up, for parsing purposes, by an unhookable
 mechanism, so extensions could only properly influence subroutine names
 that appeared with an C<&> sigil.)
@@ -160,7 +160,6 @@ XXX
 
 XXX Changes which significantly change existing files in F<pod/> go here.
 Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
-
 
 =head1 Performance Enhancements
 
