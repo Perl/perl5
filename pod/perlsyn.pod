@@ -679,7 +679,7 @@ string occurs in an array:
     }
     print "\@array contains $count copies of 'foo'\n";
 
-On exit from the C<when> block, there is an implicit C<next>.
+At the end of all C<when> blocks, there is an implicit C<next>.
 You can override that with an explicit C<last> if you're only
 interested in the first match.
 
