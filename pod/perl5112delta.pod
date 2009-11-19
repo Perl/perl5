@@ -105,9 +105,11 @@ have a F<Changes> file that could be cribbed.
 
 =over 4
 
-=item C<XXX>
+=item C<legacy>
 
-XXX
+Preserves legacy behaviors or enable new non-default behaviors.
+Currently the only behaviour concerns semantics for the 128 characters
+on ASCII systems that have the 8th bit set.
 
 =back
 
@@ -115,9 +117,13 @@ XXX
 
 =over 4
 
-=item C<XXX>
+=item C<diagnostics>
 
-XXX
+Supports %.0f formatting internally.
+
+=item C<overload>
+
+Allow overloading of 'qr'.
 
 =back
 
@@ -125,9 +131,53 @@ XXX
 
 =over 4
 
-=item C<XXX>
+=item C<B::Concise>
 
-XXX
+=item C<B::Deparse>
+
+=item C<Carp>
+
+=item C<Compress::Zlib>
+
+=item C<CPANPLUS>
+
+=item C<DBM_Filter>
+
+=item C<Encode>
+
+=item C<ExtUtils::CBuilder>
+
+=item C<Env>
+
+=item C<Exporter>
+
+=item C<File::Fetch>
+
+=item C<I8N::Langinfo>
+
+=item C<I8N::LangTags>
+
+=item C<IO::Compress>
+
+=item C<IPC::Cmd>
+
+=item C<List::Util>
+
+=item C<Locale::Maketext>
+
+=item C<Module::Build>
+
+=item C<Module::CoreList>
+
+=item C<Pod::Perldoc>
+
+=item C<Pod::Simple>
+
+=item C<Scalar::Util>
+
+=item C<Switch>
+
+=item C<XS::APItest>
 
 =back
 
