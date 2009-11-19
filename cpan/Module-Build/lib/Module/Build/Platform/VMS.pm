@@ -2,7 +2,7 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
@@ -131,22 +131,22 @@ sub _quote_args {
   # or if we get a single arg that is an array reference, quote the
   # elements of it and return the reference.
   my ($self, @args) = @_;
-  my $got_arrayref = (scalar(@args) == 1
-                      && UNIVERSAL::isa($args[0], 'ARRAY'))
-                   ? 1
+  my $got_arrayref = (scalar(@args) == 1 
+                      && UNIVERSAL::isa($args[0], 'ARRAY')) 
+                   ? 1 
                    : 0;
 
   # Do not quote qualifiers that begin with '/'.
-  map { if (!/^\//) {
+  map { if (!/^\//) { 
           $_ =~ s/\"/""/g;     # escape C<"> by doubling
           $_ = q(").$_.q(");
         }
   }
-    ($got_arrayref ? @{$args[0]}
+    ($got_arrayref ? @{$args[0]} 
                    : @args
     );
 
-  return $got_arrayref ? $args[0]
+  return $got_arrayref ? $args[0] 
                        : join(' ', @args);
 }
 
@@ -261,7 +261,7 @@ sub oneliner {
 
 =item _infer_xs_spec
 
-Inherit the standard version but tweak the library file name to be
+Inherit the standard version but tweak the library file name to be 
 something Dynaloader can find.
 
 =cut
@@ -306,7 +306,7 @@ sub rscan_dir {
 
 =item dist_dir
 
-Inherit the standard version but replace embedded dots with underscores because
+Inherit the standard version but replace embedded dots with underscores because 
 a dot is the directory delimiter on VMS.
 
 =cut
@@ -321,7 +321,7 @@ sub dist_dir {
 
 =item man3page_name
 
-Inherit the standard version but chop the extra manpage delimiter off the front if
+Inherit the standard version but chop the extra manpage delimiter off the front if 
 there is one.  The VMS version of splitdir('[.foo]') returns '', 'foo'.
 
 =cut
@@ -423,7 +423,7 @@ sub _detildefy {
             $newdirs = File::Spec::Unix->catdir(@hdirs, @backup, @dirs);
 
         }
-
+        
         # Now put the two cases back together
         $arg = File::Spec::Unix->catpath($hvol, $newdirs, $file);
 
@@ -502,7 +502,7 @@ sub _unix_rpt {
         $unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
     }
     return $unix_rpt;
 }
@@ -515,7 +515,7 @@ sub _efs {
         $efs = VMS::Feature::current("efs_charset");
     } else {
         my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ET1]/i;
+        $efs = $env_efs =~ /^[ET1]/i; 
     }
     return $efs;
 }

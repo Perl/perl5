@@ -2,7 +2,7 @@ package Module::Build::PodParser;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 use vars qw(@ISA);
 
@@ -33,13 +33,13 @@ sub new {
 
 sub _myparse_from_filehandle {
   my ($self, $fh) = @_;
-
+  
   local $_;
   while (<$fh>) {
     next unless /^=(?!cut)/ .. /^=cut/;  # in POD
     last if ($self->{abstract}) = /^  (?:  [a-z:]+  \s+ - \s+  )  (.*\S)  /ix;
   }
-
+  
   my @author;
   while (<$fh>) {
     next unless /^=head1\s+AUTHORS?/i ... /^=/;
@@ -48,16 +48,16 @@ sub _myparse_from_filehandle {
   }
   return unless @author;
   s/^\s+|\s+$//g foreach @author;
-
+  
   $self->{author} = \@author;
-
+  
   return;
 }
 
 sub get_abstract {
   my $self = shift;
   return $self->{abstract} if defined $self->{abstract};
-
+  
   $self->parse_from_filehandle($self->{fh});
 
   return $self->{abstract};
@@ -66,7 +66,7 @@ sub get_abstract {
 sub get_author {
   my $self = shift;
   return $self->{author} if defined $self->{author};
-
+  
   $self->parse_from_filehandle($self->{fh});
 
   return $self->{author} || [];

@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -74,7 +74,9 @@ sub resume {
   my $self = $package->_construct(@_);
   $self->read_config;
 
-  unshift @INC, @{ $self->{properties}{_added_to_INC} || [] };
+  my @added_earlier = @{ $self->{properties}{_added_to_INC} || [] };
+
+  @INC = ($self->_added_to_INC, @added_earlier, $self->_default_INC);
 
   # If someone called Module::Build->current() or
   # Module::Build->new_from_context() and the correct class to use is
@@ -4314,6 +4316,7 @@ sub find_packages_in_files {
 
     foreach my $package ( $pm_info->packages_inside ) {
       next if $package eq 'main';  # main can appear numerous times, ignore
+      next if $package eq 'DB';    # special debugging package, ignore
       next if grep /^_/, split( /::/, $package ); # private package, ignore
 
       my $version = $pm_info->version( $package );
@@ -4798,8 +4801,6 @@ sub cbuilder {
   my $self = shift;
   my $s = $self->{stash};
   return $s->{_cbuilder} if $s->{_cbuilder};
-  die "Module::Build is not configured with C_support"
-	  unless $self->_mb_feature('C_support');
 
   require ExtUtils::CBuilder;
   return $s->{_cbuilder} = ExtUtils::CBuilder->new(

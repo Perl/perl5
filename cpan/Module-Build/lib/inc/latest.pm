@@ -1,7 +1,7 @@
 package inc::latest;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 
 use Carp;
@@ -33,7 +33,7 @@ sub import {
     goto $import;
   }
 
-  # author mode - just record and load the modules
+  # author mode - just record and load the modules 
   push(@loaded_modules, $mod);
   require inc::latest::private;
   goto \&inc::latest::private::_load_module;
@@ -77,7 +77,7 @@ HERE
 
 sub bundle_module {
   my ($package, $module, $where) = @_;
-
+  
   # create inc/inc_$foo
   (my $dist = $module) =~ s{::}{-}g;
   my $inc_lib = File::Spec->catdir($where,"inc_$dist");
@@ -132,7 +132,7 @@ inc::latest - use modules bundled in inc/ if they are newer than installed ones
 
 The C<inc::latest> module helps bootstrap configure-time dependencies for CPAN
 distributions.  These dependencies get bundled into the C<inc> directory within
-a distribution and are used by Build.PL (or Makefile.PL).
+a distribution and are used by Build.PL (or Makefile.PL).  
 
 Arguments to C<inc::latest> are module names that are checked against both the
 current C<@INC> array and against specially-named directories in C<inc>.  If

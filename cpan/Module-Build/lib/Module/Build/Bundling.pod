@@ -5,7 +5,6 @@ Module::Build::Bundling - How to bundle Module::Build with a distribution
 =head1 SYNOPSIS
 
   # Build.PL
-  use lib '.';
   use inc::latest 'Module::Build';
 
   Module::Build->new(
@@ -50,18 +49,12 @@ fields):
 A "bundling" Build.PL replaces the initial "use" line with a nearly
 transparent replacement:
 
-  use lib '.';
   use inc::latest 'Module::Build';
 
   Module::Build->new(
     module_name => 'Foo::Bar',
     license => 'perl',
   )->create_build_script;
-
-The inital C<lib> line ensures that the top-level distribution directory is
-added to C<@INC> so that C<inc::latest> loads from C<./inc/latest.pm>.  You
-SHOULD NOT add 'inc' to C<@INC> (unless you have other special reasons for
-doing so) -- that's not how C<inc::latest> works.
 
 For I<authors>, when "Build dist" is run, Module::Build will be
 automatically bundled into C<inc> according to the rules for

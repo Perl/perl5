@@ -1,5 +1,30 @@
 Revision history for Perl extension Module::Build.
 
+0.35_09 - Thu Nov 19 01:30:42 EST 2009
+
+ Bug fixes:
+
+ - The DB package should not be included in 'provides' in META files
+   [David Golden]
+
+ - Fixed t/xs.t build failures in bleadperl for noexec temp directories
+   [Nicholas Clark]
+
+ - Adjusted order of @INC in resume() (fixes par.t, ppm.t, xs.t fails):
+   @INC = @new_additions_to_inc, @saved_additions_to_inc, @default_inc
+   [David Golden]
+
+ - Skip bundle_inc.t tests if bundled Module::Build for test can't be
+   tweaked (Works around test crashes on Win2) [David Golden]
+
+ Other:
+
+ - 'C_support' is no longer an optional feature.  Modern ExtUtils::CBuilder
+   and ExtUtils::ParseXS added to the 'requires' list.  This ensures that
+   upgrading Module::Build will upgrade this critical modules.
+   ExtUtils::CBuilder no longer requires a compiler, so it is "safe" to
+   require.
+
 0.35_08 - Mon Nov 16 22:38:28 EST 2009
 
  Bug fixes:

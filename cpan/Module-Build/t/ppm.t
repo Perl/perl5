@@ -10,12 +10,12 @@ blib_load('Module::Build::ConfigData');
 my $manpage_support = Module::Build::ConfigData->feature('manpage_support');
 my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
 
+my $tmp;
+
 {
-  my ($have_c_compiler, $C_support_feature) = check_compiler();
-  if (! $C_support_feature) {
-    plan skip_all => 'C_support not enabled';
-  } elsif ( ! $have_c_compiler ) {
-    plan skip_all => 'C_support enabled, but no compiler found';
+  my ($have_c_compiler, $tmp_exec) = check_compiler();
+  if ( ! $have_c_compiler ) {
+    plan skip_all => 'No compiler found';
   } elsif ( !$Config{usedl} ) {
     plan skip_all => 'Perl not compiled for dynamic loading'
   } elsif ( ! eval {require Archive::Tar} ) {
@@ -27,10 +27,10 @@ my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
   } else {
     plan tests => 12;
   }
+  require Cwd;
+  $tmp = MBTest->tmpdir( $tmp_exec ? () : (DIR => Cwd::cwd) );
 }
 
-
-my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp, xs => 1 );

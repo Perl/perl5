@@ -4,7 +4,7 @@ package Module::Build::Notes;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 use Data::Dumper;
 use IO::File;
@@ -33,10 +33,10 @@ sub restore {
 sub access {
   my $self = shift;
   return $self->read() unless @_;
-
+  
   my $key = shift;
   return $self->read($key) unless @_;
-
+  
   my $value = shift;
   $self->write({ $key => $value });
   return $self->read($key);
@@ -61,7 +61,7 @@ sub read {
     return $self->{new}{$key} if exists $self->{new}{$key};
     return $self->{disk}{$key};
   }
-
+   
   # Return all data
   my $out = (keys %{$self->{new}}
 	     ? {%{$self->{disk}}, %{$self->{new}}}
@@ -79,7 +79,7 @@ sub _same {
 sub write {
   my ($self, $href) = @_;
   $href ||= {};
-
+  
   @{$self->{new}}{ keys %$href } = values %$href;  # Merge
 
   # Do some optimization to avoid unnecessary writes
@@ -88,17 +88,17 @@ sub write {
     next if ref $self->{disk}{$key} or !exists $self->{disk}{$key};
     delete $self->{new}{$key} if $self->_same($self->{new}{$key}, $self->{disk}{$key});
   }
-
+  
   if (my $file = $self->{file}) {
     my ($vol, $dir, $base) = File::Spec->splitpath($file);
     $dir = File::Spec->catpath($vol, $dir, '');
     return unless -e $dir && -d $dir;  # The user needs to arrange for this
 
     return if -e $file and !keys %{ $self->{new} };  # Nothing to do
-
-    @{$self->{disk}}{ keys %{$self->{new}} } = values %{$self->{new}};  # Merge
+    
+    @{$self->{disk}}{ keys %{$self->{new}} } = values %{$self->{new}};  # Merge 
     $self->_dump($file, $self->{disk});
-
+   
     $self->{new} = {};
   }
   return $self->read;
@@ -106,7 +106,7 @@ sub write {
 
 sub _dump {
   my ($self, $file, $data) = @_;
-
+  
   my $fh = IO::File->new("> $file") or die "Can't create '$file': $!";
   print {$fh} Module::Build::Dumper->_data_dump($data);
 }
@@ -126,7 +126,7 @@ sub write_config_data {
   # strip out private POD markers we use to keep pod from being
   # recognized for *this* source file
   $template =~ s{$_\n}{} for '=begin private', '=end private';
-
+  
   my $fh = IO::File->new("> $args{file}") or die "Can't create '$args{file}': $!";
   print {$fh} $template;
   print {$fh} "\n__DATA__\n";
@@ -218,18 +218,18 @@ sub write {
 sub feature {
   my ($package, $key) = @_;
   return $features->{$key} if exists $features->{$key};
-
+  
   my $info = $auto_features->{$key} or return 0;
-
+  
   # Under perl 5.005, each(%$foo) isn't working correctly when $foo
   # was reanimated with Data::Dumper and eval().  Not sure why, but
   # copying to a new hash seems to solve it.
   my %info = %$info;
-
+  
   require Module::Build;  # XXX should get rid of this
   while (my ($type, $prereqs) = each %info) {
     next if $type eq 'description' || $type eq 'recommends';
-
+    
     my %p = %$prereqs;  # Ditto here.
     while (my ($modname, $spec) = each %p) {
       my $status = Module::Build->check_installed_status($modname, $spec);
@@ -251,10 +251,10 @@ NOTES_NAME - Configuration for MODULE_NAME
   use NOTES_NAME;
   $value = NOTES_NAME->config('foo');
   $value = NOTES_NAME->feature('bar');
-
+  
   @names = NOTES_NAME->config_names;
   @names = NOTES_NAME->feature_names;
-
+  
   NOTES_NAME->set_config(foo => $new_value);
   NOTES_NAME->set_feature(bar => $new_value);
   NOTES_NAME->write;  # Save changes

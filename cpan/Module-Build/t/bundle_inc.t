@@ -74,45 +74,57 @@ ok( -e File::Spec->catfile( $dist_inc, qw/inc_Module-Build Module Build Base.pm/
 );
 
 # Force bundled M::B to a higher version so it gets loaded
+# This has failed on Win32 for no known reason, so we'll skip if
+# we can't edit the file.
 
-my $fh = IO::File->new($mb_file, "+<") or die "Could not open $mb_file: $!";
-my $mb_code = do { local $/; <$fh> };
-$mb_code =~ s{\$VERSION\s+=\s+\S+}{\$VERSION = 9999;};
-$fh->seek(0,0);
-print {$fh} $mb_code;
-$fh->close;
+eval {
+  my $fh;
+  $fh = IO::File->new($mb_file, "<") or die "Could not read $mb_file: $!";
+  my $mb_code = do { local $/; <$fh> };
+  $mb_code =~ s{\$VERSION\s+=\s+\S+}{\$VERSION = 9999;};
+  $fh->close;
+  $fh = IO::File->new($mb_file, ">") or die "Could not write $mb_file: $!";
+  print {$fh} $mb_code;
+  $fh->close;
+};
 
-# test the bundling in dist_dir
-chdir $mb->dist_dir;
+my $err = $@;
+diag $@ if $@;
+SKIP: {
+  skip "Couldn't adjust \$VERSION in bundled M::B for testing", 10
+    if $err;
 
-stdout_of( sub { Module::Build->run_perl_script('Build.PL',[],[]) } );
+  # test the bundling in dist_dir
+  chdir $mb->dist_dir;
 
-my $meta = IO::File->new('MYMETA.yml');
-ok( $meta, "found MYMETA.yml" );
-ok( scalar( grep { /generated_by:.*9999/ } <$meta> ),
-  "dist_dir Build.PL loaded bundled Module::Build"
-);
+  stdout_of( sub { Module::Build->run_perl_script('Build.PL',[],[]) } );
 
-#--------------------------------------------------------------------------#
-# test identification of dependencies
-#--------------------------------------------------------------------------#
+  my $meta = IO::File->new('MYMETA.yml');
+  ok( $meta, "found MYMETA.yml" );
+  ok( scalar( grep { /generated_by:.*9999/ } <$meta> ),
+    "dist_dir Build.PL loaded bundled Module::Build"
+  );
 
-$dist->chdir_in;
+  #--------------------------------------------------------------------------#
+  # test identification of dependencies
+  #--------------------------------------------------------------------------#
 
-$dist->add_file( 'mylib/Foo.pm', << 'HERE' );
+  $dist->chdir_in;
+
+  $dist->add_file( 'mylib/Foo.pm', << 'HERE' );
 package Foo;
 our $VERSION = 1;
 1;
 HERE
 
-$dist->add_file( 'mylib/Bar.pm', << 'HERE' );
+  $dist->add_file( 'mylib/Bar.pm', << 'HERE' );
 package Bar;
 use Foo;
 our $VERSION = 42;
 1;
 HERE
 
-$dist->change_file( 'Build.PL', << "HERE" );
+  $dist->change_file( 'Build.PL', << "HERE" );
 use inc::latest 'Module::Build';
 use inc::latest 'Foo';
 
@@ -122,32 +134,32 @@ Module::Build->new(
 )->create_build_script;
 HERE
 
-$dist->regen( clean => 1 );
+  $dist->regen( clean => 1 );
 
-make_packlist($_,'mylib') for qw/Foo Bar/;
+  make_packlist($_,'mylib') for qw/Foo Bar/;
 
-# get a Module::Build object and test with it
-my $abs_mylib = File::Spec->rel2abs('mylib');
+  # get a Module::Build object and test with it
+  my $abs_mylib = File::Spec->rel2abs('mylib');
 
 
-unshift @INC, $abs_mylib;
-$mb = $dist->new_from_context(); # quiet by default
-isa_ok( $mb, "Module::Build" );
-is_deeply( [sort @{$mb->bundle_inc}], [ 'Foo', 'Module::Build' ],
-  "Module::Build and Foo are flagged for bundling"
-);
+  unshift @INC, $abs_mylib;
+  $mb = $dist->new_from_context(); # quiet by default
+  isa_ok( $mb, "Module::Build" );
+  is_deeply( [sort @{$mb->bundle_inc}], [ 'Foo', 'Module::Build' ],
+    "Module::Build and Foo are flagged for bundling"
+  );
 
-my $output = stdout_stderr_of( sub { $mb->dispatch('distdir') } );
+  my $output = stdout_stderr_of( sub { $mb->dispatch('distdir') } );
 
-ok( -e File::Spec->catfile( $dist_inc, 'latest.pm' ),
-  "./inc/latest.pm created"
-);
+  ok( -e File::Spec->catfile( $dist_inc, 'latest.pm' ),
+    "./inc/latest.pm created"
+  );
 
-ok( -d File::Spec->catdir( $dist_inc, 'inc_Foo' ),
-  "dist_dir/inc/inc_Foo created"
-);
+  ok( -d File::Spec->catdir( $dist_inc, 'inc_Foo' ),
+    "dist_dir/inc/inc_Foo created"
+  );
 
-$dist->change_file( 'Build.PL', << "HERE" );
+  $dist->change_file( 'Build.PL', << "HERE" );
 use inc::latest 'Module::Build';
 use inc::latest 'Bar';
 
@@ -157,25 +169,25 @@ Module::Build->new(
 )->create_build_script;
 HERE
 
-$dist->regen( clean => 1 );
-make_packlist($_,'mylib') for qw/Foo Bar/;
+  $dist->regen( clean => 1 );
+  make_packlist($_,'mylib') for qw/Foo Bar/;
 
-$mb = $dist->new_from_context(); # quiet by default
-isa_ok( $mb, "Module::Build" );
-is_deeply( [sort @{$mb->bundle_inc}], [ 'Bar', 'Module::Build' ],
-  "Module::Build and Bar are flagged for bundling"
-);
+  $mb = $dist->new_from_context(); # quiet by default
+  isa_ok( $mb, "Module::Build" );
+  is_deeply( [sort @{$mb->bundle_inc}], [ 'Bar', 'Module::Build' ],
+    "Module::Build and Bar are flagged for bundling"
+  );
 
-$output = stdout_stderr_of( sub { $mb->dispatch('distdir') } );
+  $output = stdout_stderr_of( sub { $mb->dispatch('distdir') } );
 
-ok( -e File::Spec->catfile( $dist_inc, 'latest.pm' ),
-  "./inc/latest.pm created"
-);
+  ok( -e File::Spec->catfile( $dist_inc, 'latest.pm' ),
+    "./inc/latest.pm created"
+  );
 
-ok( -d File::Spec->catdir( $dist_inc, 'inc_Bar' ),
-  "dist_dir/inc/inc_Bar created"
-);
-
+  ok( -d File::Spec->catdir( $dist_inc, 'inc_Bar' ),
+    "dist_dir/inc/inc_Bar created"
+  );
+}
 
 
 sub make_packlist {

@@ -1,7 +1,7 @@
 package inc::latest::private;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_08';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -21,7 +21,7 @@ sub import {
   # A bundled copy must be present
   my ($bundled, $bundled_dir) = $package->_search_bundled($file)
     or die "No bundled copy of $mod found";
-
+  
   my $from_inc = $package->_search_INC($file);
   unless ($from_inc) {
     # Only bundled is available
@@ -66,7 +66,7 @@ sub _search_bundled {
   while (defined(my $e = readdir DH)) {
     next unless $e =~ /^inc_/;
     my $try = File::Spec->catfile($mypath, $e, $file);
-
+    
     return($try, File::Spec->catdir($mypath, $e)) if -e $try;
   }
   return;

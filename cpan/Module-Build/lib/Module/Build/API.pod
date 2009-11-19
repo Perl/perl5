@@ -769,7 +769,7 @@ distribution-level share directory.  Alternatively, C<share_dir> can be set to
 a directory name or an arrayref of directory names containing files to be
 installed in the distribution-level share directory.
 
-If C<share_dir> is a hashref, it may have C<dist> or C<module> keys
+If C<share_dir> is a hashref, it may have C<dist> or C<module> keys 
 providing full flexibility in defining share directories to install.
 
   share_dir => {

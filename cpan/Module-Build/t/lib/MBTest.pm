@@ -93,7 +93,7 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 ########################################################################
 
 # always return to the current directory
-{ 
+{
   my $cwd = File::Spec->rel2abs(Cwd::cwd);
 
   sub original_cwd { return $cwd }
@@ -188,7 +188,6 @@ sub find_in_path {
   return;
 }
 
-# returns ($have_c_compiler, $C_support_feature);
 sub check_compiler {
   return (1,1) if $ENV{PERL_CORE};
 
@@ -214,7 +213,7 @@ sub check_compiler {
     );
     $tmp_exec = 0 == system( $exe );
   }
-  return ($have_c_compiler, $mb->feature('C_support'), $tmp_exec);
+  return ($have_c_compiler, $tmp_exec);
 }
 
 sub have_module {
