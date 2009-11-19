@@ -185,7 +185,7 @@ compatibility).
 
 Returns true if all functions are available.  As a side effect, creates
 a REXX wrapper with the specified name in the package constructed by the name
-of the DLL so that the next call to C<$dll->NAME()> will pick up the cached
+of the DLL so that the next call to C<< $dll->NAME() >> will pick up the cached
 method.
 
 =head2 Create a Perl wrapper (optional):
