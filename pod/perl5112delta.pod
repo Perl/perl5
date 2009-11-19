@@ -33,15 +33,6 @@ arithmetic via pluggable keywords. This module is mainly used for test
 purposes, and is not normally installed, but also serves as an example
 of how to use the new mechanism.
 
-=head2 Lexer API
-
-We have added a public API for the lowest layers of lexing. This is
-meant to provide a solid foundation for the parsing that Devel::Declare
-and similar modules do, and it complements the pluggable keyword
-mechanism. The API consists of some existing variables combined with
-some new functions, all marked as experimental (which making them
-public certainly is).
-
 =head2 APIs for more internals
 
 The lowest layers of the lexer and parts of the pad system now have C
