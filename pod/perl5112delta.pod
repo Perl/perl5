@@ -93,37 +93,64 @@ Allow overloading of 'qr'.
 
 =item C<B::Concise>
 
+Optimize reversing an array in-place, avoid using defined %hash in core code and tests.
+
 =item C<B::Deparse>
+
+Teach B::Deparse about in-place reverse.
 
 =item C<Carp>
 
+Refine Carp caller() fix and add tests.
+
 =item C<Compress::Zlib>
+
+Updated to 2.022.
 
 =item C<CPANPLUS>
 
-=item C<DBM_Filter>
+Updated to 0.89_09.
 
 =item C<Encode>
 
+Updated to 2.38.
+
 =item C<ExtUtils::CBuilder>
+
+Updated to 0.27.
 
 =item C<Env>
 
-=item C<Exporter>
+Add EXISTS and DELETE methods to Env.pm.
 
 =item C<File::Fetch>
 
+Updated to 0.22.
+
 =item C<I8N::Langinfo>
+
+Correctly document export of I18N::Langinfo.
 
 =item C<I8N::LangTags>
 
+In I18N::LangTags::Detect, avoid using defined @array and defined %hash.
+
 =item C<IO::Compress>
+
+Updated to 2.022.
 
 =item C<IPC::Cmd>
 
+Updated to 0.54.
+
 =item C<List::Util>
 
+Updated to 1.22.
+
 =item C<Locale::Maketext>
+
+In Locale::Maketext, avoid using defined @array and defined %hash.
+Convert the odd Locale::Maketext test out from Test to Test::More.
 
 =item C<Module::Build>
 
@@ -131,15 +158,19 @@ Updated to 0.35_08.
 
 =item C<Module::CoreList>
 
-=item C<Pod::Perldoc>
+Implemented is_deprecated().
 
 =item C<Pod::Simple>
 
+Updated to 3.10.
+
 =item C<Scalar::Util>
+
+Updated to 1.22.
 
 =item C<Switch>
 
-=item C<XS::APItest>
+Updated to 2.16.
 
 =back
 
