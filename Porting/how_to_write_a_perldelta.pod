@@ -333,6 +333,14 @@ here.
 
 The list of people to thank goes here.
 
+You can find the list of committers and authors by:
+
+  % git log v5.11.1..HEAD |grep Author | cut -d : -f 2 | cut -d \< -f 1 | sort | uniq
+
+And how many files where changed by:
+
+  % git diff v5.11.1..HEAD | diffstat
+
 =item Reporting Bugs
 
 This doesn't usually need to be changed from the previous perldelta.
