@@ -560,7 +560,7 @@ C<is_our> indicates that the name to check is an 'our' declaration
 =cut
 */
 
-void
+STATIC void
 S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 {
     dVAR;

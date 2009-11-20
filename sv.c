@@ -1431,17 +1431,13 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 
 	if (new_type == SVt_PVIO) {
 	    IO * const io = MUTABLE_IO(sv);
-	    GV *iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
+	    GV *iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
 
 	    SvOBJECT_on(io);
 	    /* Clear the stashcache because a new IO could overrule a package
 	       name */
 	    hv_clear(PL_stashcache);
 
-	    /* unless exists($main::{FileHandle}) and
-	       defined(%main::FileHandle::) */
-	    if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-		iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
 	    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
 	    IoPAGE_LEN(sv) = 60;
 	}

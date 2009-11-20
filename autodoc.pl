@@ -25,10 +25,15 @@ use strict;
 # implicit interpreter context argument.
 #
 
-my %apidocs;
-my %gutsdocs;
-my %docfuncs;
-my %seenfuncs;
+my %docs;
+my %funcflags;
+my %macro = (
+	     ax => 1,
+	     items => 1,
+	     ix => 1,
+	     svtype => 1,
+	    );
+my %missing;
 
 my $curheader = "Unknown section";
 
@@ -37,6 +42,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
     my($in, $doc, $line);
 FUNC:
     while (defined($in = <$fh>)) {
+	if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
+	    ($file ne 'embed.h' || $file ne 'proto.h')) {
+	    $macro{$1} = $file;
+	    next FUNC;
+	}
         if ($in=~ /^=head1 (.*)/) {
             $curheader = $1;
             next FUNC;
@@ -58,18 +68,49 @@ DOC:
 		$docs .= $doc;
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
+
+	    # Check the consistency of the flags
+	    my ($embed_where, $inline_where);
+	    my ($embed_may_change, $inline_may_change);
+
+	    my $docref = delete $funcflags{$name};
+	    if ($docref and %$docref) {
+		$embed_where = $docref->{flags} =~ /A/ ? 'api' : 'guts';
+		$embed_may_change = $docref->{flags} =~ /M/;
+	    } else {
+		$missing{$name} = $file;
+	    }
 	    if ($flags =~ /m/) {
-		if ($flags =~ /A/) {
-		    $apidocs{$curheader}{$name} = [$flags, $docs, $ret, $file, @args];
+		$inline_where = $flags =~ /A/ ? 'api' : 'guts';
+		$inline_may_change = $flags =~ /x/;
+
+		if (defined $embed_where && $inline_where ne $embed_where) {
+		    warn "Function '$name' inconsistency: embed.fnc says $embed_where, Pod says $inline_where";
 		}
-		else {
-		    $gutsdocs{$curheader}{$name} = [$flags, $docs, $ret, $file, @args];
+
+		if (defined $embed_may_change
+		    && $inline_may_change ne $embed_may_change) {
+		    my $message = "Function '$name' inconsistency: ";
+		    if ($embed_may_change) {
+			$message .= "embed.fnc says 'may change', Pod does not";
+		    } else {
+			$message .= "Pod says 'may change', embed.fnc does not";
+		    }
+		    warn $message;
 		}
+	    } elsif (!defined $embed_where) {
+		warn "Unable to place $name!\n";
+		next;
+	    } else {
+		$inline_where = $embed_where;
+		$flags .= 'x' if $embed_may_change;
+		@args = @{$docref->{args}};
+		$ret = $docref->{retval};
 	    }
-	    else {
-		$docfuncs{$name} = [$flags, $docs, $ret, $file, $curheader, @args];
-	    }
-	    $seenfuncs{$name} = 1;
+
+	    $docs{$inline_where}{$curheader}{$name}
+		= [$flags, $docs, $ret, $file, @args];
+
 	    if (defined $doc) {
 		if ($doc =~ /^=(?:for|head)/) {
 		    $in = $doc;
@@ -149,6 +190,33 @@ if (@ARGV) {
         or die "Couldn't chdir to '$workdir': $!";
 }
 
+open IN, "embed.fnc" or die $!;
+
+while (<IN>) {
+    chomp;
+    next if /^:/;
+    while (s|\\\s*$||) {
+	$_ .= <IN>;
+	chomp;
+    }
+    s/\s+$//;
+    next if /^\s*(#|$)/;
+
+    my ($flags, $retval, $func, @args) = split /\s*\|\s*/, $_;
+
+    next unless $func;
+
+    s/\b(NN|NULLOK)\b\s+//g for @args;
+    $func =~ s/\t//g; # clean up fields from embed.pl
+    $retval =~ s/\t//;
+
+    $funcflags{$func} = {
+			 flags => $flags,
+			 retval => $retval,
+			 args => \@args,
+			};
+}
+
 my $file;
 # glob() picks up docs from extra .c or .h files that may be in unclean
 # development trees.
@@ -165,54 +233,24 @@ for $file (($MANIFEST =~ /^(\S+\.c)\t/gm), ($MANIFEST =~ /^(\S+\.h)\t/gm)) {
     close F or die "Error closing $file: $!\n";
 }
 
-open IN, "embed.fnc" or die $!;
+for (sort keys %funcflags) {
+    next unless $funcflags{$_}{flags} =~ /d/;
+    warn "no docs for $_\n"
+}
+
+foreach (sort keys %missing) {
+    next if $macro{$_};
+    # Heuristics for known not-a-function macros:
+    next if /^[A-Z]/;
+    next if /^dj?[A-Z]/;
+
+    warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc";
+}
 
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 
-while (<IN>) {
-    chomp;
-    next if /^:/;
-    while (s|\\\s*$||) {
-	$_ .= <IN>;
-	chomp;
-    }
-    s/\s+$//;
-    next if /^\s*(#|$)/;
-
-    my ($flags, $retval, $func, @args) = split /\s*\|\s*/, $_;
-
-    next unless $flags =~ /d/;
-    next unless $func;
-
-    s/\b(NN|NULLOK)\b\s+//g for @args;
-    $func =~ s/\t//g; # clean up fields from embed.pl
-    $retval =~ s/\t//;
-
-    my $docref = delete $docfuncs{$func};
-    if ($docref and @$docref) {
-	if ($flags =~ /A/) {
-	    $docref->[0].="x" if $flags =~ /M/;
-	    $apidocs{$docref->[4]}{$func} =
-		[$docref->[0] . 'A', $docref->[1], $retval, $docref->[3],
-		 @args];
-	} else {
-	    $gutsdocs{$docref->[4]}{$func} =
-		[$docref->[0], $docref->[1], $retval, $docref->[3], @args];
-	}
-    }
-    else {
-	warn "no docs for $func\n" unless $seenfuncs{$func};
-    }
-}
-
-for (sort keys %docfuncs) {
-    # Have you used a full for apidoc or just a func name?
-    # Have you used Ap instead of Am in the for apidoc?
-    warn "Unable to place $_!\n";
-}
-
-output('perlapi', <<'_EOB_', \%apidocs, <<'_EOE_');
+output('perlapi', <<'_EOB_', $docs{api}, <<'_EOE_');
 =head1 NAME
 
 perlapi - autogenerated documentation for the perl public API
@@ -278,7 +316,7 @@ perlguts(1), perlxs(1), perlxstut(1), perlintern(1)
 
 _EOE_
 
-output('perlintern', <<'END', \%gutsdocs, <<'END');
+output('perlintern', <<'END', $docs{guts}, <<'END');
 =head1 NAME
 
 perlintern - autogenerated documentation of purely B<internal>

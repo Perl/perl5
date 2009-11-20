@@ -1006,7 +1006,7 @@ handle that format, such as C<Text::CSV>, C<Text::CSV_XS>, or
 C<Text::CSV_PP>.
 
 If you want to break apart an entire line of fixed columns, you can use
-C<unpack> with the A (ASCII) format. by using a number after the format
+C<unpack> with the A (ASCII) format. By using a number after the format
 specifier, you can denote the column width. See the C<pack> and C<unpack>
 entries in L<perlfunc> for more details.
 
@@ -1545,7 +1545,7 @@ X<cycle> X<modulus>
 
 (contributed by brian d foy)
 
-If you want to cycle through an array endlessy, you can increment the
+If you want to cycle through an array endlessly, you can increment the
 index modulo the number of elements in the array:
 
 	my @array = qw( a b c );
@@ -2156,7 +2156,7 @@ C<$hash{$key}> will be C<undef> while C<exists $hash{$key}>
 will return true.  This corresponds to (C<$key>, C<undef>)
 being in the hash.
 
-Pictures help...  here's the C<%hash> table:
+Pictures help...  Here's the C<%hash> table:
 
 	  keys  values
 	+------+------+
