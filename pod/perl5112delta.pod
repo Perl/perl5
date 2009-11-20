@@ -294,7 +294,7 @@ before the C<=>.
 =head1 Acknowledgements
 
 Perl 5.11.2 represents approximately 3 weeks development since Perl
-5.11.1 contains 29,992 lines of changes across 458 files from 38
+5.11.1 and contains 29,992 lines of changes across 458 files from 38
 authors and committers:
 
 Abhijit Menon-Sen, Abigail, Ben Morrow, Bo Borgerson, Brad Gilbert,
