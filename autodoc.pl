@@ -58,12 +58,9 @@ DOC:
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 	    if ($flags =~ /m/) {
-		if ($flags =~ /A/) {
-		    $docs{api}{$curheader}{$name} = [$flags, $docs, $ret, $file, @args];
-		}
-		else {
-		    $docs{guts}{$curheader}{$name} = [$flags, $docs, $ret, $file, @args];
-		}
+		my $where = $flags =~ /A/ ? 'api' : 'guts';
+		$docs{$where}{$curheader}{$name}
+		    = [$flags, $docs, $ret, $file, @args];
 	    }
 	    else {
 		$docfuncs{$name} = [$flags, $docs, $ret, $file, $curheader, @args];
@@ -190,15 +187,16 @@ while (<IN>) {
 
     my $docref = delete $docfuncs{$func};
     if ($docref and @$docref) {
+	my $where;
 	if ($flags =~ /A/) {
+	    $where = 'api';
 	    $docref->[0].="x" if $flags =~ /M/;
-	    $docs{api}{$docref->[4]}{$func} =
-		[$docref->[0] . 'A', $docref->[1], $retval, $docref->[3],
-		 @args];
+	    $docref->[0] .= 'A';
 	} else {
-	    $docs{guts}{$docref->[4]}{$func} =
-		[$docref->[0], $docref->[1], $retval, $docref->[3], @args];
+	    $where = 'guts';
 	}
+	$docs{$where}{$docref->[4]}{$func} =
+	    [$docref->[0], $docref->[1], $retval, $docref->[3], @args];
     }
     else {
 	warn "no docs for $func\n" unless $seenfuncs{$func};
