@@ -8362,7 +8362,7 @@ Perl_ck_each(pTHX_ OP *o)
 
 /* caller is supposed to assign the return to the 
    container of the rep_op var */
-OP *
+STATIC OP *
 S_opt_scalarhv(pTHX_ OP *rep_op) {
     UNOP *unop;
 
@@ -8391,7 +8391,7 @@ S_opt_scalarhv(pTHX_ OP *rep_op) {
  * beginning of the right-hand side. Returns the left-hand side of the
  * assignment if o acts in-place, or NULL otherwise. */
 
-OP *
+STATIC OP *
 S_is_inplace_av(pTHX_ OP *o, OP *oright) {
     OP *o2;
     OP *oleft = NULL;
