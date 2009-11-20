@@ -2,7 +2,7 @@ package legacy;
 
 our $VERSION = '1.00';
 
-$unicode8bit::hint_uni8bit = 0x00000800;
+$unicode8bit::hint_not_uni8bit = 0x00000800;
 
 my %legacy_bundle = (
     "5.10" => [qw(unicode8bit)],
@@ -156,7 +156,7 @@ sub import {
         if (!exists $legacy{$name}) {
             unknown_legacy($name);
         }
-        $^H &= ~$unicode8bit::hint_uni8bit;    # The only valid thing as of yet
+        $^H |= $unicode8bit::hint_not_uni8bit;   # The only valid thing as of yet
     }
 }
 
@@ -179,7 +179,7 @@ sub unimport {
             unknown_legacy($name);
         }
         else {
-            $^H |= $unicode8bit::hint_uni8bit; # The only valid thing as of yet
+            $^H &= ~ $unicode8bit::hint_not_uni8bit; # The only valid thing now
         }
     }
 }

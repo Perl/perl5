@@ -7,10 +7,9 @@ BEGIN {
     require './test.pl';
 }
 
-#use Test::More;
+plan(13312);    # Determined by experimentation
 
-#plan("no_plan");
-plan(13312);
+# Test the upper/lower/title case mappings for all characters 0-255.
 
 # First compute the case mappings without resorting to the functions we're
 # testing.
@@ -28,7 +27,7 @@ my @posix_to_lower
 = @posix_to_upper;
 
 # Override the elements in the to_lower arrays that have different lower case 
-# mappings with those mappings.
+# mappings
 for my $i (0x41 .. 0x5A) {
     $posix_to_lower[$i] = chr(ord($posix_to_lower[$i]) + 32);
     $latin1_to_lower[$i] = chr(ord($latin1_to_lower[$i]) + 32);
@@ -82,12 +81,12 @@ $empty{'lc'} = $empty{'uc'} = "";
 for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
     for my  $suffix (\%empty, \%posix, \%cyrillic, \%latin1) {
         for my $i (0 .. 255) {  # For each possible posix or latin1 character
-            my $cp = sprintf "%02X", $i;
+            my $cp = sprintf "U+%04X", $i;
 
             # First try using latin1 (Unicode) semantics.
             no legacy "unicode8bit";    
 
-            my $phrase = 'with unicode';
+            my $phrase = 'with uni8bit';
             my $char = chr($i);
             my $pre_lc = $prefix->{'lc'};
             my $pre_uc = $prefix->{'uc'};
@@ -99,25 +98,22 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             my $expected_lower = $pre_lc . $latin1_to_lower[$i] . $post_lc;
 
             is (uc($to_upper), $expected_upper,
-
-                # The names are commented out for now to avoid 'wide character
-                # in print' messages.
-                ); #"$cp: $phrase: uc('$to_upper') eq '$expected_upper'");
+                display("$cp: $phrase: uc($to_upper) eq $expected_upper"));
             is (lc($to_lower), $expected_lower,
-                ); #"$cp: $phrase: lc('$to_lower') eq '$expected_lower'");
+                display("$cp: $phrase: lc($to_lower) eq $expected_lower"));
 
             if ($pre_uc eq "") {    # Title case if null prefix.
                 my $expected_title = $latin1_to_title[$i] . $post_lc;
                 is (ucfirst($to_upper), $expected_title,
-                    ); #"$cp: $phrase: ucfirst('$to_upper') eq '$expected_title'");
+                    display("$cp: $phrase: ucfirst($to_upper) eq $expected_title"));
                 my $expected_lcfirst = $latin1_to_lower[$i] . $post_uc;
                 is (lcfirst($to_lower), $expected_lcfirst,
-                    ); #"$cp: $phrase: lcfirst('$to_lower') eq '$expected_lcfirst'");
+                    display("$cp: $phrase: lcfirst($to_lower) eq $expected_lcfirst"));
             }
 
             # Then try with posix semantics.
             use legacy "unicode8bit";
-            $phrase = 'no unicode';
+            $phrase = 'no uni8bit';
 
             # These don't contribute anything in this case.
             next if $suffix == \%cyrillic;
@@ -129,17 +125,17 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             $expected_lower = $pre_lc . $posix_to_lower[$i] . $post_lc;
 
             is (uc($to_upper), $expected_upper,
-                ); #"$cp: $phrase: uc('$to_upper') eq '$expected_upper'");
+                display("$cp: $phrase: uc($to_upper) eq $expected_upper"));
             is (lc($to_lower), $expected_lower,
-                ); #"$cp: $phrase: lc('$to_lower') eq '$expected_lower'");
+                display("$cp: $phrase: lc($to_lower) eq $expected_lower"));
 
             if ($pre_uc eq "") {
                 my $expected_title = $posix_to_title[$i] . $post_lc;
                 is (ucfirst($to_upper), $expected_title,
-                    ); #"$cp: $phrase: ucfirst('$to_upper') eq '$expected_title'");
+                    display("$cp: $phrase: ucfirst($to_upper) eq $expected_title"));
                 my $expected_lcfirst = $posix_to_lower[$i] . $post_uc;
                 is (lcfirst($to_lower), $expected_lcfirst,
-                    ); #"$cp: $phrase: lcfirst('$to_lower') eq '$expected_lcfirst'");
+                    display("$cp: $phrase: lcfirst($to_lower) eq $expected_lcfirst"));
             }
         }
     }
