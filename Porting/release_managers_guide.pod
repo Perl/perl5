@@ -848,7 +848,7 @@ see F<Porting/how_to_write_a_perldelta.pod>.
 You should be able to do this by just copying in a skeleton template and
 then doing a quick fix up of the version numbers, e.g.
 
-    $ cp -i Porting/perldelta_template pod/perl5102delta.pod
+    $ cp -i Porting/perldelta_template.pod pod/perl5102delta.pod
     $ (edit it)
     $ git add pod/perl5102delta.pod
 
