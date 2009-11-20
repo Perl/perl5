@@ -6858,20 +6858,29 @@ X<unlink> X<delete> X<remove> X<rm> X<del>
 
 =item unlink
 
-Deletes a list of files.  Returns the number of files successfully
-deleted.
+Deletes a list of files. On success, it returns the number of files
+it successfully deleted. On failure, it returns false and sets C<$!>
+(errno):
 
-    $cnt = unlink 'a', 'b', 'c';
+    my $unlinked = unlink 'a', 'b', 'c';
     unlink @goners;
-    unlink <*.bak>;
+    unlink glob "*.bak";
 
-Note: C<unlink> will not attempt to delete directories unless you are superuser
-and the B<-U> flag is supplied to Perl.  Even if these conditions are
-met, be warned that unlinking a directory can inflict damage on your
-filesystem.  Finally, using C<unlink> on directories is not supported on 
-many operating systems.  Use C<rmdir> instead.
+On error, C<unlink> will not tell you which files it could not remove.
+If you care about the files you could not remove, try them one
+at a time:
 
-If LIST is omitted, uses C<$_>.
+     foreach my $file ( @goners ) {
+         unlink $file or warn "Could not unlink $file: $!";
+         }
+
+Note: C<unlink> will not attempt to delete directories unless you are
+superuser and the B<-U> flag is supplied to Perl. Even if these
+conditions are met, be warned that unlinking a directory can inflict
+damage on your filesystem.  Finally, using C<unlink> on directories is
+not supported on many operating systems.  Use C<rmdir> instead.
+
+If LIST is omitted, C<unlink> uses C<$_>.
 
 =item unpack TEMPLATE,EXPR
 X<unpack>
