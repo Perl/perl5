@@ -19,7 +19,7 @@ BEGIN {
 }
 
 my $test_count = 85;
-$test_count += 114 if $symlink_exists;
+$test_count += 119 if $symlink_exists;
 $test_count += 18 if $^O eq 'MSWin32';
 $test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
 
