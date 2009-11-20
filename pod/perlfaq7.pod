@@ -654,7 +654,7 @@ see L<perltoot/"Overridden Methods">.
 (contributed by brian d foy)
 
 Calling a subroutine as C<&foo> with no trailing parentheses ignores
-the prototype of C<foo> and passes it the current value of the argumet
+the prototype of C<foo> and passes it the current value of the argument
 list, C<@_>. Here's an example; the C<bar> subroutine calls C<&foo>,
 which prints what its arguments list:
 
@@ -852,7 +852,7 @@ diagnostics as C<Carp> does, use the C<caller> built-in:
 By default, your program starts in package C<main>, so you should
 always be in some package unless someone uses the C<package> built-in
 with no namespace. See the C<package> entry in L<perlfunc> for the
-details of empty packges.
+details of empty packages.
 
 =head2 How can I comment out a large block of Perl code?
 

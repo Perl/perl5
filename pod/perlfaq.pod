@@ -28,7 +28,7 @@ https://github.com/briandfoy/perlfaq (which is outside of the
 main Perl source tree).  The git repository notes all changes to the FAQ
 and holds the latest version of the working documents and may vary
 significantly from the version distributed with the latest version of
-Perl. Check the repository before sending your corrections. 
+Perl. Check the repository before sending your corrections.
 
 =head2 How to contribute to the perlfaq
 

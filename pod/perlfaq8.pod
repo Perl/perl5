@@ -1009,31 +1009,42 @@ perform these actions for you.
 
 =head2 How do I find out if I'm running interactively or not?
 
-Good question. Sometimes C<-t STDIN> and C<-t STDOUT> can give clues,
-sometimes not.
+(contributed by brian d foy)
 
-	if (-t STDIN && -t STDOUT) {
-		print "Now what? ";
+This is a difficult question to answer, and the best answer is 
+only a guess. What do you really want to know? If you merely 
+want to know if one of your filehandles is connected to a terminal,
+you can try the C<-t> file test:
+
+	if( -t STDOUT ) {
+		print "I'm connected to a terminal!\n";
 		}
+		
+However, you might be out of luck if you expect that means there is a
+real person on the other side. With the C<Expect> module, another
+program can pretend to be a person. The program might even come close
+to passing the Turing test.
 
-On POSIX systems, you can test whether your own process group matches
-the current process group of your controlling terminal as follows:
+The C<IO::Interactive> module does the best it can to give you an
+answer. Its C<is_interactive> function returns an output filehandle;
+that filehandle points to standard output if the module thinks the
+session is interactive. Otherwise, the filehandle is a null handle
+that simply discards the output:
 
-	use POSIX qw/getpgrp tcgetpgrp/;
+	use IO::Interactive;
+	
+	print { is_interactive } "I might go to standard output!\n";
 
-	# Some POSIX systems, such as Linux, can be
-	# without a /dev/tty at boot time.
-	if (!open(TTY, "/dev/tty")) {
-		print "no tty\n";
-	} else {
-		$tpgrp = tcgetpgrp(fileno(*TTY));
-		$pgrp = getpgrp();
-		if ($tpgrp == $pgrp) {
-			print "foreground\n";
-		} else {
-			print "background\n";
+This still doesn't guarantee that a real person is answering your
+prompts or reading your output.
+
+If you want to know how to handle automated testing for your
+distribution, you can check the environment. The CPAN
+Testers, for instance, set the value of C<AUTOMATED_TESTING>:
+
+	unless( $ENV{AUTOMATED_TESTING} ) {
+		print "Hello interactive tester!\n";
 		}
-	}
 
 =head2 How do I timeout a slow event?
 
@@ -1173,50 +1184,44 @@ might not be perl's message.
 
 =head2 How do I install a module from CPAN?
 
-The easiest way is to have a module also named CPAN do it for you.
-This module comes with perl version 5.004 and later.
+(contributed by brian d foy)
 
-	$ perl -MCPAN -e shell
+The easiest way is to have a module also named CPAN do it for you by using
+the C<cpan> command the comes with Perl. You can give it a list of modules
+to install:
 
-	cpan shell -- CPAN exploration and modules installation (v1.59_54)
-	ReadLine support enabled
+	$ cpan IO::Interactive Getopt::Whatever
 
-	cpan> install Some::Module
+If you prefer C<CPANPLUS>, it's just as easy:
 
-To manually install the CPAN module, or any well-behaved CPAN module
-for that matter, follow these steps:
+	$ cpanp i IO::Interactive Getopt::Whatever
+	
+If you want to install a distribution from the current directory, you can
+tell C<CPAN.pm> to install C<.> (the full stop):
 
-=over 4
+	$ cpan .
 
-=item 1
+See the documentation for either of those commands to see what else
+you can do.
 
-Unpack the source into a temporary area.
+If you want to try to install a distribution by yourself, resolving
+all dependencies on your own, you follow one of two possible build
+paths.
 
-=item 2
+For distributions that use I<Makefile.PL>:
 
-	perl Makefile.PL
+	$ perl Makefile.PL
+	$ make test install
+	
+For distributions that use I<Build.PL>:
 
-=item 3
+	$ perl Build.PL
+	$ ./Build test
+	$ ./Build install
 
-	make
-
-=item 4
-
-	make test
-
-=item 5
-
-	make install
-
-=back
-
-If your version of perl is compiled without dynamic loading, then you
-just need to replace step 3 (B<make>) with B<make perl> and you will
-get a new F<perl> binary with your extension linked in.
-
-See L<ExtUtils::MakeMaker> for more details on building extensions.
-See also the next question, "What's the difference between require
-and use?".
+Some distributions may need to link to libraries or other third-party
+code and their build and installation sequences may be more complicated.
+Check any I<README> or I<INSTALL> files that you may find.
 
 =head2 What's the difference between require and use?
 
@@ -1280,7 +1285,7 @@ You can configure CPAN.pm to automatically use this option too:
 INSTALL_BASE tells these tools to put your modules into
 F</mydir/perl/lib/perl5>.  See L<How do I add a directory to my
 include path (@INC) at runtime?> for details on how to run your newly
-installed moudles.
+installed modules.
 
 There is one caveat with INSTALL_BASE, though, since it acts
 differently than the PREFIX and LIB settings that older versions of
