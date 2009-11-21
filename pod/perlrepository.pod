@@ -57,7 +57,7 @@ directory.
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
 
-  git clone ssh://perl5.git.perl.org/gitroot/perl.git perl-ssh
+  git clone ssh://perl5.git.perl.org/perl.git perl-ssh
 
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
@@ -72,11 +72,7 @@ F<.git/config> where you will see something like:
 change that to something like this:
 
   [remote "origin"]
-  url = ssh://perl5.git.perl.org/gitroot/perl.git
-
-NOTE: there are symlinks set up so that the /gitroot is optional and
-since SSH is the default protocol you can actually shorten the "url" to
-C<perl5.git.perl.org:/perl.git>.
+  url = ssh://perl5.git.perl.org/perl.git
 
 You can also set up your user name and e-mail address. For example
 
@@ -98,15 +94,28 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
-The committers have access to 2 servers that serve
+=head2 A NOTE ON CAMEL AND DROMEDARY
+
+The committers have SSH access to the two servers that serve
 C<perl5.git.perl.org>. One is C<perl5.git.perl.org> itself (I<camel>),
 which is the 'master' repository. The second one is
 C<users.perl5.git.perl.org> (I<dromedary>), which can be used for
 general testing and development. Dromedary syncs the git tree from
 camel every few minutes, you should not push there. Both machines also
-have a full CPAN mirror. To share files with the general public,
-dromedary serves your ~/public_html/ as
+have a full CPAN mirror in /srv/CPAN, please use this. To share files
+with the general public, dromedary serves your ~/public_html/ as
 C<http://users.perl5.git.perl.org/~yourlogin/>
+
+These hosts have fairly strict firewalls to the outside. Outgoing, only
+rsync, ssh and git are allowed. For http and ftp, you can use
+http://webproxy:3128 as proxy. Incoming, the firewall tries to detect
+attacks and blocks IP addresses with suspicious activity. This
+sometimes (but very rarely) has false positives and you might get
+blocked. The quickest way to get unblocked is to notify the admins.
+
+These two boxes are owned, hosted, and operated by booking.com. You can
+reach the sysadmins in #p5p on irc.perl.org or via mail to
+C<perl5-porters@perl.org>
 
 =head1 OVERVIEW OF THE REPOSITORY
 
