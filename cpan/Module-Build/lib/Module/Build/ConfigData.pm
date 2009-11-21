@@ -51,18 +51,18 @@ sub write {
 sub feature {
   my ($package, $key) = @_;
   return $features->{$key} if exists $features->{$key};
-  
+
   my $info = $auto_features->{$key} or return 0;
-  
+
   # Under perl 5.005, each(%$foo) isn't working correctly when $foo
   # was reanimated with Data::Dumper and eval().  Not sure why, but
   # copying to a new hash seems to solve it.
   my %info = %$info;
-  
+
   require Module::Build;  # XXX should get rid of this
   while (my ($type, $prereqs) = each %info) {
     next if $type eq 'description' || $type eq 'recommends';
-    
+
     my %p = %$prereqs;  # Ditto here.
     while (my ($modname, $spec) = each %p) {
       my $status = Module::Build->check_installed_status($modname, $spec);
@@ -78,16 +78,15 @@ sub feature {
 
 Module::Build::ConfigData - Configuration for Module::Build
 
-
 =head1 SYNOPSIS
 
   use Module::Build::ConfigData;
   $value = Module::Build::ConfigData->config('foo');
   $value = Module::Build::ConfigData->feature('bar');
-  
+
   @names = Module::Build::ConfigData->config_names;
   @names = Module::Build::ConfigData->feature_names;
-  
+
   Module::Build::ConfigData->set_config(foo => $new_value);
   Module::Build::ConfigData->set_feature(bar => $new_value);
   Module::Build::ConfigData->write;  # Save changes
@@ -163,17 +162,30 @@ authorship claim or copyright claim to the contents of C<Module::Build::ConfigDa
 
 =cut
 
-__DATA__
 
+__DATA__
 do{ my $x = [
        {},
        {},
        {
+         'license_creation' => {
+                                 'requires' => {
+                                                 'Software::License' => 0
+                                               },
+                                 'description' => 'Create licenses automatically in distributions'
+                               },
+         'inc_bundling_support' => {
+                                     'requires' => {
+                                                     'ExtUtils::Installed' => '1.999',
+                                                     'ExtUtils::Install' => '1.54'
+                                                   },
+                                     'description' => 'Bundle Module::Build in inc/'
+                                   },
          'YAML_support' => {
                              'requires' => {
-                                             'YAML' => ' >= 0.35, != 0.49_01 '
+                                             'YAML::Tiny' => '1.38'
                                            },
-                             'description' => 'Use YAML.pm to write META.yml files'
+                             'description' => 'Use YAML::Tiny to write META.yml files'
                            },
          'manpage_support' => {
                                 'requires' => {
@@ -181,15 +193,22 @@ do{ my $x = [
                                               },
                                 'description' => 'Create Unix man pages'
                               },
-         'C_support' => {
-                          'requires' => {
-                                          'ExtUtils::CBuilder' => '0.15'
-                                        },
-                          'recommends' => {
-                                            'ExtUtils::ParseXS' => '1.02'
+         'PPM_support' => {
+                            'requires' => {
+                                            'IO::File' => '1.13'
                                           },
-                          'description' => 'Compile/link C & XS code'
-                        },
+                            'description' => 'Generate PPM files for distributions'
+                          },
+         'dist_authoring' => {
+                               'requires' => {
+                                               'Archive::Tar' => '1.09'
+                                             },
+                               'recommends' => {
+                                                 'Module::Signature' => '0.21',
+                                                 'Pod::Readme' => '0.04'
+                                               },
+                               'description' => 'Create new distributions'
+                             },
          'HTML_support' => {
                              'requires' => {
                                              'Pod::Html' => 0

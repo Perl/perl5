@@ -1527,6 +1527,7 @@ cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
+cpan/Module-Build/lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/ModuleInfo.pm	Module::Build
@@ -2240,7 +2241,7 @@ cpan/Test-Simple/t/BEGIN_use_ok.t			Test::More use_ok() testing
 cpan/Test-Simple/t/buffer.t				Test::Builder buffering test
 cpan/Test-Simple/t/Builder/Builder.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/carp.t			Test::Builder test
-cpan/Test-Simple/t/Builder/create.t			Test::Builder test 
+cpan/Test-Simple/t/Builder/create.t			Test::Builder test
 cpan/Test-Simple/t/Builder/current_test.t		Test::Builder tests
 cpan/Test-Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
 cpan/Test-Simple/t/Builder/details.t			Test::Builder tests
@@ -3495,7 +3496,6 @@ lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
-lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
@@ -4158,7 +4158,7 @@ symbian/sanity.pl		Helper code for config.pl
 symbian/sdk.pl			Helper code for config.pl
 symbian/sisify.pl		Packaging utility
 symbian/symbian_dll.cpp		The DLL stub for Symbian
-symbian/symbianish.h		Header for Symbian	
+symbian/symbianish.h		Header for Symbian
 symbian/symbian_proto.h		Prototypes for Symbian
 symbian/symbian_stubs.c		Stub routines for Symbian
 symbian/symbian_stubs.h		Stub headers for Symbian
@@ -4430,7 +4430,7 @@ t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
 t/op/or.t			See if || works in weird situations
-t/op/overload_integer.t		See if overload::constant for integer works after "use".   
+t/op/overload_integer.t		See if overload::constant for integer works after "use".
 t/op/override.t			See if operator overriding works
 t/op/pack.t			See if pack and unpack work
 t/op/pos.t			See if pos works
@@ -4502,7 +4502,7 @@ t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping are
 t/README			Instructions for regression tests
 t/re/pat_advanced.t		See if advanced esoteric patterns work
 t/re/pat_advanced_thr.t		See if advanced esoteric patterns work in another thread
-t/re/pat_psycho.t		See if insane esoteric and slow patterns work 
+t/re/pat_psycho.t		See if insane esoteric and slow patterns work
 t/re/pat_psycho_thr.t		See if insane esoteric and slow patterns work in another thread
 t/re/pat_re_eval.t		See if esoteric patterns using re 'eval' work
 t/re/pat_re_eval_thr.t		See if esoteric patterns using re 'eval' work in another thread
