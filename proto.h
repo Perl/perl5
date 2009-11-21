@@ -2418,7 +2418,9 @@ PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o)
 	assert(o)
 
 PERL_CALLCONV void	Perl_pad_leavemy(pTHX);
+#ifdef DEBUGGING
 PERL_CALLCONV SV*	Perl_pad_sv(pTHX_ PADOFFSET po);
+#endif
 PERL_CALLCONV void	Perl_pad_free(pTHX_ PADOFFSET po);
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 STATIC void	S_pad_reset(pTHX);
@@ -6225,10 +6227,12 @@ PERL_CALLCONV void	Perl_save_set_svflags(pTHX_ SV *sv, U32 mask, U32 val)
 #define PERL_ARGS_ASSERT_SAVE_SET_SVFLAGS	\
 	assert(sv)
 
+#ifdef DEBUGGING
 PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_ASSERT	\
 	assert(hv)
+#endif
 
 
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV *hv)
