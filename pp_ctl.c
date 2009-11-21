@@ -2698,6 +2698,12 @@ PP(pp_goto)
                     DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
 	}
 
+	if (*enterops && enterops[1]) {
+	    I32 i = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
+	    if (enterops[i])
+		deprecate("\"goto\" to jump into a construct");
+	}
+
 	/* pop unwanted frames */
 
 	if (ix < cxstack_ix) {

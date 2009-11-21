@@ -2392,24 +2392,27 @@ X<goto> X<jump> X<jmp>
 
 =item goto &NAME
 
-The C<goto-LABEL> form finds the statement labeled with LABEL and resumes
-execution there.  It may not be used to go into any construct that
-requires initialization, such as a subroutine or a C<foreach> loop.  It
-also can't be used to go into a construct that is optimized away,
-or to get out of a block or subroutine given to C<sort>.
-It can be used to go almost anywhere else within the dynamic scope,
-including out of subroutines, but it's usually better to use some other
-construct such as C<last> or C<die>.  The author of Perl has never felt the
-need to use this form of C<goto> (in Perl, that is--C is another matter).
-(The difference being that C does not offer named loops combined with
-loop control.  Perl does, and this replaces most structured uses of C<goto>
-in other languages.)
+The C<goto-LABEL> form finds the statement labeled with LABEL and
+resumes execution there. It can't be used to get out of a block or
+subroutine given to C<sort>.  It can be used to go almost anywhere
+else within the dynamic scope, including out of subroutines, but it's
+usually better to use some other construct such as C<last> or C<die>.
+The author of Perl has never felt the need to use this form of C<goto>
+(in Perl, that is--C is another matter).  (The difference being that C
+does not offer named loops combined with loop control.  Perl does, and
+this replaces most structured uses of C<goto> in other languages.)
 
 The C<goto-EXPR> form expects a label name, whose scope will be resolved
 dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
 necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
+
+Use of C<goto-LABEL> or C<goto-EXPR> to jump into a construct is
+deprecated and will issue a warning.  Even then it may not be used to
+go into any construct that requires initialization, such as a
+subroutine or a C<foreach> loop.  It also can't be used to go into a
+construct that is optimized away,
 
 The C<goto-&NAME> form is quite different from the other forms of
 C<goto>.  In fact, it isn't a goto in the normal sense at all, and
