@@ -158,7 +158,16 @@ sub display {
                     $y = $y . $backslash_escape{$c};
                 } else {
                     my $z = chr $c; # Maybe we can get away with a literal...
-                    $z = sprintf "\\%03o", $c if $z =~ /[[:^print:]]/;
+                    if ($z =~ /[[:^print:]]/) {
+
+                        # Use octal for characters traditionally expressed as
+                        # such: the low controls
+                        if ($c <= 037) {
+                            $z = sprintf "\\%03o", $c;
+                        } else {
+                            $z = sprintf "\\x{%x}", $c;
+                        }
+                    }
                     $y = $y . $z;
                 }
             }
