@@ -4783,6 +4783,11 @@ to access the filehandle slot within a typeglob.
 operator.  Since C<split> always tries to match the pattern
 repeatedly, the C</g> has no effect.
 
+=item Use of "goto" to jump into a construct is deprecated
+
+(D deprecated) Using C<goto> to jump from an outer scope into an inner
+scope is deprecated and should be avoided.
+
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 
 (D deprecated) As an (ahem) accidental feature, C<AUTOLOAD> subroutines
