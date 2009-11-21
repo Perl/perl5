@@ -344,9 +344,9 @@ operator may be any of:
 Example:
 
     while (<>) {
-    chomp;
-    next unless -f $_;  # ignore specials
-    #...
+        chomp;
+        next unless -f $_;  # ignore specials
+        #...
     }
 
 The interpretation of the file permission operators C<-r>, C<-R>,
@@ -475,13 +475,13 @@ restart system calls on some systems.  Using C<eval>/C<die> always works,
 modulo the caveats given in L<perlipc/"Signals">.
 
     eval {
-    local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
-    alarm $timeout;
-    $nread = sysread SOCKET, $buffer, $size;
-    alarm 0;
+        local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
+        alarm $timeout;
+        $nread = sysread SOCKET, $buffer, $size;
+        alarm 0;
     };
     if ($@) {
-    die unless $@ eq "alarm\n";   # propagate unexpected errors
+        die unless $@ eq "alarm\n";   # propagate unexpected errors
         # timed out
     }
     else {
@@ -757,9 +757,9 @@ remove anything.
 If VARIABLE is omitted, it chomps C<$_>.  Example:
 
     while (<>) {
-    chomp;  # avoid \n on last field
-    @array = split(/:/);
-    # ...
+        chomp;  # avoid \n on last field
+        @array = split(/:/);
+        # ...
     }
 
 If VARIABLE is a hash, it chomps the hash's values, but not its keys.
@@ -827,7 +827,7 @@ Here's an example that looks up nonnumeric uids in the passwd file:
     chomp($pattern = <STDIN>);
 
     ($login,$pass,$uid,$gid) = getpwnam($user)
-    or die "$user not in passwd file";
+        or die "$user not in passwd file";
 
     @ary = glob($pattern);  # expand filenames
     chown $uid, $gid, @ary;
@@ -952,12 +952,12 @@ the main block.  So will C<next>, but since it will execute a C<continue>
 block, it may be more entertaining.
 
     while (EXPR) {
-    ### redo always comes here
-    do_something;
+        ### redo always comes here
+        do_something;
     } continue {
-    ### next always comes here
-    do_something_else;
-    # then back the top to re-check EXPR
+        ### next always comes here
+        do_something_else;
+        # then back the top to re-check EXPR
     }
     ### last always comes here
 
@@ -1044,9 +1044,9 @@ their password:
     system "stty echo";
 
     if (crypt($word, $pwd) ne $pwd) {
-    die "Sorry...\n";
+        die "Sorry...\n";
     } else {
-    print "ok\n";
+        print "ok\n";
     }
 
 Of course, typing in your own password to whoever asks you
@@ -1098,7 +1098,7 @@ function to iterate over large DBM files.  Example:
     # print out history file offsets
     dbmopen(%HIST,'/usr/lib/news/history',0666);
     while (($key,$val) = each %HIST) {
-    print $key, ' = ', unpack('L',$val), "\n";
+        print $key, ' = ', unpack('L',$val), "\n";
     }
     dbmclose(%HIST);
 
@@ -1111,7 +1111,7 @@ before you call dbmopen():
 
     use DB_File;
     dbmopen(%NS_Hist, "$ENV{HOME}/.netscape/history.db")
-    or die "Can't open netscape history file: $!";
+        or die "Can't open netscape history file: $!";
 
 =item defined EXPR
 X<defined> X<undef> X<undefined>
@@ -1156,7 +1156,7 @@ Examples:
     print if defined $switch{'D'};
     print "$val\n" while defined($val = pop(@ary));
     die "Can't readlink $sym: $!"
-    unless defined($value = readlink $sym);
+        unless defined($value = readlink $sym);
     sub foo { defined &$bar ? &$bar(@_) : die "No bar"; }
     $debugging = 0 unless defined $debugging;
 
@@ -1210,11 +1210,11 @@ after them down.  Use splice() for that.  See L</exists>.
 The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 
     foreach $key (keys %HASH) {
-    delete $HASH{$key};
+        delete $HASH{$key};
     }
 
     foreach $index (0 .. $#ARRAY) {
-    delete $ARRAY[$index];
+        delete $ARRAY[$index];
     }
 
 And so do these:
@@ -1396,12 +1396,12 @@ file.  Manual error checking can be done this way:
     # read in config files: system first, then user
     for $file ("/share/prog/defaults.rc",
                "$ENV{HOME}/.someprogrc")
-   {
-    unless ($return = do $file) {
-        warn "couldn't parse $file: $@" if $@;
-        warn "couldn't do $file: $!"    unless defined $return;
-        warn "couldn't run $file"       unless $return;
-    }
+    {
+        unless ($return = do $file) {
+            warn "couldn't parse $file: $@" if $@;
+            warn "couldn't do $file: $!"    unless defined $return;
+            warn "couldn't run $file"       unless $return;
+        }
     }
 
 =item dump LABEL
@@ -1468,7 +1468,7 @@ The following prints out your environment like the printenv(1) program,
 only in a different order:
 
     while (($key,$value) = each %ENV) {
-    print "$key=$value\n";
+        print "$key=$value\n";
     }
 
 See also C<keys>, C<values> and C<sort>.
@@ -1507,19 +1507,19 @@ last file.  Examples:
 
     # reset line numbering on each input file
     while (<>) {
-    next if /^\s*#/;  # skip comments
-    print "$.\t$_";
+        next if /^\s*#/;  # skip comments
+        print "$.\t$_";
     } continue {
-    close ARGV  if eof;  # Not eof()!
+        close ARGV if eof;  # Not eof()!
     }
 
     # insert dashes just before last line of last file
     while (<>) {
-    if (eof()) {  # check for end of last file
-        print "--------------\n";
-    }
-    print;
-    last if eof();          # needed if we're reading from a terminal
+        if (eof()) {  # check for end of last file
+            print "--------------\n";
+        }
+        print;
+        last if eof();          # needed if we're reading from a terminal
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
@@ -1852,7 +1852,7 @@ For example:
 
     use Fcntl;
     fcntl($filehandle, F_GETFL, $packed_return_buffer)
-    or die "can't fcntl F_GETFL: $!";
+        or die "can't fcntl F_GETFL: $!";
 
 You don't have to check for C<defined> on the return from C<fcntl>.
 Like C<ioctl>, it maps a C<0> return from the system call into
@@ -1889,7 +1889,7 @@ You can use this to find out whether two handles refer to the
 same underlying descriptor:
 
     if (fileno(THIS) == fileno(THAT)) {
-    print "THIS and THAT are dups\n";
+        print "THIS and THAT are dups\n";
     }
 
 (Filehandles connected to memory objects via new features of C<open> may
@@ -1951,16 +1951,16 @@ Here's a mailbox appender for BSD systems.
     use Fcntl qw(:flock SEEK_END); # import LOCK_* and SEEK_END constants
 
     sub lock {
-    my ($fh) = @_;
-    flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
+        my ($fh) = @_;
+        flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
 
-    # and, in case someone appended while we were waiting...
-    seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
+        # and, in case someone appended while we were waiting...
+        seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
     }
 
     sub unlock {
-    my ($fh) = @_;
-    flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
+        my ($fh) = @_;
+        flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
     }
 
     open(my $mbox, ">>", "/usr/spool/mail/$ENV{'USER'}")
@@ -2012,8 +2012,8 @@ Declare a picture format for use by the C<write> function.  For
 example:
 
     format Something =
-    Test: @<<<<<<<< @||||| @>>>>>
-          $str,     $%,    '$' . int($num)
+        Test: @<<<<<<<< @||||| @>>>>>
+              $str,     $%,    '$' . int($num)
     .
 
     $str = "widget";
@@ -2056,19 +2056,19 @@ used by itself to fetch single characters without waiting for the user
 to hit enter.  For that, try something more like:
 
     if ($BSD_STYLE) {
-    system "stty cbreak </dev/tty >/dev/tty 2>&1";
+        system "stty cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-    system "stty", '-icanon', 'eol', "\001";
+        system "stty", '-icanon', 'eol', "\001";
     }
 
     $key = getc(STDIN);
 
     if ($BSD_STYLE) {
-    system "stty -cbreak </dev/tty >/dev/tty 2>&1";
+        system "stty -cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-    system "stty", 'icanon', 'eol', '^@'; # ASCII null
+        system "stty", 'icanon', 'eol', '^@'; # ASCII null
     }
     print "\n";
 
@@ -2341,10 +2341,10 @@ An example testing if Nagle's algorithm is turned on on a socket:
     use Socket qw(:all);
 
     defined(my $tcp = getprotobyname("tcp"))
-    or die "Could not determine the protocol number for tcp";
+        or die "Could not determine the protocol number for tcp";
     # my $tcp = IPPROTO_TCP; # Alternative
     my $packed = getsockopt($socket, $tcp, TCP_NODELAY)
-    or die "Could not query TCP_NODELAY socket option: $!";
+        or die "Could not query TCP_NODELAY socket option: $!";
     my $nodelay = unpack("I", $packed);
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
@@ -2592,13 +2592,13 @@ Here is yet another way to print your environment:
     @keys = keys %ENV;
     @values = values %ENV;
     while (@keys) {
-    print pop(@keys), '=', pop(@values), "\n";
+        print pop(@keys), '=', pop(@values), "\n";
     }
 
 or how about sorted by key:
 
     foreach $key (sort(keys %ENV)) {
-    print $key, '=', $ENV{$key}, "\n";
+        print $key, '=', $ENV{$key}, "\n";
     }
 
 The returned values are copies of the original keys in the hash, so
@@ -2608,7 +2608,7 @@ To sort a hash by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash) {
-    printf "%4d %s\n", $hash{$key}, $key;
+        printf "%4d %s\n", $hash{$key}, $key;
     }
 
 As an lvalue C<keys> allows you to increase the number of hash buckets
@@ -2667,8 +2667,8 @@ omitted, the command refers to the innermost enclosing loop.  The
 C<continue> block, if any, is not executed:
 
     LINE: while (<STDIN>) {
-    last LINE if /^$/;  # exit when done with header
-    #...
+        last LINE if /^$/;  # exit when done with header
+        #...
     }
 
 C<last> cannot be used to exit a block which returns a value such as
@@ -2856,8 +2856,8 @@ The base-N log of a number is equal to the natural log of that number
 divided by the natural log of N.  For example:
 
     sub log10 {
-    my $n = shift;
-    return log($n)/log(10);
+        my $n = shift;
+        return log($n)/log(10);
     }
 
 See also L</exp> for the inverse operation.
@@ -2901,7 +2901,7 @@ is just a funny way to write
 
     %hash = ();
     foreach (@array) {
-    $hash{get_a_key_for($_)} = $_;
+        $hash{get_a_key_for($_)} = $_;
     }
 
 Note that C<$_> is an alias to the list value, so it can be used to
@@ -3039,8 +3039,8 @@ The C<next> command is like the C<continue> statement in C; it starts
 the next iteration of the loop:
 
     LINE: while (<STDIN>) {
-    next LINE if /^#/;  # discard comments
-    #...
+        next LINE if /^#/;  # discard comments
+        #...
     }
 
 Note that if there were a C<continue> block on the above, it would get
@@ -3247,47 +3247,47 @@ Examples:
     # if the open fails, output is discarded
 
     open(my $dbase, '+<', 'dbase.mine')      # open for update
-    or die "Can't open 'dbase.mine' for update: $!";
+        or die "Can't open 'dbase.mine' for update: $!";
 
     open(my $dbase, '+<dbase.mine')          # ditto
-    or die "Can't open 'dbase.mine' for update: $!";
+        or die "Can't open 'dbase.mine' for update: $!";
 
     open(ARTICLE, '-|', "caesar <$article")  # decrypt article
-    or die "Can't start caesar: $!";
+        or die "Can't start caesar: $!";
 
     open(ARTICLE, "caesar <$article |")      # ditto
-    or die "Can't start caesar: $!";
+        or die "Can't start caesar: $!";
 
     open(EXTRACT, "|sort >Tmp$$")            # $$ is our process id
-    or die "Can't start sort: $!";
+        or die "Can't start sort: $!";
 
     # in memory files
     open(MEMORY,'>', \$var)
-    or die "Can't open memory file: $!";
+        or die "Can't open memory file: $!";
     print MEMORY "foo!\n";                   # output will end up in $var
 
     # process argument list of files along with any includes
 
     foreach $file (@ARGV) {
-    process($file, 'fh00');
+        process($file, 'fh00');
     }
 
     sub process {
-    my($filename, $input) = @_;
-    $input++;    # this is a string increment
-    unless (open($input, $filename)) {
-        print STDERR "Can't open $filename: $!\n";
-        return;
-    }
-
-    local $_;
-    while (<$input>) {    # note use of indirection
-        if (/^#include "(.*)"/) {
-        process($1, $input);
-        next;
+        my($filename, $input) = @_;
+        $input++;    # this is a string increment
+        unless (open($input, $filename)) {
+            print STDERR "Can't open $filename: $!\n";
+            return;
         }
-        #...      # whatever
-    }
+
+        local $_;
+        while (<$input>) {    # note use of indirection
+            if (/^#include "(.*)"/) {
+                process($1, $input);
+                next;
+            }
+            #...          # whatever
+        }
     }
 
 See L<perliol> for detailed info on PerlIO.
@@ -3447,7 +3447,7 @@ another way to protect your filenames from interpretation.  For example:
 
     use IO::Handle;
     sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL)
-    or die "sysopen $path: $!";
+        or die "sysopen $path: $!";
     $oldfh = select(HANDLE); $| = 1; select($oldfh);
     print HANDLE "stuff $$\n";
     seek(HANDLE, 0, 0);
@@ -3461,14 +3461,14 @@ them, and automatically close whenever and however you leave that scope:
     use IO::File;
     #...
     sub read_myfile_munged {
-    my $ALL = shift;
-    my $handle = IO::File->new;
-    open($handle, "myfile") or die "myfile: $!";
-    $first = <$handle>
-        or return ();     # Automatically closed here.
-    mung $first or die "mung failed";  # Or here.
-    return $first, <$handle> if $ALL;  # Or here.
-    $first;          # Or here.
+        my $ALL = shift;
+        my $handle = IO::File->new;
+        open($handle, "myfile") or die "myfile: $!";
+        $first = <$handle>
+            or return ();     # Automatically closed here.
+        mung $first or die "mung failed";  # Or here.
+        return $first, <$handle> if $ALL;  # Or here.
+        $first;          # Or here.
     }
 
 See L</seek> for some details about mixing reading and writing.
@@ -4069,7 +4069,7 @@ Examples:
     # "@utmp1" eq "@utmp2"
 
     sub bintodec {
-    unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
+        unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
     }
 
     $foo = pack('sx2l', 12, 34);
@@ -4242,7 +4242,7 @@ onto the end of ARRAY.  The length of ARRAY increases by the length of
 LIST.  Has the same effect as
 
     for $value (LIST) {
-    $ARRAY[++$#ARRAY] = $value;
+        $ARRAY[++$#ARRAY] = $value;
     }
 
 but is more efficient.  Returns the number of elements in the array following
@@ -4462,18 +4462,18 @@ normally use this command:
     # a simpleminded Pascal comment stripper
     # (warning: assumes no { or } in strings)
     LINE: while (<STDIN>) {
-    while (s|({.*}.*){.*}|$1 |) {}
-    s|{.*}| |;
-    if (s|{.*| |) {
-        $front = $_;
-        while (<STDIN>) {
-        if (/}/) {  # end of comment?
-            s|^|$front\{|;
-              redo LINE;
+        while (s|({.*}.*){.*}|$1 |) {}
+        s|{.*}| |;
+        if (s|{.*| |) {
+            $front = $_;
+            while (<STDIN>) {
+                if (/}/) {  # end of comment?
+                    s|^|$front\{|;
+                    redo LINE;
+                }
+            }
         }
-        }
-    }
-    print;
+        print;
     }
 
 C<redo> cannot be used to retry a block which returns a value such as
@@ -4514,10 +4514,10 @@ If the referenced object has been blessed into a package, then that package
 name is returned instead.  You can think of C<ref> as a C<typeof> operator.
 
     if (ref($r) eq "HASH") {
-    print "r is a reference to a hash.\n";
+        print "r is a reference to a hash.\n";
     }
     unless (ref($r)) {
-    print "r is not a reference at all.\n";
+        print "r is not a reference at all.\n";
     }
 
 The return value C<LVALUE> indicates a reference to an lvalue that is not
@@ -4695,18 +4695,18 @@ In other words, you can write:
 
     push @INC, \&my_sub;
     sub my_sub {
-    my ($coderef, $filename) = @_;  # $coderef is \&my_sub
-    ...
+        my ($coderef, $filename) = @_;  # $coderef is \&my_sub
+        ...
     }
 
 or:
 
     push @INC, [ \&my_sub, $x, $y, ... ];
     sub my_sub {
-    my ($arrayref, $filename) = @_;
-    # Retrieve $x, $y, ...
-    my @parameters = @$arrayref[1..$#$arrayref];
-    ...
+        my ($arrayref, $filename) = @_;
+        # Retrieve $x, $y, ...
+        my @parameters = @$arrayref[1..$#$arrayref];
+        ...
     }
 
 If the hook is an object, it must provide an INC method that will be
@@ -4718,8 +4718,8 @@ into package C<main>.)  Here is a typical code layout:
     package Foo;
     sub new { ... }
     sub Foo::INC {
-    my ($self, $filename) = @_;
-    ...
+        my ($self, $filename) = @_;
+        ...
     }
 
     # In the main program
@@ -4914,12 +4914,12 @@ If that doesn't work (some IO implementations are particularly
 cantankerous), then you may need something more like this:
 
     for (;;) {
-    for ($curpos = tell(FILE); $_ = <FILE>;
+        for ($curpos = tell(FILE); $_ = <FILE>;
              $curpos = tell(FILE)) {
-        # search for some stuff and put it into files
-    }
-    sleep($for_a_while);
-    seek(FILE, $curpos, 0);
+            # search for some stuff and put it into files
+        }
+        sleep($for_a_while);
+        seek(FILE, $curpos, 0);
     }
 
 =item seekdir DIRHANDLE,POS
@@ -4974,12 +4974,12 @@ If you want to select on many filehandles you might wish to write a
 subroutine:
 
     sub fhbits {
-    my(@fhlist) = split(' ',$_[0]);
-    my($bits);
-    for (@fhlist) {
-        vec($bits,fileno($_),1) = 1;
-    }
-    $bits;
+        my(@fhlist) = split(' ',$_[0]);
+        my($bits);
+        for (@fhlist) {
+            vec($bits,fileno($_),1) = 1;
+        }
+        $bits;
     }
     $rin = fhbits('STDIN TTY SOCK');
 
@@ -5492,13 +5492,13 @@ The following equivalences hold (assuming C<< $[ == 0 and $#a >= $i >> )
 Example, assuming array lengths are passed before arrays:
 
     sub aeq {  # compare two list values
-    my(@a) = splice(@_,0,shift);
-    my(@b) = splice(@_,0,shift);
-    return 0 unless @a == @b;  # same len?
-    while (@a) {
-        return 0 if pop(@a) ne pop(@b);
-    }
-    return 1;
+        my(@a) = splice(@_,0,shift);
+        my(@b) = splice(@_,0,shift);
+        return 0 unless @a == @b;  # same len?
+        while (@a) {
+            return 0 if pop(@a) ne pop(@b);
+        }
+        return 1;
     }
     if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
 
@@ -5614,7 +5614,7 @@ Example:
         chomp;
         ($login, $passwd, $uid, $gid,
          $gcos, $home, $shell) = split(/:/);
-    #...
+        #...
     }
 
 As with regular pattern matching, any capturing parentheses that are not
@@ -6063,7 +6063,7 @@ stat is done, but the current contents of the stat structure from the
 last C<stat>, C<lstat>, or filetest are returned.  Example:
 
     if (-x $file && (($d) = stat(_)) && $d < 0) {
-    print "$file is executable NFS file\n";
+        print "$file is executable NFS file\n";
     }
 
 (This works on machines only for which the device number is negative
@@ -6085,8 +6085,8 @@ The L<File::stat> module provides a convenient, by-name access mechanism:
     use File::stat;
     $sb = stat($filename);
     printf "File is %s, size is %s, perm %04o, mtime %s\n",
-    $filename, $sb->size, $sb->mode & 07777,
-    scalar localtime $sb->mtime;
+           $filename, $sb->size, $sb->mode & 07777,
+           scalar localtime $sb->mtime;
 
 You can import symbolic mode constants (C<S_IF*>) and functions
 (C<S_IS*>) from the Fcntl module:
@@ -6192,12 +6192,12 @@ For example, here is a loop that inserts index producing entries
 before any line containing a certain pattern:
 
     while (<>) {
-    study;
-    print ".IX foo\n"     if /\bfoo\b/;
-    print ".IX bar\n"     if /\bbar\b/;
-    print ".IX blurfl\n"  if /\bblurfl\b/;
-    # ...
-    print;
+        study;
+        print ".IX foo\n"    if /\bfoo\b/;
+        print ".IX bar\n"    if /\bbar\b/;
+        print ".IX blurfl\n" if /\bblurfl\b/;
+        # ...
+        print;
     }
 
 In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<f>
@@ -6216,7 +6216,7 @@ out the names of those files that contain a match:
 
     $search = 'while (<>) { study;';
     foreach $word (@words) {
-    $search .= "++\$seen{\$ARGV} if /\\b$word\\b/;\n";
+        $search .= "++\$seen{\$ARGV} if /\\b$word\\b/;\n";
     }
     $search .= "}";
     @ARGV = @files;
@@ -6224,7 +6224,7 @@ out the names of those files that contain a match:
     eval $search;        # this screams
     $/ = "\n";        # put back to normal input delimiter
     foreach $file (sort keys(%seen)) {
-    print $file, "\n";
+        print $file, "\n";
     }
 
 =item sub NAME BLOCK
@@ -6527,20 +6527,20 @@ value.
 
     @args = ("command", "arg1", "arg2");
     system(@args) == 0
-     or die "system @args failed: $?"
+        or die "system @args failed: $?"
 
 If you'd like to manually inspect C<system>'s failure, you can check all
 possible failure modes by inspecting C<$?> like this:
 
     if ($? == -1) {
-    print "failed to execute: $!\n";
+        print "failed to execute: $!\n";
     }
     elsif ($? & 127) {
-    printf "child died with signal %d, %s coredump\n",
-        ($? & 127),  ($? & 128) ? 'with' : 'without';
+        printf "child died with signal %d, %s coredump\n",
+            ($? & 127),  ($? & 128) ? 'with' : 'without';
     }
     else {
-    printf "child exited with value %d\n", $? >> 8;
+        printf "child exited with value %d\n", $? >> 8;
     }
 
 Alternatively you might inspect the value of C<${^CHILD_ERROR_NATIVE}>
@@ -6633,7 +6633,7 @@ C<each> function to iterate over such.  Example:
     use NDBM_File;
     tie(%HIST, 'NDBM_File', '/usr/lib/news/history', 1, 0);
     while (($key,$val) = each %HIST) {
-    print $key, ' = ', unpack('L',$val), "\n";
+        print $key, ' = ', unpack('L',$val), "\n";
     }
     untie(%HIST);
 
@@ -7406,7 +7406,7 @@ The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.  If you say
     use POSIX ":sys_wait_h";
     #...
     do {
-    $kid = waitpid(-1, WNOHANG);
+        $kid = waitpid(-1, WNOHANG);
     } while $kid > 0;
 
 then you can do a non-blocking wait for all pending zombie processes.
