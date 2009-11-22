@@ -128,7 +128,7 @@ sub Error($) {
 }
 
 sub Finished() {
-    print "1..$Tests.\n";
+    print "1..$Tests\n";
     exit($Fails ? -1 : 0);
 }
 
