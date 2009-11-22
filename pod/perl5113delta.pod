@@ -32,6 +32,106 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 Unicode properties
+
+Perl can now handle every Unicode character property.  A new pod,
+L<perluniprops>, lists all available non-Unihan character properties.  By
+default the Unihan properties and certain others (deprecated and Unicode
+internal-only ones) are not exposed.  See below for more details on
+these; there is also a section in the pod listing them, and why they are
+not exposed.
+
+Perl now fully supports the Unicode compound-style of using C<=> and C<:>
+in writing regular expressions: C<\p{property=value}> and
+C<\p{property:value}> (both of which mean the same thing).
+
+Perl now supports fully the Unicode loose matching rules for text
+between the braces in C<\p{...}> constructs.  In addition, Perl also allows
+underscores between digits of numbers.
+
+All the Unicode-defined synonyms for properties and property values are
+now accepted.
+
+C<\p{...}> matches using the Canonical_Combining_Class property were
+completely broken in previous Perls.  This is now fixed.
+
+In previous Perls, the Unicode Decomposition_Type=Compat property and a
+Perl extension had the same name, which led to neither matching all the
+correct values (with more than 100 mistakes in one, and several thousand
+in the other).  The Perl extension has now been renamed to be
+Decomposition_Type=Noncanonical (short: dt=noncanon).  It has the same
+meaning as was previously intended, namely the union of all the
+non-canonical Decomposition types, with Unicode Compat being just one of
+those.
+
+C<\p{Uppercase}> and C<\p{Lowercase}> have been brought into line with the
+Unicode definitions.  This means they each match a few more characters
+than previously.
+
+C<\p{Cntrl}> now matches the same characters as C<\p{Control}>.  This means it
+no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
+(gc=cf) code points.  The Format code points represent the biggest
+possible problem.  All but 36 of them are either officially deprecated
+or strongly discouraged from being used.  Of those 36, likely the most
+widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
+similar, plus Bi-directional controls.
+
+C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>.  The Perl
+definition included a number of things that aren't really alpha (all
+marks), while omitting many that were.  The Unicode definition is
+clearly better, so we are switching to it.  As a direct consequence, the
+definitions of C<\p{Alnum}> and C<\p{Word}> which depend on Alpha also change.
+
+C<\p{Word}> also now doesn't match certain characters it wasn't supposed
+to, such as fractions.
+
+C<\p{Print}> no longer matches the line control characters: tab, lf, cr,
+ff, vt, and nel.  This brings it in line with the documentation.
+
+\p{Decomposition_Type=Canonical} now includes the Hangul syllables
+
+The Numeric type property has been extended to include the Unihan
+characters.
+
+There is a new Perl extension, the 'Present_In', or simply 'In'
+property.  This is an extension of the Unicode Age property, but
+C<\p{In=5.0}> matches any code point whose usage has been determined as of
+Unicode version 5.0.  The C<\p{Age=5.0}> only matches code points added in 5.0.
+
+A number of properties did not have the correct values for unassigned
+code points.  This is now fixed.  The affected properties are
+Bidi_Class, East_Asian_Width, Joining_Type, Decomposition_Type,
+Hangul_Syllable_Type, Numeric_Type, and Line_Break.
+
+The Default_Ignorable_Code_Point, ID_Continue, and ID_Start properties
+have been updated to their current definitions.
+
+Certain properties that are supposed to be Unicode internal-only were
+erroneously exposed by previous Perls.  Use of these in regular
+expressions will now generate a deprecated warning message, if those
+warnings are enabled.  The properties are: Other_Alphabetic,
+Other_Default_Ignorable_Code_Point, Other_Grapheme_Extend,
+Other_ID_Continue, Other_ID_Start, Other_Lowercase, Other_Math, and
+Other_Uppercase.
+
+An installation can now fairly easily change Perl to operate on any
+Unicode release.  Perl is shipped with the latest official release, but
+an installation can now download any prior release, and Perl will work
+with that.  Instructions are in L<perlunicode>.
+
+An installation can now fairly easily change which Unicode properties
+Perl understands.  As mentioned above, certain properties are by default
+turned off.  These include all the Unihan properties (which should be
+accessible via the CPAN module Unicode::Unihan) and any deprecated or
+Unicode internal-only property that Perl has never exposed.
+
+The files in the To directory are now more clearly marked as being
+stable, directly usable by applications.  New hash entries in them give
+the format of the normal entries which allows for easier machine
+parsing.  Perl can generate files in this directory for any property,
+though most are suppressed.  An installation can choose to change which
+get written.   Instructions are in L<perluniprops>.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
