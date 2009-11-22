@@ -139,6 +139,7 @@ POD = \
 	perlunicode.pod	\
 	perlunifaq.pod	\
 	perluniintro.pod	\
+	perluniprops.pod	\
 	perlunitut.pod	\
 	perlutil.pod	\
 	perlvar.pod	\
@@ -269,6 +270,7 @@ MAN = \
 	perlunicode.man	\
 	perlunifaq.man	\
 	perluniintro.man	\
+	perluniprops.man	\
 	perlunitut.man	\
 	perlutil.man	\
 	perlvar.man	\
@@ -398,6 +400,7 @@ HTML = \
 	perlunicode.html	\
 	perlunifaq.html	\
 	perluniintro.html	\
+	perluniprops.html	\
 	perlunitut.html	\
 	perlutil.html	\
 	perlvar.html	\
@@ -529,6 +532,7 @@ TEX = \
 	perlunicode.tex	\
 	perlunifaq.tex	\
 	perluniintro.tex	\
+	perluniprops.tex	\
 	perlunitut.tex	\
 	perlutil.tex	\
 	perlvar.tex	\
