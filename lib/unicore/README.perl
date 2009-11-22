@@ -1,11 +1,17 @@
 The *.txt files were copied from
 
-	http://www.unicode.org/Public/5.1.0/ucd
+	ftp://www.unicode.org/Public/UNIDATA
 
-and subdirectories 'extracted' and 'auxiliary' as of Unicode 5.1.0 (March 2008).
+with subdirectories 'extracted' and 'auxiliary'
 
-The big file, Unihan.txt (28 MB, 5.8 MB zip) was not included due to space
-considerations.  Also NOT included were any *.html files and *Test.txt files.
+The Unihan files were not included due to space considerations.  Also NOT
+included were any *.html files and *Test.txt files.  It is possible to add the
+Unihan files, and edit mktables (see instructions near its beginning) to look
+at them.
+
+The file 'version' should exist and be a single line with the Unicode version,
+like:
+5.2.0
 
 To be 8.3 filesystem friendly, the names of some of the input files have been
 changed from the values that are in the Unicode DB:
@@ -27,42 +33,68 @@ mv extracted/DerivedLineBreak.txt extracted/DLineBreak.txt
 mv extracted/DerivedNumericType.txt extracted/DNumType.txt
 mv extracted/DerivedNumericValues.txt extracted/DNumValues.txt
 
-The names of files, such as test files, that are not used by mktables are not
-changed, and will not work correctly on 8.3 filesystems.
+If you have the Unihan database (5.2 and above), you should also do the
+following:
 
-The file 'version' should exist and be a single line with the Unicode version,
-like
-5.1.0
+mv Unihan_DictionaryIndices.txt UnihanIndicesDictionary.txt
+mv Unihan_DictionaryLikeData.txt UnihanDataDictionaryLike.txt
+mv Unihan_IRGSources.txt UnihanIRGSources.txt
+mv Unihan_NumericValues.txt UnihanNumericValues.txt
+mv Unihan_OtherMappings.txt UnihanOtherMappings.txt
+mv Unihan_RadicalStrokeCounts.txt UnihanRadicalStrokeCounts.txt
+mv Unihan_Readings.txt UnihanReadings.txt
+mv Unihan_Variants.txt UnihanVariants.txt
 
-NOTE: If you modify the input file set you should also run
- 
+If you download everything, the names of files, such as test files, that are
+not used by mktables are not changed by the above, and will not work correctly
+as-is on 8.3 filesystems.
+
+mktables is used to generate the tables used by the rest of Perl.  It will warn
+you about any *.txt files in the directory substructure that it doesn't know
+about.  You should remove any so-identified, or edit mktables to add them to
+its lists to process.  You can run
+
+    mktables -globlist
+
+to have it try to process these tables generically.
+
+If any files are added, deleted, or their names change, you must run
+
     mktables -makelist
-    
-which will recreate the mktables.lst file which is used to speed up
-the build process.    
+
+to generate a new list of all the files.
 
 FOR PUMPKINS
 
-The files are inter-related.  If you take the latest UnicodeData.txt, for example,
-but leave the older versions of other files, there can be subtle problems.
+The files are inter-related.  If you take the latest UnicodeData.txt, for
+example, but leave the older versions of other files, there can be subtle
+problems.
+
+When moving to a new version of Unicode, you need to update 'version' by hand
+
+	p4 edit version
+	...
+
+You should look in the Unicode release notes (which are probably towards the
+bottom of http://www.unicode.org/reports/tr44/) to see if any properties have
+newly been moved to be Obsolete, Deprecated, or Stabilized.  The full names for
+these should be added to the respective lists near the beginning of mktables,
+using an 'if' to add them for just this Unicode version going forward, so that
+mktables can continue to be used for earlier Unicode versions. 
+
+When putting out a new Perl release, think about if any of the Deprecated
+properties should be moved to Suppressed.
 
 The *.pl files are generated from the *.txt files by the mktables script,
 more recently done during the Perl build process, but if you want to try
 the old manual way:
 	
 	cd lib/unicore
-	cp .../UnicodeOriginal/*.txt .
-	rm NormalizationTest.txt Unihan.txt Derived*.txt
-	p4 edit Properties *.pl */*.pl
-	perl ./mktables
+	p4 edit *.pl */*.pl */*/*.pl
+	perl ./mktables -P ../../pod -T ../../t/re/uniprops.t -makelist
 	p4 revert -a
 	cd ../..
 	perl Porting/manicheck
-
-You need to update version by hand
-
-	p4 edit version
-	...
 	
 If any new (or deleted, unlikely but not impossible) *.pl files are indicated:
 
@@ -78,4 +110,4 @@ And finally:
 	p4 submit
 
 -- 
-jhi@iki.fi; updated by nick@ccl4.org
+jhi@iki.fi; updated by nick@ccl4.org, public@khwilliamson.com

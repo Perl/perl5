@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1146;  # Update this when adding/deleting tests.
+plan tests => 1142;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1120,7 +1120,6 @@ sub run_tests {
             '_'.pack('U', 0x00F1),        # _ + n-tilde
             'c'.pack('U', 0x0327),        # c + cedilla
             pack('U*', 0x00F1, 0x0327),   # n-tilde + cedilla
-            'a'.pack('U', 0x00B2),        # a + superscript two
             pack('U', 0x0391),            # ALPHA
             pack('U', 0x0391).'2',        # ALPHA + 2
             pack('U', 0x0391).'_',        # ALPHA + _
@@ -1729,8 +1728,8 @@ sub run_tests {
 
         my @isPrint = grep {not /[[:print:]]/ and /\p{IsPrint}/}
                             map {chr} 0 .. 0x1f, 0x7f .. 0x9f;
-        iseq join ('', @isPrint), "\x09\x0a\x0b\x0c\x0d\x85",
-            'IsPrint disagrees with [:print:] on control characters';
+        iseq join ('', @isPrint), "",
+            'IsPrint agrees with [:print:] on control characters';
 
         my @isPunct = grep {/[[:punct:]]/ != /\p{IsPunct}/}
                             map {chr} 0x80 .. 0xff;

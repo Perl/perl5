@@ -3975,6 +3975,7 @@ pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
 pod/perlunifaq.pod		Perl Unicode FAQ
 pod/perluniintro.pod		Perl Unicode introduction
+pod/perluniprops.pod		Perl Unicode property index
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
@@ -4544,6 +4545,7 @@ t/re/substr_thr.t		See if substr works in another thread
 t/re/subst.t			See if substitution works
 t/re/substT.t			See if substitution works with -T
 t/re/subst_wamp.t		See if substitution works with $& present
+t/re/uniprops.t			Test unicode \p{} regex constructs
 t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.
