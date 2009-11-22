@@ -106,7 +106,8 @@ my %SHORT_PROPERTIES = (
     'Ll'  => ['m', '\N{CYRILLIC SMALL LETTER A}'],
     'Lu'  => ['M', '\N{GREEK CAPITAL LETTER ALPHA}'],
     'Lo'  => ['\N{HIRAGANA LETTER SMALL A}'],
-    'Mn'  => ['\N{COMBINING GRAVE ACCENT}'],
+    # is also in other alphabetic
+    'Mn'  => ['\N{HEBREW POINT RAFE}'],
     'Nd'  => ["0", '\N{ARABIC-INDIC DIGIT ZERO}'],
     'Pc'  => ["_"],
     'Po'  => ["!"],
