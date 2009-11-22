@@ -321,9 +321,11 @@ The following items are now deprecated.
 
 =over 4
 
-=item *
+=item Use of "goto" to jump into a construct is deprecated
 
-XXX
+Using C<goto> to jump from an outer scope into an inner
+scope is now deprecated. This rare use case was causing
+problems in the implementation of scopes.
 
 =back
 
