@@ -11,8 +11,7 @@ To change this file, edit lib/unicore/mktables instead.
 
 =head1 NAME
 
-perluniprops - Complete index of Unicode Version 5.1.0 properties in
-the Perl core.
+perluniprops - Complete index of Unicode Version 5.1.0 properties
 
 =head1 DESCRIPTION
 
