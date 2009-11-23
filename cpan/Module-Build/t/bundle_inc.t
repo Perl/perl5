@@ -14,7 +14,10 @@ use File::Path;
 blib_load('Module::Build');
 blib_load('Module::Build::ConfigData');
 
-if ( Module::Build::ConfigData->feature('inc_bundling_support') ) {
+if ( $ENV{PERL_CORE} ) {
+  plan skip_all => 'bundle_inc tests will never succeed in PERL_CORE';
+}
+elsif ( Module::Build::ConfigData->feature('inc_bundling_support') ) {
   plan tests => 18;
 } else {
   plan skip_all => 'inc_bundling_support feature is not enabled';
