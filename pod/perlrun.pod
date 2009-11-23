@@ -1245,6 +1245,16 @@ see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 B<Do not disclose the hash seed> to people who don't need to know it.
 See also hash_seed() of L<Hash::Util>.
 
+=item PERL_MEM_LOG
+X<PERL_MEM_LOG>
+
+If your perl was compiled with -Accflags=-DPERL_MEM_LOG, setting envar
+PERL_MEM_LOG=1mst writes (m)emory and (s)v debug messages with
+(t)imestamps to stdout(1) instead of stderr(2).  You can write to
+other opened fds too, in a variety of ways;
+
+  bash$ 3>foo3 PERL_MEM_LOG=3m perl ...
+
 =item PERL_ROOT (specific to the VMS port)
 X<PERL_ROOT>
 
