@@ -659,7 +659,9 @@
 #define oopsHV			Perl_oopsHV
 #define pad_leavemy		Perl_pad_leavemy
 #endif
+#ifdef DEBUGGING
 #define pad_sv			Perl_pad_sv
+#endif
 #ifdef PERL_CORE
 #define pad_free		Perl_pad_free
 #endif
@@ -1767,6 +1769,8 @@
 #endif
 #endif
 #define save_set_svflags	Perl_save_set_svflags
+#ifdef DEBUGGING
+#endif
 #define hv_scalar		Perl_hv_scalar
 #define hv_name_set		Perl_hv_name_set
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
@@ -3045,7 +3049,9 @@
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
 #define pad_leavemy()		Perl_pad_leavemy(aTHX)
 #endif
+#ifdef DEBUGGING
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
+#endif
 #ifdef PERL_CORE
 #define pad_free(a)		Perl_pad_free(aTHX_ a)
 #endif
@@ -4160,6 +4166,8 @@
 #endif
 #endif
 #define save_set_svflags(a,b,c)	Perl_save_set_svflags(aTHX_ a,b,c)
+#ifdef DEBUGGING
+#endif
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define hv_name_set(a,b,c,d)	Perl_hv_name_set(aTHX_ a,b,c,d)
 #ifdef PERL_CORE

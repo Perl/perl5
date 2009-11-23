@@ -769,7 +769,9 @@ pR	|OP*	|oopsAV		|NN OP* o
 pR	|OP*	|oopsHV		|NN OP* o
 : Defined in pad.c, used only in op.c
 pd	|void	|pad_leavemy
+#ifdef DEBUGGING
 Apd	|SV*	|pad_sv		|PADOFFSET po
+#endif
 : Defined in pad.c, used only in op.c
 pd	|void	|pad_free	|PADOFFSET po
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
@@ -1992,7 +1994,9 @@ p	|void	|free_tied_hv_pool
 pR	|int	|get_debug_opts	|NN const char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|NN SV *sv|U32 mask|U32 val
+#ifdef DEBUGGING
 Apod	|void	|hv_assert	|NN HV *hv
+#endif
 
 ApdR	|SV*	|hv_scalar	|NN HV *hv
 ApoR	|I32*	|hv_riter_p	|NN HV *hv

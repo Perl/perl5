@@ -6232,8 +6232,8 @@ PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_ASSERT	\
 	assert(hv)
-#endif
 
+#endif
 
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV *hv)
 			__attribute__warn_unused_result__
