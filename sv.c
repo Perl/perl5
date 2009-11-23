@@ -607,7 +607,7 @@ Perl_sv_clean_all(pTHX)
 struct arena_desc {
     char       *arena;		/* the raw storage, allocated aligned */
     size_t      size;		/* its size ~4k typ */
-    U32		misc;		/* type, and in future other things. */
+    svtype	utype;		/* bodytype stored in arena */
 };
 
 struct arena_set;
@@ -720,7 +720,7 @@ Perl_sv_free_arenas(pTHX)
    TBD: export properly for hv.c: S_more_he().
 */
 void*
-Perl_get_arena(pTHX_ const size_t arena_size, const U32 misc)
+Perl_get_arena(pTHX_ const size_t arena_size, const svtype bodytype)
 {
     dVAR;
     struct arena_desc* adesc;
@@ -749,7 +749,7 @@ Perl_get_arena(pTHX_ const size_t arena_size, const U32 misc)
     
     Newx(adesc->arena, arena_size, char);
     adesc->size = arena_size;
-    adesc->misc = misc;
+    adesc->utype = bodytype;
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %"UVuf"\n", 
 			  curr, (void*)adesc->arena, (UV)arena_size));
 

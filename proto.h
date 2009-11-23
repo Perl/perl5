@@ -4320,7 +4320,7 @@ STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const 
 
 #endif
 
-PERL_CALLCONV void*	Perl_get_arena(pTHX_ const size_t svtype, const U32 misc)
+PERL_CALLCONV void*	Perl_get_arena(pTHX_ const size_t arenasize, const svtype bodytype)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 

@@ -1378,7 +1378,7 @@ s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 : Used in hv.c
-paRxo	|void*	|get_arena	|const size_t svtype|const U32 misc
+paRxoM	|void*	|get_arena	|const size_t arenasize |const svtype bodytype
 : #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
