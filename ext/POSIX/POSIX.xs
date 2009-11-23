@@ -887,8 +887,8 @@ WEXITSTATUS(status)
 	POSIX::WSTOPSIG = 4
 	POSIX::WTERMSIG = 5
     CODE:
-#if !(defined(WEXITSTATUS) || defined(WIFEXITED) || defined(WIFSIGNALED) \
-      || defined(WIFSTOPPED) || defined(WSTOPSIG) || defined (WTERMSIG))
+#if !defined(WEXITSTATUS) || !defined(WIFEXITED) || !defined(WIFSIGNALED) \
+      || !defined(WIFSTOPPED) || !defined(WSTOPSIG) || !defined(WTERMSIG)
         RETVAL = 0; /* Silence compilers that notice this, but don't realise
 		       that not_here() can't return.  */
 #endif
