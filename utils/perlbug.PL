@@ -1159,9 +1159,15 @@ sub _probe_for_sendmail {
 sub _send_message_sendmail {
     my $sendmail = _probe_for_sendmail();
     unless ($sendmail) {
-        paraprint(<<"EOF"), die "\n";
+        my $message_start = !$Is_Linux && !$Is_OpenBSD ? <<'EOT' : <<'EOT';
 It appears that there is no program which looks like "sendmail" on
 your system and that the Mail::Send library from CPAN isn't available.
+EOT
+It appears that there is no program which looks like "sendmail" on
+your system.
+EOT
+        paraprint(<<"EOF"), die "\n";
+$message_start
 Because of this, there's no easy way to automatically send your
 message.
 
