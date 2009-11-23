@@ -980,7 +980,7 @@ my $CP_IN_NAME = 3;         # The NAME contains the code point appended to it.
 my $NULL = 4;               # The map is to the null string; utf8.c can't
                             # handle these, nor is there an accepted syntax
                             # for them in \p{} constructs
-my $COMPUTE_NO_MULTI_CP = 5; # Pseudo-type; meanst that ranges that would
+my $COMPUTE_NO_MULTI_CP = 5; # Pseudo-type; means that ranges that would
                              # otherwise be $MULTI_CP type are instead type 0
 
 # process_generic_property_file() can accept certain overrides in its input.
@@ -1085,7 +1085,7 @@ my %Jamo_T;     # Trailing consonants
 
 my @unhandled_properties;  # Will contain a list of properties found in
                            # the input that we didn't process.
-my @match_properties;      # properties that have match tables, to be
+my @match_properties;      # Properties that have match tables, to be
                            # listed in the pod
 my @map_properties;        # Properties that get map files written
 my @named_sequences;       # NamedSequences.txt contents.
@@ -8385,7 +8385,7 @@ END
         # Complications arise because any number of properties can be in the
         # file, in any order, interspersed in any way.  The first time a
         # property is seen, it gets information about that property and
-        # cache's it for quick retrieval later.  It also normalizes the maps
+        # caches it for quick retrieval later.  It also normalizes the maps
         # so that only one of many synonym is stored.  The Unicode input files
         # do use some multiple synonyms.
 
@@ -8788,7 +8788,7 @@ END
     }
 }
 
-# Unused until revise charnames;
+# XXX Unused until revise charnames;
 #sub check_and_handle_compound_name {
 #    This looks at Name properties for parenthesized components and splits
 #    them off.  Thus it finds FF as an equivalent to Form Feed.
@@ -9683,8 +9683,7 @@ sub filter_special_casing_line {
 
 sub filter_old_style_case_folding {
     # This transforms $_ containing the case folding style of 3.0.1, to 3.1
-    # and later style, then calls the handler for the later style.  Different
-    # letters were used.
+    # and later style.  Different letters were used in the earlier.
 
     my $file = shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -9859,13 +9858,6 @@ sub filter_jamo_line {
     # property file line
     $_ = "$fields[0]; $fields[1]";
 
-    return;
-}
-
-sub filter_numeric_value_comment_missing_line {
-    # Filters out the extra column in DNumValues.txt of this line
-
-    s/^($missing_defaults_prefix)\s*;\s*/$1/;
     return;
 }
 
@@ -10796,19 +10788,22 @@ sub compile_perl() {
         $CanonDCIJ = $CanonDCIJ & $Assigned;
     }
 
-    # This is used in Unicode's definition of \X
+    # These are used in Unicode's definition of \X
     my $gcb = property_ref('Grapheme_Cluster_Break');
+    #my $extend = $perl->add_match_table('_X_Extend');
+    my $extend = $perl->add_match_table('_GCB_Extend');
+    # XXX until decide what todo my $begin = $perl->add_match_table('_X_Begin');
     if (defined $gcb) {
-        my $extend = $perl->add_match_table('_GCB_Extend',
-                                        Initialize => $gcb->table('Extend'));
-        $extend += $gcb->table('SpacingMark')
-                                        if defined $gcb->table('SpacingMark');
+        $extend += $gcb->table('Extend') + $gcb->table('SpacingMark')
+        #$begin += ~ ($gcb->table('Control')
+        #             + $gcb->table('CR')
+        #             + $gcb->table('LF'));
     }
     else {    # Old definition, used on early releases.
-        $perl->add_match_table('_X_Extend', Initialize => $gc->table('Mark')
-                                                            + 0x200C    # ZWNJ
-                                                            + 0x200D    # ZWJ
-        );
+        $extend += $gc->table('Mark')
+                    + 0x200C    # ZWNJ
+                    + 0x200D;    # ZWJ
+        #$begin += ~ $extend;
     }
 
     # Create a new property specially located that is a combination of the
@@ -12075,7 +12070,8 @@ To change this file, edit $0 instead.
 
 =head1 NAME
 
-$pod_file - Complete index of Unicode Version $string_version properties
+$pod_file - Complete index of Unicode Version $string_version properties in
+the Perl core.
 
 =head1 DESCRIPTION
 
@@ -13524,8 +13520,12 @@ if ($glob_list) {
     # Here wants to process all .txt files in the directory structure.
     # Convert them to full path names.  They are stored in the platform's
     # relative style
-    my @known_files = map { File::Spec->rel2abs($_->file) }
-                                                        @input_file_objects;
+    my @known_files;
+    foreach my $object (@input_file_objects) {
+        my $file = $object->file;
+        next unless defined $file;
+        push @known_files, File::Spec->rel2abs($file);
+    }
 
     my @unknown_input_files;
     foreach my $file (keys %potential_files) {
@@ -13577,12 +13577,6 @@ END
         ) . join(", ", @unknown_input_files) . "\n\n");
     }
 } # End of looking through directory structure for more .txt files.
-
-if ( $make_list ) {
-    foreach my $file (@mktables_list_output_files) {
-        unlink internal_file_to_platform($file);
-    }
-}
 
 # Create the list of input files from the objects we have defined, plus
 # version
@@ -13863,7 +13857,7 @@ sub Error($) {
 }
 
 sub Finished() {
-    print "1..$Tests.\n";
+    print "1..$Tests\n";
     exit($Fails ? -1 : 0);
 }
 

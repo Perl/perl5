@@ -8,7 +8,7 @@ use warnings;
 # Test the \p{} regular expression constructs.  This file is constructed by
 # mktables from the tables it generates, so if mktables is buggy, this won't
 # necessarily catch those bugs.  Tests are generated for all feasible
-# properties; a few aren't currently XXX feasible; see is_code_point_usable()
+# properties; a few aren't currently feasible; see is_code_point_usable()
 # in mktables for details.
 
 # Standard test packages are not used because this manipulates SIG_WARN.  It
