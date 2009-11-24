@@ -663,7 +663,7 @@ CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
 .IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
     "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
-LINK_FLAGS	= $(LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
+LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 .ELSE
 RSC_FLAGS	= -DINCLUDE_MANIFEST
 .ENDIF
