@@ -451,7 +451,7 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
