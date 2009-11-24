@@ -6870,7 +6870,7 @@ it successfully deleted. On failure, it returns false and sets C<$!>
     unlink glob "*.bak";
 
 On error, C<unlink> will not tell you which files it could not remove.
-If you care about the files you could not remove, try them one
+If you want to know which files you could not remove, try them one
 at a time:
 
      foreach my $file ( @goners ) {
