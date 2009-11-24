@@ -1714,6 +1714,31 @@ occurrences of the regexp on each line and the C<s///o> modifier to
 compile the regexp only once.  As with C<simple_grep>, both the
 C<print> and the C<s/$regexp/$replacement/go> use C<$_> implicitly.
 
+If you don't want C<s///> to change your original variable you can use
+the non-destructive substitute modifier, C<s///r>.  This changes the
+behavior so that C<s///r> returns the final substituted string:
+
+    $x = "I like dogs.";
+    $y = $x =~ s/dogs/cats/r;
+    print "$x $y\n";
+
+That example will print "I like dogs. I like cats". Notice the original
+C<$x> variable has not been affected by the substitute. The overall
+result of the substitution is instead stored in C<$y>. If the
+substitution doesn't affect anything then the original string is
+returned:
+
+    $x = "I like dogs.";
+    $y = $x =~ s/elephants/cougars/r;
+    print "$x $y\n"; # prints "I like dogs. I like dogs."
+
+One other interesting thing that the C<s///r> flag allows is chaining
+substitutions:
+
+    $x = "Cats are great.";
+    print $x =~ s/Cats/Dogs/r =~ s/Dogs/Frogs/r =~ s/Frogs/Hedgehogs/r, "\n";
+    # prints "Hedgehogs are great."
+
 A modifier available specifically to search and replace is the
 C<s///e> evaluation modifier.  C<s///e> wraps an C<eval{...}> around
 the replacement string and the evaluated result is substituted for the

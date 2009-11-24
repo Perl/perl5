@@ -376,6 +376,8 @@ struct pmop {
 #define PMf_GLOBAL	0x00002000	/* pattern had a g modifier */
 #define PMf_CONTINUE	0x00004000	/* don't reset pos() if //g fails */
 #define PMf_EVAL	0x00008000	/* evaluating replacement as expr */
+#define PMf_NONDESTRUCT	0x00010000	/* Return substituted string instead
+					   of modifying it. */
 
 /* The following flags have exact equivalents in regcomp.h with the prefix RXf_
  * which are stored in the regexp->extflags member. If you change them here,

@@ -11826,10 +11826,11 @@ static U32
 S_pmflag(U32 pmfl, const char ch) {
     switch (ch) {
 	CASE_STD_PMMOD_FLAGS_PARSE_SET(&pmfl);
-    case GLOBAL_PAT_MOD:    pmfl |= PMf_GLOBAL; break;
-    case CONTINUE_PAT_MOD:  pmfl |= PMf_CONTINUE; break;
-    case ONCE_PAT_MOD:      pmfl |= PMf_KEEP; break;
-    case KEEPCOPY_PAT_MOD:  pmfl |= PMf_KEEPCOPY; break;
+    case GLOBAL_PAT_MOD:      pmfl |= PMf_GLOBAL; break;
+    case CONTINUE_PAT_MOD:    pmfl |= PMf_CONTINUE; break;
+    case ONCE_PAT_MOD:        pmfl |= PMf_KEEP; break;
+    case KEEPCOPY_PAT_MOD:    pmfl |= PMf_KEEPCOPY; break;
+    case NONDESTRUCT_PAT_MOD: pmfl |= PMf_NONDESTRUCT; break;
     }
     return pmfl;
 }

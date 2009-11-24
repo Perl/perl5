@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpREVERSE_INPLACE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
-	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
+	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_NONDESTRUCT
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
@@ -4310,7 +4310,9 @@ my %substwords;
 map($substwords{join "", sort split //, $_} = $_, 'ego', 'egoism', 'em',
     'es', 'ex', 'exes', 'gee', 'go', 'goes', 'ie', 'ism', 'iso', 'me',
     'meese', 'meso', 'mig', 'mix', 'os', 'ox', 'oxime', 'see', 'seem',
-    'seg', 'sex', 'sig', 'six', 'smog', 'sog', 'some', 'xi');
+    'seg', 'sex', 'sig', 'six', 'smog', 'sog', 'some', 'xi',
+    'sir', 'rise', 'smore', 'more', 'seer', 'rome', 'gore', 'grim', 'grime',
+    'or', 'rose', 'rosie');
 
 sub pp_subst {
     my $self = shift;
@@ -4351,6 +4353,7 @@ sub pp_subst {
 	($re) = $self->regcomp($kid, 1, $extended);
     }
     $flags .= "e" if $op->pmflags & PMf_EVAL;
+    $flags .= "r" if $op->pmflags & PMf_NONDESTRUCT;
     $flags .= "g" if $op->pmflags & PMf_GLOBAL;
     $flags .= "i" if $op->pmflags & PMf_FOLD;
     $flags .= "m" if $op->pmflags & PMf_MULTILINE;

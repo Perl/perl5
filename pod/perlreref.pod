@@ -45,9 +45,10 @@ within the regex.
 
 C<s/pattern/replacement/msixpogce> substitutes matches of
 'pattern' with 'replacement'. Modifiers as for C<m//>,
-with one addition:
+with two additions:
 
     e  Evaluate 'replacement' as an expression
+    r  Return substitution and leave the original string untouched.
 
 'e' may be specified multiple times. 'replacement' is interpreted
 as a double quoted string unless a single-quote (C<'>) is the delimiter.

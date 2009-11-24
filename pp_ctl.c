@@ -325,7 +325,10 @@ PP(pp_substcont)
 	    SvPV_set(dstr, NULL);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
-	    mPUSHi(saviters - 1);
+	    if (pm->op_pmflags & PMf_NONDESTRUCT)
+		PUSHs(targ);
+	    else
+		mPUSHi(saviters - 1);
 
 	    (void)SvPOK_only_UTF8(targ);
 	    TAINT_IF(cx->sb_rxtainted);

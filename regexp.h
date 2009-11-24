@@ -263,11 +263,13 @@ and check for NULL.
 #define SINGLE_PAT_MOD       's'
 #define IGNORE_PAT_MOD       'i'
 #define XTENDED_PAT_MOD      'x'
+#define NONDESTRUCT_PAT_MOD  'r'
 
 #define ONCE_PAT_MODS        "o"
 #define KEEPCOPY_PAT_MODS    "p"
 #define EXEC_PAT_MODS        "e"
 #define LOOP_PAT_MODS        "gc"
+#define NONDESTRUCT_PAT_MODS "r"
 
 #define STD_PAT_MODS        "msix"
 
@@ -276,7 +278,7 @@ and check for NULL.
 #define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
 #define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS
 #define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
-#define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS
+#define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl

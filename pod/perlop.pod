@@ -235,9 +235,11 @@ of operation work on some other string.  The right argument is a search
 pattern, substitution, or transliteration.  The left argument is what is
 supposed to be searched, substituted, or transliterated instead of the default
 $_.  When used in scalar context, the return value generally indicates the
-success of the operation.  Behavior in list context depends on the particular
-operator.  See L</"Regexp Quote-Like Operators"> for details and
-L<perlretut> for examples using these operators.
+success of the operation.  Not always though: the non-destructive substitution
+option (C</r>) causes the return value to be the result of the substition, for
+example.  Behavior in list context depends on the particular operator.  See
+L</"Regexp Quote-Like Operators"> for details and L<perlretut> for examples
+using these operators.
 
 If the right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
@@ -250,6 +252,8 @@ pattern C<\>, which it will consider a syntax error.
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
+
+Binary "!~" is not permitted to bind to a non-destructive substitute (s///r).
 
 =head2 Multiplicative Operators
 X<operator, multiplicative>
@@ -1428,13 +1432,19 @@ This usage is vaguely deprecated, which means it just might possibly
 be removed in some distant future version of Perl, perhaps somewhere
 around the year 2168.
 
-=item s/PATTERN/REPLACEMENT/msixpogce
+=item s/PATTERN/REPLACEMENT/msixpogcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
-X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e>
+X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e> X</r>
 
 Searches a string for a pattern, and if found, replaces that pattern
 with the replacement text and returns the number of substitutions
 made.  Otherwise it returns false (specifically, the empty string).
+
+If the C</r> (non-destructive) option is used then it will perform the
+substitution on a copy of the string and return the copy whether or not a
+substitution occurred. The original string will always remain unchanged in
+this case. The copy will always be a plain string, even If the input is an
+object or a tied variable.
 
 If no string is specified via the C<=~> or C<!~> operator, the C<$_>
 variable is searched and modified.  (The string specified with C<=~> must
@@ -1456,7 +1466,8 @@ Options are as with m// with the addition of the following replacement
 specific options:
 
     e	Evaluate the right side as an expression.
-    ee  Evaluate the right side as a string then eval the result
+    ee  Evaluate the right side as a string then eval the result.
+    r   Return substitution and leave the original string untouched.
 
 Any non-whitespace delimiter may replace the slashes.  Add space after
 the C<s> when using a character allowed in identifiers.  If single quotes
@@ -1480,6 +1491,11 @@ Examples:
     s/Login: $foo/Login: $bar/; # run-time pattern
 
     ($foo = $bar) =~ s/this/that/;	# copy first, then change
+    ($foo = "$bar") =~ s/this/that/;	# convert to string, copy, then change
+    $foo = $bar =~ s/this/that/r;	# Same as above using /r
+    $foo = $bar =~ s/this/that/r
+                =~ s/that/the other/r;	# Chained substitutes using /r
+    @foo = map { s/this/that/r } @bar	# /r is very useful in maps
 
     $count = ($paragraph =~ s/Mister\b/Mr./g);  # get change-count
 
@@ -1491,6 +1507,10 @@ Examples:
     s/%(.)/$percent{$1}/g;	# change percent escapes; no /e
     s/%(.)/$percent{$1} || $&/ge;	# expr now, so /e
     s/^=(\w+)/pod($1)/ge;	# use function call
+
+    $_ = 'abc123xyz';
+    $a = s/abc/def/r;           # $a is 'def123xyz' and
+                                # $_ remains 'abc123xyz'.
 
     # expand variables in $_, but dynamics only, using
     # symbolic dereferencing

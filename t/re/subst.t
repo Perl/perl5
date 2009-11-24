@@ -7,7 +7,86 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 149 );
+plan( tests => 167 );
+
+# Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
+# like() and it conflicts with test.pl
+sub must_warn {
+    my ($code, $pattern, $name) = @_;
+    my $w;
+    local $SIG {__WARN__} = sub {$w .= join "" => @_};
+    use warnings 'all';
+    ref $code ? &$code : eval $code;
+    my $r = $w && $w =~ /$pattern/;
+    $w //= "UNDEF";
+    ok( $r, $name // "Got warning /$pattern/", $r ? undef :
+            "# expected: /$pattern/\n" .
+            "#   result: $w" );
+}
+
+$_ = 'david';
+$a = s/david/rules/r;
+ok( $_ eq 'david' && $a eq 'rules', 'non-destructive substitute' );
+
+$a = "david" =~ s/david/rules/r;
+ok( $a eq 'rules', 's///r with constant' );
+
+$a = "david" =~ s/david/"is"."great"/er;
+ok( $a eq 'isgreat', 's///er' );
+
+$a = "daviddavid" =~ s/david/cool/gr;
+ok( $a eq 'coolcool', 's///gr' );
+
+$a = 'david';
+$b = $a =~ s/david/sucks/r =~ s/sucks/rules/r;
+ok( $a eq 'david' && $b eq 'rules', 'chained s///r' );
+
+$a = 'david';
+$b = $a =~ s/xxx/sucks/r;
+ok( $a eq 'david' && $b eq 'david', 'non matching s///r' );
+
+$a = 'david';
+for (0..2) {
+    ok( 'david' =~ s/$a/rules/ro eq 'rules', 's///ro '.$_ );
+}
+
+$a = 'david';
+eval '$b = $a !~ s/david/is great/r';
+like( $@, qr{Using !~ with s///r doesn't make sense}, 's///r !~ operator gives error' );
+
+{
+        no warnings 'uninitialized';
+        $a = undef;
+        $b = $a =~ s/left/right/r;
+        ok ( !defined $a && !defined $b, 's///r with undef input' );
+
+        use warnings;
+        must_warn sub { $b = $a =~ s/left/right/r }, '^Use of uninitialized value', 's///r Uninitialized warning';
+
+        $a = 'david';
+        must_warn 's/david/sucks/r; 1',    '^Useless use of Non-destructive substitution', 's///r void context warning';
+}
+
+$a = '';
+$b = $a =~ s/david/rules/r;
+ok( $a eq '' && $b eq '', 's///r on empty string' );
+
+$_ = 'david';
+@b = s/david/rules/r;
+ok( $_ eq 'david' && $b[0] eq 'rules', 's///r in list context' );
+
+# Magic value and s///r
+require Tie::Scalar;
+tie $m, 'Tie::StdScalar';  # makes $a magical
+$m = "david";
+$b = $m =~ s/david/rules/r;
+ok( $m eq 'david' && $b eq 'rules', 's///r with magic input' );
+
+$m = $b =~ s/rules/david/r;
+ok( defined tied($m), 's///r magic isn\'t lost' );
+
+$b = $m =~ s/xxx/yyy/r;
+ok( ! defined tied($b), 's///r magic isn\'t contagious' );
 
 $x = 'foo';
 $_ = "x";

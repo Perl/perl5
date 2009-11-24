@@ -440,6 +440,21 @@ of the regex in the string:
     $x = "I batted 4 for 4";
     $x =~ s/4/four/g;  # $x contains "I batted four for four"
 
+The non-destructive modifier C<s///r> causes the result of the substitution
+to be returned instead of modifying C<$_> (or whatever variable the
+substitute was bound to with C<=~>):
+
+    $x = "I like dogs.";
+    $y = $x =~ s/dogs/cats/r;
+    print "$x $y\n"; # prints "I like dogs. I like cats."
+
+    $x = "Cats are great.";
+    print $x =~ s/Cats/Dogs/r =~ s/Dogs/Frogs/r =~ s/Frogs/Hedgehogs/r, "\n";
+    # prints "Hedgehogs are great."
+
+    @foo = map { s/[a-z]/X/r } qw(a b c 1 2 3);
+    # @foo is now qw(X X X 1 2 3)
+
 The evaluation modifier C<s///e> wraps an C<eval{...}> around the
 replacement string and the evaluated result is substituted for the
 matched substring.  Some examples:
