@@ -5441,7 +5441,7 @@ Perl_yylex(pTHX)
 	d = s;
 	{
 	    const char tmp = *s;
-	    if (PL_lex_state == LEX_NORMAL)
+	    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
 		s = SKIPSPACE1(s);
 
 	    if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
