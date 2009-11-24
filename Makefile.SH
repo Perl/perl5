@@ -982,7 +982,7 @@ $(plextract):	$(MINIPERL_EXE) $(CONFIGPM) x2p/s2p $(dynamic_ext)
 x2p/s2p: $(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
-unidatafiles $(unidatafiles): uni.data
+unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
 uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 	$(MINIPERL) $(Icwd) lib/unicore/mktables -C lib/unicore -P pod -T t/re/uniprops.t -p
