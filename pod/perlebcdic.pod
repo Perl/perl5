@@ -699,7 +699,7 @@ it in tr/// like so:
     my $ebcdic_string = $ascii_string;
     eval '$ebcdic_string =~ tr/' . $cp_037 . '/\000-\377/';
 
-To convert from EBCDIC 037 to ASCII just reverse the order of the tr/// 
+To convert from EBCDIC 037 to ASCII just reverse the order of the tr///
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
@@ -1062,9 +1062,9 @@ then sort().  If the data are primarily lowercase non Latin 1 then
 apply tr/[A-Z]/[a-z]/ before sorting.  If the data are primarily UPPERCASE
 and include Latin-1 characters then apply:  
 
-    tr/[a-z]/[A-Z]/; 
+    tr/[a-z]/[A-Z]/;
     tr/[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþ]/[ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ/;
-    s/ß/SS/g; 
+    s/ß/SS/g;
 
 then sort().  Do note however that such Latin-1 manipulation does not 
 address the E<yuml> C<y WITH DIAERESIS> character that will remain at 
