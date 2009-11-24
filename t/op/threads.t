@@ -191,4 +191,21 @@ undef *a;
 threads->new(sub {})->join;
 pass("undefing a typeglob doesn't cause a crash during cloning");
 
+
+TODO: {
+    no strict 'vars';   # Accessing $TODO from test.pl
+    local $TODO = 'perl #70748';
+
+# Test we don't get:
+# panic: del_backref during global destruction.
+fresh_perl_is(<<'EOI', 'ok', { }, 'No del_backref panic');
+use threads;
+sub foo { return (sub { }); }
+my $bar = threads->create(\&foo)->join();
+threads->create(sub { })->join();
+print "ok";
+EOI
+
+} # TODO
+
 # EOF
