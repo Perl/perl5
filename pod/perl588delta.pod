@@ -1383,7 +1383,7 @@ happens at program exit, it may be skipped completely.
 
 =item *
 
-Salvador Fandiño provided improvements to reduce the memory usage of C<sort>
+Salvador FandiÃ±o provided improvements to reduce the memory usage of C<sort>
 and to speed up some cases.
 
 =item *
