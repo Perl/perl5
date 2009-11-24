@@ -155,6 +155,8 @@ if ($ENV{PERL_3LOG}) { # Tru64 third(1) tool, see perlhack
 
 # check leakage for embedders
 $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
+# check existence of all symbols
+$ENV{PERL_DL_NONLAZY} = 1 unless exists $ENV{PERL_DL_NONLAZY};
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
