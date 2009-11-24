@@ -63,6 +63,7 @@ PP(pp_padav)
 {
     dVAR; dSP; dTARGET;
     I32 gimme;
+    assert(SvTYPE(TARG) == SVt_PVAV);
     if (PL_op->op_private & OPpLVAL_INTRO)
 	if (!(PL_op->op_private & OPpPAD_STATE))
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
@@ -106,6 +107,7 @@ PP(pp_padhv)
     dVAR; dSP; dTARGET;
     I32 gimme;
 
+    assert(SvTYPE(TARG) == SVt_PVHV);
     XPUSHs(TARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
 	if (!(PL_op->op_private & OPpPAD_STATE))
