@@ -1248,10 +1248,14 @@ See also hash_seed() of L<Hash::Util>.
 =item PERL_MEM_LOG
 X<PERL_MEM_LOG>
 
-If your perl was compiled with -Accflags=-DPERL_MEM_LOG, setting envar
-PERL_MEM_LOG=1mst writes (m)emory and (s)v debug messages with
-(t)imestamps to stdout(1) instead of stderr(2).  You can write to
-other opened fds too, in a variety of ways;
+If your perl was configured with C<-Accflags=-DPERL_MEM_LOG>, setting the
+environment variable C<PERL_MEMLOG> enables logging debug messages. The
+value has the form C<< <number>[m][s][t] >>, where C<number> is the
+filedescriptor number you want to write to, and the combination of letters
+specifies that you want information about (m)emory and/or (s)v, optionally
+with (t)imestamps. For example C<PERL_MEMLOG=1mst> will log all
+information to stdout. You can write to other opened filedescriptors too,
+in a variety of ways;
 
   bash$ 3>foo3 PERL_MEM_LOG=3m perl ...
 
