@@ -1607,7 +1607,7 @@ inst_lib : $(CONFIGPM)
 
 $(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. -I..\..\cpan\Cwd\lib -I..\..\cpan\Cwd mktables
+	..\$(MINIPERL) -I.. -I..\..\cpan\Cwd\lib -I..\..\cpan\Cwd mktables -P ..\..\pod -maketest -makelist -p
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
