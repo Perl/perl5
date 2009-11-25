@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(14);
+     plan(15);
 }
 
 use strict;
