@@ -1134,7 +1134,7 @@ sub _send_message_mailsend {
     open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
     while (<REP>) { print $fh $_ }
     close(REP) or die "Error closing $filename: $!";
-    $fh->close;
+    $fh->close or die "Error sending mail: $!";
 
     print "\nMessage sent.\n";
 }
