@@ -4188,6 +4188,8 @@ t/comp/decl.t			See if declarations work
 t/comp/fold.t			See if constant folding works
 t/comp/hints.aux		Auxillary file for %^H test
 t/comp/hints.t			See if %^H works
+t/comp/line_debug_0.aux		Auxiliary file for @{"_<$file"} test
+t/comp/line_debug.t		See if @{"_<$file"} works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
 t/comp/our.t			Tests for our declaration

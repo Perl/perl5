@@ -1197,6 +1197,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     STRLEN old_bufend_pos, new_bufend_pos;
     STRLEN bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
     STRLEN linestart_pos, last_uni_pos, last_lop_pos;
+    bool got_some_for_debugger = 0;
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
@@ -1231,6 +1232,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	got_some = 0;
     } else if (filter_gets(linestr, old_bufend_pos)) {
 	got_some = 1;
+	got_some_for_debugger = 1;
     } else {
 	if (!SvPOK(linestr))   /* can get undefined by filter_gets */
 	    sv_setpvs(linestr, "");
@@ -1270,7 +1272,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	PL_parser->last_uni = buf + last_uni_pos;
     if (PL_parser->last_lop)
 	PL_parser->last_lop = buf + last_lop_pos;
-    if (got_some && (PERLDB_LINE || PERLDB_SAVESRC) &&
+    if (got_some_for_debugger && (PERLDB_LINE || PERLDB_SAVESRC) &&
 	    PL_curstash != PL_debstash) {
 	/* debugger active and we're not compiling the debugger code,
 	 * so store the line into the debugger's array of lines
@@ -4324,10 +4326,13 @@ Perl_yylex(pTHX)
 		fake_eof = LEX_FAKE_EOF;
 	    }
 	    PL_bufptr = PL_bufend;
+	    CopLINE_inc(PL_curcop);
 	    if (!lex_next_chunk(fake_eof)) {
+		CopLINE_dec(PL_curcop);
 		s = PL_bufptr;
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
+	    CopLINE_dec(PL_curcop);
 #ifdef PERL_MAD
 	    if (!PL_rsfp)
 		PL_realtokenstart = -1;
@@ -4363,8 +4368,6 @@ Perl_yylex(pTHX)
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
-	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
-	    update_debugger_info(PL_linestr, NULL, 0);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
 	if (CopLINE(PL_curcop) == 1) {
@@ -12018,10 +12021,12 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 #endif
 	PL_bufptr = s;
+	CopLINE_inc(PL_curcop);
 	if (!outer || !lex_next_chunk(0)) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf);
 	}
+	CopLINE_dec(PL_curcop);
 	s = PL_bufptr;
 #ifdef PERL_MAD
 	stuffstart = s - SvPVX(PL_linestr);
@@ -12044,8 +12049,6 @@ S_scan_heredoc(pTHX_ register char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
-	    update_debugger_info(PL_linestr, NULL, 0);
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
