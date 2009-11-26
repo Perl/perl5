@@ -13,6 +13,8 @@ typedef PTR_TBL_t *XS__APItest__PtrTable;
 typedef struct {
     int i;
     SV *sv;
+    GV *cscgv;
+    AV *cscav;
 } my_cxt_t;
 
 START_MY_CXT
@@ -241,6 +243,44 @@ rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
 }
 
 STATIC MGVTBL rmagical_b = { 0 };
+
+STATIC void
+blockhook_start(pTHX_ int full)
+{
+    dMY_CXT;
+    AV *const cur = GvAV(MY_CXT.cscgv);
+
+    SAVEGENERICSV(GvAV(MY_CXT.cscgv));
+
+    if (cur) {
+        I32 i;
+        AV *const new = newAV();
+
+        for (i = 0; i <= av_len(cur); i++) {
+            av_store(new, i, newSVsv(*av_fetch(cur, i, 0)));
+        }
+
+        GvAV(MY_CXT.cscgv) = new;
+    }
+}
+
+STATIC void
+blockhook_pre_end(pTHX_ OP **o)
+{
+    dMY_CXT;
+
+    /* if we hit the end of a scope we missed the start of, we need to
+     * unconditionally clear @CSC */
+    if (GvAV(MY_CXT.cscgv) == MY_CXT.cscav && MY_CXT.cscav)
+        av_clear(MY_CXT.cscav);
+
+}
+
+STATIC struct block_hooks my_block_hooks = {
+    blockhook_start,
+    blockhook_pre_end,
+    NULL
+};
 
 #include "const-c.inc"
 
@@ -595,8 +635,16 @@ PROTOTYPES: DISABLE
 BOOT:
 {
     MY_CXT_INIT;
+
     MY_CXT.i  = 99;
     MY_CXT.sv = newSVpv("initial",0);
+    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
+        GV_ADD, SVt_PVAV);
+    MY_CXT.cscav = GvAV(MY_CXT.cscgv);
+
+    if (!PL_blockhooks)
+        PL_blockhooks = newAV();
+    av_push(PL_blockhooks, newSViv(PTR2IV(&my_block_hooks))); 
 }                              
 
 void
@@ -604,6 +652,9 @@ CLONE(...)
     CODE:
     MY_CXT_CLONE;
     MY_CXT.sv = newSVpv("initial_clone",0);
+    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
+        GV_ADD, SVt_PVAV);
+    MY_CXT.cscav = NULL;
 
 void
 print_double(val)
