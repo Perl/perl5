@@ -518,6 +518,10 @@ backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
 backreferences.
 
+If the bracketing group did not match, the associated backreference won't
+match either. (This can happen if the bracketing group is optional, or
+in a different branch of an alternation.)
+
 X<\g{1}> X<\g{-1}> X<\g{name}> X<relative backreference> X<named backreference>
 In order to provide a safer and easier way to construct patterns using
 backreferences, Perl provides the C<\g{N}> notation (starting with perl
