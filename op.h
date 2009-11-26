@@ -645,6 +645,32 @@ struct loop {
 #define FreeOp(p) PerlMemShared_free(p)
 #endif
 
+struct block_hooks {
+    void    (*bhk_start)	(pTHX_ int full);
+    void    (*bhk_pre_end)	(pTHX_ OP **seq);
+    void    (*bhk_post_end)	(pTHX_ OP **seq);
+};
+
+#define CALL_BLOCK_HOOKS(which, arg) \
+    STMT_START { \
+	if (PL_blockhooks) { \
+	    I32 i; \
+	    for (i = av_len(PL_blockhooks); i >= 0; i--) { \
+		SV *sv = AvARRAY(PL_blockhooks)[i]; \
+		struct block_hooks *hk;	\
+		\
+		assert(SvIOK(sv)); \
+		if (SvUOK(sv)) \
+		    hk = INT2PTR(struct block_hooks *, SvUVX(sv)); \
+		else \
+		    hk = INT2PTR(struct block_hooks *, SvIVX(sv)); \
+		\
+		if (hk->bhk_ ## which) \
+		    CALL_FPTR(hk->bhk_ ## which)(aTHX_ arg); \
+	    } \
+	} \
+    } STMT_END
+
 #ifdef PERL_MAD
 #  define MAD_NULL 1
 #  define MAD_PV 2

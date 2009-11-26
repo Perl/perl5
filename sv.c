@@ -12649,6 +12649,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     PL_registered_mros  = hv_dup_inc(proto_perl->Iregistered_mros, param);
+    PL_blockhooks	= av_dup_inc(proto_perl->Iblockhooks, param);
 
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
