@@ -1201,9 +1201,6 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
-#ifdef PERL_MAD
-    flags |= LEX_KEEP_PREVIOUS;
-#endif /* PERL_MAD */
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
     if (!(flags & LEX_KEEP_PREVIOUS) &&
