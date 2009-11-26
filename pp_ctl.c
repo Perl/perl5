@@ -4849,8 +4849,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     int status = 0;
     SV *upstream;
     STRLEN got_len;
-    const char *got_p = NULL;
-    const char *prune_from = NULL;
+    char *got_p = NULL;
+    char *prune_from = NULL;
     bool read_from_cache = FALSE;
     STRLEN umaxlen;
 
@@ -4953,8 +4953,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		prune_from = got_p + umaxlen;
 	    }
 	} else {
-	    const char *const first_nl =
-		(const char *)memchr(got_p, '\n', got_len);
+	    char *const first_nl = (char *)memchr(got_p, '\n', got_len);
 	    if (first_nl && first_nl + 1 < got_p + got_len) {
 		/* There's a second line here... */
 		prune_from = first_nl + 1;
@@ -4980,6 +4979,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    SvUTF8_on(cache);
 	}
 	SvCUR_set(upstream, got_len - cached_len);
+	*prune_from = 0;
 	/* Can't yet be EOF  */
 	if (status == 0)
 	    status = 1;
