@@ -4,9 +4,9 @@ print "1..4016\n";
 my $test = 0;
 
 my %templates = (
-		 utf8 => 'C0U',
-		 utf16be => 'n',
-		 utf16le => 'v',
+		 'UTF-8'    => 'C0U',
+		 'UTF-16BE' => 'n',
+		 'UTF-16LE' => 'v',
 		);
 
 sub bytes_to_utf {
@@ -14,7 +14,7 @@ sub bytes_to_utf {
     my $template = $templates{$enc};
     die "Unsupported encoding $enc" unless $template;
     my @chars = unpack "U*", $content;
-    if ($enc ne 'utf8') {
+    if ($enc ne 'UTF-8') {
 	# Make surrogate pairs
 	my @remember_that_utf_16_is_variable_length;
 	foreach my $ord (@chars) {
@@ -41,7 +41,11 @@ sub test {
     my $got = do "./utf$$.pl";
     $test = $test + 1;
     if (!defined $got) {
-	print "not ok $test # $enc $bom $nl $name; got undef\n";
+	if ($@ =~ /^(Unsupported script encoding \Q$enc\E)/) {
+	    print "ok $test # skip $1\n";
+        } else {
+	    print "not ok $test # $enc $bom $nl $name; got undef\n";
+	}
     } elsif ($got ne $expect) {
 	print "not ok $test # $enc $bom $nl $name; got '$got'\n";
     } else {
@@ -50,7 +54,7 @@ sub test {
 }
 
 for my $bom (0, 1) {
-    for my $enc (qw(utf16le utf16be utf8)) {
+    for my $enc (qw(UTF-16LE UTF-16BE UTF-8)) {
 	for my $nl (1, 0) {
 	    for my $value (123, 1234, 12345) {
 		test($enc, $value, $value, $bom, $nl, $value);
@@ -58,7 +62,7 @@ for my $bom (0, 1) {
 		# loop without the bug fix it corresponds to:
 		test($enc, "($value)", $value, $bom, $nl, "($value)");
 	    }
-	    next if $enc eq 'utf8';
+	    next if $enc eq 'UTF-8';
 	    # Arguably a bug that currently string literals from UTF-8 file
 	    # handles are not implicitly "use utf8", but don't FIXME that
 	    # right now, as here we're testing the input filter itself.

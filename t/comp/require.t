@@ -266,9 +266,9 @@ EOT
 if ($Is_EBCDIC || $Is_UTF8) { exit; }
 
 my %templates = (
-		 utf8 => 'C0U',
-		 utf16be => 'n',
-		 utf16le => 'v',
+		 'UTF-8'    => 'C0U',
+		 'UTF-16BE' => 'n',
+		 'UTF-16LE' => 'v',
 		);
 
 sub bytes_to_utf {
@@ -280,6 +280,9 @@ sub bytes_to_utf {
 
 foreach (sort keys %templates) {
     $i++; do_require(bytes_to_utf($_, qq(print "ok $i # $_\\n"; 1;\n), 1));
+    if ($@ =~ /^(Unsupported script encoding \Q$_\E)/) {
+	print "ok $i # skip $1\n";
+    }
 }
 
 END {

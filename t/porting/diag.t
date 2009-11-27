@@ -358,10 +358,10 @@ Unknown PerlIO layer "scalar"
 Unknown Unicode option letter '%c'
 unrecognised control character '%c'
 Unstable directory path, current directory changed unexpectedly
-Unsupported script encoding UTF16-BE
-Unsupported script encoding UTF16-LE
-Unsupported script encoding UTF32-BE
-Unsupported script encoding UTF32-LE
+Unsupported script encoding UTF-16BE
+Unsupported script encoding UTF-16LE
+Unsupported script encoding UTF-32BE
+Unsupported script encoding UTF-32LE
 Unterminated compressed integer in unpack
 Usage: CODE(0x%x)(%s)
 Usage: %s(%s)
