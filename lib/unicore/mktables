@@ -4,7 +4,10 @@
 # Any files created or read by this program should be listed in 'mktables.lst'
 # Use -makelist to regenerate it.
 
-require 5.008;        # Needs pack "U". Probably safest to run on 5.8.x
+# Needs 'no overloading' to run faster on miniperl.  Code commented out at the
+# subroutine objaddr can be used instead to work as far back (untested) as
+# 5.8: needs pack "U".
+require 5.010_001;
 use strict;
 use warnings;
 use Carp;
@@ -295,6 +298,11 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # string, but it is a contributory property, and therefore not output by
 # default.
 #
+# DEBUGGING
+#
+# XXX Add more stuff here.   use perl instead of miniperl to find problems with
+# Scalar::Util
+
 # FUTURE ISSUES
 #
 # The program would break if Unicode were to change its names so that
@@ -680,7 +688,7 @@ if ($v_version gt v3.2.0) {
 # unless explicitly added.
 if ($v_version ge v5.2.0) {
     my $unihan = 'Unihan; remove from list if using Unihan';
-    foreach my $table qw ( 
+    foreach my $table qw (
                            kAccountingNumeric
                            kOtherNumeric
                            kPrimaryNumeric
@@ -924,7 +932,7 @@ my $DEVELOPMENT_ONLY=<<"EOF";
 # This file contains information artificially constrained to code points
 # present in Unicode release $string_compare_versions.
 # IT CANNOT BE RELIED ON.  It is for use during development only and should
-# not be used for production.  
+# not be used for production.
 
 EOF
 
@@ -1118,33 +1126,46 @@ sub file_exists ($) {   # platform independent '-e'.  This program internally
     return -e internal_file_to_platform($file);
 }
 
-# This 'require' doesn't necessarily work in miniperl, and even if it does,
-# the native perl version of it (which is what would operate under miniperl)
-# is extremely slow, as it does a string eval every call.
-my $has_fast_scalar_util = $ !~ /miniperl/
-                            && defined eval "require Scalar::Util";
-
 sub objaddr($) {
-    # Returns the address of the blessed input object.  Uses the XS version if
-    # available.  It doesn't check for blessedness because that would do a
-    # string eval every call, and the program is structured so that this is
-    # never called for a non-blessed object.
+    # Returns the address of the blessed input object.
+    # It doesn't check for blessedness because that would do a string eval
+    # every call, and the program is structured so that this is never called
+    # for a non-blessed object.
 
-    return Scalar::Util::refaddr($_[0]) if $has_fast_scalar_util;
-
-    # Check at least that is a ref.
-    my $pkg = ref($_[0]) or return undef;
-
-    # Change to a fake package to defeat any overloaded stringify
-    bless $_[0], 'main::Fake';
+    no overloading; # If overloaded, numifying below won't work.
 
     # Numifying a ref gives its address.
-    my $addr = 0 + $_[0];
-
-    # Return to original class
-    bless $_[0], $pkg;
-    return $addr;
+    return 0 + $_[0];
 }
+
+# Commented code below should work on Perl 5.8.
+## This 'require' doesn't necessarily work in miniperl, and even if it does,
+## the native perl version of it (which is what would operate under miniperl)
+## is extremely slow, as it does a string eval every call.
+#my $has_fast_scalar_util = $ !~ /miniperl/
+#                            && defined eval "require Scalar::Util";
+#
+#sub objaddr($) {
+#    # Returns the address of the blessed input object.  Uses the XS version if
+#    # available.  It doesn't check for blessedness because that would do a
+#    # string eval every call, and the program is structured so that this is
+#    # never called for a non-blessed object.
+#
+#    return Scalar::Util::refaddr($_[0]) if $has_fast_scalar_util;
+#
+#    # Check at least that is a ref.
+#    my $pkg = ref($_[0]) or return undef;
+#
+#    # Change to a fake package to defeat any overloaded stringify
+#    bless $_[0], 'main::Fake';
+#
+#    # Numifying a ref gives its address.
+#    my $addr = 0 + $_[0];
+#
+#    # Return to original class
+#    bless $_[0], $pkg;
+#    return $addr;
+#}
 
 sub max ($$) {
     my $a = shift;
@@ -1457,9 +1478,8 @@ package main;
                     no strict "refs";
                     *$subname = sub {
                         use strict "refs";
-                        my $self = shift;
-                        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-                        my $addr = main::objaddr $self;
+                        Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
+                        my $addr = main::objaddr $_[0];
                         if (ref $field->{$addr} ne 'ARRAY') {
                             my $type = ref $field->{$addr};
                             $type = 'scalar' unless $type;
@@ -1480,9 +1500,8 @@ package main;
                     no strict "refs";
                     *$subname = sub {
                         use strict "refs";
-                        my $self = shift;
-                        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-                        return $field->{main::objaddr $self};
+                        Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
+                        return $field->{main::objaddr $_[0]};
                     }
                 }
             }
@@ -1491,11 +1510,12 @@ package main;
                 no strict "refs";
                 *$subname = sub {
                     use strict "refs";
-                    return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
-                    my $self = shift;
-                    my $value = shift;
-                    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-                    $field->{main::objaddr $self} = $value;
+                    if (main::DEBUG) {
+                        return Carp::carp_too_few_args(\@_, 2) if @_ < 2;
+                        Carp::carp_extra_args(\@_) if @_ > 2;
+                    }
+                    # $self is $_[0]; $value is $_[1]
+                    $field->{main::objaddr $_[0]} = $_[1];
                     return;
                 }
             }
@@ -3968,6 +3988,10 @@ sub trace { return main::trace(@_); }
     main::set_access('nominal_short_name_length',
                     \%nominal_short_name_length);
 
+    my %complete_name;
+    # The complete name, including property.
+    main::set_access('complete_name', \%complete_name, 'r');
+
     my %property;
     # Parent property this table is attached to.
     main::set_access('property', \%property, 'r');
@@ -4049,6 +4073,8 @@ sub trace { return main::trace(@_); }
         $name{$addr} = delete $args{'Name'};
         $find_table_from_alias{$addr} = delete $args{'_Alias_Hash'};
         $full_name{$addr} = delete $args{'Full_Name'};
+        my $complete_name = $complete_name{$addr}
+                          = delete $args{'Complete_Name'};
         $internal_only{$addr} = delete $args{'Internal_Only_Warning'} || 0;
         $perl_extension{$addr} = delete $args{'Perl_Extension'} || 0;
         $property{$addr} = delete $args{'_Property'};
@@ -4084,7 +4110,6 @@ sub trace { return main::trace(@_); }
         # of properties or tables that have particular statuses; if not, is
         # normal.  The lists are prioritized so the most serious ones are
         # checked first
-        my $complete_name = $self->complete_name;
         if (! $status{$addr}) {
             if (exists $why_suppressed{$complete_name}) {
                 $status{$addr} = $SUPPRESSED;
@@ -4149,15 +4174,12 @@ sub trace { return main::trace(@_); }
     # class
     for my $sub qw(
                     append_to_body
-                    complete_name
                     pre_body
                 )
                 # append_to_body and pre_body are called in the write() method
                 # to add stuff after the main body of the table, but before
                 # its close; and to prepend stuff before the beginning of the
                 # table.
-                # complete_name returns the complete name of the property and
-                # table, like Script=Latin
     {
         no strict "refs";
         *$sub = sub {
@@ -4737,12 +4759,15 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $format = delete $args{'Format'};
         my $property = delete $args{'_Property'};
+        my $full_name = delete $args{'Full_Name'};
         # Rest of parameters passed on
 
         my $range_list = Range_Map->new(Owner => $property);
 
         my $self = $class->SUPER::new(
                                     Name => $name,
+                                    Complete_Name =>  $full_name,
+                                    Full_Name => $full_name,
                                     _Property => $property,
                                     _Range_List => $range_list,
                                     %args);
@@ -4770,13 +4795,6 @@ sub trace { return main::trace(@_); }
         my $name = $self->property->full_name;
         $name = '""' if $name eq "";
         return "Map table for Property '$name'";
-    }
-
-    sub complete_name {
-        # The complete name for a map table is just its full name, as that
-        # completely identifies the property it represents
-
-        return shift->full_name;
     }
 
     sub add_alias {
@@ -5001,8 +5019,6 @@ sub trace { return main::trace(@_); }
             # But for $STRING properties, must calculate now.  Subtract the
             # count from each range that maps to the default.
             foreach my $range ($self->_range_list->ranges) {
-        local $to_trace = 1 if main::DEBUG;
-        trace $self, $range;
                 if ($range->value eq $default_map) {
                     $count -= $range->end +1 - $range->start;
                 }
@@ -5709,6 +5725,10 @@ sub trace { return main::trace(@_); }
         # The property for which this table is a listing of property values.
         my $property = delete $args{'_Property'};
 
+        my $name = delete $args{'Name'};
+        my $full_name = delete $args{'Full_Name'};
+        $full_name = $name if ! defined $full_name;
+
         # Optional
         my $initialize = delete $args{'Initialize'};
         my $matches_all = delete $args{'Matches_All'} || 0;
@@ -5717,7 +5737,22 @@ sub trace { return main::trace(@_); }
         my $range_list = Range_List->new(Initialize => $initialize,
                                          Owner => $property);
 
+        my $complete = $full_name;
+        $complete = '""' if $complete eq "";  # A null name shouldn't happen,
+                                              # but this helps debug if it
+                                              # does
+        # The complete name for a match table includes it's property in a
+        # compound form 'property=table', except if the property is the
+        # pseudo-property, perl, in which case it is just the single form,
+        # 'table' (If you change the '=' must also change the ':' in lots of
+        # places in this program that assume an equal sign)
+        $complete = $property->full_name . "=$complete" if $property != $perl;
+        
+
         my $self = $class->SUPER::new(%args,
+                                      Name => $name,
+                                      Complete_Name => $complete,
+                                      Full_Name => $full_name,
                                       _Property => $property,
                                       _Range_List => $range_list,
                                       );
@@ -5797,7 +5832,7 @@ sub trace { return main::trace(@_); }
     sub _operator_stringify {
         my $self = shift;
 
-        my $name= $self->complete_name;
+        my $name = $self->complete_name;
         return "Table '$name'";
     }
 
@@ -6004,26 +6039,6 @@ sub trace { return main::trace(@_); }
 
         return if $self->carp_if_locked;
         return $self->_range_list->add_range(@_);
-    }
-
-    sub complete_name {
-        # The complete name for a match table includes it's property in a
-        # compound form 'property=table', except if the property is the
-        # pseudo-property, perl, in which case it is just the single form,
-        # 'table'
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-        my $name = $self->full_name;
-        my $property = $self->property;
-        $name = '""' if $name eq "";  # A null name shouldn't happen, but this
-                                      # helps debug if it does
-        return $name if $property == $perl;
-
-        # (If change the '=' must also change the ':' in set_final_comment(),
-        # and the references to colon in its text)
-        return $property->full_name . '=' . $name;
     }
 
     sub pre_body {  # Does nothing for match tables.
@@ -8612,7 +8627,6 @@ END
                             else {
                                 $default_map = $missings;
                             }
-                        
                             # And store it with the property for outside use.
                             $property_object->set_default_map($default_map);
                         }
@@ -8633,8 +8647,8 @@ END
                         # Make sure there is no conflict between the two.
                         # $missings has priority.
                         if (ref $missings) {
-                            $default_table 
-                                = $property_object->table($default_map);
+                            $default_table
+                                        = $property_object->table($default_map);
                             if (! defined $default_table
                                 || $default_table != $missings)
                             {
@@ -12062,7 +12076,7 @@ To change this file, edit $0 instead.
 
 =head1 NAME
 
-$pod_file - Complete index of Unicode Version $string_version properties in the Perl core.
+$pod_file - Complete index of Unicode Version $string_version properties
 
 =head1 DESCRIPTION
 
@@ -12617,7 +12631,7 @@ sub write_all_tables() {
 
                     # Add an entry in the pod file for the table; it also does
                     # the children.
-                    make_table_pod_entries($table);
+                    make_table_pod_entries($table) if defined $pod_directory;
 
                     # See if the the table matches identical code points with
                     # something that has already been output.  In that case,
@@ -12685,11 +12699,14 @@ sub write_all_tables() {
                                                 = $standard_property_name;
                         }
 
-                        # Now for the pod entry for this alias.  Skip
-                        # the first one, which is the full name so won't have
-                        # an entry like: '\p{full: *}   \p{full: *}', and skip
-                        # if don't want an entry for this one.
-                        next if $i == 0 || ! $alias->make_pod_entry;
+                        # Now for the pod entry for this alias.  Skip if not
+                        # outputting a pod; skip the first one, which is the
+                        # full name so won't have an entry like: '\p{full: *}
+                        # \p{full: *}', and skip if don't want an entry for
+                        # this one.
+                        next if $i == 0
+                                || ! defined $pod_directory
+                                || ! $alias->make_pod_entry;
 
                         push @match_properties,
                             format_pod_line($indent_info_column,
@@ -13468,8 +13485,8 @@ if ($write_unchanged_files) {
 else {
     print "Reading file list '$file_list'\n" if $verbosity >= $VERBOSE;
     my $file_handle;
-    if (! open $file_handle,"<",$file_list) {
-        Carp::my_carp("Failed to open '$file_list', turning on -globlist option instead: $!");
+    if (! open $file_handle, "<", $file_list) {
+        Carp::my_carp("Failed to open '$file_list' (this is expected to be missing the first time); turning on -globlist option instead: $!");
         $glob_list = 1;
     }
     else {
@@ -13561,7 +13578,7 @@ if ($glob_list) {
         }
     }
     if (@unknown_input_files) {
-        print STDERR simple_fold(join_line(<<END
+        print STDERR simple_fold(join_lines(<<END
 
 The following files are unknown as to how to handle.  Assuming they are
 typical property files.  You'll know by later error messages if it worked or
@@ -13759,7 +13776,7 @@ sub Expect($$$$) {
     my $line   = (caller)[2];
 
     # Convert the code point to hex form
-    my $string = sprintf "\"\\x{%04X}\"", $ord; 
+    my $string = sprintf "\"\\x{%04X}\"", $ord;
 
     # Convert the non-ASCII code points expressible as characters in Perl 5.8
     # to their ASCII equivalents, and skip the others.
