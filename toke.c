@@ -3807,7 +3807,8 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     s = SKIPSPACE1(s);
     if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 	s = force_version(s, TRUE);
-	if (*s == ';' || (s = SKIPSPACE1(s), *s == ';')) {
+	if (*s == ';' || *s == '}'
+		|| (s = SKIPSPACE1(s), (*s == ';' || *s == '}'))) {
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.opval = NULL;
 	    force_next(WORD);
