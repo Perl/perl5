@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..101\n";
+print "1..103\n";
 
 eval 'print "ok 1\n";';
 
@@ -569,6 +569,19 @@ EOP
 fresh_perl_is(<<'EOP', "ok\n", undef, 'variant of RT #70862');
 eval {
     $::{'@'}='';
+};
+print "ok\n";
+EOP
+
+fresh_perl_is(<<'EOP', "ok\n", undef, 'related to RT #70862');
+$::{'@'}=\3;
+eval {};
+print "ok\n";
+EOP
+
+fresh_perl_is(<<'EOP', "ok\n", undef, 'related to RT #70862');
+eval {
+    $::{'@'}=\3;
 };
 print "ok\n";
 EOP

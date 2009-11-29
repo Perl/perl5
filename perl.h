@@ -1311,6 +1311,24 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 #define ERRSV GvSVn(PL_errgv)
+
+#define CLEAR_ERRSV() STMT_START {					\
+    if (!GvSV(PL_errgv)) {						\
+	sv_setpvs(GvSV(gv_add_by_type(PL_errgv, SVt_PV)), "");		\
+    } else if (SvREADONLY(GvSV(PL_errgv))) {				\
+	SvREFCNT_dec(GvSV(PL_errgv));					\
+	GvSV(PL_errgv) = newSVpvs("");					\
+    } else {								\
+	SV *const errsv = GvSV(PL_errgv);				\
+	sv_setpvs(errsv, "");						\
+	if (SvMAGICAL(errsv)) {						\
+	    mg_free(errsv);						\
+	}								\
+	SvPOK_only(errsv);						\
+    }									\
+    } STMT_END
+
+
 #ifdef PERL_CORE
 # define DEFSV (0 + GvSVn(PL_defgv))
 #else
@@ -6128,8 +6146,6 @@ extern void moncontrol(int);
 */
 
 #endif /* Include guard */
-
-#define CLEAR_ERRSV() STMT_START { sv_setpvn(ERRSV,"",0); if (SvMAGICAL(ERRSV)) { mg_free(ERRSV); } SvPOK_only(ERRSV); } STMT_END
 
 /*
  * Local variables:
