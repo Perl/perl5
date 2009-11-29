@@ -1057,3 +1057,15 @@ $[ = 3;
 EXPECT
 Use of assignment to $[ is deprecated at - line 2.
 Use of assignment to $[ is deprecated at - line 4.
+########
+# op.c
+use warnings 'void';
+@x = split /y/, "z";
+$x = split /y/, "z";
+     split /y/, "z";
+no warnings 'void';
+@x = split /y/, "z";
+$x = split /y/, "z";
+     split /y/, "z";
+EXPECT
+Useless use of split in void context at - line 5.

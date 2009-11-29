@@ -1086,6 +1086,17 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    useless = OP_DESC(o);
 	break;
 
+    case OP_SPLIT:
+	kid = cLISTOPo->op_first;
+	if (kid && kid->op_type == OP_PUSHRE
+#ifdef USE_ITHREADS
+		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff)
+#else
+		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv)
+#endif
+	    useless = OP_DESC(o);
+	break;
+
     case OP_NOT:
        kid = cUNOPo->op_first;
        if (kid->op_type != OP_MATCH && kid->op_type != OP_SUBST &&
