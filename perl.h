@@ -1310,7 +1310,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define SS_NORMAL  		0
 #endif
 
-#define ERRSV GvSV(PL_errgv)
+#define ERRSV GvSVn(PL_errgv)
 #ifdef PERL_CORE
 # define DEFSV (0 + GvSVn(PL_defgv))
 #else
