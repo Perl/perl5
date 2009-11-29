@@ -961,9 +961,9 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "... Disabling check substring...\n"));
+	    /* XXX Does the destruction order has to change with do_utf8? */
 	    SvREFCNT_dec(do_utf8 ? prog->check_utf8 : prog->check_substr);
-	    if (do_utf8 ? prog->check_substr : prog->check_utf8)
-		SvREFCNT_dec(do_utf8 ? prog->check_substr : prog->check_utf8);
+	    SvREFCNT_dec(do_utf8 ? prog->check_substr : prog->check_utf8);
 	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */

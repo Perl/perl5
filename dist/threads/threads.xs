@@ -1,11 +1,17 @@
 #define PERL_NO_GET_CONTEXT
+/* Workaround for mingw 32-bit compiler by mingw-w64.sf.net - has to come before any #include.
+ * It also defines USE_NO_MINGW_SETJMP_TWO_ARGS for the mingw.org 32-bit compilers ... but
+ * that's ok as that compiler makes no use of that symbol anyway */
+#if defined(WIN32) && defined(__MINGW32__) && !defined(__MINGW64__)
+#  define USE_NO_MINGW_SETJMP_TWO_ARGS 1
+#endif
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 /* Workaround for XSUB.h bug under WIN32 */
 #ifdef WIN32
 #  undef setjmp
-#  if !defined(__BORLANDC__)
+#  if defined(USE_NO_MINGW_SETJMP_TWO_ARGS) || (!defined(__BORLANDC__) && !defined(__MINGW64__))
 #    define setjmp(x) _setjmp(x)
 #  endif
 #endif
@@ -674,8 +680,10 @@ S_ithread_create(
     ithread     *thread;
     ithread     *current_thread = S_ithread_get(aTHX);
 
+#if PERL_VERSION <= 8 && PERL_SUBVERSION <= 7
     SV         **tmps_tmp = PL_tmps_stack;
     IV           tmps_ix  = PL_tmps_ix;
+#endif
 #ifndef WIN32
     int          rc_stack_size = 0;
     int          rc_thread_create = 0;
@@ -781,12 +789,13 @@ S_ithread_create(
             sv_copypv(thread->init_function, init_function);
         } else {
             thread->init_function =
-		SvREFCNT_inc(sv_dup(init_function, &clone_param));
+                SvREFCNT_inc(sv_dup(init_function, &clone_param));
         }
 
         thread->params = sv_dup(params, &clone_param);
         SvREFCNT_inc_void(thread->params);
 
+#if PERL_VERSION <= 8 && PERL_SUBVERSION <= 7
         /* The code below checks that anything living on the tmps stack and
          * has been cloned (so it lives in the ptr_table) has a refcount
          * higher than 0.
@@ -799,7 +808,7 @@ S_ithread_create(
          * Example of this can be found in bugreport 15837 where calls in the
          * parameter list end up as a temp.
          *
-         * One could argue that this fix should be in perl_clone.
+         * As of 5.8.8 this is done in perl_clone.
          */
         while (tmps_ix > 0) {
             SV* sv = (SV*)ptr_table_fetch(PL_ptr_table, tmps_tmp[tmps_ix]);
@@ -809,6 +818,7 @@ S_ithread_create(
                 SvREFCNT_dec(sv);
             }
         }
+#endif
 
         SvTEMP_off(thread->init_function);
         ptr_table_free(PL_ptr_table);

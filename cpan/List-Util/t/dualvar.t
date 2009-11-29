@@ -16,7 +16,7 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'dualvar requires XS version')
-			: (tests => 11);
+			: (tests => 13);
 
 Scalar::Util->import('dualvar');
 
@@ -49,13 +49,22 @@ SKIP: {
   ok( $var > 0,		'UV 2');
 }
 
+
+{
+  package Tied;
+
+  sub TIESCALAR { bless {} }
+  sub FETCH { 7.5 }
+}
+
 tie my $tied, 'Tied';
 $var = dualvar($tied, "ok");
 ok($var == 7.5,		'Tied num');
 ok($var eq 'ok',	'Tied str');
 
-package Tied;
 
-sub TIESCALAR { bless {} }
-sub FETCH { 7.5 }
-
+SKIP: {
+  skip("need utf8::is_utf8",2) unless defined &utf8::is_utf8;
+  ok(!!utf8::is_utf8(dualvar(1,chr(400))), 'utf8');
+  ok( !utf8::is_utf8(dualvar(1,"abc")),    'not utf8');
+}

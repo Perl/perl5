@@ -2,7 +2,7 @@ package Module::Build::Platform::Amiga;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_09';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 

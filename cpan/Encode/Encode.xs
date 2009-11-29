@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.16 2009/09/06 14:32:21 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.17 2009/11/16 14:08:13 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -68,7 +68,7 @@ do_fallback_cb(pTHX_ UV ch, SV *fallback_cb)
 {
     dSP;
     int argc;
-    SV *temp, *retval;
+    SV *retval = newSVpv("",0);
     ENTER;
     SAVETMPS;
     PUSHMARK(sp);
@@ -79,13 +79,10 @@ do_fallback_cb(pTHX_ UV ch, SV *fallback_cb)
     if (argc != 1){
 	croak("fallback sub must return scalar!");
     }
-    temp = newSVsv(POPs);
+    sv_catsv(retval, POPs);
     PUTBACK;
     FREETMPS;
     LEAVE;
-    retval = newSVpv("",0);
-    sv_catsv(retval, temp);
-    SvREFCNT_dec(temp);
     return retval;
 }
 
@@ -199,6 +196,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src,
 		: newSVpvf(check & ENCODE_PERLQQ ? "\\x{%04"UVxf"}" :
                  check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
                  "&#x%" UVxf ";", (UV)ch);
+	    SvUTF8_off(subchar); /* make sure no decoded string gets in */
             sdone += slen + clen;
             ddone += dlen + SvCUR(subchar);
             sv_catsv(dst, subchar);
@@ -401,19 +399,26 @@ MODULE = Encode		PACKAGE = Encode::utf8	PREFIX = Method_
 PROTOTYPES: DISABLE
 
 void
-Method_decode_xs(obj,src,check = 0)
+Method_decode_xs(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
-int	check
+SV *	check_sv
 PREINIT:
     STRLEN slen;
     U8 *s;
     U8 *e;
     SV *dst;
     bool renewed = 0;
+    int check;
 CODE:
 {
     dSP; ENTER; SAVETMPS;
+    if (SvROK(check_sv)) {
+	croak("UTF-8 decoder doesn't support callback CHECK");
+    }
+    else {
+	check = SvIV(check_sv);
+    }
     if (src == &PL_sv_undef) src = newSV(0);
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
@@ -464,18 +469,25 @@ CODE:
 }
 
 void
-Method_encode_xs(obj,src,check = 0)
+Method_encode_xs(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
-int	check
+SV *	check_sv
 PREINIT:
     STRLEN slen;
     U8 *s;
     U8 *e;
     SV *dst;
     bool renewed = 0;
+    int check;
 CODE:
 {
+    if (SvROK(check_sv)) {
+	croak("UTF-8 encoder doesn't support callback CHECK");
+    }
+    else {
+	check = SvIV(check_sv);
+    }
     if (src == &PL_sv_undef) src = newSV(0);
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);

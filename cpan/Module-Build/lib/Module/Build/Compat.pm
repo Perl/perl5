@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.35_09';
 
 use File::Basename ();
 use File::Spec;
@@ -64,12 +64,49 @@ my %macro_to_build = %makefile_to_build;
 # "LIB=foo make" is not the same as "perl Makefile.PL LIB=foo"
 delete $macro_to_build{LIB};
 
+sub _simple_prereq {
+  return $_[0] =~ /^[0-9_]+\.?[0-9_]*$/; # crudly, a decimal literal
+}
 
+sub _merge_prereq {
+  my ($req, $breq) = @_;
+  $req ||= {};
+  $breq ||= {};
+
+  # validate formats
+  for my $p ( $req, $breq ) {
+    for my $k (keys %$p) {
+      die "Prereq '$p->{$k}' for '$k' is not supported by Module::Build::Compat\n"
+        unless _simple_prereq($p->{$k});
+    }
+  }
+  # merge
+  my $merge = { %$req };
+  for my $k ( keys %$breq ) {
+    my $v1 = $merge->{$k} || 0;
+    my $v2 = $breq->{$k};
+    $merge->{$k} = $v1 > $v2 ? $v1 : $v2;
+  }
+  return %$merge;
+}
+    
+    
 sub create_makefile_pl {
   my ($package, $type, $build, %args) = @_;
   
   die "Don't know how to build Makefile.PL of type '$type'"
     unless $type =~ /^(small|passthrough|traditional)$/;
+
+  if ($type eq 'passthrough') {
+    $build->log_warn(<<"HERE");
+    
+IMPORTANT NOTE: The '$type' style of Makefile.PL is deprecated and 
+may be removed in a future version of Module::Build in favor of the
+'configure_requires' property.  See Module::Build::Compat
+documentation for details.
+
+HERE
+  }
 
   my $fh;
   if ($args{fh}) {
@@ -176,7 +213,7 @@ EOF
 		  );
     %MM_Args = (%name, %version);
     
-    %prereq = ( %{$build->requires}, %{$build->build_requires} );
+    %prereq = _merge_prereq( $build->requires, $build->build_requires );
     %prereq = map {$_, $prereq{$_}} sort keys %prereq;
     
      delete $prereq{perl};
@@ -189,7 +226,7 @@ EOF
     $MM_Args{PL_FILES} = $build->PL_files || {};
 
     if ($build->recursive_test_files) {
-        $MM_Args{TESTS} = join q{ }, $package->_test_globs($build);
+        $MM_Args{test} = { TESTS => join q{ }, $package->_test_globs($build) };
     }
 
     local $Data::Dumper::Terse = 1;
@@ -363,15 +400,13 @@ sub fake_prereqs {
   my $fh = IO::File->new("< $file") or die "Can't read $file: $!";
   my $prereqs = eval do {local $/; <$fh>};
   close $fh;
-  
-  my @prereq;
-  foreach my $section (qw/build_requires requires/) {
-    foreach (keys %{$prereqs->{$section}}) {
-      next if $_ eq 'perl';
-      push @prereq, "$_=>q[$prereqs->{$section}{$_}]";
-    }
-  }
 
+  my %merged = _merge_prereq( $prereqs->{requires}, $prereqs->{build_requires} );
+  my @prereq;
+  foreach (sort keys %merged) {
+    next if $_ eq 'perl';
+    push @prereq, "$_=>q[$merged{$_}]";
+  }
   return unless @prereq;
   return "#     PREREQ_PM => { " . join(", ", @prereq) . " }\n\n";
 }
@@ -414,7 +449,7 @@ Module::Build::Compat - Compatibility with ExtUtils::MakeMaker
   my $build = Module::Build->new
     ( module_name => 'Foo::Bar',
       license     => 'perl',
-      create_makefile_pl => 'passthrough' );
+      create_makefile_pl => 'traditional' );
   ...
 
 
@@ -448,20 +483,6 @@ The currently supported styles are:
 
 =over 4
 
-=item small
-
-A small F<Makefile.PL> will be created that passes all functionality
-through to the F<Build.PL> script in the same directory.  The user must
-already have C<Module::Build> installed in order to use this, or else
-they'll get a module-not-found error.
-
-=item passthrough
-
-This is just like the C<small> option above, but if C<Module::Build> is
-not already installed on the user's system, the script will offer to
-use C<CPAN.pm> to download it and install it before continuing with
-the build.
-
 =item traditional
 
 A F<Makefile.PL> will be created in the "traditional" style, i.e. it will
@@ -473,6 +494,30 @@ You don't want to use this style if during the C<perl Build.PL> stage
 you ask the user questions, or do some auto-sensing about the user's
 environment, or if you subclass C<Module::Build> to do some
 customization, because the vanilla F<Makefile.PL> won't do any of that.
+
+=item small
+
+A small F<Makefile.PL> will be created that passes all functionality
+through to the F<Build.PL> script in the same directory.  The user must
+already have C<Module::Build> installed in order to use this, or else
+they'll get a module-not-found error.
+
+=item passthrough (DEPRECATED)
+
+This is just like the C<small> option above, but if C<Module::Build> is
+not already installed on the user's system, the script will offer to
+use C<CPAN.pm> to download it and install it before continuing with
+the build.
+
+This option has been deprecated and may be removed in a future version
+of Module::Build.  Modern CPAN.pm and CPANPLUS will recognize the
+C<configure_requires> metadata property and install Module::Build before
+running Build.PL if Module::Build is listed and Module::Build now
+adds itself to configure_requires by default.
+
+Perl 5.10.1 includes C<configure_requires> support.  In the future, when
+C<configure_requires> support is deemed sufficiently widespread, the
+C<passthrough> style will be removed.
 
 =back
 

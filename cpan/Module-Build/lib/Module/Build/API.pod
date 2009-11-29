@@ -454,8 +454,13 @@ Specifies the licensing terms of your distribution.  Valid options include:
 
 =item apache
 
-The distribution is licensed under the Apache Software License
-(L<http://opensource.org/licenses/apachepl.php>).
+The distribution is licensed under the Apache License, Version 2.0
+(L<http://apache.org/licenses/LICENSE-2.0>).
+
+=item apache_1_1
+
+The distribution is licensed under the Apache Software License, Version 1.1
+(L<http://apache.org/licenses/LICENSE-1.1>).
 
 =item artistic
 
@@ -579,6 +584,18 @@ used to set C<dist_version>.
 
 Setting C<module_name> won't override a C<dist_*> parameter you
 specify explicitly.
+
+=item needs_compiler
+
+[version 0.36]
+
+The C<needs_compiler> parameter indicates whether a compiler is required to
+build the distsribution.  The default is false, unless XS files are found or
+the C<c_source> parameter is set, in which case it is true.  If true,
+L<ExtUtils::CBuilder> is automatically added to C<build_requires> if needed.
+
+For a distribution where a compiler is I<optional>, e.g. a dual XS/pure-Perl
+distribution, C<needs_compiler> should explicitly be set to a false value.
 
 =item PL_files
 
@@ -737,6 +754,35 @@ For backward compatibility, you may use the parameter C<scripts>
 instead of C<script_files>.  Please consider this usage deprecated,
 though it will continue to exist for several version releases.
 
+=item share_dir
+
+[version 0.36]
+
+An optional parameter specifying directories of static data files to
+be installed as read-only files for use with L<File::ShareDir>.  The
+C<share_dir> property supports both distribution-level and
+module-level share files.
+
+The default when C<share_dir> is not set is for any files in a F<share>
+directory at the top level of the distribution to be installed in
+distribution-level share directory.  Alternatively, C<share_dir> can be set to
+a directory name or an arrayref of directory names containing files to be
+installed in the distribution-level share directory.
+
+If C<share_dir> is a hashref, it may have C<dist> or C<module> keys 
+providing full flexibility in defining share directories to install.
+
+  share_dir => {
+    dist => [ 'examples', 'more_examples' ],
+    module => {
+      Foo::Templates => ['share/html', 'share/text'],
+      Foo::Config    => 'share/config',
+    }
+  }
+
+If C<share_dir> is set (manually or automatically), then File::ShareDir
+will automatically be added to the C<requires> hash.
+
 =item sign
 
 [version 0.16]
@@ -802,25 +848,23 @@ files in your distribution.
 
 [version 0.28]
 
-When called from a directory containing a F<Build.PL> script and a
-F<META.yml> file (in other words, the base directory of a
-distribution), this method will run the F<Build.PL> and return the
-resulting C<Module::Build> object to the caller.  Any key-value
-arguments given to C<new_from_context()> are essentially like
-command line arguments given to the F<Build.PL> script, so for example
-you could pass C<< verbose => 1 >> to this method to turn on
-verbosity.
+When called from a directory containing a F<Build.PL> script (in other words,
+the base directory of a distribution), this method will run the F<Build.PL> and
+call C<resume()> to return the resulting C<Module::Build> object to the caller.
+Any key-value arguments given to C<new_from_context()> are essentially like
+command line arguments given to the F<Build.PL> script, so for example you
+could pass C<< verbose => 1 >> to this method to turn on verbosity.
 
 =item resume()
 
 [version 0.03]
 
-You'll probably never call this method directly, it's only called from
-the auto-generated C<Build> script.  The C<new()> method is only
-called once, when the user runs C<perl Build.PL>.  Thereafter, when
-the user runs C<Build test> or another action, the C<Module::Build>
-object is created using the C<resume()> method to re-instantiate with
-the settings given earlier to C<new()>.
+You'll probably never call this method directly, it's only called from the
+auto-generated C<Build> script (and the C<new_from_context> method).  The
+C<new()> method is only called once, when the user runs C<perl Build.PL>.
+Thereafter, when the user runs C<Build test> or another action, the
+C<Module::Build> object is created using the C<resume()> method to
+re-instantiate with the settings given earlier to C<new()>.
 
 =item subclass()
 
@@ -1527,21 +1571,24 @@ Assigning the value C<undef> to an element causes it to be removed.
 
 =item prepare_metadata()
 
-[version 0.28]
+[version 0.36]
 
-This method is provided for authors to override to customize the
-fields of F<META.yml>.  It is passed a YAML::Node node object which can
-be modified as desired and then returned.  E.g.
+This method returns a hash reference of metadata that can be used to create a
+YAML datastream. It is provided for authors to override or customize the fields
+of F<META.yml>.   E.g.
 
   package My::Builder;
   use base 'Module::Build';
 
   sub prepare_metadata {
     my $self = shift;
-    my $node = $self->SUPER::prepare_metadata( shift );
-    $node->{custom_field} = 'foo';
-    return $node;
+    my $data = $self->SUPER::prepare_metadata();
+    $data->{custom_field} = 'foo';
+    return $data;
   }
+
+Prior to version 0.36, this method took a YAML::Node as an argument to hold
+assembled metadata.
 
 =item prereq_failures()
 
@@ -1782,6 +1829,10 @@ accessor methods for the following properties:
 
 =item build_script()
 
+=item bundle_inc()
+
+=item bundle_inc_preload()
+
 =item c_source()
 
 =item config_dir()
@@ -1789,6 +1840,8 @@ accessor methods for the following properties:
 =item configure_requires()
 
 =item conflicts()
+
+=item cpan_client()
 
 =item create_license()
 
@@ -1829,6 +1882,10 @@ accessor methods for the following properties:
 =item metafile()
 
 =item module_name()
+
+=item mymetafile()
+
+=item needs_compiler()
 
 =item orig_dir()
 
@@ -1920,7 +1977,7 @@ modify it under the same terms as Perl itself.
 =head1 SEE ALSO
 
 perl(1), L<Module::Build>(3), L<Module::Build::Authoring>(3),
-L<Module::Build::Cookbook>(3), L<ExtUtils::MakeMaker>(3), L<YAML>(3)
+L<Module::Build::Cookbook>(3), L<ExtUtils::MakeMaker>(3), L<YAML::Tiny>(3)
 
 F<META.yml> Specification:
 L<http://module-build.sourceforge.net/META-spec-current.html>

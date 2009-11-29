@@ -8,7 +8,7 @@ my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
-plan tests => 37;
+plan tests => 39;
 
 ok 1;
 
@@ -265,6 +265,18 @@ cluck "Bang!"
 }
 
 cluck_undef (0, "undef", 2, undef, 4);
+
+# check that Carp respects CORE::GLOBAL::caller override after Carp
+# has been compiled
+{
+    my $accum = '';
+    local *CORE::GLOBAL::caller = sub { local *__ANON__="fakecaller"; my @c=CORE::caller(@_); $c[0] ||= 'undef'; $accum .= "@c[0..3]\n"; return CORE::caller(($_[0]||0)+1) };
+    eval "scalar caller()";
+    like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in eval");
+    $accum = '';
+    A::long();
+    like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in Carp");
+}
 
 # line 1 "A"
 package A;

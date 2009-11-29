@@ -37,11 +37,11 @@ operator or unary operator, and precedence does matter.  And whitespace
 between the function and left parenthesis doesn't count--so you need to
 be careful sometimes:
 
-    print 1+2+4;	# Prints 7.
-    print(1+2) + 4;	# Prints 3.
-    print (1+2)+4;	# Also prints 3!
-    print +(1+2)+4;	# Prints 7.
-    print ((1+2)+4);	# Prints 7.
+    print 1+2+4;      # Prints 7.
+    print(1+2) + 4;   # Prints 3.
+    print (1+2)+4;    # Also prints 3!
+    print +(1+2)+4;   # Prints 7.
+    print ((1+2)+4);  # Prints 7.
 
 If you run Perl with the B<-w> switch it can warn you about this.  For
 example, the third line above produces:
@@ -85,6 +85,14 @@ in the descriptions below.  This is different from the C interfaces,
 which return C<-1> on failure.  Exceptions to this rule are C<wait>,
 C<waitpid>, and C<syscall>.  System calls also set the special C<$!>
 variable on failure.  Other functions do not, except accidentally.
+
+Extension modules can also hook into the Perl parser to define new
+kinds of keyword-headed expression.  These may look like functions, but
+may also look completely different.  The syntax following the keyword
+is defined entirely by the extension.  If you are an implementor, see
+L<perlapi/PL_keyword_plugin> for the mechanism.  If you are using such
+a module, see the module's documentation for details of the syntax that
+it defines.
 
 =head2 Perl Functions by Category
 X<function>
@@ -299,46 +307,46 @@ the undefined value if the file doesn't exist.  Despite the funny
 names, precedence is the same as any other named unary operator.  The
 operator may be any of:
 
-    -r	File is readable by effective uid/gid.
-    -w	File is writable by effective uid/gid.
-    -x	File is executable by effective uid/gid.
-    -o	File is owned by effective uid.
+    -r  File is readable by effective uid/gid.
+    -w  File is writable by effective uid/gid.
+    -x  File is executable by effective uid/gid.
+    -o  File is owned by effective uid.
 
-    -R	File is readable by real uid/gid.
-    -W	File is writable by real uid/gid.
-    -X	File is executable by real uid/gid.
-    -O	File is owned by real uid.
+    -R  File is readable by real uid/gid.
+    -W  File is writable by real uid/gid.
+    -X  File is executable by real uid/gid.
+    -O  File is owned by real uid.
 
-    -e	File exists.
-    -z	File has zero size (is empty).
-    -s	File has nonzero size (returns size in bytes).
+    -e  File exists.
+    -z  File has zero size (is empty).
+    -s  File has nonzero size (returns size in bytes).
 
-    -f	File is a plain file.
-    -d	File is a directory.
-    -l	File is a symbolic link.
-    -p	File is a named pipe (FIFO), or Filehandle is a pipe.
-    -S	File is a socket.
-    -b	File is a block special file.
-    -c	File is a character special file.
-    -t	Filehandle is opened to a tty.
+    -f  File is a plain file.
+    -d  File is a directory.
+    -l  File is a symbolic link.
+    -p  File is a named pipe (FIFO), or Filehandle is a pipe.
+    -S  File is a socket.
+    -b  File is a block special file.
+    -c  File is a character special file.
+    -t  Filehandle is opened to a tty.
 
-    -u	File has setuid bit set.
-    -g	File has setgid bit set.
-    -k	File has sticky bit set.
+    -u  File has setuid bit set.
+    -g  File has setgid bit set.
+    -k  File has sticky bit set.
 
-    -T	File is an ASCII text file (heuristic guess).
-    -B	File is a "binary" file (opposite of -T).
+    -T  File is an ASCII text file (heuristic guess).
+    -B  File is a "binary" file (opposite of -T).
 
-    -M	Script start time minus file modification time, in days.
-    -A	Same for access time.
-    -C	Same for inode change time (Unix, may differ for other platforms)
+    -M  Script start time minus file modification time, in days.
+    -A  Same for access time.
+    -C  Same for inode change time (Unix, may differ for other platforms)
 
 Example:
 
     while (<>) {
-	chomp;
-	next unless -f $_;	# ignore specials
-	#...
+        chomp;
+        next unless -f $_;  # ignore specials
+        #...
     }
 
 The interpretation of the file permission operators C<-r>, C<-R>,
@@ -467,17 +475,17 @@ restart system calls on some systems.  Using C<eval>/C<die> always works,
 modulo the caveats given in L<perlipc/"Signals">.
 
     eval {
-	local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
-	alarm $timeout;
-	$nread = sysread SOCKET, $buffer, $size;
-	alarm 0;
+        local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
+        alarm $timeout;
+        $nread = sysread SOCKET, $buffer, $size;
+        alarm 0;
     };
     if ($@) {
-	die unless $@ eq "alarm\n";   # propagate unexpected errors
-    	# timed out
+        die unless $@ eq "alarm\n";   # propagate unexpected errors
+        # timed out
     }
     else {
-    	# didn't
+        # didn't
     }
 
 For more information see L<perlipc>.
@@ -749,9 +757,9 @@ remove anything.
 If VARIABLE is omitted, it chomps C<$_>.  Example:
 
     while (<>) {
-	chomp;	# avoid \n on last field
-	@array = split(/:/);
-	# ...
+        chomp;  # avoid \n on last field
+        @array = split(/:/);
+        # ...
     }
 
 If VARIABLE is a hash, it chomps the hash's values, but not its keys.
@@ -819,9 +827,9 @@ Here's an example that looks up nonnumeric uids in the passwd file:
     chomp($pattern = <STDIN>);
 
     ($login,$pass,$uid,$gid) = getpwnam($user)
-	or die "$user not in passwd file";
+        or die "$user not in passwd file";
 
-    @ary = glob($pattern);	# expand filenames
+    @ary = glob($pattern);  # expand filenames
     chown $uid, $gid, @ary;
 
 On most systems, you are not allowed to change the ownership of the
@@ -901,11 +909,11 @@ Example:
 
     open(OUTPUT, '|sort >foo')  # pipe to sort
         or die "Can't start sort: $!";
-    #...			# print stuff to output
-    close OUTPUT		# wait for sort to finish
+    #...                        # print stuff to output
+    close OUTPUT                # wait for sort to finish
         or warn $! ? "Error closing sort pipe: $!"
                    : "Exit status $? from sort";
-    open(INPUT, 'foo')		# get sort's results
+    open(INPUT, 'foo')          # get sort's results
         or die "Can't open 'foo' for input: $!";
 
 FILEHANDLE may be an expression whose value can be used as an indirect
@@ -944,12 +952,12 @@ the main block.  So will C<next>, but since it will execute a C<continue>
 block, it may be more entertaining.
 
     while (EXPR) {
-	### redo always comes here
-	do_something;
+        ### redo always comes here
+        do_something;
     } continue {
-	### next always comes here
-	do_something_else;
-	# then back the top to re-check EXPR
+        ### next always comes here
+        do_something_else;
+        # then back the top to re-check EXPR
     }
     ### last always comes here
 
@@ -1036,9 +1044,9 @@ their password:
     system "stty echo";
 
     if (crypt($word, $pwd) ne $pwd) {
-	die "Sorry...\n";
+        die "Sorry...\n";
     } else {
-	print "ok\n";
+        print "ok\n";
     }
 
 Of course, typing in your own password to whoever asks you
@@ -1090,7 +1098,7 @@ function to iterate over large DBM files.  Example:
     # print out history file offsets
     dbmopen(%HIST,'/usr/lib/news/history',0666);
     while (($key,$val) = each %HIST) {
-	print $key, ' = ', unpack('L',$val), "\n";
+        print $key, ' = ', unpack('L',$val), "\n";
     }
     dbmclose(%HIST);
 
@@ -1103,7 +1111,7 @@ before you call dbmopen():
 
     use DB_File;
     dbmopen(%NS_Hist, "$ENV{HOME}/.netscape/history.db")
-	or die "Can't open netscape history file: $!";
+        or die "Can't open netscape history file: $!";
 
 =item defined EXPR
 X<defined> X<undef> X<undefined>
@@ -1148,7 +1156,7 @@ Examples:
     print if defined $switch{'D'};
     print "$val\n" while defined($val = pop(@ary));
     die "Can't readlink $sym: $!"
-	unless defined($value = readlink $sym);
+        unless defined($value = readlink $sym);
     sub foo { defined &$bar ? &$bar(@_) : die "No bar"; }
     $debugging = 0 unless defined $debugging;
 
@@ -1202,11 +1210,11 @@ after them down.  Use splice() for that.  See L</exists>.
 The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 
     foreach $key (keys %HASH) {
-	delete $HASH{$key};
+        delete $HASH{$key};
     }
 
     foreach $index (0 .. $#ARRAY) {
-	delete $ARRAY[$index];
+        delete $ARRAY[$index];
     }
 
 And so do these:
@@ -1218,11 +1226,11 @@ And so do these:
 But both of these are slower than just assigning the empty list
 or undefining %HASH or @ARRAY:
 
-    %HASH = ();		# completely empty %HASH
-    undef %HASH;	# forget %HASH ever existed
+    %HASH = ();     # completely empty %HASH
+    undef %HASH;    # forget %HASH ever existed
 
-    @ARRAY = ();	# completely empty @ARRAY
-    undef @ARRAY;	# forget @ARRAY ever existed
+    @ARRAY = ();    # completely empty @ARRAY
+    undef @ARRAY;   # forget @ARRAY ever existed
 
 Note that the EXPR can be arbitrarily complicated as long as the final
 operation is a hash element, array element,  hash slice, or array slice
@@ -1328,7 +1336,7 @@ currently the case--the C<$SIG{__DIE__}> hook is currently called
 even inside eval()ed blocks/strings!  If one wants the hook to do
 nothing in such situations, put
 
-	die @_ if $^S;
+    die @_ if $^S;
 
 as the first line of the handler (see L<perlvar/$^S>).  Because
 this promotes strange action at a distance, this counterintuitive
@@ -1388,12 +1396,12 @@ file.  Manual error checking can be done this way:
     # read in config files: system first, then user
     for $file ("/share/prog/defaults.rc",
                "$ENV{HOME}/.someprogrc")
-   {
-	unless ($return = do $file) {
-	    warn "couldn't parse $file: $@" if $@;
-	    warn "couldn't do $file: $!"    unless defined $return;
-	    warn "couldn't run $file"       unless $return;
-	}
+    {
+        unless ($return = do $file) {
+            warn "couldn't parse $file: $@" if $@;
+            warn "couldn't do $file: $!"    unless defined $return;
+            warn "couldn't run $file"       unless $return;
+        }
     }
 
 =item dump LABEL
@@ -1460,7 +1468,7 @@ The following prints out your environment like the printenv(1) program,
 only in a different order:
 
     while (($key,$value) = each %ENV) {
-	print "$key=$value\n";
+        print "$key=$value\n";
     }
 
 See also C<keys>, C<values> and C<sort>.
@@ -1499,19 +1507,19 @@ last file.  Examples:
 
     # reset line numbering on each input file
     while (<>) {
-	next if /^\s*#/;	# skip comments
-	print "$.\t$_";
+        next if /^\s*#/;  # skip comments
+        print "$.\t$_";
     } continue {
-	close ARGV  if eof;	# Not eof()!
+        close ARGV if eof;  # Not eof()!
     }
 
     # insert dashes just before last line of last file
     while (<>) {
-	if (eof()) {		# check for end of last file
-	    print "--------------\n";
-	}
-	print;
-	last if eof();          # needed if we're reading from a terminal
+        if (eof()) {  # check for end of last file
+            print "--------------\n";
+        }
+        print;
+        last if eof();          # needed if we're reading from a terminal
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
@@ -1583,10 +1591,10 @@ Examples:
     eval '$answer = $a / $b'; warn $@ if $@;
 
     # a compile-time error
-    eval { $answer = };			# WRONG
+    eval { $answer = }; # WRONG
 
     # a run-time error
-    eval '$answer =';	# sets $@
+    eval '$answer =';   # sets $@
 
 Using the C<eval{}> form as an exception trap in libraries does have some
 issues.  Due to the current arguably broken state of C<__DIE__> hooks, you
@@ -1615,14 +1623,14 @@ may be fixed in a future release.
 With an C<eval>, you should be especially careful to remember what's
 being looked at when:
 
-    eval $x;		# CASE 1
-    eval "$x";		# CASE 2
+    eval $x;        # CASE 1
+    eval "$x";      # CASE 2
 
-    eval '$x';		# CASE 3
-    eval { $x };	# CASE 4
+    eval '$x';      # CASE 3
+    eval { $x };    # CASE 4
 
-    eval "\$$x++";	# CASE 5
-    $$x++;		# CASE 6
+    eval "\$$x++";  # CASE 5
+    $$x++;          # CASE 6
 
 Cases 1 and 2 above behave identically: they run the code contained in
 the variable $x.  (Although case 2 has misleading double quotes making
@@ -1699,11 +1707,11 @@ LIST as a multivalued list, even if there is only a single scalar in
 the list.)  Example:
 
     $shell = '/bin/csh';
-    exec $shell '-sh';		# pretend it's a login shell
+    exec $shell '-sh';    # pretend it's a login shell
 
 or, more directly,
 
-    exec {'/bin/csh'} '-sh';	# pretend it's a login shell
+    exec {'/bin/csh'} '-sh';  # pretend it's a login shell
 
 When the arguments get executed via the system shell, results will
 be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
@@ -1742,12 +1750,12 @@ Given an expression that specifies a hash element or array element,
 returns true if the specified element in the hash or array has ever
 been initialized, even if the corresponding value is undefined.
 
-    print "Exists\n" 	if exists $hash{$key};
-    print "Defined\n" 	if defined $hash{$key};
+    print "Exists\n"    if exists $hash{$key};
+    print "Defined\n"   if defined $hash{$key};
     print "True\n"      if $hash{$key};
 
-    print "Exists\n" 	if exists $array[$index];
-    print "Defined\n" 	if defined $array[$index];
+    print "Exists\n"    if exists $array[$index];
+    print "Defined\n"   if defined $array[$index];
     print "True\n"      if $array[$index];
 
 A hash or array element can be true only if it's defined, and defined if
@@ -1761,17 +1769,17 @@ exist may still be callable: its package may have an C<AUTOLOAD>
 method that makes it spring into existence the first time that it is
 called -- see L<perlsub>.
 
-    print "Exists\n" 	if exists &subroutine;
-    print "Defined\n" 	if defined &subroutine;
+    print "Exists\n"  if exists &subroutine;
+    print "Defined\n" if defined &subroutine;
 
 Note that the EXPR can be arbitrarily complicated as long as the final
 operation is a hash or array key lookup or subroutine name:
 
-    if (exists $ref->{A}->{B}->{$key}) 	{ }
-    if (exists $hash{A}{B}{$key}) 	{ }
+    if (exists $ref->{A}->{B}->{$key})  { }
+    if (exists $hash{A}{B}{$key})       { }
 
-    if (exists $ref->{A}->{B}->[$ix]) 	{ }
-    if (exists $hash{A}{B}[$ix]) 	{ }
+    if (exists $ref->{A}->{B}->[$ix])   { }
+    if (exists $hash{A}{B}[$ix])        { }
 
     if (exists &{$ref->{A}{B}{$key}})   { }
 
@@ -1782,8 +1790,8 @@ into existence due to the existence test for the $key element above.
 This happens anywhere the arrow operator is used, including even:
 
     undef $ref;
-    if (exists $ref->{"Some key"})	{ }
-    print $ref; 	    # prints HASH(0x80d3d5c)
+    if (exists $ref->{"Some key"})    { }
+    print $ref;  # prints HASH(0x80d3d5c)
 
 This surprising autovivification in what does not at first--or even
 second--glance appear to be an lvalue context may be fixed in a future
@@ -1792,8 +1800,8 @@ release.
 Use of a subroutine call, rather than a subroutine name, as an argument
 to exists() is an error.
 
-    exists &sub;	# OK
-    exists &sub();	# Error
+    exists &sub;    # OK
+    exists &sub();  # Error
 
 =item exit EXPR
 X<exit> X<terminate> X<abort>
@@ -1844,7 +1852,7 @@ For example:
 
     use Fcntl;
     fcntl($filehandle, F_GETFL, $packed_return_buffer)
-	or die "can't fcntl F_GETFL: $!";
+        or die "can't fcntl F_GETFL: $!";
 
 You don't have to check for C<defined> on the return from C<fcntl>.
 Like C<ioctl>, it maps a C<0> return from the system call into
@@ -1881,7 +1889,7 @@ You can use this to find out whether two handles refer to the
 same underlying descriptor:
 
     if (fileno(THIS) == fileno(THAT)) {
-	print "THIS and THAT are dups\n";
+        print "THIS and THAT are dups\n";
     }
 
 (Filehandles connected to memory objects via new features of C<open> may
@@ -1943,20 +1951,20 @@ Here's a mailbox appender for BSD systems.
     use Fcntl qw(:flock SEEK_END); # import LOCK_* and SEEK_END constants
 
     sub lock {
-	my ($fh) = @_;
-	flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
+        my ($fh) = @_;
+        flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
 
-	# and, in case someone appended while we were waiting...
-	seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
+        # and, in case someone appended while we were waiting...
+        seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
     }
 
     sub unlock {
-	my ($fh) = @_;
-	flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
+        my ($fh) = @_;
+        flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
     }
 
     open(my $mbox, ">>", "/usr/spool/mail/$ENV{'USER'}")
-	    or die "Can't open mailbox: $!";
+        or die "Can't open mailbox: $!";
 
     lock($mbox);
     print $mbox $msg,"\n\n";
@@ -2004,8 +2012,8 @@ Declare a picture format for use by the C<write> function.  For
 example:
 
     format Something =
-	Test: @<<<<<<<< @||||| @>>>>>
-	      $str,     $%,    '$' . int($num)
+        Test: @<<<<<<<< @||||| @>>>>>
+              $str,     $%,    '$' . int($num)
     .
 
     $str = "widget";
@@ -2048,19 +2056,19 @@ used by itself to fetch single characters without waiting for the user
 to hit enter.  For that, try something more like:
 
     if ($BSD_STYLE) {
-	system "stty cbreak </dev/tty >/dev/tty 2>&1";
+        system "stty cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-	system "stty", '-icanon', 'eol', "\001";
+        system "stty", '-icanon', 'eol', "\001";
     }
 
     $key = getc(STDIN);
 
     if ($BSD_STYLE) {
-	system "stty -cbreak </dev/tty >/dev/tty 2>&1";
+        system "stty -cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-	system "stty", 'icanon', 'eol', '^@'; # ASCII null
+        system "stty", 'icanon', 'eol', '^@'; # ASCII null
     }
     print "\n";
 
@@ -2333,10 +2341,10 @@ An example testing if Nagle's algorithm is turned on on a socket:
     use Socket qw(:all);
 
     defined(my $tcp = getprotobyname("tcp"))
-	or die "Could not determine the protocol number for tcp";
+        or die "Could not determine the protocol number for tcp";
     # my $tcp = IPPROTO_TCP; # Alternative
     my $packed = getsockopt($socket, $tcp, TCP_NODELAY)
-	or die "Could not query TCP_NODELAY socket option: $!";
+        or die "Could not query TCP_NODELAY socket option: $!";
     my $nodelay = unpack("I", $packed);
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
@@ -2384,24 +2392,27 @@ X<goto> X<jump> X<jmp>
 
 =item goto &NAME
 
-The C<goto-LABEL> form finds the statement labeled with LABEL and resumes
-execution there.  It may not be used to go into any construct that
-requires initialization, such as a subroutine or a C<foreach> loop.  It
-also can't be used to go into a construct that is optimized away,
-or to get out of a block or subroutine given to C<sort>.
-It can be used to go almost anywhere else within the dynamic scope,
-including out of subroutines, but it's usually better to use some other
-construct such as C<last> or C<die>.  The author of Perl has never felt the
-need to use this form of C<goto> (in Perl, that is--C is another matter).
-(The difference being that C does not offer named loops combined with
-loop control.  Perl does, and this replaces most structured uses of C<goto>
-in other languages.)
+The C<goto-LABEL> form finds the statement labeled with LABEL and
+resumes execution there. It can't be used to get out of a block or
+subroutine given to C<sort>.  It can be used to go almost anywhere
+else within the dynamic scope, including out of subroutines, but it's
+usually better to use some other construct such as C<last> or C<die>.
+The author of Perl has never felt the need to use this form of C<goto>
+(in Perl, that is--C is another matter).  (The difference being that C
+does not offer named loops combined with loop control.  Perl does, and
+this replaces most structured uses of C<goto> in other languages.)
 
 The C<goto-EXPR> form expects a label name, whose scope will be resolved
 dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
 necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
+
+Use of C<goto-LABEL> or C<goto-EXPR> to jump into a construct is
+deprecated and will issue a warning.  Even then, it may not be used to
+go into any construct that requires initialization, such as a
+subroutine or a C<foreach> loop.  It also can't be used to go into a
+construct that is optimized away.
 
 The C<goto-&NAME> form is quite different from the other forms of
 C<goto>.  In fact, it isn't a goto in the normal sense at all, and
@@ -2513,7 +2524,7 @@ X<ioctl>
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "sys/ioctl.ph";	# probably in $Config{archlib}/sys/ioctl.ph
+    require "sys/ioctl.ph";  # probably in $Config{archlib}/sys/ioctl.ph
 
 to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
@@ -2530,10 +2541,10 @@ C<ioctl>.
 
 The return value of C<ioctl> (and C<fcntl>) is as follows:
 
-	if OS returns:		then Perl returns:
-	    -1	  		  undefined value
-	     0	 		string "0 but true"
-	anything else		    that number
+    if OS returns:      then Perl returns:
+        -1               undefined value
+         0              string "0 but true"
+    anything else           that number
 
 Thus Perl returns true on success and false on failure, yet you can
 still easily determine the actual value returned by the operating
@@ -2581,13 +2592,13 @@ Here is yet another way to print your environment:
     @keys = keys %ENV;
     @values = values %ENV;
     while (@keys) {
-	print pop(@keys), '=', pop(@values), "\n";
+        print pop(@keys), '=', pop(@values), "\n";
     }
 
 or how about sorted by key:
 
     foreach $key (sort(keys %ENV)) {
-	print $key, '=', $ENV{$key}, "\n";
+        print $key, '=', $ENV{$key}, "\n";
     }
 
 The returned values are copies of the original keys in the hash, so
@@ -2597,7 +2608,7 @@ To sort a hash by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash) {
-	printf "%4d %s\n", $hash{$key}, $key;
+        printf "%4d %s\n", $hash{$key}, $key;
     }
 
 As an lvalue C<keys> allows you to increase the number of hash buckets
@@ -2656,8 +2667,8 @@ omitted, the command refers to the innermost enclosing loop.  The
 C<continue> block, if any, is not executed:
 
     LINE: while (<STDIN>) {
-	last LINE if /^$/;	# exit when done with header
-	#...
+        last LINE if /^$/;  # exit when done with header
+        #...
     }
 
 C<last> cannot be used to exit a block which returns a value such as
@@ -2845,8 +2856,8 @@ The base-N log of a number is equal to the natural log of that number
 divided by the natural log of N.  For example:
 
     sub log10 {
-	my $n = shift;
-	return log($n)/log(10);
+        my $n = shift;
+        return log($n)/log(10);
     }
 
 See also L</exp> for the inverse operation.
@@ -2890,7 +2901,7 @@ is just a funny way to write
 
     %hash = ();
     foreach (@array) {
-	$hash{get_a_key_for($_)} = $_;
+        $hash{get_a_key_for($_)} = $_;
     }
 
 Note that C<$_> is an alias to the list value, so it can be used to
@@ -3028,8 +3039,8 @@ The C<next> command is like the C<continue> statement in C; it starts
 the next iteration of the loop:
 
     LINE: while (<STDIN>) {
-	next LINE if /^#/;	# discard comments
-	#...
+        next LINE if /^#/;  # discard comments
+        #...
     }
 
 Note that if there were a C<continue> block on the above, it would get
@@ -3232,51 +3243,51 @@ Examples:
     open ARTICLE or die "Can't find article $ARTICLE: $!\n";
     while (<ARTICLE>) {...
 
-    open(LOG, '>>/usr/spool/news/twitlog');	# (log is reserved)
+    open(LOG, '>>/usr/spool/news/twitlog');  # (log is reserved)
     # if the open fails, output is discarded
 
-    open(my $dbase, '+<', 'dbase.mine')		# open for update
-	or die "Can't open 'dbase.mine' for update: $!";
+    open(my $dbase, '+<', 'dbase.mine')      # open for update
+        or die "Can't open 'dbase.mine' for update: $!";
 
-    open(my $dbase, '+<dbase.mine')			# ditto
-	or die "Can't open 'dbase.mine' for update: $!";
+    open(my $dbase, '+<dbase.mine')          # ditto
+        or die "Can't open 'dbase.mine' for update: $!";
 
-    open(ARTICLE, '-|', "caesar <$article")     # decrypt article
-	or die "Can't start caesar: $!";
+    open(ARTICLE, '-|', "caesar <$article")  # decrypt article
+        or die "Can't start caesar: $!";
 
-    open(ARTICLE, "caesar <$article |")		# ditto
-	or die "Can't start caesar: $!";
+    open(ARTICLE, "caesar <$article |")      # ditto
+        or die "Can't start caesar: $!";
 
-    open(EXTRACT, "|sort >Tmp$$")		# $$ is our process id
-	or die "Can't start sort: $!";
+    open(EXTRACT, "|sort >Tmp$$")            # $$ is our process id
+        or die "Can't start sort: $!";
 
     # in memory files
     open(MEMORY,'>', \$var)
-	or die "Can't open memory file: $!";
-    print MEMORY "foo!\n";			# output will end up in $var
+        or die "Can't open memory file: $!";
+    print MEMORY "foo!\n";                   # output will end up in $var
 
     # process argument list of files along with any includes
 
     foreach $file (@ARGV) {
-	process($file, 'fh00');
+        process($file, 'fh00');
     }
 
     sub process {
-	my($filename, $input) = @_;
-	$input++;		# this is a string increment
-	unless (open($input, $filename)) {
-	    print STDERR "Can't open $filename: $!\n";
-	    return;
-	}
+        my($filename, $input) = @_;
+        $input++;    # this is a string increment
+        unless (open($input, $filename)) {
+            print STDERR "Can't open $filename: $!\n";
+            return;
+        }
 
-	local $_;
-	while (<$input>) {		# note use of indirection
-	    if (/^#include "(.*)"/) {
-		process($1, $input);
-		next;
-	    }
-	    #...		# whatever
-	}
+        local $_;
+        while (<$input>) {    # note use of indirection
+            if (/^#include "(.*)"/) {
+                process($1, $input);
+                next;
+            }
+            #...          # whatever
+        }
     }
 
 See L<perliol> for detailed info on PerlIO.
@@ -3301,11 +3312,11 @@ C<STDERR> using various methods:
     open STDOUT, '>', "foo.out" or die "Can't redirect STDOUT: $!";
     open STDERR, ">&STDOUT"     or die "Can't dup STDOUT: $!";
 
-    select STDERR; $| = 1;	# make unbuffered
-    select STDOUT; $| = 1;	# make unbuffered
+    select STDERR; $| = 1;  # make unbuffered
+    select STDOUT; $| = 1;  # make unbuffered
 
-    print STDOUT "stdout 1\n";	# this works for
-    print STDERR "stderr 1\n"; 	# subprocesses too
+    print STDOUT "stdout 1\n";  # this works for
+    print STDERR "stderr 1\n";  # subprocesses too
 
     open STDOUT, ">&", $oldout or die "Can't dup \$oldout: $!";
     open STDERR, ">&OLDERR"    or die "Can't dup OLDERR: $!";
@@ -3436,7 +3447,7 @@ another way to protect your filenames from interpretation.  For example:
 
     use IO::Handle;
     sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL)
-	or die "sysopen $path: $!";
+        or die "sysopen $path: $!";
     $oldfh = select(HANDLE); $| = 1; select($oldfh);
     print HANDLE "stuff $$\n";
     seek(HANDLE, 0, 0);
@@ -3450,14 +3461,14 @@ them, and automatically close whenever and however you leave that scope:
     use IO::File;
     #...
     sub read_myfile_munged {
-	my $ALL = shift;
-	my $handle = IO::File->new;
-	open($handle, "myfile") or die "myfile: $!";
-	$first = <$handle>
-	    or return ();     # Automatically closed here.
-	mung $first or die "mung failed";	# Or here.
-	return $first, <$handle> if $ALL;	# Or here.
-	$first;					# Or here.
+        my $ALL = shift;
+        my $handle = IO::File->new;
+        open($handle, "myfile") or die "myfile: $!";
+        $first = <$handle>
+            or return ();     # Automatically closed here.
+        mung $first or die "mung failed";  # Or here.
+        return $first, <$handle> if $ALL;  # Or here.
+        $first;          # Or here.
     }
 
 See L</seek> for some details about mixing reading and writing.
@@ -3522,11 +3533,11 @@ of the declaration, not at the point of use.  This means the following
 behavior holds:
 
     package Foo;
-    our $bar;		# declares $Foo::bar for rest of lexical scope
+    our $bar;      # declares $Foo::bar for rest of lexical scope
     $bar = 20;
 
     package Bar;
-    print $bar;		# prints 20, as it refers to $Foo::bar
+    print $bar;    # prints 20, as it refers to $Foo::bar
 
 Multiple C<our> declarations with the same name in the same lexical
 scope are allowed if they are in different packages.  If they happen
@@ -3538,15 +3549,15 @@ merely redundant.
 
     use warnings;
     package Foo;
-    our $bar;		# declares $Foo::bar for rest of lexical scope
+    our $bar;      # declares $Foo::bar for rest of lexical scope
     $bar = 20;
 
     package Bar;
-    our $bar = 30;	# declares $Bar::bar for rest of lexical scope
-    print $bar;		# prints 30
+    our $bar = 30; # declares $Bar::bar for rest of lexical scope
+    print $bar;    # prints 30
 
-    our $bar;		# emits warning but has no other effect
-    print $bar;		# still prints 30
+    our $bar;      # emits warning but has no other effect
+    print $bar;    # still prints 30
 
 An C<our> declaration may also have a list of attributes associated
 with it.
@@ -3571,71 +3582,71 @@ converted to a sequence of 4 characters.
 The TEMPLATE is a sequence of characters that give the order and type
 of values, as follows:
 
-    a	A string with arbitrary binary data, will be null padded.
-    A	A text (ASCII) string, will be space padded.
-    Z	A null terminated (ASCIZ) string, will be null padded.
+    a  A string with arbitrary binary data, will be null padded.
+    A  A text (ASCII) string, will be space padded.
+    Z  A null terminated (ASCIZ) string, will be null padded.
 
-    b	A bit string (ascending bit order inside each byte, like vec()).
-    B	A bit string (descending bit order inside each byte).
-    h	A hex string (low nybble first).
-    H	A hex string (high nybble first).
+    b  A bit string (ascending bit order inside each byte, like vec()).
+    B  A bit string (descending bit order inside each byte).
+    h  A hex string (low nybble first).
+    H  A hex string (high nybble first).
 
-    c	A signed char (8-bit) value.
-    C	An unsigned char (octet) value.
+    c  A signed char (8-bit) value.
+    C  An unsigned char (octet) value.
     W   An unsigned char value (can be greater than 255).
 
-    s	A signed short (16-bit) value.
-    S	An unsigned short value.
+    s  A signed short (16-bit) value.
+    S  An unsigned short value.
 
-    l	A signed long (32-bit) value.
-    L	An unsigned long value.
+    l  A signed long (32-bit) value.
+    L  An unsigned long value.
 
-    q	A signed quad (64-bit) value.
-    Q	An unsigned quad value.
-	  (Quads are available only if your system supports 64-bit
-	   integer values _and_ if Perl has been compiled to support those.
+    q  A signed quad (64-bit) value.
+    Q  An unsigned quad value.
+      (Quads are available only if your system supports 64-bit
+       integer values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
-    i	A signed integer value.
-    I	A unsigned integer value.
-	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
+    i  A signed integer value.
+    I  A unsigned integer value.
+      (This 'integer' is _at_least_ 32 bits wide.  Its exact
            size depends on what a local C compiler calls 'int'.)
 
-    n	An unsigned short (16-bit) in "network" (big-endian) order.
-    N	An unsigned long (32-bit) in "network" (big-endian) order.
-    v	An unsigned short (16-bit) in "VAX" (little-endian) order.
-    V	An unsigned long (32-bit) in "VAX" (little-endian) order.
+    n  An unsigned short (16-bit) in "network" (big-endian) order.
+    N  An unsigned long (32-bit) in "network" (big-endian) order.
+    v  An unsigned short (16-bit) in "VAX" (little-endian) order.
+    V  An unsigned long (32-bit) in "VAX" (little-endian) order.
 
     j   A Perl internal signed integer value (IV).
     J   A Perl internal unsigned integer value (UV).
 
-    f	A single-precision float in the native format.
-    d	A double-precision float in the native format.
+    f  A single-precision float in the native format.
+    d  A double-precision float in the native format.
 
-    F	A Perl internal floating point value (NV) in the native format
-    D	A long double-precision float in the native format.
-	  (Long doubles are available only if your system supports long
-	   double values _and_ if Perl has been compiled to support those.
+    F  A Perl internal floating point value (NV) in the native format
+    D  A long double-precision float in the native format.
+      (Long doubles are available only if your system supports long
+       double values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
-    p	A pointer to a null-terminated string.
-    P	A pointer to a structure (fixed-length string).
+    p  A pointer to a null-terminated string.
+    P  A pointer to a structure (fixed-length string).
 
-    u	A uuencoded string.
-    U	A Unicode character number.  Encodes to a character in character mode
+    u  A uuencoded string.
+    U  A Unicode character number.  Encodes to a character in character mode
         and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in byte mode.
 
-    w	A BER compressed integer (not an ASN.1 BER, see perlpacktut for
-	details).  Its bytes represent an unsigned integer in base 128,
-	most significant digit first, with as few digits as possible.  Bit
-	eight (the high bit) is set on each byte except the last.
+    w  A BER compressed integer (not an ASN.1 BER, see perlpacktut for
+    details).  Its bytes represent an unsigned integer in base 128,
+    most significant digit first, with as few digits as possible.  Bit
+    eight (the high bit) is set on each byte except the last.
 
-    x	A null byte.
-    X	Back up a byte.
-    @	Null fill or truncate to absolute position, counted from the
+    x  A null byte.
+    X  Back up a byte.
+    @  Null fill or truncate to absolute position, counted from the
         start of the innermost ()-group.
     .   Null fill or truncate to absolute position specified by value.
-    (	Start of a ()-group.
+    (  Start of a ()-group.
 
 One or more of the modifiers below may optionally follow some letters in the
 TEMPLATE (the second column lists the letters for which the modifier is
@@ -3832,8 +3843,8 @@ exactly 32 bits, the native C<long> (as seen by the local C compiler)
 may be larger.  This is an issue mainly in 64-bit platforms.  You can
 see whether using C<!> makes any difference by
 
-	print length(pack("s")), " ", length(pack("s!")), "\n";
-	print length(pack("l")), " ", length(pack("l!")), "\n";
+    print length(pack("s")), " ", length(pack("s!")), "\n";
+    print length(pack("l")), " ", length(pack("l!")), "\n";
 
 C<i!> and C<I!> also work but only because of completeness;
 they are identical to C<i> and C<I>.
@@ -3859,8 +3870,8 @@ because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) would be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
 
- 	0x12 0x34 0x56 0x78	# big-endian
- 	0x78 0x56 0x34 0x12	# little-endian
+    0x12 0x34 0x56 0x78  # big-endian
+    0x78 0x56 0x34 0x12  # little-endian
 
 Basically, the Intel and VAX CPUs are little-endian, while everybody
 else, for example Motorola m68k/88k, PPC, Sparc, HP PA, Power, and
@@ -3875,19 +3886,19 @@ the egg-eating habits of the Lilliputians.
 
 Some systems may have even weirder byte orders such as
 
- 	0x56 0x78 0x12 0x34
- 	0x34 0x12 0x78 0x56
+   0x56 0x78 0x12 0x34
+   0x34 0x12 0x78 0x56
 
 You can see your system's preference with
 
- 	print join(" ", map { sprintf "%#02x", $_ }
+   print join(" ", map { sprintf "%#02x", $_ }
                             unpack("W*",pack("L",0x12345678))), "\n";
 
 The byteorder on the platform where Perl was built is also available
 via L<Config>:
 
-	use Config;
-	print $Config{byteorder}, "\n";
+    use Config;
+    print $Config{byteorder}, "\n";
 
 Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
 and C<'87654321'> are big-endian.
@@ -4058,7 +4069,7 @@ Examples:
     # "@utmp1" eq "@utmp2"
 
     sub bintodec {
-	unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
+        unpack("N", pack("B32", substr("0" x 32 . shift, -32)));
     }
 
     $foo = pack('sx2l', 12, 34);
@@ -4189,6 +4200,9 @@ you will have to use a block returning the filehandle value instead:
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
 
+Printing to a closed pipe or socket will generate a SIGPIPE signal.  See
+L<perlipc> for more on signal handling.
+
 =item printf FILEHANDLE FORMAT, LIST
 X<printf>
 
@@ -4228,7 +4242,7 @@ onto the end of ARRAY.  The length of ARRAY increases by the length of
 LIST.  Has the same effect as
 
     for $value (LIST) {
-	$ARRAY[++$#ARRAY] = $value;
+        $ARRAY[++$#ARRAY] = $value;
     }
 
 but is more efficient.  Returns the number of elements in the array following
@@ -4362,7 +4376,7 @@ operator, but you can use it directly.  The C<< <EXPR> >>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
 
     $line = <STDIN>;
-    $line = readline(*STDIN);		# same thing
+    $line = readline(*STDIN);    # same thing
 
 If C<readline> encounters an operating system error, C<$!> will be set
 with the corresponding error message.  It can be helpful to check
@@ -4370,10 +4384,10 @@ C<$!> when you are reading from filehandles you don't trust, such as a
 tty or a socket.  The following example uses the operator form of
 C<readline> and dies if the result is not defined.
 
-	while ( ! eof($fh) ) {
-		defined( $_ = <$fh> ) or die "readline failed: $!";
-	    ...
-	}
+    while ( ! eof($fh) ) {
+        defined( $_ = <$fh> ) or die "readline failed: $!";
+        ...
+    }
 
 Note that you have can't handle C<readline> errors that way with the
 C<ARGV> filehandle. In that case, you have to open each element of
@@ -4448,18 +4462,18 @@ normally use this command:
     # a simpleminded Pascal comment stripper
     # (warning: assumes no { or } in strings)
     LINE: while (<STDIN>) {
-	while (s|({.*}.*){.*}|$1 |) {}
-	s|{.*}| |;
-	if (s|{.*| |) {
-	    $front = $_;
-	    while (<STDIN>) {
-		if (/}/) {	# end of comment?
-		    s|^|$front\{|;
-		    redo LINE;
-		}
-	    }
-	}
-	print;
+        while (s|({.*}.*){.*}|$1 |) {}
+        s|{.*}| |;
+        if (s|{.*| |) {
+            $front = $_;
+            while (<STDIN>) {
+                if (/}/) {  # end of comment?
+                    s|^|$front\{|;
+                    redo LINE;
+                }
+            }
+        }
+        print;
     }
 
 C<redo> cannot be used to retry a block which returns a value such as
@@ -4500,10 +4514,10 @@ If the referenced object has been blessed into a package, then that package
 name is returned instead.  You can think of C<ref> as a C<typeof> operator.
 
     if (ref($r) eq "HASH") {
-	print "r is a reference to a hash.\n";
+        print "r is a reference to a hash.\n";
     }
     unless (ref($r)) {
-	print "r is not a reference at all.\n";
+        print "r is not a reference at all.\n";
     }
 
 The return value C<LVALUE> indicates a reference to an lvalue that is not
@@ -4553,9 +4567,9 @@ avoided, because it leads to misleading error messages under earlier
 versions of Perl that do not support this syntax.  The equivalent numeric
 version should be used instead.
 
-    require v5.6.1;	# run time version check
-    require 5.6.1;	# ditto
-    require 5.006_001;	# ditto; preferred for backwards compatibility
+    require v5.6.1;     # run time version check
+    require 5.6.1;      # ditto
+    require 5.006_001;  # ditto; preferred for backwards compatibility
 
 Otherwise, C<require> demands that a library file be included if it
 hasn't already been included.  The file is included via the do-FILE
@@ -4608,7 +4622,7 @@ modules does not risk altering your namespace.
 
 In other words, if you try this:
 
-        require Foo::Bar;    # a splendid bareword
+        require Foo::Bar;     # a splendid bareword
 
 The require function will actually look for the "F<Foo/Bar.pm>" file in the
 directories specified in the C<@INC> array.
@@ -4616,9 +4630,9 @@ directories specified in the C<@INC> array.
 But if you try this:
 
         $class = 'Foo::Bar';
-        require $class;	     # $class is not a bareword
+        require $class;       # $class is not a bareword
     #or
-        require "Foo::Bar";  # not a bareword because of the ""
+        require "Foo::Bar";   # not a bareword because of the ""
 
 The require function will look for the "F<Foo::Bar>" file in the @INC array and
 will complain about not finding "F<Foo::Bar>" there.  In this case you can do:
@@ -4681,18 +4695,18 @@ In other words, you can write:
 
     push @INC, \&my_sub;
     sub my_sub {
-	my ($coderef, $filename) = @_;	# $coderef is \&my_sub
-	...
+        my ($coderef, $filename) = @_;  # $coderef is \&my_sub
+        ...
     }
 
 or:
 
     push @INC, [ \&my_sub, $x, $y, ... ];
     sub my_sub {
-	my ($arrayref, $filename) = @_;
-	# Retrieve $x, $y, ...
-	my @parameters = @$arrayref[1..$#$arrayref];
-	...
+        my ($arrayref, $filename) = @_;
+        # Retrieve $x, $y, ...
+        my @parameters = @$arrayref[1..$#$arrayref];
+        ...
     }
 
 If the hook is an object, it must provide an INC method that will be
@@ -4704,8 +4718,8 @@ into package C<main>.)  Here is a typical code layout:
     package Foo;
     sub new { ... }
     sub Foo::INC {
-	my ($self, $filename) = @_;
-	...
+        my ($self, $filename) = @_;
+        ...
     }
 
     # In the main program
@@ -4728,11 +4742,11 @@ allowed for ranges).  All variables and arrays beginning with one of
 those letters are reset to their pristine state.  If the expression is
 omitted, one-match searches (C<?pattern?>) are reset to match again.  Resets
 only variables or searches in the current package.  Always returns
-1.  Examples:
+1. Examples:
 
-    reset 'X';		# reset all X variables
-    reset 'a-z';	# reset lower case variables
-    reset;		# just reset ?one-time? searches
+    reset 'X';      # reset all X variables
+    reset 'a-z';    # reset lower case variables
+    reset;          # just reset ?one-time? searches
 
 Resetting C<"A-Z"> is not recommended because you'll wipe out your
 C<@ARGV> and C<@INC> arrays and your C<%ENV> hash.  Resets only package
@@ -4774,13 +4788,17 @@ Used without arguments in scalar context, reverse() reverses C<$_>.
     print reverse;                              # No output, list context
     print scalar reverse;                       # Hello, world
 
+Note that reversing an array to itself (as in C<@a = reverse @a>) will
+preserve non-existent elements whenever possible, i.e. for non magical
+arrays or tied arrays with C<EXISTS> and C<DELETE> methods.
+
 This operator is also handy for inverting a hash, although there are some
 caveats.  If a value is duplicated in the original hash, only one of those
 can be represented as a key in the inverted hash.  Also, this has to
 unwind one hash and build a whole new one, which may take some time
 on a large hash, such as from a DBM file.
 
-    %by_name = reverse %by_address;	# Invert the hash
+    %by_name = reverse %by_address;  # Invert the hash
 
 =item rewinddir DIRHANDLE
 X<rewinddir>
@@ -4848,12 +4866,12 @@ evaluated in scalar context.  This is seldom what you want.
 
 The following single statement:
 
-	print uc(scalar(&foo,$bar)),$baz;
+    print uc(scalar(&foo,$bar)),$baz;
 
 is the moral equivalent of these two:
 
-	&foo;
-	print(uc($bar),$baz);
+    &foo;
+    print(uc($bar),$baz);
 
 See L<perlop> for more details on unary operators and the comma operator.
 
@@ -4896,12 +4914,12 @@ If that doesn't work (some IO implementations are particularly
 cantankerous), then you may need something more like this:
 
     for (;;) {
-	for ($curpos = tell(FILE); $_ = <FILE>;
+        for ($curpos = tell(FILE); $_ = <FILE>;
              $curpos = tell(FILE)) {
-	    # search for some stuff and put it into files
-	}
-	sleep($for_a_while);
-	seek(FILE, $curpos, 0);
+            # search for some stuff and put it into files
+        }
+        sleep($for_a_while);
+        seek(FILE, $curpos, 0);
     }
 
 =item seekdir DIRHANDLE,POS
@@ -4956,12 +4974,12 @@ If you want to select on many filehandles you might wish to write a
 subroutine:
 
     sub fhbits {
-	my(@fhlist) = split(' ',$_[0]);
-	my($bits);
-	for (@fhlist) {
-	    vec($bits,fileno($_),1) = 1;
-	}
-	$bits;
+        my(@fhlist) = split(' ',$_[0]);
+        my($bits);
+        for (@fhlist) {
+            vec($bits,fileno($_),1) = 1;
+        }
+        $bits;
     }
     $rin = fhbits('STDIN TTY SOCK');
 
@@ -5314,87 +5332,87 @@ Examples:
 
     # sort lexically
     @articles = sort @files;
-
+    
     # same thing, but with explicit sort routine
     @articles = sort {$a cmp $b} @files;
-
+    
     # now case-insensitively
     @articles = sort {uc($a) cmp uc($b)} @files;
-
+    
     # same thing in reversed order
     @articles = sort {$b cmp $a} @files;
-
+    
     # sort numerically ascending
     @articles = sort {$a <=> $b} @files;
-
+    
     # sort numerically descending
     @articles = sort {$b <=> $a} @files;
-
+    
     # this sorts the %age hash by value instead of key
     # using an in-line function
     @eldest = sort { $age{$b} <=> $age{$a} } keys %age;
-
+    
     # sort using explicit subroutine name
     sub byage {
-	$age{$a} <=> $age{$b};	# presuming numeric
+    $age{$a} <=> $age{$b};  # presuming numeric
     }
     @sortedclass = sort byage @class;
-
+    
     sub backwards { $b cmp $a }
     @harry  = qw(dog cat x Cain Abel);
     @george = qw(gone chased yz Punished Axed);
     print sort @harry;
-	    # prints AbelCaincatdogx
+        # prints AbelCaincatdogx
     print sort backwards @harry;
-	    # prints xdogcatCainAbel
+        # prints xdogcatCainAbel
     print sort @george, 'to', @harry;
-	    # prints AbelAxedCainPunishedcatchaseddoggonetoxyz
+        # prints AbelAxedCainPunishedcatchaseddoggonetoxyz
 
     # inefficiently sort by descending numeric compare using
     # the first integer after the first = sign, or the
     # whole record case-insensitively otherwise
 
-    @new = sort {
-	($b =~ /=(\d+)/)[0] <=> ($a =~ /=(\d+)/)[0]
-			    ||
-	            uc($a)  cmp  uc($b)
+    my @new = sort {
+        ($b =~ /=(\d+)/)[0] <=> ($a =~ /=(\d+)/)[0]
+            ||
+        uc($a)  cmp  uc($b)
     } @old;
 
     # same thing, but much more efficiently;
     # we'll build auxiliary indices instead
     # for speed
-    @nums = @caps = ();
+    my @nums = @caps = ();
     for (@old) {
-	push @nums, /=(\d+)/;
-	push @caps, uc($_);
+        push @nums, ( /=(\d+)/ ? $1 : undef );
+        push @caps, uc($_);
     }
 
-    @new = @old[ sort {
-			$nums[$b] <=> $nums[$a]
-				 ||
-			$caps[$a] cmp $caps[$b]
-		       } 0..$#old
-	       ];
+    my @new = @old[ sort {
+        $nums[$b] <=> $nums[$a]
+            ||
+        $caps[$a] cmp $caps[$b]
+        } 0..$#old
+    ];
 
     # same thing, but without any temps
     @new = map { $_->[0] }
            sort { $b->[1] <=> $a->[1]
-                           ||
-                  $a->[2] cmp $b->[2]
-           } map { [$_, /=(\d+)/, uc($_)] } @old;
+               ||
+           $a->[2] cmp $b->[2]
+    } map { [$_, /=(\d+)/, uc($_)] } @old;
 
     # using a prototype allows you to use any comparison subroutine
     # as a sort subroutine (including other package's subroutines)
     package other;
-    sub backwards ($$) { $_[1] cmp $_[0]; }	# $a and $b are not set here
-
+    sub backwards ($$) { $_[1] cmp $_[0]; }  # $a and $b are not set here
+    
     package main;
     @new = sort other::backwards @old;
-
+    
     # guarantee stability, regardless of algorithm
     use sort 'stable';
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
+    
     # force use of mergesort (not portable outside Perl 5.8)
     use sort '_mergesort';  # note discouraging _
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
@@ -5465,22 +5483,22 @@ end of the array.
 
 The following equivalences hold (assuming C<< $[ == 0 and $#a >= $i >> )
 
-    push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
-    pop(@a)		splice(@a,-1)
-    shift(@a)		splice(@a,0,1)
-    unshift(@a,$x,$y)	splice(@a,0,0,$x,$y)
-    $a[$i] = $y		splice(@a,$i,1,$y)
+    push(@a,$x,$y)      splice(@a,@a,0,$x,$y)
+    pop(@a)             splice(@a,-1)
+    shift(@a)           splice(@a,0,1)
+    unshift(@a,$x,$y)   splice(@a,0,0,$x,$y)
+    $a[$i] = $y         splice(@a,$i,1,$y)
 
 Example, assuming array lengths are passed before arrays:
 
-    sub aeq {	# compare two list values
-	my(@a) = splice(@_,0,shift);
-	my(@b) = splice(@_,0,shift);
-	return 0 unless @a == @b;	# same len?
-	while (@a) {
-	    return 0 if pop(@a) ne pop(@b);
-	}
-	return 1;
+    sub aeq {  # compare two list values
+        my(@a) = splice(@_,0,shift);
+        my(@b) = splice(@_,0,shift);
+        return 0 unless @a == @b;  # same len?
+        while (@a) {
+            return 0 if pop(@a) ne pop(@b);
+        }
+        return 1;
     }
     if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
 
@@ -5596,7 +5614,7 @@ Example:
         chomp;
         ($login, $passwd, $uid, $gid,
          $gcos, $home, $shell) = split(/:/);
-	#...
+        #...
     }
 
 As with regular pattern matching, any capturing parentheses that are not
@@ -5635,36 +5653,36 @@ useful.
 
 Perl's C<sprintf> permits the following universally-known conversions:
 
-   %%	a percent sign
-   %c	a character with the given number
-   %s	a string
-   %d	a signed integer, in decimal
-   %u	an unsigned integer, in decimal
-   %o	an unsigned integer, in octal
-   %x	an unsigned integer, in hexadecimal
-   %e	a floating-point number, in scientific notation
-   %f	a floating-point number, in fixed decimal notation
-   %g	a floating-point number, in %e or %f notation
+   %%    a percent sign
+   %c    a character with the given number
+   %s    a string
+   %d    a signed integer, in decimal
+   %u    an unsigned integer, in decimal
+   %o    an unsigned integer, in octal
+   %x    an unsigned integer, in hexadecimal
+   %e    a floating-point number, in scientific notation
+   %f    a floating-point number, in fixed decimal notation
+   %g    a floating-point number, in %e or %f notation
 
 In addition, Perl permits the following widely-supported conversions:
 
-   %X	like %x, but using upper-case letters
-   %E	like %e, but using an upper-case "E"
-   %G	like %g, but with an upper-case "E" (if applicable)
-   %b	an unsigned integer, in binary
-   %B	like %b, but using an upper-case "B" with the # flag
-   %p	a pointer (outputs the Perl value's address in hexadecimal)
-   %n	special: *stores* the number of characters output so far
+   %X    like %x, but using upper-case letters
+   %E    like %e, but using an upper-case "E"
+   %G    like %g, but with an upper-case "E" (if applicable)
+   %b    an unsigned integer, in binary
+   %B    like %b, but using an upper-case "B" with the # flag
+   %p    a pointer (outputs the Perl value's address in hexadecimal)
+   %n    special: *stores* the number of characters output so far
         into the next variable in the parameter list
 
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
 
-   %i	a synonym for %d
-   %D	a synonym for %ld
-   %U	a synonym for %lu
-   %O	a synonym for %lo
-   %F	a synonym for %f
+   %i    a synonym for %d
+   %D    a synonym for %ld
+   %U    a synonym for %lu
+   %O    a synonym for %lo
+   %F    a synonym for %f
 
 Note that the number of exponent digits in the scientific notation produced
 by C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
@@ -5856,9 +5874,9 @@ installation. (This requires that either the platform natively supports quads
 or Perl was specifically compiled to support quads.) You can find out
 whether your Perl supports quads via L<Config>:
 
-	use Config;
-	($Config{use64bitint} eq 'define' || $Config{longsize} >= 8) &&
-		print "quads\n";
+    use Config;
+    ($Config{use64bitint} eq 'define' || $Config{longsize} >= 8) &&
+        print "quads\n";
 
 For floating point conversions (C<e f g E F G>), numbers are usually assumed
 to be the default floating point size on your platform (double or long double),
@@ -5866,8 +5884,8 @@ but you can force 'long double' with C<q>, C<L>, or C<ll> if your
 platform supports them. You can find out whether your Perl supports long
 doubles via L<Config>:
 
-	use Config;
-	$Config{d_longdbl} eq 'define' && print "long doubles\n";
+    use Config;
+    $Config{d_longdbl} eq 'define' && print "long doubles\n";
 
 You can find out whether Perl considers 'long double' to be the default
 floating point size to use on your platform via L<Config>:
@@ -5913,10 +5931,10 @@ value to format.
 Here are some more examples - beware that when using an explicit
 index, the C<$> may need to be escaped:
 
-  printf "%2\$d %d\n",    12, 34;		# will print "34 12\n"
-  printf "%2\$d %d %d\n", 12, 34;		# will print "34 12 34\n"
-  printf "%3\$d %d %d\n", 12, 34, 56;		# will print "56 12 34\n"
-  printf "%2\$*3\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+  printf "%2\$d %d\n",    12, 34;        # will print "34 12\n"
+  printf "%2\$d %d %d\n", 12, 34;        # will print "34 12 34\n"
+  printf "%3\$d %d %d\n", 12, 34, 56;    # will print "56 12 34\n"
+  printf "%2\$*3\$d %d\n", 12, 34, 3;    # will print " 34 12\n"
 
 =back
 
@@ -6045,7 +6063,7 @@ stat is done, but the current contents of the stat structure from the
 last C<stat>, C<lstat>, or filetest are returned.  Example:
 
     if (-x $file && (($d) = stat(_)) && $d < 0) {
-	print "$file is executable NFS file\n";
+        print "$file is executable NFS file\n";
     }
 
 (This works on machines only for which the device number is negative
@@ -6067,8 +6085,8 @@ The L<File::stat> module provides a convenient, by-name access mechanism:
     use File::stat;
     $sb = stat($filename);
     printf "File is %s, size is %s, perm %04o, mtime %s\n",
-	$filename, $sb->size, $sb->mode & 07777,
-	scalar localtime $sb->mtime;
+           $filename, $sb->size, $sb->mode & 07777,
+           scalar localtime $sb->mtime;
 
 You can import symbolic mode constants (C<S_IF*>) and functions
 (C<S_IS*>) from the Fcntl module:
@@ -6110,11 +6128,11 @@ The commonly available C<S_IF*> constants are
 
 and the C<S_IF*> functions are
 
-    S_IMODE($mode)	the part of $mode containing the permission bits
-			and the setuid/setgid/sticky bits
+    S_IMODE($mode)    the part of $mode containing the permission bits
+            and the setuid/setgid/sticky bits
 
-    S_IFMT($mode)	the part of $mode containing the file type
-			which can be bit-anded with e.g. S_IFREG
+    S_IFMT($mode)    the part of $mode containing the file type
+            which can be bit-anded with e.g. S_IFREG
                         or with the following functions
 
     # The operators -f, -d, -l, -b, -c, -p, and -S.
@@ -6174,12 +6192,12 @@ For example, here is a loop that inserts index producing entries
 before any line containing a certain pattern:
 
     while (<>) {
-	study;
-	print ".IX foo\n" 	if /\bfoo\b/;
-	print ".IX bar\n" 	if /\bbar\b/;
-	print ".IX blurfl\n" 	if /\bblurfl\b/;
-	# ...
-	print;
+        study;
+        print ".IX foo\n"    if /\bfoo\b/;
+        print ".IX bar\n"    if /\bbar\b/;
+        print ".IX blurfl\n" if /\bblurfl\b/;
+        # ...
+        print;
     }
 
 In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<f>
@@ -6198,15 +6216,15 @@ out the names of those files that contain a match:
 
     $search = 'while (<>) { study;';
     foreach $word (@words) {
-	$search .= "++\$seen{\$ARGV} if /\\b$word\\b/;\n";
+        $search .= "++\$seen{\$ARGV} if /\\b$word\\b/;\n";
     }
     $search .= "}";
     @ARGV = @files;
     undef $/;
-    eval $search;		# this screams
-    $/ = "\n";		# put back to normal input delimiter
+    eval $search;        # this screams
+    $/ = "\n";        # put back to normal input delimiter
     foreach $file (sort keys(%seen)) {
-	print $file, "\n";
+        print $file, "\n";
     }
 
 =item sub NAME BLOCK
@@ -6242,11 +6260,11 @@ everything to the end of the string.  If LENGTH is negative, leaves that
 many characters off the end of the string.
 
     my $s = "The black cat climbed the green tree";
-    my $color  = substr $s, 4, 5;	# black
-    my $middle = substr $s, 4, -11;	# black cat climbed the
-    my $end    = substr $s, 14;		# climbed the green tree
-    my $tail   = substr $s, -4;		# tree
-    my $z      = substr $s, -4, 2;	# tr
+    my $color  = substr $s, 4, 5;      # black
+    my $middle = substr $s, 4, -11;    # black cat climbed the
+    my $end    = substr $s, 14;        # climbed the green tree
+    my $tail   = substr $s, -4;        # tree
+    my $z      = substr $s, -4, 2;     # tr
 
 You can use the substr() function as an lvalue, in which case EXPR
 must itself be an lvalue.  If you assign something shorter than LENGTH,
@@ -6262,10 +6280,10 @@ substring that is entirely outside the string is a fatal error.
 Here's an example showing the behavior for boundary cases:
 
     my $name = 'fred';
-    substr($name, 4) = 'dy';		# $name is now 'freddy'
-    my $null = substr $name, 6, 2;	# returns '' (no warning)
-    my $oops = substr $name, 7;		# returns undef, with warning
-    substr($name, 7) = 'gap';		# fatal error
+    substr($name, 4) = 'dy';         # $name is now 'freddy'
+    my $null = substr $name, 6, 2;   # returns '' (no warning)
+    my $oops = substr $name, 7;      # returns undef, with warning
+    substr($name, 7) = 'gap';        # fatal error
 
 An alternative to using substr() as an lvalue is to specify the
 replacement string as the 4th argument.  This allows you to replace
@@ -6273,7 +6291,7 @@ parts of the EXPR and return what was there before in one operation,
 just as you can with splice().
 
     my $s = "The black cat climbed the green tree";
-    my $z = substr $s, 14, 7, "jumped from";	# climbed
+    my $z = substr $s, 14, 7, "jumped from";    # climbed
     # $s is now "The black cat jumped from the green tree"
 
 Note that the lvalue returned by the 3-arg version of substr() acts as
@@ -6282,10 +6300,10 @@ of the original string is being modified; for example:
 
     $x = '1234';
     for (substr($x,1,2)) {
-        $_ = 'a';   print $x,"\n";	# prints 1a4
-        $_ = 'xyz'; print $x,"\n";	# prints 1xyz4
+        $_ = 'a';   print $x,"\n";    # prints 1a4
+        $_ = 'xyz'; print $x,"\n";    # prints 1xyz4
         $x = '56789';
-        $_ = 'pq';  print $x,"\n";	# prints 5pq9
+        $_ = 'pq';  print $x,"\n";    # prints 5pq9
     }
 
 Prior to Perl version 5.9.1, the result of using an lvalue multiple times was
@@ -6318,7 +6336,7 @@ integer arguments are not literals and have never been interpreted in a
 numeric context, you may need to add C<0> to them to force them to look
 like numbers.  This emulates the C<syswrite> function (or vice versa):
 
-    require 'syscall.ph';		# may need to run h2ph
+    require 'syscall.ph';        # may need to run h2ph
     $s = "hi there\n";
     syscall(&SYS_write, fileno(STDOUT), $s, length $s);
 
@@ -6455,8 +6473,8 @@ and C<SEEK_END> (start of the file, current position, end of the file)
 from the Fcntl module.  Use of the constants is also more portable
 than relying on 0, 1, and 2.  For example to define a "systell" function:
 
-	use Fcntl 'SEEK_CUR';
-	sub systell { sysseek($_[0], 0, SEEK_CUR) }
+    use Fcntl 'SEEK_CUR';
+    sub systell { sysseek($_[0], 0, SEEK_CUR) }
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string C<"0 but true">; thus C<sysseek> returns
@@ -6509,20 +6527,20 @@ value.
 
     @args = ("command", "arg1", "arg2");
     system(@args) == 0
-	 or die "system @args failed: $?"
+        or die "system @args failed: $?"
 
 If you'd like to manually inspect C<system>'s failure, you can check all
 possible failure modes by inspecting C<$?> like this:
 
     if ($? == -1) {
-	print "failed to execute: $!\n";
+        print "failed to execute: $!\n";
     }
     elsif ($? & 127) {
-	printf "child died with signal %d, %s coredump\n",
-	    ($? & 127),  ($? & 128) ? 'with' : 'without';
+        printf "child died with signal %d, %s coredump\n",
+            ($? & 127),  ($? & 128) ? 'with' : 'without';
     }
     else {
-	printf "child exited with value %d\n", $? >> 8;
+        printf "child exited with value %d\n", $? >> 8;
     }
 
 Alternatively you might inspect the value of C<${^CHILD_ERROR_NATIVE}>
@@ -6615,7 +6633,7 @@ C<each> function to iterate over such.  Example:
     use NDBM_File;
     tie(%HIST, 'NDBM_File', '/usr/lib/news/history', 1, 0);
     while (($key,$val) = each %HIST) {
-	print $key, ' = ', unpack('L',$val), "\n";
+        print $key, ' = ', unpack('L',$val), "\n";
     }
     untie(%HIST);
 
@@ -6843,20 +6861,29 @@ X<unlink> X<delete> X<remove> X<rm> X<del>
 
 =item unlink
 
-Deletes a list of files.  Returns the number of files successfully
-deleted.
+Deletes a list of files. On success, it returns the number of files
+it successfully deleted. On failure, it returns false and sets C<$!>
+(errno):
 
-    $cnt = unlink 'a', 'b', 'c';
+    my $unlinked = unlink 'a', 'b', 'c';
     unlink @goners;
-    unlink <*.bak>;
+    unlink glob "*.bak";
 
-Note: C<unlink> will not attempt to delete directories unless you are superuser
-and the B<-U> flag is supplied to Perl.  Even if these conditions are
-met, be warned that unlinking a directory can inflict damage on your
-filesystem.  Finally, using C<unlink> on directories is not supported on 
-many operating systems.  Use C<rmdir> instead.
+On error, C<unlink> will not tell you which files it could not remove.
+If you want to know which files you could not remove, try them one
+at a time:
 
-If LIST is omitted, uses C<$_>.
+     foreach my $file ( @goners ) {
+         unlink $file or warn "Could not unlink $file: $!";
+         }
+
+Note: C<unlink> will not attempt to delete directories unless you are
+superuser and the B<-U> flag is supplied to Perl. Even if these
+conditions are met, be warned that unlinking a directory can inflict
+damage on your filesystem.  Finally, using C<unlink> on directories is
+not supported on many operating systems.  Use C<rmdir> instead.
+
+If LIST is omitted, C<unlink> uses C<$_>.
 
 =item unpack TEMPLATE,EXPR
 X<unpack>
@@ -6878,8 +6905,8 @@ The TEMPLATE has the same format as in the C<pack> function.
 Here's a subroutine that does substring:
 
     sub substr {
-	my($what,$where,$howmuch) = @_;
-	unpack("x$where a$howmuch", $what);
+        my($what,$where,$howmuch) = @_;
+        unpack("x$where a$howmuch", $what);
     }
 
 and then there's
@@ -6897,8 +6924,8 @@ For example, the following
 computes the same number as the System V sum program:
 
     $checksum = do {
-	local $/;  # slurp!
-	unpack("%32W*",<>) % 65535;
+        local $/;  # slurp!
+        unpack("%32W*",<>) % 65535;
     };
 
 The following efficiently counts the number of set bits in a bit vector:
@@ -6971,9 +6998,9 @@ avoided, because it leads to misleading error messages under earlier
 versions of Perl (that is, prior to 5.6.0) that do not support this
 syntax.  The equivalent numeric version should be used instead.
 
-    use v5.6.1;		# compile time version check
-    use 5.6.1;		# ditto
-    use 5.006_001;	# ditto; preferred for backwards compatibility
+    use v5.6.1;     # compile time version check
+    use 5.6.1;      # ditto
+    use 5.006_001;  # ditto; preferred for backwards compatibility
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that won't work with older versions of Perl.
@@ -7115,7 +7142,7 @@ leaving it in.)
 Note that the values are not copied, which means modifying them will
 modify the contents of the hash:
 
-    for (values %hash) 	    { s/foo/bar/g }   # modifies %hash values
+    for (values %hash)      { s/foo/bar/g }   # modifies %hash values
     for (@hash{keys %hash}) { s/foo/bar/g }   # same
 
 See also C<keys>, C<each>, and C<sort>.
@@ -7169,22 +7196,22 @@ The comments show the string after each step.  Note that this code works
 in the same way on big-endian or little-endian machines.
 
     my $foo = '';
-    vec($foo,  0, 32) = 0x5065726C;	# 'Perl'
+    vec($foo,  0, 32) = 0x5065726C; # 'Perl'
 
     # $foo eq "Perl" eq "\x50\x65\x72\x6C", 32 bits
-    print vec($foo, 0, 8);		# prints 80 == 0x50 == ord('P')
+    print vec($foo, 0, 8);  # prints 80 == 0x50 == ord('P')
 
-    vec($foo,  2, 16) = 0x5065;		# 'PerlPe'
-    vec($foo,  3, 16) = 0x726C;		# 'PerlPerl'
-    vec($foo,  8,  8) = 0x50;		# 'PerlPerlP'
-    vec($foo,  9,  8) = 0x65;		# 'PerlPerlPe'
-    vec($foo, 20,  4) = 2;		# 'PerlPerlPe'   . "\x02"
-    vec($foo, 21,  4) = 7;		# 'PerlPerlPer'
-                                        # 'r' is "\x72"
-    vec($foo, 45,  2) = 3;		# 'PerlPerlPer'  . "\x0c"
-    vec($foo, 93,  1) = 1;		# 'PerlPerlPer'  . "\x2c"
-    vec($foo, 94,  1) = 1;		# 'PerlPerlPerl'
-                                        # 'l' is "\x6c"
+    vec($foo,  2, 16) = 0x5065; # 'PerlPe'
+    vec($foo,  3, 16) = 0x726C; # 'PerlPerl'
+    vec($foo,  8,  8) = 0x50;   # 'PerlPerlP'
+    vec($foo,  9,  8) = 0x65;   # 'PerlPerlPe'
+    vec($foo, 20,  4) = 2;      # 'PerlPerlPe'   . "\x02"
+    vec($foo, 21,  4) = 7;      # 'PerlPerlPer'
+                                   # 'r' is "\x72"
+    vec($foo, 45,  2) = 3;      # 'PerlPerlPer'  . "\x0c"
+    vec($foo, 93,  1) = 1;      # 'PerlPerlPer'  . "\x2c"
+    vec($foo, 94,  1) = 1;      # 'PerlPerlPerl'
+                                   # 'l' is "\x6c"
 
 To transform a bit vector into a string or list of 0's and 1's, use these:
 
@@ -7379,7 +7406,7 @@ The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.  If you say
     use POSIX ":sys_wait_h";
     #...
     do {
-	$kid = waitpid(-1, WNOHANG);
+        $kid = waitpid(-1, WNOHANG);
     } while $kid > 0;
 
 then you can do a non-blocking wait for all pending zombie processes.
@@ -7401,7 +7428,7 @@ C<eval> is looking for a list value.  Returns false if the context is
 looking for a scalar.  Returns the undefined value if the context is
 looking for no value (void context).
 
-    return unless defined wantarray;	# don't bother doing more
+    return unless defined wantarray; # don't bother doing more
     my @a = complex_calculation();
     return wantarray ? @a : "@a";
 

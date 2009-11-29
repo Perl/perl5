@@ -43,6 +43,9 @@ PERLVAR(Istack_base,	SV **)
 PERLVAR(Istack_max,	SV **)
 
 PERLVAR(Iscopestack,	I32 *)		/* scopes we've ENTERed */
+/* name of the scopes we've ENTERed. Only used with -DDEBUGGING, but needs to be
+   present always, as -DDEUBGGING must be binary compatible with non.  */
+PERLVARI(Iscopestack_name, const char * *, NULL)
 PERLVAR(Iscopestack_ix,	I32)
 PERLVAR(Iscopestack_max,I32)
 

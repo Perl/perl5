@@ -1191,8 +1191,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     }
   nope:
 
-    if (svrecode)
-	 SvREFCNT_dec(svrecode);
+    SvREFCNT_dec(svrecode);
 
     Safefree(temp_buffer);
     return count;
@@ -1467,8 +1466,7 @@ Perl_do_kv(pTHX)
 	    }
 	    LvTYPE(TARG) = 'k';
 	    if (LvTARG(TARG) != (const SV *)keys) {
-		if (LvTARG(TARG))
-		    SvREFCNT_dec(LvTARG(TARG));
+		SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc_simple(keys);
 	    }
 	    PUSHs(TARG);

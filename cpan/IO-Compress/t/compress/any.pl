@@ -57,6 +57,7 @@ sub run
             {
                 my $unc = new $AnyConstruct $input, Transparent => $trans,
                                            RawInflate => 1,
+                                           #UnLzma => 1,
                                            Append => 1  ;
 
                 ok $unc, "  Created $AnyClass object" 
@@ -76,6 +77,7 @@ sub run
             {
                 my $unc = new $AnyConstruct $input, Transparent => $trans,
                                            RawInflate => 1,
+                                           #UnLzma => 1,
                                            Append => 1  ;
 
                 ok $unc, "  Created $AnyClass object" 

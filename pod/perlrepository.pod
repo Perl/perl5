@@ -57,7 +57,7 @@ directory.
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
 
-  git clone ssh://perl5.git.perl.org/gitroot/perl.git perl-ssh
+  git clone ssh://perl5.git.perl.org/perl.git perl-ssh
 
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
@@ -72,11 +72,7 @@ F<.git/config> where you will see something like:
 change that to something like this:
 
   [remote "origin"]
-  url = ssh://perl5.git.perl.org/gitroot/perl.git
-
-NOTE: there are symlinks set up so that the /gitroot is optional and
-since SSH is the default protocol you can actually shorten the "url" to
-C<perl5.git.perl.org:/perl.git>.
+  url = ssh://perl5.git.perl.org/perl.git
 
 You can also set up your user name and e-mail address. For example
 
@@ -98,14 +94,28 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
-The committers have access to 2 servers that serve perl5.git.perl.org.
-One is camel.booking.com, which is the 'master' repository. The
-perl5.git.perl.org IP address also lives on this machine. The second
-one is dromedary.booking.com, which can be used for general testing and
-development. Dromedary syncs the git tree from camel every few minutes,
-you should not push there. Both machines also have a full CPAN mirror.
-To share files with the general public, dromedary serves your
-~/public_html/ as http://users.perl5.git.perl.org/~yourlogin/
+=head2 A NOTE ON CAMEL AND DROMEDARY
+
+The committers have SSH access to the two servers that serve
+C<perl5.git.perl.org>. One is C<perl5.git.perl.org> itself (I<camel>),
+which is the 'master' repository. The second one is
+C<users.perl5.git.perl.org> (I<dromedary>), which can be used for
+general testing and development. Dromedary syncs the git tree from
+camel every few minutes, you should not push there. Both machines also
+have a full CPAN mirror in /srv/CPAN, please use this. To share files
+with the general public, dromedary serves your ~/public_html/ as
+C<http://users.perl5.git.perl.org/~yourlogin/>
+
+These hosts have fairly strict firewalls to the outside. Outgoing, only
+rsync, ssh and git are allowed. For http and ftp, you can use
+http://webproxy:3128 as proxy. Incoming, the firewall tries to detect
+attacks and blocks IP addresses with suspicious activity. This
+sometimes (but very rarely) has false positives and you might get
+blocked. The quickest way to get unblocked is to notify the admins.
+
+These two boxes are owned, hosted, and operated by booking.com. You can
+reach the sysadmins in #p5p on irc.perl.org or via mail to
+C<perl5-porters@perl.org>
 
 =head1 OVERVIEW OF THE REPOSITORY
 
@@ -327,8 +337,8 @@ Now you should create a patch file for all your local changes:
 
 You should now send an email to perl5-porters@perl.org with a
 description of your changes, and include this patch file as an
-attachment.  (See the next section for how to configure and use
-git to send these emails for you.)
+attachment.  (See the next section for how to configure and use git to
+send these emails for you.)
 
 If you want to delete your temporary branch, you may do so with:
 
@@ -341,8 +351,8 @@ If you want to delete your temporary branch, you may do so with:
 
 =head2 Using git to send patch emails
 
-In your ~/git/perl repository, set the destination email to the perl5-porters
-mailing list.
+In your ~/git/perl repository, set the destination email to the
+perl5-porters mailing list.
 
   $ git config sendemail.to perl5-porters@perl.org
 
@@ -350,17 +360,18 @@ Then you can use git directly to send your patch emails:
 
   $ git send-email 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
-You may need to set some configuration variables for your particular email
-service provider. For example, to set your global git config to send email via
-a gmail account:
+You may need to set some configuration variables for your particular
+email service provider. For example, to set your global git config to
+send email via a gmail account:
 
   $ git config --global sendemail.smtpserver smtp.gmail.com
   $ git config --global sendemail.smtpssl 1
   $ git config --global sendemail.smtpuser YOURUSERNAME@gmail.com
 
-With this configuration, you will be prompted for your gmail password when you
-run 'git send-email'.  You can also configure C<sendemail.smtppass> with your
-password if you don't care about having your password in the .gitconfig file.
+With this configuration, you will be prompted for your gmail password
+when you run 'git send-email'.  You can also configure
+C<sendemail.smtppass> with your password if you don't care about having
+your password in the .gitconfig file.
 
 =head2 A note on derived files
 
@@ -679,26 +690,26 @@ And then push back to the repository:
 =head1 TOPIC BRANCHES AND REWRITING HISTORY
 
 Individual committers should create topic branches under
-B<yourname>/B<some_descriptive_name>. Other committers should check with
-a topic branch's creator before making any change to it.
+B<yourname>/B<some_descriptive_name>. Other committers should check
+with a topic branch's creator before making any change to it.
 
 If you are not the creator of B<yourname>/B<some_descriptive_name>, you
 might sometimes find that the original author has edited the branch's
 history. There are lots of good reasons for this. Sometimes, an author
-might simply be rebasing the branch onto a newer source point. Sometimes,
-an author might have found an error in an early commit which they wanted
-to fix before merging the branch to blead.
+might simply be rebasing the branch onto a newer source point.
+Sometimes, an author might have found an error in an early commit which
+they wanted to fix before merging the branch to blead.
 
-Currently the master repository is configured to forbid non-fast-forward
-merges.  This means that the branches within can not be rebased and
-pushed as a single step.
+Currently the master repository is configured to forbid
+non-fast-forward merges.  This means that the branches within can not
+be rebased and pushed as a single step.
 
-The only way you will ever be allowed to rebase or modify the history of
-a pushed branch is to delete it and push it as a new branch under the same
-name. Please think carefully about doing this. It may be better to sequentially
-rename your branches so that it is easier for others working with you to
-cherry-pick their local changes onto the new version. (XXX: needs
-explanation).
+The only way you will ever be allowed to rebase or modify the history
+of a pushed branch is to delete it and push it as a new branch under
+the same name. Please think carefully about doing this. It may be
+better to sequentially rename your branches so that it is easier for
+others working with you to cherry-pick their local changes onto the new
+version. (XXX: needs explanation).
 
 If you want to rebase a personal topic branch, you will have to delete
 your existing topic branch and push as a new version of it. You can do
@@ -716,25 +727,27 @@ branch:
    $ git push origin $user/$topic
 
 B<NOTE:> it is forbidden at the repository level to delete any of the
-"primary" branches. That is any branch matching C<m!^(blead|maint|perl)!>.
-Any attempt to do so will result in git producing an error like this:
+"primary" branches. That is any branch matching
+C<m!^(blead|maint|perl)!>. Any attempt to do so will result in git
+producing an error like this:
 
     $ git push origin :blead
     *** It is forbidden to delete blead/maint branches in this repository
     error: hooks/update exited with error code 1
     error: hook declined to update refs/heads/blead
-    To ssh://camel.booking.com/perl
+    To ssh://perl5.git.perl.org/perl
      ! [remote rejected] blead (hook declined)
-     error: failed to push some refs to 'ssh://camel.booking.com/perl'
+     error: failed to push some refs to 'ssh://perl5.git.perl.org/perl'
 
-As a matter of policy we do B<not> edit the history of the blead and maint-*
-branches. If a typo (or worse) sneaks into a commit to blead or maint-*, we'll
-fix it in another commit. The only types of updates allowed on these
-branches are "fast-forward's", where all history is preserved.
+As a matter of policy we do B<not> edit the history of the blead and
+maint-* branches. If a typo (or worse) sneaks into a commit to blead or
+maint-*, we'll fix it in another commit. The only types of updates
+allowed on these branches are "fast-forward's", where all history is
+preserved.
 
-Annotated tags in the canonical perl.git repository will never be deleted
-or modified. Think long and hard about whether you want to push a local
-tag to perl.git before doing so. (Pushing unannotated tags is
+Annotated tags in the canonical perl.git repository will never be
+deleted or modified. Think long and hard about whether you want to push
+a local tag to perl.git before doing so. (Pushing unannotated tags is
 not allowed.)
 
 =head1 COMMITTING TO MAINTENANCE VERSIONS
@@ -759,9 +772,9 @@ original commit in the new commit message.
 
 The perl history contains one mistake which was not caught in the
 conversion -- a merge was recorded in the history between blead and
-maint-5.10 where no merge actually occurred.  Due to the nature of
-git, this is now impossible to fix in the public repository.  You can
-remove this mis-merge locally by adding the following line to your
+maint-5.10 where no merge actually occurred.  Due to the nature of git,
+this is now impossible to fix in the public repository.  You can remove
+this mis-merge locally by adding the following line to your
 C<.git/info/grafts> file:
 
   296f12bbbbaa06de9be9d09d3dcf8f4528898a49 434946e0cb7a32589ed92d18008aaa1d88515930

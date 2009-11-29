@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 2.1 2006/05/03 18:24:10 dankogai Exp $
+# $Id: Unicode.t,v 2.2 2009/11/16 14:08:13 dankogai Exp dankogai $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
@@ -20,8 +20,8 @@ BEGIN {
 
 use strict;
 #use Test::More 'no_plan';
-use Test::More tests => 37;
-use Encode qw(encode decode);
+use Test::More tests => 38;
+use Encode qw(encode decode find_encoding);
 
 #
 # see
@@ -131,5 +131,35 @@ for my $file (@file){
     is(decode("UTF-7", encode("UTF-7", $content)), $content, 
        "UTF-7 RT:$file");
 }
+
+# Magic
+{
+    # see http://rt.perl.org/rt3//Ticket/Display.html?id=60472
+    my $work = chr(0x100);
+    my $encoding = find_encoding("UTF16-BE");
+    my $tied;
+    tie $tied, SomeScalar => \$work;
+    my $result = $encoding->encode($tied, 1);
+    is($work, "", "check set magic was applied");
+}
+
+package SomeScalar;
+use Tie::Scalar;
+use vars qw(@ISA);
+BEGIN { @ISA = 'Tie::Scalar' }
+
+sub TIESCALAR {
+    my ($class, $ref) = @_;
+    return bless $ref, $class;
+}
+
+sub FETCH {
+    ${$_[0]}
+}
+
+sub STORE {
+    ${$_[0]} = $_[1];
+}
+
 1;
 __END__

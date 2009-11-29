@@ -1,6 +1,21 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2009-11-12   David E. Wheeler <david@justatheory.org>
+	* Release 3.10
+
+	Converted test files that had DOS enedings to have Unix endings
+	(RT #50922 from Steve Hay).
+
+	Skip tests on VMS where the lack of filename case preservation can
+	wreak havoc (RT #51184 from Craig A. Berry).
+
+	Fix nested definition list format in the XHTML output
+	(RT #51187 from Lars Dɪᴇᴄᴋᴏᴡ).
+
+	Added some files missing from the MANIFEST (and therefore the
+	distribution) in the last two releases.
+
 2009-10-27   Allison Randal <allison@perl.org>
 	* Release 3.09
 
@@ -187,7 +202,7 @@
 	crazy, I've tried to basically turn off all Unicode/utf8 support
 	under 5.6. Under 5.8 and above, Unicode should work fine, and
 	under 5.6, all Unicode characters should be replaced with a little
-	"can't render" symbol, either a "�" or a "?".
+	"can't render" symbol, either a "¤" or a "?".
 	Many many thanks to Jarkko Hietaniemi for helping out.
 
 	(Works under 5.005 now too?)

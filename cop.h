@@ -99,8 +99,9 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_PUSH(v) \
     STMT_START {							\
-	DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
-			 (void*)&cur_env, (void*)PL_top_env));			\
+	DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p at %s:%d\n",	\
+		         (void*)&cur_env, (void*)PL_top_env,			\
+		         __FILE__, __LINE__));					\
 	cur_env.je_prev = PL_top_env;					\
 	OP_REG_TO_MEM;							\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
@@ -112,8 +113,9 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_POP \
     STMT_START {							\
-	DEBUG_l(Perl_deb(aTHX_ "popping jumplevel was %p, now %p\n",	\
-			 (void*)PL_top_env, (void*)cur_env.je_prev));			\
+	DEBUG_l(Perl_deb(aTHX_ "popping jumplevel was %p, now %p at %s:%d\n",	\
+		         (void*)PL_top_env, (void*)cur_env.je_prev,		\
+		         __FILE__, __LINE__));					\
 	assert(PL_top_env == &cur_env);					\
 	PL_top_env = cur_env.je_prev;					\
     } STMT_END

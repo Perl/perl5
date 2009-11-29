@@ -344,7 +344,8 @@ C<Build.PL> file if both are present. Defaults to 'true'.
 
 =cut
 
-        $Conf->{'conf'}->{'prefer_makefile'} = 1;
+        $Conf->{'conf'}->{'prefer_makefile'} = 
+                                ( $] >= 5.010001 ? 0 : 1 );
 
 =item prereqs
 

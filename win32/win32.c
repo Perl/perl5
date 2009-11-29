@@ -22,6 +22,7 @@
 #  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
 #endif
 #include <winnt.h>
+#include <commctrl.h>
 #include <tlhelp32.h>
 #include <io.h>
 #include <signal.h>
@@ -64,7 +65,6 @@ typedef struct {
 #define PERL_NO_GET_CONTEXT
 #include "XSUB.h"
 
-#include "Win32iop.h"
 #include <fcntl.h>
 #ifndef __GNUC__
 /* assert.h conflicts with #define of assert in perl.h */
@@ -2014,7 +2014,7 @@ win32_uname(struct utsname *name)
 	GetSystemInfo(&info);
 
 #if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) \
- || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION))
+ || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION) && !defined(__MINGW_EXTENSION))
 	procarch = info.u.s.wProcessorArchitecture;
 #else
 	procarch = info.wProcessorArchitecture;
@@ -2505,7 +2505,6 @@ my_open_osfhandle(intptr_t osfhandle, int flags)
 
 /* simulate flock by locking a range on the file */
 
-#define LK_ERR(f,i)	((f) ? (i = 0) : (errno = GetLastError()))
 #define LK_LEN		0xffff0000
 
 DllExport int
@@ -2521,34 +2520,46 @@ win32_flock(int fd, int oper)
 	return -1;
     }
     fh = (HANDLE)_get_osfhandle(fd);
+    if (fh == (HANDLE)-1)  /* _get_osfhandle() already sets errno to EBADF */
+        return -1;
+
     memset(&o, 0, sizeof(o));
 
     switch(oper) {
     case LOCK_SH:		/* shared lock */
-	LK_ERR(LockFileEx(fh, 0, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, 0, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_EX:		/* exclusive lock */
-	LK_ERR(LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_SH|LOCK_NB:	/* non-blocking shared lock */
-	LK_ERR(LockFileEx(fh, LOCKFILE_FAIL_IMMEDIATELY, 0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_FAIL_IMMEDIATELY, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_EX|LOCK_NB:	/* non-blocking exclusive lock */
-	LK_ERR(LockFileEx(fh,
-		       LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY,
-		       0, LK_LEN, 0, &o),i);
+	if (LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY,
+		       0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     case LOCK_UN:		/* unlock lock */
-	LK_ERR(UnlockFileEx(fh, 0, LK_LEN, 0, &o),i);
+	if (UnlockFileEx(fh, 0, LK_LEN, 0, &o))
+            i = 0;
 	break;
     default:			/* unknown */
 	errno = EINVAL;
-	break;
+	return -1;
+    }
+    if (i == -1) {
+        if (GetLastError() == ERROR_LOCK_VIOLATION)
+            errno = WSAEWOULDBLOCK;
+        else
+            errno = EINVAL;
     }
     return i;
 }
 
-#undef LK_ERR
 #undef LK_LEN
 
 /*
@@ -2612,21 +2623,24 @@ win32_strerror(int e)
 #if !defined __BORLANDC__ && !defined __MINGW32__      /* compiler intolerance */
     extern int sys_nerr;
 #endif
-    DWORD source = 0;
 
     if (e < 0 || e > sys_nerr) {
         dTHX;
 	if (e < 0)
 	    e = GetLastError();
 
-	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
-			  w32_strerror_buffer,
-			  sizeof(w32_strerror_buffer), NULL) == 0)
+	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+                         |FORMAT_MESSAGE_IGNORE_INSERTS, NULL, e, 0,
+			  w32_strerror_buffer, sizeof(w32_strerror_buffer),
+                          NULL) == 0)
+        {
 	    strcpy(w32_strerror_buffer, "Unknown Error");
-
+        }
 	return w32_strerror_buffer;
     }
+#undef strerror
     return strerror(e);
+#define strerror win32_strerror
 }
 
 DllExport void
@@ -4803,6 +4817,16 @@ Perl_win32_init(int *argcp, char ***argvp)
     _control87(MCW_EM, MCW_EM);
 #endif
     MALLOC_INIT;
+
+    /* When the manifest resource requests Common-Controls v6 then
+     * user32.dll no longer registers all the Windows classes used for
+     * standard controls but leaves some of them to be registered by
+     * comctl32.dll.  InitCommonControls() doesn't do anything but calling
+     * it makes sure comctl32.dll gets loaded into the process and registers
+     * the standard control classes.  Without this even normal Windows APIs
+     * like MessageBox() can fail under some versions of Windows XP.
+     */
+    InitCommonControls();
 
     module = GetModuleHandle("ntdll.dll");
     if (module) {

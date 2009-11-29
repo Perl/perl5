@@ -465,6 +465,13 @@ sub _find_prereqs {
     };
     
     my $args = check( $tmpl, \%hash ) or return;      
+
+    ### see if we got prereqs from MYMETA
+    my $prereqs = $dist->find_mymeta_requires();
+    
+    ### we found some prereqs, we'll trust MYMETA
+    ### but we do need to run it through the callback
+    return $cb->_callbacks->filter_prereqs->( $cb, $prereqs ) if keys %$prereqs;
     
     my $fh = FileHandle->new();
     unless( $fh->open( $file ) ) {

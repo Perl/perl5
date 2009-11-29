@@ -1519,10 +1519,14 @@ cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
 cpan/MIME-Base64/t/warn.t		See whether MIME::Base64 works
 cpan/Module-Build/Changes				Module::Build
+cpan/Module-Build/lib/inc/latest.pm			Module::Build
+cpan/Module-Build/lib/inc/latest/private.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/API.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
 cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
+cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
+cpan/Module-Build/lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
@@ -1548,33 +1552,42 @@ cpan/Module-Build/lib/Module/Build/PPMMaker.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Version.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/YAML.pm		Module::Build
 cpan/Module-Build/scripts/config_data			Module::Build
+cpan/Module-Build/t/actions/installdeps.t		Module::Build
 cpan/Module-Build/t/add_property.t			Module::Build
 cpan/Module-Build/t/basic.t				Module::Build
-cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build.pm
+cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build
+cpan/Module-Build/t/bundle_inc.t			Module::Build
 cpan/Module-Build/t/compat/exit.t			Module::Build
 cpan/Module-Build/t/compat.t				Module::Build
-cpan/Module-Build/t/debug.t				Module::Build tests
+cpan/Module-Build/t/debug.t				Module::Build
 cpan/Module-Build/t/destinations.t			Module::Build
 cpan/Module-Build/t/extend.t				Module::Build
 cpan/Module-Build/t/ext.t				Module::Build
 cpan/Module-Build/t/files.t				Module::Build
 cpan/Module-Build/t/help.t				Module::Build
-cpan/Module-Build/t/install_extra_target.t		Module::Build tests
+cpan/Module-Build/t/install_extra_target.t		Module::Build
 cpan/Module-Build/t/install.t				Module::Build
 cpan/Module-Build/t/lib/DistGen.pm			Module::Build
 cpan/Module-Build/t/lib/MBTest.pm			Module::Build
 cpan/Module-Build/t/manifypods.t			Module::Build
-cpan/Module-Build/t/mbyaml.t				Module::Build
 cpan/Module-Build/t/metadata2.t				Module::Build
 cpan/Module-Build/t/metadata.t				Module::Build
 cpan/Module-Build/t/moduleinfo.t			Module::Build
+cpan/Module-Build/t/mymeta.t				Module::Build
 cpan/Module-Build/t/new_from_context.t			Module::Build
 cpan/Module-Build/t/notes.t				Module::Build
 cpan/Module-Build/t/parents.t				Module::Build
-cpan/Module-Build/t/PL_files.t				Module::Build tests
+cpan/Module-Build/t/perl_mb_opt.t			Module::Build
+cpan/Module-Build/t/PL_files.t				Module::Build
 cpan/Module-Build/t/pod_parser.t			Module::Build
 cpan/Module-Build/t/ppm.t				Module::Build
+cpan/Module-Build/t/properties/module_name.t		Module::Build
+cpan/Module-Build/t/properties/needs_compiler.t		Module::Build
+cpan/Module-Build/t/properties/share_dir.t		Module::Build
+cpan/Module-Build/t/README.pod				Module::Build
+cpan/Module-Build/t/resume.t				Module::Build
 cpan/Module-Build/t/runthrough.t			Module::Build
+cpan/Module-Build/t/sample.t				Module::Build
 cpan/Module-Build/t/script_dist.t			Module::Build
 cpan/Module-Build/t/test_file_exts.t			Module::Build
 cpan/Module-Build/t/test_types.t			Module::Build
@@ -1582,7 +1595,7 @@ cpan/Module-Build/t/test_type.t				Module::Build
 cpan/Module-Build/t/tilde.t				Module::Build
 cpan/Module-Build/t/use_tap_harness.t			Module::Build
 cpan/Module-Build/t/versions.t				Module::Build
-cpan/Module-Build/t/write_default_maniskip.t		Module::Build tests
+cpan/Module-Build/t/write_default_maniskip.t		Module::Build
 cpan/Module-Build/t/xs.t				Module::Build
 cpan/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 cpan/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
@@ -2228,7 +2241,7 @@ cpan/Test-Simple/t/BEGIN_use_ok.t			Test::More use_ok() testing
 cpan/Test-Simple/t/buffer.t				Test::Builder buffering test
 cpan/Test-Simple/t/Builder/Builder.t			Test::Builder tests
 cpan/Test-Simple/t/Builder/carp.t			Test::Builder test
-cpan/Test-Simple/t/Builder/create.t			Test::Builder test 
+cpan/Test-Simple/t/Builder/create.t			Test::Builder test
 cpan/Test-Simple/t/Builder/current_test.t		Test::Builder tests
 cpan/Test-Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
 cpan/Test-Simple/t/Builder/details.t			Test::Builder tests
@@ -3198,6 +3211,12 @@ ext/XS-APItest/APItest.xs	XS::APItest extension
 ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS-APItest/exception.c	XS::APItest extension
+ext/XS-APItest-KeywordRPN/KeywordRPN.pm	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/KeywordRPN.xs	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/Makefile.PL	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/README	XS::APItest::KeywordRPN extension
+ext/XS-APItest-KeywordRPN/t/keyword_plugin.t	test keyword plugin mechanism
+ext/XS-APItest-KeywordRPN/t/multiline.t	test plugin parsing across lines
 ext/XS-APItest/Makefile.PL	XS::APItest extension
 ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined
@@ -3206,6 +3225,7 @@ ext/XS-APItest/t/call.t		XS::APItest extension
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
+ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
 ext/XS-APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS-APItest/t/pmflag.t	Test deprecation warning for Perl_pmflag()
 ext/XS-APItest/t/printf.t	XS::APItest extension
@@ -3469,12 +3489,13 @@ lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
+lib/legacy.pm			Pragma to preserve legacy behavior
+lib/legacy.t			For "use legacy" testing
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
-lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
@@ -3599,7 +3620,6 @@ lib/unicore/Jamo.txt				Unicode character database
 lib/unicore/LineBreak.txt			Unicode character database
 lib/unicore/Makefile				Unicode character database
 lib/unicore/mktables				Unicode character database generator
-lib/unicore/mktables.lst			File list for mktables
 lib/unicore/NameAliases.txt			Unicode character database
 lib/unicore/NamedSequences.txt			Unicode character database
 lib/unicore/NamedSqProv.txt			Unicode character database
@@ -3843,6 +3863,7 @@ pod/perl5101delta.pod		Perl changes in version 5.10.1
 pod/perl5110delta.pod		Perl changes in version 5.11.0
 pod/perl5111delta.pod		Perl changes in version 5.11.1
 pod/perl5112delta.pod		Perl changes in version 5.11.2
+pod/perl5113delta.pod		Perl changes in version 5.11.3
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl570delta.pod		Perl changes in version 5.7.0
@@ -4136,7 +4157,7 @@ symbian/sanity.pl		Helper code for config.pl
 symbian/sdk.pl			Helper code for config.pl
 symbian/sisify.pl		Packaging utility
 symbian/symbian_dll.cpp		The DLL stub for Symbian
-symbian/symbianish.h		Header for Symbian	
+symbian/symbianish.h		Header for Symbian
 symbian/symbian_proto.h		Prototypes for Symbian
 symbian/symbian_stubs.c		Stub routines for Symbian
 symbian/symbian_stubs.h		Stub headers for Symbian
@@ -4167,6 +4188,8 @@ t/comp/decl.t			See if declarations work
 t/comp/fold.t			See if constant folding works
 t/comp/hints.aux		Auxillary file for %^H test
 t/comp/hints.t			See if %^H works
+t/comp/line_debug_0.aux		Auxiliary file for @{"_<$file"} test
+t/comp/line_debug.t		See if @{"_<$file"} works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
 t/comp/our.t			Tests for our declaration
@@ -4408,7 +4431,7 @@ t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
 t/op/or.t			See if || works in weird situations
-t/op/overload_integer.t		See if overload::constant for integer works after "use".   
+t/op/overload_integer.t		See if overload::constant for integer works after "use".
 t/op/override.t			See if operator overriding works
 t/op/pack.t			See if pack and unpack work
 t/op/pos.t			See if pos works
@@ -4480,7 +4503,7 @@ t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping are
 t/README			Instructions for regression tests
 t/re/pat_advanced.t		See if advanced esoteric patterns work
 t/re/pat_advanced_thr.t		See if advanced esoteric patterns work in another thread
-t/re/pat_psycho.t		See if insane esoteric and slow patterns work 
+t/re/pat_psycho.t		See if insane esoteric and slow patterns work
 t/re/pat_psycho_thr.t		See if insane esoteric and slow patterns work in another thread
 t/re/pat_re_eval.t		See if esoteric patterns using re 'eval' work
 t/re/pat_re_eval_thr.t		See if esoteric patterns using re 'eval' work in another thread
@@ -4522,6 +4545,7 @@ t/re/substr_thr.t		See if substr works in another thread
 t/re/subst.t			See if substitution works
 t/re/substT.t			See if substitution works with -T
 t/re/subst_wamp.t		See if substitution works with $& present
+t/re/uniprops.t			Test unicode \p{} regex constructs
 t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.
@@ -4649,10 +4673,12 @@ win32/config.bc			Win32 base line config.sh (Borland C++ build)
 win32/config.ce			WinCE port
 win32/config.gc			Win32 base line config.sh (MinGW build)
 win32/config.gc64		Win64 base line config.sh (MinGW build)
+win32/config.gc64nox		Win64 base line config.sh (MinGW build)
 win32/config_H.bc		Win32 config header (Borland C++ build)
 win32/config_H.ce		WinCE port
 win32/config_H.gc		Win32 config header (MinGW build)
 win32/config_H.gc64		Win64 config header (MinGW build)
+win32/config_H.gc64nox		Win64 config header (MinGW build)
 win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
 win32/config_H.vc		Win32 config header (Visual C++ build)
 win32/config_H.vc64		Win64 config header (Visual C++ build)
@@ -4675,6 +4701,7 @@ win32/Makefile.ce		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/mdelete.bat		multifile delete
 win32/perlexe.ico		perlexe.ico image file
+win32/perlexe.manifest		Assembly manifest file
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation

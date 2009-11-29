@@ -7,9 +7,9 @@ use vars qw( $VERSION $VERBOSE @EXPORT_OK);
 $VERSION = '0.01';
 $VERBOSE = 0;
 
-
 use Carp;
 
+use MBTest ();
 use Cwd ();
 use File::Basename ();
 use File::Find ();
@@ -38,7 +38,7 @@ BEGIN {
         $vms_efs_case = VMS::Feature::current("efs_case_preserve");
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
         my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
         $vms_efs_case = $efs_case =~ /^[ET1]/i;
     }
@@ -64,42 +64,74 @@ sub undent {
 }
 
 sub chdir_all ($) {
-  # OS/2 has "current directory per disk", undeletable; 
+  # OS/2 has "current directory per disk", undeletable;
   # doing chdir() to another disk won't change cur-dir of initial disk...
   chdir('/') if $^O eq 'os2';
   chdir shift;
 }
+
 ########################################################################
 
+END { chdir_all(MBTest->original_cwd); }
+
 sub new {
-  my $package = shift;
+  my $self = bless {}, shift;
+  $self->reset(@_);
+}
+
+sub reset {
+  my $self = shift;
   my %options = @_;
 
   $options{name} ||= 'Simple';
-  $options{dir}  ||= Cwd::cwd();
+  $options{dir} = File::Spec->rel2abs(
+    defined $options{dir} ? $options{dir} : MBTest->tmpdir
+  );
 
   my %data = (
     no_manifest   => 0,
     xs            => 0,
+    inc           => 0,
     %options,
   );
-  my $self = bless( \%data, $package );
-
-  # So we can clean up later even if the caller chdir()s
-  $self->{dir} = File::Spec->rel2abs($self->{dir});
+  %$self = %data;
 
   tie %{$self->{filedata}}, 'Tie::CPHash';
 
   tie %{$self->{pending}{change}}, 'Tie::CPHash';
 
+  # start with a fresh, empty directory
   if ( -d $self->dirname ) {
     warn "Warning: Removing existing directory '@{[$self->dirname]}'\n";
-    $self->remove;
+    File::Path::rmtree( $self->dirname );
   }
+  File::Path::mkpath( $self->dirname );
 
   $self->_gen_default_filedata();
 
   return $self;
+}
+
+sub remove {
+  my $self = shift;
+  $self->chdir_original if($self->did_chdir);
+  File::Path::rmtree( $self->dirname );
+  return $self;
+}
+
+sub revert {
+  my ($self, $file) = @_;
+  if ( defined $file ) {
+    delete $self->{filedata}{$file};
+    delete $self->{pending}{$_}{$file} for qw/change remove/;
+  }
+  else {
+    delete $self->{filedata}{$_} for keys %{ $self->{filedata} };
+    for my $pend ( qw/change remove/ ) {
+      delete $self->{pending}{$pend}{$_} for keys %{ $self->{pending}{$pend} };
+    }
+  }
+  $self->_gen_default_filedata;
 }
 
 sub _gen_default_filedata {
@@ -112,17 +144,32 @@ sub _gen_default_filedata {
     $self->add_file($member, $data) unless($self->{filedata}{$member});
   };
 
-  $self->$add_unless('Build.PL', undent(<<"    ---"));
-    use strict;
-    use Module::Build;
+  if ( ! $self->{inc} ) {
+    $self->$add_unless('Build.PL', undent(<<"      ---"));
+      use strict;
+      use Module::Build;
 
-    my \$builder = Module::Build->new(
-        module_name         => '$self->{name}',
-        license             => 'perl',
-    );
+      my \$builder = Module::Build->new(
+          module_name         => '$self->{name}',
+          license             => 'perl',
+      );
 
-    \$builder->create_build_script();
-    ---
+      \$builder->create_build_script();
+      ---
+  }
+  else {
+    $self->$add_unless('Build.PL', undent(<<"      ---"));
+      use strict;
+      use inc::latest 'Module::Build';
+
+      my \$builder = Module::Build->new(
+          module_name         => '$self->{name}',
+          license             => 'perl',
+      );
+
+      \$builder->create_build_script();
+      ---
+  }
 
   my $module_filename =
     join( '/', ('lib', split(/::/, $self->{name})) ) . '.pm';
@@ -229,7 +276,7 @@ sub _gen_default_filedata {
 
   # 5.6 is missing const char * in its typemap
   $self->$add_unless('typemap', undent(<<"      ---"));
-      const char *              T_PV
+      const char *\tT_PV
       ---
 
   $self->$add_unless('t/basic.t', undent(<<"    ---"));
@@ -249,7 +296,6 @@ sub _gen_manifest {
   my $manifest = shift;
 
   my $fh = IO::File->new( ">$manifest" ) or do {
-    $self->remove();
     die "Can't write '$manifest'\n";
   };
 
@@ -312,7 +358,6 @@ sub regen {
       my $dirname = File::Basename::dirname( $fullname );
       unless ( -d $dirname ) {
         File::Path::mkpath( $dirname ) or do {
-          $self->remove();
           die "Can't create '$dirname'\n";
         };
       }
@@ -322,7 +367,6 @@ sub regen {
       }
 
       my $fh = IO::File->new(">$fullname") or do {
-        $self->remove();
         die "Can't write '$fullname'\n";
       };
       print $fh $self->{filedata}{$file};
@@ -339,6 +383,7 @@ sub regen {
     }
     $self->_gen_manifest( $manifest );
   }
+  return $self;
 }
 
 sub clean {
@@ -396,20 +441,7 @@ sub clean {
   }, ($^O eq 'VMS' ? './' : File::Spec->curdir) );
 
   chdir_all( $here );
-}
-
-sub remove {
-  my $self = shift;
-  croak("invalid usage -- remove()") if(@_);
-  $self->chdir_original if($self->did_chdir);
-  File::Path::rmtree( $self->dirname );
-  # might as well check
-  croak("\nthis test should have used chdir_in()") unless(Cwd::getcwd);
-}
-
-sub revert {
-  my $self = shift;
-  die "Unimplemented.\n";
+  return $self;
 }
 
 sub add_file {
@@ -425,10 +457,13 @@ sub remove_file {
   }
   delete( $self->{filedata}{$file} );
   $self->{pending}{remove}{$file} = 1;
+  return $self;
 }
 
 sub change_build_pl {
-  my ($self, $opts) = @_;
+  my ($self, @opts) = @_;
+
+  my $opts = ref $opts[0] eq 'HASH' ? $opts[0] : { @opts };
 
   local $Data::Dumper::Terse = 1;
   (my $args = Dumper($opts)) =~ s/^\s*\{|\}\s*$//g;
@@ -437,16 +472,17 @@ sub change_build_pl {
     use strict;
     use Module::Build;
     my \$b = Module::Build->new(
-    # Some CPANPLUS::Dist::Build versions need to allow mismatches 
+    # Some CPANPLUS::Dist::Build versions need to allow mismatches
     # On logic: thanks to Module::Install, CPAN.pm must set both keys, but
     # CPANPLUS sets only the one
-    allow_mb_mismatch => ( 
+    allow_mb_mismatch => (
       \$ENV{PERL5_CPANPLUS_IS_RUNNING} && ! \$ENV{PERL5_CPAN_IS_RUNNING} ? 1 : 0
     ),
     $args
     );
     \$b->create_build_script();
     ---
+  return $self;
 }
 
 sub change_file {
@@ -455,6 +491,7 @@ sub change_file {
   my $data = shift;
   $self->{filedata}{$file} = $data;
   $self->{pending}{change}{$file} = 1;
+  return $self;
 }
 
 sub get_file {
@@ -466,40 +503,43 @@ sub get_file {
 
 sub chdir_in {
   my $self = shift;
-
-  $self->{original_dir} ||= Cwd::cwd; # only once
+  $self->{original_dir} ||= Cwd::cwd; # only once!
   my $dir = $self->dirname;
   chdir($dir) or die "Can't chdir to '$dir': $!";
+  return $self;
 }
 ########################################################################
 
-sub did_chdir {
-  my $self = shift;
+sub did_chdir { exists shift()->{original_dir} }
 
-  return exists($self->{original_dir});
-}
 ########################################################################
 
 sub chdir_original {
   my $self = shift;
 
-  croak("never called chdir_in()") unless($self->{original_dir});
-  my $dir = $self->{original_dir};
+  my $dir = delete $self->{original_dir};
   chdir_all($dir) or die "Can't chdir to '$dir': $!";
+  return $self;
 }
 ########################################################################
+
+sub new_from_context {
+  my ($self, @args) = @_;
+  require Module::Build;
+  return Module::Build->new_from_context( quiet => 1, @args );
+}
 
 sub run_build_pl {
   my ($self, @args) = @_;
   require Module::Build;
-  Module::Build->run_perl_script('Build.PL', [], [@args])
+  return Module::Build->run_perl_script('Build.PL', [], [@args])
 }
 
 sub run_build {
   my ($self, @args) = @_;
   require Module::Build;
   my $build_script = $^O eq 'VMS' ? 'Build.com' : 'Build';
-  Module::Build->run_perl_script($build_script, [], [@args])
+  return Module::Build->run_perl_script($build_script, [], [@args])
 }
 
 1;
@@ -516,8 +556,7 @@ DistGen - Creates simple distributions for testing.
   use DistGen;
 
   # create distribution and prepare to test
-  my $dist = DistGen->new(name => 'Foo::Bar', dir => $tmp);
-  $dist->regen;
+  my $dist = DistGen->new(name => 'Foo::Bar');
   $dist->chdir_in;
 
   # change distribution files
@@ -526,42 +565,48 @@ DistGen - Creates simple distributions for testing.
   $dist->remove_file('t/some_test.t');
   $dist->regen;
 
-  # clean up extraneous files
+  # undo changes and clean up extraneous files
+  $dist->revert;
   $dist->clean;
 
   # exercise the command-line interface
   $dist->run_build_pl();
   $dist->run_build('test');
 
-  # finish testing and clean up
-  $dist->chdir_original;
-  $dist->remove;
+  # start over as a new distribution
+  $dist->reset( name => 'Foo::Bar', xs => 1 );
+  $dist->chdir_in;
 
 =head1 USAGE
 
 A DistGen object manages a set of files in a distribution directory.
 
-The constructor and some methods only define the target state of the
-distribution.  They do B<not> make any changes to the filesystem:
+The C<new()> constructor initializes the object and creates an empty
+directory for the distribution. It does not create files or chdir into
+the directory.  The C<reset()> method re-initializes the object in a
+new directory with new parameters.  It also does not create files or change
+the current directory.
 
-  new
+Some methods only define the target state of the distribution.  They do B<not>
+make any changes to the filesystem:
+
   add_file
   change_file
   change_build_pl
   remove_file
+  revert
 
 Other methods then change the filesystem to match the target state of
-the distribution (or to remove it entirely):
+the distribution:
 
-  regen
   clean
+  regen
   remove
 
 Other methods are provided for a convenience during testing. The
-most important are ones that manage the current directory:
+most important is the one to enter the distribution directory:
 
   chdir_in
-  chdir_original
 
 Additional methods portably encapsulate running Build.PL and Build:
 
@@ -570,16 +615,19 @@ Additional methods portably encapsulate running Build.PL and Build:
 
 =head1 API
 
-=head2 Constructor
+=head2 Constructors
 
 =head3 new()
 
-Create a new object.  Does not write its contents (see L</regen()>.)
+Create a new object and an empty directory to hold the distribution's files.
+If no C<dir> option is provided, it defaults to MBTest->tmpdir, which sets
+a different temp directory for Perl core testing and CPAN testing.
 
-  my $tmp = MBTest->tmpdir;
+The C<new> method does not write any files -- see L</regen()> below.
+
   my $dist = DistGen->new(
     name        => 'Foo::Bar',
-    dir         => $tmp,
+    dir         => MBTest->tmpdir,
     xs          => 1,
     no_manifest => 0,
   );
@@ -596,9 +644,14 @@ dist name.
 
 =item dir
 
-The (parent) directory in which to create the distribution directory.
-The default is File::Spec->curdir.  The distribution will be created
-under this according to the "dist" form of C<name> (e.g. "Foo-Bar".)
+The (parent) directory in which to create the distribution directory.  The
+distribution will be created under this according to the "dist" form of C<name>
+(e.g. "Foo-Bar".)  Defaults to a temporary directory.
+
+  $dist = DistGen->new( dir => '/tmp/MB-test' );
+  $dist->regen;
+
+  # distribution files have been created in /tmp/MB-test/Simple
 
 =item xs
 
@@ -621,6 +674,13 @@ the following files are also added:
 
   typemap
   lib/Simple.xs # based on name parameter
+
+=head3 reset()
+
+The C<reset> method re-initializes the object as if it were generated
+from a fresh call to C<new>.  It takes the same optional parameters as C<new>.
+
+  $dist->reset( name => 'Foo::Bar', xs => 0 );
 
 =head2 Adding and editing files
 
@@ -669,6 +729,14 @@ Removes C<$filename> from the distribution.
 
   $dist->remove_file( $filename );
 
+=head3 revert()
+
+Returns the object to its initial state, or given a $filename it returns that
+file to its initial state if it is one of the built-in files.
+
+  $dist->revert;
+  $dist->revert($filename);
+
 =head2 Changing the distribution directory
 
 These methods immediately affect the filesystem.
@@ -680,8 +748,10 @@ flagged for removal with remove_file().
 
   $dist->regen(clean => 1);
 
-If the optional C<clean> argument is given, it also removes any
-extraneous files that do not belong to the distribution.
+If the optional C<clean> argument is given, it also calls C<clean>.  These
+can also be chained like this, instead:
+
+  $dist->clean->regen;
 
 =head3 clean()
 
@@ -689,22 +759,19 @@ Removes any files that are not part of the distribution.
 
   $dist->clean;
 
-=begin TODO
-
-=head3 revert()
-
-[Unimplemented] Returns the object to its initial state, or given a
-$filename it returns that file to it's initial state if it is one of
-the built-in files.
-
-  $dist->revert;
-  $dist->revert($filename);
-
-=end TODO
-
 =head3 remove()
 
-Removes the entire distribution directory.
+Changes back to the original directory and removes the distribution
+directory (but not the temporary directory set during C<new()>).
+
+  $dist = DistGen->new->chdir->regen;
+  # ... do some testing ...
+
+  $dist->remove->chdir_in->regen;
+  # ... do more testing ...
+
+This is like a more aggressive form of C<clean>.  Generally, calling C<clean>
+and C<regen> should be sufficient.
 
 =head2 Changing directories
 

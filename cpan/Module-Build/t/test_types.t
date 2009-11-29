@@ -2,16 +2,13 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 15 + 12;
+use MBTest tests => 25;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
-
-my $tmp = MBTest->tmpdir;
+blib_load('Module::Build');
 
 use DistGen;
 
-my $dist = DistGen->new(dir => $tmp);
+my $dist = DistGen->new()->chdir_in;
 
 $dist->add_file('t/special_ext.st', <<'---');
 #!perl 
@@ -34,7 +31,6 @@ die "don't run this non-test file";
 ---
 
 $dist->regen;
-$dist->chdir_in;
 #########################
 
 my $mb = Module::Build->subclass(
@@ -98,9 +94,9 @@ is(scalar(@{[$all_output =~ m/OK 1/mg]}), 3 );
 is(scalar(@{[$all_output =~ m/OK/mg]}),   8 );
 is(scalar(@{[$all_output =~ m/ALL TESTS SUCCESSFUL\./mg]}),   1);
 
-$dist->remove;
-
 { # once-again
+
+$dist->revert;
 
 $dist->add_file('t/foo/special.st', <<'---');
 #!perl 
@@ -114,7 +110,6 @@ use strict; use Simple;
 ok 1;
 ---
 $dist->regen;
-$dist->chdir_in;
 
 my $mb = Module::Build->subclass(
    code => q#
@@ -174,7 +169,6 @@ like($all_output, qr/^OK 2 - SECOND TEST IN ANOTHER_EXT/m);
 is(scalar(@{[$all_output =~ m/(OK 1)/mg]}), 5 );
 is(scalar(@{[$all_output =~ m/(OK)/mg]}),   13 );
 
-$dist->remove;
 } # end once-again
 
 # vim:ts=4:sw=4:et:sta

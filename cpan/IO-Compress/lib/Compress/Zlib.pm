@@ -18,7 +18,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.021';
+$VERSION = '2.022';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 

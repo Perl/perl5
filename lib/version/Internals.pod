@@ -222,7 +222,7 @@ For example:
 IMPORTANT NOTE: This may mean that code which searches for a specific
 string (to determine whether a given module is available) may need to be
 changed.  It is always better to use the built-in comparison implicit in
-C<use> or C<require>, rather than manually poking at C<class->VERSION>
+C<use> or C<require>, rather than manually poking at C<< class->VERSION >>
 and then doing a comparison yourself.
 
 The replacement UNIVERSAL::VERSION, when used as a function, like this:

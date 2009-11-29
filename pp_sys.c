@@ -318,13 +318,13 @@ PP(pp_backtick)
 		NOOP;
 	}
 	else if (gimme == G_SCALAR) {
-	    ENTER;
+	    ENTER_with_name("backtick");
 	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
 	    sv_setpvs(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
 		NOOP;
-	    LEAVE;
+	    LEAVE_with_name("backtick");
 	    XPUSHs(TARG);
 	    SvTAINTED_on(TARG);
 	}
@@ -364,7 +364,7 @@ PP(pp_glob)
      * without at the same time croaking, for some reason, or if
      * perl was built with PERL_EXTERNAL_GLOB */
 
-    ENTER;
+    ENTER_with_name("glob");
 
 #ifndef VMS
     if (PL_tainting) {
@@ -389,7 +389,7 @@ PP(pp_glob)
 #endif	/* !DOSISH */
 
     result = do_readline();
-    LEAVE;
+    LEAVE_with_name("glob");
     return result;
 }
 
@@ -497,6 +497,7 @@ PP(pp_die)
 	tmpsv = newSVpvs_flags("Died", SVs_TEMP);
 
     DIE(aTHX_ "%"SVf, SVfARG(tmpsv));
+    RETURN;
 }
 
 /* I/O. */
@@ -533,9 +534,9 @@ PP(pp_open)
 	    *MARK-- = SvTIED_obj(MUTABLE_SV(io), mg);
 	    PUSHMARK(MARK);
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_OPEN");
 	    call_method("OPEN", G_SCALAR);
-	    LEAVE;
+	    LEAVE_with_name("call_OPEN");
 	    SPAGAIN;
 	    RETURN;
 	}
@@ -573,9 +574,9 @@ PP(pp_close)
 		PUSHMARK(SP);
 		XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 		PUTBACK;
-		ENTER;
+		ENTER_with_name("call_CLOSE");
 		call_method("CLOSE", G_SCALAR);
-		LEAVE;
+		LEAVE_with_name("call_CLOSE");
 		SPAGAIN;
 		RETURN;
 	    }
@@ -642,6 +643,7 @@ badexit:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_func, "pipe");
+    return NORMAL;
 #endif
 }
 
@@ -663,9 +665,9 @@ PP(pp_fileno)
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	PUTBACK;
-	ENTER;
+	ENTER_with_name("call_FILENO");
 	call_method("FILENO", G_SCALAR);
-	LEAVE;
+	LEAVE_with_name("call_FILENO");
 	SPAGAIN;
 	RETURN;
     }
@@ -738,9 +740,9 @@ PP(pp_binmode)
 	    if (discp)
 		XPUSHs(discp);
 	    PUTBACK;
-	    ENTER;
+	    ENTER_with_name("call_BINMODE");
 	    call_method("BINMODE", G_SCALAR);
-	    LEAVE;
+	    LEAVE_with_name("call_BINMODE");
 	    SPAGAIN;
 	    RETURN;
 	}
@@ -783,7 +785,7 @@ PP(pp_tie)
 {
     dVAR; dSP; dMARK;
     HV* stash;
-    GV *gv;
+    GV *gv = NULL;
     SV *sv;
     const I32 markoff = MARK - PL_stack_base;
     const char *methname;
@@ -818,7 +820,7 @@ PP(pp_tie)
     }
     items = SP - MARK++;
     if (sv_isobject(*MARK)) { /* Calls GET magic. */
-	ENTER;
+	ENTER_with_name("call_TIE");
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,(I32)items);
@@ -838,7 +840,7 @@ PP(pp_tie)
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
 		 methname, SVfARG(SvOK(*MARK) ? *MARK : &PL_sv_no));
 	}
-	ENTER;
+	ENTER_with_name("call_TIE");
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,(I32)items);
@@ -861,7 +863,7 @@ PP(pp_tie)
 		       "Self-ties of arrays and hashes are not supported");
 	sv_magic(varsv, (SvRV(sv) == varsv ? NULL : sv), how, NULL, 0);
     }
-    LEAVE;
+    LEAVE_with_name("call_TIE");
     SP = PL_stack_base + markoff;
     PUSHs(sv);
     RETURN;
@@ -888,9 +890,9 @@ PP(pp_untie)
 	       XPUSHs(SvTIED_obj(MUTABLE_SV(gv), mg));
 	       mXPUSHi(SvREFCNT(obj) - 1);
 	       PUTBACK;
-	       ENTER;
+	       ENTER_with_name("call_UNTIE");
 	       call_sv(MUTABLE_SV(cv), G_VOID);
-	       LEAVE;
+	       LEAVE_with_name("call_UNTIE");
 	       SPAGAIN;
             }
 	    else if (mg && SvREFCNT(obj) > 1) {
@@ -931,7 +933,7 @@ PP(pp_dbmopen)
     dVAR; dSP;
     dPOPPOPssrl;
     HV* stash;
-    GV *gv;
+    GV *gv = NULL;
 
     HV * const hv = MUTABLE_HV(POPs);
     SV * const sv = newSVpvs_flags("AnyDBM_File", SVs_TEMP);
@@ -1139,6 +1141,7 @@ PP(pp_sselect)
     RETURN;
 #else
     DIE(aTHX_ "select not implemented");
+    return NORMAL;
 #endif
 }
 
@@ -1158,8 +1161,7 @@ Perl_setdefout(pTHX_ GV *gv)
 {
     dVAR;
     SvREFCNT_inc_simple_void(gv);
-    if (PL_defoutgv)
-	SvREFCNT_dec(PL_defoutgv);
+    SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
 }
 
@@ -1269,8 +1271,8 @@ PP(pp_enterwrite)
     register GV *gv;
     register IO *io;
     GV *fgv;
-    CV *cv;
-    SV * tmpsv = NULL;
+    CV *cv = NULL;
+    SV *tmpsv = NULL;
 
     if (MAXARG == 0)
 	gv = PL_defoutgv;
@@ -2358,6 +2360,7 @@ PP(pp_flock)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "flock()");
+    return NORMAL;
 #endif
 }
 
@@ -2410,6 +2413,7 @@ PP(pp_socket)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "socket");
+    return NORMAL;
 #endif
 }
 
@@ -2471,6 +2475,7 @@ PP(pp_sockpair)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "socketpair");
+    return NORMAL;
 #endif
 }
 
@@ -2502,6 +2507,7 @@ nuts:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "bind");
+    return NORMAL;
 #endif
 }
 
@@ -2532,6 +2538,7 @@ nuts:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "connect");
+    return NORMAL;
 #endif
 }
 
@@ -2558,6 +2565,7 @@ nuts:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "listen");
+    return NORMAL;
 #endif
 }
 
@@ -2637,6 +2645,7 @@ badexit:
 
 #else
     DIE(aTHX_ PL_no_sock_func, "accept");
+    return NORMAL;
 #endif
 }
 
@@ -2661,6 +2670,7 @@ nuts:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "shutdown");
+    return NORMAL;
 #endif
 }
 
@@ -2738,6 +2748,7 @@ nuts2:
 
 #else
     DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
+    return NORMAL;
 #endif
 }
 
@@ -2802,6 +2813,7 @@ nuts2:
 
 #else
     DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
+    return NORMAL;
 #endif
 }
 
@@ -3556,6 +3568,7 @@ PP(pp_chroot)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "chroot");
+    return NORMAL;
 #endif
 }
 
@@ -3630,6 +3643,7 @@ PP(pp_link)
 {
     /* Have neither.  */
     DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+    return NORMAL;
 }
 #endif
 
@@ -3845,6 +3859,7 @@ nope:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "opendir");
+    return NORMAL;
 #endif
 }
 
@@ -3852,6 +3867,7 @@ PP(pp_readdir)
 {
 #if !defined(Direntry_t) || !defined(HAS_READDIR)
     DIE(aTHX_ PL_no_dir_func, "readdir");
+    return NORMAL;
 #else
 #if !defined(I_DIRENT) && !defined(VMS)
     Direntry_t *readdir (DIR *);
@@ -3930,6 +3946,7 @@ nope:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "telldir");
+    return NORMAL;
 #endif
 }
 
@@ -3955,6 +3972,7 @@ nope:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "seekdir");
+    return NORMAL;
 #endif
 }
 
@@ -3978,6 +3996,7 @@ nope:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "rewinddir");
+    return NORMAL;
 #endif
 }
 
@@ -4010,6 +4029,7 @@ nope:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "closedir");
+    return NORMAL;
 #endif
 }
 
@@ -4056,6 +4076,7 @@ PP(pp_fork)
     RETURN;
 #  else
     DIE(aTHX_ PL_no_func, "fork");
+    return NORMAL;
 #  endif
 #endif
 }
@@ -4085,6 +4106,7 @@ PP(pp_wait)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "wait");
+    return NORMAL;
 #endif
 }
 
@@ -4115,6 +4137,7 @@ PP(pp_waitpid)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "waitpid");
+    return NORMAL;
 #endif
 }
 
@@ -4320,6 +4343,7 @@ PP(pp_getppid)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getppid");
+    return NORMAL;
 #endif
 }
 
@@ -4341,6 +4365,7 @@ PP(pp_getpgrp)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpgrp()");
+    return NORMAL;
 #endif
 }
 
@@ -4374,6 +4399,7 @@ PP(pp_setpgrp)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "setpgrp()");
+    return NORMAL;
 #endif
 }
 
@@ -4387,6 +4413,7 @@ PP(pp_getpriority)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpriority()");
+    return NORMAL;
 #endif
 }
 
@@ -4402,6 +4429,7 @@ PP(pp_setpriority)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "setpriority()");
+    return NORMAL;
 #endif
 }
 
@@ -4452,6 +4480,7 @@ PP(pp_tms)
     RETURN;
 #   else
     DIE(aTHX_ "times not implemented");
+    return NORMAL;
 #   endif
 #endif /* HAS_TIMES */
 }
@@ -4548,6 +4577,7 @@ PP(pp_alarm)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "alarm");
+    return NORMAL;
 #endif
 }
 
@@ -4617,6 +4647,7 @@ PP(pp_semget)
     RETURN;
 #else
     DIE(aTHX_ "System V IPC is not implemented on this machine");
+    return NORMAL;
 #endif
 }
 
@@ -4677,7 +4708,7 @@ PP(pp_ghostent)
     struct hostent *gethostbyname(Netdb_name_t);
     struct hostent *gethostent(void);
 #endif
-    struct hostent *hent;
+    struct hostent *hent = NULL;
     unsigned long len;
 
     EXTEND(SP, 10);
@@ -4752,6 +4783,7 @@ PP(pp_ghostent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_sock_func, "gethostent");
+    return NORMAL;
 #endif
 }
 
@@ -4825,6 +4857,7 @@ PP(pp_gnetent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_sock_func, "getnetent");
+    return NORMAL;
 #endif
 }
 
@@ -4885,6 +4918,7 @@ PP(pp_gprotoent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_sock_func, "getprotoent");
+    return NORMAL;
 #endif
 }
 
@@ -4960,6 +4994,7 @@ PP(pp_gservent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_sock_func, "getservent");
+    return NORMAL;
 #endif
 }
 
@@ -4971,6 +5006,7 @@ PP(pp_shostent)
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "sethostent");
+    return NORMAL;
 #endif
 }
 
@@ -4982,6 +5018,7 @@ PP(pp_snetent)
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setnetent");
+    return NORMAL;
 #endif
 }
 
@@ -4993,6 +5030,7 @@ PP(pp_sprotoent)
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setprotoent");
+    return NORMAL;
 #endif
 }
 
@@ -5004,6 +5042,7 @@ PP(pp_sservent)
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setservent");
+    return NORMAL;
 #endif
 }
 
@@ -5016,6 +5055,7 @@ PP(pp_ehostent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "endhostent");
+    return NORMAL;
 #endif
 }
 
@@ -5028,6 +5068,7 @@ PP(pp_enetent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "endnetent");
+    return NORMAL;
 #endif
 }
 
@@ -5040,6 +5081,7 @@ PP(pp_eprotoent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "endprotoent");
+    return NORMAL;
 #endif
 }
 
@@ -5052,6 +5094,7 @@ PP(pp_eservent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "endservent");
+    return NORMAL;
 #endif
 }
 
@@ -5285,6 +5328,7 @@ PP(pp_gpwent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+    return NORMAL;
 #endif
 }
 
@@ -5296,6 +5340,7 @@ PP(pp_spwent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "setpwent");
+    return NORMAL;
 #endif
 }
 
@@ -5307,6 +5352,7 @@ PP(pp_epwent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endpwent");
+    return NORMAL;
 #endif
 }
 
@@ -5381,6 +5427,7 @@ PP(pp_ggrent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+    return NORMAL;
 #endif
 }
 
@@ -5392,6 +5439,7 @@ PP(pp_sgrent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "setgrent");
+    return NORMAL;
 #endif
 }
 
@@ -5403,6 +5451,7 @@ PP(pp_egrent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endgrent");
+    return NORMAL;
 #endif
 }
 
@@ -5418,6 +5467,7 @@ PP(pp_getlogin)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getlogin");
+    return NORMAL;
 #endif
 }
 
@@ -5516,6 +5566,7 @@ PP(pp_syscall)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "syscall");
+    return NORMAL;
 #endif
 }
 
@@ -5528,6 +5579,7 @@ PP(pp_syscall)
 static int
 fcntl_emulate_flock(int fd, int operation)
 {
+    int res;
     struct flock flock;
 
     switch (operation & ~LOCK_NB) {
@@ -5547,7 +5599,10 @@ fcntl_emulate_flock(int fd, int operation)
     flock.l_whence = SEEK_SET;
     flock.l_start = flock.l_len = (Off_t)0;
 
-    return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
+    res = fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
+    if (res == -1 && ((errno == EAGAIN) || (errno == EACCES)))
+	errno = EWOULDBLOCK;
+    return res;
 }
 
 #endif /* FCNTL_EMULATE_FLOCK */

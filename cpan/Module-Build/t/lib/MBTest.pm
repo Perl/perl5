@@ -13,6 +13,7 @@ BEGIN {
     my @delete_env_keys = qw(
         DEVEL_COVER_OPTIONS
         MODULEBUILDRC
+        PERL_MB_OPT
         HARNESS_TIMER
         HARNESS_OPTIONS
         HARNESS_VERBOSE
@@ -49,7 +50,15 @@ BEGIN {
 
   # In case the test wants to use our other bundled
   # modules, make sure they can be loaded.
-  push @INC, File::Spec->catdir('t', 'bundled');
+  my $t_lib = File::Spec->catdir('t', 'bundled');
+  push @INC, $t_lib; # Let user's installed version override
+
+  if ($ENV{PERL_CORE}) {
+    # We change directories, so expand @INC and $^X to absolute paths
+    # Also add .
+    @INC = (map(File::Spec->rel2abs($_), @INC), ".");
+    $^X = File::Spec->rel2abs($^X);
+  }
 }
 
 use Exporter;
@@ -74,7 +83,7 @@ my @extra_exports = qw(
   find_in_path
   check_compiler
   have_module
-  ensure_blib
+  blib_load
 );
 push @EXPORT, @extra_exports;
 __PACKAGE__->export(scalar caller, @extra_exports);
@@ -84,8 +93,10 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 ########################################################################
 
 # always return to the current directory
-{ 
-  my $cwd = Cwd::cwd;
+{
+  my $cwd = File::Spec->rel2abs(Cwd::cwd);
+
+  sub original_cwd { return $cwd }
 
   END {
     # Go back to where you came from!
@@ -103,13 +114,11 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 }
 ########################################################################
 
-# Setup a temp directory 
-sub tmpdir { 
-  my ($self, $usr_tmp) = @_;
-  return File::Temp::tempdir( 'MB-XXXXXXXX', 
-    CLEANUP => 1, DIR => $ENV{PERL_CORE} ? Cwd::cwd : 
-                         $usr_tmp        ? $usr_tmp : File::Spec->tmpdir 
-  );
+# Setup a temp directory
+sub tmpdir {
+  my ($self, @args) = @_;
+  my $dir = $ENV{PERL_CORE} ? MBTest->original_cwd : File::Spec->tmpdir;
+  return File::Temp::tempdir('MB-XXXXXXXX', CLEANUP => 1, DIR => $dir, @args);
 }
 
 sub save_handle {
@@ -137,7 +146,7 @@ sub stdout_stderr_of {
   $stdout = stdout_of ( sub {
       $stderr = stderr_of( $subr )
   });
-  return ($stdout, $stderr);
+  return wantarray ? ($stdout, $stderr) : $stdout . $stderr;
 }
 
 sub slurp {
@@ -160,24 +169,31 @@ sub exe_exts {
 
 sub find_in_path {
   my $thing = shift;
-  
-  my @path = split $Config{path_sep}, $ENV{PATH};
+
   my @exe_ext = exe_exts();
-  foreach (@path) {
-    my $fullpath = File::Spec->catfile($_, $thing);
+  if ( File::Spec->file_name_is_absolute( $thing ) ) {
     foreach my $ext ( '', @exe_ext ) {
-      return "$fullpath$ext" if -e "$fullpath$ext";
+      return "$thing$ext" if -e "$thing$ext";
+    }
+  }
+  else {
+    my @path = split $Config{path_sep}, $ENV{PATH};
+    foreach (@path) {
+      my $fullpath = File::Spec->catfile($_, $thing);
+      foreach my $ext ( '', @exe_ext ) {
+        return "$fullpath$ext" if -e "$fullpath$ext";
+      }
     }
   }
   return;
 }
 
-# returns ($have_c_compiler, $C_support_feature);
 sub check_compiler {
   return (1,1) if $ENV{PERL_CORE};
 
   local $SIG{__WARN__} = sub {};
 
+  blib_load('Module::Build');
   my $mb = Module::Build->current;
   $mb->verbose( 0 );
 
@@ -197,26 +213,28 @@ sub check_compiler {
     );
     $tmp_exec = 0 == system( $exe );
   }
-  return ($have_c_compiler, $mb->feature('C_support'), $tmp_exec);
+  return ($have_c_compiler, $tmp_exec);
 }
 
 sub have_module {
   my $module = shift;
-  return eval "use $module; 1";
+  return eval "require $module; 1";
 }
 
-sub ensure_blib {
-  # Make sure the given module was loaded from blib/, not the larger system
+sub blib_load {
+  # Load the given module and ensure it came from blib/, not the larger system
   my $mod = shift;
+  have_module($mod) or die "Error loading $mod\: $@\n";
+
   (my $path = $mod) =~ s{::}{/}g;
- 
-  local $Test::Builder::Level = $Test::Builder::Level + 1; 
- SKIP: {
-    skip "no blib in core", 1 if $ENV{PERL_CORE};
-    like $INC{"$path.pm"}, qr/\bblib\b/, "Make sure $mod was loaded from blib/"
-      or diag "PERL5LIB: " . ($ENV{PERL5LIB} || '') . "\n" .
-              "PERL5OPT: " . ($ENV{PERL5OPT} || '') . "\n" .
-              "\@INC contains:\n  " . join("\n  ", @INC) . "\n"; 
+  $path .= ".pm";
+  my ($pkg, $file, $line) = caller;
+  unless($ENV{PERL_CORE}) {
+    unless($INC{$path} =~ m/\bblib\b/) {
+      (my $load_from = $INC{$path}) =~ s{$path$}{};
+      die "$mod loaded from '$load_from'\nIt should have been loaded from blib.  \@INC contains:\n  ",
+      join("\n  ", @INC) . "\nFatal error occured in blib_load() at $file, line $line.\n";
+    }
   }
 }
 

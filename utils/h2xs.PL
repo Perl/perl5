@@ -2100,6 +2100,9 @@ print EX <<_END_;
 
 # change 'tests => $tests' to 'tests => last_test_to_print';
 
+use strict;
+use warnings;
+
 _END_
 
 my $test_mod = 'Test::More';

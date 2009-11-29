@@ -149,6 +149,11 @@ use constant META_YML       => sub { return @_
                                         : 'META.yml';
                             }; 
 
+use constant MYMETA_YML     => sub { return @_
+                                        ? File::Spec->catfile( @_, 'MYMETA.yml' )
+                                        : 'MYMETA.yml';
+                            }; 
+
 use constant BLIB           => sub { return @_
                                         ? File::Spec->catfile(@_, 'blib')
                                         : 'blib';

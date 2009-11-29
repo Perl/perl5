@@ -1,3 +1,4 @@
+#line 2 "perl.c"
 /*    perl.c
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
@@ -539,6 +540,8 @@ perl_destruct(pTHXx)
     PERL_UNUSED_ARG(my_perl);
 #endif
 
+    assert(PL_scopestack_ix == 1);
+
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
 
@@ -566,6 +569,7 @@ perl_destruct(pTHXx)
     }
     LEAVE;
     FREETMPS;
+    assert(PL_scopestack_ix == 0);
 
     /* Need to flush since END blocks can produce output */
     my_fflush_all();
@@ -2606,8 +2610,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    PL_curstash = PL_defstash;
 	    FREETMPS;
 	    JMPENV_POP;
-	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
-		Perl_croak(aTHX_ "Callback called exit");
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
@@ -2708,8 +2710,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	PL_curstash = PL_defstash;
 	FREETMPS;
 	JMPENV_POP;
-	if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
-	    Perl_croak(aTHX_ "Callback called exit");
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
@@ -3222,9 +3222,11 @@ Perl_moreswitches(pTHX_ const char *s)
 	    }
  #endif
 	    PerlIO_printf(PerlIO_stdout(),
-		"\nThis is perl, %"SVf
-		" built for " ARCHNAME,
-		level);
+		"\nThis is perl "	STRINGIFY(PERL_REVISION)
+		", version "		STRINGIFY(PERL_VERSION)
+		", subversion "		STRINGIFY(PERL_SUBVERSION)
+		" (%"SVf") built for "	ARCHNAME, level
+		);
 	    SvREFCNT_dec(level);
 	}
 #else /* DGUX */
@@ -3813,6 +3815,9 @@ Perl_init_stacks(pTHX)
     SET_MARK_OFFSET;
 
     Newx(PL_scopestack,REASONABLE(32),I32);
+#ifdef DEBUGGING
+    Newx(PL_scopestack_name,REASONABLE(32),const char*);
+#endif
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
@@ -4581,16 +4586,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;
-	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
-		if (paramList == PL_beginav)
-		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
-		else
-		    Perl_croak(aTHX_ "%s failed--call queue aborted",
-			       paramList == PL_checkav ? "CHECK"
-			       : paramList == PL_initav ? "INIT"
-			       : paramList == PL_unitcheckav ? "UNITCHECK"
-			       : "END");
-	    }
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:

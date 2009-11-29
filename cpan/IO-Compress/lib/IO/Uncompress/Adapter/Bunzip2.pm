@@ -9,7 +9,7 @@ use IO::Compress::Base::Common 2.021 qw(:Status);
 use Compress::Raw::Bzip2 2.021 ;
 
 our ($VERSION, @ISA);
-$VERSION = '2.021';
+$VERSION = '2.022';
 
 sub mkUncompObject
 {

@@ -73,6 +73,7 @@
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF
 %token <opval> FUNC0SUB UNIOPSUB LSTOPSUB
+%token <opval> PLUGEXPR PLUGSTMT
 %token <p_tkval> LABEL
 %token <i_tkval> FORMAT SUB ANONSUB PACKAGE USE
 %token <i_tkval> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
@@ -157,7 +158,7 @@ remember:	/* NULL */	/* start a full lexical scope */
 	;
 
 mydefsv:	/* NULL */	/* lexicalize $_ */
-			{ $$ = (I32) allocmy("$_"); }
+			{ $$ = (I32) Perl_allocmy(aTHX_ STR_WITH_LEN("$_"), 0); }
 	;
 
 progstart:
@@ -241,6 +242,8 @@ line	:	label cond
 			      }
 			  })
 			}
+	|	label PLUGSTMT
+			{ $$ = newSTATEOP(0, PVAL($1), $2); }
 	;
 
 /* An expression which may have a side-effect */
@@ -1244,6 +1247,7 @@ term	:	termbinop
 				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
 			  TOKEN_GETMAD($1,$$,'X');
 			}
+	|	PLUGEXPR
 	;
 
 /* "my" declarations, with optional attributes */

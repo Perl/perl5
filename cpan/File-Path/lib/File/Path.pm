@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.08';
+$VERSION   = '2.08_01';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
@@ -279,7 +279,7 @@ sub _rmtree {
         my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next ROOT_DIR;
 
         if ( -d _ ) {
-            $root = VMS::Filespec::pathify($root) if $Is_VMS;
+            $root = VMS::Filespec::vmspath(VMS::Filespec::pathify($root)) if $Is_VMS;
 
             if (!chdir($root)) {
                 # see if we can escalate privileges to get in
@@ -343,7 +343,6 @@ sub _rmtree {
                 # filesystems is faster if done in reverse ASCIIbetical order.
                 # include '.' to '.;' from blead patch #31775
                 @files = map {$_ eq '.' ? '.;' : $_} reverse @files;
-                ($root = VMS::Filespec::unixify($root)) =~ s/\.dir\z//;
             }
 
             @files = grep {$_ ne $updir and $_ ne $curdir} @files;

@@ -376,12 +376,11 @@
 /re.pm
 /threads
 /threads.pm
-/unicore/Canonical.pl
 /unicore/CombiningClass.pl
 /unicore/Decomposition.pl
-/unicore/Exact.pl
+/unicore/Heavy.pl
+/unicore/mktables.lst
 /unicore/Name.pl
-/unicore/PVA.pl
-/unicore/Properties
+unicore/TestProp.pl
 /unicore/To
 /unicore/lib

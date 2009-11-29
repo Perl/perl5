@@ -2,12 +2,11 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 29;
+use MBTest tests => 27;
 #use MBTest 'no_plan';
 use DistGen;
 
-BEGIN { use_ok 'Module::Build' or die; }
-ensure_blib 'Module::Build';
+blib_load 'Module::Build';
 
 my $tmp = MBTest->tmpdir;
 my $dist = DistGen->new( dir => $tmp );

@@ -216,6 +216,129 @@ char *tzname[] = { "" , "" };
 #endif /* WIN32 || NETWARE */
 #endif /* __VMS */
 
+#ifdef WIN32
+   /* Perl on Windows assigns WSAGetLastError() return values to errno
+    * (in win32/win32sck.c).  Therefore we need to map these values
+    * back to standard symbolic names, as long as the same name isn't
+    * already defined by errno.h itself.  The Errno.pm module does
+    * a similar mapping.
+    */
+#  ifndef EWOULDBLOCK
+#    define EWOULDBLOCK WSAEWOULDBLOCK
+#  endif
+#  ifndef EINPROGRESS
+#    define EINPROGRESS WSAEINPROGRESS
+#  endif
+#  ifndef EALREADY
+#    define EALREADY WSAEALREADY
+#  endif
+#  ifndef ENOTSOCK
+#    define ENOTSOCK WSAENOTSOCK
+#  endif
+#  ifndef EDESTADDRREQ
+#    define EDESTADDRREQ WSAEDESTADDRREQ
+#  endif
+#  ifndef EMSGSIZE
+#    define EMSGSIZE WSAEMSGSIZE
+#  endif
+#  ifndef EPROTOTYPE
+#    define EPROTOTYPE WSAEPROTOTYPE
+#  endif
+#  ifndef ENOPROTOOPT
+#    define ENOPROTOOPT WSAENOPROTOOPT
+#  endif
+#  ifndef EPROTONOSUPPORT
+#    define EPROTONOSUPPORT WSAEPROTONOSUPPORT
+#  endif
+#  ifndef ESOCKTNOSUPPORT
+#    define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
+#  endif
+#  ifndef EOPNOTSUPP
+#    define EOPNOTSUPP WSAEOPNOTSUPP
+#  endif
+#  ifndef EPFNOSUPPORT
+#    define EPFNOSUPPORT WSAEPFNOSUPPORT
+#  endif
+#  ifndef EAFNOSUPPORT
+#    define EAFNOSUPPORT WSAEAFNOSUPPORT
+#  endif
+#  ifndef EADDRINUSE
+#    define EADDRINUSE WSAEADDRINUSE
+#  endif
+#  ifndef EADDRNOTAVAIL
+#    define EADDRNOTAVAIL WSAEADDRNOTAVAIL
+#  endif
+#  ifndef ENETDOWN
+#    define ENETDOWN WSAENETDOWN
+#  endif
+#  ifndef ENETUNREACH
+#    define ENETUNREACH WSAENETUNREACH
+#  endif
+#  ifndef ENETRESET
+#    define ENETRESET WSAENETRESET
+#  endif
+#  ifndef ECONNABORTED
+#    define ECONNABORTED WSAECONNABORTED
+#  endif
+#  ifndef ECONNRESET
+#    define ECONNRESET WSAECONNRESET
+#  endif
+#  ifndef ENOBUFS
+#    define ENOBUFS WSAENOBUFS
+#  endif
+#  ifndef EISCONN
+#    define EISCONN WSAEISCONN
+#  endif
+#  ifndef ENOTCONN
+#    define ENOTCONN WSAENOTCONN
+#  endif
+#  ifndef ESHUTDOWN
+#    define ESHUTDOWN WSAESHUTDOWN
+#  endif
+#  ifndef ETOOMANYREFS
+#    define ETOOMANYREFS WSAETOOMANYREFS
+#  endif
+#  ifndef ETIMEDOUT
+#    define ETIMEDOUT WSAETIMEDOUT
+#  endif
+#  ifndef ECONNREFUSED
+#    define ECONNREFUSED WSAECONNREFUSED
+#  endif
+#  ifndef ELOOP
+#    define ELOOP WSAELOOP
+#  endif
+#  ifndef ENAMETOOLONG
+#    define ENAMETOOLONG WSAENAMETOOLONG
+#  endif
+#  ifndef EHOSTDOWN
+#    define EHOSTDOWN WSAEHOSTDOWN
+#  endif
+#  ifndef EHOSTUNREACH
+#    define EHOSTUNREACH WSAEHOSTUNREACH
+#  endif
+#  ifndef ENOTEMPTY
+#    define ENOTEMPTY WSAENOTEMPTY
+#  endif
+#  ifndef EPROCLIM
+#    define EPROCLIM WSAEPROCLIM
+#  endif
+#  ifndef EUSERS
+#    define EUSERS WSAEUSERS
+#  endif
+#  ifndef EDQUOT
+#    define EDQUOT WSAEDQUOT
+#  endif
+#  ifndef ESTALE
+#    define ESTALE WSAESTALE
+#  endif
+#  ifndef EREMOTE
+#    define EREMOTE WSAEREMOTE
+#  endif
+#  ifndef EDISCON
+#    define EDISCON WSAEDISCON
+#  endif
+#endif
+
 typedef int SysRet;
 typedef long SysRetLong;
 typedef sigset_t* POSIX__SigSet;
@@ -764,8 +887,8 @@ WEXITSTATUS(status)
 	POSIX::WSTOPSIG = 4
 	POSIX::WTERMSIG = 5
     CODE:
-#if !(defined(WEXITSTATUS) || defined(WIFEXITED) || defined(WIFSIGNALED) \
-      || defined(WIFSTOPPED) || defined(WSTOPSIG) || defined (WTERMSIG))
+#if !defined(WEXITSTATUS) || !defined(WIFEXITED) || !defined(WIFSIGNALED) \
+      || !defined(WIFSTOPPED) || !defined(WSTOPSIG) || !defined(WTERMSIG)
         RETVAL = 0; /* Silence compilers that notice this, but don't realise
 		       that not_here() can't return.  */
 #endif
@@ -1298,8 +1421,10 @@ sigaction(sig, optaction, oldaction = 0)
 			sv_setpvs(*svp, "DEFAULT");
 		}
 		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
-		if(RETVAL == -1)
+		if(RETVAL == -1) {
+                   LEAVE;
                    XSRETURN_UNDEF;
+                }
 		/* Get back the mask. */
 		svp = hv_fetchs(oldaction, "MASK", TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
@@ -1379,8 +1504,10 @@ sigaction(sig, optaction, oldaction = 0)
 		 * essentially meaningless anyway.
 		 */
 		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
-		if(RETVAL == -1)
+		if(RETVAL == -1) {
+                    LEAVE;
 		    XSRETURN_UNDEF;
+                }
 	    }
 
 	    LEAVE;

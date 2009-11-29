@@ -1364,8 +1364,7 @@ S_vdie(pTHX_ const char* pat, va_list *args)
 
     message = vdie_croak_common(pat, args);
 
-    PL_restartop = die_where(message);
-    JMPENV_JUMP(3);
+    die_where(message);
     /* NOTREACHED */
     return NULL;
 }
@@ -1403,13 +1402,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 
     msv = S_vdie_croak_common(aTHX_ pat, args);
 
-    if (PL_in_eval) {
-	PL_restartop = die_where(msv);
-	JMPENV_JUMP(3);
-    }
-
-    write_to_stderr( msv ? msv : ERRSV );
-    my_failure_exit();
+    die_where(msv);
 }
 
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -1564,12 +1557,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    assert(msv);
 	    S_vdie_common(aTHX_ msv, FALSE);
 	}
-	if (PL_in_eval) {
-	    PL_restartop = die_where(msv);
-	    JMPENV_JUMP(3);
-	}
-	write_to_stderr(msv);
-	my_failure_exit();
+	die_where(msv);
     }
     else {
 	Perl_vwarn(aTHX_ pat, args);
@@ -5378,7 +5366,7 @@ Perl_get_hash_seed(pTHX)
 	   * help.  Sum in another random number that will
 	   * fill in the low bits. */
 	  myseed +=
-	       (UV)(Drand01() * (NV)((1 << ((UVSIZE * 8 - RANDBITS))) - 1));
+	       (UV)(Drand01() * (NV)((((UV)1) << ((UVSIZE * 8 - RANDBITS))) - 1));
 #endif /* RANDBITS < (UVSIZE * 8) */
 	  if (myseed == 0) { /* Superparanoia. */
 	      myseed = (UV)(Drand01() * (NV)UV_MAX); /* One more chance. */

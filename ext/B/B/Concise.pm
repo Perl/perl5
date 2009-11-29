@@ -634,6 +634,7 @@ $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";
 $priv{"exists"}{64} = "SUB";
 @{$priv{"sort"}}{1,2,4,8,16,32,64} = ("NUM", "INT", "REV", "INPLACE","DESC","QSORT","STABLE");
+$priv{"reverse"}{8} = "INPLACE";
 $priv{"threadsv"}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = ("INBIN","INCR","OUTBIN","OUTCR")
   for ("open", "backtick");

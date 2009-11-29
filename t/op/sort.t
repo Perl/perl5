@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 146 );
+plan( tests => 147 );
 
 # these shouldn't hang
 {
@@ -766,6 +766,12 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
 
     $fail_msg = q(Modification of a read-only value attempted);
     cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'bug 7567');
+}
+
+{
+    local $TODO = "sort should make sure elements are not freed in the sort block";
+    eval { @nomodify_x=(1..8); our @copy = sort { @nomodify_x = (0) } (@nomodify_x, 3); };
+    is($@, "");
 }
 
 

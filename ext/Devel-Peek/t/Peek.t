@@ -616,7 +616,7 @@ do_test(25,
   SV = PVIO\\($ADDR\\) at $ADDR
     REFCNT = 3
     FLAGS = \\(OBJECT\\)
-    IV = 0
+    IV = 0					# $] < 5.011
     NV = 0					# $] < 5.011
     STASH = $ADDR\s+"IO::Handle"
     IFP = $ADDR

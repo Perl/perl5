@@ -566,6 +566,8 @@ END_EXTERN_C
 #define PL_scopestack_ix	(*Perl_Iscopestack_ix_ptr(aTHX))
 #undef  PL_scopestack_max
 #define PL_scopestack_max	(*Perl_Iscopestack_max_ptr(aTHX))
+#undef  PL_scopestack_name
+#define PL_scopestack_name	(*Perl_Iscopestack_name_ptr(aTHX))
 #undef  PL_screamfirst
 #define PL_screamfirst		(*Perl_Iscreamfirst_ptr(aTHX))
 #undef  PL_screamnext
@@ -766,6 +768,8 @@ END_EXTERN_C
 #define PL_interp_size		(*Perl_Ginterp_size_ptr(NULL))
 #undef  PL_interp_size_5_10_0
 #define PL_interp_size_5_10_0	(*Perl_Ginterp_size_5_10_0_ptr(NULL))
+#undef  PL_keyword_plugin
+#define PL_keyword_plugin	(*Perl_Gkeyword_plugin_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_mmap_page_size

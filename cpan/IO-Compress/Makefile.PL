@@ -42,8 +42,8 @@ WriteMakefile(
     INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
     
     (
-    $] >= 5.009 && ! $ENV{PERL_CORE}
-        ? (INST_LIB    => 'blib/arch')
+    $] >= 5.009 && $] <= 5.011001 && ! $ENV{PERL_CORE}
+        ? (INSTALLPRIVLIB    => '$(INSTALLARCHLIB)')
         : ()
     ),
 

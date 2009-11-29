@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 66;
+use MBTest tests => 64;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -79,7 +78,7 @@ print "Hello, World!\n";
 
   $mb->add_build_element('foo');
   $mb->add_build_element('foo');
-  is_deeply $mb->build_elements, [qw(PL support pm xs pod script foo)],
+  is_deeply $mb->build_elements, [qw(PL support pm xs share_dir pod script foo)],
       'The foo element should be in build_elements only once';
 
   $mb->dispatch('build');
@@ -187,21 +186,20 @@ print "Hello, World!\n";
 				  meta_add => {foo => 'bar'},
 				  conflicts => {'Foo::Barxx' => 0},
 			        );
-  my %data;
-  $mb->prepare_metadata( \%data );
-  is $data{foo}, 'bar';
+  my $data = $mb->prepare_metadata;
+  is $data->{foo}, 'bar';
 
   $mb->meta_merge(foo => 'baz');
-  $mb->prepare_metadata( \%data );
-  is $data{foo}, 'baz';
+  $data = $mb->prepare_metadata;
+  is $data->{foo}, 'baz';
 
   $mb->meta_merge(conflicts => {'Foo::Fooxx' => 0});
-  $mb->prepare_metadata( \%data );
-  is_deeply $data{conflicts}, {'Foo::Barxx' => 0, 'Foo::Fooxx' => 0};
+  $data = $mb->prepare_metadata;
+  is_deeply $data->{conflicts}, {'Foo::Barxx' => 0, 'Foo::Fooxx' => 0};
 
   $mb->meta_add(conflicts => {'Foo::Bazxx' => 0});
-  $mb->prepare_metadata( \%data );
-  is_deeply $data{conflicts}, {'Foo::Bazxx' => 0, 'Foo::Fooxx' => 0};
+  $data = $mb->prepare_metadata;
+  is_deeply $data->{conflicts}, {'Foo::Bazxx' => 0, 'Foo::Fooxx' => 0};
 }
 
 {
@@ -275,5 +273,3 @@ print "Hello, World!\n";
 
 }
 
-# cleanup
-$dist->remove;

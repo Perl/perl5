@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.20';
+$VERSION        = '0.22';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -36,7 +36,7 @@ $WARN           = 1;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
-    http    => [ qw|lwp wget curl lftp lynx| ],
+    http    => [ qw|lwp wget curl lftp lynx iosock| ],
     ftp     => [ qw|lwp netftp wget curl lftp ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ]
@@ -580,6 +580,86 @@ sub _lwp_fetch {
 
     } else {
         $METHOD_FAIL->{'lwp'} = 1;
+        return;
+    }
+}
+
+### Simple IO::Socket::INET fetching ###
+sub _iosock_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    my $use_list = {
+        'IO::Socket::INET' => '0.0',
+        'IO::Select'       => '0.0',
+    };
+
+    if( can_load(modules => $use_list) ) {
+        my $sock = IO::Socket::INET->new( 
+            PeerHost => $self->host,
+            ( $self->host =~ /:/ ? () : ( PeerPort => 80 ) ),
+        );
+
+        unless ( $sock ) {
+            return $self->_error(loc("Could not open socket to '%1', '%2'",$self->host,$!));
+        }
+
+        my $fh = FileHandle->new;
+
+        # Check open()
+
+        unless ( $fh->open($to,'>') ) {
+            return $self->_error(loc(
+                 "Could not open '%1' for writing: %2",$to,$!));
+        }
+
+        my $path = File::Spec::Unix->catfile( $self->path, $self->file );
+        my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
+        $sock->send( $req );
+
+        my $select = IO::Select->new( $sock );
+
+        my $resp = '';
+        my $normal = 0;
+        while ( $select->can_read( $TIMEOUT || 60 ) ) {
+          my $ret = $sock->sysread( $resp, 4096, length($resp) );
+          if ( !defined $ret or $ret == 0 ) {
+            $select->remove( $sock );
+            $normal++;
+          }
+        }
+        close $sock;
+
+        unless ( $normal ) {
+            return $self->_error(loc("Socket timed out after '%1' seconds", ( $TIMEOUT || 60 )));
+        }
+
+        # Check the "response"
+        # Strip preceeding blank lines apparently they are allowed (RFC 2616 4.1)
+        $resp =~ s/^(\x0d?\x0a)+//;
+        # Check it is an HTTP response
+        unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
+            return $self->_error(loc("Did not get a HTTP response from '%1'",$self->host));
+        }
+
+        # Check for OK
+        my ($code) = $resp =~ m!^HTTP/\d+\.\d+\s+(\d+)!i;
+        unless ( $code eq '200' ) {
+            return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
+        }
+
+        print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        close $fh;
+        return $to;
+
+    } else {
+        $METHOD_FAIL->{'iosock'} = 1;
         return;
     }
 }
@@ -1186,7 +1266,7 @@ Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
     file    => LWP, lftp, file
-    http    => LWP, wget, curl, lftp, lynx
+    http    => LWP, wget, curl, lftp, lynx, iosock
     ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
     rsync   => rsync
 
@@ -1197,6 +1277,9 @@ If a utility or module isn't available, it will be marked in a cache
 (see the C<$METHOD_FAIL> variable further down), so it will not be
 tried again. The C<fetch> method will only fail when all options are
 exhausted, and it was not able to retrieve the file.
+
+C<iosock> is a very limited L<IO::Socket::INET> based mechanism for
+retrieving C<http> schemed urls. It doesn't follow redirects for instance.
 
 A special note about fetching files from an ftp uri:
 
@@ -1304,6 +1387,7 @@ the $BLACKLIST, $METHOD_FAIL and other internal functions.
     curl        => curl
     rsync       => rsync
     lftp        => lftp
+    IO::Socket  => iosock
 
 =head1 FREQUENTLY ASKED QUESTIONS
 

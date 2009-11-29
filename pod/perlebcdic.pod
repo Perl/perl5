@@ -699,7 +699,7 @@ it in tr/// like so:
     my $ebcdic_string = $ascii_string;
     eval '$ebcdic_string =~ tr/' . $cp_037 . '/\000-\377/';
 
-To convert from EBCDIC 037 to ASCII just reverse the order of the tr/// 
+To convert from EBCDIC 037 to ASCII just reverse the order of the tr///
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
@@ -1009,7 +1009,7 @@ to use the characters in the range explicitly:
 
     sub Is_latin_1 {
         my $char = substr(shift,0,1);
-        $char =~ /[ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ]/;
+        $char =~ /[Â Â¡Â¢Â£Â¤Â¥Â¦Â§Â¨Â©ÂªÂ«Â¬Â­Â®Â¯Â°Â±Â²Â³Â´ÂµÂ¶Â·Â¸Â¹ÂºÂ»Â¼Â½Â¾Â¿Ã€ÃÃ‚ÃƒÃ„Ã…Ã†Ã‡ÃˆÃ‰ÃŠÃ‹ÃŒÃÃÃÃÃ‘Ã’Ã“Ã”Ã•Ã–Ã—Ã˜Ã™ÃšÃ›ÃœÃÃÃŸÃ Ã¡Ã¢Ã£Ã¤Ã¥Ã¦Ã§Ã¨Ã©ÃªÃ«Ã¬Ã­Ã®Ã¯Ã°Ã±Ã²Ã³Ã´ÃµÃ¶Ã·Ã¸Ã¹ÃºÃ»Ã¼Ã½Ã¾Ã¿]/;
     }
 
 Although that form may run into trouble in network transit (due to the 
@@ -1062,9 +1062,9 @@ then sort().  If the data are primarily lowercase non Latin 1 then
 apply tr/[A-Z]/[a-z]/ before sorting.  If the data are primarily UPPERCASE
 and include Latin-1 characters then apply:  
 
-    tr/[a-z]/[A-Z]/; 
-    tr/[àáâãäåæçèéêëìíîïğñòóôõöøùúûüış]/[ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖØÙÚÛÜİŞ]/;
-    s/ß/SS/g; 
+    tr/[a-z]/[A-Z]/;
+    tr/[Ã Ã¡Ã¢Ã£Ã¤Ã¥Ã¦Ã§Ã¨Ã©ÃªÃ«Ã¬Ã­Ã®Ã¯Ã°Ã±Ã²Ã³Ã´ÃµÃ¶Ã¸Ã¹ÃºÃ»Ã¼Ã½Ã¾]/[Ã€ÃÃ‚ÃƒÃ„Ã…Ã†Ã‡ÃˆÃ‰ÃŠÃ‹ÃŒÃÃÃÃÃ‘Ã’Ã“Ã”Ã•Ã–Ã˜Ã™ÃšÃ›ÃœÃÃ/;
+    s/ÃŸ/SS/g;
 
 then sort().  Do note however that such Latin-1 manipulation does not 
 address the E<yuml> C<y WITH DIAERESIS> character that will remain at 

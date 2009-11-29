@@ -86,7 +86,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define dTARG SV *targ
 
 #define NORMAL PL_op->op_next
-#define DIE return Perl_die
+#define DIE Perl_die
 
 /*
 =for apidoc Ams||PUTBACK

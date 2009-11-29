@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.021';
+$VERSION = '2.022';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -589,7 +589,7 @@ sub IO::Compress::Base::Parameters::parse
         $key = lc $key;
 
         if ($firstTime || ! $sticky) {
-            $x = [ $x ]
+            $x = []
                 if $type & Parse_multiple;
 
             $got->{$key} = [0, $type, $value, $x, $first_only, $sticky] ;

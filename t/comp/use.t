@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..69\n";
+print "1..73\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -61,6 +61,18 @@ sub is ($$;$) {
 sub isnt ($$;$) {
     _ok ('isnt', @_);
 }
+
+eval "use 5";           # implicit semicolon
+is ($@, '');
+
+eval "use 5;";
+is ($@, '');
+
+eval "{use 5}";         # [perl #70884]
+is ($@, '');
+
+eval "{use 5   }";      # [perl #70884]
+is ($@, '');
 
 # new style version numbers
 

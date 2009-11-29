@@ -194,6 +194,11 @@ The F<installman> script is slow. All it is doing text processing, which we're
 told is something Perl is good at. So it would be nice to know what it is doing
 that is taking so much CPU, and where possible address it.
 
+=head2 enable lexical enabling/disabling of inidvidual warnings
+
+Currently, warnings can only be enabled or disabled by category. There
+are times when it would be useful to quash a single warning, not a
+whole category.
 
 =head1 Tasks that need a little sysadmin-type knowledge
 

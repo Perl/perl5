@@ -7,7 +7,7 @@ BEGIN {
 use strict;
 use warnings;
 use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -86,11 +86,7 @@ in order to preserve text layout as much as possible.
 =head1 BUGS
 
 The ASCII region (0x00-0x7f) is preserved for all encodings, even
-though this conflicts with mappings by the Unicode Consortium.  See
-
-L<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
-
-to find out why it is implemented that way.
+though this conflicts with mappings by the Unicode Consortium.
 
 =head1 SEE ALSO
 

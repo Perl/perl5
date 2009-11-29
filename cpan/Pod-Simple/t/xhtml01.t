@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 33;
+use Test::More tests => 35;
 
 use_ok('Pod::Simple::XHTML') or exit;
 
@@ -220,6 +220,109 @@ is($results, <<'EOHTML', "bulleted author list");
 
 EOHTML
 
+initialize($parser, $results);
+$parser->parse_string_document(<<'EOPOD');
+=over
+
+=item Pinky
+
+=over
+
+=item World Domination
+
+=back
+
+=item Brain
+
+=back
+
+EOPOD
+
+is($results, <<'EOHTML', 'nested lists');
+<dl>
+
+<dt>Pinky</dt>
+<dd>
+
+<dl>
+
+<dt>World Domination</dt>
+<dd>
+
+</dd>
+</dl>
+
+</dd>
+<dt>Brain</dt>
+<dd>
+
+</dd>
+</dl>
+
+EOHTML
+
+initialize($parser, $results);
+$parser->parse_string_document(<<'EOPOD');
+=over
+
+=item Pinky
+
+On the list:
+
+=over
+
+=item World Domination
+
+Fight the good fight
+
+=item Go to Europe
+
+(Steve Martin joke)
+
+=back
+
+=item Brain
+
+Not so much
+
+=back
+
+EOPOD
+
+is($results, <<'EOHTML', 'multiparagraph nested lists');
+<dl>
+
+<dt>Pinky</dt>
+<dd>
+
+<p>On the list:</p>
+
+<dl>
+
+<dt>World Domination</dt>
+<dd>
+
+<p>Fight the good fight</p>
+
+</dd>
+<dt>Go to Europe</dt>
+<dd>
+
+<p>(Steve Martin joke)</p>
+
+</dd>
+</dl>
+
+</dd>
+<dt>Brain</dt>
+<dd>
+
+<p>Not so much</p>
+
+</dd>
+</dl>
+
+EOHTML
 
 initialize($parser, $results);
 $parser->parse_string_document(<<'EOPOD');

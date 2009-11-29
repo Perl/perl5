@@ -1093,7 +1093,7 @@ L<http://lists.cpan.org/showlist.cgi?name=iThreads>
 
 =head1 Bibliography
 
-Here's a short bibliography courtesy of Jürgen Christoffel:
+Here's a short bibliography courtesy of JÃ¼rgen Christoffel:
 
 =head2 Introductory Texts
 
@@ -1150,7 +1150,7 @@ L<http://www.perl.com/pub/a/2002/06/11/threads.html>
 =head1 Acknowledgements
 
 Thanks (in no particular order) to Chaim Frenkel, Steve Fink, Gurusamy
-Sarathy, Ilya Zakharevich, Benjamin Sugars, Jürgen Christoffel, Joshua
+Sarathy, Ilya Zakharevich, Benjamin Sugars, JÃ¼rgen Christoffel, Joshua
 Pritikin, and Alan Burlison, for their help in reality-checking and
 polishing this article.  Big thanks to Tom Christiansen for his rewrite
 of the prime number generator.
@@ -1161,7 +1161,7 @@ Dan Sugalski E<lt>dan@sidhe.org<gt>
 
 Slightly modified by Arthur Bergman to fit the new thread model/module.
 
-Reworked slightly by Jörg Walter E<lt>jwalt@cpan.org<gt> to be more concise
+Reworked slightly by JË†rg Walter E<lt>jwalt@cpan.org<gt> to be more concise
 about thread-safety of Perl code.
 
 Rearranged slightly by Elizabeth Mattijsen E<lt>liz@dijkmat.nl<gt> to put

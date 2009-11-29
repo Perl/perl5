@@ -194,7 +194,6 @@ CODE:
     SV *sv;
     SV *retsv = NULL;
     int index;
-    int magic;
     NV retval = 0;
     if(!items) {
 	XSRETURN_UNDEF;
@@ -334,6 +333,9 @@ CODE:
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("Not a subroutine reference");
+    }
     PUSH_MULTICALL(cv);
     SAVESPTR(GvSV(PL_defgv));
 
@@ -406,6 +408,8 @@ CODE:
     ST(0) = sv_newmortal();
     (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
+    if (SvUTF8(str))
+        SvUTF8_on(ST(0));
     if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
 	SvNV_set(ST(0), SvNV(num));
 	SvNOK_on(ST(0));

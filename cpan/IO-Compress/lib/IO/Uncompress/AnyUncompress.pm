@@ -13,7 +13,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.021';
+$VERSION = '2.022';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -31,8 +31,8 @@ BEGIN
    eval ' use IO::Uncompress::Adapter::Bunzip2 2.021 ;';
    eval ' use IO::Uncompress::Adapter::LZO 2.021 ;';
    eval ' use IO::Uncompress::Adapter::Lzf 2.021 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.020 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.020 ;';
+   #eval ' use IO::Uncompress::Adapter::UnLzma 2.020 ;';
+   #eval ' use IO::Uncompress::Adapter::UnXz 2.020 ;';
 
    eval ' use IO::Uncompress::Bunzip2 2.021 ;';
    eval ' use IO::Uncompress::UnLzop 2.021 ;';
@@ -41,8 +41,8 @@ BEGIN
    eval ' use IO::Uncompress::RawInflate 2.021 ;';
    eval ' use IO::Uncompress::Unzip 2.021 ;';
    eval ' use IO::Uncompress::UnLzf 2.021 ;';
-   eval ' use IO::Uncompress::UnLzma 2.018 ;';
-   eval ' use IO::Uncompress::UnXz 2.018 ;';
+   #eval ' use IO::Uncompress::UnLzma 2.018 ;';
+   #eval ' use IO::Uncompress::UnXz 2.018 ;';
 }
 
 sub new
@@ -61,7 +61,8 @@ sub anyuncompress
 sub getExtraParams
 {
     use IO::Compress::Base::Common 2.021 qw(:Parse);
-    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
+    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ,
+             'UnLzma'     => [1, 1, Parse_boolean,  0] ) ;
 }
 
 sub ckParams
@@ -107,7 +108,7 @@ sub mkUncomp
         }
      }
 
-#    if (defined $IO::Uncompress::UnLzma::VERSION )
+#    if (defined $IO::Uncompress::UnLzma::VERSION && $got->value('UnLzma'))
 #    {
 #        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnLzma::mkUncompObject();
 #
@@ -125,21 +126,21 @@ sub mkUncomp
 #            return 1;
 #        }
 #     }
-
-     if (defined $IO::Uncompress::UnXz::VERSION and
-         $magic = $self->ckMagic('UnXz')) {
-        *$self->{Info} = $self->readHeader($magic)
-            or return undef ;
-
-        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnXz::mkUncompObject();
-
-        return $self->saveErrorString(undef, $errstr, $errno)
-            if ! defined $obj;
-
-        *$self->{Uncomp} = $obj;
-
-         return 1;
-     }
+#
+#     if (defined $IO::Uncompress::UnXz::VERSION and
+#         $magic = $self->ckMagic('UnXz')) {
+#        *$self->{Info} = $self->readHeader($magic)
+#            or return undef ;
+#
+#        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnXz::mkUncompObject();
+#
+#        return $self->saveErrorString(undef, $errstr, $errno)
+#            if ! defined $obj;
+#
+#        *$self->{Uncomp} = $obj;
+#
+#         return 1;
+#     }
 
      if (defined $IO::Uncompress::Bunzip2::VERSION and
          $magic = $self->ckMagic('Bunzip2')) {

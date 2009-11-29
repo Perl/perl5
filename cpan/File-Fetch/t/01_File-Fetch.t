@@ -116,7 +116,9 @@ push @map, (
 
 
 ### sanity tests
-{   like( $File::Fetch::USER_AGENT, qr/$File::Fetch::VERSION/,
+{   
+    no warnings;
+    like( $File::Fetch::USER_AGENT, qr/$File::Fetch::VERSION/,
                                 "User agent contains version" );
     like( $File::Fetch::FROM_EMAIL, qr/@/,
                                 q[Email contains '@'] );
@@ -177,7 +179,7 @@ for my $entry (@map) {
                   'http://www.cpan.org/index.html?q=1',
                   'http://www.cpan.org/index.html?q=1&y=2',
     ) {
-        for (qw[lwp wget curl lftp lynx]) {
+        for (qw[lwp wget curl lftp lynx iosock]) {
             _fetch_uri( http => $uri, $_ );
         }
     }

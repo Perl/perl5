@@ -275,7 +275,8 @@ a[-]?c	ac	y	$&	ac
 \g{0}	-	c	-	Reference to invalid group 0
 \g{-0}	-	c	-	Reference to invalid group 0
 (a)|\1	a	y	-	-
-(a)|\1	x	n	-	-
+(a)|\1	x	n	-	Reference to group in different branch
+(?:(b)?a)\1	a	n	-	Reference to group that did not match
 (a)|\2	-	c	-	Reference to nonexistent group
 (([a-c])b*?\2)*	ababbbcbc	y	$&-$1-$2	ababb-bb-b
 (([a-c])b*?\2){3}	ababbbcbc	y	$&-$1-$2	ababbbcbc-cbc-c
@@ -1393,3 +1394,5 @@ foo(\h)bar	foo\tbar	y	$1	\t
 '[\x{100}\xff]'i	\x{ff}	y	$&	\x{ff}
 
 ((??{ "(?:|)" }))\s	C\x20 	y	-	-
+
+# vim: set noexpandtab

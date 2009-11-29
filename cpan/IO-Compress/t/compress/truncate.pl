@@ -64,7 +64,7 @@ sub run
                 ok $gz;
                 ok ! $gz->error() ;
                 my $buff ;
-                is $gz->read($buff), length($part) ;
+                is $gz->read($buff, 5000), length($part) ;
                 ok $buff eq $part ;
                 ok $gz->eof() ;
                 $gz->close();

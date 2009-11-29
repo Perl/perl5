@@ -3,41 +3,36 @@
 use strict;
 use lib 't/lib';
 use MBTest;
-use Module::Build;
 use Config;
 
 my $tmp;
 
-{
-  my ($have_c_compiler, $C_support_feature, $tmp_exec) = check_compiler();
+blib_load('Module::Build');
 
-  if (! $C_support_feature) {
-    plan skip_all => 'C_support not enabled';
-  } elsif ( !$have_c_compiler ) {
-    plan skip_all => 'C_support enabled, but no compiler found';
+{
+  my ($have_c_compiler, $tmp_exec) = check_compiler();
+
+  if ( !$have_c_compiler ) {
+    plan skip_all => 'No compiler found';
   } elsif ( $^O eq 'VMS' ) {
     plan skip_all => 'Child test output confuses harness';
   } elsif ( !$Config{usedl} ) {
     plan skip_all => 'Perl not compiled for dynamic loading'
   } else {
-    plan tests => 23;
+    plan tests => 20;
   }
   require Cwd;
-  $tmp = MBTest->tmpdir( $tmp_exec ? undef : Cwd::cwd );
+  $tmp = MBTest->tmpdir( $tmp_exec ? () : (DIR => Cwd::cwd) );
 }
 
-ensure_blib('Module::Build');
 
 
 #########################
 
 use DistGen;
-my $dist = DistGen->new( dir => $tmp, xs => 1 );
-$dist->regen;
+my $dist = DistGen->new( dir => $tmp, xs => 1 )->chdir_in->regen;
 
-$dist->chdir_in;
-my $mb = Module::Build->new_from_context;
-
+my $mb = $dist->new_from_context;
 
 eval {$mb->dispatch('clean')};
 is $@, '';
@@ -68,7 +63,7 @@ is $@, '';
 }
 
 {
-  # Try again in a subprocess 
+  # Try again in a subprocess
   eval {$mb->dispatch('clean')};
   is $@, '';
 
@@ -83,7 +78,7 @@ is $@, '';
 
 # We can't be verbose in the sub-test, because Test::Harness will
 # think that the output is for the top-level test.
-eval {$mb->dispatch('test')};
+stdout_stderr_of( sub { eval {$mb->dispatch('test')} });
 is $@, '';
 
 eval {$mb->dispatch('clean')};
@@ -106,42 +101,31 @@ is $@, '';
 # Make sure blib/ is gone after 'realclean'
 ok ! -e 'blib';
 
-
-# cleanup
-$dist->remove;
-
-
 ########################################
 
 # Try a XS distro with a deep namespace
 
-$dist = DistGen->new( name => 'Simple::With::Deep::Name',
-		      dir => $tmp, xs => 1 );
-$dist->regen;
-$dist->chdir_in;
 
-$mb = Module::Build->new_from_context;
+$dist->reset( name => 'Simple::With::Deep::Name', dir => $tmp, xs => 1 );
+$dist->chdir_in->regen;
+
+$mb = $dist->new_from_context;
+
+eval { $mb->dispatch('build') };
 is $@, '';
 
-$mb->dispatch('build');
+stdout_stderr_of( sub { eval { $mb->dispatch('test') } } );
 is $@, '';
 
-$mb->dispatch('test');
+eval { $mb->dispatch('realclean') };
 is $@, '';
-
-$mb->dispatch('realclean');
-is $@, '';
-
-# cleanup
-$dist->remove;
-
 
 ########################################
 
 # Try a XS distro using a flat directory structure
 # and a 'dist_name' instead of a 'module_name'
 
-$dist = DistGen->new( name => 'Dist-Name', dir => $tmp, xs => 1 );
+$dist->reset( name => 'Dist-Name', dir => $tmp, xs => 1 )->chdir_in;
 
 $dist->remove_file('lib/Dist-Name.pm');
 $dist->remove_file('lib/Dist-Name.xs');
@@ -211,20 +195,15 @@ ok( Simple::okay() eq 'ok' );
 ---
 
 $dist->regen;
-$dist->chdir_in;
 
+$mb = $dist->new_from_context;
 
-$mb = Module::Build->new_from_context;
+eval { $mb->dispatch('build') };
 is $@, '';
 
-$mb->dispatch('build');
+stdout_of( sub { eval { $mb->dispatch('test') } } );
 is $@, '';
 
-$mb->dispatch('test');
+eval { $mb->dispatch('realclean') };
 is $@, '';
 
-$mb->dispatch('realclean');
-is $@, '';
-
-# cleanup
-$dist->remove;

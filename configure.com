@@ -959,7 +959,7 @@ $   delete/symbol val
 $   delete/symbol dsym
 $   if f$type(usedebugging_perl) .nes. ""
 $   then
-$       useperldebug = usedebugging_perl
+$       DEBUGGING = usedebugging_perl
 $       delete/symbol usedebugging_perl
 $   endif
 $!
@@ -2312,10 +2312,10 @@ $ echo "enables the -D switch, at the cost of some performance.  It"
 $ echo "was mandatory on perl 5.005 and before on VMS, but is now"
 $ echo "optional.  If you do not generally use it you should probably"
 $ echo "leave this off and gain a bit of extra speed."
-$ bool_dflt = "y"
-$ if f$type(useperldebug) .nes. "" 
+$ bool_dflt = "n"
+$ if f$type(DEBUGGING) .nes. "" 
 $ then
-$   if f$extract(0,1,f$edit(useperldebug,"collapse,upcase")).eqs."N"  .or. useperldebug .eqs. "undef" then bool_dflt="n"
+$   if f$extract(0,1,f$edit(DEBUGGING,"collapse,upcase")).eqs."Y"  .or. DEBUGGING .eqs. "define" then bool_dflt="y"
 $ endif
 $ rp = "Build a DEBUGGING version of Perl? [''bool_dflt'] "
 $ GOSUB myread
@@ -5854,6 +5854,7 @@ $ WC "ccversion='" + ccversion + "'"
 $ WC "cf_by='" + cf_by + "'"
 $ WC "cf_email='" + cf_email + "'"
 $ WC "cf_time='" + cf_time + "'"
+$ WC "charbits='8'"
 $ WC "config_args='" + config_args + "'"
 $ WC "config_sh='" + config_sh + "'"
 $ WC "cpp_stuff='" + cpp_stuff + "'"

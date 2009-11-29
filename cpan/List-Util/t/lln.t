@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Scalar::Util qw(looks_like_number);
 
 foreach my $num (qw(1 -1 +1 1.0 +1.0 -1.0 -1.0e-12)) {
@@ -42,5 +42,7 @@ my %foo;
 tie %foo, 'Foo';
 is(!!looks_like_number($foo{'abc'}),	    '',			'Tied');
 is(!!looks_like_number($foo{'123'}),	    1,			'Tied');
+
+is(!!looks_like_number("\x{1815}"),	   '',			'MONGOLIAN DIGIT FIVE');
 
 # We should copy some of perl core tests like t/base/num.t here

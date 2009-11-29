@@ -108,7 +108,7 @@ ok(close($utffh));
 SKIP: {
     eval { require PerlIO::scalar };
     unless (find PerlIO::Layer 'scalar') {
-	skip("PerlIO::scalar not found", 8);
+	skip("PerlIO::scalar not found", 9);
     }
     my $var;
     ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
@@ -142,7 +142,6 @@ SKIP: {
         ok( open(STDERR,">",\$var), '       open STDERR into in-memory var');
         open STDERR,  ">&OLDERR" or die "cannot dup OLDERR: $!";
     }
-}
 
 
 { local $TODO = 'fails well back into 5.8.x';
@@ -166,6 +165,8 @@ is(read_fh_and_return_final_rv($perlio), read_fh_and_return_final_rv($no_perlio)
 
 close ($perlio);
 close ($no_perlio);
+}
+
 }
 
 

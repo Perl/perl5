@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 48;
+my $total_tests = 49;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -176,6 +176,7 @@ $foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{$_=$_+2;require bleah}; delete $INC{"bleah.pm"}; ++$::i;
+       eval q{return require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval  {require bleah};

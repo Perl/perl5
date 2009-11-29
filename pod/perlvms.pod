@@ -274,7 +274,7 @@ OpenVMS Alpha v7.3-1 and later and all version of OpenVMS I64 support
 case sensitivity as a process setting (see C<SET PROCESS
 /CASE_LOOKUP=SENSITIVE>). Perl does not currently suppport case
 sensitivity on VMS, but it may in the future, so Perl programs should
-use the C<File::Spec->case_tolerant> method to determine the state, and
+use the C<< File::Spec->case_tolerant >> method to determine the state, and
 not the C<$^O> variable.
 
 =head2 Symbolic Links

@@ -169,7 +169,7 @@ things can occur out-of-order. Just when you think you've got a
 pattern that matches your input, someone throws you a curveball.
 
 If you'd like to do it the hard way, scratching and clawing your way
-toward a right answer but constantly being disappointed, beseiged by
+toward a right answer but constantly being disappointed, besieged by
 bug reports, and weary from the inordinate amount of time you have to
 spend reinventing a triangular wheel, then there are several things
 you can try before you give up in frustration:
@@ -528,7 +528,7 @@ The regular expression to match the balanced text  uses two new (to
 Perl 5.10) regular expression features. These are covered in L<perlre>
 and this example is a modified version of one in that documentation.
 
-First, adding the new possesive C<+> to any quantifier finds the
+First, adding the new possessive C<+> to any quantifier finds the
 longest match and does not backtrack. That's important since you want
 to handle any angle brackets through the recursion, not backtracking.
 The group C<< [^<>]++ >> finds one or more non-angle brackets without

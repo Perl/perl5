@@ -607,7 +607,7 @@ Perl_sv_clean_all(pTHX)
 struct arena_desc {
     char       *arena;		/* the raw storage, allocated aligned */
     size_t      size;		/* its size ~4k typ */
-    U32		misc;		/* type, and in future other things. */
+    svtype	utype;		/* bodytype stored in arena */
 };
 
 struct arena_set;
@@ -720,7 +720,7 @@ Perl_sv_free_arenas(pTHX)
    TBD: export properly for hv.c: S_more_he().
 */
 void*
-Perl_get_arena(pTHX_ const size_t arena_size, const U32 misc)
+Perl_get_arena(pTHX_ const size_t arena_size, const svtype bodytype)
 {
     dVAR;
     struct arena_desc* adesc;
@@ -749,7 +749,7 @@ Perl_get_arena(pTHX_ const size_t arena_size, const U32 misc)
     
     Newx(adesc->arena, arena_size, char);
     adesc->size = arena_size;
-    adesc->misc = misc;
+    adesc->utype = bodytype;
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %"UVuf"\n", 
 			  curr, (void*)adesc->arena, (UV)arena_size));
 
@@ -1431,17 +1431,13 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 
 	if (new_type == SVt_PVIO) {
 	    IO * const io = MUTABLE_IO(sv);
-	    GV *iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
+	    GV *iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
 
 	    SvOBJECT_on(io);
 	    /* Clear the stashcache because a new IO could overrule a package
 	       name */
 	    hv_clear(PL_stashcache);
 
-	    /* unless exists($main::{FileHandle}) and
-	       defined(%main::FileHandle::) */
-	    if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-		iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
 	    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
 	    IoPAGE_LEN(sv) = 60;
 	}
@@ -1456,14 +1452,14 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 		   (unsigned long)new_type);
     }
 
-    if (old_type_details->arena) {
-	/* If there was an old body, then we need to free it.
-	   Note that there is an assumption that all bodies of types that
-	   can be upgraded came from arenas. Only the more complex non-
-	   upgradable types are allowed to be directly malloc()ed.  */
+    if (old_type > SVt_IV) { /* SVt_IVs are overloaded for PTEs */
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
+	/* Note that there is an assumption that all bodies of types that
+	   can be upgraded came from arenas. Only the more complex non-
+	   upgradable types are allowed to be directly malloc()ed.  */
+	assert(old_type_details->arena);
 	del_body((void*)((char*)old_body + old_type_details->offset),
 		 &PL_body_roots[old_type]);
 #endif
@@ -3250,7 +3246,9 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, ST
 	return SvCUR(sv);
     }
 
-    if (SvCUR(sv) > 0) { /* Assume Latin-1/EBCDIC */
+    if (SvCUR(sv) == 0) {
+	if (extra) SvGROW(sv, extra);
+    } else { /* Assume Latin-1/EBCDIC */
 	/* This function could be much more efficient if we
 	 * had a FLAG in SVs to signal if there are any variant
 	 * chars in the PV.  Given that there isn't such a flag
@@ -11783,6 +11781,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_curcop = NULL;
     PL_markstack = 0;
     PL_scopestack = 0;
+    PL_scopestack_name = 0;
     PL_savestack = 0;
     PL_savestack_ix = 0;
     PL_savestack_max = -1;
@@ -11821,6 +11820,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_curcop = NULL;
     PL_markstack = 0;
     PL_scopestack = 0;
+    PL_scopestack_name = 0;
     PL_savestack = 0;
     PL_savestack_ix = 0;
     PL_savestack_max = -1;
@@ -12282,6 +12282,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	Newxz(PL_scopestack, PL_scopestack_max, I32);
 	Copy(proto_perl->Iscopestack, PL_scopestack, PL_scopestack_ix, I32);
 
+#ifdef DEBUGGING
+	Newxz(PL_scopestack_name, PL_scopestack_max, const char *);
+	Copy(proto_perl->Iscopestack_name, PL_scopestack_name, PL_scopestack_ix, const char *);
+#endif
 	/* NOTE: si_dup() looks at PL_markstack */
 	PL_curstackinfo		= si_dup(proto_perl->Icurstackinfo, param);
 

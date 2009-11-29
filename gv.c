@@ -2372,6 +2372,53 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 }
 
 /*
+=for apidoc gv_try_downgrade
+
+If C<gv> is a typeglob containing only a constant sub, and is only
+referenced from its package, and both the typeglob and the sub are
+sufficiently ordinary, replace the typeglob (in the package) with a
+placeholder that more compactly represents the same thing.  This is meant
+to be used when a placeholder has been upgraded, most likely because
+something wanted to look at a proper code object, and it has turned out
+to be a constant sub to which a proper reference is no longer required.
+
+=cut
+*/
+
+void
+Perl_gv_try_downgrade(pTHX_ GV *gv)
+{
+    HV *stash;
+    CV *cv;
+    HEK *namehek;
+    SV **gvp;
+    PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE;
+    if (SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
+	    !SvOBJECT(gv) && !SvMAGICAL(gv) && !SvREADONLY(gv) &&
+	    isGV_with_GP(gv) && GvGP(gv) &&
+	    GvMULTI(gv) && !GvINTRO(gv) && GvREFCNT(gv) == 1 &&
+	    !GvSV(gv) && !GvAV(gv) && !GvHV(gv) && !GvIOp(gv) && !GvFORM(gv) &&
+	    GvEGV(gv) == gv && (stash = GvSTASH(gv)) && (cv = GvCV(gv)) &&
+	    !SvOBJECT(cv) && !SvMAGICAL(cv) && !SvREADONLY(cv) &&
+	    CvSTASH(cv) == stash && CvGV(cv) == gv &&
+	    CvCONST(cv) && !CvMETHOD(cv) && !CvLVALUE(cv) && !CvUNIQUE(cv) &&
+	    !CvNODEBUG(cv) && !CvCLONE(cv) && !CvCLONED(cv) && !CvANON(cv) &&
+	    (namehek = GvNAME_HEK(gv)) &&
+	    (gvp = hv_fetch(stash, HEK_KEY(namehek),
+			HEK_LEN(namehek)*(HEK_UTF8(namehek) ? -1 : 1), 0)) &&
+	    *gvp == (SV*)gv) {
+	SV *value = SvREFCNT_inc(CvXSUBANY(cv).any_ptr);
+	SvREFCNT(gv) = 0;
+	sv_clear((SV*)gv);
+	SvREFCNT(gv) = 1;
+	SvFLAGS(gv) = SVt_IV|SVf_ROK;
+	SvANY(gv) = (XPVGV*)((char*)&(gv->sv_u.svu_iv) -
+				STRUCT_OFFSET(XPVIV, xiv_iv));
+	SvRV_set(gv, value);
+    }
+}
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

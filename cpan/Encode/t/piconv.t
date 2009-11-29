@@ -1,20 +1,26 @@
 #
-# $Id: piconv.t,v 0.2 2009/07/13 00:50:52 dankogai Exp $
+# $Id: piconv.t,v 0.3 2009/11/16 14:08:13 dankogai Exp dankogai $
 #
 
+BEGIN {
+    if ( $ENV{'PERL_CORE'} && $] >= 5.011) {
+        print "1..0 # Skip: Don't know how to test this within perl's core\n";
+        exit 0;
+    }
+}
+
 use strict;
-use Config;
 use FindBin;
 use File::Spec;
 use IPC::Open3 qw(open3);
 use IO::Select;
 use Test::More;
 
-my $nofork = ! $Config{d_fork};
+my $WIN = $^O eq 'MSWin32';
 
-if ($nofork) {
+if ($WIN) {
     eval { require IPC::Run; IPC::Run->VERSION(0.83); 1; } or 
-        plan skip_all => 'Without fork(), we require IPC::Run 0.83 to complete this test';
+        plan skip_all => 'Win32 environments require IPC::Run 0.83 to complete this test';
 }
 
 sub run_cmd (;$$);
@@ -23,14 +29,14 @@ my $blib =
   File::Spec->rel2abs(
     File::Spec->catdir( $FindBin::RealBin, File::Spec->updir, 'blib' ) );
 my $script = File::Spec->catdir($blib, 'script', 'piconv');
-my @base_cmd = ( $^X, ($ENV{PERL_CORE} ? () : "-Mblib=$blib"), $script );
+my @base_cmd = ( $^X, "-Mblib=$blib", $script );
 
 plan tests => 5;
 
 {
     my ( $st, $out, $err ) = run_cmd;
     is( $st, 0, 'status for usage call' );
-    is( $out, $nofork ? undef : '' );
+    is( $out, $WIN ? undef : '' );
     like( $err, qr{^piconv}, 'usage' );
 }
 
@@ -52,7 +58,7 @@ sub run_cmd (;$$) {
     my $err = "x" x 10_000;
     $err = "";
         
-    if ($nofork) {
+    if ($WIN) {
 		IPC::Run->import(qw(run timeout));
 		my @cmd;
 		if (defined $args) {

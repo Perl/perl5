@@ -86,7 +86,7 @@ NLM_VERSION    = 3,20,0
 
 
 # Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
-MODULE_DESC     = "Perl 5.11.1 for NetWare"
+MODULE_DESC     = "Perl 5.11.2 for NetWare"
 CCTYPE          = CodeWarrior
 C_COMPILER		= mwccnlm -c
 CPP_COMPILER	= mwccnlm
@@ -326,6 +326,7 @@ STORABLE_NLM		= $(EXTDIR)\Storable\Storable.NLM
 LISTUTIL_NLM		= $(EXTDIR)\List\Util.NLM
 MIMEBASE64_NLM		= $(EXTDIR)\MIME\Base64\Base64.NLM
 XSAPITEST_NLM		= $(EXTDIR)\XS\APItest\APItest.NLM
+XSAPITESTKEYWORDRPN_NLM	= $(EXTDIR)\XS\APItest\KeywordRPN\KeywordRPN.NLM
 XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
 UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
 
@@ -350,6 +351,7 @@ EXTENSION_NLM	= 		\
 		$(LISTUTIL_NLM)		\
 		$(MIMEBASE64_NLM)	\
 		$(XSAPITEST_NLM)	\
+		$(XSAPITESTKEYWORDRPN_NLM)	\
 		$(XSTYPEMAP_NLM)	\
 		$(UNICODENORMALIZE_NLM)  \
 		$(FILTER_NLM)	
@@ -463,7 +465,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.11.1
+INST_VER	= \5.11.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -789,7 +791,7 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
+		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest XS/APItest/KeywordRPN \
 		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
 
 STATIC_EXT	= DynaLoader
@@ -817,6 +819,7 @@ STORABLE		= $(EXTDIR)\Storable\Storable
 LISTUTIL		= $(EXTDIR)\List\Util
 MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
+XSAPITESTKEYWORDRPN	= $(EXTDIR)\XS\APItest\KeywordRPN\KeywordRPN
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
@@ -843,6 +846,7 @@ EXTENSION_C	= 		\
 		$(LISTUTIL).c	\
 		$(MIMEBASE64).c	\
 		$(XSAPITEST).c	\
+		$(XSAPITESTKEYWORDRPN).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
 
@@ -1262,6 +1266,12 @@ $(MIMEBASE64_NLM):
 	cd ..\..\..\netware
 
 $(XSAPITEST_NLM):
+	cd $(EXTDIR)\XS\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
+$(XSAPITESTKEYWORDRPN_NLM):
 	cd $(EXTDIR)\XS\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)

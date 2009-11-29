@@ -15,7 +15,7 @@ use IO::Compress::Base::Common  2.021 qw(createSelfTiedObject);
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.021';
+$VERSION = '2.022';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);

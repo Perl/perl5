@@ -293,22 +293,69 @@ and versions required.
 sub find_configure_requires {
     my $self = shift;
     my $mod  = $self->parent;
-    my %hash = @_;
+    my $meth = 'configure_requires';
     
-    my $meta;
+    ### the prereqs as we have them now
+    my @args = ( 
+        defaults => $mod->status->$meth || {},
+        keys     => [ $meth ],
+    );
+
+    ### the default file to use, which may be overriden
+    push @args, ( file => META_YML->( $mod->status->extract ) )
+        if defined $mod->status->extract;
+        
+    my $href = $self->_prereqs_from_meta_file( @args, @_ );        
+
+    ### and store it in the module
+    $mod->status->$meth( $href );
+
+    return { %$href };
+}    
+
+sub find_mymeta_requires {
+    my $self = shift;
+    my $mod  = $self->parent;
+    my $meth = 'prereqs';
+    
+    ### the prereqs as we have them now
+    my @args = ( 
+        defaults => $mod->status->$meth || {},
+        keys     => [qw|requires build_requires|],
+    );
+
+    ### the default file to use, which may be overriden
+    push @args, ( file => MYMETA_YML->( $mod->status->extract ) )
+        if defined $mod->status->extract;
+        
+    my $href = $self->_prereqs_from_meta_file( @args, @_ );        
+
+    ### and store it in the module
+    $mod->status->$meth( $href );
+
+    return { %$href };
+}
+    
+sub _prereqs_from_meta_file {
+    my $self = shift;
+    my $mod  = $self->parent;    
+    my %hash = @_;
+
+    my( $meta, $defaults, $keys );
     my $tmpl = {                ### check if we have an extract path. if not, we 
                                 ### get 'undef value' warnings from file::spec
-        file    => { default => do { defined $mod->status->extract
+        file        => { default => do { defined $mod->status->extract
                                         ? META_YML->( $mod->status->extract )
                                         : '' },
-                     store   => \$meta,
-                },
+                        store   => \$meta,
+                    },
+        defaults    => { required => 1, default => {}, strict_type => 1,
+                         store => \$defaults },
+        keys        => { required => 1, default => [], strict_type => 1,
+                         store => \$keys },
     };                
     
     check( $tmpl, \%hash ) or return;
-    
-    ### default is an empty hashref
-    my $configure_requires = $mod->status->configure_requires || {};
     
     ### if there's a meta file, we read it;
     if( -e $meta ) {
@@ -319,22 +366,21 @@ sub find_configure_requires {
   
         unless( $doc ) {
             error(loc( "Could not read %1: '%2'", $meta, $@ ));
-            return $configure_requires; # Causes problems if we don't return a hashref
+            return $defaults;
         }
 
-        ### read the configure_requires key, make sure not to throw
+        ### read the keys now, make sure not to throw
         ### away anything that was already added
-        $configure_requires = {
-            %$configure_requires,
-            %{ $doc->{'configure_requires'} },
-        } if $doc->{'configure_requires'};
+        for my $key ( @$keys ) {
+            $defaults = {
+                %$defaults,
+                %{ $doc->{$key} },
+            } if $doc->{ $key };
+        }
     }
     
-    ### and store it in the module
-    $mod->status->configure_requires( $configure_requires );
-    
     ### and return a copy
-    return \%{$configure_requires};
+    return \%{ $defaults };
 }
 
 =head2 $bool = $dist->_resolve_prereqs( ... )

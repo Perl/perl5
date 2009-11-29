@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -259,7 +259,7 @@ Consider that "division by zero" of Encode :)
 L<Encode>, L<Encode::Unicode::UTF7>, L<http://www.unicode.org/glossary/>,
 L<http://www.unicode.org/unicode/faq/utf_bom.html>,
 
-RFC 2781 L<http://rfc.net/rfc2781.html>,
+RFC 2781 L<http://www.ietf.org/rfc/rfc2781.txt>,
 
 The whole Unicode standard L<http://www.unicode.org/unicode/uni2book/u2.html>
 

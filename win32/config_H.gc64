@@ -971,6 +971,7 @@
  */
 #if 42 == 1
 #define CAT2(a,b)	a/**/b
+#undef STRINGIFY
 #define STRINGIFY(a)	"a"
 #endif
 #if 42 == 42
@@ -978,6 +979,7 @@
 #define PeRl_StGiFy(a)	#a
 #define CAT2(a,b)	PeRl_CaTiFy(a,b)
 #define StGiFy(a)	PeRl_StGiFy(a)
+#undef STRINGIFY
 #define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42

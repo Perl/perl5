@@ -3,10 +3,9 @@
 use strict;
 
 use lib 't/lib';
-use MBTest tests => 5;
+use MBTest tests => 3;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 #########################
 
@@ -24,11 +23,13 @@ $dist->chdir_in;
 
 my $mb; stdout_of(sub{ $mb = Module::Build->new_from_context});
 
-use Module::Build::Compat;
+blib_load('Module::Build::Compat');
 
 $dist->regen;
 
-Module::Build::Compat->create_makefile_pl('passthrough', $mb);
+stdout_stderr_of(
+  sub{ Module::Build::Compat->create_makefile_pl('passthrough', $mb); }
+);
 
 # as silly as all of this exit(0) business is, that is what the cpan
 # testers have instructed everybody to do so...

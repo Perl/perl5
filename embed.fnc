@@ -218,7 +218,7 @@ Afp	|OP*	|die		|NULLOK const char* pat|...
 s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 #endif
 : Used in util.c
-p	|OP*	|die_where	|NULLOK SV* msv
+pr	|void	|die_where	|NULLOK SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
@@ -355,7 +355,7 @@ Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len
 Apdmb	|GV*	|gv_fetchmethod	|NN HV* stash|NN const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|NN HV* stash|NN const char* name \
 				|I32 autoload
-ApdM	|GV*	|gv_fetchmethod_flags|NN HV* stash|NN const char* name \
+ApM	|GV*	|gv_fetchmethod_flags|NN HV* stash|NN const char* name \
 				|U32 flags
 Ap	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 add|const svtype sv_type
 Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
@@ -365,6 +365,7 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 pMox	|GP *	|newGP		|NN GV *const gv
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
+Apd	|void	|gv_try_downgrade|NN GV* gv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
@@ -420,7 +421,7 @@ Abmd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash
 Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 				|U32 hash
-AbmdM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
+AbmM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash|int flags
 Apd	|void	|hv_undef	|NULLOK HV *hv
 AnpP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
@@ -507,12 +508,26 @@ p	|OP*	|jmaybe		|NN OP *o
 pP	|I32	|keyword	|NN const char *name|I32 len|bool all_keywords
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 s	|OP*	|opt_scalarhv	|NN OP* rep_op
+s	|OP*	|is_inplace_av	|NN OP* o|NULLOK OP* oright
 #endif
 Ap	|void	|leave_scope	|I32 base
 : Used in pp_ctl.c, and by Data::Alias
 EXp	|void	|lex_end
 : Used in various files
 p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|bool new_filter
+: Public lexer API
+AMpd	|bool	|lex_bufutf8
+AMpd	|char*	|lex_grow_linestr|STRLEN len
+AMpd	|void	|lex_stuff_pvn	|NN char* pv|STRLEN len|U32 flags
+AMpd	|void	|lex_stuff_sv	|NN SV* sv|U32 flags
+AMpd	|void	|lex_unstuff	|NN char* ptr
+AMpd	|void	|lex_read_to	|NN char* ptr
+AMpd	|void	|lex_discard_to	|NN char* ptr
+AMpd	|bool	|lex_next_chunk	|U32 flags
+AMpd	|I32	|lex_peek_unichar|U32 flags
+AMpd	|I32	|lex_read_unichar|U32 flags
+AMpd	|void	|lex_read_space	|U32 flags
+: Used in various files
 Ap	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
 EXp	|void	|op_clear	|NN OP* o
@@ -743,9 +758,10 @@ p	|void	|package_version|NN OP* v
 : Used in op.c
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 : Used in toke.c and perly.y
-p	|PADOFFSET|allocmy	|NN const char *const name
+p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\
+				|const U32 flags
 : Used in op.c and toke.c
-pdR	|PADOFFSET|pad_findmy	|NN const char* name
+AMpdR	|PADOFFSET|pad_findmy	|NN const char* name|STRLEN len|U32 flags
 Ap	|PADOFFSET|find_rundefsvoffset	|
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
@@ -753,7 +769,9 @@ pR	|OP*	|oopsAV		|NN OP* o
 pR	|OP*	|oopsHV		|NN OP* o
 : Defined in pad.c, used only in op.c
 pd	|void	|pad_leavemy
+#ifdef DEBUGGING
 Apd	|SV*	|pad_sv		|PADOFFSET po
+#endif
 : Defined in pad.c, used only in op.c
 pd	|void	|pad_free	|PADOFFSET po
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
@@ -1360,7 +1378,7 @@ s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 : Used in hv.c
-paRxo	|void*	|get_arena	|const size_t svtype|const U32 misc
+paRxoM	|void*	|get_arena	|const size_t arenasize |const svtype bodytype
 : #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
@@ -1875,7 +1893,7 @@ Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN le
 				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
-Apd	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
+Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Apd	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
@@ -1931,12 +1949,15 @@ pda	|PADLIST*|pad_new	|int flags
 : Only used in op.c
 pd	|void	|pad_undef	|NN CV* cv
 : Only used in op.c
-pd	|PADOFFSET|pad_add_name	|NN const char *name\
-				|NULLOK HV* typestash|NULLOK HV* ourstash|bool clone|bool state
+Mpd	|PADOFFSET|pad_add_name	|NN const char *name|const STRLEN len\
+				|const U32 flags|NULLOK HV *typestash\
+				|NULLOK HV *ourstash
 : Only used in op.c
 pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
-: Only used in op.c
-pd	|void	|pad_check_dup	|NN const char* name|bool is_our|NN const HV* ourstash
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+sd	|void	|pad_check_dup	|NN SV *name|const U32 flags \
+				|NULLOK const HV *ourstash
+#endif
 #ifdef DEBUGGING
 : Only used PAD_SETSV() in op.c
 pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
@@ -1959,6 +1980,8 @@ pR	|HV*	|pad_compname_type|const PADOFFSET po
 sd	|PADOFFSET|pad_findlex	|NN const char *name|NN const CV* cv|U32 seq|int warn \
 				|NULLOK SV** out_capture|NN SV** out_name_sv \
 				|NN int *out_flags
+s	|PADOFFSET|pad_add_name_sv|NN SV *namesv|const U32 flags \
+				|NULLOK HV *typestash|NULLOK HV *ourstash
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
@@ -1971,7 +1994,9 @@ p	|void	|free_tied_hv_pool
 pR	|int	|get_debug_opts	|NN const char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|NN SV *sv|U32 mask|U32 val
+#ifdef DEBUGGING
 Apod	|void	|hv_assert	|NN HV *hv
+#endif
 
 ApdR	|SV*	|hv_scalar	|NN HV *hv
 ApoR	|I32*	|hv_riter_p	|NN HV *hv
@@ -2227,6 +2252,8 @@ ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 : Only used  in op.c
 xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
+
+xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 
 END_EXTERN_C
 /*

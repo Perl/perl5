@@ -1747,7 +1747,7 @@ win32_start_child(LPVOID arg)
     parent_message_hwnd = w32_message_hwnd;
     w32_message_hwnd = win32_create_message_window();
     if (parent_message_hwnd != NULL)
-        PostMessage(parent_message_hwnd, WM_USER_MESSAGE, w32_pseudo_id, (LONG)w32_message_hwnd);
+        PostMessage(parent_message_hwnd, WM_USER_MESSAGE, w32_pseudo_id, (LPARAM)w32_message_hwnd);
 
     /* push a zero on the stack (we are the child) */
     {
@@ -1762,7 +1762,7 @@ win32_start_child(LPVOID arg)
 
     {
 	dJMPENV;
-	volatile int oldscope = PL_scopestack_ix;
+	volatile int oldscope = 1; /* We are responsible for all scopes */
 
 restart:
 	JMPENV_PUSH(status);

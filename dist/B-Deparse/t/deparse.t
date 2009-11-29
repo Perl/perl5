@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 78;
+use Test::More tests => 83;
 use Config ();
 
 use B::Deparse;
@@ -591,3 +591,27 @@ foreach (0..3) {
 	print ++$x, "\n";
     }
 }
+####
+my $pi = 4;
+####
+no warnings;
+my $pi := 4;
+>>>>
+no warnings;
+my $pi = 4;
+####
+my $pi : = 4;
+>>>>
+my $pi = 4;
+####
+our @a;
+my @b;
+@a = sort @a;
+@b = sort @b;
+();
+####
+our @a;
+my @b;
+@a = reverse @a;
+@b = reverse @b;
+();

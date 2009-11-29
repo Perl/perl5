@@ -3,10 +3,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 8;
+use MBTest tests => 6;
 
-require_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 use File::Spec::Functions qw( catdir );
 
@@ -46,11 +45,11 @@ sub process_etc_files
 }
 
 #Copy share files to blib
-sub process_share_files
+sub process_shared_files
 {
 	my $self = shift;
 
-	$self->copy_files("share");
+	$self->copy_files("shared");
 }
 
 1;
@@ -62,23 +61,23 @@ my $build = $subclass->new(
 );
 
 $build->add_build_element('etc');
-$build->add_build_element('share');
+$build->add_build_element('shared');
 
 my $distdir = lc $build->dist_name();
 
 foreach my $id ('core', 'site', 'vendor') {
 	#Where to install these build types when using prefix symantics
-	$build->prefix_relpaths($id, 'share' => "share/$distdir");
+	$build->prefix_relpaths($id, 'shared' => "shared/$distdir");
 	$build->prefix_relpaths($id, 'etc' => "etc/$distdir");
 
 	#Where to install these build types when using default symantics
 	my $set = $build->install_sets($id);
-	$set->{'share'} = '/usr/'.($id eq 'site' ? 'local/':'')."share/$distdir";
+	$set->{'shared'} = '/usr/'.($id eq 'site' ? 'local/':'')."shared/$distdir";
 	$set->{'etc'} = ($id eq 'site' ? '/usr/local/etc/':'/etc/').$distdir;
 }
 
 #Where to install these types when using install_base symantics
-$build->install_base_relpaths('share' => "share/$distdir");
+$build->install_base_relpaths('shared' => "shared/$distdir");
 $build->install_base_relpaths('etc' => "etc/$distdir");
 
 $build->create_build_script();
@@ -97,12 +96,12 @@ stardate = 1234344
 
 ===EOF===
 
-$dist->add_file("share/data", <<'===EOF===');
+$dist->add_file("shared/data", <<'===EOF===');
 7 * 9 = 42?
 
 ===EOF===
 
-$dist->add_file("share/html/index.html", <<'===EOF===');
+$dist->add_file("shared/html/index.html", <<'===EOF===');
 <HTML>
   <BODY>
     <H1>Hello World!</H1>
@@ -122,16 +121,15 @@ $output .= stdout_of sub { $dist->run_build };
 
 my $error;
 $error++ unless ok(-e "blib/etc/config", "Built etc/config");
-$error++ unless ok(-e "blib/share/data", "Built share/data");
-$error++ unless ok(-e "blib/share/html/index.html", "Built share/html");
+$error++ unless ok(-e "blib/shared/data", "Built shared/data");
+$error++ unless ok(-e "blib/shared/html/index.html", "Built shared/html");
 diag "OUTPUT:\n$output" if $error;
 
 $output = stdout_of sub { $dist->run_build('install') };
 
 $error = 0;
 $error++ unless ok(-e "$installdest/etc/simple/config", "installed etc/config");
-$error++ unless ok(-e "$installdest/share/simple/data", "installed share/data");
-$error++ unless ok(-e "$installdest/share/simple/html/index.html", "installed share/html");
+$error++ unless ok(-e "$installdest/shared/simple/data", "installed shared/data");
+$error++ unless ok(-e "$installdest/shared/simple/html/index.html", "installed shared/html");
 diag "OUTPUT:\n$output" if $error;
 
-$dist->remove();

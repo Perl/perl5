@@ -1294,7 +1294,7 @@ is governed by $flags.
 
 Same as C<WindowPos_set>, but takes the position from keys C<fl width height
 x y behind hwnd> of the hash referenced by $hash.  If $hwnd is explicitly
-specified, it overrides C<$hash->{hwnd}>.  If $hash->{flags} is not specified,
+specified, it overrides C<< $hash->{hwnd} >>.  If $hash->{flags} is not specified,
 it is calculated basing on the existing keys of $hash.  Requires (morphing to) PM.
 
 Example:

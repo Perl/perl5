@@ -190,8 +190,13 @@ typedef U64TYPE U64;
 #               define INT64_C(c)	CAT2(c,L)
 #               define UINT64_C(c)	CAT2(c,UL)
 #           else
-#               define INT64_C(c)	((I64TYPE)(c))
-#               define UINT64_C(c)	((U64TYPE)(c))
+#               if defined(_WIN64) && defined(_MSC_VER)
+#                   define INT64_C(c)	CAT2(c,I64)
+#                   define UINT64_C(c)	CAT2(c,UI64)
+#               else
+#                   define INT64_C(c)	((I64TYPE)(c))
+#                   define UINT64_C(c)	((U64TYPE)(c))
+#               endif
 #           endif
 #       endif
 #   endif
@@ -424,7 +429,7 @@ Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 alphanumeric character (including underscore) or digit.
 
 =for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin) 
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 alphabetic character.
 
 =for apidoc Am|bool|isSPACE|char ch
@@ -474,7 +479,9 @@ US-ASCII (Basic Latin) range are viewed as not having any case.
 #   define isPUNCT(c)	ispunct(c)
 #   define isXDIGIT(c)	isxdigit(c)
 #   define toUPPER(c)	toupper(c)
+#   define toUPPER_LATIN1_MOD(c)    UNI_TO_NATIVE(PL_mod_latin1_uc[(U8) NATIVE_TO_UNI(c)])
 #   define toLOWER(c)	tolower(c)
+#   define toLOWER_LATIN1(c)	UNI_TO_NATIVE(PL_latin1_lc[(U8) NATIVE_TO_UNI(c)])
 #else
 #   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
 #   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
@@ -485,6 +492,15 @@ US-ASCII (Basic Latin) range are viewed as not having any case.
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
 #   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
 #   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+
+/* Use table lookup for speed */
+#   define toLOWER_LATIN1(c)	(PL_latin1_lc[(U8) c])
+
+/* Modified uc.  Is correct uc except for three non-ascii chars which are
+ * all mapped to one of them, and these need special handling */
+#   define toUPPER_LATIN1_MOD(c)    (PL_mod_latin1_uc[(U8) c])
+
+/* ASCII casing. */
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
 #   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
 #endif

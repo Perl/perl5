@@ -28,6 +28,14 @@ SKIP: {
     }
 }
 
+if ($^O eq "hpux" && $Config{osvers} >= 11.3) {
+    # HP does not support UTC0UTC and/or GMT0GMT, as they state that this is
+    # legal syntax but as it has no DST rule, it cannot be used. That is the
+    # conclusion of bug
+    # QXCR1000896916: Some timezone valuesfailing on 11.31 that work on 11.23
+    $ENV{TZ} = "UTC";
+}
+
 # asctime and ctime...Let's stay below INT_MAX for 32-bits and
 # positive for some picky systems.
 

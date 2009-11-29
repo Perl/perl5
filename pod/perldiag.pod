@@ -373,6 +373,11 @@ is not the same as
     $var = 'myvar';
     $sym = "mypack::$var";
 
+=item Bad plugin affecting keyword '%s'
+
+(F) An extension using the keyword plugin mechanism violated the
+plugin API.
+
 =item Bad realloc() ignored
 
 (S malloc) An internal routine called realloc() on something that had
@@ -1837,6 +1842,12 @@ a term, so it's looking for the corresponding right angle bracket, and
 not finding it.  Chances are you left some needed parentheses out
 earlier in the line, and you really meant a "less than".
 
+=item gmtime(%.0f) too large
+
+(W overflow) You called C<gmtime> with an number that was beyond the 64-bit
+range that it accepts, and some rounding resulted. This warning is also
+triggered with nan (the special not-a-number value).
+
 =item Got an error from DosAllocMem
 
 (P) An error peculiar to OS/2.  Most probably you're using an obsolete
@@ -2249,11 +2260,30 @@ effective uids or gids failed.
 length/code combination tried to obtain more data. This results in
 an undefined value for the length. See L<perlfunc/pack>.
 
+=item Lexing code attempted to stuff non-Latin-1 character into Latin-1 input
+
+(F) An extension is attempting to insert text into the current parse
+(using L<lex_stuff_pvn_flags|perlapi/lex_stuff_pvn_flags> or similar), but
+tried to insert a character that couldn't be part of the current input.
+This is an inherent pitfall of the stuffing mechanism, and one of the
+reasons to avoid it.  Where it is necessary to stuff, stuffing only
+plain ASCII is recommended.
+
+=item Lexing code internal error (%s)
+
+(F) Lexing code supplied by an extension violated the lexer's API in a
+detectable way.
+
 =item listen() on closed socket %s
 
 (W closed) You tried to do a listen on a closed socket.  Did you forget
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
+
+=item localtime(%.0f) too large
+
+(W overflow) You called C<localtime> with an number that was beyond the
+64-bit range that it accepts, and some rounding resulted. This warning is also triggered with nan (the special not-a-number value).
 
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
@@ -4752,6 +4782,11 @@ to access the filehandle slot within a typeglob.
 (W regexp) You used the /g modifier on the pattern for a C<split>
 operator.  Since C<split> always tries to match the pattern
 repeatedly, the C</g> has no effect.
+
+=item Use of "goto" to jump into a construct is deprecated
+
+(D deprecated) Using C<goto> to jump from an outer scope into an inner
+scope is deprecated and should be avoided.
 
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 

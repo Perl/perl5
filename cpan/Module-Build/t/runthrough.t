@@ -2,12 +2,10 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 32;
+use MBTest tests => 30;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
-
-use Module::Build::ConfigData;
+blib_load('Module::Build');
+blib_load('Module::Build::ConfigData');
 my $have_yaml = Module::Build::ConfigData->feature('YAML_support');
 
 #########################
@@ -24,6 +22,9 @@ $dist->change_build_pl
   requires    => { 'File::Spec' => 0 },
 });
 
+$dist->add_file( 'MANIFEST.SKIP', <<'---' );
+^MYMETA.yml$
+---
 $dist->add_file( 'script', <<'---' );
 #!perl -w
 print "Hello, World!\n";
@@ -169,12 +170,11 @@ SKIP: {
   # do a strict string comparison, but absent an XML parser it's the
   # best we can do.
   is $ppd, <<'EOF';
-<SOFTPKG NAME="Simple" VERSION="0,01,0,0">
-    <TITLE>Simple</TITLE>
+<SOFTPKG NAME="Simple" VERSION="0.01">
     <ABSTRACT>Perl extension for blah blah blah</ABSTRACT>
     <AUTHOR>A. U. Thor, a.u.thor@a.galaxy.far.far.away</AUTHOR>
     <IMPLEMENTATION>
-        <DEPENDENCY NAME="File-Spec" VERSION="0,0,0,0" />
+        <REQUIRE NAME="File::Spec" VERSION="0" />
         <CODEBASE HREF="/path/to/codebase" />
     </IMPLEMENTATION>
 </SOFTPKG>
@@ -188,8 +188,6 @@ is $@, '';
 ok ! -e $mb->build_script;
 ok ! -e $mb->config_dir;
 ok ! -e $mb->dist_dir;
-
-$dist->remove;
 
 SKIP: {
   skip( 'Windows-only test', 4 ) unless $^O =~ /^MSWin/;
@@ -223,8 +221,5 @@ echo Hello, World!
   my $out = slurp( $script_file );
   is $out, $script_data, '  unmodified by pl2bat';
 
-  $dist->remove;
 }
 
-# cleanup
-$dist->remove;

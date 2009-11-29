@@ -91,7 +91,7 @@ sub find_ext
 	# Temporary hack to cope with smokers that are not clearing directories:
         next if $ext{$this_ext};
 
-        if (has_xs_or_c("$ext_dir$item") or $this_ext eq 'IO/Compress') {
+        if (has_xs_or_c("$ext_dir$item")) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
         } else {
             $ext{$this_ext} = 'nonxs';

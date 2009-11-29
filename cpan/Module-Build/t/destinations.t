@@ -2,10 +2,9 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 115;
+use MBTest tests => 113;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
 
 my $tmp = MBTest->tmpdir;
 
@@ -248,7 +247,8 @@ $mb->prefix(undef);
     }
 
     # Poke at the innards of MB to change the default install locations.
-    my $old =  $mb->install_sets->{site} = \%test_config;
+    my $old =  $mb->install_sets->{site};
+    $mb->install_sets->{site} = \%test_config;
     $mb->config(siteprefixexp => catdir(File::Spec->rootdir, 
 					'wierd', 'prefix'));
 
@@ -321,5 +321,3 @@ sub test_install_destinations {
     }
 }
 
-
-$dist->remove;

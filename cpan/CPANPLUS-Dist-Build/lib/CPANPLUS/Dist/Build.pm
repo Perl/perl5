@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.40';
+$VERSION = '0.44';
 
 =pod
 
@@ -375,47 +375,57 @@ sub _find_prereqs {
 
     my $prereqs = {};
 
-    my $safe_ver = version->new('0.31_03');
+    $prereqs = $dist->find_mymeta_requires()
+       if $dist->can('find_mymeta_requires');
 
-    my $content;
-
-    if ( version->new( $Module::Build::VERSION ) >= $safe_ver and IPC::Cmd->can_capture_buffer ) {
-        my @buildflags = $dist->_buildflags_as_list( $buildflags );
-
-        # Use the new Build action 'prereq_data'
-        my $run_perl    = $conf->get_program('perlwrapper');
-
-        unless ( scalar run(    command => [$perl, $run_perl, BUILD->($dir), 'prereq_data', @buildflags],
-                                buffer  => \$content,
-                                verbose => 0 ) 
-        ) {
-            error( loc( "Build 'prereq_data' failed: %1 %2", $!, $content ) );
-            return;
-        }
-
+    if ( keys %$prereqs ) {
+        # Ugly hack
     }
     else {
-        my $file = File::Spec->catfile( $dir, '_build', 'prereqs' );
-        return unless -f $file;
+      my $safe_ver = version->new('0.31_03');
+      my $content;
+      PREREQS: {
+        if ( version->new( $Module::Build::VERSION ) >= $safe_ver and IPC::Cmd->can_capture_buffer ) {
+          my @buildflags = $dist->_buildflags_as_list( $buildflags );
 
-        my $fh = FileHandle->new();
+          # Use the new Build action 'prereq_data'
+          my $run_perl    = $conf->get_program('perlwrapper');
 
-        unless( $fh->open( $file ) ) {
-           error( loc( "Cannot open '%1': %2", $file, $! ) );
-           return;
+          unless ( scalar run(    command => [$perl, $run_perl, BUILD->($dir), 'prereq_data', @buildflags],
+                                buffer  => \$content,
+                                verbose => 0 ) 
+          ) {
+            error( loc( "Build 'prereq_data' failed: %1 %2", $!, $content ) );
+            #return;
+          }
+          else {
+            last PREREQS;
+          }
+
         }
+        else {
+          my $file = File::Spec->catfile( $dir, '_build', 'prereqs' );
+          return unless -f $file;
+
+          my $fh = FileHandle->new();
+
+          unless( $fh->open( $file ) ) {
+            error( loc( "Cannot open '%1': %2", $file, $! ) );
+            return;
+          }
         
-        $content = do { local $/; <$fh> };
-    }
+          $content = do { local $/; <$fh> };
+        }
+      }
 
-    return unless $content;
-    my $bphash = eval $content;
-    return unless $bphash and ref $bphash eq 'HASH';
-    foreach my $type ('requires', 'build_requires') {
-       next unless $bphash->{$type} and ref $bphash->{$type} eq 'HASH';
-       $prereqs->{$_} = $bphash->{$type}->{$_} for keys %{ $bphash->{$type} };
+      return unless $content;
+      my $bphash = eval $content;
+      return unless $bphash and ref $bphash eq 'HASH';
+      foreach my $type ('requires', 'build_requires') {
+        next unless $bphash->{$type} and ref $bphash->{$type} eq 'HASH';
+        $prereqs->{$_} = $bphash->{$type}->{$_} for keys %{ $bphash->{$type} };
+      }
     }
-
     # Temporary fix
     delete $prereqs->{'perl'};
 

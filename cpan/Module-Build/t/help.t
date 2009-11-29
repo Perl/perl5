@@ -2,37 +2,22 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 25;
+use MBTest tests => 23;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
-
-use Cwd ();
-use File::Path ();
-
-my $cwd = Cwd::cwd();
-my $tmp = MBTest->tmpdir;
+blib_load('Module::Build');
 
 use DistGen;
 
-my $dist = DistGen->new(dir => $tmp);
-
-
+my $dist = DistGen->new;
 $dist->regen;
+$dist->chdir_in;
 
 my $restart = sub {
-  $dist->clean();
-  DistGen::chdir_all( $cwd );
-  File::Path::rmtree( $tmp );
   # we're redefining the same package as we go, so...
   delete($::{'MyModuleBuilder::'});
   delete($INC{'MyModuleBuilder.pm'});
-  $dist->regen;
-  chdir($dist->dirname) or
-    die "Can't chdir to '@{[$dist->dirname]}': $!";
+  $dist->regen( clean => 1 );
 };
-
-chdir($dist->dirname) or die "Can't chdir to '@{[$dist->dirname]}': $!";
 
 ########################################################################
 { # check the =item style
@@ -274,7 +259,5 @@ is($mb->get_action_docs('batz'), undef, 'nothing after uplevel');
 
 # cleanup
 $dist->clean();
-DistGen::chdir_all($cwd);
-File::Path::rmtree( $tmp );
 
 # vim:ts=2:sw=2:et:sta

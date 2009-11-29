@@ -172,8 +172,10 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
     SvGETMAGIC(sv);
 
     if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
-		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
+	    || (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv)))) {
+	LEAVE;
 	return FALSE;
+    }
 
     if (sv_isobject(sv)) {
 	classname = sv_reftype(SvRV(sv),TRUE);
@@ -181,8 +183,10 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
 	classname = SvPV_nolen(sv);
     }
 
-    if (strEQ(name,classname))
+    if (strEQ(name,classname)) {
+	LEAVE;
 	return TRUE;
+    }
 
     PUSHMARK(SP);
     XPUSHs(sv);

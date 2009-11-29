@@ -12,7 +12,7 @@ use IO::Uncompress::Adapter::Bunzip2 2.021 ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $Bunzip2Error);
 
-$VERSION = '2.021';
+$VERSION = '2.022';
 $Bunzip2Error = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );

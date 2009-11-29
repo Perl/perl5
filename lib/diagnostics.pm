@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = 1.17;
+our $VERSION = '1.18';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -377,7 +377,7 @@ my %msg;
 	# strip formatting directives from =item line
 	$header =~ s/[A-Z]<(.*?)>/$1/g;
 
-        my @toks = split( /(%l?[dx]|%c|%(?:\.\d+)?s)/, $header );
+        my @toks = split( /(%l?[dx]|%c|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
             my $conlen = 0;
             for my $i (0..$#toks){
@@ -386,7 +386,7 @@ my %msg;
                         $toks[$i] = '.';
                     } elsif( $toks[$i] eq '%d' ){
                         $toks[$i] = '\d+';
-                    } elsif( $toks[$i] eq '%s' ){
+                    } elsif( $toks[$i] =~ '^%(?:s|.*f)$' ){
                         $toks[$i] = $i == $#toks ? '.*' : '.*?';
                     } elsif( $toks[$i] =~ '%.(\d+)s' ){
                         $toks[$i] = ".{$1}";

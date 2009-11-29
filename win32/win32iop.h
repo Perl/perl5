@@ -161,7 +161,9 @@ DllExport Sighandler_t	win32_signal(int sig, Sighandler_t subcode);
 END_EXTERN_C
 
 #undef alarm
-#define alarm			win32_alarm
+#define alarm				win32_alarm
+#undef strerror
+#define strerror			win32_strerror
 
 /*
  * the following six(6) is #define in stdio.h
@@ -205,7 +207,6 @@ END_EXTERN_C
 #define ferror(f)			win32_ferror(f)
 #define errno 				(*win32_errno())
 #define environ				(*win32_environ())
-#define strerror			win32_strerror
 
 /*
  * redirect to our own version
@@ -293,6 +294,10 @@ END_EXTERN_C
 #define realloc			win32_realloc
 #define free			win32_free
 #endif
+
+/* XXX Why are APIs like sleep(), times() etc. inside a block
+ * XXX guarded by "#ifndef WIN32IO_IS_STDIO"?
+ */
 
 #define pipe(fd)		win32_pipe((fd), 512, O_BINARY)
 #define pause()			win32_sleep((32767L << 16) + 32767)

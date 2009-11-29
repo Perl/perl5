@@ -74,12 +74,16 @@ print $p;
 
 {
 my $names = join "|", sort keys %$name2where;
-ok $names, "squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo";
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+     $names, 
+     "squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo";
 }
 
 {
 my $names = join "|", sort values %$where2name;
-ok $names, "squaa|squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo";
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
+     $names, 
+     "squaa|squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo";
 
 my %count;
 for(values %$where2name) { ++$count{$_} };
@@ -99,7 +103,9 @@ ok   $name2where->{'squaa'};  # because squaa.pm IS squaa*
 
 ok( ($name2where->{'squaa::Vliff'} || 'huh???'), '/[^\^]testlib1/' );
 
-ok( ($name2where->{'squaa::Wowo'}  || 'huh???'), '/testlib2/' );
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+     ($name2where->{'squaa::Wowo'}  || 'huh???'), 
+     '/testlib2/';
 
 
 print "# OK, bye from ", __FILE__, "\n";

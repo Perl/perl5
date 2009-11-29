@@ -2,14 +2,12 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 53;
+use MBTest tests => 51;
 
-use_ok 'Module::Build';
-ensure_blib('Module::Build');
+blib_load('Module::Build');
+blib_load('Module::Build::ConfigData');
 
 my $tmp = MBTest->tmpdir;
-
-use Module::Build::ConfigData;
 
 my %metadata = 
   (
@@ -56,7 +54,6 @@ my $simple2_file = 'lib/Simple2.pm';
 
 $dist->chdir_in;
 
-use Module::Build;
 my $mb = Module::Build->new_from_context;
 
 ##################################################
@@ -68,7 +65,7 @@ my $mb = Module::Build->new_from_context;
   my $mb_config_req = { 
     'Module::Build' => int($Module::Build::VERSION * 100)/100 
   };
-  my $node = $mb->prepare_metadata( {} );
+  my $node = $mb->prepare_metadata( );
 
   # exists() doesn't seem to work here
   is $node->{name}, $metadata{module_name};
@@ -89,7 +86,7 @@ my $mb = Module::Build->new_from_context;
 {
   my $mb_prereq = { 'Module::Build' => 0 };
   $mb->configure_requires( $mb_prereq );
-  my $node = $mb->prepare_metadata( {} );
+  my $node = $mb->prepare_metadata( );
 
 
   # exists() doesn't seem to work here
@@ -366,7 +363,7 @@ package Simple;
 $VERSION = '2.34';
 ---
 $dist->regen( clean => 1 );
-$mb = new_build();
+stderr_of( sub { $mb = new_build(); } );
 $err = stderr_of( sub { $provides = $mb->find_dist_packages } );
 is_deeply($provides,
 	  {'Simple' => { file => $simple_file,
@@ -470,7 +467,7 @@ package Foo;
 $VERSION = '2.34';
 ---
 $dist->regen( clean => 1 );
-$mb = new_build();
+stderr_of( sub { $mb = new_build(); } );
 $err = stderr_of( sub { $provides = $mb->find_dist_packages } );
 # XXX Should 'Foo' exist ??? Can't predict values for file & version
 ok( exists( $provides->{Foo} ) );
@@ -604,6 +601,3 @@ $dist->regen( clean => 1 );
 $mb = new_build();
 is_deeply($mb->find_dist_packages, {});
 
-############################################################
-# cleanup
-$dist->remove;

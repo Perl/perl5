@@ -9,8 +9,8 @@ use Test::More 'no_plan';
 
 my $Class       = 'IPC::Cmd';
 my $AClass      = $Class . '::TimeOut';
-my @Funcs       = qw[run can_run QUOTE];
-my @Meths       = qw[can_use_ipc_run can_use_ipc_open3 can_capture_buffer];
+my @Funcs       = qw[run can_run QUOTE run_forked];
+my @Meths       = qw[can_use_ipc_run can_use_ipc_open3 can_capture_buffer can_use_run_forked];
 my $IsWin32     = $^O eq 'MSWin32';
 my $Verbose     = @ARGV ? 1 : 0;
 
@@ -155,6 +155,23 @@ push @Prefs, [ 0,             0 ],  [ 0,             0 ];
         }
     }
 }
+
+unless ( IPC::Cmd->can_use_run_forked ) {
+  ok(1, "run_forked not available on this platform");
+  exit;
+}
+
+{
+  my $cmd = "echo out ; echo err >&2 ; sleep 4";
+  my $r = run_forked($cmd, {'timeout' => 1});
+
+  ok(ref($r) eq 'HASH', "executed: $cmd");
+  ok($r->{'timeout'} eq 1, "timed out");
+  ok($r->{'stdout'}, "stdout: " . $r->{'stdout'});
+  ok($r->{'stderr'}, "stderr: " . $r->{'stderr'});
+}
+
+    
 __END__
 ### special call to check that output is interleaved properly
 {   my $cmd     = [$^X, File::Spec->catfile( qw[src output.pl] ) ];
@@ -219,6 +236,4 @@ __END__
         like( $err,qr/^$AClass/,"   Error '$err' mentions $AClass" );
     }
 }    
-    
-
 
