@@ -1,3 +1,7 @@
+2.20 Tue Dec 1 2009
+    fix [rt.cpan.org #51574] Safe.pm sort {} bug accessing $a and $b with
+        -Dusethreads (Tim Bunce)
+
 2.19 Tue Aug 25 2009
     t/safeuniversal.t failure under 5.8.9 (Jerry D. Hedden)
 
