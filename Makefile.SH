@@ -1263,12 +1263,34 @@ _cleaner2:
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
 	rm -fr lib/B
-	-rmdir lib/Data
-	-rmdir lib/Filter/Util lib/IO/Socket
-	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
-	-rmdir lib/threads lib/XS
-	-rmdir lib/CPANPLUS/Dist/Build/t/dummy-*
-	-rmdir lib/CPANPLUS/t/dummy-cpanplus lib/CPANPLUS/t/dummy-localmirror
+	rm -fr lib/CPAN lib/CPANPLUS
+	rm -fr lib/ExtUtils/CBuilder
+	-rmdir cpan/CPANPLUS-Dist-Build/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-localmirror
+	-rmdir ext/B/lib
+	-rmdir lib/Archive/Tar lib/Archive lib/Attribute
+	-rmdir lib/CGI
+	-rmdir lib/Data lib/Devel lib/Digest
+	-rmdir lib/ExtUtils/Command lib/ExtUtils/Constant lib/ExtUtils/Liblist lib/ExtUtils/MakeMaker
+	-rmdir lib/File/Spec lib/Filter/Util lib/Filter
+	-rmdir lib/I18N/LangTags lib/IO/Socket lib/IO lib/IPC
+	-rmdir lib/List/Util lib/List
+	-rmdir lib/Locale/Maketext lib/Locale
+	-rmdir lib/Log/Message lib/Log
+	-rmdir lib/Math/Big* lib/Math
+	-rmdir lib/Memoize lib/MIME
+	-rmdir lib/Module/Build/Platform lib/Module/Build lib/Module/Load lib/Module
+	-rmdir lib/Net/FTP lib/Object
+	-rmdir lib/Parse/CPAN lib/Parse
+	-rmdir lib/PerlIO/via lib/PerlIO
+	-rmdir lib/Package lib/Params
+	-rmdir lib/Pod/Perldoc lib/Pod/Simple lib/Pod/Text
+	-rmdir lib/Sys lib/Scalar/Util lib/Scalar
+	-rmdir lib/Term/UI lib/Thread
+	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test
+	-rmdir lib/Unicode/Collate
+	-rmdir lib/XS/APItest lib/XS
+	-rmdir lib/inc/latest lib/inc
+	-rmdir lib/autodie/exception lib/autodie lib/encoding lib/threads
 	-rm -f lib/ExtUtils/CBuilder/t/libcompilet.dll.a
 	-rm -f lib/ExtUtils/ParseXS/t/libXSTest.dll.a
 
