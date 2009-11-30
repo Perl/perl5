@@ -2755,6 +2755,7 @@ dist/Safe/t/safe2.t		See if Safe works
 dist/Safe/t/safe3.t		See if Safe works
 dist/Safe/t/safeload.t		Tests that some modules can be loaded by Safe
 dist/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
+dist/Safe/t/safesort.t		Tests Safe with sort
 dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works

@@ -2,6 +2,9 @@ package Safe;
 
 use 5.003_11;
 use strict;
+use Scalar::Util qw(reftype);
+use Config qw(%Config);
+use constant is_usethreads => $Config{usethreads};
 
 $Safe::VERSION = "2.19";
 
@@ -288,8 +291,26 @@ sub reval {
     my ($obj, $expr, $strict) = @_;
     my $root = $obj->{Root};
 
-    my $evalsub = lexless_anon_sub($root,$strict, $expr);
-    return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    my $evalsub = lexless_anon_sub($root, $strict, $expr);
+    my @ret = (wantarray)
+        ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
+        : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+
+    # RT#60374: Safe.pm sort {} bug with -Dusethreads
+    # If the Safe eval returns a code ref in a perl compiled with usethreads
+    # then wrap code ref with _safe_call_sv so that, when called, the
+    # execution will happen with the compartment fully 'in effect'.
+    # Needed to fix sort blocks that reference $a & $b and
+    # possibly other subtle issues.
+    if (is_usethreads()) {
+        for my $ret (@ret) { # edit (via alias) any CODE refs
+            next unless (reftype($ret)||'') eq 'CODE';
+            my $sub = $ret; # avoid closure problems
+            $ret = sub { Opcode::_safe_call_sv($root, $obj->{Mask}, $sub) };
+        }
+    }
+
+    return (wantarray) ? @ret : $ret[0];
 }
 
 sub rdo {

@@ -8,5 +8,6 @@ t/safe2.t
 t/safe3.t
 t/safeload.t
 t/safeops.t
+t/safesort.t
 t/safeuniversal.t
 META.yml                                 Module meta-data (added by MakeMaker)
