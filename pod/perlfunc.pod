@@ -7060,6 +7060,15 @@ block scope (like C<strict> or C<integer>, unlike ordinary modules,
 which import symbols into the current package (which are effective
 through the end of the file).
 
+Because C<use> takes effect at compile time, it doesn't respect the
+ordinary flow control of the code being compiled.  In particular, putting
+a C<use> inside the false branch of a conditional doesn't prevent it
+from being processed.  If a module or pragma needs to be loaded only
+conditionally, this can be done using the L<if> pragma:
+
+    use if $] < 5.008, "utf8";
+    use if WANT_WARNINGS, warnings => qw(all);
+
 There's a corresponding C<no> command that unimports meanings imported
 by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 It behaves exactly as C<import> does with respect to VERSION, an
