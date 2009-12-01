@@ -16,8 +16,8 @@ you should reset the version numbers to the next blead series.
 
  October 2       -  5.11.0  -   Jesse Vincent
  October 20      -  5.11.1  -   Jesse Vincent
- November 20     -  5.11.2  -   Yves Orton
- December 20     -  5.11.3  -   Leon Brocard
+ November 20     -  5.11.2  -   Leon Brocard
+ December 20     -  5.11.3  -   Jesse Vincent or minion
 
 =head2 2010
 
