@@ -461,17 +461,8 @@ our $to_trace = 0;
             }
         }
 
-        if ($print_caller) {
-            if (defined $line_number) {
-                    print STDERR sprintf "%4d: ", $line_number;
-            }
-            else {
-                    print STDERR "     ";
-            }
-            $caller_name .= ": ";
-            print STDERR $caller_name;
-        }
-
+        print STDERR sprintf "%4d: ", $line_number if defined $line_number;
+        print STDERR "$caller_name: " if $print_caller;
         print STDERR $output, "\n";
         return;
     }
@@ -1206,6 +1197,11 @@ package Carp;
 
 our $Verbose = 1 if main::DEBUG;  # Useful info when debugging
 
+# This is a work-around suggested by Nicholas Clark to fix a problem with Carp
+# and overload trying to load Scalar:Util under miniperl.  See
+# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-11/msg01057.html
+undef $overload::VERSION;
+
 sub my_carp {
     my $message = shift || "";
     my $nofold = shift || 0;
@@ -1575,7 +1571,6 @@ package Input_file;
 
 sub trace { return main::trace(@_); }
 
-
 { # Closure
     # Keep track of fields that are to be put into the constructor.
     my %constructor_fields;
@@ -1680,6 +1675,7 @@ sub trace { return main::trace(@_); }
         $missings{$addr} = [ ];
 
         # Two positional parameters.
+        return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
         $file{$addr} = main::internal_file_to_platform(shift);
         $first_released{$addr} = shift;
 
@@ -1812,7 +1808,7 @@ sub trace { return main::trace(@_); }
             if ($seen_non_extracted_non_age) {
                 if ($file =~ /$EXTRACTED/) {
                     Carp::my_carp_bug(join_lines(<<END
-$file should be processed just after the 'Prop..Alias' files, and before
+$file should be processed just after the 'Prop...Alias' files, and before
 anything not in the $EXTRACTED_DIR directory.  Proceeding, but the results may
 have subtle problems
 END
@@ -3831,7 +3827,7 @@ sub trace { return main::trace(@_); }
         return $self->_add_delete('+', $start, $end, "");
     }
 
-    my $non_ASCII = (ord('A') == 65);   # Assumes test on same platform
+    my $non_ASCII = (ord('A') != 65);   # Assumes test on same platform
 
     sub is_code_point_usable {
         # This used only for making the test script.  See if the input
@@ -8627,6 +8623,7 @@ END
                             else {
                                 $default_map = $missings;
                             }
+                        
                             # And store it with the property for outside use.
                             $property_object->set_default_map($default_map);
                         }
@@ -11833,24 +11830,37 @@ sub make_table_pod_entries($) {
 sub pod_alphanumeric_sort {
     # Sort pod entries alphanumerically.
 
-    # The first few character columns are filler; and get rid of all the
-    # trailing stuff, starting with the trailing '}', so as to sort on just
-    # '\p{Name=Value'
-    my $a = lc substr($a, $FILLER);
+    # The first few character columns are filler, plus the '\p{'; and get rid
+    # of all the trailing stuff, starting with the trailing '}', so as to sort
+    # on just 'Name=Value'
+    (my $a = lc $a) =~ s/^ .*? { //x;
     $a =~ s/}.*//;
-    my $b = lc substr($b, $FILLER);
+    (my $b = lc $b) =~ s/^ .*? { //x;
     $b =~ s/}.*//;
 
+    # Determine if the two operands are both internal only or both not.
+    # Character 0 should be a '\'; 1 should be a p; 2 should be '{', so 3
+    # should be the underscore that begins internal only
+    my $a_is_internal = (substr($a, 0, 1) eq '_');
+    my $b_is_internal = (substr($b, 0, 1) eq '_');
+
+    # Sort so the internals come last in the table instead of first (which the
+    # leading underscore would otherwise indicate).
+    if ($a_is_internal != $b_is_internal) {
+        return 1 if $a_is_internal;
+        return -1
+    }
+
     # Determine if the two operands are numeric property values or not.
-    # A numeric property will look like \p{xyz: 3}.  But the number
+    # A numeric property will look like xyz: 3.  But the number
     # can begin with an optional minus sign, and may have a
-    # fraction or rational component, like \p{xyz: 3/2}.  If either
+    # fraction or rational component, like xyz: 3/2.  If either
     # isn't numeric, use alphabetic sort.
     my ($a_initial, $a_number) =
-        ($a =~ /^\\p{ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
+        ($a =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
     return $a cmp $b unless defined $a_number;
     my ($b_initial, $b_number) =
-        ($b =~ /^\\p{ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
+        ($b =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
     return $a cmp $b unless defined $b_number;
 
     # Here they are both numeric, but use alphabetic sort if the
@@ -13555,7 +13565,7 @@ if ($glob_list) {
         # If the file isn't extracted (meaning none of the directories is the
         # extracted one), just add it to the end of the list of inputs.
         if (! grep { $EXTRACTED_DIR eq $_ } @directories) {
-            push @input_file_objects, Input_file->new($file);
+            push @input_file_objects, Input_file->new($file, v0);
         }
         else {
 
@@ -13570,7 +13580,8 @@ if ($glob_list) {
                     && $input_file_objects[$i]->file ne 'DAge.txt'
                     && $input_file_objects[$i]->file !~ /$EXTRACTED_DIR/)
                 {
-                    splice @input_file_objects, $i, 0, Input_file->new($file);
+                    splice @input_file_objects, $i, 0,
+                                                    Input_file->new($file, v0);
                     last;
                 }
             }
@@ -13584,7 +13595,7 @@ The following files are unknown as to how to handle.  Assuming they are
 typical property files.  You'll know by later error messages if it worked or
 not:
 END
-        ) . join(", ", @unknown_input_files) . "\n\n");
+        ) . " " . join(", ", @unknown_input_files) . "\n\n");
     }
 } # End of looking through directory structure for more .txt files.
 
@@ -13757,7 +13768,7 @@ my $Tests = 0;
 my $Fails = 0;
 my $Skips = 0;
 
-my $non_ASCII = (ord('A') == 65);
+my $non_ASCII = (ord('A') != 65);
 
 # The first 127 ASCII characters in ordinal order, with the ones that don't
 # have Perl names (as of 5.8) replaced by dots.  The 127th is used as the
