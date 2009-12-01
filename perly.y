@@ -332,7 +332,7 @@ cont	:	/* NULL */
 /* Loops: while, until, for, and a bare block */
 loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			{ OP *innerop;
-			  PL_parser->copline = (line_t)$2;
+			  PL_parser->copline = (line_t)IVAL($2);
 			    $$ = block_end($4,
 				   newSTATEOP(0, PVAL($1),
 				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
@@ -345,7 +345,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 
 	|	label UNTIL '(' remember iexpr ')' mintro mblock cont
 			{ OP *innerop;
-			  PL_parser->copline = (line_t)$2;
+			  PL_parser->copline = (line_t)IVAL($2);
 			    $$ = block_end($4,
 				   newSTATEOP(0, PVAL($1),
 				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
@@ -427,7 +427,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 
 /* Switch blocks */
 switch	:	label GIVEN '(' remember mydefsv mexpr ')' mblock
-			{ PL_parser->copline = (line_t) $2;
+			{ PL_parser->copline = (line_t) IVAL($2);
 			    $$ = block_end($4,
 				newSTATEOP(0, PVAL($1),
 				    newGIVENOP($6, scope($8),
