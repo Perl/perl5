@@ -11366,7 +11366,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     char *bracket = NULL;
     char funny = *s++;
     register char *d = dest;
-    register char * const e = d + destlen + 3;    /* two-character token, ending NUL */
+    register char * const e = d + destlen - 3;    /* two-character token, ending NUL */
 
     PERL_ARGS_ASSERT_SCAN_IDENT;
 

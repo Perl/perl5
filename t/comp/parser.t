@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..104\n";
+print "1..117\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -284,6 +284,54 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 6' );
 
 eval q[ BEGIN {\&foo4; die } ] for 1..10;
 like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
+
+{
+  # RT #70934
+  # check both the specific case in the ticket, and a few other paths into
+  # S_scan_ident()
+  # simplify long ids
+  my $x100 = "x" x 256;
+  my $xFE = "x" x 254;
+  my $xFD = "x" x 253;
+  my $xFC = "x" x 252;
+  my $xFB = "x" x 251;
+
+  eval qq[ \$#$xFB ];
+  is($@, "", "251 character \$# sigil ident ok");
+  eval qq[ \$#$xFC ];
+  like($@, qr/Identifier too long/, "too long id in \$# sigil ctx");
+
+  eval qq[ \$$xFB ];
+  is($@, "", "251 character \$ sigil ident ok");
+  eval qq[ \$$xFC ];
+  like($@, qr/Identifier too long/, "too long id in \$ sigil ctx");
+
+  eval qq[ %$xFB ];
+  is($@, "", "251 character % sigil ident ok");
+  eval qq[ %$xFC ];
+  like($@, qr/Identifier too long/, "too long id in % sigil ctx");
+
+  eval qq[ \\&$xFC ]; # take a ref since I don't want to call it
+  is($@, "", "252 character & sigil ident ok");
+  eval qq[ \\&$xFD ];
+  like($@, qr/Identifier too long/, "too long id in & sigil ctx");
+
+  eval qq[ *$xFC ];
+  is($@, "", "252 character glob ident ok");
+  eval qq[ *$xFD ];
+  like($@, qr/Identifier too long/, "too long id in glob ctx");
+
+  eval qq[ for $xFD ];
+  like($@, qr/Missing \$ on loop variable/,
+       "253 char id ok, but a different error");
+  eval qq[ for $xFE; ];
+  like($@, qr/Identifier too long/, "too long id in for ctx");
+
+  # the specific case from the ticket
+  my $x = "x" x 257;
+  eval qq[ for $x ];
+  like($@, qr/Identifier too long/, "too long id ticket case");
+}
 
 # Add new tests HERE:
 
