@@ -252,7 +252,7 @@ case 2:
   case 36:
 #line 334 "perly.y"
     { OP *innerop;
-			  PL_parser->copline = (line_t)(ps[(2) - (9)].val.i_tkval);
+			  PL_parser->copline = (line_t)IVAL((ps[(2) - (9)].val.i_tkval));
 			    (yyval.opval) = block_end((ps[(4) - (9)].val.ival),
 				   newSTATEOP(0, PVAL((ps[(1) - (9)].val.p_tkval)),
 				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
@@ -267,7 +267,7 @@ case 2:
   case 37:
 #line 347 "perly.y"
     { OP *innerop;
-			  PL_parser->copline = (line_t)(ps[(2) - (9)].val.i_tkval);
+			  PL_parser->copline = (line_t)IVAL((ps[(2) - (9)].val.i_tkval));
 			    (yyval.opval) = block_end((ps[(4) - (9)].val.ival),
 				   newSTATEOP(0, PVAL((ps[(1) - (9)].val.p_tkval)),
 				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
@@ -362,7 +362,7 @@ case 2:
 
   case 43:
 #line 430 "perly.y"
-    { PL_parser->copline = (line_t) (ps[(2) - (8)].val.i_tkval);
+    { PL_parser->copline = (line_t) IVAL((ps[(2) - (8)].val.i_tkval));
 			    (yyval.opval) = block_end((ps[(4) - (8)].val.ival),
 				newSTATEOP(0, PVAL((ps[(1) - (8)].val.p_tkval)),
 				    newGIVENOP((ps[(6) - (8)].val.opval), scope((ps[(8) - (8)].val.opval)),
