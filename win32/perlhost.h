@@ -1769,6 +1769,11 @@ restart:
 	switch (status) {
 	case 0:
 	    CALLRUNOPS(aTHX);
+            /* We may have additional unclosed scopes if fork() was called
+             * from within a BEGIN block.  See perlfork.pod for more details.
+             */
+	    while (PL_scopestack_ix > oldscope)
+		LEAVE;
 	    status = 0;
 	    break;
 	case 2:
