@@ -26,6 +26,11 @@ INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
 
 #
+# Uncomment if you want to build a 32-bit Perl using a 32-bit compiler
+# on a 64-bit version of Windows.
+#WIN64		*= undef
+
+#
 # Comment this out if you DON'T want your perl installation to be versioned.
 # This means that the new installation will overwrite any files from the
 # old installation at the same INST_TOP location.  Leaving it enabled is
