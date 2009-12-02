@@ -325,12 +325,12 @@ do_test(15,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(OBJECT,POK,pPOK\\)
     IV = 0
-    PV = $ADDR "\\(\\?-xism:tic\\)"\\\0
+    PV = $ADDR "\\(\\?-xism:tic\\)"
     CUR = 12
-    LEN = \\d+
+    LEN = 0
     STASH = $ADDR\\t"Regexp"');
 } else {
 do_test(15,

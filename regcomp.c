@@ -9699,7 +9699,20 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
     ret->saved_copy = NULL;
 #endif
 
-    ret->mother_re      = NULL;
+    if (ret->mother_re) {
+	if (SvPVX_const(dstr) == SvPVX_const(ret->mother_re)) {
+	    /* Our storage points directly to our mother regexp, but that's
+	       1: a buffer in a different thread
+	       2: something we no longer hold a reference on
+	       so we need to copy it locally.  */
+	    /* Note we need to sue SvCUR() on our mother_re, because it, in
+	       turn, may well be pointing to its own mother_re.  */
+	    SvPV_set(dstr, SAVEPVN(SvPVX_const(ret->mother_re),
+				   SvCUR(ret->mother_re)+1));
+	    SvLEN_set(dstr, SvCUR(ret->mother_re)+1);
+	}
+	ret->mother_re      = NULL;
+    }
     ret->gofs = 0;
 }
 #endif /* PERL_IN_XSUB_RE */
