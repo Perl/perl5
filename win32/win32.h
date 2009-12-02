@@ -260,7 +260,9 @@ typedef long		gid_t;
 #endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+#ifndef isnan
 #define isnan		_isnan	/* ...same libraries as MSVC */
+#endif
 
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080
