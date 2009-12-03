@@ -1291,7 +1291,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
  * by the original comparison routine on the elements pointed to.
  * Because we don't move the elements of list1 around through
  * this phase, we can break ties on elements that compare equal
- * using their address in the list1 array, ensuring stabilty.
+ * using their address in the list1 array, ensuring stability.
  * This leaves us with something looking like
  *
  *  indir                  list1
