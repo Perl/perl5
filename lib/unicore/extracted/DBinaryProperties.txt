@@ -1,14 +1,14 @@
-# DerivedBinaryProperties-5.1.0.txt
-# Date: 2008-03-03, 21:57:22 GMT [MD]
+# DerivedBinaryProperties-5.2.0.txt
+# Date: 2009-05-22, 18:51:12 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2008 Unicode, Inc.
+# Copyright (c) 1991-2009 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
-# For documentation, see UCD.html
+# For documentation, see http://www.unicode.org/reports/tr44/
 
 # ================================================
 
-# Bidi_Mirrored (listing UnicodeData.txt, field 9: see UCD.html)
+# Bidi_Mirrored (listing UnicodeData.txt, field 9: see UAX #44: http://www.unicode.org/reports/tr44/)
 
 0028          ; Bidi_Mirrored # Ps       LEFT PARENTHESIS
 0029          ; Bidi_Mirrored # Pe       RIGHT PARENTHESIS

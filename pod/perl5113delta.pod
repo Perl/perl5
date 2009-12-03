@@ -32,6 +32,12 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 Unicode version
+
+Perl is shipped with the latest Unicode version, 5.2, October 2009.  See
+L<http://www.unicode.org/versions/Unicode5.2.0> for details about this release
+of Unicode.
+
 =head2 Unicode properties
 
 Perl can now handle every Unicode character property.  A new pod,

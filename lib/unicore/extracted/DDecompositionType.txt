@@ -1,14 +1,14 @@
-# DerivedDecompositionType-5.1.0.txt
-# Date: 2008-03-03, 21:57:30 GMT [MD]
+# DerivedDecompositionType-5.2.0.txt
+# Date: 2009-08-22, 04:58:19 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2008 Unicode, Inc.
+# Copyright (c) 1991-2009 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
-# For documentation, see UCD.html
+# For documentation, see http://www.unicode.org/reports/tr44/
 
 # ================================================
 
-# Decomposition_Type (from UnicodeData.txt, field 5: see UCD.html)
+# Decomposition_Type (from UnicodeData.txt, field 5: see UAX #44: http://www.unicode.org/reports/tr44/)
 
 #  All code points not explicitly listed for Decomposition_Type
 #  have the value None.
@@ -239,7 +239,7 @@ FA20          ; Canonical # Lo       CJK COMPATIBILITY IDEOGRAPH-FA20
 FA22          ; Canonical # Lo       CJK COMPATIBILITY IDEOGRAPH-FA22
 FA25..FA26    ; Canonical # Lo   [2] CJK COMPATIBILITY IDEOGRAPH-FA25..CJK COMPATIBILITY IDEOGRAPH-FA26
 FA2A..FA2D    ; Canonical # Lo   [4] CJK COMPATIBILITY IDEOGRAPH-FA2A..CJK COMPATIBILITY IDEOGRAPH-FA2D
-FA30..FA6A    ; Canonical # Lo  [59] CJK COMPATIBILITY IDEOGRAPH-FA30..CJK COMPATIBILITY IDEOGRAPH-FA6A
+FA30..FA6D    ; Canonical # Lo  [62] CJK COMPATIBILITY IDEOGRAPH-FA30..CJK COMPATIBILITY IDEOGRAPH-FA6D
 FA70..FAD9    ; Canonical # Lo [106] CJK COMPATIBILITY IDEOGRAPH-FA70..CJK COMPATIBILITY IDEOGRAPH-FAD9
 FB1D          ; Canonical # Lo       HEBREW LETTER YOD WITH HIRIQ
 FB1F          ; Canonical # Lo       HEBREW LIGATURE YIDDISH YOD YOD PATAH
@@ -249,11 +249,14 @@ FB3E          ; Canonical # Lo       HEBREW LETTER MEM WITH DAGESH
 FB40..FB41    ; Canonical # Lo   [2] HEBREW LETTER NUN WITH DAGESH..HEBREW LETTER SAMEKH WITH DAGESH
 FB43..FB44    ; Canonical # Lo   [2] HEBREW LETTER FINAL PE WITH DAGESH..HEBREW LETTER PE WITH DAGESH
 FB46..FB4E    ; Canonical # Lo   [9] HEBREW LETTER TSADI WITH DAGESH..HEBREW LETTER PE WITH RAFE
+1109A         ; Canonical # Lo       KAITHI LETTER DDDHA
+1109C         ; Canonical # Lo       KAITHI LETTER RHA
+110AB         ; Canonical # Lo       KAITHI LETTER VA
 1D15E..1D164  ; Canonical # So   [7] MUSICAL SYMBOL HALF NOTE..MUSICAL SYMBOL ONE HUNDRED TWENTY-EIGHTH NOTE
 1D1BB..1D1C0  ; Canonical # So   [6] MUSICAL SYMBOL MINIMA..MUSICAL SYMBOL FUSA BLACK
 2F800..2FA1D  ; Canonical # Lo [542] CJK COMPATIBILITY IDEOGRAPH-2F800..CJK COMPATIBILITY IDEOGRAPH-2FA1D
 
-# Total code points: 13215
+# Total code points: 13221
 
 # ================================================
 
@@ -333,8 +336,11 @@ FB13..FB17    ; Compat # L&   [5] ARMENIAN SMALL LIGATURE MEN NOW..ARMENIAN SMAL
 FB4F          ; Compat # Lo       HEBREW LIGATURE ALEF LAMED
 FE49..FE4C    ; Compat # Po   [4] DASHED OVERLINE..DOUBLE WAVY OVERLINE
 FE4D..FE4F    ; Compat # Pc   [3] DASHED LOW LINE..WAVY LOW LINE
+1F100..1F10A  ; Compat # No  [11] DIGIT ZERO FULL STOP..DIGIT NINE COMMA
+1F110..1F12A  ; Compat # So  [27] PARENTHESIZED LATIN CAPITAL LETTER A..TORTOISE SHELL BRACKETED LATIN CAPITAL LETTER S
+1F240..1F248  ; Compat # So   [9] TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-672C..TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-6557
 
-# Total code points: 673
+# Total code points: 720
 
 # ================================================
 
@@ -773,14 +779,16 @@ FEFB          ; Isolated # Lo       ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
 2460..2473    ; Circle # No  [20] CIRCLED DIGIT ONE..CIRCLED NUMBER TWENTY
 24B6..24E9    ; Circle # So  [52] CIRCLED LATIN CAPITAL LETTER A..CIRCLED LATIN SMALL LETTER Z
 24EA          ; Circle # No       CIRCLED DIGIT ZERO
+3244..3247    ; Circle # So   [4] CIRCLED IDEOGRAPH QUESTION..CIRCLED IDEOGRAPH KOTO
 3251..325F    ; Circle # No  [15] CIRCLED NUMBER TWENTY ONE..CIRCLED NUMBER THIRTY FIVE
 3260..327E    ; Circle # So  [31] CIRCLED HANGUL KIYEOK..CIRCLED HANGUL IEUNG U
 3280..3289    ; Circle # No  [10] CIRCLED IDEOGRAPH ONE..CIRCLED IDEOGRAPH TEN
 328A..32B0    ; Circle # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF    ; Circle # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
 32D0..32FE    ; Circle # So  [47] CIRCLED KATAKANA A..CIRCLED KATAKANA WO
+1F12B..1F12E  ; Circle # So   [4] CIRCLED ITALIC LATIN CAPITAL LETTER C..CIRCLED WZ
 
-# Total code points: 230
+# Total code points: 238
 
 # ================================================
 
@@ -798,12 +806,12 @@ FEFB          ; Isolated # Lo       ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
 1D78          ; Super # Lm       MODIFIER LETTER CYRILLIC EN
 1D9B..1DBF    ; Super # Lm  [37] MODIFIER LETTER SMALL TURNED ALPHA..MODIFIER LETTER SMALL THETA
 2070          ; Super # No       SUPERSCRIPT ZERO
-2071          ; Super # L&       SUPERSCRIPT LATIN SMALL LETTER I
+2071          ; Super # Lm       SUPERSCRIPT LATIN SMALL LETTER I
 2074..2079    ; Super # No   [6] SUPERSCRIPT FOUR..SUPERSCRIPT NINE
 207A..207C    ; Super # Sm   [3] SUPERSCRIPT PLUS SIGN..SUPERSCRIPT EQUALS SIGN
 207D          ; Super # Ps       SUPERSCRIPT LEFT PARENTHESIS
 207E          ; Super # Pe       SUPERSCRIPT RIGHT PARENTHESIS
-207F          ; Super # L&       SUPERSCRIPT LATIN SMALL LETTER N
+207F          ; Super # Lm       SUPERSCRIPT LATIN SMALL LETTER N
 2120          ; Super # So       SERVICE MARK
 2122          ; Super # So       TRADE MARK SIGN
 2C7D          ; Super # Lm       MODIFIER LETTER CAPITAL V
@@ -946,14 +954,24 @@ FE6A..FE6B    ; Small # Po   [2] SMALL PERCENT SIGN..SMALL COMMERCIAL AT
 3300..3357    ; Square # So  [88] SQUARE APAATO..SQUARE WATTO
 3371..33DF    ; Square # So [111] SQUARE HPA..SQUARE A OVER M
 33FF          ; Square # So       SQUARE GAL
+1F131         ; Square # So       SQUARED LATIN CAPITAL LETTER B
+1F13D         ; Square # So       SQUARED LATIN CAPITAL LETTER N
+1F13F         ; Square # So       SQUARED LATIN CAPITAL LETTER P
+1F142         ; Square # So       SQUARED LATIN CAPITAL LETTER S
+1F146         ; Square # So       SQUARED LATIN CAPITAL LETTER W
+1F14A..1F14E  ; Square # So   [5] SQUARED HV..SQUARED PPV
+1F190         ; Square # So       SQUARE DJ
+1F200         ; Square # So       SQUARE HIRAGANA HOKA
+1F210..1F231  ; Square # So  [34] SQUARED CJK UNIFIED IDEOGRAPH-624B..SQUARED CJK UNIFIED IDEOGRAPH-6253
 
-# Total code points: 205
+# Total code points: 251
 
 # ================================================
 
 00BC..00BE    ; Fraction # No   [3] VULGAR FRACTION ONE QUARTER..VULGAR FRACTION THREE QUARTERS
-2153..215F    ; Fraction # No  [13] VULGAR FRACTION ONE THIRD..FRACTION NUMERATOR ONE
+2150..215F    ; Fraction # No  [16] VULGAR FRACTION ONE SEVENTH..FRACTION NUMERATOR ONE
+2189          ; Fraction # No       VULGAR FRACTION ZERO THIRDS
 
-# Total code points: 16
+# Total code points: 20
 
 # EOF
