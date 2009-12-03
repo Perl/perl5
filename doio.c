@@ -764,7 +764,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    do_close(gv,FALSE);
 		    continue;
 		}
-		if (*PL_inplace) {
+		if (*PL_inplace && strNE(PL_inplace, "*")) {
 		    const char *star = strchr(PL_inplace, '*');
 		    if (star) {
 			const char *begin = PL_inplace;
