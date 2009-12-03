@@ -3599,6 +3599,7 @@ lib/unicore/auxiliary/WordBreakProperty.txt	Unicode character database
 lib/unicore/BidiMirroring.txt			Unicode character database
 lib/unicore/Blocks.txt				Unicode character database
 lib/unicore/CaseFolding.txt			Unicode character database
+lib/unicore/CJKRadicals.txt			Unicode character database
 lib/unicore/CompositionExclusions.txt		Unicode character database
 lib/unicore/DAge.txt				Unicode character database
 lib/unicore/DCoreProperties.txt			Unicode character database
