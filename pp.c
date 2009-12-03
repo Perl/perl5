@@ -3527,6 +3527,7 @@ PP(pp_crypt)
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
+    return NORMAL;
 #endif
 }
 
