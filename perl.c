@@ -4024,7 +4024,7 @@ S_init_perllib(pTHX)
     const char *perl5lib = NULL;
 #endif
     const char *s;
-#ifdef WIN32
+#if defined(WIN32) && !defined(PERL_IS_MINIPERL)
     STRLEN len;
 #endif
 
