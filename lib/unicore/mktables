@@ -1806,7 +1806,7 @@ sub trace { return main::trace(@_); }
 
             # Here, the file exists
             if ($seen_non_extracted_non_age) {
-                if ($file =~ /$EXTRACTED/) {
+                if ($file =~ /$EXTRACTED/i) {
                     Carp::my_carp_bug(join_lines(<<END
 $file should be processed just after the 'Prop...Alias' files, and before
 anything not in the $EXTRACTED_DIR directory.  Proceeding, but the results may
@@ -1817,8 +1817,8 @@ END
             }
             elsif ($EXTRACTED_DIR
                     && $first_released{$addr} ne v0
-                    && $file !~ /$EXTRACTED/
-                    && $file ne 'DAge.txt')
+                    && $file !~ /$EXTRACTED/i
+                    && lc($file) ne 'dage.txt')
             {
                 # We don't set this (by the 'if' above) if we have no
                 # extracted directory, so if running on an early version,
@@ -1830,8 +1830,11 @@ END
             # isn't a file we are expecting.  As we process the files,
             # they are deleted from the hash, so any that remain at the
             # end of the program are files that we didn't process.
-            Carp::my_carp("Was not expecting '$file'.") if
-                    ! delete $potential_files{File::Spec->rel2abs($file)}
+            my $fkey = File::Spec->rel2abs($file);
+            my $expecting = delete $potential_files{$fkey};
+            $expecting = delete $potential_files{lc($fkey)} unless defined $expecting;
+            Carp::my_carp("Was not expecting '$file'.") if 
+                    ! $expecting                    
                     && ! defined $handle{$addr};
 
             # Open the file, converting the slashes used in this program
@@ -8919,7 +8922,7 @@ END
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $Perl_decomp = Property->new('Perl_Decomposition_Mapping',
-                                        Directory => '.',
+                                        Directory => File::Spec->curdir(),
                                         File => 'Decomposition',
                                         Format => $STRING_FORMAT,
                                         Internal_Only_Warning => 1,
@@ -10817,7 +10820,7 @@ sub compile_perl() {
     my $perl_charname = Property->new('Perl_Charnames',
                                 Core_Access => '\N{...} and charnames.pm',
                                 Default_Map => "",
-                                Directory => '.',
+                                Directory => File::Spec->curdir(),
                                 File => 'Name',
                                 Internal_Only_Warning => 1,
                                 Perl_Extension => 1,
@@ -10904,7 +10907,7 @@ END
                             Type => $ENUM,
                             Initialize => $ccc,
                             File => 'CombiningClass',
-                            Directory => '.',
+                            Directory => File::Spec->curdir(),
                             );
     $perl_ccc->set_to_output_map(1);
     $perl_ccc->add_comment(join_lines(<<END
@@ -13480,9 +13483,9 @@ File::Find::find({
     wanted=>sub {
         return unless /\.txt$/i;
         return if /Test\.txt$/i;
-        my $full = File::Spec->rel2abs($_);
+        my $full = lc(File::Spec->rel2abs($_));
         $potential_files{$full} = 1
-                        if ! grep { $full eq $_ } @ignored_files_full_names;
+                        if ! grep { $full eq lc($_) } @ignored_files_full_names;
         return;
     }
 }, File::Spec->curdir());
@@ -13526,9 +13529,9 @@ else {
 
             # The paths are stored with relative names, and with '/' as the
             # delimiter; convert to absolute on this machine
-            my $full = File::Spec->rel2abs(internal_file_to_platform($input));
+            my $full = lc(File::Spec->rel2abs(internal_file_to_platform($input)));
             $potential_files{$full} = 1
-                        if ! grep { $full eq $_ } @ignored_files_full_names;
+                        if ! grep { lc($full) eq lc($_) } @ignored_files_full_names;
         }
     }
 
@@ -13549,7 +13552,7 @@ if ($glob_list) {
 
     my @unknown_input_files;
     foreach my $file (keys %potential_files) {
-        next if grep { $file eq $_ } @known_files;
+        next if grep { lc($file) eq lc($_) } @known_files;
 
         # Here, the file is unknown to us.  Get relative path name
         $file = File::Spec->abs2rel($file);
@@ -13577,8 +13580,8 @@ if ($glob_list) {
             # $compare_versions is set.
             for (my $i = 0; $i < @input_file_objects; $i++) {
                 if ($input_file_objects[$i]->first_released ne v0
-                    && $input_file_objects[$i]->file ne 'DAge.txt'
-                    && $input_file_objects[$i]->file !~ /$EXTRACTED_DIR/)
+                    && lc($input_file_objects[$i]->file) ne 'dage.txt'
+                    && $input_file_objects[$i]->file !~ /$EXTRACTED_DIR/i)
                 {
                     splice @input_file_objects, $i, 0,
                                                     Input_file->new($file, v0);
