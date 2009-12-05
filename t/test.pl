@@ -738,9 +738,7 @@ sub fresh_perl_like {
     my($prog, $expected, $runperl_args, $name) = @_;
     local $Level = 2;
     _fresh_perl($prog,
-		sub { @_ ?
-			  $_[0] =~ (ref $expected ? $expected : /$expected/) :
-		          $expected },
+		sub { @_ ? $_[0] =~ $expected : $expected },
 		$runperl_args, $name);
 }
 
