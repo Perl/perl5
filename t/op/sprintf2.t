@@ -41,9 +41,9 @@ for my $i (1, 3, 5, 10) {
 }
 
 # Used to mangle PL_sv_undef
-fresh_perl_is(
+fresh_perl_like(
     'print sprintf "xxx%n\n"; print undef',
-    'Modification of a read-only value attempted at - line 1.',
+    'Modification of a read-only value attempted at - line 1\.',
     { switches => [ '-w' ] },
     q(%n should not be able to modify read-only constants),
 );
@@ -60,7 +60,7 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
 {
     my ($warn, $bad) = (0,0);
     local $SIG{__WARN__} = sub {
-	if ($_[0] =~ /uninitialized/) {
+	if ($_[0] =~ /missing argument/i) {
 	    $warn++
 	}
 	else {

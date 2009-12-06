@@ -2425,6 +2425,11 @@ ended earlier on the current line.
 (W syntax) An underscore (underbar) in a numeric constant did not
 separate two digits.
 
+=item Missing argument in %s
+
+(W uninitialized) A printf-type format required more arguments than were
+supplied.
+
 =item Missing argument to -%c
 
 (F) The argument to the indicated command line switch must follow
