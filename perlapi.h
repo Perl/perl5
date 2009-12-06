@@ -684,6 +684,26 @@ END_EXTERN_C
 #define PL_unlockhook		(*Perl_Iunlockhook_ptr(aTHX))
 #undef  PL_unsafe
 #define PL_unsafe		(*Perl_Iunsafe_ptr(aTHX))
+#undef  PL_utf8_X_L
+#define PL_utf8_X_L		(*Perl_Iutf8_X_L_ptr(aTHX))
+#undef  PL_utf8_X_LV
+#define PL_utf8_X_LV		(*Perl_Iutf8_X_LV_ptr(aTHX))
+#undef  PL_utf8_X_LVT
+#define PL_utf8_X_LVT		(*Perl_Iutf8_X_LVT_ptr(aTHX))
+#undef  PL_utf8_X_LV_LVT_V
+#define PL_utf8_X_LV_LVT_V	(*Perl_Iutf8_X_LV_LVT_V_ptr(aTHX))
+#undef  PL_utf8_X_T
+#define PL_utf8_X_T		(*Perl_Iutf8_X_T_ptr(aTHX))
+#undef  PL_utf8_X_V
+#define PL_utf8_X_V		(*Perl_Iutf8_X_V_ptr(aTHX))
+#undef  PL_utf8_X_begin
+#define PL_utf8_X_begin		(*Perl_Iutf8_X_begin_ptr(aTHX))
+#undef  PL_utf8_X_extend
+#define PL_utf8_X_extend	(*Perl_Iutf8_X_extend_ptr(aTHX))
+#undef  PL_utf8_X_non_hangul
+#define PL_utf8_X_non_hangul	(*Perl_Iutf8_X_non_hangul_ptr(aTHX))
+#undef  PL_utf8_X_prepend
+#define PL_utf8_X_prepend	(*Perl_Iutf8_X_prepend_ptr(aTHX))
 #undef  PL_utf8_alnum
 #define PL_utf8_alnum		(*Perl_Iutf8_alnum_ptr(aTHX))
 #undef  PL_utf8_alpha

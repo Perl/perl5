@@ -38,6 +38,12 @@ Perl is shipped with the latest Unicode version, 5.2, October 2009.  See
 L<http://www.unicode.org/versions/Unicode5.2.0> for details about this release
 of Unicode.
 
+But, an installation can now fairly easily change Perl to operate on any
+Unicode release.  Perl is shipped with the latest official release, but
+an installation can download and install any prior release from Unicode, and
+cause Perl to work with that (or even multiple releases).  Instructions are in
+L<perlunicode>.
+
 =head2 Unicode properties
 
 Perl can now handle every Unicode character property.  A new pod,
@@ -57,6 +63,15 @@ underscores between digits of numbers.
 
 All the Unicode-defined synonyms for properties and property values are
 now accepted.
+
+C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
+better with various Asian languages.  It now is defined as an C<extended
+grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).  One change
+due to this is that C<\X> will match the whole sequence C<S<CR LF>>.  Another
+change is that C<\X> will match an isolated mark.  Marks generally come after a
+base character, but it is possible in Unicode to have them in isolation, and
+C<\X> will now handle that case.  Otherwise, this change should be transparent
+for the non-affected languages.
 
 C<\p{...}> matches using the Canonical_Combining_Class property were
 completely broken in previous Perls.  This is now fixed.
@@ -119,11 +134,6 @@ warnings are enabled.  The properties are: Other_Alphabetic,
 Other_Default_Ignorable_Code_Point, Other_Grapheme_Extend,
 Other_ID_Continue, Other_ID_Start, Other_Lowercase, Other_Math, and
 Other_Uppercase.
-
-An installation can now fairly easily change Perl to operate on any
-Unicode release.  Perl is shipped with the latest official release, but
-an installation can now download any prior release, and Perl will work
-with that.  Instructions are in L<perlunicode>.
 
 An installation can now fairly easily change which Unicode properties
 Perl understands.  As mentioned above, certain properties are by default
