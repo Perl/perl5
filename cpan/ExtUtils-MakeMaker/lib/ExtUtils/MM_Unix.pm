@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.55_02';
+$VERSION = '6.55_03';
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -2611,6 +2611,10 @@ It will return the string "undef" if it can't figure out what $VERSION
 is. $VERSION should be for all to see, so C<our $VERSION> or plain $VERSION
 are okay, but C<my $VERSION> is not.
 
+C<<package Foo VERSION>> is also checked for.  The first version
+declaration found is used, but this may change as it differs from how
+Perl does it.
+
 parse_version() will try to C<use version> before checking for
 C<$VERSION> so the following will work.
 
@@ -2631,29 +2635,37 @@ sub parse_version {
         next if $inpod || /^\s*#/;
         chop;
         next if /^\s*(if|unless)/;
-        next unless m{(?<!\\) ([\$*]) (([\w\:\']*) \bVERSION)\b .* =}x;
-        my $eval = qq{
-            package ExtUtils::MakeMaker::_version;
-            no strict;
-            BEGIN { eval {
-                # Ensure any version() routine which might have leaked
-                # into this package has been deleted.  Interferes with
-                # version->import()
-                undef *version;
-                require version;
-                "version"->import;
-            } }
+        if ( m{^ \s* package \s+ \w[\w\:\']* \s+ (v?[0-9._]+) \s* ;  }x ) {
+            local $^W = 0;
+            $result = $1;
+        }
+        elsif ( m{(?<!\\) ([\$*]) (([\w\:\']*) \bVERSION)\b .* =}x ) {
+            my $eval = qq{
+                package ExtUtils::MakeMaker::_version;
+                no strict;
+                BEGIN { eval {
+                    # Ensure any version() routine which might have leaked
+                    # into this package has been deleted.  Interferes with
+                    # version->import()
+                    undef *version;
+                    require version;
+                    "version"->import;
+                } }
 
-            local $1$2;
-            \$$2=undef;
-            do {
-                $_
+                local $1$2;
+                \$$2=undef;
+                do {
+                    $_
+                };
+                \$$2;
             };
-            \$$2;
-        };
-        local $^W = 0;
-        $result = eval($eval);  ## no critic
-        warn "Could not eval '$eval' in $parsefile: $@" if $@;
+            local $^W = 0;
+            $result = eval($eval);  ## no critic
+            warn "Could not eval '$eval' in $parsefile: $@" if $@;
+        }
+        else {
+          next;
+        }
         last if defined $result;
     }
     close $fh;

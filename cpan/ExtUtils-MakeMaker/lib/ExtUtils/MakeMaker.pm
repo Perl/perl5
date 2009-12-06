@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.55_02';
+our $VERSION = '6.55_03';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -747,16 +747,17 @@ sub _MakeMaker_Parameters_section {
 #   MakeMaker Parameters:
 END
 
-    # CPAN.pm takes prereqs from this field in 'Makefile'
-    # and does not know about BUILD_REQUIRES
-    if( $att->{PREREQ_PM} || $att->{BUILD_REQUIRES} ) {
-        %{$att->{'PREREQ_PM'}} = (%{$att->{'PREREQ_PM'}||{}}, %{$att->{'BUILD_REQUIRES'}||{}});
-    }
-
     foreach my $key (sort keys %$att){
         next if $key eq 'ARGS';
+        my ($v) = neatvalue($att->{$key});
+        if ($key eq 'PREREQ_PM') {
+            # CPAN.pm takes prereqs from this field in 'Makefile'
+            # and does not know about BUILD_REQUIRES
+            $v = neatvalue({ %{ $att->{PREREQ_PM} || {} }, %{ $att->{BUILD_REQUIRES} || {} } });
+        } else {
+            $v = neatvalue($att->{$key});
+        }
 
-        my($v) = neatvalue($att->{$key});
         $v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
         $v =~ tr/\n/ /s;
         push @result, "#     $key => $v";
@@ -1531,7 +1532,7 @@ to run your distribution.
 
 This will go into the C<configure_requires> field of your F<META.yml>.
 
-Defaults to C<{ "ExtUtils::MakeMaker" => 0 }>
+Defaults to C<<< { "ExtUtils::MakeMaker" => 0 } >>>
 
 The format is the same as PREREQ_PM.
 
@@ -2342,19 +2343,16 @@ Instead of specifying the VERSION in the Makefile.PL you can let
 MakeMaker parse a file to determine the version number. The parsing
 routine requires that the file named by VERSION_FROM contains one
 single line to compute the version number. The first line in the file
-that contains the regular expression
+that contains something like a $VERSION assignment or C<package Name
+VERSION> will be used. The following lines will be parsed o.k.:
 
-    /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/
-
-will be evaluated with eval() and the value of the named variable
-B<after> the eval() will be assigned to the VERSION attribute of the
-MakeMaker object. The following lines will be parsed o.k.:
-
-    $VERSION   = '1.00';
-    *VERSION   = \'1.01';
-    ($VERSION) = q$Revision$ =~ /(\d+)/g;
-    $FOO::VERSION = '1.10';
-    *FOO::VERSION = \'1.11';
+    # Good
+    package Foo::Bar 1.23;                      # 1.23
+    $VERSION   = '1.00';                        # 1.00
+    *VERSION   = \'1.01';                       # 1.01
+    ($VERSION) = q$Revision$ =~ /(\d+)/g;       # The digits in $Revision$
+    $FOO::VERSION = '1.10';                     # 1.10
+    *FOO::VERSION = \'1.11';                    # 1.11
 
 but these will fail:
 
