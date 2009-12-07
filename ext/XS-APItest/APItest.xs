@@ -15,6 +15,8 @@ typedef struct {
     SV *sv;
     GV *cscgv;
     AV *cscav;
+    AV *bhkav;
+    bool bhk_record;
 } my_cxt_t;
 
 START_MY_CXT
@@ -245,7 +247,7 @@ rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
 STATIC MGVTBL rmagical_b = { 0 };
 
 STATIC void
-blockhook_start(pTHX_ int full)
+blockhook_csc_start(pTHX_ int full)
 {
     dMY_CXT;
     AV *const cur = GvAV(MY_CXT.cscgv);
@@ -265,7 +267,7 @@ blockhook_start(pTHX_ int full)
 }
 
 STATIC void
-blockhook_pre_end(pTHX_ OP **o)
+blockhook_csc_pre_end(pTHX_ OP **o)
 {
     dMY_CXT;
 
@@ -276,6 +278,54 @@ blockhook_pre_end(pTHX_ OP **o)
     }
 
 }
+
+STATIC void
+blockhook_test_start(pTHX_ int full)
+{
+    dMY_CXT;
+    AV *av;
+    
+    if (MY_CXT.bhk_record) {
+        av = newAV();
+        av_push(av, newSVpvs("start"));
+        av_push(av, newSViv(full));
+        av_push(MY_CXT.bhkav, newRV_noinc(MUTABLE_SV(av)));
+    }
+}
+
+STATIC void
+blockhook_test_pre_end(pTHX_ OP **o)
+{
+    dMY_CXT;
+
+    if (MY_CXT.bhk_record)
+        av_push(MY_CXT.bhkav, newSVpvs("pre_end"));
+}
+
+STATIC void
+blockhook_test_post_end(pTHX_ OP **o)
+{
+    dMY_CXT;
+
+    if (MY_CXT.bhk_record)
+        av_push(MY_CXT.bhkav, newSVpvs("post_end"));
+}
+
+STATIC void
+blockhook_test_eval(pTHX_ OP *const o)
+{
+    dMY_CXT;
+    AV *av;
+
+    if (MY_CXT.bhk_record) {
+        av = newAV();
+        av_push(av, newSVpvs("eval"));
+        av_push(av, newSVpv(OP_NAME(o), 0));
+        av_push(MY_CXT.bhkav, newRV_noinc(MUTABLE_SV(av)));
+    }
+}
+
+STATIC BHK bhk_csc, bhk_test;
 
 #include "const-c.inc"
 
@@ -629,19 +679,27 @@ PROTOTYPES: DISABLE
 
 BOOT:
 {
-    BHK *bhk;
     MY_CXT_INIT;
 
     MY_CXT.i  = 99;
     MY_CXT.sv = newSVpv("initial",0);
+
+    MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
+    MY_CXT.bhk_record = 0;
+
+    BhkENTRY_set(&bhk_test, start, blockhook_test_start);
+    BhkENTRY_set(&bhk_test, pre_end, blockhook_test_pre_end);
+    BhkENTRY_set(&bhk_test, post_end, blockhook_test_post_end);
+    BhkENTRY_set(&bhk_test, eval, blockhook_test_eval);
+    Perl_blockhook_register(aTHX_ &bhk_test);
+
     MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
-        GV_ADD, SVt_PVAV);
+        GV_ADDMULTI, SVt_PVAV);
     MY_CXT.cscav = GvAV(MY_CXT.cscgv);
 
-    Newxz(bhk, 1, BHK);
-    BhkENTRY_set(bhk, start, blockhook_start);
-    BhkENTRY_set(bhk, pre_end, blockhook_pre_end);
-    Perl_blockhook_register(aTHX_ bhk);
+    BhkENTRY_set(&bhk_csc, start, blockhook_csc_start);
+    BhkENTRY_set(&bhk_csc, pre_end, blockhook_csc_pre_end);
+    Perl_blockhook_register(aTHX_ &bhk_csc);
 }                              
 
 void
@@ -650,8 +708,10 @@ CLONE(...)
     MY_CXT_CLONE;
     MY_CXT.sv = newSVpv("initial_clone",0);
     MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
-        GV_ADD, SVt_PVAV);
+        GV_ADDMULTI, SVt_PVAV);
     MY_CXT.cscav = NULL;
+    MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
+    MY_CXT.bhk_record = 0;
 
 void
 print_double(val)
@@ -1022,3 +1082,11 @@ sv_count()
 	    RETVAL = PL_sv_count;
 	OUTPUT:
 	    RETVAL
+
+void
+bhk_record(bool on)
+    CODE:
+        dMY_CXT;
+        MY_CXT.bhk_record = on;
+        if (on)
+            av_clear(MY_CXT.bhkav);

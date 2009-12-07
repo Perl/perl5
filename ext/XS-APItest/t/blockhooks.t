@@ -1,98 +1,286 @@
-#!./perl
+#!/usr/bin/perl
 
-# Tests for @{^COMPILE_SCOPE_CONTAINER}
-
-use strict;
 use warnings;
-use Test::More tests => 12;
+use strict;
+use Test::More tests => 17;
+
 use XS::APItest;
+use t::BHK ();      # make sure it gets compiled early
 
-BEGIN { 
-    # this has to be a full glob alias, since the GvAV gets replaced
-    *COMPILE_SCOPE_CONTAINER = \*XS::APItest::COMPILE_SCOPE_CONTAINER;
+BEGIN { package XS::APItest; *main::bhkav = \@XS::APItest::bhkav }
+
+# 'use t::BHK' switches on recording hooks, and clears @bhkav.
+# 'no t::BHK' switches recording off again.
+# 'use t::BHK push => "foo"' pushes onto @bhkav
+
+BEGIN { diag "## COMPILE TIME ##" }
+diag "## RUN TIME ##";
+
+use t::BHK;
+    1;
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav, [], "no blocks" }
+
+use t::BHK;
+    {
+        1;
+    }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav, 
+    [[start => 1], qw/pre_end post_end/], 
+    "plain block";
 }
-our @COMPILE_SCOPE_CONTAINER;
 
-my %destroyed;
+use t::BHK;
+    if (1) { 1 }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],
+        [start => 0],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ], 
+    "if block";
+}
+
+use t::BHK;
+    for (1) { 1 }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],
+        [start => 0],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ],
+    "for loop";
+}
+
+use t::BHK;
+    {
+        { 1; }
+    }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],
+        [start => 1],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ],
+    "nested blocks";
+}
+
+use t::BHK;
+    use t::BHK push => "before";
+    {
+        use t::BHK push => "inside";
+    }
+    use t::BHK push => "after";
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        "before",
+        [start => 1],
+        "inside",
+        qw/pre_end post_end/,
+        "after"
+    ],
+    "hooks called in the correct places";
+}
+
+use t::BHK;
+    BEGIN { 1 }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],
+        qw/pre_end post_end/,
+    ],
+    "BEGIN block";
+}
+
+use t::BHK; t::BHK->import;
+    eval "1";
+no t::BHK; t::BHK->unimport;
+
+BEGIN { is_deeply \@bhkav, [], "string eval (compile)" }
+is_deeply \@bhkav, 
+    [
+        [eval => "entereval"],
+        [start => 1],
+        qw/pre_end post_end/,
+    ], 
+    "string eval (run)";
+
+delete @INC{qw{t/Null.pm t/Block.pm}};
+
+t::BHK->import;
+    do "t/Null.pm";
+t::BHK->unimport;
+
+is_deeply \@bhkav,
+    [
+        [eval => "dofile"],
+        [start => 1],
+        qw/pre_end post_end/,
+    ],
+    "do file (null)";
+
+t::BHK->import;
+    do "t/Block.pm";
+t::BHK->unimport;
+
+is_deeply \@bhkav,
+    [
+        [eval => "dofile"],
+        [start => 1],
+        [start => 1],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ],
+    "do file (single block)";
+
+delete @INC{qw{t/Null.pm t/Block.pm}};
+
+t::BHK->import;
+    require t::Null;
+t::BHK->unimport;
+
+is_deeply \@bhkav,
+    [
+        [eval => "require"],
+        [start => 1],
+        qw/pre_end post_end/,
+    ],
+    "require (null)";
+
+t::BHK->import;
+    require t::Block;
+t::BHK->unimport;
+
+is_deeply \@bhkav,
+    [
+        [eval => "require"],
+        [start => 1],
+        [start => 1],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ],
+    "require (single block)";
+
+BEGIN { delete $INC{"t/Block.pm"} }
+
+use t::BHK;
+    use t::Block;
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [eval => "require"],
+        [start => 1],
+        [start => 1],
+        qw/pre_end post_end/,
+        qw/pre_end post_end/,
+    ],
+    "use (single block)";
+}
+
+BEGIN { delete $INC{"t/Markers.pm"} }
+
+use t::BHK;
+    use t::BHK push => "compile/main/before";
+    use t::Markers;
+    use t::BHK push => "compile/main/after";
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        "compile/main/before",
+        [eval => "require"],
+        [start => 1],
+            "compile/pm/before",
+            [start => 1],
+                "compile/pm/inside",
+            qw/pre_end post_end/,
+            "compile/pm/after",
+        qw/pre_end post_end/,
+        "run/pm",
+        "run/import",
+        "compile/main/after",
+    ],
+    "use with markers";
+}
+
+# OK, now some *really* evil stuff...
 
 BEGIN {
-    package CounterObject;
+    package EvalDestroy;
 
-    sub new {
-        my ($class, $name) = @_;
-        return bless { name => $name }, $class;
-    }
-
-    sub name {
-        my ($self) = @_;
-        return $self->{name};
-    }
-
-    sub DESTROY {
-        my ($self) = @_;
-        $destroyed{ $self->name }++;
-    }
-
-
-    package ReplaceCounter;
-    $INC{'ReplaceCounter.pm'} = __FILE__;
-
-    sub import {
-        my ($self, $counter) = @_;
-        $COMPILE_SCOPE_CONTAINER[-1] = CounterObject->new($counter);
-    }
-
-    package InstallCounter;
-    $INC{'InstallCounter.pm'} = __FILE__;
-
-    sub import {
-        my ($class, $counter) = @_;
-        push @COMPILE_SCOPE_CONTAINER, CounterObject->new($counter);
-    }
-
-    package TestCounter;
-    $INC{'TestCounter.pm'} = __FILE__;
-
-    sub import {
-        my ($class, $counter, $number, $message) = @_;
-
-        $number = 1
-            unless defined $number;
-        $message = "counter $counter is found $number times"
-            unless defined $message;
-
-        ::is scalar(grep { $_->name eq $counter } @{COMPILE_SCOPE_CONTAINER}),
-            $number,
-            $message;
-    }
+    sub DESTROY { $_[0]->() }
 }
 
-{
-    use InstallCounter 'root';
-    use InstallCounter '3rd-party';
-
+use t::BHK;
     {
-        BEGIN { ok(!keys %destroyed, 'nothing destroyed yet'); }
-
-        use ReplaceCounter 'replace';
-
-        BEGIN { ok(!keys %destroyed, 'nothing destroyed yet'); }
-
-        use TestCounter '3rd-party', 0, '3rd-party no longer visible';
-        use TestCounter 'replace',   1, 'replacement now visible';
-        use TestCounter 'root';
-
-        BEGIN { ok(!keys %destroyed, 'nothing destroyed yet'); }
+        BEGIN {
+            # grumbleSCOPECHECKgrumble
+            push @XS::APItest::COMPILE_SCOPE_CONTAINER, 
+                bless sub {
+                    push @bhkav, "DESTROY";
+                }, "EvalDestroy";
+        }
+        1;
     }
+no t::BHK;
 
-    BEGIN {
-        ok $destroyed{replace}, 'replacement has been destroyed after end of outer scope';
-    }
-
-    use TestCounter 'root',     1, 'root visible again';
-    use TestCounter 'replace',  0, 'lower replacement no longer visible';
-    use TestCounter '3rd-party';
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],                   # block
+            [start => 1],               # BEGIN
+                [start => 1],           # sub
+                qw/pre_end post_end/,
+            qw/pre_end post_end/,
+        "pre_end",
+            "DESTROY", 
+        "post_end",
+    ],
+    "compile-time DESTROY comes between pre_ and post_end";
 }
 
-ok $destroyed{ $_ }, "$_ has been destroyed after end of outer scope"
-    for 'root', '3rd-party';
+use t::BHK;
+    {
+        BEGIN { 
+            push @XS::APItest::COMPILE_SCOPE_CONTAINER, 
+                bless sub {
+                    eval "{1}";
+                }, "EvalDestroy";
+        }
+        1;
+    }
+no t::BHK;
+
+BEGIN { is_deeply \@bhkav,
+    [
+        [start => 1],                   # block
+            [start => 1],               # BEGIN
+                [start => 1],           # sub
+                qw/pre_end post_end/,
+            qw/pre_end post_end/,
+        "pre_end",
+            [eval => "entereval"],
+            [start => 1],               # eval
+                [start => 1],           # block inside eval
+                qw/pre_end post_end/,
+            qw/pre_end post_end/,
+        "post_end",
+    ],
+    "evil eval-in-DESTROY tricks";
+}
