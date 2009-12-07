@@ -56,6 +56,7 @@ Perl_av_unshift
 Perl_av_arylen_p
 Perl_av_iter_p
 Perl_block_gimme
+Perl_blockhook_register
 Perl_call_list
 Perl_cast_ulong
 Perl_cast_i32

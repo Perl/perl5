@@ -214,6 +214,7 @@ pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
 ApR	|I32	|block_gimme
 : Used in perly.y
 pR	|int	|block_start	|int full
+Aop	|void	|blockhook_register |NN BHK *hk
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
 : Used in perl.c

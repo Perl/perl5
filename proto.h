@@ -289,6 +289,11 @@ PERL_CALLCONV I32	Perl_block_gimme(pTHX)
 PERL_CALLCONV int	Perl_block_start(pTHX_ int full)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV void	Perl_blockhook_register(pTHX_ BHK *hk)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_BLOCKHOOK_REGISTER	\
+	assert(hk)
+
 PERL_CALLCONV void	Perl_boot_core_UNIVERSAL(pTHX);
 PERL_CALLCONV void	Perl_boot_core_PerlIO(pTHX);
 PERL_CALLCONV void	Perl_call_list(pTHX_ I32 oldscope, AV *paramList)

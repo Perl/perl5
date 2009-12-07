@@ -84,6 +84,8 @@
 #define block_gimme		Perl_block_gimme
 #ifdef PERL_CORE
 #define block_start		Perl_block_start
+#endif
+#ifdef PERL_CORE
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define boot_core_PerlIO	Perl_boot_core_PerlIO
 #endif
@@ -2531,6 +2533,8 @@
 #define block_gimme()		Perl_block_gimme(aTHX)
 #ifdef PERL_CORE
 #define block_start(a)		Perl_block_start(aTHX_ a)
+#endif
+#ifdef PERL_CORE
 #define boot_core_UNIVERSAL()	Perl_boot_core_UNIVERSAL(aTHX)
 #define boot_core_PerlIO()	Perl_boot_core_PerlIO(aTHX)
 #endif

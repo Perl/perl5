@@ -641,10 +641,7 @@ BOOT:
     Newxz(bhk, 1, BHK);
     BhkENTRY_set(bhk, start, blockhook_start);
     BhkENTRY_set(bhk, pre_end, blockhook_pre_end);
-
-    if (!PL_blockhooks)
-        PL_blockhooks = newAV();
-    av_push(PL_blockhooks, newSViv(PTR2IV(bhk))); 
+    Perl_blockhook_register(aTHX_ bhk);
 }                              
 
 void

@@ -2343,6 +2343,14 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     return retval;
 }
 
+void
+Perl_blockhook_register(pTHX_ BHK *hk)
+{
+    PERL_ARGS_ASSERT_BLOCKHOOK_REGISTER;
+
+    Perl_av_create_and_push(aTHX_ &PL_blockhooks, newSViv(PTR2IV(hk)));
+}
+
 STATIC OP *
 S_newDEFSVOP(pTHX)
 {
