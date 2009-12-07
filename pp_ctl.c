@@ -4321,7 +4321,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
 		    if (!this_elem || !other_elem) {
-			if (this_elem || other_elem)
+			if ((this_elem && SvOK(*this_elem))
+				|| (other_elem && SvOK(*other_elem)))
 			    RETPUSHNO;
 		    }
 		    else if (hv_exists_ent(seen_this,

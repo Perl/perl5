@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 128;
+plan tests => 132;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -1023,6 +1023,13 @@ GIVEN5:
     }
     is($flag, 1, "goto inside given and when to the given stmt");
 }
+
+# test with unreified @_ in smart match [perl #71078]
+sub unreified_check { ok([@_] ~~ \@_) } # should always match
+unreified_check(1,2,"lala");
+unreified_check(1,2,undef);
+unreified_check(undef);
+unreified_check(undef,"");
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t
