@@ -9168,7 +9168,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  */
 #define WARN_MISSING WARN_UNINITIALIZED /* Not sure we want a new category */
 STATIC SV*
-S_vcatpvfn_missing_argument(pTHX_) {
+S_vcatpvfn_missing_argument(pTHX) {
     if (ckWARN(WARN_MISSING)) {
 	Perl_warner(aTHX_ packWARN(WARN_MISSING), "Missing argument in %s",
 		PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
@@ -9542,10 +9542,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		    vecsv = va_arg(*args, SV*);
 		else if (evix) {
 		    vecsv = (evix > 0 && evix <= svmax)
-			? svargs[evix-1] : S_vcatpvfn_missing_argument();
+			? svargs[evix-1] : S_vcatpvfn_missing_argument(aTHX);
 		} else {
 		    vecsv = svix < svmax
-			? svargs[svix++] : S_vcatpvfn_missing_argument();
+			? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
 		}
 		dotstr = SvPV_const(vecsv, dotstrlen);
 		/* Keep the DO_UTF8 test *after* the SvPV call, else things go
@@ -9693,10 +9693,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    if (efix) {
 		const I32 i = efix-1;
 		argsv = (i >= 0 && i < svmax)
-		    ? svargs[i] : S_vcatpvfn_missing_argument();
+		    ? svargs[i] : S_vcatpvfn_missing_argument(aTHX);
 	    } else {
 		argsv = (svix >= 0 && svix < svmax)
-		    ? svargs[svix++] : S_vcatpvfn_missing_argument();
+		    ? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
 	    }
 	}
 
