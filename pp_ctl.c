@@ -4313,7 +4313,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    (void) sv_2mortal(MUTABLE_SV(seen_this));
 		}
 		if (NULL == seen_other) {
-		    seen_this = newHV();
+		    seen_other = newHV();
 		    (void) sv_2mortal(MUTABLE_SV(seen_other));
 		}
 		for(i = 0; i <= other_len; ++i) {
