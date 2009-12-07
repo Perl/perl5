@@ -293,6 +293,8 @@ by the most recent "=over" command.  It permits no text after the
 
 =item "=begin formatname"
 
+=item "=begin formatname parameter"
+
 This marks the following paragraphs (until the matching "=end
 formatname") as being for some special kind of processing.  Unless
 "formatname" begins with a colon, the contained non-command
@@ -302,9 +304,11 @@ or data paragraphs.  This is discussed in detail in the section
 L</About Data Paragraphs and "=beginE<sol>=end" Regions>.
 
 It is advised that formatnames match the regexp
-C<m/\A:?[-a-zA-Z0-9_]+\z/>.  Implementors should anticipate future
-expansion in the semantics and syntax of the first parameter
-to "=begin"/"=end"/"=for".
+C<m/\A:?[−a−zA−Z0−9_]+\z/>.  Everything following whitespace after the
+formatname is a parameter that may be used by the formatter when dealing
+with this region.  This parameter must not be repeated in the "=end"
+paragraph.  Implementors should anticipate future expansion in the
+semantics and syntax of the first parameter to "=begin"/"=end"/"=for".
 
 =item "=end formatname"
 
