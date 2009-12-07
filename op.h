@@ -646,10 +646,28 @@ struct loop {
 #endif
 
 struct block_hooks {
+    U32	    bhk_flags;
     void    (*bhk_start)	(pTHX_ int full);
     void    (*bhk_pre_end)	(pTHX_ OP **seq);
     void    (*bhk_post_end)	(pTHX_ OP **seq);
+    void    (*bhk_eval)		(pTHX_ OP *const saveop);
 };
+
+#define BhkFLAGS(hk)		((hk)->bhk_flags)
+
+#define BHKf_start	    0x01
+#define BHKf_pre_end	    0x02
+#define BHKf_post_end	    0x04
+#define BHKf_eval	    0x08
+
+#define BhkENTRY(hk, which) \
+    ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->bhk_ ## which) : NULL)
+
+#define BhkENTRY_set(hk, which, ptr) \
+    STMT_START { \
+	(hk)->bhk_ ## which = ptr; \
+	(hk)->bhk_flags |= BHKf_ ## which; \
+    } STMT_END
 
 #define CALL_BLOCK_HOOKS(which, arg) \
     STMT_START { \
@@ -657,16 +675,16 @@ struct block_hooks {
 	    I32 i; \
 	    for (i = av_len(PL_blockhooks); i >= 0; i--) { \
 		SV *sv = AvARRAY(PL_blockhooks)[i]; \
-		struct block_hooks *hk;	\
+		BHK *hk; \
 		\
 		assert(SvIOK(sv)); \
 		if (SvUOK(sv)) \
-		    hk = INT2PTR(struct block_hooks *, SvUVX(sv)); \
+		    hk = INT2PTR(BHK *, SvUVX(sv)); \
 		else \
-		    hk = INT2PTR(struct block_hooks *, SvIVX(sv)); \
+		    hk = INT2PTR(BHK *, SvIVX(sv)); \
 		\
-		if (hk->bhk_ ## which) \
-		    CALL_FPTR(hk->bhk_ ## which)(aTHX_ arg); \
+		if (BhkENTRY(hk, which)) \
+		    CALL_FPTR(BhkENTRY(hk, which))(aTHX_ arg); \
 	    } \
 	} \
     } STMT_END
