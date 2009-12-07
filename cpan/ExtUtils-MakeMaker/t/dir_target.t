@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
 
-BEGIN {
-    unshift @INC, 't/lib/';
-}
+use lib 't/lib';
 chdir 't';
 
 use Test::More tests => 1;

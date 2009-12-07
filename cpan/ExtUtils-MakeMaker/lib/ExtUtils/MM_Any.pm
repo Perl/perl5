@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.55_02';
+our $VERSION = '6.55_03';
 
 use Carp;
 use File::Spec;
@@ -2279,6 +2279,8 @@ sub _PREREQ_PRINT {
 Implements PRINT_PREREQ, a slightly different version of PREREQ_PRINT
 added by Redhat to, I think, support generating RPMs from Perl modules.
 
+Should not include BUILD_REQUIRES as RPMs do not incluide them.
+
 Refactored out of MakeMaker->new().
 
 =end private
@@ -2288,7 +2290,7 @@ Refactored out of MakeMaker->new().
 sub _PRINT_PREREQ {
     my $self = shift;
 
-    my $prereqs= $self->_all_prereqs;
+    my $prereqs= $self->{PREREQ_PM};
     my @prereq = map { [$_, $prereqs->{$_}] } keys %$prereqs;
 
     if ( $self->{MIN_PERL_VERSION} ) {
