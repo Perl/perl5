@@ -777,13 +777,13 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
 
 # Sorting shouldn't increase the refcount of a sub
 {
-    sub foo {(1+$a) <=> (1+$b)}
-    my $refcnt = &Internals::SvREFCNT(\&foo);
-    @output = sort foo 3,7,9;
+    sub sportello {(1+$a) <=> (1+$b)}
+    my $refcnt = &Internals::SvREFCNT(\&sportello);
+    @output = sort sportello 3,7,9;
 
     {
-        package Foo;
-        ::is($refcnt, &Internals::SvREFCNT(\&foo), "sort sub refcnt");
+        package Doc;
+        ::is($refcnt, &Internals::SvREFCNT(\&::sportello), "sort sub refcnt");
         $fail_msg = q(Modification of a read-only value attempted);
         # Sorting a read-only array in-place shouldn't be allowed
         my @readonly = (1..10);
