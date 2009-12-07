@@ -1340,15 +1340,16 @@ given C<LE<lt>fooE<gt>> code.
 
 =item *
 
-Previous versions of perlpod allowed for a C<LE<lt>sectionE<gt>> syntax
-(as in C<LE<lt>Object AttributesE<gt>>), which was not easily distinguishable
-from C<LE<lt>nameE<gt>> syntax.  This syntax is no longer in the
-specification, and has been replaced by the C<LE<lt>"section"E<gt>> syntax
-(where the quotes were formerly optional).  Pod parsers should tolerate
-the C<LE<lt>sectionE<gt>> syntax, for a while at least.  The suggested
-heuristic for distinguishing C<LE<lt>sectionE<gt>> from C<LE<lt>nameE<gt>>
-is that if it contains any whitespace, it's a I<section>.  Pod processors
-may warn about this being deprecated syntax.
+Previous versions of perlpod allowed for a C<LE<lt>sectionE<gt>> syntax (as in
+C<LE<lt>Object AttributesE<gt>>), which was not easily distinguishable from
+C<LE<lt>nameE<gt>> syntax and for C<LE<lt>"section"E<gt>> which was only
+slightly less ambiguous.  This syntax is no longer in the specification, and
+has been replaced by the C<LE<lt>/sectionE<gt>> syntax (where the slash was
+formerly optional).  Pod parsers should tolerate the C<LE<lt>"section"E<gt>>
+syntax, for a while at least.  The suggested heuristic for distinguishing
+C<LE<lt>sectionE<gt>> from C<LE<lt>nameE<gt>> is that if it contains any
+whitespace, it's a I<section>.  Pod processors should warn about this being
+deprecated syntax.
 
 =back
 
