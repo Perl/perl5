@@ -18,8 +18,8 @@ my @empty;
 my %empty;
 my @sparse; $sparse[2] = 2;
 
-my $deep1 = []; push @$deep1, \$deep1;
-my $deep2 = []; push @$deep2, \$deep2;
+my $deep1 = []; push @$deep1, $deep1;
+my $deep2 = []; push @$deep2, $deep2;
 
 my @nums = (1..10);
 tie my @tied_nums, 'Tie::StdArray';
