@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 147 );
+plan( tests => 148 );
 
 # these shouldn't hang
 {
@@ -701,8 +701,8 @@ $fail_msg = q(Can't undef active subroutine);
 cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'undef active subr');
 
 
-
-{
+for(1,2) # We run this twice, to make sure sort does not lower the ref
+{        # count. See bug 71076.
     my $failed = 0;
 
     sub rec {

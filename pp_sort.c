@@ -1652,6 +1652,11 @@ PP(pp_sort)
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
+		/* If our comparison routine is already active (CvDEPTH is
+		 * is not 0),  then PUSHSUB does not increase the refcount,
+		 * so we have to do it ourselves, because the LEAVESUB fur-
+		 * ther down lowers it. */
+		if (CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);
 		PUSHSUB(cx);
 		if (!is_xsub) {
 		    AV* const padlist = CvPADLIST(cv);
