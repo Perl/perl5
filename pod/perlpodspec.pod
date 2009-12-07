@@ -1208,6 +1208,14 @@ For example:
         'url',                          # what sort of link
         "http://www.perl.org/"          # original content
 
+  L<Perl.org|http://www.perl.org/>
+    =>  "Perl.org",                     # link text
+        "http://www.perl.org/",         # possibly inferred link text
+        "http://www.perl.org/",         # name
+        undef,                          # section
+        'url',                          # what sort of link
+        "Perl.org|http://www.perl.org/" # original content
+
 Note that you can distinguish URL-links from anything else by the
 fact that they match C<m/\A\w+:[^:\s]\S*\z/>.  So
 C<LE<lt>http://www.perl.comE<gt>> is a URL, but

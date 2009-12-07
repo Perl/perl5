@@ -446,10 +446,10 @@ Or you can link to a web page:
 
 C<LE<lt>scheme:...E<gt>>
 
-Links to an absolute URL.  For example,
-C<LE<lt>http://www.perl.org/E<gt>>.  But note
-that there is no corresponding C<LE<lt>text|scheme:...E<gt>> syntax, for
-various reasons.
+C<LE<lt>text|scheme:...E<gt>>
+
+Links to an absolute URL.  For example, C<LE<lt>http://www.perl.org/E<gt>> or
+C<LE<lt>The Perl Home Page|http://www.perl.org/E<gt>>.
 
 =back
 
