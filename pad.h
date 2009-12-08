@@ -249,7 +249,8 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 	      PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
 
 #define PAD_RESTORE_LOCAL(opad) \
-	PL_comppad = opad && SvIS_FREED(opad) ? NULL : opad;	\
+        assert(!opad || !SvIS_FREED(opad));					\
+	PL_comppad = opad;						\
 	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;	\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] restore_local\n",	\
