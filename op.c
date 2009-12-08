@@ -7210,10 +7210,10 @@ Perl_ck_grep(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED) {
 	OP* k;
 	o = ck_sort(o);
-        kid = cLISTOPo->op_first->op_sibling;
-	if (!cUNOPx(kid)->op_next)
-	    Perl_croak(aTHX_ "panic: ck_grep");
-	for (k = cUNOPx(kid)->op_first; k; k = k->op_next) {
+        kid = cUNOPx(cLISTOPo->op_first->op_sibling)->op_first;
+	if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
+	    return no_fh_allowed(o);
+	for (k = kid; k; k = k->op_next) {
 	    kid = k;
 	}
 	NewOp(1101, gwop, 1, LOGOP);
