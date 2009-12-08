@@ -4486,6 +4486,7 @@ t/op/undef.t			See if undef works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unshift.t			See if unshift works
 t/op/upgrade.t			See if upgrading and assigning scalars works
+t/op/utf8cache.t		Tests malfunctions of utf8 cache
 t/op/utf8decode.t		See if UTF-8 decoding works
 t/op/utfhash.t			See if utf8 keys in hashes behave
 t/op/utftaint.t			See if utf8 and taint work together
