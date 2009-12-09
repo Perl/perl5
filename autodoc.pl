@@ -132,6 +132,8 @@ sub docout ($$$) { # output the docs for one function
 removed without notice.\n\n" if $flags =~ /x/;
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
 	if $flags =~ /p/;
+    $docs .= "NOTE: this function must be explicitly called as Perl_$name with an aTHX_ parameter.\n\n"
+        if $flags =~ /o/;
 
     print $fh "=item $name\nX<$name>\n$docs";
 
@@ -141,6 +143,10 @@ removed without notice.\n\n" if $flags =~ /x/;
 	print $fh "\t\t$name;\n\n";
     } elsif ($flags =~ /n/) { # no args
 	print $fh "\t$ret\t$name\n\n";
+    } elsif ($flags =~ /o/) { # no #define foo Perl_foo
+        print $fh "\t$ret\tPerl_$name";
+        print $fh "(" . (@args ? "pTHX_ " : "pTHX");
+        print $fh join(", ", @args) . ")\n\n";
     } else { # full usage
 	print $fh "\t$ret\t$name";
 	print $fh "(" . join(", ", @args) . ")";
