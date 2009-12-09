@@ -37,7 +37,7 @@ SKIP:
 {
     # based on code, dosish and epoc systems can't do no-backup inplace
     # edits
-    $^O =~ /^(MSWin32|cygwin|uwin|dos|epoc)$/
+    $^O =~ /^(MSWin32|cygwin|uwin|dos|epoc|os2)$/
 	and skip("Can't inplace edit without backups on $^O", 4);
     
     our @ifiles = ( tempfile(), tempfile(), tempfile() );
