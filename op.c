@@ -2343,6 +2343,17 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     return retval;
 }
 
+/*
+=head1 Compile-time scope hooks
+
+=for apidoc Ao||blockhook_register
+
+Register a set of hooks to be called when the Perl lexical scope changes
+at compile time. See L<perlguts/"Compile-time scope hooks">.
+
+=cut
+*/
+
 void
 Perl_blockhook_register(pTHX_ BHK *hk)
 {

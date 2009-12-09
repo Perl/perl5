@@ -1842,6 +1842,74 @@ file, add the line:
 This function should be as efficient as possible to keep your programs
 running as fast as possible.
 
+=head2 Compile-time scope hooks
+
+As of perl 5.14 it is possible to hook into the compile-time lexical
+scope mechanism using C<Perl_blockhook_register>. This is used like
+this:
+
+    STATIC void my_start_hook(pTHX_ int full);
+    STATIC BHK my_hooks;
+
+    BOOT:
+        BhkENTRY_set(&my_hooks, start, my_start_hook);
+        Perl_blockhook_register(aTHX_ &my_hooks);
+
+This will arrange to have C<my_start_hook> called at the start of
+compiling every lexical scope. The available hooks are:
+
+=over 4
+
+=item C<void start(pTHX_ int full)>
+
+This is called just after starting a new lexical scope. Note that Perl
+code like
+
+    if ($x) { ... }
+
+creates two scopes: the first starts at the C<(> and has C<full == 1>,
+the second starts at the C<{> and has C<full == 0>. Both end at the
+C<}>, so calls to C<start> and C<pre/post_end> will match. Anything
+pushed onto the save stack by this hook will be popped just before the
+scope ends (between the C<pre_> and C<post_end> hooks, in fact).
+
+=item C<void pre_end(pTHX_ OP **o)>
+
+This is called at the end of a lexical scope, just before unwinding the
+stack. I<o> is the root of the optree representing the scope; it is a
+double pointer so you can replace the OP if you need to.
+
+=item C<void post_end(pTHX_ OP **o)>
+
+This is called at the end of a lexical scope, just after unwinding the
+stack. I<o> is as above. Note that it is possible for calls to C<pre_>
+and C<post_end> to nest, if there is something on the save stack that
+calls string eval.
+
+=item C<void eval(pTHX_ OP *const o)>
+
+This is called just before starting to compile an C<eval STRING>, C<do
+FILE>, C<require> or C<use>, after the eval has been set up. I<o> is the
+OP that requested the eval, and will normally be an C<OP_ENTEREVAL>,
+C<OP_DOFILE> or C<OP_REQUIRE>.
+
+=back
+
+Once you have your hook functions, you need a C<BHK> structure to put
+them in. It's best to allocate it statically, since there is no way to
+free it once it's registered. The function pointers should be inserted
+into this structure using the C<BhkENTRY_set> macro, which will also set
+flags indicating which entries are valid. If you do need to allocate
+your C<BHK> dynamically for some reason, be sure to zero it before you
+start.
+
+Once registered, there is no mechanism to switch these hooks off, so if
+that is necessary you will need to do this yourself. An entry in C<%^H>
+is probably the best way, so the effect is lexically scoped. You should
+also be aware that generally speaking at least one scope will have
+opened before your extension is loaded, so you will see some
+C<pre/post_end> pairs that didn't have a matching C<start>.
+
 =head1 Examining internal data structures with the C<dump> functions
 
 To aid debugging, the source file F<dump.c> contains a number of
