@@ -4363,7 +4363,8 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 	    }
-	    incline(s);
+	    if (PL_rsfp)
+		incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);

@@ -4187,6 +4187,7 @@ t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
 t/comp/decl.t			See if declarations work
+t/comp/final_line_num.t		See if line numbers are correct at EOF
 t/comp/fold.t			See if constant folding works
 t/comp/hints.aux		Auxillary file for %^H test
 t/comp/hints.t			See if %^H works
