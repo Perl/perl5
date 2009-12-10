@@ -3,7 +3,7 @@ require 5;
 package Pod::Simple::PullParserToken;
  # Base class for tokens gotten from Pod::Simple::PullParser's $parser->get_token
 @ISA = ();
-$VERSION = '2.02';
+$VERSION = '3.11';
 use strict;
 
 sub new {  # Class->new('type', stuff...);  ## Overridden in derived classes anyway
@@ -119,6 +119,19 @@ L<Pod::Simple::PullParserEndToken>.
 
 L<Pod::Simple::PullParser> and L<Pod::Simple>
 
+=head1 SUPPORT
+
+Questions or discussion about POD and Pod::Simple should be sent to the
+pod-people@perl.org mail list. Send an empty email to
+pod-people-subscribe@perl.org to subscribe.
+
+This module is managed in an open GitHub repository,
+L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
+
+Patches against Pod::Simple are welcome. Please send bug reports to
+<bug-pod-simple@rt.cpan.org>.
+
 =head1 COPYRIGHT AND DISCLAIMERS
 
 Copyright (c) 2002 Sean M. Burke.  All rights reserved.
@@ -132,7 +145,19 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Sean M. Burke C<sburke@cpan.org>
+Pod::Simple was created by Sean M. Burke <sburke@cpan.org>.
+But don't bother him, he's retired.
+
+Pod::Simple is maintained by:
+
+=over
+
+=item * Allison Randal C<allison@perl.org>
+
+=item * Hans Dieter Pearcey C<hdp@cpan.org>
+
+=item * David E. Wheeler C<dwheeler@cpan.org>
+
+=back
 
 =cut
-

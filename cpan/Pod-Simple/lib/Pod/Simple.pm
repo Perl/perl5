@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.10';
+$VERSION = '3.11';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -984,7 +984,7 @@ sub _treat_Ls {  # Process our dear dear friends, the L<...> sequences
   # L<text|name/"sec"> or L<text|name/sec>
   # L<text|/"sec"> or L<text|/sec> or L<text|"sec">
   # L<scheme:...>
-  # Ltext|scheme:...>
+  # L<text|scheme:...>
 
   my($self,@stack) = @_;
 

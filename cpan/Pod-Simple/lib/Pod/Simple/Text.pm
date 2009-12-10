@@ -6,7 +6,7 @@ use Carp ();
 use Pod::Simple::Methody ();
 use Pod::Simple ();
 use vars qw( @ISA $VERSION $FREAKYMODE);
-$VERSION = '2.02';
+$VERSION = '3.11';
 @ISA = ('Pod::Simple::Methody');
 BEGIN { *DEBUG = defined(&Pod::Simple::DEBUG)
           ? \&Pod::Simple::DEBUG
@@ -66,6 +66,14 @@ sub end_Para        { $_[0]->emit_par( 0) }
 sub end_item_bullet { $_[0]->emit_par( 0) }
 sub end_item_number { $_[0]->emit_par( 0) }
 sub end_item_text   { $_[0]->emit_par(-2) }
+sub start_L         { $_[0]{'Link'} = $_[1] if $_[1]->{type} eq 'url' }
+sub end_L           {
+    if (my $link = delete $_[0]{'Link'}) {
+        # Append the URL to the output unless it's already present.
+        $_[0]{'Thispara'} .= " <$link->{to}>"
+            unless $_[0]{'Thispara'} =~ /\b\E$link->{to}/;
+    }
+}
 
 sub emit_par {
   my($self, $tweak_indent) = splice(@_,0,2);
@@ -133,6 +141,19 @@ This is a subclass of L<Pod::Simple> and inherits all its methods.
 
 L<Pod::Simple>, L<Pod::Simple::TextContent>, L<Pod::Text>
 
+=head1 SUPPORT
+
+Questions or discussion about POD and Pod::Simple should be sent to the
+pod-people@perl.org mail list. Send an empty email to
+pod-people-subscribe@perl.org to subscribe.
+
+This module is managed in an open GitHub repository,
+L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
+
+Patches against Pod::Simple are welcome. Please send bug reports to
+<bug-pod-simple@rt.cpan.org>.
+
 =head1 COPYRIGHT AND DISCLAIMERS
 
 Copyright (c) 2002 Sean M. Burke.  All rights reserved.
@@ -146,7 +167,19 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Sean M. Burke C<sburke@cpan.org>
+Pod::Simple was created by Sean M. Burke <sburke@cpan.org>.
+But don't bother him, he's retired.
+
+Pod::Simple is maintained by:
+
+=over
+
+=item * Allison Randal C<allison@perl.org>
+
+=item * Hans Dieter Pearcey C<hdp@cpan.org>
+
+=item * David E. Wheeler C<dwheeler@cpan.org>
+
+=back
 
 =cut
-

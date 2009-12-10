@@ -13,7 +13,7 @@ my $DEBUG = 0;
 #sub Pod::Simple::HTMLBatch::DEBUG () {5};
 
 use Test;
-BEGIN { plan tests => 9 }
+BEGIN { plan tests => 17 }
 
 require Pod::Simple::HTMLBatch;;
 
@@ -62,13 +62,24 @@ mkdir $outdir, 0777 or die "Can't mkdir $outdir: $!";
 print "# Converting $corpus_dir => $outdir\n" if $DEBUG;
 my $conv = Pod::Simple::HTMLBatch->new;
 $conv->verbose(0);
+$conv->index(1);
 $conv->batch_convert( [$corpus_dir], $outdir );
 ok 1;
 print "# OK, back from converting.\n" if $DEBUG;
 
 my @files;
 use File::Find;
-find( sub { push @files, $File::Find::name; return }, $outdir );
+find( sub {
+      push @files, $File::Find::name;
+      if (/[.]html$/ && $_ !~ /perl|index/) {
+          # Make sure an index was generated.
+          open HTML, $_ or die "Cannot open $_: $!\n";
+          my $html = do { local $/; <HTML> };
+          close HTML;
+          ok $html =~ /<div class='indexgroup'>/;
+      }
+      return;
+}, $outdir );
 
 {
   my $long = ( grep m/zikzik\./i, @files )[0];
@@ -100,8 +111,6 @@ if (my @long = grep { /^[^.]{9,}/ } map { s{^[^/]/}{} } @files) {
 } else {
     ok 1;
 }
-
-
 
 # use Pod::Simple;
 # *pretty = \&Pod::Simple::BlackBox::pretty;

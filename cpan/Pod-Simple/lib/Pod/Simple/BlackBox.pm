@@ -22,6 +22,8 @@ package Pod::Simple::BlackBox;
 use integer; # vroom!
 use strict;
 use Carp ();
+use vars qw($VERSION );
+$VERSION = '3.11';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;

@@ -1,10 +1,53 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
-2009-11-12   David E. Wheeler <david@justatheory.org>
-	* Release 3.10
+2009-12-09   David E. Wheeler <david@justatheory.org>
+	* Release 3.11
 
-	Converted test files that had DOS enedings to have Unix endings
+	Restored code to HTMLBatch that allows the TOC (index) to be created
+	in batch jobs (RT #52324 from Martin J. Evans).
+
+	Added resources to META.yml, including bug tracker, license, and
+	repository.
+
+	Turned man page links into links to man.he.net in Pod::Simple::HTML
+	and Pod::Simple::XHTML output. Subclass and override
+	resolve_man_page_link() to use a different URL.
+
+	Added the resolve_pod_page_link() and resolve_man_page_link() methods
+	to Pod::Simple::XHTML to make it easier for subclasses to change the
+	URLs created for POD and man page links.
+
+	Fixed the output of entities in L<> tags by Pod::Simple::XHTML.
+
+	Fixed the output of POD links from Pod::Simple::XHTML so that the
+	section part (/foo) is turned into a proper fragment identfier (#foo)
+	in the resulting search.cpan.org link.
+
+	Pod::Simple::Text now outputs URLs for links created in the
+	L<text|URL> format. For example, L<Perl|http://perl.org> is now
+	output as "Perl <http://perl.org>" rather than just as "Perl".
+
+	Updated perlpod.pod and perlpodspec.pod to sync up with Perl core
+	(and to be released in Perl 5.12). Changes include:
+	* Removing the prohibition against L<text|href>
+	* Deprecation of L<section> and L<"section">
+	* Legalization of "=begin formatname parameter"
+
+	A couple of bug fixes in Pod::Simple::HTML from Graham Barr.
+
+	Added the do_section() method to Pod::Simple::HTML. Graham Barr.
+
+	Word-smithed the "DESCRIPTION" a bit and wrote the README.
+
+	Synced up all module version numbers to 3.11 except for
+	Pod::Simple::HTMLLegacy, which is at 5.01 and should not have its
+	version number lowered.
+
+2009-11-12   David E. Wheeler <david@justatheory.org>
+	* Release 3.11
+
+	Converted test files that had DOS endings to have Unix endings
 	(RT #50922 from Steve Hay).
 
 	Skip tests on VMS where the lack of filename case preservation can

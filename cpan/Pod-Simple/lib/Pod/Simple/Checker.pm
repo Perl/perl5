@@ -9,7 +9,7 @@ use Carp ();
 use Pod::Simple::Methody ();
 use Pod::Simple ();
 use vars qw( @ISA $VERSION );
-$VERSION = '2.02';
+$VERSION = '3.11';
 @ISA = ('Pod::Simple::Methody');
 BEGIN { *DEBUG = defined(&Pod::Simple::DEBUG)
           ? \&Pod::Simple::DEBUG
@@ -152,6 +152,19 @@ This is a subclass of L<Pod::Simple> and inherits all its methods.
 
 L<Pod::Simple>, L<Pod::Simple::Text>, L<Pod::Checker>
 
+=head1 SUPPORT
+
+Questions or discussion about POD and Pod::Simple should be sent to the
+pod-people@perl.org mail list. Send an empty email to
+pod-people-subscribe@perl.org to subscribe.
+
+This module is managed in an open GitHub repository,
+L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
+
+Patches against Pod::Simple are welcome. Please send bug reports to
+<bug-pod-simple@rt.cpan.org>.
+
 =head1 COPYRIGHT AND DISCLAIMERS
 
 Copyright (c) 2002 Sean M. Burke.  All rights reserved.
@@ -165,7 +178,19 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Sean M. Burke C<sburke@cpan.org>
+Pod::Simple was created by Sean M. Burke <sburke@cpan.org>.
+But don't bother him, he's retired.
+
+Pod::Simple is maintained by:
+
+=over
+
+=item * Allison Randal C<allison@perl.org>
+
+=item * Hans Dieter Pearcey C<hdp@cpan.org>
+
+=item * David E. Wheeler C<dwheeler@cpan.org>
+
+=back
 
 =cut
-

@@ -12,28 +12,23 @@ Pod::Simple - framework for parsing Pod
 Pod::Simple is a Perl library for parsing text in the Pod ("plain old
 documentation") markup language that is typically used for writing
 documentation for Perl and for Perl modules. The Pod format is explained
-in the L<perlpod|perlpod> man page; the most common formatter is called
-"perldoc".
+L<perlpod>; the most common formatter is called C<perldoc>.
 
-Pod formatters can use Pod::Simple to parse Pod documents into produce
-renderings of them in plain ASCII, in HTML, or in any number of other
-formats. Typically, such formatters will be subclasses of Pod::Simple,
-and so they will inherit its methods, like C<parse_file>.
+Pod formatters can use Pod::Simple to parse Pod documents and render them into
+plain text, HTML, or any number of other formats. Typically, such formatters
+will be subclasses of Pod::Simple, and so they will inherit its methods, like
+C<parse_file>.
 
 If you're reading this document just because you have a Pod-processing
-subclass that you want to use, this document (plus the documentation for
-the subclass) is probably all you'll need to read.
+subclass that you want to use, this document (plus the documentation for the
+subclass) is probably all you need to read.
 
 If you're reading this document because you want to write a formatter
-subclass, continue reading this document, and then read
-L<Pod::Simple::Subclassing>, and then possibly even read L<perlpodspec>
-(some of which is for parser-writers, but much of which is notes to
-formatter-writers).
-
+subclass, continue reading it and then read L<Pod::Simple::Subclassing>, and
+then possibly even read L<perlpodspec> (some of which is for parser-writers,
+but much of which is notes to formatter-writers).
 
 =head1 MAIN METHODS
-
-
 
 =over
 
@@ -235,6 +230,18 @@ L<Pod::Escapes|Pod::Escapes>
 
 L<perldoc>
 
+=head1 SUPPORT
+
+Questions or discussion about POD and Pod::Simple should be sent to the
+pod-people@perl.org mail list. Send an empty email to
+pod-people-subscribe@perl.org to subscribe.
+
+This module is managed in an open GitHub repository,
+L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
+
+Patches against Pod::Simple are welcome. Please send bug reports to
+<bug-pod-simple@rt.cpan.org>.
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
@@ -249,9 +256,10 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Original author: Sean M. Burke C<sburke@cpan.org>
+Pod::Simple was created by Sean M. Burke <sburke@cpan.org>.
+But don't bother him, he's retired.
 
-Maintained by: 
+Pod::Simple is maintained by:
 
 =over
 
@@ -259,8 +267,8 @@ Maintained by:
 
 =item * Hans Dieter Pearcey C<hdp@cpan.org>
 
+=item * David E. Wheeler C<dwheeler@cpan.org>
+
 =back
 
 =cut
-
-

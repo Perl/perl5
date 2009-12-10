@@ -4,7 +4,7 @@ package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = 3.04;   ## Current version of this package
+$VERSION = '3.11';   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -996,21 +996,48 @@ with default attribute values is used.
 
 Returns true if the supplied filename (not POD module) contains some Pod
 documentation.
+=head1 SUPPORT
 
+Questions or discussion about POD and Pod::Simple should be sent to the
+pod-people@perl.org mail list. Send an empty email to
+pod-people-subscribe@perl.org to subscribe.
+
+This module is managed in an open GitHub repository,
+L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
+
+Patches against Pod::Simple are welcome. Please send bug reports to
+<bug-pod-simple@rt.cpan.org>.
+
+=head1 COPYRIGHT AND DISCLAIMERS
+
+Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+This program is distributed in the hope that it will be useful, but
+without any warranty; without even the implied warranty of
+merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Sean M. Burke E<lt>sburke@cpan.orgE<gt>
-borrowed code from
-Marek Rouchal's Pod::Find, which in turn
-heavily borrowed code from Nick Ing-Simmons' PodToHtml.
+Pod::Simple was created by Sean M. Burke <sburke@cpan.org> with code borrowed
+from Marek Rouchal's L<Pod::Find>, which in turn heavily borrowed code from
+Nick Ing-Simmons' C<PodToHtml>.
 
-Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt> provided
-C<find> and C<contains_pod> to Pod::Find.
+But don't bother him, he's retired.
 
-=head1 SEE ALSO
+Pod::Simple is maintained by:
 
-L<Pod::Simple>, L<Pod::Perldoc>
+=over
+
+=item * Allison Randal C<allison@perl.org>
+
+=item * Hans Dieter Pearcey C<hdp@cpan.org>
+
+=item * David E. Wheeler C<dwheeler@cpan.org>
+
+=back
 
 =cut
-
