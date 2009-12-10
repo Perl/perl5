@@ -1926,8 +1926,8 @@ to your Perl administrator.
 
 =item Illegal character in prototype for %s : %s
 
-(W syntax) An illegal character was found in a prototype declaration.  Legal
-characters in prototypes are $, @, %, *, ;, [, ], &, and \.
+(W illegalproto) An illegal character was found in a prototype declaration.
+Legal characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 
 =item Illegal declaration of anonymous subroutine
 
@@ -3535,7 +3535,7 @@ in L<perlos2>.
 
 =item Prototype after '%c' for %s : %s
 
-(W syntax) A character follows % or @ in a prototype. This is useless,
+(W illegalproto) A character follows % or @ in a prototype. This is useless,
 since % and @ gobble the rest of the subroutine arguments.
 
 =item Prototype mismatch: %s vs %s

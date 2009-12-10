@@ -79,6 +79,7 @@
 /* Warnings Categories added in Perl 5.011 */
 
 #define WARN_IMPRECISION	46
+#define WARN_ILLEGALPROTO	47
 
 #define WARNsize		12
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125"

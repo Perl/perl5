@@ -7348,7 +7348,7 @@ Perl_yylex(pTHX)
 		    bool must_be_last = FALSE;
 		    bool underscore = FALSE;
 		    bool seen_underscore = FALSE;
-		    const bool warnsyntax = ckWARN(WARN_SYNTAX);
+		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
 
 		    s = scan_str(s,!!PL_madskills,FALSE);
 		    if (!s)
@@ -7360,7 +7360,7 @@ Perl_yylex(pTHX)
 			if (!isSPACE(*p)) {
 			    d[tmp++] = *p;
 
-			    if (warnsyntax) {
+			    if (warnillegalproto) {
 				if (must_be_last)
 				    proto_after_greedy_proto = TRUE;
 				if (!strchr("$@%*;[]&\\_", *p)) {
@@ -7393,11 +7393,11 @@ Perl_yylex(pTHX)
 		    }
 		    d[tmp] = '\0';
 		    if (proto_after_greedy_proto)
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Prototype after '%c' for %"SVf" : %s",
 				    greedy_proto, SVfARG(PL_subname), d);
 		    if (bad_proto)
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Illegal character %sin prototype for %"SVf" : %s",
 				    seen_underscore ? "after '_' " : "",
 				    SVfARG(PL_subname), d);

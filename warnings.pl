@@ -46,6 +46,7 @@ my $tree = {
        	 			'printf'	=> [ 5.008, DEFAULT_OFF],
        	 			'prototype'	=> [ 5.008, DEFAULT_OFF],
        	 			'qw'		=> [ 5.008, DEFAULT_OFF],
+                                'illegalproto'  => [ 5.011, DEFAULT_OFF],
 			   }],
        	'severe'	=> [ 5.008, { 	
 				'inplace'	=> [ 5.008, DEFAULT_ON],

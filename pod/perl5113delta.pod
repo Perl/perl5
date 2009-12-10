@@ -443,6 +443,24 @@ C<sort> called recursively from within an active comparison subroutine no longer
 
 =item *
 
+The two warnings :
+
+  Illegal character in prototype for %s : %s
+  Prototype after '%c' for %s : %s
+
+have been moved from the C<syntax> top-level warnings category into a new
+first-level category, C<illegalproto>. These two warnings are currently the
+only ones emitted during parsing of an invalid/illegal prototype, so one
+can now do
+
+  no warnings 'illegalproto';
+
+to suppress only those, but not other syntax-related warnings. Warnings where
+prototypes are changed, ignored, or not met are still in the C<prototype>
+category as before.
+
+=item *
+
 C<split> now warns when called in void context
 
 
