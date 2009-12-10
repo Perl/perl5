@@ -566,13 +566,23 @@ sub _send_report {
         }
 
     ### XXX should we do an 'already sent' check? ###
-    } elsif( $reporter->send( ) ) {
-        msg(loc("Successfully sent '%1' report for '%2'", $grade, $dist),
-            $verbose);
-        return 1;
-
     ### something broke :( ###
-    } else {
+    } 
+    else {
+        my $status;
+        eval { 
+            $status = $reporter->send();
+        };
+        if ( $@ ) {
+           error(loc("Could not send '%1' report for '%2': %3",
+                $grade, $dist, $@));
+           return;
+        }
+        if ( $status ) {
+           msg(loc("Successfully sent '%1' report for '%2'", $grade, $dist),
+              $verbose);
+           return 1;
+        }
         error(loc("Could not send '%1' report for '%2': %3",
                 $grade, $dist, $reporter->errstr));
         return;

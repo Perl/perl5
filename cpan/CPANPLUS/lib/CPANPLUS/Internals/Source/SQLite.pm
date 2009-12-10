@@ -48,7 +48,7 @@ CPANPLUS::Internals::Source::SQLite - SQLite implementation
         $Dbh     = DBIx::Simple->connect(
                         "dbi:SQLite:dbname=" . $self->__sqlite_file,
                         '', '',
-                        { AutoCommit => 0 }
+                        { AutoCommit => 1 }
                     );
         #$Dbh->dbh->trace(1);
 

@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.89_09";
+    $VERSION = "0.89_12";
 }
 
 load CPANPLUS::Shell;
@@ -1220,7 +1220,8 @@ sub _set_conf {
         $args = check( $tmpl, \%hash ) or return;
     }
 
-    my ($type,$key,$value) = $input =~ m/(\w+)\s*(\w*)\s*(.*?)\s*$/;
+    my ($type,$key,$value) = $input =~ m/(\w+)\s*(\w*)\s*(.*?)$/;
+    $value =~ s/\s+$//g if $value;
     $type = lc $type;
 
     if( $type eq 'reconfigure' ) {
@@ -1563,7 +1564,7 @@ should use the same package manager to uninstall them
             loc("All modules %tense(uninstall,past) successfully"), "\n" );
     } else {
         $self->__print( 
-            loc("Problem %tense(uninstalling,present) one or more modules" ),
+            loc("Problem %tense(uninstall,present) one or more modules" ),
             "\n" );
             
         $self->__print( 

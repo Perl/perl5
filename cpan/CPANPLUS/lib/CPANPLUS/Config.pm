@@ -340,12 +340,17 @@ C<.tar.gz> files)
 =item prefer_makefile
 
 A boolean indicating whether or not prefer a C<Makefile.PL> over a 
-C<Build.PL> file if both are present. Defaults to 'true'.
+C<Build.PL> file if both are present. Defaults to 'true', unless
+the perl version is at least 5.10.1 or appropriate versions of L<Module::Build>
+and L<CPANPLUS::Dist::Build> are available.
 
 =cut
 
         $Conf->{'conf'}->{'prefer_makefile'} = 
-                                ( $] >= 5.010001 ? 0 : 1 );
+            ( $] >= 5.010001 or 
+              ( check_install( module => 'Module::Build', version => '0.32' ) and
+                check_install( module => INSTALLER_BUILD, version => '0.24' ) )
+              ? 0 : 1 );
 
 =item prereqs
 
@@ -536,7 +541,7 @@ $ENV{SHELL} setting, or $ENV{COMSPEC} on Windows.
 
 A string holding the path to your C<sudo> binary if your install path
 requires super user permissions. Looks for C<sudo> in your path, or 
-remains empty if you do not require super user permissiosn to install.
+remains empty if you do not require super user permissions to install.
 
 =cut
 

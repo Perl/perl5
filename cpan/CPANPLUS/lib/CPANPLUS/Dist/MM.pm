@@ -689,7 +689,7 @@ sub create {
                 if ( NO_TESTS_DEFINED->( $captured ) ) {
                     msg( NO_TESTS_DEFINED->( $captured ), 0 )
                 } else {
-                    msg( loc( "MAKE TEST passed: %1", $captured ), $verbose );
+                    msg( loc( "MAKE TEST passed: %1", $captured ), 0 );
                 }
             
                 $dist->status->test(1);
