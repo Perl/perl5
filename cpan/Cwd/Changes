@@ -1,5 +1,19 @@
 Revision history for Perl distribution PathTools.
 
+3.31 - Sun Nov  1 15:15:00 2009
+
+- Do not pack a Build.PL to avoid a circular dependency involving
+  ExtUtils::CBuilder (PathTools RT #50749)
+
+3.30_02 - Tue Sep 29 08:17:00 2009
+
+- Remove more special logic required for core perl.
+
+3.30_01 - Mon Sep 21 14:39:00 2009
+
+- Merge changes from core perl.
+  (Mostly changes regarding the lib->ext migration)
+
 3.30 - Sun May 10 10:55:00 2009
 
 - Promote to stable release.

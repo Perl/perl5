@@ -1131,7 +1131,7 @@ use File::Glob qw(:case);
     'PathTools' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.30_02.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.31.tar.gz',
 	'FILES'		=> q[cpan/Cwd],
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
 	'CPAN'		=> 1,
