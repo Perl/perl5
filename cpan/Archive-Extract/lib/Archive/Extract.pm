@@ -2,7 +2,7 @@ package Archive::Extract;
 
 use strict;
 
-use Cwd                         qw[cwd];
+use Cwd                         qw[cwd chdir];
 use Carp                        qw[carp];
 use IPC::Cmd                    qw[run can_run];
 use FileHandle;
@@ -41,7 +41,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.34';
+$VERSION            = '0.36';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
