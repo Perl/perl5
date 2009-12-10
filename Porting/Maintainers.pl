@@ -1136,6 +1136,9 @@ use File::Glob qw(:case);
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> "cpan",
+	# NOTE: PathTools is in cpan/Cwd/ because it contains Cwd.xs and
+	# something, possibly Makefile.SH, makes an assumption that the
+	# leafname of some  file corresponds with the pathname of the directory.
 	},
 
     'perlebcdic' =>
