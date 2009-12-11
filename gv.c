@@ -1902,7 +1902,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
            (void)((cv = cvp[off=bool__amg])
                   || (cv = cvp[off=numer_amg])
                   || (cv = cvp[off=string_amg]));
-           postpr = 1;
+           if (cv)
+               postpr = 1;
            break;
 	 case copy_amg:
 	   {
@@ -2007,35 +2008,24 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case ge_amg:
 	 case eq_amg:
 	 case ne_amg:
-	   postpr = 1; off=ncmp_amg; break;
+             off = ncmp_amg;
+             break;
 	 case slt_amg:
 	 case sle_amg:
 	 case sgt_amg:
 	 case sge_amg:
 	 case seq_amg:
 	 case sne_amg:
-	   postpr = 1; off=scmp_amg; break;
+             off = scmp_amg;
+             break;
 	 }
-      if (off != -1) cv = cvp[off];
-      if (!cv) {
-	goto not_found;
-      }
+      if ((off != -1) && (cv = cvp[off]))
+          postpr = 1;
+      else
+          goto not_found;
     } else {
     not_found:			/* No method found, either report or croak */
       switch (method) {
-	 case lt_amg:
-	 case le_amg:
-	 case gt_amg:
-	 case ge_amg:
-	 case eq_amg:
-	 case ne_amg:
-	 case slt_amg:
-	 case sle_amg:
-	 case sgt_amg:
-	 case sge_amg:
-	 case seq_amg:
-	 case sne_amg:
-	   postpr = 0; break;
 	 case to_sv_amg:
 	 case to_av_amg:
 	 case to_hv_amg:

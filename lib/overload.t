@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 605;
+use Test::More tests => 607;
 
 
 $a = new Oscalar "087";
@@ -1420,7 +1420,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 }
 
 {
-    # comparison operators with nomethod
+    # comparison operators with nomethod (bug 41546)
     my $warning = "";
     my $method;
 
@@ -1464,6 +1464,21 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($method, 'cmp');
     like($warning, qr/isn't numeric/, 'cmp should return number');
 
+}
+
+{
+    # nomethod called for '!' after attempted fallback
+    my $nomethod_called = 0;
+
+    package nomethod_not;
+    use overload nomethod => sub { $nomethod_called = 'yes'; };
+
+    package main;
+    my $o = bless [], 'nomethod_not';
+    my $res = ! $o;
+
+    is($nomethod_called, 'yes', "nomethod() is called for '!'");
+    is($res, 'yes', "nomethod(..., '!') return value propagates");
 }
 
 {
