@@ -50,8 +50,6 @@ The one current possibility is:
 
 =head3 unicode8bit
 
-THIS IS SUBJECT TO CHANGE
-
 Use legacy semantics for the 128 characters on ASCII systems that have the 8th
 bit set.  (See L</EBCDIC platforms> below for EBCDIC systems.)  Unless
 C<S<use locale>> is specified, or the scalar containing such a character is
@@ -62,7 +60,7 @@ anything.
 
 This behavior stems from when Perl did not support Unicode, and ASCII was the
 only known character set outside of C<S<use locale>>.  In order to not
-possibly break pre_Unicode programs, these characters have retained their old
+possibly break pre-Unicode programs, these characters have retained their old
 non-meanings, except when it is clear to Perl that Unicode is what is meant,
 for example by calling utf8::upgrade() on a scalar, or if the scalar also
 contains characters that are only available in Unicode.  Then these 128
@@ -80,7 +78,8 @@ The behavior is known to have effects on these areas:
 =item *
 
 Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
-and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in regular expression substitutions.
+and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in regular expression
+substitutions.
 
 =item *
 
@@ -131,7 +130,7 @@ a colon, to distinguish it from an individual legacy behavior.
 Specifying sub-versions such as the C<0> in C<5.10.0> in legacy bundles has
 no effect: legacy bundles are guaranteed to be the same for all sub-versions.
 
-Legacy bundles are not allowed with C<no legacy>
+Legacy bundles are not allowed with C<no legacy>.
 
 =cut
 
