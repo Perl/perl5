@@ -12214,6 +12214,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_utf8_punct	= sv_dup_inc(proto_perl->Iutf8_punct, param);
     PL_utf8_xdigit	= sv_dup_inc(proto_perl->Iutf8_xdigit, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
+    PL_utf8_X_begin	= sv_dup_inc(proto_perl->Iutf8_X_begin, param);
+    PL_utf8_X_extend	= sv_dup_inc(proto_perl->Iutf8_X_extend, param);
+    PL_utf8_X_prepend	= sv_dup_inc(proto_perl->Iutf8_X_prepend, param);
+    PL_utf8_X_non_hangul	= sv_dup_inc(proto_perl->Iutf8_X_non_hangul, param);
+    PL_utf8_X_L	= sv_dup_inc(proto_perl->Iutf8_X_L, param);
+    PL_utf8_X_LV	= sv_dup_inc(proto_perl->Iutf8_X_LV, param);
+    PL_utf8_X_LVT	= sv_dup_inc(proto_perl->Iutf8_X_LVT, param);
+    PL_utf8_X_T	= sv_dup_inc(proto_perl->Iutf8_X_T, param);
+    PL_utf8_X_V	= sv_dup_inc(proto_perl->Iutf8_X_V, param);
+    PL_utf8_X_LV_LVT_V	= sv_dup_inc(proto_perl->Iutf8_X_LV_LVT_V, param);
     PL_utf8_toupper	= sv_dup_inc(proto_perl->Iutf8_toupper, param);
     PL_utf8_totitle	= sv_dup_inc(proto_perl->Iutf8_totitle, param);
     PL_utf8_tolower	= sv_dup_inc(proto_perl->Iutf8_tolower, param);

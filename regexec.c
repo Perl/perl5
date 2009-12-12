@@ -120,11 +120,31 @@
 /* these are unrolled below in the CCC_TRY_XXX defined */
 #define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((const U8*)str); assert(ok); LEAVE; } } STMT_END
+
+/* Doesn't do an assert to verify that is correct */
+#define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
+    if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((const U8*)" "); LEAVE; } } STMT_END
+
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
 #define LOAD_UTF8_CHARCLASS_DIGIT() LOAD_UTF8_CHARCLASS(digit,"0")
 #define LOAD_UTF8_CHARCLASS_SPACE() LOAD_UTF8_CHARCLASS(space," ")
-#define LOAD_UTF8_CHARCLASS_MARK()  LOAD_UTF8_CHARCLASS(mark, "\xcd\x86")
 
+#define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */        \
+	LOAD_UTF8_CHARCLASS(X_begin, " "),                                  \
+	LOAD_UTF8_CHARCLASS(X_non_hangul, "A"),                             \
+	/* These are utf8 constants, and not utf-ebcdic constants, so the   \
+	    * assert should likely and hopefully fail on an EBCDIC machine */ \
+	LOAD_UTF8_CHARCLASS(X_extend, "\xcc\x80"), /* U+0300 */             \
+									    \
+	/* No asserts are done for these, in case called on an early        \
+	    * Unicode version in which they map to nothing */               \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_prepend),/* U+0E40 "\xe0\xb9\x80" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_L),	    /* U+1100 "\xe1\x84\x80" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LV),     /* U+AC00 "\xea\xb0\x80" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LVT),    /* U+AC01 "\xea\xb0\x81" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LV_LVT_V),/* U+AC01 "\xea\xb0\x81" */\
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_T),      /* U+11A8 "\xe1\x86\xa8" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_V)       /* U+1160 "\xe1\x85\xa0" */  
 
 /* 
    We dont use PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS as the direct test
@@ -3521,22 +3541,216 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	CCC_TRY_AFF( DIGIT,  DIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
 	CCC_TRY_NEG(NDIGIT, NDIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
 
-	case CLUMP:
+	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
+		       a Unicode extended Grapheme Cluster */
+	    /* From http://www.unicode.org/reports/tr29 (5.2 version).  An
+	      extended Grapheme Cluster is:
+
+	       CR LF
+	       | Prepend* Begin Extend*
+	       | .
+
+	       Begin is (Hangul-syllable | ! Control)
+	       Extend is (Grapheme_Extend | Spacing_Mark)
+	       Control is [ GCB_Control CR LF ]
+
+	       The discussion below shows how the code for CLUMP is derived
+	       from this regex.  Note that most of these concepts are from
+	       property values of the Grapheme Cluster Boundary (GCB) property.
+	       No code point can have multiple property values for a given
+	       property.  Thus a code point in Prepend can't be in Control, but
+	       it must be in !Control.  This is why Control above includes
+	       GCB_Control plus CR plus LF.  The latter two are used in the GCB
+	       property separately, and so can't be in GCB_Control, even though
+	       they logically are controls.  Control is not the same as gc=cc,
+	       but includes format and other characters as well.
+
+	       The Unicode definition of Hangul-syllable is:
+		   L+
+		   | (L* ( ( V | LV ) V* | LVT ) T*)
+		   | T+ 
+		  )
+	       Each of these is a value for the GCB property, and hence must be
+	       disjoint, so the order they are tested is immaterial, so the
+	       above can safely be changed to
+		   T+
+		   | L+
+		   | (L* ( LVT | ( V | LV ) V*) T*)
+
+	       The last two terms can be combined like this:
+		   L* ( L
+		        | (( LVT | ( V | LV ) V*) T*))
+
+	       And refactored into this:
+		   L* (L | LVT T* | V  V* T* | LV  V* T*)
+
+	       That means that if we have seen any L's at all we can quit
+	       there, but if the next character is a LVT, a V or and LV we
+	       should keep going.
+
+	       There is a subtlety with Prepend* which showed up in testing.
+	       Note that the Begin, and only the Begin is required in:
+	        | Prepend* Begin Extend*
+	       Also, Begin contains '! Control'.  A Prepend must be a '!
+	       Control', which means it must be a Begin.  What it comes down to
+	       is that if we match Prepend* and then find no suitable Begin
+	       afterwards, that if we backtrack the last Prepend, that one will
+	       be a suitable Begin.
+	    */
+
 	    if (locinput >= PL_regeol)
 		sayNO;
-	    if  (do_utf8) {
-		LOAD_UTF8_CHARCLASS_MARK();
-		if (swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
-		    sayNO;
-		locinput += PL_utf8skip[nextchr];
-		while (locinput < PL_regeol &&
-		       swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
-		    locinput += UTF8SKIP(locinput);
-		if (locinput > PL_regeol)
-		    sayNO;
-	    } 
-	    else
-	       locinput++;
+	    if  (! do_utf8) {
+
+		/* Match either CR LF  or '.', as all the other possibilities
+		 * require utf8 */
+		locinput++;	    /* Match the . or CR */
+		if (nextchr == '\r'
+		    && locinput < PL_regeol
+		    && UCHARAT(locinput) == '\n') locinput++;
+	    }
+	    else {
+
+		/* Utf8: See if is ( CR LF ); already know that locinput <
+		 * PL_regeol, so locinput+1 is in bounds */
+		if (nextchr == '\r' && UCHARAT(locinput + 1) == '\n') {
+		    locinput += 2;
+		}
+		else {
+		    /* In case have to backtrack to beginning, then match '.' */
+		    char *starting = locinput;
+
+		    /* In case have to backtrack the last prepend */
+		    char *previous_prepend = 0;
+
+		    LOAD_UTF8_CHARCLASS_GCB();
+
+		    /* Match (prepend)* */
+		    while (locinput < PL_regeol
+			   && swash_fetch(PL_utf8_X_prepend,
+					  (U8*)locinput, do_utf8))
+		    {
+			previous_prepend = locinput;
+			locinput += UTF8SKIP(locinput);
+		    }
+
+		    /* As noted above, if we matched a prepend character, but
+		     * the next thing won't match, back off the last prepend we
+		     * matched, as it is guaranteed to match the begin */
+		    if (previous_prepend
+			&& (locinput >=  PL_regeol
+			    || ! swash_fetch(PL_utf8_X_begin,
+					     (U8*)locinput, do_utf8)))
+		    {
+			locinput = previous_prepend;
+		    }
+
+		    /* Note that here we know PL_regeol > locinput, as we
+		     * tested that upon input to this switch case, and if we
+		     * moved locinput forward, we tested the result just above
+		     * and it either passed, or we backed off so that it will
+		     * now pass */
+		    if (! swash_fetch(PL_utf8_X_begin, (U8*)locinput, do_utf8)) {
+
+			/* Here did not match the required 'Begin' in the
+			 * second term.  So just match the very first
+			 * character, the '.' of the final term of the regex */
+			locinput = starting + UTF8SKIP(starting);
+		    } else {
+
+			/* Here is the beginning of a character that can have
+			 * an extender.  It is either a hangul syllable, or a
+			 * non-control */
+			if (swash_fetch(PL_utf8_X_non_hangul,
+					(U8*)locinput, do_utf8))
+			{
+
+			    /* Here not a Hangul syllable, must be a
+			     * ('!  * Control') */
+			    locinput += UTF8SKIP(locinput);
+			} else {
+
+			    /* Here is a Hangul syllable.  It can be composed
+			     * of several individual characters.  One
+			     * possibility is T+ */
+			    if (swash_fetch(PL_utf8_X_T,
+					    (U8*)locinput, do_utf8))
+			    {
+				while (locinput < PL_regeol
+					&& swash_fetch(PL_utf8_X_T,
+							(U8*)locinput, do_utf8))
+				{
+				    locinput += UTF8SKIP(locinput);
+				}
+			    } else {
+
+				/* Here, not T+, but is a Hangul.  That means
+				 * it is one of the others: L, LV, LVT or V,
+				 * and matches:
+				 * L* (L | LVT T* | V  V* T* | LV  V* T*) */
+
+				/* Match L*           */
+				while (locinput < PL_regeol
+					&& swash_fetch(PL_utf8_X_L,
+							(U8*)locinput, do_utf8))
+				{
+				    locinput += UTF8SKIP(locinput);
+				}
+
+				/* Here, have exhausted L*.  If the next
+				 * character is not an LV, LVT nor V, it means
+				 * we had to have at least one L, so matches L+
+				 * in the original equation, we have a complete
+				 * hangul syllable.  Are done. */
+
+				if (locinput < PL_regeol
+				    && swash_fetch(PL_utf8_X_LV_LVT_V,
+						    (U8*)locinput, do_utf8))
+				{
+
+				    /* Otherwise keep going.  Must be LV, LVT
+				     * or V.  See if LVT */
+				    if (swash_fetch(PL_utf8_X_LVT,
+						    (U8*)locinput, do_utf8))
+				    {
+					locinput += UTF8SKIP(locinput);
+				    } else {
+
+					/* Must be  V or LV.  Take it, then
+					 * match V*     */
+					locinput += UTF8SKIP(locinput);
+					while (locinput < PL_regeol
+						&& swash_fetch(PL_utf8_X_V,
+							 (U8*)locinput, do_utf8))
+					{
+					    locinput += UTF8SKIP(locinput);
+					}
+				    }
+
+				    /* And any of LV, LVT, or V can be followed
+				     * by T*            */
+				    while (locinput < PL_regeol
+					   && swash_fetch(PL_utf8_X_T,
+							   (U8*)locinput,
+							   do_utf8))
+				    {
+					locinput += UTF8SKIP(locinput);
+				    }
+				}
+			    }
+			}
+
+			/* Match any extender */
+			while (locinput < PL_regeol
+				&& swash_fetch(PL_utf8_X_extend,
+						(U8*)locinput, do_utf8))
+			{
+			    locinput += UTF8SKIP(locinput);
+			}
+		    }
+		}
+		if (locinput > PL_regeol) sayNO;
+	    }
 	    nextchr = UCHARAT(locinput);
 	    break;
             

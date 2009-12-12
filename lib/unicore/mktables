@@ -998,6 +998,7 @@ my $MULTIPLE = 4;          # Don't replace, but add a duplicate record if
 my $NORMAL = "";
 my $SUPPRESSED = 'z';   # The character should never actually be seen, since
                         # it is suppressed
+my $PLACEHOLDER = 'P';  # Implies no pod entry generated
 my $DEPRECATED = 'D';
 my $a_bold_deprecated = "a 'B<$DEPRECATED>'";
 my $A_bold_deprecated = "A 'B<$DEPRECATED>'";
@@ -1019,7 +1020,7 @@ my %status_past_participles = (
     $SUPPRESSED => 'should never be generated',
     $STABILIZED => 'stabilized',
     $OBSOLETE => 'obsolete',
-    $DEPRECATED => 'deprecated'
+    $DEPRECATED => 'deprecated',
 );
 
 # The format of the values of the map tables:
@@ -1074,6 +1075,7 @@ my %Jamo_L;     # Leading consonants
 my %Jamo_V;     # Vowels
 my %Jamo_T;     # Trailing consonants
 
+my @backslash_X_tests;     # List of tests read in for testing \X
 my @unhandled_properties;  # Will contain a list of properties found in
                            # the input that we didn't process.
 my @match_properties;      # Properties that have match tables, to be
@@ -1604,6 +1606,15 @@ sub trace { return main::trace(@_); }
     # processed when you set the $debug_skip global.
     main::set_access('non_skip', \%non_skip, 'c');
 
+    my %skip;
+    # This is used to skip processing of this input file semi-permanently.
+    # It is used for files that we aren't planning to process anytime soon,
+    # but want to allow to be in the directory and not raise a message that we
+    # are not handling.  Mostly for test files.  This is in contrast to the
+    # non_skip element, which is supposed to be used very temporarily for
+    # debugging.  Sets 'optional' to 1
+    main::set_access('skip', \%skip, 'c');
+
     my %each_line_handler;
     # list of subroutines to look at and filter each non-comment line in the
     # file.  defaults to none.  The subroutines are called in order, each is
@@ -1667,6 +1678,7 @@ sub trace { return main::trace(@_); }
         # Set defaults
         $handler{$addr} = \&main::process_generic_property_file;
         $non_skip{$addr} = 0;
+        $skip{$addr} = 0;
         $has_missings_defaults{$addr} = $NO_DEFAULTS;
         $handle{$addr} = undef;
         $added_lines{$addr} = [ ];
@@ -1723,6 +1735,8 @@ sub trace { return main::trace(@_); }
             print "Warning: " . __PACKAGE__ . " constructor for $file{$addr} has useless 'non_skip' in it\n";
         }
 
+        $optional{$addr} = 1 if $skip{$addr};
+
         return $self;
     }
 
@@ -1771,7 +1785,7 @@ sub trace { return main::trace(@_); }
         }
 
         # File could be optional
-        if ($optional{$addr}){
+        if ($optional{$addr}) {
             return unless -e $file;
             my $result = eval $optional{$addr};
             if (! defined $result) {
@@ -1804,7 +1818,8 @@ sub trace { return main::trace(@_); }
         }
         else {
 
-            # Here, the file exists
+            # Here, the file exists.  Some platforms may change the case of
+            # its name
             if ($seen_non_extracted_non_age) {
                 if ($file =~ /$EXTRACTED/i) {
                     Carp::my_carp_bug(join_lines(<<END
@@ -1836,6 +1851,13 @@ END
             Carp::my_carp("Was not expecting '$file'.") if 
                     ! $expecting                    
                     && ! defined $handle{$addr};
+
+            # Having deleted from expected files, we can quit if not to do
+            # anything.  Don't print progress unless really want verbosity
+            if ($skip{$addr}) {
+                print "Skipping $file.\n" if $verbosity >= $VERBOSE;
+                return;
+            }
 
             # Open the file, converting the slashes used in this program
             # into the proper form for the OS
@@ -3846,14 +3868,12 @@ sub trace { return main::trace(@_); }
 
         # For non-ASCII, we shun the characters that don't have Perl encoding-
         # independent symbols for them.  'A' is such a symbol, so is "\n".
-        # Note, this program hopefully will work on 5.8 Perls, and \v is not
-        # such a symbol in them.
         return $try_hard if $non_ASCII
                             && $code <= 0xFF
                             && ($code >= 0x7F
                                 || ($code >= 0x0E && $code <= 0x1F)
                                 || ($code >= 0x01 && $code <= 0x06)
-                                || $code == 0x0B);  # \v introduced after 5.8
+                                || $code == 0x0B);
 
         # shun null.  I'm (khw) not sure why this was done, but NULL would be
         # the character very frequently used.
@@ -4075,7 +4095,6 @@ sub trace { return main::trace(@_); }
         my $complete_name = $complete_name{$addr}
                           = delete $args{'Complete_Name'};
         $internal_only{$addr} = delete $args{'Internal_Only_Warning'} || 0;
-        $perl_extension{$addr} = delete $args{'Perl_Extension'} || 0;
         $property{$addr} = delete $args{'_Property'};
         $range_list{$addr} = delete $args{'_Range_List'};
         $status{$addr} = delete $args{'Status'} || $NORMAL;
@@ -4087,6 +4106,7 @@ sub trace { return main::trace(@_); }
         my $loose_match = delete $args{'Fuzzy'};
         my $note = delete $args{'Note'};
         my $make_pod_entry = delete $args{'Pod_Entry'};
+        my $perl_extension = delete $args{'Perl_Extension'};
 
         # Shouldn't have any left over
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
@@ -4105,11 +4125,20 @@ sub trace { return main::trace(@_); }
         push @{$description{$addr}}, $description if $description;
         push @{$note{$addr}}, $note if $note;
 
-        # If hasn't set its status already, see if it is on one of the lists
-        # of properties or tables that have particular statuses; if not, is
-        # normal.  The lists are prioritized so the most serious ones are
-        # checked first
-        if (! $status{$addr}) {
+        if ($status{$addr} eq $PLACEHOLDER) {
+
+            # A placeholder table doesn't get documented, is a perl extension,
+            # and quite likely will be empty
+            $make_pod_entry = 0 if ! defined $make_pod_entry;
+            $perl_extension = 1 if ! defined $perl_extension;
+            push @tables_that_may_be_empty, $complete_name{$addr};
+        }
+        elsif (! $status{$addr}) {
+
+            # If hasn't set its status already, see if it is on one of the
+            # lists of properties or tables that have particular statuses; if
+            # not, is normal.  The lists are prioritized so the most serious
+            # ones are checked first
             if (exists $why_suppressed{$complete_name}) {
                 $status{$addr} = $SUPPRESSED;
             }
@@ -4144,6 +4173,8 @@ sub trace { return main::trace(@_); }
                 }
             }
         }
+
+        $perl_extension{$addr} = $perl_extension || 0;
 
         # By convention what typically gets printed only or first is what's
         # first in the list, so put the full name there for good output
@@ -6204,7 +6235,17 @@ END
                     my $flag = $property->status
                                 || $table->status
                                 || $table_alias_object->status;
-                    $flags{$flag} = $status_past_participles{$flag} if $flag;
+                    if ($flag) {
+                        if ($flag ne $PLACEHOLDER) {
+                            $flags{$flag} = $status_past_participles{$flag};
+                        } else {
+                            $flags{$flag} = <<END;
+a placeholder because it is not in Version $string_version of Unicode, but is
+needed by the Perl core to work gracefully.  Because it is not in this version
+of Unicode, it will not be listed in $pod_file.pod
+END
+                        }
+                    }
 
                     $loose_count++;
 
@@ -6220,6 +6261,9 @@ END
                 push @description, $table->description;
                 push @note, $table->note;
                 push @conflicting, $table->conflicting;
+
+                # And this for output after all the tables.
+                push @global_comments, $table->comment;
 
                 # Compute an alternate compound name using the final property
                 # synonym and the first table synonym with a colon instead of
@@ -6306,8 +6350,10 @@ END
         if (%flags) {
             foreach my $flag (sort keys %flags) {
                 $comment .= <<END;
-'$flag' below means that this form is $flags{$flag}.  Consult $pod_file.pod
+'$flag' below means that this form is $flags{$flag}.
 END
+                next if $flag eq $PLACEHOLDER;
+                $comment .= "Consult $pod_file.pod\n";
             }
             $comment .= "\n";
         }
@@ -6317,7 +6363,7 @@ This file returns the $code_points in Unicode Version $string_version that
 $match$synonyms:
 
 $matches_comment
-$pod_file.pod should be consulted for the rules on using $any_of_these,
+$pod_file.pod should be consulted for the syntax rules for $any_of_these,
 including if adding or subtracting white space, underscore, and hyphen
 characters matters or doesn't matter, and other permissible syntactic
 variants.  Upper/lower case distinctions never matter.
@@ -6346,7 +6392,9 @@ END
 
         # And append any comment(s) from the actual tables.  They are all
         # gathered here, so may not read all that well.
-        $comment .= "\n" . join "\n\n", @global_comments if @global_comments;
+        if (@global_comments) {
+            $comment .= "\n" . join("\n\n", @global_comments) . "\n";
+        }
 
         if ($count) {   # The format differs if no code points, and needs no
                         # explanation in that case
@@ -9503,6 +9551,18 @@ END
     }
 } # End closure for UnicodeData
 
+sub process_GCB_test {
+
+    my $file = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    while ($file->next_line) {
+        push @backslash_X_tests, $_;
+    }
+        
+    return;
+}
+
 sub process_NamedSequences {
     # NamedSequences.txt entries are just added to an array.  Because these
     # don't look like the other tables, they have their own handler.
@@ -10795,21 +10855,78 @@ sub compile_perl() {
     }
 
     # These are used in Unicode's definition of \X
+    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1);
+    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1);
+
     my $gcb = property_ref('Grapheme_Cluster_Break');
-    #my $extend = $perl->add_match_table('_X_Extend');
-    my $extend = $perl->add_match_table('_GCB_Extend');
-    # XXX until decide what todo my $begin = $perl->add_match_table('_X_Begin');
-    if (defined $gcb) {
-        $extend += $gcb->table('Extend') + $gcb->table('SpacingMark')
-        #$begin += ~ ($gcb->table('Control')
-        #             + $gcb->table('CR')
-        #             + $gcb->table('LF'));
+
+    # The 'extended' grapheme cluster came in 5.1.  The non-extended 
+    # definition differs too much from the traditional Perl one to use.
+    if (defined $gcb && defined $gcb->table('SpacingMark')) {
+
+        # Note that assumes HST is defined; it came in an earlier release than
+        # GCB.  In the line below, two negatives means: yes hangul
+        $begin += ~ property_ref('Hangul_Syllable_Type')
+                                                    ->table('Not_Applicable')
+               + ~ ($gcb->table('Control')
+                    + $gcb->table('CR')
+                    + $gcb->table('LF'));
+        $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
+
+        $extend += $gcb->table('Extend') + $gcb->table('SpacingMark');
+        $extend->add_comment('For use in \X; matches: Extend | SpacingMark');
     }
     else {    # Old definition, used on early releases.
         $extend += $gc->table('Mark')
-                    + 0x200C    # ZWNJ
-                    + 0x200D;    # ZWJ
-        #$begin += ~ $extend;
+                + 0x200C    # ZWNJ
+                + 0x200D;   # ZWJ
+        $begin += ~ $extend;
+
+        # Here we may have a release that has the regular grapheme cluster
+        # defined, or a release that doesn't have anything defined.
+        # We set things up so the Perl core degrades gracefully, possibly with
+        # placeholders that match nothing.
+
+        if (! defined $gcb) {
+            $gcb = Property->new('GCB', Status => $PLACEHOLDER);
+        }
+        my $hst = property_ref('HST');
+        if (!defined $hst) {
+            $hst = Property->new('HST', Status => $PLACEHOLDER);
+            $hst->add_match_table('Not_Applicable',
+                                Initialize => $Any,
+                                Matches_All => 1);
+        }
+
+        # On some releases, here we may not have the needed tables for the
+        # perl core, in some releases we may.
+        foreach my $name (qw{ L LV LVT T V prepend }) {
+            my $table = $gcb->table($name);
+            if (! defined $table) {
+                $table = $gcb->add_match_table($name);
+                push @tables_that_may_be_empty, $table->complete_name;
+            }
+
+            # The HST property predates the GCB one, and has identical tables
+            # for some of them, so use it if we can.
+            if ($table->is_empty
+                && defined $hst
+                && defined $hst->table($name))
+            {
+                $table += $hst->table($name);
+            }
+        }
+    }
+
+    # More GCB.  If we found some hangul syllables, populate a combined
+    # table.
+    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V');
+    my $LV = $gcb->table('LV');
+    if ($LV->is_empty) {
+        push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
+    } else {
+        $lv_lvt_v += $LV + $gcb->table('LVT') + $gcb->table('V');
+        $lv_lvt_v->add_comment('For use in \X; matches: HST=LV | HST=LVT | HST=V');
     }
 
     # Create a new property specially located that is a combination of the
@@ -13231,6 +13348,11 @@ sub make_property_test_script() {
             }
         }
     }
+
+    foreach my $test (@backslash_X_tests) {
+        print $OUT "Test_X('$test');\n";
+    }
+
     print $OUT "Finished();\n";
     close $OUT;
     return;
@@ -13380,6 +13502,9 @@ my @input_file_objects = (
     Input_file->new('BidiMirroring.txt', v3.0.1,
                     Property => 'Bidi_Mirroring_Glyph',
                     ),
+    Input_file->new("NormalizationTest.txt", v3.0.1,
+                    Skip => 1,
+                    ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
                     Each_Line_Handler =>
@@ -13417,6 +13542,18 @@ my @input_file_objects = (
                     Property => 'Grapheme_Cluster_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     ),
+    Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
+                    Handler => \&process_GCB_test,
+                    ),
+    Input_file->new("$AUXILIARY/LBTest.txt", v4.1.0,
+                    Skip => 1,
+                    ),
+    Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
+                    Skip => 1,
+                    ),
+    Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
+                    Skip => 1,
+                    ),
     Input_file->new("$AUXILIARY/SentenceBreakProperty.txt", v4.1.0,
                     Property => 'Sentence_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
@@ -13426,6 +13563,9 @@ my @input_file_objects = (
                     ),
     Input_file->new('NameAliases.txt', v5.0.0,
                     Property => 'Name_Alias',
+                    ),
+    Input_file->new("BidiTest.txt", v5.2.0,
+                    Skip => 1,
                     ),
     Input_file->new('UnihanIndicesDictionary.txt', v5.2.0,
                     Optional => 1,
@@ -13474,18 +13614,16 @@ END
 
 # Put into %potential_files a list of all the files in the directory structure
 # that could be inputs to this program, excluding those that we should ignore.
-# Also don't consider test files.  Use absolute file names because it makes it
-# easier across machine types.
+# Use absolute file names because it makes it easier across machine types.
 my @ignored_files_full_names = map { File::Spec->rel2abs(
                                      internal_file_to_platform($_))
                                 } keys %ignored_files;
 File::Find::find({
     wanted=>sub {
-        return unless /\.txt$/i;
-        return if /Test\.txt$/i;
+        return unless /\.txt$/i;  # Some platforms change the name's case
         my $full = lc(File::Spec->rel2abs($_));
         $potential_files{$full} = 1
-                        if ! grep { $full eq lc($_) } @ignored_files_full_names;
+                    if ! grep { $full eq lc($_) } @ignored_files_full_names;
         return;
     }
 }, File::Spec->curdir());
@@ -13584,7 +13722,7 @@ if ($glob_list) {
                     && $input_file_objects[$i]->file !~ /$EXTRACTED_DIR/i)
                 {
                     splice @input_file_objects, $i, 0,
-                                                    Input_file->new($file, v0);
+                                                Input_file->new($file, v0);
                     last;
                 }
             }
@@ -13758,28 +13896,53 @@ __DATA__
 use strict;
 use warnings;
 
-# Test the \p{} regular expression constructs.  This file is constructed by
-# mktables from the tables it generates, so if mktables is buggy, this won't
-# necessarily catch those bugs.  Tests are generated for all feasible
-# properties; a few aren't currently feasible; see is_code_point_usable()
-# in mktables for details.
+# Test qr/\X/ and the \p{} regular expression constructs.  This file is
+# constructed by mktables from the tables it generates, so if mktables is
+# buggy, this won't necessarily catch those bugs.  Tests are generated for all
+# feasible properties; a few aren't currently feasible; see
+# is_code_point_usable() in mktables for details.
 
 # Standard test packages are not used because this manipulates SIG_WARN.  It
 # exits 0 if every non-skipped test succeeded; -1 if any failed.
 
 my $Tests = 0;
 my $Fails = 0;
-my $Skips = 0;
 
 my $non_ASCII = (ord('A') != 65);
 
-# The first 127 ASCII characters in ordinal order, with the ones that don't
-# have Perl names (as of 5.8) replaced by dots.  The 127th is used as the
-# string delimiter
-my $ascii_to_ebcdic = "\0......\a\b\t\n.\f\r.................. !\"#\$\%&'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-#for my $i (0..126) {
-#    print $i, ": ", substr($ascii_to_ebcdic, $i, 1), "\n";
-#}
+# The 256 8-bit characters in ASCII ordinal order, with the ones that don't
+# have Perl names replaced by -1
+my @ascii_ordered_chars = (
+    "\0",
+    (-1) x 6,
+    "\a", "\b", "\t", "\n",
+    -1,   # No Vt 
+    "\f", "\r",
+    (-1) x 18,
+    " ", "!", "\"", "#", '$', "%", "&", "'",
+    "(", ")", "*", "+", ",", "-", ".", "/",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+    ":", ";", "<", "=", ">", "?", "@",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    "[", "\\", "]", "^", "_", "`",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    "{", "|", "}", "~",
+    (-1) x 129
+);
+
+sub ASCII_ord_to_native ($) {
+    # Converts input ordinal number to the native one, if can be done easily.
+    # Returns -1 otherwise.
+
+    my $ord = shift;
+
+    return $ord if $ord > 255 || ! $non_ASCII;
+    my $result = $ascii_ordered_chars[$ord];
+    return $result if $result eq '-1';
+    return ord($result);
+}
 
 sub Expect($$$$) {
     my $expected = shift;
@@ -13789,38 +13952,24 @@ sub Expect($$$$) {
                                 # or empty if none
     my $line   = (caller)[2];
 
+    # Convert the non-ASCII code points expressible as characters to their
+    # ASCII equivalents, and skip the others.
+    $ord = ASCII_ord_to_native($ord);
+    if ($ord < 0) {
+        $Tests++;
+        print "ok $Tests - "
+              . sprintf("\"\\x{%04X}\"", $ord)
+              . " =~ $regex # Skipped: non-ASCII\n";
+        return;
+    }
+
     # Convert the code point to hex form
     my $string = sprintf "\"\\x{%04X}\"", $ord;
 
-    # Convert the non-ASCII code points expressible as characters in Perl 5.8
-    # to their ASCII equivalents, and skip the others.
-    if ($non_ASCII && $ord < 255) {
-
-        # Dots are used as place holders in the conversion string for the
-        # non-convertible ones, so check for it first.
-        if ($ord == 0x2E) {
-            $ord = ord('.');
-        }
-        elsif ($ord < 0x7F
-                  # Any dots returned are non-convertible.
-                 && ((my $char = substr($ascii_to_ebcdic, $ord, 1)) ne '.'))
-        {
-            #print STDERR "$ord, $char, \n";
-            $ord = ord($char);
-        }
-        else {
-            $Tests++;
-            $Skips++;
-            print "ok $Tests - $string =~ $regex # Skipped: non-ASCII\n";
-            return;
-        }
-    }
-
-    # The first time through, use all warnings.
     my @tests = "";
 
-    # If the input should generate a warning, add another time through with
-    # them turned off
+    # The first time through, use all warnings.  If the input should generate
+    # a warning, add another time through with them turned off
     push @tests, "no warnings '$warning_type';" if $warning_type;
 
     foreach my $no_warnings (@tests) {
@@ -13880,9 +14029,142 @@ sub Error($) {
     return;
 }
 
+# GCBTest.txt character that separates grapheme clusters
+my $breakable_utf8 = my $breakable = chr(0xF7);
+utf8::upgrade($breakable_utf8);
+
+# GCBTest.txt character that indicates that the adjoining code points are part
+# of the same grapheme cluster
+my $nobreak_utf8 = my $nobreak = chr(0xD7);
+utf8::upgrade($nobreak_utf8);
+
+sub Test_X($) {
+    # Test qr/\X/ matches.  The input is a line from auxiliary/GCBTest.txt
+    # Each such line is a sequence of code points given by their hex numbers,
+    # separated by the two characters defined just before this subroutine that
+    # indicate that either there can or cannot be a break between the adjacent
+    # code points.  If there isn't a break, that means the sequence forms an
+    # extended grapheme cluster, which means that \X should match the whole
+    # thing.  If there is a break, \X should stop there.  This is all
+    # converted by this routine into a match:
+    #   $string =~ /(\X)/,
+    # Each \X should match the next cluster; and that is what is checked.
+
+    my $template = shift;
+
+    my $line   = (caller)[2];
+
+    # The line contains characters above the ASCII range, but in Latin1.  It
+    # may or may not be in utf8, and if it is, it may or may not know it.  So,
+    # convert these characters to 8 bits.  If knows is in utf8, simply
+    # downgrade.
+    if (utf8::is_utf8($template)) {
+        utf8::downgrade($template);
+    } else {
+
+        # Otherwise, if it is in utf8, but doesn't know it, the next lines
+        # convert the two problematic characters to their 8-bit equivalents.
+        # If it isn't in utf8, they don't harm anything.
+        use bytes;
+        $template =~ s/$nobreak_utf8/$nobreak/g;
+        $template =~ s/$breakable_utf8/$breakable/g;
+    }
+
+    # Get rid of the leading and trailing breakables
+    $template =~ s/^ \s* $breakable \s* //x;
+    $template =~ s/ \s* $breakable \s* $ //x;
+
+    # And no-breaks become just a space.
+    $template =~ s/ \s* $nobreak \s* / /xg;
+
+    # Split the input into segments that are breakable between them.
+    my @segments = split /\s*$breakable\s*/, $template;
+
+    my $string = "";
+    my $display_string = "";
+    my @should_match;
+    my @should_display;
+
+    # Convert the code point sequence in each segment into a Perl string of
+    # characters
+    foreach my $segment (@segments) {
+        my @code_points = split /\s+/, $segment;
+        my $this_string = "";
+        my $this_display = "";
+        foreach my $code_point (@code_points) {
+            my $ord = ASCII_ord_to_native(hex $code_point);
+            if ($ord < 0) {
+                $Tests++;
+                print "ok $Tests - String containing $code_point =~ /(\\X)/g # Skipped: non-ASCII\n";
+                return;
+            }
+            $this_string .= chr $ord;
+            $this_display .= "\\x{$code_point}";
+        }
+
+        # The next cluster should match the string in this segment.
+        push @should_match, $this_string;
+        push @should_display, $this_display;
+        $string .= $this_string;
+        $display_string .= $this_display;
+    }
+
+    # If a string can be represented in both non-ut8 and utf8, test both cases
+    UPGRADE:
+    for my $to_upgrade (0 .. 1) {
+        
+        if ($to_upgrade) {
+
+            # If already in utf8, would just be a repeat
+            next UPGRADE if utf8::is_utf8($string);
+
+            utf8::upgrade($string);
+        }
+
+        # Finally, do the \X match.
+        my @matches = $string =~ /(\X)/g;
+
+        # Look through each matched cluster to verify that it matches what we
+        # expect.
+        my $min = (@matches < @should_match) ? @matches : @should_match;
+        for my $i (0 .. $min - 1) {
+            $Tests++;
+            if ($matches[$i] eq $should_match[$i]) {
+                print "ok $Tests - ";
+                if ($i == 0) {
+                    print "In \"$display_string\" =~ /(\\X)/g, \\X #1";
+                } else {
+                    print "And \\X #", $i + 1,
+                }
+                print " correctly matched $should_display[$i]; line $line\n";
+            } else {
+                $matches[$i] = join("", map { sprintf "\\x{%04X}", $_ }
+                                                    unpack("U*", $matches[$i]));
+                print "not ok $Tests - In \"$display_string\" =~ /(\\X)/g, \\X #",
+                    $i + 1,
+                    " should have matched $should_display[$i]",
+                    " but instead matched $matches[$i]",
+                    ".  Abandoning rest of line $line\n";
+                next UPGRADE;
+            }
+        }
+
+        # And the number of matches should equal the number of expected matches.
+        $Tests++;
+        if (@matches == @should_match) {
+            print "ok $Tests - Nothing was left over; line $line\n";
+        } else {
+            print "not ok $Tests - There were ", scalar @should_match, " \\X matches expected, but got ", scalar @matches, " instead; line $line\n";
+        }
+    }
+
+    return;
+}
+
 sub Finished() {
     print "1..$Tests\n";
     exit($Fails ? -1 : 0);
 }
 
 Error('\p{Script=InGreek}');    # Bug #69018
+Test_X("1100 $nobreak 1161");  # Bug #70940

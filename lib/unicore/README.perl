@@ -5,16 +5,17 @@ The *.txt files were copied from
 with subdirectories 'extracted' and 'auxiliary'
 
 The Unihan files were not included due to space considerations.  Also NOT
-included were any *.html files and *Test.txt files.  It is possible to add the
-Unihan files, and edit mktables (see instructions near its beginning) to look
-at them.
+included were any *.html files.  It is possible to add the Unihan files, and
+edit mktables (see instructions near its beginning) to look at them.
 
 The file 'version' should exist and be a single line with the Unicode version,
 like:
 5.2.0
 
 To be 8.3 filesystem friendly, the names of some of the input files have been
-changed from the values that are in the Unicode DB:
+changed from the values that are in the Unicode DB.  Not all of the Test files
+are currently used, so may not be present, so some of the mv's can fail.  The
+.html Test files are not touched.
 
 mv PropertyValueAliases.txt PropValueAliases.txt
 mv NamedSequencesProv.txt NamedSqProv.txt
@@ -33,6 +34,11 @@ mv extracted/DerivedLineBreak.txt extracted/DLineBreak.txt
 mv extracted/DerivedNumericType.txt extracted/DNumType.txt
 mv extracted/DerivedNumericValues.txt extracted/DNumValues.txt
 
+mv auxiliary/GraphemeBreakTest.txt auxiliary/GCBTest.txt
+mv auxiliary/LineBreakTest.txt auxiliary/LBTest.txt
+mv auxiliary/SentenceBreakTest.txt auxiliary/SBTest.txt
+mv auxiliary/WordBreakTest.txt auxiliary/WBTest.txt
+
 If you have the Unihan database (5.2 and above), you should also do the
 following:
 
@@ -45,9 +51,9 @@ mv Unihan_RadicalStrokeCounts.txt UnihanRadicalStrokeCounts.txt
 mv Unihan_Readings.txt UnihanReadings.txt
 mv Unihan_Variants.txt UnihanVariants.txt
 
-If you download everything, the names of files, such as test files, that are
-not used by mktables are not changed by the above, and will not work correctly
-as-is on 8.3 filesystems.
+If you download everything, the names of files that are not used by mktables
+are not changed by the above, and will not work correctly as-is on 8.3
+filesystems.
 
 mktables is used to generate the tables used by the rest of Perl.  It will warn
 you about any *.txt files in the directory substructure that it doesn't know
@@ -58,17 +64,12 @@ its lists to process.  You can run
 
 to have it try to process these tables generically.
 
-If any files are added, deleted, or their names change, you must run
-
-    mktables -makelist
-
-to generate a new list of all the files.
-
 FOR PUMPKINS
 
 The files are inter-related.  If you take the latest UnicodeData.txt, for
 example, but leave the older versions of other files, there can be subtle
-problems.
+problems.  So get everything available from Unicode, and delete those which
+aren't needed.
 
 When moving to a new version of Unicode, you need to update 'version' by hand
 
@@ -85,27 +86,19 @@ mktables can continue to be used for earlier Unicode versions.
 When putting out a new Perl release, think about if any of the Deprecated
 properties should be moved to Suppressed.
 
-The *.pl files are generated from the *.txt files by the mktables script,
-more recently done during the Perl build process, but if you want to try
-the old manual way:
-	
-	cd lib/unicore
-	p4 edit *.pl */*.pl */*/*.pl
-	perl ./mktables -P ../../pod -T ../../t/re/uniprops.t -makelist
-	p4 revert -a
-	cd ../..
-	perl Porting/manicheck
-	
-If any new (or deleted, unlikely but not impossible) *.pl files are indicated:
+The code in regexec.c for the \X match construct is intimately tied to the
+regular expression in UAX #29 (http://www.unicode.org/reports/tr29/).  You
+should see if it has changed, and if so regexec.c should be modified.  The
+current one is
+( CRLF
+| Prepend* ( Hangul-syllable | !Control )
+  ( Grapheme_Extend | Spacing_Mark)*
+| . )
 
-	cd lib/unicore
-	p4 add ...
-	p4 delete ...
-	cd ../...
-	p4 edit MANIFEST
-	...
+mktables has many checks to warn you if there are unexpected or novel things
+that it doesn't know how to handle.
 
-And finally:
+Finally:
 
 	p4 submit
 

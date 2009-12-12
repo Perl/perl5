@@ -73,21 +73,20 @@ END_EXTERN_C
 
    U+0000..U+007F	00..7F
    U+0080..U+07FF	C2..DF    80..BF
-   U+0800..U+0FFF	E0        A0..BF    80..BF
+   U+0800..U+0FFF	E0      * A0..BF    80..BF
    U+1000..U+CFFF       E1..EC    80..BF    80..BF
-   U+D000..U+D7FF       ED        80..9F    80..BF
-   U+D800..U+DFFF       ******* ill-formed *******
+   U+D000..U+D7FF       ED      * 80..9F    80..BF
+   U+D800..U+DFFF       +++++++ utf16 surrogates, not legal utf8 +++++++
    U+E000..U+FFFF       EE..EF    80..BF    80..BF
-  U+10000..U+3FFFF	F0        90..BF    80..BF    80..BF
+  U+10000..U+3FFFF	F0      * 90..BF    80..BF    80..BF
   U+40000..U+FFFFF	F1..F3    80..BF    80..BF    80..BF
  U+100000..U+10FFFF	F4        80..8F    80..BF    80..BF
 
-Note the A0..BF in U+0800..U+0FFF, the 80..9F in U+D000...U+D7FF,
-the 90..BF in U+10000..U+3FFFF, and the 80...8F in U+100000..U+10FFFF.
-The "gaps" are caused by legal UTF-8 avoiding non-shortest encodings:
-it is technically possible to UTF-8-encode a single code point in different
-ways, but that is explicitly forbidden, and the shortest possible encoding
-should always be used (and that is what Perl does).
+Note the gaps before the 2nd Byte entries above marked by '*'.  These are
+caused by legal UTF-8 avoiding non-shortest encodings: it is technically
+possible to UTF-8-encode a single code point in different ways, but that is
+explicitly forbidden, and the shortest possible encoding should always be used
+(and that is what Perl does).
 
  */
 
@@ -213,11 +212,12 @@ encoded character.
 #define UTF8_ALLOW_EMPTY		0x0001
 #define UTF8_ALLOW_CONTINUATION		0x0002
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
-#define UTF8_ALLOW_FE_FF		0x0008 /* Allow above 0x7fffFFFF */
-#define UTF8_ALLOW_SHORT		0x0010
+#define UTF8_ALLOW_FE_FF		0x0008 /* Allow FE or FF start bytes, \
+						  yields above 0x7fffFFFF */
+#define UTF8_ALLOW_SHORT		0x0010 /* expecting more bytes */
 #define UTF8_ALLOW_SURROGATE		0x0020
 #define UTF8_ALLOW_FFFF			0x0040 /* Allow UNICODE_ILLEGAL */
-#define UTF8_ALLOW_LONG			0x0080
+#define UTF8_ALLOW_LONG			0x0080 /* expecting fewer bytes */
 #define UTF8_ALLOW_ANYUV		(UTF8_ALLOW_EMPTY|UTF8_ALLOW_FE_FF|\
 					 UTF8_ALLOW_SURROGATE|UTF8_ALLOW_FFFF)
 #define UTF8_ALLOW_ANY			0x00FF

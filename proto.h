@@ -1414,6 +1414,66 @@ PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_MARK	\
 	assert(p)
 
+PERL_CALLCONV bool	Perl_is_utf8_X_begin(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_BEGIN	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_extend(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_PREPEND	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_non_hangul(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_NON_HANGUL	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_L(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_L	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_LV(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_LV	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_LVT(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_LVT	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_LV_LVT_V(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_LV_LVT_V	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_T(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_T	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_V(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_V	\
+	assert(p)
+
 PERL_CALLCONV OP*	Perl_jmaybe(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_JMAYBE	\

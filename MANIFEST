@@ -3593,6 +3593,7 @@ lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabicShaping.txt			Unicode character database
+lib/unicore/auxiliary/GCBTest.txt	Unicode character database
 lib/unicore/auxiliary/GraphemeBreakProperty.txt	Unicode character database
 lib/unicore/auxiliary/SentenceBreakProperty.txt	Unicode character database
 lib/unicore/auxiliary/WordBreakProperty.txt	Unicode character database

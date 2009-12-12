@@ -1488,6 +1488,106 @@ Perl_is_utf8_mark(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_mark, "IsM");
 }
 
+bool
+Perl_is_utf8_X_begin(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_BEGIN;
+
+    return is_utf8_common(p, &PL_utf8_X_begin, "_X_Begin");
+}
+
+bool
+Perl_is_utf8_X_extend(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND;
+
+    return is_utf8_common(p, &PL_utf8_X_extend, "_X_Extend");
+}
+
+bool
+Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_PREPEND;
+
+    return is_utf8_common(p, &PL_utf8_X_prepend, "GCB=Prepend");
+}
+
+bool
+Perl_is_utf8_X_non_hangul(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_NON_HANGUL;
+
+    return is_utf8_common(p, &PL_utf8_X_non_hangul, "HST=Not_Applicable");
+}
+
+bool
+Perl_is_utf8_X_L(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_L;
+
+    return is_utf8_common(p, &PL_utf8_X_L, "GCB=L");
+}
+
+bool
+Perl_is_utf8_X_LV(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LV;
+
+    return is_utf8_common(p, &PL_utf8_X_LV, "GCB=LV");
+}
+
+bool
+Perl_is_utf8_X_LVT(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LVT;
+
+    return is_utf8_common(p, &PL_utf8_X_LVT, "GCB=LVT");
+}
+
+bool
+Perl_is_utf8_X_T(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_T;
+
+    return is_utf8_common(p, &PL_utf8_X_T, "GCB=T");
+}
+
+bool
+Perl_is_utf8_X_V(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_V;
+
+    return is_utf8_common(p, &PL_utf8_X_V, "GCB=V");
+}
+
+bool
+Perl_is_utf8_X_LV_LVT_V(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LV_LVT_V;
+
+    return is_utf8_common(p, &PL_utf8_X_LV_LVT_V, "_X_LV_LVT_V");
+}
+
 /*
 =for apidoc to_utf8_case
 
@@ -1532,6 +1632,22 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 
     if (!*swashp) /* load on-demand */
          *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
+    /* This is the beginnings of a skeleton of code to read the info section
+     * that is in all the swashes in case we ever want to do that, so one can
+     * read things whose maps aren't code points, and whose default if missing
+     * is not to the code point itself.  This was just to see if it actually
+     * worked.  Details on what the possibilities are are in perluniprops.pod
+	HV * const hv = get_hv("utf8::SwashInfo", 0);
+	if (hv) {
+	 SV **svp;
+	 svp = hv_fetch(hv, (const char*)normal, strlen(normal), FALSE);
+	     const char *s;
+
+	      HV * const this_hash = SvRV(*svp);
+		svp = hv_fetch(this_hash, "type", strlen("type"), FALSE);
+	      s = SvPV_const(*svp, len);
+	}
+    }*/
 
     /* The 0xDF is the only special casing Unicode code point below 0x100. */
     if (special && (uv1 == 0xDF || uv1 > 0xFF)) {
@@ -1594,7 +1710,8 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	 }
     }
 
-    if (!len) /* Neither: just copy. */
+    if (!len) /* Neither: just copy.  In other words, there was no mapping
+		 defined, which means that the code point maps to itself */
 	 len = uvchr_to_utf8(ustrp, uv0) - ustrp;
 
     if (lenp)
@@ -1809,7 +1926,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	ptr = tmputf8;
     }
     /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
-     * then the "swatch" is a vec() for al the chars which start
+     * then the "swatch" is a vec() for all the chars which start
      * with 0xAA..0xYY
      * So the key in the hash (klen) is length of encoded char -1
      */
@@ -1817,7 +1934,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     off  = ptr[klen];
 
     if (klen == 0) {
-      /* If char in invariant then swatch is for all the invariant chars
+      /* If char is invariant then swatch is for all the invariant chars
        * In both UTF-8 and UTF-8-MOD that happens to be UTF_CONTINUATION_MARK
        */
 	needents = UTF_CONTINUATION_MARK;
