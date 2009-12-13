@@ -242,6 +242,16 @@ Perl_is_utf8_print
 Perl_is_utf8_punct
 Perl_is_utf8_xdigit
 Perl_is_utf8_mark
+Perl_is_utf8_X_begin
+Perl_is_utf8_X_extend
+Perl_is_utf8_X_prepend
+Perl_is_utf8_X_non_hangul
+Perl_is_utf8_X_L
+Perl_is_utf8_X_LV
+Perl_is_utf8_X_LVT
+Perl_is_utf8_X_LV_LVT_V
+Perl_is_utf8_X_T
+Perl_is_utf8_X_V
 Perl_leave_scope
 Perl_lex_end
 Perl_lex_bufutf8

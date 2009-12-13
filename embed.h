@@ -391,7 +391,6 @@
 #define is_utf8_punct		Perl_is_utf8_punct
 #define is_utf8_xdigit		Perl_is_utf8_xdigit
 #define is_utf8_mark		Perl_is_utf8_mark
-#ifdef PERL_CORE
 #define is_utf8_X_begin		Perl_is_utf8_X_begin
 #define is_utf8_X_extend	Perl_is_utf8_X_extend
 #define is_utf8_X_prepend	Perl_is_utf8_X_prepend
@@ -402,6 +401,7 @@
 #define is_utf8_X_LV_LVT_V	Perl_is_utf8_X_LV_LVT_V
 #define is_utf8_X_T		Perl_is_utf8_X_T
 #define is_utf8_X_V		Perl_is_utf8_X_V
+#ifdef PERL_CORE
 #define jmaybe			Perl_jmaybe
 #define keyword			Perl_keyword
 #endif
@@ -2794,7 +2794,6 @@
 #define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
-#ifdef PERL_CORE
 #define is_utf8_X_begin(a)	Perl_is_utf8_X_begin(aTHX_ a)
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
 #define is_utf8_X_prepend(a)	Perl_is_utf8_X_prepend(aTHX_ a)
@@ -2805,6 +2804,7 @@
 #define is_utf8_X_LV_LVT_V(a)	Perl_is_utf8_X_LV_LVT_V(aTHX_ a)
 #define is_utf8_X_T(a)		Perl_is_utf8_X_T(aTHX_ a)
 #define is_utf8_X_V(a)		Perl_is_utf8_X_V(aTHX_ a)
+#ifdef PERL_CORE
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
 #endif
