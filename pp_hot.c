@@ -1261,7 +1261,11 @@ PP(pp_match)
     }
 
     PUTBACK;				/* EVAL blocks need stack_sp. */
-    s = SvPV_const(TARG, len);
+    /* Skip get-magic if this is a qr// clone, because regcomp has
+       already done it. */
+    s = ((struct regexp *)SvANY(rx))->mother_re
+	 ? SvPV_nomg_const(TARG, len)
+	 : SvPV_const(TARG, len);
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
     strend = s + len;

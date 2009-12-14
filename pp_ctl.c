@@ -149,6 +149,26 @@ PP(pp_regcomp)
 	re = (REGEXP*) tmpstr;
 
     if (re) {
+	/* The match's LHS's get-magic might need to access this op's reg-
+	   exp (as is sometimes the case with $';  see bug 70764).  So we
+	   must call get-magic now before we replace the regexp. Hopeful-
+	   ly this hack can be replaced with the approach described at
+	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03
+	   /msg122415.html some day. */
+	OP *matchop = pm->op_next;
+	SV *lhs;
+	const bool was_tainted = PL_tainted;
+	if (matchop->op_flags & OPf_STACKED)
+	    lhs = TOPs;
+	else if (matchop->op_private & OPpTARGET_MY)
+	    lhs = PAD_SV(matchop->op_targ);
+	else lhs = DEFSV;
+	SvGETMAGIC(lhs);
+	/* Restore the previous value of PL_tainted (which may have been
+	   modified by get-magic), to avoid incorrectly setting the
+	   RXf_TAINTED flag further down. */
+	PL_tainted = was_tainted;
+
 	re = reg_temp_copy(NULL, re);
 	ReREFCNT_dec(PM_GETRE(pm));
 	PM_SETRE(pm, re);
