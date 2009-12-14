@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -222,6 +222,7 @@ my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine
 
 local $| = 1;
 my $_;
+local $.;
 
 my $standalone;
 my(%HTML_2_Troff, %HTML_2_Latin_1, %HTML_2_ASCII_7);
