@@ -4277,7 +4277,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    || left->op_type == OP_PADHV
 		    || left->op_type == OP_PADANY))
 	{
-	    maybe_common_vars = FALSE;
+	    if (left->op_type == OP_PADSV) maybe_common_vars = FALSE;
 	    if (left->op_private & OPpPAD_STATE) {
 		/* All single variable list context state assignments, hence
 		   state ($a) = ...

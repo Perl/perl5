@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (125);
+plan (127);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -426,6 +426,20 @@ sub test_arylen {
     our($x,$y,$z) = (1..3);
     (our $y, our $z) = ($x,$y);
     is("$x $y $z", "1 1 2");
+}
+
+# [perl #70171]
+{
+ my $x = get_x(); my %x = %$x; sub get_x { %x=(1..4); return \%x };
+ is(
+   join(" ", map +($_,$x{$_}), sort keys %x), "1 2 3 4",
+  'bug 70171 (self-assignment via my %x = %$x)'
+ );
+ my $y = get_y(); my @y = @$y; sub get_y { @y=(1..4); return \@y };
+ is(
+  "@y", "1 2 3 4",
+  'bug 70171 (self-assignment via my @x = @$x)'
+ );
 }
 
 
