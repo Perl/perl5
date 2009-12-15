@@ -152,9 +152,6 @@ sub import {
             unshift @_, @{$legacy_bundle{$v}};
             next;
         }
-        if (!exists $legacy{$name}) {
-            unknown_legacy($name);
-        }
         $^H |= $unicode8bit::hint_not_uni8bit;   # The only valid thing as of yet
     }
 }
