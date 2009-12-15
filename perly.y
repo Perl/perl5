@@ -511,7 +511,9 @@ peg	:	PEG
 	;
 
 format	:	FORMAT startformsub formname block
-			{ SvREFCNT_inc_simple_void(PL_compcv);
+			{
+			  CV *fmtcv = PL_compcv;
+			  SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  $$ = newFORM($2, $3, $4);
 			  prepend_madprops($1->tk_mad, $$, 'F');
@@ -521,6 +523,10 @@ format	:	FORMAT startformsub formname block
 			  newFORM($2, $3, $4);
 			  $$ = (OP*)NULL;
 #endif
+			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
+			    SvREFCNT_inc_simple_void(fmtcv);
+			    pad_add_anon((SV*)fmtcv, OP_NULL);
+			  }
 			}
 	;
 
