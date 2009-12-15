@@ -9,7 +9,7 @@ END { @warnings && print STDERR join "\n- ", "accumulated warnings:", @warnings 
 
 
 use strict;
-use Test::More tests => 95;
+use Test::More tests => 96;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -340,4 +340,10 @@ $kloong = 'schlozhauer';
     @value = eval 'klong';
     is ($@, '');
     is_deeply (\@value, []);
+}
+
+{
+    local $SIG{'__WARN__'} = sub { die "WARNING: $_[0]" };
+    eval 'use constant undef, 5; 1';
+    like $@, qr/\ACan't use undef as constant name at /;
 }

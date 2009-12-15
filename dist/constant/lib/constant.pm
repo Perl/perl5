@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.19';
+$VERSION = '1.20';
 
 #=======================================================================
 
@@ -60,15 +60,14 @@ sub import {
 	}
 	$constants = shift;
     } else {
+	unless (defined $_[0]) {
+	    require Carp;
+	    Carp::croak("Can't use undef as constant name");
+	}
 	$constants->{+shift} = undef;
     }
 
     foreach my $name ( keys %$constants ) {
-	unless (defined $name) {
-	    require Carp;
-	    Carp::croak("Can't use undef as constant name");
-	}
-
 	# Normal constant name
 	if ($name =~ $normal_constant_name and !$forbidden{$name}) {
 	    # Everything is okay
