@@ -99,9 +99,19 @@ $| = 1;
 #BEGIN { require '../lib/strict.pm'; "strict"->import() };
 #BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
-delete $ENV{PERL5LIB};
-delete $ENV{PERLLIB};
-delete $ENV{PERL5OPT};
+# delete env vars that may influence the results
+# but allow override via *_TEST env var if wanted
+# (e.g. PERL5OPT_TEST=-d:NYTProf)
+for my $envname (qw(PERL5LIB PERLLIB PERL5OPT)) {
+    my $override = $ENV{"${envname}_TEST"};
+    if (defined $override) {
+	warn "$0: $envname=$override\n";
+	$ENV{$envname} = $override;
+    }
+    else {
+	delete $ENV{$envname};
+    }
+}
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
