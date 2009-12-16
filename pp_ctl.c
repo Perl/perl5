@@ -1333,13 +1333,16 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
-	    if ( !CxLABEL(cx) || strNE(label, CxLABEL(cx)) ) {
+	  {
+	    const char *cx_label = CxLABEL(cx);
+	    if (!cx_label || strNE(label, cx_label) ) {
 		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
-			(long)i, CxLABEL(cx)));
+			(long)i, cx_label));
 		continue;
 	    }
 	    DEBUG_l( Perl_deb(aTHX_ "(Found label #%ld %s)\n", (long)i, label));
 	    return i;
+	  }
 	}
     }
     return i;
@@ -2413,9 +2416,11 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 	OP *kid;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		    CopLABEL(kCOP) && strEQ(CopLABEL(kCOP), label))
-		return kid;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+		const char *kid_label = CopLABEL(kCOP);
+		if (kid_label && strEQ(kid_label, label))
+		    return kid;
+	    }
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
