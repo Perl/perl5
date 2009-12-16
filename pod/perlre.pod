@@ -768,8 +768,24 @@ which buffer the captured content will be stored.
     / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
     # 1            2         2  3        2     3     4  
 
-Note: as of Perl 5.10.0, branch resets interfere with the contents of
-the C<%+> hash, that holds named captures. Consider using C<%-> instead.
+Be careful when using the branch reset pattern in combination with 
+named captures. Named captures are implemented as being aliases to 
+numbered buffers holding the captures, and that interferes with the
+implementation of the branch reset pattern. If you are using named
+captures in a branch reset pattern, it's best to use the same names,
+in the same order, in each of the alternations:
+
+   /(?|  (?<a> x ) (?<b> y )
+      |  (?<a> z ) (?<b> w )) /x
+
+Not doing so may lead to surprises:
+
+  "12" =~ /(?| (?<a> \d+ ) | (?<b> \D+))/x;
+  say $+ {a};   # Prints '12'
+  say $+ {b};   # *Also* prints '12'.
+
+The problem here is that both the buffer named C<< a >> and the buffer
+named C<< b >> are aliases for the buffer belonging to C<< $1 >>.
 
 =item Look-Around Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
