@@ -456,7 +456,7 @@ Perl_yyparse (pTHX)
     YYPUSHSTACK;
     ps->state   = yyn;
     ps->val     = parser->yylval;
-    ps->compcv  = SvREFCNT_inc(PL_compcv);
+    ps->compcv  = (CV*)SvREFCNT_inc(PL_compcv);
     ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    = (const char *)(yytname[yytoken]);
@@ -555,7 +555,7 @@ Perl_yyparse (pTHX)
 	  number reduced by.  */
 
     ps->val     = yyval;
-    ps->compcv  = SvREFCNT_inc(PL_compcv);
+    ps->compcv  = (CV*)SvREFCNT_inc(PL_compcv);
     ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    = (const char *)(yytname [yyr1[yyn]]);
@@ -670,7 +670,7 @@ Perl_yyparse (pTHX)
     YYPUSHSTACK;
     ps->state   = yyn;
     ps->val     = parser->yylval;
-    ps->compcv  = SvREFCNT_inc(PL_compcv);
+    ps->compcv  = (CV*)SvREFCNT_inc(PL_compcv);
     ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    ="<err>";
