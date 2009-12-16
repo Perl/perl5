@@ -239,6 +239,9 @@ SKIP: {
 
     my $skips = @tests * 6 * 8;
 
+    # TODO - make this skip fire if we're on a nosuid filesystem rather than guessing by OS
+    skip "OpenBSD filesystems default to nosuid breaking these tests", $skips
+          if $^O eq 'openbsd';
     skip "-- Copy preserves RMS defaults, not POSIX permissions.", $skips
           if $^O eq 'VMS';
     skip "Copy doesn't set file permissions correctly on Win32.",  $skips
