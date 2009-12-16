@@ -4389,6 +4389,7 @@ t/op/exists_sub.t		See if exists(&sub) works
 t/op/exp.t			See if math functions work
 t/op/fh.t			See if filehandles work
 t/op/filetest.t			See if file tests work
+t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/fork.t			See if fork works
 t/op/getpid.t			See if $$ and getppid work with threads
