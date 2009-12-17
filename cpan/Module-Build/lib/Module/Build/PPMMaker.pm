@@ -3,7 +3,9 @@ package Module::Build::PPMMaker;
 use strict;
 use Config;
 use vars qw($VERSION);
-$VERSION = '0.35_14';
+use IO::File;
+
+$VERSION = '0.35_15';
 $VERSION = eval $VERSION;
 
 # This code is mostly borrowed from ExtUtils::MM_Unix 6.10_03, with a
@@ -101,8 +103,9 @@ EOF
   my $fh = IO::File->new(">$ppd_file")
     or die "Cannot write to $ppd_file: $!";
 
+  my $io_file_ok = eval { IO::File->VERSION(1.13); 1 };
   $fh->binmode(":utf8")
-    if $fh->can('binmode') && $] >= 5.008 && $Config{useperlio};
+    if $io_file_ok && $fh->can('binmode') && $] >= 5.008 && $Config{useperlio};
   print $fh $ppd;
   close $fh;
 

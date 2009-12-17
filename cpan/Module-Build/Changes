@@ -1,5 +1,11 @@
 Revision history for Perl extension Module::Build.
 
+0.35_15 - Thu Dec 17 17:51:22 EST 2009
+
+ Bug fixes:
+
+ - Make sure PPM tests are skipped if IO::File is too old [David Golden]
+
 0.35_14 - Thu Dec 17 16:02:14 EST 2009
 
  Bug fixes:

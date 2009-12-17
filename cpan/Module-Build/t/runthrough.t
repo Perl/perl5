@@ -2,7 +2,7 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 30;
+use MBTest tests => 29;
 
 blib_load('Module::Build');
 blib_load('Module::Build::ConfigData');
@@ -158,27 +158,6 @@ SKIP: {
     my $first_line = <$fh>;
     isnt $first_line, "#!perl -w\n", "should rewrite the shebang line";
   }
-}
-
-{
-  # Check PPD
-  $mb->dispatch('ppd', args => {codebase => '/path/to/codebase'});
-
-  my $ppd = slurp('Simple.ppd');
-
-  # This test is quite a hack since with XML you don't really want to
-  # do a strict string comparison, but absent an XML parser it's the
-  # best we can do.
-  is $ppd, <<'EOF';
-<SOFTPKG NAME="Simple" VERSION="0.01">
-    <ABSTRACT>Perl extension for blah blah blah</ABSTRACT>
-    <AUTHOR>A. U. Thor, a.u.thor@a.galaxy.far.far.away</AUTHOR>
-    <IMPLEMENTATION>
-        <REQUIRE NAME="File::Spec" VERSION="0" />
-        <CODEBASE HREF="/path/to/codebase" />
-    </IMPLEMENTATION>
-</SOFTPKG>
-EOF
 }
 
 
