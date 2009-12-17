@@ -86,6 +86,7 @@ DllExport  int		win32_dup2(int h1, int h2);
 DllExport  int		win32_open(const char *path, int oflag,...);
 DllExport  int		win32_close(int fd);
 DllExport  int		win32_eof(int fd);
+DllExport  int		win32_isatty(int fd);
 DllExport  int		win32_read(int fd, void *buf, unsigned int cnt);
 DllExport  int		win32_write(int fd, const void *buf, unsigned int cnt);
 DllExport  int		win32_spawnvp(int mode, const char *cmdname,
@@ -252,6 +253,7 @@ END_EXTERN_C
 #define open			win32_open
 #define close(fd)		win32_close(fd)
 #define eof(fd)			win32_eof(fd)
+#define isatty(fd)		win32_isatty(fd)
 #define read(fd,b,s)		win32_read(fd,b,s)
 #define write(fd,b,s)		win32_write(fd,b,s)
 #define _open_osfhandle		win32_open_osfhandle

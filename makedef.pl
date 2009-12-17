@@ -1284,6 +1284,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_open
 			    win32_close
 			    win32_eof
+			    win32_isatty
 			    win32_read
 			    win32_write
 			    win32_spawnvp

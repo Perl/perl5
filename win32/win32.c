@@ -3509,6 +3509,27 @@ win32_eof(int fd)
 }
 
 DllExport int
+win32_isatty(int fd)
+{
+    /* The Microsoft isatty() function returns true for *all*
+     * character mode devices, including "nul".  Our implementation
+     * should only return true if the handle has a console buffer.
+     */
+    DWORD mode;
+    HANDLE fh = (HANDLE)_get_osfhandle(fd);
+    if (fh == (HANDLE)-1) {
+        /* errno is already set to EBADF */
+        return 0;
+    }
+
+    if (GetConsoleMode(fh, &mode))
+        return 1;
+
+    errno = ENOTTY;
+    return 0;
+}
+
+DllExport int
 win32_dup(int fd)
 {
     return dup(fd);

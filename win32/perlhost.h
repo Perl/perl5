@@ -1004,22 +1004,7 @@ PerlLIOIOCtl(struct IPerlLIO* piPerl, int i, unsigned int u, char *data)
 int
 PerlLIOIsatty(struct IPerlLIO* piPerl, int fd)
 {
-    /* The Microsoft isatty() function returns true for *all*
-     * character mode devices, including "nul".  Our implementation
-     * should only return true if the handle has a console buffer.
-     */
-    DWORD mode;
-    HANDLE fh = (HANDLE)_get_osfhandle(fd);
-    if (fh == (HANDLE)-1) {
-        /* errno is already set to EBADF */
-        return 0;
-    }
-
-    if (GetConsoleMode(fh, &mode))
-        return 1;
-
-    errno = ENOTTY;
-    return 0;
+    return win32_isatty(fd);
 }
 
 int
