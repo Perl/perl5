@@ -1,5 +1,77 @@
 Revision history for Perl extension Module::Build.
 
+0.35_14 - Thu Dec 17 16:02:14 EST 2009
+
+ Bug fixes:
+
+ - If not set, the 'module_name' is detected from 'dist_version_from'
+   or from 'dist_name'.  The directory is no longer used. [David Golden]
+
+ - The 'share_dir' property no longer defaults to 'share' and must be
+   explicitly set instead; this fixes problems for CPAN distributions that
+   already have a 'share' directory for whatever reason [David Golden]
+
+ - Change t/00-compile.t test for more portability [David Golden]
+
+ - Skip ppm.t if Pod::Html is not available [David Goldenj]
+
+ - Changed guts of inc::latest to work properly on older versions of Perl
+   [David Golden]
+
+ - Ensure bundle_inc.t doesn't accidentally uninstall the installed M::B
+   during testing if the user had 'uninst=1' set during Build.PL
+   [David Golden]
+
+0.35_13 - Sat Dec  5 11:26:36 EST 2009
+
+ Bug fixes:
+
+ - Protect against tempfile errors when checking ExtUtils::Installed
+   [David Golden]
+
+0.35_12 - Fri Dec  4 23:06:49 EST 2009
+
+ Bug fixes:
+
+ - Protect inc/ bundling tests against broken ExtUtils::Installed
+   [David Golden]
+
+0.35_11 - Thu Dec  3 11:07:44 EST 2009
+
+ *** API CHANGE ***
+
+ - The old API for prepare_metadata() has been restored to avoid breaking
+   distributions that were overriding it (e.g. BioPerl), but the method
+   has been marked deprecated and may be made private or may disappear in
+   some future version of Module::Build. [David Golden]
+
+ - A new get_metadata() method has been added as a simpler wrapper around
+   the old, kludgy prepare_metadata() API. [David Golden]
+
+0.35_10 - Tue Nov 24 22:49:19 EST 2009
+
+ Bug fixes:
+
+ - bundle_inc.t is more careful about permissions and open filehandles
+   to avoid failures/skips on Win32 [David Golden]
+
+ - Fix compilation error in Module::Build::Platform::VMS (RT#51766)
+   [David Golden]
+
+ - Don't generate a MANIFEST.SKIP during distclean and add any generated
+   MANIFEST.SKIP to cleanup list [reported by Zefram, fixed by David Golden]
+
+ - Module::Build::ModuleInfo version parsing would fail if a module sets
+   its $VERSION from another module, but the other module is not installed.
+   We now try to detect such failures, prepend 'lib' to @INC and try again.
+   [David Golden]
+
+ - MYMETA.yml used to be generated from scratch, overriding any
+   customizations used to create META.yml.  Now, if META.yml exists, that
+   will be used as the base for MYMETA and only prereq fields will be
+   updated (to reflect any dynamic configuration); also, 'dynamic_config'
+   will be set to false and 'generated_by' will be updated [David Golden]
+
 0.35_09 - Thu Nov 19 01:30:42 EST 2009
 
  Bug fixes:

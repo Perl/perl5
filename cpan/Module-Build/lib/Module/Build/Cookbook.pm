@@ -1,7 +1,7 @@
 package Module::Build::Cookbook;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 
 
 =head1 NAME
@@ -487,7 +487,7 @@ Next, add this to the top of your F<Build.PL>.
 
     # Find out what version of Module::Build is installed or fail quietly.
     # This should be cross-platform.
-    my $Installed_MB = 
+    my $Installed_MB =
         `$^X -e "eval q{require Module::Build; print Module::Build->VERSION} or exit 1";
 
     # some operating systems put a newline at the end of every print.

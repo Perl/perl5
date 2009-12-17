@@ -10,22 +10,26 @@ plan tests => 4;
 # Ensure any Module::Build modules are loaded from correct directory
 blib_load('Module::Build');
 
-# enter the directory and generate the skeleton files
-my $dist = DistGen->new( name => "Not::So::Simple" )->chdir_in;
+my $dist;
 
 #--------------------------------------------------------------------------#
-# try getting module_name from dist directory name
+# try getting module_name from dist_name
 #--------------------------------------------------------------------------#
+
+$dist = DistGen->new(
+  name => "Not::So::Simple",
+  distdir => 'Random-Name',
+)->chdir_in;
 
 $dist->change_build_pl(
-  dist_name => 'Random-Name',
+  dist_name => 'Not-So-Simple',
   dist_version => 1,
 )->regen;
 
 my $mb = $dist->new_from_context();
 isa_ok( $mb, "Module::Build" );
 is( $mb->module_name, "Not::So::Simple",
-  "module_name guessed from directory name"
+  "module_name guessed from dist_name"
 );
 
 #--------------------------------------------------------------------------#

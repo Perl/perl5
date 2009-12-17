@@ -9,7 +9,7 @@ blib_load('Module::Build::ConfigData');
 
 my $tmp = MBTest->tmpdir;
 
-my %metadata = 
+my %metadata =
   (
    module_name   => 'Simple',
    dist_version  => '3.14159265',
@@ -62,10 +62,10 @@ my $mb = Module::Build->new_from_context;
 
 {
   my $mb_prereq = { 'Module::Build' => $Module::Build::VERSION };
-  my $mb_config_req = { 
-    'Module::Build' => int($Module::Build::VERSION * 100)/100 
+  my $mb_config_req = {
+    'Module::Build' => int($Module::Build::VERSION * 100)/100
   };
-  my $node = $mb->prepare_metadata( );
+  my $node = $mb->get_metadata( );
 
   # exists() doesn't seem to work here
   is $node->{name}, $metadata{module_name};
@@ -86,7 +86,7 @@ my $mb = Module::Build->new_from_context;
 {
   my $mb_prereq = { 'Module::Build' => 0 };
   $mb->configure_requires( $mb_prereq );
-  my $node = $mb->prepare_metadata( );
+  my $node = $mb->get_metadata( );
 
 
   # exists() doesn't seem to work here
@@ -176,11 +176,11 @@ package Simple::Simon;
 $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 ---
   $dist->regen;
-  my $provides = new_build()->prepare_metadata()->{provides};
+  my $provides = new_build()->get_metadata()->{provides};
   is $provides->{'Simple'}{version}, 'v0.60.128', "Check version";
   is $provides->{'Simple::Simon'}{version}, 'v0.61.129', "Check version";
-  is ref($provides->{'Simple'}{version}), '', "Versions from prepare_metadata() aren't refs";
-  is ref($provides->{'Simple::Simon'}{version}), '', "Versions from prepare_metadata() aren't refs";
+  is ref($provides->{'Simple'}{version}), '', "Versions from get_metadata() aren't refs";
+  is ref($provides->{'Simple::Simon'}{version}), '', "Versions from get_metadata() aren't refs";
 }
 
 

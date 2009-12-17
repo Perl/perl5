@@ -81,7 +81,7 @@ sub import {
 	map { $args{$_} = 1 } @_
     }
     else { # no parameters at all on use line
-    	%args = 
+    	%args =
 	(
 	    qv => 1,
 	    'UNIVERSAL::VERSION' => 1,
@@ -89,9 +89,9 @@ sub import {
     }
 
     my $callpkg = caller();
-    
+
     if (exists($args{declare})) {
-	*{$callpkg."::declare"} = 
+	*{$callpkg."::declare"} =
 	    sub {return $class->declare(shift) }
 	  unless defined(&{$callpkg.'::declare'});
     }
@@ -155,7 +155,7 @@ sub new
 {
 	my ($class, $value) = @_;
 	my $self = bless ({}, ref ($class) || $class);
-	
+
 	if ( ref($value) && eval('$value->isa("version")') ) {
 	    # Can copy the elements directly
 	    $self->{version} = [ @{$value->{version} } ];
@@ -193,7 +193,7 @@ sub new
 	    $value = sprintf("%.9f",$value);
 	    $value =~ s/(0+)$//; # trim trailing zeros
 	}
-	
+
 	# This is not very efficient, but it is morally equivalent
 	# to the XS code (as that is the reference implementation).
 	# See vutil/vutil.c for details
@@ -215,7 +215,7 @@ sub new
 	}
 
 	$start = $last = $pos = $s;
-		
+
 	# pre-scan the input string to check for decimals/underbars
 	while ( substr($value,$pos,1) =~ /[._\d,]/ ) {
 	    if ( substr($value,$pos,1) eq '.' ) {
@@ -300,7 +300,7 @@ sub new
 			    $orev = $rev;
 			    $rev += substr($value,$s,1) * $mult;
 			    $mult /= 10;
-			    if (   abs($orev) > abs($rev) 
+			    if (   abs($orev) > abs($rev)
 				|| abs($rev) > abs($VERSION_MAX) ) {
 				if ( warnings::enabled("overflow") ) {
 				    require Carp;
@@ -320,7 +320,7 @@ sub new
 			    $orev = $rev;
 			    $rev += substr($value,$end,1) * $mult;
 			    $mult *= 10;
-			    if (   abs($orev) > abs($rev) 
+			    if (   abs($orev) > abs($rev)
 				|| abs($rev) > abs($VERSION_MAX) ) {
 				if ( warnings::enabled("overflow") ) {
 				    require Carp;
@@ -335,15 +335,15 @@ sub new
 
 		# Append revision
 		push @{$self->{version}}, $rev;
-		if ( substr($value,$pos,1) eq '.' 
+		if ( substr($value,$pos,1) eq '.'
 		    && substr($value,$pos+1,1) =~ /\d/ ) {
 		    $s = ++$pos;
 		}
-		elsif ( substr($value,$pos,1) eq '_' 
+		elsif ( substr($value,$pos,1) eq '_'
 		    && substr($value,$pos+1,1) =~ /\d/ ) {
 		    $s = ++$pos;
 		}
-		elsif ( substr($value,$pos,1) eq ',' 
+		elsif ( substr($value,$pos,1) eq ','
 		    && substr($value,$pos+1,1) =~ /\d/ ) {
 		    $s = ++$pos;
 		}
@@ -400,7 +400,7 @@ sub new
 
 *parse = \&new;
 
-sub numify 
+sub numify
 {
     my ($self) = @_;
     unless (_verify($self)) {
@@ -441,7 +441,7 @@ sub numify
     return $string;
 }
 
-sub normal 
+sub normal
 {
     my ($self) = @_;
     unless (_verify($self)) {
@@ -484,9 +484,9 @@ sub stringify
 	require Carp;
 	Carp::croak("Invalid version object");
     }
-    return exists $self->{original} 
-    	? $self->{original} 
-	: exists $self->{qv} 
+    return exists $self->{original}
+    	? $self->{original}
+	: exists $self->{qv}
 	    ? $self->normal
 	    : $self->numify;
 }
@@ -524,8 +524,8 @@ sub vcmp
     }
 
     # tiebreaker for alpha with identical terms
-    if ( $retval == 0 
-	&& $l == $r 
+    if ( $retval == 0
+	&& $l == $r
 	&& $left->{version}[$m] == $right->{version}[$m]
 	&& ( $lalpha || $ralpha ) ) {
 
@@ -557,7 +557,7 @@ sub vcmp
 	}
     }
 
-    return $retval;  
+    return $retval;
 }
 
 sub vbool {
@@ -565,8 +565,8 @@ sub vbool {
     return vcmp($self,$self->new("0"),1);
 }
 
-sub vnoop { 
-    require Carp; 
+sub vnoop {
+    require Carp;
     Carp::croak("operation not supported with version object");
 }
 
@@ -644,7 +644,7 @@ sub _VERSION {
     if ( defined $req ) {
 	unless ( defined $version ) {
 	    require Carp;
-	    my $msg =  $] < 5.006 
+	    my $msg =  $] < 5.006
 	    ? "$class version $req required--this is only version "
 	    : "$class does not define \$$class\::VERSION"
 	      ."--version check failed";
@@ -662,14 +662,14 @@ sub _VERSION {
 	if ( $req > $version ) {
 	    require Carp;
 	    if ( $req->is_qv ) {
-		Carp::croak( 
+		Carp::croak(
 		    sprintf ("%s version %s required--".
 			"this is only version %s", $class,
 			$req->normal, $version->normal)
 		);
 	    }
 	    else {
-		Carp::croak( 
+		Carp::croak(
 		    sprintf ("%s version %s required--".
 			"this is only version %s", $class,
 			$req->stringify, $version->stringify)

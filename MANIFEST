@@ -1552,6 +1552,7 @@ cpan/Module-Build/lib/Module/Build/PPMMaker.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Version.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/YAML.pm		Module::Build
 cpan/Module-Build/scripts/config_data			Module::Build
+cpan/Module-Build/t/00-compile.t			Module::Build
 cpan/Module-Build/t/actions/installdeps.t		Module::Build
 cpan/Module-Build/t/add_property.t			Module::Build
 cpan/Module-Build/t/basic.t				Module::Build

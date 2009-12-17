@@ -15,7 +15,7 @@ BEGIN {
 
 	# Class structure
 	require 5.004;
-	
+
 	$Module::Build::YAML::VERSION   = '1.40';
 
 	# Error storage
@@ -561,7 +561,7 @@ sub LoadFile {
 	if ( wantarray ) {
 		return @$self;
 	} else {
-		# Return only the last document to match YAML.pm, 
+		# Return only the last document to match YAML.pm,
 		return $self->[-1];
 	}
 }

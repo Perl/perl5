@@ -3,7 +3,7 @@ package Module::Build::PPMMaker;
 use strict;
 use Config;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 
 # This code is mostly borrowed from ExtUtils::MM_Unix 6.10_03, with a
@@ -137,7 +137,7 @@ sub _varchname {  # Copied from PPM.pm
 		 '<' => '&lt;',
 		);
   my $rx = join '|', keys %escapes;
-  
+
   sub _simple_xml_escape {
     $_[1] =~ s/($rx)/$escapes{$1}/go;
   }

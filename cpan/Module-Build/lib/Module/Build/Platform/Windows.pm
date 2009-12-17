@@ -2,7 +2,7 @@ package Module::Build::Platform::Windows;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 
 use Config;
@@ -207,22 +207,22 @@ sub split_like_shell {
   # into words.  The algorithm below was bashed out by Randy and Ken
   # (mostly Randy), and there are a lot of regression tests, so we
   # should feel free to adjust if desired.
-  
+
   (my $self, local $_) = @_;
-  
+
   return @$_ if defined() && UNIVERSAL::isa($_, 'ARRAY');
-  
+
   my @argv;
   return @argv unless defined() && length();
-  
+
   my $arg = '';
   my( $i, $quote_mode ) = ( 0, 0 );
-  
+
   while ( $i < length() ) {
-    
+
     my $ch      = substr( $_, $i  , 1 );
     my $next_ch = substr( $_, $i+1, 1 );
-    
+
     if ( $ch eq '\\' && $next_ch eq '"' ) {
       $arg .= '"';
       $i++;
@@ -249,10 +249,10 @@ sub split_like_shell {
     } else {
       $arg .= $ch;
     }
-    
+
     $i++;
   }
-  
+
   push( @argv, $arg ) if defined( $arg ) && length( $arg );
   return @argv;
 }

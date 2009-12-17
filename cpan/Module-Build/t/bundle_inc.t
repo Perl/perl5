@@ -8,6 +8,7 @@ use Config;
 use IO::File;
 use File::Spec;
 use ExtUtils::Packlist;
+use ExtUtils::Installed;
 use File::Path;
 
 # Ensure any Module::Build modules are loaded from correct directory
@@ -17,8 +18,11 @@ blib_load('Module::Build::ConfigData');
 if ( $ENV{PERL_CORE} ) {
   plan skip_all => 'bundle_inc tests will never succeed in PERL_CORE';
 }
+elsif ( ! MBTest::check_EUI() ) {
+  plan skip_all => 'ExtUtils::Installed takes too long on your system';
+}
 elsif ( Module::Build::ConfigData->feature('inc_bundling_support') ) {
-  plan tests => 18;
+  plan tests => 19;
 } else {
   plan skip_all => 'inc_bundling_support feature is not enabled';
 }
@@ -36,10 +40,15 @@ ok( -d $arch_path, "created temporary M::B pseudo-install directory");
 
 unshift @INC, $lib_path, $arch_path;
 local $ENV{PERL5LIB} = join( $Config{path_sep},
-  $lib_path, $arch_path, ($ENV{PERL5LIB} ? $ENV{PERL5LIB} : () )
+  $lib_path, ($ENV{PERL5LIB} ? $ENV{PERL5LIB} : () )
 );
 
-stdout_of( sub { $current_mb->dispatch('install', install_base => $temp_install) } );
+# must uninst=0 so we don't try to remove an installed M::B!
+stdout_of( sub { $current_mb->dispatch(
+      'install', install_base => $temp_install, uninst => 0
+    )
+  }
+);
 
 # create dist object in a temp directory
 # enter the directory and generate the skeleton files
@@ -53,12 +62,12 @@ is_deeply( $mb->bundle_inc, [ 'Module::Build' ],
   "Module::Build is flagged for bundling"
 );
 
-# see what gets bundled
+# bundle stuff into distdir
 stdout_stderr_of( sub { $mb->dispatch('distdir') } );
 
 my $dist_inc = File::Spec->catdir($mb->dist_dir, 'inc');
 ok( -e File::Spec->catfile( $dist_inc, 'latest.pm' ),
-  "./inc/latest.pm created"
+  "dist_dir/inc/latest.pm created"
 );
 
 ok( -d File::Spec->catdir( $dist_inc, 'inc_Module-Build' ),
@@ -82,6 +91,7 @@ ok( -e File::Spec->catfile( $dist_inc, qw/inc_Module-Build Module Build Base.pm/
 
 eval {
   my $fh;
+  chmod 0666, $mb_file;
   $fh = IO::File->new($mb_file, "<") or die "Could not read $mb_file: $!";
   my $mb_code = do { local $/; <$fh> };
   $mb_code =~ s{\$VERSION\s+=\s+\S+}{\$VERSION = 9999;};
@@ -101,12 +111,14 @@ SKIP: {
   chdir $mb->dist_dir;
 
   stdout_of( sub { Module::Build->run_perl_script('Build.PL',[],[]) } );
+  ok( -e 'MYMETA.yml', 'MYMETA was created' );
 
   my $meta = IO::File->new('MYMETA.yml');
-  ok( $meta, "found MYMETA.yml" );
+  ok( $meta, "opened MYMETA.yml" );
   ok( scalar( grep { /generated_by:.*9999/ } <$meta> ),
     "dist_dir Build.PL loaded bundled Module::Build"
   );
+  close $meta;
 
   #--------------------------------------------------------------------------#
   # test identification of dependencies

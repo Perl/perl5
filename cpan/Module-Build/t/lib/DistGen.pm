@@ -312,7 +312,7 @@ sub name { shift()->{name} }
 
 sub dirname {
   my $self = shift;
-  my $dist = join( '-', split( /::/, $self->{name} ) );
+  my $dist = $self->{distdir} || join( '-', split( /::/, $self->{name} ) );
   return File::Spec->catdir( $self->{dir}, $dist );
 }
 
@@ -645,13 +645,18 @@ dist name.
 =item dir
 
 The (parent) directory in which to create the distribution directory.  The
-distribution will be created under this according to the "dist" form of C<name>
-(e.g. "Foo-Bar".)  Defaults to a temporary directory.
+distribution will be created under this according to C<distdir> parameter
+below.  Defaults to a temporary directory.
 
   $dist = DistGen->new( dir => '/tmp/MB-test' );
   $dist->regen;
 
   # distribution files have been created in /tmp/MB-test/Simple
+
+=item distdir
+
+The name of the distribution directory to create.  Defaults to the dist form of
+C<name>, e.g. 'Foo-Bar' if C<name> is 'Foo::Bar'.
 
 =item xs
 

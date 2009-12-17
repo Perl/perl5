@@ -98,15 +98,15 @@ print "Hello, World!\n";
   use vars qw($VERSION @ISA);
   @ISA = qw(Module::Build);
   $VERSION = 0.01;
-  
+
   # Add a new property.
   ok(__PACKAGE__->add_property('foo'));
   # Add a new property with a default value.
   ok(__PACKAGE__->add_property('bar', 'hey'));
   # Add a hash property.
   ok(__PACKAGE__->add_property('hash', {}));
-  
-  
+
+
   # Catch an exception adding an existing property.
   eval { __PACKAGE__->add_property('module_name')};
   like "$@", qr/already exists/;
@@ -118,7 +118,7 @@ print "Hello, World!\n";
   use vars qw($VERSION @ISA);
   @ISA = qw(Module::Build);
   $VERSION = 0.01;
-  
+
   # Add a new property with a different default value than MBSub has.
   ok(__PACKAGE__->add_property('bar', 'yow'));
 }
@@ -130,30 +130,30 @@ print "Hello, World!\n";
   isa_ok $mb, 'MBSub';
   ok $mb->valid_property('foo');
   can_ok $mb, 'module_name';
-  
+
   # Check foo property.
   can_ok $mb, 'foo';
   ok ! $mb->foo;
   ok $mb->foo(1);
   ok $mb->foo;
-  
+
   # Check bar property.
   can_ok $mb, 'bar';
   is $mb->bar, 'hey';
   ok $mb->bar('you');
   is $mb->bar, 'you';
-  
+
   # Check hash property.
   ok $mb = MBSub->new(
 		       module_name => $dist->name,
 		       hash        => { foo => 'bar', bin => 'foo'}
 		     );
-  
+
   can_ok $mb, 'hash';
   isa_ok $mb->hash, 'HASH';
   is $mb->hash->{foo}, 'bar';
   is $mb->hash->{bin}, 'foo';
-  
+
   # Check hash property passed via the command-line.
   {
     local @ARGV = (
@@ -167,7 +167,7 @@ print "Hello, World!\n";
   isa_ok $mb->hash, 'HASH';
   is $mb->hash->{foo}, 'bar';
   is $mb->hash->{bin}, 'foo';
-  
+
   # Make sure that a different subclass with the same named property has a
   # different default.
   ok $mb = MBSub2->new( module_name => $dist->name );
@@ -186,19 +186,19 @@ print "Hello, World!\n";
 				  meta_add => {foo => 'bar'},
 				  conflicts => {'Foo::Barxx' => 0},
 			        );
-  my $data = $mb->prepare_metadata;
+  my $data = $mb->get_metadata;
   is $data->{foo}, 'bar';
 
   $mb->meta_merge(foo => 'baz');
-  $data = $mb->prepare_metadata;
+  $data = $mb->get_metadata;
   is $data->{foo}, 'baz';
 
   $mb->meta_merge(conflicts => {'Foo::Fooxx' => 0});
-  $data = $mb->prepare_metadata;
+  $data = $mb->get_metadata;
   is_deeply $data->{conflicts}, {'Foo::Barxx' => 0, 'Foo::Fooxx' => 0};
 
   $mb->meta_add(conflicts => {'Foo::Bazxx' => 0});
-  $data = $mb->prepare_metadata;
+  $data = $mb->get_metadata;
   is_deeply $data->{conflicts}, {'Foo::Bazxx' => 0, 'Foo::Fooxx' => 0};
 }
 

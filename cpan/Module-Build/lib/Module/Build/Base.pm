@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -1090,11 +1090,11 @@ sub _guess_module_name {
     $p->{module_name} = $mi->name;
   }
   else {
-    my $mod_path = my $mod_name = File::Basename::basename($self->base_dir);
+    my $mod_path = my $mod_name = $p->{dist_name};
     $mod_name =~ s{-}{::}g;
     $mod_path =~ s{-}{/}g;
     $mod_path .= ".pm";
-    if ( -e $mod_path || -e File::Spec->catfile('lib', $mod_path) ) {
+    if ( -e $mod_path || -e "lib/$mod_path" ) {
       $p->{module_name} = $mod_name;
     }
     else {
@@ -1279,7 +1279,15 @@ sub write_config {
     return unless inc::latest->can('loaded_modules');
     require ExtUtils::Installed;
     # ExtUtils::Installed is buggy about finding additions to default @INC
-    my $inst = ExtUtils::Installed->new(extra_libs => [@INC]);
+    my $inst = eval { ExtUtils::Installed->new(extra_libs => [@INC]) };
+    if ($@) {
+      $self->log_warn( << "EUI_ERROR" );
+Bundling in inc/ is disabled because ExtUtils::Installed could not
+create a list of your installed modules.  Here is the error:
+$@
+EUI_ERROR
+      return;
+    }
     my @bundle_list = map { [ $_, 0 ] } inc::latest->loaded_modules;
 
     # XXX TODO: Need to get ordering of prerequisites correct so they are
@@ -1753,17 +1761,48 @@ my \$build = $build_package->resume (
 EOF
 }
 
-sub create_build_script {
+sub create_mymeta {
   my ($self) = @_;
-  $self->write_config;
-
-  # Create MYMETA.yml
   my $mymetafile = $self->mymetafile;
+  my $metafile = $self->metafile;
+
+  # cleanup
   if ( $self->delete_filetree($mymetafile) ) {
     $self->log_verbose("Removed previous '$mymetafile'\n");
   }
   $self->log_info("Creating new '$mymetafile' with configuration results\n");
-  $self->write_metafile( $mymetafile, $self->prepare_metadata( fatal => 0 ) );
+
+  # use old meta and update prereqs, if possible
+  my $mymeta;
+  if ( -f $metafile ) {
+    $mymeta = eval { $self->read_metafile( $self->metafile ) };
+  }
+  # if we read META OK, just update it
+  if ( defined $mymeta ) {
+    my $prereqs = $self->_normalize_prereqs;
+    for my $t ( keys %$prereqs ) {
+        $mymeta->{$t} = $prereqs->{$t};
+    }
+  }
+  # but generate from scratch, ignoring errors if META doesn't exist
+  else {
+    $mymeta = $self->get_metadata( fatal => 0 );
+  }
+
+  # MYMETA is always static
+  $mymeta->{dynamic_config} = 0;
+  # Note which M::B created it
+  $mymeta->{generated_by} = "Module::Build version $Module::Build::VERSION";
+
+  $self->write_metafile( $mymetafile, $mymeta );
+  return 1;
+}
+
+sub create_build_script {
+  my ($self) = @_;
+
+  $self->write_config;
+  $self->create_mymeta;
 
   # Create Build
   my ($build_script, $dist_name, $dist_version)
@@ -2416,6 +2455,7 @@ sub _action_listing {
   while (my ($one, $two) = splice @actions, 0, 2) {
     $out .= sprintf("  %-12s                   %-12s\n", $one, $two||'');
   }
+  $out =~ s{\s*$}{}mg; # remove trailing spaces
   return $out;
 }
 
@@ -2716,14 +2756,14 @@ sub _find_share_dir_files {
 
   my @file_map;
   if ( $share_dir->{dist} ) {
-    my $prefix = File::Spec->catdir( "dist", $self->dist_name );
+    my $prefix = "dist/".$self->dist_name;
     push @file_map, $self->_share_dir_map( $prefix, $share_dir->{dist} );
   }
 
   if ( $share_dir->{module} ) {
     for my $mod ( keys %{ $share_dir->{module} } ) {
       (my $altmod = $mod) =~ s{::}{-}g;
-      my $prefix = File::Spec->catdir("module", $altmod);
+      my $prefix = "module/$altmod";
       push @file_map, $self->_share_dir_map($prefix, $share_dir->{module}{$mod});
     }
   }
@@ -2736,9 +2776,8 @@ sub _share_dir_map {
   my %files;
   for my $dir ( @$list ) {
     for my $f ( @{ $self->rscan_dir( $dir, sub {-f} )} ) {
-      $files{File::Spec->canonpath($f)} = File::Spec->catfile(
-        $prefix, File::Spec->abs2rel( $f, $dir )
-      );
+      $f =~ s{\A.*\Q$dir\E/}{};
+      $files{"$dir/$f"} = "$prefix/$f";
     }
   }
   return %files;
@@ -3482,7 +3521,7 @@ sub ACTION_dist {
 sub ACTION_distcheck {
   my ($self) = @_;
 
-  $self->_check_manifest_skip;
+  $self->_check_manifest_skip unless $self->invoked_action eq 'distclean';
 
   require ExtUtils::Manifest;
   local $^W; # ExtUtils::Manifest is not warnings clean.
@@ -3861,7 +3900,7 @@ sub _write_default_maniskip {
 
   $content .= <<'EOF';
 # Avoid configuration metadata file
-^MYMETA\.$
+^MYMETA\.
 
 # Avoid Module::Build generated and utility files.
 \bBuild$
@@ -3870,6 +3909,7 @@ sub _write_default_maniskip {
 \bBuild.COM$
 \bBUILD.COM$
 \bbuild.com$
+^MANIFEST\.SKIP
 
 # Avoid archives of this distribution
 EOF
@@ -3888,8 +3928,9 @@ sub _check_manifest_skip {
   my $maniskip = 'MANIFEST.SKIP';
 
   if ( ! -e $maniskip ) {
-    $self->log_warn("File '$maniskip' does not exist: Creating a default '$maniskip'\n");
+    $self->log_warn("File '$maniskip' does not exist: Creating a temporary '$maniskip'\n");
     $self->_write_default_maniskip($maniskip);
+    $self->add_to_cleanup($maniskip);
   }
   else {
     # MYMETA must not be added to MANIFEST, so always confirm the skip
@@ -3948,8 +3989,7 @@ sub share_dir {
 
   # Always coerce to proper hash form
   if    ( ! defined $p->{share_dir} ) {
-    # not set -- use default 'share' dir if exists
-    $p->{share_dir} = { dist => [ 'share' ] } if -d 'share';
+    return;
   }
   elsif ( ! ref $p->{share_dir}  ) {
     # scalar -- treat as a single 'dist' directory
@@ -4127,12 +4167,27 @@ sub do_create_metafile {
     push @INC, File::Spec->catdir($self->blib, 'lib');
   }
 
-  if ( $self->write_metafile( $self->metafile, $self->prepare_metadata( fatal => 1 ) ) ) {
+  if ($self->write_metafile($self->metafile,$self->get_metadata(fatal=>1))){
     $self->{wrote_metadata} = 1;
     $self->_add_to_manifest('MANIFEST', $metafile);
   }
 
   return 1;
+}
+
+sub read_metafile {
+  my $self = shift;
+  my ($metafile) = @_;
+  my $yaml;
+
+  my $class = $self->_mb_feature('YAML_support')
+            ? 'YAML::Tiny' : 'Module::Build::YAML' ;
+
+  eval "require $class; 1" or die $@;
+  my $meta = $class->read($metafile)
+    or $self->log_warn( "Error reading '$metafile': " . $class->errstr . "\n");
+
+  return $meta->[0] || {};
 }
 
 sub write_metafile {
@@ -4172,16 +4227,51 @@ sub normalize_version {
   return $version;
 }
 
-sub prepare_metadata {
-  my ($self, %args) = @_;
-  my $fatal = $args{fatal} || 0;
+sub _normalize_prereqs {
+  my ($self) = @_;
   my $p = $self->{properties};
-  my $node = {};
+
+  # copy prereq data structures so we can modify them before writing to META
+  my %prereq_types;
+  for my $type ( 'configure_requires', @{$self->prereq_action_types} ) {
+    if (exists $p->{$type}) {
+      for my $mod ( keys %{ $p->{$type} } ) {
+        $prereq_types{$type}{$mod} =
+          $self->normalize_version($p->{$type}{$mod});
+      }
+    }
+  }
+  return \%prereq_types;
+}
+
+
+# wrapper around old prepare_metadata API;
+sub get_metadata {
+  my ($self, %args) = @_;
+  my $metadata = {};
+  $self->prepare_metadata( $metadata, undef, \%args );
+  return $metadata;
+}
+
+# To preserve compatibility with old API, $node *must* be a hashref
+# passed in to prepare_metadata.  $keys is an arrayref holding a
+# list of keys -- it's use is optional and generally no longer needed
+# but kept for back compatibility.  $args is an optional parameter to
+# support the new 'fatal' toggle
+
+sub prepare_metadata {
+  my ($self, $node, $keys, $args) = @_;
+  unless ( ref $node eq 'HASH' ) {
+    croak "prepare_metadata() requires a hashref argument to hold output\n";
+  }
+  my $fatal = $args->{fatal} || 0;
+  my $p = $self->{properties};
 
   # A little helper sub
   my $add_node = sub {
     my ($name, $val) = @_;
     $node->{$name} = $val;
+    push @$keys, $name if $keys;
   };
 
   foreach (qw(dist_name dist_version dist_author dist_abstract license)) {
@@ -4223,19 +4313,10 @@ sub prepare_metadata {
     # XXX we are silently omitting the url for any unknown license
   }
 
-  # copy prereq data structures so we can modify them before writing to META
-  my %prereq_types;
-  for my $type ( 'configure_requires', @{$self->prereq_action_types} ) {
-    if (exists $p->{$type}) {
-      for my $mod ( keys %{ $p->{$type} } ) {
-        $prereq_types{$type}{$mod} =
-          $self->normalize_version($p->{$type}{$mod});
-      }
-    }
-  }
 
-  for my $t ( keys %prereq_types ) {
-      $add_node->($t, $prereq_types{$t});
+  my $prereqs = $self->_normalize_prereqs;
+  for my $t ( keys %$prereqs ) {
+      $add_node->($t, $prereqs->{$t});
   }
 
   if (exists $p->{dynamic_config}) {

@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -167,25 +167,7 @@ This illustrates initial configuration and the running of three
 'actions'.  In this case the actions run are 'build' (the default
 action), 'test', and 'install'.  Other actions defined so far include:
 
-  build                          manifest    
-  clean                          manpages    
-  code                           pardist     
-  config_data                    ppd         
-  diff                           ppmdist     
-  dist                           prereq_data 
-  distcheck                      prereq_report
-  distclean                      pure_install
-  distdir                        realclean   
-  distmeta                       retest      
-  distsign                       skipcheck   
-  disttest                       test        
-  docs                           testall     
-  fakeinstall                    testcover   
-  help                           testdb      
-  html                           testpod     
-  install                        testpodcoverage
-  installdeps                    versioninstall
-
+<action_list>
 
 You can run the 'help' action for a complete list of actions.
 
@@ -318,7 +300,7 @@ tarball of the files listed in F<MANIFEST> and compress the tarball using
 GZIP compression.
 
 By default, this action will use the C<Archive::Tar> module. However, you can
-force it to use binary "tar" and "gzip" executables by supplying an explicit 
+force it to use binary "tar" and "gzip" executables by supplying an explicit
 C<tar> (and optional C<gzip>) parameter:
 
   ./Build dist --tar C:\path\to\tar.exe --gzip C:\path\to\zip.exe
@@ -559,7 +541,7 @@ for a bug report.
 [version 0.28]
 
 This action is identical to the C<install> action.  In the future,
-though, when C<install> starts writing to the file 
+though, when C<install> starts writing to the file
 F<$(INSTALLARCHLIB)/perllocal.pod>, C<pure_install> won't, and that
 will be the only difference between them.
 
@@ -684,7 +666,7 @@ argument.
 
 [version 0.25]
 
-This checks all the files described in the C<docs> action and 
+This checks all the files described in the C<docs> action and
 produces C<Test::Harness>-style output.  If you are a module author,
 this is useful to run before creating a new release.
 
@@ -692,7 +674,7 @@ this is useful to run before creating a new release.
 
 [version 0.28]
 
-This checks the pod coverage of the distribution and 
+This checks the pod coverage of the distribution and
 produces C<Test::Harness>-style output. If you are a module author,
 this is useful to run before creating a new release.
 

@@ -1,4 +1,7 @@
-#!/usr/bin/perl
+#!/opt/perl/5.10.1/bin/perl 
+
+eval 'exec /opt/perl/5.10.1/bin/perl  -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
 
 use strict;
 use Module::Build 0.25;
@@ -92,7 +95,7 @@ sub load_config {
 
   $mod =~ /^([\w:]+)$/
     or die "Invalid module name '$mod'";
-  
+
   my $cf = $mod . "::ConfigData";
   eval "require $cf";
   die $@ if $@;
@@ -104,10 +107,10 @@ sub usage {
   my %defs = @_;
 
   my $out = "\nUsage: $0 [options]\n\n  Options include:\n";
-  
+
   foreach my $name (sort keys %defs) {
     $out .= "  --$name";
-    
+
     for ($defs{$name}{type}) {
       /^=s$/  and      $out .= " <string>";
       /^=s%$/ and      $out .= " <string>=<value>";
@@ -144,11 +147,11 @@ config_data - Query or change configuration of Perl modules
   # Get config/feature values
   config_data --module Foo::Bar --feature bazzable
   config_data --module Foo::Bar --config magic_number
-  
+
   # Set config/feature values
   config_data --module Foo::Bar --set_feature bazzable=1
   config_data --module Foo::Bar --set_config magic_number=42
-  
+
   # Print a usage message
   config_data --help
 

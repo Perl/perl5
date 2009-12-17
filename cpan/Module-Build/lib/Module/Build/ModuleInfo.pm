@@ -8,7 +8,7 @@ package Module::Build::ModuleInfo;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -23,7 +23,7 @@ my $PKG_REGEXP  = qr{   # match a package declaration
   \s+                   # whitespace
   ([\w:]+)              # a package name
   \s*                   # optional whitespace
-  ($V_NUM_REGEXP)?        # optional version number 
+  ($V_NUM_REGEXP)?        # optional version number
   \s*                   # optional whitesapce
   ;                     # semicolon line terminator
 }x;
@@ -235,7 +235,7 @@ sub _parse_fh {
 	$need_vers = 0 if $vers_pkg eq $pkg;
 
 	unless ( defined $vers{$vers_pkg} && length $vers{$vers_pkg} ) {
-	  $vers{$vers_pkg} = 
+	  $vers{$vers_pkg} =
 	    $self->_evaluate_version_line( $vers_sig, $vers_fullname, $line );
 	} else {
 	  # Warn unless the user is using the "$VERSION = eval
@@ -321,12 +321,18 @@ sub _evaluate_version_line {
   local $^W;
   # Try to get the $VERSION
   eval $eval;
+  # some modules say $VERSION = $Foo::Bar::VERSION, but Foo::Bar isn't
+  # installed, so we need to hunt in ./lib for it
+  if ( $@ =~ /Can't locate/ && -d 'lib' ) {
+    local @INC = ('lib',@INC);
+    eval $eval;
+  }
   warn "Error evaling version line '$eval' in $self->{filename}: $@\n"
     if $@;
   (ref($vsub) eq 'CODE') or
     die "failed to build version sub for $self->{filename}";
   my $result = eval { $vsub->() };
-  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n" 
+  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n"
     if $@;
 
   # Activestate apparently creates custom versions like '1.23_45_01', which
@@ -340,7 +346,7 @@ sub _evaluate_version_line {
 
   # Bless it into our own version class
   eval { $result = Module::Build::Version->new($result) };
-  die "Version '$result' from $self->{filename} does not appear to be valid:\n$eval\n\nThe fatal error was: $@\n" 
+  die "Version '$result' from $self->{filename} does not appear to be valid:\n$eval\n\nThe fatal error was: $@\n"
     if $@;
 
   return $result;

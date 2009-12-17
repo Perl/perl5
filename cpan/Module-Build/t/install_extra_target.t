@@ -7,7 +7,7 @@ use MBTest tests => 6;
 
 blib_load('Module::Build');
 
-use File::Spec::Functions qw( catdir );
+use File::Spec::Functions qw( catdir catfile );
 
 my $tmp = MBTest->tmpdir;
 my $output;
@@ -83,7 +83,7 @@ $build->install_base_relpaths('etc' => "etc/$distdir");
 $build->create_build_script();
 
 ===EOF===
-	
+
 #Test Build.PL exists ok?
 
 $dist->add_file("etc/config", <<'===EOF===');
@@ -128,8 +128,8 @@ diag "OUTPUT:\n$output" if $error;
 $output = stdout_of sub { $dist->run_build('install') };
 
 $error = 0;
-$error++ unless ok(-e "$installdest/etc/simple/config", "installed etc/config");
-$error++ unless ok(-e "$installdest/shared/simple/data", "installed shared/data");
-$error++ unless ok(-e "$installdest/shared/simple/html/index.html", "installed shared/html");
+$error++ unless ok(-e catfile($installdest, qw/etc simple config/), "installed etc/config");
+$error++ unless ok(-e catfile($installdest, qw/shared simple data/), "installed shared/data");
+$error++ unless ok(-e catfile($installdest, qw/shared simple html index.html/), "installed shared/html");
 diag "OUTPUT:\n$output" if $error;
 

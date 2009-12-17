@@ -2,7 +2,7 @@ package Module::Build::Platform::MacOS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.35_09';
+$VERSION = '0.35_14';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 use vars qw(@ISA);
@@ -15,17 +15,17 @@ sub have_forkpipe { 0 }
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new(@_);
-  
+
   # $Config{sitelib} and $Config{sitearch} are, unfortunately, missing.
   foreach ('sitelib', 'sitearch') {
     $self->config($_ => $self->config("install$_"))
       unless $self->config($_);
   }
-  
+
   # For some reason $Config{startperl} is filled with a bunch of crap.
   (my $sp = $self->config('startperl')) =~ s/.*Exit \{Status\}\s//;
   $self->config(startperl => $sp);
-  
+
   return $self;
 }
 
@@ -42,7 +42,7 @@ sub dispatch {
 
   if( !@_ and !@ARGV ) {
     require MacPerl;
-      
+
     # What comes first in the action list.
     my @action_list = qw(build test install);
     my %actions = map {+($_, 1)} $self->known_actions;
@@ -53,17 +53,17 @@ sub dispatch {
     foreach (@action_list) {
       $_ .= ' *' if $toolserver{$_};
     }
-    
+
     my $cmd = MacPerl::Pick("What build command? ('*' requires ToolServer)", @action_list);
     return unless defined $cmd;
     $cmd =~ s/ \*$//;
     $ARGV[0] = ($cmd);
-    
+
     my $args = MacPerl::Ask('Any extra arguments?  (ie. verbose=1)', '');
     return unless defined $args;
     push @ARGV, $self->split_like_shell($args);
   }
-  
+
   $self->SUPER::dispatch(@_);
 }
 
@@ -82,10 +82,10 @@ sub ACTION_realclean {
 
 sub ACTION_install {
   my $self = shift;
-  
+
   return $self->SUPER::ACTION_install(@_)
     if eval {ExtUtils::Install->VERSION('1.30'); 1};
-    
+
   local $^W = 0; # Avoid a 'redefine' warning
   local *ExtUtils::Install::find = sub {
     my ($code, @dirs) = @_;
@@ -94,7 +94,7 @@ sub ACTION_install {
 
     return File::Find::find($code, @dirs);
   };
-  
+
   return $self->SUPER::ACTION_install(@_);
 }
 
