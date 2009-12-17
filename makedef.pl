@@ -758,6 +758,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
 		    PL_hints_mutex
+		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_regdupe
 		    Perl_parser_dup
@@ -793,7 +794,6 @@ unless ($define{'USE_ITHREADS'}) {
 
 unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
     skip_symbols [qw(
-		    PL_my_ctx_mutex
 		    PL_my_cxt_index
 		    PL_my_cxt_list
 		    PL_my_cxt_size
