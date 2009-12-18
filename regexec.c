@@ -5948,8 +5948,10 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 
     if (do_utf8 && !UTF8_IS_INVARIANT(c)) {
 	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
-		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV) | UTF8_CHECK_ONLY);
-		/* see [perl #37836] for UTF8_ALLOW_ANYUV */
+		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
+		| UTF8_ALLOW_FFFF | UTF8_CHECK_ONLY);
+		/* see [perl #37836] for UTF8_ALLOW_ANYUV; [perl #38293] for
+		 * UTF8_ALLOW_FFFF */
 	if (len == (STRLEN)-1) 
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }

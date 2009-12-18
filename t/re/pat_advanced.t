@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1142;  # Update this when adding/deleting tests.
+plan tests => 1143;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1770,6 +1770,17 @@ sub run_tests {
         iseq $_, "!Bang!1!Bang!2!Bang!3!Bang!";
     }
 
+    { 
+        # Earlier versions of Perl said this was fatal.
+        local $Message = "U+0FFFF shouldn't crash the regex engine";
+        no warnings 'utf8';
+        my $a = eval "chr(65535)";
+        use warnings;
+        my $warning_message;
+        local $SIG{__WARN__} = sub { $warning_message = $_[0] };
+        eval $a =~ /[a-z]/;
+        ok(1);  # If it didn't crash, it worked.
+    }
 } # End of sub run_tests
 
 1;
