@@ -396,3 +396,761 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+
+
+
+All changes through commit b4178430270dbe109e7609d0b50d6d54bf9e95d8
+One "triage" pass done.
+
+A second triage pass is still needed to remove unimportant changes
+
+commit f13b7ac8b084674447e000c42d094f46b04c5dd7
+
+    manicheck's complaints about missing files are now closer to the form
+    you might want to paste into a MANIFEST
+
+commit 0e38ac7805aa91d94a5718273a06c051670207ca
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Fri Dec 18 18:41:00 2009 +0100
+    
+    When discarding a token free the op associated with it.
+    
+    Fixes memory leak in comp/parser.t
+    
+    Gerard Goossen
+    
+    From 7694ec023ec8856f34964b5eeea58f1b588c89bc Mon Sep 17 00:00:00 2001
+    From: Gerard Goossen <gerard@ggoossen.net>
+    Date: Fri, 18 Dec 2009 18:32:11 +0100
+    Subject: [PATCH 4/4] When discarding a token free the op associated with it.
+    Status: O
+    Content-Length: 438
+    Lines: 20
+    
+    Bring up ExtUtils::MakeMaker to 6.56 - no functional changes from 6.55_03
+
+    Import CPAN.pm 1.94_53 from CPAN
+
+commit 587808146dcf7a2a909b351c4c32085e6fcb74dc
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Fri Dec 18 15:11:25 2009 +0100
+    
+    Free the PL_scopestack_name
+    
+    Gerard Goossen
+    
+
+commit 9307c420fad2f6f5bd314f9ed66dd53288703e09
+Author: Jan Dubois <jand@activestate.com>
+Date:   Thu Dec 17 18:28:16 2009 -0800
+
+    Export PL_curinterp symbol for MULTIPLICITY without USE_ITHREADS
+    
+    This is necessary for XS extensions that define PERL_CORE.  In that
+    situation PERL_GET_CONTEXT will resolve to PL_curinterp, which is
+    normally not exported (extensions call Perl_Gcurinterp_ptr() to get a
+    pointer to PL_curinterp instead). With USE_ITHREADS defined
+    PERL_GET_CONTEXT will expand to Perl_get_context() even inside the
+    core because the context needs to be fetched from threadlocal storage.
+
+commit 8703a9a4fd75723318bc4ba1afc42a215806f2d1
+Author: Max Maischein <corion@corion.net>
+Date:   Thu Dec 17 23:22:39 2009 +0100
+
+    Correct some #ifdef USE_ITHREADS / USE_MULTI 
+
+commit 229c5935ba2b931e7f367cc5b2706adeee57ee47
+Author: David Golden <dagolden@cpan.org>
+Date:   Thu Dec 17 17:59:27 2009 -0500
+
+    Updated Module::Build to 0.35_15
+    
+commit feb517daa146d8e378d6d18de1ce5d7dc752383d
+Author: Chris Williams <chris@bingosnet.co.uk>
+Date:   Thu Dec 17 22:08:48 2009 +0000
+
+    Updated CPANPLUS to cpan release 0.90
+    
+Author: Jan Dubois <jand@activestate.com>
+Date:   Wed Dec 16 15:42:19 2009 -0800
+
+    -t should only return TRUE for file handles connected to a TTY
+    
+    The Microsoft C version of isatty() returns TRUE for all
+    character mode devices, including the /dev/null style "nul"
+    device and printers like "lpt1".
+    
+    The included test has only been tested on Windows and Linux;
+    the device names for OS/2 and VMS are just best guesses...
+
+commit ab106183f6f6440236f5be52e2a171a63882946a
+Author: Abigail <abigail@abigail.be>
+Date:   Wed Dec 16 14:01:32 2009 +0100
+
+    Document issues when using named captures in combination with a branch reset pattern (see also #71136)
+
+commit 8c63ea58497f2deb05596f96547d19395545a0ee
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Tue Dec 8 20:41:28 2009 +0100
+
+    Store the PL_compcv instead of the the PL_comppad in parser stack, and make it reference counted. Properly solves [perl #66094]
+
+commit 9d48bc6db099a4f84cb04d1ada69930fb35f8da1
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Tue Dec 15 21:08:40 2009 -0500
+
+    Update File::Copy tests to skip on OpenBSD, as it mounts too many filesystems nosuid.
+    
+commit 2574563ed1cc89a9149d4a253b94199eab5bdf71
+Author: Tim Bunce <Tim.Bunce@pobox.com>
+Date:   Tue Dec 15 23:04:11 2009 +0000
+
+    Allow override of PERL5OPT etc in t/TEST
+
+commit 6a158b577769363e3a34f3dcb7321a0e933d3353
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Wed Dec 16 00:04:34 2009 +0100
+
+    Don't make C<use legacy> die on unknown legacy names
+    
+    So we can use C<use legacy "qubits"> to avoid the new "qubit" behaviour,
+    without worrying about perls that didn't have qubit support at all. :)
+
+commit 421f30ed1e95009450bdc7905bf3433ee806ea4f
+
+    [perl #22977] Bug in format/write
+
+commit 15dc519fb7cb1c4b51fbc196af8ecf273c534ad1
+
+    [perl #68640] Wrong error for undef constant name
+
+commit 1443f10d16f26271d2df9b4bdda55dbe024319c3
+
+    more regex folding tests
+
+commit 0f907b96d618c97cd2e020841a70ae037954a616
+
+    [perl #70171] 5.10.0 -> 5.10.1 Regression in fafafbaf70 (Big slowdown in 5.10 @_ parameter passing)
+    
+    In this case my %x = %$x assigns a hash to itself. This causes the
+    hv_clear in pp_aassign to wipe away the hash before it can be copied.
+    The âpanic: attempt to copy freed scalarâ error is triggered by this
+    line, which copies the value:
+        sv_setsv(tmpstr,*relem);        /* value */
+    
+    The solution is to make sure the OPpASSIGN_COMMON flag is on in such
+    cases, so that pp_aassign copies everything before doing the assignment.
+
+commit 2ab54efd6265713df5cd4bd0927024245675c1c2
+Author: Michael Breen <perl@mbreen.com>
+
+    fix bug 67156: overload: nomethod(..., '!') return value inverted
+
+commit 412147f664b7f5805591ad996d7e5a9e70b3d80f
+
+    [perl #71204] diagnostics.pm suppresses 'Use of uninitialized value in range (or flip)' warning
+    
+    (and bump version of diagnostics.pm)
+
+commit 2653dd3c22bd18d7877da53d515dc31c46d8fbea
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Mon Dec 14 13:04:37 2009 +0100
+
+    cygwin IPv6 since 1.7
+    
+    Use g++ as default linker
+    IPv6 support for 1.7
+
+commit 69dc4b30f4725ad5f212d45d3c856ac1caaacf17
+Author: Father Chrysostomos <sprout@cpan.org>
+Date:   Mon Dec 14 12:19:35 2009 +0100
+
+    [perl #70764] $' fails to initialized for pre-compiled regular expression matches
+    
+    The match vars are associated with the regexp that last matched
+    successfully. In the case of $str =~ $qr or /$qr/, since the $qr could
+    be used in multiple scopes that need their own sets of match vars, the
+    $qr is cloned by Perl_reg_temp_copy as of change 30677/28d8d7f. This
+    happens in pp_regcomp before pp_match has stringified the LHS, hence the
+    bug. In short, /$gror/ is not equivalent to
+    ($which = !$which) ? /$gror/ : /$gror/, which is weird.
+    
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Sun Dec 13 08:06:43 2009 +0100
+
+    Eliminate OP_SETSTATE from cop.h header
+    
+    It had been added with change 3728 to track linenumbers in
+    optimized else, disabled by change 4309,
+    and removed with change 33072.
+    
+    Bump copyright, latest change was "Fix MULTICALL in List-Util" 2009-03-07
+    with commit 1bbbfc50
+
+commit 9c7b20a98a1d5faa39d9d097a77c2bf4a0a19daa
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Thu Dec 10 13:14:24 2009 -0500
+
+    Update Cwd / PathTools to 3.31 to get us a non-devel version number based on a chat with Steffen. No code changes.
+
+commit a242eeb4c06c63af5ec7e01d5602b14bde94aa81
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Thu Dec 10 11:44:26 2009 -0500
+
+    Updated to Pod::Simple 3.11 from CPAN [perl #71004]
+
+commit f62b3c7e73b3b864bf7c73fdb4e6dff9f9c0f700
+Author: Chris Williams <chris@bingosnet.co.uk>
+Date:   Thu Dec 10 12:16:57 2009 +0000
+
+    Update Archive::Extract to cpan version 0.36
+
+commit 0aa6d4a524fe5cbd48c99d293e1d8b643ab0387a
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Wed Dec 9 17:45:44 2009 -0500
+
+    Updated docpointer for illguts
+
+commit 85613cabfd8d8a9b6b36082819bd6c38e1bb21c7
+Author: Zefram <zefram@fysh.org>
+Date:   Wed Dec 9 17:40:05 2009 -0500
+
+    Fix for [perl #70910] wrong line number in syntax error message
+
+commit ecf5c238cfc27e32b6ca4c6d91b92bf8852e36b2
+Author: Andy Dougherty <doughera@lafayette.edu>
+Date:   Tue Dec 8 11:36:54 2009 -0500
+
+    Document config_args limitations reported in [perl #70912]
+
+commit f6435df36c4167f97876032948ee21a446b75f27
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Tue Dec 8 12:42:58 2009 +0100
+
+    proper error on "grep $x (1,2,3)". Solves [perl #37314]
+
+commit 13290fcd82823e130109fca5199c99fb886e29eb
+Author: Tony Cook <tony@develop-help.com>
+Date:   Tue Dec 8 12:48:59 2009 +0100
+
+    [perl #70802] -i'*' refuses to work
+    
+    Add regression tests
+    (the bug was fixed by commit c9930541bfa04399c3b648e83c9b750cee1154fb)
+
+commit 93592fd5aeec89ac25994a493ef54e1d7a572d65
+Author: Ricardo Signes <rjbs@cpan.org>
+Date:   Mon Dec 7 18:24:59 2009 -0500
+
+    legalize =begin foo bar
+
+commit b41aadf259cf55858c5ab0386356cdbe2dc49a6b
+Author: Ricardo Signes <rjbs@cpan.org>
+Date:   Mon Dec 7 18:21:44 2009 -0500
+
+    more aggressively deprecate L<section> and L<"section">
+
+commit f6e963e4dd62b8e3c01b31f4a4dd57e47e104997
+Author: Ricardo Signes <rjbs@cpan.org>
+Date:   Mon Dec 7 18:19:28 2009 -0500
+
+    remove prohibition against L<text|href>
+
+commit 1cb985b013ea71b82afbc114ed06f94d451f5e04
+Author: Jan Dubois <jand@activestate.com>
+Date:   Mon Dec 7 17:19:18 2009 -0800
+
+    Throw away uncleanable scopes when exiting a pseudo-forked process.
+    
+    Commit adab9969 tried to clean up those additional scopes, but failed
+    because some of the memory was allocated from a different pool. To
+    avoid triggering the assert() in perl_destruct() this change instead
+    moves the one remaining scope back to the root of the stack, effectively
+    discarding the additional frames without any further processing.
+
+commit 1144115d25e28286dc02b44859da121ea1b93f1c
+commit 8a27a13e89107aaf68c0748b68ee71fbd86d774b
+Author: Father Chrysostomos <sprout@cpan.org>
+Date:   Mon Dec 7 14:58:40 2009 +0100
+
+    [perl #71076] sort with active sub (5.10 regression)
+    
+    One of the tests in sort.t causes a bus error (or sometimes âUndefined
+    subroutine calledâ) if run multiple times. This is because sort
+    decreases the refcount of an active sub used as a comparison routine.
+    
+    Ironically enough, this test was added by the very change that broke it
+    (25953/9850bf2).
+
+commit 6bc991bfb3c34a5d286a1202fcc0d740d72dcee7
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Mon Dec 7 13:55:49 2009 +0100
+
+    Allocate the right HV
+    
+    This will solve an obscure bug in smart-match involving nested data
+    structures containing the same elements.
+
+commit 69c3dccf5322a59cb855347c04712ba11b65328f
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Mon Dec 7 13:41:05 2009 +0100
+
+    Fix [perl #71078] Smart match against @_ gives false negatives
+    
+    @_ can contain NULLs for undefined elements
+
+commit 7baa46900628573770d962400725b38c0773bf47
+Author: hv@crypt.org <hv@crypt.org>
+Date:   Sun Dec 6 22:24:39 2009 +0100
+
+    [perl #71000] Wrong variable name in warning
+    
+    Add a new warning "Missing argument in %s"
+
+commit f89a570b1f4dda1c19dab17cb7eb6914cdc0717c
+Author: Chip Salzenberg <chip@ci005.sv2.upperbeyond.com>
+Date:   Wed Oct 28 17:08:05 2009 -0700
+
+    avoid infinite chain of utf8 magic
+
+commit 806e7ca7a95b2271bcd698a87bd05a4b9ea9ae68
+Author: Chip Salzenberg <chip@pobox.com>
+Date:   Mon Oct 26 19:39:20 2009 -0700
+
+    when removing magic, fix SvMAGICAL flags (unless save_magic is active)
+
+commit f9c6fee519b868a2e8ef8c5b701c0d3f95565423
+Author: Chip Salzenberg <chip@ci005.sv2.upperbeyond.com>
+Date:   Wed Oct 28 16:41:02 2009 -0700
+
+    preserve readonly flag when saving and restoring magic flags
+
+commit 077f834239e40e0523e428946baaf95eaec43724
+Author: hv@crypt.org <hv@crypt.org>
+Date:   Fri Dec 4 18:50:02 2009 -0600
+
+    t/test.pl fresh_perl_like() bug
+    
+    The existing code does the wrong thing if a string (rather than a compiled
+    regexp) is supplied for $expected. Happily perl will do the right thing
+    if you let it.
+    
+    Hugo
+    
+    Message-Id: <200912041444.nB4EiqBj004436@zen.crypt.org>
+
+commit 517956bf3975a79f7429698dce4510d4616b19a3
+Author: Craig A. Berry <craigberry@mac.com>
+Date:   Fri Dec 4 17:48:27 2009 -0600
+
+    Port lib/unicore/mktables to VMS.
+    
+    This is mostly just making filename comparisons and lookups of filenames
+    in hashes case blind, which is necessary since filename case is not
+    (by default) preserved.
+
+commit a756042476315fbf04b4211a7dfb5783ff6cba2f
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Fri Dec 4 15:16:04 2009 +0000
+
+    Silence Win32 compiler warning
+    
+    Subject: Re: Smoke [5.11.2] v5.11.2-105-gc2123ae FAIL(F) MSWin32 Win2000 SP4 (x86/1 cpu)
+    Message-ID: <20091204140536.GD2582@plum.flirble.org>
+    
+    (amended to fix the obvious typo)
+
+commit 283b82dc9f704fb99591ed28497a6a263e6ef519
+Author: Karl Williamson <khw@khw-desktop.(none)>
+Date:   Wed Dec 2 21:36:17 2009 -0700
+
+    Unicode 5.2
+
+commit c9930541bfa04399c3b648e83c9b750cee1154fb
+Author: Tony Cook <tony@develop-help.com>
+Date:   Thu Dec 3 10:20:09 2009 +0100
+
+    [perl #70802] -i'*' refuses to work
+
+commit c2123ae380a372d506d1b6938667bd785fd8728b
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Wed Dec 2 16:01:10 2009 +0000
+
+    Ensure that pp_qr returns a new regexp SV each time. Resolves RT #69852.
+    
+    Instead of returning a(nother) reference to the (pre-compiled) regexp in the
+    optree, use reg_temp_copy() to create a copy of it, and return a reference to
+    that. This resolves issues about Regexp::DESTROY not being called in a timely
+    fashion (the original bug tracked by RT #69852), as well as bugs related to
+    blessing regexps, and of assigning to regexps, as described in correspondence
+    added to the ticket.
+    
+    It transpires that we also need to undo the SvPVX() sharing when ithreads
+    cloning a Regexp SV, because mother_re is set to NULL, instead of a cloned
+    copy of the mother_re. This change might fix bugs with regexps and threads in
+    certain other situations, but as yet neither tests nor bug reports have
+    indicated any problems, so it might not actually be an edge case that it's
+    possible to reach.
+
+commit adab996997d7ef1b54d382f5ab4304f438cd1dd0
+Author: Jan Dubois <jand@activestate.com>
+Date:   Wed Dec 2 01:34:18 2009 -0800
+
+    Cleanup all scopes before exiting a pseudo-forked process.
+    
+    perl_destruct() contains an assertion that the scope stack
+    is empty.  The remaining scopes are due to fork() being
+    called from within a BEGIN block.
+
+commit 781ecc3f4e65a5261736cf5fa8e56b6bea2ff71a
+Author: Jan Dubois <jand@activestate.com>
+Date:   Tue Dec 1 23:11:03 2009 -0800
+
+    Revert commit cbdd5331.
+    
+    Commit a09dc31d1 says:
+    
+        It's possible that someone has built a module with -DDEBUGGING,
+        but they're using it against a perl built non-DEBUGGING, [...]
+    
+    which means that the PL_scopestack_name symbol must always be exported.
+
+commit 0b3da58dfdc350792109691bb6c07a48109b9e12
+Author: Tony Cook <tony@develop-help.com>
+Date:   Tue Dec 1 22:25:39 2009 +1100
+
+    -Dmad: double free or corruption
+    
+    > If your perl has -Dmad, the following program crashes:
+    >
+    > $ bleadperl -we '$x="x" x 257; eval "for $x"'
+    > *** glibc detected *** bleadperl: double free or corruption (!prev): 0x0000000001dca670 ***
+    
+    Change 6136c704 changed S_scan_ident from:
+    
+       e = d + destlen - 3;
+    
+    to:
+    
+       register char * const e = d + destlen + 3;
+    
+    where e is used to mark the end of the buffer, this meant that the
+    various buffer end checks allowed the various buffers supplied
+    S_scan_ident to overflow.
+    
+    Attached is a fix, various tests with fencepost checks on different
+    identifier lengths, and the specific case mentioned in the ticket.
+    
+    Tony
+    
+    Signed-off-by: H.Merijn Brand <h.m.brand@xs4all.nl>
+
+commit 5ca68648d92617d8e0deebbc877c24f91be5ce4d
+Author: Tony Cook <tony@develop-help.com>
+Date:   Tue Dec 1 19:12:30 2009 +1100
+
+    -Dmad broken for c++
+    
+    On Tue, Dec 01, 2009 at 08:22:38AM +0100, H.Merijn Brand wrote:
+    > perly.y: In function 'int Perl_madparse(PerlInterpreter*)':
+    > perly.y:335: error: cast from 'TOKEN*' to 'line_t' loses precision
+    > perly.y:348: error: cast from 'TOKEN*' to 'line_t' loses precision
+    > perly.y:430: error: cast from 'TOKEN*' to 'line_t' loses precision
+    
+    Uses the same mechanism used in if, unless to retrieve an ival set in
+    toke.c
+    
+    Signed-off-by: H.Merijn Brand <h.m.brand@xs4all.nl>
+
+commit 576b33a19ccaf98d4dfe201d529c55c3747f0cb6
+Author: Tim Bunce <Tim.Bunce@pobox.com>
+Date:   Tue Dec 1 00:15:21 2009 +0100
+
+    [rt.cpan.org #51574] Safe.pm sort {} bug accessing $a and $b with -Dusethreads
+
+commit c362798e2bfee6dd58e97b97c7f3aa37c2c6af9f
+Author: Zefram <zefram@fysh.org>
+Date:   Mon Nov 30 11:42:14 2009 +0100
+
+    Document if.pm in perlfunc
+
+commit 71eaafb1e6768e777bc805cc8490b55c6e77da64
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Mon Nov 30 10:30:41 2009 +0100
+
+    Make distclean work again
+
+commit ee6ba15dedda3e88eb66891eaf387c00a4c0a2fb
+Author: Eric Brine <ikegami@adaelis.com>
+Date:   Thu Nov 26 19:16:16 2009 -0500
+
+    Fix -DPERL_NO_UTF16_FILTER
+
+commit 75068674a0c83a71b3705f2c6000b34d849b9640
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Sun Nov 29 23:30:45 2009 +0100
+
+    Make split warn in void context
+
+commit dfd167e94af611f6248e804cb228b35ca4123bd6
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Nov 29 19:02:05 2009 +0000
+
+    Handle $@ being assigned a read-only value (without error or busting the stack).
+    
+    Discovered whilst investigating RT #70862.
+
+commit f5fa9033b8c1fdcbd7710850b3b0380d6b937853
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Nov 29 16:42:42 2009 +0000
+
+    Fix RT #70862 by converting ERRSV to GvSVn() to ensure a non-NULL GvSV().
+
+commit ff868e665bf85a829dc47bfa1243b26d4367cacd
+Author: Steve Peters <steve@fisharerojo.org>
+Date:   Sat Nov 28 23:43:11 2009 -0600
+
+    Add error codes for getaddrinfo() and getnameinfo()
+
+commit 23e33b604408d78c7993c7ba35b0a4323eb9feeb
+Author: Karl Williamson <khw@khw-desktop.(none)>
+Date:   Sat Nov 28 12:04:34 2009 -0700
+
+    mktables performance improvement
+    
+    The attached patch got the easiest performance improvements to mktables.
+    Hopefully this is good enough for now.
+    
+    This involved:
+    
+    1) Nicholas' patch
+    2) I stored complete_name instead of recomputing it each time.
+    3) Used $_[xxx] instead of shift in very heavily used subroutines
+    4) removed trace accidentally left in.
+    
+    I also changed the misspelled subroutine name discovered by Craig Berry.
+    I searched for any other misspellings and didn't find any.
+    
+    Also removed trailing white space that keeps creeping back in, and now
+    this doesn't generate pod entries if not outputting a pod file, and
+    clarified warning message if no mktables.lst is present.
+    
+    I couldn't figure out a way to conditionally use 'no overloading', as
+    it is called at compile time.  So I just commented out the old stuff
+    that will work for 5.8, with a note about using that if you want to
+    use 5.8
+
+commit 408633379a1452b4e14d7c3b5e80f7dc05ea7986
+Author: Moritz Lenz <moritz@faui2k3.org>
+Date:   Fri Nov 27 00:33:09 2009 +0100
+
+    Document backreferences to groups that did not match
+    
+    Also add a test for that, fill in test description, and sneak in a vim
+    modeline for re_tests
+
+commit e90b02b98382872bd43097b9b146a9b00ca3171b
+Author: Tim Bunce (via RT) <perlbug-followup@perl.org>
+Date:   Wed Nov 25 03:02:24 2009 -0800
+
+    perlbug reports "Message sent" even when it hasn't
+    
+    perlbug doesn't check the return status of Mail::Send and so reports
+    "Message sent" even if it hasn't:
+
+commit 17cc9359ea8ee1b546aa067b91362160e3c1e1ee
+Author: Zefram <zefram@fysh.org>
+Date:   Wed Nov 25 22:17:52 2009 +0000
+
+    perl-5.11.2 breaks NYTProf savesrc option (Lexer API suspected)
+    
+    Tim Bunce wrote:
+    >The primary issue is the off-by-one error in the array indexing.
+    
+    There's a bit more to it than that.  The indexing was off-by-one for
+    *some* places that process a new line, but correct for others, so the
+    saved source as a whole was mangled rather than simply offset.  Also,
+    there were some redundant calls to update_debugger_info(), so some lines
+    got saved twice, in some cases off-by-one for one saving and not for
+    the other.  The saved source is, therefore, hopelessly broken in 5.11.2.
+    
+    Attached patch fixes the source saving.  Includes a new test, which works
+    through all reachable places that source lines get saved.  This should
+    close RT #70804.
+    
+    -zefram
+
+commit f706d24c20941a6401e90643488acaa0705ba877
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Tue Nov 24 12:13:13 2009 +0100
+
+    add interpolation test for [perl #70091]
+    
+commit ae28bb2a75e3c50332b2684a214bf3dcd1bdb937
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Tue Nov 24 12:06:55 2009 +0100
+
+    Also skip spaces after variable if we are within lexical brackets. Fixes #70091: Segmentation fault in hash lookup in regex substitution
+
+commit ec983580254c32fd44889fde43973ac5dd74257b
+Author: Andrew Rodland <andrew@hbslabs.com>
+Date:   Sat Nov 14 01:26:09 2009 -0600
+
+    Add code and starting perldoc for warnings::fatal_enabled.
+    
+    This is an analog for warnings::enabled, except it tests whether the
+    given category has been set fatal using "use warnings FATAL => foo".
+    This is mostly for symmetry.
+    
+    Assumes that the fatal bit for a category will have an offset one higher
+    than the regular bit for the category, because otherwise much rewriting
+    of __chk would be required.
+
+commit 6b1226db4432ba7f08619ebe4c5365f692dcbbf7
+Author: Steve Hay <SteveHay@planit.com>
+Date:   Tue Nov 24 11:02:58 2009 +0000
+
+    Add missing library to VC++ section of Win32 dmake makefile
+
+commit 5e8632492467a144fabe819ac1f4206ecde8d14d
+Author: Steve Hay <SteveHay@planit.com>
+Date:   Tue Nov 24 10:51:54 2009 +0000
+
+    Avoid circularity in $(LINK_FLAGS) definition in Win32 dmake makefile
+
+commit 524ce141dcd46f87e73a300e1436937336261b19
+Author: Rafael Garcia-Suarez <rgs@consttype.org>
+Date:   Tue Nov 24 09:47:46 2009 +0100
+
+    Remove generated file pod/perluniprops.pod from the source distribution
+
+commit f86864acbf97469fd9e5d5233d51ff743f4d8d6e
+Author: Karl Williamson <khw@khw-desktop.(none)>
+Date:   Mon Nov 23 16:26:16 2009 -0700
+
+    mktables not run unless needed
+
+commit aadc0e04984c523115970b0a0c0ba40ddcee3d41
+Author: brian d foy <bdfoy@cpan.org>
+Date:   Mon Nov 23 18:53:39 2009 -0600
+
+    * Convert some pod files to UTF-8 (like all of the other pod files)
+
+commit dbb3120a48c1483138e02a3fadf359e5b664ae11
+Author: Steve Hay <SteveHay@planit.com>
+Date:   Mon Nov 23 23:04:41 2009 +0000
+
+    Fix code-before-declaration error on Win32 with recent VC++ compilers
+    
+    (We only #define SET_INVALID_PARAMETER_HANDLER for VC2005 and later, so
+    users of earlier compilers will not have seen this error)
+
+commit 24855dffdf07c139d331fbdd811a1a8299756ee0
+Author: Jerry D. Hedden <jdhedden@cpan.org>
+Date:   Mon Nov 23 10:34:04 2009 -0500
+
+    Upgrade to threads 1.75
+
+commit a9ed9b74fd79d60cccbe784b8d7b2eae94ded913
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Mon Nov 23 09:38:10 2009 -0500
+
+    Added a perltodo about enabling/disabling individual warnings
+
+commit 61fc5122f0d8a509834282b8ecb3252d2e4c9f5d
+Author: Karl Williamson <khw@khw-desktop.(none)>
+Date:   Fri Nov 20 11:02:01 2009 -0700
+
+    Make unicode semantics the default
+
+    *****************
+
+commit b500e03bf95eb884a53407409b4e755d303171a4
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Sat Nov 21 12:16:07 2009 +0100
+
+    deprecate "goto" to jump into a construct
+
+commit 021f53de09926928546378b3552f9240c9241dde
+Author: Gerard Goossen <gerard@ggoossen.net>
+Date:   Mon Nov 16 13:58:24 2009 +0100
+
+    Force OP_REQUIRE to scalar context at the end of ck_require and don't let it become void context. Fixes problem with require not always being in scalar context.
+
+commit 6a0e50422a84b53e998825128c56791913cd03aa
+Author: Craig A. Berry <craigberry@mac.com>
+Date:   Sat Nov 21 11:17:38 2009 -0600
+
+    Make -UDEBUGGING the default on VMS for 5.12.0.
+    
+    Like it has been everywhere else for ages and ages.  Also make
+    command-line selection of -UDEBUGGING and -DDEBUGGING work in
+    configure.com; before the only way to turn it off was by saying
+    no in answer to the interactive question.
+
+commit c35076938c7236fb2aaabecd40e3a5a444c3be77
+Author: Craig A. Berry <craigberry@mac.com>
+Date:   Sat Nov 21 11:13:01 2009 -0600
+
+    Perl_pad_sv and Perl_hv_assert don't exist without -DDEBUGGING.
+    
+    So let's not make them part of the API when they don't exist.
+
+commit 4ebea3c679ca93eb90d62be76bf8eb3cd7d14160
+Author: Jan Dubois <jand@activestate.com>
+Date:   Thu Apr 30 16:53:20 2009 -0700
+
+    Always add a manifest resource to perl.exe to specify the <trustInfo>
+    settings for Windows Vista and later.  Without this setting Windows
+    will treat perl.exe as a legacy application and apply various
+    heuristics like redirecting access to protected file system areas
+    (like the "Program Files" folder) to the users "VirtualStore"
+    instead of generating a proper "permission denied" error.
+    
+    For VC8 and VC9 this manifest setting is automatically generated by
+    the compiler/linker (together with the binding information for their
+    respective runtime libraries); for all other compilers we need to
+    embed the manifest resource explicitly in the external resource file.
+    
+    This change also requests the Microsoft Common-Controls version 6.0
+    (themed controls introduced in Windows XP) via the dependency list
+    in the assembly manifest.  For VC8 and VC9 this is specified using the
+    /manifestdependency linker commandline option instead.
+
+commit 51393fc07355ffd0a4b6b212fd676ee37de23e09
+Author: Abigail <abigail@abigail.be>
+Date:   Fri Nov 20 18:58:34 2009 +0100
+
+    File::Find was not resolving paths of the form "/..////../" correctly.
+    Fixed by adding a quantifier to the substitution parameter in
+    contract_name().
+
+commit 31c9a3ace4f559b79a21319b8903e92f53b44868
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Fri Nov 20 10:23:54 2009 +0000
+
+    Always bless filehandles into IO::Handle:: - don't try for FileHandle:: first.
+    
+    Given that FileHandle "is now a front-end to the IO::* classes" it seems
+    wasted effort to indirect through it.
+
+
+commit 40ea6f68f5e33895a1a9d11f269b177eb901c03f
+Author: brian d foy <bdfoy@cpan.org>
+Date:   Thu Nov 19 18:38:30 2009 -0600
+
+    * Note that unlink sets $! on failure.
+    
+    The docs to unlink didn't explicitly note that it set $! on
+    failure, unlike the docs on some other system calls do.
+    
+    While I was in there, I cleansed the entry a little and
+    added an example of unlinking files one-by-one to find
+    the ones that fail.
+    
+    Modern Perl fix: let's call a glob a glob() and not a <*>.
+    
+    This problem was noted on the Perl Beginner's list:
+    
+    http://www.nntp.perl.org/group/perl.beginners/2009/11/msg110062.html
