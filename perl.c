@@ -3842,6 +3842,9 @@ S_nuke_stacks(pTHX)
     Safefree(PL_tmps_stack);
     Safefree(PL_markstack);
     Safefree(PL_scopestack);
+#ifdef DEBUGGING
+    Safefree(PL_scopestack_name);
+#endif
     Safefree(PL_savestack);
 }
 
