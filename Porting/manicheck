@@ -21,7 +21,7 @@ find {
         return if -d;
         return if $_ eq '.gitignore';
         return if $x =~ /^\.git\b/;
-        print "$File::Find::name not in MANIFEST\n" if !$files{$x};
+        print "$x\t\tnot in MANIFEST\n" if !$files{$x};
     },
 }, ".";
 
