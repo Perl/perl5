@@ -304,6 +304,7 @@ cpan/Compress-Raw-Zlib/zlib-src/zutil.c		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Zlib.xs			Compress::Raw::Zlib
 cpan/CPAN/Changes				CPAN.pm Changes file
+cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
 cpan/CPAN/lib/CPAN/Author.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Bundle.pm		helper package for CPAN.pm
@@ -313,8 +314,6 @@ cpan/CPAN/lib/CPAN/Debug.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Distribution.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Distroprefs.pm	helper package for CPAN.pm
-cpan/CPAN/lib/CPAN/Mirrors.pm		helper package for CPAN.pm
-cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
@@ -329,6 +328,7 @@ cpan/CPAN/lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config fil
 cpan/CPAN/lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
 cpan/CPAN/lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/LWP/UserAgent.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/Mirrors.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Module.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 cpan/CPAN/lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
