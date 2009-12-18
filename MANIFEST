@@ -312,7 +312,9 @@ cpan/CPAN/lib/CPAN/Complete.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Debug.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/DeferredCode.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Distribution.pm	helper package for CPAN.pm
-cpan/CPAN/lib/CPAN/Distroprefs.pm		helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/Distroprefs.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/Mirrors.pm		helper package for CPAN.pm
+cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
