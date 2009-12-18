@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_51';
+$CPAN::VERSION = '1.94_53';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -342,7 +342,7 @@ Enter 'h' for help.
         s/^\s+//;
         next SHELLCOMMAND if /^$/;
         s/^\s*\?\s*/help /;
-        if (/^(?:q(?:uit)?|bye|exit)$/i) {
+        if (/^(?:q(?:uit)?|bye|exit)\s*$/i) {
             last SHELLCOMMAND;
         } elsif (s/\\$//s) {
             chomp;
@@ -1024,7 +1024,8 @@ sub has_usable {
                                             my $atv = Archive::Tar->VERSION;
                                             for ("You have Archive::Tar $atv, but $demand or later is recommended. Please upgrade.\n") {
                                                 $CPAN::Frontend->mywarn($_);
-                                                die $_;
+                                            # don't die, because we may need
+                                            # Archive::Tar to upgrade
                                             }
                                             
                                        }
@@ -1468,12 +1469,29 @@ are printed in one-line format.
 =item C<get>, C<make>, C<test>, C<install>, C<clean> modules or distributions
 
 These commands take any number of arguments and investigate what is
-necessary to perform the action. If the argument is a distribution
-file name (recognized by embedded slashes), it is processed. If it is
-a module, CPAN determines the distribution file in which this module
-is included and processes that, following any dependencies named in
-the module's META.yml or Makefile.PL (this behavior is controlled by
-the configuration parameter C<prerequisites_policy>.)
+necessary to perform the action. Argument processing is as follows:
+
+  known module name in format Foo/Bar.pm   module
+  other embedded slash                     distribution
+    - with trailing slash dot              directory
+  enclosing slashes                        regexp
+  known module name in format Foo::Bar     module
+
+If the argument is a distribution file name (recognized by embedded
+slashes), it is processed. If it is a module, CPAN determines the
+distribution file in which this module is included and processes that,
+following any dependencies named in the module's META.yml or
+Makefile.PL (this behavior is controlled by the configuration
+parameter C<prerequisites_policy>). If an argument is enclosed in
+slashes it is treated as a regular expression: it is expanded and if
+the result is a single object (distribution, bundle or module), this
+object is processed.
+
+Example:
+
+    install Dummy::Perl                   # installs the module
+    install AUXXX/Dummy-Perl-3.14.tar.gz  # installs that distribution
+    install /Dummy-Perl-3.14/             # same if the regexp is unambiguous
 
 C<get> downloads a distribution file and untars or unzips it, C<make>
 builds it, C<test> runs the test suite, and C<install> installs it.
@@ -1609,7 +1627,8 @@ pressing C<^C> twice.
 
 CPAN.pm ignores SIGPIPE. If the user sets C<inactivity_timeout>, a
 SIGALRM is used during the run of the C<perl Makefile.PL> or C<perl
-Build.PL> subprocess.
+Build.PL> subprocess. A SIGALRM is also used during module version
+parsing, and is controlled by C<version_timeout>.
 
 =back
 
@@ -1985,6 +2004,8 @@ currently defined:
   urllist            arrayref to nearby CPAN sites (or equivalent locations)
   use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
   username           your username if you CPAN server wants one
+  version_timeout    stops version parsing after this many seconds.
+                     Default is 15 secs. Set to 0 to disable.
   wait_list          arrayref to a wait server to try (See CPAN::WAIT)
   wget               path to external prg
   yaml_load_code     enable YAML code deserialisation via CPAN::DeferredCode
@@ -2263,7 +2284,7 @@ C<expect>.
 
     expect: []
 
-    commendline: "echo SKIPPING make"
+    commandline: "echo SKIPPING make"
 
   test:
     args: []
@@ -2434,6 +2455,9 @@ C<args> is not used.
 Extended C<expect>. This is a hash reference with four allowed keys,
 C<mode>, C<timeout>, C<reuse>, and C<talk>.
 
+You must install the C<Expect> module to use C<eexpect>. CPAN.pm
+does not install it for you.
+
 C<mode> may have the values C<deterministic> for the case where all
 questions come in the order written down and C<anyorder> for the case
 where the questions may come in any order. The default mode is
@@ -2470,12 +2494,15 @@ Environment variables to be set during the command
 
 =item expect [array]
 
-C<< expect: <array> >> is a short notation for
+You must install the C<Expect> module to use C<expect>. CPAN.pm
+does not install it for you.
 
-eexpect:
-    mode: deterministic
-    timeout: 15
-    talk: <array>
+C<< expect: <array> >> is a short notation for this C<eexpect>:
+
+	eexpect:
+		mode: deterministic
+		timeout: 15
+		talk: <array>
 
 =back
 
@@ -2650,7 +2677,7 @@ Recursively runs the C<get> method on all items contained in the bundle
 =item CPAN::Bundle::inst_file()
 
 Returns the highest installed version of the bundle in either @INC or
-C<$CPAN::Config->{cpan_home}>. Note that this is different from
+C<< $CPAN::Config->{cpan_home} >>. Note that this is different from
 CPAN::Module::inst_file.
 
 =item CPAN::Bundle::inst_version()
@@ -2783,10 +2810,10 @@ Makefile.PL> or C<perl Build.PL> and C<make> there.
 
 Downloads the pod documentation of the file associated with a
 distribution (in HTML format) and runs it through the external
-command I<lynx> specified in C<$CPAN::Config->{lynx}>. If I<lynx>
+command I<lynx> specified in C<< $CPAN::Config->{lynx} >>. If I<lynx>
 isn't available, it converts it to plain text with the external
 command I<html2text> and runs it through the pager specified
-in C<$CPAN::Config->{pager}>
+in C<< $CPAN::Config->{pager} >>.
 
 =item CPAN::Distribution::prefs()
 
@@ -2815,7 +2842,7 @@ undef otherwise.
 =item CPAN::Distribution::readme()
 
 Downloads the README file associated with a distribution and runs it
-through the pager specified in C<$CPAN::Config->{pager}>.
+through the pager specified in C<< $CPAN::Config->{pager} >>.
 
 =item CPAN::Distribution::reports()
 
@@ -2847,7 +2874,7 @@ Forces a reload of all indices.
 =item CPAN::Index::reload()
 
 Reloads all indices if they have not been read for more than
-C<$CPAN::Config->{index_expire}> days.
+C<< $CPAN::Config->{index_expire} >> days.
 
 =item CPAN::InfoObj::dump()
 
@@ -3610,9 +3637,7 @@ nice about obeying that variable as well):
 How do I create a Module::Build based Build.PL derived from an
 ExtUtils::MakeMaker focused Makefile.PL?
 
-http://search.cpan.org/search?query=Module::Build::Convert
-
-http://www.refcnt.org/papers/module-build-convert
+http://search.cpan.org/dist/Module-Build-Convert/
 
 =item 15)
 

@@ -1,3 +1,53 @@
+2009-12-18  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_53
+
+	* bzip2 support should now be on par with gzip
+
+	* allow Foo/Bar.pm on the commandline to mean Foo::Bar (suggested by
+	c9s)
+
+	* bugfix: quit, exit, and bye did not allow a trailing space
+
+	* address #51018: do not switch to default sites when we have a
+	user-configured urllist (reported by Marc Lehmann)
+
+	* bugfix for programming interface (shell did not suffer from this):
+	localize $CPAN::Distrostatus::something_has_failed_at properly so it
+	gets reset after each command (bug inspection by brian d foy)
+
+	* added lib/App/Cpan.pm from brian d foy and update cpan script to his
+	current version
+
+	* major rewrite of the FirstTime experience for new users (including
+	auto-pick of download sites) (by David Golden)
+
+	* improved support for Perl core module deprecation (by David Golden)
+
+2009-10-15  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_52
+
+	* address #48803: avoid 'unreached' if not following
+	configure_requires (David Golden)
+
+	* solaris tar gets more handholding to avoid solaris tar errors (David
+	Golden)
+
+	* allow calling make/test/install with regexp if unambiguous (Andreas
+	Koenig)
+
+	* new config variable version_timeout used in
+	CPAN::Module::parse_version() (Jerry D. Hedden)
+
+	* streamline first time configuration to be more intuitive and less
+	noisy (David Golden)
+
+	* bugfix: eexpect in mode=anyorder with reuse=1 did not consume the
+	output (Andreas Koenig)
+
+	* now with 355 distroprefs files
+
 2009-09-14  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_51

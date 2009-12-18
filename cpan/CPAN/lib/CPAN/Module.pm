@@ -508,37 +508,34 @@ sub test   {
     $self->rematein('test',@_);
 }
 
+#-> sub CPAN::Module::deprecated_in_core ;
+sub deprecated_in_core {
+    my ($self) = @_;
+    return unless $CPAN::META->has_inst('Module::CoreList') && Module::CoreList->can('is_deprecated');
+    return Module::CoreList::is_deprecated($self->{ID});
+}
+
+#-> sub CPAN::Module::inst_deprecated;
+# Indicates whether the *installed* version of the module is a deprecated *and*
+# installed as part of the Perl core library path
+sub inst_deprecated {
+    my ($self) = @_;
+    my $inst_file = $self->inst_file or return;
+    return $self->deprecated_in_core && $self->_in_priv_or_arch($inst_file);
+}
+
 #-> sub CPAN::Module::uptodate ;
 sub uptodate {
     my ($self) = @_;
     local ($_);
-    my $inst = $self->inst_version or return undef;
+    my $inst = $self->inst_version or return 0;
     my $cpan = $self->cpan_version;
-    local ($^W) = 0;
-    CPAN::Version->vgt($cpan,$inst) and return 0;
-    my $inst_file = $self->inst_file;
-    # trying to support deprecated.pm by Nicholas 2009-02
-    my $in_priv_or_arch = "";
-    my $isa_perl = "";
-    if ($] >= 5.011) { # probably harmful when distros say INSTALLDIRS=perl?
-        if (0 == CPAN::Version->vcmp($cpan,$inst)) {
-            if ($in_priv_or_arch = $self->_in_priv_or_arch($inst_file)) {
-                if (my $distribution = $self->distribution) {
-                    unless ($isa_perl = $distribution->isa_perl) {
-                        return 0;
-                    }
-                }
-            }
-        }
-    }
+    return 0 if CPAN::Version->vgt($cpan,$inst) || $self->inst_deprecated;
     CPAN->debug
         (join
          ("",
           "returning uptodate. ",
-          "inst_file[$inst_file]",
           "cpan[$cpan]inst[$inst]",
-          "in_priv_or_arch[$in_priv_or_arch]",
-          "isa_perl[$isa_perl]",
          )) if $CPAN::DEBUG;
     return 1;
 }
@@ -657,7 +654,12 @@ sub available_version {
 #-> sub CPAN::Module::parse_version ;
 sub parse_version {
     my($self,$parsefile) = @_;
-    alarm(10) if ALARM_IMPLEMENTED;
+    if (ALARM_IMPLEMENTED) {
+        my $timeout = (exists($CPAN::Config{'version_timeout'}))
+                            ? $CPAN::Config{'version_timeout'}
+                            : 15;
+        alarm($timeout);
+    }
     my $have = eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
         MM->parse_version($parsefile);

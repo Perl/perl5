@@ -99,6 +99,7 @@ $VERSION = "5.5";
      "urllist",
      "use_sqlite",
      "username",
+     "version_timeout",
      "wait_list",
      "wget",
      "yaml_load_code",

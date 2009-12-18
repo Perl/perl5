@@ -8,12 +8,13 @@ use File::Basename qw(dirname);
 use File::Path qw(mkpath);
 use CPAN::FTP::netrc;
 use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
+
 @CPAN::FTP::ISA = qw(CPAN::Debug);
 
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5002";
+$VERSION = "5.5004";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -42,7 +43,7 @@ sub _ftp_statistics {
     if ($@) {
         if (ref $@) {
             if (ref $@ eq "CPAN::Exception::yaml_not_installed") {
-                $CPAN::Frontend->myprint("Warning (usually harmless): $@");
+                $CPAN::Frontend->myprint("Warning (usually harmless): $@\n");
                 return;
             } elsif (ref $@ eq "CPAN::Exception::yaml_process_error") {
                 $CPAN::Frontend->mydie($@);
@@ -159,8 +160,7 @@ sub _copy_stat {
 # checked from, maybe only for young files?
 #-> sub CPAN::FTP::_recommend_url_for
 sub _recommend_url_for {
-    my($self, $file) = @_;
-    my $urllist = $self->_get_urllist;
+    my($self, $file, $urllist) = @_;
     if ($file =~ s|/CHECKSUMS(.gz)?$||) {
         my $fullstats = $self->_ftp_statistics();
         my $history = $fullstats->{history} || [];
@@ -183,13 +183,17 @@ sub _recommend_url_for {
 
 #-> sub CPAN::FTP::_get_urllist
 sub _get_urllist {
-    my($self) = @_;
+    my($self, $with_defaults) = @_;
+    $with_defaults ||= 0;
+    CPAN->debug("with_defaults[$with_defaults]") if $CPAN::DEBUG;
+
     $CPAN::Config->{urllist} ||= [];
     unless (ref $CPAN::Config->{urllist} eq 'ARRAY') {
         $CPAN::Frontend->mywarn("Malformed urllist; ignoring.  Configuration file corrupt?\n");
         $CPAN::Config->{urllist} = [];
     }
     my @urllist = grep { defined $_ and length $_ } @{$CPAN::Config->{urllist}};
+    push @urllist, @CPAN::Defaultsites if $with_defaults;
     for my $u (@urllist) {
         CPAN->debug("u[$u]") if $CPAN::DEBUG;
         if (UNIVERSAL::can($u,"text")) {
@@ -219,19 +223,19 @@ sub ftp_get {
     $class->debug(qq[Going to login("anonymous","$Config::Config{cf_email}")]);
     unless ( $ftp->login("anonymous",$Config::Config{'cf_email'}) ) {
         my $msg = $ftp->message;
-        $CPAN::Frontend->mywarn("  Couldn't login on $host: $msg");
+        $CPAN::Frontend->mywarn("  Couldn't login on $host: $msg\n");
         return;
     }
     unless ( $ftp->cwd($dir) ) {
         my $msg = $ftp->message;
-        $CPAN::Frontend->mywarn("  Couldn't cwd $dir: $msg");
+        $CPAN::Frontend->mywarn("  Couldn't cwd $dir: $msg\n");
         return;
     }
     $ftp->binary;
     $class->debug(qq[Going to ->get("$file","$target")\n]) if $CPAN::DEBUG;
     unless ( $ftp->get($file,$target) ) {
         my $msg = $ftp->message;
-        $CPAN::Frontend->mywarn("  Couldn't fetch $file from $host: $msg");
+        $CPAN::Frontend->mywarn("  Couldn't fetch $file from $host: $msg\n");
         return;
     }
     $ftp->quit; # it's ok if this fails
@@ -268,9 +272,9 @@ sub ftp_get {
 
 #-> sub CPAN::FTP::localize ;
 sub localize {
-    my($self,$file,$aslocal,$force) = @_;
+    my($self,$file,$aslocal,$force,$with_defaults) = @_;
     $force ||= 0;
-    Carp::croak( "Usage: ->localize(cpan_file,as_local_file[,$force])" )
+    Carp::croak( "Usage: ->localize(cpan_file,as_local_file[,\$force])" )
         unless defined $aslocal;
     if ($CPAN::DEBUG){
         require Carp;
@@ -346,7 +350,7 @@ sub localize {
     # Try the list of urls for each single object. We keep a record
     # where we did get a file from
     my(@reordered,$last);
-    my $ccurllist = $self->_get_urllist;
+    my $ccurllist = $self->_get_urllist($with_defaults);
     $last = $#$ccurllist;
     if ($force & 2) { # local cpans probably out of date, don't reorder
         @reordered = (0..$last);
@@ -398,7 +402,7 @@ sub localize {
         my $level_tuple = $levels[$levelno];
         my($level,$scheme,$sitetag) = @$level_tuple;
         $self->mymkpath($aslocal_dir) unless $scheme && "file" eq $scheme;
-        my $defaultsites = $sitetag && $sitetag eq "defaultsites";
+        my $defaultsites = $sitetag && $sitetag eq "defaultsites" && !@$ccurllist;
         my @urllist;
         if ($defaultsites) {
             unless (defined $connect_to_internet_ok) {
@@ -427,14 +431,14 @@ I would like to connect to one of the following sites to get '%s':
                 require CPAN::Exception::blocked_urllist;
                 die CPAN::Exception::blocked_urllist->new;
             }
-        } else {
+        } else { # ! $defaultsites
             my @host_seq = $level =~ /dleasy/ ?
                 @reordered : 0..$last;  # reordered has file and $Thesiteurl first
             @urllist = map { $ccurllist->[$_] } @host_seq;
         }
         $self->debug("synth. urllist[@urllist]") if $CPAN::DEBUG;
         my $aslocal_tempfile = $aslocal . ".tmp" . $$;
-        if (my $recommend = $self->_recommend_url_for($file)) {
+        if (my $recommend = $self->_recommend_url_for($file,\@urllist)) {
             @urllist = grep { $_ ne $recommend } @urllist;
             unshift @urllist, $recommend;
         }
@@ -449,6 +453,10 @@ I would like to connect to one of the following sites to get '%s':
                     or $CPAN::Frontend->mydie("Error while trying to rename ".
                                               "'$ret' to '$aslocal': $!");
                 $ret = $aslocal;
+            }
+            elsif (-f $ret && $scheme eq 'file' ) {
+                # it's a local file, so there's nothing left to do, we
+                # let them read from where it is
             }
             $Themethod = $level;
             my $now = time;
@@ -490,7 +498,7 @@ I would like to connect to one of the following sites to get '%s':
     if ($maybe_restore) {
         rename "$aslocal.bak$$", $aslocal;
         $CPAN::Frontend->myprint("Trying to get away with old file:\n" .
-                                 $self->ls($aslocal));
+                                 $self->ls($aslocal) . "\n");
         return $aslocal;
     }
     return;
@@ -536,7 +544,7 @@ sub hostdleasy { #called from hostdlxxx
             my $l;
             if ($CPAN::META->has_inst('URI::URL')) {
                 my $u =  URI::URL->new($url);
-                $l = $u->dir;
+                $l = $u->file;
             } else { # works only on Unix, is poorly constructed, but
                 # hopefully better than nothing.
                 # RFC 1738 says fileurl BNF is
@@ -555,29 +563,53 @@ sub hostdleasy { #called from hostdlxxx
                 $ThesiteURL = $ro_url;
                 return $l;
             }
+            # If request is for a compressed file and we can find the 
+            # uncompressed file also, return the path of the uncompressed file
+            # otherwise, decompress it and return the resulting path
             if ($l =~ /(.+)\.gz$/) {
                 my $ungz = $1;
                 if ( -f $ungz && -r _) {
                     $ThesiteURL = $ro_url;
                     return $ungz;
                 }
+                else {
+                    eval { CPAN::Tarzip->new($l)->gunzip($aslocal) };
+                    if ( -f $aslocal) {
+                        $ThesiteURL = $ro_url;
+                        return $aslocal;
+                    }
+                    else {
+                        $CPAN::Frontend->mywarn("Error decompressing '$l': $@\n")
+                            if $@;
+                        return;
+                    }
+                }
             }
-            # Maybe mirror has compressed it?
-            if (-f "$l.gz") {
+            # Otherwise, return the local file path if it exists
+            elsif ( -f $l && -r _) {
+                $ThesiteURL = $ro_url;
+                return $l;
+            }
+            # If we can't find it, but there is a compressed version
+            # of it, then decompress it
+            elsif (-f "$l.gz") {
                 $self->debug("found compressed $l.gz") if $CPAN::DEBUG;
                 eval { CPAN::Tarzip->new("$l.gz")->gunzip($aslocal) };
                 if ( -f $aslocal) {
                     $ThesiteURL = $ro_url;
                     return $aslocal;
                 }
+                else {
+                    $CPAN::Frontend->mywarn("Error decompressing '$l': $@\n")
+                        if $@;
+                    return;
+                }
             }
             $CPAN::Frontend->mywarn("Could not find '$l'\n");
         }
         $self->debug("it was not a file URL") if $CPAN::DEBUG;
         if ($CPAN::META->has_usable('LWP')) {
-            $CPAN::Frontend->myprint("Fetching with LWP:
-  $url
-");
+            $CPAN::Frontend->myprint("Fetching with LWP:\n$url\n");
             unless ($Ua) {
                 CPAN::LWP::UserAgent->config;
                 eval { $Ua = CPAN::LWP::UserAgent->new; };
@@ -595,9 +627,7 @@ sub hostdleasy { #called from hostdlxxx
                 return $aslocal;
             } elsif ($url !~ /\.gz(?!\n)\Z/) {
                 my $gzurl = "$url.gz";
-                $CPAN::Frontend->myprint("Fetching with LWP:
-  $gzurl
-");
+                $CPAN::Frontend->myprint("Fetching with LWP:\n$gzurl\n");
                 $res = $Ua->mirror($gzurl, "$aslocal.gz");
                 if ($res->is_success) {
                     if (eval {CPAN::Tarzip->new("$aslocal.gz")->gunzip($aslocal)}) {
@@ -625,9 +655,7 @@ sub hostdleasy { #called from hostdlxxx
             my($host,$dir,$getfile) = ($1,$2,$3);
             if ($CPAN::META->has_usable('Net::FTP')) {
                 $dir =~ s|/+|/|g;
-                $CPAN::Frontend->myprint("Fetching with Net::FTP:
-  $url
-");
+                $CPAN::Frontend->myprint("Fetching with Net::FTP:\n$url\n");
                 $self->debug("getfile[$getfile]dir[$dir]host[$host]" .
                              "aslocal[$aslocal]") if $CPAN::DEBUG;
                 if (CPAN::FTP->ftp_get($host,$dir,$getfile,$aslocal)) {
@@ -636,9 +664,7 @@ sub hostdleasy { #called from hostdlxxx
                 }
                 if ($aslocal !~ /\.gz(?!\n)\Z/) {
                     my $gz = "$aslocal.gz";
-                    $CPAN::Frontend->myprint("Fetching with Net::FTP
-  $url.gz
-");
+                    $CPAN::Frontend->myprint("Fetching with Net::FTP\n$url.gz\n");
                     if (CPAN::FTP->ftp_get($host,
                                            $dir,
                                            "$getfile.gz",
@@ -682,6 +708,7 @@ sub hostdlhard {
     my($aslocal_dir) = dirname($aslocal);
     mkpath($aslocal_dir);
     my $some_dl_success = 0;
+    my $any_attempt = 0;
  HOSTHARD: for $ro_url (@$host_seq) {
         $self->_set_attempt($stats,"dlhard",$ro_url);
         my $url = "$ro_url$file";
@@ -698,6 +725,9 @@ sub hostdlhard {
         }
         next HOSTHARD if $proto eq "file"; # file URLs would have had
                                            # success above. Likely a bogus URL
+
+        # making at least one attempt against a host
+        $any_attempt++;
 
         $self->debug("localizing funkyftpwise[$url]") if $CPAN::DEBUG;
 
@@ -830,12 +860,12 @@ No success, the file that lynx has downloaded is an empty file.
             return if $CPAN::Signal;
         } # download/transfer programs (DLPRG)
     } # host
+    return unless $any_attempt;
     if ($some_dl_success) {
-        $CPAN::Frontend->mywarn("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.");
+        $CPAN::Frontend->mywarn("Warning: doesn't seem we had substantial success downloading '$aslocal'. Don't know how to proceed.\n");
     } else {
-        $CPAN::Frontend->mywarn("Warning: no success downloading '$aslocal'. Giving up on it.");
+        $CPAN::Frontend->mywarn("Warning: no success downloading '$aslocal'. Giving up on it.\n");
     }
-    $CPAN::Frontend->mysleep(5);
     return;
 }
 

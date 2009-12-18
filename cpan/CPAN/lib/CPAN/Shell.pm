@@ -1229,7 +1229,21 @@ sub autobundle {
 sub expandany {
     my($self,$s) = @_;
     CPAN->debug("s[$s]") if $CPAN::DEBUG;
-    if ($s =~ m|/| or substr($s,-1,1) eq ".") { # looks like a file or a directory
+    my $module_as_path = "";
+    if ($s =~ m|(?:\w+/)*\w+\.pm$|) {
+        $module_as_path = $s;
+        $module_as_path =~ s/.pm$//;
+        $module_as_path =~ s|/|::|g;
+    }
+    if ($module_as_path) {
+        if ($module_as_path =~ m|^Bundle::|) {
+            $self->local_bundles;
+            return $self->expand('Bundle',$module_as_path);
+        } else {
+            return $self->expand('Module',$module_as_path)
+                if $CPAN::META->exists('CPAN::Module',$module_as_path);
+        }
+    } elsif ($s =~ m|/| or substr($s,-1,1) eq ".") { # looks like a file or a directory
         $s = CPAN::Distribution->normalize($s);
         return $CPAN::META->instance('CPAN::Distribution',$s);
         # Distributions spring into existence, not expand
@@ -1585,6 +1599,8 @@ sub setup_output {
 # RE-adme||MA-ke||TE-st||IN-stall : nearly everything runs through here
 sub rematein {
     my $self = shift;
+    # this variable was global and disturbed programmers, so localize:
+    local $CPAN::Distrostatus::something_has_failed_at;
     my($meth,@some) = @_;
     my @pragma;
     while($meth =~ /^(ff?orce|notest)$/) {
@@ -1626,10 +1642,22 @@ sub rematein {
             if (substr($s,-1,1) eq ".") {
                 $obj = CPAN::Shell->expandany($s);
             } else {
-                $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
-                                        "not supported.\nRejecting argument '$s'\n");
-                $CPAN::Frontend->mysleep(2);
-                next;
+                my @obj;
+            CLASS: for my $class (qw(Distribution Bundle Module)) {
+                    if (@obj = $self->expand($class,$s)) {
+                        last CLASS;
+                    }
+                }
+                if (@obj) {
+                    if (1==@obj) {
+                        $obj = $obj[0];
+                    } else {
+                        $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
+                                                "only supported when unambiguous.\nRejecting argument '$s'\n");
+                        $CPAN::Frontend->mysleep(2);
+                        next STHING;
+                    }
+                }
             }
         } elsif ($meth eq "ls") {
             $self->globls($s,\@pragma);

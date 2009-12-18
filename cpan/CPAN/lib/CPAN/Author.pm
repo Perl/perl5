@@ -149,16 +149,24 @@ sub dir_listing {
     }
     my $lc_file;
     if ($may_ftp) {
-        $lc_file = CPAN::FTP->localize(
-                                       "authors/id/@$chksumfile",
-                                       $lc_want,
-                                       $force,
-                                      );
+        $lc_file = eval {
+            CPAN::FTP->localize
+                    (
+                     "authors/id/@$chksumfile",
+                     $lc_want,
+                     $force,
+                    );
+        };
         unless ($lc_file) {
             $CPAN::Frontend->myprint("Trying $lc_want.gz\n");
             $chksumfile->[-1] .= ".gz";
-            $lc_file = CPAN::FTP->localize("authors/id/@$chksumfile",
-                                           "$lc_want.gz",1);
+            $lc_file = eval {
+                CPAN::FTP->localize
+                        ("authors/id/@$chksumfile",
+                         "$lc_want.gz",
+                         1,
+                        );
+            };
             if ($lc_file) {
                 $lc_file =~ s{\.gz(?!\n)\Z}{}; #};
                 eval{CPAN::Tarzip->new("$lc_file.gz")->gunzip($lc_file)};

@@ -663,6 +663,9 @@ sub satisfy_configure_requires {
             $CPAN::Frontend->mywarn($@);
             return $self->goodbye("[depend] -- NOT OK");
         }
+        else {
+          return $self->goodbye("[configure_requires] -- NOT OK");
+        }
     }
     die "never reached";
 }
@@ -687,8 +690,13 @@ sub choose_MM_or_MB {
     if (-f File::Spec->catfile($self->{build_dir},"Build.PL")) {
         if ($mpl_exists) { # they *can* choose
             if ($CPAN::META->has_inst("Module::Build")) {
-                $prefer_installer = CPAN::HandleConfig->prefs_lookup($self,
-                                                                     q{prefer_installer});
+                $prefer_installer = CPAN::HandleConfig->prefs_lookup(
+                  $self, q{prefer_installer}
+                );
+                # M::B <= 0.35 left a DATA handle open that 
+                # causes problems upgrading M::B on Windows
+                close *Module::Build::Version::DATA
+                  if fileno *Module::Build::Version::DATA;
             }
         } else {
             $prefer_installer = "mb";
@@ -1258,10 +1266,11 @@ sub readme {
                             "id",
                             split(/\//,"$sans.readme"),
                            );
-    $self->debug("Doing localize") if $CPAN::DEBUG;
-    $local_file = CPAN::FTP->localize("authors/id/$sans.readme",
+    my $readme = "authors/id/$sans.readme";
+    $self->debug("Doing localize for '$readme'") if $CPAN::DEBUG;
+    $local_file = CPAN::FTP->localize($readme,
                                       $local_wanted)
-        or $CPAN::Frontend->mydie(qq{No $sans.readme found});;
+        or $CPAN::Frontend->mydie(qq{No $sans.readme found});
 
     if ($^O eq 'MacOS') {
         Mac::BuildTools::launch_file($local_file);
@@ -2084,6 +2093,8 @@ sub _run_via_expect_anyorder {
                     $expo->send($send);
                     # never allow reusing an QA pair unless they told us
                     splice @expectacopy, $i, 2 unless $reuse;
+                    $but =~ s/(?s:^.*?)$regex//;
+                    $timeout_start = time;
                     next EXPECT;
                 }
             }
@@ -2511,7 +2522,7 @@ sub unsat_prereq {
     my @merged = %merged;
     CPAN->debug("all merged_prereqs[@merged]") if $CPAN::DEBUG;
   NEED: while (my($need_module, $need_version) = each %merged) {
-        my($available_version,$available_file,$nmo);
+        my($available_version,$inst_file,$available_file,$nmo);
         if ($need_module eq "perl") {
             $available_version = $];
             $available_file = CPAN::find_perl();
@@ -2522,10 +2533,11 @@ sub unsat_prereq {
             }
             $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
             next if $nmo->uptodate;
-            $available_file = $nmo->available_file;
+            $inst_file = $nmo->inst_file || '';
+            $available_file = $nmo->available_file || '';
 
             # if they have not specified a version, we accept any installed one
-            if (defined $available_file
+            if ( $available_file
                 and ( # a few quick shortcurcuits
                      not defined $need_version
                      or $need_version eq '0'    # "==" would trigger warning when not numeric
@@ -2540,10 +2552,19 @@ sub unsat_prereq {
         # We only want to install prereqs if either they're not installed
         # or if the installed version is too old. We cannot omit this
         # check, because if 'force' is in effect, nobody else will check.
-        if (defined $available_file) {
-            my $fulfills_all_version_rqs = $self->_fulfills_all_version_rqs
-                ($need_module,$available_file,$available_version,$need_version);
-            next NEED if $fulfills_all_version_rqs;
+        # But we don't want to accept a deprecated module installed as part
+        # of the Perl core, so we continue if the available file is the installed
+        # one and is deprecated
+
+        if ( $available_file ) {
+            if  ( $inst_file && $available_file eq $inst_file && $nmo->inst_deprecated ) {
+                # continue installing as a prereq
+            }
+            else {
+                next NEED if $self->_fulfills_all_version_rqs(
+                    $need_module,$available_file,$available_version,$need_version
+                );
+            }
         }
 
         if ($need_module eq "perl") {
