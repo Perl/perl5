@@ -19,8 +19,8 @@ find {
     wanted => sub {
         my $x = $File::Find::name; $x =~ s/^..//;
         return if -d;
-	return if $_ eq '.gitignore';
-	return if $x =~ /^\.git\b/;
+        return if $_ eq '.gitignore';
+        return if $x =~ /^\.git\b/;
         print "$File::Find::name not in MANIFEST\n" if !$files{$x};
     },
 }, ".";
