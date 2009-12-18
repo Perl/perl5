@@ -1,6 +1,33 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2009-12-17   David E. Wheeler <david@justatheory.org>
+	* Release 3.13
+
+	Removed deleted test file from MANIFEST.
+
+2009-12-17   David E. Wheeler <david@justatheory.org>
+	* Release 3.12
+
+	Removed "All rights reserved" from all files.
+
+	Added acknowledgements to man.he.net and search.cpan.org for
+	permission to link man pages and Perl module links to their sites
+	in the output of Pod::Simple::HTML and Pod::Simple::XHTML.
+
+	Add "html_h_level" option to Pod::Simple::XHTML and ::HTML to allow
+	a =head1 to become an <h2> and so on. RJBS.
+
+	Add batch_mode_page_object_init() method to Pod::Simple::XHTML.
+	This allows it to be used by Pod::Simple::HTMLBatch.
+
+	Fixed a regression in Pod::Simple::XHTML where '=begin html' blocks
+	were incorrectly escaped rather than simply passed through unmolested.
+	RJBS.
+
+	Removed the undocumented "fullstop_space_harden" attribute, which
+	apparently was only used by Pod::Text a very long time ago.
+
 2009-12-09   David E. Wheeler <david@justatheory.org>
 	* Release 3.11
 
@@ -45,7 +72,7 @@
 	version number lowered.
 
 2009-11-12   David E. Wheeler <david@justatheory.org>
-	* Release 3.11
+	* Release 3.10
 
 	Converted test files that had DOS endings to have Unix endings
 	(RT #50922 from Steve Hay).

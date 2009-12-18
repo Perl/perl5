@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 43;
+use Test::More tests => 48;
 #use Test::More 'no_plan';
 
 use_ok('Pod::Simple::XHTML') or exit;
@@ -26,6 +26,11 @@ $parser->parse_string_document( "=head1 Poit!" );
 is($results, qq{<h1 id="Poit-">Poit!</h1>\n\n}, "head1 level output");
 
 initialize($parser, $results);
+$parser->html_h_level(2);
+$parser->parse_string_document( "=head1 Poit!" );
+is($results, qq{<h2 id="Poit-">Poit!</h2>\n\n}, "head1 level output h_level 2");
+
+initialize($parser, $results);
 $parser->parse_string_document( "=head2 I think so Brain." );
 is($results, qq{<h2 id="I-think-so-Brain.">I think so Brain.</h2>\n\n}, "head2 level output");
 
@@ -37,6 +42,18 @@ initialize($parser, $results);
 $parser->parse_string_document( "=head4 Zort & Zog!" );
 is($results, qq{<h4 id="Zort-Zog-">Zort &amp; Zog!</h4>\n\n}, "head4 level output");
 
+sub x ($;&) {
+  my $code = $_[1];
+  Pod::Simple::XHTML->_out(
+  sub { $code->($_[0]) if $code },
+  "=pod\n\n$_[0]",
+) }
+
+like(
+  x("=head1 Header\n\n=for html <div>RAW<span>!</span></div>\n\nDone."),
+  qr/.+<\/h1>\s+<div>RAW<span>!<\/span><\/div>\s+.*/sm,
+  "heading building"
+) or exit;
 
 initialize($parser, $results);
 $parser->parse_string_document(<<'EOPOD');
@@ -562,6 +579,13 @@ is $parser->resolve_man_page_link('crontab(5)'),
     "${MANURL}5/crontab", 'Man link without fragment';
 is $parser->resolve_man_page_link('crontab'),
     "${MANURL}1/crontab", 'Man link without section';
+
+# Make sure that batch_mode_page_object_init() works.
+ok $parser->batch_mode_page_object_init(0, 0, 0, 0, 6),
+    'Call batch_mode_page_object_init()';
+ok $parser->batch_mode, 'We should be in batch mode';
+is $parser->batch_mode_current_level, 6,
+    'The level should have been set';
 
 ######################################
 

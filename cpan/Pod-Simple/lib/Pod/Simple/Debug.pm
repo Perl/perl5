@@ -3,7 +3,7 @@ require 5;
 package Pod::Simple::Debug;
 use strict;
 use vars qw($VERSION );
-$VERSION = '3.11';
+$VERSION = '3.13';
 
 sub import {
   my($value,$variable);
@@ -149,7 +149,7 @@ Patches against Pod::Simple are welcome. Please send bug reports to
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+Copyright (c) 2002 Sean M. Burke.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

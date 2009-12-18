@@ -1948,7 +1948,6 @@ cpan/Pod-Simple/t/fcodes_s.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes.t				Pod::Simple test file
 cpan/Pod-Simple/t/fornot.t				Pod::Simple test file
 cpan/Pod-Simple/t/for.t					Pod::Simple test file
-cpan/Pod-Simple/t/fullstop.t				Pod::Simple test file
 cpan/Pod-Simple/t/heads.t				Pod::Simple test file
 cpan/Pod-Simple/t/html01.t				Pod::Simple test file
 cpan/Pod-Simple/t/html02.t				Pod::Simple test file

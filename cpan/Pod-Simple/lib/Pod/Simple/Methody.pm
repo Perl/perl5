@@ -4,7 +4,7 @@ package Pod::Simple::Methody;
 use strict;
 use Pod::Simple ();
 use vars qw(@ISA $VERSION);
-$VERSION = '3.11';
+$VERSION = '3.13';
 @ISA = ('Pod::Simple');
 
 # Yes, we could use named variables, but I want this to be impose
@@ -123,7 +123,7 @@ Patches against Pod::Simple are welcome. Please send bug reports to
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+Copyright (c) 2002 Sean M. Burke.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

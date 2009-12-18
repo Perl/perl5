@@ -5,7 +5,7 @@ use Pod::Simple::PullParserToken ();
 use strict;
 use vars qw(@ISA $VERSION);
 @ISA = ('Pod::Simple::PullParserToken');
-$VERSION = '3.11';
+$VERSION = '3.13';
 
 sub new {  # Class->new(tagname, optional_attrhash);
   my $class = shift;
@@ -132,7 +132,7 @@ Patches against Pod::Simple are welcome. Please send bug reports to
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+Copyright (c) 2002 Sean M. Burke.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -28,7 +28,7 @@ L<Pod::Simple::HTML>, but it largely preserves the same interface.
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.11';
+$VERSION = '3.13';
 use Carp ();
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
@@ -117,6 +117,12 @@ default value is just a content type header tag:
 Add additional meta tags here, or blocks of inline CSS or JavaScript
 (wrapped in the appropriate tags).
 
+=head2 html_h_level
+
+This is the level of HTML "Hn" element to which a Pod "head1" corresponds.  For
+example, if C<html_h_level> is set to 2, a head1 will produce an H2, a head2
+will produce an H3, and so on.
+
 =head2 default_title
 
 Set a default title for the page if no title can be determined from the
@@ -163,6 +169,7 @@ __PACKAGE__->_accessorize(
  'html_javascript',
  'html_doctype',
  'html_header_tags',
+ 'html_h_level',
  'title', # Used internally for the title extracted from the content
  'default_title',
  'force_title',
@@ -189,7 +196,6 @@ sub new {
   my $self = shift;
   my $new = $self->SUPER::new(@_);
   $new->{'output_fh'} ||= *STDOUT{IO};
-  $new->accept_targets( 'html', 'HTML' );
   $new->perldoc_url_prefix('http://search.cpan.org/perldoc?');
   $new->man_url_prefix('http://man.he.net/man');
   $new->html_header_tags('<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />');
@@ -200,6 +206,11 @@ sub new {
   $new->{'output'} = [];
   $new->{'saved'} = [];
   $new->{'ids'} = {};
+
+  $new->{'__region_targets'}  = [];
+  $new->{'__literal_targets'} = {};
+  $new->accept_targets_as_html( 'html', 'HTML' );
+
   return $new;
 }
 
@@ -235,11 +246,31 @@ something like:
       }
   }
 
+=head2 accept_targets_as_html
+
+This method behaves like C<accept_targets_as_text>, but also marks the region
+as one whose content should be emitted literally, without HTML entity escaping
+or wrapping in a C<div> element.
+
 =cut
+
+sub __in_literal_xhtml_region {
+    return unless @{ $_[0]{__region_targets} };
+    my $target = $_[0]{__region_targets}[-1];
+    return $_[0]{__literal_targets}{ $target };
+}
+
+sub accept_targets_as_html {
+    my ($self, @targets) = @_;
+    $self->accept_targets(@targets);
+    $self->{__literal_targets}{$_} = 1 for @targets;
+}
 
 sub handle_text {
     # escape special characters in HTML (<, >, &, etc)
-    $_[0]{'scratch'} .= encode_entities( $_[1] )
+    $_[0]{'scratch'} .= $_[0]->__in_literal_xhtml_region
+                      ? $_[1]
+                      : encode_entities( $_[1] );
 }
 
 sub start_Para     { $_[0]{'scratch'} = '<p>' }
@@ -314,6 +345,11 @@ sub end_Verbatim {
 
 sub _end_head {
     my $h = delete $_[0]{in_head};
+
+    my $add = $_[0]->html_h_level;
+    $add = 1 unless defined $add;
+    $h += $add - 1;
+
     my $id = $_[0]->idify($_[0]{scratch});
     my $text = $_[0]{scratch};
     $_[0]{'scratch'} = qq{<h$h id="$id">$text</h$h>};
@@ -338,15 +374,24 @@ sub end_item_text   {
 # This handles =begin and =for blocks of all kinds.
 sub start_for { 
   my ($self, $flags) = @_;
-  $self->{'scratch'} .= '<div';
-  $self->{'scratch'} .= ' class="'.$flags->{'target'}.'"' if ($flags->{'target'});
-  $self->{'scratch'} .= '>';
+
+  push @{ $self->{__region_targets} }, $flags->{target_matching};
+
+  unless ($self->__in_literal_xhtml_region) {
+    $self->{scratch} .= '<div';
+    $self->{scratch} .= qq( class="$flags->{target}") if $flags->{target};
+    $self->{scratch} .= '>';
+  }
+
   $self->emit;
 
 }
 sub end_for { 
   my ($self) = @_;
-  $self->{'scratch'} .= '</div>';
+
+  $self->{'scratch'} .= '</div>' unless $self->__in_literal_xhtml_region;
+
+  pop @{ $self->{__region_targets} };
   $self->emit;
 }
 
@@ -592,13 +637,27 @@ sub idify {
     return "$t$i";
 }
 
+=head2 batch_mode_page_object_init
+
+  $pod->batch_mode_page_object_init($batchconvobj, $module, $infile, $outfile, $depth);
+
+Called by L<Pod::Simple::HTMLBatch> so that the class has a chance to
+initialize the converter. Internally it sets the C<batch_mode> property to
+true and sets C<batch_mode_current_level()>, but Pod::Simple::XHTML does not
+currently use those features. Subclasses might, though.
+
+=cut
+
+sub batch_mode_page_object_init {
+  my ($self, $batchconvobj, $module, $infile, $outfile, $depth) = @_;
+  $self->batch_mode(1);
+  $self->batch_mode_current_level($depth);
+  return $self;
+}
+
 1;
 
 __END__
-
-=head1 SEE ALSO
-
-L<Pod::Simple>, L<Pod::Simple::Methody>
 
 =head1 SEE ALSO
 
@@ -627,6 +686,14 @@ under the same terms as Perl itself.
 This program is distributed in the hope that it will be useful, but
 without any warranty; without even the implied warranty of
 merchantability or fitness for a particular purpose.
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to L<Hurricane Electrict|http://he.net/> for permission to use its
+L<Linux man pages online|http://man.he.net/> site for man page links.
+
+Thanks to L<search.cpan.org|http://search.cpan.org/> for permission to use the
+site for Perl module links.
 
 =head1 AUTHOR
 

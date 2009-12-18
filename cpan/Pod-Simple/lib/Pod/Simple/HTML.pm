@@ -10,7 +10,7 @@ use vars qw(
   $Doctype_decl  $Content_decl
 );
 @ISA = ('Pod::Simple::PullParser');
-$VERSION = '3.11';
+$VERSION = '3.13';
 
 use UNIVERSAL ();
 BEGIN {
@@ -70,6 +70,8 @@ __PACKAGE__->_accessorize(
  'title_prefix',  'title_postfix',
   # What to put before and after the title in the head.
   # Should already be &-escaped
+
+ 'html_h_level',
   
  'html_header_before_title',
  'html_header_after_title',
@@ -208,7 +210,23 @@ sub new {
   $new->html_footer( qq[\n<!-- end doc -->\n\n</body></html>\n] );
 
   $new->{'Tagmap'} = {%Tagmap};
+
   return $new;
+}
+
+sub __adjust_html_h_levels {
+  my ($self) = @_;
+  my $Tagmap = $self->{'Tagmap'};
+
+  my $add = $self->html_h_level;
+  return unless defined $add;
+  return if ($self->{'Adjusted_html_h_levels'}||0) == $add;
+
+  $add -= 1;
+  for (1 .. 4) {
+    $Tagmap->{"head$_"}  =~ s/$_/$_ + $add/e;
+    $Tagmap->{"/head$_"} =~ s/$_/$_ + $add/e;
+  }
 }
 
 sub batch_mode_page_object_init {
@@ -433,6 +451,8 @@ sub _do_middle_main_loop {
   my $self = $_[0];
   my $fh = $self->{'output_fh'};
   my $tagmap = $self->{'Tagmap'};
+
+  $self->__adjust_html_h_levels;
   
   my($token, $type, $tagname, $linkto, $linktype);
   my @stack;
@@ -922,7 +942,7 @@ Patches against Pod::Simple are welcome. Please send bug reports to
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002-2004 Sean M. Burke.  All rights reserved.
+Copyright (c) 2002-2004 Sean M. Burke.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
@@ -930,6 +950,14 @@ under the same terms as Perl itself.
 This program is distributed in the hope that it will be useful, but
 without any warranty; without even the implied warranty of
 merchantability or fitness for a particular purpose.
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to L<Hurricane Electrict|http://he.net/> for permission to use its
+L<Linux man pages online|http://man.he.net/> site for man page links.
+
+Thanks to L<search.cpan.org|http://search.cpan.org/> for permission to use the
+site for Perl module links.
 
 =head1 AUTHOR
 

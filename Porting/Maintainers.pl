@@ -1293,7 +1293,7 @@ use File::Glob qw(:case);
     'Pod::Simple' =>
 	{
 	'MAINTAINER'	=> 'arandal',
-	'DISTRIBUTION'	=> 'DWHEELER/Pod-Simple-3.11.tar.gz',
+	'DISTRIBUTION'	=> 'DWHEELER/Pod-Simple-3.13.tar.gz',
 	'FILES'		=> q[cpan/Pod-Simple],
 	# XXX these two files correspond to similar ones in blead under
 	# pod/, but the blead ones have newer changes, and also seem to

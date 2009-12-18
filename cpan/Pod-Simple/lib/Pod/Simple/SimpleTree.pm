@@ -6,7 +6,7 @@ use strict;
 use Carp ();
 use Pod::Simple ();
 use vars qw( $ATTR_PAD @ISA $VERSION $SORT_ATTRS);
-$VERSION = '3.11';
+$VERSION = '3.13';
 BEGIN {
   @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
@@ -151,7 +151,7 @@ Patches against Pod::Simple are welcome. Please send bug reports to
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+Copyright (c) 2002 Sean M. Burke.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
