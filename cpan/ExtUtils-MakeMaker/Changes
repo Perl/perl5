@@ -1,9 +1,24 @@
+6.56  Thu Dec 17 14:02:14 PST 2009
+    * Stable release of 6.55_03
+
+
+6.55_03  Fri Dec  4 23:08:02 PDT 2009 
     Bug Fixes
     * BUILD_REQUIRES will not be used when generating ppd, PRINT_PREREQ and
     'requires' section of META.yml (Alexandr Ciornii)
 
     OS/2
     * Better compatibility with miniperl [rt.cpan.org 48534] (Ilya Zakharevich)
+
+    Win32
+    * mingw64 support (Sisyphus)
+    * Fixed a typo causing bad Makefiles for Visual C++ users (Steve Hay)
+
+    New Features
+    * The new "package NAME VERSION" syntax from 5.11 is now supported by
+      parse_version() and thus VERSION_FROM.  The first version declaration,
+      package or $VERSION, is used. (David Golden)
+
 
 6.55_02  Wed Aug  5 00:36:36 PDT 2009
     Feature Changes

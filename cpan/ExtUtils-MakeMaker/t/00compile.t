@@ -15,7 +15,7 @@ BEGIN {
 chdir "..";
 my $manifest = "MANIFEST";
 open(my $manifest_fh, "<", $manifest) or die "Can't open $manifest: $!";
-my @modules = map  { m{^lib/(\S+)}; $1 }
+my @modules = map  { m{^lib/(\S+)}; $1 } 
               grep { m{^lib/\S+\.pm} } 
               <$manifest_fh>;
 
