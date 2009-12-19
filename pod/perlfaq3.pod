@@ -31,7 +31,7 @@ A crude table of contents for the Perl manpage set is found in L<perltoc>.
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-perldebug(1) manpage, on an "empty" program, like this:
+C<perldebug(1)> manpage, on an "empty" program, like this:
 
     perl -de 42
 
@@ -42,21 +42,21 @@ operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
-The psh (Perl sh) is currently at version 1.8. The Perl Shell is a shell
+The C<psh> (Perl sh) is currently at version 1.8. The Perl Shell is a shell
 that combines the interactive nature of a Unix shell with the power of
 Perl. The goal is a full featured shell that behaves as expected for
 normal shell activity and uses Perl syntax and functionality for
-control-flow statements and other things. You can get psh at
+control-flow statements and other things. You can get C<psh> at
 http://sourceforge.net/projects/psh/ .
 
-Zoidberg is a similar project and provides a shell written in perl,
+C<Zoidberg> is a similar project and provides a shell written in perl,
 configured in perl and operated in perl. It is intended as a login shell
 and development environment. It can be found at
 http://pardus-larus.student.utwente.nl/~pardus/projects/zoidberg/
 or your local CPAN mirror.
 
-The Shell.pm module (distributed with Perl) makes Perl try commands
-which aren't part of the Perl language as shell commands.  perlsh from
+The C<Shell.pm> module (distributed with Perl) makes Perl try commands
+which aren't part of the Perl language as shell commands.  C<perlsh> from
 the source distribution is simplistic and uninteresting, but may still
 be what you want.
 
@@ -71,7 +71,7 @@ that C<CPAN.pm> understands and can use to re-install every module:
 
 	$ cpan -a
 
-Inside a Perl program, you can use the ExtUtils::Installed module to
+Inside a Perl program, you can use the C<ExtUtils::Installed> module to
 show all installed distributions, although it can take awhile to do
 its magic.  The standard library which comes with Perl just shows up
 as "Perl" (although you can get those with C<Module::CoreList>).
@@ -94,7 +94,7 @@ can use C<File::Find::Rule>:
 		;
 
 If you do not have that module, you can do the same thing
-with File::Find which is part of the standard library:
+with C<File::Find> which is part of the standard library:
 
 	use File::Find;
 	my @files;
@@ -153,11 +153,11 @@ The C<Data::Dumper> module can pretty-print Perl data structures:
 Perl comes with an interactive debugger, which you can start with the
 C<-d> switch. It's fully explained in L<perldebug>.
 
-If you'd like a graphical user interface and you have Tk, you can use
+If you'd like a graphical user interface and you have C<Tk>, you can use
 C<ptkdb>. It's on CPAN and available for free.
 
 If you need something much more sophisticated and controllable, Leon
-Brocard's Devel::ebug (which you can call with the -D switch as -Debug)
+Brocard's C<Devel::ebug> (which you can call with the C<-D> switch as C<-Debug>)
 gives you the programmatic hooks into everything you need to write your
 own (without too much pain and suffering).
 
@@ -182,7 +182,7 @@ C<Devel::DProf>.
 	dprofpp
 
 You can also do the profiling and reporting in one step with the C<-p>
-switch to <dprofpp>:
+switch to C<dprofpp>:
 
 	dprofpp -p program.pl
 
@@ -224,18 +224,18 @@ http://www.stonehenge.com/merlyn/LinuxMag/col75.html .
 
 =head2 How do I cross-reference my Perl programs?
 
-The B::Xref module can be used to generate cross-reference reports
+The C<B::Xref> module can be used to generate cross-reference reports
 for Perl programs.
 
     perl -MO=Xref[,OPTIONS] scriptname.plx
 
 =head2 Is there a pretty-printer (formatter) for Perl?
 
-Perltidy is a Perl script which indents and reformats Perl scripts
+C<Perltidy> is a Perl script which indents and reformats Perl scripts
 to make them easier to read by trying to follow the rules of the
 L<perlstyle>. If you write Perl scripts, or spend much time reading
 them, you will probably find it useful.  It is available at
-http://perltidy.sourceforge.net
+http://perltidy.sourceforge.net .
 
 Of course, if you simply follow the guidelines in L<perlstyle>,
 you shouldn't need to reformat.  The habit of formatting your code

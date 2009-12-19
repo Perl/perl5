@@ -278,9 +278,9 @@ returns the escaped string:
 
 	my $original = "Colon : Hash # Percent %";
 
-	my $escaped = uri_escape( $original )
+	my $escaped = uri_escape( $original );
 
-	print "$escaped\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25%20'
+	print "$escaped\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25'
 
 To decode the string, use the C<uri_unescape> function:
 
@@ -406,7 +406,7 @@ for you, too.
 
 Many people try to write their own decoder (or copy one from
 another program) and then run into one of the many "gotchas"
-of the task.  It's much easier and less hassle to use CGI.pm.
+of the task.  It's much easier and less hassle to use C<CGI.pm>.
 
 =head2 How do I check a valid mail address?
 
@@ -470,7 +470,7 @@ the MIME/QP encoding.  Decoding BASE64 becomes as simple as:
 	use MIME::Base64;
 	$decoded = decode_base64($encoded);
 
-The MIME-Tools package (available from CPAN) supports extraction with
+The C<MIME-Tools> package (available from CPAN) supports extraction with
 decoding of BASE64 encoded attachments and content directly from email
 messages.
 
@@ -497,7 +497,7 @@ that the company's mail system will not accept, so you should ask for
 users' mail addresses when this matters.  Furthermore, not all systems
 on which Perl runs are so forthcoming with this information as is Unix.
 
-The C<Mail::Util> module from CPAN (part of the MailTools package) provides a
+The C<Mail::Util> module from CPAN (part of the C<MailTools> package) provides a
 C<mailaddress()> function that tries to guess the mail address of the user.
 It makes a more intelligent guess than the code above, using information
 given when the module was installed, but it could still be incorrect.
@@ -519,19 +519,19 @@ Use the C<sendmail> program directly:
 	EOF
 	close(SENDMAIL)     or warn "sendmail didn't close nicely";
 
-The B<-oi> option prevents sendmail from interpreting a line consisting
+The B<-oi> option prevents C<sendmail> from interpreting a line consisting
 of a single dot as "end of message".  The B<-t> option says to use the
 headers to decide who to send the message to, and B<-odq> says to put
 the message into the queue.  This last option means your message won't
 be immediately delivered, so leave it out if you want immediate
 delivery.
 
-Alternate, less convenient approaches include calling mail (sometimes
-called mailx) directly or simply opening up port 25 have having an
+Alternate, less convenient approaches include calling C<mail> (sometimes
+called C<mailx>) directly or simply opening up port 25 have having an
 intimate conversation between just you and the remote SMTP daemon,
-probably sendmail.
+probably C<sendmail>.
 
-Or you might be able use the CPAN module Mail::Mailer:
+Or you might be able use the CPAN module C<Mail::Mailer>:
 
 	use Mail::Mailer;
 
@@ -546,7 +546,7 @@ Or you might be able use the CPAN module Mail::Mailer:
 
 The C<Mail::Internet> module uses C<Net::SMTP> which is less Unix-centric than
 C<Mail::Mailer>, but less reliable.  Avoid raw SMTP commands.  There
-are many reasons to use a mail transport agent like sendmail.  These
+are many reasons to use a mail transport agent like C<sendmail>.  These
 include queuing, MX records, and security.
 
 =head2 How do I use MIME to make an attachment to a mail message?
@@ -639,7 +639,7 @@ perl5.6, can also get the hostname.
 To get the IP address, you can use the C<gethostbyname> built-in function
 to turn the name into a number. To turn that number into the dotted octet
 form (a.b.c.d) that most people expect, use the C<inet_ntoa> function
-from the <Socket> module, which also comes with perl.
+from the C<Socket> module, which also comes with perl.
 
 	use Socket;
 
