@@ -17,6 +17,8 @@ my($dev_tty, $dev_null) = qw(/dev/tty /dev/null);
 SKIP: {
     open(my $tty, "<", $dev_tty)
 	or skip("Can't open terminal '$dev_tty': $!");
+    skip("Probably batch mode since TT is _NLA0:") 
+        if $^O eq 'VMS' && lc(VMS::Filespec::vmspath('TT')) eq '_nla0:';
     ok(-t $tty);
 }
 SKIP: {
