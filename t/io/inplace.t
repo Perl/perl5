@@ -57,7 +57,11 @@ SKIP:
 	
 	is(scalar(@ARGV), 0, "consumed ARGV");
 	
-	is( runperl( prog => 'print<>;', args => \@ifiles ),
+#	runperl may quote its arguments, so don't expect to be able
+#	to reuse things you send it.
+
+	my @my_ifiles = @ifiles;
+	is( runperl( prog => 'print<>;', args => \@my_ifiles ),
 	    "foobar\nfoobar\nfoobar\n",
 	    "normal inplace edit");
     }
@@ -78,7 +82,8 @@ SKIP:
 	
 	is(scalar(@ARGV), 0, "consumed ARGV");
 	
-	is( runperl( prog => 'print<>;', args => \@ifiles ),
+	my @my_ifiles = @ifiles;
+	is( runperl( prog => 'print<>;', args => \@my_ifiles ),
 	    "foobar\nfoobar\nfoobar\n",
 	    "normal inplace edit");
     }
