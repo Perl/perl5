@@ -2586,8 +2586,8 @@ dist/base/MANIFEST		base.pm manifest
 dist/base/META.yml		base.pm META.yml file
 dist/base/t/base.t		See if base works
 dist/base/t/compile-time.t	See if base works
-dist/base/t/fields-5.6.0.t	See if fields work
-dist/base/t/fields-5.8.0.t	See if fields work
+dist/base/t/fields-5_6_0.t	See if fields work
+dist/base/t/fields-5_8_0.t	See if fields work
 dist/base/t/fields-base.t	See if fields work
 dist/base/t/fields.t		See if fields work
 dist/base/t/isa.t		See if base's behaviour doesn't change
