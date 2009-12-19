@@ -10,8 +10,10 @@ $|=1;
 
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
-open my $diagfh, "<", "../pod/perldiag.pod"
-  or die "Can't open ../pod/perldiag.pod: $!";
+chdir '..' or die "Can't chdir ..: $!";
+
+open my $diagfh, "<", "pod/perldiag.pod"
+  or die "Can't open pod/perldiag.pod: $!";
 
 my %entries;
 while (<DATA>) {
@@ -32,12 +34,12 @@ while (<$diagfh>) {
   }
 }
 
-my @todo = ('..');
+my @todo = <*>;
 while (@todo) {
   my $todo = shift @todo;
-  next if $todo ~~ ['../t', '../lib', '../ext', '../dist', '../cpan'];
+  next if $todo ~~ ['t', 'lib', 'ext', 'dist', 'cpan'];
   # opmini.c is just a copy of op.c, so there's no need to check again.
-  next if $todo eq '../opmini.c';
+  next if $todo eq 'opmini.c';
   if (-d $todo) {
     push @todo, glob "$todo/*";
   } elsif ($todo =~ m/\.[ch]$/) {
