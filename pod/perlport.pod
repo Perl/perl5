@@ -295,7 +295,7 @@ to be running the program.
 
     use File::Spec::Functions;
     chdir(updir());        # go up one directory
-    $file = catfile(curdir(), 'temp', 'file.txt');
+    my $file = catfile(curdir(), 'temp', 'file.txt');
     # on Unix and Win32, './temp/file.txt'
     # on Mac OS Classic, ':temp:file.txt'
     # on VMS, '[.temp]file.txt'
@@ -356,7 +356,7 @@ Always use C<< < >> explicitly to open a file for reading, or even
 better, use the three-arg version of open, unless you want the user to
 be able to specify a pipe open.
 
-    open(FILE, '<', $existing_file) or die $!;
+    open my $fh, '<', $existing_file) or die $!;
 
 If filenames might use strange characters, it is safest to open it
 with C<sysopen> instead of C<open>.  C<open> is magic and can
@@ -481,14 +481,14 @@ To convert $^X to a file pathname, taking account of the requirements
 of the various operating system possibilities, say:
 
   use Config;
-  $thisperl = $^X;
+  my $thisperl = $^X;
   if ($^O ne 'VMS')
      {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
 To convert $Config{perlpath} to a file pathname, say:
 
   use Config;
-  $thisperl = $Config{perlpath};
+  my $thisperl = $Config{perlpath};
   if ($^O ne 'VMS')
      {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
@@ -635,7 +635,7 @@ When calculating specific times, such as for tests in time or date modules,
 it may be appropriate to calculate an offset for the epoch.
 
     require Time::Local;
-    $offset = Time::Local::timegm(0, 0, 0, 1, 0, 70);
+    my $offset = Time::Local::timegm(0, 0, 0, 1, 0, 70);
 
 The value for C<$offset> in Unix will be C<0>, but in Mac OS Classic
 will be some large number.  C<$offset> can then be added to a Unix time
@@ -693,10 +693,10 @@ of avoiding wasteful constructs such as:
     for (0..10000000) {}                       # bad
     for (my $x = 0; $x <= 10000000; ++$x) {}   # good
 
-    @lines = <VERY_LARGE_FILE>;                # bad
+    my @lines = <$very_large_file>;            # bad
 
-    while (<FILE>) {$file .= $_}               # sometimes bad
-    $file = join('', <FILE>);                  # better
+    while (<$fh>) {$file .= $_}                # sometimes bad
+    my $file = join('', <$fh>);                # better
 
 The last two constructs may appear unintuitive to most people.  The
 first repeatedly grows a string, whereas the second allocates a
@@ -846,10 +846,10 @@ Users familiar with I<COMMAND.COM> or I<CMD.EXE> style shells should
 be aware that each of these file specifications may have subtle
 differences:
 
-    $filespec0 = "c:/foo/bar/file.txt";
-    $filespec1 = "c:\\foo\\bar\\file.txt";
-    $filespec2 = 'c:\foo\bar\file.txt';
-    $filespec3 = 'c:\\foo\\bar\\file.txt';
+    my $filespec0 = "c:/foo/bar/file.txt";
+    my $filespec1 = "c:\\foo\\bar\\file.txt";
+    my $filespec2 = 'c:\foo\bar\file.txt';
+    my $filespec3 = 'c:\\foo\\bar\\file.txt';
 
 System calls accept either C</> or C<\> as the path separator.
 However, many command-line utilities of DOS vintage treat C</> as
