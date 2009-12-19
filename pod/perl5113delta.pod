@@ -256,13 +256,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 
 
-    legalize =begin foo bar
+The Pod specification (L<perlpodspec>) has been updated to bring the
+specification in line with modern usage already supported by most Pod systems.
+A parameter string may now follow the format name in a "begin/end" region.
+Links to URIs with a text description are now allowed.  The usage of C<<
+L<"section"> >> has been marked as deprecated.
 
-    more aggressively deprecate L<section> and L<"section">
-
-    remove prohibition against L<text|href>
-
-    Document if.pm in perlfunc
+L<if.pm|if> has been documented in L<perlfunc/use> as a means to get
+conditional loading of modules despite the implicit BEGIN block around C<use>.
 
 
 
