@@ -222,6 +222,10 @@ utility script
 
 Upgraded from version 0.89_09 to 0.90.
 
+=item C<Encode>
+
+Upgraded from version 2.38 to 2.39.
+
 =item C<ExtUtils::MakeMaker>
 
 Upgraded from version 6.55_02 to 6.56.  Adds new BUILD_REQUIRES key to
