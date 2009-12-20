@@ -268,6 +268,7 @@ chip                                    chip\100pobox.com
 +                                       chip\100atlantic.net
 +                                       chip\100rio.atlantic.net
 +                                       salzench\100dun.nielsen.com
++                                       chip\100ci005.sv2.upperbeyond.com
 craigb                                  craig.berry\100psinetcs.com
 +                                       craig.berry\100metamorgs.com
 +                                       craig.berry\100signaltreesolutions.com
@@ -447,6 +448,7 @@ daniel\100bitpusher.com                 daniel\100biz.bitpusher.com
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100kineticode.com                 david\100wheeler.com
 +                                       david\100wheeler.net
+dennis\100booking.com                   dennis\100camel.ams6.corp.booking.com
 dev-perl\100pimb.org                    knew-p5p\100pimb.org
 djberg86\100attbi.com                   djberg96\100attbi.com
 domo\100computer.org                    shouldbedomo\100mac.com
@@ -654,6 +656,8 @@ roderick\100argon.org                   roderick\100gate.net
 +                                       roderick\100ibcinc.com
 rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
+rurban\100x-ray.at                      rurban\100cpan.org
+
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
 +                                       schubiger\100gmail.com
