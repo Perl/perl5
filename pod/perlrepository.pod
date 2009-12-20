@@ -567,6 +567,8 @@ testcase:
   #!/bin/sh
   git clean -dxf
   # If you can use ccache, add -Dcc=ccache\ gcc -Dld=gcc to the Configure line
+  # if Encode is not needed for the test, you can speed up the bisect by
+  # excluding it from the runs with -Dnoextensions=Encode
   sh Configure -des -Dusedevel -Doptimize="-g"
   test -f config.sh || exit 125
   # Correct makefile for newer GNU gcc
