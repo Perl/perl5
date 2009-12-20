@@ -422,6 +422,24 @@ Several compilation errors and segfaults when perl was built with C<-Dmad> were 
 
 Fixes for lexer API changes in 5.11.2 which broke NYTProf's savesrc option.
 
+=item *
+
+F<-t> should only return TRUE for file handles connected to a TTY
+
+The Microsoft C version of isatty() returns TRUE for all
+character mode devices, including the /dev/null style "nul"
+device and printers like "lpt1".
+
+=item *
+
+Fixed a regression caused by commit fafafbaf which caused a panic during parameter passing [perl #70171]
+
+
+=item *
+
+On systems which in-place edits without backup files, -i'*' now works as the documentation says it does [perl #70802]
+
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -591,25 +609,9 @@ Date:   Thu Dec 17 18:28:16 2009 -0800
     PERL_GET_CONTEXT will expand to Perl_get_context() even inside the
     core because the context needs to be fetched from threadlocal storage.
 
-commit 8703a9a4fd75723318bc4ba1afc42a215806f2d1
-
-    Correct some #ifdef USE_ITHREADS / USE_MULTI
-
-Author: Jan Dubois <jand@activestate.com>
-Date:   Wed Dec 16 15:42:19 2009 -0800
-
-    -t should only return TRUE for file handles connected to a TTY
-
-    The Microsoft C version of isatty() returns TRUE for all
-    character mode devices, including the /dev/null style "nul"
-    device and printers like "lpt1".
-
-    The included test has only been tested on Windows and Linux;
-    the device names for OS/2 and VMS are just best guesses...
 
 commit 0f907b96d618c97cd2e020841a70ae037954a616
 
-    [perl #70171] 5.10.0 -> 5.10.1 Regression in fafafbaf70 (Big slowdown in 5.10 @_ parameter passing)
 
 commit 2ab54efd6265713df5cd4bd0927024245675c1c2
 
@@ -669,12 +671,10 @@ commit 69c3dccf5322a59cb855347c04712ba11b65328f
 
     [perl #71000] Wrong variable name in warning ; Add a new warning "Missing argument in %s"
 
-
     preserve readonly flag when saving and restoring magic flags
 
 commit c9930541bfa04399c3b648e83c9b750cee1154fb
 
-    [perl #70802] -i'*' refuses to work
 
 commit adab996997d7ef1b54d382f5ab4304f438cd1dd0
 
@@ -696,8 +696,6 @@ commit dfd167e94af611f6248e804cb228b35ca4123bd6
 
     Handle $@ being assigned a read-only value (without error or busting the stack).
 
-    Discovered whilst investigating RT #70862.
-
 commit f5fa9033b8c1fdcbd7710850b3b0380d6b937853
 
     Fix RT #70862 by converting ERRSV to GvSVn() to ensure a non-NULL GvSV().
@@ -705,20 +703,4 @@ commit f5fa9033b8c1fdcbd7710850b3b0380d6b937853
 commit ff868e665bf85a829dc47bfa1243b26d4367cacd
 
     Add error codes for getaddrinfo() and getnameinfo()
-
-commit 61fc5122f0d8a509834282b8ecb3252d2e4c9f5d
-
-    Make unicode semantics the default
-
-    *****************
-
-commit 021f53de09926928546378b3552f9240c9241dde
-Author: Gerard Goossen <gerard@ggoossen.net>
-Date:   Mon Nov 16 13:58:24 2009 +0100
-
-    Force OP_REQUIRE to scalar context at the end of ck_require and don't let it become void context. Fixes problem with require not always being in scalar context.
-
-commit 6a0e50422a84b53e998825128c56791913cd03aa
-Author: Craig A. Berry <craigberry@mac.com>
-Date:   Sat Nov 21 11:17:38 2009 -0600
 
