@@ -24,6 +24,9 @@ XXX Any important notices here
 
 =item Filehandles are blessed directly into C<IO::Handle::>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
 
+XXX Some description of why this change was made would be nice -- e.g. what
+the benefit that justifies the incompatibility -- dagolden, 2009-12-20
+
 =back
 
 =head1 Core Enhancements
@@ -36,13 +39,8 @@ here, but most should go in the L</Performance Enhancements> section.
 
 Perl is shipped with the latest Unicode version, 5.2, October 2009.  See
 L<http://www.unicode.org/versions/Unicode5.2.0> for details about this release
-of Unicode.
-
-But, an installation can now fairly easily change Perl to operate on any
-Unicode release.  Perl is shipped with the latest official release, but
-an installation can download and install any prior release from Unicode, and
-cause Perl to work with that (or even multiple releases).  Instructions are in
-L<perlunicode>.
+of Unicode.  See L<perlunicode> for instructions on installing and using
+older versions of Unicode.
 
 =head2 Unicode properties
 
@@ -57,7 +55,7 @@ Perl now fully supports the Unicode compound-style of using C<=> and C<:>
 in writing regular expressions: C<\p{property=value}> and
 C<\p{property:value}> (both of which mean the same thing).
 
-Perl now supports fully the Unicode loose matching rules for text
+Perl now fully supports the Unicode loose matching rules for text
 between the braces in C<\p{...}> constructs.  In addition, Perl also allows
 underscores between digits of numbers.
 
@@ -71,7 +69,7 @@ due to this is that C<\X> will match the whole sequence C<S<CR LF>>.  Another
 change is that C<\X> will match an isolated mark.  Marks generally come after a
 base character, but it is possible in Unicode to have them in isolation, and
 C<\X> will now handle that case.  Otherwise, this change should be transparent
-for the non-affected languages.
+for non-affected languages.
 
 C<\p{...}> matches using the Canonical_Combining_Class property were
 completely broken in previous Perls.  This is now fixed.
@@ -109,7 +107,7 @@ to, such as fractions.
 C<\p{Print}> no longer matches the line control characters: tab, lf, cr,
 ff, vt, and nel.  This brings it in line with the documentation.
 
-\p{Decomposition_Type=Canonical} now includes the Hangul syllables
+C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables
 
 The Numeric type property has been extended to include the Unihan
 characters.
@@ -141,6 +139,8 @@ turned off.  These include all the Unihan properties (which should be
 accessible via the CPAN module Unicode::Unihan) and any deprecated or
 Unicode internal-only property that Perl has never exposed.
 
+XXX what does "files in the To directory" mean? -- dagolden, 2009-12-20
+
 The files in the To directory are now more clearly marked as being
 stable, directly usable by applications.  New hash entries in them give
 the format of the normal entries which allows for easier machine
@@ -167,18 +167,6 @@ have a F<Changes> file that could be cribbed.
 
 =over 4
 
-=item C<warnings::fatal_enabled>
-
-    Add code and starting perldoc for warnings::fatal_enabled.
-    
-    This is an analog for warnings::enabled, except it tests whether the
-    given category has been set fatal using "use warnings FATAL => foo".
-    This is mostly for symmetry.
-    
-    Assumes that the fatal bit for a category will have an offset one higher
-    than the regular bit for the category, because otherwise much rewriting
-    of __chk would be required.
-
 XXX
 
 =back
@@ -187,58 +175,32 @@ XXX
 
 =over 4
 
-=item C<use feature "unicode_strings">
+=item C<feature>
+
+Upgraded from 1.13 to 1.14.  Added the C<unicode_strings> feature:
+
+    use feature "unicode_strings";
 
 This pragma turns on Unicode semantics for the case-changing operations
-(uc/lc/ucfirst/lcfirst) on strings that don't have the internal UTF-8
-flag set, but that however contain higher characters (between 128 and
-255).
+(uc/lc/ucfirst/lcfirst) on strings that don't have the internal UTF-8 flag set,
+but that contain single-byte characters between 128 and 255.
 
 =item C<legacy>
 
 The experimental C<legacy> pragma, introduced in 5.11.2, has been removed,
-and its functionality replaced by a new feature pragma, C<use feature
+and its functionality replaced by the new feature pragma, C<use feature
 "unicode_strings">.
+
+=item C<warnings>
+
+Upgraded from 1.07 to 1.08.  Added new C<warnings::fatal_enabled()> function.
 
 =back
 
 =head2 Updated Modules
 
-=over 4
-
-=item C<XXX>
-
-    Updated CPANPLUS to cpan release 0.90
-    Bring up ExtUtils::MakeMaker to 6.56 - no functional changes from 6.55_03
-    Upgrade to threads 1.75
-
-    Import CPAN.pm 1.94_53 from CPAN
-
-    Updated Module::Build to 0.35_15
-    
-    Update Cwd / PathTools to 3.31 to get us a non-devel version number based on a chat with Steffen. No code changes.
-
-    Updated to Pod::Simple 3.11 from CPAN [perl #71004]
-
-
-    Update Archive::Extract to cpan version 0.36
-
-XXX
-=item
-
-    File::Find was not resolving paths of the form "/..////../" correctly.
-    Fixed by adding a quantifier to the substitution parameter in
-    contract_name().
-
-=item ExtUtils::MakeMaker
-
-    New BUILD_REQUIRES key to indicate build-only prerequisites.
-
-    mingw64 support.
-
-    Support new "package NAME VERSION" syntax.
-
-=back
+XXX This should be generated with Porting/corelist-perldelta.pl once
+Module::Corelist is updated for 5.011003.
 
 =head1 Utility Changes
 
@@ -247,11 +209,9 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 
 =over 4
 
-=item F<XXX>
+=item F<perlbug>
 
-XXX
-
-    Perlbug no longer reports "Message sent" when it hasn't actually sent the message
+No longer reports "Message sent" when it hasn't actually sent the message
 
 =back
 
@@ -325,7 +285,7 @@ XXX
 
 =item Win32
 
-=over 4 
+=over 4
 
 =item *
 
@@ -544,7 +504,7 @@ Author: Jan Dubois <jand@activestate.com>
 Date:   Thu Dec 17 18:28:16 2009 -0800
 
     Export PL_curinterp symbol for MULTIPLICITY without USE_ITHREADS
-    
+
     This is necessary for XS extensions that define PERL_CORE.  In that
     situation PERL_GET_CONTEXT will resolve to PL_curinterp, which is
     normally not exported (extensions call Perl_Gcurinterp_ptr() to get a
@@ -554,24 +514,24 @@ Date:   Thu Dec 17 18:28:16 2009 -0800
 
 commit 8703a9a4fd75723318bc4ba1afc42a215806f2d1
 
-    Correct some #ifdef USE_ITHREADS / USE_MULTI 
+    Correct some #ifdef USE_ITHREADS / USE_MULTI
 
 Author: Jan Dubois <jand@activestate.com>
 Date:   Wed Dec 16 15:42:19 2009 -0800
 
     -t should only return TRUE for file handles connected to a TTY
-    
+
     The Microsoft C version of isatty() returns TRUE for all
     character mode devices, including the /dev/null style "nul"
     device and printers like "lpt1".
-    
+
     The included test has only been tested on Windows and Linux;
     the device names for OS/2 and VMS are just best guesses...
 
 commit 0f907b96d618c97cd2e020841a70ae037954a616
 
     [perl #70171] 5.10.0 -> 5.10.1 Regression in fafafbaf70 (Big slowdown in 5.10 @_ parameter passing)
-    
+
 commit 2ab54efd6265713df5cd4bd0927024245675c1c2
 
     fix bug 67156: overload: nomethod(..., '!') return value inverted
@@ -579,14 +539,14 @@ commit 2ab54efd6265713df5cd4bd0927024245675c1c2
 commit 412147f664b7f5805591ad996d7e5a9e70b3d80f
 
     [perl #71204] diagnostics.pm suppresses 'Use of uninitialized value in range (or flip)' warning
-    
+
 
 commit 69dc4b30f4725ad5f212d45d3c856ac1caaacf17
 Author: Father Chrysostomos <sprout@cpan.org>
 Date:   Mon Dec 14 12:19:35 2009 +0100
 
     [perl #70764] $' fails to initialized for pre-compiled regular expression matches
-    
+
     The match vars are associated with the regexp that last matched
     successfully. In the case of $str =~ $qr or /$qr/, since the $qr could
     be used in multiple scopes that need their own sets of match vars, the
@@ -594,16 +554,16 @@ Date:   Mon Dec 14 12:19:35 2009 +0100
     happens in pp_regcomp before pp_match has stringified the LHS, hence the
     bug. In short, /$gror/ is not equivalent to
     ($which = !$which) ? /$gror/ : /$gror/, which is weird.
-    
+
 Author: Reini Urban <rurban@x-ray.at>
 Date:   Sun Dec 13 08:06:43 2009 +0100
 
     Eliminate OP_SETSTATE from cop.h header
-    
+
     It had been added with change 3728 to track linenumbers in
     optimized else, disabled by change 4309,
     and removed with change 33072.
-    
+
     Bump copyright, latest change was "Fix MULTICALL in List-Util" 2009-03-07
     with commit 1bbbfc50
 
@@ -617,15 +577,15 @@ Date:   Sun Dec 13 08:06:43 2009 +0100
 commit 8a27a13e89107aaf68c0748b68ee71fbd86d774b
 
     [perl #71076] sort with active sub (5.10 regression)
-    
+
     One of the tests in sort.t causes a bus error (or sometimes âUndefined
     subroutine calledâ) if run multiple times. This is because sort
     decreases the refcount of an active sub used as a comparison routine.
-    
+
 commit 69c3dccf5322a59cb855347c04712ba11b65328f
 
     Fix [perl #71078] Smart match against @_ gives false negatives
-    
+
     @_ can contain NULLs for undefined elements
 
     [perl #71000] Wrong variable name in warning ; Add a new warning "Missing argument in %s"
@@ -640,7 +600,7 @@ commit c9930541bfa04399c3b648e83c9b750cee1154fb
 commit adab996997d7ef1b54d382f5ab4304f438cd1dd0
 
     Cleanup all scopes before exiting a pseudo-forked process.
-    
+
     perl_destruct() contains an assertion that the scope stack
     is empty.  The remaining scopes are due to fork() being
     called from within a BEGIN block.
@@ -656,7 +616,7 @@ commit ee6ba15dedda3e88eb66891eaf387c00a4c0a2fb
 commit dfd167e94af611f6248e804cb228b35ca4123bd6
 
     Handle $@ being assigned a read-only value (without error or busting the stack).
-    
+
     Discovered whilst investigating RT #70862.
 
 commit f5fa9033b8c1fdcbd7710850b3b0380d6b937853
