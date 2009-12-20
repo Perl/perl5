@@ -225,6 +225,14 @@ XXX
     Fixed by adding a quantifier to the substitution parameter in
     contract_name().
 
+=item ExtUtils::MakeMaker
+
+    New BUILD_REQUIRES key to indicate build-only prerequisites.
+
+    mingw64 support.
+
+    Support new "package NAME VERSION" syntax.
+
 =back
 
 =head1 Utility Changes
