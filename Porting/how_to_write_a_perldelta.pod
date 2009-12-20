@@ -261,45 +261,9 @@ Changes which create B<new> files in F<t/> go here. Changes to existing files
 in F<t/> aren't worth summarising, although the bugs that they represent
 may be.
 
-B<FIXME> - this could be automated, at least as far as generating a first
-draft.
+Autogenerate this section by running something like this:
 
-=over
-
-=item 1
-
-Start with a clean exploded tarball of the previous release, and a clean
-checkout of the branch in question
-
-=item 2
-
-Take the F<MANIFEST> file of each
-
-=item 3
-
-Search for lines matching C<m!t/.*\.t!> (and I think also for new tests in
-F<ext/DynaLoader>)
-
-=item 4
-
-Diff them
-
-=item 5
-
-For each file only in the newer F<MANIFEST>
-
-=over
-
-=item 1
-
-Grab the description line from F<MANIFEST>
-
-=item 2
-
-Write out an =item section with the filename, and description, just like
-L<http://perl5.git.perl.org/perl.git/blob/maint-5.10:/pod/perl5101delta.pod>
-
-=back
+ # perl newtests-perldelta.pl v5.11.1 HEAD
 
 =back
 
