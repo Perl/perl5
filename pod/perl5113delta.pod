@@ -139,6 +139,10 @@ parsing.  Perl can generate files in this directory for any property,
 though most are suppressed.  An installation can choose to change which
 get written.   Instructions are in L<perluniprops>.
 
+=head2 Regular Expressions
+
+U+0FFFF is now a legal character in regular expressions
+
 =head1 Modules and Pragmata
 
 =head2 Pragmata Changes
@@ -528,6 +532,3 @@ The F<Artistic> and F<Copying> files for copyright information.
 =cut
 
 
-
-
-All changes through commit b4178430270dbe109e7609d0b50d6d54bf9e95d8
