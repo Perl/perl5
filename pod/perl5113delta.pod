@@ -414,6 +414,10 @@ Smart match against C<@_> sometimes gave false negatives negatives. [perl #71078
 
 C<$@> may now be assigned a read-only value (without error or busting the stack).
 
+=item *
+
+C<sort> called recursively from within an active comparison subroutine no longer causes a bus error if run multiple times. [perl #71076]
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -527,35 +531,3 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 
 All changes through commit b4178430270dbe109e7609d0b50d6d54bf9e95d8
-One "triage" pass done.
-
-A second triage pass is still needed to remove unimportant changes
-
-commit 9307c420fad2f6f5bd314f9ed66dd53288703e09
-Author: Jan Dubois <jand@activestate.com>
-Date:   Thu Dec 17 18:28:16 2009 -0800
-
-    Export PL_curinterp symbol for MULTIPLICITY without USE_ITHREADS
-
-    This is necessary for XS extensions that define PERL_CORE.  In that
-    situation PERL_GET_CONTEXT will resolve to PL_curinterp, which is
-    normally not exported (extensions call Perl_Gcurinterp_ptr() to get a
-    pointer to PL_curinterp instead). With USE_ITHREADS defined
-    PERL_GET_CONTEXT will expand to Perl_get_context() even inside the
-    core because the context needs to be fetched from threadlocal storage.
-
-commit 8a27a13e89107aaf68c0748b68ee71fbd86d774b
-
-    [perl #71076] sort with active sub (5.10 regression)
-
-    One of the tests in sort.t causes a bus error (or sometimes âUndefined
-    subroutine calledâ) if run multiple times. This is because sort
-    decreases the refcount of an active sub used as a comparison routine.
-
-commit 576b33a19ccaf98d4dfe201d529c55c3747f0cb6
-
-    [rt.cpan.org #51574] Safe.pm sort {} bug accessing $a and $b with -Dusethreads
-
-commit ee6ba15dedda3e88eb66891eaf387c00a4c0a2fb
-
-    Fix -DPERL_NO_UTF16_FILTER
