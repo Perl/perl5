@@ -265,8 +265,6 @@ Autogenerate this section by running something like this:
 
  # perl newtests-perldelta.pl v5.11.1 HEAD
 
-=back
-
 =item Known Problems
 
 Descriptions of platform agnostic bugs we know we can't fix go here. Any
