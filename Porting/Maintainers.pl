@@ -1941,6 +1941,7 @@ use File::Glob qw(:case);
 				lib/exceptions.pl
 				lib/fastcwd.pl
 				lib/feature.{pm,t}
+				lib/feature/
 				lib/filetest.{pm,t}
 				lib/find.pl
 				lib/finddepth.pl

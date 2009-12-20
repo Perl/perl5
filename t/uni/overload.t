@@ -35,7 +35,7 @@ package main;
 
 # These tests are based on characters 128-255 not having latin1, and hence
 # Unicode, semantics
-use legacy 'unicode8bit';
+# no feature "unicode_strings";
 
 # Bug 34297
 foreach my $t ("ASCII", "B\366se") {

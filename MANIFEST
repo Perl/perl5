@@ -3454,6 +3454,7 @@ lib/ExtUtils/XSSymSet.pm	on VMS, manage linker symbols when building extensions
 lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/feature.pm			Pragma to enable new syntax
 lib/feature.t			See if features work
+lib/feature/unicode_strings.t	See if feature "unicode_strings" work
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
 lib/File/CheckTree.pm		Perl module supporting wholesale file mode validation
@@ -3492,8 +3493,6 @@ lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
-lib/legacy.pm			Pragma to preserve legacy behavior
-lib/legacy.t			For "use legacy" testing
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/locale.pm			For "use locale"

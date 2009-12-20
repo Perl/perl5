@@ -84,7 +84,7 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             my $cp = sprintf "U+%04X", $i;
 
             # First try using latin1 (Unicode) semantics.
-            no legacy "unicode8bit";    
+            use feature "unicode_strings";    
 
             my $phrase = 'with uni8bit';
             my $char = chr($i);
@@ -112,7 +112,7 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             }
 
             # Then try with posix semantics.
-            use legacy "unicode8bit";
+            no feature "unicode_strings";
             $phrase = 'no uni8bit';
 
             # These don't contribute anything in this case.
