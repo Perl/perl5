@@ -1506,7 +1506,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_svconst),	/* hintseval */
 	MEMBER_TO_FPTR(Perl_ck_eval),	/* entereval */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leaveeval */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* entertry */
+	MEMBER_TO_FPTR(Perl_ck_eval),	/* entertry */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leavetry */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* ghbyname */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* ghbyaddr */
@@ -1884,7 +1884,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000c04,	/* hintseval */
 	0x00003640,	/* entereval */
 	0x00002200,	/* leaveeval */
-	0x00000600,	/* entertry */
+	0x00001640,	/* entertry */
 	0x00000800,	/* leavetry */
 	0x00003600,	/* ghbyname */
 	0x00022800,	/* ghbyaddr */

@@ -1068,7 +1068,7 @@ hintseval	eval hints		ck_svconst	s$
 entereval	eval "string"		ck_eval		d%	S
 leaveeval	eval "string" exit	ck_null		1	S
 #evalonce	eval constant string	ck_null		d1	S
-entertry	eval {block}		ck_null		|	
+entertry	eval {block}		ck_eval		d%	
 leavetry	eval {block} exit	ck_null		@	
 
 # Get system info.

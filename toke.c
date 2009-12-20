@@ -6589,8 +6589,14 @@ Perl_yylex(pTHX)
 
 	case KEY_eval:
 	    s = SKIPSPACE1(s);
-	    PL_expect = (*s == '{') ? XTERMBLOCK : XTERM;
-	    UNIBRACK(OP_ENTEREVAL);
+	    if (*s == '{') { /* block eval */
+		PL_expect = XTERMBLOCK;
+		UNIBRACK(OP_ENTERTRY);
+	    }
+	    else { /* string eval */
+		PL_expect = XTERM;
+		UNIBRACK(OP_ENTEREVAL);
+	    }
 
 	case KEY_eof:
 	    UNI(OP_EOF);

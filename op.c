@@ -3092,6 +3092,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP
 	|| type == OP_SASSIGN
+	|| type == OP_ENTERTRY
 	|| type == OP_NULL );
 
     if (!first)
@@ -6599,8 +6600,6 @@ Perl_ck_eval(pTHX_ OP *o)
 
 	    /* establish postfix order */
 	    enter->op_next = (OP*)enter;
-
-	    CHECKOP(OP_ENTERTRY, enter);
 
 	    o = prepend_elem(OP_LINESEQ, (OP*)enter, (OP*)kid);
 	    o->op_type = OP_LEAVETRY;
