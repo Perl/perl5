@@ -154,10 +154,6 @@ recent versions of vmstar (e.g. V3.4 or later).  Contrary to advice
 provided with previous versions of Perl, do I<not> use the ODS-2
 compatability qualifier.  Instead, use a command like the following:
 
-    vmstar /extract/verbose perl-V^.XI^.III.tar
-
-or:
-
     vmstar -xvf perl-5^.11^.3.tar
 
 Then rename the top-level source directory like so:
