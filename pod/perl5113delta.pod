@@ -187,13 +187,18 @@ XXX
 
 =over 4
 
-=item Don't make C<use legacy> die on unknown legacy names
+=item C<use feature "unicode_strings">
 
-So we can use C<use legacy "qubits"> to avoid the new "qubit" behaviour,
-without worrying about perls that didn't have qubit support at all. :)
+This pragma turns on Unicode semantics for the case-changing operations
+(uc/lc/ucfirst/lcfirst) on strings that don't have the internal UTF-8
+flag set, but that however contain higher characters (between 128 and
+255).
 
-NOTE: C<B<legacy>> will be removed before 5.12.0.
+=item C<legacy>
 
+The experimental C<legacy> pragma, introduced in 5.11.2, has been removed,
+and its functionality replaced by a new feature pragma, C<use feature
+"unicode_strings">.
 
 =back
 
