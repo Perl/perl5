@@ -20,8 +20,11 @@ XXX Any important notices here
 
 =head1 Incompatible Changes
 
-=item Filehandles are blessed directly into C<IO::Handle::>, as L<FileHandle/> is merely a wrapper around L<IO::Handle/>.
+=over
 
+=item Filehandles are blessed directly into C<IO::Handle::>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
+
+=back
 
 =head1 Core Enhancements
 
@@ -236,6 +239,7 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 XXX
 
     Perlbug no longer reports "Message sent" when it hasn't actually sent the message
+
 =back
 
 =head1 New Documentation
@@ -259,8 +263,8 @@ Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 The Pod specification (L<perlpodspec>) has been updated to bring the
 specification in line with modern usage already supported by most Pod systems.
 A parameter string may now follow the format name in a "begin/end" region.
-Links to URIs with a text description are now allowed.  The usage of C<<
-L<"section"> >> has been marked as deprecated.
+Links to URIs with a text description are now allowed.  The usage of
+C<LE<lt>"section"E<gt>> has been marked as deprecated.
 
 L<if.pm|if> has been documented in L<perlfunc/use> as a means to get
 conditional loading of modules despite the implicit BEGIN block around C<use>.
@@ -349,6 +353,8 @@ Like it has been everywhere else for ages and ages.  Also make
 command-line selection of -UDEBUGGING and -DDEBUGGING work in
 configure.com; before the only way to turn it off was by saying
 no in answer to the interactive question.
+
+=back
 
 =back
 
@@ -625,10 +631,6 @@ commit adab996997d7ef1b54d382f5ab4304f438cd1dd0
     perl_destruct() contains an assertion that the scope stack
     is empty.  The remaining scopes are due to fork() being
     called from within a BEGIN block.
-
-=item *
-
-
 
 commit 576b33a19ccaf98d4dfe201d529c55c3747f0cb6
 
