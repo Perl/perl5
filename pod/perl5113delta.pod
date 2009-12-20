@@ -175,6 +175,10 @@ XXX
 
 =over 4
 
+=item C<constant>
+
+Upgraded from version 1.19 to 1.20.
+
 =item C<feature>
 
 Upgraded from 1.13 to 1.14.  Added the C<unicode_strings> feature:
@@ -191,6 +195,10 @@ The experimental C<legacy> pragma, introduced in 5.11.2, has been removed,
 and its functionality replaced by the new feature pragma, C<use feature
 "unicode_strings">.
 
+=item C<threads>
+
+Upgraded from version 1.74 to 1.75.
+
 =item C<warnings>
 
 Upgraded from 1.07 to 1.08.  Added new C<warnings::fatal_enabled()> function.
@@ -201,6 +209,46 @@ Upgraded from 1.07 to 1.08.  Added new C<warnings::fatal_enabled()> function.
 
 XXX This should be generated with Porting/corelist-perldelta.pl once
 Module::Corelist is updated for 5.011003.
+
+=over 4
+
+=item C<Archive::Extract>
+
+Upgraded from version 0.34 to 0.36.
+
+=item C<CPAN>
+
+Upgraded from version 1.94_51 to 1.94_53.
+
+=item C<CPANPLUS>
+
+Upgraded from version 0.89_09 to 0.90.
+
+=item C<ExtUtils::MakeMaker>
+
+Upgraded from version 6.55_02 to 6.56.
+
+=item C<File::Path>
+
+Upgraded from version 2.08 to 2.08_01.
+
+=item C<Module::Build>
+
+Upgraded from version 0.35_09 to 0.36.
+
+=item C<Module::CoreList>
+
+Upgraded from version 2.23 to 2.24.
+
+=item C<Pod::Simple>
+
+Upgraded from version 3.10 to 3.13.
+
+=item C<Safe>
+
+Upgraded from version 2.19 to 2.20.
+
+=back
 
 =head1 Utility Changes
 
