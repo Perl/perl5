@@ -129,23 +129,18 @@ collate changes to F<ext/> and F<lib/> by module, and then summarise all
 changes to a module as a group. This can be done by partitioning directories
 within F<ext/> and F<lib/> to a number of people.
 
-B<FIXME> - this could be automated, although the two below would be easier
-to start with.
+B<FIXME> - this could be automated better
 
-Start with F<Porting/cmpVERSION.pl>
+If Module::CoreList has been updated, then F<Porting/corelist-perldelta.pl>
+will automatically print out this section following a template like this:
 
-Augment it with a flag, so that instead of reporting which modules are
-different but have the same version, report on modules which I<are> different.
-Grab the old version from the exploded tarball, and the new version from
-the git checkout, and output the line
+    =item C<less>
 
-    =item *
+    Upgraded from version 0.01 to 0.02
 
-    C<less> upgraded from version 0.01 to 0.02
+That's a start and the output can be copied/inserted into the perldelta.
 
-That's a start.
-
-Once that's done, a more adventurous enhancement is to automate grabbing
+A more adventurous enhancement would be to automate grabbing
 the changelogs for dual lived modules. For each of them, grab the relevant
 changes files from CPAN for the old and new versions, and if the old one is
 a strict subset of the new one, splice the extra lines right into the output,
@@ -208,7 +203,7 @@ For each file only in the newer F<MANIFEST>
 
 =over
 
-=item 1 
+=item 1
 
 Use F<git> to determine its Author
 

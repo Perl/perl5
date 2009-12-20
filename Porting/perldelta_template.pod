@@ -69,6 +69,9 @@ XXX
 
 =head2 Updated Modules
 
+XXX If Module::CoreList is updated, generate this section using
+F<Porting/corelist-perldelta.pl>
+
 =over 4
 
 =item C<XXX>
