@@ -1,7 +1,14 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.38 2009/11/16 14:08:13 dankogai Exp dankogai $
-$Revision: 2.38 $ $Date: 2009/11/16 14:08:13 $
+# $Id: Changes,v 2.39 2009/11/26 09:23:59 dankogai Exp dankogai $
+! Encode.xs t/fallback.t
+  $utf8 = decode('utf8', $malformed, sub{ ... }) # now works!
+  http://rt.cpan.org/Ticket/Display.html?id=51204
+! t/CJKT.t t/guess.t t/perlio.t
+  $ENV{'PERL_CORE'} tricks removed since they are no longer necessary.
+  Message-Id: <20091116161513.GA25556@bestpractical.com>
+
+$Revision: 2.39 $ $Date: 2009/11/26 09:23:59 $
 ! Encode.xs
   Addressed: Encode memory corruption [perl #70528]
   Message-Id: <alpine.LFD.2.00.0911152328070.9483@ein.m-l.org>

@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.17 2009/11/16 14:08:13 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.18 2009/11/26 09:23:59 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -301,11 +301,23 @@ strict_utf8(pTHX_ SV* sv)
 }
 
 static U8*
-process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
+process_utf8(pTHX_ SV* dst, U8* s, U8* e, SV *check_sv,
              bool encode, bool strict, bool stop_at_partial)
 {
     UV uv;
     STRLEN ulen;
+    SV *fallback_cb;
+    int check;
+
+    if (SvROK(check_sv)) {
+	/* croak("UTF-8 decoder doesn't support callback CHECK"); */
+	fallback_cb = check_sv;
+	check = ENCODE_PERLQQ|ENCODE_LEAVE_SRC; /* same as perlqq */
+    }
+    else {
+	fallback_cb = &PL_sv_undef;
+	check = SvIV(check_sv);
+    }
 
     SvPOK_only(dst);
     SvCUR_set(dst,0);
@@ -378,9 +390,16 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
                 break;
         }
         if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-            SV* subchar = newSVpvf(check & ENCODE_PERLQQ ? (ulen == 1 ? "\\x%02" UVXf : "\\x{%04" UVXf "}"):
-                                   check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
-                                   "&#x%" UVxf ";", uv);
+	    SV* subchar =
+		(fallback_cb != &PL_sv_undef)
+		? do_fallback_cb(aTHX_ uv, fallback_cb)
+		: newSVpvf(check & ENCODE_PERLQQ 
+			   ? (ulen == 1 ? "\\x%02" UVXf : "\\x{%04" UVXf "}")
+			   :  check & ENCODE_HTMLCREF ? "&#%" UVuf ";" 
+			   : "&#x%" UVxf ";", uv);
+	    if (encode){
+		SvUTF8_off(subchar); /* make sure no decoded string gets in */
+	    }
             sv_catsv(dst, subchar);
             SvREFCNT_dec(subchar);
         } else {
@@ -413,17 +432,11 @@ PREINIT:
 CODE:
 {
     dSP; ENTER; SAVETMPS;
-    if (SvROK(check_sv)) {
-	croak("UTF-8 decoder doesn't support callback CHECK");
-    }
-    else {
-	check = SvIV(check_sv);
-    }
     if (src == &PL_sv_undef) src = newSV(0);
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
     dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
-
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV(check_sv);
     /* 
      * PerlIO check -- we assume the object is of PerlIO if renewed
      */
@@ -453,7 +466,7 @@ CODE:
     }
     }
 
-    s = process_utf8(aTHX_ dst, s, e, check, 0, strict_utf8(aTHX_ obj), renewed);
+    s = process_utf8(aTHX_ dst, s, e, check_sv, 0, strict_utf8(aTHX_ obj), renewed);
 
     /* Clear out translated part of source unless asked not to */
     if (check && !(check & ENCODE_LEAVE_SRC)){
@@ -482,12 +495,7 @@ PREINIT:
     int check;
 CODE:
 {
-    if (SvROK(check_sv)) {
-	croak("UTF-8 encoder doesn't support callback CHECK");
-    }
-    else {
-	check = SvIV(check_sv);
-    }
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV(check_sv);
     if (src == &PL_sv_undef) src = newSV(0);
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
@@ -495,7 +503,7 @@ CODE:
     if (SvUTF8(src)) {
     /* Already encoded */
     if (strict_utf8(aTHX_ obj)) {
-        s = process_utf8(aTHX_ dst, s, e, check, 1, 1, 0);
+        s = process_utf8(aTHX_ dst, s, e, check_sv, 1, 1, 0);
     }
         else {
             /* trust it and just copy the octets */
