@@ -4394,8 +4394,11 @@ representative, who probably put it there in the first place.
 (W utf8) Certain codepoints, such as U+FFFE and U+FFFF, are defined by the
 Unicode standard to be non-characters. Those are legal codepoints, but are
 reserved for internal use; so, applications shouldn't attempt to exchange
-them. If you know what you are doing you can turn off this warning by
-C<no warnings 'utf8';>.
+them.  In some cases, this message is also given if you use a codepoint that
+isn't in Unicode--that is it is above the legal maximum of U+10FFFF.  These
+aren't legal at all in Unicode, so they are illegal for interchange, but can be
+used internally in a Perl program.  If you know what you are doing you can turn
+off this warning by C<no warnings 'utf8';>.
 
 =item Unknown BYTEORDER
 

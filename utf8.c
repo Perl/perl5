@@ -454,10 +454,11 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     const UV startbyte = *s;
     STRLEN expectlen = 0;
     U32 warning = 0;
+    SV* sv;
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
 
-/* This list is a superset of the UTF8_ALLOW_XXX. */
+/* This list is a superset of the UTF8_ALLOW_XXX.  BUT it isn't, eg SUPER missing XXX */
 
 #define UTF8_WARN_EMPTY				 1
 #define UTF8_WARN_CONTINUATION			 2
@@ -583,52 +584,55 @@ malformed:
     }
 
     if (dowarn) {
-	SV* const sv = newSVpvs_flags("Malformed UTF-8 character ", SVs_TEMP);
+	if (warning == UTF8_WARN_FFFF) {
+	    sv = newSVpvs_flags("Unicode non-character ", SVs_TEMP);
+	    Perl_sv_catpvf(aTHX_ sv, "0x%04"UVxf" is illegal for interchange", uv);
+	}
+	else {
+	    sv = newSVpvs_flags("Malformed UTF-8 character ", SVs_TEMP);
 
-	switch (warning) {
-	case 0: /* Intentionally empty. */ break;
-	case UTF8_WARN_EMPTY:
-	    sv_catpvs(sv, "(empty string)");
-	    break;
-	case UTF8_WARN_CONTINUATION:
-	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
-	    break;
-	case UTF8_WARN_NON_CONTINUATION:
-	    if (s == s0)
-	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", immediately after start byte 0x%02"UVxf")",
-                           (UV)s[1], startbyte);
-	    else {
-		const int len = (int)(s-s0);
-	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", %d byte%s after start byte 0x%02"UVxf", expected %d bytes)",
-                           (UV)s[1], len, len > 1 ? "s" : "", startbyte, (int)expectlen);
+	    switch (warning) {
+		case 0: /* Intentionally empty. */ break;
+		case UTF8_WARN_EMPTY:
+		    sv_catpvs(sv, "(empty string)");
+		    break;
+		case UTF8_WARN_CONTINUATION:
+		    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
+		    break;
+		case UTF8_WARN_NON_CONTINUATION:
+		    if (s == s0)
+			Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", immediately after start byte 0x%02"UVxf")",
+				   (UV)s[1], startbyte);
+		    else {
+			const int len = (int)(s-s0);
+			Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", %d byte%s after start byte 0x%02"UVxf", expected %d bytes)",
+				   (UV)s[1], len, len > 1 ? "s" : "", startbyte, (int)expectlen);
+		    }
+
+		    break;
+		case UTF8_WARN_FE_FF:
+		    Perl_sv_catpvf(aTHX_ sv, "(byte 0x%02"UVxf")", uv);
+		    break;
+		case UTF8_WARN_SHORT:
+		    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
+				   (int)curlen, curlen == 1 ? "" : "s", (int)expectlen, startbyte);
+		    expectlen = curlen;		/* distance for caller to skip */
+		    break;
+		case UTF8_WARN_OVERFLOW:
+		    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x, after start byte 0x%02"UVxf")",
+				   ouv, *s, startbyte);
+		    break;
+		case UTF8_WARN_SURROGATE:
+		    Perl_sv_catpvf(aTHX_ sv, "(UTF-16 surrogate 0x%04"UVxf")", uv);
+		    break;
+		case UTF8_WARN_LONG:
+		    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
+				   (int)expectlen, expectlen == 1 ? "": "s", UNISKIP(uv), startbyte);
+		    break;
+		default:
+		    sv_catpvs(sv, "(unknown reason)");
+		    break;
 	    }
-
-	    break;
-	case UTF8_WARN_FE_FF:
-	    Perl_sv_catpvf(aTHX_ sv, "(byte 0x%02"UVxf")", uv);
-	    break;
-	case UTF8_WARN_SHORT:
-	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
-                           (int)curlen, curlen == 1 ? "" : "s", (int)expectlen, startbyte);
-	    expectlen = curlen;		/* distance for caller to skip */
-	    break;
-	case UTF8_WARN_OVERFLOW:
-	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x, after start byte 0x%02"UVxf")",
-                           ouv, *s, startbyte);
-	    break;
-	case UTF8_WARN_SURROGATE:
-	    Perl_sv_catpvf(aTHX_ sv, "(UTF-16 surrogate 0x%04"UVxf")", uv);
-	    break;
-	case UTF8_WARN_LONG:
-	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
-			   (int)expectlen, expectlen == 1 ? "": "s", UNISKIP(uv), startbyte);
-	    break;
-	case UTF8_WARN_FFFF:
-	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);
-	    break;
-	default:
-	    sv_catpvs(sv, "(unknown reason)");
-	    break;
 	}
 	
 	if (warning) {
