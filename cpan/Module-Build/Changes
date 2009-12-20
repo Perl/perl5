@@ -1,5 +1,98 @@
 Revision history for Perl extension Module::Build.
 
+0.36 - Sun Dec 20 15:02:38 EST 2009
+
+No changes from 0.35_15 other than the version number.
+
+Summary of major changes since 0.35:
+
+ Enhancements:
+
+ - Added 'Build installdeps' action to install needed dependencies via
+   a user-configurable command line program.  (Defaults to 'cpan'.)
+
+ - Command line options may be set via the PERL_MB_OPT environment
+   variable (similar to PERL_MM_OPT in ExtUtils::MakeMaker)
+
+ - Generates MYMETA.yml during Build.PL (new standard protocol for
+   communicating configuration results between toolchain components)
+
+ - Reduced amount of console output under normal operation (use --verbose
+   to see all output)
+
+ - Added experimental inc/ bundling; see Module::Build::Bundling for
+   details.
+
+ New or changed properties:
+
+ - Added 'share_dir' property to provide File::ShareDir support;
+   File::ShareDir automatically added to 'requires' if 'share_dir' is set
+
+ - Added 'needs_compiler' property.  Defaults to true if XS or c_source
+   exist.  If true, ExtUtils::CBuilder is also added to build_requires.
+
+ - 'C_support' is no longer an optional feature.  Modern ExtUtils::CBuilder
+   and ExtUtils::ParseXS added to the 'requires' list.  This ensures that
+   upgrading Module::Build will upgrade these critical modules.
+
+ - Clarified that 'apache' in the license attribute indicates the Apache
+   License 2.0 and added 'apache_1_1' for the older version of the license
+   (RT#50614)
+
+ Deprecations:
+
+ - Module::Build::Compat 'passthrough' style has been deprecated.  Using
+   'passthrough' will issue warnings on Makefile.PL generation.  See
+   Module::Build::Compat documentation for rationale.
+
+ Internals:
+
+ - Replaced use of YAML.pm with YAML::Tiny; Module::Build::YAML is now
+   based on YAML::Tiny as well
+
+ - A new get_metadata() method has been added as a simpler wrapper around
+   the old, kludgy prepare_metadata() API.
+
+ - Replaced guts of new_from_context().  Build.PL is now executed in a
+   separate process before resume() is called.  (This is generally only of
+   interest to Module::Build or toolchain developers) (RT#49350)
+
+ - Add support for 'package NAME VERSION' syntax added in Perl 5.11.1
+
+ Notable bug fixes:
+
+ - The "test" action now dies when using the 'use_tap_harness'
+   option and tests fail, matching the behavior under Test::Harness.
+   (RT#49080) [initial patch from David Wheeler; revised by David Golden]
+
+ - Updated PPM generation to PPM v4 (RT#49600) [Olivier Mengue]
+
+ - When module_name is not supplied, no packlist was being written; fixed
+   by guessing module_name from dist_version_from or the directory name
+   (just like ExtUtils::Manifest does without NAME) [David Golden]
+
+ - Failure to detect a compiler will now warn during Build.PL and be a
+   fatal error when trying to compile during Build. (RT#48918) [David
+   Golden]
+
+ - Auto-detection of abstract and author fixed for mixed-case POD headers
+   (RT#51117) [David Wheeler]
+
+ - resume() was not restoring additions to @INC added in Build.PL
+   (RT#50145) [David Golden]
+
+ - When tarball paths are less than 100 characters, disables 'prefix'
+   mode of Archive::Tar for maximum compatibility (RT#50571) [David Golden]
+
+ - Merging 'requires' and 'build_requires' in Module::Build::Compat could
+   lead to duplicate PREREQ_PM entries; now the highest version is used
+   for PREREQ_PM. (RT#50948) [David Golden]
+
+ - Module::Build::Compat will now die with an error if advanced,
+   non-numeric prerequisites are given, as these are not supported by
+   ExtUtils::MakeMaker in PREREQ_PM [David Golden]
+
+
 0.35_15 - Thu Dec 17 17:51:22 EST 2009
 
  Bug fixes:

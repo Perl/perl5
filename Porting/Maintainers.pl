@@ -1004,7 +1004,7 @@ use File::Glob qw(:case);
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.35_15.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.36.tar.gz',
 	'FILES'		=> q[cpan/Module-Build],
 	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t },
 			     qr!^contrib/!,  qr!^devtools! ],
