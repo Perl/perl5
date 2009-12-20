@@ -26,6 +26,10 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Improve Porting/cmpVERSION.pl to work from git tags
+
+See F<Porting/release_managers_guide.pod> for a bit more detail.
+
 =head2 Migrate t/ from custom TAP generation
 
 Many tests below F<t/> still generate TAP by "hand", rather than using library
