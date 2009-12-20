@@ -5642,8 +5642,6 @@ Perl_yylex(pTHX)
 		    pl_yylval.ival = 0;
 		OPERATOR(DOTDOT);
 	    }
-	    if (PL_expect != XOPERATOR)
-		check_uni();
 	    Aop(OP_CONCAT);
 	}
 	/* FALL THROUGH */
