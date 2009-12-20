@@ -218,7 +218,10 @@ Upgraded from version 0.34 to 0.36.
 
 =item C<CPAN>
 
-Upgraded from version 1.94_51 to 1.94_53.
+Upgraded from version 1.94_51 to 1.94_53.  Includes better bzip2 support,
+improved FirstTime experience with auto-selection of CPAN mirrors, proper
+handling of modules removed from the Perl core, and an updated 'cpan'
+utility script
 
 =item C<CPANPLUS>
 
@@ -226,7 +229,9 @@ Upgraded from version 0.89_09 to 0.90.
 
 =item C<ExtUtils::MakeMaker>
 
-Upgraded from version 6.55_02 to 6.56.
+Upgraded from version 6.55_02 to 6.56.  Adds new BUILD_REQUIRES key to
+indicate build-only prerequisites.  Also adds support for
+mingw64 and the new "package NAME VERSION" syntax.
 
 =item C<File::Path>
 
@@ -234,7 +239,11 @@ Upgraded from version 2.08 to 2.08_01.
 
 =item C<Module::Build>
 
-Upgraded from version 0.35_09 to 0.36.
+Upgraded from version 0.35_09 to 0.36.  Compared to 0.35, this version has a
+new 'installdeps' action, supports the PERL_MB_OPT environment variable, adds a
+'share_dir' property for L<File::ShareDir> support, support the "package NAME
+VERSION" syntax and has many other enhancements and bug fixes.  The
+'passthrough' style of Module::Build::Compat has been deprecated.
 
 =item C<Module::CoreList>
 
