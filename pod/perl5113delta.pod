@@ -1,8 +1,5 @@
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.11.3
 
 =head1 DESCRIPTION
@@ -10,13 +7,9 @@ perldelta - what is new for perl v5.11.3
 This document describes differences between the 5.11.2 release and
 the 5.11.3 release.
 
-If you are upgrading from an earlier release such as 5.11.3, first read
-the L<perl5XXXdelta>, which describes differences between 5.11.3 and
-5.10.0
-
-=head1 Notice
-
-XXX Any important notices here
+If you are upgrading from an earlier release such as 5.11.1, first read
+the L<perl5112delta>, which describes differences between 5.11.1 and
+5.11.2
 
 =head1 Incompatible Changes
 
@@ -24,16 +17,14 @@ XXX Any important notices here
 
 =item Filehandles are blessed directly into C<IO::Handle::>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
 
-XXX Some description of why this change was made would be nice -- e.g. what
-the benefit that justifies the incompatibility -- dagolden, 2009-12-20
+The previous behaviour was to bless Filehandles into L<FileHandle/>
+(an empty proxy class) if it was loaded into memory and otherwise
+to bless them into C<IO::Handle::>.
+
 
 =back
 
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
 
 =head2 Unicode version
 
@@ -148,28 +139,7 @@ parsing.  Perl can generate files in this directory for any property,
 though most are suppressed.  An installation can choose to change which
 get written.   Instructions are in L<perluniprops>.
 
-=head1 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here, in a list ordered by distribution name. Minimally it should be the
-module version, but it's more useful to the end user to give a paragraph's
-summary of the module's changes. In an ideal world, dual-life modules would
-have a F<Changes> file that could be cribbed.
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-XXX
-
-=back
 
 =head2 Pragmata Changes
 
@@ -210,9 +180,6 @@ Upgraded from 1.07 to 1.08.  Added new C<warnings::fatal_enabled()> function.
 =back
 
 =head2 Updated Modules
-
-XXX This should be generated with Porting/corelist-perldelta.pl once
-Module::Corelist is updated for 5.011003.
 
 =over 4
 
@@ -270,9 +237,6 @@ Upgraded from version 2.19 to 2.20.
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
 =over 4
 
 =item F<perlbug>
@@ -281,23 +245,7 @@ No longer reports "Message sent" when it hasn't actually sent the message
 
 =back
 
-=head1 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=over 4
-
-=item L<XXX>
-
-XXX
-
-=back
-
 =head1 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
-
 
 The Pod specification (L<perlpodspec>) has been updated to bring the
 specification in line with modern usage already supported by most Pod systems.
@@ -309,19 +257,6 @@ L<if.pm|if> has been documented in L<perlfunc/use> as a means to get
 conditional loading of modules despite the implicit BEGIN block around C<use>.
 
 
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head1 Installation and Configuration Improvements
 
