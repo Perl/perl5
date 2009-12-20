@@ -17,7 +17,7 @@ BEGIN {
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 48;
+use Test::More tests => 50;
 use Encode q(:all);
 
 my $uo = '';
@@ -175,3 +175,10 @@ $dst = $ascii->decode($src, sub{ $_[0] });
 is $dst, 0xFF."", qq{$ascii->encode(\$src, sub{ \$_[0] } )};
 $dst = decode("ascii", (pack "C*", 0xFF), sub{ $_[0] });
 is $dst, 0xFF."", qq{decode("ascii", (pack "C*", 0xFF), sub{ \$_[0] })};
+
+
+$src = pack "C*", 0x80;
+$dst = $utf8->decode($src, sub{ $_[0] });
+is $dst, 0x80."", qq{$utf8->encode(\$src, sub{ \$_[0] } )};
+$dst = decode("utf8", $src, sub{ $_[0] });
+is $dst, 0x80."", qq{decode("utf8", (pack "C*", 0x80), sub{ \$_[0] })};
