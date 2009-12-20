@@ -28,7 +28,7 @@ to bless them into C<IO::Handle::>.
 
 =head2 Unicode version
 
-Perl is shipped with the latest Unicode version, 5.2, October 2009.  See
+Perl is shipped with the latest Unicode version, 5.2, dated October 2009.  See
 L<http://www.unicode.org/versions/Unicode5.2.0> for details about this release
 of Unicode.  See L<perlunicode> for instructions on installing and using
 older versions of Unicode.
@@ -55,23 +55,45 @@ now accepted.
 
 C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
 better with various Asian languages.  It now is defined as an C<extended
-grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).  One change
-due to this is that C<\X> will match the whole sequence C<S<CR LF>>.  Another
-change is that C<\X> will match an isolated mark.  Marks generally come after a
-base character, but it is possible in Unicode to have them in isolation, and
-C<\X> will now handle that case.  Otherwise, this change should be transparent
-for non-affected languages.
+grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).
+Anything matched by previously will continue to be matched.  But in addition:
+
+=over
+
+=item *
+
+C<\X> will now not break apart a C<S<CR LF>> sequence.
+
+=item *
+
+C<\X> will now match a sequence including the C<ZWJ> and C<ZWNJ> characters.
+
+=item *
+
+C<\X> will now always match at least one character, including an initial mark.
+Marks generally come after a base character, but it is possible in Unicode to
+have them in isolation, and C<\X> will now handle that case, for example at the
+beginning of a line or after a C<ZWSP>.
+
+=item *
+
+C<\X> will now match a (Korean) Hangul syllable sequence, and the Thai and Lao
+exception cases.
+
+=back
+
+Otherwise, this change should be transparent for the non-affected languages.
 
 C<\p{...}> matches using the Canonical_Combining_Class property were
 completely broken in previous Perls.  This is now fixed.
 
-In previous Perls, the Unicode Decomposition_Type=Compat property and a
+In previous Perls, the Unicode C<Decomposition_Type=Compat> property and a
 Perl extension had the same name, which led to neither matching all the
 correct values (with more than 100 mistakes in one, and several thousand
 in the other).  The Perl extension has now been renamed to be
-Decomposition_Type=Noncanonical (short: dt=noncanon).  It has the same
+C<Decomposition_Type=Noncanonical> (short: C<dt=noncanon>).  It has the same
 meaning as was previously intended, namely the union of all the
-non-canonical Decomposition types, with Unicode Compat being just one of
+non-canonical Decomposition types, with Unicode C<Compat> being just one of
 those.
 
 C<\p{Uppercase}> and C<\p{Lowercase}> have been brought into line with the
@@ -88,25 +110,25 @@ similar, plus Bi-directional controls.
 
 C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>.  The Perl
 definition included a number of things that aren't really alpha (all
-marks), while omitting many that were.  The Unicode definition is
-clearly better, so we are switching to it.  As a direct consequence, the
+marks), while omitting many that were.  As a direct consequence, the
 definitions of C<\p{Alnum}> and C<\p{Word}> which depend on Alpha also change.
 
 C<\p{Word}> also now doesn't match certain characters it wasn't supposed
 to, such as fractions.
 
-C<\p{Print}> no longer matches the line control characters: tab, lf, cr,
-ff, vt, and nel.  This brings it in line with the documentation.
+C<\p{Print}> no longer matches the line control characters: Tab, LF, CR,
+FF, VT, and NEL.  This brings it in line with the documentation.
 
-C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables
+C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables.
 
 The Numeric type property has been extended to include the Unihan
 characters.
 
-There is a new Perl extension, the 'Present_In', or simply 'In'
+There is a new Perl extension, the 'Present_In', or simply 'In',
 property.  This is an extension of the Unicode Age property, but
-C<\p{In=5.0}> matches any code point whose usage has been determined as of
-Unicode version 5.0.  The C<\p{Age=5.0}> only matches code points added in 5.0.
+C<\p{In=5.0}> matches any code point whose usage has been determined
+I<as of> Unicode version 5.0.  The C<\p{Age=5.0}> only matches code points
+added in I<precisely> version 5.0.
 
 A number of properties did not have the correct values for unassigned
 code points.  This is now fixed.  The affected properties are
@@ -114,15 +136,14 @@ Bidi_Class, East_Asian_Width, Joining_Type, Decomposition_Type,
 Hangul_Syllable_Type, Numeric_Type, and Line_Break.
 
 The Default_Ignorable_Code_Point, ID_Continue, and ID_Start properties
-have been updated to their current definitions.
+have been updated to their current Unicode definitions.
 
 Certain properties that are supposed to be Unicode internal-only were
 erroneously exposed by previous Perls.  Use of these in regular
-expressions will now generate a deprecated warning message, if those
-warnings are enabled.  The properties are: Other_Alphabetic,
-Other_Default_Ignorable_Code_Point, Other_Grapheme_Extend,
-Other_ID_Continue, Other_ID_Start, Other_Lowercase, Other_Math, and
-Other_Uppercase.
+expressions will now generate, if enabled, a deprecated warning message.
+The properties are: Other_Alphabetic, Other_Default_Ignorable_Code_Point,
+Other_Grapheme_Extend, Other_ID_Continue, Other_ID_Start, Other_Lowercase,
+Other_Math, and Other_Uppercase.
 
 An installation can now fairly easily change which Unicode properties
 Perl understands.  As mentioned above, certain properties are by default
@@ -132,12 +153,12 @@ Unicode internal-only property that Perl has never exposed.
 
 XXX what does "files in the To directory" mean? -- dagolden, 2009-12-20
 
-The files in the To directory are now more clearly marked as being
-stable, directly usable by applications.  New hash entries in them give
-the format of the normal entries which allows for easier machine
-parsing.  Perl can generate files in this directory for any property,
-though most are suppressed.  An installation can choose to change which
-get written.   Instructions are in L<perluniprops>.
+The files in the C<lib/unicore/To> directory are now more clearly marked as
+being stable, directly usable by applications.  New hash entries in them give
+the format of the normal entries, which allows for easier machine parsing.
+Perl can generate files in this directory for any property, though most are
+suppressed.  An installation can choose to change which get written.
+Instructions are in L<perluniprops>.
 
 =head2 Regular Expressions
 

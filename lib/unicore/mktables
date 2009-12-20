@@ -12206,7 +12206,7 @@ To change this file, edit $0 instead.
 
 =head1 NAME
 
-$pod_file - Complete index of Unicode Version $string_version properties
+$pod_file - Index of Unicode Version $string_version properties in Perl
 
 =head1 DESCRIPTION
 
