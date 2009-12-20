@@ -85,4 +85,8 @@ $desc{ $file }
 ITEM
 };
 
-say "=back\n";
+print <<TAIL
+
+=back
+
+TAIL
