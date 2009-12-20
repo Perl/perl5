@@ -394,15 +394,37 @@ XXX
 
 =head1 New Tests
 
-XXX Changes which create B<new> files in F<t/> go here. Changes to
-existing files in F<t/> aren't worth summarising, although the bugs that
-they represent may be.
+Many modules updated from CPAN incorporate new tests.
 
 =over 4
 
-=item F<XXX>
+=item t/comp/final_line_num.t
 
-XXX
+See if line numbers are correct at EOF
+
+=item t/comp/form_scope.t
+
+See if format scoping works
+
+=item t/comp/line_debug.t
+
+See if @{"_<$file"} works
+
+=item t/op/filetest_t.t
+
+See if -t file test works
+
+=item t/op/qr.t
+
+See if qr works
+
+=item t/op/utf8cache.t
+
+Tests malfunctions of utf8 cache
+
+=item t/re/uniprops.t
+
+Test unicode \p{} regex constructs
 
 =back
 
