@@ -385,6 +385,25 @@ On systems which in-place edits without backup files, -i'*' now works as the doc
 
 =item *
 
+Saving and restoring magic flags no longer loses readonly flag.
+
+=item *
+
+The malformed syntax C<grep EXPR LIST> (note the missing comma) no longer
+causes abrupt and total failure.
+
+=item *
+
+Regular expressions compiled with C<qr{}> literals properly set C<$'> when
+matching again.
+
+=item *
+
+Using named subroutines with C<sort> should no longer lead to bus errors [perl
+#71076]
+
+=item *
+
 Numerous bugfixes catch small issues caused by the recently-added Lexer API.
 
 =item *
@@ -399,26 +418,17 @@ C<$@> may now be assigned a read-only value (without error or busting the stack)
 
 =head1 New or Changed Diagnostics
 
-XXX New or changed warnings emitted by the core's C<C> code go here.
-
-=over 4
-
-=item C<XXX>
-
-    Make split warn in void context
-XXX
-
-=back
-
-=head1 Changed Internals
-
-XXX Changes which affect the interface available to C<XS> code go here.
-
 =over 4
 
 =item *
 
-XXX
+C<split> now warns when called in void context
+
+
+=item *
+
+C<printf>-style functions called with too few arguments will now issue the warning C<"Missing argument in %s"> [perl #71000] 
+
 
 =back
 
@@ -458,26 +468,7 @@ Test unicode \p{} regex constructs
 
 =back
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.11.3 or 5.11.3.
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Deprecations
-
-XXX Add any new known deprecations here.
 
 The following items are now deprecated.
 
@@ -490,17 +481,6 @@ scope is now deprecated. This rare use case was causing
 problems in the implementation of scopes.
 
 =back
-
-=head1 Platform Specific Notes
-
-XXX Any changes specific to a particular platform. VMS and Win32 are the usual
-stars here. It's probably best to group changes under the same section layout
-as the main perldelta
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
@@ -564,30 +544,6 @@ Date:   Thu Dec 17 18:28:16 2009 -0800
     PERL_GET_CONTEXT will expand to Perl_get_context() even inside the
     core because the context needs to be fetched from threadlocal storage.
 
-commit 2ab54efd6265713df5cd4bd0927024245675c1c2
-
-    fix bug 67156: overload: nomethod(..., '!') return value inverted
-
-commit 69dc4b30f4725ad5f212d45d3c856ac1caaacf17
-Author: Father Chrysostomos <sprout@cpan.org>
-Date:   Mon Dec 14 12:19:35 2009 +0100
-
-    [perl #70764] $' fails to initialized for pre-compiled regular expression matches
-
-    The match vars are associated with the regexp that last matched
-    successfully. In the case of $str =~ $qr or /$qr/, since the $qr could
-    be used in multiple scopes that need their own sets of match vars, the
-    $qr is cloned by Perl_reg_temp_copy as of change 30677/28d8d7f. This
-    happens in pp_regcomp before pp_match has stringified the LHS, hence the
-    bug. In short, /$gror/ is not equivalent to
-    ($which = !$which) ? /$gror/ : /$gror/, which is weird.
-
-
-
-    Document config_args limitations reported in [perl #70912]
-
-    proper error on "grep $x (1,2,3)". Solves [perl #37314]
-
 commit 8a27a13e89107aaf68c0748b68ee71fbd86d774b
 
     [perl #71076] sort with active sub (5.10 regression)
@@ -595,14 +551,6 @@ commit 8a27a13e89107aaf68c0748b68ee71fbd86d774b
     One of the tests in sort.t causes a bus error (or sometimes âUndefined
     subroutine calledâ) if run multiple times. This is because sort
     decreases the refcount of an active sub used as a comparison routine.
-
-commit 69c3dccf5322a59cb855347c04712ba11b65328f
-
-
-
-    [perl #71000] Wrong variable name in warning ; Add a new warning "Missing argument in %s"
-
-    preserve readonly flag when saving and restoring magic flags
 
 commit 576b33a19ccaf98d4dfe201d529c55c3747f0cb6
 
