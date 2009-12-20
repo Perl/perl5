@@ -7,7 +7,7 @@ perldelta - what is new for perl v5.11.3
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.11.3 release and
+This document describes differences between the 5.11.2 release and
 the 5.11.3 release.
 
 If you are upgrading from an earlier release such as 5.11.3, first read
