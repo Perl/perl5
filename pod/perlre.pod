@@ -257,8 +257,7 @@ X<word> X<whitespace> X<character class> X<backreference>
     \D	     Match a non-digit character
     \pP	     Match P, named property.  Use \p{Prop} for longer names.
     \PP	     Match non-P
-    \X	     Match eXtended Unicode "combining character sequence",
-             equivalent to (?>\PM\pM*)
+    \X	     Match Unicode "eXtended grapheme cluster"
     \C	     Match a single C char (octet) even under Unicode.
 	     NOTE: breaks up characters into their UTF-8 bytes,
 	     so you may end up with malformed pieces of UTF-8.
@@ -517,7 +516,6 @@ left parentheses have opened before it.  Likewise \11 is a
 backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
 backreferences.
-
 If the bracketing group did not match, the associated backreference won't
 match either. (This can happen if the bracketing group is optional, or
 in a different branch of an alternation.)

@@ -45,25 +45,29 @@ these properties are independent of the names of the characters.
 Furthermore, various operations on the characters like uppercasing,
 lowercasing, and collating (sorting) are defined.
 
-A Unicode character consists either of a single code point, or a
-I<base character> (like C<LATIN CAPITAL LETTER A>), followed by one or
-more I<modifiers> (like C<COMBINING ACUTE ACCENT>).  This sequence of
+A Unicode I<logical> "character" can actually consist of more than one internal
+I<actual> "character" or code point.  For Western languages, this is adequately
+represented by a I<base character> (like C<LATIN CAPITAL LETTER A>), followed
+by one or more I<modifiers> (like C<COMBINING ACUTE ACCENT>).  This sequence of
 base character and modifiers is called a I<combining character
-sequence>.
+sequence>.  Some non-western languages require more complicated
+representations, so Unicode invented a I<grapheme cluster> and then an
+I<extended grapheme cluster>.  For example, A Korean Hangul syllable is
+considered a single logical character, but most often consists of three actual
+characters: a leading consonant followed by an interior vowel followed by a
+trailing consonant.
 
-Whether to call these combining character sequences "characters"
-depends on your point of view. If you are a programmer, you probably
-would tend towards seeing each element in the sequences as one unit,
-or "character".  The whole sequence could be seen as one "character",
-however, from the user's point of view, since that's probably what it
-looks like in the context of the user's language.
+Whether to call these extended grapheme clusters "characters" depends on your
+point of view. If you are a programmer, you probably would tend towards seeing
+each element in the sequences as one unit, or "character".  The whole sequence
+could be seen as one "character", however, from the user's point of view, since
+that's probably what it looks like in the context of the user's language.
 
 With this "whole sequence" view of characters, the total number of
 characters is open-ended. But in the programmer's "one unit is one
 character" point of view, the concept of "characters" is more
 deterministic.  In this document, we take that second  point of view:
-one "character" is one Unicode code point, be it a base character or
-a combining character.
+one "character" is one Unicode code point.
 
 For some combinations, there are I<precomposed> characters.
 C<LATIN CAPITAL LETTER A WITH ACUTE>, for example, is defined as
@@ -261,14 +265,14 @@ strings as usual.  Functions like C<index()>, C<length()>, and
 C<substr()> will work on the Unicode characters; regular expressions
 will work on the Unicode characters (see L<perlunicode> and L<perlretut>).
 
-Note that Perl considers combining character sequences to be
-separate characters, so for example
+Note that Perl considers grapheme clusters to be separate characters, so for
+example
 
     use charnames ':full';
     print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"), "\n";
 
 will print 2, not 1.  The only exception is that regular expressions
-have C<\X> for matching a combining character sequence.
+have C<\X> for matching an extended grapheme cluster.
 
 Life is not quite so transparent, however, when working with legacy
 encodings, I/O, and certain special cases:

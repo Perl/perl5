@@ -100,7 +100,7 @@ quoted constructs>.
  \w                Character class for word characters.
  \W                Character class for non-word characters.
  \x{}, \x00        Hexadecimal escape sequence.
- \X                Extended Unicode "combining character sequence".
+ \X                Unicode "extended grapheme cluster".
  \z                End of string.
  \Z                End of string.
 
@@ -507,18 +507,14 @@ metacharacter, and suggests C<\R> as the notation.
 
 =item \X
 
-This matches an extended Unicode I<combining character sequence>, and
-is equivalent to C<< (?>\PM\pM*) >>. C<\PM> matches any character that is
-not considered a Unicode mark character, while C<\pM> matches any character
-that is considered a Unicode mark character; so C<\X> matches any non
-mark character followed by zero or more mark characters. Mark characters
-include (but are not restricted to) I<combining characters> and
-I<vowel signs>.
+This matches a Unicode I<extended grapheme cluster>.
 
 C<\X> matches quite well what normal (non-Unicode-programmer) usage
-would consider a single character: for example a base character
-(the C<\PM> above), for example a letter, followed by zero or more
-diacritics, which are I<combining characters> (the C<\pM*> above).
+would consider a single character.  As an example, consider a G with some sort
+of accent mark over it (a diacritic).  There is no such single character in
+Unicode, but something like one can be constructed by using a G followed by a
+Unicode combining accent, and would be displayed by Unicode-aware software as
+if it were a single character.
 
 Mnemonic: eI<X>tended Unicode character.
 

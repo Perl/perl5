@@ -135,7 +135,7 @@ and L<perlunicode> for details.
    \p{...} Match Unicode property with long name
    \PP     Match non-P
    \P{...} Match lack of Unicode property with long name
-   \X      Match extended Unicode combining character sequence
+   \X      Match Unicode extended grapheme cluster
 
 POSIX character classes and their Unicode and Perl equivalents:
 
