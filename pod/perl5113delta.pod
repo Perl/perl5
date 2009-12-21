@@ -213,7 +213,8 @@ Upgraded from version 0.34 to 0.36.
 
 =item C<CPAN>
 
-Upgraded from version 1.94_51 to 1.94_53, plus some local fixes.
+Upgraded from version 1.94_51 to 1.94_5301, which is 1.94_53 on CPAN 
+plus some local fixes for bleadperl.
 
 Includes better bzip2 support, improved FirstTime experience with
 auto-selection of CPAN mirrors, proper handling of modules removed from the

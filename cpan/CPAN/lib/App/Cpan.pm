@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use vars qw($VERSION);
 
-$VERSION = '1.57';
+$VERSION = '1.570001'; # 1.57 + local patches for bleadperl
 
 =head1 NAME
 
