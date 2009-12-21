@@ -481,7 +481,8 @@ HP-UX versions before 10.30 require a separate installation of a POSIX
 threads library package. Two examples are the HP DCE package, available
 on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
 April 1999 (B3920-13941)" or the Freely available PTH package, available
-on H.Merijn's site (http://mirrors.develooper.com/hpux/).
+on H.Merijn's site (http://mirrors.develooper.com/hpux/). The use of PTH
+will be unsupported in perl-5.12 and up and is rather buggy in 5.11.x.
 
 If you are going to use the HP DCE package, the library used for threading
 is /usr/lib/libcma.sl, but there have been multiple updates of that
