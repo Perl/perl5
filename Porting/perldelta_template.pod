@@ -42,43 +42,20 @@ source tree.
 =head1 Modules and Pragmata
 
 XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here, in a list ordered by distribution name. Minimally it should be the
-module version, but it's more useful to the end user to give a paragraph's
-summary of the module's changes. In an ideal world, dual-life modules would
-have a F<Changes> file that could be cribbed.
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>, which prints stub
+entries to STDOUT.  Results can be pasted in place of the '=head2' entries
+below.  A paragraph summary for important changes should then be added by hand.
+In an ideal world, dual-life modules would have a F<Changes> file that could be
+cribbed.
 
 =head2 New Modules and Pragmata
 
-=over 4
-
-=item C<XXX>
-
-XXX
-
-=back
-
 =head2 Pragmata Changes
-
-=over 4
-
-=item C<XXX>
-
-XXX
-
-=back
 
 =head2 Updated Modules
 
-XXX If Module::CoreList is updated, generate this section using
-F<Porting/corelist-perldelta.pl>
-
-=over 4
-
-=item C<XXX>
-
-XXX
-
-=back
+=head2 Removed Modules and Pragmata
 
 =head1 Utility Changes
 

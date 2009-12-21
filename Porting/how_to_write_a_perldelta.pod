@@ -132,13 +132,23 @@ within F<ext/> and F<lib/> to a number of people.
 B<FIXME> - this could be automated better
 
 If Module::CoreList has been updated, then F<Porting/corelist-perldelta.pl>
-will automatically print out this section following a template like this:
+will automatically print out several sections if relevent that can be
+pasted into F<perldelta>:
+
+    * New Modules and Pragmata
+    * Pragmata Changes
+    * Updated Modules
+    * Removed Modules and Pragmata
+
+Each section will have stub entries following a template like this:
 
     =item C<less>
 
     Upgraded from version 0.01 to 0.02
 
-That's a start and the output can be copied/inserted into the perldelta.
+It does not include modules listed in F<Porting/Maintainers.pl> under
+C<_PERLLIB>, but it's a start.  Where relevent, a summary of changes can be
+added by hand.
 
 A more adventurous enhancement would be to automate grabbing
 the changelogs for dual lived modules. For each of them, grab the relevant
