@@ -395,7 +395,7 @@ sub run
 package Local::Null::Logger;
 
 sub new { bless \ my $x, $_[0] }
-sub AUTOLOAD { shift; print "NullLogger: ", @_, $/ }
+sub AUTOLOAD { shift; print "NullLogger: ", @_, $/ if $ENV{CPAN_NULL_LOGGER} }
 sub DESTROY { 1 }
 }
 
@@ -492,7 +492,7 @@ sub _hook_into_CPANpm_report
 	
 	*CPAN::Shell::myprint = sub {
 		my($self,$what) = @_;
-		$scalar .= $what;
+		$scalar .= $what if defined $what;
 		$self->print_ornamented($what,
 			$CPAN::Config->{colorize_print}||'bold blue on_white',
 			);
@@ -500,7 +500,7 @@ sub _hook_into_CPANpm_report
 
 	*CPAN::Shell::mywarn = sub {
 		my($self,$what) = @_;
-		$scalar .= $what;   
+		$scalar .= $what if defined $what;
 		$self->print_ornamented($what, 
 			$CPAN::Config->{colorize_warn}||'bold red on_white'
 			);
