@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(15);
+     plan(17);
 }
 
 use strict;
@@ -192,13 +192,11 @@ threads->new(sub {})->join;
 pass("undefing a typeglob doesn't cause a crash during cloning");
 
 
-TODO: {
-    no strict 'vars';   # Accessing $TODO from test.pl
-    local $TODO = 'perl #70748';
-
 # Test we don't get:
 # panic: del_backref during global destruction.
-fresh_perl_is(<<'EOI', 'ok', { }, 'No del_backref panic');
+# when returning a non-closure sub from a thread and subsequently starting
+# a new thread.
+fresh_perl_is(<<'EOI', 'ok', { }, 'No del_backref panic [perl #70748]');
 use threads;
 sub foo { return (sub { }); }
 my $bar = threads->create(\&foo)->join();
@@ -206,6 +204,24 @@ threads->create(sub { })->join();
 print "ok";
 EOI
 
-} # TODO
+# Another, more reliable test for the same del_backref bug:
+fresh_perl_like(
+ <<'   EOJ', qr/ok/, {}, 'No del_backref panic [perl #70748] (2)'
+   use threads;
+   push @bar, threads->create(sub{sub{}})->join() for 1...10;
+   print "ok";
+   EOJ
+);
+
+# Simple closure-returning test: At least this case works (though it
+# leaks), and we don't want to break it.
+fresh_perl_like(<<'EOJ', qr/^foo\n/, {}, 'returning a closure');
+use threads;
+print create threads sub {
+ my $x = "foo\n";
+ sub{sub{$x}}
+}=>->join->()()
+ //"undef"
+EOJ
 
 # EOF

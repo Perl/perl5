@@ -11035,10 +11035,23 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
 		    /* Don't call sv_add_backref here as it's going to be
 		       created as part of the magic cloning of the symbol
-		       table.  */
+		       table--unless this is during a join and the stash
+		       is not actually being cloned.  */
 		    /* Danger Will Robinson - GvGP(dstr) isn't initialised
 		       at the point of this comment.  */
 		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
+		    if(param->flags & CLONEf_JOIN_IN) {
+			const HEK * const hvname
+			 = HvNAME_HEK(GvSTASH(dstr));
+			if( hvname
+			 && GvSTASH(dstr) == gv_stashpvn(
+			     HEK_KEY(hvname), HEK_LEN(hvname), 0
+			    )
+			  )
+			    Perl_sv_add_backref(
+			     aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr
+			    );
+		    }
 		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
 		    (void)GpREFCNT_inc(GvGP(dstr));
 		} else
