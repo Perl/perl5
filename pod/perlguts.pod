@@ -2512,7 +2512,8 @@ Currently, Perl deals with Unicode strings and non-Unicode strings
 slightly differently. A flag in the SV, C<SVf_UTF8>, indicates that the
 string is internally encoded as UTF-8. Without it, the byte value is the
 codepoint number and vice versa (in other words, the string is encoded
-as iso-8859-1). You can check and manipulate this flag with the
+as iso-8859-1, but C<use feature 'unicode_strings'> is needed to get iso-8859-1
+semantics). You can check and manipulate this flag with the
 following macros:
 
     SvUTF8(sv)

@@ -72,17 +72,17 @@ END_EXTERN_C
  Code Points		1st Byte  2nd Byte  3rd Byte  4th Byte
 
    U+0000..U+007F	00..7F
-   U+0080..U+07FF	C2..DF    80..BF
+   U+0080..U+07FF     * C2..DF    80..BF
    U+0800..U+0FFF	E0      * A0..BF    80..BF
    U+1000..U+CFFF       E1..EC    80..BF    80..BF
-   U+D000..U+D7FF       ED      * 80..9F    80..BF
+   U+D000..U+D7FF       ED        80..9F    80..BF
    U+D800..U+DFFF       +++++++ utf16 surrogates, not legal utf8 +++++++
    U+E000..U+FFFF       EE..EF    80..BF    80..BF
   U+10000..U+3FFFF	F0      * 90..BF    80..BF    80..BF
   U+40000..U+FFFFF	F1..F3    80..BF    80..BF    80..BF
  U+100000..U+10FFFF	F4        80..8F    80..BF    80..BF
 
-Note the gaps before the 2nd Byte entries above marked by '*'.  These are
+Note the gaps before several of the byte entries above marked by '*'.  These are
 caused by legal UTF-8 avoiding non-shortest encodings: it is technically
 possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
@@ -101,7 +101,7 @@ explicitly forbidden, and the shortest possible encoding should always be used
   00000dddccccccbbbbbbaaaaaa     11110ddd  10cccccc  10bbbbbb  10aaaaaa
 
 As you can see, the continuation bytes all begin with C<10>, and the
-leading bits of the start byte tell how many bytes the are in the
+leading bits of the start byte tell how many bytes there are in the
 encoded character.
 
 */

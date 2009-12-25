@@ -24,7 +24,7 @@ Unicode 1.0 was released in October 1991, and 4.0 in April 2003.
 A Unicode I<character> is an abstract entity.  It is not bound to any
 particular integer width, especially not to the C language C<char>.
 Unicode is language-neutral and display-neutral: it does not encode the
-language of the text and it does not generally define fonts or other graphical
+language of the text, and it does not generally define fonts or other graphical
 layout details.  Unicode operates on characters and on text built from
 those characters.
 
@@ -88,7 +88,7 @@ character.  Firstly, there are unallocated code points within
 otherwise used blocks.  Secondly, there are special Unicode control
 characters that do not represent true characters.
 
-A common myth about Unicode is that it would be "16-bit", that is,
+A common myth about Unicode is that it is "16-bit", that is,
 Unicode is only represented as C<0x10000> (or 65536) characters from
 C<0x0000> to C<0xFFFF>.  B<This is untrue.>  Since Unicode 2.0 (July
 1996), Unicode has been defined all the way up to 21 bits (C<0x10FFFF>),
@@ -98,22 +98,22 @@ I<Plane 0>, or the I<Basic Multilingual Plane> (BMP).  With Unicode
 3.1, 17 (yes, seventeen) planes in all were defined--but they are
 nowhere near full of defined characters, yet.
 
-Another myth is that the 256-character blocks have something to
+Another myth is about Unicode blocks--that they have something to
 do with languages--that each block would define the characters used
 by a language or a set of languages.  B<This is also untrue.>
 The division into blocks exists, but it is almost completely
 accidental--an artifact of how the characters have been and
-still are allocated.  Instead, there is a concept called I<scripts>,
-which is more useful: there is C<Latin> script, C<Greek> script, and
-so on.  Scripts usually span varied parts of several blocks.
-For further information see L<Unicode::UCD>.
+still are allocated.  Instead, there is a concept called I<scripts>, which is
+more useful: there is C<Latin> script, C<Greek> script, and so on.  Scripts
+usually span varied parts of several blocks.  For more information about
+scripts, see L<perlunicode/Scripts>.
 
 The Unicode code points are just abstract numbers.  To input and
 output these abstract numbers, the numbers must be I<encoded> or
 I<serialised> somehow.  Unicode defines several I<character encoding
 forms>, of which I<UTF-8> is perhaps the most popular.  UTF-8 is a
 variable length encoding that encodes Unicode characters as 1 to 6
-bytes (only 4 with the currently defined characters).  Other encodings
+bytes.  Other encodings
 include UTF-16 and UTF-32 and their big- and little-endian variants
 (UTF-8 is byte-order independent) The ISO/IEC 10646 defines the UCS-2
 and UCS-4 encoding forms.
@@ -144,8 +144,8 @@ scripts with legacy 8-bit data in them would break.  See L<utf8>.
 Perl supports both pre-5.6 strings of eight-bit native bytes, and
 strings of Unicode characters.  The principle is that Perl tries to
 keep its data as eight-bit bytes for as long as possible, but as soon
-as Unicodeness cannot be avoided, the data is transparently upgraded
-to Unicode.
+as Unicodeness cannot be avoided, the data is (mostly) transparently upgraded
+to Unicode.  There are some problems--see L<perlunicode/The "Unicode Bug">.
 
 Internally, Perl currently uses either whatever the native eight-bit
 character set of the platform (for example Latin-1) is, defaulting to
@@ -196,11 +196,12 @@ C<useperlio=define>.
 
 Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
 Unicode support is somewhat more complex to implement since
-additional conversions are needed at every step.  Some problems
-remain, see L<perlebcdic> for details.
+additional conversions are needed at every step.
 
-In any case, the Unicode support on EBCDIC platforms is better than
-in the 5.6 series, which didn't work much at all for EBCDIC platform.
+Later Perl releases have added code that will not work on EBCDIC platforms, and
+no one has complained, so the divergence has continued.  If you want to run
+Perl on an EBCDIC platform, send email to perlbug@perl.org
+
 On EBCDIC platforms, the internal Unicode encoding form is UTF-EBCDIC
 instead of UTF-8.  The difference is that as UTF-8 is "ASCII-safe" in
 that ASCII characters encode to UTF-8 as-is, while UTF-EBCDIC is
@@ -515,13 +516,12 @@ case, the answer is no (because 0x00C1 != 0x0041).  But sometimes, any
 CAPITAL LETTER As should be considered equal, or even As of any case.
 
 The long answer is that you need to consider character normalization
-and casing issues: see L<Unicode::Normalize>, Unicode Technical
-Reports #15 and #21, I<Unicode Normalization Forms> and I<Case
-Mappings>, L<http://www.unicode.org/unicode/reports/tr15/> and
-L<http://www.unicode.org/unicode/reports/tr21/>
+and casing issues: see L<Unicode::Normalize>, Unicode Technical Report #15,
+L<Unicode Normalization Forms|http://www.unicode.org/unicode/reports/tr15> and
+sections on case mapping in the L<Unicode Standard|http://www.unicode.org>.
 
 As of Perl 5.8.0, the "Full" case-folding of I<Case
-Mappings/SpecialCasing> is implemented.
+Mappings/SpecialCasing> is implemented, but bugs remain in C<qr//i> with them.
 
 =item *
 
@@ -609,7 +609,7 @@ How Do I Know Whether My String Is In Unicode?
 You shouldn't have to care.  But you may, because currently the semantics of the
 characters whose ordinals are in the range 128 to 255 is different depending on
 whether the string they are contained within is in Unicode or not.
-(See L<perlunicode>.) 
+(See L<perlunicode/When Unicode Does Not Happen>.)
 
 To determine if a string is in Unicode, use:
 

@@ -195,18 +195,24 @@ use C<\d+>; to match a word, use C<\w+>.
 
 C<\pP> and C<\p{Prop}> are character classes to match characters that
 fit given Unicode classes. One letter classes can be used in the C<\pP>
-form, with the class name following the C<\p>, otherwise, the property
-name is enclosed in braces, and follows the C<\p>. For instance, a
-match for a number can be written as C</\pN/> or as C</\p{Number}/>.
-Lowercase letters are matched by the property I<LowercaseLetter> which
-has as short form I<Ll>. They have to be written as C</\p{Ll}/> or
-C</\p{LowercaseLetter}/>. C</\pLl/> is valid, but means something different.
+form, with the class name following the C<\p>, otherwise, braces are required.
+There is a single form, which is just the property name enclosed in the braces,
+and a compound form which looks like C<\p{name=value}>, which means to match
+if the property C<name> for the character has the particular C<value>.
+For instance, a match for a number can be written as C</\pN/> or as
+C</\p{Number}/>, or as C</\p{Number=True}/>.
+Lowercase letters are matched by the property I<Lowercase_Letter> which
+has as short form I<Ll>. They need the braces, so are written as C</\p{Ll}/> or
+C</\p{Lowercase_Letter}/>, or C</\p{General_Category=Lowercase_Letter}/>
+(the underscores are optional).
+C</\pLl/> is valid, but means something different.
 It matches a two character string: a letter (Unicode property C<\pL>),
 followed by a lowercase C<l>.
 
-For a list of possible properties, see
-L<perlunicode/Unicode Character Properties>. It is also possible to
-defined your own properties. This is discussed in
+For more details, see L<perlunicode/Unicode Character Properties>; for a
+complete list of possible properties, see
+L<perluniprops/Properties accessible through \p{} and \P{}>.
+It is also possible to define your own properties. This is discussed in
 L<perlunicode/User-Defined Character Properties>.
 
 
@@ -433,7 +439,7 @@ and the Unicode properties:
  word        IsWord
  xdigit      IsXDigit
 
-Some character classes may have a non-obvious name:
+Some of these names may not be obvious:
 
 =over 4
 

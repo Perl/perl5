@@ -2376,7 +2376,7 @@ ASCII is a 7 bit encoding, but bytes have 8 bits in them.  The 128 extra
 characters have different meanings depending on the locale.  Absent a locale,
 currently these extra characters are generally considered to be unassigned,
 and this has presented some problems.
-This is scheduled to be changed in 5.12 so that these characters will
+This is being changed starting in 5.12 so that these characters will
 be considered to be Latin-1 (ISO-8859-1).
 
 =item *

@@ -717,9 +717,9 @@ is no builtin with the name C<word>.
 =item Can't find %s character property "%s"
 
 (F) You used C<\p{}> or C<\P{}> but the character property by that name
-could not be found. Maybe you misspelled the name of the property
-(remember that the names of character properties consist only of
-alphanumeric characters), or maybe you forgot the C<Is> or C<In> prefix?
+could not be found. Maybe you misspelled the name of the property?
+See L<perluniprops/Properties accessible through \p{} and \P{}>
+for a complete list of available properties.
 
 =item Can't find label %s
 
@@ -752,8 +752,10 @@ editor will have a way to help you find these characters.
 =item Can't find Unicode property definition "%s"
 
 (F) You may have tried to use C<\p> which means a Unicode property (for
-example C<\p{Lu}> is all uppercase letters).  If you did mean to use a
-Unicode property, see L<perlunicode> for the list of known properties.
+example C<\p{Lu}> matches all uppercase letters).  If you did mean to use a
+Unicode property, see
+L<perluniprops/Properties accessible through \p{} and \P{}>
+for a complete list of available properties.
 If you didn't mean to use a Unicode property, escape the C<\p>, either
 by C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, until
 possible C<\E>).
@@ -4916,7 +4918,7 @@ requesting a Unicode character between the code points 0xD800 and
 0xDFFF (inclusive).  That range is reserved exclusively for the use of
 UTF-16 encoding (by having two 16-bit UCS-2 characters); but Perl
 encodes its characters in UTF-8, so what you got is a very illegal
-character.  If you really know what you are doing you can turn off
+character.  If you really really know what you are doing you can turn off
 this warning by C<no warnings 'utf8';>.
 
 =item Value of %s can be "0"; test with defined()

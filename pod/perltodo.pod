@@ -762,12 +762,6 @@ See L</"Virtualize operating system access">.
 Currently glob patterns and filenames returned from File::Glob::glob()
 are always byte strings.  See L</"Virtualize operating system access">.
 
-=head2 Unicode and lc/uc operators
-
-Some built-in operators (C<lc>, C<uc>, etc.) behave differently, based on
-what the internal encoding of their argument is. That should not be the
-case. Maybe add a pragma to switch behaviour.
-
 =head2 use less 'memory'
 
 Investigate trade offs to switch out perl's choices on memory usage.
@@ -916,8 +910,7 @@ years for this discrepancy.
 The handling of Unicode is unclean in many places. For example, the regexp
 engine matches in Unicode semantics whenever the string or the pattern is
 flagged as UTF-8, but that should not be dependent on an internal storage
-detail of the string. Likewise, case folding behaviour is dependent on the
-UTF8 internal flag being on or off.
+detail of the string.
 
 =head2 Properly Unicode safe tokeniser and pads.
 

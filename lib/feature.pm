@@ -29,7 +29,7 @@ $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
 =head1 NAME
 
-feature - Perl pragma to enable new syntactic features
+feature - Perl pragma to enable new features
 
 =head1 SYNOPSIS
 
@@ -103,76 +103,10 @@ See L<perlsub/"Persistent Private Variables"> for details.
 =head2 the 'unicode_strings' feature
 
 C<use feature 'unicode_strings'> tells the compiler to treat
-strings with codepoints larger than 128 as Unicode. It is available
-starting with Perl 5.11.3.
+all strings outside of C<use locale> and C<use bytes> as Unicode. It is
+available starting with Perl 5.11.3.
 
-In greater detail:
-
-This feature modifies the semantics for the 128 characters on ASCII
-systems that have the 8th bit set.  (See L</EBCDIC platforms> below for
-EBCDIC systems.) By default, unless C<S<use locale>> is specified, or the
-scalar containing such a character is known by Perl to be encoded in UTF8,
-the semantics are essentially that the characters have an ordinal number,
-and that's it.  They are caseless, and aren't anything: they're not
-controls, not letters, not punctuation, ..., not anything.
-
-This behavior stems from when Perl did not support Unicode, and ASCII was the
-only known character set outside of C<S<use locale>>.  In order to not
-possibly break pre-Unicode programs, these characters have retained their old
-non-meanings, except when it is clear to Perl that Unicode is what is meant,
-for example by calling utf8::upgrade() on a scalar, or if the scalar also
-contains characters that are only available in Unicode.  Then these 128
-characters take on their Unicode meanings.
-
-The problem with this behavior is that a scalar that encodes these characters
-has a different meaning depending on if it is stored as utf8 or not.
-In general, the internal storage method should not affect the
-external behavior.
-
-The behavior is known to have effects on these areas:
-
-=over 4
-
-=item *
-
-Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
-and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in regular expression
-substitutions.
-
-=item *
-
-Using caseless (C</i>) regular expression matching
-
-=item *
-
-Matching a number of properties in regular expressions, such as C<\w>
-
-=item *
-
-User-defined case change mappings.  You can create a C<ToUpper()> function, for
-example, which overrides Perl's built-in case mappings.  The scalar must be
-encoded in utf8 for your function to actually be invoked.
-
-=back
-
-B<This lack of semantics for these characters is currently the default,>
-outside of C<use locale>.  See below for EBCDIC.
-
-To turn on B<case changing semantics only> for these characters, use
-C<use feature "unicode_strings">.
-
-The other old (legacy) behaviors regarding these characters are currently
-unaffected by this pragma.
-
-=head4 EBCDIC platforms
-
-On EBCDIC platforms, the situation is somewhat different.  The legacy
-semantics are whatever the underlying semantics of the native C language
-library are.  Each of the three EBCDIC encodings currently known by Perl is an
-isomorph of the Latin-1 character set.  That means every character in Latin-1
-has a corresponding EBCDIC equivalent, and vice-versa.  Specifying C<S<no
-legacy>> currently makes sure that all EBCDIC characters have the same
-B<casing only> semantics as their corresponding Latin-1 characters.
+See L<perlunicode/The "Unicode Bug"> for details.
 
 =head1 FEATURE BUNDLES
 

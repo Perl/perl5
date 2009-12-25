@@ -85,8 +85,8 @@ quoted constructs>.
  \n                (Logical) newline character.
  \N                Any character but newline.
  \N{}              Named (Unicode) character.
- \p{}, \pP         Character with a Unicode property.
- \P{}, \PP         Character without a Unicode property.
+ \p{}, \pP         Character with the given Unicode property.
+ \P{}, \PP         Character without the given Unicode property.
  \Q                Quotemeta till \E.
  \r                Return character.
  \R                Generic new line.
