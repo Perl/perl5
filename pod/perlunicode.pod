@@ -754,15 +754,15 @@ UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
 
 [c] Try the C<:crlf> layer (see L<PerlIO>).
 
-[d] Avoid C<use warning 'utf8';> (or say C<no warning 'utf8';>) to allow
-U+FFFF (C<\x{FFFF}>).
+[d] U+FFFF will currently generate a warning message if 'utf8' warnings are
+    enabled
 
 =item *
 
 Level 2 - Extended Unicode Support
 
         RL2.1   Canonical Equivalents           - MISSING       [10][11]
-        RL2.2   Default Grapheme Clusters       - MISSING       [12][13]
+        RL2.2   Default Grapheme Clusters       - MISSING       [12]
         RL2.3   Default Word Boundaries         - MISSING       [14]
         RL2.4   Default Loose Matches           - MISSING       [15]
         RL2.5   Name Properties                 - MISSING       [16]

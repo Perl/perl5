@@ -47,15 +47,15 @@ lowercasing, and collating (sorting) are defined.
 
 A Unicode I<logical> "character" can actually consist of more than one internal
 I<actual> "character" or code point.  For Western languages, this is adequately
-represented by a I<base character> (like C<LATIN CAPITAL LETTER A>), followed
+modelled by a I<base character> (like C<LATIN CAPITAL LETTER A>) followed
 by one or more I<modifiers> (like C<COMBINING ACUTE ACCENT>).  This sequence of
 base character and modifiers is called a I<combining character
 sequence>.  Some non-western languages require more complicated
-representations, so Unicode invented a I<grapheme cluster> and then an
-I<extended grapheme cluster>.  For example, A Korean Hangul syllable is
+models, so Unicode created the I<grapheme cluster> concept, and then the
+I<extended grapheme cluster>.  For example, a Korean Hangul syllable is
 considered a single logical character, but most often consists of three actual
-characters: a leading consonant followed by an interior vowel followed by a
-trailing consonant.
+Unicode characters: a leading consonant followed by an interior vowel followed
+by a trailing consonant.
 
 Whether to call these extended grapheme clusters "characters" depends on your
 point of view. If you are a programmer, you probably would tend towards seeing

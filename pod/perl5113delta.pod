@@ -56,7 +56,8 @@ now accepted.
 C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
 better with various Asian languages.  It now is defined as an C<extended
 grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).
-Anything matched by previously will continue to be matched.  But in addition:
+Anything matched previously that made sense will continue to be matched.  But
+in addition:
 
 =over
 
@@ -73,7 +74,9 @@ C<\X> will now match a sequence including the C<ZWJ> and C<ZWNJ> characters.
 C<\X> will now always match at least one character, including an initial mark.
 Marks generally come after a base character, but it is possible in Unicode to
 have them in isolation, and C<\X> will now handle that case, for example at the
-beginning of a line or after a C<ZWSP>.
+beginning of a line or after a C<ZWSP>.  And this is the part where C<\X>
+doesn't match the things that it used to that don't make sense.  Formerly, for
+example, you could have the nonsensical case of an accented LF.
 
 =item *
 

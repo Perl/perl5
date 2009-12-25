@@ -511,10 +511,10 @@ This matches a Unicode I<extended grapheme cluster>.
 
 C<\X> matches quite well what normal (non-Unicode-programmer) usage
 would consider a single character.  As an example, consider a G with some sort
-of accent mark over it (a diacritic).  There is no such single character in
-Unicode, but something like one can be constructed by using a G followed by a
-Unicode combining accent, and would be displayed by Unicode-aware software as
-if it were a single character.
+of diacritic mark, such as an arrow.  There is no such single character in
+Unicode, but one can be composed using a G followed by a Unicode "COMBINING
+UPWARDS ARROW BELOW", and would be displayed by Unicode-aware software as if it
+were a single character.
 
 Mnemonic: eI<X>tended Unicode character.
 
