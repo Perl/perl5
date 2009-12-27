@@ -14,7 +14,7 @@ BEGIN {
 
 use warnings;
 
-plan 91;
+plan 92;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -111,6 +111,11 @@ is "@attrs", "method Z";
 
 # Test attributes on predeclared subroutines:
 eval 'package A; sub PS : lvalue';
+@attrs = eval 'attributes::get \&A::PS';
+is "@attrs", "lvalue";
+
+# Test attributes on predeclared subroutines, after definition
+eval 'package A; sub PS : lvalue; sub PS { }';
 @attrs = eval 'attributes::get \&A::PS';
 is "@attrs", "lvalue";
 

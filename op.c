@@ -5785,8 +5785,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
                   && block->op_type != OP_NULL
 #endif
 	) {
+	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
 	    cv_undef(cv);
-	    CvFLAGS(cv) = CvFLAGS(PL_compcv);
+	    CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs;
 	    if (!CvWEAKOUTSIDE(cv))
 		SvREFCNT_dec(CvOUTSIDE(cv));
 	    CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);

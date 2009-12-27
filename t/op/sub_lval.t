@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>70;
+plan tests=>71;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -562,3 +562,11 @@ lvalue attribute ignored after the subroutine has been defined at - line 4.
 Can't modify non-lvalue subroutine call in scalar assignment at - line 5, near "3;"
 Execution of - aborted due to compilation errors.
 ====
+
+{
+    my $x;
+    sub lval_decl : lvalue;
+    sub lval_decl { $x }
+    lval_decl = 5;
+    is($x, 5, "subroutine declared with lvalue before definition retains lvalue. [perl #68758]");
+}
