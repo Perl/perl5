@@ -10843,7 +10843,7 @@ sub compile_perl() {
     $dt->add_match_table('Non_Canon', Full_Name => 'Non_Canonical',
         Initialize => ~ ($dt->table('None') + $dt->table('Canonical')),
         Perl_Extension => 1,
-        Note => 'Perl extension consisting of the union of all non-canonical decompositions',
+        Note => 'Union of all non-canonical decompositions',
         );
 
     # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
@@ -11941,6 +11941,10 @@ sub make_table_pod_entries($) {
             $parenthesized .= ')' if $parenthesized;
 
             push @info, $parenthesized if $parenthesized;
+
+            if ($table_property != $perl && $table->perl_extension) {
+                push @info, '(Perl extension)';
+            }
             push @info, "($string_count)" if $output_range_counts;
 
             # Now, we have both the entry and info so add them to the
@@ -12359,6 +12363,9 @@ single and compound forms if applicable.
 
 The right column will also caution you if a property means something different
 than what might normally be expected.
+
+All single forms are Perl extensions; a few compound forms are as well, and
+are noted as such.
 
 Numbers in (parentheses) indicate the total number of code points matched by
 the property.  For emphasis, those properties that match no code points at all
@@ -12853,10 +12860,14 @@ sub write_all_tables() {
                                 || ! defined $pod_directory
                                 || ! $alias->make_pod_entry;
 
+                        my $rhs = $full_property_name;
+                        if ($property != $perl && $table->perl_extension) {
+                            $rhs .= ' (Perl extension)';
+                        }
                         push @match_properties,
                             format_pod_line($indent_info_column,
                                         '\p{' . $alias->name . ': *}',
-                                        $full_property_name,
+                                        $rhs,
                                         $alias->status);
                     }
                 } # End of non-string-like property code
