@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>69;
+plan tests=>70;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -550,3 +550,15 @@ TODO: {
     $foo->bar;
     is ($result, 'bar', "RT #41550");
 }
+
+fresh_perl_is(<<'----', <<'====', "lvalue can not be set after definition. [perl #68758]");
+use warnings;
+our $x;
+sub foo { $x }
+sub foo : lvalue;
+foo = 3;
+----
+lvalue attribute ignored after the subroutine has been defined at - line 4.
+Can't modify non-lvalue subroutine call in scalar assignment at - line 5, near "3;"
+Execution of - aborted due to compilation errors.
+====

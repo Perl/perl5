@@ -2307,6 +2307,14 @@ You may wish to switch to using L<Math::BigInt> explicitly.
 by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
 instead on the filehandle.)
 
+=item lvalue attribute ignored after the subroutine has been defined
+
+(W) Making a subroutine an lvalue subroutine after it has been defined
+by declaring the subroutine with a lvalue attribute is not
+possible. To make the the subroutine a lvalue subroutine add the
+lvalue attribute to the definition, or put the the declaration before
+the definition.
+
 =item Lvalue subs returning %s not implemented yet
 
 (F) Due to limitations in the current implementation, array and hash

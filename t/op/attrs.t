@@ -115,15 +115,15 @@ eval 'package A; sub PS : lvalue';
 is "@attrs", "lvalue";
 
 # Test ability to modify existing sub's (or XSUB's) attributes.
-eval 'package A; sub X { $_[0] } sub X : lvalue';
+eval 'package A; sub X { $_[0] } sub X : method';
 @attrs = eval 'attributes::get \&A::X';
-is "@attrs", "lvalue";
+is "@attrs", "method";
 
 # Above not with just 'pure' built-in attributes.
 sub Z::MODIFY_CODE_ATTRIBUTES { (); }
-eval 'package Z; sub L { $_[0] } sub L : Z lvalue';
+eval 'package Z; sub L { $_[0] } sub L : Z method';
 @attrs = eval 'attributes::get \&Z::L';
-is "@attrs", "lvalue Z";
+is "@attrs", "method Z";
 
 # Begin testing attributes that tie
 
