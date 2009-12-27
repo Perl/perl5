@@ -39,26 +39,6 @@ sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 # have been checked for somewhat more than just sanity.  It can handle all
 # existing Unicode character properties in those releases.
 #
-# This program needs to be able to run under miniperl.  Therefore, it uses a
-# minimum of other modules, and hence implements some things itself that could
-# be gotten from CPAN
-#
-# This program uses inputs published by the Unicode Consortium.  These can
-# change incompatibly between releases without the Perl maintainers realizing
-# it.  Therefore this program is now designed to try to flag these.  It looks
-# at the directories where the inputs are, and flags any unrecognized files.
-# It keeps track of all the properties in the files it handles, and flags any
-# that it doesn't know how to handle.  It also flags any input lines that
-# don't match the expected syntax, among other checks.
-# It is also designed so if a new input file matches one of the known
-# templates, one hopefully just needs to add it to a list to have it
-# processed.
-#
-# It tries to keep fatal errors to a minimum, to generate something usable for
-# testing purposes.  It always looks for files that could be inputs, and will
-# warn about any that it doesn't know how to handle (the -q option suppresses
-# the warning).
-#
 # This program is mostly about Unicode character (or code point) properties.
 # A property describes some attribute or quality of a code point, like if it
 # is lowercase or not, its name, what version of Unicode it was first defined
@@ -145,7 +125,7 @@ my $map_directory = 'To';        # Where map files go.
 # writing, such as the path to each one's file.  There is a heading in each
 # map table that gives the format of its entries, and what the map is for all
 # the code points missing from it.  (This allows tables to be more compact.)
-
+#
 # The Property data structure contains one or more tables.  All properties
 # contain a map table (except the $perl property which is a
 # pseudo-property containing only match tables), and any properties that
@@ -167,7 +147,7 @@ my $map_directory = 'To';        # Where map files go.
 # constructs will.  Generally a property will have either its map table or its
 # match tables written but not both.  Again, what gets written is controlled
 # by lists which can easily be changed.
-
+#
 # For information about the Unicode properties, see Unicode's UAX44 document:
 
 my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
@@ -188,9 +168,9 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # introductory comments.
 #
 # This program works on all properties as of 5.2, though the files for some
-# are suppressed from apparent lack of demand for.  You can change which are
-# output by changing lists in this program.
-
+# are suppressed from apparent lack of demand for them.  You can change which
+# are output by changing lists in this program.
+#
 # The old version of mktables emphasized the term "Fuzzy" to mean Unocde's
 # loose matchings rules (from Unicode TR18):
 #
@@ -204,7 +184,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # The program still allows Fuzzy to override its determination of if loose
 # matching should be used, but it isn't currently used, as it is no longer
 # needed; the calculations it makes are good enough.
-
+#
 # SUMMARY OF HOW IT WORKS:
 #
 #   Process arguments
@@ -234,20 +214,10 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #        The Perl-defined properties are created and populated.  Many of these
 #            require data determined from the earlier steps
 #        Any Perl-defined synonyms are created, and name clashes between Perl
-#            and Unicode are reconciled.
+#            and Unicode are reconciled and warned about.
 #        All the properties are written to files
 #        Any other files are written, and final warnings issued.
-
-# As mentioned above, some properties are given in more than one file.  In
-# particular, the files in the extracted directory are supposedly just
-# reformattings of the others.  But they contain information not easily
-# derivable from the other files, including results for Unihan, which this
-# program doesn't ordinarily look at, and for unassigned code points.  They
-# also have historically had errors or been incomplete.  In an attempt to
-# create the best possible data, this program thus processes them first to
-# glean information missing from the other files; then processes those other
-# files to override any errors in the extracted ones.
-
+#
 # For clarity, a number of operators have been overloaded to work on tables:
 #   ~ means invert (take all characters not in the set).  The more
 #       conventional '!' is not used because of the possibility of confusing
@@ -261,48 +231,116 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # Operations are done on references and affect the underlying structures, so
 # that the copy constructors for them have been overloaded to not return a new
 # clone, but the input object itself.
-
+#
 # The bool operator is deliberately not overloaded to avoid confusion with
 # "should it mean if the object merely exists, or also is non-empty?".
-
 #
 # WHY CERTAIN DESIGN DECISIONS WERE MADE
-
-# XXX These comments need more work.
+#
+# This program needs to be able to run under miniperl.  Therefore, it uses a
+# minimum of other modules, and hence implements some things itself that could
+# be gotten from CPAN
+#
+# This program uses inputs published by the Unicode Consortium.  These can
+# change incompatibly between releases without the Perl maintainers realizing
+# it.  Therefore this program is now designed to try to flag these.  It looks
+# at the directories where the inputs are, and flags any unrecognized files.
+# It keeps track of all the properties in the files it handles, and flags any
+# that it doesn't know how to handle.  It also flags any input lines that
+# don't match the expected syntax, among other checks.
+#
+# It is also designed so if a new input file matches one of the known
+# templates, one hopefully just needs to add it to a list to have it
+# processed.
+#
+# As mentioned earlier, some properties are given in more than one file.  In
+# particular, the files in the extracted directory are supposedly just
+# reformattings of the others.  But they contain information not easily
+# derivable from the other files, including results for Unihan, which this
+# program doesn't ordinarily look at, and for unassigned code points.  They
+# also have historically had errors or been incomplete.  In an attempt to
+# create the best possible data, this program thus processes them first to
+# glean information missing from the other files; then processes those other
+# files to override any errors in the extracted ones.  Much of the design was
+# driven by this need to store things and then possibly override them.
+#
+# It tries to keep fatal errors to a minimum, to generate something usable for
+# testing purposes.  It always looks for files that could be inputs, and will
+# warn about any that it doesn't know how to handle (the -q option suppresses
+# the warning).
 #
 # Why have files written out for binary 'N' matches?
 #   For binary properties, if you know the mapping for either Y or N; the
-#   other is trivial to construct, so could be done at Perl run-time instead
-#   of having a file for it.  That is, if someone types in \p{foo: N}, Perl
-#   could translate that to \P{foo: Y} and not need a file.   The problem is
-#   communicating to Perl that a given property is binary.  Perl can't figure
-#   it out from looking at the N (or No), as some non-binary properties have
-#   these as property values.
-# Why
-# There are several types of properties, based on what form their values can
-# take on.  These are described in more detail below in the DATA STRUCTURES
-# section of these comments, but for now, you should know that there are
-# string properties, whose values are strings of one or more code points (such
-# as the Uppercase_mapping property); every other property maps to some other
-# form, like true or false, or a number, or a name, etc.  The reason there are
-# two directories for map files is because of the way utf8.c works.  It
-# expects that any files there are string properties, that is that the
-# mappings are each to one code point, with mappings in multiple code points
-# handled specially in an extra hash data structure.  Digit.pl is a table that
-# is written there for historical reasons, even though it doesn't fit that
-# mold.  Thus it can't currently be looked at by the Perl core.
+#   other is trivial to construct, so could be done at Perl run-time by just
+#   complementing the result, instead of having a file for it.  That is, if
+#   someone types in \p{foo: N}, Perl could translate that to \P{foo: Y} and
+#   not need a file.   The problem is communicating to Perl that a given
+#   property is binary.  Perl can't figure it out from looking at the N (or
+#   No), as some non-binary properties have these as property values.  So
+#   rather than inventing a way to communicate this info back to the core,
+#   which would have required changes there as well, it was simpler just to
+#   add the extra tables.
+#
+# Why is there more than one type of range?
+#   This simplified things.  There are some very specialized code points that
+#   have to be handled specially for output, such as Hangul syllable names.
+#   By creating a range type (done late in the development process), it
+#   allowed this to be stored with the range, and overridden by other input.
+#   Originally these were stored in another data structure, and it became a
+#   mess trying to decide if a second file that was for the same property was
+#   overriding the earlier one or not.
+#
+# Why are there two kinds of tables, match and map?
+#   (And there is a base class shared by the two as well.)  As stated above,
+#   they actually are for different things.  Development proceeded much more
+#   smoothly when I (khw) realized the distinction.  Map tables are used to
+#   give the property value for every code point (actually every code point
+#   that doesn't map to a default value).  Match tables are used for regular
+#   expression matches, and are essentially the inverse mapping.  Separating
+#   the two allows more specialized methods, and error checks so that one
+#   can't just take the intersection of two map tables, for example, as that
+#   is nonsensical.
 #
 # There are no match tables generated for matches of the null string.  These
-# would like like \p{JSN=}.  Perhaps something like them could be added if
-# necessary.  The JSN does have a real code point U+110B that maps to the null
-# string, but it is a contributory property, and therefore not output by
-# default.
+# would like like qr/\p{JSN=}/ currently without modifying the regex code.
+# Perhaps something like them could be added if necessary.  The JSN does have
+# a real code point U+110B that maps to the null string, but it is a
+# contributory property, and therefore not output by default.  And it's easily
+# handled so far by making the null string the default where it is a
+# possibility.
 #
 # DEBUGGING
 #
-# XXX Add more stuff here.   use perl instead of miniperl to find problems with
-# Scalar::Util
-
+# This program is written so it will run under miniperl.  Occasionally changes
+# will cause an error where the backtrace doesn't work well under miniperl.
+# To diagnose the problem, you can instead run it under regular perl, if you
+# have one compiled.
+#
+# There is a good trace facility.  To enable it, first sub DEBUG must be set
+# to return true.  Then a line like
+#
+# local $to_trace = 1 if main::DEBUG;
+#
+# can be added to enable tracing in its lexical scope or until you insert
+# another line:
+#
+# local $to_trace = 0 if main::DEBUG;
+#
+# then use a line like "trace $a, @b, %c, ...;
+#
+# Some of the more complex subroutines already have trace statements in them.
+# Permanent trace statements should be like:
+#
+# trace ... if main::DEBUG && $to_trace;
+#
+# If there is just one or a few files that you're debugging, you can easily
+# cause most everything else to be skipped.  Change the line
+#
+# my $debug_skip = 0;
+#
+# to 1, and every file whose object is in @input_file_objects and doesn't have
+# a, 'non_skip => 1,' in its constructor will be skipped.
+#
 # FUTURE ISSUES
 #
 # The program would break if Unicode were to change its names so that
@@ -335,7 +373,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # synonym would have to be used for the new property.  This is ugly, and
 # manual intervention would certainly be easier to do in the short run; lets
 # hope it never comes to this.
-
+#
 # A NOTE ON UNIHAN
 #
 # This program can generate tables from the Unihan database.  But it doesn't
@@ -368,17 +406,67 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # file could be edited to fix them.
 # have to be
 #
-# HOW TO ADD A FILE
-
-# Unicode Versions Notes
-
-# alpha's numbers halve in 2.1.9, answer cjk block at 4E00 were removed from PropList; not changed, could add gc Letter, put back in in 3.1.0
-# Some versions of 2.1.x Jamo.txt have the wrong value for 1105, which causes
-# real problems for the algorithms for Jamo calculations, so it is changed
-# here.
-#   White space vs Space.  in 3.2 perl has +205F=medium math space, fixed in 4.0, and ok in 3.1.1 because not there in unicode. synonym introduced in 4.1
-# ATBL = 202.  202 changed to ATB, and all code points stayed there.  So if you were useing ATBL you were out of luck.
-# Hrkt Katakana_Or_Hiragana came in 4.01, before was Unknown.
+# HOW TO ADD A FILE TO BE PROCESSED
+#
+# A new file from Unicode needs to have an object constructed for it in
+# @input_file_objects, probably at the end or at the end of the extracted
+# ones.  The program should warn you if its name will clash with others on
+# restrictive file systems, like DOS.  If so, figure out a better name, and
+# add lines to the README.perl file giving that.  If the file is a character
+# property, it should be in the format that Unicode has by default
+# standardized for such files for the more recently introduced ones.
+# If so, the Input_file constructor for @input_file_objects can just be the
+# file name and release it first appeared in.  If not, then it should be
+# possible to construct an each_line_handler() to massage the line into the
+# standardized form.
+#
+# For non-character properties, more code will be needed.  You can look at
+# the existing entries for clues.
+#
+# UNICODE VERSIONS NOTES
+#
+# The Unicode UCD has had a number of errors in it over the versions.  And
+# these remain, by policy, in the standard for that version.  Therefore it is
+# risky to correct them, because code may be expecting the error.  So this
+# program doesn't generally make changes, unless the error breaks the Perl
+# core.  As an example, some versions of 2.1.x Jamo.txt have the wrong value
+# for U+1105, which causes real problems for the algorithms for Jamo
+# calculations, so it is changed here.
+#
+# But it isn't so clear cut as to what to do about concepts that are
+# introduced in a later release; should they extend back to earlier releases
+# where the concept just didn't exist?  It was easier to do this than to not,
+# so that's what was done.  For example, the default value for code points not
+# in the files for various properties was probably undefined until changed by
+# some version.  No_Block for blocks is such an example.  This program will
+# assign No_Block even in Unicode versions that didn't have it.  This has the
+# benefit that code being written doesn't have to special case earlier
+# versions; and the detriment that it doesn't match the Standard precisely for
+# the affected versions.
+#
+# Here are some observations about some of the issues in early versions:
+#
+# The number of code points in \p{alpha} halve in 2.1.9.  It turns out that
+# the reason is that the CJK block starting at 4E00 was removed from PropList,
+# and was not put back in until 3.1.0
+#
+# Unicode introduced the synonym Space for White_Space in 4.1.  Perl has
+# always had a \p{Space}.  In release 3.2 only, they are not synonymous.  The
+# reason is that 3.2 introduced U+205F=medium math space, which was not
+# classed as white space, but Perl figured out that it should have been. 4.0
+# reclassified it correctly.
+#
+# Another change between 3.2 and 4.0 is the CCC property value ATBL.  In 3.2
+# this was erroneously a synonym for 202.  In 4.0, ATB became 202, and ATBL
+# was left with no code points, as all the ones that mapped to 202 stayed
+# mapped to 202.  Thus if your program used the numeric name for the class,
+# it would not have been affected, but if it used the mnemonic, it would have
+# been.
+#
+# \p{Script=Hrkt} (Katakana_Or_Hiragana) came in 4.0.1.  Before that code
+# points which eventually came to have this script property value, instead
+# mapped to "Unknown".  But in the next release all these code points were
+# moved to \p{sc=common} instead.
 #
 # The default for missing code points for BidiClass is complicated.  Starting
 # in 3.1.1, the derived file DBidiClass.txt handles this, but this program
@@ -902,7 +990,7 @@ my %ignored_files = (
     'StandardizedVariants.txt' => 'Only for glyph changes, not a Unicode character property.  Does not fit into current scheme where one code point is mapped',
 );
 
-################ End of externally interesting definitions ###############
+### End of externally interesting definitions, except for @input_file_objects
 
 my $HEADER=<<"EOF";
 # !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
@@ -1848,8 +1936,8 @@ END
             my $fkey = File::Spec->rel2abs($file);
             my $expecting = delete $potential_files{$fkey};
             $expecting = delete $potential_files{lc($fkey)} unless defined $expecting;
-            Carp::my_carp("Was not expecting '$file'.") if 
-                    ! $expecting                    
+            Carp::my_carp("Was not expecting '$file'.") if
+                    ! $expecting
                     && ! defined $handle{$addr};
 
             # Having deleted from expected files, we can quit if not to do
@@ -5786,7 +5874,7 @@ sub trace { return main::trace(@_); }
         # 'table' (If you change the '=' must also change the ':' in lots of
         # places in this program that assume an equal sign)
         $complete = $property->full_name . "=$complete" if $property != $perl;
-        
+
 
         my $self = $class->SUPER::new(%args,
                                       Name => $name,
@@ -8683,7 +8771,7 @@ END
                             else {
                                 $default_map = $missings;
                             }
-                        
+
                             # And store it with the property for outside use.
                             $property_object->set_default_map($default_map);
                         }
@@ -9571,7 +9659,7 @@ sub process_GCB_test {
     while ($file->next_line) {
         push @backslash_X_tests, $_;
     }
-        
+
     return;
 }
 
@@ -10887,7 +10975,7 @@ sub compile_perl() {
 
     my $gcb = property_ref('Grapheme_Cluster_Break');
 
-    # The 'extended' grapheme cluster came in 5.1.  The non-extended 
+    # The 'extended' grapheme cluster came in 5.1.  The non-extended
     # definition differs too much from the traditional Perl one to use.
     if (defined $gcb && defined $gcb->table('SpacingMark')) {
 
@@ -13954,7 +14042,7 @@ my @ascii_ordered_chars = (
     "\0",
     (-1) x 6,
     "\a", "\b", "\t", "\n",
-    -1,   # No Vt 
+    -1,   # No Vt
     "\f", "\r",
     (-1) x 18,
     " ", "!", "\"", "#", '$', "%", "&", "'",
@@ -14150,7 +14238,7 @@ sub Test_X($) {
     # If a string can be represented in both non-ut8 and utf8, test both cases
     UPGRADE:
     for my $to_upgrade (0 .. 1) {
-        
+
         if ($to_upgrade) {
 
             # If already in utf8, would just be a repeat
