@@ -3,4 +3,4 @@ all:
 
 clean:
 	rm -fr *.pl To lib
-	rm -f ../../pod/perluniprops.pod ../../t/re/uniprops.t mktables.lst
+	rm -f ../../pod/perluniprops.pod mktables.lst
