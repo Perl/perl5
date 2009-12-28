@@ -192,8 +192,8 @@ See L</"User-Defined Character Properties"> for more details.
 
 =item *
 
-The special pattern C<\X> matches a logical character, an C<extended grapheme
-cluster> in Standardese.  In Unicode what appears to the user to be a single
+The special pattern C<\X> matches a logical character, an "extended grapheme
+cluster" in Standardese.  In Unicode what appears to the user to be a single
 character, for example an accented C<G>, may in fact be composed of a sequence
 of characters, in this case a C<G> followed by an accent character.  C<\X>
 will match the entire sequence.
@@ -290,8 +290,8 @@ take on more values than just True and False.  For example, the Bidi_Class (see
 L</"Bidirectional Character Types"> below), can take on a number of different
 values, such as Left, Right, Whitespace, and others.  To match these, one needs
 to specify the property name (Bidi_Class), and the value being matched against
-(Left, Right, etc.).  This is done, as in the examples above, by having the two
-components separated by an equal sign (or interchangeably, a colon), like
+(Left, Right, I<etc.>).  This is done, as in the examples above, by having the
+two components separated by an equal sign (or interchangeably, a colon), like
 C<\p{Bidi_Class: Left}>.
 
 All Unicode-defined character properties may be written in these compound forms
@@ -339,7 +339,7 @@ Every Unicode character is assigned a general category, which is the "most
 usual categorization of a character" (from
 L<http://www.unicode.org/reports/tr44>).
 
-The compound way of writing these is like C<{\p{General_Category=Number}>
+The compound way of writing these is like C<\p{General_Category=Number}>
 (short, C<\p{gc:n}>).  But Perl furnishes shortcuts in which everything up
 through the equal or colon separator is omitted.  So you can instead just write
 C<\pN>.
@@ -452,13 +452,6 @@ C<\P{Cyrillic}>.
 
 A complete list of scripts and their shortcuts is in L<perluniprops>.
 
-=head3 B<Extended property classes>
-
-There are many more property classes than the basic ones described here,
-including some Perl extensions.
-A complete list is in L<perluniprops>.
-The extensions are more fully described in L<perlrecharclass>
-
 =head3 B<Use of "Is" Prefix>
 
 For backward compatibility (with Perl 5.6), all properties mentioned
@@ -472,11 +465,11 @@ In addition to B<scripts>, Unicode also defines B<blocks> of
 characters.  The difference between scripts and blocks is that the
 concept of scripts is closer to natural languages, while the concept
 of blocks is more of an artificial grouping based on groups of Unicode
-characters with consecutive ordinal values. For example, the C<Basic Latin>
+characters with consecutive ordinal values. For example, the "Basic Latin"
 block is all characters whose ordinals are between 0 and 127, inclusive, in
-other words, the ASCII characters.  The C<Latin> script contains some letters
-from this block as well as several more, like C<Latin-1 Supplement>,
-C<Latin Extended-A>, I<etc.>, but it does not contain all the characters from
+other words, the ASCII characters.  The "Latin" script contains some letters
+from this block as well as several more, like "Latin-1 Supplement",
+"Latin Extended-A", I<etc.>, but it does not contain all the characters from
 those blocks. It does not, for example, contain digits, because digits are
 shared across many scripts. Digits and similar groups, like punctuation, are in
 the script called C<Common>.  There is also a script called C<Inherited> for
@@ -504,14 +497,14 @@ reasons:
 =item 1
 
 It is confusing.  There are many naming conflicts, and you may forget some.
-For example, \p{Hebrew} means the I<script> Hebrew, and NOT the I<block>
+For example, C<\p{Hebrew}> means the I<script> Hebrew, and NOT the I<block>
 Hebrew.  But would you remember that 6 months from now?
 
 =item 2
 
 It is unstable.  A new version of Unicode may pre-empt the current meaning by
 creating a property with the same name.  There was a time in very early Unicode
-releases when \p{Hebrew} would have matched the I<block> Hebrew; now it
+releases when C<\p{Hebrew}> would have matched the I<block> Hebrew; now it
 doesn't.
 
 =back
@@ -522,6 +515,230 @@ difference between 'In' and 'Is' anyway (or aren't confident that those who
 eventually will read their code will know).
 
 A complete list of blocks and their shortcuts is in L<perluniprops>.
+
+=head3 B<Other Properties>
+
+There are many more properties than the very basic ones described here.
+A complete list is in L<perluniprops>.
+
+Unicode defines all its properties in the compound form, so all single-form
+properties are Perl extensions.  A number of these are just synonyms for the
+Unicode ones, but some are genunine extensions, including a couple that are in
+the compound form.  And quite a few of these are actually recommended by Unicode
+(in L<http://www.unicode.org/reports/tr18>).
+
+This section gives some details on all the extensions that aren't synonyms for
+compound-form Unicode properties (for those, you'll have to refer to the
+L<Unicode Standard|http://www.unicode.org/reports/tr44>.
+
+=over
+
+=item B<C<\p{All}>>
+
+This matches any of the 1_114_112 Unicode code points.  It is a synonym for
+C<\p{Any}>.
+
+=item B<C<\p{Alnum}>>
+
+This matches any C<\p{Alphabetic}> or C<\p{Decimal_Number}> character.
+
+=item B<C<\p{Any}>>
+
+This matches any of the 1_114_112 Unicode code points.  It is a synonym for
+C<\p{All}>.
+
+=item B<C<\p{Assigned}>>
+
+This matches any assigned code point; that is, any code point whose general
+category is not Unassigned (or equivalently, not Cn).
+
+=item B<C<\p{Blank}>>
+
+This is the same as C<\h> and C<\p{HorizSpace}>:  A character that changes the
+spacing horizontally.
+
+=item B<C<\p{Decomposition_Type: Non_Canonical}>>    (Short: C<\p{Dt=NonCanon}>)
+
+Matches a character that has a non-canonical decomposition.
+
+To understand the use of this rarely used property=value combination, it is
+necessary to know some basics about decomposition.
+Consider a character, say H.  It could appear with various marks around it,
+such as an acute accent, or a circumflex, or various hooks, circles, arrows,
+I<etc.>, above, below, to one side and/or the other, I<etc.>  There are many
+possibilities among the world's languages.  The number of combinations is
+astronomical, and if there were a character for each combination, it would
+soon exhaust Unicode's more than a million possible characters.  So Unicode
+took a different approach: there is a character for the base H, and a
+character for each of the possible marks, and they can be combined variously
+to get a final logical character.  So a logical character--what appears to be a
+single character--can be a sequence of more than one individual characters.
+This is called an "extended grapheme cluster".  (Perl furnishes the C<\X>
+construct to match such sequences.)
+
+But Unicode's intent is to unify the existing character set standards and
+practices, and a number of pre-existing standards have single characters that
+mean the same thing as some of these combinations.  An example is ISO-8859-1,
+which has quite a few of these in the Latin-1 range, an example being "LATIN
+CAPITAL LETTER E WITH ACUTE".  Because this character was in this pre-existing
+standard, Unicode added it to its repertoire.  But this character is considered
+by Unicode to be equivalent to the sequence consisting of first the character
+"LATIN CAPITAL LETTER E", then the character "COMBINING ACUTE ACCENT".
+
+"LATIN CAPITAL LETTER E WITH ACUTE" is called a "pre-composed" character, and
+the equivalence with the sequence is called canonical equivalence.  All
+pre-composed characters are said to have a decomposition (into the equivalent
+sequence) and the decomposition type is also called canonical.
+
+However, many more characters have a different type of decomposition, a
+"compatible" or "non-canonical" decomposition.  The sequences that form these
+decompositions are not considered canonically equivalent to the pre-composed
+character.  An example, again in the Latin-1 range, is the "SUPERSCRIPT ONE".
+It is kind of like a regular digit 1, but not exactly; its decomposition
+into the digit 1 is called a "compatible" decomposition, specifically a
+"super" decomposition.  There are several such compatibility
+decompositions (see L<http://www.unicode.org/reports/tr44>), including one
+called "compat" which means some miscellaneous type of decomposition
+that doesn't fit into the decomposition categories that Unicode has chosen. 
+
+Note that most Unicode characters don't have a decomposition, so their
+decomposition type is "None".
+
+Perl has added the C<Non_Canonical> type, for your convenience, to mean any of
+the compatibility decompositions.
+
+=item B<C<\p{Graph}>>
+
+Matches any character that is graphic.  Theoretically, this means a character
+that on a printer would cause ink to be used.
+
+=item B<C<\p{HorizSpace}>>
+
+This is the same as C<\h> and C<\p{Blank}>:  A character that changes the
+spacing horizontally.
+
+=item B<C<\p{In=*}>> 
+
+This is a synonym for C<\p{Present_In=*}>
+
+=item B<C<\p{PerlSpace}>>
+
+This is the same as C<\s>, restricted to ASCII, namely C<S<[ \f\n\r\t]>>.
+
+Mnemonic: Perl's (original) space
+
+=item B<C<\p{PerlWord}>>
+
+This is the same as C<\w>, restricted to ASCII, namely C<[A-Za-z0-9_]>
+
+Mnemonic: Perl's (original) word.
+
+=item B<C<\p{PosixAlnum}>>
+
+This matches any alphanumeric character in the ASCII range, namely
+C<[A-Za-z0-9]>.
+
+=item B<C<\p{PosixAlpha}>>
+
+This matches any alphabetic character in the ASCII range, namely C<[A-Za-z]>.
+
+=item B<C<\p{PosixBlank}>>
+
+This matches any blank character in the ASCII range, namely C<S<[ \t]>>.
+
+=item B<C<\p{PosixCntrl}>>
+
+This matches any control character in the ASCII range, namely C<[\x00-\x1F\x7F]>
+
+=item B<C<\p{PosixDigit}>>
+
+This matches any digit character in the ASCII range, namely C<[0-9]>.
+
+=item B<C<\p{PosixGraph}>>
+
+This matches any graphical character in the ASCII range, namely C<[\x21-\x7E]>.
+
+=item B<C<\p{PosixLower}>>
+
+This matches any lowercase character in the ASCII range, namely C<[a-z]>.
+
+=item B<C<\p{PosixPrint}>>
+
+This matches any printable character in the ASCII range, namely C<[\x20-\x7E]>.
+These are the graphical characters plus SPACE.
+
+=item B<C<\p{PosixPunct}>>
+
+This matches any punctuation character in the ASCII range, namely
+C<[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]>.  These are the
+graphical characters that aren't word characters.  Note that the Posix standard
+includes in its definition of punctuation, those characters that Unicode calls
+"symbols."
+
+=item B<C<\p{PosixSpace}>>
+
+This matches any space character in the ASCII range, namely
+C<S<[ \f\n\r\t\x0B]>> (the last being a vertical tab).
+
+=item B<C<\p{PosixUpper}>>
+
+This matches any uppercase character in the ASCII range, namely C<[A-Z]>.
+
+=item B<C<\p{Present_In: *}>>    (Short: C<\p{In=*}>)
+
+This property is used when you need to know in what Unicode version(s) a
+character is.
+
+The "*" above stands for some two digit Unicode version number, such as
+C<1.1> or C<4.0>; or the "*" can also be C<Unassigned>.  This property will
+match the code points whose final disposition has been settled as of the
+Unicode release given by the version number; C<\p{Present_In: Unassigned}>
+will match those code points whose meaning has yet to be assigned.
+
+For example, C<U+0041> "LATIN CAPITAL LETTER A" was present in the very first
+Unicode release available, which is C<1.1>, so this property is true for all
+valid "*" versions.  On the other hand, C<U+1EFF> was not assigned until version
+5.1 when it became "LATIN SMALL LETTER Y WITH LOOP", so the only "*" that
+would match it are 5.1, 5.2, and later.
+
+Unicode furnishes the C<Age> property from which this is derived.  The problem
+with Age is that a strict interpretation of it (which Perl takes) has it
+matching the precise release a code point's meaning is introduced in.  Thus
+C<U+0041> would match only 1.1; and C<U+1EFF> only 5.1.  This is not usually what
+you want.
+
+Some non-Perl implementations of the Age property may change its meaning to be
+the same as the Perl Present_In property; just be aware of that.
+
+Another confusion with both these properties is that the definition is not
+that the code point has been assigned, but that the meaning of the code point
+has been determined.  This is because 66 code points will always be
+unassigned, and, so the Age for them is the Unicode version the decision to
+make them so was made in.  For example, C<U+FDD0> is to be permanently
+unassigned to a character, and the decision to do that was made in version 3.1,
+so C<\p{Age=3.1}> matches this character and C<\p{Present_In: 3.1}> and up
+matches as well.
+
+=item B<C<\p{Print}>>
+
+This matches any character that is graphical or is space, but not a control.
+
+=item B<C<\p{SpacePerl}>>
+
+This is the same as C<\s>, including beyond ASCII.
+
+Mnemonic: Space, as modified by Perl.  (It doesn't include vertical tab which
+both the Posix standard and Unicode consider to be space.)
+
+=item B<C<\p{VertSpace}>>
+
+This is the same as C<\v>:  A character that changes the spacing vertically.
+
+=item B<C<\p{Word}>>
+
+This is the same as C<\w>, including beyond ASCII.
+
+=back
 
 =head2 User-Defined Character Properties
 
@@ -671,10 +888,10 @@ mapping; you can't just override a couple of characters and leave the rest
 unchanged.  You can find all the mappings in the directory
 C<$Config{privlib}>/F<unicore/To/>.  The mapping data is returned as the
 here-document, and the C<utf8::ToSpecFoo> are special exception mappings
-derived from <$Config{privlib}>/F<unicore/SpecialCasing.txt>.  The C<Digit> and
-C<Fold> mappings that one can see in the directory are not directly
+derived from <$Config{privlib}>/F<unicore/SpecialCasing.txt>.  The "Digit" and
+"Fold" mappings that one can see in the directory are not directly
 user-accessible, one can use either the C<Unicode::UCD> module, or just match
-case-insensitively (that's when the C<Fold> mapping is used).
+case-insensitively (that's when the "Fold" mapping is used).
 
 The mappings will only take effect on scalars that have been marked as having
 Unicode characters, for example by using C<utf8::upgrade()>.
@@ -850,7 +1067,7 @@ Another way to look at it is via bits:
             ccccbbbbbbaaaaaa     1110cccc  10bbbbbb  10aaaaaa
   00000dddccccccbbbbbbaaaaaa     11110ddd  10cccccc  10bbbbbb  10aaaaaa
 
-As you can see, the continuation bytes all begin with C<10>, and the
+As you can see, the continuation bytes all begin with "10", and the
 leading bits of the start byte tell how many bytes there are in the
 encoded character.
 
@@ -875,7 +1092,7 @@ surrogate>, and the second being the I<low surrogate>.
 
 Surrogates are code points set aside to encode the C<U+10000..U+10FFFF>
 range of Unicode code points in pairs of 16-bit units.  The I<high
-surrogates> are the range C<U+D800..U+DBFF>, and the I<low surrogates>
+surrogates> are the range C<U+D800..U+DBFF> and the I<low surrogates>
 are the range C<U+DC00..U+DFFF>.  The surrogate encoding is
 
 	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
@@ -1136,7 +1353,7 @@ an example, consider the following program and its output:
  0
  1
 
-If there's no \w in s1 or in s2, why does their concatenation have one?
+If there's no C<\w> in C<s1> or in C<s2>, why does their concatenation have one?
 
 This anomaly stems from Perl's attempt to not disturb older programs that
 didn't use Unicode, and hence had no semantics for characters outside of the
@@ -1308,7 +1525,7 @@ use characters above that range when mapped into Unicode.  Perl's
 Unicode support will also tend to run slower.  Use of locales with
 Unicode is discouraged.
 
-=head2 Problems with characters in the C<Latin-1 Supplement> range
+=head2 Problems with characters in the Latin-1 Supplement range
 
 See L</The "Unicode Bug">
 
@@ -1316,9 +1533,9 @@ See L</The "Unicode Bug">
 
 There are problems with case-insensitive matches, including those involving
 character classes (enclosed in [square brackets]), characters whose fold
-is to multiple characters (such as the single character C<LATIN SMALL LIGATURE
-FFL> matches case-insensitively with the 3-character string C<ffl>), and
-characters in the C<Latin-1 Supplement>.
+is to multiple characters (such as the single character LATIN SMALL LIGATURE
+FFL matches case-insensitively with the 3-character string C<ffl>), and
+characters in the Latin-1 Supplement.
 
 =head2 Interaction with Extensions
 
