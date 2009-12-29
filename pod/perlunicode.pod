@@ -727,8 +727,8 @@ This matches any character that is graphical or is space, but not a control.
 
 This is the same as C<\s>, including beyond ASCII.
 
-Mnemonic: Space, as modified by Perl.  (It doesn't include vertical tab which
-both the Posix standard and Unicode consider to be space.)
+Mnemonic: Space, as modified by Perl.  (It doesn't include the vertical tab
+which both the Posix standard and Unicode consider to be space.)
 
 =item B<C<\p{VertSpace}>>
 
