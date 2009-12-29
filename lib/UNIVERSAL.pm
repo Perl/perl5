@@ -15,6 +15,7 @@ require Exporter;
 # anything unless called on UNIVERSAL.
 sub import {
     return unless $_[0] eq __PACKAGE__;
+    return unless @_ > 1;
     require warnings;
     warnings::warnif(
       'deprecated',

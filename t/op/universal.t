@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 123;
+plan tests => 124;
 
 $a = {};
 bless $a, "Bob";
@@ -249,9 +249,14 @@ use warnings "deprecated";
 {
     my $m;
     local $SIG{__WARN__} = sub { $m = $_[0] };
-    eval "use UNIVERSAL";
+    eval "use UNIVERSAL 'can'";
     like($m, qr/^UNIVERSAL->import is deprecated/,
-	"deprecation warning for UNIVERSAL->import");
+	"deprecation warning for UNIVERSAL->import('can')");
+
+	  undef $m;
+    eval "use UNIVERSAL";
+    is($m, undef,
+	"no deprecation warning for UNIVERSAL->import");
 }
 
 # Test: [perl #66112]: change @ISA inside  sub isa
