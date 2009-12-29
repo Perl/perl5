@@ -10781,7 +10781,7 @@ sub compile_perl() {
 
     my $Print = $perl->add_match_table('Print',
                         Description => "[[:Print:]] extended beyond ASCII",
-                        Initialize => $Space + $Graph - $gc->table('Control'),
+                        Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $posix_equivalent{'Print'} = $Print;
 
@@ -10801,6 +10801,7 @@ sub compile_perl() {
     $posix_equivalent{'Digit'} = $Digit;
 
     # AHex was not present in early releases
+    # XXX TUS recommends Hex_Digit, not ASCII_Hex_Digit.
     my $Xdigit = $perl->add_match_table('XDigit',
                                         Description => '[0-9A-Fa-f]');
     my $AHex = property_ref('ASCII_Hex_Digit');
@@ -14168,3 +14169,5 @@ sub Finished() {
 
 Error('\p{Script=InGreek}');    # Bug #69018
 Test_X("1100 $nobreak 1161");  # Bug #70940
+Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
+Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722

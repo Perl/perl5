@@ -721,7 +721,7 @@ matches as well.
 
 =item B<C<\p{Print}>>
 
-This matches any character that is graphical or is space, but not a control.
+This matches any character that is graphical or blank, except controls.
 
 =item B<C<\p{SpacePerl}>>
 
