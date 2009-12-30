@@ -4074,6 +4074,12 @@ sub trace { return main::trace(@_); }
     # standard.
     main::set_access('perl_extension', \%perl_extension, 'r');
 
+    my %output_range_counts;
+    # A boolean set iff this table is to have comments written in the
+    # output file that contain the number of code points in the range.
+    # The constructor can override the global flag of the same name.
+    main::set_access('output_range_counts', \%output_range_counts, 'r');
+
     sub new {
         # All arguments are key => value pairs, which you can see below, most
         # of which match fields documented above.  Otherwise: Pod_Entry,
@@ -4095,6 +4101,7 @@ sub trace { return main::trace(@_); }
         my $complete_name = $complete_name{$addr}
                           = delete $args{'Complete_Name'};
         $internal_only{$addr} = delete $args{'Internal_Only_Warning'} || 0;
+        $output_range_counts{$addr} = delete $args{'Output_Range_Counts'};
         $property{$addr} = delete $args{'_Property'};
         $range_list{$addr} = delete $args{'_Range_List'};
         $status{$addr} = delete $args{'Status'} || $NORMAL;
@@ -4114,6 +4121,8 @@ sub trace { return main::trace(@_); }
         # Can't use || above because conceivably the name could be 0, and
         # can't use // operator in case this program gets used in Perl 5.8
         $full_name{$addr} = $name{$addr} if ! defined $full_name{$addr};
+        $output_range_counts{$addr} = $output_range_counts if
+                                        ! defined $output_range_counts{$addr};
 
         $aliases{$addr} = [ ];
         $comment{$addr} = [ ];
@@ -4564,7 +4573,7 @@ sub trace { return main::trace(@_); }
                     # Add a comment with the size of the range, if requested.
                     # Expand Tabs to make sure they all start in the same
                     # column, and then unexpand to use mostly tabs.
-                    if (! $output_range_counts) {
+                    if (! $output_range_counts{$addr}) {
                         $OUT[-1] .= "\n";
                     }
                     else {
@@ -5170,7 +5179,7 @@ START\\tSTOP\\tMAPPING where START is the starting code point of the
 range, in hex; STOP is the ending point, or if omitted, the range has just one
 code point; MAPPING is what each code point between START and STOP maps to.
 END
-                if ($output_range_counts) {
+                if ($self->output_range_counts) {
                     $comment .= <<END;
 Numbers in comments in [brackets] indicate how many code points are in the
 range (omitted when the range is a single code point or if the mapping is to
@@ -6406,7 +6415,7 @@ END
 START\\tSTOP\\twhere START is the starting code point of the range, in hex;
 STOP is the ending point, or if omitted, the range has just one code point.
 END
-            if ($output_range_counts) {
+            if ($leader->output_range_counts) {
                 $comment .= <<END;
 Numbers in comments in [brackets] indicate how many code points are in the
 range.
@@ -8976,6 +8985,9 @@ END
                                         Internal_Only_Warning => 1,
                                         Perl_Extension => 1,
                                         Default_Map => $CODE_POINT,
+
+                                        # normalize.pm can't cope with these
+                                        Output_Range_Counts => 0,
 
                                         # This is a specially formatted table
                                         # explicitly for normalize.pm, which
