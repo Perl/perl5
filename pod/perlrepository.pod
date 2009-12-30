@@ -236,7 +236,7 @@ a single atomic unit, run this command:
 If you want to commit some, but not all of your changes, have a look
 at the documentation for C<git add>.)
 
-Git will start up your favorite text message, so that you can craft a
+Git will start up your favorite text editor, so that you can craft a
 commit message for your change. See L</Commit message> below for more
 information about what makes a good commit message.
 
