@@ -7432,7 +7432,7 @@ Perl_yylex(pTHX)
 		else if (*s != '{' && key == KEY_sub) {
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
-		    else if (*s != ';')
+		    else if (*s != ';' && *s != '}')
 			Perl_croak(aTHX_ "Illegal declaration of subroutine %"SVf, SVfARG(PL_subname));
 		}
 

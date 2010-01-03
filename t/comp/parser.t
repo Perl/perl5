@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..117\n";
+print "1..118\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -331,6 +331,11 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   my $x = "x" x 257;
   eval qq[ for $x ];
   like($@, qr/Identifier too long/, "too long id ticket case");
+}
+
+{
+  eval qq[ {sub zlonk} ];
+  is($@, '', 'sub declaration followed by a closing curly');
 }
 
 # Add new tests HERE:
