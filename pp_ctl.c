@@ -3982,14 +3982,38 @@ PP(pp_leavegiven)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
-    SP = newsp;
-    PUTBACK;
-
-    PL_curpm = newpm;   /* pop $1 et al */
+    TAINT_NOT;
+    if (gimme == G_VOID)
+	SP = newsp;
+    else if (gimme == G_SCALAR) {
+	register SV **mark;
+	MARK = newsp + 1;
+	if (MARK <= SP) {
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	}
+	else {
+	    MEXTEND(mark,0);
+	    *MARK = &PL_sv_undef;
+	}
+	SP = MARK;
+    }
+    else {
+	/* in case LEAVE wipes old return values */
+	register SV **mark;
+	for (mark = newsp + 1; mark <= SP; mark++) {
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
+		*mark = sv_mortalcopy(*mark);
+		TAINT_NOT;	/* Each item is independent */
+	    }
+	}
+    }
+    PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("given");
-
-    return NORMAL;
+    RETURN;
 }
 
 /* Helper routines used by pp_smartmatch */
@@ -4529,9 +4553,10 @@ PP(pp_enterwhen)
        fails, we don't want to push a context and then
        pop it again right away, so we skip straight
        to the op that follows the leavewhen.
+       RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
-	return cLOGOP->op_other->op_next;
+	RETURNOP(cLOGOP->op_other->op_next);
 
     ENTER_with_name("eval");
     SAVETMPS;
@@ -4590,7 +4615,8 @@ PP(pp_break)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 inner;
-    
+    dSP;
+
     cxix = dopoptogiven(cxstack_ix); 
     if (cxix < 0) {
 	if (PL_op->op_flags & OPf_SPECIAL)
@@ -4614,7 +4640,8 @@ PP(pp_break)
     if (CxFOREACH(cx))
 	return CX_LOOP_NEXTOP_GET(cx);
     else
-	return cx->blk_givwhen.leave_op;
+	/* RETURNOP calls PUTBACK which restores the old old sp */
+	RETURNOP(cx->blk_givwhen.leave_op);
 }
 
 STATIC OP *

@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 132;
+plan tests => 160;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -1030,6 +1030,138 @@ unreified_check(1,2,"lala");
 unreified_check(1,2,undef);
 unreified_check(undef);
 unreified_check(undef,"");
+
+# Test do { given } as a rvalue
+
+{
+    # Simple scalar
+    my $lexical = 5;
+    my @things = (11 .. 26); # 16 elements
+    my @exp = (5, 16, 9);
+    no warnings 'void';
+    for (0, 1, 2) {
+	my $scalar = do { given ($_) {
+	    when (0) { $lexical }
+	    when (2) { 'void'; 8, 9 }
+	    @things;
+	} };
+	is($scalar, shift(@exp), "rvalue given - simple scalar [$_]");
+    }
+}
+{
+    # Postfix scalar
+    my $lexical = 5;
+    my @exp = (5, 7, 9);
+    for (0, 1, 2) {
+	no warnings 'void';
+	my $scalar = do { given ($_) {
+	    $lexical when 0;
+	    8, 9     when 2;
+	    6, 7;
+	} };
+	is($scalar, shift(@exp), "rvalue given - postfix scalar [$_]");
+    }
+}
+{
+    # Default scalar
+    my @exp = (5, 9, 9);
+    for (0, 1, 2) {
+	my $scalar = do { given ($_) {
+	    no warnings 'void';
+	    when (0) { 5 }
+	    default  { 8, 9 }
+	    6, 7;
+	} };
+	is($scalar, shift(@exp), "rvalue given - default scalar [$_]");
+    }
+}
+{
+    # Simple list
+    my @things = (11 .. 13);
+    my @exp = ('3 4 5', '11 12 13', '8 9');
+    for (0, 1, 2) {
+	my @list = do { given ($_) {
+	    when (0) { 3 .. 5 }
+	    when (2) { my $fake = 'void'; 8, 9 }
+	    @things;
+	} };
+	is("@list", shift(@exp), "rvalue given - simple list [$_]");
+    }
+}
+{
+    # Postfix list
+    my @things = (12);
+    my @exp = ('3 4 5', '6 7', '12');
+    for (0, 1, 2) {
+	my @list = do { given ($_) {
+	    3 .. 5  when 0;
+	    @things when 2;
+	    6, 7;
+	} };
+	is("@list", shift(@exp), "rvalue given - postfix list [$_]");
+    }
+}
+{
+    # Default list
+    my @things = (11 .. 20); # 10 elements
+    my @exp = ('m o o', '8 10', '8 10');
+    for (0, 1, 2) {
+	my @list = do { given ($_) {
+	    when (0) { "moo" =~ /(.)/g }
+	    default  { 8, scalar(@things) }
+	    6, 7;
+	} };
+	is("@list", shift(@exp), "rvalue given - default list [$_]");
+    }
+}
+{
+    # Switch control
+    my @exp = ('6 7', '', '6 7');
+    for (0, 1, 2, 3) {
+	my @list = do { given ($_) {
+	    continue when $_ <= 1;
+	    break    when 1;
+	    next     when 2;
+	    6, 7;
+	} };
+	is("@list", shift(@exp), "rvalue given - default list [$_]");
+    }
+}
+{
+    # Context propagation
+    my $smart_hash = sub {
+	do { given ($_[0]) {
+	    'undef' when undef;
+	    when ([ 1 .. 3 ]) { 1 .. 3 }
+	    when (4) { my $fake; do { 4, 5 } }
+	} };
+    };
+
+    my $scalar;
+
+    $scalar = $smart_hash->();
+    is($scalar, 'undef', "rvalue given - scalar context propagation [undef]");
+
+    $scalar = $smart_hash->(4);
+    is($scalar, 5,       "rvalue given - scalar context propagation [4]");
+
+    $scalar = $smart_hash->(999);
+    is($scalar, undef,   "rvalue given - scalar context propagation [999]");
+
+    my @list;
+
+    @list = $smart_hash->();
+    is("@list", 'undef', "rvalue given - list context propagation [undef]");
+
+    @list = $smart_hash->(2);
+    is("@list", '1 2 3', "rvalue given - list context propagation [2]");
+
+    @list = $smart_hash->(4);
+    is("@list", '4 5',   "rvalue given - list context propagation [4]");
+
+    @list = $smart_hash->(999);
+    is("@list", '',      "rvalue given - list context propagation [999]");
+}
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t
