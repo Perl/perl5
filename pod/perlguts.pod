@@ -1895,7 +1895,7 @@ MULTIPLICITY build has a C structure that packages all the interpreter
 state. With multiplicity-enabled perls, PERL_IMPLICIT_CONTEXT is also
 normally defined, and enables the support for passing in a "hidden" first
 argument that represents all three data structures. MULTIPLICITY makes
-mutli-threaded perls possible (with the ithreads threading model, related
+multi-threaded perls possible (with the ithreads threading model, related
 to the macro USE_ITHREADS.)
 
 Two other "encapsulation" macros are the PERL_GLOBAL_STRUCT and
