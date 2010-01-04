@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..118\n";
+print "1..121\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -334,8 +334,11 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
 }
 
 {
+  is(exists &zlonk, '', 'sub not present');
   eval qq[ {sub zlonk} ];
   is($@, '', 'sub declaration followed by a closing curly');
+  is(exists &zlonk, 1, 'sub now stubbed');
+  is(defined &zlonk, '', 'but no body defined');
 }
 
 # Add new tests HERE:
