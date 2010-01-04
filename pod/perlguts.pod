@@ -2653,8 +2653,7 @@ C<PL_custom_op_descs> and C<PL_custom_op_names> hashes. This means you
 need to enter a name and description for your op at the appropriate
 place in the C<PL_custom_op_names> and C<PL_custom_op_descs> hashes.
 
-Forthcoming versions of C<B::Generate> (version 1.0 and above) should
-directly support the creation of custom ops by name.
+C<B::Generate> directly supports the creation of custom ops by name.
 
 =head1 AUTHORS
 
