@@ -8,7 +8,7 @@ BEGIN {
 
 # Do a basic test on all the tied methods of Tie::Hash::NamedCapture
 
-print "1..13\n";
+plan(tests => 21);
 
 # PL_curpm->paren_names can be a null pointer. See that this succeeds anyway.
 'x' =~ /(.)/;
@@ -51,3 +51,18 @@ is(join('|', sort keys %+), "a|b|e", "FIRSTKEY/NEXTKEY");
 # SCALAR
 is(scalar(%+), 3, "SCALAR");
 is(scalar(%-), 3, "SCALAR");
+
+# Abuse all methods with undef as the first argument (RT #71828 and then some):
+
+is(Tie::Hash::NamedCapture::FETCH(undef, undef), undef, 'FETCH with undef');
+eval {Tie::Hash::NamedCapture::STORE(undef, undef, undef)};
+like($@, qr/Modification of a read-only value attempted/, 'STORE with undef');
+eval {Tie::Hash::NamedCapture::DELETE(undef, undef)};
+like($@, , qr/Modification of a read-only value attempted/,
+     'DELETE with undef');
+eval {Tie::Hash::NamedCapture::CLEAR(undef)};
+like($@, qr/Modification of a read-only value attempted/, 'CLEAR with undef');
+is(Tie::Hash::NamedCapture::EXISTS(undef, undef), undef, 'EXISTS with undef');
+is(Tie::Hash::NamedCapture::FIRSTKEY(undef), undef, 'FIRSTKEY with undef');
+is(Tie::Hash::NamedCapture::NEXTKEY(undef, undef), undef, 'NEXTKEY with undef');
+is(Tie::Hash::NamedCapture::SCALAR(undef), undef, 'SCALAR with undef');

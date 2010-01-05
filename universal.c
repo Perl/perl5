@@ -1368,7 +1368,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         XSRETURN_UNDEF;
 
     SP -= items;
@@ -1398,7 +1398,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx) {
+    if (!rx || !SvROK(ST(0))) {
         if (!PL_localizing)
             Perl_croak(aTHX_ "%s", PL_no_modify);
         else
@@ -1421,7 +1421,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     if (items != 2)
 	croak_xs_usage(cv, "$key, $flags");
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         Perl_croak(aTHX_ "%s", PL_no_modify);
 
     SP -= items;
@@ -1442,7 +1442,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         Perl_croak(aTHX_ "%s", PL_no_modify);
 
     SP -= items;
@@ -1464,7 +1464,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         XSRETURN_UNDEF;
 
     SP -= items;
@@ -1492,7 +1492,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         XSRETURN_UNDEF;
 
     SP -= items;
@@ -1524,7 +1524,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         XSRETURN_UNDEF;
 
     SP -= items;
@@ -1555,7 +1555,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (!rx)
+    if (!rx || !SvROK(ST(0)))
         XSRETURN_UNDEF;
 
     SP -= items;
