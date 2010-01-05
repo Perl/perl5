@@ -1401,12 +1401,14 @@ chunk will not be discarded.
 =cut
 */
 
+#define LEX_NO_NEXT_CHUNK 0x80000000
+
 void
 Perl_lex_read_space(pTHX_ U32 flags)
 {
     char *s, *bufend;
     bool need_incline = 0;
-    if (flags & ~(LEX_KEEP_PREVIOUS))
+    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_NO_NEXT_CHUNK))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_read_space");
 #ifdef PERL_MAD
     if (PL_skipwhite) {
@@ -1439,6 +1441,8 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    if (PL_madskills)
 		sv_catpvn(PL_skipwhite, PL_parser->bufptr, s-PL_parser->bufptr);
 #endif /* PERL_MAD */
+	    if (flags & LEX_NO_NEXT_CHUNK)
+		break;
 	    PL_parser->bufptr = s;
 	    CopLINE_inc(PL_curcop);
 	    got_more = lex_next_chunk(flags);
@@ -1714,20 +1718,12 @@ S_skipspace(pTHX_ register char *s)
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	while (s < PL_bufend && SPACE_OR_TAB(*s))
 	    s++;
-    } else if (PL_sublex_info.sub_inwhat || PL_lex_state == LEX_FORMLINE) {
-	while (isSPACE(*s) && *s != '\n')
-	    s++;
-	if (*s == '#') {
-	    do {
-		s++;
-	    } while (s != PL_bufend && *s != '\n');
-	}
-	if (*s == '\n')
-	    s++;
     } else {
 	STRLEN bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
 	PL_bufptr = s;
-	lex_read_space(LEX_KEEP_PREVIOUS);
+	lex_read_space(LEX_KEEP_PREVIOUS |
+		(PL_sublex_info.sub_inwhat || PL_lex_state == LEX_FORMLINE ?
+		    LEX_NO_NEXT_CHUNK : 0));
 	s = PL_bufptr;
 	PL_bufptr = SvPVX(PL_linestr) + bufptr_pos;
 	if (PL_linestart > PL_bufptr)
