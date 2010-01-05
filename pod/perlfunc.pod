@@ -1022,7 +1022,7 @@ Traditionally the result is a string of 13 bytes: two first bytes of
 the salt, followed by 11 bytes from the set C<[./0-9A-Za-z]>, and only
 the first eight bytes of PLAINTEXT mattered. But alternative
 hashing schemes (like MD5), higher level security schemes (like C2),
-and implementations on non-UNIX platforms may produce different
+and implementations on non-Unix platforms may produce different
 strings.
 
 When choosing a new salt create a random two character string whose
@@ -3194,7 +3194,7 @@ C<< '+<' >> is almost always preferred for read/write updates--the C<<
 either read-write mode for updating textfiles, since they have
 variable length records.  See the B<-i> switch in L<perlrun> for a
 better approach.  The file is created with permissions of C<0666>
-modified by the process' C<umask> value.
+modified by the process's C<umask> value.
 
 These various prefixes correspond to the fopen(3) modes of C<'r'>,
 C<'r+'>, C<'w'>, C<'w+'>, C<'a'>, and C<'a+'>.
@@ -3405,7 +3405,7 @@ the same file descriptor.
 
 Note that if you are using Perls older than 5.8.0, Perl will be using
 the standard C libraries' fdopen() to implement the "=" functionality.
-On many UNIX systems fdopen() fails when file descriptors exceed a
+On many Unix systems fdopen() fails when file descriptors exceed a
 certain value, typically 255.  For Perls 5.8.0 and later, PerlIO is
 most often the default.
 
@@ -3440,7 +3440,7 @@ The following triples are more or less equivalent:
 The last example in each block shows the pipe as "list form", which is
 not yet supported on all platforms.  A good rule of thumb is that if
 your platform has true C<fork()> (in other words, if your platform is
-UNIX) you can use the list form.
+Unix) you can use the list form.
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
@@ -4165,7 +4165,7 @@ C<$::sail> is equivalent to C<$main::sail> (as well as to C<$main'sail>,
 still seen in older code).
 
 If VERSION is provided, C<package> also sets the C<$VERSION> variable in the
-given namespace.  VERSION must be be a numeric literal or v-string; it is
+given namespace.  VERSION must be a numeric literal or v-string; it is
 parsed exactly the same way as a VERSION argument to C<use MODULE VERSION>.
 C<$VERSION> should only be set once per package.
 
@@ -4280,7 +4280,7 @@ function has no prototype).  FUNCTION is a reference to, or the name of,
 the function whose prototype you want to retrieve.
 
 If FUNCTION is a string starting with C<CORE::>, the rest is taken as a
-name for Perl builtin.  If the builtin is not I<overridable> (such as
+name for a Perl builtin.  If the builtin is not I<overridable> (such as
 C<qw//>) or if its arguments cannot be adequately expressed by a prototype
 (such as C<system>), prototype() returns C<undef>, because the builtin
 does not really behave like a Perl function.  Otherwise, the string
@@ -4902,7 +4902,7 @@ Deletes the directory specified by FILENAME if that directory is
 empty.  If it succeeds it returns true, otherwise it returns false and
 sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
 
-To remove a directory tree recursively (C<rm -rf> on unix) look at
+To remove a directory tree recursively (C<rm -rf> on Unix) look at
 the C<rmtree> function of the L<File::Path> module.
 
 =item s///
@@ -6488,7 +6488,7 @@ Better to omit it.  See the perlfunc(1) entry on C<umask> for more
 on this.
 
 Note that C<sysopen> depends on the fdopen() C library function.
-On many UNIX systems, fdopen() is known to fail when file descriptors
+On many Unix systems, fdopen() is known to fail when file descriptors
 exceed a certain value, typically 255. If you need more file
 descriptors than that, consider rebuilding Perl to use the C<sfio>
 library, or perhaps using the POSIX::open() function.

@@ -2701,7 +2701,7 @@ the letter's counter. Then C<(*FAIL)> does what it says, and
 the regexp  engine proceeds according to the book: as long as the end of
 the string  hasn't been reached, the position is advanced before looking
 for another vowel. Thus, match or no match makes no difference, and the
-regexp engine proceeds until the the entire string has been inspected.
+regexp engine proceeds until the entire string has been inspected.
 (It's remarkable that an alternative solution using something like
 
    $count{lc($_)}++ for split('', "supercalifragilisticexpialidoceous");

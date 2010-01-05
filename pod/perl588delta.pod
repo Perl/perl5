@@ -1472,7 +1472,7 @@ Trailing spaces are now trimmed from C<$!> and C<$^E>.
 
 =item *
 
-Operations that require perl to read a process' list of groups, such as reads
+Operations that require perl to read a process's list of groups, such as reads
 of C<$(> and C<$)>, now dynamically allocate memory rather than using a
 fixed sized array. The fixed size array could cause C stack exhaustion on
 systems configured to use large numbers of groups.

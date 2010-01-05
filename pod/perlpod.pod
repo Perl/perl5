@@ -383,7 +383,7 @@ C<LE<lt>nameE<gt>>
 
 Link to a Perl manual page (e.g., C<LE<lt>Net::PingE<gt>>).  Note
 that C<name> should not contain spaces.  This syntax
-is also occasionally used for references to UNIX man pages, as in
+is also occasionally used for references to Unix man pages, as in
 C<LE<lt>crontab(5)E<gt>>.
 
 =item *

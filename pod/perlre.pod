@@ -1344,7 +1344,7 @@ otherwise stated the ARG argument is optional; in some cases, it is
 forbidden.
 
 Any pattern containing a special backtracking verb that allows an argument
-has the special behaviour that when executed it sets the current packages'
+has the special behaviour that when executed it sets the current package's
 C<$REGERROR> and C<$REGMARK> variables. When doing so the following
 rules apply:
 

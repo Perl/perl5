@@ -1149,7 +1149,7 @@ file. This eliminates a potential race condition [RT #60904].
 
 =item *
 
-On some UNIX systems, the value in C<$?> would not have the top bit set
+On some Unix systems, the value in C<$?> would not have the top bit set
 (C<$? & 128>) even if the child core dumped.
 
 =item *

@@ -103,7 +103,7 @@ It even includes limited support for Windows.
 
 However, using the code requires that you have a working C compiler
 and can use it to build and install a CPAN module.  Here's a solution
-using the standard C<POSIX> module, which is already on your systems
+using the standard C<POSIX> module, which is already on your system
 (assuming your system supports POSIX).
 
 	use HotKey;
@@ -389,7 +389,7 @@ C<IPC::Open3>, C<IPC::Run>, C<Parallel::Jobs>, C<Parallel::ForkManager>, C<POE>,
 C<Proc::Background>, and C<Win32::Process>. There are many other modules you
 might use, so check those namespaces for other options too.
 
-If you are on a unix-like system, you might be able to get away with a
+If you are on a Unix-like system, you might be able to get away with a
 system call where you put an C<&> on the end of the command:
 
 	system("cmd &")
@@ -494,7 +494,7 @@ the VMS equivalent is C<set time>.
 However, if all you want to do is change your time zone, you can
 probably get away with setting an environment variable:
 
-	$ENV{TZ} = "MST7MDT";		   # unixish
+	$ENV{TZ} = "MST7MDT";		   # Unixish
 	$ENV{'SYS$TIMEZONE_DIFFERENTIAL'}="-5" # vms
 	system "trn comp.lang.perl.misc";
 
@@ -864,7 +864,7 @@ stuck, because Windows does not have an argc/argv-style API.
 =head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
 
 This happens only if your perl is compiled to use stdio instead of
-perlio, which is the default. Some (maybe all?) stdio's set error and
+perlio, which is the default. Some (maybe all?) stdios set error and
 eof flags that you may need to clear. The C<POSIX> module defines
 C<clearerr()> that you can use.  That is the technically correct way to
 do it.  Here are some less reliable workarounds:

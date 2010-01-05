@@ -271,7 +271,7 @@ modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
 
 The "inode change timestamp" (the C<-C> filetest) may really be the
-"creation timestamp" (which it is not in UNIX).
+"creation timestamp" (which it is not in Unix).
 
 VOS perl can emulate Unix filenames with C</> as path separator.  The
 native pathname characters greater-than, less-than, number-sign, and
@@ -281,10 +281,10 @@ S<RISC OS> perl can emulate Unix filenames with C</> as path
 separator, or go native and use C<.> for path separator and C<:> to
 signal filesystems and disk names.
 
-Don't assume UNIX filesystem access semantics: that read, write,
+Don't assume Unix filesystem access semantics: that read, write,
 and execute are all the permissions there are, and even if they exist,
 that their semantics (for example what do r, w, and x mean on
-a directory) are the UNIX ones.  The various UNIX/POSIX compatibility
+a directory) are the Unix ones.  The various Unix/POSIX compatibility
 layers usually try to make interfaces like chmod() work, but sometimes
 there simply is no good mapping.
 
@@ -714,7 +714,7 @@ is usually best to know what type of system you will be running
 under so that you can write code explicitly for that platform (or
 class of platforms).
 
-Don't assume the UNIX filesystem access semantics: the operating
+Don't assume the Unix filesystem access semantics: the operating
 system or the filesystem may be using some ACL systems, which are
 richer languages than the usual rwx.  Even if the rwx exist,
 their semantics might be different.
@@ -725,7 +725,7 @@ for race conditions-- someone or something might change the
 permissions between the permissions check and the actual operation.
 Just try the operation.)
 
-Don't assume the UNIX user and group semantics: especially, don't
+Don't assume the Unix user and group semantics: especially, don't
 expect the C<< $< >> and C<< $> >> (or the C<$(> and C<$)>) to work
 for switching identities (or memberships).
 
@@ -1020,7 +1020,7 @@ Unicode characters.  Characters that could be misinterpreted by the DCL
 shell or file parsing utilities need to be prefixed with the C<^>
 character, or replaced with hexadecimal characters prefixed with the
 C<^> character.  Such prefixing is only needed with the pathnames are
-in VMS format in applications.  Programs that can accept the UNIX format
+in VMS format in applications.  Programs that can accept the Unix format
 of pathnames do not need the escape characters.  The maximum length for
 filenames is 255 characters.  The ODS-5 file system can handle both
 a case preserved and a case sensitive mode.
@@ -1031,34 +1031,34 @@ Support for the extended file specifications is being done as optional
 settings to preserve backward compatibility with Perl scripts that
 assume the previous VMS limitations.
 
-In general routines on VMS that get a UNIX format file specification
-should return it in a UNIX format, and when they get a VMS format
+In general routines on VMS that get a Unix format file specification
+should return it in a Unix format, and when they get a VMS format
 specification they should return a VMS format unless they are documented
 to do a conversion.
 
 For routines that generate return a file specification, VMS allows setting
 if the C library which Perl is built on if it will be returned in VMS
-format or in UNIX format.
+format or in Unix format.
 
 With the ODS-2 file system, there is not much difference in syntax of
-filenames without paths for VMS or UNIX.  With the extended character
+filenames without paths for VMS or Unix.  With the extended character
 set available with ODS-5 there can be a significant difference.
 
 Because of this, existing Perl scripts written for VMS were sometimes
-treating VMS and UNIX filenames interchangeably.  Without the extended
+treating VMS and Unix filenames interchangeably.  Without the extended
 character set enabled, this behavior will mostly be maintained for
 backwards compatibility.
 
 When extended characters are enabled with ODS-5, the handling of
-UNIX formatted file specifications is to that of a UNIX system.
+Unix formatted file specifications is to that of a Unix system.
 
 VMS file specifications without extensions have a trailing dot.  An
-equivalent UNIX file specification should not show the trailing dot.
+equivalent Unix file specification should not show the trailing dot.
 
 The result of all of this, is that for VMS, for portable scripts, you
 can not depend on Perl to present the filenames in lowercase, to be
 case sensitive, and that the filenames could be returned in either
-UNIX or VMS format.
+Unix or VMS format.
 
 And if a routine returns a file specification, unless it is intended to
 convert it, it should return it in the same format as it found it.
@@ -1073,7 +1073,7 @@ return F<a.> when VMS is (though that file could be opened with
 C<open(FH, 'A')>).
 
 With support for extended file specifications and if C<opendir> was
-given a UNIX format directory, a file named F<A.;5> will return F<a>
+given a Unix format directory, a file named F<A.;5> will return F<a>
 and optionally in the exact case on the disk.  When C<opendir> is given
 a VMS format directory, then C<readdir> should return F<a.>, and
 again with the optionally the exact case.
@@ -1590,7 +1590,7 @@ Does not automatically flush output handles on some platforms.
 
 =item exit
 
-Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+Emulates Unix exit() (which considers C<exit 1> to indicate an error) by
 mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
 with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
 function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
@@ -1885,7 +1885,7 @@ Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 =item sockatmark
 
 A relatively recent addition to socket functions, may not
-be implemented even in UNIX platforms.
+be implemented even in Unix platforms.
 
 =item socketpair
 

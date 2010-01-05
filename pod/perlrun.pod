@@ -566,7 +566,7 @@ folks use it for their backup files:
     $ perl -pi~ -e 's/foo/bar/' file1 file2 file3...
 
 Note that because B<-i> renames or deletes the original file before
-creating a new file of the same name, UNIX-style soft and hard links will
+creating a new file of the same name, Unix-style soft and hard links will
 not be preserved.
 
 Finally, the B<-i> switch does not impede execution when no
@@ -946,7 +946,7 @@ locations are automatically included if they exist (this lookup
 being done at interpreter startup time.)
 
 If PERL5LIB is not defined, PERLLIB is used.  Directories are separated
-(like in PATH) by a colon on unixish platforms and by a semicolon on
+(like in PATH) by a colon on Unixish platforms and by a semicolon on
 Windows (the proper path separator being given by the command C<perl
 -V:path_sep>).
 
@@ -978,7 +978,7 @@ layer specification strings (which is also used to decode the PERLIO
 environment variable) treats the colon as a separator.
 
 An unset or empty PERLIO is equivalent to the default set of layers for
-your platform, for example C<:unix:perlio> on UNIX-like systems
+your platform, for example C<:unix:perlio> on Unix-like systems
 and C<:unix:crlf> on Windows and other DOS-like systems.
 
 The list becomes the default for I<all> perl's IO. Consequently only built-in
@@ -1072,7 +1072,7 @@ buggy in this release.
 
 On all platforms the default set of layers should give acceptable results.
 
-For UNIX platforms that will equivalent of "unix perlio" or "stdio".
+For Unix platforms that will equivalent of "unix perlio" or "stdio".
 Configure is setup to prefer "stdio" implementation if system's library
 provides for fast access to the buffer, otherwise it uses the "unix perlio"
 implementation.
@@ -1097,7 +1097,7 @@ X<PERLIO_DEBUG>
 
 If set to the name of a file or device then certain operations of PerlIO
 sub-system will be logged to that file (opened as append). Typical uses
-are UNIX:
+are Unix:
 
    PERLIO_DEBUG=/dev/tty perl script ...
 

@@ -425,7 +425,7 @@ Numerous bugfixes catch small issues caused by the recently-added Lexer API.
 
 =item *
 
-Smart match against C<@_> sometimes gave false negatives negatives. [perl #71078]
+Smart match against C<@_> sometimes gave false negatives. [perl #71078]
 
 =item *
 

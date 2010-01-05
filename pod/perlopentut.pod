@@ -449,7 +449,7 @@ be 0777, and for anything else, 0666.
 Why so permissive?  Well, it isn't really.  The MASK will be modified
 by your process's current C<umask>.  A umask is a number representing
 I<disabled> permissions bits; that is, bits that will not be turned on
-in the created files' permissions field.
+in the created file's permissions field.
 
 For example, if your C<umask> were 027, then the 020 part would
 disable the group from writing, and the 007 part would disable others

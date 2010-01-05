@@ -397,7 +397,7 @@ Configure, build and installation process, as well as the overall
 portability of the core code rests with the Configure pumpkin -
 others help out with individual operating systems.
 
-The three files that fall under his/her resposibility are Configure,
+The three files that fall under his/her responsibility are Configure,
 config_h.SH, and Porting/Glossary (and a whole bunch of small related
 files that are less important here). The Configure pumpkin decides how
 patches to these are dealt with. Currently, the Configure pumpkin will
@@ -2598,7 +2598,7 @@ not perfect, because the below is a compile-time check):
   #endif
 
 How does the HAS_QUUX become defined where it needs to be?  Well, if
-Foonix happens to be UNIXy enough to be able to run the Configure
+Foonix happens to be Unixy enough to be able to run the Configure
 script, and Configure has been taught about detecting and testing
 quux(), the HAS_QUUX will be correctly defined.  In other platforms,
 the corresponding configuration step will hopefully do the same.
@@ -2699,7 +2699,7 @@ and for Bourne-type shells:
     PERL_DESTRUCT_LEVEL=2
     export PERL_DESTRUCT_LEVEL
 
-or in UNIXy environments you can also use the C<env> command:
+or in Unixy environments you can also use the C<env> command:
 
     env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 
@@ -3010,7 +3010,7 @@ results.
 
 =head2 Gprof Profiling
 
-gprof is a profiling tool available in many UNIX platforms,
+gprof is a profiling tool available in many Unix platforms,
 it uses F<statistical time-sampling>.
 
 You can build a profiled version of perl called "perl.gprof" by

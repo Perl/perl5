@@ -718,7 +718,7 @@ the pipe and expecting an EOF will never receive it, and therefore
 never exit.  A single process closing a pipe is not enough to close it;
 the last process with the pipe open must close it for it to read EOF.
 
-There are some features built-in to unix to help prevent this most of
+Certain built-in Unix features help prevent this most of
 the time.  For instance, filehandles have a 'close on exec' flag (set
 I<en masse> with Perl using the C<$^F> L<perlvar>), so that any
 filehandles which you didn't explicitly route to the STDIN, STDOUT or

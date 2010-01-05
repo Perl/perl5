@@ -116,7 +116,7 @@ cash.
 
 =head2 Improve the coverage of the core tests
 
-Use Devel::Cover to ascertain the core modules's test coverage, then add
+Use Devel::Cover to ascertain the core modules' test coverage, then add
 tests that are currently missing.
 
 =head2 test B
@@ -1098,7 +1098,7 @@ in fact, all of L<perlport> is.)
 This has actually already been implemented (but only for Win32),
 take a look at F<iperlsys.h> and F<win32/perlhost.h>.  While all Win32
 variants go through a set of "vtables" for operating system access,
-non-Win32 systems currently go straight for the POSIX/UNIX-style
+non-Win32 systems currently go straight for the POSIX/Unix-style
 system/library call.  Similar system as for Win32 should be
 implemented for all platforms.  The existing Win32 implementation
 probably does not need to survive alongside this proposed new

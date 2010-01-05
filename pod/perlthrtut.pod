@@ -366,7 +366,7 @@ threading, or for that matter, to most other threading systems out there,
 is that by default, no data is shared. When a new Perl thread is created,
 all the data associated with the current thread is copied to the new
 thread, and is subsequently private to that new thread!
-This is similar in feel to what happens when a UNIX process forks,
+This is similar in feel to what happens when a Unix process forks,
 except that in this case, the data is just copied to a different part of
 memory within the same process rather than a real fork taking place.
 
@@ -739,7 +739,7 @@ Semaphores with counters greater than one are also useful for
 establishing quotas.  Say, for example, that you have a number of
 threads that can do I/O at once.  You don't want all the threads
 reading or writing at once though, since that can potentially swamp
-your I/O channels, or deplete your process' quota of filehandles.  You
+your I/O channels, or deplete your process's quota of filehandles.  You
 can use a semaphore initialized to the number of concurrent I/O
 requests (or open files) that you want at any one time, and have your
 threads quietly block and unblock themselves.
@@ -1030,7 +1030,7 @@ changing uids and gids.
 
 Thinking of mixing C<fork()> and threads?  Please lie down and wait
 until the feeling passes.  Be aware that the semantics of C<fork()> vary
-between platforms.  For example, some UNIX systems copy all the current
+between platforms.  For example, some Unix systems copy all the current
 threads into the child process, while others only copy the thread that
 called C<fork()>. You have been warned!
 
@@ -1161,7 +1161,7 @@ Dan Sugalski E<lt>dan@sidhe.org<gt>
 
 Slightly modified by Arthur Bergman to fit the new thread model/module.
 
-Reworked slightly by Jˆrg Walter E<lt>jwalt@cpan.org<gt> to be more concise
+Reworked slightly by Jörg Walter E<lt>jwalt@cpan.org<gt> to be more concise
 about thread-safety of Perl code.
 
 Rearranged slightly by Elizabeth Mattijsen E<lt>liz@dijkmat.nl<gt> to put

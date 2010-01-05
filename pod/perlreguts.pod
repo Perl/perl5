@@ -20,7 +20,7 @@ the regex engine, or understand how the regex engine works. Readers of
 this document are expected to understand perl's regex syntax and its
 usage in detail. If you want to learn about the basics of Perl's
 regular expressions, see L<perlre>. And if you want to replace the
-regex engine with your own see see L<perlreapi>.
+regex engine with your own, see L<perlreapi>.
 
 =head1 OVERVIEW
 
@@ -222,7 +222,7 @@ always be so.
 =item *
 
 There is the "next regop" from a given regop/regnode. This is the
-regop physically located after the the current one, as determined by
+regop physically located after the current one, as determined by
 the size of the current regop. This is often useful, such as when
 dumping the structure we use this order to traverse. Sometimes the code
 assumes that the "next regnode" is the same as the "next regop", or in
@@ -624,13 +624,13 @@ interpreter.
 The two entry points are C<re_intuit_start()> and C<pregexec()>. These routines
 have a somewhat incestuous relationship with overlap between their functions,
 and C<pregexec()> may even call C<re_intuit_start()> on its own. Nevertheless
-other parts of the the perl source code may call into either, or both.
+other parts of the perl source code may call into either, or both.
 
 Execution of the interpreter itself used to be recursive, but thanks to the
 efforts of Dave Mitchell in the 5.9.x development track, that has changed: now an
 internal stack is maintained on the heap and the routine is fully
 iterative. This can make it tricky as the code is quite conservative
-about what state it stores, with the result that that two consecutive lines in the
+about what state it stores, with the result that two consecutive lines in the
 code can actually be running in totally different contexts due to the
 simulated recursion.
 
