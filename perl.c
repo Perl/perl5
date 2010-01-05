@@ -1678,6 +1678,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
+#  ifdef USE_ATTRIBUTES_FOR_PERLIO
+			     " USE_ATTRIBUTES_FOR_PERLIO"
+#  endif
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
 #  endif	       
