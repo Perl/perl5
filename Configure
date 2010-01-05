@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Fri Nov  6 07:43:05 CET 2009 [metaconfig 3.5 PL0]
+# Generated on Tue Jan  5 09:34:08 CET 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -58,7 +58,7 @@ true || exec sh $0 $argv:q
 rm -f c1$$ c2$$
 
 if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
-	cat >&4 <<EOF
+	cat <<EOF
 ***
 *** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
 *** Configure that well.  (Plan 9 is close to UNIX but not close enough.)
@@ -70,7 +70,7 @@ EOF
 fi
 
 if test ! -c /dev/null ; then
-	cat >&4 <<EOF
+	cat <<EOF
 ***
 *** I'm sorry, but /dev/null appears to be a file rather than a device.
 *** Please consult your operating sytem's notes for making a device
@@ -1232,6 +1232,7 @@ usethreads=''
 incpath=''
 mips_type=''
 usrinc=''
+vaproto=''
 d_vendorarch=''
 installvendorarch=''
 vendorarch=''
@@ -21210,6 +21211,21 @@ case "$usesitecustomize" in
 	;;
     esac
 
+: see if prototypes support variable argument declarations
+echo " "
+case "$prototype$i_stdarg" in
+$define$define)
+	echo "It appears we'll be able to prototype varargs functions." >&4
+	val="$define"
+	;;
+*)
+	echo "Too bad... We won't be using prototyped varargs functions..." >&4
+	val="$undef"
+	;;
+esac
+set vaproto
+eval $setvar
+
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -23279,6 +23295,7 @@ uvsize='$uvsize'
 uvtype='$uvtype'
 uvuformat='$uvuformat'
 uvxformat='$uvxformat'
+vaproto='$vaproto'
 vendorarch='$vendorarch'
 vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'
