@@ -1652,7 +1652,7 @@ S_Internals_V(pTHX_ CV *cv)
 			     " DEBUGGING"
 #  endif
 #  ifdef NO_MATHOMS
-                            " NO_MATHOMS"
+			     " NO_MATHOMS"
 #  endif
 #  ifdef PERL_DISABLE_PMC
 			     " PERL_DISABLE_PMC"
@@ -1678,11 +1678,14 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
-#  ifdef USE_SITECUSTOMIZE
-			     " USE_SITECUSTOMIZE"
-#  endif	       
+#  ifdef USE_ATTRIBUTES_FOR_PERLIO
+			     " USE_ATTRIBUTES_FOR_PERLIO"
+#  endif
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
+#  endif	       
+#  ifdef USE_SITECUSTOMIZE
+			     " USE_SITECUSTOMIZE"
 #  endif	       
 	;
     PERL_UNUSED_ARG(cv);

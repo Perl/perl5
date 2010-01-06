@@ -559,7 +559,11 @@ all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) miniperl $(generated_pods) $(private) $(un
 
 .PHONY: all translators utilities
 
-lib/Config_git.pl git_version.h: $(MINIPERL_EXE) make_patchnum.pl
+# Both git_version.h and lib/Config_git.pl are built
+# by make_patchnum.pl.
+git_version.h: lib/Config_git.pl
+
+lib/Config_git.pl: $(MINIPERL_EXE) make_patchnum.pl
 	$(MINIPERL) make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes

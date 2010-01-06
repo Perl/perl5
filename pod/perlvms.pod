@@ -348,15 +348,14 @@ argument to the C<system> operator (see below).  In this case,
 Perl will wait for the subprocess to complete before continuing. 
 
 The mailbox (MBX) that perl can create to communicate with a pipe
-defaults to a buffer size of 512.  The default buffer size is
-adjustable via the logical name PERL_MBX_SIZE provided that the
-value falls between 128 and the SYSGEN parameter MAXBUF inclusive.
-For example, to double the MBX size from the default within
-a Perl program, use C<$ENV{'PERL_MBX_SIZE'} = 1024;> and then
-open and use pipe constructs.  An alternative would be to issue
-the command:
+defaults to a buffer size of 8192 on 64-bit systems, 512 on VAX.  The
+default buffer size is adjustable via the logical name PERL_MBX_SIZE
+provided that the value falls between 128 and the SYSGEN parameter
+MAXBUF inclusive.  For example, to set the mailbox size to 32767 use
+C<$ENV{'PERL_MBX_SIZE'} = 32767;> and then open and use pipe constructs. 
+An alternative would be to issue the command:
 
-    $ Define PERL_MBX_SIZE 1024
+    $ Define PERL_MBX_SIZE 32767
 
 before running your wide record pipe program.  A larger value may
 improve performance at the expense of the BYTLM UAF quota.
