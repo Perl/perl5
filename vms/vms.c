@@ -2885,7 +2885,11 @@ int test_unix_status;
 
 
 /* default piping mailbox size */
-#define PERL_BUFSIZ        512
+#ifdef __VAX
+#  define PERL_BUFSIZ        512
+#else
+#  define PERL_BUFSIZ        8192
+#endif
 
 
 static void
