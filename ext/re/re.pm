@@ -203,11 +203,13 @@ other transformations.
 =head2 'eval' mode
 
 When C<use re 'eval'> is in effect, a regexp is allowed to contain
-C<(?{ ... })> zero-width assertions even if the regular expression contains
+C<(?{ ... })> zero-width assertions and C<(??{ ... })> postponed
+subexpressions, even if the regular expression contains
 variable interpolation.  That is normally disallowed, since it is a
 potential security risk.  Note that this pragma is ignored when the regular
 expression is obtained from tainted data, i.e.  evaluation is always
-disallowed with tainted regular expressions.  See L<perlre/(?{ code })>.
+disallowed with tainted regular expressions.  See L<perlre/(?{ code })> 
+and L<perlre/(?{ code })>.
 
 For the purpose of this pragma, interpolation of precompiled regular
 expressions (i.e., the result of C<qr//>) is I<not> considered variable
@@ -216,7 +218,7 @@ interpolation.  Thus:
     /foo${pat}bar/
 
 I<is> allowed if $pat is a precompiled regular expression, even
-if $pat contains C<(?{ ... })> assertions.
+if $pat contains C<(?{ ... })> assertions or C<(??{ ... })> subexpressions.
 
 =head2 'debug' mode
 

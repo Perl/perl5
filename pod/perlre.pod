@@ -1035,6 +1035,12 @@ The following pattern matches a parenthesized group:
 See also C<(?PARNO)> for a different, more efficient way to accomplish
 the same task.
 
+For reasons of security, this construct is forbidden if the regular
+expression involves run-time interpolation of variables, unless the
+perilous C<use re 'eval'> pragma has been used (see L<re>), or the
+variables contain results of C<qr//> operator (see
+L<perlop/"qr/STRING/imosx">).
+
 Because perl's regex engine is not currently re-entrant, delayed
 code may not invoke the regex engine either directly with C<m//> or C<s///>),
 or indirectly with functions such as C<split>.
