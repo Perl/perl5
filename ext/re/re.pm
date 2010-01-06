@@ -1,6 +1,6 @@
 package re;
 
-# pragma for controlling the regex engine
+# pragma for controlling the regexp engine
 use strict;
 use warnings;
 
@@ -80,7 +80,7 @@ sub _load_unload {
 	# the last time it was called.
 
 	# install() returns an integer, which if casted properly
-	# in C resolves to a structure containing the regex
+	# in C resolves to a structure containing the regexp
 	# hooks. Setting it to a random integer will guarantee
 	# segfaults.
 	$^H{regcomp} = install();
@@ -195,15 +195,15 @@ re - Perl pragma to alter regular expression behaviour
 =head2 'taint' mode
 
 When C<use re 'taint'> is in effect, and a tainted string is the target
-of a regex, the regex memories (or values returned by the m// operator
-in list context) are tainted.  This feature is useful when regex operations
+of a regexp, the regexp memories (or values returned by the m// operator
+in list context) are tainted.  This feature is useful when regexp operations
 on tainted data aren't meant to extract safe substrings, but to perform
 other transformations.
 
 =head2 'eval' mode
 
-When C<use re 'eval'> is in effect, a regex is allowed to contain
-C<(?{ ... })> zero-width assertions even if regular expression contains
+When C<use re 'eval'> is in effect, a regexp is allowed to contain
+C<(?{ ... })> zero-width assertions even if the regular expression contains
 variable interpolation.  That is normally disallowed, since it is a
 potential security risk.  Note that this pragma is ignored when the regular
 expression is obtained from tainted data, i.e.  evaluation is always
@@ -326,7 +326,7 @@ states as well. This output from this can be quite large.
 =item OPTIMISEM
 
 Enable enhanced optimisation debugging and start point optimisations.
-Probably not useful except when debugging the regex engine itself.
+Probably not useful except when debugging the regexp engine itself.
 
 =item OFFSETS
 
@@ -408,7 +408,7 @@ the pattern was compiled.
 
   my ($pat, $mods) = regexp_pattern($ref);
 
-In scalar context it returns the same as perl would when strigifying a raw
+In scalar context it returns the same as perl would when stringifying a raw
 C<qr//> with the same pattern inside.  If the argument is not a compiled
 reference then this routine returns false but defined in scalar context,
 and the empty list in list context. Thus the following
@@ -423,7 +423,7 @@ or blessing of the object.
 =item regmust($ref)
 
 If the argument is a compiled regular expression as returned by C<qr//>,
-then this function returns what the optimiser consiers to be the longest
+then this function returns what the optimiser considers to be the longest
 anchored fixed string and longest floating fixed string in the pattern.
 
 A I<fixed string> is defined as being a substring that must appear for the
