@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 83;
+use Test::More tests => 84;
 use Config ();
 
 use B::Deparse;
@@ -614,4 +614,10 @@ our @a;
 my @b;
 @a = reverse @a;
 @b = reverse @b;
+();
+####
+my($r, $s, @a);
+@a = split(/foo/, $s, 0);
+$r = qr/foo/;
+@a = split(/$r/, $s, 0);
 ();

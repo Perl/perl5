@@ -23,7 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.93;
+$VERSION = 0.94;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -4311,10 +4311,11 @@ sub pp_split {
     }
 
     # handle special case of split(), and split(' ') that compiles to /\s+/
+    # Under 5.10, the reflags may be undef if the split regexp isn't a constant
     $kid = $op->first;
     if ( $kid->flags & OPf_SPECIAL
 	 and ( $] < 5.009 ? $kid->pmflags & PMf_SKIPWHITE()
-	      : $kid->reflags & RXf_SKIPWHITE() ) ) {
+	      : ($kid->reflags || 0) & RXf_SKIPWHITE() ) ) {
 	$exprs[0] = "' '";
     }
 
