@@ -9,7 +9,7 @@ BEGIN {
 	require './test.pl';
 }
 
-plan tests => 40;
+plan tests => 42;
 
 use_ok('PerlIO');
 
@@ -97,14 +97,34 @@ ok(close($utffh));
         if !$Config{d_mkstemp}
         || $^O eq 'VMS' || $^O eq 'MSwin32' || $^O eq 'os2';
       local $ENV{TMPDIR} = $nonexistent;
+
+      # hardcoded default temp path
+      my $perlio_tmp_file_glob = '/tmp/PerlIO_??????';
+
+      my @before = glob $perlio_tmp_file_glob;
+
       ok( open(my $x,"+<",undef), 'TMPDIR honored by magic temp file via 3 arg open with undef - works if TMPDIR points to a non-existent dir');
+
+      my @after = glob $perlio_tmp_file_glob;
+      is( "@after", "@before", "No tmp files leaked");
+
+      unlink_new(\@before, \@after);
 
       mkdir $ENV{TMPDIR};
       ok(open(my $x,"+<",undef), 'TMPDIR honored by magic temp file via 3 arg open with undef - works if TMPDIR points to an existent dir');
 
-      # hardcoded default temp path
-      unlink </tmp/PerlIO_*>;
+      @after = glob $perlio_tmp_file_glob;
+      is( "@after", "@before", "No tmp files leaked");
+
+      unlink_new(\@before, \@after);
     }
+}
+
+sub unlink_new {
+    my ($before, $after) = @_;
+    my %before;
+    @before{@$before} = ();
+    unlink grep {!exists $before{$_}} @$after;
 }
 
 # in-memory open

@@ -5157,16 +5157,18 @@ PerlIO_tmpfile(void)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = PL_tainting ? NULL : PerlEnv_getenv("TMPDIR");
-     SV * const sv = tmpdir && *tmpdir ? newSVpv(tmpdir, 0) : NULL;
+     SV * sv;
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
-     if (sv) {
+     if (tmpdir && *tmpdir) {
 	 /* if TMPDIR is set and not empty, we try that first */
+	 sv = newSVpv(tmpdir, 0);
 	 sv_catpv(sv, tempname + 4);
 	 fd = mkstemp(SvPVX(sv));
      }
      if (fd < 0) {
+	 sv = NULL;
 	 /* else we try /tmp */
 	 fd = mkstemp(tempname);
      }
