@@ -101,6 +101,9 @@ ok(close($utffh));
 
       mkdir $ENV{TMPDIR};
       ok(open(my $x,"+<",undef), 'TMPDIR honored by magic temp file via 3 arg open with undef - works if TMPDIR points to an existent dir');
+
+      # hardcoded default temp path
+      unlink </tmp/PerlIO_*>;
     }
 }
 
