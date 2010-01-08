@@ -11854,7 +11854,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
 
-#    ifdef DEBUGGING
+#  ifdef DEBUGGING
     PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
     PL_curcop = NULL;
@@ -11867,9 +11867,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sig_pending = 0;
     PL_parser = NULL;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
-#    else	/* !DEBUGGING */
+#  else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
-#    endif	/* DEBUGGING */
+#  endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
     param->flags = flags;
     param->proto_perl = proto_perl;
