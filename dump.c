@@ -1566,12 +1566,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     s = SvPVX_const(d);
 
 #ifdef DEBUG_LEAKING_SCALARS
-    Perl_dump_indent(aTHX_ level, file, "ALLOCATED at %s:%d %s %s%s\n",
+    Perl_dump_indent(aTHX_ level, file,
+	"ALLOCATED at %s:%d %s %s%s; serial %"UVuf"\n",
 	sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
 	sv->sv_debug_line,
 	sv->sv_debug_inpad ? "for" : "by",
 	sv->sv_debug_optype ? PL_op_name[sv->sv_debug_optype]: "(none)",
-	sv->sv_debug_cloned ? " (cloned)" : "");
+	sv->sv_debug_cloned ? " (cloned)" : "",
+	sv->sv_debug_serial
+    );
 #endif
     Perl_dump_indent(aTHX_ level, file, "SV = ");
     if (type < SVt_LAST) {
