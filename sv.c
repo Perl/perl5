@@ -11810,27 +11810,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PerlInterpreter * const my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
 
     PERL_ARGS_ASSERT_PERL_CLONE_USING;
-
-    /* for each stash, determine whether its objects should be cloned */
-    S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
-    PERL_SET_THX(my_perl);
-
-#  ifdef DEBUGGING
-    PoisonNew(my_perl, 1, PerlInterpreter);
-    PL_op = NULL;
-    PL_curcop = NULL;
-    PL_markstack = 0;
-    PL_scopestack = 0;
-    PL_scopestack_name = 0;
-    PL_savestack = 0;
-    PL_savestack_ix = 0;
-    PL_savestack_max = -1;
-    PL_sig_pending = 0;
-    PL_parser = NULL;
-    Zero(&PL_debug_pad, 1, struct perl_debug_pad);
-#  else	/* !DEBUGGING */
-    Zero(my_perl, 1, PerlInterpreter);
-#  endif	/* DEBUGGING */
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
     CLONE_PARAMS clone_params;
@@ -11838,12 +11817,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PerlInterpreter * const my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
     PERL_ARGS_ASSERT_PERL_CLONE;
+#endif		/* PERL_IMPLICIT_SYS */
 
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
 
-#  ifdef DEBUGGING
+#ifdef DEBUGGING
     PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
     PL_curcop = NULL;
@@ -11856,10 +11836,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sig_pending = 0;
     PL_parser = NULL;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
-#  else	/* !DEBUGGING */
+#else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
-#  endif	/* DEBUGGING */
-#endif		/* PERL_IMPLICIT_SYS */
+#endif	/* DEBUGGING */
 
 #ifdef PERL_IMPLICIT_SYS
     /* host pointers */
