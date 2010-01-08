@@ -11831,17 +11831,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #  else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #  endif	/* DEBUGGING */
-
-    /* host pointers */
-    PL_Mem		= ipM;
-    PL_MemShared	= ipMS;
-    PL_MemParse		= ipMP;
-    PL_Env		= ipE;
-    PL_StdIO		= ipStd;
-    PL_LIO		= ipLIO;
-    PL_Dir		= ipD;
-    PL_Sock		= ipS;
-    PL_Proc		= ipP;
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
     CLONE_PARAMS clone_params;
@@ -11871,6 +11860,20 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Zero(my_perl, 1, PerlInterpreter);
 #  endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
+
+#ifdef PERL_IMPLICIT_SYS
+    /* host pointers */
+    PL_Mem		= ipM;
+    PL_MemShared	= ipMS;
+    PL_MemParse		= ipMP;
+    PL_Env		= ipE;
+    PL_StdIO		= ipStd;
+    PL_LIO		= ipLIO;
+    PL_Dir		= ipD;
+    PL_Sock		= ipS;
+    PL_Proc		= ipP;
+#endif		/* PERL_IMPLICIT_SYS */
+
     param->flags = flags;
     param->proto_perl = proto_perl;
 
