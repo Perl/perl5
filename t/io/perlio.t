@@ -93,7 +93,7 @@ ok(close($utffh));
     close OLDOUT;
 
     SKIP: {
-      skip("TMPDIR not honored on this platform", 2)
+      skip("TMPDIR not honored on this platform", 4)
         if !$Config{d_mkstemp}
         || $^O eq 'VMS' || $^O eq 'MSwin32' || $^O eq 'os2';
       local $ENV{TMPDIR} = $nonexistent;
