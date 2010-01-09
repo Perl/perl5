@@ -65,6 +65,11 @@ $Archive::Extract::WARN     = $Archive::Extract::WARN   = $Debug;
 
 diag( "\n\n*** DEBUG INFORMATION ENABLED ***\n\n" ) if $Debug;
 
+# Be as evil as possible to print
+$\ = "ORS_FLAG";
+$, = "OFS_FLAG";
+$" = "LISTSEP_FLAG";
+
 my $tmpl = {
     ### plain files
     'x.bz2' => {    programs    => [qw[bunzip2]],

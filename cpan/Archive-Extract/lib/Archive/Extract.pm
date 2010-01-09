@@ -41,7 +41,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.36';
+$VERSION            = '0.38';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -899,7 +899,7 @@ sub _gunzip_bin {
         $self->_error( $self->_no_buffer_content( $self->archive ) );
     }
 
-    print $fh $buffer if defined $buffer;
+    $self->_print($fh, $buffer) if defined $buffer;
 
     close $fh;
 
@@ -929,7 +929,7 @@ sub _gunzip_cz {
                             $self->_gunzip_to, $! ));
 
     my $buffer;
-    $fh->print($buffer) while $gz->gzread($buffer) > 0;
+    $self->_print($fh, $buffer) while $gz->gzread($buffer) > 0;
     $fh->close;
 
     ### set what files where extract, and where they went ###
@@ -974,7 +974,7 @@ sub _uncompress_bin {
         $self->_error( $self->_no_buffer_content( $self->archive ) );
     }
 
-    print $fh $buffer if defined $buffer;
+    $self->_print($fh, $buffer) if defined $buffer;
 
     close $fh;
 
@@ -1190,7 +1190,7 @@ sub _bunzip2_bin {
         $self->_error( $self->_no_buffer_content( $self->archive ) );
     }
     
-    print $fh $buffer if defined $buffer;
+    $self->_print($fh, $buffer) if defined $buffer;
 
     close $fh;
 
@@ -1292,7 +1292,7 @@ sub _unlzma_bin {
         $self->_error( $self->_no_buffer_content( $self->archive ) );
     }
 
-    print $fh $buffer if defined $buffer;
+    $self->_print($fh, $buffer) if defined $buffer;
 
     close $fh;
 
@@ -1324,7 +1324,7 @@ sub _unlzma_cz {
                                     $self->archive, $@));
     }
 
-    print $fh $buffer if defined $buffer;
+    $self->_print($fh, $buffer) if defined $buffer;
 
     close $fh;
 
@@ -1340,6 +1340,15 @@ sub _unlzma_cz {
 # Error code
 #
 #################################
+
+# For printing binaries that avoids interfering globals
+sub _print {
+    my $self = shift;
+    my $fh = shift;
+
+    local( $\, $", $, ) = ( undef, ' ', '' );
+    return print $fh @_;
+}
 
 sub _error {
     my $self    = shift;
