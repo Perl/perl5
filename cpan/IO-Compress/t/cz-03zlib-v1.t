@@ -23,16 +23,16 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 390 ;
+        $count = 445 ;
     }
     else {
-        $count = 401 ;
+        $count = 456 ;
     }
 
 
     plan tests => $count + $extra ;
 
-    use_ok('Compress::Zlib', 2) ;
+    use_ok('Compress::Zlib', qw(:ALL memGunzip memGzip zlib_version));
     use_ok('IO::Compress::Gzip::Constants') ;
 
     use_ok('IO::Compress::Gzip', qw($GzipError)) ;
@@ -47,8 +47,8 @@ EOM
 my $len   = length $hello ;
 
 # Check zlib_version and ZLIB_VERSION are the same.
-is Compress::Zlib::zlib_version, ZLIB_VERSION, 
-    "ZLIB_VERSION matches Compress::Zlib::zlib_version" ;
+is zlib_version, ZLIB_VERSION, 
+    "ZLIB_VERSION matches zlib_version" ;
 
 # generate a long random string
 my $contents = '' ;
@@ -344,8 +344,9 @@ EOM
 
 
     # create an in-memory gzip file
-    my $dest = Compress::Zlib::memGzip($buffer) ;
+    my $dest = memGzip($buffer) ;
     ok length $dest ;
+    is $gzerrno, 0;
 
     # write it to disk
     ok open(FH, ">$name") ;
@@ -366,14 +367,16 @@ EOM
     1 while unlink $name ;
 
     # now check that memGunzip can deal with it.
-    my $ungzip = Compress::Zlib::memGunzip($dest) ;
+    my $ungzip = memGunzip($dest) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
  
     # now do the same but use a reference 
 
-    $dest = Compress::Zlib::memGzip(\$buffer) ; 
+    $dest = memGzip(\$buffer) ; 
     ok length $dest ;
+    is $gzerrno, 0;
 
     # write it to disk
     ok open(FH, ">$name") ;
@@ -392,103 +395,121 @@ EOM
  
     # now check that memGunzip can deal with it.
     my $keep = $dest;
-    $ungzip = Compress::Zlib::memGunzip(\$dest) ;
+    $ungzip = memGunzip(\$dest) ;
+    is $gzerrno, 0;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
 
     # check memGunzip can cope with missing gzip trailer
     my $minimal = substr($keep, 0, -1) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -2) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -3) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -4) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -5) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -6) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -7) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -8) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok defined $ungzip ;
     ok $buffer eq $ungzip ;
+    is $gzerrno, 0;
 
     $minimal = substr($keep, 0, -9) ;
-    $ungzip = Compress::Zlib::memGunzip(\$minimal) ;
+    $ungzip = memGunzip(\$minimal) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
  
     1 while unlink $name ;
 
     # check corrupt header -- too short
     $dest = "x" ;
-    my $result = Compress::Zlib::memGunzip($dest) ;
+    my $result = memGunzip($dest) ;
     ok !defined $result ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # check corrupt header -- full of junk
     $dest = "x" x 200 ;
-    $result = Compress::Zlib::memGunzip($dest) ;
+    $result = memGunzip($dest) ;
     ok !defined $result ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt header - 1st byte wrong
     my $bad = $keep ;
     substr($bad, 0, 1) = "\xFF" ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt header - 2st byte wrong
     $bad = $keep ;
     substr($bad, 1, 1) = "\xFF" ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt header - method not deflated
     $bad = $keep ;
     substr($bad, 2, 1) = "\xFF" ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt header - reserverd bits used
     $bad = $keep ;
     substr($bad, 3, 1) = "\xFF" ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt trailer - length wrong
     $bad = $keep ;
     substr($bad, -8, 4) = "\xFF" x 4 ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     # corrupt trailer - CRC wrong
     $bad = $keep ;
     substr($bad, -4, 4) = "\xFF" x 4 ;
-    $ungzip = Compress::Zlib::memGunzip(\$bad) ;
+    $ungzip = memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 }
 
 {
@@ -535,7 +556,8 @@ EOM
 
     my $compr = readFile($name);
     ok length $compr ;
-    my $unc = Compress::Zlib::memGunzip($compr) ;
+    my $unc = memGunzip($compr) ;
+    is $gzerrno, 0;
     ok defined $unc ;
     ok $buffer eq $unc ;
     1 while unlink $name ;
@@ -897,10 +919,12 @@ if ($] >= 5.005)
     foreach (1 .. 20000)
       { $contents .= chr int rand 256 }
 
-    ok my $compressed = Compress::Zlib::memGzip(\$contents) ;
+    ok my $compressed = memGzip(\$contents) ;
+    is $gzerrno, 0;
 
     ok length $compressed > 4096 ;
-    ok my $out = Compress::Zlib::memGunzip(\$compressed) ;
+    ok my $out = memGunzip(\$compressed) ;
+    is $gzerrno, 0;
      
     ok $contents eq $out ;
     is length $out, length $contents ;
@@ -926,7 +950,8 @@ EOM
         my $buffer = $good ;
         substr($buffer, 0, 1) = 'x' ;
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
     }
 
     {
@@ -934,7 +959,8 @@ EOM
         my $buffer = $good ;
         substr($buffer, 1, 1) = "\xFF" ;
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
     }
 
     {
@@ -942,7 +968,8 @@ EOM
         my $buffer = $good ;
         substr($buffer, 2, 1) = 'x' ;
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
     }
 
     {
@@ -950,7 +977,8 @@ EOM
         my $buffer = $good ;
         substr($buffer, 3, 1) = "\xff";
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
     }
 
 }
@@ -970,7 +998,8 @@ EOM
 
     substr($truncated, $index) = '' ;
 
-    ok ! Compress::Zlib::memGunzip(\$truncated) ;
+    ok ! memGunzip(\$truncated) ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
 
 }
@@ -990,7 +1019,8 @@ EOM
 
     substr($truncated, $index) = '' ;
 
-    ok ! Compress::Zlib::memGunzip(\$truncated) ;
+    ok ! memGunzip(\$truncated) ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 }
 
 my $Comment = "comment" ;
@@ -1007,7 +1037,8 @@ EOM
     ok  $x->close ;
 
     substr($truncated, $index) = '' ;
-    ok ! Compress::Zlib::memGunzip(\$truncated) ;
+    ok ! memGunzip(\$truncated) ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 }
 
 for my $index ( GZIP_MIN_HEADER_SIZE ..  GZIP_MIN_HEADER_SIZE + GZIP_FHCRC_SIZE -1)
@@ -1024,7 +1055,8 @@ EOM
 
     substr($truncated, $index) = '' ;
 
-    ok ! Compress::Zlib::memGunzip(\$truncated) ;
+    ok ! memGunzip(\$truncated) ;
+    cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 }
 
 {
@@ -1046,9 +1078,10 @@ EOM
 
     ok defined $buffer ;
 
-    ok my $got = Compress::Zlib::memGunzip($buffer) 
+    ok my $got = memGunzip($buffer) 
         or diag "gzerrno is $gzerrno" ;
     is $got, $string ;
+    is $gzerrno, 0;
 }
 
 
@@ -1072,7 +1105,8 @@ EOM
 
         substr($buffer, $trim) = '';
 
-        ok my $u = Compress::Zlib::memGunzip(\$buffer) ;
+        ok my $u = memGunzip(\$buffer) ;
+        is $gzerrno, 0;
         ok $u eq $string;
 
     }
@@ -1082,7 +1116,8 @@ EOM
         my $buffer = $good ;
         substr($buffer, -4, 4) = pack('V', 1234);
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
     }
 
     {
@@ -1091,7 +1126,8 @@ EOM
         substr($buffer, -4, 4) = pack('V', 1234);
         substr($buffer, -8, 4) = pack('V', 1234);
 
-        ok ! Compress::Zlib::memGunzip(\$buffer) ;
+        ok ! memGunzip(\$buffer) ;
+        cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
     }
 }

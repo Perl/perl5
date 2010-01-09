@@ -1,5 +1,13 @@
 CHANGES
 -------
+  2.023 9 November 2009
+
+      * Removed redundant bzip2 source files from the bzip2-src directory.
+        [RT# 47225]
+
+      * Fixed instance where $[ should have been $] in t/01bzip2.t
+        Thanks to Robin Barker and zefram [RT #50764] for independantly
+        spotting the issue.
 
   2.021 30 August 2009
 

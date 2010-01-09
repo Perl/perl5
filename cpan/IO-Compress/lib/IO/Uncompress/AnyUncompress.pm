@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.021 qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.024 qw(createSelfTiedObject);
 
-use IO::Uncompress::Base 2.021 ;
+use IO::Uncompress::Base 2.024 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.022';
+$VERSION = '2.024';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,22 +27,22 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate 2.021 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.021 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.021 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.021 ;';
-   #eval ' use IO::Uncompress::Adapter::UnLzma 2.020 ;';
-   #eval ' use IO::Uncompress::Adapter::UnXz 2.020 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.024 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.024 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.024 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.024 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.020 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.020 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.021 ;';
-   eval ' use IO::Uncompress::UnLzop 2.021 ;';
-   eval ' use IO::Uncompress::Gunzip 2.021 ;';
-   eval ' use IO::Uncompress::Inflate 2.021 ;';
-   eval ' use IO::Uncompress::RawInflate 2.021 ;';
-   eval ' use IO::Uncompress::Unzip 2.021 ;';
-   eval ' use IO::Uncompress::UnLzf 2.021 ;';
-   #eval ' use IO::Uncompress::UnLzma 2.018 ;';
-   #eval ' use IO::Uncompress::UnXz 2.018 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.024 ;';
+   eval ' use IO::Uncompress::UnLzop 2.024 ;';
+   eval ' use IO::Uncompress::Gunzip 2.024 ;';
+   eval ' use IO::Uncompress::Inflate 2.024 ;';
+   eval ' use IO::Uncompress::RawInflate 2.024 ;';
+   eval ' use IO::Uncompress::Unzip 2.024 ;';
+   eval ' use IO::Uncompress::UnLzf 2.024 ;';
+   eval ' use IO::Uncompress::UnLzma 2.024 ;';
+   eval ' use IO::Uncompress::UnXz 2.024 ;';
 }
 
 sub new
@@ -60,7 +60,7 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common 2.021 qw(:Parse);
+    use IO::Compress::Base::Common 2.024 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ,
              'UnLzma'     => [1, 1, Parse_boolean,  0] ) ;
 }
@@ -108,39 +108,40 @@ sub mkUncomp
         }
      }
 
-#    if (defined $IO::Uncompress::UnLzma::VERSION && $got->value('UnLzma'))
-#    {
-#        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnLzma::mkUncompObject();
-#
-#        return $self->saveErrorString(undef, $errstr, $errno)
-#            if ! defined $obj;
-#
-#        *$self->{Uncomp} = $obj;
-#        
-#        my @possible = qw( UnLzma );
-#        #unshift @possible, 'RawInflate' 
-#        #    if $got->value('RawInflate');
-#
-#        if ( *$self->{Info} = $self->ckMagic( @possible ))
-#        {
-#            return 1;
-#        }
-#     }
-#
-#     if (defined $IO::Uncompress::UnXz::VERSION and
-#         $magic = $self->ckMagic('UnXz')) {
-#        *$self->{Info} = $self->readHeader($magic)
-#            or return undef ;
-#
-#        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnXz::mkUncompObject();
-#
-#        return $self->saveErrorString(undef, $errstr, $errno)
-#            if ! defined $obj;
-#
-#        *$self->{Uncomp} = $obj;
-#
-#         return 1;
-#     }
+    if (defined $IO::Uncompress::UnLzma::VERSION && $got->value('UnLzma'))
+    {
+        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnLzma::mkUncompObject();
+
+        return $self->saveErrorString(undef, $errstr, $errno)
+            if ! defined $obj;
+
+        *$self->{Uncomp} = $obj;
+        
+        my @possible = qw( UnLzma );
+        #unshift @possible, 'RawInflate' 
+        #    if $got->value('RawInflate');
+
+        if ( *$self->{Info} = $self->ckMagic( @possible ))
+        {
+            return 1;
+        }
+     }
+
+     if (defined $IO::Uncompress::UnXz::VERSION and
+         $magic = $self->ckMagic('UnXz')) {
+        *$self->{Info} = $self->readHeader($magic)
+            or return undef ;
+
+        my ($obj, $errstr, $errno) =
+            IO::Uncompress::Adapter::UnXz::mkUncompObject();
+
+        return $self->saveErrorString(undef, $errstr, $errno)
+            if ! defined $obj;
+
+        *$self->{Uncomp} = $obj;
+
+         return 1;
+     }
 
      if (defined $IO::Uncompress::Bunzip2::VERSION and
          $magic = $self->ckMagic('Bunzip2')) {
@@ -295,6 +296,10 @@ The formats supported are:
 
 =item lzf
 
+=item lzma
+
+=item xz
+
 =back
 
 The module will auto-detect which, if any, of the supported
@@ -445,7 +450,48 @@ Defaults to 0.
 
 =item C<< Append => 0|1 >>
 
-TODO
+The behaviour of this option is dependent on the type of output data
+stream.
+
+=over 5
+
+=item * A Buffer
+
+If C<Append> is enabled, all uncompressed data will be append to the end of
+the output buffer. Otherwise the output buffer will be cleared before any
+uncompressed data is written to it.
+
+=item * A Filename
+
+If C<Append> is enabled, the file will be opened in append mode. Otherwise
+the contents of the file, if any, will be truncated before any uncompressed
+data is written to it.
+
+=item * A Filehandle
+
+If C<Append> is enabled, the filehandle will be positioned to the end of
+the file via a call to C<seek> before any uncompressed data is
+written to it.  Otherwise the file pointer will not be moved.
+
+=back
+
+When C<Append> is specified, and set to true, it will I<append> all uncompressed 
+data to the output data stream.
+
+So when the output is a filehandle it will carry out a seek to the eof
+before writing any uncompressed data. If the output is a filename, it will be opened for
+appending. If the output is a buffer, all uncompressed data will be appened to
+the existing buffer.
+
+Conversely when C<Append> is not specified, or it is present and is set to
+false, it will operate as follows.
+
+When the output is a filename, it will truncate the contents of the file
+before writing any uncompressed data. If the output is a filehandle
+its position will not be changed. If the output is a buffer, it will be
+wiped before any uncompressed data is output.
+
+Defaults to 0.
 
 =item C<< MultiStream => 0|1 >>
 
@@ -676,6 +722,17 @@ When auto-detecting the compressed format, try to test for raw-deflate (RFC
 1951) content using the C<IO::Uncompress::RawInflate> module. 
 
 The reason this is not default behaviour is because RFC 1951 content can
+only be detected by attempting to uncompress it. This process is error
+prone and can result is false positives.
+
+Defaults to 0.
+
+=item C<< UnLzma => 0|1 >>
+
+When auto-detecting the compressed format, try to test for lzma_alone
+content using the C<IO::Uncompress::UnLzma> module. 
+
+The reason this is not default behaviour is because lzma_alone content can
 only be detected by attempting to uncompress it. This process is error
 prone and can result is false positives.
 
@@ -936,7 +993,7 @@ Same as doing this
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 
@@ -954,7 +1011,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2009 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

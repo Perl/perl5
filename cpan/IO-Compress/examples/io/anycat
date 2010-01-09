@@ -3,15 +3,15 @@
 use strict ;
 use warnings ;
 
-use IO::Uncompress::AnyInflate qw( anyinflate $AnyInflateError );
+use IO::Uncompress::AnyUncompress qw( anyuncompress $AnyUncompressError );
 
 @ARGV = '-' unless @ARGV ;
 
 foreach my $file (@ARGV) {
 
-    anyinflate $file       => '-',
+    anyuncompress $file       => '-',
                Transparent => 1,
                Strict      => 0,
-         or die "Cannot uncompress '$file': $AnyInflateError\n" ;
+         or die "Cannot uncompress '$file': $AnyUncompressError\n" ;
 
 }

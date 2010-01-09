@@ -16,7 +16,7 @@ use Carp ;
 sub title
 {
     #diag "" ; 
-    ok 1, $_[0] ;
+    ok(1, $_[0]) ;
     #diag "" ;
 }
 
@@ -476,6 +476,7 @@ sub anyUncompress
                     Append => 1, 
                     Transparent => 0, 
                     RawInflate => 1,
+                    UnLzma     => 1,
                     @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 
@@ -537,6 +538,7 @@ sub getHeaders
                 Append => 1, 
                 Transparent => 0, 
                 RawInflate => 1,
+                UnLzma     => 1,
                 @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 
@@ -647,7 +649,7 @@ sub getMultiValues
 {
     my $class = shift ;
 
-    return (0,0) if $class =~ /lzf/i;
+    return (0,0) if $class =~ /lzf|lzma/i;
     return (1,0);
 }
 

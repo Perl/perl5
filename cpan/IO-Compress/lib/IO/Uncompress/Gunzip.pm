@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.021 ;
+use IO::Uncompress::RawInflate 2.024 ;
 
-use Compress::Raw::Zlib 2.021 qw( crc32 ) ;
-use IO::Compress::Base::Common 2.021 qw(:Status createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.021 ;
-use IO::Compress::Zlib::Extra 2.021 ;
+use Compress::Raw::Zlib 2.024 qw( crc32 ) ;
+use IO::Compress::Base::Common 2.024 qw(:Status createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.024 ;
+use IO::Compress::Zlib::Extra 2.024 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.022';
+$VERSION = '2.024';
 
 sub new
 {
@@ -47,7 +47,7 @@ sub gunzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.021 qw(:Parse);
+    use IO::Compress::Base::Common  2.024 qw(:Parse);
     return ( 'ParseExtra' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -477,7 +477,48 @@ Defaults to 0.
 
 =item C<< Append => 0|1 >>
 
-TODO
+The behaviour of this option is dependent on the type of output data
+stream.
+
+=over 5
+
+=item * A Buffer
+
+If C<Append> is enabled, all uncompressed data will be append to the end of
+the output buffer. Otherwise the output buffer will be cleared before any
+uncompressed data is written to it.
+
+=item * A Filename
+
+If C<Append> is enabled, the file will be opened in append mode. Otherwise
+the contents of the file, if any, will be truncated before any uncompressed
+data is written to it.
+
+=item * A Filehandle
+
+If C<Append> is enabled, the filehandle will be positioned to the end of
+the file via a call to C<seek> before any uncompressed data is
+written to it.  Otherwise the file pointer will not be moved.
+
+=back
+
+When C<Append> is specified, and set to true, it will I<append> all uncompressed 
+data to the output data stream.
+
+So when the output is a filehandle it will carry out a seek to the eof
+before writing any uncompressed data. If the output is a filename, it will be opened for
+appending. If the output is a buffer, all uncompressed data will be appened to
+the existing buffer.
+
+Conversely when C<Append> is not specified, or it is present and is set to
+false, it will operate as follows.
+
+When the output is a filename, it will truncate the contents of the file
+before writing any uncompressed data. If the output is a filehandle
+its position will not be changed. If the output is a buffer, it will be
+wiped before any uncompressed data is output.
+
+Defaults to 0.
 
 =item C<< MultiStream => 0|1 >>
 
@@ -1032,7 +1073,7 @@ See L<IO::Uncompress::Gunzip::FAQ|IO::Uncompress::Gunzip::FAQ/"Compressed files 
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 
@@ -1063,7 +1104,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2009 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

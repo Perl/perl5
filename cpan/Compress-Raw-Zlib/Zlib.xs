@@ -3,7 +3,7 @@
  * Created : 22nd January 1996
  * Version : 2.000
  *
- *   Copyright (c) 1995-2009 Paul Marquess. All rights reserved.
+ *   Copyright (c) 1995-2010 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
  *   modify it under the same terms as Perl itself.
  *

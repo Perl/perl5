@@ -26,6 +26,9 @@ sub run
     my $Error           = getErrorRef($CompressClass);
     my $UnError         = getErrorRef($UncompressClass);
 
+    my @anyUnLz = ();
+    @anyUnLz = (UnLzma => 1 ) if $CompressClass =~ /lzma/i ;
+
     my $AnyConstruct = "IO::Uncompress::${AnyClass}" ;
     no strict 'refs';
     my $AnyError = \${ "IO::Uncompress::${AnyClass}::${AnyClass}Error" };
@@ -57,7 +60,7 @@ sub run
             {
                 my $unc = new $AnyConstruct $input, Transparent => $trans,
                                            RawInflate => 1,
-                                           #UnLzma => 1,
+                                           @anyUnLz,
                                            Append => 1  ;
 
                 ok $unc, "  Created $AnyClass object" 
@@ -77,7 +80,7 @@ sub run
             {
                 my $unc = new $AnyConstruct $input, Transparent => $trans,
                                            RawInflate => 1,
-                                           #UnLzma => 1,
+                                           @anyUnLz,
                                            Append => 1  ;
 
                 ok $unc, "  Created $AnyClass object" 

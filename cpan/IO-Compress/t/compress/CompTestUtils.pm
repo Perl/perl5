@@ -476,7 +476,7 @@ sub anyUncompress
                     Append => 1, 
                     Transparent => 0, 
                     RawInflate => 1,
-                    #UnLzma     => 1,
+                    UnLzma     => 1,
                     @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 
@@ -538,7 +538,7 @@ sub getHeaders
                 Append => 1, 
                 Transparent => 0, 
                 RawInflate => 1,
-                #UnLzma     => 1,
+                UnLzma     => 1,
                 @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 

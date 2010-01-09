@@ -27,10 +27,10 @@ BEGIN
         $count = 230 ;
     }
     elsif ($] >= 5.006) {
-        $count = 284 ;
+        $count = 300 ;
     }
     else {
-        $count = 242 ;
+        $count = 258 ;
     }
 
     plan tests => $count + $extra;
@@ -603,7 +603,7 @@ for my $consume ( 0 .. 1)
 
 foreach (1 .. 2)
 {
-    next if $[ < 5.005 ;
+    next if $] < 5.005 ;
 
     title 'test inflate/deflate with a substr';
 

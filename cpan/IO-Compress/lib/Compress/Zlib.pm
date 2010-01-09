@@ -8,17 +8,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.021 ;
-use Compress::Raw::Zlib 2.021 ;
-use IO::Compress::Gzip 2.021 ;
-use IO::Uncompress::Gunzip 2.021 ;
+use IO::Compress::Base::Common 2.024 ;
+use Compress::Raw::Zlib 2.024 ;
+use IO::Compress::Gzip 2.024 ;
+use IO::Uncompress::Gunzip 2.024 ;
 
 use strict ;
 use warnings ;
 use bytes ;
-our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
+our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 
-$VERSION = '2.022';
+$VERSION = '2.024';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -35,6 +35,11 @@ $VERSION = eval $VERSION;
     );
 
 push @EXPORT, @Compress::Raw::Zlib::EXPORT ;
+
+@EXPORT_OK = qw(memGunzip memGzip zlib_version);
+%EXPORT_TAGS = (
+    ALL         => \@EXPORT
+);
 
 BEGIN
 {
@@ -88,6 +93,11 @@ sub _set_gzerr
     return $value ;
 }
 
+sub _set_gzerr_undef
+{
+    _set_gzerr(@_);
+    return undef;
+}
 sub _save_gzerr
 {
     my $gz = shift ;
@@ -452,7 +462,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.021 ;
+use IO::Compress::Gzip::Constants 2.024 ;
 
 sub memGzip($)
 {
@@ -464,12 +474,15 @@ sub memGzip($)
   $] >= 5.008 and (utf8::downgrade($$string, 1) 
       or croak "Wide character in memGzip");
 
-  IO::Compress::Gzip::gzip($string, \$out, Minimal => 1)
-      or return undef ;
+  _set_gzerr(0);
+  if ( ! IO::Compress::Gzip::gzip($string, \$out, Minimal => 1) )
+  {
+      $Compress::Zlib::gzerrno = $IO::Compress::Gzip::GzipError;
+      return undef ;
+  }
 
   return $out;
 }
-
 
 sub _removeGzipHeader($)
 {
@@ -529,6 +542,12 @@ sub _removeGzipHeader($)
     return Z_OK();
 }
 
+sub _ret_gun_error
+{
+    $Compress::Zlib::gzerrno = $IO::Uncompress::Gunzip::GunzipError;
+    return undef;
+}
+
 
 sub memGunzip($)
 {
@@ -538,25 +557,35 @@ sub memGunzip($)
     $] >= 5.008 and (utf8::downgrade($$string, 1) 
         or croak "Wide character in memGunzip");
 
-    _removeGzipHeader($string) == Z_OK() 
-        or return undef;
+    _set_gzerr(0);
+
+    my $status = _removeGzipHeader($string) ;
+    $status == Z_OK() 
+        or return _set_gzerr_undef($status);
      
     my $bufsize = length $$string > 4096 ? length $$string : 4096 ;
     my $x = new Compress::Raw::Zlib::Inflate({-WindowBits => - MAX_WBITS(),
                          -Bufsize => $bufsize}) 
 
-              or return undef;
+              or return _ret_gun_error();
 
     my $output = "" ;
-    my $status = $x->inflate($string, $output);
-    return undef 
-        unless $status == Z_STREAM_END();
+    $status = $x->inflate($string, $output);
+    
+    if ( $status == Z_OK() )
+    {
+        _set_gzerr(Z_DATA_ERROR());
+        return undef;
+    }
+
+    return _ret_gun_error()
+        if ($status != Z_STREAM_END());
 
     if (length $$string >= 8)
     {
         my ($crc, $len) = unpack ("VV", substr($$string, 0, 8));
         substr($$string, 0, 8) = '';
-        return undef 
+        return _set_gzerr_undef(Z_DATA_ERROR())
             unless $len == length($output) and
                    $crc == crc32($output);
     }
@@ -564,6 +593,7 @@ sub memGunzip($)
     {
         $$string = '';
     }
+
     return $output;   
 }
 
@@ -972,10 +1002,11 @@ standard output.
 This function is used to create an in-memory gzip file with the minimum
 possible gzip header (exactly 10 bytes).
 
-    $dest = Compress::Zlib::memGzip($buffer) ;
+    $dest = Compress::Zlib::memGzip($buffer) 
+        or die "Cannot compress: $gzerrno\n";
 
-If successful, it returns the in-memory gzip file, otherwise it returns
-undef.
+If successful, it returns the in-memory gzip file. Otherwise it returns
+C<undef> and the C<$gzerrno> variable will store the zlib error code.
 
 The C<$buffer> parameter can either be a scalar or a scalar reference.
 
@@ -986,10 +1017,12 @@ carry out in-memory gzip compression.
 
 This function is used to uncompress an in-memory gzip file.
 
-    $dest = Compress::Zlib::memGunzip($buffer) ;
+    $dest = Compress::Zlib::memGunzip($buffer) 
+        or die "Cannot uncomprss: $gzerrno\n";
 
-If successful, it returns the uncompressed gzip file, otherwise it
-returns undef.
+If successful, it returns the uncompressed gzip file. Otherwise it
+returns C<undef> and the C<$gzerrno> variable will store the zlib error
+code.
 
 The C<$buffer> parameter can either be a scalar or a scalar reference. The
 contents of the C<$buffer> parameter are destroyed after calling this function.
@@ -1423,7 +1456,7 @@ of I<Compress::Zlib>.
 
 =head1 SEE ALSO
 
-L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 
@@ -1454,7 +1487,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 1995-2009 Paul Marquess. All rights reserved.
+Copyright (c) 1995-2010 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

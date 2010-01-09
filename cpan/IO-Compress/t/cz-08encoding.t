@@ -30,15 +30,15 @@ BEGIN
 
     plan tests => 29 + $extra ;
 
-    use_ok('Compress::Zlib', 2);
+    use_ok('Compress::Zlib', qw(:ALL zlib_version memGunzip memGzip));
 }
 
 
 
 
 # Check zlib_version and ZLIB_VERSION are the same.
-is Compress::Zlib::zlib_version, ZLIB_VERSION, 
-    "ZLIB_VERSION matches Compress::Zlib::zlib_version" ;
+is zlib_version, ZLIB_VERSION, 
+    "ZLIB_VERSION matches zlib_version" ;
 
 
 {
@@ -46,7 +46,7 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
     # length of this string is 2 characters
     my $s = "\x{df}\x{100}"; 
 
-    my $cs = Compress::Zlib::memGzip(Encode::encode_utf8($s));
+    my $cs = memGzip(Encode::encode_utf8($s));
 
     # length stored at end of gzip file should be 4
     my ($crc, $len) = unpack ("VV", substr($cs, -8, 8));
@@ -58,12 +58,12 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
     title "memGunzip when compressed gzip has been encoded" ;
     my $s = "hello world" ;
 
-    my $co = Compress::Zlib::memGzip($s);
-    is Compress::Zlib::memGunzip(my $x = $co), $s, "  match uncompressed";
+    my $co = memGzip($s);
+    is memGunzip(my $x = $co), $s, "  match uncompressed";
 
     utf8::upgrade($co);
      
-    my $un = Compress::Zlib::memGunzip($co);
+    my $un = memGunzip($co);
     ok $un, "  got uncompressed";
 
     is $un, $s, "  uncompressed matched original";
@@ -116,16 +116,16 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
     title "Catch wide characters";
 
     my $a = "a\xFF\x{100}";
-    eval { Compress::Zlib::memGzip($a) };
+    eval { memGzip($a) };
     like($@, qr/Wide character in memGzip/, "  wide characters in memGzip");
 
-    eval { Compress::Zlib::memGunzip($a) };
+    eval { memGunzip($a) };
     like($@, qr/Wide character in memGunzip/, "  wide characters in memGunzip");
 
-    eval { Compress::Zlib::compress($a) };
+    eval { compress($a) };
     like($@, qr/Wide character in compress/, "  wide characters in compress");
 
-    eval { Compress::Zlib::uncompress($a) };
+    eval { uncompress($a) };
     like($@, qr/Wide character in uncompress/, "  wide characters in uncompress");
 
     my $lex = new LexFile my $name ;

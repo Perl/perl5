@@ -233,21 +233,15 @@ cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
 cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
 cpan/Class-ISA/t/01_old_junk.t		Tests for Class::ISA
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
-cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.c
-cpan/Compress-Raw-Bzip2/bzip2-src/bzip2recover.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.h
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib_private.h
 cpan/Compress-Raw-Bzip2/bzip2-src/compress.c
 cpan/Compress-Raw-Bzip2/bzip2-src/crctable.c
 cpan/Compress-Raw-Bzip2/bzip2-src/decompress.c
-cpan/Compress-Raw-Bzip2/bzip2-src/dlltest.c
 cpan/Compress-Raw-Bzip2/bzip2-src/huffman.c
 cpan/Compress-Raw-Bzip2/bzip2-src/LICENSE
-cpan/Compress-Raw-Bzip2/bzip2-src/mk251.c
 cpan/Compress-Raw-Bzip2/bzip2-src/randtable.c
-cpan/Compress-Raw-Bzip2/bzip2-src/spewG.c
-cpan/Compress-Raw-Bzip2/bzip2-src/unzcrash.c
 cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/Changes
 cpan/Compress-Raw-Bzip2/fallback/constants.h

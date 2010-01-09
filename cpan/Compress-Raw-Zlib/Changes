@@ -1,6 +1,12 @@
 CHANGES
 -------
 
+  2.023 9 November 2009
+
+      * fixed instance where $[ should have been $] in t/02zlib.t
+        Thanks to Robin Barker and zefram [RT #50765] for independantly
+        spotting the issue.
+
   2.021 30 August 2009
 
       * Changed test harness so that it can cope with PERL5OPT=-MCarp=verbose

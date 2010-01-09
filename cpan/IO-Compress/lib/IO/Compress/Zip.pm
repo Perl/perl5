@@ -4,27 +4,27 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.021 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.021 ;
-use IO::Compress::Adapter::Deflate 2.021 ;
-use IO::Compress::Adapter::Identity 2.021 ;
-use IO::Compress::Zlib::Extra 2.021 ;
-use IO::Compress::Zip::Constants 2.021 ;
+use IO::Compress::Base::Common  2.024 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.024 ;
+use IO::Compress::Adapter::Deflate 2.024 ;
+use IO::Compress::Adapter::Identity 2.024 ;
+use IO::Compress::Zlib::Extra 2.024 ;
+use IO::Compress::Zip::Constants 2.024 ;
 
 
-use Compress::Raw::Zlib  2.021 qw(crc32) ;
+use Compress::Raw::Zlib  2.024 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.021 ; 
+           import  IO::Compress::Adapter::Bzip2 2.024 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.021 ; 
+           import  IO::Compress::Bzip2 2.024 ; 
          } ;
-    eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.020 ; 
-           require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.020 ; 
-         } ;
+#    eval { require IO::Compress::Adapter::Lzma ; 
+#           import  IO::Compress::Adapter::Lzma 2.020 ; 
+#           require IO::Compress::Lzma ; 
+#           import  IO::Compress::Lzma 2.024 ; 
+#         } ;
 }
 
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.022';
+$VERSION = '2.024';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -89,10 +89,10 @@ sub mkComp
                                                );
         *$self->{ZipData}{CRC32} = crc32(undef);
     }
-    elsif (*$self->{ZipData}{Method} == ZIP_CM_LZMA) {
-        ($obj, $errstr, $errno) = IO::Compress::Adapter::Lzma::mkCompObject();
-        *$self->{ZipData}{CRC32} = crc32(undef);
-    }
+#    elsif (*$self->{ZipData}{Method} == ZIP_CM_LZMA) {
+#        ($obj, $errstr, $errno) = IO::Compress::Adapter::Lzma::mkCompObject();
+#        *$self->{ZipData}{CRC32} = crc32(undef);
+#    }
 
     return $self->saveErrorString(undef, $errstr, $errno)
        if ! defined $obj;
@@ -475,8 +475,9 @@ sub ckParams
            ! defined $IO::Compress::Adapter::Bzip2::VERSION;
 
     return $self->saveErrorString(undef, "Lzma not available")
-        if $method == ZIP_CM_LZMA and 
-           ! defined $IO::Compress::Adapter::Lzma::VERSION;
+        if $method == ZIP_CM_LZMA ;
+        #and 
+           #! defined $IO::Compress::Adapter::Lzma::VERSION;
 
     *$self->{ZipData}{Method} = $method;
 
@@ -512,8 +513,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.021 qw(:Parse);
-    use Compress::Raw::Zlib  2.021 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.024 qw(:Parse);
+    use Compress::Raw::Zlib  2.024 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -859,7 +860,48 @@ Defaults to 0.
 
 =item C<< Append => 0|1 >>
 
-TODO
+The behaviour of this option is dependent on the type of output data
+stream.
+
+=over 5
+
+=item * A Buffer
+
+If C<Append> is enabled, all compressed data will be append to the end of
+the output buffer. Otherwise the output buffer will be cleared before any
+compressed data is written to it.
+
+=item * A Filename
+
+If C<Append> is enabled, the file will be opened in append mode. Otherwise
+the contents of the file, if any, will be truncated before any compressed
+data is written to it.
+
+=item * A Filehandle
+
+If C<Append> is enabled, the filehandle will be positioned to the end of
+the file via a call to C<seek> before any compressed data is
+written to it.  Otherwise the file pointer will not be moved.
+
+=back
+
+When C<Append> is specified, and set to true, it will I<append> all compressed 
+data to the output data stream.
+
+So when the output is a filehandle it will carry out a seek to the eof
+before writing any compressed data. If the output is a filename, it will be opened for
+appending. If the output is a buffer, all compressed data will be appened to
+the existing buffer.
+
+Conversely when C<Append> is not specified, or it is present and is set to
+false, it will operate as follows.
+
+When the output is a filename, it will truncate the contents of the file
+before writing any compressed data. If the output is a filehandle
+its position will not be changed. If the output is a buffer, it will be
+wiped before any compressed data is output.
+
+Defaults to 0.
 
 =back
 
@@ -988,7 +1030,7 @@ The behaviour of this option is dependent on the type of C<$output>.
 =item * A Buffer
 
 If C<$output> is a buffer and C<Append> is enabled, all compressed data
-will be append to the end if C<$output>. Otherwise C<$output> will be
+will be append to the end of C<$output>. Otherwise C<$output> will be
 cleared before any data is written to it.
 
 =item * A Filename
@@ -1532,7 +1574,7 @@ See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 
@@ -1563,7 +1605,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2009 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

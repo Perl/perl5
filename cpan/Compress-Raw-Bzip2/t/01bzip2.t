@@ -28,10 +28,10 @@ BEGIN
         $count = 103 ;
     }
     elsif ($] >= 5.006) {
-        $count = 157 ;
+        $count = 173 ;
     }
     else {
-        $count = 115 ;
+        $count = 131 ;
     }
 
     plan tests => $count + $extra;
@@ -352,7 +352,7 @@ for my $consume ( 0 .. 1)
 
 foreach (1 .. 2)
 {
-    next if $[ < 5.005 ;
+    next if $] < 5.005 ;
 
     title 'test bzinflate/bzdeflate with a substr';
 
@@ -365,12 +365,12 @@ foreach (1 .. 2)
     my $status = $x->bzdeflate(substr($contents,0), $X);
     cmp_ok $status, '==', BZ_RUN_OK ;
     
-    cmp_ok $x->bzflush($X), '==', BZ_RUN_OK  ;
+    cmp_ok $x->bzclose($X), '==', BZ_STREAM_END  ;
      
     my $append = "Appended" ;
     $X .= $append ;
      
-    ok my $k = new Compress::Raw::Bunzip2(1, 0) ;
+    ok my $k = new Compress::Raw::Bunzip2(1, 1) ;
      
     my $Z; 
     my $keep = $X ;

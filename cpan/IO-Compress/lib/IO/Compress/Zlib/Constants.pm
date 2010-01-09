@@ -9,7 +9,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT);
 
-$VERSION = '2.022';
+$VERSION = '2.024';
 
 @ISA = qw(Exporter);
 

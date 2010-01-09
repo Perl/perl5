@@ -1,6 +1,25 @@
 CHANGES
 -------
 
+  2.024 7 January 2010
+
+      * Compress::Zlib
+        Get memGunzip & memGzip to set $gzerrno
+        [RT# 47283]
+
+      * Compress::Zlib
+        Export memGunzip, memGzip and zlib_version on demand 
+        [RT# 52992]
+
+      * examples/io/anycat
+        This sample was using IO::Uncompress::AnyInflate. Much better to
+        use IO::Uncompress::AnyUncompress.
+
+  2.023 9 November 2009
+
+      * IO::Compress::AnyUncompress 
+        Added support for lzma_alone & xz.
+
   2.022 9 October 2009
 
       * IO::Compress - Makefile.PL
