@@ -13,16 +13,11 @@ the L<perl5112delta>, which describes differences between 5.11.1 and
 
 =head1 Incompatible Changes
 
-=over
-
-=item Filehandles are blessed directly into C<IO::Handle::>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
+=head2 Filehandles are blessed directly into C<IO::Handle>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
 
 The previous behaviour was to bless Filehandles into L<FileHandle>
 (an empty proxy class) if it was loaded into memory and otherwise
-to bless them into C<IO::Handle::>.
-
-
-=back
+to bless them into C<IO::Handle>.
 
 =head1 Core Enhancements
 
@@ -216,7 +211,7 @@ Upgraded from version 0.34 to 0.36.
 
 =item C<CPAN>
 
-Upgraded from version 1.94_51 to 1.94_5301, which is 1.94_53 on CPAN 
+Upgraded from version 1.94_51 to 1.94_5301, which is 1.94_53 on CPAN
 plus some local fixes for bleadperl.
 
 Includes better bzip2 support, improved FirstTime experience with
@@ -255,8 +250,8 @@ Upgraded from version 2.23 to 2.24.
 
 =item C<POSIX>
 
-Upgraded from version 1.18 to 1.19. Error codes for C<getaddrinfo()> and C<getnameinfo()> are now
-available.
+Upgraded from version 1.18 to 1.19. Error codes for C<getaddrinfo()> and
+C<getnameinfo()> are now available.
 
 =item C<Pod::Simple>
 
@@ -311,7 +306,7 @@ conditional loading of modules despite the implicit BEGIN block around C<use>.
 
 =item *
 
-Always add a manifest resource to C<perl.exe> to specify the <trustInfo>
+Always add a manifest resource to C<perl.exe> to specify the C<trustInfo>
 settings for Windows Vista and later.  Without this setting Windows
 will treat C<perl.exe> as a legacy application and apply various
 heuristics like redirecting access to protected file system areas
@@ -393,12 +388,13 @@ device and printers like "lpt1".
 
 =item *
 
-Fixed a regression caused by commit fafafbaf which caused a panic during parameter passing [perl #70171]
-
+Fixed a regression caused by commit fafafbaf which caused a panic during
+parameter passing [perl #70171]
 
 =item *
 
-On systems which in-place edits without backup files, -i'*' now works as the documentation says it does [perl #70802]
+On systems which in-place edits without backup files, -i'*' now works as
+the documentation says it does [perl #70802]
 
 =item *
 
@@ -433,7 +429,8 @@ C<$@> may now be assigned a read-only value (without error or busting the stack)
 
 =item *
 
-C<sort> called recursively from within an active comparison subroutine no longer causes a bus error if run multiple times. [perl #71076]
+C<sort> called recursively from within an active comparison subroutine no
+longer causes a bus error if run multiple times. [perl #71076]
 
 =back
 
@@ -457,7 +454,7 @@ can now do
 
 to suppress only those, but not other syntax-related warnings. Warnings where
 prototypes are changed, ignored, or not met are still in the C<prototype>
-category as before.
+category as before. (Matt S. Trout)
 
 =item *
 
@@ -466,8 +463,8 @@ C<split> now warns when called in void context
 
 =item *
 
-C<printf>-style functions called with too few arguments will now issue the warning C<"Missing argument in %s"> [perl #71000] 
-
+C<printf>-style functions called with too few arguments will now issue the
+warning C<"Missing argument in %s"> [perl #71000]
 
 =back
 
