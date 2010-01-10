@@ -1661,7 +1661,7 @@ Here's a small example showing shared memory usage.
     use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRUSR S_IWUSR);
 
     $size = 2000;
-    $id = shmget(IPC_PRIVATE, $size, S_IRUSR|S_IWUSR) || die "$!";
+    $id = shmget(IPC_PRIVATE, $size, S_IRUSR|S_IWUSR) // die "$!";
     print "shm key $id\n";
 
     $message = "Message #1";
@@ -1683,7 +1683,7 @@ Here's an example of a semaphore:
     use IPC::SysV qw(IPC_CREAT);
 
     $IPC_KEY = 1234;
-    $id = semget($IPC_KEY, 10, 0666 | IPC_CREAT ) || die "$!";
+    $id = semget($IPC_KEY, 10, 0666 | IPC_CREAT ) // die "$!";
     print "shm key $id\n";
 
 Put this code in a separate file to be run in more than one process.
