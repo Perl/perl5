@@ -66,7 +66,7 @@ that's probably what it looks like in the context of the user's language.
 With this "whole sequence" view of characters, the total number of
 characters is open-ended. But in the programmer's "one unit is one
 character" point of view, the concept of "characters" is more
-deterministic.  In this document, we take that second  point of view:
+deterministic.  In this document, we take that second point of view:
 one "character" is one Unicode code point.
 
 For some combinations, there are I<precomposed> characters.
