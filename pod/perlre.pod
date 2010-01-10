@@ -1471,8 +1471,7 @@ This zero-width pattern can be used to mark the point reached in a string
 when a certain part of the pattern has been successfully matched. This
 mark may be given a name. A later C<(*SKIP)> pattern will then skip
 forward to that point if backtracked into on failure. Any number of
-C<(*MARK)> patterns are allowed, and the NAME portion is optional and may
-be duplicated.
+C<(*MARK)> patterns are allowed, and the NAME portion may be duplicated.
 
 In addition to interacting with the C<(*SKIP)> pattern, C<(*MARK:NAME)>
 can be used to "label" a pattern branch, so that after matching, the
