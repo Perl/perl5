@@ -4,6 +4,9 @@ BEGIN {
 	require './test.pl';
 }
 
+use warnings;
+no warnings "once";
+
 my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
@@ -63,7 +66,6 @@ is($info{sub_name}, "eval '$eval'", 'caller_info API');
 my $warning;
 eval {
     BEGIN {
-	$^W = 1;
 	local $SIG{__WARN__} =
 	    sub { if( defined $^S ){ warn $_[0] } else { $warning = $_[0] } }
     }
@@ -270,7 +272,13 @@ cluck_undef (0, "undef", 2, undef, 4);
 # has been compiled
 {
     my $accum = '';
-    local *CORE::GLOBAL::caller = sub { local *__ANON__="fakecaller"; my @c=CORE::caller(@_); $c[0] ||= 'undef'; $accum .= "@c[0..3]\n"; return CORE::caller(($_[0]||0)+1) };
+    local *CORE::GLOBAL::caller = sub {
+        local *__ANON__="fakecaller";
+        my @c=CORE::caller(@_);
+        $c[0] ||= 'undef';
+        $accum .= "@c[0..3]\n";
+        return CORE::caller(($_[0]||0)+1);
+    };
     eval "scalar caller()";
     like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in eval");
     $accum = '';
