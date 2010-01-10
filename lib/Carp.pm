@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -70,7 +70,7 @@ sub caller_info {
   my %call_info;
   @call_info{
     qw(pack file line sub has_args wantarray evaltext is_require)
-  } = defined (*CORE::GLOBAL::caller::{CODE}) ? *CORE::GLOBAL::{caller}->($i) : caller($i);
+  } = defined (*CORE::GLOBAL::caller{CODE}) ? *CORE::GLOBAL::caller{CODE}->($i) : caller($i);
   
   unless (defined $call_info{pack}) {
     return ();
