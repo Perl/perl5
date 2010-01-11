@@ -1918,7 +1918,11 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
      return (mode & statbufp->st_mode) ? TRUE : FALSE;
 
 #else /* ! DOSISH */
+# ifdef __CYGWIN__
+    if (ingroup(544,effective)) {     /* member of Administrators */
+# else
     if ((effective ? PL_euid : PL_uid) == 0) {	/* root is special */
+# endif
 	if (mode == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
 		return TRUE;

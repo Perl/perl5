@@ -27,9 +27,14 @@ $Is_DGUX    = $^O eq 'dgux';
 $Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
 $Is_Rhapsody= $^O eq 'rhapsody';
 
-$Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
+$Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
 
 $Is_UFS     = $Is_Darwin && (() = `df -t ufs . 2>/dev/null`) == 2;
+
+if ($Is_Cygwin) {
+  require Win32;
+  Win32->import;
+}
 
 my($DEV, $INO, $MODE, $NLINK, $UID, $GID, $RDEV, $SIZE,
    $ATIME, $MTIME, $CTIME, $BLKSIZE, $BLOCKS) = (0..12);
@@ -163,10 +168,10 @@ SKIP: {
         my $olduid = $>;
         eval { $> = 1; };
         skip "Can't test -r or -w meaningfully if you're superuser", 2
-          if $> == 0;
+          if ($Is_Cygwin ? Win32::IsAdminUser : $> == 0);
 
         SKIP: {
-            skip "Can't test -r meaningfully?", 1 if $Is_Dos || $Is_Cygwin;
+            skip "Can't test -r meaningfully?", 1 if $Is_Dos;
             ok(!-r $tmpfile,    "   -r");
         }
 
