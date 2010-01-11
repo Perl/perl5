@@ -11104,6 +11104,11 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    else {
 			while (items-- > 0)
 			    *dst_ary++ = sv_dup(*src_ary++, param);
+			if (!(param->flags & CLONEf_COPY_STACKS)
+			     && AvREIFY(sstr))
+			{
+			    av_reify(MUTABLE_AV(dstr)); /* #41138 */
+			}
 		    }
 		    items = AvMAX((const AV *)sstr) - AvFILLp((const AV *)sstr);
 		    while (items-- > 0) {

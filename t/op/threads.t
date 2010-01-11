@@ -129,6 +129,8 @@ foreach my $BLOCK (qw(CHECK INIT)) {
 EOI
 }
 
+} # TODO
+
 # Scalars leaked: 1
 fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
     use threads;
@@ -141,7 +143,6 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
     print 'ok';
 EOI
 
-} # TODO
 
 # [perl #45053] Memory corruption with heavy module loading in threads
 #
