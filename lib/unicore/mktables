@@ -10580,11 +10580,6 @@ sub compile_perl() {
         $ASCII->initialize([ 0..127 ]);
     }
 
-    # A number of the Perl synonyms have a restricted-range synonym whose name
-    # begins with Posix.  This hash gets filled in with them, so that they can
-    # be populated in a small loop.
-    my %posix_equivalent;
-
     # Get the best available case definitions.  Early Unicode versions didn't
     # have Uppercase and Lowercase defined, so use the general category
     # instead for them.
@@ -10597,7 +10592,10 @@ sub compile_perl() {
         $Lower->set_equivalent_to($gc->table('Lowercase_Letter'),
                                                                 Related => 1);
     }
-    $posix_equivalent{'Lower'} = $Lower;
+    $perl->add_match_table("PosixLower",
+                            Description => "[a-z]",
+                            Initialize => $Lower & $ASCII,
+                            );
 
     my $Upper = $perl->add_match_table('Upper');
     my $Unicode_Upper = property_ref('Uppercase');
@@ -10608,7 +10606,10 @@ sub compile_perl() {
         $Upper->set_equivalent_to($gc->table('Uppercase_Letter'),
                                                                 Related => 1);
     }
-    $posix_equivalent{'Upper'} = $Upper;
+    $perl->add_match_table("PosixUpper",
+                            Description => "[A-Z]",
+                            Initialize => $Upper & $ASCII,
+                            );
 
     # Earliest releases didn't have title case.  Initialize it to empty if not
     # otherwise present
@@ -10679,8 +10680,7 @@ sub compile_perl() {
     # one whose name generally begins with Posix that is posix-compliant, and
     # one that matches Unicode characters beyond the Posix, ASCII range
 
-    my $Alpha = $perl->add_match_table('Alpha',
-                        Description => '[[:Alpha:]] extended beyond ASCII');
+    my $Alpha = $perl->add_match_table('Alpha');
 
     # Alphabetic was not present in early releases
     my $Alphabetic = property_ref('Alphabetic');
@@ -10698,14 +10698,21 @@ sub compile_perl() {
                             + $gc->table('Mn')
                             + $gc->table('Mc'));
         $Alpha += $gc->table('Nl') if defined $gc->table('Nl');
+        $Alpha->add_description('Alphabetic');
     }
-    $posix_equivalent{'Alpha'} = $Alpha;
+    $perl->add_match_table("PosixAlpha",
+                            Description => "[A-Za-z]",
+                            Initialize => $Alpha & $ASCII,
+                            );
 
     my $Alnum = $perl->add_match_table('Alnum',
-                        Description => "[[:Alnum:]] extended beyond ASCII",
+                        Description => 'Alphabetic and (Decimal) Numeric',
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
-    $posix_equivalent{'Alnum'} = $Alnum;
+    $perl->add_match_table("PosixAlnum",
+                            Description => "[A-Za-z0-9]",
+                            Initialize => $Alnum & $ASCII,
+                            );
 
     my $Word = $perl->add_match_table('Word',
                                 Description => '\w, including beyond ASCII',
@@ -10731,7 +10738,10 @@ sub compile_perl() {
                                             -   0x200B, # ZWSP
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
-    $posix_equivalent{'Blank'} = $Blank;
+    $perl->add_match_table("PosixBlank",
+                            Description => "\\t and ' '",
+                            Initialize => $Blank & $ASCII,
+                            );
 
     my $VertSpace = $perl->add_match_table('VertSpace',
                             Description => '\v',
@@ -10746,10 +10756,13 @@ sub compile_perl() {
     # No Posix equivalent for vertical space
 
     my $Space = $perl->add_match_table('Space',
-        Description => '\s including beyond ASCII plus vertical tab = [[:Space:]]',
-        Initialize => $Blank + $VertSpace,
+                Description => '\s including beyond ASCII plus vertical tab',
+                Initialize => $Blank + $VertSpace,
     );
-    $posix_equivalent{'Space'} = $Space;
+    $perl->add_match_table("PosixSpace",
+                            Description => "\\t \\n, \\x0B, \\f, \\r, and ' '",
+                            Initialize => $Space & $ASCII,
+                            );
 
     # Perl's traditional space doesn't include Vertical Tab
     my $SpacePerl = $perl->add_match_table('SpacePerl',
@@ -10762,9 +10775,12 @@ sub compile_perl() {
                             );
 
     my $Cntrl = $perl->add_match_table('Cntrl',
-                        Description => "[[:Cntrl:]] extended beyond ASCII");
+                                        Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
-    $posix_equivalent{'Cntrl'} = $Cntrl;
+    $perl->add_match_table("PosixCntrl",
+                            Description => '[\x00-\x1F]',
+                            Initialize => $Cntrl & $ASCII,
+                            );
 
     # $controls is a temporary used to construct Graph.
     my $controls = Range_List->new(Initialize => $gc->table('Unassigned')
@@ -10774,31 +10790,40 @@ sub compile_perl() {
 
     # Graph is  ~space &  ~(Cc|Cs|Cn) = ~(space + $controls)
     my $Graph = $perl->add_match_table('Graph',
-                        Description => "[[:Graph:]] extended beyond ASCII",
+                        Description => 'Characters that are graphical',
                         Initialize => ~ ($Space + $controls),
                         );
-    $posix_equivalent{'Graph'} = $Graph;
+    $perl->add_match_table("PosixGraph",
+                            Description => '[\x21-\x7E]',
+                            Initialize => $Graph & $ASCII,
+                            );
 
     my $Print = $perl->add_match_table('Print',
-                        Description => "[[:Print:]] extended beyond ASCII",
+                        Description => 'Characters that are graphical plus space characters (but no controls)',
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
-    $posix_equivalent{'Print'} = $Print;
+    $perl->add_match_table("PosixPrint",
+                            Description => '[\x20-\x7E]',
+                            Initialize => $Print & $ASCII,
+                            );
 
     my $Punct = $perl->add_match_table('Punct');
     $Punct->set_equivalent_to($gc->table('Punctuation'), Related => 1);
 
     # \p{punct} doesn't include the symbols, which posix does
     $perl->add_match_table('PosixPunct',
-                            Description => "[[:Punct:]]",
-                            Initialize => $ASCII & ($gc->table('Punctuation')
-                                                    + $gc->table('Symbol')),
-                            );
+        Description => 'Graphical characters that aren\'t Word characters = [\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]',
+        Initialize => $ASCII & ($gc->table('Punctuation')
+                                + $gc->table('Symbol')),
+        );
 
     my $Digit = $perl->add_match_table('Digit',
                             Description => '\d, extended beyond just [0-9]');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
-    $posix_equivalent{'Digit'} = $Digit;
+    my $PosixDigit = $perl->add_match_table("PosixDigit",
+                                            Description => '[0-9]',
+                                            Initialize => $Digit & $ASCII,
+                                            );
 
     # AHex was not present in early releases
     # XXX TUS recommends Hex_Digit, not ASCII_Hex_Digit.
@@ -10809,21 +10834,10 @@ sub compile_perl() {
         $Xdigit->set_equivalent_to($AHex->table('Y'), Related => 1);
     }
     else {
-        # (Have to use hex because could be running on an non-ASCII machine,
+        # (Have to use hex because could be running on a non-ASCII machine,
         # and we want the Unicode (ASCII) values)
         $Xdigit->initialize([ 0x30..0x39, 0x41..0x46, 0x61..0x66 ]);
     }
-
-    # Now, add the ASCII-restricted tables that get uniform treatment
-    while (my ($name, $table) = each %posix_equivalent) {
-        $perl->add_match_table("Posix$name",
-                                Description => "[[:$name:]]",
-                                Initialize => $table & $ASCII,
-                                );
-    }
-    $perl->table('PosixDigit')->add_description('\d, restricted to ASCII');
-    $perl->table('PosixDigit')->add_description('[0-9]');
-
 
     my $dt = property_ref('Decomposition_Type');
     $dt->add_match_table('Non_Canon', Full_Name => 'Non_Canonical',
