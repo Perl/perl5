@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 301;
+plan tests => 302;
 
 $| = 1;
 
@@ -1307,6 +1307,17 @@ foreach my $ord (78, 163, 256) {
     my $zz = pack "a*a*", q{print "Hello world\n"}, $TAINT;
     ok(tainted($zz), "pack a*a* preserves tainting");
 }
+
+# Bug RT #61976 tainted $! would show numeric rather than string value
+
+{
+    my $tainted_path = substr($^X,0,0) . "/no/such/file";
+    my $err;
+    # $! is used in a tainted expression, so gets tainted
+    open my $fh, $tainted_path or $err= "$!";
+    unlike($err, qr/^\d+$/, 'tainted $!');
+}
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
