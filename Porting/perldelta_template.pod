@@ -11,8 +11,8 @@ This document describes differences between the 5.XXX.XXX release and
 the 5.XXX.XXX release.
 
 If you are upgrading from an earlier release such as 5.XXX.XXX, first read
-the L<perl5XXXdelta>, which describes differences between 5.XXX.XXX and
-5.10.0
+L<perl5XXXdelta>, which describes differences between 5.XXX.XXX and
+5.XXX.XXX.
 
 =head1 Notice
 
