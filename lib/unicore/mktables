@@ -10837,18 +10837,18 @@ sub compile_perl() {
                                             Initialize => $Digit & $ASCII,
                                             );
 
-    # AHex was not present in early releases
-    # XXX TUS recommends Hex_Digit, not ASCII_Hex_Digit.
-    my $Xdigit = $perl->add_match_table('XDigit',
-                                        Description => '[0-9A-Fa-f]');
-    my $AHex = property_ref('ASCII_Hex_Digit');
-    if (defined $AHex && ! $AHex->is_empty) {
-        $Xdigit->set_equivalent_to($AHex->table('Y'), Related => 1);
+    # Hex_Digit was not present in first release
+    my $Xdigit = $perl->add_match_table('XDigit');
+    my $Hex = property_ref('Hex_Digit');
+    if (defined $Hex && ! $Hex->is_empty) {
+        $Xdigit->set_equivalent_to($Hex->table('Y'), Related => 1);
     }
     else {
-        # (Have to use hex because could be running on a non-ASCII machine,
-        # and we want the Unicode (ASCII) values)
-        $Xdigit->initialize([ 0x30..0x39, 0x41..0x46, 0x61..0x66 ]);
+        # (Have to use hex instead of e.g. '0', because could be running on an
+        # non-ASCII machine, and we want the Unicode (ASCII) values)
+        $Xdigit->initialize([ 0x30..0x39, 0x41..0x46, 0x61..0x66,
+                              0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
+        $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
 
     my $dt = property_ref('Decomposition_Type');
@@ -14208,3 +14208,4 @@ Error('\p{Script=InGreek}');    # Bug #69018
 Test_X("1100 $nobreak 1161");  # Bug #70940
 Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
+Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
