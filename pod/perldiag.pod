@@ -2309,7 +2309,7 @@ instead on the filehandle.)
 
 =item lvalue attribute ignored after the subroutine has been defined
 
-(W) Making a subroutine an lvalue subroutine after it has been defined
+(W misc) Making a subroutine an lvalue subroutine after it has been defined
 by declaring the subroutine with a lvalue attribute is not
 possible. To make the the subroutine a lvalue subroutine add the
 lvalue attribute to the definition, or put the the declaration before
