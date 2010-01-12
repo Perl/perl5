@@ -157,6 +157,11 @@ to suppress only those, but not other syntax-related warnings. Warnings where
 prototypes are changed, ignored, or not met are still in the C<prototype>
 category as before. (Matt S. Trout)
 
+=item lvalue attribute ignored after the subroutine has been defined
+
+This new warning is issued when one attempts to mark a subroutine as
+lvalue after it has been defined.
+
 =back
 
 =head1 Changed Internals
