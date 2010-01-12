@@ -11,6 +11,7 @@ $|=1;
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
 chdir '..' or die "Can't chdir ..: $!";
+BEGIN { defined $ENV{PERL_UNICODE} and push @INC, "lib"; }
 
 open my $diagfh, "<", "pod/perldiag.pod"
   or die "Can't open pod/perldiag.pod: $!";
