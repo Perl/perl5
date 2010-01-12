@@ -37,12 +37,13 @@ sub of {
 
 sub import {
     my $class = shift @_;
+    my $stash = $class->stash_name;
 
     @_ = 'please' if not @_;
     my %tags;
-    @tags{ _unpack_tags( @_, $^H{ $class->stash_name } ) } = ();
+    @tags{ _unpack_tags( @_, $^H{ $stash } ) } = ();
 
-    $^H{$class} = _pack_tags( keys %tags );
+    $^H{$stash} = _pack_tags( keys %tags );
     return;
 }
 
