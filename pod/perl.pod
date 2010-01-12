@@ -97,7 +97,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perluniintro	Perl Unicode introduction
     perlunicode 	Perl Unicode support
     perlunifaq		Perl Unicode FAQ
-    perluniprops	Perl Unicode property index
+    perluniprops	Complete index of Unicode Version 5.1.0 properties
     perlunitut		Perl Unicode tutorial
     perlebcdic		Considerations for running Perl on EBCDIC platforms
 
@@ -150,6 +150,7 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl5113delta	Perl changes in version 5.11.3
     perl5112delta	Perl changes in version 5.11.2
     perl5111delta	Perl changes in version 5.11.1
     perl5110delta	Perl changes in version 5.11.0
