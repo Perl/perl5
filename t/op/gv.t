@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 178 );
+plan( tests => 181 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -558,6 +558,27 @@ foreach my $type (qw(integer number string)) {
     is (scalar eval "$prog; 1", undef, "$prog failed...");
     like ($@, qr/Can't coerce GLOB to $type in/,
 	  "with the correct error message");
+}
+
+# RT #60954 anonymous glob should be defined, and not coredump when
+# stringified. The behaviours are:
+#
+#        defined($glob)    "$glob"
+# 5.8.8     false           "" with uninit warning
+# 5.10.0    true            (coredump)
+# 5.12.0    true            ""
+
+{
+    my $io_ref = *STDOUT{IO};
+    my $glob = *$io_ref;
+    ok(defined $glob, "RT #60954 anon glob should be defined");
+
+    my $warn = '';
+    local $SIG{__WARN__} = sub { $warn = $_[0] };
+    use warnings;
+    my $str = "$glob";
+    is($warn, '', "RT #60954 anon glob stringification shouln't warn");
+    is($str,  '', "RT #60954 anon glob stringification should be empty");
 }
 
 __END__

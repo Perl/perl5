@@ -2986,11 +2986,17 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    gv_efullname3(buffer, gv, "*");
 	    SvFLAGS(gv) |= wasfake;
 
-	    assert(SvPOK(buffer));
-	    if (lp) {
-		*lp = SvCUR(buffer);
+	    if (SvPOK(buffer)) {
+		if (lp) {
+		    *lp = SvCUR(buffer);
+		}
+		return SvPVX(buffer);
 	    }
-	    return SvPVX(buffer);
+	    else {
+		if (lp)
+		    *lp = 0;
+		return (char *)"";
+	    }
 	}
 
 	if (lp)
