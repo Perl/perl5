@@ -209,15 +209,17 @@ XXX
 
 =head1 Deprecations
 
-XXX Add any new known deprecations here.
-
 The following items are now deprecated.
 
 =over 4
 
-=item *
+=item C<< UNIVERSAL-E<gt>import() >>
 
-XXX
+The method C<< UNIVERSAL-E<gt>import() >> is now deprecated.
+Attempting to pass import arguments to a C<use UNIVERSAL>
+statement will result in a deprecation warning. (This is
+a less noisy version of the full deprecation warning
+added in 5.11.0.)
 
 =back
 
