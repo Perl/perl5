@@ -12,6 +12,7 @@ my %feature = (
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
+# See HINT_UNI_8_BIT in perl.h.
 our $hint_uni8bit = 0x00000800;
 
 # NB. the latest bundle must be loaded by the -E switch (see toke.c)
