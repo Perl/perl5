@@ -15,9 +15,9 @@ contain more detailed information on the vagaries of your perl.
 
 =head2 How do I find out which operating system I'm running under?
 
-The C<$^O> variable (C<$OSNAME> if you use C<English>) contains an indication of
-the name of the operating system (not its release number) that your perl
-binary was built for.
+The C<$^O> variable (C<$OSNAME> if you use C<English>) contains an
+indication of the name of the operating system (not its release
+number) that your perl binary was built for.
 
 =head2 How come exec() doesn't return?
 X<exec> X<system> X<fork> X<open> X<pipe>
@@ -103,7 +103,7 @@ It even includes limited support for Windows.
 
 However, using the code requires that you have a working C compiler
 and can use it to build and install a CPAN module.  Here's a solution
-using the standard C<POSIX> module, which is already on your system
+using the standard C<POSIX> module, which is already on your systems
 (assuming your system supports POSIX).
 
 	use HotKey;
@@ -340,10 +340,11 @@ L<perlfunc/"select">.
 
 =back
 
-While trying to read from his caller-id box, the notorious Jamie Zawinski
-C<< <jwz@netscape.com> >>, after much gnashing of teeth and fighting with C<sysread>,
-C<sysopen>, POSIX's C<tcgetattr> business, and various other functions that
-go bump in the night, finally came up with this:
+While trying to read from his caller-id box, the notorious Jamie
+Zawinski C<< <jwz@netscape.com> >>, after much gnashing of teeth and
+fighting with C<sysread>, C<sysopen>, POSIX's C<tcgetattr> business,
+and various other functions that go bump in the night, finally came up
+with this:
 
 	sub open_modem {
 		use IPC::Open2;
@@ -385,11 +386,12 @@ tasks. Process management depends on your particular operating system,
 and many of the techniques are in L<perlipc>.
 
 Several CPAN modules may be able to help, including C<IPC::Open2> or
-C<IPC::Open3>, C<IPC::Run>, C<Parallel::Jobs>, C<Parallel::ForkManager>, C<POE>,
-C<Proc::Background>, and C<Win32::Process>. There are many other modules you
-might use, so check those namespaces for other options too.
+C<IPC::Open3>, C<IPC::Run>, C<Parallel::Jobs>,
+C<Parallel::ForkManager>, C<POE>, C<Proc::Background>, and
+C<Win32::Process>. There are many other modules you might use, so
+check those namespaces for other options too.
 
-If you are on a Unix-like system, you might be able to get away with a
+If you are on a unix-like system, you might be able to get away with a
 system call where you put an C<&> on the end of the command:
 
 	system("cmd &")
@@ -494,7 +496,7 @@ the VMS equivalent is C<set time>.
 However, if all you want to do is change your time zone, you can
 probably get away with setting an environment variable:
 
-	$ENV{TZ} = "MST7MDT";		   # Unixish
+	$ENV{TZ} = "MST7MDT";		   # unixish
 	$ENV{'SYS$TIMEZONE_DIFFERENTIAL'}="-5" # vms
 	system "trn comp.lang.perl.misc";
 
@@ -537,11 +539,11 @@ though, so if you use C<END> blocks you should also use
 
 	use sigtrap qw(die normal-signals);
 
-Perl's exception-handling mechanism is its C<eval()> operator.  You can
-use C<eval()> as C<setjmp> and C<die()> as C<longjmp>.  For details of this, see
-the section on signals, especially the time-out handler for a blocking
-C<flock()> in L<perlipc/"Signals"> or the section on "Signals" in
-the Camel Book.
+Perl's exception-handling mechanism is its C<eval()> operator.  You
+can use C<eval()> as C<setjmp> and C<die()> as C<longjmp>.  For
+details of this, see the section on signals, especially the time-out
+handler for a blocking C<flock()> in L<perlipc/"Signals"> or the
+section on "Signals" in the Camel Book.
 
 If exception handling is all you're interested in, try the
 C<exceptions.pl> library (part of the standard perl distribution).
@@ -606,10 +608,10 @@ scripts inherently insecure.  Perl gives you a number of options
 
 =head2 How can I open a pipe both to and from a command?
 
-The C<IPC::Open2> module (part of the standard perl distribution) is an
-easy-to-use approach that internally uses C<pipe()>, C<fork()>, and C<exec()>
-to do the job.  Make sure you read the deadlock warnings in its documentation,
-though (see L<IPC::Open2>).  See
+The C<IPC::Open2> module (part of the standard perl distribution) is
+an easy-to-use approach that internally uses C<pipe()>, C<fork()>, and
+C<exec()> to do the job.  Make sure you read the deadlock warnings in
+its documentation, though (see L<IPC::Open2>).  See
 L<perlipc/"Bidirectional Communication with Another Process"> and
 L<perlipc/"Bidirectional Communication with Yourself">
 
@@ -864,7 +866,7 @@ stuck, because Windows does not have an argc/argv-style API.
 =head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
 
 This happens only if your perl is compiled to use stdio instead of
-perlio, which is the default. Some (maybe all?) stdios set error and
+perlio, which is the default. Some (maybe all?) stdio's set error and
 eof flags that you may need to clear. The C<POSIX> module defines
 C<clearerr()> that you can use.  That is the technically correct way to
 do it.  Here are some less reliable workarounds:
@@ -906,10 +908,11 @@ causes many inefficiencies.
 
 =head2 Can I use perl to run a telnet or ftp session?
 
-Try the C<Net::FTP>, C<TCP::Client>, and C<Net::Telnet> modules (available from
-CPAN).  http://www.cpan.org/scripts/netstuff/telnet.emul.shar
-will also help for emulating the telnet protocol, but C<Net::Telnet> is
-quite probably easier to use.
+Try the C<Net::FTP>, C<TCP::Client>, and C<Net::Telnet> modules
+(available from CPAN). 
+http://www.cpan.org/scripts/netstuff/telnet.emul.shar will also help
+for emulating the telnet protocol, but C<Net::Telnet> is quite
+probably easier to use.
 
 If all you want to do is pretend to be telnet but don't need
 the initial telnet handshaking, then the standard dual-process
@@ -1012,9 +1015,11 @@ perform these actions for you.
 (contributed by brian d foy)
 
 This is a difficult question to answer, and the best answer is 
-only a guess. What do you really want to know? If you merely 
-want to know if one of your filehandles is connected to a terminal,
-you can try the C<-t> file test:
+only a guess. 
+
+What do you really want to know? If you merely want to know if one of
+your filehandles is connected to a terminal, you can try the C<-t>
+file test:
 
 	if( -t STDOUT ) {
 		print "I'm connected to a terminal!\n";
@@ -1091,8 +1096,8 @@ through a database driver, or DBD.  You can see a complete list of
 available drivers on CPAN: http://www.cpan.org/modules/by-module/DBD/ .
 You can read more about DBI on http://dbi.perl.org .
 
-Other modules provide more specific access: C<Win32::ODBC>, C<Alzabo>, C<iodbc>,
-and others found on CPAN Search: http://search.cpan.org .
+Other modules provide more specific access: C<Win32::ODBC>, C<Alzabo>,
+C<iodbc>, and others found on CPAN Search: http://search.cpan.org .
 
 =head2 How do I make a system() exit on control-C?
 
@@ -1265,8 +1270,9 @@ when generating Makefiles:
 
 	perl Makefile.PL INSTALL_BASE=/mydir/perl
 
-You can set this in your C<CPAN.pm> configuration so modules automatically install
-in your private library directory when you use the CPAN.pm shell:
+You can set this in your C<CPAN.pm> configuration so modules
+automatically install in your private library directory when you use
+the CPAN.pm shell:
 
 	% cpan
 	cpan> o conf makepl_arg INSTALL_BASE=/mydir/perl
@@ -1279,7 +1285,7 @@ For C<Build.PL>-based distributions, use the --install_base option:
 You can configure C<CPAN.pm> to automatically use this option too:
 
 	% cpan
-	cpan> o conf mbuild_arg --install_base /mydir/perl
+	cpan> o conf mbuild_arg "--install_base /mydir/perl"
 	cpan> o conf commit
 
 INSTALL_BASE tells these tools to put your modules into
@@ -1373,17 +1379,9 @@ It's a Perl 4 style file defining values for system networking
 constants.  Sometimes it is built using C<h2ph> when Perl is installed,
 but other times it is not.  Modern programs C<use Socket;> instead.
 
-=head1 REVISION
-
-Revision: $Revision$
-
-Date: $Date$
-
-See L<perlfaq> for source control details and availability.
-
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2009 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2010 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

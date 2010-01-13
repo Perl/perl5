@@ -261,19 +261,63 @@ To delete lines, only print the ones that you want.
 =head2 How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
 
-One fairly efficient way is to count newlines in the file. The
-following program uses a feature of tr///, as documented in L<perlop>.
-If your text file doesn't end with a newline, then it's not really a
-proper text file, so this may report one fewer line than you expect.
+(contributed by brian d foy)
 
-	$lines = 0;
-	open(FILE, $filename) or die "Can't open `$filename': $!";
-	while (sysread FILE, $buffer, 4096) {
-		$lines += ($buffer =~ tr/\n//);
+Conceptually, the easiest way to count the lines in a file is to
+simply read them and count them:
+
+	my $count = 0;
+	while( <$fh> ) { $count++; }
+
+You don't really have to count them yourself, though, since Perl
+already does that with the C<$.> variable, which is the current line
+number from the last filehandle read:
+
+	1 while( <$fh> );
+	my $count = $.;
+
+If you want to use C<$.>, you can reduce it to a simple one-liner,
+like one of these:
+
+	% perl -lne '} print $.; {'    file
+
+	% perl -lne 'END { print $. }' file
+
+Those can be rather inefficient though. If they aren't fast enough for
+you, you might just read chunks of data and count the number of
+newlines:
+
+	my $lines = 0;
+	open my($fh), '<:raw', $filename or die "Can't open $filename: $!";
+	while( sysread $fh, $buffer, 4096 ) {
+		$lines += ( $buffer =~ tr/\n// );
 		}
 	close FILE;
 
-This assumes no funny games with newline translations.
+However, that doesn't work if the line ending isn't a newline. You
+might change that C<tr///> to a C<s///> so you can count the number of
+times the input record separator, C<$/>, shows up:
+
+	my $lines = 0;
+	open my($fh), '<:raw', $filename or die "Can't open $filename: $!";
+	while( sysread $fh, $buffer, 4096 ) {
+		$lines += ( $buffer =~ s|$/||g; );
+		}
+	close FILE;
+
+If you don't mind shelling out, the C<wc> command is usually the
+fastest, even with the extra interprocess overhead. Ensure that you
+have an untainted filename though:
+
+	#!perl -T
+	
+	$ENV{PATH} = undef;
+	
+	my $lines;
+	if( $filename =~ /^([0-9a-z_.]+)\z/ ) {
+		$lines = `/usr/bin/wc -l $1`
+		chomp $lines;
+		}
 
 =head2 How do I delete the last N lines from a file?
 X<lines> X<file>
@@ -1451,21 +1495,20 @@ a similar interface, but does the traversal for you too:
 
 (contributed by brian d foy)
 
-If you have an empty directory, you can use Perl's built-in C<rmdir>. If
-the directory is not empty (so, no files or subdirectories), you either
-have to empty it yourself (a lot of work) or use a module to help you.
+If you have an empty directory, you can use Perl's built-in C<rmdir>.
+If the directory is not empty (so, no files or subdirectories), you
+either have to empty it yourself (a lot of work) or use a module to
+help you.
 
-The C<File::Path> module, which comes with Perl, has a C<rmtree> which
-can take care of all of the hard work for you:
+The C<File::Path> module, which comes with Perl, has a C<remove_tree>
+which can take care of all of the hard work for you:
 
-	use File::Path qw(rmtree);
+	use File::Path qw(remove_tree);
 
-	rmtree( \@directories, 0, 0 );
+	remove_tree( @directories );
 
-The first argument to C<rmtree> is either a string representing a directory path
-or an array reference. The second argument controls progress messages, and the
-third argument controls the handling of files you don't have permissions to
-delete. See the C<File::Path> module for the details.
+The C<File::Path> module also has a legacy interface to the older
+C<rmtree> subroutine.
 
 =head2 How do I copy an entire directory?
 
@@ -1474,17 +1517,10 @@ delete. See the C<File::Path> module for the details.
 To do the equivalent of C<cp -R> (i.e. copy an entire directory tree
 recursively) in portable Perl, you'll either need to write something yourself
 or find a good CPAN module such as  L<File::Copy::Recursive>.
-=head1 REVISION
-
-Revision: $Revision$
-
-Date: $Date$
-
-See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2009 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2010 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

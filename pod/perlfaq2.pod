@@ -217,7 +217,7 @@ including setting the Followup-To header line to NOT include alt.sources;
 see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
-( http://www.google.com ), Google's USENET search interface
+( http://www.google.com ), Google's usenet search interface
 ( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).
 This is faster and more productive than just posting a request.
 
@@ -535,17 +535,9 @@ http://www.cpan.org/ is the Comprehensive Perl Archive Network,
 a replicated worldwide repository of Perl software, see
 the I<What is CPAN?> question earlier in this document.
 
-=head1 REVISION
-
-Revision: $Revision$
-
-Date: $Date$
-
-See L<perlfaq> for source control details and availability.
-
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2009 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2010 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
