@@ -62,7 +62,7 @@ are in base 10:
 	print $string + 44; # prints 688, certainly not octal!
 
 This problem usually involves one of the Perl built-ins that has the
-same name a unix command that uses octal numbers as arguments on the
+same name a Unix command that uses octal numbers as arguments on the
 command line. In this example, C<chmod> on the command line knows that
 its first argument is octal because that's what it does:
 
@@ -537,7 +537,7 @@ doesn't matter and you end up with the previous date.
 
 (contributed by brian d foy)
 
-Perl itself never had a Y2K problem, although that nevers stopped people
+Perl itself never had a Y2K problem, although that never stopped people
 from creating Y2K problems on their own. See the documentation for
 C<localtime> for its proper use.
 

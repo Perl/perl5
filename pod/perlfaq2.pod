@@ -217,7 +217,7 @@ including setting the Followup-To header line to NOT include alt.sources;
 see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
-( http://www.google.com ), Google's usenet search interface
+( http://www.google.com ), Google's Usenet search interface
 ( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).
 This is faster and more productive than just posting a request.
 
