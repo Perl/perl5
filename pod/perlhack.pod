@@ -1267,8 +1267,8 @@ C<-Wstrict-prototypes>
 =back
 
 The C<-Wtraditional> is another example of the annoying tendency of
-gcc to bundle a lot of warnings under one switch -- it would be
-impossible to deploy in practice because it would complain a lot -- but
+gcc to bundle a lot of warnings under one switch (it would be
+impossible to deploy in practice because it would complain a lot) but
 it does contain some warnings that would be beneficial to have available
 on their own, such as the warning about string constants inside macros
 containing the macro arguments: this behaved differently pre-ANSI
@@ -2178,7 +2178,7 @@ in L<perlguts>.
 The following are common causes of compilation and/or execution
 failures, not common to Perl as such.  The C FAQ is good bedtime
 reading.  Please test your changes with as many C compilers and
-platforms as possible -- we will, anyway, and it's nice to save
+platforms as possible; we will, anyway, and it's nice to save
 oneself from public embarrassment.
 
 If using gcc, you can add the C<-std=c89> option which will hopefully
@@ -2681,25 +2681,25 @@ Third Degree greatly slows down the execution: seconds become minutes,
 minutes become hours.  For example as of Perl 5.8.1, the
 ext/Encode/t/Unicode.t takes extraordinarily long to complete under
 e.g. Purify, Third Degree, and valgrind.  Under valgrind it takes more
-than six hours, even on a snappy computer-- the said test must be
+than six hours, even on a snappy computer. The said test must be
 doing something that is quite unfriendly for memory debuggers.  If you
 don't feel like waiting, that you can simply kill away the perl
 process.
 
 B<NOTE 2>: To minimize the number of memory leak false alarms (see
-L</PERL_DESTRUCT_LEVEL> for more information), you have to have
-environment variable PERL_DESTRUCT_LEVEL set to 2.  The F<TEST>
-and harness scripts do that automatically.  But if you are running
-some of the tests manually-- for csh-like shells:
+L</PERL_DESTRUCT_LEVEL> for more information), you have to set the
+environment variable PERL_DESTRUCT_LEVEL to 2. 
+
+For csh-like shells:
 
     setenv PERL_DESTRUCT_LEVEL 2
 
-and for Bourne-type shells:
+For Bourne-type shells:
 
     PERL_DESTRUCT_LEVEL=2
     export PERL_DESTRUCT_LEVEL
 
-or in Unixy environments you can also use the C<env> command:
+In Unixy environments you can also use the C<env> command:
 
     env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 

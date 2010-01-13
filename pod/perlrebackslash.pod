@@ -392,7 +392,7 @@ contain a hyphen, so there is no ambiguity.
 
 =head2 Assertions
 
-Assertions are conditions that have to be true -- they don't actually
+Assertions are conditions that have to be true; they don't actually
 match parts of the substring. There are six assertions that are written as
 backslash sequences.
 

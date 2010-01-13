@@ -1286,7 +1286,7 @@ The last example should print:
 
 Notice that the final match matched C<q> instead of C<p>, which a match
 without the C<\G> anchor would have done. Also note that the final match
-did not update C<pos> -- C<pos> is only updated on a C</g> match. If the
+did not update C<pos>. C<pos> is only updated on a C</g> match. If the
 final match did indeed match C<p>, it's a good bet that you're running an
 older (pre-5.6.0) Perl.
 
@@ -1806,7 +1806,7 @@ must be sure there is a newline after it; otherwise, Perl will give the
 warning B<Can't find string terminator "END" anywhere before EOF...>.
 
 Additionally, the quoting rules for the end of string identifier are not
-related to Perl's quoting rules -- C<q()>, C<qq()>, and the like are not
+related to Perl's quoting rules. C<q()>, C<qq()>, and the like are not
 supported in place of C<''> and C<"">, and the only interpolation is for
 backslashing the quoting character:
 
@@ -2070,7 +2070,7 @@ which are processed further.
 X<regexp, parse>
 
 Previous steps were performed during the compilation of Perl code,
-but this one happens at run time--although it may be optimized to
+but this one happens at run time, although it may be optimized to
 be calculated at compile time if appropriate.  After preprocessing
 described above, and possibly after evaluation if concatenation,
 joining, casing translation, or metaquoting are involved, the
@@ -2229,7 +2229,7 @@ is equivalent to the following Perl-like pseudo code:
 except that it isn't so cumbersome to say, and will actually work.
 It really does shift the @ARGV array and put the current filename
 into the $ARGV variable.  It also uses filehandle I<ARGV>
-internally--<> is just a synonym for <ARGV>, which
+internally. <> is just a synonym for <ARGV>, which
 is magical.  (The pseudo code above doesn't work because it treats
 <ARGV> as non-magical.)
 

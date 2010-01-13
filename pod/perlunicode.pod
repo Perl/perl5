@@ -31,7 +31,7 @@ To indicate that Perl source itself is in UTF-8, use C<use utf8;>.
 The regular expression compiler produces polymorphic opcodes.  That is,
 the pattern adapts to the data and automatically switches to the Unicode
 character scheme when presented with data that is internally encoded in
-UTF-8 -- or instead uses a traditional byte scheme when presented with
+UTF-8, or instead uses a traditional byte scheme when presented with
 byte data.
 
 =item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
@@ -857,7 +857,7 @@ two (or more) classes.
     END
     }
 
-It's important to remember not to use "&" for the first set -- that
+It's important to remember not to use "&" for the first set; that
 would be intersecting with nothing (resulting in an empty set).
 
 =head2 User-Defined Case Mappings

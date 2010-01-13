@@ -316,8 +316,8 @@ The pragmatic approach was to say "I know the risks, but prefer the
 convenience", and to do anything you wanted in your signal handler,
 and be prepared to clean up core dumps now and again.
 
-In Perl 5.7.3 and later to avoid these problems signals are
-"deferred"-- that is when the signal is delivered to the process by
+Perl 5.7.3 and later avoid these problems by "deferring" signals.
+That is, when the signal is delivered to the process by
 the system (to the C code that implements Perl) a flag is set, and the
 handler returns immediately. Then at strategic "safe" points in the
 Perl interpreter (e.g. when it is about to execute a new opcode) the

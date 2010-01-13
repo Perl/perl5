@@ -155,7 +155,7 @@ Don't put "=headI<n>" commands inside an "=over" ... "=back" region.
 And perhaps most importantly, keep the items consistent: either use
 "=item *" for all of them, to produce bullets; or use "=item 1.",
 "=item 2.", etc., to produce numbered lists; or use "=item foo",
-"=item bar", etc. -- namely, things that look nothing like bullets or
+"=item bar", etc.--namely, things that look nothing like bullets or
 numbers.
 
 If you start with bullets or numbers, stick with them, as
@@ -708,8 +708,8 @@ that could cause odd formatting.
 Older translators might add wording around an LE<lt>E<gt> link, so that
 C<LE<lt>Foo::BarE<gt>> may become "the Foo::Bar manpage", for example.
 So you shouldn't write things like C<the LE<lt>fooE<gt>
-documentation>, if you want the translated document to read sensibly
--- instead write C<the LE<lt>Foo::Bar|Foo::BarE<gt> documentation> or
+documentation>, if you want the translated document to read sensibly.
+Instead, write C<the LE<lt>Foo::Bar|Foo::BarE<gt> documentation> or
 C<LE<lt>the Foo::Bar documentation|Foo::BarE<gt>>, to control how the
 link comes out.
 

@@ -1280,7 +1280,7 @@ See L<perlipc/"Deferred Signals (Safe Signals)">.
 X<PERL_UNICODE>
 
 Equivalent to the B<-C> command-line switch.  Note that this is not
-a boolean variable-- setting this to C<"1"> is not the right way to
+a boolean variable. Setting this to C<"1"> is not the right way to
 "enable Unicode" (whatever that would mean).  You can use C<"0"> to
 "disable Unicode", though (or alternatively unset PERL_UNICODE in
 your shell before starting Perl).  See the description of the C<-C>

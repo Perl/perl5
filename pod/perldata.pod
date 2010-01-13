@@ -633,9 +633,9 @@ key/value pairs.  That's why it's good to use references sometimes.
 It is often more readable to use the C<< => >> operator between key/value
 pairs.  The C<< => >> operator is mostly just a more visually distinctive
 synonym for a comma, but it also arranges for its left-hand operand to be
-interpreted as a string -- if it's a bareword that would be a legal simple
-identifier (C<< => >> doesn't quote compound identifiers, that contain
-double colons). This makes it nice for initializing hashes:
+interpreted as a string if it's a bareword that would be a legal simple
+identifier. C<< => >> doesn't quote compound identifiers, that contain
+double colons. This makes it nice for initializing hashes:
 
     %map = (
                  red   => 0x00f,

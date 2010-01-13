@@ -833,7 +833,7 @@ original commit in the new commit message.
 =head1 GRAFTS
 
 The perl history contains one mistake which was not caught in the
-conversion -- a merge was recorded in the history between blead and
+conversion: a merge was recorded in the history between blead and
 maint-5.10 where no merge actually occurred.  Due to the nature of git,
 this is now impossible to fix in the public repository.  You can remove
 this mis-merge locally by adding the following line to your

@@ -155,8 +155,8 @@ character set.  Otherwise, it uses UTF-8.
 
 A user of Perl does not normally need to know nor care how Perl
 happens to encode its internal strings, but it becomes relevant when
-outputting Unicode strings to a stream without a PerlIO layer -- one with
-the "default" encoding.  In such a case, the raw bytes used internally
+outputting Unicode strings to a stream without a PerlIO layer (one with
+the "default" encoding).  In such a case, the raw bytes used internally
 (the native character set or UTF-8, as appropriate for each string)
 will be used, and a "Wide character" warning will be issued if those
 strings contain a character beyond 0x00FF.

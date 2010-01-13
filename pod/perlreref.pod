@@ -178,7 +178,7 @@ All are zero-width assertions.
 
 =head2 QUANTIFIERS
 
-Quantifiers are greedy by default -- match the B<longest> leftmost.
+Quantifiers are greedy by default and match the B<longest> leftmost.
 
    Maximal Minimal Possessive Allowed range
    ------- ------- ---------- -------------
@@ -194,7 +194,7 @@ The possessive forms (new in Perl 5.10) prevent backtracking: what gets
 matched by a pattern with a possessive quantifier will not be backtracked
 into, even if that causes the whole match to fail.
 
-There is no quantifier {,n} -- that gets understood as a literal string.
+There is no quantifier C<{,n}>. That's interpreted as a literal string.
 
 =head2 EXTENDED CONSTRUCTS
 

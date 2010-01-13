@@ -734,7 +734,7 @@ match).
 Closely associated with the matching variables C<$1>, C<$2>, ... are
 the I<backreferences> C<\1>, C<\2>,...  Backreferences are simply
 matching variables that can be used I<inside> a regexp.  This is a
-really nice feature -- what matches later in a regexp is made to depend on
+really nice feature; what matches later in a regexp is made to depend on
 what matched earlier in the regexp.  Suppose we wanted to look
 for doubled words in a text, like 'the the'.  The following regexp finds
 all 3-letter doubles with a space in between:
@@ -787,10 +787,10 @@ tempted to use it as a part of some other pattern:
         print "bad line: '$line'\n";
     }
 
-But this doesn't match -- at least not the way one might expect. Only
+But this doesn't match, at least not the way one might expect. Only
 after inserting the interpolated C<$a99a> and looking at the resulting
 full text of the regexp is it obvious that the backreferences have
-backfired -- the subexpression C<(\w+)> has snatched number 1 and
+backfired. The subexpression C<(\w+)> has snatched number 1 and
 demoted the groups in C<$a99a> by one rank. This can be avoided by
 using relative backreferences:
 
@@ -1059,7 +1059,7 @@ satisfied.
 
 =back
 
-As we have seen above, Principle 0 overrides the others -- the regexp
+As we have seen above, Principle 0 overrides the others. The regexp
 will be matched as early as possible, with the other principles
 determining how the regexp matches at that earliest character
 position.
@@ -2487,8 +2487,8 @@ example:
                                             # but _does_ print
 
 Hmm. What happened here? If you've been following along, you know that
-the above pattern should be effectively (almost) the same as the last one --
-enclosing the d in a character class isn't going to change what it
+the above pattern should be effectively (almost) the same as the last one;
+enclosing the C<d> in a character class isn't going to change what it
 matches. So why does the first not print while the second one does?
 
 The answer lies in the optimizations the regex engine makes. In the first

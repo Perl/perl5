@@ -109,7 +109,7 @@ looking for implementation details you're going to be either
 disappointed or confused.  Possibly both.
 
 This is not to say that Perl threads are completely different from
-everything that's ever come before -- they're not.  Perl's threading
+everything that's ever come before. They're not.  Perl's threading
 model owes a lot to other thread models, especially POSIX.  Just as
 Perl is not C, though, Perl threads are not POSIX threads.  So if you
 find yourself looking for mutexes, or thread priorities, it's time to
@@ -161,7 +161,7 @@ make threaded programming easier.
 
 =head2 Basic Thread Support
 
-Thread support is a Perl compile-time option -- it's something that's
+Thread support is a Perl compile-time option. It's something that's
 turned on or off when Perl is built at your site, rather than when
 your programs are compiled. If your Perl wasn't compiled with thread
 support enabled, then any attempt to use threads will fail.
@@ -1003,7 +1003,7 @@ all the variables and data of the parent thread has to be taken. Thus,
 thread creation can be quite expensive, both in terms of memory usage and
 time spent in creation. The ideal way to reduce these costs is to have a
 relatively short number of long-lived threads, all created fairly early
-on -- before the base thread has accumulated too much data. Of course, this
+on (before the base thread has accumulated too much data). Of course, this
 may not always be possible, so compromises have to be made. However, after
 a thread has been created, its performance and extra memory usage should
 be little different than ordinary code.
@@ -1049,9 +1049,8 @@ Whether various library calls are thread-safe is outside the control
 of Perl.  Calls often suffering from not being thread-safe include:
 C<localtime()>, C<gmtime()>,  functions fetching user, group and
 network information (such as C<getgrent()>, C<gethostent()>,
-C<getnetent()> and so on), C<readdir()>,
-C<rand()>, and C<srand()> -- in general, calls that depend on some global
-external state.
+C<getnetent()> and so on), C<readdir()>, C<rand()>, and C<srand()>. In
+general, calls that depend on some global external state.
 
 If the system Perl is compiled in has thread-safe variants of such
 calls, they will be used.  Beyond that, Perl is at the mercy of

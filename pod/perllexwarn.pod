@@ -91,7 +91,7 @@ a block of code. You might expect this to be enough to do the trick:
      }
 
 When this code is run with the B<-w> flag, a warning will be produced
-for the C<$a> line -- C<"Reversed += operator">.
+for the C<$a> line:  C<"Reversed += operator">.
 
 The problem is that Perl has both compile-time and run-time warnings. To
 disable compile-time warnings you need to rewrite the code like this:
@@ -177,7 +177,7 @@ will work unchanged.
 
 =item 2.
 
-The B<-w> flag just sets the global C<$^W> variable as in 5.005 -- this
+The B<-w> flag just sets the global C<$^W> variable as in 5.005. This
 means that any legacy code that currently relies on manipulating C<$^W>
 to control warning behavior will still work as is. 
 

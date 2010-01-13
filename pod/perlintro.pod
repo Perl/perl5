@@ -188,7 +188,7 @@ of elements in the array:
     if (@animals < 5) { ... }
 
 The elements we're getting from the array start with a C<$> because
-we're getting just a single value out of the array -- you ask for a scalar,
+we're getting just a single value out of the array; you ask for a scalar,
 you get a scalar.
 
 To get multiple values from an array:
@@ -443,7 +443,7 @@ before 99).
     !   not
 
 (C<and>, C<or> and C<not> aren't just in the above table as descriptions
-of the operators -- they're also supported as operators in their own
+of the operators. They're also supported as operators in their own
 right.  They're more readable than the C-style operators, but have
 different precedence to C<&&> and friends.  Check L<perlop> for more
 detail.)

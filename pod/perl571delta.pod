@@ -935,7 +935,7 @@ machines (Perl's malloc is mostly tuned for space).
 
 Many new tests have been added.  The most notable is probably the
 lib/1_compile: it is very notable because running it takes quite a
-long time -- it test compiles all the Perl modules in the distribution.
+long time. It test compiles all the Perl modules in the distribution.
 Please be patient.
 
 =head1 Known Problems

@@ -786,7 +786,7 @@ to survive its use on the stack you need not do any mortalization.
 If you are not sure then doing an C<SvREFCNT_inc> and C<sv_2mortal>, or
 making a C<sv_mortalcopy> is safer.
 
-The mortal routines are not just for SVs -- AVs and HVs can be
+The mortal routines are not just for SVs; AVs and HVs can be
 made mortal by passing their address (type-casted to C<SV*>) to the
 C<sv_2mortal> or C<sv_mortalcopy> routines.
 
@@ -1624,11 +1624,10 @@ and C<dXSTARG>.
 =head2 Scratchpads
 
 The question remains on when the SVs which are I<target>s for opcodes
-are created. The answer is that they are created when the current unit --
-a subroutine or a file (for opcodes for statements outside of
-subroutines) -- is compiled. During this time a special anonymous Perl
-array is created, which is called a scratchpad for the current
-unit.
+are created. The answer is that they are created when the current
+unit--a subroutine or a file (for opcodes for statements outside of
+subroutines)--is compiled. During this time a special anonymous Perl
+array is created, which is called a scratchpad for the current unit.
 
 A scratchpad keeps SVs which are lexicals for the current unit and are
 targets for opcodes. One can deduce that an SV lives on a scratchpad

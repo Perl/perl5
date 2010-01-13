@@ -30,7 +30,7 @@ it implicates that such an option I<may> be provided.
 
 =head1 Pod Definitions
 
-Pod is embedded in files, typically Perl source files -- although you
+Pod is embedded in files, typically Perl source files, although you
 can write a file that's nothing but Pod.
 
 A B<line> in a file consists of zero or more non-newline characters,
@@ -49,7 +49,7 @@ A B<non-blank line> is a line containing one or more characters other
 than space or tab (and terminated by a newline or end-of-file).
 
 (I<Note:> Many older Pod parsers did not accept a line consisting of
-spaces/tabs and then a newline as a blank line -- the only lines they
+spaces/tabs and then a newline as a blank line. The only lines they
 considered blank were lines consisting of I<no characters at all>,
 terminated by a newline.)
 
@@ -70,7 +70,7 @@ etc.).
 
 Pod content is contained in B<Pod blocks>.  A Pod block starts with a
 line that matches <m/\A=[a-zA-Z]/>, and continues up to the next line
-that matches C<m/\A=cut/> -- or up to the end of the file, if there is
+that matches C<m/\A=cut/> or up to the end of the file if there is
 no C<m/\A=cut/> line.
 
 =for comment
@@ -132,7 +132,7 @@ I<Some> command paragraphs allow formatting codes in their content
 
 In other words, the Pod processing handler for "head1" will apply the
 same processing to "Did You Remember to CE<lt>use strict;>?" that it
-would to an ordinary paragraph -- i.e., formatting codes (like
+would to an ordinary paragraph (i.e., formatting codes like
 "CE<lt>...>") are parsed and presumably formatted appropriately, and
 whitespace in the form of literal spaces and/or tabs is not
 significant.
@@ -415,7 +415,7 @@ formatting code.  Examples:
     B<< $foo->bar(); >>
 
 With this syntax, the whitespace character(s) after the "CE<lt><<"
-and before the ">>" (or whatever letter) are I<not> renderable -- they
+and before the ">>" (or whatever letter) are I<not> renderable. They
 do not signify whitespace, are merely part of the formatting codes
 themselves.  That is, these are all synonymous:
 
@@ -1121,14 +1121,14 @@ link text.  Note that link text may contain formatting.)
 
 =item Second:
 
-The possibly inferred link-text -- i.e., if there was no real link
+The possibly inferred link-text; i.e., if there was no real link
 text, then this is the text that we'll infer in its place.  (E.g., for
 "LE<lt>Getopt::Std>", the inferred link text is "Getopt::Std".)
 
 =item Third:
 
 The name or URL, or undef if none.  (E.g., in "LE<lt>Perl
-Functions|perlfunc>", the name -- also sometimes called the page --
+Functions|perlfunc>", the name (also sometimes called the page)
 is "perlfunc".  In "LE<lt>/CAVEATS>", the name is undef.)
 
 =item Fourth:
@@ -1302,9 +1302,8 @@ for formatting or for EE<lt>...> escapes, as in:
   L<B<ummE<234>stuff>|...>
 
 For C<LE<lt>...E<gt>> codes without a "name|" part, only
-C<EE<lt>...E<gt>> and C<ZE<lt>E<gt>> codes may occur -- no
-other formatting codes.  That is, authors should not use
-"C<LE<lt>BE<lt>Foo::BarE<gt>E<gt>>".
+C<EE<lt>...E<gt>> and C<ZE<lt>E<gt>> codes may occur.  That is,
+authors should not use "C<LE<lt>BE<lt>Foo::BarE<gt>E<gt>>".
 
 Note, however, that formatting codes and ZE<lt>>'s can occur in any
 and all parts of an LE<lt>...> (i.e., in I<name>, I<section>, I<text>,
@@ -1874,7 +1873,7 @@ currently open region has the formatname "inner", not "outer".  (It just
 happens that "outer" is the format name of a higher-up region.)  This is
 an error.  Processors must by default report this as an error, and may halt
 processing the document containing that error.  A corollary of this is that
-regions cannot "overlap" -- i.e., the latter block above does not represent
+regions cannot "overlap". That is, the latter block above does not represent
 a region called "outer" which contains X and Y, overlapping a region called
 "inner" which contains Y and Z.  But because it is invalid (as all
 apparently overlapping regions would be), it doesn't represent that, or

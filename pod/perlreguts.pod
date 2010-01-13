@@ -685,7 +685,7 @@ that is a permissive version of Unicode's UTF-8 encoding[2]. This uses single
 bytes to represent characters from the ASCII character set, and sequences
 of two or more bytes for all other characters. (See L<perlunitut>
 for more information about the relationship between UTF-8 and perl's
-encoding, utf8 -- the difference isn't important for this discussion.)
+encoding, utf8. The difference isn't important for this discussion.)
 
 No matter how you look at it, Unicode support is going to be a pain in a
 regex engine. Tricks that might be fine when you have 256 possible

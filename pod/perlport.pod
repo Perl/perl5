@@ -452,7 +452,7 @@ Don't count on per-program environment variables, or per-program current
 directories.
 
 Don't count on specific values of C<$!>, neither numeric nor
-especially the strings values-- users may switch their locales causing
+especially the strings values. Users may switch their locales causing
 error messages to be translated into their languages.  If you can
 trust a POSIXish environment, you can portably use the symbols defined
 by the Errno module, like ENOENT.  And don't trust on the values of C<$!>
@@ -518,13 +518,13 @@ Don't assume that you can ping hosts and get replies.
 
 Don't assume that any particular port (service) will respond.
 
-Don't assume that Sys::Hostname (or any other API or command)
-returns either a fully qualified hostname or a non-qualified hostname:
-it all depends on how the system had been configured.  Also remember
-things like DHCP and NAT-- the hostname you get back might not be very
-useful.
+Don't assume that Sys::Hostname (or any other API or command) returns
+either a fully qualified hostname or a non-qualified hostname: it all
+depends on how the system had been configured.  Also remember that for
+things such as DHCP and NAT, the hostname you get back might not be
+very useful.
 
-All the above "don't":s may look daunting, and they are -- but the key
+All the above "don't":s may look daunting, and they are, but the key
 is to degrade gracefully if one cannot reach the particular network
 service one wants.  Croaking or hanging do not look very professional.
 
@@ -706,8 +706,8 @@ more efficient that the first.
 =head2 Security
 
 Most multi-user platforms provide basic levels of security, usually
-implemented at the filesystem level.  Some, however, do
-not-- unfortunately.  Thus the notion of user id, or "home" directory,
+implemented at the filesystem level.  Some, however, unfortunately do
+not.  Thus the notion of user id, or "home" directory,
 or even the state of being logged-in, may be unrecognizable on many
 platforms.  If you write programs that are security-conscious, it
 is usually best to know what type of system you will be running
@@ -721,7 +721,7 @@ their semantics might be different.
 
 (From security viewpoint testing for permissions before attempting to
 do something is silly anyway: if one tries this, there is potential
-for race conditions-- someone or something might change the
+for race conditions. Someone or something might change the
 permissions between the permissions check and the actual operation.
 Just try the operation.)
 

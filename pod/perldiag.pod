@@ -115,8 +115,8 @@ which 'splits' output into two streams, such as
 (W misc) The pattern match (C<//>), substitution (C<s///>), and
 transliteration (C<tr///>) operators work on scalar values.  If you apply
 one of them to an array or a hash, it will convert the array or hash to
-a scalar value -- the length of an array, or the population info of a
-hash -- and then work on that scalar value.  This is probably not what
+a scalar value (the length of an array, or the population info of a
+hash) and then work on that scalar value.  This is probably not what
 you meant to do.  See L<perlfunc/grep> and L<perlfunc/map> for
 alternatives.
 
