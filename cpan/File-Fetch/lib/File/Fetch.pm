@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.22';
+$VERSION        = '0.24';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -178,13 +178,13 @@ result of $ff->output_file will be used.
         bless $args, $class;
     
         if( lc($args->scheme) ne 'file' and not $args->host ) {
-            return File::Fetch->_error(loc(
+            return $class->_error(loc(
                 "Hostname required when fetching from '%1'",$args->scheme));
         }
         
         for (qw[path file]) {
             unless( $args->$_() ) { # 5.5.x needs the ()
-                return File::Fetch->_error(loc("No '%1' specified",$_));
+                return $class->_error(loc("No '%1' specified",$_));
             }
         }
         
@@ -275,10 +275,10 @@ sub new {
     check( $tmpl, \%hash ) or return;
 
     ### parse the uri to usable parts ###
-    my $href    = __PACKAGE__->_parse_uri( $uri ) or return;
+    my $href    = $class->_parse_uri( $uri ) or return;
 
     ### make it into a FFI object ###
-    my $ff      = File::Fetch->_create( %$href ) or return;
+    my $ff      = $class->_create( %$href ) or return;
 
 
     ### return the object ###
