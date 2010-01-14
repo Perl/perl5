@@ -1172,7 +1172,7 @@ XS(XS_re_regexp_pattern)
 
     if ((re = SvRX(ST(0)))) /* assign deliberate */
     {
-        /* Housten, we have a regex! */
+        /* Houston, we have a regex! */
         SV *pattern;
         STRLEN left = 0;
         char reflags[6];
