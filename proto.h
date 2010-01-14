@@ -2383,6 +2383,11 @@ PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv
 #define PERL_ARGS_ASSERT_SCAN_VERSION	\
 	assert(s); assert(rv)
 
+PERL_CALLCONV const char*	Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_period, int *swidth, bool *salpha)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PRESCAN_VERSION	\
+	assert(s)
+
 PERL_CALLCONV SV*	Perl_new_version(pTHX_ SV *ver)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEW_VERSION	\
@@ -5800,6 +5805,11 @@ STATIC void	S_force_next(pTHX_ I32 type);
 STATIC char*	S_force_version(pTHX_ char *s, int guessing)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FORCE_VERSION	\
+	assert(s)
+
+STATIC char*	S_force_strict_version(pTHX_ char *s)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FORCE_STRICT_VERSION	\
 	assert(s)
 
 STATIC char*	S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack, int allow_tick)

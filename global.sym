@@ -376,6 +376,7 @@ Perl_newWHILEOP
 Perl_new_stackinfo
 Perl_scan_vstring
 Perl_scan_version
+Perl_prescan_version
 Perl_new_version
 Perl_upg_version
 Perl_vverify

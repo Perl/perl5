@@ -546,10 +546,10 @@ XS(XS_version_new)
 		? HvNAME(SvSTASH(SvRV(ST(0))))
 		: (char *)SvPV_nolen(ST(0));
 
-	if ( items == 1 || vs == &PL_sv_undef ) { /* no param or explicit undef */
+	if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
 	    /* create empty object */
 	    vs = sv_newmortal();
-	    sv_setpvs(vs,"");
+	    sv_setpvs(vs, "undef");
 	}
 	else if ( items == 3 ) {
 	    vs = sv_newmortal();
@@ -659,7 +659,7 @@ XS(XS_version_vcmp)
 
 	       if ( ! sv_derived_from(robj, "version") )
 	       {
-		    robj = new_version(robj);
+		    robj = new_version(SvOK(robj) ? robj : newSVpvs("undef"));
 	       }
 	       rvs = SvRV(robj);
 
@@ -743,7 +743,7 @@ XS(XS_version_qv)
 	SV * ver = ST(0);
 	SV * rv;
 	const char * classname = "";
-	if ( items == 2 && (ST(1)) != &PL_sv_undef ) {
+	if ( items == 2 && SvOK(ST(1)) ) {
 	    /* getting called as object or class method */
 	    ver = ST(1);
 	    classname = 

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..22\n";
+print "1..14\n";
 
 $blurfl = 123;
 $foo = 3;
@@ -72,35 +72,3 @@ package bug32562;
 print       __PACKAGE__  eq 'bug32562' ? "ok 13\n" : "not ok 13\n";
 print eval '__PACKAGE__' eq 'bug32562' ? "ok 14\n" : "not ok 14\n";
 
-# test: package NAME VERSION
-
-my @variations = (
-  '1.00',
-  '1.00_01',
-  'v1.2.3',
-  'v1.2_3',
-);
-
-my $test_count = 15;
-
-for my $v ( @variations ) {
-  my $ok = eval "package withversion $v; $v eq \$withversion::VERSION";
-  print $ok ? "ok $test_count\n" : "not ok $test_count\n";
-  $test_count++;
-}
-
-eval q/package Foo Bar/;
-$@ =~ /syntax error/ or print "not ";
-print "ok $test_count\n"; $test_count++;
-
-eval q/package Foo 1a/;
-$@ =~ /syntax error/ or print "not ";
-print "ok $test_count\n"; $test_count++;
-
-eval q/package Foo v/;
-$@ =~ /syntax error/ or print "not ";
-print "ok $test_count\n"; $test_count++;
-
-eval q/package Foo $foo/;
-$@ =~ /syntax error/ or print "not ";
-print "ok $test_count\n"; $test_count++;

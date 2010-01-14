@@ -4181,6 +4181,205 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 }
 
 #define VERSION_MAX 0x7FFFFFFF
+
+const char *
+Perl_prescan_version(pTHX_ const char *s, bool strict,
+		     const char **errstr,
+		     bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha) {
+    bool qv = (sqv ? *sqv : FALSE);
+    int width = 3;
+    int saw_decimal = 0;
+    bool alpha = FALSE;
+    const char *d = s;
+
+    PERL_ARGS_ASSERT_PRESCAN_VERSION;
+
+    if (qv && isDIGIT(*d))
+	goto dotted_decimal_version;
+
+    if (*d == 'v') { /* explicit v-string */
+	d++;
+	if (isDIGIT(*d)) {
+	    qv = TRUE;
+	}
+	else { /* degenerate v-string */
+	    /* requires v1.2.3 */
+	    BADVERSION(s,errstr,"Invalid version format (dotted-decimal versions require at least three parts)");
+	}
+
+dotted_decimal_version:
+	if (strict && d[0] == '0' && isDIGIT(d[1])) {
+	    /* no leading zeros allowed */
+	    BADVERSION(s,errstr,"Invalid version format (no leading zeros)");
+	}
+
+	while (isDIGIT(*d)) 	/* integer part */
+	    d++;
+
+	if (*d == '.')
+	{
+	    saw_decimal++;
+	    d++; 		/* decimal point */
+	}
+	else
+	{
+	    if (strict) {
+		/* require v1.2.3 */
+		BADVERSION(s,errstr,"Invalid version format (dotted-decimal versions require at least three parts)");
+	    }
+	    else {
+		goto version_prescan_finish;
+	    }
+	}
+
+	{
+	    int i = 0;
+	    int j = 0;
+	    while (isDIGIT(*d)) {	/* just keep reading */
+		i++;
+		while (isDIGIT(*d)) {
+		    d++; j++;
+		    /* maximum 3 digits between decimal */
+		    if (strict && j > 3) {
+			BADVERSION(s,errstr,"Invalid version format (maximum 3 digits between decimals)");
+		    }
+		}
+		if (*d == '_') {
+		    if (strict) {
+			BADVERSION(s,errstr,"Invalid version format (no underscores)");
+		    }
+		    if ( alpha ) {
+			BADVERSION(s,errstr,"Invalid version format (multiple underscores)");
+		    }
+		    d++;
+		    alpha = TRUE;
+		}
+		else if (*d == '.') {
+		    if (alpha) {
+			BADVERSION(s,errstr,"Invalid version format (underscores before decimal)");
+		    }
+		    saw_decimal++;
+		    d++;
+		}
+		else if (!isDIGIT(*d)) {
+		    break;
+		}
+		j = 0;
+	    }
+
+	    if (strict && i < 2) {
+		/* requires v1.2.3 */
+		BADVERSION(s,errstr,"Invalid version format (dotted-decimal versions require at least three parts)");
+	    }
+	}
+    } 					/* end if dotted-decimal */
+    else
+    {					/* decimal versions */
+	/* special strict case for leading '.' or '0' */
+	if (strict) {
+	    if (*d == '.') {
+		BADVERSION(s,errstr,"Invalid version format (0 before decimal required)");
+	    }
+	    if (*d == '0' && isDIGIT(d[1])) {
+		BADVERSION(s,errstr,"Invalid version format (no leading zeros)");
+	    }
+	}
+
+	/* consume all of the integer part */
+	while (isDIGIT(*d))
+	    d++;
+
+	/* look for a fractional part */
+	if (*d == '.') {
+	    /* we found it, so consume it */
+	    saw_decimal++;
+	    d++;
+	}
+	else if (!*d || *d == ';' || isSPACE(*d) || *d == '}') {
+	    if ( d == s ) {
+		/* found nothing */
+		BADVERSION(s,errstr,"Invalid version format (version required)");
+	    }
+	    /* found just an integer */
+	    goto version_prescan_finish;
+	}
+	else if ( d == s ) {
+	    /* didn't find either integer or period */
+	    BADVERSION(s,errstr,"Invalid version format (non-numeric data)");
+	}
+	else if (*d == '_') {
+	    /* underscore can't come after integer part */
+	    if (strict) {
+		BADVERSION(s,errstr,"Invalid version format (no underscores)");
+	    }
+	    else if (isDIGIT(d[1])) {
+		BADVERSION(s,errstr,"Invalid version format (alpha without decimal)");
+	    }
+	    else {
+		BADVERSION(s,errstr,"Invalid version format (misplaced underscore)");
+	    }
+	}
+	else {
+	    /* anything else after integer part is just invalid data */
+	    BADVERSION(s,errstr,"Invalid version format (non-numeric data)");
+	}
+
+	/* scan the fractional part after the decimal point*/
+
+	if (!isDIGIT(*d) && (strict || ! (!*d || *d == ';' || isSPACE(*d) || *d == '}') )) {
+		/* strict or lax-but-not-the-end */
+		BADVERSION(s,errstr,"Invalid version format (fractional part required)");
+	}
+
+	while (isDIGIT(*d)) {
+	    d++;
+	    if (*d == '.' && isDIGIT(d[-1])) {
+		if (alpha) {
+		    BADVERSION(s,errstr,"Invalid version format (underscores before decimal)");
+		}
+		if (strict) {
+		    BADVERSION(s,errstr,"Invalid version format (dotted-decimal versions must begin with 'v')");
+		}
+		d = (char *)s; 		/* start all over again */
+		qv = TRUE;
+		goto dotted_decimal_version;
+	    }
+	    if (*d == '_') {
+		if (strict) {
+		    BADVERSION(s,errstr,"Invalid version format (no underscores)");
+		}
+		if ( alpha ) {
+		    BADVERSION(s,errstr,"Invalid version format (multiple underscores)");
+		}
+		if ( ! isDIGIT(d[1]) ) {
+		    BADVERSION(s,errstr,"Invalid version format (misplaced underscore)");
+		}
+		d++;
+		alpha = TRUE;
+	    }
+	}
+    }
+
+version_prescan_finish:
+    while (isSPACE(*d))
+	d++;
+
+    if (!isDIGIT(*d) && (! (!*d || *d == ';' || *d == '}') )) {
+	/* trailing non-numeric data */
+	BADVERSION(s,errstr,"Invalid version format (non-numeric data)");
+    }
+
+    if (sqv)
+	*sqv = qv;
+    if (swidth)
+	*swidth = width;
+    if (ssaw_decimal)
+	*ssaw_decimal = saw_decimal;
+    if (salpha)
+	*salpha = alpha;
+    return d;
+}
+
 /*
 =for apidoc scan_version
 
@@ -4209,9 +4408,10 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     const char *start;
     const char *pos;
     const char *last;
-    int saw_period = 0;
-    int alpha = 0;
+    const char *errstr = NULL;
+    int saw_decimal = 0;
     int width = 3;
+    bool alpha = FALSE;
     bool vinf = FALSE;
     AV * const av = newAV();
     SV * const hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
@@ -4220,54 +4420,24 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 
     (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 
+#ifndef NODEFAULT_SHAREKEYS
+    HvSHAREKEYS_on(hv);         /* key-sharing on by default */
+#endif
+
     while (isSPACE(*s)) /* leading whitespace is OK */
 	s++;
 
-    start = last = s;
-
-    if (*s == 'v') {
-	s++;  /* get past 'v' */
-	qv = 1; /* force quoted version processing */
+    last = prescan_version(s, FALSE, &errstr, &qv, &saw_decimal, &width, &alpha);
+    if (errstr) {
+	/* "undef" is a special case and not an error */
+	if ( ! ( *s == 'u' && strEQ(s,"undef")) ) {
+	    Perl_croak(aTHX_ "%s", errstr);
+	}
     }
 
-    pos = s;
-
-    /* pre-scan the input string to check for decimals/underbars */
-    while ( *pos == '.' || *pos == '_' || *pos == ',' || isDIGIT(*pos) )
-    {
-	if ( *pos == '.' )
-	{
-	    if ( alpha )
-		Perl_croak(aTHX_ "Invalid version format (underscores before decimal)");
-	    saw_period++ ;
-	    last = pos;
-	}
-	else if ( *pos == '_' )
-	{
-	    if ( alpha )
-		Perl_croak(aTHX_ "Invalid version format (multiple underscores)");
-	    alpha = 1;
-	    width = pos - last - 1; /* natural width of sub-version */
-	}
-	else if ( *pos == ',' && isDIGIT(pos[1]) )
-	{
-	    saw_period++ ;
-	    last = pos;
-	}
-
-	pos++;
-    }
-
-    if ( alpha && !saw_period )
-	Perl_croak(aTHX_ "Invalid version format (alpha without decimal)");
-
-    if ( alpha && saw_period && width == 0 )
-	Perl_croak(aTHX_ "Invalid version format (misplaced _ in number)");
-
-    if ( saw_period > 1 )
-	qv = 1; /* force quoted version processing */
-
-    last = pos;
+    start = s;
+    if (*s == 'v')
+	s++;
     pos = s;
 
     if ( qv )
@@ -4294,7 +4464,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 		 * point of a version originally created with a bare
 		 * floating point number, i.e. not quoted in any way
 		 */
- 		if ( !qv && s > start && saw_period == 1 ) {
+		if ( !qv && s > start && saw_decimal == 1 ) {
 		    mult *= 100;
  		    while ( s < end ) {
 			orev = rev;
@@ -4384,7 +4554,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     }
     else if ( s > start ) {
 	SV * orig = newSVpvn(start,s-start);
-	if ( qv && saw_period == 1 && *start != 'v' ) {
+	if ( qv && saw_decimal == 1 && *start != 'v' ) {
 	    /* need to insert a v to be consistent */
 	    sv_insert(orig, 0, 0, "v", 1);
 	}
@@ -4433,6 +4603,9 @@ Perl_new_version(pTHX_ SV *ver)
 	/* This will get reblessed later if a derived class*/
 	SV * const hv = newSVrv(rv, "version"); 
 	(void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
+#ifndef NODEFAULT_SHAREKEYS
+	HvSHAREKEYS_on(hv);         /* key-sharing on by default */
+#endif
 
 	if ( SvROK(ver) )
 	    ver = SvRV(ver);
@@ -4475,7 +4648,7 @@ Perl_new_version(pTHX_ SV *ver)
 	    char * const version = savepvn( (const char*)mg->mg_ptr, len);
 	    sv_setpvn(rv,version,len);
 	    /* this is for consistency with the pure Perl class */
-	    if ( *version != 'v' ) 
+	    if ( isDIGIT(*version) )
 		sv_insert(rv, 0, 0, "v", 1);
 	    Safefree(version);
 	}
@@ -4530,7 +4703,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #ifdef SvVOK
     else if ( (mg = SvVSTRING_mg(ver)) ) { /* already a v-string */
 	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
-	qv = 1;
+	qv = TRUE;
     }
 #endif
     else /* must be a string or something like a string */
@@ -4540,12 +4713,14 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #ifndef SvVOK
 #  if PERL_VERSION > 5
 	/* This will only be executed for 5.6.0 - 5.8.0 inclusive */
-	if ( len == 3 && !instr(version,".") && !instr(version,"_") ) {
+	if ( len >= 3 && !instr(version,".") && !instr(version,"_")
+	    && !(*version == 'u' && strEQ(version, "undef"))
+	    && (*version < '0' || *version > '9') ) {
 	    /* may be a v-string */
 	    SV * const nsv = sv_newmortal();
 	    const char *nver;
 	    const char *pos;
-	    int saw_period = 0;
+	    int saw_decimal = 0;
 	    sv_setpvf(nsv,"v%vd",ver);
 	    pos = nver = savepv(SvPV_nolen(nsv));
 
@@ -4553,12 +4728,12 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	    pos++; /* skip the leading 'v' */
 	    while ( *pos == '.' || isDIGIT(*pos) ) {
 		if ( *pos == '.' )
-		    saw_period++ ;
+		    saw_decimal++ ;
 		pos++;
 	    }
 
 	    /* is definitely a v-string */
-	    if ( saw_period == 2 ) {	
+	    if ( saw_decimal >= 2 ) {
 		Safefree(version);
 		version = nver;
 	    }

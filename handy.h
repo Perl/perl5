@@ -656,6 +656,18 @@ US-ASCII (Basic Latin) range are viewed as not having any case.
 typedef U32 line_t;
 #define NOLINE ((line_t) 4294967295UL)
 
+/* Helpful alias for version prescan */
+#define is_LAX_VERSION(a,b) \
+	(a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
+
+#define is_STRICT_VERSION(a,b) \
+	(a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
+
+#define BADVERSION(a,b,c) \
+	if (b) { \
+	    *b = c; \
+	} \
+	return a;
 
 /*
 =head1 Memory Management
