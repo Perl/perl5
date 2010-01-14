@@ -1,3 +1,7 @@
+2.21 Thu Jan 14 2010
+    fix [perl #72068]: An anonymous sub created by the Safe container will have
+    bogus arguments passed to it.
+
 2.20 Tue Dec 1 2009
     fix [rt.cpan.org #51574] Safe.pm sort {} bug accessing $a and $b with
         -Dusethreads (Tim Bunce)
