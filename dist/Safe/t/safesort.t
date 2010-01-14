@@ -19,7 +19,7 @@ my $func = $safe->reval(q{ sub { @_ } });
 is_deeply [ $func->() ], [ ];
 is_deeply [ $func->("foo") ], [ "foo" ];
 
-my $func = $safe->reval(<<'EOS');
+$func = $safe->reval(<<'EOS');
 
     # uses quotes in { "$a" <=> $b } to avoid the optimizer replacing the block
     # with a hardwired comparison
@@ -33,6 +33,6 @@ EOS
 is $@, '', 'reval should not fail';
 is ref $func, 'CODE', 'reval should return a CODE ref';
 
-my ($l_sorted, $p_sorted) = $func->(@_);
+my ($l_sorted, $p_sorted) = $func->(1,2,3);
 is $l_sorted, "1,2,3";
 is $p_sorted, "1,2,3";
