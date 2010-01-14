@@ -2481,7 +2481,7 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
-    LEAVE_with_name("sub");
+    LEAVE;
     cxstack_ix--;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -2542,7 +2542,7 @@ PP(pp_leavesublv)
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
 	if (!CvLVALUE(cx->blk_sub.cv)) {
-	    LEAVE_with_name("sub");
+	    LEAVE;
 	    cxstack_ix--;
 	    POPSUB(cx,sv);
 	    PL_curpm = newpm;
@@ -2557,7 +2557,7 @@ PP(pp_leavesublv)
 		 * of a tied hash or array */
 		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY) &&
 		    !(SvRMAGICAL(TOPs) && mg_find(TOPs, PERL_MAGIC_tiedelem))) {
-		    LEAVE_with_name("sub");
+		    LEAVE;
 		    cxstack_ix--;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
@@ -2573,7 +2573,7 @@ PP(pp_leavesublv)
 		}
 	    }
 	    else {			/* Should not happen? */
-		LEAVE_with_name("sub");
+		LEAVE;
 		cxstack_ix--;
 		POPSUB(cx,sv);
 		PL_curpm = newpm;
@@ -2590,7 +2590,7 @@ PP(pp_leavesublv)
 		    && SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
-		    LEAVE_with_name("sub");
+		    LEAVE;
 		    cxstack_ix--;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
@@ -2645,7 +2645,7 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
-    LEAVE_with_name("sub");
+    LEAVE;
     cxstack_ix--;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -2675,7 +2675,7 @@ PP(pp_entersub)
 	    cv = sv_2cv(sv, &stash, &gv, 0);
 	}
 	if (!cv) {
-	    ENTER_with_name("sub");
+	    ENTER;
 	    SAVETMPS;
 	    goto try_autoload;
 	}
@@ -2729,7 +2729,7 @@ PP(pp_entersub)
 	break;
     }
 
-    ENTER_with_name("sub");
+    ENTER;
     SAVETMPS;
 
   retry:
@@ -2889,7 +2889,7 @@ try_autoload:
 		*(PL_stack_base + markix) = *PL_stack_sp;
 	    PL_stack_sp = PL_stack_base + markix;
 	}
-	LEAVE_with_name("sub");
+	LEAVE;
 	return NORMAL;
     }
 }

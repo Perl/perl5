@@ -1881,7 +1881,7 @@ PP(pp_dbstate)
 	    /* don't do recursive DB::DB call */
 	    return NORMAL;
 
-	ENTER_with_name("sub");
+	ENTER;
 	SAVETMPS;
 
 	SAVEI32(PL_debug);
@@ -1896,7 +1896,7 @@ PP(pp_dbstate)
 	    (void)(*CvXSUB(cv))(aTHX_ cv);
 	    CvDEPTH(cv)--;
 	    FREETMPS;
-	    LEAVE_with_name("sub");
+	    LEAVE;
 	    return NORMAL;
 	}
 	else {
@@ -2559,7 +2559,7 @@ PP(pp_goto)
 		PUSHMARK(mark);
 		PUTBACK;
 		(void)(*CvXSUB(cv))(aTHX_ cv);
-		LEAVE_with_name("sub");
+		LEAVE;
 		return retop;
 	    }
 	    else {
