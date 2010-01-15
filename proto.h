@@ -2383,7 +2383,7 @@ PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv
 #define PERL_ARGS_ASSERT_SCAN_VERSION	\
 	assert(s); assert(rv)
 
-PERL_CALLCONV const char*	Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_period, int *swidth, bool *salpha)
+PERL_CALLCONV const char*	Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PRESCAN_VERSION	\
 	assert(s)

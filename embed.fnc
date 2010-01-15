@@ -746,7 +746,8 @@ Ap	|char*	|scan_vstring	|NN const char *s|NN const char *const e \
 				|NN SV *sv
 Apd	|const char*	|scan_version	|NN const char *s|NN SV *rv|bool qv
 Apd	|const char*	|prescan_version	|NN const char *s\
-	|bool strict|NULLOK const char** errstr|bool *sqv|int *ssaw_period|int *swidth|bool *salpha
+	|bool strict|NULLOK const char** errstr|NULLOK bool *sqv\
+	|NULLOK int *ssaw_decimal|NULLOK int *swidth|NULLOK bool *salpha
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver|bool qv
 Apd	|bool	|vverify	|NN SV *vs
