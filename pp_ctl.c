@@ -3275,21 +3275,21 @@ PP(pp_require)
 			SVfARG(vnormal(PL_patchlevel)));
 		}
 		else { /* probably 'use 5.10' or 'use 5.8' */
-		    SV * hintsv = newSV(0);
+		    SV *hintsv;
 		    I32 second = 0;
 
 		    if (av_len(lav)>=1) 
 			second = SvIV(*av_fetch(lav,1,0));
 
 		    second /= second >= 600  ? 100 : 10;
-		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.%d",
-		    	(int)first, (int)second,0);
+		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
+					   (int)first, (int)second);
 		    upg_version(hintsv, TRUE);
 
 		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
 		    	"--this is only %"SVf", stopped",
 			SVfARG(vnormal(req)),
-			SVfARG(vnormal(hintsv)),
+			SVfARG(vnormal(sv_2mortal(hintsv))),
 			SVfARG(vnormal(PL_patchlevel)));
 		}
 	    }
