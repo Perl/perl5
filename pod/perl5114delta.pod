@@ -29,6 +29,13 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 Unicode properties
+
+C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>.  This
+means that in addition to the characters it currently matches,
+C<[A-Fa-f0-9]>, it will also match their fullwidth equivalent forms, for
+example U+FF10: FULLWIDTH DIGIT ZERO.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
