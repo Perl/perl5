@@ -526,6 +526,11 @@ from that type of reference to a typeglob.
 (P) Perl detected an attempt to copy a value to an internal type that cannot
 be directly assigned not.
 
+=item Cannot find encoding "%s"
+
+(S io) You tried to apply an encoding that did not exist to a filehandle,
+either with open() or binmode().
+
 =item Can only compress unsigned integers in pack
 
 (F) An argument to pack("w",...) was not an integer.  The BER compressed
