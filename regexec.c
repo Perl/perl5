@@ -2200,7 +2200,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 		RE_PV_QUOTED_DECL(quoted,do_utf8,PERL_DEBUG_PAD_ZERO(1),
 		    s,strend-s,60);
 		PerlIO_printf(Perl_debug_log,
-		    "Matching stclass %.*s against %s (%d chars)\n",
+		    "Matching stclass %.*s against %s (%d bytes)\n",
 		    (int)SvCUR(prop), SvPVX_const(prop),
 		     quoted, (int)(strend - s));
 	    }
