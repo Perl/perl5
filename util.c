@@ -4814,7 +4814,7 @@ Perl_vnumify(pTHX_ SV *vs)
     I32 i, len, digit;
     int width;
     bool alpha = FALSE;
-    SV * const sv = newSV(0);
+    SV *sv;
     AV *av;
 
     PERL_ARGS_ASSERT_VNUMIFY;
@@ -4836,19 +4836,17 @@ Perl_vnumify(pTHX_ SV *vs)
 
     /* attempt to retrieve the version array */
     if ( !(av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE))) ) ) {
-	sv_catpvs(sv,"0");
-	return sv;
+	return newSVpvs("0");
     }
 
     len = av_len(av);
     if ( len == -1 )
     {
-	sv_catpvs(sv,"0");
-	return sv;
+	return newSVpvs("0");
     }
 
     digit = SvIV(*av_fetch(av, 0, 0));
-    Perl_sv_setpvf(aTHX_ sv, "%d.", (int)PERL_ABS(digit));
+    sv = Perl_newSVpvf(aTHX_ "%d.", (int)PERL_ABS(digit));
     for ( i = 1 ; i < len ; i++ )
     {
 	digit = SvIV(*av_fetch(av, i, 0));
@@ -4895,7 +4893,7 @@ Perl_vnormal(pTHX_ SV *vs)
 {
     I32 i, len, digit;
     bool alpha = FALSE;
-    SV * const sv = newSV(0);
+    SV *sv;
     AV *av;
 
     PERL_ARGS_ASSERT_VNORMAL;
@@ -4913,11 +4911,10 @@ Perl_vnormal(pTHX_ SV *vs)
     len = av_len(av);
     if ( len == -1 )
     {
-	sv_catpvs(sv,"");
-	return sv;
+	return newSVpvs("");
     }
     digit = SvIV(*av_fetch(av, 0, 0));
-    Perl_sv_setpvf(aTHX_ sv, "v%"IVdf, (IV)digit);
+    sv = Perl_newSVpvf(aTHX_ "v%"IVdf, (IV)digit);
     for ( i = 1 ; i < len ; i++ ) {
 	digit = SvIV(*av_fetch(av, i, 0));
 	Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
