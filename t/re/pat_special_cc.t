@@ -37,6 +37,7 @@ sub run_tests {
         my @plain_complement_failed;
         for my $ord (0 .. $upper_bound) {
             my $ch= chr $ord;
+            my $ord = sprintf "U+%04X", $ord;  # For display in Unicode terms
             my $plain= $ch=~/$special/ ? 1 : 0;
             my $plain_u= $ch=~/$upper/ ? 1 : 0;
             push @plain_complement_failed, "$ord-$plain-$plain_u" if $plain == $plain_u;
