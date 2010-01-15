@@ -3079,12 +3079,12 @@ PP(pp_substr)
 {
     dVAR; dSP; dTARGET;
     SV *sv;
-    I32 len = 0;
+    IV len = 0;
     STRLEN curlen;
     STRLEN utf8_curlen;
-    I32 pos;
-    I32 rem;
-    I32 fail;
+    IV pos;
+    IV rem;
+    IV fail;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     const char *tmps;
     const I32 arybase = CopARYBASE_get(PL_curcop);
@@ -3147,7 +3147,7 @@ PP(pp_substr)
 	    rem = curlen;
 	else if (len >= 0) {
 	    rem = pos+len;
-	    if (rem > (I32)curlen)
+	    if (rem > (IV)curlen)
 		rem = curlen;
 	}
 	else {
@@ -3167,8 +3167,8 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
-	const I32 upos = pos;
-	const I32 urem = rem;
+	const IV upos = pos;
+	const IV urem = rem;
 	if (utf8_curlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
