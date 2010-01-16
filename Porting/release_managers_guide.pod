@@ -109,7 +109,7 @@ If you don't have a PAUSE account, then request one:
     https://pause.perl.org/pause/query?ACTION=request_id
 
 Check that your account is allowed to upload perl distros: goto
-https://pause.perl.org/, login, then select 'upload file to CPAN'; there
+L<https://pause.perl.org/>, login, then select 'upload file to CPAN'; there
 should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
 König to add your ID to the list of people allowed to upload something
 called perl.  You can find Andreas' email address at:
