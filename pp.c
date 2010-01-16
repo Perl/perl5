@@ -3169,8 +3169,11 @@ PP(pp_substr)
     else {
 	const IV upos = pos;
 	const IV urem = rem;
+	/* FIXME -- if an IV is longer than an I32, we're truncating here,
+         * but a 64-bit version of sv_pos_u2b is not (yet) available.
+         */
 	if (utf8_curlen)
-	    sv_pos_u2b(sv, &pos, &rem);
+	    sv_pos_u2b(sv, (I32 *)&pos, (I32 *)&rem);
 	tmps += pos;
 	/* we either return a PV or an LV. If the TARG hasn't been used
 	 * before, or is of that type, reuse it; otherwise use a mortal
