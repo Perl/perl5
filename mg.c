@@ -1035,13 +1035,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_copypv(sv, PL_ors_sv);
 	break;
     case '!':
-#ifdef VMS
-	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
-	sv_setpv(sv, errno ? Strerror(errno) : "");
-#else
 	{
 	dSAVE_ERRNO;
+#ifdef VMS
+	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
+#else
 	sv_setnv(sv, (NV)errno);
+#endif
 #ifdef OS2
 	if (errno == errno_isOS2 || errno == errno_isOS2_set)
 	    sv_setpv(sv, os2error(Perl_rc));
@@ -1051,7 +1051,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	SvPOK_on(sv);	/* may have got removed during taint processing */
 	RESTORE_ERRNO;
 	}
-#endif
+
 	SvRTRIM(sv);
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
