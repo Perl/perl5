@@ -9,7 +9,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $silent);
-$VERSION = "5.530001"; # 5.53 + local patches for bleadperl
+$VERSION = "5.53";
 
 =head1 NAME
 

@@ -90,6 +90,7 @@ for my $interesting_module (qw(
         Archive::Tar
         Archive::Zip
         CPAN::Checksums
+        Compress::Bzip2
         Compress::Zlib
         Data::Dumper
         Digest::SHA
@@ -266,11 +267,11 @@ release :: disttest
 	git tag -m 'This is $(VERSION)' "$(VERSION)"
 	ls -l $(DISTVNAME).tar$(SUFFIX)
 	rm -rf $(DISTVNAME)
-	$(NOECHO) $(ECHO) '%   lftp pause.perl.org'
-	$(NOECHO) $(ECHO) '>   cd incoming'
-	$(NOECHO) $(ECHO) '>   put $(DISTVNAME).tar$(SUFFIX)'
-	$(NOECHO) $(ECHO) '>   quit'
-	$(NOECHO) $(ECHO) '%   git push --tags master'
+	$(NOECHO) $(ECHO) '  lftp pause.perl.org'
+	$(NOECHO) $(ECHO) '    cd incoming'
+	$(NOECHO) $(ECHO) '    put $(DISTVNAME).tar$(SUFFIX)'
+	$(NOECHO) $(ECHO) '    quit'
+	$(NOECHO) $(ECHO) '  git push --tags'
 
 snapshot : Makefile no_CR META.yml README testdistros all tardist
 
@@ -362,6 +363,7 @@ testdistros: \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-Expect-1.00.tar.gz \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-Failearly-1.02.tar.gz \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-Features-1.06.tar.gz \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew-1.00.tar.gz \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-UnsatPrereq-1.00.tar.gz \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-Zip-1.03.zip \
         t/CPAN/authors/id/A/AN/ANDK/NotInChecksums-0.000.tar.gz
@@ -396,6 +398,24 @@ testshell-with-protocol-twice: testdistros
 #
 # testdistros
 #
+
+# TimeSkey has Makefile.PL missing here because it gets the timestamp
+# of the Makefile.PL set to the future which confuses make
+t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew-1.00.tar.gz: \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew/Changes \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew/MANIFEST \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew/README \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew/lib/CPAN/Test/Dummy/Perl5/Make/TimeSkew.pm \
+	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew/t/00_load.t
+	-cd t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Make-TimeSkew && \
+		$(PERL) -e 'utime((time-12)x2), "Makefile.PL"' && \
+		$(PERL) Makefile.PL && \
+		$(MAKE) dist && \
+		mv CPAN-Test-Dummy-Perl5-Make-TimeSkew-1.00.tar.gz .. && \
+		$(MAKE) tamper-timestamps-now
+	-$(MAKE) clean
+	ls -l $@
+
 
 t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Build-1.03.tar.gz: \
 	t/CPAN/authors/id/A/AN/ANDK/CPAN-Test-Dummy-Perl5-Build/Changes \

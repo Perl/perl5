@@ -739,35 +739,33 @@ sub hostdlhard {
             next DLPRG unless defined $funkyftp;
             next DLPRG if $funkyftp =~ /^\s*$/;
 
-            my($asl_ungz, $asl_gz);
-            ($asl_ungz = $aslocal) =~ s/\.gz//;
-                $asl_gz = "$asl_ungz.gz";
-
             my($src_switch) = "";
             my($chdir) = "";
-            my($stdout_redir) = " > $asl_ungz";
+            my($stdout_redir) = " > \"$aslocal\"";
             if ($f eq "lynx") {
                 $src_switch = " -source";
             } elsif ($f eq "ncftp") {
+                next DLPRG unless $url =~ m{\Aftp://};
                 $src_switch = " -c";
             } elsif ($f eq "wget") {
-                $src_switch = " -O $asl_ungz";
+                $src_switch = " -O \"$aslocal\"";
                 $stdout_redir = "";
             } elsif ($f eq 'curl') {
                 $src_switch = ' -L -f -s -S --netrc-optional';
                 if ($proxy_vars->{http_proxy}) {
                     $src_switch .= qq{ -U "$proxy_vars->{proxy_user}:$proxy_vars->{proxy_pass}" -x "$proxy_vars->{http_proxy}"};
                 }
-            }
-
-            if ($f eq "ncftpget") {
+            } elsif ($f eq "ncftpget") {
+                next DLPRG unless $url =~ m{\Aftp://};
                 $chdir = "cd $aslocal_dir && ";
                 $stdout_redir = "";
             }
             $CPAN::Frontend->myprint(
                                      qq[
-Trying with "$funkyftp$src_switch" to get
-    "$url"
+Trying with
+    $funkyftp$src_switch
+to get
+    $url
 ]);
             my($system) =
                 "$chdir$funkyftp$src_switch \"$url\" $devnull$stdout_redir";
@@ -775,9 +773,9 @@ Trying with "$funkyftp$src_switch" to get
             my($wstatus) = system($system);
             if ($f eq "lynx") {
                 # lynx returns 0 when it fails somewhere
-                if (-s $asl_ungz) {
+                if (-s $aslocal) {
                     my $content = do { local *FH;
-                                       open FH, $asl_ungz or die;
+                                       open FH, $aslocal or die;
                                        local $/;
                                        <FH> };
                     if ($content =~ /^<.*(<title>[45]|Error [45])/si) {
@@ -800,53 +798,9 @@ No success, the file that lynx has downloaded is an empty file.
                 if (-s $aslocal) {
                     # Looks good
                     $some_dl_success++;
-                } elsif ($asl_ungz ne $aslocal) {
-                    # test gzip integrity
-                    if (eval{CPAN::Tarzip->new($asl_ungz)->gtest}) {
-                        # e.g. foo.tar is gzipped --> foo.tar.gz
-                        rename $asl_ungz, $aslocal;
-                        $some_dl_success++;
-                    } else {
-                        eval{CPAN::Tarzip->new($asl_gz)->gzip($asl_ungz)};
-                        if ($@) {
-                            warn "Warning: $@";
-                        } else {
-                            $some_dl_success++;
-                        }
-                    }
                 }
                 $ThesiteURL = $ro_url;
                 return $aslocal;
-            } elsif ($url !~ /\.gz(?!\n)\Z/) {
-                unlink $asl_ungz if
-                    -f $asl_ungz && -s _ == 0;
-                my $gz = "$aslocal.gz";
-                my $gzurl = "$url.gz";
-                $CPAN::Frontend->myprint(
-                                        qq[
-    Trying with "$funkyftp$src_switch" to get
-    "$url.gz"
-    ]);
-                my($system) = "$funkyftp$src_switch \"$url.gz\" $devnull > $asl_gz";
-                $self->debug("system[$system]") if $CPAN::DEBUG;
-                my($wstatus);
-                if (($wstatus = system($system)) == 0
-                    &&
-                    -s $asl_gz
-                ) {
-                    # test gzip integrity
-                    my $ct = eval{CPAN::Tarzip->new($asl_gz)};
-                    if ($ct && $ct->gtest) {
-                        $ct->gunzip($aslocal);
-                    } else {
-                        # somebody uncompressed file for us?
-                        rename $asl_ungz, $aslocal;
-                    }
-                    $ThesiteURL = $ro_url;
-                    return $aslocal;
-                } else {
-                    unlink $asl_gz if -f $asl_gz;
-                }
             } else {
                 my $estatus = $wstatus >> 8;
                 my $size = -f $aslocal ?
@@ -952,6 +906,7 @@ ftp config variable with
              "cd /",
              map("cd $_", split /\//, $dir), # RFC 1738
              "bin",
+             "passive",
              "get $getfile $targetfile",
              "quit"
         );

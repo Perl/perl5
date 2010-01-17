@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_5301'; # 1.94_53 + local patches for bleadperl
+$CPAN::VERSION = '1.94_54';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -3112,6 +3112,18 @@ modules in a snapshot bundle file.
 
 =head1 PREREQUISITES
 
+The CPAN program is trying to depend on as little as possible so the
+user can use it in hostile enviroment. It works better the more goodies
+the environment provides. For example if you try in the CPAN shell
+
+  install Bundle::CPAN
+
+or
+
+  install Bundle::CPANxxl
+
+you will find the shell more convenient than the bare shell before.
+
 If you have a local mirror of CPAN and can access all files with
 "file:" URLs, then you only need a perl later than perl5.003 to run
 this module. Otherwise Net::FTP is strongly recommended. LWP may be
@@ -3743,11 +3755,17 @@ See L<http://www.perl.com/perl/misc/Artistic.html>
 
 =head1 TRANSLATIONS
 
-Kawai,Takanori provides a Japanese translation of this manpage at
+Kawai,Takanori provides a Japanese translation of a very old version
+of this manpage at
 L<http://homepage3.nifty.com/hippo2000/perltips/CPAN.htm>
 
 =head1 SEE ALSO
 
-L<cpan>, L<CPAN::Nox>, L<CPAN::Version>
+Many people enter the CPAN shell by running the L<cpan> utility
+program which is installed in the same directory as perl itself. So if
+you have this directory in your PATH variable (or some equivalent in
+your operating system) then typing C<cpan> in a console window will
+work for you as well. Above that the utility provides several
+commandline shortcuts.
 
 =cut

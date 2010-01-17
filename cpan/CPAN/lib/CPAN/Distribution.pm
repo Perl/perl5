@@ -819,6 +819,7 @@ sub try_download {
                     $patch = $f if -f $f;
                 }
                 unless (-f $patch) {
+                    CPAN->debug("not on disk: patch[$patch]") if $CPAN::DEBUG;
                     if (my $trydl = $self->try_download($patch)) {
                         $patch = $trydl;
                     } else {

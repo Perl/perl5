@@ -3,7 +3,7 @@
 package CPAN::Mirrors;
 use strict;
 use vars qw($VERSION $urllist $silent);
-$VERSION = "1.770001"; # 1.77 + local patches for bleadperl
+$VERSION = "1.77";
 
 use Carp;
 use FileHandle;

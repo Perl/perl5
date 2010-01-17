@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use vars qw($VERSION);
 
-$VERSION = '1.570001'; # 1.57 + local patches for bleadperl
+$VERSION = '1.5701';
 
 =head1 NAME
 
@@ -314,7 +314,7 @@ sub _process_setup_options
 		{
 		# this is what CPAN.pm would do otherwise
 		CPAN::HandleConfig->load(
-			be_silent  => 1,
+			# be_silent  => 1, # candidate to be ripped out forever
 			write_file => 0,
 			);
 		}
@@ -477,9 +477,8 @@ sub _default
 
 =for comment
 
-CPAN.pm sends all the good stuff either to STDOUT, or to a temp
-file if $CPAN::Be_Silent is set. I have to intercept that output
-so I can find out what happened.
+CPAN.pm sends all the good stuff either to STDOUT. I have to intercept
+that output so I can find out what happened.
 
 =cut
 

@@ -325,7 +325,14 @@ sub d { $CPAN::Frontend->myprint(shift->format_result('Distribution',@_));}
 #-> sub CPAN::Shell::m ;
 sub m { # emacs confused here }; sub mimimimimi { # emacs in sync here
     my $self = shift;
-    $CPAN::Frontend->myprint($self->format_result('Module',@_));
+    my @m = @_;
+    for (@m) {
+        if (m|(?:\w+/)*\w+\.pm$|) { # same regexp in expandany
+            s/.pm$//;
+            s|/|::|g;
+        }
+    }
+    $CPAN::Frontend->myprint($self->format_result('Module',@m));
 }
 
 #-> sub CPAN::Shell::i ;
@@ -1230,7 +1237,7 @@ sub expandany {
     my($self,$s) = @_;
     CPAN->debug("s[$s]") if $CPAN::DEBUG;
     my $module_as_path = "";
-    if ($s =~ m|(?:\w+/)*\w+\.pm$|) {
+    if ($s =~ m|(?:\w+/)*\w+\.pm$|) { # same regexp in sub m
         $module_as_path = $s;
         $module_as_path =~ s/.pm$//;
         $module_as_path =~ s|/|::|g;
