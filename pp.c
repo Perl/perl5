@@ -139,6 +139,7 @@ PP(pp_rv2gv)
 {
     dVAR; dSP; dTOPss;
 
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
       wasref:
 	tryAMAGICunDEREF(to_gv);
@@ -156,11 +157,6 @@ PP(pp_rv2gv)
     }
     else {
 	if (!isGV_with_GP(sv)) {
-	    if (SvGMAGICAL(sv)) {
-		mg_get(sv);
-		if (SvROK(sv))
-		    goto wasref;
-	    }
 	    if (!SvOK(sv) && sv != &PL_sv_undef) {
 		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
@@ -276,8 +272,8 @@ PP(pp_rv2sv)
     dVAR; dSP; dTOPss;
     GV *gv = NULL;
 
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
-      wasref:
 	tryAMAGICunDEREF(to_sv);
 
 	sv = SvRV(sv);
@@ -295,11 +291,6 @@ PP(pp_rv2sv)
 	gv = MUTABLE_GV(sv);
 
 	if (!isGV_with_GP(gv)) {
-	    if (SvGMAGICAL(sv)) {
-		mg_get(sv);
-		if (SvROK(sv))
-		    goto wasref;
-	    }
 	    gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV, &sp);
 	    if (!gv)
 		RETURN;

@@ -840,6 +840,10 @@ fetching... <=> 1
 {
  package overloaded;
  use overload
+  '*{}' => sub { print '*{}'; \*100 },
+  '@{}' => sub { print '@{}'; \@100 },
+  '%{}' => sub { print '%{}'; \%100 },
+  '${}' => sub { print '${}'; \$100 },
   map {
    my $op = $_;
    $_ => sub { print "$op"; 100 }
@@ -868,6 +872,10 @@ $ghew=undef; $ghew<=1; print "\n";
 $ghew=undef; $ghew >=1; print "\n";
 $ghew=undef; $ghew != 1; print "\n";
 $ghew=undef; $ghew<=>1; print "\n";
+$ghew=\*shrext; *$ghew; print "\n";
+$ghew=\@spled; @$ghew; print "\n";
+$ghew=\%frit; %$ghew; print "\n";
+$ghew=\$drile; $$ghew; print "\n";
 EXPECT
 fetching... +
 fetching... **
@@ -885,3 +893,7 @@ fetching... <=
 fetching... >=
 fetching... !=
 fetching... <=>
+fetching... *{}
+fetching... @{}
+fetching... %{}
+fetching... ${}

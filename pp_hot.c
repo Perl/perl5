@@ -820,8 +820,8 @@ PP(pp_rv2av)
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
-      wasref:
 	tryAMAGICunDEREF_var(is_pp_rv2av ? to_av_amg : to_hv_amg);
 
 	sv = SvRV(sv);
@@ -858,11 +858,6 @@ PP(pp_rv2av)
 	    GV *gv;
 	
 	    if (!isGV_with_GP(sv)) {
-		if (SvGMAGICAL(sv)) {
-		    mg_get(sv);
-		    if (SvROK(sv))
-			goto wasref;
-		}
 		gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
 				     type, &sp);
 		if (!gv)
