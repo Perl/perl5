@@ -157,14 +157,9 @@ if (IPC::Open3::DO_SPAWN) {
     }
 } else {
     if ($@) {
-	# exec failure should throw exception in parent.
-	print "ok 23 # TODO RT 72016\n";
+	print "ok 23\n";
     } else {
-	if (waitpid($pid, 0) > 0) {
-	    # exec failure currently appears as child error.
-	    print "not ok 23 # TODO RT 72016\n";
-	} else {
-	    print "not ok 23\n";
-	}
+	waitpid($pid, 0);
+	print "not ok 23\n";
     }
 }
