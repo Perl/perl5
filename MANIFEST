@@ -4197,7 +4197,6 @@ t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
 t/comp/our.t			Tests for our declaration
 t/comp/package.t		See if packages work
-t/comp/packagev.t		See if package VERSION work
 t/comp/parser.t			See if the parser works in edge cases
 t/comp/proto.t			See if function prototypes work
 t/comp/redef.t			See if we get correct warnings on redefined subs
@@ -4438,6 +4437,7 @@ t/op/ord.t			See if ord works
 t/op/or.t			See if || works in weird situations
 t/op/overload_integer.t		See if overload::constant for integer works after "use".
 t/op/override.t			See if operator overriding works
+t/op/packagev.t			See if package VERSION work
 t/op/pack.t			See if pack and unpack work
 t/op/pos.t			See if pos works
 t/op/pow.t			See if ** works
