@@ -462,10 +462,10 @@ month or next year.
 
 A commit message isn't intended to take the place of comments in your
 code.  Commit messages should describe the change you made, while code
-comments should describe the current state of the code.  If you've
-just implemented a new feature, complete with doc, tests and well-
-commented code, a brief commit message will often suffice.  If, however,
-you've just a single character deep in the parser or lexer, you might
+comments should describe the current state of the code.  If you've just
+implemented a new feature, complete with doc, tests and well-commented
+code, a brief commit message will often suffice.  If, however, you've
+just changed a single character deep in the parser or lexer, you might
 need to write a small novel to ensure that future readers understand
 what you did and why you did it.
 
