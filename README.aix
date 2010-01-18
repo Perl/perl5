@@ -60,10 +60,13 @@ development team.
 
 =head2 Incompatibility with AIX Toolbox lib gdbm
 
-If the AIX Toolbox version of lib gdbm 1.8.x is installed on the
-system then Perl will not work. This library contains a defect version
-of the dbm_store() function. The lib gdbm will be automatically removed
-from the wanted libraries.
+If the AIX Toolbox version of lib gdbm < 1.8.3-5 is installed on your
+system then Perl will not work. This library contains the header files
+/opt/freeware/include/gdbm/dbm.h|ndbm.h which conflict with the AIX
+system versions. The lib gdbm will be automatically removed from the
+wanted libraries if the presence of one of these two header files is
+detected. If you want to bild Perl with GDBM support then please install
+at leas gdbm-devel-1.8.3-5 (or higher).
 
 =head2 Perl 5.10 was successfully compiled and tested on:
 
@@ -470,6 +473,6 @@ Rainer Tammer <tammer@tammer.net>
 
 =head1 DATE
 
-Version 0.0.10: 07 Aug 2009
+Version 0.0.11: 18 Jan 2010
 
 =cut

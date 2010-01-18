@@ -539,10 +539,13 @@ libswanted=`echo " $libswanted " | sed -e 's/ BSD / /'`
 d_flock='undef'
 
 # remove libgdbm from wanted libraries
-# The libgdbm 1.8.3 from the AIX Toolbox is not working 
-# (the dbm_store() function is defective)
-libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
-i_gdbm='undef'
-i_gdbmndbm='undef'
-
+# The libgdbm < 1.8.3-5 from the AIX Toolbox is not working
+# because two wrong .h are present
+if [ -f "/opt/freeware/include/gdbm/dbm.h" ] ||
+   [ -f "/opt/freeware/include/gdbm/ndbm.h" ]; then
+    echo "GDBM support disabled because your GDBM package contains extraneous headers - see README.aix."
+    libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
+    i_gdbm='undef'
+    i_gdbmndbm='undef'
+fi
 # EOF
