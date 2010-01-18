@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 require './test.pl';
 
-plan(338);
+plan(334);
 
 run_tests() unless caller;
 
@@ -680,21 +680,6 @@ is($x, "\x{100}\x{200}\xFFb");
     my  $a = "abcd\x{100}";
     is(substr($a,1,2), 'bc');
     is(substr($a,1,1), 'b');
-}
-
-# [perl #62646] offsets exceeding 32 bits on 64-bit system
-SKIP: {
-    skip("32-bit system", 4) unless ~0 > 0xffffffff;
-    my $a = "abc";
-    my $r;
-    $w = 0;
-    $r = substr($a, 0xffffffff, 1);
-    is($r, undef);
-    is($w, 1);
-    $w = 0;
-    $r = substr($a, 0xffffffff+1, 1);
-    is($r, undef);
-    is($w, 1);
 }
 
 }
