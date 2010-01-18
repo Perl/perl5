@@ -2217,7 +2217,8 @@ Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETMGLOB;
     PERL_UNUSED_CONTEXT;
     mg->mg_len = -1;
-    SvSCREAM_off(sv);
+    if (!isGV_with_GP(sv))
+	SvSCREAM_off(sv);
     return 0;
 }
 
