@@ -4185,10 +4185,12 @@ package as assumed.  That is, C<$::sail> is equivalent to
 C<$main::sail> (as well as to C<$main'sail>, still seen in ancient
 code, mostly from Perl 4).
 
-If VERSION is provided, C<package> sets the C<$VERSION> variable in the
-given namespace.  VERSION must be a numeric literal or v-string; it is
-parsed the same way the VERSION argument in C<use MODULE VERSION> is.
-Set C<$VERSION> only once per package.
+If VERSION is provided, C<package> sets the C<$VERSION> variable in the given
+namespace.  VERSION must be a "strict" style version  number as defined by the
+L<version> module: a positive decimal number (integer or decimal-fraction)
+without exponentiation or else a dotted-decimal v-string with a leading 'v'
+character and at least three components.  You should set C<$VERSION> only once
+per package.
 
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.
@@ -7058,9 +7060,9 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-In the peculiar C<use VERSION> form, VERSION may be either a numeric
-argument such as 5.006, which will be compared to C<$]>, or a literal of
-the form v5.6.1, which will be compared to C<$^V> (aka $PERL_VERSION).  An
+In the peculiar C<use VERSION> form, VERSION may be either a positive
+decimal fraction such as 5.006, which will be compared to C<$]>, or a v-string
+of the form v5.6.1, which will be compared to C<$^V> (aka $PERL_VERSION).  An
 exception is raised if VERSION is greater than the version of the
 current Perl interpreter; Perl will not attempt to parse the rest of the
 file.  Compare with L</require>, which can do a similar check at run time.

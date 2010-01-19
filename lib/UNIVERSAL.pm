@@ -165,7 +165,9 @@ block or C<blessed> if you need to be extra paranoid.
 C<VERSION> will return the value of the variable C<$VERSION> in the
 package the object is blessed into. If C<REQUIRE> is given then
 it will do a comparison and die if the package version is not
-greater than or equal to C<REQUIRE>.
+greater than or equal to C<REQUIRE>.  Both C<$VERSION> or C<REQUIRE>
+must be "lax" version numbers (as defined by the L<version> module)
+or C<VERSION> will die with an error.
 
 C<VERSION> can be called as either a class (static) method or an object
 method.
