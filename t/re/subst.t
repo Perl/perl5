@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 142 );
+plan( tests => 143 );
 
 $x = 'foo';
 $_ = "x";
@@ -598,3 +598,19 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
 fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo', '[perl #69056] positive GPOS regex segfault' );
 fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXX[c-e][e-f]f', 'positive GPOS regex substitution failure' );
 
+# [perl #~~~~~] $var =~ s/$qr//e calling get-magic on $_ as well as $var
+{
+ local *_;
+ my $scratch;
+ sub qrBug::TIESCALAR { bless[pop], 'qrBug' }
+ sub qrBug::FETCH { $scratch .= "[fetching $_[0][0]]"; 'prew' }
+ sub qrBug::STORE{}
+ tie my $kror, qrBug => '$kror';
+ tie $_, qrBug => '$_';
+ my $qr = qr/(?:)/;
+ $kror =~ s/$qr/""/e;
+ is(
+   $scratch, '[fetching $kror]',
+  'bug: $var =~ s/$qr//e calling get-magic on $_ as well as $var',
+ );
+}

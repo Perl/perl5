@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 4;
+plan tests => 5;
 
 my $rx = qr//;
 
@@ -70,4 +70,14 @@ for($'){
  $output .= "2: $foo\n"; # initialization warning, incorrect results
 
  is $output, "5\n1: 5\n2: 5\n", q|/$qr/ with $'_ aliased to a match var|;
+}
+
+# Make sure /$qr/ calls get-magic on its LHS (bug ~~~~~).
+{
+ my $scratch;
+ sub qrBug::TIESCALAR{bless[], 'qrBug'}
+ sub qrBug::FETCH { $scratch .= "[fetching]"; 'glat' }
+ tie my $flile, "qrBug";
+ $flile =~ qr/(?:)/;
+ is $scratch, "[fetching]", '/$qr/ with magical LHS';
 }
