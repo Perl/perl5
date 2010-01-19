@@ -10,7 +10,7 @@ BEGIN {
     require "test.pl";
 }
 
-print "1..78\n";
+print "1..79\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -292,3 +292,16 @@ EOT
 	"check if UNIVERSAL::AUTOLOAD works",
     );
 }
+
+# Test for #71952: crash when looking for a nonexistent destructor
+# Regression introduced by fbb3ee5af3d4
+{
+    fresh_perl_is(<<'EOT',
+sub M::DESTROY; bless {}, "M" ; print "survived\n";
+EOT
+    "survived",
+    {},
+	"no crash with a declared but missing DESTROY method"
+    );
+}
+
