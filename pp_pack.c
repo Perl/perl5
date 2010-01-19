@@ -70,6 +70,18 @@ typedef struct tempsym {
 	(symptr)->previous = NULL;	\
    } STMT_END
 
+typedef union {
+    NV nv;
+    U8 bytes[sizeof(NV)];
+} NV_bytes;
+
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+typedef union {
+    long double ld;
+    U8 bytes[sizeof(long double)];
+} ld_bytes;
+#endif
+
 #if PERL_VERSION >= 9
 # define PERL_PACK_CAN_BYTEORDER
 # define PERL_PACK_CAN_SHRIEKSIGN
@@ -146,16 +158,19 @@ typedef struct tempsym {
 #define PUSH32(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF32(p), SIZE32)
 
 /* Only to be used inside a loop (see the break) */
-#define SHIFT_VAR(utf8, s, strend, var, datumtype)	\
+#define SHIFT_BYTES(utf8, s, strend, buf, len, datumtype)	\
 STMT_START {						\
     if (utf8) {						\
         if (!uni_to_bytes(aTHX_ &s, strend,		\
-            (char *) &var, sizeof(var), datumtype)) break;\
+	  (char *) (buf), len, datumtype)) break;	\
     } else {						\
-        Copy(s, (char *) &var, sizeof(var), char);	\
-        s += sizeof(var);				\
+        Copy(s, (char *) (buf), len, char);		\
+        s += len;					\
     }							\
 } STMT_END
+
+#define SHIFT_VAR(utf8, s, strend, var, datumtype)	\
+       SHIFT_BYTES(utf8, s, strend, &(var), sizeof(var), datumtype)
 
 #define PUSH_VAR(utf8, aptr, var)	\
 	PUSH_BYTES(utf8, aptr, &(var), sizeof(var))
@@ -2085,25 +2100,25 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    break;
 	case 'F':
 	    while (len-- > 0) {
-		NV anv;
-		SHIFT_VAR(utf8, s, strend, anv, datumtype);
-		DO_BO_UNPACK_N(anv, NV);
+		NV_bytes anv;
+		SHIFT_BYTES(utf8, s, strend, anv.bytes, sizeof(anv.bytes), datumtype);
+		DO_BO_UNPACK_N(anv.nv, NV);
 		if (!checksum)
-		    mPUSHn(anv);
+		    mPUSHn(anv.nv);
 		else
-		    cdouble += anv;
+		    cdouble += anv.nv;
 	    }
 	    break;
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
 	case 'D':
 	    while (len-- > 0) {
-		long double aldouble;
-		SHIFT_VAR(utf8, s, strend, aldouble, datumtype);
-		DO_BO_UNPACK_N(aldouble, long double);
+		ld_bytes aldouble;
+		SHIFT_BYTES(utf8, s, strend, aldouble.bytes, sizeof(aldouble.bytes), datumtype);
+		DO_BO_UNPACK_N(aldouble.ld, long double);
 		if (!checksum)
-		    mPUSHn(aldouble);
+		    mPUSHn(aldouble.ld);
 		else
-		    cdouble += aldouble;
+		    cdouble += aldouble.ld;
 	    }
 	    break;
 #endif
@@ -3156,26 +3171,26 @@ extern const double _double_constants[];
 	    }
 	    break;
 	case 'F': {
-	    NV anv;
+	    NV_bytes anv;
 	    Zero(&anv, 1, NV); /* can be long double with unused bits */
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		anv = SvNV(fromstr);
+		anv.nv = SvNV(fromstr);
 		DO_BO_PACK_N(anv, NV);
-		PUSH_VAR(utf8, cur, anv);
+		PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes));
 	    }
 	    break;
 	}
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
 	case 'D': {
-	    long double aldouble;
+	    ld_bytes aldouble;
 	    /* long doubles can have unused bits, which may be nonzero */
 	    Zero(&aldouble, 1, long double);
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aldouble = (long double)SvNV(fromstr);
+		aldouble.ld = (long double)SvNV(fromstr);
 		DO_BO_PACK_N(aldouble, long double);
-		PUSH_VAR(utf8, cur, aldouble);
+		PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes));
 	    }
 	    break;
 	}
