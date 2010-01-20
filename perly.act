@@ -1627,5 +1627,8 @@ case 2:
     { (yyval.opval) = (ps[(1) - (1)].val.opval); ;}
     break;
 
+
+/* Line 1267 of yacc.c.  */
+
       default: break;
     

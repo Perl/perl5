@@ -216,7 +216,7 @@ static const char *const yytname[] =
   "mexpr", "mnexpr", "miexpr", "label", "decl", "peg", "format",
   "formname", "mysubrout", "subrout", "startsub", "startanonsub",
   "startformsub", "subname", "proto", "subattrlist", "myattrlist",
-  "subbody", "package", "use", "$@1", "expr", "argexpr", "listop", "@2",
+  "subbody", "package", "use", "@1", "expr", "argexpr", "listop", "@2",
   "method", "subscripted", "termbinop", "termunop", "anonymous", "termdo",
   "term", "myattrterm", "myterm", "listexpr", "listexprcom", "my_scalar",
   "amper", "scalar", "ary", "hsh", "arylen", "star", "indirob", 0
