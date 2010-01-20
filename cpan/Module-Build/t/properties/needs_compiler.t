@@ -106,6 +106,9 @@ is( $mb->build_requires->{'ExtUtils::CBuilder'}, 0.2,
 # falsify compiler and test error handling
 #--------------------------------------------------------------------------#
 
+# clear $ENV{CC} so we are sure to fail to find our fake compiler :-)
+local $ENV{CC};
+
 my $err = stderr_of( sub {
     $mb = $dist->new_from_context( config => { cc => "adfasdfadjdjk" } )
 });

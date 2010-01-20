@@ -11,20 +11,20 @@ use DistGen;
 my $dist = DistGen->new()->chdir_in;
 
 $dist->add_file('t/special_ext.st', <<'---');
-#!perl 
+#!perl
 use Test::More tests => 2;
 ok(1, 'first test in special_ext');
 ok(1, 'second test in special_ext');
 ---
 
 $dist->add_file('t/another_ext.at', <<'---');
-#!perl 
+#!perl
 use Test::More tests => 2;
 ok(1, 'first test in another_ext');
 ok(1, 'second test in another_ext');
 ---
 $dist->add_file('t/foo.txt', <<'---');
-#!perl 
+#!perl
 use Test::More tests => 1;
 ok 0, "don't run this non-test file";
 die "don't run this non-test file";
@@ -35,11 +35,11 @@ $dist->regen;
 
 my $mb = Module::Build->subclass(
    code => q#
-        sub ACTION_testspecial { 
+        sub ACTION_testspecial {
             shift->generic_test(type => 'special');
         }
 
-        sub ACTION_testanother { 
+        sub ACTION_testanother {
             shift->generic_test(type => 'another');
         }
   #
@@ -99,7 +99,7 @@ is(scalar(@{[$all_output =~ m/ALL TESTS SUCCESSFUL\./mg]}),   1);
 $dist->revert;
 
 $dist->add_file('t/foo/special.st', <<'---');
-#!perl 
+#!perl
 use Test::More tests => 2;
 ok(1, 'first test in special_ext');
 ok(1, 'second test in special_ext');
@@ -113,11 +113,11 @@ $dist->regen;
 
 my $mb = Module::Build->subclass(
    code => q#
-        sub ACTION_testspecial { 
+        sub ACTION_testspecial {
             shift->generic_test(type => 'special');
         }
 
-        sub ACTION_testanother { 
+        sub ACTION_testanother {
             shift->generic_test(type => 'another');
         }
   #

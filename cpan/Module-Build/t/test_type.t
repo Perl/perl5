@@ -21,7 +21,7 @@ my $dist = DistGen->new( dir => $tmp );
 
 
 $dist->add_file('t/special_ext.st', <<'---' );
-#!perl 
+#!perl
 use Test::More tests => 2;
 ok(1, 'first test in special_ext');
 ok(1, 'second test in special_ext');
@@ -37,7 +37,7 @@ $dist->chdir_in;
 $::x = 0;
 my $mb = Module::Build->subclass(
     code => q#
-        sub ACTION_testspecial { 
+        sub ACTION_testspecial {
             $::x++;
             shift->generic_test(type => 'special');
         }

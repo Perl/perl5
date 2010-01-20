@@ -118,7 +118,7 @@ while (my ($from, $v) = each %distro) {
     ok ! $mb->contains_pod($from), "$from should not contain POD";
     next;
   }
-  
+
   my $to = File::Spec->catfile('blib', ($from =~ /^[\.\/\[]*lib/ ? 'libdoc' : 'bindoc'), $v);
   ok $mb->contains_pod($from), "$from should contain POD";
   ok -e $to, "Created $to manpage";

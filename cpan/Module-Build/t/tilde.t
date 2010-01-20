@@ -55,7 +55,7 @@ SKIP: {
     is( run_sample( $p => '~/foo' )->$p(),  "$home/foo" );
 
     is( run_sample( $p => '~/ foo')->$p(),  "$home/ foo" );
-      
+
     is( run_sample( $p => '~/fo o')->$p(),  "$home/fo o" );
 
     is( run_sample( $p => 'foo~'  )->$p(),  'foo~' );
@@ -97,7 +97,7 @@ SKIP: {
     my @info = eval { getpwuid $> };
     skip "No home directory for tilde-expansion tests", 1 if $@;
     my ($me, $home) = @info[0,7];
-    
+
     my $expected = "$home/foo";
 
     if ($^O eq 'VMS') {

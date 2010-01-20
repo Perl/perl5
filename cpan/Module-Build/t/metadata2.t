@@ -42,12 +42,12 @@ SKIP: {
 
 my $provides; # Used a bunch of times below
 
-my $pod_text = <<'---'; 
+my $pod_text = <<'---';
 =pod
 
 =head1 NAME
 
-Simple - A simple module 
+Simple - A simple module
 
 =head1 AUTHOR
 
@@ -77,11 +77,11 @@ $dist->regen( clean => 1 );
 ok( -e "lib/Simple.pm", "Creating Simple.pm" );
 my $mb = Module::Build->new_from_context;
 $mb->do_create_readme;
-like( slurp("README"), qr/NAME/, 
+like( slurp("README"), qr/NAME/,
     "Generating README from .pm");
-is( $mb->dist_author->[0], 'Simple Simon <simon@simple.sim>', 
+is( $mb->dist_author->[0], 'Simple Simon <simon@simple.sim>',
     "Extracting AUTHOR from .pm");
-is( $mb->dist_abstract, "A simple module", 
+is( $mb->dist_abstract, "A simple module",
     "Extracting abstract from .pm");
 
 # .pm File with pod in separate file
@@ -99,12 +99,12 @@ ok( -e "lib/Simple.pod", "Creating Simple.pod" );
 $mb = Module::Build->new_from_context;
 $mb->do_create_readme;
 like( slurp("README"), qr/NAME/, "Generating README from .pod");
-is( $mb->dist_author->[0], 'Simple Simon <simon@simple.sim>', 
+is( $mb->dist_author->[0], 'Simple Simon <simon@simple.sim>',
     "Extracting AUTHOR from .pod");
-is( $mb->dist_abstract, "A simple module", 
+is( $mb->dist_abstract, "A simple module",
     "Extracting abstract from .pod");
 
-# .pm File with pod and separate pod file 
+# .pm File with pod and separate pod file
 #
 
 $dist->change_file( 'lib/Simple.pm', <<'---' );

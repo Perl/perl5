@@ -67,7 +67,7 @@ test_makefile_types();
 # Test with requires and PL_files
 
 my $distname = $dist->name;
-$dist->change_build_pl({ 
+$dist->change_build_pl({
   module_name         => $distname,
   license             => 'perl',
   requires            => {
@@ -104,7 +104,7 @@ test_makefile_types(
 
 ######################
 
-$dist->change_build_pl({ 
+$dist->change_build_pl({
   module_name         => $distname,
   license             => 'perl',
 });
@@ -140,7 +140,7 @@ ok $mb, "Module::Build->new_from_context";
   });
   foreach my $style ('passthrough', 'small') {
     create_makefile_pl($style, $foo_builder);
-    
+
     # Should fail with "can't find Foo/Builder.pm"
     my $result;
     my ($stdout, $stderr ) = stdout_stderr_of (sub {
@@ -149,7 +149,7 @@ ok $mb, "Module::Build->new_from_context";
     ok ! $result, "Makefile.PL failed";
     like $stderr, qr{Foo/Builder.pm}, "custom builder wasn't found";
   }
-  
+
   # Now make sure it can actually work.
   my $bar_builder;
   stdout_stderr_of( sub {
@@ -243,7 +243,7 @@ ok $mb, "Module::Build->new_from_context";
       if ExtUtils::Install->VERSION < 1.32;
 
     for my $c (@cases) {
-      my @make_args = @{$c->{args}}; 
+      my @make_args = @{$c->{args}};
       if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
         $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
         pop @make_args while scalar(@make_args) > 1;
@@ -284,7 +284,7 @@ ok $mb, "Module::Build->new_from_context";
   my $b2 = Module::Build->current;
   ok $b2->install_base, "install_base set";
   unlike $b2->install_base, qr/^~/, "Tildes should be expanded";
-  
+
   stdout_stderr_of( sub { $mb->do_system(@make, 'realclean'); } );
   ok ! -e $makefile, "$makefile shouldn't exist";
 
@@ -341,7 +341,7 @@ sub test_makefile_types {
   $opts{PL_files} ||= {};
 
   foreach my $type (@makefile_types) {
-    # Create M::B instance 
+    # Create M::B instance
     my $mb;
     stdout_stderr_of( sub {
         $mb = Module::Build->new_from_context;
@@ -355,7 +355,7 @@ sub test_makefile_types {
     test_makefile_creation($mb);
     test_makefile_prereq_pm( _merge_prereqs($opts{requires}, $opts{build_requires}) );
     test_makefile_pl_files( $opts{PL_files} ) if $type eq 'traditional';
-      
+
     my ($output,$success);
     # Capture output to keep our STDOUT clean
     $output = stdout_stderr_of( sub {
@@ -373,7 +373,7 @@ sub test_makefile_types {
     });
     ok $success, "make test ran without error";
     like uc $output, qr{DONE\.|SUCCESS}, "make test output indicated success";
-    
+
     $output = stdout_stderr_of( sub {
       $success = $mb->do_system(@make, 'realclean');
     });
@@ -381,7 +381,7 @@ sub test_makefile_types {
 
     # Try again with some Makefile.PL arguments
     test_makefile_creation($mb, [], 'INSTALLDIRS=vendor', 'realclean');
-    
+
     # Try again using distclean
     test_makefile_creation($mb, [], '', 'distclean');
 
@@ -392,7 +392,7 @@ sub test_makefile_types {
 
 sub test_makefile_creation {
   my ($build, $preargs, $postargs, $cleanup) = @_;
-  
+
   my ($output, $result);
   # capture output to avoid polluting our test output
   $output = stdout_stderr_of( sub {
@@ -404,7 +404,7 @@ sub test_makefile_creation {
   }
   ok $result, $label;
   ok -e $makefile, "$makefile exists";
-  
+
   if ($cleanup) {
     # default to 'realclean' unless we recognize the clean method
     $cleanup = 'realclean' unless $cleanup =~ /^(dist|real)clean$/;
@@ -457,7 +457,7 @@ sub test_makefile_pl_requires_perl {
 }
 
 sub find_params_in_makefile {
-  my $fh = IO::File->new( $makefile, 'r' ) 
+  my $fh = IO::File->new( $makefile, 'r' )
     or die "Can't read $makefile: $!";
   local($/) = "\n";
 

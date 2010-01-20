@@ -10,14 +10,14 @@ blib_load('Module::Build::PodParser');
 
 {
   package IO::StringBased;
-  
+
   sub TIEHANDLE {
     my ($class, $string) = @_;
     return bless {
 		  data => [ map "$_\n", split /\n/, $string],
 		 }, $class;
   }
-  
+
   sub READLINE {
     shift @{ shift()->{data} };
   }
@@ -59,7 +59,7 @@ EOF
 
   my $pp = Module::Build::PodParser->new(fh => \*FH);
   ok $pp, 'object created';
-  
+
   is_deeply $pp->get_author, [], 'author';
   is $pp->get_abstract, 'Perl extension for blah blah blah', 'abstract';
 }

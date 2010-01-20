@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.36';
+$VERSION = '0.3603';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -750,7 +750,8 @@ false to prevent the custom resource file from being loaded.
 Suppresses the check upon startup that the version of Module::Build
 we're now running under is the same version that was initially invoked
 when building the distribution (i.e. when the C<Build.PL> script was
-first run).  Use with caution.
+first run).  As of 0.3601, a mismatch results in a warning instead of
+a fatal error, so this option effectively just suppresses the warning.
 
 =item debug
 

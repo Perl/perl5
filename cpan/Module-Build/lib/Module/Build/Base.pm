@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.36';
+$VERSION = '0.3603';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -103,10 +103,13 @@ sub resume {
 
   unless ($self->allow_mb_mismatch) {
     my $mb_version = $Module::Build::VERSION;
-    die(" * ERROR: Configuration was initially created with Module::Build version '$self->{properties}{mb_version}',\n".
-	"   but we are now using version '$mb_version'.  Please re-run the Build.PL or Makefile.PL script,\n".
-	"   or use --allow_mb_mismatch 1 to skip this version check.\n")
-    if $mb_version ne $self->{properties}{mb_version};
+    if ( $mb_version ne $self->{properties}{mb_version} ) {
+      $self->log_warn(<<"MISMATCH");
+* WARNING: Configuration was initially created with Module::Build 
+  version '$self->{properties}{mb_version}' but we are now using version '$mb_version'.
+  If errors occur, you must re-run the Build.PL or Makefile.PL script.
+MISMATCH
+    }
   }
 
   $self->{invoked_action} = $self->{action} ||= 'build';

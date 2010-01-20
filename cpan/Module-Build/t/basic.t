@@ -146,7 +146,7 @@ $dist->chdir_in;
   is $mb->args('dee'), 'goo';
   is $mb->destdir, 'yo';
   my %runtime = $mb->runtime_params;
-  is_deeply \%runtime, 
+  is_deeply \%runtime,
     {
      verbose => 1,
      destdir => 'yo',

@@ -4,7 +4,7 @@ use strict;
 use lib 't/lib';
 use MBTest;
 
-my @unix_splits = 
+my @unix_splits =
   (
    { q{one t'wo th'ree f"o\"ur " "five" } => [ 'one', 'two three', 'fo"ur ', 'five' ] },
    { q{ foo bar }                         => [ 'foo', 'bar'                         ] },
@@ -13,7 +13,7 @@ my @unix_splits =
    { qq{one\\\ntwo}                       => [ "one\ntwo"                           ] },  # TODO
   );
 
-my @win_splits = 
+my @win_splits =
   (
    { 'a" "b\\c" "d'         => [ 'a b\c d'       ] },
    { '"a b\\c d"'           => [ 'a b\c d'       ] },

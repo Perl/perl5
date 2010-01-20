@@ -15,7 +15,7 @@ blib_load('Module::Build::ConfigData');
 my $dist = DistGen->new(dir => MBTest->tmpdir);
 $dist->add_file('bin/foo', undent(<<'  ---'));
   #!/usr/bin/perl
-  
+
   package bin::foo;
   $VERSION = 0.01;
 

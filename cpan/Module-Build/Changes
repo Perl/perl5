@@ -1,5 +1,41 @@
 Revision history for Perl extension Module::Build.
 
+0.3603 - Mon Jan 18 22:28:59 EST 2010
+
+(Oops, I released the last one before I realized this should have been
+fixed along with it.)
+
+ Bug fixes:
+
+ - Module::Build::Compat would croak on distibutions that set requires
+   'perl' to a dotted decimal like '5.6.2'.  We now skip that key
+   since it doesn't go into PREREQ_PM and we numify it properly for
+   'use 5.006002' in the generated Makefile.PL (RT#53409)
+   [David Golden, adapted from patch by G. Allen Morris III]
+
+0.3602 - Mon Jan 18 22:09:54 EST 2010
+
+ Bug fixes:
+
+ - Fix failures in t/properties/needs_compiler.t when $ENV{CC} is set
+   (RT#53296) [David Golden, adapted from patch by Jens Rehsack]
+
+0.3601 - Mon Dec 21 14:39:33 EST 2009
+
+ Bug fixes:
+
+ - When the currently running Module::Build is not the same as the one
+   that created the Build file, there is now a warning rather than a fatal
+   error.  This helps installation of dependency chains where a dependency
+   might configure_requires a new Module::Build after Build.PL was already
+   run for an earlier distribution. [David Golden, on advice of Matt Trout]
+
+ Other:
+
+ - t/bundle_inc.t fails in odd ways.  This test of an experimental feature
+   should not prevent users from installing Module::Build, so this test
+   now skips unless $ENV{MB_TEST_EXPERIMENTAL} is true
+
 0.36 - Sun Dec 20 15:02:38 EST 2009
 
 No changes from 0.35_15 other than the version number.

@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.36';
+$VERSION = '0.3603';
 
 use File::Basename ();
 use File::Spec;
@@ -10,6 +10,7 @@ use IO::File;
 use Config;
 use Module::Build;
 use Module::Build::ModuleInfo;
+use Module::Build::Version;
 use Data::Dumper;
 
 my %convert_installdirs = (
@@ -76,6 +77,7 @@ sub _merge_prereq {
   # validate formats
   for my $p ( $req, $breq ) {
     for my $k (keys %$p) {
+      next if $k eq 'perl';
       die "Prereq '$p->{$k}' for '$k' is not supported by Module::Build::Compat\n"
         unless _simple_prereq($p->{$k});
     }
@@ -124,7 +126,8 @@ HERE
   # Makefile.PL
   my $requires = $build->requires;
   if ( my $minimum_perl = $requires->{perl} ) {
-    print {$fh} "require $minimum_perl;\n";
+    my $min_ver = Module::Build::Version->new($minimum_perl)->numify;
+    print {$fh} "require $min_ver;\n";
   }
 
   # If a *bundled* custom subclass is being used, make sure we add its

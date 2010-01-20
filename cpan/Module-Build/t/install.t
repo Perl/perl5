@@ -61,15 +61,15 @@ $mb->add_to_cleanup($destdir);
 {
   eval {$mb->dispatch('install', destdir => $destdir)};
   is $@, '';
-  
+
   my @libdir = strip_volume( $mb->install_destination('lib') );
   my $install_to = File::Spec->catfile($destdir, @libdir, $dist->name ) . '.pm';
   file_exists($install_to);
-  
+
   local @INC = (@INC, File::Spec->catdir($destdir, @libdir));
   eval "require @{[$dist->name]}";
   is $@, '';
-  
+
   # Make sure there's a packlist installed
   my $archdir = $mb->install_destination('arch');
   my @dirs = strip_volume($archdir);
@@ -106,19 +106,19 @@ $mb->add_to_cleanup($destdir);
 
 {
   # Test the ConfigData stuff
-  
+
   $mb->config_data(foo => 'bar');
   $mb->features(baz => 1);
   $mb->auto_features(auto_foo => {requires => {'File::Spec' => 0}});
   eval {$mb->dispatch('install', destdir => $destdir)};
   is $@, '';
-  
+
   my @libdir = strip_volume( $mb->install_destination('lib') );
   local @INC = (@INC, File::Spec->catdir($destdir, @libdir));
   eval "require @{[$dist->name]}::ConfigData";
 
   is $mb->feature('auto_foo'), 1;
-  
+
   SKIP: {
     skip $@, 5 if @_;
 
@@ -153,7 +153,7 @@ is $@, '';
   my $libdir = File::Spec->catdir('', 'foo', 'lib');
   eval {$mb->run_perl_script('Build.PL', [], ['--install_path', "lib=$libdir"])};
   is $@, '';
-  
+
   my $cmd = 'Build';
      $cmd .= ".COM" if $^O eq 'VMS';
   eval {$mb->run_perl_script($cmd, [], ['install', '--destdir', $destdir])};
@@ -165,10 +165,10 @@ is $@, '';
   eval {$mb->run_perl_script($cmd, [], ['install', '--destdir', $destdir,
 					      '--install_base', $basedir])};
   is $@, '';
-  
+
   $install_to = File::Spec->catfile($destdir, $libdir, $dist->name ) . '.pm';
   is -e $install_to, 1, "Look for file at $install_to";
-  
+
   eval {$mb->dispatch('realclean')};
   is $@, '';
 }
@@ -214,11 +214,11 @@ Simple Man <simple@example.com>
   $expect = lc($expect) if $^O eq 'VMS';
 
   is $pods->{$expect}, $expect;
-  
+
   my $pms = $mb->_find_file_by_type('awefawef', 'lib');
   ok $pms;
   is keys %$pms, 0;
-  
+
   $pms = $mb->_find_file_by_type('pod', 'awefawef');
   ok $pms;
   is keys %$pms, 0;

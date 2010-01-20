@@ -18,6 +18,9 @@ blib_load('Module::Build::ConfigData');
 if ( $ENV{PERL_CORE} ) {
   plan skip_all => 'bundle_inc tests will never succeed in PERL_CORE';
 }
+elsif ( ! $ENV{MB_TEST_EXPERIMENTAL} ) {
+  plan skip_all => '$ENV{MB_TEST_EXPERIMENTAL} is not set';
+}
 elsif ( ! MBTest::check_EUI() ) {
   plan skip_all => 'ExtUtils::Installed takes too long on your system';
 }

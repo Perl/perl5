@@ -51,7 +51,7 @@ my $mb = Module::Build->subclass(
     sub ACTION_bar { die "barey" }
     sub ACTION_baz { die "bazey" }
 
-    # guess we can have extra pod later 
+    # guess we can have extra pod later
 
     =over
 
@@ -211,7 +211,7 @@ my $mb = Module::Build->subclass(
     sub ACTION_baz { die "bazey" }
     sub ACTION_batz { die "batzey" }
 
-    # guess we can have extra pod later 
+    # guess we can have extra pod later
     # Though, I do wonder whether we should allow them to mix...
     # maybe everything should have to be head2?
 
@@ -243,7 +243,7 @@ my %also = (
   bar => "\n=head3 bears\n\nBe careful with bears.\n",
   baz => "\n=head4 What's a baz\\?\n",
 );
-  
+
 foreach my $action (qw(foo bar baz)) {
   my $doc = $mb->get_action_docs($action);
   ok($doc, "got doc for '$action'");
