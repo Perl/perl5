@@ -1296,9 +1296,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	/* Names of length 1.  (Or 0. But name is NUL terminated, so that will
 	   be case '\0' in this switch statement (ie a default case)  */
 	switch (*name) {
-	case '&':
-	case '`':
-	case '\'':
+	case '&':		/* $& */
+	case '`':		/* $` */
+	case '\'':		/* $' */
 	    if (
 		sv_type == SVt_PVAV ||
 		sv_type == SVt_PVHV ||
@@ -1309,17 +1309,17 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    PL_sawampersand = TRUE;
 	    goto magicalize;
 
-	case ':':
+	case ':':		/* $: */
 	    sv_setpv(GvSVn(gv),PL_chopset);
 	    goto magicalize;
 
-	case '?':
+	case '?':		/* $? */
 #ifdef COMPLEX_STATUS
 	    SvUPGRADE(GvSVn(gv), SVt_PVLV);
 #endif
 	    goto magicalize;
 
-	case '!':
+	case '!':		/* $! */
 	    GvMULTI_on(gv);
 	    /* If %! has been used, automatically load Errno.pm. */
 
@@ -1330,8 +1330,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 
 	    break;
-	case '-':
-	case '+':
+	case '-':		/* $- */
+	case '+':		/* $+ */
 	GvMULTI_on(gv); /* no used once warnings here */
         {
             AV* const av = GvAVn(gv);
@@ -1348,13 +1348,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
             break;
 	}
-	case '*':
-	case '#':
+	case '*':		/* $* */
+	case '#':		/* $# */
 	    if (sv_type == SVt_PV)
 		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 				 "$%c is no longer supported", *name);
 	    break;
-	case '|':
+	case '|':		/* $| */
 	    sv_setiv(GvSVn(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	    goto magicalize;
 
@@ -1368,28 +1368,28 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	ro_magicalize:
 	    SvREADONLY_on(GvSVn(gv));
 	    /* FALL THROUGH */
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	case '[':
-	case '^':
-	case '~':
-	case '=':
-	case '%':
-	case '.':
-	case '(':
-	case ')':
-	case '<':
-	case '>':
-	case '\\':
-	case '/':
+	case '0':		/* $0 */
+	case '1':		/* $1 */
+	case '2':		/* $2 */
+	case '3':		/* $3 */
+	case '4':		/* $4 */
+	case '5':		/* $5 */
+	case '6':		/* $6 */
+	case '7':		/* $7 */
+	case '8':		/* $8 */
+	case '9':		/* $9 */
+	case '[':		/* $[ */
+	case '^':		/* $^ */
+	case '~':		/* $~ */
+	case '=':		/* $= */
+	case '%':		/* $% */
+	case '.':		/* $. */
+	case '(':		/* $( */
+	case ')':		/* $) */
+	case '<':		/* $< */
+	case '>':		/* $> */
+	case '\\':		/* $\ */
+	case '/':		/* $/ */
 	case '\001':	/* $^A */
 	case '\003':	/* $^C */
 	case '\004':	/* $^D */
@@ -1409,10 +1409,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    sv_setpvs(GvSVn(gv),"\f");
 	    PL_formfeed = GvSVn(gv);
 	    break;
-	case ';':
+	case ';':		/* $; */
 	    sv_setpvs(GvSVn(gv),"\034");
 	    break;
-	case ']':
+	case ']':		/* $] */
 	{
 	    SV * const sv = GvSVn(gv);
 	    if (!sv_derived_from(PL_patchlevel, "version"))
