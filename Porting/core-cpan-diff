@@ -75,6 +75,8 @@ Usage: $0 [opts] [ -d | -v | -x ] [ -a | module ... ]
 
 -r/--reverse  Reverses the diff (perl to CPAN).
 
+-u/--upstream only print modules with the given upstream (defaults to all)
+
 -v/--verbose  List the fate of *all* files in the tarball, not just those
               that differ or are missing.
 
@@ -97,6 +99,7 @@ sub run {
     my $scan_all;
     my $diff_opts;
     my $reverse    = 0;
+    my @wanted_upstreams;
     my $cache_dir;
     my $use_diff;
     my $output_file;
@@ -113,6 +116,7 @@ sub run {
 	'h|help'       => \&usage,
 	'o|output=s'   => \$output_file,
 	'r|reverse'    => \$reverse,
+	'u|upstream=s@'=> \@wanted_upstreams,
 	'v|verbose'    => \$verbose,
 	'x|crosscheck' => \$do_crosscheck,
     ) or usage;
@@ -157,7 +161,7 @@ sub run {
     }
     else {
 	do_compare(\@modules, $outfh, $output_file, $cache_dir, $verbose, $use_diff,
-	    $reverse, $diff_opts);
+	    $reverse, $diff_opts, \@wanted_upstreams);
     }
 }
 
@@ -167,7 +171,7 @@ sub run {
 
 sub do_compare {
     my ($modules, $outfh, $output_file, $cache_dir, $verbose,
-		$use_diff, $reverse, $diff_opts) = @_;
+		$use_diff, $reverse, $diff_opts, $wanted_upstreams) = @_;
 
 
     # first, make sure we have a directory where they can all be untarred,
@@ -207,6 +211,8 @@ sub do_compare {
 	    warn "WARNING: duplicate entry for $dist in $module\n"
 	}
 
+	my $upstream = $m->{UPSTREAM} || 'UNKNOWN';
+	next if @$wanted_upstreams and ! ($upstream ~~ $wanted_upstreams);
 	print $outfh "\n$module - ".$Maintainers::Modules{$module}->{DISTRIBUTION}."\n" unless $use_diff;
 	print $outfh "  upstream is: ".($m->{UPSTREAM} || 'UNKNOWN!')."\n";
 
