@@ -315,6 +315,10 @@ Commit your changes:
 
     $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
+When the version number is bumped, you should also update Module::CoreList (as
+described below in L<"Building a release - on the day">) to reflect the new
+version number.
+
 =item *
 
 I<You MUST SKIP this step for SNAPSHOT>
@@ -465,7 +469,8 @@ Then change to your perl checkout, and if necessary,
 
     $ make perl
 
-If this not the first update for this version, first edit
+If this not the first update for this version (e.g. if it was updated
+when the version number was originally bumped), first edit
 F<dist/Module-CoreList/lib/Module/CoreList.pm> to delete the existing
 entries for this version from the C<%released> and C<%version> hashes:
 they will have a key like C<5.010001> for 5.10.1.
