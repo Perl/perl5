@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.16';
+$VERSION = '2.17';
 
 require Exporter;
 @ISA = qw(Exporter);

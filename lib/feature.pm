@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
