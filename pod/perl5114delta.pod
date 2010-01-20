@@ -11,16 +11,7 @@ If you are upgrading from an earlier release such as 5.11.2, first read
 L<perl5113delta>, which describes differences between 5.11.2 and
 5.11.3.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
 
 =head2 Version number formats
 
@@ -45,23 +36,12 @@ functions to check a scalar against these rules.
 
 =head1 Core Enhancements
 
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
 =head2 Unicode properties
 
 C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>.  This
 means that in addition to the characters it currently matches,
 C<[A-Fa-f0-9]>, it will also match their fullwidth equivalent forms, for
 example U+FF10: FULLWIDTH DIGIT ZERO.
-
-=head1 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
 
 =head1 Modules and Pragmata
 
@@ -73,78 +53,106 @@ below.  A paragraph summary for important changes should then be added by hand.
 In an ideal world, dual-life modules would have a F<Changes> file that could be
 cribbed.
 
-=head2 New Modules and Pragmata
-
 =head2 Pragmata Changes
-
-=head2 Updated Modules
-
-=head2 Removed Modules and Pragmata
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
 
 =over 4
 
-=item F<XXX>
+=item C<less>
 
-XXX
+Upgraded from version 0.03 to 0.03.
+
+This version introduces the C<stash_name> method to allow subclasses of less to
+pick where in %^H to store their stash.
+
+=item C<version>
+
+Upgraded from version 0.77 to 0.81.
+
+This version adds support for L</Version number formats> as described earlier
+in this document and in its own documentation.
+
+=item C<warnings>
+
+Upgraded from version 1.08 to 1.09.
+
+This version adds the C<illegalproto> warning category.  See also L</New or
+Changed Diagnostics> for this change.
 
 =back
 
-=head1 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
+=head2 Updated Modules
 
 =over 4
 
-=item L<XXX>
+=item C<Archive::Extract>
 
-XXX
+Upgraded from version 0.36 to 0.38.
+
+=item C<B::Deparse>
+
+Upgraded from version 0.93 to 0.94.
+
+=item C<Compress::Raw::Bzip2>
+
+Upgraded from version 2.021 to 2.024.
+
+=item C<Compress::Raw::Zlib>
+
+Upgraded from version 2.021 to 2.024.
+
+=item C<CPAN>
+
+Upgraded from version 1.94_5301 to 1.94_54.
+
+=item C<File::Fetch>
+
+Upgraded from version 0.22 to 0.24.
+
+=item C<Module::Build>
+
+Upgraded from version 0.36 to 0.3603.
+
+=item C<Safe>
+
+Upgraded from version 2.20 to 2.21.
+
+Anonymous coderefs created in Safe containers no longer get bogus
+arguments passed to them, fixing RT #72068.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item C<Devel::DProf::V>
+
+Removed from the Perl core.  Prior version was 'undef'.
 
 =back
 
 =head1 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
+A significant fraction of the core documentation has been updated to clarify
+the behavior of Perl's Unicode handling.
 
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Installation and Configuration Improvements
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.
+Much of the remaining core documentation has been reviewed and edited
+for clarity, consistent use of language, and to fix the spelling of Tom
+Christiansen's name.
 
 =head2 Configuration improvements
 
-XXX
-
-=head2 Compilation improvements
-
-XXX
+USE_ATTRIBUTES_FOR_PERLIO is now reported in the compile-time options
+listed by the C<-V> switch.
 
 =head2 Platform Specific Changes
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+The default pipe buffer size on VMS has been updated to 8192 on 64-bit
+systems.
 
 =back
 
@@ -158,7 +166,12 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Tie::Hash::NamedCapture::* shouldn't abort if passed bad input (RT #71828)
+
+=item *
+
+@_ and $_ no longer leak under threads (RT #34342 and #41138, also
+#70602, #70974)
 
 =back
 
@@ -193,46 +206,19 @@ lvalue after it has been defined.
 
 =head1 Changed Internals
 
-XXX Changes which affect the interface available to C<XS> code go here.
-
 =over 4
 
 =item *
 
-XXX
-
-=back
-
-=head1 New Tests
-
-XXX Changes which create B<new> files in F<t/> go here. Changes to
-existing files in F<t/> aren't worth summarising, although the bugs that
-they represent may be.
-
-=over 4
-
-=item F<XXX>
-
-XXX
+Perl_magic_setmglob now knows about globs, fixing RT #71254.
 
 =back
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+Perl 5.11.4 is a development release leading up to Perl 5.12.0.
+Some notable known problems found in 5.11.4 are listed as dependencies
+of RT #69710, the Perl 5 version 12 meta-ticket.
 
 =head1 Deprecations
 
@@ -242,36 +228,37 @@ The following items are now deprecated.
 
 =item C<< UNIVERSAL-E<gt>import() >>
 
-The method C<< UNIVERSAL-E<gt>import() >> is now deprecated.
-Attempting to pass import arguments to a C<use UNIVERSAL>
-statement will result in a deprecation warning. (This is
-a less noisy version of the full deprecation warning
-added in 5.11.0.)
+The method C<< UNIVERSAL-E<gt>import() >> is now deprecated.  Attempting to
+pass import arguments to a C<use UNIVERSAL> statement will result in a
+deprecation warning. (This is a less noisy version of the full deprecation
+warning added in 5.11.0.)
 
 =back
 
-=head1 Platform Specific Notes
-
-XXX Any changes specific to a particular platform. VMS and Win32 are the usual
-stars here. It's probably best to group changes under the same section layout
-as the main perldelta
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.11.4 represents approximately one month of development since
+Perl 5.11.3 and contains 17682 lines of changes across 318 files
+from 40 authors and committers:
 
+Abigail, Andy Dougherty, brian d foy, Chris Williams, Craig A. Berry,
+David Golden, David Mitchell, Father Chrysostomos, Gerard Goossen,
+H.Merijn Brand, Jesse Vincent, Jim Cromie, Josh ben Jore, Karl
+Williamson, kmx, Matt S Trout, Nicholas Clark, Niko Tyni, Paul Marquess,
+Philip Hazel, Rafael Garcia-Suarez, Rainer Tammer, Reini Urban, Ricardo
+Signes, Shlomi Fish, Tim Bunce, Todd Rinaldo, Tom Christiansen, Tony
+Cook, Vincent Pit, and Zefram
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
 
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://rt.perl.org/perlbug/ .  There may also be
-information at http://www.perl.org/ , the Perl Home Page.
+bug database at L<http://rt.perl.org/perlbug/>.  There may also be
+information at L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
