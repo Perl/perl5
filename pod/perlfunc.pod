@@ -4186,11 +4186,11 @@ C<$main::sail> (as well as to C<$main'sail>, still seen in ancient
 code, mostly from Perl 4).
 
 If VERSION is provided, C<package> sets the C<$VERSION> variable in the given
-namespace.  VERSION must be a "strict" style version  number as defined by the
-L<version> module: a positive decimal number (integer or decimal-fraction)
-without exponentiation or else a dotted-decimal v-string with a leading 'v'
-character and at least three components.  You should set C<$VERSION> only once
-per package.
+namespace to a L<version> object with the VERSION provided.  VERSION must be a
+"strict" style version number as defined by the L<version> module: a positive
+decimal number (integer or decimal-fraction) without exponentiation or else a
+dotted-decimal v-string with a leading 'v' character and at least three
+components.  You should set C<$VERSION> only once per package.
 
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.
