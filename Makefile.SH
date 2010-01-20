@@ -1345,6 +1345,9 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
+runtests: runtests.SH config.sh
+	sh ./runtests.SH
+
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
@@ -1364,7 +1367,7 @@ _test:
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) $(dynamic_ext) $(TEST_PERL_DLL)
+test_prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) $(dynamic_ext) $(TEST_PERL_DLL) runtests
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 
 test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
