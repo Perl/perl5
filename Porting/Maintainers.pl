@@ -386,6 +386,7 @@ use File::Glob qw(:case);
 			     qr{^t/CPAN/authors/},
 			     qw{
 				lib/CPAN/Admin.pm
+				Makefile.PL
 				SlayMakefile
 				t/00signature.t
 				t/04clean_load.t

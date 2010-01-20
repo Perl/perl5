@@ -332,7 +332,6 @@ cpan/CPAN/lib/CPAN/Shell.pm
 cpan/CPAN/lib/CPAN/Tarzip.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/URL.pm
 cpan/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version strings
-cpan/CPAN/Makefile.PL
 cpan/CPAN/PAUSE2003.pub		CPAN public key
 cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
