@@ -151,6 +151,7 @@ in having one for a snapshot, but it's not required).
 
 =back
 
+
 =head2 Building a release - advance actions
 
 The work of building a release candidate for a numbered release of
@@ -324,6 +325,22 @@ I<You MUST SKIP this step for SNAPSHOT>
 
 Review and update INSTALL to account for the change in version number;
 in particular, the "Coexistence with earlier versions of perl 5" section.
+
+=item *
+
+I<You MUST SKIP this step for SNAPSHOT>
+
+Update the F<Changes> file to contain the git log command which would show
+all the changes in this release. You will need assume the existence of a
+not-yet created tag for the forthcoming release; e.g.
+
+    git log ... perl-5.10.0..perl-5.12.0
+
+Due to warts in the perforce-to-git migration, some branches require extra
+exclusions to avoid other branches being pulled in. Make sure you have the
+correct incantation: replace the not-yet-created tag with C<HEAD> and see
+if C<git log> produces roughly the right number of commits across roughly the
+right time period (you may find C<git log --pretty=oneline | wc> useful).
 
 =item *
 
