@@ -1686,6 +1686,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
 #  endif	       
+#  ifdef USE_PERL_ATOF
+			     " USE_PERL_ATOF"
+#  endif	       
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
 #  endif	       
