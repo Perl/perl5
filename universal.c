@@ -549,7 +549,7 @@ XS(XS_version_new)
 	if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
 	    /* create empty object */
 	    vs = sv_newmortal();
-	    sv_setpvs(vs, "undef");
+	    sv_setpvs(vs, "0");
 	}
 	else if ( items == 3 ) {
 	    vs = sv_newmortal();
@@ -659,7 +659,7 @@ XS(XS_version_vcmp)
 
 	       if ( ! sv_derived_from(robj, "version") )
 	       {
-		    robj = new_version(SvOK(robj) ? robj : newSVpvs("undef"));
+		    robj = new_version(SvOK(robj) ? robj : newSVpvs("0"));
 	       }
 	       rvs = SvRV(robj);
 
