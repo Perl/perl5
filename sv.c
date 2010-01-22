@@ -919,18 +919,18 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(NV)) },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
-    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
+    { sizeof(XPV),
+      copy_length(XPV, xpv_len),
+      0,
       SVt_PV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+      FIT_ARENA(0, sizeof(XPV)) },
 
     /* 12 */
-    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPVIV, xpv_cur),
+    { sizeof(XPVIV),
+      copy_length(XPVIV, xiv_u),
+      0,
       SVt_PVIV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+      FIT_ARENA(0, sizeof(XPV)) },
 
     /* 20 */
     { sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, SVt_PVNV, FALSE, HADNV,
@@ -941,9 +941,9 @@ static const struct body_details bodies_by_type[] = {
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
     /* something big */
-    { sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur),
-      sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur),
-      + STRUCT_OFFSET(regexp, xpv_cur),
+    { sizeof(regexp),
+      sizeof(regexp),
+      0,
       SVt_REGEXP, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur))
     },
@@ -956,37 +956,37 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
 
-    { sizeof(XPVAV) - STRUCT_OFFSET(XPVAV, xav_fill),
-      copy_length(XPVAV, xmg_stash) - STRUCT_OFFSET(XPVAV, xav_fill),
-      + STRUCT_OFFSET(XPVAV, xav_fill),
+    { sizeof(XPVAV),
+      copy_length(XPVAV, xmg_stash),
+      0,
       SVt_PVAV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVAV) - STRUCT_OFFSET(XPVAV, xav_fill)) },
+      FIT_ARENA(0, sizeof(XPVAV)) },
 
-    { sizeof(XPVHV) - STRUCT_OFFSET(XPVHV, xhv_fill),
-      copy_length(XPVHV, xmg_stash) - STRUCT_OFFSET(XPVHV, xhv_fill),
-      + STRUCT_OFFSET(XPVHV, xhv_fill),
+    { sizeof(XPVHV),
+      copy_length(XPVHV, xmg_stash),
+      0,
       SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVHV) - STRUCT_OFFSET(XPVHV, xhv_fill)) },
+      FIT_ARENA(0, sizeof(XPVHV)) },
 
     /* 56 */
-    { sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur),
-      sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur),
-      + STRUCT_OFFSET(XPVCV, xpv_cur),
+    { sizeof(XPVCV),
+      sizeof(XPVCV),
+      0,
       SVt_PVCV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVCV) - STRUCT_OFFSET(XPVCV, xpv_cur)) },
+      FIT_ARENA(0, sizeof(XPVCV)) },
 
-    { sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur),
-      sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur),
-      + STRUCT_OFFSET(XPVFM, xpv_cur),
+    { sizeof(XPVFM),
+      sizeof(XPVFM),
+      0,
       SVt_PVFM, TRUE, NONV, NOARENA,
-      FIT_ARENA(20, sizeof(XPVFM) - STRUCT_OFFSET(XPVFM, xpv_cur)) },
+      FIT_ARENA(20, sizeof(XPVFM)) },
 
     /* XPVIO is 84 bytes, fits 48x */
-    { sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur),
-      sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur),
-      + STRUCT_OFFSET(XPVIO, xpv_cur),
+    { sizeof(XPVIO),
+      sizeof(XPVIO),
+      0,
       SVt_PVIO, TRUE, NONV, HASARENA,
-      FIT_ARENA(24, sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur)) },
+      FIT_ARENA(24, sizeof(XPVIO)) },
 };
 
 #define new_body_allocated(sv_type)		\
