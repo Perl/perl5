@@ -2,7 +2,7 @@
 #
 # filehandle.t -- Test the parse_from_filehandle interface.
 #
-# Copyright 2006 by Russ Allbery <rra@stanford.edu>
+# Copyright 2006, 2009 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -11,27 +11,24 @@ BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
         @INC = '../lib';
-    } else {
-        unshift (@INC, '../blib/lib');
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
 }
 
-END {
-    print "not ok 1\n" unless $loaded;
+use strict;
+
+use Test::More tests => 6;
+
+BEGIN {
+    use_ok ('Pod::Man');
+    use_ok ('Pod::Text');
 }
 
-use Pod::Man;
-use Pod::Text;
-
-$loaded = 1;
-print "ok 1\n";
-
-my $man = Pod::Man->new or die "Cannot create parser\n";
-my $text = Pod::Text->new or die "Cannot create parser\n";
-my $n = 2;
+my $man = Pod::Man->new;
+isa_ok ($man, 'Pod::Man', 'Pod::Man parser object');
+my $text = Pod::Text->new;
+isa_ok ($text, 'Pod::Text', 'Pod::Text parser object');
 while (<DATA>) {
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
@@ -40,6 +37,8 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
+
+    # Test Pod::Man output.
     open (IN, '< tmp.pod') or die "Cannot open tmp.pod: $!\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     $man->parse_from_filehandle (\*IN, \*OUT);
@@ -58,13 +57,9 @@ while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
-    $n++;
+    is ($output, $expected, 'Pod::Man output is correct');
+
+    # Test Pod::Text output.
     open (IN, '< tmp.pod') or die "Cannot open tmp.pod: $!\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     $text->parse_from_filehandle (\*IN, \*OUT);
@@ -76,19 +71,13 @@ while (<DATA>) {
         $output = <OUT>;
     }
     close OUT;
-    unlink ('tmp.pod', 'out.tmp');
+    1 while unlink ('tmp.pod', 'out.tmp');
     $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
-    $n++;
+    is ($output, $expected, 'Pod::Text output is correct');
 }
 
 # Below the marker are bits of POD, corresponding expected nroff output, and

@@ -2,7 +2,7 @@
 #
 # man-options.t -- Additional tests for Pod::Man options.
 #
-# Copyright 2002, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -11,19 +11,15 @@ BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
         @INC = '../lib';
-    } else {
-        unshift (@INC, '../blib/lib');
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..7\n";
 }
 
-END {
-    print "not ok 1\n" unless $loaded;
-}
+use strict;
 
-use Pod::Man;
+use Test::More tests => 10;
+BEGIN { use_ok ('Pod::Man') }
 
 # Redirect stderr to a file.
 sub stderr_save {
@@ -38,10 +34,7 @@ sub stderr_restore {
     close OLDERR;
 }
 
-$loaded = 1;
-print "ok 1\n";
-
-my $n = 2;
+my $n = 1;
 while (<DATA>) {
     my %options;
     next until $_ eq "###\n";
@@ -56,7 +49,8 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
+    my $parser = Pod::Man->new (%options);
+    isa_ok ($parser, 'Pod::Man', 'Parser object');
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     stderr_save;
     $parser->parse_from_file ('tmp.pod', \*OUT);
@@ -73,19 +67,13 @@ while (<DATA>) {
         $output = <TMP>;
     }
     close TMP;
-    unlink ('tmp.pod', 'out.tmp');
+    1 while unlink ('tmp.pod', 'out.tmp');
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
-    $n++;
+    is ($output, $expected, "Output correct for test $n");
     open (ERR, 'out.err') or die "Cannot open out.err: $!\n";
     my $errors;
     {
@@ -93,24 +81,20 @@ while (<DATA>) {
         $errors = <ERR>;
     }
     close ERR;
-    unlink ('out.err');
+    1 while unlink ('out.err');
     $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($errors eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected errors:\n    ${expected}Errors:\n    $errors";
-    }
+    is ($errors, $expected, "Errors are correct for test $n");
     $n++;
 }
 
-# Below the marker are bits of POD and corresponding expected text output.
-# This is used to test specific features or problems with Pod::Man.  The
-# input and output are separated by lines containing only ###.
+# Below the marker are bits of POD and corresponding expected text output and
+# error output.  This is used to test specific features or problems with
+# Pod::Man.  The options, input, output, and errors are separated by lines
+# containing only ###.
 
 __DATA__
 

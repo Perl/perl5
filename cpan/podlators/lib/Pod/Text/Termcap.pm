@@ -1,6 +1,7 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
 #
-# Copyright 1999, 2001, 2002, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001, 2002, 2004, 2006, 2008, 2009
+#     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -93,6 +94,16 @@ sub output_code {
     $self->output ($$self{BOLD} . $code . $$self{NORM});
 }
 
+# Strip all of the formatting from a provided string, returning the stripped
+# version.
+sub strip_format {
+    my ($self, $text) = @_;
+    $text =~ s/\Q$$self{BOLD}//g;
+    $text =~ s/\Q$$self{UNDL}//g;
+    $text =~ s/\Q$$self{NORM}//g;
+    return $text;
+}
+
 # Override the wrapping code to igore the special sequences.
 sub wrap {
     my $self = shift;
@@ -175,7 +186,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001, 2002, 2004, 2006, 2008 Russ Allbery
+Copyright 1999, 2001, 2002, 2004, 2006, 2008, 2009 Russ Allbery
 <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it

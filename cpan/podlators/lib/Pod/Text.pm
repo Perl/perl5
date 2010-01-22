@@ -1,6 +1,6 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008
+# Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -37,7 +37,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 ##############################################################################
 # Initialization
@@ -304,6 +304,14 @@ sub start_document {
 # Text blocks
 ##############################################################################
 
+# Intended for subclasses to override, this method returns text with any
+# non-printing formatting codes stripped out so that length() correctly
+# returns the length of the text.  For basic Pod::Text, it does nothing.
+sub strip_format {
+    my ($self, $string) = @_;
+    return $string;
+}
+
 # This method is called whenever an =item command is complete (in other words,
 # we've seen its associated paragraph or know for certain that it doesn't have
 # one).  It gets the paragraph associated with the item as an argument.  If
@@ -325,7 +333,8 @@ sub item {
     my $indent = $$self{INDENTS}[-1];
     $indent = $$self{opt_indent} unless defined $indent;
     my $margin = ' ' x $$self{opt_margin};
-    my $fits = ($$self{MARGIN} - $indent >= length ($tag) + 1);
+    my $tag_length = length ($self->strip_format ($tag));
+    my $fits = ($$self{MARGIN} - $indent >= $tag_length + 1);
 
     # If the tag doesn't fit, or if we have no associated text, print out the
     # tag separately.  Otherwise, put the tag in the margin of the paragraph.
@@ -350,7 +359,7 @@ sub item {
         $space =~ s/^$margin /$margin:/ if $$self{opt_alt};
         $text = $self->reformat ($text);
         $text =~ s/^$margin /$margin:/ if ($$self{opt_alt} && $indent > 0);
-        my $tagspace = ' ' x length $tag;
+        my $tagspace = ' ' x $tag_length;
         $text =~ s/^($space)$tagspace/$1$tag/ or warn "Bizarre space in item";
         $self->output ($text);
     }
@@ -563,7 +572,15 @@ sub cmd_c {
 # a URL.
 sub cmd_l {
     my ($self, $attrs, $text) = @_;
-    return $$attrs{type} eq 'url' ? "<$text>" : $text;
+    if ($$attrs{type} eq 'url') {
+        if (not defined($$attrs{to}) or $$attrs{to} eq $text) {
+            return "<$text>";
+        } else {
+            return "$text <$$attrs{to}>";
+        }
+    } else {
+        return $text;
+    }
 }
 
 ##############################################################################
@@ -852,7 +869,7 @@ how to use Pod::Simple.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008 Russ Allbery
+Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009 Russ Allbery
 <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it

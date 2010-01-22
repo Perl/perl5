@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# termcap.t -- Additional specialized tests for Pod::Text::Termcap.
+# overstrike.t -- Additional specialized tests for Pod::Text::Overstrike.
 #
 # Copyright 2002, 2004, 2006, 2009 by Russ Allbery <rra@stanford.edu>
 #
@@ -19,15 +19,10 @@ BEGIN {
 use strict;
 
 use Test::More tests => 4;
-BEGIN { use_ok ('Pod::Text::Termcap') }
+BEGIN { use_ok ('Pod::Text::Overstrike') }
 
-# Hard-code a few values to try to get reproducible results.
-$ENV{COLUMNS} = 80;
-$ENV{TERM} = 'xterm';
-$ENV{TERMCAP} = 'xterm:co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m';
-
-my $parser = Pod::Text::Termcap->new;
-isa_ok ($parser, 'Pod::Text::Termcap', 'Parser module');
+my $parser = Pod::Text::Overstrike->new;
+isa_ok ($parser, 'Pod::Text::Overstrike', 'Parser module');
 my $n = 1;
 while (<DATA>) {
     next until $_ eq "###\n";
@@ -68,8 +63,8 @@ __DATA__
 
 B<I<Do>> I<B<not>> B<I<include>> B<I<formatting codes when>> B<I<wrapping>>.
 ###
-[1mWRAPPING[m
-    [1m[4mDo[m[m [4m[1mnot[m[m [1m[4minclude[m[m [1m[4mformatting codes when[m[m [1m[4mwrapping[m[m.
+WWRRAAPPPPIINNGG
+    DDoo _n_o_t iinncclluuddee ffoorrmmaattttiinngg  ccooddeess  wwhheenn wwrraappppiinngg.
 
 ###
 
@@ -96,13 +91,13 @@ D
 
 =back
 ###
-[1mTAG WIDTH[m
+TTAAGG  WWIIDDTTHH
     12345678  A
 
-    [1m12345678[m  B
+    1122334455667788  B
 
     1         C
 
-    [1m1[m         D
+    11         D
 
 ###

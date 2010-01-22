@@ -32,11 +32,10 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 
 use Carp qw(croak);
 use Pod::Simple ();
-use POSIX qw(strftime);
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.22';
+$VERSION = '2.23';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -255,11 +254,11 @@ sub _handle_element_start {
 
     # If we have a command handler, we need to accumulate the contents of the
     # tag before calling it.  Turn off IN_NAME for any command other than
-    # <Para> so that IN_NAME isn't still set for the first heading after the
-    # NAME heading.
+    # <Para> and the formatting codes so that IN_NAME isn't still set for the
+    # first heading after the NAME heading.
     if ($self->can ("cmd_$method")) {
         DEBUG > 2 and print "<$element> starts saving a tag\n";
-        $$self{IN_NAME} = 0 if ($element ne 'Para');
+        $$self{IN_NAME} = 0 if ($element ne 'Para' && length ($element) > 1);
 
         # How we're going to format embedded text blocks depends on the tag
         # and also depends on our parent tags.  Thankfully, inside tags that
@@ -395,6 +394,10 @@ sub quote_literal {
     # array or hash index, separated out just because we want to use it in
     # several places in the following regex.
     my $index = '(?: \[.*\] | \{.*\} )?';
+
+    # If in NAME section, just return an ASCII quoted string to avoid
+    # confusing tools like whatis.
+    return qq{"$_"} if $$self{IN_NAME};
 
     # Check for things that we don't want to quote, and if we find any of
     # them, return the string with just a font change and no quoting.
@@ -712,6 +715,7 @@ sub outindex {
     for (@output) {
         my ($type, $entry) = @$_;
         $entry =~ s/\"/\"\"/g;
+        $entry =~ s/\\/\\\\/g;
         $self->output (".IX $type " . '"' . $entry . '"' . "\n");
     }
 }
@@ -853,7 +857,12 @@ sub devise_date {
     } else {
         $time = time;
     }
-    return strftime ('%Y-%m-%d', localtime $time);
+
+    # Can't use POSIX::strftime(), which uses Fcntl, because MakeMaker
+    # uses this and it has to work in the core which can't load dynamic
+    # libraries.
+    my ($year, $month, $day) = (localtime $time)[5,4,3];
+    return sprintf ("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
 }
 
 # Print out the preamble and the title.  The meaning of the arguments to .TH
@@ -1076,9 +1085,9 @@ sub cmd_head4 {
 
 # All of the formatting codes that aren't handled internally by the parser,
 # other than L<> and X<>.
-sub cmd_b { return '\f(BS' . $_[2] . '\f(BE' }
-sub cmd_i { return '\f(IS' . $_[2] . '\f(IE' }
-sub cmd_f { return '\f(IS' . $_[2] . '\f(IE' }
+sub cmd_b { return $_[0]->{IN_NAME} ? $_[2] : '\f(BS' . $_[2] . '\f(BE' }
+sub cmd_i { return $_[0]->{IN_NAME} ? $_[2] : '\f(IS' . $_[2] . '\f(IE' }
+sub cmd_f { return $_[0]->{IN_NAME} ? $_[2] : '\f(IS' . $_[2] . '\f(IE' }
 sub cmd_c { return $_[0]->quote_literal ($_[2]) }
 
 # Index entries are just added to the pending entries.
@@ -1092,7 +1101,15 @@ sub cmd_x {
 # a URL.
 sub cmd_l {
     my ($self, $attrs, $text) = @_;
-    return $$attrs{type} eq 'url' ? "<$text>" : $text;
+    if ($$attrs{type} eq 'url') {
+        if (not defined($$attrs{to}) or $$attrs{to} eq $text) {
+            return "<$text>";
+        } else {
+            return "$text <$$attrs{to}>";
+        }
+    } else {
+        return $text;
+    }
 }
 
 ##############################################################################

@@ -2,7 +2,7 @@
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004, 2006, 2007, 2008
+# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -12,28 +12,22 @@ BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
         @INC = '../lib';
-    } else {
-        unshift (@INC, '../blib/lib');
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..25\n";
 }
 
-END {
-    print "not ok 1\n" unless $loaded;
-}
+use strict;
 
-use Pod::Man;
-
-$loaded = 1;
-print "ok 1\n";
+use Test::More tests => 30;
+BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
 my $have_encoding = (eval { require PerlIO::encoding; 1 } and not $@);
 
-my $parser = Pod::Man->new or die "Cannot create parser\n";
-my $n = 2;
+my $parser = Pod::Man->new;
+isa_ok ($parser, 'Pod::Man', 'Parser object');
+my $n = 1;
 while (<DATA>) {
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
@@ -59,18 +53,13 @@ while (<DATA>) {
         $output = <OUT>;
     }
     close OUT;
-    unlink ('tmp.pod', 'out.tmp');
+    1 while unlink ('tmp.pod', 'out.tmp');
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
+    is ($output, $expected, "Output correct for test $n");
     $n++;
 }
 
@@ -83,14 +72,14 @@ __DATA__
 ###
 =head1 NAME
 
-gcc - GNU project C and C++ compiler
+gcc - GNU project C<C> and C++ compiler
 
 =head1 C++ NOTES
 
 Other mentions of C++.
 ###
 .SH "NAME"
-gcc \- GNU project C and C++ compiler
+gcc \- GNU project "C" and C++ compiler
 .SH "\*(C+ NOTES"
 .IX Header " NOTES"
 Other mentions of \*(C+.
@@ -481,4 +470,43 @@ Some raw nroff.
 \&A paragraph.
 .PP
 More text.
+###
+
+###
+=head1 NAME
+
+test - C<test>
+###
+.SH "NAME"
+test \- "test"
+###
+
+###
+=head1 INDEX
+
+Index entry matching a whitespace escape.X<\n>
+###
+.SH "INDEX"
+.IX Header "INDEX"
+Index entry matching a whitespace escape.
+.IX Xref "\\n"
+###
+
+###
+=head1 LINK TO URL
+
+This is a L<link|http://www.example.com/> to a URL.
+###
+.SH "LINK TO URL"
+.IX Header "LINK TO URL"
+This is a link <http://www.example.com/> to a \s-1URL\s0.
+###
+
+###
+=head1 NAME
+
+test - B<test> I<italics> F<file>
+###
+.SH "NAME"
+test \- test italics file
 ###

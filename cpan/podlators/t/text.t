@@ -11,26 +11,20 @@ BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
         @INC = '../lib';
-    } else {
-        unshift (@INC, '../blib/lib');
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..6\n";
 }
 
-END {
-    print "not ok 1\n" unless $loaded;
-}
+use strict;
 
-use Pod::Text;
 use Pod::Simple;
+use Test::More tests => 8;
+BEGIN { use_ok ('Pod::Text') }
 
-$loaded = 1;
-print "ok 1\n";
-
-my $parser = Pod::Text->new or die "Cannot create parser\n";
-my $n = 2;
+my $parser = Pod::Text->new;
+isa_ok ($parser, 'Pod::Text', 'Parser object');
+my $n = 1;
 while (<DATA>) {
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
@@ -49,20 +43,13 @@ while (<DATA>) {
         $output = <TMP>;
     }
     close TMP;
-    unlink ('tmp.pod', 'out.tmp');
+    1 while unlink ('tmp.pod', 'out.tmp');
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } elsif ($n == 4 && $Pod::Simple::VERSION < 3.06) {
-        print "ok $n # skip Pod::Simple S<> parsing bug\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
+    is ($output, $expected, "Output correct for test $n");
     $n++;
 }
 
@@ -143,5 +130,15 @@ text
       line1
   
       line3
+
+###
+
+###
+=head1 LINK TO URL
+
+This is a L<link|http://www.example.com/> to a URL.
+###
+LINK TO URL
+    This is a link <http://www.example.com/> to a URL.
 
 ###

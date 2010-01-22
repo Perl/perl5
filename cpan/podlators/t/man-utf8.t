@@ -2,7 +2,7 @@
 #
 # man-options.t -- Additional tests for Pod::Man options.
 #
-# Copyright 2002, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -11,35 +11,34 @@ BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
         @INC = '../lib';
-    } else {
-        unshift (@INC, '../blib/lib');
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..5\n";
+}
 
-    # UTF-8 support requires Perl 5.8 or later.
+use strict;
+
+use Test::More;
+
+# UTF-8 support requires Perl 5.8 or later.
+BEGIN {
     if ($] < 5.008) {
-        my $n;
-        for $n (1..5) {
-            print "ok $n # skip -- Perl 5.8 required for UTF-8 support\n";
-        }
-        exit;
+        plan skip_all => 'Perl 5.8 required for UTF-8 support';
+    } else {
+        plan tests => 7;
     }
 }
+BEGIN { use_ok ('Pod::Man') }
 
-END {
-    print "not ok 1\n" unless $loaded;
-}
-
-use Pod::Man;
-
-$loaded = 1;
-print "ok 1\n";
-
-my $n = 2;
+# Force UTF-8 on all relevant file handles.  Do this inside eval in case the
+# encoding parameter doesn't work.
 eval { binmode (\*DATA, ':encoding(utf-8)') };
 eval { binmode (\*STDOUT, ':encoding(utf-8)') };
+my $builder = Test::More->builder;
+eval { binmode ($builder->output, ':encoding(utf-8)') };
+eval { binmode ($builder->failure_output, ':encoding(utf-8)') };
+
+my $n = 1;
 while (<DATA>) {
     my %options;
     next until $_ eq "###\n";
@@ -56,7 +55,8 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
+    my $parser = Pod::Man->new (%options);
+    isa_ok ($parser, 'Pod::Man', 'Parser object');
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
@@ -73,26 +73,18 @@ while (<DATA>) {
         $output = <TMP>;
     }
     close TMP;
-    unlink ('tmp.pod', 'out.tmp');
-    if (($options{utf8} && !$accents) || (!$options{utf8} && $accents)) {
-        print "ok $n\n";
+    1 while unlink ('tmp.pod', 'out.tmp');
+    if ($options{utf8}) {
+        ok (!$accents, "Saw no accent definitions for test $n");
     } else {
-        print "not ok $n\n";
-        print ($accents ? "Saw accents\n" : "Saw no accents\n");
-        print ($options{utf8} ? "Wanted no accents\n" : "Wanted accents\n");
+        ok ($accents, "Saw accent definitions for test $n");
     }
-    $n++;
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
         $expected .= $_;
     }
-    if ($output eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected\n========\n$expected\nOutput\n======\n$output\n";
-    }
+    is ($output, $expected, "Output correct for test $n");
     $n++;
 }
 

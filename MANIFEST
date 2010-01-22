@@ -1765,10 +1765,13 @@ cpan/podlators/t/basic.pod			podlators test
 cpan/podlators/t/basic.t			podlators test
 cpan/podlators/t/basic.txt			podlators test
 cpan/podlators/t/color.t			podlators test
+cpan/podlators/t/devise-date.t			podlators test
 cpan/podlators/t/filehandle.t			podlators test
+cpan/podlators/t/man-heading.t			podlators test
 cpan/podlators/t/man-options.t			podlators test
 cpan/podlators/t/man.t				podlators test
 cpan/podlators/t/man-utf8.t			podlators test
+cpan/podlators/t/overstrike.t			podlators test
 cpan/podlators/t/parselink.t			podlators test
 cpan/podlators/t/pod-parser.t			podlators test
 cpan/podlators/t/pod-spelling.t			podlators test

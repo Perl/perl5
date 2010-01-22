@@ -2,17 +2,14 @@
 #
 # parselink.t -- Tests for Pod::ParseLink.
 #
-# Copyright 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 2001, 2009 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # The format of each entry in this array is the L<> text followed by the
-# five-element parse returned by parselink.  When adding a new test, also
-# increment the test count in the BEGIN block below.  We don't use any of the
-# fancy test modules intentionally for backward compatibility to older
-# versions of Perl.
-@TESTS = (
+# five-element parse returned by parselink.
+our @TESTS = (
     [ 'foo',
       undef, 'foo', 'foo', undef, 'pod' ],
 
@@ -87,46 +84,37 @@
 
     [ 'news:yld72axzc8.fsf@windlord.stanford.edu',
       undef, 'news:yld72axzc8.fsf@windlord.stanford.edu',
-      'news:yld72axzc8.fsf@windlord.stanford.edu', undef, 'url' ]
+      'news:yld72axzc8.fsf@windlord.stanford.edu', undef, 'url' ],
+
+    [ 'link|http://www.perl.org/',
+      'link', 'link', 'http://www.perl.org/', undef, 'url' ],
+
+    [ '0|http://www.perl.org/',
+      '0', '0', 'http://www.perl.org/', undef, 'url' ],
+
+    [ '0|Pod::Parser',
+      '0', '0', 'Pod::Parser', undef, 'pod' ],
 );
 
 BEGIN {
     chdir 't' if -d 't';
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..25\n";
 }
 
-END {
-    print "not ok 1\n" unless $loaded;
-}
+use strict;
 
-use Pod::ParseLink;
-$loaded = 1;
-print "ok 1\n";
+use Test::More tests => 28;
+BEGIN { use_ok ('Pod::ParseLink') }
 
 # Used for reporting test failures.
 my @names = qw(text inferred name section type);
 
-my $n = 2;
 for (@TESTS) {
     my @expected = @$_;
     my $link = shift @expected;
     my @results = parselink ($link);
-    my $okay = 1;
-    for (0..4) {
-        # Make sure to check undef explicitly; we don't want undef to match
-        # the empty string because they're semantically different.
-        unless ((!defined ($results[$_]) && !defined ($expected[$_]))
-                || (defined ($results[$_]) && defined ($expected[$_])
-                    && $results[$_] eq $expected[$_])) {
-            print "not ok $n\n" if $okay;
-            print "# Incorrect $names[$_]:\n";
-            print "#   expected: $expected[$_]\n";
-            print "#       seen: $results[$_]\n";
-            $okay = 0;
-        }
-    }
-    print "ok $n\n" if $okay;
-    $n++;
+    my $pretty = $link;
+    $pretty =~ s/\n/\\n/g;
+    is_deeply (\@results, \@expected, $pretty);
 }

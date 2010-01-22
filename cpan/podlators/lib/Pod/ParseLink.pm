@@ -1,6 +1,6 @@
 # Pod::ParseLink -- Parse an L<> formatting code in POD text.
 #
-# Copyright 2001, 2008 by Russ Allbery <rra@stanford.edu>
+# Copyright 2001, 2008, 2009 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -30,7 +30,7 @@ use Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(parselink);
 
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 ##############################################################################
 # Implementation
@@ -81,15 +81,25 @@ sub _infer_text {
 sub parselink {
     my ($link) = @_;
     $link =~ s/\s+/ /g;
+    my $text;
+    if ($link =~ /\|/) {
+        ($text, $link) = split (/\|/, $link, 2);
+    }
     if ($link =~ /\A\w+:[^:\s]\S*\Z/) {
-        return (undef, $link, $link, undef, 'url');
-    } else {
-        my $text;
-        if ($link =~ /\|/) {
-            ($text, $link) = split (/\|/, $link, 2);
+        my $inferred;
+        if (defined ($text) && length ($text) > 0) {
+            return ($text, $text, $link, undef, 'url');
+        } else {
+            return ($text, $link, $link, undef, 'url');
         }
+    } else {
         my ($name, $section) = _parse_section ($link);
-        my $inferred = $text || _infer_text ($name, $section);
+        my $inferred;
+        if (defined ($text) && length ($text) > 0) {
+            $inferred = $text;
+        } else {
+            $inferred = _infer_text ($name, $section);
+        }
         my $type = ($name && $name =~ /\(\S*\)/) ? 'man' : 'pod';
         return ($text, $inferred, $name, $section, $type);
     }
@@ -174,7 +184,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2001, 2008 Russ Allbery <rra@stanford.edu>.
+Copyright 2001, 2008, 2009 Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

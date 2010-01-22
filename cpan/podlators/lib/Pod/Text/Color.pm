@@ -1,6 +1,6 @@
 # Pod::Text::Color -- Convert POD data to formatted color ASCII text
 #
-# Copyright 1999, 2001, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -55,6 +55,15 @@ sub output_code {
     my ($self, $code) = @_;
     $code = colored ($code, 'green');
     $self->output ($code);
+}
+
+# Strip all of the formatting from a provided string, returning the stripped
+# version.  We will eventually want to use colorstrip() from Term::ANSIColor,
+# but it's fairly new so avoid the tight dependency.
+sub strip_format {
+    my ($self, $text) = @_;
+    $text =~ s/\e\[[\d;]*m//g;
+    return $text;
 }
 
 # We unfortunately have to override the wrapping code here, since the normal
@@ -138,7 +147,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2001, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
