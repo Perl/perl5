@@ -6734,13 +6734,13 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
             PUTBACK ;
             
             count= call_sv(cv, G_SCALAR);
+            SPAGAIN ;
             
             if (count == 1) { /* XXXX is this right? dmq */
                 sv_str = POPs;
                 SvREFCNT_inc_simple_void(sv_str);
             } 
             
-            SPAGAIN ;
             PUTBACK ;
             FREETMPS ;
             LEAVE ;
