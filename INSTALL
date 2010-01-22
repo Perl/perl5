@@ -932,7 +932,8 @@ only if it is able to find the gdbm library.
 
 To disable certain extensions so that they are not built, use the
 -Dnoextensions=... and -Donlyextensions=... options.  They both accept
-a space-separated list of extensions.  The extensions listed in
+a space-separated list of extensions, such as C<IPC/SysV>. The extensions
+listed in
 C<noextensions> are removed from the list of extensions to build, while
 the C<onlyextensions> is rather more severe and builds only the listed
 extensions.  The latter should be used with extreme caution since
