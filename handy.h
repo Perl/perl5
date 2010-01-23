@@ -789,9 +789,9 @@ PoisonWith(0xEF) for catching access to freed memory.
  * implementation unless -DPERL_MEM_LOG_NOIMPL is also defined.
  *
  * Known problems:
- * - all memory allocs do not get logged, only those
+ * - not all memory allocs get logged, only those
  *   that go through Newx() and derivatives (while all
- *  Safefrees do get logged)
+ *   Safefrees do get logged)
  * - __FILE__ and __LINE__ do not work everywhere
  * - __func__ or __FUNCTION__ even less so
  * - I think more goes on after the perlio frees but
