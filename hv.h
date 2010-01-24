@@ -85,9 +85,8 @@ struct xpvhv_aux {
 struct xpvhv {
     HV*		xmg_stash;	/* class package */
     union _xmgu	xmg_u;
-    STRLEN      xhv_fill;       /* how full xhv_array currently is */
+    STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
-    STRLEN	xhv_keys;	/* total keys, including placeholders */
 };
 
 /* hash a key */
