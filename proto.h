@@ -1028,6 +1028,11 @@ PERL_CALLCONV void*	Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 kl
 #define PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN	\
 	assert(key)
 
+PERL_CALLCONV STRLEN	Perl_hv_fill(pTHX_ HV const *const hv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_HV_FILL	\
+	assert(hv)
+
 PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV *hv, HE *entryK)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT	\

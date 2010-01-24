@@ -235,7 +235,7 @@ C<SV*>.
 #  define Nullhv Null(HV*)
 #endif
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
-#define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
+#define HvFILL(hv)	Perl_hv_fill(aTHX_ (const HV *)(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 /* This quite intentionally does no flag checking first. That's your
    responsibility.  */

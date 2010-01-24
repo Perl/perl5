@@ -1339,13 +1339,6 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 	    HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
 	    HvMAX(sv) = 7; /* (start with 8 buckets) */
-	    if (old_type_details->body_size) {
-		HvFILL(sv) = 0;
-	    } else {
-		/* It will have been zeroed when the new body was allocated.
-		   Lets not write to it, in case it confuses a write-back
-		   cache.  */
-	    }
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.

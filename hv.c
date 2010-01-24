@@ -817,7 +817,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!counter) {				/* initial entry? */
-	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max) {
 	    hsplit(hv);
 	} else if(!HvREHASH(hv)) {
@@ -1055,9 +1054,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HvPLACEHOLDERS(hv)++;
 	} else {
 	    *oentry = HeNEXT(entry);
-	    if(!*first_entry) {
-		xhv->xhv_fill--; /* HvFILL(hv)-- */
-	    }
 	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else
@@ -1156,8 +1152,6 @@ S_hsplit(pTHX_ HV *hv)
 	    if ((HeHASH(entry) & newsize) != (U32)i) {
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = *bep;
-		if (!*bep)
-		    xhv->xhv_fill++; /* HvFILL(hv)++ */
 		*bep = entry;
 		right_length++;
 		continue;
@@ -1167,8 +1161,6 @@ S_hsplit(pTHX_ HV *hv)
 		left_length++;
 	    }
 	}
-	if (!*aep)				/* everything moved */
-	    xhv->xhv_fill--; /* HvFILL(hv)-- */
 	/* I think we don't actually need to keep track of the longest length,
 	   merely flag if anything is too long. But for the moment while
 	   developing this code I'll track it.  */
@@ -1204,7 +1196,6 @@ S_hsplit(pTHX_ HV *hv)
 
     was_shared = HvSHAREKEYS(hv);
 
-    xhv->xhv_fill = 0;
     HvSHAREKEYS_off(hv);
     HvREHASH_on(hv);
 
@@ -1239,8 +1230,6 @@ S_hsplit(pTHX_ HV *hv)
 
 	    /* Copy oentry to the correct new chain.  */
 	    bep = ((HE**)a) + (hash & (I32) xhv->xhv_max);
-	    if (!*bep)
-		    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	    HeNEXT(entry) = *bep;
 	    *bep = entry;
 
@@ -1330,16 +1319,13 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	    if (j != i) {
 		j -= i;
 		*oentry = HeNEXT(entry);
-		if (!(HeNEXT(entry) = aep[j]))
-		    xhv->xhv_fill++; /* HvFILL(hv)++ */
+		HeNEXT(entry) = aep[j];
 		aep[j] = entry;
 		continue;
 	    }
 	    else
 		oentry = &HeNEXT(entry);
 	}
-	if (!*aep)				/* everything moved */
-	    xhv->xhv_fill--; /* HvFILL(hv)-- */
     }
 }
 
@@ -1396,7 +1382,6 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	}
 
 	HvMAX(hv)   = hv_max;
-	HvFILL(hv)  = HvFILL(ohv);
 	HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);
 	HvARRAY(hv) = ents;
     } /* not magical */
@@ -1639,8 +1624,6 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 	while ((entry = *oentry)) {
 	    if (HeVAL(entry) == &PL_sv_placeholder) {
 		*oentry = HeNEXT(entry);
-		if (first && !*oentry)
-		    HvFILL(hv)--; /* This linked list is now empty.  */
 		if (entry == HvEITER_get(hv))
 		    HvLAZYDEL_on(hv);
 		else
@@ -1783,7 +1766,6 @@ S_hfreeentries(pTHX_ HV *hv)
 	/* make everyone else think the array is empty, so that the destructors
 	 * called for freed entries can't recusively mess with us */
 	HvARRAY(hv) = NULL;
-	HvFILL(hv) = 0;
 	((XPVHV*) SvANY(hv))->xhv_keys = 0;
 
 
@@ -1875,6 +1857,37 @@ Perl_hv_undef(pTHX_ HV *hv)
 
     if (SvRMAGICAL(hv))
 	mg_clear(MUTABLE_SV(hv));
+}
+
+/*
+=for apidoc hv_fill
+
+Returns the number of hash buckets that happen to be in use. This function is
+wrapped by the macro C<HvFILL>.
+
+Previously this value was stored in the HV structure, rather than being
+calculated on demand.
+
+=cut
+*/
+
+STRLEN
+Perl_hv_fill(pTHX_ HV const *const hv)
+{
+    STRLEN count = 0;
+    HE **ents = HvARRAY(hv);
+
+    PERL_ARGS_ASSERT_HV_FILL;
+
+    if (ents) {
+	HE *const *const end = ents + HvMAX(hv);
+
+	do {
+	    if (*ents)
+		++count;
+	} while (++ents <= end);
+    }
+    return count;
 }
 
 static struct xpvhv_aux*
@@ -2428,10 +2441,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     if (entry) {
         if (--entry->he_valu.hent_refcount == 0) {
             *oentry = HeNEXT(entry);
-            if (!*first) {
-		/* There are now no entries in our slot.  */
-                xhv->xhv_fill--; /* HvFILL(hv)-- */
-	    }
             Safefree(entry);
             xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
         }
@@ -2551,7 +2560,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
-	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
 	}
@@ -2733,10 +2741,6 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 
 	/* Link it into the chain.  */
 	HeNEXT(entry) = *oentry;
-	if (!HeNEXT(entry)) {
-	    /* initial entry.   */
-	    HvFILL(hv)++;
-	}
 	*oentry = entry;
 
 	HvTOTALKEYS(hv)++;

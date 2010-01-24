@@ -1115,7 +1115,6 @@ perl_destruct(pTHXx)
 	Safefree(array);
 	HvARRAY(PL_strtab) = 0;
 	HvTOTALKEYS(PL_strtab) = 0;
-	HvFILL(PL_strtab) = 0;
     }
     SvREFCNT_dec(PL_strtab);
 
