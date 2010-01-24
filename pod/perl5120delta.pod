@@ -1,0 +1,16 @@
+=head1 NAME
+
+perl5120delta - what is new for perl v5.12.0
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.10.0 release and
+the 5.12.0 release.
+
+Many of the bug fixes in 5.12.0 were already seen in the 5.10.1
+maintenance release since the two releases were kept closely
+coordinated (while 5.12.0 was still called 5.11.something).
+
+You can see the list of changes in the 5.10.1 release 
+by reading L<perl5101delta>.
+
