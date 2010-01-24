@@ -887,7 +887,7 @@ Perl_hv_scalar(pTHX_ HV *hv)
     }
 
     sv = sv_newmortal();
-    if (HvFILL((const HV *)hv)) 
+    if (HvTOTALKEYS((const HV *)hv)) 
         Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
     else
@@ -1317,7 +1317,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     }
     xhv->xhv_max = --newsize; 	/* HvMAX(hv) = --newsize */
     HvARRAY(hv) = (HE **) a;
-    if (!xhv->xhv_fill /* !HvFILL(hv) */)	/* skip rest if no entries */
+    if (!xhv->xhv_keys /* !HvTOTALKEYS(hv) */)	/* skip rest if no entries */
 	return;
 
     aep = (HE**)a;
@@ -1348,9 +1348,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 {
     dVAR;
     HV * const hv = newHV();
-    STRLEN hv_max, hv_fill;
+    STRLEN hv_max;
 
-    if (!ohv || (hv_fill = HvFILL(ohv)) == 0)
+    if (!ohv || !HvTOTALKEYS(ohv))
 	return hv;
     hv_max = HvMAX(ohv);
 
@@ -1396,7 +1396,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	}
 
 	HvMAX(hv)   = hv_max;
-	HvFILL(hv)  = hv_fill;
+	HvFILL(hv)  = HvFILL(ohv);
 	HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);
 	HvARRAY(hv) = ents;
     } /* not magical */
@@ -1405,6 +1405,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	HE *entry;
 	const I32 riter = HvRITER_get(ohv);
 	HE * const eiter = HvEITER_get(ohv);
+	STRLEN hv_fill = HvFILL(ohv);
 
 	/* Can we use fewer buckets? (hv_max is always 2^n-1) */
 	while (hv_max && hv_max + 1 >= hv_fill * 2)
@@ -1431,10 +1432,10 @@ HV *
 Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 {
     HV * const hv = newHV();
-    STRLEN hv_fill;
 
-    if (ohv && (hv_fill = HvFILL(ohv))) {
+    if (ohv && HvTOTALKEYS(ohv)) {
 	STRLEN hv_max = HvMAX(ohv);
+	STRLEN hv_fill = HvFILL(ohv);
 	HE *entry;
 	const I32 riter = HvRITER_get(ohv);
 	HE * const eiter = HvEITER_get(ohv);
