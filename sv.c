@@ -982,7 +982,7 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(XPVAV)) },
 
     { sizeof(XPVHV),
-      copy_length(XPVHV, xiv_u),
+      copy_length(XPVHV, xhv_keys),
       0,
       SVt_PVHV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVHV)) },

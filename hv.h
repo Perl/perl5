@@ -87,10 +87,8 @@ struct xpvhv {
     union _xmgu	xmg_u;
     STRLEN      xhv_fill;       /* how full xhv_array currently is */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
-    union _xivu xiv_u;
+    STRLEN	xhv_keys;	/* total keys, including placeholders */
 };
-
-#define xhv_keys xiv_u.xivu_iv
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
