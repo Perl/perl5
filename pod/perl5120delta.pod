@@ -32,7 +32,7 @@ by reading L<perl5101delta>.
 It is now possible to overload the C<qr//> operator, that is,
 conversion to regexp, like it was already possible to overload
 conversion to boolean, string or number of objects. It is invoked when
-an object appears on the right hand side of the C<=~> operator, or when
+an object appears on the right hand side of the C<=~> operator or when
 it is interpolated into a regexp. See L<overload>.
 
 =head2 Pluggable keywords
@@ -41,7 +41,7 @@ Extension modules can now cleanly hook into the Perl parser to define
 new kinds of keyword-headed expression and compound statement. The
 syntax following the keyword is defined entirely by the extension. This
 allow a completely non-Perl sublanguage to be parsed inline, with the
-right ops cleanly generated. This feature is currently considered
+correct ops cleanly generated. This feature is currently considered
 experimental.
 
 See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core
@@ -84,15 +84,15 @@ Perl can now handle every Unicode character property.  A new pod,
 L<perluniprops>, lists all available non-Unihan character properties.  By
 default the Unihan properties and certain others (deprecated and Unicode
 internal-only ones) are not exposed.  See below for more details on
-these; there is also a section in the pod listing them, and why they are
-not exposed.
+these; there is also a section in the pod listing them, and explaining
+why they are not exposed.
 
 Perl now fully supports the Unicode compound-style of using C<=> and C<:>
 in writing regular expressions: C<\p{property=value}> and
 C<\p{property:value}> (both of which mean the same thing).
 
 Perl now fully supports the Unicode loose matching rules for text
-between the braces in C<\p{...}> constructs.  In addition, Perl also allows
+between the braces in C<\p{...}> constructs.  In addition, Perl allows
 underscores between digits of numbers.
 
 All the Unicode-defined synonyms for properties and property values are
@@ -101,8 +101,8 @@ now accepted.
 C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
 better with various Asian languages.  It now is defined as an C<extended
 grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).
-Anything matched previously that made sense will continue to be matched.  But
-in addition:
+Anything matched previously and that made sense will continue to be
+matched, but in addition:
 
 =over
 
@@ -154,7 +154,7 @@ no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
 possible problem.  All but 36 of them are either officially deprecated
 or strongly discouraged from being used.  Of those 36, likely the most
 widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
-similar, plus Bi-directional controls.
+similar, plus bidirectional controls.
 
 C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>.  The Perl
 definition included a number of things that aren't really alpha (all
@@ -280,7 +280,7 @@ again sequentially and see if the failures go away.
 =head2 The C<...> operator
 
 A new operator, C<...>, nicknamed the Yada Yada operator, has been added.
-It is intended to mark placeholder code, that is not yet implemented.
+It is intended to mark placeholder code that is not yet implemented.
 See L<perlop/"Yada Yada Operator">. (chromatic)
 
 =head2 DTrace support
@@ -399,51 +399,37 @@ or dotted-decimal component.
 The L<version> module adds C<version::is_strict> and C<version::is_lax>
 functions to check a scalar against these rules.
 
-=over
-
-=item *
-
-The boolkeys op moved to the group of hash ops. This breaks binary compatibility.
-
-=item *
-
-C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
-
-=item *
-
-Filehandles are blessed directly into C<IO::Handle>, as C<FileHandle> is merely a wrapper around C<IO::Handle>.
-
-The previous behaviour was to bless Filehandles into L<FileHandle>
-(an empty proxy class) if it was loaded into memory and otherwise
-to bless them into C<IO::Handle>.
-
-=back
-
 =head2 Unicode interpretation of \w, \d, \s, and the POSIX character classes redefined.
 
-Previous versions of Perl tried to map POSIX style character class definitions onto
-Unicode property names so that patterns would "dwim" when matches were made against latin-1 or
-unicode strings. This proved to be a mistake, breaking character class negation, causing
-forward compatibility problems (as Unicode keeps updating their property definitions and adding
-new characters), and other problems.
+Previous versions of Perl tried to map POSIX style character class
+definitions onto Unicode property names so that patterns would "do what
+you meant" when matches were made against latin-1 or unicode strings.
+This proved to be a mistake, breaking character class negation, causing
+forward compatibility problems (as Unicode keeps updating their property
+definitions and adding new characters), and other problems.
 
-Therefore we have now defined a new set of artificial "unicode" property names which will be
-used to do unicode matching of patterns using POSIX style character classes and perl short-form
-escape character classes like \w and \d.
+Therefore we have now defined a new set of artificial "unicode" property
+names which will be used to do unicode matching of patterns using POSIX
+style character classes and perl short-form escape character classes
+like \w and \d.
 
-The key change here is that \d will no longer match every digit in the unicode standard
-(there are thousands) nor will \w match every word character in the standard, instead they
-will match precisely their POSIX or Perl definition.
+The key change here is that \d will no longer match every digit in the
+unicode standard (there are thousands) nor will \w match every word
+character in the standard, instead they will match precisely their POSIX
+or Perl definition.
 
-Those needing to match based on Unicode properties can continue to do so by using the \p{} syntax
-to match whichever property they like, including the new artificial definitions.
+Those needing to match based on Unicode properties can continue to do so
+by using the \p{} syntax to match whichever property they like,
+including the new artificial definitions.
 
-B<NOTE:> This is a backwards incompatible no-warning change in behaviour. If you are upgrading
-and you process large volumes of text look for POSIX and Perl style character classes and
-change them to the relevent property name (by removing the word 'Posix' from the current name).
+B<NOTE:> This is a backwards incompatible no-warning change in
+behaviour. If you are upgrading and you process large volumes of text
+look for POSIX and Perl style character classes and change them to the
+relevent property name (by removing the word 'Posix' from the current
+name).
 
-The following table maps the POSIX character class names, the escapes and the old and new
-Unicode property mappings:
+The following table maps the POSIX character class names, the escapes
+and the old and new Unicode property mappings:
 
     POSIX  Esc  Class               New-Property  ! Old-Property
     ----------------------------------------------+-------------
@@ -473,8 +459,7 @@ in regcomp.h, and then setting
 
 to true your enviornment when testing.
 
-=head2 
-@INC reorganization
+=head2 @INC reorganization
 
 In @INC, ARCHLIB and PRIVLIB now occur after after the current version's
 site_perl and vendor_perl.
@@ -483,9 +468,9 @@ site_perl and vendor_perl.
 
 The handling of complex expressions by the C<given>/C<when> switch
 statement has been enhanced. These enhancements are also available in
-5.10.1 and subsequent 5.10 releases. There are two new cases where C<when> now
-interprets its argument as a boolean, instead of an expression to be used
-in a smart match:
+5.10.1 and subsequent 5.10 releases. There are two new cases where
+C<when> now interprets its argument as a boolean, instead of an
+expression to be used in a smart match:
 
 =head2 flip-flop operators
 
@@ -516,9 +501,8 @@ to the regular or operator, as in C<when (expr1 || expr2)>.)
 This section details more changes brought to the semantics to
 the smart match operator, that naturally also modify the behaviour
 of the switch statements where smart matching is implicitly used.
-These changers were also made for the 5.10.1 release, and will remain in
+These changes were also made for the 5.10.1 release, and will remain in
 subsequent 5.10 releases.
-
 
 =head3 Changes to type-based dispatch
 
@@ -574,12 +558,12 @@ when an object overloading C<~~> appears on the right side of the
 operator, the overload routine will always be called (with a 3rd argument
 set to a true value, see L<overload>.) However, when the object will
 appear on the left, the overload routine will be called only when the
-rightmost argument is a simple scalar. This way distributivity of smart match
-across arrays is not broken, as well as the other behaviours with complex
-types (coderefs, hashes, regexes). Thus, writers of overloading routines
-for smart match mostly need to worry only with comparing against a scalar,
-and possibly with stringification overloading; the other common cases
-will be automatically handled consistently.
+rightmost argument is a simple scalar. This way, distributivity of smart
+match across arrays is not broken, as well as the other behaviours with
+complex types (coderefs, hashes, regexes). Thus, writers of overloading
+routines for smart match mostly need to worry only with comparing
+against a scalar, and possibly with stringification overloading; the
+other common cases will be automatically handled consistently.
 
 C<~~> will now refuse to work on objects that do not overload it (in order
 to avoid relying on the object's underlying structure). (However, if the
@@ -604,15 +588,26 @@ avoided.
 
 =item *
 
-The semantics of C<use feature :5.10*> have changed slightly.
-See L<"Modules and Pragmata"> for more information.
+The boolkeys op moved to the group of hash ops. This breaks binary
+compatibility.
 
 =item *
 
-It is now a run-time error to use the smart match operator C<~~>
-with an object that has no overload defined for it. (This way
-C<~~> will not break encapsulation by matching against the
-object's internal representation as a reference.)
+C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
+
+=item *
+
+Filehandles are blessed directly into C<IO::Handle>, as C<FileHandle> is
+merely a wrapper around C<IO::Handle>.
+
+The previous behaviour was to bless Filehandles into L<FileHandle>
+(an empty proxy class) if it was loaded into memory and otherwise
+to bless them into C<IO::Handle>.
+
+=item *
+
+The semantics of C<use feature :5.10*> have changed slightly.
+See L<"Modules and Pragmata"> for more information.
 
 =item *
 
@@ -681,7 +676,8 @@ components of the regexp engine, because they're not yet built.
 
 =item *
 
-F<miniperl>'s @INC is now restricted to just -I..., the split of $ENV{PERL5LIB}, and "."
+F<miniperl>'s @INC is now restricted to just C<-I...>, the split of
+C<$ENV{PERL5LIB}>, and "C<.>"
 
 =item *
 
@@ -693,7 +689,8 @@ Tied filehandles now have an additional method EOF which provides the EOF type
 
 =item *
 
-To better match all other flow control statements, C<foreach> may no longer be used as an attribute.
+To better match all other flow control statements, C<foreach> may no
+longer be used as an attribute.
 
 =back
 
@@ -743,26 +740,17 @@ absolutely necessary to have empty attribute lists (for example,
 because of a code generator) then avoid the warning by adding a space
 before the C<=>.
 
-=item C<< UNIVERSAL-E<gt>import() >>
+=item C<< UNIVERSAL->import() >>
 
-The method C<< UNIVERSAL-E<gt>import() >> is now deprecated.  Attempting to
+The method C<< UNIVERSAL->import() >> is now deprecated.  Attempting to
 pass import arguments to a C<use UNIVERSAL> statement will result in a
-deprecation warning. (This is a less noisy version of the full deprecation
-warning added in 5.11.0.)
+deprecation warning.
 
 =item Use of "goto" to jump into a construct is deprecated
 
-Using C<goto> to jump from an outer scope into an inner
-scope is now deprecated. This rare use case was causing
-problems in the implementation of scopes.
-
-=item C<Switch> is buggy and should be avoided. 
-
-From perl 5.11.0 onwards, it is
-intended that any use of the core version of this module will emit a
-warning, and that the module will eventually be removed from the core
-(probably in perl 5.14.0). See L<perlsyn/"Switch statements"> for its
-replacement.
+Using C<goto> to jump from an outer scope into an inner scope is now
+deprecated. This rare use case was causing problems in the
+implementation of scopes.
 
 =item Deprecated Modules
 
@@ -773,11 +761,16 @@ of these modules warnings will issue a deprecation warning.
 
 =over
 
-=item C<Class::ISA>
+=item L<Class::ISA>
 
-=item C<Pod::Plainer>
+=item L<Pod::Plainer>
 
-=item C<Shell>
+=item L<Shell>
+
+=item L<Switch>
+
+Switch is buggy and should be avoided.  See L<perlsyn/"Switch
+statements"> for its replacement.
 
 =back
 
@@ -818,10 +811,10 @@ Dual-lifed modules maintained primarily in the Perl core now live in dist/.
 Dual-lifed modules maintained primarily on CPAN now live in cpan/
 
 In previous releases of Perl, it was customary to enumerate all module
-changes in this section of the C<perldelta> file.   From 5.11.0 forward
-only notable updates (such as new or deprecated modules ) will be
-listed in this section. For a complete reference to the versions of
-modules shipped in a given release of perl, please see L<Module::CoreList>.
+changes in this section of the C<perldelta> file. From 5.11.0 forward
+only notable updates (such as new or deprecated modules ) will be listed
+in this section. For a complete reference to the versions of modules
+shipped in a given release of perl, please see L<Module::CoreList>.
 
 =head2 New Modules and Pragmata
 
@@ -847,7 +840,8 @@ This has been added to the core (version 2.020).
 C<parent>
 
 This pragma establishes an ISA relationship with base classes at compile
-time. It provides the key feature of C<base> without the feature creep.
+time. It provides the key feature of C<base> without further unwanted
+behaviors.
 
 =item *
 
@@ -926,7 +920,8 @@ Upgraded from version 1.19 to 1.20.
 
 C<diagnostics>
 
-This pragma no longer suppresses C<Use of uninitialized value in range (or flip)> warnings. [perl #71204]
+This pragma no longer suppresses C<Use of uninitialized value in range
+(or flip)> warnings. [perl #71204]
 
 =item *
 
@@ -937,8 +932,9 @@ Upgraded from 1.13 to 1.14.  Added the C<unicode_strings> feature:
     use feature "unicode_strings";
 
 This pragma turns on Unicode semantics for the case-changing operations
-(uc/lc/ucfirst/lcfirst) on strings that don't have the internal UTF-8 flag set,
-but that contain single-byte characters between 128 and 255.
+(C<uc>, C<lc>, C<ucfirst>, C<lcfirst>) on strings that don't have the
+internal UTF-8 flag set, but that contain single-byte characters between
+128 and 255.
 
 =item *
 
@@ -950,10 +946,10 @@ Upgraded from version 1.74 to 1.75.
 
 C<less>
 
-Upgraded from version 0.03 to 0.03.
+Upgraded from version 0.02 to 0.03.
 
-This version introduces the C<stash_name> method to allow subclasses of less to
-pick where in %^H to store their stash.
+This version introduces the C<stash_name> method to allow subclasses of
+C<less> to pick where in %^H to store their stash.
 
 =item *
 
@@ -1063,11 +1059,11 @@ Documented that C<when()> treats specially most of the filetest operators
 
 =item *
 
-Documented when as a syntax modifier
+Documented C<when> as a syntax modifier
 
 =item *
 
-Eliminated "Old Perl threads tutorial", which describes 5005 threads.
+Eliminated "Old Perl threads tutorial", which described 5005 threads.
 
 F<pod/perlthrtut.pod> is the same material reworked for ithreads.
 
@@ -1076,7 +1072,7 @@ F<pod/perlthrtut.pod> is the same material reworked for ithreads.
 Correct previous documentation: v-strings are not deprecated
 
 With version objects, we need them to use MODULE VERSION syntax.  This
-patch removes the deprecation note.
+patch removes the deprecation notice.
 
 =item *
 
@@ -1090,17 +1086,19 @@ for clarity, consistent use of language, and to fix the spelling of Tom
 Christiansen's name.
 
 The Pod specification (L<perlpodspec>) has been updated to bring the
-specification in line with modern usage already supported by most Pod systems.
-A parameter string may now follow the format name in a "begin/end" region.
-Links to URIs with a text description are now allowed.  The usage of
-C<LE<lt>"section"E<gt>> has been marked as deprecated.
+specification in line with modern usage already supported by most Pod
+systems.  A parameter string may now follow the format name in a
+"begin/end" region.  Links to URIs with a text description are now
+allowed.  The usage of C<LE<lt>"section"E<gt>> has been marked as
+deprecated.
 
 L<if.pm|if> has been documented in L<perlfunc/use> as a means to get
-conditional loading of modules despite the implicit BEGIN block around C<use>.
+conditional loading of modules despite the implicit BEGIN block around
+C<use>.
 
 =item *
 
-Documentation for C<$1> in perlvar.pod clarified
+The documentation for C<$1> in perlvar.pod has been clarified.
 
 =back
 
@@ -1187,7 +1185,7 @@ F<Configure> will enable use of C<-fstack-protector>, to provide protection
 against stack-smashing attacks, if the compiler supports it.
 
 F<Configure> will now determine the correct prototypes for re-entrant
-functions, and for C<gconvert>, if you are using a C++ compiler rather
+functions and for C<gconvert> if you are using a C++ compiler rather
 than a C compiler.
 
 On Unix, if you build from a tree containing a git repository, the
@@ -1205,7 +1203,6 @@ As part of the flattening of F<ext>, all extensions on all platforms are
 built by F<make_ext.pl>. This replaces the Unix-specific
 F<ext/util/make_ext>, VMS-specific F<make_ext.com> and Win32-specific
 F<win32/buildext.pl>.
-
 
 =head1 Changed Internals
 
@@ -1400,7 +1397,8 @@ interpreter features are not used before they're tested.
 
 =item *
 
-C<make test_porting> now runs a number of important pre-commit checks which might be of use to anyone working on the Perl core.
+C<make test_porting> now runs a number of important pre-commit checks
+which might be of use to anyone working on the Perl core.
 
 =item *
 
@@ -1420,182 +1418,182 @@ Test that a bare readdir in while loop sets $_.
 
 =item *
 
-t/comp/retainedlines.t
+F<t/comp/retainedlines.t>
 
 Check that the debugger can retain source lines from C<eval>.
 
 =item *
 
-t/io/perlio_fail.t
+F<t/io/perlio_fail.t>
 
 Check that bad layers fail.
 
 =item *
 
-t/io/perlio_leaks.t
+F<t/io/perlio_leaks.t>
 
 Check that PerlIO layers are not leaking.
 
 =item *
 
-t/io/perlio_open.t
+F<t/io/perlio_open.t>
 
 Check that certain special forms of open work.
 
 =item *
 
-t/io/perlio.t
+F<t/io/perlio.t>
 
 General PerlIO tests.
 
 =item *
 
-t/io/pvbm.t
+F<t/io/pvbm.t>
 
 Check that there is no unexpected interaction between the internal types
 C<PVBM> and C<PVGV>.
 
 =item *
 
-t/mro/package_aliases.t
+F<t/mro/package_aliases.t>
 
 Check that mro works properly in the presence of aliased packages.
 
 =item *
 
-t/op/dbm.t
+F<t/op/dbm.t>
 
 Tests for C<dbmopen> and C<dbmclose>.
 
 =item *
 
-t/op/index_thr.t
+F<t/op/index_thr.t>
 
 Tests for the interaction of C<index> and threads.
 
 =item *
 
-t/op/pat_thr.t
+F<t/op/pat_thr.t>
 
 Tests for the interaction of esoteric patterns and threads.
 
 =item *
 
-t/op/qr_gc.t
+F<t/op/qr_gc.t>
 
 Test that C<qr> doesn't leak.
 
 =item *
 
-t/op/reg_email_thr.t
+F<t/op/reg_email_thr.t>
 
 Tests for the interaction of regex recursion and threads.
 
 =item *
 
-t/op/regexp_qr_embed_thr.t
+F<t/op/regexp_qr_embed_thr.t>
 
 Tests for the interaction of patterns with embedded C<qr//> and threads.
 
 =item *
 
-t/op/regexp_unicode_prop.t
+F<t/op/regexp_unicode_prop.t>
 
 Tests for Unicode properties in regular expressions.
 
 =item *
 
-t/op/regexp_unicode_prop_thr.t
+F<t/op/regexp_unicode_prop_thr.t>
 
 Tests for the interaction of Unicode properties and threads.
 
 =item *
 
-t/op/reg_nc_tie.t
+F<t/op/reg_nc_tie.t>
 
 Test the tied methods of C<Tie::Hash::NamedCapture>.
 
 =item *
 
-t/op/reg_posixcc.t
+F<t/op/reg_posixcc.t>
 
 Check that POSIX character classes behave consistently.
 
 =item *
 
-t/op/re.t
+F<t/op/re.t>
 
 Check that exportable C<re> functions in F<universal.c> work.
 
 =item *
 
-t/op/setpgrpstack.t
+F<t/op/setpgrpstack.t>
 
 Check that C<setpgrp> works.
 
 =item *
 
-t/op/substr_thr.t
+F<t/op/substr_thr.t>
 
 Tests for the interaction of C<substr> and threads.
 
 =item *
 
-t/op/upgrade.t
+F<t/op/upgrade.t>
 
 Check that upgrading and assigning scalars works.
 
 =item *
 
-t/uni/lex_utf8.t
+F<t/uni/lex_utf8.t>
 
 Check that Unicode in the lexer works.
 
 =item *
 
-t/uni/tie.t
+F<t/uni/tie.t>
 
 Check that Unicode and C<tie> work.
 
 =item *
 
-t/comp/final_line_num.t
+F<t/comp/final_line_num.t>
 
 See if line numbers are correct at EOF
 
 =item *
 
-t/comp/form_scope.t
+F<t/comp/form_scope.t>
 
 See if format scoping works
 
 =item *
 
-t/comp/line_debug.t
+F<t/comp/line_debug.t>
 
-See if @{"_<$file"} works
+See if C<< @{"_<$file"} >> works
 
 =item *
 
-t/op/filetest_t.t
+F<t/op/filetest_t.t>
 
 See if -t file test works
 
 =item *
 
-t/op/qr.t
+F<t/op/qr.t>
 
 See if qr works
 
 =item *
 
-t/op/utf8cache.t
+F<t/op/utf8cache.t>
 
 Tests malfunctions of utf8 cache
 
 =item *
 
-t/re/uniprops.t
+F<t/re/uniprops.t>
 
 Test unicode \p{} regex constructs
 
@@ -1679,12 +1677,14 @@ lvalue after it has been defined.
 
 =item *
 
-warn if ++ or -- are unable to change the value because it's beyond the limit of representation
+warn if C<++> or C<--> are unable to change the value because it's
+beyond the limit of representation
 
 This uses a new warnings category: "imprecision".
 
 =item * 
-lc/uc/lcfirst/ucfirst warn when passed undef.
+
+C<lc>, C<uc>, C<lcfirst>, and C<ucfirst> warn when passed undef.
 
 =item *
 
@@ -1700,15 +1700,17 @@ Add a new warning, "Prototype after '%s'"
 
 =item *
 
-Tweak the "Illegal character in prototype" warning so it's more precise when reporting illegal characters after _
+Tweak the "Illegal character in prototype" warning so it's more precise
+when reporting illegal characters after _
 
 =item *
 
-Unintended interpolation of $\ in regex
+Correct the unintended interpolation of C<$\> in regex
 
 =item *
 
-Make overflow warnings in gmtime/localtime only occur when warnings are on
+Make overflow warnings in C<gmtime> and C<localtime> only occur when
+warnings are enabled
 
 =item *
 
@@ -1726,17 +1728,10 @@ simpler to spot and correct the suspicious character.
 
 =item *
 
-Explicitely point to $. when it causes an uninitialized warning for ranges in scalar context
-
-=back
-
-One diagnostic has been removed:
-
-=over 4
+Explicitely point to C<$.> when it causes an uninitialized warning for
+ranges in scalar context
 
 =item *
-
-C<Runaway format>
 
 C<split> now warns when called in void context
 
@@ -1756,20 +1751,6 @@ possible.
 
 =item *
 
-C<Can't locate package %s for the parents of %s>
-
-This warning has been removed. In general, it only got produced in
-conjunction with other warnings, and removing it allowed an ISA lookup
-optimisation to be added.
-
-=item *
-
-C<v-string in use/require is non-portable>
-
-This warning has been removed.
-
-=item *
-
 C<Deep recursion on subroutine "%s">
 
 It is now possible to change the depth threshold for this warning from the
@@ -1779,17 +1760,20 @@ pre-processor macro C<PERL_SUB_DEPTH_WARN> to the desired value.
 =item *
 
 Perl now properly returns a syntax error instead of segfaulting
-if C<each>, C<keys> or C<values> is used without an argument
+if C<each>, C<keys>, or C<values> is used without an argument.
 
 =item *
 
-C<tell()> now fails properly if called without an argument and when no previous file was read
+C<tell()> now fails properly if called without an argument and when no
+previous file was read.
 
-C<tell()> now returns C<-1>, and sets errno to C<EBADF>, thus restoring the 5.8.x behaviour
+C<tell()> now returns C<-1>, and sets errno to C<EBADF>, thus restoring
+the 5.8.x behaviour.
 
 =item *
 
-overload no longer implicitly unsets fallback on repeated 'use overload' lines
+C<overload> no longer implicitly unsets fallback on repeated 'use
+overload' lines.
 
 =item *
 
@@ -1797,15 +1781,18 @@ POSIX::strftime() can now handle Unicode characters in the format string.
 
 =item *
 
-The Windows select() implementation now supports all empty C<fd_set>s more correctly.
+The Windows select() implementation now supports all empty C<fd_set>s
+more correctly.
 
 =item *
 
-The 'syntax' category was removed from 5 warnings that should only be in 'deprecated'.
+The "syntax" category was removed from 5 warnings that should only be in
+"deprecated".
 
 =item *
 
-Three fatal pack/unpack error messages have been normalized to "panic: %s"
+Three fatal C<pack>/C<unpack> error messages have been normalized to
+"panic: %s"
 
 =item *
 
@@ -1816,12 +1803,35 @@ perldiag documentation has been expanded a bit.
 
 =item *
 
-Perl now defaults to issuing a warning if a deprecated language feature is used.
+Perl now defaults to issuing a warning if a deprecated language feature
+is used.
 
 To disable this feature in a given lexical scope, you should use C<no
 warnings 'deprecated';> For information about which language features
 are deprecated and explanations of various deprecation warnings, please
 see L<perldiag.pod>
+
+=back
+
+The following diagnostics have been removed:
+
+=over 4
+
+=item *
+
+C<Runaway format>
+
+=item *
+
+C<Can't locate package %s for the parents of %s>
+
+This warning has been removed. In general, it only got produced in
+conjunction with other warnings, and removing it allowed an ISA lookup
+optimisation to be added.
+
+=item *
+
+C<v-string in use/require is non-portable>
 
 =back
 
@@ -1886,7 +1896,7 @@ No longer reports "Message sent" when it hasn't actually sent the message
 F<a2p>
 
 Fixed bugs with the match() operator in list context, remove mention of
-$[.
+C<$[>.
 
 =back
 
@@ -1914,8 +1924,6 @@ possible to reach.
 
 =item *
 
- *
-
 Several compilation errors and segfaults when perl was built with C<-Dmad> were fixed.
 
 =item *
@@ -1924,10 +1932,10 @@ Fixes for lexer API changes in 5.11.2 which broke NYTProf's savesrc option.
 
 =item *
 
-F<-t> should only return TRUE for file handles connected to a TTY
+C<-t> should only return TRUE for file handles connected to a TTY
 
-The Microsoft C version of isatty() returns TRUE for all
-character mode devices, including the /dev/null style "nul"
+The Microsoft C version of C<isatty()> returns TRUE for all
+character mode devices, including the F</dev/null>-style "nul"
 device and printers like "lpt1".
 
 =item *
@@ -1969,7 +1977,8 @@ Smart match against C<@_> sometimes gave false negatives. [perl #71078]
 
 =item *
 
-C<$@> may now be assigned a read-only value (without error or busting the stack).
+C<$@> may now be assigned a read-only value (without error or busting
+the stack).
 
 =item *
 
@@ -1978,7 +1987,7 @@ longer causes a bus error if run multiple times. [perl #71076]
 
 =item *
 
-Tie::Hash::NamedCapture::* shouldn't abort if passed bad input (RT #71828)
+Tie::Hash::NamedCapture::* will not abort if passed bad input (RT #71828)
 
 =item *
 
@@ -1993,17 +2002,17 @@ as documented, and as does C<-I> when specified on the command-line.
 =item *
 
 C<kill> is now fatal when called on non-numeric process identifiers.
-Previously, an 'undef' process identifier would be interpreted as a request to
-kill process "0", which would terminate the current process group on POSIX
-systems.  Since process identifiers are always integers, killing a non-numeric
-process is now fatal.
+Previously, an C<undef> process identifier would be interpreted as a
+request to kill process 0, which would terminate the current process
+group on POSIX systems.  Since process identifiers are always integers,
+killing a non-numeric process is now fatal.
 
 =item *
 
 5.10.0 inadvertently disabled an optimisation, which caused a measurable
 performance drop in list assignment, such as is often used to assign
 function parameters from C<@_>. The optimisation has been re-instated, and
-the performance regression fixed.
+the performance regression fixed.  (This fix is also present in 5.10.1)
 
 =item *
 
@@ -2348,7 +2357,9 @@ Initial support for mingw64 is now available
 
 =item *
 
-Various bits of Perl's build infrastructure are no longer converted to win32 line endings at release time. If this hurts you, please speak up.
+Various bits of Perl's build infrastructure are no longer converted to
+win32 line endings at release time. If this hurts you, please report the
+problem with the L<perlbug> program included with perl.
 
 =item *
 
@@ -2511,12 +2522,6 @@ A workaround is to generate the character outside of the regex:
 
 Some regexes may run much more slowly when run in a child thread compared
 with the thread the pattern was compiled into [RT #55600].
-
-=item *
-
-Perl 5.11.4 is a development release leading up to Perl 5.12.0.
-Some notable known problems found in 5.11.4 are listed as dependencies
-of RT #69710, the Perl 5 version 12 meta-ticket.
 
 =item *
 
