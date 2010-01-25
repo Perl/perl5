@@ -13,11 +13,9 @@ struct xpvav {
     union _xmgu	xmg_u;
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
-    union _xivu xiv_u;
+    SV**	xav_alloc;	/* pointer to beginning of C array of SVs */
 };
 
-/* SV**	xav_alloc; */
-#define xav_alloc xiv_u.xivu_p1
 /* SV*	xav_arylen; */
 
 /* SVpav_REAL is set for all AVs whose xav_array contents are refcounted.
@@ -59,7 +57,7 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #endif
 
 #define AvARRAY(av)	((av)->sv_u.svu_array)
-#define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))
+#define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
 #define AvARYLEN(av)	(*Perl_av_arylen_p(aTHX_ MUTABLE_AV(av)))
