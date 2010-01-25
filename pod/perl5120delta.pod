@@ -330,7 +330,7 @@ character arrays as addresses: They start with nul byte and are not
 terminated by nul byte, but with the length passed to the socket()
 system call.
 
-=head2 Add C<package NAME VERSION> syntax
+=head2 New C<package NAME VERSION> syntax
 
 This new syntax allows a module author to set the $VERSION of a namespace
 when the namespace is declared with 'package'.  It eliminates the need
@@ -345,11 +345,17 @@ There are several advantages to this:
 
 =item *
 
-C<$VERSION> is parsed in I<exactly> the same way as C<use NAME VERSION>
+C<$VERSION> is parsed in exactly the same way as C<use NAME VERSION>
 
 =item *
 
 C<$VERSION> is set at compile time
+
+=item *
+
+C<$VERSION> is a version object that provides proper overloading of
+comparision operators so comparing C<$VERSION> to decimal (1.23) or
+dotted-decimal (v1.2.3) version numbers works correctly.
 
 =item *
 
@@ -363,18 +369,16 @@ without C<eval> the way MM-E<gt>parse_version does for C<$VERSION = ...>
 
 =item *
 
-Alpha versions with underscores do not need to be quoted; static
-parsing will preserve the underscore, but during compilation, Perl
-will remove underscores as it does for all numeric literals
-
 It does not break old code with only C<package NAME>, but code that uses
-C<package NAME VERSION> will need to be restricted to perl 5.11.X or newer
+C<package NAME VERSION> will need to be restricted to perl 5.12.0 or newer
 This is analogous to the change to C<open> from two-args to three-args.
-Users requiring the latest Perl will benefit, and perhaps N years from
-now it will become standard practice when Perl 5.12 is targeted the way
-that 5.6 is today.
+Users requiring the latest Perl will benefit, and perhaps after several
+years, it will become a standard practice.
 
 =back
+
+However, C<package NAME VERSION> requires a new, 'strict' version
+number format.  See L<"Version number formats"> for details.
 
 =head1 Incompatible Changes
 
