@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.44';
+$VERSION = '0.46';
 
 =pod
 
@@ -403,19 +403,19 @@ sub _find_prereqs {
           }
 
         }
-        else {
-          my $file = File::Spec->catfile( $dir, '_build', 'prereqs' );
-          return unless -f $file;
 
-          my $fh = FileHandle->new();
+        my $file = File::Spec->catfile( $dir, '_build', 'prereqs' );
+        return unless -f $file;
 
-          unless( $fh->open( $file ) ) {
-            error( loc( "Cannot open '%1': %2", $file, $! ) );
-            return;
-          }
-        
-          $content = do { local $/; <$fh> };
+        my $fh = FileHandle->new();
+
+        unless( $fh->open( $file ) ) {
+          error( loc( "Cannot open '%1': %2", $file, $! ) );
+          return;
         }
+        
+        $content = do { local $/; <$fh> };
+
       }
 
       return unless $content;
