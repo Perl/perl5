@@ -989,13 +989,6 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(24, sizeof(XPVIO) - STRUCT_OFFSET(XPVIO, xpv_cur)) },
 };
 
-#define new_body_type(sv_type)		\
-    (void *)((char *)S_new_body(aTHX_ sv_type))
-
-#define del_body_type(p, sv_type)	\
-    del_body(p, &PL_body_roots[sv_type])
-
-
 #define new_body_allocated(sv_type)		\
     (void *)((char *)S_new_body(aTHX_ sv_type)	\
 	     - bodies_by_type[sv_type].offset)
@@ -1030,11 +1023,11 @@ static const struct body_details bodies_by_type[] = {
 
 #else /* !PURIFY */
 
-#define new_XNV()	new_body_type(SVt_NV)
-#define del_XNV(p)	del_body_type(p, SVt_NV)
+#define new_XNV()	new_body_allocated(SVt_NV)
+#define del_XNV(p)	del_body_allocated(p, SVt_NV)
 
-#define new_XPVNV()	new_body_type(SVt_PVNV)
-#define del_XPVNV(p)	del_body_type(p, SVt_PVNV)
+#define new_XPVNV()	new_body_allocated(SVt_PVNV)
+#define del_XPVNV(p)	del_body_allocated(p, SVt_PVNV)
 
 #define new_XPVAV()	new_body_allocated(SVt_PVAV)
 #define del_XPVAV(p)	del_body_allocated(p, SVt_PVAV)
@@ -1042,11 +1035,11 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVHV()	new_body_allocated(SVt_PVHV)
 #define del_XPVHV(p)	del_body_allocated(p, SVt_PVHV)
 
-#define new_XPVMG()	new_body_type(SVt_PVMG)
-#define del_XPVMG(p)	del_body_type(p, SVt_PVMG)
+#define new_XPVMG()	new_body_allocated(SVt_PVMG)
+#define del_XPVMG(p)	del_body_allocated(p, SVt_PVMG)
 
-#define new_XPVGV()	new_body_type(SVt_PVGV)
-#define del_XPVGV(p)	del_body_type(p, SVt_PVGV)
+#define new_XPVGV()	new_body_allocated(SVt_PVGV)
+#define del_XPVGV(p)	del_body_allocated(p, SVt_PVGV)
 
 #endif /* PURIFY */
 
