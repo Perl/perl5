@@ -103,7 +103,7 @@ typedef struct regexp_paren_pair {
 
 typedef struct regexp {
 	_XPV_HEAD;
-	_XPVMG_HEAD;
+	union _xivu xiv_u;
 	_REGEXP_COMMON;
 } regexp;
 

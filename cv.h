@@ -12,7 +12,6 @@
 
 struct xpvcv {
     _XPV_HEAD;
-    _XPVMG_HEAD;
     _XPVCV_COMMON;
 };
 

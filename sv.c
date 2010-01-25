@@ -915,8 +915,9 @@ static const struct body_details bodies_by_type[] = {
     },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
-    { sizeof(NV), sizeof(NV), 0, SVt_NV, FALSE, HADNV, HASARENA,
-      FIT_ARENA(0, sizeof(NV)) },
+    { sizeof(NV), sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(XPV),
@@ -933,11 +934,11 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(XPV)) },
 
     /* 20 */
-    { sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, SVt_PVNV, FALSE, HADNV,
+    { sizeof(XPVNV), copy_length(XPVNV, xnv_u), 0, SVt_PVNV, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVNV)) },
 
     /* 28 */
-    { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_PVMG, FALSE, HADNV,
+    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
     /* something big */
@@ -957,13 +958,13 @@ static const struct body_details bodies_by_type[] = {
       HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
 
     { sizeof(XPVAV),
-      copy_length(XPVAV, xmg_stash),
+      copy_length(XPVAV, xiv_u),
       0,
       SVt_PVAV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVAV)) },
 
     { sizeof(XPVHV),
-      copy_length(XPVHV, xmg_stash),
+      copy_length(XPVHV, xiv_u),
       0,
       SVt_PVHV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVHV)) },

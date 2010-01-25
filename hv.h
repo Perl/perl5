@@ -83,10 +83,11 @@ struct xpvhv_aux {
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    union _xnvu xnv_u;
+    HV*		xmg_stash;	/* class package */
+    union _xmgu	xmg_u;
     STRLEN      xhv_fill;       /* how full xhv_array currently is */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
-    _XPVMG_HEAD;
+    union _xivu xiv_u;
 };
 
 #define xhv_keys xiv_u.xivu_iv

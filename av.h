@@ -9,10 +9,11 @@
  */
 
 struct xpvav {
-    union _xnvu xnv_u;
+    HV*		xmg_stash;	/* class package */
+    union _xmgu	xmg_u;
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
-    _XPVMG_HEAD;
+    union _xivu xiv_u;
 };
 
 /* SV**	xav_alloc; */
