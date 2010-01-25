@@ -1300,7 +1300,7 @@ exported.
 
 C<PL_na> has been exterminated from the core code, replaced by local STRLEN
 temporaries, or C<*_nolen()> calls. Either approach is faster than C<PL_na>,
-which is a pointer deference into the interpreter structure under ithreads,
+which is a pointer dereference into the interpreter structure under ithreads,
 and a global variable otherwise.
 
 =item *
