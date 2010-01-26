@@ -316,7 +316,7 @@ You can use C<-C0> (or C<"0"> for C<PERL_UNICODE>) to explicitly
 disable all the above Unicode features.
 
 The read-only magic variable C<${^UNICODE}> reflects the numeric value
-of this setting.  This is variable is set during Perl startup and is
+of this setting.  This variable is set during Perl startup and is
 thereafter read-only.  If you want runtime effects, use the three-arg
 open() (see L<perlfunc/open>), the two-arg binmode() (see L<perlfunc/binmode>),
 and the C<open> pragma (see L<open>).
