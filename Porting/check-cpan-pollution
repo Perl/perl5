@@ -7,12 +7,13 @@ use constant GITCMD => 'git';
 
 sub usage {
   print <<HERE;
-Usage: $0 [options] [<start-commit> [<end-commit>]] 
+Usage: $0 [options] [<start-commit> [<end-commit>]]
 
 Scans the commit logs for commits that are potentially, illegitimately
 touching modules that are primarily maintained outside of the perl core.
 Also checks for commits that span multiple distributions in cpan/ or dist/.
-Ignores MANIFEST and Porting/Maintainers.pl.
+Makes sure that updated CPAN distributions also update Porting/Maintainers.pl,
+but otherwise ignores changes to that file (and MANIFEST).
 
 Skip the <start-commit> to go back indefinitely. <end-commit> defaults to
 HEAD.
@@ -104,7 +105,14 @@ sub check_commit {
   my $safe   = shift;
   my $unsafe = shift;
 
-  my @files = grep {$_ ne 'MANIFEST' and $_ ne 'Porting/Maintainers.pl'}
+  # Note to self: Adding any more greps and such will make this
+  # look even more silly. Just use a single foreach, smart guy!
+  my $touches_maintainers_pl = 0;
+  my @files = grep {
+                $touches_maintainers_pl = 1
+                  if $_ eq 'Porting/Maintainers.pl';
+                $_ ne 'MANIFEST' and $_ ne 'Porting/Maintainers.pl'
+              }
               @{$commit->{files}};
   my @touching_cpan = grep {/^cpan\//} @files;
   return if not @touching_cpan;
@@ -128,6 +136,11 @@ sub check_commit {
       $commit->{msg} = 'Touched multiple directories under cpan/';
       push @$unsafe, $commit;
     }
+    elsif (not $touches_maintainers_pl) {
+      $commit->{msg} = 'Touched files under cpan/, but does not update '
+                       . 'Porting/Maintainers.pl';
+      push @$unsafe, $commit;
+    }
     elsif ($commit->{commit_msg} =~ /(?:up(?:grad|dat)|import)(?:ed?|ing)/i) {
       $commit->{msg} = 'Touched files under cpan/ with '
                        . '"upgrading"-like commit message';
@@ -148,7 +161,7 @@ sub check_commit {
                                @touching_dist;
   $touches_others = @files - @touching_dist;
   my $touches_multiple_dists = (keys(%touched_dist_dirs) > 1);
- 
+
   if (@touching_dist) {
     if ($touches_others) {
       $commit->{msg} = 'Touched files under dist/ and other locations';
