@@ -327,7 +327,6 @@ do_test(15,
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
-    IV = 0
     PV = $ADDR "\\(\\?-xism:tic\\)"
     CUR = 12
     LEN = 0
