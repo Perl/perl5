@@ -13,6 +13,7 @@
 struct xpvcv {
     _XPV_HEAD;
     _XPVCV_COMMON;
+    I32	xcv_depth;	/* >= 2 indicates recursive call */
 };
 
 /*
@@ -51,10 +52,10 @@ Returns the stash of the CV.
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define CvDEPTH(sv) (*({const CV *const _cvdepth = (const CV *)sv; \
 			  assert(SvTYPE(_cvdepth) == SVt_PVCV);	 \
-			  &((XPVCV*)SvANY(_cvdepth))->xiv_u.xivu_i32; \
+			  &((XPVCV*)SvANY(_cvdepth))->xcv_depth; \
 			}))
 #else
-#  define CvDEPTH(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xiv_u.xivu_i32
+#  define CvDEPTH(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
 #endif
 #define CvPADLIST(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
