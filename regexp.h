@@ -70,6 +70,7 @@ typedef struct regexp_paren_pair {
         /* what engine created this regexp? */				\
 	const struct regexp_engine* engine; 				\
 	REGEXP *mother_re; /* what re is this a lightweight copy of? */	\
+	HV *paren_names;   /* Optional hash of paren names */		\
 	/* Information about the match that the perl core uses to */	\
 	/* manage things */						\
 	U32 extflags;	/* Flags used both externally and internally */	\
@@ -103,14 +104,10 @@ typedef struct regexp_paren_pair {
 
 typedef struct regexp {
 	_XPV_HEAD;
-	union _xivu xiv_u;
 	_REGEXP_COMMON;
 } regexp;
 
-/*        HV *paren_names;	 Optional hash of paren names
-	  now stored in the IV union */
-
-#define RXp_PAREN_NAMES(rx)	((rx)->xiv_u.xivu_hv)
+#define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
