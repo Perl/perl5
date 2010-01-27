@@ -171,68 +171,41 @@ Some examples:
 
 See L<VERSION OBJECT DETAILS> for more on version number conversion.
 
-=head2 How to check for a version
+=head2 How to check for a legal version string
 
 If you do not want to actually create a full blown version object, but
 would still like to verify that a given string meets the criteria to
-be parsed as a version, there are now regular expressions included with
-the version module and there are two helper functions that can be
+be parsed as a version, there are two helper functions that can be
 employed directly:
 
-=over 2
+=over 4
+
+=item C<is_lax()>
+
+The lax criteria corresponds to what is currently allowed by the 
+version parser.  All of the following formats are acceptable
+for dotted-decimal formats strings:
+
+    v1.2
+    1.2345.6
+    v1.23_4
+    1.2345
+    1.2345_01
 
 =item C<is_strict()>
 
 If you want to limit youself to a much more narrow definition of what
-a version string constitutes, you can use this function, which limits
-legal version strings to the following list:
+a version string constitutes, C<is_strict()> is limited to version
+strings like the following list:
 
-=over 2
-
-=item v1.234.5
-
-For dotted-decimal versions, requires a leading 'v', three sub-versions
-of no more than three digits.  A leading 0 (zero) before the first
-sub-version (in the above example, '1') is also prohibited.
-
-=item 2.3456
-
-For standard decimal version, requires an integer portion (no leading
-0), a decimal, and one or more digits to the right of the decimal
+    v1.234.5
+    2.3456
 
 =back
 
-=item C<is_lax()>
-
-=over 2
-
-=item v1.2
-=item 1.2345.6
-=item 1.23_4
-
-With the lax criteria, all of the above styles are acceptable for
-dotted-decimal formats.  The leading 'v' is optional if two or more
-decimals appear.  If only a single decimal is included, then the leading
-'v' is required to trigger the dotted-decimal parsing.  A leading zero
-is permitted, though not recommended except when quoted, because of the
-risk that Perl will treat the number as octal.  A trailing underscore
-plus one or more digits denotes an alpha or development release
-(and must be quoted to be parsed properly).
-
-=item 1.2345
-=item 1.2345_01
-
-For decimal versions, the lax form is nearly identical to the strict
-form except that the alpha form is allowed and a leading zero is
-permitted.  Just like the lax dotted-decimal version, quoting the
-values is required for alpha/development forms to be parsed correctly.
-
-=back
-
-See L<version::Internal> for details of the regular expressions used,
-as well as how to use the regular expressions in your own code.
-
-=back
+See L<version::Internals> for details of the regular expressions
+that define the legal version string forms, as well as how to use
+those regular expressions in your own code.
 
 =head2 How to compare version objects
 

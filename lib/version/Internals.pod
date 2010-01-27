@@ -130,6 +130,91 @@ following sequence of $VERSION's:
 The stringified form of Decimal versions will always be the same string
 that was used to initialize the version object.
 
+=head2 Regular Expressions for Version Parsing
+
+A formalized definition of the legal forms for version strings is
+included in the main F<version.pm> file.  Primitives are included for
+common elements, although they are scoped to the file so they are useful
+for reference purposes only.  There are two publicly accessible scalars
+that can be used in other code (not exported):
+
+=over 4
+
+=item C<$version::LAX>
+
+This regexp covers all of the legal forms allowed under the current
+version string parser.  This is not to say that all of these forms
+are recommended, and some of them can only be used when quoted.
+
+For dotted decimals:
+
+    v1.2
+    1.2345.6
+    v1.23_4
+
+The leading 'v' is optional if two or more decimals appear.  If only
+a single decimal is included, then the leading 'v' is required to
+trigger the dotted-decimal parsing.  A leading zero is permitted,
+though not recommended except when quoted, because of the risk that
+Perl will treat the number as octal.  A trailing underscore plus one
+or more digits denotes an alpha or development release (and must be
+quoted to be parsed properly).
+
+For decimal versions:
+
+    1
+    1.2345
+    1.2345_01
+
+an integer portion, an optional decimal point, and optionally one or
+more digits to the right of the decimal are all required.  A trailing
+underscore is permitted and a leading zero is permitted.  Just like
+the lax dotted-decimal version, quoting the values is required for
+alpha/development forms to be parsed correctly.
+
+=item C<$version::STRICT>
+
+This regexp covers a much more limited set of formats and constitutes
+the best practices for initializing version objects.  Whether you choose
+to employ decimal or dotted-decimal for is a personal preference however.
+
+=over 4
+
+=item v1.234.5
+
+For dotted-decimal versions, a leading 'v' is required, with three or
+more sub-versions of no more than three digits.  A leading 0 (zero)
+before the first sub-version (in the above example, '1') is also
+prohibited.
+
+=item 2.3456
+
+For decimal versions, an integer portion (no leading 0), a decimal point,
+and one or more digits to the right of the decimal are all required.
+
+=back
+
+=back
+
+Both of the provided scalars are already compiled as regular expressions
+and do not contain either anchors or implicit groupings, so they can be
+included in your own regular expressions freely.  For example, consider
+the following code:
+
+	($pkg, $ver) =~ /
+		^[ \t]*
+		use [ \t]+($PKGNAME)
+		(?:[ \t]+($version::STRICT))?
+		[ \t]*;
+	/x;
+
+This would match a line of the form:
+
+	use Foo::Bar::Baz v1.2.3;	# legal only in Perl 5.8.1+
+
+where C<$PKGNAME> is another regular expression that defines the legal
+forms for package names.
+
 =head1 High level design
 
 =head2 version objects
