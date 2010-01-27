@@ -1781,7 +1781,6 @@ cpan/podlators/t/text-encoding.t		podlators test
 cpan/podlators/t/text-options.t			podlators test
 cpan/podlators/t/text.t				podlators test
 cpan/podlators/t/text-utf8.t			podlators test
-cpan/podlators/VERSION				podlators custom Makefile.PL
 cpan/podlators/VERSION				podlators distribution version
 cpan/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 cpan/Pod-Parser/lib/Pod/Find.pm			used by pod/splitpod
@@ -3629,7 +3628,6 @@ lib/unicore/NormalizationCorrections.txt	Unicode character database
 lib/unicore/PropertyAliases.txt			Unicode character database
 lib/unicore/PropList.txt			Unicode character database
 lib/unicore/PropValueAliases.txt		Unicode character database
-lib/unicore/README.perl				Unicode character database
 lib/unicore/README.perl				Unicode character database
 lib/unicore/ReadMe.txt				Unicode character database info
 lib/unicore/Scripts.txt				Unicode character database
