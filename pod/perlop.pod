@@ -556,33 +556,33 @@ like this:
 	# code
     }
 
-The range operator also works on strings, using the magical auto-increment,
-see below.
+The range operator also works on strings, using the magical
+auto-increment, see below.
 
 In scalar context, ".." returns a boolean value.  The operator is
-bistable, like a flip-flop, and emulates the line-range (comma) operator
-of B<sed>, B<awk>, and various editors.  Each ".." operator maintains its
-own boolean state.  It is false as long as its left operand is false.
+bistable, like a flip-flop, and emulates the line-range (comma)
+operator of B<sed>, B<awk>, and various editors. Each ".." operator
+maintains its own boolean state, even across calls to a subroutine
+that contains it. It is false as long as its left operand is false.
 Once the left operand is true, the range operator stays true until the
 right operand is true, I<AFTER> which the range operator becomes false
-again.  It doesn't become false till the next time the range operator is
-evaluated.  It can test the right operand and become false on the same
-evaluation it became true (as in B<awk>), but it still returns true once.
-If you don't want it to test the right operand until the next
-evaluation, as in B<sed>, just use three dots ("...") instead of
+again.  It doesn't become false till the next time the range operator
+is evaluated.  It can test the right operand and become false on the
+same evaluation it became true (as in B<awk>), but it still returns
+true once. If you don't want it to test the right operand until the
+next evaluation, as in B<sed>, just use three dots ("...") instead of
 two.  In all other regards, "..." behaves just like ".." does.
 
 The right operand is not evaluated while the operator is in the
 "false" state, and the left operand is not evaluated while the
 operator is in the "true" state.  The precedence is a little lower
 than || and &&.  The value returned is either the empty string for
-false, or a sequence number (beginning with 1) for true.  The
-sequence number is reset for each range encountered.  The final
-sequence number in a range has the string "E0" appended to it, which
-doesn't affect its numeric value, but gives you something to search
-for if you want to exclude the endpoint.  You can exclude the
-beginning point by waiting for the sequence number to be greater
-than 1.
+false, or a sequence number (beginning with 1) for true.  The sequence
+number is reset for each range encountered.  The final sequence number
+in a range has the string "E0" appended to it, which doesn't affect
+its numeric value, but gives you something to search for if you want
+to exclude the endpoint.  You can exclude the beginning point by
+waiting for the sequence number to be greater than 1.
 
 If either operand of scalar ".." is a constant expression,
 that operand is considered true if it is equal (C<==>) to the current
