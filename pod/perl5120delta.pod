@@ -534,7 +534,7 @@ avoided.
 
 The definitions of a number of Unicode properties have changed to match those
 of the current Unicode standard.  These are listed above under L</Unicode
-Properties>.  This could break code that is expecting the old definitions.
+properties>.  This could break code that is expecting the old definitions.
 
 =item *
 
