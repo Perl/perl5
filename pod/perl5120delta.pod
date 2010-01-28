@@ -80,6 +80,9 @@ older versions of Unicode.
 
 =head2 Unicode properties
 
+A concerted effort has been made to update Perl to be in sync with the latest
+Unicode standard.  Changes for this include:
+
 Perl can now handle every Unicode character property.  A new pod,
 L<perluniprops>, lists all available non-Unihan character properties.  By
 default the Unihan properties and certain others (deprecated and Unicode
@@ -99,7 +102,7 @@ All the Unicode-defined synonyms for properties and property values are
 now accepted.
 
 C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
-better with various Asian languages.  It now is defined as an C<extended
+better with various Asian languages.  It now is defined as an I<extended
 grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).
 Anything matched previously and that made sense will continue to be
 matched, but in addition:
@@ -108,18 +111,18 @@ matched, but in addition:
 
 =item *
 
-C<\X> will now not break apart a C<S<CR LF>> sequence.
+C<\X> will not break apart a C<S<CR LF>> sequence.
 
 =item *
 
-C<\X> will now match a sequence including the C<ZWJ> and C<ZWNJ> characters.
+C<\X> will now match a sequence which includes the C<ZWJ> and C<ZWNJ> characters.
 
 =item *
 
 C<\X> will now always match at least one character, including an initial mark.
 Marks generally come after a base character, but it is possible in Unicode to
 have them in isolation, and C<\X> will now handle that case, for example at the
-beginning of a line or after a C<ZWSP>.  And this is the part where C<\X>
+beginning of a line, or after a C<ZWSP>.  And this is the part where C<\X>
 doesn't match the things that it used to that don't make sense.  Formerly, for
 example, you could have the nonsensical case of an accented LF.
 
@@ -154,20 +157,26 @@ no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
 possible problem.  All but 36 of them are either officially deprecated
 or strongly discouraged from being used.  Of those 36, likely the most
 widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
-similar, plus bidirectional controls.
+similar characters, plus bidirectional controls.
 
 C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>.  The Perl
 definition included a number of things that aren't really alpha (all
 marks), while omitting many that were.  As a direct consequence, the
-definitions of C<\p{Alnum}> and C<\p{Word}> which depend on Alpha also change.
+definitions of C<\p{Alnum}> and C<\p{Word}> which depend on Alpha also change
+correspondingly.
 
 C<\p{Word}> also now doesn't match certain characters it wasn't supposed
 to, such as fractions.
 
 C<\p{Print}> no longer matches the line control characters: Tab, LF, CR,
-FF, VT, and NEL.  This brings it in line with the documentation.
+FF, VT, and NEL.  This brings it in line with standards and the documentation.
 
 C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables.
+
+C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>.  This
+means that in addition to the characters it currently matches,
+C<[A-Fa-f0-9]>, it will also match the 22 fullwidth equivalents, for
+example U+FF10: FULLWIDTH DIGIT ZERO.
 
 The Numeric type property has been extended to include the Unihan
 characters.
@@ -211,20 +220,6 @@ are in L<perluniprops>.
 
 U+0FFFF is now a legal character in regular expressions.
 
-=head2 Unicode properties
-
-C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>.  This
-means that in addition to the characters it currently matches,
-C<[A-Fa-f0-9]>, it will also match their fullwidth equivalent forms, for
-example U+FF10: FULLWIDTH DIGIT ZERO.
-
-=head2 Unicode Character Database 5.1.0
-
-The copy of the Unicode Character Database included in Perl 5.11.0 has
-been updated to 5.1.0 from 5.0.0. See
-L<http://www.unicode.org/versions/Unicode5.1.0/#Notable_Changes> for the
-notable changes.
-
 =head2 A proper interface for pluggable Method Resolution Orders
 
 As of Perl 5.11.0 there is a new interface for plugging and using method
@@ -245,6 +240,11 @@ is not a newline, independently from the presence or absence of the single
 line match modifier C</s>. (If C<\N> is followed by an opening brace and
 by a letter, perl will still assume that a Unicode character name is
 coming, so compatibility is preserved.) (Rafael Garcia-Suarez)
+
+This will break a L<custom charnames translator|charnames/CUSTOM TRANSLATORS>
+which allows numbers for character names, as C<\N{3}> will now mean to match 3
+non-newline characters, and not the character whose name is C<3>.  (No standard
+name is a number, so only a custom translator would be affected.)
 
 =head2 Implicit strictures
 
@@ -403,66 +403,6 @@ or dotted-decimal component.
 The L<version> module adds C<version::is_strict> and C<version::is_lax>
 functions to check a scalar against these rules.
 
-=head2 Unicode interpretation of \w, \d, \s, and the POSIX character classes redefined.
-
-Previous versions of Perl tried to map POSIX style character class
-definitions onto Unicode property names so that patterns would "do what
-you meant" when matches were made against latin-1 or unicode strings.
-This proved to be a mistake, breaking character class negation, causing
-forward compatibility problems (as Unicode keeps updating their property
-definitions and adding new characters), and other problems.
-
-Therefore we have now defined a new set of artificial "unicode" property
-names which will be used to do unicode matching of patterns using POSIX
-style character classes and perl short-form escape character classes
-like \w and \d.
-
-The key change here is that \d will no longer match every digit in the
-unicode standard (there are thousands) nor will \w match every word
-character in the standard, instead they will match precisely their POSIX
-or Perl definition.
-
-Those needing to match based on Unicode properties can continue to do so
-by using the \p{} syntax to match whichever property they like,
-including the new artificial definitions.
-
-B<NOTE:> This is a backwards incompatible no-warning change in
-behaviour. If you are upgrading and you process large volumes of text
-look for POSIX and Perl style character classes and change them to the
-relevent property name (by removing the word 'Posix' from the current
-name).
-
-The following table maps the POSIX character class names, the escapes
-and the old and new Unicode property mappings:
-
-    POSIX  Esc  Class               New-Property  ! Old-Property
-    ----------------------------------------------+-------------
-    alnum       [0-9A-Za-z]         IsPosixAlnum  ! IsAlnum
-    alpha       [A-Za-z]            IsPosixAlpha  ! IsAlpha
-    ascii       [\000-\177]         IsASCII       = IsASCII
-    blank       [\011 ]             IsPosixBlank  !
-    cntrl       [\0-\37\177]        IsPosixCntrl  ! IsCntrl
-    digit   \d  [0-9]               IsPosixDigit  ! IsDigit
-    graph       [!-~]               IsPosixGraph  ! IsGraph
-    lower       [a-z]               IsPosixLower  ! IsLower
-    print       [ -~]               IsPosixPrint  ! IsPrint
-    punct       [!-/:-@[-`{-~]      IsPosixPunct  ! IsPunct
-    space       [\11-\15 ]          IsPosixSpace  ! IsSpace
-            \s  [\11\12\14\15 ]     IsPerlSpace   ! IsSpacePerl
-    upper       [A-Z]               IsPosixUpper  ! IsUpper
-    word    \w  [0-9A-Z_a-z]        IsPerlWord    ! IsWord
-    xdigit      [0-9A-Fa-f]         IsXDigit      = IsXDigit
-
-If you wish to build perl with the old mapping you may do so by setting
-
-	#define PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS 1
-
-in regcomp.h, and then setting
-
-	PERL_TEST_LEGACY_POSIX_CC
-
-to true your enviornment when testing.
-
 =head2 @INC reorganization
 
 In @INC, ARCHLIB and PRIVLIB now occur after after the current version's
@@ -592,12 +532,14 @@ avoided.
 
 =item *
 
-The boolkeys op moved to the group of hash ops. This breaks binary
-compatibility.
+The definitions of a number of Unicode properties have changed to match those
+of the current Unicode standard.  These are listed above under L</Unicode
+Properties>.  This could break code that is expecting the old definitions.
 
 =item *
 
-C<\s> C<\w> and C<\d> once again have the semantics they had in Perl 5.8.x.
+The boolkeys op moved to the group of hash ops. This breaks binary
+compatibility.
 
 =item *
 
@@ -2521,6 +2463,9 @@ A workaround is to generate the character outside of the regex:
 
     my $a = "\N{THAI CHARACTER SARA I}";
     my $r1 = qr/$a/;
+
+However, C<$r1> must be used within the scope of the C<use charnames> for this
+to work.
 
 =item *
 
