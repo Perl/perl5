@@ -788,6 +788,16 @@ a new release with a new minor version or RC number.
 
 (Login, then select 'Upload a file to CPAN')
 
+If your workstation is not connected to a high-bandwidth,
+high-reliability connection to the Internet, you should probably use the
+"GET URL" feature (rather than "HTTP UPLOAD") to have PAUSE retrieve the
+new release from wherever you put it for testers to find it.  This will
+eliminate anxious gnashing of teeth while you wait to see if your
+15 megabyte HTTP upload successfully completes across your slow, twitchy
+cable modem.  I<Remember>: if your upload is partially successful, you
+may need to contact a PAUSE administrator or even bump the version of
+perl.
+
 Upload both the .gz and .bz2 versions of the tarball.
 
 =item *
