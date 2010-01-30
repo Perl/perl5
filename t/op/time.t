@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 44;
+plan tests => 56;
 
 ($beguser,$begsys) = times;
 
@@ -144,4 +144,27 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
         gmtime(1.23);
     };
     is($@, '', 'Ignore fractional time');
+}
+
+
+# Some sanity tests for the far, far future and far, far past
+{
+    my %time2year = (
+        -2**52  => -142711421,
+        -2**48  => -8917617,
+        -2**46  => -2227927,
+         2**46  => 2231866,
+         2**48  => 8921556,
+         2**52  => 142715360,
+    );
+
+    for my $time (sort keys %time2year) {
+        my $want = $time2year{$time};
+
+        my $have = (gmtime($time))[5] + 1900;
+        is $have, $want, "year check, gmtime($time)";
+
+        $have = (localtime($time))[5] + 1900;
+        is $have, $want, "year check, localtime($time)";
+    }
 }
