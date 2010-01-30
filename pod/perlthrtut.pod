@@ -275,7 +275,7 @@ instead, as described next.
 
 NOTE: In the example above, the thread returns a list, thus necessitating
 that the thread creation call be made in list context (i.e., C<my ($thr)>).
-See L<threads/"$thr->join()"> and L<threads/"THREAD CONTEXT"> for more
+See L<< threads/"$thr->join()" >> and L<threads/"THREAD CONTEXT"> for more
 details on thread context and return values.
 
 =head2 Ignoring A Thread
