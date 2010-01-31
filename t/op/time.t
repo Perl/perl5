@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 56;
+plan tests => 62;
 
 # These tests make sure, among other things, that we don't end up
 # burning tons of CPU for dates far in the future.
@@ -36,9 +36,9 @@ ok($i >= 2_000_000, 'very basic times test');
 ($xsec,$foo) = localtime($now);
 $localyday = $yday;
 
-isnt($sec, $xsec),      'localtime() list context';
-ok $mday,               '  month day';
-ok $year,               '  year';
+isnt($sec, $xsec,      'localtime() list context');
+ok $mday,              '  month day';
+ok $year,              '  year';
 
 ok(localtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
                     (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]
@@ -66,9 +66,9 @@ ok($hour != $hour2,                             'changes to $ENV{TZ} respected')
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($beg);
 ($xsec,$foo) = localtime($now);
 
-isnt($sec, $xsec),      'gmtime() list conext';
-ok $mday,               '  month day';
-ok $year,               '  year';
+isnt($sec, $xsec,      'gmtime() list conext');
+ok $mday,              '  month day';
+ok $year,              '  year';
 
 my $day_diff = $localyday - $yday;
 ok( grep({ $day_diff == $_ } (0, 1, -1, 364, 365, -364, -365)),
@@ -142,12 +142,12 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 {
     eval {
         $SIG{__WARN__} = sub { die @_; };
-        localtime(1.23);
+        is( (localtime(1296000.23))[5] + 1900, 1970 );
     };
     is($@, '', 'Ignore fractional time');
     eval {
         $SIG{__WARN__} = sub { die @_; };
-        gmtime(1.23);
+        is( (gmtime(1.23))[5] + 1900, 1970 );
     };
     is($@, '', 'Ignore fractional time');
 }
@@ -173,4 +173,30 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
         $have = (localtime($time))[5] + 1900;
         is $have, $want, "year check, localtime($time)";
     }
+}
+
+
+# Test that Perl warns properly when it can't handle a time.
+{
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning .= join "\n", @_; };
+
+    my $big_time   = 2**60;
+    my $small_time = -2**60;
+
+    $warning = '';
+    my $date = gmtime($big_time);
+    like $warning, qr/^gmtime(.*) too large/;
+
+    $warning = '';
+    $date = localtime($big_time);
+    like $warning, qr/^localtime(.*) too large/;
+
+    $warning = '';
+    $date = gmtime($small_time);
+    like $warning, qr/^gmtime(.*) too small/;
+
+    $warning = '';
+    $date = localtime($small_time);
+    like $warning, qr/^localtime(.*) too small/;
 }

@@ -4485,6 +4485,15 @@ PP(pp_tms)
 #endif /* HAS_TIMES */
 }
 
+/* The 32 bit int year limits the times we can represent to these
+   boundaries with a few days wiggle room to account for time zone
+   offsets
+*/
+/* Sat Jan  3 00:00:00 -2147481748 */
+#define TIME_LOWER_BOUND -67768100567755200.0
+/* Sun Dec 29 12:00:00  2147483647 */
+#define TIME_UPPER_BOUND  67767976233316800.0
+
 PP(pp_gmtime)
 {
     dVAR;
@@ -4513,10 +4522,22 @@ PP(pp_gmtime)
 	}
     }
 
-    if (PL_op->op_type == OP_LOCALTIME)
-        err = S_localtime64_r(&when, &tmbuf);
-    else
-	err = S_gmtime64_r(&when, &tmbuf);
+    if ( TIME_LOWER_BOUND > when ) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		       "%s(%.0f) too small", opname, when);
+	err = NULL;
+    }
+    else if( when > TIME_UPPER_BOUND ) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		       "%s(%.0f) too large", opname, when);
+	err = NULL;
+    }
+    else {
+	if (PL_op->op_type == OP_LOCALTIME)
+	    err = S_localtime64_r(&when, &tmbuf);
+	else
+	    err = S_gmtime64_r(&when, &tmbuf);
+    }
 
     if (err == NULL) {
 	/* XXX %lld broken for quads */
