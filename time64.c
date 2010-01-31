@@ -377,7 +377,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
     time      = time >= 0 ? floor(time / 60.0) : ceil(time / 60.0);
     v_tm_hour = (int)fmod(time, 24.0);
     time      = time >= 0 ? floor(time / 24.0) : ceil(time / 24.0);
-    v_tm_tday = (int)time;
+    v_tm_tday = time;
 
     WRAP (v_tm_sec, v_tm_min, 60);
     WRAP (v_tm_min, v_tm_hour, 60);
