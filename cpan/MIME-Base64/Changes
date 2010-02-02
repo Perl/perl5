@@ -1,3 +1,13 @@
+2010-01-25   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.09
+
+   The Quoted-Printable encoder would sometimes output lines
+   that were 77 characters long.  The max line length should be 76.
+   [RT#53919]
+
+
+
 2009-06-09   Gisle Aas <gisle@ActiveState.com>
 
    Release 3.08

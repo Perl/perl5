@@ -1,4 +1,4 @@
-/* $Id$
+/*
 
 Copyright 1997-2004 Gisle Aas
 
@@ -119,7 +119,7 @@ encode_base64(sv,...)
 	PREINIT:
 	char *str;     /* string to encode */
 	SSize_t len;   /* length of the string */
-	char *eol;     /* the end-of-line sequence to use */
+	const char*eol;/* the end-of-line sequence to use */
 	STRLEN eollen; /* length of the EOL sequence */
 	char *r;       /* result string */
 	STRLEN rlen;   /* length of result string */
@@ -157,8 +157,8 @@ encode_base64(sv,...)
 	/* encode */
 	for (chunk=0; len > 0; len -= 3, chunk++) {
 	    if (chunk == (MAX_LINE/4)) {
-		char *c = eol;
-		char *e = eol + eollen;
+		const char *c = eol;
+		const char *e = eol + eollen;
 		while (c < e)
 		    *r++ = *c++;
 		chunk = 0;
@@ -181,8 +181,8 @@ encode_base64(sv,...)
 	}
 	if (rlen) {
 	    /* append eol to the result string */
-	    char *c = eol;
-	    char *e = eol + eollen;
+	    const char *c = eol;
+	    const char *e = eol + eollen;
 	    while (c < e)
 		*r++ = *c++;
 	}
@@ -270,7 +270,7 @@ encode_qp(sv,...)
 	PROTOTYPE: $;$$
 
 	PREINIT:
-	char *eol;
+	const char *eol;
 	STRLEN eol_len;
 	int binary;
 	STRLEN sv_len;
@@ -320,15 +320,8 @@ encode_qp(sv,...)
 	    if (p_len) {
 	        /* output plain text (with line breaks) */
 	        if (eol_len) {
-		    STRLEN max_last_line = (p == end || *p == '\n')
-					      ? MAX_LINE         /* .......\n */
-					      : ((p + 1) == end || *(p + 1) == '\n')
-	                                        ? MAX_LINE - 3   /* ....=XX\n */
-	                                        : MAX_LINE - 4;  /* ...=XX=\n */
-		    while (p_len + linelen > max_last_line) {
+		    while (p_len > MAX_LINE - 1 - linelen) {
 			STRLEN len = MAX_LINE - 1 - linelen;
-			if (len > p_len)
-			    len = p_len;
 			sv_catpvn(RETVAL, p_beg, len);
 			p_beg += len;
 			p_len -= len;
@@ -347,14 +340,21 @@ encode_qp(sv,...)
 		break;
             }
 	    else if (*p == '\n' && eol_len && !binary) {
-	        sv_catpvn(RETVAL, eol, eol_len);
-	        p++;
+		if (linelen == 1 && SvCUR(RETVAL) > eol_len + 1 && SvEND(RETVAL)[-eol_len - 2] == '=') {
+		    /* fixup useless soft linebreak */
+		    SvEND(RETVAL)[-eol_len - 2] = SvEND(RETVAL)[-1];
+		    SvCUR_set(RETVAL, SvCUR(RETVAL) - 1);
+		}
+		else {
+		    sv_catpvn(RETVAL, eol, eol_len);
+		}
+		p++;
 		linelen = 0;
 	    }
 	    else {
 		/* output escaped char (with line breaks) */
 	        assert(p < end);
-		if (eol_len && linelen > MAX_LINE - 4) {
+		if (eol_len && linelen > MAX_LINE - 4 && !(linelen == MAX_LINE - 3 && p + 1 < end && p[1] == '\n' && !binary)) {
 		    sv_catpvn(RETVAL, "=", 1);
 		    sv_catpvn(RETVAL, eol, eol_len);
 		    linelen = 0;
