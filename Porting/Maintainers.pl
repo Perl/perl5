@@ -995,11 +995,11 @@ use File::Glob qw(:case);
     'MIME::Base64' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.09.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.08.tar.gz',
 	'FILES'		=> q[cpan/MIME-Base64],
 	'EXCLUDED'	=> [ qw{ t/bad-sv.t }, ],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'cpan',
+	'UPSTREAM'	=> undef,
 	},
 
     'Module::Build' =>
