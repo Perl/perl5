@@ -8,6 +8,12 @@ BEGIN {
 
 plan tests => 56;
 
+# These tests make sure, among other things, that we don't end up
+# burning tons of CPU for dates far in the future.
+# watchdog() makes sure that the test script eventually exits if
+# the tests are triggering the failing behavior
+watchdog(15);
+
 ($beguser,$begsys) = times;
 
 $beg = time;
