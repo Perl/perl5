@@ -17,7 +17,8 @@ my @syntax_cases = (
 
 my @version_cases = <DATA>;
 
-plan tests => 5 * @syntax_cases + 5 * grep { $_ !~ /^#/ } @version_cases;
+plan tests => 5 * @syntax_cases + 5 * (grep { $_ !~ /^#/ } @version_cases)
+            + 3;
 
 use warnings qw/syntax/;
 use version;
@@ -94,6 +95,17 @@ for my $line (@version_cases) {
     }
 }
 
+#
+# Tests for #72432 - which reports a syntax error if there's a newline
+# between the package name and the version.
+#
+# Note that we are using 'run_perl' here - there's no problem if 
+# "package Foo\n1;" is evalled.
+#
+for my $v ("1", "1.23", "v1.2.3") {
+    ok (run_perl (prog => "package Foo\n$v; print 1;"),
+                          "New line between package name and version");
+}
 
 # The data is organized in tab delimited format with these columns:
 #
