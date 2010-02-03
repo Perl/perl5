@@ -7014,6 +7014,7 @@ Perl_yylex(pTHX)
 
 	case KEY_package:
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    s = SKIPSPACE1(s);
 	    s = force_strict_version(s);
 	    OPERATOR(PACKAGE);
 
