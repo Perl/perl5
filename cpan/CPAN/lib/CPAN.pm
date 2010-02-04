@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_54';
+$CPAN::VERSION = '1.94_55';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -1981,6 +1981,9 @@ currently defined:
   prerequisites_policy
                      what to do if you are missing module prerequisites
                      ('follow' automatically, 'ask' me, or 'ignore')
+                     For 'follow', also sets PERL_AUTOINSTALL and
+                     PERL_EXTUTILS_AUTOINSTALL for "--defaultdeps" if
+                     not already set
   prefs_dir          local directory to store per-distro build options
   proxy_user         username for accessing an authenticating proxy
   proxy_pass         password for accessing an authenticating proxy

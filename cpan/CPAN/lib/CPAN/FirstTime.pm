@@ -397,8 +397,11 @@ building modules that need some customization?
 The CPAN module can detect when a module which you are trying to build
 depends on prerequisites. If this happens, it can build the
 prerequisites for you automatically ('follow'), ask you for
-confirmation ('ask'), or just ignore them ('ignore'). Please set your
-policy to one of the three values.
+confirmation ('ask'), or just ignore them ('ignore').  Choosing
+'follow' also sets PERL_AUTOINSTALL and PERL_EXTUTILS_AUTOINSTALL for
+"--defaultdeps" if not already set.
+
+Please set your policy to one of the three values.
 
 Policy on building prerequisites (follow, ask or ignore)?
 
@@ -841,9 +844,9 @@ sub init {
     #= Do we follow PREREQ_PM?
     #
 
-    my_prompt_loop(prerequisites_policy => 'ask', $matcher,
+    my_prompt_loop(prerequisites_policy => 'follow', $matcher,
                    'follow|ask|ignore');
-    my_prompt_loop(build_requires_install_policy => 'ask/yes', $matcher,
+    my_prompt_loop(build_requires_install_policy => 'yes', $matcher,
                    'yes|no|ask/yes|ask/no');
 
     #
@@ -881,7 +884,7 @@ sub init {
         my_dflt_prompt(yaml_module => "YAML", $matcher);
         my $old_v = $CPAN::Config->{load_module_verbosity};
         $CPAN::Config->{load_module_verbosity} = q[none];
-        unless ($CPAN::META->has_inst($CPAN::Config->{yaml_module})) {
+        if (!$silent && !$CPAN::META->has_inst($CPAN::Config->{yaml_module})) {
             $CPAN::Frontend->mywarn
                 ("Warning (maybe harmless): '$CPAN::Config->{yaml_module}' not installed.\n");
             $CPAN::Frontend->mysleep(3);
@@ -929,11 +932,11 @@ sub init {
     # verbosity
     #
 
-    my_prompt_loop(tar_verbosity => 'v', $matcher,
+    my_prompt_loop(tar_verbosity => 'none', $matcher,
                    'none|v|vv');
     my_prompt_loop(load_module_verbosity => 'none', $matcher,
                    'none|v');
-    my_prompt_loop(perl5lib_verbosity => 'v', $matcher,
+    my_prompt_loop(perl5lib_verbosity => 'none', $matcher,
                    'none|v');
     my_yn_prompt(inhibit_startup_message => 0, $matcher);
 

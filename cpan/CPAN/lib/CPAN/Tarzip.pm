@@ -29,8 +29,8 @@ sub new {
             } else {
                 $CPAN::Frontend->mydie(qq{
 CPAN.pm needs the external program bzip2 in order to handle '$file'.
-Please install it now and run 'o conf init' to register it as external
-program.
+Please install it now and run 'o conf init bzip2' from the
+CPAN shell prompt to register it as external program.
 });
             }
         }
@@ -422,11 +422,20 @@ sub unzip {
             return if $CPAN::Signal;
         }
         return 1;
-    } else {
-        my $unzip = $CPAN::Config->{unzip} or
-            $CPAN::Frontend->mydie("Cannot unzip, no unzip program available");
+    } elsif ( my $unzip = $CPAN::Config->{unzip}  ) {
         my @system = ($unzip, $file);
         return system(@system) == 0;
+    }
+    else {
+            $CPAN::Frontend->mydie(<<"END");
+
+Can't unzip '$file':
+
+You have not configured an 'unzip' program and do not have Archive::Zip
+installed.  Please either install Archive::Zip or else configure 'unzip'
+by running the command 'o conf init unzip' from the CPAN shell prompt.
+
+END
     }
 }
 

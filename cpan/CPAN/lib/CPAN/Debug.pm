@@ -52,9 +52,9 @@ sub debug {
         if ($arg and ref $arg) {
             eval { require Data::Dumper };
             if ($@) {
-                $CPAN::Frontend->myprint($arg->as_string);
+                $CPAN::Frontend->myprint("Debug(\n" . $arg->as_string . ")\n");
             } else {
-                $CPAN::Frontend->myprint(Data::Dumper::Dumper($arg));
+                $CPAN::Frontend->myprint("Debug(\n" . Data::Dumper::Dumper($arg) . ")\n");
             }
         } else {
             my $outer = "";

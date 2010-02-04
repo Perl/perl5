@@ -1,3 +1,21 @@
+2010-02-03  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_55
+
+	* Fixed rt.perl.org#72362 (CPAN ignoring configure_requires).
+	  Also fixed (MY)META.yml processing to always prefer
+	  Parse::CPAN::Meta, if available.  Reported by Joshua B Jore
+	  and patched by David Golden
+
+	* Fixed rt.perl.org#72348 (missing CPAN::HandleConfig::output);
+	  Reported by Joshua B Jore and patched by David Golden
+
+	* Quieter user interface: made lots of '$module missing' type
+	  warnings only warn once; eliminated 'no YAML' warnings for
+	  distroprefs if there are no distroprefs.
+
+	* now with 359 distroprefs files
+
 2010-01-14  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_54
