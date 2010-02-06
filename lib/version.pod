@@ -388,6 +388,20 @@ to your namespace, use this form:
 
   use version 0.77 ();
 
+=head2 is_lax()
+
+(Not exported by default)
+
+This function takes a scalar argument and returns a boolean value indicating
+whether the argument meets the "lax" rules for a version number.
+
+=head2 is_strict()
+
+(Not exported by default)
+
+This function takes a scalar argument and returns a boolean value indicating
+whether the argument meets the "strict" rules for a version number.
+
 =head1 AUTHOR
 
 John Peacock E<lt>jpeacock@cpan.orgE<gt>
