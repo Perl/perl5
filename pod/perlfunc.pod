@@ -1176,21 +1176,25 @@ See also L</undef>, L</exists>, L</ref>.
 =item delete EXPR
 X<delete>
 
-Given an expression that specifies an element or slice of an aggregate (a
-hash or an array), deletes the specified elements from that aggregate so
-that exists() on that element no longer returns true.  Setting an aggregate
-element to the undefined value does not remove its key, but deleting it
-does; see L</exists>.
+Given an expression that specifies an element or slice of a hash, C<delete>
+deletes the specified elements from that hash so that exists() on that element
+no longer returns true.  Setting a hash element to the undefined value does
+not remove its key, but deleting it does; see L</exists>.
 
-Returns the value or values deleted in list context, or the last such
+It returns the value or values deleted in list context, or the last such
 element in scalar context.  The return list's length always matches that of
-the argument list: deleting non-existent elements returns the undefined
-value in their corresponding positions.
+the argument list: deleting non-existent elements returns the undefined value
+in their corresponding positions.
 
-Deleting array elements never changes indices of existing values; use
-shift() or splice() for that.  However, if all deleted elements fall at
-the end of an array, the array's size shrinks to the position of the
-highest element that still tests true for exists(), or to 0 if none do.
+delete() may also be used on arrays and array slices, but its behavior is less
+straightforward.  Although exists() will return false for deleted entries,
+deleting array elements never changes indices of existing values; use shift()
+or splice() for that.  However, if all deleted elements fall at the end of an
+array, the array's size shrinks to the position of the highest element that
+still tests true for exists(), or to 0 if none do.
+
+B<Be aware> that calling delete on array values is deprecated and likely to
+be removed in a future version of Perl.
 
 Deleting from C<%ENV> modifies the environment.  Deleting from a hash tied to
 a DBM file deletes the entry from the DBM file.  Deleting from a C<tied> hash
@@ -1740,13 +1744,18 @@ C<DESTROY> methods on your objects.
 =item exists EXPR
 X<exists> X<autovivification>
 
-Given an expression that specifies an element of a hash or array,
-returns true if the specified element in that aggregate has ever
-been initialized, even if the corresponding value is undefined.
+Given an expression that specifies an element of a hash, returns true if the
+specified element in the hash has ever been initialized, even if the
+corresponding value is undefined.
 
     print "Exists\n"    if exists $hash{$key};
     print "Defined\n"   if defined $hash{$key};
     print "True\n"      if $hash{$key};
+
+exists may also be called on array elements, but its behavior is much less
+obvious, and is strongly tied to the use of L</delete> on arrays.  B<Be aware>
+that calling exists on array values is deprecated and likely to be removed in
+a future version of Perl.
 
     print "Exists\n"    if exists $array[$index];
     print "Defined\n"   if defined $array[$index];
