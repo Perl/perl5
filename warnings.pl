@@ -743,11 +743,11 @@ sub __chk
 	    unless defined $offset ;
     }
 
-    my $this_pkg = (caller(1))[0] ;
-    my $i = 2 ;
-    my $pkg ;
+    my $i;
 
     if ($isobj) {
+        my $pkg;
+        $i = 2;
         while (do { { package DB; $pkg = (caller($i++))[0] } } ) {
             last unless @DB::args && $DB::args[0] =~ /^$category=/ ;
         }
