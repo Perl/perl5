@@ -1836,7 +1836,7 @@ If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
 bomb, you can run them by hand, e.g.,
 
-	cd t ; ./perl -MTestInit op/groups.t
+	./perl -MTestInit t/op/groups.t
 
 Another way to get more detailed information about failed tests and
 individual subtests is to cd to the t directory and run
