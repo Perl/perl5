@@ -102,8 +102,7 @@ a single decimal point, e.g.:
 
 In general, Dotted-Decimal Versions permit the greatest amount of freedom
 to specify a version, whereas Decimal Versions enforce a certain
-uniformity.  See also L<New Operator> for an additional method of
-initializing version objects.
+uniformity.  
 
 Just like L<Decimal Versions>, Dotted-Decimal Versions can be used as
 L<Alpha Versions>.
@@ -678,7 +677,7 @@ has been initialized, you can simply test it directly:
   $vobj = version->new($something);
   if ( $vobj )   # true only if $something was non-blank
 
-You can also test whether a version object is an L<Alpha Version>, for
+You can also test whether a version object is an alpha version, for
 example to prevent the use of some feature not present in the main
 release:
 
