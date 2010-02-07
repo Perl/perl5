@@ -193,8 +193,8 @@ for (
     like ("$ref", qr/^$type\(0x[0-9a-f]+\)$/, "stringify for ref to $desc");
 }
 
-is (ref *STDOUT{IO}, 'IO::Handle', 'IO refs are blessed into IO::Handle');
-like (*STDOUT{IO}, qr/^IO::Handle=IO\(0x[0-9a-f]+\)$/,
+is (ref *STDOUT{IO}, 'IO::File', 'IO refs are blessed into IO::File');
+like (*STDOUT{IO}, qr/^IO::File=IO\(0x[0-9a-f]+\)$/,
     'stringify for IO refs');
 
 # Test anonymous hash syntax.

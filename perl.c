@@ -3863,9 +3863,33 @@ S_init_predump_symbols(pTHX)
     dVAR;
     GV *tmpgv;
     IO *io;
+    AV *isa;
 
     sv_setpvs(get_sv("\"", GV_ADD), " ");
     PL_ofsgv = (GV*)SvREFCNT_inc(gv_fetchpvs(",", GV_ADD|GV_NOTQUAL, SVt_PV));
+
+
+    /* Historically, PVIOs were blessed into IO::Handle, unless
+       FileHandle was loaded, in which case they were blessed into
+       that. Action at a distance.
+       However, if we simply bless into IO::Handle, we break code
+       that assumes that PVIOs will have (among others) a seek
+       method. IO::File inherits from IO::Handle and IO::Seekable,
+       and provides the needed methods. But if we simply bless into
+       it, then we break code that assumed that by loading
+       IO::Handle, *it* would work.
+       So a compromise is to set up the correct @IO::File::ISA,
+       so that code that does C<use IO::Handle>; will still work.
+    */
+		   
+    isa = get_av("IO::File::ISA", GV_ADD | GV_ADDMULTI);
+    av_push(isa, newSVpvs("IO::Handle"));
+    av_push(isa, newSVpvs("IO::Seekable"));
+    av_push(isa, newSVpvs("Exporter"));
+    (void) gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVGV);
+    (void) gv_fetchpvs("IO::Seekable::", GV_ADD, SVt_PVGV);
+    (void) gv_fetchpvs("Exporter::", GV_ADD, SVt_PVGV);
+
 
     PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);

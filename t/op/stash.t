@@ -10,9 +10,9 @@ BEGIN { require "./test.pl"; }
 plan( tests => 31 );
 
 # Used to segfault (bug #15479)
-fresh_perl_is(
+fresh_perl_like(
     '%:: = ""',
-    'Odd number of elements in hash assignment at - line 1.',
+    qr/Odd number of elements in hash assignment at - line 1\./,
     { switches => [ '-w' ] },
     'delete $::{STDERR} and print a warning',
 );

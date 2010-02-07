@@ -4389,6 +4389,7 @@ t/op/exec.t			See if exec, system and qx work
 t/op/exists_sub.t		See if exists(&sub) works
 t/op/exp.t			See if math functions work
 t/op/fh.t			See if filehandles work
+t/op/filehandle.t		Tests for http://rt.perl.org/rt3/Ticket/Display.html?id=72586
 t/op/filetest.t			See if file tests work
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works

@@ -618,7 +618,7 @@ do_test(25,
     FLAGS = \\(OBJECT\\)
     IV = 0					# $] < 5.011
     NV = 0					# $] < 5.011
-    STASH = $ADDR\s+"IO::Handle"
+    STASH = $ADDR\s+"IO::File"
     IFP = $ADDR
     OFP = $ADDR
     DIRP = 0x0
