@@ -1851,9 +1851,17 @@ earlier in the line, and you really meant a "less than".
 
 =item gmtime(%.0f) too large
 
-(W overflow) You called C<gmtime> with an number that was beyond the 64-bit
-range that it accepts, and some rounding resulted. This warning is also
-triggered with nan (the special not-a-number value).
+(W overflow) You called C<gmtime> with an number that was larger than
+it can reliably handle and C<gmtime> probably returned the wrong
+date. This warning is also triggered with nan (the special
+not-a-number value).
+
+=item gmtime(%.0f) too small
+
+(W overflow) You called C<gmtime> with an number that was smaller than
+it can reliably handle and C<gmtime> probably returned the wrong
+date. This warning is also triggered with nan (the special
+not-a-number value).
 
 =item Got an error from DosAllocMem
 
@@ -2289,8 +2297,17 @@ L<perlfunc/listen>.
 
 =item localtime(%.0f) too large
 
-(W overflow) You called C<localtime> with an number that was beyond the
-64-bit range that it accepts, and some rounding resulted. This warning is also triggered with nan (the special not-a-number value).
+(W overflow) You called C<localtime> with an number that was larger
+than it can reliably handle and C<localtime> probably returned the
+wrong date. This warning is also triggered with nan (the special
+not-a-number value).
+
+=item localtime(%.0f) too small
+
+(W overflow) You called C<localtime> with an number that was smaller
+than it can reliably handle and C<localtime> probably returned the
+wrong date. This warning is also triggered with nan (the special
+not-a-number value).
 
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
