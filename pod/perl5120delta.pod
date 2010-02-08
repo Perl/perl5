@@ -385,20 +385,22 @@ number format.  See L<"Version number formats"> for details.
 =head2 Version number formats
 
 Acceptable version number formats have been formalized into "strict" and
-"lax" rules.  C<package NAME VERSION> takes a strict version number.  C<use
-NAME VERSION> takes a lax version number.  C<UNIVERSAL::VERSION> and the
-L<version> object constructors take lax version numbers.  Providing an
-invalid version will result in a fatal error.
+"lax" rules.  C<package NAME VERSION> takes a strict version number.
+C<UNIVERSAL::VERSION> and the L<version> object constructors take lax
+version numbers.  Providing an invalid version will result in a fatal
+error.  The version argument in C<use NAME VERSION> is first parsed as a
+numeric literal or v-string and then passed to C<UNIVERSAL::VERSION>
+(and must then pass the "lax" format test).
 
-These formats will be documented fully in the L<version> module in a
-subsequent release of Perl 5.11.  To a first approximation, a "strict"
-version number is a positive decimal number (integer or decimal-fraction)
-without exponentiation or else a dotted-decimal v-string with a leading 'v'
-character and at least three components.  A "lax" version number allows
-v-strings with fewer than three components or without a leading 'v'.  Under
-"lax" rules, both decimal and dotted-decimal versions may have a trailing
-"alpha" component separated by an underscore character after a fractional
-or dotted-decimal component.
+These formats are documented fully in the L<version> module.  To a first
+approximation, a "strict" version number is a positive decimal number
+(integer or decimal-fraction) without exponentiation or else a
+dotted-decimal v-string with a leading 'v' character and at least three
+components.  A "lax" version number allows v-strings with fewer than
+three components or without a leading 'v'.  Under "lax" rules, both
+decimal and dotted-decimal versions may have a trailing "alpha"
+component separated by an underscore character after a fractional or
+dotted-decimal component.
 
 The L<version> module adds C<version::is_strict> and C<version::is_lax>
 functions to check a scalar against these rules.
