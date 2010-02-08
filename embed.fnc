@@ -39,6 +39,9 @@
 :         in embed.h, change "#ifdef PERL_CORE"
 :         into               "#if defined(PERL_CORE) || defined(PERL_EXT)"
 :
+:      Should always be combined with "X" to be usable from dynamically
+:      loaded extensions.
+:
 :   f  Function takes printf style format string, varargs:
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
