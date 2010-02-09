@@ -230,6 +230,7 @@ The following compound statements may be used to control flow:
     if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
     unless (EXPR) BLOCK
     unless (EXPR) BLOCK else BLOCK
+    unless (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
     LABEL until (EXPR) BLOCK
@@ -254,8 +255,11 @@ all do the same thing:
 The C<if> statement is straightforward.  Because BLOCKs are always
 bounded by curly brackets, there is never any ambiguity about which
 C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
-the sense of the test is reversed. In Perl even C<unless> followed
-by C<else> is valid.
+the sense of the test is reversed. Like C<if>, C<unless> can be followed
+by C<else>. C<unless> can even be followed by one or more C<elsif>
+statements, though you may want to think twice before using that particular
+language construct, as everyone reading your code will have to think at least
+twice before they can understand what's going on.
 
 The C<while> statement executes the block as long as the expression is
 L<true|/"Truth and Falsehood">.
