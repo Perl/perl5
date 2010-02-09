@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Feb  1 12:57:52 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Tue Feb  9 16:39:40 CET 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2438,20 +2438,20 @@ for file in $trylist; do
 		;;
 	esac
 done
-case "$less" in
-'')	;;
-*)	if $less -R </dev/null >/dev/null; then
-		echo "Substituting less -R for less."
-		less="$less -R"
-		_less=$less
-	fi
-	;;
-esac
 case "$egrep" in
 egrep)
 	echo "Substituting grep for egrep."
 	egrep=$grep
 	_egrep=$grep
+	;;
+esac
+case "$less" in
+'')	;;
+*)	if $less -R </dev/null >/dev/null; then
+	       echo "Substituting less -R for less."
+	       less="$less -R"
+	       _less=$less
+	fi
 	;;
 esac
 case "$ln" in
