@@ -1372,6 +1372,10 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 	break;
 
 
+    case SVt_REGEXP:
+	/* This ensures that SvTHINKFIRST(sv) is true, and hence that
+	   sv_force_normal_flags(sv) is called.  */
+	SvFAKE_on(sv);
     case SVt_PVIV:
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
@@ -1382,7 +1386,6 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
-    case SVt_REGEXP:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:
@@ -4615,6 +4618,45 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
 	sv_unglob(sv);
+    else if (SvFAKE(sv) && SvTYPE(sv) == SVt_REGEXP) {
+	/* Need to downgrade the REGEXP to a simple(r) scalar. This is analagous
+	   to sv_unglob. We only need it here, so inline it.  */
+	const svtype new_type = SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
+	SV *const temp = newSV_type(new_type);
+	void *const temp_p = SvANY(sv);
+
+	if (new_type == SVt_PVMG) {
+	    SvMAGIC_set(temp, SvMAGIC(sv));
+	    SvMAGIC_set(sv, NULL);
+	    SvSTASH_set(temp, SvSTASH(sv));
+	    SvSTASH_set(sv, NULL);
+	}
+	SvCUR_set(temp, SvCUR(sv));
+	/* Remember that SvPVX is in the head, not the body. */
+	if (SvLEN(temp)) {
+	    SvLEN_set(temp, SvLEN(sv));
+	    /* This signals "buffer is owned by someone else" in sv_clear,
+	       which is the least effort way to stop it freeing the buffer.
+	    */
+	    SvLEN_set(sv, SvLEN(sv)+1);
+	} else {
+	    /* Their buffer is already owned by someone else. */
+	    SvPVX(sv) = savepvn(SvPVX(sv), SvCUR(sv));
+	    SvLEN_set(temp, SvCUR(sv)+1);
+	}
+
+	/* Now swap the rest of the bodies. */
+
+	SvFLAGS(sv) &= ~(SVf_FAKE|SVTYPEMASK);
+	SvFLAGS(sv) |= new_type;
+	SvANY(sv) = SvANY(temp);
+
+	SvFLAGS(temp) &= ~(SVTYPEMASK);
+	SvFLAGS(temp) |= SVt_REGEXP|SVf_FAKE;
+	SvANY(temp) = temp_p;
+
+	SvREFCNT_dec(temp);
+    }
 }
 
 /*

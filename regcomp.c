@@ -9457,6 +9457,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),
 	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
     SvLEN_set(ret_x, 0);
+    SvSTASH_set(ret_x, NULL);
     Newx(ret->offs, npar, regexp_paren_pair);
     Copy(r->offs, ret->offs, npar, regexp_paren_pair);
     if (r->substrs) {
