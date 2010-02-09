@@ -623,7 +623,7 @@ return the value of the internal "utf8ness" flag attached to the
 C<$string>.  If the flag is off, the bytes in the scalar are interpreted
 as a single byte encoding.  If the flag is on, the bytes in the scalar
 are interpreted as the (multi-byte, variable-length) UTF-8 encoded code
-points of the characters.  Bytes added to an UTF-8 encoded string are
+points of the characters.  Bytes added to a UTF-8 encoded string are
 automatically upgraded to UTF-8.  If mixed non-UTF-8 and UTF-8 scalars
 are merged (double-quoted interpolation, explicit concatenation, and
 printf/sprintf parameter substitution), the result will be UTF-8 encoded

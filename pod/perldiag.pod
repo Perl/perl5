@@ -4945,7 +4945,7 @@ removed in a future version.
 
 =item UTF-16 surrogate %s
 
-(W utf8) You tried to generate half of an UTF-16 surrogate by
+(W utf8) You tried to generate half of a UTF-16 surrogate by
 requesting a Unicode character between the code points 0xD800 and
 0xDFFF (inclusive).  That range is reserved exclusively for the use of
 UTF-16 encoding (by having two 16-bit UCS-2 characters); but Perl

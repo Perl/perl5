@@ -1321,7 +1321,7 @@ all its results against linear scans, and panicking on any discrepancy.
 
 =item ${^UTF8LOCALE}
 
-This variable indicates whether an UTF-8 locale was detected by perl at
+This variable indicates whether a UTF-8 locale was detected by perl at
 startup. This information is used by perl when it's in
 adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
 switch); see L<perlrun> for more info on this.

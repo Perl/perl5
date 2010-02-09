@@ -2181,9 +2181,13 @@ functions or functions used in a program in which Perl is embedded.
 Similarly, all global variables begin with C<PL_>. (By convention,
 static functions start with C<S_>.)
 
-Inside the Perl core, you can get at the functions either with or
-without the C<Perl_> prefix, thanks to a bunch of defines that live in
-F<embed.h>. This header file is generated automatically from
+Inside the Perl core (C<PERL_CORE> defined), you can get at the functions
+either with or without the C<Perl_> prefix, thanks to a bunch of defines
+that live in F<embed.h>. Note that extension code should I<not> set
+C<PERL_CORE>; this exposes the full perl internals, and is likely to cause
+breakage of the XS in each new perl release.
+
+The file F<embed.h> is generated automatically from
 F<embed.pl> and F<embed.fnc>. F<embed.pl> also creates the prototyping
 header files for the internal functions, generates the documentation
 and a lot of other bits and pieces. It's important that when you add

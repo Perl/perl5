@@ -2438,6 +2438,15 @@ for file in $trylist; do
 		;;
 	esac
 done
+case "$less" in
+'')	;;
+*)	if $less -R </dev/null >/dev/null; then
+		echo "Substituting less -R for less."
+		less="$less -R"
+		_less=$less
+	fi
+	;;
+esac
 case "$egrep" in
 egrep)
 	echo "Substituting grep for egrep."
