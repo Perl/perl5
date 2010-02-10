@@ -2079,6 +2079,11 @@ pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 : Only used in PAD_COMPNAME_TYPE() in op.c
 pR	|HV*	|pad_compname_type|const PADOFFSET po
+: Used in sv.c
+#if defined(USE_ITHREADS)
+pR	|AV*	|padlist_dup	|NULLOK AV *const srcpad \
+				|NN CLONE_PARAMS *const param
+#endif
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|NN const char *name|NN const CV* cv|U32 seq|int warn \

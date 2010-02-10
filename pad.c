@@ -1752,6 +1752,31 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     return NULL;
 }
 
+#if defined(USE_ITHREADS)
+
+#  define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
+
+AV *
+Perl_padlist_dup(pTHX_ AV *const srcpad, CLONE_PARAMS *const param)
+{
+    AV *dstpad;
+    PERL_ARGS_ASSERT_PADLIST_DUP;
+
+    if (!srcpad)
+	return NULL;
+
+    assert(!AvREAL(srcpad));
+    /* XXX padlists are real, but pretend to be not */
+    AvREAL_on(srcpad);
+    dstpad = av_dup_inc(srcpad, param);
+    AvREAL_off(srcpad);
+    AvREAL_off(dstpad);
+
+    return dstpad;
+}
+
+#endif
+
 /*
  * Local variables:
  * c-indentation-style: bsd

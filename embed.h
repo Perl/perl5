@@ -1777,6 +1777,11 @@
 #define pad_push		Perl_pad_push
 #define pad_compname_type	Perl_pad_compname_type
 #endif
+#if defined(USE_ITHREADS)
+#ifdef PERL_CORE
+#define padlist_dup		Perl_padlist_dup
+#endif
+#endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_findlex		S_pad_findlex
@@ -4211,6 +4216,11 @@
 #ifdef PERL_CORE
 #define pad_push(a,b)		Perl_pad_push(aTHX_ a,b)
 #define pad_compname_type(a)	Perl_pad_compname_type(aTHX_ a)
+#endif
+#if defined(USE_ITHREADS)
+#ifdef PERL_CORE
+#define padlist_dup(a,b)	Perl_padlist_dup(aTHX_ a,b)
+#endif
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

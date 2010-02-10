@@ -11326,7 +11326,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		 * duped GV may never be freed. A bit of a hack! DAPM */
 		CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
 		    NULL : gv_dup(CvGV(dstr), param) ;
-		PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
+		CvPADLIST(dstr) = padlist_dup(CvPADLIST(sstr), param);
 		CvOUTSIDE(dstr)	=
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)
