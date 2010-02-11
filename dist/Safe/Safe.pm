@@ -311,7 +311,21 @@ sub reval {
             $ret = sub {
                 my @args = @_; # lexical to close over
                 my $sub_with_args = sub { $sub->(@args) };
-                return Opcode::_safe_call_sv($root, $obj->{Mask}, $sub_with_args)
+
+                my @subret;
+                my $error;
+                do {
+                    local $@;  # needed due to perl_call_sv(sv, G_EVAL|G_KEEPERR)
+                    @subret = (wantarray)
+                        ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $sub_with_args)
+                        : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $sub_with_args);
+                    $error = $@;
+                };
+                if ($error) { # rethrow exception
+                    $error =~ s/\t\(in cleanup\) //; # prefix added by G_KEEPERR
+                    die $error;
+                }
+                return (wantarray) ? @subret : $subret[0];
             };
         }
     }

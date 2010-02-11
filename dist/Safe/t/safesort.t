@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use Safe 1.00;
-use Test::More tests => 6;
+use Test::More tests => 9;
 
 my $safe = Safe->new('PLPerl');
 $safe->permit_only(qw(:default sort));
@@ -36,3 +36,16 @@ is ref $func, 'CODE', 'reval should return a CODE ref';
 my ($l_sorted, $p_sorted) = $func->(1,2,3);
 is $l_sorted, "1,2,3";
 is $p_sorted, "1,2,3";
+
+# check other aspects of closures created inside Safe
+
+my $die_func = $safe->reval(q{ sub { die @_ if @_; 1 } });
+
+# check $@ not affected by successful call
+$@ = 42;
+$die_func->();
+is $@, 42, 'successful closure call should not alter $@';
+
+ok !eval { $die_func->("died\n"); 1 }, 'should die';
+is $@, "died\n", '$@ should be set correctly';
+
