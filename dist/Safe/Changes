@@ -1,3 +1,7 @@
+2.22 Thu Feb 11 2010
+    fix [perl #72700]: An exception thrown from a closure was getting lost.
+    (Tim Bunce)
+
 2.21 Thu Jan 14 2010
     fix [perl #72068]: An anonymous sub created by the Safe container will have
     bogus arguments passed to it.

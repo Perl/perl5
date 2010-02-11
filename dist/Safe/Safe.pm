@@ -6,7 +6,7 @@ use Scalar::Util qw(reftype);
 use Config qw(%Config);
 use constant is_usethreads => $Config{usethreads};
 
-$Safe::VERSION = "2.21";
+$Safe::VERSION = "2.22";
 
 # *** Don't declare any lexicals above this point ***
 #
