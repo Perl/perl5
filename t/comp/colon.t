@@ -4,7 +4,7 @@
 # Ensure that syntax using colons (:) is parsed correctly.
 # The tests are done on the following tokens (by default):
 # ABC LABEL XYZZY m q qq qw qx s tr y AUTOLOAD and alarm 
-#	-- Robin Barker <rmb@cise.npl.co.uk>
+#	-- Robin Barker 
 #
 
 # Uncomment this for testing, but don't leave it in for "production", as
