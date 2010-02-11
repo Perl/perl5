@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 use strict;
 require 5.006;
@@ -347,6 +347,10 @@ With option -exec, walks tree in execute order,
 otherwise in basic order.
 
 =head1 Changes
+
+  1.12 2010-02-10 rurban
+	remove archlib installation cruft, and use the proper PM rule.
+	By Todd Rinaldo (toddr)
 
   1.11 2008-07-14 rurban
 	avoid B::Flags in CORE tests not to crash on old XS in @INC
