@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl - Practical Extraction and Report Language
+perl - The Perl language interpreter
 
 =head1 SYNOPSIS
 
@@ -246,6 +246,9 @@ not sure where you should look for help, try the B<-w> switch first.  It will
 often point out exactly where the trouble is.
 
 =head1 DESCRIPTION
+
+Perl officially stands for Practical Extraction and Report Language,
+except when it doesn't.
 
 Perl is a language optimized for scanning arbitrary
 text files, extracting information from those text files, and printing
