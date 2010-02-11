@@ -5,6 +5,8 @@
 # http://rt.perl.org/rt3/Ticket/Display.html?id=39060
 
 use strict;
+use Config;
+
 require './test.pl';
 
 plan( tests => 16 );
@@ -25,6 +27,8 @@ for my $perlio ('perlio', 'stdio') {
 SKIP:
     for my $test_in ("test\n", "test") {
 		skip("Guaranteed newline at EOF on VMS", 4) if $^O eq 'VMS' && $test_in eq 'test';
+                skip("[perl #71504] OpenBSD test failures in errno.t with ithreads and perlio", 8)
+                    if $^O eq 'openbsd' && $Config{useithreads} && $perlio eq 'stdio';
 		my $test_in_esc = $test_in;
 		$test_in_esc =~ s/\n/\\n/g;
 		for my $rs_code ('', '$/=undef', '$/=\2', '$/=\1024') {
