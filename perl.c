@@ -2835,11 +2835,11 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-T                enable tainting checks",
 "-u                dump core after parsing program",
 "-U                allow unsafe operations",
-"-v                print version, subversion (includes VERY IMPORTANT perl info)",
+"-v                print version, patchlevel and license",
 "-V[:variable]     print configuration summary (or a single Config.pm variable)",
 "-w                enable many useful warnings (RECOMMENDED)",
 "-W                enable all warnings",
-"-x[directory]     strip off text before #!perl line and perhaps cd to directory",
+"-x[directory]     ignore text before #!perl line (optionally cd to directory)",
 "-X                disable all warnings",
 "\n",
 NULL
