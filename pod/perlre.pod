@@ -370,23 +370,6 @@ whole character class.  For example:
 
 matches zero, one, any alphabetic character, and the percent sign.
 
-=over 4
-
-=item C<$>
-
-Currency symbol
-
-=item C<+> C<< < >> C<=> C<< > >> C<|> C<~>
-
-Mathematical symbols
-
-=item C<^> C<`>
-
-Modifier symbols (accents)
-
-
-=back
-
 The other named classes are:
 
 =over 4
