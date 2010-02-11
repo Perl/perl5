@@ -6722,6 +6722,9 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
         if ( he_str ) {
             sv_str = HeVAL(he_str);
             cached = 1;
+	} else if (PL_parser && PL_parser->error_count > 0) {
+	    /* Don't attempt to load charnames if we're already in error */
+	    vFAIL("Too many errors, cannot continue parsing");
         } else {
             dSP ;
 
