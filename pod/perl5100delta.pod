@@ -625,6 +625,27 @@ Previously, the exception would not occur until Perl attempted to make
 use of the recursive inheritance while resolving a method or doing a
 C<$foo-E<gt>isa($bar)> lookup.
 
+=head2 warnings::register changed to favor users of modules
+
+The behaviour in 5.10.x favors the person using the module;
+The behaviour in 5.8.x favors the module writer;
+
+Assume the following code:
+
+  main calls Foo::Bar::baz()
+  Foo::Bar inherits from Foo::Base
+  Foo::Bar::baz() calls Foo::Base::_bazbaz()
+  Foo::Base::_bazbaz() calls: warnings::warnif('substr', 'some warning 
+message');
+
+On 5.8.x, the code warns when Foo::Bar contains C<use warnings;>
+It does not matter if Foo::Base or main have warnings enabled
+to disable the warning one has to modify Foo::Bar.
+
+On 5.10.0 and newer, the code warns when main contains C<use warnings;>
+It does not matter if Foo::Base or Foo::Bar have warnings enabled
+to disable the warning one has to modify main.
+
 =head1 Modules and Pragmata
 
 =head2 Upgrading individual core modules
