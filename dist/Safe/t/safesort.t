@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use Safe 1.00;
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 my $safe = Safe->new('PLPerl');
 $safe->permit_only(qw(:default sort));
@@ -46,6 +46,11 @@ $@ = 42;
 $die_func->();
 is $@, 42, 'successful closure call should not alter $@';
 
-ok !eval { $die_func->("died\n"); 1 }, 'should die';
-is $@, "died\n", '$@ should be set correctly';
-
+{
+    my $warns = 0;
+    local $SIG{__WARN__} = sub { $warns++ };
+    ok !eval { $die_func->("died\n"); 1 }, 'should die';
+    is $@, "died\n", '$@ should be set correctly';
+    local $TODO = "Shouldn't warn";
+    is $warns, 0;
+}
