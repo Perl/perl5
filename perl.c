@@ -2853,6 +2853,10 @@ NULL
 		  name);
     while (*p)
 	PerlIO_printf(PerlIO_stdout(), "\n  %s", *p++);
+
+    PerlIO_printf(PerlIO_stdout(),
+		  "Run 'perldoc perl' for more help with Perl.\n\n"
+		  );
 }
 
 /* convert a string of -D options (or digits) into an int.

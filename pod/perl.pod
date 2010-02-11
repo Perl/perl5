@@ -15,9 +15,16 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ [B<-e>|B<-E>] I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
-If you're new to Perl, you should start with L<perlintro>, which is a 
-general intro for beginners and provides some background to help you
-navigate the rest of Perl's extensive documentation.
+=head1 GETTING HELP
+
+The F<perldoc> program gives you access to all the documentation that comes
+with Perl.  You can get more documentation, tutorials and community support
+online at L<http://www.perl.org/>.
+
+If you're new to Perl, you should start by running C<perldoc perlintro>,
+which is a general intro for beginners and provides some background to help
+you navigate the rest of Perl's extensive documentation.  Run C<perldoc
+perldoc> to learn more things you can do with F<perldoc>.
 
 For ease of access, the Perl manual has been split up into several sections.
 
@@ -231,37 +238,12 @@ For ease of access, the Perl manual has been split up into several sections.
     perlvos		Perl notes for Stratus VOS
     perlwin32		Perl notes for Windows
 
+On a Unix-like system, these documentation files will usually also be
+available as manpages for use with the F<man> program.
 
-By default, the manpages listed above are installed in the 
-F</usr/local/man/> directory.  
-
-Extensive additional documentation for Perl modules is available.  The
-default configuration for perl will place this additional documentation
-in the F</usr/local/lib/perl5/man> directory (or else in the F<man>
-subdirectory of the Perl library directory).  Some of this additional
-documentation is distributed standard with Perl, but you'll also find
-documentation for third-party modules there.
-
-You should be able to view Perl's documentation with your man(1)
-program by including the proper directories in the appropriate start-up
-files, or in the MANPATH environment variable.  To find out where the
-configuration has installed the manpages, type:
-
-    perl -V:man.dir
-
-If the directories have a common stem, such as F</usr/local/man/man1>
-and F</usr/local/man/man3>, you need only to add that stem
-(F</usr/local/man>) to your man(1) configuration files or your MANPATH
-environment variable.  If they do not share a stem, you'll have to add
-both stems.
-
-If that doesn't work for some reason, you can still use the
-supplied F<perldoc> script to view module information.  You might
-also look into getting a replacement man program.
-
-If something strange has gone wrong with your program and you're not
-sure where you should look for help, try the B<-w> switch first.  It
-will often point out exactly where the trouble is.
+In general, if something strange has gone wrong with your program and you're
+not sure where you should look for help, try the B<-w> switch first.  It will
+often point out exactly where the trouble is.
 
 =head1 DESCRIPTION
 
