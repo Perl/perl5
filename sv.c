@@ -6240,6 +6240,65 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 
 
 /*
+=for apidoc sv_pos_u2b_proper
+
+Converts the value pointed to by offsetp from a count of UTF-8 chars from
+the start of the string, to a count of the equivalent number of bytes; if
+lenp is non-zero, it does the same to lenp, but this time starting from
+the offset, rather than from the start of the string. Handles magic and
+type coercion.
+
+=cut
+*/
+
+/*
+ * sv_pos_u2b_proper() uses, like sv_pos_b2u(), the mg_ptr of the potential
+ * PERL_MAGIC_utf8 of the sv to store the mapping between UTF-8 and
+ * byte offsets.  See also the comments of S_utf8_mg_pos_cache_update().
+ *
+ */
+
+void
+Perl_sv_pos_u2b_proper(pTHX_ register SV *const sv, STRLEN *const offsetp, STRLEN *const lenp)
+{
+    const U8 *start;
+    STRLEN len;
+
+    PERL_ARGS_ASSERT_SV_POS_U2B;
+
+    if (!sv)
+	return;
+
+    start = (U8*)SvPV_const(sv, len);
+    if (len) {
+	STRLEN uoffset = *offsetp;
+	const U8 * const send = start + len;
+	MAGIC *mg = NULL;
+	const STRLEN boffset = sv_pos_u2b_cached(sv, &mg, start, send,
+					     uoffset, 0, 0);
+
+	*offsetp = boffset;
+
+	if (lenp) {
+	    /* Convert the relative offset to absolute.  */
+	    const STRLEN uoffset2 = uoffset + *lenp;
+	    const STRLEN boffset2
+		= sv_pos_u2b_cached(sv, &mg, start, send, uoffset2,
+				      uoffset, boffset) - boffset;
+
+	    *lenp = boffset2;
+	}
+    }
+    else {
+	 *offsetp = 0;
+	 if (lenp)
+	      *lenp = 0;
+    }
+
+    return;
+}
+
+/*
 =for apidoc sv_pos_u2b
 
 Converts the value pointed to by offsetp from a count of UTF-8 chars from
@@ -6258,44 +6317,20 @@ type coercion.
  *
  */
 
+/* This function is subject to size and sign problems */
+
 void
 Perl_sv_pos_u2b(pTHX_ register SV *const sv, I32 *const offsetp, I32 *const lenp)
 {
-    const U8 *start;
-    STRLEN len;
-
-    PERL_ARGS_ASSERT_SV_POS_U2B;
-
-    if (!sv)
-	return;
-
-    start = (U8*)SvPV_const(sv, len);
-    if (len) {
-	STRLEN uoffset = (STRLEN) *offsetp;
-	const U8 * const send = start + len;
-	MAGIC *mg = NULL;
-	const STRLEN boffset = sv_pos_u2b_cached(sv, &mg, start, send,
-					     uoffset, 0, 0);
-
-	*offsetp = (I32) boffset;
-
-	if (lenp) {
-	    /* Convert the relative offset to absolute.  */
-	    const STRLEN uoffset2 = uoffset + (STRLEN) *lenp;
-	    const STRLEN boffset2
-		= sv_pos_u2b_cached(sv, &mg, start, send, uoffset2,
-				      uoffset, boffset) - boffset;
-
-	    *lenp = boffset2;
-	}
+    STRLEN uoffset = (STRLEN)*offsetp;
+    if (lenp) {
+	STRLEN ulen = (STRLEN)*lenp;
+	sv_pos_u2b_proper(sv, &uoffset, &ulen);
+	*lenp = (I32)ulen;
+    } else {
+	sv_pos_u2b_proper(sv, &uoffset, NULL);
     }
-    else {
-	 *offsetp = 0;
-	 if (lenp)
-	      *lenp = 0;
-    }
-
-    return;
+    *offsetp = (I32)uoffset;
 }
 
 /* Create and update the UTF8 magic offset cache, with the proffered utf8/

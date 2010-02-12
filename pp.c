@@ -3079,15 +3079,19 @@ PP(pp_substr)
 {
     dVAR; dSP; dTARGET;
     SV *sv;
-    I32 len = 0;
     STRLEN curlen;
     STRLEN utf8_curlen;
-    I32 pos;
-    I32 rem;
-    I32 fail;
+    SV *   pos_sv;
+    IV     pos1_iv;
+    int    pos1_is_uv;
+    IV     pos2_iv;
+    int    pos2_is_uv;
+    SV *   len_sv;
+    IV     len_iv = 0;
+    int    len_is_uv = 1;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     const char *tmps;
-    const I32 arybase = CopARYBASE_get(PL_curcop);
+    const IV arybase = CopARYBASE_get(PL_curcop);
     SV *repl_sv = NULL;
     const char *repl = NULL;
     STRLEN repl_len;
@@ -3103,9 +3107,13 @@ PP(pp_substr)
 	    repl = SvPV_const(repl_sv, repl_len);
 	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
 	}
-	len = POPi;
+	len_sv    = POPs;
+	len_iv    = SvIV(len_sv);
+	len_is_uv = SvIOK_UV(len_sv);
     }
-    pos = POPi;
+    pos_sv     = POPs;
+    pos1_iv    = SvIV(pos_sv);
+    pos1_is_uv = SvIOK_UV(pos_sv);
     sv = POPs;
     PUTBACK;
     if (repl_sv) {
@@ -3127,51 +3135,80 @@ PP(pp_substr)
     else
 	utf8_curlen = 0;
 
-    if (pos >= arybase) {
-	pos -= arybase;
-	rem = curlen-pos;
-	fail = rem;
-	if (num_args > 2) {
-	    if (len < 0) {
-		rem += len;
-		if (rem < 0)
-		    rem = 0;
+    if ( (pos1_is_uv && arybase < 0) || (pos1_iv >= arybase) ) { /* pos >= $[ */
+	UV pos1_uv = pos1_iv-arybase;
+	/* Overflow can occur when $[ < 0 */
+	if (arybase < 0 && pos1_uv < (UV)pos1_iv)
+	    goto BOUND_FAIL;
+	pos1_iv = pos1_uv;
+	pos1_is_uv = 1;
+    }
+    else if (pos1_is_uv ? (UV)pos1_iv > 0 : pos1_iv > 0) {
+	goto BOUND_FAIL;  /* $[=3; substr($_,2,...) */
+    }
+    else { /* pos < $[ */
+	if (pos1_iv == 0) { /* $[=1; substr($_,0,...) */
+	    pos1_iv = curlen;
+	    pos1_is_uv = 1;
+	} else {
+	    if (curlen) {
+		pos1_is_uv = curlen-1 > ~(UV)pos1_iv;
+		pos1_iv += curlen;
+	   }
+	}
+    }
+    if (pos1_is_uv || pos1_iv > 0) {
+	if ((UV)pos1_iv > curlen)
+	    goto BOUND_FAIL;
+    }
+
+    if (num_args > 2) {
+	if (!len_is_uv && len_iv < 0) {
+	    pos2_iv = curlen + len_iv;
+	    if (curlen)
+		pos2_is_uv = curlen-1 > ~(UV)len_iv;
+	    else
+		pos2_is_uv = 0;
+	} else {  /* len_iv >= 0 */
+	    if (!pos1_is_uv && pos1_iv < 0) {
+		pos2_iv = pos1_iv + len_iv;
+		pos2_is_uv = (UV)len_iv > (UV)IV_MAX;
+	    } else {
+		if ((UV)len_iv > curlen-(UV)pos1_iv)
+		    pos2_iv = curlen;
+		else
+		    pos2_iv = pos1_iv+len_iv;
+		pos2_is_uv = 1;
 	    }
-	    else if (rem > len)
-		     rem = len;
 	}
     }
     else {
-	pos += curlen;
-	if (num_args < 3)
-	    rem = curlen;
-	else if (len >= 0) {
-	    rem = pos+len;
-	    if (rem > (I32)curlen)
-		rem = curlen;
-	}
-	else {
-	    rem = curlen+len;
-	    if (rem < pos)
-		rem = pos;
-	}
-	if (pos < 0)
-	    pos = 0;
-	fail = rem;
-	rem -= pos;
+	pos2_iv = curlen;
+	pos2_is_uv = 1;
     }
-    if (fail < 0) {
-	if (lvalue || repl)
-	    Perl_croak(aTHX_ "substr outside of string");
-	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
-	RETPUSHUNDEF;
+
+    if (!pos2_is_uv && pos2_iv < 0) {
+	if (!pos1_is_uv && pos1_iv < 0)
+	    goto BOUND_FAIL;
+	pos2_iv = 0;
     }
-    else {
-	const I32 upos = pos;
-	const I32 urem = rem;
+    else if (!pos1_is_uv && pos1_iv < 0)
+	pos1_iv = 0;
+
+    if ((UV)pos2_iv < (UV)pos1_iv)
+	pos2_iv = pos1_iv;
+    if ((UV)pos2_iv > curlen)
+	pos2_iv = curlen;
+
+    {
+	/* pos1_iv and pos2_iv both in 0..curlen, so the cast is safe */
+	const STRLEN pos = (STRLEN)( (UV)pos1_iv );
+	const STRLEN len = (STRLEN)( (UV)pos2_iv - (UV)pos1_iv );
+	STRLEN byte_pos = pos;
+	STRLEN byte_len = len;
 	if (utf8_curlen)
-	    sv_pos_u2b(sv, (I32 *)&pos, (I32 *)&rem);
-	tmps += pos;
+	    sv_pos_u2b_proper(sv, &byte_pos, &byte_len);
+	tmps += byte_pos;
 	/* we either return a PV or an LV. If the TARG hasn't been used
 	 * before, or is of that type, reuse it; otherwise use a mortal
 	 * instead. Note that LVs can have an extended lifetime, so also
@@ -3185,7 +3222,7 @@ PP(pp_substr)
 	    }
 	}
 
-	sv_setpvn(TARG, tmps, rem);
+	sv_setpvn(TARG, tmps, byte_len);
 #ifdef USE_LOCALE_COLLATE
 	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
 #endif
@@ -3202,7 +3239,7 @@ PP(pp_substr)
 	    }
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
-	    sv_insert_flags(sv, pos, rem, repl, repl_len, 0);
+	    sv_insert_flags(sv, byte_pos, byte_len, repl, repl_len, 0);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
 	    SvREFCNT_dec(repl_sv_copy);
@@ -3232,13 +3269,19 @@ PP(pp_substr)
 		SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	    }
-	    LvTARGOFF(TARG) = upos;
-	    LvTARGLEN(TARG) = urem;
+	    LvTARGOFF(TARG) = pos;
+	    LvTARGLEN(TARG) = len;
 	}
     }
     SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
     RETURN;
+
+BOUND_FAIL:
+    if (lvalue || repl)
+	Perl_croak(aTHX_ "substr outside of string");
+    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
+    RETPUSHUNDEF;
 }
 
 PP(pp_vec)

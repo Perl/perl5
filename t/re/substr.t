@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 require './test.pl';
 
-plan(334);
+plan(360);
 
 run_tests() unless caller;
 
@@ -199,6 +199,11 @@ like($@, $FATAL_MSG);
 $b = substr($a,1) ; # warning   # P=R=S Q
 is($w--, 1);
 eval{substr($a,1) = "" ; };     # P=R=S Q
+like($@, $FATAL_MSG);
+
+$b = substr($a,-7,-6) ; # warn  # Q R P S
+is($w--, 1);
+eval{substr($a,-7,-6) = "" ; }; # Q R P S
 like($@, $FATAL_MSG);
 
 my $a = 'zxcvbnm';
@@ -680,6 +685,41 @@ is($x, "\x{100}\x{200}\xFFb");
     my  $a = "abcd\x{100}";
     is(substr($a,1,2), 'bc');
     is(substr($a,1,1), 'b');
+}
+
+# [perl #62646] offsets exceeding 32 bits on 64-bit system
+SKIP: {
+    skip("32-bit system", 24) unless ~0 > 0xffffffff;
+    my $a = "abc";
+    my $s;
+    my $r;
+
+    utf8::downgrade($a);
+    for (1..2) {
+	$w = 0;
+	$r = substr($a, 0xffffffff, 1);
+	is($r, undef);
+	is($w, 1);
+
+	$w = 0;
+	$r = substr($a, 0xffffffff+1, 1);
+	is($r, undef);
+	is($w, 1);
+
+	$w = 0;
+	ok( !eval { $r = substr($s=$a, 0xffffffff, 1, "_"); 1 } );
+	is($r, undef);
+	is($s, $a);
+	is($w, 0);
+
+	$w = 0;
+	ok( !eval { $r = substr($s=$a, 0xffffffff+1, 1, "_"); 1 } );
+	is($r, undef);
+	is($s, $a);
+	is($w, 0);
+
+	utf8::upgrade($a);
+    }
 }
 
 }

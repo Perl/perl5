@@ -3374,6 +3374,11 @@ PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV *const sv, I32 *const offsetp, I32 *
 #define PERL_ARGS_ASSERT_SV_POS_U2B	\
 	assert(offsetp)
 
+PERL_CALLCONV void	Perl_sv_pos_u2b_proper(pTHX_ SV *const sv, STRLEN *const offsetp, STRLEN *const lenp)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_POS_U2B_PROPER	\
+	assert(offsetp)
+
 PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_POS_B2U	\
