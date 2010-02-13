@@ -254,7 +254,7 @@ inet_ntoa(ip_address_sv)
 	char * addr_str;
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
-	     croak("Wide character in Socket::inet_ntoa");
+	     croak("Wide character in %s", "Socket::inet_ntoa");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 	        addr.s_addr =
@@ -409,7 +409,7 @@ pack_sockaddr_in(port, ip_address_sv)
 	STRLEN addrlen;
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
-	     croak("Wide character in Socket::pack_sockaddr_in");
+	     croak("Wide character in %s", "Socket::pack_sockaddr_in");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 	        addr.s_addr =
@@ -474,7 +474,8 @@ inet_ntop(af, ip_address_sv)
         } else if(af == AF_INET6) {
             struct_size = sizeof(struct in6_addr);
         } else {
-           croak("Bad address family for Socket::inet_ntop, got %d, should be either AF_INET or AF_INET6",
+           croak("Bad address family for %s, got %d, should be either AF_INET or AF_INET6",
+               "Socket::inet_ntop",
                af);
         }
 
