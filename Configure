@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Feb  9 16:39:40 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Sat Feb 13 19:05:42 CET 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7152,6 +7152,8 @@ esac
 
 : DTrace support
 dflt_dtrace='/usr/sbin/dtrace'
+$test -x /usr/bin/dtrace && dflt_dtrace='/usr/bin/dtrace'
+
 cat <<EOM
 
 Perl can be built to support DTrace on platforms that support it.
