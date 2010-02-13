@@ -71,7 +71,7 @@ typedef struct _ithread {
     int state;                  /* Detached, joined, finished, etc. */
     int gimme;                  /* Context of create */
     SV *init_function;          /* Code to run */
-    SV *params;                 /* Args to pass function */
+    AV *params;                 /* Args to pass function */
 #ifdef WIN32
     DWORD  thr;                 /* OS's idea if thread id */
     HANDLE handle;              /* OS's waitable handle */
@@ -215,7 +215,7 @@ S_ithread_clear(pTHX_ ithread *thread)
         S_ithread_set(aTHX_ thread);
 
         SvREFCNT_dec(thread->params);
-        thread->params = Nullsv;
+        thread->params = NULL;
 
         if (thread->err) {
             SvREFCNT_dec(thread->err);
@@ -487,7 +487,7 @@ S_ithread_run(void * arg)
     PL_perl_destruct_level = 2;
 
     {
-        AV *params = (AV *)SvRV(thread->params);
+        AV *params = thread->params;
         int len = (int)av_len(params)+1;
         int ii;
 
@@ -675,7 +675,7 @@ S_ithread_create(
         IV        stack_size,
         int       gimme,
         int       exit_opt,
-        SV       *params)
+        AV       *params)
 {
     ithread     *thread;
     ithread     *current_thread = S_ithread_get(aTHX);
@@ -792,7 +792,7 @@ S_ithread_create(
                 SvREFCNT_inc(sv_dup(init_function, &clone_param));
         }
 
-        thread->params = sv_dup(params, &clone_param);
+        thread->params = (AV *)sv_dup((SV *)params, &clone_param);
         SvREFCNT_inc_void(thread->params);
 
 #if PERL_VERSION <= 8 && PERL_SUBVERSION <= 7
@@ -908,7 +908,7 @@ S_ithread_create(
 #endif
         /* Must unlock mutex for destruct call */
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
-        sv_2mortal(params);
+        sv_2mortal((SV *)params);
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
@@ -924,7 +924,7 @@ S_ithread_create(
     }
 
     MY_POOL.running_threads++;
-    sv_2mortal(params);
+    sv_2mortal((SV *)params);
     return (thread);
 }
 
@@ -1063,7 +1063,7 @@ ithread_create(...)
                                         stack_size,
                                         context,
                                         exit_opt,
-                                        newRV_noinc((SV*)params));
+                                        params);
         if (! thread) {
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
@@ -1236,7 +1236,7 @@ ithread_join(...)
             PerlInterpreter *other_perl;
             CLONE_PARAMS clone_params;
 
-            params_copy = (AV *)SvRV(thread->params);
+            params_copy = thread->params;
             other_perl = thread->interp;
             clone_params.stashes = newAV();
             clone_params.flags = CLONEf_JOIN_IN;
