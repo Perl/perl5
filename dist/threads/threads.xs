@@ -994,18 +994,19 @@ ithread_create(...)
 
         context = -1;
         if (specs) {
+            SV **svp;
             /* stack_size */
-            if (hv_exists(specs, "stack", 5)) {
-                stack_size = SvIV(*hv_fetch(specs, "stack", 5, 0));
-            } else if (hv_exists(specs, "stacksize", 9)) {
-                stack_size = SvIV(*hv_fetch(specs, "stacksize", 9, 0));
-            } else if (hv_exists(specs, "stack_size", 10)) {
-                stack_size = SvIV(*hv_fetch(specs, "stack_size", 10, 0));
+            if ((svp = hv_fetch(specs, "stack", 5, 0))) {
+                stack_size = SvIV(*svp);
+            } else if ((svp = hv_fetch(specs, "stacksize", 9, 0))) {
+                stack_size = SvIV(*svp);
+            } else if ((svp = hv_fetch(specs, "stack_size", 10, 0))) {
+                stack_size = SvIV(*svp);
             }
 
             /* context */
-            if (hv_exists(specs, "context", 7)) {
-                str = (char *)SvPV_nolen(*hv_fetch(specs, "context", 7, 0));
+            if ((svp = hv_fetch(specs, "context", 7, 0))) {
+                str = (char *)SvPV_nolen(*svp);
                 switch (*str) {
                     case 'a':
                     case 'A':
@@ -1024,27 +1025,27 @@ ithread_create(...)
                     default:
                         Perl_croak(aTHX_ "Invalid context: %s", str);
                 }
-            } else if (hv_exists(specs, "array", 5)) {
-                if (SvTRUE(*hv_fetch(specs, "array", 5, 0))) {
+            } else if ((svp = hv_fetch(specs, "array", 5, 0))) {
+                if (SvTRUE(*svp)) {
                     context = G_ARRAY;
                 }
-            } else if (hv_exists(specs, "list", 4)) {
-                if (SvTRUE(*hv_fetch(specs, "list", 4, 0))) {
+            } else if ((svp = hv_fetch(specs, "list", 4, 0))) {
+                if (SvTRUE(*svp)) {
                     context = G_ARRAY;
                 }
-            } else if (hv_exists(specs, "scalar", 6)) {
-                if (SvTRUE(*hv_fetch(specs, "scalar", 6, 0))) {
+            } else if ((svp = hv_fetch(specs, "scalar", 6, 0))) {
+                if (SvTRUE(*svp)) {
                     context = G_SCALAR;
                 }
-            } else if (hv_exists(specs, "void", 4)) {
-                if (SvTRUE(*hv_fetch(specs, "void", 4, 0))) {
+            } else if ((svp = hv_fetch(specs, "void", 4, 0))) {
+                if (SvTRUE(*svp)) {
                     context = G_VOID;
                 }
             }
 
             /* exit => thread_only */
-            if (hv_exists(specs, "exit", 4)) {
-                str = (char *)SvPV_nolen(*hv_fetch(specs, "exit", 4, 0));
+            if ((svp = hv_fetch(specs, "exit", 4, 0))) {
+                str = (char *)SvPV_nolen(*svp);
                 exit_opt = (*str == 't' || *str == 'T')
                                     ? PERL_ITHR_THREAD_EXIT_ONLY : 0;
             }
