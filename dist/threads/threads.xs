@@ -675,10 +675,13 @@ S_ithread_create(
         IV        stack_size,
         int       gimme,
         int       exit_opt,
-        AV       *params)
+        SV      **params_start,
+        SV      **params_end)
 {
     ithread     *thread;
     ithread     *current_thread = S_ithread_get(aTHX);
+    AV          *params;
+    SV          **array;
 
 #if PERL_VERSION <= 8 && PERL_SUBVERSION <= 7
     SV         **tmps_tmp = PL_tmps_stack;
@@ -792,8 +795,13 @@ S_ithread_create(
                 SvREFCNT_inc(sv_dup(init_function, &clone_param));
         }
 
-        thread->params = (AV *)sv_dup((SV *)params, &clone_param);
-        SvREFCNT_inc_void(thread->params);
+        thread->params = params = newAV();
+        av_extend(params, params_end - params_start - 1);
+        AvFILLp(params) = params_end - params_start - 1;
+        array = AvARRAY(params);
+        while (params_start < params_end) {
+            *array++ = SvREFCNT_inc(sv_dup(*params_start++, &clone_param));
+        }
 
 #if PERL_VERSION <= 8 && PERL_SUBVERSION <= 7
         /* The code below checks that anything living on the tmps stack and
@@ -908,7 +916,6 @@ S_ithread_create(
 #endif
         /* Must unlock mutex for destruct call */
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
-        sv_2mortal((SV *)params);
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
@@ -924,7 +931,6 @@ S_ithread_create(
     }
 
     MY_POOL.running_threads++;
-    sv_2mortal((SV *)params);
     return (thread);
 }
 
@@ -942,7 +948,6 @@ ithread_create(...)
         char *classname;
         ithread *thread;
         SV *function_to_call;
-        AV *params;
         HV *specs;
         IV stack_size;
         int context;
@@ -950,7 +955,8 @@ ithread_create(...)
         SV *thread_exit_only;
         char *str;
         int idx;
-        int ii;
+        SV **args_start;
+        SV **args_end;
         dMY_POOL;
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
@@ -1050,11 +1056,11 @@ ithread_create(...)
         }
 
         /* Function args */
-        params = newAV();
+        args_start = &ST(idx + 2);
         if (items > 2) {
-            for (ii=2; ii < items ; ii++) {
-                av_push(params, SvREFCNT_inc(ST(idx+ii)));
-            }
+            args_end = &ST(idx + items);
+        } else {
+            args_end = args_start;
         }
 
         /* Create thread */
@@ -1063,7 +1069,8 @@ ithread_create(...)
                                         stack_size,
                                         context,
                                         exit_opt,
-                                        params);
+                                        args_start,
+                                        args_end);
         if (! thread) {
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
