@@ -1145,17 +1145,9 @@ distclean: realclean
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
-	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
-	-del /f $(LIBDIR)\Devel\PPPort.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
-	-del /f $(LIBDIR)\Digest\MD5.pm
-	-del /f $(LIBDIR)\Digest\SHA.pm
-	-del /f $(LIBDIR)\PerlIO\encoding.pm
-	-del /f $(LIBDIR)\PerlIO\scalar.pm
-	-del /f $(LIBDIR)\PerlIO\via.pm
 	-del /f $(LIBDIR)\Sys\Hostname.pm
-	-del /f $(LIBDIR)\threads\shared.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
@@ -1164,28 +1156,62 @@ distclean: realclean
 	-del /f $(LIBDIR)\Win32API\File.pm
 	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-del /f $(DISTDIR)\XSLoader\XSLoader.pm
+	-if exist $(LIBDIR)\App rmdir /s /q $(LIBDIR)\App
+	-if exist $(LIBDIR)\Archive rmdir /s /q $(LIBDIR)\Archive
+	-if exist $(LIBDIR)\Attribute rmdir /s /q $(LIBDIR)\Attribute
+	-if exist $(LIBDIR)\autodie rmdir /s /q $(LIBDIR)\autodie
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
+	-if exist $(LIBDIR)\CGI rmdir /s /q $(LIBDIR)\CGI
+	-if exist $(LIBDIR)\CPAN rmdir /s /q $(LIBDIR)\CPAN
+	-if exist $(LIBDIR)\CPANPLUS rmdir /s /q $(LIBDIR)\CPANPLUS
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
+	-if exist $(LIBDIR)\Devel rmdir /s /q $(LIBDIR)\Devel
+	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
-	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
+	-if exist $(LIBDIR)\encoding rmdir /s /q $(LIBDIR)\encoding
+	-if exist $(LIBDIR)\ExtUtils\CBuilder rmdir /s /q $(LIBDIR)\ExtUtils\CBuilder
+	-if exist $(LIBDIR)\ExtUtils\Command rmdir /s /q $(LIBDIR)\ExtUtils\Command
+	-if exist $(LIBDIR)\ExtUtils\Constant rmdir /s /q $(LIBDIR)\ExtUtils\Constant
+	-if exist $(LIBDIR)\ExtUtils\Liblist rmdir /s /q $(LIBDIR)\ExtUtils\Liblist
+	-if exist $(LIBDIR)\ExtUtils\MakeMaker rmdir /s /q $(LIBDIR)\ExtUtils\MakeMaker
+	-if exist $(LIBDIR)\File\Spec rmdir /s /q $(LIBDIR)\File\Spec
+	-if exist $(LIBDIR)\Filter rmdir /s /q $(LIBDIR)\Filter
 	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
-	-if exist $(LIBDIR)\App rmdir /s /q $(LIBDIR)\App
+	-if exist $(LIBDIR)\I18N\LangTags rmdir /s /q $(LIBDIR)\I18N\LangTags
+	-if exist $(LIBDIR)\inc rmdir /s /q $(LIBDIR)\inc
 	-if exist $(LIBDIR)\Module\Pluggable rmdir /s /q $(LIBDIR)\Module\Pluggable
-	-if exist $(LIBDIR)\TAP rmdir /s /q $(LIBDIR)\TAP
-	-if exist $(LIBDIR)\mro rmdir /s /q $(LIBDIR)\mro
-	-if exist $(LIBDIR)\IO\Compress rmdir /s /q $(LIBDIR)\IO\Compress
-	-if exist $(LIBDIR)\IO\Socket rmdir /s /q $(LIBDIR)\IO\Socket
-	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress
+	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
+	-if exist $(LIBDIR)\IPC rmdir /s /q $(LIBDIR)\IPC
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
+	-if exist $(LIBDIR)\Locale rmdir /s /q $(LIBDIR)\Locale
+	-if exist $(LIBDIR)\Log rmdir /s /q $(LIBDIR)\Log
+	-if exist $(LIBDIR)\Math rmdir /s /q $(LIBDIR)\Math
+	-if exist $(LIBDIR)\Memoize rmdir /s /q $(LIBDIR)\Memoize
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
+	-if exist $(LIBDIR)\Module rmdir /s /q $(LIBDIR)\Module
+	-if exist $(LIBDIR)\mro rmdir /s /q $(LIBDIR)\mro
+	-if exist $(LIBDIR)\Net\FTP rmdir /s /q $(LIBDIR)\Net\FTP
+	-if exist $(LIBDIR)\Object rmdir /s /q $(LIBDIR)\Object
+	-if exist $(LIBDIR)\Package rmdir /s /q $(LIBDIR)\Package
+	-if exist $(LIBDIR)\Params rmdir /s /q $(LIBDIR)\Params
+	-if exist $(LIBDIR)\Parse rmdir /s /q $(LIBDIR)\Parse
+	-if exist $(LIBDIR)\PerlIO rmdir /s /q $(LIBDIR)\PerlIO
+	-if exist $(LIBDIR)\Pod\Perldoc rmdir /s /q $(LIBDIR)\Pod\Perldoc
+	-if exist $(LIBDIR)\Pod\Simple rmdir /s /q $(LIBDIR)\Pod\Simple
+	-if exist $(LIBDIR)\Pod\Text rmdir /s /q $(LIBDIR)\Pod\Text
 	-if exist $(LIBDIR)\re rmdir /s /q $(LIBDIR)\re
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
+	-if exist $(LIBDIR)\TAP rmdir /s /q $(LIBDIR)\TAP
+	-if exist $(LIBDIR)\Term\UI rmdir /s /q $(LIBDIR)\Term\UI
+	-if exist $(LIBDIR)\Test rmdir /s /q $(LIBDIR)\Test
+	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
+	-if exist $(LIBDIR)\Unicode\Collate rmdir /s /q $(LIBDIR)\Unicode\Collate
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
-	-cd $(PODDIR) && del /f *.html *.bat podchecker \
+	-cd $(PODDIR) && del /f *.html *.bat \
 	    perlaix.pod perlamiga.pod perlapi.pod perlapollo.pod \
 	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
 	    perlcygwin.pod perldelta.pod perldgux.pod perldos.pod \
