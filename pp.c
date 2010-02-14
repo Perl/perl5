@@ -3139,12 +3139,12 @@ PP(pp_substr)
 	UV pos1_uv = pos1_iv-arybase;
 	/* Overflow can occur when $[ < 0 */
 	if (arybase < 0 && pos1_uv < (UV)pos1_iv)
-	    goto BOUND_FAIL;
+	    goto bound_fail;
 	pos1_iv = pos1_uv;
 	pos1_is_uv = 1;
     }
     else if (pos1_is_uv ? (UV)pos1_iv > 0 : pos1_iv > 0) {
-	goto BOUND_FAIL;  /* $[=3; substr($_,2,...) */
+	goto bound_fail;  /* $[=3; substr($_,2,...) */
     }
     else { /* pos < $[ */
 	if (pos1_iv == 0) { /* $[=1; substr($_,0,...) */
@@ -3159,7 +3159,7 @@ PP(pp_substr)
     }
     if (pos1_is_uv || pos1_iv > 0) {
 	if ((UV)pos1_iv > curlen)
-	    goto BOUND_FAIL;
+	    goto bound_fail;
     }
 
     if (num_args > 2) {
@@ -3189,7 +3189,7 @@ PP(pp_substr)
 
     if (!pos2_is_uv && pos2_iv < 0) {
 	if (!pos1_is_uv && pos1_iv < 0)
-	    goto BOUND_FAIL;
+	    goto bound_fail;
 	pos2_iv = 0;
     }
     else if (!pos1_is_uv && pos1_iv < 0)
@@ -3277,7 +3277,7 @@ PP(pp_substr)
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
     RETURN;
 
-BOUND_FAIL:
+bound_fail:
     if (lvalue || repl)
 	Perl_croak(aTHX_ "substr outside of string");
     Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");

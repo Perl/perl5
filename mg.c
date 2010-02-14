@@ -2020,7 +2020,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 	offs = len;
     if (rem > len - offs)
 	rem = len - offs;
-    sv_setpvn(sv, tmps + offs, (STRLEN)rem);
+    sv_setpvn(sv, tmps + offs, rem);
     if (SvUTF8(lsv))
         SvUTF8_on(sv);
     return 0;
