@@ -2015,7 +2015,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     if (SvUTF8(lsv))
-	sv_pos_u2b_proper(lsv, &offs, &rem);
+	offs = sv_pos_u2b_flags(lsv, offs, &rem, SV_CONST_RETURN);
     if (offs > len)
 	offs = len;
     if (rem > len - offs)
@@ -2041,14 +2041,14 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 
     if (DO_UTF8(sv)) {
 	sv_utf8_upgrade(lsv);
-	sv_pos_u2b_proper(lsv, &lvoff, &lvlen);
+	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	sv_insert(lsv, lvoff, lvlen, tmps, len);
 	LvTARGLEN(sv) = sv_len_utf8(sv);
 	SvUTF8_on(lsv);
     }
     else if (lsv && SvUTF8(lsv)) {
 	const char *utf8;
-	sv_pos_u2b_proper(lsv, &lvoff, &lvlen);
+	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	LvTARGLEN(sv) = len;
 	utf8 = (char*)bytes_to_utf8((U8*)tmps, &len);
 	sv_insert(lsv, lvoff, lvlen, utf8, len);

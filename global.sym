@@ -567,7 +567,7 @@ Perl_sv_newmortal
 Perl_sv_newref
 Perl_sv_peek
 Perl_sv_pos_u2b
-Perl_sv_pos_u2b_proper
+Perl_sv_pos_u2b_flags
 Perl_sv_pos_b2u
 Perl_sv_pvn_force
 Perl_sv_pvutf8n_force

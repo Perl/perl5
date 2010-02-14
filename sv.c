@@ -6240,44 +6240,40 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 
 
 /*
-=for apidoc sv_pos_u2b_proper
+=for apidoc sv_pos_u2b_flags
 
 Converts the value pointed to by offsetp from a count of UTF-8 chars from
 the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
-the offset, rather than from the start of the string. Handles magic and
-type coercion.
+the offset, rather than from the start of the string. Handles type coercion.
+I<flags> is passed to C<SvPV_flags>, and usually should be
+C<SV_GMAGIC|SV_CONST_RETURN> to handle magic.
 
 =cut
 */
 
 /*
- * sv_pos_u2b_proper() uses, like sv_pos_b2u(), the mg_ptr of the potential
+ * sv_pos_u2b_flags() uses, like sv_pos_b2u(), the mg_ptr of the potential
  * PERL_MAGIC_utf8 of the sv to store the mapping between UTF-8 and
  * byte offsets.  See also the comments of S_utf8_mg_pos_cache_update().
  *
  */
 
-void
-Perl_sv_pos_u2b_proper(pTHX_ register SV *const sv, STRLEN *const offsetp, STRLEN *const lenp)
+STRLEN
+Perl_sv_pos_u2b_flags(pTHX_ SV *const sv, STRLEN uoffset, STRLEN *const lenp,
+		      U32 flags)
 {
     const U8 *start;
     STRLEN len;
+    STRLEN boffset;
 
-    PERL_ARGS_ASSERT_SV_POS_U2B;
+    PERL_ARGS_ASSERT_SV_POS_U2B_FLAGS;
 
-    if (!sv)
-	return;
-
-    start = (U8*)SvPV_const(sv, len);
+    start = (U8*)SvPV_flags(sv, len, flags);
     if (len) {
-	STRLEN uoffset = *offsetp;
 	const U8 * const send = start + len;
 	MAGIC *mg = NULL;
-	const STRLEN boffset = sv_pos_u2b_cached(sv, &mg, start, send,
-					     uoffset, 0, 0);
-
-	*offsetp = boffset;
+	boffset = sv_pos_u2b_cached(sv, &mg, start, send, uoffset, 0, 0);
 
 	if (lenp) {
 	    /* Convert the relative offset to absolute.  */
@@ -6288,14 +6284,13 @@ Perl_sv_pos_u2b_proper(pTHX_ register SV *const sv, STRLEN *const offsetp, STRLE
 
 	    *lenp = boffset2;
 	}
-    }
-    else {
-	 *offsetp = 0;
-	 if (lenp)
-	      *lenp = 0;
+    } else {
+	if (lenp)
+	    *lenp = 0;
+	boffset = 0;
     }
 
-    return;
+    return boffset;
 }
 
 /*
@@ -6306,6 +6301,9 @@ the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start of the string. Handles magic and
 type coercion.
+
+Use C<sv_pos_u2b_flags> in preference, which correctly handles strings longer
+than 2Gb.
 
 =cut
 */
@@ -6323,14 +6321,18 @@ void
 Perl_sv_pos_u2b(pTHX_ register SV *const sv, I32 *const offsetp, I32 *const lenp)
 {
     STRLEN uoffset = (STRLEN)*offsetp;
+
+    PERL_ARGS_ASSERT_SV_POS_U2B;
+
     if (lenp) {
 	STRLEN ulen = (STRLEN)*lenp;
-	sv_pos_u2b_proper(sv, &uoffset, &ulen);
+	*offsetp = (I32)sv_pos_u2b_flags(sv, (STRLEN)*offsetp, &ulen,
+					 SV_GMAGIC|SV_CONST_RETURN);
 	*lenp = (I32)ulen;
     } else {
-	sv_pos_u2b_proper(sv, &uoffset, NULL);
+	*offsetp = (I32)sv_pos_u2b_flags(sv, (STRLEN)*offsetp, NULL,
+					 SV_GMAGIC|SV_CONST_RETURN);
     }
-    *offsetp = (I32)uoffset;
 }
 
 /* Create and update the UTF8 magic offset cache, with the proffered utf8/

@@ -3204,10 +3204,10 @@ PP(pp_substr)
 	/* pos1_iv and pos2_iv both in 0..curlen, so the cast is safe */
 	const STRLEN pos = (STRLEN)( (UV)pos1_iv );
 	const STRLEN len = (STRLEN)( (UV)pos2_iv - (UV)pos1_iv );
-	STRLEN byte_pos = pos;
 	STRLEN byte_len = len;
-	if (utf8_curlen)
-	    sv_pos_u2b_proper(sv, &byte_pos, &byte_len);
+	STRLEN byte_pos = utf8_curlen
+	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
+
 	tmps += byte_pos;
 	/* we either return a PV or an LV. If the TARG hasn't been used
 	 * before, or is of that type, reuse it; otherwise use a mortal
