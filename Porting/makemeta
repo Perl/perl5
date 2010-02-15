@@ -50,6 +50,7 @@ resources:
   homepage: http://www.perl.org/
   bugtracker: http://rt.perl.org/perlbug/
   license: http://dev.perl.org/licenses/
+  repository: http://perl5.git.perl.org/
 distribution_type: core
 generated_by: $0
 no_index:
