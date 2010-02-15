@@ -2850,8 +2850,8 @@ object contained in I<THING> until the lock goes out of scope.
 
 lock() is a "weak keyword" : this means that if you've defined a function
 by this name (before any calls to it), that function will be called
-instead. (However, if you've said C<use threads>, lock() is always a
-keyword.) See L<threads>.
+instead.  If you are not under C<use threads::shared> this does nothing.
+See L<threads::shared>.
 
 =item log EXPR
 X<log> X<logarithm> X<e> X<ln> X<base>
