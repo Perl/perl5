@@ -45,7 +45,7 @@ This clones the repository and makes a local copy in the F<perl-git>
 directory.
 
 If your local network does not allow you to use port 9418, then you can
-fetch a copy of the repository over HTTP (this is slower):
+fetch a copy of the repository over HTTP (this is at least 4x slower):
 
   git clone http://perl5.git.perl.org/perl.git perl-http
 
