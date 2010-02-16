@@ -17,13 +17,17 @@ you should reset the version numbers to the next blead series.
  October 2       -  5.11.0  -   Jesse Vincent
  October 20      -  5.11.1  -   Jesse Vincent
  November 20     -  5.11.2  -   Leon Brocard
- December 20     -  5.11.3  -   Jesse Vincent or minion
+ December 20     -  5.11.3  -   Jesse Vincent
 
 =head2 2010
 
  January 20      -  5.11.4  -   Ricardo Signes
  February 20     -  5.11.5  -   Steve Hay
  March 20        -  5.11.6  -   Ask Bjørn Hansen
+ April 20        -  5.11.7  -   Leon Brocard
+ May 20          -  5.11.8  -   Ricardo Signes
+ June 20         -  5.11.9  -   Phillipe Bruhat
+ July 20         -  5.11.10 -   Matt Trout
 
 =head1 VICTIMS
 
