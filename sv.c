@@ -6320,8 +6320,6 @@ than 2Gb.
 void
 Perl_sv_pos_u2b(pTHX_ register SV *const sv, I32 *const offsetp, I32 *const lenp)
 {
-    STRLEN uoffset = (STRLEN)*offsetp;
-
     PERL_ARGS_ASSERT_SV_POS_U2B;
 
     if (lenp) {
