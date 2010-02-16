@@ -28,6 +28,7 @@ you should reset the version numbers to the next blead series.
  May 20          -  5.11.8  -   Ricardo Signes
  June 20         -  5.11.9  -   Phillipe Bruhat
  July 20         -  5.11.10 -   Matt Trout
+ August 20       -  5.11.11 -   David Golden
 
 =head1 VICTIMS
 
@@ -41,14 +42,15 @@ Yves Orton <F<demerphq@gmail.com>>
 Ricardo Signes <F<rjbs@manxome.org>>
 Steve Hay <F<stevehay@planit.com>>
 Ask Bjørn Hansen <F<ask@perl.org>>
-
+David Golden <F<dagolden@cpan.org>>
+Phillipe Bruhat <F<book@cpan.org>>
+Matt Trout <F<mst@shadowcat.co.uk>>
 
 =head2 Reticent victims
 
 These folks have said that they'd be willing to release Perl but would
 prefer that others have the opportunity before they pitch in:
 
-David Golden <F<xdave@gmail.com>> 
 
 
 =head1 AUTHOR
