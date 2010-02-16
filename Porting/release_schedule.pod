@@ -43,7 +43,7 @@ Ricardo Signes <F<rjbs@manxome.org>>
 Steve Hay <F<stevehay@planit.com>>
 Ask Bjørn Hansen <F<ask@perl.org>>
 David Golden <F<dagolden@cpan.org>>
-Phillipe Bruhat <F<book@cpan.org>>
+Philippe Bruhat <F<book@cpan.org>>
 Matt Trout <F<mst@shadowcat.co.uk>>
 
 =head2 Reticent victims
