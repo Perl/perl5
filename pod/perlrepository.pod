@@ -69,10 +69,16 @@ this:
 
   % git config remote.origin.url ssh://perl5.git.perl.org/perl.git
 
-You can also set up your user name and e-mail address. For example
+You can also set up your user name and e-mail address. Most people do
+this once globally in their F<~/.gitconfig> by doing something like:
 
-  % git config user.name "Leon Brocard"
-  % git config user.email acme@astray.com
+  % git config --global user.name "Ævar Arnfjörð Bjarmason"
+  % git config --global user.email avarab@gmail.com
+
+However if you'd like to override that just for perl then execute then
+execute something like the following in F<perl-git>:
+
+  % git config user.email avar@cpan.org
 
 It is also possible to keep C<origin> as a git remote, and add a new
 remote for ssh access:
