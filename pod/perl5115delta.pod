@@ -27,7 +27,6 @@ and C<len> arguments.
 
 =item C<version>
 
-XXX Double-check that the following has actually been done or else remove it:
 Upgraded from version 0.81 to 0.82.
 
 The C<is_lax> and C<is_strict> functions can now be optionally exported to the
@@ -103,6 +102,11 @@ was a regression since Perl 5.10.0. (Fixes RT #72590)
 
 =item *
 
+Reading C<$!> no longer causes a SEGV for out of range C<errno> values. (Fixes
+RT #72850)
+
+=item *
+
 A possible SEGV in C</\N{...}/> has been fixed. This was a regression since
 Perl 5.10.
 
@@ -125,9 +129,9 @@ rather than checking for C<FileHandle> first.
 
 =item *
 
-A change in C<warnings::register>'s behaviour in Perl 5.10.0 that wasn't
-documented at the time is now documented in L<perl5100delta>. (Fixes RT
-#62522)
+A change in the behaviour of C<warnings::enabled> and C<warnings::warnif> in
+Perl 5.10.0 that wasn't documented at the time is now documented in
+L<perl5100delta>. (Fixes RT #62522)
 
 =item *
 
