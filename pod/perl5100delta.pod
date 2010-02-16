@@ -625,7 +625,7 @@ Previously, the exception would not occur until Perl attempted to make
 use of the recursive inheritance while resolving a method or doing a
 C<$foo-E<gt>isa($bar)> lookup.
 
-=head2 warnings::register changed to favor users of modules
+=head2 warnings::enabled and warnings::warnif changed to favor users of modules
 
 The behaviour in 5.10.x favors the person using the module;
 The behaviour in 5.8.x favors the module writer;
