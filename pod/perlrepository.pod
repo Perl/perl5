@@ -299,6 +299,14 @@ which is the short form of
   % git branch orange
   % git checkout orange
 
+Creating a topic branch makes it easier for the maintainers to rebase
+or merge back into the master blead for a more linear history. If you
+don't work on a topic branch the maintainer has to manually cherry
+pick your changes onto blead before they can be applied.
+
+That'll get you scolded on perl5-porters, so don't do that. Be
+Awesome.
+
 Then make your changes. For example, if Leon Brocard changes his name
 to Orange Brocard, we should change his name in the AUTHORS file:
 
