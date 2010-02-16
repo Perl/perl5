@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use Config;
 
-plan (tests => 79);
+plan (tests => 80);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -490,4 +490,10 @@ is delete $SIG{HUNGRY}, undef, "HUNGRY remains gone";
 foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
     is $SIG{$sig}, undef, "$sig is not present";
     is delete $SIG{$sig}, undef, "delete of $sig returns undef";
+}
+
+{
+    $! = 9999;
+    is int $!, 9999, q{[perl #72850] Core dump in bleadperl from perl -e '$! = 9999; $a = $!;'};
+
 }
