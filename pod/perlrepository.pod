@@ -63,16 +63,11 @@ This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
 
 If you cloned using the git protocol, which is faster than ssh, then
-you will need to modify your config in order to enable pushing. Edit
-F<.git/config> where you will see something like:
+you will need to modify the URL for the origin remote to enable
+pushing. To do that edit F<.git/config> with L<git-config(1)> like
+this:
 
-  [remote "origin"]
-  url = git://perl5.git.perl.org/perl.git
-
-change that to something like this:
-
-  [remote "origin"]
-  url = ssh://perl5.git.perl.org/perl.git
+  git config remote.origin.url ssh://perl5.git.perl.org/perl.git
 
 You can also set up your user name and e-mail address. For example
 
