@@ -39,7 +39,7 @@ A mirror of the repository is found at:
 You will need a copy of Git for your computer. You can fetch a copy of
 the repository using the Git protocol (which uses port 9418):
 
-  git clone git://perl5.git.perl.org/perl.git perl-git
+  % git clone git://perl5.git.perl.org/perl.git perl-git
 
 This clones the repository and makes a local copy in the F<perl-git>
 directory.
@@ -47,7 +47,7 @@ directory.
 If your local network does not allow you to use port 9418, then you can
 fetch a copy of the repository over HTTP (this is at least 4x slower):
 
-  git clone http://perl5.git.perl.org/perl.git perl-http
+  % git clone http://perl5.git.perl.org/perl.git perl-http
 
 This clones the repository and makes a local copy in the F<perl-http>
 directory.
@@ -57,7 +57,7 @@ directory.
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
 
-  git clone ssh://perl5.git.perl.org/perl.git perl-ssh
+  % git clone ssh://perl5.git.perl.org/perl.git perl-ssh
 
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
@@ -67,7 +67,7 @@ you will need to modify the URL for the origin remote to enable
 pushing. To do that edit F<.git/config> with L<git-config(1)> like
 this:
 
-  git config remote.origin.url ssh://perl5.git.perl.org/perl.git
+  % git config remote.origin.url ssh://perl5.git.perl.org/perl.git
 
 You can also set up your user name and e-mail address. For example
 
@@ -603,11 +603,11 @@ replacement for C<make clean>.
 
 To reset your working directory to a pristine condition you can do:
 
-  git clean -dxf
+  % git clean -dxf
 
 However, be aware this will delete ALL untracked content. You can use
 
-  git clean -Xf
+  % git clean -Xf
 
 to remove all ignored untracked files, such as build and test
 byproduct, but leave any  manually created files alone.
