@@ -503,7 +503,8 @@ inet_pton(af, host)
 
         ST(0) = sv_newmortal();
         if (ok) {
-                sv_setpvn( ST(0), (char *)&ip_address, sizeof ip_address );
+                sv_setpvn( ST(0), (char *)&ip_address,
+                           af == AF_INET6 ? sizeof(ip_address) : sizeof(struct in_addr) );
         }
 #else
         ST(0) = (SV *)not_here("inet_pton");
