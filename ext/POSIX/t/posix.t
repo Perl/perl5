@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 106;
+use Test::More tests => 109;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -224,6 +224,21 @@ try_strftime("Mon Feb 28 00:00:00 2000 059", 0,0,0, 28,1,100);
 try_strftime("Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
 try_strftime("Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
 try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
+
+{ # rt 72232
+
+  # Std C/POSIX allows day/month to be negative and requires that
+  # wday/yday be adjusted as needed
+  # previously mini_mktime() would allow yday to dominate if mday and
+  # month were both non-positive
+  # check that yday doesn't dominate
+  try_strftime("Thu Dec 30 00:00:00 1999 364", 0,0,0, -1,0,100);
+  try_strftime("Thu Dec 30 00:00:00 1999 364", 0,0,0, -1,0,100,-1,10);
+  # it would also allow a positive wday to override the calculated value
+  # check that wday is recalculated too
+  try_strftime("Thu Dec 30 00:00:00 1999 364", 0,0,0, -1,0,100,0,10);
+}
+
 &POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
 
 {

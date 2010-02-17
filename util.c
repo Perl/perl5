@@ -3910,15 +3910,7 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
     year = 1900 + ptm->tm_year;
     month = ptm->tm_mon;
     mday = ptm->tm_mday;
-    /* allow given yday with no month & mday to dominate the result */
-    if (ptm->tm_yday >= 0 && mday <= 0 && month <= 0) {
-	month = 0;
-	mday = 0;
-	jday = 1 + ptm->tm_yday;
-    }
-    else {
-	jday = 0;
-    }
+    jday = 0;
     if (month >= 2)
 	month+=2;
     else
@@ -4013,9 +4005,7 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
     yearday = year*DAYS_PER_YEAR + year/4 - year/100 + year/400;
     yearday += 14*MONTH_TO_DAYS + 1;
     ptm->tm_yday = jday - yearday;
-    /* fix tm_wday if not overridden by caller */
-    if ((unsigned)ptm->tm_wday > 6)
-	ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
+    ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
 char *
