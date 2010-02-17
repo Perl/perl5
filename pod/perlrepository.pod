@@ -39,15 +39,15 @@ A mirror of the repository is found at:
 You will need a copy of Git for your computer. You can fetch a copy of
 the repository using the Git protocol (which uses port 9418):
 
-  git clone git://perl5.git.perl.org/perl.git perl-git
+  % git clone git://perl5.git.perl.org/perl.git perl-git
 
 This clones the repository and makes a local copy in the F<perl-git>
 directory.
 
 If your local network does not allow you to use port 9418, then you can
-fetch a copy of the repository over HTTP (this is slower):
+fetch a copy of the repository over HTTP (this is at least 4x slower):
 
-  git clone http://perl5.git.perl.org/perl.git perl-http
+  % git clone http://perl5.git.perl.org/perl.git perl-http
 
 This clones the repository and makes a local copy in the F<perl-http>
 directory.
@@ -57,27 +57,28 @@ directory.
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
 
-  git clone ssh://perl5.git.perl.org/perl.git perl-ssh
+  % git clone ssh://perl5.git.perl.org/perl.git perl-ssh
 
 This clones the repository and makes a local copy in the F<perl-ssh>
 directory.
 
 If you cloned using the git protocol, which is faster than ssh, then
-you will need to modify your config in order to enable pushing. Edit
-F<.git/config> where you will see something like:
+you will need to modify the URL for the origin remote to enable
+pushing. To do that edit F<.git/config> with L<git-config(1)> like
+this:
 
-  [remote "origin"]
-  url = git://perl5.git.perl.org/perl.git
+  % git config remote.origin.url ssh://perl5.git.perl.org/perl.git
 
-change that to something like this:
+You can also set up your user name and e-mail address. Most people do
+this once globally in their F<~/.gitconfig> by doing something like:
 
-  [remote "origin"]
-  url = ssh://perl5.git.perl.org/perl.git
+  % git config --global user.name "Ævar Arnfjörð Bjarmason"
+  % git config --global user.email avarab@gmail.com
 
-You can also set up your user name and e-mail address. For example
+However if you'd like to override that just for perl then execute then
+execute something like the following in F<perl-git>:
 
-  % git config user.name "Leon Brocard"
-  % git config user.email acme@astray.com
+  % git config user.email avar@cpan.org
 
 It is also possible to keep C<origin> as a git remote, and add a new
 remote for ssh access:
@@ -297,6 +298,14 @@ which is the short form of
 
   % git branch orange
   % git checkout orange
+
+Creating a topic branch makes it easier for the maintainers to rebase
+or merge back into the master blead for a more linear history. If you
+don't work on a topic branch the maintainer has to manually cherry
+pick your changes onto blead before they can be applied.
+
+That'll get you scolded on perl5-porters, so don't do that. Be
+Awesome.
 
 Then make your changes. For example, if Leon Brocard changes his name
 to Orange Brocard, we should change his name in the AUTHORS file:
@@ -608,11 +617,11 @@ replacement for C<make clean>.
 
 To reset your working directory to a pristine condition you can do:
 
-  git clean -dxf
+  % git clean -dxf
 
 However, be aware this will delete ALL untracked content. You can use
 
-  git clean -Xf
+  % git clean -Xf
 
 to remove all ignored untracked files, such as build and test
 byproduct, but leave any  manually created files alone.
