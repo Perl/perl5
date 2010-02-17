@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15_01';
+$VERSION = '3.15_02';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -301,7 +301,7 @@ sub usage_brief {
 Usage: $me [-h] [-V] [-r] [-i] [-D] [-t] [-u] [-m] [-n nroffer_program] [-l] [-T] [-d output_filename] [-o output_format] [-M FormatterModuleNameToUse] [-w formatter_option:option_value] [-L translation_code] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
        $me -q FAQKeywords
-       $me -A PerlVar
+       $me -v PerlVar
 
 The -h option prints more help.  Also try "perldoc perldoc" to get
 acquainted with the system.                        [Perldoc v$VERSION]
