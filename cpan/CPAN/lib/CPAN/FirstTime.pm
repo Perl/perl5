@@ -9,7 +9,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $silent);
-$VERSION = "5.53";
+$VERSION = "5.5301";
 
 =head1 NAME
 

@@ -1,3 +1,11 @@
+2010-02-17  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_56
+
+	* No code change, only version bumps on files that had changed but did
+	not get a version bump. Requested by Steve Hay in his role as perl
+	pumpkin.
+
 2010-02-03  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_55
