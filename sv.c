@@ -6072,6 +6072,10 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 		    }
 		    assert(mg);
 		    mg->mg_len = ulen;
+		    /* For now, treat "overflowed" as "still unknown".
+		       See RT #72924.  */
+		    if (ulen != (STRLEN) mg->mg_len)
+			mg->mg_len = -1;
 		}
 	    }
 	    return ulen;
