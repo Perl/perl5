@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1143;  # Update this when adding/deleting tests.
+plan tests => 1155;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1024,21 +1024,20 @@ sub run_tests {
         use Cname;
 
         ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
-        my $test   = 1233;
         #
         # Why doesn't must_warn work here?
         #
         my $w;
         local $SIG {__WARN__} = sub {$w .= "@_"};
         eval 'q(xxWxx) =~ /[\N{WARN}]/';
-        ok $w && $w =~ /^Ignoring excess chars from/,
-                 "Ignoring excess chars warning";
+        ok $w && $w =~ /Using just the first character returned by \\N{} in character class/,
+                 "single character in [\\N{}] warning";
 
         undef $w;
         eval q [ok "\0" !~ /[\N{EMPTY-STR}XY]/,
                    "Zerolength charname in charclass doesn't match \\0"];
-        ok $w && $w =~ /^Ignoring zero length/,
-                 'Ignoring zero length \N{%} in character class warning';
+        ok $w && $w =~ /Ignoring zero length/,
+                 'Ignoring zero length \N{} in character class warning';
 
         ok 'AB'  =~ /(\N{EVIL})/ && $1 eq 'A', 'Charname caching $1';
         ok 'ABC' =~ /(\N{EVIL})/,              'Charname caching $1';
@@ -1046,6 +1045,26 @@ sub run_tests {
                     'Empty string charname produces NOTHING node';
         ok ''    =~ /\N{EMPTY-STR}/,
                     'Empty string charname produces NOTHING node';
+        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/, 'Verify that long string works';
+        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
+
+        # If remove the limitation in regcomp code these should work
+        # differently
+        undef $w;
+        eval q [ok "\N{LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that too long a string fails gracefully'];
+        ok $w && $w =~ /Using just the first characters returned/, 'Verify that got too-long string warning in \N{} that exceeds the limit';
+        undef $w;
+        eval q [ok "\N{LONG-STR}" =~ /^\N{TOO-LONG-STR}$/i, 'Verify under folding that too long a string fails gracefully'];
+        ok $w && $w =~ /Using just the first characters returned/, 'Verify under folding that got too-long string warning in \N{} that exceeds the limit';
+        undef $w;
+        eval q [ok "\N{TOO-LONG-STR}" !~ /^\N{TOO-LONG-STR}$/, 'Verify that too long a string doesnt work'];
+        ok $w && $w =~ /Using just the first characters returned/, 'Verify that got too-long string warning in \N{} that exceeds the limit';
+        undef $w;
+        eval q [ok "\N{TOO-LONG-STR}" !~ /^\N{TOO-LONG-STR}$/i, 'Verify under folding that too long a string doesnt work'];
+        ok $w && $w =~ /Using just the first characters returned/i, 'Verify under folding that got too-long string warning in \N{} that exceeds the limit';
+        undef $w;
+        eval 'q(syntax error) =~ /\N{MALFORMED}/';
+        ok $@ && $@ =~ /Malformed/, 'Verify that malformed utf8 gives an error';
 
     }
 
@@ -1064,6 +1083,7 @@ sub run_tests {
         ok "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}" =~
            /[\N{SPACE}\N{U+0041}][\N{SPACE}\N{U+0042}]/,
             'Intermixed named and unicode escapes';
+        ok "\0" =~ /^\N{NULL}$/, 'Verify that \N{NULL} works; is not confused with an error';
     }
 
 

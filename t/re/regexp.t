@@ -36,6 +36,10 @@
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in re/pat.t instead.
 #
+# Note that the inputs get passed on as "m're'", so the re bypasses the lexer.
+# This means this file cannot be used for testing anything that the lexer
+# handles; in 5.12 this means just \N{NAME} and \N{U+...}.
+#
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
 

@@ -1388,11 +1388,36 @@ foo(\h)bar	foo\tbar	y	$1	\t
 # [perl #60344] Regex lookbehind failure after an (if)then|else in perl 5.10
 /\A(?(?=db2)db2|\D+)(?<!processed)\.csv\z/xms	sql_processed.csv	n	-	-
 /\N{U+0100}/	\x{100}	y	$&	\x{100}	# Bug #59328
+/[a\N{U+0100}]/	\x{100}	y	$&	\x{100}
+/[a\N{U+0100}]/	a	y	$&	a
+
+# Verify that \N{U+...} forces Unicode semantics
+/\N{U+41}\x{c1}/i	a\x{e1}	y	$&	a\x{e1}
+/[\N{U+41}\x{c1}]/i	\x{e1}	y	$&	\x{e1}
+
 [\s][\S]	\x{a0}\x{a0}	nT	-	-	# Unicode complements should not match same character
 
 # was generating malformed utf8
 '[\x{100}\xff]'i	\x{ff}	y	$&	\x{ff}
 
 ((??{ "(?:|)" }))\s	C\x20 	y	-	-
+
+# Verify that \ escapes the { after \N, and causes \N to match non-newline
+abc\N\{U+BEEF}	abc\n{UBEEF}	n		
+abc\N\{U+BEEF}	abc.{UBEEF}	y	$&	abc.{UBEEF}
+[abc\N\{U+BEEF}]	-	c	-	\\N in a character class must be a named character
+
+# Verify that \N can be trailing and causes \N to match non-newline
+abc\N	abcd	y	$&	abcd
+abc\N	abc\n	n		
+
+# Verify get errors.  For these, we need // or else puts it in single quotes,
+# and doesn't expand.
+/\N{U+}/	-	c	-	Invalid hexadecimal number
+/abc\N{def/	-	c	-	Missing right brace
+
+# Verifies catches hex errors, and doesn't expose our . notation to the outside
+/\N{U+0xBEEF}/	- 	c	-	Illegal hexadecimal digit
+/\N{U+BEEF.BEAD}/	- 	c	-	Illegal hexadecimal digit
 
 # vim: set noexpandtab

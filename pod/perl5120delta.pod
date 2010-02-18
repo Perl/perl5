@@ -237,9 +237,10 @@ for some or all operations. (Yuval Kogman)
 
 A new regex escape has been added, C<\N>. It will match any character that
 is not a newline, independently from the presence or absence of the single
-line match modifier C</s>. (If C<\N> is followed by an opening brace and
+line match modifier C</s>.  It is not usable within a character class.
+(If C<\N> is followed by an opening brace and
 by a letter, perl will still assume that a Unicode character name is
-coming, so compatibility is preserved.) (Rafael Garcia-Suarez)
+coming, so compatibility is preserved.) (Rafael Garcia-Suarez).
 
 This will break a L<custom charnames translator|charnames/CUSTOM TRANSLATORS>
 which allows numbers for character names, as C<\N{3}> will now mean to match 3
@@ -2461,24 +2462,6 @@ A similar issue may occur in other modules that provide functions which
 take a block as their first argument, like
 
     foo { ... $_ ...} list
-
-=item *
-
-The C<charnames> pragma may generate a run-time error when a regex is
-interpolated [RT #56444]:
-
-    use charnames ':full';
-    my $r1 = qr/\N{THAI CHARACTER SARA I}/;
-    "foo" =~ $r1;    # okay
-    "foo" =~ /$r1+/; # runtime error
-
-A workaround is to generate the character outside of the regex:
-
-    my $a = "\N{THAI CHARACTER SARA I}";
-    my $r1 = qr/$a/;
-
-However, C<$r1> must be used within the scope of the C<use charnames> for this
-to work.
 
 =item *
 

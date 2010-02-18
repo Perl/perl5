@@ -2471,10 +2471,7 @@ S_sublex_done(pTHX)
 
   In patterns:
     backslashes:
-      double-quoted style: \r and \n
-      regexp special ones: \D \s
-      constants: \x31
-      backrefs: \1
+      constants: \N{NAME} only
       case and quoting: \U \Q \E
     stops on @ and $, but not for $ as tail anchor
 
@@ -2488,7 +2485,7 @@ S_sublex_done(pTHX)
   In double-quoted strings:
     backslashes:
       double-quoted style: \r and \n
-      constants: \x31
+      constants: \x31, etc.
       deprecated backrefs: \1 (in substitution replacements)
       case and quoting: \U \Q \E
     stops on @ and $
@@ -2516,14 +2513,14 @@ S_sublex_done(pTHX)
 	  check for embedded arrays
 	  check for embedded scalars
 	  if (backslash) {
-	      leave intact backslashes from leaveit (below)
 	      deprecate \1 in substitution replacements
 	      handle string-changing backslashes \l \U \Q \E, etc.
 	      switch (what was escaped) {
 		  handle \- in a transliteration (becomes a literal -)
+		  if a pattern and not \N{, go treat as regular character
 		  handle \132 (octal characters)
 		  handle \x15 and \x{1234} (hex characters)
-		  handle \N{name} (named characters)
+		  handle \N{name} (named characters, also \N{3,5} in a pattern)
 		  handle \cV (control characters)
 		  handle printf-style backslashes (\f, \r, \n, etc)
 	      } (end switch)
@@ -2581,6 +2578,7 @@ S_scan_const(pTHX_ char *start)
 
 
     while (s < send || dorange) {
+
         /* get transliterations out of the way (they're most literal) */
 	if (PL_lex_inwhat == OP_TRANS) {
 	    /* expand a range A-Z to the full set of characters.  AIE! */
@@ -2800,6 +2798,8 @@ S_scan_const(pTHX_ char *start)
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
+	    char* e;	/* Can be used for ending '}', etc. */
+
 	    s++;
 
 	    /* deprecate \1 in strings and substitution replacements */
@@ -2816,13 +2816,28 @@ S_scan_const(pTHX_ char *start)
 		--s;
 		break;
 	    }
-	    /* skip any other backslash escapes in a pattern */
-	    else if (PL_lex_inpat) {
+	    /* In a pattern, process \N, but skip any other backslash escapes.
+	     * This is because we don't want to translate an escape sequence
+	     * into a meta symbol and have the regex compiler use the meta
+	     * symbol meaning, e.g. \x{2E} would be confused with a dot.  But
+	     * in spite of this, we do have to process \N here while the proper
+	     * charnames handler is in scope.  See bugs #56444 and #62056.
+	     * There is a complication because \N in a pattern may also stand
+	     * for 'match a non-nl', and not mean a charname, in which case its
+	     * processing should be deferred to the regex compiler.  To be a
+	     * charname it must be followed immediately by a '{', and not look
+	     * like \N followed by a curly quantifier, i.e., not something like
+	     * \N{3,}.  regcurly returns a boolean indicating if it is a legal
+	     * quantifier */
+	    else if (PL_lex_inpat
+		    && (*s != 'N'
+			|| s[1] != '{'
+			|| regcurly(s + 1)))
+	    {
 		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
 		goto default_action;
 	    }
 
-	    /* if we get here, it's either a quoted -, or a digit */
 	    switch (*s) {
 
 	    /* quoted - in transliterations */
@@ -2881,15 +2896,13 @@ S_scan_const(pTHX_ char *start)
 		}
 
 	      NUM_ESCAPE_INSERT:
-		/* Insert oct, hex, or \N{U+...} escaped character.  There will
-		 * always be enough room in sv since such escapes will be
-		 * longer than any UTF-8 sequence they can end up as, except if
-		 * they force us to recode the rest of the string into utf8 */
+		/* Insert oct or hex escaped character.  There will always be
+		 * enough room in sv since such escapes will be longer than any
+		 * UTF-8 sequence they can end up as, except if they force us
+		 * to recode the rest of the string into utf8 */
 		
 		/* Here uv is the ordinal of the next character being added in
-		 * unicode (converted from native).  (It has to be done before
-		 * here because \N is interpreted as unicode, and oct and hex
-		 * as native.) */
+		 * unicode (converted from native). */
 		if (!UNI_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
 			/* Might need to recode whatever we have accumulated so
@@ -2929,92 +2942,289 @@ S_scan_const(pTHX_ char *start)
 		}
 		continue;
 
-	    /* \N{LATIN SMALL LETTER A} is a named character, and so is
-	     * \N{U+0041} */
  	    case 'N':
- 		++s;
- 		if (*s == '{') {
- 		    char* e = strchr(s, '}');
- 		    SV *res;
- 		    STRLEN len;
- 		    const char *str;
+		/* In a non-pattern \N must be a named character, like \N{LATIN
+		 * SMALL LETTER A} or \N{U+0041}.  For patterns, it also can
+		 * mean to match a non-newline.  For non-patterns, named
+		 * characters are converted to their string equivalents. In
+		 * patterns, named characters are not converted to their
+		 * ultimate forms for the same reasons that other escapes
+		 * aren't.  Instead, they are converted to the \N{U+...} form
+		 * to get the value from the charnames that is in effect right
+		 * now, while preserving the fact that it was a named character
+		 * so that the regex compiler knows this */
 
- 		    if (!e) {
+		/* This section of code doesn't generally use the
+		 * NATIVE_TO_NEED() macro to transform the input.  I (khw) did
+		 * a close examination of this macro and determined it is a
+		 * no-op except on utfebcdic variant characters.  Every
+		 * character generated by this that would normally need to be
+		 * enclosed by this macro is invariant, so the macro is not
+		 * needed, and would complicate use of copy(). There are other
+		 * parts of this file where the macro is used inconsistently,
+		 * but are saved by it being a no-op */
+
+		/* The structure of this section of code (besides checking for
+		 * errors and upgrading to utf8) is:
+		 *  Further disambiguate between the two meanings of \N, and if
+		 *	not a charname, go process it elsewhere
+		 *  If of form \N{U+...}, pass it through if a pattern; otherwise
+		 *	convert to utf8
+		 *  Otherwise must be \N{NAME}: convert to \N{U+c1.c2...} if a pattern;
+		 *	otherwise convert to utf8 */
+
+		/* Here, s points to the 'N'; the test below is guaranteed to
+		 * succeed if we are being called on a pattern as we already
+		 * know from a test above that the next character is a '{'.
+		 * On a non-pattern \N must mean 'named sequence, which
+		 * requires braces */
+		s++;
+		if (*s != '{') {
+		    yyerror("Missing braces on \\N{}"); 
+		    continue;
+		}
+		s++;
+
+		/* If there is no matching '}', it is an error outside of a
+		 * pattern, or ambiguous inside. */
+		if (! (e = strchr(s, '}'))) {
+		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
-			e = s - 1;
-			goto cont_scan;
+			continue;
 		    }
-		    if (e > s + 2 && s[1] == 'U' && s[2] == '+') {
-			/* \N{U+...} The ... is a unicode value even on EBCDIC
-			 * machines */
-		        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
-			  PERL_SCAN_DISALLOW_PREFIX;
-		        s += 3;
-			len = e - s;
-			uv = grok_hex(s, &len, &flags, NULL);
-			if ( e > s && len != (STRLEN)(e - s) ) {
-			    uv = 0xFFFD;
+		    else {
+
+			/* A missing brace means it can't be a legal character
+			 * name, and it could be a legal "match non-newline".
+			 * But it's kind of weird without an unescaped left
+			 * brace, so warn. */
+			if (ckWARN(WARN_SYNTAX)) {
+			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				    "Missing right brace on \\N{} or unescaped left brace after \\N.  Assuming the latter");
 			}
-			s = e + 1;
-			goto NUM_ESCAPE_INSERT;
+			s -= 3; /* Backup over cur char, {, N, to the '\' */
+			*d++ = NATIVE_TO_NEED(has_utf8,'\\');
+			goto default_action;
 		    }
-		    res = newSVpvn(s + 1, e - s - 1);
-		    res = new_constant( NULL, 0, "charnames",
-					res, NULL, s - 2, e - s + 3 );
-		    if (has_utf8)
-			sv_utf8_upgrade(res);
-		    str = SvPV_const(res,len);
-#ifdef EBCDIC_NEVER_MIND
-		    /* charnames uses pack U and that has been
-		     * recently changed to do the below uni->native
-		     * mapping, so this would be redundant (and wrong,
-		     * the code point would be doubly converted).
-		     * But leave this in just in case the pack U change
-		     * gets revoked, but the semantics is still
-		     * desireable for charnames. --jhi */
-		    {
-			 UV uv = utf8_to_uvchr((const U8*)str, 0);
+		}
 
-			 if (uv < 0x100) {
-			      U8 tmpbuf[UTF8_MAXBYTES+1], *d;
+		/* Here it looks like a named character */
 
-			      d = uvchr_to_utf8(tmpbuf, UNI_TO_NATIVE(uv));
-			      sv_setpvn(res, (char *)tmpbuf, d - tmpbuf);
-			      str = SvPV_const(res, len);
-			 }
-		    }
-#endif
-		    /* If destination is not in utf8 but this new character is,
-		     * recode the dest to utf8 */
-		    if (!has_utf8 && SvUTF8(res)) {
+		if (PL_lex_inpat) {
+
+		    /* XXX This block is temporary code.  \N{} implies that the
+		     * pattern is to have Unicode semantics, and therefore
+		     * currently has to be encoded in utf8.  By putting it in
+		     * utf8 now, we save a whole pass in the regular expression
+		     * compiler.  Once that code is changed so Unicode
+		     * semantics doesn't necessarily have to be in utf8, this
+		     * block should be removed */
+		    if (!has_utf8) {
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
 			/* See Note on sizing above.  */
 			sv_utf8_upgrade_flags_grow(sv,
-					    SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					    len + (STRLEN)(send - s) + 1);
+					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+					/* 5 = '\N{' + cur char + NUL */
+					(STRLEN)(send - s) + 5);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
-		    } else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
-
-			/* See Note on sizing above.  (NOTE: SvCUR() is not set
-			 * correctly here). */
-			const STRLEN off = d - SvPVX_const(sv);
-			d = SvGROW(sv, off + len + (STRLEN)(send - s) + 1) + off;
 		    }
-#ifdef EBCDIC
-		    if (!dorange)
-			native_range = FALSE; /* \N{} is guessed to be Unicode */
-#endif
-		    Copy(str, d, len, char);
-		    d += len;
-		    SvREFCNT_dec(res);
-		  cont_scan:
-		    s = e + 1;
 		}
-		else
-		    yyerror("Missing braces on \\N{}");
+
+		if (*s == 'U' && s[1] == '+') { /* \N{U+...} */
+		    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+				| PERL_SCAN_DISALLOW_PREFIX;
+		    STRLEN len;
+
+		    /* For \N{U+...}, the '...' is a unicode value even on
+		     * EBCDIC machines */
+		    s += 2;	    /* Skip to next char after the 'U+' */
+		    len = e - s;
+		    uv = grok_hex(s, &len, &flags, NULL);
+		    if (len == 0 || len != (STRLEN)(e - s)) {
+			yyerror("Invalid hexadecimal number in \\N{U+...}");
+			s = e + 1;
+			continue;
+		    }
+
+		    if (PL_lex_inpat) {
+
+			/* Pass through to the regex compiler unchanged.  The
+			 * reason we evaluated the number above is to make sure
+			 * there wasn't a syntax error.  It also makes sure
+			 * that the syntax created below, \N{Uc1.c2...}, is
+			 * internal-only */
+			s -= 5;	    /* Include the '\N{U+' */
+			Copy(s, d, e - s + 1, char);	/* 1 = include the } */
+			d += e - s + 1;
+		    }
+		    else {  /* Not a pattern: convert the hex to string */
+
+			 /* If destination is not in utf8, unconditionally
+			  * recode it to be so.  This is because \N{} implies
+			  * Unicode semantics, and scalars have to be in utf8
+			  * to guarantee those semantics */
+			if (! has_utf8) {
+			    SvCUR_set(sv, d - SvPVX_const(sv));
+			    SvPOK_on(sv);
+			    *d = '\0';
+			    /* See Note on sizing above.  */
+			    sv_utf8_upgrade_flags_grow(
+					sv,
+					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+					UNISKIP(uv) + (STRLEN)(send - e) + 1);
+			    d = SvPVX(sv) + SvCUR(sv);
+			    has_utf8 = TRUE;
+			}
+
+			/* Add the string to the output */
+			if (UNI_IS_INVARIANT(uv)) {
+			    *d++ = (char) uv;
+			}
+			else d = (char*)uvuni_to_utf8((U8*)d, uv);
+		    }
+		}
+		else { /* Here is \N{NAME} but not \N{U+...}. */
+
+		    SV *res;		/* result from charnames */
+		    const char *str;    /* the string in 'res' */
+		    STRLEN len;		/* its length */
+
+		    /* Get the value for NAME */
+		    res = newSVpvn(s, e - s);
+		    res = new_constant( NULL, 0, "charnames",
+					/* includes all of: \N{...} */
+					res, NULL, s - 3, e - s + 4 );
+
+		    /* Most likely res will be in utf8 already since the
+		     * standard charnames uses pack U, but a custom translator
+		     * can leave it otherwise, so make sure.  XXX This can be
+		     * revisited to not have charnames use utf8 for characters
+		     * that don't need it when regexes don't have to be in utf8
+		     * for Unicode semantics.  If doing so, remember EBCDIC */
+		    sv_utf8_upgrade(res);
+		    str = SvPV_const(res, len);
+
+		    /* Don't accept malformed input */
+		    if (! is_utf8_string((U8 *) str, len)) {
+			yyerror("Malformed UTF-8 returned by \\N");
+		    }
+		    else if (PL_lex_inpat) {
+
+			if (! len) { /* The name resolved to an empty string */
+			    Copy("\\N{}", d, 4, char);
+			    d += 4;
+			}
+			else {
+			    /* In order to not lose information for the regex
+			    * compiler, pass the result in the specially made
+			    * syntax: \N{U+c1.c2.c3...}, where c1 etc. are
+			    * the code points in hex of each character
+			    * returned by charnames */
+
+			    const char *str_end = str + len;
+			    STRLEN char_length;	    /* cur char's byte length */
+			    STRLEN output_length;   /* and the number of bytes
+						       after this is translated
+						       into hex digits */
+			    const STRLEN off = d - SvPVX_const(sv);
+
+			    /* 2 hex per byte; 2 chars for '\N'; 2 chars for
+			     * max('U+', '.'); and 1 for NUL */
+			    char hex_string[2 * UTF8_MAXBYTES + 5];
+
+			    /* Get the first character of the result. */
+			    U32 uv = utf8n_to_uvuni((U8 *) str,
+						    len,
+						    &char_length,
+						    UTF8_ALLOW_ANYUV);
+
+			    /* The call to is_utf8_string() above hopefully
+			     * guarantees that there won't be an error.  But
+			     * it's easy here to make sure.  The function just
+			     * above warns and returns 0 if invalid utf8, but
+			     * it can also return 0 if the input is validly a
+			     * NUL. Disambiguate */
+			    if (uv == 0 && NATIVE_TO_ASCII(*str) != '\0') {
+				uv = UNICODE_REPLACEMENT;
+			    }
+
+			    /* Convert first code point to hex, including the
+			     * boiler plate before it */
+			    sprintf(hex_string, "\\N{U+%X", (unsigned int) uv);
+			    output_length = strlen(hex_string);
+
+			    /* Make sure there is enough space to hold it */
+			    d = off + SvGROW(sv, off
+						 + output_length
+						 + (STRLEN)(send - e)
+						 + 2);	/* '}' + NUL */
+			    /* And output it */
+			    Copy(hex_string, d, output_length, char);
+			    d += output_length;
+
+			    /* For each subsequent character, append dot and
+			     * its ordinal in hex */
+			    while ((str += char_length) < str_end) {
+				const STRLEN off = d - SvPVX_const(sv);
+				U32 uv = utf8n_to_uvuni((U8 *) str,
+							str_end - str,
+							&char_length,
+							UTF8_ALLOW_ANYUV);
+				if (uv == 0 && NATIVE_TO_ASCII(*str) != '\0') {
+				    uv = UNICODE_REPLACEMENT;
+				}
+
+				sprintf(hex_string, ".%X", (unsigned int) uv);
+				output_length = strlen(hex_string);
+
+				d = off + SvGROW(sv, off
+						     + output_length
+						     + (STRLEN)(send - e)
+						     + 2);	/* '}' +  NUL */
+				Copy(hex_string, d, output_length, char);
+				d += output_length;
+			    }
+
+			    *d++ = '}';	/* Done.  Add the trailing brace */
+			}
+		    }
+		    else { /* Here, not in a pattern.  Convert the name to a
+			    * string. */
+
+			 /* If destination is not in utf8, unconditionally
+			  * recode it to be so.  This is because \N{} implies
+			  * Unicode semantics, and scalars have to be in utf8
+			  * to guarantee those semantics */
+			if (! has_utf8) {
+			    SvCUR_set(sv, d - SvPVX_const(sv));
+			    SvPOK_on(sv);
+			    *d = '\0';
+			    /* See Note on sizing above.  */
+			    sv_utf8_upgrade_flags_grow(sv,
+						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+						len + (STRLEN)(send - s) + 1);
+			    d = SvPVX(sv) + SvCUR(sv);
+			    has_utf8 = TRUE;
+			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
+
+			    /* See Note on sizing above.  (NOTE: SvCUR() is not
+			     * set correctly here). */
+			    const STRLEN off = d - SvPVX_const(sv);
+			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
+			}
+			Copy(str, d, len, char);
+			d += len;
+		    }
+		    SvREFCNT_dec(res);
+		}
+#ifdef EBCDIC
+		if (!dorange) 
+		    native_range = FALSE; /* \N{} is defined to be Unicode */
+#endif
+		s = e + 1;  /* Point to just after the '}' */
 		continue;
 
 	    /* \c is a control character */
@@ -11308,6 +11518,10 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
  	SvREFCNT_dec(msg);
   	return sv;
     }
+
+    /* charnames doesn't work well if there have been errors found */
+    if (PL_error_count > 0 && strEQ(key,"charnames")) return res;
+
     cvp = hv_fetch(table, key, keylen, FALSE);
     if (!cvp || !SvOK(*cvp)) {
 	why1 = "$^H{";

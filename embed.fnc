@@ -165,6 +165,7 @@ npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t
+EpRnP	|I32	|regcurly	|NN const char *s
 
 END_EXTERN_C
 
@@ -1706,7 +1707,6 @@ Es	|regnode*|regbranch	|NN struct RExC_state_t *pRExC_state \
 Es	|STRLEN	|reguni		|NN const struct RExC_state_t *pRExC_state \
 				|UV uv|NN char *s
 Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state|U32 depth
-ERsn	|I32	|regcurly	|NN const char *s
 Es	|regnode*|reg_node	|NN struct RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \

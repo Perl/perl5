@@ -1912,10 +1912,10 @@ about 250 characters for simple names, and somewhat more for compound
 names (like C<$A::B>).  You've exceeded Perl's limits.  Future versions
 of Perl are likely to eliminate these arbitrary limitations.
 
-=item Ignoring %s in character class in regex; marked by <-- HERE in m/%s/
+=item Ignoring zero length \N{} in character class"
 
-(W) Named Unicode character escapes (\N{...}) may return multi-char
-or zero length sequences. When such an escape is used in a character class
+(W) Named Unicode character escapes (\N{...}) may return a
+zero length sequence.  When such an escape is used in a character class
 its behaviour is not well defined. Check that the correct escape has
 been used, and the correct charname handler is in scope.
 
@@ -2395,6 +2395,10 @@ See also L<Encode/"Handling Malformed Data">.
 (F) Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
 
+=item Malformed UTF-8 returned by \N
+
+(F) The charnames handler returned malformed UTF-8.
+
 =item Malformed UTF-8 string in pack
 
 (F) You tried to pack something that didn't comply with UTF-8 encoding
@@ -2467,7 +2471,7 @@ supplied.
 (F) The argument to the indicated command line switch must follow
 immediately after the switch, without intervening spaces.
 
-=item Missing %sbrace%s on \N{}
+=item Missing braces on \N{}
 
 (F) Wrong syntax of character name literal C<\N{charname}> within
 double-quotish context.
@@ -2506,7 +2510,34 @@ can vary from one line to the next.
 
 =item Missing right brace on %s
 
-(F) Missing right brace in C<\x{...}>, C<\p{...}> or C<\P{...}>.
+(F) Missing right brace in C<\x{...}>, C<\p{...}>, C<\P{...}>, or C<\N{...}>.
+
+=item Missing right brace on \\N{} or unescaped left brace after \\N.  Assuming the latter
+
+(W syntax)
+C<\N> has traditionally been followed by a name enclosed in braces,
+meaning the character (or sequence of characters) given by that name.
+Thus C<\N{ASTERISK}> is another way of writing C<*>, valid in both
+double-quoted strings and regular expression patterns.
+In patterns, it doesn't have the meaning an unescaped C<*> does.
+
+Starting in Perl 5.12.0, C<\N> also can have an additional meaning in patterns,
+namely to match a non-newline character.  (This is like C<.> but is not
+affected by the C</s> modifier.)
+
+This can lead to some ambiguities.  When C<\N> is not followed immediately by a
+left brace, Perl assumes the "match non-newline character" meaning.  Also, if
+the braces form a valid quantifier such as C<\N{3}> or C<\N{5,}>, Perl assumes
+that this means to match the given quantity of non-newlines (in these examples,
+3, and 5 or more, respectively).  In all other case, where there is a C<\N{>
+and a matching C<}>, Perl assumes that a character name is desired.
+
+However, if there is no matching C<}>, Perl doesn't know if it was mistakenly
+omitted, or if "match non-newline" followed by "match a C<{>" was desired.
+It assumes the latter because that is actually a valid interpretation as
+written, unlike the other case.  If you meant the former, you need to add the
+matching right brace.  If you did mean the latter, you can silence this warning
+by writing instead C<\N\{>.
 
 =item Missing right curly or square bracket
 
@@ -2593,6 +2624,13 @@ that yet.
 sense to try to declare one with a package qualifier on the front.  Use
 local() if you want to localize a package variable.
 
+=item \\N in a character class must be a named character: \\N{...}
+
+The new (5.12) meaning of C<\N> to match non-newlines is not valid in a
+bracketed character class, for the same reason that C<.> in a character class
+loses its specialness: it matches almost everything, which is probably not what
+you want.
+
 =item Name "%s::%s" used only once: possible typo
 
 (W once) Typographical errors often show up as unique variable names.
@@ -2604,6 +2642,11 @@ NOTE: This warning detects symbols that have been used only once so $c, @c,
 %c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
 the same; if a program uses $c only once but also uses any of the others it
 will not trigger this warning.
+
+=item Invalid hexadecimal number in \\N{U+...}
+
+(F) The character constant represented by C<...> is not a valid hexadecimal
+number.
 
 =item Negative '/' count in unpack
 
@@ -4942,6 +4985,20 @@ be removed in a future version.
 C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
 allow this syntax, but shouldn't have. It is now deprecated, and will be
 removed in a future version.
+
+=item Using just the first character returned by \N{} in character class
+
+(W) A charnames handler may return a sequence of more than one character.
+Currently all but the first one are discarded when used in a regular
+expression pattern bracketed character class.
+
+=item Using just the first characters returned by \N{}
+
+(W) A charnames handler may return a sequence of characters.  There is a finite
+limit as to the number of characters that can be used, which this sequence
+exceeded.  In the message, the characters in the sequence are separated by
+dots, and each is shown by its ordinal in hex.  Anything to the left of the
+C<HERE> was retained; anything to the right was discarded.
 
 =item UTF-16 surrogate %s
 
