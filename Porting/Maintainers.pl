@@ -1308,7 +1308,7 @@ use File::Glob qw(:case);
     'podlators' =>
 	{
 	'MAINTAINER'	=> 'rra',
-	'DISTRIBUTION'	=> 'RRA/podlators-2.3.0.tar.gz',
+	'DISTRIBUTION'	=> 'RRA/podlators-2.3.1.tar.gz',
 	'FILES'		=> q[cpan/podlators
 			     pod/pod2man.PL
 			     pod/pod2text.PL
