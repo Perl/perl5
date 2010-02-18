@@ -42,7 +42,7 @@ Undefined version objects are now uninitialized with zero rather than C<undef>.
 
 =item C<CPAN>
 
-Upgraded from version 1.94_53 to 1.94_55.
+Upgraded from version 1.94_53 to 1.94_56.
 
 This module is also now built in a less specialized way, which resolves a
 problem that caused C<make> after C<make clean> to fail, fixing RT #72218.
@@ -57,6 +57,13 @@ Upgraded from version 2.21 to 2.22.
 
 This resolves RT #72700, in which an exception thrown from a closure was
 getting lost.
+
+=item C<Socket>
+
+Upgraded from version 1.85 to 1.86.
+
+This makes the new Socket implementation of C<inet_pton> consistent with the
+existing Socket6 implementation of C<inet_pton>, fixing RT #72884.
 
 =item C<podlators>
 
