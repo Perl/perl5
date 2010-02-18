@@ -707,6 +707,17 @@ release, and should be installed from CPAN instead. Distributions on CPAN
 which require these should add them to their prerequisites. The core versions
 of these modules warnings will issue a deprecation warning.
 
+If you ship a packaged version of Perl, either alone or as part of a larger
+system, then you should carefully consider the reprecussions of core module
+deprecations.  You may want to consider shipping your default build of
+Perl with packages for some or all deprecated modules which install into
+C<vendor> or C<site> perl library directories. This will inhibit the 
+deprecation warnings.
+
+Alternatively, you may want to consider patching F<lib/deprecate.pm>
+to provide deprecation warnings specific to your packaging system or
+distribution of Perl.
+
 =over
 
 =item L<Class::ISA>
