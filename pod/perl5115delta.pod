@@ -67,7 +67,7 @@ existing Socket6 implementation of C<inet_pton>, fixing RT #72884.
 
 =item C<podlators>
 
-Upgraded from version 2.2.2 to 2.3.0.
+Upgraded from version 2.2.2 to 2.3.1.
 
 =back
 
