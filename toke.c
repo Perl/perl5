@@ -2968,10 +2968,10 @@ S_scan_const(pTHX_ char *start)
 		 * errors and upgrading to utf8) is:
 		 *  Further disambiguate between the two meanings of \N, and if
 		 *	not a charname, go process it elsewhere
-		 *  If of form \N{U+...}, pass it through if a pattern; otherwise
-		 *	convert to utf8
-		 *  Otherwise must be \N{NAME}: convert to \N{U+c1.c2...} if a pattern;
-		 *	otherwise convert to utf8 */
+		 *  If of form \N{U+...}, pass it through if a pattern;
+		 *	otherwise convert to utf8
+		 *  Otherwise must be \N{NAME}: convert to \N{U+c1.c2...} if a
+		 *  pattern; otherwise convert to utf8 */
 
 		/* Here, s points to the 'N'; the test below is guaranteed to
 		 * succeed if we are being called on a pattern as we already
@@ -2985,27 +2985,14 @@ S_scan_const(pTHX_ char *start)
 		}
 		s++;
 
-		/* If there is no matching '}', it is an error outside of a
-		 * pattern, or ambiguous inside. */
+		/* If there is no matching '}', it is an error. */
 		if (! (e = strchr(s, '}'))) {
 		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
-			continue;
+		    } else {
+			yyerror("Missing right brace on \\N{} or unescaped left brace after \\N.");
 		    }
-		    else {
-
-			/* A missing brace means it can't be a legal character
-			 * name, and it could be a legal "match non-newline".
-			 * But it's kind of weird without an unescaped left
-			 * brace, so warn. */
-			if (ckWARN(WARN_SYNTAX)) {
-			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				    "Missing right brace on \\N{} or unescaped left brace after \\N.  Assuming the latter");
-			}
-			s -= 3; /* Backup over cur char, {, N, to the '\' */
-			*d++ = NATIVE_TO_NEED(has_utf8,'\\');
-			goto default_action;
-		    }
+		    continue;
 		}
 
 		/* Here it looks like a named character */
@@ -3053,9 +3040,7 @@ S_scan_const(pTHX_ char *start)
 
 			/* Pass through to the regex compiler unchanged.  The
 			 * reason we evaluated the number above is to make sure
-			 * there wasn't a syntax error.  It also makes sure
-			 * that the syntax created below, \N{Uc1.c2...}, is
-			 * internal-only */
+			 * there wasn't a syntax error. */
 			s -= 5;	    /* Include the '\N{U+' */
 			Copy(s, d, e - s + 1, char);	/* 1 = include the } */
 			d += e - s + 1;

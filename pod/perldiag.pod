@@ -2512,32 +2512,32 @@ can vary from one line to the next.
 
 (F) Missing right brace in C<\x{...}>, C<\p{...}>, C<\P{...}>, or C<\N{...}>.
 
-=item Missing right brace on \\N{} or unescaped left brace after \\N.  Assuming the latter
+=item Missing right brace on \\N{} or unescaped left brace after \\N
 
-(W syntax)
-C<\N> has traditionally been followed by a name enclosed in braces,
-meaning the character (or sequence of characters) given by that name.
+(F)
+C<\N> has two meanings.
+
+The traditional one has it followed by a name enclosed
+in braces, meaning the character (or sequence of characters) given by that name.
 Thus C<\N{ASTERISK}> is another way of writing C<*>, valid in both
-double-quoted strings and regular expression patterns.
-In patterns, it doesn't have the meaning an unescaped C<*> does.
+double-quoted strings and regular expression patterns.  In patterns, it doesn't
+have the meaning an unescaped C<*> does.
 
-Starting in Perl 5.12.0, C<\N> also can have an additional meaning in patterns,
-namely to match a non-newline character.  (This is like C<.> but is not
-affected by the C</s> modifier.)
+Starting in Perl 5.12.0, C<\N> also can have an additional meaning (only) in
+patterns, namely to match a non-newline character.  (This is like C<.> but is
+not affected by the C</s> modifier.)
 
 This can lead to some ambiguities.  When C<\N> is not followed immediately by a
 left brace, Perl assumes the "match non-newline character" meaning.  Also, if
 the braces form a valid quantifier such as C<\N{3}> or C<\N{5,}>, Perl assumes
 that this means to match the given quantity of non-newlines (in these examples,
-3, and 5 or more, respectively).  In all other case, where there is a C<\N{>
+3; and 5 or more, respectively).  In all other case, where there is a C<\N{>
 and a matching C<}>, Perl assumes that a character name is desired.
 
 However, if there is no matching C<}>, Perl doesn't know if it was mistakenly
-omitted, or if "match non-newline" followed by "match a C<{>" was desired.
-It assumes the latter because that is actually a valid interpretation as
-written, unlike the other case.  If you meant the former, you need to add the
-matching right brace.  If you did mean the latter, you can silence this warning
-by writing instead C<\N\{>.
+omitted, or if "match non-newline" followed by "match a C<{>" was desired, and
+raises this error.  If you meant the former, add the right brace; if you meant
+the latter, escape the brace with a backslash, like so: C<\N\{>
 
 =item Missing right curly or square bracket
 
