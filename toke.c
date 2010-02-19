@@ -11505,7 +11505,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     }
 
     /* charnames doesn't work well if there have been errors found */
-    if (PL_error_count > 0 && strEQ(key,"charnames")) return res;
+    if (PL_error_count > 0 && strEQ(key,"charnames"))
+	return &PL_sv_undef;
 
     cvp = hv_fetch(table, key, keylen, FALSE);
     if (!cvp || !SvOK(*cvp)) {
