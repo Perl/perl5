@@ -34,9 +34,15 @@ ab*bc	abbbbc	y	$+[0]	6
 \N{1}	abbbbc	y	$&	a
 \N{1}	abbbbc	y	$-[0]	0
 \N{1}	abbbbc	y	$+[0]	1
+/\N {1}/x	abbbbc	y	$&	a
+/\N {1}/x	abbbbc	y	$-[0]	0
+/\N {1}/x	abbbbc	y	$+[0]	1
 \N{3,4}	abbbbc	y	$&	abbb
 \N{3,4}	abbbbc	y	$-[0]	0
 \N{3,4}	abbbbc	y	$+[0]	4
+/\N {3,4}/x	abbbbc	y	$&	abbb
+/\N {3,4}/x	abbbbc	y	$-[0]	0
+/\N {3,4}/x	abbbbc	y	$+[0]	4
 ab{0,}bc	abbbbc	y	$&	abbbbc
 ab{0,}bc	abbbbc	y	$-[0]	0
 ab{0,}bc	abbbbc	y	$+[0]	6
@@ -76,10 +82,13 @@ $	abc	y	$&
 a.c	abc	y	$&	abc
 a.c	axc	y	$&	axc
 a\Nc	abc	y	$&	abc
+/a\N c/x	abc	y	$&	abc
 a.*c	axyzc	y	$&	axyzc
 a\N*c	axyzc	y	$&	axyzc
+/a\N *c/x	axyzc	y	$&	axyzc
 a.*c	axyzd	n	-	-
 a\N*c	axyzd	n	-	-
+/a\N *c/x	axyzd	n	-	-
 a[bc]d	abc	n	-	-
 a[bc]d	abd	y	$&	abd
 a[b]d	abd	y	$&	abd
@@ -1412,12 +1421,32 @@ abc\N	abcd	y	$&	abcd
 abc\N	abc\n	n		
 
 # Verify get errors.  For these, we need // or else puts it in single quotes,
-# and doesn't expand.
+# and bypasses the lexer.
 /\N{U+}/	-	c	-	Invalid hexadecimal number
+# Below currently gives a misleading message
+/[\N{U+}]/	-	c	-	Unmatched
 /abc\N{def/	-	c	-	Missing right brace
+/\N{U+4AG3}/	-	c	-	Illegal hexadecimal digit
+/[\N{U+4AG3}]/	-	c	-	Illegal hexadecimal digit
+
+# And verify that in single quotes which bypasses the lexer, the regex compiler
+# figures it out.
+\N{U+}	-	c	-	Invalid hexadecimal number
+[\N{U+}]	-	c	-	Invalid hexadecimal number
+\N{U+4AG3}	-	c	-	Invalid hexadecimal number
+[\N{U+4AG3}]	-	c	-	Invalid hexadecimal number
+abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
+
+# Verify that under /x that still cant have space before left brace
+/abc\N {U+41}/x	-	c	-	Missing braces
+/abc\N {SPACE}/x	-	c	-	Missing braces
 
 # Verifies catches hex errors, and doesn't expose our . notation to the outside
 /\N{U+0xBEEF}/	- 	c	-	Illegal hexadecimal digit
 /\N{U+BEEF.BEAD}/	- 	c	-	Illegal hexadecimal digit
+
+# Verify works in single quotish context; regex compiler delivers slightly different msg
+# \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
+\N{U+0xBEEF}	- 	c	-	Invalid hexadecimal number
 
 # vim: set noexpandtab

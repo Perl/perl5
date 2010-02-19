@@ -6625,26 +6625,29 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 STATIC regnode *
 S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 {
-    char * endbrace;    /* endbrace following the name */
+    char * endbrace;    /* '}' following the name */
     regnode *ret = NULL;
 #ifdef DEBUGGING
     char* parse_start = RExC_parse - 2;	    /* points to the '\N' */
 #endif
+    char* p;
 
     GET_RE_DEBUG_FLAGS_DECL;
  
     PERL_ARGS_ASSERT_REG_NAMEDSEQ;
 
     GET_RE_DEBUG_FLAGS;
+
+    /* The [^\n] meaning of \N ignores spaces and comments under the /x
+     * modifier.  The other meaning does not */
+    p = (RExC_flags & RXf_PMf_EXTENDED)
+	? regwhite( pRExC_state, RExC_parse )
+	: RExC_parse;
    
     /* Disambiguate between \N meaning a named character versus \N meaning
-     * don't match a newline. */
-    if (*RExC_parse != '{'
-	|| (! (endbrace = strchr(RExC_parse, '}'))) /* no trailing brace */
-	|| ! (endbrace == RExC_parse + 1	/* nothing between the {} */
-	      || (endbrace - RExC_parse > 3	/* U+ and at least one hex */
-		  && strnEQ(RExC_parse + 1, "U+", 2))))
-    {
+     * [^\n].  The former is assumed when it can't be the latter. */
+    if (*p != '{' || regcurly(p)) {
+	RExC_parse = p;
 	if (valuep) {
 	    /* no bare \N in a charclass */
 	    vFAIL("\\N in a character class must be a named character: \\N{...}");
@@ -6658,8 +6661,27 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	return ret;
     }
 
-    /* Here, we have decided it is a named sequence */
+    /* Here, we have decided it should be a named sequence */
+
+    /* The test above made sure that the next real character is a '{', but
+     * under the /x modifier, it could be separated by space (or a comment and
+     * \n) and this is not allowed (for consistency with \x{...} and the
+     * tokenizer handling of \N{NAME}). */
+    if (*RExC_parse != '{') {
+	vFAIL("Missing braces on \\N{}");
+    }
+
     RExC_parse++;	/* Skip past the '{' */
+
+    if (! (endbrace = strchr(RExC_parse, '}')) /* no trailing brace */
+	|| ! (endbrace == RExC_parse		/* nothing between the {} */
+	      || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked below */
+		  && strnEQ(RExC_parse, "U+", 2)))) /* for a better error msg) */
+    {
+	if (endbrace) RExC_parse = endbrace;	/* position msg's '<--HERE' */
+	vFAIL("\\N{NAME} must be resolved by the lexer");
+    }
+
     if (endbrace == RExC_parse) {   /* empty: \N{} */
 	if (! valuep) {
 	    RExC_parse = endbrace + 1;  
@@ -6703,8 +6725,16 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 
 	/* The tokenizer should have guaranteed validity, but it's possible to
 	 * bypass it by using single quoting, so check */
-	if ( length_of_hex != (STRLEN)(endchar - RExC_parse) ) {
-	    *valuep = UNICODE_REPLACEMENT;
+	if (length_of_hex == 0
+	    || length_of_hex != (STRLEN)(endchar - RExC_parse) )
+	{
+	    RExC_parse += length_of_hex;	/* Includes all the valid */
+	    RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
+			    ? UTF8SKIP(RExC_parse)
+			    : 1;
+	    /* Guard against malformed utf8 */
+	    if (RExC_parse >= endchar) RExC_parse = endchar;
+	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}    
 
 	RExC_parse = endbrace + 1;
@@ -6731,7 +6761,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	 * is primarily a named character, and not intended to be a huge long
 	 * string, so 255 bytes should be good enough */
 	while (1) {
-	    STRLEN this_char_length;
+	    STRLEN length_of_hex;
 	    I32 grok_flags = PERL_SCAN_ALLOW_UNDERSCORES
 			    | PERL_SCAN_DISALLOW_PREFIX
 			    | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
@@ -6743,12 +6773,18 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	    if (! endchar) endchar = endbrace;
 
 	    /* The values are Unicode even on EBCDIC machines */
-	    this_char_length = (STRLEN)(endchar - RExC_parse);
-	    cp = grok_hex(RExC_parse, &this_char_length, &grok_flags, NULL);
-	    if ( this_char_length == 0 
-		|| this_char_length != (STRLEN)(endchar - RExC_parse) )
+	    length_of_hex = (STRLEN)(endchar - RExC_parse);
+	    cp = grok_hex(RExC_parse, &length_of_hex, &grok_flags, NULL);
+	    if ( length_of_hex == 0 
+		|| length_of_hex != (STRLEN)(endchar - RExC_parse) )
 	    {
-		cp = UNICODE_REPLACEMENT;   /* Substitute a valid character */
+		RExC_parse += length_of_hex;	    /* Includes all the valid */
+		RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
+				? UTF8SKIP(RExC_parse)
+				: 1;
+		/* Guard against malformed utf8 */
+		if (RExC_parse >= endchar) RExC_parse = endchar;
+		vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	    }    
 
 	    if (! FOLD) {	/* Not folding, just append to the string */

@@ -1912,7 +1912,7 @@ about 250 characters for simple names, and somewhat more for compound
 names (like C<$A::B>).  You've exceeded Perl's limits.  Future versions
 of Perl are likely to eliminate these arbitrary limitations.
 
-=item Ignoring zero length \N{} in character class"
+=item Ignoring zero length \N{} in character class
 
 (W) Named Unicode character escapes (\N{...}) may return a
 zero length sequence.  When such an escape is used in a character class
@@ -2474,7 +2474,10 @@ immediately after the switch, without intervening spaces.
 =item Missing braces on \N{}
 
 (F) Wrong syntax of character name literal C<\N{charname}> within
-double-quotish context.
+double-quotish context.  This can also happen when there is a space (or
+comment) between the C<\N> and the C<{> in a regex with the C</x> modifier.
+This modifier does not change the requirement that the brace immediately follow
+the C<\N>.
 
 =item Missing comma after first argument to %s function
 
@@ -2524,18 +2527,18 @@ double-quoted strings and regular expression patterns.  In patterns, it doesn't
 have the meaning an unescaped C<*> does.
 
 Starting in Perl 5.12.0, C<\N> also can have an additional meaning (only) in
-patterns, namely to match a non-newline character.  (This is like C<.> but is
-not affected by the C</s> modifier.)
+patterns, namely to match a non-newline character.  (This is short for
+C<[^\n]>, and like C<.> but is not affected by the C</s> regex modifier.)
 
 This can lead to some ambiguities.  When C<\N> is not followed immediately by a
-left brace, Perl assumes the "match non-newline character" meaning.  Also, if
+left brace, Perl assumes the C<[^\n]> meaning.  Also, if
 the braces form a valid quantifier such as C<\N{3}> or C<\N{5,}>, Perl assumes
 that this means to match the given quantity of non-newlines (in these examples,
 3; and 5 or more, respectively).  In all other case, where there is a C<\N{>
 and a matching C<}>, Perl assumes that a character name is desired.
 
 However, if there is no matching C<}>, Perl doesn't know if it was mistakenly
-omitted, or if "match non-newline" followed by "match a C<{>" was desired, and
+omitted, or if C<[^\n]{> was desired, and
 raises this error.  If you meant the former, add the right brace; if you meant
 the latter, escape the brace with a backslash, like so: C<\N\{>
 
@@ -2626,10 +2629,38 @@ local() if you want to localize a package variable.
 
 =item \\N in a character class must be a named character: \\N{...}
 
-The new (5.12) meaning of C<\N> to match non-newlines is not valid in a
-bracketed character class, for the same reason that C<.> in a character class
-loses its specialness: it matches almost everything, which is probably not what
-you want.
+(F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
+character class, for the same reason that C<.> in a character class loses its
+specialness: it matches almost everything, which is probably not what you want.
+
+=item \\N{NAME} must be resolved by the lexer
+
+(F) When compiling a regex pattern, an unresolved named character or sequence
+was encountered.  This can happen in any of several ways that bypass the lexer,
+such as using single-quotish context:
+
+    $re = '\N{SPACE}';	# Wrong!
+    /$re/;
+
+Instead, use double-quotes:
+
+    $re = "\N{SPACE}";	# ok
+    /$re/;
+
+The lexer can be bypassed as well by creating the pattern from smaller
+components:
+
+    $re = '\N';
+    /${re}{SPACE}/;	# Wrong!
+
+It's not a good idea to split a construct in the middle like this, and it
+doesn't work here.  Instead use the solution above.
+
+Finally, the message also can happen under the C</x> regex modifier when the
+C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
+
+    /\N {SPACE}/x;	# Wrong!
+    /\N{SPACE}/x;	# ok
 
 =item Name "%s::%s" used only once: possible typo
 
@@ -2646,7 +2677,8 @@ will not trigger this warning.
 =item Invalid hexadecimal number in \\N{U+...}
 
 (F) The character constant represented by C<...> is not a valid hexadecimal
-number.
+number.  Either it is empty, or you tried to use a character other than 0 - 9
+or A - F, a - f in a hexadecimal number.
 
 =item Negative '/' count in unpack
 
