@@ -129,6 +129,16 @@ has been fixed.
 
 =item *
 
+Interpolating a regex that makes use of the C<charnames> pragma will no longer
+cause a run-time error. (Fixes RT #56444)
+
+=item *
+
+Array references assigned to C<*Foo::ISA> now have the necessary magic added
+to them to catch any further updates to the new C<@ISA>. (Fixes RT #72866)
+
+=item *
+
 Filehandles are now always blessed into C<IO::File>, which, together with
 some suitable manipulation of C<@IO::File::ISA>, fixes a breakage introduced
 in Perl 5.11.3 by a change that always blessed filehandles into C<IO::Handle>
