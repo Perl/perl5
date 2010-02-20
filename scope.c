@@ -931,6 +931,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    (*SSPOPDXPTR)(aTHX_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
+	    /* regexp must have croaked */
+	    PL_savestack_ix -= uv >> SAVE_TIGHT_SHIFT;
+	    break;
 	case SAVEt_ALLOC:
 	    i = SSPOPINT;
 	    PL_savestack_ix -= i;  	/* regexp must have croaked */

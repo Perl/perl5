@@ -296,7 +296,7 @@ static void restore_pos(pTHX_ void *arg);
 
 #define REGCP_PAREN_ELEMS 4
 #define REGCP_OTHER_ELEMS 5
-#define REGCP_FRAME_ELEMS 2
+#define REGCP_FRAME_ELEMS 1
 /* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
  * are needed for the regexp context stack bookkeeping. */
 
@@ -306,12 +306,17 @@ S_regcppush(pTHX_ I32 parenfloor)
     dVAR;
     const int retval = PL_savestack_ix;
     const int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
-    const unsigned int total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
+    const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
+    const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
     int p;
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (paren_elems_to_push < 0)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
+
+    if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
+	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
+		   " out of range (%d-%d)", total_elems, PL_regsize, parenfloor);
 
     SSGROW(total_elems + REGCP_FRAME_ELEMS);
     
@@ -334,8 +339,7 @@ S_regcppush(pTHX_ I32 parenfloor)
     SSPUSHINT(*PL_reglastparen);
     SSPUSHINT(*PL_reglastcloseparen);
     SSPUSHPTR(PL_reginput);
-    SSPUSHINT(total_elems);
-    SSPUSHUV(SAVEt_REGCONTEXT); /* Magic cookie. */
+    SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
 
     return retval;
 }
@@ -360,7 +364,7 @@ STATIC char *
 S_regcppop(pTHX_ const regexp *rex)
 {
     dVAR;
-    U32 i;
+    UV i;
     char *input;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -368,8 +372,8 @@ S_regcppop(pTHX_ const regexp *rex)
 
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
     i = SSPOPUV;
-    assert(i == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
-    i = SSPOPINT; /* Parentheses elements to pop. */
+    assert((i & SAVE_MASK) == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
+    i >>= SAVE_TIGHT_SHIFT; /* Parentheses elements to pop. */
     input = (char *) SSPOPPTR;
     *PL_reglastcloseparen = SSPOPINT;
     *PL_reglastparen = SSPOPINT;
