@@ -11,6 +11,9 @@ use warnings;
 my $count=1;
 my @tests;
 
+my %todo_pass = map { $_ => 1 }
+	    qw(00DF 1E9E FB00 FB01 FB02 FB03 FB04 FB05 FB06);
+
 my $file="../lib/unicore/CaseFolding.txt";
 open my $fh,"<",$file or die "Failed to read '$file': $!";
 while (<$fh>) {
@@ -58,7 +61,9 @@ while (<$fh>) {
                     $tests[-1]="TODO: { local \$::TODO='Multi-char, non-utf8 folded inside character class [ ] doesnt work';\n$tests[-1] }"
                 } elsif (! $upgrade && $cpv >= 128 && $cpv <= 255 && $cpv != 0xb5) {
                     $tests[-1]="TODO: { local \$::TODO='Most non-utf8 latin1 doesnt work';\n$tests[-1] }"
-                } elsif (! $swap && $charclass && @folded > 1) {
+                } elsif (! $swap && $charclass && @folded > 1
+		    && ! $todo_pass{$cp})
+		{
                     # There are a few of these that pass; most fail.
                     $tests[-1]="TODO: { local \$::TODO='Some multi-char, f8 folded inside character class [ ] doesnt work';\n$tests[-1] }"
                 }
