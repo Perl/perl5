@@ -507,13 +507,18 @@ void
 Perl_save_clearsv(pTHX_ SV **svp)
 {
     dVAR;
+    const UV offset = svp - PL_curpad;
+    const UV offset_shifted = offset << SAVE_TIGHT_SHIFT;
 
     PERL_ARGS_ASSERT_SAVE_CLEARSV;
 
     ASSERT_CURPAD_ACTIVE("save_clearsv");
-    SSCHECK(2);
-    SSPUSHLONG((long)(svp-PL_curpad));
-    SSPUSHUV(SAVEt_CLEARSV);
+    if ((offset_shifted >> SAVE_TIGHT_SHIFT) != offset)
+	Perl_croak(aTHX_ "panic: pad offset %"UVuf" out of range (%p-%p)",
+		   offset, svp, PL_curpad);
+
+    SSCHECK(1);
+    SSPUSHUV(offset_shifted | SAVEt_CLEARSV);
     SvPADSTALE_off(*svp); /* mark lexical as active */
 }
 
@@ -850,7 +855,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    Safefree(ptr);
 	    break;
 	case SAVEt_CLEARSV:
-	    ptr = (void*)&PL_curpad[SSPOPLONG];
+	    ptr = (void*)&PL_curpad[uv >> SAVE_TIGHT_SHIFT];
 	    sv = *(SV**)ptr;
 
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
