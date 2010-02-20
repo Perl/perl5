@@ -165,7 +165,7 @@ npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t
-EpRnP	|I32	|regcurly	|NN const char *s
+EXpRnP	|I32	|regcurly	|NN const char *s
 
 END_EXTERN_C
 
@@ -575,16 +575,16 @@ ApR	|bool	|is_utf8_print	|NN const U8 *p
 ApR	|bool	|is_utf8_punct	|NN const U8 *p
 ApR	|bool	|is_utf8_xdigit	|NN const U8 *p
 ApR	|bool	|is_utf8_mark	|NN const U8 *p
-EpR	|bool	|is_utf8_X_begin	|NN const U8 *p
-EpR	|bool	|is_utf8_X_extend	|NN const U8 *p
-EpR	|bool	|is_utf8_X_prepend	|NN const U8 *p
-EpR	|bool	|is_utf8_X_non_hangul	|NN const U8 *p
-EpR	|bool	|is_utf8_X_L		|NN const U8 *p
-EpR	|bool	|is_utf8_X_LV		|NN const U8 *p
-EpR	|bool	|is_utf8_X_LVT		|NN const U8 *p
-EpR	|bool	|is_utf8_X_LV_LVT_V	|NN const U8 *p
-EpR	|bool	|is_utf8_X_T		|NN const U8 *p
-EpR	|bool	|is_utf8_X_V		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_begin	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_extend	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_prepend	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_non_hangul	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_L		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_LV		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_LVT		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_LV_LVT_V	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_T		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_V		|NN const U8 *p
 : Used in perly.y
 p	|OP*	|jmaybe		|NN OP *o
 : Used in pp.c 
