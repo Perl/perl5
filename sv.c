@@ -11660,12 +11660,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 						 proto_perl));
 	    break;
 	case SAVEt_REGCONTEXT:
-	    ix -= uv >> SAVE_TIGHT_SHIFT;
-	    break;
 	case SAVEt_ALLOC:
-	    i = POPINT(ss,ix);
-	    TOPINT(nss,ix) = i;
-	    ix -= i;
+	    ix -= uv >> SAVE_TIGHT_SHIFT;
 	    break;
 	case SAVEt_AELEM:		/* array element */
 	    sv = (const SV *)POPPTR(ss,ix);

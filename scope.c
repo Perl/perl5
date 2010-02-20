@@ -680,13 +680,17 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
     dVAR;
     register const I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
 				- (char*)PL_savestack);
-    register const I32 elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
+    const UV elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
+    const UV elems_shifted = elems << SAVE_TIGHT_SHIFT;
 
-    SSGROW(elems + 2);
+    if ((elems_shifted >> SAVE_TIGHT_SHIFT) != elems)
+	Perl_croak(aTHX_ "panic: save_alloc elems %"UVuf" out of range (%ld-%ld)",
+		   elems, size, pad);
+
+    SSGROW(elems + 1);
 
     PL_savestack_ix += elems;
-    SSPUSHINT(elems);
-    SSPUSHUV(SAVEt_ALLOC);
+    SSPUSHUV(SAVEt_ALLOC | elems_shifted);
     return start;
 }
 
@@ -932,11 +936,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_REGCONTEXT:
 	    /* regexp must have croaked */
-	    PL_savestack_ix -= uv >> SAVE_TIGHT_SHIFT;
-	    break;
 	case SAVEt_ALLOC:
-	    i = SSPOPINT;
-	    PL_savestack_ix -= i;  	/* regexp must have croaked */
+	    PL_savestack_ix -= uv >> SAVE_TIGHT_SHIFT;
 	    break;
 	case SAVEt_STACK_POS:		/* Position on Perl stack */
 	    i = SSPOPINT;

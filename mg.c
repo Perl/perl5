@@ -3071,14 +3071,12 @@ S_restore_magic(pTHX_ const void *p)
      */
     if (PL_savestack_ix == mgs->mgs_ss_ix)
     {
-	UV type = SSPOPUV;
-	I32 popval;
-        assert(type == SAVEt_DESTRUCTOR_X);
+	UV popval = SSPOPUV;
+        assert(popval == SAVEt_DESTRUCTOR_X);
         PL_savestack_ix -= 2;
-	type = SSPOPUV;
-        assert(type == SAVEt_ALLOC);
-	popval = SSPOPINT;
-        PL_savestack_ix -= popval;
+	popval = SSPOPUV;
+        assert((popval & SAVE_MASK) == SAVEt_ALLOC);
+        PL_savestack_ix -= popval >> SAVE_TIGHT_SHIFT;
     }
 
 }
