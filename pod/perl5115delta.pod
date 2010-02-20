@@ -274,10 +274,17 @@ of RT #69710, the Perl 5 version 12 meta-ticket.
 =head1 Acknowledgements
 
 Perl 5.11.5 represents approximately one month of development since
-Perl 5.11.4 and contains XXX lines of changes across XXX files
-from XXX authors and committers:
+Perl 5.11.4 and contains 9618 lines of changes across 151 files
+from 33 authors and committers:
 
-XXX The list of people to thank goes here.
+E<AElig>var ArnfjE<ouml>rE<eth> Bjarmason, Abigail, brian d foy, Chris
+Williams, David Golden, David Mitchell, Eric Brine, Frank Wiegand, Gisle
+Aas, H.Merijn Brand, Jan Dubois, Jesse Vincent, Jim Cromie, John Peacock,
+Josh ben Jore, Karl Williamson, Marcus Holland-Moritz, Michael G Schwern,
+Nicholas Clark, Offer Kaye, Philippe Bruhat (BooK), Rafael Garcia-Suarez,
+Reini Urban, Ricardo Signes, Robin Barker, Slaven Rezic, Steffen Mueller,
+Steve Hay, Steve Peters, Tim Bunce, Todd Rinaldo, Tony Cook and
+Vincent Pit.
 
 Many of the changes included in this version originated in the CPAN
 modules included in Perl's core. We're grateful to the entire CPAN
