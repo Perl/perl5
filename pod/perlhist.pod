@@ -26,7 +26,7 @@ Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
-Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes.
+Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay.
 
 =head2 PUMPKIN?
 
@@ -407,6 +407,7 @@ the strings?).
  Leon     5.11.2        2009-Nov-20
  Jesse    5.11.3        2009-Dec-20
  Ricardo  5.11.4        2010-Jan-20
+ Steve    5.11.5        2010-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
