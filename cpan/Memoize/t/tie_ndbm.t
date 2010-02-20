@@ -26,11 +26,6 @@ if ($@) {
   exit 0;
 }
 
-if (! -w $ENV{TMP}) {
-  print "1..0\n";
-  exit 0;
-}
-
 print "1..4\n";
 
 $file = "md$$";
