@@ -373,10 +373,9 @@ Perl_save_bool(pTHX_ bool *boolp)
 
     PERL_ARGS_ASSERT_SAVE_BOOL;
 
-    SSCHECK(3);
-    SSPUSHBOOL(*boolp);
+    SSCHECK(2);
     SSPUSHPTR(boolp);
-    SSPUSHUV(SAVEt_BOOL);
+    SSPUSHUV(SAVEt_BOOL | (*boolp << 8));
 }
 
 void
@@ -799,7 +798,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    ptr = SSPOPPTR;
-	    *(bool*)ptr = cBOOL(SSPOPBOOL);
+	    *(bool*)ptr = cBOOL(uv >> 8);
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;

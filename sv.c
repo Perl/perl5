@@ -11584,6 +11584,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_VPTR:			/* random* reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    /* Fall through */
+	case SAVEt_BOOL:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    break;
@@ -11697,12 +11699,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    break;
-	case SAVEt_BOOL:
-	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    longval = (long)POPBOOL(ss,ix);
-	    TOPBOOL(nss,ix) = cBOOL(longval);
 	    break;
 	case SAVEt_SET_SVFLAGS:
 	    i = POPINT(ss,ix);
