@@ -405,7 +405,9 @@ Perl_save_I8(pTHX_ I8 *bytep)
 
     PERL_ARGS_ASSERT_SAVE_I8;
 
-    save_pushi32ptr(*bytep, bytep, SAVEt_I8);
+    SSCHECK(2);
+    SSPUSHPTR(bytep);
+    SSPUSHUV(SAVEt_I8 | ((UV)*bytep << 8));
 }
 
 void
@@ -1088,7 +1090,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_I8:				/* I8 reference */
 	    ptr = SSPOPPTR;
-	    *(I8*)ptr = (I8)SSPOPINT;
+	    *(I8*)ptr = (I8)(uv >> 8);
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
