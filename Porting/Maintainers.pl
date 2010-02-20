@@ -261,7 +261,7 @@ use File::Glob qw(:case);
     'B::Debug' =>
 	{
 	'MAINTAINER'	=> 'rurban',
-	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.11.tar.gz',
+	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.12.tar.gz',
 	'FILES'		=> q[cpan/B-Debug],
 	'EXCLUDED'	=> [ qw( t/coverage.html t/pod.t ) ],
 	'CPAN'		=> 1,
@@ -1282,7 +1282,7 @@ use File::Glob qw(:case);
 
     'Pod::Plainer' =>
 	{
-	'DISTRIBUTION'	=> 'RMBARKER/Pod-Plainer-1.01.tar.gz',
+	'DISTRIBUTION'	=> 'RMBARKER/Pod-Plainer-1.02.tar.gz',
 	'MAINTAINER'	=> 'rmbarker',
 	'FILES'		=> q[dist/Pod-Plainer],
 	'CPAN'		=> 1,
@@ -1323,7 +1323,7 @@ use File::Glob qw(:case);
     'Safe' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.19.tar.gz',
+	'DISTRIBUTION'	=> 'RGARCIA/Safe-2.22.tar.gz',
 	'FILES'		=> q[dist/Safe],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'blead',
