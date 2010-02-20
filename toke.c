@@ -938,6 +938,7 @@ function is more convenient.
 void
 Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
 {
+    dVAR;
     char *bufptr;
     PERL_ARGS_ASSERT_LEX_STUFF_PVN;
     if (flags & ~(LEX_STUFF_UTF8))
@@ -1302,6 +1303,7 @@ is encountered, an exception is generated.
 I32
 Perl_lex_peek_unichar(pTHX_ U32 flags)
 {
+    dVAR;
     char *s, *bufend;
     if (flags & ~(LEX_KEEP_PREVIOUS))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_peek_unichar");

@@ -8369,6 +8369,7 @@ Perl_ck_each(pTHX_ OP *o)
    container of the rep_op var */
 STATIC OP *
 S_opt_scalarhv(pTHX_ OP *rep_op) {
+    dVAR;
     UNOP *unop;
 
     PERL_ARGS_ASSERT_OPT_SCALARHV;

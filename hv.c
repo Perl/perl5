@@ -1346,6 +1346,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
+    dVAR;
     HV * const hv = newHV();
     STRLEN hv_max, hv_fill;
 
