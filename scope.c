@@ -417,7 +417,9 @@ Perl_save_I16(pTHX_ I16 *intp)
 
     PERL_ARGS_ASSERT_SAVE_I16;
 
-    save_pushi32ptr(*intp, intp, SAVEt_I16);
+    SSCHECK(2);
+    SSPUSHPTR(intp);
+    SSPUSHUV(SAVEt_I16 | ((UV)*intp << 8));
 }
 
 void
@@ -1086,7 +1088,7 @@ Perl_leave_scope(pTHX_ I32 base)
 
 	case SAVEt_I16:				/* I16 reference */
 	    ptr = SSPOPPTR;
-	    *(I16*)ptr = (I16)SSPOPINT;
+	    *(I16*)ptr = (I16)(uv >> 8);
 	    break;
 	case SAVEt_I8:				/* I8 reference */
 	    ptr = SSPOPPTR;
