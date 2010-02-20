@@ -392,10 +392,16 @@ void
 Perl_save_int(pTHX_ int *intp)
 {
     dVAR;
+    const UV shifted = (UV)*intp << SAVE_TIGHT_SHIFT;
 
     PERL_ARGS_ASSERT_SAVE_INT;
 
-    save_pushi32ptr(*intp, intp, SAVEt_INT);
+    if ((int)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
+	SSCHECK(2);
+	SSPUSHPTR(intp);
+	SSPUSHUV(SAVEt_INT_SMALL | shifted);
+    } else
+	save_pushi32ptr(*intp, intp, SAVEt_INT);
 }
 
 void
@@ -801,6 +807,10 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvSETMAGIC(MUTABLE_SV(hv));
 		PL_localizing = 0;
 	    }
+	    break;
+	case SAVEt_INT_SMALL:
+	    ptr = SSPOPPTR;
+	    *(int*)ptr = (int)(uv >> SAVE_TIGHT_SHIFT);
 	    break;
 	case SAVEt_INT:				/* int reference */
 	    ptr = SSPOPPTR;
