@@ -3206,7 +3206,70 @@ S_scan_const(pTHX_ char *start)
 			d += len;
 		    }
 		    SvREFCNT_dec(res);
-		}
+
+		    /* Deprecate non-approved name syntax */
+		    if (ckWARN_d(WARN_DEPRECATED)) {
+			bool problematic = FALSE;
+			char* i = s;
+
+			/* For non-ut8 input, look to see that the first
+			 * character is an alpha, then loop through the rest
+			 * checking that each is a continuation */
+			if (! this_utf8) {
+			    if (! isALPHAU(*i)) problematic = TRUE;
+			    else for (i = s + 1; i < e; i++) {
+				if (isCHARNAME_CONT(*i)) continue;
+				problematic = TRUE;
+				break;
+			    }
+			}
+			else {
+			    /* Similarly for utf8.  For invariants can check
+			     * directly.  We accept anything above the latin1
+			     * range because it is immaterial to Perl if it is
+			     * correct or not, and is expensive to check.  But
+			     * it is fairly easy in the latin1 range to convert
+			     * the variants into a single character and check
+			     * those */
+			    if (UTF8_IS_INVARIANT(*i)) {
+				if (! isALPHAU(*i)) problematic = TRUE;
+			    } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
+				if (! isALPHAU(UNI_TO_NATIVE(UTF8_ACCUMULATE(*i,
+									    *(i+1)))))
+				{
+				    problematic = TRUE;
+				}
+			    }
+			    if (! problematic) for (i = s + UTF8SKIP(s);
+						    i < e;
+						    i+= UTF8SKIP(i))
+			    {
+				if (UTF8_IS_INVARIANT(*i)) {
+				    if (isCHARNAME_CONT(*i)) continue;
+				} else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
+				    continue;
+				} else if (isCHARNAME_CONT(
+					    UNI_TO_NATIVE(
+					    UTF8_ACCUMULATE(*i, *(i+1)))))
+				{
+				    continue;
+				}
+				problematic = TRUE;
+				break;
+			    }
+			}
+			if (problematic) {
+			    char *string;
+			    Newx(string, e - i + 1, char);
+			    Copy(i, string, e - i, char);
+			    string[e - i] = '\0';
+			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+				"Deprecated character(s) in \\N{...} starting at '%s'",
+				string);
+			    Safefree(string);
+			}
+		    }
+		} /* End \N{NAME} */
 #ifdef EBCDIC
 		if (!dorange) 
 		    native_range = FALSE; /* \N{} is defined to be Unicode */

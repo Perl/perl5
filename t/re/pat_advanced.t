@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1155;  # Update this when adding/deleting tests.
+plan tests => 1159;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1065,6 +1065,20 @@ sub run_tests {
         undef $w;
         eval 'q(syntax error) =~ /\N{MALFORMED}/';
         ok $@ && $@ =~ /Malformed/, 'Verify that malformed utf8 gives an error';
+        undef $w;
+        eval 'q() =~ /\N{4F}/';
+        ok $w && $w =~ /Deprecated/, 'Verify that leading digit in name gives warning';
+        undef $w;
+        eval 'q() =~ /\N{COM,MA}/';
+        ok $w && $w =~ /Deprecated/, 'Verify that comma in name gives warning';
+        undef $w;
+        my $name = "A\x{D7}O";
+        eval "q(W) =~ /\\N{$name}/";
+        ok $w && $w =~ /Deprecated/, 'Verify that latin1 symbol in name gives warning';
+        undef $w;
+        $name = "A\x{D1}O";
+        eval "q(W) =~ /\\N{$name}/";
+        ok ! $w, 'Verify that latin1 letter in name doesnt give warning';
 
     }
 
