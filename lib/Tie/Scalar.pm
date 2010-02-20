@@ -104,9 +104,20 @@ sub new {
 
 sub TIESCALAR {
     my $pkg = shift;
-	if ($pkg->can('new') and $pkg ne __PACKAGE__) {
-	warnings::warnif("WARNING: calling ${pkg}->new since ${pkg}->TIESCALAR is missing");
-	$pkg->new(@_);
+    my $pkg_new = $pkg -> can ('new');
+
+    if ($pkg_new and $pkg ne __PACKAGE__) {
+        my $my_new = __PACKAGE__ -> can ('new');
+        if ($pkg_new == $my_new) {  
+            #
+            # Prevent recursion
+            #
+            croak "$pkg must define either a TIESCALAR() or a new() method";
+        }
+
+	warnings::warnif ("WARNING: calling ${pkg}->new since " .
+                          "${pkg}->TIESCALAR is missing");
+	$pkg -> new (@_);
     }
     else {
 	croak "$pkg doesn't define a TIESCALAR method";
