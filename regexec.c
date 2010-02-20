@@ -294,21 +294,26 @@
 
 static void restore_pos(pTHX_ void *arg);
 
+#define REGCP_PAREN_ELEMS 4
+#define REGCP_OTHER_ELEMS 5
+#define REGCP_FRAME_ELEMS 2
+/* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
+ * are needed for the regexp context stack bookkeeping. */
+
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
 {
     dVAR;
     const int retval = PL_savestack_ix;
-#define REGCP_PAREN_ELEMS 4
     const int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
+    const unsigned int total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     int p;
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (paren_elems_to_push < 0)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
 
-#define REGCP_OTHER_ELEMS 7
-    SSGROW(paren_elems_to_push + REGCP_OTHER_ELEMS);
+    SSGROW(total_elems + REGCP_FRAME_ELEMS);
     
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
@@ -329,10 +334,7 @@ S_regcppush(pTHX_ I32 parenfloor)
     SSPUSHINT(*PL_reglastparen);
     SSPUSHINT(*PL_reglastcloseparen);
     SSPUSHPTR(PL_reginput);
-#define REGCP_FRAME_ELEMS 2
-/* REGCP_FRAME_ELEMS are part of the REGCP_OTHER_ELEMS and
- * are needed for the regexp context stack bookkeeping. */
-    SSPUSHINT(paren_elems_to_push + REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
+    SSPUSHINT(total_elems);
     SSPUSHINT(SAVEt_REGCONTEXT); /* Magic cookie. */
 
     return retval;
@@ -374,10 +376,9 @@ S_regcppop(pTHX_ const regexp *rex)
     PL_regsize = SSPOPINT;
     PL_regoffs=(regexp_paren_pair *) SSPOPPTR;
 
-    
+    i -= REGCP_OTHER_ELEMS;
     /* Now restore the parentheses context. */
-    for (i -= (REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
-	 i > 0; i -= REGCP_PAREN_ELEMS) {
+    for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
 	U32 paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
