@@ -203,6 +203,9 @@ sub _system_groups {
         # uid=39957(gsar) gid=22(users) groups=33536,39181,22(users),0(root),1067(dev)
         # FreeBSD since 6.2 has a fake id -a:
         # uid=1001(tobez) gid=20(staff) groups=20(staff), 0(wheel), 68(dialer)
+        #
+        # Linux may also have a context= field
+
         return ( $cmd, $str );
     }
 
@@ -243,9 +246,17 @@ sub extract_system_groups {
     # Remember that group names can contain whitespace, '-', '(parens)',
     # et cetera. That is: do not \w, do not \S.
     my @extracted;
-    if ($groups_string =~ /groups=(.+)( [ug]id=|$)/) {
-        my $gr = $1;
 
+    my @fields = split /\b(\w+=)/, $groups_string;
+    my $gr;
+    for my $i (0..@fields-2) {
+        if ($fields[$i] eq 'groups=') {
+            $gr = $fields[$i+1];
+            $gr =~ s/ $//;
+            last;
+        }
+    }
+    if (defined $gr) {
         my @g = split m{, ?}, $gr;
         # prefer names over numbers
         for (@g) {
