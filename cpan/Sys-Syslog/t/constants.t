@@ -4,8 +4,7 @@ use File::Spec;
 use Test::More;
 
 # NB. For PERL_CORE to be set, taint mode must not be enabled
-my $macrosall = $ENV{PERL_CORE} ? File::Spec->catfile(qw(.. ext Sys-Syslog macros.all))
-                                : 'macros.all';
+my $macrosall = 'macros.all';
 open(MACROS, $macrosall) or plan skip_all => "can't read '$macrosall': $!";
 my @names = map {chomp;$_} <MACROS>;
 close(MACROS);
