@@ -293,6 +293,7 @@ sub do_update {
     my %contents;
     for my $file (sort keys %changes) {
 	open my $fh, '<', $file or die "open '$file': $!\n";
+	binmode $fh;
 	$contents{$file} = [ <$fh> ];
 	chomp @{$contents{$file}};
 	close $fh or die "close: '$file': $!\n";
@@ -323,6 +324,7 @@ sub do_update {
     for my $file (sort keys %contents) {
 	my $nfile = "$file-new";
 	open my $fh, '>', $nfile or die "create '$nfile' failed: $!\n";
+	binmode $fh;
 	print $fh $_, "\n" for @{$contents{$file}};
 	close $fh or die "failed to close $nfile; aborting: $!\n";
 
