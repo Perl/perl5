@@ -206,7 +206,7 @@ If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
 new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more
 efficient.
 
-=for apidoc Am|char*|HeUTF8|HE* he|STRLEN len
+=for apidoc Am|char*|HeUTF8|HE* he
 Returns whether the C<char *> value returned by C<HePV> is encoded in UTF-8,
 doing any necessary dereferencing of possibly C<SV*> keys.  The value returned
 will be 0 or non-0, not necessarily 1 (or even a value with any low bits set),
