@@ -119,13 +119,19 @@ print "# we seem to have sparse files...\n";
 
 $ENV{LC_ALL} = "C";
 
-my $r = system '../perl', '-I../lib', '-e', <<'EOF';
+my $perl = '../../perl';
+unless (-x $perl) {
+    print "1..1\nnot ok 1 - can't find perl: expected $perl\n";
+    exit 0;
+}
+my $r = system $perl, '-I../lib', '-e', <<'EOF';
 use Fcntl qw(/^O_/ /^SEEK_/);
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or die $!;
 my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
 my $syswrite = syswrite(BIG, "big");
 exit 0;
 EOF
+
 
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 	do { warn "sysopen 'big' failed: $!\n"; bye };
