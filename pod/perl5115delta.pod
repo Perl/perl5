@@ -163,6 +163,57 @@ with ithreads and perlio.
 
 =item *
 
+The fatal error C<Malformed UTF-8 returned by \N> is now produced if the
+C<charnames> handler returns malformed UTF-8.
+
+=item *
+
+If an unresolved named character or sequence was encountered when compiling a
+regex pattern then the fatal error C<\\N{NAME} must be resolved by the lexer>
+is now produced. This can happen, for example, when using a single-quotish
+context like C<$re = '\N{SPACE}'; $re;>. See L<perldiag> for more examples of
+how the lexer can get bypassed.
+
+=item *
+
+The fatal error C<Invalid hexadecimal number in \\N{U+...}> will be produced
+if the character constant represented by C<...> is not a valid hexadecimal
+number. 
+
+=item *
+
+The new meaning of C<\N> as C<[^\n]> is not valid in a bracketed character
+class, just like C<.> in a character class loses its special meaning, and will
+cause the fatal error C<\\N in a character class must be a named character:
+\\N{...}>.
+
+=item *
+
+The warning C<Using just the first characters returned by \N{}> will be
+issued if the C<charnames> handler returns a sequence of characters which
+exceeds the limit of the number of characters that can be used. The message
+will indicate which characters were used and which were discarded.
+
+=item *
+
+Currently, all but the first of the several characters that the C<charnames>
+handler may return are discarded when used in a regular expression pattern
+bracketed character class. If this happens then the warning C<Using just the
+first character returned by \N{} in character class> will be issued.
+
+=item *
+
+The warning C<Missing right brace on \\N{} or unescaped left brace after \\N.
+Assuming the latter> will be issued if Perl encounters a C<\N{> but doesn't
+find a matching C<}>. In this case Perl doesn't know if it was mistakenly
+omitted, or if "match non-newline" followed by "match a C<{>" was desired.
+It assumes the latter because that is actually a valid interpretation as
+written, unlike the other case.  If you meant the former, you need to add the
+matching right brace.  If you did mean the latter, you can silence this
+warning by writing instead C<\N\{>.
+
+=item *
+
 C<gmtime> and C<localtime> called with numbers smaller than they can reliably
 handle will now issue the warnings C<gmtime(%.0f) too small> and
 C<localtime(%.0f) too small>.
