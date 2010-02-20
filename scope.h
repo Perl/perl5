@@ -55,6 +55,7 @@
 #define SAVEt_STACK_CXPOS	44
 #define SAVEt_PARSER		45
 #define SAVEt_ADELETE		46
+#define SAVEt_I32_SMALL		47
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2

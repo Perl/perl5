@@ -426,10 +426,16 @@ void
 Perl_save_I32(pTHX_ I32 *intp)
 {
     dVAR;
+    const UV shifted = (UV)*intp << SAVE_TIGHT_SHIFT;
 
     PERL_ARGS_ASSERT_SAVE_I32;
 
-    save_pushi32ptr(*intp, intp, SAVEt_I32);
+    if ((I32)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
+	SSCHECK(2);
+	SSPUSHPTR(intp);
+	SSPUSHUV(SAVEt_I32_SMALL | shifted);
+    } else
+	save_pushi32ptr(*intp, intp, SAVEt_I32);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
@@ -803,6 +809,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_BOOL:			/* bool reference */
 	    ptr = SSPOPPTR;
 	    *(bool*)ptr = cBOOL(uv >> 8);
+	    break;
+	case SAVEt_I32_SMALL:
+	    ptr = SSPOPPTR;
+	    *(I32*)ptr = (I32)(uv >> SAVE_TIGHT_SHIFT);
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
