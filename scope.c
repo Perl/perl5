@@ -202,7 +202,7 @@ Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
     SSCHECK(3);
     SSPUSHPTR(ptr1);
     SSPUSHPTR(ptr2);
-    SSPUSHINT(type);
+    SSPUSHUV(type);
 }
 
 SV *
@@ -271,7 +271,7 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
     SSPUSHPTR(sv);
     SSPUSHINT(mask);
     SSPUSHINT(val);
-    SSPUSHINT(SAVEt_SET_SVFLAGS);
+    SSPUSHUV(SAVEt_SET_SVFLAGS);
 }
 
 void
@@ -376,7 +376,7 @@ Perl_save_bool(pTHX_ bool *boolp)
     SSCHECK(3);
     SSPUSHBOOL(*boolp);
     SSPUSHPTR(boolp);
-    SSPUSHINT(SAVEt_BOOL);
+    SSPUSHUV(SAVEt_BOOL);
 }
 
 void
@@ -386,7 +386,7 @@ Perl_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
     SSCHECK(3);
     SSPUSHINT(i);
     SSPUSHPTR(ptr);
-    SSPUSHINT(type);
+    SSPUSHUV(type);
 }
 
 void
@@ -471,7 +471,7 @@ Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
     SSPUSHPTR(SvREFCNT_inc_simple_NN(PL_curpad[off]));
     SSPUSHPTR(PL_comppad);
     SSPUSHLONG((long)off);
-    SSPUSHINT(SAVEt_PADSV_AND_MORTALIZE);
+    SSPUSHUV(SAVEt_PADSV_AND_MORTALIZE);
 }
 
 void
@@ -500,7 +500,7 @@ Perl_save_pushptr(pTHX_ void *const ptr, const int type)
     dVAR;
     SSCHECK(2);
     SSPUSHPTR(ptr);
-    SSPUSHINT(type);
+    SSPUSHUV(type);
 }
 
 void
@@ -513,7 +513,7 @@ Perl_save_clearsv(pTHX_ SV **svp)
     ASSERT_CURPAD_ACTIVE("save_clearsv");
     SSCHECK(2);
     SSPUSHLONG((long)(svp-PL_curpad));
-    SSPUSHINT(SAVEt_CLEARSV);
+    SSPUSHUV(SAVEt_CLEARSV);
     SvPADSTALE_off(*svp); /* mark lexical as active */
 }
 
@@ -563,7 +563,7 @@ Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
     SSCHECK(3);
     SSPUSHDPTR(f);
     SSPUSHPTR(p);
-    SSPUSHINT(SAVEt_DESTRUCTOR);
+    SSPUSHUV(SAVEt_DESTRUCTOR);
 }
 
 void
@@ -573,7 +573,7 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
     SSCHECK(3);
     SSPUSHDXPTR(f);
     SSPUSHPTR(p);
-    SSPUSHINT(SAVEt_DESTRUCTOR_X);
+    SSPUSHUV(SAVEt_DESTRUCTOR_X);
 }
 
 void
@@ -602,7 +602,7 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
     SSPUSHPTR(ptr1);
     SSPUSHINT(i);
     SSPUSHPTR(ptr2);
-    SSPUSHINT(type);
+    SSPUSHUV(type);
 }
 
 void
@@ -644,7 +644,7 @@ Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
     SSPUSHPTR(SvREFCNT_inc_simple(hv));
     SSPUSHPTR(newSVsv(key));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_HELEM);
+    SSPUSHUV(SAVEt_HELEM);
     save_scalar_at(sptr, flags);
     if (flags & SAVEf_KEEPOLDELEM)
 	return;
@@ -681,7 +681,7 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
 
     PL_savestack_ix += elems;
     SSPUSHINT(elems);
-    SSPUSHINT(SAVEt_ALLOC);
+    SSPUSHUV(SAVEt_ALLOC);
     return start;
 }
 
@@ -705,9 +705,11 @@ Perl_leave_scope(pTHX_ I32 base)
     DEBUG_l(Perl_deb(aTHX_ "savestack: releasing items %ld -> %ld\n",
 			(long)PL_savestack_ix, (long)base));
     while (PL_savestack_ix > base) {
+	UV uv = SSPOPUV;
+	const U8 type = (U8)uv & SAVE_MASK;
 	TAINT_NOT;
 
-	switch (SSPOPINT) {
+	switch (type) {
 	case SAVEt_ITEM:			/* normal string */
 	    value = MUTABLE_SV(SSPOPPTR);
 	    sv = MUTABLE_SV(SSPOPPTR);

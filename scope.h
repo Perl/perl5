@@ -59,6 +59,9 @@
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2
 
+#define SAVE_TIGHT_SHIFT	6
+#define SAVE_MASK		0x3F
+
 #define save_aelem(av,idx,sptr)	save_aelem_flags(av,idx,sptr,SAVEf_SETMAGIC)
 #define save_helem(hv,key,sptr)	save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
 
@@ -72,6 +75,7 @@
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
 #define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))
 #define SSPUSHIV(i) (PL_savestack[PL_savestack_ix++].any_iv = (IV)(i))
+#define SSPUSHUV(u) (PL_savestack[PL_savestack_ix++].any_uv = (UV)(u))
 #define SSPUSHPTR(p) (PL_savestack[PL_savestack_ix++].any_ptr = (void*)(p))
 #define SSPUSHDPTR(p) (PL_savestack[PL_savestack_ix++].any_dptr = (p))
 #define SSPUSHDXPTR(p) (PL_savestack[PL_savestack_ix++].any_dxptr = (p))
@@ -79,6 +83,7 @@
 #define SSPOPLONG (PL_savestack[--PL_savestack_ix].any_long)
 #define SSPOPBOOL (PL_savestack[--PL_savestack_ix].any_bool)
 #define SSPOPIV (PL_savestack[--PL_savestack_ix].any_iv)
+#define SSPOPUV (PL_savestack[--PL_savestack_ix].any_uv)
 #define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
 #define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
@@ -192,7 +197,7 @@ scope has the given name. Name must be a literal string.
     STMT_START {				\
 	SSCHECK(2);				\
 	SSPUSHINT(PL_stack_sp - PL_stack_base);	\
-	SSPUSHINT(SAVEt_STACK_POS);		\
+	SSPUSHUV(SAVEt_STACK_POS);		\
     } STMT_END
 
 #define SAVEOP()	save_op()
@@ -222,7 +227,7 @@ scope has the given name. Name must be a literal string.
         SSCHECK(3);                               \
         SSPUSHINT(cxstack[cxstack_ix].blk_oldsp); \
         SSPUSHINT(cxstack_ix);                    \
-        SSPUSHINT(SAVEt_STACK_CXPOS);             \
+        SSPUSHUV(SAVEt_STACK_CXPOS);              \
     } STMT_END
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)

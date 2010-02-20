@@ -9883,7 +9883,7 @@ Perl_save_re_context(pTHX)
 
     state = (struct re_save_state *)(PL_savestack + PL_savestack_ix);
     PL_savestack_ix += SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
-    SSPUSHINT(SAVEt_RE_STATE);
+    SSPUSHUV(SAVEt_RE_STATE);
 
     Copy(&PL_reg_state, state, 1, struct re_save_state);
 

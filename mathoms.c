@@ -1171,7 +1171,7 @@ Perl_save_long(pTHX_ long int *longp)
     SSCHECK(3);
     SSPUSHLONG(*longp);
     SSPUSHPTR(longp);
-    SSPUSHINT(SAVEt_LONG);
+    SSPUSHUV(SAVEt_LONG);
 }
 
 void
@@ -1184,7 +1184,7 @@ Perl_save_iv(pTHX_ IV *ivp)
     SSCHECK(3);
     SSPUSHIV(*ivp);
     SSPUSHPTR(ivp);
-    SSPUSHINT(SAVEt_IV);
+    SSPUSHUV(SAVEt_IV);
 }
 
 void
@@ -1196,7 +1196,7 @@ Perl_save_nogv(pTHX_ GV *gv)
 
     SSCHECK(2);
     SSPUSHPTR(gv);
-    SSPUSHINT(SAVEt_NSTAB);
+    SSPUSHUV(SAVEt_NSTAB);
 }
 
 void
@@ -1213,7 +1213,7 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 	SSCHECK(3);
 	SSPUSHPTR(sarg[i]);		/* remember the pointer */
 	SSPUSHPTR(sv);			/* remember the value */
-	SSPUSHINT(SAVEt_ITEM);
+	SSPUSHUV(SAVEt_ITEM);
     }
 }
 

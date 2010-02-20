@@ -11430,6 +11430,8 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 #define TOPLONG(ss,ix)	((ss)[ix].any_long)
 #define POPIV(ss,ix)	((ss)[--(ix)].any_iv)
 #define TOPIV(ss,ix)	((ss)[ix].any_iv)
+#define POPUV(ss,ix)	((ss)[--(ix)].any_uv)
+#define TOPUV(ss,ix)	((ss)[ix].any_uv)
 #define POPBOOL(ss,ix)	((ss)[--(ix)].any_bool)
 #define TOPBOOL(ss,ix)	((ss)[ix].any_bool)
 #define POPPTR(ss,ix)	((ss)[--(ix)].any_ptr)
@@ -11502,8 +11504,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     Newxz(nss, max, ANY);
 
     while (ix > 0) {
-	const I32 type = POPINT(ss,ix);
-	TOPINT(nss,ix) = type;
+	const UV uv = POPUV(ss,ix);
+	const U8 type = (U8)uv & SAVE_MASK;
+
+	TOPUV(nss,ix) = uv;
 	switch (type) {
 	case SAVEt_HELEM:		/* hash element */
 	    sv = (const SV *)POPPTR(ss,ix);

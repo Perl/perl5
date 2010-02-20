@@ -335,7 +335,7 @@ S_regcppush(pTHX_ I32 parenfloor)
     SSPUSHINT(*PL_reglastcloseparen);
     SSPUSHPTR(PL_reginput);
     SSPUSHINT(total_elems);
-    SSPUSHINT(SAVEt_REGCONTEXT); /* Magic cookie. */
+    SSPUSHUV(SAVEt_REGCONTEXT); /* Magic cookie. */
 
     return retval;
 }
@@ -367,7 +367,7 @@ S_regcppop(pTHX_ const regexp *rex)
     PERL_ARGS_ASSERT_REGCPPOP;
 
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
-    i = SSPOPINT;
+    i = SSPOPUV;
     assert(i == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
     i = SSPOPINT; /* Parentheses elements to pop. */
     input = (char *) SSPOPPTR;
