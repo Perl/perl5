@@ -73,6 +73,18 @@ destruction of an instance.
 
 =back
 
+=head2 Tie::Scalar vs Tie::StdScalar
+
+C<< Tie::Scalar >> provides all the necessary methods, but one should realize
+they do not do anything useful. Calling C<< Tie::Scalar::FETCH >> or 
+C<< Tie::Scalar::STORE >> results in a (trappable) croak. And if you inherit
+from C<< Tie::Scalar >>, you I<must> provide either a C<< new >> or a
+C<< TIESCALAR >> method. 
+
+If you are looking for a class that does everything for you you don't
+define yourself, use the C<< Tie::StdScalar >> class, not the
+C<< Tie::Scalar >> one.
+
 =head1 MORE INFORMATION
 
 The L<perltie> section uses a good example of tying scalars by associating
