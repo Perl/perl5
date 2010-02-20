@@ -31,6 +31,7 @@ Perl_realloc
 Perl_mfree
 Perl_get_context
 Perl_set_context
+Perl_regcurly
 Perl_amagic_call
 Perl_Gv_AMupdate
 Perl_gv_handler
