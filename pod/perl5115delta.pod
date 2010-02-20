@@ -40,9 +40,17 @@ Undefined version objects are now uninitialized with zero rather than C<undef>.
 
 =over 4
 
+=item C<B::Debug>
+
+Upgraded from version 1.11 to 1.12.
+
 =item C<CPAN>
 
 Upgraded from version 1.94_53 to 1.94_56.
+
+This resolves RT #72362, in which CPAN was ignoring C<configure_requires>,
+and RT #72348, in which the command C<o conf init> in the CPAN shell could
+cause an exception to be thrown.
 
 This module is also now built in a less specialized way, which resolves a
 problem that caused C<make> after C<make clean> to fail, fixing RT #72218.
@@ -50,6 +58,17 @@ problem that caused C<make> after C<make clean> to fail, fixing RT #72218.
 =item C<CPANPLUS::Dist::Build>
 
 Upgraded from version 0.44 to 0.46.
+
+This makes the prereq resolving fall back to F<_build/> querying if the
+C<prereq_data> action fails.
+
+=item C<Pod::Perldoc>
+
+Upgraded from version 3.15_01 to 3.15_02.
+
+=item C<Pod::Plainer>
+
+Upgraded from version 1.01 to 1.02.
 
 =item C<Safe>
 
@@ -186,6 +205,14 @@ The new meaning of C<\N> as C<[^\n]> is not valid in a bracketed character
 class, just like C<.> in a character class loses its special meaning, and will
 cause the fatal error C<\\N in a character class must be a named character:
 \\N{...}>.
+
+=item *
+
+The rules on what is legal for the C<...> in C<\N{...}> have been tightened
+up so that unless the C<...> begins with an alphabetic character and continues
+with a combination of alphanumerics, dashes, spaces, parentheses or colons
+then the warning C<Deprecated character(s) in \\N{...} starting at '%s'> is
+now issued.
 
 =item *
 
