@@ -303,10 +303,6 @@ this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
-Have a look a couple lines up from that. You'll see roman numerals.
-Update those too. Find someone with VMS clue if you have to update 
-the Roman numerals for a .0 release.
-
 Commit your changes:
 
     $ git st
@@ -460,7 +456,9 @@ I<blead> and subsequently cherry-pick it.
 
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
 modules on CPAN. It can use a full, local CPAN mirror or fall back
-to C<wget> or C<curl> to fetch only package metadata remotely.
+to C<wget> or C<curl> to fetch only package metadata remotely. (If you're
+on Win32, then installing Cygwin is one way to have commands like C<wget>
+and C<curl> available.)
 
 (If you'd prefer to have a full CPAN mirror, see 
 http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
@@ -501,6 +499,9 @@ appear in the final release, and leave as-is for the later RCs and final).
 
 Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
 entry, as that is likely to reflect the previous version number.
+
+Also edit Module::CoreList's new version number in its F<Changes> file and
+in its F<META.yml> file.
 
 In addition, if this is a final release (rather than a release candidate):
 
@@ -610,9 +611,12 @@ Push all your recent commits:
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Tag the release:
+Tag the release (e.g.):
 
     $ git tag v5.11.0 -m'First release of the v5.11 series!'
+
+(Adjust the syntax appropriately if you're working on Win32, i.e. use
+C<-m "..."> rather than C<-m'...'>.)
 
 It is VERY important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
@@ -714,6 +718,10 @@ Bootstrap the CPAN client on the clean install:
 
     $ bin/perl -MCPAN -e'shell' 
 
+(Use C<... -e "shell"> instead on Win32. You probably also need a set of
+Unix command-line tools available for CPAN to function correctly without
+Perl alternatives like LWP installed. Cygwin is an obvious choice.)
+
 =item *
 
 Try installing a popular CPAN module that's reasonably complex and that
@@ -728,11 +736,17 @@ Check that your perl can run this:
     42
     $
 
+(Use C<... -lwe "use ..."> instead on Win32.)
+
 =item *
 
 Bootstrap the CPANPLUS client on the clean install:
 
     $ bin/cpanp
+
+(Again, on Win32 you'll need something like Cygwin installed, but make sure
+that you don't end up with its various F<bin/cpan*> programs being found on
+the PATH before those of the Perl that you're trying to test.)
 
 =item *
 
@@ -803,7 +817,7 @@ Upload both the .gz and .bz2 versions of the tarball.
 =item *
 
 Now that you've shipped the new perl release to PAUSE, it's
-time to publish the tag you created earlier to the public git repo:
+time to publish the tag you created earlier to the public git repo (e.g.):
 
     $ git push origin tag v5.11.0
 
@@ -855,7 +869,7 @@ to CPAN.
 
 I<You MUST SKIP this step for RC>
 
-Bump the perlXYZ version number.
+Bump the perlXYZdelta version number.
 
 First, create a new empty perlNNNdelta.pod file for the current release + 1;
 see F<Porting/how_to_write_a_perldelta.pod>.

@@ -3,6 +3,20 @@
 # A tool to build a perl release tarball
 # Very basic but functional - if you're on a unix system.
 #
+# If you're on Win32 then it should still work, but various Unix command-line
+# tools will need to be available somewhere. An obvious choice is to install
+# Cygwin and ensure its 'bin' folder is on the PATH in the shell where you run
+# this script. The Cygwin 'bin' folder needs to precede the Windows 'system32'
+# folder so that Cygwin's 'find' command is found in preference to the Windows
+# 'find' command. Your Cygwin installation will need to contain at least the
+# 'cpio' command, in addition to the commands installed by default, and it will
+# also be useful to have 'curl' and 'diffstat' installed too for later stages
+# of the release process (namely, Porting\corelist.pl and generating the commit
+# statistics for the perlXYZdelta.pod file respectively). Finally, ensure that
+# the 'awk' and 'shasum' commands are copies of gawk.exe and sha1sum.exe
+# respectively, rather the links to them that only work in a Cygwin bash shell
+# which they are by default.
+#
 # No matter how automated this gets, you'll always need to read
 # and re-read pumpkin.pod and release_managers_guide.pod to
 # check for things to be done at various stages of the process.
@@ -189,8 +203,9 @@ print "\n";
 system("ls -ld $perl*");
 print "\n";
 
+my $null = $^O eq 'MSWin32' ? 'NUL' : '/dev/null';
 for my $sha (qw(sha1 shasum sha1sum)) {
-    if (`which $sha 2>/dev/null`) {
+    if (`which $sha 2>$null`) {
 	system("$sha $perl*.tar.*");
 	last;
     }
