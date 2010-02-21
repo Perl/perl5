@@ -29,6 +29,7 @@ you should reset the version numbers to the next blead series.
  June 20         -  5.11.9  -   Philippe Bruhat
  July 20         -  5.11.10 -   Matt Trout
  August 20       -  5.11.11 -   David Golden
+ September 20    -  5.11.12 -   Steve Hay
 
 =head1 VICTIMS
 
