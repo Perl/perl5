@@ -256,9 +256,9 @@ my %orig_inc;
 @orig_inc{@orig_inc} = ();
 
 my $failed;
-# This is the order that directories are pushed onto @INC in perl.c:
+# This [used to be] the order that directories are pushed onto @INC in perl.c:
 foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
-		     vendorarchexp vendorlibexp vendorlib_stem)) {
+		     vendorarchexp vendorlibexp)) {
   my $dir = $Config{$lib};
   SKIP: {
     skip "lib $lib not in \@INC on Win32" if $^O eq 'MSWin32';
