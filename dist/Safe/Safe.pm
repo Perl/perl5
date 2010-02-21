@@ -41,6 +41,23 @@ use Opcode 1.01, qw(
 
 *ops_to_opset = \&opset;   # Temporary alias for old Penguins
 
+# Regular expressions and other unicode-aware code may need to call
+# utf8->SWASHNEW (via perl's utf8.c).  That will fail unless we share the
+# SWASHNEW method.
+# Sadly we can't just add utf8::SWASHNEW to $default_share because perl's
+# utf8.c code does a fetchmethod on SWASHNEW to check if utf8.pm is loaded,
+# and sharing makes it look like the method exists.
+# The simplest and most robust fix is to ensure the utf8 module is loaded when
+# Safe is loaded. Then we can add utf8::SWASHNEW to $default_share.
+require utf8;
+# we must ensure that utf8_heavy.pl, where SWASHNEW is defined, is loaded
+# but without depending on knowledge of that implementation detail.
+# This code (//i on a unicode string) ensures utf8 is fully loaded
+# and also loads the ToFold SWASH.
+# (Swashes are cached internally by perl in PL_utf8_* variables
+# independent of being inside/outside of Safe. So once loaded they can be)
+do { my $unicode = pack('U',0xC4).'1a'; $unicode =~ /\xE4/i; };
+# now we can safely include utf8::SWASHNEW in $default_share defined below.
 
 my $default_root  = 0;
 # share *_ and functions defined in universal.c
@@ -60,6 +77,7 @@ my $default_share = [qw[
     &utf8::downgrade
     &utf8::native_to_unicode
     &utf8::unicode_to_native
+    &utf8::SWASHNEW
     $version::VERSION
     $version::CLASS
     $version::STRICT
