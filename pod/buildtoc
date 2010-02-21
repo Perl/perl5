@@ -748,6 +748,7 @@ while (my ($target, $name) = each %Targets) {
   }
   print "Now processing $name\n" if $Verbose;
   open THING, $name or die "Can't open $name: $!";
+  binmode THING;
   my @orig = <THING>;
   my $orig = join '', @orig;
   close THING;
@@ -762,6 +763,7 @@ while (my ($target, $name) = each %Targets) {
   }
   rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
   open THING, ">$name" or die "$0: Can't open $name for writing: $!";
+  binmode THING;
   print THING $new or die "$0: print to $name failed: $!";
   close THING or die "$0: close $name failed: $!";
 }
