@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what is new for perl v5.11.3
+perl5113delta - what is new for perl v5.11.3
 
 =head1 DESCRIPTION
 
