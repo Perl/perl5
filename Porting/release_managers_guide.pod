@@ -848,7 +848,9 @@ do it for you.)
 
 =item *
 
-Ask Jarkko to add the tarball to http://www.cpan.org/src/
+Check http://www.cpan.org/src/ to see if the new tarballs have appeared.
+They should appear automatically, but if they don't then ask Jarkko to look
+into it, since his scripts must have broken.
 
 =item *
 
