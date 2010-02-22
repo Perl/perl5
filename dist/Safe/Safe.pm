@@ -116,6 +116,9 @@ my $default_share = [qw[
     &version::noop
     &version::is_alpha
     &version::qv
+    &version::vxs::declare
+    &version::vxs::qv
+    &version::vxs::_VERSION
 ]), ($] >= 5.011 && qw[
     &re::regexp_pattern
 ])];
