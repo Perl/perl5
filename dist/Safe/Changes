@@ -1,3 +1,9 @@
+2.23 Mon Feb 22 2010
+    - Install Safe in "site" instead of "perl" for perls > 5.10
+    - [perl #72942] Can't perform unicode operations in Safe compartment
+      (Tim Bunce)
+    - Add some symbols from version::vxs to the default share
+
 2.22 Thu Feb 11 2010
     fix [perl #72700]: An exception thrown from a closure was getting lost.
     (Tim Bunce)
