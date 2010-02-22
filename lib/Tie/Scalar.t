@@ -83,11 +83,22 @@ package main;
 
 @NoMethods::ISA = qw [Tie::Scalar];
 
-eval {tie my $foo => "NoMethods"};
+{
+    #
+    # Without the fix for #72878, the code runs forever.
+    # Trap this, and die if with an appropriate message if this happens.
+    #
+    local $SIG {__WARN__} = sub {
+        die "Called NoMethods->new"
+             if $_ [0] =~ /^WARNING: calling NoMethods->new/;
+    };
 
-like $@ =>
-    qr /\QNoMethods must define either a TIESCALAR() or a new() method/,
-    "croaks if both new() and TIESCALAR() are missing";
+    eval {tie my $foo => "NoMethods";};
+
+    like $@ =>
+        qr /\QNoMethods must define either a TIESCALAR() or a new() method/,
+        "croaks if both new() and TIESCALAR() are missing";
+};
 
 #
 # Don't croak on missing new/TIESCALAR if you're inheriting one.
