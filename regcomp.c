@@ -8887,6 +8887,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
 /*
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
+#ifndef PERL_IN_XSUB_RE
 I32
 Perl_regcurly(register const char *s)
 {
@@ -8906,7 +8907,7 @@ Perl_regcurly(register const char *s)
 	return FALSE;
     return TRUE;
 }
-
+#endif
 
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
