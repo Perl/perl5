@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(17);
+     plan(18);
 }
 
 use strict;
@@ -224,5 +224,17 @@ print create threads sub {
 }=>->join->()()
  //"undef"
 EOJ
+
+# At the point of thread creation, $h{1} is on the temps stack.
+# The weak reference $a, however, is visible from the symbol table.
+fresh_perl_is(<<'EOI', 'ok', { }, 'Test for 34394ecd06e704e9');
+    use threads;
+    %h = (1, 2);
+    use Scalar::Util 'weaken';
+    $a = \$h{1};
+    weaken($a);
+    delete $h{1} && threads->create(sub {}, shift)->join();
+    print 'ok';
+EOI
 
 # EOF
