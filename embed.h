@@ -1181,6 +1181,7 @@
 #endif
 #endif
 #define sv_dup			Perl_sv_dup
+#define sv_dup_inc		Perl_sv_dup_inc
 #define rvpv_dup		Perl_rvpv_dup
 #define parser_dup		Perl_parser_dup
 #endif
@@ -3590,6 +3591,7 @@
 #endif
 #endif
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
+#define sv_dup_inc(a,b)		Perl_sv_dup_inc(aTHX_ a,b)
 #define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
 #define parser_dup(a,b)		Perl_parser_dup(aTHX_ a,b)
 #endif

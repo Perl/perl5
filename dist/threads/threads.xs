@@ -792,7 +792,7 @@ S_ithread_create(
             sv_copypv(thread->init_function, init_function);
         } else {
             thread->init_function =
-                SvREFCNT_inc(sv_dup(init_function, &clone_param));
+                sv_dup_inc(init_function, &clone_param);
         }
 
         thread->params = params = newAV();

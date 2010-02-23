@@ -4295,6 +4295,12 @@ PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const pa
 #define PERL_ARGS_ASSERT_SV_DUP	\
 	assert(param)
 
+PERL_CALLCONV SV*	Perl_sv_dup_inc(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DUP_INC	\
+	assert(param)
+
 PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const param)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

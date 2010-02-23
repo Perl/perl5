@@ -162,23 +162,22 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     if (newmeta->mro_linear_all) {
 	newmeta->mro_linear_all
-	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_all, param)));
+	    = MUTABLE_HV(sv_dup_inc((const SV *)newmeta->mro_linear_all, param));
 	/* This is just acting as a shortcut pointer, and will be automatically
 	   updated on the first get.  */
 	newmeta->mro_linear_current = NULL;
     } else if (newmeta->mro_linear_current) {
 	/* Only the current MRO is stored, so this owns the data.  */
 	newmeta->mro_linear_current
-	    = SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_current,
-				  param));
+	    = sv_dup_inc((const SV *)newmeta->mro_linear_current, param);
     }
 
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
-	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_nextmethod, param)));
+	    = MUTABLE_HV(sv_dup_inc((const SV *)newmeta->mro_nextmethod, param));
     if (newmeta->isa)
 	newmeta->isa
-	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->isa, param)));
+	    = MUTABLE_HV(sv_dup_inc((const SV *)newmeta->isa, param));
 
     return newmeta;
 }

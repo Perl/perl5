@@ -10491,18 +10491,17 @@ ptr_table_* functions.
    that currently av_dup, gv_dup and hv_dup are the same as sv_dup.
    If this changes, please unmerge ss_dup.
    Likewise, sv_dup_inc_multiple() relies on this fact.  */
-#define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
-#define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
+#define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup_inc(s,t))
 #define av_dup(s,t)	MUTABLE_AV(sv_dup((const SV *)s,t))
-#define av_dup_inc(s,t)	MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
+#define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
 #define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
-#define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
+#define hv_dup_inc(s,t)	MUTABLE_HV(sv_dup_inc((const SV *)s,t))
 #define cv_dup(s,t)	MUTABLE_CV(sv_dup((const SV *)s,t))
-#define cv_dup_inc(s,t)	MUTABLE_CV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
+#define cv_dup_inc(s,t)	MUTABLE_CV(sv_dup_inc((const SV *)s,t))
 #define io_dup(s,t)	MUTABLE_IO(sv_dup((const SV *)s,t))
-#define io_dup_inc(s,t)	MUTABLE_IO(SvREFCNT_inc(sv_dup((const SV *)s,t)))
+#define io_dup_inc(s,t)	MUTABLE_IO(sv_dup_inc((const SV *)s,t))
 #define gv_dup(s,t)	MUTABLE_GV(sv_dup((const SV *)s,t))
-#define gv_dup_inc(s,t)	MUTABLE_GV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
+#define gv_dup_inc(s,t)	MUTABLE_GV(sv_dup_inc((const SV *)s,t))
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
@@ -11351,6 +11350,13 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 
     return dstr;
  }
+
+SV *
+Perl_sv_dup_inc(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
+{
+    PERL_ARGS_ASSERT_SV_DUP_INC;
+    return SvREFCNT_inc(sv_dup(sstr,param));
+}
 
 /* duplicate a context */
 

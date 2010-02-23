@@ -179,7 +179,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 	char *k;
 	Newx(k, HEK_BASESIZE + sizeof(const SV *), char);
 	HeKEY_hek(ret) = (HEK*)k;
-	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
+	HeKEY_sv(ret) = sv_dup_inc(HeKEY_sv(e), param);
     }
     else if (shared) {
 	/* This is hek_dup inlined, which seems to be important for speed
@@ -202,7 +202,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
     else
 	HeKEY_hek(ret) = save_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
                                         HeKFLAGS(e));
-    HeVAL(ret) = SvREFCNT_inc(sv_dup(HeVAL(e), param));
+    HeVAL(ret) = sv_dup_inc(HeVAL(e), param);
     return ret;
 }
 #endif	/* USE_ITHREADS */
