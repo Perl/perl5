@@ -132,7 +132,7 @@ PP(pp_padhv)
 
 /* Translations. */
 
-const char S_no_symref_sv[] =
+static const char S_no_symref_sv[] =
     "Can't use string (\"%" SVf32 "\"%s) as %s ref while \"strict refs\" in use";
 
 PP(pp_rv2gv)
