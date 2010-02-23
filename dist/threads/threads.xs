@@ -784,7 +784,7 @@ S_ithread_create(
          * they are created
          */
         SvREFCNT_dec(PL_endav);
-        PL_endav = newAV();
+        PL_endav = NULL;
 
         clone_param.flags = 0;
         if (SvPOK(init_function)) {
