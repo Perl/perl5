@@ -4289,6 +4289,15 @@ STATIC SV **	S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest, SSize_t i
 	assert(source); assert(dest); assert(param)
 
 #endif
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+STATIC SV*	S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DUP_COMMON	\
+	assert(sstr); assert(param)
+
+#endif
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);

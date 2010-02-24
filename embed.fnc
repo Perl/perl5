@@ -1421,6 +1421,10 @@ ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC *mg|NN CLONE_PARAMS *const param
 s	|SV **	|sv_dup_inc_multiple|NN SV *const *source|NN SV **dest \
 				|SSize_t items|NN CLONE_PARAMS *const param
 #endif
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+sR	|SV*	|sv_dup_common	|NN const SV *const sstr \
+				|NN CLONE_PARAMS *const param
+#endif
 ApR	|SV*	|sv_dup		|NULLOK const SV *const sstr|NN CLONE_PARAMS *const param
 ApR	|SV*	|sv_dup_inc	|NULLOK const SV *const sstr \
 				|NN CLONE_PARAMS *const param

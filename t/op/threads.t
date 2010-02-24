@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(19);
+     plan(20);
 }
 
 use strict;
@@ -251,6 +251,16 @@ fresh_perl_like(<<'EOI', qr/\AThread 1 terminated abnormally: Not a CODE referen
     threads->create({}, delete $h{1})->join();
 
     print "end";
+EOI
+
+fresh_perl_is(<<'EOI', 'ok', { }, '0 refcnt neither on tmps stack nor in @_');
+    use threads;
+    my %h = (1, []);
+    use Scalar::Util 'weaken';
+    my $a = $h{1};
+    weaken($a);
+    delete $h{1} && threads->create(sub {}, shift)->join();
+    print 'ok';
 EOI
 
 # EOF

@@ -11005,16 +11005,14 @@ S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
 
 /* duplicate an SV of any type (including AV, HV etc) */
 
-SV *
-Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
+static SV *
+S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 {
     dVAR;
     SV *dstr;
 
-    PERL_ARGS_ASSERT_SV_DUP;
+    PERL_ARGS_ASSERT_SV_DUP_COMMON;
 
-    if (!sstr)
-	return NULL;
     if (SvTYPE(sstr) == SVTYPEMASK) {
 #ifdef DEBUG_LEAKING_SCALARS_ABORT
 	abort();
@@ -11245,11 +11243,6 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    else {
 			while (items-- > 0)
 			    *dst_ary++ = sv_dup(*src_ary++, param);
-			if (!(param->flags & CLONEf_COPY_STACKS)
-			     && AvREIFY(sstr))
-			{
-			    av_reify(MUTABLE_AV(dstr)); /* #41138 */
-			}
 		    }
 		    items = AvMAX((const AV *)sstr) - AvFILLp((const AV *)sstr);
 		    while (items-- > 0) {
@@ -11355,7 +11348,22 @@ SV *
 Perl_sv_dup_inc(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 {
     PERL_ARGS_ASSERT_SV_DUP_INC;
-    return SvREFCNT_inc(sv_dup(sstr,param));
+    return sstr ? SvREFCNT_inc(sv_dup_common(sstr, param)) : NULL;
+}
+
+SV *
+Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
+{
+    SV *dstr = sstr ? sv_dup_common(sstr, param) : NULL;
+    PERL_ARGS_ASSERT_SV_DUP;
+
+    /* Track every SV that (at least initially) had a reference count of 0.  */
+    if (dstr && !(param->flags & CLONEf_COPY_STACKS) && !SvREFCNT(dstr)) {
+	assert(param->unreferenced);
+	av_push(param->unreferenced, dstr);
+    }
+
+    return dstr;
 }
 
 /* duplicate a context */
@@ -12018,6 +12026,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Likely nothing will use this, but it is initialised to be consistent
        with Perl_clone_params_new().  */
     param->proto_perl = my_perl;
+    param->unreferenced = NULL;
 
     INIT_TRACK_MEMPOOL(my_perl->Imemory_debug_header, my_perl);
 
@@ -12118,6 +12127,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
        work inside av.c, filling slots between AvFILL() and AvMAX() with
        &PL_sv_undef, and SvREFCNT_dec()ing those.  */
     AvREAL_off(param->stashes);
+
+    if (!(flags & CLONEf_COPY_STACKS)) {
+	param->unreferenced = newAV();
+	AvREAL_off(param->unreferenced);
+    }
 
     /* Set tainting stuff before PerlIO_debug can possibly get called */
     PL_tainting		= proto_perl->Itainting;
@@ -12513,19 +12527,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else {
 	init_stacks();
 	ENTER;			/* perl_destruct() wants to LEAVE; */
-
-	/* although we're not duplicating the tmps stack, we should still
-	 * add entries for any SVs on the tmps stack that got cloned by a
-	 * non-refcount means (eg a temp in @_); otherwise they will be
-	 * orphaned
-	 */
-	for (i = 0; i<= proto_perl->Itmps_ix; i++) {
-	    SV * const nsv = MUTABLE_SV(ptr_table_fetch(PL_ptr_table,
-		    proto_perl->Itmps_stack[i]));
-	    if (nsv && !SvREFCNT(nsv)) {
-		PUSH_EXTEND_MORTAL__SV_C(SvREFCNT_inc_simple(nsv));
-	    }
-	}
     }
 
     PL_start_env	= proto_perl->Istart_env;	/* XXXXXX */
@@ -12632,6 +12633,39 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         PL_ptr_table = NULL;
     }
 
+    if (!(flags & CLONEf_COPY_STACKS)) {
+	/* although we're not duplicating the tmps stack, we should still
+	 * add entries for any SVs on the tmps stack that got cloned by a
+	 * non-refcount means (eg a temp in @_); otherwise they will be
+	 * orphaned.
+	 *
+	 * This actualy expands to all SVs which are pointed to, without a
+	 * reference being owned by that pointer, such as @_ and weak
+	 * references. Owners of these references include the tmps stack, the
+	 * save stack, and (effectively) the magic backreference structure.
+	 */
+	if (AvFILLp(param->unreferenced) > -1) {
+	    SV **svp = AvARRAY(param->unreferenced);
+	    SV **const last = svp + AvFILLp(param->unreferenced);
+	    SSize_t count = 0;
+
+	    do {
+		if (!SvREFCNT(*svp))
+		    ++count;
+	    } while (++svp <= last);
+
+	    EXTEND_MORTAL(count);
+
+	    svp = AvARRAY(param->unreferenced);
+
+	    do {
+		if (!SvREFCNT(*svp))
+		    PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(*svp);
+	    } while (++svp <= last);
+	}
+
+	SvREFCNT_dec(param->unreferenced);
+    }
 
     SvREFCNT_dec(param->stashes);
 
@@ -12658,6 +12692,7 @@ Perl_clone_params_del(CLONE_PARAMS *param)
     }
 
     SvREFCNT_dec(param->stashes);
+    SvREFCNT_dec(param->unreferenced);
 
     Safefree(param);
 
@@ -12690,6 +12725,8 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
     param->new_perl = to;
     param->stashes = (AV *)Perl_newSV_type(to, SVt_PVAV);
     AvREAL_off(param->stashes);
+    param->unreferenced = (AV *)Perl_newSV_type(to, SVt_PVAV);
+    AvREAL_off(param->unreferenced);
 
     if (was != to) {
 	PERL_SET_THX(was);

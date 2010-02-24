@@ -1180,6 +1180,11 @@
 #define sv_dup_inc_multiple	S_sv_dup_inc_multiple
 #endif
 #endif
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_dup_common		S_sv_dup_common
+#endif
+#endif
 #define sv_dup			Perl_sv_dup
 #define sv_dup_inc		Perl_sv_dup_inc
 #define rvpv_dup		Perl_rvpv_dup
@@ -3590,6 +3595,11 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define sv_dup_inc_multiple(a,b,c,d)	S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
+#endif
+#endif
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_dup_common(a,b)	S_sv_dup_common(aTHX_ a,b)
 #endif
 #endif
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)

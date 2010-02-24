@@ -1940,6 +1940,7 @@ struct clone_params {
   UV  flags;
   PerlInterpreter *proto_perl;
   PerlInterpreter *new_perl;
+  AV *unreferenced;
 };
 
 /*
