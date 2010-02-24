@@ -301,6 +301,9 @@ B<Note:> C<\R> has no special meaning inside of a character class;
 use C<\v> instead (vertical whitespace).
 X<\R>
 
+Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it matches the
+character whose name is C<NAME>.  Otherwise it matches any character but C<\n>.
+
 The POSIX character class syntax
 X<character class>
 

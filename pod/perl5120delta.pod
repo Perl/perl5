@@ -238,9 +238,12 @@ for some or all operations. (Yuval Kogman)
 A new regex escape has been added, C<\N>. It will match any character that
 is not a newline, independently from the presence or absence of the single
 line match modifier C</s>.  It is not usable within a character class.
-(If C<\N> is followed by an opening brace and
-by a letter, perl will still assume that a Unicode character name is
-coming, so compatibility is preserved.) (Rafael Garcia-Suarez).
+C<\N{3}> means to match 3 non-newlines; C<\N{5,}> means to match at least 5.
+C<\N{NAME}> still means the character or sequence named C<NAME>, but C<NAME> no
+longer can be things like C<3>, or C<5,>.
+Compatibility with Unicode names is preserved, as none look like these, but it
+has been possible to create custom names that do look like them, and those will
+no longer work. (Rafael Garcia-Suarez)
 
 This will break a L<custom charnames translator|charnames/CUSTOM TRANSLATORS>
 which allows numbers for character names, as C<\N{3}> will now mean to match 3

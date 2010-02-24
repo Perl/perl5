@@ -45,7 +45,7 @@ constitute a character class. That is, they will match a single
 character, if that character belongs to a specific set of characters
 (defined by the sequence). A backslashed sequence is a sequence of
 characters starting with a backslash. Not all backslashed sequences
-are character class; for a full list, see L<perlrebackslash>.
+are character classes; for a full list, see L<perlrebackslash>.
 
 Here's a list of the backslashed sequences, which are discussed in
 more detail below.
@@ -116,8 +116,12 @@ that is not considered horizontal white space.
 C<\N>, like the dot, will match any character that is not a newline. The
 difference is that C<\N> will not be influenced by the single line C</s>
 regular expression modifier. (Note that, since C<\N{}> is also used for
-Unicode named characters, if C<\N> is followed by an opening brace and
-by a letter, perl will assume that a Unicode character name is coming.)
+named characters, if C<\N> is followed by an opening brace and something that
+is not a quantifier, perl will assume that a character name is coming.  For
+example, C<\N{3}> means to match 3 non-newlines; C<\N{5,}> means to match 5 or
+more non-newlines, but C<\N{4F}> is not a legal quantifier, and will cause
+perl to look for a character named C<4F> (and won't find it unless custom names
+have been defined.)
 
 C<\v> will match any character that is considered vertical white space;
 this includes the carriage return and line feed characters (newline).
@@ -265,7 +269,7 @@ Examples:
 =head3 Special Characters Inside a Bracketed Character Class
 
 Most characters that are meta characters in regular expressions (that
-is, characters that carry a special meaning like C<*> or C<(>) lose
+is, characters that carry a special meaning like C<.>, C<*>, or C<(>) lose
 their special meaning and can be used inside a character class without
 the need to escape them. For instance, C<[()]> matches either an opening
 parenthesis, or a closing parenthesis, and the parens inside the character
@@ -281,6 +285,22 @@ outside the character class C<\b> is an assertion indicating a point
 that does not have either two word characters or two non-word characters
 on either side, inside a bracketed character class, C<\b> matches a
 backspace character.
+
+The sequences
+C<\a>,
+C<\c>,
+C<\e>,
+C<\f>,
+C<\n>,
+C<\N{NAME}>,
+C<\r>,
+C<\t>,
+and
+C<\x>
+are also special and have the same meanings as they do outside a bracketed character
+class.
+
+Also, a backslash followed by digits is considered an octal number.
 
 A C<[> is not special inside a character class, unless it's the start
 of a POSIX character class (see below). It normally does not need escaping.
@@ -362,11 +382,16 @@ Examples:
 
 =head3 Backslash Sequences
 
-You can put a backslash sequence character class inside a bracketed character
-class, and it will act just as if you put all the characters matched by
-the backslash sequence inside the character class. For instance,
-C<[a-f\d]> will match any digit, or any of the lowercase letters between
-'a' and 'f' inclusive.
+You can put any backslash sequence character class (with one exception listed
+in the next paragraph) inside a bracketed character class, and it will act just
+as if you put all the characters matched by the backslash sequence inside the
+character class. For instance, C<[a-f\d]> will match any digit, or any of the
+lowercase letters between 'a' and 'f' inclusive.
+
+C<\N> within a bracketed character class must be of the form C<\N{NAME}> for
+the same reason that a dot C<.> inside a bracketed character class loses its
+special meaning: it matches nearly anything, which generally isn't what you
+want to happen.
 
 Examples:
 

@@ -113,7 +113,7 @@ This one works differently from normal strings:
    [f-j-]   Dash escaped or at start or end means 'dash'
    [^f-j]   Caret indicates "match any character _except_ these"
 
-The following sequences work within or without a character class.
+The following sequences (except C<\N>) work within or without a character class.
 The first six are locale aware, all are Unicode aware. See L<perllocale>
 and L<perlunicode> for details.
 
@@ -125,7 +125,9 @@ and L<perlunicode> for details.
    \S      A non-whitespace character
    \h      An horizontal white space
    \H      A non horizontal white space
-   \N      A non newline (when not followed by a '{'; it's like . without /s)
+   \N      A non newline (when not followed by '{NAME}'; not valid in a
+	   character class; equivalent to [^\n]; it's like . without /s
+	   modifier)
    \v      A vertical white space
    \V      A non vertical white space
    \R      A generic newline           (?>\v|\x0D\x0A)
