@@ -823,4 +823,6 @@ Perl_sys_init
 Perl_sys_init3
 Perl_sys_term
 Perl_fetch_cop_label
+Perl_clone_params_new
+Perl_clone_params_del
 # ex: set ro:

@@ -6878,6 +6878,21 @@ PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN k
 	assert(keyword_ptr); assert(op_ptr)
 
 
+#if defined(USE_ITHREADS)
+PERL_CALLCONV CLONE_PARAMS *	Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_CLONE_PARAMS_NEW	\
+	assert(from); assert(to)
+
+PERL_CALLCONV void	Perl_clone_params_del(CLONE_PARAMS *param)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_CLONE_PARAMS_DEL	\
+	assert(param)
+
+#endif
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

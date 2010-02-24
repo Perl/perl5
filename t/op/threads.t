@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(18);
+     plan(19);
 }
 
 use strict;
@@ -235,6 +235,22 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Test for 34394ecd06e704e9');
     weaken($a);
     delete $h{1} && threads->create(sub {}, shift)->join();
     print 'ok';
+EOI
+
+# This will fail in "interesting" ways if stashes in clone_params is not
+# initialised correctly.
+fresh_perl_like(<<'EOI', qr/\AThread 1 terminated abnormally: Not a CODE reference/, { }, 'RT #73046');
+    use strict;
+    use threads;
+
+    sub foo::bar;
+
+    my %h = (1, *{$::{'foo::'}}{HASH});
+    *{$::{'foo::'}} = {};
+
+    threads->create({}, delete $h{1})->join();
+
+    print "end";
 EOI
 
 # EOF

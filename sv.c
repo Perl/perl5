@@ -12012,7 +12012,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif		/* PERL_IMPLICIT_SYS */
 
     param->flags = flags;
+    /* Nothing in the core code uses this, but we make it available to
+       extensions (using mg_dup).  */
     param->proto_perl = proto_perl;
+    /* Likely nothing will use this, but it is initialised to be consistent
+       with Perl_clone_params_new().  */
+    param->proto_perl = my_perl;
 
     INIT_TRACK_MEMPOOL(my_perl->Imemory_debug_header, my_perl);
 
@@ -12637,6 +12642,82 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     return my_perl;
+}
+
+/* An initial implementation suitable for ppport.h, which doesn't make any
+   assumptions about a new structure member existing, and not being garbage.  */
+#define CLONE_PARAMS_PRIVATE 0xFE60
+
+void
+Perl_clone_params_del(CLONE_PARAMS *param)
+{
+    PerlInterpreter *const was = PERL_GET_THX;
+    /* mg_find starts PERL_UNUSED_CONTEXT, so this first argument doesn't
+       actually matter.  */
+    MAGIC *mg = Perl_mg_find(param->proto_perl, MUTABLE_SV(param->stashes),
+			     PERL_MAGIC_ext);
+    PerlInterpreter *const to = mg && mg->mg_private == CLONE_PARAMS_PRIVATE
+	? (PerlInterpreter *) mg->mg_ptr : NULL;
+
+    PERL_ARGS_ASSERT_CLONE_PARAMS_DEL;
+
+    if (to) {
+	dTHXa(to);
+
+	if (was != to) {
+	    PERL_SET_THX(to);
+	}
+
+	SvREFCNT_dec(param->stashes);
+	Safefree(param);
+
+	if (was != to) {
+	    PERL_SET_THX(was);
+	}
+    } else {
+	/* Have to assume/hope that this is going to work with whatever
+	   interpreter we currently have set.  Should never get here anyway.  */
+	dTHXa(PERL_GET_CONTEXT);
+
+	SvREFCNT_dec(param->stashes);
+	Safefree(param);
+    }
+}
+
+CLONE_PARAMS *
+Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
+{
+    /* Need to play this game, as newAV() can call safesysmalloc(), and that
+       does a dTHX; to get the context from thread local storage.
+       FIXME - under PERL_CORE Newx(), Safefree() and friends should expand to
+       a version that passes in my_perl.  */
+    PerlInterpreter *const was = PERL_GET_THX;
+    CLONE_PARAMS *param;
+    MAGIC *mg;
+
+    PERL_ARGS_ASSERT_CLONE_PARAMS_NEW;
+
+    if (was != to) {
+	PERL_SET_THX(to);
+    }
+
+    /* Given that we've set the context, we can do this unshared.  */
+    Newx(param, 1, CLONE_PARAMS);
+
+    param->flags = 0;
+    param->proto_perl = from;
+    param->stashes = (AV *)Perl_newSV_type(to, SVt_PVAV);
+    AvREAL_off(param->stashes);
+
+    mg = Perl_sv_magicext(to, MUTABLE_SV(param->stashes), 0, PERL_MAGIC_ext,
+			  NULL, (char *)to, 0);
+    if (mg)
+	mg->mg_private = CLONE_PARAMS_PRIVATE;
+
+    if (was != to) {
+	PERL_SET_THX(was);
+    }
+    return param;
 }
 
 #endif /* USE_ITHREADS */
