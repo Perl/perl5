@@ -12100,6 +12100,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origargv		= proto_perl->Iorigargv;
 
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
+    /* This makes no difference to the implementation, as it always pushes
+       and shifts pointers to other SVs without changing their reference
+       count, with the array becoming empty before it is freed. However, it
+       makes it conceptually clear what is going on, and will avoid some
+       work inside av.c, filling slots between AvFILL() and AvMAX() with
+       &PL_sv_undef, and SvREFCNT_dec()ing those.  */
+    AvREAL_off(param->stashes);
 
     /* Set tainting stuff before PerlIO_debug can possibly get called */
     PL_tainting		= proto_perl->Itainting;
