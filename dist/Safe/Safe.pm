@@ -83,7 +83,9 @@ my $default_share = [qw[
     $version::STRICT
     $version::LAX
     @version::ISA
-], ($] >= 5.008001 && qw[
+], ($] < 5.010 && qw[
+    &utf8::SWASHGET
+]), ($] >= 5.008001 && qw[
     &Regexp::DESTROY
 ]), ($] >= 5.010 && qw[
     &re::is_regexp
