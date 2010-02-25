@@ -120,8 +120,8 @@ named characters, if C<\N> is followed by an opening brace and something that
 is not a quantifier, perl will assume that a character name is coming.  For
 example, C<\N{3}> means to match 3 non-newlines; C<\N{5,}> means to match 5 or
 more non-newlines, but C<\N{4F}> is not a legal quantifier, and will cause
-perl to look for a character named C<4F> (and won't find it unless custom names
-have been defined.)
+perl to look for a character named C<4F> (and won't find one unless custom names
+have been defined that include it.)
 
 C<\v> will match any character that is considered vertical white space;
 this includes the carriage return and line feed characters (newline).
@@ -292,7 +292,8 @@ C<\c>,
 C<\e>,
 C<\f>,
 C<\n>,
-C<\N{NAME}>,
+C<\N{I<NAME>}>,
+C<\N{U+I<wide hex char>}>,
 C<\r>,
 C<\t>,
 and
@@ -388,10 +389,10 @@ as if you put all the characters matched by the backslash sequence inside the
 character class. For instance, C<[a-f\d]> will match any digit, or any of the
 lowercase letters between 'a' and 'f' inclusive.
 
-C<\N> within a bracketed character class must be of the form C<\N{NAME}> for
-the same reason that a dot C<.> inside a bracketed character class loses its
-special meaning: it matches nearly anything, which generally isn't what you
-want to happen.
+C<\N> within a bracketed character class must be of the forms C<\N{I<name>}>  or
+C<\N{U+I<wide hex char>}> for the same reason that a dot C<.> inside a
+bracketed character class loses its special meaning: it matches nearly
+anything, which generally isn't what you want to happen.
 
 Examples:
 

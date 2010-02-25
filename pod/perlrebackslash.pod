@@ -86,7 +86,7 @@ as C<Not in [].>
  \L                Lowercase till \E.  Not in [].
  \n                (Logical) newline character.
  \N                Any character but newline.  Not in [].
- \N{}              Named (Unicode) character.
+ \N{}              Named or numbered (Unicode) character.
  \p{}, \pP         Character with the given Unicode property.
  \P{}, \PP         Character without the given Unicode property.
  \Q                Quotemeta till \E.  Not in [].
@@ -156,15 +156,26 @@ Mnemonic: I<c>ontrol character.
 
  $str =~ /\cK/;  # Matches if $str contains a vertical tab (control-K).
 
-=head3 Named characters
+=head3 Named or numbered characters
 
-All Unicode characters have a Unicode name. It is even possible to give your
-own names to characters, even to short sequences of characters.  You can use a
-character by name by using the C<\N{}> construct; the name of the character
-goes between the curly braces.  You do have to C<use charnames> to load the
-Unicode names of the characters, otherwise Perl will complain.  (If you instead
-have your own names, a C<use> statement will be required for your translator.)
-For more details, see L<charnames>.
+All Unicode characters have a Unicode name and numeric ordinal value.  Use the
+C<\N{}> construct to specify a character by either of these values.
+
+To specify by name, the name of the character goes between the curly braces.
+In this case, you have to C<use charnames> to load the Unicode names of the
+characters, otherwise Perl will complain.
+
+To specify by Unicode ordinal number, use the form
+C<\N{U+I<wide hex character>}>, where I<wide hex character> is a number in
+hexadecimal that gives the ordinal number that Unicode has assigned to the
+desired character.  It is customary (but not required) to use leading zeros to
+pad the number to 4 digits.  Thus C<\N{U+0041}> means
+C<Latin Capital Letter A>, and you will rarely see it written without the two
+leading zeros.  C<\N{U+0041}> means C<A> even on EBCDIC machines (where the
+ordinal value of C<A> is not 0x41).
+
+It is even possible to give your own names to characters, and even to short
+sequences of characters.  For details, see L<charnames>.
 
 Mnemonic: I<N>amed character.
 
@@ -505,7 +516,8 @@ It is a short-hand for writing C<[^\n]>, and is identical to the C<.>
 metasymbol, except under the C</s> flag, which changes the meaning of C<.>, but
 not C<\N>.
 
-Note that C<\N{...}> can mean a L<named character|/Named characters>.
+Note that C<\N{...}> can mean a
+L<named or numbered character|/Named or numbered characters>.
 
 Mnemonic: Complement of I<\n>.
 

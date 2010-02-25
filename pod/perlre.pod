@@ -226,6 +226,7 @@ X<\0> X<\c> X<\N> X<\x>
     \x{263a}	long hex char         (example: Unicode SMILEY)
     \cK		control char          (example: VT)
     \N{name}	named Unicode character
+    \N{U+263D}	Unicode character     (example: FIRST QUARTER MOON)
     \l		lowercase next char (think vi)
     \u		uppercase next char (think vi)
     \L		lowercase till \E (think vi)
@@ -302,7 +303,9 @@ use C<\v> instead (vertical whitespace).
 X<\R>
 
 Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it matches the
-character whose name is C<NAME>.  Otherwise it matches any character but C<\n>.
+character whose name is C<NAME>; and similarly when of the form
+C<\N{U+I<wide hex char>}>, it matches the character whose Unicode ordinal is
+I<wide hex char>.  Otherwise it matches any character but C<\n>.
 
 The POSIX character class syntax
 X<character class>

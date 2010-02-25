@@ -92,6 +92,7 @@ These work as in normal strings.
    \x{263a} A wide hexadecimal value
    \cx      Control-x
    \N{name} A named character
+   \N{U+263D} A Unicode character by hex ordinal
 
    \l  Lowercase next character
    \u  Titlecase next character

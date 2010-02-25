@@ -1866,8 +1866,8 @@ Unicode and encoded in UTF-8, then an explicit C<use utf8> is needed.)
 Figuring out the hexadecimal sequence of a Unicode character you want
 or deciphering someone else's hexadecimal Unicode regexp is about as
 much fun as programming in machine code.  So another way to specify
-Unicode characters is to use the I<named character>> escape
-sequence C<\N{name}>.  C<name> is a name for the Unicode character, as
+Unicode characters is to use the I<named character> escape
+sequence C<\N{I<name>}>.  I<name> is a name for the Unicode character, as
 specified in the Unicode standard.  For instance, if we wanted to
 represent or match the astrological sign for the planet Mercury, we
 could use
