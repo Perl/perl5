@@ -185,9 +185,9 @@ form only, subject to change, and you should not try to use it yourself.)
 
 Mnemonic: I<N>amed character.
 
-Note that a character that is expressed as a named character is considered
-as a character without special meaning by the regex engine, and will match
-"as is".
+Note that a character that is expressed as a named or numbered character is
+considered as a character without special meaning by the regex engine, and will
+match "as is".
 
 =head4 Example
 
