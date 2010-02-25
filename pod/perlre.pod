@@ -95,11 +95,15 @@ making Perl's regular expressions more readable.  Note that you have to
 be careful not to include the pattern delimiter in the comment--perl has
 no way of knowing you did not intend to close the pattern early.  See
 the C-comment deletion code in L<perlop>.  Also note that anything inside
-a C<\Q...\E> stays unaffected by C</x>.  Also note that space is never allowed
-within a L<quantifier|Quantifiers> such as C<{3}> or C<{5,}>, regardless of
-C</x>, nor is space allowed before the C<{> or within the braces in C<\x{...}>
-nor C<\N{U+...}>.  Similarly space is not allowed before the C<{> in
-C<\N{I<name>}> and is currently significant within the braces.
+a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect
+whether space interpretation within a single multi-character construct.  For
+example in C<\x{...}>, regardless of the C</x> modifier, there can be no
+spaces.  Same for a L<quantifier|Quantifiers> such as C<{3}> or
+C<{5,}>.  Similarly, C<(?:...)> can't have a space between the C<?> and C<:>.
+Within any delimiters for such a construct, allowed spaces are not affected by
+C</x>, and depend on the construct.  For example, C<\x{...}> can't have spaces
+because hexadecimal numbers don't have spaces in them.  But, in C<\p{...}>  the
+C<...> can have spaces that follow the Unicode properties rules.
 X</x>
 
 =head2 Regular Expressions
