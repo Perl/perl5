@@ -33,9 +33,9 @@ comments.
 =item Comments Inside the Regex
 
 The C</x> modifier causes whitespace to be ignored in a regex pattern
-(except in a character class), and also allows you to use normal
-comments there, too.  As you can imagine, whitespace and comments help
-a lot.
+(except in a character class and a few other places), and also allows you to
+use normal comments there, too.  As you can imagine, whitespace and comments
+help a lot.
 
 C</x> lets you turn this:
 
