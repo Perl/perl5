@@ -12634,37 +12634,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     if (!(flags & CLONEf_COPY_STACKS)) {
-	/* although we're not duplicating the tmps stack, we should still
-	 * add entries for any SVs on the tmps stack that got cloned by a
-	 * non-refcount means (eg a temp in @_); otherwise they will be
-	 * orphaned.
-	 *
-	 * This actualy expands to all SVs which are pointed to, without a
-	 * reference being owned by that pointer, such as @_ and weak
-	 * references. Owners of these references include the tmps stack, the
-	 * save stack, and (effectively) the magic backreference structure.
-	 */
-	if (AvFILLp(param->unreferenced) > -1) {
-	    SV **svp = AvARRAY(param->unreferenced);
-	    SV **const last = svp + AvFILLp(param->unreferenced);
-	    SSize_t count = 0;
-
-	    do {
-		if (!SvREFCNT(*svp))
-		    ++count;
-	    } while (++svp <= last);
-
-	    EXTEND_MORTAL(count);
-
-	    svp = AvARRAY(param->unreferenced);
-
-	    do {
-		if (!SvREFCNT(*svp))
-		    PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(*svp);
-	    } while (++svp <= last);
-	}
-
-	SvREFCNT_dec(param->unreferenced);
+	unreferenced_to_tmp_stack(param->unreferenced);
     }
 
     SvREFCNT_dec(param->stashes);
@@ -12676,6 +12646,32 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     return my_perl;
+}
+
+static void
+S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
+{
+    PERL_ARGS_ASSERT_UNREFERENCED_TO_TMP_STACK;
+    
+    if (AvFILLp(unreferenced) > -1) {
+	SV **svp = AvARRAY(unreferenced);
+	SV **const last = svp + AvFILLp(unreferenced);
+	SSize_t count = 0;
+
+	do {
+	    if (!SvREFCNT(*svp))
+		++count;
+	} while (++svp <= last);
+
+	EXTEND_MORTAL(count);
+	svp = AvARRAY(unreferenced);
+
+	do {
+	    if (!SvREFCNT(*svp))
+		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(*svp);
+	} while (++svp <= last);
+    }
+    SvREFCNT_dec(unreferenced);
 }
 
 void
@@ -12692,7 +12688,8 @@ Perl_clone_params_del(CLONE_PARAMS *param)
     }
 
     SvREFCNT_dec(param->stashes);
-    SvREFCNT_dec(param->unreferenced);
+    if (param->unreferenced)
+	unreferenced_to_tmp_stack(param->unreferenced);
 
     Safefree(param);
 

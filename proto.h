@@ -6888,6 +6888,13 @@ PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN k
 
 
 #if defined(USE_ITHREADS)
+#  if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+STATIC void	S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_UNREFERENCED_TO_TMP_STACK	\
+	assert(unreferenced)
+
+#  endif
 PERL_CALLCONV CLONE_PARAMS *	Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 			__attribute__malloc__
 			__attribute__warn_unused_result__

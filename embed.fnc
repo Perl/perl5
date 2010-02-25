@@ -2360,6 +2360,9 @@ xpoM	|struct refcounted_he *|store_cop_label \
 xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 
 #if defined(USE_ITHREADS)
+#  if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+s	|void	|unreferenced_to_tmp_stack|NN AV *const unreferenced
+#  endif
 Aanop	|CLONE_PARAMS *|clone_params_new|NN PerlInterpreter *const from \
 		|NN PerlInterpreter *const to
 Anop	|void	|clone_params_del|NN CLONE_PARAMS *param

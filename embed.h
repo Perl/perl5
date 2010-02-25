@@ -2049,6 +2049,11 @@
 #define boot_core_mro		Perl_boot_core_mro
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define unreferenced_to_tmp_stack	S_unreferenced_to_tmp_stack
+#endif
+#  endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -4491,6 +4496,11 @@
 #ifdef PERL_CORE
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define unreferenced_to_tmp_stack(a)	S_unreferenced_to_tmp_stack(aTHX_ a)
+#endif
+#  endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

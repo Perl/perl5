@@ -116,10 +116,6 @@ print do 'op/threads_create.pl' || die $@;
 EOI
 
 
-TODO: {
-    no strict 'vars';   # Accessing $TODO from test.pl
-    local $TODO = 'refcount issues with threads';
-
 # Scalars leaked: 1
 foreach my $BLOCK (qw(CHECK INIT)) {
     fresh_perl_is(<<EOI, 'ok', { }, "threads in $BLOCK block");
@@ -128,8 +124,6 @@ foreach my $BLOCK (qw(CHECK INIT)) {
         print 'ok';
 EOI
 }
-
-} # TODO
 
 # Scalars leaked: 1
 fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
@@ -206,8 +200,8 @@ print "ok";
 EOI
 
 # Another, more reliable test for the same del_backref bug:
-fresh_perl_like(
- <<'   EOJ', qr/ok/, {}, 'No del_backref panic [perl #70748] (2)'
+fresh_perl_is(
+ <<'   EOJ', 'ok', {}, 'No del_backref panic [perl #70748] (2)'
    use threads;
    push @bar, threads->create(sub{sub{}})->join() for 1...10;
    print "ok";
@@ -216,10 +210,10 @@ fresh_perl_like(
 
 # Simple closure-returning test: At least this case works (though it
 # leaks), and we don't want to break it.
-fresh_perl_like(<<'EOJ', qr/^foo\n/, {}, 'returning a closure');
+fresh_perl_is(<<'EOJ', 'foo', {}, 'returning a closure');
 use threads;
 print create threads sub {
- my $x = "foo\n";
+ my $x = 'foo';
  sub{sub{$x}}
 }=>->join->()()
  //"undef"
