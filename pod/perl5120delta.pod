@@ -707,6 +707,18 @@ Using C<goto> to jump from an outer scope into an inner scope is now
 deprecated. This rare use case was causing problems in the
 implementation of scopes.
 
+=item Custom character names in \N{name} should look like names
+
+In C<\N{I<name>}>, I<name> can be just about anything.  The standard Unicode
+names have a very limited domain, but a custom name translator could create
+names that are, for example, made up entirely of punctuation symbols.  It is
+now deprecated to make names that don't begin with an alphabetic character, and
+aren't alphanumeric or contain other than a very few other characters,
+namely spaces, dashes, parentheses and colons.  Because of the added meaning of
+C<\N> (See L</C<\N> experimental regex escape>), names that look like curly
+brace -enclosed quantifiers won't work.  For example, C<\N{3,4}> now means to
+match 3 to 4 non-newlines; before a custom name C<3,4> could have been created.
+
 =item Deprecated Modules
 
 The following modules will be removed from the core distribution in a future
