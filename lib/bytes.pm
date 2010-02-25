@@ -40,7 +40,7 @@ has since been superseded. It breaks encapsulation (i.e. it exposes the
 innards of how the perl executable currently happens to store a string),
 and use of this module for anything other than debugging purposes is
 strongly discouraged. If you feel that the functions here within might be
-useful for your application, this possibly indicates a mismatch beteen
+useful for your application, this possibly indicates a mismatch between
 your mental model of Perl Unicode and the current reality. In that case,
 you may wish to peruse some of the perl Unicode documentation:
 L<perluniintro>, L<perlunitut>, L<perlunifaq> and L<perlunicode>.
