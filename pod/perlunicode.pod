@@ -146,12 +146,15 @@ If you use a Unicode editor to edit your program, Unicode characters may
 occur directly within the literal strings in UTF-8 encoding, or UTF-16.
 (The former requires a BOM or C<use utf8>, the latter requires a BOM.)
 
-Unicode characters can also be added to a string by using the C<\x{...}>
-notation.  The Unicode code for the desired character, in hexadecimal,
+Unicode characters can also be added to a string by using the C<\x{...} or C<\N{U+...}>
+notations.  The Unicode code for the desired character, in hexadecimal,
 should be placed in the braces. For instance, a smiley face is
-C<\x{263A}>.  This encoding scheme works for all characters, but
-for characters under 0x100, note that Perl may use an 8 bit encoding
-internally, for optimization and/or backward compatibility.
+C<\N{U+263A}>.
+
+For characters below 0x100 you may get byte semantics instead of
+character semantics;  see L</The "Unicode Bug">.  On EBCDIC machines there is
+the additional problem with the C\x{...} form in that the value for such characters gives the EBCDIC
+character rather than the Unicode one.
 
 Additionally, if you
 
@@ -159,6 +162,7 @@ Additionally, if you
 
 you can use the C<\N{...}> notation and put the official Unicode
 character name within the braces, such as C<\N{WHITE SMILING FACE}>.
+See L<charnames>.
 
 =item *
 
@@ -1296,7 +1300,7 @@ readdir, readlink
 =head2 The "Unicode Bug"
 
 The term, the "Unicode bug" has been applied to an inconsistency with the
-Unicode characters whose code points are in the Latin-1 Supplement block, that
+Unicode characters whose ordinals are in the Latin-1 Supplement block, that
 is, between 128 and 255.  Without a locale specified, unlike all other
 characters or code points, these characters have very different semantics in
 byte semantics versus character semantics.
@@ -1374,7 +1378,9 @@ operations in the 5.12 release, it is planned to have it affect all the
 problematic behaviors in later releases: you can't have one without them all.
 
 In the meantime, a workaround is to always call utf8::upgrade($string), or to
-use the standard modules L<Encode> or L<charnames>.
+use the standard module L<Encode>.   Also, a scalar that has any characters
+whose ordinal is above 0x100, or which were specified using either of the
+C<\N{...}> notations will automatically have character semantics.
 
 =head2 Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
 
