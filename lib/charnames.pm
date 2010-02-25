@@ -444,7 +444,8 @@ brace-enclosed quantifier (see L<perlreref/QUANTIFIERS>).  For example
 C<\N{123}> means to match 123 non-newline characters, and is not treated as an
 alias.  Aliases are discouraged from beginning with anything other than an
 alphabetic character and from containing anything other than alphanumerics,
-spaces, dashes, colons, parentheses, and underscores.
+spaces, dashes, colons, parentheses, and underscores.  Currently they must be
+ASCII.
 
 =head2 Anonymous hashes
 
@@ -560,6 +561,8 @@ otherwise.  It is planned to change this to always return an ord.
 
 None of the functions work on almost all the Hangul syllable and CJK Unicode
 characters that have their code points as part of their names.
+
+Names must be ASCII characters only.
 
 Unicode standard named sequences are not recognized, such as
 C<LATIN CAPITAL LETTER A WITH MACRON AND GRAVE>
