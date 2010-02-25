@@ -233,7 +233,7 @@ more information.
 This pragma allows you to lexically disable or enable overloading
 for some or all operations. (Yuval Kogman)
 
-=head2 C<\N> regex escape
+=head2 C<\N> experimental regex escape
 
 A new regex escape has been added, C<\N>. It will match any character that
 is not a newline, independently from the presence or absence of the single
@@ -249,6 +249,9 @@ This will break a L<custom charnames translator|charnames/CUSTOM TRANSLATORS>
 which allows numbers for character names, as C<\N{3}> will now mean to match 3
 non-newline characters, and not the character whose name is C<3>.  (No standard
 name is a number, so only a custom translator would be affected.)
+
+This escape is experimental, subject to change, because there is some concern
+about possible confusion with the previous meaning of C<\N{...}>
 
 =head2 Implicit strictures
 

@@ -85,7 +85,7 @@ as C<Not in [].>
  \l                Lowercase next character.  Not in [].
  \L                Lowercase till \E.  Not in [].
  \n                (Logical) newline character.
- \N                Any character but newline.  Not in [].
+ \N                Any character but newline.  Experimental.  Not in [].
  \N{}              Named or numbered (Unicode) character.
  \p{}, \pP         Character with the given Unicode property.
  \P{}, \PP         Character without the given Unicode property.
@@ -517,10 +517,10 @@ Mnemonic: I<K>eep.
 
 =item \N
 
-This is new in perl 5.12.0.  It matches any character that is not a newline.
-It is a short-hand for writing C<[^\n]>, and is identical to the C<.>
-metasymbol, except under the C</s> flag, which changes the meaning of C<.>, but
-not C<\N>.
+This is a new experimental feature in perl 5.12.0.  It matches any character
+that is not a newline.  It is a short-hand for writing C<[^\n]>, and is
+identical to the C<.> metasymbol, except under the C</s> flag, which changes
+the meaning of C<.>, but not C<\N>.
 
 Note that C<\N{...}> can mean a
 L<named or numbered character|/Named or numbered characters>.
