@@ -177,6 +177,12 @@ ordinal value of C<A> is not 0x41).
 It is even possible to give your own names to characters, and even to short
 sequences of characters.  For details, see L<charnames>.
 
+(There is an expanded internal form that you may see in debug output:
+C<\N{U+I<wide hex character>.I<wide hex character>...}>.
+The C<...> means any number of these I<wide hex character>s separated by dots.
+This represents the sequence formed by the characters.  This is an internal
+form only, subject to change, and you should not try to use it yourself.)
+
 Mnemonic: I<N>amed character.
 
 Note that a character that is expressed as a named character is considered
