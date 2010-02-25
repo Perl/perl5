@@ -1304,21 +1304,12 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	AvREIFY_only(av);
     }
 
-    /* XXX DAPM rationalise these two similar branches */
-
-    if (type == padtidy_SUB) {
+    if (type == padtidy_SUB || type == padtidy_FORMAT) {
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
 	    if (!SvPADMY(PL_curpad[ix]))
-		SvPADTMP_on(PL_curpad[ix]);
-	}
-    }
-    else if (type == padtidy_FORMAT) {
-	PADOFFSET ix;
-	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
-	    if (!SvPADMY(PL_curpad[ix]) && !SvIMMORTAL(PL_curpad[ix]))
 		SvPADTMP_on(PL_curpad[ix]);
 	}
     }
