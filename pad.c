@@ -1772,6 +1772,7 @@ Perl_padlist_dup(pTHX_ AV *const srcpad, CLONE_PARAMS *const param)
 
 	I32 ix = AvFILLp((const AV *)AvARRAY(srcpad)[1]);
 	AV *pad1;
+	const I32 names_fill = AvFILLp((const AV *)(AvARRAY(srcpad)[0]));
 	const AV *const srcpad1 = (const AV *) AvARRAY(srcpad)[1];
 	SV **oldpad = AvARRAY(srcpad1);
 	SV **names;
@@ -1803,7 +1804,50 @@ Perl_padlist_dup(pTHX_ AV *const srcpad, CLONE_PARAMS *const param)
 	    AvFILLp(pad1) = ix;
 
 	    for ( ;ix > 0; ix--) {
-		pad1a[ix] = sv_dup_inc(oldpad[ix], param);
+		if (!oldpad[ix]) {
+		    pad1a[ix] = NULL;
+		} else if (names_fill >= ix && names[ix] != &PL_sv_undef) {
+		    const char sigil = SvPVX_const(names[ix])[0];
+		    if ((SvFLAGS(names[ix]) & SVf_FAKE)
+			|| (SvFLAGS(names[ix]) & SVpad_STATE)
+			|| sigil == '&')
+			{
+			    /* outer lexical or anon code */
+			    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
+			}
+		    else {		/* our own lexical */
+			if(SvREFCNT(oldpad[ix]) > 1) {
+			    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
+			} else {
+			    SV *sv; 
+			    
+			    if (sigil == '@')
+				sv = MUTABLE_SV(newAV());
+			    else if (sigil == '%')
+				sv = MUTABLE_SV(newHV());
+			    else
+				sv = newSV(0);
+			    pad1a[ix] = sv;
+			    SvPADMY_on(sv);
+			}
+		    }
+		}
+		else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
+		    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
+		}
+		else {
+		    /* save temporaries on recursion? */
+		    SV * const sv = newSV(0);
+		    pad1a[ix] = sv;
+
+		    /* SvREFCNT(oldpad[ix]) != 1 for some code in threads.xs
+		       FIXTHAT before merging this branch.
+		       (And I know how to) */
+		    if (SvPADMY(oldpad[ix]))
+			SvPADMY_on(sv);
+		    else
+			SvPADTMP_on(sv);
+		}
 	    }
 
 	    if (oldpad[0]) {

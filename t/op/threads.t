@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(20);
+     plan(21);
 }
 
 use strict;
@@ -256,5 +256,22 @@ fresh_perl_is(<<'EOI', 'ok', { }, '0 refcnt neither on tmps stack nor in @_');
     delete $h{1} && threads->create(sub {}, shift)->join();
     print 'ok';
 EOI
+
+{
+    my $got;
+    sub stuff {
+	my $a;
+	if (@_) {
+	    $a = "Leakage";
+	    threads->create(\&stuff)->join();
+	} else {
+	    is ($a, undef, 'RT #73086 - clone used to clone active pads');
+	}
+    }
+
+    stuff(1);
+
+    curr_test(curr_test() + 1);
+}
 
 # EOF
