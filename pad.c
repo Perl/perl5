@@ -1766,11 +1766,62 @@ Perl_padlist_dup(pTHX_ AV *const srcpad, CLONE_PARAMS *const param)
 	return NULL;
 
     assert(!AvREAL(srcpad));
-    /* XXX padlists are real, but pretend to be not */
-    AvREAL_on(srcpad);
-    dstpad = av_dup_inc(srcpad, param);
-    AvREAL_off(srcpad);
-    AvREAL_off(dstpad);
+
+    if (param->flags & CLONEf_COPY_STACKS
+	|| SvREFCNT(AvARRAY(srcpad)[1]) > 1) {
+	/* XXX padlists are real, but pretend to be not */
+	AvREAL_on(srcpad);
+	dstpad = av_dup_inc(srcpad, param);
+	AvREAL_off(srcpad);
+	AvREAL_off(dstpad);
+	assert (SvREFCNT(AvARRAY(srcpad)[1]) == 1);
+    } else {
+	/* CvDEPTH() on our subroutine will be set to 0, so there's no need
+	   to build anything other than the first level of pads.  */
+
+	I32 ix = AvFILLp((const AV *)AvARRAY(srcpad)[1]);
+	AV *pad1;
+	const AV *const srcpad1 = (const AV *) AvARRAY(srcpad)[1];
+	SV **oldpad = AvARRAY(srcpad1);
+	SV **names;
+	SV **pad1a;
+	AV *args;
+	/* look for it in the table first.
+	   I *think* that it shouldn't be possible to find it there.
+	   Well, except for how Perl_sv_compile_2op() "works" :-(   */
+	dstpad = (AV*)ptr_table_fetch(PL_ptr_table, srcpad);
+
+	if (dstpad)
+	    return dstpad;
+
+	dstpad = newAV();
+	ptr_table_store(PL_ptr_table, srcpad, dstpad);
+	AvREAL_off(dstpad);
+	av_extend(dstpad, 1);
+	AvARRAY(dstpad)[0] = MUTABLE_SV(av_dup_inc(AvARRAY(srcpad)[0], param));
+	names = AvARRAY(AvARRAY(dstpad)[0]);
+
+	pad1 = newAV();
+
+	av_extend(pad1, ix);
+	AvARRAY(dstpad)[1] = MUTABLE_SV(pad1);
+	pad1a = AvARRAY(pad1);
+	AvFILLp(dstpad) = 1;
+
+	if (ix > -1) {
+	    AvFILLp(pad1) = ix;
+
+	    for ( ;ix > 0; ix--) {
+		pad1a[ix] = sv_dup_inc(oldpad[ix], param);
+	    }
+
+	    if (oldpad[0]) {
+		args = newAV();			/* Will be @_ */
+		AvREIFY_only(args);
+		pad1a[0] = (SV *)args;
+	    }
+	}
+    }
 
     return dstpad;
 }
