@@ -1086,6 +1086,10 @@ C<use>.
 
 The documentation for C<$1> in perlvar.pod has been clarified.
 
+=item *
+
+C<\N{U+I<wide hex char>}> is now documented.
+
 =back
 
 =head1 Performance Enhancements
