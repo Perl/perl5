@@ -2154,6 +2154,10 @@ Subroutine call to a named capture buffer. Equivalent to C<< (?&NAME) >>.
 
 =head1 BUGS
 
+There are numerous problems with case insensitive matching of characters
+outside the ASCII range, especially with those whose folds are multiple
+characters, such as ligatures like C<LATIN SMALL LIGATURE FF>.
+
 In a bracketed character class with case insensitive matching, ranges only work
 for ASCII characters.  For example,
 C<m/[\N{CYRILLIC CAPITAL LETTER A}-\N{CYRILLIC CAPITAL LETTER YA}]/i>
