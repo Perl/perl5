@@ -253,6 +253,14 @@ name is a number, so only a custom translator would be affected.)
 This escape is experimental, subject to change, because there is some concern
 about possible confusion with the previous meaning of C<\N{...}>
 
+=head2 \N{...} now compiles better, always forces UTF-8 internal representation.
+
+There were several problems that have been fixed with recognizing C<\N{...}>
+constructs.   As part of this, any scalar or regex that has either a
+C<\N{I<name>}> or C<\N{U+I<wide hex char>}> in its definition will be stored in
+UTF-8 format.  (This was true previously for all occurences of C<\N{I<name>}>
+that did not use a custom translator, but now it's always true.)
+
 =head2 Implicit strictures
 
 Using the C<use VERSION> syntax with a version number greater or equal
