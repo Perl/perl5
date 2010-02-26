@@ -33,7 +33,7 @@ __END__
 
 bytes - Perl pragma to force byte semantics rather than character semantics
 
-=head1 DEPRECATED
+=head1 NOTICE
 
 This pragma reflects early attempts to incorporate Unicode into perl and
 has since been superseded. It breaks encapsulation (i.e. it exposes the
