@@ -2500,6 +2500,11 @@ with the thread the pattern was compiled into [RT #55600].
 
 =item *
 
+Things like C<"\N{LATIN SMALL LIGATURE FF}" =~ /\N{LATIN SMALL LETTER F}+/>
+will appear to hang as they get into a very long running loop [RT #72998].
+
+=item *
+
 Untriaged test crashes on Windows 2000
 
 Several porters have reported mysterious crashes when Perl's entire test suite is run after a build on certain Windows 2000 systems.  When run by hand, the individual tests reportedly work fine.
