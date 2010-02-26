@@ -2152,6 +2152,11 @@ Subroutine call to a named capture buffer. Equivalent to C<< (?&NAME) >>.
 
 =head1 BUGS
 
+In a bracketed character class with case insensitive matching, ranges only work
+for ASCII characters.  For example,
+C<m/[\N{CYRILLIC CAPITAL LETTER A}-\N{CYRILLIC CAPITAL LETTER YA}]/i>
+doesn't match all the Russian upper and lower case letters.
+
 This document varies from difficult to understand to completely
 and utterly opaque.  The wandering prose riddled with jargon is
 hard to fathom in several places.
