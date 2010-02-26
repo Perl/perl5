@@ -42,7 +42,7 @@ and use of this module for anything other than debugging purposes is
 strongly discouraged. If you feel that the functions here within might be
 useful for your application, this possibly indicates a mismatch between
 your mental model of Perl Unicode and the current reality. In that case,
-you may wish to peruse some of the perl Unicode documentation:
+you may wish to read some of the perl Unicode documentation:
 L<perluniintro>, L<perlunitut>, L<perlunifaq> and L<perlunicode>.
 
 =head1 SYNOPSIS
