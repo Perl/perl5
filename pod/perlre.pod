@@ -41,7 +41,7 @@ X<regular expression, single-line>
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which normally it would not match.
 
-Used together, as /ms, they let the "." match any character whatsoever,
+Used together, as C</ms>, they let the "." match any character whatsoever,
 while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
