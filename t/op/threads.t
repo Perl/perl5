@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(21);
+     plan(22);
 }
 
 use strict;
@@ -270,6 +270,24 @@ EOI
     }
 
     stuff(1);
+
+    curr_test(curr_test() + 1);
+}
+
+{
+    my $got;
+    sub more_stuff {
+	my $a;
+	$::b = \$a;
+	if (@_) {
+	    $a = "More leakage";
+	    threads->create(\&more_stuff)->join();
+	} else {
+	    is ($a, undef, 'Just special casing lexicals in ?{ ... }');
+	}
+    }
+
+    more_stuff(1);
 
     curr_test(curr_test() + 1);
 }

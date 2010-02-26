@@ -1305,12 +1305,32 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     }
 
     if (type == padtidy_SUB || type == padtidy_FORMAT) {
+	SV * const * const namep = AvARRAY(PL_comppad_name);
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
-	    if (!SvPADMY(PL_curpad[ix]))
+	    if (!SvPADMY(PL_curpad[ix])) {
 		SvPADTMP_on(PL_curpad[ix]);
+	    } else if (!SvFAKE(namep[ix])) {
+		/* This is a work around for how the current implementation of
+		   ?{ } blocks in regexps interacts with lexicals.
+
+		   One of our lexicals.
+		   Can't do this on all lexicals, otherwise sub baz() won't
+		   compile in
+
+		   my $foo;
+
+		   sub bar { ++$foo; }
+
+		   sub baz { ++$foo; }
+
+		   because completion of compiling &bar calling pad_tidy()
+		   would cause (top level) $foo to be marked as stale, and
+		   "no longer available".  */
+		SvPADSTALE_on(PL_curpad[ix]);
+	    }
 	}
     }
     PL_curpad = AvARRAY(PL_comppad);
@@ -1816,7 +1836,10 @@ Perl_padlist_dup(pTHX_ AV *const srcpad, CLONE_PARAMS *const param)
 			    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
 			}
 		    else {		/* our own lexical */
-			if(SvREFCNT(oldpad[ix]) > 1) {
+			if(SvPADSTALE(oldpad[ix]) && SvREFCNT(oldpad[ix]) > 1) {
+			    /* This is a work around for how the current
+			       implementation of ?{ } blocks in regexps
+			       interacts with lexicals.  */
 			    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
 			} else {
 			    SV *sv; 
