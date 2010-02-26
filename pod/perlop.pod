@@ -2073,6 +2073,11 @@ is emitted if the C<use warnings> pragma or the B<-w> command-line flag
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\E>,
 and interpolation happens (almost) as with C<qq//> constructs.
 
+Processing of C<\N{...}> is also done here, and compiled into an intermediate
+form for the regex compiler.  (This is because, as mentioned below, the regex
+compilation may be done at execution time, and C<\N{...}> is a compile-time
+construct.)
+
 However any other combinations of C<\> followed by a character
 are not substituted but only skipped, in order to parse them
 as regular expressions at the following step.
