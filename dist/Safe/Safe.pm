@@ -360,7 +360,6 @@ sub _find_code_refs {
 
 sub wrap_code_ref {
     my ($obj, $sub) = @_;
-    my $root = $obj->{Root};
 
     # wrap code ref $sub with _safe_call_sv so that, when called, the
     # execution will happen with the compartment fully 'in effect'.
