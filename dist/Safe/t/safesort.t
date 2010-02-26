@@ -19,7 +19,7 @@ my $func = $safe->reval(q{ sub { @_ } });
 is_deeply [ $func->() ], [ ];
 is_deeply [ $func->("foo") ], [ "foo" ];
 
-$func = $safe->reval(<<'EOS');
+my $func1 = $safe->reval(<<'EOS');
 
     # uses quotes in { "$a" <=> $b } to avoid the optimizer replacing the block
     # with a hardwired comparison
@@ -33,7 +33,13 @@ EOS
 is $@, '', 'reval should not fail';
 is ref $func, 'CODE', 'reval should return a CODE ref';
 
-my ($l_sorted, $p_sorted) = $func->(1,2,3);
+# $func1 will work in non-threaded perl
+# but RT#60374 "Safe.pm sort {} bug with -Dusethreads"
+# means the sorting won't work unless we wrap the code ref
+# such that it's executed with Safe 'in effect' at runtime
+my $func2 = $safe->wrap_code_ref($func1);
+
+my ($l_sorted, $p_sorted) = $func2->(3,1,2);
 is $l_sorted, "1,2,3";
 is $p_sorted, "1,2,3";
 

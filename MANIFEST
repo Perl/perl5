@@ -2756,6 +2756,7 @@ dist/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
 dist/Safe/t/safesort.t		Tests Safe with sort
 dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 dist/Safe/t/safeutf8.t		Tests Safe with utf8.pm
+dist/Safe/t/safewrap.t		Tests Safe::wrap_code_ref()
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works

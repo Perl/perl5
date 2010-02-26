@@ -11,4 +11,5 @@ t/safeops.t
 t/safesort.t
 t/safeuniversal.t
 t/safeutf8.t
+t/safewrap.t
 META.yml                                 Module meta-data (added by MakeMaker)
