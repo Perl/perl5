@@ -12008,9 +12008,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvNV_set(&PL_sv_yes, 1);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 
-    /* dbargs array probably holds garbage; give the child a clean array */
-    PL_dbargs		= newAV();
-    ptr_table_store(PL_ptr_table, proto_perl->Idbargs, PL_dbargs);
+    /* dbargs array probably holds garbage */
+    PL_dbargs		= NULL;
 
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
