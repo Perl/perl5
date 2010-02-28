@@ -2645,12 +2645,13 @@ specialness: it matches almost everything, which is probably not what you want.
 
 (F) When compiling a regex pattern, an unresolved named character or sequence
 was encountered.  This can happen in any of several ways that bypass the lexer,
-such as using single-quotish context:
+such as using single-quotish context, or an extra backslash in double quotish:
 
     $re = '\N{SPACE}';	# Wrong!
+    $re = "\\N{SPACE}";	# Wrong!
     /$re/;
 
-Instead, use double-quotes:
+Instead, use double-quotes with a single backslash:
 
     $re = "\N{SPACE}";	# ok
     /$re/;
