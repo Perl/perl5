@@ -15,7 +15,7 @@ require File::Spec;
 
 $| = 1;
 
-print "1..79\n";
+print "1..80\n";
 
 use charnames ':full';
 
@@ -341,6 +341,23 @@ if ($@) {
 # Verify that db includes the normative NameAliases.txt names
 print "not " unless "\N{U+1D0C5}" eq "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}";
 print "ok 79\n";
+
+# [perl #73174] use of \N{FOO} used to reset %^H
+
+{
+    use charnames ":full";
+    my $res;
+    BEGIN { $^H{73174} = "foo" }
+    BEGIN { $res = ($^H{73174} // "") }
+    # forces loading of utf8.pm, which used to reset %^H
+    $res .= '-1' if ":" =~ /\N{COLON}/i;
+    BEGIN { $res .= '-' . ($^H{73174} // "") }
+    $res .= '-' . ($^H{73174} // "");
+    $res .= '-2' if ":" =~ /\N{COLON}/;
+    $res .= '-3' if ":" =~ /\N{COLON}/i;
+    print $res eq "foo-foo-1--2-3" ? "" : "not ",
+	"ok 80 - \$^H{foo} correct after /\\N{bar}/i (res=$res)\n";
+}
 
 __END__
 # unsupported pragma

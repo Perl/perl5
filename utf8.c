@@ -1842,8 +1842,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 
     PUSHSTACKi(PERLSI_MAGIC);
     ENTER;
-    SAVEI32(PL_hints);
-    PL_hints = 0;
+    SAVEHINTS();
     save_re_context();
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;

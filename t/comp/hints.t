@@ -4,7 +4,7 @@
 
 @INC = '../lib';
 
-BEGIN { print "1..23\n"; }
+BEGIN { print "1..24\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -109,6 +109,21 @@ BEGIN {
     print +($rf2 eq "z" ? "" : "not "), "ok 22 - \$^H{foo} correct after require\n";
 }
 
+# [perl #73174]
+
+{
+    my $res;
+    BEGIN { $^H{73174} = "foo" }
+    BEGIN { $res = ($^H{73174} // "") }
+    "" =~ /\x{100}/i;	# forces loading of utf8.pm, which used to reset %^H
+    BEGIN { $res .= '-' . ($^H{73174} // "")}
+    $res .= '-' . ($^H{73174} // "");
+    print $res eq "foo-foo-" ? "" : "not ",
+	"ok 23 - \$^H{foo} correct after /unicode/i (res=$res)\n";
+}
+
+
+
 # Add new tests above this require, in case it fails.
 require './test.pl';
 
@@ -118,7 +133,7 @@ my $result = runperl(
     stderr => 1
 );
 print "not " if length $result;
-print "ok 23 - double-freeing hints hash\n";
+print "ok 24 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
 __END__
