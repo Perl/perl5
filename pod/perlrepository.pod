@@ -745,7 +745,7 @@ If someone has provided a branch via GitHub and you are a committer,
 you should use the following in your perl-ssh directory:
 
   % git remote add dandv git://github.com/dandv/perl.git
-  % git fetch
+  % git fetch dandv
 
 Now you can see the differences between the branch and blead:
 
