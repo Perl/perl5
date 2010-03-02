@@ -149,7 +149,7 @@ sub perl_lib {
 	# $ENV{PERL5LIB} will be set with this, but (by default) it's a relative
 	# path.
 	$ENV{PERL5LIB} = join $Config{path_sep}, map {
-	    File::Spec->rel2abs($_) } split $Config{path_sep}, $ENV{PERL5LIB};
+	    File::Spec->rel2abs($_) } split quotemeta($Config{path_sep}), $ENV{PERL5LIB};
 	@INC = map { File::Spec->rel2abs($_) } @INC;
     } else {
 	my $lib = 'blib/lib';
