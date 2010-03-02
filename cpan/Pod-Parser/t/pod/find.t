@@ -3,6 +3,13 @@
 
 $| = 1;
 
+BEGIN {
+  if ($^O eq 'VMS') {
+    print "1..0 # needs upstream patch from https://rt.cpan.org/Ticket/Display.html?id=55121";
+    exit 0;
+  }
+}
+
 use Test::More tests => 4;
 
 BEGIN {
