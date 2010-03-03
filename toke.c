@@ -6143,8 +6143,6 @@ Perl_yylex(pTHX)
 	/* Is this a label? */
 	if (!anydelim && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
-	    if (tmp)
-		Perl_croak(aTHX_ "Can't use keyword '%s' as a label", PL_tokenbuf);
 	    s = d + 1;
 	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
 	    CLINE;
