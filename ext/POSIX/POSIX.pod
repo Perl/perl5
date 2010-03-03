@@ -1103,7 +1103,7 @@ Spanish. B<NOTE>: The naming and availability of locales depends on
 your operating system. Please consult L<perllocale> for how to find
 out which locales are available in your system.
 
-	$loc = setlocale( LC_ALL, "es_AR.ISO8859-1" );
+	$loc = setlocale( LC_COLLATE, "es_AR.ISO8859-1" );
 
 =item setpgid
 
