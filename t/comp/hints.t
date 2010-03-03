@@ -2,7 +2,9 @@
 
 # Tests the scoping of $^H and %^H
 
-@INC = '../lib';
+BEGIN {
+    @INC = qw(. ../lib);
+}
 
 BEGIN { print "1..24\n"; }
 BEGIN {
