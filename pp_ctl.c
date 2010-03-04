@@ -2831,6 +2831,20 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
+/*
+=for apidoc docatch
+
+Check for the cases 0 or 3 of cur_env.je_ret, only used inside an eval context.
+
+0 is used as continue inside eval,
+
+3 is used for a die caught by an inner eval - continue inner loop
+
+See cop.h: je_mustcatch, when set at any runlevel to TRUE, means eval ops must
+establish a local jmpenv to handle exception traps.
+
+=cut
+*/
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {

@@ -4182,6 +4182,11 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 #define VERSION_MAX 0x7FFFFFFF
 
+/*
+=for apidoc prescan_version
+
+=cut
+*/
 const char *
 Perl_prescan_version(pTHX_ const char *s, bool strict,
 		     const char **errstr,
