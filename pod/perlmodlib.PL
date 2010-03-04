@@ -1150,7 +1150,7 @@ of code that need less strictness.
 
 Always use B<-w>.
 
-Follow the guidelines in the perlstyle(1) manual.
+Follow the guidelines in L<perlstyle>.
 
 Always use B<-w>.
 

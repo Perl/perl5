@@ -2671,4 +2671,4 @@ Stephen McCamant, and Gurusamy Sarathy.
 
 =head1 SEE ALSO
 
-perlapi(1), perlintern(1), perlxs(1), perlembed(1)
+L<perlapi>, L<perlintern>, L<perlxs>, L<perlembed>
