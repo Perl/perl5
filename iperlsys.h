@@ -226,9 +226,9 @@ struct IPerlStdIOInfo
 #define PerlSIO_get_ptr(f)						\
 	(*PL_StdIO->pGetPtr)(PL_StdIO, (f))
 #define PerlSIO_fputc(f,c)						\
-	(*PL_StdIO->pPutc)(PL_StdIO, (f),(c))
+	(*PL_StdIO->pPutc)(PL_StdIO, (c),(f))
 #define PerlSIO_fputs(f,s)						\
-	(*PL_StdIO->pPuts)(PL_StdIO, (f),(s))
+	(*PL_StdIO->pPuts)(PL_StdIO, (s),(f))
 #define PerlSIO_fflush(f)						\
 	(*PL_StdIO->pFlush)(PL_StdIO, (f))
 #define PerlSIO_fgets(s, n, fp)						\
