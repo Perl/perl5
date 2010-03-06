@@ -3,6 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype);
+use B qw(sub_generation);
 
 $Safe::VERSION = "2.23";
 
@@ -319,6 +320,19 @@ sub varglob {
     return *{$obj->root()."::$var"};
 }
 
+sub _clean_stash {
+    my ($root) = @_;
+    my @destroys;
+    no strict 'refs';
+    push @destroys, delete ${$root}{DESTROY};
+    push @destroys, delete ${$root}{AUTOLOAD};
+    push @destroys, delete ${$root}{$_} for grep /^\(/, keys %$root;
+
+    for (grep /::$/, keys %$root) {
+        next if $_ eq 'main::';
+        _clean_stash($root.$_);
+    }
+}
 
 sub reval {
     my ($obj, $expr, $strict) = @_;
@@ -326,7 +340,12 @@ sub reval {
 
     my $evalsub = lexless_anon_sub($root, $strict, $expr);
     # propagate context
-    return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    my $sg = sub_generation();
+    my @subret = (wantarray)
+               ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
+               : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    _clean_stash($root.'::') if $sg != sub_generation();
+    return (wantarray) ? @subret : $subret[0];
 }
 
 
@@ -375,10 +394,12 @@ sub wrap_code_ref {
         my $error;
         do {
             local $@;  # needed due to perl_call_sv(sv, G_EVAL|G_KEEPERR)
+            my $sg = sub_generation();
             @subret = (wantarray)
                 ?        Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask}, $sub_with_args)
                 : scalar Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask}, $sub_with_args);
             $error = $@;
+            _clean_stash($obj->{Root}.'::') if $sg != sub_generation();
         };
         if ($error) { # rethrow exception
             $error =~ s/\t\(in cleanup\) //; # prefix added by G_KEEPERR
@@ -395,9 +416,14 @@ sub rdo {
     my ($obj, $file) = @_;
     my $root = $obj->{Root};
 
+    my $sg = sub_generation();
     my $evalsub = eval
             sprintf('package %s; sub { @_ = (); do $file }', $root);
-    return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    my @subret = (wantarray)
+               ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
+               : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    _clean_stash($root.'::') if $sg != sub_generation();
+    return (wantarray) ? @subret : $subret[0];
 }
 
 
