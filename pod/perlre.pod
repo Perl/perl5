@@ -2163,6 +2163,8 @@ for ASCII characters.  For example,
 C<m/[\N{CYRILLIC CAPITAL LETTER A}-\N{CYRILLIC CAPITAL LETTER YA}]/i>
 doesn't match all the Russian upper and lower case letters.
 
+Many regular expression constructs don't work on EBCDIC platforms.
+
 This document varies from difficult to understand to completely
 and utterly opaque.  The wandering prose riddled with jargon is
 hard to fathom in several places.
