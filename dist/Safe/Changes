@@ -1,3 +1,16 @@
+2.24 Sat Mar  6 2010
+    - Clean the stashes from the Safe compartment after evaluation of code.
+      (Nick Cleaton, Tim Bunce, Rafael Garcia-Suarez)
+    - Add methods wrap_code_ref and wrap_code_refs_within (Tim Bunce)
+    - Share SWASHGET in perls < 5.10 (R.G-S)
+    - Add more version::vxs routines to the default share (Tatsuhiko Miyagawa)
+
+2.23 Mon Feb 22 2010
+    - Install Safe in "site" instead of "perl" for perls > 5.10
+    - [perl #72942] Can't perform unicode operations in Safe compartment
+      (Tim Bunce)
+    - Add some symbols from version::vxs to the default share
+
 2.22 Thu Feb 11 2010
     fix [perl #72700]: An exception thrown from a closure was getting lost.
     (Tim Bunce)
