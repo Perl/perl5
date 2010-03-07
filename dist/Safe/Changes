@@ -1,3 +1,6 @@
+2.25 Sun Mar  7 2010
+    - More security fixes by Nick Cleaton
+
 2.24 Sat Mar  6 2010
     - Clean the stashes from the Safe compartment after evaluation of code.
       (Nick Cleaton, Tim Bunce, Rafael Garcia-Suarez)

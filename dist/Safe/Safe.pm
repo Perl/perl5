@@ -5,7 +5,7 @@ use strict;
 use Scalar::Util qw(reftype);
 use B qw(sub_generation);
 
-$Safe::VERSION = "2.24";
+$Safe::VERSION = "2.25";
 
 # *** Don't declare any lexicals above this point ***
 #
