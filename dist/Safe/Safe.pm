@@ -321,16 +321,17 @@ sub varglob {
 }
 
 sub _clean_stash {
-    my ($root) = @_;
-    my @destroys;
+    my ($root, $saved_refs) = @_;
+    $saved_refs ||= [];
     no strict 'refs';
-    push @destroys, delete ${$root}{DESTROY};
-    push @destroys, delete ${$root}{AUTOLOAD};
-    push @destroys, delete ${$root}{$_} for grep /^\(/, keys %$root;
+    foreach my $hook (qw(DESTROY AUTOLOAD), grep /^\(/, keys %$root) {
+        push @$saved_refs, \*{$root.$hook};
+        delete ${$root}{$hook};
+    }
 
     for (grep /::$/, keys %$root) {
-        next if $_ eq 'main::';
-        _clean_stash($root.$_);
+        next if \%{$root.$_} eq \%$root;
+        _clean_stash($root.$_, $saved_refs);
     }
 }
 
