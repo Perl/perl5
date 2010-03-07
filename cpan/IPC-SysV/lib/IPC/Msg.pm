@@ -1,12 +1,12 @@
 ################################################################################
 #
-#  $Revision: 17 $
+#  $Revision: 18 $
 #  $Author: mhx $
-#  $Date: 2007/10/15 20:29:06 +0200 $
+#  $Date: 2010/03/07 16:01:42 +0100 $
 #
 ################################################################################
 #
-#  Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz <mhx@cpan.org>.
+#  Version 2.x, Copyright (C) 2007-2010, Marcus Holland-Moritz <mhx@cpan.org>.
 #  Version 1.x, Copyright (C) 1997, Graham Barr <gbarr@pobox.com>.
 #
 #  This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /IPC-SysV/2.02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 $VERSION = eval $VERSION;
 
 # Figure out if we have support for native sized types
@@ -234,7 +234,7 @@ Marcus Holland-Moritz <mhx@cpan.org>
 
 =head1 COPYRIGHT
 
-Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz.
+Version 2.x, Copyright (C) 2007-2010, Marcus Holland-Moritz.
 
 Version 1.x, Copyright (c) 1997, Graham Barr.
 
