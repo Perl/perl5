@@ -242,6 +242,9 @@ ok $mb, "Module::Build->new_from_context";
     skip "Needs ExtUtils::Install 1.32 or later", 2 * @cases
       if ExtUtils::Install->VERSION < 1.32;
 
+    skip "Needs upstream patch at http://rt.cpan.org/Public/Bug/Display.html?id=55288", 2 * @cases
+      if $^O eq 'VMS';
+
     for my $c (@cases) {
       my @make_args = @{$c->{args}};
       if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.

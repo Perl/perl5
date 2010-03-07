@@ -179,6 +179,11 @@ ok( -d 'blib/lib/auto/share', "blib/lib/auto/share exists" );
 
 my $share_list = Module::Build->rscan_dir('blib/lib/auto/share', sub {-f});
 
+SKIP:
+{
+
+skip 'filename case not necessarily preserved', 1 if $^O eq 'VMS';
+
 is_deeply(
   [ sort @$share_list ], [
     'blib/lib/auto/share/dist/Simple-Share/foo.txt',
@@ -186,6 +191,8 @@ is_deeply(
   ],
   "share_dir files copied to blib"
 );
+
+}
 
 #--------------------------------------------------------------------------#
 # test installing
@@ -202,6 +209,11 @@ $share_list = Module::Build->rscan_dir(
   "$temp_install/lib/perl5/auto/share", sub {-f}
 );
 
+SKIP:
+{
+
+skip 'filename case not necessarily preserved', 1 if $^O eq 'VMS';
+
 is_deeply(
   [ sort @$share_list ], [
     "$temp_install/lib/perl5/auto/share/dist/Simple-Share/foo.txt",
@@ -209,6 +221,8 @@ is_deeply(
   ],
   "share_dir files correctly installed"
 );
+
+}
 
 #--------------------------------------------------------------------------#
 # test with File::ShareDir
