@@ -118,19 +118,19 @@ hunk.
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 #  if defined(PERL_IS_MINIPERL)
 #    define PERL_PATCHNUM "UNKNOWN-miniperl"
-#    define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
 #    define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
 #  elif defined(PERL_MICRO)
 #    define PERL_PATCHNUM "UNKNOWN-microperl"
-#    define PERL_GIT_UNCOMMITTED_CHANGES ,"UNKNOWN"
 #    define PERL_GIT_UNPUSHED_COMMITS /*leave-this-comment*/
 #  else
 #include "git_version.h"
 #  endif
 static const char * const local_patches[] = {
 	NULL
+#ifdef PERL_GIT_UNCOMMITTED_CHANGES
+	,"uncommitted-changes"
+#endif
 	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
-        PERL_GIT_UNCOMMITTED_CHANGES	/* do not remove this line */
 	,NULL
 };
 

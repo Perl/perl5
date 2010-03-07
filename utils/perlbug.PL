@@ -42,7 +42,7 @@ while (<PATCH_LEVEL>) {
     last if /^\s*}/;
     next if /^\s*#/;  # preprocessor stuff
     next if /PERL_GIT_UNPUSHED_COMMITS/;    # XXX expand instead
-    next if /PERL_GIT_UNCOMMITTED_CHANGES/; # XXX expand instead
+    next if /"uncommitted-changes"/;        # XXX determine if active instead
     chomp;
     s/^\s+,?\s*"?//;
     s/"?\s*,?$//;
