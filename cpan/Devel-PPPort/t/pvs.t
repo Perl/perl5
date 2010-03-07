@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (12) {
+  if (11) {
     load();
-    plan(tests => 12);
+    plan(tests => 11);
   }
 }
 
@@ -52,7 +52,6 @@ my $x = 'foo';
 
 ok(Devel::PPPort::newSVpvs(), "newSVpvs");
 ok(Devel::PPPort::newSVpvs_flags(), "newSVpvs_flags");
-ok(Devel::PPPort::newSVpvs_share(), 3);
 
 Devel::PPPort::sv_catpvs($x);
 ok($x, "foosv_catpvs");
@@ -66,8 +65,7 @@ ok(scalar keys %h, 2);
 ok(exists $h{'hv_stores'});
 ok($h{'hv_stores'}, 4711);
 ok(Devel::PPPort::hv_fetchs(\%h), 42);
-ok(Devel::PPPort::gv_fetchpvs(), \*Devel::PPPort::VERSION);
-ok(Devel::PPPort::gv_stashpvs(), \%Devel::PPPort::);
-
-ok(Devel::PPPort::get_cvs(), 3);
+ok(Devel::PPPort::gv_fetchpvn_flags(), \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_fetchpvs(),       \*Devel::PPPort::VERSION);
+ok(Devel::PPPort::gv_stashpvs(),       \%Devel::PPPort::);
 

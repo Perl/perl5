@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 29 $
+#  $Revision: 27 $
 #  $Author: mhx $
-#  $Date: 2010/03/07 13:15:43 +0100 $
+#  $Date: 2009/01/18 14:10:51 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2010, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2009, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -312,22 +312,17 @@ sub parse_embed
         my @e = split /\s*\|\s*/, $line;
         if( @e >= 3 ) {
           my($flags, $ret, $name, @args) = @e;
-          if ($name =~ /^[^\W\d]\w*$/) {
-            for (@args) {
-              $_ = [trim_arg($_)];
-            }
-            ($ret) = trim_arg($ret);
-            push @func, {
-              name  => $name,
-              flags => { map { $_, 1 } $flags =~ /./g },
-              ret   => $ret,
-              args  => \@args,
-              cond  => ppcond(\@pps),
-            };
+          for (@args) {
+            $_ = [trim_arg($_)];
           }
-          else {
-            warn "mysterious name [$name] in $file, line $.\n";
-          }
+          ($ret) = trim_arg($ret);
+          push @func, {
+            name  => $name,
+            flags => { map { $_, 1 } $flags =~ /./g },
+            ret   => $ret,
+            args  => \@args,
+            cond  => ppcond(\@pps),
+          };
         }
       }
     }

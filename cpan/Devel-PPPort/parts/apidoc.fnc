@@ -41,9 +41,10 @@ Am|bool|SvTRUE|SV* sv
 Am|bool|SvUOK|SV* sv
 Am|bool|SvVOK|SV* sv
 Am|char*|HePV|HE* he|STRLEN len
-Am|char*|HeUTF8|HE* he
+Am|char*|HeUTF8|HE* he|STRLEN len
 Am|char*|HvNAME|HV* stash
 Am|char*|SvEND|SV* sv
+Am|char*|SvGAMAGIC|SV* sv
 Am|char *|SvGROW|SV* sv|STRLEN len
 Am|char*|SvPVbyte_force|SV* sv|STRLEN len
 Am|char*|SvPVbyte_nolen|SV* sv
@@ -83,7 +84,6 @@ Amn|I32|ix
 Amn|IV|POPi
 Amn|long|POPl
 Amn|NV|POPn
-Amn|Perl_ophook_t|PL_opfreehook
 Amn|STRLEN|PL_na
 Amn|SV|PL_sv_no
 Amn|SV|PL_sv_undef
@@ -143,7 +143,6 @@ Ams||XSRETURN_UNDEF
 Ams||XSRETURN_YES
 Ams||XS_VERSION_BOOTCHECK
 Am|U32|HeHASH|HE* he
-Am|U32|SvGAMAGIC|SV* sv
 Am|U32|SvIOKp|SV* sv
 Am|U32|SvIOK|SV* sv
 Am|U32|SvNIOKp|SV* sv
@@ -189,10 +188,8 @@ Am|UV|SvUVX|SV* sv
 AmU||XCPT_CATCH
 AmU||XCPT_TRY_END
 AmU||XCPT_TRY_START
-AmUx|Perl_keyword_plugin_t|PL_keyword_plugin
 AmU||XS
 AmU||XS_VERSION
-AmU|yy_parser *|PL_parser
 Am|void *|CopyD|void* src|void* dest|int nitems|type
 Am|void|Copy|void* src|void* dest|int nitems|type
 Am|void|EXTEND|SP|int nitems
@@ -298,10 +295,6 @@ Am|void|XST_mUNDEF|int pos
 Am|void|XST_mYES|int pos
 Am|void *|ZeroD|void* dest|int nitems|type
 Am|void|Zero|void* dest|int nitems|type
-AmxU|char *|PL_parser-E<gt>bufend
-AmxU|char *|PL_parser-E<gt>bufptr
-AmxU|char *|PL_parser-E<gt>linestart
-AmxU|SV *|PL_parser-E<gt>linestr
 m|AV *|CvPADLIST|CV *cv
 m|bool|CvWEAKOUTSIDE|CV *cv
 m|char *|PAD_COMPNAME_PV|PADOFFSET po

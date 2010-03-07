@@ -7,7 +7,7 @@ SvGETMAGIC                     # U
 do_binmode                     # E
 newCONSTSUB                    # E
 newSVpvn                       # E
-save_aelem                     # U
+save_aelem                     # E
 save_helem                     # U
 sv_catpv_mg                    # E
 sv_catpvn_mg                   # U

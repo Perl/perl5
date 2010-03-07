@@ -514,7 +514,6 @@ cpan/Devel-PPPort/parts/base/5008005	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5008006	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5008007	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5008008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008009	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5009000	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5009001	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5009002	Devel::PPPort baseline todo file
@@ -522,13 +521,7 @@ cpan/Devel-PPPort/parts/base/5009003	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5009004	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5009005	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5010000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5010001	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/base/5011000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011005	Devel::PPPort baseline todo file
 cpan/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
 cpan/Devel-PPPort/parts/inc/call	Devel::PPPort include
 cpan/Devel-PPPort/parts/inc/cop		Devel::PPPort include
@@ -595,7 +588,6 @@ cpan/Devel-PPPort/parts/todo/5008005	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5008006	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5008007	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5008008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008009	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5009000	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5009001	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5009002	Devel::PPPort todo file
@@ -603,13 +595,7 @@ cpan/Devel-PPPort/parts/todo/5009003	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5009004	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5009005	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5010000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5010001	Devel::PPPort todo file
 cpan/Devel-PPPort/parts/todo/5011000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011005	Devel::PPPort todo file
 cpan/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 cpan/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
 cpan/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
