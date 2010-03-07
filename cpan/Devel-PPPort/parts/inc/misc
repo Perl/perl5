@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 53 $
+##  $Revision: 55 $
 ##  $Author: mhx $
-##  $Date: 2009/03/31 23:05:55 +0200 $
+##  $Date: 2010/03/07 13:15:48 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2009, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2010, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -475,7 +475,6 @@ Perl_ppaddr_t(string)
 		Perl_ppaddr_t lower;
 	PPCODE:
 		lower = PL_ppaddr[OP_LC];
-		PUSHMARK(SP);
 		mXPUSHs(newSVpv(string, 0));
 		PUTBACK;
 		ENTER;

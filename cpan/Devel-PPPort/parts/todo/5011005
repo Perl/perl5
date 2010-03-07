@@ -1,0 +1,8 @@
+5.011005
+MULTICALL                      # E
+PERL_SYS_TERM                  # E
+POP_MULTICALL                  # E
+PUSH_MULTICALL                 # E
+ref                            # U (Perl_ref)
+stashpv_hvname_match           # U
+sv_pos_u2b_flags               # U
