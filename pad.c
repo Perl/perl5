@@ -101,13 +101,13 @@ become so if C<my sub foo {}> is implemented.)
 Note that formats are treated as anon subs, and are cloned each time
 write is called (if necessary).
 
-The flag SVf_PADSTALE is cleared on lexicals each time the my() is executed,
+The flag SVs_PADSTALE is cleared on lexicals each time the my() is executed,
 and set on scope exit. This allows the 'Variable $x is not available' warning
 to be generated in evals, such as 
 
     { my $x = 1; sub f { eval '$x'} } f();
 
-For state vars, SVf_PADSTALE is overloaded to mean 'not yet initialised'
+For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'
 
 =cut
 */
