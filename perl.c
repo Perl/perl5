@@ -4103,7 +4103,7 @@ S_init_perllib(pTHX)
        (and not the architecture specific directories from $ENV{PERL5LIB}) */
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
+    SITEARCH, SITELIB, VENDORARCH, VENDORLIB, ARCHLIB and PRIVLIB
 */
 #ifdef APPLLIB_EXP
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP),
@@ -4207,7 +4207,7 @@ S_init_perllib(pTHX)
     }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
+    SITELIB and VENDORLIB for older versions
 */
 #ifdef APPLLIB_EXP
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS
