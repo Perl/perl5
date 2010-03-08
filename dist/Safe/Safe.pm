@@ -3,7 +3,6 @@ package Safe;
 use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype);
-use B qw(sub_generation);
 
 $Safe::VERSION = "2.25";
 
@@ -31,6 +30,18 @@ use Carp;
 BEGIN { eval q{
     use Carp::Heavy;
 } }
+
+use B ();
+BEGIN {
+    no strict 'refs';
+    if (defined &B::sub_generation) {
+        *sub_generation = \&B::sub_generation;
+    }
+    else {
+        # fake sub generation changing for perls < 5.8.9
+        my $sg; *sub_generation = sub { ++$sg };
+    }
+}
 
 use Opcode 1.01, qw(
     opset opset_to_ops opmask_add
