@@ -4,7 +4,7 @@ use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype);
 
-$Safe::VERSION = "2.25";
+$Safe::VERSION = "2.26";
 
 # *** Don't declare any lexicals above this point ***
 #
