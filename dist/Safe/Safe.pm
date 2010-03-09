@@ -66,7 +66,7 @@ require utf8;
 # and also loads the ToFold SWASH.
 # (Swashes are cached internally by perl in PL_utf8_* variables
 # independent of being inside/outside of Safe. So once loaded they can be)
-do { my $unicode = pack('U',0xC4).'1a'; $unicode =~ /\xE4/i; };
+do { my $a = pack('U',0xC4); my $b = chr 0xE4; utf8::upgrade $b; $a =~ /$b/i };
 # now we can safely include utf8::SWASHNEW in $default_share defined below.
 
 my $default_root  = 0;
