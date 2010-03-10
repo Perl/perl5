@@ -122,7 +122,8 @@ be used to force byte semantics on Unicode data, and the C<use feature
 
 If strings operating under byte semantics and strings with Unicode
 character data are concatenated, the new string will have
-character semantics.  This can cause surprises: See L</BUGS>, below
+character semantics.  This can cause surprises: See L</BUGS>, below.
+You can choose to be warned when this happens.  See L<encoding::warnings>.
 
 Under character semantics, many operations that formerly operated on
 bytes now operate on characters. A character in Perl is
