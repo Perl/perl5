@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 182 );
+plan( tests => 188 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -591,6 +591,28 @@ foreach my $type (qw(integer number string)) {
         '[perl #71254] assignment of globs to vars with pos'
     );
 }
+
+# [perl #72740] - indirect object syntax, heuristically imputed due to
+# the non-existence of a function, should not cause a stash entry to be
+# created for the non-existent function.
+{
+	package RT72740a;
+	my $f = bless({}, RT72740b);
+	sub s1 { s2 $f; }
+	our $s4;
+	sub s3 { s4 $f; }
+}
+{
+	package RT72740b;
+	sub s2 { "RT72740b::s2" }
+	sub s4 { "RT72740b::s4" }
+}
+ok(exists($RT72740a::{s1}), "RT72740a::s1 exists");
+ok(!exists($RT72740a::{s2}), "RT72740a::s2 does not exist");
+ok(exists($RT72740a::{s3}), "RT72740a::s3 exists");
+ok(exists($RT72740a::{s4}), "RT72740a::s4 exists");
+is(RT72740a::s1(), "RT72740b::s2", "RT72740::s1 parsed correctly");
+is(RT72740a::s3(), "RT72740b::s4", "RT72740::s3 parsed correctly");
 
 __END__
 Perl

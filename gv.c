@@ -2364,13 +2364,19 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 /*
 =for apidoc gv_try_downgrade
 
-If C<gv> is a typeglob containing only a constant sub, and is only
-referenced from its package, and both the typeglob and the sub are
-sufficiently ordinary, replace the typeglob (in the package) with a
-placeholder that more compactly represents the same thing.  This is meant
-to be used when a placeholder has been upgraded, most likely because
-something wanted to look at a proper code object, and it has turned out
-to be a constant sub to which a proper reference is no longer required.
+If the typeglob C<gv> can be expressed more succinctly, by having
+something other than a real GV in its place in the stash, replace it
+with the optimised form.  Basic requirements for this are that C<gv>
+is a real typeglob, is sufficiently ordinary, and is only referenced
+from its package.  This function is meant to be used when a GV has been
+looked up in part to see what was there, causing upgrading, but based
+on what was found it turns out that the real GV isn't required after all.
+
+If C<gv> is a completely empty typeglob, it is deleted from the stash.
+
+If C<gv> is a typeglob containing only a sufficiently-ordinary constant
+sub, the typeglob is replaced with a scalar-reference placeholder that
+more compactly represents the same thing.
 
 =cut
 */
@@ -2383,12 +2389,19 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     HEK *namehek;
     SV **gvp;
     PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE;
-    if (SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
+    if (!(SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
 	    !SvOBJECT(gv) && !SvMAGICAL(gv) && !SvREADONLY(gv) &&
 	    isGV_with_GP(gv) && GvGP(gv) &&
-	    GvMULTI(gv) && !GvINTRO(gv) && GvREFCNT(gv) == 1 &&
+	    !GvINTRO(gv) && GvREFCNT(gv) == 1 &&
 	    !GvSV(gv) && !GvAV(gv) && !GvHV(gv) && !GvIOp(gv) && !GvFORM(gv) &&
-	    GvEGV(gv) == gv && (stash = GvSTASH(gv)) && (cv = GvCV(gv)) &&
+	    GvEGV(gv) == gv && (stash = GvSTASH(gv))))
+	return;
+    cv = GvCV(gv);
+    if (!cv) {
+	HEK *gvnhek = GvNAME_HEK(gv);
+	(void)hv_delete(stash, HEK_KEY(gvnhek),
+	    HEK_UTF8(gvnhek) ? -HEK_LEN(gvnhek) : HEK_LEN(gvnhek), G_DISCARD);
+    } else if (GvMULTI(gv) && cv &&
 	    !SvOBJECT(cv) && !SvMAGICAL(cv) && !SvREADONLY(cv) &&
 	    CvSTASH(cv) == stash && CvGV(cv) == gv &&
 	    CvCONST(cv) && !CvMETHOD(cv) && !CvLVALUE(cv) && !CvUNIQUE(cv) &&
