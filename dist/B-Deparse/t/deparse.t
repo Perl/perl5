@@ -548,19 +548,24 @@ if ($a == 1) { x(); } elsif ($b == 2) { z(); }
 if (do { foo(); GLIPP }) { x(); }
 if (do { ++$a; GLIPP }) { x(); }
 ####
+# TODO constant deparsing has been backed out for 5.12
 # 62 tests for deparsing constants
 warn PI;
 ####
+# TODO constant deparsing has been backed out for 5.12
 # 63 tests for deparsing imported constants
 warn O_TRUNC;
 ####
+# TODO constant deparsing has been backed out for 5.12
 # 64 tests for deparsing re-exported constants
 warn O_CREAT;
 ####
+# TODO constant deparsing has been backed out for 5.12
 # 65 tests for deparsing imported constants that got deleted from the original namespace
 warn O_APPEND;
 ####
-# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
+# TODO constant deparsing has been backed out for 5.12
+# XXXTODO ? $Config::Config{useithreads} && "doesn't work with threads"
 # 66 tests for deparsing constants which got turned into full typeglobs
 # It might be fundamentally impossible to make this work on ithreads, in which
 # case the TODO should become a SKIP
@@ -568,6 +573,7 @@ warn O_EXCL;
 eval '@Fcntl::O_EXCL = qw/affe tiger/;';
 warn O_EXCL;
 ####
+# TODO constant deparsing has been backed out for 5.12
 # 67 tests for deparsing of blessed constant with overloaded numification
 warn OVERLOADED_NUMIFICATION;
 ####
