@@ -743,7 +743,11 @@ deprecation warnings.
 
 Alternatively, you may want to consider patching F<lib/deprecate.pm>
 to provide deprecation warnings specific to your packaging system or
-distribution of Perl.
+distribution of Perl, consistent with how your packaging system or
+distribution manages a staged transition from a release where the
+installation of a single package provides the given functionality, to a later
+release where the system administrator needs to know to install multiple
+packages to get that same functionality.
 
 =over
 
