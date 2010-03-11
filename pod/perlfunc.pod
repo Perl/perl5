@@ -681,6 +681,20 @@ might not return information about the call frame you expect it to, for
 C<< N > 1 >>.  In particular, C<@DB::args> might have information from the
 previous time C<caller> was called.
 
+Also be aware that setting C<@DB::args> is I<best effort>, intended for
+debugging or generating backtraces, and should not be relied upon. In
+particular, as C<@_> contains aliases to the caller's arguments, Perl does
+not take a copy of C<@_>, so C<@DB::args> will contain modifications the
+subroutine makes to C<@_> or its contents, not the original values at call
+time. C<@DB::args>, like C<@_>, does not hold explicit references to its
+elements, so under certain cases its elements may have become freed and
+reallocated for other variables or temporary values. Finally, a side effect
+of the current implementation means that the effects of C<shift @_> can
+I<normally> be undone (but not C<pop @_> or other splicing, and not if a
+reference to C<@_> has been taken, and subject to the caveat about reallocated
+elements), so C<@DB::args> is actually a hybrid of the current state and
+initial state of C<@_>. Buyer beware.
+
 =item chdir EXPR
 X<chdir>
 X<cd>
