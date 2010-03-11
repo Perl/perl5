@@ -9,7 +9,7 @@ require DynaLoader;
 use Time::Seconds;
 use Carp;
 use Time::Local;
-use UNIVERSAL qw(isa);
+#use UNIVERSAL qw(isa); # Commented out for Perl 5.12.0 by JRV to avoid a deprecation warning
 
 our @ISA = qw(Exporter DynaLoader);
 
@@ -22,7 +22,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.15';
+our $VERSION = '1.15_01';
 
 bootstrap Time::Piece $VERSION;
 

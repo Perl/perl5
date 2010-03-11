@@ -3,7 +3,7 @@
 package Time::Seconds;
 use strict;
 use vars qw/@EXPORT @EXPORT_OK @ISA/;
-use UNIVERSAL qw(isa);
+# use UNIVERSAL qw(isa); # Commented out for Perl 5.12.0 by JRV to avoid a deprecation warning.
 
 @ISA = 'Exporter';
 
