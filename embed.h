@@ -294,7 +294,9 @@
 #define gv_fullname4		Perl_gv_fullname4
 #define gv_init			Perl_gv_init
 #define gv_name_set		Perl_gv_name_set
+#ifdef PERL_CORE
 #define gv_try_downgrade	Perl_gv_try_downgrade
+#endif
 #define gv_stashpv		Perl_gv_stashpv
 #define gv_stashpvn		Perl_gv_stashpvn
 #define gv_stashsv		Perl_gv_stashsv
@@ -2696,7 +2698,9 @@
 #endif
 #define gv_init(a,b,c,d,e)	Perl_gv_init(aTHX_ a,b,c,d,e)
 #define gv_name_set(a,b,c,d)	Perl_gv_name_set(aTHX_ a,b,c,d)
+#ifdef PERL_CORE
 #define gv_try_downgrade(a)	Perl_gv_try_downgrade(aTHX_ a)
+#endif
 #define gv_stashpv(a,b)		Perl_gv_stashpv(aTHX_ a,b)
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
 #define gv_stashsv(a,b)		Perl_gv_stashsv(aTHX_ a,b)

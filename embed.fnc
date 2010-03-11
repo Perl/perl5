@@ -438,7 +438,7 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 pMox	|GP *	|newGP		|NN GV *const gv
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
-Apd	|void	|gv_try_downgrade|NN GV* gv
+XMpd	|void	|gv_try_downgrade|NN GV* gv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
