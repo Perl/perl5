@@ -1558,7 +1558,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($m+$m, 2*$num_val, 'numifies to usual reference value');
     is(0-$m, -$num_val, 'numifies to usual reference value');
     is(1*$m, $num_val, 'numifies to usual reference value');
-    is($m/1, $num_val, 'numifies to usual reference value');
+    is(int($m/1), $num_val, 'numifies to usual reference value');
     is($m%100, $num_val%100, 'numifies to usual reference value');
     is($m**1, $num_val, 'numifies to usual reference value');
 
@@ -1569,7 +1569,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($aref+$aref, 2*$num_val, 'ref addition');
     is(0-$aref, -$num_val, 'subtraction of ref');
     is(1*$aref, $num_val, 'multiplicaton of ref');
-    is($aref/1, $num_val, 'division of ref');
+    is(int($aref/1), $num_val, 'division of ref');
     is($aref%100, $num_val%100, 'modulo of ref');
     is($aref**1, $num_val, 'exponentiation of ref');
 }
