@@ -534,7 +534,8 @@ do {
 '???';
 !1;
 ####
-# TODO ? $Config::Config{useithreads} && "doesn't work with threads"
+# TODO constant deparsing has been backed out for 5.12
+# XXXTODO ? $Config::Config{useithreads} && "doesn't work with threads"
 # 61 tests that shouldn't be constant folded
 # It might be fundamentally impossible to make this work on ithreads, in which
 # case the TODO should become a SKIP
