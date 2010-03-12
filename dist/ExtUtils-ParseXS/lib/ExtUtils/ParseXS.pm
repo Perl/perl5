@@ -9,31 +9,29 @@ use Symbol;
 
 require Exporter;
 
+our (@ISA, @EXPORT_OK, $VERSION);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(process_file);
+$VERSION = '2.2210_01';
+$VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # use strict;  # One of these days...
 
 my(@XSStack);    # Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
-use vars qw($VERSION);
-$VERSION = '2.2210_01';
-$VERSION = eval $VERSION if $VERSION =~ /_/;
-
-use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH 
-  $proto_re $Overload $errors $Fallback $cplusplus $hiertype 
-  $WantPrototypes $WantVersionChk $except $WantLineNumbers 
-  $WantOptimize $process_inout $process_argtypes @tm $dir 
-  $filename $filepathname %IncludedFiles %type_kind %proto_letter 
-  %targetable $BLOCK_re $lastline $lastline_no $Package $Prefix
-  @line @BootCode %args_match %defaults %var_types %arg_list @proto_arg
-  $processing_arg_with_types %argtype_seen @outlist %in_out %lengthof
-  $proto_in_this_xsub $scope_in_this_xsub $interface $prepush_done
-  $interface_macro $interface_macro_set $ProtoThisXSUB $ScopeThisXSUB 
-  $xsreturn @line_no $ret_type $func_header $orig_args
-); # Add these just to get compilation to happen.
-
+our (%input_expr, %output_expr, $ProtoUsed, @InitFileCode, $FH,
+  $proto_re, $Overload, $errors, $Fallback, $cplusplus, $hiertype,
+  $WantPrototypes, $WantVersionChk, $except, $WantLineNumbers,
+  $WantOptimize, $process_inout, $process_argtypes, @tm, $dir,
+  $filename, $filepathname, %IncludedFiles, %type_kind, %proto_letter,
+  %targetable, $BLOCK_re, $lastline, $lastline_no, $Package, $Prefix,
+  @line, @BootCode, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
+  $processing_arg_with_types, %argtype_seen, @outlist, %in_out, %lengthof,
+  $proto_in_this_xsub, $scope_in_this_xsub, $interface, $prepush_done,
+  $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB,
+  $xsreturn, @line_no, $ret_type, $func_header, $orig_args,
+);
 
 sub process_file {
 
@@ -2009,7 +2007,7 @@ sub map_type {
 package
   ExtUtils::ParseXS::CountLines;
 use strict;
-use vars qw($SECTION_END_MARKER);
+our $SECTION_END_MARKER;
 
 sub TIEHANDLE {
   my ($class, $cfile, $fh) = @_;
