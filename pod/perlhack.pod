@@ -283,7 +283,7 @@ to B<maintenance>. (With an exception for some patches that document
 behaviour that only appears in the maintenance branch, but which has
 changed in the development version.)
 
-To report a bug in Perl, use the program I<perlbug> which comes with
+To report a bug in Perl, use the program L<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
 I<perlbug@perl.org> or I<perlbug@perl.com>).  Reporting bugs through
 I<perlbug> feeds into the automated bug-tracking system, access to

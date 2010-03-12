@@ -787,7 +787,7 @@ I<If you're building a SNAPSHOT, you should STOP HERE>
 
 =item *
 
-Check that the C<perlbug> utility works. Try the following:
+Check that the L<perlbug> utility works. Try the following:
 
     $ bin/perlbug
     ...

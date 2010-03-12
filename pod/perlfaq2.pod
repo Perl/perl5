@@ -311,7 +311,7 @@ found an actual bug.
 
 If you've found a bug with the perl interpreter or one of the modules
 in the standard library (those that come with Perl), you can use the
-C<perlbug> utility that comes with Perl (>= 5.004). It collects
+L<perlbug> utility that comes with Perl (>= 5.004). It collects
 information about your installation to include with your message, then
 sends the message to the right place.
 

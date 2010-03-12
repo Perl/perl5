@@ -454,7 +454,7 @@ affected by wraparound).
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source
 tree, or by C<perl -V>) to perlbug@perl.org .  If you've succeeded
-in compiling perl, the B<perlbug> script in the F<utils/> subdirectory
+in compiling perl, the L<perlbug> script in the F<utils/> subdirectory
 can be used to help mail in a bug report.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
