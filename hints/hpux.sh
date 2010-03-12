@@ -237,9 +237,9 @@ EOM
 	    # HP-UX 11.00 uses only 48 bits internally in 64bit mode, not 64
 	    # force min/max to 2**47-1
 	    sGMTIME_max=140737488355327
-	    sGMTIME_min=-140737488355327
+	    sGMTIME_min=-62167219200
 	    sLOCALTIME_max=140737488355327
-	    sLOCALTIME_min=-140737488355327
+	    sLOCALTIME_min=-62167219200
 	    fi
 
 	# Set libc and the library paths
