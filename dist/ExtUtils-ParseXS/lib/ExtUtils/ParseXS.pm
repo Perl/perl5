@@ -29,13 +29,11 @@ our (
   $hiertype, $WantPrototypes, $WantVersionChk, $WantLineNumbers, $filepathname, 
   $dir, $filename, %IncludedFiles, %input_expr, %output_expr, 
   %type_kind, %proto_letter, $BLOCK_re, $lastline, $lastline_no, $Package, 
-  $Prefix,
-  
-  @line, @BootCode, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
-  $processing_arg_with_types, %argtype_seen, @outlist, %in_out, %lengthof,
-  $proto_in_this_xsub, $scope_in_this_xsub, $interface, $prepush_done,
-  $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB,
-  $xsreturn, @line_no, $ret_type, $func_header, $orig_args,
+  $Prefix, @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
+  $processing_arg_with_types, %argtype_seen, %in_out, %lengthof, 
+  $proto_in_this_xsub, $scope_in_this_xsub, $interface, 
+  $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
+  @line_no, $ret_type, 
 );
 
 sub process_file {
@@ -379,6 +377,7 @@ EOF
   $lastline    = $_;
   $lastline_no = $.;
 
+  my (@BootCode, @outlist, $prepush_done, $xsreturn, $func_header, $orig_args, );
  PARAGRAPH:
   while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
