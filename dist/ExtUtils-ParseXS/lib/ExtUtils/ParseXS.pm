@@ -34,7 +34,8 @@ our (
   $proto_in_this_xsub, $scope_in_this_xsub, $interface, 
   $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
-  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs,
+  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
+  $pname,
 );
 
 sub process_file {
@@ -210,7 +211,8 @@ sub process_file {
   }
 
   my ($cast, $size);
-  our $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
+  our $bal;
+  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
   $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
@@ -494,6 +496,7 @@ EOF
     ($class, $func_name, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
+    my $clean_func_name;
     ($clean_func_name = $func_name) =~ s/^$Prefix//;
     $Full_func_name = "${Packid}_$clean_func_name";
     if ($Is_VMS) {
