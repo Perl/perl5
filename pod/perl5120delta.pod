@@ -2,7 +2,7 @@
 
 perl5120delta - what is new for perl v5.12.0
 
-=head1 XXX - THIS DOCUMENT IS ONLY CURRENT THROUGH PERL5114
+=head1 XXX - THIS DOCUMENT IS ONLY CURRENT THROUGH PERL5115
 
 FIX ME BEFORE RELEASE
 
@@ -18,345 +18,26 @@ HEAVY COPYEDITING IS NEEDED
 This document describes differences between the 5.10.0 release and
 the 5.12.0 release.
 
-Many of the bug fixes in 5.12.0 were already seen in the 5.10.1
-maintenance release since the two releases were kept closely
-coordinated (while 5.12.0 was still called 5.11.something).
+Many of the bug fixes in 5.12.0 are already included in the 5.10.1
+maintenance release.
 
-You can see the list of changes in the 5.10.1 release 
-by reading L<perl5101delta>.
+You can see the list of those changes in the 5.10.1 release notes (L<perl5101delta>).
 
-=head1 Core Enhancements
 
-=head2 qr overloading
-
-It is now possible to overload the C<qr//> operator, that is,
-conversion to regexp, like it was already possible to overload
-conversion to boolean, string or number of objects. It is invoked when
-an object appears on the right hand side of the C<=~> operator or when
-it is interpolated into a regexp. See L<overload>.
-
-=head2 Pluggable keywords
-
-Extension modules can now cleanly hook into the Perl parser to define
-new kinds of keyword-headed expression and compound statement. The
-syntax following the keyword is defined entirely by the extension. This
-allow a completely non-Perl sublanguage to be parsed inline, with the
-correct ops cleanly generated. This feature is currently considered
-experimental.
-
-See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core
-source distribution also includes a new module
-L<XS::APItest::KeywordRPN>, which implements reverse Polish notation
-arithmetic via pluggable keywords. This module is mainly used for test
-purposes, and is not normally installed, but also serves as an example
-of how to use the new mechanism.
-
-=head2 APIs for more internals
-
-The lowest layers of the lexer and parts of the pad system now have C
-APIs available to XS extensions. These are necessary to support proper
-use of pluggable keywords, but have other uses too. The new APIs are
-experimental, and only cover a small proportion of what would be
-necessary to take full advantage of the core's facilities in these
-areas. It is intended that the Perl 5.13 development cycle will see the
-addition of a full range of clean, supported interfaces.
-
-=head2 Overridable function lookup
-
-Where an extension module hooks the creation of rv2cv ops to modify the
-subroutine lookup process, this now works correctly for bareword
-subroutine calls. This means that prototypes on subroutines referenced
-this way will be processed correctly. (Previously bareword subroutine
-names were initially looked up, for parsing purposes, by an unhookable
-mechanism, so extensions could only properly influence subroutine names
-that appeared with an C<&> sigil.)
-
-=head2 Unicode version
-
-Perl is shipped with the latest Unicode version, 5.2, dated October 2009.  See
-L<http://www.unicode.org/versions/Unicode5.2.0> for details about this release
-of Unicode.  See L<perlunicode> for instructions on installing and using
-older versions of Unicode.
-
-=head2 Unicode properties
-
-A concerted effort has been made to update Perl to be in sync with the latest
-Unicode standard.  Changes for this include:
-
-Perl can now handle every Unicode character property.  A new pod,
-L<perluniprops>, lists all available non-Unihan character properties.  By
-default the Unihan properties and certain others (deprecated and Unicode
-internal-only ones) are not exposed.  See below for more details on
-these; there is also a section in the pod listing them, and explaining
-why they are not exposed.
-
-Perl now fully supports the Unicode compound-style of using C<=> and C<:>
-in writing regular expressions: C<\p{property=value}> and
-C<\p{property:value}> (both of which mean the same thing).
-
-Perl now fully supports the Unicode loose matching rules for text
-between the braces in C<\p{...}> constructs.  In addition, Perl allows
-underscores between digits of numbers.
-
-All the Unicode-defined synonyms for properties and property values are
-now accepted.
-
-C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
-better with various Asian languages.  It now is defined as an I<extended
-grapheme cluster>.  (See L<http://www.unicode.org/reports/tr29/>).
-Anything matched previously and that made sense will continue to be
-matched, but in addition:
-
-=over
-
-=item *
-
-C<\X> will not break apart a C<S<CR LF>> sequence.
-
-=item *
-
-C<\X> will now match a sequence which includes the C<ZWJ> and C<ZWNJ> characters.
-
-=item *
-
-C<\X> will now always match at least one character, including an initial mark.
-Marks generally come after a base character, but it is possible in Unicode to
-have them in isolation, and C<\X> will now handle that case, for example at the
-beginning of a line, or after a C<ZWSP>.  And this is the part where C<\X>
-doesn't match the things that it used to that don't make sense.  Formerly, for
-example, you could have the nonsensical case of an accented LF.
-
-=item *
-
-C<\X> will now match a (Korean) Hangul syllable sequence, and the Thai and Lao
-exception cases.
-
-=back
-
-Otherwise, this change should be transparent for the non-affected languages.
-
-C<\p{...}> matches using the Canonical_Combining_Class property were
-completely broken in previous Perls.  This is now fixed.
-
-In previous Perls, the Unicode C<Decomposition_Type=Compat> property and a
-Perl extension had the same name, which led to neither matching all the
-correct values (with more than 100 mistakes in one, and several thousand
-in the other).  The Perl extension has now been renamed to be
-C<Decomposition_Type=Noncanonical> (short: C<dt=noncanon>).  It has the same
-meaning as was previously intended, namely the union of all the
-non-canonical Decomposition types, with Unicode C<Compat> being just one of
-those.
-
-C<\p{Uppercase}> and C<\p{Lowercase}> have been brought into line with the
-Unicode definitions.  This means they each match a few more characters
-than previously.
-
-C<\p{Cntrl}> now matches the same characters as C<\p{Control}>.  This means it
-no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
-(gc=cf) code points.  The Format code points represent the biggest
-possible problem.  All but 36 of them are either officially deprecated
-or strongly discouraged from being used.  Of those 36, likely the most
-widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
-similar characters, plus bidirectional controls.
-
-C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>.  The Perl
-definition included a number of things that aren't really alpha (all
-marks), while omitting many that were.  As a direct consequence, the
-definitions of C<\p{Alnum}> and C<\p{Word}> which depend on Alpha also change
-correspondingly.
-
-C<\p{Word}> also now doesn't match certain characters it wasn't supposed
-to, such as fractions.
-
-C<\p{Print}> no longer matches the line control characters: Tab, LF, CR,
-FF, VT, and NEL.  This brings it in line with standards and the documentation.
-
-C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables.
-
-C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>.  This
-means that in addition to the characters it currently matches,
-C<[A-Fa-f0-9]>, it will also match the 22 fullwidth equivalents, for
-example U+FF10: FULLWIDTH DIGIT ZERO.
-
-The Numeric type property has been extended to include the Unihan
-characters.
-
-There is a new Perl extension, the 'Present_In', or simply 'In',
-property.  This is an extension of the Unicode Age property, but
-C<\p{In=5.0}> matches any code point whose usage has been determined
-I<as of> Unicode version 5.0.  The C<\p{Age=5.0}> only matches code points
-added in I<precisely> version 5.0.
-
-A number of properties did not have the correct values for unassigned
-code points.  This is now fixed.  The affected properties are
-Bidi_Class, East_Asian_Width, Joining_Type, Decomposition_Type,
-Hangul_Syllable_Type, Numeric_Type, and Line_Break.
-
-The Default_Ignorable_Code_Point, ID_Continue, and ID_Start properties
-have been updated to their current Unicode definitions.
-
-Certain properties that are supposed to be Unicode internal-only were
-erroneously exposed by previous Perls.  Use of these in regular
-expressions will now generate, if enabled, a deprecated warning message.
-The properties are: Other_Alphabetic, Other_Default_Ignorable_Code_Point,
-Other_Grapheme_Extend, Other_ID_Continue, Other_ID_Start, Other_Lowercase,
-Other_Math, and Other_Uppercase.
-
-An installation can now fairly easily change which Unicode properties
-Perl understands.  As mentioned above, certain properties are by default
-turned off.  These include all the Unihan properties (which should be
-accessible via the CPAN module Unicode::Unihan) and any deprecated or
-Unicode internal-only property that Perl has never exposed.
-
-The generated files in the C<lib/unicore/To> directory are now more
-clearly marked as being stable, directly usable by applications.
-New hash entries in them give the format of the normal entries,
-which allows for easier machine parsing.  Perl can generate files
-in this directory for any property, though most are suppressed.  An
-installation can choose to change which get written.  Instructions
-are in L<perluniprops>.
-
-=head2 Regular Expressions
-
-U+0FFFF is now a legal character in regular expressions.
-
-=head2 A proper interface for pluggable Method Resolution Orders
-
-As of Perl 5.11.0 there is a new interface for plugging and using method
-resolution orders other than the default (linear depth first search).
-The C3 method resolution order added in 5.10.0 has been re-implemented as
-a plugin, without changing its Perl-space interface. See L<perlmroapi> for
-more information.
-
-=head2 The C<overloading> pragma
-
-This pragma allows you to lexically disable or enable overloading
-for some or all operations. (Yuval Kogman)
-
-=head2 C<\N> experimental regex escape
-
-A new regex escape has been added, C<\N>. It will match any character that
-is not a newline, independently from the presence or absence of the single
-line match modifier C</s>.  It is not usable within a character class.
-C<\N{3}> means to match 3 non-newlines; C<\N{5,}> means to match at least 5.
-C<\N{NAME}> still means the character or sequence named C<NAME>, but C<NAME> no
-longer can be things like C<3>, or C<5,>.
-Compatibility with Unicode names is preserved, as none look like these, but it
-has been possible to create custom names that do look like them, and those will
-no longer work. (Rafael Garcia-Suarez)
-
-This will break a L<custom charnames translator|charnames/CUSTOM TRANSLATORS>
-which allows numbers for character names, as C<\N{3}> will now mean to match 3
-non-newline characters, and not the character whose name is C<3>.  (No standard
-name is a number, so only a custom translator would be affected.)
-
-This escape is experimental, subject to change, because there is some concern
-about possible confusion with the previous meaning of C<\N{...}>
-
-=head2 \N{...} now compiles better, always forces UTF-8 internal representation.
-
-There were several problems that have been fixed with recognizing C<\N{...}>
-constructs.   As part of this, any scalar or regex that has either a
-C<\N{I<name>}> or C<\N{U+I<wide hex char>}> in its definition will be stored in
-UTF-8 format.  (This was true previously for all occurences of C<\N{I<name>}>
-that did not use a custom translator, but now it's always true.)
-
-=head2 Implicit strictures
-
-Using the C<use VERSION> syntax with a version number greater or equal
-to 5.11.0 will also lexically enable strictures just like C<use strict>
-would do (in addition to enabling features.) So, the following:
-
-    use 5.11.0;
-
-will now imply:
-
-    use strict;
-    use feature ':5.11';
-
-=head2 Parallel tests
-
-The core distribution can now run its regression tests in parallel on
-Unix-like platforms. Instead of running C<make test>, set C<TEST_JOBS> in
-your environment to the number of tests to run in parallel, and run
-C<make test_harness>. On a Bourne-like shell, this can be done as
-
-    TEST_JOBS=3 make test_harness  # Run 3 tests in parallel
-
-An environment variable is used, rather than parallel make itself, because
-L<TAP::Harness> needs to be able to schedule individual non-conflicting test
-scripts itself, and there is no standard interface to C<make> utilities to
-interact with their job schedulers.
-
-Note that currently some test scripts may fail when run in parallel (most
-notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
-again sequentially and see if the failures go away.
-
-=head2 The C<...> operator
-
-A new operator, C<...>, nicknamed the Yada Yada operator, has been added.
-It is intended to mark placeholder code that is not yet implemented.
-See L<perlop/"Yada Yada Operator">. (chromatic)
-
-=head2 DTrace support
-
-Some support for DTrace has been added. See "DTrace support" in F<INSTALL>.
-
-=head2 Support for C<configure_requires> in CPAN module metadata
-
-Both C<CPAN> and C<CPANPLUS> now support the C<configure_requires> keyword
-in the F<META.yml> metadata file included in most recent CPAN distributions.
-This allows distribution authors to specify configuration prerequisites that
-must be installed before running F<Makefile.PL> or F<Build.PL>.
-
-See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for more
-on how to specify C<configure_requires> when creating a distribution for CPAN.
-
-=head2 C<each> is now more flexible
-
-The C<each> function can now operate on arrays.
-
-=head2 Y2038 compliance
-
-Perl's core time-related functions are now Y2038 compliant. (With 29
-years to spare!)
-
-=head2 C<$,> flexibility
-
-The variable C<$,> may now be tied.
-
-=head2 // in where clauses
-
-// now behaves like || in when clauses
-
-=head2 Enabling warnings from your shell environment
-
-You can now set C<-W> from the C<PERL5OPT> environment variable
-
-=head2 C<delete local>
-
-C<delete local> now allows you to locally delete a hash entry.
-
-=head2 New support for Abstract namespace sockets
-
-Abstract namespace sockets are Linux-specific socket type that live in
-AF_UNIX family, slightly abusing it to be able to use arbitrary
-character arrays as addresses: They start with nul byte and are not
-terminated by nul byte, but with the length passed to the socket()
-system call.
+=head1 New features and New syntax
 
 =head2 New C<package NAME VERSION> syntax
 
 This new syntax allows a module author to set the $VERSION of a namespace
-when the namespace is declared with 'package'.  It eliminates the need
-for C<our $VERSION = ...> and similar constructs.  E.g.
+when the namespace is declared with 'package'. It eliminates the need
+for C<our $VERSION = ...> and similar constructs. E.g.
 
       package Foo::Bar 1.23;
       # $Foo::Bar::VERSION == 1.23
 
 There are several advantages to this:
 
-=over 
+=over
 
 =item *
 
@@ -393,26 +74,347 @@ years, it will become a standard practice.
 =back
 
 However, C<package NAME VERSION> requires a new, 'strict' version
-number format.  See L<"Version number formats"> for details.
+number format. See L<"Version number formats"> for details.
+
+
+=head2 The C<...> operator
+
+A new operator, C<...>, nicknamed the Yada Yada operator, has been added.
+It is intended to mark placeholder code that is not yet implemented.
+See L<perlop/"Yada Yada Operator">. (chromatic)
+
+=head2 Implicit strictures
+
+Using the C<use VERSION> syntax with a version number greater or equal
+to 5.11.0 will lexically enable strictures just like C<use strict>
+would do (in addition to enabling features.) The following:
+
+    use 5.12.0;
+
+means:
+
+    use strict;
+    use feature ':5.12';
+
+
+=head1 Core Enhancements
+
+=head2 qr overloading
+
+It is now possible to overload the C<qr//> operator, that is,
+conversion to regexp, like it was already possible to overload
+conversion to boolean, string or number of objects. It is invoked when
+an object appears on the right hand side of the C<=~> operator or when
+it is interpolated into a regexp. See L<overload>.
+
+=head2 Pluggable keywords
+
+Extension modules can now cleanly hook into the Perl parser to define
+new kinds of keyword-headed expression and compound statement. The
+syntax following the keyword is defined entirely by the extension. This
+allow a completely non-Perl sublanguage to be parsed inline, with the
+correct ops cleanly generated.
+
+See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core
+source distribution also includes a new module
+L<XS::APItest::KeywordRPN>, which implements reverse Polish notation
+arithmetic via pluggable keywords. This module is mainly used for test
+purposes, and is not normally installed, but also serves as an example
+of how to use the new mechanism.
+
+Perl's developers consider this feature to be experimental. We may remove
+it or change it in a backwards-incompatible way in Perl 5.14.
+
+=head2 APIs for more internals
+
+The lowest layers of the lexer and parts of the pad system now have C
+APIs available to XS extensions. These are necessary to support proper
+use of pluggable keywords, but have other uses too. The new APIs are
+experimental, and only cover a small proportion of what would be
+necessary to take full advantage of the core's facilities in these
+areas. It is intended that the Perl 5.13 development cycle will see the
+addition of a full range of clean, supported interfaces.
+
+Perl's developers consider this feature to be experimental. We may remove
+it or change it in a backwards-incompatible way in Perl 5.14.
+
+=head2 Overridable function lookup
+
+Where an extension module hooks the creation of rv2cv ops to modify the
+subroutine lookup process, this now works correctly for bareword
+subroutine calls. This means that prototypes on subroutines referenced
+this way will be processed correctly. (Previously bareword subroutine
+names were initially looked up, for parsing purposes, by an unhookable
+mechanism, so extensions could only properly influence subroutine names
+that appeared with an C<&> sigil.)
+
+=head2 Unicode version 5.2
+
+Perl 5.12 comes with Unicode 5.2, the latest version available to
+us at the time of release.  This version of Unicode was released in
+October 2009. See L<http://www.unicode.org/versions/Unicode5.2.0> for
+further details about what's changed in this version of the standard.
+See L<perlunicode> for instructions on installing and using other versions
+of Unicode.
+
+=head2 Major overhaul of Unicode property support
+
+Perl's developers have made a concerted effort to update Perl to be in
+sync with the latest Unicode standard. Changes for this include:
+
+Perl can now handle every Unicode character property. New documentation,
+L<perluniprops>, lists all available non-Unihan character properties. By
+default, perl does not expose Unihan, deprecated or Unicode-internal
+properties.  See below for more details on these; there is also a section
+in the pod listing them, and explaining why they are not exposed.
+
+Perl now fully supports the Unicode compound-style of using C<=> and C<:>
+in writing regular expressions: C<\p{property=value}> and
+C<\p{property:value}> (both of which mean the same thing).
+
+Perl now fully supports the Unicode loose matching rules for text
+between the braces in C<\p{...}> constructs. In addition, Perl allows
+underscores between digits of numbers.
+
+Perl now accepts all the Unicode-defined synonyms for properties and property values.
+
+C<qr/\X/>, which matches a Unicode logical character, has been expanded to work
+better with various Asian languages. It now is defined as an I<extended
+grapheme cluster>. (See L<http://www.unicode.org/reports/tr29/>).
+Anything matched previously and that made sense will continue to be
+accepted.   Additionally:
+
+=over
+
+=item *
+
+C<\X> will not break apart a C<S<CR LF>> sequence.
+
+=item *
+
+C<\X> will now match a sequence which includes the C<ZWJ> and C<ZWNJ> characters.
+
+=item *
+
+C<\X> will now always match at least one character, including an initial mark.
+Marks generally come after a base character, but it is possible in Unicode to
+have them in isolation, and C<\X> will now handle that case, for example at the
+beginning of a line, or after a C<ZWSP>. And this is the part where C<\X>
+doesn't match the things that it used to that don't make sense. Formerly, for
+example, you could have the nonsensical case of an accented LF.
+
+=item *
+
+C<\X> will now match a (Korean) Hangul syllable sequence, and the Thai and Lao
+exception cases.
+
+=back
+
+Otherwise, this change should be transparent for the non-affected languages.
+
+C<\p{...}> matches using the Canonical_Combining_Class property were
+completely broken in previous releases of Perl.  They should now work correctly.
+
+Before Perl 5.12, the Unicode C<Decomposition_Type=Compat> property and a
+Perl extension had the same name, which led to neither matching all the
+correct values (with more than 100 mistakes in one, and several thousand
+in the other). The Perl extension has now been renamed to be
+C<Decomposition_Type=Noncanonical> (short: C<dt=noncanon>). It has the same
+meaning as was previously intended, namely the union of all the
+non-canonical Decomposition types, with Unicode C<Compat> being just one of
+those.
+
+C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables.
+
+C<\p{Uppercase}> and C<\p{Lowercase}> now work as the Unicode standard says they should.
+This means they each match a few more characters than they used to.
+
+C<\p{Cntrl}> now matches the same characters as C<\p{Control}>. This means it
+no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
+(gc=cf) code points. The Format code points represent the biggest
+possible problem. All but 36 of them are either officially deprecated
+or strongly discouraged from being used. Of those 36, likely the most
+widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
+similar characters, plus bidirectional controls.
+
+C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>. Before 5.12, Perl's definition
+definition included a number of things that aren't really alpha (all
+marks) while omitting many that were. The
+definitions of C<\p{Alnum}> and C<\p{Word}> depend on Alpha's definition and have changed accordingly.
+
+C<\p{Word}> no longer incorrectly matches non-word characters such as fractions.
+
+C<\p{Print}> no longer matches the line control characters: Tab, LF, CR,
+FF, VT, and NEL. This brings it in line with standards and the documentation.
+
+C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>. This
+means that in addition to the characters it currently matches,
+C<[A-Fa-f0-9]>, it will also match the 22 fullwidth equivalents, for
+example U+FF10: FULLWIDTH DIGIT ZERO.
+
+The Numeric type property has been extended to include the Unihan
+characters.
+
+There is a new Perl extension, the 'Present_In', or simply 'In',
+property. This is an extension of the Unicode Age property, but
+C<\p{In=5.0}> matches any code point whose usage has been determined
+I<as of> Unicode version 5.0. The C<\p{Age=5.0}> only matches code points
+added in I<precisely> version 5.0.
+
+A number of properties now have the correct values for unassigned
+code points. The affected properties are
+Bidi_Class, East_Asian_Width, Joining_Type, Decomposition_Type,
+Hangul_Syllable_Type, Numeric_Type, and Line_Break.
+
+The Default_Ignorable_Code_Point, ID_Continue, and ID_Start properties
+are now up to date with current Unicode definitions.
+
+Earlier versions of Perl erroneously exposed certain properties that are supposed to be Unicode internal-only.
+Use of these in regular expressions will now generate, if enabled, a deprecation warning message.
+The properties are: Other_Alphabetic, Other_Default_Ignorable_Code_Point,
+Other_Grapheme_Extend, Other_ID_Continue, Other_ID_Start, Other_Lowercase,
+Other_Math, and Other_Uppercase.
+
+It is now possible to change which Unicode properties Perl understands
+on a per-installation basis. As mentioned above, certain properties
+are turned off by default.  These include all the Unihan properties
+(which should be accessible via the CPAN module Unicode::Unihan) and any
+deprecated or Unicode internal-only property that Perl has never exposed.
+
+The generated files in the C<lib/unicore/To> directory are now more
+clearly marked as being stable, directly usable by applications.
+New hash entries in them give the format of the normal entries,
+which allows for easier machine parsing. Perl can generate files
+in this directory for any property, though most are suppressed.
+You can find instructions for changing which are written in L<perluniprops>.
+
+=head2 Regular Expressions
+
+U+0FFFF is now a legal character in regular expressions.
+
+=head2 A proper interface for pluggable Method Resolution Orders
+
+As of Perl 5.12.0 there is a new interface for plugging and using method
+resolution orders other than the default linear depth first search.
+The C3 method resolution order added in 5.10.0 has been re-implemented as
+a plugin, without changing its Perl-space interface. See L<perlmroapi> for
+more information.
+
+=head2 The C<overloading> pragma
+
+This pragma allows you to lexically disable or enable overloading
+for some or all operations. (Yuval Kogman)
+
+
+=head2 \N{...} now compiles better, always forces UTF-8 internal representation.
+
+There were several problems that have been fixed with recognizing C<\N{...}>
+constructs.  As part of this, any scalar or regex that has either a
+C<\N{I<name>}> or C<\N{U+I<wide hex char>}> in its definition will be stored in
+UTF-8 format. (This was true previously for all occurences of C<\N{I<name>}>
+that did not use a custom translator, but now it's always true.)
+
+=head2 C<\N> experimental regex escape
+
+Perl now supports C<\N>, a new regex escape which you can think of as
+the inverse of C<\n>. It will match any character that is not a newline,
+independently from the presence or absence of the single line match
+modifier C</s>. It is not usable within a character class.  C<\N{3}>
+means to match 3 non-newlines; C<\N{5,}> means to match at least 5.
+C<\N{NAME}> still means the character or sequence named C<NAME>, but
+C<NAME> no longer can be things like C<3>, or C<5,>.
+
+This will break a L<custom charnames translator|charnames/CUSTOM
+TRANSLATORS> which allows numbers for character names, as C<\N{3}> will
+now mean to match 3 non-newline characters, and not the character whose
+name is C<3>. (No name defined by the Unicode standard is a number,
+so only custom translators might be affected.)
+
+Perl's developers are somewhat concerned about possible user confusion
+with the existing C<\N{...}> construct which matches characters by their
+Unicode name. Consequently, this feature is experimental. We may remove
+it or change it in a backwards-incompatible way in Perl 5.14.
+
+=head2 DTrace support
+
+Perl now has some support for DTrace. See "DTrace support" in F<INSTALL>.
+
+=head2 Support for C<configure_requires> in CPAN module metadata
+
+Both C<CPAN> and C<CPANPLUS> now support the C<configure_requires> keyword
+in the F<META.yml> metadata file included in most recent CPAN distributions.
+This allows distribution authors to specify configuration prerequisites that
+must be installed before running F<Makefile.PL> or F<Build.PL>.
+
+See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for more
+on how to specify C<configure_requires> when creating a distribution for CPAN.
+
+=head2 C<each> is now more flexible
+
+The C<each> function can now operate on arrays.
+
+=head2 Y2038 compliance
+
+Perl's core time-related functions are now Y2038 compliant. (It may not mean much to you, but your kids will love it!)
+
+=head2 C<$,> flexibility
+
+The variable C<$,> may now be tied.
+
+=head2 // in where clauses
+
+// now behaves like || in when clauses
+
+=head2 Enabling warnings from your shell environment
+
+You can now set C<-W> from the C<PERL5OPT> environment variable
+
+=head2 C<delete local>
+
+C<delete local> now allows you to locally delete a hash entry.
+
+=head2 New support for Abstract namespace sockets
+
+Abstract namespace sockets are Linux-specific socket type that live in
+AF_UNIX family, slightly abusing it to be able to use arbitrary
+character arrays as addresses: They start with nul byte and are not
+terminated by nul byte, but with the length passed to the socket()
+system call.
+
+=head2 32-bit limit on substr arguments removed
+
+The 32-bit limit on C<substr> arguments has now been removed. The full range
+of the system's signed and unsigned integers is now available for the C<pos>
+and C<len> arguments.
 
 =head1 Incompatible Changes
+
+=head2 Deprecations warn by default
+
+Perl now defaults to issuing a warning if a deprecated language feature
+is used.
+
+To disable this feature in a given lexical scope, you should use C<no
+warnings 'deprecated';> For information about which language features
+are deprecated and explanations of various deprecation warnings, please
+see L<perldiag.pod>
 
 =head2 Version number formats
 
 Acceptable version number formats have been formalized into "strict" and
-"lax" rules.  C<package NAME VERSION> takes a strict version number.
+"lax" rules. C<package NAME VERSION> takes a strict version number.
 C<UNIVERSAL::VERSION> and the L<version> object constructors take lax
-version numbers.  Providing an invalid version will result in a fatal
-error.  The version argument in C<use NAME VERSION> is first parsed as a
+version numbers. Providing an invalid version will result in a fatal
+error. The version argument in C<use NAME VERSION> is first parsed as a
 numeric literal or v-string and then passed to C<UNIVERSAL::VERSION>
 (and must then pass the "lax" format test).
 
-These formats are documented fully in the L<version> module.  To a first
+These formats are documented fully in the L<version> module. To a first
 approximation, a "strict" version number is a positive decimal number
 (integer or decimal-fraction) without exponentiation or else a
 dotted-decimal v-string with a leading 'v' character and at least three
-components.  A "lax" version number allows v-strings with fewer than
-three components or without a leading 'v'.  Under "lax" rules, both
+components. A "lax" version number allows v-strings with fewer than
+three components or without a leading 'v'. Under "lax" rules, both
 decimal and dotted-decimal versions may have a trailing "alpha"
 component separated by an underscore character after a fractional or
 dotted-decimal component.
@@ -550,8 +552,8 @@ avoided.
 =item *
 
 The definitions of a number of Unicode properties have changed to match those
-of the current Unicode standard.  These are listed above under L</Unicode
-properties>.  This could break code that is expecting the old definitions.
+of the current Unicode standard. These are listed above under L</Unicode
+properties>. This could break code that is expecting the old definitions.
 
 =item *
 
@@ -560,8 +562,7 @@ compatibility.
 
 =item *
 
-Filehandles are blessed directly into C<IO::Handle>, as C<FileHandle> is
-merely a wrapper around C<IO::Handle>.
+Filehandles are now always blessed into C<IO::File>.
 
 The previous behaviour was to bless Filehandles into L<FileHandle>
 (an empty proxy class) if it was loaded into memory and otherwise
@@ -575,7 +576,7 @@ See L<"Modules and Pragmata"> for more information.
 =item *
 
 The version control system used for the development of the perl
-interpreter has been switched from Perforce to git.  This is mainly an
+interpreter has been switched from Perforce to git. This is mainly an
 internal issue that only affects people actively working on the perl core;
 but it may have minor external visibility, for example in some of details
 of the output of C<perl -V>. See L<perlrepository> for more information.
@@ -670,7 +671,7 @@ be poorly designed or implemented. Sometimes, this is because they're
 holding back other features or causing performance problems. Sometimes,
 the reasons are more complex. Wherever possible, we try to keep deprecated
 functionality available to developers in its previous form for at least
-one major release.  So long as a deprecated feature isn't actively
+one major release. So long as a deprecated feature isn't actively
 disrupting our ability to maintain and extend Perl, we'll try to leave
 it in place as long as possible.
 
@@ -705,7 +706,7 @@ before the C<=>.
 
 =item C<< UNIVERSAL->import() >>
 
-The method C<< UNIVERSAL->import() >> is now deprecated.  Attempting to
+The method C<< UNIVERSAL->import() >> is now deprecated. Attempting to
 pass import arguments to a C<use UNIVERSAL> statement will result in a
 deprecation warning.
 
@@ -717,14 +718,14 @@ implementation of scopes.
 
 =item Custom character names in \N{name} should look like names
 
-In C<\N{I<name>}>, I<name> can be just about anything.  The standard Unicode
+In C<\N{I<name>}>, I<name> can be just about anything. The standard Unicode
 names have a very limited domain, but a custom name translator could create
-names that are, for example, made up entirely of punctuation symbols.  It is
+names that are, for example, made up entirely of punctuation symbols. It is
 now deprecated to make names that don't begin with an alphabetic character, and
 aren't alphanumeric or contain other than a very few other characters,
-namely spaces, dashes, parentheses and colons.  Because of the added meaning of
+namely spaces, dashes, parentheses and colons. Because of the added meaning of
 C<\N> (See L</C<\N> experimental regex escape>), names that look like curly
-brace -enclosed quantifiers won't work.  For example, C<\N{3,4}> now means to
+brace -enclosed quantifiers won't work. For example, C<\N{3,4}> now means to
 match 3 to 4 non-newlines; before a custom name C<3,4> could have been created.
 
 =item Deprecated Modules
@@ -736,7 +737,7 @@ of these modules warnings will issue a deprecation warning.
 
 If you ship a packaged version of Perl, either alone or as part of a larger
 system, then you should carefully consider the reprecussions of core module
-deprecations.  You may want to consider shipping your default build of
+deprecations. You may want to consider shipping your default build of
 Perl with packages for some or all deprecated modules which install into
 C<vendor> or C<site> perl library directories. This will inhibit the 
 deprecation warnings.
@@ -759,7 +760,7 @@ packages to get that same functionality.
 
 =item L<Switch>
 
-Switch is buggy and should be avoided.  See L<perlsyn/"Switch
+Switch is buggy and should be avoided. See L<perlsyn/"Switch
 statements"> for its replacement.
 
 =back
@@ -917,7 +918,7 @@ This pragma no longer suppresses C<Use of uninitialized value in range
 
 C<feature>
 
-Upgraded from 1.13 to 1.14.  Added the C<unicode_strings> feature:
+Upgraded from 1.13 to 1.14. Added the C<unicode_strings> feature:
 
     use feature "unicode_strings";
 
@@ -957,7 +958,7 @@ C<warnings>
 Upgraded from 1.07 to 1.09. 
 
 Added new C<warnings::fatal_enabled()> function.
-This version adds the C<illegalproto> warning category.  See also L</New or
+This version adds the C<illegalproto> warning category. See also L</New or
 Changed Diagnostics> for this change.
 
 =back
@@ -979,7 +980,7 @@ Changed Diagnostics> for this change.
 
 C<Devel::DProf::V>
 
-Removed from the Perl core.  Prior version was 'undef'.
+Removed from the Perl core. Prior version was 'undef'.
 
 =back
 
@@ -1025,19 +1026,30 @@ the beginnings of a document on Perl porting policies.
 
 =head2 Changes to Existing Documentation
 
+=over
+
+
+=item *
+
 The various large F<Changes*> files (which listed every change made to perl
 over the last 18 years) have been removed, and replaced by a small file,
 also called F<Changes>, which just explains how that same information may
 be extracted from the git version control system.
 
+=item *
+
 The file F<Porting/patching.pod> has been deleted, as it mainly described
 interacting with the old Perforce-based repository, which is now obsolete.
 Information still relevant has been moved to L<perlrepository>.
 
-L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all
-generated at build time, rather than being shipped as part of the release.
 
-=over
+=item *
+
+The syntax C<unless (EXPR) BLOCK else BLOCK> is now documented as valid, as
+is the syntax C<unless (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK>,
+although actually using the latter may not be the best idea for the
+readability of your source code.
+
 
 =item *
 
@@ -1061,7 +1073,7 @@ F<pod/perlthrtut.pod> is the same material reworked for ithreads.
 
 Correct previous documentation: v-strings are not deprecated
 
-With version objects, we need them to use MODULE VERSION syntax.  This
+With version objects, we need them to use MODULE VERSION syntax. This
 patch removes the deprecation notice.
 
 =item *
@@ -1077,9 +1089,9 @@ Christiansen's name.
 
 The Pod specification (L<perlpodspec>) has been updated to bring the
 specification in line with modern usage already supported by most Pod
-systems.  A parameter string may now follow the format name in a
-"begin/end" region.  Links to URIs with a text description are now
-allowed.  The usage of C<LE<lt>"section"E<gt>> has been marked as
+systems. A parameter string may now follow the format name in a
+"begin/end" region. Links to URIs with a text description are now
+allowed. The usage of C<LE<lt>"section"E<gt>> has been marked as
 deprecated.
 
 L<if.pm|if> has been documented in L<perlfunc/use> as a means to get
@@ -1150,7 +1162,7 @@ C<DELETE> methods.
 The layout of directories in F<ext> has been revised. Specifically, all
 extensions are now flat, and at the top level, with C</> in pathnames
 replaced by C<->, so that F<ext/Data/Dumper/> is now F<ext/Data-Dumper/>,
-etc.  The names of the extensions as specified to F<Configure>, and as
+etc. The names of the extensions as specified to F<Configure>, and as
 reported by C<%Config::Config> under the keys C<dynamic_ext>,
 C<known_extensions>, C<nonxs_ext> and C<static_ext> have not changed, and
 still use C</>. Hence this change will not have any affect once perl is
@@ -1167,20 +1179,37 @@ build, such as C<ExtUtils::ParseXS>, have now become extensions, and
 without them the build will fail well before it attempts to run the
 regression tests.
 
-=head2 Configuration improvements
+=head2 Other Installation and Configuration Improvements
+
+=over 4
+
+=item *
+
+L<perlapi>, L<perlintern>, L<perlmodlib> and L<perltoc> are now all
+generated at build time, rather than being shipped as part of the release.
+
+=item *
 
 If C<vendorlib> and C<vendorarch> are the same, then they are only added to
 C<@INC> once.
 
+=item *
+
 C<$Config{usedevel}> and the C-level C<PERL_USE_DEVEL> are now defined if
 perl is built with  C<-Dusedevel>.
+
+=item *
 
 F<Configure> will enable use of C<-fstack-protector>, to provide protection
 against stack-smashing attacks, if the compiler supports it.
 
+=item *
+
 F<Configure> will now determine the correct prototypes for re-entrant
 functions and for C<gconvert> if you are using a C++ compiler rather
 than a C compiler.
+
+=item *
 
 On Unix, if you build from a tree containing a git repository, the
 configuration process will note the commit hash you have checked out, for
@@ -1188,8 +1217,29 @@ display in the output of C<perl -v> and C<perl -V>. Unpushed local commits
 are automatically added to the list of local patches displayed by
 C<perl -V>.
 
+=item *
+
 USE_ATTRIBUTES_FOR_PERLIO is now reported in the compile-time options
 listed by the C<-V> switch.
+
+=item *
+
+Support for SystemTap's C<dtrace> compatibility layer has been added and an
+issue with linking C<miniperl> has been fixed in the process.
+
+=item *
+
+C<less -R> is now used instead of C<less> for C<groff>'s new usage of ANSI
+escape codes by setting C<$Config{less}> (and thereby C<$Config{pager}>,
+which fixes RT #72156.
+
+=item *
+
+USE_PERL_ATOF is now reported in the compile-time options listed by the C<-V>
+switch.
+
+=back
+
 
 =head2 Compilation improvements
 
@@ -1591,13 +1641,43 @@ F<t/re/uniprops.t>
 
 Test unicode \p{} regex constructs
 
+=item F<t/op/filehandle.t>
+
+Tests some suitably portable filetest operators to check that they work as
+expected, particularly in the light of some internal changes made in how
+filehandles are blessed.
+
+=item F<t/op/time_loop.t>
+
+Tests that times greater than C<2**63>, which can now be handed to C<gmtime>
+and C<localtime>, do not cause an internal overflow or an excessively long
+loop.
+
 =back
 
 =head2 Testing improvements
 
 =over 4
 
-=item *
+=item Parallel tests
+
+The core distribution can now run its regression tests in parallel on
+Unix-like platforms. Instead of running C<make test>, set C<TEST_JOBS> in
+your environment to the number of tests to run in parallel, and run
+C<make test_harness>. On a Bourne-like shell, this can be done as
+
+    TEST_JOBS=3 make test_harness  # Run 3 tests in parallel
+
+An environment variable is used, rather than parallel make itself, because
+L<TAP::Harness> needs to be able to schedule individual non-conflicting test
+scripts itself, and there is no standard interface to C<make> utilities to
+interact with their job schedulers.
+
+Note that currently some test scripts may fail when run in parallel (most
+notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
+again sequentially and see if the failures go away.
+
+=item Test harness flexibility
 
 It's now possible to override C<PERL5OPT> and friends in F<t/TEST>
 
@@ -1797,13 +1877,70 @@ perldiag documentation has been expanded a bit.
 
 =item *
 
-Perl now defaults to issuing a warning if a deprecated language feature
-is used.
+The fatal error C<Malformed UTF-8 returned by \N> is now produced if the
+C<charnames> handler returns malformed UTF-8.
 
-To disable this feature in a given lexical scope, you should use C<no
-warnings 'deprecated';> For information about which language features
-are deprecated and explanations of various deprecation warnings, please
-see L<perldiag.pod>
+=item *
+
+If an unresolved named character or sequence was encountered when compiling a
+regex pattern then the fatal error C<\\N{NAME} must be resolved by the lexer>
+is now produced. This can happen, for example, when using a single-quotish
+context like C<$re = '\N{SPACE}'; $re;>. See L<perldiag> for more examples of
+how the lexer can get bypassed.
+
+=item *
+
+The fatal error C<Invalid hexadecimal number in \\N{U+...}> will be produced
+if the character constant represented by C<...> is not a valid hexadecimal
+number.
+
+=item *
+
+The new meaning of C<\N> as C<[^\n]> is not valid in a bracketed character
+class, just like C<.> in a character class loses its special meaning, and will
+cause the fatal error C<\\N in a character class must be a named character:
+\\N{...}>.
+
+=item *
+
+The rules on what is legal for the C<...> in C<\N{...}> have been tightened
+up so that unless the C<...> begins with an alphabetic character and continues
+with a combination of alphanumerics, dashes, spaces, parentheses or colons
+then the warning C<Deprecated character(s) in \\N{...} starting at '%s'> is
+now issued.
+
+=item *
+
+The warning C<Using just the first characters returned by \N{}> will be
+issued if the C<charnames> handler returns a sequence of characters which
+exceeds the limit of the number of characters that can be used. The message
+will indicate which characters were used and which were discarded.
+
+=item *
+
+Currently, all but the first of the several characters that the C<charnames>
+handler may return are discarded when used in a regular expression pattern
+bracketed character class. If this happens then the warning C<Using just the
+first character returned by \N{} in character class> will be issued.
+
+=item *
+
+The warning C<Missing right brace on \\N{} or unescaped left brace after \\N.
+Assuming the latter> will be issued if Perl encounters a C<\N{> but doesn't
+find a matching C<}>. In this case Perl doesn't know if it was mistakenly
+omitted, or if "match non-newline" followed by "match a C<{>" was desired.
+It assumes the latter because that is actually a valid interpretation as
+written, unlike the other case.  If you meant the former, you need to add the
+matching right brace.  If you did mean the latter, you can silence this
+warning by writing instead C<\N\{>.
+
+=item *
+
+C<gmtime> and C<localtime> called with numbers smaller than they can reliably
+handle will now issue the warnings C<gmtime(%.0f) too small> and
+C<localtime(%.0f) too small>.
+
+=back
 
 =back
 
@@ -1998,7 +2135,7 @@ as documented, and as does C<-I> when specified on the command-line.
 C<kill> is now fatal when called on non-numeric process identifiers.
 Previously, an C<undef> process identifier would be interpreted as a
 request to kill process 0, which would terminate the current process
-group on POSIX systems.  Since process identifiers are always integers,
+group on POSIX systems. Since process identifiers are always integers,
 killing a non-numeric process is now fatal.
 
 =item *
@@ -2006,7 +2143,7 @@ killing a non-numeric process is now fatal.
 5.10.0 inadvertently disabled an optimisation, which caused a measurable
 performance drop in list assignment, such as is often used to assign
 function parameters from C<@_>. The optimisation has been re-instated, and
-the performance regression fixed.  (This fix is also present in 5.10.1)
+the performance regression fixed. (This fix is also present in 5.10.1)
 
 =item *
 
@@ -2100,7 +2237,7 @@ Using C<setpgrp> with no arguments could corrupt the perl stack.
 =item *
 
 The block form of C<eval> is now specifically trappable by C<Safe> and
-C<ops>.  Previously it was erroneously treated like string C<eval>.
+C<ops>. Previously it was erroneously treated like string C<eval>.
 
 =item *
 
@@ -2166,7 +2303,7 @@ fixed. This used to cause various threading issues, including SEGVs.
 
 In C<unpack>, the use of C<()> groups in scalar context was internally
 placing a list on the interpreter's stack, which manifested in various
-ways, including SEGVs.  This is now fixed [RT #50256].
+ways, including SEGVs. This is now fixed [RT #50256].
 
 =item *
 
@@ -2358,7 +2495,7 @@ problem with the L<perlbug> program included with perl.
 =item *
 
 Always add a manifest resource to C<perl.exe> to specify the C<trustInfo>
-settings for Windows Vista and later.  Without this setting Windows
+settings for Windows Vista and later. Without this setting Windows
 will treat C<perl.exe> as a legacy application and apply various
 heuristics like redirecting access to protected file system areas
 (like the "Program Files" folder) to the users "VirtualStore"
@@ -2371,7 +2508,7 @@ embed the manifest resource explicitly in the external resource file.
 
 This change also requests the Microsoft Common-Controls version 6.0
 (themed controls introduced in Windows XP) via the dependency list
-in the assembly manifest.  For VC8 and VC9 this is specified using the
+in the assembly manifest. For VC8 and VC9 this is specified using the
 C</manifestdependency> linker commandline option instead.
 
 =item *
@@ -2399,7 +2536,7 @@ Enable IPv6 support on cygwin 1.7 and newer
 
 Make -UDEBUGGING the default on VMS for 5.12.0.
 
-Like it has been everywhere else for ages and ages.  Also make
+Like it has been everywhere else for ages and ages. Also make
 command-line selection of -UDEBUGGING and -DDEBUGGING work in
 configure.com; before the only way to turn it off was by saying
 no in answer to the interactive question.
@@ -2428,7 +2565,7 @@ and conversion code.
 
 Enabling the C<PERL_VMS_POSIX_EXIT> logical name now encodes a POSIX exit
 status in a VMS condition value for better interaction with GNV's bash
-shell and other utilities that depend on POSIX exit values.  See
+shell and other utilities that depend on POSIX exit values. See
 L<perlvms/"$?"> for details.
 
 =item *
@@ -2481,7 +2618,7 @@ There is now support for Symbian S60 3.2 SDK and S60 5.0 SDK.
 =head1 Known Problems
 
 This is a list of some significant unfixed bugs, which are regressions
-from either 5.10.0 or 5.8.x.
+from either 5.10.x or 5.8.x.
 
 =over 4
 
@@ -2511,7 +2648,7 @@ will appear to hang as they get into a very long running loop [RT #72998].
 
 Untriaged test crashes on Windows 2000
 
-Several porters have reported mysterious crashes when Perl's entire test suite is run after a build on certain Windows 2000 systems.  When run by hand, the individual tests reportedly work fine.
+Several porters have reported mysterious crashes when Perl's entire test suite is run after a build on certain Windows 2000 systems. When run by hand, the individual tests reportedly work fine.
 
 =item *
 
@@ -2519,13 +2656,6 @@ Known test failures on VMS
 
 Perl 5.11.1 fails a small set of core and CPAN tests as of this release.
 With luck, that'll be sorted out for 5.11.2
-
-=item *
-
-Known test failures on VMS
-
-Perl 5.11.2 fails a small set of core and CPAN tests as of this
-release. With luck, that'll be sorted out for 5.11.3.
 
 =back
 
@@ -2545,12 +2675,12 @@ community for helping Perl to flourish.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at L<http://rt.perl.org/perlbug/>.  There may also be
+bug database at L<http://rt.perl.org/perlbug/>. There may also be
 information at L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
-program included with your release.  Be sure to trim your bug down
-to a tiny but sufficient test case.  Your bug report, along with the
+program included with your release. Be sure to trim your bug down
+to a tiny but sufficient test case. Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analyzed by the Perl porting team.
 
