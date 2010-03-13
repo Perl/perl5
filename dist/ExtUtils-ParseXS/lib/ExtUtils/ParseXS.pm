@@ -33,7 +33,8 @@ our (
   $processing_arg_with_types, %argtype_seen, %in_out, %lengthof, 
   $proto_in_this_xsub, $scope_in_this_xsub, $interface, 
   $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
-  @line_no, $ret_type, 
+  @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
+  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs,
 );
 
 sub process_file {
