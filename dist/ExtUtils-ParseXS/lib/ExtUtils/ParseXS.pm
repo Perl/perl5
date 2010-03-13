@@ -27,13 +27,10 @@ my($XSS_work_idx, $cpp_next_tmp);
 our (
   $ProtoUsed, @InitFileCode, $FH, $proto_re, $Overload, $errors, $Fallback, 
   $hiertype, $WantPrototypes, $WantVersionChk, $WantLineNumbers, $filepathname, 
-  $dir, $filename, %IncludedFiles, 
-
-  %input_expr, %output_expr, 
+  $dir, $filename, %IncludedFiles, %input_expr, %output_expr, 
+  %type_kind, %proto_letter, $BLOCK_re, $lastline, $lastline_no, $Package, 
+  $Prefix,
   
-  
-  %type_kind, %proto_letter,
-  %targetable, $BLOCK_re, $lastline, $lastline_no, $Package, $Prefix,
   @line, @BootCode, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
   $processing_arg_with_types, %argtype_seen, @outlist, %in_out, %lengthof,
   $proto_in_this_xsub, $scope_in_this_xsub, $interface, $prepush_done,
@@ -159,7 +156,7 @@ sub process_file {
     my $current = \$junk;
     while (<$TYPEMAP>) {
       next if /^\s*#/;
-      my $line_no = $. + 1;
+#      my $line_no = $. + 1;
       if (/^INPUT\s*$/) {
         $mode = 'Input';   $current = \$junk;  next;
       }
@@ -218,6 +215,7 @@ sub process_file {
   $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
+  my %targetable;
   foreach my $key (keys %output_expr) {
     # We can still bootstrap compile 're', because in code re.pm is
     # available to miniperl, and does not attempt to load the XS code.
@@ -1779,9 +1777,9 @@ sub output_init {
 
 sub Warn {
   # work out the line number
-  my $line_no = $line_no[@line_no - @line -1];
+  my $warn_line_number = $line_no[@line_no - @line -1];
 
-  print STDERR "@_ in $filename, line $line_no\n";
+  print STDERR "@_ in $filename, line $warn_line_number\n";
 }
 
 sub blurt {
