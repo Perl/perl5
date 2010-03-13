@@ -24,11 +24,15 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 my(@XSStack);    # Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
-our (%input_expr, %output_expr, $ProtoUsed, @InitFileCode, $FH,
-  $proto_re, $Overload, $errors, $Fallback, $cplusplus, $hiertype,
-  $WantPrototypes, $WantVersionChk, $except, $WantLineNumbers,
-  $WantOptimize, $process_inout, $process_argtypes, @tm, $dir,
-  $filename, $filepathname, %IncludedFiles, %type_kind, %proto_letter,
+our (
+  $ProtoUsed, @InitFileCode, $FH, $proto_re, $Overload, $errors, $Fallback, 
+  $hiertype, $WantPrototypes, $WantVersionChk, $WantLineNumbers, $filepathname, 
+  $dir, $filename, %IncludedFiles, 
+
+  %input_expr, %output_expr, 
+  
+  
+  %type_kind, %proto_letter,
   %targetable, $BLOCK_re, $lastline, $lastline_no, $Package, $Prefix,
   @line, @BootCode, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
   $processing_arg_with_types, %argtype_seen, @outlist, %in_out, %lengthof,
@@ -46,19 +50,17 @@ sub process_file {
 
   # Set defaults.
   %args = (
-    # 'C++' => 0, # Doesn't seem to *do* anything...
-    hiertype => 0,
-    except => 0,
-    prototypes => 0,
-    versioncheck => 1,
-    linenumbers => 1,
-    optimize => 1,
-    prototypes => 0,
-    inout => 1,
-    argtypes => 1,
-    typemap => [],
-    output => \*STDOUT,
-    csuffix => '.c',
+    argtypes        => 1,
+    csuffix         => '.c',
+    except          => 0,
+    hiertype        => 0,
+    inout           => 1,
+    linenumbers     => 1,
+    optimize        => 1,
+    output          => \*STDOUT,
+    prototypes      => 0,
+    typemap         => [],
+    versioncheck    => 1,
     %args,
   );
 
@@ -85,16 +87,17 @@ sub process_file {
   # clean this up sometime, probably.  For now, we just pull them out
   # of %args.  -Ken
 
-  $cplusplus = $args{'C++'};
+  # $cplusplus not used anywhere; deletable
+  my $cplusplus = $args{'C++'};
   $hiertype = $args{hiertype};
   $WantPrototypes = $args{prototypes};
   $WantVersionChk = $args{versioncheck};
-  $except = $args{except} ? ' TRY' : '';
+  my $except = $args{except} ? ' TRY' : '';
   $WantLineNumbers = $args{linenumbers};
-  $WantOptimize = $args{optimize};
-  $process_inout = $args{inout};
-  $process_argtypes = $args{argtypes};
-  @tm = ref $args{typemap} ? @{$args{typemap}} : ($args{typemap});
+  my $WantOptimize = $args{optimize};
+  my $process_inout = $args{inout};
+  my $process_argtypes = $args{argtypes};
+  my @tm = ref $args{typemap} ? @{$args{typemap}} : ($args{typemap});
 
   for ($args{filename}) {
     die "Missing required parameter 'filename'" unless $_;
@@ -151,12 +154,12 @@ sub process_file {
     # skip directories, binary files etc.
     warn("Warning: ignoring non-text typemap file '$typemap'\n"), next
       unless -T $typemap;
-    open(TYPEMAP, $typemap)
+    open my $TYPEMAP, '<', $typemap
       or warn ("Warning: could not open typemap file '$typemap': $!\n"), next;
     my $mode = 'Typemap';
     my $junk = "";
     my $current = \$junk;
-    while (<TYPEMAP>) {
+    while (<$TYPEMAP>) {
       next if /^\s*#/;
       my $line_no = $. + 1;
       if (/^INPUT\s*$/) {
@@ -198,7 +201,7 @@ sub process_file {
         $current = \$output_expr{$_};
       }
     }
-    close(TYPEMAP);
+    close $TYPEMAP;
   }
 
   foreach my $value (values %input_expr) {
