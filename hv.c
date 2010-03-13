@@ -1880,12 +1880,13 @@ Perl_hv_fill(pTHX_ HV const *const hv)
     PERL_ARGS_ASSERT_HV_FILL;
 
     if (ents) {
-	HE *const *const end = ents + HvMAX(hv);
+	HE *const *const last = ents + HvMAX(hv);
+	count = last + 1 - ents;
 
 	do {
-	    if (*ents)
-		++count;
-	} while (++ents <= end);
+	    if (!*ents)
+		--count;
+	} while (++ents <= last);
     }
     return count;
 }
