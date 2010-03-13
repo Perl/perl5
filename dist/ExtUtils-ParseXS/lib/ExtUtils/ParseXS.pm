@@ -34,9 +34,9 @@ our (
   $proto_in_this_xsub, $scope_in_this_xsub, $interface, 
   $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
-  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
-  $pname,
+  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
 );
+#our $DoSetMagic;
 
 sub process_file {
 
@@ -524,7 +524,7 @@ EOF
         for ( @args ) {
           s/^\s+//;
           s/\s+$//;
-          my ($arg, $default) = / ( [^=]* ) ( (?: = .* )? ) /x;
+          my ($arg, $default) = ($_ =~ m/ ( [^=]* ) ( (?: = .* )? ) /x);
           my ($pre, $name) = ($arg =~ /(.*?) \s*
                              \b ( \w+ | length\( \s*\w+\s* \) )
                              \s* $ /x);
