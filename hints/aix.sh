@@ -234,6 +234,7 @@ case "$usethreads" in
 	d_setgrent_r='undef'
 	d_setpwent_r='undef'
 	d_srand48_r='undef'
+	d_srandom_r='undef'
 	d_strerror_r='undef'
 
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
