@@ -19,7 +19,7 @@ This document describes differences between the 5.10.0 release and
 the 5.12.0 release.
 
 Many of the bug fixes in 5.12.0 are already included in the 5.10.1
-maintenance release.
+maintenance release. 
 
 You can see the list of those changes in the 5.10.1 release notes (L<perl5101delta>).
 
@@ -37,7 +37,7 @@ for C<our $VERSION = ...> and similar constructs. E.g.
 
 There are several advantages to this:
 
-=over
+=over 
 
 =item *
 
@@ -113,7 +113,7 @@ Extension modules can now cleanly hook into the Perl parser to define
 new kinds of keyword-headed expression and compound statement. The
 syntax following the keyword is defined entirely by the extension. This
 allow a completely non-Perl sublanguage to be parsed inline, with the
-correct ops cleanly generated.
+correct ops cleanly generated. 
 
 See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core
 source distribution also includes a new module
@@ -157,7 +157,7 @@ further details about what's changed in this version of the standard.
 See L<perlunicode> for instructions on installing and using other versions
 of Unicode.
 
-=head2 Major overhaul of Unicode property support
+=head2 Overhaul of Unicode property support
 
 Perl's developers have made a concerted effort to update Perl to be in
 sync with the latest Unicode standard. Changes for this include:
@@ -237,7 +237,7 @@ or strongly discouraged from being used. Of those 36, likely the most
 widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
 similar characters, plus bidirectional controls.
 
-C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>. Before 5.12, Perl's definition
+C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>. Before 5.12, Perl's definition 
 definition included a number of things that aren't really alpha (all
 marks) while omitting many that were. The
 definitions of C<\p{Alnum}> and C<\p{Word}> depend on Alpha's definition and have changed accordingly.
@@ -551,9 +551,10 @@ avoided.
 
 =item *
 
-The definitions of a number of Unicode properties have changed to match those
-of the current Unicode standard. These are listed above under L</Unicode
-properties>. This could break code that is expecting the old definitions.
+The definitions of a number of Unicode properties have changed to match
+those of the current Unicode standard. These are listed above under
+L</Overhaul of Unicode property support>. This could break code that
+is expecting the old definitions.
 
 =item *
 
@@ -1179,7 +1180,7 @@ build, such as C<ExtUtils::ParseXS>, have now become extensions, and
 without them the build will fail well before it attempts to run the
 regression tests.
 
-=head2 Other Installation and Configuration Improvements
+=head2 Other Installation and Configuration Improvements 
 
 =over 4
 
@@ -1641,13 +1642,17 @@ F<t/re/uniprops.t>
 
 Test unicode \p{} regex constructs
 
-=item F<t/op/filehandle.t>
+=item *
+
+F<t/op/filehandle.t>
 
 Tests some suitably portable filetest operators to check that they work as
 expected, particularly in the light of some internal changes made in how
 filehandles are blessed.
 
-=item F<t/op/time_loop.t>
+=item *
+
+F<t/op/time_loop.t>
 
 Tests that times greater than C<2**63>, which can now be handed to C<gmtime>
 and C<localtime>, do not cause an internal overflow or an excessively long
@@ -1677,7 +1682,7 @@ Note that currently some test scripts may fail when run in parallel (most
 notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
 again sequentially and see if the failures go away.
 
-=item Test harness flexibility
+=item Test harness flexibility 
 
 It's now possible to override C<PERL5OPT> and friends in F<t/TEST>
 
@@ -1892,7 +1897,7 @@ how the lexer can get bypassed.
 
 The fatal error C<Invalid hexadecimal number in \\N{U+...}> will be produced
 if the character constant represented by C<...> is not a valid hexadecimal
-number.
+number. 
 
 =item *
 
@@ -1939,8 +1944,6 @@ warning by writing instead C<\N\{>.
 C<gmtime> and C<localtime> called with numbers smaller than they can reliably
 handle will now issue the warnings C<gmtime(%.0f) too small> and
 C<localtime(%.0f) too small>.
-
-=back
 
 =back
 
