@@ -39,7 +39,7 @@ our (
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
-  $RETVAL_code, $name_printed, $func_args, @XSStack, 
+  $RETVAL_code, $name_printed, $func_args, @XSStack, $ALIAS, 
 );
 #our $DoSetMagic;
 
@@ -632,7 +632,21 @@ EOF
     #   to set explicit return values.
     my $EXPLICIT_RETURN = ($CODE &&
             ("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-    my $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+
+    # In principle, the following $ALIAS ought to be a lexical, i.e., 'my
+    # $ALIAS' like the other nearby variables.  However, implementing that
+    # change produced a slight difference in the resulting .c output in at
+    # least two distributions:  B/BD/BDFOY/Crypt-Rijndael and
+    # G/GF/GFUJI/Hash-FieldHash.  The difference is, arguably, an improvement
+    # in the resulting C code.  Example:
+    # 388c388
+    # <                       GvNAME(CvGV(cv)),
+    # ---
+    # >                       "Crypt::Rijndael::encrypt",
+    # But at this point we're committed to generating the *same* C code that
+    # the current version of ParseXS.pm does.  So we're declaring it as 'our'.
+    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+
     my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
 
     $xsreturn = 1 if $EXPLICIT_RETURN;
