@@ -9,6 +9,7 @@ our (@ISA, @EXPORT_OK);
   standard_typemap_locations
   trim_whitespace
   tidy_type
+  C_string
 );
 
 =head1 NAME
@@ -176,6 +177,35 @@ sub tidy_type {
   trim_whitespace($_);
 
   $_;
+}
+
+=head2 C<C_string()>
+
+=over 4
+
+=item * Purpose
+
+Escape backslashes (C<\>) in prototype strings.
+
+=item * Arguments
+
+      $ProtoThisXSUB = C_string($_);
+
+String needing escaping.
+
+=item * Return Value
+
+Properly escaped string.
+
+=back
+
+=cut
+
+sub C_string {
+  my($string) = @_;
+
+  $string =~ s[\\][\\\\]g;
+  $string;
 }
 
 1;

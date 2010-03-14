@@ -14,6 +14,7 @@ use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
   tidy_type
+  C_string
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -46,12 +47,12 @@ our (
 sub process_file {
 
   # Allow for $package->process_file(%hash) in the future
-  my ($pkg, %args) = @_ % 2 ? @_ : (__PACKAGE__, @_);
+  my ($pkg, %options) = @_ % 2 ? @_ : (__PACKAGE__, @_);
 
-  $ProtoUsed = exists $args{prototypes};
+  $ProtoUsed = exists $options{prototypes};
 
   # Set defaults.
-  %args = (
+  my %args = (
     argtypes        => 1,
     csuffix         => '.c',
     except          => 0,
@@ -63,8 +64,9 @@ sub process_file {
     prototypes      => 0,
     typemap         => [],
     versioncheck    => 1,
-    %args,
+    %options,
   );
+  $args{except} = $args{except} ? ' TRY' : '';
 
   # Global Constants
 
@@ -92,19 +94,15 @@ sub process_file {
   $hiertype = $args{hiertype};
   $WantPrototypes = $args{prototypes};
   $WantVersionChk = $args{versioncheck};
-  my $except = $args{except} ? ' TRY' : '';
   $WantLineNumbers = $args{linenumbers};
-  my $WantOptimize = $args{optimize};
-  my $process_inout = $args{inout};
-  my $process_argtypes = $args{argtypes};
   my @tm = ref $args{typemap} ? @{$args{typemap}} : ($args{typemap});
 
-  for ($args{filename}) {
-    die "Missing required parameter 'filename'" unless $_;
-    $filepathname = $_;
-    ($dir, $filename) = (dirname($_), basename($_));
+  for my $f ($args{filename}) {
+    die "Missing required parameter 'filename'" unless $f;
+    $filepathname = $f;
+    ($dir, $filename) = (dirname($f), basename($f));
     $filepathname =~ s/\\/\\\\/g;
-    $IncludedFiles{$_}++;
+    $IncludedFiles{$f}++;
   }
 
   # Open the input file
@@ -485,7 +483,7 @@ EOF
 
     # Allow one-line ANSI-like declaration
     unshift @line, $2
-      if $process_argtypes
+      if $args{argtypes}
         and $ret_type =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
 
     # a function definition needs at least 2 lines
@@ -523,7 +521,7 @@ EOF
     my @args;
 
     my %only_C_inlist;        # Not in the signature of Perl function
-    if ($process_argtypes and $orig_args =~ /\S/) {
+    if ($args{argtypes} and $orig_args =~ /\S/) {
       my $args = "$orig_args ,";
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
         @args = ($args =~ /\G ( (??{ $C_arg }) ) , /xg);
@@ -537,7 +535,7 @@ EOF
           next unless defined($pre) && length($pre);
           my $out_type = '';
           my $inout_var;
-          if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
+          if ($args{inout} and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
             my $type = $1;
             $out_type = $type if $type ne 'IN';
             $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
@@ -574,7 +572,7 @@ EOF
     else {
       @args = split(/\s*,\s*/, $orig_args);
       for (@args) {
-        if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
+        if ($args{inout} and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
           my $out_type = $1;
           next if $out_type eq 'IN';
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
@@ -669,7 +667,7 @@ EOF
       $cond = qq(items < $min_args || items > $num_args);
     }
 
-    print Q(<<"EOF") if $except;
+    print Q(<<"EOF") if $args{except};
 #    char errbuf[1024];
 #    *errbuf = '\0';
 EOF
@@ -711,7 +709,7 @@ EOF
     while (@line) {
       &CASE_handler if check_keyword("CASE");
       print Q(<<"EOF");
-#   $except [[
+#   $args{except} [[
 EOF
 
       # do initialization of input variables
@@ -754,7 +752,7 @@ EOF
           $args_match{"RETVAL"} = 0;
           $var_types{"RETVAL"} = $ret_type;
           print "\tdXSTARG;\n"
-            if $WantOptimize and $targetable{$type_kind{$ret_type}};
+            if $args{optimize} and $targetable{$type_kind{$ret_type}};
         }
 
         if (@fake_INPUT or @fake_INPUT_pre) {
@@ -825,7 +823,7 @@ EOF
         print "\t$RETVAL_code\n";
       }
       elsif ($gotRETVAL || $wantRETVAL) {
-        my $t = $WantOptimize && $targetable{$type_kind{$ret_type}};
+        my $t = $args{optimize} && $targetable{$type_kind{$ret_type}};
         my $var = 'RETVAL';
         my $type = $ret_type;
     
@@ -877,7 +875,7 @@ EOF
       print Q(<<"EOF");
 #    ]]
 EOF
-      print Q(<<"EOF") if $except;
+      print Q(<<"EOF") if $args{except};
 #    BEGHANDLERS
 #    CATCHALL
 #    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
@@ -893,7 +891,7 @@ EOF
       death(/^$BLOCK_re/o ? "Misplaced `$1:'" : "Junk at end of function ($_)");
     }
 
-    print Q(<<"EOF") if $except;
+    print Q(<<"EOF") if $args{except};
 #    if (errbuf[0])
 #    Perl_croak(aTHX_ errbuf);
 EOF
@@ -1645,13 +1643,6 @@ sub ValidProtoString ($) {
   }
 
   return 0;
-}
-
-sub C_string ($) {
-  my($string) = @_;
-
-  $string =~ s[\\][\\\\]g;
-  $string;
 }
 
 sub ProtoString ($) {
