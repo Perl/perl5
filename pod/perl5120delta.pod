@@ -2471,10 +2471,58 @@ in a change of behaviour between 5.8.x and 5.10.0:
 =head1 Acknowledgements
 
 Perl 5.12.0 represents approximately two years of development since
-Perl 5.10.0 and contains __ lines of changes across ___ files
-from __ authors and committers:
+Perl 5.10.0 and contains over 750,000 lines of changes across over
+3000 files from over 200 authors and committers.
 
-XXX TODO LIST
+Perl continues to flourish into its third decade thanks to a vibrant community of users and developers.  The following people are known to have contributed the improvements that became Perl 5.12.0:
+
+Aaron Crane, Abe Timmerman, Abhijit Menon-Sen, Abigail, Adam Russell,
+Adriano Ferreira, Ævar Arnfjörð Bjarmason, Alan Grover, Alexandr
+Ciornii, Alex Davies, Alex Vandiver, Andreas Koenig, Andrew Rodland,
+andrew@sundale.net, Andy Armstrong, Andy Dougherty, Jose AUGUSTE-ETIENNE,
+Benjamin Smith, Ben Morrow, bharanee rathna, Bo Borgerson, Bo Lindbergh,
+Brad Gilbert, Bram, Brendan O'Dea, brian d foy, Charles Bailey,
+Chip Salzenberg, Chris 'BinGOs' Williams, Christoph Lamprecht, Chris
+Williams, chromatic, Claes Jakobsson, Craig A. Berry, Dan Dascalescu,
+Daniel Frederick Crisman, Daniel M. Quinlan, Dan Jacobson, Dan Kogai,
+Dave Mitchell, Dave Rolsky, David Cantrell, David Dick, David Golden,
+David Mitchell, David M. Syzdek, David Nicol, David Wheeler, Dennis
+Kaarsemaker, Dintelmann, Peter, Dominic Dunlop, Dr.Ruud, Duke Leto,
+Enrico Sorcinelli, Eric Brine, Father Chrysostomos, Florian Ragwitz,
+Frank Wiegand, Gabor Szabo, Gene Sullivan, Geoffrey T. Dairiki, George
+Greer, Gerard Goossen, Gisle Aas, Goro Fuji, Graham Barr, Green, Paul,
+Hans Dieter Pearcey, Harmen, H. Merijn Brand, Hugo van der Sanden,
+Ian Goodacre, Igor Sutton, Ingo Weinhold, James Bence, James Mastros,
+Jan Dubois, Jari Aalto, Jarkko Hietaniemi, Jay Hannah, Jerry Hedden,
+Jesse Vincent, Jim Cromie, Jody Belka, John E. Malmberg, John Malmberg,
+John Peacock, John Peacock via RT, John P. Linderman, John Wright,
+Josh ben Jore, Jos I. Boumans, Karl Williamson, Kenichi Ishigaki, Ken
+Williams, Kevin Brintnall, Kevin Ryde, Kurt Starsinic, Leon Brocard,
+Lubomir Rintel, Luke Ross, Marcel Grünauer, Marcus Holland-Moritz, Mark
+Jason Dominus, Marko Asplund, Martin Hasch, Mashrab Kuvatov, Matt Kraai,
+Matt S Trout, Max Maischein, Michael Breen, Michael Cartmell, Michael
+G Schwern, Michael Witten, Mike Giroux, Milosz Tanski, Moritz Lenz,
+Nicholas Clark, Nick Cleaton, Niko Tyni, Offer Kaye, Osvaldo Villalon,
+Paul Fenwick, Paul Gaborit, Paul Green, Paul Johnson, Paul Marquess,
+Philip Hazel, Philippe Bruhat, Rafael Garcia-Suarez, Rainer Tammer,
+Rajesh Mandalemula, Reini Urban, Renée Bäcker, Ricardo Signes,
+Ricardo SIGNES, Richard Foley, Rich Rauenzahn, Rick Delaney, Risto
+Kankkunen, Robert May, Roberto C. Sanchez, Robin Barker, SADAHIRO
+Tomoyuki, Salvador Ortiz Garcia, Sam Vilain, Scott Lanning, Sébastien
+Aperghis-Tramoni, Sérgio Durigan Júnior, Shlomi Fish, Simon 'corecode'
+Schubert, Sisyphus, Slaven Rezic, Smylers, Steffen Müller, Steffen
+Ullrich, Stepan Kasal, Steve Hay, Steven Schubiger, Steve Peters, Tels,
+The Doctor, Tim Bunce, Tim Jenness, Todd Rinaldo, Tom Christiansen,
+Tom Hukins, Tom Wyant, Tony Cook, Torsten Schoenfeld, Tye McQueen,
+Vadim Konovalov, Vincent Pit, Hio YAMASHINA, Yasuhiro Matsumoto,
+Yitzchak Scott-Thoennes, Yuval Kogman, Yves Orton, Zefram, Zsban Ambrus
+
+This is woefully incomplete as it's automatically generated from version
+control history.  In particular, it doesn't include the names of the
+(very much appreciated) contributors who reported issues in previous
+versions of Perl that helped make Perl 5.12.0 better. For a more complete
+list of all of Perl's historical contributors, please see the C<AUTHORS>
+file in the Perl 5.12.0 distribution.
 
 Many of the changes included in this version originated in the CPAN
 modules included in Perl's core. We're grateful to the entire CPAN
