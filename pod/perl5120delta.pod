@@ -2,10 +2,6 @@
 
 perl5120delta - what is new for perl v5.12.0
 
-FIX ME BEFORE RELEASE
-
-UPDATED MODULE LIST NEEDS TO BE GENERATED
-
 =head1 DESCRIPTION
 
 This document describes differences between the 5.10.0 release and
