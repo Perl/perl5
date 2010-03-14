@@ -57,8 +57,6 @@ my @versions = sort keys %$corelist;
 my ($old, $new) = @ARGV;
 $old ||= $versions[-2];
 $new ||= $versions[-1];
-warn $old;
-warn $new;
 $deprecated = $Module::CoreList::deprecated{$new};
 
 my (@new,@deprecated,@removed,@pragmas,@modules);
