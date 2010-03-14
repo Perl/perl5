@@ -39,7 +39,7 @@ C<$VERSION> is set at compile time
 =item *
 
 C<$VERSION> is a version object that provides proper overloading of
-comparision operators so comparing C<$VERSION> to decimal (1.23) or
+comparison operators so comparing C<$VERSION> to decimal (1.23) or
 dotted-decimal (v1.2.3) version numbers works correctly.
 
 =item *
@@ -2283,7 +2283,7 @@ F<perl5db.pl> now supports C<LVALUE> subroutines.  Additionally, the debugger no
 
 F<perlbug> now uses C<%Module::CoreList::bug_tracker> to print out
 upstream bug tracker URLs.  If a user identifies a particular module
-as the topic of their bug report and we're able to divine ithe URL for
+as the topic of their bug report and we're able to divine the URL for
 its upstream bug tracker, perlbug now provide a message to the user
 explaining that the core copies the CPAN version directly, and provide
 the URL for reporting the bug directly to the upstream author.
@@ -2800,7 +2800,7 @@ will no longer be dropped under race conditions.
 
 =item *
 
-Perl now suppoorts IPv6 on cygwin 1.7 and newer.
+Perl now supports IPv6 on cygwin 1.7 and newer.
 
 =back
 
