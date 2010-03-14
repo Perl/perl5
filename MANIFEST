@@ -2971,26 +2971,27 @@ dist/ExtUtils-Install/t/Packlist.t			See if Packlist works
 dist/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 dist/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 dist/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
-dist/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
+dist/ExtUtils-ParseXS/Changes					ExtUtils::ParseXS change log
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Constants.pm		ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/CountLines.pm	ExtUtils::ParseXS guts
-dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
-dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod	ExtUtils::ParseXS documentation
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm			converts Perl XS code into C code
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod			ExtUtils::ParseXS documentation
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Utilities.pm		ExtUtils::ParseXS guts
-dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
-dist/ExtUtils-ParseXS/t/001-basic.t		See if ExtUtils::ParseXS works
-dist/ExtUtils-ParseXS/t/002-more.t		Extended ExtUtils::ParseXS testing
-dist/ExtUtils-ParseXS/t/003-usage.t		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
+dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
+dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
+dist/ExtUtils-ParseXS/t/003-usage.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/102-trim_whitespace.t	ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/103-tidy_type.t		ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm	ExtUtils::ParseXS testing utility
-dist/ExtUtils-ParseXS/t/typemap			Standard typemap for controlled testing
-dist/ExtUtils-ParseXS/t/XSInclude.xsh		Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSMore.xs		Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/102-trim_whitespace.t			ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/103-tidy_type.t				ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
+dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing
+dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSTest.xs				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSUsage.pm				ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSUsage.xs				ExtUtils::ParseXS tests
 dist/File-CheckTree/lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 dist/File-CheckTree/t/CheckTree.t		See if File::CheckTree works
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
