@@ -13,6 +13,7 @@ our (@ISA, @EXPORT_OK);
   tidy_type
   C_string
   valid_proto_string
+  process_typemaps
 );
 
 =head1 NAME
@@ -242,4 +243,99 @@ sub valid_proto_string {
 
   return 0;
 }
+
+=head2 C<process_typemaps()>
+
+=over 4
+
+=item * Purpose
+
+Process all typemap files.
+
+=item * Arguments
+
+  my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
+    process_typemaps( $args{typemap}, $pwd );
+      
+List of two elements:  C<typemap> element from C<%args>; current working
+directory.
+
+=item * Return Value
+
+Upon success, returns a list of four hash references.  (This will probably be
+refactored.)
+
+=back
+
+=cut
+
+sub process_typemaps {
+  my ($tmap, $pwd) = @_;
+
+  my @tm = ref $tmap ? @{$tmap} : ($tmap);
+
+  foreach my $typemap (@tm) {
+    die "Can't find $typemap in $pwd\n" unless -r $typemap;
+  }
+
+  push @tm, standard_typemap_locations( \@INC );
+
+  my (%type_kind, %proto_letter, %input_expr, %output_expr);
+
+  foreach my $typemap (@tm) {
+    next unless -f $typemap;
+    # skip directories, binary files etc.
+    warn("Warning: ignoring non-text typemap file '$typemap'\n"), next
+      unless -T $typemap;
+    open my $TYPEMAP, '<', $typemap
+      or warn ("Warning: could not open typemap file '$typemap': $!\n"), next;
+    my $mode = 'Typemap';
+    my $junk = "";
+    my $current = \$junk;
+    while (<$TYPEMAP>) {
+      next if /^\s*#/;
+      if (/^INPUT\s*$/) {
+        $mode = 'Input';   $current = \$junk;  next;
+      }
+      if (/^OUTPUT\s*$/) {
+        $mode = 'Output';  $current = \$junk;  next;
+      }
+      if (/^TYPEMAP\s*$/) {
+        $mode = 'Typemap'; $current = \$junk;  next;
+      }
+      if ($mode eq 'Typemap') {
+        chomp;
+        my $line = $_;
+        trim_whitespace($_);
+        # skip blank lines and comment lines
+        next if /^$/ or /^#/;
+        my($type,$kind, $proto) = /^\s*(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::proto_re*)\s*$/ or
+          warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 or 3 columns\n"), next;
+        $type = tidy_type($type);
+        $type_kind{$type} = $kind;
+        # prototype defaults to '$'
+        $proto = "\$" unless $proto;
+        warn("Warning: File '$typemap' Line $. '$line' Invalid prototype '$proto'\n")
+          unless valid_proto_string($proto);
+        $proto_letter{$type} = C_string($proto);
+      }
+      elsif (/^\s/) {
+        $$current .= $_;
+      }
+      elsif ($mode eq 'Input') {
+        s/\s+$//;
+        $input_expr{$_} = '';
+        $current = \$input_expr{$_};
+      }
+      else {
+        s/\s+$//;
+        $output_expr{$_} = '';
+        $current = \$output_expr{$_};
+      }
+    }
+    close $TYPEMAP;
+  }
+  return (\%type_kind, \%proto_letter, \%input_expr, \%output_expr);
+}
+
 1;

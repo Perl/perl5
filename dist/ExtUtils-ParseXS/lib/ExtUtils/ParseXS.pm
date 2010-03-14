@@ -17,6 +17,7 @@ use ExtUtils::ParseXS::Utilities qw(
   tidy_type
   C_string
   valid_proto_string
+  process_typemaps
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -95,7 +96,6 @@ sub process_file {
   $WantPrototypes = $args{prototypes};
   $WantVersionChk = $args{versioncheck};
   $WantLineNumbers = $args{linenumbers};
-  my @tm = ref $args{typemap} ? @{$args{typemap}} : ($args{typemap});
 
   for my $f ($args{filename}) {
     die "Missing required parameter 'filename'" unless $f;
@@ -141,65 +141,13 @@ sub process_file {
     select $args{output};
   }
 
-  foreach my $typemap (@tm) {
-    die "Can't find $typemap in $pwd\n" unless -r $typemap;
-  }
+  my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
+    process_typemaps( $args{typemap}, $pwd );
 
-  push @tm, standard_typemap_locations( \@INC );
-
-  foreach my $typemap (@tm) {
-    next unless -f $typemap;
-    # skip directories, binary files etc.
-    warn("Warning: ignoring non-text typemap file '$typemap'\n"), next
-      unless -T $typemap;
-    open my $TYPEMAP, '<', $typemap
-      or warn ("Warning: could not open typemap file '$typemap': $!\n"), next;
-    my $mode = 'Typemap';
-    my $junk = "";
-    my $current = \$junk;
-    while (<$TYPEMAP>) {
-      next if /^\s*#/;
-      if (/^INPUT\s*$/) {
-        $mode = 'Input';   $current = \$junk;  next;
-      }
-      if (/^OUTPUT\s*$/) {
-        $mode = 'Output';  $current = \$junk;  next;
-      }
-      if (/^TYPEMAP\s*$/) {
-        $mode = 'Typemap'; $current = \$junk;  next;
-      }
-      if ($mode eq 'Typemap') {
-        chomp;
-        my $line = $_;
-        trim_whitespace($_);
-        # skip blank lines and comment lines
-        next if /^$/ or /^#/;
-        my($type,$kind, $proto) = /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/ or
-          warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 or 3 columns\n"), next;
-        $type = tidy_type($type);
-        $type_kind{$type} = $kind;
-        # prototype defaults to '$'
-        $proto = "\$" unless $proto;
-        warn("Warning: File '$typemap' Line $. '$line' Invalid prototype '$proto'\n")
-          unless valid_proto_string($proto);
-        $proto_letter{$type} = C_string($proto);
-      }
-      elsif (/^\s/) {
-        $$current .= $_;
-      }
-      elsif ($mode eq 'Input') {
-        s/\s+$//;
-        $input_expr{$_} = '';
-        $current = \$input_expr{$_};
-      }
-      else {
-        s/\s+$//;
-        $output_expr{$_} = '';
-        $current = \$output_expr{$_};
-      }
-    }
-    close $TYPEMAP;
-  }
+  %type_kind    = %{ $type_kind_ref };
+  %proto_letter = %{ $proto_letter_ref };
+  %input_expr   = %{ $input_expr_ref };
+  %output_expr  = %{ $output_expr_ref };
 
   foreach my $value (values %input_expr) {
     $value =~ s/;*\s+\z//;
@@ -633,7 +581,8 @@ EOF
     my $EXPLICIT_RETURN = ($CODE &&
             ("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
 
-    # In principle, the following $ALIAS ought to be a lexical, i.e., 'my
+    # The $ALIAS which follows is only explicitly called within the scope of
+    # process_file().  In principle, it ought to be a lexical, i.e., 'my
     # $ALIAS' like the other nearby variables.  However, implementing that
     # change produced a slight difference in the resulting .c output in at
     # least two distributions:  B/BD/BDFOY/Crypt-Rijndael and
