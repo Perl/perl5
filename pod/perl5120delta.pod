@@ -862,7 +862,7 @@ This pragma turns on Unicode semantics for the case-changing operations
 internal UTF-8 flag set, but that contain single-byte characters between
 128 and 255.
 
-Upgraded from version 1.11 to 1.15.
+Upgraded from version 1.11 to 1.16.
 
 =item C<less>
 
