@@ -675,42 +675,48 @@ exception cases.
 
 =back
 
-Otherwise, this change should be transparent for the non-affected languages.
+Otherwise, this change should be transparent for the non-affected
+languages.
 
 C<\p{...}> matches using the Canonical_Combining_Class property were
-completely broken in previous releases of Perl.  They should now work correctly.
+completely broken in previous releases of Perl.  They should now work
+correctly.
 
-Before Perl 5.12, the Unicode C<Decomposition_Type=Compat> property and a
-Perl extension had the same name, which led to neither matching all the
-correct values (with more than 100 mistakes in one, and several thousand
-in the other). The Perl extension has now been renamed to be
-C<Decomposition_Type=Noncanonical> (short: C<dt=noncanon>). It has the same
-meaning as was previously intended, namely the union of all the
-non-canonical Decomposition types, with Unicode C<Compat> being just one of
-those.
+Before Perl 5.12, the Unicode C<Decomposition_Type=Compat> property
+and a Perl extension had the same name, which led to neither matching
+all the correct values (with more than 100 mistakes in one, and several
+thousand in the other). The Perl extension has now been renamed to be
+C<Decomposition_Type=Noncanonical> (short: C<dt=noncanon>). It has the
+same meaning as was previously intended, namely the union of all the
+non-canonical Decomposition types, with Unicode C<Compat> being just
+one of those.
 
 C<\p{Decomposition_Type=Canonical}> now includes the Hangul syllables.
 
-C<\p{Uppercase}> and C<\p{Lowercase}> now work as the Unicode standard says they should.
-This means they each match a few more characters than they used to.
+C<\p{Uppercase}> and C<\p{Lowercase}> now work as the Unicode standard
+says they should.  This means they each match a few more characters than
+they used to.
 
-C<\p{Cntrl}> now matches the same characters as C<\p{Control}>. This means it
-no longer will match Private Use (gc=co), Surrogates (gc=cs), nor Format
-(gc=cf) code points. The Format code points represent the biggest
-possible problem. All but 36 of them are either officially deprecated
-or strongly discouraged from being used. Of those 36, likely the most
-widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ, WJ, and
-similar characters, plus bidirectional controls.
+C<\p{Cntrl}> now matches the same characters as C<\p{Control}>. This
+means it no longer will match Private Use (gc=co), Surrogates (gc=cs),
+nor Format (gc=cf) code points. The Format code points represent the
+biggest possible problem. All but 36 of them are either officially
+deprecated or strongly discouraged from being used. Of those 36, likely
+the most widely used are the soft hyphen (U+00AD), and BOM, ZWSP, ZWNJ,
+WJ, and similar characters, plus bidirectional controls.
 
-C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>. Before 5.12, Perl's definition
-definition included a number of things that aren't really alpha (all
-marks) while omitting many that were. The
-definitions of C<\p{Alnum}> and C<\p{Word}> depend on Alpha's definition and have changed accordingly.
+C<\p{Alpha}> now matches the same characters as C<\p{Alphabetic}>. Before
+5.12, Perl's definition definition included a number of things that aren't
+really alpha (all marks) while omitting many that were. The definitions
+of C<\p{Alnum}> and C<\p{Word}> depend on Alpha's definition and have
+changed accordingly.
 
-C<\p{Word}> no longer incorrectly matches non-word characters such as fractions.
+C<\p{Word}> no longer incorrectly matches non-word characters such
+as fractions.
 
-C<\p{Print}> no longer matches the line control characters: Tab, LF, CR,
-FF, VT, and NEL. This brings it in line with standards and the documentation.
+C<\p{Print}> no longer matches the line control characters: Tab, LF,
+CR, FF, VT, and NEL. This brings it in line with standards and the
+documentation.
 
 C<\p{XDigit}> now matches the same characters as C<\p{Hex_Digit}>. This
 means that in addition to the characters it currently matches,
@@ -727,15 +733,16 @@ I<as of> Unicode version 5.0. The C<\p{Age=5.0}> only matches code points
 added in I<precisely> version 5.0.
 
 A number of properties now have the correct values for unassigned
-code points. The affected properties are
-Bidi_Class, East_Asian_Width, Joining_Type, Decomposition_Type,
-Hangul_Syllable_Type, Numeric_Type, and Line_Break.
+code points. The affected properties are Bidi_Class, East_Asian_Width,
+Joining_Type, Decomposition_Type, Hangul_Syllable_Type, Numeric_Type,
+and Line_Break.
 
 The Default_Ignorable_Code_Point, ID_Continue, and ID_Start properties
 are now up to date with current Unicode definitions.
 
-Earlier versions of Perl erroneously exposed certain properties that are supposed to be Unicode internal-only.
-Use of these in regular expressions will now generate, if enabled, a deprecation warning message.
+Earlier versions of Perl erroneously exposed certain properties that
+are supposed to be Unicode internal-only.  Use of these in regular
+expressions will now generate, if enabled, a deprecation warning message.
 The properties are: Other_Alphabetic, Other_Default_Ignorable_Code_Point,
 Other_Grapheme_Extend, Other_ID_Continue, Other_ID_Start, Other_Lowercase,
 Other_Math, and Other_Uppercase.
@@ -747,60 +754,101 @@ are turned off by default.  These include all the Unihan properties
 deprecated or Unicode internal-only property that Perl has never exposed.
 
 The generated files in the C<lib/unicore/To> directory are now more
-clearly marked as being stable, directly usable by applications.
-New hash entries in them give the format of the normal entries,
-which allows for easier machine parsing. Perl can generate files
-in this directory for any property, though most are suppressed.
-You can find instructions for changing which are written in L<perluniprops>.
+clearly marked as being stable, directly usable by applications.  New hash
+entries in them give the format of the normal entries, which allows for
+easier machine parsing. Perl can generate files in this directory for
+any property, though most are suppressed.  You can find instructions
+for changing which are written in L<perluniprops>.
 
 
 
 =head1 Modules and Pragmata
 
-=head2 Notable new Modules and Pragmata
+=head2 New Modules and Pragmata
 
 =over 4
 
-=item *
+=item C<autodie>
 
 C<autodie> is a new lexically-scoped alternative for the C<Fatal> module.
 The bundled version is 2.06_01. Note that in this release, using a string
 eval when C<autodie> is in effect can cause the autodie behaviour to leak
 into the surrounding scope. See L<autodie/"BUGS"> for more details.
 
-=item *
+Version 2.06_01 has been added to the Perl core.
 
-C<Compress::Raw::Bzip2>
+=item C<Compress::Raw::Bzip2>
 
-=item *
+Version 2.024 has been added to the Perl core.
+
+=item C<overloading>
 
 C<overloading> allows you to lexically disable or enable overloading
 for some or all operations. (Yuval Kogman)
 
-=item *
+Version 0.001 has been added to the Perl core.
+
+=item C<parent>
 
 C<parent> establishes an ISA relationship with base classes at compile
 time. It provides the key feature of C<base> without further unwanted
 behaviors.
 
-=item *
+Version 0.223 has been added to the Perl core.
 
-C<Parse::CPAN::Meta>
+=item C<Parse::CPAN::Meta>
+
+Version 1.40 has been added to the Perl core.
+
+=item C<VMS::DCLsym>
+
+Version 1.03 has been added to the Perl core.
+
+=item C<VMS::Stdio>
+
+Version 2.4 has been added to the Perl core.
+
+=item C<XS::APItest::KeywordRPN>
+
+Version 0.003 has been added to the Perl core.
 
 =back
 
-=head2 Notable changes to Modules and Pragmata
+=head2 Updated Pragmata
 
 =over 4
 
-=item *
+=item C<base>
+
+Upgraded from version 2.13 to 2.15.
+
+=item C<bignum>
+
+Upgraded from version 0.22 to 0.23.
+
+=item C<charnames>
 
 C<charnames> now contains the Unicode F<NameAliases.txt> database file.
 This has the effect of adding some extra C<\N> character names that
 formerly wouldn't have been recognised; for example, C<"\N{LATIN CAPITAL
 LETTER GHA}">.
 
-=item *
+Upgraded from version 1.06 to 1.07.
+
+=item C<constant>
+
+Upgraded from version 1.13 to 1.20.
+
+=item C<diagnostics>
+
+C<diagnostics> now supports %.0f formatting internally.
+
+C<diagnostics> no longer suppresses C<Use of uninitialized value in range
+(or flip)> warnings. [perl #71204]
+
+Upgraded from version 1.17 to 1.19.
+
+=item C<feature>
 
 In C<feature>, the meaning of the C<:5.10> and C<:5.10.X> feature bundles has
 changed slightly. The last component, if any (i.e. C<X>) is simply ignored.
@@ -818,60 +866,492 @@ This pragma turns on Unicode semantics for the case-changing operations
 internal UTF-8 flag set, but that contain single-byte characters between
 128 and 255.
 
-=item *
+Upgraded from version 1.11 to 1.15.
+
+=item C<less>
+
+C<less> now includes the C<stash_name> method to allow subclasses of
+C<less> to pick where in %^H to store their stash.
+
+Upgraded from version 0.02 to 0.03.
+
+=item C<lib>
+
+Upgraded from version 0.5565 to 0.62.
+
+=item C<mro>
 
 C<mro> is now implemented as an XS extension. The documented interface has not
 changed. Code relying on the implementation detail that some C<mro::>
 methods happened to be available at all times gets to "keep both pieces".
 
-=item *
+Upgraded from version 1.00 to 1.02.
 
-C<diagnostics> now supports %.0f formatting internally.
-
-=item *
+=item C<overload>
 
 C<overload> now allow overloading of 'qr'.
 
-=item *
+Upgraded from version 1.06 to 1.10.
 
-C<diagnostics> no longer suppresses C<Use of uninitialized value in range
-(or flip)> warnings. [perl #71204]
+=item C<threads>
 
-C<less> now includes the C<stash_name> method to allow subclasses of
-C<less> to pick where in %^H to store their stash.
+Upgraded from version 1.67 to 1.75.
 
-=item *
+=item C<threads::shared>
+
+Upgraded from version 1.14 to 1.32.
+
+=item C<version>
 
 C<version> now has support for L</Version number formats> as described earlier
 in this document and in its own documentation.
 
-=item *
+Upgraded from version 0.74 to 0.82.
 
-C<warnings> has a new C<warnings::fatal_enabled()> function.  It also includes a new C<illegalproto> warning category. See also L</New or Changed Diagnostics> for this change.
+=item C<warnings>
+
+C<warnings> has a new C<warnings::fatal_enabled()> function.  It also
+includes a new C<illegalproto> warning category. See also L</New or
+Changed Diagnostics> for this change.
+
+Upgraded from version 1.06 to 1.09.
 
 =back
 
+=head2 Updated Modules
+
+=over 4
+
+=item C<Archive::Extract>
+
+Upgraded from version 0.24 to 0.38.
+
+=item C<Archive::Tar>
+
+Upgraded from version 1.38 to 1.54.
+
+=item C<Attribute::Handlers>
+
+Upgraded from version 0.79 to 0.87.
+
+=item C<AutoLoader>
+
+Upgraded from version 5.63 to 5.70.
+
+=item C<B::Concise>
+
+Upgraded from version 0.74 to 0.78.
+
+=item C<B::Debug>
+
+Upgraded from version 1.05 to 1.12.
+
+=item C<B::Deparse>
+
+Upgraded from version 0.83 to 0.94.
+
+=item C<B::Lint>
+
+Upgraded from version 1.09 to 1.11_01.
+
+=item C<CGI>
+
+Upgraded from version 3.29 to 3.48.
+
+=item C<Class::ISA>
+
+Upgraded from version 0.33 to 0.36.
+
+NOTE: C<Class::ISA> is deprecated and may be removed from a future version of Perl.
+
+=item C<Compress::Raw::Zlib>
+
+Upgraded from version 2.008 to 2.024.
+
+=item C<CPAN>
+
+Upgraded from version 1.9205 to 1.94_56.
+
+=item C<CPANPLUS>
+
+Upgraded from version 0.84 to 0.90.
+
+=item C<CPANPLUS::Dist::Build>
+
+Upgraded from version 0.06_02 to 0.46.
+
+=item C<Data::Dumper>
+
+Upgraded from version 2.121_14 to 2.125.
+
+=item C<DB_File>
+
+Upgraded from version 1.816_1 to 1.820.
+
+=item C<Devel::PPPort>
+
+Upgraded from version 3.13 to 3.19.
+
+=item C<Digest>
+
+Upgraded from version 1.15 to 1.16.
+
+=item C<Digest::MD5>
+
+Upgraded from version 2.36_01 to 2.39.
+
+=item C<Digest::SHA>
+
+Upgraded from version 5.45 to 5.47.
+
+=item C<Encode>
+
+Upgraded from version 2.23 to 2.39.
+
+=item C<Exporter>
+
+Upgraded from version 5.62 to 5.64_01.
+
+=item C<ExtUtils::CBuilder>
+
+Upgraded from version 0.21 to 0.27.
+
+=item C<ExtUtils::Command>
+
+Upgraded from version 1.13 to 1.16.
+
+=item C<ExtUtils::Constant>
+
+Upgraded from version 0.2 to 0.22.
+
+=item C<ExtUtils::Install>
+
+Upgraded from version 1.44 to 1.55.
+
+=item C<ExtUtils::MakeMaker>
+
+Upgraded from version 6.42 to 6.56.
+
+=item C<ExtUtils::Manifest>
+
+Upgraded from version 1.51_01 to 1.57.
+
+=item C<ExtUtils::ParseXS>
+
+Upgraded from version 2.18_02 to 2.21.
+
+=item C<File::Fetch>
+
+Upgraded from version 0.14 to 0.24.
+
+=item C<File::Path>
+
+Upgraded from version 2.04 to 2.08_01.
+
+=item C<File::Temp>
+
+Upgraded from version 0.18 to 0.22.
+
+=item C<Filter::Simple>
+
+Upgraded from version 0.82 to 0.84.
+
+=item C<Filter::Util::Call>
+
+Upgraded from version 1.07 to 1.08.
+
+=item C<Getopt::Long>
+
+Upgraded from version 2.37 to 2.38.
+
+=item C<IO>
+
+Upgraded from version 1.23_01 to 1.25_02.
+
+=item C<IO::Zlib>
+
+Upgraded from version 1.07 to 1.10.
+
+=item C<IPC::Cmd>
+
+Upgraded from version 0.40_1 to 0.54.
+
+=item C<IPC::SysV>
+
+Upgraded from version 1.05 to 2.01.
+
+=item C<Locale::Maketext>
+
+Upgraded from version 1.12 to 1.14.
+
+=item C<Locale::Maketext::Simple>
+
+Upgraded from version 0.18 to 0.21.
+
+=item C<Log::Message>
+
+Upgraded from version 0.01 to 0.02.
+
+=item C<Log::Message::Simple>
+
+Upgraded from version 0.04 to 0.06.
+
+=item C<Math::BigInt>
+
+Upgraded from version 1.88 to 1.89_01.
+
+=item C<Math::BigInt::FastCalc>
+
+Upgraded from version 0.16 to 0.19.
+
+=item C<Math::BigRat>
+
+Upgraded from version 0.21 to 0.24.
+
+=item C<Math::Complex>
+
+Upgraded from version 1.37 to 1.56.
+
+=item C<Memoize>
+
+Upgraded from version 1.01_02 to 1.01_03.
+
+=item C<MIME::Base64>
+
+Upgraded from version 3.07_01 to 3.08.
+
+=item C<Module::Build>
+
+Upgraded from version 0.2808_01 to 0.3603.
+
+=item C<Module::CoreList>
+
+Upgraded from version 2.12 to 2.26.
+
+=item C<Module::Load>
+
+Upgraded from version 0.12 to 0.16.
+
+=item C<Module::Load::Conditional>
+
+Upgraded from version 0.22 to 0.34.
+
+=item C<Module::Loaded>
+
+Upgraded from version 0.01 to 0.06.
+
+=item C<Module::Pluggable>
+
+Upgraded from version 3.6 to 3.9.
+
+=item C<Net::Ping>
+
+Upgraded from version 2.33 to 2.36.
+
+=item C<NEXT>
+
+Upgraded from version 0.60_01 to 0.64.
+
+=item C<Object::Accessor>
+
+Upgraded from version 0.32 to 0.36.
+
+=item C<Package::Constants>
+
+Upgraded from version 0.01 to 0.02.
+
+=item C<PerlIO>
+
+Upgraded from version 1.04 to 1.06.
+
+=item C<Pod::Parser>
+
+Upgraded from version 1.35 to 1.37.
+
+=item C<Pod::Perldoc>
+
+Upgraded from version 3.14_02 to 3.15_02.
+
+=item C<Pod::Plainer>
+
+Upgraded from version 0.01 to 1.02.
+
+NOTE: C<Pod::Plainer> is deprecated and may be removed from a future version of Perl.
+
+=item C<Pod::Simple>
+
+Upgraded from version 3.05 to 3.13.
+
+=item C<Safe>
+
+Upgraded from version 2.12 to 2.22.
+
+=item C<SelfLoader>
+
+Upgraded from version 1.11 to 1.17.
+
+=item C<Storable>
+
+Upgraded from version 2.18 to 2.22.
+
+=item C<Switch>
+
+Upgraded from version 2.13 to 2.16.
+
+NOTE: C<Switch> is deprecated and may be removed from a future version of Perl.
+
+=item C<Sys::Syslog>
+
+Upgraded from version 0.22 to 0.27.
+
+=item C<Term::ANSIColor>
+
+Upgraded from version 1.12 to 2.02.
+
+=item C<Term::UI>
+
+Upgraded from version 0.18 to 0.20.
+
+=item C<Test>
+
+Upgraded from version 1.25 to 1.25_02.
+
+=item C<Test::Harness>
+
+Upgraded from version 2.64 to 3.17.
+
+=item C<Test::Simple>
+
+Upgraded from version 0.72 to 0.94.
+
+=item C<Text::Balanced>
+
+Upgraded from version 2.0.0 to 2.02.
+
+=item C<Text::ParseWords>
+
+Upgraded from version 3.26 to 3.27.
+
+=item C<Text::Soundex>
+
+Upgraded from version 3.03 to 3.03_01.
+
+=item C<Thread::Queue>
+
+Upgraded from version 2.00 to 2.11.
+
+=item C<Thread::Semaphore>
+
+Upgraded from version 2.01 to 2.09.
+
+=item C<Tie::RefHash>
+
+Upgraded from version 1.37 to 1.38.
+
+=item C<Time::HiRes>
+
+Upgraded from version 1.9711 to 1.9719.
+
+=item C<Time::Local>
+
+Upgraded from version 1.18 to 1.1901_01.
+
+=item C<Time::Piece>
+
+Upgraded from version 1.12 to 1.15.
+
+=item C<Unicode::Collate>
+
+Upgraded from version 0.52 to 0.52_01.
+
+=item C<Unicode::Normalize>
+
+Upgraded from version 1.02 to 1.03.
+
+=item C<Win32>
+
+Upgraded from version 0.34 to 0.39.
+
+=item C<Win32API::File>
+
+Upgraded from version 0.1001_01 to 0.1101.
+
+=item C<XSLoader>
+
+Upgraded from version 0.08 to 0.10.
+
+=back
 
 =head2 Removed Modules and Pragmata
 
 =over 4
 
-=item *
+=item C<attrs>
 
-C<attrs>
+Removed from the Perl core.  Prior version was 1.02.
 
-The C<attrs> pragma has been removed. It had been marked as deprecated
-since 5.6.0.
+=item C<CPAN::API::HOWTO>
 
-=item *
+Removed from the Perl core.  Prior version was 'undef'.
 
-C<Devel::DProf::V> is no longer part of the Perl core.
+=item C<CPAN::DeferedCode>
+
+Removed from the Perl core.  Prior version was 5.50.
+
+=item C<CPANPLUS::inc>
+
+Removed from the Perl core.  Prior version was 'undef'.
+
+=item C<DCLsym>
+
+Removed from the Perl core.  Prior version was 1.03.
+
+=item C<ExtUtils::MakeMaker::bytes>
+
+Removed from the Perl core.  Prior version was 6.42.
+
+=item C<ExtUtils::MakeMaker::vmsish>
+
+Removed from the Perl core.  Prior version was 6.42.
+
+=item C<Stdio>
+
+Removed from the Perl core.  Prior version was 2.3.
+
+=item C<Test::Harness::Assert>
+
+Removed from the Perl core.  Prior version was 0.02.
+
+=item C<Test::Harness::Iterator>
+
+Removed from the Perl core.  Prior version was 0.02.
+
+=item C<Test::Harness::Point>
+
+Removed from the Perl core.  Prior version was 0.01.
+
+=item C<Test::Harness::Results>
+
+Removed from the Perl core.  Prior version was 0.01.
+
+=item C<Test::Harness::Straps>
+
+Removed from the Perl core.  Prior version was 0.26_01.
+
+=item C<Test::Harness::Util>
+
+Removed from the Perl core.  Prior version was 0.01.
+
+=item C<XSSymSet>
+
+Removed from the Perl core.  Prior version was 1.1.
 
 =back
 
 =head2 Deprecated Modules and Pragmata
 
 See L</Deprecated Modules> above.
+
 
 =head1 Documentation
 

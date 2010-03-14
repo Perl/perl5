@@ -57,13 +57,15 @@ my @versions = sort keys %$corelist;
 my ($old, $new) = @ARGV;
 $old ||= $versions[-2];
 $new ||= $versions[-1];
-
+warn $old;
+warn $new;
 $deprecated = $Module::CoreList::deprecated{$new};
 
 my (@new,@deprecated,@removed,@pragmas,@modules);
 
 # %Modules defines what is currently in core
 for my $k ( keys %Modules ) {
+    warn "Considering $k";
   next unless exists $corelist->{$new}{$k};
   my $old_ver = $corelist->{$old}{$k};
   my $new_ver = $corelist->{$new}{$k};
