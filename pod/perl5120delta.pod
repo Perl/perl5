@@ -203,7 +203,7 @@ The C<each> function can now operate on arrays.
 
 The variable C<$,> may now be tied.
 
-=head2 // in where clauses
+=head2 // in when clauses
 
 // now behaves like || in when clauses
 
