@@ -2061,14 +2061,14 @@ C<charnames> handler returns malformed UTF-8.
 =item *
 
 If an unresolved named character or sequence was encountered when compiling a
-regex pattern then the fatal error C<\\N{NAME} must be resolved by the lexer>
+regex pattern then the fatal error C<\N{NAME} must be resolved by the lexer>
 is now produced. This can happen, for example, when using a single-quotish
-context like C<$re = '\N{SPACE}'; $re;>. See L<perldiag> for more examples of
+context like C<$re = '\N{SPACE}'; /$re/;>. See L<perldiag> for more examples of
 how the lexer can get bypassed.
 
 =item *
 
-C<Invalid hexadecimal number in \\N{U+...}> is a new fatal error triggered when
+C<Invalid hexadecimal number in \N{U+...}> is a new fatal error triggered when
 the character constant represented by C<...> is not a valid hexadecimal
 number.
 
@@ -2076,14 +2076,14 @@ number.
 
 The new meaning of C<\N> as C<[^\n]> is not valid in a bracketed character
 class, just like C<.> in a character class loses its special meaning, and will
-cause the fatal error C<\\N in a character class must be a named character: \\N{...}>.
+cause the fatal error C<\N in a character class must be a named character: \N{...}>.
 
 =item *
 
 The rules on what is legal for the C<...> in C<\N{...}> have been tightened
 up so that unless the C<...> begins with an alphabetic character and continues
 with a combination of alphanumerics, dashes, spaces, parentheses or colons
-then the warning C<Deprecated character(s) in \\N{...} starting at '%s'> is
+then the warning C<Deprecated character(s) in \N{...} starting at '%s'> is
 now issued.
 
 =item *
@@ -2221,7 +2221,7 @@ first character returned by \N{} in character class> will be issued.
 
 =item *
 
-The warning C<Missing right brace on \\N{} or unescaped left brace after \\N.
+The warning C<Missing right brace on \N{} or unescaped left brace after \N.
 Assuming the latter> will be issued if Perl encounters a C<\N{> but doesn't
 find a matching C<}>. In this case Perl doesn't know if it was mistakenly
 omitted, or if "match non-newline" followed by "match a C<{>" was desired.
@@ -2680,7 +2680,7 @@ or cause the following assertion failure [RT #60508]:
 
 =item *
 
-Perl now includes previously missing files from the Unicode 5.1 Character Database.
+Perl now includes previously missing files from the Unicode Character Database.
 
 =item *
 
