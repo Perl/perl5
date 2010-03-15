@@ -279,14 +279,18 @@ EOM
 					ldflags="$ldflags -mlp64"
 					;;
 				    esac
-				    ;;
+				;;
 			    esac
 			;;
 		    esac
 		;;
 	    *)
-		ccflags="$ccflags +DD64"
-		ldflags="$ldflags +DD64"
+		case "$use64bitall" in
+		    $define|true|[yY]*)
+			ccflags="$ccflags +DD64"
+			ldflags="$ldflags +DD64"
+			;;
+		    esac
 		;;
 	    esac
 
