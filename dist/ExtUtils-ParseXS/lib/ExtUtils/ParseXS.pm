@@ -18,6 +18,7 @@ use ExtUtils::ParseXS::Utilities qw(
   C_string
   valid_proto_string
   process_typemaps
+  make_targetable
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -105,9 +106,6 @@ sub process_file {
     $IncludedFiles{$f}++;
   }
 
-  # Open the input file
-  open($FH, $args{filename}) or die "cannot open $args{filename}: $!\n";
-
   # Open the output file if given as a string.  If they provide some
   # other kind of reference, trust them that we can print to it.
   if (not ref $args{output}) {
@@ -160,29 +158,7 @@ sub process_file {
     $value =~ s/^\s+#/#/mg;
   }
 
-  my ($cast, $size);
-  our $bal;
-  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
-  $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
-  $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
-
-  my %targetable;
-  foreach my $key (keys %output_expr) {
-    # We can still bootstrap compile 're', because in code re.pm is
-    # available to miniperl, and does not attempt to load the XS code.
-    use re 'eval';
-
-    my ($t, $with_size, $arg, $sarg) =
-      ($output_expr{$key} =~
-        m[^ \s+ sv_set ( [iunp] ) v (n)?    # Type, is_setpvn
-          \s* \( \s* $cast \$arg \s* ,
-          \s* ( (??{ $bal }) )    # Set from
-          ( (??{ $size }) )?    # Possible sizeof set-from
-          \) \s* ; \s* $
-        ]x
-    );
-    $targetable{$key} = [$t, $with_size, $arg, $sarg] if $t;
-  }
+  my %targetable = make_targetable(\%output_expr);
 
   my $END = "!End!\n\n";        # "impossible" keyword (multiple newline)
 
@@ -223,6 +199,9 @@ EOM
 
   print("#line 1 \"$filepathname\"\n")
     if $WantLineNumbers;
+
+  # Open the input file (using basename'd $args{filename} due to chdir above)
+  open($FH, $filename) or die "cannot open $filename: $!\n";
 
   firstmodule:
   while (<$FH>) {
@@ -477,7 +456,7 @@ EOF
           s/^\s+//;
           s/\s+$//;
           my ($arg, $default) = ($_ =~ m/ ( [^=]* ) ( (?: = .* )? ) /x);
-          my ($pre, $name) = ($arg =~ /(.*?) \s*
+          my ($pre, $len_name) = ($arg =~ /(.*?) \s*
                              \b ( \w+ | length\( \s*\w+\s* \) )
                              \s* $ /x);
           next unless defined($pre) && length($pre);
@@ -490,8 +469,8 @@ EOF
             $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
           }
           my $islength;
-          if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            $name = "XSauto_length_of_$1";
+          if ($len_name =~ /^length\( \s* (\w+) \s* \)\z/x) {
+            $len_name = "XSauto_length_of_$1";
             $islength = 1;
             die "Default value on length() argument: `$_'"
               if length $default;
@@ -504,12 +483,12 @@ EOF
               push @fake_INPUT, $arg;
             }
             # warn "pushing '$arg'\n";
-            $argtype_seen{$name}++;
-            $_ = "$name$default"; # Assigns to @args
+            $argtype_seen{$len_name}++;
+            $_ = "$len_name$default"; # Assigns to @args
           }
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $islength;
-          push @outlist, $name if $out_type =~ /OUTLIST$/;
-          $in_out{$name} = $out_type if $out_type;
+          push @outlist, $len_name if $out_type =~ /OUTLIST$/;
+          $in_out{$len_name} = $out_type if $out_type;
         }
       }
       else {
@@ -803,11 +782,11 @@ EOF
           my $what = eval qq("$t->[2]");
           warn $@ if $@;
     
-          my $size = $t->[3];
-          $size = '' unless defined $size;
-          $size = eval qq("$size");
+          my $tsize = $t->[3];
+          $tsize = '' unless defined $tsize;
+          $tsize = eval qq("$tsize");
           warn $@ if $@;
-          print "\tXSprePUSH; PUSH$t->[0]($what$size);\n";
+          print "\tXSprePUSH; PUSH$t->[0]($what$tsize);\n";
           $prepush_done = 1;
         }
         else {

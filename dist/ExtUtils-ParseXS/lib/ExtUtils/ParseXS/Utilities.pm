@@ -14,6 +14,7 @@ our (@ISA, @EXPORT_OK);
   C_string
   valid_proto_string
   process_typemaps
+  make_targetable
 );
 
 =head1 NAME
@@ -336,6 +337,56 @@ sub process_typemaps {
     close $TYPEMAP;
   }
   return (\%type_kind, \%proto_letter, \%input_expr, \%output_expr);
+}
+
+=head2 C<make_targetable()>
+
+=over 4
+
+=item * Purpose
+
+Populate C<%targetable>.
+
+=item * Arguments
+
+  %targetable = make_targetable(\%output_expr);
+      
+Reference to C<%output_expr>.
+
+=item * Return Value
+
+Hash.
+
+=back
+
+=cut
+
+sub make_targetable {
+  my $output_expr_ref = shift;
+  my ($cast, $size);
+  our $bal;
+  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
+  $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
+  $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
+
+  my %targetable;
+  foreach my $key (keys %{ $output_expr_ref }) {
+    # We can still bootstrap compile 're', because in code re.pm is
+    # available to miniperl, and does not attempt to load the XS code.
+    use re 'eval';
+
+    my ($t, $with_size, $arg, $sarg) =
+      ($output_expr_ref->{$key} =~
+        m[^ \s+ sv_set ( [iunp] ) v (n)?    # Type, is_setpvn
+          \s* \( \s* $cast \$arg \s* ,
+          \s* ( (??{ $bal }) )    # Set from
+          ( (??{ $size }) )?    # Possible sizeof set-from
+          \) \s* ; \s* $
+        ]x
+    );
+    $targetable{$key} = [$t, $with_size, $arg, $sarg] if $t;
+  }
+  return %targetable;
 }
 
 1;
