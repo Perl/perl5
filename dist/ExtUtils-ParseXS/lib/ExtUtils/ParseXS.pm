@@ -503,6 +503,8 @@ EOF
           my $out_type = $1;
           next if $out_type eq 'IN';
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
+          # $name in line below appears to a global not previously declared or
+          # defined
           push @outlist, $name if $out_type =~ /OUTLIST$/;
           $in_out{$_} = $out_type;
         }
@@ -900,8 +902,8 @@ EOF
     }
     elsif ($interface) {
       while ( ($name, $value) = each %Interfaces) {
-    $name = "$Package\::$name" unless $name =~ /::/;
-    push(@InitFileCode, Q(<<"EOF"));
+        $name = "$Package\::$name" unless $name =~ /::/;
+        push(@InitFileCode, Q(<<"EOF"));
 #        cv = ${newXS}(\"$name\", XS_$Full_func_name, file$proto);
 #        $interface_macro_set(cv,$value);
 EOF
@@ -1106,6 +1108,7 @@ sub INPUT_handler {
     # Process the length(foo) declarations
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x) {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
+      # $name in line below is global ?
       $lengthof{$2} = $name;
       # $islengthof{$name} = $1;
       $deferred .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
@@ -1229,9 +1232,9 @@ sub INTERFACE_handler() {
   trim_whitespace($in);
 
   foreach (split /[\s,]+/, $in) {
-    my $name = $_;
-    $name =~ s/^$Prefix//;
-    $Interfaces{$name} = $_;
+    my $iface_name = $_;
+    $iface_name =~ s/^$Prefix//;
+    $Interfaces{$iface_name} = $_;
   }
   print Q(<<"EOF");
 #    XSFUNCTION = $interface_macro($ret_type,cv,XSANY.any_dptr);
