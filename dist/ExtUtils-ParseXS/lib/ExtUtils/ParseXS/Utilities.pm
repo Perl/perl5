@@ -27,6 +27,10 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     standard_typemap_locations
     trim_whitespace
     tidy_type
+    C_string
+    valid_proto_string
+    process_typemaps
+    make_targetable
   );
 
 =head1 SUBROUTINES
