@@ -887,9 +887,9 @@ EOF
     if (%XsubAliases) {
       $XsubAliases{$pname} = 0
         unless defined $XsubAliases{$pname};
-      while ( ($name, $value) = each %XsubAliases) {
+      while ( my ($xname, $value) = each %XsubAliases) {
         push(@InitFileCode, Q(<<"EOF"));
-#        cv = ${newXS}(\"$name\", XS_$Full_func_name, file$proto);
+#        cv = ${newXS}(\"$xname\", XS_$Full_func_name, file$proto);
 #        XSANY.any_i32 = $value;
 EOF
       }
@@ -901,10 +901,10 @@ EOF
 EOF
     }
     elsif ($interface) {
-      while ( ($name, $value) = each %Interfaces) {
-        $name = "$Package\::$name" unless $name =~ /::/;
+      while ( my ($yname, $value) = each %Interfaces) {
+        $yname = "$Package\::$yname" unless $yname =~ /::/;
         push(@InitFileCode, Q(<<"EOF"));
-#        cv = ${newXS}(\"$name\", XS_$Full_func_name, file$proto);
+#        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$proto);
 #        $interface_macro_set(cv,$value);
 EOF
       }
