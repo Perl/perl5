@@ -41,7 +41,7 @@ our (
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
-  $RETVAL_code, $name_printed, $func_args, @XSStack, $ALIAS, 
+  $RETVAL_code, $printed_name, $func_args, @XSStack, $ALIAS, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, );
 
@@ -1137,11 +1137,11 @@ sub INPUT_handler {
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # Function pointers are not yet supported with &output_init!
       print "\t" . &map_type($var_type, $var_name);
-      $name_printed = 1;
+      $printed_name = 1;
     }
     else {
       print "\t" . &map_type($var_type);
-      $name_printed = 0;
+      $printed_name = 0;
     }
     $var_num = $args_match{$var_name};
 
@@ -1151,7 +1151,7 @@ sub INPUT_handler {
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
       or $in_out{$var_name} and $in_out{$var_name} =~ /^OUT/
       and $var_init !~ /\S/) {
-      if ($name_printed) {
+      if ($printed_name) {
         print ";\n";
       }
       else {
@@ -1159,11 +1159,11 @@ sub INPUT_handler {
       }
     }
     elsif ($var_init =~ /\S/) {
-      &output_init($var_type, $var_num, $var_name, $var_init, $name_printed);
+      &output_init($var_type, $var_num, $var_name, $var_init, $printed_name);
     }
     elsif ($var_num) {
       # generate initialization code
-      &generate_init($var_type, $var_num, $var_name, $name_printed);
+      &generate_init($var_type, $var_num, $var_name, $printed_name);
     }
     else {
       print ";\n";
@@ -1678,11 +1678,11 @@ sub fetch_para {
 }
 
 sub output_init {
-  local($type, $num, $var, $init, $name_printed) = @_;
+  local($type, $num, $var, $init, $printed_name) = @_;
   local($arg) = "ST(" . ($num - 1) . ")";
 
   if (  $init =~ /^=/  ) {
-    if ($name_printed) {
+    if ($printed_name) {
       eval qq/print " $init\\n"/;
     }
     else {
@@ -1692,9 +1692,9 @@ sub output_init {
   }
   else {
     if (  $init =~ s/^\+//  &&  $num  ) {
-      &generate_init($type, $num, $var, $name_printed);
+      &generate_init($type, $num, $var, $printed_name);
     }
-    elsif ($name_printed) {
+    elsif ($printed_name) {
       print ";\n";
       $init =~ s/^;//;
     }
@@ -1741,7 +1741,7 @@ sub generate_init {
   $tk = $type_kind{$type};
   $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
   if ($tk eq 'T_PV' and exists $lengthof{$var}) {
-    print "\t$var" unless $name_printed;
+    print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
       if defined $defaults{$var};
@@ -1771,7 +1771,7 @@ sub generate_init {
   if (defined($defaults{$var})) {
     $expr =~ s/(\t+)/$1    /g;
     $expr =~ s/        /\t/g;
-    if ($name_printed) {
+    if ($printed_name) {
       print ";\n";
     }
     else {
@@ -1787,7 +1787,7 @@ sub generate_init {
     warn $@   if  $@;
   }
   elsif ($ScopeThisXSUB or $expr !~ /^\s*\$var =/) {
-    if ($name_printed) {
+    if ($printed_name) {
       print ";\n";
     }
     else {
@@ -1799,7 +1799,7 @@ sub generate_init {
   }
   else {
     die "panic: do not know how to handle this branch for function pointers"
-      if $name_printed;
+      if $printed_name;
     eval qq/print "$expr;\\n"/;
     warn $@   if  $@;
   }
