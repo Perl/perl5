@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 139;
+plan tests => 143;
 
 $_ = 'abc';
 $c = foo();
@@ -242,4 +242,23 @@ foreach my $start (@chars) {
 
     map chomp(+()), ('')x68;
     ok(1, "extend sp in pp_chomp");
+}
+
+{
+    # [perl #73246] chop doesn't support utf8
+    # the problem was UTF8_IS_START() didn't handle perl's extended UTF8
+    my $utf = "\x{80000001}\x{80000000}";
+    my $result = chop($utf);
+    is($utf, "\x{80000001}", "chopping high 'unicode'- remnant");
+    is($result, "\x{80000000}", "chopping high 'unicode' - result");
+
+    SKIP: {
+        use Config;
+        $Config{ivsize} >= 8
+	  or skip("this build can't handle very large characters", 2);
+        my $utf = "\x{ffffffffffffffff}\x{fffffffffffffffe}";
+        my $result = chop $utf;
+        is($utf, "\x{ffffffffffffffff}", "chop even higher 'unicode' - remnant");
+        is($result, "\x{fffffffffffffffe}", "chop even higher 'unicode' - result");
+    }
 }

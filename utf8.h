@@ -104,13 +104,15 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tell how many bytes there are in the
 encoded character.
 
+Perl's extended UTF-8 means we can have start bytes up to FF.
+
 */
 
 
 #define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
 /* Note that C0 and C1 are invalid in legal UTF8, so the lower bound of the
  * below might ought to be C2 */
-#define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
+#define UTF8_IS_START(c)		(((U8)c) >= 0xc0)
 #define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfc) == 0xc0)
