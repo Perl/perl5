@@ -128,19 +128,19 @@ GROUPP		GROUPP, num 1	Whether the group matched.
 LONGJMP		LONGJMP,off 1 1	Jump far away.
 BRANCHJ		BRANCHJ,off 1 1	BRANCH with long offset.
 
-#*The heavy worker (57..58)
+#*The heavy worker (57)
 
 EVAL		EVAL,   evl 1	Execute some Perl code.
 
-#*Modifiers (59..60)
+#*Modifiers (58..59)
 
 MINMOD		MINMOD, no	Next operator is not greedy.
 LOGICAL		LOGICAL,no	Next opcode should set the flag only.
 
-# This is not used yet (61)
+# This is not used yet (60)
 RENUM		BRANCHJ,off 1 1	Group with independently numbered parens.
 
-#*Trie Related (62..64)
+#*Trie Related (61..62)
 
 # Behave the same as A|LIST|OF|WORDS would. The '..C' variants have  
 # inline charclass data (ascii only), the 'C' store it in the structure.
