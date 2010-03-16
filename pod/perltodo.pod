@@ -927,7 +927,9 @@ Currently C<goto keyword> "computes" the label value:
     $ perl -e 'goto print'
     Can't find label 1 at -e line 1.
 
-It would be nice to forbid labels with keyword names, to avoid confusion.
+It is controversial if the right way to avoid the confusion is to forbid
+labels with keyword names, or if it would be better to always treat
+bareword expressions after a "goto" as a label and never as a keyword.
 
 =head2 truncate() prototype
 
