@@ -2729,9 +2729,9 @@ Removed F<libbsd> for AIX 5L and 6.1. Only C<flock()> was used from F<libbsd>.
 
 =item *
 
-Removed F<libgdbm> for AIX 5L and 6.1. The F<libgdbm> is delivered as an
-optional package with the AIX Toolbox. Unfortunately the 64 bit version
-is broken.
+Removed F<libgdbm> for AIX 5L and 6.1 if F<libgdbm> < 1.8.3-5 is installed.
+The F<libgdbm> is delivered as an optional package with the AIX Toolbox.
+Unfortunately the versions below 1.8.3-5 are broken.
 
 =item *
 
