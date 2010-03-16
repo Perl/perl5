@@ -175,7 +175,7 @@ ACCEPT		ENDLIKE,   parno 1 	Accepts the current matched string.
 
 
 #*Verbs With Arguments
-VERB		VERB,	   no-sv 1	Used only for the type field of verbs
+VERB		VERB,      no-sv 1	Used only for the type field of verbs
 PRUNE		VERB,      no-sv 1 	Pattern fails at this startpoint if no-backtracking through this 
 MARKPOINT	VERB,      no-sv 1	Push the current location for rollback by cut.
 SKIP		VERB,      no-sv 1	On failure skip forward (to the mark) before retrying

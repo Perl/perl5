@@ -85,7 +85,7 @@
 #define	ENDLIKE               	73	/* 0x49 Used only for the type field of verbs */
 #define	OPFAIL                	74	/* 0x4a Same as (?!) */
 #define	ACCEPT                	75	/* 0x4b Accepts the current matched string. */
-#define	VERB                  	76	/* 0x4c    no-sv 1	Used only for the type field of verbs */
+#define	VERB                  	76	/* 0x4c Used only for the type field of verbs */
 #define	PRUNE                 	77	/* 0x4d Pattern fails at this startpoint if no-backtracking through this */
 #define	MARKPOINT             	78	/* 0x4e Push the current location for rollback by cut. */
 #define	SKIP                  	79	/* 0x4f On failure skip forward (to the mark) before retrying */
@@ -363,7 +363,7 @@ static const U8 regarglen[] = {
 	0,                                   	/* ENDLIKE      */
 	0,                                   	/* OPFAIL       */
 	EXTRA_SIZE(struct regnode_1),        	/* ACCEPT       */
-	0,                                   	/* VERB         */
+	EXTRA_SIZE(struct regnode_1),        	/* VERB         */
 	EXTRA_SIZE(struct regnode_1),        	/* PRUNE        */
 	EXTRA_SIZE(struct regnode_1),        	/* MARKPOINT    */
 	EXTRA_SIZE(struct regnode_1),        	/* SKIP         */
