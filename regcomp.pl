@@ -36,11 +36,11 @@ while (<DESC>) {
     }
     unless ($lastregop) {
         $ind++;
-        ($name[$ind], $desc, $rest[$ind]) = split /\t+/, $_, 3;  
+        ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+)\s*;\s*(.*)/;
         ($type[$ind], $code[$ind], $args[$ind], $longj[$ind]) 
           = split /[,\s]\s*/, $desc, 4;
     } else {
-        my ($type,@lists)=split /\s*\t+\s*/, $_;
+        my ($type,@lists)=split /\s+/, $_;
         die "No list? $type" if !@lists;
         foreach my $list (@lists) {
             my ($names,$special)=split /:/, $list , 2;
