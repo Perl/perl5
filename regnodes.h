@@ -662,30 +662,46 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 #endif /* DOINIT */
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
-#define REGNODE_VARIES(node) strchr((const char *)PL_varies, (node))
+#define REGNODE_VARIES(node) (PL_varies_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
 #ifndef DOINIT
-EXTCONST U8 PL_varies[];
+EXTCONST U8 PL_varies[] __attribute__deprecated__;
 #else
-EXTCONST U8 PL_varies[] = {
+EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
     CLUMP, BRANCH, BACK, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM,
     REF, REFF, REFFL, SUSPEND, IFTHEN, BRANCHJ, NREF, NREFF, NREFFL,
     0
 };
 #endif /* DOINIT */
 
+#ifndef DOINIT
+EXTCONST U8 PL_varies_bitmask[];
+#else
+EXTCONST U8 PL_varies_bitmask[] = {
+    0x00, 0x00, 0x00, 0xC0, 0xC1, 0x9F, 0x33, 0x01, 0x38, 0x00, 0x00, 0x00
+};
+#endif /* DOINIT */
+
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
-#define REGNODE_SIMPLE(node) strchr((const char *)PL_simple, (node))
+#define REGNODE_SIMPLE(node) (PL_simple_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
 #ifndef DOINIT
-EXTCONST U8 PL_simple[];
+EXTCONST U8 PL_simple[] __attribute__deprecated__;
 #else
-EXTCONST U8 PL_simple[] = {
+EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
     REG_ANY, SANY, CANY, ANYOF, ALNUM, ALNUML, NALNUM, NALNUML, SPACE,
     SPACEL, NSPACE, NSPACEL, DIGIT, NDIGIT, VERTWS, NVERTWS, HORIZWS,
     NHORIZWS,
     0
+};
+#endif /* DOINIT */
+
+#ifndef DOINIT
+EXTCONST U8 PL_simple_bitmask[];
+#else
+EXTCONST U8 PL_simple_bitmask[] = {
+    0x00, 0xC0, 0xFF, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00
 };
 #endif /* DOINIT */
 

@@ -85,19 +85,43 @@ sub process_flags {
 
   $ind = 0;
   my @selected;
+  my $bitmap = '';
   do {
-    push @selected, $name[$ind] if $flags[$ind] && $flags[$ind] eq $flag;
+    my $set = $flags[$ind] && $flags[$ind] eq $flag ? 1 : 0;
+    # Whilst I could do this with vec, I'd prefer to do longhand the arithmetic
+    # ops in the C code.
+    my $current = do {
+      no warnings 'uninitialized';
+      ord do {
+	no warnings 'substr';
+	substr $bitmap, ($ind >> 3);
+      }
+    };
+    substr $bitmap, ($ind >> 3), 1, chr($current | ($set << ($ind & 7)));
+
+    push @selected, $name[$ind] if $set;
   } while (++$ind < $lastregop);
   my $out_string = join ', ', @selected, 0;
   $out_string =~ s/(.{1,70},) /$1\n    /g;
+
+  my $out_mask = join ', ', map {sprintf "0x%02X", ord $_} split '', $bitmap;
+
   return $comment . <<"EOP";
-#define REGNODE_\U$varname\E(node) strchr((const char *)PL_${varname}, (node))
+#define REGNODE_\U$varname\E(node) (PL_${varname}_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
 #ifndef DOINIT
-EXTCONST U8 PL_${varname}[];
+EXTCONST U8 PL_${varname}[] __attribute__deprecated__;
 #else
-EXTCONST U8 PL_${varname}[] = {
+EXTCONST U8 PL_${varname}[] __attribute__deprecated__ = {
     $out_string
+};
+#endif /* DOINIT */
+
+#ifndef DOINIT
+EXTCONST U8 PL_${varname}_bitmask[];
+#else
+EXTCONST U8 PL_${varname}_bitmask[] = {
+    $out_mask
 };
 #endif /* DOINIT */
 
