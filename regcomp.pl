@@ -91,6 +91,8 @@ sub process_flags {
   my $out_string = join ', ', @selected, 0;
   $out_string =~ s/(.{1,70},) /$1\n    /g;
   return $comment . <<"EOP";
+#define REGNODE_\U$varname\E(node) strchr((const char *)PL_${varname}, (node))
+
 #ifndef DOINIT
 EXTCONST U8 PL_${varname}[];
 #else

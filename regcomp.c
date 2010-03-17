@@ -3116,7 +3116,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-	else if (strchr((const char*)PL_varies,OP(scan))) {
+	else if (REGNODE_VARIES(OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
 	    regnode * const oscan = scan;
@@ -3268,7 +3268,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		    /* Skip open. */
 		    nxt = regnext(nxt);
-		    if (!strchr((const char*)PL_simple,OP(nxt))
+		    if (!REGNODE_SIMPLE(OP(nxt))
 			&& !(PL_regkind[OP(nxt)] == EXACT
 			     && STR_LEN(nxt) == 1))
 			goto nogo;
@@ -3527,7 +3527,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		data->longest = &(data->longest_float);
 	    }
 	}
-	else if (strchr((const char*)PL_simple,OP(scan))) {
+	else if (REGNODE_SIMPLE(OP(scan))) {
 	    int value = 0;
 
 	    if (flags & SCF_DO_SUBSTR) {
@@ -4604,7 +4604,7 @@ reStudy:
 	    ri->regstclass = trie_op;
 	}
 #endif	
-	else if (strchr((const char*)PL_simple,OP(first)))
+	else if (REGNODE_SIMPLE(OP(first)))
 	    ri->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOUND ||
 		 PL_regkind[OP(first)] == NBOUND)

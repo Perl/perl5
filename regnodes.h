@@ -662,6 +662,8 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 #endif /* DOINIT */
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
+#define REGNODE_VARIES(node) strchr((const char *)PL_varies, (node))
+
 #ifndef DOINIT
 EXTCONST U8 PL_varies[];
 #else
@@ -674,6 +676,8 @@ EXTCONST U8 PL_varies[] = {
 
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
+#define REGNODE_SIMPLE(node) strchr((const char *)PL_simple, (node))
+
 #ifndef DOINIT
 EXTCONST U8 PL_simple[];
 #else
