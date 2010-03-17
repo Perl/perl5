@@ -35,10 +35,10 @@ while (<DESC>) {
         next;
     }
     unless ($lastregop) {
-        $ind++;
         ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+)\s*;\s*(.*)/;
         ($type[$ind], $code[$ind], $args[$ind], $flags[$ind], $longj[$ind])
           = split /[,\s]\s*/, $desc;
+        ++$ind;
     } else {
         my ($type,@lists)=split /\s+/, $_;
         die "No list? $type" if !@lists;
@@ -60,10 +60,10 @@ while (<DESC>) {
                     die "unknown :type ':$special'";
                 }
                 foreach my $suffix (@suffix) {
-                    $ind++;
                     $name[$ind]="$real$suffix";
                     $type[$ind]=$type;
                     $rest[$ind]="state for $type";
+                    ++$ind;
                 }
             }
         }
@@ -85,9 +85,9 @@ sub process_flags {
 
   $ind = 0;
   my @selected;
-  while (++$ind <= $lastregop) {
+  do {
     push @selected, $name[$ind] if $flags[$ind] && $flags[$ind] eq $flag;
-  }
+  } while (++$ind < $lastregop);
   my $out_string = join ', ', @selected, 0;
   $out_string =~ s/(.{1,70},) /$1\n    /g;
   return $comment . <<"EOP";
@@ -128,15 +128,14 @@ EOP
 ;
 
 
-for ($ind=1; $ind <= $lastregop ; $ind++) {
-  my $oind = $ind - 1;
+for ($ind=0; $ind < $lastregop ; ++$ind) {
   printf $out "#define\t%*s\t%d\t/* %#04x %s */\n",
-    -$width, $name[$ind], $ind-1, $ind-1, $rest[$ind];
+    -$width, $name[$ind], $ind, $ind, $rest[$ind];
 }
 print $out "\t/* ------------ States ------------- */\n";
-for ( ; $ind <= $tot ; $ind++) {
+for ( ; $ind < $tot ; $ind++) {
   printf $out "#define\t%*s\t(REGNODE_MAX + %d)\t/* %s */\n",
-    -$width, $name[$ind], $ind - $lastregop, $rest[$ind];
+    -$width, $name[$ind], $ind - $lastregop + 1, $rest[$ind];
 }
 
 print $out <<EOP;
@@ -150,12 +149,12 @@ EXTCONST U8 PL_regkind[] = {
 EOP
 
 $ind = 0;
-while (++$ind <= $tot) {
+do {
   printf $out "\t%*s\t/* %*s */\n",
              -1-$twidth, "$type[$ind],", -$width, $name[$ind];
   print $out "\t/* ------------ States ------------- */\n"
-    if $ind == $lastregop and $lastregop != $tot;
-}
+    if $ind + 1 == $lastregop and $lastregop != $tot;
+} while (++$ind < $tot);
 
 print $out <<EOP;
 };
@@ -168,13 +167,13 @@ static const U8 regarglen[] = {
 EOP
 
 $ind = 0;
-while (++$ind <= $lastregop) {
+do {
   my $size = 0;
   $size = "EXTRA_SIZE(struct regnode_$args[$ind])" if $args[$ind];
   
   printf $out "\t%*s\t/* %*s */\n",
 	-37, "$size,",-$rwidth,$name[$ind];
-}
+} while (++$ind < $lastregop);
 
 print $out <<EOP;
 };
@@ -185,12 +184,12 @@ static const char reg_off_by_arg[] = {
 EOP
 
 $ind = 0;
-while (++$ind <= $lastregop) {
+do {
   my $size = $longj[$ind] || 0;
 
   printf $out "\t%d,\t/* %*s */\n",
 	$size, -$rwidth, $name[$ind]
-}
+} while (++$ind < $lastregop);
 
 print $out <<EOP;
 };
@@ -206,20 +205,20 @@ EXTCONST char * const PL_reg_name[] = {
 EOP
 
 $ind = 0;
-my $ofs = 1;
+my $ofs = 0;
 my $sym = "";
-while (++$ind <= $tot) {
+do {
   my $size = $longj[$ind] || 0;
 
   printf $out "\t%*s\t/* $sym%#04x */\n",
 	-3-$width,qq("$name[$ind]",), $ind - $ofs;
-  if ($ind == $lastregop and $lastregop != $tot) {
+  if ($ind + 1 == $lastregop and $lastregop != $tot) {
     print $out "\t/* ------------ States ------------- */\n";
-    $ofs = $lastregop;
+    $ofs = $lastregop - 1;
     $sym = 'REGNODE_MAX +';
   }
     
-}
+} while (++$ind < $tot);
 
 print $out <<EOP;
 };
