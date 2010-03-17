@@ -3023,7 +3023,7 @@ in a change of behaviour between 5.8.x and 5.10.0:
 
 Perl 5.12.0 represents approximately two years of development since
 Perl 5.10.0 and contains over 750,000 lines of changes across over
-3000 files from over 200 authors and committers.
+3,000 files from over 200 authors and committers.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
