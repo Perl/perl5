@@ -440,10 +440,13 @@ is (runperl(
 # REGEX pad had already been freed (ithreads build only). The
 # object is required to trigger the early freeing of GV refs to to STDOUT
 
-like (runperl(
-    prog => '$x=bless[]; sub IO::Handle::DESTROY{$_="bad";s/bad/ok/;print}',
-    stderr => 1
-      ), qr/^(ok)+$/, 'STDOUT destructor');
+TODO: {
+    local $TODO = "works but output through pipe is mangled" if $^O eq 'VMS';
+    like (runperl(
+        prog => '$x=bless[]; sub IO::Handle::DESTROY{$_="bad";s/bad/ok/;print}',
+        stderr => 1
+          ), qr/^(ok)+$/, 'STDOUT destructor');
+}
 
 TODO: {
     no strict 'refs';
