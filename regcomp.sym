@@ -9,7 +9,7 @@
 # Note that the order in this file is important.
 #
 # Format for first section: 
-# NAME \s+ TYPE, arg-description [num-args] [longjump-len] ; DESCRIPTION
+# NAME \s+ TYPE, arg-description [flags] [num-args] [longjump-len] ; DESCRIPTION
 #
 #
 # run perl regen.pl after editing this file
@@ -38,23 +38,23 @@ GPOS        GPOS,       no        ; Matches where last m//g left off.
 
 #* [Special] alternatives: (14..30)
 
-REG_ANY     REG_ANY,    no        ; Match any one character (except newline).
-SANY        REG_ANY,    no        ; Match any one character.
-CANY        REG_ANY,    no        ; Match any one byte.
-ANYOF       ANYOF,      sv        ; Match character in (or not in) this class.
-ALNUM       ALNUM,      no        ; Match any alphanumeric character
-ALNUML      ALNUM,      no        ; Match any alphanumeric char in locale
-NALNUM      NALNUM,     no        ; Match any non-alphanumeric character
-NALNUML     NALNUM,     no        ; Match any non-alphanumeric char in locale
-SPACE       SPACE,      no        ; Match any whitespace character
-SPACEL      SPACE,      no        ; Match any whitespace char in locale
-NSPACE      NSPACE,     no        ; Match any non-whitespace character
-NSPACEL     NSPACE,     no        ; Match any non-whitespace char in locale
-DIGIT       DIGIT,      no        ; Match any numeric character
+REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
+SANY        REG_ANY,    no 0 S    ; Match any one character.
+CANY        REG_ANY,    no 0 S    ; Match any one byte.
+ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class.
+ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character
+ALNUML      ALNUM,      no 0 S    ; Match any alphanumeric char in locale
+NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character
+NALNUML     NALNUM,     no 0 S    ; Match any non-alphanumeric char in locale
+SPACE       SPACE,      no 0 S    ; Match any whitespace character
+SPACEL      SPACE,      no 0 S    ; Match any whitespace char in locale
+NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character
+NSPACEL     NSPACE,     no 0 S    ; Match any non-whitespace char in locale
+DIGIT       DIGIT,      no 0 S    ; Match any numeric character
 DIGITL      DIGIT,      no        ; Match any numeric character in locale
-NDIGIT      NDIGIT,     no        ; Match any non-numeric character
+NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character
 NDIGITL     NDIGIT,     no        ; Match any non-numeric character in locale
-CLUMP       CLUMP,      no        ; Match any combining character sequence
+CLUMP       CLUMP,      no 0 V    ; Match any combining character sequence
 
 #* Alternation (31)
 
@@ -66,14 +66,14 @@ CLUMP       CLUMP,      no        ; Match any combining character sequence
 #               final "next" pointer of each individual branch points; each
 #               branch starts with the operand node of a BRANCH node.
 #
-BRANCH      BRANCH,     node      ; Match this alternative, or the next...
+BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
 #*Back pointer (32)
 
 # BACK          Normal "next" pointers all implicitly point forward; BACK
 #               exists to make loop structures possible.
 # not used
-BACK        BACK,       no        ; Match "", "next" ptr points backward.
+BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 
 #*Literals (33..35)
 
@@ -94,16 +94,16 @@ TAIL        NOTHING,    no        ; Match empty string. Can jump here from outsi
 #               per match) are implemented with STAR and PLUS for speed
 #               and to minimize recursive plunges.
 #
-STAR        STAR,       node      ; Match this (simple) thing 0 or more times.
-PLUS        PLUS,       node      ; Match this (simple) thing 1 or more times.
+STAR        STAR,       node 0 V  ; Match this (simple) thing 0 or more times.
+PLUS        PLUS,       node 0 V  ; Match this (simple) thing 1 or more times.
 
-CURLY       CURLY,      sv 2      ; Match this simple thing {n,m} times.
-CURLYN      CURLY,      no 2      ; Capture next-after-this simple thing 
-CURLYM      CURLY,      no 2      ; Capture this medium-complex thing {n,m} times. 
-CURLYX      CURLY,      sv 2      ; Match this complex thing {n,m} times.
+CURLY       CURLY,      sv 2 V    ; Match this simple thing {n,m} times.
+CURLYN      CURLY,      no 2 V    ; Capture next-after-this simple thing 
+CURLYM      CURLY,      no 2 V    ; Capture this medium-complex thing {n,m} times. 
+CURLYX      CURLY,      sv 2 V    ; Match this complex thing {n,m} times.
 
 # This terminator creates a loop structure for CURLYX
-WHILEM      WHILEM,     no        ; Do curly processing and see if rest matches.
+WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.
 
 #*Buffer related (45..49)
 
@@ -111,22 +111,21 @@ WHILEM      WHILEM,     no        ; Do curly processing and see if rest matches.
 OPEN        OPEN,       num 1     ; Mark this point in input as start of #n.
 CLOSE       CLOSE,      num 1     ; Analogous to OPEN.
 
-REF         REF,        num 1     ; Match some already matched string
-REFF        REF,        num 1     ; Match already matched string, folded
-REFFL       REF,        num 1     ; Match already matched string, folded in loc.
+REF         REF,        num 1 V   ; Match some already matched string
+REFF        REF,        num 1 V   ; Match already matched string, folded
+REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
 
-#*Grouping assertions (50..54)
 
-IFMATCH     BRANCHJ,    off 1 2   ; Succeeds if the following matches.
-UNLESSM     BRANCHJ,    off 1 2   ; Fails if the following matches.
-SUSPEND     BRANCHJ,    off 1 1   ; "Independent" sub-RE.
-IFTHEN      BRANCHJ,    off 1 1   ; Switch, should be preceeded by switcher .
+IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
+UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
+SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
+IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceeded by switcher .
 GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
 #*Support for long RE (55..56)
 
-LONGJMP     LONGJMP,    off 1 1   ; Jump far away.
-BRANCHJ     BRANCHJ,    off 1 1   ; BRANCH with long offset.
+LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
+BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
 
 #*The heavy worker (57)
 
@@ -138,7 +137,7 @@ MINMOD      MINMOD,     no        ; Next operator is not greedy.
 LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
 
 # This is not used yet (60)
-RENUM       BRANCHJ,    off 1 1   ; Group with independently numbered parens.
+RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 
 #*Trie Related (61..62)
 
@@ -158,9 +157,9 @@ GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs ar
 GOSTART     GOSTART,    no        ; recurse to start of pattern
 
 #*Named references (67..69)
-NREF        REF,        no-sv 1   ; Match some already matched string
-NREFF       REF,        no-sv 1   ; Match already matched string, folded
-NREFFL      REF,        no-sv 1   ; Match already matched string, folded in loc.
+NREF        REF,        no-sv 1 V ; Match some already matched string
+NREFF       REF,        no-sv 1 V ; Match already matched string, folded
+NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
 
 
 #*Special conditionals  (70..72)
@@ -187,10 +186,10 @@ KEEPS       KEEPS,      no        ; $& begins here.
 
 #*New charclass like patterns
 LNBREAK     LNBREAK,    none      ; generic newline pattern
-VERTWS      VERTWS,     none      ; vertical whitespace         (Perl 6)
-NVERTWS     NVERTWS,    none      ; not vertical whitespace     (Perl 6)
-HORIZWS     HORIZWS,    none      ; horizontal whitespace       (Perl 6)
-NHORIZWS    NHORIZWS,   none      ; not horizontal whitespace   (Perl 6)
+VERTWS      VERTWS,     none 0 S  ; vertical whitespace         (Perl 6)
+NVERTWS     NVERTWS,    none 0 S  ; not vertical whitespace     (Perl 6)
+HORIZWS     HORIZWS,    none 0 S  ; horizontal whitespace       (Perl 6)
+NHORIZWS    NHORIZWS,   none 0 S  ; not horizontal whitespace   (Perl 6)
 
 FOLDCHAR    FOLDCHAR,   codepoint 1 ; codepoint with tricky case folding properties.
 

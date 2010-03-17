@@ -24,7 +24,7 @@ use warnings;
 open DESC, 'regcomp.sym';
 
 my $ind = 0;
-my (@name,@rest,@type,@code,@args,@longj);
+my (@name,@rest,@type,@code,@args,@flags,@longj);
 my ($desc,$lastregop);
 while (<DESC>) {
     s/#.*$//;
@@ -37,8 +37,8 @@ while (<DESC>) {
     unless ($lastregop) {
         $ind++;
         ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+)\s*;\s*(.*)/;
-        ($type[$ind], $code[$ind], $args[$ind], $longj[$ind]) 
-          = split /[,\s]\s*/, $desc, 4;
+        ($type[$ind], $code[$ind], $args[$ind], $flags[$ind], $longj[$ind])
+          = split /[,\s]\s*/, $desc;
     } else {
         my ($type,@lists)=split /\s+/, $_;
         die "No list? $type" if !@lists;
@@ -78,6 +78,29 @@ my $tot = $ind;
 close DESC;
 die "Too many regexp/state opcodes! Maximum is 256, but there are $lastregop in file!"
     if $lastregop>256;
+
+sub process_flags {
+  my ($flag, $varname, $comment) = @_;
+  $comment = '' unless defined $comment;
+
+  $ind = 0;
+  my @selected;
+  while (++$ind <= $lastregop) {
+    push @selected, $name[$ind] if $flags[$ind] && $flags[$ind] eq $flag;
+  }
+  my $out_string = join ', ', @selected, 0;
+  $out_string =~ s/(.{1,70},) /$1\n    /g;
+  return $comment . <<"EOP";
+#ifndef DOINIT
+EXTCONST U8 PL_${varname}[];
+#else
+EXTCONST U8 PL_${varname}[] = {
+    $out_string
+};
+#endif /* DOINIT */
+
+EOP
+}
 
 my $tmp_h = 'regnodes.h-new';
 
@@ -236,6 +259,18 @@ print $out <<EOP;
 };
 #endif /* DOINIT */
 
+EOP
+
+print $out process_flags('V', 'varies', <<'EOC');
+/* The following have no fixed length. U8 so we can do strchr() on it. */
+EOC
+
+print $out process_flags('S', 'simple', <<'EOC');
+/* The following always have a length of 1. U8 we can do strchr() on it. */
+/* (Note that length 1 means "one character" under UTF8, not "one octet".) */
+EOC
+
+print $out <<EOP;
 /* ex: set ro: */
 EOP
 safer_close($out);

@@ -447,37 +447,6 @@ START_EXTERN_C
 #include "regnodes.h"
 #endif
 
-/* The following have no fixed length. U8 so we can do strchr() on it. */
-#ifndef DOINIT
-EXTCONST U8 PL_varies[];
-#else
-EXTCONST U8 PL_varies[] = {
-    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL,
-    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP,
-    NREF, NREFF, NREFFL,
-    0
-};
-#endif
-
-/* The following always have a length of 1. U8 we can do strchr() on it. */
-/* (Note that length 1 means "one character" under UTF8, not "one octet".) */
-#ifndef DOINIT
-EXTCONST U8 PL_simple[];
-#else
-EXTCONST U8 PL_simple[] = {
-    REG_ANY,	SANY,	CANY,
-    ANYOF,
-    ALNUM,	ALNUML,
-    NALNUM,	NALNUML,
-    SPACE,	SPACEL,
-    NSPACE,	NSPACEL,
-    DIGIT,	NDIGIT,
-    VERTWS,     NVERTWS,
-    HORIZWS,    NHORIZWS,
-    0
-};
-#endif
-
 #ifndef PLUGGABLE_RE_EXTENSION
 #ifndef DOINIT
 EXTCONST regexp_engine PL_core_reg_engine;
