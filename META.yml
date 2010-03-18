@@ -37,6 +37,7 @@ no_index:
     - dist/XSLoader
     - ext/Time-Local
     - lib/version
+    - win32
 
   file:
     - dist/IO/ChangeLog
@@ -81,6 +82,7 @@ no_index:
     - lib/Exporter.t
     - lib/Exporter/Heavy.pm
     - lib/newgetopt.pl
+    - lib/unicore/mktables
     - lib/version.pm
     - lib/version.pod
     - lib/version.t
@@ -92,4 +94,7 @@ no_index:
     - pod/pod2usage.PL
     - pod/podchecker.PL
     - pod/podselect.PL
+    - Porting/Maintainers.pm
+    - Porting/perldelta_template.pod
+    - TestInit.pm
 
