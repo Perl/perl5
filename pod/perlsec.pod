@@ -346,10 +346,15 @@ programs launched on someone else's behalf, like CGI programs.
 This is quite different, however, from not even trusting the writer of the
 code not to try to do something evil.  That's the kind of trust needed
 when someone hands you a program you've never seen before and says, "Here,
-run this."  For that kind of safety, check out the Safe module,
-included standard in the Perl distribution.  This module allows the
+run this."  For that kind of safety, you might want to check out the Safe
+module, included standard in the Perl distribution.  This module allows the
 programmer to set up special compartments in which all system operations
-are trapped and namespace access is carefully controlled.
+are trapped and namespace access is carefully controlled.  Safe should
+not be considered bullet-proof, though: it will not prevent the foreign
+code to set up infinite loops, allocate gigabytes of memory, or even
+abusing perl bugs to make the host interpreter crash or behave in
+unpredictable ways. In any case it's better avoided completely if you're
+really concerned about security.
 
 =head2 Security Bugs
 
