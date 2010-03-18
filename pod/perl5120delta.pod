@@ -199,6 +199,10 @@ on how to specify C<configure_requires> when creating a distribution for CPAN.
 
 The C<each> function can now operate on arrays.
 
+=head2 C<when> as a statement modifier
+
+C<when> is now allowed to be used as a statement modifier.
+
 =head2 C<$,> flexibility
 
 The variable C<$,> may now be tied.
@@ -1508,6 +1512,11 @@ C<keys> on empty hash is now faster.
 =item *
 
 C<if (%foo)> has been optimized to be faster than C<if (keys %foo)>.
+
+=item *
+
+The string repetition operator (C<$str x $num>) is now several times faster
+when C<$str> has length one or C<$num> is large.
 
 =item *
 
@@ -3023,7 +3032,7 @@ in a change of behaviour between 5.8.x and 5.10.0:
 
 Perl 5.12.0 represents approximately two years of development since
 Perl 5.10.0 and contains over 750,000 lines of changes across over
-3000 files from over 200 authors and committers.
+3,000 files from over 200 authors and committers.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
