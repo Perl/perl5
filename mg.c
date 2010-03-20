@@ -1701,12 +1701,33 @@ int
 Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR; dSP;
+    MAGIC *tmg;
+    SV    *val;
 
     PERL_ARGS_ASSERT_MAGIC_SETPACK;
 
+    /* in the code C<$tied{foo} = $val>, the "thing" that gets passed to
+     * STORE() is not $val, but rather a PVLV (the sv in this call), whose
+     * public flags indicate its value based on copying from $val. Doing
+     * mg_set() on the PVLV temporarily does SvMAGICAL_off(), then calls us.
+     * So STORE()'s $_[2] arg is a temporarily disarmed PVLV. This goes
+     * wrong if $val happened to be tainted, as sv hasn't got magic
+     * enabled, even though taint magic is in the chain. In which case,
+     * fake up a temporary tainted value (this is easier than temporarily
+     * re-enabling magic on sv). */
+
+    if (PL_tainting && (tmg = mg_find(sv, PERL_MAGIC_taint))
+	&& (tmg->mg_len & 1))
+    {
+	val = sv_mortalcopy(sv);
+	SvTAINTED_on(val);
+    }
+    else
+	val = sv;
+
     ENTER;
     PUSHSTACKi(PERLSI_MAGIC);
-    magic_methcall(sv, mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
+    magic_methcall(sv, mg, "STORE", G_SCALAR|G_DISCARD, 3, val);
     POPSTACK;
     LEAVE;
     return 0;

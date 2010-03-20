@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 302;
+plan tests => 307;
 
 $| = 1;
 
@@ -1316,6 +1316,35 @@ foreach my $ord (78, 163, 256) {
     # $! is used in a tainted expression, so gets tainted
     open my $fh, $tainted_path or $err= "$!";
     unlike($err, qr/^\d+$/, 'tainted $!');
+}
+
+{
+    # #6758: tainted values become untainted in tied hashes
+    #         (also applies to other value magic such as pos)
+
+
+    package P6758;
+
+    sub TIEHASH { bless {} }
+    sub TIEARRAY { bless {} }
+
+    my $i = 0;
+
+    sub STORE {
+	main::ok(main::tainted($_[1]), "tied arg1 tainted");
+	main::ok(main::tainted($_[2]), "tied arg2 tainted");
+        $i++;
+    }
+
+    package main;
+
+    my ($k,$v) = qw(1111 val);
+    taint_these($k,$v);
+    tie my @array, 'P6758';
+    tie my %hash , 'P6758';
+    $array[$k] = $v;
+    $hash{$k} = $v;
+    ok $i == 2, "tied STORE called correct number of times";
 }
 
 
