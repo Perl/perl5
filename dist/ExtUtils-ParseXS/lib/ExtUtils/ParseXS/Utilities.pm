@@ -15,6 +15,7 @@ our (@ISA, @EXPORT_OK);
   valid_proto_string
   process_typemaps
   make_targetable
+  map_type
 );
 
 =head1 NAME
@@ -391,6 +392,23 @@ sub make_targetable {
     $targetable{$key} = [$t, $with_size, $arg, $sarg] if $t;
   }
   return %targetable;
+}
+
+sub map_type {
+  my ($type, $varname, $hiertype) = @_;
+
+  # C++ has :: in types too so skip this
+  $type =~ tr/:/_/ unless $hiertype;
+  $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
+  if ($varname) {
+    if ($type =~ / \( \s* \* (?= \s* \) ) /xg) {
+      (substr $type, pos $type, 0) = " $varname ";
+    }
+    else {
+      $type .= "\t$varname";
+    }
+  }
+  return $type;
 }
 
 1;
