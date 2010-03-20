@@ -47,7 +47,6 @@ our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, );
 
 sub process_file {
 
-#print STDERR "ICANHAZSTDERR\n";
   # Allow for $package->process_file(%hash) in the future
   my ($pkg, %options) = @_ % 2 ? @_ : (__PACKAGE__, @_);
 
@@ -508,13 +507,12 @@ EOF
           # defined
 #          push @outlist, $name if $out_type =~ /OUTLIST$/;
           if ($out_type =~ /OUTLIST$/) {
-              print STDERR "matched OUTLIST, pushing \$name\n";
               if (defined $name) {
-                  print STDERR "name: $name\n";
+print STDERR "CRITICAL: matched OUTLIST, \$name: <$name>\n";
                   push @outlist, $name;
               }
               else {
-                  print STDERR "\$name is undefined\n";
+print STDERR "SOMEWHAT CRITICAL: matched OUTLIST, but \$name is undefined\n";
                   push @outlist, undef;
               }
           }
@@ -1122,13 +1120,12 @@ sub INPUT_handler {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
       # $name in line below is global ?
 #      $lengthof{$2} = $name;
-      print STDERR "Inside INPUT_handler\n";
       if (defined $name) {
-        print STDERR "name: $name\n";
+print STDERR "CRITICAL: Inside INPUT_handler: \$name defined as: <$name>\t\$2: <$2>\n";
         $lengthof{$2} = $name;
       }
       else {
-        print STDERR "\$name is undefined\n";
+print STDERR "CRITICAL: Inside INPUT_handler: \$name is undefined\t\$2: <$2>\n";
         $lengthof{$2} = undef;
       }
       $deferred .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
@@ -1761,6 +1758,7 @@ sub generate_init {
   $tk = $type_kind{$type};
   $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
   if ($tk eq 'T_PV' and exists $lengthof{$var}) {
+print STDERR "SOMEWHAT CRITICAL: Inside generate_init(): \$var <$var>\n";
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
