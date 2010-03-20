@@ -787,6 +787,10 @@ can be configured on a per-directory basis, although the default with
 "-Duserelocatableinc" is that everything is relocated. The initial
 install is done to the original configured prefix.
 
+This option is not compatible with the building of a shared libperl
+("-Duseshrplib"), because in that case perl is linked with an hard-coded
+rpath that points at the libperl.so, that cannot be relocated.
+
 =head2 Site-wide Policy settings
 
 After Configure runs, it stores a number of common site-wide "policy"
