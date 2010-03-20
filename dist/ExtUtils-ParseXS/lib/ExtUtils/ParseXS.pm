@@ -43,7 +43,7 @@ our (
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
   $RETVAL_code, $printed_name, $func_args, @XSStack, $ALIAS, 
 );
-our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, );
+our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
 
 sub process_file {
 
@@ -503,18 +503,8 @@ EOF
           my $out_type = $1;
           next if $out_type eq 'IN';
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
-          # $name in line below appears to a global not previously declared or
-          # defined
-#          push @outlist, $name if $out_type =~ /OUTLIST$/;
           if ($out_type =~ /OUTLIST$/) {
-              if (defined $name) {
-print STDERR "CRITICAL: matched OUTLIST, \$name: <$name>\n";
-                  push @outlist, $name;
-              }
-              else {
-print STDERR "SOMEWHAT CRITICAL: matched OUTLIST, but \$name is undefined\n";
-                  push @outlist, undef;
-              }
+              push @outlist, undef;
           }
           $in_out{$_} = $out_type;
         }
@@ -1118,16 +1108,7 @@ sub INPUT_handler {
     # Process the length(foo) declarations
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x) {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
-      # $name in line below is global ?
-#      $lengthof{$2} = $name;
-      if (defined $name) {
-print STDERR "CRITICAL: Inside INPUT_handler: \$name defined as: <$name>\t\$2: <$2>\n";
-        $lengthof{$2} = $name;
-      }
-      else {
-print STDERR "CRITICAL: Inside INPUT_handler: \$name is undefined\t\$2: <$2>\n";
-        $lengthof{$2} = undef;
-      }
+      $lengthof{$2} = undef;
       $deferred .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
     }
 
@@ -1645,7 +1626,7 @@ sub fetch_para {
 
   if ($lastline =~
       /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
-    $Module = $1;
+    my $Module = $1;
     $Package = defined($2) ? $2 : ''; # keep -w happy
     $Prefix  = defined($3) ? $3 : ''; # keep -w happy
     $Prefix = quotemeta $Prefix;
@@ -1743,22 +1724,26 @@ sub death {
 }
 
 sub generate_init {
-  local($type, $num, $var) = @_;
-  local($arg) = "ST(" . ($num - 1) . ")";
-  local($argoff) = $num - 1;
-  local($ntype);
-  local($tk);
+#  local($type, $num, $var) = @_;
+#  local($arg) = "ST(" . ($num - 1) . ")";
+  my ($type, $num, $var) = @_;
+  my $arg = "ST(" . ($num - 1) . ")";
+#  local($argoff) = $num - 1;
+#  local($ntype);
+#  local($tk);
+  my ($argoff, $ntype, $tk);
+  $argoff = $num - 1;
 
   $type = tidy_type($type);
   blurt("Error: '$type' not in typemap"), return
     unless defined($type_kind{$type});
 
   ($ntype = $type) =~ s/\s*\*/Ptr/g;
+  my $subtype;
   ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
   $tk = $type_kind{$type};
   $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
   if ($tk eq 'T_PV' and exists $lengthof{$var}) {
-print STDERR "SOMEWHAT CRITICAL: Inside generate_init(): \$var <$var>\n";
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
@@ -1768,13 +1753,13 @@ print STDERR "SOMEWHAT CRITICAL: Inside generate_init(): \$var <$var>\n";
   $type =~ tr/:/_/ unless $hiertype;
   blurt("Error: No INPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
     unless defined $input_expr{$tk};
-  $expr = $input_expr{$tk};
+  my $expr = $input_expr{$tk};
   if ($expr =~ /DO_ARRAY_ELEM/) {
     blurt("Error: '$subtype' not in typemap"), return
       unless defined($type_kind{$subtype});
     blurt("Error: No INPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
       unless defined $input_expr{$type_kind{$subtype}};
-    $subexpr = $input_expr{$type_kind{$subtype}};
+    my $subexpr = $input_expr{$type_kind{$subtype}};
     $subexpr =~ s/\$type/\$subtype/g;
     $subexpr =~ s/ntype/subtype/g;
     $subexpr =~ s/\$arg/ST(ix_$var)/g;
@@ -1824,10 +1809,13 @@ print STDERR "SOMEWHAT CRITICAL: Inside generate_init(): \$var <$var>\n";
 }
 
 sub generate_output {
-  local($type, $num, $var, $do_setmagic, $do_push) = @_;
-  local($arg) = "ST(" . ($num - ($num != 0)) . ")";
-  local($argoff) = $num - 1;
-  local($ntype);
+#  local($type, $num, $var, $do_setmagic, $do_push) = @_;
+#  local($arg) = "ST(" . ($num - ($num != 0)) . ")";
+  my ($type, $num, $var, $do_setmagic, $do_push) = @_;
+  my $arg = "ST(" . ($num - ($num != 0)) . ")";
+#  local($argoff) = $num - 1;
+#  local($ntype);
+  my $ntype;
 
   $type = tidy_type($type);
   if ($type =~ /^array\(([^,]*),(.*)\)/) {
@@ -1842,14 +1830,15 @@ sub generate_output {
       unless defined $output_expr{$type_kind{$type}};
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
+    my $subtype;
     ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-    $expr = $output_expr{$type_kind{$type}};
+    my $expr = $output_expr{$type_kind{$type}};
     if ($expr =~ /DO_ARRAY_ELEM/) {
       blurt("Error: '$subtype' not in typemap"), return
     unless defined($type_kind{$subtype});
       blurt("Error: No OUTPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
     unless defined $output_expr{$type_kind{$subtype}};
-      $subexpr = $output_expr{$type_kind{$subtype}};
+      my $subexpr = $output_expr{$type_kind{$subtype}};
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;
       $subexpr =~ s/\$var/${var}[ix_$var]/g;
