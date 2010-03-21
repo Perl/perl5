@@ -768,6 +768,14 @@ EOF
       }
       elsif ($gotRETVAL || $wantRETVAL) {
         my $t = $args{optimize} && $targetable{$type_kind{$ret_type}};
+        # Although the '$var' declared in the next line is never explicitly
+        # used within this 'elsif' block, commenting it out leads to
+        # disaster, starting with the first 'eval qq' inside the 'elsif' block
+        # below.
+        # It appears that this is related to the fact that at this point the
+        # value of $t is a reference to an array whose [2] element includes
+        # '$var' as a substring:
+        # <i> <> <(IV)$var>
         my $var = 'RETVAL';
         my $type = $ret_type;
     
