@@ -214,7 +214,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
-	    name = SvOK(*svp) ? savesvpv (*svp) : savepvs ("");
+	    name = (SvOK(*svp) || SvGMAGICAL(*svp)) ?
+			savesvpv (*svp) : savepvs ("");
 	    SAVEFREEPV(name);
 	}
 	else {
