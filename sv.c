@@ -10431,6 +10431,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    goto vector;
 	}
     }
+    SvTAINT(sv);
 }
 
 /* =========================================================================

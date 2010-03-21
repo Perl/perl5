@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 307;
+plan tests => 319;
 
 $| = 1;
 
@@ -1346,6 +1346,33 @@ foreach my $ord (78, 163, 256) {
     $hash{$k} = $v;
     ok $i == 2, "tied STORE called correct number of times";
 }
+
+# Bug RT #45167 the return value of sprintf sometimes wasn't tainted
+# when the args were tainted. This only occured on the first use of
+# sprintf; after that, its TARG has taint magic attached, so setmagic
+# at the end works.  That's why there are multiple sprintf's below, rather
+# than just one wrapped in an inner loop. Also, any plantext betwerrn
+# fprmat entires would correctly cause tainting to get set. so test with
+# "%s%s" rather than eg "%s %s".
+
+{
+    for my $var1 ($TAINT, "123") {
+	for my $var2 ($TAINT0, "456") {
+	    my @s;
+	    push @s, sprintf '%s', $var1, $var2;
+	    push @s, sprintf ' %s', $var1, $var2;
+	    push @s, sprintf '%s%s', $var1, $var2;
+	    for (0..2) {
+		ok( !(
+			tainted($s[$_]) xor
+			(tainted($var1) || ($_==2 && tainted($var2)))
+		    ),
+		    "sprintf fmt$_, '$var1', '$var2'");
+	    }
+	}
+    }
+}
+
 
 
 # This may bomb out with the alarm signal so keep it last
