@@ -18,6 +18,40 @@ use File::Basename;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Utils;
 
+# File::Spec and Cwd might return different values for a
+# symlinked directory, so we need to be careful.
+sub paths_are_same {
+    my($have, $want, $name) = @_;
+
+    $have = _resolve_symlinks($have);
+    $want = _resolve_symlinks($want);
+
+    my $builder = Test::More->builder;
+    return $builder->like( $have, qr/\Q$want/i, $name );
+}
+
+# Resolve any symlinks in a path
+sub _resolve_symlinks {
+    my $path = shift;
+    my($vol, $dirs, $file) = File::Spec->splitpath($path);
+
+    my $resolved = File::Spec->catpath( $vol, "", "" );
+
+    for my $dir (File::Spec->splitdir($dirs)) {
+        # Resolve the next part of the path
+        my $next = File::Spec->catdir( $resolved, $dir );
+        $next = eval { readlink $next } || $next;
+
+        # If its absolute, use it.
+        # Otherwise tack it onto the end of the previous path.
+        $resolved = File::Spec->file_name_is_absolute($next)
+                       ? $next
+                       : File::Spec->catdir( $resolved, $next );
+    }
+
+    return File::Spec->catfile($resolved, $file);
+}
+
 my $Cwd     = File::Spec->rel2abs(cwd());
 my $Class   = 'CPANPLUS::Internals::Utils';
 my $Dir     = 'foo';
@@ -35,13 +69,12 @@ rmdir $Dir  if -d $Dir;
 ### test _chdir ###
 {   ok( $Class->_chdir( dir => $Dir),   "Chdir to '$Dir'" );    
 
-    my $abs_re = quotemeta File::Spec->rel2abs(File::Spec->catdir($Cwd,$Dir));
-    like( File::Spec->rel2abs(cwd()), qr/$abs_re/i,
+    my $abs = File::Spec->rel2abs(File::Spec->catdir($Cwd,$Dir));
+    paths_are_same( File::Spec->rel2abs(cwd()), $abs,
                                         "   Cwd() is '$Dir'");  
 
-    my $cwd_re = quotemeta $Cwd;
     ok( $Class->_chdir( dir => $Cwd),   "Chdir back to '$Cwd'" );
-    like( File::Spec->rel2abs(cwd()), qr/$cwd_re/i,
+    paths_are_same( File::Spec->rel2abs(cwd()), $Cwd,
                                         "   Cwd() is '$Cwd'" );
 }
 
