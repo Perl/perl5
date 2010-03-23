@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 319;
+plan tests => 321;
 
 $| = 1;
 
@@ -1128,13 +1128,19 @@ TERNARY_CONDITIONALS: {
 
 {
     my @a;
-    local $::TODO = 1;
-    $a[0] = $^X;
-    my $i = 0;
-    while($a[0]=~ m/(.)/g ) {
-	last if $i++ > 10000;
-    }
-    cmp_ok $i, '<', 10000, "infinite m//g";
+    $a[0] = $^X . '-';
+    $a[0]=~ m/(.)/g;
+    cmp_ok pos($a[0]), '>', 0, "infinite m//g on arrays (aelemfast)";
+
+    my $i = 1;
+    $a[$i] = $^X . '-';
+    $a[$i]=~ m/(.)/g;
+    cmp_ok pos($a[$i]), '>', 0, "infinite m//g on arrays (aelem)";
+
+    my %h;
+    $h{a} = $^X . '-';
+    $h{a}=~ m/(.)/g;
+    cmp_ok pos($h{a}), '>', 0, "infinite m//g on hashes (helem)";
 }
 
 SKIP:

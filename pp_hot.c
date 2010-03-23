@@ -658,7 +658,7 @@ PP(pp_aelemfast)
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
     if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
-	sv = sv_mortalcopy(sv);
+	mg_get(sv);
     PUSHs(sv);
     RETURN;
 }
@@ -893,7 +893,7 @@ PP(pp_rv2av)
 		SV ** const svp = av_fetch(av, i, FALSE);
 		/* See note in pp_helem, and bug id #27839 */
 		SP[i+1] = svp
-		    ? SvGMAGICAL(*svp) ? sv_mortalcopy(*svp) : *svp
+		    ? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
 		    : &PL_sv_undef;
 	    }
 	}
@@ -1840,14 +1840,20 @@ PP(pp_helem)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }
     sv = (svp ? *svp : &PL_sv_undef);
-    /* This makes C<local $tied{foo} = $tied{foo}> possible.
-     * Pushing the magical RHS on to the stack is useless, since
-     * that magic is soon destined to be misled by the local(),
-     * and thus the later pp_sassign() will fail to mg_get() the
-     * old value.  This should also cure problems with delayed
-     * mg_get()s.  GSAR 98-07-03 */
+    /* Originally this did a conditional C<sv = sv_mortalcopy(sv)>; this
+     * was to make C<local $tied{foo} = $tied{foo}> possible.
+     * However, it seems no longer to be needed for that purpose, and
+     * introduced a new bug: stuff like C<while ($hash{taintedval} =~ /.../g>
+     * would loop endlessly since the pos magic is getting set on the
+     * mortal copy and lost. However, the copy has the effect of
+     * triggering the get magic, and losing it altogether made things like
+     * c<$tied{foo};> in void context no longer do get magic, which some
+     * code relied on. Also, delayed triggering of magic on @+ and friends
+     * meant the original regex may be out of scope by now. So as a
+     * compromise, do the get magic here. (The MGf_GSKIP flag will stop it
+     * being called too many times). */
     if (!lval && SvGMAGICAL(sv))
-	sv = sv_mortalcopy(sv);
+	mg_get(sv);
     PUSHs(sv);
     RETURN;
 }
@@ -2983,7 +2989,7 @@ PP(pp_aelem)
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
-	sv = sv_mortalcopy(sv);
+	mg_get(sv);
     PUSHs(sv);
     RETURN;
 }
