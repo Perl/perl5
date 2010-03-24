@@ -1561,6 +1561,26 @@ specific rule.
 SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
 that includes libdbm.nfs (which includes dbmclose()) may be available.
 
+=item error: too few arguments to function 'dbmclose'
+
+Building ODBM_File on some (Open)SUSE distributions might run into this
+error, as the header file is broken. There are two ways to deal with this
+
+ 1. Disable the use of ODBM_FILE
+
+    Configure ... -Dnoextensions=ODBM_File
+
+ 2. Fix the header file, somewhat like this:
+
+    --- a/usr/include/dbm.h  2010-03-24 08:54:59.000000000 +0100
+    +++ b/usr/include/dbm.h  2010-03-24 08:55:15.000000000 +0100
+    @@ -59,4 +59,4 @@ extern datum  firstkey __P((void));
+
+     extern datum   nextkey __P((datum key));
+
+    -extern int     dbmclose __P((DBM *));
+    +extern int     dbmclose __P((void));
+
 =item Note (probably harmless): No library found for -lsomething
 
 If you see such a message during the building of an extension, but
