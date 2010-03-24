@@ -774,6 +774,22 @@ Individual committers should create topic branches under
 B<yourname>/B<some_descriptive_name>. Other committers should check
 with a topic branch's creator before making any change to it.
 
+A remote topic branch can be created as follows. First, create and
+checkout a local branch. Do some work on it, then when you're ready, push
+the local branch to the remote repository and update the local branch
+to make it track.
+
+    $ branch="$user/$topic"
+    $ git checkout -b $branch
+    ... do local edits, commits etc ...
+    $ git push origin $branch:refs/heads/$branch
+    $ git config branch.$branch.remote origin
+    $ git config branch.$branch.merge refs/heads/$branch
+
+Note that there are many ways to create remote branches, this is just one
+relatively straightforward way that should work with most git versions and
+configurations.
+
 If you are not the creator of B<yourname>/B<some_descriptive_name>, you
 might sometimes find that the original author has edited the branch's
 history. There are lots of good reasons for this. Sometimes, an author
