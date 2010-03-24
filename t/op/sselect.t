@@ -32,12 +32,17 @@ eval {select $blank, $blank, "a", 0};
 like ($@, qr/^Modification of a read-only value attempted/);
 
 my $sleep = 3;
+# Actual sleep time on Windows may be rounded down to an integral
+# multiple of the system clock tick interval.  Clock tick interval
+# is configurable, but usually about 15.625 milliseconds.
+my $fudge = $^O eq "MSWin32" ? 0.1 : 0;
+
 my $t = time;
 select(undef, undef, undef, $sleep);
-ok(time-$t >= $sleep, "$sleep seconds have passed");
+ok(time-$t >= $sleep-$fudge, "$sleep seconds have passed");
 
 my $empty = "";
 vec($empty,0,1) = 0;
 $t = time;
 select($empty, undef, undef, $sleep);
-ok(time-$t >= $sleep, "$sleep seconds have passed");
+ok(time-$t >= $sleep-$fudge, "$sleep seconds have passed");
