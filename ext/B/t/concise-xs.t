@@ -218,8 +218,8 @@ my $testpkgs = {
 		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
 			   sockatmark sockaddr_family pack_sockaddr_un
 			   pack_sockaddr_in inet_ntoa inet_aton
-			   inet_ntop inet_pton
 			   /],
+            # skip inet_ntop and inet_pton as they're not exported by default
 		},
 };
 

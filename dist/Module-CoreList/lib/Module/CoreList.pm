@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.27';
+$VERSION = '2.28';
 
 =head1 NAME
 
@@ -13881,7 +13881,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'SelectSaver'           => '1.02',
 	'SelfLoader'            => '1.17',
 	'Shell'                 => '0.72_01',
-	'Socket'                => '1.86',
+	'Socket'                => '1.87',
 	'Storable'              => '2.22',
 	'Switch'                => '2.16',
 	'Symbol'                => '1.07',
