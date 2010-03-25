@@ -69,7 +69,7 @@ number format. See L<"Version number formats"> for details.
 
 A new operator, C<...>, nicknamed the Yada Yada operator, has been added.
 It is intended to mark placeholder code that is not yet implemented.
-See L<perlop/"Yada Yada Operator">. (chromatic)
+See L<perlop/"Yada Yada Operator">.
 
 =head2 Implicit strictures
 
@@ -783,7 +783,7 @@ Version 2.024 has been added to the Perl core.
 =item C<overloading>
 
 C<overloading> allows you to lexically disable or enable overloading
-for some or all operations. (Yuval Kogman)
+for some or all operations.
 
 Version 0.001 has been added to the Perl core.
 
@@ -1789,7 +1789,7 @@ It's now possible to override C<PERL5OPT> and friends in F<t/TEST>
 Several tests that have the potential to hang forever if they fail now
 incorporate a "watchdog" functionality that will kill them after a timeout,
 which helps ensure that C<make test> and C<make test_harness> run to
-completion automatically. (Jerry Hedden).
+completion automatically.
 
 
 =back
@@ -2135,7 +2135,7 @@ can now do
 
 to suppress only those, but not other syntax-related warnings. Warnings where
 prototypes are changed, ignored, or not met are still in the C<prototype>
-category as before. (Matt S. Trout)
+category as before.
 
 =item *
 
@@ -2274,9 +2274,8 @@ search path.
 
 =item *
 
-F<h2xs> no longer incorrectly treats enum values like macros (Daniel Burr).
-It also now handles C++ style comments (C<//>) properly in enums. (A patch from
-Rainer Weikusat was used; Daniel Burr also proposed a similar fix).
+F<h2xs> no longer incorrectly treats enum values like macros.
+It also now handles C++ style comments (C<//>) properly in enums. 
 
 =item *
 
