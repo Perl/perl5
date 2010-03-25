@@ -1897,9 +1897,7 @@ F<t/op/reg_posixcc.t> checks that POSIX character classes behave consistently.
 
 =item *
 
-F<t/op/re.t>
-
-checks that exportable C<re> functions in F<universal.c> work.
+F<t/op/re.t> checks that exportable C<re> functions in F<universal.c> work.
 
 =item *
 
