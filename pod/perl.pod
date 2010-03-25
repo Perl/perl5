@@ -156,7 +156,6 @@ For ease of access, the Perl manual has been split up into several sections.
     perldoc		Look up Perl documentation in Pod format
 
     perlhist		Perl history records
-    perl5120delta	Perl changes in version 5.12.0
     perldelta		Perl changes since previous version
     perl5115delta	Perl changes in version 5.11.5
     perl5114delta	Perl changes in version 5.11.4
@@ -238,6 +237,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlvms		Perl notes for VMS
     perlvos		Perl notes for Stratus VOS
     perlwin32		Perl notes for Windows
+
 
 On a Unix-like system, these documentation files will usually also be
 available as manpages for use with the F<man> program.
