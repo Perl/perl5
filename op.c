@@ -8680,7 +8680,7 @@ Perl_peep(pTHX_ register OP *o)
             ){	
                 OP * nop = o;
                 OP * lop = o;
-                if (!(nop->op_flags && OPf_WANT_VOID)) {
+                if (!((nop->op_flags & OPf_WANT) == OPf_WANT_VOID)) {
                     while (nop && nop->op_next) {
                         switch (nop->op_next->op_type) {
                             case OP_NOT:
@@ -8698,7 +8698,7 @@ Perl_peep(pTHX_ register OP *o)
                         }
                     }            
                 }
-                if (lop->op_flags && OPf_WANT_VOID) {
+                if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
                     if (fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV) 
                         cLOGOP->op_first = opt_scalarhv(fop);
                     if (sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)) 
