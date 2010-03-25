@@ -52,7 +52,7 @@ As it requires VERSION to be a numeric literal or v-string
 literal, it can be statically parsed by toolchain modules
 without C<eval> the way MM-E<gt>parse_version does for C<$VERSION = ...>
 
-=item *
+=back
 
 It does not break old code with only C<package NAME>, but code that uses
 C<package NAME VERSION> will need to be restricted to perl 5.12.0 or newer
@@ -60,7 +60,6 @@ This is analogous to the change to C<open> from two-args to three-args.
 Users requiring the latest Perl will benefit, and perhaps after several
 years, it will become a standard practice.
 
-=back
 
 However, C<package NAME VERSION> requires a new, 'strict' version
 number format. See L<"Version number formats"> for details.
@@ -2276,7 +2275,7 @@ search path.
 =item *
 
 F<h2xs> no longer incorrectly treats enum values like macros (Daniel Burr).
-It also now handles C++ style constants (C<//>) properly in enums. (A patch from
+It also now handles C++ style comments (C<//>) properly in enums. (A patch from
 Rainer Weikusat was used; Daniel Burr also proposed a similar fix).
 
 =item *
@@ -2306,7 +2305,8 @@ out F<perlthanks>. It will make the developers smile.
 =item *
 
 Perl's developers have fixed bugs in F<a2p> having to do with the
-C<match()> operator in list context.
+C<match()> operator in list context.  Additionally, F<a2p> no longer
+generates code that uses the C<$[> variable.
 
 =back
 
