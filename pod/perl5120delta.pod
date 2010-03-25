@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 perl5120delta - what is new for perl v5.12.0
