@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 321;
+plan tests => 325;
 
 $| = 1;
 
@@ -1379,6 +1379,22 @@ foreach my $ord (78, 163, 256) {
     }
 }
 
+
+# Bug RT #67962: old tainted $1 gets treated as tainted
+# in next untainted # match
+
+{
+    use re 'taint';
+    "abc".$TAINT =~ /(.*)/; # make $1 tainted
+    ok(tainted($1), '$1 should be tainted');
+
+    my $untainted = "abcdef";
+    ok(!tainted($untainted), '$untainted should be untainted');
+    $untainted =~ s/(abc)/$1/;
+    ok(!tainted($untainted), '$untainted should still be untainted');
+    $untainted =~ s/(abc)/x$1/;
+    ok(!tainted($untainted), '$untainted should yet still be untainted');
+}
 
 
 # This may bomb out with the alarm signal so keep it last
