@@ -104,7 +104,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perluniintro	Perl Unicode introduction
     perlunicode 	Perl Unicode support
     perlunifaq		Perl Unicode FAQ
-    perluniprops	Complete index of Unicode Version 5.1.0 properties
+    perluniprops	Index of Unicode Version 5.2.0 properties in Perl
     perlunitut		Perl Unicode tutorial
     perlebcdic		Considerations for running Perl on EBCDIC platforms
 
