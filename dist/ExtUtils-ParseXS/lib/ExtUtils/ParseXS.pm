@@ -675,12 +675,24 @@ EOF
         if (defined($static) or $func_name eq 'new') {
           print "\tchar *";
           $var_types{"CLASS"} = "char *";
-          &generate_init("char *", 1, "CLASS", undef);
+#          &generate_init("char *", 1, "CLASS", undef);
+          generate_init( {
+            type          => "char *",
+            num           => 1,
+            var           => "CLASS",
+            printed_name  => undef,
+          } );
         }
         else {
           print "\t$class *";
           $var_types{"THIS"} = "$class *";
-          &generate_init("$class *", 1, "THIS", undef);
+#          &generate_init("$class *", 1, "THIS", undef);
+          generate_init( {
+            type          => "$class *",
+            num           => 1,
+            var           => "THIS",
+            printed_name  => undef,
+          } );
         }
       }
 
@@ -759,8 +771,14 @@ EOF
       undef %outargs;
       process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
-      &generate_output($var_types{$_}, $args_match{$_}, $_, $DoSetMagic)
-        for grep $in_out{$_} =~ /OUT$/, keys %in_out;
+#      &generate_output($var_types{$_}, $args_match{$_}, $_, $DoSetMagic)
+      generate_output( {
+        type        => $var_types{$_},
+        num         => $args_match{$_},
+        var         => $_,
+        do_setmagic => $DoSetMagic,
+        do_push     => undef,
+      } ) for grep $in_out{$_} =~ /OUT$/, keys %in_out;
 
       # all OUTPUT done, so now push the return value on the stack
       if ($gotRETVAL && $RETVAL_code) {
@@ -801,7 +819,14 @@ EOF
         }
         else {
           # RETVAL almost never needs SvSETMAGIC()
-          &generate_output($ret_type, 0, 'RETVAL', 0);
+#          &generate_output($ret_type, 0, 'RETVAL', 0);
+          generate_output( {
+            type        => $ret_type,
+            num         => 0,
+            var         => 'RETVAL',
+            do_setmagic => 0,
+            do_push     => undef,
+          } );
         }
       }
 
@@ -811,7 +836,14 @@ EOF
       print "\tXSprePUSH;" if $c and not $prepush_done;
       print "\tEXTEND(SP,$c);\n" if $c;
       $xsreturn += $c;
-      generate_output($var_types{$_}, $num++, $_, 0, 1) for @outlist;
+#      generate_output($var_types{$_}, $num++, $_, 0, 1) for @outlist;
+      generate_output( {
+        type        => $var_types{$_},
+        num         => $num++,
+        var         => $_,
+        do_setmagic => 0,
+        do_push     => 1,
+      } ) for @outlist;
 
       # do cleanup
       process_keyword("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
@@ -1169,7 +1201,13 @@ sub INPUT_handler {
     }
     elsif ($var_num) {
       # generate initialization code
-      &generate_init($var_type, $var_num, $var_name, $printed_name);
+#      &generate_init($var_type, $var_num, $var_name, $printed_name);
+      generate_init( {
+        type          => $var_type,
+        num           => $var_num,
+        var           => $var_name,
+        printed_name  => $printed_name,
+      } );
     }
     else {
       print ";\n";
@@ -1203,7 +1241,14 @@ sub OUTPUT_handler {
       print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $DoSetMagic;
     }
     else {
-      &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
+#      &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
+      generate_output( {
+        type        => $var_types{$outarg},
+        num         => $var_num,
+        var         => $outarg,
+        do_setmagic => $DoSetMagic,
+        do_push     => undef,
+      } );
     }
     delete $in_out{$outarg}     # No need to auto-OUTPUT
       if exists $in_out{$outarg} and $in_out{$outarg} =~ /OUT$/;
@@ -1699,7 +1744,13 @@ sub output_init {
   }
   else {
     if (  $init =~ s/^\+//  &&  $num  ) {
-      &generate_init($type, $num, $var, $printed_name);
+#      &generate_init($type, $num, $var, $printed_name);
+      generate_init( {
+        type          => $type,
+        num           => $num,
+        var           => $var,
+        printed_name  => $printed_name,
+      } );
     }
     elsif ($printed_name) {
       print ";\n";
@@ -1733,7 +1784,14 @@ sub death {
 }
 
 sub generate_init {
-  my ($type, $num, $var, $printed_name) = @_;
+#  my ($type, $num, $var, $printed_name) = @_;
+  my $argsref = shift;
+  my ($type, $num, $var, $printed_name) = (
+    $argsref->{type},
+    $argsref->{num},
+    $argsref->{var},
+    $argsref->{printed_name},
+  );
   my $arg = "ST(" . ($num - 1) . ")";
   my ($argoff, $ntype, $tk);
   $argoff = $num - 1;
@@ -1813,7 +1871,15 @@ sub generate_init {
 }
 
 sub generate_output {
-  my ($type, $num, $var, $do_setmagic, $do_push) = @_;
+#  my ($type, $num, $var, $do_setmagic, $do_push) = @_;
+  my $argsref = shift;
+  my ($type, $num, $var, $do_setmagic, $do_push) = (
+    $argsref->{type},
+    $argsref->{num},
+    $argsref->{var},
+    $argsref->{do_setmagic},
+    $argsref->{do_push}
+  );
   my $arg = "ST(" . ($num - ($num != 0)) . ")";
   my $ntype;
 
