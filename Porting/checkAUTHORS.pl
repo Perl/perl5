@@ -24,7 +24,7 @@ $0 --percentage ...                         # show rankings as percentages
 $0 --cumulative ...                         # show rankings cumulatively
 $0 --reverse ...                            # show rankings in reverse
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
-Generate changes with git log --pretty=fuller --name-status rev1..rev2
+Generate changes with git log --pretty=fuller rev1..rev2
 EOS
 }
 

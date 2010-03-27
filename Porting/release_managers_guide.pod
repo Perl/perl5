@@ -365,7 +365,7 @@ Update F<AUTHORS>, using the C<Porting/checkAUTHORS.pl> script, and if
 necessary, update the script to include new alias mappings for porters
 already in F<AUTHORS>
 
-	$ git log | perl Porting/checkAUTHORS.pl --acknowledged AUTHORS -
+    $ git log --pretty=fuller | perl Porting/checkAUTHORS.pl --acknowledged AUTHORS -
 
 =back
 
