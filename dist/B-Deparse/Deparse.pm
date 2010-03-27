@@ -1593,11 +1593,11 @@ sub unop {
     my($op, $cx, $name) = @_;
     my $kid;
     if ($op->flags & OPf_KIDS) {
+	$kid = $op->first;
  	if (not $name) {
  	    # this deals with 'boolkeys' right now
  	    return $self->deparse($kid,$cx);
  	}
-	$kid = $op->first;
 	my $builtinname = $name;
 	$builtinname =~ /^CORE::/ or $builtinname = "CORE::$name";
 	if (defined prototype($builtinname)

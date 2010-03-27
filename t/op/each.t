@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 52;
+plan tests => 54;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -216,6 +216,8 @@ for my $k (qw(each keys values)) {
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
     like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+    my @arr=%foo&&%foo;
+    is(@arr,10,"Got expected number of elements in list context");
 }    
 {
     our %foo=(1..10);
@@ -233,4 +235,6 @@ for my $k (qw(each keys values)) {
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
     like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+    my @arr=%foo&&%foo;
+    is(@arr,10,"Got expected number of elements in list context");
 }    
