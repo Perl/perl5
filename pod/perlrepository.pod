@@ -725,7 +725,7 @@ you should clone:
 The same patch as above, using github might look like this:
 
   % cd perl-github
-  % git remote add upstream git://github.com/github/perl.git
+  % git remote add upstream git://perl5.git.perl.org/perl.git
   % git pull upstream blead
   % git checkout -b orange
   % perl -pi -e 's{Leon Brocard}{Orange Brocard}' AUTHORS
