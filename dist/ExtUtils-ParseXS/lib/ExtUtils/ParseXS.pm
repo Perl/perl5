@@ -1176,8 +1176,9 @@ sub INPUT_handler {
     }
     $var_num = $args_match{$var_name};
 
-    $proto_arg[$var_num] = ProtoString($var_type)
-      if $var_num;
+    if ($var_num) {
+      $proto_arg[$var_num] = $proto_letter{$var_type} || "\$";
+    }
     $func_args =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
       or $in_out{$var_name} and $in_out{$var_name} =~ /^OUT/
@@ -1626,12 +1627,6 @@ sub PopFile() {
 EOF
 
   return 1;
-}
-
-sub ProtoString ($) {
-  my ($type) = @_;
-
-  $proto_letter{$type} or "\$";
 }
 
 sub check_cpp {
