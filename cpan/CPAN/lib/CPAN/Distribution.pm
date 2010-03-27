@@ -5,7 +5,7 @@ use CPAN::Distroprefs;
 use CPAN::InfoObj;
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "1.9456";
+$VERSION = "1.9456_01";
 
 # Accessors
 sub cpan_comment {
@@ -2576,7 +2576,10 @@ sub unsat_prereq {
                      or $need_version eq '0'    # "==" would trigger warning when not numeric
                      or $need_version eq "undef"
                     )) {
-                next NEED;
+                unless ($nmo->inst_deprecated) {                               
+                    next NEED;                                                 
+                }                                                              
+
             }
 
             $available_version = $nmo->available_version;
