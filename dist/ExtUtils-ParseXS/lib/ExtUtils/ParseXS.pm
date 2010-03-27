@@ -29,8 +29,6 @@ our @EXPORT_OK = qw(
 our $VERSION = '3';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
-# use strict;  # One of these days ...
-
 our (
   $ProtoUsed, @InitFileCode, $FH, $proto_re, $Overload, $errors, $Fallback, 
   $hiertype, $WantPrototypes, $WantVersionChk, $WantLineNumbers, $filepathname, 
