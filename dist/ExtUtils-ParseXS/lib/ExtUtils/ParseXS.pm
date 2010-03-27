@@ -1886,9 +1886,9 @@ sub generate_output {
     my $expr = $output_expr{$type_kind{$type}};
     if ($expr =~ /DO_ARRAY_ELEM/) {
       blurt("Error: '$subtype' not in typemap"), return
-    unless defined($type_kind{$subtype});
+        unless defined($type_kind{$subtype});
       blurt("Error: No OUTPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
-    unless defined $output_expr{$type_kind{$subtype}};
+        unless defined $output_expr{$type_kind{$subtype}};
       my $subexpr = $output_expr{$type_kind{$subtype}};
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;
