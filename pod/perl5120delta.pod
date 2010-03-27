@@ -3112,6 +3112,16 @@ versions of Perl that helped make Perl 5.12.0 better. For a more complete
 list of all of Perl's historical contributors, please see the C<AUTHORS>
 file in the Perl 5.12.0 distribution.
 
+Our "retired" pumpkings Nicholas Clark and Rafael Garcia-Suarez
+deserve special thanks for their brilliant and substantive ongoing
+contributions. Nicholas personally authored over 30% of the patches
+since 5.10.0. Rafael comes in second in patch authorship with 11%,
+but is first by a long shot in committing patches authored by others,
+pushing 44% of the commits since 5.10.0 in this category, often after
+providing considerable coaching to the patch authors. These statistics
+in no way comprise all of their contributions, but express in shorthand
+that we couldn't have done it without them.
+
 Many of the changes included in this version originated in the CPAN
 modules included in Perl's core. We're grateful to the entire CPAN
 community for helping Perl to flourish.
