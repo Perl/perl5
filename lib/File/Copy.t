@@ -14,7 +14,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 461;
+plan tests => 463;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -223,6 +223,17 @@ for my $cross_partition_test (0..1) {
 
   unlink "file-$$" or die $!;
   unlink "copy-$$" or die $!;
+
+  # RT #73714 copy to file with leading whitespace failed
+
+  open(F, ">file-$$") or die $!;
+  close F;
+  copy "file-$$", " copy-$$";
+  warn "XXX\n";
+  ok -e " copy-$$", "copy with leading whitespace";
+  unlink "file-$$" or die "unlink: $!";
+  unlink " copy-$$" or die "unlink: $!";
+
 }
 
 

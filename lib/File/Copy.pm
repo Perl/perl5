@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.17';
+$VERSION = '2.18';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -242,8 +242,7 @@ sub copy {
     if ($to_a_handle) {
        $to_h = $to;
     } else {
-	$to = _protect($to) if $to =~ /^\s/s;
-	$to_h = \do { local *FH };
+	$to_h = \do { local *FH }; # XXX is this line obsolete?
 	open $to_h, ">", $to or goto fail_open2;
 	binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
