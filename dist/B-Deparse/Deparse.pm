@@ -23,7 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.95;
+$VERSION = 0.96;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
