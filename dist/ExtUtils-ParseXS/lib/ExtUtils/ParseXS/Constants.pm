@@ -29,5 +29,11 @@ our $proto_re     = "[" . quotemeta('\$%&*@;[]') . "]";
 our $Overload     = 0;
 our $errors       = 0;
 our $Fallback     = '&PL_sv_undef';
+our @keywords     = qw( 
+  REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE
+  OUTPUT CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE
+  VERSIONCHECK INCLUDE INCLUDE_COMMAND SCOPE INTERFACE
+  INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD FALLBACK
+);
 
 1;

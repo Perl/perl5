@@ -163,12 +163,9 @@ sub process_file {
   my $END = "!End!\n\n";        # "impossible" keyword (multiple newline)
 
   # Match an XS keyword
-  $BLOCK_re = '\s*(' . join('|', qw(
-    REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE
-    OUTPUT CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE
-    VERSIONCHECK INCLUDE INCLUDE_COMMAND SCOPE INTERFACE
-    INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD FALLBACK
-    )) . "|$END)\\s*:";
+  $BLOCK_re = '\s*(' .
+    join('|' => @ExtUtils::ParseXS::Constants::keywords) .
+    "|$END)\\s*:";
 
   our ($C_group_rex, $C_arg);
   # Group in C (no support for comments or literals)
