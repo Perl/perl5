@@ -92,6 +92,8 @@ my $seen=0;
 while (<PLIN>) {
     if (/\t,NULL/ and $seen) {
        while (my $c = shift @ARGV){
+	    $c =~ s|\\|\\\\|g;
+	    $c =~ s|"|\\"|g;
             print PLOUT qq{\t,"$c"\n};
        }
     }
