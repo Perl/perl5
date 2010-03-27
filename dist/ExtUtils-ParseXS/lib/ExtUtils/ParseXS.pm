@@ -21,10 +21,12 @@ use ExtUtils::ParseXS::Utilities qw(
   map_type
 );
 
-our (@ISA, @EXPORT_OK, $VERSION);
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(process_file);
-$VERSION = '3';
+our @ISA = qw(Exporter);
+our @EXPORT_OK = qw(
+  process_file
+  report_error_count
+);
+our $VERSION = '3';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # use strict;  # One of these days ...
@@ -1074,7 +1076,8 @@ EOF
   return 1;
 }
 
-sub errors { $errors }
+#sub errors { $errors }
+sub report_error_count { $errors }
 
 # Input:  ($_, @line) == unparsed input.
 # Output: ($_, @line) == (rest of line, following lines).

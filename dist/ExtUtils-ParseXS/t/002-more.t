@@ -58,7 +58,7 @@ SKIP: {
     sub new{ bless {}, shift }
   };
   is $@, '';
-  is ExtUtils::ParseXS::errors(), 0, 'ExtUtils::ParseXS::errors()';
+  is ExtUtils::ParseXS::report_error_count(), 0, 'ExtUtils::ParseXS::errors()';
 
   is $XSMore::boot_ok, 100, 'the BOOT keyword';
 
