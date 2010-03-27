@@ -675,7 +675,6 @@ EOF
         if (defined($static) or $func_name eq 'new') {
           print "\tchar *";
           $var_types{"CLASS"} = "char *";
-#          &generate_init("char *", 1, "CLASS", undef);
           generate_init( {
             type          => "char *",
             num           => 1,
@@ -686,7 +685,6 @@ EOF
         else {
           print "\t$class *";
           $var_types{"THIS"} = "$class *";
-#          &generate_init("$class *", 1, "THIS", undef);
           generate_init( {
             type          => "$class *",
             num           => 1,
@@ -771,7 +769,6 @@ EOF
       undef %outargs;
       process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
-#      &generate_output($var_types{$_}, $args_match{$_}, $_, $DoSetMagic)
       generate_output( {
         type        => $var_types{$_},
         num         => $args_match{$_},
@@ -819,7 +816,6 @@ EOF
         }
         else {
           # RETVAL almost never needs SvSETMAGIC()
-#          &generate_output($ret_type, 0, 'RETVAL', 0);
           generate_output( {
             type        => $ret_type,
             num         => 0,
@@ -836,7 +832,6 @@ EOF
       print "\tXSprePUSH;" if $c and not $prepush_done;
       print "\tEXTEND(SP,$c);\n" if $c;
       $xsreturn += $c;
-#      generate_output($var_types{$_}, $num++, $_, 0, 1) for @outlist;
       generate_output( {
         type        => $var_types{$_},
         num         => $num++,
@@ -1197,11 +1192,15 @@ sub INPUT_handler {
       }
     }
     elsif ($var_init =~ /\S/) {
-      &output_init($var_type, $var_num, $var_name, $var_init, $printed_name);
+      output_init( {
+        type          => $var_type,
+        num           => $var_num,
+        var           => $var_name,
+        init          => $var_init,
+        printed_name  => $printed_name,
+      } );
     }
     elsif ($var_num) {
-      # generate initialization code
-#      &generate_init($var_type, $var_num, $var_name, $printed_name);
       generate_init( {
         type          => $var_type,
         num           => $var_num,
@@ -1241,7 +1240,6 @@ sub OUTPUT_handler {
       print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $DoSetMagic;
     }
     else {
-#      &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
       generate_output( {
         type        => $var_types{$outarg},
         num         => $var_num,
@@ -1730,7 +1728,14 @@ sub fetch_para {
 }
 
 sub output_init {
-  my ($type, $num, $var, $init, $printed_name) = @_;
+  my $argsref = shift;
+  my ($type, $num, $var, $init, $printed_name) = (
+    $argsref->{type},
+    $argsref->{num},
+    $argsref->{var},
+    $argsref->{init},
+    $argsref->{printed_name}
+  );
   my $arg = "ST(" . ($num - 1) . ")";
 
   if (  $init =~ /^=/  ) {
@@ -1744,7 +1749,6 @@ sub output_init {
   }
   else {
     if (  $init =~ s/^\+//  &&  $num  ) {
-#      &generate_init($type, $num, $var, $printed_name);
       generate_init( {
         type          => $type,
         num           => $num,
@@ -1766,25 +1770,7 @@ sub output_init {
   }
 }
 
-sub Warn {
-  # work out the line number
-  my $warn_line_number = $line_no[@line_no - @line -1];
-
-  print STDERR "@_ in $filename, line $warn_line_number\n";
-}
-
-sub blurt {
-  Warn @_;
-  $errors++
-}
-
-sub death {
-  Warn @_;
-  exit 1;
-}
-
 sub generate_init {
-#  my ($type, $num, $var, $printed_name) = @_;
   my $argsref = shift;
   my ($type, $num, $var, $printed_name) = (
     $argsref->{type},
@@ -1871,7 +1857,6 @@ sub generate_init {
 }
 
 sub generate_output {
-#  my ($type, $num, $var, $do_setmagic, $do_push) = @_;
   my $argsref = shift;
   my ($type, $num, $var, $do_setmagic, $do_push) = (
     $argsref->{type},
@@ -1955,6 +1940,23 @@ sub generate_output {
       print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     }
   }
+}
+
+sub Warn {
+  # work out the line number
+  my $warn_line_number = $line_no[@line_no - @line -1];
+
+  print STDERR "@_ in $filename, line $warn_line_number\n";
+}
+
+sub blurt {
+  Warn @_;
+  $errors++
+}
+
+sub death {
+  Warn @_;
+  exit 1;
 }
 
 1;
