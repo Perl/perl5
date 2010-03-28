@@ -287,7 +287,7 @@ X<\g> X<\k> X<\K> X<backreference>
     \R       Linebreak
 
 See L<perlrecharclass/Backslashed sequences> for details on
-on C<\w>, C<\W>, C<\s>, C<\S>, C<\d>, C<\D>, C<\p>, C<\P>, C<\N>, C<\v>, C<\V>,
+C<\w>, C<\W>, C<\s>, C<\S>, C<\d>, C<\D>, C<\p>, C<\P>, C<\N>, C<\v>, C<\V>,
 C<\h>, and C<\H>.
 See L<perlrebackslash/Misc> for details on C<\R> and C<\X>.
 
@@ -322,7 +322,7 @@ The following Posix-style character classes are available:
  [[:lower:]]  Any lowercase character.
  [[:print:]]  Any printable character, including a space.
  [[:punct:]]  Any graphical character excluding "word" characters.
- [[:space:]]  Any whitespace character. "\s" plus the vertical tab ("\cK").
+ [[:space:]]  Any whitespace character. "\s" plus vertical tab ("\cK").
  [[:upper:]]  Any uppercase character.
  [[:word:]]   A Perl extension, equivalent to "\w".
  [[:xdigit:]] Any hexadecimal digit.
