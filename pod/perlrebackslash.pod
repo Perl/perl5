@@ -264,7 +264,7 @@ as a character without special meaning by the regex engine, and will match
 
 Mnemonic: heI<x>adecimal.
 
-=head4 Examples
+=head4 Examples (assuming an ASCII platform)
 
  $str = "Perl";
  $str =~ /\x50/;    # Match, "\x50" is "P".

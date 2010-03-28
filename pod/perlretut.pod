@@ -184,7 +184,7 @@ bytes.  Here are some examples of escapes:
     "1000\t2000" =~ m(0\t2)   # matches
     "1000\n2000" =~ /0\n20/   # matches
     "1000\t2000" =~ /\000\t2/ # doesn't match, "0" ne "\000"
-    "cat"        =~ /\143\x61\x74/ # matches, but a weird way to spell cat
+    "cat"   =~ /\143\x61\x74/ # matches in ASCII, but a weird way to spell cat
 
 If you've been around Perl a while, all this talk of escape sequences
 may seem familiar.  Similar escape sequences are used in double-quoted
