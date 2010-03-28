@@ -35,7 +35,7 @@ our (
   %type_kind, %proto_letter, $Package, 
   @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
   %argtype_seen, %in_out, %lengthof, 
-  @line_no, $func_name, $Full_func_name, $Packprefix, $Packid,  
+  @line_no, $func_name, $Full_func_name, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
   $RETVAL_code, $printed_name, $func_args, @XSStack, $ALIAS, 
@@ -422,7 +422,7 @@ EOF
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
-    ($pname = $func_name) =~ s/^($self->{Prefix})?/$Packprefix/;
+    ($pname = $func_name) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
     my $clean_func_name;
     ($clean_func_name = $func_name) =~ s/^$self->{Prefix}//;
     $Full_func_name = "${Packid}_$clean_func_name";
@@ -1307,7 +1307,7 @@ sub GetAliases {
     my $orig_alias = $alias;
 
     # check for optional package definition in the alias
-    $alias = $Packprefix . $alias if $alias !~ /::/;
+    $alias = $self->{Packprefix} . $alias if $alias !~ /::/;
 
     # check for duplicate alias name & duplicate value
     Warn("Warning: Ignoring duplicate alias '$orig_alias'")
@@ -1676,8 +1676,8 @@ sub fetch_para {
     $self->{Prefix} = quotemeta $self->{Prefix};
     ($Module_cname = $Module) =~ s/\W/_/g;
     ($Packid = $Package) =~ tr/:/_/;
-    $Packprefix = $Package;
-    $Packprefix .= "::" if $Packprefix ne "";
+    $self->{Packprefix} = $Package;
+    $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
     $self->{lastline} = "";
   }
 
