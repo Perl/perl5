@@ -111,8 +111,8 @@ as C<Not in [].>
 =head3  Fixed characters
 
 A handful of characters have a dedicated I<character escape>. The following
-table shows them, along with their code points (in decimal and hex), their
-ASCII name, the control escape (see below) and a short description.
+table shows them, along with their ASCII code points (in decimal and hex),
+their ASCII name, the control escape (see below) and a short description.
 
  Seq.  Code Point  ASCII   Cntr    Description.
        Dec    Hex
@@ -210,7 +210,7 @@ Note that a character that is expressed as an octal escape is considered
 as a character without special meaning by the regex engine, and will match
 "as is".
 
-=head4 Examples
+=head4 Examples (assuming an ASCII platform)
 
  $str = "Perl";
  $str =~ /\120/;    # Match, "\120" is "P".
@@ -253,7 +253,7 @@ matched as is.
 
 =head3 Hexadecimal escapes
 
-Hexadecimal escapes start with C<\x> and are then either followed by
+Hexadecimal escapes start with C<\x> and are then either followed by a
 two digit hexadecimal number, or a hexadecimal number of arbitrary length
 surrounded by curly braces. The hexadecimal number is the code point of
 the character you want to express.
@@ -316,15 +316,15 @@ the character classes are written as a backslash sequence. We will briefly
 discuss those here; full details of character classes can be found in
 L<perlrecharclass>.
 
-C<\w> is a character class that matches any I<word> character (letters,
-digits, underscore). C<\d> is a character class that matches any digit,
+C<\w> is a character class that matches any single I<word> character (letters,
+digits, underscore). C<\d> is a character class that matches any decimal digit,
 while the character class C<\s> matches any white space character.
 New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical white space characters.
 
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
 character classes that match any character that isn't a word character,
-digit, white space, horizontal white space or vertical white space.
+digit, white space, horizontal white space nor vertical white space.
 
 Mnemonics: I<w>ord, I<d>igit, I<s>pace, I<h>orizontal, I<v>ertical.
 
@@ -533,10 +533,10 @@ C<\R> matches a I<generic newline>, that is, anything that is considered
 a newline by Unicode. This includes all characters matched by C<\v>
 (vertical white space), and the multi character sequence C<"\x0D\x0A">
 (carriage return followed by a line feed, aka the network newline, or
-the newline used in Windows text files). C<\R> is equivalent with
-C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a more than one character,
-it cannot be put inside a bracketed character class; C</[\R]/> is an error.
-C<\R> was introduced in perl 5.10.0.
+the newline used in Windows text files). C<\R> is equivalent to
+C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a sequence of more than one
+character, it cannot be put inside a bracketed character class; C</[\R]/> is an
+error; use C<\v> instead.  C<\R> was introduced in perl 5.10.0.
 
 Mnemonic: none really. C<\R> was picked because PCRE already uses C<\R>,
 and more importantly because Unicode recommends such a regular expression
