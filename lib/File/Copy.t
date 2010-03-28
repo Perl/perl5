@@ -229,7 +229,6 @@ for my $cross_partition_test (0..1) {
   open(F, ">file-$$") or die $!;
   close F;
   copy "file-$$", " copy-$$";
-  warn "XXX\n";
   ok -e " copy-$$", "copy with leading whitespace";
   unlink "file-$$" or die "unlink: $!";
   unlink " copy-$$" or die "unlink: $!";
