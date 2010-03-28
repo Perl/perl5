@@ -31,10 +31,10 @@ takes away the special meaning (if any) of the character following it.
 
 If the character following the backslash is an ASCII letter or an ASCII digit,
 then the sequence may be special; if so, it's listed below. A few letters have
-not been used yet, and escaping them with a backslash is safe for now, but a
-future version of Perl may assign a special meaning to it. However, if you
-have warnings turned on, Perl will issue a warning if you use such a sequence.
-[1].
+not been used yet, so escaping them with a backslash doesn't change them to be
+special.  A future version of Perl may assign a special meaning to them, so if
+you have warnings turned on, Perl will issue a warning if you use such a
+sequence.  [1].
 
 It is however guaranteed that backslash or escape sequences never have a
 punctuation character following the backslash, not now, and not in a future
@@ -528,6 +528,7 @@ L<named or numbered character|/Named or numbered characters>.
 Mnemonic: Complement of I<\n>.
 
 =item \R
+X<\R>
 
 C<\R> matches a I<generic newline>, that is, anything that is considered
 a newline by Unicode. This includes all characters matched by C<\v>
@@ -543,6 +544,7 @@ and more importantly because Unicode recommends such a regular expression
 metacharacter, and suggests C<\R> as the notation.
 
 =item \X
+X<\X>
 
 This matches a Unicode I<extended grapheme cluster>.
 
