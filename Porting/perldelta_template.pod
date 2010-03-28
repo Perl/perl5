@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
