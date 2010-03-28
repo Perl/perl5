@@ -226,13 +226,15 @@ for my $cross_partition_test (0..1) {
 
   # RT #73714 copy to file with leading whitespace failed
 
+  TODO: {
+  local $TODO = 'spaces in filenames require DECC$EFS_CHARSET enabled' if $^O eq 'VMS';
   open(F, ">file-$$") or die $!;
   close F;
   copy "file-$$", " copy-$$";
   ok -e " copy-$$", "copy with leading whitespace";
   unlink "file-$$" or die "unlink: $!";
   unlink " copy-$$" or die "unlink: $!";
-
+  }
 }
 
 
