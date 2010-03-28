@@ -33,10 +33,8 @@ our (
   @InitFileCode, $FH, 
   %IncludedFiles, %input_expr, %output_expr, 
   %type_kind, %proto_letter, $Package, 
-  $Prefix, @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
-  $processing_arg_with_types, %argtype_seen, %in_out, %lengthof, 
-  $proto_in_this_xsub, $scope_in_this_xsub, $interface, 
-  $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
+  @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
+  %argtype_seen, %in_out, %lengthof, 
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
@@ -233,7 +231,7 @@ EOM
       die ("Error: Unterminated pod in $self->{filename}, line $podstartline\n")
         unless $self->{lastline};
     }
-    last if ($Package, $Prefix) =
+    last if ($Package, $self->{Prefix}) =
       /^MODULE\s*=\s*[\w:]+(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
     print $_;
@@ -370,19 +368,19 @@ EOF
     undef(%defaults);
     undef(%arg_list);
     undef(@proto_arg);
-    undef($processing_arg_with_types);
+    undef($self->{processing_arg_with_types});
     undef(%argtype_seen);
     undef(@outlist);
     undef(%in_out);
     undef(%lengthof);
-    undef($proto_in_this_xsub);
-    undef($scope_in_this_xsub);
-    undef($interface);
+    undef($self->{proto_in_this_xsub});
+    undef($self->{scope_in_this_xsub});
+    undef($self->{interface});
     undef($prepush_done);
-    $interface_macro = 'XSINTERFACE_FUNC';
-    $interface_macro_set = 'XSINTERFACE_FUNC_SET';
-    $ProtoThisXSUB = $self->{WantPrototypes};
-    $ScopeThisXSUB = 0;
+    $self->{interface_macro} = 'XSINTERFACE_FUNC';
+    $self->{interface_macro_set} = 'XSINTERFACE_FUNC_SET';
+    $self->{ProtoThisXSUB} = $self->{WantPrototypes};
+    $self->{ScopeThisXSUB} = 0;
     $xsreturn = 0;
 
     $_ = shift(@line);
@@ -424,9 +422,9 @@ EOF
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
-    ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
+    ($pname = $func_name) =~ s/^($self->{Prefix})?/$Packprefix/;
     my $clean_func_name;
-    ($clean_func_name = $func_name) =~ s/^$Prefix//;
+    ($clean_func_name = $func_name) =~ s/^$self->{Prefix}//;
     $Full_func_name = "${Packid}_$clean_func_name";
     if ($Is_VMS) {
       $Full_func_name = $SymSet->addsym($Full_func_name);
@@ -664,7 +662,7 @@ EOF
       INPUT_handler();
       process_keyword("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
 
-      print Q(<<"EOF") if $ScopeThisXSUB;
+      print Q(<<"EOF") if $self->{ScopeThisXSUB};
 #   ENTER;
 #   [[
 EOF
@@ -710,7 +708,7 @@ EOF
         if (@fake_INPUT or @fake_INPUT_pre) {
           unshift @line, @fake_INPUT_pre, @fake_INPUT, $_;
           $_ = "";
-          $processing_arg_with_types = 1;
+          $self->{processing_arg_with_types} = 1;
           INPUT_handler();
         }
         print $deferred;
@@ -720,7 +718,7 @@ EOF
         if (check_keyword("PPCODE")) {
           print_section();
           death ("PPCODE must be last thing") if @line;
-          print "\tLEAVE;\n" if $ScopeThisXSUB;
+          print "\tLEAVE;\n" if $self->{ScopeThisXSUB};
           print "\tPUTBACK;\n\treturn;\n";
         }
         elsif (check_keyword("CODE")) {
@@ -754,7 +752,7 @@ EOF
           }
           $func_name =~ s/^\Q$args{'s'}//
             if exists $args{'s'};
-          $func_name = 'XSFUNCTION' if $interface;
+          $func_name = 'XSFUNCTION' if $self->{interface};
           print "$func_name($func_args);\n";
         }
       }
@@ -841,10 +839,10 @@ EOF
       # do cleanup
       process_keyword("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
-      print Q(<<"EOF") if $ScopeThisXSUB;
+      print Q(<<"EOF") if $self->{ScopeThisXSUB};
 #   ]]
 EOF
-      print Q(<<"EOF") if $ScopeThisXSUB and not $PPCODE;
+      print Q(<<"EOF") if $self->{ScopeThisXSUB} and not $PPCODE;
 #   LEAVE;
 EOF
 
@@ -893,13 +891,13 @@ EOF
     $proto = "";
 
     # Build the prototype string for the xsub
-    if ($ProtoThisXSUB) {
+    if ($self->{ProtoThisXSUB}) {
       $newXS = "newXSproto_portable";
 
-      if ($ProtoThisXSUB eq 2) {
+      if ($self->{ProtoThisXSUB} eq 2) {
         # User has specified empty prototype
       }
-      elsif ($ProtoThisXSUB eq 1) {
+      elsif ($self->{ProtoThisXSUB} eq 1) {
         my $s = ';';
         if ($min_args < $num_args)  {
           $s = '';
@@ -912,7 +910,7 @@ EOF
       }
       else {
         # User has specified a prototype
-        $proto = $ProtoThisXSUB;
+        $proto = $self->{ProtoThisXSUB};
       }
       $proto = qq{, "$proto"};
     }
@@ -933,12 +931,12 @@ EOF
 #        apply_attrs_string("$Package", cv, "@Attributes", 0);
 EOF
     }
-    elsif ($interface) {
+    elsif ($self->{interface}) {
       while ( my ($yname, $value) = each %Interfaces) {
         $yname = "$Package\::$yname" unless $yname =~ /::/;
         push(@InitFileCode, Q(<<"EOF"));
 #        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$proto);
-#        $interface_macro_set(cv,$value);
+#        $self->{interface_macro_set}(cv,$value);
 EOF
       }
     }
@@ -1157,7 +1155,7 @@ sub INPUT_handler {
     # Check for duplicate definitions
     blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
       if $arg_list{$var_name}++
-    or defined $argtype_seen{$var_name} and not $processing_arg_with_types;
+    or defined $argtype_seen{$var_name} and not $self->{processing_arg_with_types};
 
     $thisdone |= $var_name eq "THIS";
     $retvaldone |= $var_name eq "RETVAL";
@@ -1264,13 +1262,13 @@ sub INTERFACE_MACRO_handler() {
 
   trim_whitespace($in);
   if ($in =~ /\s/) {        # two
-    ($interface_macro, $interface_macro_set) = split ' ', $in;
+    ($self->{interface_macro}, $self->{interface_macro_set}) = split ' ', $in;
   }
   else {
-    $interface_macro = $in;
-    $interface_macro_set = 'UNKNOWN_CVT'; # catch later
+    $self->{interface_macro} = $in;
+    $self->{interface_macro_set} = 'UNKNOWN_CVT'; # catch later
   }
-  $interface = 1;        # local
+  $self->{interface} = 1;        # local
   $Interfaces = 1;        # global
 }
 
@@ -1281,13 +1279,13 @@ sub INTERFACE_handler() {
 
   foreach (split /[\s,]+/, $in) {
     my $iface_name = $_;
-    $iface_name =~ s/^$Prefix//;
+    $iface_name =~ s/^$self->{Prefix}//;
     $Interfaces{$iface_name} = $_;
   }
   print Q(<<"EOF");
-#    XSFUNCTION = $interface_macro($ret_type,cv,XSANY.any_dptr);
+#    XSFUNCTION = $self->{interface_macro}($ret_type,cv,XSANY.any_dptr);
 EOF
-  $interface = 1;        # local
+  $self->{interface} = 1;        # local
   $Interfaces = 1;        # global
 }
 
@@ -1410,41 +1408,41 @@ sub PROTOTYPE_handler () {
   my $specified;
 
   death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-    if $proto_in_this_xsub++;
+    if $self->{proto_in_this_xsub}++;
 
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
     next unless /\S/;
     $specified = 1;
     trim_whitespace($_);
     if ($_ eq 'DISABLE') {
-      $ProtoThisXSUB = 0;
+      $self->{ProtoThisXSUB} = 0;
     }
     elsif ($_ eq 'ENABLE') {
-      $ProtoThisXSUB = 1;
+      $self->{ProtoThisXSUB} = 1;
     }
     else {
       # remove any whitespace
       s/\s+//g;
       death("Error: Invalid prototype '$_'")
         unless valid_proto_string($_);
-      $ProtoThisXSUB = C_string($_);
+      $self->{ProtoThisXSUB} = C_string($_);
     }
   }
 
   # If no prototype specified, then assume empty prototype ""
-  $ProtoThisXSUB = 2 unless $specified;
+  $self->{ProtoThisXSUB} = 2 unless $specified;
 
   $self->{ProtoUsed} = 1;
 }
 
 sub SCOPE_handler () {
   death("Error: Only 1 SCOPE declaration allowed per xsub")
-    if $scope_in_this_xsub++;
+    if $self->{scope_in_this_xsub}++;
 
   trim_whitespace($_);
   death ("Error: SCOPE: ENABLE/DISABLE")
       unless /^(ENABLE|DISABLE)\b/i;
-  $ScopeThisXSUB = ( uc($1) eq 'ENABLE' );
+  $self->{ScopeThisXSUB} = ( uc($1) eq 'ENABLE' );
 }
 
 sub PROTOTYPES_handler () {
@@ -1674,8 +1672,8 @@ sub fetch_para {
       /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
     my $Module = $1;
     $Package = defined($2) ? $2 : ''; # keep -w happy
-    $Prefix  = defined($3) ? $3 : ''; # keep -w happy
-    $Prefix = quotemeta $Prefix;
+    $self->{Prefix}  = defined($3) ? $3 : ''; # keep -w happy
+    $self->{Prefix} = quotemeta $self->{Prefix};
     ($Module_cname = $Module) =~ s/\W/_/g;
     ($Packid = $Package) =~ tr/:/_/;
     $Packprefix = $Package;
@@ -1811,7 +1809,7 @@ sub generate_init {
     $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
   }
   if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-    $ScopeThisXSUB = 1;
+    $self->{ScopeThisXSUB} = 1;
   }
   if (defined($defaults{$var})) {
     $expr =~ s/(\t+)/$1    /g;
@@ -1831,7 +1829,7 @@ sub generate_init {
     }
     warn $@ if $@;
   }
-  elsif ($ScopeThisXSUB or $expr !~ /^\s*\$var =/) {
+  elsif ($self->{ScopeThisXSUB} or $expr !~ /^\s*\$var =/) {
     if ($printed_name) {
       print ";\n";
     }
