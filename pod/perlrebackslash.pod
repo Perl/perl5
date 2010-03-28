@@ -78,8 +78,8 @@ as C<Not in [].>
  \f                Form feed.
  \g{}, \g1         Named, absolute or relative backreference.  Not in [].
  \G                Pos assertion.  Not in [].
- \h                Character class for horizontal white space.
- \H                Character class for non horizontal white space.
+ \h                Character class for horizontal whitespace.
+ \H                Character class for non horizontal whitespace.
  \k{}, \k<>, \k''  Named backreference.  Not in [].
  \K                Keep the stuff left of \K.  Not in [].
  \l                Lowercase next character.  Not in [].
@@ -92,13 +92,13 @@ as C<Not in [].>
  \Q                Quotemeta till \E.  Not in [].
  \r                Return character.
  \R                Generic new line.  Not in [].
- \s                Character class for white space.
- \S                Character class for non white space.
+ \s                Character class for whitespace.
+ \S                Character class for non whitespace.
  \t                Tab character.
  \u                Titlecase next character.  Not in [].
  \U                Uppercase till \E.  Not in [].
- \v                Character class for vertical white space.
- \V                Character class for non vertical white space.
+ \v                Character class for vertical whitespace.
+ \V                Character class for non vertical whitespace.
  \w                Character class for word characters.
  \W                Character class for non-word characters.
  \x{}, \x00        Hexadecimal escape sequence.
@@ -318,13 +318,13 @@ L<perlrecharclass>.
 
 C<\w> is a character class that matches any single I<word> character (letters,
 digits, underscore). C<\d> is a character class that matches any decimal digit,
-while the character class C<\s> matches any white space character.
+while the character class C<\s> matches any whitespace character.
 New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
-and vertical white space characters.
+and vertical whitespace characters.
 
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
 character classes that match any character that isn't a word character,
-digit, white space, horizontal white space nor vertical white space.
+digit, whitespace, horizontal whitespace nor vertical whitespace.
 
 Mnemonics: I<w>ord, I<d>igit, I<s>pace, I<h>orizontal, I<v>ertical.
 
@@ -531,7 +531,7 @@ Mnemonic: Complement of I<\n>.
 
 C<\R> matches a I<generic newline>, that is, anything that is considered
 a newline by Unicode. This includes all characters matched by C<\v>
-(vertical white space), and the multi character sequence C<"\x0D\x0A">
+(vertical whitespace), and the multi character sequence C<"\x0D\x0A">
 (carriage return followed by a line feed, aka the network newline, or
 the newline used in Windows text files). C<\R> is equivalent to
 C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a sequence of more than one
