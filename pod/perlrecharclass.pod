@@ -126,7 +126,7 @@ that is not considered horizontal whitespace.
 
 C<\N> is new in 5.12, and is experimental.  It, like the dot, will match any
 character that is not a newline. The difference is that C<\N> will not be
-influenced by the single line C</s> regular expression modifier. (Note that,
+influenced by the single line C</s> regular expression modifier.  Note that
 there is a second meaning of C<\N> when of the form C<\N{...}>.  This form is
 for named characters.  See L<charnames> for those.  If C<\N> is followed by an
 opening brace and something that is not a quantifier, perl will assume that a
@@ -150,7 +150,7 @@ Details are discussed in L<perlrebackslash>.
 Note that unlike C<\s>, C<\d> and C<\w>, C<\h> and C<\v> always match
 the same characters, regardless whether the source string is in UTF-8
 format or not. The set of characters they match is also not influenced
-by locale or EBCDIC code page.
+by locale nor EBCDIC code page.
 
 One might think that C<\s> is equivalent to C<[\h\v]>. This is not true.  The
 vertical tab (C<"\x0b">) is not matched by C<\s>, it is however considered
@@ -212,12 +212,13 @@ use C<\d+>; to match a word, use C<\w+>.
 
 =head3 Unicode Properties
 
-C<\pP> and C<\p{Prop}> are character classes to match characters that
-fit given Unicode classes. One letter classes can be used in the C<\pP>
-form, with the class name following the C<\p>, otherwise, braces are required.
-There is a single form, which is just the property name enclosed in the braces,
-and a compound form which looks like C<\p{name=value}>, which means to match
-if the property "name" for the character has the particular "value".
+C<\pP> and C<\p{Prop}> are character classes to match characters that fit given
+Unicode properties.  One letter property names can be used in the C<\pP> form,
+with the property name following the C<\p>, otherwise, braces are required.
+When using braces, there is a single form, which is just the property name
+enclosed in the braces, and a compound form which looks like C<\p{name=value}>,
+which means to match if the property "name" for the character has the particular
+"value".
 For instance, a match for a number can be written as C</\pN/> or as
 C</\p{Number}/>, or as C</\p{Number=True}/>.
 Lowercase letters are matched by the property I<Lowercase_Letter> which
@@ -263,7 +264,7 @@ L<perlunicode/User-Defined Character Properties>.
 
 The third form of character class you can use in Perl regular expressions
 is the bracketed form. In its simplest form, it lists the characters
-that may be matched inside square brackets, like this: C<[aeiou]>.
+that may be matched, surrounded by square brackets, like this: C<[aeiou]>.
 This matches one of C<a>, C<e>, C<i>, C<o> or C<u>.  Like the other
 character classes, exactly one character will be matched. To match
 a longer string consisting of characters mentioned in the character
@@ -322,9 +323,9 @@ number.
 A C<[> is not special inside a character class, unless it's the start
 of a POSIX character class (see below). It normally does not need escaping.
 
-A C<]> is either the end of a POSIX character class (see below), or it
-signals the end of the bracketed character class. Normally it needs
-escaping if you want to include a C<]> in the set of characters.
+A C<]> is normally either the end of a POSIX character class (see below), or it
+signals the end of the bracketed character class.  If you want to include a
+C<]> in the set of characters, you must generally escape it.
 However, if the C<]> is the I<first> (or the second if the first
 character is a caret) character of a bracketed character class, it
 does not denote the end of the class (as you cannot have an empty class)
@@ -335,7 +336,7 @@ Examples:
 
  "+"   =~ /[+?*]/     #  Match, "+" in a character class is not special.
  "\cH" =~ /[\b]/      #  Match, \b inside in a character class
-                      #  is equivalent with a backspace.
+                      #  is equivalent to a backspace.
  "]"   =~ /[][]/      #  Match, as the character class contains.
                       #  both [ and ].
  "[]"  =~ /[[]]/      #  Match, the pattern contains a character class
@@ -361,16 +362,16 @@ a platform that uses a different character set, such as EBCDIC.
 If a hyphen in a character class cannot syntactically be part of a range, for
 instance because it is the first or the last character of the character class,
 or if it immediately follows a range, the hyphen isn't special, and will be
-considered a character that may be matched. You have to escape the hyphen with
-a backslash if you want to have a hyphen in your set of characters to be
-matched, and its position in the class is such that it could be considered part
-of a range.
+considered a character that may be matched literally. You have to escape the
+hyphen with a backslash if you want to have a hyphen in your set of characters
+to be matched, and its position in the class is such that it could be
+considered part of a range.
 
 Examples:
 
  [a-z]       #  Matches a character that is a lower case ASCII letter.
- [a-fz]      #  Matches any letter between 'a' and 'f' (inclusive) or the
-             #  letter 'z'.
+ [a-fz]      #  Matches any letter between 'a' and 'f' (inclusive) or
+             #  the letter 'z'.
  [-z]        #  Matches either a hyphen ('-') or the letter 'z'.
  [a-f-m]     #  Matches any letter between 'a' and 'f' (inclusive), the
              #  hyphen ('-'), or the letter 'm'.
@@ -422,14 +423,15 @@ of a range.
 
 =head3 Posix Character Classes
 X<character class> X<\p> X<\p{}>
-fix
 X<alpha> X<alnum> X<ascii> X<blank> X<cntrl> X<digit> X<graph>
 X<lower> X<print> X<punct> X<space> X<upper> X<word> X<xdigit>
 
 Posix character classes have the form C<[:class:]>, where I<class> is
 name, and the C<[:> and C<:]> delimiters. Posix character classes only appear
 I<inside> bracketed character classes, and are a convenient and descriptive
-way of listing a group of characters. Be careful about the syntax,
+way of listing a group of characters, though they currently suffer from
+portability issues (see below and L<Locale, EBCDIC, Unicode and UTF-8>).  Be
+careful about the syntax,
 
  # Correct:
  $string =~ /[[:alpha:]]/
@@ -457,7 +459,7 @@ Perl recognizes the following POSIX character classes:
  graph  Any printable character, excluding a space.  See Note [3] below.
  lower  Any lowercase character ("[a-z]").
  print  Any printable character, including a space.  See Note [4] below.
- punct  Any graphical character excluding "word" characters.  See Note [5]
+ punct  Any graphical character excluding "word" characters.  Note [5].
  space  Any whitespace character. "\s" plus the vertical tab ("\cK").
  upper  Any uppercase character ("[A-Z]").
  word   A Perl extension ("[A-Za-z0-9_]"), equivalent to "\w".
@@ -506,7 +508,7 @@ disagree with this proposal, send email to C<perl5-porters@perl.org>.
    alpha      \p{PosixAlpha}       \p{Alpha}
    alnum      \p{PosixAlnum}       \p{Alnum}
    ascii      \p{ASCII}          
-   blank      \p{PosixBlank}       \p{Blank} =
+   blank      \p{PosixBlank}       \p{Blank} =             [1]
                                    \p{HorizSpace}  \h      [1]
    cntrl      \p{PosixCntrl}       \p{Cntrl}               [2]
    digit      \p{PosixDigit}       \p{Digit}       \d
@@ -533,9 +535,9 @@ the terminal somehow: for example newline and backspace are control characters.
 In the ASCII range, characters whose ordinals are between 0 and 31 inclusive,
 plus 127 (C<DEL>) are control characters.
 
-On EBCDIC platforms, it is likely that the code page will define this character
-class to be the counterparts to the ASCII controls, plus the controls that in
-Unicode have ordinals from 128 through 139.
+On EBCDIC platforms, it is likely that the code page will define C<[[:cntrl:]]>
+to be the EBCDIC equivalents of the ASCII controls, plus the controls
+that in Unicode have ordinals from 128 through 139.
 
 =item [3]
 
@@ -555,14 +557,12 @@ C<[-!"#$%&'()*+,./:;<=E<gt>?@[\\\]^_`{|}~]> (although if a locale is in effect,
 it could alter the behavior of C<[[:punct:]]>).
 
 When the matching string is in UTF-8 format, C<[[:punct:]]> matches the above
-set, plus whatever C<\p{Punct}> matches beyond the ASCII range.  It matches
-more than what C<\p{Punct}> matches in the ASCII range, because the POSIX
-definition of "Punct" includes more than what Unicode calls "Punct"; namely, it
-includes what Unicode calls "Symbol".  In other words, the Posix C<[[:punct:]]>
-lumps the Unicode "Punct" and "Symbol" together.
-
-This character class does not match any characters of Unicode type "Symbol"
-outside the ASCII range when the matching string is in UTF-8 format.
+set, plus what C<\p{Punct}> matches.  This is different than strictly matching
+according to C<\p{Punct}>, because the above set includes characters that aren't
+considered punctuation by Unicode, but rather "symbols".  Another way to say it
+is that for a UTF-8 string, C<[[:punct:]]> matches all the characters that
+Unicode considers to be punctuation, plus all the ASCII-range characters that
+Unicode considers to be symbols.
 
 =item [6]
 
@@ -581,9 +581,10 @@ Some examples:
      POSIX         ASCII-range     Full-range  backslash
                     Unicode         Unicode    sequence
  -----------------------------------------------------
- [[:^digit:]]   \P{PosixDigit}     \P{Digit}     \D
+ [[:^digit:]]   \P{PosixDigit}     \P{Digit}      \D
  [[:^space:]]   \P{PosixSpace}     \P{Space}
- [[:^word:]]    \P{PerlWord}       \P{Word}      \W
+                \P{PerlSpace}      \P{SpacePerl}  \S
+ [[:^word:]]    \P{PerlWord}       \P{Word}       \W
 
 =head4 [= =] and [. .]
 
@@ -597,13 +598,15 @@ such a construct will lead to an error.
  /[[:digit:]]/            # Matches a character that is a digit.
  /[01[:lower:]]/          # Matches a character that is either a
                           # lowercase letter, or '0' or '1'.
- /[[:digit:][:^xdigit:]]/ # Matches a character that can be anything,
-                          # but the letters 'a' to 'f' in either case.
-                          # This is because the character class contains
-                          # all digits, and anything that isn't a
-                          # hex digit, resulting in a class containing
-                          # all characters, but the letters 'a' to 'f'
-                          # and 'A' to 'F'.
+ /[[:digit:][:^xdigit:]]/ # Matches a character that can be anything
+			  # except the letters 'a' to 'f'.  This is
+			  # because the main character class is composed
+			  # of two POSIX character classes that are ORed
+			  # together, one that matches any digit, and
+			  # the other that matches anything that isn't a
+			  # hex digit.  The result matches all
+			  # characters except the letters 'a' to 'f' and
+			  # 'A' to 'F'.
 
 
 =head2 Locale, EBCDIC, Unicode and UTF-8
@@ -613,15 +616,16 @@ on the internal encoding of the source string, and the locale that is
 in effect, and if the program is running on an EBCDIC platform.
 
 C<\w>, C<\d>, C<\s> and the POSIX character classes (and their negations,
-including C<\W>, C<\D>, C<\S>) suffer from this behaviour.  (This also affects
-the backslash sequences C<\b> and C<\B>.)
+including C<\W>, C<\D>, C<\S>) suffer from this behaviour.  (Since the backslash
+sequences C<\b> and C<\B> are defined in terms of C<\w> and C<\W>, they also are
+affected.)
 
 The rule is that if the source string is in UTF-8 format, the character
 classes match according to the Unicode properties. If the source string
 isn't, then the character classes match according to whatever locale or EBCDIC
 code page is in effect. If there is no locale nor EBCDIC, they match the ASCII
 defaults (52 letters, 10 digits and underscore for C<\w>; 0 to 9 for C<\d>;
-L</Whitespace> above gives the list for C<\s>).
+etc.).
 
 This usually means that if you are matching against characters whose C<ord()>
 values are between 128 and 255 inclusive, your character class may match
