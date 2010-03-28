@@ -30,14 +30,18 @@ our $VERSION = '3';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 our (
-  @InitFileCode, $FH, 
+  # The scalars in the line below remain as 'our' variables because pulling
+  # them into $self led to build problems.  In most cases, strings being
+  # 'eval'-ed contain the variables' names hard-coded.
+  $FH, $Package, $func_name, $Full_func_name, $Packid,  $pname,
+  @InitFileCode, 
   %IncludedFiles, %input_expr, %output_expr, 
-  %type_kind, %proto_letter, $Package, 
+  %type_kind, %proto_letter, 
   @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
   %argtype_seen, %in_out, %lengthof, 
-  @line_no, $func_name, $Full_func_name, $Packid,  
-  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
-  $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
+  @line_no, 
+  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
+  $deferred, $gotRETVAL, $condnum, $cond,
   $RETVAL_code, $printed_name, $func_args, @XSStack, $ALIAS, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
@@ -653,8 +657,8 @@ EOF
 EOF
 
       # do initialization of input variables
-      $thisdone = 0;
-      $retvaldone = 0;
+      $self->{thisdone} = 0;
+      $self->{retvaldone} = 0;
       $deferred = "";
       %arg_list = ();
       $gotRETVAL = 0;
@@ -667,7 +671,7 @@ EOF
 #   [[
 EOF
 
-      if (!$thisdone && defined($class)) {
+      if (!$self->{thisdone} && defined($class)) {
         if (defined($static) or $func_name eq 'new') {
           print "\tchar *";
           $var_types{"CLASS"} = "char *";
@@ -698,7 +702,7 @@ EOF
       else {
         if ($self->{ret_type} ne "void") {
           print "\t" . &map_type($self->{ret_type}, 'RETVAL', $self->{hiertype}) . ";\n"
-            if !$retvaldone;
+            if !$self->{retvaldone};
           $args_match{"RETVAL"} = 0;
           $var_types{"RETVAL"} = $self->{ret_type};
           print "\tdXSTARG;\n"
@@ -1157,8 +1161,8 @@ sub INPUT_handler {
       if $arg_list{$var_name}++
     or defined $argtype_seen{$var_name} and not $self->{processing_arg_with_types};
 
-    $thisdone |= $var_name eq "THIS";
-    $retvaldone |= $var_name eq "RETVAL";
+    $self->{thisdone} |= $var_name eq "THIS";
+    $self->{retvaldone} |= $var_name eq "RETVAL";
     $var_types{$var_name} = $var_type;
     # XXXX This check is a safeguard against the unfinished conversion of
     # generate_init().  When generate_init() is fixed,
