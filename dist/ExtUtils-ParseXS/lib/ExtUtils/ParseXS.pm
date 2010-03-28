@@ -42,7 +42,7 @@ our (
   @line_no, 
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
   $deferred, $gotRETVAL, $condnum, $cond,
-  $RETVAL_code, $printed_name, $func_args, @XSStack, $ALIAS, 
+  $RETVAL_code, $func_args, @XSStack, $ALIAS, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
 
@@ -1167,6 +1167,7 @@ sub INPUT_handler {
     # XXXX This check is a safeguard against the unfinished conversion of
     # generate_init().  When generate_init() is fixed,
     # one can use 2-args map_type() unconditionally.
+    my $printed_name;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # Function pointers are not yet supported with &output_init!
       print "\t" . &map_type($var_type, $var_name, $self->{hiertype});
