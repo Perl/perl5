@@ -280,6 +280,16 @@ version's C<site_perl> and C<vendor_perl>.  Modules installed into
 C<site_perl> and C<vendor_perl> will now be loaded in preference to
 those installed in C<ARCHLIB> and C<PRIVLIB>.
 
+
+=head2 REGEXPs are now first class
+
+Internally, Perl now treates compiled regular expressions (such as
+those created with C<qr//>) as first class entities. Perl modules which
+serialize, deserialize or otherwise have deep interaction with Perl's
+internal data structures need to be updated for this change.  Affected
+modules include L<FreezeThaw>,L<Data::Dump::Streamer> and L<Regexp::Copy>.
+
+
 =head2 Switch statement changes
 
 The C<given>/C<when> switch statement handles complex statements better
@@ -1648,10 +1658,6 @@ Perl_magic_setmglob now knows about globs, fixing RT #71254.
 =item *
 
 C<SVt_RV> no longer exists. RVs are now stored in IVs.
-
-=item *
-
-REGEXPs are now first class.
 
 =item *
 
