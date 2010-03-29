@@ -3170,4 +3170,8 @@ The F<README> file for general stuff.
 
 The F<Artistic> and F<Copying> files for copyright information.
 
+L<http://dev.perl.org/perl5/errata.html> for a list of issues
+found after this release, as well as a list of CPAN modules known
+to be incompatible with this release.
+
 =cut
