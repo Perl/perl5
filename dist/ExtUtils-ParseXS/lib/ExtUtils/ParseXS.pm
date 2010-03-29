@@ -34,14 +34,12 @@ our (
   # them into $self led to build problems.  In most cases, strings being
   # 'eval'-ed contain the variables' names hard-coded.
   $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS, 
-  @InitFileCode, 
-  %IncludedFiles, %input_expr, %output_expr, 
-  %type_kind, %proto_letter, 
-  @line, %args_match, %defaults, %var_types, %arg_list, @proto_arg,
-  %argtype_seen, %in_out, %lengthof, 
-  @line_no, 
-  %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
-  @XSStack, 
+);
+our (
+  @InitFileCode, %IncludedFiles, %input_expr, %output_expr, %type_kind,
+  %proto_letter, @line, %args_match, %defaults, %var_types, %arg_list,
+  @proto_arg, %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
+  %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
 
