@@ -42,7 +42,7 @@ our (
   @line_no, 
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
   $condnum, $cond,
-  $func_args, @XSStack, $ALIAS, 
+  @XSStack, $ALIAS, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
 
@@ -552,7 +552,7 @@ EOF
     for (@func_args) {
       s/^/&/ if $in_out{$_};
     }
-    $func_args = join(", ", @func_args);
+    $self->{func_args} = join(", ", @func_args);
     @args_match{@args} = @args_num;
 
     my $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
@@ -757,7 +757,7 @@ EOF
           $func_name =~ s/^\Q$args{'s'}//
             if exists $args{'s'};
           $func_name = 'XSFUNCTION' if $self->{interface};
-          print "$func_name($func_args);\n";
+          print "$func_name($self->{func_args});\n";
         }
       }
 
@@ -1182,7 +1182,7 @@ sub INPUT_handler {
     if ($var_num) {
       $proto_arg[$var_num] = $proto_letter{$var_type} || "\$";
     }
-    $func_args =~ s/\b($var_name)\b/&$1/ if $var_addr;
+    $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
       or $in_out{$var_name} and $in_out{$var_name} =~ /^OUT/
       and $var_init !~ /\S/) {
@@ -1259,7 +1259,7 @@ sub C_ARGS_handler() {
   my $in = merge_section();
 
   trim_whitespace($in);
-  $func_args = $in;
+  $self->{func_args} = $in;
 }
 
 sub INTERFACE_MACRO_handler() {
