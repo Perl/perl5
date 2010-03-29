@@ -1045,7 +1045,7 @@ your data.  There is no slowdown on retrieval.
 
 =head1 BUGS
 
-You can't store GLOB, FORMLINE, etc.... If you can define semantics
+You can't store GLOB, FORMLINE, REGEXP, etc.... If you can define semantics
 for those operations, feel free to enhance Storable so that it can
 deal with them.
 
