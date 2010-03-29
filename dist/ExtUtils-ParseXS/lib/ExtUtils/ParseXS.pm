@@ -41,7 +41,7 @@ our (
   %argtype_seen, %in_out, %lengthof, 
   @line_no, 
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
-  $deferred, $gotRETVAL, $condnum, $cond,
+  $gotRETVAL, $condnum, $cond,
   $RETVAL_code, $func_args, @XSStack, $ALIAS, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
@@ -659,7 +659,7 @@ EOF
       # do initialization of input variables
       $self->{thisdone} = 0;
       $self->{retvaldone} = 0;
-      $deferred = "";
+      $self->{deferred} = "";
       %arg_list = ();
       $gotRETVAL = 0;
 
@@ -715,7 +715,7 @@ EOF
           $self->{processing_arg_with_types} = 1;
           INPUT_handler();
         }
-        print $deferred;
+        print $self->{deferred};
 
         process_keyword("INIT|ALIAS|ATTRS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS|OVERLOAD");
 
@@ -1144,7 +1144,7 @@ sub INPUT_handler {
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x) {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
       $lengthof{$2} = undef;
-      $deferred .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
+      $self->{deferred} .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
     }
 
     # check for optional initialisation code
@@ -1762,7 +1762,7 @@ sub output_init {
       warn $@ if $@;
       $init =~ s/^;//;
     }
-    $deferred .= eval qq/"\\n\\t$init\\n"/;
+    $self->{deferred} .= eval qq/"\\n\\t$init\\n"/;
     warn $@ if $@;
   }
 }
@@ -1827,10 +1827,10 @@ sub generate_init {
       warn $@ if $@;
     }
     if ($defaults{$var} eq 'NO_INIT') {
-      $deferred .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
+      $self->{deferred} .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
     }
     else {
-      $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+      $self->{deferred} .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
     }
     warn $@ if $@;
   }
@@ -1842,7 +1842,7 @@ sub generate_init {
       eval qq/print "\\t$var;\\n"/;
       warn $@ if $@;
     }
-    $deferred .= eval qq/"\\n$expr;\\n"/;
+    $self->{deferred} .= eval qq/"\\n$expr;\\n"/;
     warn $@ if $@;
   }
   else {
