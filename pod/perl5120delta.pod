@@ -29,7 +29,7 @@ for C<our $VERSION = ...> and similar constructs. E.g.
 
 There are several advantages to this:
 
-=over 
+=over
 
 =item *
 
@@ -117,7 +117,7 @@ Extension modules can now cleanly hook into the Perl parser to define
 new kinds of keyword-headed expression and compound statement. The
 syntax following the keyword is defined entirely by the extension. This
 allow a completely non-Perl sublanguage to be parsed inline, with the
-correct ops cleanly generated. 
+correct ops cleanly generated.
 
 See L<perlapi/PL_keyword_plugin> for the mechanism. The Perl core
 source distribution also includes a new module
@@ -494,6 +494,11 @@ EOF type.
 
 To better match all other flow control statements, C<foreach> may no
 longer be used as an attribute.
+
+=item *
+
+Perl's command-line switch "-P", which was deprecated in version 5.10.0, has
+now been removed.
 
 =back
 
@@ -2069,7 +2074,7 @@ because it's beyond the limit of representation.
 
 This uses a new warnings category: "imprecision".
 
-=item * 
+=item *
 
 C<lc>, C<uc>, C<lcfirst>, and C<ucfirst> warn when passed undef.
 
@@ -2308,7 +2313,7 @@ to gcc's search path.
 =item *
 
 F<h2xs> no longer incorrectly treats enum values like macros.
-It also now handles C++ style comments (C<//>) properly in enums. 
+It also now handles C++ style comments (C<//>) properly in enums.
 
 =item *
 
