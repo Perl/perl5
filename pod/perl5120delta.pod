@@ -241,8 +241,12 @@ the C<pos> and C<len> arguments.
 
 =head2 Deprecations warn by default
 
-Perl now defaults to issuing a warning if a deprecated language feature
-is used.
+Over the years, Perl's developers have deprecated a number of language
+features for a variety of reasons.  Perl now defaults to issuing a
+warning if a deprecated language feature is used. Many of the deprecations
+Perl now warns you about have been deprecated for many years.  You can
+find a list of what was deprecated in a given release of Perl in the
+C<perl5xxdelta.pod> file for that release.
 
 To disable this feature in a given lexical scope, you should use C<no
 warnings 'deprecated';> For information about which language features
