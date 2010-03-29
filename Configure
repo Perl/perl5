@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Sat Feb 13 19:05:42 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Mon Mar 29 10:12:43 CEST 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -628,6 +628,8 @@ d_pause=''
 d_pipe=''
 d_poll=''
 d_portable=''
+d_prctl=''
+d_prctl_set_name=''
 d_procselfexe=''
 procselfexe=''
 d_old_pthread_create_joinable=''
@@ -16049,6 +16051,31 @@ eval $inlibc
 set poll d_poll
 eval $inlibc
 
+: see if prctl exists
+set prctl d_prctl
+eval $inlibc
+
+: see if prctl supports PR_SET_NAME
+d_prctl_set_name=$undef
+case $d_prctl in
+    $define)
+	$cat >try.c <<EOM
+#include <sys/prctl.h>
+
+int main (int argc, char *argv[])
+{
+    return (prctl (PR_SET_NAME, "Test"));
+    } /* main */
+EOM
+	set try
+	if eval $compile_ok && $run ./try; then
+	    echo "Your prctl (PR_SET_NAME, ...) works"
+	    d_prctl_set_name=$define
+	    fi
+	$rm_try
+	;;
+    esac
+
 : see if readlink exists
 set readlink d_readlink
 eval $inlibc
@@ -22615,6 +22642,8 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
+d_prctl='$d_prctl'
+d_prctl_set_name='$d_prctl_set_name'
 d_printf_format_null='$d_printf_format_null'
 d_procselfexe='$d_procselfexe'
 d_pseudofork='$d_pseudofork'

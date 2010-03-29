@@ -1617,6 +1617,14 @@ d_portable (d_portable.U):
 	indicates to the C program that it should not assume that it is
 	running on the machine it was compiled on.
 
+d_prctl (d_prctl.U):
+	This variable conditionally defines the HAS_PRCTL symbol, which
+	indicates to the C program that the prctl() routine is available.
+
+d_prctl_set_name (d_prctl.U):
+	This variable conditionally defines the HAS_PRCTL symbol, which
+	indicates to the C program that the prctl() routine is available.
+
 d_PRId64 (quadfio.U):
 	This variable conditionally defines the PERL_PRId64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.

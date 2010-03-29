@@ -1185,6 +1185,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_ctime_r HAS_CTIME_R	   /**/
 #define CTIME_R_PROTO $ctime_r_proto	   /**/
 
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+#$d_dosuid DOSUID		/**/
+
 /* HAS_DRAND48_R:
  *	This symbol, if defined, indicates that the drand48_r routine
  *	is available to drand48 re-entrantly.
@@ -3309,26 +3329,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$ebcdic	EBCDIC 		/**/
 
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-#$d_dosuid DOSUID		/**/
-
 /* PERL_USE_DEVEL:
  *	This symbol, if defined, indicates that Perl was configured with
  *	-Dusedevel, to enable development features.  This should not be
@@ -3806,6 +3806,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol will be defined if the C compiler supports off64_t.
  */
 #$d_off64_t	HAS_OFF64_T    		/**/
+
+/* HAS_PRCTL:
+ *	This symbol, if defined, indicates that the prctl routine is
+ *	available to set process title.
+ */
+/* HAS_PRCTL_SET_NAME:
+ *	This symbol, if defined, indicates that the prctl routine is
+ *	available to set process title and supports PR_SET_NAME.
+ */
+#$d_prctl HAS_PRCTL		/**/
+#$d_prctl_set_name HAS_PRCTL_SET_NAME		/**/
 
 /* HAS_PROCSELFEXE:
  *	This symbol is defined if PROCSELFEXE_PATH is a symlink
