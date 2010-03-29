@@ -33,7 +33,7 @@ our (
   # The scalars in the line below remain as 'our' variables because pulling
   # them into $self led to build problems.  In most cases, strings being
   # 'eval'-ed contain the variables' names hard-coded.
-  $FH, $Package, $func_name, $Full_func_name, $Packid,  $pname,
+  $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS, 
   @InitFileCode, 
   %IncludedFiles, %input_expr, %output_expr, 
   %type_kind, %proto_letter, 
@@ -41,8 +41,7 @@ our (
   %argtype_seen, %in_out, %lengthof, 
   @line_no, 
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, 
-  $condnum, $cond,
-  @XSStack, $ALIAS, 
+  @XSStack, 
 );
 our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
 
@@ -602,13 +601,13 @@ EOF
 #    dXSFUNCTION($self->{ret_type});
 EOF
     if ($ellipsis) {
-      $cond = ($min_args ? qq(items < $min_args) : 0);
+      $self->{cond} = ($min_args ? qq(items < $min_args) : 0);
     }
     elsif ($min_args == $num_args) {
-      $cond = qq(items != $min_args);
+      $self->{cond} = qq(items != $min_args);
     }
     else {
-      $cond = qq(items < $min_args || items > $num_args);
+      $self->{cond} = qq(items < $min_args || items > $num_args);
     }
 
     print Q(<<"EOF") if $args{except};
@@ -616,9 +615,9 @@ EOF
 #    *errbuf = '\0';
 EOF
 
-    if($cond) {
+    if($self->{cond}) {
       print Q(<<"EOF");
-#    if ($cond)
+#    if ($self->{cond})
 #       croak_xs_usage(cv,  "$report_args");
 EOF
     }
@@ -644,8 +643,8 @@ EOF
 
     # Now do a block of some sort.
 
-    $condnum = 0;
-    $cond = '';            # last CASE: condidional
+    $self->{condnum} = 0;
+    $self->{cond} = '';            # last CASE: condidional
     push(@line, "$END:");
     push(@line_no, $line_no[-1]);
     $_ = '';
@@ -862,7 +861,7 @@ EOF
 EOF
       if (check_keyword("CASE")) {
         blurt ("Error: No `CASE:' at top of function")
-          unless $condnum;
+          unless $self->{condnum};
         $_ = "CASE: $_";    # Restore CASE: label
         next;
       }
@@ -1122,10 +1121,10 @@ sub process_keyword($) {
 
 sub CASE_handler {
   blurt ("Error: `CASE:' after unconditional `CASE:'")
-    if $condnum && $cond eq '';
-  $cond = $_;
-  trim_whitespace($cond);
-  print "   ", ($condnum++ ? " else" : ""), ($cond ? " if ($cond)\n" : "\n");
+    if $self->{condnum} && $self->{cond} eq '';
+  $self->{cond} = $_;
+  trim_whitespace($self->{cond});
+  print "   ", ($self->{condnum}++ ? " else" : ""), ($self->{cond} ? " if ($self->{cond})\n" : "\n");
   $_ = '';
 }
 
