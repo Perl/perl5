@@ -29,19 +29,22 @@ our @EXPORT_OK = qw(
 our $VERSION = '3';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
+# The scalars in the line below remain as 'our' variables because pulling
+# them into $self led to build problems.  In most cases, strings being
+# 'eval'-ed contain the variables' names hard-coded.
 our (
-  # The scalars in the line below remain as 'our' variables because pulling
-  # them into $self led to build problems.  In most cases, strings being
-  # 'eval'-ed contain the variables' names hard-coded.
   $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS, 
 );
+# The scalars in the line below remain, for the time being, 'our' variables
+# because I suspect they will pose the same problems as those in the statement
+# above.
+our ($newXS, $proto, $Module_cname, );
 our (
   @InitFileCode, %IncludedFiles, %input_expr, %output_expr, %type_kind,
   %proto_letter, @line, %args_match, %defaults, %var_types, %arg_list,
   @proto_arg, %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
   %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
-our ($newXS, $proto, $Module_cname, $var_num, );
 
 our $self = {};
 
@@ -1174,10 +1177,10 @@ sub INPUT_handler {
       print "\t" . &map_type($var_type, undef, $self->{hiertype});
       $printed_name = 0;
     }
-    $var_num = $args_match{$var_name};
+    $self->{var_num} = $args_match{$var_name};
 
-    if ($var_num) {
-      $proto_arg[$var_num] = $proto_letter{$var_type} || "\$";
+    if ($self->{var_num}) {
+      $proto_arg[$self->{var_num}] = $proto_letter{$var_type} || "\$";
     }
     $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
@@ -1193,16 +1196,16 @@ sub INPUT_handler {
     elsif ($var_init =~ /\S/) {
       output_init( {
         type          => $var_type,
-        num           => $var_num,
+        num           => $self->{var_num},
         var           => $var_name,
         init          => $var_init,
         printed_name  => $printed_name,
       } );
     }
-    elsif ($var_num) {
+    elsif ($self->{var_num}) {
       generate_init( {
         type          => $var_type,
-        num           => $var_num,
+        num           => $self->{var_num},
         var           => $var_name,
         printed_name  => $printed_name,
       } );
@@ -1233,15 +1236,15 @@ sub OUTPUT_handler {
       unless defined($args_match{$outarg});
     blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
       unless defined $var_types{$outarg};
-    $var_num = $args_match{$outarg};
+    $self->{var_num} = $args_match{$outarg};
     if ($outcode) {
       print "\t$outcode\n";
-      print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $self->{DoSetMagic};
+      print "\tSvSETMAGIC(ST(" , $self->{var_num} - 1 , "));\n" if $self->{DoSetMagic};
     }
     else {
       generate_output( {
         type        => $var_types{$outarg},
-        num         => $var_num,
+        num         => $self->{var_num},
         var         => $outarg,
         do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
