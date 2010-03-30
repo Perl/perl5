@@ -28,7 +28,7 @@ you should reset the version numbers to the next blead series.
  May 20          -  5.11.8  -   Ricardo Signes
  June 20         -  5.11.9  -   Matt Trout
  July 20         -  5.11.10 -   David Golden
- August 20       -  5.11.11 -   TBD
+ August 20       -  5.11.11 -   Florian Ragwitz
  September 20    -  5.11.12 -   Steve Hay
 
 =head1 VICTIMS
@@ -46,6 +46,7 @@ Ask Bjørn Hansen <F<ask@perl.org>>
 David Golden <F<dagolden@cpan.org>>
 Philippe Bruhat <F<book@cpan.org>>
 Matt Trout <F<mst@shadowcat.co.uk>>
+Florian Ragwitz <F<rafl@debian.org>>
 
 =head2 Reticent victims
 
