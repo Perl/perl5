@@ -1,3 +1,5 @@
+=encoding utf8
+
 =for comment
 Consistent formatting of this file is achieved with:
   perl ./Porting/podtidy pod/perlrepository.pod

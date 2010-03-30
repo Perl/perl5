@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 Release schedule
 
 This document lists the release engineers for at least the next

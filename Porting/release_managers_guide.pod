@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 release_managers_guide - Releasing a new version of perl 5.x

@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 perlthrtut - Tutorial on threads in Perl
