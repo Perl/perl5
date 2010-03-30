@@ -41,7 +41,7 @@ our (
   @proto_arg, %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
   %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
-our ($newXS, $proto, $Module_cname, $Interfaces, $var_num, );
+our ($newXS, $proto, $Module_cname, $var_num, );
 
 our $self = {};
 
@@ -1016,7 +1016,7 @@ EOF
 #
 EOF
 
-  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $Interfaces;
+  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $self->{interfaces};
 #    {
 #        CV * cv;
 #
@@ -1036,7 +1036,7 @@ EOF
 
   print @InitFileCode;
 
-  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $Interfaces;
+  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $self->{interfaces};
 #    }
 EOF
 
@@ -1271,7 +1271,7 @@ sub INTERFACE_MACRO_handler() {
     $self->{interface_macro_set} = 'UNKNOWN_CVT'; # catch later
   }
   $self->{interface} = 1;        # local
-  $Interfaces = 1;        # global
+  $self->{interfaces} = 1;        # global
 }
 
 sub INTERFACE_handler() {
@@ -1288,7 +1288,7 @@ sub INTERFACE_handler() {
 #    XSFUNCTION = $self->{interface_macro}($self->{ret_type},cv,XSANY.any_dptr);
 EOF
   $self->{interface} = 1;        # local
-  $Interfaces = 1;        # global
+  $self->{interfaces} = 1;        # global
 }
 
 sub CLEANUP_handler() { print_section() }
