@@ -41,7 +41,7 @@ our (
   @proto_arg, %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
   %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
-our ($DoSetMagic, $newXS, $proto, $Module_cname, $XsubAliases, $Interfaces, $var_num, );
+our ($newXS, $proto, $Module_cname, $Interfaces, $var_num, );
 
 our $self = {};
 
@@ -439,7 +439,7 @@ EOF
     }
     $XSStack[$XSS_work_idx]{functions}{$Full_func_name}++;
     %XsubAliases = %XsubAliasValues = %Interfaces = @Attributes = ();
-    $DoSetMagic = 1;
+    $self->{DoSetMagic} = 1;
 
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
     my @args;
@@ -770,7 +770,7 @@ EOF
         type        => $var_types{$_},
         num         => $args_match{$_},
         var         => $_,
-        do_setmagic => $DoSetMagic,
+        do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
       } ) for grep $in_out{$_} =~ /OUT$/, keys %in_out;
 
@@ -1016,7 +1016,7 @@ EOF
 #
 EOF
 
-  print Q(<<"EOF") if defined $XsubAliases or defined $Interfaces;
+  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $Interfaces;
 #    {
 #        CV * cv;
 #
@@ -1036,7 +1036,7 @@ EOF
 
   print @InitFileCode;
 
-  print Q(<<"EOF") if defined $XsubAliases or defined $Interfaces;
+  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $Interfaces;
 #    }
 EOF
 
@@ -1217,7 +1217,7 @@ sub OUTPUT_handler {
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
     next unless /\S/;
     if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-      $DoSetMagic = ($1 eq "ENABLE" ? 1 : 0);
+      $self->{DoSetMagic} = ($1 eq "ENABLE" ? 1 : 0);
       next;
     }
     my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
@@ -1236,14 +1236,14 @@ sub OUTPUT_handler {
     $var_num = $args_match{$outarg};
     if ($outcode) {
       print "\t$outcode\n";
-      print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $DoSetMagic;
+      print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $self->{DoSetMagic};
     }
     else {
       generate_output( {
         type        => $var_types{$outarg},
         num         => $var_num,
         var         => $outarg,
-        do_setmagic => $DoSetMagic,
+        do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
       } );
     }
@@ -1318,7 +1318,7 @@ sub GetAliases {
     Warn("Warning: Aliases '$orig_alias' and '$XsubAliasValues{$value}' have identical values")
       if $XsubAliasValues{$value};
 
-    $XsubAliases = 1;
+    $self->{xsubaliases} = 1;
     $XsubAliases{$alias} = $value;
     $XsubAliasValues{$value} = $orig_alias;
   }
