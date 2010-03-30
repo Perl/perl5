@@ -3818,8 +3818,10 @@ Gid_t getegid (void);
 
 
 #define DEBUG_SCOPE(where) \
-    DEBUG_l(WITH_THR(Perl_deb(aTHX_ "%s scope %ld at %s:%d\n",	\
-		    where, (long)PL_scopestack_ix, __FILE__, __LINE__)));
+    DEBUG_l(WITH_THR( \
+    Perl_deb(aTHX_ "%s scope %ld (savestack=%ld) at %s:%d\n",	\
+		    where, (long)PL_scopestack_ix, (long)PL_savestack_ix, \
+		    __FILE__, __LINE__)));
 
 
 

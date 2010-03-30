@@ -1339,11 +1339,11 @@ S_dopoptolabel(pTHX_ const char *label)
 	  {
 	    const char *cx_label = CxLABEL(cx);
 	    if (!cx_label || strNE(label, cx_label) ) {
-		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
+		DEBUG_l(Perl_deb(aTHX_ "(poptolabel(): skipping label at cx=%ld %s)\n",
 			(long)i, cx_label));
 		continue;
 	    }
-	    DEBUG_l( Perl_deb(aTHX_ "(Found label #%ld %s)\n", (long)i, label));
+	    DEBUG_l( Perl_deb(aTHX_ "(poptolabel(): found label at cx=%ld %s)\n", (long)i, label));
 	    return i;
 	  }
 	}
@@ -1412,7 +1412,7 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 	case CXt_EVAL:
 	case CXt_SUB:
 	case CXt_FORMAT:
-	    DEBUG_l( Perl_deb(aTHX_ "(Found sub #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1430,7 +1430,7 @@ S_dopoptoeval(pTHX_ I32 startingblock)
 	default:
 	    continue;
 	case CXt_EVAL:
-	    DEBUG_l( Perl_deb(aTHX_ "(Found eval #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptoeval(): found eval at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1459,7 +1459,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
-	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptoloop(): found loop at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1477,7 +1477,7 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	default:
 	    continue;
 	case CXt_GIVEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(Found given #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogiven(): found given at cx=%ld)\n", (long)i));
 	    return i;
 	case CXt_LOOP_PLAIN:
 	    assert(!CxFOREACHDEF(cx));
@@ -1486,7 +1486,7 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	    if (CxFOREACHDEF(cx)) {
-		DEBUG_l( Perl_deb(aTHX_ "(Found foreach #%ld)\n", (long)i));
+		DEBUG_l( Perl_deb(aTHX_ "(dopoptogiven(): found foreach at cx=%ld)\n", (long)i));
 		return i;
 	    }
 	}
@@ -1505,7 +1505,7 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 	default:
 	    continue;
 	case CXt_WHEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(Found when #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptowhen(): found when at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1521,8 +1521,7 @@ Perl_dounwind(pTHX_ I32 cxix)
     while (cxstack_ix > cxix) {
 	SV *sv;
         register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
-	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
-			      (long) cxstack_ix, PL_block_type[CxTYPE(cx)]));
+	DEBUG_CX("UNWIND");						\
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:

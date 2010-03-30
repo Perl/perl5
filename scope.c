@@ -694,6 +694,8 @@ Perl_leave_scope(pTHX_ I32 base)
 
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
+    DEBUG_l(Perl_deb(aTHX_ "savestack: releasing items %ld -> %ld\n",
+			(long)PL_savestack_ix, (long)base));
     while (PL_savestack_ix > base) {
 	TAINT_NOT;
 
