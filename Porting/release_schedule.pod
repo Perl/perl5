@@ -26,9 +26,9 @@ you should reset the version numbers to the next blead series.
  March 20        -  5.11.6  -   Ask Bjørn Hansen
  April 20        -  5.11.7  -   Leon Brocard
  May 20          -  5.11.8  -   Ricardo Signes
- June 20         -  5.11.9  -   Philippe Bruhat
- July 20         -  5.11.10 -   Matt Trout
- August 20       -  5.11.11 -   David Golden
+ June 20         -  5.11.9  -   Matt Trout
+ July 20         -  5.11.10 -   David Golden
+ August 20       -  5.11.11 -   TBD
  September 20    -  5.11.12 -   Steve Hay
 
 =head1 VICTIMS
