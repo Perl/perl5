@@ -4223,6 +4223,7 @@ t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
 t/io/crlf.t			See if :crlf works
 t/io/crlf_through.t		See if pipe passes data intact with :crlf
+t/io/defout.t			See if PL_defoutgv works
 t/io/dup.t			See if >& works right
 t/io/errno.t			See if $! is correctly set
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works

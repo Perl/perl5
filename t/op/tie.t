@@ -646,3 +646,15 @@ sub TIEHASH { bless [], 'main' }
 }
 print "tied\n" if tied %h;
 EXPECT
+########
+# RT 20727: PL_defoutgv is left as a tied element
+sub TIESCALAR { return bless {}, 'main' }
+
+sub STORE {
+    select($_[1]);
+    $_[1] = 1;
+    select(); # this used to coredump or assert fail
+}
+tie $SELECT, 'main';
+$SELECT = *STDERR;
+EXPECT
