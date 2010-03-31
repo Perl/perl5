@@ -605,7 +605,7 @@ multiple packages to get that same functionality.
 
 You can silence these deprecation warnings by installing the modules
 in question from CPAN.  To install the latest version of all of them,
-just install C<Task::Deprecations::512>.
+just install C<Task::Deprecations::5_12>.
 
 =over
 
