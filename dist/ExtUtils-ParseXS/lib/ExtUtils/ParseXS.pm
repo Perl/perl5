@@ -35,14 +35,12 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 our (
   $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS, 
 );
-# The scalars in the line below remain, for the time being, 'our' variables
+# The scalars in the line below remain (for the time being) 'our' variables
 # because I suspect they will pose the same problems as those in the statement
 # above.
 our ($newXS, $proto, $Module_cname, );
 our (
   @line, %defaults, 
-  @line_no, 
-  @Attributes, %outargs, @XSStack, 
 );
 
 our $self = {};
@@ -81,11 +79,11 @@ sub process_file {
     require ExtUtils::XSSymSet;
     $SymSet = new ExtUtils::XSSymSet 28;
   }
-  @XSStack = ({type => 'none'});
+  @{ $self->{XSStack} } = ({type => 'none'});
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
-  $FH           = $ExtUtils::ParseXS::Constants::FH;
+  $FH                   = $ExtUtils::ParseXS::Constants::FH;
   $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
   $self->{errors}       = $ExtUtils::ParseXS::Constants::errors;
   $self->{Fallback}     = $ExtUtils::ParseXS::Constants::Fallback;
@@ -319,42 +317,42 @@ EOF
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
       if ($statement eq 'if') {
-        $XSS_work_idx = @XSStack;
-        push(@XSStack, {type => 'if'});
+        $XSS_work_idx = @{ $self->{XSStack} };
+        push(@{ $self->{XSStack} }, {type => 'if'});
       }
       else {
         death ("Error: `$statement' with no matching `if'")
-          if $XSStack[-1]{type} ne 'if';
-        if ($XSStack[-1]{varname}) {
+          if $self->{XSStack}->[-1]{type} ne 'if';
+        if ($self->{XSStack}->[-1]{varname}) {
           push(@{ $self->{InitFileCode} }, "#endif\n");
           push(@BootCode,     "#endif");
         }
 
-        my(@fns) = keys %{$XSStack[-1]{functions}};
+        my(@fns) = keys %{$self->{XSStack}->[-1]{functions}};
         if ($statement ne 'endif') {
           # Hide the functions defined in other #if branches, and reset.
-          @{$XSStack[-1]{other_functions}}{@fns} = (1) x @fns;
-          @{$XSStack[-1]}{qw(varname functions)} = ('', {});
+          @{$self->{XSStack}->[-1]{other_functions}}{@fns} = (1) x @fns;
+          @{$self->{XSStack}->[-1]}{qw(varname functions)} = ('', {});
         }
         else {
-          my($tmp) = pop(@XSStack);
+          my($tmp) = pop(@{ $self->{XSStack} });
           0 while (--$XSS_work_idx
-               && $XSStack[$XSS_work_idx]{type} ne 'if');
+               && $self->{XSStack}->[$XSS_work_idx]{type} ne 'if');
           # Keep all new defined functions
           push(@fns, keys %{$tmp->{other_functions}});
-          @{$XSStack[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
+          @{$self->{XSStack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
         }
       }
     }
 
     next PARAGRAPH unless @line;
 
-    if ($XSS_work_idx && !$XSStack[$XSS_work_idx]{varname}) {
+    if ($XSS_work_idx && !$self->{XSStack}->[$XSS_work_idx]{varname}) {
       # We are inside an #if, but have not yet #defined its xsubpp variable.
       print "#define $cpp_next_tmp 1\n\n";
       push(@{ $self->{InitFileCode} }, "#if $cpp_next_tmp\n");
       push(@BootCode,     "#if $cpp_next_tmp");
-      $XSStack[$XSS_work_idx]{varname} = $cpp_next_tmp++;
+      $self->{XSStack}->[$XSS_work_idx]{varname} = $cpp_next_tmp++;
     }
 
     death ("Code is not inside a function"
@@ -398,7 +396,7 @@ EOF
 
     if (check_keyword("BOOT")) {
       &check_cpp;
-      push (@BootCode, "#line $line_no[@line_no - @line] \"$self->{filepathname}\"")
+      push (@BootCode, "#line $self->{line_no}->[@{ $self->{line_no} } - @line] \"$self->{filepathname}\"")
         if $self->{WantLineNumbers} && $line[0] !~ /^\s*#\s*line\b/;
       push (@BootCode, @line, "");
       next PARAGRAPH;
@@ -435,13 +433,13 @@ EOF
     }
 
     # Check for duplicate function definition
-    for my $tmp (@XSStack) {
+    for my $tmp (@{ $self->{XSStack} }) {
       next unless defined $tmp->{functions}{$Full_func_name};
       Warn("Warning: duplicate function definition '$clean_func_name' detected");
       last;
     }
-    $XSStack[$XSS_work_idx]{functions}{$Full_func_name}++;
-    %{ $self->{XsubAliases} } = %{ $self->{XsubAliasValues} } = %{ $self->{Interfaces} } = @Attributes = ();
+    $self->{XSStack}->[$XSS_work_idx]{functions}{$Full_func_name}++;
+    %{ $self->{XsubAliases} } = %{ $self->{XsubAliasValues} } = %{ $self->{Interfaces} } = @{ $self->{Attributes} } = ();
     $self->{DoSetMagic} = 1;
 
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
@@ -647,7 +645,7 @@ EOF
     $self->{condnum} = 0;
     $self->{cond} = '';            # last CASE: condidional
     push(@line, "$END:");
-    push(@line_no, $line_no[-1]);
+    push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
     $_ = '';
     &check_cpp;
     while (@line) {
@@ -766,7 +764,7 @@ EOF
       undef $self->{RETVAL_code} ;    # code to set RETVAL (from OUTPUT section);
       # $wantRETVAL set if 'RETVAL =' autogenerated
       ($wantRETVAL, $self->{ret_type}) = (0, 'void') if $RETVAL_no_return;
-      undef %outargs;
+      undef %{ $self->{outargs} };
       process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
       generate_output( {
@@ -929,10 +927,10 @@ EOF
 EOF
       }
     }
-    elsif (@Attributes) {
+    elsif (@{ $self->{Attributes} }) {
       push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);
-#        apply_attrs_string("$Package", cv, "@Attributes", 0);
+#        apply_attrs_string("$Package", cv, "@{ $self->{Attributes} }", 0);
 EOF
     }
     elsif ($self->{interface}) {
@@ -1088,7 +1086,7 @@ sub print_section {
   # the "do" is required for right semantics
   do { $_ = shift(@line) } while !/\S/ && @line;
 
-  print("#line ", $line_no[@line_no - @line -1], " \"$self->{filepathname}\"\n")
+  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @line -1], " \"$self->{filepathname}\"\n")
     if $self->{WantLineNumbers} && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
   for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
     print "$_\n";
@@ -1225,7 +1223,7 @@ sub OUTPUT_handler {
     }
     my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
     blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
-      if $outargs{$outarg}++;
+      if $self->{outargs}->{$outarg}++;
     if (!$self->{gotRETVAL} and $outarg eq 'RETVAL') {
       # deal with RETVAL last
       $self->{RETVAL_code} = $outcode;
@@ -1334,7 +1332,7 @@ sub ATTRS_handler () {
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
     next unless /\S/;
     trim_whitespace($_);
-    push @Attributes, $_;
+    push @{ $self->{Attributes} }, $_;
   }
 }
 
@@ -1469,12 +1467,12 @@ sub PROTOTYPES_handler () {
 sub PushXSStack {
   my %args = @_;
   # Save the current file context.
-  push(@XSStack, {
+  push(@{ $self->{XSStack} }, {
           type            => 'file',
           LastLine        => $self->{lastline},
           LastLineNo      => $self->{lastline_no},
           Line            => \@line,
-          LineNo          => \@line_no,
+          LineNo          => $self->{line_no},
           Filename        => $self->{filename},
           Filepathname    => $self->{filepathname},
           Handle          => $FH,
@@ -1596,9 +1594,9 @@ EOF
 }
 
 sub PopFile() {
-  return 0 unless $XSStack[-1]{type} eq 'file';
+  return 0 unless $self->{XSStack}->[-1]{type} eq 'file';
 
-  my $data     = pop @XSStack;
+  my $data     = pop @{ $self->{XSStack} };
   my $ThisFile = $self->{filename};
   my $isPipe   = $data->{IsPipe};
 
@@ -1616,7 +1614,7 @@ sub PopFile() {
   $self->{lastline}   = $data->{LastLine};
   $self->{lastline_no} = $data->{LastLineNo};
   @line       = @{ $data->{Line} };
-  @line_no    = @{ $data->{LineNo} };
+  @{ $self->{line_no} }    = @{ $data->{LineNo} };
 
   if ($isPipe and $? ) {
     --$self->{lastline_no};
@@ -1644,7 +1642,7 @@ sub check_cpp {
       elsif (!$cpplevel) {
         Warn("Warning: #else/elif/endif without #if in this function");
         print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-          if $XSStack[-1]{type} eq 'if';
+          if $self->{XSStack}->[-1]{type} eq 'if';
         return;
       }
       elsif ($cpp =~ /^\#\s*endif/) {
@@ -1668,9 +1666,9 @@ sub Q {
 sub fetch_para {
   # parse paragraph
   death ("Error: Unterminated `#if/#ifdef/#ifndef'")
-    if !defined $self->{lastline} && $XSStack[-1]{type} eq 'if';
+    if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @line = ();
-  @line_no = ();
+  @{ $self->{line_no} } = ();
   return PopFile() if !defined $self->{lastline};
 
   if ($self->{lastline} =~
@@ -1707,7 +1705,7 @@ sub fetch_para {
     $self->{lastline} =~ /^#[ \t]*(?:(?:if|ifn?def|elif|else|endif|define|undef|pragma|error|warning|line\s+\d+|ident)\b|(?:include(?:_next)?|import)\s*["<].*[>"])/) {
       last if $self->{lastline} =~ /^\S/ && @line && $line[-1] eq "";
       push(@line, $self->{lastline});
-      push(@line_no, $self->{lastline_no});
+      push(@{ $self->{line_no} }, $self->{lastline_no});
     }
 
     # Read next line and continuation lines
@@ -1720,7 +1718,7 @@ sub fetch_para {
     chomp $self->{lastline};
     $self->{lastline} =~ s/^\s+$//;
   }
-  pop(@line), pop(@line_no) while @line && $line[-1] eq "";
+  pop(@line), pop(@{ $self->{line_no} }) while @line && $line[-1] eq "";
   1;
 }
 
@@ -1941,7 +1939,7 @@ sub generate_output {
 
 sub Warn {
   # work out the line number
-  my $warn_line_number = $line_no[@line_no - @line -1];
+  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @line -1];
 
   print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
 }
