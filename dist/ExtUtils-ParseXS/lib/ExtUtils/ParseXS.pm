@@ -41,7 +41,7 @@ our (
 our ($newXS, $proto, $Module_cname, );
 our (
   @line, %defaults, 
-  %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
+  %lengthof, @line_no, %XsubAliases,
   %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
 
@@ -373,9 +373,9 @@ EOF
     undef(%{ $self->{arg_list} });
     undef(@{ $self->{proto_arg} });
     undef($self->{processing_arg_with_types});
-    undef(%argtype_seen);
+    undef(%{ $self->{argtype_seen} });
     undef(@outlist);
-    undef(%in_out);
+    undef(%{ $self->{in_out} });
     undef(%lengthof);
     undef($self->{proto_in_this_xsub});
     undef($self->{scope_in_this_xsub});
@@ -483,12 +483,12 @@ EOF
               push @fake_INPUT, $arg;
             }
             # warn "pushing '$arg'\n";
-            $argtype_seen{$len_name}++;
+            $self->{argtype_seen}->{$len_name}++;
             $_ = "$len_name$default"; # Assigns to @args
           }
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $islength;
           push @outlist, $len_name if $out_type =~ /OUTLIST$/;
-          $in_out{$len_name} = $out_type if $out_type;
+          $self->{in_out}->{$len_name} = $out_type if $out_type;
         }
       }
       else {
@@ -506,7 +506,7 @@ EOF
           if ($out_type =~ /OUTLIST$/) {
               push @outlist, undef;
           }
-          $in_out{$_} = $out_type;
+          $self->{in_out}->{$_} = $out_type;
         }
       }
     }
@@ -550,7 +550,7 @@ EOF
     shift @func_args if defined($class);
 
     for (@func_args) {
-      s/^/&/ if $in_out{$_};
+      s/^/&/ if $self->{in_out}->{$_};
     }
     $self->{func_args} = join(", ", @func_args);
     @{ $self->{args_match} }{@args} = @args_num;
@@ -775,7 +775,7 @@ EOF
         var         => $_,
         do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
-      } ) for grep $in_out{$_} =~ /OUT$/, keys %in_out;
+      } ) for grep $self->{in_out}->{$_} =~ /OUT$/, keys %{ $self->{in_out} };
 
       # all OUTPUT done, so now push the return value on the stack
       if ($self->{gotRETVAL} && $self->{RETVAL_code}) {
@@ -1159,7 +1159,7 @@ sub INPUT_handler {
     # Check for duplicate definitions
     blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
       if $self->{arg_list}->{$var_name}++
-    or defined $argtype_seen{$var_name} and not $self->{processing_arg_with_types};
+    or defined $self->{argtype_seen}->{$var_name} and not $self->{processing_arg_with_types};
 
     $self->{thisdone} |= $var_name eq "THIS";
     $self->{retvaldone} |= $var_name eq "RETVAL";
@@ -1184,7 +1184,7 @@ sub INPUT_handler {
     }
     $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
-      or $in_out{$var_name} and $in_out{$var_name} =~ /^OUT/
+      or $self->{in_out}->{$var_name} and $self->{in_out}->{$var_name} =~ /^OUT/
       and $var_init !~ /\S/) {
       if ($printed_name) {
         print ";\n";
@@ -1250,8 +1250,8 @@ sub OUTPUT_handler {
         do_push     => undef,
       } );
     }
-    delete $in_out{$outarg}     # No need to auto-OUTPUT
-      if exists $in_out{$outarg} and $in_out{$outarg} =~ /OUT$/;
+    delete $self->{in_out}->{$outarg}     # No need to auto-OUTPUT
+      if exists $self->{in_out}->{$outarg} and $self->{in_out}->{$outarg} =~ /OUT$/;
   }
 }
 
