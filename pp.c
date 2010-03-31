@@ -5418,12 +5418,15 @@ PP(pp_reverse)
 	    }
 	    else {
 		SV **begin = AvARRAY(av);
-		SV **end   = begin + AvFILLp(av);
 
-		while (begin < end) {
-		    register SV * const tmp = *begin;
-		    *begin++ = *end;
-		    *end--   = tmp;
+		if (begin) {
+		    SV **end   = begin + AvFILLp(av);
+
+		    while (begin < end) {
+			register SV * const tmp = *begin;
+			*begin++ = *end;
+			*end--   = tmp;
+		    }
 		}
 	    }
 	}
