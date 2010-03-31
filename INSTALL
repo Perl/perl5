@@ -310,7 +310,7 @@ Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
 Configure process will build a 32bit perl. Implementing -Duse32bit*
-options is planned for perl 5.12.
+options is planned for a future release of perl.
 
 =head3 Long doubles
 
