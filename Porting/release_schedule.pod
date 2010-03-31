@@ -14,22 +14,22 @@ you should reset the version numbers to the next blead series.
 
 =head2 2009
 
- October 2       -  5.11.0  -   Jesse Vincent
- October 20      -  5.11.1  -   Jesse Vincent
- November 20     -  5.11.2  -   Leon Brocard
- December 20     -  5.11.3  -   Jesse Vincent
+ October 2       -   Jesse Vincent
+ October 20      -   Jesse Vincent
+ November 20     -   Leon Brocard
+ December 20     -   Jesse Vincent
 
 =head2 2010
 
- January 20      -  5.11.4  -   Ricardo Signes
- February 20     -  5.11.5  -   Steve Hay
- March 20        -  5.11.6  -   Ask Bjørn Hansen
- April 20        -  5.11.7  -   Leon Brocard
- May 20          -  5.11.8  -   Ricardo Signes
- June 20         -  5.11.9  -   Matt Trout
- July 20         -  5.11.10 -   David Golden
- August 20       -  5.11.11 -   Florian Ragwitz
- September 20    -  5.11.12 -   Steve Hay
+ January 20      -   Ricardo Signes
+ February 20     -   Steve Hay
+ March 20        -   Ask Bjørn Hansen
+ April 20        -   Leon Brocard
+ May 20          -   Ricardo Signes
+ June 20         -   Matt Trout
+ July 20         -   David Golden
+ August 20       -   Florian Ragwitz
+ September 20    -   Steve Hay
 
 =head1 VICTIMS
 
