@@ -5420,7 +5420,7 @@ PP(pp_reverse)
 		SV **begin = AvARRAY(av);
 		SV **end   = begin + AvFILLp(av);
 
-		while (begin < end) {
+		while (begin && begin < end) {
 		    register SV * const tmp = *begin;
 		    *begin++ = *end;
 		    *end--   = tmp;
