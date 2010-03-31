@@ -79,6 +79,8 @@ http://strawberryperl.com/package/kmx/64_gcctoolchain/mingw64-w64-20100123-kmx-v
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
 operating system, then you should set the WIN64 environment variable to "undef".
+Also, the trimmed down compiler only passes tests when USE_ITHREADS *= define
+(as opposed to undef) and when the CFG *= Debug line is commented out.
 
 This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
