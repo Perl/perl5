@@ -40,9 +40,8 @@ our (
 # above.
 our ($newXS, $proto, $Module_cname, );
 our (
-  @InitFileCode, %IncludedFiles, %input_expr, %output_expr, %type_kind,
-  %proto_letter, @line, %args_match, %defaults, %var_types, %arg_list,
-  @proto_arg, %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
+  @line, %defaults, 
+  %argtype_seen, %in_out, %lengthof, @line_no, %XsubAliases,
   %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
 );
 
@@ -85,7 +84,7 @@ sub process_file {
   @XSStack = ({type => 'none'});
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
-  @InitFileCode = @ExtUtils::ParseXS::Constants::InitFileCode;
+  $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
   $FH           = $ExtUtils::ParseXS::Constants::FH;
   $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
   $self->{errors}       = $ExtUtils::ParseXS::Constants::errors;
@@ -99,13 +98,14 @@ sub process_file {
   $self->{WantPrototypes} = $args{prototypes};
   $self->{WantVersionChk} = $args{versioncheck};
   $self->{WantLineNumbers} = $args{linenumbers};
+  $self->{IncludedFiles} = {};
 
   for my $f ($args{filename}) {
     die "Missing required parameter 'filename'" unless $f;
     $self->{filepathname} = $f;
     ($self->{dir}, $self->{filename}) = (dirname($f), basename($f));
     $self->{filepathname} =~ s/\\/\\\\/g;
-    $IncludedFiles{$f}++;
+    $self->{IncludedFiles}->{$f}++;
   }
 
   # Open the output file if given as a string.  If they provide some
@@ -144,23 +144,23 @@ sub process_file {
   my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
     process_typemaps( $args{typemap}, $pwd );
 
-  %type_kind    = %{ $type_kind_ref };
-  %proto_letter = %{ $proto_letter_ref };
-  %input_expr   = %{ $input_expr_ref };
-  %output_expr  = %{ $output_expr_ref };
+  $self->{type_kind}    = $type_kind_ref;
+  $self->{proto_letter} = $proto_letter_ref;
+  $self->{input_expr}   = $input_expr_ref;
+  $self->{output_expr}  = $output_expr_ref;
 
-  foreach my $value (values %input_expr) {
+  foreach my $value (values %{ $self->{input_expr} }) {
     $value =~ s/;*\s+\z//;
     # Move C pre-processor instructions to column 1 to be strictly ANSI
     # conformant. Some pre-processors are fussy about this.
     $value =~ s/^\s+#/#/mg;
   }
-  foreach my $value (values %output_expr) {
+  foreach my $value (values %{ $self->{output_expr} }) {
     # And again.
     $value =~ s/^\s+#/#/mg;
   }
 
-  my %targetable = make_targetable(\%output_expr);
+  my %targetable = make_targetable($self->{output_expr});
 
   my $END = "!End!\n\n";        # "impossible" keyword (multiple newline)
 
@@ -326,7 +326,7 @@ EOF
         death ("Error: `$statement' with no matching `if'")
           if $XSStack[-1]{type} ne 'if';
         if ($XSStack[-1]{varname}) {
-          push(@InitFileCode, "#endif\n");
+          push(@{ $self->{InitFileCode} }, "#endif\n");
           push(@BootCode,     "#endif");
         }
 
@@ -352,7 +352,7 @@ EOF
     if ($XSS_work_idx && !$XSStack[$XSS_work_idx]{varname}) {
       # We are inside an #if, but have not yet #defined its xsubpp variable.
       print "#define $cpp_next_tmp 1\n\n";
-      push(@InitFileCode, "#if $cpp_next_tmp\n");
+      push(@{ $self->{InitFileCode} }, "#if $cpp_next_tmp\n");
       push(@BootCode,     "#if $cpp_next_tmp");
       $XSStack[$XSS_work_idx]{varname} = $cpp_next_tmp++;
     }
@@ -367,11 +367,11 @@ EOF
     my (@fake_INPUT);
 
     # initialize info arrays
-    undef(%args_match);
-    undef(%var_types);
+    undef(%{ $self->{args_match} });
+    undef(%{ $self->{var_types} });
     undef(%defaults);
-    undef(%arg_list);
-    undef(@proto_arg);
+    undef(%{ $self->{arg_list} });
+    undef(@{ $self->{proto_arg} });
     undef($self->{processing_arg_with_types});
     undef(%argtype_seen);
     undef(@outlist);
@@ -541,7 +541,7 @@ EOF
         $defaults{$args[$i]} = $2;
         $defaults{$args[$i]} =~ s/"/\\"/g;
       }
-      $proto_arg[$i+1] = '$';
+      $self->{proto_arg}->[$i+1] = '$';
     }
     my $min_args = $num_args - $extra_args;
     $report_args =~ s/"/\\"/g;
@@ -553,7 +553,7 @@ EOF
       s/^/&/ if $in_out{$_};
     }
     $self->{func_args} = join(", ", @func_args);
-    @args_match{@args} = @args_num;
+    @{ $self->{args_match} }{@args} = @args_num;
 
     my $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
     my $CODE = grep(/^\s*CODE\s*:/, @line);
@@ -660,7 +660,7 @@ EOF
       $self->{thisdone} = 0;
       $self->{retvaldone} = 0;
       $self->{deferred} = "";
-      %arg_list = ();
+      %{ $self->{arg_list} } = ();
       $self->{gotRETVAL} = 0;
 
       INPUT_handler();
@@ -674,7 +674,7 @@ EOF
       if (!$self->{thisdone} && defined($class)) {
         if (defined($static) or $func_name eq 'new') {
           print "\tchar *";
-          $var_types{"CLASS"} = "char *";
+          $self->{var_types}->{"CLASS"} = "char *";
           generate_init( {
             type          => "char *",
             num           => 1,
@@ -684,7 +684,7 @@ EOF
         }
         else {
           print "\t$class *";
-          $var_types{"THIS"} = "$class *";
+          $self->{var_types}->{"THIS"} = "$class *";
           generate_init( {
             type          => "$class *",
             num           => 1,
@@ -703,10 +703,10 @@ EOF
         if ($self->{ret_type} ne "void") {
           print "\t" . &map_type($self->{ret_type}, 'RETVAL', $self->{hiertype}) . ";\n"
             if !$self->{retvaldone};
-          $args_match{"RETVAL"} = 0;
-          $var_types{"RETVAL"} = $self->{ret_type};
+          $self->{args_match}->{"RETVAL"} = 0;
+          $self->{var_types}->{"RETVAL"} = $self->{ret_type};
           print "\tdXSTARG;\n"
-            if $args{optimize} and $targetable{$type_kind{$self->{ret_type}}};
+            if $args{optimize} and $targetable{$self->{type_kind}->{$self->{ret_type}}};
         }
 
         if (@fake_INPUT or @fake_INPUT_pre) {
@@ -770,8 +770,8 @@ EOF
       process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
       generate_output( {
-        type        => $var_types{$_},
-        num         => $args_match{$_},
+        type        => $self->{var_types}->{$_},
+        num         => $self->{args_match}->{$_},
         var         => $_,
         do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
@@ -782,7 +782,7 @@ EOF
         print "\t$self->{RETVAL_code}\n";
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
-        my $t = $args{optimize} && $targetable{$type_kind{$self->{ret_type}}};
+        my $t = $args{optimize} && $targetable{$self->{type_kind}->{$self->{ret_type}}};
         # Although the '$var' declared in the next line is never explicitly
         # used within this 'elsif' block, commenting it out leads to
         # disaster, starting with the first 'eval qq' inside the 'elsif' block
@@ -833,7 +833,7 @@ EOF
       print "\tEXTEND(SP,$c);\n" if $c;
       $xsreturn += $c;
       generate_output( {
-        type        => $var_types{$_},
+        type        => $self->{var_types}->{$_},
         num         => $num++,
         var         => $_,
         do_setmagic => 0,
@@ -905,12 +905,12 @@ EOF
         my $s = ';';
         if ($min_args < $num_args)  {
           $s = '';
-          $proto_arg[$min_args] .= ";";
+          $self->{proto_arg}->[$min_args] .= ";";
         }
-        push @proto_arg, "$s\@"
+        push @{ $self->{proto_arg} }, "$s\@"
           if $ellipsis;
     
-        $proto = join ("", grep defined, @proto_arg);
+        $proto = join ("", grep defined, @{ $self->{proto_arg} } );
       }
       else {
         # User has specified a prototype
@@ -923,14 +923,14 @@ EOF
       $XsubAliases{$pname} = 0
         unless defined $XsubAliases{$pname};
       while ( my ($xname, $value) = each %XsubAliases) {
-        push(@InitFileCode, Q(<<"EOF"));
+        push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$xname\", XS_$Full_func_name, file$proto);
 #        XSANY.any_i32 = $value;
 EOF
       }
     }
     elsif (@Attributes) {
-      push(@InitFileCode, Q(<<"EOF"));
+      push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);
 #        apply_attrs_string("$Package", cv, "@Attributes", 0);
 EOF
@@ -938,18 +938,18 @@ EOF
     elsif ($self->{interface}) {
       while ( my ($yname, $value) = each %Interfaces) {
         $yname = "$Package\::$yname" unless $yname =~ /::/;
-        push(@InitFileCode, Q(<<"EOF"));
+        push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$proto);
 #        $self->{interface_macro_set}(cv,$value);
 EOF
       }
     }
     elsif($newXS eq 'newXS'){ # work around P5NCI's empty newXS macro
-      push(@InitFileCode,
+      push(@{ $self->{InitFileCode} },
        "        ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
     }
     else {
-      push(@InitFileCode,
+      push(@{ $self->{InitFileCode} },
        "        (void)${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
     }
   } # END 'PARAGRAPH' 'while' loop
@@ -964,7 +964,7 @@ EOF
 #}
 #
 EOF
-    unshift(@InitFileCode, <<"MAKE_FETCHMETHOD_WORK");
+    unshift(@{ $self->{InitFileCode} }, <<"MAKE_FETCHMETHOD_WORK");
     /* Making a sub named "${Package}::()" allows the package */
     /* to be findable via fetchmethod(), and causes */
     /* overload::Overloaded("${Package}") to return true. */
@@ -1037,7 +1037,7 @@ EOF
 #    );
 EOF
 
-  print @InitFileCode;
+  print @{ $self->{InitFileCode} };
 
   print Q(<<"EOF") if defined $self->{xsubaliases} or defined $self->{interfaces};
 #    }
@@ -1158,12 +1158,12 @@ sub INPUT_handler {
 
     # Check for duplicate definitions
     blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
-      if $arg_list{$var_name}++
+      if $self->{arg_list}->{$var_name}++
     or defined $argtype_seen{$var_name} and not $self->{processing_arg_with_types};
 
     $self->{thisdone} |= $var_name eq "THIS";
     $self->{retvaldone} |= $var_name eq "RETVAL";
-    $var_types{$var_name} = $var_type;
+    $self->{var_types}->{$var_name} = $var_type;
     # XXXX This check is a safeguard against the unfinished conversion of
     # generate_init().  When generate_init() is fixed,
     # one can use 2-args map_type() unconditionally.
@@ -1177,10 +1177,10 @@ sub INPUT_handler {
       print "\t" . &map_type($var_type, undef, $self->{hiertype});
       $printed_name = 0;
     }
-    $self->{var_num} = $args_match{$var_name};
+    $self->{var_num} = $self->{args_match}->{$var_name};
 
     if ($self->{var_num}) {
-      $proto_arg[$self->{var_num}] = $proto_letter{$var_type} || "\$";
+      $self->{proto_arg}->[$self->{var_num}] = $self->{proto_letter}->{$var_type} || "\$";
     }
     $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
@@ -1233,17 +1233,17 @@ sub OUTPUT_handler {
       next;
     }
     blurt ("Error: OUTPUT $outarg not an argument"), next
-      unless defined($args_match{$outarg});
+      unless defined($self->{args_match}->{$outarg});
     blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
-      unless defined $var_types{$outarg};
-    $self->{var_num} = $args_match{$outarg};
+      unless defined $self->{var_types}->{$outarg};
+    $self->{var_num} = $self->{args_match}->{$outarg};
     if ($outcode) {
       print "\t$outcode\n";
       print "\tSvSETMAGIC(ST(" , $self->{var_num} - 1 , "));\n" if $self->{DoSetMagic};
     }
     else {
       generate_output( {
-        type        => $var_types{$outarg},
+        type        => $self->{var_types}->{$outarg},
         num         => $self->{var_num},
         var         => $outarg,
         do_setmagic => $self->{DoSetMagic},
@@ -1353,7 +1353,7 @@ sub OVERLOAD_handler() {
     while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
       $self->{Overload} = 1 unless $self->{Overload};
       my $overload = "$Package\::(".$1;
-      push(@InitFileCode,
+      push(@{ $self->{InitFileCode} },
        "        (void)${newXS}(\"$overload\", XS_$Full_func_name, file$proto);\n");
     }
   }
@@ -1497,9 +1497,9 @@ sub INCLUDE_handler () {
 
   # simple minded recursion detector
   death("INCLUDE loop detected")
-    if $IncludedFiles{$_};
+    if $self->{IncludedFiles}->{$_};
 
-  ++$IncludedFiles{$_} unless /\|\s*$/;
+  ++$self->{IncludedFiles}->{$_} unless /\|\s*$/;
 
   if (/\|\s*$/ && /^\s*perl\s/) {
     Warn("The INCLUDE directive with a command is discouraged." .
@@ -1602,7 +1602,7 @@ sub PopFile() {
   my $ThisFile = $self->{filename};
   my $isPipe   = $data->{IsPipe};
 
-  --$IncludedFiles{$self->{filename}}
+  --$self->{IncludedFiles}->{$self->{filename}}
     unless $isPipe;
 
   close $FH;
@@ -1781,12 +1781,12 @@ sub generate_init {
 
   $type = tidy_type($type);
   blurt("Error: '$type' not in typemap"), return
-    unless defined($type_kind{$type});
+    unless defined($self->{type_kind}->{$type});
 
   ($ntype = $type) =~ s/\s*\*/Ptr/g;
   my $subtype;
   ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-  $tk = $type_kind{$type};
+  $tk = $self->{type_kind}->{$type};
   $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
   if ($tk eq 'T_PV' and exists $lengthof{$var}) {
     print "\t$var" unless $printed_name;
@@ -1796,15 +1796,15 @@ sub generate_init {
     return;
   }
   $type =~ tr/:/_/ unless $self->{hiertype};
-  blurt("Error: No INPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
-    unless defined $input_expr{$tk};
-  my $expr = $input_expr{$tk};
+  blurt("Error: No INPUT definition for type '$type', typekind '$self->{type_kind}->{$type}' found"), return
+    unless defined $self->{input_expr}->{$tk};
+  my $expr = $self->{input_expr}->{$tk};
   if ($expr =~ /DO_ARRAY_ELEM/) {
     blurt("Error: '$subtype' not in typemap"), return
-      unless defined($type_kind{$subtype});
-    blurt("Error: No INPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
-      unless defined $input_expr{$type_kind{$subtype}};
-    my $subexpr = $input_expr{$type_kind{$subtype}};
+      unless defined($self->{type_kind}->{$subtype});
+    blurt("Error: No INPUT definition for type '$subtype', typekind '$self->{type_kind}->{$subtype}' found"), return
+      unless defined $self->{input_expr}->{$self->{type_kind}->{$subtype}};
+    my $subexpr = $self->{input_expr}->{$self->{type_kind}->{$subtype}};
     $subexpr =~ s/\$type/\$subtype/g;
     $subexpr =~ s/ntype/subtype/g;
     $subexpr =~ s/\$arg/ST(ix_$var)/g;
@@ -1873,20 +1873,20 @@ sub generate_output {
   }
   else {
     blurt("Error: '$type' not in typemap"), return
-      unless defined($type_kind{$type});
-    blurt("Error: No OUTPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
-      unless defined $output_expr{$type_kind{$type}};
+      unless defined($self->{type_kind}->{$type});
+    blurt("Error: No OUTPUT definition for type '$type', typekind '$self->{type_kind}->{$type}' found"), return
+      unless defined $self->{output_expr}->{$self->{type_kind}->{$type}};
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
     my $subtype;
     ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-    my $expr = $output_expr{$type_kind{$type}};
+    my $expr = $self->{output_expr}->{$self->{type_kind}->{$type}};
     if ($expr =~ /DO_ARRAY_ELEM/) {
       blurt("Error: '$subtype' not in typemap"), return
-        unless defined($type_kind{$subtype});
-      blurt("Error: No OUTPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
-        unless defined $output_expr{$type_kind{$subtype}};
-      my $subexpr = $output_expr{$type_kind{$subtype}};
+        unless defined($self->{type_kind}->{$subtype});
+      blurt("Error: No OUTPUT definition for type '$subtype', typekind '$self->{type_kind}->{$subtype}' found"), return
+        unless defined $self->{output_expr}->{$self->{type_kind}->{$subtype}};
+      my $subexpr = $self->{output_expr}->{$self->{type_kind}->{$subtype}};
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;
       $subexpr =~ s/\$var/${var}[ix_$var]/g;
