@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 22;
+plan tests => 23;
 
 is(reverse("abc"), "cba");
 
@@ -77,6 +77,10 @@ use Tie::Array;
     @a = reverse @a;
     ok(!exists $a[2] && !exists $a[3]);
     is($a[0] . $a[1] . $a[4], '985');
+
+    tie my @empty, "Tie::StdArray";
+    @empty = reverse @empty;
+    is(scalar(@empty), 0);
 }
 
 {
