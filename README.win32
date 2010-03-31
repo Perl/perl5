@@ -75,7 +75,7 @@ The MS Platform SDK can be downloaded from http://www.microsoft.com/.
 The MinGW64 compiler is available at http://sourceforge.net/projects/mingw-w64.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
-http://svn.ali.as/cpan/users/kmx/strawberry_gcc-toolchain/
+http://strawberryperl.com/package/kmx/64_gcctoolchain/mingw64-w64-20100123-kmx-v2.zip
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
 operating system, then you should set the WIN64 environment variable to "undef".
