@@ -41,8 +41,8 @@ our (
 our ($newXS, $proto, $Module_cname, );
 our (
   @line, %defaults, 
-  %lengthof, @line_no, %XsubAliases,
-  %XsubAliasValues, %Interfaces, @Attributes, %outargs, @XSStack, 
+  @line_no, 
+  @Attributes, %outargs, @XSStack, 
 );
 
 our $self = {};
@@ -376,7 +376,7 @@ EOF
     undef(%{ $self->{argtype_seen} });
     undef(@outlist);
     undef(%{ $self->{in_out} });
-    undef(%lengthof);
+    undef(%{ $self->{lengthof} });
     undef($self->{proto_in_this_xsub});
     undef($self->{scope_in_this_xsub});
     undef($self->{interface});
@@ -441,7 +441,7 @@ EOF
       last;
     }
     $XSStack[$XSS_work_idx]{functions}{$Full_func_name}++;
-    %XsubAliases = %XsubAliasValues = %Interfaces = @Attributes = ();
+    %{ $self->{XsubAliases} } = %{ $self->{XsubAliasValues} } = %{ $self->{Interfaces} } = @Attributes = ();
     $self->{DoSetMagic} = 1;
 
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
@@ -919,10 +919,10 @@ EOF
       $proto = qq{, "$proto"};
     }
 
-    if (%XsubAliases) {
-      $XsubAliases{$pname} = 0
-        unless defined $XsubAliases{$pname};
-      while ( my ($xname, $value) = each %XsubAliases) {
+    if (%{ $self->{XsubAliases} }) {
+      $self->{XsubAliases}->{$pname} = 0
+        unless defined $self->{XsubAliases}->{$pname};
+      while ( my ($xname, $value) = each %{ $self->{XsubAliases} }) {
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$xname\", XS_$Full_func_name, file$proto);
 #        XSANY.any_i32 = $value;
@@ -936,7 +936,7 @@ EOF
 EOF
     }
     elsif ($self->{interface}) {
-      while ( my ($yname, $value) = each %Interfaces) {
+      while ( my ($yname, $value) = each %{ $self->{Interfaces} }) {
         $yname = "$Package\::$yname" unless $yname =~ /::/;
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$proto);
@@ -1143,7 +1143,7 @@ sub INPUT_handler {
     # Process the length(foo) declarations
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x) {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
-      $lengthof{$2} = undef;
+      $self->{lengthof}->{$2} = undef;
       $self->{deferred} .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
     }
 
@@ -1285,7 +1285,7 @@ sub INTERFACE_handler() {
   foreach (split /[\s,]+/, $in) {
     my $iface_name = $_;
     $iface_name =~ s/^$self->{Prefix}//;
-    $Interfaces{$iface_name} = $_;
+    $self->{Interfaces}->{$iface_name} = $_;
   }
   print Q(<<"EOF");
 #    XSFUNCTION = $self->{interface_macro}($self->{ret_type},cv,XSANY.any_dptr);
@@ -1316,14 +1316,14 @@ sub GetAliases {
 
     # check for duplicate alias name & duplicate value
     Warn("Warning: Ignoring duplicate alias '$orig_alias'")
-      if defined $XsubAliases{$alias};
+      if defined $self->{XsubAliases}->{$alias};
 
-    Warn("Warning: Aliases '$orig_alias' and '$XsubAliasValues{$value}' have identical values")
-      if $XsubAliasValues{$value};
+    Warn("Warning: Aliases '$orig_alias' and '$self->{XsubAliasValues}->{$value}' have identical values")
+      if $self->{XsubAliasValues}->{$value};
 
     $self->{xsubaliases} = 1;
-    $XsubAliases{$alias} = $value;
-    $XsubAliasValues{$value} = $orig_alias;
+    $self->{XsubAliases}->{$alias} = $value;
+    $self->{XsubAliasValues}->{$value} = $orig_alias;
   }
 
   blurt("Error: Cannot parse ALIAS definitions from '$orig'")
@@ -1788,7 +1788,7 @@ sub generate_init {
   ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
   $tk = $self->{type_kind}->{$type};
   $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
-  if ($tk eq 'T_PV' and exists $lengthof{$var}) {
+  if ($tk eq 'T_PV' and exists $self->{lengthof}->{$var}) {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
