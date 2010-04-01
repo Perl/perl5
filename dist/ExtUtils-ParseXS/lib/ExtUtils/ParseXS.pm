@@ -39,9 +39,7 @@ our (
 # because I suspect they will pose the same problems as those in the statement
 # above.
 our ($newXS, $proto, $Module_cname, );
-our (
-  @line, %defaults, 
-);
+our ( %defaults, );
 
 our $self = {};
 
@@ -311,8 +309,8 @@ EOF
  PARAGRAPH:
   while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
-    while (@line && $line[0] !~ /^[^\#]/) {
-      my $ln = shift(@line);
+    while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
+      my $ln = shift(@{ $self->{line} });
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
@@ -345,7 +343,7 @@ EOF
       }
     }
 
-    next PARAGRAPH unless @line;
+    next PARAGRAPH unless @{ $self->{line} };
 
     if ($XSS_work_idx && !$self->{XSStack}->[$XSS_work_idx]{varname}) {
       # We are inside an #if, but have not yet #defined its xsubpp variable.
@@ -358,7 +356,7 @@ EOF
     death ("Code is not inside a function"
        ." (maybe last function was ended by a blank line "
        ." followed by a statement on column one?)")
-      if $line[0] =~ /^\s/;
+      if $self->{line}->[0] =~ /^\s/;
 
     my ($class, $externC, $static, $ellipsis, $wantRETVAL, $RETVAL_no_return);
     my (@fake_INPUT_pre);    # For length(s) generated variables
@@ -385,20 +383,20 @@ EOF
     $self->{ScopeThisXSUB} = 0;
     $xsreturn = 0;
 
-    $_ = shift(@line);
+    $_ = shift(@{ $self->{line} });
     while (my $kwd = check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
       no strict 'refs';
       &{"${kwd}_handler"}();
       use strict 'refs';
-      next PARAGRAPH unless @line;
-      $_ = shift(@line);
+      next PARAGRAPH unless @{ $self->{line} };
+      $_ = shift(@{ $self->{line} });
     }
 
     if (check_keyword("BOOT")) {
       &check_cpp;
-      push (@BootCode, "#line $self->{line_no}->[@{ $self->{line_no} } - @line] \"$self->{filepathname}\"")
-        if $self->{WantLineNumbers} && $line[0] !~ /^\s*#\s*line\b/;
-      push (@BootCode, @line, "");
+      push (@BootCode, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \"$self->{filepathname}\"")
+        if $self->{WantLineNumbers} && $self->{line}->[0] !~ /^\s*#\s*line\b/;
+      push (@BootCode, @{ $self->{line} }, "");
       next PARAGRAPH;
     }
 
@@ -407,18 +405,18 @@ EOF
     $RETVAL_no_return = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line ANSI-like declaration
-    unshift @line, $2
+    unshift @{ $self->{line} }, $2
       if $args{argtypes}
         and $self->{ret_type} =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
 
     # a function definition needs at least 2 lines
     blurt ("Error: Function definition too short '$self->{ret_type}'"), next PARAGRAPH
-      unless @line;
+      unless @{ $self->{line} };
 
     $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
     $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
 
-    $func_header = shift(@line);
+    $func_header = shift(@{ $self->{line} });
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
@@ -553,12 +551,12 @@ EOF
     $self->{func_args} = join(", ", @func_args);
     @{ $self->{args_match} }{@args} = @args_num;
 
-    my $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
-    my $CODE = grep(/^\s*CODE\s*:/, @line);
+    my $PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });
+    my $CODE = grep(/^\s*CODE\s*:/, @{ $self->{line} });
     # Detect CODE: blocks which use ST(n)= or XST_m*(n,v)
     #   to set explicit return values.
     my $EXPLICIT_RETURN = ($CODE &&
-            ("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
+            ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
 
     # The $ALIAS which follows is only explicitly called within the scope of
     # process_file().  In principle, it ought to be a lexical, i.e., 'my
@@ -573,9 +571,9 @@ EOF
     # >                       "Crypt::Rijndael::encrypt",
     # But at this point we're committed to generating the *same* C code that
     # the current version of ParseXS.pm does.  So we're declaring it as 'our'.
-    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
 
-    my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
+    my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
     $xsreturn = 1 if $EXPLICIT_RETURN;
 
@@ -644,11 +642,11 @@ EOF
 
     $self->{condnum} = 0;
     $self->{cond} = '';            # last CASE: condidional
-    push(@line, "$END:");
+    push(@{ $self->{line} }, "$END:");
     push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
     $_ = '';
     &check_cpp;
-    while (@line) {
+    while (@{ $self->{line} }) {
       &CASE_handler if check_keyword("CASE");
       print Q(<<"EOF");
 #   $args{except} [[
@@ -708,7 +706,7 @@ EOF
         }
 
         if (@fake_INPUT or @fake_INPUT_pre) {
-          unshift @line, @fake_INPUT_pre, @fake_INPUT, $_;
+          unshift @{ $self->{line} }, @fake_INPUT_pre, @fake_INPUT, $_;
           $_ = "";
           $self->{processing_arg_with_types} = 1;
           INPUT_handler();
@@ -719,7 +717,7 @@ EOF
 
         if (check_keyword("PPCODE")) {
           print_section();
-          death ("PPCODE must be last thing") if @line;
+          death ("PPCODE must be last thing") if @{ $self->{line} };
           print "\tLEAVE;\n" if $self->{ScopeThisXSUB};
           print "\tPUTBACK;\n\treturn;\n";
         }
@@ -1043,7 +1041,7 @@ EOF
 
   if (@BootCode) {
     print "\n    /* Initialisation Section */\n\n";
-    @line = @BootCode;
+    @{ $self->{line} } = @BootCode;
     print_section();
     print "\n    /* End of Initialisation Section */\n\n";
   }
@@ -1074,21 +1072,21 @@ EOF
 
 sub report_error_count { $self->{errors} }
 
-# Input:  ($_, @line) == unparsed input.
-# Output: ($_, @line) == (rest of line, following lines).
+# Input:  ($_, @{ $self->{line} }) == unparsed input.
+# Output: ($_, @{ $self->{line} }) == (rest of line, following lines).
 # Return: the matched keyword if found, otherwise 0
 sub check_keyword {
-  $_ = shift(@line) while !/\S/ && @line;
+  $_ = shift(@{ $self->{line} }) while !/\S/ && @{ $self->{line} };
   s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
 }
 
 sub print_section {
   # the "do" is required for right semantics
-  do { $_ = shift(@line) } while !/\S/ && @line;
+  do { $_ = shift(@{ $self->{line} }) } while !/\S/ && @{ $self->{line} };
 
-  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @line -1], " \"$self->{filepathname}\"\n")
+  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1], " \"$self->{filepathname}\"\n")
     if $self->{WantLineNumbers} && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
-  for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     print "$_\n";
   }
   print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n" if $self->{WantLineNumbers};
@@ -1097,11 +1095,11 @@ sub print_section {
 sub merge_section {
   my $in = '';
 
-  while (!/\S/ && @line) {
-    $_ = shift(@line);
+  while (!/\S/ && @{ $self->{line} }) {
+    $_ = shift(@{ $self->{line} });
   }
 
-  for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     $in .= "$_\n";
   }
   chomp $in;
@@ -1128,7 +1126,7 @@ sub CASE_handler {
 }
 
 sub INPUT_handler {
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     last if /^\s*NOT_IMPLEMENTED_YET/;
     next unless /\S/;        # skip blank lines
 
@@ -1215,7 +1213,7 @@ sub INPUT_handler {
 }
 
 sub OUTPUT_handler {
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
       $self->{DoSetMagic} = ($1 eq "ENABLE" ? 1 : 0);
@@ -1329,7 +1327,7 @@ sub GetAliases {
 }
 
 sub ATTRS_handler () {
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
     push @{ $self->{Attributes} }, $_;
@@ -1337,7 +1335,7 @@ sub ATTRS_handler () {
 }
 
 sub ALIAS_handler () {
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
     GetAliases($_) if $_;
@@ -1345,7 +1343,7 @@ sub ALIAS_handler () {
 }
 
 sub OVERLOAD_handler() {
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
     while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
@@ -1413,7 +1411,7 @@ sub PROTOTYPE_handler () {
   death("Error: Only 1 PROTOTYPE definition allowed per xsub")
     if $self->{proto_in_this_xsub}++;
 
-  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@line)) {
+  for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     $specified = 1;
     trim_whitespace($_);
@@ -1471,7 +1469,7 @@ sub PushXSStack {
           type            => 'file',
           LastLine        => $self->{lastline},
           LastLineNo      => $self->{lastline_no},
-          Line            => \@line,
+          Line            => $self->{line},
           LineNo          => $self->{line_no},
           Filename        => $self->{filename},
           Filepathname    => $self->{filepathname},
@@ -1613,7 +1611,7 @@ sub PopFile() {
   $self->{filepathname} = $data->{Filepathname};
   $self->{lastline}   = $data->{LastLine};
   $self->{lastline_no} = $data->{LastLineNo};
-  @line       = @{ $data->{Line} };
+  @{ $self->{line} }       = @{ $data->{Line} };
   @{ $self->{line_no} }    = @{ $data->{LineNo} };
 
   if ($isPipe and $? ) {
@@ -1632,7 +1630,7 @@ EOF
 }
 
 sub check_cpp {
-  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @line);
+  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
   if (@cpp) {
     my ($cpp, $cpplevel);
     for $cpp (@cpp) {
@@ -1662,12 +1660,12 @@ sub Q {
   $text;
 }
 
-# Read next xsub into @line from ($lastline, <$FH>).
+# Read next xsub into @{ $self->{line} } from ($lastline, <$FH>).
 sub fetch_para {
   # parse paragraph
   death ("Error: Unterminated `#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
-  @line = ();
+  @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
   return PopFile() if !defined $self->{lastline};
 
@@ -1703,8 +1701,8 @@ sub fetch_para {
     #   obj-c:    import
     #   others:    ident (gcc notes that some cpps have this one)
     $self->{lastline} =~ /^#[ \t]*(?:(?:if|ifn?def|elif|else|endif|define|undef|pragma|error|warning|line\s+\d+|ident)\b|(?:include(?:_next)?|import)\s*["<].*[>"])/) {
-      last if $self->{lastline} =~ /^\S/ && @line && $line[-1] eq "";
-      push(@line, $self->{lastline});
+      last if $self->{lastline} =~ /^\S/ && @{ $self->{line} } && $self->{line}->[-1] eq "";
+      push(@{ $self->{line} }, $self->{lastline});
       push(@{ $self->{line_no} }, $self->{lastline_no});
     }
 
@@ -1718,7 +1716,7 @@ sub fetch_para {
     chomp $self->{lastline};
     $self->{lastline} =~ s/^\s+$//;
   }
-  pop(@line), pop(@{ $self->{line_no} }) while @line && $line[-1] eq "";
+  pop(@{ $self->{line} }), pop(@{ $self->{line_no} }) while @{ $self->{line} } && $self->{line}->[-1] eq "";
   1;
 }
 
@@ -1939,7 +1937,7 @@ sub generate_output {
 
 sub Warn {
   # work out the line number
-  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @line -1];
+  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
 
   print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
 }
