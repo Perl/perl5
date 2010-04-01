@@ -38,7 +38,7 @@ our (
 # The scalars in the line below remain (for the time being) 'our' variables
 # because I suspect they will pose the same problems as those in the statement
 # above.
-our ($newXS, $proto, );
+our ($newXS, );
 
 our $self = {};
 
@@ -887,7 +887,7 @@ EOF
 EOF
 
     $newXS = "newXS";
-    $proto = "";
+    $self->{proto} = "";
 
     # Build the prototype string for the xsub
     if ($self->{ProtoThisXSUB}) {
@@ -905,13 +905,13 @@ EOF
         push @{ $self->{proto_arg} }, "$s\@"
           if $ellipsis;
     
-        $proto = join ("", grep defined, @{ $self->{proto_arg} } );
+        $self->{proto} = join ("", grep defined, @{ $self->{proto_arg} } );
       }
       else {
         # User has specified a prototype
-        $proto = $self->{ProtoThisXSUB};
+        $self->{proto} = $self->{ProtoThisXSUB};
       }
-      $proto = qq{, "$proto"};
+      $self->{proto} = qq{, "$self->{proto}"};
     }
 
     if (%{ $self->{XsubAliases} }) {
@@ -919,14 +919,14 @@ EOF
         unless defined $self->{XsubAliases}->{$pname};
       while ( my ($xname, $value) = each %{ $self->{XsubAliases} }) {
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = ${newXS}(\"$xname\", XS_$Full_func_name, file$proto);
+#        cv = ${newXS}(\"$xname\", XS_$Full_func_name, file$self->{proto});
 #        XSANY.any_i32 = $value;
 EOF
       }
     }
     elsif (@{ $self->{Attributes} }) {
       push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);
+#        cv = ${newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});
 #        apply_attrs_string("$Package", cv, "@{ $self->{Attributes} }", 0);
 EOF
     }
@@ -934,18 +934,18 @@ EOF
       while ( my ($yname, $value) = each %{ $self->{Interfaces} }) {
         $yname = "$Package\::$yname" unless $yname =~ /::/;
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$proto);
+#        cv = ${newXS}(\"$yname\", XS_$Full_func_name, file$self->{proto});
 #        $self->{interface_macro_set}(cv,$value);
 EOF
       }
     }
     elsif($newXS eq 'newXS'){ # work around P5NCI's empty newXS macro
       push(@{ $self->{InitFileCode} },
-       "        ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
+       "        ${newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});\n");
     }
     else {
       push(@{ $self->{InitFileCode} },
-       "        (void)${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
+       "        (void)${newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});\n");
     }
   } # END 'PARAGRAPH' 'while' loop
 
@@ -963,7 +963,7 @@ EOF
     /* Making a sub named "${Package}::()" allows the package */
     /* to be findable via fetchmethod(), and causes */
     /* overload::Overloaded("${Package}") to return true. */
-    (void)${newXS}("${Package}::()", XS_${Packid}_nil, file$proto);
+    (void)${newXS}("${Package}::()", XS_${Packid}_nil, file$self->{proto});
 MAKE_FETCHMETHOD_WORK
   }
 
@@ -1349,7 +1349,7 @@ sub OVERLOAD_handler() {
       $self->{Overload} = 1 unless $self->{Overload};
       my $overload = "$Package\::(".$1;
       push(@{ $self->{InitFileCode} },
-       "        (void)${newXS}(\"$overload\", XS_$Full_func_name, file$proto);\n");
+       "        (void)${newXS}(\"$overload\", XS_$Full_func_name, file$self->{proto});\n");
     }
   }
 }
