@@ -38,7 +38,7 @@ our (
 # The scalars in the line below remain (for the time being) 'our' variables
 # because I suspect they will pose the same problems as those in the statement
 # above.
-our ($newXS, $proto, $Module_cname, );
+our ($newXS, $proto, );
 
 our $self = {};
 
@@ -976,8 +976,8 @@ MAKE_FETCHMETHOD_WORK
 EOF
 
   print Q(<<"EOF");
-#XS(boot_$Module_cname); /* prototype to pass -Wmissing-prototypes */
-#XS(boot_$Module_cname)
+#XS(boot_$self->{Module_cname}); /* prototype to pass -Wmissing-prototypes */
+#XS(boot_$self->{Module_cname})
 EOF
 
   print Q(<<"EOF");
@@ -1674,7 +1674,7 @@ sub fetch_para {
     $Package = defined($2) ? $2 : ''; # keep -w happy
     $self->{Prefix}  = defined($3) ? $3 : ''; # keep -w happy
     $self->{Prefix} = quotemeta $self->{Prefix};
-    ($Module_cname = $Module) =~ s/\W/_/g;
+    ($self->{Module_cname} = $Module) =~ s/\W/_/g;
     ($Packid = $Package) =~ tr/:/_/;
     $self->{Packprefix} = $Package;
     $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
