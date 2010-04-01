@@ -39,7 +39,6 @@ our (
 # because I suspect they will pose the same problems as those in the statement
 # above.
 our ($newXS, $proto, $Module_cname, );
-our ( %defaults, );
 
 our $self = {};
 
@@ -365,7 +364,7 @@ EOF
     # initialize info arrays
     undef(%{ $self->{args_match} });
     undef(%{ $self->{var_types} });
-    undef(%defaults);
+    undef(%{ $self->{defaults} });
     undef(%{ $self->{arg_list} });
     undef(@{ $self->{proto_arg} });
     undef($self->{processing_arg_with_types});
@@ -534,8 +533,8 @@ EOF
       if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
         $extra_args++;
         $args[$i] = $1;
-        $defaults{$args[$i]} = $2;
-        $defaults{$args[$i]} =~ s/"/\\"/g;
+        $self->{defaults}->{$args[$i]} = $2;
+        $self->{defaults}->{$args[$i]} =~ s/"/\\"/g;
       }
       $self->{proto_arg}->[$i+1] = '$';
     }
@@ -1788,7 +1787,7 @@ sub generate_init {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
-      if defined $defaults{$var};
+      if defined $self->{defaults}->{$var};
     return;
   }
   $type =~ tr/:/_/ unless $self->{hiertype};
@@ -1812,7 +1811,7 @@ sub generate_init {
   if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
     $self->{ScopeThisXSUB} = 1;
   }
-  if (defined($defaults{$var})) {
+  if (defined($self->{defaults}->{$var})) {
     $expr =~ s/(\t+)/$1    /g;
     $expr =~ s/        /\t/g;
     if ($printed_name) {
@@ -1822,11 +1821,11 @@ sub generate_init {
       eval qq/print "\\t$var;\\n"/;
       warn $@ if $@;
     }
-    if ($defaults{$var} eq 'NO_INIT') {
+    if ($self->{defaults}->{$var} eq 'NO_INIT') {
       $self->{deferred} .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
     }
     else {
-      $self->{deferred} .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+      $self->{deferred} .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $self->{defaults}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
     }
     warn $@ if $@;
   }
