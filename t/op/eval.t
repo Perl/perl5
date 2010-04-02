@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..105\n";
+print "1..106\n";
 
 eval 'print "ok 1\n";';
 
@@ -594,3 +594,13 @@ eval {
 };
 print "ok\n";
 EOP
+
+TODO: {
+    local $TODO = 'syntax errors in block evals segfault since 32e2a35d';
+    fresh_perl_is(<<'EOP', "ok\n", undef, 'segfault on syntax errors in block evals');
+# localize the hits hash so the eval ends up with the pad offset of a copy of it in its targ
+BEGIN { $^H |= 0x00020000 }
+eval q{ eval { + } };
+print "ok\n";
+EOP
+}
