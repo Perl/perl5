@@ -562,6 +562,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    o->op_targ = 0;
 	    goto retry;
 	}
+    case OP_ENTERTRY:
     case OP_ENTEREVAL:	/* Was holding hints. */
 	o->op_targ = 0;
 	break;
