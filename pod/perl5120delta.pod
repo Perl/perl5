@@ -1643,7 +1643,7 @@ and proper citations added, thanks to a patch from Tom Christiansen.
 =item *
 
 The internal structure of the dual-life modules traditionally found in
-the F<lib/> and F<ext/> directories y in the perl source has changed
+the F<lib/> and F<ext/> directories in the perl source has changed
 significantly. Where possible, dual-lifed modules have been extracted
 from F<lib/> and F<ext/>.
 
