@@ -409,7 +409,7 @@ the strings?).
  Ricardo  5.11.4        2010-Jan-20
  Steve    5.11.5        2010-Feb-20
  Jesse    5.12.0-RC1    2010-Mar-29
- Jesse    5.12.0        2010-Apr-07
+ Jesse    5.12.0        2010-Apr-09
 
 =head2 SELECTED RELEASE SIZES
 
