@@ -33,7 +33,7 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 # them into $self led to build problems.  In most cases, strings being
 # 'eval'-ed contain the variables' names hard-coded.
 our (
-  $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS, 
+  $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS,
 );
 
 our $self = {};
@@ -784,20 +784,20 @@ EOF
         # <i> <> <(IV)$var>
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
-    
+
         # 0: type, 1: with_size, 2: how, 3: how_size
         if ($t and not $t->[1] and $t->[0] eq 'p') {
           # PUSHp corresponds to setpvn.  Treate setpv directly
           my $what = eval qq("$t->[2]");
           warn $@ if $@;
-    
+
           print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
           $prepush_done = 1;
         }
         elsif ($t) {
           my $what = eval qq("$t->[2]");
           warn $@ if $@;
-    
+
           my $tsize = $t->[3];
           $tsize = '' unless defined $tsize;
           $tsize = eval qq("$tsize");
@@ -900,7 +900,7 @@ EOF
         }
         push @{ $self->{proto_arg} }, "$s\@"
           if $ellipsis;
-    
+
         $self->{proto} = join ("", grep defined, @{ $self->{proto_arg} } );
       }
       else {
@@ -1150,7 +1150,7 @@ sub INPUT_handler {
     # Check for duplicate definitions
     blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
       if $self->{arg_list}->{$var_name}++
-    or defined $self->{argtype_seen}->{$var_name} and not $self->{processing_arg_with_types};
+        or defined $self->{argtype_seen}->{$var_name} and not $self->{processing_arg_with_types};
 
     $self->{thisdone} |= $var_name eq "THIS";
     $self->{retvaldone} |= $var_name eq "RETVAL";
