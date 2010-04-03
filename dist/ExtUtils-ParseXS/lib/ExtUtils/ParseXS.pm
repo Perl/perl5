@@ -297,7 +297,8 @@ EOF
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my (@BootCode, @outlist, $prepush_done, $xsreturn, $func_header, $orig_args, );
+  my (@outlist, $prepush_done, $xsreturn, $func_header, $orig_args, );
+  my $BootCode_ref = [];
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
  PARAGRAPH:
@@ -317,7 +318,7 @@ EOF
           if $self->{XSStack}->[-1]{type} ne 'if';
         if ($self->{XSStack}->[-1]{varname}) {
           push(@{ $self->{InitFileCode} }, "#endif\n");
-          push(@BootCode,     "#endif");
+          push(@{ $BootCode_ref },     "#endif");
         }
 
         my(@fns) = keys %{$self->{XSStack}->[-1]{functions}};
@@ -343,7 +344,7 @@ EOF
       # We are inside an #if, but have not yet #defined its xsubpp variable.
       print "#define $cpp_next_tmp 1\n\n";
       push(@{ $self->{InitFileCode} }, "#if $cpp_next_tmp\n");
-      push(@BootCode,     "#if $cpp_next_tmp");
+      push(@{ $BootCode_ref },     "#if $cpp_next_tmp");
       $self->{XSStack}->[$XSS_work_idx]{varname} = $cpp_next_tmp++;
     }
 
@@ -388,9 +389,9 @@ EOF
 
     if (check_keyword("BOOT")) {
       &check_cpp;
-      push (@BootCode, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \"$self->{filepathname}\"")
+      push (@{ $BootCode_ref }, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \"$self->{filepathname}\"")
         if $self->{WantLineNumbers} && $self->{line}->[0] !~ /^\s*#\s*line\b/;
-      push (@BootCode, @{ $self->{line} }, "");
+      push (@{ $BootCode_ref }, @{ $self->{line} }, "");
       next PARAGRAPH;
     }
 
@@ -1033,9 +1034,9 @@ EOF
 #    }
 EOF
 
-  if (@BootCode) {
+  if (@{ $BootCode_ref }) {
     print "\n    /* Initialisation Section */\n\n";
-    @{ $self->{line} } = @BootCode;
+    @{ $self->{line} } = @{ $BootCode_ref };
     print_section();
     print "\n    /* End of Initialisation Section */\n\n";
   }
