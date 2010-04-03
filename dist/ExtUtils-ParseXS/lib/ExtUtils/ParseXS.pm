@@ -73,8 +73,6 @@ sub process_file {
     $SymSet = new ExtUtils::XSSymSet 28;
   }
   @{ $self->{XSStack} } = ({type => 'none'});
-  my $XSS_work_idx = 0;
-  my $cpp_next_tmp = 'XSubPPtmpAAAA';
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
   $FH                   = $ExtUtils::ParseXS::Constants::FH;
   $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
@@ -132,13 +130,12 @@ sub process_file {
     select $args{output};
   }
 
-  my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
-    process_typemaps( $args{typemap}, $pwd );
-
-  $self->{type_kind}    = $type_kind_ref;
-  $self->{proto_letter} = $proto_letter_ref;
-  $self->{input_expr}   = $input_expr_ref;
-  $self->{output_expr}  = $output_expr_ref;
+  (
+    $self->{type_kind},
+    $self->{proto_letter},
+    $self->{input_expr},
+    $self->{output_expr},
+  ) = process_typemaps( $args{typemap}, $pwd );
 
   foreach my $value (values %{ $self->{input_expr} }) {
     $value =~ s/;*\s+\z//;
@@ -301,6 +298,8 @@ EOF
   $self->{lastline_no} = $.;
 
   my (@BootCode, @outlist, $prepush_done, $xsreturn, $func_header, $orig_args, );
+  my $XSS_work_idx = 0;
+  my $cpp_next_tmp = 'XSubPPtmpAAAA';
  PARAGRAPH:
   while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
