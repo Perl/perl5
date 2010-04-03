@@ -89,13 +89,20 @@ sub process_file {
   $self->{WantLineNumbers} = $args{linenumbers};
   $self->{IncludedFiles} = {};
 
-  for my $f ($args{filename}) {
-    die "Missing required parameter 'filename'" unless $f;
-    $self->{filepathname} = $f;
-    ($self->{dir}, $self->{filename}) = (dirname($f), basename($f));
-    $self->{filepathname} =~ s/\\/\\\\/g;
-    $self->{IncludedFiles}->{$f}++;
-  }
+#  for my $f ($args{filename}) {
+#    die "Missing required parameter 'filename'" unless $f;
+#    $self->{filepathname} = $f;
+#    ($self->{dir}, $self->{filename}) = (dirname($f), basename($f));
+#    $self->{filepathname} =~ s/\\/\\\\/g;
+#    $self->{IncludedFiles}->{$f}++;
+#  }
+
+  die "Missing required parameter 'filename'" unless $args{filename};
+  $self->{filepathname} = $args{filename};
+  ($self->{dir}, $self->{filename}) =
+    (dirname($args{filename}), basename($args{filename}));
+  $self->{filepathname} =~ s/\\/\\\\/g;
+  $self->{IncludedFiles}->{$args{filename}}++;
 
   # Open the output file if given as a string.  If they provide some
   # other kind of reference, trust them that we can print to it.
