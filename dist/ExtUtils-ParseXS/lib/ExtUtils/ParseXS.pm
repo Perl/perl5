@@ -89,14 +89,6 @@ sub process_file {
   $self->{WantLineNumbers} = $args{linenumbers};
   $self->{IncludedFiles} = {};
 
-#  for my $f ($args{filename}) {
-#    die "Missing required parameter 'filename'" unless $f;
-#    $self->{filepathname} = $f;
-#    ($self->{dir}, $self->{filename}) = (dirname($f), basename($f));
-#    $self->{filepathname} =~ s/\\/\\\\/g;
-#    $self->{IncludedFiles}->{$f}++;
-#  }
-
   die "Missing required parameter 'filename'" unless $args{filename};
   $self->{filepathname} = $args{filename};
   ($self->{dir}, $self->{filename}) =
@@ -177,6 +169,19 @@ sub process_file {
            )* "        # String literal
                 |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
          )* /xs;
+
+  # Since at this point we're ready to begin printing to the output file and
+  # reading from the input file, I want to get as much data as possible into
+  # the proto-object $self.  That means assigning to $self and elements of
+  # %args referenced below this point.
+  # HOWEVER:  This resulted in an error when I tried:
+  #   $args{'s'} ---> $self->{s}.
+  # Use of uninitialized value in quotemeta at
+  #   .../blib/lib/ExtUtils/ParseXS.pm line 733
+
+  foreach my $datum ( qw| argtypes except inout optimize | ) {
+    $self->{$datum} = $args{$datum};
+  }
 
   # Identify the version of xsubpp used
   print <<EOM;
@@ -382,7 +387,7 @@ EOF
 
     # Allow one-line ANSI-like declaration
     unshift @{ $self->{line} }, $2
-      if $args{argtypes}
+      if $self->{argtypes}
         and $self->{ret_type} =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
 
     # a function definition needs at least 2 lines
@@ -423,7 +428,7 @@ EOF
     my @args;
 
     my %only_C_inlist;        # Not in the signature of Perl function
-    if ($args{argtypes} and $orig_args =~ /\S/) {
+    if ($self->{argtypes} and $orig_args =~ /\S/) {
       my $args = "$orig_args ,";
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
         @args = ($args =~ /\G ( (??{ $C_arg }) ) , /xg);
@@ -437,7 +442,7 @@ EOF
           next unless defined($pre) && length($pre);
           my $out_type = '';
           my $inout_var;
-          if ($args{inout} and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
+          if ($self->{inout} and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
             my $type = $1;
             $out_type = $type if $type ne 'IN';
             $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
@@ -474,7 +479,7 @@ EOF
     else {
       @args = split(/\s*,\s*/, $orig_args);
       for (@args) {
-        if ($args{inout} and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
+        if ($self->{inout} and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
           my $out_type = $1;
           next if $out_type eq 'IN';
           $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
@@ -586,7 +591,7 @@ EOF
       $self->{cond} = qq(items < $min_args || items > $num_args);
     }
 
-    print Q(<<"EOF") if $args{except};
+    print Q(<<"EOF") if $self->{except};
 #    char errbuf[1024];
 #    *errbuf = '\0';
 EOF
@@ -628,7 +633,7 @@ EOF
     while (@{ $self->{line} }) {
       &CASE_handler if check_keyword("CASE");
       print Q(<<"EOF");
-#   $args{except} [[
+#   $self->{except} [[
 EOF
 
       # do initialization of input variables
@@ -681,7 +686,7 @@ EOF
           $self->{args_match}->{"RETVAL"} = 0;
           $self->{var_types}->{"RETVAL"} = $self->{ret_type};
           print "\tdXSTARG;\n"
-            if $args{optimize} and $targetable{$self->{type_kind}->{$self->{ret_type}}};
+            if $self->{optimize} and $targetable{$self->{type_kind}->{$self->{ret_type}}};
         }
 
         if (@fake_INPUT or @fake_INPUT_pre) {
@@ -757,7 +762,7 @@ EOF
         print "\t$self->{RETVAL_code}\n";
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
-        my $t = $args{optimize} && $targetable{$self->{type_kind}->{$self->{ret_type}}};
+        my $t = $self->{optimize} && $targetable{$self->{type_kind}->{$self->{ret_type}}};
         # Although the '$var' declared in the next line is never explicitly
         # used within this 'elsif' block, commenting it out leads to
         # disaster, starting with the first 'eval qq' inside the 'elsif' block
@@ -829,7 +834,7 @@ EOF
       print Q(<<"EOF");
 #    ]]
 EOF
-      print Q(<<"EOF") if $args{except};
+      print Q(<<"EOF") if $self->{except};
 #    BEGHANDLERS
 #    CATCHALL
 #    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
@@ -845,7 +850,7 @@ EOF
       death(/^$self->{BLOCK_re}/o ? "Misplaced `$1:'" : "Junk at end of function ($_)");
     }
 
-    print Q(<<"EOF") if $args{except};
+    print Q(<<"EOF") if $self->{except};
 #    if (errbuf[0])
 #    Perl_croak(aTHX_ errbuf);
 EOF
