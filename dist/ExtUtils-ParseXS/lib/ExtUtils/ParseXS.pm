@@ -308,7 +308,7 @@ EOF
       my $ln = shift(@{ $self->{line} });
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
-      ( $XSS_work_idx, $BootCode_ref ) =
+      ( $self, $XSS_work_idx, $BootCode_ref ) =
         print_preprocessor_statements( $self, $XSS_work_idx, $BootCode_ref );
     }
 
@@ -362,7 +362,7 @@ EOF
     }
 
     if (check_keyword("BOOT")) {
-      &check_cpp;
+      check_cpp($self);
       push (@{ $BootCode_ref }, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \"$self->{filepathname}\"")
         if $self->{WantLineNumbers} && $self->{line}->[0] !~ /^\s*#\s*line\b/;
       push (@{ $BootCode_ref }, @{ $self->{line} }, "");
@@ -406,7 +406,10 @@ EOF
       last;
     }
     $self->{XSStack}->[$XSS_work_idx]{functions}{$Full_func_name}++;
-    %{ $self->{XsubAliases} } = %{ $self->{XsubAliasValues} } = %{ $self->{Interfaces} } = @{ $self->{Attributes} } = ();
+    %{ $self->{XsubAliases} }     = ();
+    %{ $self->{XsubAliasValues} } = ();
+    %{ $self->{Interfaces} }      = ();
+    @{ $self->{Attributes} }      = ();
     $self->{DoSetMagic} = 1;
 
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
@@ -614,7 +617,7 @@ EOF
     push(@{ $self->{line} }, "$END:");
     push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
     $_ = '';
-    &check_cpp;
+    check_cpp($self);
     while (@{ $self->{line} }) {
       &CASE_handler if check_keyword("CASE");
       print Q(<<"EOF");
@@ -1599,6 +1602,7 @@ EOF
 }
 
 sub check_cpp {
+  my ($self) = @_;
   my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
   if (@cpp) {
     my ($cpp, $cpplevel);
@@ -1952,7 +1956,7 @@ sub print_preprocessor_statements {
       @{$self->{XSStack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
     }
   }
-  return ($XSS_work_idx, $BootCode_ref);
+  return ($self, $XSS_work_idx, $BootCode_ref);
 }
 
 1;
