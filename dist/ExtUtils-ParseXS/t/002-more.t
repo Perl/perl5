@@ -37,7 +37,7 @@ SKIP: {
   skip "no compiler available", 2
     if ! $b->have_compiler;
   $obj_file = $b->compile( source => $source_file );
-  ok $obj_file;
+  ok $obj_file, "ExtUtils::CBuilder::compile() returned true value";
   ok -e $obj_file, "Make sure $obj_file exists";
 }
 
@@ -46,7 +46,7 @@ SKIP: {
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSMore';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
-  ok $lib_file;
+  ok $lib_file, "ExtUtils::CBuilder::link() returned true value";
   ok -e $lib_file,  "Make sure $lib_file exists";
 
   eval{
@@ -57,7 +57,7 @@ SKIP: {
 
     sub new{ bless {}, shift }
   };
-  is $@, '';
+  is $@, '', "No error message recorded, as expected";
   is ExtUtils::ParseXS::report_error_count(), 0, 'ExtUtils::ParseXS::errors()';
 
   is $XSMore::boot_ok, 100, 'the BOOT keyword';
