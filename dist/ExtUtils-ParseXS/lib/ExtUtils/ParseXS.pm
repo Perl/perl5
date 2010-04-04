@@ -309,8 +309,9 @@ EOF
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my (@outlist, $prepush_done, $xsreturn, $func_header, $orig_args, );
+  my ($prepush_done, $xsreturn, $func_header, $orig_args, );
   my $BootCode_ref = [];
+  my $outlist_ref  = [];
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
  PARAGRAPH:
@@ -351,7 +352,7 @@ EOF
     undef(@{ $self->{proto_arg} });
     undef($self->{processing_arg_with_types});
     undef(%{ $self->{argtype_seen} });
-    undef(@outlist);
+    undef(@{ $outlist_ref });
     undef(%{ $self->{in_out} });
     undef(%{ $self->{lengthof} });
     undef($self->{proto_in_this_xsub});
@@ -427,7 +428,7 @@ EOF
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
     my @args;
 
-    my %only_C_inlist;        # Not in the signature of Perl function
+    my $only_C_inlist_ref = {};        # Not in the signature of Perl function
     if ($self->{argtypes} and $orig_args =~ /\S/) {
       my $args = "$orig_args ,";
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -466,8 +467,8 @@ EOF
             $self->{argtype_seen}->{$len_name}++;
             $_ = "$len_name$default"; # Assigns to @args
           }
-          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $islength;
-          push @outlist, $len_name if $out_type =~ /OUTLIST$/;
+          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST" or $islength;
+          push @{ $outlist_ref }, $len_name if $out_type =~ /OUTLIST$/;
           $self->{in_out}->{$len_name} = $out_type if $out_type;
         }
       }
@@ -482,9 +483,9 @@ EOF
         if ($self->{inout} and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
           my $out_type = $1;
           next if $out_type eq 'IN';
-          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
+          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST";
           if ($out_type =~ /OUTLIST$/) {
-              push @outlist, undef;
+              push @{ $outlist_ref }, undef;
           }
           $self->{in_out}->{$_} = $out_type;
         }
@@ -508,7 +509,7 @@ EOF
           last;
         }
       }
-      if ($only_C_inlist{$args[$i]}) {
+      if ($only_C_inlist_ref->{$args[$i]}) {
         push @args_num, undef;
       }
       else {
@@ -808,7 +809,7 @@ EOF
 
       $xsreturn = 1 if $self->{ret_type} ne "void";
       my $num = $xsreturn;
-      my $c = @outlist;
+      my $c = @{ $outlist_ref };
       print "\tXSprePUSH;" if $c and not $prepush_done;
       print "\tEXTEND(SP,$c);\n" if $c;
       $xsreturn += $c;
@@ -818,7 +819,7 @@ EOF
         var         => $_,
         do_setmagic => 0,
         do_push     => 1,
-      } ) for @outlist;
+      } ) for @{ $outlist_ref };
 
       # do cleanup
       process_keyword("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
