@@ -11,10 +11,6 @@
 #
 # Suggested alternative: Cwd
 
-warn( "The 'pwd.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Cwd module instead." );
-
 ;# $RCSfile: pwd.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:11 $
 ;#
 ;# $Log:	pwd.pl,v $

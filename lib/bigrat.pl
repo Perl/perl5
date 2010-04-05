@@ -11,10 +11,6 @@ require "bigint.pl";
 #
 # Arbitrary size rational math package
 
-warn( "The 'bigrat.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " bigrat module instead." );
-
 # by Mark Biggar
 #
 # Input values to these routines consist of strings of the form 

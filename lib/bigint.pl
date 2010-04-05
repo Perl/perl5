@@ -10,10 +10,6 @@ package bigint;
 #
 # Suggested alternative:  Math::BigInt
 
-warn( "The 'bigint.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Math::BigInt module instead." );
-
 # arbitrary size integer math package
 #
 # by Mark Biggar

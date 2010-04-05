@@ -10,10 +10,6 @@
 #
 # Suggested alternative: Cwd
 
-warn( "The 'fastcwd.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Cwd module instead." );
-
 # Usage: $cwd = &fastcwd;
 #
 # This is a faster version of getcwd.  It's also more dangerous because

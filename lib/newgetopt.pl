@@ -11,10 +11,6 @@
 #
 # Suggested alternative: Getopt::Long
 
-warn( "The 'newgetopt.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Getopt::Long module instead." );
-
 {   package newgetopt;
 
     # Values for $order. See GNU getopt.c for details.

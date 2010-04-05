@@ -10,10 +10,6 @@
 #
 #     require 'open2.pl';
 
-warn( "The 'open2.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " IPC::Open2 module instead." );
-
 package main;
 use IPC::Open2 'open2';
 1

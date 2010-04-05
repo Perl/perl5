@@ -10,10 +10,6 @@
 #
 #     require 'open3.pl';
 
-warn( "The 'open3.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " IPC::Open3 module instead." );
-
 package main;
 use IPC::Open3 'open3';
 1

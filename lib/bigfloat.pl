@@ -11,10 +11,6 @@ require "bigint.pl";
 #
 # Suggested alternative: Math::BigFloat
 
-warn( "The 'bigfloat.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Math::BigFloat module instead." );
-
 # Arbitrary length float math package
 #
 # by Mark Biggar

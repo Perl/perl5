@@ -9,10 +9,6 @@
 #
 # Suggested alternative: IO::Handle
 
-warn( "The 'flush.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " IO::Handle module instead." );
-
 ;# Usage: &flush(FILEHANDLE)
 ;# flushes the named filehandle
 

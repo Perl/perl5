@@ -1,3 +1,9 @@
+#
+# This library is no longer being maintained, and is included for backward
+# compatibility with Perl 4 programs which may require it.
+# This legacy library is deprecated and will be removed in a future
+# release of perl.
+#
 # assert.pl
 # tchrist@convex.com (Tom Christiansen)
 # 
@@ -10,9 +16,6 @@
 # rest of the args, if any, are nice to know because they will
 # be printed out by &panic, which is just the stack-backtrace
 # routine shamelessly borrowed from the perl debugger.
-
-warn( "The 'assert.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl." );
 
 sub assert {
     &panic("ASSERTION BOTCHED: $_[$[]",$@) unless eval $_[$[];

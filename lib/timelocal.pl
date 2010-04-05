@@ -19,6 +19,3 @@ use Time::Local;
 
 *timelocal::cheat = \&Time::Local::cheat;
 
-warn( "The 'timelocal.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Time::Local module instead." );

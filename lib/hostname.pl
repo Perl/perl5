@@ -10,10 +10,6 @@
 #
 # Suggested alternative: Sys::Hostname
 
-warn( "The 'hostname.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Sys::Hostname module instead." );
-
 sub hostname
 {
 	local(*P,@tmp,$hostname,$_);

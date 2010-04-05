@@ -8,9 +8,6 @@
 # In particular, this should not be used as an example of modern Perl
 # programming techniques.
 
-warn( "The 'look.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl." );
-
 ;# Sets file position in FILEHANDLE to be first line greater than or equal
 ;# (stringwise) to $key.  Pass flags for dictionary order and case folding.
 

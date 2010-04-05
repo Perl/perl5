@@ -33,11 +33,6 @@
 #      &dotsh ('/foo/bar arg1 ... argN');
 #
 
-warn( "The 'dotsh.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use "
-      . " one of the related modules from CPAN instead."
-      . " (Shell::Source, Shell::GetEnv, ...)" );
-
 sub dotsh {
    local(@sh) = @_;
    local($tmp,$key,$shell,$command,$args,$vars) = '';

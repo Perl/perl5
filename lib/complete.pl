@@ -10,10 +10,6 @@
 #
 # Suggested alternative: Term::Complete
 
-warn( "The 'complete.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Term::Complete module instead." );
-
 ;#      @(#)complete.pl,v1.1            (me@anywhere.EBay.Sun.COM) 09/23/91
 ;#
 ;# Author: Wayne Thompson

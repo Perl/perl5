@@ -3,10 +3,6 @@
 # This legacy library is deprecated and will be removed in a future
 # release of perl.
 
-warn( "The 'importenv.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Env::Export module (or similar) from CPAN instead." );
-
 ;# This file, when interpreted, pulls the environment into normal variables.
 ;# Usage:
 ;#	require 'importenv.pl';

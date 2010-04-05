@@ -3,10 +3,6 @@
 # removed in a future version of Perl. Please use the File::Find module
 # instead.
 
-warn( "Please use the File::Find module instead of the deprecated"
-     ." 'finddepth.pl' library, which will be removed in the next"
-     ." major release of perl" );
-
 # Usage:
 #	require "finddepth.pl";
 #

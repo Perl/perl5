@@ -9,10 +9,6 @@
 #
 # Suggested alternative: FileCache
 
-warn( "The 'cacheout.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " FileCache module instead." );
-
 # Open in their package.
 
 sub cacheout'open {

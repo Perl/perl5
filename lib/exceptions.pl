@@ -9,9 +9,6 @@
 # In particular, this should not be used as an example of modern Perl
 # programming techniques.
 
-warn( "The 'exceptions.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl." );
-
 # Here's a little code I use for exception handling.  It's really just
 # glorfied eval/die.  The way to use use it is when you might otherwise
 # exit, use &throw to raise an exception.  The first enclosing &catch

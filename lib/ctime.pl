@@ -10,10 +10,6 @@
 #
 # Suggested alternative: the POSIX ctime function
 
-warn( "The 'ctime.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " POSIX module (ctime function) instead." );
-
 ;#
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP

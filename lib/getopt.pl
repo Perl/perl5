@@ -10,10 +10,6 @@
 #
 # Suggested alternatives: Getopt::Long or Getopt::Std
 
-warn( "The 'getopt.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Getopt::Long or Getopt::Std modules instead." );
-
 ;# Process single-character switches with switch clustering.  Pass one argument
 ;# which is a string containing all switches that take an argument.  For each
 ;# switch found, sets $opt_x (where x is the switch name) to the value of the

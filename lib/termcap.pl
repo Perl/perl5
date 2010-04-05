@@ -11,10 +11,6 @@
 # Suggested alternative: Term::Cap
 #
 
-warn( "The 'termcap.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Term::Cap module instead." );
-
 ;#
 ;# Usage:
 ;#	require 'ioctl.pl';

@@ -9,10 +9,6 @@
 #
 # Suggested alternative: Cwd
 
-warn( "The 'getcwd.pl' legacy library is deprecated and will be"
-      . " removed in the next major release of perl. Please use the"
-      . " Cwd module instead." );
-
 #
 # Usage: $cwd = &getcwd;
 
