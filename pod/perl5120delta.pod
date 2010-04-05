@@ -290,9 +290,8 @@ those installed in C<ARCHLIB> and C<PRIVLIB>.
 Internally, Perl now treates compiled regular expressions (such as
 those created with C<qr//>) as first class entities. Perl modules which
 serialize, deserialize or otherwise have deep interaction with Perl's
-internal data structures need to be updated for this change.  Affected
-modules include L<FreezeThaw>,L<Data::Dump::Streamer> and L<Regexp::Copy>.
-
+internal data structures need to be updated for this change.  Most
+affected CPAN modules have already been updated as of this writing.
 
 =head2 Switch statement changes
 
