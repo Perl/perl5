@@ -646,7 +646,14 @@ F<finddepth.pl>, F<importenv.pl>, F<hostname.pl>, F<getopts.pl>,
 F<getopt.pl>, F<getcwd.pl>, F<flush.pl>, F<fastcwd.pl>, F<exceptions.pl>,
 F<ctime.pl>, F<complete.pl>, F<cacheout.pl>, F<bigrat.pl>, F<bigint.pl>,
 F<bigfloat.pl>, F<assert.pl>, F<abbrev.pl>, F<dotsh.pl>, and
-F<timelocal.pl> are all now deprecated. Using them will incur a warning.
+F<timelocal.pl> are all now deprecated.  Earlier, Perl's developers
+intended to remove these libraries from Perl's core for the 5.14.0 release.
+
+During final testing before the release of 5.12.0, several developers
+discovered current production code using these ancient libraries, some
+inside the Perl core itself.  Accordingly, the pumpking granted them
+a stay of execution. They will begin to warn about their deprecation
+in the 5.14.0 release and will be removed in the 5.16.0 release.
 
 
 =back
