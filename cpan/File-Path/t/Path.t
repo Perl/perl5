@@ -441,6 +441,8 @@ SKIP: {
         unless $Config{d_getgrent};
     skip 'not running as root', $skip_count
         unless $< == 0;
+    skip "darwin's nobody and nogroup are -1", $skip_count
+        if $^O eq 'darwin';
 
     my $dir_stem = $dir = catdir($tmp_base, 'owned-by');
 
