@@ -103,9 +103,8 @@ typedef struct jmpenv JMPENV;
 	DEBUG_l({							\
 	    int i = 0; JMPENV *p = PL_top_env;				\
 	    while (p) { i++; p = p->je_prev; }				\
-	    Perl_deb(aTHX_ "push JUMPLEVEL %d (now %p, was %p) at %s:%d\n",\
-		         i, (void*)&cur_env, (void*)PL_top_env,		\
-		         __FILE__, __LINE__);})				\
+	    Perl_deb(aTHX_ "JUMPENV_PUSH level=%d at %s:%d\n",		\
+		         i,  __FILE__, __LINE__);})			\
 	cur_env.je_prev = PL_top_env;					\
 	OP_REG_TO_MEM;							\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
@@ -120,9 +119,8 @@ typedef struct jmpenv JMPENV;
 	DEBUG_l({							\
 	    int i = -1; JMPENV *p = PL_top_env;				\
 	    while (p) { i++; p = p->je_prev; }				\
-	    Perl_deb(aTHX_ "pop  JUMPLEVEL %d (now %p, was %p) at %s:%d\n",\
-		         i, (void*)cur_env.je_prev, (void*)PL_top_env,	\
-		         __FILE__, __LINE__);})				\
+	    Perl_deb(aTHX_ "JUMPENV_POP level=%d at %s:%d\n",		\
+		         i, __FILE__, __LINE__);})			\
 	assert(PL_top_env == &cur_env);					\
 	PL_top_env = cur_env.je_prev;					\
     } STMT_END
@@ -132,9 +130,8 @@ typedef struct jmpenv JMPENV;
 	DEBUG_l({						\
 	    int i = -1; JMPENV *p = PL_top_env;			\
 	    while (p) { i++; p = p->je_prev; }			\
-	    Perl_deb(aTHX_ "JUMP JUMPLEVEL %d (%p) at %s:%d\n",	\
-		         i, (void*)PL_top_env,			\
-		         __FILE__, __LINE__);})			\
+	    Perl_deb(aTHX_ "JUMPENV_JUMP(%d) level=%d at %s:%d\n", \
+		         (int)v, i, __FILE__, __LINE__);})	\
 	OP_REG_TO_MEM;						\
 	if (PL_top_env->je_prev)				\
 	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
