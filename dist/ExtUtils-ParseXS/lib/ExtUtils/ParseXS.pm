@@ -255,7 +255,7 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my ($prepush_done, $xsreturn, $func_header, $orig_args, );
+  my ($prepush_done, $xsreturn, $orig_args, );
   my $BootCode_ref = [];
   my $outlist_ref  = [];
   my $XSS_work_idx = 0;
@@ -344,7 +344,7 @@ EOM
     $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
     $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
 
-    $func_header = shift(@{ $self->{line} });
+    my $func_header = shift(@{ $self->{line} });
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
