@@ -89,7 +89,7 @@ on the simple F<awk> script C<{print $2}> will produce a Perl program
 based around this code:
 
     while (<>) {
-        ($Fld1,$Fld2) = split(/[:\n]/, $_, 9999);
+        ($Fld1,$Fld2) = split(/[:\n]/, $_, -1);
         print $Fld2;
     }
 
