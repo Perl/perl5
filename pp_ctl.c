@@ -1653,6 +1653,10 @@ Perl_die_where(pTHX_ SV *msv)
 		SV * const nsv = cx->blk_eval.old_namesv;
                 (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                                &PL_sv_undef, 0);
+		/* note that unlike pp_entereval, pp_require isn't
+		 * supposed to trap errors. So now that we've popped the
+		 * EVAL that pp_require pushed, and processed the error
+		 * message, rethrow the error */
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
@@ -3041,6 +3045,35 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 }
 
 
+/* Run yyparse() in a setjmp wrapper. Returns:
+ *   0: yyparse() successful
+ *   1: yyparse() failed
+ *   3: yyparse() died
+ */
+STATIC int
+S_try_yyparse(pTHX)
+{
+    int ret;
+    dJMPENV;
+
+    assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 0:
+	ret = yyparse() ? 1 : 0;
+	break;
+    case 3:
+	break;
+    default:
+	JMPENV_POP;
+	JMPENV_JUMP(ret);
+	/* NOTREACHED */
+    }
+    JMPENV_POP;
+    return ret;
+}
+
+
 /* Compile a require/do, an eval '', or a /(?{...})/.
  * In the last case, startop is non-null, and contains the address of
  * a pointer that should be set to the just-compiled code.
@@ -3055,8 +3088,10 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 {
     dVAR; dSP;
     OP * const saveop = PL_op;
+    bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
+    int yystatus;
 
-    PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
+    PL_in_eval = (in_require
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
 		  : EVAL_INEVAL);
 
@@ -3108,27 +3143,39 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	CLEAR_ERRSV();
-    if (yyparse() || PL_parser->error_count || !PL_eval_root) {
+
+    /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
+     * so honour CATCH_GET and trap it here if necessary */
+
+    yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX) : yyparse();
+
+    if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx = &cxstack[cxstack_ix];
-	I32 optype = 0;			/* Might be reset by POPEVAL. */
+	I32 optype;			/* Used by POPEVAL. */
 	const char *msg;
+
+	PERL_UNUSED_VAR(newsp);
+	PERL_UNUSED_VAR(optype);
 
 	PL_op = saveop;
 	if (PL_eval_root) {
 	    op_free(PL_eval_root);
 	    PL_eval_root = NULL;
 	}
-	SP = PL_stack_base + POPMARK;		/* pop original mark */
-	if (!startop) {
-	    POPBLOCK(cx,PL_curpm);
-	    POPEVAL(cx);
+	if (yystatus != 3) {
+	    SP = PL_stack_base + POPMARK;	/* pop original mark */
+	    if (!startop) {
+		POPBLOCK(cx,PL_curpm);
+		POPEVAL(cx);
+	    }
 	}
 	lex_end();
-	LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
+	if (yystatus != 3)
+	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 
 	msg = SvPVx_nolen_const(ERRSV);
-	if (optype == OP_REQUIRE) {
+	if (in_require) {
 	    const SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
@@ -3136,8 +3183,10 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		       *msg ? msg : "Unknown error\n");
 	}
 	else if (startop) {
-	    POPBLOCK(cx,PL_curpm);
-	    POPEVAL(cx);
+	    if (yystatus != 3) {
+		POPBLOCK(cx,PL_curpm);
+		POPEVAL(cx);
+	    }
 	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
 		       (*msg ? msg : "Unknown error\n"));
 	}
@@ -3146,7 +3195,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	        sv_setpvs(ERRSV, "Compilation error");
 	    }
 	}
-	PERL_UNUSED_VAR(newsp);
 	PUSHs(&PL_sv_undef);
 	PUTBACK;
 	return FALSE;

@@ -658,3 +658,93 @@ sub STORE {
 tie $SELECT, 'main';
 $SELECT = *STDERR;
 EXPECT
+########
+# RT 23810: eval in die in FETCH can corrupt context stack
+
+my $file = 'rt23810.pm';
+
+my $e;
+my $s;
+
+sub do_require {
+    my ($str, $eval) = @_;
+    open my $fh, '>', $file or die "Can't create $file: $!\n";
+    print $fh $str;
+    close $fh;
+    if ($eval) {
+	$s .= '-ERQ';
+	eval { require $pm; $s .= '-ENDE' }
+    }
+    else {
+	$s .= '-RQ';
+	require $pm;
+    }
+    $s .= '-ENDRQ';
+    unlink $file;
+}
+
+sub TIEHASH { bless {} }
+
+sub FETCH {
+    # 10 or more syntax errors makes yyparse croak()
+    my $bad = q{$x+;$x+;$x+;$x+;$x+;$x+;$x+;$x+;$x+$x+;$x+;$x+;$x+;$x+;;$x+;};
+
+    if ($_[1] eq 'eval') {
+	$s .= 'EVAL';
+	eval q[BEGIN { die; $s .= '-X1' }];
+	$s .= '-BD';
+	eval q[BEGIN { $x+ }];
+	$s .= '-BS';
+	eval '$x+';
+	$s .= '-E1';
+	$s .= '-S1' while $@ =~ /syntax error at/g;
+	eval $bad;
+	$s .= '-E2';
+	$s .= '-S2' while $@ =~ /syntax error at/g;
+    }
+    elsif ($_[1] eq 'require') {
+	$s .= 'REQUIRE';
+	my @text = (
+	    q[BEGIN { die; $s .= '-X1' }],
+	    q[BEGIN { $x+ }],
+	    '$x+',
+	    $bad
+	);
+	for my $i (0..$#text) {
+	    $s .= "-$i";
+	    do_require($txt[$i], 0) if $e;;
+	    do_require($txt[$i], 1);
+	}
+    }
+    elsif ($_[1] eq 'exit') {
+	eval q[exit(0); print "overshot eval\n"];
+    }
+    else {
+	print "unknown key: '$_[1]'\n";
+    }
+    return "-R";
+}
+my %foo;
+tie %foo, "main";
+
+for my $action(qw(eval require)) {
+    $s = ''; $e = 0; $s .= main->FETCH($action); print "$action: s0=$s\n";
+    $s = ''; $e = 1; eval { $s .= main->FETCH($action)}; print "$action: s1=$s\n";
+    $s = ''; $e = 0; $s .= $foo{$action}; print "$action: s2=$s\n";
+    $s = ''; $e = 1; eval { $s .= $foo{$action}}; print "$action: s3=$s\n";
+}
+1 while unlink $file;
+
+$foo{'exit'};
+print "overshot main\n"; # shouldn't reach here
+
+EXPECT
+eval: s0=EVAL-BD-BS-E1-S1-E2-S2-S2-S2-S2-S2-S2-S2-S2-S2-S2-R
+eval: s1=EVAL-BD-BS-E1-S1-E2-S2-S2-S2-S2-S2-S2-S2-S2-S2-S2-R
+eval: s2=EVAL-BD-BS-E1-S1-E2-S2-S2-S2-S2-S2-S2-S2-S2-S2-S2-R
+eval: s3=EVAL-BD-BS-E1-S1-E2-S2-S2-S2-S2-S2-S2-S2-S2-S2-S2-R
+require: s0=REQUIRE-0-ERQ-ENDRQ-1-ERQ-ENDRQ-2-ERQ-ENDRQ-3-ERQ-ENDRQ-R
+require: s1=REQUIRE-0-RQ
+require: s2=REQUIRE-0-ERQ-ENDRQ-1-ERQ-ENDRQ-2-ERQ-ENDRQ-3-ERQ-ENDRQ-R
+require: s3=REQUIRE-0-RQ
+
