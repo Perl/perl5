@@ -255,7 +255,6 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my ($xsreturn, );
   my $BootCode_ref = [];
   my $outlist_ref  = [];
   my $XSS_work_idx = 0;
@@ -286,7 +285,6 @@ EOM
        ." followed by a statement on column one?)")
       if $self->{line}->[0] =~ /^\s/;
 
-    my ($class, $externC, $static, $ellipsis, $wantRETVAL, $RETVAL_no_return);
     my (@fake_INPUT_pre);    # For length(s) generated variables
     my (@fake_INPUT);
 
@@ -308,7 +306,7 @@ EOM
     $self->{interface_macro_set} = 'XSINTERFACE_FUNC_SET';
     $self->{ProtoThisXSUB} = $self->{WantPrototypes};
     $self->{ScopeThisXSUB} = 0;
-    $xsreturn = 0;
+    my $xsreturn = 0;
 
     $_ = shift(@{ $self->{line} });
     while (my $kwd = check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
@@ -329,7 +327,7 @@ EOM
 
     # extract return type, function name and arguments
     ($self->{ret_type}) = tidy_type($_);
-    $RETVAL_no_return = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
+    my $RETVAL_no_return = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line ANSI-like declaration
     unshift @{ $self->{line} }, $2
@@ -340,14 +338,14 @@ EOM
     blurt ("Error: Function definition too short '$self->{ret_type}'"), next PARAGRAPH
       unless @{ $self->{line} };
 
-    $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
-    $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
+    my $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
+    my $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
 
     my $func_header = shift(@{ $self->{line} });
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-    my $orig_args;
+    my ($class, $orig_args);
     ($class, $func_name, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
     ($pname = $func_name) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
@@ -446,6 +444,7 @@ EOM
     my @args_num = ();
     my $num_args = 0;
     my $report_args = '';
+    my $ellipsis;
     foreach my $i (0 .. $#args) {
       if ($args[$i] =~ s/\.\.\.//) {
         $ellipsis = 1;
@@ -621,6 +620,7 @@ EOF
         }
       }
 
+      my ($wantRETVAL);
       # do code
       if (/^\s*NOT_IMPLEMENTED_YET/) {
         print "\n\tPerl_croak(aTHX_ \"$pname: not implemented yet\");\n";
