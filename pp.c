@@ -207,7 +207,7 @@ PP(pp_rv2gv)
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ S_no_symref_sv, sv, (SvCUR(sv)>32 ? "..." : ""), "a symbol");
+		    DIE(aTHX_ S_no_symref_sv, sv, (SvPOK(sv) && SvCUR(sv)>32 ? "..." : ""), "a symbol");
 		if ((PL_op->op_private & (OPpLVAL_INTRO|OPpDONT_INIT_GV))
 		    == OPpDONT_INIT_GV) {
 		    /* We are the target of a coderef assignment.  Return
@@ -237,7 +237,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 
     if (PL_op->op_private & HINT_STRICT_REFS) {
 	if (SvOK(sv))
-	    Perl_die(aTHX_ S_no_symref_sv, sv, (SvCUR(sv)>32 ? "..." : ""), what);
+	    Perl_die(aTHX_ S_no_symref_sv, sv, (SvPOK(sv) && SvCUR(sv)>32 ? "..." : ""), what);
 	else
 	    Perl_die(aTHX_ PL_no_usym, what);
     }
