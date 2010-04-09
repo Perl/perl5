@@ -255,7 +255,7 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my ($prepush_done, $xsreturn, $orig_args, );
+  my ($xsreturn, $orig_args, );
   my $BootCode_ref = [];
   my $outlist_ref  = [];
   my $XSS_work_idx = 0;
@@ -304,7 +304,6 @@ EOM
     undef($self->{proto_in_this_xsub});
     undef($self->{scope_in_this_xsub});
     undef($self->{interface});
-    undef($prepush_done);
     $self->{interface_macro} = 'XSINTERFACE_FUNC';
     $self->{interface_macro_set} = 'XSINTERFACE_FUNC_SET';
     $self->{ProtoThisXSUB} = $self->{WantPrototypes};
@@ -704,6 +703,7 @@ EOF
         do_push     => undef,
       } ) for grep $self->{in_out}->{$_} =~ /OUT$/, keys %{ $self->{in_out} };
 
+      my $prepush_done;
       # all OUTPUT done, so now push the return value on the stack
       if ($self->{gotRETVAL} && $self->{RETVAL_code}) {
         print "\t$self->{RETVAL_code}\n";
