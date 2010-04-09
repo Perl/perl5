@@ -256,11 +256,11 @@ EOM
   $self->{lastline_no} = $.;
 
   my $BootCode_ref = [];
-  my $outlist_ref  = [];
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
  PARAGRAPH:
   while (fetch_para()) {
+    my $outlist_ref  = [];
     # Print initial preprocessor statements and blank lines
     while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
       my $ln = shift(@{ $self->{line} });
@@ -285,9 +285,6 @@ EOM
        ." followed by a statement on column one?)")
       if $self->{line}->[0] =~ /^\s/;
 
-    my (@fake_INPUT_pre);    # For length(s) generated variables
-    my (@fake_INPUT);
-
     # initialize info arrays
     undef(%{ $self->{args_match} });
     undef(%{ $self->{var_types} });
@@ -296,7 +293,6 @@ EOM
     undef(@{ $self->{proto_arg} });
     undef($self->{processing_arg_with_types});
     undef(%{ $self->{argtype_seen} });
-    undef(@{ $outlist_ref });
     undef(%{ $self->{in_out} });
     undef(%{ $self->{lengthof} });
     undef($self->{proto_in_this_xsub});
@@ -372,6 +368,8 @@ EOM
     $orig_args =~ s/\\\s*/ /g;    # process line continuations
     my @args;
 
+    my (@fake_INPUT_pre);    # For length(s) generated variables
+    my (@fake_INPUT);
     my $only_C_inlist_ref = {};        # Not in the signature of Perl function
     if ($self->{argtypes} and $orig_args =~ /\S/) {
       my $args = "$orig_args ,";
