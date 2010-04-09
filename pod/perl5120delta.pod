@@ -3034,6 +3034,14 @@ from either 5.10.x or 5.8.x.
 
 =item *
 
+Some CPANPLUS tests may fail if there is a functioning file
+F<../../cpanp-run-perl> outside your build directory. The failure
+shouldn't imply there's a problem with the actual functional
+software. The bug is already fixed in [RT #74188] and is scheduled for
+inclusion in perl-v5.12.1.
+
+=item *
+
 C<List::Util::first> misbehaves in the presence of a lexical C<$_>
 (typically introduced by C<my $_> or implicitly by C<given>). The variable
 which gets set for each iteration is the package variable C<$_>, not the
