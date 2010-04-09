@@ -5282,13 +5282,10 @@ S_looks_like_bool(pTHX_ const OP *o)
 	     && looks_like_bool(cLOGOPo->op_first->op_sibling));
 
 	case OP_NULL:
+	case OP_SCALAR:
 	    return (
 		o->op_flags & OPf_KIDS
 	    && looks_like_bool(cUNOPo->op_first));
-
-        case OP_SCALAR:
-            return looks_like_bool(cUNOPo->op_first);
-
 
 	case OP_ENTERSUB:
 
