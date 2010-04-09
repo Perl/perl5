@@ -113,6 +113,7 @@
 /DB_File.pm
 /Data
 /Devel/DProf.pm
+/Devel/DProf/
 /Devel/InnerPackage.pm
 /Devel/PPPort.pm
 /Devel/Peek.pm
