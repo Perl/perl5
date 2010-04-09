@@ -255,7 +255,7 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my ($xsreturn, $orig_args, );
+  my ($xsreturn, );
   my $BootCode_ref = [];
   my $outlist_ref  = [];
   my $XSS_work_idx = 0;
@@ -347,6 +347,7 @@ EOM
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
+    my $orig_args;
     ($class, $func_name, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
     ($pname = $func_name) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
