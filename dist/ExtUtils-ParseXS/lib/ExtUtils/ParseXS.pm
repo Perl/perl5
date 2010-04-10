@@ -478,7 +478,7 @@ EOM
     my $PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });
     my $CODE = grep(/^\s*CODE\s*:/, @{ $self->{line} });
     # Detect CODE: blocks which use ST(n)= or XST_m*(n,v)
-    #   to set explicit return values.
+    # to set explicit return values.
     my $EXPLICIT_RETURN = ($CODE &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
 
@@ -1880,3 +1880,5 @@ sub death {
 }
 
 1;
+
+# vim: ts=2 sw=2 et:
