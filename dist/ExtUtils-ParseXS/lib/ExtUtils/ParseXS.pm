@@ -20,6 +20,7 @@ use ExtUtils::ParseXS::Utilities qw(
   make_targetable
   map_type
   standard_XS_defs
+  assign_func_args
 );
 
 our @ISA = qw(Exporter);
@@ -470,13 +471,7 @@ EOM
     my $min_args = $num_args - $extra_args;
     $report_args =~ s/"/\\"/g;
     $report_args =~ s/^,\s+//;
-    my @func_args = @args;
-    shift @func_args if defined($class);
-
-    for (@func_args) {
-      s/^/&/ if $self->{in_out}->{$_};
-    }
-    $self->{func_args} = join(", ", @func_args);
+    $self->{func_args} = assign_func_args($self, \@args, $class);
     @{ $self->{args_match} }{@args} = @args_num;
 
     my $PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });

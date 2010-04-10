@@ -18,6 +18,7 @@ our (@ISA, @EXPORT_OK);
   make_targetable
   map_type
   standard_XS_defs
+  assign_func_args
 );
 
 =head1 NAME
@@ -488,6 +489,17 @@ S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 #endif /* !defined(newXS_flags) */
 
 EOF
+}
+
+sub assign_func_args {
+  my ($self, $argsref, $class) = @_;
+  my @func_args = @{$argsref};
+  shift @func_args if defined($class);
+
+  for (@func_args) {
+    s/^/&/ if $self->{in_out}->{$_};
+  }
+  return join(", ", @func_args);
 }
 
 1;
