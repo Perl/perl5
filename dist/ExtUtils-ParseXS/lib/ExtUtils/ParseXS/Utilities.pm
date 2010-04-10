@@ -19,6 +19,7 @@ our (@ISA, @EXPORT_OK);
   map_type
   standard_XS_defs
   assign_func_args
+  print_preprocessor_statements
 );
 
 =head1 NAME
@@ -500,6 +501,40 @@ sub assign_func_args {
     s/^/&/ if $self->{in_out}->{$_};
   }
   return join(", ", @func_args);
+}
+
+sub print_preprocessor_statements {
+  my ($self, $XSS_work_idx, $BootCode_ref) = @_;
+
+  my $statement = $+;
+  if ($statement eq 'if') {
+    $XSS_work_idx = @{ $self->{XSStack} };
+    push(@{ $self->{XSStack} }, {type => 'if'});
+  }
+  else {
+    death ("Error: `$statement' with no matching `if'")
+      if $self->{XSStack}->[-1]{type} ne 'if';
+    if ($self->{XSStack}->[-1]{varname}) {
+      push(@{ $self->{InitFileCode} }, "#endif\n");
+      push(@{ $BootCode_ref },     "#endif");
+    }
+
+    my(@fns) = keys %{$self->{XSStack}->[-1]{functions}};
+    if ($statement ne 'endif') {
+      # Hide the functions defined in other #if branches, and reset.
+      @{$self->{XSStack}->[-1]{other_functions}}{@fns} = (1) x @fns;
+      @{$self->{XSStack}->[-1]}{qw(varname functions)} = ('', {});
+    }
+    else {
+      my($tmp) = pop(@{ $self->{XSStack} });
+      0 while (--$XSS_work_idx
+           && $self->{XSStack}->[$XSS_work_idx]{type} ne 'if');
+      # Keep all new defined functions
+      push(@fns, keys %{$tmp->{other_functions}});
+      @{$self->{XSStack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
+    }
+  }
+  return ($self, $XSS_work_idx, $BootCode_ref);
 }
 
 1;
