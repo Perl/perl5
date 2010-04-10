@@ -37,7 +37,7 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 # them into $self led to build problems.  In most cases, strings being
 # 'eval'-ed contain the variables' names hard-coded.
 our (
-  $FH, $Package, $func_name, $Full_func_name, $Packid, $pname, $ALIAS,
+  $FH, $Package, $func_name, $Full_func_name, $pname, $ALIAS,
 );
 
 our $self = {};
@@ -350,7 +350,7 @@ EOM
     ($pname = $func_name) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
     my $clean_func_name;
     ($clean_func_name = $func_name) =~ s/^$self->{Prefix}//;
-    $Full_func_name = "${Packid}_$clean_func_name";
+    $Full_func_name = "$self->{Packid}_$clean_func_name";
     if ($Is_VMS) {
       $Full_func_name = $SymSet->addsym($Full_func_name);
     }
@@ -872,8 +872,8 @@ EOF
 
   if ($self->{Overload}) { # make it findable with fetchmethod
     print Q(<<"EOF");
-#XS(XS_${Packid}_nil); /* prototype to pass -Wmissing-prototypes */
-#XS(XS_${Packid}_nil)
+#XS(XS_$self->{Packid}_nil); /* prototype to pass -Wmissing-prototypes */
+#XS(XS_$self->{Packid}_nil)
 #{
 #   dXSARGS;
 #   XSRETURN_EMPTY;
@@ -884,7 +884,7 @@ EOF
     /* Making a sub named "${Package}::()" allows the package */
     /* to be findable via fetchmethod(), and causes */
     /* overload::Overloaded("${Package}") to return true. */
-    (void)$self->{newXS}("${Package}::()", XS_${Packid}_nil, file$self->{proto});
+    (void)$self->{newXS}("${Package}::()", XS_$self->{Packid}_nil, file$self->{proto});
 MAKE_FETCHMETHOD_WORK
   }
 
@@ -1572,7 +1572,6 @@ sub check_cpp {
   }
 }
 
-
 sub Q {
   my($text) = @_;
   $text =~ s/^#//gm;
@@ -1597,7 +1596,7 @@ sub fetch_para {
     $self->{Prefix}  = defined($3) ? $3 : ''; # keep -w happy
     $self->{Prefix} = quotemeta $self->{Prefix};
     ($self->{Module_cname} = $Module) =~ s/\W/_/g;
-    ($Packid = $Package) =~ tr/:/_/;
+    ($self->{Packid} = $Package) =~ tr/:/_/;
     $self->{Packprefix} = $Package;
     $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
     $self->{lastline} = "";
