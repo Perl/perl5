@@ -22,6 +22,7 @@ use ExtUtils::ParseXS::Utilities qw(
   standard_XS_defs
   assign_func_args
   print_preprocessor_statements
+  set_cond
 );
 
 our @ISA = qw(Exporter);
@@ -108,7 +109,7 @@ sub process_file {
   }
 
   # Really, we shouldn't have to chdir() or select() in the first
-  # place.  For now, just save & restore.
+  # place.  For now, just save and restore.
   my $orig_cwd = cwd();
   my $orig_fh = select();
 
@@ -521,15 +522,8 @@ EOF
     print Q(<<"EOF") if $INTERFACE;
 #    dXSFUNCTION($self->{ret_type});
 EOF
-    if ($ellipsis) {
-      $self->{cond} = ($min_args ? qq(items < $min_args) : 0);
-    }
-    elsif ($min_args == $num_args) {
-      $self->{cond} = qq(items != $min_args);
-    }
-    else {
-      $self->{cond} = qq(items < $min_args || items > $num_args);
-    }
+
+    $self->{cond} = set_cond($ellipsis, $min_args, $num_args);
 
     print Q(<<"EOF") if $self->{except};
 #    char errbuf[1024];
@@ -565,13 +559,13 @@ EOF
     # Now do a block of some sort.
 
     $self->{condnum} = 0;
-    $self->{cond} = '';            # last CASE: condidional
+    $self->{cond} = '';            # last CASE: conditional
     push(@{ $self->{line} }, "$END:");
     push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
     $_ = '';
     check_cpp($self);
     while (@{ $self->{line} }) {
-      &CASE_handler if check_keyword("CASE");
+      CASE_handler() if check_keyword("CASE");
       print Q(<<"EOF");
 #   $self->{except} [[
 EOF
@@ -622,7 +616,7 @@ EOF
       }
       else {
         if ($self->{ret_type} ne "void") {
-          print "\t" . &map_type($self->{ret_type}, 'RETVAL', $self->{hiertype}) . ";\n"
+          print "\t" . map_type($self->{ret_type}, 'RETVAL', $self->{hiertype}) . ";\n"
             if !$self->{retvaldone};
           $self->{args_match}->{"RETVAL"} = 0;
           $self->{var_types}->{"RETVAL"} = $self->{ret_type};
@@ -1092,11 +1086,11 @@ sub INPUT_handler {
     my $printed_name;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # Function pointers are not yet supported with &output_init!
-      print "\t" . &map_type($var_type, $var_name, $self->{hiertype});
+      print "\t" . map_type($var_type, $var_name, $self->{hiertype});
       $printed_name = 1;
     }
     else {
-      print "\t" . &map_type($var_type, undef, $self->{hiertype});
+      print "\t" . map_type($var_type, undef, $self->{hiertype});
       $printed_name = 0;
     }
     $self->{var_num} = $self->{args_match}->{$var_name};

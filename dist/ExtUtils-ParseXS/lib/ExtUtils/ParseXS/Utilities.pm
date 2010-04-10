@@ -20,6 +20,7 @@ our (@ISA, @EXPORT_OK);
   standard_XS_defs
   assign_func_args
   print_preprocessor_statements
+  set_cond
 );
 
 =head1 NAME
@@ -535,6 +536,21 @@ sub print_preprocessor_statements {
     }
   }
   return ($self, $XSS_work_idx, $BootCode_ref);
+}
+
+sub set_cond {
+  my ($ellipsis, $min_args, $num_args) = @_;
+  my $cond;
+  if ($ellipsis) {
+    $cond = ($min_args ? qq(items < $min_args) : 0);
+  }
+  elsif ($min_args == $num_args) {
+    $cond = qq(items != $min_args);
+  }
+  else {
+    $cond = qq(items < $min_args || items > $num_args);
+  }
+  return $cond;
 }
 
 1;
