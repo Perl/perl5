@@ -4484,6 +4484,7 @@ t/op/study.t			See if study works
 t/op/studytied.t		See if study works with tied scalars
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sub.t			See if subroutines work
+t/op/svleak.t			See if stuff leaks SVs
 t/op/switch.t			See if switches (given/when) work
 t/op/symbolcache.t		See if undef/delete works on stashes with functions
 t/op/sysio.t			See if sysread and syswrite work

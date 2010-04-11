@@ -936,3 +936,10 @@ void
 my_exit(int exitcode)
         PPCODE:
         my_exit(exitcode);
+
+I32
+sv_count()
+        CODE:
+	    RETVAL = PL_sv_count;
+	OUTPUT:
+	    RETVAL
