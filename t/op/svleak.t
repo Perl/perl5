@@ -13,7 +13,7 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
-plan tests => 3;
+plan tests => 4;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -35,3 +35,14 @@ my @a;
 leak(5, 0, sub {},                 "basic check 1 of leak test infrastructure");
 leak(5, 0, sub {push @a,1;pop @a}, "basic check 2 of leak test infrastructure");
 leak(5, 1, sub {push @a,1;},       "basic check 3 of leak test infrastructure");
+
+sub TIEARRAY	{ bless [], $_[0] }
+sub FETCH	{ $_[0]->[$_[1]] }
+sub STORE	{ $_[0]->[$_[1]] = $_[2] }
+
+# local $tied_elem[..] leaks <20020502143736.N16831@dansat.data-plan.com>"
+{
+    tie my @a, 'main';
+    leak(5, 0, sub {local $a[0]}, "local \$tied[0]");
+}
+

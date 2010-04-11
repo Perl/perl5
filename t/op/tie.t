@@ -747,4 +747,24 @@ require: s0=REQUIRE-0-ERQ-ENDRQ-1-ERQ-ENDRQ-2-ERQ-ENDRQ-3-ERQ-ENDRQ-R
 require: s1=REQUIRE-0-RQ
 require: s2=REQUIRE-0-ERQ-ENDRQ-1-ERQ-ENDRQ-2-ERQ-ENDRQ-3-ERQ-ENDRQ-R
 require: s3=REQUIRE-0-RQ
+########
+# RT 8857: STORE incorrectly invoked for local($_) on aliased tied array
+#          element
 
+sub TIEARRAY { bless [], $_[0] }
+sub TIEHASH  { bless [], $_[0] }
+sub FETCH { $_[0]->[$_[1]] }
+sub STORE { $_[0]->[$_[1]] = $_[2] }
+
+
+sub f {
+    local $_[0];
+}
+tie @a, 'main';
+tie %h, 'main';
+
+foreach ($a[0], $h{a}) {
+    f($_);
+}
+# on failure, chucks up 'premature free' etc messages
+EXPECT
