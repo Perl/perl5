@@ -2645,7 +2645,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 	PL_uid = PerlProc_getuid();
-	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '>':
 	PL_euid = SvIV(sv);
@@ -2672,7 +2671,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 	PL_euid = PerlProc_geteuid();
-	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '(':
 	PL_gid = SvIV(sv);
@@ -2699,7 +2697,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 	PL_gid = PerlProc_getgid();
-	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case ')':
 #ifdef HAS_SETGROUPS
@@ -2761,7 +2758,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 	PL_egid = PerlProc_getegid();
-	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case ':':
 	PL_chopset = SvPV_force(sv,len);
