@@ -21,8 +21,11 @@ our (@ISA, @EXPORT_OK);
   assign_func_args
   print_preprocessor_statements
   set_cond
+  Warn
+  blurt
+  death
+  check_conditional_preprocessor_statements
 );
-#  check_conditional_preprocessor_statements
 
 =head1 NAME
 
@@ -554,28 +557,48 @@ sub set_cond {
   return $cond;
 }
 
-#sub check_conditional_preprocessor_statements {
-#  my ($self) = @_;
-#  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
-#  if (@cpp) {
-#    my $cpplevel;
-#    for my $cpp (@cpp) {
-#      if ($cpp =~ /^\#\s*if/) {
-#        $cpplevel++;
-#      }
-#      elsif (!$cpplevel) {
-#        Warn("Warning: #else/elif/endif without #if in this function");
-#        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-#          if $self->{XSStack}->[-1]{type} eq 'if';
-#        return;
-#      }
-#      elsif ($cpp =~ /^\#\s*endif/) {
-#        $cpplevel--;
-#      }
-#    }
-#    Warn("Warning: #if without #endif in this function") if $cpplevel;
-#  }
-#}
+sub Warn {
+  my $self = shift;
+  # work out the line number
+  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
+
+  print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
+}
+
+sub blurt {
+  my $self = shift;
+  Warn($self, @_);
+  $self->{errors}++
+}
+
+sub death {
+  my $self = shift;
+  Warn($self, @_);
+  exit 1;
+}
+
+sub check_conditional_preprocessor_statements {
+  my ($self) = @_;
+  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
+  if (@cpp) {
+    my $cpplevel;
+    for my $cpp (@cpp) {
+      if ($cpp =~ /^\#\s*if/) {
+        $cpplevel++;
+      }
+      elsif (!$cpplevel) {
+        Warn( $self, "Warning: #else/elif/endif without #if in this function");
+        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
+          if $self->{XSStack}->[-1]{type} eq 'if';
+        return;
+      }
+      elsif ($cpp =~ /^\#\s*endif/) {
+        $cpplevel--;
+      }
+    }
+    Warn( $self, "Warning: #if without #endif in this function") if $cpplevel;
+  }
+}
 
 1;
 

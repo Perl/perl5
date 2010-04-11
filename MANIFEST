@@ -2995,6 +2995,7 @@ dist/ExtUtils-ParseXS/t/110-assign_func_args.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/111-print_preprocessor_statements.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/112-set_cond.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/113-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/114-blurt_death_Warn.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
 dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
 dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing

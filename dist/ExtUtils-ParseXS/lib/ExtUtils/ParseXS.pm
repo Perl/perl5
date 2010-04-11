@@ -23,8 +23,11 @@ use ExtUtils::ParseXS::Utilities qw(
   assign_func_args
   print_preprocessor_statements
   set_cond
+  Warn
+  blurt
+  death
+  check_conditional_preprocessor_statements
 );
-#  check_conditional_preprocessor_statements
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
@@ -1364,7 +1367,7 @@ sub SCOPE_handler () {
     if $self->{scope_in_this_xsub}++;
 
   trim_whitespace($_);
-  death ("Error: SCOPE: ENABLE/DISABLE")
+  death("Error: SCOPE: ENABLE/DISABLE")
       unless /^(ENABLE|DISABLE)\b/i;
   $self->{ScopeThisXSUB} = ( uc($1) eq 'ENABLE' );
 }
@@ -1376,7 +1379,7 @@ sub PROTOTYPES_handler () {
   trim_whitespace($_);
 
   # check for ENABLE/DISABLE
-  death ("Error: PROTOTYPES: ENABLE/DISABLE")
+  death("Error: PROTOTYPES: ENABLE/DISABLE")
     unless /^(ENABLE|DISABLE)/i;
 
   $self->{WantPrototypes} = 1 if $1 eq 'ENABLE';
@@ -1552,29 +1555,6 @@ EOF
   return 1;
 }
 
-sub check_conditional_preprocessor_statements {
-  my ($self) = @_;
-  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
-  if (@cpp) {
-    my $cpplevel;
-    for my $cpp (@cpp) {
-      if ($cpp =~ /^\#\s*if/) {
-        $cpplevel++;
-      }
-      elsif (!$cpplevel) {
-        Warn( $self, "Warning: #else/elif/endif without #if in this function");
-        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-          if $self->{XSStack}->[-1]{type} eq 'if';
-        return;
-      }
-      elsif ($cpp =~ /^\#\s*endif/) {
-        $cpplevel--;
-      }
-    }
-    Warn( $self, "Warning: #if without #endif in this function") if $cpplevel;
-  }
-}
-
 sub Q {
   my($text) = @_;
   $text =~ s/^#//gm;
@@ -1586,7 +1566,7 @@ sub Q {
 # Read next xsub into @{ $self->{line} } from ($lastline, <$FH>).
 sub fetch_para {
   # parse paragraph
-  death ("Error: Unterminated `#if/#ifdef/#ifndef'")
+  death("Error: Unterminated `#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
@@ -1611,7 +1591,7 @@ sub fetch_para {
       while ($self->{lastline} = <$FH>) {
         last if ($self->{lastline} =~ /^=cut\s*$/);
       }
-      death ("Error: Unterminated pod") unless $self->{lastline};
+      death("Error: Unterminated pod") unless $self->{lastline};
       $self->{lastline} = <$FH>;
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
@@ -1856,26 +1836,6 @@ sub generate_output {
       print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     }
   }
-}
-
-sub Warn {
-  my $self = shift;
-  # work out the line number
-  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
-
-  print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
-}
-
-sub blurt {
-  my $self = shift;
-  Warn($self, @_);
-  $self->{errors}++
-}
-
-sub death {
-  my $self = shift;
-  Warn($self, @_);
-  exit 1;
 }
 
 1;
