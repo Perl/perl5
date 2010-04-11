@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+$| = 1;
 use Carp;
 use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
-use Capture::Tiny qw( capture );
 use Test::More tests =>  7;
-use lib qw( lib );
+use lib qw( lib t/lib );
 use ExtUtils::ParseXS::Utilities qw(
     Warn
     blurt
     death
 );
+use PrimitiveCapture;
 
 my $self = {};
 $self->{line} = [];
@@ -30,9 +31,9 @@ $self->{line_no} = [];
 
     my $message = 'Warning: Ignoring duplicate alias';
     
-    my ($stdout, $stderr) = capture {
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         Warn( $self, $message);
-    };
+    });
     like( $stderr,
         qr/$message in $self->{filename}, line 20/,
         "Got expected Warn output",
@@ -51,9 +52,9 @@ $self->{line_no} = [];
     $self->{filename} = 'myfile2';
 
     my $message = 'Warning: Ignoring duplicate alias';
-    my ($stdout, $stderr) = capture {
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         Warn( $self, $message);
-    };
+    });
     like( $stderr,
         qr/$message in $self->{filename}, line 19/,
         "Got expected Warn output",
@@ -71,9 +72,9 @@ $self->{line_no} = [];
     $self->{filename} = 'myfile1';
 
     my $message = 'Warning: Ignoring duplicate alias';
-    my ($stdout, $stderr) = capture {
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         Warn( $self, $message);
-    };
+    });
     like( $stderr,
         qr/$message in $self->{filename}, line 17/,
         "Got expected Warn output",
@@ -93,9 +94,9 @@ $self->{line_no} = [];
 
 
     my $message = 'Error: Cannot parse function definition';
-    my ($stdout, $stderr) = capture {
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         blurt( $self, $message);
-    };
+    });
     like( $stderr,
         qr/$message in $self->{filename}, line 20/,
         "Got expected blurt output",
@@ -117,9 +118,9 @@ SKIP: {
 
     my $message = "Code is not inside a function";
     eval {
-        my ($stdout, $stderr) = capture {
+        my $stderr = PrimitiveCapture::capture_stderr(sub {
             death( $self, $message);
-        };
+        });
         like( $stderr,
             qr/$message in $self->{filename}, line 20/,
             "Got expected death output",

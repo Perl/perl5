@@ -21,7 +21,7 @@ use ExtUtils::ParseXS::Utilities qw(
   map_type
   standard_XS_defs
   assign_func_args
-  print_preprocessor_statements
+  analyze_preprocessor_statements
   set_cond
   Warn
   blurt
@@ -273,8 +273,11 @@ EOM
       my $ln = shift(@{ $self->{line} });
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
+      my $statement = $+;
       ( $self, $XSS_work_idx, $BootCode_ref ) =
-        print_preprocessor_statements( $self, $XSS_work_idx, $BootCode_ref );
+        analyze_preprocessor_statements(
+          $self, $statement, $XSS_work_idx, $BootCode_ref
+        );
     }
 
     next PARAGRAPH unless @{ $self->{line} };
@@ -621,7 +624,7 @@ EOF
       }
       else {
         if ($self->{ret_type} ne "void") {
-          print "\t" . map_type($self->{ret_type}, 'RETVAL', $self->{hiertype}) . ";\n"
+          print "\t" . map_type($self, $self->{ret_type}, 'RETVAL') . ";\n"
             if !$self->{retvaldone};
           $self->{args_match}->{"RETVAL"} = 0;
           $self->{var_types}->{"RETVAL"} = $self->{ret_type};
@@ -1092,11 +1095,11 @@ sub INPUT_handler {
     my $printed_name;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # Function pointers are not yet supported with &output_init!
-      print "\t" . map_type($var_type, $var_name, $self->{hiertype});
+      print "\t" . map_type($self, $var_type, $var_name);
       $printed_name = 1;
     }
     else {
-      print "\t" . map_type($var_type, undef, $self->{hiertype});
+      print "\t" . map_type($self, $var_type, undef);
       $printed_name = 0;
     }
     $self->{var_num} = $self->{args_match}->{$var_name};

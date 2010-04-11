@@ -19,7 +19,7 @@ our (@ISA, @EXPORT_OK);
   map_type
   standard_XS_defs
   assign_func_args
-  print_preprocessor_statements
+  analyze_preprocessor_statements
   set_cond
   Warn
   blurt
@@ -310,6 +310,31 @@ sub process_typemaps {
   return ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref);
 }
 
+=head2 C<process_single_typemap()>
+
+=over 4
+
+=item * Purpose
+
+Process a single typemap within C<process_typemaps()>.
+
+=item * Arguments
+
+    ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
+      process_single_typemap( $typemap,
+        $type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref);
+
+List of five elements:  The individual typemap needing processing and four
+references.
+
+=item * Return Value
+
+List of four references -- modified versions of those passed in as arguments.
+
+=back
+
+=cut
+
 sub process_single_typemap {
   my ($typemap,
     $type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) = @_;
@@ -347,10 +372,6 @@ sub process_single_typemap {
       $type_kind_ref->{$type} = $kind;
       # prototype defaults to '$'
       $proto = "\$" unless $proto;
-#      warn(
-#          "Warning: File '$typemap' Line $. '$logged_line' " .
-#          "Invalid prototype '$proto'\n"
-#      ) unless valid_proto_string($proto);
       $proto_letter_ref->{$type} = C_string($proto);
     }
     elsif (/^\s/) {
@@ -421,11 +442,33 @@ sub make_targetable {
   return %targetable;
 }
 
+=head2 C<map_type()>
+
+=over 4
+
+=item * Purpose
+
+Performs a mapping at several places inside C<PARAGRAPH> loop.
+
+=item * Arguments
+
+  $type = map_type($self, $type, $varname);
+
+List of three arguments.
+
+=item * Return Value
+
+String holding augmented version of second argument.
+
+=back
+
+=cut
+
 sub map_type {
-  my ($type, $varname, $hiertype) = @_;
+  my ($self, $type, $varname) = @_;
 
   # C++ has :: in types too so skip this
-  $type =~ tr/:/_/ unless $hiertype;
+  $type =~ tr/:/_/ unless $self->{hiertype};
   $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
   if ($varname) {
     if ($type =~ / \( \s* \* (?= \s* \) ) /xg) {
@@ -437,6 +480,27 @@ sub map_type {
   }
   return $type;
 }
+
+=head2 C<standard_XS_defs()>
+
+=over 4
+
+=item * Purpose
+
+Writes to the C<.c> output file certain preprocessor directives and function
+headers needed in all such files.
+
+=item * Arguments
+
+None.
+
+=item * Return Value
+
+Implicitly returns true when final C<print> statement completes.
+
+=back
+
+=cut
 
 sub standard_XS_defs {
   print <<"EOF";
@@ -497,21 +561,69 @@ S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 EOF
 }
 
+=head2 C<assign_func_args()>
+
+=over 4
+
+=item * Purpose
+
+Perform assignment to the C<func_args> attribute.
+
+=item * Arguments
+
+  $string = assign_func_args($self, $argsref, $class);
+
+List of three elements.  Second is an array reference; third is a string.
+
+=item * Return Value
+
+String.
+
+=back
+
+=cut
+
 sub assign_func_args {
   my ($self, $argsref, $class) = @_;
   my @func_args = @{$argsref};
   shift @func_args if defined($class);
 
-  for (@func_args) {
-    s/^/&/ if $self->{in_out}->{$_};
+  for my $arg (@func_args) {
+    $arg =~ s/^/&/ if $self->{in_out}->{$arg};
   }
   return join(", ", @func_args);
 }
 
-sub print_preprocessor_statements {
-  my ($self, $XSS_work_idx, $BootCode_ref) = @_;
+=head2 C<analyze_preprocessor_statements()>
 
-  my $statement = $+;
+=over 4
+
+=item * Purpose
+
+Within each function inside each Xsub, print to the F<.c> output file certain
+preprocessor statements.
+
+=item * Arguments
+
+      ( $self, $XSS_work_idx, $BootCode_ref ) =
+        analyze_preprocessor_statements(
+          $self, $statement, $XSS_work_idx, $BootCode_ref
+        );
+
+List of four elements.
+
+=item * Return Value
+
+Modifed values of three of the arguments passed to the function.  In
+particular, the C<XSStack> and C<InitFileCode> attributes are modified.
+
+=back
+
+=cut
+
+sub analyze_preprocessor_statements {
+  my ($self, $statement, $XSS_work_idx, $BootCode_ref) = @_;
+
   if ($statement eq 'if') {
     $XSS_work_idx = @{ $self->{XSStack} };
     push(@{ $self->{XSStack} }, {type => 'if'});
@@ -542,6 +654,20 @@ sub print_preprocessor_statements {
   return ($self, $XSS_work_idx, $BootCode_ref);
 }
 
+=head2 C<set_cond()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=back
+
+=cut
+
 sub set_cond {
   my ($ellipsis, $min_args, $num_args) = @_;
   my $cond;
@@ -557,6 +683,20 @@ sub set_cond {
   return $cond;
 }
 
+=head2 C<Warn()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=back
+
+=cut
+
 sub Warn {
   my $self = shift;
   # work out the line number
@@ -565,17 +705,59 @@ sub Warn {
   print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
 }
 
+=head2 C<blurt()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=back
+
+=cut
+
 sub blurt {
   my $self = shift;
   Warn($self, @_);
   $self->{errors}++
 }
 
+=head2 C<death()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=back
+
+=cut
+
 sub death {
   my $self = shift;
   Warn($self, @_);
   exit 1;
 }
+
+=head2 C<check_conditional_preprocessor_statements()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=back
+
+=cut
 
 sub check_conditional_preprocessor_statements {
   my ($self) = @_;

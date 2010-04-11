@@ -5,12 +5,12 @@ use Carp;
 use Cwd;
 use File::Spec;
 use File::Temp qw( tempdir );
-use Capture::Tiny qw( capture );
 use Test::More tests => 13;
-use lib qw( lib );
+use lib qw( lib t/lib );
 use ExtUtils::ParseXS::Utilities qw(
     check_conditional_preprocessor_statements
 );
+use PrimitiveCapture;
 
 my $self = {};
 $self->{line} = [];
@@ -31,10 +31,10 @@ $self->{XSStack}->[0] = {};
     $self->{XSStack}->[-1]{type} = 'if';
     $self->{filename} = 'myfile1';
 
-    my ($stdout, $stderr, $rv);
-    ($stdout, $stderr) = capture {
+    my $rv;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
-    };
+    });
         
     is( $rv, 0, "Basic case: returned 0: all ifs resolved" );
     ok( ! $stderr, "No warnings captured, as expected" );
@@ -54,10 +54,10 @@ $self->{XSStack}->[0] = {};
     $self->{XSStack}->[-1]{type} = 'if';
     $self->{filename} = 'myfile1';
 
-    my ($stdout, $stderr, $rv);
-    ($stdout, $stderr) = capture {
+    my $rv;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
-    };
+    });
     is( $rv, 0, "One nested if case: returned 0: all ifs resolved" );
     ok( ! $stderr, "No warnings captured, as expected" );
 }
@@ -75,10 +75,10 @@ $self->{XSStack}->[0] = {};
     $self->{XSStack}->[-1]{type} = 'if';
     $self->{filename} = 'myfile1';
 
-    my ($stdout, $stderr, $rv);
-    ($stdout, $stderr) = capture {
+    my $rv;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
-    };
+    });
     is( $rv, undef,
         "Missing 'if' case: returned undef: all ifs resolved" );
     like( $stderr,
@@ -104,10 +104,10 @@ $self->{XSStack}->[0] = {};
     $self->{XSStack}->[-1]{type} = 'file';
     $self->{filename} = 'myfile1';
 
-    my ($stdout, $stderr, $rv);
-    ($stdout, $stderr) = capture {
+    my $rv;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
-    };
+    });
     is( $rv, undef,
         "Missing 'if' case: returned undef: all ifs resolved" );
     like( $stderr,
@@ -133,10 +133,10 @@ $self->{XSStack}->[0] = {};
     $self->{XSStack}->[-1]{type} = 'if';
     $self->{filename} = 'myfile1';
 
-    my ($stdout, $stderr, $rv);
-    ($stdout, $stderr) = capture {
+    my $rv;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
-    };
+    });
     isnt( $rv, 0,
         "Missing 'endif' case: returned non-zero as expected" );
     like( $stderr,
