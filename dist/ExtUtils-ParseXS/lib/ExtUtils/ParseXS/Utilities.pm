@@ -22,6 +22,7 @@ our (@ISA, @EXPORT_OK);
   print_preprocessor_statements
   set_cond
 );
+#  check_conditional_preprocessor_statements
 
 =head1 NAME
 
@@ -552,6 +553,29 @@ sub set_cond {
   }
   return $cond;
 }
+
+#sub check_conditional_preprocessor_statements {
+#  my ($self) = @_;
+#  my @cpp = grep(/^\#\s*(?:if|e\w+)/, @{ $self->{line} });
+#  if (@cpp) {
+#    my $cpplevel;
+#    for my $cpp (@cpp) {
+#      if ($cpp =~ /^\#\s*if/) {
+#        $cpplevel++;
+#      }
+#      elsif (!$cpplevel) {
+#        Warn("Warning: #else/elif/endif without #if in this function");
+#        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
+#          if $self->{XSStack}->[-1]{type} eq 'if';
+#        return;
+#      }
+#      elsif ($cpp =~ /^\#\s*endif/) {
+#        $cpplevel--;
+#      }
+#    }
+#    Warn("Warning: #if without #endif in this function") if $cpplevel;
+#  }
+#}
 
 1;
 
