@@ -1124,7 +1124,7 @@ it is not permitted to discard text that has yet to be lexed.
 Normally it is not necessarily to do this directly, because it suffices to
 use the implicit discarding behaviour of L</lex_next_chunk> and things
 based on it.  However, if a token stretches across multiple lines,
-and the lexing code has kept multiple lines of text in the buffer fof
+and the lexing code has kept multiple lines of text in the buffer for
 that purpose, then after completion of the token it would be wise to
 explicitly discard the now-unneeded earlier lines, to avoid future
 multi-line tokens growing the buffer without bound.
