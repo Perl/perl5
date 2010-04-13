@@ -18,7 +18,7 @@ my (@pragma, @mod, @files);
 
 open (MANIFEST, "../MANIFEST") or die $!;
 @files = grep m#(?:\.pm|\.pod|_pm\.PL)#, map {s/\s.*//s; $_}
-    grep {m#^lib# || m#^ext#} grep !m#/(?:t|demo)/#, <MANIFEST>;
+    grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo)/# } <MANIFEST>;
 
 my %exceptions = (
     'abbrev' => 'Text::Abbrev',
