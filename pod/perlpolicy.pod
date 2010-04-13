@@ -50,10 +50,12 @@ gives up their ownership of it.  In particular:
 
 =over
 
-=item *  The version of the module in the core should still be considered the
-    work of the original author.  All patches, bug reports, and so forth
-    should be fed back to them.  Their development directions should be
-    respected whenever possible.
+=item *
+
+The version of the module in the core should still be considered the
+work of the original author.  All patches, bug reports, and so
+forth should be fed back to them.  Their development directions
+should be respected whenever possible.
 
 =item *
 
