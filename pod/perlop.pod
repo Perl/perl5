@@ -2520,8 +2520,8 @@ so some corners must be cut.  For example:
     printf "%.20g\n", 123456789123456789;
     #        produces 123456789123456784
 
-Testing for exact equality of floating-point equality or inequality is
-not a good idea.  Here's a (relatively expensive) work-around to compare
+Testing for exact floating-point equality or inequality is not a
+good idea.  Here's a (relatively expensive) work-around to compare
 whether two floating-point numbers are equal to a particular number of
 decimal places.  See Knuth, volume II, for a more robust treatment of
 this topic.
