@@ -619,7 +619,7 @@ Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
      * won't actually be stored in the array - so it won't get
      * reaped when the localize ends. Ensure it gets reaped by
      * mortifying it instead. DAPM */
-    if (SvTIED_mg(av, PERL_MAGIC_tied))
+    if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied))
 	sv_2mortal(sv);
 }
 
@@ -645,7 +645,7 @@ Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
      * won't actually be stored in the hash - so it won't get
      * reaped when the localize ends. Ensure it gets reaped by
      * mortifying it instead. DAPM */
-    if (SvTIED_mg(hv, PERL_MAGIC_tied))
+    if (SvTIED_mg((const SV *)hv, PERL_MAGIC_tied))
 	sv_2mortal(sv);
 }
 
