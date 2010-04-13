@@ -1468,7 +1468,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 void
 Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
-    const GV * const egv = GvEGV(gv);
+    const GV * const egv = GvEGVx(gv);
 
     PERL_ARGS_ASSERT_GV_EFULLNAME4;
 
@@ -2394,7 +2394,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 	    isGV_with_GP(gv) && GvGP(gv) &&
 	    !GvINTRO(gv) && GvREFCNT(gv) == 1 &&
 	    !GvSV(gv) && !GvAV(gv) && !GvHV(gv) && !GvIOp(gv) && !GvFORM(gv) &&
-	    GvEGV(gv) == gv && (stash = GvSTASH(gv))))
+	    GvEGVx(gv) == gv && (stash = GvSTASH(gv))))
 	return;
     cv = GvCV(gv);
     if (!cv) {

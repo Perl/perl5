@@ -1170,11 +1170,11 @@ PP(pp_select)
     dVAR; dSP; dTARGET;
     HV *hv;
     GV * const newdefout = (PL_op->op_private > 0) ? (MUTABLE_GV(POPs)) : NULL;
-    GV * egv = GvEGV(PL_defoutgv);
+    GV * egv = GvEGVx(PL_defoutgv);
 
     if (!egv)
 	egv = PL_defoutgv;
-    hv = GvSTASH(egv);
+    hv = isGV_with_GP(egv) ? GvSTASH(egv) : NULL;
     if (! hv)
 	XPUSHs(&PL_sv_undef);
     else {
@@ -2017,7 +2017,7 @@ PP(pp_eof)
     if (MAXARG)
 	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
     else if (PL_op->op_flags & OPf_SPECIAL)
-	gv = PL_last_in_gv = GvEGV(PL_argvgv);	/* eof() - ARGV magic */
+	gv = PL_last_in_gv = GvEGVx(PL_argvgv);	/* eof() - ARGV magic */
     else
 	gv = PL_last_in_gv;			/* eof */
 

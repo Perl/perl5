@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 108;
+plan tests => 109;
 
 my $Perl = which_perl();
 
@@ -310,3 +310,17 @@ fresh_perl_is(
 
 eval { open $99, "foo" };
 like($@, qr/Modification of a read-only value attempted/, "readonly fh");
+
+# [perl#73626] mg_get wasn't run on the pipe arg
+
+{
+    package p73626;
+    sub TIESCALAR { bless {} }
+    sub FETCH { "$Perl -e 1"}
+
+    tie my $p, 'p73626';
+
+    package main;
+
+    ok( open(my $f, '-|', $p),     'open -| magic');
+}

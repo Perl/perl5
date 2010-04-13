@@ -14,11 +14,12 @@
  */
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
- * Note that there is a start_env initialized when perl starts, and top_env
- * points to this initially, so top_env should always be non-null.
+ * Note that there is a PL_start_env initialized when perl starts, and
+ * PL_top_env points to this initially, so PL_top_env should always be
+ * non-null.
  *
- * Existence of a non-null top_env->je_prev implies it is valid to call
- * longjmp() at that runlevel (we make sure start_env.je_prev is always
+ * Existence of a non-null PL_top_env->je_prev implies it is valid to call
+ * longjmp() at that runlevel (we make sure PL_start_env.je_prev is always
  * null to ensure this).
  *
  * je_mustcatch, when set at any runlevel to TRUE, means eval ops must
@@ -99,9 +100,11 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_PUSH(v) \
     STMT_START {							\
-	DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p at %s:%d\n",	\
-		         (void*)&cur_env, (void*)PL_top_env,			\
-		         __FILE__, __LINE__));					\
+	DEBUG_l({							\
+	    int i = 0; JMPENV *p = PL_top_env;				\
+	    while (p) { i++; p = p->je_prev; }				\
+	    Perl_deb(aTHX_ "JUMPENV_PUSH level=%d at %s:%d\n",		\
+		         i,  __FILE__, __LINE__);})			\
 	cur_env.je_prev = PL_top_env;					\
 	OP_REG_TO_MEM;							\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
@@ -113,15 +116,22 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_POP \
     STMT_START {							\
-	DEBUG_l(Perl_deb(aTHX_ "popping jumplevel was %p, now %p at %s:%d\n",	\
-		         (void*)PL_top_env, (void*)cur_env.je_prev,		\
-		         __FILE__, __LINE__));					\
+	DEBUG_l({							\
+	    int i = -1; JMPENV *p = PL_top_env;				\
+	    while (p) { i++; p = p->je_prev; }				\
+	    Perl_deb(aTHX_ "JUMPENV_POP level=%d at %s:%d\n",		\
+		         i, __FILE__, __LINE__);})			\
 	assert(PL_top_env == &cur_env);					\
 	PL_top_env = cur_env.je_prev;					\
     } STMT_END
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\
+	DEBUG_l({						\
+	    int i = -1; JMPENV *p = PL_top_env;			\
+	    while (p) { i++; p = p->je_prev; }			\
+	    Perl_deb(aTHX_ "JUMPENV_JUMP(%d) level=%d at %s:%d\n", \
+		         (int)v, i, __FILE__, __LINE__);})	\
 	OP_REG_TO_MEM;						\
 	if (PL_top_env->je_prev)				\
 	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
@@ -132,7 +142,15 @@ typedef struct jmpenv JMPENV;
     } STMT_END
 
 #define CATCH_GET		(PL_top_env->je_mustcatch)
-#define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))
+#define CATCH_SET(v) \
+    STMT_START {							\
+	DEBUG_l(							\
+	    Perl_deb(aTHX_						\
+		"JUMPLEVEL set catch %d => %d (for %p) at %s:%d\n",	\
+		 PL_top_env->je_mustcatch, v, (void*)PL_top_env,	\
+		 __FILE__, __LINE__);)					\
+	PL_top_env->je_mustcatch = (v);					\
+    } STMT_END
 
 
 #include "mydtrace.h"
@@ -550,6 +568,16 @@ struct block {
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
 #define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
 
+#define DEBUG_CX(action)						\
+    DEBUG_l(WITH_THX(							\
+	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) at %s:%d\n",	\
+		    (long)cxstack_ix,					\
+		    action,						\
+		    PL_block_type[CxTYPE(&cxstack[cxstack_ix])],	\
+		    (long)PL_scopestack_ix,				\
+		    (long)(cxstack[cxstack_ix].blk_oldscopesp),		\
+		    __FILE__, __LINE__)));
+
 /* Enter a block. */
 #define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
 	cx->cx_type		= t,					\
@@ -559,28 +587,27 @@ struct block {
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= (U8)gimme;				\
-	DEBUG_l( PerlIO_printf(Perl_debug_log, "Entering block %ld, type %s\n",	\
-		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
+	DEBUG_CX("PUSH");
 
 /* Exit a block (RETURN and LAST). */
-#define POPBLOCK(cx,pm) cx = &cxstack[cxstack_ix--],			\
+#define POPBLOCK(cx,pm)							\
+	DEBUG_CX("POP");						\
+	cx = &cxstack[cxstack_ix--],					\
 	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
 	pm		 = cx->blk_oldpm,				\
-	gimme		 = cx->blk_gimme;				\
-	DEBUG_SCOPE("POPBLOCK");					\
-	DEBUG_l( PerlIO_printf(Perl_debug_log, "Leaving block %ld, type %s\n",		\
-		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
+	gimme		 = cx->blk_gimme;
 
 /* Continue a block elsewhere (NEXT and REDO). */
-#define TOPBLOCK(cx) cx  = &cxstack[cxstack_ix],			\
+#define TOPBLOCK(cx)							\
+	DEBUG_CX("TOP");						\
+	cx  = &cxstack[cxstack_ix],					\
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_curpm         = cx->blk_oldpm;				\
-	DEBUG_SCOPE("TOPBLOCK");
+	PL_curpm         = cx->blk_oldpm;
 
 /* substitution context */
 struct subst {
@@ -809,6 +836,11 @@ typedef struct stackinfo PERL_SI;
 #define PUSHSTACKi(type) \
     STMT_START {							\
 	PERL_SI *next = PL_curstackinfo->si_next;			\
+	DEBUG_l({							\
+	    int i = 0; PERL_SI *p = PL_curstackinfo;			\
+	    while (p) { i++; p = p->si_prev; }				\
+	    Perl_deb(aTHX_ "push STACKINFO %d at %s:%d\n",		\
+		         i, __FILE__, __LINE__);})			\
 	if (!next) {							\
 	    next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
 	    next->si_prev = PL_curstackinfo;				\
@@ -830,6 +862,11 @@ typedef struct stackinfo PERL_SI;
     STMT_START {							\
 	dSP;								\
 	PERL_SI * const prev = PL_curstackinfo->si_prev;		\
+	DEBUG_l({							\
+	    int i = -1; PERL_SI *p = PL_curstackinfo;			\
+	    while (p) { i++; p = p->si_prev; }				\
+	    Perl_deb(aTHX_ "pop  STACKINFO %d at %s:%d\n",		\
+		         i, __FILE__, __LINE__);})			\
 	if (!prev) {							\
 	    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");		\
 	    my_exit(1);							\

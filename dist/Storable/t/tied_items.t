@@ -55,5 +55,5 @@ $ref2 = dclone $ref;
 ok 5, $a_fetches == 0;
 ok 6, $$ref2 eq $$ref;
 ok 7, $$ref2 == 8;
-# I don't understand why it's 3 and not 2
-ok 8, $a_fetches == 3;
+# a bug in 5.12 and earlier caused an extra FETCH
+ok 8, $a_fetches == 2 || $a_fetches == 3 ;

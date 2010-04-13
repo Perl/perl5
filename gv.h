@@ -114,6 +114,7 @@ Return the SV from the GV.
 #define GvFILEGV(gv)	(gv_fetchfile(GvFILE(gv)))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
+#define GvEGVx(gv)	(isGV_with_GP(gv) ? GvEGV(gv) : NULL)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)
 #define GvESTASH(gv)	GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
 
