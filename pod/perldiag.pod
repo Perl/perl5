@@ -1500,8 +1500,8 @@ do.  See L<perlfunc/require>.
 
 =item (Did you mean &%s instead?)
 
-(W) You probably referred to an imported subroutine &FOO as $FOO or some
-such.
+(W misc) You probably referred to an imported subroutine &FOO as $FOO or
+some such.
 
 =item (Did you mean "local" instead of "our"?)
 
@@ -5094,8 +5094,8 @@ executed, so its $a is not available for capture.
 
 =item Variable "%s" is not imported%s
 
-(F) While "use strict" in effect, you referred to a global variable that
-you apparently thought was imported from another module, because
+(W misc) With "use strict" in effect, you referred to a global variable
+that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
 front of your variable.

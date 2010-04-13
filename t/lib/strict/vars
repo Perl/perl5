@@ -439,3 +439,10 @@ qr/(?{$foo++})/;
 EXPECT
 Global symbol "$foo" requires explicit package name at (re_eval 1) line 1.
 Compilation failed in regexp at - line 3.
+########
+# [perl #73712] 'Variable is not imported' should be suppressable
+$dweck;
+use strict 'vars';
+no warnings;
+eval q/$dweck/;
+EXPECT

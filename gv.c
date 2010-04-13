@@ -1061,12 +1061,17 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			     (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
 		    {
 			/* diag_listed_as: Variable "%s" is not imported%s */
-			Perl_warn(aTHX_ "Variable \"%c%s\" is not imported",
+			Perl_ck_warner_d(
+			    aTHX_ packWARN(WARN_MISC),
+			    "Variable \"%c%s\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
 			if (GvCVu(*gvp))
-			    Perl_warn(aTHX_ "\t(Did you mean &%s instead?)\n", name);
+			    Perl_ck_warner_d(
+				aTHX_ packWARN(WARN_MISC),
+				"\t(Did you mean &%s instead?)\n", name
+			    );
 			stash = NULL;
 		    }
 		}
