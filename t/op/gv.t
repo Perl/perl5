@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 188 );
+plan( tests => 202 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -484,18 +484,6 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
 }
 
 {
-    no warnings qw(once uninitialized);
-    my $g = \*clatter;
-    my $r = eval {no strict; ${*{$g}{SCALAR}}};
-    is ($@, '', "PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax");
-
-    $g = \*vowm;
-    $r = eval {use strict; ${*{$g}{SCALAR}}};
-    is ($@, '',
-	"PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax under strict");
-}
-
-{
     # Bug reported by broquaint on IRC
     *slosh::{HASH}->{ISA}=[];
     slosh->import;
@@ -613,6 +601,27 @@ ok(exists($RT72740a::{s3}), "RT72740a::s3 exists");
 ok(exists($RT72740a::{s4}), "RT72740a::s4 exists");
 is(RT72740a::s1(), "RT72740b::s2", "RT72740::s1 parsed correctly");
 is(RT72740a::s3(), "RT72740b::s4", "RT72740::s3 parsed correctly");
+
+$RT73666::scalar = undef;
+isnt(*RT73666::scalar{SCALAR}, undef, "scalar vivified correctly");
+is(*RT73666::scalar{ARRAY}, undef, "scalar doesn't autovivify array");
+is(*RT73666::scalar{HASH}, undef, "scalar doesn't autovivify hash");
+is(*RT73666::scalar{CODE}, undef, "scalar doesn't autovivify code");
+@RT73666::array = ();
+is(*RT73666::array{SCALAR}, undef, "array doesn't autovivify scalar");
+isnt(*RT73666::array{ARRAY}, undef, "array vivified correctly");
+is(*RT73666::array{HASH}, undef, "array doesn't autovivify hash");
+is(*RT73666::array{CODE}, undef, "array doesn't autovivify code");
+%RT73666::hash = ();
+is(*RT73666::hash{SCALAR}, undef, "hash doesn't autovivify scalar");
+is(*RT73666::hash{ARRAY}, undef, "hash doesn't autovivify array");
+isnt(*RT73666::hash{HASH}, undef, "hash vivified correctly");
+is(*RT73666::hash{CODE}, undef, "hash doesn't autovivify code");
+sub RT73666::code { }
+is(*RT73666::code{SCALAR}, undef, "code doesn't autovivify scalar");
+is(*RT73666::code{ARRAY}, undef, "code doesn't autovivify array");
+is(*RT73666::code{HASH}, undef, "code doesn't autovivify hash");
+isnt(*RT73666::code{CODE}, undef, "code vivified correctly");
 
 __END__
 Perl
