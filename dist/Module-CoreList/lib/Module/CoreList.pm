@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.29';
+$VERSION = '2.30';
 
 =head1 NAME
 
@@ -14078,6 +14078,12 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Shell'                 => '1',
 	'Switch'                => '1',
     },
+    5.013000 => {
+	'Class::ISA'            => '1',
+	'Pod::Plainer'          => '1',
+	'Shell'                 => '1',
+	'Switch'                => '1',
+    },
 );
 
 %upstream = (
@@ -15053,14 +15059,17 @@ $released{'5.000'} = $released{5};
 $released{'5.010000'} = $released{5.01};
 $released{'5.011000'} = $released{5.011};
 $released{'5.012000'} = $released{5.012};
+$released{'5.013000'} = $released{5.013};
 
 $version{'5.000'} = $version{5};
 $version{'5.010000'} = $version{5.01};
 $version{'5.011000'} = $version{5.011};
 $version{'5.012000'} = $version{5.012};
+$version{'5.013000'} = $version{5.01333};
 
 $deprecated{'5.011000'} = $deprecated{5.011};
 $deprecated{'5.012000'} = $deprecated{5.012};
+$deprecated{'5.013000'} = $deprecated{5.013};
 
 1;
 __END__
