@@ -251,7 +251,7 @@ sub unwrap {
 	  if ($#$v >= 0) {
 	    $short = $sp . "0..$#{$v}  " . 
 	      join(" ", 
-		   map {exists $v->[$_] ? stringify $v->[$_] : "empty"} ($[..$tArrayDepth)
+		   map {exists $v->[$_] ? stringify $v->[$_] : "empty"} (0..$tArrayDepth)
 		  ) . "$shortmore";
 	  } else {
 	    $short = $sp . "empty array";
@@ -262,7 +262,7 @@ sub unwrap {
 	#  print "$short\n";
 	#  return;
 	#}
-	for $num ($[ .. $tArrayDepth) {
+	for $num (0 .. $tArrayDepth) {
 	    return if $DB::signal;
 	    print "$sp$num  ";
 	    if (exists $v->[$num]) {

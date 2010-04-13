@@ -22,7 +22,6 @@ sub main'abbrev {
     local(*domain) = @_;
     shift(@_);
     @cmp = @_;
-    local($[) = 0;
     foreach $name (@_) {
 	@extra = split(//,$name);
 	$abbrev = shift(@extra);

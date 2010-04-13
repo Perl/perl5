@@ -230,14 +230,14 @@ sub unwrap {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
 	  join(" ", 
-	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} ($[..$tArrayDepth)
+	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} (0..$tArrayDepth)
 	      ) . "$shortmore";
       } else {
 	$short = $sp . "empty array";
       }
       (print "$short\n"), return if length $short <= $self->{compactDump};
     }
-    for my $num ($[ .. $tArrayDepth) {
+    for my $num (0 .. $tArrayDepth) {
       return if $DB::signal and $self->{stopDbSignal};
       print "$sp$num  ";
       if (exists $v->[$num]) {

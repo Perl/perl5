@@ -38,7 +38,7 @@ sub getcwd
 	    closedir(getcwd'PARENT);					#');
 	    return '';
 	}
-	if ($pst[$[] == $cst[$[] && $pst[$[ + 1] == $cst[$[ + 1])
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
 	{
 	    $dir = '';
 	}
@@ -59,8 +59,8 @@ sub getcwd
 		    # return '';
 		}
 	    }
-	    while ($dir eq '.' || $dir eq '..' || $tst[$[] != $pst[$[] ||
-		   $tst[$[ + 1] != $pst[$[ + 1]);
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
 	}
 	$cwd = "$dir/$cwd";
 	closedir(getcwd'PARENT);					#');

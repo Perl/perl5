@@ -61,7 +61,7 @@ sub main'bnorm { #(num_str) return num_str
     local($_) = @_;
     s/\s+//g;                           # strip white space
     if (s/^([+-]?)0*(\d+)$/$1$2/) {     # test if number
-	substr($_,$[,0) = '+' unless $1; # Add missing sign
+	substr($_,0,0) = '+' unless $1; # Add missing sign
 	s/^-0/+0/;
 	$_;
     } else {
@@ -73,8 +73,8 @@ sub main'bnorm { #(num_str) return num_str
 #   Assumes normalized value as input.
 sub internal { #(num_str) return int_num_array
     local($d) = @_;
-    ($is,$il) = (substr($d,$[,1),length($d)-2);
-    substr($d,$[,1) = '';
+    ($is,$il) = (substr($d,0,1),length($d)-2);
+    substr($d,0,1) = '';
     ($is, reverse(unpack("a" . ($il%5+1) . ("a5" x ($il/5)), $d)));
 }
 
@@ -107,7 +107,7 @@ sub abs { # post-normalized abs for internal use
 
 # Compares 2 values.  Returns one of undef, <0, =0, >0. (suitable for sort)
 sub main'bcmp { #(num_str, num_str) return cond_code
-    local($x,$y) = (&'bnorm($_[$[]),&'bnorm($_[$[+1]));
+    local($x,$y) = (&'bnorm($_[0]),&'bnorm($_[1]));
     if ($x eq 'NaN') {
 	undef;
     } elsif ($y eq 'NaN') {
@@ -139,7 +139,7 @@ sub cmp { # post-normalized compare for internal use
 }
 
 sub main'badd { #(num_str, num_str) return num_str
-    local(*x, *y); ($x, $y) = (&'bnorm($_[$[]),&'bnorm($_[$[+1]));
+    local(*x, *y); ($x, $y) = (&'bnorm($_[0]),&'bnorm($_[1]));
     if ($x eq 'NaN') {
 	'NaN';
     } elsif ($y eq 'NaN') {
@@ -162,12 +162,12 @@ sub main'badd { #(num_str, num_str) return num_str
 }
 
 sub main'bsub { #(num_str, num_str) return num_str
-    &'badd($_[$[],&'bneg($_[$[+1]));    
+    &'badd($_[0],&'bneg($_[1]));    
 }
 
 # GCD -- Euclids algorithm Knuth Vol 2 pg 296
 sub main'bgcd { #(num_str, num_str) return num_str
-    local($x,$y) = (&'bnorm($_[$[]),&'bnorm($_[$[+1]));
+    local($x,$y) = (&'bnorm($_[0]),&'bnorm($_[1]));
     if ($x eq 'NaN' || $y eq 'NaN') {
 	'NaN';
     } else {
@@ -206,7 +206,7 @@ sub sub { #(int_num_array, int_num_array) return int_num_array
 
 # multiply two numbers -- stolen from Knuth Vol 2 pg 233
 sub main'bmul { #(num_str, num_str) return num_str
-    local(*x, *y); ($x, $y) = (&'bnorm($_[$[]), &'bnorm($_[$[+1]));
+    local(*x, *y); ($x, $y) = (&'bnorm($_[0]), &'bnorm($_[1]));
     if ($x eq 'NaN') {
 	'NaN';
     } elsif ($y eq 'NaN') {
@@ -217,7 +217,7 @@ sub main'bmul { #(num_str, num_str) return num_str
 	local($signr) = (shift @x ne shift @y) ? '-' : '+';
 	@prod = ();
 	for $x (@x) {
-	    ($car, $cty) = (0, $[);
+	    ($car, $cty) = (0, 0);
 	    for $y (@y) {
 		$prod = $x * $y + $prod[$cty] + $car;
                 if ($use_mult) {
@@ -238,16 +238,16 @@ sub main'bmul { #(num_str, num_str) return num_str
 
 # modulus
 sub main'bmod { #(num_str, num_str) return num_str
-    (&'bdiv(@_))[$[+1];
+    (&'bdiv(@_))[1];
 }
 
 sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
-    local (*x, *y); ($x, $y) = (&'bnorm($_[$[]), &'bnorm($_[$[+1]));
+    local (*x, *y); ($x, $y) = (&'bnorm($_[0]), &'bnorm($_[1]));
     return wantarray ? ('NaN','NaN') : 'NaN'
 	if ($x eq 'NaN' || $y eq 'NaN' || $y eq '+0');
     return wantarray ? ('+0',$x) : '+0' if (&cmp(&abs($x),&abs($y)) < 0);
     @x = &internal($x); @y = &internal($y);
-    $srem = $y[$[];
+    $srem = $y[0];
     $sr = (shift @x ne shift @y) ? '-' : '+';
     $car = $bar = $prd = 0;
     if (($dd = int(1e5/($y[$#y]+1))) != 1) {
@@ -281,7 +281,7 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
 	--$q while ($v2*$q > ($u0*1e5+$u1-$q*$v1)*1e5+$u2);
 	if ($q) {
 	    ($car, $bar) = (0,0);
-	    for ($y = $[, $x = $#x-$#y+$[-1; $y <= $#y; ++$y,++$x) {
+	    for ($y = 0, $x = $#x-$#y-1; $y <= $#y; ++$y,++$x) {
 		$prd = $q * $y[$y] + $car;
                 if ($use_mult) {
 		$prd -= ($car = int($prd * 1e-5)) * 1e5;
@@ -293,7 +293,7 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
 	    }
 	    if ($x[$#x] < $car + $bar) {
 		$car = 0; --$q;
-		for ($y = $[, $x = $#x-$#y+$[-1; $y <= $#y; ++$y,++$x) {
+		for ($y = 0, $x = $#x-$#y-1; $y <= $#y; ++$y,++$x) {
 		    $x[$x] -= 1e5
 			if ($car = (($x[$x] += $y[$y] + $car) > 1e5));
 		}

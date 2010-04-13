@@ -22,11 +22,10 @@
 sub Getopt {
     local($argumentative) = @_;
     local($_,$first,$rest);
-    local($[) = 0;
 
     while (@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
 	($first,$rest) = ($1,$2);
-	if (index($argumentative,$first) >= $[) {
+	if (index($argumentative,$first) >= 0) {
 	    if ($rest ne '') {
 		shift(@ARGV);
 	    }

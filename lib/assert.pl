@@ -18,7 +18,7 @@
 # routine shamelessly borrowed from the perl debugger.
 
 sub assert {
-    &panic("ASSERTION BOTCHED: $_[$[]",$@) unless eval $_[$[];
+    &panic("ASSERTION BOTCHED: $_[0]",$@) unless eval $_[0];
 } 
 
 sub panic {

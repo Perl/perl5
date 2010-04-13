@@ -304,13 +304,13 @@ sub vianame
   $txt = do "unicore/Name.pl" unless $txt;
 
   my $pos = index $txt, "\t\t$arg\n";
-  if ($[ <= $pos) {
+  if (0 <= $pos) {
     my $posLF = rindex $txt, "\n", $pos;
     (my $code = substr $txt, $posLF + 1, 6) =~ tr/\t//d;
     return $vianame{$arg} = CORE::hex $code;
 
-    # If $pos is at the 1st line, $posLF must be $[ - 1 (not found);
-    # then $posLF + 1 equals to $[ (at the beginning of $txt).
+    # If $pos is at the 1st line, $posLF must be -1 (not found);
+    # then $posLF + 1 equals to 0 (at the beginning of $txt).
     # Otherwise $posLF is the position of "\n";
     # then $posLF + 1 must be the position of the next to "\n"
     # (the beginning of the line).
