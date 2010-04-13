@@ -6513,9 +6513,7 @@ PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv)
 
 #endif
 
-#ifdef PERL_DONT_CREATE_GVSV
 /* PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV *gv); */
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC bool	S_ckwarn_common(pTHX_ U32 w);
 #endif

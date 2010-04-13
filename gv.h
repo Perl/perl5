@@ -79,13 +79,9 @@ Return the SV from the GV.
 */
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
-#ifdef PERL_DONT_CREATE_GVSV
 #define GvSVn(gv)	(*(GvGP(gv)->gp_sv ? \
 			 &(GvGP(gv)->gp_sv) : \
 			 &(GvGP(gv_SVadd(gv))->gp_sv)))
-#else
-#define GvSVn(gv)	GvSV(gv)
-#endif
 
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)
 #define GvIO(gv)	((gv) && SvTYPE((const SV*)gv) == SVt_PVGV && GvGP(gv) ? GvIOp(gv) : NULL)

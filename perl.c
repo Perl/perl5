@@ -1659,9 +1659,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_DISABLE_PMC
 			     " PERL_DISABLE_PMC"
 #  endif
-#  ifdef PERL_DONT_CREATE_GVSV
-			     " PERL_DONT_CREATE_GVSV"
-#  endif
 #  ifdef PERL_IS_MINIPERL
 			     " PERL_IS_MINIPERL"
 #  endif
@@ -3474,9 +3471,7 @@ S_init_main_stash(pTHX)
     PL_replgv = gv_fetchpvs("\022", GV_ADD|GV_NOTQUAL, SVt_PV); /* ^R */
     GvMULTI_on(PL_replgv);
     (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
-#ifdef PERL_DONT_CREATE_GVSV
     gv_SVadd(PL_errgv);
-#endif
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     CLEAR_ERRSV();
     PL_curstash = PL_defstash;

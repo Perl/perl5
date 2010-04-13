@@ -2205,9 +2205,7 @@ ApR	|bool	|stashpv_hvname_match|NN const COP *c|NN const HV *hv
 p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
-#ifdef PERL_DONT_CREATE_GVSV
 Apbm	|GV*	|gv_SVadd	|NULLOK GV *gv
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|bool	|ckwarn_common	|U32 w
 #endif

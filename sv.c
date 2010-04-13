@@ -513,10 +513,7 @@ do_clean_named_objs(pTHX_ SV *const sv)
     assert(SvTYPE(sv) == SVt_PVGV);
     assert(isGV_with_GP(sv));
     if (GvGP(sv)) {
-	if ((
-#ifdef PERL_DONT_CREATE_GVSV
-	     GvSV(sv) &&
-#endif
+	if ((GvSV(sv) &&
 	     SvOBJECT(GvSV(sv))) ||
 	     (GvAV(sv) && SvOBJECT(GvAV(sv))) ||
 	     (GvHV(sv) && SvOBJECT(GvHV(sv))) ||

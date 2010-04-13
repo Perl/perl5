@@ -116,11 +116,7 @@ Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
-#ifdef PERL_DONT_CREATE_GVSV
 	GvSV(gv) = newSVpvn(name, namelen);
-#else
-	sv_setpvn(GvSV(gv), name, namelen);
-#endif
 	if (PERLDB_LINE || PERLDB_SAVESRC)
 	    hv_magic(GvHVn(gv_AVadd(gv)), NULL, PERL_MAGIC_dbfile);
     }
@@ -178,10 +174,6 @@ Perl_newGP(pTHX_ GV *const gv)
     PERL_HASH(hash, file, len);
 
     Newxz(gp, 1, GP);
-
-#ifndef PERL_DONT_CREATE_GVSV
-    gp->gp_sv = newSV(0);
-#endif
 
     gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
     /* XXX Ideally this cast would be replaced with a change to const char*
@@ -289,7 +281,6 @@ S_gv_init_sv(pTHX_ GV *gv, const svtype sv_type)
     case SVt_PVHV:
 	(void)GvHVn(gv);
 	break;
-#ifdef PERL_DONT_CREATE_GVSV
     case SVt_NULL:
     case SVt_PVCV:
     case SVt_PVFM:
@@ -301,7 +292,6 @@ S_gv_init_sv(pTHX_ GV *gv, const svtype sv_type)
 	       If we just cast GvSVn(gv) to void, it ignores evaluating it for
 	       its side effect */
 	}
-#endif
     }
 }
 
@@ -757,9 +747,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 
     if (!isGV(vargv)) {
 	gv_init(vargv, varstash, S_autoload, S_autolen, FALSE);
-#ifdef PERL_DONT_CREATE_GVSV
 	GvSV(vargv) = newSV(0);
-#endif
     }
     LEAVE;
     varsv = GvSVn(vargv);
@@ -1667,11 +1655,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 
     if (!gv)
 	lim = DESTROY_amg;		/* Skip overloading entries. */
-#ifdef PERL_DONT_CREATE_GVSV
     else if (!sv) {
 	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
     }
-#endif
     else if (SvTRUE(sv))
 	amt.fallback=AMGfallYES;
     else if (SvOK(sv))

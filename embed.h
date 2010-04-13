@@ -1939,8 +1939,6 @@
 #define dump_sv_child		Perl_dump_sv_child
 #endif
 #endif
-#ifdef PERL_DONT_CREATE_GVSV
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define ckwarn_common		S_ckwarn_common
@@ -4358,8 +4356,6 @@
 #ifdef PERL_CORE
 #define dump_sv_child(a)	Perl_dump_sv_child(aTHX_ a)
 #endif
-#endif
-#ifdef PERL_DONT_CREATE_GVSV
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

@@ -931,14 +931,6 @@ EXTERN_C int usleep(unsigned int);
 
 #endif /* PERL_CORE */
 
-/* We no longer default to creating a new SV for GvSV.
-   Do this before embed.  */
-#ifndef PERL_CREATE_GVSV
-#  ifndef PERL_DONT_CREATE_GVSV
-#    define PERL_DONT_CREATE_GVSV
-#  endif
-#endif
-
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
 #define PERL_USES_PL_PIDSTATUS
 #endif

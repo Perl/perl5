@@ -1476,13 +1476,11 @@ Perl_save_op(pTHX)
     save_op();
 }
 
-#ifdef PERL_DONT_CREATE_GVSV
 GV *
 Perl_gv_SVadd(pTHX_ GV *gv)
 {
     return gv_SVadd(gv);
 }
-#endif
 
 GV *
 Perl_gv_AVadd(pTHX_ GV *gv)
