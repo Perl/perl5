@@ -653,7 +653,7 @@ testcase:
   # Correct makefile for newer GNU gcc
   perl -ni -we 'print unless /<(?:built-in|command)/' makefile x2p/makefile
   # if you just need miniperl, replace test_prep with miniperl
-  make -j4 test_prep
+  make test_prep
   [ -x ./perl ] || exit 125
   ./perl -Ilib ~/testcase.pl
   ret=$?
