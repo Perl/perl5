@@ -1621,9 +1621,10 @@ d_prctl (d_prctl.U):
 	This variable conditionally defines the HAS_PRCTL symbol, which
 	indicates to the C program that the prctl() routine is available.
 
-d_prctl_set_name (d_prctl.U):
-	This variable conditionally defines the HAS_PRCTL symbol, which
-	indicates to the C program that the prctl() routine is available.
+d_prctl_set_name (d_prctl_set_name.U):
+	This variable conditionally defines the HAS_PRCTL_SET_NAME symbol, 
+	which indicates to the C program that the prctl() routine supports
+	the PR_SET_NAME option.
 
 d_PRId64 (quadfio.U):
 	This variable conditionally defines the PERL_PRId64 symbol, which
