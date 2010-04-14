@@ -51,6 +51,14 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
     is(regnames_count(),3);
 }
+
+    { # Keep this test last, as whole script will be interrupted if times out
+        # Bug #72998; this can loop 
+        watchdog(2);
+        eval '"\x{100}\x{FB00}" =~ /\x{100}\N{U+66}+/i';
+        pass("Didn't loop");
+    }
+
 # New tests above this line, don't forget to update the test count below!
-BEGIN { plan tests => 18 }
+BEGIN { plan tests => 19 }
 # No tests here!
