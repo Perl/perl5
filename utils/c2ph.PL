@@ -369,13 +369,13 @@ $DEFINES = '';
 
 $perl++ if $0 =~ m#/?c2ph$#;
 
-require 'getopts.pl';
+use Getopt::Std qw(getopts);
 
 use File::Temp 'tempdir';
 
 eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_]+=)(.*)/ && shift;
 
-&Getopts('aixdpvtnws:') || &usage(0);
+getopts('aixdpvtnws:') || &usage(0);
 
 $opt_d && $debug++;
 $opt_t && $trace++;
