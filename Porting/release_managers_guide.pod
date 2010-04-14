@@ -994,6 +994,12 @@ e.g.
 
 =item *
 
+If necessary, send an email to C<perlbug-admin at perl.org> requesting
+that new version numbers be added to the RT fields C<Perl Version> and
+C<Fixed In>.
+
+=item *
+
 I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some
 much-needed rest and relaxation>.
 
