@@ -8,7 +8,7 @@
 	(!sv_is_glob(sv) && !sv_is_regexp(sv) && \
 	 (SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK|SVp_IOK|SVp_NOK|SVp_POK)))
 
-static SV *hintkey_rpn_sv, *hintkey_calcrpn_sv;
+static SV *hintkey_rpn_sv, *hintkey_calcrpn_sv, *hintkey_stufftest_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -150,6 +150,27 @@ static OP *THX_parse_keyword_calcrpn(pTHX)
 }
 #define parse_keyword_calcrpn() THX_parse_keyword_calcrpn(aTHX)
 
+static OP *THX_parse_keyword_stufftest(pTHX)
+{
+	I32 c;
+	bool do_stuff;
+	lex_read_space(0);
+	do_stuff = lex_peek_unichar(0) == '+';
+	if(do_stuff) {
+		lex_read_unichar(0);
+		lex_read_space(0);
+	}
+	c = lex_peek_unichar(0);
+	if(c == ';') {
+		lex_read_unichar(0);
+	} else if(c != /*{*/'}') {
+		croak("syntax error");
+	}
+	if(do_stuff) lex_stuff_pvn(" ", 1, 0);
+	return newOP(OP_NULL, 0);
+}
+#define parse_keyword_stufftest() THX_parse_keyword_stufftest(aTHX)
+
 /* plugin glue */
 
 static int THX_keyword_active(pTHX_ SV *hintkey_sv)
@@ -200,6 +221,10 @@ static int my_keyword_plugin(pTHX_
 			keyword_active(hintkey_calcrpn_sv)) {
 		*op_ptr = parse_keyword_calcrpn();
 		return KEYWORD_PLUGIN_STMT;
+	} else if(keyword_len == 9 && strnEQ(keyword_ptr, "stufftest", 9) &&
+			keyword_active(hintkey_stufftest_sv)) {
+		*op_ptr = parse_keyword_stufftest();
+		return KEYWORD_PLUGIN_STMT;
 	} else {
 		return next_keyword_plugin(aTHX_
 				keyword_ptr, keyword_len, op_ptr);
@@ -211,6 +236,8 @@ MODULE = XS::APItest::KeywordRPN PACKAGE = XS::APItest::KeywordRPN
 BOOT:
 	hintkey_rpn_sv = newSVpvs_share("XS::APItest::KeywordRPN/rpn");
 	hintkey_calcrpn_sv = newSVpvs_share("XS::APItest::KeywordRPN/calcrpn");
+	hintkey_stufftest_sv =
+		newSVpvs_share("XS::APItest::KeywordRPN/stufftest");
 	next_keyword_plugin = PL_keyword_plugin;
 	PL_keyword_plugin = my_keyword_plugin;
 
@@ -225,6 +252,9 @@ PPCODE:
 			keyword_enable(hintkey_rpn_sv);
 		} else if(sv_is_string(item) && strEQ(SvPVX(item), "calcrpn")) {
 			keyword_enable(hintkey_calcrpn_sv);
+		} else if(sv_is_string(item) &&
+				strEQ(SvPVX(item), "stufftest")) {
+			keyword_enable(hintkey_stufftest_sv);
 		} else {
 			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));
@@ -242,6 +272,9 @@ PPCODE:
 			keyword_disable(hintkey_rpn_sv);
 		} else if(sv_is_string(item) && strEQ(SvPVX(item), "calcrpn")) {
 			keyword_disable(hintkey_calcrpn_sv);
+		} else if(sv_is_string(item) &&
+				strEQ(SvPVX(item), "stufftest")) {
+			keyword_disable(hintkey_stufftest_sv);
 		} else {
 			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));

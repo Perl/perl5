@@ -956,6 +956,8 @@ Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len+highhalf);
 	    bufptr = PL_parser->bufptr;
 	    Move(bufptr, bufptr+len+highhalf, PL_parser->bufend+1-bufptr, char);
+	    SvCUR_set(PL_parser->linestr,
+	    	SvCUR(PL_parser->linestr) + len+highhalf);
 	    PL_parser->bufend += len+highhalf;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
@@ -994,6 +996,8 @@ Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len-highhalf);
 	    bufptr = PL_parser->bufptr;
 	    Move(bufptr, bufptr+len-highhalf, PL_parser->bufend+1-bufptr, char);
+	    SvCUR_set(PL_parser->linestr,
+	    	SvCUR(PL_parser->linestr) + len-highhalf);
 	    PL_parser->bufend += len-highhalf;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
@@ -1009,6 +1013,7 @@ Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len);
 	    bufptr = PL_parser->bufptr;
 	    Move(bufptr, bufptr+len, PL_parser->bufend+1-bufptr, char);
+	    SvCUR_set(PL_parser->linestr, SvCUR(PL_parser->linestr) + len);
 	    PL_parser->bufend += len;
 	    Copy(pv, bufptr, len, char);
 	}
