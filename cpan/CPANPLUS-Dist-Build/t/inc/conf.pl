@@ -29,11 +29,10 @@ BEGIN {
     
     ### add CPANPLUS' bin dir to the front of $ENV{PATH}, so that cpanp-run-perl
     ### and friends get picked up, only under PERL_CORE though.
+    $old_env_path = $ENV{PATH};
     if ( $ENV{PERL_CORE} ) {
-       $old_env_path = $ENV{PATH};
        $ENV{'PATH'}  = join $Config{'path_sep'}, 
-                    grep { defined } "$FindBin::Bin/../../CPANPLUS/bin", $ENV{'PATH'};
-
+                    grep { defined } "$FindBin::Bin/../../../utils", $ENV{'PATH'};
     }
 
     ### Fix up the path to perl, as we're about to chdir
