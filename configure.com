@@ -63,6 +63,7 @@ $ ccflags = ""
 $ static_ext = ""
 $ dynamic_ext = ""
 $ nonxs_ext = ""
+$ nonxs_ext2 = ""
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
 $! max_allowed_dir_depth = 2 ! e.g. [A.PERLxxx] not [A.B.PERLxxx]
@@ -2772,14 +2773,21 @@ $ THEN
 $     xxx = nonxs_ext
 $     gosub may_already_have_extension
 $ ENDIF
+$ IF $STATUS .EQ. 1
+$ THEN
+$     xxx = nonxs_ext2
+$     gosub may_already_have_extension
+$ ENDIF
 $ IF $STATUS .NE. 1 THEN goto ext_loop
 $ goto found_new_extension
 $!
 $ may_already_have_extension:
 $   idx = F$LOCATE(extspec, xxx)
 $   extlen = F$LENGTH(xxx) 
-$   IF idx .EQ. extlen THEN return 1
-$!  But "Flirble" may just be part of "Acme-Flirble"
+$   IF idx .EQ. extlen THEN return 1	! didn't find it
+$!  But "Flirble" may just be part of "Acme-Flirble".  This is not
+$!  bullet-proof because we may only be looking at one chunk of the
+$!  existing extension list.
 $   IF idx .GT. 0 .AND. F$EXTRACT(idx - 1, 1, xxx) .NES. " "
 $   THEN
 $	xxx = F$EXTRACT(idx + F$LENGTH(extspec) + 1, extlen, xxx)
@@ -2798,7 +2806,13 @@ $!
 $ found_new_extension:
 $   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.dist.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. ""
 $   THEN
-$       nonxs_ext = nonxs_ext + " ''extspec'"
+$!  Bit if a hack to get around the 1K buffer on older systems.
+$       IF F$LENGTH(nonxs_ext) .GT. 950
+$       THEN
+$           nonxs_ext2 = nonxs_ext2 + " ''extspec'"
+$       ELSE
+$           nonxs_ext = nonxs_ext + " ''extspec'"
+$       ENDIF
 $   ELSE
 $       known_extensions = known_extensions + " ''extspec'"
 $   ENDIF
@@ -2829,8 +2843,10 @@ $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
 $ dflt = dflt - "Win32API/File" - "Win32"  ! need Dave Cutler's other project
 $ nonxs_ext = nonxs_ext - "Win32CORE"
+$ nonxs_ext2 = nonxs_ext2 - "Win32CORE"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $ nonxs_ext = F$EDIT(nonxs_ext,"TRIM,COMPRESS")
+$ nonxs_ext2 = F$EDIT(nonxs_ext2,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build
 $ echo ""
@@ -6290,9 +6306,7 @@ $ WC "exe_ext='" + exe_ext + "'"
 $!
 $! The extensions symbols may be quite long
 $!
-$ tmp = "extensions='" + nonxs_ext + " " + dynamic_ext + "'"
-$ WC/symbol tmp
-$ DELETE/SYMBOL tmp
+$ WC/symbol "extensions='", nonxs_ext, " ", nonxs_ext2, " ", dynamic_ext, "'"
 $ WC "fflushNULL='define'"
 $ WC "fflushall='undef'"
 $ WC "fpostype='fpos_t'"
@@ -6461,9 +6475,7 @@ $ WC "netdb_hlen_type='" + netdb_hlen_type + "'"
 $ WC "netdb_host_type='" + netdb_host_type + "'"
 $ WC "netdb_name_type='" + netdb_name_type + "'"
 $ WC "netdb_net_type='" + netdb_net_type + "'"
-$ tmp = "nonxs_ext='" + nonxs_ext + "'"
-$ WC/symbol tmp
-$ DELETE/SYMBOL tmp
+$ WC/symbol "nonxs_ext='", nonxs_ext, " ", nonxs_ext2, "'"
 $ WC "nveformat='" + nveformat + "'"
 $ WC "nvfformat='" + nvfformat + "'"
 $ WC "nvgformat='" + nvgformat + "'"
