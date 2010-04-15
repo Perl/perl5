@@ -476,13 +476,14 @@ sub process_single_typemap {
 
 =item * Purpose
 
-Populate C<%targetable>.
+Populate C<%targetable>.  This constitutes a refinement of the output of
+C<process_typemaps()> with respect to its fourth output, C<$output_expr_ref>.
 
 =item * Arguments
 
-  %targetable = make_targetable(\%output_expr);
+  %targetable = make_targetable($output_expr_ref);
       
-Reference to C<%output_expr>.
+Single hash reference:  the fourth such ref returned by C<process_typemaps()>.
 
 =item * Return Value
 
