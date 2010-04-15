@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use Config;
 
-plan (tests => 81);
+plan (tests => 83);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -345,6 +345,37 @@ SKIP: {
 	       || ($^O eq 'freebsd' && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
 		       'altering $0 is effective (testing with `ps`)');
 	}
+}
+
+# Check that assigning to $0 on Linux sets the process name with both
+# argv[0] assignment and by calling prctl()
+{
+  SKIP: {
+    skip "We don't have prctl() here", 2 unless $Config{d_prctl_set_name};
+
+    # We don't really need these tests. prctl() is tested in the
+    # Kernel, but test it anyway for our sanity. If something doesn't
+    # work (like if the system doesn't have a ps(1) for whatever
+    # reason) just bail out gracefully.
+    my $maybe_ps = sub {
+        my ($cmd) = @_;
+        local ($?, $!);
+
+        no warnings;
+        my $res = `$cmd`;
+        skip "Couldn't shell out to `$cmd', returned code $?", 2 if $?;
+        return $res;
+    };
+
+    my $name = "Good Morning, Dave";
+    $0 = $name;
+
+    chomp(my $argv0 = $maybe_ps->("ps h $$"));
+    chomp(my $prctl = $maybe_ps->("ps hc $$"));
+
+    like($argv0, $name, "Set process name through argv[0] ($argv0)");
+    like($prctl, substr($name, 0, 15), "Set process name through prctl() ($prctl)");
+  }
 }
 
 {

@@ -57,6 +57,10 @@ tie.
 #  include <sys/pstat.h>
 #endif
 
+#ifdef HAS_PRCTL_SET_NAME
+#  include <sys/prctl.h>
+#endif
+
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Signal_t Perl_csighandler(int sig, siginfo_t *, void *);
 #else
@@ -2823,6 +2827,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    PL_origargv[0][PL_origalen-1] = 0;
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = 0;
+#ifdef HAS_PRCTL_SET_NAME
+	    /* Set the legacy process name in addition to the POSIX name on Linux */
+	    if (prctl(PR_SET_NAME, (unsigned long)s, 0, 0, 0) != 0) {
+		/* diag_listed_as: SKIPME */
+		Perl_croak(aTHX_ "Can't set $0 with prctl(): %s", Strerror(errno));
+	    }
+#endif
 	}
 #endif
 	UNLOCK_DOLLARZERO_MUTEX;
