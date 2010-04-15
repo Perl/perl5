@@ -110,6 +110,12 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 # define HAS_BOOL 1
 #endif
 
+/* a simple (bool) cast may not do the right thing: if bool is defined
+ * as char for example, then the cast from int is implementation-defined
+ */
+
+#define cBOOL(cbool) ((bool)!!(cbool))
+
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
  *     and FUNCTION__ as results.

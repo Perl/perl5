@@ -193,7 +193,7 @@
                     LEAVE;                                                              \
                 }                                                                       \
                 if (!(OP(scan) == NAME                                                  \
-                    ? (bool)swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8)   \
+                    ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8))  \
                     : LCFUNC_utf8((U8*)locinput)))                                      \
                 {                                                                       \
                     sayNO;                                                              \
@@ -224,7 +224,7 @@
                     LEAVE;                                                              \
                 }                                                                       \
                 if ((OP(scan) == NAME                                                  \
-                    ? (bool)swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8)    \
+                    ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, do_utf8))  \
                     : LCFUNC_utf8((U8*)locinput)))                                      \
                 {                                                                       \
                     sayNO;                                                              \
@@ -1179,7 +1179,7 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
     if ( (CoNd)                                        \
 	 && (ln == len ||                              \
 	     !ibcmp_utf8(s, &my_strend, 0,  do_utf8,   \
-			m, NULL, ln, (bool)UTF))       \
+			m, NULL, ln, cBOOL(UTF)))      \
 	 && (!reginfo || regtry(reginfo, &s)) )        \
 	goto got_it;                                   \
     else {                                             \
@@ -1190,7 +1190,7 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 	      && (f == c1 || f == c2)                  \
 	      && (ln == len ||                         \
 	        !ibcmp_utf8(s, &my_strend, 0,  do_utf8,\
-			      m, NULL, ln, (bool)UTF)) \
+			      m, NULL, ln, cBOOL(UTF)))\
 	      && (!reginfo || regtry(reginfo, &s)) )   \
 	      goto got_it;                             \
     }                                                  \
@@ -1479,7 +1479,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == BOUND ?
-				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
+				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) :
 				 isALNUM_LC_utf8((U8*)s)))
 		    {
 			tmp = !tmp;
@@ -1517,7 +1517,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == NBOUND ?
-				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
+				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) :
 				 isALNUM_LC_utf8((U8*)s)))
 			tmp = !tmp;
 		    else REXEC_FBC_TRYIT;
@@ -1872,7 +1872,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds = NULL;
-    const bool do_utf8 = (bool)DO_UTF8(sv);
+    const bool do_utf8 = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo;  /* create some info to pass to regtry etc */
@@ -3419,7 +3419,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		const char * const l = locinput;
 		char *e = PL_regeol;
 
-		if (ibcmp_utf8(s, 0,  ln, (bool)UTF,
+		if (ibcmp_utf8(s, 0,  ln, cBOOL(UTF),
 			       l, &e, 0,  do_utf8)) {
 		     /* One more case for the sharp s:
 		      * pack("U0U*", 0xDF) =~ /ss/i,
@@ -4055,7 +4055,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* NOTREACHED */
 	    }
 	    /* logical is 1,   /(?(?{...})X|Y)/ */
-	    sw = (bool)SvTRUE(ret);
+	    sw = cBOOL(SvTRUE(ret));
 	    logical = 0;
 	    break;
 	}
@@ -4156,11 +4156,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    /*NOTREACHED*/	    
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (bool)(*PL_reglastparen >= n && PL_regoffs[n].end != -1);
+	    sw = cBOOL(*PL_reglastparen >= n && PL_regoffs[n].end != -1);
 	    break;
 	case NGROUPP:
 	    /* reg_check_named_buff_matched returns 0 for no match */
-	    sw = (bool)(0 < reg_check_named_buff_matched(rex,scan));
+	    sw = cBOOL(0 < reg_check_named_buff_matched(rex,scan));
 	    break;
         case INSUBP:
             n = ARG(scan);
@@ -5167,7 +5167,7 @@ NULL
 		    /* trivial fail */
 		    if (logical) {
 			logical = 0;
-			sw = 1 - (bool)ST.wanted;
+			sw = 1 - cBOOL(ST.wanted);
 		    }
 		    else if (ST.wanted)
 			sayNO;
@@ -5196,7 +5196,7 @@ NULL
 
 	case IFMATCH_A: /* body of (?...A) succeeded */
 	    if (ST.logical) {
-		sw = (bool)ST.wanted;
+		sw = cBOOL(ST.wanted);
 	    }
 	    else if (!ST.wanted)
 		sayNO;
