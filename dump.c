@@ -2026,7 +2026,6 @@ Perl_runops_debug(pTHX)
 
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
-	PERL_ASYNC_CHECK();
 	if (PL_debug) {
 	    if (PL_watchaddr && (*PL_watchaddr != PL_watchok))
 		PerlIO_printf(Perl_debug_log,

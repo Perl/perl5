@@ -52,6 +52,7 @@ PP(pp_nextstate)
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
+    PERL_ASYNC_CHECK();
     return NORMAL;
 }
 
@@ -98,6 +99,7 @@ PP(pp_gv)
 PP(pp_and)
 {
     dVAR; dSP;
+    PERL_ASYNC_CHECK();
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
@@ -203,6 +205,7 @@ PP(pp_sassign)
 PP(pp_cond_expr)
 {
     dVAR; dSP;
+    PERL_ASYNC_CHECK();
     if (SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other);
     else
@@ -416,6 +419,7 @@ PP(pp_preinc)
 PP(pp_or)
 {
     dVAR; dSP;
+    PERL_ASYNC_CHECK();
     if (SvTRUE(TOPs))
 	RETURN;
     else {
@@ -434,6 +438,7 @@ PP(pp_defined)
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
 
     if (is_dor) {
+	PERL_ASYNC_CHECK();
         sv = TOPs;
         if (!sv || !SvANY(sv)) {
 	    if (op_type == OP_DOR)
@@ -2076,6 +2081,8 @@ PP(pp_subst)
     bool is_cow;
 #endif
     SV *nsv = NULL;
+
+    PERL_ASYNC_CHECK();
 
     /* known replacement string? */
     register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
