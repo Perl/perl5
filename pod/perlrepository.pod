@@ -359,10 +359,13 @@ Now you should create a patch file for all your local changes:
   % git format-patch origin
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
-You should now send an email to perl5-porters@perl.org with a
-description of your changes, and include this patch file as an
-attachment.  (See the next section for how to configure and use git to
-send these emails for you.)
+You should now send an email to either perlbug@perl.org or
+perl5-porters@perl.org with a description of your changes, and include
+this patch file as an attachment. The perlbug address is preferred,
+but use perl5-porters for patches intended for discussion.
+
+See the next section for how to configure and use git to send these
+emails for you.
 
 If you want to delete your temporary branch, you may do so with:
 
@@ -375,8 +378,12 @@ If you want to delete your temporary branch, you may do so with:
 
 =head2 Using git to send patch emails
 
-In your ~/git/perl repository, set the destination email to the
-perl5-porters mailing list.
+In your ~/git/perl repository, set the destination email to perl's bug
+tracker:
+
+  $ git config sendemail.to perlbug@perl.org
+
+Or maybe perl5-porters (discussed above):
 
   $ git config sendemail.to perl5-porters@perl.org
 
@@ -733,8 +740,8 @@ The same patch as above, using github might look like this:
   % git push origin orange
 
 The orange branch has been pushed to GitHub, so you should now send an
-email to perl5-porters@perl.org with a description of your changes and
-the following information:
+email (see L</SUBMITTING A PATCH>) with a description of your changes
+and the following information:
 
   http://github.com/USERNAME/perl/tree/orange
   git@github.com:USERNAME/perl.git branch orange
