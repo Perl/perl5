@@ -2593,7 +2593,7 @@ sub parse_abstract {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if !$inpod;
         chop;
-        next unless /^($package\s-\s)(.*)/;
+        next unless /^($package(?:\.pm)?\s+\-+\s+)(.*)/;
         $result = $2;
         last;
     }
