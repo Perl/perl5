@@ -1179,7 +1179,7 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_catpvn(name, tmpbuf, nchars);
 		    }
 		
-		    if (indent >= 2) {
+		    if (indent >= 2 && !terse) {
 			SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name)+3);
 			newapad = newSVsv(apad);
 			sv_catsv(newapad, tmpsv);
@@ -1193,7 +1193,7 @@ Data_Dumper_Dumpxs(href, ...)
 			    freezer, toaster, purity, deepcopy, quotekeys,
 			    bless, maxdepth, sortkeys);
 		
-		    if (indent >= 2)
+		    if (indent >= 2 && !terse)
 			SvREFCNT_dec(newapad);
 
 		    postlen = av_len(postav);

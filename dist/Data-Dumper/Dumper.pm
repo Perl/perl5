@@ -234,7 +234,7 @@ sub Dumpperl {
     my $valstr;
     {
       local($s->{apad}) = $s->{apad};
-      $s->{apad} .= ' ' x (length($name) + 3) if $s->{indent} >= 2;
+      $s->{apad} .= ' ' x (length($name) + 3) if $s->{indent} >= 2 and !$s->{terse};
       $valstr = $s->_dump($val, $name);
     }
 
