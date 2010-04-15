@@ -4880,6 +4880,14 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
+=item Use of := for an empty attribute list is deprecated
+
+(D deprecated) The construction C<my $x := 42> currently
+parses correctly in perl, being equivalent to C<my $x : = 42>
+(applying an empty attribute list to C<$x>). This useless
+construct is now deprecated, so C<:=> can be reclaimed as a new
+operator in the future.
+
 =item Use of freed value in iteration
 
 (F) Perhaps you modified the iterated array within the loop?
