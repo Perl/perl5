@@ -52,7 +52,7 @@ typedef perl_os_thread pthread_t;
 
 /* Values for 'state' member */
 #define PERL_ITHR_DETACHED           1 /* Thread has been detached */
-#define PERL_ITHR_JOINED             2 /* Thread has been joined */
+#define PERL_ITHR_JOINED             2 /* Thread is being / has been joined */
 #define PERL_ITHR_FINISHED           4 /* Thread has finished execution */
 #define PERL_ITHR_THREAD_EXIT_ONLY   8 /* exit() only exits current thread */
 #define PERL_ITHR_NONVIABLE         16 /* Thread creation failed */
@@ -1409,6 +1409,7 @@ void
 ithread_object(...)
     PREINIT:
         char *classname;
+        SV *arg;
         UV tid;
         ithread *thread;
         int state;
@@ -1421,34 +1422,47 @@ ithread_object(...)
         }
         classname = (char *)SvPV_nolen(ST(0));
 
-        if ((items < 2) || ! SvOK(ST(1))) {
+        /* Turn $tid from PVLV to SV if needed (bug #73330) */
+        arg = ST(1);
+        SvGETMAGIC(arg);
+
+        if ((items < 2) || ! SvOK(arg)) {
             XSRETURN_UNDEF;
         }
 
         /* threads->object($tid) */
-        tid = SvUV(ST(1));
+        tid = SvUV(arg);
 
-        /* Walk through threads list */
-        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-        for (thread = MY_POOL.main_thread.next;
-             thread != &MY_POOL.main_thread;
-             thread = thread->next)
-        {
-            /* Look for TID */
-            if (thread->tid == tid) {
-                /* Ignore if detached or joined */
-                MUTEX_LOCK(&thread->mutex);
-                state = thread->state;
-                MUTEX_UNLOCK(&thread->mutex);
-                if (! (state & PERL_ITHR_UNCALLABLE)) {
-                    /* Put object on stack */
-                    ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
-                    have_obj = 1;
+        /* If current thread wants its own object, then behave the same as
+           ->self() */
+        thread = S_ithread_get(aTHX);
+        if (thread->tid == tid) {
+            ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
+            have_obj = 1;
+
+        } else {
+            /* Walk through threads list */
+            MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+            for (thread = MY_POOL.main_thread.next;
+                 thread != &MY_POOL.main_thread;
+                 thread = thread->next)
+            {
+                /* Look for TID */
+                if (thread->tid == tid) {
+                    /* Ignore if detached or joined */
+                    MUTEX_LOCK(&thread->mutex);
+                    state = thread->state;
+                    MUTEX_UNLOCK(&thread->mutex);
+                    if (! (state & PERL_ITHR_UNCALLABLE)) {
+                        /* Put object on stack */
+                        ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
+                        have_obj = 1;
+                    }
+                    break;
                 }
-                break;
             }
+            MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
         }
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         if (! have_obj) {
             XSRETURN_UNDEF;
