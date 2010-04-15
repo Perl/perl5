@@ -2081,11 +2081,11 @@ PP(pp_subst)
     bool is_cow;
 #endif
     SV *nsv = NULL;
+    /* known replacement string? */
+    register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
 
     PERL_ASYNC_CHECK();
 
-    /* known replacement string? */
-    register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else if (PL_op->op_private & OPpTARGET_MY)
