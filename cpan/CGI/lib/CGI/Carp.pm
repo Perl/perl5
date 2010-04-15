@@ -423,35 +423,26 @@ sub ineval {
 sub die {
   my ($arg,@rest) = @_;
 
-  if ($DIE_HANDLER) {
-      &$DIE_HANDLER($arg,@rest);
-  }
+  &$DIE_HANDLER($arg,@rest) if $DIE_HANDLER;
 
-  if ( ineval() )  {
-    if (!ref($arg)) {
-      $arg = join("",($arg,@rest)) || "Died";
-      my($file,$line,$id) = id(1);
-      $arg .= " at $file line $line.\n" unless $arg=~/\n$/;
-      realdie($arg);
-    }
-    else {
-      realdie($arg,@rest);
-    }
-  }
+  # if called as die( $object, 'string' ),
+  # all is stringified, just like with
+  # the real 'die'
+  $arg = join '' => "$arg", @rest if @rest;
 
-  if (!ref($arg)) {
-    $arg = join("", ($arg,@rest));
-    my($file,$line,$id) = id(1);
-    $arg .= " at $file line $line." unless $arg=~/\n$/;
-    &fatalsToBrowser($arg) if $WRAP;
-    if (($arg =~ /\n$/) || !exists($ENV{MOD_PERL})) {
-      my $stamp = stamp;
-      $arg=~s/^/$stamp/gm;
-    }
-    if ($arg !~ /\n$/) {
-      $arg .= "\n";
-    }
-  }
+  $arg ||= 'Died';
+
+  my($file,$line,$id) = id(1);
+
+  $arg .= " at $file line $line.\n" unless ref $arg or $arg=~/\n$/;
+
+  realdie $arg           if ineval();
+  &fatalsToBrowser($arg) if $WRAP;
+
+  $arg=~s/^/ stamp() /gme if $arg =~ /\n$/ or not exists $ENV{MOD_PERL};
+
+  $arg .= "\n" unless $arg =~ /\n$/;
+
   realdie $arg;
 }
 
@@ -503,11 +494,15 @@ sub warningsToBrowser {
 
 # headers
 sub fatalsToBrowser {
-  my($msg) = @_;
+  my $msg = shift;
+
+  $msg = "$msg" if ref $msg;
+
   $msg=~s/&/&amp;/g;
   $msg=~s/>/&gt;/g;
   $msg=~s/</&lt;/g;
-  $msg=~s/\"/&quot;/g;
+  $msg=~s/"/&quot;/g;
+
   my($wm) = $ENV{SERVER_ADMIN} ? 
     qq[the webmaster (<a href="mailto:$ENV{SERVER_ADMIN}">$ENV{SERVER_ADMIN}</a>)] :
       "this site's webmaster";

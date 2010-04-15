@@ -3,7 +3,7 @@
 
 use strict;
 
-use Test::More tests => 41;
+use Test::More tests => 59;
 use IO::Handle;
 
 BEGIN { use_ok('CGI::Carp') };
@@ -116,12 +116,13 @@ like($@,
 # Test that realwarn is called
 {
   local $^W = 0;
-  eval 'sub CGI::Carp::realdie {my $mess = shift; return $mess};';
-}
+  local *CGI::Carp::realdie = sub { my $mess = shift; return $mess };
 
-like(CGI::Carp::die('There is a problem'),
-     $stamp,
-     'CGI::Carp::die calls CORE::die, but adds stamp');
+    like(CGI::Carp::die('There is a problem'),
+        $stamp,
+        'CGI::Carp::die calls CORE::die, but adds stamp');
+
+}
 
 #-----------------------------------------------------------------------------
 # Test set_message
@@ -273,3 +274,100 @@ ok( defined buffer( $fh ),         '$fh returns proper filehandle');
 ok( defined buffer('::STDOUT'),    'STDIN returns proper filehandle');
 ok( defined buffer(*main::STDOUT), 'STDIN returns proper filehandle');
 ok(!defined buffer("WIBBLE"),      '"WIBBLE" doesn\'t returns proper filehandle');
+
+# Calling die with code refs with no WRAP
+{
+    local $CGI::Carp::WRAP = 0;
+
+    eval { CGI::Carp::die( 'regular string' ) };
+    like $@ => qr/regular string/, 'die with string';
+
+    eval { CGI::Carp::die( [ 1..10 ] ) };
+    like $@ => qr/ARRAY\(0x[\da-f]+\)/, 'die with array ref';
+
+    eval { CGI::Carp::die( { a => 1 } ) };
+    like $@ => qr/HASH\(0x[\da-f]+\)/, 'die with hash ref';
+
+    eval { CGI::Carp::die( sub { 'Farewell' } ) };
+    like $@ => qr/CODE\(0x[\da-f]+\)/, 'die with code ref';
+
+    eval { CGI::Carp::die( My::Plain::Object->new ) };
+    isa_ok $@, 'My::Plain::Object';
+
+    eval { CGI::Carp::die( My::Plain::Object->new, ' and another argument' ) };
+    like $@ => qr/My::Plain::Object/,     'object is stringified';
+    like $@ => qr/and another argument/, 'second argument is present';
+
+    eval { CGI::Carp::die( My::Stringified::Object->new ) };
+    isa_ok $@, 'My::Stringified::Object';
+
+    eval { CGI::Carp::die( My::Stringified::Object->new, ' and another argument' ) };
+    like $@ => qr/stringified/,          'object is stringified';
+    like $@ => qr/and another argument/, 'second argument is present';
+
+    eval { CGI::Carp::die() };
+    like $@ => qr/Died at/, 'die with no argument';
+}
+
+# Calling die with code refs when WRAPped
+{
+    local $CGI::Carp::WRAP = 1;
+    local *CGI::Carp::realdie = sub { return @_ };
+    local *STDOUT;
+
+    tie *STDOUT, 'StoreStuff';
+
+    my %result;   # store results because stdout is kidnapped
+
+    CGI::Carp::die( 'regular string' );
+    $result{string} .= $_ while <STDOUT>;
+
+    CGI::Carp::die( [ 1..10 ] );
+    $result{array_ref} .= $_ while <STDOUT>;
+
+    CGI::Carp::die( { a => 1 } );
+    $result{hash_ref} .= $_ while <STDOUT>;
+
+    CGI::Carp::die( sub { 'Farewell' } );
+    $result{code_ref} .= $_ while <STDOUT>;
+
+    CGI::Carp::die( My::Plain::Object->new );
+    $result{plain_object} .= $_ while <STDOUT>;
+
+    CGI::Carp::die( My::Stringified::Object->new );
+    $result{string_object} .= $_ while <STDOUT>;
+
+    CGI::Carp::die();
+    $result{no_args} .= $_ while <STDOUT>;
+
+    untie *STDOUT;
+
+    like $result{string}    => qr/regular string/, 'regular string, wrapped';
+    like $result{array_ref} => qr/ARRAY\(\w+?\)/,  'array ref, wrapped';
+    like $result{hash_ref}  => qr/HASH\(\w+?\)/,   'hash ref, wrapped';
+    like $result{code_ref}  => qr/CODE\(\w+?\)/,   'code ref, wrapped';
+    like $result{plain_object} => qr/My::Plain::Object/,
+      'plain object, wrapped';
+    like $result{string_object} => qr/stringified/,
+      'stringified object, wrapped';
+    like $result{no_args} => qr/Died at/, 'no args, wrapped';
+
+}
+
+{
+    package My::Plain::Object;
+
+    sub new {
+        return bless {}, shift;
+    }
+}
+
+{
+    package My::Stringified::Object;
+
+    use overload '""' => sub { 'stringified' };
+
+    sub new {
+        return bless {}, shift;
+    }
+}

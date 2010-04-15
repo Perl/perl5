@@ -224,6 +224,7 @@ cpan/CGI/t/unescapeHTML.t		See if CGI::unescapeHTML() works
 cpan/CGI/t/uploadInfo.t			See if CGI.pm works
 cpan/CGI/t/upload_post_text.txt		Test data for CGI.pm
 cpan/CGI/t/upload.t			See if CGI.pm works
+cpan/CGI/t/url.t			See if CGI.pm works
 cpan/CGI/t/user_agent.t			See if CGI->user_agent() works
 cpan/CGI/t/utf8.t			See if CGI.pm works
 cpan/CGI/t/util-58.t			See if 5.8-dependent features work
