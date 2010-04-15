@@ -864,29 +864,32 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
     SV *saggregate = S_sharedsv_from_obj(aTHX_ mg->mg_obj);
-    SV** svp;
+    SV** svp = NULL;
 
     ENTER_LOCK;
-    if (SvTYPE(saggregate) == SVt_PVAV) {
-        assert ( mg->mg_ptr == 0 );
-        SHARED_CONTEXT;
-        svp = av_fetch((AV*) saggregate, mg->mg_len, 0);
-    } else {
-        char *key = mg->mg_ptr;
-        I32 len = mg->mg_len;
-        assert ( mg->mg_ptr != 0 );
-        if (mg->mg_len == HEf_SVKEY) {
-            STRLEN slen;
-            key = SvPV((SV *)mg->mg_ptr, slen);
-            len = slen;
-            if (SvUTF8((SV *)mg->mg_ptr)) {
-                len = -len;
+    if (saggregate) {  /* During global destruction, underlying
+                          aggregate may no longer exist */
+        if (SvTYPE(saggregate) == SVt_PVAV) {
+            assert ( mg->mg_ptr == 0 );
+            SHARED_CONTEXT;
+            svp = av_fetch((AV*) saggregate, mg->mg_len, 0);
+        } else {
+            char *key = mg->mg_ptr;
+            I32 len = mg->mg_len;
+            assert ( mg->mg_ptr != 0 );
+            if (mg->mg_len == HEf_SVKEY) {
+                STRLEN slen;
+                key = SvPV((SV *)mg->mg_ptr, slen);
+                len = slen;
+                if (SvUTF8((SV *)mg->mg_ptr)) {
+                    len = -len;
+                }
             }
+            SHARED_CONTEXT;
+            svp = hv_fetch((HV*) saggregate, key, len, 0);
         }
-        SHARED_CONTEXT;
-        svp = hv_fetch((HV*) saggregate, key, len, 0);
+        CALLER_CONTEXT;
     }
-    CALLER_CONTEXT;
     if (svp) {
         /* Exists in the array */
         if (SvROK(*svp)) {
@@ -957,6 +960,12 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
     dTHXc;
     MAGIC *shmg;
     SV *saggregate = S_sharedsv_from_obj(aTHX_ mg->mg_obj);
+
+    /* Object may not exist during global destruction */
+    if (! saggregate) {
+        return (0);
+    }
+
     ENTER_LOCK;
     sharedsv_elem_mg_FETCH(aTHX_ sv, mg);
     if ((shmg = mg_find(sv, PERL_MAGIC_shared_scalar)))
