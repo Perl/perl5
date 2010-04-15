@@ -302,11 +302,11 @@ The list of people to thank goes here.
 
 You can find the list of committers and authors by:
 
-  % git log v5.11.1..HEAD | perl -nlwe '$seen{$1}++ if /^Author: ([^<]*)/; END { print for sort keys %seen }'
+  % git log --pretty='format:%an' v5.11.1..HEAD | sort | uniq
 
 And how many files where changed by:
 
-  % git diff v5.11.1..HEAD | diffstat
+  % git diff --stat=200,200 v5.11.1..HEAD
 
 =item Reporting Bugs
 
