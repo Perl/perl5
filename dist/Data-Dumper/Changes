@@ -6,6 +6,12 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.126 (Apr 15 2010)
+
+Fix Data::Dumper's Fix Terse(1) + Indent(2):
+perl-RT #73604: When $Data::Dumper::Terse is true, the indentation is thrown
+off. It appears to be acting as if the $VAR1 = is still there.
+
 =item 2.125 (Aug  8 2009)
 
 CPAN distribution fixes (meta information for META.yml).

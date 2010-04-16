@@ -1026,6 +1026,13 @@ have their own copies of it.
 If the program has been given to perl via the switches C<-e> or C<-E>,
 C<$0> will contain the string C<"-e">.
 
+On Linux as of perl 5.14 the legacy process name will be set with
+L<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
+perl has done since version 4.000. Now system utilities that read the
+legacy process name such as ps, top and killall will recognize the
+name you set when assigning to C<$0>. The string you supply will be
+cut off at 16 bytes, this is a limitation imposed by Linux.
+
 =item $[
 X<$[>
 

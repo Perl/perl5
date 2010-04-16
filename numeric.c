@@ -142,7 +142,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     NV value_nv = 0;
 
     const UV max_div_2 = UV_MAX / 2;
-    const bool allow_underscores = (bool)(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
     bool overflowed = FALSE;
     char bit;
 
@@ -259,7 +259,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     UV value = 0;
     NV value_nv = 0;
     const UV max_div_16 = UV_MAX / 16;
-    const bool allow_underscores = (bool)(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
     bool overflowed = FALSE;
 
     PERL_ARGS_ASSERT_GROK_HEX;
@@ -373,7 +373,7 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     UV value = 0;
     NV value_nv = 0;
     const UV max_div_8 = UV_MAX / 8;
-    const bool allow_underscores = (bool)(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
     bool overflowed = FALSE;
 
     PERL_ARGS_ASSERT_GROK_OCT;

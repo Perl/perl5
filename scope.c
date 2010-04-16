@@ -780,7 +780,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    ptr = SSPOPPTR;
-	    *(bool*)ptr = (bool)SSPOPBOOL;
+	    *(bool*)ptr = cBOOL(SSPOPBOOL);
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
@@ -1115,6 +1115,8 @@ Perl_leave_scope(pTHX_ I32 base)
     }
 
     PL_tainted = was;
+
+    PERL_ASYNC_CHECK();
 }
 
 void

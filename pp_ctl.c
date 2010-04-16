@@ -264,6 +264,9 @@ PP(pp_substcont)
     register REGEXP * const rx = cx->sb_rx;
     SV *nsv = NULL;
     REGEXP *old = PM_GETRE(pm);
+
+    PERL_ASYNC_CHECK();
+
     if(old != rx) {
 	if(old)
 	    ReREFCNT_dec(old);
@@ -1870,6 +1873,8 @@ PP(pp_dbstate)
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
 
+    PERL_ASYNC_CHECK();
+
     if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
 	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
@@ -2651,6 +2656,8 @@ PP(pp_goto)
     }
     else
 	label = cPVOP->op_pv;
+
+    PERL_ASYNC_CHECK();
 
     if (label && *label) {
 	OP *gotoprobe = NULL;

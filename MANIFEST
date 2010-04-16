@@ -224,6 +224,7 @@ cpan/CGI/t/unescapeHTML.t		See if CGI::unescapeHTML() works
 cpan/CGI/t/uploadInfo.t			See if CGI.pm works
 cpan/CGI/t/upload_post_text.txt		Test data for CGI.pm
 cpan/CGI/t/upload.t			See if CGI.pm works
+cpan/CGI/t/url.t			See if CGI.pm works
 cpan/CGI/t/user_agent.t			See if CGI->user_agent() works
 cpan/CGI/t/utf8.t			See if CGI.pm works
 cpan/CGI/t/util-58.t			See if 5.8-dependent features work
@@ -2606,6 +2607,7 @@ dist/Data-Dumper/t/freezer.t	See if $Data::Dumper::Freezer works
 dist/Data-Dumper/Todo		Data pretty printer, futures
 dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
+dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
 dist/ExtUtils-Install/Changes				ExtUtils-Install change log
 dist/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
 dist/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions

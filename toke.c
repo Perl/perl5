@@ -13700,7 +13700,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     SV *const utf16_buffer = MUTABLE_SV(IoTOP_GV(filter));
     SV *const utf8_buffer = filter;
     IV status = IoPAGE(filter);
-    const bool reverse = (bool) IoLINES(filter);
+    const bool reverse = cBOOL(IoLINES(filter));
     I32 retval;
 
     /* As we're automatically added, at the lowest level, and hence only called

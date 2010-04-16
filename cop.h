@@ -592,6 +592,7 @@ struct block {
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm)							\
 	DEBUG_CX("POP");						\
+	PERL_ASYNC_CHECK();						\
 	cx = &cxstack[cxstack_ix--],					\
 	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\

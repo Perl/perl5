@@ -3124,7 +3124,7 @@ Perl_sv_2bool(pTHX_ register SV *const sv)
 	if (SvAMAGIC(sv)) {
 	    SV * const tmpsv = AMG_CALLun(sv,bool_);
 	    if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-		return (bool)SvTRUE(tmpsv);
+		return cBOOL(SvTRUE(tmpsv));
 	}
 	return SvRV(sv) != 0;
     }
@@ -11243,7 +11243,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			daux->xhv_riter = saux->xhv_riter;
 			daux->xhv_eiter = saux->xhv_eiter
 			    ? he_dup(saux->xhv_eiter,
-					(bool)!!HvSHAREKEYS(sstr), param) : 0;
+					cBOOL(HvSHAREKEYS(sstr)), param) : 0;
 			/* backref array needs refcnt=2; see sv_add_backref */
 			daux->xhv_backreferences =
 			    saux->xhv_backreferences
@@ -11696,7 +11696,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    longval = (long)POPBOOL(ss,ix);
-	    TOPBOOL(nss,ix) = (bool)longval;
+	    TOPBOOL(nss,ix) = cBOOL(longval);
 	    break;
 	case SAVEt_SET_SVFLAGS:
 	    i = POPINT(ss,ix);

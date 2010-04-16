@@ -143,7 +143,7 @@ SKIP: {
 {
     rc(
         qq|
-        &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+        &parse_options("NonStop=0 ReadLine=0 TTY=db.out LineInfo=db.out");
         \n|,
 
         qq|

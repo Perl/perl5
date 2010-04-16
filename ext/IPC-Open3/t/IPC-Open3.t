@@ -47,7 +47,7 @@ my ($pid, $reaped_pid);
 STDOUT->autoflush;
 STDERR->autoflush;
 
-print "1..22\n";
+print "1..23\n";
 
 # basic
 ok 1, $pid = open3 'WRITE', 'READ', 'ERROR', $perl, '-e', cmd_line(<<'EOF');
@@ -145,4 +145,21 @@ if ($@) {
 else {
 	print WRITE "ok 22\n";
 	waitpid $pid, 0;
+}
+
+# RT 72016
+eval{$pid = open3 'WRITE', 'READ', 'ERROR', '/non/existant/program'; };
+if (IPC::Open3::DO_SPAWN) {
+    if ($@ || waitpid($pid, 0) > 0) {
+	print "ok 23\n";
+    } else {
+	print "not ok 23\n";
+    }
+} else {
+    if ($@) {
+	print "ok 23\n";
+    } else {
+	waitpid($pid, 0);
+	print "not ok 23\n";
+    }
 }

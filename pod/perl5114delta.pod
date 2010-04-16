@@ -51,7 +51,7 @@ example U+FF10: FULLWIDTH DIGIT ZERO.
 
 =item C<less>
 
-Upgraded from version 0.03 to 0.03.
+Upgraded from version 0.02 to 0.03.
 
 This version introduces the C<stash_name> method to allow subclasses of less to
 pick where in %^H to store their stash.

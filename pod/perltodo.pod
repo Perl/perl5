@@ -1046,11 +1046,6 @@ slices. This would be good to fix.
 The regexp optimiser is not optional. It should configurable to be, to allow
 its performance to be measured, and its bugs to be easily demonstrated.
 
-=head2 delete &function
-
-Allow to delete functions. One can already undef them, but they're still
-in the stash.
-
 =head2 C</w> regex modifier
 
 That flag would enable to match whole words, and also to interpolate

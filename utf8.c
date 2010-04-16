@@ -2609,7 +2609,8 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 
      /* A match is defined by all the scans that specified
       * an explicit length reaching their final goals. */
-     match = (f1 == 0 || p1 == f1) && (f2 == 0 || p2 == f2);
+     match = (n1 == 0 && n2 == 0    /* Must not match partial char; Bug #72998 */
+	     && (f1 == 0 || p1 == f1) && (f2 == 0 || p2 == f2));
 
      if (match) {
 	  if (pe1)

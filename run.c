@@ -37,8 +37,8 @@ int
 Perl_runops_standard(pTHX)
 {
     dVAR;
-    while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX))) {
-	PERL_ASYNC_CHECK();
+    register OP *op = PL_op;
+    while ((PL_op = op = CALL_FPTR(op->op_ppaddr)(aTHX))) {
     }
 
     TAINT_NOT;

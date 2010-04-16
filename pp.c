@@ -1030,7 +1030,7 @@ PP(pp_pow)
 			   on same algorithm as above */
 			register UV result = 1;
 			register UV base = baseuv;
-			const bool odd_power = (bool)(power & 1);
+			const bool odd_power = cBOOL(power & 1);
 			if (odd_power) {
 			    result *= base;
 			}

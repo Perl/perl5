@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.75';
+our $VERSION = '1.77_01';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.75
+This document describes threads version 1.77
 
 =head1 SYNOPSIS
 
@@ -361,9 +361,10 @@ key) will cause its ID to be used as the value:
 =item threads->object($tid)
 
 This will return the I<threads> object for the I<active> thread associated
-with the specified thread ID.  Returns C<undef> if there is no thread
-associated with the TID, if the thread is joined or detached, if no TID is
-specified or if the specified TID is undef.
+with the specified thread ID.  If C<$tid> is the value for the current thread,
+then this call works the same as C<-E<gt>self()>.  Otherwise, returns C<undef>
+if there is no thread associated with the TID, if the thread is joined or
+detached, if no TID is specified or if the specified TID is undef.
 
 =item threads->yield()
 
@@ -902,6 +903,18 @@ other threads are started afterwards.
 If the above does not work, or is not adequate for your application, then file
 a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
 
+=item Memory consumption
+
+On most systems, frequent and continual creation and destruction of threads
+can lead to ever-increasing growth in the memory footprint of the Perl
+interpreter.  While it is simple to just launch threads and then
+C<-E<gt>join()> or C<-E<gt>detach()> them, for long-lived applications, it is
+better to maintain a pool of threads, and to reuse them for the work needed,
+using L<queues|Thread::Queue> to notify threads of pending work.  The CPAN
+distribution of this module contains a simple example
+(F<examples/pool_reuse.pl>) illustrating the creation, use and monitoring of a
+pool of I<reusable> threads.
+
 =item Current working directory
 
 On all platforms except MSWin32, the setting for the current working directory
@@ -975,7 +988,7 @@ involved, you may be able to work around this by returning a serialized
 version of the object (e.g., using L<Data::Dumper> or L<Storable>), and then
 reconstituting it in the joining thread.  If you're using Perl 5.10.0 or
 later, and if the class supports L<shared objects|threads::shared/"OBJECTS">,
-you can pass them via L<shared queues| Thread::Queue>.
+you can pass them via L<shared queues|Thread::Queue>.
 
 =item END blocks in threads
 
@@ -1021,7 +1034,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.75/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.77/threads.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>

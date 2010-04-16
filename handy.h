@@ -110,6 +110,12 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 # define HAS_BOOL 1
 #endif
 
+/* a simple (bool) cast may not do the right thing: if bool is defined
+ * as char for example, then the cast from int is implementation-defined
+ */
+
+#define cBOOL(cbool) ((bool)!!(cbool))
+
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
  *     and FUNCTION__ as results.
@@ -208,8 +214,7 @@ typedef U64TYPE U64;
  * GMTIME_MAX	GMTIME_MIN	LOCALTIME_MAX	LOCALTIME_MIN
  * HAS_CTIME64	HAS_LOCALTIME64	HAS_GMTIME64	HAS_DIFFTIME64
  * HAS_MKTIME64	HAS_ASCTIME64	HAS_GETADDRINFO	HAS_GETNAMEINFO
- * HAS_INETNTOP	HAS_INETPTON	CHARBITS	HAS_PRCTL_SET_NAME
- * HAS_PRCTL
+ * HAS_INETNTOP	HAS_INETPTON	CHARBITS	HAS_PRCTL
  * Not (yet) used at top level, but mention them for metaconfig
  */
 

@@ -32,11 +32,6 @@ if ($^O eq 'VMS') { $CRLF = "\n"; }
 
 if (ord("\t") != 9) { $CRLF = "\r\n"; }
 
-# Web servers on EBCDIC hosts are typically set up to do an EBCDIC -> ASCII
-# translation hence CRLF is used as \r\n within CGI.pm on such machines.
-
-if (ord("\t") != 9) { $CRLF = "\r\n"; }
- 
 # Set up a CGI environment
 $ENV{REQUEST_METHOD}='GET';
 $ENV{QUERY_STRING}  ='game=chess&game=checkers&weather=dull';
