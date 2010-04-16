@@ -1452,7 +1452,7 @@ there are neither package declarations nor a C<$VERSION>.
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
 
-=item Deprecated character(s) in \\N{...} starting at '%s'
+=item Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%s<-- HERE %s
 
 (D deprecated) Just about anything is legal for the C<...> in C<\N{...}>.
 But starting in 5.12, non-reasonable ones that don't look like names are

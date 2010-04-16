@@ -3264,14 +3264,11 @@ S_scan_const(pTHX_ char *start)
 			    }
 			}
 			if (problematic) {
-			    char *string;
-			    Newx(string, e - i + 1, char);
-			    Copy(i, string, e - i, char);
-			    string[e - i] = '\0';
+			    /* The e-i passed to the final %.*s makes sure that
+			     * should the trailing NUL be missing that this
+			     * print won't run off the end of the string */
 			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-				"Deprecated character(s) in \\N{...} starting at '%s'",
-				string);
-			    Safefree(string);
+				"Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s", i - s + 1, s, e - i, i + 1);
 			}
 		    }
 		} /* End \N{NAME} */
