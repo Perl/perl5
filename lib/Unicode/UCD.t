@@ -24,6 +24,26 @@ use Unicode::UCD 'charinfo';
 
 my $charinfo;
 
+$charinfo = charinfo(0);    # Null is often problematic, so test it.
+
+is($charinfo->{code},           '0000', '<control>');
+is($charinfo->{name},           '<control>');
+is($charinfo->{category},       'Cc');
+is($charinfo->{combining},      '0');
+is($charinfo->{bidi},           'BN');
+is($charinfo->{decomposition},  '');
+is($charinfo->{decimal},        '');
+is($charinfo->{digit},          '');
+is($charinfo->{numeric},        '');
+is($charinfo->{mirrored},       'N');
+is($charinfo->{unicode10},      'NULL');
+is($charinfo->{comment},        '');
+is($charinfo->{upper},          '');
+is($charinfo->{lower},          '');
+is($charinfo->{title},          '');
+is($charinfo->{block},          'Basic Latin');
+is($charinfo->{script},         'Common');
+
 $charinfo = charinfo(0x41);
 
 is($charinfo->{code},           '0041', 'LATIN CAPITAL LETTER A');

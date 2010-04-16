@@ -242,7 +242,7 @@ you will need also the L</compexcl()>, and L</casespec()> functions.
 
 =cut
 
-# NB: This function is duplicated in charnames.pm
+# NB: This function is nearly duplicated in charnames.pm
 sub _getcode {
     my $arg = shift;
 
