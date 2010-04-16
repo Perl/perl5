@@ -15,7 +15,7 @@ require File::Spec;
 
 $| = 1;
 
-print "1..80\n";
+print "1..81\n";
 
 use charnames ':full';
 
@@ -254,6 +254,9 @@ print "ok 45\n";
 print "not " if grep { /you asked for U+110000/ } @WARN;
 print "ok 46\n";
 
+print "not " unless "NULL" eq charnames::viacode(0);
+print "ok 47\n";
+
 
 # ---- Alias extensions
 
@@ -265,7 +268,7 @@ my @prgs;
     @prgs = split "\n########\n", <DATA>;
     }
 
-my $i = 46;
+my $i = 47;
 for (@prgs) {
     my ($code, $exp) = ((split m/\nEXPECT\n/), '$');
     my ($prog, $fil) = ((split m/\nFILE\n/, $code), "");
@@ -311,7 +314,7 @@ for (@prgs) {
 $_ = 'foobar';
 eval "use charnames ':full';";
 print "not " unless $_ eq 'foobar';
-print "ok 74\n";
+print "ok 75\n";
 
 # Unicode slowdown noted by Phil Pennock, traced to a bug fix in index
 # SADAHIRO Tomoyuki's suggestion is to ensure that the UTF-8ness of both
@@ -320,27 +323,27 @@ print "ok 74\n";
 # (or at least should be). So assert that that it's true here.
 
 my $names = do "unicore/Name.pl";
-print defined $names ? "ok 75\n" : "not ok 75\n";
+print defined $names ? "ok 76\n" : "not ok 76\n";
 if (ord('A') == 65) { # as on ASCII or UTF-8 machines
   my $non_ascii = $names =~ tr/\0-\177//c;
-  print $non_ascii ? "not ok 76 # $non_ascii\n" : "ok 76\n";
+  print $non_ascii ? "not ok 77 # $non_ascii\n" : "ok 77\n";
 } else {
-  print "ok 76\n";
+  print "ok 77\n";
 }
 
 # Verify that charnames propagate to eval("")
 my $evaltry = eval q[ "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}" ];
 if ($@) {
-    print "# $@not ok 77\nnot ok 78\n";
+    print "# $@not ok 78\nnot ok 79\n";
 } else {
-    print "ok 77\n";
-    print "not " unless $evaltry eq "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}";
     print "ok 78\n";
+    print "not " unless $evaltry eq "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}";
+    print "ok 79\n";
 }
 
 # Verify that db includes the normative NameAliases.txt names
 print "not " unless "\N{U+1D0C5}" eq "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}";
-print "ok 79\n";
+print "ok 80\n";
 
 # [perl #73174] use of \N{FOO} used to reset %^H
 
@@ -356,7 +359,7 @@ print "ok 79\n";
     $res .= '-2' if ":" =~ /\N{COLON}/;
     $res .= '-3' if ":" =~ /\N{COLON}/i;
     print $res eq "foo-foo-1--2-3" ? "" : "not ",
-	"ok 80 - \$^H{foo} correct after /\\N{bar}/i (res=$res)\n";
+	"ok 81 - \$^H{foo} correct after /\\N{bar}/i (res=$res)\n";
 }
 
 __END__

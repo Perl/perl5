@@ -256,13 +256,16 @@ sub viacode
 
   my $arg = shift;
 
-  # this comes actually from Unicode::UCD, where it is the named
-  # function _getcode (), but it avoids the overhead of loading it
+  # this is derived from Unicode::UCD, where it is nearly the same as the
+  # function _getcode(), but it makes sure that even a hex argument has the
+  # proper number of leading zeros, which is critical in matching against $txt
+  # below
   my $hex;
   if ($arg =~ /^[1-9]\d*$/) {
     $hex = sprintf "%04X", $arg;
   } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
-    $hex = $1;
+    # Below is the line that differs from the _getcode() source
+    $hex = sprintf "%04X", hex $arg;
   } else {
     carp("unexpected arg \"$arg\" to charnames::viacode()");
     return;
