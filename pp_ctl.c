@@ -3758,7 +3758,18 @@ PP(pp_entereval)
     if (PL_compiling.cop_hints_hash) {
 	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
     }
-    PL_compiling.cop_hints_hash = PL_curcop->cop_hints_hash;
+    if (Perl_fetch_cop_label(aTHX_ PL_curcop->cop_hints_hash, NULL, NULL)) {
+	/* The label, if present, is the first entry on the chain. So rather
+	   than writing a blank label in front of it (which involves an
+	   allocation), just use the next entry in the chain.  */
+	PL_compiling.cop_hints_hash
+	    = PL_curcop->cop_hints_hash->refcounted_he_next;
+	/* Check the assumption that this removed the label.  */
+	assert(Perl_fetch_cop_label(aTHX_ PL_compiling.cop_hints_hash, NULL,
+				    NULL) == NULL);
+    }
+    else
+	PL_compiling.cop_hints_hash = PL_curcop->cop_hints_hash;
     if (PL_compiling.cop_hints_hash) {
 	HINTS_REFCNT_LOCK;
 	PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
