@@ -2972,6 +2972,8 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
     }
 }
 
+/* pp_entereval is aware that labels are stored with a key ':' at the top of
+   the linked list.  */
 const char *
 Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len,
 		     U32 *flags) {

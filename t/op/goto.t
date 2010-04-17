@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 66;
+plan tests => 67;
 our $TODO;
 
 my $deprecated = 0;
@@ -474,3 +474,12 @@ TODO: {
 }
 
 is($deprecated, 0);
+
+#74290
+{
+    my $x;
+    my $y;
+    F1:++$x and eval 'return if ++$y == 10; goto F1;';
+    is($x, 10,
+       'labels outside evals can be distinguished from the start of the eval');
+}
