@@ -2867,31 +2867,31 @@ int
 Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 {
     static const char * const usage_msgd[] = {
-      " Debugging flag values: (see also -d)",
-      "  p  Tokenizing and parsing (with v, displays parse stack)",
-      "  s  Stack snapshots (with v, displays all stacks)",
-      "  l  Context (loop) stack processing",
-      "  t  Trace execution",
-      "  o  Method and overloading resolution",
-      "  c  String/numeric conversions",
-      "  P  Print profiling info, source file input state",
-      "  m  Memory and SV allocation",
-      "  f  Format processing",
-      "  r  Regular expression parsing and execution",
-      "  x  Syntax tree dump",
-      "  u  Tainting checks",
-      "  H  Hash dump -- usurps values()",
-      "  X  Scratchpad allocation",
-      "  D  Cleaning up",
-      "  T  Tokenising",
-      "  R  Include reference counts of dumped variables (eg when using -Ds)",
-      "  J  Do not s,t,P-debug (Jump over) opcodes within package DB",
-      "  v  Verbose: use in conjunction with other flags",
-      "  C  Copy On Write",
-      "  A  Consistency checks on internal structures",
-      "  q  quiet - currently only suppresses the 'EXECUTING' message",
-      "  M  trace smart match resolution",
-      "  B  dump suBroutine definitions, including special Blocks like BEGIN",
+      " Debugging flag values: (see also -d)\n"
+      "  p  Tokenizing and parsing (with v, displays parse stack)\n"
+      "  s  Stack snapshots (with v, displays all stacks)\n"
+      "  l  Context (loop) stack processing\n"
+      "  t  Trace execution\n"
+      "  o  Method and overloading resolution\n",
+      "  c  String/numeric conversions\n"
+      "  P  Print profiling info, source file input state\n"
+      "  m  Memory and SV allocation\n"
+      "  f  Format processing\n"
+      "  r  Regular expression parsing and execution\n"
+      "  x  Syntax tree dump\n",
+      "  u  Tainting checks\n"
+      "  H  Hash dump -- usurps values()\n"
+      "  X  Scratchpad allocation\n"
+      "  D  Cleaning up\n"
+      "  T  Tokenising\n"
+      "  R  Include reference counts of dumped variables (eg when using -Ds)\n",
+      "  J  Do not s,t,P-debug (Jump over) opcodes within package DB\n"
+      "  v  Verbose: use in conjunction with other flags\n"
+      "  C  Copy On Write\n"
+      "  A  Consistency checks on internal structures\n"
+      "  q  quiet - currently only suppresses the 'EXECUTING' message\n"
+      "  M  trace smart match resolution\n"
+      "  B  dump suBroutine definitions, including special Blocks like BEGIN\n",
       NULL
     };
     int i = 0;
@@ -2917,7 +2917,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     }
     else if (givehelp) {
       const char *const *p = usage_msgd;
-      while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
+      while (*p) PerlIO_puts(PerlIO_stdout(), *p++);
     }
 #  ifdef EBCDIC
     if ((i & DEBUG_p_FLAG) && ckWARN_d(WARN_DEBUGGING))
