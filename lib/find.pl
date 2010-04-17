@@ -1,3 +1,5 @@
+warn "Legacy library @{[(caller(0))[6]]} will be removed from the Perl core distribution in the next major release. Please install it from the CPAN distribution Perl4::CoreLibs. It is being used at @{[(caller)[1]]}, line @{[(caller)[2]]}.\n";
+
 # This library is deprecated and unmaintained. It is included for
 # compatibility with Perl 4 scripts which may use it, but it will be
 # removed in a future version of Perl. Please use the File::Find module
