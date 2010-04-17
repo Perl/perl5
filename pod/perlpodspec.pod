@@ -429,6 +429,18 @@ themselves.  That is, these are all synonymous:
 
 and so on.
 
+Finally, the multiple-angle-bracket form does I<not> alter the interpretation
+of nested formatting codes, meaning that the following four example lines are
+identical in meaning:
+
+  B<example: C<$a E<lt>=E<gt> $b>>
+
+  B<example: C<< $a <=> $b >>>
+
+  B<example: C<< $a E<lt>=E<gt> $b >>>
+
+  B<<< example: C<< $a E<lt>=E<gt> $b >> >>>
+
 =back
 
 In parsing Pod, a notably tricky part is the correct parsing of
