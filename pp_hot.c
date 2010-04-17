@@ -216,6 +216,7 @@ PP(pp_unstack)
 {
     dVAR;
     I32 oldsave;
+    PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
