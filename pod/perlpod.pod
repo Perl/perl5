@@ -558,8 +558,8 @@ This will produce: "C<$a E<lt>=E<gt> $b>"
 
 A more readable, and perhaps more "plain" way is to use an alternate
 set of delimiters that doesn't require a single ">" to be escaped.  With
-the Pod formatters that are standard starting with perl5.5.660, doubled
-angle brackets ("<<" and ">>") may be used I<if and only if there is
+the Pod formatters that are standard starting with perl5.5.660 (circa 2000),
+doubled angle brackets ("<<" and ">>") may be used I<if and only if there is
 whitespace right after the opening delimiter and whitespace right
 before the closing delimiter!>  For example, the following will
 do the trick:
@@ -581,6 +581,12 @@ X<POD, formatting code, escaping with multiple brackets>
 And they all mean exactly the same as this:
 
     C<$a E<lt>=E<gt> $b>
+
+The multiple-bracket form does not affect the interpretation of the contents of
+the formatting code, only how it must end.  That means that the examples above
+are also exactly the same as this:
+
+    C<< $a E<lt>=E<gt> $b >>
 
 As a further example, this means that if you wanted to put these bits of
 code in C<C> (code) style:
