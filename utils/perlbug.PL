@@ -460,7 +460,7 @@ EOF
 	# Try and guess return address
 	my $guess;
 
-	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || '';
+	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || $ENV{'EMAIL'} || '';
         if ($Is_MacOS) {
             require Mac::InternetConfig;
             $guess = $Mac::InternetConfig::InternetConfig{
