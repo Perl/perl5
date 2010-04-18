@@ -1740,6 +1740,7 @@ nothing in the core.
 		    }
 		}
 	    }
+	    PERL_ASYNC_CHECK();
 	    break;
 	}
 #endif
@@ -1770,6 +1771,7 @@ nothing in the core.
 		    tot--;
 	    }
 	}
+	PERL_ASYNC_CHECK();
 	break;
 #endif
     case OP_UNLINK:
