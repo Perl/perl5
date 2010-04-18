@@ -95,15 +95,11 @@ Text::Tabs -- expand and unexpand tabs per the unix expand(1) and unexpand(1)
 
 =head1 SYNOPSIS
 
-  use Text::Tabs qw(expand unexpand);
+  use Text::Tabs;
 
+  $tabstop = 4;  # default = 8
   @lines_without_tabs = expand(@lines_with_tabs);
   @lines_with_tabs = unexpand(@lines_without_tabs);
-
-  {
-      local $Text::Tabs::tabstop = 4;  # default is 8
-      @lines_without_tabs = expand(@lines_with_tabs);
-  }
 
 =head1 DESCRIPTION
 
@@ -112,12 +108,6 @@ do.  Given a line with tabs in it, expand will replace the tabs with
 the appropriate number of spaces.  Given a line with or without tabs in
 it, unexpand will add tabs when it can save bytes by doing so (just
 like C<unexpand -a>).  Invisible compression with plain ASCII! 
-
-The global variable C<$Text::Tabs::tabstop> controls how many columns
-positions apart each tabstop are.  The default is 8.
-
-The functions expand(), unexpand() as well as the variable $tabstop
-are exported by default.
 
 =head1 EXAMPLE
 
