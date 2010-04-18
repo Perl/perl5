@@ -1,5 +1,62 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+2.2205 - Wed Mar 10 18:15:36 EST 2010
+
+ Other:
+
+ - No longer ships with Build.PL to avoid creating a circular dependency
+
+2.2204 - Wed Mar 10 14:23:52 EST 2010
+
+ Other:
+
+ - Downgraded warnings on using INCLUDE with a command from "deprecated"
+   to "discouraged" and limited it to the case where the command includes
+   "perl" [Steffen Mueller]
+
+2.2203 - Thu Feb 11 14:00:51 EST 2010
+
+ Bug fixes:
+
+ - Build.PL was not including ExtUtils/xsubpp for installation.  Fixed
+   by subclassing M::B::find_pm_files to include it [David Golden]
+
+2.2202 - Wed Jan 27 15:04:59 EST 2010
+
+ Bug fixes:
+
+ - The fix to IN/OUT/OUTLIST was itself broken and is now fixed.
+   [Reported by Serdar Dalgic; fix suggested by Rafael Garcia-Suarez]
+
+   We apologize for the fault in the regex. Those responsible 
+   have been sacked.
+
+2.2201 Mon Jan 25 16:12:05 EST 2010
+
+ Bug fixes:
+
+ - IN/OUT/OUTLIST, etc. were broken due to a bad regexp.  [Simon Cozens]
+
+2.22 - Mon Jan 11 15:00:07 EST 2010
+
+ No changes from 2.21_02
+
+2.21_02 - Sat Dec 19 10:55:41 EST 2009
+
+ Bug fixes:
+
+ - fixed bugs and added tests for INCLUDE_COMMAND [Steffen Mueller]
+
+2.21_01 - Sat Dec 19 07:22:44 EST 2009
+
+ Enhancements:
+
+ - New 'INCLUDE_COMMAND' directive [Steffen Mueller]
+
+ Bug fixes:
+
+ - Workaround for empty newXS macro found in P5NCI [Goro Fuji]
+
 2.21 - Mon Oct  5 11:17:53 EDT 2009
 
  Bug fixes:
@@ -12,7 +69,7 @@ Revision history for Perl extension ExtUtils::ParseXS.
 
  Bug fixes:
  - Use "char* file" for perl < 5.9, not "char[] file"; fixes mod_perl
-   breakage due to prior attempts to fix RT#48104 [David Golden] 
+   breakage due to prior attempts to fix RT#48104 [David Golden]
 
 2.20_06 - Fri Oct  2 23:45:45 EDT 2009
 
@@ -62,8 +119,8 @@ Revision history for Perl extension ExtUtils::ParseXS.
 2.20_03 - Thu Jul 23 23:14:50 EDT 2009
 
  Bug fixes:
- - Fixed "const char *" errors for 5.8.8 (and older) (RT#48104) 
-   [Vincent Pit] 
+ - Fixed "const char *" errors for 5.8.8 (and older) (RT#48104)
+   [Vincent Pit]
  - Added newline before a preprocessor directive (RT#30673)
    [patch by hjp]
 

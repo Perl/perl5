@@ -106,6 +106,8 @@ outlist(OUTLIST int a, OUTLIST int b)
 int
 len(char* s, int length(s))
 
+INCLUDE_COMMAND: $^X -Ilib -It/lib -MIncludeTester -e IncludeTester::print_xs
+
 #if 1
 
 INCLUDE: XSInclude.xsh

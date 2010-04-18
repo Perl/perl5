@@ -628,7 +628,7 @@ use File::Glob qw(:case);
     'ExtUtils::ParseXS' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-    'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-ParseXS-2.21.tar.gz',
+    'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-ParseXS-2.2205.tar.gz',
     'EXCLUDED'  => [ qw{
 	                t/bugs/RT48104.xs
 				    t/bugs/typemap

@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.21';
+$VERSION = '2.2205';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
@@ -230,9 +230,10 @@ sub process_file {
 
   # Match an XS keyword
   $BLOCK_re= '\s*(' . join('|', qw(
-				   REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT
-				   CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE VERSIONCHECK INCLUDE
-				   SCOPE INTERFACE INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD FALLBACK
+				   REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE
+				   OUTPUT CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE
+				   VERSIONCHECK INCLUDE INCLUDE_COMMAND SCOPE INTERFACE
+				   INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD FALLBACK
 				  )) . "|$END)\\s*:";
 
   
@@ -448,7 +449,7 @@ EOF
     $xsreturn = 0;
 
     $_ = shift(@line);
-    while (my $kwd = check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE|SCOPE")) {
+    while (my $kwd = check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
       &{"${kwd}_handler"}() ;
       next PARAGRAPH unless @line ;
       $_ = shift(@line);
@@ -520,11 +521,11 @@ EOF
 	  next unless defined($pre) && length($pre);
 	  my $out_type = '';
 	  my $inout_var;
-	  if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//) {
+	  if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
 	    my $type = $1;
 	    $out_type = $type if $type ne 'IN';
-	    $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//;
-	    $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//;
+	    $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
+	    $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
 	  }
 	  my $islength;
 	  if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
@@ -554,7 +555,7 @@ EOF
     } else {
       @args = split(/\s*,\s*/, $orig_args);
       for (@args) {
-	if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\s+//) {
+	if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
 	  my $out_type = $1;
 	  next if $out_type eq 'IN';
 	  $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
@@ -933,6 +934,10 @@ EOF
 #        $interface_macro_set(cv,$value) ;
 EOF
       }
+    }
+    elsif($newXS eq 'newXS'){ # work around P5NCI's empty newXS macro
+      push(@InitFileCode,
+	   "        ${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
     }
     else {
       push(@InitFileCode,
@@ -1481,6 +1486,22 @@ sub PROTOTYPES_handler ()
 
   }
 
+sub PushXSStack
+  {
+    # Save the current file context.
+    push(@XSStack, {
+		    type            => 'file',
+		    LastLine        => $lastline,
+		    LastLineNo      => $lastline_no,
+		    Line            => \@line,
+		    LineNo          => \@line_no,
+		    Filename        => $filename,
+		    Filepathname    => $filepathname,
+		    Handle          => $FH,
+		   }) ;
+
+  }
+
 sub INCLUDE_handler ()
   {
     # the rest of the current line should contain a valid filename
@@ -1499,17 +1520,16 @@ sub INCLUDE_handler ()
 
     ++ $IncludedFiles{$_} unless /\|\s*$/ ;
 
-    # Save the current file context.
-    push(@XSStack, {
-		    type		=> 'file',
-		    LastLine        => $lastline,
-		    LastLineNo      => $lastline_no,
-		    Line            => \@line,
-		    LineNo          => \@line_no,
-		    Filename        => $filename,
-		    Filepathname    => $filepathname,
-		    Handle          => $FH,
-		   }) ;
+    if (/\|\s*$/ && /^\s*perl\s/) {
+      Warn("The INCLUDE directive with a command is discouraged." .
+           " Use INCLUDE_COMMAND instead! In particular using 'perl'" .
+           " in an 'INCLUDE: ... |' directive is not guaranteed to pick" .
+           " up the correct perl. The INCLUDE_COMMAND directive allows" .
+           " the use of \$^X as the currently running perl, see" .
+           " 'perldoc perlxs' for details.");
+    }
+
+    PushXSStack();
 
     $FH = Symbol::gensym();
 
@@ -1535,7 +1555,51 @@ EOF
 
     $lastline = $_ ;
     $lastline_no = $. ;
+  }
 
+sub INCLUDE_COMMAND_handler ()
+  {
+    # the rest of the current line should contain a valid command
+
+    TrimWhitespace($_) ;
+
+    death("INCLUDE_COMMAND: command missing")
+      unless $_ ;
+
+    death("INCLUDE_COMMAND: pipes are illegal")
+      if /^\s*\|/ or /\|\s*$/ ;
+
+    PushXSStack();
+
+    $FH = Symbol::gensym();
+
+    # If $^X is used in INCLUDE_COMMAND, we know it's supposed to be
+    # the same perl interpreter as we're currently running
+    s/^\s*\$\^X/$^X/;
+
+    # open the new file
+    open ($FH, "-|", "$_")
+      or death("Cannot run command '$_' to include its output: $!") ;
+
+    print Q(<<"EOF");
+#
+#/* INCLUDE_COMMAND:  Including output of '$_' from '$filename' */
+#
+EOF
+
+    $filename = $_ ;
+    $filepathname = "$dir/$filename";
+
+    # Prime the pump by reading the first
+    # non-blank line
+
+    # skip leading blank lines
+    while (<$FH>) {
+      last unless /^\s*$/ ;
+    }
+
+    $lastline = $_ ;
+    $lastline_no = $. ;
   }
 
 sub PopFile()
