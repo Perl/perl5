@@ -24,7 +24,7 @@ use lib 'Porting';
 use Maintainers;
 
 sub usage {
-die <<'EOF';
+die <<"EOF";
 usage: $0 [ -d -x ] source_dir1 source_dir2
 EOF
 }
