@@ -1311,7 +1311,7 @@ use File::Glob qw(:case);
     'Scalar-List-Utils' =>
 	{
 	'MAINTAINER'	=> 'gbarr',
-	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.22.tar.gz',
+	'DISTRIBUTION'	=> 'GBARR/Scalar-List-Utils-1.23.tar.gz',
 	# Note that perl uses its own version of Makefile.PL
 	'FILES'		=> q[cpan/List-Util],
 	'EXCLUDED'	=> [ qr{^inc/Module/},
