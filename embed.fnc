@@ -601,7 +601,7 @@ p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|bool new_filter
 : Public lexer API
 AMpd	|bool	|lex_bufutf8
 AMpd	|char*	|lex_grow_linestr|STRLEN len
-AMpd	|void	|lex_stuff_pvn	|NN char* pv|STRLEN len|U32 flags
+AMpd	|void	|lex_stuff_pvn	|NN const char* pv|STRLEN len|U32 flags
 AMpd	|void	|lex_stuff_sv	|NN SV* sv|U32 flags
 AMpd	|void	|lex_unstuff	|NN char* ptr
 AMpd	|void	|lex_read_to	|NN char* ptr

@@ -914,7 +914,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 }
 
 /*
-=for apidoc Amx|void|lex_stuff_pvn|char *pv|STRLEN len|U32 flags
+=for apidoc Amx|void|lex_stuff_pvn|const char *pv|STRLEN len|U32 flags
 
 Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
@@ -936,7 +936,7 @@ function is more convenient.
 */
 
 void
-Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
+Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 {
     dVAR;
     char *bufptr;
@@ -948,7 +948,7 @@ Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
 	    goto plain_copy;
 	} else {
 	    STRLEN highhalf = 0;
-	    char *p, *e = pv+len;
+	    const char *p, *e = pv+len;
 	    for (p = pv; p != e; p++)
 		highhalf += !!(((U8)*p) & 0x80);
 	    if (!highhalf)
@@ -972,7 +972,7 @@ Perl_lex_stuff_pvn(pTHX_ char *pv, STRLEN len, U32 flags)
     } else {
 	if (flags & LEX_STUFF_UTF8) {
 	    STRLEN highhalf = 0;
-	    char *p, *e = pv+len;
+	    const char *p, *e = pv+len;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
 		if (c >= 0xc4) {

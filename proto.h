@@ -1509,7 +1509,7 @@ PERL_CALLCONV void	Perl_lex_end(pTHX);
 PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp, bool new_filter);
 PERL_CALLCONV bool	Perl_lex_bufutf8(pTHX);
 PERL_CALLCONV char*	Perl_lex_grow_linestr(pTHX_ STRLEN len);
-PERL_CALLCONV void	Perl_lex_stuff_pvn(pTHX_ char* pv, STRLEN len, U32 flags)
+PERL_CALLCONV void	Perl_lex_stuff_pvn(pTHX_ const char* pv, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_LEX_STUFF_PVN	\
 	assert(pv)
