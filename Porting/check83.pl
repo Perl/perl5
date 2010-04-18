@@ -62,7 +62,7 @@ if (open(MANIFEST, "MANIFEST")) {
 	    next;
 	}
 	while (m!/|\z!g) {
-	    my ($dir, $edt) = eight_dot_three($`);
+	    my ($dir, $edt) = eight_dot_three("$`");
 	    next unless defined $dir;
 	    ($dir, $edt) = map { lc } ($dir, $edt);
 	    push @{$dir{$dir}->{$edt}}, $_;
