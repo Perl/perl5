@@ -1434,9 +1434,25 @@ The XS module can use INCLUDE: to pull that file into it.
     INCLUDE: Rpcb1.xsh
 
 If the parameters to the INCLUDE: keyword are followed by a pipe (C<|>) then
-the compiler will interpret the parameters as a command.
+the compiler will interpret the parameters as a command. This feature is
+mildly deprecated in favour of the C<INCLUDE_COMMAND:> directive, as documented
+below.
 
     INCLUDE: cat Rpcb1.xsh |
+
+Do not use this to run perl: C<INCLUDE: perl |> will run the perl that
+happens to be the first in your path and not necessarily the same perl that is
+used to run C<xsubpp>. See L<"The INCLUDE_COMMAND: Keyword">.
+
+=head2 The INCLUDE_COMMAND: Keyword
+
+Runs the supplied command and includes its output into the current XS
+document. C<INCLUDE_COMMAND> assigns special meaning to the C<$^X> token
+in that it runs the same perl interpreter that is running C<xsubpp>:
+
+    INCLUDE_COMMAND: cat Rpcb1.xsh
+
+    INCLUDE_COMMAND: $^X -e ...
 
 =head2 The CASE: Keyword
 
