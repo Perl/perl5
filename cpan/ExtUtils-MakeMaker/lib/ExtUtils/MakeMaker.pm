@@ -467,14 +467,16 @@ END
         if (!$installed_file) {
             warn sprintf "Warning: prerequisite %s %s not found.\n", 
               $prereq, $required_version
-                   unless $self->{PREREQ_FATAL};
+                   unless $self->{PREREQ_FATAL}
+                       or $ENV{PERL_CORE};
 
             $unsatisfied{$prereq} = 'not installed';
         }
         elsif ($pr_version < $required_version ){
             warn sprintf "Warning: prerequisite %s %s not found. We have %s.\n",
               $prereq, $required_version, ($pr_version || 'unknown version') 
-                  unless $self->{PREREQ_FATAL};
+                  unless $self->{PREREQ_FATAL}
+                       or $ENV{PERL_CORE};
 
             $unsatisfied{$prereq} = $required_version ? $required_version : 'unknown version' ;
         }
