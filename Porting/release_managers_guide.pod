@@ -306,8 +306,8 @@ this line in README.vms needs special handling:
 Commit your changes:
 
     $ git st
-	$ git diff
-	  B<review the delta carefully>
+    $ git diff
+    B<review the delta carefully>
 
     $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
