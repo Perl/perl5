@@ -27,7 +27,7 @@ our @EXPORT = qw( print_double print_int print_long
 		  sv_count
 );
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
