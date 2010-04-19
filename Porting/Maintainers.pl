@@ -1374,16 +1374,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
-    'Switch' =>
-	{
-	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'RGARCIA/Switch-2.15.tar.gz',
-	'FILES'		=> q[dist/Switch],
-	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'blead',
-	'DEPRECATED'	=> 5.011,
-	},
-
     'Sys::Syslog' =>
 	{
 	'MAINTAINER'	=> 'saper',

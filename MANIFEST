@@ -2811,15 +2811,6 @@ dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/weak.t			Can Storable store weakrefs
-dist/Switch/Changes		Changes for Switch.pm
-dist/Switch/Makefile.PL		Makefile.PL for Switch.pm
-dist/Switch/MANIFEST		MANIFEST for Switch.pm
-dist/Switch/META.yml		META.yml for Switch.pm
-dist/Switch/README		README for Switch.pm
-dist/Switch/Switch.pm		Switch for Perl
-dist/Switch/t/given.t		See if Perl 6 given (switch) works
-dist/Switch/t/nested.t		See if nested switch works
-dist/Switch/t/switch.t		See if Perl 5 switch works
 dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
 dist/Thread-Queue/t/01_basic.t		Thread::Queue tests
 dist/Thread-Queue/t/02_refs.t		Thread::Queue tests
