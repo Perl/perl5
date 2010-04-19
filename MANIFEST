@@ -229,10 +229,6 @@ cpan/CGI/t/user_agent.t			See if CGI->user_agent() works
 cpan/CGI/t/utf8.t			See if CGI.pm works
 cpan/CGI/t/util-58.t			See if 5.8-dependent features work
 cpan/CGI/t/util.t			See if CGI.pm works
-cpan/Class-ISA/ChangeLog		Changes for Class::ISA
-cpan/Class-ISA/lib/Class/ISA.pm		Class::ISA
-cpan/Class-ISA/t/00_about_verbose.t	Tests for Class::ISA
-cpan/Class-ISA/t/01_old_junk.t		Tests for Class::ISA
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.h

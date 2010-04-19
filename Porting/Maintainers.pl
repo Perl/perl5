@@ -322,16 +322,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
-    'Class::ISA' =>
-	{
-	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/Class-ISA-0.36.tar.gz',
-	'FILES'		=> q[cpan/Class-ISA],
-	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'cpan',
-	'DEPRECATED'	=> 5.011,
-	},
-
     'Compress::Raw::Bzip2' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
