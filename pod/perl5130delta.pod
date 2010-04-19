@@ -30,6 +30,8 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Core Enhancements
 
+=head2 "safe signals" optimization
+
 Signal dispatch has been moved from the runloop into control ops. This should
 give a few percent speed increase, and eliminates almost all of the speed
 penalty caused by the introduction of "safe signals" in 5.8.0. Signals should
