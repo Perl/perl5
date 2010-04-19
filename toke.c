@@ -11848,19 +11848,6 @@ S_pmflag(U32 pmfl, const char ch) {
     return pmfl;
 }
 
-void
-Perl_pmflag(pTHX_ U32* pmfl, int ch)
-{
-    PERL_ARGS_ASSERT_PMFLAG;
-
-    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-		     "Perl_pmflag() is deprecated, and will be removed from the XS API");
-
-    if (ch<256) {
-	*pmfl = S_pmflag(*pmfl, (char)ch);
-    }
-}
-
 STATIC char *
 S_scan_pat(pTHX_ char *start, I32 type)
 {

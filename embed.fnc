@@ -908,7 +908,6 @@ Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV 
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 s	|void	|pidgone	|Pid_t pid|int status
 #endif
-DUXpo	|void	|pmflag		|NN U32 *pmfl|int ch
 : Used in perly.y
 p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)

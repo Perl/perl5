@@ -420,7 +420,6 @@ Perl_set_numeric_standard
 Perl_require_pv
 Perl_pack_cat
 Perl_packlist
-Perl_pmflag
 Perl_pop_scope
 Perl_push_scope
 Perl_ref

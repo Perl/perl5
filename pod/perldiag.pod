@@ -3447,13 +3447,6 @@ so it was not possible to set up some or all fixed-width byte-order
 conversion functions.  This is only a problem when you're using the
 '<' or '>' modifiers in (un)pack templates.  See L<perlfunc/pack>.
 
-=item Perl_pmflag() is deprecated, and will be removed from the XS API
-
-(D deprecated) XS code called the C function C<Perl_pmflag>. This was part of
-Perl's listed public API for extending or embedding the perl interpreter. It has
-now been removed from the public API, and will be removed in a future release,
-hence XS code should be re-written not to use it.
-
 =item Perl %s required--this is only version %s, stopped
 
 (F) The module in question uses features of a version of Perl more
