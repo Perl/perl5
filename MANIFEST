@@ -2010,8 +2010,6 @@ cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
-cpan/Shell/Shell.pm		Make AUTOLOADed system() calls
-cpan/Shell/t/Shell.t		Tests for above
 cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
