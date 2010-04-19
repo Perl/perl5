@@ -2740,8 +2740,6 @@ dist/Pod-Perldoc/t/01_about_verbose.t		test Pod::Perldoc
 dist/Pod-Perldoc/t/checkerbasic.t		test Pod::Perldoc::ToChecker
 dist/Pod-Perldoc/t/perldocbasic.t		test Pod::Perldoc basic operation
 dist/Pod-Perldoc/t/textbasic.t			test Pod::Perldoc::ToText
-dist/Pod-Plainer/Plainer.pm	Pod migration utility module
-dist/Pod-Plainer/t/plainer.t	Test Pod::Plainer
 dist/Safe/Changes		Changes for Safe.pm
 dist/Safe/Makefile.PL		Makefile.PL for Safe.pm
 dist/Safe/MANIFEST		MANIFEST for Safe.pm

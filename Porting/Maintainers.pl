@@ -1280,17 +1280,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
-    'Pod::Plainer' =>
-	{
-	'DISTRIBUTION'	=> 'RMBARKER/Pod-Plainer-1.02.tar.gz',
-	'MAINTAINER'	=> 'rmbarker',
-	'FILES'		=> q[dist/Pod-Plainer],
-	'CPAN'		=> 1,
-	'UPSTREAM'	=> 'blead',
-	'EXCLUDED'	=> [ qw(t/pod.t t/pod-coverage.t) ],
-	'DEPRECATED'	=> 5.011,
-	},
-
     'Pod::Simple' =>
 	{
 	'MAINTAINER'	=> 'arandal',
