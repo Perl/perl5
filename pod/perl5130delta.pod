@@ -39,6 +39,15 @@ still be dispatched within the same statement as they were previously - if
 this is not the case, or it is possible to create uninterruptable loops, this
 is a bug, and reports are encouraged of how to recreate such issues.
 
+=head2 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
+
+On Linux the legacy process name will be set with L<prctl(2)>, in
+addition to altering the POSIX name via C<argv[0]> as perl has done
+since version 4.000. Now system utilities that read the legacy process
+name such as ps, top and killall will recognize the name you set when
+assigning to C<$0>. The string you supply will be cut off at 16 bytes,
+this is a limitation imposed by Linux.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
