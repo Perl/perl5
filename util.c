@@ -4482,7 +4482,7 @@ dotted_decimal_version:
 	    saw_decimal++;
 	    d++;
 	}
-	else if (!*d || *d == ';' || isSPACE(*d) || *d == '}') {
+	else if (!*d || *d == ';' || isSPACE(*d) || *d == '{' || *d == '}') {
 	    if ( d == s ) {
 		/* found nothing */
 		BADVERSION(s,errstr,"Invalid version format (version required)");
@@ -4513,7 +4513,7 @@ dotted_decimal_version:
 
 	/* scan the fractional part after the decimal point*/
 
-	if (!isDIGIT(*d) && (strict || ! (!*d || *d == ';' || isSPACE(*d) || *d == '}') )) {
+	if (!isDIGIT(*d) && (strict || ! (!*d || *d == ';' || isSPACE(*d) || *d == '{' || *d == '}') )) {
 		/* strict or lax-but-not-the-end */
 		BADVERSION(s,errstr,"Invalid version format (fractional part required)");
 	}
@@ -4551,7 +4551,7 @@ version_prescan_finish:
     while (isSPACE(*d))
 	d++;
 
-    if (!isDIGIT(*d) && (! (!*d || *d == ';' || *d == '}') )) {
+    if (!isDIGIT(*d) && (! (!*d || *d == ';' || *d == '{' || *d == '}') )) {
 	/* trailing non-numeric data */
 	BADVERSION(s,errstr,"Invalid version format (non-numeric data)");
     }

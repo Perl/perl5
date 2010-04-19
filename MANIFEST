@@ -4207,6 +4207,7 @@ t/comp/line_debug.t		See if @{"_<$file"} works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
 t/comp/our.t			Tests for our declaration
+t/comp/package_block.t		See if package block syntax works
 t/comp/package.t		See if packages work
 t/comp/parser.t			See if the parser works in edge cases
 t/comp/proto.t			See if function prototypes work

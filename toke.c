@@ -2098,7 +2098,7 @@ S_force_version(pTHX_ char *s, int guessing)
 	    curmad('X', newSVpvn(s,d-s));
 	}
 #endif
-        if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
+        if (*d == ';' || isSPACE(*d) || *d == '{' || *d == '}' || !*d) {
 	    SV *ver;
 #ifdef USE_LOCALE_NUMERIC
 	    char *loc = setlocale(LC_NUMERIC, "C");
@@ -2167,7 +2167,9 @@ S_force_strict_version(pTHX_ char *s)
 	s = (char *)scan_version(s, ver, 0);
 	version = newSVOP(OP_CONST, 0, ver);
     }
-    else if ( (*s != ';' && *s != '}' ) && (s = SKIPSPACE1(s), (*s != ';' && *s !='}' ))) {
+    else if ( (*s != ';' && *s != '{' && *s != '}' ) &&
+	    (s = SKIPSPACE1(s), (*s != ';' && *s != '{' && *s != '}' )))
+    {
 	PL_bufptr = s;
 	if (errstr)
 	    yyerror(errstr); /* version required */
@@ -7271,6 +7273,7 @@ Perl_yylex(pTHX)
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
 	    s = SKIPSPACE1(s);
 	    s = force_strict_version(s);
+	    PL_lex_expect = XBLOCK;
 	    OPERATOR(PACKAGE);
 
 	case KEY_pipe:

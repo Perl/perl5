@@ -4243,10 +4243,19 @@ X<package> X<module> X<namespace> X<version>
 
 =item package NAMESPACE
 
-Declares the compilation unit as being in the given namespace.  The scope
-of the package declaration is from the declaration itself through the end
-of the enclosing block, file, or eval (the same as the C<my> operator).
-All further unqualified dynamic identifiers will be in this namespace.
+=item package NAMESPACE VERSION BLOCK
+X<package> X<module> X<namespace> X<version>
+
+=item package NAMESPACE BLOCK
+
+Declares the BLOCK, or the rest of the compilation unit, as being in
+the given namespace.  The scope of the package declaration is either the
+supplied code BLOCK or, in the absence of a BLOCK, from the declaration
+itself through the end of the enclosing block, file, or eval (the same
+as the C<my> operator).  All unqualified dynamic identifiers in this
+scope will be in the given namespace, except where overridden by another
+C<package> declaration.
+
 A package statement affects dynamic variables only, including those
 you've used C<local> on, but I<not> lexical variables, which are created
 with C<my> (or C<our> (or C<state>)).  Typically it would be the first 
