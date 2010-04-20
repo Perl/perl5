@@ -76,6 +76,7 @@ use File::Glob qw(:case);
     'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
     'salva'	=> 'Salvador Fandiño García <salva@cpan.org>',
     'saper'	=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
+    'sbeck'     => 'Sullivan Beck <sbeck@cpan.org>',
     'sburke'	=> 'Sean Burke <sburke@cpan.org>',
     'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
     'simonw'	=> 'Simon Wistow <simonw@cpan.org>',
@@ -851,11 +852,11 @@ use File::Glob qw(:case);
 
     'Locale-Codes' =>
 	{
-	'MAINTAINER'	=> 'neilb',
+	'MAINTAINER'	=> 'sbeck',
 	'DISTRIBUTION'	=> 'NEILB/Locale-Codes-2.07.tar.gz',
 	'FILES'		=> q[cpan/Locale-Codes],
 	'CPAN'		=> 1,
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Locale::Maketext' =>
