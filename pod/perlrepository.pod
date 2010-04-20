@@ -757,7 +757,7 @@ email (see L</SUBMITTING A PATCH>) with a description of your changes
 and the following information:
 
   http://github.com/USERNAME/perl/tree/orange
-  git@github.com:USERNAME/perl.git branch orange
+  git://github.com/USERNAME/perl.git branch orange
 
 =head1 Merging from a branch via GitHub
 
