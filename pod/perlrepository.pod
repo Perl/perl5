@@ -867,7 +867,8 @@ not allowed.)
 
 =head1 Committing to maintenance versions
 
-Maintenance versions should only be altered to add critical bug fixes.
+Maintenance versions should only be altered to add critical bug
+fixes, see L<perlpolicy>.
 
 To commit to a maintenance version of perl, you need to create a local
 tracking branch:
@@ -897,9 +898,15 @@ C<.git/info/grafts> file:
 It is particularly important to have this graft line if any bisecting
 is done in the area of the "merge" in question.
 
-
-
 =head1 SEE ALSO
 
-The git documentation, accessible via C<git help command>.
+=over
+
+=item * The git documentation, accessible via the C<git help> command
+
+=item * L<perlpolicy> - Perl core development policy
+
+=back
+
+=cut
 
