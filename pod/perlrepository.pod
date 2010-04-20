@@ -406,7 +406,7 @@ Be aware that many files in the distribution are derivative--avoid
 patching them, because git won't see the changes to them, and the build
 process will overwrite them. Patch the originals instead.  Most
 utilities (like perldoc) are in this category, i.e. patch
-utils/perldoc.PL rather than utils/perldoc. Similarly, don't create
+F<utils/perldoc.PL> rather than F<utils/perldoc>. Similarly, don't create
 patches for files under $src_root/ext from their copies found in
 $install_root/lib.  If you are unsure about the proper location of a
 file that may have gotten copied while building the source
