@@ -20,9 +20,9 @@ bleadperl, the development version of perl 5) takes up about 160MB of
 disk space (including the repository). A build of bleadperl takes up
 about 200MB (including the repository and the check out).
 
-=head1 GETTING ACCESS TO THE REPOSITORY
+=head1 Getting access to the repository
 
-=head2 READ ACCESS VIA THE WEB
+=head2 Read access via the web
 
 You may access the repository over the web. This allows you to browse
 the tree, see recent commits, subscribe to RSS feeds for the changes,
@@ -34,7 +34,7 @@ A mirror of the repository is found at:
 
   http://github.com/mirrors/perl
 
-=head2 READ ACCESS VIA GIT
+=head2 Read access via Git
 
 You will need a copy of Git for your computer. You can fetch a copy of
 the repository using the Git protocol (which uses port 9418):
@@ -52,7 +52,7 @@ fetch a copy of the repository over HTTP (this is at least 4x slower):
 This clones the repository and makes a local copy in the F<perl-http>
 directory.
 
-=head2 WRITE ACCESS TO THE REPOSITORY
+=head2 Write access to the repository
 
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
@@ -95,7 +95,7 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
-=head2 A NOTE ON CAMEL AND DROMEDARY
+=head2 A note on camel and dromedary
 
 The committers have SSH access to the two servers that serve
 C<perl5.git.perl.org>. One is C<perl5.git.perl.org> itself (I<camel>),
@@ -118,7 +118,7 @@ These two boxes are owned, hosted, and operated by booking.com. You can
 reach the sysadmins in #p5p on irc.perl.org or via mail to
 C<perl5-porters@perl.org>
 
-=head1 OVERVIEW OF THE REPOSITORY
+=head1 Overview of the repository
 
 Once you have changed into the repository directory, you can inspect
 it.
@@ -184,7 +184,7 @@ To switch back to blead:
 
   % git checkout blead
 
-=head2 FINDING OUT YOUR STATUS
+=head2 Finding out your status
 
 The most common git command you will use will probably be
 
@@ -262,7 +262,7 @@ When in doubt, before you do anything else, check your status and read
 it carefully, many questions are answered directly by the git status
 output.
 
-=head1 SUBMITTING A PATCH
+=head1 Submitting a patch
 
 If you have a patch in mind for Perl, you should first get a copy of
 the repository:
@@ -560,7 +560,7 @@ Your testsuite additions should generally follow these guidelines
 
 =back
 
-=head1 ACCEPTING A PATCH
+=head1 Accepting a patch
 
 If you have received a patch file generated using the above section,
 you should try out the patch.
@@ -621,7 +621,7 @@ If you want to delete your temporary branch, you may do so with:
   % git branch -D experimental
   Deleted branch experimental.
 
-=head1 CLEANING A WORKING DIRECTORY
+=head1 Cleaning a working directory
 
 The command C<git clean> can with varying arguments be used as a
 replacement for C<make clean>.
@@ -643,7 +643,7 @@ checkout> and give it a list of files to be reverted, or C<git checkout
 
 If you want to cancel one or several commits, you can use C<git reset>.
 
-=head1 BISECTING
+=head1 Bisecting
 
 C<git> provides a built-in way to determine, with a binary search in
 the history, which commit should be blamed for introducing a given bug.
@@ -727,7 +727,7 @@ the "first commit where the bug is solved".
 C<git help bisect> has much more information on how you can tweak your
 binary searches.
 
-=head1 SUBMITTING A PATCH VIA GITHUB
+=head1 Submitting a patch via GitHub
 
 GitHub is a website that makes it easy to fork and publish projects
 with Git. First you should set up a GitHub account and log in.
@@ -759,7 +759,7 @@ and the following information:
   http://github.com/USERNAME/perl/tree/orange
   git@github.com:USERNAME/perl.git branch orange
 
-=head1 MERGING FROM A BRANCH VIA GITHUB
+=head1 Merging from a branch via GitHub
 
 If someone has provided a branch via GitHub and you are a committer,
 you should use the following in your perl-ssh directory:
@@ -788,7 +788,7 @@ And then push back to the repository:
   % git push
 
 
-=head1 TOPIC BRANCHES AND REWRITING HISTORY
+=head1 Topic branches and rewriting history
 
 Individual committers should create topic branches under
 B<yourname>/B<some_descriptive_name>. Other committers should check
@@ -865,7 +865,7 @@ deleted or modified. Think long and hard about whether you want to push
 a local tag to perl.git before doing so. (Pushing unannotated tags is
 not allowed.)
 
-=head1 COMMITTING TO MAINTENANCE VERSIONS
+=head1 Committing to maintenance versions
 
 Maintenance versions should only be altered to add critical bug fixes.
 
@@ -883,7 +883,7 @@ using the C<git cherry-pick> command. It is recommended to use the
 B<-x> option to C<git cherry-pick> in order to record the SHA1 of the
 original commit in the new commit message.
 
-=head1 GRAFTS
+=head1 Grafts
 
 The perl history contains one mistake which was not caught in the
 conversion: a merge was recorded in the history between blead and
