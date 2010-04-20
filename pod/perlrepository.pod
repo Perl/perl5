@@ -32,7 +32,7 @@ search for particular commits and more. You may access it at:
 
 A mirror of the repository is found at:
 
-  http://github.com/github/perl
+  http://github.com/mirrors/perl
 
 =head2 READ ACCESS VIA GIT
 
@@ -714,7 +714,7 @@ with Git. First you should set up a GitHub account and log in.
 
 Perl's git repository is mirrored on GitHub at this page:
 
-  http://github.com/github/perl/tree/blead
+  http://github.com/mirrors/perl/tree/blead
 
 Visit the page and click the "fork" button. This clones the Perl git
 repository for you and provides you with "Your Clone URL" from which
