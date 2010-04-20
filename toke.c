@@ -3283,12 +3283,7 @@ S_scan_const(pTHX_ char *start)
 	    case 'c':
 		s++;
 		if (s < send) {
-		    U8 c = *s++;
-#ifdef EBCDIC
-		    if (isLOWER(c))
-			c = toUPPER(c);
-#endif
-		    *d++ = NATIVE_TO_NEED(has_utf8,toCTRL(c));
+		    *d++ = grok_bslash_c(*s++, 1);
 		}
 		else {
 		    yyerror("Missing control char name in \\c");

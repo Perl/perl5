@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print q(1..21
+print q(1..23
 );
 
 # This is() function is written to avoid ""
@@ -61,3 +61,21 @@ is ("\x{000000000000000000000000000000000000000000000000000000000000000072}",
 is ("\x{0_06_5}", chr 101);
 is ("\x{1234}", chr 4660);
 is ("\x{10FFFD}", chr 1114109);
+
+# These kludged tests should change when we remove the temporary fatal error
+# in util.c for "\c{" 
+# BE SURE TO remove the message from the __DATA__ section of porting/diag.t,
+# and to verify the messages in util.c are adequately covered in perldiag.pod
+my $value = eval '"\c{ACK}"';
+if ($^V lt v5.13.0 || $^V ge v5.14.0) {
+    is ($@, "");
+    is ($value, ";ACK}");
+}
+elsif ($@ ne "") {  # 5.13 series, should fail
+    is ("1", "1");  # This .t only has 'is' at its disposal 
+    is ("1", "1");
+} 
+else {  # Something wrong; someone has removed the failure in util.c
+    is ("Should fail for 5.13 until fix test", "0");
+    is ("1", "1");
+}

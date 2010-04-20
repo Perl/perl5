@@ -7445,8 +7445,7 @@ tryagain:
 			break;
 		    case 'c':
 			p++;
-			ender = UCHARAT(p++);
-			ender = toCTRL(ender);
+			ender = grok_bslash_c(*p++, SIZE_ONLY);
 			break;
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
@@ -8063,8 +8062,7 @@ parseit:
 		    goto recode_encoding;
 		break;
 	    case 'c':
-		value = UCHARAT(RExC_parse++);
-		value = toCTRL(value);
+		value = grok_bslash_c(*RExC_parse++, SIZE_ONLY);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':

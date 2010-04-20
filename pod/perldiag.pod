@@ -1211,6 +1211,10 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Character following "\\c" must be ASCII
+
+(F) In C<\cI<X>>, I<X> must be an ASCII character.
+
 =item Character in 'C' format wrapped in pack
 
 (W pack) You said
@@ -1418,6 +1422,12 @@ valid magic number.
 (F) You had an unpack template indicating a counted-length string, but
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
+
+=item \\c%c" more clearly written simply as "%c
+
+(D deprecated) The C<\cI<X>> construct is intended to be a way to specify
+non-printable characters.  You used it for a printable one, which is better
+written as simply itself.
 
 =item Deep recursion on subroutine "%s"
 
