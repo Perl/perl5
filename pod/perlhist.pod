@@ -410,6 +410,7 @@ the strings?).
  Steve    5.11.5        2010-Feb-20
  Jesse    5.12.0-RC1    2010-Mar-29
  Jesse    5.12.0        2010-Apr-12
+ Leon     5.13.0        2010-Apr-20
 
 =head2 SELECTED RELEASE SIZES
 
