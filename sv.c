@@ -12475,6 +12475,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_bodytarget	= sv_dup_inc(proto_perl->Ibodytarget, param);
     PL_formtarget	= sv_dup(proto_perl->Iformtarget, param);
 
+    PL_restartjmpenv	= proto_perl->Irestartjmpenv;
     PL_restartop	= proto_perl->Irestartop;
     PL_in_eval		= proto_perl->Iin_eval;
     PL_delaymagic	= proto_perl->Idelaymagic;

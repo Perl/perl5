@@ -126,6 +126,7 @@ PERLVAR(Idefstash,	HV *)		/* main symbol table */
 PERLVAR(Icurstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(Irestartop,	OP *)		/* propagating an error from croak? */
+PERLVAR(Irestartjmpenv,	JMPENV *)	/* target frame for longjmp in die */
 PERLVAR(Icurcop,	COP *)
 PERLVAR(Icurstack,	AV *)		/* THE STACK */
 PERLVAR(Icurstackinfo,	PERL_SI *)	/* current stack + context */

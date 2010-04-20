@@ -2193,6 +2193,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 
     ENTER;
+    PL_restartjmpenv = NULL;
     PL_restartop = 0;
     return NULL;
 }
@@ -2298,6 +2299,7 @@ S_run_body(pTHX_ I32 oldscope)
     /* do it */
 
     if (PL_restartop) {
+	PL_restartjmpenv = NULL;
 	PL_op = PL_restartop;
 	PL_restartop = 0;
 	CALLRUNOPS(aTHX);
@@ -2620,6 +2622,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    /* NOTREACHED */
 	case 3:
 	    if (PL_restartop) {
+		PL_restartjmpenv = NULL;
 		PL_op = PL_restartop;
 		PL_restartop = 0;
 		goto redo_body;
@@ -2720,6 +2723,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	/* NOTREACHED */
     case 3:
 	if (PL_restartop) {
+	    PL_restartjmpenv = NULL;
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;

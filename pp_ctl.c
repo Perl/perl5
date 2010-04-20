@@ -1664,6 +1664,7 @@ Perl_die_where(pTHX_ SV *msv)
 		    *msg ? msg : "Unknown error\n");
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
+	    PL_restartjmpenv = cx->blk_eval.cur_top_env;
 	    PL_restartop = cx->blk_eval.retop;
 	    JMPENV_JUMP(3);
 	    /* NOTREACHED */
@@ -2881,17 +2882,8 @@ S_docatch(pTHX_ OP *o)
 	break;
     case 3:
 	/* die caught by an inner eval - continue inner loop */
-
-	/* NB XXX we rely on the old popped CxEVAL still being at the top
-	 * of the stack; the way die_where() currently works, this
-	 * assumption is valid. In theory The cur_top_env value should be
-	 * returned in another global, the way retop (aka PL_restartop)
-	 * is. */
-	assert(CxTYPE(&cxstack[cxstack_ix+1]) == CXt_EVAL);
-
-	if (PL_restartop
-	    && cxstack[cxstack_ix+1].blk_eval.cur_top_env == PL_top_env)
-	{
+	if (PL_restartop && PL_restartjmpenv == PL_top_env) {
+	    PL_restartjmpenv = NULL;
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;
