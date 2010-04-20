@@ -180,7 +180,7 @@ sub module_version {
     print "\n",$msg,"\n";
 
     if(defined $ret and exists $Opts{a} and $Opts{a}){
-        for my $v(
+        for my $v( grep !/000$/,
             sort keys %Module::CoreList::version ){
 
             printf "  %-10s %-10s\n",
