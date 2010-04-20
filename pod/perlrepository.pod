@@ -764,24 +764,24 @@ and the following information:
 If someone has provided a branch via GitHub and you are a committer,
 you should use the following in your perl-ssh directory:
 
-  % git remote add dandv git://github.com/dandv/perl.git
-  % git fetch dandv
+  % git remote add avar git://github.com/avar/perl.git
+  % git fetch avar
 
 Now you can see the differences between the branch and blead:
 
-  % git diff dandv/blead
+  % git diff avar/orange
 
 And you can see the commits:
 
-  % git log dandv/blead
+  % git log avar/orange
 
 If you approve of a specific commit, you can cherry pick it:
 
-  % git cherry-pick 3adac458cb1c1d41af47fc66e67b49c8dec2323f
+  % git cherry-pick 0c24b290ae02b2ab3304f51d5e11e85eb3659eae
 
 Or you could just merge the whole branch if you like it all:
 
-  % git merge dandv/blead
+  % git merge avar/orange
 
 And then push back to the repository:
 
