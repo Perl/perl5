@@ -439,8 +439,16 @@ you need to do.
 As you craft each patch you intend to submit to the Perl core, it's
 important to write a good commit message.
 
-Your commit message should start with a description of the problem that
-the patch corrects or new functionality that the patch adds.
+The first line of the commit message should be a short description and
+should skip the full stop. It should be no longer than the subject
+line of an E-Mail, 50 characters being a good rule of thumb.
+
+A lot of Git tools (Gitweb, GitHub, git log --pretty=oneline, ..) will
+only display the first line (cut off at 50 characters) when presenting
+commit summaries.
+
+The commit message should include description of the problem that the
+patch corrects or new functionality that the patch adds.
 
 As a general rule of thumb, your commit message should let a programmer
 with a reasonable familiarity with the Perl core quickly understand what
