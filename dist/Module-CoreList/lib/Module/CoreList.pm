@@ -15065,7 +15065,7 @@ $version{'5.000'} = $version{5};
 $version{'5.010000'} = $version{5.01};
 $version{'5.011000'} = $version{5.011};
 $version{'5.012000'} = $version{5.012};
-$version{'5.013000'} = $version{5.01333};
+$version{'5.013000'} = $version{5.013};
 
 $deprecated{'5.011000'} = $deprecated{5.011};
 $deprecated{'5.012000'} = $deprecated{5.012};
