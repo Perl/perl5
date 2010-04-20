@@ -4386,6 +4386,7 @@ t/op/crypt.t			See if crypt works
 t/op/dbm.t			See if dbmopen/dbmclose work
 t/op/defins.t			See if auto-insert of defined() works
 t/op/delete.t			See if delete works
+t/op/die_except.t		See if die/eval avoids $@ clobberage
 t/op/die_exit.t			See if die and exit status interaction works
 t/op/die.t			See if die works
 t/op/dor.t			See if defined-or (//) works
