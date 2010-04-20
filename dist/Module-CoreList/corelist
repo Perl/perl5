@@ -84,7 +84,7 @@ use warnings;
 
 my %Opts;
 
-GetOptions(\%Opts, qw[ help|?! man! v|version:f a! d ] );
+GetOptions(\%Opts, qw[ help|?! man! v|version:s a! d ] );
 
 pod2usage(1) if $Opts{help};
 pod2usage(-verbose=>2) if $Opts{man};
@@ -92,22 +92,25 @@ pod2usage(-verbose=>2) if $Opts{man};
 if(exists $Opts{v} ){
     if( !$Opts{v} ) {
         print "\nModule::CoreList has info on the following perl versions:\n";
-        print "$_\n" for sort keys %Module::CoreList::version;
+        print format_perl_version($_)."\n" for sort keys %Module::CoreList::version;
         print "\n";
         exit 0;
     }
 
-    $Opts{v} = numify_version( $Opts{v} );
-    my $version_hash = Module::CoreList->find_version($Opts{v});
+    my $num_v = numify_version( $Opts{v} );
+    my $version_hash = Module::CoreList->find_version($num_v);
+
     if( !$version_hash ) {
-        print "\nModule::CoreList has no info on perl v$Opts{v}\n\n";
+        print "\nModule::CoreList has no info on perl $Opts{v}\n\n";
         exit 1;
     }
 
     if ( !@ARGV ) {
-	print "\nThe following modules were in perl v$Opts{v} CORE\n";
-	print "$_ ", $version_hash->{$_} || " ","\n"
-	for sort keys %$version_hash;
+	print "\nThe following modules were in perl $Opts{v} CORE\n";
+	my $max_mod_len = max_mod_len($version_hash);
+	for my $mod ( sort keys %$version_hash ) {
+	    printf "%-${max_mod_len}s  %s\n", $mod, $version_hash->{$mod} || "";
+	}
 	print "\n";
 	exit 0;
     }
@@ -155,7 +158,8 @@ sub module_version {
     my($mod,$ver) = @_;
 
     if ( $Opts{v} ) {
-	my $version_hash = Module::CoreList->find_version($Opts{v});
+	my $numeric_v = numify_version($Opts{v});
+	my $version_hash = Module::CoreList->find_version($numeric_v);
 	if ($version_hash) {
 	    print $mod, " ", $version_hash->{$mod} || 'undef', "\n";
 	    return;
@@ -180,23 +184,60 @@ sub module_version {
     print "\n",$msg,"\n";
 
     if(defined $ret and exists $Opts{a} and $Opts{a}){
-        for my $v( grep !/000$/,
-            sort keys %Module::CoreList::version ){
-
-            printf "  %-10s %-10s\n",
-                $v,
-                $Module::CoreList::version{$v}{$mod}
-                    || 'undef'
-                    if exists $Module::CoreList::version{$v}{$mod};
-        }
-        print "\n";
+        display_a($mod);
     }
 }
+
+
+sub max_mod_len {
+    my $versions = shift;
+    my $max = 0;
+    for my $mod (keys %$versions) {
+        $max = max($max, length $mod);
+    }
+
+    return $max;
+}
+
+sub max {
+    my($this, $that) = @_;
+    return $this if $this > $that;
+    return $that;
+}
+
+sub display_a {
+    my $mod = shift;
+
+    for my $v (grep !/000$/, sort keys %Module::CoreList::version ) {
+        next unless exists $Module::CoreList::version{$v}{$mod};
+
+        my $mod_v = $Module::CoreList::version{$v}{$mod} || 'undef';
+        printf "  %-10s %-10s\n", format_perl_version($v), $mod_v;
+    }
+    print "\n";
+}
+
+
+{
+    my $have_version_pm;
+    sub have_version_pm {
+        return $have_version_pm if defined $have_version_pm;
+        return $have_version_pm = eval { require version; 1 };
+    }
+}
+
+
+sub format_perl_version {
+    my $v = shift;
+    return $v if $v < 5.006 or !have_version_pm;
+    return version->new($v)->normal;
+}
+
 
 sub numify_version {
     my $ver = shift;
     if ($ver =~ /\..+\./) {
-	eval { require version ; 1 }
+	have_version_pm()
 	    or die "You need to install version.pm to use dotted version numbers\n";
         $ver = version->new($ver)->numify;
     }
