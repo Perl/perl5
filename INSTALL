@@ -42,7 +42,7 @@ If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
-pod/perl5130delta.pod file.  For more information about how to find more
+pod/perl5131delta.pod file.  For more information about how to find more
 specific detail about changes, see the Changes file.
 
 =head1 DESCRIPTION
@@ -75,10 +75,10 @@ directory.
 
 =head2 Changes and Incompatibilities
 
-Please see pod/perl5130delta.pod for a description of the changes and
+Please see pod/perl5131delta.pod for a description of the changes and
 potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
-to pod/perl5130delta.pod for more detailed information.
+to pod/perl5131delta.pod for more detailed information.
 
 B<WARNING:> This version is not binary compatible with prior releases of Perl.
 If you have built extensions (i.e. modules that include C code)
@@ -93,7 +93,7 @@ The standard extensions supplied with Perl will be handled automatically.
 
 On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
-pod/perl5130delta.pod for a description of what's changed.  See your
+pod/perl5131delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
@@ -524,9 +524,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.13.0.
+By default, Configure will use the following directories for 5.13.1.
 $version is the full perl version number, including subversion, e.g.
-5.13.0 or 5.9.5, and $archname is a string like sun4-sunos,
+5.13.1 or 5.9.5, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -2360,9 +2360,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.13.0
+	sh Configure -Dprefix=/opt/perl5.13.1
 
-and adding /opt/perl5.13.0/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.13.1/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2377,11 +2377,11 @@ yet.
 
 =head2 Upgrading from 5.11.0 or earlier
 
-B<Perl 5.13.0 is binary incompatible with Perl 5.11.1 and any earlier
+B<Perl 5.13.1 is binary incompatible with Perl 5.11.1 and any earlier
 Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.13.0.  If you find you do need to rebuild an extension with
-5.13.0, you may safely do so without disturbing the older
+used with 5.13.1.  If you find you do need to rebuild an extension with
+5.13.1, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
