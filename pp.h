@@ -450,6 +450,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define tryAMAGICun_var(meth_enum) tryAMAGICunW_var(meth_enum,SETsvUN,0,RETURN)
 #define tryAMAGICun(meth)	tryAMAGICun_var(CAT2(meth,_amg))
+#define tryAMAGICunSET_var(meth_enum) tryAMAGICunW_var(meth_enum,SETs,0,RETURN)
 #define tryAMAGICunSET(meth)	tryAMAGICunW(meth,SETs,0,RETURN)
 #define tryAMAGICunTARGET(meth, shift)					\
 	STMT_START { dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\

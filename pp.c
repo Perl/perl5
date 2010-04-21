@@ -2485,14 +2485,14 @@ PP(pp_negate)
 
 PP(pp_not)
 {
-    dVAR; dSP; tryAMAGICunSET(not);
+    dVAR; dSP; tryAMAGICunSET_var(not_amg);
     *PL_stack_sp = boolSV(!SvTRUE(*PL_stack_sp));
     return NORMAL;
 }
 
 PP(pp_complement)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(compl);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(compl_amg);
     {
       dTOPss;
       SvGETMAGIC(sv);
