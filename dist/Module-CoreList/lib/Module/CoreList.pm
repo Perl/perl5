@@ -100,7 +100,9 @@ END {
 
 
 sub first_release_raw {
-    my ($discard, $module, $version) = @_;
+    my $module = shift;
+    $module = shift if $module->isa(__PACKAGE__);
+    my $version = shift;
 
     my @perls = $version
         ? grep { exists $version{$_}{ $module } &&
@@ -123,8 +125,8 @@ sub first_release {
 }
 
 sub find_modules {
-    my $discard = shift;
     my $regex = shift;
+    $regex = shift if $regex->isa(__PACKAGE__);
     my @perls = @_;
     @perls = keys %version unless @perls;
 
@@ -138,13 +140,17 @@ sub find_modules {
 }
 
 sub find_version {
-    my ($class, $v) = @_;
+    my $class = shift;
+    $class = shift if $class->isa(__PACKAGE__);
+    my $v = shift;
     return $version{$v} if defined $version{$v};
     return undef;
 }
 
 sub is_deprecated {
-    my ($module, $perl_version) = @_;
+    my $module = shift;
+    $module = shift if $module->isa(__PACKAGE__);
+    my $perl_version = shift;
     $perl_version ||= $];
     return unless $module && exists $deprecated{$perl_version}{$module};
     return $deprecated{$perl_version}{$module};
