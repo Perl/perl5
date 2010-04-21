@@ -245,6 +245,8 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
             sv = sv_newmortal();
 	    sv_upgrade(sv, SVt_PVLV);
 	    mg_copy(MUTABLE_SV(av), sv, 0, key);
+	    if (!tied_magic) /* for regdata, force leavesub to make copies */
+		SvTEMP_off(sv);
 	    LvTYPE(sv) = 't';
 	    LvTARG(sv) = sv; /* fake (SV**) */
 	    return &(LvTARG(sv));

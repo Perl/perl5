@@ -466,13 +466,13 @@ is "@+", "10 1 6 10";
 
 # Test for bug [perl #27839]
 {
-    local $TODO = "fixing a casting issue revealed broken behaviour in this test";
     my $x;
     sub f {
 	"abc" =~ /(.)./;
 	$x = "@+";
 	return @+;
     };
+    "pqrstuvwxyz" =~ /..(....)../; # prime @+ etc in this scope
     my @y = f();
     is $x, "@y", "return a magic array ($x) vs (@y)";
 
