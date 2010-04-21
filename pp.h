@@ -474,7 +474,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define tryAMAGICftest(chr)				\
     STMT_START {					\
 	assert(chr != '?');				\
-	if (SvAMAGIC(TOPs)) {				\
+	if ((PL_op->op_flags & OPf_KIDS)		\
+		&& SvAMAGIC(TOPs)) {			\
 	    const char tmpchr = (chr);			\
 	    SV * const tmpsv = amagic_call(TOPs,	\
 		newSVpvn_flags(&tmpchr, 1, SVs_TEMP),	\
