@@ -9,6 +9,9 @@ git_version.h
 # ignore bug*.pl
 bug*.pl
 
+# Exists during ./Configure
+/UU
+
 # files produced by './configure.gnu' on a Linux machine
 Makefile.old
 /Makefile
