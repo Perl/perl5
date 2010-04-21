@@ -162,7 +162,7 @@ scope has the given name. Name must be a literal string.
 #define SAVEINT(i)	save_int((int*)&(i))
 #define SAVEIV(i)	save_iv((IV*)&(i))
 #define SAVELONG(l)	save_long((long*)&(l))
-#define SAVEBOOL(b)	save_bool((bool*)&(b))
+#define SAVEBOOL(b)	save_bool(&(b))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr((char**)&(s))
 #define SAVEVPTR(s)	save_vptr((void*)&(s))
