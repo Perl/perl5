@@ -1346,16 +1346,6 @@ cpan/List-Util/t/tainted.t		Scalar::Util
 cpan/List-Util/t/weak.t			Scalar::Util
 cpan/List-Util/XS.pp			List::Util
 cpan/Locale-Codes/ChangeLog			Locale::Codes
-cpan/Locale-Codes/examples/README.examples	Locale::Codes
-cpan/Locale-Codes/internal/build.yaml		Locale::Codes maintainer file
-cpan/Locale-Codes/internal/data.country.pl	Locale::Codes maintainer file
-cpan/Locale-Codes/internal/data.currency.pl	Locale::Codes maintainer file
-cpan/Locale-Codes/internal/data.language.pl	Locale::Codes maintainer file
-cpan/Locale-Codes/internal/data.script.pl	Locale::Codes maintainer file
-cpan/Locale-Codes/internal/get_codes		Locale::Codes maintainer file
-cpan/Locale-Codes/internal/ispell.isp		Locale::Codes maintainer file
-cpan/Locale-Codes/internal/NOTES		Locale::Codes maintainer file
-cpan/Locale-Codes/internal/VERSION		Locale::Codes maintainer file
 cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Country.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Currency.pm	Locale::Codes
