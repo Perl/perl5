@@ -1,356 +1,284 @@
-#
-# Locale::Currency - ISO three letter codes for currency identification
-#                    (ISO 4217)
-#
-# $Id: Currency.pm,v 2.7 2004/06/10 21:19:34 neilb Exp $
-#
-
 package Locale::Currency;
+# Copyright (C) 2001      Canon Research Centre Europe (CRE).
+# Copyright (C) 2002-2009 Neil Bowers
+# Copyright (c) 2010-2010 Sullivan Beck
+# This program is free software; you can redistribute it and/or modify it
+# under the same terms as Perl itself.
+
 use strict;
+use warnings;
 require 5.002;
 
 require Exporter;
+use Carp;
+use Locale::Codes;
+use Locale::Constants;
+use Locale::Codes::Currency;
 
-#-----------------------------------------------------------------------
-#	Public Global Variables
-#-----------------------------------------------------------------------
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION      = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
-@ISA          = qw(Exporter);
-@EXPORT       = qw(&code2currency &currency2code
-                   &all_currency_codes &all_currency_names );
+#=======================================================================
+#       Public Global Variables
+#=======================================================================
 
-#-----------------------------------------------------------------------
-#	Private Global Variables
-#-----------------------------------------------------------------------
-my %CODES      = ();
-my %CURRENCIES = ();
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 
+$VERSION='3.12';
+@ISA       = qw(Exporter);
+@EXPORT    = qw(code2currency
+                currency2code
+                all_currency_codes
+                all_currency_names
+                currency_code2code
+                LOCALE_CURR_ALPHA
+                LOCALE_CURR_NUMERIC
+               );
+
+sub _code {
+   my($code,$codeset) = @_;
+   $code = ""  if (! $code);
+
+   $codeset = LOCALE_CURR_DEFAULT  if (! defined($codeset)  ||  $codeset eq "");
+
+   if ($codeset =~ /^\d+$/) {
+      if      ($codeset ==  LOCALE_CURR_ALPHA) {
+         $codeset = "alpha";
+      } elsif ($codeset ==  LOCALE_CURR_NUMERIC) {
+         $codeset = "num";
+      } else {
+         return (1);
+      }
+   }
+
+   if      ($codeset eq "alpha") {
+      $code    = uc($code);
+   } elsif ($codeset eq "num") {
+      if (defined($code)  &&  $code ne "") {
+         return (1)  unless ($code =~ /^\d+$/);
+         $code    = sprintf("%.3d", $code);
+      }
+   } else {
+      return (1);
+   }
+
+   return (0,$code,$codeset);
+}
 
 #=======================================================================
 #
-# code2currency( CODE )
+# code2currency ( CODE [,CODESET] )
 #
 #=======================================================================
-sub code2currency
-{
-    my $code = shift;
 
+sub code2currency {
+   my($err,$code,$codeset) = _code(@_);
+   return undef  if ($err  ||
+                     ! defined $code);
 
-    return undef unless defined $code;
-    $code = lc($code);
-    if (exists $CODES{$code})
-    {
-        return $CODES{$code};
-    }
-    else
-    {
-        #---------------------------------------------------------------
-        # no such currency code!
-        #---------------------------------------------------------------
-        return undef;
-    }
+   return Locale::Codes::_code2name("currency",$code,$codeset);
+}
+
+#=======================================================================
+#
+# currency2code ( CURRENCY [,CODESET] )
+#
+#=======================================================================
+
+sub currency2code {
+   my($currency,$codeset) = @_;
+   my($err,$tmp);
+   ($err,$tmp,$codeset) = _code("",$codeset);
+   return undef  if ($err  ||
+                     ! defined $currency);
+
+   return Locale::Codes::_name2code("currency",$currency,$codeset);
+}
+
+#=======================================================================
+#
+# currency_code2code ( CODE,CODESET_IN,CODESET_OUT )
+#
+#=======================================================================
+
+sub currency_code2code {
+   (@_ == 3) or croak "currency_code2code() takes 3 arguments!";
+   my($code,$inset,$outset) = @_;
+   my($err,$tmp);
+   ($err,$code,$inset) = _code($code,$inset);
+   return undef  if ($err);
+   ($err,$tmp,$outset) = _code("",$outset);
+   return undef  if ($err);
+
+   return Locale::Codes::_code2code("currency",$code,$inset,$outset);
+}
+
+#=======================================================================
+#
+# all_currency_codes ( [CODESET] )
+#
+#=======================================================================
+
+sub all_currency_codes {
+   my($codeset) = @_;
+   my($err,$tmp);
+   ($err,$tmp,$codeset) = _code("",$codeset);
+   return undef  if ($err);
+
+   return Locale::Codes::_all_codes("currency",$codeset);
 }
 
 
 #=======================================================================
 #
-# currency2code ( CURRENCY )
+# all_currency_names ( [CODESET] )
 #
 #=======================================================================
-sub currency2code
-{
-    my $curr = shift;
 
+sub all_currency_names {
+   my($codeset) = @_;
+   my($err,$tmp);
+   ($err,$tmp,$codeset) = _code("",$codeset);
+   return undef  if ($err);
 
-    return undef unless defined $curr;
-    $curr = lc($curr);
-    if (exists $CURRENCIES{$curr})
-    {
-        return $CURRENCIES{$curr};
-    }
-    else
-    {
-        #---------------------------------------------------------------
-        # no such currency!
-        #---------------------------------------------------------------
-        return undef;
-    }
+   return Locale::Codes::_all_names("currency",$codeset);
 }
 
+#=======================================================================
+#
+# rename_currency ( CODE,NAME [,CODESET] )
+#
+#=======================================================================
 
-#=======================================================================
-#
-# all_currency_codes()
-#
-#=======================================================================
-sub all_currency_codes
-{
-    return keys %CODES;
+sub rename_currency {
+   my($code,$new_name,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($code,$codeset);
+
+   return Locale::Codes::_rename("currency",$code,$new_name,$codeset,$nowarn);
 }
 
+#=======================================================================
+#
+# add_currency ( CODE,NAME [,CODESET] )
+#
+#=======================================================================
 
-#=======================================================================
-#
-# all_currency_names()
-#
-#=======================================================================
-sub all_currency_names
-{
-    return values %CODES;
+sub add_currency {
+   my($code,$name,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($code,$codeset);
+
+   return Locale::Codes::_add_code("currency",$code,$name,$codeset,$nowarn);
 }
 
+#=======================================================================
+#
+# delete_currency ( CODE [,CODESET] )
+#
+#=======================================================================
+
+sub delete_currency {
+   my($code,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($code,$codeset);
+
+   return Locale::Codes::_delete_code("currency",$code,$codeset,$nowarn);
+}
 
 #=======================================================================
-# initialisation code - stuff the DATA into the CODES hash
+#
+# add_currency_alias ( NAME,NEW_NAME )
+#
 #=======================================================================
-{
-    my    $code;
-    my    $currency;
-    local $_;
 
+sub add_currency_alias {
+   my($name,$new_name,$nowarn) = @_;
+   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
 
-    while (<DATA>)
-    {
-        next unless /\S/;
-        chop;
-        ($code, $currency) = split(/:/, $_, 2);
-        $CODES{$code} = $currency;
-        $CURRENCIES{"\L$currency"} = $code;
-    }
+   return Locale::Codes::_add_alias("currency",$name,$new_name,$nowarn);
+}
 
-    close(DATA);
+#=======================================================================
+#
+# delete_currency_alias ( NAME )
+#
+#=======================================================================
+
+sub delete_currency_alias {
+   my($name,$nowarn) = @_;
+   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
+
+   return Locale::Codes::_delete_alias("currency",$name,$nowarn);
+}
+
+#=======================================================================
+#
+# rename_currency_code ( CODE,NEW_CODE [,CODESET] )
+#
+#=======================================================================
+
+sub rename_currency_code {
+   my($code,$new_code,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = _code($code,$codeset);
+   ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
+
+   return Locale::Codes::_rename_code("currency",$code,$new_code,$codeset,$nowarn);
+}
+
+#=======================================================================
+#
+# add_currency_code_alias ( CODE,NEW_CODE [,CODESET] )
+#
+#=======================================================================
+
+sub add_currency_code_alias {
+   my($code,$new_code,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = _code($code,$codeset);
+   ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
+
+   return Locale::Codes::_add_code_alias("currency",$code,$new_code,$codeset,$nowarn);
+}
+
+#=======================================================================
+#
+# delete_currency_code_alias ( CODE [,CODESET] )
+#
+#=======================================================================
+
+sub delete_currency_code_alias {
+   my($code,@args) = @_;
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = _code($code,$codeset);
+
+   return Locale::Codes::_delete_code_alias("currency",$code,$codeset,$nowarn);
 }
 
 1;
-
-__DATA__
-adp:Andorran Peseta
-aed:UAE Dirham
-afa:Afghani
-all:Lek
-amd:Armenian Dram
-ang:Netherlands Antillean Guilder
-aoa:Kwanza
-aon:New Kwanza
-aor:Kwanza Reajustado
-ars:Argentine Peso
-ats:Schilling
-aud:Australian Dollar
-awg:Aruban Guilder
-azm:Azerbaijanian Manat
-
-bam:Convertible Marks
-bbd:Barbados Dollar
-bdt:Taka
-bef:Belgian Franc
-bgl:Lev
-bgn:Bulgarian Lev
-bhd:Bahraini Dinar
-bhd:Dinar
-bif:Burundi Franc
-bmd:Bermudian Dollar
-bnd:Brunei Dollar
-bob:Boliviano
-bov:MVDol
-brl:Brazilian Real
-bsd:Bahamian Dollar
-btn:Ngultrum
-bwp:Pula
-byb:Belarussian Ruble
-byr:Belarussian Ruble
-bzd:Belize Dollar
-
-cad:Canadian Dollar
-cdf:Franc Congolais
-chf:Swiss Franc
-clf:Unidades de Formento
-clp:Chilean Peso
-cny:Yuan Renminbi
-cop:Colombian Peso
-crc:Costa Rican Colon
-cup:Cuban Peso
-cve:Cape Verde Escudo
-cyp:Cyprus Pound
-czk:Czech Koruna
-
-dem:German Mark
-djf:Djibouti Franc
-dkk:Danish Krone
-dop:Dominican Peso
-dzd:Algerian Dinar
-
-ecs:Sucre
-ecv:Unidad de Valor Constante (UVC)
-eek:Kroon
-egp:Egyptian Pound
-ern:Nakfa
-esp:Spanish Peseta
-etb:Ethiopian Birr
-eur:Euro
-
-fim:Markka
-fjd:Fiji Dollar
-fkp:Falkland Islands Pound
-frf:French Franc
-
-gbp:Pound Sterling
-gel:Lari
-ghc:Cedi
-gip:Gibraltar Pound
-gmd:Dalasi
-gnf:Guinea Franc
-grd:Drachma
-gtq:Quetzal
-gwp:Guinea-Bissau Peso
-gyd:Guyana Dollar
-
-hkd:Hong Kong Dollar
-hnl:Lempira
-hrk:Kuna
-htg:Gourde
-huf:Forint
-
-idr:Rupiah
-iep:Irish Pound
-ils:Shekel
-inr:Indian Rupee
-iqd:Iraqi Dinar
-irr:Iranian Rial
-isk:Iceland Krona
-itl:Italian Lira
-
-jmd:Jamaican Dollar
-jod:Jordanian Dinar
-jpy:Yen
-
-kes:Kenyan Shilling
-kgs:Som
-khr:Riel
-kmf:Comoro Franc
-kpw:North Korean Won
-krw:Won
-kwd:Kuwaiti Dinar
-kyd:Cayman Islands Dollar
-kzt:Tenge
-
-lak:Kip
-lbp:Lebanese Pound
-lkr:Sri Lanka Rupee
-lrd:Liberian Dollar
-lsl:Loti
-ltl:Lithuanian Litas
-luf:Luxembourg Franc
-lvl:Latvian Lats
-lyd:Libyan Dinar
-
-mad:Moroccan Dirham
-mdl:Moldovan Leu
-mgf:Malagasy Franc
-mkd:Denar
-mmk:Kyat
-mnt:Tugrik
-mop:Pataca
-mro:Ouguiya
-mtl:Maltese Lira
-mur:Mauritius Rupee
-mvr:Rufiyaa
-mwk:Kwacha
-mxn:Mexican Nuevo Peso
-myr:Malaysian Ringgit
-mzm:Metical
-
-nad:Namibia Dollar
-ngn:Naira
-nio:Cordoba Oro
-nlg:Netherlands Guilder
-nok:Norwegian Krone
-npr:Nepalese Rupee
-nzd:New Zealand Dollar
-
-omr:Rial Omani
-
-pab:Balboa
-pen:Nuevo Sol
-pgk:Kina
-php:Philippine Peso
-pkr:Pakistan Rupee
-pln:Zloty
-pte:Portuguese Escudo
-pyg:Guarani
-
-qar:Qatari Rial
-
-rol:Leu
-rub:Russian Ruble
-rur:Russian Ruble
-rwf:Rwanda Franc
-
-sar:Saudi Riyal
-sbd:Solomon Islands Dollar
-scr:Seychelles Rupee
-sdd:Sudanese Dinar
-sek:Swedish Krona
-sgd:Singapore Dollar
-shp:St. Helena Pound
-sit:Tolar
-skk:Slovak Koruna
-sll:Leone
-sos:Somali Shilling
-srg:Surinam Guilder
-std:Dobra
-svc:El Salvador Colon
-syp:Syrian Pound
-szl:Lilangeni
-
-thb:Baht
-tjr:Tajik Ruble
-tmm:Manat
-tnd:Tunisian Dollar
-top:Pa'anga
-tpe:Timor Escudo
-trl:Turkish Lira
-ttd:Trinidad and Tobago Dollar
-twd:New Taiwan Dollar
-tzs:Tanzanian Shilling
-
-uah:Hryvnia
-uak:Karbovanets
-ugx:Uganda Shilling
-usd:US Dollar
-usn:US Dollar (Next day)
-uss:US Dollar (Same day)
-uyu:Peso Uruguayo
-uzs:Uzbekistan Sum
-
-veb:Bolivar
-vnd:Dong
-vuv:Vatu
-
-wst:Tala
-
-xaf:CFA Franc BEAC
-xag:Silver
-xau:Gold
-xba:European Composite Unit
-xbb:European Monetary Unit
-xbc:European Unit of Account 9
-xb5:European Unit of Account 17
-xcd:East Caribbean Dollar
-xdr:SDR
-xeu:ECU (until 1998-12-31)
-xfu:UIC-Franc
-xfo:Gold-Franc
-xof:CFA Franc BCEAO
-xpd:Palladium
-xpf:CFP Franc
-xpt:Platinum
-
-yer:Yemeni Rial
-yum:New Dinar
-
-zal:Financial Rand
-zar:Rand
-zmk:Kwacha
-zrn:New Zaire
-zwd:Zimbabwe Dollar
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
+# End:

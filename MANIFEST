@@ -1346,6 +1346,23 @@ cpan/List-Util/t/tainted.t		Scalar::Util
 cpan/List-Util/t/weak.t			Scalar::Util
 cpan/List-Util/XS.pp			List::Util
 cpan/Locale-Codes/ChangeLog			Locale::Codes
+cpan/Locale-Codes/examples/README.examples	Locale::Codes
+cpan/Locale-Codes/internal/build.yaml		Locale::Codes maintainer file
+cpan/Locale-Codes/internal/data.country.pl	Locale::Codes maintainer file
+cpan/Locale-Codes/internal/data.currency.pl	Locale::Codes maintainer file
+cpan/Locale-Codes/internal/data.language.pl	Locale::Codes maintainer file
+cpan/Locale-Codes/internal/data.script.pl	Locale::Codes maintainer file
+cpan/Locale-Codes/internal/get_codes		Locale::Codes maintainer file
+cpan/Locale-Codes/internal/ispell.isp		Locale::Codes maintainer file
+cpan/Locale-Codes/internal/NOTES		Locale::Codes maintainer file
+cpan/Locale-Codes/internal/VERSION		Locale::Codes maintainer file
+cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Codes/Country.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Codes/Currency.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Codes/Language.pm	Locale::Codes
+cpan/Locale-Codes/lib/Locale/Codes.pm		Locale::Codes
+cpan/Locale-Codes/lib/Locale/Codes.pod		Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Codes/Script.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Constants.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Constants.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Country.pm		Locale::Codes
@@ -1356,16 +1373,21 @@ cpan/Locale-Codes/lib/Locale/Language.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Language.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
-cpan/Locale-Codes/Makefile.PL
-cpan/Locale-Codes/README			Locale::Codes
-cpan/Locale-Codes/t/all.t			See if Locale::Codes work
-cpan/Locale-Codes/t/constants.t			See if Locale::Codes work
-cpan/Locale-Codes/t/country.t			See if Locale::Codes work
-cpan/Locale-Codes/t/currency.t			See if Locale::Codes work
-cpan/Locale-Codes/t/language.t			See if Locale::Codes work
-cpan/Locale-Codes/t/rename.t			See if Locale::Codes work
-cpan/Locale-Codes/t/script.t			See if Locale::Codes work
-cpan/Locale-Codes/t/uk.t			See if Locale::Codes work
+cpan/Locale-Codes/LICENSE			Locale::Codes
+cpan/Locale-Codes/README.first			Locale::Codes
+cpan/Locale-Codes/t/alias_code.t		Locale::Codes tests
+cpan/Locale-Codes/t/code2country.t		Locale::Codes tests
+cpan/Locale-Codes/t/code2currency.t		Locale::Codes tests
+cpan/Locale-Codes/t/code2language.t		Locale::Codes tests
+cpan/Locale-Codes/t/code2script.t		Locale::Codes tests
+cpan/Locale-Codes/t/country2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/country_code2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/country.t			Locale::Codes tests
+cpan/Locale-Codes/t/currency2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/language2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/language.t			Locale::Codes tests
+cpan/Locale-Codes/t/script2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/testfunc.pl			Locale::Codes tests
 cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 cpan/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests

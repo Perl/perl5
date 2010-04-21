@@ -843,8 +843,9 @@ use File::Glob qw(:case);
     'Locale-Codes' =>
 	{
 	'MAINTAINER'	=> 'sbeck',
-	'DISTRIBUTION'	=> 'NEILB/Locale-Codes-2.07.tar.gz',
+	'DISTRIBUTION'	=> 'SBECK/Locale-Codes-3.12.tar.gz',
 	'FILES'		=> q[cpan/Locale-Codes],
+	'EXCLUDED'	=> [ qw{t/pod_coverage.t t/pod.t}, qr{^t/runtests} ],
 	'CPAN'		=> 1,
 	'UPSTREAM'	=> 'cpan',
 	},

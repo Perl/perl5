@@ -1,0 +1,64 @@
+The files in this directory are for primary use by me, the maintainer
+of Locale::Codes to prepare a new release.
+
+There is no reason for an end user to need to do this. However, it
+is documented for the sake of completeness, and to remind me of the
+steps I need to do.
+
+It's also available in case someone ever chooses to fork the
+module (though I hope that won't be necessary).
+
+#########################################################################
+Before every release, spellcheck the documents:
+
+   for i in `find lib -type f -name \*.pod` ;do
+      podspell $i > $i.txt
+      ispell -p internal/ispell.isp $i.txt
+      rm -f $i.txt $i.txt.bak
+   done
+
+#########################################################################
+Get the newest codes:
+
+   ./internal/get_codes -c
+   diff lib/Locale/Codes/Country.pm{.bak,}
+
+   ./internal/get_codes -l
+   diff lib/Locale/Codes/Language.pm{.bak,}
+
+   ./internal/get_codes -r
+   diff lib/Locale/Codes/Currency.pm{.bak,}
+
+   ./internal/get_codes -s
+   diff lib/Locale/Codes/Script.pm{.bak,}
+
+   ./internal/get_codes -C
+   rm lib/Locale/Codes/*.bak
+
+#########################################################################
+Set the release version
+
+   v=`cat internal/VERSION`
+   for i in \
+       internal/get_codes \
+       `find lib -name \*.pm` \
+   ;do
+      sed -e "s,VERSION *=.*;,VERSION='$v';," $i > z
+      mv z $i
+   done
+
+#########################################################################
+Update the history file with the date
+
+#########################################################################
+Update the copyright
+
+   y=`date '+%Y'`
+   for i in `find . -type f | xargs egrep -l 'Copyright \(c\) ....\-.... Sullivan Beck'` ;do
+     sed -e "s,\(Copyright (c) ....\)\-.... \(Sullivan Beck\),\1-$y \2," $i > z
+     mv z $i
+   done
+
+#########################################################################
+Regenerate the MANIFEST, Build.PL, Makefile.PL
+Run the kwalitee tests
