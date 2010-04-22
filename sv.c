@@ -1717,7 +1717,7 @@ Perl_sv_setnv(pTHX_ register SV *const sv, const NV num)
     case SVt_PVFM:
     case SVt_PVIO:
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
-		   OP_NAME(PL_op));
+		   OP_DESC(PL_op));
     default: NOOP;
     }
     SvNV_set(sv, num);
@@ -3914,7 +3914,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	{
 	const char * const type = sv_reftype(sstr,0);
 	if (PL_op)
-	    Perl_croak(aTHX_ "Bizarre copy of %s in %s", type, OP_NAME(PL_op));
+	    Perl_croak(aTHX_ "Bizarre copy of %s in %s", type, OP_DESC(PL_op));
 	else
 	    Perl_croak(aTHX_ "Bizarre copy of %s", type);
 	}
@@ -3974,7 +3974,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     } else if (dtype == SVt_PVAV || dtype == SVt_PVHV) {
 	const char * const type = sv_reftype(dstr,0);
 	if (PL_op)
-	    Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_NAME(PL_op));
+	    Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_DESC(PL_op));
 	else
 	    Perl_croak(aTHX_ "Cannot copy to %s", type);
     } else if (sflags & SVf_ROK) {
@@ -8435,14 +8435,14 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    const char * const ref = sv_reftype(sv,0);
 	    if (PL_op)
 		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
-			   ref, OP_NAME(PL_op));
+			   ref, OP_DESC(PL_op));
 	    else
 		Perl_croak(aTHX_ "Can't coerce readonly %s to string", ref);
 	}
 	if ((SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM)
 	    || isGV_with_GP(sv))
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
-		OP_NAME(PL_op));
+		OP_DESC(PL_op));
 	s = sv_2pv_flags(sv, &len, flags);
 	if (lp)
 	    *lp = len;
@@ -9291,7 +9291,7 @@ S_expect_number(pTHX_ char **const pattern)
 	while (isDIGIT(**pattern)) {
 	    const I32 tmp = var * 10 + (*(*pattern)++ - '0');
 	    if (tmp < var)
-		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_NAME(PL_op) : "sv_vcatpvfn"));
+		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
 	    var = tmp;
 	}
     }
