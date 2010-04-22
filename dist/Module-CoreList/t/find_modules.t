@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 BEGIN { require_ok('Module::CoreList'); }
 
@@ -18,3 +18,6 @@ is_deeply([ Module::CoreList->find_modules(qr/Module::/, 5.008008) ], [], 'qr/Mo
 is_deeply([ Module::CoreList->find_modules(qr/Test::H.*::.*s/, 5.006001, 5.007003) ], 
           [ qw(Test::Harness::Assert Test::Harness::Straps) ],
           'qr/Test::H.*::.*s/ at 5.006001 and 5.007003');
+
+is_deeply([ Module::CoreList::find_modules(qr/Module::CoreList/) ], [ qw(Module::CoreList) ], 
+          'Module::CoreList functional' );

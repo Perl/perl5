@@ -173,10 +173,15 @@ sub module_version {
     my $msg = $mod;
     $msg .= " $ver" if $ver;
 
+    my $rem = $Opts{d}
+	? Module::CoreList->removed_from_by_date($mod)
+	: Module::CoreList->removed_from($mod);
+
     if( defined $ret ) {
         $msg .= " was ";
         $msg .= "first " unless $ver;
-        $msg .= "released with perl $ret"
+        $msg .= "released with perl " . format_perl_version($ret);
+        $msg .= " and removed from " . format_perl_version($rem) if $rem;
     } else {
         $msg .= " was not in CORE (or so I think)";
     }

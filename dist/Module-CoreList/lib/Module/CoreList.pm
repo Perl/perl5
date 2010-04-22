@@ -82,6 +82,18 @@ Available in version 2.22 and above.
 Returns true if MODULE is marked as deprecated in PERL_VERSION.  If PERL_VERSION is
 omitted, it defaults to the current version of Perl.
 
+=item C<removed_from( MODULE )>
+
+Takes a module name as an argument, returns the first perl version where that module
+was removed from core. Returns undef if the given module was never in core or remains
+in core.
+
+=item C<removed_from_by_date( MODULE )>
+
+Takes a module name as an argument, returns the first perl version by release date where that module
+was removed from core. Returns undef if the given module was never in core or remains
+in core.
+
 =back
 
 =head1 DATA STRUCTURES
@@ -193,7 +205,8 @@ END {
 
 sub first_release_raw {
     my $module = shift;
-    $module = shift if $module->isa(__PACKAGE__);
+    $module = shift if $module->isa(__PACKAGE__)
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
     my $version = shift;
 
     my @perls = $version
@@ -240,11 +253,32 @@ sub find_version {
 
 sub is_deprecated {
     my $module = shift;
-    $module = shift if $module->isa(__PACKAGE__);
+    $module = shift if $module->isa(__PACKAGE__)
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
     my $perl_version = shift;
     $perl_version ||= $];
     return unless $module && exists $deprecated{$perl_version}{$module};
     return $deprecated{$perl_version}{$module};
+}
+
+sub removed_from {
+  my @perls = &removed_raw;
+  return shift @perls;
+}
+
+sub removed_from_by_date {
+  my @perls = sort { $released{$a} cmp $released{$b} } &removed_raw;
+  return shift @perls;
+}
+
+sub removed_raw {
+  my $mod = shift;
+  $mod = shift if $mod->isa(__PACKAGE__)
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
+  return unless my @perls = sort { $a cmp $b } first_release_raw($mod);
+  my $last = pop @perls;
+  my @removed = grep { $_ > $last } sort { $a cmp $b } keys %version;
+  return @removed;
 }
 
 # When things escaped.
