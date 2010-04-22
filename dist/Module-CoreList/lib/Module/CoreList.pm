@@ -140,9 +140,8 @@ sub find_modules {
 }
 
 sub find_version {
-    my $class = shift;
-    $class = shift if $class->isa(__PACKAGE__);
     my $v = shift;
+    $v = shift if $v->isa(__PACKAGE__);
     return $version{$v} if defined $version{$v};
     return undef;
 }
