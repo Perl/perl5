@@ -28,30 +28,122 @@ Module::CoreList - what modules shipped with versions of perl
 
 =head1 DESCRIPTION
 
-Module::CoreList contains the hash of hashes
-%Module::CoreList::version, that is keyed on perl version as indicated
+Module::CoreList provides information on which core and dual-life modules shipped
+with each version of L<perl>.
+
+It provides a number of mechanisms for querying this information.
+
+There is a utility called L<corelist> provided with this module
+which is a convenient way of querying from the command-line.
+
+There is a functional programming API available for programmers to query
+information.
+
+Programmers may also query the contained hash structures to find relevant 
+information.
+
+=head1 FUNCTIONS API
+
+These are the functions that are available, they may either be called as functions or class methods:
+
+  Module::CoreList::first_release('File::Spec'); # as a function
+
+  Module::CoreList->first_release('File::Spec'); # class method
+
+=over
+
+=item C<first_release( MODULE )>
+
+Behaviour since version 2.11
+
+Requires a MODULE name as an argument, returns the perl version when that module first
+appeared in core as ordered by perl version number or undef if that module is not in core.
+
+=item C<first_release_by_date( MODULE )>
+
+Requires a MODULE name as an argument, returns the perl version when that module first
+appeared in core as ordered by release date or undef if that module is not in core.
+
+=item C<find_modules( REGEX, [ LIST OF PERLS ] )>
+
+Takes a regex as an argument, returns a list of modules that match the regex given.
+If only a regex is provided applies to all modules in all perl versions. Optionally
+you may provide a list of perl versions to limit the regex search.
+
+=item C<find_version( PERL_VERSION )>
+
+Takes a perl version as an argument. Returns that perl version if it exists or C<undef>
+otherwise.
+
+=item C<is_deprecated( MODULE, PERL_VERSION )>
+
+Available in version 2.22 and above.
+
+Returns true if MODULE is marked as deprecated in PERL_VERSION.  If PERL_VERSION is
+omitted, it defaults to the current version of Perl.
+
+=back
+
+=head1 DATA STRUCTURES
+
+These are the hash data structures that are available:
+
+=over
+
+=item C<%Module::CoreList::version>
+
+A hash of hashes that is keyed on perl version as indicated
 in $].  The second level hash is module => version pairs.
 
 Note, it is possible for the version of a module to be unspecified,
-whereby the value is undef, so use C<exists $version{$foo}{$bar}> if
+whereby the value is C<undef>, so use C<exists $version{$foo}{$bar}> if
 that's what you're testing for.
-
-It also contains %Module::CoreList::released hash, which has ISO
-formatted versions of the release dates, as gleaned from L<perlhist>.
-
-New, in 1.96 is also the %Module::CoreList::families hash, which
-clusters known perl releases by their major versions.
 
 Starting with 2.10, the special module name C<Unicode> refers to the version of
 the Unicode Character Database bundled with Perl.
 
-Since 2.11, Module::CoreList::first_release() returns the first release
-in the order of perl version numbers. If you want to get the earliest
-perl release instead, use Module::CoreList::first_release_by_date().
+=item C<%Module::CoreList::released>
 
-New in 2.22, Module::CoreList::is_deprecated(MODULE,PERL_VERSION) returns true
-if MODULE is marked as deprecated in PERL_VERSION.  If PERL_VERSION is
-omitted, it defaults to the current version of Perl.
+Keyed on perl version this contains ISO 
+formatted versions of the release dates, as gleaned from L<perlhist>.
+
+=item C<%Module::CoreList::families>
+
+New, in 1.96, a hash that
+clusters known perl releases by their major versions.
+
+=item C<%Module::CoreList::deprecated>
+
+A hash of hashes keyed on perl version and on module name.
+If a module is defined it indicates that that module is 
+deprecated in that perl version and is scheduled for removal
+from core at some future point.
+
+=item C<%Module::CoreList::upstream>
+
+A hash that contains information on where patches should be directed
+for each core module.
+
+UPSTREAM indicates where patches should go. C<undef> implies
+that this hasn't been discussed for the module at hand.
+C<blead> indicates that the copy of the module in the blead
+sources is to be considered canonical, C<cpan> means that the
+module on CPAN is to be patched first. C<first-come> means
+that blead can be patched freely if it is in sync with the
+latest release on CPAN.
+
+=item C<%Module::CoreList::bug_tracker>
+
+A hash that contains information on the appropriate bug tracker
+for each core module.
+
+BUGS is an email or url to post bug reports.  For modules with
+UPSTREAM => 'blead', use perl5-porters@perl.org.  rt.cpan.org
+appears to automatically provide a URL for CPAN modules; any value
+given here overrides the default:
+http://rt.cpan.org/Public/Dist/Display.html?Name=$ModuleName
+
+=back
 
 =head1 CAVEATS
 
