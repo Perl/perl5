@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 13;
+use Test::More tests => 24;
 
 BEGIN { require_ok('Module::CoreList'); }
 
@@ -29,6 +29,15 @@ is(Module::CoreList->first_release('File::Spec'), 5.00405,
 is(Module::CoreList->first_release('File::Spec', 0.82), 5.006_001,
    "File::Spec reached 0.82 with 5.006_001");
 
+is(Module::CoreList::first_release_by_date('File::Spec'), 5.005,
+   "File::Spec was first bundled in 5.005");
+
+is(Module::CoreList::first_release('File::Spec'), 5.00405,
+   "File::Spec was released in perl with lowest version number 5.00405");
+
+is(Module::CoreList::first_release('File::Spec', 0.82), 5.006_001,
+   "File::Spec reached 0.82 with 5.006_001");
+
 is_deeply([ sort keys %Module::CoreList::released ],
           [ sort keys %Module::CoreList::version ],
           "have a note of everythings release");
@@ -50,3 +59,30 @@ for my $family (values %Module::CoreList::families) {
 }
 is( $consistent, 1,
     "families seem consistent (descendants have same modules as ancestors)" );
+
+# Check the function API for consistency
+
+is(Module::CoreList->first_release_by_date('Module::CoreList'), 5.009002,
+   "Module::CoreList was first bundled in 5.009002");
+
+is(Module::CoreList->first_release('Module::CoreList'), 5.008009,
+   "Module::CoreList was released in perl with lowest version number 5.008009");
+
+is(Module::CoreList->first_release('Module::CoreList', 2.18), 5.010001,
+   "Module::CoreList reached 2.18 with 5.010001");
+
+is(Module::CoreList::first_release_by_date('Module::CoreList'), 5.009002,
+   "Module::CoreList was first bundled in 5.009002");
+
+is(Module::CoreList::first_release('Module::CoreList'), 5.008009,
+   "Module::CoreList was released in perl with lowest version number 5.008009");
+
+is(Module::CoreList::first_release('Module::CoreList', 2.18), 5.010001,
+   "Module::CoreList reached 2.18 with 5.010001");
+
+is(Module::CoreList->removed_from('CPANPLUS::inc'), 5.010001, 
+   "CPANPLUS::inc was removed from 5.010001");
+
+is(Module::CoreList::removed_from('CPANPLUS::inc'), 5.010001, 
+   "CPANPLUS::inc was removed from 5.010001");
+
