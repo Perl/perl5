@@ -401,7 +401,10 @@ if ($opt_e && (scalar(keys %bad_file) > 0)) {
 exit $Exit;
 
 sub expr {
-    $new = '"(assembly code)"' and return if /\b__asm__\b/; # freak out.
+    if (/\b__asm__\b/) {	# freak out
+	$new = '"(assembly code)"';
+	return
+    }
     my $joined_args;
     if(keys(%curargs)) {
 	$joined_args = join('|', keys(%curargs));
@@ -770,7 +773,7 @@ sub inc_dirs
 sub build_preamble_if_necessary
 {
     # Increment $VERSION every time this function is modified:
-    my $VERSION     = 2;
+    my $VERSION     = 3;
     my $preamble    = "$Dest_dir/_h2ph_pre.ph";
 
     # Can we skip building the preamble file?
@@ -798,7 +801,16 @@ sub build_preamble_if_necessary
 		# parenthesized value:  d=(v)
 		$define{$_} = $1;
 	    }
-	    if ($define{$_} =~ /^([+-]?(\d+)?\.\d+([eE][+-]?\d+)?)[FL]?$/) {
+	    if (/^(\w+)\((\w)\)$/) {
+		my($macro, $arg) = ($1, $2);
+		my $def = $define{$_};
+		$def =~ s/$arg/\$\{$arg\}/g;
+		print PREAMBLE <<DEFINE;
+unless (defined &$macro) { sub $macro(\$) { my (\$$arg) = \@_; \"$def\" } }
+
+DEFINE
+	    } elsif
+		($define{$_} =~ /^([+-]?(\d+)?\.\d+([eE][+-]?\d+)?)[FL]?$/) {
 		# float:
 		print PREAMBLE
 		    "unless (defined &$_) { sub $_() { $1 } }\n\n";
@@ -807,8 +819,14 @@ sub build_preamble_if_necessary
 		print PREAMBLE
 		    "unless (defined &$_) { sub $_() { $1 } }\n\n";
 	    } elsif ($define{$_} =~ /^\w+$/) {
-		print PREAMBLE
-		    "unless (defined &$_) { sub $_() { &$define{$_} } }\n\n";
+		my $def = $define{$_};
+		if ($isatype{$def}) {
+		  print PREAMBLE
+		    "unless (defined &$_) { sub $_() { \"$def\" } }\n\n";
+		} else {
+		  print PREAMBLE
+		    "unless (defined &$_) { sub $_() { &$def } }\n\n";
+	        }
 	    } else {
 		print PREAMBLE
 		    "unless (defined &$_) { sub $_() { \"",

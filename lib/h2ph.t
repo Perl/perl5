@@ -18,7 +18,7 @@ if (!(-e $extracted_program)) {
     exit 0;
 }
 
-plan(4);
+plan(5);
 
 # quickly compare two text files
 sub txt_compare {
@@ -41,8 +41,16 @@ $result = runperl( progfile => 'lib/h2ph.pht',
                    stderr => 1 );
 like( $result, qr/syntax OK$/, "output compiles");
 
+$result = runperl( progfile => '_h2ph_pre.ph',
+                   switches => ['-c'],
+                   stderr => 1 );
+like( $result, qr/syntax OK$/, "preamble compiles");
+
 $result = runperl( switches => ["-w"], 
-                   prog => '$SIG{__WARN__} = sub { die $_[0] }; require q(lib/h2ph.pht);');
+                   stderr => 1,
+                   prog => <<'PROG' );
+$SIG{__WARN__} = sub { die $_[0] }; require q(lib/h2ph.pht);
+PROG
 is( $result, '', "output free of warnings" );
 
 # cleanup
