@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 188 );
+plan( tests => 191 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -613,6 +613,15 @@ ok(exists($RT72740a::{s3}), "RT72740a::s3 exists");
 ok(exists($RT72740a::{s4}), "RT72740a::s4 exists");
 is(RT72740a::s1(), "RT72740b::s2", "RT72740::s1 parsed correctly");
 is(RT72740a::s3(), "RT72740b::s4", "RT72740::s3 parsed correctly");
+
+# [perl #71686] Globs that are in symbol table can be un-globbed
+$sym = undef;
+$::{fake} = *sym;
+is (eval 'local *::fake = \"chuck"; $fake', 'chuck',
+	"Localized glob didn't coerce into a RV");
+is ($@, '', "Can localize FAKE glob that's present in stash");
+is (scalar $::{fake}, "*main::sym",
+	"Localized FAKE glob's value was correctly restored");
 
 __END__
 Perl

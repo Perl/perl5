@@ -281,7 +281,15 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 
     PERL_ARGS_ASSERT_SAVE_GP;
 
-    save_pushptrptr(SvREFCNT_inc(gv), GvGP(gv), SAVEt_GP);
+    SSCHECK(4);
+    SSPUSHINT(SvFAKE(gv));
+    SSPUSHPTR(GvGP(gv));
+    SSPUSHPTR(SvREFCNT_inc(gv));
+    SSPUSHINT(SAVEt_GP);
+
+    /* Don't let the localized GV coerce into non-glob, otherwise we would
+     * not be able to restore GP upon leave from context if that happened */
+    SvFAKE_off(gv);
 
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
@@ -812,10 +820,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    *(AV**)ptr = MUTABLE_AV(SSPOPPTR);
 	    break;
 	case SAVEt_GP:				/* scalar reference */
-	    ptr = SSPOPPTR;
 	    gv = MUTABLE_GV(SSPOPPTR);
 	    gp_free(gv);
-	    GvGP(gv) = (GP*)ptr;
+	    GvGP(gv) = (GP*)SSPOPPTR;
+	    if (SSPOPINT)
+		SvFAKE_on(gv);
             /* putting a method back into circulation ("local")*/
 	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvNAME_get(hv))
                 mro_method_changed_in(hv);
