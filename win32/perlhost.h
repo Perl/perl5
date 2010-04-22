@@ -663,7 +663,7 @@ PerlStdIOGetPtr(struct IPerlStdIO* piPerl, FILE* pf)
 }
 
 char*
-PerlStdIOGets(struct IPerlStdIO* piPerl, FILE* pf, char* s, int n)
+PerlStdIOGets(struct IPerlStdIO* piPerl, char* s, int n, FILE* pf)
 {
     return win32_fgets(s, n, pf);
 }

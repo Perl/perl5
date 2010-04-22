@@ -77,7 +77,7 @@ typedef STDCHAR*	(*LPGetBase)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPGetBufsiz)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPGetCnt)(struct IPerlStdIO*, FILE*);
 typedef STDCHAR*	(*LPGetPtr)(struct IPerlStdIO*, FILE*);
-typedef char*		(*LPGets)(struct IPerlStdIO*, FILE*, char*, int);
+typedef char*		(*LPGets)(struct IPerlStdIO*, char*, int, FILE*);
 typedef int		(*LPPutc)(struct IPerlStdIO*, int, FILE*);
 typedef int		(*LPPuts)(struct IPerlStdIO*, const char *, FILE*);
 typedef int		(*LPFlush)(struct IPerlStdIO*, FILE*);
@@ -231,8 +231,8 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pPuts)(PL_StdIO, (s),(f))
 #define PerlSIO_fflush(f)						\
 	(*PL_StdIO->pFlush)(PL_StdIO, (f))
-#define PerlSIO_fgets(s, n, fp)						\
-	(*PL_StdIO->pGets)(PL_StdIO, (fp), s, n)
+#define PerlSIO_fgets(s, n, f)						\
+	(*PL_StdIO->pGets)(PL_StdIO, s, n, (f))
 #define PerlSIO_ungetc(c,f)						\
 	(*PL_StdIO->pUngetc)(PL_StdIO, (c),(f))
 #define PerlSIO_fileno(f)						\
@@ -314,7 +314,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_fputc(c,f)		fputc(c,f)
 #define PerlSIO_fputs(s,f)		fputs(s,f)
 #define PerlSIO_fflush(f)		Fflush(f)
-#define PerlSIO_fgets(s, n, fp)		fgets(s,n,fp)
+#define PerlSIO_fgets(s, n, f)		fgets(s,n,f)
 #if defined(VMS) && defined(__DECC)
      /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
