@@ -31,11 +31,13 @@ like ($@, qr/^Modification of a read-only value attempted/);
 eval {select $blank, $blank, "a", 0};
 like ($@, qr/^Modification of a read-only value attempted/);
 
-my $sleep = 3;
+my($sleep,$fudge) = (3,0);
 # Actual sleep time on Windows may be rounded down to an integral
 # multiple of the system clock tick interval.  Clock tick interval
 # is configurable, but usually about 15.625 milliseconds.
-my $fudge = $^O eq "MSWin32" ? 0.1 : 0;
+# time() however doesn't return fractional values, so the observed
+# delay may be 1 second short.
+($sleep,$fudge) = (4,1) if $^O eq "MSWin32";
 
 my $t = time;
 select(undef, undef, undef, $sleep);
