@@ -34,8 +34,8 @@
 #define PerlIO_fdopen			PerlSIO_fdopen
 #define PerlIO_reopen			PerlSIO_freopen
 #define PerlIO_close(f)			PerlSIO_fclose(f)
-#define PerlIO_puts(f,s)		PerlSIO_fputs(f,s)
-#define PerlIO_putc(f,c)		PerlSIO_fputc(f,c)
+#define PerlIO_puts(f,s)		PerlSIO_fputs(s,f)
+#define PerlIO_putc(f,c)		PerlSIO_fputc(c,f)
 #if defined(VMS)
 #  if defined(__DECC)
      /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
