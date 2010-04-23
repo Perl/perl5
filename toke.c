@@ -13122,8 +13122,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	       hex(ish) fractions... but '..' is OK. */
 	    if (s[0] == '.' &&
 		s[1] != '.') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			       "Dot after %s literal is concatenation", base);
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+			"Dot after %s literal is concatenation", base);
 	    }
 
 	    sv = newSV(0);
