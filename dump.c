@@ -1365,8 +1365,13 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 			   maxnest, dumpops, pvlim); /* MG is already +1 */
 		continue;
 	    }
+	    else if (mg->mg_len == -1 && mg->mg_type == PERL_MAGIC_utf8);
 	    else
-		PerlIO_puts(file, " ???? - please notify IZ");
+		PerlIO_puts(
+		  file,
+		 " ???? - " __FILE__
+		 " does not know how to handle this MG_LEN"
+		);
             PerlIO_putc(file, '\n');
         }
 	if (mg->mg_type == PERL_MAGIC_utf8) {
