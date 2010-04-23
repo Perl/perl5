@@ -1562,9 +1562,11 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    /* Preliminary length estimate, acceptable for utf8 too */
 	    if (howlen == e_star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
-	    sv = sv_2mortal(newSV(len ? len : 1));
-	    SvPOK_on(sv);
-	    str = SvPVX(sv);
+	    if (!checksum) {
+		sv = sv_2mortal(newSV(len ? len : 1));
+		SvPOK_on(sv);
+		str = SvPVX(sv);
+	    }
 	    if (datumtype == 'h') {
 		U8 bits = 0;
 		I32 ai32 = len;
@@ -1574,7 +1576,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			if (s >= strend) break;
 			bits = uni_to_byte(aTHX_ &s, strend, datumtype);
 		    } else bits = * (U8 *) s++;
-		    *str++ = PL_hexdigit[bits & 15];
+		    if (!checksum)
+			*str++ = PL_hexdigit[bits & 15];
 		}
 	    } else {
 		U8 bits = 0;
@@ -1585,12 +1588,15 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			if (s >= strend) break;
 			bits = uni_to_byte(aTHX_ &s, strend, datumtype);
 		    } else bits = *(U8 *) s++;
-		    *str++ = PL_hexdigit[(bits >> 4) & 15];
+		    if (!checksum)
+			*str++ = PL_hexdigit[(bits >> 4) & 15];
 		}
 	    }
-	    *str = '\0';
-	    SvCUR_set(sv, str - SvPVX_const(sv));
-	    XPUSHs(sv);
+	    if (!checksum) {
+		*str = '\0';
+		SvCUR_set(sv, str - SvPVX_const(sv));
+		XPUSHs(sv);
+	    }
 	    break;
 	}
 	case 'C':
@@ -2123,7 +2129,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    break;
 #endif
 	case 'u':
-	    {
+	    if (!checksum) {
                 const STRLEN l = (STRLEN) (strend - s) * 3 / 4;
 		sv = sv_2mortal(newSV(l));
 		if (l) SvPOK_on(sv);
@@ -2141,7 +2147,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			hunk[0] = (char)((a << 2) | (b >> 4));
 			hunk[1] = (char)((b << 4) | (c >> 2));
 			hunk[2] = (char)((c << 6) | d);
-			sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
+			if (!checksum)
+			    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
 			len -= 3;
 		    }
 		    if (s < strend) {
@@ -2182,7 +2189,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			hunk[0] = (char)((a << 2) | (b >> 4));
 			hunk[1] = (char)((b << 4) | (c >> 2));
 			hunk[2] = (char)((c << 6) | d);
-			sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
+			if (!checksum)
+			    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
 			len -= 3;
 		    }
 		    if (*s == '\n')
@@ -2192,7 +2200,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			    s += 2;
 		}
 	    }
-	    XPUSHs(sv);
+	    if (!checksum)
+		XPUSHs(sv);
 	    break;
 	}
 
