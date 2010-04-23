@@ -778,7 +778,7 @@ L<perlcall>.
 				   hash actions codes defined in hv.h */
 #define G_EVAL		8	/* Assume eval {} around subroutine call. */
 #define G_NOARGS       16	/* Don't construct a @_ array. */
-#define G_KEEPERR      32	/* Append errors to $@, don't overwrite it */
+#define G_KEEPERR      32	/* Warn for errors, don't overwrite $@ */
 #define G_NODEBUG      64	/* Disable debugging at toplevel.  */
 #define G_METHOD      128       /* Calling method. */
 #define G_FAKINGEVAL  256	/* Faking an eval context for call_sv or

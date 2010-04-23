@@ -18,11 +18,11 @@ use warnings;
 use strict;
 
 # Test::More doesn't have fresh_perl_is() yet
-# use Test::More tests => 240;
+# use Test::More tests => 342;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(240);
+    plan(342);
     use_ok('XS::APItest')
 };
 
@@ -36,7 +36,6 @@ sub f {
 }
 
 sub d {
-    no warnings 'misc'; # keep G_KEEPERR from emitting this as a warning
     die "its_dead_jim\n";
 }
 
@@ -52,7 +51,6 @@ sub Foo::meth {
 }
 
 sub Foo::d {
-    no warnings 'misc'; # keep G_KEEPERR from emitting this as a warning
     die "its_dead_jim\n";
 }
 
@@ -92,31 +90,42 @@ for my $test (
 	? [0] : [ undef, 1 ];
     for my $keep (0, G_KEEPERR) {
 	my $desc = $description . ($keep ? ' G_KEEPERR' : '');
-	my $exp_err = $keep ? "before\n\t(in cleanup) its_dead_jim\n"
+	my $exp_warn = $keep ? "\t(in cleanup) its_dead_jim\n" : "";
+	my $exp_err = $keep ? "before\n"
 			    : "its_dead_jim\n";
+	my $warn;
+	local $SIG{__WARN__} = sub { $warn .= $_[0] };
 	$@ = "before\n";
+	$warn = "";
 	ok(eq_array( [ call_sv('d', $flags|G_EVAL|$keep, @$args) ],
 		    $returnval),
 		    "$desc G_EVAL call_sv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_sv('d') - \$@");
+	is($warn, $exp_warn, "$desc G_EVAL call_sv('d') - warning");
 
 	$@ = "before\n";
+	$warn = "";
 	ok(eq_array( [ call_pv('d', $flags|G_EVAL|$keep, @$args) ], 
 		    $returnval),
 		    "$desc G_EVAL call_pv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_pv('d') - \$@");
+	is($warn, $exp_warn, "$desc G_EVAL call_pv('d') - warning");
 
 	$@ = "before\n";
+	$warn = "";
 	ok(eq_array( [ eval_sv('d()', $flags|$keep) ],
 		    $returnval),
 		    "$desc eval_sv('d()')");
 	is($@, $exp_err, "$desc eval_sv('d()') - \$@");
+	is($warn, $exp_warn, "$desc G_EVAL eval_sv('d') - warning");
 
 	$@ = "before\n";
+	$warn = "";
 	ok(eq_array( [ call_method('d', $flags|G_EVAL|$keep, $obj, @$args) ],
 		    $returnval),
 		    "$desc G_EVAL call_method('d')");
 	is($@, $exp_err, "$desc G_EVAL call_method('d') - \$@");
+	is($warn, $exp_warn, "$desc G_EVAL call_method('d') - warning");
     }
 
     ok(eq_array( [ sub { call_sv('f', $flags|G_NOARGS, "bad") }->(@$args) ],
@@ -146,6 +155,40 @@ for my $test (
 	[ "its_dead_jim\n" ]), "$description eval { call_method('d') }");
 
 };
+
+foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
+    foreach my $outx ("", "xxyyzz\n", [qw(xx yy zz)]) {
+	my $warn;
+	local $SIG{__WARN__} = sub { $warn .= $_[0] };
+	$@ = $outx;
+	$warn = "";
+	call_sv(sub { die $inx if $inx }, G_VOID|G_EVAL);
+	ok ref($@) eq ref($inx) && $@ eq $inx;
+	$warn =~ s/ at [^\n]*\n\z//;
+	is $warn, "";
+	$@ = $outx;
+	$warn = "";
+	call_sv(sub { die $inx if $inx }, G_VOID|G_EVAL|G_KEEPERR);
+	ok ref($@) eq ref($outx) && $@ eq $outx;
+	$warn =~ s/ at [^\n]*\n\z//;
+	is $warn, $inx ? "\t(in cleanup) $inx" : "";
+    }
+}
+
+{
+    no warnings "misc";
+    my $warn = "";
+    local $SIG{__WARN__} = sub { $warn .= $_[0] };
+    call_sv(sub { die "aa\n" }, G_VOID|G_EVAL|G_KEEPERR);
+    is $warn, "";
+}
+
+{
+    my $warn = "";
+    local $SIG{__WARN__} = sub { $warn .= $_[0] };
+    call_sv(sub { no warnings "misc"; die "aa\n" }, G_VOID|G_EVAL|G_KEEPERR);
+    is $warn, "\t(in cleanup) aa\n";
+}
 
 is(eval_pv('f()', 0), 'y', "eval_pv('f()', 0)");
 is(eval_pv('f(qw(a b c))', 0), 'y', "eval_pv('f(qw(a b c))', 0)");

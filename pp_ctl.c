@@ -1633,29 +1633,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 		    *msg ? msg : "Unknown error\n");
 	    }
 	    if (in_eval & EVAL_KEEPERR) {
-                static const char prefix[] = "\t(in cleanup) ";
-		SV * const err = ERRSV;
-		const char *e = NULL;
-		if (!SvPOK(err))
-		    sv_setpvs(err,"");
-		else if (SvCUR(err) >= sizeof(prefix)+SvCUR(exceptsv)-1) {
-		    STRLEN len;
-		    STRLEN msglen;
-		    const char* message = SvPV_const(exceptsv, msglen);
-		    e = SvPV_const(err, len);
-		    e += len - msglen;
-		    if (*e != *message || strNE(e,message))
-			e = NULL;
-		}
-		if (!e) {
-		    STRLEN start;
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+SvCUR(exceptsv));
-		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catsv(err, exceptsv);
-		    start = SvCUR(err)-SvCUR(exceptsv)-sizeof(prefix)+1;
-		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "%s",
-				   SvPVX_const(err)+start);
-		}
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",
+			       SvPV_nolen_const(exceptsv));
 	    }
 	    else {
 		sv_setsv(ERRSV, exceptsv);
