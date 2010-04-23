@@ -1572,11 +1572,12 @@ Perl_qerror(pTHX_ SV *err)
 }
 
 void
-Perl_die_where(pTHX_ SV *msv)
+Perl_die_unwind(pTHX_ SV *msv)
 {
     dVAR;
-    SV *exceptsv = sv_mortalcopy(msv ? msv : ERRSV);
+    SV *exceptsv = sv_mortalcopy(msv);
     U8 in_eval = PL_in_eval;
+    PERL_ARGS_ASSERT_DIE_UNWIND;
 
     if (in_eval) {
 	I32 cxix;
@@ -1631,7 +1632,7 @@ Perl_die_where(pTHX_ SV *msv)
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
-	    if ((in_eval & EVAL_KEEPERR) && msv) {
+	    if (in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
 		SV * const err = ERRSV;
 		const char *e = NULL;
@@ -2879,7 +2880,7 @@ S_docatch(pTHX_ OP *o)
 	/* die caught by an inner eval - continue inner loop */
 
 	/* NB XXX we rely on the old popped CxEVAL still being at the top
-	 * of the stack; the way die_where() currently works, this
+	 * of the stack; the way die_unwind() currently works, this
 	 * assumption is valid. In theory The cur_top_env value should be
 	 * returned in another global, the way retop (aka PL_restartop)
 	 * is. */
@@ -3925,7 +3926,7 @@ PP(pp_leaveeval)
 	SV * const nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
-	/* die_where() did LEAVE, or we won't be here */
+	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {
 	LEAVE_with_name("eval");

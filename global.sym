@@ -60,6 +60,7 @@ Perl_cast_i32
 Perl_cast_iv
 Perl_cast_uv
 Perl_my_chsize
+Perl_croak_sv
 Perl_croak
 Perl_vcroak
 Perl_croak_xs_usage
@@ -96,6 +97,7 @@ Perl_debop
 Perl_debstack
 Perl_debstackptrs
 Perl_delimcpy
+Perl_die_sv
 Perl_die
 Perl_dounwind
 Perl_do_aexec
@@ -280,6 +282,7 @@ Perl_grok_numeric_radix
 Perl_grok_oct
 Perl_markstack_grow
 Perl_mess
+Perl_mess_sv
 Perl_vmess
 Perl_qerror
 Perl_sortsv
@@ -639,6 +642,7 @@ Perl_sv_uni_display
 Perl_vivify_defelem
 Perl_seed
 Perl_report_uninit
+Perl_warn_sv
 Perl_warn
 Perl_vwarn
 Perl_warner
