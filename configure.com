@@ -3053,7 +3053,7 @@ $!
 $ bool_dflt = "y"
 $ IF F$TYPE(useperlio) .NES. ""
 $ then
-$   if f$extract(0,1,f$edit(useperlio,"collapse,upcase")) .eqs. "N" .or. useperlio .eqs. "undef" then bool_dflt = "n"
+$   if .not. useperlio .or. useperlio .eqs. "undef" then bool_dflt = "n"
 $ endif
 $ IF .NOT. silent
 $ THEN
