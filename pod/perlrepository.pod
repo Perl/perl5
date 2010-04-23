@@ -20,9 +20,9 @@ bleadperl, the development version of perl 5) takes up about 160MB of
 disk space (including the repository). A build of bleadperl takes up
 about 200MB (including the repository and the check out).
 
-=head1 GETTING ACCESS TO THE REPOSITORY
+=head1 Getting access to the repository
 
-=head2 READ ACCESS VIA THE WEB
+=head2 Read access via the web
 
 You may access the repository over the web. This allows you to browse
 the tree, see recent commits, subscribe to RSS feeds for the changes,
@@ -32,9 +32,9 @@ search for particular commits and more. You may access it at:
 
 A mirror of the repository is found at:
 
-  http://github.com/github/perl
+  http://github.com/mirrors/perl
 
-=head2 READ ACCESS VIA GIT
+=head2 Read access via Git
 
 You will need a copy of Git for your computer. You can fetch a copy of
 the repository using the Git protocol (which uses port 9418):
@@ -52,7 +52,7 @@ fetch a copy of the repository over HTTP (this is at least 4x slower):
 This clones the repository and makes a local copy in the F<perl-http>
 directory.
 
-=head2 WRITE ACCESS TO THE REPOSITORY
+=head2 Write access to the repository
 
 If you are a committer, then you can fetch a copy of the repository
 that you can push back on with:
@@ -95,7 +95,7 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
-=head2 A NOTE ON CAMEL AND DROMEDARY
+=head2 A note on camel and dromedary
 
 The committers have SSH access to the two servers that serve
 C<perl5.git.perl.org>. One is C<perl5.git.perl.org> itself (I<camel>),
@@ -118,7 +118,7 @@ These two boxes are owned, hosted, and operated by booking.com. You can
 reach the sysadmins in #p5p on irc.perl.org or via mail to
 C<perl5-porters@perl.org>
 
-=head1 OVERVIEW OF THE REPOSITORY
+=head1 Overview of the repository
 
 Once you have changed into the repository directory, you can inspect
 it.
@@ -176,10 +176,6 @@ Neither of these last two commands will update your working directory,
 however both will update the remote-tracking branches in your
 repository.
 
-To switch to another branch:
-
-  % git checkout origin/maint-5.8-dor
-
 To make a local branch of a remote branch:
 
   % git checkout -b maint-5.10 origin/maint-5.10
@@ -188,7 +184,7 @@ To switch back to blead:
 
   % git checkout blead
 
-=head2 FINDING OUT YOUR STATUS
+=head2 Finding out your status
 
 The most common git command you will use will probably be
 
@@ -266,7 +262,7 @@ When in doubt, before you do anything else, check your status and read
 it carefully, many questions are answered directly by the git status
 output.
 
-=head1 SUBMITTING A PATCH
+=head1 Submitting a patch
 
 If you have a patch in mind for Perl, you should first get a copy of
 the repository:
@@ -356,7 +352,7 @@ itself you can fix it up by editing the files once more and then issue:
 
 Now you should create a patch file for all your local changes:
 
-  % git format-patch origin
+  % git format-patch -M origin..
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
 You should now send an email to either perlbug@perl.org or
@@ -410,7 +406,7 @@ Be aware that many files in the distribution are derivative--avoid
 patching them, because git won't see the changes to them, and the build
 process will overwrite them. Patch the originals instead.  Most
 utilities (like perldoc) are in this category, i.e. patch
-utils/perldoc.PL rather than utils/perldoc. Similarly, don't create
+F<utils/perldoc.PL> rather than F<utils/perldoc>. Similarly, don't create
 patches for files under $src_root/ext from their copies found in
 $install_root/lib.  If you are unsure about the proper location of a
 file that may have gotten copied while building the source
@@ -443,8 +439,16 @@ you need to do.
 As you craft each patch you intend to submit to the Perl core, it's
 important to write a good commit message.
 
-Your commit message should start with a description of the problem that
-the patch corrects or new functionality that the patch adds.
+The first line of the commit message should be a short description and
+should skip the full stop. It should be no longer than the subject
+line of an E-Mail, 50 characters being a good rule of thumb.
+
+A lot of Git tools (Gitweb, GitHub, git log --pretty=oneline, ..) will
+only display the first line (cut off at 50 characters) when presenting
+commit summaries.
+
+The commit message should include description of the problem that the
+patch corrects or new functionality that the patch adds.
 
 As a general rule of thumb, your commit message should let a programmer
 with a reasonable familiarity with the Perl core quickly understand what
@@ -556,7 +560,7 @@ Your testsuite additions should generally follow these guidelines
 
 =back
 
-=head1 ACCEPTING A PATCH
+=head1 Accepting a patch
 
 If you have received a patch file generated using the above section,
 you should try out the patch.
@@ -617,7 +621,7 @@ If you want to delete your temporary branch, you may do so with:
   % git branch -D experimental
   Deleted branch experimental.
 
-=head1 CLEANING A WORKING DIRECTORY
+=head1 Cleaning a working directory
 
 The command C<git clean> can with varying arguments be used as a
 replacement for C<make clean>.
@@ -639,7 +643,7 @@ checkout> and give it a list of files to be reverted, or C<git checkout
 
 If you want to cancel one or several commits, you can use C<git reset>.
 
-=head1 BISECTING
+=head1 Bisecting
 
 C<git> provides a built-in way to determine, with a binary search in
 the history, which commit should be blamed for introducing a given bug.
@@ -723,14 +727,14 @@ the "first commit where the bug is solved".
 C<git help bisect> has much more information on how you can tweak your
 binary searches.
 
-=head1 SUBMITTING A PATCH VIA GITHUB
+=head1 Submitting a patch via GitHub
 
 GitHub is a website that makes it easy to fork and publish projects
 with Git. First you should set up a GitHub account and log in.
 
 Perl's git repository is mirrored on GitHub at this page:
 
-  http://github.com/github/perl/tree/blead
+  http://github.com/mirrors/perl/tree/blead
 
 Visit the page and click the "fork" button. This clones the Perl git
 repository for you and provides you with "Your Clone URL" from which
@@ -753,38 +757,38 @@ email (see L</SUBMITTING A PATCH>) with a description of your changes
 and the following information:
 
   http://github.com/USERNAME/perl/tree/orange
-  git@github.com:USERNAME/perl.git branch orange
+  git://github.com/USERNAME/perl.git branch orange
 
-=head1 MERGING FROM A BRANCH VIA GITHUB
+=head1 Merging from a branch via GitHub
 
 If someone has provided a branch via GitHub and you are a committer,
 you should use the following in your perl-ssh directory:
 
-  % git remote add dandv git://github.com/dandv/perl.git
-  % git fetch dandv
+  % git remote add avar git://github.com/avar/perl.git
+  % git fetch avar
 
 Now you can see the differences between the branch and blead:
 
-  % git diff dandv/blead
+  % git diff avar/orange
 
 And you can see the commits:
 
-  % git log dandv/blead
+  % git log avar/orange
 
 If you approve of a specific commit, you can cherry pick it:
 
-  % git cherry-pick 3adac458cb1c1d41af47fc66e67b49c8dec2323f
+  % git cherry-pick 0c24b290ae02b2ab3304f51d5e11e85eb3659eae
 
 Or you could just merge the whole branch if you like it all:
 
-  % git merge dandv/blead
+  % git merge avar/orange
 
 And then push back to the repository:
 
   % git push
 
 
-=head1 TOPIC BRANCHES AND REWRITING HISTORY
+=head1 Topic branches and rewriting history
 
 Individual committers should create topic branches under
 B<yourname>/B<some_descriptive_name>. Other committers should check
@@ -861,9 +865,10 @@ deleted or modified. Think long and hard about whether you want to push
 a local tag to perl.git before doing so. (Pushing unannotated tags is
 not allowed.)
 
-=head1 COMMITTING TO MAINTENANCE VERSIONS
+=head1 Committing to maintenance versions
 
-Maintenance versions should only be altered to add critical bug fixes.
+Maintenance versions should only be altered to add critical bug
+fixes, see L<perlpolicy>.
 
 To commit to a maintenance version of perl, you need to create a local
 tracking branch:
@@ -879,7 +884,7 @@ using the C<git cherry-pick> command. It is recommended to use the
 B<-x> option to C<git cherry-pick> in order to record the SHA1 of the
 original commit in the new commit message.
 
-=head1 GRAFTS
+=head1 Grafts
 
 The perl history contains one mistake which was not caught in the
 conversion: a merge was recorded in the history between blead and
@@ -893,9 +898,15 @@ C<.git/info/grafts> file:
 It is particularly important to have this graft line if any bisecting
 is done in the area of the "merge" in question.
 
-
-
 =head1 SEE ALSO
 
-The git documentation, accessible via C<git help command>.
+=over
+
+=item * The git documentation, accessible via the C<git help> command
+
+=item * L<perlpolicy> - Perl core development policy
+
+=back
+
+=cut
 
