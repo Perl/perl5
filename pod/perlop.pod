@@ -1011,33 +1011,70 @@ from the next line.  This allows you to write:
 
 The following escape sequences are available in constructs that interpolate
 and in transliterations.
-X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N>
+X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
 
-    \t		tab             (HT, TAB)
-    \n		newline         (NL)
-    \r		return          (CR)
-    \f		form feed       (FF)
-    \b		backspace       (BS)
-    \a		alarm (bell)    (BEL)
-    \e		escape          (ESC)
-    \033	octal char	(example: ESC)
-    \x1b	hex char	(example: ESC)
-    \x{263a}	wide hex char	(example: SMILEY)
-    \c[		control char    (example: ESC)
-    \N{name}	named Unicode character
-    \N{U+263D}	Unicode character (example: FIRST QUARTER MOON)
+    Sequence    Note  Description
+    \t                tab             (HT, TAB)
+    \n                newline         (NL)
+    \r                return          (CR)
+    \f                form feed       (FF)
+    \b                backspace       (BS)
+    \a                alarm (bell)    (BEL)
+    \e                escape          (ESC)
+    \033              octal char      (example: ESC)
+    \x1b              hex char        (example: ESC)
+    \x{263a}          wide hex char   (example: SMILEY)
+    \c[          [1]  control char    (example: chr(27))
+    \N{name}     [2]  named Unicode character
+    \N{U+263D}   [3]  Unicode character (example: FIRST QUARTER MOON)
 
-The character following C<\c> is mapped to some other character by
-converting letters to upper case and then (on ASCII systems) by inverting
-the 7th bit (0x40). The most interesting range is from '@' to '_'
-(0x40 through 0x5F), resulting in a control character from 0x00
-through 0x1F. A '?' maps to the DEL character. On EBCDIC systems only
-'@', the letters, '[', '\', ']', '^', '_' and '?' will work, resulting
-in 0x00 through 0x1F and 0x7F.
+=over 4
+
+=item [1]
+
+The character following C<\c> is mapped to some other character as shown in the
+table:
+
+ Sequence   Value
+   \c@      chr(0)
+   \cA      chr(1)
+   \ca      chr(1)
+   \cB      chr(2)
+   \cb      chr(2)
+   ...
+   \cZ      chr(26)
+   \cz      chr(26)
+   \c[      chr(27)
+   \c]      chr(29)
+   \c^      chr(30)
+   \c?      chr(127)
+
+Also, C<\c\I<X>> yields C< chr(28) . "I<X>"> for any I<X>, but cannot come at the
+end of a string, because the backslash would be parsed as escaping the end
+quote.
+
+On ASCII platforms, the resulting characters from the list above are the
+complete set of ASCII controls.  This isn't the case on EBCDIC platforms; see
+L<perlebcdic/OPERATOR DIFFERENCES> for the complete list of what these
+sequences mean on both ASCII and EBCDIC platforms.
+
+Use of any other character following the "c" besides those listed above is
+prohibited on EBCDIC platforms, and discouraged (and may become deprecated or
+forbidden) on ASCII ones.  What happens for those other characters currently
+though, is that the value is derived by inverting the 7th bit (0x40).
+
+To get platform independent controls, you can use C<\N{...}>.
+
+=item [2]
+
+For documentation of C<\N{name}>, see L<charnames>.
+
+=item [3]
 
 C<\N{U+I<wide hex char>}> means the Unicode character whose Unicode ordinal
 number is I<wide hex char>.
-For documentation of C<\N{name}>, see L<charnames>.
+
+=back
 
 B<NOTE>: Unlike C and other languages, Perl has no C<\v> escape sequence for
 the vertical tab (VT - ASCII 11), but you may use C<\ck> or C<\x0b>.  (C<\v>
