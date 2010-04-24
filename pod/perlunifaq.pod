@@ -25,7 +25,7 @@ To find out which character encodings your Perl supports, run:
 =head2 Which version of perl should I use?
 
 Well, if you can, upgrade to the most recent, but certainly C<5.8.1> or newer.
-The tutorial and FAQ are based on the status quo as of C<5.8.8>.
+The tutorial and FAQ assume the latest release.
 
 You should also check your modules, and upgrade them if necessary. For example,
 HTML::Entities requires version >= 1.32 to function correctly, even though the
@@ -227,9 +227,9 @@ use C<is_utf8>, C<_utf8_on> or C<_utf8_off> at all.
 
 The UTF8 flag, also called SvUTF8, is an internal flag that indicates that the
 current internal representation is UTF-8. Without the flag, it is assumed to be
-ISO-8859-1. Perl converts between these automatically.  (Actually Perl assumes
-the representation is ASCII; see L</Why do regex character classes sometimes
-match only in the ASCII range?> above.)
+ISO-8859-1. Perl converts between these automatically.  (Actually Perl usually
+assumes the representation is ASCII; see L</Why do regex character classes
+sometimes match only in the ASCII range?> above.)
 
 One of Perl's internal formats happens to be UTF-8. Unfortunately, Perl can't
 keep a secret, so everyone knows about this. That is the source of much
