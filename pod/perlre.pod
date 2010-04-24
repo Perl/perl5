@@ -98,14 +98,14 @@ the C-comment deletion code in L<perlop>.  Also note that anything inside
 a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect
 whether space interpretation within a single multi-character construct.  For
 example in C<\x{...}>, regardless of the C</x> modifier, there can be no
-spaces.  Same for a L<quantifier|Quantifiers> such as C<{3}> or
+spaces.  Same for a L<quantifier|/Quantifiers> such as C<{3}> or
 C<{5,}>.  Similarly, C<(?:...)> can't have a space between the C<?> and C<:>,
 but can between the C<(> and C<?>.  Within any delimiters for such a
 construct, allowed spaces are not affected by C</x>, and depend on the
 construct.  For example, C<\x{...}> can't have spaces because hexadecimal
 numbers don't have spaces in them.  But, Unicode properties can have spaces, so
 in C<\p{...}>  there can be spaces that follow the Unicode rules, for which see
-L<perluniprops.pod/Properties accessible through \p{} and \P{}>.
+L<perluniprops/Properties accessible through \p{} and \P{}>.
 X</x>
 
 =head2 Regular Expressions
@@ -130,7 +130,7 @@ X<\> X<^> X<.> X<$> X<|> X<(> X<()> X<[> X<[]>
     $	Match the end of the line (or before newline at the end)
     |	Alternation
     ()	Grouping
-    []	Character class
+    []	Bracketed Character class
 
 By default, the "^" character is guaranteed to match only the
 beginning of the string, the "$" character only the end (or before the
@@ -222,8 +222,6 @@ instance the above example could also be written as follows:
 
 Because patterns are processed as double quoted strings, the following
 also work:
-X<\t> X<\n> X<\r> X<\f> X<\e> X<\a> X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
-X<\0> X<\c> X<\N{}> X<\x>
 
     \t		tab                   (HT, TAB)
     \n		newline               (LF, NL)
@@ -241,101 +239,88 @@ X<\0> X<\c> X<\N{}> X<\x>
     \u		uppercase next char (think vi)
     \L		lowercase till \E (think vi)
     \U		uppercase till \E (think vi)
-    \E		end case modification (think vi)
     \Q		quote (disable) pattern metacharacters till \E
+    \E		end either case modification or quoted section (think vi)
 
-If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and C<\U> is taken from the current locale.  See L<perllocale>.  For
-documentation of C<\N{name}>, see L<charnames>.
-
-You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
-An unescaped C<$> or C<@> interpolates the corresponding variable,
-while escaping will cause the literal string C<\$> to be matched.
-You'll need to write something like C<m/\Quser\E\@\Qhost/>.
+Details are in L<perlop/Quote and Quote-like Operators>.
 
 =head3 Character Classes and other Special Escapes
 
 In addition, Perl defines the following:
 X<\g> X<\k> X<\K> X<backreference>
 
-    \w	     Match a "word" character (alphanumeric plus "_")
-    \W	     Match a non-"word" character
-    \s	     Match a whitespace character
-    \S	     Match a non-whitespace character
-    \d	     Match a digit character
-    \D	     Match a non-digit character
-    \pP	     Match P, named property.  Use \p{Prop} for longer names.
-    \PP	     Match non-P
-    \X	     Match Unicode "eXtended grapheme cluster"
-    \C	     Match a single C char (octet) even under Unicode.
-	     NOTE: breaks up characters into their UTF-8 bytes,
-	     so you may end up with malformed pieces of UTF-8.
-	     Unsupported in lookbehind.
-    \1       Backreference to a specific group.
-	     '1' may actually be any positive integer.
-    \g1      Backreference to a specific or previous group,
-    \g{-1}   number may be negative indicating a previous buffer and may
-             optionally be wrapped in curly brackets for safer parsing.
-    \g{name} Named backreference
-    \k<name> Named backreference
-    \K       Keep the stuff left of the \K, don't include it in $&
-    \N       Any character but \n (experimental)
-    \v       Vertical whitespace
-    \V       Not vertical whitespace
-    \h       Horizontal whitespace
-    \H       Not horizontal whitespace
-    \R       Linebreak
+  Sequence   Note    Description
+   [...]     [1]  Match a character according to the rules of the bracketed
+                    character class defined by the "...".  Example: [a-z]
+                    matches "a" or "b" or "c" ... or "z"
+   [[:...:]] [2]  Match a character according to the rules of the POSIX
+                    character class "..." within the outer bracketed character
+                    class.  Example: [[:upper:]] matches any uppercase
+                    character.
+   \w        [3]  Match a "word" character (alphanumeric plus "_")
+   \W        [3]  Match a non-"word" character
+   \s        [3]  Match a whitespace character
+   \S        [3]  Match a non-whitespace character
+   \d        [3]  Match a decimal digit character
+   \D        [3]  Match a non-digit character
+   \pP       [3]  Match P, named property.  Use \p{Prop} for longer names.
+   \PP       [3]  Match non-P
+   \X        [4]  Match Unicode "eXtended grapheme cluster"
+   \C             Match a single C-language char (octet) even if that is part
+                    of a larger UTF-8 character.  Thus it breaks up characters
+                    into their UTF-8 bytes, so you may end up with malformed
+                    pieces of UTF-8.  Unsupported in lookbehind.
+   \1        [5]  Backreference to a specific capture buffer or group.
+                    '1' may actually be any positive integer.
+   \g1       [5]  Backreference to a specific or previous group,
+   \g{-1}    [5]  The number may be negative indicating a relative previous
+                    buffer and may optionally be wrapped in curly brackets for
+                    safer parsing.
+   \g{name}  [5]  Named backreference
+   \k<name>  [5]  Named backreference
+   \K        [6]  Keep the stuff left of the \K, don't include it in $&
+   \N        [7]  Any character but \n (experimental).  Not affected by /s
+                    modifier
+   \v        [3]  Vertical whitespace
+   \V        [3]  Not vertical whitespace
+   \h        [3]  Horizontal whitespace
+   \H        [3]  Not horizontal whitespace
+   \R        [4]  Linebreak
 
-See L<perlrecharclass/Backslashed sequences> for details on
-C<\w>, C<\W>, C<\s>, C<\S>, C<\d>, C<\D>, C<\p>, C<\P>, C<\N>, C<\v>, C<\V>,
-C<\h>, and C<\H>.
-See L<perlrebackslash/Misc> for details on C<\R> and C<\X>.
+=over 4
+
+=item [1]
+
+See L<perlrecharclass/Bracketed Character Classes> for details.
+
+=item [2]
+
+See L<perlrecharclass/POSIX Character Classes> for details.
+
+=item [3]
+
+See L<perlrecharclass/Backslash sequences> for details.
+
+=item [4]
+
+See L<perlrebackslash/Misc> for details.
+
+=item [5]
+
+See L</Capture buffers> below for details.
+
+=item [6]
+
+See L</Extended Patterns> below for details.
+
+=item [7]
 
 Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it matches the
 character whose name is C<NAME>; and similarly when of the form
 C<\N{U+I<wide hex char>}>, it matches the character whose Unicode ordinal is
 I<wide hex char>.  Otherwise it matches any character but C<\n>.
 
-The POSIX character class syntax
-X<character class>
-
-    [:class:]
-
-is also available.  Note that the C<[> and C<]> brackets are I<literal>;
-they must always be used within a character class expression.
-
-    # this is correct:
-    $string =~ /[[:alpha:]]/;
-
-    # this is not, and will generate a warning:
-    $string =~ /[:alpha:]/;
-
-The following Posix-style character classes are available:
-
- [[:alpha:]]  Any alphabetical character.
- [[:alnum:]]  Any alphanumerical character.
- [[:ascii:]]  Any character in the ASCII character set.
- [[:blank:]]  A GNU extension, equal to a space or a horizontal tab
- [[:cntrl:]]  Any control character.
- [[:digit:]]  Any decimal digit, equivalent to "\d".
- [[:graph:]]  Any printable character, excluding a space.
- [[:lower:]]  Any lowercase character.
- [[:print:]]  Any printable character, including a space.
- [[:punct:]]  Any graphical character excluding "word" characters.
- [[:space:]]  Any whitespace character. "\s" plus vertical tab ("\cK").
- [[:upper:]]  Any uppercase character.
- [[:word:]]   A Perl extension, equivalent to "\w".
- [[:xdigit:]] Any hexadecimal digit.
-
-You can negate the [::] character classes by prefixing the class name
-with a '^'. This is a Perl extension.
-
-The POSIX character classes
-[.cc.] and [=cc=] are recognized but B<not> supported and trying to
-use them will cause an error.
-
-Details on POSIX character classes are in
-L<perlrecharclass/Posix Character Classes>.
+=back
 
 =head3 Assertions
 
@@ -345,12 +330,12 @@ X<regexp, zero-width assertion>
 X<regular expression, zero-width assertion>
 X<\b> X<\B> X<\A> X<\Z> X<\z> X<\G>
 
-    \b	Match a word boundary
-    \B	Match except at a word boundary
-    \A	Match only at beginning of string
-    \Z	Match only at end of string, or before newline at the end
-    \z	Match only at end of string
-    \G	Match only at pos() (e.g. at the end-of-match position
+    \b  Match a word boundary
+    \B  Match except at a word boundary
+    \A  Match only at beginning of string
+    \Z  Match only at end of string, or before newline at the end
+    \z  Match only at end of string
+    \G  Match only at pos() (e.g. at the end-of-match position
         of prior m//g)
 
 A word boundary (C<\b>) is a spot between two characters
@@ -866,7 +851,7 @@ For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
 variables contain results of C<qr//> operator (see
-L<perlop/"qr/STRING/imosx">).
+L<perlop/"qr/STRINGE<sol>msixpo">).
 
 This restriction is due to the wide-spread and remarkably convenient
 custom of using run-time determined strings as patterns.  For example:
@@ -937,7 +922,7 @@ For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
 variables contain results of C<qr//> operator (see
-L<perlop/"qr/STRING/imosx">).
+L<perlop/"qrE<sol>STRINGE<sol>msixpo">).
 
 Because perl's regex engine is not currently re-entrant, delayed
 code may not invoke the regex engine either directly with C<m//> or C<s///>),
