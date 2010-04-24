@@ -16,7 +16,6 @@ Most sequences are described in detail in different documents; the primary
 purpose of this document is to have a quick reference guide describing all
 backslash and escape sequences.
 
-
 =head2 The backslash
 
 In a regular expression, the backslash can perform one of two tasks:
@@ -69,7 +68,7 @@ as C<Not in [].>
  \A                Beginning of string.  Not in [].
  \b                Word/non-word boundary. (Backspace in []).
  \B                Not a word/non-word boundary.  Not in [].
- \cX               Control-X (X can be any ASCII character).
+ \cX               Control-X
  \C                Single octet, even under UTF-8.  Not in [].
  \d                Character class for digits.
  \D                Character class for non-digits.
@@ -112,9 +111,10 @@ as C<Not in [].>
 
 A handful of characters have a dedicated I<character escape>. The following
 table shows them, along with their ASCII code points (in decimal and hex),
-their ASCII name, the control escape (see below) and a short description.
+their ASCII name, the control escape on ASCII platforms and a short
+description.  (For EBCDIC platforms, see L<perlebcdic/OPERATOR DIFFERENCES>.)
 
- Seq.  Code Point  ASCII   Cntr    Description.
+ Seq.  Code Point  ASCII   Cntrl   Description.
        Dec    Hex
   \a     7     07    BEL    \cG    alarm or bell
   \b     8     08     BS    \cH    backspace [1]
@@ -145,10 +145,18 @@ OSses native newline character when reading from or writing to text files.
 =head3 Control characters
 
 C<\c> is used to denote a control character; the character following C<\c>
-is the name of the control character. For instance, C</\cM/> matches the
-character I<control-M> (a carriage return, code point 13). The case of the
-character following C<\c> doesn't matter: C<\cM> and C<\cm> match the same
-character.
+determines the value of the construct.  For example the value of C<\cA> is
+C<chr(1)>, and the value of C<\cb> is C<chr(2)>, etc.
+The gory details are in L<perlop/"Regexp Quote-Like Operators">.  A complete
+list of what C<chr(1)>, etc. means for ASCII and EBCDIC platforms is in
+L<perlebcdic/OPERATOR DIFFERENCES>.
+
+Note that C<\c\> alone at the end of a regular expression (or doubled-quoted
+string) is not valid.  The backslash must be followed by another character.
+That is, C<\c\I<X>> means C<chr(28) . 'I<X>'> for all characters I<X>.
+
+To write platform-independent code, you must use C<\N{I<NAME>}> instead, like
+C<\N{ESCAPE}> or C<\N{U+001B}>, see L<charnames>.
 
 Mnemonic: I<c>ontrol character.
 
@@ -335,7 +343,7 @@ match a character that matches the given Unicode property; properties
 include things like "letter", or "thai character". Capitalizing the
 sequence to C<\PP> and C<\P{Property}> make the sequence match a character
 that doesn't match the given Unicode property. For more details, see
-L<perlrecharclass/Backslashed sequences> and
+L<perlrecharclass/Backslash sequences> and
 L<perlunicode/Unicode Character Properties>.
 
 Mnemonic: I<p>roperty.
