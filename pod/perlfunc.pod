@@ -2712,11 +2712,60 @@ X<lc> X<lowercase>
 =item lc
 
 Returns a lowercased version of EXPR.  This is the internal function
-implementing the C<\L> escape in double-quoted strings.  Respects
-current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<perlunicode> for more details about locale and Unicode support.
+implementing the C<\L> escape in double-quoted strings.
 
 If EXPR is omitted, uses C<$_>.
+
+What gets returned depends on several factors:
+
+=over
+
+=item If C<use bytes> is in effect:
+
+=over
+
+=item On EBCDIC platforms
+
+The results are what the C language system call C<tolower()> returns.
+
+=item On ASCII platforms
+
+The results follow ASCII semantics.  Only characters C<A-Z> change, to C<a-z>
+respectively.
+
+=back
+
+=item Otherwise, If EXPR has the UTF8 flag set
+
+If the current package has a subroutine named C<ToLower>, it will be used to
+change the case (See L<perlunicode/User-Defined Case Mappings>.)
+Otherwise Unicode semantics are used for the case change.
+
+=item Otherwise, if C<use locale> is in effect
+
+Respects current LC_CTYPE locale.  See L<perllocale>.
+
+=item Otherwise, if C<use feature 'unicode_strings'> is in effect:
+
+Unicode semantics are used for the case change.  Any subroutine named
+C<ToLower> will not be used.
+
+=item Otherwise:
+
+=over
+
+=item On EBCDIC platforms
+
+The results are what the C language system call C<tolower()> returns.
+
+=item On ASCII platforms
+
+ASCII semantics are used for the case change.  The lowercase of any character
+outside the ASCII range is the character itself.
+
+=back
+
+=back
 
 =item lcfirst EXPR
 X<lcfirst> X<lowercase>
@@ -2725,11 +2774,12 @@ X<lcfirst> X<lowercase>
 
 Returns the value of EXPR with the first character lowercased.  This
 is the internal function implementing the C<\l> escape in
-double-quoted strings.  Respects current LC_CTYPE locale if C<use
-locale> in force.  See L<perllocale> and L<perlunicode> for more
-details about locale and Unicode support.
+double-quoted strings.
 
 If EXPR is omitted, uses C<$_>.
+
+This function behaves the same way under various pragma, such as in a locale,
+as L</lc> does.
 
 =item length EXPR
 X<length> X<size>
@@ -3603,8 +3653,10 @@ Takes a LIST of values and converts it into a string using the rules
 given by the TEMPLATE.  The resulting string is the concatenation of
 the converted values.  Typically, each converted value looks
 like its machine-level representation.  For example, on 32-bit machines
-an integer may be represented by a sequence of 4 bytes, which will in 
-Perl be presented as a string that's 4 characters long.
+an integer may be represented by a sequence of 4 bytes, which  will in
+Perl be presented as a string that's 4 characters long. 
+
+See L<perlpacktut> for an introduction to this function.
 
 The TEMPLATE is a sequence of characters that give the order and type
 of values, as follows:
@@ -6869,13 +6921,14 @@ X<uc> X<uppercase> X<toupper>
 =item uc
 
 Returns an uppercased version of EXPR.  This is the internal function
-implementing the C<\U> escape in double-quoted strings.  Respects
-current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<perlunicode> for more details about locale and Unicode support.
+implementing the C<\U> escape in double-quoted strings.
 It does not attempt to do titlecase mapping on initial letters.  See
-C<ucfirst> for that.
+L</ucfirst> for that.
 
 If EXPR is omitted, uses C<$_>.
+
+This function behaves the same way under various pragma, such as in a locale,
+as L</lc> does.
 
 =item ucfirst EXPR
 X<ucfirst> X<uppercase>
@@ -6884,11 +6937,12 @@ X<ucfirst> X<uppercase>
 
 Returns the value of EXPR with the first character in uppercase
 (titlecase in Unicode).  This is the internal function implementing
-the C<\u> escape in double-quoted strings.  Respects current LC_CTYPE
-locale if C<use locale> in force.  See L<perllocale> and L<perlunicode>
-for more details about locale and Unicode support.
+the C<\u> escape in double-quoted strings.
 
 If EXPR is omitted, uses C<$_>.
+
+This function behaves the same way under various pragma, such as in a locale,
+as L</lc> does.
 
 =item umask EXPR
 X<umask>
@@ -6993,7 +7047,9 @@ C<unpack> does the reverse of C<pack>: it takes a string
 and expands it out into a list of values.
 (In scalar context, it returns merely the first value produced.)
 
-If EXPR is omitted, unpacks the C<$_> string.
+If EXPR is omitted, unpacks the C<$_> string. for an introduction to this function.
+
+See L<perlpacktut> for an introduction to this function.
 
 The string is broken into chunks described by the TEMPLATE.  Each chunk
 is converted separately to a value.  Typically, either the string is a result
