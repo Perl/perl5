@@ -553,19 +553,19 @@ L<http://www.unicode.org/unicode/reports/tr10/>
 
 Character Ranges and Classes
 
-Character ranges in regular expression character classes (C</[a-z]/>)
-and in the C<tr///> (also known as C<y///>) operator are not magically
-Unicode-aware.  What this means is that C<[A-Za-z]> will not magically start
-to mean "all alphabetic letters"; not that it does mean that even for
-8-bit characters, you should be using C</[[:alpha:]]/> in that case.
+Character ranges in regular expression bracketed character classes ( e.g.,
+C</[a-z]/>) and in the C<tr///> (also known as C<y///>) operator are not
+magically Unicode-aware.  What this means is that C<[A-Za-z]> will not
+magically start to mean "all alphabetic letters" (not that it does mean that
+even for 8-bit characters; for those, if you are using locales (L<perllocale>),
+use C</[[:alpha:]]/>; and if not, use the 8-bit-aware property C<\p{alpha}>).
 
-For specifying character classes like that in regular expressions,
-you can use the various Unicode properties--C<\pL>, or perhaps
-C<\p{Alphabetic}>, in this particular case.  You can use Unicode
-code points as the end points of character ranges, but there is no
-magic associated with specifying a certain range.  For further
-information--there are dozens of Unicode character classes--see
-L<perlunicode>.
+All the properties that begin with C<\p> (and its inverse C<\P>) are actually
+character classes that are Unicode-aware.  There are dozens of them, see
+L<perluniprops>.
+
+You can use Unicode code points as the end points of character ranges, and the
+range will include all Unicode code points that lie between those end points.
 
 =item *
 
@@ -607,7 +607,7 @@ Unicode; for that, see the earlier I/O discussion.
 How Do I Know Whether My String Is In Unicode?
 
 You shouldn't have to care.  But you may, because currently the semantics of the
-characters whose ordinals are in the range 128 to 255 is different depending on
+characters whose ordinals are in the range 128 to 255 are different depending on
 whether the string they are contained within is in Unicode or not.
 (See L<perlunicode/When Unicode Does Not Happen>.)
 
@@ -622,8 +622,8 @@ string has any characters at all.  All the C<is_utf8()> does is to
 return the value of the internal "utf8ness" flag attached to the
 C<$string>.  If the flag is off, the bytes in the scalar are interpreted
 as a single byte encoding.  If the flag is on, the bytes in the scalar
-are interpreted as the (multi-byte, variable-length) UTF-8 encoded code
-points of the characters.  Bytes added to a UTF-8 encoded string are
+are interpreted as the (variable-length, potentially multi-byte) UTF-8 encoded
+code points of the characters.  Bytes added to a UTF-8 encoded string are
 automatically upgraded to UTF-8.  If mixed non-UTF-8 and UTF-8 scalars
 are merged (double-quoted interpolation, explicit concatenation, and
 printf/sprintf parameter substitution), the result will be UTF-8 encoded
@@ -648,6 +648,7 @@ the C<length()> function:
     use bytes;
     print length($unicode), "\n"; # will also print 2
                                   # (the 0xC4 0x80 of the UTF-8)
+    no bytes;
 
 =item *
 
