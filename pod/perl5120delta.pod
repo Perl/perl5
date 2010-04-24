@@ -251,7 +251,7 @@ C<perl5xxdelta.pod> file for that release.
 To disable this feature in a given lexical scope, you should use C<no
 warnings 'deprecated';> For information about which language features
 are deprecated and explanations of various deprecation warnings, please
-see L<perldiag.pod>. See L</Deprecations> below for the list of features
+see L<perldiag>. See L</Deprecations> below for the list of features
 and modules Perl's developers have deprecated as part of this release.
 
 =head2 Version number formats
