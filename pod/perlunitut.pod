@@ -66,9 +66,6 @@ B<Text strings>, or B<character strings> are made of characters. Bytes are
 irrelevant here, and so are encodings. Each character is just that: the
 character.
 
-Text strings are also called B<Unicode strings>, because in Perl, every text
-string is a Unicode string.
-
 On a text string, you would do things like:
 
     $text =~ s/foo/bar/;
