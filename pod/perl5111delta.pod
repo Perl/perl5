@@ -260,7 +260,7 @@ Perl now defaults to issuing a warning if a deprecated language feature is used.
 To disable this feature in a given lexical scope, you should use C<no
 warnings 'deprecated';> For information about which language features
 are deprecated and explanations of various deprecation warnings, please
-see L<perldiag.pod>
+see L<perldiag>
 
 =back
 
