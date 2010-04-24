@@ -1642,55 +1642,111 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-/* caller is responsible for stack switching/cleanup */
-STATIC int
-S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int n, SV *val)
+/*
+=for apidoc magic_methcall
+
+Invoke a magic method (like FETCH).
+
+* sv and mg are the tied thinggy and the tie magic;
+* meth is the name of the method to call;
+* n, arg1, arg2 are the number of args (in addition to $self) to pass to
+  the method, and the args themselves (negative n is special-cased);
+* flags:
+    G_DISCARD:     invoke method with G_DISCARD flag and don't return a value
+
+Returns the SV (if any) returned by the method, or NULL on failure.
+
+
+=cut
+*/
+
+SV*
+Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
+    int n, SV *arg1, SV *arg2)
 {
     dVAR;
     dSP;
+    SV* ret = NULL;
 
     PERL_ARGS_ASSERT_MAGIC_METHCALL;
 
+    ENTER;
+    PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
-    EXTEND(SP, n);
-    PUSHs(SvTIED_obj(sv, mg));
-    if (n > 1) {
-	if (mg->mg_ptr) {
-	    if (mg->mg_len >= 0)
-		mPUSHp(mg->mg_ptr, mg->mg_len);
-	    else if (mg->mg_len == HEf_SVKEY)
-		PUSHs(MUTABLE_SV(mg->mg_ptr));
-	}
-	else if (mg->mg_type == PERL_MAGIC_tiedelem) {
-	    mPUSHi(mg->mg_len);
+
+    if (n < 0) {
+	/* special case for UNSHIFT */
+	EXTEND(SP,-n+1);
+	PUSHs(SvTIED_obj(sv, mg));
+	while (n++ < 0) {
+	    PUSHs(&PL_sv_undef);
 	}
     }
-    if (n > 2) {
-	PUSHs(val);
+    else {
+	EXTEND(SP,n+1);
+	PUSHs(SvTIED_obj(sv, mg));
+	if (n > 0) {
+	    PUSHs(arg1);
+	    if (n > 1) PUSHs(arg2);
+	    assert(n <= 2);
+	}
     }
     PUTBACK;
+    if (flags & G_DISCARD) {
+	call_method(meth, G_SCALAR|G_DISCARD);
+    }
+    else {
+	if (call_method(meth, G_SCALAR))
+	    ret = *PL_stack_sp--;
+    }
+    POPSTACK;
+    LEAVE;
+    return ret;
+}
 
-    return call_method(meth, flags);
+
+/* wrapper for magic_methcall that creates the first arg */
+
+STATIC SV*
+S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
+    int n, SV *val)
+{
+    dVAR;
+    SV* arg1 = NULL;
+
+    PERL_ARGS_ASSERT_MAGIC_METHCALL1;
+
+    if (mg->mg_ptr) {
+	if (mg->mg_len >= 0) {
+	    arg1 = newSVpvn(mg->mg_ptr, mg->mg_len);
+	    sv_2mortal(arg1);
+	}
+	else if (mg->mg_len == HEf_SVKEY)
+	    arg1 = MUTABLE_SV(mg->mg_ptr);
+    }
+    else if (mg->mg_type == PERL_MAGIC_tiedelem) {
+	arg1 = newSV_type(SVt_IV);
+	sv_setiv(arg1, (IV)(mg->mg_len));
+	sv_2mortal(arg1);
+    }
+    if (!arg1) {
+	arg1 = val;
+	n--;
+    }
+    return magic_methcall(sv, mg, meth, flags, n, arg1, val);
 }
 
 STATIC int
 S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, const char *meth)
 {
-    dVAR; dSP;
+    dVAR;
+    SV* ret;
 
     PERL_ARGS_ASSERT_MAGIC_METHPACK;
 
-    ENTER;
-    SAVETMPS;
-    PUSHSTACKi(PERLSI_MAGIC);
-
-    if (magic_methcall(sv, mg, meth, G_SCALAR, 2, NULL)) {
-	sv_setsv(sv, *PL_stack_sp--);
-    }
-
-    POPSTACK;
-    FREETMPS;
-    LEAVE;
+    ret = magic_methcall1(sv, mg, meth, 0, 1, NULL);
+    if (ret)
+	sv_setsv(sv, ret);
     return 0;
 }
 
@@ -1708,7 +1764,7 @@ Perl_magic_getpack(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR; dSP;
+    dVAR;
     MAGIC *tmg;
     SV    *val;
 
@@ -1733,11 +1789,7 @@ Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
     else
 	val = sv;
 
-    ENTER;
-    PUSHSTACKi(PERLSI_MAGIC);
-    magic_methcall(sv, mg, "STORE", G_SCALAR|G_DISCARD, 3, val);
-    POPSTACK;
-    LEAVE;
+    magic_methcall1(sv, mg, "STORE", G_DISCARD, 2, val);
     return 0;
 }
 
@@ -1753,69 +1805,46 @@ Perl_magic_clearpack(pTHX_ SV *sv, MAGIC *mg)
 U32
 Perl_magic_sizepack(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR; dSP;
+    dVAR;
     I32 retval = 0;
+    SV* retsv;
 
     PERL_ARGS_ASSERT_MAGIC_SIZEPACK;
 
-    ENTER;
-    SAVETMPS;
-    PUSHSTACKi(PERLSI_MAGIC);
-    if (magic_methcall(sv, mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
-	sv = *PL_stack_sp--;
-	retval = SvIV(sv)-1;
+    retsv = magic_methcall1(sv, mg, "FETCHSIZE", 0, 1, NULL);
+    if (retsv) {
+	retval = SvIV(retsv)-1;
 	if (retval < -1)
 	    Perl_croak(aTHX_ "FETCHSIZE returned a negative value");
     }
-    POPSTACK;
-    FREETMPS;
-    LEAVE;
     return (U32) retval;
 }
 
 int
 Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR; dSP;
+    dVAR;
 
     PERL_ARGS_ASSERT_MAGIC_WIPEPACK;
 
-    ENTER;
-    PUSHSTACKi(PERLSI_MAGIC);
-    PUSHMARK(SP);
-    XPUSHs(SvTIED_obj(sv, mg));
-    PUTBACK;
-    call_method("CLEAR", G_SCALAR|G_DISCARD);
-    POPSTACK;
-    LEAVE;
-
+    magic_methcall(sv, mg, "CLEAR", G_DISCARD, 0, NULL, NULL);
     return 0;
 }
 
 int
 Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
-    dVAR; dSP;
-    const char * const meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
+    dVAR;
+    SV* ret;
 
     PERL_ARGS_ASSERT_MAGIC_NEXTPACK;
 
-    ENTER;
-    SAVETMPS;
-    PUSHSTACKi(PERLSI_MAGIC);
-    PUSHMARK(SP);
-    EXTEND(SP, 2);
-    PUSHs(SvTIED_obj(sv, mg));
-    if (SvOK(key))
-	PUSHs(key);
-    PUTBACK;
-
-    if (call_method(meth, G_SCALAR))
-	sv_setsv(key, *PL_stack_sp--);
-
-    POPSTACK;
-    FREETMPS;
-    LEAVE;
+    ret = magic_methcall(sv, mg,
+	    (SvOK(key) ? "NEXTKEY" : "FIRSTKEY"),
+	    0,
+	    (SvOK(key) ? 1 : 0), key, NULL);
+    if (ret)
+	sv_setsv(key,ret);
     return 0;
 }
 
@@ -1830,7 +1859,7 @@ Perl_magic_existspack(pTHX_ SV *sv, const MAGIC *mg)
 SV *
 Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 {
-    dVAR; dSP;
+    dVAR;
     SV *retval;
     SV * const tied = SvTIED_obj(MUTABLE_SV(hv), mg);
     HV * const pkg = SvSTASH((const SV *)SvRV(tied));
@@ -1850,19 +1879,9 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
     }
    
     /* there is a SCALAR method that we can call */
-    ENTER;
-    PUSHSTACKi(PERLSI_MAGIC);
-    PUSHMARK(SP);
-    EXTEND(SP, 1);
-    PUSHs(tied);
-    PUTBACK;
-
-    if (call_method("SCALAR", G_SCALAR))
-        retval = *PL_stack_sp--; 
-    else
+    retval = magic_methcall(MUTABLE_SV(hv), mg, "SCALAR", 0, 0, NULL, NULL);
+    if (!retval)
 	retval = &PL_sv_undef;
-    POPSTACK;
-    LEAVE;
     return retval;
 }
 

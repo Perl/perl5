@@ -511,6 +511,7 @@
 #define magic_set_all_env	Perl_magic_set_all_env
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
+#define magic_methcall		Perl_magic_methcall
 #endif
 #define markstack_grow		Perl_markstack_grow
 #if defined(USE_LOCALE_COLLATE)
@@ -1242,7 +1243,7 @@
 #ifdef PERL_CORE
 #define save_magic		S_save_magic
 #define magic_methpack		S_magic_methpack
-#define magic_methcall		S_magic_methcall
+#define magic_methcall1		S_magic_methcall1
 #define restore_magic		S_restore_magic
 #define unwind_handler_stack	S_unwind_handler_stack
 #endif
@@ -2922,6 +2923,7 @@
 #define magic_set_all_env(a,b)	Perl_magic_set_all_env(aTHX_ a,b)
 #define magic_sizepack(a,b)	Perl_magic_sizepack(aTHX_ a,b)
 #define magic_wipepack(a,b)	Perl_magic_wipepack(aTHX_ a,b)
+#define magic_methcall(a,b,c,d,e,f,g)	Perl_magic_methcall(aTHX_ a,b,c,d,e,f,g)
 #endif
 #define markstack_grow()	Perl_markstack_grow(aTHX)
 #if defined(USE_LOCALE_COLLATE)
@@ -3647,7 +3649,7 @@
 #ifdef PERL_CORE
 #define save_magic(a,b)		S_save_magic(aTHX_ a,b)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
-#define magic_methcall(a,b,c,d,e,f)	S_magic_methcall(aTHX_ a,b,c,d,e,f)
+#define magic_methcall1(a,b,c,d,e,f)	S_magic_methcall1(aTHX_ a,b,c,d,e,f)
 #define restore_magic(a)	S_restore_magic(aTHX_ a)
 #define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #endif

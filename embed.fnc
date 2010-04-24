@@ -681,6 +681,9 @@ p	|int	|magic_setutf8	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_set_all_env|NN SV* sv|NN MAGIC* mg
 p	|U32	|magic_sizepack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_wipepack	|NN SV* sv|NN MAGIC* mg
+pd	|SV*	|magic_methcall	|NN SV *sv|NN const MAGIC *mg \
+				|NN const char *meth|I32 flags \
+				|int n|NULLOK SV* arg1|NULLOK SV* arg2
 Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
@@ -1489,8 +1492,9 @@ sM	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 s	|void	|save_magic	|I32 mgs_ix|NN SV *sv
-s	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN const char *meth
-s	|int	|magic_methcall	|NN SV *sv|NN const MAGIC *mg|NN const char *meth|I32 f \
+-s	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN const char *meth
+s	|SV*	|magic_methcall1|NN SV *sv|NN const MAGIC *mg \
+				|NN const char *meth|I32 flags \
 				|int n|NULLOK SV *val
 s	|void	|restore_magic	|NULLOK const void *p
 s	|void	|unwind_handler_stack|NN const void *p
