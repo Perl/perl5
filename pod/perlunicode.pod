@@ -11,8 +11,11 @@ implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
 
 People who want to learn to use Unicode in Perl, should probably read
-L<the Perl Unicode tutorial, perlunitut|perlunitut>, before reading
+the L<Perl Unicode tutorial, perlunitut|perlunitut>, before reading
 this reference document.
+
+Also, the use of Unicode may present security issues that aren't obvious.
+Read L<Unicode Security Considerations|http://www.unicode.org/reports/tr36>.
 
 =over 4
 
@@ -99,8 +102,8 @@ The C<bytes> pragma will always, regardless of platform, force byte
 semantics in a particular lexical scope.  See L<bytes>.
 
 The C<use feature 'unicode_strings'> pragma is intended to always, regardless
-of platform, force Unicode semantics in a particular lexical scope.  In
-release 5.12, it is partially implemented, applying only to case changes.
+of platform, force character (Unicode) semantics in a particular lexical scope.
+In release 5.12, it is partially implemented, applying only to case changes.
 See L</The "Unicode Bug"> below.
 
 The C<utf8> pragma is primarily a compatibility device that enables
@@ -180,15 +183,15 @@ a character instead of a byte.
 
 =item *
 
-Character classes in regular expressions match characters instead of
+Bracketed character classes in regular expressions match characters instead of
 bytes and match against the character properties specified in the
 Unicode properties database.  C<\w> can be used to match a Japanese
 ideograph, for instance.
 
 =item *
 
-Named Unicode properties, scripts, and block ranges may be used like
-character classes via the C<\p{}> "matches property" construct and
+Named Unicode properties, scripts, and block ranges may be used (like bracketed
+character classes) by using the C<\p{}> "matches property" construct and
 the C<\P{}> negation, "doesn't match property".
 See L</"Unicode Character Properties"> for more details.
 
@@ -261,8 +264,9 @@ complement B<and> the full character-wide bit complement.
 
 =item *
 
-You can define your own mappings to be used in lc(),
-lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
+You can define your own mappings to be used in C<lc()>,
+C<lcfirst()>, C<uc()>, and C<ucfirst()> (or their double-quoted string inlined
+versions such as C<\U>).
 See L</"User-Defined Case Mappings"> for more details.
 
 =back
@@ -278,25 +282,30 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 =head2 Unicode Character Properties
 
 Most Unicode character properties are accessible by using regular expressions.
-They are used like character classes via the C<\p{}> "matches property"
-construct and the C<\P{}> negation, "doesn't match property".
+They are used (like bracketed character classes) by using the C<\p{}> "matches
+property" construct and the C<\P{}> negation, "doesn't match property".
 
-For instance, C<\p{Uppercase}> matches any character with the Unicode
+Note that the only time that Perl considers a sequence of individual code
+points as a single logical character is in the C<\X> construct, already
+mentioned above.   Therefore "character" in this discussion means a single
+Unicode code point.
+
+For instance, C<\p{Uppercase}> matches any single character with the Unicode
 "Uppercase" property, while C<\p{L}> matches any character with a
 General_Category of "L" (letter) property.  Brackets are not
-required for single letter properties, so C<\p{L}> is equivalent to C<\pL>.
+required for single letter property names, so C<\p{L}> is equivalent to C<\pL>.
 
-More formally, C<\p{Uppercase}> matches any character whose Unicode Uppercase
-property value is True, and C<\P{Uppercase}> matches any character whose
-Uppercase property value is False, and they could have been written as
-C<\p{Uppercase=True}> and C<\p{Uppercase=False}>, respectively
+More formally, C<\p{Uppercase}> matches any single character whose Unicode
+Uppercase property value is True, and C<\P{Uppercase}> matches any character
+whose Uppercase property value is False, and they could have been written as
+C<\p{Uppercase=True}> and C<\p{Uppercase=False}>, respectively.
 
 This formality is needed when properties are not binary, that is if they can
 take on more values than just True and False.  For example, the Bidi_Class (see
 L</"Bidirectional Character Types"> below), can take on a number of different
 values, such as Left, Right, Whitespace, and others.  To match these, one needs
 to specify the property name (Bidi_Class), and the value being matched against
-(Left, Right, I<etc.>).  This is done, as in the examples above, by having the
+(Left, Right, etc.).  This is done, as in the examples above, by having the
 two components separated by an equal sign (or interchangeably, a colon), like
 C<\p{Bidi_Class: Left}>.
 
@@ -403,8 +412,7 @@ Here are the short and long forms of the General Category properties:
 
 Single-letter properties match all characters in any of the
 two-letter sub-properties starting with the same letter.
-C<LC> and C<L&> are special cases, which are aliases for the set of
-C<Ll>, C<Lu>, and C<Lt>.
+C<LC> and C<L&> are special cases, which are both aliases for the set consisting of everything matched by C<Ll>, C<Lu>, and C<Lt>.
 
 Because Perl hides the need for the user to understand the internal
 representation of Unicode characters, there is no need to implement
@@ -413,8 +421,8 @@ supported.
 
 =head3 B<Bidirectional Character Types>
 
-Because scripts differ in their directionality--Hebrew is
-written right to left, for example--Unicode supplies these properties in
+Because scripts differ in their directionality (Hebrew is
+written right to left, for example) Unicode supplies these properties in
 the Bidi_Class class:
 
     Property    Meaning
@@ -451,10 +459,10 @@ written in Cyrllic, and Greek is written in, well, Greek; Japanese mainly in
 Hiragana or Katakana.  There are many more.
 
 The Unicode Script property gives what script a given character is in,
-and can be matched with the compound form like C<\p{Script=Hebrew}> (short:
-C<\p{sc=hebr}>).  Perl furnishes shortcuts for all script names.  You can omit
-everything up through the equals (or colon), and simply write C<\p{Latin}> or
-C<\P{Cyrillic}>.
+and the property can be specified with the compound form like
+C<\p{Script=Hebrew}> (short: C<\p{sc=hebr}>).  Perl furnishes shortcuts for all
+script names.  You can omit everything up through the equals (or colon), and
+simply write C<\p{Latin}> or C<\P{Cyrillic}>.
 
 A complete list of scripts and their shortcuts is in L<perluniprops>.
 
@@ -475,7 +483,7 @@ characters with consecutive ordinal values. For example, the "Basic Latin"
 block is all characters whose ordinals are between 0 and 127, inclusive, in
 other words, the ASCII characters.  The "Latin" script contains some letters
 from this block as well as several more, like "Latin-1 Supplement",
-"Latin Extended-A", I<etc.>, but it does not contain all the characters from
+"Latin Extended-A", etc., but it does not contain all the characters from
 those blocks. It does not, for example, contain digits, because digits are
 shared across many scripts. Digits and similar groups, like punctuation, are in
 the script called C<Common>.  There is also a script called C<Inherited> for
@@ -571,7 +579,7 @@ To understand the use of this rarely used property=value combination, it is
 necessary to know some basics about decomposition.
 Consider a character, say H.  It could appear with various marks around it,
 such as an acute accent, or a circumflex, or various hooks, circles, arrows,
-I<etc.>, above, below, to one side and/or the other, I<etc.>  There are many
+I<etc.>, above, below, to one side and/or the other, etc.  There are many
 possibilities among the world's languages.  The number of combinations is
 astronomical, and if there were a character for each combination, it would
 soon exhaust Unicode's more than a million possible characters.  So Unicode
