@@ -689,7 +689,6 @@ Perl_sv_free_arenas(pTHX)
   2. regular body arenas
   3. arenas for reduced-size bodies
   4. Hash-Entry arenas
-  5. pte arenas (thread related)
 
   Arena types 2 & 3 are chained by body-type off an array of
   arena-root pointers, which is indexed by svtype.  Some of the
@@ -708,12 +707,6 @@ Perl_sv_free_arenas(pTHX)
 
   HE, HEK arenas are managed separately, with separate code, but may
   be merge-able later..
-
-  PTE arenas are not sv-bodies, but they share these mid-level
-  mechanics, so are considered here.  The new mid-level mechanics rely
-  on the sv_type of the body being allocated, so we just reserve one
-  of the unused body-slots for PTEs, then use it in those (2) PTE
-  contexts below (line ~10k)
 */
 
 /* get_arena(size): this creates custom-sized arenas
@@ -852,13 +845,6 @@ PL_body_roots[HE_SVSLOT=SVt_NULL] is filled by S_more_he, but the
 bodies_by_type[SVt_NULL] slot is not used, as the table is not
 available in hv.c.
 
-PTEs also use arenas, but are never seen in Perl_sv_upgrade. Nonetheless,
-they get their own slot in bodies_by_type[PTE_SVSLOT =SVt_IV], so they can
-just use the same allocation semantics.  At first, PTEs were also
-overloaded to a non-body sv-type, but this yielded hard-to-find malloc
-bugs, so was simplified by claiming a new slot.  This choice has no
-consequence at this time.
-
 */
 
 struct body_details {
@@ -921,14 +907,11 @@ static const struct body_details bodies_by_type[] = {
        implemented.  */
     { 0, 0, 0, SVt_BIND, TRUE, NONV, NOARENA, 0 },
 
-    /* IVs are in the head, so the allocation size is 0.
-       However, the slot is overloaded for PTEs.  */
-    { sizeof(struct ptr_tbl_ent), /* This is used for PTEs.  */
+    /* IVs are in the head, so the allocation size is 0.  */
+    { 0,
       sizeof(IV), /* This is used to copy out the IV body.  */
       STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
-      NOARENA /* IVS don't need an arena  */,
-      /* But PTEs need to know the size of their arena  */
-      FIT_ARENA(0, sizeof(struct ptr_tbl_ent))
+      NOARENA /* IVS don't need an arena  */, 0
     },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
@@ -1455,7 +1438,7 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 		   (unsigned long)new_type);
     }
 
-    if (old_type > SVt_IV) { /* SVt_IVs are overloaded for PTEs */
+    if (old_type > SVt_IV) {
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
@@ -5676,15 +5659,9 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 
     if (type <= SVt_IV) {
 	/* See the comment in sv.h about the collusion between this early
-	   return and the overloading of the NULL and IV slots in the size
-	   table.  */
-	if (SvROK(sv)) {
-	    SV * const target = SvRV(sv);
-	    if (SvWEAKREF(sv))
-	        sv_del_backref(target, sv);
-	    else
-	        SvREFCNT_dec(target);
-	}
+	   return and the overloading of the NULL slots in the size table.  */
+	if (SvROK(sv))
+	    goto free_rv;
 	SvFLAGS(sv) &= SVf_BREAK;
 	SvFLAGS(sv) |= SVTYPEMASK;
 	return;
@@ -5836,11 +5813,14 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
 	if (SvROK(sv)) {
-	    SV * const target = SvRV(sv);
-	    if (SvWEAKREF(sv))
-	        sv_del_backref(target, sv);
-	    else
-	        SvREFCNT_dec(target);
+	free_rv:
+	    {
+		SV * const target = SvRV(sv);
+		if (SvWEAKREF(sv))
+		    sv_del_backref(target, sv);
+		else
+		    SvREFCNT_dec(target);
+	    }
 	}
 #ifdef PERL_OLD_COPY_ON_WRITE
 	else if (SvPVX_const(sv)) {
@@ -10737,6 +10717,11 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 
 #endif /* USE_ITHREADS */
 
+struct ptr_tbl_arena {
+    struct ptr_tbl_arena *next;
+    struct ptr_tbl_ent array[1023/3]; /* as ptr_tbl_ent has 3 pointers.  */
+};
+
 /* create a new pointer-mapping table */
 
 PTR_TBL_t *
@@ -10748,20 +10733,15 @@ Perl_ptr_table_new(pTHX)
     Newx(tbl, 1, PTR_TBL_t);
     tbl->tbl_max	= 511;
     tbl->tbl_items	= 0;
+    tbl->tbl_arena	= NULL;
+    tbl->tbl_arena_next	= NULL;
+    tbl->tbl_arena_end	= NULL;
     Newxz(tbl->tbl_ary, tbl->tbl_max + 1, PTR_TBL_ENT_t*);
     return tbl;
 }
 
 #define PTR_TABLE_HASH(ptr) \
   ((PTR2UV(ptr) >> 3) ^ (PTR2UV(ptr) >> (3 + 7)) ^ (PTR2UV(ptr) >> (3 + 17)))
-
-/* 
-   we use the PTE_SVSLOT 'reservation' made above, both here (in the
-   following define) and at call to new_body_inline made below in 
-   Perl_ptr_table_store()
- */
-
-#define del_pte(p)     del_body_type(p, PTE_SVSLOT)
 
 /* map an existing pointer using a table */
 
@@ -10807,7 +10787,18 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *
     } else {
 	const UV entry = PTR_TABLE_HASH(oldsv) & tbl->tbl_max;
 
-	new_body_inline(tblent, PTE_SVSLOT);
+	if (tbl->tbl_arena_next == tbl->tbl_arena_end) {
+	    struct ptr_tbl_arena *new_arena;
+
+	    Newx(new_arena, 1, struct ptr_tbl_arena);
+	    new_arena->next = tbl->tbl_arena;
+	    tbl->tbl_arena = new_arena;
+	    tbl->tbl_arena_next = new_arena->array;
+	    tbl->tbl_arena_end = new_arena->array
+		+ sizeof(new_arena->array) / sizeof(new_arena->array[0]);
+	}
+
+	tblent = tbl->tbl_arena_next++;
 
 	tblent->oldval = oldsv;
 	tblent->newval = newsv;
@@ -10860,20 +10851,21 @@ void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
 {
     if (tbl && tbl->tbl_items) {
-	register PTR_TBL_ENT_t * const * const array = tbl->tbl_ary;
-	UV riter = tbl->tbl_max;
+	struct ptr_tbl_arena *arena = tbl->tbl_arena;
 
-	do {
-	    PTR_TBL_ENT_t *entry = array[riter];
+	Zero(tbl->tbl_ary, tbl->tbl_max + 1, struct ptr_tbl_ent **);
 
-	    while (entry) {
-		PTR_TBL_ENT_t * const oentry = entry;
-		entry = entry->next;
-		del_pte(oentry);
-	    }
-	} while (riter--);
+	while (arena) {
+	    struct ptr_tbl_arena *next = arena->next;
+
+	    Safefree(arena);
+	    arena = next;
+	};
 
 	tbl->tbl_items = 0;
+	tbl->tbl_arena = NULL;
+	tbl->tbl_arena_next = NULL;
+	tbl->tbl_arena_end = NULL;
     }
 }
 

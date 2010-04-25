@@ -3453,9 +3453,6 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
 
-/* Keep next first in this structure, because sv_free_arenas take
-   advantage of this to share code between the pte arenas and the SV
-   body arenas  */
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;
     const void*			oldval;
@@ -3466,6 +3463,9 @@ struct ptr_tbl {
     struct ptr_tbl_ent**	tbl_ary;
     UV				tbl_max;
     UV				tbl_items;
+    struct ptr_tbl_arena	*tbl_arena;
+    struct ptr_tbl_ent		*tbl_arena_next;
+    struct ptr_tbl_ent		*tbl_arena_end;
 };
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)

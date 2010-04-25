@@ -76,13 +76,9 @@ typedef enum {
 #endif
 
 /* There is collusion here with sv_clear - sv_clear exits early for SVt_NULL
-   and SVt_IV, so never reaches the clause at the end that uses
-   sv_type_details->body_size to determine whether to call safefree(). Hence
-   body_size can be set no-zero to record the size of PTEs and HEs, without
-   fear of bogus frees.  */
-#ifdef PERL_IN_SV_C
-#define PTE_SVSLOT	SVt_IV
-#endif
+   so never reaches the clause at the end that uses sv_type_details->body_size
+   to determine whether to call safefree(). Hence body_size can be set
+   non-zero to record the size of HEs, without fear of bogus frees.  */
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
 #define HE_SVSLOT	SVt_NULL
 #endif
