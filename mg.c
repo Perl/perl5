@@ -1661,7 +1661,7 @@ Returns the SV (if any) returned by the method, or NULL on failure.
 */
 
 SV*
-Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
+Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     int n, SV *arg1, SV *arg2)
 {
     dVAR;
@@ -1708,7 +1708,7 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
 /* wrapper for magic_methcall that creates the first arg */
 
 STATIC SV*
-S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
+S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     int n, SV *val)
 {
     dVAR;

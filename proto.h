@@ -1901,7 +1901,7 @@ PERL_CALLCONV int	Perl_magic_wipepack(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_WIPEPACK	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV SV*	Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int n, SV* arg1, SV* arg2)
+PERL_CALLCONV SV*	Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags, int n, SV* arg1, SV* arg2)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -4488,7 +4488,7 @@ STATIC int	S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, const char *meth)
 #define PERL_ARGS_ASSERT_MAGIC_METHPACK	\
 	assert(sv); assert(mg); assert(meth)
 
-STATIC SV*	S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int n, SV *val)
+STATIC SV*	S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags, int n, SV *val)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
