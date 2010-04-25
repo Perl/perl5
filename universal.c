@@ -794,7 +794,8 @@ XS(XS_utf8_is_utf8)
      if (items != 1)
 	 croak_xs_usage(cv, "sv");
      else {
-	const SV * const sv = ST(0);
+	SV * const sv = ST(0);
+	SvGETMAGIC(sv);
 	    if (SvUTF8(sv))
 		XSRETURN_YES;
 	    else
