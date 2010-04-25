@@ -1623,6 +1623,7 @@ Perl_die_where(pTHX_ SV *msv)
 
 	if (cxix >= 0) {
 	    I32 optype;
+	    SV *namesv;
 	    register PERL_CONTEXT *cx;
 	    SV **newsp;
 
@@ -1638,6 +1639,7 @@ Perl_die_where(pTHX_ SV *msv)
 		my_exit(1);
 	    }
 	    POPEVAL(cx);
+	    namesv = cx->blk_eval.old_namesv;
 
 	    if (gimme == G_SCALAR)
 		*++newsp = &PL_sv_undef;
@@ -1653,8 +1655,8 @@ Perl_die_where(pTHX_ SV *msv)
 
 	    if (optype == OP_REQUIRE) {
                 const char* const msg = SvPVx_nolen_const(ERRSV);
-		SV * const nsv = cx->blk_eval.old_namesv;
-                (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
+                (void)hv_store(GvHVn(PL_incgv),
+                               SvPVX_const(namesv), SvCUR(namesv),
                                &PL_sv_undef, 0);
 		/* note that unlike pp_entereval, pp_require isn't
 		 * supposed to trap errors. So now that we've popped the
@@ -2123,6 +2125,7 @@ PP(pp_return)
     SV **newsp;
     PMOP *newpm;
     I32 optype = 0;
+    SV *namesv;
     SV *sv;
     OP *retop = NULL;
 
@@ -2165,6 +2168,7 @@ PP(pp_return)
 	if (!(PL_in_eval & EVAL_KEEPERR))
 	    clear_errsv = TRUE;
 	POPEVAL(cx);
+	namesv = cx->blk_eval.old_namesv;
 	retop = cx->blk_eval.retop;
 	if (CxTRYBLOCK(cx))
 	    break;
@@ -2173,9 +2177,10 @@ PP(pp_return)
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
 	    /* Unassume the success we assumed earlier. */
-	    SV * const nsv = cx->blk_eval.old_namesv;
-	    (void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
+	    (void)hv_delete(GvHVn(PL_incgv),
+			    SvPVX_const(namesv), SvCUR(namesv),
+			    G_DISCARD);
+	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
 	}
 	break;
     case CXt_FORMAT:
@@ -3150,8 +3155,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
-	PERL_CONTEXT *cx = &cxstack[cxstack_ix];
+	PERL_CONTEXT *cx = NULL;
 	I32 optype;			/* Used by POPEVAL. */
+	SV *namesv = NULL;
 	const char *msg;
 
 	PERL_UNUSED_VAR(newsp);
@@ -3167,6 +3173,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    if (!startop) {
 		POPBLOCK(cx,PL_curpm);
 		POPEVAL(cx);
+		namesv = cx->blk_eval.old_namesv;
 	    }
 	}
 	lex_end();
@@ -3175,9 +3182,16 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
 	msg = SvPVx_nolen_const(ERRSV);
 	if (in_require) {
-	    const SV * const nsv = cx->blk_eval.old_namesv;
-	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
-                          &PL_sv_undef, 0);
+	    if (!cx) {
+		/* If cx is still NULL, it means that we didn't go in the
+		 * POPEVAL branch. */
+		cx = &cxstack[cxstack_ix];
+		assert(CxTYPE(cx) == CXt_EVAL);
+		namesv = cx->blk_eval.old_namesv;
+	    }
+	    (void)hv_store(GvHVn(PL_incgv),
+			   SvPVX_const(namesv), SvCUR(namesv),
+			   &PL_sv_undef, 0);
 	    Perl_croak(aTHX_ "%sCompilation failed in require",
 		       *msg ? msg : "Unknown error\n");
 	}
@@ -3875,9 +3889,11 @@ PP(pp_leaveeval)
     OP *retop;
     const U8 save_flags = PL_op -> op_flags;
     I32 optype;
+    SV *namesv;
 
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
+    namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
 
     TAINT_NOT;
@@ -3918,9 +3934,11 @@ PP(pp_leaveeval)
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
-	SV * const nsv = cx->blk_eval.old_namesv;
-	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
+	(void)hv_delete(GvHVn(PL_incgv),
+			SvPVX_const(namesv), SvCUR(namesv),
+			G_DISCARD);
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value",
+			       SVfARG(namesv));
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
