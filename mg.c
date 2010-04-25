@@ -1649,10 +1649,12 @@ Invoke a magic method (like FETCH).
 
 * sv and mg are the tied thinggy and the tie magic;
 * meth is the name of the method to call;
-* n, arg1, arg2 are the number of args (in addition to $self) to pass to
-  the method, and the args themselves (negative n is special-cased);
+* argc, arg1, arg2 are the number of args (in addition to $self) to pass to
+  the method, and the args themselves
 * flags:
     G_DISCARD:     invoke method with G_DISCARD flag and don't return a value
+    G_UNDEF_FILL:  fill the stack with argc pointers to PL_sv_undef;
+                   ignore arg1 and arg2.
 
 Returns the SV (if any) returned by the method, or NULL on failure.
 
@@ -1662,7 +1664,7 @@ Returns the SV (if any) returned by the method, or NULL on failure.
 
 SV*
 Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
-    int n, SV *arg1, SV *arg2)
+		    U32 argc, SV *arg1, SV *arg2)
 {
     dVAR;
     dSP;
@@ -1674,22 +1676,16 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
 
-    if (n < 0) {
-	/* special case for UNSHIFT */
-	EXTEND(SP,-n+1);
-	PUSHs(SvTIED_obj(sv, mg));
-	while (n++ < 0) {
+    EXTEND(SP, argc+1);
+    PUSHs(SvTIED_obj(sv, mg));
+    if (flags & G_UNDEF_FILL) {
+	while (argc--) {
 	    PUSHs(&PL_sv_undef);
 	}
-    }
-    else {
-	EXTEND(SP,n+1);
-	PUSHs(SvTIED_obj(sv, mg));
-	if (n > 0) {
-	    PUSHs(arg1);
-	    if (n > 1) PUSHs(arg2);
-	    assert(n <= 2);
-	}
+    } else if (argc > 0) {
+	PUSHs(arg1);
+	if (argc > 1) PUSHs(arg2);
+	assert(argc <= 2);
     }
     PUTBACK;
     if (flags & G_DISCARD) {

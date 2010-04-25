@@ -684,7 +684,7 @@ p	|U32	|magic_sizepack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_wipepack	|NN SV* sv|NN MAGIC* mg
 pd	|SV*	|magic_methcall	|NN SV *sv|NN const MAGIC *mg \
 				|NN const char *meth|U32 flags \
-				|int n|NULLOK SV* arg1|NULLOK SV* arg2
+				|U32 argc|NULLOK SV* arg1|NULLOK SV* arg2
 Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg

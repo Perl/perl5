@@ -632,8 +632,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	Perl_croak(aTHX_ "%s", PL_no_modify);
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	magic_methcall(MUTABLE_SV(av), mg, "UNSHIFT", G_DISCARD,
-	    -num, NULL, NULL);
+	magic_methcall(MUTABLE_SV(av), mg, "UNSHIFT", G_DISCARD | G_UNDEF_FILL,
+		       num, NULL, NULL);
 	return;
     }
 

@@ -783,6 +783,9 @@ L<perlcall>.
 #define G_METHOD      128       /* Calling method. */
 #define G_FAKINGEVAL  256	/* Faking an eval context for call_sv or
 				   fold_constants. */
+#define G_UNDEF_FILL  512	/* Fill the stack with &PL_sv_undef
+				   A special case for UNSHIFT in
+				   Perl_magic_methcall().  */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
