@@ -404,7 +404,7 @@ C<strncmp>).
 #endif
 
 #define memEQs(s1, l, s2) \
-	(sizeof(s2)-1 == l && memEQ(s1, (s2 ""), (sizeof(s2)-1)))
+	(sizeof(s2)-1 == l && memEQ(s1, ("" s2 ""), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) !memEQs(s1, l, s2)
 
 /*
