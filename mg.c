@@ -1718,15 +1718,13 @@ S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags,
 
     if (mg->mg_ptr) {
 	if (mg->mg_len >= 0) {
-	    arg1 = newSVpvn(mg->mg_ptr, mg->mg_len);
-	    sv_2mortal(arg1);
+	    arg1 = newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP);
 	}
 	else if (mg->mg_len == HEf_SVKEY)
 	    arg1 = MUTABLE_SV(mg->mg_ptr);
     }
     else if (mg->mg_type == PERL_MAGIC_tiedelem) {
-	arg1 = newSV_type(SVt_IV);
-	sv_setiv(arg1, (IV)(mg->mg_len));
+	arg1 = newSViv((IV)(mg->mg_len));
 	sv_2mortal(arg1);
     }
     if (!arg1) {
