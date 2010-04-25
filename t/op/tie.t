@@ -337,7 +337,7 @@ sub FETCH {
 }
 package main;
 tie $a->{foo}, "Foo", $a, "foo";
-$a->{foo}; # access once
+my $s = $a->{foo}; # access once
 # the hash element should not be tied anymore
 print defined tied $a->{foo} ? "not ok" : "ok";
 EXPECT
@@ -768,3 +768,25 @@ foreach ($a[0], $h{a}) {
 }
 # on failure, chucks up 'premature free' etc messages
 EXPECT
+########
+# RT 5475:
+# the initial fix for this bug caused tied scalar FETCH to be called
+# multiple times when that scalar was an element in an array. Check it
+# only gets called once now.
+
+sub TIESCALAR { bless [], $_[0] }
+my $c = 0;
+sub FETCH { $c++; 0 }
+sub FETCHSIZE { 1 }
+sub STORE { $c += 100; 0 }
+
+
+my (@a, %h);
+tie $a[0],   'main';
+tie $h{foo}, 'main';
+
+my $i = 0;
+my $x = $a[0] + $h{foo} + $a[$i] + (@a)[0];
+print "x=$x c=$c\n";
+EXPECT
+x=0 c=4

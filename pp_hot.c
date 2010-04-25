@@ -663,7 +663,7 @@ PP(pp_aelemfast)
     SV** const svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
-    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+    if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);
     PUSHs(sv);
     RETURN;
@@ -1858,7 +1858,7 @@ PP(pp_helem)
      * meant the original regex may be out of scope by now. So as a
      * compromise, do the get magic here. (The MGf_GSKIP flag will stop it
      * being called too many times). */
-    if (!lval && SvGMAGICAL(sv))
+    if (!lval && SvRMAGICAL(hv) && SvGMAGICAL(sv))
 	mg_get(sv);
     PUSHs(sv);
     RETURN;
@@ -2996,7 +2996,7 @@ PP(pp_aelem)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }
     sv = (svp ? *svp : &PL_sv_undef);
-    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+    if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);
     PUSHs(sv);
     RETURN;
