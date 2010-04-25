@@ -4501,6 +4501,7 @@ t/op/unshift.t			See if unshift works
 t/op/upgrade.t			See if upgrading and assigning scalars works
 t/op/utf8cache.t		Tests malfunctions of utf8 cache
 t/op/utf8decode.t		See if UTF-8 decoding works
+t/op/utf8magic.t		See if utf8:: functions handle magic variables
 t/op/utfhash.t			See if utf8 keys in hashes behave
 t/op/utftaint.t			See if utf8 and taint work together
 t/op/vec.t			See if vectors work
