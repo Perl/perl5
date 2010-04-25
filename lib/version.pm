@@ -157,15 +157,11 @@ sub import {
     }
 
     if (exists($args{'is_strict'})) {
-	*{$callpkg.'::is_strict'} = 
-	    sub {return $class->is_strict(shift)}
-	  unless defined(&{$callpkg.'::is_strict'});
+	*{$callpkg.'::is_strict'} = \&version::is_strict;
     }
 
     if (exists($args{'is_lax'})) {
-	*{$callpkg.'::is_lax'} = 
-	    sub {return $class->is_lax(shift)}
-	  unless defined(&{$callpkg.'::is_lax'});
+	*{$callpkg.'::is_lax'} = \&version::is_lax;
     }
 }
 
