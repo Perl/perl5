@@ -458,6 +458,9 @@
 #endif
 #define looks_like_number	Perl_looks_like_number
 #define grok_bin		Perl_grok_bin
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define grok_bslash_c		Perl_grok_bslash_c
+#endif
 #define grok_hex		Perl_grok_hex
 #define grok_number		Perl_grok_number
 #define grok_numeric_radix	Perl_grok_numeric_radix
@@ -2870,6 +2873,9 @@
 #endif
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
+#endif
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
 #define grok_numeric_radix(a,b)	Perl_grok_numeric_radix(aTHX_ a,b)
