@@ -7047,8 +7047,7 @@ C<unpack> does the reverse of C<pack>: it takes a string
 and expands it out into a list of values.
 (In scalar context, it returns merely the first value produced.)
 
-If EXPR is omitted, unpacks the C<$_> string. for an introduction to this function.
-
+If EXPR is omitted, unpacks the C<$_> string.
 See L<perlpacktut> for an introduction to this function.
 
 The string is broken into chunks described by the TEMPLATE.  Each chunk
