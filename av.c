@@ -76,7 +76,8 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
     if (mg) {
 	SV *arg1 = sv_newmortal();
 	sv_setiv(arg1, (IV)(key + 1));
-	magic_methcall(MUTABLE_SV(av), mg, "EXTEND", G_DISCARD, 1, arg1, NULL);
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "EXTEND", G_DISCARD, 1,
+			    arg1);
 	return;
     }
     if (key > AvMAX(av)) {
@@ -544,7 +545,8 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
 	Perl_croak(aTHX_ "%s", PL_no_modify);
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	magic_methcall(MUTABLE_SV(av), mg, "PUSH", G_DISCARD, 1, val, NULL);
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "PUSH", G_DISCARD, 1,
+			    val);
 	return;
     }
     av_store(av,AvFILLp(av)+1,val);
@@ -572,7 +574,7 @@ Perl_av_pop(pTHX_ register AV *av)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ "%s", PL_no_modify);
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	retval = magic_methcall(MUTABLE_SV(av), mg, "POP", 0, 0, NULL, NULL);
+	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "POP", 0, 0);
 	if (retval)
 	    retval = newSVsv(retval);
 	return retval;
@@ -632,8 +634,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	Perl_croak(aTHX_ "%s", PL_no_modify);
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	magic_methcall(MUTABLE_SV(av), mg, "UNSHIFT", G_DISCARD | G_UNDEF_FILL,
-		       num, NULL, NULL);
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "UNSHIFT",
+			    G_DISCARD | G_UNDEF_FILL, num);
 	return;
     }
 
@@ -693,7 +695,7 @@ Perl_av_shift(pTHX_ register AV *av)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ "%s", PL_no_modify);
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	retval = magic_methcall(MUTABLE_SV(av), mg, "SHIFT", 0, 0, NULL, NULL);
+	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "SHIFT", 0, 0);
 	if (retval)
 	    retval = newSVsv(retval);
 	return retval;
@@ -757,8 +759,8 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
 	SV *arg1 = sv_newmortal();
 	sv_setiv(arg1, (IV)(fill + 1));
-	magic_methcall(MUTABLE_SV(av), mg, "STORESIZE", G_DISCARD,
-		1, arg1, NULL);
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "STORESIZE", G_DISCARD,
+			    1, arg1);
 	return;
     }
     if (fill <= AvMAX(av)) {

@@ -1664,7 +1664,7 @@ Returns the SV (if any) returned by the method, or NULL on failure.
 
 SV*
 Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
-		    U32 argc, SV *arg1, SV *arg2)
+		    U32 argc, ...)
 {
     dVAR;
     dSP;
@@ -1683,9 +1683,15 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
 	    PUSHs(&PL_sv_undef);
 	}
     } else if (argc > 0) {
-	PUSHs(arg1);
-	if (argc > 1) PUSHs(arg2);
-	assert(argc <= 2);
+	va_list args;
+	va_start(args, argc);
+
+	do {
+	    SV *const sv = va_arg(args, SV *);
+	    PUSHs(sv);
+	} while (--argc);
+
+	va_end(args);
     }
     PUTBACK;
     if (flags & G_DISCARD) {
@@ -1724,10 +1730,9 @@ S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
 	sv_2mortal(arg1);
     }
     if (!arg1) {
-	arg1 = val;
-	n--;
+	return Perl_magic_methcall(aTHX_ sv, mg, meth, flags, n - 1, val);
     }
-    return magic_methcall(sv, mg, meth, flags, n, arg1, val);
+    return Perl_magic_methcall(aTHX_ sv, mg, meth, flags, n, arg1, val);
 }
 
 STATIC int
@@ -1821,7 +1826,7 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_WIPEPACK;
 
-    magic_methcall(sv, mg, "CLEAR", G_DISCARD, 0, NULL, NULL);
+    Perl_magic_methcall(aTHX_ sv, mg, "CLEAR", G_DISCARD, 0);
     return 0;
 }
 
@@ -1833,10 +1838,8 @@ Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 
     PERL_ARGS_ASSERT_MAGIC_NEXTPACK;
 
-    ret = magic_methcall(sv, mg,
-	    (SvOK(key) ? "NEXTKEY" : "FIRSTKEY"),
-	    0,
-	    (SvOK(key) ? 1 : 0), key, NULL);
+    ret = SvOK(key) ? Perl_magic_methcall(aTHX_ sv, mg, "NEXTKEY", 0, 1, key)
+	: Perl_magic_methcall(aTHX_ sv, mg, "FIRSTKEY", 0, 0);
     if (ret)
 	sv_setsv(key,ret);
     return 0;
@@ -1873,7 +1876,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
     }
    
     /* there is a SCALAR method that we can call */
-    retval = magic_methcall(MUTABLE_SV(hv), mg, "SCALAR", 0, 0, NULL, NULL);
+    retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(hv), mg, "SCALAR", 0, 0);
     if (!retval)
 	retval = &PL_sv_undef;
     return retval;
