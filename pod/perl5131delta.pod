@@ -22,11 +22,12 @@ XXX Any important notices here
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 "C<\cI<X>>"
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
-
+The backslash-c construct was designed as a way of specifying
+non-printable characters, but there were no restrictions (on ASCII
+platforms) on what the character following the C<c> could be.  Now, that
+character must be one of the ASCII characters.
 
 =head1 Core Enhancements
 
