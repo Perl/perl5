@@ -11586,7 +11586,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    gp = (GP*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gp = gp_dup(gp, param);
 	    (void)GpREFCNT_inc(gp);
-	    TOPINT(nss,ix) = POPINT(ss,ix);
+	    i = POPINT(ss,ix);
+	    TOPINT(nss,ix) = i;
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = POPPTR(ss,ix);
