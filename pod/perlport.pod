@@ -2021,11 +2021,9 @@ Not useful. (S<RISC OS>)
 
 =head1 Supported Platforms (Perl 5.12)
 
-
-As of _____ 20??, (The release of Perl 5.12), the following platforms are
+As of April 2010 (the release of Perl 5.12), the following platforms are
 known to build Perl from the standard source code distribution available
 at http://www.cpan.org/src
-
 
 =over
 
