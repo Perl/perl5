@@ -1385,7 +1385,8 @@ is considerably faster, especially for files on network drives.
 
 This variable could be set in the F<sitecustomize.pl> file to
 configure the local Perl installation to use "sloppy" stat() by
-default.  See L<perlrun> for more information about site
+default.  See the documentation for B<-f> in
+L<perlrun|perlrun/"Command Switches"> for more information about site
 customization.
 
 =item $EXECUTABLE_NAME
