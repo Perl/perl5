@@ -440,7 +440,7 @@ behaves just like B<-e>, except that it implicitly enables all
 optional features (in the main compilation unit). See L<feature>.
 
 =item B<-f>
-X<-f>
+X<-f> X<sitecustomize> X<sitecustomize.pl>
 
 Disable executing F<$Config{sitelib}/sitecustomize.pl> at startup.
 
