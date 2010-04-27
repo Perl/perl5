@@ -30,6 +30,7 @@ you should reset the version numbers to the next blead series.
  July 20         -   David Golden
  August 20       -   Florian Ragwitz
  September 20    -   Steve Hay
+ October 20      -   Tatsuhiko Miyagawa
 
 =head1 VICTIMS
 
@@ -47,6 +48,7 @@ David Golden <F<dagolden@cpan.org>>
 Philippe Bruhat <F<book@cpan.org>>
 Matt Trout <F<mst@shadowcat.co.uk>>
 Florian Ragwitz <F<rafl@debian.org>>
+Tatsuhiko Miyagawa <F<miyagawa@bulknews.net>>
 
 =head2 Reticent victims
 
