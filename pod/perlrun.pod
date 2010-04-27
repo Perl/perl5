@@ -450,6 +450,28 @@ This is a hook that allows the sysadmin to customize how perl behaves.
 It can for instance be used to add entries to the @INC array to make perl
 find modules in non-standard locations.
 
+Perl actually inserts the following code:
+
+    BEGIN {
+        do { local $!; -f "$Config{sitelib}/sitecustomize.pl"; }
+            && do "$Config{sitelib}/sitecustomize.pl";
+    }
+
+Since it is an actual C<do> (not a C<require>), F<sitecustomize.pl>
+doesn't need to return a true value. The code is run in package C<main>,
+in its own lexical scope. However, if the script dies, C<$@> will not
+be set.
+
+The value of C<$Config{sitelib}> is also determined in C code and not
+read from C<Config.pm>, which is not loaded.
+
+The code is executed B<very> early. For example, any changes made to
+C<@INC> will show up in the output of `perl -V`. Of course, C<END>
+blocks will be likewise executed very late.
+
+To determine at runtime if this capability has been compiled in your
+perl, you can check the value of C<$Config{usesitecustomize}>.
+
 =item B<-F>I<pattern>
 X<-F>
 
