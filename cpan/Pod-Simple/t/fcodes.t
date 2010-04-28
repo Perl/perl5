@@ -7,7 +7,7 @@ BEGIN {
 
 use strict;
 use Test;
-BEGIN { plan tests => 21 };
+BEGIN { plan tests => 23 };
 
 #use Pod::Simple::Debug (5);
 
@@ -81,22 +81,28 @@ ok( Pod::Simple::XMLOutStream->_out("=pod\n\nF<< a >>C<<< b >>>I<<<< c >>>>B<< d
 
 print "# Without any nesting, but with Z's, and odder whitespace...\n";
 ok( Pod::Simple::XMLOutStream->_out("=pod\n\nF<< aZ<> >>C<<< Z<>b >>>I<<<< c  >>>>B<< d \t >>X<<\ne >>\n"),
-  '<Document><Para><F>aZ&#60;&#62;</F><C>Z&#60;&#62;b</C><I>c</I><B>d</B><X>e</X></Para></Document>'
+  '<Document><Para><F>a</F><C>b</C><I>c</I><B>d</B><X>e</X></Para></Document>'
 );
 
 print "# With nesting and Z's, and odder whitespace...\n";
 ok( Pod::Simple::XMLOutStream->_out("=pod\n\nF<< aZ<> >>C<<< Z<>bZ<>B<< d \t >>X<<\ne >> >>>I<<<< c  >>>>\n"),
- "<Document><Para><F>aZ&#60;&#62;</F><C>Z&#60;&#62;bZ&#60;&#62;B&#60;&#60; d &#62;&#62;X&#60;&#60; e &#62;&#62;</C><I>c</I></Para></Document>"
+ "<Document><Para><F>a</F><C>b<B>d</B><X>e</X></C><I>c</I></Para></Document>"
 );
 
-print "# Regression https://rt.cpan.org/Ticket/Display.html?id=12239\n";
+print "# Regression https://rt.cpan.org/Ticket/Display.html?id=55602 (vs 12239)\n";
 ok( Pod::Simple::XMLOutStream->_out("=pod\n\nC<<< foo->bar >>>\n"),
  '<Document><Para><C>foo-&#62;bar</C></Para></Document>'
 );
 ok( Pod::Simple::XMLOutStream->_out("=pod\n\nC<<< C<foo> >>>\n"),
- '<Document><Para><C>C&#60;foo&#62;</C></Para></Document>'
+ '<Document><Para><C><C>foo</C></C></Para></Document>'
 );
 ok( Pod::Simple::XMLOutStream->_out("=pod\n\nC<<< C<<foo>> >>>\n"),
+ '<Document><Para><C><C>&#60;foo</C>&#62;</C></Para></Document>'
+);
+ok( Pod::Simple::XMLOutStream->_out("=pod\n\nC<<< CZ<><<foo>> >>>\n"),
+ '<Document><Para><C>C&#60;&#60;foo&#62;&#62;</C></Para></Document>'
+);
+ok( Pod::Simple::XMLOutStream->_out("=pod\n\nC<<< CE<lt><foo>> >>>\n"),
  '<Document><Para><C>C&#60;&#60;foo&#62;&#62;</C></Para></Document>'
 );
 

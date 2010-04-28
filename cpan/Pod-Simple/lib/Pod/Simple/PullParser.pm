@@ -1,7 +1,7 @@
 
 require 5;
 package Pod::Simple::PullParser;
-$VERSION = '3.13';
+$VERSION = '3.14';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
@@ -205,7 +205,6 @@ sub get_token {
   return shift @{$self->{'token_buffer'}}; # that's an undef if empty
 }
 
-use UNIVERSAL ();
 sub unget_token {
   my $self = shift;
   DEBUG and print "Ungetting ", scalar(@_), " tokens: ",

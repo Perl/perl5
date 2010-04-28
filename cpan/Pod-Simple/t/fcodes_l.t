@@ -337,32 +337,32 @@ print "#\n# Now some very complex L<text|stuff> tests with variant syntax...\n";
 
 
 ok( $x->_out(qq{=pod\n\nL<< Perl B<<< Error E<77>essages >>>|perldiag >>\n}),
- '<Document><Para><L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;</Para></Document>',
+ '<Document><Para><L to="perldiag" type="pod">Perl <B>Error Messages</B></L></Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nL<< Perl\nB<<< Error\nE<77>essages >>>|perldiag >>\n}),
- '<Document><Para><L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;</Para></Document>'
+ '<Document><Para><L to="perldiag" type="pod">Perl <B>Error Messages</B></L></Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nL<< Perl\nB<<< Error\t  E<77>essages >>>|perldiag >>\n}),
- '<Document><Para><L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;</Para></Document>'
+ '<Document><Para><L to="perldiag" type="pod">Perl <B>Error Messages</B></L></Para></Document>'
 );
 
 
 ok( $x->_out(qq{=pod\n\nL<< SWITCH B<<< E<115>tatements >>>|perlsyn/"Basic I<<<< BLOCKs >>>> and Switch StatementE<115>" >>\n}),
- '<Document><Para><L content-implicit="yes" section="SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements" type="pod">&#34;SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements&#34;</L>&#62;|perlsyn/&#34;Basic <I>BLOCKs</I> and Switch Statements&#34; &#62;&#62;</Para></Document>'
+ '<Document><Para><L section="Basic BLOCKs and Switch Statements" to="perlsyn" type="pod">SWITCH <B>statements</B></L></Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nL<< SWITCH B<<< E<115>tatements >>>|perlsyn/Basic I<<<< BLOCKs >>>> and Switch StatementE<115> >>\n}),
- '<Document><Para><L content-implicit="yes" section="SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements" type="pod">&#34;SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements&#34;</L>&#62;|perlsyn/Basic <I>BLOCKs</I> and Switch Statements &#62;&#62;</Para></Document>'
+ '<Document><Para><L section="Basic BLOCKs and Switch Statements" to="perlsyn" type="pod">SWITCH <B>statements</B></L></Para></Document>'
 );
 
 
 ok( $x->_out(qq{=pod\n\nL<<< the F<< various >> attributes|/"Member Data" >>>\n}),
-  '<Document><Para><L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L></Para></Document>'
+ '<Document><Para><L section="Member Data" type="pod">the <F>various</F> attributes</L></Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nL<<< the F<< various >> attributes|/Member Data >>>\n}),
- '<Document><Para><L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L></Para></Document>'
+ '<Document><Para><L section="Member Data" type="pod">the <F>various</F> attributes</L></Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nL<<< the F<< various >> attributes|"Member Data" >>>\n}),
- '<Document><Para><L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L></Para></Document>'
+ '<Document><Para><L section="Member Data" type="pod">the <F>various</F> attributes</L></Para></Document>'
 );
 
 ###########################################################################
@@ -371,51 +371,51 @@ print "#\n# Now some very complex L<text|stuff> tests with variant syntax and te
 
 
 ok( $x->_out(qq{=pod\n\nI like L<< Perl B<<< Error E<77>essages >>>|perldiag >>.\n}),
- '<Document><Para>I like <L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;.</Para></Document>'
+ '<Document><Para>I like <L to="perldiag" type="pod">Perl <B>Error Messages</B></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<< Perl\nB<<< Error\nE<77>essages >>>|perldiag >>.\n}),
- '<Document><Para>I like <L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;.</Para></Document>'
+ '<Document><Para>I like <L to="perldiag" type="pod">Perl <B>Error Messages</B></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<< Perl\nB<<< Error\t  E<77>essages >>>|perldiag >>.\n}),
- '<Document><Para>I like <L content-implicit="yes" section="Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages" type="pod">&#34;Perl B&#60;&#60;&#60; Error E&#60;77&#62;essages&#34;</L>&#62;|perldiag &#62;&#62;.</Para></Document>'
+ '<Document><Para>I like <L to="perldiag" type="pod">Perl <B>Error Messages</B></L>.</Para></Document>'
 );
 
 
 ok( $x->_out(qq{=pod\n\nI like L<< SWITCH B<<< E<115>tatements >>>|perlsyn/"Basic I<<<< BLOCKs >>>> and Switch StatementE<115>" >>.\n}),
- '<Document><Para>I like <L content-implicit="yes" section="SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements" type="pod">&#34;SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements&#34;</L>&#62;|perlsyn/&#34;Basic <I>BLOCKs</I> and Switch Statements&#34; &#62;&#62;.</Para></Document>'
+ '<Document><Para>I like <L section="Basic BLOCKs and Switch Statements" to="perlsyn" type="pod">SWITCH <B>statements</B></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<< SWITCH B<<< E<115>tatements >>>|perlsyn/Basic I<<<< BLOCKs >>>> and Switch StatementE<115> >>.\n}),
- '<Document><Para>I like <L content-implicit="yes" section="SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements" type="pod">&#34;SWITCH B&#60;&#60;&#60; E&#60;115&#62;tatements&#34;</L>&#62;|perlsyn/Basic <I>BLOCKs</I> and Switch Statements &#62;&#62;.</Para></Document>'
+ '<Document><Para>I like <L section="Basic BLOCKs and Switch Statements" to="perlsyn" type="pod">SWITCH <B>statements</B></L>.</Para></Document>'
 );
 
 
 ok( $x->_out(qq{=pod\n\nI like L<<< the F<< various >> attributes|/"Member Data" >>>.\n}),
- '<Document><Para>I like <L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L>.</Para></Document>'
+ '<Document><Para>I like <L section="Member Data" type="pod">the <F>various</F> attributes</L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< the F<< various >> attributes|/Member Data >>>.\n}),
- '<Document><Para>I like <L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L>.</Para></Document>'
+ '<Document><Para>I like <L section="Member Data" type="pod">the <F>various</F> attributes</L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< the F<< various >> attributes|"Member Data" >>>.\n}),
- '<Document><Para>I like <L section="Member Data" type="pod">the F&#60;&#60; various &#62;&#62; attributes</L>.</Para></Document>'
+ '<Document><Para>I like <L section="Member Data" type="pod">the <F>various</F> attributes</L>.</Para></Document>'
 );
 
 ok( $x->_out(qq{=pod\n\nI like L<<< B<text>s|http://text.com >>>.\n}),
-'<Document><Para>I like <L to="http://text.com" type="url">B&#60;text&#62;s</L>.</Para></Document>'
+'<Document><Para>I like <L to="http://text.com" type="url"><B>text</B>s</L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< text|https://text.com/1/2 >>>.\n}),
 '<Document><Para>I like <L to="https://text.com/1/2" type="url">text</L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< I<text>|http://text.com >>>.\n}),
-'<Document><Para>I like <L to="http://text.com" type="url">I&#60;text&#62;</L>.</Para></Document>'
+'<Document><Para>I like <L to="http://text.com" type="url"><I>text</I></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< C<text>|http://text.com >>>.\n}),
-'<Document><Para>I like <L to="http://text.com" type="url">C&#60;text&#62;</L>.</Para></Document>'
+'<Document><Para>I like <L to="http://text.com" type="url"><C>text</C></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< I<tI<eI<xI<t>>>>|mailto:earlE<64>text.com >>>.\n}),
-'<Document><Para>I like <L to="mailto:earlE&#60;64&#62;text.com" type="url">I&#60;tI&#60;eI&#60;xI&#60;t&#62;&#62;&#62;&#62;</L>.</Para></Document>'
+'<Document><Para>I like <L to="mailto:earl@text.com" type="url"><I>t<I>e<I>x<I>t</I></I></I></I></L>.</Para></Document>'
 );
 ok( $x->_out(qq{=pod\n\nI like L<<< textZ<>|http://text.com >>>.\n}),
-'<Document><Para>I like <L to="http://text.com" type="url">textZ&#60;&#62;</L>.</Para></Document>'
+'<Document><Para>I like <L to="http://text.com" type="url">text</L>.</Para></Document>'
 );
 
 

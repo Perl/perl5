@@ -1,6 +1,17 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2009-04-27
+	* Release 3.14
+
+	Removed explicit loading of UNIVERSAL. RJBS.
+
+	Reversed the change applied in release 3.09 to fix RT #12239. POD
+	tag found inside a complex POD tag (e.g., "C<<< I<foo> >>>") is
+	again parsed as a tag embedded in a tag instead of text and
+	entities. The previous interpretation of `perldoc perlpod` was
+	mistaken. (RT #55602 from Christopher J. Madsen).
+
 2009-12-17   David E. Wheeler <david@justatheory.org>
 	* Release 3.13
 

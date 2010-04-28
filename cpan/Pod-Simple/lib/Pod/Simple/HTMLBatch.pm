@@ -5,7 +5,7 @@ use strict;
 use vars qw( $VERSION $HTML_RENDER_CLASS $HTML_EXTENSION
  $CSS $JAVASCRIPT $SLEEPY $SEARCH_CLASS @ISA
 );
-$VERSION = '3.13';
+$VERSION = '3.14';
 @ISA = ();  # Yup, we're NOT a subclass of Pod::Simple::HTML!
 
 # TODO: nocontents stylesheets. Strike some of the color variations?
@@ -13,8 +13,6 @@ $VERSION = '3.13';
 use Pod::Simple::HTML ();
 BEGIN {*esc = \&Pod::Simple::HTML::esc }
 use File::Spec ();
-use UNIVERSAL ();
-  # "Isn't the Universe an amazing place?  I wouldn't live anywhere else!"
 
 use Pod::Simple::Search;
 $SEARCH_CLASS ||= 'Pod::Simple::Search';
