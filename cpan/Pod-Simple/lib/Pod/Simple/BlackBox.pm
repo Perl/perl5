@@ -23,7 +23,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.13';
+$VERSION = '3.14';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;
@@ -1701,30 +1701,15 @@ sub _treelet_from_formatting_codes {
     if(defined $1) {
       if(defined $2) {
         DEBUG > 3 and print "Found complex start-text code \"$1\"\n";
-        # signal that we're looking for simple unless we're in complex.
-        if ($stack[-1]) {
-            # We're in complex already. It's just stuff.
-            DEBUG > 4 and print " It's just stuff.\n";
-            push @{ $lineage[-1] }, $1;
-        } else {
-            # length of the necessary complex end-code string
-            push @stack, length($2) + 1;
-            push @lineage, [ substr($1,0,1), {}, ];  # new node object
-            push @{ $lineage[-2] }, $lineage[-1];
-        }
+        push @stack, length($2) + 1; 
+          # length of the necessary complex end-code string
       } else {
         DEBUG > 3 and print "Found simple start-text code \"$1\"\n";
-        if ($stack[-1]) {
-            # We're in complex already. It's just stuff.
-            DEBUG > 4 and print " It's just stuff.\n";
-            push @{ $lineage[-1] }, $1;
-        } else {
-            # signal that we're looking for simple.
-            push @stack, 0;
-            push @lineage, [ substr($1,0,1), {}, ];  # new node object
-            push @{ $lineage[-2] }, $lineage[-1];
-        }
+        push @stack, 0;  # signal that we're looking for simple
       }
+      push @lineage, [ substr($1,0,1), {}, ];  # new node object
+      push @{ $lineage[-2] }, $lineage[-1];
+      
     } elsif(defined $4) {
       DEBUG > 3 and print "Found apparent complex end-text code \"$3$4\"\n";
       # This is where it gets messy...
@@ -1828,7 +1813,6 @@ sub stringify_lol {  # function: stringify_lol($lol)
 
 sub _stringify_lol {  # the real recursor
   my($lol, $to) = @_;
-  use UNIVERSAL ();
   for(my $i = 2; $i < @$lol; ++$i) {
     if( ref($lol->[$i] || '') and UNIVERSAL::isa($lol->[$i], 'ARRAY') ) {
       _stringify_lol( $lol->[$i], $to);  # recurse!

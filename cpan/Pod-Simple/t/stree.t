@@ -125,7 +125,6 @@ sub deq { # deep-equals
   return '' if ref($_[0]) ne ref($_[1]); # unequal referentiality
   return $_[0] eq $_[1] unless ref $_[0];
   # So it's a ref:
-  use UNIVERSAL;
   if(UNIVERSAL::isa($_[0], 'ARRAY')) {
     return '' unless @{$_[0]} == @{$_[1]};
     for(my $i = 0; $i < @{$_[0]}; $i++) {

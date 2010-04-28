@@ -83,7 +83,7 @@ $x->preserve_whitespace(1);
 # RT#25679
 ok(
   $x->_out(<<END
-=head1 The Tk::mega manpage showed me how C<< S< > foo >> is being rendered
+=head1 The Tk::mega manpage showed me how C<< SE<lt> > foo >> is being rendered
 
 Both pod2text and pod2man S<    > lose the rest of the line
 
