@@ -4299,7 +4299,9 @@ PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
 #define PERL_ARGS_ASSERT_PTR_TABLE_SPLIT	\
 	assert(tbl)
 
-PERL_CALLCONV void	Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl);
+PERL_CALLCONV void	Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
+			__attribute__deprecated__;
+
 PERL_CALLCONV void	Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl);
 #if defined(USE_ITHREADS)
 #  if defined(HAVE_INTERP_INTERN)

@@ -10846,6 +10846,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
 }
 
 /* remove all the entries from a ptr table */
+/* Deprecated - will be removed post 5.14 */
 
 void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
@@ -10874,10 +10875,21 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
 void
 Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
 {
+    struct ptr_tbl_arena *arena;
+
     if (!tbl) {
         return;
     }
-    ptr_table_clear(tbl);
+
+    arena = tbl->tbl_arena;
+
+    while (arena) {
+	struct ptr_tbl_arena *next = arena->next;
+
+	Safefree(arena);
+	arena = next;
+    }
+
     Safefree(tbl->tbl_ary);
     Safefree(tbl);
 }
