@@ -131,6 +131,7 @@ my $default_share = [qw[
     &version::vxs::declare
     &version::vxs::qv
     &version::vxs::_VERSION
+    &version::vxs::stringify
     &version::vxs::new
     &version::vxs::parse
 ]), ($] >= 5.011 && qw[
