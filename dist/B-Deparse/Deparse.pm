@@ -23,7 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.96;
+$VERSION = 0.97;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1380,7 +1380,6 @@ sub pp_nextstate {
     $self->{'curcop'} = $op;
     my @text;
     push @text, $self->cop_subs($op);
-    push @text, $op->label . ": " if $op->label;
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
@@ -1433,6 +1432,8 @@ sub pp_nextstate {
 	push @text, "\f#line " . $op->line .
 	  ' "' . $op->file, qq'"\n';
     }
+
+    push @text, $op->label . ": " if $op->label;
 
     return join("", @text);
 }
