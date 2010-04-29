@@ -358,6 +358,7 @@ sub reval {
                ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
                : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
     _clean_stash($root.'::') if $sg != sub_generation();
+    $obj->wrap_code_refs_within(@subret);
     return (wantarray) ? @subret : $subret[0];
 }
 
@@ -436,6 +437,7 @@ sub rdo {
                ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
                : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
     _clean_stash($root.'::') if $sg != sub_generation();
+    $obj->wrap_code_refs_within(@subret);
     return (wantarray) ? @subret : $subret[0];
 }
 
