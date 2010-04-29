@@ -3,9 +3,8 @@ package Safe;
 use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype);
-use B qw(sub_generation);
 
-$Safe::VERSION = "2.25";
+$Safe::VERSION = "2.27";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -32,6 +31,18 @@ BEGIN { eval q{
     use Carp::Heavy;
 } }
 
+use B ();
+BEGIN {
+    no strict 'refs';
+    if (defined &B::sub_generation) {
+        *sub_generation = \&B::sub_generation;
+    }
+    else {
+        # fake sub generation changing for perls < 5.8.9
+        my $sg; *sub_generation = sub { ++$sg };
+    }
+}
+
 use Opcode 1.01, qw(
     opset opset_to_ops opmask_add
     empty_opset full_opset invert_opset verify_opset
@@ -55,7 +66,7 @@ require utf8;
 # and also loads the ToFold SWASH.
 # (Swashes are cached internally by perl in PL_utf8_* variables
 # independent of being inside/outside of Safe. So once loaded they can be)
-do { my $unicode = pack('U',0xC4).'1a'; $unicode =~ /\xE4/i; };
+do { my $a = pack('U',0xC4); my $b = chr 0xE4; utf8::upgrade $b; $a =~ /$b/i };
 # now we can safely include utf8::SWASHNEW in $default_share defined below.
 
 my $default_root  = 0;
@@ -120,6 +131,7 @@ my $default_share = [qw[
     &version::vxs::declare
     &version::vxs::qv
     &version::vxs::_VERSION
+    &version::vxs::stringify
     &version::vxs::new
     &version::vxs::parse
 ]), ($] >= 5.011 && qw[
@@ -346,6 +358,7 @@ sub reval {
                ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
                : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
     _clean_stash($root.'::') if $sg != sub_generation();
+    $obj->wrap_code_refs_within(@subret);
     return (wantarray) ? @subret : $subret[0];
 }
 
@@ -424,6 +437,7 @@ sub rdo {
                ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
                : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
     _clean_stash($root.'::') if $sg != sub_generation();
+    $obj->wrap_code_refs_within(@subret);
     return (wantarray) ? @subret : $subret[0];
 }
 
@@ -637,9 +651,9 @@ expression evaluated, or a return statement may be used, just as with
 subroutines and B<eval()>. The context (list or scalar) is determined
 by the caller as usual.
 
-This behaviour differs from the beta distribution of the Safe extension
-where earlier versions of perl made it hard to mimic the return
-behaviour of the eval() command and the context was always scalar.
+If the return value of reval() is (or contains) any code reference,
+those code references are wrapped to be themselves executed always
+in the compartment. See L</wrap_code_refs_within>.
 
 The formerly undocumented STRICT argument sets strictness: if true
 'use strict;' is used, otherwise it uses 'no strict;'. B<Note>: if

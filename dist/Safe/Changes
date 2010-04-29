@@ -1,3 +1,10 @@
+2.27 Thu Apr 29 2010
+    - Wrap coderefs returned by reval() and rdo()
+    - Add even more version::vxs routines to the default share
+
+2.26 Mon Mar  9 2010
+    - Restore compatibility with perls < 5.8.9
+
 2.25 Sun Mar  7 2010
     - More security fixes by Nick Cleaton
 

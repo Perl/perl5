@@ -16,12 +16,12 @@ use Opcode qw(full_opset);
 pass;
 
 my $safe = Safe->new('PLPerl');
-$safe->permit(qw(pack));
+$safe->deny_only();
 
 # Expression that triggers require utf8 and call to SWASHNEW.
 # Fails with "Undefined subroutine PLPerl::utf8::SWASHNEW called"
 # if SWASHNEW is not shared, else returns true if unicode logic is working.
-my $trigger = q{ my $a = pack('U',0xC4); $a =~ /\\xE4/i };
+my $trigger = q{ my $a = pack('U',0xC4); my $b = chr 0xE4; utf8::upgrade $b; $a =~ /$b/i };
 
 ok $safe->reval( $trigger ), 'trigger expression should return true';
 is $@, '', 'trigger expression should not die';

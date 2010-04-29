@@ -33,13 +33,7 @@ EOS
 is $@, '', 'reval should not fail';
 is ref $func, 'CODE', 'reval should return a CODE ref';
 
-# $func1 will work in non-threaded perl
-# but RT#60374 "Safe.pm sort {} bug with -Dusethreads"
-# means the sorting won't work unless we wrap the code ref
-# such that it's executed with Safe 'in effect' at runtime
-my $func2 = $safe->wrap_code_ref($func1);
-
-my ($l_sorted, $p_sorted) = $func2->(3,1,2);
+my ($l_sorted, $p_sorted) = $func1->(3,1,2);
 is $l_sorted, "1,2,3";
 is $p_sorted, "1,2,3";
 
@@ -57,5 +51,6 @@ is $@, 42, 'successful closure call should not alter $@';
     local $SIG{__WARN__} = sub { $warns++ };
     ok !eval { $die_func->("died\n"); 1 }, 'should die';
     is $@, "died\n", '$@ should be set correctly';
+    local $TODO = "Shouldn't warn";
     is $warns, 0;
 }
