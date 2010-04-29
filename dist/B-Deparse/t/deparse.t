@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 84;
+use Test::More tests => 85;
 use Config ();
 
 use B::Deparse;
@@ -628,3 +628,8 @@ my($r, $s, @a);
 $r = qr/foo/;
 @a = split(/$r/, $s, 0);
 ();
+####
+{
+    package Foo;
+    label: print 123;
+}
