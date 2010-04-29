@@ -3,6 +3,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+typedef SV *SVREF;
+typedef PTR_TBL_t *XS__APItest__PtrTable;
 
 /* for my_cxt tests */
 
@@ -546,6 +548,45 @@ sub DELETE   { delete $_[0]->{$_[1]} }
 sub CLEAR    { %{$_[0]} = () }
 
 =cut
+
+MODULE = XS::APItest::PtrTable	PACKAGE = XS::APItest::PtrTable PREFIX = ptr_table_
+
+void
+ptr_table_new(classname)
+const char * classname
+    PPCODE:
+    PUSHs(sv_setref_pv(sv_newmortal(), classname, (void*)ptr_table_new()));
+
+void
+DESTROY(table)
+XS::APItest::PtrTable table
+    CODE:
+    ptr_table_free(table);
+
+void
+ptr_table_store(table, old, new)
+XS::APItest::PtrTable table
+SVREF old
+SVREF new
+   CODE:
+   ptr_table_store(table, old, new);
+
+UV
+ptr_table_fetch(table, old)
+XS::APItest::PtrTable table
+SVREF old
+   CODE:
+   RETVAL = PTR2UV(ptr_table_fetch(table, old));
+   OUTPUT:
+   RETVAL
+
+void
+ptr_table_split(table)
+XS::APItest::PtrTable table
+
+void
+ptr_table_clear(table)
+XS::APItest::PtrTable table
 
 MODULE = XS::APItest		PACKAGE = XS::APItest
 
