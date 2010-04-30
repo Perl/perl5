@@ -838,8 +838,8 @@ CFGH_TMPL	= config_H.gc64nox
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
 .ENDIF
-PERLIMPLIB	= ..\libperl511$(a)
-PERLSTATICLIB	= ..\libperl511s$(a)
+PERLIMPLIB	= ..\libperl513$(a)
+PERLSTATICLIB	= ..\libperl513s$(a)
 
 .ELSE
 
