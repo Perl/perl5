@@ -171,6 +171,25 @@ unless ( IPC::Cmd->can_use_run_forked ) {
   ok($r->{'stderr'}, "stderr: " . $r->{'stderr'});
 }
 
+
+# try discarding the out+err
+{
+  my $out;
+  my $cmd = "echo out ; echo err >&2";
+  my $r = run_forked(
+        $cmd,
+    {   discard_output => 1,
+        stderr_handler => sub { $out .= shift },
+        stdout_handler => sub { $out .= shift }
+    });
+
+  ok(ref($r) eq 'HASH', "executed: $cmd");
+  ok(!$r->{'stdout'}, "stdout discarded");
+  ok(!$r->{'stderr'}, "stderr discarded");
+  ok($out =~ m/out/, "stdout handled");
+  ok($out =~ m/err/, "stderr handled");
+}
+
     
 __END__
 ### special call to check that output is interleaved properly
