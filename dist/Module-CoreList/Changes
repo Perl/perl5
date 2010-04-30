@@ -1,3 +1,16 @@
+2.31_01 Fri Apr 30 2010
+  - [rt.cpan.org #56740] Format Perl versions >= 5.6.0 as X.Y.Z (schwern)
+  - Functional interface amended to make calling conventions consistent
+    (bingos)
+  - Documented all functions and all hash structures (bingos)
+  - Fixed functions with edge-case involving querying for Module::CoreList
+    itself. Pointed out by Ilmari.
+  - Added removed_from() and removed_from_by_date() functions 
+    for querying which release a module was removed from core. (bingos)
+  - Amended corelist utility to use new removed from functions when
+    stating when a module entered core ( and when it left it ). (bingos)
+  - Added tests to the testsuite to cover the edge-cases and new funcs. (bingos)
+
 2.31    Sun Mar 20 2010
   - Updated for 5.13.0
 
