@@ -176,6 +176,11 @@ Currently, warnings can only be enabled or disabled by category. There
 are times when it would be useful to quash a single warning, not a
 whole category.
 
+=head2 document diagnostics
+
+Many diagnostic messages are not currently documented.  The list is at the end
+of t/porting/diag.t.
+
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills
