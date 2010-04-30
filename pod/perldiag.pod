@@ -1534,12 +1534,13 @@ you called it with no args and both C<$@> and C<$_> were empty.
 
 See Server error.
 
-=item Dot after %s literal is concatenation
+=item Dot after %s literal is deprecated concatenation
 
-(D) You had something like 0x123.456 in your code.  This is currently
+(D deprecated, syntax) You had something like 0x123.456 in your code.
+This is currently
 parsed as the hexadecimal number 0x123 concatenated with the decimal
-number 456, not 0x123 + 0x456/0x1000 -- we only support decimal
-decimal points.  If you meant it to be a fraction, you'll need to use
+number 456, not the fraction 0x123 + 0x456/0x1000 -- we only support decimal
+fractions.  If you meant it to be a fraction, you'll need to use
 Math::BigFloat's from_hex (or friends).  If you meant it to be
 concatenation, just put spaces around the dot to make it clearer.  In
 5.14.0, we expect to change this to mean a hex fraction.  (Of course,

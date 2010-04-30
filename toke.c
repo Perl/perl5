@@ -13014,6 +13014,18 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 		switch (*s) {
 
+		case '.':
+		    /* Dot here is historically concat, not a radix point.
+		       Deprecate that; it's confusing, and gets in the way of
+		       hex(ish) fractions... but '..' is OK. */
+		    if (s[1] != '.') {
+			Perl_ck_warner_d(aTHX_
+			    packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			    "Dot after %s literal is deprecated concatenation",
+			    base);
+		    }
+		    /* FALL THROUGH */
+
 		/* if we don't mention it, we're done */
 		default:
 		    goto out;
@@ -13094,15 +13106,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    /* final misplaced underbar check */
 	    if (s[-1] == '_') {
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
-	    }
-
-	    /* Dot here is historically concat, not a radix point.
-	       Deprecate that; it's confusing, and gets in the way of
-	       hex(ish) fractions... but '..' is OK. */
-	    if (s[0] == '.' &&
-		s[1] != '.') {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			"Dot after %s literal is concatenation", base);
 	    }
 
 	    sv = newSV(0);
