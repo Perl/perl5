@@ -564,19 +564,19 @@ XS::APItest::PtrTable table
     ptr_table_free(table);
 
 void
-ptr_table_store(table, old, new)
+ptr_table_store(table, from, to)
 XS::APItest::PtrTable table
-SVREF old
-SVREF new
+SVREF from
+SVREF to
    CODE:
-   ptr_table_store(table, old, new);
+   ptr_table_store(table, from, to);
 
 UV
-ptr_table_fetch(table, old)
+ptr_table_fetch(table, from)
 XS::APItest::PtrTable table
-SVREF old
+SVREF from
    CODE:
-   RETVAL = PTR2UV(ptr_table_fetch(table, old));
+   RETVAL = PTR2UV(ptr_table_fetch(table, from));
    OUTPUT:
    RETVAL
 
