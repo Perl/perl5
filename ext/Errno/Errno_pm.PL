@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.11";
+our $VERSION = "1.12";
 
 my %err = ();
 my %wsa = ();
@@ -354,9 +354,7 @@ use strict;
 
 EDQ
    
-    my $len = 0;
     my @err = sort { $err{$a} <=> $err{$b} } keys %err;
-    map { $len = length if length > $len } @err;
 
     my $j = "\@EXPORT_OK = qw(" . join(" ",keys %err) . ");\n";
     $j =~ s/(.{50,70})\s/$1\n\t/g;
