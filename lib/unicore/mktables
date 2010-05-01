@@ -10821,7 +10821,7 @@ sub compile_perl() {
     my $Pc = $gc->table('Connector_Punctuation'); # 'Pc' Not in release 1
     $Word += $Pc if defined $Pc;
 
-    # There is no [[:Word:]], so the name doesn't begin with Posix.
+    # This is a Perl extension, so the name doesn't begin with Posix.
     $perl->add_match_table('PerlWord',
                     Description => '\w, restricted to ASCII = [A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
@@ -10860,7 +10860,7 @@ sub compile_perl() {
                 Initialize => $Blank + $VertSpace,
     );
     $perl->add_match_table("PosixSpace",
-                            Description => "\\t \\n, \\x0B, \\f, \\r, and ' '",
+                            Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
 
@@ -10878,7 +10878,7 @@ sub compile_perl() {
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
     $perl->add_match_table("PosixCntrl",
-                            Description => '[\x00-\x1F]',
+                            Description => "ASCII control characters: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EOM, SUB, ESC, FS, GS, RS, US, and DEL",
                             Initialize => $Cntrl & $ASCII,
                             );
 
@@ -10894,7 +10894,8 @@ sub compile_perl() {
                         Initialize => ~ ($Space + $controls),
                         );
     $perl->add_match_table("PosixGraph",
-                            Description => '[\x21-\x7E]',
+                            Description =>
+                                '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
 
@@ -10903,7 +10904,8 @@ sub compile_perl() {
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $perl->add_match_table("PosixPrint",
-                            Description => '[\x20-\x7E]',
+                            Description => 
+                              '[- 0-9A-Za-z!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
                             Initialize => $Print & $ASCII,
                             );
 
@@ -10912,7 +10914,7 @@ sub compile_perl() {
 
     # \p{punct} doesn't include the symbols, which posix does
     $perl->add_match_table('PosixPunct',
-        Description => 'Graphical characters that aren\'t Word characters = [\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]',
+        Description => '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & ($gc->table('Punctuation')
                                 + $gc->table('Symbol')),
         );
