@@ -1410,8 +1410,8 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'jdhedden',
 	'DISTRIBUTION'	=> 'JDHEDDEN/threads-1.77.tar.gz',
 	'FILES'		=> q[dist/threads],
-	'EXCLUDED'	=> [ qw(examples/pool.pl
-				t/pod.t
+	'EXCLUDED'	=> [ qr{^examples/},
+			     qw(t/pod.t
 				t/test.pl
 				threads.h
 			       ) ],
