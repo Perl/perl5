@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..3\n";
+print "1..4\n";
 
 $main::result = "";
 eval q{
@@ -33,5 +33,8 @@ eval q{
 	$main::result .= "b(".__PACKAGE__.")";
 };
 print $main::result eq "a(main)b(main)" ? "ok 3\n" : "not ok 3\n";
+
+eval q[package Foo {];
+print $@ =~ /\AMissing right curly / ? "ok 4\n" : "not ok 4\n";
 
 1;
