@@ -1050,13 +1050,18 @@ Deprecated use of my() in false conditional at - line 8.
 ########
 # op.c
 $[ = 1;
+($[) = 1;
 use warnings 'deprecated';
 $[ = 2;
+($[) = 2;
 no warnings 'deprecated';
 $[ = 3;
+($[) = 3;
 EXPECT
 Use of assignment to $[ is deprecated at - line 2.
-Use of assignment to $[ is deprecated at - line 4.
+Use of assignment to $[ is deprecated at - line 3.
+Use of assignment to $[ is deprecated at - line 5.
+Use of assignment to $[ is deprecated at - line 6.
 ########
 # op.c
 use warnings 'void';
