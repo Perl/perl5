@@ -156,22 +156,6 @@ empty, the best available package is loaded.
 (Note that processing of C<PERL_RL> for ornaments is in the discretion of the 
 particular used C<Term::ReadLine::*> package).
 
-=head1 CAVEATS
-
-It seems that using Term::ReadLine from Emacs minibuffer doesn't work
-quite right and one will get an error message like
-
-    Cannot open /dev/tty for read at ...
-
-One possible workaround for this is to explicitly open /dev/tty like this
-
-    open (FH, "/dev/tty" )
-      or eval 'sub Term::ReadLine::findConsole { ("&STDIN", "&STDERR") }';
-    die $@ if $@;
-    close (FH);
-
-or you can try using the 4-argument form of Term::ReadLine->new().
-
 =cut
 
 use strict;
@@ -235,6 +219,10 @@ sub findConsole {
 
     $consoleOUT = $console unless defined $consoleOUT;
     $console = "&STDIN" unless defined $console;
+    if ($console eq "/dev/tty" && !open(my $fh, "<", $console)) {
+      $console = "&STDIN";
+      undef($consoleOUT);
+    }
     if (!defined $consoleOUT) {
       $consoleOUT = defined fileno(STDERR) && $^O ne 'MSWin32' ? "&STDERR" : "&STDOUT";
     }
