@@ -1037,7 +1037,8 @@ PP(pp_aassign)
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;
 		assert(*relem);
-		sv = newSVsv(*relem);
+		sv = newSV(0);
+		sv_setsv(sv, *relem);
 		*(relem++) = sv;
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
