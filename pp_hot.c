@@ -1004,7 +1004,17 @@ PP(pp_aassign)
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
 	    if ((sv = *relem)) {
 		TAINT_NOT;	/* Each item is independent */
-		*relem = sv_mortalcopy(sv);
+
+		/* Dear TODO test in t/op/sort.t, I love you.
+		   (It's relying on a panic, not a "semi-panic" from newSVsv()
+		   and then an assertion failure below.)  */
+		if (SvIS_FREED(sv)) {
+		    Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
+			       (void*)sv);
+		}
+		/* Specifically *not* sv_mortalcopy(), as that will steal TEMPs,
+		   and we need a second copy of a temp here.  */
+		*relem = sv_2mortal(newSVsv(sv));
 	    }
 	}
     }

@@ -4063,9 +4063,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	         (!(flags & SV_NOSTEAL)) &&
 					/* and we're allowed to steal temps */
                  SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
-                 SvLEN(sstr) 	&&	  /* and really is a string */
-	    			/* and won't be needed again, potentially */
-	      !(PL_op && PL_op->op_type == OP_AASSIGN))
+                 SvLEN(sstr))             /* and really is a string */
 #ifdef PERL_OLD_COPY_ON_WRITE
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
