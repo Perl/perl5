@@ -339,7 +339,7 @@ EOF
 #
 
 package Errno;
-our (\@EXPORT_OK,\%EXPORT_TAGS,\@ISA,\$VERSION);
+our (\@ISA,\$VERSION);
 use Exporter ();
 use Config;
 use strict;
@@ -352,15 +352,36 @@ use strict;
 \$VERSION = eval \$VERSION;
 \@ISA = qw(Exporter);
 
+my %err;
+
+BEGIN {
+    %err = (
 EDQ
    
     my @err = sort { $err{$a} <=> $err{$b} } keys %err;
 
-    my $j = "\@EXPORT_OK = qw(" . join(" ",keys %err) . ");\n";
-    $j =~ s/(.{50,70})\s/$1\n\t/g;
-    print $j,"\n";
+    foreach $err (@err) {
+	print "\t$err => $err{$err},\n";
+    }
 
 print <<'ESQ';
+    );
+    # Generate proxy constant subroutines for all the values.
+    # We assume at this point that our symbol table is empty.
+    # Doing this before defining @EXPORT_OK etc means that even if a platform is
+    # crazy enough to define EXPORT_OK as an error constant, everything will
+    # still work, because the parser will upgrade the PCS to a real typeglob.
+    # We rely on the subroutine definitions below to update the internal caches.
+    # Don't use %each, as we don't want a copy of the value.
+    foreach my $name (keys %err) {
+        $Errno::{$name} = \$err{$name};
+    }
+}
+
+our (@EXPORT_OK, %EXPORT_TAGS);
+
+@EXPORT_OK = keys %err;
+
 %EXPORT_TAGS = (
     POSIX => [qw(
 ESQ
@@ -383,24 +404,14 @@ ESQ
     $k =~ s/(.{50,70})\s/$1\n\t/g;
     print "\t",$k,"\n    )]\n);\n\n";
 
-    foreach $err (@err) {
-	printf "sub %s () { %d }\n",,$err,$err{$err};
-    }
-
     print <<'ESQ';
-
-sub TIEHASH { bless [] }
+sub TIEHASH { bless \%err }
 
 sub FETCH {
-    my ($self, $errname) = @_;
-    my $proto = prototype("Errno::$errname");
-    my $errno = "";
-    if (defined($proto) && $proto eq "") {
-	no strict 'refs';
-	$errno = &$errname;
-        $errno = 0 unless $! == $errno;
-    }
-    return $errno;
+    my (undef, $errname) = @_;
+    return "" unless exists $err{$errname};
+    my $errno = $err{$errname};
+    return $errno == $! ? $errno : 0;
 }
 
 sub STORE {
@@ -412,29 +423,21 @@ sub STORE {
 *DELETE = \&STORE;
 
 sub NEXTKEY {
-    my($k,$v);
-    while(($k,$v) = each %Errno::) {
-	my $proto = prototype("Errno::$k");
-	last if (defined($proto) && $proto eq "");
-    }
-    $k
+    each %err;
 }
 
 sub FIRSTKEY {
-    my $s = scalar keys %Errno::;	# initialize iterator
-    goto &NEXTKEY;
+    my $s = scalar keys %err;	# initialize iterator
+    each %err;
 }
 
 sub EXISTS {
-    my ($self, $errname) = @_;
-    my $r = ref $errname;
-    my $proto = !$r || $r eq 'CODE' ? prototype($errname) : undef;
-    defined($proto) && $proto eq "";
+    my (undef, $errname) = @_;
+    exists $err{$errname};
 }
 
-tie %!, __PACKAGE__;
+tie %!, __PACKAGE__; # Returns an object, objects are true.
 
-1;
 __END__
 
 =head1 NAME
