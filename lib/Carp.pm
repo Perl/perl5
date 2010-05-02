@@ -428,7 +428,7 @@ Defaults to C<8>.
 
 =head2 $Carp::Verbose
 
-This variable makes C<carp> and C<cluck> generate stack backtraces
+This variable makes C<carp> and C<croak> generate stack backtraces
 just like C<cluck> and C<confess>.  This is how C<use Carp 'verbose'>
 is implemented internally.
 
