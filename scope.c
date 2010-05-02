@@ -285,7 +285,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     SSPUSHINT(SvFAKE(gv));
     SSPUSHPTR(GvGP(gv));
     SSPUSHPTR(SvREFCNT_inc(gv));
-    SSPUSHINT(SAVEt_GP);
+    SSPUSHUV(SAVEt_GP);
 
     /* Don't let the localized GV coerce into non-glob, otherwise we would
      * not be able to restore GP upon leave from context if that happened */
