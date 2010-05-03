@@ -4373,6 +4373,32 @@ the C<\Q> escape in double-quoted strings.
 
 If EXPR is omitted, uses C<$_>.
 
+quotemeta (and C<\Q> ... C<\E>) are useful when interpolating strings into
+regular expressions, because by default an interpolated variable will be
+considered a mini-regular expression. For example:
+
+    my $sentence = 'The quick brown fox jumped over the lazy dog';
+    my $substring = 'quick.*?fox';
+    $sentence =~ s{$substring}{big bad wolf};
+
+Will cause C<$sentence> to become C<'The big bad wolf jumped over...'>.
+
+On the other hand:
+
+    my $sentence = 'The quick brown fox jumped over the lazy dog';
+    my $substring = 'quick.*?fox';
+    $sentence =~ s{\Q$substring\E}{big bad wolf};
+
+Or:
+
+    my $sentence = 'The quick brown fox jumped over the lazy dog';
+    my $substring = 'quick.*?fox';
+    my $quoted_substring = quotemeta($substring);
+    $sentence =~ s{$quoted_substring}{big bad wolf};
+
+Will both leave the sentence as is. Normally, when accepting string input from
+the user, quotemeta() or C<\Q> must be used.
+
 =item rand EXPR
 X<rand> X<random>
 
