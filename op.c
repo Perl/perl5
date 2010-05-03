@@ -7746,8 +7746,14 @@ Perl_ck_shift(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SHIFT;
 
     if (!(o->op_flags & OPf_KIDS)) {
-	OP *argop = newUNOP(OP_RV2AV, 0,
-	    scalar(newGVOP(OP_GV, 0, CvUNIQUE(PL_compcv) ? PL_argvgv : PL_defgv)));
+	OP *argop;
+
+	if (!CvUNIQUE(PL_compcv)) {
+	    o->op_flags |= OPf_SPECIAL;
+	    return o;
+	}
+
+	argop = newUNOP(OP_RV2AV, 0, scalar(newGVOP(OP_GV, 0, PL_argvgv)));
 #ifdef PERL_MAD
 	OP * const oldo = o;
 	o = newUNOP(type, 0, scalar(argop));

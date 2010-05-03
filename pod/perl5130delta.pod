@@ -34,6 +34,12 @@ name such as ps, top and killall will recognize the name you set when
 assigning to C<$0>. The string you supply will be cut off at 16 bytes,
 this is a limitation imposed by Linux.
 
+=head2 Optimization of shift; and pop; calls without arguments
+
+Additional two OPs are not added anymore into op tree for shift and pop
+calls without argument (when it works on C<@_>). Makes C<shift;> 5%
+faster over C<shift @_;> on not threaded perl and 25% faster on threaded.
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules

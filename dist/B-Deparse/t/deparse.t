@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 85;
+use Test::More tests => 89;
 use Config ();
 
 use B::Deparse;
@@ -633,3 +633,15 @@ $r = qr/foo/;
     package Foo;
     label: print 123;
 }
+####
+shift;
+>>>>
+shift();
+####
+shift @_;
+####
+pop;
+>>>>
+pop();
+####
+pop @_;
