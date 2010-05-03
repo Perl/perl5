@@ -1736,7 +1736,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         }
                                             
                         if ( word ) {
-                            U8 *lpos= points[ (pointpos - trie->wordlen[word-1] ) % maxlen ];
+                            U8 *lpos= points[ (pointpos - trie->wordinfo[word].len) % maxlen ];
                             if (!leftmost || lpos < leftmost) {
                                 DEBUG_r(accepted_word=word);
                                 leftmost= lpos;
@@ -1810,7 +1810,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         }
                     }
                     if ( aho->states[ state ].wordnum ) {
-                        U8 *lpos = points[ (pointpos - trie->wordlen[aho->states[ state ].wordnum-1]) % maxlen ];
+                        U8 *lpos = points[ (pointpos - trie->wordinfo[aho->states[ state ].wordnum].len) % maxlen ];
                         if (!leftmost || lpos < leftmost) {
                             DEBUG_r(accepted_word=aho->states[ state ].wordnum);
                             leftmost = lpos;
@@ -2505,9 +2505,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 #define REPORT_CODE_OFF 32
 
 
-/* Make sure there is a test for this +1 options in re_tests */
-#define TRIE_INITAL_ACCEPT_BUFFLEN 4;
-
 #define CHRTEST_UNINIT -1001 /* c1/c2 haven't been calculated yet */
 #define CHRTEST_VOID   -1000 /* the c1/c2 "next char" test should be skipped */
 
@@ -3069,6 +3066,50 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             }
             /* FALL THROUGH */
 	case TRIE:
+	    /* the basic plan of execution of the trie is:
+	     * At the beginning, run though all the states, and
+	     * find the longest-matching word. Also remember the position
+	     * of the shortest matching word. For example, this pattern:
+	     *    1  2 3 4    5
+	     *    ab|a|x|abcd|abc
+	     * when matched against the string "abcde", will generate
+	     * accept states for all words except 3, with the longest
+	     * matching word being 4, and the shortest being 1 (with
+	     * the position being after char 1 of the string).
+	     *
+	     * Then for each matching word, in word order (i.e. 1,2,4,5),
+	     * we run the remainder of the pattern; on each try setting
+	     * the current position to the character following the word,
+	     * returning to try the next word on failure.
+	     *
+	     * We avoid having to build a list of words at runtime by
+	     * using a compile-time structure, wordinfo[].prev, which
+	     * gives, for each word, the previous accepting word (if any).
+	     * In the case above it would contain the mappings 1->2, 2->0,
+	     * 3->0, 4->5, 5->1.  We can use this table to generate, from
+	     * the longest word (4 above), a list of all words, by
+	     * following the list of prev pointers; this gives us the
+	     * unordered list 4,5,1,2. Then given the current word we have
+	     * just tried, we can go through the list and find the
+	     * next-biggest word to try (so if we just failed on word 2,
+	     * the next in the list is 4).
+	     *
+	     * Since at runtime we don't record the matching position in
+	     * the string for each word, we have to work that out for
+	     * each word we're about to process. The wordinfo table holds
+	     * the character length of each word; given that we recorded
+	     * at the start: the position of the shortest word and its
+	     * length in chars, we just need to move the pointer the
+	     * difference between the two char lengths. Depending on
+	     * Unicode status and folding, that's cheap or expensive.
+	     *
+	     * This algorithm is optimised for the case where are only a
+	     * small number of accept states, i.e. 0,1, or maybe 2.
+	     * With lots of accepts states, and having to try all of them,
+	     * it becomes quadratic on number of accept states to find all
+	     * the next words.
+	     */
+
 	    {
                 /* what type of TRIE am I? (utf8 makes this contextual) */
                 DECL_TRIE_TYPE(scan);
@@ -3105,76 +3146,62 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		STRLEN len = 0;
 		STRLEN foldlen = 0;
 		U8 *uscan = (U8*)NULL;
-		STRLEN bufflen=0;
-		SV *sv_accept_buff = NULL;
 		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+		U32 charcount = 0; /* how many input chars we have matched */
+		U32 accepted = 0; /* have we seen any accepting states? */
 
-	    	ST.accepted = 0; /* how many accepting states we have seen */
 		ST.B = next;
 		ST.jump = trie->jump;
 		ST.me = scan;
-	        /*
-        	   traverse the TRIE keeping track of all accepting states
-        	   we transition through until we get to a failing node.
-        	*/
+		ST.firstpos = NULL;
+		ST.longfold = FALSE; /* char longer if folded => it's harder */
+		ST.nextword = 0;
+
+		/* fully traverse the TRIE; note the position of the
+		   shortest accept state and the wordnum of the longest
+		   accept state */
 
 		while ( state && uc <= (U8*)PL_regeol ) {
                     U32 base = trie->states[ state ].trans.base;
                     UV uvc = 0;
                     U16 charid;
-                    /* We use charid to hold the wordnum as we don't use it
-                       for charid until after we have done the wordnum logic. 
-                       We define an alias just so that the wordnum logic reads
-                       more naturally. */
+		    U16 wordnum;
+                    wordnum = trie->states[ state ].wordnum;
 
-#define got_wordnum charid
-                    got_wordnum = trie->states[ state ].wordnum;
-
-		    if ( got_wordnum ) {
-			if ( ! ST.accepted ) {
-			    ENTER;
-			    SAVETMPS; /* XXX is this necessary? dmq */
-			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
-			    sv_accept_buff=newSV(bufflen *
-					    sizeof(reg_trie_accepted) - 1);
-			    SvCUR_set(sv_accept_buff, 0);
-			    SvPOK_on(sv_accept_buff);
-			    sv_2mortal(sv_accept_buff);
-			    SAVETMPS;
-			    ST.accept_buff =
-				(reg_trie_accepted*)SvPV_nolen(sv_accept_buff );
-			}
-			do {
-			    if (ST.accepted >= bufflen) {
-				bufflen *= 2;
-				ST.accept_buff =(reg_trie_accepted*)
-				    SvGROW(sv_accept_buff,
-				       	bufflen * sizeof(reg_trie_accepted));
+		    if (wordnum) { /* it's an accept state */
+			if (!accepted) {
+			    accepted = 1;
+			    /* record first match position */
+			    if (ST.longfold) {
+				ST.firstpos = (U8*)locinput;
+				ST.firstchars = 0;
 			    }
-			    SvCUR_set(sv_accept_buff,SvCUR(sv_accept_buff)
-				+ sizeof(reg_trie_accepted));
-
-
-			    ST.accept_buff[ST.accepted].wordnum = got_wordnum;
-			    ST.accept_buff[ST.accepted].endpos = uc;
-			    ++ST.accepted;
-		        } while (trie->nextword && (got_wordnum= trie->nextword[got_wordnum]));
+			    else {
+				ST.firstpos = uc;
+				ST.firstchars = charcount;
+			    }
+			}
+			if (!ST.nextword || wordnum < ST.nextword)
+			    ST.nextword = wordnum;
+			ST.topword = wordnum;
 		    }
-#undef got_wordnum 
 
 		    DEBUG_TRIE_EXECUTE_r({
 		                DUMP_EXEC_POS( (char *)uc, scan, do_utf8 );
 			        PerlIO_printf( Perl_debug_log,
-			            "%*s  %sState: %4"UVxf" Accepted: %4"UVxf" ",
+			            "%*s  %sState: %4"UVxf" Accepted: %c ",
 			            2+depth * 2, "", PL_colors[4],
-			            (UV)state, (UV)ST.accepted );
+			            (UV)state, (accepted ? 'Y' : 'N'));
 		    });
 
+		    /* read a char and goto next state */
 		    if ( base ) {
 			REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
 					     uscan, len, uvc, charid, foldlen,
 					     foldbuf, uniflags);
-
+			charcount++;
+			if (foldlen>0)
+			    ST.longfold = TRUE;
 			if (charid &&
 			     (base + charid > trie->uniquecharcount )
 			     && (base + charid - 1 - trie->uniquecharcount
@@ -3200,8 +3227,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
-		if (!ST.accepted )
+		if (!accepted)
 		   sayNO;
+
+		/* calculate total number of accept states */
+		{
+		    U16 w = ST.topword;
+		    accepted = 0;
+		    while (w) {
+			w = trie->wordinfo[w].prev;
+			accepted++;
+		    }
+		    ST.accepted = accepted;
+		}
 
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf( Perl_debug_log,
@@ -3209,16 +3247,42 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			REPORT_CODE_OFF + depth * 2, "",
 			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
 		);
+		goto trie_first_try; /* jump into the fail handler */
 	    }}
-            goto trie_first_try; /* jump into the fail handler */
 	    /* NOTREACHED */
-	case TRIE_next_fail: /* we failed - try next alterative */
+
+	case TRIE_next_fail: /* we failed - try next alternative */
             if ( ST.jump) {
                 REGCP_UNWIND(ST.cp);
 	        for (n = *PL_reglastparen; n > ST.lastparen; n--)
 		    PL_regoffs[n].end = -1;
 	        *PL_reglastparen = n;
 	    }
+	    if (!--ST.accepted) {
+	        DEBUG_EXECUTE_r({
+		    PerlIO_printf( Perl_debug_log,
+			"%*s  %sTRIE failed...%s\n",
+			REPORT_CODE_OFF+depth*2, "", 
+			PL_colors[4],
+			PL_colors[5] );
+		});
+		sayNO_SILENT;
+	    }
+	    {
+		/* Find next-highest word to process.  Note that this code
+		 * is O(N^2) per trie run (O(N) per branch), so keep tight */
+		register U32 min = 0;
+		register U32 word;
+		register U16 const nextword = ST.nextword;
+		register reg_trie_wordinfo * const wordinfo
+		    = ((reg_trie_data*)rexi->data->data[ARG(ST.me)])->wordinfo;
+		for (word=ST.topword; word; word=wordinfo[word].prev) {
+		    if (word > nextword && (!min || word < min))
+			min = word;
+		}
+		ST.nextword = min;
+	    }
+
           trie_first_try:
             if (do_cutgroup) {
                 do_cutgroup = 0;
@@ -3228,136 +3292,103 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             if ( ST.jump) {
                 ST.lastparen = *PL_reglastparen;
 	        REGCP_SET(ST.cp);
-            }	        
-	    if ( ST.accepted == 1 ) {
-		/* only one choice left - just continue */
-		DEBUG_EXECUTE_r({
-		    AV *const trie_words
-			= MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
-		    SV ** const tmp = av_fetch( trie_words, 
-		        ST.accept_buff[ 0 ].wordnum-1, 0 );
-		    SV *sv= tmp ? sv_newmortal() : NULL;
-		    
-		    PerlIO_printf( Perl_debug_log,
-			"%*s  %sonly one match left: #%d <%s>%s\n",
-			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
-			ST.accept_buff[ 0 ].wordnum,
-			tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0, 
-	                        PL_colors[0], PL_colors[1],
-	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
-                            ) 
-			: "not compiled under -Dr",
-			PL_colors[5] );
-		});
-		PL_reginput = (char *)ST.accept_buff[ 0 ].endpos;
-		/* in this case we free tmps/leave before we call regmatch
-		   as we wont be using accept_buff again. */
-		
-		locinput = PL_reginput;
-		nextchr = UCHARAT(locinput);
-    		if ( !ST.jump || !ST.jump[ST.accept_buff[0].wordnum]) 
-    		    scan = ST.B;
-    		else
-    		    scan = ST.me + ST.jump[ST.accept_buff[0].wordnum];
-		if (!has_cutgroup) {
-		    FREETMPS;
-		    LEAVE;
-                } else {
-                    ST.accepted--;
-                    PUSH_YES_STATE_GOTO(TRIE_next, scan);
-                }
-		
-		continue; /* execute rest of RE */
-	    }
-	    
-	    if ( !ST.accepted-- ) {
-	        DEBUG_EXECUTE_r({
-		    PerlIO_printf( Perl_debug_log,
-			"%*s  %sTRIE failed...%s\n",
-			REPORT_CODE_OFF+depth*2, "", 
-			PL_colors[4],
-			PL_colors[5] );
-		});
-		FREETMPS;
-		LEAVE;
-		sayNO_SILENT;
-		/*NOTREACHED*/
-	    } 
+            }
 
-	    /*
-	       There are at least two accepting states left.  Presumably
-	       the number of accepting states is going to be low,
-	       typically two. So we simply scan through to find the one
-	       with lowest wordnum.  Once we find it, we swap the last
-	       state into its place and decrement the size. We then try to
-	       match the rest of the pattern at the point where the word
-	       ends. If we succeed, control just continues along the
-	       regex; if we fail we return here to try the next accepting
-	       state
-	     */
-
+	    /* find start char of end of current word */
 	    {
-		U32 best = 0;
-		U32 cur;
-		for( cur = 1 ; cur <= ST.accepted ; cur++ ) {
-		    DEBUG_TRIE_EXECUTE_r(
-			PerlIO_printf( Perl_debug_log,
-			    "%*s  %sgot %"IVdf" (%d) as best, looking at %"IVdf" (%d)%s\n",
-			    REPORT_CODE_OFF + depth * 2, "", PL_colors[4],
-			    (IV)best, ST.accept_buff[ best ].wordnum, (IV)cur,
-			    ST.accept_buff[ cur ].wordnum, PL_colors[5] );
-		    );
+		U32 chars; /* how many chars to skip */
+		U8 *uc = ST.firstpos;
+		reg_trie_data * const trie
+		    = (reg_trie_data*)rexi->data->data[ARG(ST.me)];
 
-		    if (ST.accept_buff[cur].wordnum <
-			    ST.accept_buff[best].wordnum)
-			best = cur;
+		assert((trie->wordinfo[ST.nextword].len - trie->prefixlen)
+			    >=  ST.firstchars);
+		chars = (trie->wordinfo[ST.nextword].len - trie->prefixlen)
+			    - ST.firstchars;
+
+		if (ST.longfold) {
+		    /* the hard option - fold each char in turn and find
+		     * its folded length (which may be different */
+		    U8 foldbuf[UTF8_MAXBYTES_CASE + 1];
+		    STRLEN foldlen;
+		    STRLEN len;
+		    U8 uvc;
+		    U8 *uscan;
+
+		    while (chars) {
+			if (do_utf8) {
+			    uvc = utf8n_to_uvuni((U8*)uc, UTF8_MAXLEN, &len,
+						    uniflags);
+			    uc += len;
+			}
+			else {
+			    uvc = *uc;
+			    uc++;
+			}
+			uvc = to_uni_fold(uvc, foldbuf, &foldlen);
+			uscan = foldbuf;
+			while (foldlen) {
+			    if (!--chars)
+				break;
+			    uvc = utf8n_to_uvuni(uscan, UTF8_MAXLEN, &len,
+					    uniflags);
+			    uscan += len;
+			    foldlen -= len;
+			}
+		    }
 		}
-
-		DEBUG_EXECUTE_r({
-		    AV *const trie_words
-			= MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
-		    SV ** const tmp = av_fetch( trie_words, 
-		        ST.accept_buff[ best ].wordnum - 1, 0 );
-		    regnode *nextop=(!ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) ? 
-		                    ST.B : 
-		                    ST.me + ST.jump[ST.accept_buff[best].wordnum];    
-		    SV *sv= tmp ? sv_newmortal() : NULL;
-		    
-		    PerlIO_printf( Perl_debug_log, 
-		        "%*s  %strying alternation #%d <%s> at node #%d %s\n",
-			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
-			ST.accept_buff[best].wordnum,
-			tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0, 
-	                        PL_colors[0], PL_colors[1],
-	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
-                            ) : "not compiled under -Dr", 
-			    REG_NODE_NUM(nextop),
-			PL_colors[5] );
-		});
-
-		if ( best<ST.accepted ) {
-		    reg_trie_accepted tmp = ST.accept_buff[ best ];
-		    ST.accept_buff[ best ] = ST.accept_buff[ ST.accepted ];
-		    ST.accept_buff[ ST.accepted ] = tmp;
-		    best = ST.accepted;
+		else {
+		    if (do_utf8) 
+			while (chars--)
+			    uc += UTF8SKIP(uc);
+		    else
+			uc += chars;
 		}
-		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
-		if ( !ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) {
-		    scan = ST.B;
-		} else {
-		    scan = ST.me + ST.jump[ST.accept_buff[best].wordnum];
-                }
-                PUSH_YES_STATE_GOTO(TRIE_next, scan);    
-                /* NOTREACHED */
+		PL_reginput = (char *)uc;
 	    }
+
+	    scan = (ST.jump && ST.jump[ST.nextword]) 
+			? ST.me + ST.jump[ST.nextword]
+			: ST.B;
+
+	    DEBUG_EXECUTE_r({
+		PerlIO_printf( Perl_debug_log,
+		    "%*s  %sTRIE matched word #%d, continuing%s\n",
+		    REPORT_CODE_OFF+depth*2, "", 
+		    PL_colors[4],
+		    ST.nextword,
+		    PL_colors[5]
+		    );
+	    });
+
+	    if (ST.accepted > 1 || has_cutgroup) {
+		PUSH_STATE_GOTO(TRIE_next, scan);
+		/* NOTREACHED */
+	    }
+	    /* only one choice left - just continue */
+	    DEBUG_EXECUTE_r({
+		AV *const trie_words
+		    = MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
+		SV ** const tmp = av_fetch( trie_words,
+		    ST.nextword-1, 0 );
+		SV *sv= tmp ? sv_newmortal() : NULL;
+
+		PerlIO_printf( Perl_debug_log,
+		    "%*s  %sonly one match left, short-circuiting: #%d <%s>%s\n",
+		    REPORT_CODE_OFF+depth*2, "", PL_colors[4],
+		    ST.nextword,
+		    tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0,
+			    PL_colors[0], PL_colors[1],
+			    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
+			) 
+		    : "not compiled under -Dr",
+		    PL_colors[5] );
+	    });
+
+	    locinput = PL_reginput;
+	    nextchr = UCHARAT(locinput);
+	    continue; /* execute rest of RE */
 	    /* NOTREACHED */
-        case TRIE_next:
-	    /* we dont want to throw this away, see bug 57042*/
-	    if (oreplsv != GvSV(PL_replgv))
-		sv_setsv(oreplsv, GvSV(PL_replgv));
-            FREETMPS;
-	    LEAVE;
-	    sayYES;
 #undef  ST
 
 	case EXACT: {

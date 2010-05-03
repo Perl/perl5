@@ -70,7 +70,4 @@ sub STORE	{ $_[0]->[$_[1]] = $_[2] }
 
 # [perl #74484]  repeated tries leaked SVs on the tmps stack
 
-{
-    local $TODO = 'not fixed yet';
-    leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
-}
+leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");

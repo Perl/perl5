@@ -490,13 +490,6 @@ and check for NULL.
 
 #define FBMrf_MULTILINE	1
 
-/* an accepting state/position*/
-struct _reg_trie_accepted {
-    U8   *endpos;
-    U16  wordnum;
-};
-typedef struct _reg_trie_accepted reg_trie_accepted;
-
 /* some basic information about the current match that is created by
  * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
 
@@ -557,11 +550,15 @@ typedef struct regmatch_state {
 	    U32 lastparen;
 	    CHECKPOINT cp;
 
-	    reg_trie_accepted *accept_buff; /* accepting states we have seen */
-	    U32		accepted; /* how many accepting states we have seen */
+	    U32		accepted; /* how many accepting states left */
 	    U16         *jump;  /* positive offsets from me */
 	    regnode	*B;	/* node following the trie */
 	    regnode	*me;	/* Which node am I - needed for jump tries*/
+	    U8		*firstpos;/* pos in string of first trie match */
+	    U32		firstchars;/* len in chars of firstpos from start */
+	    U16		nextword;/* next word to try */
+	    U16		topword; /* longest accepted word */
+	    bool	longfold;/* saw a fold with a 1->n char mapping */
 	} trie;
 
         /* special types - these members are used to store state for special
