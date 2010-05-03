@@ -3271,8 +3271,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    {
 		/* Find next-highest word to process.  Note that this code
 		 * is O(N^2) per trie run (O(N) per branch), so keep tight */
-		register U32 min = 0;
-		register U32 word;
+		register U16 min = 0;
+		register U16 word;
 		register U16 const nextword = ST.nextword;
 		register reg_trie_wordinfo * const wordinfo
 		    = ((reg_trie_data*)rexi->data->data[ARG(ST.me)])->wordinfo;
@@ -3312,7 +3312,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    U8 foldbuf[UTF8_MAXBYTES_CASE + 1];
 		    STRLEN foldlen;
 		    STRLEN len;
-		    U8 uvc;
+		    UV uvc;
 		    U8 *uscan;
 
 		    while (chars) {
