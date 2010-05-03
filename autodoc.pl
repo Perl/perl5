@@ -176,7 +176,7 @@ _EOH_
     }
 
     if (@$missing) {
-        print $fh "=head1 Undocumented functions\n\n";
+        print $fh "\n=head1 Undocumented functions\n\n";
 	print $fh "These functions are currently undocumented:\n\n=over\n\n";
 	for my $missing (sort @$missing) {
 	    print $fh "=item $missing\nX<$missing>\n\n";
