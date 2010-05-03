@@ -4769,8 +4769,8 @@ first look for a similar filename with a "F<.pmc>" extension. If this file
 is found, it will be loaded in place of any file ending in a "F<.pm>"
 extension.
 
-You can also insert hooks into the import facility, by putting directly
-Perl code into the @INC array.  There are three forms of hooks: subroutine
+You can also insert hooks into the import facility, by putting Perl code
+directly into the @INC array.  There are three forms of hooks: subroutine
 references, array references and blessed objects.
 
 Subroutine references are the simplest case.  When the inclusion system
