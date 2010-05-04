@@ -537,11 +537,11 @@ PERL_CALLCONV OP*	Perl_die_sv(pTHX_ SV *baseex)
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
-PERL_CALLCONV void	Perl_die_unwind(pTHX_ SV* ex)
+PERL_CALLCONV void	Perl_die_unwind(pTHX_ SV* msv)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DIE_UNWIND	\
-	assert(ex)
+	assert(msv)
 
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)

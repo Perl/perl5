@@ -290,7 +290,7 @@ pM	|void	|delete_eval_scope
 Apd	|OP*	|die_sv		|NN SV *baseex
 Afpd	|OP*	|die		|NULLOK const char* pat|...
 : Used in util.c
-pr	|void	|die_unwind	|NN SV* ex
+pr	|void	|die_unwind	|NN SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
