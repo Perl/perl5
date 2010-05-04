@@ -2581,13 +2581,6 @@ package _Range_List_Base;
 # There are a number of methods to manipulate range lists, and some operators
 # are overloaded to handle them.
 
-# Because of the slowness of pure Perl objaddr() on miniperl, and measurements
-# showing this package was using a lot of real time calculating that, the code
-# was changed to only calculate it once per call stack.  This is done by
-# consistently using the package variable $addr in routines, and only calling
-# objaddr() if it isn't defined, and setting that to be local, so that callees
-# will have it already.  It would be a good thing to change this. XXX
-
 sub trace { return main::trace(@_); }
 
 { # Closure
