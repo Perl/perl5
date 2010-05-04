@@ -49,6 +49,7 @@ is $@, 42, 'successful closure call should not alter $@';
 {
     my $warns = 0;
     local $SIG{__WARN__} = sub { $warns++ };
+    local $TODO = $] >= 5.013 ? "Doesn't die in 5.13" : undef;
     ok !eval { $die_func->("died\n"); 1 }, 'should die';
     is $@, "died\n", '$@ should be set correctly';
     local $TODO = "Shouldn't warn";
