@@ -1225,7 +1225,7 @@ STATIC I32
 S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s )
 {
     dVAR; dSP;
-    SV *sv;
+    SV *sv = NULL;
     const I32 start_sp_offset = SP - PL_stack_base;
     howlen_t howlen;
     I32 checksum = 0;
@@ -1558,7 +1558,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	}
 	case 'H':
 	case 'h': {
-	    char *str;
+	    char *str = NULL;
 	    /* Preliminary length estimate, acceptable for utf8 too */
 	    if (howlen == e_star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
