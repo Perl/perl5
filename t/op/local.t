@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 306;
+plan tests => 310;
 
 my $list_assignment_supported = 1;
 
@@ -780,6 +780,33 @@ like( runperl(stderr => 1,
               prog => 'use constant foo => q(a);' .
                       'index(q(a), foo);' .
                       'local *g=${::}{foo};print q(ok);'), "ok", "[perl #52740]");
+
+# localising a tied scalar should give you an untied var
+{
+    package TS;
+    sub TIESCALAR { bless \my $self, shift }
+
+    my $s;
+    sub FETCH { $s .= ":F=${$_[0]}"; ${$_[0]} }
+    sub STORE { $s .= ":S($_[1])"; ${$_[0]} = $_[1]; }
+
+    package main;
+    tie $ts, 'TS';
+    $ts = 1;
+    {
+	$s .= ':L1';
+	local $ts;
+	$s .= ':L2';
+	is($ts, undef, 'local tied scalar initially undef');
+	$ts = 2;
+	is($ts, 2, 'local tied scalar now has a value');
+	$s .= ':E';
+    }
+    is($ts, 1, 'restored tied scalar has correct value');
+    $ts = 3;
+    is($s, ':S(1):L1:F=1:L2:E:F=1:S(3)',
+		"local tied scalar shouldn't call methods");
+}
 
 # Keep this test last, as it can SEGV
 {
