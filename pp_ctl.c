@@ -1572,47 +1572,16 @@ Perl_qerror(pTHX_ SV *err)
 }
 
 void
-Perl_die_where(pTHX_ SV *msv)
+Perl_die_unwind(pTHX_ SV *msv)
 {
     dVAR;
+    SV *exceptsv = sv_mortalcopy(msv);
+    U8 in_eval = PL_in_eval;
+    PERL_ARGS_ASSERT_DIE_UNWIND;
 
-    if (PL_in_eval) {
+    if (in_eval) {
 	I32 cxix;
 	I32 gimme;
-
-	if (msv) {
-	    if (PL_in_eval & EVAL_KEEPERR) {
-                static const char prefix[] = "\t(in cleanup) ";
-		SV * const err = ERRSV;
-		const char *e = NULL;
-		if (!SvPOK(err))
-		    sv_setpvs(err,"");
-		else if (SvCUR(err) >= sizeof(prefix)+SvCUR(msv)-1) {
-		    STRLEN len;
-		    STRLEN msglen;
-		    const char* message = SvPV_const(msv, msglen);
-		    e = SvPV_const(err, len);
-		    e += len - msglen;
-		    if (*e != *message || strNE(e,message))
-			e = NULL;
-		}
-		if (!e) {
-		    STRLEN start;
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+SvCUR(msv));
-		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catsv(err, msv);
-		    start = SvCUR(err)-SvCUR(msv)-sizeof(prefix)+1;
-		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "%s",
-				   SvPVX_const(err)+start);
-		}
-	    }
-	    else {
-		STRLEN msglen;
-		const char* message = SvPV_const(msv, msglen);
-		sv_setpvn(ERRSV, message, msglen);
-		SvFLAGS(ERRSV) |= SvFLAGS(msv) & SVf_UTF8;
-	    }
-	}
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
@@ -1633,7 +1602,7 @@ Perl_die_where(pTHX_ SV *msv)
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		STRLEN msglen;
-		const char* message = SvPVx_const( msv ? msv : ERRSV, msglen);
+		const char* message = SvPVx_const(exceptsv, msglen);
 		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1654,7 +1623,7 @@ Perl_die_where(pTHX_ SV *msv)
 	    PL_curcop = cx->blk_oldcop;
 
 	    if (optype == OP_REQUIRE) {
-                const char* const msg = SvPVx_nolen_const(ERRSV);
+                const char* const msg = SvPVx_nolen_const(exceptsv);
                 (void)hv_store(GvHVn(PL_incgv),
                                SvPVX_const(namesv), SvCUR(namesv),
                                &PL_sv_undef, 0);
@@ -1665,6 +1634,13 @@ Perl_die_where(pTHX_ SV *msv)
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
+	    if (in_eval & EVAL_KEEPERR) {
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",
+			       SvPV_nolen_const(exceptsv));
+	    }
+	    else {
+		sv_setsv(ERRSV, exceptsv);
+	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
 	    PL_restartjmpenv = cx->blk_eval.cur_top_env;
 	    PL_restartop = cx->blk_eval.retop;
@@ -1673,7 +1649,7 @@ Perl_die_where(pTHX_ SV *msv)
 	}
     }
 
-    write_to_stderr( msv ? msv : ERRSV );
+    write_to_stderr(exceptsv);
     my_failure_exit();
     /* NOTREACHED */
 }
@@ -3939,7 +3915,7 @@ PP(pp_leaveeval)
 			G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value",
 			       SVfARG(namesv));
-	/* die_where() did LEAVE, or we won't be here */
+	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {
 	LEAVE_with_name("eval");

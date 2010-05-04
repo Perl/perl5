@@ -4383,7 +4383,9 @@ t/op/crypt.t			See if crypt works
 t/op/dbm.t			See if dbmopen/dbmclose work
 t/op/defins.t			See if auto-insert of defined() works
 t/op/delete.t			See if delete works
+t/op/die_except.t		See if die/eval avoids $@ clobberage
 t/op/die_exit.t			See if die and exit status interaction works
+t/op/die_keeperr.t		See if G_KEEPERR works for destructors
 t/op/die.t			See if die works
 t/op/dor.t			See if defined-or (//) works
 t/op/do.t			See if subroutines work
@@ -4510,6 +4512,7 @@ t/op/utftaint.t			See if utf8 and taint work together
 t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
+t/op/warn.t			See if warn works
 t/op/while_readdir.t		See if while(readdir) works
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works

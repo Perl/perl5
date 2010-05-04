@@ -321,33 +321,30 @@ See I<Using G_EVAL> for details on using G_EVAL.
 
 =head2 G_KEEPERR
 
-You may have noticed that using the G_EVAL flag described above will
-B<always> clear the C<$@> variable and set it to a string describing
-the error iff there was an error in the called code.  This unqualified
-resetting of C<$@> can be problematic in the reliable identification of
-errors using the C<eval {}> mechanism, because the possibility exists
-that perl will call other code (end of block processing code, for
-example) between the time the error causes C<$@> to be set within
-C<eval {}>, and the subsequent statement which checks for the value of
-C<$@> gets executed in the user's script.
+Using the G_EVAL flag described above will always set C<$@>: clearing
+it if there was no error, and setting it to describe the error if there
+was an error in the called code.  This is what you want if your intention
+is to handle possible errors, but sometimes you just want to trap errors
+and stop them interfering with the rest of the program.
 
-This scenario will mostly be applicable to code that is meant to be
-called from within destructors, asynchronous callbacks, signal
-handlers, C<__DIE__> or C<__WARN__> hooks, and C<tie> functions.  In
-such situations, you will not want to clear C<$@> at all, but simply to
-append any new errors to any existing value of C<$@>.
+This scenario will mostly be applicable to code that is meant to be called
+from within destructors, asynchronous callbacks, and signal handlers.
+In such situations, where the code being called has little relation to the
+surrounding dynamic context, the main program needs to be insulated from
+errors in the called code, even if they can't be handled intelligently.
+It may also be useful to do this with code for C<__DIE__> or C<__WARN__>
+hooks, and C<tie> functions.
 
 The G_KEEPERR flag is meant to be used in conjunction with G_EVAL in
 I<call_*> functions that are used to implement such code.  This flag
 has no effect when G_EVAL is not used.
 
-When G_KEEPERR is used, any errors in the called code will be prefixed
-with the string "\t(in cleanup)", and appended to the current value
-of C<$@>.  an error will not be appended if that same error string is
-already at the end of C<$@>.
-
-In addition, a warning is generated using the appended string. This can be
-disabled using C<no warnings 'misc'>.
+When G_KEEPERR is used, any error in the called code will terminate the
+call as usual, and the error will not propagate beyond the call (as usual
+for G_EVAL), but it will not go into C<$@>.  Instead the error will be
+converted into a warning, prefixed with the string "\t(in cleanup)".
+This can be disabled using C<no warnings 'misc'>.  If there is no error,
+C<$@> will not be cleared.
 
 The G_KEEPERR flag was introduced in Perl version 5.002.
 
@@ -986,12 +983,15 @@ version of the call_Subtract example above inside a destructor:
     sub foo { die "foo dies"; }
 
     package main;
-    eval { Foo->new->foo };
+    {
+	my $foo = Foo->new;
+	eval { $foo->foo };
+    }
     print "Saw: $@" if $@;             # should be, but isn't
 
 This example will fail to recognize that an error occurred inside the
 C<eval {}>.  Here's why: the call_Subtract code got executed while perl
-was cleaning up temporaries when exiting the eval block, and because
+was cleaning up temporaries when exiting the outer braced block, and because
 call_Subtract is implemented with I<call_pv> using the G_EVAL
 flag, it promptly reset C<$@>.  This results in the failure of the
 outermost test for C<$@>, and thereby the failure of the error trap.

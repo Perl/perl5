@@ -321,6 +321,12 @@ PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
+PERL_CALLCONV void	Perl_croak_sv(pTHX_ SV *baseex)
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CROAK_SV	\
+	assert(baseex)
+
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
@@ -523,14 +529,19 @@ PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from,
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 
 PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
+PERL_CALLCONV OP*	Perl_die_sv(pTHX_ SV *baseex)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DIE_SV	\
+	assert(baseex)
+
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
-STATIC OP*	S_vdie(pTHX_ const char* pat, va_list* args);
-#endif
-PERL_CALLCONV void	Perl_die_where(pTHX_ SV* msv)
-			__attribute__noreturn__;
+PERL_CALLCONV void	Perl_die_unwind(pTHX_ SV* ex)
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DIE_UNWIND	\
+	assert(ex)
 
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)
@@ -1931,6 +1942,11 @@ PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MESS	\
 	assert(pat)
+
+PERL_CALLCONV SV*	Perl_mess_sv(pTHX_ SV* basemsg, bool consume)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MESS_SV	\
+	assert(basemsg)
 
 PERL_CALLCONV SV*	Perl_vmess(pTHX_ const char* pat, va_list* args)
 			__attribute__nonnull__(pTHX_1);
@@ -3825,6 +3841,11 @@ PERL_CALLCONV UV	Perl_get_hash_seed(pTHX)
 
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX_ const SV *uninit_sv);
+PERL_CALLCONV void	Perl_warn_sv(pTHX_ SV *baseex)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_WARN_SV	\
+	assert(baseex)
+
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2)
 			__attribute__nonnull__(pTHX_1);
@@ -6056,8 +6077,12 @@ STATIC const COP*	S_closest_cop(pTHX_ const COP *cop, const OP *o)
 	assert(cop)
 
 STATIC SV*	S_mess_alloc(pTHX);
-STATIC SV *	S_vdie_croak_common(pTHX_ const char *pat, va_list *args);
-STATIC bool	S_vdie_common(pTHX_ SV *message, bool warn);
+STATIC SV *	S_with_queued_errors(pTHX_ SV *ex)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS	\
+	assert(ex)
+
+STATIC bool	S_invoke_exception_hook(pTHX_ SV *ex, bool warn);
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 

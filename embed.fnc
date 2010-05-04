@@ -230,9 +230,10 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
 : Used in op.c and perl.c
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
+Aprd	|void	|croak_sv	|NN SV *baseex
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Afprd	|void	|croak		|NULLOK const char* pat|...
-Apr	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
+Aprd	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
 Aprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 
@@ -286,12 +287,10 @@ Anp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 : Used in op.c, perl.c
 pM	|void	|delete_eval_scope
-Afp	|OP*	|die		|NULLOK const char* pat|...
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
-s	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
-#endif
+Apd	|OP*	|die_sv		|NN SV *baseex
+Afpd	|OP*	|die		|NULLOK const char* pat|...
 : Used in util.c
-pr	|void	|die_where	|NULLOK SV* msv
+pr	|void	|die_unwind	|NN SV* ex
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
@@ -691,8 +690,9 @@ p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 : Defined in locale.c, used only in sv.c
 p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
 #endif
-Afp	|SV*	|mess		|NN const char* pat|...
-Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
+Afpd	|SV*	|mess		|NN const char* pat|...
+Apd	|SV*	|mess_sv	|NN SV* basemsg|bool consume
+Apd	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
 : FIXME - either make it public, or stop exporting it. (Data::Alias uses this)
 : Used in gv.c, op.c, toke.c
 EXp	|void	|qerror		|NN SV* err
@@ -1288,8 +1288,9 @@ pR	|UV	|get_hash_seed
 p	|void	|report_evil_fh	|NULLOK const GV *gv|NULLOK const IO *io|I32 op
 : Used in mg.c, pp.c, pp_hot.c, regcomp.c
 XEpd	|void	|report_uninit	|NULLOK const SV *uninit_sv
+Apd	|void	|warn_sv	|NN SV *baseex
 Afpd	|void	|warn		|NN const char* pat|...
-Ap	|void	|vwarn		|NN const char* pat|NULLOK va_list* args
+Apd	|void	|vwarn		|NN const char* pat|NULLOK va_list* args
 Afp	|void	|warner		|U32 err|NN const char* pat|...
 Afp	|void	|ck_warner	|U32 err|NN const char* pat|...
 Afp	|void	|ck_warner_d	|U32 err|NN const char* pat|...
@@ -1956,8 +1957,8 @@ s	|char*	|stdize_locale	|NN char* locs
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
-s	|SV *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args
-s	|bool	|vdie_common	|NULLOK SV *message|bool warn
+s	|SV *|with_queued_errors|NN SV *ex
+s	|bool	|invoke_exception_hook|NULLOK SV *ex|bool warn
 sr	|char *	|write_no_mem
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \

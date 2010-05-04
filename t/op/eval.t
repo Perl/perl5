@@ -526,6 +526,8 @@ if (eval "use Devel::Peek; 1;") {
         my $in = <IN>;
         my ($first, $second) = split (/\*\*\*\*\*\*\n/, $in, 2);
         $first =~ s/,pNOK//;
+        s/ PV = 0x[0-9a-f]+/ PV = 0x/ foreach $first, $second;
+        s/ LEN = [0-9]+/ LEN = / foreach $first, $second;
         $ok = 1 if ($first eq $second);
       }
     }
