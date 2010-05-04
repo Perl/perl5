@@ -9025,16 +9025,16 @@ END
     $field_names[$COMMENT] = 'ISO_Comment';
     $field_names[$DECOMP_MAP] = 'Decomposition_Mapping';
     $field_names[$DECOMP_TYPE] = 'Decomposition_Type';
-    $field_names[$LOWER] = 'Simple_Lowercase_Mapping';
+    $field_names[$LOWER] = 'Lowercase_Mapping';
     $field_names[$MIRRORED] = 'Bidi_Mirrored';
     $field_names[$NAME] = 'Name';
     $field_names[$NUMERIC] = 'Numeric_Value';
     $field_names[$NUMERIC_TYPE_OTHER_DIGIT] = 'Numeric_Type';
     $field_names[$PERL_DECIMAL_DIGIT] = 'Perl_Decimal_Digit';
     $field_names[$PERL_DECOMPOSITION] = 'Perl_Decomposition_Mapping';
-    $field_names[$TITLE] = 'Simple_Titlecase_Mapping';
+    $field_names[$TITLE] = 'Titlecase_Mapping';
     $field_names[$UNICODE_1_NAME] = 'Unicode_1_Name';
-    $field_names[$UPPER] = 'Simple_Uppercase_Mapping';
+    $field_names[$UPPER] = 'Uppercase_Mapping';
 
     # Some of these need a little more explanation.  The $PERL_DECIMAL_DIGIT
     # field does not lead to an official Unicode property, but is used in
@@ -9784,26 +9784,35 @@ sub filter_arabic_shaping_line {
 
 sub setup_special_casing {
     # SpecialCasing.txt contains the non-simple case change mappings.  The
-    # simple ones are in UnicodeData.txt, and should already have been read
-    # in.
-    # This routine initializes the full mappings to the simple, then as each
-    # line is processed, it overrides the simple ones.
+    # simple ones are in UnicodeData.txt, which should already have been read
+    # in to the full property data structures, so as to initialize these with
+    # the simple ones.  Then the SpecialCasing.txt entries overwrite the ones
+    # which have different full mappings.
+
+    # This routine sees if the simple mappings are to be output, and if so,
+    # copies what has already been put into the full mapping tables, while
+    # they still contain only the simple mappings.
+
+    # The reason it is done this way is that the simple mappings are probably
+    # not going to be output, so it saves work to initialize the full tables
+    # with the simple mappings, and then overwrite those relatively few
+    # entries in them that have different full mappings, and thus skip the
+    # simple mapping tables altogether.
 
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # For each of the case change mappings...
     foreach my $case ('lc', 'tc', 'uc') {
+        my $full = property_ref($case);
+        unless (defined $full && ! $full->is_empty) {
+            Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
+        }
 
         # The simple version's name in each mapping merely has an 's' in front
         # of the full one's
         my $simple = property_ref('s' . $case);
-        unless (defined $simple && ! $simple->is_empty) {
-            Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
-        }
-
-        # Initialize the full case mappings with the simple ones.
-        property_ref($case)->initialize($simple);
+        $simple->initialize($case) if $simple->to_output_map();
     }
 
     return;
