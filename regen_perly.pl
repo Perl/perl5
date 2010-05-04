@@ -66,6 +66,10 @@ die "$0: must be run on an ASCII system\n" unless ord 'A' == 65;
 # the test below to allow that version too. DAPM Feb 04.
 
 my $version = `$bison -V`;
+unless ($version) { die <<EOF; }
+Could not find a version of bison in your path. Please install bison.
+EOF
+
 unless ($version =~ /\b(1\.875[a-z]?|2\.[0134])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
