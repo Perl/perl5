@@ -28,7 +28,7 @@ checkOptree ( name	=> '-basic sub {if shift print then,else}',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
-# 1        <;> nextstate(main 665 optree_samples.t:24) v ->2
+# 1        <;> nextstate(main 665 optree_samples.t:24) v:>,<,% ->2
 # -        <1> null K/1 ->-
 # 3           <|> cond_expr(other->4) K/1 ->8
 # 2              <0> shift s* ->3
@@ -39,14 +39,14 @@ checkOptree ( name	=> '-basic sub {if shift print then,else}',
 # 5                    <$> const[PV "then"] s ->6
 # d              <@> leave KP ->7
 # 8                 <0> enter ->9
-# 9                 <;> nextstate(main 663 optree_samples.t:25) v ->a
+# 9                 <;> nextstate(main 663 optree_samples.t:25) v:>,<,% ->a
 # c                 <@> print sK ->d
 # a                    <0> pushmark s ->b
 # b                    <$> const[PV "else"] s ->c
 EOT_EOT
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
-# 1        <;> nextstate(main 665 optree_samples.t:24) v ->2
+# 1        <;> nextstate(main 665 optree_samples.t:24) v:>,<,% ->2
 # -        <1> null K/1 ->-
 # 3           <|> cond_expr(other->4) K/1 ->8
 # 2              <0> shift s* ->3
@@ -57,7 +57,7 @@ EOT_EOT
 # 5                    <$> const(PV "then") s ->6
 # d              <@> leave KP ->7
 # 8                 <0> enter ->9
-# 9                 <;> nextstate(main 663 optree_samples.t:25) v ->a
+# 9                 <;> nextstate(main 663 optree_samples.t:25) v:>,<,% ->a
 # c                 <@> print sK ->d
 # a                    <0> pushmark s ->b
 # b                    <$> const(PV "else") s ->c
@@ -73,11 +73,11 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # b  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->b
-# 1        <;> nextstate(main 666 optree_samples.t:70) v ->2
+# 1        <;> nextstate(main 666 optree_samples.t:70) v:>,<,% ->2
 # 4        <2> sassign vKS/2 ->5
 # 2           <0> shift s* ->3
 # 3           <0> padsv[$a:666,670] sRM*/LVINTRO ->4
-# 5        <;> nextstate(main 670 optree_samples.t:71) v ->6
+# 5        <;> nextstate(main 670 optree_samples.t:71) v:>,<,% ->6
 # -        <1> null K/1 ->-
 # 7           <|> cond_expr(other->8) K/1 ->c
 # 6              <0> padsv[$a:666,670] s ->7
@@ -88,18 +88,18 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 # 9                    <$> const[PV "foo"] s ->a
 # h              <@> leave KP ->b
 # c                 <0> enter ->d
-# d                 <;> nextstate(main 668 optree_samples.t:72) v ->e
+# d                 <;> nextstate(main 668 optree_samples.t:72) v:>,<,% ->e
 # g                 <@> print sK ->h
 # e                    <0> pushmark s ->f
 # f                    <$> const[PV "bar"] s ->g
 EOT_EOT
 # b  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->b
-# 1        <;> nextstate(main 666 optree_samples.t:72) v ->2
+# 1        <;> nextstate(main 666 optree_samples.t:72) v:>,<,% ->2
 # 4        <2> sassign vKS/2 ->5
 # 2           <0> shift s* ->3
 # 3           <0> padsv[$a:666,670] sRM*/LVINTRO ->4
-# 5        <;> nextstate(main 670 optree_samples.t:73) v ->6
+# 5        <;> nextstate(main 670 optree_samples.t:73) v:>,<,% ->6
 # -        <1> null K/1 ->-
 # 7           <|> cond_expr(other->8) K/1 ->c
 # 6              <0> padsv[$a:666,670] s ->7
@@ -110,7 +110,7 @@ EOT_EOT
 # 9                    <$> const(PV "foo") s ->a
 # h              <@> leave KP ->b
 # c                 <0> enter ->d
-# d                 <;> nextstate(main 668 optree_samples.t:74) v ->e
+# d                 <;> nextstate(main 668 optree_samples.t:74) v:>,<,% ->e
 # g                 <@> print sK ->h
 # e                    <0> pushmark s ->f
 # f                    <$> const(PV "bar") s ->g
@@ -123,7 +123,7 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 			     },
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 674 optree_samples.t:125) v
+# 1  <;> nextstate(main 674 optree_samples.t:125) v:>,<,%
 # 2  <0> shift s*
 # 3  <|> cond_expr(other->4) K/1
 # 4      <0> pushmark s
@@ -131,14 +131,14 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 # 6      <@> print sK
 #            goto 7
 # 8  <0> enter 
-# 9  <;> nextstate(main 672 optree_samples.t:126) v
+# 9  <;> nextstate(main 672 optree_samples.t:126) v:>,<,%
 # a  <0> pushmark s
 # b  <$> const[PV "else"] s
 # c  <@> print sK
 # d  <@> leave KP
 # 7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 674 optree_samples.t:129) v
+# 1  <;> nextstate(main 674 optree_samples.t:129) v:>,<,%
 # 2  <0> shift s*
 # 3  <|> cond_expr(other->4) K/1
 # 4      <0> pushmark s
@@ -146,7 +146,7 @@ EOT_EOT
 # 6      <@> print sK
 #            goto 7
 # 8  <0> enter 
-# 9  <;> nextstate(main 672 optree_samples.t:130) v
+# 9  <;> nextstate(main 672 optree_samples.t:130) v:>,<,%
 # a  <0> pushmark s
 # b  <$> const(PV "else") s
 # c  <@> print sK
@@ -162,11 +162,11 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 			     },
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 675 optree_samples.t:165) v
+# 1  <;> nextstate(main 675 optree_samples.t:165) v:>,<,%
 # 2  <0> shift s*
 # 3  <0> padsv[$a:675,679] sRM*/LVINTRO
 # 4  <2> sassign vKS/2
-# 5  <;> nextstate(main 679 optree_samples.t:166) v
+# 5  <;> nextstate(main 679 optree_samples.t:166) v:>,<,%
 # 6  <0> padsv[$a:675,679] s
 # 7  <|> cond_expr(other->8) K/1
 # 8      <0> pushmark s
@@ -174,18 +174,18 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 # a      <@> print sK
 #            goto b
 # c  <0> enter 
-# d  <;> nextstate(main 677 optree_samples.t:167) v
+# d  <;> nextstate(main 677 optree_samples.t:167) v:>,<,%
 # e  <0> pushmark s
 # f  <$> const[PV "bar"] s
 # g  <@> print sK
 # h  <@> leave KP
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 675 optree_samples.t:171) v
+# 1  <;> nextstate(main 675 optree_samples.t:171) v:>,<,%
 # 2  <0> shift s*
 # 3  <0> padsv[$a:675,679] sRM*/LVINTRO
 # 4  <2> sassign vKS/2
-# 5  <;> nextstate(main 679 optree_samples.t:172) v
+# 5  <;> nextstate(main 679 optree_samples.t:172) v:>,<,%
 # 6  <0> padsv[$a:675,679] s
 # 7  <|> cond_expr(other->8) K/1
 # 8      <0> pushmark s
@@ -193,7 +193,7 @@ EOT_EOT
 # a      <@> print sK
 #            goto b
 # c  <0> enter 
-# d  <;> nextstate(main 677 optree_samples.t:173) v
+# d  <;> nextstate(main 677 optree_samples.t:173) v:>,<,%
 # e  <0> pushmark s
 # f  <$> const(PV "bar") s
 # g  <@> print sK
@@ -206,7 +206,7 @@ checkOptree ( name	=> '-exec sub { print (shift) ? "foo" : "bar" }',
 	      bcopts	=> '-exec',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 680 optree_samples.t:213) v
+# 1  <;> nextstate(main 680 optree_samples.t:213) v:>,<,%
 # 2  <0> pushmark s
 # 3  <0> shift s*
 # 4  <@> print sK
@@ -216,7 +216,7 @@ checkOptree ( name	=> '-exec sub { print (shift) ? "foo" : "bar" }',
 # 8  <$> const[PV "bar"] s
 # 7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 680 optree_samples.t:221) v
+# 1  <;> nextstate(main 680 optree_samples.t:221) v:>,<,%
 # 2  <0> pushmark s
 # 3  <0> shift s*
 # 4  <@> print sK
