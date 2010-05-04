@@ -8987,7 +8987,7 @@ END
     # 0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;
     # The fields in order are:
     my $i = 0;            # The code point is in field 0, and is shifted off.
-    my $NAME = $i++;      # character name (e.g. "LATIN CAPITAL LETTER A")
+    my $CHARNAME = $i++;  # character name (e.g. "LATIN CAPITAL LETTER A")
     my $CATEGORY = $i++;  # category (e.g. "Lu")
     my $CCC = $i++;       # Canonical combining class (e.g. "230")
     my $BIDI = $i++;      # directional class (e.g. "L")
@@ -9006,7 +9006,14 @@ END
 
     # This routine in addition outputs these extra fields:
     my $DECOMP_TYPE = $i++; # Decomposition type
-    my $DECOMP_MAP = $i++;  # Must be last; another decomposition mapping
+
+    # These fields are modifications of ones above, and are usually
+    # suppressed; they must come last, as for speed, the loop upper bound is
+    # normally set to ignore them
+    my $NAME = $i++;        # This is the strict name field, not the one that
+                            # charnames uses.
+    my $DECOMP_MAP = $i++;  # Strict decomposition mapping; not the one used
+                            # by Unicode::Normalize
     my $last_field = $i - 1;
 
     # All these are read into an array for each line, with the indices defined
@@ -9019,6 +9026,7 @@ END
     $field_names[$BIDI] = 'Bidi_Class';
     $field_names[$CATEGORY] = 'General_Category';
     $field_names[$CCC] = 'Canonical_Combining_Class';
+    $field_names[$CHARNAME] = 'Perl_Charnames';
     $field_names[$COMMENT] = 'ISO_Comment';
     $field_names[$DECOMP_MAP] = 'Decomposition_Mapping';
     $field_names[$DECOMP_TYPE] = 'Decomposition_Type';
@@ -9033,17 +9041,29 @@ END
     $field_names[$UNICODE_1_NAME] = 'Unicode_1_Name';
     $field_names[$UPPER] = 'Uppercase_Mapping';
 
-    # Some of these need a little more explanation.  The $PERL_DECIMAL_DIGIT
-    # field does not lead to an official Unicode property, but is used in
-    # calculating the Numeric_Type.  Perl however, creates a file from this
-    # field, so a Perl property is created from it.  Similarly, the Other
-    # Digit field is used only for calculating the Numeric_Type, and so it can
-    # be safely re-used as the place to store the value for Numeric_Type;
-    # hence it is referred to as $NUMERIC_TYPE_OTHER_DIGIT.  The input field
-    # named $PERL_DECOMPOSITION is a combination of both the decomposition
-    # mapping and its type.  Perl creates a file containing exactly this
-    # field, so it is used for that.  The two properties are separated into
-    # two extra output fields, $DECOMP_MAP and $DECOMP_TYPE.
+    # Some of these need a little more explanation:
+    # The $PERL_DECIMAL_DIGIT field does not lead to an official Unicode
+    #   property, but is used in calculating the Numeric_Type.  Perl however,
+    #   creates a file from this field, so a Perl property is created from it.
+    # Similarly, the Other_Digit field is used only for calculating the
+    #   Numeric_Type, and so it can be safely re-used as the place to store
+    #   the value for Numeric_Type; hence it is referred to as
+    #   $NUMERIC_TYPE_OTHER_DIGIT.
+    # The input field named $PERL_DECOMPOSITION is a combination of both the
+    #   decomposition mapping and its type.  Perl creates a file containing
+    #   exactly this field, so it is used for that.  The two properties are
+    #   separated into two extra output fields, $DECOMP_MAP and $DECOMP_TYPE.
+    #   $DECOMP_MAP is usually suppressed (unless the lists are changed to
+    #   output it), as Perl doesn't use it directly.
+    # The input field named here $CHARNAME is used to construct the
+    #   Perl_Charnames property, which is a combination of the Name property
+    #   (which the input field contains), and the Unicode_1_Name property, and
+    #   others from other files.  Since, the strict Name property is not used
+    #   by Perl, this field is used for the table that Perl does use.  The
+    #   strict Name property table is usually suppressed (unless the lists are
+    #   changed to output it), so it is accumulated in a separate field,
+    #   $NAME, which to save time is discarded unless the table is actually to
+    #   be output
 
     # This file is processed like most in this program.  Control is passed to
     # process_generic_property_file() which calls filter_UnicodeData_line()
@@ -9089,6 +9109,22 @@ END
     sub setup_UnicodeData { # Called before any lines of the input are read
         my $file = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        # Create a new property specially located that is a combination of the
+        # various Name properties: Name, Unicode_1_Name, Named Sequences, and
+        # Name_Alias properties.  (The final duplicates elements of the
+        # first.)  A comment for it will later be constructed based on the
+        # actual properties present and used
+        Property->new('Perl_Charnames',
+                       Core_Access => '\N{...} and "use charnames"',
+                       Default_Map => "",
+                       Directory => File::Spec->curdir(),
+                       File => 'Name',
+                       Internal_Only_Warning => 1,
+                       Perl_Extension => 1,
+                       Range_Size_1 => 1,
+                       Type => $STRING,
+                       );
 
         my $Perl_decomp = Property->new('Perl_Decomposition_Mapping',
                                         Directory => File::Spec->curdir(),
@@ -9141,12 +9177,18 @@ numerals.
 END
         ));
 
-        # This property is not used for generating anything else, and is
-        # usually not output.  By making it last in the list, we can just
+        # These properties are not used for generating anything else, and are
+        # usually not output.  By making them last in the list, we can just
         # change the high end of the loop downwards to avoid the work of
-        # generating a table that is just going to get thrown away.
-        if (! property_ref('Decomposition_Mapping')->to_output_map) {
-            $last_field--;
+        # generating a table(s) that is/are just going to get thrown away.
+        if (! property_ref('Decomposition_Mapping')->to_output_map
+            && ! property_ref('Name')->to_output_map)
+        {
+            $last_field = min($NAME, $DECOMP_MAP) - 1;
+        } elsif (property_ref('Decomposition_Mapping')->to_output_map) {
+            $last_field = $DECOMP_MAP;
+        } elsif (property_ref('Name')->to_output_map) {
+            $last_field = $NAME;
         }
         return;
     }
@@ -9280,45 +9322,47 @@ END
         #   D7A3;<Hangul Syllable, Last>;Lo;0;L;;;;;N;;;;;
         # that define ranges.  These should be processed after the fields are
         # adjusted above, as they may override some of them; but mostly what
-        # is left is to possibly adjust the $NAME field.  The names of all the
+        # is left is to possibly adjust the $CHARNAME field.  The names of all the
         # paired lines start with a '<', but this is also true of '<control>,
         # which isn't one of these special ones.
-        if ($fields[$NAME] eq '<control>') {
+        if ($fields[$CHARNAME] eq '<control>') {
 
             # Some code points in this file have the pseudo-name
             # '<control>', but the official name for such ones is the null
-            # string.
+            # string.  For charnames.pm, we use the Unicode version 1 name
             $fields[$NAME] = "";
+            $fields[$CHARNAME] = $fields[$UNICODE_1_NAME];
 
             # We had better not be in between range lines.
             if ($in_range) {
-                $file->carp_bad_line("Expecting a closing range line, not a $fields[$NAME]'.  Trying anyway");
+                $file->carp_bad_line("Expecting a closing range line, not a $fields[$CHARNAME]'.  Trying anyway");
                 $in_range = 0;
             }
         }
-        elsif (substr($fields[$NAME], 0, 1) ne '<') {
+        elsif (substr($fields[$CHARNAME], 0, 1) ne '<') {
 
             # Here is a non-range line.  We had better not be in between range
             # lines.
             if ($in_range) {
-                $file->carp_bad_line("Expecting a closing range line, not a $fields[$NAME]'.  Trying anyway");
+                $file->carp_bad_line("Expecting a closing range line, not a $fields[$CHARNAME]'.  Trying anyway");
                 $in_range = 0;
             }
             # XXX until charnames catches up.
-#            if ($fields[$NAME] =~ s/- $cp $//x) {
+#            if ($fields[$CHARNAME] =~ s/- $cp $//x) {
 #
 #                # These are code points whose names end in their code points,
 #                # which means the names are algorithmically derivable from the
 #                # code points.  To shorten the output Name file, the algorithm
 #                # for deriving these is placed in the file instead of each
 #                # code point, so they have map type $CP_IN_NAME
-#                $fields[$NAME] = $CMD_DELIM
+#                $fields[$CHARNAME] = $CMD_DELIM
 #                                 . $MAP_TYPE_CMD
 #                                 . '='
 #                                 . $CP_IN_NAME
 #                                 . $CMD_DELIM
-#                                 . $fields[$NAME];
+#                                 . $fields[$CHARNAME];
 #            }
+            $fields[$NAME] = $fields[$CHARNAME];
 
             # Some official names are really two alternate names with one in
             # parentheses.  What we do here is use the full official one for
@@ -9326,16 +9370,16 @@ END
             # table, we add two more entries, one for each of the alternate
             # ones.
             # elsif name ne ""
-            #check_and_handle_compound_name($cp, $fields[$NAME]);
+            #check_and_handle_compound_name($cp, $fields[$CHARNAME]);
             #check_and_handle_compound_name($cp, $unicode_1_name);
             # XXX until charnames catches up.
         }
-        elsif ($fields[$NAME] =~ /^<(.+), First>$/) {
-            $fields[$NAME] = $1;
+        elsif ($fields[$CHARNAME] =~ /^<(.+), First>$/) {
+            $fields[$CHARNAME] = $fields[$NAME] = $1;
 
             # Here we are at the beginning of a range pair.
             if ($in_range) {
-                $file->carp_bad_line("Expecting a closing range line, not a beginning one, $fields[$NAME]'.  Trying anyway");
+                $file->carp_bad_line("Expecting a closing range line, not a beginning one, $fields[$CHARNAME]'.  Trying anyway");
             }
             $in_range = 1;
 
@@ -9345,19 +9389,21 @@ END
             $force_output = 1;
 
         }
-        elsif ($fields[$NAME] !~ s/^<(.+), Last>$/$1/) {
-            $file->carp_bad_line("Unexpected name starting with '<' $fields[$NAME].  Ignoring this line.");
+        elsif ($fields[$CHARNAME] !~ s/^<(.+), Last>$/$1/) {
+            $file->carp_bad_line("Unexpected name starting with '<' $fields[$CHARNAME].  Ignoring this line.");
             $_ = "";
             return;
         }
         else { # Here, we are at the last line of a range pair.
 
             if (! $in_range) {
-                $file->carp_bad_line("Unexpected end of range $fields[$NAME] when not in one.  Ignoring this line.");
+                $file->carp_bad_line("Unexpected end of range $fields[$CHARNAME] when not in one.  Ignoring this line.");
                 $_ = "";
                 return;
             }
             $in_range = 0;
+
+            $fields[$NAME] = $fields[$CHARNAME];
 
             # Check that the input is valid: that the closing of the range is
             # the same as the beginning.
@@ -9367,8 +9413,8 @@ END
             }
 
             # The processing differs depending on the type of range,
-            # determined by its $NAME
-            if ($fields[$NAME] =~ /^Hangul Syllable/) {
+            # determined by its $CHARNAME
+            if ($fields[$CHARNAME] =~ /^Hangul Syllable/) {
 
                 # Check that the data looks right.
                 if ($decimal_previous_cp != $SBase) {
@@ -9392,20 +9438,22 @@ END
 
                 # This range is stored in our internal structure with its
                 # own map type, different from all others.
-                $previous_fields[$NAME] = $CMD_DELIM
+                $previous_fields[$CHARNAME] = $previous_fields[$NAME]
+                                        = $CMD_DELIM
                                           . $MAP_TYPE_CMD
                                           . '='
                                           . $HANGUL_SYLLABLE
                                           . $CMD_DELIM
-                                          . $fields[$NAME];
+                                          . $fields[$CHARNAME];
             }
-            elsif ($fields[$NAME] =~ /^CJK/) {
+            elsif ($fields[$CHARNAME] =~ /^CJK/) {
 
                 # The name for these contains the code point itself, and all
                 # are defined to have the same base name, regardless of what
                 # is in the file.  They are stored in our internal structure
                 # with a map type of $CP_IN_NAME
-                $previous_fields[$NAME] = $CMD_DELIM
+                $previous_fields[$CHARNAME] = $previous_fields[$NAME]
+                                        = $CMD_DELIM
                                            . $MAP_TYPE_CMD
                                            . '='
                                            . $CP_IN_NAME
@@ -9420,10 +9468,10 @@ END
                 # null, as there are no names for the private use and
                 # surrogate code points.
 
-                $previous_fields[$NAME] = "";
+                $previous_fields[$CHARNAME] = $previous_fields[$NAME] = "";
             }
             else {
-                $file->carp_bad_line("Unexpected code point range $fields[$NAME] because category is $fields[$CATEGORY].  Attempting to process it.");
+                $file->carp_bad_line("Unexpected code point range $fields[$CHARNAME] because category is $fields[$CATEGORY].  Attempting to process it.");
             }
 
             # The first line of the range caused everything else to be output,
@@ -9527,6 +9575,7 @@ END
             # essentially be this code.)  This uses the algorithm published by
             # Unicode.
             if (property_ref('Decomposition_Mapping')->to_output_map) {
+        local $to_trace = 1 if main::DEBUG;
                 for (my $S = $SBase; $S < $SBase + $SCount; $S++) {
                     use integer;
                     my $SIndex = $S - $SBase;
@@ -11079,24 +11128,8 @@ sub compile_perl() {
         $lv_lvt_v->add_comment('For use in \X; matches: HST=LV | HST=LVT | HST=V');
     }
 
-    # Create a new property specially located that is a combination of the
-    # various Name properties: Name, Unicode_1_Name, Named Sequences, and
-    # Name_Alias properties.  (The final duplicates elements of the first.)  A
-    # comment for it is constructed based on the actual properties present and
-    # used
-    my $perl_charname = Property->new('Perl_Charnames',
-                                Core_Access => '\N{...} and charnames.pm',
-                                Default_Map => "",
-                                Directory => File::Spec->curdir(),
-                                File => 'Name',
-                                Internal_Only_Warning => 1,
-                                Perl_Extension => 1,
-                                Range_Size_1 => 1,
-                                Type => $STRING,
-                                Initialize => property_ref('Unicode_1_Name'),
-                                );
-    # Name overrides Unicode_1_Name
-    $perl_charname->property_add_or_replace_non_nulls(property_ref('Name'));
+    my $perl_charname = property_ref('Perl_Charnames');
+    # Was previously constructed to contain both Name and Unicode_1_Name
     my @composition = ('Name', 'Unicode_1_Name');
 
     if (@named_sequences) {
@@ -13598,6 +13631,7 @@ my @input_file_objects = (
                     Each_Line_Handler => \&filter_jamo_line,
                     ),
     Input_file->new('UnicodeData.txt', v1.1.5,
+non_skip => 1,
                     Pre_Handler => \&setup_UnicodeData,
 
                     # We clean up this file for some early versions.
