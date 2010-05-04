@@ -29,6 +29,21 @@ non-printable characters, but there were no restrictions (on ASCII
 platforms) on what the character following the C<c> could be.  Now, that
 character must be one of the ASCII characters.
 
+=head2 localised tied hashes, arrays and scalars are no longed tied
+
+In the following:
+
+    tie @a, ...;
+    {
+	local @a;
+	# here, @a is a now a new, untied array
+    }
+    # here, @a refers again to the old, tied array
+
+The new local array used to be made tied too, which was fairly pointless,
+and has now been fixed. This fix could however potentially cause a change
+in behaviour of some code.
+
 =head1 Core Enhancements
 
 XXX New core language features go here. Summarise user-visible core language
