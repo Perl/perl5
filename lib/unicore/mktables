@@ -4240,7 +4240,11 @@ sub trace { return main::trace(@_); }
             # lists of properties or tables that have particular statuses; if
             # not, is normal.  The lists are prioritized so the most serious
             # ones are checked first
-            if (exists $why_suppressed{$complete_name}) {
+            if (exists $why_suppressed{$complete_name}
+                # Don't suppress if overriden
+                && ! grep { $_ eq $complete_name{$addr} }
+                                                    @output_mapped_properties)
+            {
                 $status{$addr} = $SUPPRESSED;
             }
             elsif (exists $why_deprecated{$complete_name}) {
