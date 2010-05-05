@@ -610,6 +610,10 @@ my $glob_list = 0;             # ? Should we try to include unknown .txt files
                                # in the input.
 my $output_range_counts = 1;   # ? Should we include the number of code points
                                # in ranges in the output
+my $output_names = 0;          # ? Should character names be in the output
+my @viacode;                   # Contains the 1 million character names, if
+                               # $output_names is true
+
 # Verbosity levels; 0 is quiet
 my $NORMAL_VERBOSITY = 1;
 my $PROGRESS = 2;
@@ -665,6 +669,9 @@ while (@ARGV) {
     elsif ($arg eq '-c') {
         $output_range_counts = ! $output_range_counts
     }
+    elsif ($arg eq '-output_names') {
+        $output_names = 1;
+    }
     else {
         my $with_c = 'with';
         $with_c .= 'out' if $output_range_counts;   # Complements the state
@@ -689,6 +696,9 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
   -maketest   : Make test script 'TestProp.pl' in current (or -C directory),
                 overrides -T
   -makelist   : Rewrite the file list $file_list based on current setup
+  -output_names : Output each character's name in the table files; useful for
+                doing what-ifs, looking at diffs; is slow, memory intensive,
+                resulting tables are usable but very large.
   -check A B  : Executes $0 only if A and B are the same
 END
     }
@@ -4199,6 +4209,7 @@ sub trace { return main::trace(@_); }
         $status{$addr} = delete $args{'Status'} || $NORMAL;
         $status_info{$addr} = delete $args{'_Status_Info'} || "";
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
+        $range_size_1{$addr} = 1 if $output_names;  # Make sure 1 name per line
 
         my $description = delete $args{'Description'};
         my $externally_ok = delete $args{'Externally_Ok'};
@@ -4670,6 +4681,15 @@ sub trace { return main::trace(@_); }
                 if ($start == $end || $range_size_1) {
                     for my $i ($start .. $end) {
                         push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                        if ($output_names) {
+                            if (! defined $viacode[$i]) {
+                                $viacode[$i] =
+                                    Property::property_ref('Perl_Charnames')
+                                                                ->value_of($i)
+                                    || "";
+                            }
+                            $OUT[-1] =~ s/\n/\t# $viacode[$i]\n/;
+                        }
                     }
                 }
                 else  {
