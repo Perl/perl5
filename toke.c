@@ -13096,15 +13096,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
 	    }
 
-	    /* Dot here is historically concat, not a radix point.
-	       Deprecate that; it's confusing, and gets in the way of
-	       hex(ish) fractions... but '..' is OK. */
-	    if (s[0] == '.' &&
-		s[1] != '.') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			       "Dot after %s literal is concatenation", base);
-	    }
-
 	    sv = newSV(0);
 	    if (overflowed) {
 		if (n > 4294967295.0)
