@@ -244,6 +244,16 @@ XXX Changes which affect the interface available to C<XS> code go here.
 
 =item *
 
+The protocol for unwinding the C stack at the last stage of a C<die>
+has changed how it identifies the target stack frame.  This now uses
+a separate variable C<PL_restartjmpenv>, where previously it relied on
+the C<blk_eval.cur_top_env> pointer in the C<eval> context frame that
+has nominally just been discarded.  This change means that code running
+during various stages of Perl-level unwinding no longer needs to take
+care to avoid destroying the ghost frame.
+
+=item *
+
 XXX
 
 =back
