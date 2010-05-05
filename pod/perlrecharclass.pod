@@ -70,7 +70,7 @@ character classes, see L<perlrebackslash>.)
  \V             Match a character that isn't vertical whitespace.
  \N             Match a character that isn't a newline.  Experimental.
  \pP, \p{Prop}  Match a character that has the given Unicode property.
- \PP, \P{Prop}  Match a character that doesn't have the given Unicode property
+ \PP, \P{Prop}  Match a character that doesn't have the Unicode property
 
 =head3 Digits
 
@@ -594,20 +594,24 @@ of all the alphanumerical characters and all punctuation characters.
 All printable characters, which is the set of all the graphical characters
 plus whitespace characters that are not also controls.
 
-=item [5]
+=item [5] (punct)
 
 C<\p{PosixPunct}> and C<[[:punct:]]> in the ASCII range match all the
 non-controls, non-alphanumeric, non-space characters:
 C<[-!"#$%&'()*+,./:;<=E<gt>?@[\\\]^_`{|}~]> (although if a locale is in effect,
 it could alter the behavior of C<[[:punct:]]>).
 
-When the matching string is in UTF-8 format, C<[[:punct:]]> matches the above
-set, plus what C<\p{Punct}> matches.  This is different than strictly matching
-according to C<\p{Punct}>, because the above set includes characters that aren't
-considered punctuation by Unicode, but rather "symbols".  Another way to say it
-is that for a UTF-8 string, C<[[:punct:]]> matches all the characters that
-Unicode considers to be punctuation, plus all the ASCII-range characters that
-Unicode considers to be symbols.
+C<\p{Punct}> matches a somewhat different set in the ASCII range, namely
+C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing C<[$+E<lt>=E<gt>^`|~]>.
+This is because Unicode splits what POSIX considers to be punctuation into two
+categories, Punctuation and Symbols.
+
+When the matching string is in UTF-8 format, C<[[:punct:]]> matches what it
+matches in the ASCII range, plus what C<\p{Punct}> matches.  This is different
+than strictly matching according to C<\p{Punct}>.  Another way to say it is that
+for a UTF-8 string, C<[[:punct:]]> matches all the characters that Unicode
+considers to be punctuation, plus all the ASCII-range characters that Unicode
+considers to be symbols.
 
 =item [6]
 
