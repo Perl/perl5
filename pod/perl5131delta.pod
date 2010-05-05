@@ -50,6 +50,56 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 Exception Handling Reliability
+
+Several changes have been made to the way C<die>, C<warn>, and C<$@>
+behave, in order to make them more reliable and consistent.
+
+When an exception is thrown inside an C<eval>, the exception is no
+longer at risk of being clobbered by code running during unwinding
+(e.g., destructors).  Previously, the exception was written into C<$@>
+early in the throwing process, and would be overwritten if C<eval> was
+used internally in the destructor for an object that had to be freed
+while exiting from the outer C<eval>.  Now the exception is written
+into C<$@> last thing before exiting the outer C<eval>, so the code
+running immediately thereafter can rely on the value in C<$@> correctly
+corresponding to that C<eval>.
+
+Likewise, a C<local $@> inside an C<eval> will no longer clobber any
+exception thrown in its scope.  Previously, the restoration of C<$@> upon
+unwinding would overwrite any exception being thrown.  Now the exception
+gets to the C<eval> anyway.  So C<local $@> is safe inside an C<eval>,
+albeit of rather limited use.
+
+Exceptions thrown from object destructors no longer modify the C<$@>
+of the surrounding context.  (If the surrounding context was exception
+unwinding, this used to be another way to clobber the exception being
+thrown.  Due to the above change it no longer has that significance,
+but there are other situations where C<$@> is significant.)  Previously
+such an exception was sometimes emitted as a warning, and then either
+string-appended to the surrounding C<$@> or completely replaced the
+surrounding C<$@>, depending on whether that exception and the surrounding
+C<$@> were strings or objects.  Now, an exception in this situation is
+always emitted as a warning, leaving the surrounding C<$@> untouched.
+In addition to object destructors, this also affects any function call
+performed by XS code using the C<G_KEEPERR> flag.
+
+C<$@> is also no longer used as an internal temporary variable when
+preparing to C<die>.  Previously it was internally necessary to put
+any exception object (any non-string exception) into C<$@> first,
+before it could be used as an exception.  (The C API still offers the
+old option, so an XS module might still clobber C<$@> in the old way.)
+This change together with the foregoing means that, in various places,
+C<$@> may be observed to contain its previously-assigned value, rather
+than having been overwritten by recent exception-related activity.
+
+Warnings for C<warn> can now be objects, in the same way as exceptions
+for C<die>.  If an object-based warning gets the default handling,
+of writing to standard error, it will of course still be stringified
+along the way.  But a C<$SIG{__WARN__}> handler will now receive an
+object-based warning as an object, where previously it was passed the
+result of stringifying the object.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
