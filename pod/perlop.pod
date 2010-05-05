@@ -602,7 +602,7 @@ Examples:
 As a scalar operator:
 
     if (101 .. 200) { print; } # print 2nd hundred lines, short for
-                               #   if ($. == 101 .. $. == 200) { print; }
+                               #  if ($. == 101 .. $. == 200) { print; }
 
     next LINE if (1 .. /^$/);  # skip header lines, short for
                                #   next LINE if ($. == 1 .. /^$/);
@@ -677,7 +677,8 @@ return an alpha:
 
 To get lower-case greek letters, use this instead:
 
-    my @greek_small =  map { chr } ( ord("\N{alpha}") .. ord("\N{omega}") );
+    my @greek_small =  map { chr } ( ord("\N{alpha}") ..
+                                                     ord("\N{omega}") );
 
 Because each operand is evaluated in integer form, C<2.18 .. 3.14> will
 return two elements in list context.
@@ -1237,8 +1238,8 @@ is in effect.
 Options are as described in C<qr//>; in addition, the following match
 process modifiers are available:
 
-    g	Match globally, i.e., find all occurrences.
-    c	Do not reset search position on a failed match when /g is in effect.
+ g  Match globally, i.e., find all occurrences.
+ c  Do not reset search position on a failed match when /g is in effect.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-whitespace characters
@@ -1385,18 +1386,18 @@ doing different actions depending on which regexp matched.  Each
 regexp tries to match where the previous one leaves off.
 
  $_ = <<'EOL';
-      $url = URI::URL->new( "http://example.com/" ); die if $url eq "xXx";
+    $url = URI::URL->new( "http://example.com/" ); die if $url eq "xXx";
  EOL
  LOOP:
     {
-      print(" digits"),		redo LOOP if /\G\d+\b[,.;]?\s*/gc;
-      print(" lowercase"),	redo LOOP if /\G[a-z]+\b[,.;]?\s*/gc;
-      print(" UPPERCASE"),	redo LOOP if /\G[A-Z]+\b[,.;]?\s*/gc;
-      print(" Capitalized"),	redo LOOP if /\G[A-Z][a-z]+\b[,.;]?\s*/gc;
-      print(" MiXeD"),		redo LOOP if /\G[A-Za-z]+\b[,.;]?\s*/gc;
-      print(" alphanumeric"),	redo LOOP if /\G[A-Za-z0-9]+\b[,.;]?\s*/gc;
-      print(" line-noise"),	redo LOOP if /\G[^A-Za-z0-9]+/gc;
-      print ". That's all!\n";
+     print(" digits"),       redo LOOP if /\G\d+\b[,.;]?\s*/gc;
+     print(" lowercase"),    redo LOOP if /\G[a-z]+\b[,.;]?\s*/gc;
+     print(" UPPERCASE"),    redo LOOP if /\G[A-Z]+\b[,.;]?\s*/gc;
+     print(" Capitalized"),  redo LOOP if /\G[A-Z][a-z]+\b[,.;]?\s*/gc;
+     print(" MiXeD"),        redo LOOP if /\G[A-Za-z]+\b[,.;]?\s*/gc;
+     print(" alphanumeric"), redo LOOP if /\G[A-Za-z0-9]+\b[,.;]?\s*/gc;
+     print(" line-noise"),   redo LOOP if /\G[^A-Za-z0-9]+/gc;
+     print ". That's all!\n";
     }
 
 Here is the output (split into several lines):
@@ -2606,17 +2607,17 @@ external C libraries.
 
 Here is a short, but incomplete summary:
 
-	Math::Fraction		big, unlimited fractions like 9973 / 12967
-	Math::String		treat string sequences like numbers
-	Math::FixedPrecision	calculate with a fixed precision
-	Math::Currency		for currency calculations
-	Bit::Vector		manipulate bit vectors fast (uses C)
-	Math::BigIntFast	Bit::Vector wrapper for big numbers
-	Math::Pari		provides access to the Pari C library
-	Math::BigInteger	uses an external C library
-	Math::Cephes		uses external Cephes C library (no big numbers)
-	Math::Cephes::Fraction	fractions via the Cephes library
-	Math::GMP		another one using an external C library
+  Math::Fraction         big, unlimited fractions like 9973 / 12967
+  Math::String           treat string sequences like numbers
+  Math::FixedPrecision   calculate with a fixed precision
+  Math::Currency         for currency calculations
+  Bit::Vector            manipulate bit vectors fast (uses C)
+  Math::BigIntFast       Bit::Vector wrapper for big numbers
+  Math::Pari             provides access to the Pari C library
+  Math::BigInteger       uses an external C library
+  Math::Cephes           uses external Cephes C library (no big numbers)
+  Math::Cephes::Fraction fractions via the Cephes library
+  Math::GMP              another one using an external C library
 
 Choose wisely.
 
