@@ -125,6 +125,11 @@ cribbed.
 
 =over
 
+=item Perl 4 C<.pl> libraries
+
+These historical libraries have been minimally modified to avoid using
+C<$[>.  This is to prepare them for the deprecation of C<$[>.
+
 =item C<B::Deparse>
 
 A bug has been fixed when deparsing a nextstate op that has both a
