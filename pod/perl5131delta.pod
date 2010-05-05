@@ -123,6 +123,19 @@ cribbed.
 
 =head2 Updated Modules
 
+=over
+
+=item C<B::Deparse>
+
+A bug has been fixed when deparsing a nextstate op that has both a
+change of package (relative to the previous nextstate), or a change of
+C<%^H> or other state, and a label.  Previously the label was emitted
+first, leading to syntactically invalid output because a label is not
+permitted immediately before a package declaration, B<BEGIN> block,
+or some other things.  Now the label is emitted last.
+
+=back
+
 =head2 Removed Modules and Pragmata
 
 =head1 Utility Changes
