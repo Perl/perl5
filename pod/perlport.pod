@@ -480,17 +480,17 @@ file name.
 To convert $^X to a file pathname, taking account of the requirements
 of the various operating system possibilities, say:
 
-  use Config;
-  my $thisperl = $^X;
-  if ($^O ne 'VMS')
-     {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
+ use Config;
+ my $thisperl = $^X;
+ if ($^O ne 'VMS')
+    {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
 To convert $Config{perlpath} to a file pathname, say:
 
-  use Config;
-  my $thisperl = $Config{perlpath};
-  if ($^O ne 'VMS')
-     {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
+ use Config;
+ my $thisperl = $Config{perlpath};
+ if ($^O ne 'VMS')
+    {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
 =head2 Networking
 
@@ -1089,7 +1089,7 @@ Pumpkings and module integrators can easily see whether files with too many
 directory levels have snuck into the core by running the following in the
 top-level source directory:
 
-   $ perl -ne "$_=~s/\s+.*//; print if scalar(split /\//) > 8;" < MANIFEST
+ $ perl -ne "$_=~s/\s+.*//; print if scalar(split /\//) > 8;" < MANIFEST
 
 
 The VMS::Filespec module, which gets installed as part of the build
@@ -1801,7 +1801,7 @@ Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
 =item localtime
 
-localtime() has the same range as L<gmtime>, but because time zone
+localtime() has the same range as L</gmtime>, but because time zone
 rules change its accuracy for historical and future times may degrade
 but usually by no more than an hour.
 
