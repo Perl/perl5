@@ -124,13 +124,13 @@ X<metacharacter>
 X<\> X<^> X<.> X<$> X<|> X<(> X<()> X<[> X<[]>
 
 
-    \	Quote the next metacharacter
-    ^	Match the beginning of the line
-    .	Match any character (except newline)
-    $	Match the end of the line (or before newline at the end)
-    |	Alternation
-    ()	Grouping
-    []	Bracketed Character class
+    \        Quote the next metacharacter
+    ^        Match the beginning of the line
+    .        Match any character (except newline)
+    $        Match the end of the line (or before newline at the end)
+    |        Alternation
+    ()       Grouping
+    []       Bracketed Character class
 
 By default, the "^" character is guaranteed to match only the
 beginning of the string, the "$" character only the end (or before the
@@ -155,12 +155,12 @@ X<.> X</s>
 The following standard quantifiers are recognized:
 X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
 
-    *	   Match 0 or more times
-    +	   Match 1 or more times
-    ?	   Match 1 or 0 times
-    {n}    Match exactly n times
-    {n,}   Match at least n times
-    {n,m}  Match at least n but not more than m times
+    *           Match 0 or more times
+    +           Match 1 or more times
+    ?           Match 1 or 0 times
+    {n}         Match exactly n times
+    {n,}        Match at least n times
+    {n,m}       Match at least n but not more than m times
 
 (If a curly bracket occurs in any other context, it is treated
 as a regular character.  In particular, the lower bound
@@ -180,24 +180,24 @@ that the meanings don't change, just the "greediness":
 X<metacharacter> X<greedy> X<greediness>
 X<?> X<*?> X<+?> X<??> X<{n}?> X<{n,}?> X<{n,m}?>
 
-    *?     Match 0 or more times, not greedily
-    +?     Match 1 or more times, not greedily
-    ??     Match 0 or 1 time, not greedily
-    {n}?   Match exactly n times, not greedily
-    {n,}?  Match at least n times, not greedily
-    {n,m}? Match at least n but not more than m times, not greedily
+    *?        Match 0 or more times, not greedily
+    +?        Match 1 or more times, not greedily
+    ??        Match 0 or 1 time, not greedily
+    {n}?      Match exactly n times, not greedily
+    {n,}?     Match at least n times, not greedily
+    {n,m}?    Match at least n but not more than m times, not greedily
 
 By default, when a quantified subpattern does not allow the rest of the
 overall pattern to match, Perl will backtrack. However, this behaviour is
 sometimes undesirable. Thus Perl provides the "possessive" quantifier form
 as well.
 
-    *+     Match 0 or more times and give nothing back
-    ++     Match 1 or more times and give nothing back
-    ?+     Match 0 or 1 time and give nothing back
-    {n}+   Match exactly n times and give nothing back (redundant)
-    {n,}+  Match at least n times and give nothing back
-    {n,m}+ Match at least n but not more than m times and give nothing back
+ *+     Match 0 or more times and give nothing back
+ ++     Match 1 or more times and give nothing back
+ ?+     Match 0 or 1 time and give nothing back
+ {n}+   Match exactly n times and give nothing back (redundant)
+ {n,}+  Match at least n times and give nothing back
+ {n,m}+ Match at least n but not more than m times and give nothing back
 
 For instance,
 
@@ -223,24 +223,24 @@ instance the above example could also be written as follows:
 Because patterns are processed as double quoted strings, the following
 also work:
 
-    \t		tab                   (HT, TAB)
-    \n		newline               (LF, NL)
-    \r		return                (CR)
-    \f		form feed             (FF)
-    \a		alarm (bell)          (BEL)
-    \e		escape (think troff)  (ESC)
-    \033	octal char            (example: ESC)
-    \x1B	hex char              (example: ESC)
-    \x{263a}	long hex char         (example: Unicode SMILEY)
-    \cK		control char          (example: VT)
-    \N{name}	named Unicode character
-    \N{U+263D}	Unicode character     (example: FIRST QUARTER MOON)
-    \l		lowercase next char (think vi)
-    \u		uppercase next char (think vi)
-    \L		lowercase till \E (think vi)
-    \U		uppercase till \E (think vi)
-    \Q		quote (disable) pattern metacharacters till \E
-    \E		end either case modification or quoted section (think vi)
+ \t          tab                   (HT, TAB)
+ \n          newline               (LF, NL)
+ \r          return                (CR)
+ \f          form feed             (FF)
+ \a          alarm (bell)          (BEL)
+ \e          escape (think troff)  (ESC)
+ \033        octal char            (example: ESC)
+ \x1B        hex char              (example: ESC)
+ \x{263a}    long hex char         (example: Unicode SMILEY)
+ \cK         control char          (example: VT)
+ \N{name}    named Unicode character
+ \N{U+263D}  Unicode character     (example: FIRST QUARTER MOON)
+ \l          lowercase next char (think vi)
+ \u          uppercase next char (think vi)
+ \L          lowercase till \E (think vi)
+ \U          uppercase till \E (think vi)
+ \Q          quote (disable) pattern metacharacters till \E
+ \E          end either case modification or quoted section, think vi
 
 Details are in L<perlop/Quote and Quote-like Operators>.
 
@@ -249,43 +249,44 @@ Details are in L<perlop/Quote and Quote-like Operators>.
 In addition, Perl defines the following:
 X<\g> X<\k> X<\K> X<backreference>
 
-  Sequence   Note    Description
-   [...]     [1]  Match a character according to the rules of the bracketed
-                    character class defined by the "...".  Example: [a-z]
-                    matches "a" or "b" or "c" ... or "z"
-   [[:...:]] [2]  Match a character according to the rules of the POSIX
-                    character class "..." within the outer bracketed character
-                    class.  Example: [[:upper:]] matches any uppercase
-                    character.
-   \w        [3]  Match a "word" character (alphanumeric plus "_")
-   \W        [3]  Match a non-"word" character
-   \s        [3]  Match a whitespace character
-   \S        [3]  Match a non-whitespace character
-   \d        [3]  Match a decimal digit character
-   \D        [3]  Match a non-digit character
-   \pP       [3]  Match P, named property.  Use \p{Prop} for longer names.
-   \PP       [3]  Match non-P
-   \X        [4]  Match Unicode "eXtended grapheme cluster"
-   \C             Match a single C-language char (octet) even if that is part
-                    of a larger UTF-8 character.  Thus it breaks up characters
-                    into their UTF-8 bytes, so you may end up with malformed
-                    pieces of UTF-8.  Unsupported in lookbehind.
-   \1        [5]  Backreference to a specific capture buffer or group.
-                    '1' may actually be any positive integer.
-   \g1       [5]  Backreference to a specific or previous group,
-   \g{-1}    [5]  The number may be negative indicating a relative previous
-                    buffer and may optionally be wrapped in curly brackets for
-                    safer parsing.
-   \g{name}  [5]  Named backreference
-   \k<name>  [5]  Named backreference
-   \K        [6]  Keep the stuff left of the \K, don't include it in $&
-   \N        [7]  Any character but \n (experimental).  Not affected by /s
-                    modifier
-   \v        [3]  Vertical whitespace
-   \V        [3]  Not vertical whitespace
-   \h        [3]  Horizontal whitespace
-   \H        [3]  Not horizontal whitespace
-   \R        [4]  Linebreak
+ Sequence   Note    Description
+  [...]     [1]  Match a character according to the rules of the
+                   bracketed character class defined by the "...".
+                   Example: [a-z] matches "a" or "b" or "c" ... or "z"
+  [[:...:]] [2]  Match a character according to the rules of the POSIX
+                   character class "..." within the outer bracketed
+                   character class.  Example: [[:upper:]] matches any
+                   uppercase character.
+  \w        [3]  Match a "word" character (alphanumeric plus "_")
+  \W        [3]  Match a non-"word" character
+  \s        [3]  Match a whitespace character
+  \S        [3]  Match a non-whitespace character
+  \d        [3]  Match a decimal digit character
+  \D        [3]  Match a non-digit character
+  \pP       [3]  Match P, named property.  Use \p{Prop} for longer names
+  \PP       [3]  Match non-P
+  \X        [4]  Match Unicode "eXtended grapheme cluster"
+  \C             Match a single C-language char (octet) even if that is
+                   part of a larger UTF-8 character.  Thus it breaks up
+                   characters into their UTF-8 bytes, so you may end up
+                   with malformed pieces of UTF-8.  Unsupported in
+                   lookbehind.
+  \1        [5]  Backreference to a specific capture buffer or group.
+                   '1' may actually be any positive integer.
+  \g1       [5]  Backreference to a specific or previous group,
+  \g{-1}    [5]  The number may be negative indicating a relative
+                   previous buffer and may optionally be wrapped in
+                   curly brackets for safer parsing.
+  \g{name}  [5]  Named backreference
+  \k<name>  [5]  Named backreference
+  \K        [6]  Keep the stuff left of the \K, don't include it in $&
+  \N        [7]  Any character but \n (experimental).  Not affected by
+                   /s modifier
+  \v        [3]  Vertical whitespace
+  \V        [3]  Not vertical whitespace
+  \h        [3]  Horizontal whitespace
+  \H        [3]  Not horizontal whitespace
+  \R        [4]  Linebreak
 
 =over 4
 
@@ -455,9 +456,9 @@ Examples:
          and print "'$1' is the first doubled character\n";
 
     if (/Time: (..):(..):(..)/) {   # parse out values
-	$hours = $1;
-	$minutes = $2;
-	$seconds = $3;
+        $hours = $1;
+        $minutes = $2;
+        $seconds = $3;
     }
 
 Several special variables also refer back to portions of the previous
@@ -821,16 +822,16 @@ C<local>ization are undone, so that
 
   $_ = 'a' x 8;
   m<
-     (?{ $cnt = 0 })			# Initialize $cnt.
+     (?{ $cnt = 0 })                   # Initialize $cnt.
      (
        a
        (?{
-           local $cnt = $cnt + 1;	# Update $cnt, backtracking-safe.
+           local $cnt = $cnt + 1;      # Update $cnt, backtracking-safe.
        })
      )*
      aaaa
-     (?{ $res = $cnt })			# On success copy to non-localized
-					# location.
+     (?{ $res = $cnt })                # On success copy to
+                                       # non-localized location.
    >x;
 
 will set C<$res = 4>.  Note that after the match, C<$cnt> returns to the globally
@@ -906,14 +907,14 @@ where the C<code> ends are currently somewhat convoluted.
 The following pattern matches a parenthesized group:
 
   $re = qr{
-	     \(
-	     (?:
-		(?> [^()]+ )	# Non-parens without backtracking
-	      |
-		(??{ $re })	# Group with matching parens
-	     )*
-	     \)
-	  }x;
+             \(
+             (?:
+                (?> [^()]+ )       # Non-parens without backtracking
+              |
+                (??{ $re })        # Group with matching parens
+             )*
+             \)
+          }x;
 
 See also C<(?PARNO)> for a different, more efficient way to accomplish
 the same task.
@@ -1148,7 +1149,7 @@ Consider this pattern:
 
     m{ \(
           (
-            [^()]+		# x+
+            [^()]+           # x+
           |
             \( [^()]* \)
           )+
@@ -1168,7 +1169,7 @@ hung.  However, a tiny change to this pattern
 
     m{ \(
           (
-            (?> [^()]+ )	# change x+ above to (?> x+ )
+            (?> [^()]+ )        # change x+ above to (?> x+ )
           |
             \( [^()]* \)
           )+
@@ -1500,7 +1501,7 @@ word following "foo" in the string "Food is on the foo table.":
 
     $_ = "Food is on the foo table.";
     if ( /\b(foo)\s+(\w+)/i ) {
-	print "$2 follows $1.\n";
+        print "$2 follows $1.\n";
     }
 
 When the match runs, the first part of the regular expression (C<\b(foo)>)
@@ -1518,7 +1519,7 @@ like this:
 
     $_ =  "The food is under the bar in the barn.";
     if ( /foo(.*)bar/ ) {
-	print "got <$1>\n";
+        print "got <$1>\n";
     }
 
 Which perhaps unexpectedly yields:
@@ -1538,8 +1539,8 @@ of a string, and you also want to keep the preceding part of the match.
 So you write this:
 
     $_ = "I have 2 numbers: 53147";
-    if ( /(.*)(\d*)/ ) {				# Wrong!
-	print "Beginning is <$1>, number is <$2>.\n";
+    if ( /(.*)(\d*)/ ) {                                # Wrong!
+        print "Beginning is <$1>, number is <$2>.\n";
     }
 
 That won't work at all, because C<.*> was greedy and gobbled up the
@@ -1552,23 +1553,23 @@ Here are some variants, most of which don't work:
 
     $_ = "I have 2 numbers: 53147";
     @pats = qw{
-	(.*)(\d*)
-	(.*)(\d+)
-	(.*?)(\d*)
-	(.*?)(\d+)
-	(.*)(\d+)$
-	(.*?)(\d+)$
-	(.*)\b(\d+)$
-	(.*\D)(\d+)$
+        (.*)(\d*)
+        (.*)(\d+)
+        (.*?)(\d*)
+        (.*?)(\d+)
+        (.*)(\d+)$
+        (.*?)(\d+)$
+        (.*)\b(\d+)$
+        (.*\D)(\d+)$
     };
 
     for $pat (@pats) {
-	printf "%-12s ", $pat;
-	if ( /$pat/ ) {
-	    print "<$1> <$2>\n";
-	} else {
-	    print "FAIL\n";
-	}
+        printf "%-12s ", $pat;
+        if ( /$pat/ ) {
+            print "<$1> <$2>\n";
+        } else {
+            print "FAIL\n";
+        }
     }
 
 That will print out:
@@ -1594,8 +1595,8 @@ trickier.  Imagine you'd like to find a sequence of non-digits not
 followed by "123".  You might try to write that as
 
     $_ = "ABC123";
-    if ( /^\D*(?!123)/ ) {		# Wrong!
-	print "Yup, no 123 in $_\n";
+    if ( /^\D*(?!123)/ ) {                # Wrong!
+        print "Yup, no 123 in $_\n";
     }
 
 But that isn't going to match; at least, not the way you're hoping.  It
@@ -1777,7 +1778,7 @@ meaning of C<\1> is kludged in for C<s///>.  However, if you get into the habit
 of doing that, you get yourself into trouble if you then add an C</e>
 modifier.
 
-    s/(\d+)/ \1 + 1 /eg;    	# causes warning under -w
+    s/(\d+)/ \1 + 1 /eg;            # causes warning under -w
 
 Or if you try to do
 
@@ -1818,7 +1819,7 @@ However, long experience has shown that many programming tasks may
 be significantly simplified by using repeated subexpressions that
 may match zero-length substrings.  Here's a simple example being:
 
-    @chars = split //, $string;		  # // is not magic in split
+    @chars = split //, $string;                  # // is not magic in split
     ($whitewashed = $string) =~ s/()/ /g; # parens avoid magic s// /
 
 Thus Perl allows such constructs, by I<forcefully breaking
@@ -1991,7 +1992,7 @@ this:
     # We must also take care of not escaping the legitimate \\Y|
     # sequence, hence the presence of '\\' in the conversion rules.
     my %rules = ( '\\' => '\\\\',
-		  'Y|' => qr/(?=\S)(?<!\S)|(?!\S)(?<=\S)/ );
+                  'Y|' => qr/(?=\S)(?<!\S)|(?!\S)(?<=\S)/ );
     sub convert {
       my $re = shift;
       $re =~ s{
