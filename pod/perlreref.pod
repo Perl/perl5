@@ -57,25 +57,26 @@ delimiters can be used.  Must be reset with reset().
 
 =head2 SYNTAX
 
-   \       Escapes the character immediately following it
-   .       Matches any single character except a newline (unless /s is used)
-   ^       Matches at the beginning of the string (or line, if /m is used)
-   $       Matches at the end of the string (or line, if /m is used)
-   *       Matches the preceding element 0 or more times
-   +       Matches the preceding element 1 or more times
-   ?       Matches the preceding element 0 or 1 times
-   {...}   Specifies a range of occurrences for the element preceding it
-   [...]   Matches any one of the characters contained within the brackets
-   (...)   Groups subexpressions for capturing to $1, $2...
-   (?:...) Groups subexpressions without capturing (cluster)
-   |       Matches either the subexpression preceding or following it
-   \1, \2, \3 ...           Matches the text from the Nth group
-   \g1 or \g{1}, \g2 ...    Matches the text from the Nth group
-   \g-1 or \g{-1}, \g-2 ... Matches the text from the Nth previous group
-   \g{name}     Named backreference
-   \k<name>     Named backreference
-   \k'name'     Named backreference
-   (?P=name)    Named backreference (python syntax)
+ \       Escapes the character immediately following it
+ .       Matches any single character except a newline (unless /s is
+           used)
+ ^       Matches at the beginning of the string (or line, if /m is used)
+ $       Matches at the end of the string (or line, if /m is used)
+ *       Matches the preceding element 0 or more times
+ +       Matches the preceding element 1 or more times
+ ?       Matches the preceding element 0 or 1 times
+ {...}   Specifies a range of occurrences for the element preceding it
+ [...]   Matches any one of the characters contained within the brackets
+ (...)   Groups subexpressions for capturing to $1, $2...
+ (?:...) Groups subexpressions without capturing (cluster)
+ |       Matches either the subexpression preceding or following it
+ \1, \2, \3 ...           Matches the text from the Nth group
+ \g1 or \g{1}, \g2 ...    Matches the text from the Nth group
+ \g-1 or \g{-1}, \g-2 ... Matches the text from the Nth previous group
+ \g{name}     Named backreference
+ \k<name>     Named backreference
+ \k'name'     Named backreference
+ (?P=name)    Named backreference (python syntax)
 
 =head2 ESCAPE SEQUENCES
 
@@ -126,9 +127,9 @@ and L<perlunicode> for details.
    \S      A non-whitespace character
    \h      An horizontal whitespace
    \H      A non horizontal whitespace
-   \N      A non newline (when not followed by '{NAME}'; experimental; not
-	   valid in a character class; equivalent to [^\n]; it's like '.'
-	   without /s modifier)
+   \N      A non newline (when not followed by '{NAME}'; experimental;
+           not valid in a character class; equivalent to [^\n]; it's
+           like '.' without /s modifier)
    \v      A vertical whitespace
    \V      A non vertical whitespace
    \R      A generic newline           (?>\v|\x0D\x0A)
@@ -142,27 +143,50 @@ and L<perlunicode> for details.
 
 POSIX character classes and their Unicode and Perl equivalents:
 
-   alnum   IsAlnum              Alphanumeric
-   alpha   IsAlpha              Alphabetic
-   ascii   IsASCII              Any ASCII char
-   blank   IsSpace  [ \t]       Horizontal whitespace (GNU extension)
-   cntrl   IsCntrl              Control characters
-   digit   IsDigit  \d          Digits
-   graph   IsGraph              Alphanumeric and punctuation
-   lower   IsLower              Lowercase chars (locale and Unicode aware)
-   print   IsPrint              Alphanumeric, punct, and space
-   punct   IsPunct              Punctuation
-   space   IsSpace  [\s\ck]     Whitespace
-           IsSpacePerl   \s     Perl's whitespace definition
-   upper   IsUpper              Uppercase chars (locale and Unicode aware)
-   word    IsWord   \w          Alphanumeric plus _ (Perl extension)
-   xdigit  IsXDigit [0-9A-Fa-f] Hexadecimal digit
+           ASCII-         Full-
+           range          range   backslash
+ POSIX    \p{...}         \p{}    sequence       Description
+ -----------------------------------------------------------------------
+ alnum   PosixAlnum       Alnum               Alpha plus Digit
+ alpha   PosixAlpha       Alpha               Alphabetic characters
+ ascii   ASCII                                Any ASCII character
+ blank   PosixBlank       Blank     \h        Horizontal whitespace;
+                                                full-range also written
+                                                as \p{HorizSpace} (GNU
+                                                extension)
+ cntrl   PosixCntrl       Cntrl               Control characters
+ digit   PosixDigit       Digit     \d        Decimal digits
+ graph   PosixGraph       Graph               Alnum plus Punct
+ lower   PosixLower       Lower               Lowercase characters
+ print   PosixPrint       Print               Graph plus Print, but not
+                                                any Cntrls
+ punct   PosixPunct       Punct               These aren't precisely
+                                                equivalent.  See NOTE,
+                                                below.
+ space   PosixSpace       Space     [\s\cK]   Whitespace
+         PerlSpace        SpacePerl \s        Perl's whitespace
+                                                definition
+ upper   PosixUpper       Upper               Uppercase characters
+ word    PerlWord         Word      \w        Alnum plus '_' (Perl
+                                                extension)
+ xdigit  ASCII_Hex_Digit  XDigit              Hexadecimal digit,
+                                                ASCII-range is
+                                                [0-9A-Fa-f]
+
+NOTE on C<[[:punct:]]>, C<\p{PosixPunct}> and C<\p{Punct}>:
+In the ASCII range, C<[[:punct:]]> and C<\p{PosixPunct}> match
+C<[-!"#$%&'()*+,./:;<=E<gt>?@[\\\]^_`{|}~]> (although if a locale is in
+effect, it could alter the behavior of C<[[:punct:]]>); and C<\p{Punct}>
+matches C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  When matching a UTF-8 string,
+C<[[:punct:]]> matches what it does in the ASCII range, plus what
+C<\p{Punct}> matches.  C<\p{Punct}> matches, anything that isn't a
+control, an alphanumeric, a space, nor a symbol.
 
 Within a character class:
 
-    POSIX       traditional   Unicode
-    [:digit:]       \d        \p{IsDigit}
-    [:^digit:]      \D        \P{IsDigit}
+    POSIX      traditional   Unicode
+  [:digit:]       \d        \p{Digit}
+  [:^digit:]      \D        \P{Digit}
 
 =head2 ANCHORS
 
@@ -176,7 +200,6 @@ All are zero-width assertions.
    \Z Match string end (before optional newline)
    \z Match absolute string end
    \G Match where previous m//g left off
-
    \K Keep the stuff left of the \K, don't include it in $&
 
 =head2 QUANTIFIERS
