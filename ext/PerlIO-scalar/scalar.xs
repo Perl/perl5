@@ -52,6 +52,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	s->posn = SvCUR(s->var);
     else
 	s->posn = 0;
+    SvSETMAGIC(s->var);
     return code;
 }
 
@@ -84,6 +85,7 @@ IV
 PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+    SvGETMAGIC(s->var);
     STRLEN oldcur = SvCUR(s->var);
     STRLEN newlen;
     switch (whence) {
@@ -124,6 +126,34 @@ PerlIOScalar_tell(pTHX_ PerlIO * f)
     return s->posn;
 }
 
+
+SSize_t
+PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
+{
+    if (!f)
+	return 0;
+    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	SETERRNO(EBADF, SS_IVCHAN);
+	return 0;
+    }
+    {
+	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+	SV *sv = s->var;
+	char *p;
+	STRLEN len, got;
+	p = SvPV(sv, len);
+	got = len - (STRLEN)(s->posn);
+	if (got <= 0)
+	    return 0;
+	if (got > (STRLEN)count)
+	    got = (STRLEN)count;
+	Copy(p + (STRLEN)(s->posn), vbuf, got, STDCHAR);
+	s->posn += (Off_t)got;
+	return (SSize_t)got;
+    }
+}
+
 SSize_t
 PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 {
@@ -132,6 +162,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	SV *sv = s->var;
 	char *dst;
+	SvGETMAGIC(sv);
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
 	    dst = SvGROW(sv, SvCUR(sv) + count);
 	    offset = SvCUR(sv);
@@ -141,14 +172,15 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	    if ((s->posn + count) > SvCUR(sv))
 		dst = SvGROW(sv, (STRLEN)s->posn + count);
 	    else
-		dst = SvPV_nolen(sv);
+		dst = SvPVX(sv);
 	    offset = s->posn;
 	    s->posn += count;
 	}
 	Move(vbuf, dst + offset, count, char);
 	if ((STRLEN) s->posn > SvCUR(sv))
 	    SvCUR_set(sv, (STRLEN)s->posn);
-	SvPOK_on(s->var);
+	SvPOK_on(sv);
+	SvSETMAGIC(sv);
 	return count;
     }
     else
@@ -172,6 +204,7 @@ PerlIOScalar_get_base(pTHX_ PerlIO * f)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
+	SvGETMAGIC(s->var);
 	return (STDCHAR *) SvPV_nolen(s->var);
     }
     return (STDCHAR *) NULL;
@@ -192,6 +225,7 @@ PerlIOScalar_get_cnt(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+	SvGETMAGIC(s->var);
 	if (SvCUR(s->var) > (STRLEN) s->posn)
 	    return SvCUR(s->var) - (STRLEN)s->posn;
 	else
@@ -205,6 +239,7 @@ PerlIOScalar_bufsiz(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+	SvGETMAGIC(s->var);
 	return SvCUR(s->var);
     }
     return 0;
@@ -214,6 +249,7 @@ void
 PerlIOScalar_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, SSize_t cnt)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+    SvGETMAGIC(s->var);
     s->posn = SvCUR(s->var) - cnt;
 }
 
@@ -277,7 +313,7 @@ PERLIO_FUNCS_DECL(PerlIO_scalar) = {
     PerlIOScalar_arg,
     PerlIOScalar_fileno,
     PerlIOScalar_dup,
-    PerlIOBase_read,
+    PerlIOScalar_read,
     NULL, /* unread */
     PerlIOScalar_write,
     PerlIOScalar_seek,
