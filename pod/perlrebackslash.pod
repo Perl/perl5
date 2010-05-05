@@ -75,7 +75,7 @@ as C<Not in [].>
  \e                Escape character.
  \E                Turn off \Q, \L and \U processing.  Not in [].
  \f                Form feed.
- \g{}, \g1         Named, absolute or relative backreference.  Not in [].
+ \g{}, \g1         Named, absolute or relative backreference.  Not in []
  \G                Pos assertion.  Not in [].
  \h                Character class for horizontal whitespace.
  \H                Character class for non horizontal whitespace.
@@ -222,7 +222,7 @@ as a character without special meaning by the regex engine, and will match
 
  $str = "Perl";
  $str =~ /\120/;    # Match, "\120" is "P".
- $str =~ /\120+/;   # Match, "\120" is "P", it is repeated at least once.
+ $str =~ /\120+/;   # Match, "\120" is "P", it is repeated at least once
  $str =~ /P\053/;   # No match, "\053" is "+" and taken literally.
 
 =head4 Caveat
@@ -276,7 +276,7 @@ Mnemonic: heI<x>adecimal.
 
  $str = "Perl";
  $str =~ /\x50/;    # Match, "\x50" is "P".
- $str =~ /\x50+/;   # Match, "\x50" is "P", it is repeated at least once.
+ $str =~ /\x50+/;   # Match, "\x50" is "P", it is repeated at least once
  $str =~ /P\x2B/;   # No match, "\x2B" is "+" and taken literally.
 
  /\x{2603}\x{2602}/ # Snowman with an umbrella.
@@ -571,7 +571,7 @@ Mnemonic: eI<X>tended Unicode character.
 
  "\x{256}" =~ /^\C\C$/;    # Match as chr (256) takes 2 octets in UTF-8.
 
- $str =~ s/foo\Kbar/baz/g; # Change any 'bar' following a 'foo' to 'baz'.
+ $str =~ s/foo\Kbar/baz/g; # Change any 'bar' following a 'foo' to 'baz'
  $str =~ s/(.)\K\1//g;     # Delete duplicated characters.
 
  "\n"   =~ /^\R$/;         # Match, \n   is a generic newline.
