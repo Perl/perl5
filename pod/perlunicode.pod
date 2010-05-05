@@ -404,7 +404,7 @@ Here are the short and long forms of the General Category properties:
     Zp          Paragraph_Separator
 
     C           Other
-    Cc          Control	(also Cntrl)
+    Cc          Control (also Cntrl)
     Cf          Format
     Cs          Surrogate   (not usable)
     Co          Private_Use
@@ -821,7 +821,7 @@ For example, to define a property that covers both the Japanese
 syllabaries (hiragana and katakana), you can define
 
     sub InKana {
-	return <<END;
+        return <<END;
     3040\t309F
     30A0\t30FF
     END
@@ -833,7 +833,7 @@ Now you can use C<\p{InKana}> and C<\P{InKana}>.
 You could also have used the existing block property names:
 
     sub InKana {
-	return <<'END';
+        return <<'END';
     +utf8::InHiragana
     +utf8::InKatakana
     END
@@ -844,7 +844,7 @@ not the raw block ranges: in other words, you want to remove
 the non-characters:
 
     sub InKana {
-	return <<'END';
+        return <<'END';
     +utf8::InHiragana
     +utf8::InKatakana
     -utf8::IsCn
@@ -854,7 +854,7 @@ the non-characters:
 The negation is useful for defining (surprise!) negated classes.
 
     sub InNotKana {
-	return <<'END';
+        return <<'END';
     !utf8::InHiragana
     -utf8::InKatakana
     +utf8::IsCn
@@ -889,7 +889,7 @@ separated by two tabulators: the two numbers being, respectively, the source
 code point and the destination code point.  For example:
 
     sub ToUpper {
-	return <<END;
+        return <<END;
     0061\t\t0041
     END
     }
@@ -930,36 +930,38 @@ and the section numbers refer to the Unicode Technical Standard #18,
 
 Level 1 - Basic Unicode Support
 
-        RL1.1   Hex Notation                        - done          [1]
-        RL1.2   Properties                          - done          [2][3]
-        RL1.2a  Compatibility Properties            - done          [4]
-        RL1.3   Subtraction and Intersection        - MISSING       [5]
-        RL1.4   Simple Word Boundaries              - done          [6]
-        RL1.5   Simple Loose Matches                - done          [7]
-        RL1.6   Line Boundaries                     - MISSING       [8]
-        RL1.7   Supplementary Code Points           - done          [9]
+        RL1.1   Hex Notation                     - done          [1]
+        RL1.2   Properties                       - done          [2][3]
+        RL1.2a  Compatibility Properties         - done          [4]
+        RL1.3   Subtraction and Intersection     - MISSING       [5]
+        RL1.4   Simple Word Boundaries           - done          [6]
+        RL1.5   Simple Loose Matches             - done          [7]
+        RL1.6   Line Boundaries                  - MISSING       [8]
+        RL1.7   Supplementary Code Points        - done          [9]
 
         [1]  \x{...}
         [2]  \p{...} \P{...}
-	[3]  supports not only minimal list, but all Unicode character
-	     properties (see L</Unicode Character Properties>)
+        [3]  supports not only minimal list, but all Unicode character
+             properties (see L</Unicode Character Properties>)
         [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
         [5]  can use regular expression look-ahead [a] or
-             user-defined character properties [b] to emulate set operations
+             user-defined character properties [b] to emulate set
+             operations
         [6]  \b \B
-	[7]  note that Perl does Full case-folding in matching (but with bugs),
-	     not Simple: for example U+1F88 is equivalent to U+1F00 U+03B9,
-             not with 1F80.  This difference matters mainly for certain Greek
-             capital letters with certain modifiers: the Full case-folding
-             decomposes the letter, while the Simple case-folding would map
-             it to a single character.
-        [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR (\r),
-             CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS (U+2029);
-             should also affect <>, $., and script line numbers;
-             should not split lines within CRLF [c] (i.e. there is no empty
-             line between \r and \n)
-        [9]  UTF-8/UTF-EBDDIC used in perl allows not only U+10000 to U+10FFFF
-             but also beyond U+10FFFF [d]
+        [7]  note that Perl does Full case-folding in matching (but with
+             bugs), not Simple: for example U+1F88 is equivalent to
+             U+1F00 U+03B9, not with 1F80.  This difference matters
+             mainly for certain Greek capital letters with certain
+             modifiers: the Full case-folding decomposes the letter,
+             while the Simple case-folding would map it to a single
+             character.
+        [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR
+             (\r), CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS
+             (U+2029); should also affect <>, $., and script line
+             numbers; should not split lines within CRLF [c] (i.e. there
+             is no empty line between \r and \n)
+        [9]  UTF-8/UTF-EBDDIC used in perl allows not only U+10000 to
+             U+10FFFF but also beyond U+10FFFF [d]
 
 [a] You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
@@ -1027,11 +1029,12 @@ Level 3 - Tailored Support
 
         [17] see UAX#10 "Unicode Collation Algorithms"
         [18] have Unicode::Collate but not integrated to regexes
-        [19] have (?<=x) and (?=x), but look-aheads or look-behinds should see
-             outside of the target substring
-        [20] need insensitive matching for linguistic features other than case;
-             for example, hiragana to katakana, wide and narrow, simplified Han
-             to traditional Han (see UTR#30 "Character Foldings")
+        [19] have (?<=x) and (?=x), but look-aheads or look-behinds
+             should see outside of the target substring
+        [20] need insensitive matching for linguistic features other
+             than case; for example, hiragana to katakana, wide and
+             narrow, simplified Han to traditional Han (see UTR#30
+             "Character Foldings")
 
 =back
 
@@ -1053,18 +1056,18 @@ transparent.
 
 The following table is from Unicode 3.2.
 
- Code Points		1st Byte  2nd Byte  3rd Byte  4th Byte
+ Code Points            1st Byte  2nd Byte  3rd Byte  4th Byte
 
-   U+0000..U+007F	00..7F
+   U+0000..U+007F       00..7F
    U+0080..U+07FF     * C2..DF    80..BF
-   U+0800..U+0FFF	E0      * A0..BF    80..BF
+   U+0800..U+0FFF       E0      * A0..BF    80..BF
    U+1000..U+CFFF       E1..EC    80..BF    80..BF
    U+D000..U+D7FF       ED        80..9F    80..BF
    U+D800..U+DFFF       +++++++ utf16 surrogates, not legal utf8 +++++++
    U+E000..U+FFFF       EE..EF    80..BF    80..BF
-  U+10000..U+3FFFF	F0      * 90..BF    80..BF    80..BF
-  U+40000..U+FFFFF	F1..F3    80..BF    80..BF    80..BF
- U+100000..U+10FFFF	F4        80..8F    80..BF    80..BF
+  U+10000..U+3FFFF      F0      * 90..BF    80..BF    80..BF
+  U+40000..U+FFFFF      F1..F3    80..BF    80..BF    80..BF
+ U+100000..U+10FFFF     F4        80..8F    80..BF    80..BF
 
 Note the gaps before several of the byte entries above marked by '*'.  These are
 caused by legal UTF-8 avoiding non-shortest encodings: it is technically
@@ -1109,12 +1112,12 @@ range of Unicode code points in pairs of 16-bit units.  The I<high
 surrogates> are the range C<U+D800..U+DBFF> and the I<low surrogates>
 are the range C<U+DC00..U+DFFF>.  The surrogate encoding is
 
-	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
-	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+    $hi = ($uni - 0x10000) / 0x400 + 0xD800;
+    $lo = ($uni - 0x10000) % 0x400 + 0xDC00;
 
 and the decoding is
 
-	$uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
+    $uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
 If you try to generate surrogates (for example by using chr()), you
 will get a warning, if warnings are turned on, because those code
@@ -1581,9 +1584,10 @@ would convert the argument to raw UTF-8 and convert the result back to
 Perl's internal representation like so:
 
     sub my_escape_html ($) {
-      my($what) = shift;
-      return unless defined $what;
-      Encode::decode_utf8(Foo::Bar::escape_html(Encode::encode_utf8($what)));
+        my($what) = shift;
+        return unless defined $what;
+        Encode::decode_utf8(Foo::Bar::escape_html(
+                                         Encode::encode_utf8($what)));
     }
 
 Sometimes, when the extension does not convert data but just stores
@@ -1714,7 +1718,8 @@ to deal with UTF-8 data. Please check the documentation to verify if
 that is still true.
 
   sub fetchrow {
-    my($self, $sth, $what) = @_; # $what is one of fetchrow_{array,hashref}
+    # $what is one of fetchrow_{array,hashref}
+    my($self, $sth, $what) = @_;
     if ($] < 5.007) {
       return $sth->$what;
     } else {
@@ -1729,7 +1734,9 @@ that is still true.
         my $ret = $sth->$what;
         if (ref $ret) {
           for my $k (keys %$ret) {
-            defined && /[^\000-\177]/ && Encode::_utf8_on($_) for $ret->{$k};
+            defined
+            && /[^\000-\177]/
+            && Encode::_utf8_on($_) for $ret->{$k};
           }
           return $ret;
         } else {
