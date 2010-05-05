@@ -4188,7 +4188,6 @@ t/cmd/mod.t			See if statement modifiers work
 t/cmd/subval.t			See if subroutine values work
 t/cmd/switch.t			See if switch optimizations work
 t/cmd/while.t			See if while loops work
-t/comp/binary_num.t		See if bin/oct/hex numbers are parsed right
 t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly

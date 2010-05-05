@@ -970,9 +970,9 @@ my $d = 0123 . 456;
 no warnings 'deprecated';
 my $e = 0765.432;
 EXPECT
-Dot after octal literal is deprecated concatenation at - line 3.
-Dot after hexadecimal literal is deprecated concatenation at - line 4.
-Dot after binary literal is deprecated concatenation at - line 5.
+Dot after octal literal is concatenation at - line 3.
+Dot after hexadecimal literal is concatenation at - line 4.
+Dot after binary literal is concatenation at - line 5.
 ########
 # toke.c
 use warnings;
