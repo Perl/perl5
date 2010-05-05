@@ -84,12 +84,12 @@ or encode anymore, on things that use the layered handle.
 
 You can provide this layer when C<open>ing the file:
 
-    open my $fh, '>:encoding(UTF-8)', $filename;  # auto encoding on write
-    open my $fh, '<:encoding(UTF-8)', $filename;  # auto decoding on read
+  open my $fh, '>:encoding(UTF-8)', $filename;  # auto encoding on write
+  open my $fh, '<:encoding(UTF-8)', $filename;  # auto decoding on read
 
 Or if you already have an open filehandle:
 
-    binmode $fh, ':encoding(UTF-8)';
+  binmode $fh, ':encoding(UTF-8)';
 
 Some database drivers for DBI can also automatically encode and decode, but
 that is sometimes limited to the UTF-8 encoding.

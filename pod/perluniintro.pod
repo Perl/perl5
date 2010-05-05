@@ -344,7 +344,8 @@ layer when opening files
 The I/O layers can also be specified more flexibly with
 the C<open> pragma.  See L<open>, or look at the following example.
 
-    use open ':encoding(utf8)'; # input/output default encoding will be UTF-8
+    use open ':encoding(utf8)'; # input/output default encoding will be
+                                # UTF-8
     open X, ">file";
     print X chr(0x100), "\n";
     close X;
@@ -355,7 +356,8 @@ the C<open> pragma.  See L<open>, or look at the following example.
 With the C<open> pragma you can use the C<:locale> layer
 
     BEGIN { $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R' }
-    # the :locale will probe the locale environment variables like LC_ALL
+    # the :locale will probe the locale environment variables like
+    # LC_ALL
     use open OUT => ':locale'; # russki parusski
     open(O, ">koi8");
     print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xc1
@@ -432,13 +434,13 @@ its argument so that Unicode characters with code points greater than
 255 are displayed as C<\x{...}>, control characters (like C<\n>) are
 displayed as C<\x..>, and the rest of the characters as themselves:
 
-   sub nice_string {
-       join("",
-         map { $_ > 255 ?                  # if wide character...
-               sprintf("\\x{%04X}", $_) :  # \x{...}
-               chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
-               sprintf("\\x%02X", $_) :    # \x..
-               quotemeta(chr($_))          # else quoted or as themselves
+ sub nice_string {
+     join("",
+       map { $_ > 255 ?                  # if wide character...
+              sprintf("\\x{%04X}", $_) :  # \x{...}
+              chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
+              sprintf("\\x%02X", $_) :    # \x..
+              quotemeta(chr($_))          # else quoted or as themselves
          } unpack("W*", $_[0]));           # unpack Unicode characters
    }
 
@@ -731,11 +733,11 @@ or:
 
 You can find the bytes that make up a UTF-8 sequence with
 
-	@bytes = unpack("C*", $Unicode_string)
+    @bytes = unpack("C*", $Unicode_string)
 
 and you can create well-formed Unicode with
 
-	$Unicode_string = pack("U*", 0xff, ...)
+    $Unicode_string = pack("U*", 0xff, ...)
 
 =item *
 
