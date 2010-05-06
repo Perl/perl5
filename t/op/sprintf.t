@@ -70,7 +70,8 @@ $SIG{__WARN__} = sub {
 for ($i = 1; @tests; $i++) {
     ($template, $evalData, $result, $comment, $data) = @{shift @tests};
     $w = undef;
-    $x = sprintf(">$template<", @$evalData);
+    $x = sprintf($template, @$evalData);
+    $x = ">$x<" if defined $x;
     substr($x, -1, 0) = $w if $w;
     # $x may have 3 exponent digits, not 2
     my $y = $x;
