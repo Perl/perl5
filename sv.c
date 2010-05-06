@@ -9365,6 +9365,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	else if (svix < svmax) {
 	    sv_catsv(sv, *svargs);
 	}
+	else
+	    S_vcatpvfn_missing_argument(aTHX);
 	return;
     }
     if (args && patlen == 3 && pat[0] == '%' &&
@@ -9390,7 +9392,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    if (svix < svmax)
 		nv = SvNV(*svargs);
 	    else
-		return;
+		S_vcatpvfn_missing_argument(aTHX);
 	    if (*pp == 'g') {
 		/* Add check for digits != 0 because it seems that some
 		   gconverts are buggy in this case, and we don't yet have
