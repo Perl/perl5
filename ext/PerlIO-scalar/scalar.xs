@@ -85,9 +85,12 @@ IV
 PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
-    SvGETMAGIC(s->var);
-    STRLEN oldcur = SvCUR(s->var);
+    STRLEN oldcur;
     STRLEN newlen;
+
+    SvGETMAGIC(s->var);
+    oldcur = SvCUR(s->var);
+
     switch (whence) {
     case SEEK_SET:
 	s->posn = offset;
