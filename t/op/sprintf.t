@@ -57,11 +57,11 @@ print '1..', scalar @tests, "\n";
 
 $SIG{__WARN__} = sub {
     if ($_[0] =~ /^Invalid conversion/) {
-	$w = ' INVALID';
+	$w .= ' INVALID';
     } elsif ($_[0] =~ /^Use of uninitialized value/) {
-	$w = ' UNINIT';
+	$w .= ' UNINIT';
     } elsif ($_[0] =~ /^Missing argument/) {
-	$w = ' MISSING';
+	$w .= ' MISSING';
     } else {
 	warn @_;
     }
@@ -687,7 +687,7 @@ __END__
 >%V-%s<		>["Hello"]<	>%V-Hello INVALID<
 >%K %d %d<	>[13, 29]<	>%K 13 29 INVALID<
 >%*.*K %d<	>[13, 29, 76]<	>%*.*K 13 INVALID<
->%4$K %d<	>[45, 67]<	>%4$K 45 INVALID<
+>%4$K %d<	>[45, 67]<	>%4$K 45 MISSING INVALID<
 >%d %K %d<	>[23, 45]<	>23 %K 45 INVALID<
 >%*v*999\$d %d %d<	>[11, 22, 33]<	>%*v*999\$d 11 22 INVALID<
 >%#b<		>0<	>0<
