@@ -374,7 +374,7 @@ __END__
 >%+8.1f<    >-1234.875<   > -1234.9<
 >%*.*f<     >[5, 2, 12.3456]< >12.35<
 >%f<        >0<           >0.000000<
->%.0f<      >[]<          >0 MISSING<
+>%.0f<      >[]<          > MISSING<
 > %.0f<     >[]<          > 0 MISSING<
 >%.0f<      >0<           >0<
 >%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
@@ -390,7 +390,9 @@ __END__
 >%g<        >12345.6789<  >12345.7<
 >%+g<       >12345.6789<  >+12345.7<
 >%#g<       >12345.6789<  >12345.7<
->%.0g<      >-0.0<	  >-0<		   >C99 standard mandates minus sign but C89 does not skip: MSWin32 VMS hpux:10.20 openbsd netbsd:1.5 irix darwin<
+>%.0g<      >[]<          > MISSING<
+> %.0g<     >[]<          > 0 MISSING<
+>%.0g<      >-0.0<        >-0<		   >C99 standard mandates minus sign but C89 does not skip: MSWin32 VMS hpux:10.20 openbsd netbsd:1.5 irix darwin<
 >%.0g<      >12345.6789<  >1e+04<
 >%#.0g<     >12345.6789<  >1.e+04<
 >%.2g<      >12345.6789<  >1.2e+04<

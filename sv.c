@@ -9391,8 +9391,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 
 	    if (svix < svmax)
 		nv = SvNV(*svargs);
-	    else
+	    else {
 		S_vcatpvfn_missing_argument(aTHX);
+		return;
+	    }
 	    if (*pp == 'g') {
 		/* Add check for digits != 0 because it seems that some
 		   gconverts are buggy in this case, and we don't yet have
