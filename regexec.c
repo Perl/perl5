@@ -316,7 +316,8 @@ S_regcppush(pTHX_ I32 parenfloor)
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
-		   " out of range (%d-%d)", total_elems, PL_regsize, parenfloor);
+		   " out of range (%lu-%ld)",
+		   total_elems, (unsigned long)PL_regsize, (long)parenfloor);
 
     SSGROW(total_elems + REGCP_FRAME_ELEMS);
     
