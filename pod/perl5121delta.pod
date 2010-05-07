@@ -30,30 +30,129 @@ changes to the core langauge in this release.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules and Pragmata
-
 =head2 Pragmata Changes
 
-=head2 Updated Modules
-
-=head2 Removed Modules and Pragmata
-
-=head1 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
-
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-=over 4
+=over 
 
 =item *
 
-XXX
+We fixed exporting of C<version::is_strict> and C<version::is_lax>
+
+These were being exported with a wrapper that treated them as method
+calls, which causes them to fail.  They are just functions, are
+documented as such, and should never be subclassed, so this patch
+just exports them directly as functions without the wrapper.
+
+=back
+
+=head2 Updated Modules
+
+=over 
+
+=item *
+
+We upgraded L<CGI.pm> to version 3.49 to incorporate fixes for regressions
+introduced in the release we shipped with Perl 5.12.0.
+
+=item *
+
+We upgraded L<Pod::Simple> to version 3.14 to get an improvement to \C\<\< \>\>
+parsing.
+
+=back
+
+=head1 Changes to Existing Documentation
+
+=over
+
+=item *
+
+We added the new maintenance release policy to L<perlpolicy.pod>
+
+=item *
+
+We've clarified the multiple-angle-bracked construct in the spec for POD.
+
+=item *
+
+We added a missing explanation for a warning about C<:=> to L<perldiag.pod>
+
+=item *
+
+We removed a false claim that all text strings are Unicode strings in Perl.
+
+=item *
+
+GitHub's mirror is now at mirrors/perl, not github/perl
+
+=item *
+
+We fixed a a minor error in L<perl5114delta.pod>.
+
+=item * 
+
+We replaced a mention of the now-obsolete L<Switch.pm> with F<given>/F<when>.
+
+=item *
+
+We improved documentation about F<$sitelibexp/sitecustomize.pl>.
+
+=item * 
+
+We corrected L<perlmodlib.pod> which had unintentionally ommitted a number of modules.
+
+=item * 
+
+We updated the documentation for 'require' in L<perlfunc.pod> relating to putting Perl code in @INC.
+
+=item *
+
+We reinstated some erroneously-removed documentation about quotemeta.
+
+=item *
+
+We fixed an F<a2p> example in L<perlutil.pod>.
+
+=item  *
+
+We filled in a blank in L<perlport.pod> with the release date of Perl 5.12.
+
+=item  *
+
+We fixed broken links in a number of perldelta files.
+
+=item * 
+
+The documentation for L<Carp.pm> incorrectly stated that the $Carp::Verbose
+variable makes cluck generate stack backtraces.
+
+=item *
+
+We fixed a number of typos in L<Pod::Functions>
+
+=back
+
+=head1 Testing
+
+=head2 Testing Improvements
+
+=over
+
+=item *
+
+F<t/op/sselect.t> is now less prone to clock jitter during timing checks
+on Windows.
+
+sleep() time on Win32 may be rounded down to multiple of
+the clock tick interval.
+
+=item *
+
+F<lib/blib.t> and F<lib/locale.t>: Fixes for test failures on Darwin/PPC
+
+=item *
+
+F<perl5db.t>: Fix for test failures when C<Term::ReadLine::Gnu> is installed.
 
 =back
 
@@ -64,33 +163,51 @@ go here.
 
 =head2 Configuration improvements
 
-XXX
+=over 
 
-=head2 Compilation improvements
+=item * 
 
-XXX
-
-=head2 Platform Specific Changes
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
+We updated F<INSTALL> with notes aboute how to deal with broken F<dbm.h> on OpenSUSE (and possibly other platforms)
 
 =back
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
 =over 4
 
 =item *
 
-XXX
+A bug in how we process filetest operations could cause a segfault.
+Filetest don't always expect an op on the stack, so we now use
+TOPs only if we're sure that we're not stat'ing the _ filehandle.
+This is indicated by OPf_KIDS (as checked in ck_ftst).
+
+See also http://rt.perl.org/rt3/Public/Bug/Display.html?id=74542
+
+=item *
+
+When deparsing a nextstate op that has both a change of package (relative
+to the previous nextstate) and a label, the package declaration is now
+emitted first, because it is syntactically impermissible for a label to
+prefix a package declaration.
+
+=item * 
+
+XSUB.h now correctly redefines fgets under PERL_IMPLICIT_SYS
+
+See also http://rt.cpan.org/Public/Bug/Display.html?id=55049
+
+
+=item * 
+
+utf8::is_utf8 now respects respect GMAGIC (e.g. $1)
+
+
+=item * 
+
+XS code using C<fputc()> or C<fputs()>: on Windows could cause an error due to their arguments being swapped.
+
+See also: http://rt.perl.org/rt3/Public/Bug/Display.html?id=72704
 
 =back
 
@@ -102,22 +219,11 @@ XXX Changes which affect the interface available to C<XS> code go here.
 
 =item *
 
-XXX
+commit bd94fa25a8ae3c7107bd1aec68d4488d21c79b05
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Mon Apr 19 15:35:59 2010 +0100
 
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-=over 4
-
-=item *
+    Possible undefined behaviour, spotted by gcc 4.5.0 and HP's updated compiler.
 
 XXX
 
@@ -125,9 +231,68 @@ XXX
 
 =head1 Platform Specific Notes
 
-XXX Any changes specific to a particular platform. VMS and Win32 are the usual
-stars here. It's probably best to group changes under the same section layout
-as the main perldelta
+=head2 HP-UX
+
+=over 
+
+=item *
+
+Perl now allows -Duse64bitint without promoting to use64bitall on HP-UX
+
+=back
+
+=head2 AIX
+
+=over
+
+=item * 
+
+Perl now builds on AIX 4.2
+
+The changes required work around AIX 4.2s' lack of support for IPv6,
+and limited support for POSIX C<sigaction()>.
+
+=back
+
+=head2 FreeBSD 7
+
+=over
+
+=item * 
+
+FreeBSD 7 no longer contains F</usr/bin/objformat>. At build time,
+Perl now skips the F<objformat> check for versions 7 and higher and
+assumes ELF.
+
+=back
+
+=head2 VMS
+
+=over
+
+=item *
+
+It's now possible to build extensions on older (pre 7.3-2) VMS systems.
+
+DCL symbol length was limited to 1K up until about seven years or
+so ago, but there was no particularly deep reason to prevent those
+older systems from configuring and building Perl.
+
+=item *
+
+We fixed the previously-broken C<-Uuseperlio> build on VMS.
+
+We were checking a variable that doesn't exist in the non-default
+case of disabling perlio.  Now we only look at it when it exists.
+
+=item *
+
+We fixed the -Uuseperlio command-line option in configure.com.
+
+Formerly it only worked if you went through all the questions
+interactively and explicitly answered no.
+
+=back
 
 =head1 Acknowledgements
 
@@ -170,302 +335,6 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
 
-
-
-=HEAD2 BUILD AND INSTALL
-
-=item *
-
-Ignore the /UU directory that exists during ./Configure
-
-=HEAD2 DIAGNOSTICS
-
-=item *
-
-Added a missing explanation for a warning about C<:=> to L<perldiag.pod>
-
-=head2 TEST FIXES
-
-=item *
-
-Fixes for 5.12.0 test failures in lib/blib.t and lib/locale.t on Darwin/PPC
-
-
-=item *
-
-    Fix a test failure in perl5db.t when Term::ReadLine::Gnu is installed
-
-
-=item *
-    Add fudge to timing checks on Windows
-    
-    sleep() time on Win32 may be rounded down to multiple of
-    the clock tick interval.
-    
-    http://www.nntp.perl.org/group/perl.perl5.porters/2010/03/msg157878.html
-
-
-
-DOC 
-
-=item *
-
-Add the new maint policy to perlpolicy.pod
-
-=item *
-
-We've clarified the multiple-angle-bracked construct in the spec for POD
-
-=item * 
-
-    Nits in perlunifaq.pod
-
-=item *
-
-    Update title of "Supported Platforms" in perlport to avoid
-    breaking pod links at each perl release (spotted by Karl Williamson)
-
-=item * 
-    [perl #74808] Carp.pm POD error
-    
-    The documentation incorrectly states that the $Carp::Verbose
-    variable makes cluck generate stack backtraces.  cluck
-    already generates stack backtraces.  It should say that
-    the variable makes croak generate stack backtraces.
-
-
-
-=item *
-
-Fix F<a2p> example in L<perlutil.pod>
-
-
-=item  *
-
-Fill blank with the release date of 5.12 in perlport.pod
-
-=item  *
-
-Fix broken links in perldelta files
-=item *
-
-Typo fixes in Pod::Functions
-=item *
-
-    Add POD index entries for sitecustomize and sitecustomize.pl
-
-
-=item * 
-    Replace mention of Switch.pm with given/when
-=item *
-
-    Improve documentation about sitecustomize.pl.
-    
-=item * 
-    Reintroduce a lot of missing modules into perlmodlib.pod
-    
-    That was due to the great move of dual-life modules into cpan/ and
-    dist/. This fixes the bug: [perl #74332] lots of modules missing from
-    perlmodlib.
-
-=item * 
-
-POD tweak to 'require' in perlfunc relating to putting Perl code in @INC
-
-=item *
-    Reinstate some documentation about quotemeta
-    (that was removed in 8bdbc703cb0af3faf2163ebce618944c51f180a0)
-
-=item *
-    [perl #74856] Fix POD syntax in perlapi
-
-=item *
-
-    Remove false statement about Unicode strings
-    It is simply not true that all text strings are Unicode strings in Perl.
-
-=item *
-    GitHub's mirror is now at mirrors/perl, not github/perl
-=item *
-    Fix a minor perl5114delta error.
-
-PLATFORM AIX 4.2
-
-=item * 
-
-    [PATCH] [5.12] Allow build on aix 4.2 (sigaction and IPv6)
-    
-    Based on a patch by AUGUSTE-ETIENNE JosÃ© <jose.auguste-etienne@cgss-guyane.fr>
-    
-    The attached patches are necessary to work around aix 4.2 lack of support for IPv6,
-    and limited support for POSIX sigaction()
-    
-    The hints/aix_4.sh patch solves the following build failure:
-    
-    "Socket.xs", line 468.16: 1506-007 (S) "struct in6_addr" is undefined.
-    
-    The ext/POSIX/t/sigaction.t patch solves the failing test reported a looong time ago:
-    
-    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-01/msg01124.html
-    
-    After testing a simple C program using POSIX sigaction() with SA_SIGINFO,
-    I found that it worked on aix 4.3 but failed on aix 4.2.
-    
-    I think it's safe to skip the SA_SIGINFO test on the aix 4.2 platform.
-    
-    perl 5.12.0 builds fine on the following platforms / C compiler :
-    
-    aix 4.2.1 / vac 5.0.2.7 (with attached patches)
-    aix 4.3.2 / gcc 2.95.3
-    aix 4.3.3 / vac 4.4.0.3
-    aix 4.3.3 / vac 5.0.28
-    aix 5.2 / GNUpro gcc 2.9.aix51.020209
-    
-    The atatched patches should be applied to blead and maint.
-
-
-
-Platform FreeBSD
-=item * 
-    FreeBSD 7+ no longer contains /usr/bin/objformat, so the following
-    (harmless) following error message is printed when hints are run:
-    
-    ./hints/freebsd.sh: /usr/bin/objformat: not found
-    
-    The reason for this is outlined in this email from Feb 2007
-    http://lists.freebsd.org/pipermail/freebsd-ports/2007-February/038523.html
-    
-    This patch just skips the objformat check for versions 7+ and
-    assumes ELF.  (The end result is unchanged, but the error
-    message will not be printed anymore.)
-
-PLATFORMS VMS
-
-=item *
-    Allow extension building on older (pre 7.3-2) VMS systems.
-    
-    DCL symbol length was limited to 1K up until about seven years or
-    so ago, but there was no particularly deep reason to prevent those
-    older systems from configuring and building Perl.
-
-
-=item *
-
-    Fix broken -Uuseperlio build on VMS.
-    
-    We were checking a variable that doesn't exist in the non-default
-    case of disabling perlio.  Now we only look at it when it exists.
-
-=item *(
-
-    Fix -Uuseperlio command-line option in configure.com.
-    
-    Formerly it only worked if you went through all the questions
-    interactively and explicitly answered no.
-    (cherry picked from commit 839d17582bad556c85fba50bb136d1c1fa878a54)
-commit bd94fa25a8ae3c7107bd1aec68d4488d21c79b05
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Mon Apr 19 15:35:59 2010 +0100
-
-    Possible undefined behaviour, spotted by gcc 4.5.0 and HP's updated compiler.
-
-PLATFORM SUSE?
-
-=item * 
-
-    Note how to deal with broken dbm.h on OpenSUSE
-    (cherry picked from commit 1bb125e2afe6197deaf55852a3f8a9c52736bfdc)
-
-
-PLATFORM HPUX
-
-=item *
-    Allow -Duse64bitint without promoting to use64bitall on HP-UX
-    
-    Fix for http://rt.perl.org/rt3/Public/Bug/Display.html?id=17736
-    (cherry picked from commit 064b70ffe2beced36b4693cdd2a8e2cbd2139b47)
-
-
-Module Updates
-
-
-
-=item *
-
-    fix version::is_strict/is_lax exporting
-    
-    These were being exported with a wrapper that treated them as method
-    calls, which causes them to fail.  They are just functions, are
-    documented as such, and should never be subclassed, so this patch
-    just exports them directly as functions without the wrapper.
-
-
-
-=item *
-
-    Upgrade to CGI.pm 3.49
-
-    TODO WHY
-
-=item *
-
-    import Pod-Simple 3.14 for C<< >> fix
-
-
-=HEAD2 Release Engineering
-
-=item *
-
-Teach bump-perl-version about "libperl511.a"
-
-
-
-commit 72c7417ae4c0cbb91b46622e0657f57469f025f8
-Author: Jan Dubois <jand@activestate.com>
-Date:   Fri Mar 5 15:24:17 2010 -0800
-
-    Apply minimal patch for Perl bug 72704.
-    
-    Arguments to fputc() and fputs() are reversed on Windows.
-    
-    http://rt.perl.org/rt3/Public/Bug/Display.html?id=72704
-
-=HEAD2 Internals
-
-=item * 
-
-utf8::is_utf8 now respects respect GMAGIC (e.g. $1)
-
-commit 349476ba0aabe6945fe0b234090937e992e7b95d
-
-    Fix [perl #74542] 5.12.0 crash on diverse platforms
-    
-    Filetest ops don't always expect an op on the stack, so we should use
-    TOPs only if we're sure that we're not stat'ing the _ filehandle.
-    This is indicated by OPf_KIDS (as checked in ck_ftst).
-
-commit 5e8d0adeb52de899a2c0954a747fe56eda402bed
-Author: Zefram <zefram@fysh.org>
-Date:   Fri Apr 30 00:02:06 2010 +0100
-
-    put package declaration before label in deparsing
-    
-    When deparsing a nextstate op that has both a change of package (relative
-    to the previous nextstate) and a label, the package declaration must be
-    emitted first, because it is syntactically impermissible for a label to
-    prefix a package declaration.
-    (cherry picked from commit 98a1a1376eb18f3329f6d272d4dc3e9a7780689f)
-
-
-commit e560917618a7d70a9f3420f75c62e08872bf97b5
-Author: Jan Dubois <jand@activestate.com>
-Date:   Wed Apr 21 16:49:09 2010 -0700
-
-    XSUB.h is supposed to redefine fgets under PERL_IMPLICIT_SYS, but doesn't.
-    
-    See also http://rt.cpan.org/Public/Bug/Display.html?id=55049
-    with workaround in http://code.google.com/p/perl-devel-nytprof/source/detail?r=1168
-    (cherry picked from commit 20c8f8f9118fd23081c818637815bf1aab60b808)
 
 
 
