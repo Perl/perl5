@@ -2322,7 +2322,10 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 	if (SvROK(sv)) {
 	return_rok:
 	    if (SvAMAGIC(sv)) {
-		SV * const tmpstr=AMG_CALLun(sv,numer);
+		SV * tmpstr;
+		if (flags & SV_SKIP_OVERLOAD)
+		    return 0;
+		tmpstr=AMG_CALLun(sv,numer);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvIV(tmpstr);
 		}
@@ -2398,7 +2401,10 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 	if (SvROK(sv)) {
 	return_rok:
 	    if (SvAMAGIC(sv)) {
-		SV *const tmpstr = AMG_CALLun(sv,numer);
+		SV *tmpstr;
+		if (flags & SV_SKIP_OVERLOAD)
+		    return 0;
+		tmpstr = AMG_CALLun(sv,numer);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvUV(tmpstr);
 		}
@@ -2469,7 +2475,10 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
 	if (SvROK(sv)) {
 	return_rok:
 	    if (SvAMAGIC(sv)) {
-		SV *const tmpstr = AMG_CALLun(sv,numer);
+		SV *tmpstr;
+		if (flags & SV_SKIP_OVERLOAD)
+		    return 0;
+		tmpstr = AMG_CALLun(sv,numer);
                 if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvNV(tmpstr);
 		}
@@ -2786,7 +2795,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	if (SvROK(sv)) {
 	return_rok:
             if (SvAMAGIC(sv)) {
-		SV *const tmpstr = AMG_CALLun(sv,string);
+		SV *tmpstr;
+		if (flags & SV_SKIP_OVERLOAD)
+		    return NULL;
+		tmpstr = AMG_CALLun(sv,string);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    /* Unwrap this:  */
 		    /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
