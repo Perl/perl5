@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 148 );
+plan( tests => 151 );
 
 # these shouldn't hang
 {
@@ -814,3 +814,32 @@ sub cmp_as_string($$) { $_[0] < $_[1] ? "-1" : $_[0] == $_[1] ? "0" : "+1" }
 is("@b", "1 2 3 3 4 5 7", "comparison result as string");
 @b = sort cmp_as_string (1,5,4,7,3,2,3);
 is("@b", "1 2 3 3 4 5 7", "comparison result as string");
+
+# RT #34604: sort didn't honour overloading if the overloaded elements
+# were retrieved via tie
+
+{
+    package RT34604;
+
+    sub TIEHASH { bless {
+			p => bless({ val => 2 }),
+			q => bless({ val => 1 }),
+		    }
+		}
+    sub FETCH { $_[0]{$_[1] } }
+
+    my $cc = 0;
+    sub compare { $cc++; $_[0]{val} cmp $_[1]{val} }
+    my $cs = 0;
+    sub str { $cs++; $_[0]{val} }
+
+    use overload 'cmp' => \&compare, '""' => \&str;
+
+    package main;
+
+    tie my %h, 'RT34604';
+    my @sorted = sort @h{qw(p q)};
+    is($cc, 1, 'overload compare called once');
+    is("@sorted","1 2", 'overload sort result');
+    is($cs, 2, 'overload string called twice');
+}

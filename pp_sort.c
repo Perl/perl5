@@ -1589,33 +1589,23 @@ PP(pp_sort)
 	    if (!PL_sortcop) {
 		if (priv & OPpSORT_NUMERIC) {
 		    if (priv & OPpSORT_INTEGER) {
-			if (!SvIOK(*p1)) {
-			    if (SvAMAGIC(*p1))
-				overloading = 1;
-			    else
-				(void)sv_2iv(*p1);
-			}
+			if (!SvIOK(*p1))
+			    (void)sv_2iv_flags(*p1, SV_GMAGIC|SV_SKIP_OVERLOAD);
 		    }
 		    else {
-			if (!SvNSIOK(*p1)) {
-			    if (SvAMAGIC(*p1))
-				overloading = 1;
-			    else
-				(void)sv_2nv(*p1);
-			}
+			if (!SvNSIOK(*p1))
+			    (void)sv_2nv_flags(*p1, SV_GMAGIC|SV_SKIP_OVERLOAD);
 			if (all_SIVs && !SvSIOK(*p1))
 			    all_SIVs = 0;
 		    }
 		}
 		else {
-		    if (!SvPOK(*p1)) {
-			if (SvAMAGIC(*p1))
-			    overloading = 1;
-			else
-			    (void)sv_2pv_flags(*p1, 0,
-					       SV_GMAGIC|SV_CONST_RETURN);
-		    }
+		    if (!SvPOK(*p1))
+			(void)sv_2pv_flags(*p1, 0,
+			    SV_GMAGIC|SV_CONST_RETURN|SV_SKIP_OVERLOAD);
 		}
+		if (SvAMAGIC(*p1))
+		    overloading = 1;
 	    }
 	    p1++;
 	}
