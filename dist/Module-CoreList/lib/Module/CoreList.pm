@@ -84,11 +84,15 @@ omitted, it defaults to the current version of Perl.
 
 =item C<removed_from( MODULE )>
 
+Available in version 2.32 and above
+
 Takes a module name as an argument, returns the first perl version where that module
 was removed from core. Returns undef if the given module was never in core or remains
 in core.
 
 =item C<removed_from_by_date( MODULE )>
+
+Available in version 2.32 and above
 
 Takes a module name as an argument, returns the first perl version by release date where that module
 was removed from core. Returns undef if the given module was never in core or remains
