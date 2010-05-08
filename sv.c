@@ -2428,14 +2428,14 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 =for apidoc sv_2nv
 
 Return the num value of an SV, doing any necessary string or integer
-conversion, magic etc. Normally used via the C<SvNV(sv)> and C<SvNVx(sv)>
-macros.
+conversion. If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvNV(sv)> and C<SvNVx(sv)> macros.
 
 =cut
 */
 
 NV
-Perl_sv_2nv(pTHX_ register SV *const sv)
+Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
 {
     dVAR;
     if (!sv)
@@ -2443,7 +2443,8 @@ Perl_sv_2nv(pTHX_ register SV *const sv)
     if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
 	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
 	   cache IVs just in case.  */
-	mg_get(sv);
+	if (flags & SV_GMAGIC)
+	    mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if ((SvPOKp(sv) && SvLEN(sv)) && !SvIOKp(sv)) {

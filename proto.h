@@ -3176,7 +3176,7 @@ STATIC bool	S_glob_2number(pTHX_ GV* const gv)
 /* PERL_CALLCONV IV	Perl_sv_2iv(pTHX_ SV *sv); */
 PERL_CALLCONV IV	Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags);
 PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV *const sv);
-PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV *const sv);
+PERL_CALLCONV NV	Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags);
 PERL_CALLCONV SV*	Perl_sv_2num(pTHX_ SV *const sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_2NUM	\

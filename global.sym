@@ -519,7 +519,7 @@ Perl_sv_2io
 Perl_sv_2iv
 Perl_sv_2iv_flags
 Perl_sv_2mortal
-Perl_sv_2nv
+Perl_sv_2nv_flags
 Perl_sv_2pv
 Perl_sv_2pv_flags
 Perl_sv_2pvutf8

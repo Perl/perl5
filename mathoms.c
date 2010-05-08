@@ -42,6 +42,7 @@ PERL_CALLCONV void Perl_sv_unref(pTHX_ SV *sv);
 PERL_CALLCONV void Perl_sv_taint(pTHX_ SV *sv);
 PERL_CALLCONV IV Perl_sv_2iv(pTHX_ register SV *sv);
 PERL_CALLCONV UV Perl_sv_2uv(pTHX_ register SV *sv);
+PERL_CALLCONV NV Perl_sv_2nv(pTHX_ register SV *sv);
 PERL_CALLCONV char * Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp);
 PERL_CALLCONV char * Perl_sv_2pv_nolen(pTHX_ register SV *sv);
 PERL_CALLCONV char * Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv);
@@ -140,6 +141,17 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 {
     return sv_2uv_flags(sv, SV_GMAGIC);
 }
+
+/* sv_2nv() is now a macro using Perl_sv_2nv_flags();
+ * this function provided for binary compatibility only
+ */
+
+NV
+Perl_sv_2nv(pTHX_ register SV *sv)
+{
+    return sv_2nv_flags(sv, SV_GMAGIC);
+}
+
 
 /* sv_2pv() is now a macro using Perl_sv_2pv_flags();
  * this function provided for binary compatibility only
