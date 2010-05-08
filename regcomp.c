@@ -6714,11 +6714,10 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	    | PERL_SCAN_DISALLOW_PREFIX
 	    | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
     
-	char * endchar = strchr(RExC_parse, '.');
-	if (endchar) {
+	char * endchar = RExC_parse + strcspn(RExC_parse, ".}");
+	if (endchar < endbrace) {
 	    ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
 	}
-	else endchar = endbrace;
 
 	length_of_hex = (STRLEN)(endchar - RExC_parse);
 	*valuep = grok_hex(RExC_parse, &length_of_hex, &flags, NULL);
@@ -6769,8 +6768,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 
 	    /* Code points are separated by dots.  If none, there is only one
 	     * code point, and is terminated by the brace */
-	    endchar = strchr(RExC_parse, '.');
-	    if (! endchar) endchar = endbrace;
+	    endchar = RExC_parse + strcspn(RExC_parse, ".}");
 
 	    /* The values are Unicode even on EBCDIC machines */
 	    length_of_hex = (STRLEN)(endchar - RExC_parse);

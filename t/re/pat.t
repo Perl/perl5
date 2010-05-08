@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 297;  # Update this when adding/deleting tests.
+plan tests => 299;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -987,6 +987,12 @@ sub run_tests {
         ok "abbbbc" =~ m/\N{3,4}/ && $& eq "abbb", '"abbbbc" =~ m/\N{3,4}/ && $& eq "abbb"';
     }
 
+    {
+        use charnames ":full";
+        local $Message = '[perl #74982] Period coming after \N{}';
+        ok "\x{ff08}." =~ m/\N{FULLWIDTH LEFT PARENTHESIS}./ && $& eq "\x{ff08}.";
+        ok "\x{ff08}." =~ m/[\N{FULLWIDTH LEFT PARENTHESIS}]./ && $& eq "\x{ff08}.";
+    }
 
 } # End of sub run_tests
 
