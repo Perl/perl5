@@ -1,5 +1,7 @@
 # This stops me getting screenfulls of syntax errors every time I accidentally
 # run this file via a shell glob.  Format of this file is given in regexp.t
+# Can't use \N{VALID NAME TEST} here because need 'use charnames'; but can use
+# \N{U+valid} here.
 __END__
 abc	abc	y	$&	abc
 abc	abc	y	$-[0]	0
