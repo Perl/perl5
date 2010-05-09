@@ -359,10 +359,13 @@ Now you should create a patch file for all your local changes:
   % git format-patch origin
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
-You should now send an email to either perlbug@perl.org or
-perl5-porters@perl.org with a description of your changes, and include
-this patch file as an attachment. The perlbug address is preferred,
-but use perl5-porters for patches intended for discussion.
+You should now send an email to to
+L<perlbug@perl.org|mailto:perlbug@perl.org> with a description of your
+changes, and include this patch file as an attachment. In addition to
+being tracked by RT, mail to perlbug will automatically be forwarded
+to perl5-porters. You should only send patches to
+L<perl5-porters@perl.org|mailto:perl5-porters@perl.org> directly if the
+patch is not ready to be applied, but intended for discussion.
 
 See the next section for how to configure and use git to send these
 emails for you.
