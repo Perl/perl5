@@ -21,7 +21,7 @@ incompatibilities with 5.12.0 exist, they are bugs. Please report them.
 =head1 Core Enhancements
 
 Other than the bug fixes listed below, there should be no user-visible
-changes to the core langauge in this release.
+changes to the core language in this release.
 
 =head1 Modules and Pragmata
 
@@ -31,10 +31,10 @@ changes to the core langauge in this release.
 
 =item *
 
-We fixed exporting of C<version::is_strict> and C<version::is_lax>
+We fixed exporting of C<is_strict> and C<is_lax> from L<version>.
 
 These were being exported with a wrapper that treated them as method
-calls, which causes them to fail.  They are just functions, are
+calls, which caused them to fail.  They are just functions, are
 documented as such, and should never be subclassed, so this patch
 just exports them directly as functions without the wrapper.
 
@@ -56,8 +56,7 @@ parsing.
 
 =item *
 
-We made a small fix to CPANPLUS's test suite to fix an occasional spurious test
-failure.
+We made a small fix to the L<CPANPLUS> test suite to fix an occasional spurious test failure.
 
 =back
 
@@ -71,7 +70,8 @@ We added the new maintenance release policy to L<perlpolicy.pod>
 
 =item *
 
-We've clarified the multiple-angle-bracket construct in the spec for POD.
+We've clarified the multiple-angle-bracket construct in the spec for POD
+in L<perlpodspec>
 
 =item *
 
@@ -79,11 +79,11 @@ We added a missing explanation for a warning about C<:=> to L<perldiag.pod>
 
 =item *
 
-We removed a false claim that all text strings are Unicode strings in Perl.
+We removed a false claim in L<perlunitut> that all text strings are Unicode strings in Perl.
 
 =item *
 
-GitHub's mirror is now at mirrors/perl, not github/perl
+We updated the Github mirror link in L<perlrepository> to mirrors/perl, not github/perl
 
 =item *
 
@@ -95,11 +95,11 @@ We replaced a mention of the now-obsolete L<Switch.pm> with F<given>/F<when>.
 
 =item *
 
-We improved documentation about F<$sitelibexp/sitecustomize.pl>.
+We improved documentation about F<$sitelibexp/sitecustomize.pl> in L<perlrun>.
 
 =item * 
 
-We corrected L<perlmodlib.pod> which had unintentionally ommitted a number of modules.
+We corrected L<perlmodlib.pod> which had unintentionally omitted a number of modules.
 
 =item * 
 
@@ -107,7 +107,7 @@ We updated the documentation for 'require' in L<perlfunc.pod> relating to puttin
 
 =item *
 
-We reinstated some erroneously-removed documentation about quotemeta.
+We reinstated some erroneously-removed documentation about quotemeta in L<perlfunc>.
 
 =item *
 
@@ -187,7 +187,7 @@ on OpenSUSE (and possibly other platforms)
 =item *
 
 A bug in how we process filetest operations could cause a segfault.
-Filetest don't always expect an op on the stack, so we now use
+Filetests don't always expect an op on the stack, so we now use
 TOPs only if we're sure that we're not stat'ing the _ filehandle.
 This is indicated by OPf_KIDS (as checked in ck_ftst).
 
@@ -222,7 +222,7 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=72704>
 =item *
     
 We fixed a small bug in lex_stuff_pvn() that caused spurious syntax errors
-in an obscure situation.  It happend  when stuffing was s performed on the
+in an obscure situation.  It happened when stuffing was performed on the
 last line of a file and the line ended with a statement that lacked a
 terminating semicolon.  
 
@@ -246,7 +246,7 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74114>
 =item *
 
 We fixed a regression in the handling of labels immediately before string
-evals introduced in Perl 5.12.0.
+evals that was introduced in Perl 5.12.0.
 
 See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74290>
 
@@ -327,7 +327,7 @@ interactively and explicitly answered no.
 =head1 Acknowledgements
 
 Perl 5.12.1 represents approximately four weeks of development since
-Perl 5.12.0 and contains approximately about 4,000 lines of changes 
+Perl 5.12.0 and contains approximately 4,000 lines of changes
 across 142 files from 28 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant
