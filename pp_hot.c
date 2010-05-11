@@ -2126,6 +2126,7 @@ PP(pp_subst)
 	DIE(aTHX_ "%s", PL_no_modify);
     PUTBACK;
 
+  setup_match:
     s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
@@ -2181,6 +2182,22 @@ PP(pp_subst)
 			 r_flags | REXEC_CHECKED);
     /* known replacement string? */
     if (dstr) {
+
+	/* Upgrade the source if the replacement is utf8 but the source is not,
+	 * but only if it matched; see
+	 * http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg158809.html
+	 */
+	if (matched && DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
+	    const STRLEN new_len = sv_utf8_upgrade(TARG);
+
+	    /* If the lengths are the same, the pattern contains only
+	     * invariants, can keep going; otherwise, various internal markers
+	     * could be off, so redo */
+	    if (new_len != len) {
+		goto setup_match;
+	    }
+	}
+
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
 	     nsv = sv_newmortal();
