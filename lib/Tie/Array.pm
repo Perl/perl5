@@ -152,9 +152,9 @@ Tie::Array - base class for tied arrays
 
     package main;
 
-    $object = tie @somearray,Tie::NewArray;
-    $object = tie @somearray,Tie::StdArray;
-    $object = tie @somearray,Tie::NewStdArray;
+    $object = tie @somearray,'Tie::NewArray';
+    $object = tie @somearray,'Tie::StdArray';
+    $object = tie @somearray,'Tie::NewStdArray';
 
 
 
