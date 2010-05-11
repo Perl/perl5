@@ -4003,6 +4003,7 @@ Porting/checkansi.pl		Check source code for ANSI-C violations
 Porting/checkAUTHORS.pl		Check that the AUTHORS file is complete
 Porting/checkcfgvar.pl		Check that config scripts define all symbols
 Porting/check-cpan-pollution	Check for commits that may wrongly touch CPAN distros
+Porting/checkpodencoding.pl	Check POD encoding
 Porting/checkURL.pl		Check whether we have working URLs
 Porting/checkVERSION.pl		Check whether we have $VERSIONs
 Porting/cmpVERSION.pl		Compare whether two trees have changed modules
