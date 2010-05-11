@@ -407,7 +407,8 @@ B<-D14> is equivalent to B<-Dtls>):
  33554432  B  dump suBroutine definitions, including special Blocks like BEGIN
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
-executable (but see L<Devel::Peek>, L<re> which may change this).
+executable (but see C<:opd> in L<Devel::Peek> or L<re/'debug' mode>
+which may change this).
 See the F<INSTALL> file in the Perl source distribution
 for how to do this.  This flag is automatically set if you include B<-g>
 option when C<Configure> asks you about optimizer/debugger flags.
