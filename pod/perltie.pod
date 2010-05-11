@@ -673,9 +673,9 @@ method on the original object reference returned by tie().
 	croak "@{[&whowasi]}: $file not clobberable"
 	    unless $self->{CLOBBER};
 
-	open(F, "> $file") || croak "can't open $file: $!";
-	print F $value;
-	close(F);
+	open(my $f, '>', $file) || croak "can't open $file: $!";
+	print $f $value;
+	close($f);
     }
 
 If they wanted to clobber something, they might say:
