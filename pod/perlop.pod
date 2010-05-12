@@ -1060,9 +1060,9 @@ L<perlebcdic/OPERATOR DIFFERENCES> for the complete list of what these
 sequences mean on both ASCII and EBCDIC platforms.
 
 Use of any other character following the "c" besides those listed above is
-prohibited on EBCDIC platforms, and discouraged (and may become deprecated or
-forbidden) on ASCII ones.  What happens for those other characters currently
-though, is that the value is derived by inverting the 7th bit (0x40).
+discouraged, and may become deprecated or forbidden.  What happens for those
+other characters currently though, is that the value is derived by inverting
+the 7th bit (0x40).
 
 To get platform independent controls, you can use C<\N{...}>.
 

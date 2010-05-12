@@ -664,16 +664,9 @@ parameter, casts can silently truncate and yield wrong results.
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
-#ifdef EBCDIC
-#  ifdef PERL_IMPLICIT_CONTEXT
-#    define toCTRL(c)     Perl_ebcdic_control(aTHX_ c)
-#  else
-#    define toCTRL        Perl_ebcdic_control
-#  endif
-#else
-  /* This conversion works both ways, strangely enough. */
-#  define toCTRL(c)    (toUPPER(c) ^ 64)
-#endif
+/* This conversion works both ways, strangely enough. On EBCDIC platforms,
+ * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII */
+#  define toCTRL(c)    (toUPPER(NATIVE_TO_UNI(c)) ^ 64)
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;

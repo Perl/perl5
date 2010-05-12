@@ -366,7 +366,6 @@ Unexpected constant lvalue entersub entry via type/targ %d:%d
 Unicode non-character 0x%04
 Unknown PerlIO layer "scalar"
 Unknown Unicode option letter '%c'
-unrecognised control character '%c'
 Unstable directory path, current directory changed unexpectedly
 Unsupported script encoding UTF-16BE
 Unsupported script encoding UTF-16LE
