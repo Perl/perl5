@@ -901,6 +901,9 @@ DOSish perls are as follows:
      Windows 2000  MSWin32    MSWin32-x86       2      5 00
      Windows XP    MSWin32    MSWin32-x86       2      5 01
      Windows 2003  MSWin32    MSWin32-x86       2      5 02
+     Windows Vista MSWin32    MSWin32-x86       2      6 00
+     Windows 7     MSWin32    MSWin32-x86       2      6 01
+     Windows 7     MSWin32    MSWin32-x64       2      6 01
      Windows CE    MSWin32    ?                 3           
      Cygwin        cygwin     cygwin
 
