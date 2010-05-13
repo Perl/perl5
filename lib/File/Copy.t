@@ -237,6 +237,14 @@ for my $cross_partition_test (0..1) {
   }
 }
 
+my $can_suidp = sub {
+    my $dir = "suid-$$";
+    my $ok = 1;
+    mkdir $dir or die "Can't mkdir($dir) for suid test";
+    $ok = 0 unless chmod 2000, $dir;
+    rmdir $dir;
+    return $ok;
+};
 
 SKIP: {
     my @tests = (
@@ -251,9 +259,8 @@ SKIP: {
 
     my $skips = @tests * 6 * 8;
 
-    # TODO - make this skip fire if we're on a nosuid filesystem rather than guessing by OS
-    skip "OpenBSD filesystems default to nosuid breaking these tests", $skips
-          if $^O eq 'openbsd';
+    my $can_suid = $can_suidp->();
+    skip "Can't suid on this $^O filesystem", $skips unless $can_suid;
     skip "-- Copy preserves RMS defaults, not POSIX permissions.", $skips
           if $^O eq 'VMS';
     skip "Copy doesn't set file permissions correctly on Win32.",  $skips
