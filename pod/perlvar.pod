@@ -1197,9 +1197,11 @@ this variable.
 X<$^O> X<$OSNAME>
 
 The name of the operating system under which this copy of Perl was
-built, as determined during the configuration process.  The value
-is identical to C<$Config{'osname'}>.  See also L<Config> and the 
-B<-V> command-line switch documented in L<perlrun>.
+built, as determined during the configuration process. For examples
+see L<perlport/PLATFORMS>.
+
+The value is identical to C<$Config{'osname'}>.  See also L<Config>
+and the B<-V> command-line switch documented in L<perlrun>.
 
 In Windows platforms, $^O is not very helpful: since it is always
 C<MSWin32>, it doesn't tell the difference between
