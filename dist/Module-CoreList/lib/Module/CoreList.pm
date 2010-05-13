@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.32';
+$VERSION = '2.33';
 
 =head1 NAME
 
@@ -15255,7 +15255,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Pod::Text::Termcap'    => '2.06',
 	'Pod::Usage'            => '1.36',
 	'SDBM_File'             => '1.06',
-	'Safe'                  => '2.25',
+	'Safe'                  => '2.27',
 	'Scalar::Util'          => '1.22',
 	'Scalar::Util::PP'      => '1.22',
 	'Search::Dict'          => '1.02',
