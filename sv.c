@@ -9399,15 +9399,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	pp = pat + 2;
 	while (*pp >= '0' && *pp <= '9')
 	    digits = 10 * digits + (*pp++ - '0');
-	if (pp - pat == (int)patlen - 1) {
-	    NV nv;
-
-	    if (svix < svmax)
-		nv = SvNV(*svargs);
-	    else {
-		S_vcatpvfn_missing_argument(aTHX);
-		return;
-	    }
+	if (pp - pat == (int)patlen - 1 && svix < svmax) {
+	    const NV nv = SvNV(*svargs);
 	    if (*pp == 'g') {
 		/* Add check for digits != 0 because it seems that some
 		   gconverts are buggy in this case, and we don't yet have

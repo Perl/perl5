@@ -393,7 +393,7 @@ SKIP: {
 
 # Operations which affect directories can't use tainted data.
 {
-    test !eval { mkdir "foo".$TAINT, 0755.$TAINT0 }, 'mkdir';
+    test !eval { mkdir "foo".$TAINT, 0755 . $TAINT0 }, 'mkdir';
     test $@ =~ /^Insecure dependency/, $@;
 
     test !eval { rmdir $TAINT }, 'rmdir';
