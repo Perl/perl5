@@ -58,6 +58,10 @@ parsing.
 
 We made a small fix to the L<CPANPLUS> test suite to fix an occasional spurious test failure.
 
+=item *
+
+We upgraded L<Safe> to version 2.27 to wrap coderefs retured by C<reval()> and C<rdo()>.
+
 =back
 
 =head1 Changes to Existing Documentation
