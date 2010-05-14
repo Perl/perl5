@@ -33,7 +33,7 @@ like DBD::Oracle, it is better to use the _r version of the compiler.
 This will not build a threaded Perl, but a thread-enabled Perl. See
 also L<Threaded Perl> later on.
 
-As of writing (2010-03) only the I<IBM XL C for AIX> or I<IBM XL C/C++
+As of writing (2010-05) only the I<IBM XL C for AIX> or I<IBM XL C/C++
 for AIX> compiler is supported by IBM on AIX 5L/6.1.
 
 The following compiler versions are currently supported by IBM:
@@ -49,6 +49,9 @@ to an optimization bug. You can circumvent this problem by
 adding -qipa to the optimization flags (-Doptimize='-O -qipa').
 The PTF for APAR IZ35785 which solves this problem is available
 from IBM (April 2009 PTF for XL C/C++ Enterprise Edition for AIX, V9.0).
+
+If you choose XL C/C++ V11 you need the April 2010 PTF installed
+otherwise you will not get a working Perl version.
 
 Perl can be compiled with either IBM's ANSI C compiler or with gcc.
 The former is recommended, as not only it can compile Perl with no
@@ -72,18 +75,20 @@ at least gdbm-devel-1.8.3-5 (or higher).
 
 =head2 Perl 5.12 was successfully compiled and tested on:
 
-    AIX Level            | Compiler Level          | w th | w/o th
-    ---------------------+-------------------------+------+-------
-    5.1 TL9 32 bit       | XL C/C++ V7             | OK   | OK
-    5.1 TL9 64 bit       | XL C/C++ V7             | OK   | OK
-    5.2 TL10 SP8 32 bit  | XL C/C++ V8             | OK   | OK
-    5.2 TL10 SP8 32 bit  | gcc 3.2.2               | OK   | OK
-    5.2 TL10 SP8 64 bit  | XL C/C++ V8             | OK   | OK
-    5.3 TL8 SP8 32 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
-    5.3 TL8 SP8 32 bit   | gcc 4.2.4               | OK   | OK
-    5.3 TL8 SP8 64 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
-    6.1 TL1 SP7 32 bit   | XL C/C++ V10            | OK   | OK
-    6.1 TL1 SP7 64 bit   | XL C/C++ V10            | OK   | OK
+    AIX Level            | Compiler Level            | w th | w/o th
+    ---------------------+---------------------------+------+-------
+    5.1 TL9 32 bit       | XL C/C++ V7               | OK   | OK
+    5.1 TL9 64 bit       | XL C/C++ V7               | OK   | OK
+    5.2 TL10 SP8 32 bit  | XL C/C++ V8               | OK   | OK
+    5.2 TL10 SP8 32 bit  | gcc 3.2.2                 | OK   | OK
+    5.2 TL10 SP8 64 bit  | XL C/C++ V8               | OK   | OK
+    5.3 TL8 SP8 32 bit   | XL C/C++ V9 + IZ35785     | OK   | OK
+    5.3 TL8 SP8 32 bit   | gcc 4.2.4                 | OK   | OK
+    5.3 TL8 SP8 64 bit   | XL C/C++ V9 + IZ35785     | OK   | OK
+    5.3 TL10 SP3 32 bit  | XL C/C++ V11 + April 2010 | OK   | OK
+    5.3 TL10 SP3 64 bit  | XL C/C++ V11 + April 2010 | OK   | OK
+    6.1 TL1 SP7 32 bit   | XL C/C++ V10              | OK   | OK
+    6.1 TL1 SP7 64 bit   | XL C/C++ V10              | OK   | OK
 
     w th   = with thread support
     w/o th = without thread support
@@ -482,6 +487,6 @@ Rainer Tammer <tammer@tammer.net>
 
 =head1 DATE
 
-Version 5.12.1 / 2010-03-20
+Version 5.12.1 / 2010-05-14
 
 =cut
