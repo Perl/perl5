@@ -30,14 +30,6 @@ symlink sometimes returns an incorrect value
 In these cases perl will fall back to the old behaviour of using C's
 argv[0] value for C<$^X>.
 
-=head2 Perl will no longer be part of "base FreeBSD"
-
-Not as bad as it sounds--what this means is that Perl will no longer be
-part of the B<kernel build system> of FreeBSD.  Perl will still very
-probably be part of the "default install", and in any case the latest
-version will be in the ports system.  The first FreeBSD version this
-change will affect is 5.0, all 4.n versions will keep the status quo.
-
 =head1 AUTHOR
 
 Nicholas Clark <nick@ccl4.org>, collating wisdom supplied by Slaven Rezic
