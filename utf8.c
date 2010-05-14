@@ -1653,8 +1653,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	}
     }*/
 
-    /* The 0xDF is the only special casing Unicode code point below 0x100. */
-    if (special && (uv1 == 0xDF || uv1 > 0xFF)) {
+    if (special) {
          /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
 	 HV * const hv = get_hv(special, 0);
