@@ -415,7 +415,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 =for apidoc av_clear
 
 Clears an array, making it empty.  Does not free the memory used by the
-array itself.
+array itself. Perl equivalent: C<@myarray = ();>.
 
 =cut
 */
