@@ -791,7 +791,9 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 
 Deletes the element indexed by C<key> from the array.  Returns the
 deleted element. If C<flags> equals C<G_DISCARD>, the element is freed
-and null is returned.
+and null is returned. Perl equivalent: C<my $elem = delete($myarray[$idx]);>
+for the non-C<G_DISCARD> version and a void-context C<delete($myarray[$idx]);>
+for the C<G_DISCARD> version.
 
 =cut
 */
