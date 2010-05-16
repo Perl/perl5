@@ -136,6 +136,7 @@ sub check_file {
         $name =~ s/\\t/\t/g;
         $name =~ s/\\n/ /g;
         $name =~ s/\s+$//;
+        $name =~ s/(\\)\\/$1/g;
       }
 
       # Extra explanatory info on an already-listed error, doesn't
@@ -226,9 +227,9 @@ Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't take %s of %f
 Can't use '%c' after -mname
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
-Can't use \\%c to mean $%c in expression
+Can't use \%c to mean $%c in expression
 Can't use when() outside a topicalizer
-\\%c better written as $%c
+\%c better written as $%c
 Character(s) in '%c' format wrapped in %s
 $%c is no longer supported
 Cloning substitution context is unimplemented
@@ -240,7 +241,7 @@ Corrupted regexp opcode %d > %d
 Debug leaking scalars child failed%s%s with errno %d: %s
 Deep recursion on anonymous subroutine
 defined(\%hash) is deprecated
-Don't know how to handle magic of type \\%o
+Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 entering effective gid failed
 entering effective uid failed
@@ -258,12 +259,12 @@ glob failed (child exited with status %d%s)
 Goto undefined subroutine
 Goto undefined subroutine &%s
 Hash \%%s missing the \% in argument %d of %s()
-Illegal character \\%03o (carriage return)
+Illegal character \%03o (carriage return)
 Illegal character %sin prototype for %s : %s
 Integer overflow in decimal number
 Integer overflow in version %d
 internal \%<num>p might conflict with future printf extensions
-invalid control request: '\\%03o'
+invalid control request: '\%03o'
 Invalid module name %s with -%c option: contains single ':'
 invalid option -D%c, use -D'' to see choices
 Invalid range "%c-%c" in transliteration operator
@@ -282,7 +283,7 @@ Invalid strict version format (1.[0-9] required)
 Invalid version format (alpha without decimal)
 Invalid version format (misplaced _ in number)
 Invalid version object
-It is proposed that "\\c{" no longer be valid. It has historically evaluated to  ";".  If you disagree with this proposal, send email to perl5-porters@perl.org Otherwise, or in the meantime, you can work around this failure by changing "\\c{" to ";"
+It is proposed that "\c{" no longer be valid. It has historically evaluated to  ";".  If you disagree with this proposal, send email to perl5-porters@perl.org Otherwise, or in the meantime, you can work around this failure by changing "\c{" to ";"
 'j' not supported on this platform
 'J' not supported on this platform
 Layer does not match this perl
@@ -313,7 +314,7 @@ PERL_SIGNALS illegal: "%s"
 Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
 Perls since %s too modern--this is %s, stopped
-Possible unintended interpolation of $\\ in regex
+Possible unintended interpolation of $\ in regex
 ptr wrong %p != %p fl=%08
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Recursive call to Perl_load_module in PerlIO_find_layer
@@ -379,7 +380,7 @@ Usage: VMS::Filespec::unixrealpath(spec)
 Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 UTF-16 surrogate 0x%04
-utf8 "\\x%02X" does not map to Unicode
+utf8 "\x%02X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
 Value of %s%s can be "0"; test with defined()

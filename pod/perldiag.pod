@@ -1211,7 +1211,7 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Character following "\\c" must be ASCII
+=item Character following "\c" must be ASCII
 
 (F) In C<\cI<X>>, I<X> must be an ASCII character.
 
@@ -1462,7 +1462,7 @@ there are neither package declarations nor a C<$VERSION>.
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
 
-=item Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%s<-- HERE %s
+=item Deprecated character in \N{...}; marked by <-- HERE  in \N{%s<-- HERE %s
 
 (D deprecated) Just about anything is legal for the C<...> in C<\N{...}>.
 But starting in 5.12, non-reasonable ones that don't look like names are
@@ -2528,7 +2528,7 @@ can vary from one line to the next.
 
 (F) Missing right brace in C<\x{...}>, C<\p{...}>, C<\P{...}>, or C<\N{...}>.
 
-=item Missing right brace on \\N{} or unescaped left brace after \\N
+=item Missing right brace on \N{} or unescaped left brace after \N
 
 (F)
 C<\N> has two meanings.
@@ -2640,13 +2640,13 @@ that yet.
 sense to try to declare one with a package qualifier on the front.  Use
 local() if you want to localize a package variable.
 
-=item \\N in a character class must be a named character: \\N{...}
+=item \N in a character class must be a named character: \N{...}
 
 (F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
 character class, for the same reason that C<.> in a character class loses its
 specialness: it matches almost everything, which is probably not what you want.
 
-=item \\N{NAME} must be resolved by the lexer
+=item \N{NAME} must be resolved by the lexer
 
 (F) When compiling a regex pattern, an unresolved named character or sequence
 was encountered.  This can happen in any of several ways that bypass the lexer,
@@ -2688,7 +2688,7 @@ NOTE: This warning detects symbols that have been used only once so $c, @c,
 the same; if a program uses $c only once but also uses any of the others it
 will not trigger this warning.
 
-=item Invalid hexadecimal number in \\N{U+...}
+=item Invalid hexadecimal number in \N{U+...}
 
 (F) The character constant represented by C<...> is not a valid hexadecimal
 number.  Either it is empty, or you tried to use a character other than 0 - 9
@@ -3948,7 +3948,7 @@ where the problem was discovered. See L<perlre>.
 <-- HERE shows in the regular expression about where the problem was
 discovered.  See L<perlre>.
 
-=item Sequence \\%s... not terminated in regex; marked by <-- HERE in m/%s/
+=item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
 
 (F) The regular expression expects a mandatory argument following the escape
 sequence and this has been omitted or incorrectly written.
@@ -4617,7 +4617,7 @@ subroutine.
 in your Perl script (or eval) near the specified column.  Perhaps you tried 
 to run a compressed script, a binary program, or a directory as a Perl program.
 
-=item Unrecognized escape \\%c in character class passed through in regex; marked by <-- HERE in m/%s/
+=item Unrecognized escape \%c in character class passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl inside character classes.  The character was
@@ -4625,13 +4625,13 @@ understood literally, but this may change in a future version of Perl.
 The <-- HERE shows in the regular expression about where the
 escape was discovered.
 
-=item Unrecognized escape \\%c passed through
+=item Unrecognized escape \%c passed through
 
 (W misc) You used a backslash-character combination which is not
 recognized by Perl.  The character was understood literally, but this may
 change in a future version of Perl.
 
-=item Unrecognized escape \\%c passed through in regex; marked by <-- HERE in m/%s/
+=item Unrecognized escape \%c passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl.  The character was understood literally, but this may
