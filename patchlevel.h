@@ -126,8 +126,7 @@ hunk.
 #include "git_version.h"
 #  endif
 static const char * const local_patches[] = {
-	NULL,
-    "RC2"
+	NULL
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
 	,"uncommitted-changes"
 #endif
