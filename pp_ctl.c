@@ -3139,12 +3139,14 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	PERL_UNUSED_VAR(newsp);
 	PERL_UNUSED_VAR(optype);
 
+	/* note that if yystatus == 3, then the EVAL CX block has already
+	 * been popped, and various vars restored */
 	PL_op = saveop;
-	if (PL_eval_root) {
-	    op_free(PL_eval_root);
-	    PL_eval_root = NULL;
-	}
 	if (yystatus != 3) {
+	    if (PL_eval_root) {
+		op_free(PL_eval_root);
+		PL_eval_root = NULL;
+	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
 	    if (!startop) {
 		POPBLOCK(cx,PL_curpm);

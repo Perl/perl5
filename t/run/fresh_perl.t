@@ -857,3 +857,43 @@ $@ =~ s/ at .*/ at/;
 print $@
 EXPECT
 Malformed UTF-8 character (unexpected end of string) in substitution (s///) at
+######## "#75146: 27e904532594b7fb (fix for #23810) introduces a #regression"
+use strict;
+
+unshift @INC, sub {
+    my ($self, $fn) = @_;
+
+    (my $pkg = $fn) =~ s{/}{::}g;
+    $pkg =~ s{.pm$}{};
+
+    if ($pkg eq 'Credit') {
+        my $code = <<'EOC';
+package Credit;
+
+use NonsenseAndBalderdash;
+
+1;
+EOC
+        eval $code;
+        die "\$@ is $@";
+    }
+
+    #print STDERR "Generator: not one of mine, ignoring\n";
+    return undef;
+};
+
+# create load-on-demand new() constructors
+{
+    package Credit;
+    sub new {
+        eval "use Credit";
+    }
+};
+
+eval {
+    my $credit = new Credit;
+};
+
+print "If you get here, you didn't crash\n";
+EXPECT
+If you get here, you didn't crash
