@@ -254,7 +254,8 @@ work with a pod2_other_format translation) through:
 =back
 
     perl -ne 'if(/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/)' \
-     -e '{printf("%s%-9o%-9o%-9o%o\n",$1,$2,$3,$4,$5)}' perlebcdic.pod
+     -e '{printf("%s%-9.03o%-9.03o%-9.03o%.03o\n",$1,$2,$3,$4,$5)}' \
+     perlebcdic.pod
 
 If you want to retain the UTF-x code points then in script form you
 might want to write:
@@ -267,17 +268,20 @@ might want to write:
 
  open(FH,"<perlebcdic.pod") or die "Could not open perlebcdic.pod: $!";
  while (<FH>) {
-     if (/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\.?(\d*)\s+(\d+)\.?(\d*)/)  {
+     if (/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\.?(\d*)\s+(\d+)\.?(\d*)/)
+     {
          if ($7 ne '' && $9 ne '') {
-             printf("%s%-9o%-9o%-9o%-9o%-3o.%-5o%-3o.%o\n",
-                                        $1,$2,$3,$4,$5,$6,$7,$8,$9);
+             printf(
+                "%s%-9.03o%-9.03o%-9.03o%-9.03o%-3o.%-5o%-3o.%.03o\n",
+                                            $1,$2,$3,$4,$5,$6,$7,$8,$9);
          }
          elsif ($7 ne '') {
-             printf("%s%-9o%-9o%-9o%-9o%-3o.%-5o%o\n",
+             printf("%s%-9.03o%-9.03o%-9.03o%-9.03o%-3o.%-5o%.03o\n",
                                            $1,$2,$3,$4,$5,$6,$7,$8);
          }
          else {
-             printf("%s%-9o%-9o%-9o%-9o%-9o%o\n",$1,$2,$3,$4,$5,$6,$8);
+             printf("%s%-9.03o%-9.03o%-9.03o%-9.03o%-9.03o%.03o\n",
+                                                $1,$2,$3,$4,$5,$6,$8);
          }
      }
  }
@@ -292,7 +296,8 @@ run the table through:
 =back
 
     perl -ne 'if(/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/)' \
-     -e '{printf("%s%-9X%-9X%-9X%X\n",$1,$2,$3,$4,$5)}' perlebcdic.pod
+     -e '{printf("%s%-9.02X%-9.02X%-9.02X%.02X\n",$1,$2,$3,$4,$5)}' \
+     perlebcdic.pod
 
 Or, in order to retain the UTF-x code points in hexadecimal:
 
@@ -304,17 +309,20 @@ Or, in order to retain the UTF-x code points in hexadecimal:
 
  open(FH,"<perlebcdic.pod") or die "Could not open perlebcdic.pod: $!";
  while (<FH>) {
-     if (/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\.?(\d*)\s+(\d+)\.?(\d*)/)  {
+     if (/(.{43})(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\.?(\d*)\s+(\d+)\.?(\d*)/)
+     {
          if ($7 ne '' && $9 ne '') {
-             printf("%s%-9X%-9X%-9X%-9X%-2X.%-6X%-2X.%X\n",
+             printf(
+                "%s%-9.02X%-9.02X%-9.02X%-9.02X%-2X.%-6.02X%02X.%02X\n",
                                            $1,$2,$3,$4,$5,$6,$7,$8,$9);
          }
          elsif ($7 ne '') {
-             printf("%s%-9X%-9X%-9X%-9X%-2X.%-6X%X\n",
+             printf("%s%-9.02X%-9.02X%-9.02X%-9.02X%-2X.%-6.02X%02X\n",
                                               $1,$2,$3,$4,$5,$6,$7,$8);
          }
          else {
-             printf("%s%-9X%-9X%-9X%-9X%-9X%X\n",$1,$2,$3,$4,$5,$6,$8);
+             printf("%s%-9.02X%-9.02X%-9.02X%-9.02X%-9.02X%02X\n",
+                                                  $1,$2,$3,$4,$5,$6,$8);
          }
      }
  }
@@ -589,7 +597,8 @@ ASCII + Latin-1 order then run the table through:
 
 =back
 
- perl -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
+ perl \
+    -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
      -e '{push(@l,$_)}' \
      -e 'END{print map{$_->[0]}' \
      -e '          sort{$a->[1] <=> $b->[1]}' \
@@ -604,11 +613,12 @@ If you would rather see it in CCSID 1047 order then change the number
 
 =back
 
- perl -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
-     -e '{push(@l,$_)}' \
-     -e 'END{print map{$_->[0]}' \
-     -e '          sort{$a->[1] <=> $b->[1]}' \
-     -e '          map{[$_,substr($_,61,3)]}@l;}' perlebcdic.pod
+ perl \
+    -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
+    -e '{push(@l,$_)}' \
+    -e 'END{print map{$_->[0]}' \
+    -e '          sort{$a->[1] <=> $b->[1]}' \
+    -e '          map{[$_,substr($_,61,3)]}@l;}' perlebcdic.pod
 
 If you would rather see it in POSIX-BC order then change the number
 61 in the last line to 70, like this:
@@ -619,7 +629,8 @@ If you would rather see it in POSIX-BC order then change the number
 
 =back
 
- perl -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
+ perl \
+    -ne 'if(/.{43}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
      -e '{push(@l,$_)}' \
      -e 'END{print map{$_->[0]}' \
      -e '          sort{$a->[1] <=> $b->[1]}' \
@@ -678,44 +689,49 @@ code page you can use the Config module like so:
 In order to convert a string of characters from one character set to 
 another a simple list of numbers, such as in the right columns in the
 above table, along with perl's tr/// operator is all that is needed.  
-The data in the table are in ASCII order hence the EBCDIC columns 
-provide easy to use ASCII to EBCDIC operations that are also easily 
+The data in the table are in ASCII/Latin1 order, hence the EBCDIC columns
+provide easy to use ASCII/Latin1 to EBCDIC operations that are also easily 
 reversed.
 
-For example, to convert ASCII to code page 037 take the output of the second 
-column from the output of recipe 0 (modified to add \\ characters) and use 
-it in tr/// like so:
+For example, to convert ASCII/Latin1 to code page 037 take the output of the
+second numbers column from the output of recipe 2 (modified to add '\'
+characters) and use it in tr/// like so:
 
     $cp_037 = 
-    '\000\001\002\003\234\011\206\177\227\215\216\013\014\015\016\017' .
-    '\020\021\022\023\235\205\010\207\030\031\222\217\034\035\036\037' .
-    '\200\201\202\203\204\012\027\033\210\211\212\213\214\005\006\007' .
-    '\220\221\026\223\224\225\226\004\230\231\232\233\024\025\236\032' .
-    '\040\240\342\344\340\341\343\345\347\361\242\056\074\050\053\174' .
-    '\046\351\352\353\350\355\356\357\354\337\041\044\052\051\073\254' .
-    '\055\057\302\304\300\301\303\305\307\321\246\054\045\137\076\077' .
-    '\370\311\312\313\310\315\316\317\314\140\072\043\100\047\075\042' .
-    '\330\141\142\143\144\145\146\147\150\151\253\273\360\375\376\261' .
-    '\260\152\153\154\155\156\157\160\161\162\252\272\346\270\306\244' .
-    '\265\176\163\164\165\166\167\170\171\172\241\277\320\335\336\256' .
-    '\136\243\245\267\251\247\266\274\275\276\133\135\257\250\264\327' .
-    '\173\101\102\103\104\105\106\107\110\111\255\364\366\362\363\365' .
-    '\175\112\113\114\115\116\117\120\121\122\271\373\374\371\372\377' .
-    '\134\367\123\124\125\126\127\130\131\132\262\324\326\322\323\325' .
-    '\060\061\062\063\064\065\066\067\070\071\263\333\334\331\332\237' ;
+    '\x00\x01\x02\x03\x37\x2D\x2E\x2F\x16\x05\x25\x0B\x0C\x0D\x0E\x0F' .
+    '\x10\x11\x12\x13\x3C\x3D\x32\x26\x18\x19\x3F\x27\x1C\x1D\x1E\x1F' .
+    '\x40\x5A\x7F\x7B\x5B\x6C\x50\x7D\x4D\x5D\x5C\x4E\x6B\x60\x4B\x61' .
+    '\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9\x7A\x5E\x4C\x7E\x6E\x6F' .
+    '\x7C\xC1\xC2\xC3\xC4\xC5\xC6\xC7\xC8\xC9\xD1\xD2\xD3\xD4\xD5\xD6' .
+    '\xD7\xD8\xD9\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xBA\xE0\xBB\xB0\x6D' .
+    '\x79\x81\x82\x83\x84\x85\x86\x87\x88\x89\x91\x92\x93\x94\x95\x96' .
+    '\x97\x98\x99\xA2\xA3\xA4\xA5\xA6\xA7\xA8\xA9\xC0\x4F\xD0\xA1\x07' .
+    '\x20\x21\x22\x23\x24\x15\x06\x17\x28\x29\x2A\x2B\x2C\x09\x0A\x1B' .
+    '\x30\x31\x1A\x33\x34\x35\x36\x08\x38\x39\x3A\x3B\x04\x14\x3E\xFF' .
+    '\x41\xAA\x4A\xB1\x9F\xB2\x6A\xB5\xBD\xB4\x9A\x8A\x5F\xCA\xAF\xBC' .
+    '\x90\x8F\xEA\xFA\xBE\xA0\xB6\xB3\x9D\xDA\x9B\x8B\xB7\xB8\xB9\xAB' .
+    '\x64\x65\x62\x66\x63\x67\x9E\x68\x74\x71\x72\x73\x78\x75\x76\x77' .
+    '\xAC\x69\xED\xEE\xEB\xEF\xEC\xBF\x80\xFD\xFE\xFB\xFC\xAD\xAE\x59' .
+    '\x44\x45\x42\x46\x43\x47\x9C\x48\x54\x51\x52\x53\x58\x55\x56\x57' .
+    '\x8C\x49\xCD\xCE\xCB\xCF\xCC\xE1\x70\xDD\xDE\xDB\xDC\x8D\x8E\xDF';
 
     my $ebcdic_string = $ascii_string;
-    eval '$ebcdic_string =~ tr/' . $cp_037 . '/\000-\377/';
+    eval '$ebcdic_string =~ tr/\000-\377/' . $cp_037 . '/';
 
 To convert from EBCDIC 037 to ASCII just reverse the order of the tr///
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
-    eval '$ascii_string =~ tr/\000-\377/' . $cp_037 . '/';
+    eval '$ascii_string =~ tr/' . $cp_037 . '/\000-\377/';
 
-Similarly one could take the output of the third column from recipe 0 to
-obtain a C<$cp_1047> table.  The fourth column of the output from recipe
-0 could provide a C<$cp_posix_bc> table suitable for transcoding as well.
+Similarly one could take the output of the third numbers column from recipe 2
+to obtain a C<$cp_1047> table.  The fourth numbers column of the output from
+recipe 2 could provide a C<$cp_posix_bc> table suitable for transcoding as
+well.
+
+If you wanted to see the inverse tables, you would first have to sort on the
+desired numbers column as in recipes 4, 5 or 6, then take the output of the
+first numbers column.
 
 =head2 iconv
 
@@ -857,7 +873,7 @@ recommend something similar to:
 Under the IBM OS/390 USS Web Server or WebSphere on z/OS for example 
 you should instead write that as:
 
-    print "Content-type:\ttext/html\r\n\r\n"; # OK for DGW et alia
+    print "Content-type:\ttext/html\r\n\r\n"; # OK for DGW et al
 
 That is because the translation from EBCDIC to ASCII is done
 by the web server in this case (such code will not be appropriate for
