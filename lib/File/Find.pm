@@ -217,7 +217,7 @@ through a collection of variables.
 =back
 
 The above variables have all been localized and may be changed without
-effecting data outside of the wanted function.
+affecting data outside of the wanted function.
 
 For example, when examining the file F</some/path/foo.ext> you will have:
 
