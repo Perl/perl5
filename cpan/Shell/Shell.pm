@@ -9,6 +9,8 @@ our($capture_stderr, $raw, $VERSION, $AUTOLOAD);
 $VERSION = '0.72_01';
 $VERSION = eval $VERSION;
 
+use if $] >= 5.011, 'deprecate';
+
 sub new { bless \my $foo, shift }
 sub DESTROY { }
 
