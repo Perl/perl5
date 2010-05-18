@@ -885,6 +885,8 @@ Returns true if the element indexed by C<key> has been initialized.
 This relies on the fact that uninitialized array elements are set to
 C<&PL_sv_undef>.
 
+Perl equivalent: C<exists($myarray[$key])>.
+
 =cut
 */
 bool
