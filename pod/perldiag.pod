@@ -1423,7 +1423,7 @@ valid magic number.
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
 
-=item \\c%c" more clearly written simply as "%c
+=item "\c%c" more clearly written simply as "%c"
 
 (D deprecated) The C<\cI<X>> construct is intended to be a way to specify
 non-printable characters.  You used it for a printable one, which is better

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 143 );
+plan( tests => 149 );
 
 $x = 'foo';
 $_ = "x";
@@ -613,4 +613,24 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
    $scratch, '[fetching $kror]',
   'bug: $var =~ s/$qr//e calling get-magic on $_ as well as $var',
  );
+}
+
+{ # Bug #41530; replacing non-utf8 with a utf8 causes problems
+    my $string = "a\x{a0}a";
+    my $sub_string = $string;
+    ok(! utf8::is_utf8($sub_string), "Verify that string isn't initially utf8");
+    $sub_string =~ s/a/\x{100}/g;
+    ok(utf8::is_utf8($sub_string),
+                        'Verify replace of non-utf8 with utf8 upgrades to utf8');
+    is($sub_string, "\x{100}\x{A0}\x{100}",
+                            'Verify #41530 fixed: replace of non-utf8 with utf8');
+
+    my $non_sub_string = $string;
+    ok(! utf8::is_utf8($non_sub_string),
+                                    "Verify that string isn't initially utf8");
+    $non_sub_string =~ s/b/\x{100}/g;
+    ok(! utf8::is_utf8($non_sub_string),
+            "Verify that failed substitute doesn't change string's utf8ness");
+    is($non_sub_string, $string,
+                        "Verify that failed substitute doesn't change string");
 }

@@ -196,13 +196,14 @@ sub _system_groups {
     # prefer 'id' over 'groups' (is this ever wrong anywhere?)
     # and 'id -a' over 'id -Gn' (the former is good about spaces in group names)
 
-    $cmd = 'id -a 2>/dev/null';
+    $cmd = 'id -a 2>/dev/null || id 2>/dev/null';
     $str = `$cmd`;
     if ( $str && $str =~ /groups=/ ) {
         # $str is of the form:
         # uid=39957(gsar) gid=22(users) groups=33536,39181,22(users),0(root),1067(dev)
         # FreeBSD since 6.2 has a fake id -a:
         # uid=1001(tobez) gid=20(staff) groups=20(staff), 0(wheel), 68(dialer)
+        # On AIX it's id
         #
         # Linux may also have a context= field
 

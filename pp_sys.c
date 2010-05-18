@@ -4505,22 +4505,22 @@ PP(pp_gmtime)
 	when = (Time64_T)now;
     }
     else {
-	double input = Perl_floor(POPn);
+	NV input = Perl_floor(POPn);
 	when = (Time64_T)input;
 	if (when != input) {
 	    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-			   "%s(%.0f) too large", opname, input);
+			   "%s(%.0" NVff ") too large", opname, input);
 	}
     }
 
     if ( TIME_LOWER_BOUND > when ) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		       "%s(%.0f) too small", opname, when);
+		       "%s(%.0" NVff ") too small", opname, when);
 	err = NULL;
     }
     else if( when > TIME_UPPER_BOUND ) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		       "%s(%.0f) too large", opname, when);
+		       "%s(%.0" NVff ") too large", opname, when);
 	err = NULL;
     }
     else {
@@ -4533,7 +4533,7 @@ PP(pp_gmtime)
     if (err == NULL) {
 	/* XXX %lld broken for quads */
 	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		       "%s(%.0f) failed", opname, (double)when);
+		       "%s(%.0" NVff ") failed", opname, when);
     }
 
     if (GIMME != G_ARRAY) {	/* scalar context */

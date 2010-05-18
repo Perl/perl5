@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 62;
+plan tests => 66;
 
 # These tests make sure, among other things, that we don't end up
 # burning tons of CPU for dates far in the future.
@@ -199,4 +199,45 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
     $warning = '';
     $date = localtime($small_time);
     like $warning, qr/^localtime(.*) too small/;
+}
+
+SKIP: { #rt #73040
+    # these are from the definitions of TIME_LOWER_BOUND AND TIME_UPPER_BOUND
+    my $smallest = -67768100567755200.0;
+    my $biggest = 67767976233316800.0;
+
+    # offset to a value that will fail
+    my $small_time = $smallest - 200;
+    my $big_time = $biggest + 200;
+
+    # check they're representable - typically means NV is
+    # long double
+    if ($small_time + 200 != $smallest
+	|| $small_time == $smallest
+        || $big_time - 200 != $biggest
+	|| $big_time == $biggest) {
+	skip "Can't represent test values", 4;
+    }
+    my $small_time_f = sprintf("%.0f", $small_time);
+    my $big_time_f = sprintf("%.0f", $big_time);
+
+    # check the numbers in the warning are correct
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning .= join "\n", @_; };
+    $warning = '';
+    my $date = gmtime($big_time);
+    like $warning, qr/^gmtime\($big_time_f\) too large/;
+
+    $warning = '';
+    $date = localtime($big_time);
+    like $warning, qr/^localtime\($big_time_f\) too large/;
+
+    $warning = '';
+    $date = gmtime($small_time);
+    like $warning, qr/^gmtime\($small_time_f\) too small/;
+
+    $warning = '';
+    $date = localtime($small_time);
+    like $warning, qr/^localtime\($small_time_f\) too small/;
+  
 }
