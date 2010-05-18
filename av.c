@@ -191,12 +191,14 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 =for apidoc av_fetch
 
 Returns the SV at the specified index in the array.  The C<key> is the
-index.  If C<lval> is set then the fetch will be part of a store.  Check
-that the return value is non-null before dereferencing it to a C<SV*>.
+index.  If lval is true, you are guaranteed to get a real SV back (in case
+it wasn't real before), which you can then modify.  Check that the return
+value is non-null before dereferencing it to a C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
 
+The rough perl equivalent is C<$myarray[$idx]>.
 =cut
 */
 
