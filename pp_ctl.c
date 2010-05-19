@@ -3357,8 +3357,9 @@ PP(pp_require)
 	    }
 	}
 
-        /* We do this only with use, not require. */
+	/* We do this only with "use", not "require" or "no". */
 	if (PL_compcv &&
+		!(cUNOP->op_first->op_private & OPpCONST_NOVER) &&
 	  /* If we request a version >= 5.9.5, load feature.pm with the
 	   * feature bundle that corresponds to the required version. */
 		vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
