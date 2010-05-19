@@ -740,7 +740,7 @@ Set the highest index in the array to the given number, equivalent to
 Perl's C<$#array = $fill;>.
 
 The number of elements in the an array will be C<fill + 1> after
-av_fill() returns.  If the array was previously shorter then the
+av_fill() returns.  If the array was previously shorter, then the
 additional elements appended are set to C<PL_sv_undef>.  If the array
 was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
 the same as C<av_clear(av)>.
