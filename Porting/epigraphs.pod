@@ -1,15 +1,19 @@
 =head1 NAME
 
-perlepigrams - list of Perl release epigrams
+perlepigraphs - list of Perl release epigraphs
 
 =head1 DESCRIPTION
 
-Many Perl release announcements included an I<epigram>, a short excerpt
+Many Perl release announcements included an I<epigraph>, a short excerpt
 from a literary or other creative work, chosen by the pumpking or
-release manager.  This file assembles the known list of epigrams for
+release manager.  This file assembles the known list of epigraph for
 posterity.
 
-=head1 EPIGRAMS
+I<Note>: these have also been referred to as <epigrams>, but the
+definition of I<epigraph> is closer to the way they have been used.
+Consult your favorite dictionary for details.
+
+=head1 EPIGRAPHS
 
 =head2 v5.13.0 - Jules Verne, "A Journey to the Centre of the Earth"
 
@@ -145,7 +149,7 @@ Mercia and Northumbria—"'
 
 =back
 
-=head2 v5.12.0-RC2 - no epigram
+=head2 v5.12.0-RC2 - no epigraph
 
 =head2 v5.12.0-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
@@ -174,7 +178,7 @@ in the world she was to get out again.
 
 =back
 
-=head2 v5.12.0-RC0 - no epigram
+=head2 v5.12.0-RC0 - no epigraph
 
 =head2 v5.11.5 - Samuel Taylor Coleridge, "Christabel"
 
@@ -337,9 +341,9 @@ replied. 'Not quite all.'
 
 =back
 
-=head2 v5.10.1-RC2 - no epigram
+=head2 v5.10.1-RC2 - no epigraph
 
-=head2 v5.10.1-RC1 - no epigram
+=head2 v5.10.1-RC1 - no epigraph
 
 =head2 v5.10.0 - Laurence Sterne, "Tristram Shandy"
 
@@ -355,15 +359,15 @@ did not raise and hoist it up into the best vacancies in the kingdom.
 
 =back
 
-=head2 v5.10.0-RC2 - no epigram
+=head2 v5.10.0-RC2 - no epigraph
 
-=head2 v5.10.0-RC1 - no epigram
+=head2 v5.10.0-RC1 - no epigraph
 
-=head2 v5.9.5 - no epigram
+=head2 v5.9.5 - no epigraph
 
-=head2 v5.9.4 - no epigram
+=head2 v5.9.4 - no epigraph
 
-=head2 v5.9.3 - no epigram
+=head2 v5.9.3 - no epigraph
 
 =head2 v5.9.2 - Thomas Pynchon, "V"
 
@@ -1002,9 +1006,9 @@ long in this instance.
 
 =back
 
-=head2 5.005_05-RC1 - no epigram
+=head2 5.005_05-RC1 - no epigraph
 
-=head2 5.005_04 - no epigram
+=head2 5.005_04 - no epigraph
 
 =head2 5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
 
@@ -1044,7 +1048,7 @@ she fell past it.
 
 =head1 ACKNOWLEDGEMENTS
 
-This document was originally compiled based on a list of epigrams
+This document was originally compiled based on a list of epigraphs
 on L<Perl Monks|http://perlmonks.org> titled
 L<Recent Perl Release Announcement|http://perlmonks.org/?node_id=372406>
 by ysth.
