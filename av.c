@@ -721,6 +721,8 @@ Perl_av_shift(pTHX_ register AV *av)
 Returns the highest index in the array.  The number of elements in the
 array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 
+The Perl equivalent for this is C<$#myarray>.
+
 =cut
 */
 
