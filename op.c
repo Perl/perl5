@@ -924,25 +924,28 @@ Perl_scalar(pTHX_ OP *o)
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
 	scalar(kid);
-	while ((kid = kid->op_sibling)) {
-	    if (kid->op_sibling)
-		scalarvoid(kid);
-	    else
+	kid = kid->op_sibling;
+    do_kids:
+	while (kid) {
+	    OP *sib = kid->op_sibling;
+	    if (sib && kid->op_type != OP_LEAVEWHEN) {
+		if (sib->op_type == OP_BREAK && sib->op_flags & OPf_SPECIAL) {
+		    scalar(kid);
+		    scalarvoid(sib);
+		    break;
+		} else
+		    scalarvoid(kid);
+	    } else
 		scalar(kid);
+	    kid = sib;
 	}
 	PL_curcop = &PL_compiling;
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
     case OP_LIST:
-	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
-	    if (kid->op_sibling)
-		scalarvoid(kid);
-	    else
-		scalar(kid);
-	}
-	PL_curcop = &PL_compiling;
-	break;
+	kid = cLISTOPo->op_first;
+	goto do_kids;
     case OP_SORT:
 	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
@@ -986,7 +989,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     want = o->op_flags & OPf_WANT;
     if ((want && want != OPf_WANT_SCALAR)
 	 || (PL_parser && PL_parser->error_count)
-	 || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE)
+	 || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
     {
 	return o;
     }
@@ -1297,24 +1300,27 @@ Perl_list(pTHX_ OP *o)
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
 	list(kid);
-	while ((kid = kid->op_sibling)) {
-	    if (kid->op_sibling)
-		scalarvoid(kid);
-	    else
+	kid = kid->op_sibling;
+    do_kids:
+	while (kid) {
+	    OP *sib = kid->op_sibling;
+	    if (sib && kid->op_type != OP_LEAVEWHEN) {
+		if (sib->op_type == OP_BREAK && sib->op_flags & OPf_SPECIAL) {
+		    list(kid);
+		    scalarvoid(sib);
+		    break;
+		} else
+		    scalarvoid(kid);
+	    } else
 		list(kid);
+	    kid = sib;
 	}
 	PL_curcop = &PL_compiling;
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
-	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
-	    if (kid->op_sibling)
-		scalarvoid(kid);
-	    else
-		list(kid);
-	}
-	PL_curcop = &PL_compiling;
-	break;
+	kid = cLISTOPo->op_first;
+	goto do_kids;
     }
     return o;
 }
