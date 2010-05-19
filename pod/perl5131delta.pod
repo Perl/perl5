@@ -117,6 +117,15 @@ below.  A paragraph summary for important changes should then be added by hand.
 In an ideal world, dual-life modules would have a F<Changes> file that could be
 cribbed.
 
+=over
+
+=item C<Errno>
+
+The implementation of C<Errno> has been refactored to use about 55% less memory.
+There should be no user-visible changes.
+
+=back
+
 =head2 New Modules and Pragmata
 
 =head2 Pragmata Changes
@@ -142,6 +151,23 @@ or some other things.  Now the label is emitted last.
 =back
 
 =head2 Removed Modules and Pragmata
+
+The following modules have been removed from the core distribution, and if
+needed should be installed from CPAN instead.
+
+=over
+
+=item C<Class::ISA>
+
+=item C<Pod::Plainer>
+
+=item C<Switch>
+
+=back
+
+The removal of C<Shell> has been deferred until after 5.14, as the
+implementation of C<Shell> shipped with 5.12.0 did not correctly issue the
+warning that it was to be removed from core.
 
 =head1 Utility Changes
 
@@ -254,6 +280,22 @@ care to avoid destroying the ghost frame.
 
 =item *
 
+The format of entries on the scope stack has been changed, resulting in a
+reduction of memory usage of about 10%. In particular, the memory used by
+the scope stack to record each active lexical variable has been halved.
+
+=item *
+
+Memory allocation for pointer tables has been changed. Previously
+C<Perl_ptr_table_store> allocated memory from the same arena system as C<SV>
+bodies and C<HE>s, with freed memory remaining bound to those arenas until
+interpreter exit. Now it allocates memory from arenas private to the specific
+pointer table, and that memory is returned to the system when
+C<Perl_ptr_table_free> is called. Additionally, allocation and release are both
+less CPU intensive.
+
+=item *
+
 XXX
 
 =back
@@ -296,6 +338,12 @@ XXX Add any new known deprecations here.
 The following items are now deprecated.
 
 =over 4
+
+=item C<Perl_ptr_table_clear>
+
+C<Perl_ptr_table_clear> is no longer part of Perl's public API. Calling it now
+generates a deprecation warning, and it will be removed in a future
+release.
 
 =item *
 
