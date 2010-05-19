@@ -859,6 +859,10 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 
 =item *
 
+Add your quote to F<Porting/epigraphs.pod> and commit it.
+
+=item *
+
 Wait 24 hours or so, then post the announcement to use.perl.org.
 (if you don't have access rights to post news, ask someone like Rafael to
 do it for you.)
