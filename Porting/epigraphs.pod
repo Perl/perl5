@@ -15,6 +15,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.1 - Miguel de Unamuno, "The Sepulchre of Don Quixote"
+
+And if anyone shall come to you and say that he knows how to construct
+bridges and that perhaps a time will come when you will wish to avail
+yourself of his science in order to cross over a river, out with him!  Out
+with the engineer!  Rivers will be crossed by wading or swimming them, even
+if half the crusaders drown themselves.  Let the engineer go off and build
+bridges somewhere else, where they are badly wanted.  For those who go in
+quest of the sepulchre, faith is bridge enough.
+
 =head2 v5.13.0 - Jules Verne, "A Journey to the Centre of the Earth"
 
 The heat still remained at quite a supportable degree. With an
