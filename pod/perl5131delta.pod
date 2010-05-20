@@ -156,11 +156,6 @@ warning that it was to be removed from core.
 
 =over 4
 
-=item perlepigraph
-
-You can now find a list of the quotes issued with each release of perl in
-F<Porting/perlepigraph.pod>.
-
 =item perlgpl
 
 L<perlgpl> has been updated to contain GPL version 1, as is included in the
