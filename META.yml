@@ -19,17 +19,16 @@ no_index:
     - dist/Data-Dumper
     - dist/ExtUtils-Install
     - dist/Filter-Simple
+    - dist/I18N-LangTags
     - dist/IO/
     - dist/lib/
     - dist/Locale-Maketext
     - dist/Module-CoreList
     - dist/Net-Ping
     - dist/Pod-Perldoc
-    - dist/Pod-Plainer
     - dist/Safe
     - dist/SelfLoader
     - dist/Storable
-    - dist/Switch
     - dist/Thread-Queue
     - dist/Thread-Semaphore
     - dist/threads
