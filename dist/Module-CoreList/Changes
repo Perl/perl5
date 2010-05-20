@@ -1,3 +1,6 @@
+2.34    Thu Apr 20 2010
+  - Updated for 5.13.1
+
 2.31_01 Fri Apr 30 2010
   - [rt.cpan.org #56740] Format Perl versions >= 5.6.0 as X.Y.Z (schwern)
   - Functional interface amended to make calling conventions consistent
