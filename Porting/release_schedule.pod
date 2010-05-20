@@ -40,7 +40,7 @@ and can't find a substitute amongst this list, mail p5p.
 Jesse Vincent <F<jesse@cpan.org>>
 Leon Brocard <F<acme@astray.com>>
 Yves Orton <F<demerphq@gmail.com>>
-Ricardo Signes <F<rjbs@manxome.org>>
+Ricardo Signes <F<rjbs@cpan.org>>
 Steve Hay <F<steve.m.hay@googlemail.com>>
 Ask Bjørn Hansen <F<ask@perl.org>>
 David Golden <F<dagolden@cpan.org>>
