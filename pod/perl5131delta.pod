@@ -239,8 +239,6 @@ release.
 
 =back
 
-=head1 Platform Specific Notes
-
 =head1 Acknowledgements
 
 Perl 5.13.1 represents thirty days of development since Perl 5.13.0 and
