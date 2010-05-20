@@ -16095,13 +16095,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Shell'                 => '1',
 	'Switch'                => '1',
     },
-    5.013000 => {
+    5.012001 => {
 	'Class::ISA'            => '1',
 	'Pod::Plainer'          => '1',
 	'Shell'                 => '1',
 	'Switch'                => '1',
     },
-    5.012001 => {
+    5.013001 => {
 	'Class::ISA'            => '1',
 	'Pod::Plainer'          => '1',
 	'Shell'                 => '1',
