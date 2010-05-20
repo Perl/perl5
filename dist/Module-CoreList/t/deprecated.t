@@ -18,8 +18,8 @@ ok(exists $Module::CoreList::deprecated{5.011000}{'Switch'},
    "Switch deprecated in 5.011000 (hash)"
 );
 
-is(!! Module::CoreList::is_deprecated('Switch'), !! ($] >= 5.011),
-   "Switch deprecated current perl (function)"
+is(!! Module::CoreList::is_deprecated('Switch'), !! ($] >= 5.011 and $] < 5.013001 ),
+   "Switch deprecated current perl (if pre-5.13.1.) (function)"
 );
 
 ok(! Module::CoreList::is_deprecated('Switch', 5.010000), 
