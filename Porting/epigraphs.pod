@@ -17,8 +17,6 @@ Consult your favorite dictionary for details.
 
 =head2 v5.13.0 - Jules Verne, "A Journey to the Centre of the Earth"
 
-=over
-
 The heat still remained at quite a supportable degree. With an
 involuntary shudder, I reflected on what the heat must have been
 when the volcano of Sneffels was pouring its smoke, flames, and
@@ -30,11 +28,7 @@ smoke, steam, and sulphurous stench!
 "Only to think of the consequences," I mused, "if the old
 volcano were once more to set to work."
 
-=back
-
 =head2 v5.12.1 - Kurt Vonnegut, "Cat's Cradle"
-
-=over
 
 "Now suppose," chortled Dr. Breed, enjoying himself, "that there were
 many possible ways in which water could crystallize, could freeze.
@@ -48,11 +42,7 @@ hard as this desk—with a melting point of, let us say, one-hundred
 degrees Fahrenheit, or, better still, a melting point of one-hundred-
 and-thirty degrees."
 
-=back
-
 =head2 v5.12.1-RC2 - Kurt Vonnegut, "Cat's Cradle"
-
-=over
 
 San Lorenzo was fifty miles long and twenty miles wide, I learned from
 the supplement to the New York Sunday Times. Its population was four
@@ -64,11 +54,7 @@ level. Its capital was Bolivar, "...a strikingly modern city built on a
 harbor capable of sheltering the entire United States Navy." The principal
 exports were sugar, coffee, bananas, indigo, and handcrafted novelties.
 
-=back
-
 =head2 v5.12.1-RC2 - Kurt Vonnegut, "Cat's Cradle"
-
-=over
 
 Which brings me to the Bokononist concept of a wampeter.  A wampeter is
 the pivot of a karass. No karass is without a wampeter, Bokonon tells us,
@@ -82,11 +68,7 @@ bodies that revolve. As Bokonon invites us to sing:
    Around and around and around we spin,
    With feet of lead and wings of tin . . .
 
-=back
-
 =head2 v5.12.0 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-=over
 
 'Please would you tell me,' said Alice, a little timidly, for she was
 not quite sure whether it was good manners for her to speak first, 'why
@@ -103,11 +85,7 @@ that cats COULD grin.'
 
 'They all can,' said the Duchess; 'and most of 'em do.'
 
-=back
-
 =head2 v5.12.0-RC5 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-=over
 
 'Not QUITE right, I'm afraid,' said Alice, timidly; 'some of the words
 have got altered.'
@@ -115,11 +93,7 @@ have got altered.'
 'It is wrong from beginning to end,' said the Caterpillar decidedly, and
 there was silence for some minutes.
 
-=back
-
 =head2 v5.12.0-RC4 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-=over
 
 'It was much pleasanter at home,' thought poor Alice, 'when one wasn't
 always growing larger and smaller, and being ordered about by mice and
@@ -128,11 +102,7 @@ yet--it's rather curious, you know, this sort of life! I do wonder what
 can have happened to me! When I used to read fairy-tales, I fancied that
 kind of thing never happened, and now here I am in the middle of one!
 
-=back
-
 =head2 v5.12.0-RC3 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-=over
 
 At last the Mouse, who seemed to be a person of authority among them,
 called out, 'Sit down, all of you, and listen to me! I'LL soon make you
@@ -147,13 +117,11 @@ to by the English, who wanted leaders, and had been of late much
 accustomed to usurpation and conquest. Edwin and Morcar, the earls of
 Mercia and Northumbria—"'
 
-=back
-
 =head2 v5.12.0-RC2 - no epigraph
 
-=head2 v5.12.0-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
+Z<>
 
-=over
+=head2 v5.12.0-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
 So she was considering in her own mind (as well as she could, for the
 hot day made her feel very sleepy and stupid), whether the pleasure of
@@ -176,13 +144,11 @@ rabbit-hole under the hedge.
 In another moment down went Alice after it, never once considering how
 in the world she was to get out again.
 
-=back
-
 =head2 v5.12.0-RC0 - no epigraph
 
-=head2 v5.11.5 - Samuel Taylor Coleridge, "Christabel"
+Z<>
 
-=over
+=head2 v5.11.5 - Samuel Taylor Coleridge, "Christabel"
 
     A little child, a limber elf,
     Singing, dancing to itself,
@@ -207,11 +173,7 @@ in the world she was to get out again.
     Comes seldom save from rage and pain,
     So talks as it's most used to do.
 
-=back
-
 =head2 v5.11.4 - Fyodor Dostoevsky, "Crime and Punishment"
-
-=over
 
 And you don't suppose that I went into it headlong like a fool? I went
 into it like a wise man, and that was just my destruction. And you
@@ -223,11 +185,7 @@ who would go straight to his goal without asking questions.... If I
 worried myself all those days, wondering whether Napoleon would have
 done it or not, I felt clearly of course that I wasn't Napoleon.
 
-=back
-
 =head2 v5.11.3 - Mark Twain, "The Adventures of Tom Sawyer"
-
-=over
 
 "Say -- I'm going in a swimming, I am. Don't you wish you could? But of
 course you'd druther work—wouldn't you? Course you would!"
@@ -250,12 +208,8 @@ swept his brush daintily back and forth -- stepped back to note the effect
 watching every move and getting more and more interested, more and more
 absorbed. Presently he said: "Say, Tom, let me whitewash a little."
 
-=back
-
 
 =head2 v5.11.2 - Michael Marshall Smith, "Only Forward"
-
-=over
 
 The streets were pretty quiet, which was nice. They're always quiet here
 at that time: you have to be wearing a black jacket to be out on the
@@ -268,11 +222,7 @@ wearing.  When the streets are busy it's kind of intense, and anyone
 prone to epileptic seizures isn't allowed to live in the Neighbourhood,
 however much they're into colour.
 
-=back
-
 =head2 v5.11.1 - Joseph Heller, "Catch-22"
-
-=over
 
 Milo had been caught red-handed in the act of plundering his countrymen,
 and, as a result, his stock had never been higher. He proved good as his
@@ -286,11 +236,7 @@ war record, was astonished by the deferential humility with which Mil
 presented himself at Group Headquarters and made his fantastic appeal
 for more hazardous assignment.
 
-=back
-
 =head2 v5.11.0 - Mikhail Bulgakov, "The Master and Margarita"
-
-=over
 
 Whispers of an "evil power" were heard in lines at dairy shops, in
 streetcars, stores, arguments, kitchens, suburban and long-distance
@@ -305,12 +251,8 @@ people shared the point of view of the investigating team: it was the
 work of a gang of hypnotists and ventriloquists magnificently skilled in
 their art.
 
-=back
-
 
 =head2 v5.10.1 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
-
-=over
 
 'Briefly, sir, I am the Permanent Under-Secretary of State, known as
 the Permanent Secretary. Woolley here is your Principal Private
@@ -339,15 +281,15 @@ all say that, do they?' I ventured.
 Sir Humphrey reassured me on that. 'Certainly not, Minister,' he
 replied. 'Not quite all.'
 
-=back
-
 =head2 v5.10.1-RC2 - no epigraph
+
+Z<>
 
 =head2 v5.10.1-RC1 - no epigraph
 
-=head2 v5.10.0 - Laurence Sterne, "Tristram Shandy"
+Z<>
 
-=over
+=head2 v5.10.0 - Laurence Sterne, "Tristram Shandy"
 
 He would often declare, in speaking his thoughts upon the subject, that
 he did not conceive how the greatest family in England could stand it
@@ -357,21 +299,27 @@ must be one of the greatest problems in civil life, where the same
 number of long and jolly noses, following one another in a direct line,
 did not raise and hoist it up into the best vacancies in the kingdom.
 
-=back
-
 =head2 v5.10.0-RC2 - no epigraph
+
+Z<>
 
 =head2 v5.10.0-RC1 - no epigraph
 
+Z<>
+
 =head2 v5.9.5 - no epigraph
+
+Z<>
 
 =head2 v5.9.4 - no epigraph
 
+Z<>
+
 =head2 v5.9.3 - no epigraph
 
-=head2 v5.9.2 - Thomas Pynchon, "V"
+Z<>
 
-=over
+=head2 v5.9.2 - Thomas Pynchon, "V"
 
 This word flip was weird. Every recording date of McClintic's he'd
 gotten into the habit of talking electricity with the audio men and
@@ -399,27 +347,15 @@ flip or flop, why so could a musician's. As long as you were flop,
 everything was cool. But where did the trigger-pulse come from to
 make you flip?
 
-=back
-
 =head2 v5.9.1 - Tom Stoppard, "Arcadia"
-
-=over
 
 Aren't you supposed to have a pony?
 
-=back
-
 =head2 v5.9.0 - Doris Lessing, "Martha Quest"
-
-=over
 
 What of October, that ambiguous month
 
-=back
-
 =head2 v5.8.9 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
-
-=over
 
 Frank and I, unlike the civil servants, were still puzzled that such a
 proposal as the Europass could even be seriously under consideration by
@@ -476,11 +412,7 @@ This all strikes me as the most appalling cynicism, and I said so.
 Sir Humphrey agreed completely. 'Yes Minister. We call it
 diplomacy. It's what made Britain great, you know.'
 
-=back
-
 =head2 v5.8.9-RC2 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
-
-=over
 
 There was silence in the office. I didn't know what we were going to do
 about the four hundred new people supervising our economy drive or the
@@ -507,11 +439,7 @@ it's juggling with figures, it's pulling the wool over people's eyes.'
 
 'A government press release, in fact.' said Humphrey.
 
-=back
-
 =head2 v5.8.9-RC1 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
-
-=over
 
 A jumbo jet touched down, with BURANDAN AIRWAYS written on the side. I
 was hugely impressed. British Airways are having to pawn their Concordes,
@@ -577,11 +505,7 @@ revolving door and comes out in front.'
 
 'Ah, I see. A politician, Minister.'
 
-=back
-
 =head2 v5.8.8 - Joe Raposo, "Bein' Green"
-
-=over
 
     It's not that easy bein' green                        
     Having to spend each day the color of the leaves  
@@ -605,21 +529,13 @@ revolving door and comes out in front.'
     Wonder I am green and it'll do fine, it's beautiful
     And I think it's what I want to be
 
-=back
-
 =head2 v5.8.8-RC1 - Cosgrove Hall Productions, "Dangermouse"
-
-=over
 
   Greenback: And the world is mine, all mine. Muhahahahaha. See to it! 
   
   Stiletto: Si, Barone. Subito, Barone. 
 
-=back
-
 =head2 v5.8.7 - Sergei Prokofiev, "Peter and the Wolf"
-
-=over
 
 And now, imagine the triumphant procession: Peter at the head; after him the
 hunters leading the wolf; and winding up the procession, grandfather and the
@@ -628,11 +544,7 @@ cat.
 Grandfather shook his head discontentedly: "Well, and if Peter hadn't caught
 the wolf? What then?" 
 
-=back
-
 =head2 v5.8.7-RC1 - Sergei Prokofiev, "Peter and the Wolf"
-
-=over
 
 And now this is how things stood: The cat was sitting on one branch. The
 bird on another, not too close to the cat. And the wolf walked round and
@@ -655,11 +567,7 @@ snapped angrily at him from this side and that.
 How that bird teased the wolf, how that wolf wanted to catch him! But
 the bird was clever and the wolf simply couldn't do anything about it. 
 
-=back
-
 =head2 v5.8.6 - A. A. Milne, "The House at Pooh Corner"
-
-=over
 
 "Hallo, Pooh," said Piglet, giving a jump of surprise. "I knew it was
 you." 
@@ -690,11 +598,7 @@ Piglet agreed that that would be rather bothering.
 how to do it," he said; and he put the acorn in the hole he had made,
 and covered it up with earth, and jumped on it. 
 
-=back
-
 =head2 v5.8.6-RC1 - A. A. Milne, "Winnie the Pooh"
-
-=over
 
 "Hallo!" said Piglet, "whare are /you/ doing?"
 
@@ -717,11 +621,7 @@ you see there?"
 "Track," said Piglet. "Paw-marks." He gave a little squeak of
 excitement.  "Oh, Pooh!" Do you think it's a--a--a Woozle?"
 
-=back
-
 =head2 v5.8.5 - wikipedia, "Yew"
-
-=over
 
 Yews are relatively slow growing trees, widely used in landscaping and
 ornamental horticulture. They have flat, dark-green needles, reddish
@@ -742,11 +642,7 @@ farmers and drovers from letting their animals wander into the burial
 grounds. The yew tree is a frequent symbol in the Christian poetry of
 T.S. Eliot, especially his Four Quartets. 
 
-=back
-
 =head2 v5.8.5-RC2 - wikipedia, "Beech"
-
-=over
 
 Beeches are trees of the Genus Fagus, family Fagaceae, including about
 ten species in Europe, Asia, and North America. The leaves are entire or
@@ -758,11 +654,7 @@ The southern beeches belong to a different but related genus,
 Nothofagus. They are found in Australia, New Zealand, New Guinea, New
 Caledonia and South America. 
 
-=back
-
 =head2 v5.8.5-RC1 - wikipedia, "Pedunculate Oak" (abridged)
-
-=over
 
 The Pedunculate Oak is called the Common Oak  in Britain, and is also
 often called the English Oak in other English speaking countries It is a
@@ -785,11 +677,7 @@ mammals and some birds, notably Jays Garrulus glandarius.
 It is planted for forestry, and produces a long-lasting and durable
 heartwood, much in demand for interior and furniture work. 
 
-=back
-
 =head2 v5.8.4 - T. S. Eliot, "The Old Gumbie Cat"
-
-=over
 
   I have a Gumbie Cat in mind, her name is Jennyanydots;
   The curtain-cord she likes to wind, and tie it into sailor-knots.
@@ -805,16 +693,11 @@ heartwood, much in demand for interior and furniture work.
   With a purpose in life and a good deed to do--
   And she's even created a Beetles' Tattoo.
 
-
   So for Old Gumbie Cats let us now give three cheers --
   On whom well-ordered households depend, it appears.
 
-=back
-
 
 =head2 v5.8.4-RC2 - T. S. Eliot, "Macavity: The Mystery Cat"
-
-=over
 
   Macavity's a Mystery Cat: he's called the Hidden Paw --
   For he's the master criminal who can defy the Law.
@@ -828,11 +711,7 @@ heartwood, much in demand for interior and furniture work.
   You may seek him in the basement, you may look up in the air --
   But I tell you once and once again, /Macavity's not there/!
 
-=back
-
 =head2 v5.8.4-RC1 - T. S. Eliot, "Skimbleshanks: The Railway Cat"
-
-=over
 
   There's a whisper down the line at 11.39
   When the Night Mail's ready to depart,
@@ -851,11 +730,7 @@ heartwood, much in demand for interior and furniture work.
   And we're off at last of the northern part
   Of the Northern Hemisphere!
 
-=back
-
 =head2 v5.8.3 - Arthur William Edgar O'Shaugnessy, "Ode"
-
-=over
 
   We are the music makers, 
   And we are the dreamers of dreams, 
@@ -866,11 +741,7 @@ heartwood, much in demand for interior and furniture work.
   Yet we are the movers and shakers 
   Of the world for ever, it seems. 
 
-=back
-
 =head2 v5.8.3-RC1 - Irving Berlin, "Let's Face the Music and Dance"
-
-=over
 
   There may be trouble ahead,
   But while there's music and moonlight,
@@ -890,11 +761,7 @@ heartwood, much in demand for interior and furniture work.
   And love and romance,
   Let's face the music and dance.
 
-=back
-
 =head2 v5.8.2 - Walt Whitman, "Passage to India"
-
-=over
 
   Passage, immediate passage! the blood burns in my veins!
   Away O soul! hoist instantly the anchor!
@@ -902,7 +769,6 @@ heartwood, much in demand for interior and furniture work.
   Have we not stood here like trees in the ground long enough?
   Have we not grovel'd here long enough, eating and drinking like mere brutes?
   Have we not darken'd and dazed ourselves with books long enough?
-
 
   Sail forth - steer for the deep waters only,
   Reckless O soul, exploring, I with the and thou with me,
@@ -914,22 +780,14 @@ heartwood, much in demand for interior and furniture work.
   O daring job, but safe! are they not all the seas of God?
   O farther, farther, farther sail!
 
-=back
-
 =head2 v5.8.2-RC2 - Eric Idle/John Du Prez, "Accountancy Shanty"
-
-=over
 
   It's fun to charter an accountant
   And sail the wide accountan-cy,
   To find, explore the funds offshore
   And skirt the shoals of bankruptcy.
 
-=back
-
 =head2 v5.8.2-RC1 - Edward Lear, "The Jumblies"
-
-=over
 
   They went to sea in a Sieve, they did,
     In a Sieve they went to sea:
@@ -947,11 +805,7 @@ heartwood, much in demand for interior and furniture work.
   Their heads are green, and their hands are blue,
     And they went to sea in a Sieve.
 
-=back
-
 =head2 v5.8.1 - Terry Pratchett, "The Color of Magic"
-
-=over
 
 "What happens next?" asked Twoflower.
 
@@ -972,11 +826,7 @@ ceiling, whistling tunelessly.
 
 "Usually."
 
-=back
-
 =head2 v5.8.1-RC5 - Terry Pratchett, "Lords and Ladies"
-
-=over
 
 No matter what she did with her hair it took about
 three minutes for it to tangle itself up again,
@@ -984,11 +834,7 @@ like a garden hosepipe in a shed [Footnote: Which,
 no matter how carefully coiled, will always uncoil
 overnight and tie the lawnmower to the bicycles].
 
-=back
-
 =head2 v5.6.2 - Sterne, "Tristram Shandy"
-
-=over
 
 When great or unexpected events fall out upon the stage of this
 sublunary word--the mind of man, which is an inquisitive kind of
@@ -996,23 +842,19 @@ a substance, naturally takes a flight, behind the scenes, to see
 what is the cause and first spring of them--The search was not
 long in this instance.
 
-=back
-
 =head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
-
-=over
 
 "Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?" 
 
-=back
-
 =head2 5.005_05-RC1 - no epigraph
+
+Z<>
 
 =head2 5.005_04 - no epigraph
 
-=head2 5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
+Z<>
 
-=over
+=head2 5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
 
 The monkeys called the place their city, and pretended to despise
 the Jungle-People because they lived in the forest. And yet they
@@ -1026,11 +868,7 @@ and down the terraces of the king's garden, where they would shake
 the rose trees and the oranges in sport to see the fruit and flowers
 fall.
 
-=back
-
 =head2 5.005_04-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-=over
 
 Either the well was very deep, or she fell very slowly, for she had
 plenty of time as she went down to look about her and to wonder what was
@@ -1044,8 +882,6 @@ disappointment it was empty: she did not like to drop the jar for fear
 of killing somebody, so managed to put it into one of the cupboards as
 she fell past it. 
 
-=back
-
 =head1 ACKNOWLEDGEMENTS
 
 This document was originally compiled based on a list of epigraphs
@@ -1054,4 +890,5 @@ L<Recent Perl Release Announcement|http://perlmonks.org/?node_id=372406>
 by ysth.
 
 =cut
+
 # vim:tw=72:
