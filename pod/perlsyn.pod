@@ -677,28 +677,31 @@ case to the next:
 =head3 Return value
 
 When a C<given> statement is also a valid expression (e.g.
-when it's the last statement of a block), it returns :
+when it's the last statement of a block), it evaluates to :
 
 =over 4
 
 =item *
 
-An empty list as soon as an explicit C<break> is encountered.
+an empty list as soon as an explicit C<break> is encountered.
 
 =item *
 
-The value of the last evaluated expression of the successful
+the value of the last evaluated expression of the successful
 C<when>/C<default> clause, if there's one.
 
 =item *
 
-The value of the last evaluated expression of the C<given> block if no
-condition was true.
+the value of the last evaluated expression of the C<given> block if no
+condition is true.
 
 =back
 
-Note that, unlike C<if> and C<unless>, both C<when> and C<default> always
-themselves return an empty list.
+In both last cases, the last expression is evaluated in the context that
+was applied to the C<given> block.
+
+Note that, unlike C<if> and C<unless>, failed C<when> statements always
+evaluate to an empty list.
 
     my $price = do { given ($item) {
 	when ([ 'pear', 'apple' ]) { 1 }
@@ -707,7 +710,7 @@ themselves return an empty list.
         'unknown';
     } };
 
-C<given> blocks can't currently be used as proper expressions. This
+Currently, C<given> blocks can't always be used as proper expressions. This
 may be addressed in a future version of perl.
 
 =head3 Switching in a loop
