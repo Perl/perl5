@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 607;
+use Test::More tests => 1970;
 
 
 $a = new Oscalar "087";
@@ -1588,6 +1588,245 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     my $y = ++$o;
     is($x, $o, "copy constructor falls back to assignment (postinc)");
     is($y, $o, "copy constructor falls back to assignment (preinc)");
+}
+
+# only scalar 'x' should currently overload
+
+{
+    package REPEAT;
+
+    my ($x,$n, $nm);
+
+    use overload
+	'x'        => sub { $x++; 1 },
+	'0+'       => sub { $n++; 1 },
+	'nomethod' => sub { $nm++; 1 },
+	'fallback' => 0,
+    ;
+
+    my $s = bless {};
+
+    package main;
+
+    my @a;
+    my $count = 3;
+
+    ($x,$n,$nm) = (0,0,0);
+    @a = ((1,2,$s) x $count);
+    is("$x-$n-$nm", "0-0-0", 'repeat 1');
+
+    ($x,$n,$nm) = (0,0,0);
+    @a = ((1,$s,3) x $count);
+    is("$x-$n-$nm", "0-0-0", 'repeat 2');
+
+    ($x,$n,$nm) = (0,0,0);
+    @a = ((1,2,3) x $s);
+    is("$x-$n-$nm", "0-1-0", 'repeat 3');
+}
+
+
+
+# RT #57012: magic items need to have mg_get() called before testing for
+# overload. Lack of this means that overloaded values returned by eg a
+# tied array didn't call overload methods.
+# We test here both a tied array and scalar, since the implementation of
+# tied  arrays (and hashes) is such that in rvalue context, mg_get is
+# called prior to executing the op, while it isn't for a tied scalar.
+
+{
+
+    my @terms;
+    my %subs;
+    my $funcs;
+    my $use_int;
+
+    BEGIN {
+	# A note on what methods to expect to be called, and
+	# how many times FETCH/STORE is called:
+	#
+	# Mutating ops (+=, ++ etc) trigger a copy ('='), since
+	# the code can't distingish between something that's been copied:
+	#    $a = foo->new(0); $b = $a; refcnt($$b) == 2
+	# and overloaded objects stored in ties which will have extra
+	# refcounts due to the tied_obj magic and entries on the tmps
+	# stack when returning from FETCH etc. So we always copy.
+
+	# This accounts for a '=', and an extra STORE.
+	# We also have a FETCH returning the final value from the eval,
+	# plus a FETCH in the overload subs themselves: ($_[0][0])
+	# triggers one. However, tied agregates have a mechanism to prevent
+	# multiple fetches between STOREs, which means that the tied
+	# hash skips doing a FETCH during '='.
+
+	for (qw(+ - * / % ** << >> x . & | ^)) {
+	    my $e = "%s $_= 3";
+	    $subs{"$_="} = $e;
+	    # ARRAY  FETCH: initial,        sub+=, eval-return,
+	    # SCALAR FETCH: initial, sub=,  sub+=, eval-return,
+	    # STORE:        copy, mutator
+	    push @terms, [ 18, $e, "$_=", '(=)', 3, 4, 2 ];
+	    $e = "%s $_ 3";
+	    $subs{$_} = $e;
+	    # ARRAY  FETCH: initial
+	    # SCALAR FETCH: initial eval-return,
+	    push @terms, [ 18, $e, $_, '', 1, 2, 0 ];
+	}
+	for (qw(++ --)) {
+	    my $pre  = "$_%s";
+	    my $post = "%s$_";
+	    $subs{$_} = $pre;
+	    push @terms,
+		# ARRAY  FETCH: initial,        sub+=, eval-return,
+		# SCALAR FETCH: initial, sub=,  sub+=, eval-return,
+		# STORE:        copy, mutator
+		[ 18, $pre,  $_, '(=)("")', 3, 4, 2 ],
+		# ARRAY  FETCH: initial,        sub+=
+		# SCALAR FETCH: initial, sub=,  sub+=
+		# STORE:        copy, mutator
+		[ 18, $post, $_, '(=)("")', 2, 3, 2 ];
+	}
+
+	# For the non-mutator ops, we have a initial FETCH,
+	# an extra FETCH within the sub itself for the scalar option,
+	# and no STOREs
+
+	for (qw(< <= >  >= == != lt le gt ge eq ne <=> cmp)) {
+	    my $e = "%s $_ 3";
+	    $subs{$_} = $e;
+	    push @terms, [ 3, $e, $_, '', 1, 2, 0 ];
+	}
+	for (qw(atan2)) {
+	    my $e = "$_ %s, 3";
+	    $subs{$_} = $e;
+	    push @terms, [ 18, $e, $_, '', 1, 2, 0 ];
+	}
+	for (qw(cos sin exp abs log sqrt int ! ~)) {
+	    my $e = "$_(%s)";
+	    $subs{$_} = $e;
+	    push @terms, [ 1.23, $e, $_, '', 1, 2, 0 ];
+	}
+	for (qw(-)) {
+	    my $e = "$_(%s)";
+	    $subs{neg} = $e;
+	    push @terms, [ 18, $e, 'neg', '', 1, 2, 0 ];
+	}
+	my $e = '(%s) ? 1 : 0';
+	$subs{bool} = $e;
+	push @terms, [ 18, $e, 'bool', '', 1, 2, 0 ];
+
+	# note: this is testing unary qr, not binary =~
+	$subs{qr} = '(%s)';
+	push @terms, [ qr/abc/, '"abc" =~ (%s)', 'qr', '', 1, 2, 0 ];
+
+	$e = '"abc" ~~ (%s)';
+	$subs{'~~'} = $e;
+	push @terms, [ "abc", $e, '~~', '', 1, 1, 0 ];
+
+	$subs{'-X'} = 'do { my $f = (%s);'
+		    . '$_[1] eq "r" ? (-r ($f)) :'
+		    . '$_[1] eq "e" ? (-e ($f)) :'
+		    . '$_[1] eq "f" ? (-f ($f)) :'
+		    . '$_[1] eq "l" ? (-l ($f)) :'
+		    . '$_[1] eq "t" ? (-t ($f)) :'
+		    . '$_[1] eq "T" ? (-T ($f)) : 0;}';
+	# Note - we don't care what these filetests return, as
+	# long as the tied and untied versions return the same value.
+	# The flags below are chosen to test all uses of tryAMAGICftest_MG
+	for (qw(r e f l t T)) {
+	    push @terms, [ 'TEST', "-$_ (%s)", '-X', '', 1, 2, 0 ];
+	}
+
+	$subs{'${}'} = '%s';
+	push @terms, [ do {my $s=99; \$s}, '${%s}', '${}', '', 1, 2, 0 ];
+
+	# we skip testing '@{}' here because too much of this test
+	# framework involves array deredfences!
+
+	$subs{'%{}'} = '%s';
+	push @terms, [ {qw(a 1 b 2 c 3)}, 'join "", sort keys %%{%s}', '%{}',
+		'', 1, 2, 0 ];
+
+	$subs{'&{}'} = '%s';
+	push @terms, [ sub {99}, '&{%s}', '&{}', '', 1, 2, 0 ];
+
+	our $RT57012A = 88;
+	our $RT57012B;
+	$subs{'*{}'} = '%s';
+	push @terms, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
+		'*{}', '', 1, 2, 0 ];
+
+	# XXX TODO: '<>'
+
+	for my $sub (keys %subs) {
+	    my $term = $subs{$sub};
+	    my $t = sprintf $term, '$_[0][0]';
+	    $subs{$sub} = eval
+		"sub { \$funcs .= '($sub)'; my \$r; if (\$use_int) {"
+		. "use integer; \$r = ($t) } else { \$r = ($t) } \$r }";
+	    die $@ if $@;
+	}
+    }
+
+    my $fetches;
+    my $stores;
+
+    package RT57012_OV;
+
+    my $other;
+    use overload
+	%subs,
+	"="   => sub { $other .= '(=)';  bless [ $_[0][0] ] },
+	'0+'  => sub { $other .= '(0+)'; 0 + $_[0][0] },
+	'""'  => sub { $other .= '("")'; "$_[0][0]"   },
+	;
+
+    package RT57012_TIE_S;
+
+    my $tie_val;
+    sub TIESCALAR { bless [ bless [ $tie_val ], 'RT57012_OV' ] }
+    sub FETCH     { $fetches++; $_[0][0] }
+    sub STORE     { $stores++;  $_[0][0] = $_[1] }
+
+    package RT57012_TIE_A;
+
+    sub TIEARRAY  { bless [] }
+    sub FETCH     { $fetches++; $_[0][0] }
+    sub STORE     { $stores++;  $_[0][$_[1]] = $_[2] }
+
+    package main;
+
+    for my $term (@terms) {
+	my ($val, $sub_term, $exp_funcs, $exp_side,
+	    $exp_fetch_a, $exp_fetch_s, $exp_store) = @$term;
+
+	$tie_val = $val;
+	for my $int ('', 'use integer; ') {
+	    $use_int = ($int ne '');
+	    for my $var ('$ta[0]', '$ts') {
+		my $exp_fetch = ($var eq '$ts') ? $exp_fetch_s : $exp_fetch_a;
+		tie my $ts, 'RT57012_TIE_S';
+		tie my @ta, 'RT57012_TIE_A';
+		$ta[0] = bless [ $val ], 'RT57012_OV';
+		my $x = $val;
+		my $tied_term  = $int . sprintf $sub_term, $var;
+		my $plain_term = $int . sprintf $sub_term, '$x';
+
+		$other = ''; $funcs = '';
+
+		$fetches = 0;
+		$stores = 0;
+		my $res = eval $tied_term;
+		$res = "$res";
+		my $exp = eval $plain_term;
+		$exp = "$exp";
+		is ($res, $exp, "tied '$tied_term' return value");
+		is ($funcs, "($exp_funcs)", "tied '$tied_term' methods called");
+		is ($other, $exp_side, "tied '$tied_term' side effects called");
+		is ($fetches, $exp_fetch, "tied '$tied_term' FETCH count");
+		is ($stores, $exp_store, "tied '$tied_term' STORE count");
+	    }
+	}
+    }
 }
 
 # EOF

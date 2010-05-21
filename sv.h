@@ -1163,6 +1163,9 @@ the scalar's value cannot change unless written to.
 #define SvIV_please(sv) \
 	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
 		(void) SvIV(sv); } STMT_END
+#define SvIV_please_nomg(sv) \
+	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
+		(void) SvIV_nomg(sv); } STMT_END
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		assert(SvTYPE(sv) != SVt_PVAV);		\
@@ -1419,6 +1422,9 @@ otherwise use the more efficient C<SvIV>.
 Coerce the given SV to a double and return it. See C<SvNVx> for a version
 which guarantees to evaluate sv only once.
 
+=for apidoc Am|NV|SvNV_nomg|SV* sv
+Like C<SvNV> but doesn't process magic.
+
 =for apidoc Am|NV|SvNVx|SV* sv
 Coerces the given SV to a double and returns it. Guarantees to evaluate
 C<sv> only once. Only use this if C<sv> is an expression with side effects,
@@ -1510,6 +1516,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 
 #define SvIV_nomg(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv_flags(sv, 0))
 #define SvUV_nomg(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv_flags(sv, 0))
+#define SvNV_nomg(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv_flags(sv, 0))
 
 /* ----*/
 

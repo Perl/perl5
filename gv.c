@@ -1818,6 +1818,99 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 }
 
 
+/* Implement tryAMAGICun_MG macro.
+   Do get magic, then see if the stack arg is overloaded and if so call it.
+   Flags:
+	AMGf_set     return the arg using SETs rather than assigning to
+		     the targ
+	AMGf_numeric apply sv_2num to the stack arg.
+*/
+
+bool
+Perl_try_amagic_un(pTHX_ int method, int flags) {
+    dVAR;
+    dSP;
+    SV* tmpsv;
+    SV* const arg = TOPs;
+
+    SvGETMAGIC(arg);
+
+    if (SvAMAGIC(arg) && (tmpsv = AMG_CALLun_var(arg,method))) {
+	if (flags & AMGf_set) {
+	    SETs(tmpsv);
+	}
+	else {
+	    dTARGET;
+	    if (SvPADMY(TARG)) {
+		sv_setsv(TARG, tmpsv);
+		SETTARG;
+	    }
+	    else
+		SETs(tmpsv);
+	}
+	PUTBACK;
+	return TRUE;
+    }
+
+    if ((flags & AMGf_numeric) && SvROK(arg))
+	*sp = sv_2num(arg);
+    return FALSE;
+}
+
+
+/* Implement tryAMAGICbin_MG macro.
+   Do get magic, then see if the two stack args are overloaded and if so
+   call it.
+   Flags:
+	AMGf_set     return the arg using SETs rather than assigning to
+		     the targ
+	AMGf_assign  op may be called as mutator (eg +=)
+	AMGf_numeric apply sv_2num to the stack arg.
+*/
+
+bool
+Perl_try_amagic_bin(pTHX_ int method, int flags) {
+    dVAR;
+    dSP;
+    SV* const left = TOPm1s;
+    SV* const right = TOPs;
+
+    SvGETMAGIC(left);
+    if (left != right)
+	SvGETMAGIC(right);
+
+    if (SvAMAGIC(left) || SvAMAGIC(right)) {
+	SV * const tmpsv = amagic_call(left, right, method,
+		    ((flags & AMGf_assign) && opASSIGN ? AMGf_assign: 0));
+	if (tmpsv) {
+	    if (flags & AMGf_set) {
+		(void)POPs;
+		SETs(tmpsv);
+	    }
+	    else {
+		dATARGET;
+		(void)POPs;
+		if (opASSIGN || SvPADMY(TARG)) {
+		    sv_setsv(TARG, tmpsv);
+		    SETTARG;
+		}
+		else
+		    SETs(tmpsv);
+	    }
+	    PUTBACK;
+	    return TRUE;
+	}
+    }
+    if (flags & AMGf_numeric) {
+	if (SvROK(left))
+	    *(sp-1) = sv_2num(left);
+	if (SvROK(right))
+	    *sp     = sv_2num(right);
+    }
+    return FALSE;
+}
+
+
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
@@ -2120,7 +2213,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   if (( (method + assignshift == off)
 	&& (assign || (method == inc_amg) || (method == dec_amg)))
       || force_cpy)
+  {
     RvDEEPCP(left);
+  }
+
   {
     dSP;
     BINOP myop;

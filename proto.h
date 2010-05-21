@@ -132,6 +132,8 @@ END_EXTERN_C
 /* functions with flag 'n' should come before here */
 START_EXTERN_C
 #  include "pp_proto.h"
+PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
+PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -3318,6 +3320,7 @@ PERL_CALLCONV int	Perl_getcwd_sv(pTHX_ SV* sv)
 	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_dec(pTHX_ SV *const sv);
+PERL_CALLCONV void	Perl_sv_dec_nomg(pTHX_ SV *const sv);
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_DUMP	\
@@ -3357,6 +3360,7 @@ PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_inc(pTHX_ SV *const sv);
+PERL_CALLCONV void	Perl_sv_inc_nomg(pTHX_ SV *const sv);
 /* PERL_CALLCONV void	Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_4); */

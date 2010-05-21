@@ -32,6 +32,8 @@ Perl_mfree
 Perl_get_context
 Perl_set_context
 Perl_regcurly
+Perl_try_amagic_bin
+Perl_try_amagic_un
 Perl_amagic_call
 Perl_Gv_AMupdate
 Perl_gv_handler
@@ -549,6 +551,7 @@ Perl_sv_collxfrm
 Perl_sv_compile_2op
 Perl_getcwd_sv
 Perl_sv_dec
+Perl_sv_dec_nomg
 Perl_sv_dump
 Perl_sv_derived_from
 Perl_sv_does
@@ -558,6 +561,7 @@ Perl_sv_free2
 Perl_sv_gets
 Perl_sv_grow
 Perl_sv_inc
+Perl_sv_inc_nomg
 Perl_sv_insert
 Perl_sv_insert_flags
 Perl_sv_isa

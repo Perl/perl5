@@ -328,6 +328,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define dPOPss		SV *sv = POPs
 #define dTOPnv		NV value = TOPn
 #define dPOPnv		NV value = POPn
+#define dPOPnv_nomg	NV value = (sp--, SvNV_nomg(TOPp1s))
 #define dTOPiv		IV value = TOPi
 #define dPOPiv		IV value = POPi
 #define dTOPuv		UV value = TOPu
@@ -353,6 +354,10 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     IV right = POPi;					\
     SV *leftsv = CAT2(X,s);				\
     IV left = USE_LEFT(leftsv) ? SvIV(leftsv) : 0
+#define dPOPXiirl_ul_nomg(X) \
+    IV right = POPi;					\
+    SV *leftsv = CAT2(X,s);				\
+    IV left = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0
 
 #define dPOPPOPssrl	dPOPXssrl(POP)
 #define dPOPPOPnnrl	dPOPXnnrl(POP)
@@ -363,8 +368,13 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define dPOPTOPssrl	dPOPXssrl(TOP)
 #define dPOPTOPnnrl	dPOPXnnrl(TOP)
 #define dPOPTOPnnrl_ul	dPOPXnnrl_ul(TOP)
+#define dPOPTOPnnrl_nomg \
+    NV right = SvNV_nomg(TOPs); NV left = (sp--, SvNV_nomg(TOPs))
 #define dPOPTOPiirl	dPOPXiirl(TOP)
 #define dPOPTOPiirl_ul	dPOPXiirl_ul(TOP)
+#define dPOPTOPiirl_ul_nomg dPOPXiirl_ul_nomg(TOP)
+#define dPOPTOPiirl_nomg \
+    IV right = SvIV_nomg(TOPs); IV left = (sp--, SvIV_nomg(TOPs))
 
 #define RETPUSHYES	RETURNX(PUSHs(&PL_sv_yes))
 #define RETPUSHNO	RETURNX(PUSHs(&PL_sv_no))
@@ -398,6 +408,26 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define AMGf_noleft	2
 #define AMGf_assign	4
 #define AMGf_unary	8
+#define AMGf_numeric	0x10	/* for Perl_try_amagic_bin */
+#define AMGf_set	0x20	/* for Perl_try_amagic_bin */
+
+
+/* do SvGETMAGIC on the stack args before checking for overload */
+
+#define tryAMAGICun_MG(method, flags) STMT_START { \
+	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
+		&& Perl_try_amagic_un(aTHX_ method, flags)) \
+	    return NORMAL; \
+    } STMT_END
+#define tryAMAGICbin_MG(method, flags) STMT_START { \
+	if ( ((SvFLAGS(TOPm1s)|SvFLAGS(TOPs)) & (SVf_ROK|SVs_GMG)) \
+		&& Perl_try_amagic_bin(aTHX_ method, flags)) \
+	    return NORMAL; \
+    } STMT_END
+
+/* these  tryAMAGICun* tryAMAGICbin* macros are no longer used in core
+ * (except for tryAMAGICunDEREF*, tryAMAGICunTARGET),
+ * and are only here for backwards compatibility */
 
 #define tryAMAGICbinW_var(meth_enum,assign,set) STMT_START { \
 	    SV* const left = *(sp-1); \
@@ -472,9 +502,12 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define tryAMAGICunDEREF_var(meth_enum) \
 	tryAMAGICunW_var(meth_enum,setAGAIN,0,(void)0)
 
+/* this macro is obsolete and is only here for backwards compatibility */
+
 #define tryAMAGICftest(chr)				\
     STMT_START {					\
 	assert(chr != '?');				\
+	SvGETMAGIC(TOPs);				\
 	if ((PL_op->op_flags & OPf_KIDS)		\
 		&& SvAMAGIC(TOPs)) {			\
 	    const char tmpchr = (chr);			\
@@ -522,6 +555,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv); SV* rv_copy;     \
   if (SvREFCNT(tmpRef)>1 && (rv_copy = AMG_CALLun(rv,copy))) {          \
     SvRV_set(rv, rv_copy);		    \
+    SvSETMAGIC(rv);			    \
     SvREFCNT_dec(tmpRef);                   \
   } } STMT_END
 

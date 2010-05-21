@@ -2950,6 +2950,53 @@ PP(pp_stat)
     RETURN;
 }
 
+#define tryAMAGICftest_MG(chr) STMT_START { \
+	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
+		&& S_try_amagic_ftest(aTHX_ chr)) \
+	    return NORMAL; \
+    } STMT_END
+
+STATIC bool
+S_try_amagic_ftest(pTHX_ char chr) {
+    dVAR;
+    dSP;
+    SV* const arg = TOPs;
+
+    assert(chr != '?');
+    SvGETMAGIC(arg);
+
+    if ((PL_op->op_flags & OPf_KIDS)
+	    && SvAMAGIC(TOPs))
+    {
+	const char tmpchr = chr;
+	const OP *next;
+	SV * const tmpsv = amagic_call(arg,
+				newSVpvn_flags(&tmpchr, 1, SVs_TEMP),
+				ftest_amg, AMGf_unary);
+
+	if (!tmpsv)
+	    return FALSE;
+
+	SPAGAIN;
+
+	next = PL_op->op_next;
+	if (next->op_type >= OP_FTRREAD &&
+	    next->op_type <= OP_FTBINARY &&
+	    next->op_private & OPpFT_STACKED
+	) {
+	    if (SvTRUE(tmpsv))
+		/* leave the object alone */
+		return TRUE;
+	}
+
+	SETs(tmpsv);
+	PUTBACK;
+	return TRUE;
+    }
+    return FALSE;
+}
+
+
 /* This macro is used by the stacked filetest operators :
  * if the previous filetest failed, short-circuit and pass its value.
  * Else, discard it from the stack and continue. --rgs
@@ -2992,7 +3039,7 @@ PP(pp_ftrread)
     case OP_FTEWRITE:	opchar = 'w'; break;
     case OP_FTEEXEC:	opchar = 'x'; break;
     }
-    tryAMAGICftest(opchar);
+    tryAMAGICftest_MG(opchar);
 
     STACKED_FTEST_CHECK;
 
@@ -3096,7 +3143,7 @@ PP(pp_ftis)
     case OP_FTCTIME:	opchar = 'C'; break;
     case OP_FTATIME:	opchar = 'A'; break;
     }
-    tryAMAGICftest(opchar);
+    tryAMAGICftest_MG(opchar);
 
     STACKED_FTEST_CHECK;
 
@@ -3153,7 +3200,7 @@ PP(pp_ftrowned)
     case OP_FTSGID:	opchar = 'g'; break;
     case OP_FTSVTX:	opchar = 'k'; break;
     }
-    tryAMAGICftest(opchar);
+    tryAMAGICftest_MG(opchar);
 
     /* I believe that all these three are likely to be defined on most every
        system these days.  */
@@ -3241,7 +3288,7 @@ PP(pp_ftlink)
     dSP;
     I32 result;
 
-    tryAMAGICftest('l');
+    tryAMAGICftest_MG('l');
     result = my_lstat();
     SPAGAIN;
 
@@ -3260,7 +3307,7 @@ PP(pp_fttty)
     GV *gv;
     SV *tmpsv = NULL;
 
-    tryAMAGICftest('t');
+    tryAMAGICftest_MG('t');
 
     STACKED_FTEST_CHECK;
 
@@ -3311,7 +3358,7 @@ PP(pp_fttext)
     GV *gv;
     PerlIO *fp;
 
-    tryAMAGICftest(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
+    tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
     STACKED_FTEST_CHECK;
 

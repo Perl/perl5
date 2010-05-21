@@ -952,6 +952,7 @@
 #define sv_compile_2op		Perl_sv_compile_2op
 #define getcwd_sv		Perl_getcwd_sv
 #define sv_dec			Perl_sv_dec
+#define sv_dec_nomg		Perl_sv_dec_nomg
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
 #define sv_does			Perl_sv_does
@@ -963,6 +964,7 @@
 #define sv_gets			Perl_sv_gets
 #define sv_grow			Perl_sv_grow
 #define sv_inc			Perl_sv_inc
+#define sv_inc_nomg		Perl_sv_inc_nomg
 #define sv_insert_flags		Perl_sv_insert_flags
 #define sv_isa			Perl_sv_isa
 #define sv_isobject		Perl_sv_isobject
@@ -2465,6 +2467,8 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcurly		Perl_regcurly
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
 #define gv_handler(a,b)		Perl_gv_handler(aTHX_ a,b)
@@ -3365,6 +3369,7 @@
 #define sv_compile_2op(a,b,c,d)	Perl_sv_compile_2op(aTHX_ a,b,c,d)
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
+#define sv_dec_nomg(a)		Perl_sv_dec_nomg(aTHX_ a)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
 #define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
@@ -3376,6 +3381,7 @@
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
 #define sv_grow(a,b)		Perl_sv_grow(aTHX_ a,b)
 #define sv_inc(a)		Perl_sv_inc(aTHX_ a)
+#define sv_inc_nomg(a)		Perl_sv_inc_nomg(aTHX_ a)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
 #define sv_isa(a,b)		Perl_sv_isa(aTHX_ a,b)
 #define sv_isobject(a)		Perl_sv_isobject(aTHX_ a)

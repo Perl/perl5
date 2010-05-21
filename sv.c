@@ -7323,7 +7323,7 @@ return_string_or_null:
 =for apidoc sv_inc
 
 Auto-increment of the value in the SV, doing string to numeric conversion
-if necessary. Handles 'get' magic.
+if necessary. Handles 'get' magic and operator overloading.
 
 =cut
 */
@@ -7331,13 +7331,30 @@ if necessary. Handles 'get' magic.
 void
 Perl_sv_inc(pTHX_ register SV *const sv)
 {
+    if (!sv)
+	return;
+    SvGETMAGIC(sv);
+    sv_inc_nomg(sv);
+}
+
+/*
+=for apidoc sv_inc_nomg
+
+Auto-increment of the value in the SV, doing string to numeric conversion
+if necessary. Handles operator overloading. Skips handling 'get' magic.
+
+=cut
+*/
+
+void
+Perl_sv_inc_nomg(pTHX_ register SV *const sv)
+{
     dVAR;
     register char *d;
     int flags;
 
     if (!sv)
 	return;
-    SvGETMAGIC(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);
@@ -7487,7 +7504,7 @@ Perl_sv_inc(pTHX_ register SV *const sv)
 =for apidoc sv_dec
 
 Auto-decrement of the value in the SV, doing string to numeric conversion
-if necessary. Handles 'get' magic.
+if necessary. Handles 'get' magic and operator overloading.
 
 =cut
 */
@@ -7496,11 +7513,29 @@ void
 Perl_sv_dec(pTHX_ register SV *const sv)
 {
     dVAR;
+    if (!sv)
+	return;
+    SvGETMAGIC(sv);
+    sv_dec_nomg(sv);
+}
+
+/*
+=for apidoc sv_dec_nomg
+
+Auto-decrement of the value in the SV, doing string to numeric conversion
+if necessary. Handles operator overloading. Skips handling 'get' magic.
+
+=cut
+*/
+
+void
+Perl_sv_dec_nomg(pTHX_ register SV *const sv)
+{
+    dVAR;
     int flags;
 
     if (!sv)
 	return;
-    SvGETMAGIC(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);

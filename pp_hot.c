@@ -227,7 +227,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dVAR; dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  dVAR; dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
   {
     dPOPTOPssrl;
     bool lbyte;
@@ -236,9 +236,8 @@ PP(pp_concat)
     bool rbyte = FALSE;
     bool rcopied = FALSE;
 
-    if (TARG == right && right != left) {
-	/* mg_get(right) may happen here ... */
-	rpv = SvPV_const(right, rlen);
+    if (TARG == right && right != left) { /* $r = $l.$r */
+	rpv = SvPV_nomg_const(right, rlen);
 	rbyte = !DO_UTF8(right);
 	right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	rpv = SvPV_const(right, rlen);	/* no point setting UTF-8 here */
@@ -247,7 +246,7 @@ PP(pp_concat)
 
     if (TARG != left) {
         STRLEN llen;
-        const char* const lpv = SvPV_const(left, llen);	/* mg_get(left) may happen here */
+        const char* const lpv = SvPV_nomg_const(left, llen);
 	lbyte = !DO_UTF8(left);
 	sv_setpvn(TARG, lpv, llen);
 	if (!lbyte)
@@ -257,7 +256,6 @@ PP(pp_concat)
     }
     else { /* TARG == left */
         STRLEN llen;
-	SvGETMAGIC(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG)) {
 	    if (left == right && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(right);
@@ -269,9 +267,11 @@ PP(pp_concat)
 	    SvUTF8_off(TARG);
     }
 
-    /* or mg_get(right) may happen here */
     if (!rcopied) {
-	rpv = SvPV_const(right, rlen);
+	if (left == right)
+	    /* $a.$a: do magic twice: tied might return different 2nd time */
+	    SvGETMAGIC(right);
+	rpv = SvPV_nomg_const(right, rlen);
 	rbyte = !DO_UTF8(right);
     }
     if (lbyte != rbyte) {
@@ -281,7 +281,7 @@ PP(pp_concat)
 	    if (!rcopied)
 		right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	    sv_utf8_upgrade_nomg(right);
-	    rpv = SvPV_const(right, rlen);
+	    rpv = SvPV_nomg_const(right, rlen);
 	}
     }
     sv_catpvn_nomg(TARG, rpv, rlen);
@@ -329,21 +329,22 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    dVAR; dSP; tryAMAGICbinSET(eq,0);
+    dVAR; dSP;
+    tryAMAGICbin_MG(eq_amg, AMGf_set);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
         SP--;
 	SETs(boolSV(SvRV(TOPs) == SvRV(TOPp1s)));
 	RETURN;
     }
 #endif
 #ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
+    SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
 	/* Unless the left argument is integer in range we are going
 	   to have to use NV maths. Hence only attempt to coerce the
 	   right argument if we know the left is integer.  */
-      SvIV_please(TOPm1s);
+      SvIV_please_nomg(TOPm1s);
 	if (SvIOK(TOPm1s)) {
 	    const bool auvok = SvUOK(TOPm1s);
 	    const bool buvok = SvUOK(TOPs);
@@ -388,13 +389,13 @@ PP(pp_eq)
 #endif
     {
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl;
+      dPOPTOPnnrl_nomg;
       if (Perl_isnan(left) || Perl_isnan(right))
 	  RETSETNO;
       SETs(boolSV(left == right));
 #else
-      dPOPnv;
-      SETs(boolSV(TOPn == value));
+      dPOPnv_nomg;
+      SETs(boolSV(SvNV_nomg(TOPs) == value));
 #endif
       RETURN;
     }
@@ -491,9 +492,10 @@ PP(pp_defined)
 PP(pp_add)
 {
     dVAR; dSP; dATARGET; bool useleft; SV *svl, *svr;
-    tryAMAGICbin(add,opASSIGN);
-    svl = sv_2num(TOPm1s);
-    svr = sv_2num(TOPs);
+    tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
+    svr = TOPs;
+    svl = TOPm1s;
+
     useleft = USE_LEFT(svl);
 #ifdef PERL_PRESERVE_IVUV
     /* We must see if we can perform the addition with integers if possible,
@@ -542,7 +544,8 @@ PP(pp_add)
        unsigned code below is actually shorter than the old code. :-)
     */
 
-    SvIV_please(svr);
+    SvIV_please_nomg(svr);
+
     if (SvIOK(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
@@ -559,7 +562,7 @@ PP(pp_add)
 	       lots of code to speed up what is probably a rarish case.  */
 	} else {
 	    /* Left operand is defined, so is it IV? */
-	    SvIV_please(svl);
+	    SvIV_please_nomg(svl);
 	    if (SvIOK(svl)) {
 		if ((auvok = SvUOK(svl)))
 		    auv = SvUVX(svl);
@@ -642,14 +645,14 @@ PP(pp_add)
     }
 #endif
     {
-	NV value = SvNV(svr);
+	NV value = SvNV_nomg(svr);
 	(void)POPs;
 	if (!useleft) {
 	    /* left operand is undef, treat as zero. + 0.0 is identity. */
 	    SETn(value);
 	    RETURN;
 	}
-	SETn( value + SvNV(svl) );
+	SETn( value + SvNV_nomg(svl) );
 	RETURN;
     }
 }
