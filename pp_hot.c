@@ -332,7 +332,7 @@ PP(pp_eq)
     dVAR; dSP;
     tryAMAGICbin_MG(eq_amg, AMGf_set);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
 	SETs(boolSV(SvRV(TOPs) == SvRV(TOPp1s)));
 	RETURN;

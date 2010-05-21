@@ -1852,7 +1852,7 @@ PP(pp_lt)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
 	SP--;
 	SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
 	RETURN;
@@ -1936,7 +1936,7 @@ PP(pp_gt)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) > SvRV(TOPp1s)));
         RETURN;
@@ -2020,7 +2020,7 @@ PP(pp_le)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) <= SvRV(TOPp1s)));
         RETURN;
@@ -2104,7 +2104,7 @@ PP(pp_ge)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) >= SvRV(TOPp1s)));
         RETURN;
@@ -2129,7 +2129,7 @@ PP(pp_ne)
     dVAR; dSP;
     tryAMAGICbin_MG(ne_amg,AMGf_set);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
 	SETs(boolSV(SvRV(TOPs) != SvRV(TOPp1s)));
 	RETURN;
@@ -2206,7 +2206,7 @@ PP(pp_ncmp)
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s) ) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
 	const UV right = PTR2UV(SvRV(POPs));
 	const UV left = PTR2UV(SvRV(TOPs));
 	SETi((left > right) - (left < right));
