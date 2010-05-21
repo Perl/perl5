@@ -221,8 +221,6 @@ CCHOME		*= C:\MinGW
 .ELSE
 CCHOME		*= $(MSVCDIR)
 .ENDIF
-CCINCDIR	*= $(CCHOME)\include
-CCLIBDIR	*= $(CCHOME)\lib
 
 #
 # If building with gcc-4.x.x (or x86_64-w64-mingw32-gcc-4.x.x), then
@@ -246,6 +244,18 @@ CCLIBDIR	*= $(CCHOME)\lib
 # instead of the usual 'gcc'.
 #
 #GCCCROSS	*= define
+
+#
+# Following sets $Config{incpath} and $Config{libpth}
+#
+
+.IF "$(GCCCROSS)" == "define"
+CCINCDIR *= $(CCHOME)\mingw\include
+CCLIBDIR *= $(CCHOME)\mingw\lib
+.ELSE
+CCINCDIR *= $(CCHOME)\include
+CCLIBDIR *= $(CCHOME)\lib
+.ENDIF
 
 #
 # Additional compiler flags can be specified here.
