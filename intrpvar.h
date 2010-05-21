@@ -257,7 +257,7 @@ PERLVAR(Iexit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(Isrand_called,	bool)
 /* Part of internal state, but makes the 16th 1 byte variable in a row.  */
 PERLVAR(Itainting,	bool)		/* doing taint checks */
-/* Space for a U8 */
+PERLVARI(Iin_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
 PERLVAR(Iinplace,	char *)
 PERLVAR(Ie_script,	SV *)
 
@@ -632,7 +632,7 @@ PERLVARI(Iunitcheckav_save, AV*, NULL)	/* save UNITCHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 
-PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
+/* Space for an int */
 
 PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
