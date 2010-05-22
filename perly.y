@@ -246,8 +246,7 @@ line	:	label cond
 			{ $$ = newSTATEOP(0, NULL,
 				 newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 					    NOLINE, (OP*)NULL, $1,
-					    (OP*)NULL, 0));
-			  TOKEN_GETMAD($1,((LISTOP*)$$)->op_first,'L'); }
+					    (OP*)NULL, 0)); }
 	|	label PLUGSTMT
 			{ $$ = newSTATEOP(0, PVAL($1), $2); }
 	;
