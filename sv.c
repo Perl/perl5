@@ -2436,7 +2436,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 }
 
 /*
-=for apidoc sv_2nv
+=for apidoc sv_2nv_flags
 
 Return the num value of an SV, doing any necessary string or integer
 conversion. If flags includes SV_GMAGIC, does an mg_get() first.
