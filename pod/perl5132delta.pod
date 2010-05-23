@@ -133,7 +133,11 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Overloading now works properly in conjunction with tied variables. What
+formerly happened was that most ops checked their arguments for overloading
+I<before> checking for magic, so for example an overloaded object returned
+by a tied array access would usually be treated as not overloaded
+(RT #57012).
 
 =back
 
@@ -157,7 +161,8 @@ XXX Changes which affect the interface available to C<XS> code go here.
 
 =item *
 
-XXX
+The following new functions or macros have been added to the public API:
+C<SvNV_nomg>,  C<sv_2nv_flags>.
 
 =back
 
