@@ -309,7 +309,8 @@ the strings?).
           5.004_74      1998-Jul-14     5.005 beta candidate.
           5.004_75      1998-Jul-15     5.005 beta1.
           5.004_76      1998-Jul-21     5.005 beta2.
-          5.005         1998-Jul-22     Oneperl.
+
+ Sarathy  5.005         1998-Jul-22     Oneperl.
 
  Sarathy  5.005_01      1998-Jul-27     The 5.005 maintenance track.
           5.005_02-T1   1998-Aug-02
@@ -347,7 +348,8 @@ the strings?).
           5.6.0-RC1     2000-Mar-09     Release candidate 1.
           5.6.0-RC2     2000-Mar-14     Release candidate 2.
           5.6.0-RC3     2000-Mar-21     Release candidate 3.
-          5.6.0         2000-Mar-22
+
+ Sarathy  5.6.0         2000-Mar-22
 
  Sarathy  5.6.1-TRIAL1  2000-Dec-18     The 5.6 maintenance track.
           5.6.1-TRIAL2  2001-Jan-31
@@ -364,8 +366,10 @@ the strings?).
           5.8.0-RC1     2002-Jun-01
           5.8.0-RC2     2002-Jun-21
           5.8.0-RC3     2002-Jul-13
-          5.8.0         2002-Jul-18
-          5.8.1-RC1     2003-Jul-10
+
+ Jarkko   5.8.0         2002-Jul-18
+
+ Jarkko   5.8.1-RC1     2003-Jul-10     The 5.8 maintenance track
           5.8.1-RC2     2003-Jul-11
           5.8.1-RC3     2003-Jul-30
           5.8.1-RC4     2003-Aug-01
@@ -392,7 +396,7 @@ the strings?).
           5.8.9-RC2     2008-Dec-06
           5.8.9         2008-Dec-14
 
- Hugo     5.9.0         2003-Oct-27
+ Hugo     5.9.0         2003-Oct-27     The 5.9 development track
  Rafael   5.9.1         2004-Mar-16
           5.9.2         2005-Apr-01
           5.9.3         2006-Jan-28
@@ -400,20 +404,26 @@ the strings?).
           5.9.5         2007-Jul-07
           5.10.0-RC1    2007-Nov-17
           5.10.0-RC2    2007-Nov-25
-          5.10.0        2007-Dec-18
- David    5.10.1-RC1    2009-Aug-06
+
+ Rafael   5.10.0        2007-Dec-18
+
+ David    5.10.1-RC1    2009-Aug-06     The 5.10 maintenance track
           5.10.1-RC2    2009-Aug-18
           5.10.1        2009-Aug-22
- Jesse    5.11.0        2009-Oct-02
+
+ Jesse    5.11.0        2009-Oct-02     The 5.11 development track
           5.11.1        2009-Oct-20
  Leon     5.11.2        2009-Nov-20
  Jesse    5.11.3        2009-Dec-20
  Ricardo  5.11.4        2010-Jan-20
  Steve    5.11.5        2010-Feb-20
  Jesse    5.12.0-RC1    2010-Mar-29
+
  Jesse    5.12.0        2010-Apr-12
- Leon     5.13.0        2010-Apr-20
- Jesse    5.12.1        2010-May-16
+
+ Jesse    5.12.1        2010-May-16     The 5.12 maintenance track
+
+ Leon     5.13.0        2010-Apr-20     The 5.13 development track
  Ricardo  5.13.1        2010-May-20
 
 =head2 SELECTED RELEASE SIZES
