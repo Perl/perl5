@@ -235,11 +235,11 @@ of operation work on some other string.  The right argument is a search
 pattern, substitution, or transliteration.  The left argument is what is
 supposed to be searched, substituted, or transliterated instead of the default
 $_.  When used in scalar context, the return value generally indicates the
-success of the operation.  Not always though: the non-destructive substitution
-option (C</r>) causes the return value to be the result of the substition, for
-example.  Behavior in list context depends on the particular operator.  See
-L</"Regexp Quote-Like Operators"> for details and L<perlretut> for examples
-using these operators.
+success of the operation.  The exception is substitution with the C</r>
+(non-destructive) option, which causes the return value to be the result of
+the substition.  Behavior in list context depends on the particular operator.
+See L</"Regexp Quote-Like Operators"> for details and L<perlretut> for
+examples using these operators.
 
 If the right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
@@ -253,7 +253,7 @@ pattern C<\>, which it will consider a syntax error.
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
 
-Binary "!~" is not permitted to bind to a non-destructive substitute (s///r).
+Binary "!~" with a non-destructive substitution (s///r) is a syntax error.
 
 =head2 Multiplicative Operators
 X<operator, multiplicative>
