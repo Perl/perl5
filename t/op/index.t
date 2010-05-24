@@ -92,13 +92,8 @@ is(rindex($a, "foo",    ), 0);
 {
     my $search;
     my $text;
-    if (ord('A') == 193) {
-	$search = "foo \x71 bar";
-	$text = "a\xb1\xb1a $search    $search quux";
-    } else {
-	$search = "foo \xc9 bar";
-	$text = "a\xa3\xa3a $search    $search quux";
-    }
+    $search = latin1_to_native("foo \xc9 bar");
+    $text = latin1_to_native("a\xa3\xa3a $search    $search quux");
 
     my $text_utf8 = $text;
     utf8::upgrade($text_utf8);
