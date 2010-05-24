@@ -876,13 +876,13 @@ would be intersecting with nothing (resulting in an empty set).
 
 =head2 User-Defined Case Mappings
 
-You can also define your own mappings to be used in the lc(),
-lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
+You can also define your own mappings to be used in C<lc()>,
+C<lcfirst()>, C<uc()>, and C<ucfirst()> (or their string-inlined versions,
+C<\L>, C<\l>, C<\U>, and C<\u>).
 The principle is similar to that of user-defined character
 properties: to define subroutines
-with names like C<ToLower> (for lc() and lcfirst()), C<ToTitle> (for
-the first character in ucfirst()), and C<ToUpper> (for uc(), and the
-rest of the characters in ucfirst()).
+with names C<ToLower> (for C<lc()> and C<lcfirst()>); C<ToTitle> (for
+C<ucfirst()>); and C<ToUpper> (for C<uc()>).
 
 The string returned by the subroutines needs to be two hexadecimal numbers
 separated by two tabulators: the two numbers being, respectively, the source
@@ -894,17 +894,18 @@ code point and the destination code point.  For example:
     END
     }
 
-defines an uc() mapping that causes only the character "a"
+defines a mapping for C<uc()> (and C<\U>) that causes only the character "a"
 to be mapped to "A"; all other characters will remain unchanged.
 
 (For serious hackers only)  The above means you have to furnish a complete
 mapping; you can't just override a couple of characters and leave the rest
 unchanged.  You can find all the mappings in the directory
-C<$Config{privlib}>/F<unicore/To/>.  The mapping data is returned as the
-here-document, and the C<utf8::ToSpecFoo> are special exception mappings
-derived from <$Config{privlib}>/F<unicore/SpecialCasing.txt>.  The "Digit" and
+C<$Config{privlib}>F</unicore/To/>.  The mapping data is returned as the
+here-document.  The C<utf8::ToSpecI<Foo>> hashes in those files are special
+exception mappings derived from
+C<$Config{privlib}>F</unicore/SpecialCasing.txt>.  The "Digit" and
 "Fold" mappings that one can see in the directory are not directly
-user-accessible, one can use either the C<Unicode::UCD> module, or just match
+user-accessible, one can use either the L<Unicode::UCD> module, or just match
 case-insensitively (that's when the "Fold" mapping is used).
 
 The mappings will only take effect on scalars that have been marked as having
