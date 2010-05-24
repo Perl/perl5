@@ -31,6 +31,18 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 Non-destructive substitution
+
+The substitution operator now supports a C</r> option that
+copies the input variable, carries out the substitution on
+the copy and returns the result.  The original remains unmodified.
+
+  my $old = 'cat';
+  my $new = $old =~ s/cat/dog/r;
+  # $old is 'cat' and $new is 'dog'
+
+This is particularly useful with C<map>.  See L<perlop> for more examples.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
