@@ -379,6 +379,8 @@ Creates a new AV and populates it with a list of SVs.  The SVs are copied
 into the array, so they may be freed after the call to av_make.  The new AV
 will have a reference count of 1.
 
+Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
+
 =cut
 */
 
