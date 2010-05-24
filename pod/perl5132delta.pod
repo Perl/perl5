@@ -43,6 +43,14 @@ the copy and returns the result.  The original remains unmodified.
 
 This is particularly useful with C<map>.  See L<perlop> for more examples.
 
+=head2 package block syntax
+
+A package declaration can now contain a code block, in which case the
+declaration is in scope only inside that block.  So C<package Foo { ... }>
+is precisely equivalent to C<{ package Foo; ... }>.  It also works with
+a version number in the declaration, as in C<package Foo 1.2 { ... }>.
+See L<perlfunc>.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
