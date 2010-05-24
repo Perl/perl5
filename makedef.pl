@@ -761,6 +761,8 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_regdupe
+		    Perl_clone_params_del
+		    Perl_clone_params_new
 		    Perl_parser_dup
 		    Perl_dirp_dup
 		    Perl_cx_dup
@@ -774,6 +776,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_mro_meta_dup
 		    Perl_re_dup_guts
 		    Perl_sv_dup
+		    Perl_sv_dup_inc
 		    Perl_rvpv_dup
 		    Perl_hek_dup
 		    Perl_sys_intern_dup
