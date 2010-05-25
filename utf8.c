@@ -33,7 +33,7 @@
 #include "perl.h"
 
 #ifndef EBCDIC
-/* Separate prototypes needed because in ASCII systems these
+/* Separate prototypes needed because in ASCII systems these are
  * usually macros but they still are compiled as code, too. */
 PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags);
 PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
@@ -57,8 +57,10 @@ within non-zero characters.
 /*
 =for apidoc is_ascii_string
 
-Returns true if first C<len> bytes of the given string are ASCII (i.e. none
-of them even raise the question of UTF-8-ness).
+Returns true if the first C<len> bytes of the given string are the same whether
+or not the string is encoded in UTF-8 (or UTF-EBCDIC on EBCDIC machines).  That
+is, if they are invariant.  On ASCII-ish machines, only ASCII characters
+fit this definition, hence the function's name.
 
 See also is_utf8_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
 
