@@ -214,15 +214,20 @@ changes.
 How to clone and use the git perl repository is described in L<perlrepository>.
 
 You can also choose to use rsync to get a copy of the current source tree
-for the bleadperl branch and all maintenance branches :
+for the bleadperl branch and all maintenance branches:
 
-    $ rsync -avz rsync://perl5.git.perl.org/APC/perl-current .
-    $ rsync -avz rsync://perl5.git.perl.org/APC/perl-5.10.x .
-    $ rsync -avz rsync://perl5.git.perl.org/APC/perl-5.8.x .
-    $ rsync -avz rsync://perl5.git.perl.org/APC/perl-5.6.x .
-    $ rsync -avz rsync://perl5.git.perl.org/APC/perl-5.005xx .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-current .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-5.12.x .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-5.10.x .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-5.8.x .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-5.6.x .
+    $ rsync -avz rsync://perl5.git.perl.org/perl-5.005xx .
 
 (Add the C<--delete> option to remove leftover files)
+
+To get a full list of the available sync points:
+
+    $ rsync perl5.git.perl.org::
 
 You may also want to subscribe to the perl5-changes mailing list to
 receive a copy of each patch that gets submitted to the maintenance
