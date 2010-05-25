@@ -820,7 +820,8 @@ PP(pp_rv2av)
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
-    SvGETMAGIC(sv);
+    if (!(PL_op->op_private & OPpDEREFed))
+	SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	tryAMAGICunDEREF_var(is_pp_rv2av ? to_av_amg : to_hv_amg);
 

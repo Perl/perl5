@@ -272,7 +272,8 @@ PP(pp_rv2sv)
     dVAR; dSP; dTOPss;
     GV *gv = NULL;
 
-    SvGETMAGIC(sv);
+    if (!(PL_op->op_private & OPpDEREFed))
+	SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	tryAMAGICunDEREF(to_sv);
 

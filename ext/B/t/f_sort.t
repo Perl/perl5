@@ -518,7 +518,7 @@ checkOptree(name   => q{Compound sort/map Expression },
 # l  <|> mapwhile(other->m)[t26] lK
 # m      <#> gv[*_] s
 # n      <1> rv2sv sKM/DREFAV,1
-# o      <1> rv2av[t4] sKR/1
+# o      <1> rv2av[t4] sKR/DEREFed,1
 # p      <$> const[IV 0] s
 # q      <2> aelem sK/2
 # -      <@> scope lK
@@ -553,7 +553,7 @@ EOT_EOT
 # l  <|> mapwhile(other->m)[t12] lK
 # m      <$> gv(*_) s
 # n      <1> rv2sv sKM/DREFAV,1
-# o      <1> rv2av[t2] sKR/1
+# o      <1> rv2av[t2] sKR/DREFed,1
 # p      <$> const(IV 0) s
 # q      <2> aelem sK/2
 # -      <@> scope lK
