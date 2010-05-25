@@ -2504,22 +2504,33 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 /*
 =for apidoc ibcmp_utf8
 
-Return true if the strings s1 and s2 differ case-insensitively, false
-if not (if they are equal case-insensitively).  If u1 is true, the
-string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
-the string s2 is assumed to be in UTF-8-encoded Unicode.  If u1 or u2
-are false, the respective string is assumed to be in native 8-bit
-encoding.
+Returns true if the strings s1 and s2 differ case-insensitively, false
+if they are equal case-insensitively.  Note that this is the complement of what
+you might expect (perhaps it would have been better to name it C<ibncmp_utf8>).
 
-If the pe1 and pe2 are non-NULL, the scanning pointers will be copied
-in there (they will point at the beginning of the I<next> character).
-If the pointers behind pe1 or pe2 are non-NULL, they are the end
-pointers beyond which scanning will not continue under any
-circumstances.  If the byte lengths l1 and l2 are non-zero, s1+l1 and
-s2+l2 will be used as goal end pointers that will also stop the scan,
-and which qualify towards defining a successful match: all the scans
-that define an explicit length must reach their goal pointers for
-a match to succeed).
+If u1 is true, the string s1 is assumed to be in UTF-8-encoded Unicode;
+otherwise it is assumed to be in native 8-bit encoding.  Correspondingly for u2
+with respect to s2.
+
+If the byte length l1 is non-zero, s1+l1 will be used as a goal to reach.  The
+scan will not be considered to be a match unless the goal is reached, and
+scanning won't continue past that goal.  Correspondingly for l2 with respect to
+s2.
+
+If pe1 is non-NULL and the pointer it points to is not NULL, that pointer is
+considered an end pointer beyond which scanning of s1 will not continue under
+any circumstances.  This means that if both l1 and pe1 are specified, and pe1
+is less than s1+l1, the match will never be successful because it can never
+get as far as its goal.  Correspondingly for pe2 with respect to s2.
+
+At least one of s1 and s2 must have a goal, and if both do, both have to be
+reached for a successful match.   Also, if the fold of a character is multiple
+characters, all of them must be matched (see tr21 reference below for
+'folding').
+
+Upon a successful match (when the routine returns false), if pe1 is non-NULL,
+it will be set to point to the beginning of the I<next> character of s1 beyond
+what was matched.  Correspondingly for pe2 and s2.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
@@ -2529,98 +2540,131 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
 {
-     dVAR;
-     register const U8 *p1  = (const U8*)s1;
-     register const U8 *p2  = (const U8*)s2;
-     register const U8 *f1 = NULL;
-     register const U8 *f2 = NULL;
-     register U8 *e1 = NULL;
-     register U8 *q1 = NULL;
-     register U8 *e2 = NULL;
-     register U8 *q2 = NULL;
-     STRLEN n1 = 0, n2 = 0;
-     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
-     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
-     U8 natbuf[1+1];
-     STRLEN foldlen1, foldlen2;
-     bool match;
+    dVAR;
+    register const U8 *p1  = (const U8*)s1; /* Point to current char */
+    register const U8 *p2  = (const U8*)s2;
+    register const U8 *g1 = NULL;	/* goal for s1 */
+    register const U8 *g2 = NULL;
+    register const U8 *e1 = NULL;	/* Don't scan s1 past this */
+    register U8 *f1 = NULL;		/* Point to current folded */
+    register const U8 *e2 = NULL;
+    register U8 *f2 = NULL;
+    STRLEN n1 = 0, n2 = 0;		/* Number of bytes in current char */
+    U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
+    U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
+    U8 natbuf[2];		/* Holds native 8-bit char converted to utf8;
+				   these always fit in 2 bytes */
 
-     PERL_ARGS_ASSERT_IBCMP_UTF8;
-     
-     if (pe1)
-	  e1 = *(U8**)pe1;
-     /* assert(e1 || l1); */
-     if (e1 == 0 || (l1 && l1 < (UV)(e1 - (const U8*)s1)))
-	  f1 = (const U8*)s1 + l1;
-     if (pe2)
-	  e2 = *(U8**)pe2;
-     /* assert(e2 || l2); */
-     if (e2 == 0 || (l2 && l2 < (UV)(e2 - (const U8*)s2)))
-	  f2 = (const U8*)s2 + l2;
+    PERL_ARGS_ASSERT_IBCMP_UTF8;
 
-     /* This shouldn't happen. However, putting an assert() there makes some
-      * tests fail. */
-     /* assert((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0)); */
-     if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
-	  return 1; /* mismatch; possible infinite loop or false positive */
+    if (pe1) {
+	e1 = *(U8**)pe1;
+    }
 
-     if (!u1 || !u2)
-	  natbuf[1] = 0; /* Need to terminate the buffer. */
+    if (l1) {
+	g1 = (const U8*)s1 + l1;
+    }
 
-     while ((e1 == 0 || p1 < e1) &&
-	    (f1 == 0 || p1 < f1) &&
-	    (e2 == 0 || p2 < e2) &&
-	    (f2 == 0 || p2 < f2)) {
-	  if (n1 == 0) {
-	       if (u1)
-		    to_utf8_fold(p1, foldbuf1, &foldlen1);
-	       else {
-		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
-		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
-	       }
-	       q1 = foldbuf1;
-	       n1 = foldlen1;
-	  }
-	  if (n2 == 0) {
-	       if (u2)
-		    to_utf8_fold(p2, foldbuf2, &foldlen2);
-	       else {
-		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
-		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
-	       }
-	       q2 = foldbuf2;
-	       n2 = foldlen2;
-	  }
-	  while (n1 && n2) {
-	       if ( UTF8SKIP(q1) != UTF8SKIP(q2) ||
-		   (UTF8SKIP(q1) == 1 && *q1 != *q2) ||
-		    memNE((char*)q1, (char*)q2, UTF8SKIP(q1)) )
-		   return 1; /* mismatch */
-	       n1 -= UTF8SKIP(q1);
-	       q1 += UTF8SKIP(q1);
-	       n2 -= UTF8SKIP(q2);
-	       q2 += UTF8SKIP(q2);
-	  }
-	  if (n1 == 0)
-	       p1 += u1 ? UTF8SKIP(p1) : 1;
-	  if (n2 == 0)
-	       p2 += u2 ? UTF8SKIP(p2) : 1;
+    if (pe2) {
+	e2 = *(U8**)pe2;
+    }
 
-     }
+    if (l2) {
+	g2 = (const U8*)s2 + l2;
+    }
 
-     /* A match is defined by all the scans that specified
-      * an explicit length reaching their final goals. */
-     match = (n1 == 0 && n2 == 0    /* Must not match partial char; Bug #72998 */
-	     && (f1 == 0 || p1 == f1) && (f2 == 0 || p2 == f2));
+    /* Must have at least one goal */
+    assert(g1 || g2);
 
-     if (match) {
-	  if (pe1)
-	       *pe1 = (char*)p1;
-	  if (pe2)
-	       *pe2 = (char*)p2;
-     }
+    if (g1) {
 
-     return match ? 0 : 1; /* 0 match, 1 mismatch */
+	/* Will never match if goal is out-of-bounds */
+	assert(! e1  || e1 >= g1);
+
+	/* Here, there isn't an end pointer, or it is beyond the goal.  We
+	* only go as far as the goal */
+	e1 = g1;
+    }
+    else assert(e1);	/* Must have an end for looking at s1 */
+
+    /* Same for goal for s2 */
+    if (g2) {
+	assert(! e2  || e2 >= g2);
+	e2 = g2;
+    }
+    else assert(e2);
+
+    /* Look through both strings, a character at a time */
+    while (p1 < e1 && p2 < e2) {
+
+	/* If at the beginning of a new character in s1, get its fold to use */
+	if (n1 == 0) {
+	    if (u1) {
+		to_utf8_fold(p1, foldbuf1, &n1);
+	    }
+	    else {  /* Not utf8, convert to it first and then get fold */
+		uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
+		to_utf8_fold(natbuf, foldbuf1, &n1);
+	    }
+	    f1 = foldbuf1;
+	}
+
+	if (n2 == 0) {    /* Same for s2 */
+	    if (u2) {
+		to_utf8_fold(p2, foldbuf2, &n2);
+	    }
+	    else {
+		uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
+		to_utf8_fold(natbuf, foldbuf2, &n2);
+	    }
+	    f2 = foldbuf2;
+	}
+
+	/* While there is more to look for in both folds, see if they
+	* continue to match */
+	while (n1 && n2) {
+	    U8 fold_length = UTF8SKIP(f1);
+	    if (fold_length != UTF8SKIP(f2)
+		|| (fold_length == 1 && *f1 != *f2) /* Short circuit memNE
+						       function call for single
+						       character */
+		|| memNE((char*)f1, (char*)f2, fold_length))
+	    {
+		return 1; /* mismatch */
+	    }
+
+	    /* Here, they matched, advance past them */
+	    n1 -= fold_length;
+	    f1 += fold_length;
+	    n2 -= fold_length;
+	    f2 += fold_length;
+	}
+
+	/* When reach the end of any fold, advance the input past it */
+	if (n1 == 0) {
+	    p1 += u1 ? UTF8SKIP(p1) : 1;
+	}
+	if (n2 == 0) {
+	    p2 += u2 ? UTF8SKIP(p2) : 1;
+	}
+    } /* End of loop through both strings */
+
+    /* A match is defined by each scan that specified an explicit length
+    * reaching its final goal, and the other not having matched a partial
+    * character (which can happen when the fold of a character is more than one
+    * character). */
+    if (! ((g1 == 0 || p1 == g1) && (g2 == 0 || p2 == g2)) || n1 || n2) {
+	return 1;
+    }
+
+    /* Successful match.  Set output pointers */
+    if (pe1) {
+	*pe1 = (char*)p1;
+    }
+    if (pe2) {
+	*pe2 = (char*)p2;
+    }
+    return 0;
 }
 
 /*
