@@ -11357,10 +11357,23 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
     SV *dstr = sstr ? sv_dup_common(sstr, param) : NULL;
     PERL_ARGS_ASSERT_SV_DUP;
 
-    /* Track every SV that (at least initially) had a reference count of 0.  */
+    /* Track every SV that (at least initially) had a reference count of 0.
+       We need to do this by holding an actual reference to it in this array.
+       If we attempt to cheat, turn AvREAL_off(), and store only pointers
+       (akin to the stashes hash, and the perl stack), we come unstuck if
+       a weak reference (or other SV legitimately SvREFCNT() == 0 for this
+       thread) is manipulated in a CLONE method, because CLONE runs before the
+       unreferenced array is walked to find SVs still with SvREFCNT() == 0
+       (and fix things up by giving each a reference via the temps stack).
+       Instead, during CLONE, if the 0-referenced SV has SvREFCNT_inc() and
+       then SvREFCNT_dec(), it will be cleaned up (and added to the free list)
+       before the walk of unreferenced happens and a reference to that is SV
+       added to the temps stack. At which point we have the same SV considered
+       to be in use, and free to be re-used. Not good.
+    */
     if (dstr && !(param->flags & CLONEf_COPY_STACKS) && !SvREFCNT(dstr)) {
 	assert(param->unreferenced);
-	av_push(param->unreferenced, dstr);
+	av_push(param->unreferenced, SvREFCNT_inc(dstr));
     }
 
     return dstr;
@@ -12130,7 +12143,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     if (!(flags & CLONEf_COPY_STACKS)) {
 	param->unreferenced = newAV();
-	AvREAL_off(param->unreferenced);
     }
 
     /* Set tainting stuff before PerlIO_debug can possibly get called */
@@ -12659,7 +12671,7 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 	SSize_t count = 0;
 
 	do {
-	    if (!SvREFCNT(*svp))
+	    if (SvREFCNT(*svp) == 1)
 		++count;
 	} while (++svp <= last);
 
@@ -12667,9 +12679,27 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 	svp = AvARRAY(unreferenced);
 
 	do {
-	    if (!SvREFCNT(*svp))
-		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(*svp);
+	    if (SvREFCNT(*svp) == 1) {
+		/* Our reference is the only one to this SV. This means that
+		   in this thread, the scalar effectively has a 0 reference.
+		   That doesn't work (cleanup never happens), so donate our
+		   reference to it onto the save stack. */
+		PL_tmps_stack[++PL_tmps_ix] = *svp;
+	    } else {
+		/* As an optimisation, because we are already walking the
+		   entire array, instead of above doing either
+		   SvREFCNT_inc(*svp) or *svp = &PL_sv_undef, we can instead
+		   release our reference to the scalar, so that at the end of
+		   the array owns zero references to the scalars it happens to
+		   point to. We are effectively converting the array from
+		   AvREAL() on to AvREAL() off. This saves the av_clear()
+		   (triggered by the SvREFCNT_dec(unreferenced) below) from
+		   walking the array a second time.  */
+		SvREFCNT_dec(*svp);
+	    }
+
 	} while (++svp <= last);
+	AvREAL_off(unreferenced);
     }
     SvREFCNT_dec(unreferenced);
 }
@@ -12723,7 +12753,6 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
     param->stashes = (AV *)Perl_newSV_type(to, SVt_PVAV);
     AvREAL_off(param->stashes);
     param->unreferenced = (AV *)Perl_newSV_type(to, SVt_PVAV);
-    AvREAL_off(param->unreferenced);
 
     if (was != to) {
 	PERL_SET_THX(was);

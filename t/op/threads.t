@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(22);
+     plan(23);
 }
 
 use strict;
@@ -291,5 +291,62 @@ EOI
 
     curr_test(curr_test() + 1);
 }
+
+# Test from Jerry Hedden, reduced by him from Object::InsideOut's tests.
+fresh_perl_is(<<'EOI', 'ok', { }, '0 refcnt during CLONE');
+use strict;
+use warnings;
+
+use threads;
+
+{
+    package My::Obj;
+    use Scalar::Util 'weaken';
+
+    my %reg;
+
+    sub new
+    {
+        # Create object with ID = 1
+        my $class = shift;
+        my $id = 1;
+        my $obj = bless(\do{ my $scalar = $id; }, $class);
+
+        # Save weak copy of object for reference during cloning
+        weaken($reg{$id} = $obj);
+
+        # Return object
+        return $obj;
+    }
+
+    # Return the internal ID of the object
+    sub id
+    {
+        my $obj = shift;
+        return $$obj;
+    }
+
+    # During cloning 'look' at the object
+    sub CLONE {
+        foreach my $id (keys(%reg)) {
+            # This triggers SvREFCNT_inc() then SvREFCNT_dec() on the referant.
+            my $obj = $reg{$id};
+        }
+    }
+}
+
+# Create object in 'main' thread
+my $obj = My::Obj->new();
+my $id = $obj->id();
+die "\$id is '$id'" unless $id == 1;
+
+# Access object in thread
+threads->create(
+    sub {
+        print $obj->id() == 1 ? "ok\n" : "not ok '" . $obj->id() . "'\n";
+    }
+)->join();
+
+EOI
 
 # EOF
