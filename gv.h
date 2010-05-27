@@ -49,7 +49,7 @@ struct gp {
 	   assert(!SvVALID(_gvname_hek));				\
 	   &(GvXPVGV(_gvname_hek)->xiv_u.xivu_namehek);			\
 	 }))
-#  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_KEY(GvNAME_HEK(gv)); })
+#  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
 #  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
 #else
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)
