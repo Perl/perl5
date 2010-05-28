@@ -795,6 +795,44 @@ const struct flag_to_name op_flags_names[] = {
     {OPf_SPECIAL, ",SPECIAL"}
 };
 
+const struct flag_to_name op_trans_names[] = {
+    {OPpTRANS_SQUASH, ",SQUASH"},
+    {OPpTRANS_DELETE, ",DELETE"},
+    {OPpTRANS_COMPLEMENT, ",COMPLEMENT"},
+    {OPpTRANS_IDENTICAL, ",IDENTICAL"},
+    {OPpTRANS_GROWS, ",GROWS"}
+};
+
+const struct flag_to_name op_entersub_names[] = {
+    {OPpENTERSUB_AMPER, ",AMPER"},
+    {OPpENTERSUB_DB, ",DB"},
+    {OPpENTERSUB_HASTARG, ",HASTARG"},
+    {OPpENTERSUB_NOPAREN, ",NOPAREN"},
+    {OPpENTERSUB_INARGS, ",INARGS"},
+    {OPpENTERSUB_NOMOD, ",NOMOD"}
+};
+
+const struct flag_to_name op_const_names[] = {
+    {OPpCONST_BARE, ",BARE"},
+    {OPpCONST_STRICT, ",STRICT"},
+    {OPpCONST_ARYBASE, ",ARYBASE"},
+    {OPpCONST_WARNING, ",WARNING"},
+    {OPpCONST_ENTERED, ",ENTERED"}
+};
+
+const struct flag_to_name op_sort_names[] = {
+    {OPpSORT_NUMERIC, ",NUMERIC"},
+    {OPpSORT_INTEGER, ",INTEGER"},
+    {OPpSORT_REVERSE, ",REVERSE"}
+};
+
+const struct flag_to_name op_open_names[] = {
+    {OPpOPEN_IN_RAW, ",IN_RAW"},
+    {OPpOPEN_IN_CRLF, ",IN_CRLF"},
+    {OPpOPEN_OUT_RAW, ",OUT_RAW"},
+    {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
+};
+
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
@@ -889,16 +927,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",BACKWARDS");
 	}
 	else if (optype == OP_TRANS) {
-	    if (o->op_private & OPpTRANS_SQUASH)
-		sv_catpv(tmpsv, ",SQUASH");
-	    if (o->op_private & OPpTRANS_DELETE)
-		sv_catpv(tmpsv, ",DELETE");
-	    if (o->op_private & OPpTRANS_COMPLEMENT)
-		sv_catpv(tmpsv, ",COMPLEMENT");
-	    if (o->op_private & OPpTRANS_IDENTICAL)
-		sv_catpv(tmpsv, ",IDENTICAL");
-	    if (o->op_private & OPpTRANS_GROWS)
-		sv_catpv(tmpsv, ",GROWS");
+	    append_flags(tmpsv, o->op_private, op_trans_names);
 	}
 	else if (optype == OP_REPEAT) {
 	    if (o->op_private & OPpREPEAT_DOLIST)
@@ -914,18 +943,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		 optype == OP_HELEM )
 	{
 	    if (optype == OP_ENTERSUB) {
-		if (o->op_private & OPpENTERSUB_AMPER)
-		    sv_catpv(tmpsv, ",AMPER");
-		if (o->op_private & OPpENTERSUB_DB)
-		    sv_catpv(tmpsv, ",DB");
-		if (o->op_private & OPpENTERSUB_HASTARG)
-		    sv_catpv(tmpsv, ",HASTARG");
-		if (o->op_private & OPpENTERSUB_NOPAREN)
-		    sv_catpv(tmpsv, ",NOPAREN");
-		if (o->op_private & OPpENTERSUB_INARGS)
-		    sv_catpv(tmpsv, ",INARGS");
-		if (o->op_private & OPpENTERSUB_NOMOD)
-		    sv_catpv(tmpsv, ",NOMOD");
+		append_flags(tmpsv, o->op_private, op_entersub_names);
 	    }
 	    else {
 		switch (o->op_private & OPpDEREF) {
@@ -959,17 +977,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    }
 	}
 	else if (optype == OP_CONST) {
-	    if (o->op_private & OPpCONST_BARE)
-		sv_catpv(tmpsv, ",BARE");
-	    if (o->op_private & OPpCONST_STRICT)
-		sv_catpv(tmpsv, ",STRICT");
-	    if (o->op_private & OPpCONST_ARYBASE)
-		sv_catpv(tmpsv, ",ARYBASE");
-	    if (o->op_private & OPpCONST_WARNING)
-		sv_catpv(tmpsv, ",WARNING");
-	    if (o->op_private & OPpCONST_ENTERED)
-		sv_catpv(tmpsv, ",ENTERED");
-	}
+	    append_flags(tmpsv, o->op_private, op_const_names);
+ 	}
 	else if (optype == OP_FLIP) {
 	    if (o->op_private & OPpFLIP_LINENUM)
 		sv_catpv(tmpsv, ",LINENUM");
@@ -999,22 +1008,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",EXISTS_SUB");
 	}
 	else if (optype == OP_SORT) {
-	    if (o->op_private & OPpSORT_NUMERIC)
-		sv_catpv(tmpsv, ",NUMERIC");
-	    if (o->op_private & OPpSORT_INTEGER)
-		sv_catpv(tmpsv, ",INTEGER");
-	    if (o->op_private & OPpSORT_REVERSE)
-		sv_catpv(tmpsv, ",REVERSE");
+	    append_flags(tmpsv, o->op_private, op_sort_names);
 	}
 	else if (optype == OP_OPEN || optype == OP_BACKTICK) {
-	    if (o->op_private & OPpOPEN_IN_RAW)
-		sv_catpv(tmpsv, ",IN_RAW");
-	    if (o->op_private & OPpOPEN_IN_CRLF)
-		sv_catpv(tmpsv, ",IN_CRLF");
-	    if (o->op_private & OPpOPEN_OUT_RAW)
-		sv_catpv(tmpsv, ",OUT_RAW");
-	    if (o->op_private & OPpOPEN_OUT_CRLF)
-		sv_catpv(tmpsv, ",OUT_CRLF");
+	    append_flags(tmpsv, o->op_private, op_open_names);
 	}
 	else if (optype == OP_EXIT) {
 	    if (o->op_private & OPpEXIT_VMSISH)
