@@ -68,6 +68,25 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "IO"
 };
 
+struct flag_to_name {
+    U32 flag;
+    const char *name;
+};
+
+static void
+S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
+	       const struct flag_to_name *const end)
+{
+    do {
+	if (flags & start->flag)
+	    sv_catpv(sv, start->name);
+    } while (++start < end);
+}
+
+#define append_flags(sv, f, flags) \
+    S_append_flags(aTHX_ (sv), (f), (flags), (flags) + C_ARRAY_LENGTH(flags))
+
+
 #define Sequence PL_op_sequence
 
 void
@@ -601,6 +620,16 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     Perl_dump_indent(aTHX_ level-1, file, "}\n");
 }
 
+const struct flag_to_name pmflags_flags_names[] = {
+    {PMf_CONST, ",CONST"},
+    {PMf_KEEP, ",KEEP"},
+    {PMf_GLOBAL, ",GLOBAL"},
+    {PMf_CONTINUE, ",CONTINUE"},
+    {PMf_RETAINT, ",RETAINT"},
+    {PMf_EVAL, ",EVAL"},
+    {PMf_NONDESTRUCT, ",NONDESTRUCT"},
+};
+
 static SV *
 S_pm_description(pTHX_ const PMOP *pm)
 {
@@ -633,20 +662,7 @@ S_pm_description(pTHX_ const PMOP *pm)
             sv_catpv(desc, ",SKIPWHITE");
     }
 
-    if (pmflags & PMf_CONST)
-	sv_catpv(desc, ",CONST");
-    if (pmflags & PMf_KEEP)
-	sv_catpv(desc, ",KEEP");
-    if (pmflags & PMf_GLOBAL)
-	sv_catpv(desc, ",GLOBAL");
-    if (pmflags & PMf_CONTINUE)
-	sv_catpv(desc, ",CONTINUE");
-    if (pmflags & PMf_RETAINT)
-	sv_catpv(desc, ",RETAINT");
-    if (pmflags & PMf_EVAL)
-	sv_catpv(desc, ",EVAL");
-    if (pmflags & PMf_NONDESTRUCT)
-	sv_catpv(desc, ",NONDESTRUCT");
+    append_flags(desc, pmflags, pmflags_flags_names);
     return desc;
 }
 
@@ -770,6 +786,15 @@ S_sequence_num(pTHX_ const OP *o)
     return seq ? SvUV(*seq): 0;
 }
 
+const struct flag_to_name op_flags_names[] = {
+    {OPf_KIDS, ",KIDS"},
+    {OPf_PARENS, ",PARENS"},
+    {OPf_STACKED, ",STACKED"},
+    {OPf_REF, ",REF"},
+    {OPf_MOD, ",MOD"},
+    {OPf_SPECIAL, ",SPECIAL"}
+};
+
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
@@ -832,18 +857,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    sv_catpv(tmpsv, ",UNKNOWN");
 	    break;
 	}
-	if (o->op_flags & OPf_KIDS)
-	    sv_catpv(tmpsv, ",KIDS");
-	if (o->op_flags & OPf_PARENS)
-	    sv_catpv(tmpsv, ",PARENS");
-	if (o->op_flags & OPf_STACKED)
-	    sv_catpv(tmpsv, ",STACKED");
-	if (o->op_flags & OPf_REF)
-	    sv_catpv(tmpsv, ",REF");
-	if (o->op_flags & OPf_MOD)
-	    sv_catpv(tmpsv, ",MOD");
-	if (o->op_flags & OPf_SPECIAL)
-	    sv_catpv(tmpsv, ",SPECIAL");
+	append_flags(tmpsv, o->op_flags, op_flags_names);
 	if (o->op_latefree)
 	    sv_catpv(tmpsv, ",LATEFREE");
 	if (o->op_latefreed)
@@ -1445,6 +1459,28 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 	PerlIO_putc(file, '\n');
 }
 
+const struct flag_to_name first_sv_flags_names[] = {
+    {SVs_TEMP, "TEMP,"},
+    {SVs_OBJECT, "OBJECT,"},
+    {SVs_GMG, "GMG,"},
+    {SVs_SMG, "SMG,"},
+    {SVs_RMG, "RMG,"},
+    {SVf_IOK, "IOK,"},
+    {SVf_NOK, "NOK,"},
+    {SVf_POK, "POK,"}
+};
+
+const struct flag_to_name second_sv_flags_names[] = {
+    {SVf_OOK, "OOK,"},
+    {SVf_FAKE, "FAKE,"},
+    {SVf_READONLY, "READONLY,"},
+    {SVf_BREAK, "BREAK,"},
+    {SVf_AMAGIC, "OVERLOAD,"},
+    {SVp_IOK, "pIOK,"},
+    {SVp_NOK, "pNOK,"},
+    {SVp_POK, "pPOK,"}
+};
+
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
@@ -1477,28 +1513,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
 	if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
     }
-    if (flags & SVs_TEMP)	sv_catpv(d, "TEMP,");
-    if (flags & SVs_OBJECT)	sv_catpv(d, "OBJECT,");
-    if (flags & SVs_GMG)	sv_catpv(d, "GMG,");
-    if (flags & SVs_SMG)	sv_catpv(d, "SMG,");
-    if (flags & SVs_RMG)	sv_catpv(d, "RMG,");
-
-    if (flags & SVf_IOK)	sv_catpv(d, "IOK,");
-    if (flags & SVf_NOK)	sv_catpv(d, "NOK,");
-    if (flags & SVf_POK)	sv_catpv(d, "POK,");
+    append_flags(d, flags, first_sv_flags_names);
     if (flags & SVf_ROK)  {	
     				sv_catpv(d, "ROK,");
 	if (SvWEAKREF(sv))	sv_catpv(d, "WEAKREF,");
     }
-    if (flags & SVf_OOK)	sv_catpv(d, "OOK,");
-    if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
-    if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");
-    if (flags & SVf_BREAK)	sv_catpv(d, "BREAK,");
-
-    if (flags & SVf_AMAGIC)	sv_catpv(d, "OVERLOAD,");
-    if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
-    if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
-    if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
+    append_flags(d, flags, second_sv_flags_names);
     if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv)) {
 	if (SvPCS_IMPORTED(sv))
 				sv_catpv(d, "PCS_IMPORTED,");
