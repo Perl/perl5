@@ -1478,6 +1478,40 @@ const struct flag_to_name second_sv_flags_names[] = {
     {SVp_POK, "pPOK,"}
 };
 
+const struct flag_to_name cv_flags_names[] = {
+    {CVf_ANON, "ANON,"},
+    {CVf_UNIQUE, "UNIQUE,"},
+    {CVf_CLONE, "CLONE,"},
+    {CVf_CLONED, "CLONED,"},
+    {CVf_CONST, "CONST,"},
+    {CVf_NODEBUG, "NODEBUG,"},
+    {CVf_LVALUE, "LVALUE,"},
+    {CVf_METHOD, "METHOD,"},
+    {CVf_WEAKOUTSIDE, "WEAKOUTSIDE,"}
+};
+
+const struct flag_to_name hv_flags_names[] = {
+    {SVphv_SHAREKEYS, "SHAREKEYS,"},
+    {SVphv_LAZYDEL, "LAZYDEL,"},
+    {SVphv_HASKFLAGS, "HASKFLAGS,"},
+    {SVphv_REHASH, "REHASH,"},
+    {SVphv_CLONEABLE, "CLONEABLE,"}
+};
+
+const struct flag_to_name gp_flags_names[] = {
+    {GVf_INTRO, "INTRO,"},
+    {GVf_MULTI, "MULTI,"},
+    {GVf_ASSUMECV, "ASSUMECV,"},
+    {GVf_IN_PAD, "IN_PAD,"}
+};
+
+const struct flag_to_name gp_flags_imported_names[] = {
+    {GVf_IMPORTED_SV, " SV"},
+    {GVf_IMPORTED_AV, " AV"},
+    {GVf_IMPORTED_HV, " HV"},
+    {GVf_IMPORTED_CV, " CV"},
+};
+
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
@@ -1526,31 +1560,16 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     switch (type) {
     case SVt_PVCV:
     case SVt_PVFM:
-	if (CvANON(sv))		sv_catpv(d, "ANON,");
-	if (CvUNIQUE(sv))	sv_catpv(d, "UNIQUE,");
-	if (CvCLONE(sv))	sv_catpv(d, "CLONE,");
-	if (CvCLONED(sv))	sv_catpv(d, "CLONED,");
-	if (CvCONST(sv))	sv_catpv(d, "CONST,");
-	if (CvNODEBUG(sv))	sv_catpv(d, "NODEBUG,");
-	if (CvLVALUE(sv))	sv_catpv(d, "LVALUE,");
-	if (CvMETHOD(sv))	sv_catpv(d, "METHOD,");
-	if (CvWEAKOUTSIDE(sv))	sv_catpv(d, "WEAKOUTSIDE,");
+	append_flags(d, CvFLAGS(sv), cv_flags_names);
 	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
 	break;
     case SVt_PVHV:
-	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
-	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
-	if (HvHASKFLAGS(sv))	sv_catpv(d, "HASKFLAGS,");
-	if (HvREHASH(sv))	sv_catpv(d, "REHASH,");
-	if (flags & SVphv_CLONEABLE) sv_catpv(d, "CLONEABLE,");
+	append_flags(d, flags, hv_flags_names);
 	break;
     case SVt_PVGV:
     case SVt_PVLV:
 	if (isGV_with_GP(sv)) {
-	    if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
-	    if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
-	    if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
-	    if (GvIN_PAD(sv))   sv_catpv(d, "IN_PAD,");
+	    append_flags(d, GvFLAGS(sv), gp_flags_names);
 	}
 	if (isGV_with_GP(sv) && GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
@@ -1558,10 +1577,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		sv_catpv(d, "ALL,");
 	    else {
 		sv_catpv(d, "(");
-		if (GvIMPORTED_SV(sv))	sv_catpv(d, " SV");
-		if (GvIMPORTED_AV(sv))	sv_catpv(d, " AV");
-		if (GvIMPORTED_HV(sv))	sv_catpv(d, " HV");
-		if (GvIMPORTED_CV(sv))	sv_catpv(d, " CV");
+		append_flags(d, GvFLAGS(sv), gp_flags_imported_names);
 		sv_catpv(d, " ),");
 	    }
 	}
