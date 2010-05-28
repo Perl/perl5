@@ -916,6 +916,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #endif
 
 #define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
+#define C_ARRAY_END(a)		(a) + (sizeof(a)/sizeof((a)[0]))
 
 #ifdef NEED_VA_COPY
 # ifdef va_copy

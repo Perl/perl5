@@ -84,7 +84,7 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
 }
 
 #define append_flags(sv, f, flags) \
-    S_append_flags(aTHX_ (sv), (f), (flags), (flags) + C_ARRAY_LENGTH(flags))
+    S_append_flags(aTHX_ (sv), (f), (flags), C_ARRAY_END(flags))
 
 
 #define Sequence PL_op_sequence
