@@ -899,20 +899,83 @@ to be mapped to "A"; all other characters will remain unchanged.
 
 (For serious hackers only)  The above means you have to furnish a complete
 mapping; you can't just override a couple of characters and leave the rest
-unchanged.  You can find all the mappings in the directory
+unchanged.  You can find all the official mappings in the directory
 C<$Config{privlib}>F</unicore/To/>.  The mapping data is returned as the
 here-document.  The C<utf8::ToSpecI<Foo>> hashes in those files are special
 exception mappings derived from
-C<$Config{privlib}>F</unicore/SpecialCasing.txt>.  The "Digit" and
+C<$Config{privlib}>F</unicore/SpecialCasing.txt>.  (The "Digit" and
 "Fold" mappings that one can see in the directory are not directly
 user-accessible, one can use either the L<Unicode::UCD> module, or just match
-case-insensitively (that's when the "Fold" mapping is used).
+case-insensitively, which is what uses the "Fold" mapping.  Neither are user
+overridable.)
 
-The mappings will only take effect on scalars that have been marked as having
-Unicode characters, for example by using C<utf8::upgrade()>.
-Old byte-style strings are not affected.
+If you have many mappings to change, you can take the official mapping data,
+change by hand the affected code points, and place the whole thing into your
+subroutine.  But this will only be valid on Perls that use the same Unicode
+version.  Another option would be to have your subroutine read the official
+mapping file(s) and overwrite the affected code points.
 
-The mappings are in effect for the package they are defined in.
+If you have only a few mappings to change, starting in 5.14 you can use the
+following trick, here illustrated for Turkish.
+
+    use Config;
+
+    sub ToUpper {
+        my $official = do "$Config{privlib}/unicore/To/Upper.pl";
+        $utf8::ToSpecUpper{'i'} = 
+                           "\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}";
+        return $official;
+    }
+
+This takes the official mappings and overrides just one, for "LATIN SMALL
+LETTER I".  The keys to the hash must be in UTF-8 (or on EBCDIC platforms,
+UTF-EBCDIC), as illustrated by the inverse function.
+
+    sub ToLower {
+        my $official = do $lower;
+        $utf8::ToSpecLower{"\xc4\xb0"} = "i";
+        return $official;
+    }
+
+This example is for an ASCII platform, and C<\xc4\xb0> is the UTF-8 string that 
+represents C<\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}>, C<U+0130>.
+
+(The trick illustrated here does work in earlier releases, but only if all the
+characters you want to override have ordinal values of 256 or higher.)
+
+The mappings are in effect only for the package they are defined in, and only
+on scalars that have been marked as having Unicode characters, for example by
+using C<utf8::upgrade()>.  You can get around the latter restriction in the
+scope of a C<S<use subs>>:
+
+    use subs qw(uc ucfirst lc lcfirst);
+
+    sub uc($) {
+        my $string = shift;
+        utf8::upgrade($string);
+        return CORE::uc($string);
+    }
+
+    sub lc($) {
+        my $string = shift;
+        utf8::upgrade($string);
+
+        # Unless an I is before a dot_above, it turns into a dotless i.
+        $string =~ 
+              s/I (?! [^\p{ccc=0}\p{ccc=Above}]* \x{0307} )/\x{131}/gx;
+
+        # But when the I is followed by a dot_above, remove the
+        # dot_above so the end result will be i.
+        $string =~ s/I ([^\p{ccc=0}\p{ccc=Above}]* ) \x{0307}/i$1/gx;
+        return CORE::lc($string);
+    }
+
+These examples (also for Turkish) make sure the input is in UTF-8, and then
+call the corresponding official function, which will use the C<ToUpper()> and
+C<ToLower()> functions you have defined in the package.  The C<lc()> example
+shows how you can add context-dependent casing.  (For Turkish, there other
+required functions: C<ucfirst>, C<lcfirst>, and C<ToTitle>.  These are very
+similar to the ones given above.)
 
 =head2 Character Encodings for Input and Output
 
