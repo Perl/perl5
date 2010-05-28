@@ -833,6 +833,38 @@ const struct flag_to_name op_open_names[] = {
     {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
 };
 
+struct op_private_by_op {
+    U16 op_type;
+    U16 len;
+    const struct flag_to_name *start;
+};
+
+const struct op_private_by_op op_private_names[] = {
+    {OP_TRANS, C_ARRAY_LENGTH(op_trans_names), op_trans_names },
+    {OP_CONST, C_ARRAY_LENGTH(op_const_names), op_const_names },
+    {OP_SORT, C_ARRAY_LENGTH(op_sort_names), op_sort_names },
+    {OP_OPEN, C_ARRAY_LENGTH(op_open_names), op_open_names },
+    {OP_BACKTICK, C_ARRAY_LENGTH(op_open_names), op_open_names }
+};
+
+static bool
+S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
+    const struct op_private_by_op *start = op_private_names;
+    const struct op_private_by_op *const end
+	= op_private_names + C_ARRAY_LENGTH(op_private_names);
+
+    /* This is a linear search, but no worse than the code that it replaced.
+       It's debugging code - size is more important than speed.  */
+    do {
+	if (optype == start->op_type) {
+	    S_append_flags(aTHX_ tmpsv, op_private, start->start,
+			   start->start + start->len);
+	    return TRUE;
+	}
+    } while (++start < end);
+    return FALSE;
+}
+
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
@@ -954,6 +986,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		    sv_catpv(tmpsv, ",OUR_INTRO");
 	    }
 	}
+	else if (S_op_private_to_names(aTHX_ tmpsv, optype, o->op_private)) {
+	}
 	else if (optype == OP_LEAVESUB ||
 		 optype == OP_LEAVE ||
 		 optype == OP_LEAVESUBLV ||
@@ -969,16 +1003,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    if (o->op_private & OPpASSIGN_BACKWARDS)
 		sv_catpv(tmpsv, ",BACKWARDS");
 	}
-	else if (optype == OP_TRANS) {
-	    append_flags(tmpsv, o->op_private, op_trans_names);
-	}
 	else if (optype == OP_REPEAT) {
 	    if (o->op_private & OPpREPEAT_DOLIST)
 		sv_catpv(tmpsv, ",DOLIST");
 	}
-	else if (optype == OP_CONST) {
-	    append_flags(tmpsv, o->op_private, op_const_names);
- 	}
 	else if (optype == OP_FLIP) {
 	    if (o->op_private & OPpFLIP_LINENUM)
 		sv_catpv(tmpsv, ",LINENUM");
@@ -1006,12 +1034,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	else if (optype == OP_EXISTS) {
 	    if (o->op_private & OPpEXISTS_SUB)
 		sv_catpv(tmpsv, ",EXISTS_SUB");
-	}
-	else if (optype == OP_SORT) {
-	    append_flags(tmpsv, o->op_private, op_sort_names);
-	}
-	else if (optype == OP_OPEN || optype == OP_BACKTICK) {
-	    append_flags(tmpsv, o->op_private, op_open_names);
 	}
 	else if (optype == OP_EXIT) {
 	    if (o->op_private & OPpEXIT_VMSISH)
