@@ -34,9 +34,11 @@ reg_extflags_name
 sig_name
 sig_num
 simple
+simple_bitmask
 utf8skip
 uuemap
 varies
+varies_bitmask
 vtbl_amagic
 vtbl_amagicelem
 vtbl_arylen
