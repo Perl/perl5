@@ -911,36 +911,14 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    if (o->op_private & OPpTARGET_MY)
 		sv_catpv(tmpsv, ",TARGET_MY");
 	}
-	else if (optype == OP_LEAVESUB ||
-		 optype == OP_LEAVE ||
-		 optype == OP_LEAVESUBLV ||
-		 optype == OP_LEAVEWRITE) {
-	    if (o->op_private & OPpREFCOUNTED)
-		sv_catpv(tmpsv, ",REFCOUNTED");
-	}
-        else if (optype == OP_AASSIGN) {
-	    if (o->op_private & OPpASSIGN_COMMON)
-		sv_catpv(tmpsv, ",COMMON");
-	}
-	else if (optype == OP_SASSIGN) {
-	    if (o->op_private & OPpASSIGN_BACKWARDS)
-		sv_catpv(tmpsv, ",BACKWARDS");
-	}
-	else if (optype == OP_TRANS) {
-	    append_flags(tmpsv, o->op_private, op_trans_names);
-	}
-	else if (optype == OP_REPEAT) {
-	    if (o->op_private & OPpREPEAT_DOLIST)
-		sv_catpv(tmpsv, ",DOLIST");
-	}
 	else if (optype == OP_ENTERSUB ||
-		 optype == OP_RV2SV ||
-		 optype == OP_GVSV ||
-		 optype == OP_RV2AV ||
-		 optype == OP_RV2HV ||
-		 optype == OP_RV2GV ||
-		 optype == OP_AELEM ||
-		 optype == OP_HELEM )
+	    optype == OP_RV2SV ||
+	    optype == OP_GVSV ||
+	    optype == OP_RV2AV ||
+	    optype == OP_RV2HV ||
+	    optype == OP_RV2GV ||
+	    optype == OP_AELEM ||
+	    optype == OP_HELEM )
 	{
 	    if (optype == OP_ENTERSUB) {
 		append_flags(tmpsv, o->op_private, op_entersub_names);
@@ -975,6 +953,28 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		if (o->op_private & OPpOUR_INTRO)
 		    sv_catpv(tmpsv, ",OUR_INTRO");
 	    }
+	}
+	else if (optype == OP_LEAVESUB ||
+		 optype == OP_LEAVE ||
+		 optype == OP_LEAVESUBLV ||
+		 optype == OP_LEAVEWRITE) {
+	    if (o->op_private & OPpREFCOUNTED)
+		sv_catpv(tmpsv, ",REFCOUNTED");
+	}
+        else if (optype == OP_AASSIGN) {
+	    if (o->op_private & OPpASSIGN_COMMON)
+		sv_catpv(tmpsv, ",COMMON");
+	}
+	else if (optype == OP_SASSIGN) {
+	    if (o->op_private & OPpASSIGN_BACKWARDS)
+		sv_catpv(tmpsv, ",BACKWARDS");
+	}
+	else if (optype == OP_TRANS) {
+	    append_flags(tmpsv, o->op_private, op_trans_names);
+	}
+	else if (optype == OP_REPEAT) {
+	    if (o->op_private & OPpREPEAT_DOLIST)
+		sv_catpv(tmpsv, ",DOLIST");
 	}
 	else if (optype == OP_CONST) {
 	    append_flags(tmpsv, o->op_private, op_const_names);
