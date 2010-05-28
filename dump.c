@@ -833,6 +833,28 @@ const struct flag_to_name op_open_names[] = {
     {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
 };
 
+const struct flag_to_name op_exit_names[] = {
+    {OPpEXIT_VMSISH, ",EXIT_VMSISH"},
+    {OPpHUSH_VMSISH, ",HUSH_VMSISH"}
+};
+
+#define OP_PRIVATE_ONCE(op, flag, name) \
+    const struct flag_to_name CAT2(op, _names)[] = {	\
+	{(flag), (name)} \
+    };
+
+OP_PRIVATE_ONCE(op_aassign, OPpASSIGN_COMMON, ",COMMON");
+OP_PRIVATE_ONCE(op_leavesub, OPpREFCOUNTED, ",REFCOUNTED");
+OP_PRIVATE_ONCE(op_sassign, OPpASSIGN_BACKWARDS, ",BACKWARDS");
+OP_PRIVATE_ONCE(op_repeat, OPpREPEAT_DOLIST, ",DOLIST");
+OP_PRIVATE_ONCE(op_rv2cv, OPpLVAL_INTRO, ",INTRO");
+OP_PRIVATE_ONCE(op_flip, OPpFLIP_LINENUM, ",LINENUM");
+OP_PRIVATE_ONCE(op_gv, OPpEARLY_CV, ",EARLY_CV");
+OP_PRIVATE_ONCE(op_list, OPpLIST_GUESSED, ",GUESSED");
+OP_PRIVATE_ONCE(op_delete, OPpSLICE, ",SLICE");
+OP_PRIVATE_ONCE(op_exists, OPpEXISTS_SUB, ",EXISTS_SUB");
+OP_PRIVATE_ONCE(op_die, OPpHUSH_VMSISH, ",HUSH_VMSISH");
+
 struct op_private_by_op {
     U16 op_type;
     U16 len;
@@ -840,6 +862,22 @@ struct op_private_by_op {
 };
 
 const struct op_private_by_op op_private_names[] = {
+    {OP_LEAVESUB, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
+    {OP_LEAVE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
+    {OP_LEAVESUBLV, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
+    {OP_LEAVEWRITE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
+    {OP_AASSIGN, C_ARRAY_LENGTH(op_aassign_names), op_aassign_names },
+    {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
+    {OP_DELETE, C_ARRAY_LENGTH(op_delete_names), op_delete_names },
+    {OP_EXISTS, C_ARRAY_LENGTH(op_exists_names), op_exists_names },
+    {OP_EXIT, C_ARRAY_LENGTH(op_exit_names), op_exit_names },
+    {OP_FLIP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
+    {OP_FLOP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
+    {OP_GV, C_ARRAY_LENGTH(op_gv_names), op_gv_names },
+    {OP_LIST, C_ARRAY_LENGTH(op_list_names), op_list_names },
+    {OP_SASSIGN, C_ARRAY_LENGTH(op_sassign_names), op_sassign_names },
+    {OP_REPEAT, C_ARRAY_LENGTH(op_repeat_names), op_repeat_names },
+    {OP_RV2CV, C_ARRAY_LENGTH(op_rv2cv_names), op_rv2cv_names },
     {OP_TRANS, C_ARRAY_LENGTH(op_trans_names), op_trans_names },
     {OP_CONST, C_ARRAY_LENGTH(op_const_names), op_const_names },
     {OP_SORT, C_ARRAY_LENGTH(op_sort_names), op_sort_names },
@@ -987,63 +1025,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    }
 	}
 	else if (S_op_private_to_names(aTHX_ tmpsv, optype, o->op_private)) {
-	}
-	else if (optype == OP_LEAVESUB ||
-		 optype == OP_LEAVE ||
-		 optype == OP_LEAVESUBLV ||
-		 optype == OP_LEAVEWRITE) {
-	    if (o->op_private & OPpREFCOUNTED)
-		sv_catpv(tmpsv, ",REFCOUNTED");
-	}
-        else if (optype == OP_AASSIGN) {
-	    if (o->op_private & OPpASSIGN_COMMON)
-		sv_catpv(tmpsv, ",COMMON");
-	}
-	else if (optype == OP_SASSIGN) {
-	    if (o->op_private & OPpASSIGN_BACKWARDS)
-		sv_catpv(tmpsv, ",BACKWARDS");
-	}
-	else if (optype == OP_REPEAT) {
-	    if (o->op_private & OPpREPEAT_DOLIST)
-		sv_catpv(tmpsv, ",DOLIST");
-	}
-	else if (optype == OP_FLIP) {
-	    if (o->op_private & OPpFLIP_LINENUM)
-		sv_catpv(tmpsv, ",LINENUM");
-	}
-	else if (optype == OP_FLOP) {
-	    if (o->op_private & OPpFLIP_LINENUM)
-		sv_catpv(tmpsv, ",LINENUM");
-	}
-	else if (optype == OP_RV2CV) {
-	    if (o->op_private & OPpLVAL_INTRO)
-		sv_catpv(tmpsv, ",INTRO");
-	}
-	else if (optype == OP_GV) {
-	    if (o->op_private & OPpEARLY_CV)
-		sv_catpv(tmpsv, ",EARLY_CV");
-	}
-	else if (optype == OP_LIST) {
-	    if (o->op_private & OPpLIST_GUESSED)
-		sv_catpv(tmpsv, ",GUESSED");
-	}
-	else if (optype == OP_DELETE) {
-	    if (o->op_private & OPpSLICE)
-		sv_catpv(tmpsv, ",SLICE");
-	}
-	else if (optype == OP_EXISTS) {
-	    if (o->op_private & OPpEXISTS_SUB)
-		sv_catpv(tmpsv, ",EXISTS_SUB");
-	}
-	else if (optype == OP_EXIT) {
-	    if (o->op_private & OPpEXIT_VMSISH)
-		sv_catpv(tmpsv, ",EXIT_VMSISH");
-	    if (o->op_private & OPpHUSH_VMSISH)
-		sv_catpv(tmpsv, ",HUSH_VMSISH");
-	}
-	else if (optype == OP_DIE) {
-	    if (o->op_private & OPpHUSH_VMSISH)
-		sv_catpv(tmpsv, ",HUSH_VMSISH");
 	}
 	else if (PL_check[optype] != MEMBER_TO_FPTR(Perl_ck_ftst)) {
 	    if (OP_IS_FILETEST_ACCESS(o->op_type) && o->op_private & OPpFT_ACCESS)
