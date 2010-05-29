@@ -557,8 +557,6 @@ past U+10FFFF you do get a warning.)  See L</BUGS> below.
 viacode should return an empty string for unassigned in-range Unicode code
 points, as that is their correct current name.
 
-viacode(0) doesn't return C<NULL>, but C<undef>
-
 vianame returns a chr if the input name is of the form C<U+...>, and an ord
 otherwise.  It is planned to change this to always return an ord.
 
