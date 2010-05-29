@@ -4945,7 +4945,7 @@ reStudy:
 #endif
 #ifdef DEBUGGING
     if (RExC_paren_names) {
-        ri->name_list_idx = add_data( pRExC_state, 1, "p" );
+        ri->name_list_idx = add_data( pRExC_state, 1, "a" );
         ri->data->data[ri->name_list_idx] = (void*)SvREFCNT_inc(RExC_paren_name_list);
     } else
 #endif
@@ -9556,6 +9556,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	while (--n >= 0) {
           /* If you add a ->what type here, update the comment in regcomp.h */
 	    switch (ri->data->what[n]) {
+	    case 'a':
 	    case 's':
 	    case 'S':
 	    case 'u':
@@ -9789,8 +9790,9 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	for (i = 0; i < count; i++) {
 	    d->what[i] = ri->data->what[i];
 	    switch (d->what[i]) {
-	        /* legal options are one of: sSfpontTu
+	        /* legal options are one of: sSfpontTua
 	           see also regcomp.h and pregfree() */
+	    case 'a': /* actually an AV, but the dup function is identical.  */
 	    case 's':
 	    case 'S':
 	    case 'p': /* actually an AV, but the dup function is identical.  */

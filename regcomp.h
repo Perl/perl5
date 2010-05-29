@@ -476,6 +476,7 @@ END_EXTERN_C
 
 /* .what is a character array with one character for each member of .data
  * The character describes the function of the corresponding .data item:
+ *   a - AV for paren_name_list under DEBUGGING
  *   f - start-class data for regstclass optimization
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
