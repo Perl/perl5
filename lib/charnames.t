@@ -1,4 +1,5 @@
 #!./perl
+use strict;
 
 my @WARN;
 
@@ -15,35 +16,36 @@ require File::Spec;
 
 $| = 1;
 
-print "1..81\n";
+plan(83);
 
 use charnames ':full';
 
-print "not " unless "Here\N{EXCLAMATION MARK}?" eq "Here!?";
-print "ok 1\n";
+is("Here\N{EXCLAMATION MARK}?", "Here!?");
 
 {
-  use bytes;			# TEST -utf8 can switch utf8 on
+    use bytes;			# TEST -utf8 can switch utf8 on
 
-  print "# \$res=$res \$\@='$@'\nnot "
-    if $res = eval <<'EOE'
+    my $res = eval <<'EOE';
 use charnames ":full";
 "Here: \N{CYRILLIC SMALL LETTER BE}!";
 1
 EOE
-      or $@ !~ /above 0xFF/;
-  print "ok 2\n";
-  # print "# \$res=$res \$\@='$@'\n";
 
-  print "# \$res=$res \$\@='$@'\nnot "
-    if $res = eval <<'EOE'
+    like($@, "above 0xFF");
+    is($res, undef);
+
+    $res = eval <<'EOE';
 use charnames 'cyrillic';
 "Here: \N{Be}!";
 1
 EOE
-      or $@ !~ /CYRILLIC CAPITAL LETTER BE.*above 0xFF/;
-  print "ok 3\n";
+    like($@, "CYRILLIC CAPITAL LETTER BE.*above 0xFF");
 }
+
+my $encoded_be;
+my $encoded_alpha;
+my $encoded_bet;
+my $encoded_deseng;
 
 # If octal representation of unicode char is \0xyzt, then the utf8 is \3xy\2zt
 if (ord('A') == 65) { # as on ASCII or UTF-8 machines
@@ -67,208 +69,145 @@ sub to_bytes {
 {
   use charnames ':full';
 
-  print "not " unless to_bytes("\N{CYRILLIC SMALL LETTER BE}") eq $encoded_be;
-  print "ok 4\n";
+  is(to_bytes("\N{CYRILLIC SMALL LETTER BE}"), $encoded_be);
 
   use charnames qw(cyrillic greek :short);
 
-  print "not " unless to_bytes("\N{be},\N{alpha},\N{hebrew:bet}")
-    eq "$encoded_be,$encoded_alpha,$encoded_bet";
-  print "ok 5\n";
+  is(to_bytes("\N{be},\N{alpha},\N{hebrew:bet}"),
+                                    "$encoded_be,$encoded_alpha,$encoded_bet");
 }
 
 {
     use charnames ':full';
-    print "not " unless "\x{263a}" eq "\N{WHITE SMILING FACE}";
-    print "ok 6\n";
-    print "not " unless length("\x{263a}") == 1;
-    print "ok 7\n";
-    print "not " unless length("\N{WHITE SMILING FACE}") == 1;
-    print "ok 8\n";
-    print "not " unless sprintf("%vx", "\x{263a}") eq "263a";
-    print "ok 9\n";
-    print "not " unless sprintf("%vx", "\N{WHITE SMILING FACE}") eq "263a";
-    print "ok 10\n";
-    print "not " unless sprintf("%vx", "\xFF\N{WHITE SMILING FACE}") eq "ff.263a";
-    print "ok 11\n";
-    print "not " unless sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}") eq "ff.263a";
-    print "ok 12\n";
+    is("\x{263a}", "\N{WHITE SMILING FACE}");
+    cmp_ok(length("\x{263a}"), '==', 1);
+    cmp_ok(length("\N{WHITE SMILING FACE}"), '==', 1);
+    is(sprintf("%vx", "\x{263a}"), "263a");
+    is(sprintf("%vx", "\N{WHITE SMILING FACE}"), "263a");
+    is(sprintf("%vx", "\xFF\N{WHITE SMILING FACE}"), "ff.263a");
+    is(sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}"), "ff.263a");
 }
 
 {
-   use charnames qw(:full);
-   use utf8;
+    use charnames qw(:full);
+    use utf8;
 
     my $x = "\x{221b}";
     my $named = "\N{CUBE ROOT}";
 
-    print "not " unless ord($x) == ord($named);
-    print "ok 13\n";
+    cmp_ok(ord($x), '==', ord($named));
 }
 
 {
-   use charnames qw(:full);
-   use utf8;
-   print "not " unless "\x{100}\N{CENT SIGN}" eq "\x{100}"."\N{CENT SIGN}";
-   print "ok 14\n";
+    use charnames qw(:full);
+    use utf8;
+    is("\x{100}\N{CENT SIGN}", "\x{100}"."\N{CENT SIGN}");
 }
 
 {
-  use charnames ':full';
+    use charnames ':full';
 
-  print "not "
-      unless to_bytes("\N{DESERET SMALL LETTER ENG}") eq $encoded_deseng;
-  print "ok 15\n";
+    is(to_bytes("\N{DESERET SMALL LETTER ENG}"), $encoded_deseng);
 }
 
 {
-  # 20001114.001
+    # 20001114.001
 
-  no utf8; # naked Latin-1
+    no utf8; # naked Latin-1
 
-  if (ord("Ä") == 0xc4) { # Try to do this only on Latin-1.
-      use charnames ':full';
-      my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
-      print "not " unless $text eq "\xc4" && ord($text) == 0xc4;
-      print "ok 16\n";
-  } else {
-      print "ok 16 # Skip: not Latin-1\n";
-  }
+    use charnames ':full';
+    my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
+    is($text, latin1_to_native("\xc4"));
+
+    # I'm not sure that this tests anything different from the above.
+    cmp_ok(ord($text), '==', ord(latin1_to_native("\xc4")));
 }
 
 {
-    print "not " unless charnames::viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE";
-    print "ok 17\n";
+    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE");
 
     # Unused Hebrew.
-    print "not " if defined charnames::viacode(0x0590);
-    print "ok 18\n";
+    ok(! defined charnames::viacode(0x0590));
 }
 
 {
-    print "not " unless
-	sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")) eq "10330";
-    print "ok 19\n";
-
-    print "not " if
-	defined charnames::vianame("NONE SUCH");
-    print "ok 20\n";
+    is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330");
+    ok (! defined charnames::vianame("NONE SUCH"));
 }
 
 {
     # check that caching at least hasn't broken anything
 
-    print "not " unless charnames::viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE";
-    print "ok 21\n";
+    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE");
 
-    print "not " unless
-	sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")) eq "10330";
-    print "ok 22\n";
+    is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330");
 
 }
 
-print "not " unless "\N{CHARACTER TABULATION}" eq "\t";
-print "ok 23\n";
+is("\N{CHARACTER TABULATION}", "\t");
 
-print "not " unless "\N{ESCAPE}" eq "\e";
-print "ok 24\n";
+is("\N{ESCAPE}", "\e");
+is("\N{NULL}", "\c@");
+is("\N{LINE FEED (LF)}", "\n");
+is("\N{LINE FEED}", "\n");
+is("\N{LF}", "\n");
 
-print "not " unless "\N{NULL}" eq "\c@";
-print "ok 25\n";
+my $nel = latin1_to_native("\x85");
+$nel = qr/^$nel$/;
 
-print "not " unless "\N{LINE FEED (LF)}" eq "\n";
-print "ok 26\n";
-
-print "not " unless "\N{LINE FEED}" eq "\n";
-print "ok 27\n";
-
-print "not " unless "\N{LF}" eq "\n";
-print "ok 28\n";
-
-my $nel = ord("A") == 193 ? qr/^(?:\x15|\x25)$/ : qr/^\x85$/;
-
-print "not " unless "\N{NEXT LINE (NEL)}" =~ $nel;
-print "ok 29\n";
-
-print "not " unless "\N{NEXT LINE}" =~ $nel;
-print "ok 30\n";
-
-print "not " unless "\N{NEL}" =~ $nel;
-print "ok 31\n";
-
-print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFEFF);
-print "ok 32\n";
-
-print "not " unless "\N{BOM}" eq chr(0xFEFF);
-print "ok 33\n";
+like("\N{NEXT LINE (NEL)}", $nel);
+like("\N{NEXT LINE}", $nel);
+like("\N{NEL}", $nel);
+is("\N{BYTE ORDER MARK}", chr(0xFEFF));
+is("\N{BOM}", chr(0xFEFF));
 
 {
     use warnings 'deprecated';
 
-    print "not " unless "\N{HORIZONTAL TABULATION}" eq "\t";
-    print "ok 34\n";
+    is("\N{HORIZONTAL TABULATION}", "\t");
 
-    print "not " unless grep { /"HORIZONTAL TABULATION" is deprecated/ } @WARN;
-    print "ok 35\n";
+    ok(grep { /"HORIZONTAL TABULATION" is deprecated/ } @WARN);
 
     no warnings 'deprecated';
 
-    print "not " unless "\N{VERTICAL TABULATION}" eq "\013";
-    print "ok 36\n";
+    is("\N{VERTICAL TABULATION}", "\013");
 
-    print "not " if grep { /"VERTICAL TABULATION" is deprecated/ } @WARN;
-    print "ok 37\n";
+    ok(! grep { /"VERTICAL TABULATION" is deprecated/ } @WARN);
 }
 
-print "not " unless charnames::viacode(0xFEFF) eq "ZERO WIDTH NO-BREAK SPACE";
-print "ok 38\n";
+is(charnames::viacode(0xFEFF), "ZERO WIDTH NO-BREAK SPACE");
 
 {
     use warnings;
-    print "not " unless ord("\N{BOM}") == 0xFEFF;
-    print "ok 39\n";
+    cmp_ok(ord("\N{BOM}"), '==', 0xFEFF);
 }
 
-print "not " unless ord("\N{ZWNJ}") == 0x200C;
-print "ok 40\n";
+cmp_ok(ord("\N{ZWNJ}"), '==', 0x200C);
 
-print "not " unless ord("\N{ZWJ}") == 0x200D;
-print "ok 41\n";
+cmp_ok(ord("\N{ZWJ}"), '==', 0x200D);
 
-print "not " unless "\N{U+263A}" eq "\N{WHITE SMILING FACE}";
-print "ok 42\n";
+is("\N{U+263A}", "\N{WHITE SMILING FACE}");
 
 {
-    print "not " unless
-	0x3093 == charnames::vianame("HIRAGANA LETTER N");
-    print "ok 43\n";
-
-    print "not " unless
-	0x0397 == charnames::vianame("GREEK CAPITAL LETTER ETA");
-    print "ok 44\n";
+    cmp_ok( 0x3093, '==', charnames::vianame("HIRAGANA LETTER N"));
+    cmp_ok(0x0397, '==', charnames::vianame("GREEK CAPITAL LETTER ETA"));
 }
 
-print "not " if defined charnames::viacode(0x110000);
-print "ok 45\n";
+ok(! defined charnames::viacode(0x110000));
+ok(! grep { /you asked for U+110000/ } @WARN);
 
-print "not " if grep { /you asked for U+110000/ } @WARN;
-print "ok 46\n";
-
-print "not " unless "NULL" eq charnames::viacode(0);
-print "ok 47\n";
-
+is("NULL", charnames::viacode(0));
 
 # ---- Alias extensions
 
 my $alifile = File::Spec->catfile(File::Spec->updir, qw(lib unicore xyzzy_alias.pl));
-my $i = 0;
 
 my @prgs;
-{   local $/ = undef;
+{
+    local $/ = undef;
     @prgs = split "\n########\n", <DATA>;
-    }
+}
 
-my $i = 47;
 for (@prgs) {
     my ($code, $exp) = ((split m/\nEXPECT\n/), '$');
     my ($prog, $fil) = ((split m/\nFILE\n/, $code), "");
@@ -281,8 +220,9 @@ for (@prgs) {
 	open my $ali, "> $alifile" or die "Could not open $alifile: $!";
 	print $ali $fil;
 	close $ali or die "Could not close $alifile: $!";
-	}
-    my $res = runperl( switches => $switch, 
+    }
+    my $switch = "";
+    my $res = runperl( switches => $switch,
                        progfile => $tmpfile,
                        stderr => 1 );
     my $status = $?;
@@ -293,28 +233,26 @@ for (@prgs) {
     $exp =~ s/[\r\n]+$//;
     my $pfx = ($res =~ s/^PREFIX\n//);
     my $rexp = qr{^$exp};
-    if ($res =~ s/^SKIPPED\n//) {
-	print "$results\n";
-	}
-    elsif (($pfx and $res !~ /^\Q$expected/) or
-	  (!$pfx and $res !~ $rexp)) {
-        print STDERR
-	    "PROG:\n$prog\n",
-	    "FILE:\n$fil",
-	    "EXPECTED:\n$exp\n",
-	    "GOT:\n$res\n";
-        print "not ";
-	}
-    print "ok ", ++$i, "\n";
+    my $expected = "";      # Unsure why this is here, as was never initialized
+
+    SKIP: {
+        skip $res, 1, if $res =~ s/^SKIPPED\n//;
+        if (($pfx and $res !~ /^\Q$expected/) or
+            (!$pfx and $res !~ $rexp))
+        {
+            fail("PROG:\n$prog\nFILE:\n${fil}EXPECTED:\n$exp\nGOT:\n$res");
+        } else {
+            pass("");
+        }
+    }
     $fil or next;
     1 while unlink $alifile;
-    }
+}
 
 # [perl #30409] charnames.pm clobbers default variable
 $_ = 'foobar';
 eval "use charnames ':full';";
-print "not " unless $_ eq 'foobar';
-print "ok 75\n";
+is($_, 'foobar');
 
 # Unicode slowdown noted by Phil Pennock, traced to a bug fix in index
 # SADAHIRO Tomoyuki's suggestion is to ensure that the UTF-8ness of both
@@ -323,27 +261,22 @@ print "ok 75\n";
 # (or at least should be). So assert that that it's true here.
 
 my $names = do "unicore/Name.pl";
-print defined $names ? "ok 76\n" : "not ok 76\n";
-if (ord('A') == 65) { # as on ASCII or UTF-8 machines
-  my $non_ascii = $names =~ tr/\0-\177//c;
-  print $non_ascii ? "not ok 77 # $non_ascii\n" : "ok 77\n";
-} else {
-  print "ok 77\n";
-}
+ok(defined $names);
+my $non_ascii = native_to_latin1($names) =~ tr/\0-\177//c;
+ok(! $non_ascii, "Make sure all names are ASCII-only");
 
 # Verify that charnames propagate to eval("")
 my $evaltry = eval q[ "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}" ];
 if ($@) {
-    print "# $@not ok 78\nnot ok 79\n";
+    fail('charnames failed to propagate to eval("")');
+    fail('next test also fails to make the same number of tests');
 } else {
-    print "ok 78\n";
-    print "not " unless $evaltry eq "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}";
-    print "ok 79\n";
+    pass('charnames propagated to eval("")');
+    is($evaltry, "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}");
 }
 
 # Verify that db includes the normative NameAliases.txt names
-print "not " unless "\N{U+1D0C5}" eq "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}";
-print "ok 80\n";
+is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
 
 # [perl #73174] use of \N{FOO} used to reset %^H
 
@@ -358,8 +291,7 @@ print "ok 80\n";
     $res .= '-' . ($^H{73174} // "");
     $res .= '-2' if ":" =~ /\N{COLON}/;
     $res .= '-3' if ":" =~ /\N{COLON}/i;
-    print $res eq "foo-foo-1--2-3" ? "" : "not ",
-	"ok 81 - \$^H{foo} correct after /\\N{bar}/i (res=$res)\n";
+    is($res, "foo-foo-1--2-3");
 }
 
 __END__
