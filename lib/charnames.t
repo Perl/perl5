@@ -16,7 +16,7 @@ require File::Spec;
 
 $| = 1;
 
-plan(83);
+plan(85);
 
 use charnames ':full';
 
@@ -196,7 +196,10 @@ is("\N{U+263A}", "\N{WHITE SMILING FACE}");
 ok(! defined charnames::viacode(0x110000));
 ok(! grep { /you asked for U+110000/ } @WARN);
 
-is("NULL", charnames::viacode(0));
+is(charnames::viacode(0), "NULL");
+is(charnames::viacode("BE"), "VULGAR FRACTION THREE QUARTERS");
+is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM");
+
 
 # ---- Alias extensions
 

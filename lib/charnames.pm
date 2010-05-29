@@ -265,7 +265,7 @@ sub viacode
     $hex = sprintf "%04X", $arg;
   } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
     # Below is the line that differs from the _getcode() source
-    $hex = sprintf "%04X", hex $arg;
+    $hex = sprintf "%04X", hex $1;
   } else {
     carp("unexpected arg \"$arg\" to charnames::viacode()");
     return;
