@@ -3787,11 +3787,14 @@ Perl_init_debugger(pTHX)
     PL_DBline = gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV);
     PL_DBsub = gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV));
     PL_DBsingle = GvSV((gv_fetchpvs("DB::single", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBsingle, 0);
+    if (!SvIOK(PL_DBsingle))
+	sv_setiv(PL_DBsingle, 0);
     PL_DBtrace = GvSV((gv_fetchpvs("DB::trace", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBtrace, 0);
+    if (!SvIOK(PL_DBtrace))
+	sv_setiv(PL_DBtrace, 0);
     PL_DBsignal = GvSV((gv_fetchpvs("DB::signal", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBsignal, 0);
+    if (!SvIOK(PL_DBsignal))
+	sv_setiv(PL_DBsignal, 0);
     PL_curstash = ostash;
 }
 
