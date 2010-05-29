@@ -174,6 +174,7 @@ use the macro wrapper C<SvPV_nolen(sv)> instead.
 char *
 Perl_sv_2pv_nolen(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_2PV_NOLEN;
     return sv_2pv(sv, NULL);
 }
 

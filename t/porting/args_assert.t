@@ -26,7 +26,7 @@ unless (-d 't' && -f 'MANIFEST') {
     open my $fh, '<', $proto or die "Can't open $proto: $!";
 
     while (<$fh>) {
-	$declared{$1}++ if /^#define\s+(PERL_ARGS_ASSERT[A-Za-z_]+)\s+/;
+	$declared{$1}++ if /^#define\s+(PERL_ARGS_ASSERT[A-Za-z0-9_]+)\s+/;
     }
 }
 
@@ -42,7 +42,7 @@ if (!@ARGV) {
 }
 
 while (<>) {
-    $used{$1}++ if /^\s+(PERL_ARGS_ASSERT_[A-Za-z_]+);$/;
+    $used{$1}++ if /^\s+(PERL_ARGS_ASSERT_[A-Za-z0-9_]+);$/;
 }
 
 my %unused;

@@ -13669,6 +13669,8 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const bool reverse = cBOOL(IoLINES(filter));
     I32 retval;
 
+    PERL_ARGS_ASSERT_UTF16_TEXTFILTER;
+
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
        don't bother writing code to deal with block mode.  */
@@ -13781,6 +13783,8 @@ static U8 *
 S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
 {
     SV *filter = filter_add(S_utf16_textfilter, NULL);
+
+    PERL_ARGS_ASSERT_ADD_UTF16_TEXTFILTER;
 
     IoTOP_GV(filter) = MUTABLE_GV(newSVpvn((char *)s, PL_bufend - (char*)s));
     sv_setpvs(filter, "");
