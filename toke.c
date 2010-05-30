@@ -13083,13 +13083,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
 	    }
 
-	    sv = newSV(0);
 	    if (overflowed) {
 		if (n > 4294967295.0)
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
 				   "%s number > %s non-portable",
 				   Base, max);
-		sv_setnv(sv, n);
+		sv = newSVnv(n);
 	    }
 	    else {
 #if UVSIZE > 4
@@ -13098,7 +13097,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 				   "%s number > %s non-portable",
 				   Base, max);
 #endif
-		sv_setuv(sv, u);
+		sv = newSVuv(u);
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
 		sv = new_constant(start, s - start, "integer",
@@ -13229,9 +13228,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	}
 
 
-	/* make an sv from the string */
-	sv = newSV(0);
-
 	/*
            We try to do an integer conversion first if no characters
            indicating "float" have been found.
@@ -13243,12 +13239,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             if (flags == IS_NUMBER_IN_UV) {
               if (uv <= IV_MAX)
-		sv_setiv(sv, uv); /* Prefer IVs over UVs. */
+		sv = newSViv(uv); /* Prefer IVs over UVs. */
               else
-	    	sv_setuv(sv, uv);
+	    	sv = newSVuv(uv);
             } else if (flags == (IS_NUMBER_IN_UV | IS_NUMBER_NEG)) {
               if (uv <= (UV) IV_MIN)
-                sv_setiv(sv, -(IV)uv);
+                sv = newSViv(-(IV)uv);
               else
 	    	floatit = TRUE;
             } else
@@ -13258,7 +13254,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    /* terminate the string */
 	    *d = '\0';
 	    nv = Atof(PL_tokenbuf);
-	    sv_setnv(sv, nv);
+	    sv = newSVnv(nv);
 	}
 
 	if ( floatit
