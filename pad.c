@@ -200,7 +200,6 @@ Perl_pad_new(pTHX_ int flags)
 	 */
 
         AV * const a0 = newAV();			/* will be @_ */
-	av_extend(a0, 0);
 	av_store(pad, 0, MUTABLE_SV(a0));
 	AvREIFY_only(a0);
     }
@@ -1299,7 +1298,6 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     else if (type == padtidy_SUB) {
 	/* XXX DAPM this same bit of code keeps appearing !!! Rationalise? */
 	AV * const av = newAV();			/* Will be @_ */
-	av_extend(av, 0);
 	av_store(PL_comppad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
     }
@@ -1742,7 +1740,6 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	    }
 	}
 	av = newAV();
-	av_extend(av, 0);
 	av_store(newpad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
 
