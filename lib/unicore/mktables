@@ -12,6 +12,9 @@
 #       my $addr; { no overloading; $addr = 0+$self; }
 # with
 #       my $addr = main::objaddr $self;
+# (or reverse commit 9b01bafde4b022706c3d6f947a0963f821b2e50b
+# that instituted this change.)
+
 require 5.010_001;
 use strict;
 use warnings;
