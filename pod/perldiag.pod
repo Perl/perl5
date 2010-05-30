@@ -1423,11 +1423,12 @@ valid magic number.
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
 
-=item "\c%c" more clearly written simply as "%c"
+=item "\c%c" more clearly written simply as "%s"
 
 (D deprecated) The C<\cI<X>> construct is intended to be a way to specify
 non-printable characters.  You used it for a printable one, which is better
-written as simply itself.
+written as simply itself, perhaps preceded by a backslash for non-word
+characters.  This message may not remain as Deprecated beyond 5.13.
 
 =item Deep recursion on subroutine "%s"
 

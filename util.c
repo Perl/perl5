@@ -3855,10 +3855,18 @@ Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 	    Perl_croak(aTHX_ "It is proposed that \"\\c{\" no longer be valid. It has historically evaluated to\n \";\".  If you disagree with this proposal, send email to perl5-porters@perl.org\nOtherwise, or in the meantime, you can work around this failure by changing\n\"\\c{\" to \";\"");
 	}
 	else if (output_warning) {
+	    U8 clearer[3];
+	    U8 i = 0;
+	    if (! isALNUM(result)) {
+		clearer[i++] = '\\';
+	    }
+	    clearer[i++] = result;
+	    clearer[i++] = '\0';
+
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			    "\"\\c%c\" more clearly written simply as \"%c\"",
+			    "\"\\c%c\" more clearly written simply as \"%s\"",
 			    source,
-			    result);
+			    clearer);
 	}
     }
 
