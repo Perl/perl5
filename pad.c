@@ -420,13 +420,13 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
 	PL_min_intro_pending = offset;
     PL_max_intro_pending = offset;
     /* if it's not a simple scalar, replace with an AV or HV */
-    /* XXX DAPM since slot has been allocated, replace
-     * av_store with PL_curpad[offset] ? */
+    assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
+    assert(SvREFCNT(PL_curpad[offset]) == 1);
     if (*name == '@')
-	av_store(PL_comppad, offset, MUTABLE_SV(newAV()));
+	sv_upgrade(PL_curpad[offset], SVt_PVAV);
     else if (*name == '%')
-	av_store(PL_comppad, offset, MUTABLE_SV(newHV()));
-    SvPADMY_on(PL_curpad[offset]);
+	sv_upgrade(PL_curpad[offset], SVt_PVHV);
+    assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
 			   (long)offset, name, PTR2UV(PL_curpad[offset])));
