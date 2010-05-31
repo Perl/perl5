@@ -36,6 +36,11 @@ any prefix location by adding "-Dprefix='/some/dir'" to Configure's args.
 To explicitly name the perl binary, use the command
 "make install PERLNAME=myperl".
 
+Building perl from source requires an ANSI compliant C-Compiler.
+A minimum of C89 is required. Some features available in C99 will
+be probed for and used when found. The perl build process does not
+rely on anything more than C89.
+
 These options, and many more, are explained in further detail below.
 
 If you have problems, corrections, or questions, please see
