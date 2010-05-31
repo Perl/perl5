@@ -13,16 +13,50 @@ my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 chdir '..' or die "Can't chdir ..: $!";
 BEGIN { defined $ENV{PERL_UNICODE} and push @INC, "lib"; }
 
-open my $diagfh, "<", "pod/perldiag.pod"
-  or die "Can't open pod/perldiag.pod: $!";
+my @functions;
+
+open my $func_fh, "<", "embed.fnc" or die "Can't open embed.fnc: $!";
+
+# Look for functions in embed.fnc that look like they could be diagnostic ones.
+while (<$func_fh>) {
+  chomp;
+  s/^\s+//;
+  while (s/\s*\\$//) {      # Grab up all continuation lines, these end in \
+    my $next = <$func_fh>;
+    $next =~ s/^\s+//;
+    chomp $next;
+    $_ .= $next;
+  }
+  next if /^:/;     # Lines beginning with colon are comments.
+  next unless /\|/; # Lines without a vertical bar are something we can't deal
+                    # with
+  my @fields = split /\s*\|\s*/;
+  next unless $fields[2] =~ /warn|err|(\b|_)die|croak/i;
+  push @functions, $fields[2];
+
+  # The flag p means that this function may have a 'Perl_' prefix
+  # The flag s means that this function may have a 'S_' prefix
+  push @functions, "Perl_$fields[2]", if $fields[0] =~ /p/;
+  push @functions, "S_$fields[2]", if $fields[0] =~ /s/;
+}
+
+close $func_fh;
+
+my $function_re = join '|', @functions;
+my $source_msg_re = qr/(?<routine>\bDIE\b|$function_re)/;
 
 my %entries;
+
+# Get the ignores that are compiled into this file
 while (<DATA>) {
   chomp;
   $entries{$_}{todo}=1;
 }
 
 my $cur_entry;
+open my $diagfh, "<", "pod/perldiag.pod"
+  or die "Can't open pod/perldiag.pod: $!";
+
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
     $cur_entry = $1;
@@ -35,6 +69,7 @@ while (<$diagfh>) {
   }
 }
 
+# Recursively descend looking for source files.
 my @todo = <*>;
 while (@todo) {
   my $todo = shift @todo;
@@ -74,7 +109,9 @@ sub check_file {
     }
     next if /^#/;
     next if /^ * /;
-    while (m/\bDIE\b|Perl_(croak|die|warn(er)?)/ and not m/\);$/) {
+
+    # Loop to accumulate the message text all on one line.
+    while (m/$source_msg_re/ and not m/\);$/) {
       my $nextline = <$codefh>;
       # Means we fell off the end of the file.  Not terribly surprising;
       # this code tries to merge a lot of things that aren't regular C
@@ -108,27 +145,28 @@ sub check_file {
       s/%"\s*$from/\%$specialformats{$from}"/g;
     }
     # The %"foo" thing needs to happen *before* this regex.
-    if (m/(?:DIE|Perl_(croak|die|warn|warner))(?:_nocontext)? \s*
+    if (m/$source_msg_re(?:_nocontext)? \s*
           \(aTHX_ \s*
-          (?:packWARN\d*\((.*?)\),)? \s*
-          "((?:\\"|[^"])*?)"/x) {
-      # diag($_);
-      # DIE is just return Perl_die
-      my $severity = {croak => [qw/P F/],
+          (?:packWARN\d*\((?<category>.*?)\),)? \s*
+          "(?<text>(?:\\"|[^"])*?)"/x)
+    {
+    # diag($_);
+    # DIE is just return Perl_die
+    my $severity = {croak => [qw/P F/],
                       die   => [qw/P F/],
                       warn  => [qw/W D S/],
-                     }->{$1||'die'};
-      my @categories;
-      if ($2) {
-        @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $2;
-      }
-      my $name;
-      if ($listed_as and $listed_as_line == $.) {
+                     }->{$+{'routine'}||'die'};
+    my @categories;
+    if ($+{'category'}) {
+        @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $+{'category'};
+    }
+    my $name;
+    if ($listed_as and $listed_as_line == $.) {
         $name = $listed_as;
-      } else {
-        $name = $3;
-        # The form listed in perldiag ignores most sorts of fancy printf formatting,
-        # or makes it more perlish.
+    } else {
+        $name = $+{'text'};
+        # The form listed in perldiag ignores most sorts of fancy printf
+        # formatting, or makes it more perlish.
         $name =~ s/%%/\\%/g;
         $name =~ s/%l[ud]/%d/g;
         $name =~ s/%\.(\d+|\*)s/\%s/g;
@@ -155,7 +193,7 @@ sub check_file {
       if (exists $entries{$name}) {
         if ($entries{$name}{todo}) {
         TODO: {
-	    no warnings 'once';
+            no warnings 'once';
             local $::TODO = 'in DATA';
             fail("Presence of '$name' from $codefn line $.");
           }
@@ -261,7 +299,10 @@ Goto undefined subroutine &%s
 Hash \%%s missing the \% in argument %d of %s()
 Illegal character \%03o (carriage return)
 Illegal character %sin prototype for %s : %s
+Integer overflow in binary number
 Integer overflow in decimal number
+Integer overflow in hexadecimal number
+Integer overflow in octal number
 Integer overflow in version %d
 internal \%<num>p might conflict with future printf extensions
 invalid control request: '\%03o'
@@ -325,6 +366,7 @@ refcnt_inc: fd %d < 0
 refcnt_inc: fd %d: %d <= 0
 Reversed %c= operator
 Runaway prototype
+%s(%.0
 %s(%.0f) failed
 %s(%.0f) too large
 Scalar value %s better written as $%s

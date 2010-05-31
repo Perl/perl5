@@ -218,7 +218,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
 works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
-    Perl_croak(aTHX_ "Usage %s::%s(%s)", "ouch" "awk", "eee_yow");
+    Perl_croak(aTHX_ "Usage: %s::%s(%s)", "ouch" "awk", "eee_yow");
 
 =cut
 */
