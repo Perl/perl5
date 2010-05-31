@@ -1263,13 +1263,11 @@ final operation is an element or slice of an aggregate:
 =item die LIST
 X<die> X<throw> X<exception> X<raise> X<$@> X<abort>
 
-Outside an C<eval>, prints the value of LIST to C<STDERR> and
-exits with the current value of C<$!> (errno).  If C<$!> is C<0>,
-exits with the value of C<<< ($? >> 8) >>> (backtick `command`
-status).  If C<<< ($? >> 8) >>> is C<0>, exits with C<255>.  Inside
-an C<eval(),> the error message is stuffed into C<$@> and the
-C<eval> is terminated with the undefined value.  This makes
-C<die> the way to raise an exception.
+C<die> raises an exception. Inside an C<eval> the error message is stuffed
+into C<$@> and the C<eval> is terminated with the undefined value.
+If the exception is outside of all enclosing C<eval>s, then the uncaught
+exception prints LIST to C<STDERR> and exits with a non-zero value. If you
+need to exit the process with a specific exit code, see L<exit>.
 
 Equivalent examples:
 
@@ -1295,8 +1293,6 @@ produce, respectively
     /etc/games is no good at canasta line 123.
     /etc/games is no good, stopped at canasta line 123.
 
-See also exit(), warn(), and the Carp module.
-
 If the output is empty and C<$@> already contains a value (typically from a
 previous eval) that value is reused after appending C<"\t...propagated">.
 This is useful for propagating exceptions:
@@ -1311,6 +1307,19 @@ C<$@>.  i.e., as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
 were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
+
+If an uncaught exception results in interpreter exit, the exit code is
+determined from the values of C<$!> and C<$?> with this pseudocode:
+
+    exit $! if $!;              # errno
+    exit $? >> 8 if $? >> 8;    # child exit status
+    exit 255;                   # last resort
+
+The intent is to squeeze as much possible information about the likely cause
+into the limited space of the system exit code. However, as C<$!> is the value
+of C's C<errno>, which can be set by any system call, this means that the value
+of the exit code used by C<die> can be non-predictable, so should not be relied
+upon, other than to be non-zero.
 
 You can also call C<die> with a reference argument, and if this is trapped
 within an C<eval>, C<$@> contains that reference.  This permits more
@@ -1354,6 +1363,8 @@ nothing in such situations, put
 as the first line of the handler (see L<perlvar/$^S>).  Because
 this promotes strange action at a distance, this counterintuitive
 behavior may be fixed in a future release.
+
+See also exit(), warn(), and the Carp module.
 
 =item do BLOCK
 X<do> X<block>
