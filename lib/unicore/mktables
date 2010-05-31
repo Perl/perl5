@@ -13640,7 +13640,6 @@ my @input_file_objects = (
                     Each_Line_Handler => \&filter_jamo_line,
                     ),
     Input_file->new('UnicodeData.txt', v1.1.5,
-non_skip => 1,
                     Pre_Handler => \&setup_UnicodeData,
 
                     # We clean up this file for some early versions.
