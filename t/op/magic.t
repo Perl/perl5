@@ -279,6 +279,19 @@ is $^O, $orig_osname, 'Assigning $^I does not clobber $^O';
 }
 $^O = $orig_osname;
 
+{
+    #RT #72422
+    foreach my $p (0, 1) {
+	fresh_perl_is(<<"EOP", '2 4 8', undef, "test \$^P = $p");
+\$DB::single = 2;
+\$DB::trace = 4;
+\$DB::signal = 8;
+\$^P = $p;
+print "\$DB::single \$DB::trace \$DB::signal";
+EOP
+    }
+}
+
 SKIP: {
     skip("%ENV manipulations fail or aren't safe on $^O", 4)
 	if $Is_VMS || $Is_Dos;
