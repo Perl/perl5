@@ -608,12 +608,14 @@ $;=$";$;{Just=>another=>Perl=>Hacker=>}=$/;print%;
 $_ = "\112\165\163\1648\141\156\157\164\150\145\1628\120\145"
    . "\162\1548\110\141\143\153\145\162\0128\177"  and &japh;
 sub japh {print "@_" and return if pop; split /\d/ and &japh}
+SKIP: As of 5.12.0, split() in void context no longer populates @_.
 
 ####### magic goto.
 sub _ {$_ = shift and y/b-yB-Y/a-yB-Y/                xor      !@ _?
        exit print                                                  :
             print and push @_ => shift and goto &{(caller (0)) [3]}}
             split // => "KsvQtbuf fbsodpmu\ni flsI "  xor       & _
+SKIP: As of 5.12.0, split() in void context no longer populates @_.
 
 ####### $: fun 1
 :$:=~s:$":Just$&another$&:;$:=~s:
