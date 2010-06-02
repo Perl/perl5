@@ -1832,6 +1832,7 @@ t/test.pl and ad hoc C<print $test ? "ok 42\n" : "not ok 42\n">.  The
 decision of which to use depends on what part of the test suite you're
 working on.  This is a measure to prevent a high-level failure (such
 as Config.pm breaking) from causing basic functionality tests to fail.
+If you write your own test, use the L<Test Anything Protocol|TAP>.
 
 =over 4
 
