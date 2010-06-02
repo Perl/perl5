@@ -226,7 +226,6 @@ sub check_file {
 # PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
 # pod/perldiag.pod for your new (warning|error).
 __DATA__
-Ambiguous use of -%s resolved as -&%s()
 Argument "%s" isn't numeric
 Argument "%s" isn't numeric in %s
 Attempt to clear deleted array

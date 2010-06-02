@@ -115,6 +115,14 @@ please write C<$foo[2]>, or you might have meant to pass an anonymous
 arrayref to the function named foo, then do a scalar deref on the
 value it returns.  If you meant that, write C<${foo([2])}>.
 
+=item Ambiguous use of -%s resolved as -&%s() at - line 3.
+
+(W ambiguous) You wrote something like C<-foo>, which might be the
+string C<"-foo"> (outside of C<use strict 'subs'>), or a call to the
+function C<foo>, negated.  If you meant the string, just write
+C<"-foo">, and please use strict.  If you meant the function call,
+write C<-foo()>.
+
 =item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line
