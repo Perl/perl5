@@ -107,6 +107,14 @@ the varable, you can just write C<@foo>.  If you wanted to call the
 function, write C<@{foo()}> ... or you could just not have a variable
 and a function with the same name, and save yourself a lot of trouble.
 
+=item Ambiguous use of %c{%s%s} resolved to %c%s%s
+
+(W ambiguous) You wrote something like C<${foo[2]}>, which might be
+looking for element number 2 of the array named C<@foo>, in which case
+please write C<$foo[2]>, or you might have meant to pass an anonymous
+arrayref to the function named foo, then do a scalar deref on the
+value it returns.  If you meant that, write C<${foo([2])}>.
+
 =item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line
