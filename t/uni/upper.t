@@ -4,5 +4,7 @@ BEGIN {
     require "case.pl";
 }
 
-casetest("Upper", \%utf8::ToSpecUpper, sub { uc $_[0] },
+casetest( 0,	# extra tests already run
+	"Upper", \%utf8::ToSpecUpper,
+	 sub { uc $_[0] },
 	 sub { my $a = ""; uc ($_[0] . $a) });
