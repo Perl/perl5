@@ -222,6 +222,9 @@ sub check_file {
 }
 # Lists all missing things as of the inaguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
+# 
+# PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
+# pod/perldiag.pod for your new (warning|error).
 __DATA__
 Ambiguous use of %c resolved as operator %c
 Ambiguous use of %c{%s} resolved to %c%s
