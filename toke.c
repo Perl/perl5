@@ -6204,8 +6204,9 @@ Perl_yylex(pTHX)
 		gvp = 0;
 		if (hgv && tmp != KEY_x && tmp != KEY_CORE)	/* never ambiguous */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-				   "Ambiguous call resolved as CORE::%s(), %s",
-				   GvENAME(hgv), "qualify as such or use &");
+				   "Ambiguous call resolved as CORE::%s(), "
+				   "qualify as such or use &",
+				   GvENAME(hgv));
 	    }
 	}
 

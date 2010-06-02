@@ -223,7 +223,6 @@ sub check_file {
 # Lists all missing things as of the inaguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
 __DATA__
-Ambiguous call resolved as CORE::%s(), %s
 Ambiguous use of %c resolved as operator %c
 Ambiguous use of %c{%s} resolved to %c%s
 Ambiguous use of %c{%s%s} resolved to %c%s%s
