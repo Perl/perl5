@@ -98,6 +98,15 @@ meant the infix operator, but please try to make it more clear -- in
 the example given, you might write C<*foo * foo()> if you really meant
 to multiply a glob by the result of calling a function.
 
+=item Ambiguous use of %c{%s} resolved to %c%s
+
+(W ambiguous) You wrote something like C<@{foo}>, which might be
+asking for the variable C<@foo>, or it might be calling a function
+named foo, and dereferencing it as an array reference.  If you wanted
+the varable, you can just write C<@foo>.  If you wanted to call the
+function, write C<@{foo()}> ... or you could just not have a variable
+and a function with the same name, and save yourself a lot of trouble.
+
 =item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line
