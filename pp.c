@@ -4056,18 +4056,19 @@ PP(pp_uc)
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
 
-/* This is ifdefd out because it needs more work and thought.  It isn't clear
- * that we should do it.  These are hard-coded rules from the Unicode standard,
- * and may change.  5.2 gives new guidance on the iota subscript, for example,
- * which has not been checked against this; and secondly it may be that we are
- * passed a subset of the context, via a \U...\E, for example, and its not
- * clear what the best approach is to that */
-#ifdef CONTEXT_DEPENDENT_CASING
+	/* All occurrences of these are to be moved to follow any other marks.
+	 * This is context-dependent.  We may not be passed enough context to
+	 * move the iota subscript beyond all of them, but we do the best we can
+	 * with what we're given.  The result is always better than if we
+	 * hadn't done this.  And, the problem would only arise if we are
+	 * passed a character without all its combining marks, which would be
+	 * the caller's mistake.  The information this is based on comes from a
+	 * comment in Unicode SpecialCasing.txt, (and the Standard's text
+	 * itself) and so can't be checked properly to see if it ever gets
+	 * revised.  But the likelihood of it changing is remote */
 	bool in_iota_subscript = FALSE;
-#endif
 
 	while (s < send) {
-#ifdef CONTEXT_DEPENDENT_CASING
 	    if (in_iota_subscript && ! is_utf8_mark(s)) {
 		/* A non-mark.  Time to output the iota subscript */
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
@@ -4076,7 +4077,6 @@ PP(pp_uc)
 		CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
 		in_iota_subscript = FALSE;
 	    }
-#endif
 
 
 /* See comments at the first instance in this file of this ifdef */
@@ -4108,15 +4108,13 @@ PP(pp_uc)
 		const STRLEN u = UTF8SKIP(s);
 		STRLEN ulen;
 
-#ifndef CONTEXT_DEPENDENT_CASING
-		toUPPER_utf8(s, tmpbuf, &ulen);
-#else
 		const UV uv = toUPPER_utf8(s, tmpbuf, &ulen);
-		if (uv == GREEK_CAPITAL_LETTER_IOTA && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI) {
+		if (uv == GREEK_CAPITAL_LETTER_IOTA
+		    && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
+		{
 		    in_iota_subscript = TRUE;
 		}
 		else {
-#endif
 		    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
 			/* If the eventually required minimum size outgrows
 			 * the available space, we need to grow. */
@@ -4125,26 +4123,25 @@ PP(pp_uc)
 			/* If someone uppercases one million U+03B0s we
 			 * SvGROW() one million times.  Or we could try
 			 * guessing how much to allocate without allocating too
-			 * much.  Such is life.  See corresponding comment in lc code
-			 * for another option */
+			 * much.  Such is life.  See corresponding comment in
+			 * lc code for another option */
 			SvGROW(dest, min);
 			d = (U8*)SvPVX(dest) + o;
 		    }
 		    Copy(tmpbuf, d, ulen, U8);
 		    d += ulen;
-#ifdef CONTEXT_DEPENDENT_CASING
 		}
-#endif
 		s += u;
 	    }
 	}
-#ifdef CONTEXT_DEPENDENT_CASING
-	if (in_iota_subscript) CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
-#endif
+	if (in_iota_subscript) {
+	    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
+	}
 	SvUTF8_on(dest);
 	*d = '\0';
 	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
-    } else {	/* Not UTF-8 */
+    }
+    else {	/* Not UTF-8 */
 	if (len) {
 	    const U8 *const send = s + len;
 
@@ -4345,12 +4342,23 @@ PP(pp_lc)
 		const STRLEN u = UTF8SKIP(s);
 		STRLEN ulen;
 
-/* See comments at the first instance in this file of this ifdef */
 #ifndef CONTEXT_DEPENDENT_CASING
 		toLOWER_utf8(s, tmpbuf, &ulen);
 #else
-		/* Here is context dependent casing, not compiled in currently;
-		 * needs more thought and work */
+/* This is ifdefd out because it needs more work and thought.  It isn't clear
+ * that we should do it.
+ * A minor objection is that this is based on a hard-coded rule from the
+ *  Unicode standard, and may change, but this is not very likely at all.
+ *  mktables should check and warn if it does.
+ * More importantly, if the sigma occurs at the end of the string, we don't
+ * have enough context to know whether it is part of a larger string or going
+ * to be or not.  It may be that we are passed a subset of the context, via
+ * a \U...\E, for example, and we could conceivably know the larger context if
+ * code were changed to pass that in.  But, if the string passed in is an
+ * intermediate result, and the user concatenates two strings together
+ * after we have made a final sigma, that would be wrong.  If the final sigma
+ * occurs in the middle of the string we are working on, then we know that it
+ * should be a final sigma, but otherwise we can't be sure. */
 
 		const UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
 
