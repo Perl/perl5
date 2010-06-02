@@ -375,11 +375,14 @@ core:
 
     lib/  is for pure-Perl modules, which exist in the core only.
 
-    ext/  is for XS extensions, and modules with special Makefile.PL requirements, which exist in the core only.
+    ext/  is for XS extensions, and modules with special Makefile.PL
+          requirements, which exist in the core only.
 
-    cpan/ is for dual-life modules, where the CPAN module is canonical (should be patched first).
+    cpan/ is for dual-life modules, where the CPAN module is
+          canonical (should be patched first).
 
-    dist/ is for dual-life modules, where the blead source is canonical.
+    dist/ is for dual-life modules, where the blead source is
+          canonical.
 
 For some dual-life modules it has not been discussed if the CPAN version or the
 blead source is canonical. Until that is done, those modules should be in
@@ -481,7 +484,7 @@ Line 4 calls a function in F<perl.c> to allocate memory for a Perl
 interpreter. It's quite a simple function, and the guts of it looks like
 this:
 
-    my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
+ my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
 Here you see an example of Perl's system abstraction, which we'll see
 later: C<PerlMem_malloc> is either your system's C<malloc>, or Perl's
@@ -494,13 +497,13 @@ needs, the stacks, and so on.
 
 Now we pass Perl the command line options, and tell it to go:
 
-    exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
-    if (!exitstatus)
-        perl_run(my_perl);
+ exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
+ if (!exitstatus)
+     perl_run(my_perl);
 
-    exitstatus = perl_destruct(my_perl);
+ exitstatus = perl_destruct(my_perl);
 
-    perl_free(my_perl);
+ perl_free(my_perl);
 
 C<perl_parse> is actually a wrapper around C<S_parse_body>, as defined
 in F<perl.c>, which processes the command line options, sets up any
@@ -1462,9 +1465,9 @@ We looked at this bit of code before, and we said that C<dPOPTOPnnrl_ul>
 arranges for two C<NV>s to be placed into C<left> and C<right> - let's
 slightly expand it:
 
-    #define dPOPTOPnnrl_ul  NV right = POPn; \
-                            SV *leftsv = TOPs; \
-                            NV left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
+ #define dPOPTOPnnrl_ul  NV right = POPn; \
+                         SV *leftsv = TOPs; \
+                         NV left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
 
 C<POPn> takes the SV from the top of the stack and obtains its NV either
 directly (if C<SvNOK> is set) or by calling the C<sv_2nv> function.
@@ -1623,7 +1626,8 @@ use the one from t/test.pl.
 
 so instead of this:
 
- print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000);
+ print 'not ' unless "1.20.300.4000" eq sprintf "%vd",
+                                               pack("U*",1,20,300,4000);
  print "ok $test\n"; $test++;
 
 we can write the more sensible (see L<Test::More> for a full
@@ -1635,7 +1639,7 @@ explanation of is() and other testing functions).
 Now we'll test that we got that space-at-the-beginning business right:
 
  is( "1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000),
-                                       "  with spaces at the beginning" );
+                                     "  with spaces at the beginning" );
 
 And finally we'll test that we don't make Unicode strings if C<U> is B<not>
 the first active format:
@@ -1666,9 +1670,10 @@ this text in the description of C<pack>:
  If the pattern begins with a C<U>, the resulting string will be treated
  as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a string
  with an initial C<U0>, and the bytes that follow will be interpreted as
- Unicode characters. If you don't want this to happen, you can begin your
- pattern with C<C0> (or anything else) to force Perl not to UTF-8 encode your
- string, and then follow this with a C<U*> somewhere in your pattern.
+ Unicode characters. If you don't want this to happen, you can begin
+ your pattern with C<C0> (or anything else) to force Perl not to UTF-8
+ encode your string, and then follow this with a C<U*> somewhere in your
+ pattern.
 
 =head2 Patching a core module
 
@@ -1729,7 +1734,7 @@ When you write your new code, please be conscious of existing code
 conventions used in the perl source files.  See L<perlstyle> for
 details.  Although most of the guidelines discussed seem to focus on
 Perl code, rather than c, they all apply (except when they don't ;).
-Also see I<perlrepository> for lots of details about both formatting and
+Also see L<perlrepository> for lots of details about both formatting and
 submitting patches of your changes.
 
 Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
@@ -2823,7 +2828,7 @@ should change to get the most use out of Purify:
 You should add -DPURIFY to the DEFINES line so the DEFINES
 line looks something like:
 
-    DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1
+   DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1
 
 to disable Perl's arena memory allocation functions, as
 well as to force use of memory allocation functions derived
