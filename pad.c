@@ -704,6 +704,28 @@ Perl_find_rundefsvoffset(pTHX)
 }
 
 /*
+ * Returns a lexical $_, if there is one, at run time ; or the global one
+ * otherwise.
+ */
+
+SV *
+Perl_find_rundefsv(pTHX)
+{
+    SV *namesv;
+    int flags;
+    PADOFFSET po;
+
+    po = pad_findlex("$_", find_runcv(NULL), PL_curcop->cop_seq, 1,
+	    NULL, &namesv, &flags);
+
+    if (po == NOT_IN_PAD
+	|| (SvFLAGS(namesv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
+	return DEFSV;
+
+    return PAD_SVl(po);
+}
+
+/*
 =for apidoc pad_findlex
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries

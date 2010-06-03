@@ -2510,6 +2510,7 @@ PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ const char* name, STRLEN len, U32 
 	assert(name)
 
 PERL_CALLCONV PADOFFSET	Perl_find_rundefsvoffset(pTHX);
+PERL_CALLCONV SV*	Perl_find_rundefsv(pTHX);
 PERL_CALLCONV OP*	Perl_oopsAV(pTHX_ OP* o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

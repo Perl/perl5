@@ -182,7 +182,7 @@ XXX Changes which affect the interface available to C<XS> code go here.
 =item *
 
 The following new functions or macros have been added to the public API:
-C<SvNV_nomg>,  C<sv_2nv_flags>.
+C<SvNV_nomg>,  C<sv_2nv_flags>, C<find_rundefsv>.
 
 =back
 

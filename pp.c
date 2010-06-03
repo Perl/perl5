@@ -5489,19 +5489,12 @@ PP(pp_reverse)
 	register I32 tmp;
 	dTARGET;
 	STRLEN len;
-	PADOFFSET padoff_du;
 
 	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
 	else {
-	    sv_setsv(TARG, (SP > MARK)
-		    ? *SP
-		    : (padoff_du = find_rundefsvoffset(),
-			(padoff_du == NOT_IN_PAD
-			 || PAD_COMPNAME_FLAGS_isOUR(padoff_du))
-			? DEFSV : PAD_SVl(padoff_du)));
-
+	    sv_setsv(TARG, SP > MARK ? *SP : find_rundefsv());
 	    if (! SvOK(TARG) && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(TARG);
 	}

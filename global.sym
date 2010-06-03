@@ -396,6 +396,7 @@ Perl_ninstr
 Perl_op_free
 Perl_pad_findmy
 Perl_find_rundefsvoffset
+Perl_find_rundefsv
 Perl_pad_sv
 Perl_reentrant_size
 Perl_reentrant_init

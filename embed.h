@@ -673,6 +673,7 @@
 #endif
 #define pad_findmy		Perl_pad_findmy
 #define find_rundefsvoffset	Perl_find_rundefsvoffset
+#define find_rundefsv		Perl_find_rundefsv
 #ifdef PERL_CORE
 #define oopsAV			Perl_oopsAV
 #define oopsHV			Perl_oopsHV
@@ -3106,6 +3107,7 @@
 #endif
 #define pad_findmy(a,b,c)	Perl_pad_findmy(aTHX_ a,b,c)
 #define find_rundefsvoffset()	Perl_find_rundefsvoffset(aTHX)
+#define find_rundefsv()		Perl_find_rundefsv(aTHX)
 #ifdef PERL_CORE
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
