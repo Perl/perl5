@@ -841,7 +841,7 @@ const struct flag_to_name op_exit_names[] = {
 #define OP_PRIVATE_ONCE(op, flag, name) \
     const struct flag_to_name CAT2(op, _names)[] = {	\
 	{(flag), (name)} \
-    };
+    }
 
 OP_PRIVATE_ONCE(op_aassign, OPpASSIGN_COMMON, ",COMMON");
 OP_PRIVATE_ONCE(op_leavesub, OPpREFCOUNTED, ",REFCOUNTED");
