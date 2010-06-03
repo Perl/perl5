@@ -184,6 +184,11 @@ XXX Changes which affect the interface available to C<XS> code go here.
 The following new functions or macros have been added to the public API:
 C<SvNV_nomg>,  C<sv_2nv_flags>, C<find_rundefsv>.
 
+=item *
+
+The C<UNDERBAR> macro now calls C<find_rundefsv>. C<dUNDERBAR> is now a
+noop but should still be used to ensure past and future compatibility.
+
 =back
 
 =head1 New Tests

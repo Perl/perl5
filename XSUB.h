@@ -72,8 +72,9 @@ Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
 handled automatically by C<xsubpp>.
 
 =for apidoc Ams||dUNDERBAR
-Sets up the C<padoff_du> variable for an XSUB that wishes to use
-C<UNDERBAR>.
+Sets up any variable needed by the C<UNDERBAR> macro. It used to define
+C<padoff_du>, but it is currently a noop. However, it is strongly adviced
+to still use it for ensuring past and future compatibility.
 
 =for apidoc AmU||UNDERBAR
 The SV* corresponding to the $_ variable. Works even if there
@@ -166,10 +167,8 @@ is a lexical $_ in scope.
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
-#define dUNDERBAR PADOFFSET padoff_du = find_rundefsvoffset()
-#define UNDERBAR ((padoff_du == NOT_IN_PAD \
-	    || PAD_COMPNAME_FLAGS_isOUR(padoff_du)) \
-	? DEFSV : PAD_SVl(padoff_du))
+#define dUNDERBAR dNOOP
+#define UNDERBAR  find_rundefsv()
 
 /* Simple macros to put new mortal values onto the stack.   */
 /* Typically used to return values from XS functions.       */
