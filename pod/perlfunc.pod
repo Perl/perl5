@@ -6181,8 +6181,8 @@ example:
 
     srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip -f`);
 
-If you're particularly concerned with this, see the C<Math::TrulyRandom>
-module in CPAN.
+If you're particularly concerned with this, search the CPAN for
+random number generator modules instead of rolling out your own.
 
 Frequently called programs (like CGI scripts) that simply use
 
