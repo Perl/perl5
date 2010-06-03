@@ -181,6 +181,15 @@ XXX Changes which affect the interface available to C<XS> code go here.
 
 =item *
 
+The C<fund_rundefsvoffset> function has been deprecated. It appeared that
+its design was insufficient to reliably get the lexical C<$_> at run-time.
+
+Use the new C<find_rundefsv> function or the C<UNDERBAR> macro instead.
+They directly return the right SV representing C<$_>, whether it's lexical
+or dynamic.
+
+=item *
+
 The following new functions or macros have been added to the public API:
 C<SvNV_nomg>,  C<sv_2nv_flags>, C<find_rundefsv>.
 

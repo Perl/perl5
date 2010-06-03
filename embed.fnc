@@ -855,7 +855,7 @@ p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\
 				|const U32 flags
 : Used in op.c and toke.c
 AMpdR	|PADOFFSET|pad_findmy	|NN const char* name|STRLEN len|U32 flags
-Ap	|PADOFFSET|find_rundefsvoffset	|
+ApD	|PADOFFSET|find_rundefsvoffset	|
 : Used in pp.c
 Ap	|SV*	|find_rundefsv	|
 : Used in perly.y
