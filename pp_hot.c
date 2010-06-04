@@ -1041,14 +1041,8 @@ PP(pp_aassign)
 		*(relem++) = sv;
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
-		    if (SvSMAGICAL(sv)) {
-			/* More magic can happen in the mg_set callback, so we
-			 * backup the delaymagic for now. */
-			U16 dmbak = PL_delaymagic;
-			PL_delaymagic = 0;
+		    if (SvSMAGICAL(sv))
 			mg_set(sv);
-			PL_delaymagic = dmbak;
-		    }
 		    if (!didstore)
 			sv_2mortal(sv);
 		}
@@ -1078,12 +1072,8 @@ PP(pp_aassign)
 			duplicates += 2;
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic) {
-			if (SvSMAGICAL(tmpstr)) {
-			    U16 dmbak = PL_delaymagic;
-			    PL_delaymagic = 0;
+			if (SvSMAGICAL(tmpstr))
 			    mg_set(tmpstr);
-			    PL_delaymagic = dmbak;
-			}
 			if (!didstore)
 			    sv_2mortal(tmpstr);
 		    }
@@ -1107,13 +1097,7 @@ PP(pp_aassign)
 	    }
 	    else
 		sv_setsv(sv, &PL_sv_undef);
-
-	    if (SvSMAGICAL(sv)) {
-		U16 dmbak = PL_delaymagic;
-		PL_delaymagic = 0;
-		mg_set(sv);
-		PL_delaymagic = dmbak;
-	    }
+	    SvSETMAGIC(sv);
 	    break;
 	}
     }
