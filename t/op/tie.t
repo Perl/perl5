@@ -913,3 +913,19 @@ sub EXTEND   { }
 
 EXPECT
 ok
+########
+# RT 8438: Tied scalars don't call FETCH when subref is dereferenced
+
+sub TIESCALAR { bless {} }
+
+my $fetch = 0;
+my $called = 0;
+sub FETCH { $fetch++; sub { $called++ } }
+
+tie my $f, 'main';
+$f->(1) for 1,2;
+print "fetch=$fetch\ncalled=$called\n";
+
+EXPECT
+fetch=2
+called=2

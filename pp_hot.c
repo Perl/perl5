@@ -2726,29 +2726,20 @@ PP(pp_entersub)
 	}
 	break;
     default:
-	if (!SvROK(sv)) {
+	if (sv == &PL_sv_yes) {		/* unfound import, ignore */
+	    if (hasargs)
+		SP = PL_stack_base + POPMARK;
+	    RETURN;
+	}
+	SvGETMAGIC(sv);
+	if (SvROK(sv)) {
+	    SV * const * sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
+	    tryAMAGICunDEREF(to_cv);
+	}
+	else {
 	    const char *sym;
 	    STRLEN len;
-	    if (sv == &PL_sv_yes) {		/* unfound import, ignore */
-		if (hasargs)
-		    SP = PL_stack_base + POPMARK;
-		RETURN;
-	    }
-	    if (SvGMAGICAL(sv)) {
-		mg_get(sv);
-		if (SvROK(sv))
-		    goto got_rv;
-		if (SvPOKp(sv)) {
-		    sym = SvPVX_const(sv);
-		    len = SvCUR(sv);
-		} else {
-		    sym = NULL;
-		    len = 0;
-		}
-	    }
-	    else {
-		sym = SvPV_const(sv, len);
-            }
+	    sym = SvPV_nomg_const(sv, len);
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
@@ -2756,11 +2747,6 @@ PP(pp_entersub)
 	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
 	    break;
 	}
-  got_rv:
-	{
-	    SV * const * sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
-	    tryAMAGICunDEREF(to_cv);
-	}	
 	cv = MUTABLE_CV(SvRV(sv));
 	if (SvTYPE(cv) == SVt_PVCV)
 	    break;
