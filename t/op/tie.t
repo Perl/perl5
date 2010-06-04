@@ -897,3 +897,19 @@ fetching... *{}
 fetching... @{}
 fetching... %{}
 fetching... ${}
+########
+# RT 51636: segmentation fault with array ties
+
+tie my @a, 'T';
+@a = (1);
+print "ok\n"; # if we got here we didn't crash
+
+package T;
+
+sub TIEARRAY { bless {} }
+sub STORE    { tie my @b, 'T' }
+sub CLEAR    { }
+sub EXTEND   { }
+
+EXPECT
+ok
