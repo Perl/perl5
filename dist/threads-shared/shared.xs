@@ -1167,6 +1167,23 @@ Perl_shared_object_destroy(pTHX_ SV *sv)
 }
 #endif
 
+/* veto signal despatch if we have the lock */
+
+#ifdef PL_signalhook
+
+STATIC despatch_signals_proc_t prev_signal_hook = NULL;
+
+STATIC void
+S_shared_signal_hook(pTHX) {
+    int us;
+    MUTEX_LOCK(&PL_sharedsv_lock.mutex);
+    us = (PL_sharedsv_lock.owner == aTHX);
+    MUTEX_UNLOCK(&PL_sharedsv_lock.mutex);
+    if (us)
+	return; /* try again later */
+    CALL_FPTR(prev_signal_hook)(aTHX);
+}
+#endif
 
 /* Saves a space for keeping SVs wider than an interpreter. */
 
@@ -1183,6 +1200,12 @@ Perl_sharedsv_init(pTHX)
     PL_sharehook = &Perl_sharedsv_share;
 #ifdef PL_destroyhook
     PL_destroyhook = &Perl_shared_object_destroy;
+#endif
+#ifdef PL_signalhook
+    if (!prev_signal_hook) {
+	prev_signal_hook = PL_signalhook;
+	PL_signalhook = &S_shared_signal_hook;
+    }
 #endif
 }
 
