@@ -42,7 +42,7 @@ PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
 static const char unees[] =
     "Malformed UTF-8 character (unexpected end of string)";
 
-/* 
+/*
 =head1 Unicode Support
 
 This file contains various utility functions for manipulating UTF8-encoded
@@ -264,7 +264,7 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 	if (!UTF8_IS_CONTINUATION(*s))
 	    return 0;
 	uv = UTF8_ACCUMULATE(uv, *s);
-	if (uv < ouv) 
+	if (uv < ouv)
 	    return 0;
 	ouv = uv;
 	s++;
@@ -2377,7 +2377,7 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 =for apidoc utf8n_to_uvchr
 flags
 
-Returns the native character value of the first character in the string 
+Returns the native character value of the first character in the string
 C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
@@ -2390,7 +2390,7 @@ Allows length and flags to be passed to low level routine.
    a real function in case XS code wants it
 */
 UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, 
+Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen,
 U32 flags)
 {
     const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
@@ -2475,7 +2475,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
     }
     if (truncated)
 	 sv_catpvs(dsv, "...");
-    
+
     return SvPVX(dsv);
 }
 
@@ -2505,8 +2505,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 =for apidoc ibcmp_utf8
 
 Returns true if the strings s1 and s2 differ case-insensitively, false
-if they are equal case-insensitively.  Note that this is the complement of what
-you might expect (perhaps it would have been better to name it C<ibncmp_utf8>).
+if they are equal case-insensitively.
 
 If u1 is true, the string s1 is assumed to be in UTF-8-encoded Unicode;
 otherwise it is assumed to be in native 8-bit encoding.  Correspondingly for u2
@@ -2543,34 +2542,34 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     dVAR;
     register const U8 *p1  = (const U8*)s1; /* Point to current char */
     register const U8 *p2  = (const U8*)s2;
-    register const U8 *g1 = NULL;	/* goal for s1 */
+    register const U8 *g1 = NULL;       /* goal for s1 */
     register const U8 *g2 = NULL;
-    register const U8 *e1 = NULL;	/* Don't scan s1 past this */
-    register U8 *f1 = NULL;		/* Point to current folded */
+    register const U8 *e1 = NULL;       /* Don't scan s1 past this */
+    register U8 *f1 = NULL;             /* Point to current folded */
     register const U8 *e2 = NULL;
     register U8 *f2 = NULL;
-    STRLEN n1 = 0, n2 = 0;		/* Number of bytes in current char */
+    STRLEN n1 = 0, n2 = 0;              /* Number of bytes in current char */
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
-    U8 natbuf[2];		/* Holds native 8-bit char converted to utf8;
-				   these always fit in 2 bytes */
+    U8 natbuf[2];               /* Holds native 8-bit char converted to utf8;
+                                   these always fit in 2 bytes */
 
     PERL_ARGS_ASSERT_IBCMP_UTF8;
 
     if (pe1) {
-	e1 = *(U8**)pe1;
+        e1 = *(U8**)pe1;
     }
 
     if (l1) {
-	g1 = (const U8*)s1 + l1;
+        g1 = (const U8*)s1 + l1;
     }
 
     if (pe2) {
-	e2 = *(U8**)pe2;
+        e2 = *(U8**)pe2;
     }
 
     if (l2) {
-	g2 = (const U8*)s2 + l2;
+        g2 = (const U8*)s2 + l2;
     }
 
     /* Must have at least one goal */
@@ -2578,75 +2577,75 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 
     if (g1) {
 
-	/* Will never match if goal is out-of-bounds */
-	assert(! e1  || e1 >= g1);
+        /* Will never match if goal is out-of-bounds */
+        assert(! e1  || e1 >= g1);
 
-	/* Here, there isn't an end pointer, or it is beyond the goal.  We
-	* only go as far as the goal */
-	e1 = g1;
+        /* Here, there isn't an end pointer, or it is beyond the goal.  We
+        * only go as far as the goal */
+        e1 = g1;
     }
-    else assert(e1);	/* Must have an end for looking at s1 */
+    else assert(e1);    /* Must have an end for looking at s1 */
 
     /* Same for goal for s2 */
     if (g2) {
-	assert(! e2  || e2 >= g2);
-	e2 = g2;
+        assert(! e2  || e2 >= g2);
+        e2 = g2;
     }
     else assert(e2);
 
     /* Look through both strings, a character at a time */
     while (p1 < e1 && p2 < e2) {
 
-	/* If at the beginning of a new character in s1, get its fold to use */
-	if (n1 == 0) {
-	    if (u1) {
-		to_utf8_fold(p1, foldbuf1, &n1);
-	    }
-	    else {  /* Not utf8, convert to it first and then get fold */
-		uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
-		to_utf8_fold(natbuf, foldbuf1, &n1);
-	    }
-	    f1 = foldbuf1;
-	}
+        /* If at the beginning of a new character in s1, get its fold to use */
+        if (n1 == 0) {
+            if (u1) {
+                to_utf8_fold(p1, foldbuf1, &n1);
+            }
+            else {  /* Not utf8, convert to it first and then get fold */
+                uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
+                to_utf8_fold(natbuf, foldbuf1, &n1);
+            }
+            f1 = foldbuf1;
+        }
 
-	if (n2 == 0) {    /* Same for s2 */
-	    if (u2) {
-		to_utf8_fold(p2, foldbuf2, &n2);
-	    }
-	    else {
-		uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
-		to_utf8_fold(natbuf, foldbuf2, &n2);
-	    }
-	    f2 = foldbuf2;
-	}
+        if (n2 == 0) {    /* Same for s2 */
+            if (u2) {
+                to_utf8_fold(p2, foldbuf2, &n2);
+            }
+            else {
+                uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
+                to_utf8_fold(natbuf, foldbuf2, &n2);
+            }
+            f2 = foldbuf2;
+        }
 
-	/* While there is more to look for in both folds, see if they
-	* continue to match */
-	while (n1 && n2) {
-	    U8 fold_length = UTF8SKIP(f1);
-	    if (fold_length != UTF8SKIP(f2)
-		|| (fold_length == 1 && *f1 != *f2) /* Short circuit memNE
-						       function call for single
-						       character */
-		|| memNE((char*)f1, (char*)f2, fold_length))
-	    {
-		return 1; /* mismatch */
-	    }
+        /* While there is more to look for in both folds, see if they
+        * continue to match */
+        while (n1 && n2) {
+            U8 fold_length = UTF8SKIP(f1);
+            if (fold_length != UTF8SKIP(f2)
+                || (fold_length == 1 && *f1 != *f2) /* Short circuit memNE
+                                                       function call for single
+                                                       character */
+                || memNE((char*)f1, (char*)f2, fold_length))
+            {
+                return 1; /* mismatch */
+            }
 
-	    /* Here, they matched, advance past them */
-	    n1 -= fold_length;
-	    f1 += fold_length;
-	    n2 -= fold_length;
-	    f2 += fold_length;
-	}
+            /* Here, they matched, advance past them */
+            n1 -= fold_length;
+            f1 += fold_length;
+            n2 -= fold_length;
+            f2 += fold_length;
+        }
 
-	/* When reach the end of any fold, advance the input past it */
-	if (n1 == 0) {
-	    p1 += u1 ? UTF8SKIP(p1) : 1;
-	}
-	if (n2 == 0) {
-	    p2 += u2 ? UTF8SKIP(p2) : 1;
-	}
+        /* When reach the end of any fold, advance the input past it */
+        if (n1 == 0) {
+            p1 += u1 ? UTF8SKIP(p1) : 1;
+        }
+        if (n2 == 0) {
+            p2 += u2 ? UTF8SKIP(p2) : 1;
+        }
     } /* End of loop through both strings */
 
     /* A match is defined by each scan that specified an explicit length
@@ -2654,15 +2653,15 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     * character (which can happen when the fold of a character is more than one
     * character). */
     if (! ((g1 == 0 || p1 == g1) && (g2 == 0 || p2 == g2)) || n1 || n2) {
-	return 1;
+        return 1;
     }
 
     /* Successful match.  Set output pointers */
     if (pe1) {
-	*pe1 = (char*)p1;
+        *pe1 = (char*)p1;
     }
     if (pe2) {
-	*pe2 = (char*)p2;
+        *pe2 = (char*)p2;
     }
     return 0;
 }
