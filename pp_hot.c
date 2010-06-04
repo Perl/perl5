@@ -1048,7 +1048,7 @@ PP(pp_aassign)
 		}
 		TAINT_NOT;
 	    }
-	    if (PL_delaymagic & DM_ARRAY)
+	    if (PL_delaymagic & DM_ARRAY_ISA)
 		SvSETMAGIC(MUTABLE_SV(ary));
 	    break;
 	case SVt_PVHV: {				/* normal hash */

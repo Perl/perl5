@@ -1557,7 +1557,7 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
 
     /* Skip _isaelem because _isa will handle it shortly */
-    if (PL_delaymagic & DM_ARRAY && mg->mg_type == PERL_MAGIC_isaelem)
+    if (PL_delaymagic & DM_ARRAY_ISA && mg->mg_type == PERL_MAGIC_isaelem)
 	return 0;
 
     return magic_clearisa(NULL, mg);

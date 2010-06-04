@@ -365,7 +365,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	    sv_magic(val, MUTABLE_SV(av), toLOWER(mg->mg_type), 0, key);
 	}
 	if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa)
-	    PL_delaymagic |= DM_ARRAY;
+	    PL_delaymagic |= DM_ARRAY_ISA;
 	else
 	   mg_set(MUTABLE_SV(av));
     }
@@ -446,7 +446,7 @@ Perl_av_clear(pTHX_ register AV *av)
     if (SvRMAGICAL(av)) {
 	const MAGIC* const mg = SvMAGIC(av);
 	if (PL_delaymagic && mg && mg->mg_type == PERL_MAGIC_isa)
-	    PL_delaymagic |= DM_ARRAY;
+	    PL_delaymagic |= DM_ARRAY_ISA;
         else
 	    mg_clear(MUTABLE_SV(av)); 
     }

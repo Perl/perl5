@@ -5349,7 +5349,7 @@ PP(pp_push)
 		sv_setsv(sv, *MARK);
 	    av_store(ary, AvFILLp(ary)+1, sv);
 	}
-	if (PL_delaymagic & DM_ARRAY)
+	if (PL_delaymagic & DM_ARRAY_ISA)
 	    mg_set(MUTABLE_SV(ary));
 
 	PL_delaymagic = 0;
