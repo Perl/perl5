@@ -273,6 +273,7 @@
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
+#define PL_signalhook		(vTHX->Isignalhook)
 #define PL_signals		(vTHX->Isignals)
 #define PL_slab_count		(vTHX->Islab_count)
 #define PL_slabs		(vTHX->Islabs)
@@ -601,6 +602,7 @@
 #define PL_Isharehook		PL_sharehook
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
+#define PL_Isignalhook		PL_signalhook
 #define PL_Isignals		PL_signals
 #define PL_Islab_count		PL_slab_count
 #define PL_Islabs		PL_slabs

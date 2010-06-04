@@ -12451,6 +12451,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_unlockhook	= proto_perl->Iunlockhook;
     PL_threadhook	= proto_perl->Ithreadhook;
     PL_destroyhook	= proto_perl->Idestroyhook;
+    PL_signalhook	= proto_perl->Isignalhook;
 
 #ifdef THREADS_HAVE_PIDS
     PL_ppid		= proto_perl->Ippid;

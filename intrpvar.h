@@ -655,6 +655,8 @@ PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(PERL_UNLOCK_HOOK))
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 
+PERLVARI(Isignalhook,	despatch_signals_proc_t, MEMBER_TO_FPTR(Perl_despatch_signals))
+
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
 PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */

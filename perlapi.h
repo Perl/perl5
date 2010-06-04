@@ -582,6 +582,8 @@ END_EXTERN_C
 #define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHX))
 #undef  PL_sighandlerp
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHX))
+#undef  PL_signalhook
+#define PL_signalhook		(*Perl_Isignalhook_ptr(aTHX))
 #undef  PL_signals
 #define PL_signals		(*Perl_Isignals_ptr(aTHX))
 #undef  PL_slab_count

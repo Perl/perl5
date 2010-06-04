@@ -4189,6 +4189,7 @@ typedef void (CPERLscope(*share_proc_t)) (pTHX_ SV *sv);
 typedef int  (CPERLscope(*thrhook_proc_t)) (pTHX);
 typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 typedef bool (CPERLscope(*destroyable_proc_t)) (pTHX_ SV *sv);
+typedef void (CPERLscope(*despatch_signals_proc_t)) (pTHX);
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
@@ -5677,7 +5678,7 @@ typedef struct am_table_short AMTS;
 
 #ifndef PERL_MICRO
 #	ifndef PERL_ASYNC_CHECK
-#		define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) CALL_FPTR(PL_signalhook)(aTHX)
 #	endif
 #endif
 
