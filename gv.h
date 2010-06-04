@@ -168,13 +168,13 @@ Return the SV from the GV.
 #  define Nullgv Null(GV*)
 #endif
 
-#define DM_UID   0x003
 #define DM_RUID   0x001
 #define DM_EUID   0x002
+#define DM_UID       (DM_RUID|DM_EUID)
 #define DM_ARRAY_ISA 0x004
-#define DM_GID   0x030
 #define DM_RGID   0x010
 #define DM_EGID   0x020
+#define DM_GID       (DM_RGID|DM_EGID)
 #define DM_DELAY 0x100
 
 /*
