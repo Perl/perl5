@@ -253,6 +253,7 @@ foreach my $start (@chars) {
     is($result, "\x{80000000}", "chopping high 'unicode' - result");
 
     SKIP: {
+        no warnings 'overflow'; # avoid compile-time warnings below on 32-bit architectures
         use Config;
         $Config{ivsize} >= 8
 	  or skip("this build can't handle very large characters", 2);
