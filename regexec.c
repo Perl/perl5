@@ -1184,7 +1184,7 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
     char *my_strend= (char *)strend;                   \
     if ( (CoNd)                                        \
 	 && (ln == len ||                              \
-	     !ibcmp_utf8(s, &my_strend, 0,  do_utf8,   \
+	     foldEQ_utf8(s, &my_strend, 0,  do_utf8,   \
 			m, NULL, ln, cBOOL(UTF)))      \
 	 && (!reginfo || regtry(reginfo, &s)) )        \
 	goto got_it;                                   \
@@ -1195,7 +1195,7 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 	 if ( f != c                                   \
 	      && (f == c1 || f == c2)                  \
 	      && (ln == len ||                         \
-	        !ibcmp_utf8(s, &my_strend, 0,  do_utf8,\
+	        foldEQ_utf8(s, &my_strend, 0,  do_utf8,\
 			      m, NULL, ln, cBOOL(UTF)))\
 	      && (!reginfo || regtry(reginfo, &s)) )   \
 	      goto got_it;                             \
@@ -1207,9 +1207,9 @@ s += len
 STMT_START {                                              \
     while (s <= e) {                                      \
 	if ( (CoNd)                                       \
-	     && (ln == 1 || !(OP(c) == EXACTF             \
-			      ? ibcmp(s, m, ln)           \
-			      : ibcmp_locale(s, m, ln)))  \
+	     && (ln == 1 || (OP(c) == EXACTF             \
+			      ? foldEQ(s, m, ln)           \
+			      : foldEQ_locale(s, m, ln)))  \
 	     && (!reginfo || regtry(reginfo, &s)) )        \
 	    goto got_it;                                  \
 	s++;                                              \
@@ -1416,7 +1416,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	     * than just upper and lower: one needs to use
 	     * the so-called folding case for case-insensitive
 	     * matching (called "loose matching" in Unicode).
-	     * ibcmp_utf8() will do just that. */
+	     * foldEQ_utf8() will do just that. */
 
 	    if (do_utf8 || UTF) {
 	        UV c, f;
@@ -3456,7 +3456,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		const char * const l = locinput;
 		char *e = PL_regeol;
 
-		if (ibcmp_utf8(s, 0,  ln, cBOOL(UTF),
+		if (! foldEQ_utf8(s, 0,  ln, cBOOL(UTF),
 			       l, &e, 0,  do_utf8)) {
 		     /* One more case for the sharp s:
 		      * pack("U0U*", 0xDF) =~ /ss/i,
@@ -3487,8 +3487,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    if (PL_regeol - locinput < ln)
 		sayNO;
 	    if (ln > 1 && (OP(scan) == EXACTF
-			   ? ibcmp(s, locinput, ln)
-			   : ibcmp_locale(s, locinput, ln)))
+			   ? ! foldEQ(s, locinput, ln)
+			   : ! foldEQ_locale(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
 	    nextchr = UCHARAT(locinput);
@@ -3866,8 +3866,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    if (ln > 1 && (type == REF
 			   ? memNE(s, locinput, ln)
 			   : (type == REFF
-			      ? ibcmp(s, locinput, ln)
-			      : ibcmp_locale(s, locinput, ln))))
+			      ? ! foldEQ(s, locinput, ln)
+			      : ! foldEQ_locale(s, locinput, ln))))
 		sayNO;
 	    locinput += ln;
 	    nextchr = UCHARAT(locinput);
@@ -5363,7 +5363,7 @@ NULL
                 char *e = PL_regeol;
                 to_uni_fold(n, folded, &foldlen);
 
-		if (ibcmp_utf8((const char*) folded, 0,  foldlen, 1,
+		if (! foldEQ_utf8((const char*) folded, 0,  foldlen, 1,
                 	       l, &e, 0,  do_utf8)) {
                         sayNO;
                 }
