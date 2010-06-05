@@ -5026,6 +5026,19 @@ START_EXTERN_C
  * not the same beast. ANSI doesn't allow the assignment from one to the other.
  * (although most, but not all, compilers are prepared to do it)
  */
+
+/* args are:
+    vtable
+    get
+    set
+    len
+    clear
+    free
+    copy
+    dup
+    local
+*/
+
 MGVTBL_SET(
     PL_vtbl_sv,
     MEMBER_TO_FPTR(Perl_magic_get),
