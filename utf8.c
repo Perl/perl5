@@ -2504,14 +2504,16 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 /*
 =for apidoc ibcmp_utf8
 
-Returns true if the strings s1 and s2 differ case-insensitively, false
-if they are equal case-insensitively.
+Returns true if the leading portions of the strings s1 and s2 (either or both
+of which may be in UTF-8) differ case-insensitively; false otherwise.
+How far into the strings to compare is determined by other input parameters.
 
 If u1 is true, the string s1 is assumed to be in UTF-8-encoded Unicode;
 otherwise it is assumed to be in native 8-bit encoding.  Correspondingly for u2
 with respect to s2.
 
-If the byte length l1 is non-zero, s1+l1 will be used as a goal to reach.  The
+If the byte length l1 is non-zero, it says how far into s1 to check for fold
+equality.  In other words, s1+l1 will be used as a goal to reach.  The
 scan will not be considered to be a match unless the goal is reached, and
 scanning won't continue past that goal.  Correspondingly for l2 with respect to
 s2.
@@ -2520,9 +2522,11 @@ If pe1 is non-NULL and the pointer it points to is not NULL, that pointer is
 considered an end pointer beyond which scanning of s1 will not continue under
 any circumstances.  This means that if both l1 and pe1 are specified, and pe1
 is less than s1+l1, the match will never be successful because it can never
-get as far as its goal.  Correspondingly for pe2 with respect to s2.
+get as far as its goal (and in fact is asserted against).  Correspondingly for
+pe2 with respect to s2.
 
-At least one of s1 and s2 must have a goal, and if both do, both have to be
+At least one of s1 and s2 must have a goal (at least one of l1 and l2 must be
+non-zero), and if both do, both have to be
 reached for a successful match.   Also, if the fold of a character is multiple
 characters, all of them must be matched (see tr21 reference below for
 'folding').
@@ -2596,7 +2600,8 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     /* Look through both strings, a character at a time */
     while (p1 < e1 && p2 < e2) {
 
-        /* If at the beginning of a new character in s1, get its fold to use */
+        /* If at the beginning of a new character in s1, get its fold to use
+         * and the length of the fold */
         if (n1 == 0) {
             if (u1) {
                 to_utf8_fold(p1, foldbuf1, &n1);
