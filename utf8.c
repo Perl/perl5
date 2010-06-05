@@ -2502,10 +2502,10 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc ibcmp_utf8
+=for apidoc foldEQ_utf8
 
 Returns true if the leading portions of the strings s1 and s2 (either or both
-of which may be in UTF-8) differ case-insensitively; false otherwise.
+of which may be in UTF-8) are the same case-insensitively; false otherwise.
 How far into the strings to compare is determined by other input parameters.
 
 If u1 is true, the string s1 is assumed to be in UTF-8-encoded Unicode;
@@ -2531,7 +2531,7 @@ reached for a successful match.   Also, if the fold of a character is multiple
 characters, all of them must be matched (see tr21 reference below for
 'folding').
 
-Upon a successful match (when the routine returns false), if pe1 is non-NULL,
+Upon a successful match, if pe1 is non-NULL,
 it will be set to point to the beginning of the I<next> character of s1 beyond
 what was matched.  Correspondingly for pe2 and s2.
 
@@ -2541,7 +2541,7 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
 =cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
+Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
 {
     dVAR;
     register const U8 *p1  = (const U8*)s1; /* Point to current char */
@@ -2558,7 +2558,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     U8 natbuf[2];               /* Holds native 8-bit char converted to utf8;
                                    these always fit in 2 bytes */
 
-    PERL_ARGS_ASSERT_IBCMP_UTF8;
+    PERL_ARGS_ASSERT_FOLDEQ_UTF8;
 
     if (pe1) {
         e1 = *(U8**)pe1;
@@ -2634,7 +2634,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
                                                        character */
                 || memNE((char*)f1, (char*)f2, fold_length))
             {
-                return 1; /* mismatch */
+                return 0; /* mismatch */
             }
 
             /* Here, they matched, advance past them */
@@ -2658,7 +2658,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     * character (which can happen when the fold of a character is more than one
     * character). */
     if (! ((g1 == 0 || p1 == g1) && (g2 == 0 || p2 == g2)) || n1 || n2) {
-        return 1;
+        return 0;
     }
 
     /* Successful match.  Set output pointers */
@@ -2668,7 +2668,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
     if (pe2) {
         *pe2 = (char*)p2;
     }
-    return 0;
+    return 1;
 }
 
 /*

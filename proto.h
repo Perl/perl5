@@ -1109,24 +1109,36 @@ STATIC struct refcounted_he *	S_refcounted_he_new_common(pTHX_ struct refcounted
 /* PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash); */
 /* PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags); */
 PERL_CALLCONV void	Perl_hv_undef(pTHX_ HV *hv);
-PERL_CALLCONV I32	Perl_ibcmp(const char* a, const char* b, I32 len)
+/* PERL_CALLCONV I32	ibcmp(pTHX_ const char* a, const char* b, I32 len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
+PERL_CALLCONV I32	Perl_foldEQ(const char* a, const char* b, I32 len)
 			__attribute__pure__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_IBCMP	\
+#define PERL_ARGS_ASSERT_FOLDEQ	\
 	assert(a); assert(b)
 
-PERL_CALLCONV I32	Perl_ibcmp_locale(const char* a, const char* b, I32 len)
+/* PERL_CALLCONV I32	ibcmp_locale(pTHX_ const char* a, const char* b, I32 len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
+PERL_CALLCONV I32	Perl_foldEQ_locale(const char* a, const char* b, I32 len)
 			__attribute__pure__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_IBCMP_LOCALE	\
+#define PERL_ARGS_ASSERT_FOLDEQ_LOCALE	\
 	assert(a); assert(b)
 
-PERL_CALLCONV I32	Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
+/* PERL_CALLCONV I32	ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_5); */
+
+PERL_CALLCONV I32	Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_IBCMP_UTF8	\
+#define PERL_ARGS_ASSERT_FOLDEQ_UTF8	\
 	assert(s1); assert(s2)
 
 #if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)

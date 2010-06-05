@@ -878,37 +878,58 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     return NULL;
 }
 
+/*
+=for apidoc foldEQ
+
+Returns true if the leading len bytes of the strings s1 and s2 are the same
+case-insensitively; false otherwise.  Uppercase and lowercase ASCII range bytes
+match themselves and their opposite case counterparts.  Non-cased and non-ASCII
+range bytes match only themselves.
+
+=cut
+*/
+
+
 I32
-Perl_ibcmp(const char *s1, const char *s2, register I32 len)
+Perl_foldEQ(const char *s1, const char *s2, register I32 len)
 {
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
 
-    PERL_ARGS_ASSERT_IBCMP;
+    PERL_ARGS_ASSERT_FOLDEQ;
 
     while (len--) {
 	if (*a != *b && *a != PL_fold[*b])
-	    return 1;
+	    return 0;
 	a++,b++;
     }
-    return 0;
+    return 1;
 }
 
+/*
+=for apidoc foldEQ_locale
+
+Returns true if the leading len bytes of the strings s1 and s2 are the same
+case-insensitively in the current locale; false otherwise.
+
+=cut
+*/
+
 I32
-Perl_ibcmp_locale(const char *s1, const char *s2, register I32 len)
+Perl_foldEQ_locale(const char *s1, const char *s2, register I32 len)
 {
     dVAR;
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
 
-    PERL_ARGS_ASSERT_IBCMP_LOCALE;
+    PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
 
     while (len--) {
 	if (*a != *b && *a != PL_fold_locale[*b])
-	    return 1;
+	    return 0;
 	a++,b++;
     }
-    return 0;
+    return 1;
 }
 
 /* copy a string to a safe spot */

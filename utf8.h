@@ -20,6 +20,16 @@
 #define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
 #define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
 
+/*
+=for apidoc ibcmp_utf8
+
+This is a synonym for (! foldEQ_utf8())
+
+=cut
+*/
+#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
+		    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
+
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:

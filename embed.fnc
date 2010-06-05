@@ -499,9 +499,14 @@ Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 AbmM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash|int flags
 Apd	|void	|hv_undef	|NULLOK HV *hv
-AnpP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
-AnpP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
-Apd	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
+Am	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
+AnpP	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
+Am	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
+AnpP	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
+Am	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
+				|bool u1|NN const char *s2|NULLOK char **pe2 \
+				|UV l2|bool u2
+Apd	|I32	|foldEQ_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
 #if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)

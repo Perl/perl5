@@ -315,9 +315,9 @@
 #endif
 #endif
 #define hv_undef		Perl_hv_undef
-#define ibcmp			Perl_ibcmp
-#define ibcmp_locale		Perl_ibcmp_locale
-#define ibcmp_utf8		Perl_ibcmp_utf8
+#define foldEQ			Perl_foldEQ
+#define foldEQ_locale		Perl_foldEQ_locale
+#define foldEQ_utf8		Perl_foldEQ_utf8
 #if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define ingroup			S_ingroup
@@ -2752,9 +2752,9 @@
 #endif
 #endif
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
-#define ibcmp			Perl_ibcmp
-#define ibcmp_locale		Perl_ibcmp_locale
-#define ibcmp_utf8(a,b,c,d,e,f,g,h)	Perl_ibcmp_utf8(aTHX_ a,b,c,d,e,f,g,h)
+#define foldEQ			Perl_foldEQ
+#define foldEQ_locale		Perl_foldEQ_locale
+#define foldEQ_utf8(a,b,c,d,e,f,g,h)	Perl_foldEQ_utf8(aTHX_ a,b,c,d,e,f,g,h)
 #if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define ingroup(a,b)		S_ingroup(aTHX_ a,b)
