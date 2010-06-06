@@ -147,7 +147,7 @@ sub FETCHSIZE { -1 }
 
 package main;
   
-plan(tests => 66);
+plan(tests => 69);
 
 {my @ary;
 
@@ -178,7 +178,7 @@ is(pop(@ary), 3);
 is($seen{'POP'}, 1);
 is(join(':',@ary), '1:2');
 
-push(@ary,4);
+is(push(@ary,4), 3);
 is($seen{'PUSH'}, 1);
 is(join(':',@ary), '1:2:4');
 
@@ -216,10 +216,12 @@ $seen{SHIFT} = 0;
 shift @ary;                     # this didn't used to call SHIFT at  all
 is($seen{SHIFT}, 1);
 $seen{PUSH} = 0;
-push @ary;                       # this didn't used to call PUSH at all
+my $got = push @ary;            # this didn't used to call PUSH at all
+is($got, 0);
 is($seen{PUSH}, 1);
 $seen{UNSHIFT} = 0;
-unshift @ary;                   # this didn't used to call UNSHIFT at all
+$got = unshift @ary;            # this didn't used to call UNSHIFT at all
+is($got, 0);
 is($seen{UNSHIFT}, 1);
 
 @ary = qw(3 2 1);
