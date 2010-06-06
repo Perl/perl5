@@ -1774,14 +1774,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             });
                             if ( base ) {
                                 U32 tmp;
+				I32 offset;
                                 if (charid &&
-                                     (base + charid > trie->uniquecharcount )
-                                     && (base + charid - 1 - trie->uniquecharcount
-                                            < trie->lasttrans)
-                                     && trie->trans[base + charid - 1 -
-                                            trie->uniquecharcount].check == state
-                                     && (tmp=trie->trans[base + charid - 1 -
-                                        trie->uniquecharcount ].next))
+				     ( ((offset = base + charid
+					- 1 - trie->uniquecharcount)) >= 0)
+                                     && ((U32)offset < trie->lasttrans)
+                                     && trie->trans[offset].check == state
+                                     && (tmp=trie->trans[offset].next))
                                 {
                                     DEBUG_TRIE_EXECUTE_r(
                                         PerlIO_printf( Perl_debug_log," - legal\n"));
@@ -3197,6 +3196,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		    /* read a char and goto next state */
 		    if ( base ) {
+			I32 offset;
 			REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
 					     uscan, len, uvc, charid, foldlen,
 					     foldbuf, uniflags);
@@ -3204,14 +3204,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			if (foldlen>0)
 			    ST.longfold = TRUE;
 			if (charid &&
-			     (base + charid > trie->uniquecharcount )
-			     && (base + charid - 1 - trie->uniquecharcount
-				    < trie->lasttrans)
-			     && trie->trans[base + charid - 1 -
-				    trie->uniquecharcount].check == state)
+			     ( ((offset =
+			      base + charid - 1 - trie->uniquecharcount)) >= 0)
+
+			     && ((U32)offset < trie->lasttrans)
+			     && trie->trans[offset].check == state)
 			{
-			    state = trie->trans[base + charid - 1 -
-				trie->uniquecharcount ].next;
+			    state = trie->trans[offset].next;
 			}
 			else {
 			    state = 0;
