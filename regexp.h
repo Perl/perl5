@@ -603,12 +603,11 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
-	    regnode	*A, *B;	/* the nodes corresponding to /A*B/  */
+	    regnode	*me;	/* the CURLYX node  */
+	    regnode	*B;	/* the B node in /A*B/  */
 	    CHECKPOINT	cp;	/* remember current savestack index */
 	    bool	minmod;
 	    int		parenfloor;/* how far back to strip paren data */
-	    int		min;	/* the minimal number of A's to match */
-	    int		max;	/* the maximal number of A's to match */
 
 	    /* these two are modified by WHILEM */
 	    int		count;	/* how many instances of A we've matched */

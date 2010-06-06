@@ -4325,9 +4325,7 @@ NULL
 	    /* these fields contain the state of the current curly.
 	     * they are accessed by subsequent WHILEMs */
 	    ST.parenfloor = parenfloor;
-	    ST.min = ARG1(scan);
-	    ST.max = ARG2(scan);
-	    ST.A = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
+	    ST.me = scan;
 	    ST.B = next;
 	    ST.minmod = minmod;
 	    minmod = 0;
@@ -4358,6 +4356,10 @@ NULL
 	{
 	    /* see the discussion above about CURLYX/WHILEM */
 	    I32 n;
+	    int min = ARG1(cur_curlyx->u.curlyx.me);
+	    int max = ARG2(cur_curlyx->u.curlyx.me);
+	    regnode *A = NEXTOPER(cur_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS;
+
 	    assert(cur_curlyx); /* keep Coverity happy */
 	    n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
 	    ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
@@ -4367,17 +4369,15 @@ NULL
 	    PL_reginput = locinput;
 
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-		  "%*s  whilem: matched %ld out of %ld..%ld\n",
-		  REPORT_CODE_OFF+depth*2, "", (long)n,
-		  (long)cur_curlyx->u.curlyx.min,
-		  (long)cur_curlyx->u.curlyx.max)
+		  "%*s  whilem: matched %ld out of %d..%d\n",
+		  REPORT_CODE_OFF+depth*2, "", (long)n, min, max)
 	    );
 
 	    /* First just match a string of min A's. */
 
-	    if (n < cur_curlyx->u.curlyx.min) {
+	    if (n < min) {
 		cur_curlyx->u.curlyx.lastloc = locinput;
-		PUSH_STATE_GOTO(WHILEM_A_pre, cur_curlyx->u.curlyx.A);
+		PUSH_STATE_GOTO(WHILEM_A_pre, A);
 		/* NOTREACHED */
 	    }
 
@@ -4457,11 +4457,11 @@ NULL
 
 	    /* Prefer A over B for maximal matching. */
 
-	    if (n < cur_curlyx->u.curlyx.max) { /* More greed allowed? */
+	    if (n < max) { /* More greed allowed? */
 		ST.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
-		PUSH_STATE_GOTO(WHILEM_A_max, cur_curlyx->u.curlyx.A);
+		PUSH_STATE_GOTO(WHILEM_A_max, A);
 		/* NOTREACHED */
 	    }
 	    goto do_whilem_B_max;
@@ -4521,7 +4521,7 @@ NULL
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex);
 
-	    if (cur_curlyx->u.curlyx.count >= cur_curlyx->u.curlyx.max) {
+	    if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
 		/* Maximum greed exceeded */
 		if (cur_curlyx->u.curlyx.count >= REG_INFTY
 		    && ckWARN(WARN_REGEXP)
@@ -4545,7 +4545,8 @@ NULL
 	    cur_curlyx->u.curlyx.lastloc = locinput;
 	    ST.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
 	    REGCP_SET(ST.lastcp);
-	    PUSH_STATE_GOTO(WHILEM_A_min, ST.save_curlyx->u.curlyx.A);
+	    PUSH_STATE_GOTO(WHILEM_A_min,
+		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS);
 	    /* NOTREACHED */
 
 #undef  ST
