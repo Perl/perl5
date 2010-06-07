@@ -2842,7 +2842,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "  -U                allow unsafe operations\n"
 "  -v                print version, patchlevel and license\n"
 "  -V[:variable]     print configuration summary (or a single Config.pm variable)\n",
-"  -w                enable many useful warnings (RECOMMENDED)\n"
+"  -w                enable many useful warnings\n"
 "  -W                enable all warnings\n"
 "  -x[directory]     ignore text before #!perl line (optionally cd to directory)\n"
 "  -X                disable all warnings\n"
