@@ -94,7 +94,7 @@ as well.
 
 =head2 How does C3 work
 
-C3 works by always preserving local precendence ordering. This essentially
+C3 works by always preserving local precedence ordering. This essentially
 means that no class will appear before any of its subclasses. Take, for
 instance, the classic diamond inheritance pattern:
 
