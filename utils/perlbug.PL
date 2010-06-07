@@ -456,11 +456,12 @@ EOF
     }
 
     # Prompt for return address, if needed
-    unless ($from) {
+    unless ($::opt_r) {
 	# Try and guess return address
 	my $guess;
 
-	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || $ENV{'EMAIL'} || '';
+	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || $ENV{'EMAIL'}
+	    || $from || '';
         if ($Is_MacOS) {
             require Mac::InternetConfig;
             $guess = $Mac::InternetConfig::InternetConfig{
