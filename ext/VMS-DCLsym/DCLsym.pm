@@ -245,7 +245,7 @@ recorded, but in the rare event that someone changes the process' symbol table
 from outside (as is possible using some software from the net), the iterator
 will be out of sync with the symbol table.  If you expect this to happen, you
 can reset the cache by calling this method.  In addition, if you pass a FALSE
-value as the first argument, caching will be disabled.  It can be reenabled
+value as the first argument, caching will be disabled.  It can be re-enabled
 later by calling C<clearcache> again with a TRUE value as the first argument.
 It returns TRUE or FALSE to indicate whether caching was previously enabled or
 disabled, respectively.
