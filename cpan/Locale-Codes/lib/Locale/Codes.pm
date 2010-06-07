@@ -27,7 +27,7 @@ use vars qw($VERSION %Data);
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
 
-$VERSION='3.12';
+$VERSION='3.13';
 
 #=======================================================================
 #
@@ -177,9 +177,9 @@ sub _rename {
       my ($new_id,$i) = @{ $Data{$type}{'alias2id'}{lc($new_name)} };
       if ($new_id != $id) {
          # Case 1
- 	 carp "rename_$type(): rename to an existing $type not allowed\n"
- 	   unless ($nowarn);
- 	 return 0;
+         carp "rename_$type(): rename to an existing $type not allowed\n"
+           unless ($nowarn);
+         return 0;
       }
 
       # Case 2
@@ -587,7 +587,7 @@ sub _delete_code_alias {
 #       ($id,$i) = @{ $Data{$type}{'code2id'}{$codeset}{$code} };
 #    } else {
 #       carp "alias_code: attempt to alias \"$alias\" to unknown country code \"$code\"\n"
-# 	unless ($nowarn);
+#       unless ($nowarn);
 #       return 0;
 #    }
 
@@ -602,7 +602,7 @@ sub _delete_code_alias {
 
 #    if (exists $Data{$type}{'code2id'}{$codeset}{$alias}) {
 #       carp "alias_code: attempt to alias \"$alias\" which is already in use\n"
-# 	unless ($nowarn);
+#       unless ($nowarn);
 #       return 0;
 #    }
 

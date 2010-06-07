@@ -2,7 +2,7 @@ package Locale::Codes::Script;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Apr  6 08:17:27 EDT 2010
+#    Generated on: Tue Jun  1 15:14:48 EDT 2010
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 use vars qw($VERSION);
-$VERSION='3.12';
+$VERSION='3.13';
 
 $Locale::Codes::Data{'script'}{'id'} = '0144';
 

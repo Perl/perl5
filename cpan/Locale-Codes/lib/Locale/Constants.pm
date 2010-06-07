@@ -16,8 +16,8 @@ require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT);
 
-$VERSION='3.12';
-@ISA	 = qw(Exporter);
+$VERSION='3.13';
+@ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3
               LOCALE_CODE_NUMERIC

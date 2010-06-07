@@ -144,6 +144,8 @@ all 2.X releases, but has been dropped as of 3.00.
 
 =item B<Locale::Constants>
 
+The Locale-Codes distribution.
+
 =item B<Locale::SubCountry>
 
 ISO codes for country sub-divisions (states, counties, provinces,
