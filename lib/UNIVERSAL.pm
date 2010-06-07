@@ -147,7 +147,7 @@ I<undef>.  This includes methods inherited or imported by C<$obj>, C<CLASS>, or
 C<VAL>.
 
 C<can> cannot know whether an object will be able to provide a method through
-AUTOLOAD (unless the object's class has overriden C<can> appropriately), so a
+AUTOLOAD (unless the object's class has overridden C<can> appropriately), so a
 return value of I<undef> does not necessarily mean the object will not be able
 to handle the method call. To get around this some module authors use a forward
 declaration (see L<perlsub>) for methods they will handle via AUTOLOAD. For
