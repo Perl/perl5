@@ -78,7 +78,7 @@ successful.
 
 =item prepared ()
 
-BOOL indicating if the C<prepare> call exited succesfully
+BOOL indicating if the C<prepare> call exited successfully
 This gets set after C<perl Makefile.PL>
 
 =item distdir ()
@@ -88,7 +88,7 @@ set after a call to C<prepare>.
 
 =item created ()
 
-BOOL indicating if the C<create> call exited succesfully. This gets
+BOOL indicating if the C<create> call exited successfully. This gets
 set after C<make> and C<make test>.
 
 =item installed ()

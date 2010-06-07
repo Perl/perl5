@@ -98,7 +98,7 @@ BOOL indicating if the C<Build test> command was successful.
 
 =item C<prepared ()>
 
-BOOL indicating if the C<prepare> call exited succesfully
+BOOL indicating if the C<prepare> call exited successfully
 This gets set after C<perl Build.PL>
 
 =item C<distdir ()>
@@ -108,7 +108,7 @@ set after a call to C<prepare>.
 
 =item C<created ()>
 
-BOOL indicating if the C<create> call exited succesfully. This gets
+BOOL indicating if the C<create> call exited successfully. This gets
 set after C<Build> and C<Build test>.
 
 =item C<installed ()>

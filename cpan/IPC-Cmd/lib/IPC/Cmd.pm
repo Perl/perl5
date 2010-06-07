@@ -516,7 +516,7 @@ sub open3_run {
 
 C<run_forked> is used to execute some program or a coderef,
 optionally feed it with some input, get its return code
-and output (both stdout and stderr into seperate buffers).
+and output (both stdout and stderr into separate buffers).
 In addition it allows to terminate the program
 which take too long to finish.
 
@@ -1532,7 +1532,7 @@ You can use it as follows:
   my $cmd = q[echo ] . QUOTE . q[foo bar] . QUOTE;
 
 This makes sure that C<foo bar> is treated as a string, rather than two
-seperate arguments to the C<echo> function.
+separate arguments to the C<echo> function.
 
 __END__
 
