@@ -716,6 +716,10 @@ EOF
 sub Dump {
     local(*OUT) = @_;
 
+    # these won't have been set if run with -d
+    $category ||= 'core';
+    $severity ||= 'low';
+
     print OUT <<EFF;
 ---
 Flags:
@@ -784,6 +788,7 @@ EOF
 	my $value;
 	foreach (sort keys %::Config) {
 	    $value = $::Config{$_};
+	    $value = '' unless defined $value;
 	    $value =~ s/'/\\'/g;
 	    print OUT "$_='$value'\n";
 	}
