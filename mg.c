@@ -179,7 +179,6 @@ S_is_container_magic(const MAGIC *mg)
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
     case PERL_MAGIC_tied: /* treat as value, so 'local @tied' isn't tied */
-    case PERL_MAGIC_tiedscalar: /* so 'local $scalar' isn't tied */
 	return 0;
     default:
 	return 1;
