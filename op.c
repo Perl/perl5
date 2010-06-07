@@ -7161,11 +7161,12 @@ Perl_ck_glob(pTHX_ OP *o)
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
 		newSVpvs("File::Glob"), NULL, NULL, NULL);
-	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
-	glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV);
-	GvCV(gv) = GvCV(glob_gv);
-	SvREFCNT_inc_void(MUTABLE_SV(GvCV(gv)));
-	GvIMPORTED_CV_on(gv);
+	if((glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV))) {
+	    gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
+	    GvCV(gv) = GvCV(glob_gv);
+	    SvREFCNT_inc_void(MUTABLE_SV(GvCV(gv)));
+	    GvIMPORTED_CV_on(gv);
+	}
 	LEAVE;
     }
 #endif /* PERL_EXTERNAL_GLOB */
