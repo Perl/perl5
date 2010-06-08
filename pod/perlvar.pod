@@ -553,6 +553,11 @@ taken for something more important.)
 Consider using "real" multidimensional arrays as described
 in L<perllol>.
 
+=item $#
+X<$#>
+
+C<$#> was removed in Perl 5.10.0. See L<perldata/"Variable names"> for C<$#ary> usage.
+
 =item HANDLE->format_page_number(EXPR)
 
 =item $FORMAT_PAGE_NUMBER
