@@ -140,13 +140,16 @@ Use of comma-less variable list is deprecated at - line 4.
 Use of comma-less variable list is deprecated at - line 4.
 ########
 # toke.c
+$a =~ m/$foo/sand $bar;
 $a = <<;
 
 no warnings 'deprecated' ;
+$a =~ m/$foo/sand $bar;
 $a = <<;
 
 EXPECT
-Use of bare << to mean <<"" is deprecated at - line 2.
+Having no space between pattern and following word is deprecated at - line 2.
+Use of bare << to mean <<"" is deprecated at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;

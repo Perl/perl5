@@ -11887,6 +11887,12 @@ S_scan_pat(pTHX_ char *start, I32 type)
 #endif
     while (*s && strchr(valid_flags, *s))
 	pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
+
+    if (isALNUM(*s)) {
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
+	    "Having no space between pattern and following word is deprecated");
+
+    }
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {
 	SV* tmptoken = newSVpvn(modstart, s - modstart);

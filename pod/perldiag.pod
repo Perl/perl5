@@ -1913,6 +1913,23 @@ spots.  This is now heavily deprecated.
 (F) The parser has given up trying to parse the program after 10 errors.
 Further error messages would likely be uninformative.
 
+=item Having no space between pattern and following word is deprecated
+
+(D syntax)
+
+You had a word that isn't a regex modifier immediately following a pattern
+without an intervening space.  For example, the two constructs:
+
+ $a =~ m/$foo/sand $bar
+ $a =~ m/$foo/s and $bar
+
+both currently mean the same thing, but it is planned to disallow the first form
+in Perl 5.16.  And,
+
+ $a =~ m/$foo/and $bar
+
+will be disallowed too.
+
 =item Hexadecimal number > 0xffffffff non-portable
 
 (W portable) The hexadecimal number you specified is larger than 2**32-1
@@ -2855,7 +2872,6 @@ your system.
 
 (F) The indicated command line switch needs a mandatory argument, but
 you haven't specified one.
-
 =item No such class field "%s" in variable %s of type %s
 
 (F) You tried to access a key from a hash through the indicated typed variable
