@@ -56,10 +56,11 @@ sub do_test {
 	    # legitimate regexp, it still isn't true. Seems easier and clearer
 	    # things that look like comments.
 
+	    my $version_condition = qr/\$] [<>]=? 5\.\d\d\d/;
 	    # Could do this is in a s///mge but seems clearer like this:
 	    $pattern = join '', map {
 		# If we identify the version condition, take *it* out whatever
-		s/\s*# (\$] [<>]=? 5\.\d\d\d)$//
+		s/\s*# ($version_condition(?: && $version_condition)?)$//
 		    ? (eval $1 ? $_ : '')
 		    : $_ # Didn't match, so this line is in
 	    } split /^/, $pattern;
@@ -311,6 +312,7 @@ do_test(14,
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$version_condition"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"			# $] < 5.009
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0	# $] >= 5.009
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
@@ -591,7 +593,8 @@ do_test(23,
     MUTEXP = $ADDR
     OWNER = $ADDR)?
     FLAGS = 0x200				# $] < 5.009
-    FLAGS = 0xc00				# $] >= 5.009
+    FLAGS = 0xc00				# $] >= 5.009 && $] < 5.013
+    FLAGS = 0xc					# $] >= 5.013
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
