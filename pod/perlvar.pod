@@ -1629,6 +1629,45 @@ L<warnings> for additional information.
 
 =back
 
+=head2 Names that are no longer special
+
+These variables had special meaning in prior versions of Perl but now
+have no effect and will cause warnings if used.  They are included
+here for historical reference.
+
+=over 8
+
+=item $#
+X<$#>
+
+C<$#> used to be a variable that could be used to format printed numbers.
+After a deprecation cycle, its magic was removed in Perl 5.10 and using it
+now triggers a warning: C<$# is no longer supported>.
+
+C<$#> is also used as sigil, which, when prepended on the name of an
+array, gives the index of the last element in that array.
+
+    my @array        = ("a", "b", "c");
+    my $last_index   = $#array;   # $last_index is 2
+
+    for my $i (0 .. $#array) {
+        print "The value of index $i is $array[$i]\n";
+    }
+
+Also see L<perldata>.
+
+=item $*
+X<$*>
+
+C<$*> used to be a variable that enabled multiline matching.
+After a deprecation cycle, its magic was removed in Perl 5.10.
+Using it now triggers a warning: C<$* is no longer supported>.
+Use the C</s> and C</m> regexp modifiers instead.
+
+Also see L<perlre>.
+
+=back
+
 =head2 Error Indicators
 X<error> X<exception>
 
