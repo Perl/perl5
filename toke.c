@@ -3270,7 +3270,8 @@ S_scan_const(pTHX_ char *start)
 			     * should the trailing NUL be missing that this
 			     * print won't run off the end of the string */
 			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-				"Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s", i - s + 1, s, e - i, i + 1);
+					"Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s",
+					(int)(i - s + 1), s, (int)(e - i), i + 1);
 			}
 		    }
 		} /* End \N{NAME} */
