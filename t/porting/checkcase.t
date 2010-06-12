@@ -20,9 +20,10 @@ find(sub {
 	   push @{$files{lc $name}}, $name;
 	 }, '..');
 
-foreach (values %files) {
+foreach (sort values %files) {
     if (@$_ > 1) {
 		print "not ok ".++$test_count. " - ". join(", ", @$_), "\n";
+		print STDERR "# $_\n" foreach @$_;
     } else {
 		print "ok ".++$test_count. " - ". join(", ", @$_), "\n";
 	}
