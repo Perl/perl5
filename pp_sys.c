@@ -656,7 +656,7 @@ PP(pp_fileno)
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	PUTBACK;
 	ENTER_with_name("call_FILENO");
 	call_method("FILENO", G_SCALAR);
@@ -729,9 +729,9 @@ PP(pp_binmode)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    if (discp)
-		XPUSHs(discp);
+		PUSHs(discp);
 	    PUTBACK;
 	    ENTER_with_name("call_BINMODE");
 	    call_method("BINMODE", G_SCALAR);
@@ -879,7 +879,7 @@ PP(pp_untie)
 	    CV *cv;
 	    if (gv && isGV(gv) && (cv = GvCV(gv))) {
 	       PUSHMARK(SP);
-	       XPUSHs(SvTIED_obj(MUTABLE_SV(gv), mg));
+	       PUSHs(SvTIED_obj(MUTABLE_SV(gv), mg));
 	       mXPUSHi(SvREFCNT(obj) - 1);
 	       PUTBACK;
 	       ENTER_with_name("call_UNTIE");
@@ -1203,7 +1203,7 @@ PP(pp_getc)
 	if (mg) {
 	    const I32 gimme = GIMME_V;
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("GETC", gimme);
@@ -2026,7 +2026,7 @@ PP(pp_eof)
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	/*
 	 * in Perl 5.12 and later, the additional paramter is a bitmask:
 	 * 0 = eof
@@ -2085,7 +2085,7 @@ PP(pp_tell)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("TELL", G_SCALAR);
@@ -2126,13 +2126,13 @@ PP(pp_sysseek)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 #if LSEEKSIZE > IVSIZE
-	    mXPUSHn((NV) offset);
+	    mPUSHn((NV) offset);
 #else
-	    mXPUSHi(offset);
+	    mPUSHi(offset);
 #endif
-	    mXPUSHi(whence);
+	    mPUSHi(whence);
 	    PUTBACK;
 	    ENTER;
 	    call_method("SEEK", G_SCALAR);
