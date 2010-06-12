@@ -1194,6 +1194,9 @@ PP(pp_getc)
     IO *io = NULL;
     GV * const gv = (MAXARG==0) ? PL_stdingv : MUTABLE_GV(POPs);
 
+    if (MAXARG == 0)
+	EXTEND(SP, 1);
+
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
@@ -2067,6 +2070,8 @@ PP(pp_tell)
 
     if (MAXARG != 0)
 	PL_last_in_gv = MUTABLE_GV(POPs);
+    else
+	EXTEND(SP, 1);
     gv = PL_last_in_gv;
 
     if (gv && (io = GvIO(gv))) {
