@@ -2019,10 +2019,14 @@ PP(pp_eof)
 
     if (MAXARG)
 	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
-    else if (PL_op->op_flags & OPf_SPECIAL)
-	gv = PL_last_in_gv = GvEGV(PL_argvgv);	/* eof() - ARGV magic */
-    else
-	gv = PL_last_in_gv;			/* eof */
+    else {
+	EXTEND(SP, 1);
+
+	if (PL_op->op_flags & OPf_SPECIAL)
+	    gv = PL_last_in_gv = GvEGV(PL_argvgv);	/* eof() - ARGV magic */
+	else
+	    gv = PL_last_in_gv;			/* eof */
+    }
 
     if (!gv)
 	RETPUSHNO;
