@@ -557,13 +557,16 @@ PP(pp_close)
     dVAR; dSP;
     GV * const gv = (MAXARG == 0) ? PL_defoutgv : MUTABLE_GV(POPs);
 
+    if (MAXARG == 0)
+	EXTEND(SP, 1);
+
     if (gv) {
 	IO * const io = GvIO(gv);
 	if (io) {
 	    MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
 		PUSHMARK(SP);
-		XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+		PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 		PUTBACK;
 		ENTER_with_name("call_CLOSE");
 		call_method("CLOSE", G_SCALAR);
@@ -573,7 +576,6 @@ PP(pp_close)
 	    }
 	}
     }
-    EXTEND(SP, 1);
     PUSHs(boolSV(do_close(gv, TRUE)));
     RETURN;
 }
@@ -739,7 +741,6 @@ PP(pp_binmode)
 	}
     }
 
-    EXTEND(SP, 1);
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
@@ -1268,14 +1269,15 @@ PP(pp_enterwrite)
     CV *cv = NULL;
     SV *tmpsv = NULL;
 
-    if (MAXARG == 0)
+    if (MAXARG == 0) {
 	gv = PL_defoutgv;
+	EXTEND(SP, 1);
+    }
     else {
 	gv = MUTABLE_GV(POPs);
 	if (!gv)
 	    gv = PL_defoutgv;
     }
-    EXTEND(SP, 1);
     io = GvIO(gv);
     if (!io) {
 	RETPUSHNO;
@@ -3710,7 +3712,6 @@ PP(pp_readlink)
 #endif
     tmps = POPpconstx;
     len = readlink(tmps, buf, sizeof(buf) - 1);
-    EXTEND(SP, 1);
     if (len < 0)
 	RETPUSHUNDEF;
     PUSHp(buf, len);
@@ -4639,7 +4640,6 @@ PP(pp_alarm)
     int anum;
     anum = POPi;
     anum = alarm((unsigned int)anum);
-    EXTEND(SP, 1);
     if (anum < 0)
 	RETPUSHUNDEF;
     PUSHi(anum);
