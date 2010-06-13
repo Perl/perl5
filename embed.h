@@ -1455,6 +1455,7 @@
 #  endif
 #ifdef PERL_CORE
 #define space_join_names_mortal	S_space_join_names_mortal
+#define tied_handle_method	S_tied_handle_method
 #endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
@@ -3895,6 +3896,7 @@
 #  endif
 #ifdef PERL_CORE
 #define space_join_names_mortal(a)	S_space_join_names_mortal(aTHX_ a)
+#define tied_handle_method(a,b,c,d)	S_tied_handle_method(aTHX_ a,b,c,d)
 #endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)

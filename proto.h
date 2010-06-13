@@ -5350,6 +5350,14 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 #define PERL_ARGS_ASSERT_SPACE_JOIN_NAMES_MORTAL	\
 	assert(array)
 
+STATIC OP *	S_tied_handle_method(pTHX_ const char *const methname, SV **sp, IO *const io, MAGIC *const mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_TIED_HANDLE_METHOD	\
+	assert(methname); assert(sp); assert(io); assert(mg)
+
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)

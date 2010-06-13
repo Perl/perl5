@@ -552,6 +552,21 @@ PP(pp_open)
     RETURN;
 }
 
+static OP *
+S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
+		     IO *const io, MAGIC *const mg)
+{
+    PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
+
+    PUSHMARK(sp);
+    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+    PUTBACK;
+    ENTER_with_name("call_tied_handle_method");
+    call_method(methname, G_SCALAR);
+    LEAVE_with_name("call_tied_handle_method");
+    return NORMAL;
+}
+
 PP(pp_close)
 {
     dVAR; dSP;
@@ -565,14 +580,7 @@ PP(pp_close)
 	if (io) {
 	    MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
-		PUSHMARK(SP);
-		PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-		PUTBACK;
-		ENTER_with_name("call_CLOSE");
-		call_method("CLOSE", G_SCALAR);
-		LEAVE_with_name("call_CLOSE");
-		SPAGAIN;
-		RETURN;
+		return tied_handle_method("CLOSE", SP, io, mg);
 	    }
 	}
     }
@@ -655,14 +663,7 @@ PP(pp_fileno)
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
-	PUSHMARK(SP);
-	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	PUTBACK;
-	ENTER_with_name("call_FILENO");
-	call_method("FILENO", G_SCALAR);
-	LEAVE_with_name("call_FILENO");
-	SPAGAIN;
-	RETURN;
+	return tied_handle_method("FILENO", SP, io, mg);
     }
 
     if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io))) {
@@ -2084,14 +2085,7 @@ PP(pp_tell)
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    PUSHMARK(SP);
-	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	    PUTBACK;
-	    ENTER;
-	    call_method("TELL", G_SCALAR);
-	    LEAVE;
-	    SPAGAIN;
-	    RETURN;
+	    return tied_handle_method("TELL", SP, io, mg);
 	}
     }
     else if (!gv) {

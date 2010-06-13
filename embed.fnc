@@ -1716,6 +1716,8 @@ s	|OP*	|doform		|NN CV *cv|NN GV *gv|NN OP *retop
 sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
 s	|SV *	|space_join_names_mortal|NN char *const *array
+s	|OP *	|tied_handle_method|NN const char *const methname|NN SV **sp \
+				|NN IO *const io|NN MAGIC *const mg
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
