@@ -552,26 +552,30 @@ PP(pp_open)
     RETURN;
 }
 
-/* This is private to this function, which is private to this file.
+/* These are private to this function, which is private to this file.
    Use 0x04 rather than the next available bit, to help the compiler if the
    architecture can generate more efficient instructions.  */
 #define MORTALIZE_NOT_NEEDED	0x04
+#define TIED_HANDLE_ARGC_SHIFT	3
 
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg, const U32 flags,
-		     unsigned int argc, ...)
+		     IO *const io, MAGIC *const mg, const U32 flags, ...)
 {
+    U32 argc = flags >> TIED_HANDLE_ARGC_SHIFT;
+
     PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
 
+    /* Ensure that our flag bits do not overlap.  */
     assert((MORTALIZE_NOT_NEEDED & G_WANT) == 0);
+    assert((G_WANT >> TIED_HANDLE_ARGC_SHIFT) == 0);
 
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
     if (argc) {
 	const U32 mortalize_not_needed = flags & MORTALIZE_NOT_NEEDED;
 	va_list args;
-	va_start(args, argc);
+	va_start(args, flags);
 	do {
 	    SV *const arg = va_arg(args, SV *);
 	    if(mortalize_not_needed)
@@ -590,11 +594,11 @@ S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
 }
 
 #define tied_handle_method(a,b,c,d)		\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,0)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR)
 #define tied_handle_method1(a,b,c,d,e)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,1,e)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (1 << TIED_HANDLE_ARGC_SHIFT),e)
 #define tied_handle_method2(a,b,c,d,e,f)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,2,e,f)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (2 << TIED_HANDLE_ARGC_SHIFT), e,f)
 
 PP(pp_close)
 {
@@ -763,8 +767,10 @@ PP(pp_binmode)
 	       figure out. Although, as it's a static function, in theory it
 	       could.  */
 	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg,
-					G_SCALAR|MORTALIZE_NOT_NEEDED,
-					discp ? 1 : 0, discp);
+					G_SCALAR|MORTALIZE_NOT_NEEDED
+					| (discp
+					   ? (1 << TIED_HANDLE_ARGC_SHIFT) : 0),
+					discp);
 	}
     }
 
@@ -1229,7 +1235,7 @@ PP(pp_getc)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    const U32 gimme = GIMME_V;
-	    S_tied_handle_method(aTHX_ "GETC", SP, io, mg, gimme, 0);
+	    S_tied_handle_method(aTHX_ "GETC", SP, io, mg, gimme);
 	    if (gimme == G_SCALAR) {
 		SPAGAIN;
 		SvSetMagicSV_nosteal(TARG, TOPs);

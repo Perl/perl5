@@ -1718,7 +1718,7 @@ sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 s	|SV *	|space_join_names_mortal|NN char *const *array
 so	|OP *	|tied_handle_method|NN const char *const methname|NN SV **sp \
 				|NN IO *const io|NN MAGIC *const mg \
-				|const U32 flags|unsigned int argc|...
+				|const U32 flags|...
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
