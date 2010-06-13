@@ -554,7 +554,8 @@ PP(pp_open)
 
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg, unsigned int argc, ...)
+		     IO *const io, MAGIC *const mg, const U32 gimme,
+		     unsigned int argc, ...)
 {
     PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
 
@@ -572,17 +573,17 @@ S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
 
     PUTBACK;
     ENTER_with_name("call_tied_handle_method");
-    call_method(methname, G_SCALAR);
+    call_method(methname, gimme);
     LEAVE_with_name("call_tied_handle_method");
     return NORMAL;
 }
 
 #define tied_handle_method(a,b,c,d)		\
-    S_tied_handle_method(aTHX_ a,b,c,d,0)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,0)
 #define tied_handle_method1(a,b,c,d,e)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,1,e)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,1,e)
 #define tied_handle_method2(a,b,c,d,e,f)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,2,e,f)
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,2,e,f)
 
 PP(pp_close)
 {
@@ -750,7 +751,7 @@ PP(pp_binmode)
 	       function, which I don't think that the optimiser will be able to
 	       figure out. Although, as it's a static function, in theory it
 	       could.  */
-	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg,
+	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg, G_SCALAR,
 					discp ? 1 : 0, discp);
 	}
     }
@@ -1215,17 +1216,13 @@ PP(pp_getc)
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    const I32 gimme = GIMME_V;
-	    PUSHMARK(SP);
-	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	    PUTBACK;
-	    ENTER;
-	    call_method("GETC", gimme);
-	    LEAVE;
-	    SPAGAIN;
-	    if (gimme == G_SCALAR)
+	    const U32 gimme = GIMME_V;
+	    S_tied_handle_method(aTHX_ "GETC", SP, io, mg, gimme, 0);
+	    if (gimme == G_SCALAR) {
+		SPAGAIN;
 		SvSetMagicSV_nosteal(TARG, TOPs);
-	    RETURN;
+	    }
+	    return NORMAL;
 	}
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
