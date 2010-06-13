@@ -552,28 +552,39 @@ PP(pp_open)
     RETURN;
 }
 
+/* This is private to this function, which is private to this file.
+   Use 0x04 rather than the next available bit, to help the compiler if the
+   architecture can generate more efficient instructions.  */
+#define MORTALIZE_NOT_NEEDED	0x04
+
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg, const U32 gimme,
+		     IO *const io, MAGIC *const mg, const U32 flags,
 		     unsigned int argc, ...)
 {
     PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
 
+    assert((MORTALIZE_NOT_NEEDED & G_WANT) == 0);
+
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
     if (argc) {
+	const U32 mortalize_not_needed = flags & MORTALIZE_NOT_NEEDED;
 	va_list args;
 	va_start(args, argc);
 	do {
 	    SV *const arg = va_arg(args, SV *);
-	    PUSHs(arg);
+	    if(mortalize_not_needed)
+		PUSHs(arg);
+	    else
+		mPUSHs(arg);
 	} while (--argc);
 	va_end(args);
     }
 
     PUTBACK;
     ENTER_with_name("call_tied_handle_method");
-    call_method(methname, gimme);
+    call_method(methname, flags & G_WANT);
     LEAVE_with_name("call_tied_handle_method");
     return NORMAL;
 }
@@ -751,7 +762,8 @@ PP(pp_binmode)
 	       function, which I don't think that the optimiser will be able to
 	       figure out. Although, as it's a static function, in theory it
 	       could.  */
-	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg, G_SCALAR,
+	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg,
+					G_SCALAR|MORTALIZE_NOT_NEEDED,
 					discp ? 1 : 0, discp);
 	}
     }
@@ -2053,8 +2065,7 @@ PP(pp_eof)
 	RETPUSHNO;
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
-	return tied_handle_method1("EOF", SP, io, mg,
-				   sv_2mortal(newSVuv(which)));
+	return tied_handle_method1("EOF", SP, io, mg, newSVuv(which));
     }
 
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
@@ -2128,13 +2139,13 @@ PP(pp_sysseek)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 #if LSEEKSIZE > IVSIZE
-	    SV *const offset_sv = sv_2mortal(newSVnv((NV) offset));
+	    SV *const offset_sv = newSVnv((NV) offset);
 #else
-	    SV *const offset_sv = sv_2mortal(newSViv(offset));
+	    SV *const offset_sv = newSViv(offset);
 #endif
 
 	    return tied_handle_method2("SEEK", SP, io, mg, offset_sv,
-				       sv_2mortal(newSViv(whence)));
+				       newSViv(whence));
 	}
     }
 
