@@ -554,18 +554,35 @@ PP(pp_open)
 
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg)
+		     IO *const io, MAGIC *const mg, unsigned int argc, ...)
 {
     PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
 
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+    if (argc) {
+	va_list args;
+	va_start(args, argc);
+	do {
+	    SV *const arg = va_arg(args, SV *);
+	    PUSHs(arg);
+	} while (--argc);
+	va_end(args);
+    }
+
     PUTBACK;
     ENTER_with_name("call_tied_handle_method");
     call_method(methname, G_SCALAR);
     LEAVE_with_name("call_tied_handle_method");
     return NORMAL;
 }
+
+#define tied_handle_method(a,b,c,d)		\
+    S_tied_handle_method(aTHX_ a,b,c,d,0)
+#define tied_handle_method1(a,b,c,d,e)	\
+    S_tied_handle_method(aTHX_ a,b,c,d,1,e)
+#define tied_handle_method2(a,b,c,d,e,f)	\
+    S_tied_handle_method(aTHX_ a,b,c,d,2,e,f)
 
 PP(pp_close)
 {
@@ -729,16 +746,12 @@ PP(pp_binmode)
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    PUSHMARK(SP);
-	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	    if (discp)
-		PUSHs(discp);
-	    PUTBACK;
-	    ENTER_with_name("call_BINMODE");
-	    call_method("BINMODE", G_SCALAR);
-	    LEAVE_with_name("call_BINMODE");
-	    SPAGAIN;
-	    RETURN;
+	    /* This takes advantage of the implementation of the varargs
+	       function, which I don't think that the optimiser will be able to
+	       figure out. Although, as it's a static function, in theory it
+	       could.  */
+	    return S_tied_handle_method(aTHX_ "BINMODE", SP, io, mg,
+					discp ? 1 : 0, discp);
 	}
     }
 
@@ -2010,43 +2023,41 @@ PP(pp_eof)
     GV *gv;
     IO *io;
     MAGIC *mg;
+    /*
+     * in Perl 5.12 and later, the additional parameter is a bitmask:
+     * 0 = eof
+     * 1 = eof(FH)
+     * 2 = eof()  <- ARGV magic
+     *
+     * I'll rely on the compiler's trace flow analysis to decide whether to
+     * actually assign this out here, or punt it into the only block where it is
+     * used. Doing it out here is DRY on the condition logic.
+     */
+    unsigned int which;
 
-    if (MAXARG)
+    if (MAXARG) {
 	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
+	which = 1;
+    }
     else {
 	EXTEND(SP, 1);
 
-	if (PL_op->op_flags & OPf_SPECIAL)
+	if (PL_op->op_flags & OPf_SPECIAL) {
 	    gv = PL_last_in_gv = GvEGVx(PL_argvgv);	/* eof() - ARGV magic */
-	else
+	    which = 2;
+	}
+	else {
 	    gv = PL_last_in_gv;			/* eof */
+	    which = 0;
+	}
     }
 
     if (!gv)
 	RETPUSHNO;
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
-	PUSHMARK(SP);
-	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	/*
-	 * in Perl 5.12 and later, the additional paramter is a bitmask:
-	 * 0 = eof
-	 * 1 = eof(FH)
-	 * 2 = eof()  <- ARGV magic
-	 */
-	EXTEND(SP, 1);
-	if (MAXARG)
-	    mPUSHi(1);		/* 1 = eof(FH) - simple, explicit FH */
-	else if (PL_op->op_flags & OPf_SPECIAL)
-	    mPUSHi(2);		/* 2 = eof()   - ARGV magic */
-	else
-	    mPUSHi(0);		/* 0 = eof     - simple, implicit FH */
-	PUTBACK;
-	ENTER;
-	call_method("EOF", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+	return tied_handle_method1("EOF", SP, io, mg,
+				   sv_2mortal(newSVuv(which)));
     }
 
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
@@ -2119,20 +2130,14 @@ PP(pp_sysseek)
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    PUSHMARK(SP);
-	    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 #if LSEEKSIZE > IVSIZE
-	    mPUSHn((NV) offset);
+	    SV *const offset_sv = sv_2mortal(newSVnv((NV) offset));
 #else
-	    mPUSHi(offset);
+	    SV *const offset_sv = sv_2mortal(newSViv(offset));
 #endif
-	    mPUSHi(whence);
-	    PUTBACK;
-	    ENTER;
-	    call_method("SEEK", G_SCALAR);
-	    LEAVE;
-	    SPAGAIN;
-	    RETURN;
+
+	    return tied_handle_method2("SEEK", SP, io, mg, offset_sv,
+				       sv_2mortal(newSViv(whence)));
 	}
     }
 
