@@ -2031,6 +2031,7 @@ PP(pp_eof)
 	 * 1 = eof(FH)
 	 * 2 = eof()  <- ARGV magic
 	 */
+	EXTEND(SP, 1);
 	if (MAXARG)
 	    mPUSHi(1);		/* 1 = eof(FH) - simple, explicit FH */
 	else if (PL_op->op_flags & OPf_SPECIAL)
