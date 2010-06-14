@@ -180,7 +180,7 @@ Richard Clamp E<lt>richardc@unixbeard.netE<gt>
 
 Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
 
-=head1 COPYRIGHT
+=head1 LICENSE
 
 Copyright (C) 2002-2009 Richard Clamp.  All Rights Reserved.
 
