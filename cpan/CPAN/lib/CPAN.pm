@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_56';
+$CPAN::VERSION = '1.94_57';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -1142,7 +1142,7 @@ sub has_inst {
   CPAN: Module::Signature security checks disabled because Module::Signature
   not installed.  Please consider installing the Module::Signature module.
   You may also need to be able to connect over the Internet to the public
-  keyservers like pgp.mit.edu (port 11371).
+  keyservers like pool.sks-keyservers.net or pgp.mit.edu.
 
 });
                 $CPAN::Frontend->mysleep(2);
@@ -3728,6 +3728,11 @@ prerequisite but CPAN has reasonable workarounds if it is missing.
 This module and its competitor, the CPANPLUS module, are both much
 cooler than the other. CPAN.pm is older. CPANPLUS was designed to be
 more modular, but it was never intended to be compatible with CPAN.pm.
+
+=head2 CPANMINUS
+
+In the year 2010 App::cpanminus was launched as a new approach to a
+cpan shell with a considerably smaller footprint. Very cool stuff.
 
 =head1 SECURITY ADVICE
 

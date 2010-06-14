@@ -46,7 +46,11 @@ sub _ftp_statistics {
                 $CPAN::Frontend->myprint("Warning (usually harmless): $@\n");
                 return;
             } elsif (ref $@ eq "CPAN::Exception::yaml_process_error") {
-                $CPAN::Frontend->mydie($@);
+                my $time = time;
+                my $to = "$file.$time";
+                $CPAN::Frontend->myprint("Error reading '$file': $@\nStashing away as '$to' to prevent further interruptions. You may want to remove that file later.\n");
+                rename $file, $to or $CPAN::Frontend->mydie("Could not rename: $!");
+                return;
             }
         } else {
             $CPAN::Frontend->mydie($@);

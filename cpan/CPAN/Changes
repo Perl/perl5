@@ -1,3 +1,19 @@
+2010-05-24  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_57
+
+	* bugfix: treat modules correctly that are deprecated in perl 5.12.
+
+	* bugfix: RT #57482 and #57788 revealed that configure_requires
+	implicitly assumed build_requires instead of normal requires. (Reported
+	by Andrew Whatson and Father Chrysostomos respectively)
+
+	* testfix: solaris should run the tests without expect because (some?)
+	solaris have a broken expect
+
+	* testfix: run tests with cache_metadata off to prevent spill over
+	effects from previous test runs
+
 2010-02-17  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_56

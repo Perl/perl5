@@ -109,9 +109,9 @@ sub jumpqueue {
     my $class = shift;
     my @what = @_;
     CPAN->debug(sprintf("before jumpqueue All[%s] what[%s]",
-                        join("",
-                             map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All, @what
-                            ))) if $CPAN::DEBUG;
+                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All),
+                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @what),
+                       )) if $CPAN::DEBUG;
     unless (defined $what[0]{reqtype}) {
         # apparently it was not the Shell that sent us this enquiry,
         # treat it as commandline

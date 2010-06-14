@@ -5,7 +5,7 @@ use CPAN::Distroprefs;
 use CPAN::InfoObj;
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "1.9456_01";
+$VERSION = "1.9600";
 
 # Accessors
 sub cpan_comment {
@@ -638,7 +638,7 @@ sub satisfy_configure_requires {
         # configure_requires simply fail, all others succeed
     }
     my @prereq = $self->unsat_prereq("configure_requires_later");
-    $self->debug("configure_requires[@prereq]") if $CPAN::DEBUG;
+    $self->debug(sprintf "configure_requires[%s]", join(",",map {join "/",@$_} @prereq)) if $CPAN::DEBUG;
     return 1 unless @prereq;
     $self->debug(\@prereq) if $CPAN::DEBUG;
     if ($self->{configure_requires_later}) {
@@ -2576,10 +2576,9 @@ sub unsat_prereq {
                      or $need_version eq '0'    # "==" would trigger warning when not numeric
                      or $need_version eq "undef"
                     )) {
-                unless ($nmo->inst_deprecated) {                               
-                    next NEED;                                                 
-                }                                                              
-
+                unless ($nmo->inst_deprecated) {
+                    next NEED;
+                }
             }
 
             $available_version = $nmo->available_version;
@@ -2696,7 +2695,16 @@ sub unsat_prereq {
                 }
             }
         }
-        my $needed_as = exists $prereq_pm->{requires}{$need_module} ? "r" : "b";
+        my $needed_as;
+        if (0) {
+        } elsif (exists $prereq_pm->{requires}{$need_module}) {
+            $needed_as = "r";
+        } elsif ($slot eq "configure_requires_later") {
+            # we have not yet run the {Build,Makefile}.PL, we must presume "r"
+            $needed_as = "r";
+        } else {
+            $needed_as = "b";
+        }
         push @need, [$need_module,$needed_as];
     }
     my @unfolded = map { "[".join(",",@$_)."]" } @need;
