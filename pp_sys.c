@@ -855,8 +855,10 @@ PP(pp_tie)
 	call_method(methname, G_SCALAR);
     }
     else {
-	/* Not clear why we don't call call_method here too.
-	 * perhaps to get different error message ?
+	/* Can't use call_method here, else this: fileno FOO; tie @a, "FOO"
+	 * will attempt to invoke IO::File::TIEARRAY, with (best case) the
+	 * wrong error message, and worse case, supreme action at a distance.
+	 * (Sorry obfuscation writers. You're not going to be given this one.)
 	 */
 	STRLEN len;
 	const char *name = SvPV_nomg_const(*MARK, len);

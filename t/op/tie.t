@@ -929,3 +929,11 @@ print "fetch=$fetch\ncalled=$called\n";
 EXPECT
 fetch=2
 called=2
+########
+# tie mustn't attempt to call methods on bareword filehandles.
+sub IO::File::TIEARRAY {
+    die "Did not want to invoke IO::File::TIEARRAY";
+}
+fileno FOO; tie @a, "FOO"
+EXPECT
+Can't locate object method "TIEARRAY" via package "FOO" at - line 5.
