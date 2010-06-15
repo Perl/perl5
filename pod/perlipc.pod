@@ -150,7 +150,43 @@ or better still:
     $SIG{CHLD} = \&REAPER;
     # do something that forks...
 
-Signal handling is also used for timeouts in Unix,   While safely
+Note: qx(), system() and some modules for calling external commands do a
+fork() and wait() for the result. Thus, your signal handler (REAPER in the
+example) will be called. Since wait() was already called by system() or qx()
+the wait() in the signal handler will not see any more zombies and therefore
+block.
+
+The best way to prevent this issue is to use waitpid, as in the following
+example:
+
+    use POSIX ":sys_wait_h"; # for nonblocking read
+
+    my %children;
+
+    $SIG{CHLD} = sub {
+        # don't change $! and $? outside handler
+        local ($!,$?);
+        my $pid = waitpid(-1, WNOHANG);
+        return if $pid == -1;
+        return unless defined $children{$pid};
+        delete $children{$pid};
+        cleanup_child($pid, $?);
+    };
+
+    while (1) {
+        my $pid = fork();
+        if ($pid == 0) {
+            # ...
+            exit 0;
+        } else {
+        $children{$pid}=1;
+            # ...
+            system($command);
+            # ...
+       }
+    }
+
+Signal handling is also used for timeouts in Unix.  While safely
 protected within an C<eval{}> block, you set a signal handler to trap
 alarm signals and then schedule to have one delivered to you in some
 number of seconds.  Then try your blocking operation, clearing the alarm
