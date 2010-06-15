@@ -75,7 +75,9 @@ S_write_no_mem(pTHX)
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
 {
+#ifdef DEBUGGING
     dTHX;
+#endif
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
@@ -118,10 +120,15 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
 	return ptr;
 }
-    else if (PL_nomemok)
-	return NULL;
     else {
-	return write_no_mem();
+#ifndef DEBUGGING
+	dTHX;
+#endif
+	if (PL_nomemok)
+	    return NULL;
+	else {
+	    return write_no_mem();
+	}
     }
     /*NOTREACHED*/
 }
@@ -131,7 +138,9 @@ Perl_safesysmalloc(MEM_SIZE size)
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
+#ifdef DEBUGGING
     dTHX;
+#endif
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) && !defined(PERL_MICRO)
     Malloc_t PerlMem_realloc();
@@ -213,10 +222,15 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     if (ptr != NULL) {
 	return ptr;
     }
-    else if (PL_nomemok)
-	return NULL;
     else {
-	return write_no_mem();
+#ifndef DEBUGGING
+	dTHX;
+#endif
+	if (PL_nomemok)
+	    return NULL;
+	else {
+	    return write_no_mem();
+	}
     }
     /*NOTREACHED*/
 }
@@ -226,7 +240,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
-#if defined(PERL_IMPLICIT_SYS) || defined(PERL_TRACK_MEMPOOL)
+#if defined(DEBUGGING) && (defined(PERL_IMPLICIT_SYS) || defined(PERL_TRACK_MEMPOOL))
     dTHX;
 #else
     dVAR;
@@ -268,7 +282,9 @@ Perl_safesysfree(Malloc_t where)
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
+#ifdef DEBUGGING
     dTHX;
+#endif
     Malloc_t ptr;
     MEM_SIZE total_size = 0;
 
@@ -330,9 +346,14 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
 	return ptr;
     }
-    else if (PL_nomemok)
-	return NULL;
-    return write_no_mem();
+    else {
+#ifndef DEBUGGING
+	dTHX;
+#endif
+	if (PL_nomemok)
+	    return NULL;
+	return write_no_mem();
+    }
 }
 
 /* These must be defined when not using Perl's malloc for binary
