@@ -8,8 +8,12 @@
 #	./Configure -des -Dopenbsd_distribution=defined
 #
 
-# OpenBSD has a better malloc than perl...
-test "$usemymalloc" || usemymalloc='n'
+# In OpenBSD > 3.7, use perl's malloc [perl #75742]
+case "$osvers" in
+3.[89]*|[4-9]*)
+    test "$usemymalloc" || usemymalloc=y
+    ;;
+esac
 
 # malloc wrap works
 case "$usemallocwrap" in
