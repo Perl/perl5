@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.88";
+$VERSION = "1.89";
 
 =head1 NAME
 
@@ -377,7 +377,19 @@ use XSLoader ();
 	       TCP_MAXRT
 	       TCP_MAXSEG
 	       TCP_NODELAY
-	       TCP_STDURG);
+	       TCP_STDURG
+	       TCP_CORK
+	       TCP_KEEPIDLE
+	       TCP_KEEPINTVL
+	       TCP_KEEPCNT
+	       TCP_SYNCNT
+	       TCP_LINGER2
+	       TCP_DEFER_ACCEPT
+	       TCP_WINDOW_CLAMP
+	       TCP_INFO
+	       TCP_QUICKACK
+	       TCP_CONGESTION
+	       TCP_MD5SIG);
 
 %EXPORT_TAGS = (
     crlf    => [qw(CR LF CRLF $CR $LF $CRLF)],
