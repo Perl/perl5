@@ -70,12 +70,16 @@ S_write_no_mem(pTHX)
     NORETURN_FUNCTION_END;
 }
 
+#if defined (DEBUGGING) || defined(PERL_IMPLICIT_SYS)
+#  define ALWAYS_NEED_THX
+#endif
+
 /* paranoid version of system's malloc() */
 
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
 {
-#ifdef DEBUGGING
+#ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
     Malloc_t ptr;
@@ -121,7 +125,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	return ptr;
 }
     else {
-#ifndef DEBUGGING
+#ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
 	if (PL_nomemok)
@@ -138,7 +142,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
-#ifdef DEBUGGING
+#ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
     Malloc_t ptr;
@@ -223,7 +227,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	return ptr;
     }
     else {
-#ifndef DEBUGGING
+#ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
 	if (PL_nomemok)
@@ -282,7 +286,7 @@ Perl_safesysfree(Malloc_t where)
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
-#ifdef DEBUGGING
+#ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
     Malloc_t ptr;
@@ -347,7 +351,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	return ptr;
     }
     else {
-#ifndef DEBUGGING
+#ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
 	if (PL_nomemok)
