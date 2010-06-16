@@ -569,14 +569,14 @@ struct block {
 #define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
 
 #define DEBUG_CX(action)						\
-    DEBUG_l(WITH_THX(							\
+    DEBUG_l(								\
 	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) at %s:%d\n",	\
 		    (long)cxstack_ix,					\
 		    action,						\
 		    PL_block_type[CxTYPE(&cxstack[cxstack_ix])],	\
 		    (long)PL_scopestack_ix,				\
 		    (long)(cxstack[cxstack_ix].blk_oldscopesp),		\
-		    __FILE__, __LINE__)));
+		    __FILE__, __LINE__));
 
 /* Enter a block. */
 #define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
