@@ -70,7 +70,7 @@ S_write_no_mem(pTHX)
     NORETURN_FUNCTION_END;
 }
 
-#if defined (DEBUGGING) || defined(PERL_IMPLICIT_SYS)
+#if defined (DEBUGGING) || defined(PERL_IMPLICIT_SYS) || defined (PERL_TRACK_MEMPOOL)
 #  define ALWAYS_NEED_THX
 #endif
 
@@ -244,7 +244,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
-#if defined(DEBUGGING) && (defined(PERL_IMPLICIT_SYS) || defined(PERL_TRACK_MEMPOOL))
+#ifdef ALWAYS_NEED_THX
     dTHX;
 #else
     dVAR;
