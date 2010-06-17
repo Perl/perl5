@@ -1720,9 +1720,10 @@ nothing in the core.
 	    while (++mark <= sp) {
 		I32 proc;
 		register unsigned long int __vmssts;
+		SvGETMAGIC(*mark);
 		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
 		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV(*mark);
+		proc = SvIV_nomg(*mark);
 		APPLY_TAINT_PROPER();
 		if (!((__vmssts = sys$delprc(&proc,0)) & 1)) {
 		    tot--;
@@ -1746,9 +1747,10 @@ nothing in the core.
 	    val = -val;
 	    while (++mark <= sp) {
 		I32 proc;
+		SvGETMAGIC(*mark);
 		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
 		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV(*mark);
+		proc = SvIV_nomg(*mark);
 		APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
 		if (PerlProc_killpg(proc,val))	/* BSD */
@@ -1761,9 +1763,10 @@ nothing in the core.
 	else {
 	    while (++mark <= sp) {
 		I32 proc;
+		SvGETMAGIC(*mark);
 		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
 		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV(*mark);
+		proc = SvIV_nomg(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlProc_kill(proc, val))
 		    tot--;
