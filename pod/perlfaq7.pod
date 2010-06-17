@@ -375,12 +375,9 @@ The expected output is:
 
 =head2 How can I pass/return a {Function, FileHandle, Array, Hash, Method, Regex}?
 
-With the exception of regexes, you need to pass references to these
-objects.  See L<perlsub/"Pass by Reference"> for this particular
-question, and L<perlref> for information on references.
-
-See "Passing Regexes", later in L<perlfaq7>, for information on
-passing regular expressions.
+You need to pass references to these objects.  See L<perlsub/"Pass by
+Reference"> for this particular question, and L<perlref> for
+information on references.
 
 =over 4
 
@@ -420,12 +417,9 @@ and especially L<perlsub/"Pass by Reference"> for more information.
 
 =item Passing Regexes
 
-To pass regexes around, you'll need to be using a release of Perl
-sufficiently recent as to support the C<qr//> construct, pass around
-strings and use an exception-trapping eval, or else be very, very clever.
-
-Here's an example of how to pass in a string to be regex compared
-using C<qr//>:
+Here's an example of how to pass in a string and a regular expression
+for it to match against. You construct the pattern with the C<qr//>
+operator:
 
 	sub compare($$) {
 		my ($val1, $regex) = @_;
@@ -827,18 +821,6 @@ into strings like you can with variables:
 	my $current_package = __PACKAGE__;
 	print "I am in package $current_package\n";
 
-This is different from finding out the package an object is blessed
-into, which might not be the current package. For that, use C<blessed>
-from C<Scalar::Util>, part of the Standard Library since Perl 5.8:
-
-	use Scalar::Util qw(blessed);
-	my $object_package = blessed( $object );
-
-Most of the time, you shouldn't care what package an object is blessed
-into, however, as long as it claims to inherit from that class:
-
-	my $is_right_class = eval { $object->isa( $package ) }; # true or false
-
 If you want to find the package calling your code, perhaps to give better
 diagnostics as C<Carp> does, use the C<caller> built-in:
 
@@ -853,6 +835,26 @@ By default, your program starts in package C<main>, so you should
 always be in some package unless someone uses the C<package> built-in
 with no namespace. See the C<package> entry in L<perlfunc> for the
 details of empty packages.
+
+This is different from finding out the package an object is blessed
+into, which might not be the current package. For that, use C<blessed>
+from C<Scalar::Util>, part of the Standard Library since Perl 5.8:
+
+	use Scalar::Util qw(blessed);
+	my $object_package = blessed( $object );
+
+Most of the time, you shouldn't care what package an object is blessed
+into, however, as long as it claims to inherit from that class:
+
+	my $is_right_class = eval { $object->isa( $package ) }; # true or false
+
+And, with Perl 5.10 and later, you don't have to check for an
+inheritance to see if the object can handle a role. For that, you can
+use C<DOES>, which comes from C<UNIVERSAL>:
+
+	my $class_does_it = eval { $object->DOES( $role ) }; # true or false
+
+You can safely replace C<isa> with C<DOES> (although the converse is not true).
 
 =head2 How can I comment out a large block of Perl code?
 
@@ -874,10 +876,10 @@ comments). You end the comment with C<=cut>, ending the Pod section:
 
 	=cut
 
-The quick-and-dirty method only works well when you don't plan to 
+The quick-and-dirty method only works well when you don't plan to
 leave the commented code in the source. If a Pod parser comes along,
 you're multiline comment is going to show up in the Pod translation.
-A better way hides it from Pod parsers as well. 
+A better way hides it from Pod parsers as well.
 
 The C<=begin> directive can mark a section for a particular purpose.
 If the Pod parser doesn't want to handle it, it just ignores it. Label

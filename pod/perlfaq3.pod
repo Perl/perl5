@@ -528,20 +528,19 @@ the standard benchmark file for vi emulators.  The file runs best with nvi,
 the current version of vi out of Berkeley, which incidentally can be built
 with an embedded Perl interpreter--see http://www.cpan.org/src/misc/ .
 
-=head2 Where can I get perl-mode for emacs?
+=head2 Where can I get perl-mode or cperl-mode for emacs?
+X<emacs>
 
 Since Emacs version 19 patchlevel 22 or so, there have been both a
 perl-mode.el and support for the Perl debugger built in.  These should
 come with the standard Emacs 19 distribution.
 
-In the Perl source directory, you'll find a directory called "emacs",
-which contains a cperl-mode that color-codes keywords, provides
-context-sensitive help, and other nifty things.
-
 Note that the perl-mode of emacs will have fits with C<"main'foo">
 (single quote), and mess up the indentation and highlighting.  You
 are probably using C<"main::foo"> in new Perl code anyway, so this
 shouldn't be an issue.
+
+For CPerlMode, see http://www.emacswiki.org/cgi-bin/wiki/CPerlMode
 
 =head2 How can I use curses with Perl?
 

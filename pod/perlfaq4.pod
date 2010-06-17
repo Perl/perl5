@@ -11,6 +11,10 @@ numbers, dates, strings, arrays, hashes, and miscellaneous data issues.
 
 =head2 Why am I getting long decimals (eg, 19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?
 
+For the long explanation, see David Goldberg's "What Every Computer
+Scientist Should Know About Floating-Point Arithmetic"
+(http://docs.sun.com/source/806-3568/ncg_goldberg.html).
+
 Internally, your computer represents floating-point numbers in binary.
 Digital (as in powers of two) computers cannot store all numbers
 exactly.  Some real numbers lose precision in the process.  This is a
@@ -297,8 +301,8 @@ but a string consisting of two null bytes (the result of C<"\020\020"
 
 =head2 How do I multiply matrices?
 
-Use the Math::Matrix or Math::MatrixReal modules (available from CPAN)
-or the PDL extension (also available from CPAN).
+Use the C<Math::Matrix> or C<Math::MatrixReal> modules (available from CPAN)
+or the C<PDL> extension (also available from CPAN).
 
 =head2 How do I perform an operation on a series of integers?
 
@@ -342,7 +346,7 @@ will not create a list of 500,000 integers.
 
 =head2 How can I output Roman numerals?
 
-Get the http://www.cpan.org/modules/by-module/Roman module.
+Get the L<http://www.cpan.org/modules/by-module/Roman> module.
 
 =head2 Why aren't my random numbers random?
 
@@ -358,7 +362,7 @@ rather than more.
 Computers are good at being predictable and bad at being random
 (despite appearances caused by bugs in your programs :-).  see the
 F<random> article in the "Far More Than You Ever Wanted To Know"
-collection in http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz , courtesy
+collection in L<http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz>, courtesy
 of Tom Phoenix, talks more about this.  John von Neumann said, "Anyone
 who attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin."
@@ -368,7 +372,7 @@ provides, you should also check out the C<Math::TrulyRandom> module from
 CPAN.  It uses the imperfections in your system's timer to generate
 random numbers, but this takes quite a while.  If you want a better
 pseudorandom generator than comes with your operating system, look at
-"Numerical Recipes in C" at http://www.nr.com/ .
+"Numerical Recipes in C" at L<http://www.nr.com/>.
 
 =head2 How do I get a random number between X and Y?
 
@@ -401,8 +405,8 @@ integers (inclusive), For example: C<random_int_between(50,120)>.
 
 =head2 How do I find the day or week of the year?
 
-The localtime function returns the day of the year.  Without an
-argument localtime uses the current time.
+The C<localtime> function returns the day of the year.  Without an
+argument C<localtime> uses the current time.
 
 	$day_of_year = (localtime)[7];
 
@@ -414,7 +418,7 @@ week of the year.
 	my $week_of_year = strftime "%W", localtime;
 
 To get the day of year for any date, use C<POSIX>'s C<mktime> to get
-a time in epoch seconds for the argument to localtime.
+a time in epoch seconds for the argument to C<localtime>.
 
 	use POSIX qw/mktime strftime/;
 	my $week_of_year = strftime "%W",
@@ -541,7 +545,7 @@ Perl itself never had a Y2K problem, although that never stopped people
 from creating Y2K problems on their own. See the documentation for
 C<localtime> for its proper use.
 
-Starting with Perl 5.11, C<localtime> and C<gmtime> can handle dates past 
+Starting with Perl 5.11, C<localtime> and C<gmtime> can handle dates past
 03:14:08 January 19, 2038, when a 32-bit based time would overflow. You
 still might get a warning on a 32-bit C<perl>:
 
@@ -978,7 +982,7 @@ Left and right padding with any character, modifying C<$text> directly:
 
 (contributed by brian d foy)
 
-If you know where the columns that contain the data, you can
+If you know the columns that contain the data, you can
 use C<substr> to extract a single column.
 
 	my $column = substr( $line, $start_column, $length );
@@ -1213,7 +1217,7 @@ for list operations, so list operations also work on arrays:
 
 	my @three = grep { length == 3 } qw( dog cat bird );
 	my @three = grep { length == 3 } @animals;
-	
+
 	# supply an argument list
 	wash_animals( qw( dog cat bird ) );
 	wash_animals( @animals );
@@ -1236,15 +1240,15 @@ You can change an array element, but you can't change a list element:
 	foreach ( @animals ) {
 		s/^d/fr/;  # works fine
 		}
-	
+
 	foreach ( qw( dog cat bird ) ) {
 		s/^d/fr/;  # Error! Modification of read only value!
 		}
 
-However, if the list element is itself a variable, it appears that you 
+However, if the list element is itself a variable, it appears that you
 can change a list element. However, the list element is the variable, not
 the data. You're not changing the list element, but something the list
-element refers to. The list element itself doesn't change: it's still 
+element refers to. The list element itself doesn't change: it's still
 the same variable.
 
 You also have to be careful about context. You can assign an array to
@@ -1252,7 +1256,7 @@ a scalar to get the number of elements in the array. This only works
 for arrays, though:
 
 	my $count = @animals;  # only works with arrays
-	
+
 If you try to do the same thing with what you think is a list, you
 get a quite different result. Although it looks like you have a list
 on the righthand side, Perl actually sees a bunch of scalars separated
@@ -1292,8 +1296,8 @@ You can pull out multiple elements simultaneously by specifying
 additional indices as a list, like C<@array[1,4,3,0]>.
 
 Using a slice on the lefthand side of the assignment supplies list
-context to the righthand side. This can lead to unexpected results. 
-For instance, if you want to read a single line from a filehandle, 
+context to the righthand side. This can lead to unexpected results.
+For instance, if you want to read a single line from a filehandle,
 assigning to a scalar value is fine:
 
 	$array[1] = <STDIN>;
@@ -2133,9 +2137,9 @@ You can use the C<keys()> built-in function in scalar context to find out
 have many entries you have in a hash:
 
 	my $key_count = keys %hash; # must be scalar context!
-	
+
 If you want to find out how many entries have a defined value, that's
-a bit different. You have to check each value. A C<grep> is handy: 
+a bit different. You have to check each value. A C<grep> is handy:
 
 	my $defined_value_count = grep { defined } values %hash;
 
@@ -2144,7 +2148,7 @@ you like. If you want the count of the keys with vowels in them,
 you just test for that instead:
 
 	my $vowel_count = grep { /[aeiou]/ } keys %hash;
-	
+
 The C<grep> in scalar context returns the count. If you want the list
 of matching items, just use it in list context instead:
 
