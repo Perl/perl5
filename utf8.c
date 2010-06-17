@@ -2588,14 +2588,18 @@ Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, cons
         * only go as far as the goal */
         e1 = g1;
     }
-    else assert(e1);    /* Must have an end for looking at s1 */
+    else {
+	assert(e1);    /* Must have an end for looking at s1 */
+    }
 
     /* Same for goal for s2 */
     if (g2) {
         assert(! e2  || e2 >= g2);
         e2 = g2;
     }
-    else assert(e2);
+    else {
+	assert(e2);
+    }
 
     /* Look through both strings, a character at a time */
     while (p1 < e1 && p2 < e2) {
