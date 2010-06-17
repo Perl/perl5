@@ -405,7 +405,8 @@ If your perl is compiled with C<-DDEBUGGING>, you may use the
 B<-Dr> flag on the command line.
 
 Otherwise, one can C<use re 'debug'>, which has effects at
-compile time and run time.  It is not lexically scoped.
+compile time and run time.  Since Perl 5.9.5, this pragma is lexically
+scoped.
 
 =head2 Compile-time output
 
