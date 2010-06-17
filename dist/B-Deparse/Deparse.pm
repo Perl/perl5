@@ -16,7 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
-	 OPpREVERSE_INPLACE
+	 OPpREVERSE_INPLACE OPpCONST_NOVER
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_NONDESTRUCT
@@ -1789,7 +1789,7 @@ sub pp_require {
 	$name =~ s/\.pm//g;
 	return "$opname $name";
     } else {	
-	$self->unop($op, $cx, $opname);
+	$self->unop($op, $cx, $op->first->private & OPpCONST_NOVER ? "no" : $opname);
     }
 }
 
