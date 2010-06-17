@@ -9,7 +9,7 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.64_01';
+our $VERSION = '5.64_02';
 our (%Cache);
 
 sub as_heavy {
@@ -35,9 +35,12 @@ sub import {
   }
 
   # We *need* to treat @{"$pkg\::EXPORT_FAIL"} since Carp uses it :-(
-  my($exports, $fail) = (\@{"$pkg\::EXPORT"}, \@{"$pkg\::EXPORT_FAIL"});
+  my $exports = \@{"$pkg\::EXPORT"};
+  # But, avoid creating things if they don't exist, which saves a couple of
+  # hundred bytes per package processed.
+  my $fail = ${$pkg . '::'}{EXPORT_FAIL} && \@{"$pkg\::EXPORT_FAIL"};
   return export $pkg, $callpkg, @_
-    if $Verbose or $Debug or @$fail > 1;
+    if $Verbose or $Debug or $fail && @$fail > 1;
   my $export_cache = ($Cache{$pkg} ||= {});
   my $args = @_ or @_ = @$exports;
 
@@ -51,7 +54,7 @@ sub import {
   # We bomb out of the loop with last as soon as heavy is set.
   if ($args or $fail) {
     ($heavy = (/\W/ or $args and not exists $export_cache->{$_}
-               or @$fail and $_ eq $fail->[0])) and last
+               or $fail and @$fail and $_ eq $fail->[0])) and last
                  foreach (@_);
   } else {
     ($heavy = /\W/) and last
