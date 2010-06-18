@@ -241,7 +241,9 @@ The following items are now deprecated.
 
 =item *
 
-XXX
+Omitting a space between a regex pattern or pattern modifiers and the following
+word is deprecated.  For example, C<< m/foo/sand $bar >> will still be parsed
+as C<< m/foo/s and $bar >> but will issue a warning.
 
 =back
 
