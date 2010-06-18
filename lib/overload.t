@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -T
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1737,7 +1737,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	}
 
 	$subs{'${}'} = '%s';
-	push @terms, [ do {my $s=99; \$s}, '${%s}', '${}', '', 1, 2, 0 ];
+	push @terms, [ do {my $s=99; \$s}, '${%s}', '${}', '', 1, 1, 0 ];
 
 	# we skip testing '@{}' here because too much of this test
 	# framework involves array deredfences!
@@ -1747,13 +1747,13 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		'', 1, 2, 0 ];
 
 	$subs{'&{}'} = '%s';
-	push @terms, [ sub {99}, 'do {&{%s} for 1,2}', '&{})(&{}', '', 2, 4, 0 ];
+	push @terms, [ sub {99}, 'do {&{%s} for 1,2}', '&{})(&{}', '', 2, 2, 0 ];
 
 	our $RT57012A = 88;
 	our $RT57012B;
 	$subs{'*{}'} = '%s';
 	push @terms, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
-		'*{}', '', 1, 2, 0 ];
+		'*{}', '', 1, 1, 0 ];
 
 	# XXX TODO: '<>'
 
