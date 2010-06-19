@@ -6,7 +6,7 @@
 
 package warnings;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -368,10 +368,6 @@ sub import
 {
     shift;
 
-    my $catmask ;
-    my $fatal = 0 ;
-    my $no_fatal = 0 ;
-
     my $mask = ${^WARNING_BITS} ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
@@ -379,7 +375,14 @@ sub import
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
     
-    push @_, 'all' unless @_;
+    unless (@_) {
+	# This is equivalent to @_ = 'all' ;
+	return ${^WARNING_BITS} = $mask | $Bits{all} ;
+    }
+
+    my $catmask ;
+    my $fatal = 0 ;
+    my $no_fatal = 0 ;
 
     foreach my $word ( @_ ) {
 	if ($word eq 'FATAL') {
