@@ -617,13 +617,8 @@ sub Croaker
     Carp::croak(@_);
 }
 
-sub bits
-{
-    # called from B::Deparse.pm
-
-    push @_, 'all' unless @_;
-
-    my $mask;
+sub _bits {
+    my $mask = shift ;
     my $catmask ;
     my $fatal = 0 ;
     my $no_fatal = 0 ;
@@ -649,6 +644,13 @@ sub bits
     return $mask ;
 }
 
+sub bits
+{
+    # called from B::Deparse.pm
+    push @_, 'all' unless @_ ;
+    return _bits(undef, @_) ;
+}
+
 sub import 
 {
     shift;
@@ -660,34 +662,8 @@ sub import
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
     
-    unless (@_) {
-	# This is equivalent to @_ = 'all' ;
-	return ${^WARNING_BITS} = $mask | $Bits{all} ;
-    }
-
-    my $catmask ;
-    my $fatal = 0 ;
-    my $no_fatal = 0 ;
-
-    foreach my $word ( @_ ) {
-	if ($word eq 'FATAL') {
-	    $fatal = 1;
-	    $no_fatal = 0;
-	}
-	elsif ($word eq 'NONFATAL') {
-	    $fatal = 0;
-	    $no_fatal = 1;
-	}
-	elsif ($catmask = $Bits{$word}) {
-	    $mask |= $catmask ;
-	    $mask |= $DeadBits{$word} if $fatal ;
-	    $mask &= ~($DeadBits{$word}|$All) if $no_fatal ;
-	}
-	else
-          { Croaker("Unknown warnings category '$word'")}
-    }
-
-    ${^WARNING_BITS} = $mask ;
+    # Empty @_ is equivalent to @_ = 'all' ;
+    ${^WARNING_BITS} = @_ ? _bits($mask, @_) : $mask | $Bits{all} ;
 }
 
 sub unimport 
