@@ -291,62 +291,40 @@ EOT
 
 if ($seen_quotes{'"'}) {
     # We need the full ' and " code
-    $fetch_string .= <<'EOT';
-    my $quote_type = "'";
-    my $marker = "$key=";
 
-    # Check for the common case, ' delimited
-    my $start = index($Config_SH_expanded, "\n$marker$quote_type");
-    # If that failed, check for " delimited
-    if ($start == -1) {
-        $quote_type = '"';
-        $start = index($Config_SH_expanded, "\n$marker$quote_type");
-    }
-EOT
-} else {
-    $fetch_string .= <<'EOT';
-    # We only have ' delimted.
-    my $start = index($Config_SH_expanded, "\n$key=\'");
-EOT
-}
 $fetch_string .= <<'EOT';
-    # Start can never be -1 now, as we've rigged the long string we're
-    # searching with an initial dummy newline.
-    return undef if $start == -1;
-
-    $start += length($key) + 3;
-
-EOT
-if (!$seen_quotes{'"'}) {
-    # Don't need the full ' and " code, or the eval expansion.
-    $fetch_string .= <<'EOT';
-    my $value = substr($Config_SH_expanded, $start,
-                       index($Config_SH_expanded, "'\n", $start)
-		       - $start);
-EOT
-} else {
-    $fetch_string .= <<'EOT';
-    my $value = substr($Config_SH_expanded, $start,
-                       index($Config_SH_expanded, "$quote_type\n", $start)
-		       - $start);
+    return undef unless my ($quote_type, $value) = $Config_SH_expanded =~ /\n$key=(['"])(.*?)\1\n/s;
 
     # If we had a double-quote, we'd better eval it so escape
     # sequences and such can be interpolated. Since the incoming
     # value is supposed to follow shell rules and not perl rules,
     # we escape any perl variable markers
+
+    # Historically, since " 'support' was added in change 1409, the
+    # interpolation was done before the undef. Stick to this arguably buggy
+    # behaviour as we're refactoring.
     if ($quote_type eq '"') {
 	$value =~ s/\$/\\\$/g;
 	$value =~ s/\@/\\\@/g;
 	eval "\$value = \"$value\"";
     }
-EOT
-}
-$fetch_string .= <<'EOT';
+
     # So we can say "if $Config{'foo'}".
-    $value = undef if $value eq 'undef';
-    $self->{$key} = $value; # cache it
+    $self->{$key} = $value eq 'undef' ? undef : $value; # cache it
 }
 EOT
+
+} else {
+    # We only have ' delimted.
+
+$fetch_string .= <<'EOT';
+    return undef unless $Config_SH_expanded =~ /\n$key=\'(.*?)\'\n/s;
+    # So we can say "if $Config{'foo'}".
+    $self->{$key} = $1 eq 'undef' ? undef : $1;
+}
+EOT
+
+}
 
 eval $fetch_string;
 die if $@;
