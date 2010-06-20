@@ -188,13 +188,16 @@ sub config_sh;
 sub config_vars;
 sub config_re;
 
-my %%Export_Cache = map {($_ => 1)} (@Config::EXPORT, @Config::EXPORT_OK);
+# Skip @Config::EXPORT because it only contains %%Config, which we special
+# case below as it's not a function. @Config::EXPORT won't change in the
+# lifetime of Perl 5.
+my %%Export_Cache = map {($_ => 1)} @Config::EXPORT_OK;
 
 our %%Config;
 
 # Define our own import method to avoid pulling in the full Exporter:
 sub import {
-    my $pkg = shift;
+    shift;
     @_ = @Config::EXPORT unless @_;
 
     my @funcs = grep $_ ne '%%Config', @_;
@@ -203,8 +206,8 @@ sub import {
     no strict 'refs';
     my $callpkg = caller(0);
     foreach my $func (@funcs) {
-	die sprintf qq{"%%s" is not exported by the %%s module\n},
-	    $func, __PACKAGE__ unless $Export_Cache{$func};
+	die qq{"$func" is not exported by the Config module\n}
+	    unless $Export_Cache{$func};
 	*{$callpkg.'::'.$func} = \&{$func};
     }
 
