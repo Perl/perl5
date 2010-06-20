@@ -736,7 +736,8 @@ sub __chk
         $i = _error_loc(); # see where Carp will allocate the error
     }
 
-    my $callers_bitmask = (caller($i))[9] ;
+    # Defaulting this to 0 reduces complexity in code paths below.
+    my $callers_bitmask = (caller($i))[9] || 0 ;
     return ($callers_bitmask, $offset, $i) ;
 }
 
@@ -752,7 +753,6 @@ sub enabled
 
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
 
-    return 0 unless defined $callers_bitmask ;
     return vec($callers_bitmask, $offset, 1) ||
            vec($callers_bitmask, $Offsets{'all'}, 1) ;
 }
@@ -764,7 +764,6 @@ sub fatal_enabled
 
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
 
-    return 0 unless defined $callers_bitmask;
     return vec($callers_bitmask, $offset + 1, 1) ||
            vec($callers_bitmask, $Offsets{'all'} + 1, 1) ;
 }
@@ -792,8 +791,7 @@ sub warnif
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
 
     return
-        unless defined $callers_bitmask &&
-            	(vec($callers_bitmask, $offset, 1) ||
+        unless (vec($callers_bitmask, $offset, 1) ||
             	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
 
     require Carp;
