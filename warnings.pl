@@ -738,7 +738,7 @@ sub __chk
 
     # Defaulting this to 0 reduces complexity in code paths below.
     my $callers_bitmask = (caller($i))[9] || 0 ;
-    return ($callers_bitmask, $offset, $i) ;
+    return ($callers_bitmask, $offset) ;
 }
 
 sub _error_loc {
@@ -751,7 +751,7 @@ sub enabled
     Croaker("Usage: warnings::enabled([category])")
 	unless @_ == 1 || @_ == 0 ;
 
-    my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+    my ($callers_bitmask, $offset) = __chk(@_) ;
 
     return vec($callers_bitmask, $offset, 1) ||
            vec($callers_bitmask, $Offsets{'all'}, 1) ;
@@ -762,7 +762,7 @@ sub fatal_enabled
     Croaker("Usage: warnings::fatal_enabled([category])")
   unless @_ == 1 || @_ == 0 ;
 
-    my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+    my ($callers_bitmask, $offset) = __chk(@_) ;
 
     return vec($callers_bitmask, $offset + 1, 1) ||
            vec($callers_bitmask, $Offsets{'all'} + 1, 1) ;
@@ -774,7 +774,7 @@ sub warn
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
-    my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+    my ($callers_bitmask, $offset) = __chk(@_) ;
     require Carp;
     Carp::croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
@@ -788,7 +788,7 @@ sub warnif
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
-    my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+    my ($callers_bitmask, $offset) = __chk(@_) ;
 
     return
         unless (vec($callers_bitmask, $offset, 1) ||
