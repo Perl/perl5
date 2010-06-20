@@ -696,11 +696,15 @@ sub unimport
 
 my %builtin_type; @builtin_type{qw(SCALAR ARRAY HASH CODE REF GLOB LVALUE Regexp)} = ();
 
+sub FATAL () { 2 };
+sub NORMAL () { 1 };
+
 sub __chk
 {
     my $category ;
     my $offset ;
     my $isobj = 0 ;
+    my $wanted = shift;
 
     if (@_) {
         # check the category supplied.
@@ -738,7 +742,15 @@ sub __chk
 
     # Defaulting this to 0 reduces complexity in code paths below.
     my $callers_bitmask = (caller($i))[9] || 0 ;
-    return ($callers_bitmask, $offset) ;
+
+    my @results;
+    foreach my $type (NORMAL, FATAL) {
+	next unless $wanted & $type;
+
+	push @results, (vec($callers_bitmask, $offset + $type - 1, 1) ||
+			vec($callers_bitmask, $Offsets{'all'} + $type - 1, 1));
+    }
+    return $wanted == (NORMAL | FATAL) ? @results : $results[0];
 }
 
 sub _error_loc {
@@ -751,10 +763,7 @@ sub enabled
     Croaker("Usage: warnings::enabled([category])")
 	unless @_ == 1 || @_ == 0 ;
 
-    my ($callers_bitmask, $offset) = __chk(@_) ;
-
-    return vec($callers_bitmask, $offset, 1) ||
-           vec($callers_bitmask, $Offsets{'all'}, 1) ;
+    return __chk(NORMAL, @_);
 }
 
 sub fatal_enabled
@@ -762,10 +771,7 @@ sub fatal_enabled
     Croaker("Usage: warnings::fatal_enabled([category])")
   unless @_ == 1 || @_ == 0 ;
 
-    my ($callers_bitmask, $offset) = __chk(@_) ;
-
-    return vec($callers_bitmask, $offset + 1, 1) ||
-           vec($callers_bitmask, $Offsets{'all'} + 1, 1) ;
+    return __chk(FATAL, @_);
 }
 
 sub warn
@@ -774,11 +780,8 @@ sub warn
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
-    my ($callers_bitmask, $offset) = __chk(@_) ;
     require Carp;
-    Carp::croak($message)
-	if vec($callers_bitmask, $offset+1, 1) ||
-	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
+    Carp::croak($message) if __chk(FATAL, @_);
     Carp::carp($message) ;
 }
 
@@ -788,18 +791,17 @@ sub warnif
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
-    my ($callers_bitmask, $offset) = __chk(@_) ;
+    my ($warn, $fatal) = __chk(NORMAL | FATAL, @_);
 
-    return
-        unless (vec($callers_bitmask, $offset, 1) ||
-            	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
+    return unless $warn or $fatal;
 
     require Carp;
-    Carp::croak($message)
-	if vec($callers_bitmask, $offset+1, 1) ||
-	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
-
+    Carp::croak($message) if $fatal;
     Carp::carp($message) ;
 }
+
+# These are not part of any public interface, so we can delete them to save
+# space.
+delete $warnings::{$_} foreach qw(NORMAL FATAL);
 
 1;
