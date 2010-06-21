@@ -120,6 +120,10 @@ effects from previous test runs
 Hash::Util now enables "no warnings 'uninitialized'" to suppress spurious
 warnings from undefined hash values (RT #74280).
 
+=head3 B::Deparse now handles 'no VERSION'
+
+The 'no 5.13.2' or similar form is now correctly handled by B::Deparse.
+
 =head1 Changes to Existing Documentation
 
 =head2 Replace wrong tr/// table in perlebcdic.pod
