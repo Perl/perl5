@@ -140,7 +140,8 @@ already exists and is a directory.
 
 =head3 Multiple POD spelling fixes.
 
-Fixes were made to VMS::DCLsym, mro, Search::Dist and UNIVERSAL.
+Fixes were made to VMS::DCLsym, mro, Search::Dist, B::t::OptreeCheck
+and UNIVERSAL.
 
 =head1 Changes to Existing Documentation
 
