@@ -40,7 +40,7 @@ use Cwd;
 use File::Spec;
 
 use vars qw($VERSION $Verbose);
-$VERSION = '1.04';
+$VERSION = '1.05';
 $Verbose = 0;
 
 sub import
@@ -73,15 +73,7 @@ sub import
   {
    $blib = File::Spec->catdir($dir, "blib");
    $blib_lib = File::Spec->catdir($blib, "lib");
-
-   if ($^O eq 'MacOS')
-    {
-     $blib_arch = File::Spec->catdir($blib_lib, $MacPerl::Architecture);
-    }
-   else
-    {
-     $blib_arch = File::Spec->catdir($blib, "arch");
-    }
+   $blib_arch = File::Spec->catdir($blib, "arch");
 
    if (-d $blib && -d $blib_arch && -d $blib_lib)
     {

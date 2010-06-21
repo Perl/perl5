@@ -180,7 +180,6 @@ sub readline {
 	and defined &Tk::DoOneEvent;
   #$str = scalar <$in>;
   $str = $self->get_line;
-  $str =~ s/^\s*\Q$prompt\E// if ($^O eq 'MacOS');
   utf8::upgrade($str)
       if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
          utf8::valid($str);
@@ -195,9 +194,7 @@ sub findConsole {
     my $console;
     my $consoleOUT;
 
-    if ($^O eq 'MacOS') {
-        $console = "Dev:Console";
-    } elsif (-e "/dev/tty") {
+    if (-e "/dev/tty") {
 	$console = "/dev/tty";
     } elsif (-e "con" or $^O eq 'MSWin32') {
        $console = 'CONIN$';
@@ -291,7 +288,7 @@ sub get_line {
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {

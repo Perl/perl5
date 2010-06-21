@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -210,12 +210,6 @@ my @trypod = (
 # handy for development testing of new warnings etc
 unshift @trypod, "./pod/perldiag.pod" if -e "pod/perldiag.pod";
 (my $PODFILE) = ((grep { -e } @trypod), $trypod[$#trypod])[0];
-
-if ($^O eq 'MacOS') {
-    # just updir one from each lib dir, we'll find it ...
-    ($PODFILE) = grep { -e } map { "$_:pod:perldiag.pod" } @INC;
-}
-
 
 $DEBUG ||= 0;
 my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine
