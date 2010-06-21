@@ -41,13 +41,6 @@ sub carp {
     goto &Carp::carp;
 }
 
-my $macfiles;
-if ($^O eq 'MacOS') {
-	$macfiles = eval { require Mac::MoreFiles };
-	warn 'Mac::MoreFiles could not be loaded; using non-native syscopy'
-		if $@ && $^W;
-}
-
 # Look up the feature settings on VMS using VMS::Feature when available.
 
 my $use_vms_feature = 0;
@@ -91,11 +84,6 @@ sub _catname {
     if (not defined &basename) {
 	require File::Basename;
 	import  File::Basename 'basename';
-    }
-
-    if ($^O eq 'MacOS') {
-	# a partial dir name that's valid only in the cwd (e.g. 'tmp')
-	$to = ':' . $to if $to !~ /:/;
     }
 
     return File::Spec->catfile($to, basename($from));
@@ -166,7 +154,6 @@ sub copy {
 	&& !($from_a_handle && $^O eq 'os2' )	# OS/2 cannot handle handles
 	&& !($from_a_handle && $^O eq 'mpeix')	# and neither can MPE/iX.
 	&& !($from_a_handle && $^O eq 'MSWin32')
-	&& !($from_a_handle && $^O eq 'MacOS')
 	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
@@ -435,22 +422,6 @@ unless (defined &syscopy) {
 	*syscopy = sub {
 	    return 0 unless @_ == 2;
 	    return Win32::CopyFile(@_, 1);
-	};
-    } elsif ($macfiles) {
-	*syscopy = sub {
-	    my($from, $to) = @_;
-	    my($dir, $toname);
-
-	    return 0 unless -e $from;
-
-	    if ($to =~ /(.*:)([^:]+):?$/) {
-		($dir, $toname) = ($1, $2);
-	    } else {
-		($dir, $toname) = (":", $to);
-	    }
-
-	    unlink($to);
-	    Mac::MoreFiles::FSpFileCopy($from, $dir, $toname, 1);
 	};
     } else {
 	$Syscopy_is_copy = 1;

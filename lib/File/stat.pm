@@ -45,9 +45,6 @@ BEGIN {
 
 # from doio.c
 sub _ingroup {
-
-    $^O eq "MacOS"  and return 1;
-    
     my ($gid, $eff)   = @_;
 
     # I am assuming that since VMS doesn't have getgroups(2), $) will

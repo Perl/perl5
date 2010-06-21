@@ -9,7 +9,7 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 use strict;
 use warnings;
 
@@ -261,40 +261,6 @@ sub _expand_volume {
 	return @new_pat;
 }
 
-
-#
-# _preprocess_pattern() will only be used on Mac OS (Classic): 
-# Resolves any updirs in the pattern. Removes a single trailing colon 
-# from the pattern, unless it's a volume name pattern like "*HD:"
-#
-sub _preprocess_pattern {
-	my @pat = @_;
-	
-	foreach my $p (@pat) {
-		my $proceed;
-		# resolve any updirs, e.g. "*HD:t?p::a*" -> "*HD:a*"
-		do {
-			$proceed = ($p =~ s/^(.*):[^:]+::(.*?)\z/$1:$2/);  
-		} while ($proceed);
-		# remove a single trailing colon, e.g. ":*:" -> ":*"
-		$p =~ s/:([^:]+):\z/:$1/;
-	}
-	return @pat;
-}
-		
-		
-#
-# _un_escape() will only be used on Mac OS (Classic):
-# Unescapes a list of arguments which may contain escaped 
-# metachars '*', '?' and '\'.
-#
-sub _un_escape {
-	foreach (@_) {
-		s/\\([*?\\])/$1/g;
-	}
-	return @_;
-}
-
 #
 # this can be used to override CORE::glob in a specific
 # package by saying C<use File::DosGlob 'glob';> in that
@@ -373,15 +339,7 @@ sub glob {
 
     # if we're just beginning, do it all first
     if ($iter{$cxix} == 0) {
-	if ($^O eq 'MacOS') {
-		# first, take care of updirs and trailing colons
-		@pat = _preprocess_pattern(@pat);
-		# expand volume names
-		@pat = _expand_volume(@pat);
-		$entries{$cxix} = (@pat) ? [_un_escape( doglob_Mac(1,@pat) )] : [()];
-	} else {
-		$entries{$cxix} = [doglob(1,@pat)];
-    }
+	    $entries{$cxix} = [doglob(1,@pat)];
 	}
 
     # chuck it all out, quick or slow

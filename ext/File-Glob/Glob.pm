@@ -56,7 +56,7 @@ use XSLoader ();
     ) ],
 );
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 sub import {
     require Exporter;
@@ -110,7 +110,7 @@ sub GLOB_CSH () {
 }
 
 $DEFAULT_FLAGS = GLOB_CSH();
-if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
+if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
     $DEFAULT_FLAGS |= GLOB_NOCASE();
 }
 
