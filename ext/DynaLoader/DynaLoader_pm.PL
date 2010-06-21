@@ -134,11 +134,6 @@ $Is_VMS    = $^O eq 'VMS';
 <</$^O-eq-VMS>>
 $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
-<<$^O-eq-MacOS>>
-my $Mac_FS;
-$Mac_FS = eval { require Mac::FileSpec::Unixish };
-<</$^O-eq-MacOS>>
-
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
@@ -312,30 +307,20 @@ sub bootstrap {
 	}
     <</$^O-eq-NetWare>>
 
-    my $modpname = join(<<$^O-eq-MacOS>>':'<<|$^O-eq-MacOS>>'/'<</$^O-eq-MacOS>>,@modparts);
+    my $modpname = join('/',@modparts);
 
     print STDERR "DynaLoader::bootstrap for $module ",
-		       <<$^O-eq-MacOS>> "(:auto:$modpname:$modfname.$dl_dlext)\n" 
-		       <<|$^O-eq-MacOS>>"(auto/$modpname/$modfname.$dl_dlext)\n"<</$^O-eq-MacOS>>
+		       "(auto/$modpname/$modfname.$dl_dlext)\n"
 	if $dl_debug;
 
     foreach (@INC) {
 	<<$^O-eq-VMS>>chop($_ = VMS::Filespec::unixpath($_));<</$^O-eq-VMS>>
-	<<$^O-eq-MacOS>>
-	    my $path = $_;
-	    if ($Mac_FS && ! -d $path) {
-		$path = Mac::FileSpec::Unixish::nativize($path);
-	    }
-	    $path .= ":"  unless /:$/;
-	    my $dir = "${path}auto:$modpname";
-	<<|$^O-eq-MacOS>>
 	    my $dir = "$_/auto/$modpname";
-	<</$^O-eq-MacOS>>
 	
 	next unless -d $dir; # skip over uninteresting directories
 	
 	# check for common cases to avoid autoload of dl_findfile
-	my $try = <<$^O-eq-MacOS>> "$dir:$modfname.$dl_dlext" <<|$^O-eq-MacOS>> "$dir/$modfname.$dl_dlext"<</$^O-eq-MacOS>>;
+	my $try = "$dir/$modfname.$dl_dlext";
 	last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
 	
 	# no luck here, save dir for possible later dl_findfile search
@@ -439,12 +424,6 @@ sub dl_findfile {
 	    next;
         }
 	<</$^O-eq-VMS>>
-	<<$^O-eq-MacOS>>
-	    if (m/:/ && -f $_) {
-	    	push(@found,$_);
-	    	last arg unless wantarray;
-	    }
-	<</$^O-eq-MacOS>>
 	<<$^O-ne-VMS>>
         if (m:/: && -f $_) {
 	    push(@found,$_);
@@ -457,30 +436,6 @@ sub dl_findfile {
         #  Using a -L prefix is the preferred option (faster and more robust)
         if (m:^-L:) { s/^-L//; push(@dirs, $_); next; }
 
-	<<$^O-eq-MacOS>>
-            #  Otherwise we try to try to spot directories by a heuristic
-            #  (this is a more complicated issue than it first appears)
-	    if (m/:/ && -d $_) {   push(@dirs, $_); next; }
-            #  Only files should get this far...
-            my(@names, $name);    # what filenames to look for
-	    s/^-l//;
-	    push(@names, $_);
-            foreach $dir (@dirs, @dl_library_path) {
-            	next unless -d $dir;
-		$dir =~ s/^([^:]+)$/:$1/;
-		$dir =~ s/:$//;
-            	foreach $name (@names) {
-	    	    my($file) = "$dir:$name";
-                    print STDERR " checking in $dir for $name\n" if $dl_debug;
-		    if (-f $file) {
-                    	push(@found, $file);
-                    	next arg; # no need to look any further
-                    }
-                }
-	    }
-	    next;
-	<</$^O-eq-MacOS>>
-	
         #  Otherwise we try to try to spot directories by a heuristic
         #  (this is a more complicated issue than it first appears)
         if (m:/: && -d $_) {   push(@dirs, $_); next; }
