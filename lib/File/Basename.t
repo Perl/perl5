@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 64;
+use Test::More tests => 49;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -75,34 +75,6 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(fileparse_set_fstype('MSDOS'), 'DOS');
     is( dirname("\\foo\\bar\\baz"), "\\foo\\bar" );
 }
-
-
-### Testing MacOS
-{
-    is(fileparse_set_fstype('MacOS'), 'MSDOS', 'set fstype to MacOS');
-
-    my($base,$path,$type) = fileparse('virgil:aeneid:draft.book7',
-                                      '\.book\d+');
-    is($base, 'draft');
-    is($path, 'virgil:aeneid:');
-    is($type, '.book7');
-
-    is(basename(':arma:virumque:cano.trojae'), 'cano.trojae');
-    is(dirname(':arma:virumque:cano.trojae'),  ':arma:virumque:');
-    is(dirname(':arma:virumque:'), ':arma:');
-    is(dirname(':arma:virumque'), ':arma:');
-    is(dirname(':arma:'), ':');
-    is(dirname(':arma'),  ':');
-    is(dirname('arma:'), 'arma:');
-    is(dirname('arma'), ':');
-    is(dirname(':'), ':');
-
-
-    # Check quoting of metacharacters in suffix arg by basename()
-    is(basename(':arma:virumque:cano.trojae','.trojae'), 'cano');
-    is(basename(':arma:virumque:cano_trojae','.trojae'), 'cano_trojae');
-}
-
 
 ### extra tests for a few specific bugs
 {

@@ -54,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.78";
+$VERSION = "2.79";
 
 fileparse_set_fstype($^O);
 
@@ -130,10 +130,6 @@ sub fileparse {
     ($dirpath,$basename) = ($fullname =~ m#^((?:.*[:\\/])?)(.*)#s);
     $dirpath = './' unless $dirpath;	# Can't be 0
     $dirpath .= '/' unless $dirpath =~ m#[\\/]\z#;
-  }
-  elsif ($type eq "MacOS") {
-    ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/s);
-    $dirpath = ':' unless $dirpath;
   }
   elsif ($type eq "AmigaOS") {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/s);
@@ -296,13 +292,6 @@ sub dirname {
     if ($type eq 'VMS') { 
         $dirname ||= $ENV{DEFAULT};
     }
-    elsif ($type eq 'MacOS') {
-	if( !length($basename) && $dirname !~ /^[^:]+:\z/) {
-            _strip_trailing_sep($dirname);
-	    ($basename,$dirname) = fileparse $dirname;
-	}
-	$dirname .= ":" unless $dirname =~ /:\z/;
-    }
     elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
         _strip_trailing_sep($dirname);
         unless( length($basename) ) {
@@ -331,10 +320,7 @@ sub dirname {
 sub _strip_trailing_sep  {
     my $type = $Fileparse_fstype;
 
-    if ($type eq 'MacOS') {
-        $_[0] =~ s/([^:]):\z/$1/s;
-    }
-    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
+    if (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
         $_[0] =~ s/([^:])[\\\/]*\z/$1/;
     }
     else {
@@ -353,7 +339,7 @@ Normally File::Basename will assume a file path type native to your current
 operating system (ie. /foo/bar style on Unix, \foo\bar on Windows, etc...).
 With this function you can override that assumption.
 
-Valid $types are "MacOS", "VMS", "AmigaOS", "OS2", "RISCOS",
+Valid $types are "VMS", "AmigaOS", "OS2", "RISCOS",
 "MSWin32", "DOS" (also "MSDOS" for backwards bug compatibility),
 "Epoc" and "Unix" (all case-insensitive).  If an unrecognized $type is
 given "Unix" will be assumed.
@@ -370,7 +356,7 @@ call only.
 
 BEGIN {
 
-my @Ignore_Case = qw(MacOS VMS AmigaOS OS2 RISCOS MSWin32 MSDOS DOS Epoc);
+my @Ignore_Case = qw(VMS AmigaOS OS2 RISCOS MSWin32 MSDOS DOS Epoc);
 my @Types = (@Ignore_Case, qw(Unix));
 
 sub fileparse_set_fstype {
