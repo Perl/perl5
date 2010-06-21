@@ -1630,23 +1630,6 @@ We then determine what the console should be on various systems:
         $console = "con";
     }
 
-=item * MacOS - use C<Dev:Console:Perl Debug> if this is the MPW version; C<Dev:
-Console> if not.
-
-Note that Mac OS X returns C<darwin>, not C<MacOS>. Also note that the debugger doesn't do anything special for C<darwin>. Maybe it should.
-
-=cut
-
-    elsif ( $^O eq 'MacOS' ) {
-        if ( $MacPerl::Version !~ /MPW/ ) {
-            $console =
-              "Dev:Console:Perl Debug";    # Separate window for application
-        }
-        else {
-            $console = "Dev:Console";
-        }
-    } ## end elsif ($^O eq 'MacOS')
-
 =item * VMS - use C<sys$command>.
 
 =cut
@@ -1922,13 +1905,6 @@ sub DB {
     # Create an alias to the active file magical array to simplify
     # the code here.
     local (*dbline) = $main::{ '_<' . $filename };
-
-    # we need to check for pseudofiles on Mac OS (these are files
-    # not attached to a filename, but instead stored in Dev:Pseudo)
-    if ( $^O eq 'MacOS' && $#dbline < 0 ) {
-        $filename_ini = $filename = 'Dev:Pseudo';
-        *dbline = $main::{ '_<' . $filename };
-    }
 
     # Last line in the program.
     local $max = $#dbline;
@@ -8040,7 +8016,7 @@ Just checks the contents of C<$^O> and sets the C<$doccmd> global accordingly.
 =cut
 
 sub setman {
-    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|MacOS|NetWare)\z/s
+    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|NetWare)\z/s
       ? "man"         # O Happy Day!
       : "perldoc";    # Alas, poor unfortunates
 } ## end sub setman
