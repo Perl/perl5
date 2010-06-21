@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.31";
+$VERSION = "1.32";
 
 @EXPORT_OK = qw(sockatmark);
 

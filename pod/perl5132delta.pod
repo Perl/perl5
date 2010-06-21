@@ -124,6 +124,10 @@ warnings from undefined hash values (RT #74280).
 
 The 'no 5.13.2' or similar form is now correctly handled by B::Deparse.
 
+=head3 IO::Socket doc additions
+
+getsockopt and setsockopt are now documented.
+
 =head1 Changes to Existing Documentation
 
 =head2 Replace wrong tr/// table in perlebcdic.pod
