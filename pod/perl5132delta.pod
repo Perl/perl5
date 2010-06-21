@@ -133,6 +133,11 @@ getsockopt and setsockopt are now documented.
 B::Concise marks rv2sv, rv2av and rv2hv ops with the new OPpDEREF flag
 as "DREFed".
 
+=head3 File::Copy doc clarification
+
+An extra stanza was added explaining behaviours when the copy destination
+already exists and is a directory.
+
 =head3 Multiple POD spelling fixes.
 
 Fixes were made to VMS::DCLsym, mro, Search::Dist and UNIVERSAL.
