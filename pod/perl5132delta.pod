@@ -128,6 +128,11 @@ The 'no 5.13.2' or similar form is now correctly handled by B::Deparse.
 
 getsockopt and setsockopt are now documented.
 
+=head3 B::Concise updated for OPpDEREF
+
+B::Concise marks rv2sv, rv2av and rv2hv ops with the new OPpDEREF flag
+as "DREFed".
+
 =head1 Changes to Existing Documentation
 
 =head2 Replace wrong tr/// table in perlebcdic.pod
