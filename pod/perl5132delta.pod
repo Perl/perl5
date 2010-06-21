@@ -133,6 +133,10 @@ getsockopt and setsockopt are now documented.
 B::Concise marks rv2sv, rv2av and rv2hv ops with the new OPpDEREF flag
 as "DREFed".
 
+=head3 Multiple POD spelling fixes.
+
+Fixes were made to VMS::DCLsym, mro, Search::Dist and UNIVERSAL.
+
 =head1 Changes to Existing Documentation
 
 =head2 Replace wrong tr/// table in perlebcdic.pod

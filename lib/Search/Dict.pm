@@ -4,7 +4,7 @@ require Exporter;
 
 use strict;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 our @ISA = qw(Exporter);
 our @EXPORT = qw(look);
 
