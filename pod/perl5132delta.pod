@@ -86,8 +86,8 @@ Locale::Country, Locale::Language and Locale::Currency were updated from
 
 =head3 Thread-Semaphore 2.11
 
-Added new methods ->down_nb() and ->down_force() at the suggestion of Rick
-Garlick.
+Added new methods -E<gt>down_nb() and -E<gt>down_force() at the suggestion
+of Rick Garlick.
 
 Refactored methods to skip argument validation when no argument is supplied.
 
@@ -96,15 +96,15 @@ Refactored methods to skip argument validation when no argument is supplied.
 =head3 CPAN.pm 1.94_57
 
 =over 4
- 
+
 =item * release 1.94_57
-   
+
 =item * bugfix: treat modules correctly that are deprecated in perl 5.12.
-   
+
 =item * bugfix: RT #57482 and #57788 revealed that configure_requires
 implicitly assumed build_requires instead of normal requires. (Reported
 by Andrew Whatson and Father Chrysostomos respectively)
-   
+
 =item * testfix: solaris should run the tests without expect because (some?)
 solaris have a broken expect 
 
@@ -278,7 +278,7 @@ arguments for overloading I<before> checking for magic, so for example
 an overloaded object returned by a tied array access would usually be
 treated as not overloaded (RT #57012) (6f1401, ed3b9b, 6a5f8c .. 24328f).
 
-=item * Independently, a bug was fixed that prevented $tied->() from
+=item * Independently, a bug was fixed that prevented $tied-E<gt>() from
 always calling FETCH correctly (RT #8438) (7c7501)
 
 =back
@@ -338,10 +338,10 @@ as C<< m/foo/s and $bar >> but will issue a warning.
 
 =head2 Recent OpenBSDs now use perl's malloc
 
-OpenBSD > 3.7 has a new malloc implementation which is mmap based and as such
-can release memory back to the OS; however for perl using this malloc causes
-a substantial slowdown so we now default to using perl's malloc instead
-(RT #75742) (9b58b5).
+OpenBSD E<gt> 3.7 has a new malloc implementation which is mmap based
+and as such can release memory back to the OS; however for perl using
+this malloc causes a substantial slowdown so we now default to using
+perl's malloc instead (RT #75742) (9b58b5).
 
 =head1 Acknowledgements
 
