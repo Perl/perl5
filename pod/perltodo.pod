@@ -1243,6 +1243,12 @@ combines the code in pp_entersub, pp_leavesub.  This should probably
 be done 1st in XS, and using B::Generate to patch the new OP into the
 optrees.
 
+=head2 Add C<00dddd>
+
+It has been proposed that octal constants be specifiable through the syntax
+C<0oddddd>, parallel to the existing construct to specify hex constants
+C<0xddddd>
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
