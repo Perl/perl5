@@ -799,18 +799,18 @@ using relative backreferences:
 
 =head2 Named backreferences
 
-Perl 5.10 also introduced named capture buffers and named backreferences.
+Perl 5.10 also introduced named capture groups and named backreferences.
 To attach a name to a capturing group, you write either
 C<< (?<name>...) >> or C<< (?'name'...) >>.  The backreference may
 then be written as C<\g{name}>.  It is permissible to attach the
 same name to more than one group, but then only the leftmost one of the
 eponymous set can be referenced.  Outside of the pattern a named
-capture buffer is accessible through the C<%+> hash.
+capture group is accessible through the C<%+> hash.
 
 Assuming that we have to match calendar dates which may be given in one
 of the three formats yyyy-mm-dd, mm/dd/yyyy or dd.mm.yyyy, we can write
 three suitable patterns where we use 'd', 'm' and 'y' respectively as the
-names of the buffers capturing the pertaining components of a date. The
+names of the groups capturing the pertaining components of a date. The
 matching operation combines the three patterns as alternatives:
 
     $fmt1 = '(?<y>\d\d\d\d)-(?<m>\d\d)-(?<d>\d\d)';
@@ -838,7 +838,7 @@ Consider a pattern for matching a time of the day, civil or military style:
 
 Processing the results requires an additional if statement to determine
 whether C<$1> and C<$2> or C<$3> and C<$4> contain the goodies. It would
-be easier if we could use buffer numbers 1 and 2 in second alternative as
+be easier if we could use group numbers 1 and 2 in second alternative as
 well, and this is exactly what the parenthesized construct C<(?|...)>,
 set around an alternative achieves. Here is an extended version of the
 previous pattern:
@@ -847,7 +847,7 @@ previous pattern:
 	print "hour=$1 minute=$2 zone=$3\n";
     }
 
-Within the alternative numbering group, buffer numbers start at the same
+Within the alternative numbering group, group numbers start at the same
 position for each alternative. After the group, numbering continues
 with one higher than the maximum reached across all the alternatives.
 
@@ -901,10 +901,10 @@ C<@+> instead:
 
 A group that is required to bundle a set of alternatives may or may not be
 useful as a capturing group.  If it isn't, it just creates a superfluous
-addition to the set of available capture buffer values, inside as well as
+addition to the set of available capture group values, inside as well as
 outside the regexp.  Non-capturing groupings, denoted by C<(?:regexp)>,
 still allow the regexp to be treated as a single unit, but don't establish
-a capturing buffer at the same time.  Both capturing and non-capturing
+a capturing group at the same time.  Both capturing and non-capturing
 groupings are allowed to co-exist in the same regexp.  Because there is
 no extraction, non-capturing groupings are faster than capturing
 groupings.  Non-capturing groupings are also handy for choosing exactly
@@ -2372,7 +2372,7 @@ matched, otherwise the C<no-regexp> will be matched.
 The C<condition> can have several forms.  The first form is simply an
 integer in parentheses C<(integer)>.  It is true if the corresponding
 backreference C<\integer> matched earlier in the regexp.  The same
-thing can be done with a name associated with a capture buffer, written
+thing can be done with a name associated with a capture group, written
 as C<< (<name>) >> or C<< ('name') >>.  The second form is a bare
 zero width assertion C<(?...)>, either a lookahead, a lookbehind, or a
 code assertion (discussed in the next section).  The third set of forms
@@ -2466,8 +2466,8 @@ have the full pattern:
 
 In C<(?...)> both absolute and relative backreferences may be used.
 The entire pattern can be reinserted with C<(?R)> or C<(?0)>.
-If you prefer to name your buffers, you can use C<(?&name)> to
-recurse into that buffer.
+If you prefer to name your groups, you can use C<(?&name)> to
+recurse into that group.
 
 
 =head2 A bit of magic: executing Perl code in a regular expression
@@ -2712,7 +2712,7 @@ it will cause to fail, just like at some mismatch between the pattern
 and the string. Processing of the regexp continues like after any "normal"
 failure, so that, for instance, the next position in the string or another
 alternative will be tried. As failing to match doesn't preserve capture
-buffers or produce results, it may be necessary to use this in
+groups or produce results, it may be necessary to use this in
 combination with embedded code.
 
    %count = ();

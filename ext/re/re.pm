@@ -307,7 +307,7 @@ Turns on all "extra" debugging options.
 
 =item BUFFERS
 
-Enable debugging the capture buffer storage during match. Warning,
+Enable debugging the capture group storage during match. Warning,
 this can potentially produce extremely large output.
 
 =item TRIEM

@@ -535,11 +535,11 @@ The group C<< [^<>]++ >> finds one or more non-angle brackets without
 backtracking.
 
 Second, the new C<(?PARNO)> refers to the sub-pattern in the
-particular capture buffer given by C<PARNO>. In the following regex,
-the first capture buffer finds (and remembers) the balanced text, and
+particular capture group given by C<PARNO>. In the following regex,
+the first capture group finds (and remembers) the balanced text, and
 you  need that same pattern within the first buffer to get past the
 nested text. That's the recursive part. The C<(?1)> uses the pattern
-in the outer capture buffer as an independent part of the regex.
+in the outer capture group as an independent part of the regex.
 
 Putting it all together, you have:
 
@@ -552,15 +552,15 @@ Putting it all together, you have:
 	HERE
 
 	my @groups = $string =~ m/
-			(                   # start of capture buffer 1
+			(                   # start of capture group 1
 			<                   # match an opening angle bracket
 				(?:
 					[^<>]++     # one or more non angle brackets, non backtracking
 					  |
-					(?1)        # found < or >, so recurse to capture buffer 1
+					(?1)        # found < or >, so recurse to capture group 1
 				)*
 			>                   # match a closing angle bracket
-			)                   # end of capture buffer 1
+			)                   # end of capture group 1
 			/xg;
 
 	$" = "\n\t";

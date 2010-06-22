@@ -71,8 +71,8 @@ delimiters can be used.  Must be reset with reset().
  (...)   Groups subexpressions for capturing to $1, $2...
  (?:...) Groups subexpressions without capturing (cluster)
  |       Matches either the subexpression preceding or following it
- \1, \2, \3 ...           Matches the text from the Nth group
  \g1 or \g{1}, \g2 ...    Matches the text from the Nth group
+ \1, \2, \3 ...           Matches the text from the Nth group
  \g-1 or \g{-1}, \g-2 ... Matches the text from the Nth previous group
  \g{name}     Named backreference
  \k<name>     Named backreference
@@ -281,8 +281,8 @@ specify the C</p> (preserve) modifier on your regular expression.
    $^R   Holds the result of the last (?{...}) expr
    @-    Offsets of starts of groups. $-[0] holds start of whole match
    @+    Offsets of ends of groups. $+[0] holds end of whole match
-   %+    Named capture buffers
-   %-    Named capture buffers, as array refs
+   %+    Named capture groups
+   %-    Named capture groups, as array refs
 
 Captured groups are numbered according to their I<opening> paren.
 

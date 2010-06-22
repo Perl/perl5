@@ -271,11 +271,11 @@ X<\g> X<\k> X<\K> X<backreference>
                    characters into their UTF-8 bytes, so you may end up
                    with malformed pieces of UTF-8.  Unsupported in
                    lookbehind.
-  \1        [5]  Backreference to a specific capture buffer or group.
+  \1        [5]  Backreference to a specific capture group or buffer.
                    '1' may actually be any positive integer.
   \g1       [5]  Backreference to a specific or previous group,
   \g{-1}    [5]  The number may be negative indicating a relative
-                   previous buffer and may optionally be wrapped in
+                   previous group and may optionally be wrapped in
                    curly brackets for safer parsing.
   \g{name}  [5]  Named backreference
   \k<name>  [5]  Named backreference
@@ -308,7 +308,7 @@ See L<perlrebackslash/Misc> for details.
 
 =item [5]
 
-See L</Capture buffers> below for details.
+See L</Capture groups> below for details.
 
 =item [6]
 
@@ -377,18 +377,20 @@ row.
 It is worth noting that C<\G> improperly used can result in an infinite
 loop. Take care when using patterns that include C<\G> in an alternation.
 
-=head3 Capture buffers
+=head3 Capture groups
 
-The bracketing construct C<( ... )> creates capture buffers. To refer
-to the current contents of a buffer later on, within the same pattern,
-use \1 for the first, \2 for the second, and so on.
+The bracketing construct C<( ... )> creates capture groups (also referred to as
+capture buffers). To refer to the current contents of a group later on, within
+same pattern, use \1 for the first, \2 for the second, and so on.
 Outside the match use "$" instead of "\".  (The
 \<digit> notation works in certain circumstances outside
 the match.  See L</Warning on \1 Instead of $1> below for details.)
 Referring back to another part of the match is called a
 I<backreference>.
 X<regex, capture buffer> X<regexp, capture buffer>
+X<regex, capture group> X<regexp, capture group>
 X<regular expression, capture buffer> X<backreference>
+X<regular expression, capture group> X<backreference>
 
 There is no limit to the number of captured substrings that you may
 use.  However Perl also uses \10, \11, etc. as aliases for \010,
@@ -413,33 +415,34 @@ following it. When N is a positive integer the C<\g{N}> notation is
 exactly equivalent to using normal backreferences. When N is a negative
 integer then it is a relative backreference referring to the previous N'th
 capturing group. When the bracket form is used and N is not an integer, it
-is treated as a reference to a named buffer.
+is treated as a reference to a named group.
 
-Thus C<\g{-1}> refers to the last buffer, C<\g{-2}> refers to the
-buffer before that. For example:
+Thus C<\g{-1}> refers to the last group, C<\g{-2}> refers to the
+group before that. For example:
 
         /
-         (Y)            # buffer 1
-         (              # buffer 2
-            (X)         # buffer 3
-            \g{-1}      # backref to buffer 3
-            \g{-3}      # backref to buffer 1
+         (Y)            # group 1
+         (              # group 2
+            (X)         # group 3
+            \g{-1}      # backref to group 3
+            \g{-3}      # backref to group 1
          )
         /x
 
 and would match the same as C</(Y) ( (X) \3 \1 )/x>.
 
-Additionally, as of Perl 5.10.0 you may use named capture buffers and named
+Additionally, as of Perl 5.10.0 you may use named capture groups and named
 backreferences. The notation is C<< (?<name>...) >> to declare and C<< \k<name> >>
 to reference. You may also use apostrophes instead of angle brackets to delimit the
 name; and you may use the bracketed C<< \g{name} >> backreference syntax.
-It's possible to refer to a named capture buffer by absolute and relative number as well.
-Outside the pattern, a named capture buffer is available via the C<%+> hash.
-When different buffers within the same pattern have the same name, C<$+{name}>
+It's possible to refer to a named capture group by absolute and relative number as well.
+Outside the pattern, a named capture group is available via the C<%+> hash.
+When different groups within the same pattern have the same name, C<$+{name}>
 and C<< \k<name> >> refer to the leftmost defined group. (Thus it's possible
-to do things with named capture buffers that would otherwise require C<(??{})>
+to do things with named capture groups that would otherwise require C<(??{})>
 code to accomplish.)
 X<named capture buffer> X<regular expression, named capture buffer>
+X<named capture group> X<regular expression, named capture group>
 X<%+> X<$+{name}> X<< \k<name> >>
 
 Examples:
@@ -628,22 +631,22 @@ is equivalent to the more verbose
 X<(?|)> X<Branch reset>
 
 This is the "branch reset" pattern, which has the special property
-that the capture buffers are numbered from the same starting point
+that the capture groups are numbered from the same starting point
 in each alternation branch. It is available starting from perl 5.10.0.
 
-Capture buffers are numbered from left to right, but inside this
+Capture groups are numbered from left to right, but inside this
 construct the numbering is restarted for each branch.
 
-The numbering within each branch will be as normal, and any buffers
+The numbering within each branch will be as normal, and any groups
 following this construct will be numbered as though the construct
 contained only one branch, that being the one with the most capture
-buffers in it.
+groups in it.
 
 This construct will be useful when you want to capture one of a
 number of alternative matches.
 
 Consider the following pattern.  The numbers underneath show in
-which buffer the captured content will be stored.
+which group the captured content will be stored.
 
 
     # before  ---------------branch-reset----------- after        
@@ -652,7 +655,7 @@ which buffer the captured content will be stored.
 
 Be careful when using the branch reset pattern in combination with 
 named captures. Named captures are implemented as being aliases to 
-numbered buffers holding the captures, and that interferes with the
+numbered groups holding the captures, and that interferes with the
 implementation of the branch reset pattern. If you are using named
 captures in a branch reset pattern, it's best to use the same names,
 in the same order, in each of the alternations:
@@ -666,8 +669,8 @@ Not doing so may lead to surprises:
   say $+ {a};   # Prints '12'
   say $+ {b};   # *Also* prints '12'.
 
-The problem here is that both the buffer named C<< a >> and the buffer
-named C<< b >> are aliases for the buffer belonging to C<< $1 >>.
+The problem here is that both the group named C<< a >> and the group
+named C<< b >> are aliases for the group belonging to C<< $1 >>.
 
 =item Look-Around Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
@@ -744,18 +747,18 @@ only for fixed-width look-behind.
 =item C<< (?<NAME>pattern) >>
 X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
-A named capture buffer. Identical in every respect to normal capturing
+A named capture group. Identical in every respect to normal capturing
 parentheses C<()> but for the additional fact that C<%+> or C<%-> may be
-used after a successful match to refer to a named buffer. See C<perlvar>
+used after a successful match to refer to a named group. See C<perlvar>
 for more details on the C<%+> and C<%-> hashes.
 
-If multiple distinct capture buffers have the same name then the
-$+{NAME} will refer to the leftmost defined buffer in the match.
+If multiple distinct capture groups have the same name then the
+$+{NAME} will refer to the leftmost defined group in the match.
 
 The forms C<(?'NAME'pattern)> and C<< (?<NAME>pattern) >> are equivalent.
 
 B<NOTE:> While the notation of this construct is the same as the similar
-function in .NET regexes, the behavior is not. In Perl the buffers are
+function in .NET regexes, the behavior is not. In Perl the groups are
 numbered sequentially regardless of being named or not. Thus in the
 pattern
 
@@ -892,9 +895,9 @@ This is a "postponed" regular subexpression.  The C<code> is evaluated
 at run time, at the moment this subexpression may match.  The result
 of evaluation is considered as a regular expression and matched as
 if it were inserted instead of this construct.  Note that this means
-that the contents of capture buffers defined inside an eval'ed pattern
+that the contents of capture groups defined inside an eval'ed pattern
 are not available outside of the pattern, and vice versa, there is no
-way for the inner pattern to refer to a capture buffer defined outside.
+way for the inner pattern to refer to a capture group defined outside.
 Thus,
 
     ('a' x 100)=~/(??{'(.)' x 100})/
@@ -939,20 +942,20 @@ X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
 X<regex, relative recursion>
 
 Similar to C<(??{ code })> except it does not involve compiling any code,
-instead it treats the contents of a capture buffer as an independent
-pattern that must match at the current position.  Capture buffers
+instead it treats the contents of a capture group as an independent
+pattern that must match at the current position.  Capture groups
 contained by the pattern will have the value as determined by the
 outermost recursion.
 
 PARNO is a sequence of digits (not starting with 0) whose value reflects
-the paren-number of the capture buffer to recurse to. C<(?R)> recurses to
+the paren-number of the capture group to recurse to. C<(?R)> recurses to
 the beginning of the whole pattern. C<(?0)> is an alternate syntax for
 C<(?R)>. If PARNO is preceded by a plus or minus sign then it is assumed
-to be relative, with negative numbers indicating preceding capture buffers
+to be relative, with negative numbers indicating preceding capture groups
 and positive ones following. Thus C<(?-1)> refers to the most recently
-declared buffer, and C<(?+1)> indicates the next buffer to be declared.
+declared group, and C<(?+1)> indicates the next group to be declared.
 Note that the counting for relative recursion differs from that of
-relative backreferences, in that with recursion unclosed buffers B<are>
+relative backreferences, in that with recursion unclosed groups B<are>
 included.
 
 The following pattern matches a function foo() which may contain
@@ -987,7 +990,7 @@ the output produced should be the following:
     $2 = (bar(baz)+baz(bop))
     $3 = bar(baz)+baz(bop)
 
-If there is no corresponding capture buffer defined, then it is a
+If there is no corresponding capture group defined, then it is a
 fatal error.  Recursing deeper than 50 times without consuming any input
 string will also result in a fatal error.  The maximum depth is compiled
 into perl, so changing it requires a custom build.
@@ -1030,7 +1033,7 @@ X<(?()>
 Conditional expression.  C<(condition)> should be either an integer in
 parentheses (which is valid if the corresponding pair of parentheses
 matched), a look-ahead/look-behind/evaluate zero-width assertion, a
-name in angle brackets or single quotes (which is valid if a buffer
+name in angle brackets or single quotes (which is valid if a group
 with the given name matched), or the special symbol (R) (true when
 evaluated inside of recursion or eval). Additionally the R may be
 followed by a number, (which will be true when evaluated when recursing
@@ -1043,11 +1046,11 @@ Here's a summary of the possible predicates:
 
 =item (1) (2) ...
 
-Checks if the numbered capturing buffer has matched something.
+Checks if the numbered capturing group has matched something.
 
 =item (<NAME>) ('NAME')
 
-Checks if a buffer with the given name has matched something.
+Checks if a group with the given name has matched something.
 
 =item (?{ CODE })
 
@@ -1112,8 +1115,8 @@ An example of how this might be used is as follows:
      (?<ADRESS_PAT>....)
    )/x
 
-Note that capture buffers matched inside of recursion are not accessible
-after the recursion returns, so the extra layer of capturing buffers is
+Note that capture groups matched inside of recursion are not accessible
+after the recursion returns, so the extra layer of capturing groups is
 necessary. Thus C<$+{NAME_PAT}> would not be defined even though
 C<$+{NAME}> would be.
 
@@ -1367,7 +1370,7 @@ name of the most recently executed C<(*MARK:NAME)> that was involved
 in the match.
 
 This can be used to determine which branch of a pattern was matched
-without using a separate capture buffer for each branch, which in turn
+without using a separate capture group for each branch, which in turn
 can result in a performance improvement, as perl cannot optimize
 C</(?:(x)|(y)|(z))/> as efficiently as something like
 C</(?:x(*MARK:x)|y(*MARK:y)|z(*MARK:z))/>.
@@ -1462,7 +1465,7 @@ whether there is actually more to match in the string. When inside of a
 nested pattern, such as recursion, or in a subpattern dynamically generated
 via C<(??{})>, only the innermost pattern is ended immediately.
 
-If the C<(*ACCEPT)> is inside of capturing buffers then the buffers are
+If the C<(*ACCEPT)> is inside of capturing groups then the groups are
 marked as ended at the point at which the C<(*ACCEPT)> was encountered.
 For instance:
 
@@ -1952,7 +1955,7 @@ only whether or not C<S> can match is important.
 =item C<(??{ EXPR })>, C<(?PARNO)>
 
 The ordering is the same as for the regular expression which is
-the result of EXPR, or the pattern contained by capture buffer PARNO.
+the result of EXPR, or the pattern contained by capture group PARNO.
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 
@@ -2026,15 +2029,15 @@ Perl specific syntax, the following are also accepted:
 
 =item C<< (?PE<lt>NAMEE<gt>pattern) >>
 
-Define a named capture buffer. Equivalent to C<< (?<NAME>pattern) >>.
+Define a named capture group. Equivalent to C<< (?<NAME>pattern) >>.
 
 =item C<< (?P=NAME) >>
 
-Backreference to a named capture buffer. Equivalent to C<< \g{NAME} >>.
+Backreference to a named capture group. Equivalent to C<< \g{NAME} >>.
 
 =item C<< (?P>NAME) >>
 
-Subroutine call to a named capture buffer. Equivalent to C<< (?&NAME) >>.
+Subroutine call to a named capture group. Equivalent to C<< (?&NAME) >>.
 
 =back
 

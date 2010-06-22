@@ -360,41 +360,51 @@ absolutely, relatively, and by name.
 
 =head3 Absolute referencing
 
-A backslash sequence that starts with a backslash and is followed by a
-number is an absolute reference (but be aware of the caveat mentioned above).
-If the number is I<N>, it refers to the Nth set of parentheses - whatever
-has been matched by that set of parenthesis has to be matched by the C<\N>
-as well.
+Either C<\gI<N>> (starting in Perl 5.10.0), or C<\I<N>> (old-style) where I<N>
+is an positive (unsigned) decimal number of any length is an absolute reference
+to a capturing group.
 
-=head4 Examples
+I<N> refers to the Nth set of parentheses - or more accurately, whatever has
+been matched by that set of parenthesis.  Thus C<\g1> refers to the first
+capture group in the regex.
 
- /(\w+) \1/;    # Finds a duplicated word, (e.g. "cat cat").
- /(.)(.)\2\1/;  # Match a four letter palindrome (e.g. "ABBA").
+The C<\gI<N>> form can be equivalently written as C<\g{I<N>}>
+which avoids ambiguity when building a regex by concatenating shorter
+strings.  Otherwise if you had a regex C</$a$b/>, and C<$a> contained C<"\g1">,
+and C<$b> contained C<"37">, you would get C</\g137/> which is probably not
+what you intended.
 
-
-=head3 Relative referencing
-
-New in perl 5.10.0 is a different way of referring to capture buffers: C<\g>.
-C<\g> takes a number as argument, with the number in curly braces (the
-braces are optional). If the number (N) does not have a sign, it's a reference
-to the Nth capture group (so C<\g{2}> is equivalent to C<\2> - except that
-C<\g> always refers to a capture group and will never be seen as an octal
-escape). If the number is negative, the reference is relative, referring to
-the Nth group before the C<\g{-N}>.
-
-The big advantage of C<\g{-N}> is that it makes it much easier to write
-patterns with references that can be interpolated in larger patterns,
-even if the larger pattern also contains capture groups.
+In the C<\I<N>> form, I<N> must not begin with a "0", and there must be at
+least I<N> capturing groups, or else I<N> will be considered an octal escape
+(but something like C<\18> is the same as C<\0018>, that is the octal escape
+C<"\001"> followed by a literal digit C<"8">).
 
 Mnemonic: I<g>roup.
 
 =head4 Examples
 
- /(A)        # Buffer 1
-  (          # Buffer 2
-    (B)      # Buffer 3
-    \g{-1}   # Refers to buffer 3 (B)
-    \g{-3}   # Refers to buffer 1 (A)
+ /(\w+) \g1/;    # Finds a duplicated word, (e.g. "cat cat").
+ /(\w+) \1/;     # Same thing; written old-style
+ /(.)(.)\g2\g1/;  # Match a four letter palindrome (e.g. "ABBA").
+
+
+=head3 Relative referencing
+
+C<\g-I<N>> (starting in Perl 5.10.0) is used for relative addressing.  (It can
+be written as C<\g{-I<N>>.)  It refers to the I<N>th group before the
+C<\g{-I<N>}>.
+
+The big advantage of this form is that it makes it much easier to write
+patterns with references that can be interpolated in larger patterns,
+even if the larger pattern also contains capture groups.
+
+=head4 Examples
+
+ /(A)        # Group 1
+  (          # Group 2
+    (B)      # Group 3
+    \g{-1}   # Refers to group 3 (B)
+    \g{-3}   # Refers to group 1 (A)
   )
  /x;         # Matches "ABBA".
 
@@ -403,9 +413,9 @@ Mnemonic: I<g>roup.
 
 =head3 Named referencing
 
-Also new in perl 5.10.0 is the use of named capture buffers, which can be
+Also new in perl 5.10.0 is the use of named capture groups, which can be
 referred to by name. This is done with C<\g{name}>, which is a
-backreference to the capture buffer with the name I<name>.
+backreference to the capture group with the name I<name>.
 
 To be compatible with .Net regular expressions, C<\g{name}> may also be
 written as C<\k{name}>, C<< \k<name> >> or C<\k'name'>.
