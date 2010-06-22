@@ -33,8 +33,20 @@ this change (c1bd23).
 
 =head2 Stashes are now always defined
 
-%stash:: is now autovivified so 'defined %Foo::' always returns true
-- although calling defined on a stash is now deprecated.
+C<defined %Foo::> now always returns true, even when no symbols have yet been
+defined in that package.
+
+This is a side effect of removing a special case kludge in the tokeniser,
+added for 5.10.0, to hide side effects of changes to the internal storage of
+hashes that to drastically reduce their memory usage overhead.
+
+Calling defined on a stash has been deprecated since 5.6.0, warned on
+lexicals since 5.6.0, and has warned for stashes (and other package
+variables) since 5.12.0. C<defined %hash> has always exposed an
+implementation detail - emptying a hash by deleting all entries from it does
+not make C<defined %hash> false, hence C<defined %hash> is not valid code to
+determine whether an arbitrary hash is empty. Instead, use the behaviour
+that an empty <%hash> always returns false in a scalar context.
 
 =head1 Core Enhancements
 
