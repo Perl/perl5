@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..106\n";
+print "1..107\n";
 
 eval 'print "ok 1\n";';
 
@@ -601,6 +601,13 @@ EOP
 # localize the hits hash so the eval ends up with the pad offset of a copy of it in its targ
 BEGIN { $^H |= 0x00020000 }
 eval q{ eval { + } };
+print "ok\n";
+EOP
+
+fresh_perl_is(<<'EOP', "ok\n", undef, 'assert fail on non-string in Perl_lex_start');
+use overload '""'  => sub { '1;' };
+my $ov = bless [];
+eval $ov;
 print "ok\n";
 EOP
 
