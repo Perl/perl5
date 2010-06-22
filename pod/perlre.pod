@@ -384,7 +384,7 @@ to the current contents of a buffer later on, within the same pattern,
 use \1 for the first, \2 for the second, and so on.
 Outside the match use "$" instead of "\".  (The
 \<digit> notation works in certain circumstances outside
-the match.  See the warning below about \1 vs $1 for details.)
+the match.  See L</Warning on \1 Instead of $1> below for details.)
 Referring back to another part of the match is called a
 I<backreference>.
 X<regex, capture buffer> X<regexp, capture buffer>
@@ -1770,7 +1770,8 @@ Some people get too used to writing things like:
 
     $pattern =~ s/(\W)/\\\1/g;
 
-This is grandfathered for the RHS of a substitute to avoid shocking the
+This is grandfathered (for \1 to \9) for the RHS of a substitute to avoid
+shocking the
 B<sed> addicts, but it's a dirty habit to get into.  That's because in
 PerlThink, the righthand side of an C<s///> is a double-quoted string.  C<\1> in
 the usual double-quoted string means a control-A.  The customary Unix
