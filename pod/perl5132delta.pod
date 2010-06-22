@@ -352,7 +352,20 @@ perl's malloc instead (RT #75742) (9b58b5).
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.2 represents thirty days of development since Perl 5.13.1 (and
+two days of waiting around while the release manager remembered where he
+left his brain) and contains 3685 lines of changes across 194 files from
+30 authors and committers.
+
+Thank you to the following for contributing to this release:
+
+Abigail, Andreas J. Koenig, Chas. Owens, Chris 'BinGOs' Williams,
+Craig A. Berry, David Caldwell, David Golden, David Mitchell,
+Father Chrysostomos, George Greer, H.Merijn Brand, Jerry D. Hedden,
+Karl Williamson, Maik Hentsche, Matt S Trout, Nicholas Clark, Rafael
+Garcia-Suarez, Ricardo Signes, Salvador Fandino, Salvador Ortiz Garcia,
+Shlomi Fish, Sinan Unur, Sisyphus, Slaven Rezic, Sullivan Beck, Tony Cook,
+Vincent Pit, Zefram, brian d foy, Ævar Arnfjörð Bjarmason
 
 Your humble release manager would like to specifically call out
 Karl Williamson for making the tests a better place to be, and Shlomi
