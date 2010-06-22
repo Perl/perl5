@@ -235,11 +235,13 @@ terminated by the null character, you can say this:
     find . -name '*.orig' -print0 | perl -n0e unlink
 
 The special value 00 will cause Perl to slurp files in paragraph mode.
-The value 0777 will cause Perl to slurp files whole because there is no
-legal byte with that value.
+Any value 0400 or above will cause Perl to slurp files whole, but by convention
+the value 0777 is the one normally used for this purpose.
 
-If you want to specify any Unicode character, use the hexadecimal
-format: C<-0xHHH...>, where the C<H> are valid hexadecimal digits.
+You can also specify the separator character using hexadecimal notation:
+C<-0xHHH...>, where the C<H> are valid hexadecimal digits.  Unlike the octal
+form, this one may be used to specify any Unicode character, even those beyond
+0xFF.
 (This means that you cannot use the C<-x> with a directory name that
 consists of hexadecimal digits.)
 
