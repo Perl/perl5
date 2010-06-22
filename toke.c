@@ -2811,7 +2811,8 @@ S_scan_const(pTHX_ char *start)
 
 	    s++;
 
-	    /* deprecate \1 in strings and substitution replacements */
+	    /* warn on \1 - \9 in substitution replacements, but note that \11
+	     * is an octal; and \19 is \1 followed by '9' */
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
