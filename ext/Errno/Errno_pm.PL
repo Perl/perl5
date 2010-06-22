@@ -334,13 +334,13 @@ EOF
     # Write Errno.pm
 
     print <<"EDQ";
+# -*- buffer-read-only: t -*-
 #
 # This file is auto-generated. ***ANY*** changes here will be lost
 #
 
 package Errno;
-our (\@ISA,\$VERSION);
-use Exporter ();
+require Exporter;
 use Config;
 use strict;
 
@@ -348,9 +348,9 @@ use strict;
 "$Config{'archname'}-$Config{'osvers'}" or
 	die "Errno architecture ($Config{'archname'}-$Config{'osvers'}) does not match executable architecture (\$Config{'archname'}-\$Config{'osvers'})";
 
-\$VERSION = "$VERSION";
+our \$VERSION = "$VERSION";
 \$VERSION = eval \$VERSION;
-\@ISA = qw(Exporter);
+our \@ISA = 'Exporter';
 
 my %err;
 
@@ -378,11 +378,9 @@ print <<'ESQ';
     }
 }
 
-our (@EXPORT_OK, %EXPORT_TAGS);
+our @EXPORT_OK = keys %err;
 
-@EXPORT_OK = keys %err;
-
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
     POSIX => [qw(
 ESQ
 
@@ -493,6 +491,7 @@ under the same terms as Perl itself.
 
 =cut
 
+# ex: set ro:
 ESQ
 
 }
