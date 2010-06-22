@@ -227,10 +227,10 @@ as a character without special meaning by the regex engine, and will match
 
 =head4 Caveat
 
-Octal escapes potentially clash with backreferences. They both consist
-of a backslash followed by numbers. So Perl has to use heuristics to
-determine whether it is a backreference or an octal escape. Perl uses
-the following rules:
+Octal escapes potentially clash with old-style backreferences (see L</Absolute
+referencing> below). They both consist of a backslash followed by numbers. So
+Perl has to use heuristics to determine whether it is a backreference or an
+octal escape. Perl uses the following rules:
 
 =over 4
 
@@ -348,7 +348,6 @@ L<perlunicode/Unicode Character Properties>.
 
 Mnemonic: I<p>roperty.
 
-
 =head2 Referencing
 
 If capturing parenthesis are used in a regular expression, we can refer
@@ -361,18 +360,18 @@ absolutely, relatively, and by name.
 =head3 Absolute referencing
 
 Either C<\gI<N>> (starting in Perl 5.10.0), or C<\I<N>> (old-style) where I<N>
-is an positive (unsigned) decimal number of any length is an absolute reference
+is a positive (unsigned) decimal number of any length is an absolute reference
 to a capturing group.
 
-I<N> refers to the Nth set of parentheses - or more accurately, whatever has
+I<N> refers to the Nth set of parentheses - so C<\gI<N>> refers to whatever has
 been matched by that set of parenthesis.  Thus C<\g1> refers to the first
 capture group in the regex.
 
 The C<\gI<N>> form can be equivalently written as C<\g{I<N>}>
 which avoids ambiguity when building a regex by concatenating shorter
-strings.  Otherwise if you had a regex C</$a$b/>, and C<$a> contained C<"\g1">,
-and C<$b> contained C<"37">, you would get C</\g137/> which is probably not
-what you intended.
+strings.  Otherwise if you had a regex C<qr/$a$b/>, and C<$a> contained
+C<"\g1">, and C<$b> contained C<"37">, you would get C</\g137/> which is
+probably not what you intended.
 
 In the C<\I<N>> form, I<N> must not begin with a "0", and there must be at
 least I<N> capturing groups, or else I<N> will be considered an octal escape
@@ -413,17 +412,15 @@ even if the larger pattern also contains capture groups.
 
 =head3 Named referencing
 
-Also new in perl 5.10.0 is the use of named capture groups, which can be
-referred to by name. This is done with C<\g{name}>, which is a
-backreference to the capture group with the name I<name>.
+C<\g{I<name>}> (starting in Perl 5.10.0) can be used to back refer to a
+named capture group, dispensing completely with having to think about capture
+buffer positions.
 
 To be compatible with .Net regular expressions, C<\g{name}> may also be
 written as C<\k{name}>, C<< \k<name> >> or C<\k'name'>.
 
-Note that C<\g{}> has the potential to be ambiguous, as it could be a named
-reference, or an absolute or relative reference (if its argument is numeric).
-However, names are not allowed to start with digits, nor are they allowed to
-contain a hyphen, so there is no ambiguity.
+To prevent any ambiguity, I<name> must not start with a digit nor contain a
+hyphen.
 
 =head4 Examples
 
@@ -582,7 +579,7 @@ Mnemonic: eI<X>tended Unicode character.
  "\x{256}" =~ /^\C\C$/;    # Match as chr (256) takes 2 octets in UTF-8.
 
  $str =~ s/foo\Kbar/baz/g; # Change any 'bar' following a 'foo' to 'baz'
- $str =~ s/(.)\K\1//g;     # Delete duplicated characters.
+ $str =~ s/(.)\K\g1//g;    # Delete duplicated characters.
 
  "\n"   =~ /^\R$/;         # Match, \n   is a generic newline.
  "\r"   =~ /^\R$/;         # Match, \r   is a generic newline.

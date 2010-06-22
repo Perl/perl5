@@ -99,7 +99,7 @@ record read in.
 
 	$/ = '';  		# read in whole paragraph, not just one line
 	while ( <> ) {
-		while ( /\b([\w'-]+)(\s+\1)+\b/gi ) {  	# word starts alpha
+		while ( /\b([\w'-]+)(\s+\g1)+\b/gi ) { 	# word starts alpha
 			print "Duplicate $1 at paragraph $.\n";
 		}
 	}

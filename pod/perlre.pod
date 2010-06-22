@@ -381,44 +381,29 @@ loop. Take care when using patterns that include C<\G> in an alternation.
 
 The bracketing construct C<( ... )> creates capture groups (also referred to as
 capture buffers). To refer to the current contents of a group later on, within
-same pattern, use \1 for the first, \2 for the second, and so on.
-Outside the match use "$" instead of "\".  (The
-\<digit> notation works in certain circumstances outside
-the match.  See L</Warning on \1 Instead of $1> below for details.)
-Referring back to another part of the match is called a
-I<backreference>.
+the same pattern, use C<\g1> (or C<\g{1}>) for the first, C<\g2> (or C<\g{2}>)
+for the second, and so on.
+This is called a I<backreference>.
 X<regex, capture buffer> X<regexp, capture buffer>
 X<regex, capture group> X<regexp, capture group>
 X<regular expression, capture buffer> X<backreference>
 X<regular expression, capture group> X<backreference>
-
-There is no limit to the number of captured substrings that you may
-use.  However Perl also uses \10, \11, etc. as aliases for \010,
-\011, etc.  (Recall that 0 means octal, so \011 is the character at
-number 9 in your coded character set; which would be the 10th character,
-a horizontal tab under ASCII.)  Perl resolves this
-ambiguity by interpreting \10 as a backreference only if at least 10
-left parentheses have opened before it.  Likewise \11 is a
-backreference only if at least 11 left parentheses have opened
-before it.  And so on.  \1 through \9 are always interpreted as
-backreferences.
-If the bracketing group did not match, the associated backreference won't
-match either. (This can happen if the bracketing group is optional, or
-in a different branch of an alternation.)
-
 X<\g{1}> X<\g{-1}> X<\g{name}> X<relative backreference> X<named backreference>
-In order to provide a safer and easier way to construct patterns using
-backreferences, Perl provides the C<\g{N}> notation (starting with perl
-5.10.0). The curly brackets are optional, however omitting them is less
-safe as the meaning of the pattern can be changed by text (such as digits)
-following it. When N is a positive integer the C<\g{N}> notation is
-exactly equivalent to using normal backreferences. When N is a negative
-integer then it is a relative backreference referring to the previous N'th
-capturing group. When the bracket form is used and N is not an integer, it
-is treated as a reference to a named group.
+X<named capture buffer> X<regular expression, named capture buffer>
+X<named capture group> X<regular expression, named capture group>
+X<%+> X<$+{name}> X<< \k<name> >>
+There is no limit to the number of captured substrings that you may use.
+Groups are numbered with the leftmost open parenthesis being number 1, etc.  If
+a group did not match, the associated backreference won't match either. (This
+can happen if the group is optional, or in a different branch of an
+alternation.)
+You can omit the C<"g">, and write C<"\1">, etc, but there are some issues with
+this form, described below.
 
-Thus C<\g{-1}> refers to the last group, C<\g{-2}> refers to the
-group before that. For example:
+You can also refer to capture groups relatively, by using a negative number, so
+that C<\g-1> and C<\g{-1}> both refer to the immediately preceding capture
+group, and C<\g-2> and C<\g{-2}> both refer to the group before it.  For
+example:
 
         /
          (Y)            # group 1
@@ -429,33 +414,62 @@ group before that. For example:
          )
         /x
 
-and would match the same as C</(Y) ( (X) \3 \1 )/x>.
+would match the same as C</(Y) ( (X) \g3 \g1 )/x>.  This allows you to
+interpolate regexes into larger regexes and not have to worry about the
+capture groups being renumbered.
 
-Additionally, as of Perl 5.10.0 you may use named capture groups and named
-backreferences. The notation is C<< (?<name>...) >> to declare and C<< \k<name> >>
-to reference. You may also use apostrophes instead of angle brackets to delimit the
-name; and you may use the bracketed C<< \g{name} >> backreference syntax.
-It's possible to refer to a named capture group by absolute and relative number as well.
-Outside the pattern, a named capture group is available via the C<%+> hash.
-When different groups within the same pattern have the same name, C<$+{name}>
-and C<< \k<name> >> refer to the leftmost defined group. (Thus it's possible
-to do things with named capture groups that would otherwise require C<(??{})>
-code to accomplish.)
-X<named capture buffer> X<regular expression, named capture buffer>
-X<named capture group> X<regular expression, named capture group>
-X<%+> X<$+{name}> X<< \k<name> >>
+You can dispense with numbers altogether and create named capture groups.
+The notation is C<(?E<lt>I<name>E<gt>...)> to declare and C<\g{I<name>}> to
+reference.  (To be compatible with .Net regular expressions, C<\g{I<name>}> may
+also be written as C<\k{I<name>}>, C<\kE<lt>I<name>E<gt>> or C<\k'I<name>'>.)
+I<name> must not begin with a number, nor contain hyphens.
+When different groups within the same pattern have the same name, any reference
+to that name assumes the leftmost defined group.  Named groups count in
+absolute and relative numbering, and so can also be referred to by those
+numbers.
+(It's possible to do things with named capture groups that would otherwise
+require C<(??{})>.)
+
+Capture group contents are dynamically scoped and available to you outside the
+pattern until the end of the enclosing block or until the next successful
+match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
+You can refer to them by absolute number (using C<"$1"> instead of C<"\g1">,
+etc); or by name via the C<%+> hash, using C<"$+{I<name>}">.
+
+Braces are required in referring to named capture groups, but are optional for
+absolute or relative numbered ones.  Braces are safer when creating a regex by
+concatenating smaller strings.  For example if you have C<qr/$a$b/>, and C<$a>
+contained C<"\g1">, and C<$b> contained C<"37">, you would get C</\g137/> which
+is probably not what you intended.
+
+The C<\g> and C<\k> notations were introduced in Perl 5.10.0.  Prior to that
+there were no named nor relative numbered capture groups.  Absolute numbered
+groups were referred to using C<\1>, C<\2>, etc, and this notation is still
+accepted (and likely always will be).  But it leads to some ambiguities if
+there are more than 9 capture groups, as C<\10> could mean either the tenth
+capture group, or the character whose ordinal in octal is 010 (a backspace in
+ASCII).  Perl resolves this ambiguity by interpreting C<\10> as a backreference
+only if at least 10 left parentheses have opened before it.  Likewise C<\11> is
+a backreference only if at least 11 left parentheses have opened before it.
+And so on.  C<\1> through C<\9> are always interpreted as backreferences.  You
+can minimize the ambiguity by always using C<\g> if you mean capturing groups;
+and always using 3 digits for octal constants, with the first always "0" (which
+works if there are 63 (= \077) or fewer capture groups).
+
+The C<\I<digit>> notation also works in certain circumstances outside
+the pattern.  See L</Warning on \1 Instead of $1> below for details.)
 
 Examples:
 
     s/^([^ ]*) *([^ ]*)/$2 $1/;     # swap first two words
 
-    /(.)\1/                         # find first doubled char
+    /(.)\g1/                        # find first doubled char
          and print "'$1' is the first doubled character\n";
 
     /(?<char>.)\k<char>/            # ... a different way
          and print "'$+{char}' is the first doubled character\n";
 
-    /(?'char'.)\1/                  # ... mix and match
+    /(?'char'.)\g1/                 # ... mix and match
          and print "'$1' is the first doubled character\n";
 
     if (/Time: (..):(..):(..)/) {   # parse out values
@@ -475,13 +489,12 @@ extended patterns (see below), for example to assign a submatch to a
 variable.
 X<$+> X<$^N> X<$&> X<$`> X<$'>
 
-The numbered match variables ($1, $2, $3, etc.) and the related punctuation
-set (C<$+>, C<$&>, C<$`>, C<$'>, and C<$^N>) are all dynamically scoped
+These special variables, like the C<%+> hash and the numbered match variables
+(C<$1>, C<$2>, C<$3>, etc.) are dynamically scoped
 until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 X<$+> X<$^N> X<$&> X<$`> X<$'>
 X<$1> X<$2> X<$3> X<$4> X<$5> X<$6> X<$7> X<$8> X<$9>
-
 
 B<NOTE>: Failed matches in Perl do not reset the match variables,
 which makes it easier to write code that tests for a series of more
@@ -490,7 +503,7 @@ specific cases and remembers the best match.
 B<WARNING>: Once Perl sees that you need one of C<$&>, C<$`>, or
 C<$'> anywhere in the program, it has to provide them for every
 pattern match.  This may substantially slow your program.  Perl
-uses the same mechanism to produce $1, $2, etc, so you also pay a
+uses the same mechanism to produce C<$1>, C<$2>, etc, so you also pay a
 price for each pattern that contains capturing parentheses.  (To
 avoid this cost while retaining the grouping behaviour, use the
 extended regular expression C<(?: ... )> instead.)  But if you never
@@ -586,7 +599,7 @@ include C<(?i)> at the front of the pattern.  For example:
 
 These modifiers are restored at the end of the enclosing group. For example,
 
-    ( (?i) blah ) \s+ \1
+    ( (?i) blah ) \s+ \g1
 
 will match C<blah> in any case, some spaces, and an exact (I<including the case>!)
 repetition of the previous word, assuming the C</x> modifier, and no C</i>
@@ -1141,8 +1154,8 @@ C<a*ab> will match fewer characters than a standalone C<a*>, since
 this makes the tail match.
 
 An effect similar to C<< (?>pattern) >> may be achieved by writing
-C<(?=(pattern))\1>.  This matches the same substring as a standalone
-C<a+>, and the following C<\1> eats the matched string; it therefore
+C<(?=(pattern))\g1>.  This matches the same substring as a standalone
+C<a+>, and the following C<\g1> eats the matched string; it therefore
 makes a zero-length assertion into an analogue of C<< (?>...) >>.
 (The difference between these two constructs is that the second one
 uses a capturing group, thus shifting ordinals of backreferences
@@ -1762,7 +1775,7 @@ I<n>th subpattern later in the pattern using the metacharacter
 \I<n>.  Subpatterns are numbered based on the left to right order
 of their opening parenthesis.  A backreference matches whatever
 actually matched the subpattern in the string being examined, not
-the rules for that subpattern.  Therefore, C<(0|0x)\d*\s\1\d*> will
+the rules for that subpattern.  Therefore, C<(0|0x)\d*\s\g1\d*> will
 match "0x1234 0x4321", but not "0x1234 01234", because subpattern
 1 matched "0x", even though the rule C<0|0x> could potentially match
 the leading 0 in the second number.

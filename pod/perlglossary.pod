@@ -234,13 +234,14 @@ some of its high-level ideas.
 =item backreference
 
 A substring L<captured|/capturing> by a subpattern within
-unadorned parentheses in a L</regex>, also referred to as a capture group.
-Backslashed decimal numbers
-(C<\1>, C<\2>, etc.)  later in the same pattern refer back to the
-corresponding subpattern in the current match.  Outside the pattern,
+unadorned parentheses in a L</regex>, also referred to as a capture group.  The
+sequences (C<\g1>, C<\g2>, etc.)  later in the same pattern refer back to
+the corresponding subpattern in the current match.  Outside the pattern,
 the numbered variables (C<$1>, C<$2>, etc.) continue to refer to these
 same values, as long as the pattern was the last successful match of
-the current dynamic scope.
+the current dynamic scope.  C<\g{-1}> can be used to refer to a group by
+relative rather than absolute position; and groups can be also be named, and
+referred to later by name rather than number.  See L<perlre/Capture Buffers>.
 
 =item backtracking
 

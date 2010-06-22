@@ -114,7 +114,7 @@ entities--like C<&lt;> for example.
 Here's one "simple-minded" approach, that works for most files:
 
 	#!/usr/bin/perl -p0777
-	s/<(?:[^>'"]*|(['"]).*?\1)*>//gs
+	s/<(?:[^>'"]*|(['"]).*?\g1)*>//gs
 
 If you want a more complete solution, see the 3-stage striphtml
 program in
@@ -166,7 +166,7 @@ attribute is HREF and there are no other attributes.
 	# qxurl - tchrist@perl.com
 	print "$2\n" while m{
 		< \s*
-		  A \s+ HREF \s* = \s* (["']) (.*?) \1
+		  A \s+ HREF \s* = \s* (["']) (.*?) \g1
 		\s* >
 	}gsix;
 

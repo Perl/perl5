@@ -594,11 +594,11 @@ This won't expand C<"\n"> or C<"\t"> or any other special escapes.
 You can use the substitution operator to find pairs of characters (or
 runs of characters) and replace them with a single instance. In this
 substitution, we find a character in C<(.)>. The memory parentheses
-store the matched character in the back-reference C<\1> and we use
+store the matched character in the back-reference C<\g1> and we use
 that to require that the same thing immediately follow it. We replace
 that part of the string with the character in C<$1>.
 
-	s/(.)\1/$1/g;
+	s/(.)\g1/$1/g;
 
 We can also use the transliteration operator, C<tr///>. In this
 example, the search list side of our C<tr///> contains nothing, but
@@ -1162,7 +1162,7 @@ subsequent line.
     sub fix {
         local $_ = shift;
         my ($white, $leader);  # common whitespace and common leading string
-        if (/^\s*(?:([^\w\s]+)(\s*).*\n)(?:\s*\1\2?.*\n)+$/) {
+        if (/^\s*(?:([^\w\s]+)(\s*).*\n)(?:\s*\g1\g2?.*\n)+$/) {
             ($white, $leader) = ($2, quotemeta($1));
         } else {
             ($white, $leader) = (/^(\s+)/, '');

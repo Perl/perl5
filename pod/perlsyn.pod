@@ -931,7 +931,7 @@ C preprocessors: it matches the regular expression
     # example: '# line 42 "new_filename.plx"'
     /^\#   \s*
       line \s+ (\d+)   \s*
-      (?:\s("?)([^"]+)\2)? \s*
+      (?:\s("?)([^"]+)\g2)? \s*
      $/x
 
 with C<$1> being the line number for the next line, and C<$3> being

@@ -732,21 +732,21 @@ match).
 =head2 Backreferences
 
 Closely associated with the matching variables C<$1>, C<$2>, ... are
-the I<backreferences> C<\1>, C<\2>,...  Backreferences are simply
+the I<backreferences> C<\g1>, C<\g2>,...  Backreferences are simply
 matching variables that can be used I<inside> a regexp.  This is a
 really nice feature; what matches later in a regexp is made to depend on
 what matched earlier in the regexp.  Suppose we wanted to look
 for doubled words in a text, like 'the the'.  The following regexp finds
 all 3-letter doubles with a space in between:
 
-    /\b(\w\w\w)\s\1\b/;
+    /\b(\w\w\w)\s\g1\b/;
 
-The grouping assigns a value to \1, so that the same 3 letter sequence
+The grouping assigns a value to \g1, so that the same 3 letter sequence
 is used for both parts.
 
 A similar task is to find words consisting of two identical parts:
 
-    % simple_grep '^(\w\w\w\w|\w\w\w|\w\w|\w)\1$' /usr/dict/words
+    % simple_grep '^(\w\w\w\w|\w\w\w|\w\w|\w)\g1$' /usr/dict/words
     beriberi
     booboo
     coco
@@ -755,10 +755,10 @@ A similar task is to find words consisting of two identical parts:
     papa
 
 The regexp has a single grouping which considers 4-letter
-combinations, then 3-letter combinations, etc., and uses C<\1> to look for
-a repeat.  Although C<$1> and C<\1> represent the same thing, care should be
+combinations, then 3-letter combinations, etc., and uses C<\g1> to look for
+a repeat.  Although C<$1> and C<\g1> represent the same thing, care should be
 taken to use matched variables C<$1>, C<$2>,... only I<outside> a regexp
-and backreferences C<\1>, C<\2>,... only I<inside> a regexp; not doing
+and backreferences C<\g1>, C<\g2>,... only I<inside> a regexp; not doing
 so may lead to surprising and unsatisfactory results.
 
 
@@ -775,7 +775,7 @@ Another good reason in addition to readability and maintainability
 for using relative backreferences  is illustrated by the following example,
 where a simple pattern for matching peculiar strings is used:
 
-    $a99a = '([a-z])(\d)\2\1';   # matches a11a, g22g, x33x, etc.
+    $a99a = '([a-z])(\d)\g2\g1';   # matches a11a, g22g, x33x, etc.
 
 Now that we have this pattern stored as a handy string, we might feel
 tempted to use it as a part of some other pattern:
@@ -976,7 +976,7 @@ Here are some examples:
 
     /[a-z]+\s+\d*/;  # match a lowercase word, at least one space, and
                      # any number of digits
-    /(\w+)\s+\1/;    # match doubled words of arbitrary length
+    /(\w+)\s+\g1/;    # match doubled words of arbitrary length
     /y(es)?/i;       # matches 'y', 'Y', or a case-insensitive 'yes'
     $year =~ /\d{2,4}/;  # make sure year is at least 2 but not more
                          # than 4 digits
@@ -984,7 +984,7 @@ Here are some examples:
     $year =~ /\d{2}(\d{2})?/;  # same thing written differently. However,
                                # this produces $1 and the other does not.
 
-    % simple_grep '^(\w+)\1$' /usr/dict/words   # isn't this easier?
+    % simple_grep '^(\w+)\g1$' /usr/dict/words   # isn't this easier?
     beriberi
     booboo
     coco
@@ -2385,7 +2385,7 @@ The integer or name form of the C<condition> allows us to choose,
 with more flexibility, what to match based on what matched earlier in the
 regexp. This searches for words of the form C<"$x$x"> or C<"$x$y$y$x">:
 
-    % simple_grep '^(\w+)(\w+)?(?(2)\2\1|\1)$' /usr/dict/words
+    % simple_grep '^(\w+)(\w+)?(?(2)\g2\g1|\g1)$' /usr/dict/words
     beriberi
     coco
     couscous
