@@ -325,11 +325,6 @@ noop but should still be used to ensure past and future compatibility.
 The ibcmp_* functions have been renamed and are now called foldEQ,
 foldEQ_locale and foldEQ_utf8 (e6226b).
 
-=item *
-
-The ibcmp_* functions have been renamed and are now called foldEQ,
-foldEQ_locale and foldEQ_utf8 (e6226b).
-
 =back
 
 =head1 Deprecations
