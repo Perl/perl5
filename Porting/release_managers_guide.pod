@@ -653,6 +653,10 @@ the MANIFEST files into it, sets the correct permissions on them,
 adds DOS line endings to some, then tars it up as
 F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a C<tar.bz2> file.
 
+If you're getting your tarball suffixed with -uncommitted and you're sure
+your changes were all committed, you can override the suffix with:
+
+    $ perl Porting/makerel -b -s ''
 
 XXX if we go for extra tags and branches stuff, then add the extra details
 here
