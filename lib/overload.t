@@ -47,8 +47,9 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 1970;
+use Test::More tests => 4826;
 
+use Scalar::Util qw(tainted);
 
 $a = new Oscalar "087";
 $b= "$a";
@@ -1632,10 +1633,45 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 # We test here both a tied array and scalar, since the implementation of
 # tied  arrays (and hashes) is such that in rvalue context, mg_get is
 # called prior to executing the op, while it isn't for a tied scalar.
+# We also check that return values are correctly tainted.
+# We try against two overload packages; one has all expected methods, the
+# other uses only fallback methods.
 
 {
 
-    my @terms;
+    # @tests holds a list of test cases. Each elem is an array ref with
+    # the following entries:
+    #
+    #  * the value that the overload method should return
+    #
+    #  * the expression to be evaled. %s is replaced with the
+    #       variable being tested ($ta[0], $ts, or $plain)
+    #
+    #  * a string listing what functions we expect to be called.
+    #       Each method appends its name in parentheses, so "(=)(+)" means
+    #       we expect the copy constructor and then the add method to be
+    #       called.
+    #
+    #  * like above, but what should be called for the fallback-only test
+    #      (in this case, nomethod() identifies itself as "(NM:*)" where *
+    #      is the op).  If this value is undef, fallback tests are skipped.
+    #
+    #  * An array ref of expected counts of calls to FETCH/STORE.
+    #      The first three values are:
+    #         1. the expected number of FETCHs for a tied array
+    #         2. the expected number of FETCHs for a tied scalar
+    #         3. the expected number of STOREs
+    #       If there are a further three elements present, then
+    #       these represent the expected counts for the fallback
+    #       version of the tests. If absent, they are assumed to
+    #       be the same as for the full method test
+    #
+    #  * Under the taint version of the tests,  whether we expect
+    #       the result to be tainted (for example comparison ops
+    #       like '==' don't return a tainted value, even if their
+    #       args are.
+    my @tests;
+
     my %subs;
     my $funcs;
     my $use_int;
@@ -1658,69 +1694,132 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# multiple fetches between STOREs, which means that the tied
 	# hash skips doing a FETCH during '='.
 
-	for (qw(+ - * / % ** << >> x . & | ^)) {
-	    my $e = "%s $_= 3";
+	for (qw(+ - * / % ** << >> & | ^)) {
+	    my $op = $_;
+	    $op = '%%' if $op eq '%';
+	    my $e = "%s $op= 3";
 	    $subs{"$_="} = $e;
 	    # ARRAY  FETCH: initial,        sub+=, eval-return,
 	    # SCALAR FETCH: initial, sub=,  sub+=, eval-return,
 	    # STORE:        copy, mutator
-	    push @terms, [ 18, $e, "$_=", '(=)', 3, 4, 2 ];
-	    $e = "%s $_ 3";
-	    $subs{$_} = $e;
+	    push @tests, [ 18, $e, "(=)($_=)", "(=)(NM:$_=)", [ 3, 4, 2 ], 1 ];
+
+	    $subs{$_} =
+		"do { my \$arg = %s; \$_[2] ? (3 $op \$arg) : (\$arg $op 3) }";
 	    # ARRAY  FETCH: initial
 	    # SCALAR FETCH: initial eval-return,
-	    push @terms, [ 18, $e, $_, '', 1, 2, 0 ];
+	    push @tests, [ 18, "%s $op 3", "($_)", "(NM:$_)", [ 1, 2, 0 ], 1 ];
+	    push @tests, [ 18, "3 $op %s", "($_)", "(NM:$_)", [ 1, 2, 0 ], 1 ];
 	}
+
+	# these use string fallback rather than nomethod
+	for (qw(x .)) {
+	    my $op = $_;
+	    my $e = "%s $op= 3";
+	    $subs{"$_="} = $e;
+	    # For normal case:
+	    #   ARRAY  FETCH: initial,        sub+=, eval-return,
+	    #   SCALAR FETCH: initial, sub=,  sub+=, eval-return,
+	    #          STORE: copy, mutator
+	    # for fallback, we just stringify, so eval-return and copy skipped
+	    #
+	    # XXX TODO concat LH overload with fallback calls "" and FETCH
+	    # too often
+	    if ($_ eq '.') {
+		push @tests, [ 18, $e, "(=)($_=)", '("")("")',
+			[ 3, 4, 2,     2, 4, 1 ], 1 ];
+	    }
+	    else {
+		push @tests, [ 18, $e, "(=)($_=)", '("")',
+			[ 3, 4, 2,     2, 3, 1 ], 1 ];
+	    }
+
+	    $subs{$_} =
+		"do { my \$arg = %s; \$_[2] ? (3 $op \$arg) : (\$arg $op 3) }";
+	    # ARRAY  FETCH: initial
+	    # SCALAR FETCH: initial eval-return,
+	    # with fallback, we just stringify, so eval-return skipped
+
+	    # XXX TODO concat overload with fallback calls FETCH too often
+	    if ($_ eq '.') {
+		push @tests, [ 18, "%s $op 3", "($_)", '("")',
+				[ 1, 2, 0,     1, 2, 0 ], 1 ];
+		push @tests, [ 18, "3 $op %s", "($_)", '("")',
+				[ 1, 2, 0,     1, 2, 0 ], 1 ];
+	    }
+	    else {
+		push @tests, [ 18, "%s $op 3", "($_)", '("")',
+				[ 1, 2, 0,     1, 1, 0 ], 1 ];
+		next if $_ eq 'x'; # repeat only overloads on LHS
+		push @tests, [ 18, "3 $op %s", "($_)", '("")',
+				[ 1, 2, 0,     1, 1, 0 ], 1 ];
+	    }
+	}
+
 	for (qw(++ --)) {
 	    my $pre  = "$_%s";
 	    my $post = "%s$_";
 	    $subs{$_} = $pre;
-	    push @terms,
+	    push @tests,
 		# ARRAY  FETCH: initial,        sub+=, eval-return,
 		# SCALAR FETCH: initial, sub=,  sub+=, eval-return,
 		# STORE:        copy, mutator
-		[ 18, $pre,  $_, '(=)("")', 3, 4, 2 ],
+		[ 18, $pre, "(=)($_)(\"\")", "(=)(NM:$_)(\"\")", [ 3, 4, 2 ], 1 ],
 		# ARRAY  FETCH: initial,        sub+=
 		# SCALAR FETCH: initial, sub=,  sub+=
 		# STORE:        copy, mutator
-		[ 18, $post, $_, '(=)("")', 2, 3, 2 ];
+		[ 18, $post, "(=)($_)(\"\")", "(=)(NM:$_)(\"\")", [ 2, 3, 2 ], 1 ];
 	}
 
 	# For the non-mutator ops, we have a initial FETCH,
 	# an extra FETCH within the sub itself for the scalar option,
 	# and no STOREs
 
-	for (qw(< <= >  >= == != lt le gt ge eq ne <=> cmp)) {
+	for (qw(< <= >  >= == != lt le gt ge eq ne)) {
 	    my $e = "%s $_ 3";
 	    $subs{$_} = $e;
-	    push @terms, [ 3, $e, $_, '', 1, 2, 0 ];
+	    push @tests, [ 3, $e, "($_)", "(NM:$_)", [ 1, 2, 0 ], 0 ];
+	}
+	for (qw(<=> cmp)) {
+	    my $e = "%s $_ 3";
+	    $subs{$_} = $e;
+	    push @tests, [ 3, $e, "($_)", "(NM:$_)", [ 1, 2, 0 ], 1 ];
 	}
 	for (qw(atan2)) {
 	    my $e = "$_ %s, 3";
 	    $subs{$_} = $e;
-	    push @terms, [ 18, $e, $_, '', 1, 2, 0 ];
+	    push @tests, [ 18, $e, "($_)", "(NM:$_)", [ 1, 2, 0 ], 1 ];
 	}
-	for (qw(cos sin exp abs log sqrt int ! ~)) {
+	for (qw(cos sin exp abs log sqrt int ~)) {
 	    my $e = "$_(%s)";
 	    $subs{$_} = $e;
-	    push @terms, [ 1.23, $e, $_, '', 1, 2, 0 ];
+	    push @tests, [ 1.23, $e, "($_)",
+		    ($_ eq 'int' ? '(0+)' : "(NM:$_)") , [ 1, 2, 0 ], 1 ];
+	}
+	for (qw(!)) {
+	    my $e = "$_(%s)";
+	    $subs{$_} = $e;
+	    push @tests, [ 1.23, $e, "($_)", '(0+)', [ 1, 2, 0 ], 0 ];
 	}
 	for (qw(-)) {
 	    my $e = "$_(%s)";
 	    $subs{neg} = $e;
-	    push @terms, [ 18, $e, 'neg', '', 1, 2, 0 ];
+	    push @tests, [ 18, $e, '(neg)', '(NM:neg)', [ 1, 2, 0 ], 1 ];
 	}
 	my $e = '(%s) ? 1 : 0';
 	$subs{bool} = $e;
-	push @terms, [ 18, $e, 'bool', '', 1, 2, 0 ];
+	push @tests, [ 18, $e, '(bool)', '(0+)', [ 1, 2, 0 ], 0 ];
 
 	# note: this is testing unary qr, not binary =~
-	$subs{qr} = '(%s)';
-	push @terms, [ qr/abc/, '"abc" =~ (%s)', 'qr', '', 1, 2, 0 ];
+	$subs{qr} = '(qr/%s/)';
+	# XXX TODO qr overload with fallback calls "" and FETCH too often
+	#push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")', [ 1, 2, 0 ], 0 ];
+	push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")("")',
+			    [ 1, 2, 0,  1, 5, 0 ], 0 ];
 
 	$e = '"abc" ~~ (%s)';
 	$subs{'~~'} = $e;
-	push @terms, [ "abc", $e, '~~', '', 1, 1, 0 ];
+	push @tests, [ "abc", $e, '(~~)', '(NM:~~)', [ 1, 1, 0 ], 0 ];
 
 	$subs{'-X'} = 'do { my $f = (%s);'
 		    . '$_[1] eq "r" ? (-r ($f)) :'
@@ -1733,37 +1832,48 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# long as the tied and untied versions return the same value.
 	# The flags below are chosen to test all uses of tryAMAGICftest_MG
 	for (qw(r e f l t T)) {
-	    push @terms, [ 'TEST', "-$_ (%s)", '-X', '', 1, 2, 0 ];
+	    # XXX TODO -X overload with fallback calls FETCH too often
+	    # XXX and -t calls "" too often too
+	    #push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")', [ 1, 2, 0 ], 0 ];
+	    if ($_ eq 't') {
+		push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")("")',
+				    [ 1, 2, 0,    1, 5, 0 ], 0 ];
+	    }
+	    else {
+		push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")',
+				    [ 1, 2, 0,    1, 3, 0 ], 0 ];
+	    }
 	}
 
 	$subs{'${}'} = '%s';
-	push @terms, [ do {my $s=99; \$s}, '${%s}', '${}', '', 1, 1, 0 ];
+	push @tests, [ do {my $s=99; \$s}, '${%s}', '(${})', undef, [ 1, 1, 0 ], 0 ];
 
 	# we skip testing '@{}' here because too much of this test
-	# framework involves array deredfences!
+	# framework involves array dereferences!
 
 	$subs{'%{}'} = '%s';
-	push @terms, [ {qw(a 1 b 2 c 3)}, 'join "", sort keys %%{%s}', '%{}',
-		'', 1, 2, 0 ];
+	push @tests, [ {qw(a 1 b 2 c 3)}, 'join "", sort keys %%{%s}',
+			'(%{})', undef, [ 1, 2, 0 ], 0 ];
 
 	$subs{'&{}'} = '%s';
-	push @terms, [ sub {99}, 'do {&{%s} for 1,2}', '&{})(&{}', '', 2, 2, 0 ];
+	push @tests, [ sub {99}, 'do {&{%s} for 1,2}',
+			    '(&{})(&{})', undef, [ 2, 2, 0 ], 0 ];
 
 	our $RT57012A = 88;
 	our $RT57012B;
 	$subs{'*{}'} = '%s';
-	push @terms, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
-		'*{}', '', 1, 1, 0 ];
+	push @tests, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
+		'(*{})', undef, [ 1, 1, 0 ], 0 ];
 
 	# XXX TODO: '<>'
 
 	for my $sub (keys %subs) {
 	    my $term = $subs{$sub};
 	    my $t = sprintf $term, '$_[0][0]';
-	    $subs{$sub} = eval
-		"sub { \$funcs .= '($sub)'; my \$r; if (\$use_int) {"
+	    my $e ="sub { \$funcs .= '($sub)'; my \$r; if (\$use_int) {"
 		. "use integer; \$r = ($t) } else { \$r = ($t) } \$r }";
-	    die $@ if $@;
+	    $subs{$sub} = eval $e;
+	    die "Compiling sub gave error:\n<$e>\n<$@>\n" if $@;
 	}
     }
 
@@ -1772,18 +1882,49 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
     package RT57012_OV;
 
-    my $other;
     use overload
 	%subs,
-	"="   => sub { $other .= '(=)';  bless [ $_[0][0] ] },
-	'0+'  => sub { $other .= '(0+)'; 0 + $_[0][0] },
-	'""'  => sub { $other .= '("")'; "$_[0][0]"   },
+	"="   => sub { $funcs .= '(=)';  bless [ $_[0][0] ] },
+	'0+'  => sub { $funcs .= '(0+)'; 0 + $_[0][0] },
+	'""'  => sub { $funcs .= '("")'; "$_[0][0]"   },
+	;
+
+    package RT57012_OV_FB; # only contains fallback conversion functions
+
+    use overload
+	"="   => sub { $funcs .= '(=)';  bless [ $_[0][0] ] },
+	'0+'  => sub { $funcs .= '(0+)'; 0 + $_[0][0] },
+	'""'  => sub { $funcs .= '("")'; "$_[0][0]"   },
+	"nomethod" => sub {
+			$funcs .= "(NM:$_[3])";
+			my $e = defined($_[1])
+				? $_[3] eq 'atan2'
+				    ? $_[2]
+				       ? "atan2(\$_[1],\$_[0][0])"
+				       : "atan2(\$_[0][0],\$_[1])"
+				    : $_[2]
+					? "\$_[1] $_[3] \$_[0][0]"
+					: "\$_[0][0] $_[3] \$_[1]"
+				: $_[3] eq 'neg'
+				    ? "-\$_[0][0]"
+				    : "$_[3](\$_[0][0])";
+			my $r;
+			if ($use_int) {
+			    use integer; $r = eval $e;
+			}
+			else {
+			    $r = eval $e;
+			}
+			::diag("eval of nomethod <$e> gave <$@>") if $@;
+			$r;
+		    }
+
 	;
 
     package RT57012_TIE_S;
 
     my $tie_val;
-    sub TIESCALAR { bless [ bless [ $tie_val ], 'RT57012_OV' ] }
+    sub TIESCALAR { bless [ bless [ $tie_val ], $_[1] ] }
     sub FETCH     { $fetches++; $_[0][0] }
     sub STORE     { $stores++;  $_[0][0] = $_[1] }
 
@@ -1795,35 +1936,78 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
     package main;
 
-    for my $term (@terms) {
-	my ($val, $sub_term, $exp_funcs, $exp_side,
-	    $exp_fetch_a, $exp_fetch_s, $exp_store) = @$term;
+    for my $test (@tests) {
+	my ($val, $sub_term, $exp_funcs, $exp_fb_funcs,
+	    $exp_counts, $exp_taint) = @$test;
 
-	$tie_val = $val;
+	my $tainted_val;
+	{
+	    # create tainted version of $val (unless its a ref)
+	    my $t = substr($^X,0,0);
+	    my $t0 = $t."0";
+	    my $val1 = $val; # use a copy to avoid stringifying original
+	    $tainted_val = ref($val1) ? $val :
+			($val1 =~ /^[\d\.]+$/) ? $val+$t0 : $val.$t;
+	}
+	$tie_val = $tainted_val;
+
 	for my $int ('', 'use integer; ') {
 	    $use_int = ($int ne '');
-	    for my $var ('$ta[0]', '$ts') {
-		my $exp_fetch = ($var eq '$ts') ? $exp_fetch_s : $exp_fetch_a;
-		tie my $ts, 'RT57012_TIE_S';
+	    my $plain = $tainted_val;
+	    my $plain_term = $int . sprintf $sub_term, '$plain';
+	    my $exp = eval $plain_term;
+	    diag("eval of plain_term <$plain_term> gave <$@>") if $@;
+	    is(tainted($exp), $exp_taint,
+			"<$plain_term> taint of expected return");
+
+	    for my $ov_pkg (qw(RT57012_OV RT57012_OV_FB)) {
+		# the deref ops don't support fallback
+		next if $ov_pkg eq 'RT57012_OV_FB'
+			and  not defined $exp_fb_funcs;
+		my ($exp_fetch_a, $exp_fetch_s, $exp_store) =
+		    ($ov_pkg eq 'RT57012_OV' || @$exp_counts < 4)
+			? @$exp_counts[0,1,2]
+			: @$exp_counts[3,4,5];
+
+		tie my $ts, 'RT57012_TIE_S', $ov_pkg;
 		tie my @ta, 'RT57012_TIE_A';
-		$ta[0] = bless [ $val ], 'RT57012_OV';
-		my $x = $val;
-		my $tied_term  = $int . sprintf $sub_term, $var;
-		my $plain_term = $int . sprintf $sub_term, '$x';
+		$ta[0]    = bless [ $tainted_val ], $ov_pkg;
+		my $oload = bless [ $tainted_val ], $ov_pkg;
 
-		$other = ''; $funcs = '';
+		for my $var ('$ta[0]', '$ts', '$oload') {
 
-		$fetches = 0;
-		$stores = 0;
-		my $res = eval $tied_term;
-		$res = "$res";
-		my $exp = eval $plain_term;
-		$exp = "$exp";
-		is ($res, $exp, "tied '$tied_term' return value");
-		is ($funcs, "($exp_funcs)", "tied '$tied_term' methods called");
-		is ($other, $exp_side, "tied '$tied_term' side effects called");
-		is ($fetches, $exp_fetch, "tied '$tied_term' FETCH count");
-		is ($stores, $exp_store, "tied '$tied_term' STORE count");
+		    $funcs = '';
+		    $fetches = 0;
+		    $stores = 0;
+
+		    my $res_term  = $int . sprintf $sub_term, $var;
+		    my $desc =  "<$res_term> $ov_pkg" ;
+		    my $res = eval $res_term;
+		    diag("eval of res_term $desc gave <$@>") if $@;
+		    # uniquely, the inc/dec ops return tthe original
+		    # ref rather than a copy, so stringify it to
+		    # find out if its tainted
+		    $res = "$res" if $res_term =~ /\+\+|--/;
+		    is(tainted($res), $exp_taint,
+			    "$desc taint of result return");
+		    #XXX$res = "$res";
+		    is($res, $exp, "$desc return value");
+		    my $fns =($ov_pkg eq 'RT57012_OV_FB')
+				? $exp_fb_funcs : $exp_funcs;
+		    if ($var eq '$oload' && $res_term !~ /oload(\+\+|--)/) {
+			# non-tied overloading doesn't trigger a copy
+			# except for post inc/dec
+			$fns =~ s/^\(=\)//;
+		    }
+		    is($funcs, $fns, "$desc methods called");
+		    next if $var eq '$oload';
+		    my $exp_fetch = ($var eq '$ts') ?
+			    $exp_fetch_s : $exp_fetch_a;
+		    is($fetches, $exp_fetch, "$desc FETCH count");
+		    is($stores, $exp_store, "$desc STORE count");
+
+		}
+
 	    }
 	}
     }

@@ -2683,6 +2683,7 @@ Perl_sv_2num(pTHX_ register SV *const sv)
 	return sv;
     if (SvAMAGIC(sv)) {
 	SV * const tmpsv = AMG_CALLun(sv,numer);
+	TAINT_IF(tmpsv && SvTAINTED(tmpsv));
 	if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
 	    return sv_2num(tmpsv);
     }
@@ -2804,6 +2805,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 		if (flags & SV_SKIP_OVERLOAD)
 		    return NULL;
 		tmpstr = AMG_CALLun(sv,string);
+		TAINT_IF(tmpstr && SvTAINTED(tmpstr));
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    /* Unwrap this:  */
 		    /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
