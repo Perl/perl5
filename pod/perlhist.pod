@@ -28,7 +28,8 @@ Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
-Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay.
+Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
+Matt S Trout.
 
 =head2 PUMPKIN?
 
@@ -425,6 +426,7 @@ the strings?).
 
  Leon     5.13.0        2010-Apr-20     The 5.13 development track
  Ricardo  5.13.1        2010-May-20
+ Matt     5.13.2        2010-Jun-22
 
 =head2 SELECTED RELEASE SIZES
 
