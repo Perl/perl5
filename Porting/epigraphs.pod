@@ -15,7 +15,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.13.2 - Miguel de Unamuno, "The Sepulchre of Don Quixote"
+=head2 v5.13.2 - Iain M Banks, "Use of Weapons"
+
+We deal in the moral equivalent of black holes, where the normal laws - 
+the rules of right and wrong that people imagine apply everywhere else 
+in the universe - break down; beyond those metaphysical event-horizons, 
+there exist ... special circumstances.
+
+=head2 v5.13.1 - Miguel de Unamuno, "The Sepulchre of Don Quixote"
 
 And if anyone shall come to you and say that he knows how to construct
 bridges and that perhaps a time will come when you will wish to avail
