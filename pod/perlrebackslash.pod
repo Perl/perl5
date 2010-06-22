@@ -207,12 +207,12 @@ match "as is".
 
 =head3 Octal escapes
 
-Octal escapes consist of a backslash followed by two or three octal digits
-matching the code point of the character you want to use. This allows for
-512 characters (C<\00> up to C<\777>) that can be expressed this way (but
-anything above C<\377> is deprecated).
-Enough in pre-Unicode days, but most Unicode characters cannot be escaped
-this way.
+Octal escapes consist of a backslash followed by three octal digits
+matching the code point of the character you want to use.  (In some contexts,
+two or even one octal digits are also accepted, sometimes with a warning.) This
+allows for 512 characters (C<\000> up to C<\777>) that can be expressed this
+way (but anything above C<\377> is deprecated).  Enough in pre-Unicode days,
+but most Unicode characters cannot be escaped this way.
 
 Note that a character that is expressed as an octal escape is considered
 as a character without special meaning by the regex engine, and will match
@@ -230,7 +230,10 @@ as a character without special meaning by the regex engine, and will match
 Octal escapes potentially clash with old-style backreferences (see L</Absolute
 referencing> below). They both consist of a backslash followed by numbers. So
 Perl has to use heuristics to determine whether it is a backreference or an
-octal escape. Perl uses the following rules:
+octal escape. You can avoid ambiguity by using the C<\g> form for
+backreferences, and by beginning octal escapes with a "0".  (Since octal
+escapes are 3 digits, this latter method works only up to C<\077>.)  In the
+absence of C<\g>, Perl uses the following rules:
 
 =over 4
 

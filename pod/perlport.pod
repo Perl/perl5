@@ -1277,7 +1277,7 @@ The values of C<$^O> on some of these platforms includes:
 Some simple tricks for determining if you are running on an EBCDIC
 platform could include any of the following (perhaps all):
 
-    if ("\t" eq "\05")   { print "EBCDIC may be spoken here!\n"; }
+    if ("\t" eq "\005")   { print "EBCDIC may be spoken here!\n"; }
 
     if (ord('A') == 193) { print "EBCDIC may be spoken here!\n"; }
 

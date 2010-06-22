@@ -3880,7 +3880,7 @@ For each such format, pack() generates 4 bits of the result.
 With non-alphabetical characters, the result is based on the 4 least-significant
 bits of the input character, i.e., on C<ord($char)%16>.  In particular,
 characters C<"0"> and C<"1"> generate nybbles 0 and 1, as do bytes
-C<"\0"> and C<"\1">.  For characters C<"a".."f"> and C<"A".."F">, the result
+C<"\000"> and C<"\001">.  For characters C<"a".."f"> and C<"A".."F">, the result
 is compatible with the usual hexadecimal digits, so that C<"a"> and
 C<"A"> both generate the nybble C<0xa==10>.  Do not use any characters
 but these with this format.
@@ -4204,8 +4204,8 @@ Examples:
     #      $foo = pack("WWWW",193,194,195,196);
 
     $foo = pack("s2",1,2);
-    # "\1\0\2\0" on little-endian
-    # "\0\1\0\2" on big-endian
+    # "\001\000\002\000" on little-endian
+    # "\000\001\000\002" on big-endian
 
     $foo = pack("a4","abcd","x","y","z");
     # "abcd"
