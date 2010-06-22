@@ -261,7 +261,7 @@ to do this manually are roughly
 =item *
 
 do a normal C<Configure>, but include Devel::Cover as a module to install
-(see F<INSTALL> for how to do this)
+(see L<INSTALL> for how to do this)
 
 =item *
 
