@@ -128,7 +128,7 @@ description.  (For EBCDIC platforms, see L<perlebcdic/OPERATOR DIFFERENCES>.)
 
 =item [1]
 
-C<\b> is only the backspace character inside a character class. Outside a
+C<\b> is the backspace character only inside a character class. Outside a
 character class, C<\b> is a word/non-word boundary.
 
 =item [2]
