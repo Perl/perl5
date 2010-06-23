@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Sat Feb 13 19:05:42 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Wed Jun 23 16:03:55 CEST 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -18578,8 +18578,8 @@ $signal_t bletch(int s) { exit(4); }
 #endif
 int main() {
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
-    U8 buf[8];
-    U32 *up;
+    volatile U8 buf[8];
+    volatile U32 *up;
     int i;
 
     if (sizeof(U32) != 4) {
