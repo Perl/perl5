@@ -1771,8 +1771,13 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
 
+    if (AvREAL(av)) {
+	av_clear(av);
+	AvREAL_off(av);
+	AvREIFY_on(av);
+    }
     if (AvMAX(av) < 1) {
-	SV** ary = AvALLOC(av);
+	SV **ary = AvALLOC(av);
 	if (AvARRAY(av) != ary) {
 	    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
 	    AvARRAY(av) = ary;
@@ -1781,6 +1786,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 	    AvMAX(av) = 1;
 	    Renew(ary,2,SV*);
 	    AvARRAY(av) = ary;
+	    AvALLOC(av) = ary;
 	}
     }
     AvFILLp(av) = 1;
