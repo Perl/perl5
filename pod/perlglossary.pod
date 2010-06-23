@@ -469,7 +469,7 @@ a L<captured substring|/capturing> by a regex subpattern.
 
 The use of parentheses around a L</subpattern> in a L</regular
 expression> to store the matched L</substring> as a L</backreference>
-or L</capture group>.
+or L<capture group|/capture buffer, capture group>.
 (Captured strings are also returned as a list in L</list context>.)
 
 =item character
