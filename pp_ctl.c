@@ -3763,6 +3763,15 @@ PP(pp_entereval)
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
     }
     sv = POPs;
+    if (!SvPOK(sv)) {
+	/* make sure we've got a plain PV (no overload etc) before testing
+	 * for taint. Making a copy here is probably overkill, but better
+	 * safe than sorry */
+	SV* tmpsv = newSV_type(SVt_PV);
+	sv_copypv(tmpsv, sv);
+	sv_2mortal(tmpsv);
+	sv = tmpsv;
+    }
 
     TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");

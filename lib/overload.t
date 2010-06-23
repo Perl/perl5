@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 4826;
+use Test::More tests => 4880;
 
 use Scalar::Util qw(tainted);
 
@@ -1867,6 +1867,11 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	# XXX TODO: '<>'
 
+	# eval should do tie, overload on its arg before checking taint */
+	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
+		'("")', '("")', [ 1, 2, 0 ], 0 ];
+
+
 	for my $sub (keys %subs) {
 	    my $term = $subs{$sub};
 	    my $t = sprintf $term, '$_[0][0]';
@@ -1990,7 +1995,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    $res = "$res" if $res_term =~ /\+\+|--/;
 		    is(tainted($res), $exp_taint,
 			    "$desc taint of result return");
-		    #XXX$res = "$res";
 		    is($res, $exp, "$desc return value");
 		    my $fns =($ov_pkg eq 'RT57012_OV_FB')
 				? $exp_fb_funcs : $exp_funcs;
