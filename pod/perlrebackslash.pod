@@ -134,7 +134,7 @@ character class, C<\b> is a word/non-word boundary.
 =item [2]
 
 C<\n> matches a logical newline. Perl will convert between C<\n> and your
-OSses native newline character when reading from or writing to text files.
+OS's native newline character when reading from or writing to text files.
 
 =back
 
@@ -166,7 +166,7 @@ Mnemonic: I<c>ontrol character.
 
 =head3 Named or numbered characters
 
-All Unicode characters have a Unicode name and numeric ordinal value.  Use the
+Unicode characters have a Unicode name and numeric ordinal value.  Use the
 C<\N{}> construct to specify a character by either of these values.
 
 To specify by name, the name of the character goes between the curly braces.
@@ -179,8 +179,8 @@ hexadecimal that gives the ordinal number that Unicode has assigned to the
 desired character.  It is customary (but not required) to use leading zeros to
 pad the number to 4 digits.  Thus C<\N{U+0041}> means
 C<Latin Capital Letter A>, and you will rarely see it written without the two
-leading zeros.  C<\N{U+0041}> means C<A> even on EBCDIC machines (where the
-ordinal value of C<A> is not 0x41).
+leading zeros.  C<\N{U+0041}> means "A" even on EBCDIC machines (where the
+ordinal value of "A" is not 0x41).
 
 It is even possible to give your own names to characters, and even to short
 sequences of characters.  For details, see L<charnames>.
@@ -247,11 +247,11 @@ If the first digit following the backslash is a 0, it's an octal escape.
 
 =item 3
 
-If the number following the backslash is N (decimal), and Perl already has
+If the number following the backslash is N (in decimal), and Perl already has
 seen N capture groups, Perl will consider this to be a backreference.
-Otherwise, it will consider it to be an octal escape. Note that if N > 999,
-Perl only takes the first three digits for the octal escape; the rest is
-matched as is.
+Otherwise, it will consider it to be an octal escape. Note that if N has more
+than three digits, Perl only takes the first three for the octal escape;
+the rest are matched as is.
 
  my $pat  = "(" x 999;
     $pat .= "a";
