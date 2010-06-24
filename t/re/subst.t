@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 167 );
+plan( tests => 170 );
 
 # Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
 # like() and it conflicts with test.pl
@@ -712,4 +712,15 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
             "Verify that failed substitute doesn't change string's utf8ness");
     is($non_sub_string, $string,
                         "Verify that failed substitute doesn't change string");
+}
+
+{ # Verify largish octal in replacement pattern
+
+    my $string = "a";
+    $string =~ s/a/\400/;
+    is($string, chr 0x100, "Verify that handles s/foo/\\400/");
+    $string =~ s/./\600/;
+    is($string, chr 0x180, "Verify that handles s/foo/\\600/");
+    $string =~ s/./\777/;
+    is($string, chr 0x1FF, "Verify that handles s/foo/\\777/");
 }
