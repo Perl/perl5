@@ -1,4 +1,4 @@
-                       Term::ANSIColor version 2.02
+                       Term::ANSIColor version 3.00
               (A simple ANSI text attribute control module)
 
   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2007, 2009
@@ -151,5 +151,8 @@ THANKS
   To Tim Bellinghausen for the AUTOLOAD taint fix for Perl 5.10.
 
   To Paul Miller for the idea and initial implementation of colorstrip.
+
+  To Jakob Ilves for sixteen-color support and the initial documentation
+  of bright color issues.
 
   To Larry Wall, as always, for Perl.
