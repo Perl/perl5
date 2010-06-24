@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 153 );
+plan( tests => 159 );
 
 # these shouldn't hang
 {
@@ -853,3 +853,40 @@ fresh_perl_is('sub w ($$) {my ($l, my $r) = @_; my $v = \@_; undef @_; @_ = 0..2
              '0 1 2 3',
              {stderr => 1, switches => ['-w']},
              'RT #72334');
+
+{
+    my $count = 0;
+    {
+	package Counter;
+
+	sub new {
+	    ++$count;
+	    bless [];
+	}
+
+	sub DESTROY {
+	    --$count;
+	}
+    }
+
+    sub sorter ($$) {
+	my ($l, $r) = @_;
+	my $q = \@_;
+	$l <=> $r;
+    }
+
+    is($count, 0, 'None before we start');
+    my @a = map { Counter->new() } 0..1;
+    is($count, 2, '2 here');
+
+    my @b = sort sorter @a;
+
+    is(scalar @b, 2);
+    cmp_ok($b[0], '<', $b[1], 'sorted!');
+
+    is($count, 2, 'still the same 2 here');
+
+    @a = (); @b = ();
+
+    is($count, 0, 'all gone');
+}

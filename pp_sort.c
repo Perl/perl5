@@ -1678,9 +1678,9 @@ PP(pp_sort)
 		    sort_flags);
 
 	    if (!(flags & OPf_SPECIAL)) {
-		LEAVESUB(cv);
-		if (!is_xsub)
-		    CvDEPTH(cv)--;
+		SV *sv;
+		POPSUB(cx, sv);
+		LEAVESUB(sv);
 	    }
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
