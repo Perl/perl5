@@ -211,7 +211,7 @@ Octal escapes consist of a backslash followed by three octal digits
 matching the code point of the character you want to use.  (In some contexts,
 two or even one octal digits are also accepted, sometimes with a warning.) This
 allows for 512 characters (C<\000> up to C<\777>) that can be expressed this
-way (but anything above C<\377> is deprecated).  Enough in pre-Unicode days,
+way.  Enough in pre-Unicode days,
 but most Unicode characters cannot be escaped this way.
 
 Note that a character that is expressed as an octal escape is considered

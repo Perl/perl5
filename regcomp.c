@@ -7500,17 +7500,8 @@ tryagain:
                             I32 flags = 0;
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
-
-			    /* An octal above 0xff is interpreted differently
-			     * depending on if the re is in utf8 or not.  If it
-			     * is in utf8, the value will be itself, otherwise
-			     * it is interpreted as modulo 0x100.  It has been
-			     * decided to discourage the use of octal above the
-			     * single-byte range.  For now, warn only when
-			     * it ends up modulo */
-			    if (SIZE_ONLY && ender >= 0x100
-				    && ! UTF && ! PL_encoding) {
-				ckWARNregdep(p, "Use of octal value above 377 is deprecated");
+			    if (ender > 0xff) {
+				RExC_utf8 = 1;
 			    }
 			    p += numlen;
 			}

@@ -76,6 +76,16 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 \400 - \777
+
+Use of C<\400> - C<\777> in regexes in certain circumstances has given different,
+anomalous behavior than their use in all other double-quotish contexts.   Since
+5.10.1, a deprecated warning message has been raised when this happens.  Now,
+all double-quotish contexts have the same behavior, namely to be equivalent to
+C<\x{100}> - C<\x{1FF}>, with no deprecation warning. Use of these values in the
+command line option C<"-0"> retains the current meaning to slurp input files
+whole; previously, this was documented only for C<"-0777">.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

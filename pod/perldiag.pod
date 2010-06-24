@@ -4961,15 +4961,6 @@ In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
 
-=item Use of octal value above 377 is deprecated
-
-(D deprecated, W regexp) There is a constant in the regular expression whose
-value is interpeted by Perl as octal and larger than 377 (255 decimal, 0xFF
-hex).  Perl may take this to mean different things depending on the rest of
-the regular expression.  If you meant such an octal value, convert it to
-hexadecimal and use C<\xHH> or C<\x{HH}> instead.  If you meant to have
-part of it mean a backreference, use C<\g> for that.  See L<perlre>.
-
 =item Use of %s in printf format not supported
 
 (F) You attempted to use a feature of printf that is accessible from

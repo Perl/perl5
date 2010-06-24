@@ -1454,4 +1454,11 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 \c1	-	c	-	\"\\c1\" more clearly written simply as \"q\"
 \cA	\001	y	$&	\1
 
+\400	\x{100}	y	$&	\x{100}
+\600	\x{180}	y	$&	\x{180}
+\777	\x{1FF}	y	$&	\x{1FF}
+[a\400]	\x{100}	y	$&	\x{100}
+[b\600]	\x{180}	y	$&	\x{180}
+[c\777]	\x{1FF}	y	$&	\x{1FF}
+
 # vim: softtabstop=0 noexpandtab
