@@ -1444,14 +1444,14 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /abc\N {SPACE}/x	-	c	-	Missing braces
 
 # Verifies catches hex errors, and doesn't expose our . notation to the outside
-/\N{U+0xBEEF}/	- 	c	-	Illegal hexadecimal digit
-/\N{U+BEEF.BEAD}/	- 	c	-	Illegal hexadecimal digit
+/\N{U+0xBEEF}/	-	c	-	Illegal hexadecimal digit
+/\N{U+BEEF.BEAD}/	-	c	-	Illegal hexadecimal digit
 
 # Verify works in single quotish context; regex compiler delivers slightly different msg
 # \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
-\N{U+0xBEEF}	- 	c	-	Invalid hexadecimal number
-\c`	- 	c	-	\"\\c`\" more clearly written simply as \"\\ \"
-\c1	- 	c	-	\"\\c1\" more clearly written simply as \"q\"
-\cA	\001 	y	$&	\1
+\N{U+0xBEEF}	-	c	-	Invalid hexadecimal number
+\c`	-	c	-	\"\\c`\" more clearly written simply as \"\\ \"
+\c1	-	c	-	\"\\c1\" more clearly written simply as \"q\"
+\cA	\001	y	$&	\1
 
-# vim: set noexpandtab
+# vim: softtabstop=0 noexpandtab
