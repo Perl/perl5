@@ -454,7 +454,8 @@ a backreference only if at least 11 left parentheses have opened before it.
 And so on.  C<\1> through C<\9> are always interpreted as backreferences.  You
 can minimize the ambiguity by always using C<\g> if you mean capturing groups;
 and always using 3 digits for octal constants, with the first always "0" (which
-works if there are 63 (= \077) or fewer capture groups).
+works if there are 63 (= \077) or fewer capture groups).  There are several
+examples below that illustrate these perils.
 
 The C<\I<digit>> notation also works in certain circumstances outside
 the pattern.  See L</Warning on \1 Instead of $1> below for details.)
@@ -477,6 +478,20 @@ Examples:
         $minutes = $2;
         $seconds = $3;
     }
+
+    /(.)(.)(.)(.)(.)(.)(.)(.)(.)\g10/   # \g10 is a backreference
+    /(.)(.)(.)(.)(.)(.)(.)(.)(.)\10/    # \10 is octal
+    /((.)(.)(.)(.)(.)(.)(.)(.)(.))\10/  # \10 is a backreference
+    /((.)(.)(.)(.)(.)(.)(.)(.)(.))\010/ # \010 is octal
+
+    $a = '(.)\1';        # Creates problems when concatenated.
+    $b = '(.)\g{1}';     # Avoids the problems.
+    "aa" =~ /${a}/;      # True
+    "aa" =~ /${b}/;      # True
+    "aa0" =~ /${a}0/;    # False!
+    "aa0" =~ /${b}0/;    # True
+    "aa\x8" =~ /${a}0/;  # True!
+    "aa\x8" =~ /${b}0/;  # False
 
 Several special variables also refer back to portions of the previous
 match.  C<$+> returns whatever the last bracket match matched.
