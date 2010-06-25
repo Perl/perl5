@@ -234,8 +234,8 @@ system undef
 syswrite (*$;$$)
 tell (;*)
 telldir (*)
-tie undef
-tied undef
+tie (\[$@%*]$@)
+tied (\[$@%*])
 time ()
 times ()
 tr undef
@@ -248,7 +248,7 @@ unless undef
 unlink (@)
 unpack ($;$)
 unshift (\@@)
-untie undef
+untie (\[$@%*])
 until undef
 use undef
 utime (@)

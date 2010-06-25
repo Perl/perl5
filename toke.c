@@ -8501,7 +8501,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           if (name[1] == 'i' &&
               name[2] == 'e')
           {                                       /* tie        */
-            return KEY_tie;
+            return -KEY_tie;
           }
 
           goto unknown;
@@ -8945,7 +8945,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
                 case 'e':
                   if (name[3] == 'd')
                   {                               /* tied       */
-                    return KEY_tied;
+                    return -KEY_tied;
                   }
 
                   goto unknown;
@@ -9440,7 +9440,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
                     {
                       case 'e':
                         {                         /* untie      */
-                          return KEY_untie;
+                          return -KEY_untie;
                         }
 
                       case 'l':
