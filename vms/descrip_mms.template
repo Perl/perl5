@@ -313,7 +313,7 @@ h = $(h0) $(h1) $(h2) $(h3) $(h4) $(h5) $(h6)
 ac0 = $(ARCHCORE)$(sockh) $(ARCHCORE)av.h $(ARCHCORE)cc_runtime.h
 ac1 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac2 = $(ARCHCORE)embedvar.h $(ARCHCORE)EXTERN.h $(ARCHCORE)fakethr.h
-ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
+ac3 = $(ARCHCORE)form.h $(ARCHCORE)git_version.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
 ac4 = $(ARCHCORE)INTERN.h $(ARCHCORE)intrpvar.h $(ARCHCORE)iperlsys.h
 ac5 = $(ARCHCORE)keywords.h $(ARCHCORE)mydtrace.h $(ARCHCORE)mg.h $(ARCHCORE)nostdio.h
 ac6 = $(ARCHCORE)op.h $(ARCHCORE)opcode.h $(ARCHCORE)opnames.h  $(ARCHCORE)overload.h
@@ -1555,6 +1555,9 @@ $(ARCHCORE)fakethr.h : fakethr.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)form.h : form.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
+$(ARCHCORE)git_version.h : git_version.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)gv.h : gv.h
