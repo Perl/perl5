@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..40\n"; }
+BEGIN { $| = 1; print "1..48\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -102,7 +102,7 @@ if ($have_fork) {
 my $xdefine = ''; 
 
 if (open(XDEFINE, "xdefine")) {
-    chomp($xdefine = <XDEFINE>);
+    chomp($xdefine = <XDEFINE> || "");
     close(XDEFINE);
 }
 
@@ -746,7 +746,7 @@ if ($^O =~ /^(cygwin|MSWin)/) {
 }
 
 unless ($can_subsecond_alarm) {
-    skip 39..40;
+    skip 39..44;
 } else {
     {
 	my $alrm;
@@ -763,6 +763,51 @@ unless ($can_subsecond_alarm) {
 	my $t0 = time();
 	1 while time() - $t0 <= 2;
 	print $alrm ? "ok 40\n" : "not ok 40\n";
+    }
+
+    {
+	my $alrm = 0;
+	$SIG{ALRM} = sub { $alrm++ };
+	my $got = Time::HiRes::alarm(2.7);
+	ok(41, $got == 0, $got);
+
+	my $t0 = time();
+	1 while time() - $t0 <= 1;
+
+	$got = Time::HiRes::alarm(0);
+	ok(42, $got > 0 && $got < 1.8, $got);
+
+	ok(43, $alrm == 0, $alrm);
+
+	$got = Time::HiRes::alarm(0);
+	ok(44, $got == 0, $got);
+    }
+}
+
+unless ($have_ualarm) {
+	skip 45..48;
+}
+else {
+    {
+	my $alrm = 0;
+	$SIG{ALRM} = sub { $alrm++ };
+	my $got = Time::HiRes::ualarm(500_000);
+	ok(45, $got == 0, $got);
+
+	my $t0 = Time::HiRes::time();
+	my $t1;
+	do {
+	    $t1 = Time::HiRes::time();
+	} while $t1 - $t0 <= 0.3;
+	print "# t0 = $t0\n# t1 = $t1\n# t1 - t0 = ", ($t1 - $t0), "\n";
+
+	$got = Time::HiRes::ualarm(0);
+	ok(46, $got > 0 && $got < 300_000, $got);
+
+	ok(47, $alrm == 0, $alrm);
+
+	$got = Time::HiRes::ualarm(0);
+	ok(48, $got == 0, $got);
     }
 }
 
