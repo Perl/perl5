@@ -153,3 +153,7 @@ t Revision history for Perl extension Attribute-Handlers
 
 0.87	Mon Sep 21 15:55:00 CET 2009
         - Promote to stable release
+
+0.88	Mon Apr  5 16:33:00 CET 2010
+	- Avoid clobbering $_ (perl #74052, LanX)
+
