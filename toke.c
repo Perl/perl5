@@ -11974,8 +11974,14 @@ S_scan_subst(pTHX_ char *start)
 	}
 	else if (strchr(S_PAT_MODS, *s))
 	    pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
-	else
+	else {
+	    if (isALNUM(*s)) {
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
+		    "Having no space between pattern and following word is deprecated");
+
+	    }
 	    break;
+	}
     }
 
 #ifdef PERL_MAD
