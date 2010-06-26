@@ -1481,7 +1481,7 @@ use File::Glob qw(:case);
     'Time::Piece' =>
 	{
 	'MAINTAINER'	=> 'msergeant',
-	'DISTRIBUTION'	=> 'MSERGEANT/Time-Piece-1.15.tar.gz',
+	'DISTRIBUTION'	=> 'MSERGEANT/Time-Piece-1.20.tar.gz',
 	'FILES'		=> q[cpan/Time-Piece],
 	'UPSTREAM'	=> undef,
 	},
