@@ -10875,20 +10875,22 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
     tbl->tbl_max = --newsize;
     tbl->tbl_ary = ary;
     for (i=0; i < oldsize; i++, ary++) {
-	PTR_TBL_ENT_t **curentp, **entp, *ent;
-	if (!*ary)
+	PTR_TBL_ENT_t **entp = ary;
+	PTR_TBL_ENT_t *ent = *ary;
+	PTR_TBL_ENT_t **curentp;
+	if (!ent)
 	    continue;
 	curentp = ary + oldsize;
-	for (entp = ary, ent = *ary; ent; ent = *entp) {
+	do {
 	    if ((newsize & PTR_TABLE_HASH(ent->oldval)) != i) {
 		*entp = ent->next;
 		ent->next = *curentp;
 		*curentp = ent;
-		continue;
 	    }
 	    else
 		entp = &ent->next;
-	}
+	    ent = *entp;
+	} while (ent);
     }
 }
 

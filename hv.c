@@ -1148,19 +1148,19 @@ S_hsplit(pTHX_ HV *hv)
 	if (!entry)				/* non-existent */
 	    continue;
 	bep = aep+oldsize;
-	for (; entry; entry = *oentry) {
+	do {
 	    if ((HeHASH(entry) & newsize) != (U32)i) {
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = *bep;
 		*bep = entry;
 		right_length++;
-		continue;
 	    }
 	    else {
 		oentry = &HeNEXT(entry);
 		left_length++;
 	    }
-	}
+	    entry = *oentry;
+	} while (entry);
 	/* I think we don't actually need to keep track of the longest length,
 	   merely flag if anything is too long. But for the moment while
 	   developing this code I'll track it.  */
@@ -1314,7 +1314,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
 	if (!entry)				/* non-existent */
 	    continue;
-	for (; entry; entry = *oentry) {
+	do {
 	    register I32 j = (HeHASH(entry) & newsize);
 
 	    if (j != i) {
@@ -1322,11 +1322,11 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = aep[j];
 		aep[j] = entry;
-		continue;
 	    }
 	    else
 		oentry = &HeNEXT(entry);
-	}
+	    entry = *oentry;
+	} while (entry);
     }
 }
 
