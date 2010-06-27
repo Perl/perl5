@@ -1,5 +1,13 @@
 Revision history for Perl module Unicode::Collate.
 
+0.53  Sun Feb 14 20:46:27 2010
+    - Now UCA Revision 18 (based on Unicode 5.1.0).
+    - DUCET is also upgrated (for Unicode 5.1.0) as Collate/allkeys.txt,
+      which is not required to test this module.
+    ! Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - U+9FBC..U+9FC3 are new CJK Unified Ideographs.
+
 0.52  Thu Oct 13 21:51:09 2005
     - The Unicode::Collate->new method does not destroy user's $_ any longer.
       (thanks to Jon Warbrick for bug report)
@@ -7,7 +15,7 @@ Revision history for Perl module Unicode::Collate.
 0.51  Sun May 29 20:21:19 2005
     - Added the latest DUCET (for Unicode 4.1.0) as Collate/allkeys.txt,
       which is not required to test this module.
-      Please notice that allkeys.txt will be overwritten if you have had
+    ! Please notice that allkeys.txt will be overwritten if you have had
       other allkeys.txt already.
     - Added INSTALL section in POD.
 
@@ -174,4 +182,3 @@ Revision history for Perl module Unicode::Collate.
 0.01  Sun Jul 29 16:16:15 2001
     - original version; created by h2xs 1.21
       with options -A -X -n Sort::UCA
-
