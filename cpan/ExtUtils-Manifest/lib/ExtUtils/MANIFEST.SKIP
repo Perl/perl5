@@ -47,5 +47,9 @@
 # Mac OSX SMB mount metadata files
 \B\._
 
-# Avoid Devel::Cover files.
+# Avoid Devel::Cover and Devel::CoverX::Covered files.
 \bcover_db\b
+\bcovered\b
+ 
+# Avoid MYMETA files
+^MYMETA\.
