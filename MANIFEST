@@ -2512,9 +2512,9 @@ cpan/Unicode-Normalize/t/form.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/func.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/illegal.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/norm.t		Unicode::Normalize
+cpan/Unicode-Normalize/t/null.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/partial1.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/partial2.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/null.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
