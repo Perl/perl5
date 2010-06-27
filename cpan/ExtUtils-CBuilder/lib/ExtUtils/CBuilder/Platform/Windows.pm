@@ -10,7 +10,7 @@ use ExtUtils::CBuilder::Base;
 use IO::File;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.27';
+$VERSION = '0.2703';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 =begin comment
@@ -85,6 +85,9 @@ sub compile {
   my $cf = $self->{config};
 
   die "Missing 'source' argument to compile()" unless defined $args{source};
+
+  $args{include_dirs} = [ $args{include_dirs} ] 
+    if exists($args{include_dirs}) && ref($args{include_dirs}) ne "ARRAY";
 
   my ($basename, $srcdir) =
     ( File::Basename::fileparse($args{source}, '\.[^.]+$') )[0,1];

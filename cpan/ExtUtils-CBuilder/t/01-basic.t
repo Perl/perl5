@@ -23,7 +23,7 @@ if ( ! $b->have_compiler ) {
   plan skip_all => "no compiler available for testing";
 }
 else {
-  plan tests => 10;
+  plan tests => 12;
 }
 
 ok $b, "created EU::CB object";
@@ -69,4 +69,38 @@ SKIP: {
   is( @words, 2 );
   is( $words[0], 'foo' );
   is( $words[1], 'bar' );
+}
+
+# include_dirs should be settable as string or list
+{
+  package Sub;
+  use vars '@ISA';
+  @ISA = ('ExtUtils::CBuilder');
+  my $saw = 0;
+  sub do_system {
+    if ($^O eq "MSWin32") {
+	# ExtUtils::CBuilder::MSVC::write_compiler_script() puts the
+	# include_dirs into a response file and not the commandline
+	for (@_) {
+	    next unless /^\@"(.*)"$/;
+	    open(my $fh, "<", $1) or next;
+	    local $/;
+	    $saw = 1 if <$fh> =~ /another dir/;
+	    last;
+	}
+    }
+    $saw = 1 if grep {$_ =~ /another dir/} @_;
+    return 1;
+  }
+
+  package main;
+  my $s = Sub->new();
+  $s->compile(source => 'foo',
+	      include_dirs => 'another dir');
+  ok $saw;
+
+  $saw = 0;
+  $s->compile(source => 'foo',
+	      include_dirs => ['a dir', 'another dir']);
+  ok $saw;
 }

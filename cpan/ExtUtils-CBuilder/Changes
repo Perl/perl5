@@ -1,5 +1,21 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.2703 - Tue Mar 16 17:10:55 EDT 2010
+
+ Bugs fixed:
+ - fixed tests for Windows and MSVC [Jan Dubois]
+
+0.2702 - Mon Feb 22 15:10:52 EST 2010
+
+ Bugs fixed:
+ - compile() changes in 0.2701 did not work on Windows.  Now fixed.
+
+0.2701 - Tue Feb 16 09:12:45 EST 2010
+
+ Bugs fixed:
+ - compile() now accepts both string & array for 'include_dirs'
+   argument, as documented.(RT#54606) [Alberto Simões]
+
 0.27 - Thu Oct 29 21:29:56 EDT 2009
 
  Other:

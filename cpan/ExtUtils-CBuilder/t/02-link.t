@@ -2,7 +2,7 @@
 
 use strict;
 use Test::More;
-BEGIN {
+BEGIN { 
   if ($^O eq 'VMS') {
     # So we can get the return value of system()
     require vmsish;
@@ -67,7 +67,7 @@ SKIP: {
   # Try the executable
   my $ec = my_system($exe_file);
   is( $ec, 11, "got expected exit code from executable" )
-    or diag( $ec == -1 ? "Could not run '$exe_file': $!\n"
+    or diag( $ec == -1 ? "Could not run '$exe_file': $!\n" 
                        : "Unexpected exit code '$ec'\n");
 }
 
@@ -86,10 +86,7 @@ sub my_system {
   my $cmd = shift;
   my $ec;
   if ($^O eq 'VMS') {
-    # Preserve non-posixified status and don't bit shift the result.
-    use vmsish 'status';
     $ec = system("mcr $cmd");
-    return $ec;
   }
   $ec = system($cmd);
   return $ec == -1 ? -1 : $ec >> 8;

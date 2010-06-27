@@ -9,7 +9,7 @@ use Text::ParseWords;
 use IO::File;
 
 use vars qw($VERSION);
-$VERSION = '0.27';
+$VERSION = '0.2703';
 
 sub new {
   my $class = shift;
@@ -89,7 +89,10 @@ sub compile {
   my $cf = $self->{config}; # For convenience
 
   $args{object_file} ||= $self->object_file($args{source});
-  
+
+  $args{include_dirs} = [ $args{include_dirs} ]
+    if exists($args{include_dirs}) && ref($args{include_dirs}) ne "ARRAY";
+
   my @include_dirs = $self->arg_include_dirs
     (@{$args{include_dirs} || []},
      $self->perl_inc());
