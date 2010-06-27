@@ -336,6 +336,9 @@ PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 PERL_CALLCONV void	Perl_vcroak(pTHX_ const char* pat, va_list* args)
 			__attribute__noreturn__;
 
+PERL_CALLCONV void	Perl_croak_no_modify(pTHX)
+			__attribute__noreturn__;
+
 PERL_CALLCONV void	Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1)

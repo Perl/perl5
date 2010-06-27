@@ -1638,6 +1638,21 @@ Perl_croak(pTHX_ const char *pat, ...)
 }
 
 /*
+=for apidoc Am|void|croak_no_modify
+
+Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
+terser object code than using C<Perl_croak>. Less code used on exception code
+paths reduces CPU cache pressure.
+
+*/
+
+void
+Perl_croak_no_modify(pTHX)
+{
+    Perl_croak(aTHX_ "%s", PL_no_modify);
+}
+
+/*
 =for apidoc Am|void|warn_sv|SV *baseex
 
 This is an XS interface to Perl's C<warn> function.

@@ -1568,7 +1568,7 @@ PP(pp_sort)
 	}
 	else {
 	    if (SvREADONLY(av))
-		Perl_croak(aTHX_ "%s", PL_no_modify);
+		Perl_croak_no_modify(aTHX);
 	    else
 		SvREADONLY_on(av);
 	    p1 = p2 = AvARRAY(av);

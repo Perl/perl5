@@ -105,6 +105,7 @@
 #define croak_sv		Perl_croak_sv
 #define croak			Perl_croak
 #define vcroak			Perl_vcroak
+#define croak_no_modify		Perl_croak_no_modify
 #define croak_xs_usage		Perl_croak_xs_usage
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
@@ -2546,6 +2547,7 @@
 #endif
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
+#define croak_no_modify()	Perl_croak_no_modify(aTHX)
 #define croak_xs_usage(a,b)	Perl_croak_xs_usage(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
 #endif
