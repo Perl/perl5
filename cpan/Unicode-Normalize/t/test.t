@@ -19,7 +19,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 58 };
+BEGIN { plan tests => 70 };
 use Unicode::Normalize;
 ok(1); # If we made it this far, we're ok.
 
@@ -123,3 +123,19 @@ my $str21 = _pack_U(0xE0, 0xAC00);
 my $str22 = _pack_U(0x61, 0x0300, 0x1100, 0x1161);
 ok(NFD $str21 eq $str22);
 
+## Bug #53197: NFKC("\x{2000}") produces...
+
+ok(NFKC("\x{2002}") eq ' ');
+ok(NFKD("\x{2002}") eq ' ');
+ok(NFKC("\x{2000}") eq ' ');
+ok(NFKD("\x{2000}") eq ' ');
+
+ok(NFKC("\x{210C}") eq 'H');
+ok(NFKD("\x{210C}") eq 'H');
+ok(NFKC("\x{210D}") eq 'H');
+ok(NFKD("\x{210D}") eq 'H');
+
+ok(NFC("\x{F907}") eq "\x{9F9C}");
+ok(NFD("\x{F907}") eq "\x{9F9C}");
+ok(NFKC("\x{F907}") eq "\x{9F9C}");
+ok(NFKD("\x{F907}") eq "\x{9F9C}");

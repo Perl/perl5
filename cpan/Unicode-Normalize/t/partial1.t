@@ -27,7 +27,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 34 };
+BEGIN { plan tests => 26 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -36,43 +36,6 @@ sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
 
 #########################
 
-our $proc;    # before the last starter
-our $unproc;  # the last starter and after
-# If string has no starter, entire string is set to $unproc.
-
-($proc, $unproc) = splitOnLastStarter("");
-ok($proc,   "");
-ok($unproc, "");
-
-($proc, $unproc) = splitOnLastStarter("A");
-ok($proc,   "");
-ok($unproc, "A");
-
-($proc, $unproc) = splitOnLastStarter(_pack_U(0x41, 0x300, 0x327, 0x42));
-ok($proc,   _pack_U(0x41, 0x300, 0x327));
-ok($unproc, "B");
-
-($proc, $unproc) = splitOnLastStarter(_pack_U(0x4E00, 0x41, 0x301));
-ok($proc,   _pack_U(0x4E00));
-ok($unproc, _pack_U(0x41, 0x301));
-
-($proc, $unproc) = splitOnLastStarter(_pack_U(0x302, 0x301, 0x300));
-ok($proc,   "");
-ok($unproc, _pack_U(0x302, 0x301, 0x300));
-
-our $ka_grave = _pack_U(0x41, 0, 0x42, 0x304B, 0x300);
-our $dakuten  = _pack_U(0x3099);
-our $ga_grave = _pack_U(0x41, 0, 0x42, 0x304C, 0x300);
-
-our ($p, $u) = splitOnLastStarter($ka_grave);
-our $concat = $p . NFC($u.$dakuten);
-
-ok(NFC($ka_grave.$dakuten) eq $ga_grave);
-ok(NFC($ka_grave).NFC($dakuten) ne $ga_grave);
-ok($concat eq $ga_grave);
-
-##############
-
 sub arraynorm {
     my $form   = shift;
     my @string = @_;
@@ -80,10 +43,11 @@ sub arraynorm {
     my $unproc = "";
     foreach my $str (@string) {
         $unproc .= $str;
-        my $n = normalize($form, $unproc);
-        my($p, $u) = splitOnLastStarter($n);
-        $result .= $p;
-        $unproc  = $u;
+        $result .= $form eq 'NFC'  ? NFC_partial ($unproc) :
+		   $form eq 'NFD'  ? NFD_partial ($unproc) :
+		   $form eq 'NFKC' ? NFKC_partial($unproc) :
+		   $form eq 'NFKD' ? NFKD_partial($unproc) :
+		   undef;
     }
     $result .= $unproc;
     return $result;
@@ -120,12 +84,21 @@ ok($strZ eq arraynorm('NFD', @strZ));
 ok($strZ eq NFKD(join('', @strZ)));
 ok($strZ eq arraynorm('NFKD', @strZ));
 
-##############
+####
 
-# don't modify the source
+# must modify the source
+my $sNFD = "\x{FA19}";
+ok(NFD_partial($sNFD), "");
+ok($sNFD, "\x{795E}");
 
-my $source = "ABC";
-($proc, $unproc) = splitOnLastStarter($source);
-ok($proc,   "AB");
-ok($unproc, "C");
-ok($source, "ABC");
+my $sNFC = "\x{FA1B}";
+ok(NFC_partial($sNFC), "");
+ok($sNFC, "\x{798F}");
+
+my $sNFKD = "\x{FA1E}";
+ok(NFKD_partial($sNFKD), "");
+ok($sNFKD, "\x{7FBD}");
+
+my $sNFKC = "\x{FA26}";
+ok(NFKC_partial($sNFKC), "");
+ok($sNFKC, "\x{90FD}");

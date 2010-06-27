@@ -1,5 +1,18 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.06  Thu Feb 11 16:19:54 2010
+    - Pure Perl/mkheader: fixed the internal _getHexArray() for perl 5.11.3
+      changes (Bug #53197).
+
+1.05  Mon Sep 28 21:43:17 2009
+    - normalize_partial() and NFX_partial(). { NFX =~ /^NFK?[CD]\z/ }
+    - added partial1.t for NFX_partial().
+    - added partial2.t for normalize_partial().
+
+1.04  Wed Sep 23 22:32:57 2009
+    - doc: splitOnLastStarter() since 0.24 is now documented.
+    - test: some new tests are added to split.t.
+
 1.03  Sun Mar 29 12:56:23 2009
     - mkheader: check if no composition needs growing the string.
     - Makefile.PL: a tweak
@@ -69,7 +82,8 @@ Revision history for Perl extension Unicode::Normalize.
         script files, named "enableXS" and "disableXS".
         (no longer <perl Makefile.PL xs> and <perl Makefile.PL noxs>.)
       * simplified Makefile.PL.
-    - added fcdc.t and split.t.
+    - added fcdc.t for FCD() and FCC().
+    - added split.t for splitOnLastStarter(): an undocumented function.
 
 0.23  Sat Jun 28 20:38:10 2003
     - bug fix: \0-terminate in compose() in XS.
