@@ -1085,7 +1085,6 @@ S_hsplit(pTHX_ HV *hv)
     register I32 i;
     char *a = (char*) HvARRAY(hv);
     register HE **aep;
-    register HE **oentry;
     int longest_chain = 0;
     int was_shared;
 
@@ -1142,13 +1141,14 @@ S_hsplit(pTHX_ HV *hv)
     for (i=0; i<oldsize; i++,aep++) {
 	int left_length = 0;
 	int right_length = 0;
-	register HE *entry;
+	HE **oentry = aep;
+	HE *entry = *aep;
 	register HE **bep;
 
-	if (!*aep)				/* non-existent */
+	if (!entry)				/* non-existent */
 	    continue;
 	bep = aep+oldsize;
-	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
+	for (; entry; entry = *oentry) {
 	    if ((HeHASH(entry) & newsize) != (U32)i) {
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = *bep;
@@ -1250,8 +1250,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     register I32 i;
     register char *a;
     register HE **aep;
-    register HE *entry;
-    register HE **oentry;
 
     PERL_ARGS_ASSERT_HV_KSPLIT;
 
@@ -1311,9 +1309,12 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     aep = (HE**)a;
     for (i=0; i<oldsize; i++,aep++) {
-	if (!*aep)				/* non-existent */
+	HE **oentry = aep;
+	HE *entry = *aep;
+
+	if (!entry)				/* non-existent */
 	    continue;
-	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
+	for (; entry; entry = *oentry) {
 	    register I32 j = (HeHASH(entry) & newsize);
 
 	    if (j != i) {
