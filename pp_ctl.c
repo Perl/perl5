@@ -1635,8 +1635,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 		 * supposed to trap errors. So now that we've popped the
 		 * EVAL that pp_require pushed, and processed the error
 		 * message, rethrow the error */
-		DIE(aTHX_ "%sCompilation failed in require",
-		    *msg ? msg : "Unknown error\n");
+		Perl_croak(aTHX_ "%sCompilation failed in require",
+			   *msg ? msg : "Unknown error\n");
 	    }
 	    if (in_eval & EVAL_KEEPERR) {
 		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",

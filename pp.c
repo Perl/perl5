@@ -3618,7 +3618,6 @@ PP(pp_crypt)
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
-    return NORMAL;
 #endif
 }
 
@@ -6020,7 +6019,6 @@ PP(unimplemented_op)
     dVAR;
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
 	PL_op->op_type);
-    return NORMAL;
 }
 
 PP(pp_boolkeys)
