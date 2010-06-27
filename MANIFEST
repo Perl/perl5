@@ -80,6 +80,7 @@ cpan/autodie/t/context_lexical.t	autodie - Context clobbering lexically
 cpan/autodie/t/context.t		autodie - Context clobbering tests
 cpan/autodie/t/crickey.t		autodie - Like an Australian
 cpan/autodie/t/dbmopen.t		autodie - dbm tests
+cpan/autodie/t/eval_error.t
 cpan/autodie/t/exception_class.t	autodie - Exception class subclasses
 cpan/autodie/t/exceptions.t		autodie - 5.10 exception tests.
 cpan/autodie/t/exec.t			autodie - exec tests.
