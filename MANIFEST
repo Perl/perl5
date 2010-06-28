@@ -27,7 +27,10 @@ cpan/Archive-Extract/t/src/x.lzma		Archive::Extract tests
 cpan/Archive-Extract/t/src/x.par		Archive::Extract tests
 cpan/Archive-Extract/t/src/x.tar		Archive::Extract tests
 cpan/Archive-Extract/t/src/x.tar.gz		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.tar.xz		Archive::Extract tests
 cpan/Archive-Extract/t/src/x.tgz		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.txz		Archive::Extract tests
+cpan/Archive-Extract/t/src/x.xz		Archive::Extract tests
 cpan/Archive-Extract/t/src/x.Z			Archive::Extract tests
 cpan/Archive-Extract/t/src/x.zip		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.jar		Archive::Extract tests
@@ -35,8 +38,10 @@ cpan/Archive-Extract/t/src/y.par		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tar		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tar.bz2		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tar.gz		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.tar.xz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tbz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.tgz		Archive::Extract tests
+cpan/Archive-Extract/t/src/y.txz		Archive::Extract tests
 cpan/Archive-Extract/t/src/y.zip		Archive::Extract tests
 cpan/Archive-Tar/bin/ptar				the ptar utility
 cpan/Archive-Tar/bin/ptardiff				the ptardiff utility

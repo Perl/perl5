@@ -36,12 +36,14 @@ use constant BZ2            => 'bz2';
 use constant TBZ            => 'tbz';
 use constant Z              => 'Z';
 use constant LZMA           => 'lzma';
+use constant XZ             => 'xz';
+use constant TXZ            => 'txz';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG 
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.38';
+$VERSION            = '0.42';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -50,7 +52,7 @@ $_ALLOW_BIN         = 1;    # allow binary extractors
 $_ALLOW_TAR_ITER        = 1;    # try to use Archive::Tar->iter if available
 
 # same as all constants
-my @Types           = ( TGZ, TAR, GZ, ZIP, BZ2, TBZ, Z, LZMA ); 
+my @Types           = ( TGZ, TAR, GZ, ZIP, BZ2, TBZ, Z, LZMA, XZ, TXZ ); 
 
 local $Params::Check::VERBOSE = $Params::Check::VERBOSE = 1;
 
@@ -91,6 +93,8 @@ Archive::Extract - A generic archive extracting mechanism
     $ae->is_bz2;    # is it a .bz2 file?
     $ae->is_tbz;    # is it a .tar.bz2 or .tbz file?
     $ae->is_lzma;   # is it a .lzma file?
+    $ae->is_xz;     # is it a .xz file?
+    $ae->is_txz;    # is it a .tar.xz or .txz file?
 
     ### absolute path to the archive you provided ###
     $ae->archive;
@@ -101,13 +105,15 @@ Archive::Extract - A generic archive extracting mechanism
     $ae->bin_unzip   # path to /bin/unzip, if found
     $ae->bin_bunzip2 # path to /bin/bunzip2 if found
     $ae->bin_unlzma  # path to /bin/unlzma if found
+    $ae->bin_unxz    # path to /bin/unxz if found
 
 =head1 DESCRIPTION
 
 Archive::Extract is a generic archive extraction mechanism.
 
 It allows you to extract any archive file of the type .tar, .tar.gz,
-.gz, .Z, tar.bz2, .tbz, .bz2, .zip or .lzma without having to worry how it 
+.gz, .Z, tar.bz2, .tbz, .bz2, .zip, .xz,, .txz, .tar.xz or .lzma 
+without having to worry how it 
 does so, or use different interfaces for each type by using either 
 perl modules, or commandline tools on your system.
 
@@ -118,7 +124,7 @@ See the C<HOW IT WORKS> section further down for details.
 
 ### see what /bin/programs are available ###
 $PROGRAMS = {};
-for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma]) {
+for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma unxz]) {
     $PROGRAMS->{$pgm} = can_run($pgm);
 }
 
@@ -132,6 +138,8 @@ my $Mapping = {  # binary program           # pure perl module
     is_bz2  => { bin => '_bunzip2_bin',     pp => '_bunzip2_bz2'},
     is_Z    => { bin => '_uncompress_bin',  pp => '_gunzip_cz'  },
     is_lzma => { bin => '_unlzma_bin',      pp => '_unlzma_cz'  },
+    is_xz   => { bin => '_unxz_bin',        pp => '_unxz_cz'    },
+    is_txz  => { bin => '_untar_bin',       pp => '_untar_at'   },
 };
 
 {   ### use subs so we re-generate array refs etc for the no-overide flags
@@ -209,6 +217,16 @@ Corresponds to a C<.tbz> or C<.tar.bz2> suffix.
 Lzma compressed file, as produced by C</bin/lzma>.
 Corresponds to a C<.lzma> suffix.
 
+=item xz
+
+Xz compressed file, as produced by C</bin/xz>.
+Corresponds to a C<.xz> suffix.
+
+=item txz
+
+Xz compressed tar file, as produced by, for exmample C</bin/tar -J>.
+Corresponds to a C<.txz> or C<.tar.xz> suffix.
+
 =back
 
 Returns a C<Archive::Extract> object on success, or false on failure.
@@ -240,6 +258,8 @@ Returns a C<Archive::Extract> object on success, or false on failure.
                 $ar =~ /.+?\.bz2$/i                 ? BZ2   :
                 $ar =~ /.+?\.Z$/                    ? Z     :
                 $ar =~ /.+?\.lzma$/                 ? LZMA  :
+                $ar =~ /.+?\.(?:txz|tar\.xz)$/i     ? TXZ   :
+                $ar =~ /.+?\.xz$/                   ? XZ    :
                 '';
 
         }
@@ -320,9 +340,9 @@ sub extract {
     ### to.
     my $dir;
     {   ### a foo.gz file
-        if( $self->is_gz or $self->is_bz2 or $self->is_Z or $self->is_lzma ) {
+        if( $self->is_gz or $self->is_bz2 or $self->is_Z or $self->is_lzma or $self->is_xz ) {
     
-            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2?|Z|lzma)$//i;
+            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2?|Z|lzma|xz)$//i;
         
             ### to is a dir?
             if ( -d $to ) {
@@ -491,6 +511,11 @@ See the C<new()> method for details.
 Returns true if the file is of type C<.lzma>.
 See the C<new()> method for details.
 
+=head2 $ae->is_xz
+
+Returns true if the file is of type C<.xz>.
+See the C<new()> method for details.
+
 =cut
 
 ### quick check methods ###
@@ -502,6 +527,8 @@ sub is_tbz  { return $_[0]->type eq TBZ }
 sub is_bz2  { return $_[0]->type eq BZ2 }
 sub is_Z    { return $_[0]->type eq Z   }
 sub is_lzma { return $_[0]->type eq LZMA }
+sub is_xz   { return $_[0]->type eq XZ   }
+sub is_txz  { return $_[0]->type eq TXZ }
 
 =pod
 
@@ -521,6 +548,10 @@ Returns the full path to your unzip binary, if found
 
 Returns the full path to your unlzma binary, if found
 
+=head2 $ae->bin_unxz
+
+Returns the full path to your unxz binary, if found
+
 =cut
 
 ### paths to commandline tools ###
@@ -531,6 +562,7 @@ sub bin_bunzip2     { return $PROGRAMS->{'bunzip2'} if $PROGRAMS->{'bunzip2'} }
 sub bin_uncompress  { return $PROGRAMS->{'uncompress'} 
                                                  if $PROGRAMS->{'uncompress'} }
 sub bin_unlzma      { return $PROGRAMS->{'unlzma'}  if $PROGRAMS->{'unlzma'} }
+sub bin_unxz        { return $PROGRAMS->{'unxz'}    if $PROGRAMS->{'unxz'} }
 
 =head2 $bool = $ae->have_old_bunzip2
 
@@ -613,6 +645,8 @@ sub have_old_bunzip2 {
                             loc("No '%1' program found", '/bin/gzip') :
                         $self->is_tbz && !$self->bin_bunzip2 ?
                             loc("No '%1' program found", '/bin/bunzip2') :
+                        $self->is_txz && !$self->bin_unxz ?
+                            loc("No '%1' program found", '/bin/unxz') :
                         '';
                         
             if( $diag ) {
@@ -635,6 +669,8 @@ sub have_old_bunzip2 {
                 $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|', 
                                  $self->bin_tar, '-tf', '-'] :
                 $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',                             
+                                 $self->bin_tar, '-tf', '-'] :
+                $self->is_txz ? [$self->bin_unxz, '-cd', $self->archive, '|',                             
                                  $self->bin_tar, '-tf', '-'] :
                 [$self->bin_tar, @ExtraTarFlags, '-tf', $self->archive];
     
@@ -688,6 +724,8 @@ sub have_old_bunzip2 {
                 $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|',
                                  $self->bin_tar, '-xf', '-'] :
                 $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',                             
+                                 $self->bin_tar, '-xf', '-'] :
+                $self->is_txz ? [$self->bin_unxz, '-cd', $self->archive, '|',                             
                                  $self->bin_tar, '-xf', '-'] :
                 [$self->bin_tar, @ExtraTarFlags, '-xf', $self->archive];
     
@@ -781,6 +819,24 @@ sub _untar_at {
                             $IO::Uncompress::Bunzip2::Bunzip2Error));
 
         $fh_to_read = $bz;
+    } elsif ( $self->is_txz ) {
+        my $use_list = { 'IO::Uncompress::UnXz' => '0.0' };
+        unless( can_load( modules => $use_list ) ) {
+            $self->_error(loc(
+                "You do not have '%1' installed - Please " .
+                "install it as soon as possible.", 
+                'IO::Uncompress::UnXz')
+            );
+            
+            return METHOD_NA;
+        }
+
+        my $xz = IO::Uncompress::UnXz->new( $self->archive ) or
+            return $self->_error(loc("Unable to open '%1': %2",
+                            $self->archive,
+                            $IO::Uncompress::UnXz::UnXzError));
+
+        $fh_to_read = $xz;
     }
 
     my @files;
@@ -1256,6 +1312,75 @@ sub _bunzip2_bz2 {
     return 1;
 }
 
+#################################
+#
+# UnXz code
+#
+#################################
+
+sub _unxz_bin {
+    my $self = shift;
+
+    ### check for /bin/unxz -- we need it ###
+    unless( $self->bin_unxz ) {
+        $self->_error(loc("No '%1' program found", '/bin/unxz'));
+        return METHOD_NA;
+    }
+
+    my $fh = FileHandle->new('>'. $self->_gunzip_to) or
+        return $self->_error(loc("Could not open '%1' for writing: %2",
+                            $self->_gunzip_to, $! ));
+
+    my $cmd = [ $self->bin_unxz, '-cdf', $self->archive ];
+
+    my $buffer;
+    unless( scalar run( command => $cmd,
+                        verbose => $DEBUG,
+                        buffer  => \$buffer )
+    ) {
+        return $self->_error(loc("Unable to unxz '%1': %2",
+                                    $self->archive, $buffer));
+    }
+
+    ### no buffers available?
+    if( !IPC::Cmd->can_capture_buffer and !$buffer ) {
+        $self->_error( $self->_no_buffer_content( $self->archive ) );
+    }
+
+    $self->_print($fh, $buffer) if defined $buffer;
+
+    close $fh;
+
+    ### set what files where extract, and where they went ###
+    $self->files( [$self->_gunzip_to] );
+    $self->extract_path( File::Spec->rel2abs(cwd()) );
+
+    return 1;
+}
+
+sub _unxz_cz {
+    my $self = shift;
+
+    my $use_list = { 'IO::Uncompress::UnXz' => '0.0' };
+    unless( can_load( modules => $use_list ) ) {
+        $self->_error(loc("You do not have '%1' installed - Please " .
+                          "install it as soon as possible.",
+                          'IO::Uncompress::UnXz'));
+        return METHOD_NA;                          
+    }
+
+    IO::Uncompress::UnXz::unxz($self->archive => $self->_gunzip_to)
+        or return $self->_error(loc("Unable to uncompress '%1': %2",
+                            $self->archive,
+                            $IO::Uncompress::UnXz::UnXzError));
+
+    ### set what files where extract, and where they went ###
+    $self->files( [$self->_gunzip_to] );
+    $self->extract_path( File::Spec->rel2abs(cwd()) );
+
+    return 1;
+}
+
 
 #################################
 #
@@ -1306,27 +1431,37 @@ sub _unlzma_bin {
 sub _unlzma_cz {
     my $self = shift;
 
-    my $use_list = { 'Compress::unLZMA' => '0.0' };
-    unless( can_load( modules => $use_list ) ) {
-        $self->_error(loc("You do not have '%1' installed - Please " .
-                    "install it as soon as possible.", 'Compress::unLZMA'));
+    my $use_list1 = { 'IO::Uncompress::UnLzma' => '0.0' };
+    my $use_list2 = { 'Compress::unLZMA' => '0.0' };
+
+    if (can_load( modules => $use_list1 ) ) {
+        IO::Uncompress::UnLzma::unlzma($self->archive => $self->_gunzip_to)
+            or return $self->_error(loc("Unable to uncompress '%1': %2",
+                                $self->archive,
+                                $IO::Uncompress::UnLzma::UnLzmaError));
+    }
+    elsif (can_load( modules => $use_list2 ) ) {
+
+        my $fh = FileHandle->new('>'. $self->_gunzip_to) or
+            return $self->_error(loc("Could not open '%1' for writing: %2",
+                                $self->_gunzip_to, $! ));
+
+        my $buffer;
+        $buffer = Compress::unLZMA::uncompressfile( $self->archive );
+        unless ( defined $buffer ) {
+            return $self->_error(loc("Could not unlzma '%1': %2",
+                                        $self->archive, $@));
+        }
+
+        $self->_print($fh, $buffer) if defined $buffer;
+
+        close $fh;
+    }
+    else {
+        $self->_error(loc("You do not have '%1' or '%2' installed - Please " .
+                    "install it as soon as possible.", 'Compress::unLZMA', 'IO::Uncompress::UnLzma'));
         return METHOD_NA;                    
     }
-
-    my $fh = FileHandle->new('>'. $self->_gunzip_to) or
-        return $self->_error(loc("Could not open '%1' for writing: %2",
-                            $self->_gunzip_to, $! ));
-
-    my $buffer;
-    $buffer = Compress::unLZMA::uncompressfile( $self->archive );
-    unless ( defined $buffer ) {
-        return $self->_error(loc("Could not unlzma '%1': %2",
-                                    $self->archive, $@));
-    }
-
-    $self->_print($fh, $buffer) if defined $buffer;
-
-    close $fh;
 
     ### set what files where extract, and where they went ###
     $self->files( [$self->_gunzip_to] );
