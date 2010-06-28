@@ -115,6 +115,17 @@ modification for the lzma logic to favour IO::Uncompress::Unlzma
 
 =item *
 
+Archive-Tar updated to CPAN version 1.62 (d33cd7c)
+    
+Important changes since 1.54 include: compatibility with busybox
+implementations of tar which was added by Mark Swayne; a fix so
+that write() and create_archive() close only handles
+they opened by Darrell K.; and a bug was fixed regarding the exit code
+of extract_archive which was spotted by and upstreamed from RedHat by
+Martin Cermak.
+
+=item *
+
 Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
 
 =item *
