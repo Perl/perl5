@@ -505,40 +505,37 @@ struct xpvfm {
     IV		xfm_lines;
 };
 
-#define _XPVIO_TAIL							\
-    PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */	\
-    PerlIO *	xio_ofp;	/* but sockets need separate streams */	\
-    /* Cray addresses everything by word boundaries (64 bits) and	\
-     * code and data pointers cannot be mixed (which is exactly what	\
-     * Perl_filter_add() tries to do with the dirp), hence the		\
-     *  following union trick (as suggested by Gurusamy Sarathy).	\
-     * For further information see Geir Johansen's problem report	\
-     * titled [ID 20000612.002] Perl problem on Cray system		\
-     * The any pointer (known as IoANY()) will also be a good place	\
-     * to hang any IO disciplines to.					\
-     */									\
-    union {								\
-	DIR *	xiou_dirp;	/* for opendir, readdir, etc */		\
-	void *	xiou_any;	/* for alignment */			\
-    } xio_dirpu;							\
-    /* IV xio_lines is now in IVX  $. */				\
-    IV		xio_page;	/* $% */				\
-    IV		xio_page_len;	/* $= */				\
-    IV		xio_lines_left;	/* $- */				\
-    char *	xio_top_name;	/* $^ */				\
-    GV *	xio_top_gv;	/* $^ */				\
-    char *	xio_fmt_name;	/* $~ */				\
-    GV *	xio_fmt_gv;	/* $~ */				\
-    char *	xio_bottom_name;/* $^B */				\
-    GV *	xio_bottom_gv;	/* $^B */				\
-    char	xio_type;						\
-    U8		xio_flags
-
 
 struct xpvio {
     _XPV_HEAD;
     union _xivu xiv_u;
-    _XPVIO_TAIL;
+    PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
+    PerlIO *	xio_ofp;	/* but sockets need separate streams */
+    /* Cray addresses everything by word boundaries (64 bits) and
+     * code and data pointers cannot be mixed (which is exactly what
+     * Perl_filter_add() tries to do with the dirp), hence the
+     *  following union trick (as suggested by Gurusamy Sarathy).
+     * For further information see Geir Johansen's problem report
+     * titled [ID 20000612.002] Perl problem on Cray system
+     * The any pointer (known as IoANY()) will also be a good place
+     * to hang any IO disciplines to.
+     */
+    union {
+	DIR *	xiou_dirp;	/* for opendir, readdir, etc */
+	void *	xiou_any;	/* for alignment */
+    } xio_dirpu;
+    /* IV xio_lines is now in IVX  $. */
+    IV		xio_page;	/* $% */
+    IV		xio_page_len;	/* $= */
+    IV		xio_lines_left;	/* $- */
+    char *	xio_top_name;	/* $^ */
+    GV *	xio_top_gv;	/* $^ */
+    char *	xio_fmt_name;	/* $~ */
+    GV *	xio_fmt_gv;	/* $~ */
+    char *	xio_bottom_name;/* $^B */
+    GV *	xio_bottom_gv;	/* $^B */
+    char	xio_type;
+    U8		xio_flags;
 };
 
 #define xio_dirp	xio_dirpu.xiou_dirp
