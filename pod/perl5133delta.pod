@@ -105,6 +105,16 @@ arguments is now significantly more efficient. (8452af9)
 
 =item *
 
+Archive-Extract updated to CPAN version 0.42 (d7f8799)
+
+Updates since 0.38 include: a safe print method that Michael Schwern
+contributed, that guards Archive::Extract from changes to $\; a
+fix to the tests when run in core perl from Robin Barker; and
+support for TZ files contributed by Paul Marquess, who also supplied a
+modification for the lzma logic to favour IO::Uncompress::Unlzma
+
+=item *
+
 Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
 
 =item *
