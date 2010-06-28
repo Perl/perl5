@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+5.48  Mon Jan  4 16:32:52 MST 2010
+	- fixed "shasum -a0" option (ref. rt.cpan.org #53319)
+		-- incorrectly accepted 0 as a valid algorithm
+			-- thanks to Zefram for patch
+	- updated URL for NIST test vectors
+		-- ref. files t/nistbit.t, t/nistbyte.t
+			-- thanks to Leon Brocard for patch
+
 5.47  Wed Apr 30 04:00:54 MST 2008
 	- modified Makefile.PL to install in core for Perls >= 5.10
 		-- thanks to Jerry Hedden for patch

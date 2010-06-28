@@ -8,7 +8,7 @@
 static int ix2alg[] =
 	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512};
 
-MODULE = Digest::SHA		PACKAGE = Digest::SHA		
+MODULE = Digest::SHA		PACKAGE = Digest::SHA
 
 PROTOTYPES: ENABLE
 

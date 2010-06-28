@@ -6,7 +6,7 @@ use strict;
 use integer;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 
-$VERSION = '5.47';
+$VERSION = '5.48';
 
 require Exporter;
 require DynaLoader;
@@ -659,7 +659,7 @@ for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2008 Mark Shelor
+Copyright (C) 2003-2010 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

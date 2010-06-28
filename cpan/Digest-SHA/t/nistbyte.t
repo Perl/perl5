@@ -1,13 +1,13 @@
 # Test against SHA-1 Sample Vectors from NIST
 #
-#	ref: http://csrc.nist.gov/cryptval/shs.html
+#	ref: http://www.nsrl.nist.gov/testdata/
 
 use strict;
 
 my $MODULE;
 
 BEGIN {
-	$MODULE = ($ENV{PERL_CORE} || -d "src") ? "Digest::SHA" : "Digest::SHA::PurePerl";
+	$MODULE = (-d "src") ? "Digest::SHA" : "Digest::SHA::PurePerl";
 	eval "require $MODULE" || die $@;
 	$MODULE->import(qw());
 }

@@ -2,10 +2,10 @@
 
 	# shasum: filter for computing SHA digests (analogous to sha1sum)
 	#
-	# Copyright (C) 2003-2008 Mark Shelor, All Rights Reserved
+	# Copyright (C) 2003-2010 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.47
-	# Wed Apr 30 04:00:54 MST 2008
+	# Version: 5.48
+	# Mon Jan  4 16:32:52 MST 2010
 
 =head1 NAME
 
@@ -49,11 +49,11 @@ I<shasum> through files, standard input, or both.
 The following command shows how easy it is to compute digests for typical
 inputs such as the NIST test vector "abc":
 
-	perl -e "print qw(abc)" | shasum
+	perl -e "print qq(abc)" | shasum
 
 Or, if you want to use SHA-256 instead of the default SHA-1, simply say:
 
-	perl -e "print qw(abc)" | shasum -a 256
+	perl -e "print qq(abc)" | shasum -a 256
 
 Since I<shasum> uses the same interface employed by the familiar
 I<sha1sum> program (and its somewhat outmoded anscestor I<md5sum>),
@@ -61,7 +61,7 @@ you can install this script as a convenient drop-in replacement.
 
 =head1 AUTHOR
 
-Copyright (c) 2003-2008 Mark Shelor <mshelor@cpan.org>.
+Copyright (c) 2003-2010 Mark Shelor <mshelor@cpan.org>.
 
 =head1 SEE ALSO
 
@@ -74,7 +74,7 @@ use strict;
 use FileHandle;
 use Getopt::Long;
 
-my $VERSION = "5.47";
+my $VERSION = "5.48";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,
@@ -164,7 +164,7 @@ usage(1, "shasum: --status option used only when verifying checksums\n")
 
 	# Default to SHA-1 unless overriden by command line option
 
-$alg = 1 unless $alg;
+$alg = 1 unless defined $alg;
 grep { $_ == $alg } (1, 224, 256, 384, 512)
 	or usage(1, "shasum: Unrecognized algorithm\n");
 
