@@ -109,6 +109,10 @@ Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
 
 =item *
 
+Digest-SHA updated to CPAN version 5.48 (dfe1edc)
+
+=item *
+
 ExtUtils-CBuilder updated to CPAN version 0.2703 (7b0eef9)
 
 =item *
