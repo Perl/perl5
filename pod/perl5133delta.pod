@@ -121,6 +121,10 @@ ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
 
 =item *
 
+IPC-SysV updated to CPAN version 2.03 (10613b6)
+
+=item *
+
 Module-Load updated to CPAN version 0.18 (93eaa32)
 
 =item *
