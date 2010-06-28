@@ -23,7 +23,7 @@ require Exporter;
 use strict;
 use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
             $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING $SAME_PERMISSIONS
-            $INSECURE_EXTRACT_MODE @ISA @EXPORT
+            $INSECURE_EXTRACT_MODE $ZERO_PAD_NUMBERS @ISA @EXPORT
          ];
 
 @ISA                    = qw[Exporter];
@@ -31,12 +31,13 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.54";
+$VERSION                = "1.62";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
 $DO_NOT_USE_PREFIX      = 0;
 $INSECURE_EXTRACT_MODE  = 0;
+$ZERO_PAD_NUMBERS       = 0;
 
 BEGIN {
     use Config;
@@ -317,6 +318,7 @@ sub _read_tar {
     while( $handle->read( $chunk, HEAD ) ) {
         ### IO::Zlib doesn't support this yet
         my $offset = eval { tell $handle } || 'unknown';
+        $@ = '';
 
         unless( $read++ ) {
             my $gzip = GZIP_MAGIC_NUM;
@@ -369,7 +371,7 @@ sub _read_tar {
         }
 
         ### ignore labels:
-        ### http://www.gnu.org/manual/tar/html_node/tar_139.html
+        ### http://www.gnu.org/software/tar/manual/html_chapter/Media.html#SEC159
         next if $entry->is_label;
 
         if( length $entry->type and ($entry->is_file || $entry->is_longlink) ) {
@@ -453,10 +455,11 @@ sub _read_tar {
             next LOOP;
         }
 
-        $self->_extract_file( $entry ) if $extract
-                                            && !$entry->is_longlink
-                                            && !$entry->is_unknown
-                                            && !$entry->is_label;
+        if ( $extract && !$entry->is_longlink
+                      && !$entry->is_unknown
+                      && !$entry->is_label ) {
+            $self->_extract_file( $entry ) or return;
+        }
 
         ### Guard against tarfiles with garbage at the end
 	    last LOOP if $entry->name eq '';
@@ -1242,8 +1245,8 @@ sub write {
                         : $HAS_PERLIO ? $dummy
                         : do { seek $handle, 0, 0; local $/; <$handle> };
 
-    ### make sure to close the handle;
-    close $handle;
+    ### make sure to close the handle if we created it
+    close $handle unless ref($file);
 
     return $rv;
 }
@@ -1273,7 +1276,7 @@ sub _format_tar_entry {
     my $l = PREFIX_LENGTH; # is ambiguous otherwise...
     substr ($prefix, 0, -$l) = "" if length $prefix >= PREFIX_LENGTH;
 
-    my $f1 = "%06o"; my $f2  = "%11o";
+    my $f1 = "%06o"; my $f2  = $ZERO_PAD_NUMBERS ? "%011o" : "%11o";
 
     ### this might be optimizable with a 'changed' flag in the file objects ###
     my $tar = pack (
@@ -1296,6 +1299,7 @@ sub _format_tar_entry {
     );
 
     ### add the checksum ###
+    my $checksum_fmt = $ZERO_PAD_NUMBERS ? "%06o\0" : "%06o\0";
     substr($tar,148,7) = sprintf("%6o\0", unpack("%16C*",$tar));
 
     return $tar;
@@ -1873,6 +1877,13 @@ your perl to be able to  write stringified archives.
 
 Don't change this variable unless you B<really> know what you're
 doing.
+
+=head2 $Archive::Tar::ZERO_PAD_NUMBERS
+
+This variable holds a boolean indicating if we will create
+zero padded numbers for C<size>, C<mtime> and C<checksum>. 
+The default is C<0>, indicating that we will create space padded
+numbers. Added for compatibility with C<busybox> implementations.
 
 =head1 FAQ
 

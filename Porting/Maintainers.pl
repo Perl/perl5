@@ -192,7 +192,7 @@ use File::Glob qw(:case);
     'Archive::Tar' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/Archive-Tar-1.54.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Archive-Tar-1.62.tar.gz',
 	'FILES'		=> q[cpan/Archive-Tar],
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-archive-tar@rt.cpan.org',
