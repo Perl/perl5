@@ -96,7 +96,41 @@ XXX
 
 =item *
 
-XXX
+autodie updated to CPAN version 2.10 (a009834)
+
+=item *
+
+warnings updated to 1.10.  Calling C<use warnings> without
+arguments is now significantly more efficient. (8452af9)
+
+=item *
+
+Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
+
+=item *
+
+ExtUtils-CBuilder updated to CPAN version 0.2703 (7b0eef9)
+
+=item *
+
+ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
+
+=item *
+
+Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
+
+=item *
+
+Time-Piece updated to CPAN version 1.20 (90d55c2)
+
+=item *
+
+Unicode-Collate updated to CPAN version 0.53.  Includes Unicode Collation
+Algorithm 18 (74b94a7)
+
+=item *
+
+Unicode-Normalize updated to CPAN release 1.06 (a96160d)
 
 =back
 
@@ -257,9 +291,11 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item MacOS Classic
 
-XXX
+Support for MacOS Classic within ExtUtils::MakeMaker was removed from Perl in
+December 2004.  Vestigial MacOS Classic specific code has now been removed
+from other core modules as well.
 
 =back
 
@@ -290,7 +326,13 @@ be noted as well.
 
 =item *
 
-XXX
+Added Perl_croak_no_modify() to implement Perl_croak("%s", PL_no_modify).
+(6ad8f25)
+
+=item *
+
+Added prototypes for tie() and untie() to allow overloading (RT#75902)
+(1db4d19)
 
 =back
 
@@ -306,7 +348,14 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fixed a regression of kill() when a match variable is used for the
+process ID to kill.  (RT #75812) (8af710e)
+
+=item *
+
+Fixed several subtle bugs in sort() when @_ is accessed within a subroutine
+used for sorting. (RT#72334) (8f443ca)
+
 
 =back
 
@@ -326,6 +375,17 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 =item *
 
 XXX
+
+=back
+
+=head1 Errata
+
+=over 4
+
+=item *
+
+Retroactively added the Acknowledgements list to L<perl5132delta>,
+which was excluded in the original release (d1e2db0)
 
 =back
 
