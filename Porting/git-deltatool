@@ -64,7 +64,7 @@ sub run {
   elsif ( $opt{mode} eq 'update' ) {
     die "Explicit --type argument required for update mode\n"
       unless defined $opt{type};
-    die "Explicit --status argument requrid for update mode\n"
+    die "Explicit --status argument required for update mode\n"
       unless defined $opt{status};
     $gdt->update;
   }
@@ -378,6 +378,25 @@ sub do_head2 {
   return;
 }
 
+sub do_linked_item {
+  my ($self, $choice, $log) = @_;
+  my $section = _strip_parens($choice->{name});
+  my $subject = $log->subject;
+  my $body = $log->body;
+  my $id = $log->short_id;
+
+  my $template = $self->note_template( $log,
+    "perldelta: $section [pending]\n\n=item L<LINK-NAME>\n\n$subject ($id)\n\n$body\n"
+  );
+
+  my $note = $self->edit_text($template);
+  if ( ($note ne $template) or $self->y_n("Note unchanged. Commit it?") ) {
+    $self->add_note( $log->id, $note );
+    return 1;
+  }
+  return;
+}
+
 sub do_item {
   my ($self, $choice, $log) = @_;
   my $section = _strip_parens($choice->{name});
@@ -402,6 +421,25 @@ sub do_none {
   my $note = "perldelta: None [ignored]\n";
   $self->add_note( $log->id, $note );
   return 1;
+}
+
+sub do_platform {
+  my ($self, $choice, $log) = @_;
+  my $section = _strip_parens($choice->{name});
+  my $subject = $log->subject;
+  my $body = $log->body;
+  my $id = $log->short_id;
+
+  my $template = $self->note_template( $log,
+    "perldelta: $section [pending]\n\n=item PLATFORM-NAME\n\n$subject ($id)\n\n$body\n"
+  );
+
+  my $note = $self->edit_text($template);
+  if ( ($note ne $template) or $self->y_n("Note unchanged. Commit it?") ) {
+    $self->add_note( $log->id, $note );
+    return 1;
+  }
+  return;
 }
 
 sub do_quit { exit 0 }
@@ -510,11 +548,11 @@ sub section_choices {
       subsection => [
         {
           name => '(N)ew Documentation',
-          handler => 'item',
+          handler => 'linked_item',
         },
         {
           name => '(C)hanges to Existing Documentation',
-          handler => 'item',
+          handler => 'linked_item',
         },
       ],
     },
@@ -534,7 +572,7 @@ sub section_choices {
     },
     {
       name => '(U)tilities',
-      handler => 'item',
+      handler => 'linked_item',
     },
 
     # Details on building/testing Perl (for porters and packagers)
@@ -552,15 +590,15 @@ sub section_choices {
       subsection => [
         {
           name => '(N)ew Platforms',
-          handler => 'item',
+          handler => 'platform',
         },
         {
           name => '(D)iscontinued Platforms',
-          handler => 'item',
+          handler => 'platform',
         },
         {
           name => '(P)latform-Specific Notes',
-          handler => 'item',
+          handler => 'platform',
         },
       ],
     },
@@ -718,6 +756,13 @@ Defines the boundary for searching git commits.  Defaults to the last
 major tag (as would be given by 'git describe').
 
 =back
+
+=head1 TODO
+
+It would be nice to make some of the structured sections smarter -- e.g.
+look at changed files in pod/* for Documentation section entries.  Likewise
+it would be nice to collate them during the render phase -- e.g. cluster
+all platform-specific things properly.
 
 =head1 AUTHOR
 
