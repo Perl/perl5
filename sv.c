@@ -11132,7 +11132,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 #endif
 
 	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV
-		&& !isGV_with_GP(dstr))
+		&& !isGV_with_GP(dstr)
+		&& !(sv_type == SVt_PVIO && !(IoFLAGS(dstr) & IOf_FAKE_DIRP)))
 		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 
 	    /* The Copy above means that all the source (unduplicated) pointers
