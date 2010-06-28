@@ -1644,6 +1644,7 @@ Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
 terser object code than using C<Perl_croak>. Less code used on exception code
 paths reduces CPU cache pressure.
 
+=cut
 */
 
 void
