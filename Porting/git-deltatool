@@ -384,8 +384,9 @@ sub do_item {
   my $body = $log->body;
   my $id = $log->short_id;
 
-  my $template =
-    "perldelta: $section [pending]\n\n=item *\n\n $subject ($id)\n\n$body\n";
+  my $template = $self->note_template( $log,
+    "perldelta: $section [pending]\n\n=item *\n\n$subject ($id)\n\n$body\n"
+  );
 
   my $note = $self->edit_text($template);
   if ( ($note ne $template) or $self->y_n("Note unchanged. Commit it?") ) {
