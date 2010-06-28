@@ -121,6 +121,10 @@ ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
 
 =item *
 
+Module-Load updated to CPAN version 0.18 (93eaa32)
+
+=item *
+
 Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
 
 =item *
