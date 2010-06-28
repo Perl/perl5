@@ -12,13 +12,29 @@ perldelta - what is new for perl v5.13.3
 This document describes differences between the 5.13.3 release and
 the 5.13.2 release.
 
-If you are upgrading from an earlier release such as 5.10, first read
-L<perl5120delta>, which describes differences between 5.10.0 and
-5.12.0.
+If you are upgrading from an earlier release such as 5.13.1, first read
+L<perl5132delta>, which describes differences between 5.13.1 and
+5.13.2.
 
 =head1 Notice
 
 XXX Any important notices here
+
+=head1 Core Enhancements
+
+XXX New core language features go here. Summarise user-visible core language
+enhancements. Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
+
+[ List each enhancement as a =head2 entry ]
+
+=head1 Security
+
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
+
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
@@ -27,19 +43,30 @@ XXX For a release on a stable branch, this section aspires to be:
     There are no changes intentionally incompatible with 5.XXX.XXX. If any
     exist, they are bugs and reports are welcome.
 
+[ List each incompatible change as a =head2 entry ]
 
-=head1 Core Enhancements
+=head1 Deprecations
 
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+In particular, deprecated modules should be listed here even if they are
+listed as an updated module in the L</Modules and Pragmata> section.
 
-=head1 New Platforms
+[ List each deprecation as a =head2 entry ]
 
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here. There
+may well be none in a stable release.
+
+[ List each enhancement as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
 
@@ -51,28 +78,46 @@ below.  A paragraph summary for important changes should then be added by hand.
 In an ideal world, dual-life modules would have a F<Changes> file that could be
 cribbed.
 
+[ Within each section, list entries as a =item entry ]
+
 =head2 New Modules and Pragmata
-
-=head2 Pragmata Changes
-
-=head2 Updated Modules
-
-=head2 Removed Modules and Pragmata
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
 
 =over 4
 
-=item F<XXX>
+=item *
 
 XXX
 
 =back
 
-=head1 New Documentation
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+[ Within each section, list entries as a =item entry ]
+
+=head2 New Documentation
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
@@ -84,16 +129,34 @@ XXX
 
 =back
 
-=head1 Changes to Existing Documentation
+=head2 Changes to Existing Documentation
 
 XXX Changes which significantly change existing files in F<pod/> go here.
-Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
 
+=over 4
 
-=head1 Performance Enhancements
+=item L<XXX>
 
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
+XXX
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+XXX New or changed warnings emitted by the core's C<C> code go here. Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
+[ Within each section, list entries as a =item entry ]
+
+=head2 New Diagnostics
+
+XXX Newly added diagnostic messages go here
 
 =over 4
 
@@ -103,24 +166,129 @@ XXX
 
 =back
 
-=head1 Installation and Configuration Improvements
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
+here. Most of these are built within the directories F<utils> and F<x2p>.
+
+[ List utility changes as a =item entry.  Use L<XXX> with program names to get
+proper documentation linking. ]
+
+=over 4
+
+=item L<XXX>
+
+XXX
+
+=back
+
+=head1 Configuration and Compilation
 
 XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
 
-=head2 Configuration improvements
+[ List changes as a =item entry ].
+
+=over 4
+
+=item *
 
 XXX
 
-=head2 Compilation improvements
+=back
+
+=head1 Testing
+
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarising, although the bugs
+that they represent may be covered elsewhere.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
+
+=item *
 
 XXX
 
-=head2 Platform Specific Changes
+=back
+
+=head1 Platform Support
+
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as a =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not. These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
 
 =over 4
 
 =item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms. This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head1 Internal Changes
+
+XXX Changes which affect the interface available to C<XS> code go here.
+Other significant internal changes for future core maintainers should
+be noted as well.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
+
+=item *
 
 XXX
 
@@ -132,47 +300,11 @@ XXX Important bug fixes in the core language are summarised here.
 Bug fixes in files in F<ext/> and F<lib/> are best summarised in
 L</Modules and Pragmata>.
 
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 New or Changed Diagnostics
-
-XXX New or changed warnings emitted by the core's C<C> code go here.
-
-=over 4
-
-=item C<XXX>
-
-XXX
-
-=back
-
-=head1 Changed Internals
-
-XXX Changes which affect the interface available to C<XS> code go here.
+[ List each fix as a =item entry ]
 
 =over 4
 
 =item *
-
-XXX
-
-=back
-
-=head1 New Tests
-
-XXX Changes which create B<new> files in F<t/> go here. Changes to
-existing files in F<t/> aren't worth summarising, although the bugs that
-they represent may be.
-
-=over 4
-
-=item F<XXX>
 
 XXX
 
@@ -187,19 +319,7 @@ they were specific to a particular platform (see below).
 This is a list of some significant unfixed bugs, which are regressions
 from either 5.XXX.XXX or 5.XXX.XXX.
 
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Deprecations
-
-XXX Add any new known deprecations here.
-
-The following items are now deprecated.
+[ List each fix as a =item entry ]
 
 =over 4
 
@@ -208,12 +328,6 @@ The following items are now deprecated.
 XXX
 
 =back
-
-=head1 Platform Specific Notes
-
-XXX Any changes specific to a particular platform. VMS and Win32 are the usual
-stars here. It's probably best to group changes under the same section layout
-as the main perldelta
 
 =head1 Obituary
 
@@ -223,7 +337,6 @@ here.
 =head1 Acknowledgements
 
 XXX The list of people to thank goes here.
-
 
 =head1 Reporting Bugs
 
