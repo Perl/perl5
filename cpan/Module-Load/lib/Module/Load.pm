@@ -1,6 +1,6 @@
 package Module::Load;
 
-$VERSION = '0.16';
+$VERSION = '0.18';
 
 use strict;
 use File::Spec ();
@@ -141,9 +141,9 @@ If the argument matches only C<[\w:']>, it must be a module
 =item *
 
 If the argument matches only C<\w>, it could either be a module or a
-file. We will try to find C<file> first in C<@INC> and if that fails,
-we will try to find C<file.pm> in @INC.
-If both fail, we die with the respective error messages.
+file. We will try to find C<file.pm> first in C<@INC> and if that
+fails, we will try to find C<file> in @INC.  If both fail, we die with
+the respective error messages.
 
 =back
 
