@@ -84,6 +84,7 @@ sub assign {
   $self->_iterate_commits(
     sub {
       my $log = shift;
+      say "";
       say "-" x 75;
       $self->show_header($log);
       $self->show_body($log, 1);
@@ -100,9 +101,9 @@ sub review {
   $self->_iterate_commits(
     sub {
       my $log = shift;
+      say "";
       say "-" x 75;
       $self->show_header($log);
-      $self->show_body($log, 1);
       $self->show_notes($log, 1);
       say "-" x 75;
       return $self->dispatch( $self->prompt( @choices ), $log);
@@ -168,7 +169,7 @@ sub _iterate_commits {
 
 sub add_note {
   my ($self, $id, $note) = @_;
-  my @lines = split "\n", $note;
+  my @lines = split "\n", _strip_comments($note);
   pop @lines while @lines && $lines[-1] =~ m{^\s*$};
   my $tempfh = File::Temp->new;
   if (@lines) {
@@ -354,7 +355,7 @@ sub do_edit {
   my ($self, $choice, $log) = @_;
   my $old_note = $log->notes;
   my $new_note = $self->edit_text( $self->note_template( $log, $old_note) );
-  $self->add_note( $log->id, _strip_comments($new_note) );
+  $self->add_note( $log->id, $new_note );
   return 1;
 }
 
@@ -371,7 +372,7 @@ sub do_head2 {
 
   my $note = $self->edit_text( $template );
   if ( ($note ne $template) or $self->y_n("Note unchanged. Commit it?") ) {
-    $self->add_note( $log->id, _strip_comments($note) );
+    $self->add_note( $log->id, $note );
     return 1;
   }
   return;
@@ -424,7 +425,7 @@ HERE
 
   my $note = $self->edit_text( $template );
   if ( ($note ne $template) or $self->y_n("Note unchanged. Commit it?") ) {
-    $self->add_note( $log->id, _strip_comments($note) );
+    $self->add_note( $log->id, $note );
     return 1;
   }
   return;
