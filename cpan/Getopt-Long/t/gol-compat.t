@@ -14,7 +14,7 @@ BEGIN {
     # of testing. These tests will be removed along with newgetopt.pl in
     # the next major release of perl.
     local $SIG{__WARN__} = sub {
-        if ($_[0] !~ /deprecated/) {
+        if ($_[0] !~ /will be removed from the Perl core distribution/) {
             print(STDERR @_);
         }
     };
