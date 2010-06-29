@@ -1538,7 +1538,6 @@ cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
 cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/ConfigData.pm	Configuration for Module::Build
 cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
@@ -2095,7 +2094,6 @@ cpan/Test-Harness/lib/TAP/Parser/Scheduler/Job.pm	A parser for Test Anything Pro
 cpan/Test-Harness/lib/TAP/Parser/Scheduler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Spinner.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
-cpan/Test-Harness/lib/TAP/Parser/Source/Perl.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
@@ -2137,15 +2135,12 @@ cpan/Test-Harness/t/lib/IO/c55Capture.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyCustom.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyFileSourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MyGrammar.pm			Module for testing Test::Harness
-cpan/Test-Harness/t/lib/MyIteratorFactory.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyIterator.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyPerlSourceHandler.pm				Test::Harness test
-cpan/Test-Harness/t/lib/MyPerlSource.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyResultFactory.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyResult.pm			Module for testing Test::Harness
-cpan/Test-Harness/t/lib/MyShebanger.pm				Test::Harness test
+cpan/Test-Harness/t/lib/MyShebangger.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MySourceHandler.pm				Test::Harness test
-cpan/Test-Harness/t/lib/MySource.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NoFork.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NOP.pm				Module for testing Test::Harness
 cpan/Test-Harness/t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
