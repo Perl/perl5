@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    push @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+    else {
+        push @INC, 't/lib';
+    }
 }
 
 use strict;
@@ -24,6 +30,10 @@ my $IsWin32 = $^O eq 'MSWin32';
 
 my $SAMPLE_TESTS = File::Spec->catdir(
     File::Spec->curdir,
+    (   $ENV{PERL_CORE}
+        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
+        : ()
+    ),
     't',
     'sample-tests'
 );

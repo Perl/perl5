@@ -2,7 +2,8 @@
 
 BEGIN {
     if ( $ENV{PERL_CORE} ) {
-        @INC = ( '../../lib', 't/lib' );
+        chdir 't';
+        @INC = ( '../lib', 'lib' );
     }
     else {
         unshift @INC, 't/lib';
@@ -11,4 +12,4 @@ BEGIN {
 
 use Test::More tests => 1;
 
-ok 1;
+ok 1, 'source';

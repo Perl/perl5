@@ -43,15 +43,15 @@ BEGIN {
 
 =head1 NAME
 
-TAP::Formatter::Console - Harness output delegate for default console output
+TAP::Formatter::Base - Base class for harness output delegates
 
 =head1 VERSION
 
-Version 3.17
+Version 3.21
 
 =cut
 
-$VERSION = '3.17';
+$VERSION = '3.21';
 
 =head1 DESCRIPTION
 
@@ -206,7 +206,7 @@ sub prepare {
 
     my $longest = 0;
 
-    foreach my $test (@tests) {
+    for my $test (@tests) {
         $longest = length $test if length $test > $longest;
     }
 
@@ -290,7 +290,7 @@ sub summary {
     if ( $total != $passed or $aggregate->has_problems ) {
         $self->_output("\nTest Summary Report");
         $self->_output("\n-------------------\n");
-        foreach my $test (@$tests) {
+        for my $test (@$tests) {
             $self->_printed_summary_header(0);
             my ($parser) = $aggregate->parsers($test);
             $self->_output_summary_failure(
@@ -330,7 +330,7 @@ sub summary {
                     sprintf "  Parse errors: %s\n",
                     shift @errors
                 );
-                foreach my $error (@errors) {
+                for my $error (@errors) {
                     my $spaces = ' ' x 16;
                     $self->_failure_output("$spaces$error\n");
                 }
@@ -422,7 +422,7 @@ sub _range {
     @numbers = sort { $a <=> $b } @numbers;
     my ( $min, @range );
 
-    foreach my $i ( 0 .. $#numbers ) {
+    for my $i ( 0 .. $#numbers ) {
         my $num  = $numbers[$i];
         my $next = $numbers[ $i + 1 ];
         if ( defined $next && $next == $num + 1 ) {

@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    unshift @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 use strict;
@@ -12,8 +18,10 @@ use TAP::Harness;
 
 my $HARNESS = 'TAP::Harness';
 
-my $source_tests = 't/source_tests';
-my $sample_tests = 't/sample-tests';
+my $source_tests
+  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/source_tests' : 't/source_tests';
+my $sample_tests
+  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
 
 plan tests => 56;
 

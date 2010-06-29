@@ -6,7 +6,7 @@ use vars qw($VERSION @ISA);
 use TAP::Object ();
 
 @ISA     = 'TAP::Object';
-$VERSION = '3.17';
+$VERSION = '3.21';
 
 # TODO:
 #   Handle blessed object syntax
@@ -270,7 +270,7 @@ TAP::Parser::YAMLish::Reader - Read YAMLish data from iterator
 
 =head1 VERSION
 
-Version 3.17
+Version 3.21
 
 =head1 SYNOPSIS
 
@@ -294,7 +294,7 @@ C<TAP::Parser::YAMLish::Reader> object.
 
 =head3 C<read>
 
- my $got = $reader->read($stream);
+ my $got = $reader->read($iterator);
 
 Read YAMLish from a L<TAP::Parser::Iterator> and return the data structure it
 represents.

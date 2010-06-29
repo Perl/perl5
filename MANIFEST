@@ -2094,6 +2094,7 @@ cpan/Test-Harness/lib/TAP/Parser/Result/YAML.pm		A parser for Test Anything Prot
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Job.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Scheduler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Spinner.pm	A parser for Test Anything Protocol
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Source/Perl.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
@@ -2111,6 +2112,7 @@ cpan/Test-Harness/t/compat/inc-propagation.t		Test::Harness test
 cpan/Test-Harness/t/compat/inc_taint.t			Test::Harness test
 cpan/Test-Harness/t/compat/nonumbers.t			Test::Harness test
 cpan/Test-Harness/t/compat/regression.t			Test::Harness test
+cpan/Test-Harness/t/compat/subclass.t				Test::Harness test
 cpan/Test-Harness/t/compat/switches.t			Test::Harness test
 cpan/Test-Harness/t/compat/test-harness-compat.t	Test::Harness test
 cpan/Test-Harness/t/compat/version.t			Test::Harness test
@@ -2125,6 +2127,7 @@ cpan/Test-Harness/t/grammar.t				Test::Harness test
 cpan/Test-Harness/t/harness-bailout.t			Test::Harness test
 cpan/Test-Harness/t/harness-subclass.t			Test::Harness test
 cpan/Test-Harness/t/harness.t				Test::Harness test
+cpan/Test-Harness/t/iterator_factory.t				Test::Harness test
 cpan/Test-Harness/t/iterators.t				Test::Harness test
 cpan/Test-Harness/t/lib/App/Prove/Plugin/Dummy2.pm	Module for testing Test::Harness
 cpan/Test-Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
@@ -2132,12 +2135,16 @@ cpan/Test-Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/IO/c55Capture.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyCustom.pm			Module for testing Test::Harness
+cpan/Test-Harness/t/lib/MyFileSourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MyGrammar.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyIteratorFactory.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyIterator.pm			Module for testing Test::Harness
+cpan/Test-Harness/t/lib/MyPerlSourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MyPerlSource.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyResultFactory.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyResult.pm			Module for testing Test::Harness
+cpan/Test-Harness/t/lib/MyShebanger.pm				Test::Harness test
+cpan/Test-Harness/t/lib/MySourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MySource.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NoFork.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NOP.pm				Module for testing Test::Harness
@@ -2215,13 +2222,22 @@ cpan/Test-Harness/t/sample-tests/vms_nit		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/with_comments		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/zero_valid		Test data for Test::Harness
 cpan/Test-Harness/t/scheduler.t				Test::Harness test
+cpan/Test-Harness/t/source_handler.t				Test::Harness test
 cpan/Test-Harness/t/source.t				Test::Harness test
 cpan/Test-Harness/t/source_tests/harness		Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_badtap		Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_complain	Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_directives	Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_failure	Test data for Test::Harness
+cpan/Test-Harness/t/source_tests/psql				Test::Harness test
+cpan/Test-Harness/t/source_tests/psql.bat				Test::Harness test
 cpan/Test-Harness/t/source_tests/source			Test data for Test::Harness
+cpan/Test-Harness/t/source_tests/source.1				Test::Harness test
+cpan/Test-Harness/t/source_tests/source.bat				Test::Harness test
+cpan/Test-Harness/t/source_tests/source.pl				Test::Harness test
+cpan/Test-Harness/t/source_tests/source.sh				Test::Harness test
+cpan/Test-Harness/t/source_tests/source.t				Test::Harness test
+cpan/Test-Harness/t/source_tests/source.tap				Test::Harness test
 cpan/Test-Harness/t/spool.t				Test::Harness test
 cpan/Test-Harness/t/state_results.t			Test::Harness test
 cpan/Test-Harness/t/state.t				Test::Harness test

@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    unshift @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 use strict;
@@ -47,6 +53,10 @@ for my $class ( values %class_map ) {
 
     my $aggregate = $harness->runtests(
         File::Spec->catfile(
+            (   $ENV{PERL_CORE}
+                ? ( File::Spec->updir, 'ext', 'Test-Harness' )
+                : ()
+            ),
             't',
             'sample-tests',
             'simple'

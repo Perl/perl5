@@ -56,6 +56,11 @@ my @schedule = (
             return [
                 TAP::Parser->new(
                     {   source => File::Spec->catfile(
+                            (   $ENV{PERL_CORE}
+                                ? ( File::Spec->updir(), 'ext', 'Test-Harness'
+                                  )
+                                : ()
+                            ),
                             't',
                             'sample-tests',
                             'simple'
@@ -77,6 +82,12 @@ my @schedule = (
             return map {
                 [   TAP::Parser->new(
                         {   source => File::Spec->catfile(
+                                (   $ENV{PERL_CORE}
+                                    ? ( File::Spec->updir(), 'ext',
+                                        'Test-Harness'
+                                      )
+                                    : ()
+                                ),
                                 't',
                                 'sample-tests',
                                 'simple'
@@ -118,6 +129,12 @@ my @schedule = (
               ( map {
                     [   TAP::Parser->new(
                             {   source => File::Spec->catfile(
+                                    (   $ENV{PERL_CORE}
+                                        ? ( File::Spec->updir(), 'ext',
+                                            'Test-Harness'
+                                          )
+                                        : ()
+                                    ),
                                     't',
                                     'sample-tests',
                                     'simple'

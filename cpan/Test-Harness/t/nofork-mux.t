@@ -1,10 +1,17 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    use lib 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
+    }
+    else {
+        use lib 't/lib';
+    }
 }
 
 use strict;
 
 use NoFork;
-require( 't/multiplexer.t' );
+require(
+    ( $ENV{PERL_CORE} ? '../ext/Test-Harness/' : '' ) . 't/multiplexer.t' );

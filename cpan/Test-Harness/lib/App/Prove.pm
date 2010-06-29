@@ -17,11 +17,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.17
+Version 3.21
 
 =cut
 
-$VERSION = '3.17';
+$VERSION = '3.21';
 
 =head1 DESCRIPTION
 
@@ -59,7 +59,7 @@ BEGIN {
       really_quiet recurse backwards shuffle taint_fail taint_warn timer
       verbose warnings_fail warnings_warn show_help show_man show_version
       state_class test_args state dry extension ignore_exit rules state_manager
-      normalize
+      normalize sources
     );
     __PACKAGE__->mk_methods(@ATTR);
 }
@@ -82,7 +82,9 @@ sub _initialize {
     my $args = shift || {};
 
     # setup defaults:
-    for my $key (qw( argv rc_opts includes modules state plugins rules )) {
+    for my $key (
+        qw( argv rc_opts includes modules state plugins rules sources ))
+    {
         $self->{$key} = [];
     }
     $self->{harness_class} = 'TAP::Harness';
@@ -197,7 +199,7 @@ sub process_args {
 
     {
         local @ARGV = @args;
-        Getopt::Long::Configure( 'no_ignore_case', 'bundling' );
+        Getopt::Long::Configure(qw(no_ignore_case bundling pass_through));
 
         # Don't add coderefs to GetOptions
         GetOptions(
@@ -215,6 +217,7 @@ sub process_args {
             'ext=s'       => \$self->{extension},
             'harness=s'   => \$self->{harness},
             'ignore-exit' => \$self->{ignore_exit},
+            'source=s@'   => $self->{sources},
             'formatter=s' => \$self->{formatter},
             'r|recurse'   => \$self->{recurse},
             'reverse'     => \$self->{backwards},
@@ -308,6 +311,11 @@ sub _get_args {
 
     if ( my $formatter = $self->formatter ) {
         $args{formatter_class} = $formatter;
+    }
+
+    for my $handler ( @{ $self->sources } ) {
+        my ( $name, $config ) = $self->_parse_source($handler);
+        $args{sources}->{$name} = $config;
     }
 
     if ( $self->ignore_exit ) {
@@ -409,6 +417,30 @@ sub _load_extension {
 sub _load_extensions {
     my ( $self, $ext, @search ) = @_;
     $self->_load_extension( $_, @search ) for @$ext;
+}
+
+sub _parse_source {
+    my ( $self, $handler ) = @_;
+
+    # Load any options.
+    ( my $opt_name = lc $handler ) =~ s/::/-/g;
+    local @ARGV = @{ $self->{argv} };
+    my %config;
+    Getopt::Long::GetOptions(
+        "$opt_name-option=s%" => sub {
+            my ( undef, $k, $v ) = @_;
+            if ( exists $config{$k} ) {
+                $config{$k} = [ $config{$k} ]
+                  unless ref $config{$k} eq 'ARRAY';
+                push @{ $config{$k} } => $v;
+            }
+            else {
+                $config{$k} = $v;
+            }
+        }
+    );
+    $self->{argv} = \@ARGV;
+    return ( $handler, \%config );
 }
 
 =head3 C<run>

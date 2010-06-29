@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    unshift @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 use strict;

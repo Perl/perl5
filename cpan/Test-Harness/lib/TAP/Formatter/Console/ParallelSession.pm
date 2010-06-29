@@ -42,11 +42,11 @@ TAP::Formatter::Console::ParallelSession - Harness output delegate for parallel 
 
 =head1 VERSION
 
-Version 3.17
+Version 3.21
 
 =cut
 
-$VERSION = '3.17';
+$VERSION = '3.21';
 
 =head1 DESCRIPTION
 
@@ -94,7 +94,7 @@ sub _output_ruler {
 
     my $ruler = sprintf '===( %7d;%d  ', $context->{tests}, $now - $start;
 
-    foreach my $active ( @{ $context->{active} } ) {
+    for my $active ( @{ $context->{active} } ) {
         my $parser  = $active->parser;
         my $tests   = $parser->tests_run;
         my $planned = $parser->tests_planned || '?';

@@ -1323,7 +1323,7 @@ use File::Glob qw(:case);
 				t/lib/if.pm
 			       }
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Test::Simple' =>

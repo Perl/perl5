@@ -3,7 +3,13 @@
 use strict;
 
 BEGIN {
-    unshift @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 use Test::More tests => 94;
@@ -14,8 +20,8 @@ use TAP::Parser::Iterator::Array;
 
 my $GRAMMAR = 'TAP::Parser::Grammar';
 
-# Array based stream that we can push items in to
-package SS;
+# Array based iterator that we can push items in to
+package IT;
 
 sub new {
     my $class = shift;
@@ -36,10 +42,10 @@ sub handle_unicode { }
 
 package main;
 
-my $stream = SS->new;
-my $parser = EmptyParser->new;
+my $iterator = IT->new;
+my $parser   = EmptyParser->new;
 can_ok $GRAMMAR, 'new';
-my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
+my $grammar = $GRAMMAR->new( { iterator => $iterator, parser => $parser } );
 isa_ok $grammar, $GRAMMAR, '... and the object it returns';
 
 # Note:  all methods are actually class methods.  See the docs for the reason
@@ -63,7 +69,7 @@ can_ok $grammar, 'syntax_for';
 can_ok $grammar, 'handler_for';
 
 my ( %syntax_for, %handler_for );
-foreach my $type (@types) {
+for my $type (@types) {
     ok $syntax_for{$type} = $grammar->syntax_for($type),
       '... and calling syntax_for() with a type name should succeed';
     cmp_ok ref $syntax_for{$type}, 'eq', 'Regexp',
@@ -96,7 +102,7 @@ is_deeply $plan_token, $expected,
   '... and it should contain the correct data';
 
 can_ok $grammar, 'tokenize';
-$stream->put($plan);
+$iterator->put($plan);
 ok my $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 is_deeply $token, $expected,
@@ -122,7 +128,7 @@ $expected = {
 is_deeply $plan_token, $expected,
   '... and it should contain the correct data';
 
-$stream->put($plan);
+$iterator->put($plan);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 is_deeply $token, $expected,
@@ -149,7 +155,7 @@ $expected = {
 is_deeply $plan_token, $expected,
   '... and it should contain the correct data';
 
-$stream->put($plan);
+$iterator->put($plan);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 is_deeply $token, $expected,
@@ -167,7 +173,7 @@ my $bailout = 'Bail out!';
 like $bailout, $syntax_for{'bailout'},
   'Bail out! should match a bailout syntax';
 
-$stream->put($bailout);
+$iterator->put($bailout);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 $expected = {
@@ -182,7 +188,7 @@ $bailout = 'Bail out! some explanation';
 like $bailout, $syntax_for{'bailout'},
   'Bail out! should match a bailout syntax';
 
-$stream->put($bailout);
+$iterator->put($bailout);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 $expected = {
@@ -199,7 +205,7 @@ my $comment = '# this is a comment';
 like $comment, $syntax_for{'comment'},
   'Comments should match the comment syntax';
 
-$stream->put($comment);
+$iterator->put($comment);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 $expected = {
@@ -215,7 +221,7 @@ is_deeply $token, $expected,
 my $test = 'ok 1 this is a test';
 like $test, $syntax_for{'test'}, 'Tests should match the test syntax';
 
-$stream->put($test);
+$iterator->put($test);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -236,7 +242,7 @@ is_deeply $token, $expected,
 $test = 'not ok 2 this is a test # TODO whee!';
 like $test, $syntax_for{'test'}, 'Tests should match the test syntax';
 
-$stream->put($test);
+$iterator->put($test);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -257,7 +263,7 @@ is_deeply $token, $expected, '... and the TODO should be parsed';
 $test = 'ok 22 this is a test \# TODO whee!';
 like $test, $syntax_for{'test'}, 'Tests should match the test syntax';
 
-$stream->put($test);
+$iterator->put($test);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -278,7 +284,7 @@ is_deeply $token, $expected,
 my $pragma = 'pragma +strict';
 like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
 
-$stream->put($pragma);
+$iterator->put($pragma);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -294,7 +300,7 @@ is_deeply $token, $expected,
 $pragma = 'pragma +strict,-foo';
 like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
 
-$stream->put($pragma);
+$iterator->put($pragma);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -310,7 +316,7 @@ is_deeply $token, $expected,
 $pragma = 'pragma  +strict  ,  -foo ';
 like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
 
-$stream->put($pragma);
+$iterator->put($pragma);
 ok $token = $grammar->tokenize,
   '... and calling it with data should return a token';
 
@@ -346,13 +352,14 @@ is_deeply $token, $expected,
 
 # tokenize
 {
-    my $stream  = SS->new;
-    my $parser  = EmptyParser->new;
-    my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
+    my $iterator = IT->new;
+    my $parser   = EmptyParser->new;
+    my $grammar
+      = $GRAMMAR->new( { iterator => $iterator, parser => $parser } );
 
     my $plan = '';
 
-    $stream->put($plan);
+    $iterator->put($plan);
 
     my $result = $grammar->tokenize();
 
@@ -390,9 +397,10 @@ is_deeply $token, $expected,
 # _make_yaml_token
 
 {
-    my $stream  = SS->new;
-    my $parser  = EmptyParser->new;
-    my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
+    my $iterator = IT->new;
+    my $parser   = EmptyParser->new;
+    my $grammar
+      = $GRAMMAR->new( { iterator => $iterator, parser => $parser } );
 
     $grammar->set_version(13);
 
@@ -419,7 +427,7 @@ is_deeply $token, $expected,
     my $iter = iter($yaml);
 
     while ( my $line = $iter->() ) {
-        $stream->put($line);
+        $iterator->put($line);
     }
 
     # pad == '   ', marker == '--- '

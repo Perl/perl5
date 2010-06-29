@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    unshift @INC, 't/lib';
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 use strict;
@@ -15,7 +21,8 @@ use Test::Harness qw(execute_tests);
 # unset this global when self-testing ('testcover' and etc issue)
 local $ENV{HARNESS_PERL_SWITCHES};
 
-my $TEST_DIR = 't/sample-tests';
+my $TEST_DIR
+  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
 
 {
 
