@@ -1,0 +1,87 @@
+#!/usr/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+use File::Basename;
+use Getopt::Long;
+use LWP::UserAgent;
+
+my %votemap = (
+  'unexamined' => 0,
+  'rejected' => 1,
+  'vote' => 4,
+  'picked' => 5,
+);
+
+# Usage
+my $program = basename $0;
+my $usage = << "HERE";
+Usage: $program [ACTION] [COMMIT]
+
+  ACTIONS: (default is 'vote' if omitted)
+
+HERE
+$usage .= join( "\n", map { "    --$_" } (sort keys %votemap), 'help' );
+$usage .= "\n" . << "HERE";
+
+  COMMIT: a git revision ID (SHA1 or symbolic reference like HEAD)
+
+HERE
+
+die $usage if grep { /^(--help|-h)$/ } @ARGV;
+
+# Determine action
+my %opt;
+GetOptions( \%opt, keys %votemap ) or die $usage;
+
+if ( keys(%opt) > 1 ) {
+  die "Error: cherrymaint takes only one action argument\n\n$usage" 
+}
+
+my ($action) = keys %opt;
+$action ||= 'vote';
+
+# Determine commit SHA1
+my $commit = shift @ARGV;
+
+unless ( defined $commit ) {
+  die "Error: cherrymaint requires an explicit commit ID\n\n$usage"
+}
+
+my $short_id = qx/git rev-parse --short $commit/;
+if ( $? ) {
+  die "Error: couldn't get git commit SHA1 from '$commit'\n";
+}
+chomp $short_id;
+
+# Confirm actions
+unless ( $action eq 'vote' ) {
+  say "Are you sure you want to mark $short_id as $action? (y/n)";
+  my $ans = <STDIN>;
+  exit 0 unless $ans =~ /^y/i;
+}
+
+# Send the action to cherrymaint
+my $n = $votemap{$action};
+my $url = "http://localhost:3000/mark?commit=${short_id}&value=${n}";
+
+my $ua = LWP::UserAgent->new(
+  agent => 'Porting/cherrymaint ',
+  timeout => 30,
+  env_proxy => 1,
+);
+
+my $response = $ua->get($url);
+
+if ($response->is_success) {
+    say "Done.";
+}
+else {
+    die $response->status_line . << 'HERE';
+
+Have you remembered to tunnel localhost:3000 to perl5.git.perl.org:3000? E.g.
+  $ ssh -C -L3000:localhost:3000 perl5.git.perl.org
+HERE
+}
+
+exit 0;
