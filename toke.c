@@ -3757,8 +3757,6 @@ Perl_filter_del(pTHX_ filter_t funcp)
     /* if filter is on top of stack (usual case) just pop it off */
     datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
     if (IoANY(datasv) == FPTR2DPTR(void *, funcp)) {
-	IoFLAGS(datasv) &= ~IOf_FAKE_DIRP;
-	IoANY(datasv) = (void *)NULL;
 	sv_free(av_pop(PL_rsfp_filters));
 
         return;
