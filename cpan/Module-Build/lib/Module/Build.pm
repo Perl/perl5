@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.3603';
+$VERSION = '0.3607';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -25,6 +25,7 @@ $VERSION = eval $VERSION;
 my %OSTYPES = qw(
 		 aix       Unix
 		 bsdos     Unix
+		 beos      Unix
 		 dgux      Unix
 		 dragonfly Unix
 		 dynixptx  Unix
@@ -167,7 +168,27 @@ This illustrates initial configuration and the running of three
 'actions'.  In this case the actions run are 'build' (the default
 action), 'test', and 'install'.  Other actions defined so far include:
 
-<action_list>
+  build                          manpages
+  checkchanges                   pardist
+  checkgit                       patch_blead
+  clean                          ppd
+  code                           ppmdist
+  config_data                    prereq_data
+  diff                           prereq_report
+  dist                           pure_install
+  distcheck                      realclean
+  distclean                      retest
+  distdir                        skipcheck
+  distmeta                       tag_git
+  distsign                       test
+  disttest                       testall
+  docs                           testcover
+  fakeinstall                    testdb
+  help                           testpod
+  html                           testpodcoverage
+  install                        upload
+  installdeps                    versioninstall
+  manifest
 
 You can run the 'help' action for a complete list of actions.
 
