@@ -1,43 +1,5 @@
 Revision history for Perl extension Module::Build.
 
-0.3607 - Thu Apr  1 11:27:16 EDT 2010
-
- Bug fixes:
-
- - The 'dist' action now always ensures a clean dist directory before
-   creating the tarball [David Golden]
-
-0.36_06 - Thu Apr  1 01:23:58 EDT 2010
-
- Other:
-
- - Migrated repository to git and updated META.yml to match
-
- - Removed bugtracker URL (let search.cpan.org use default)
-
- - Disabled SIGNATURE generation
-
-0.3605 - Wed Mar 31 12:05:11 EDT 2010
-
- - No changes from 0.36_04
-
-0.36_04 - Tue Mar 16 21:41:41 EDT 2010
-
- Bug fixes:
-
- - Added missing newline to "Changing sharpbang" messages under verbose
-   output (RT#54474) [David Golden]
-
- - Added 'beos' to list of Unix-like os types (RT#53876) [Nigel Horne]
-
- - Sets $ENV{HOME} to a temporary directory during testing [David Golden]
-
- - For VMS: fixed prefix handling plus other test fixes [Craig Berry]
-
- - Support anonymous array of directories for c_source [Alberto Simões]
-
- - Small POD formatting fix [James Keenan]
-
 0.3603 - Mon Jan 18 22:28:59 EST 2010
 
 (Oops, I released the last one before I realized this should have been
