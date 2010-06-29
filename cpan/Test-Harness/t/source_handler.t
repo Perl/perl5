@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+   unshift @INC, 't/lib';
 }
 
 use strict;
@@ -27,10 +21,6 @@ my $HAS_SH   = -x '/bin/sh';
 my $HAS_ECHO = -x '/bin/echo';
 
 my $dir = File::Spec->catdir(
-    (   $ENV{PERL_CORE}
-        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-        : ()
-    ),
     't',
     'source_tests'
 );

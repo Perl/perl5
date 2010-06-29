@@ -1538,8 +1538,8 @@ cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
 cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
 cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/ConfigData.pm		Module::Build
+cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
 cpan/Module-Build/lib/Module/Build/ModuleInfo.pm	Module::Build

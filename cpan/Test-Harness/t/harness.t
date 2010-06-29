@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+   unshift @INC, 't/lib';
 }
 
 use strict;
@@ -20,9 +14,9 @@ use TAP::Harness;
 my $HARNESS = 'TAP::Harness';
 
 my $source_tests
-  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/source_tests' : 't/source_tests';
+  = 't/source_tests';
 my $sample_tests
-  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
+  = 't/sample-tests';
 
 plan tests => 128;
 
@@ -545,9 +539,7 @@ SKIP: {
     eval {
         _runtests(
             $harness,
-            $ENV{PERL_CORE}
-            ? '../ext/Test-Harness/t/data/catme.1'
-            : 't/data/catme.1'
+            't/data/catme.1'
         );
     };
 
@@ -595,9 +587,7 @@ SKIP: {
             exec      => sub {
                 return [
                     $cat,
-                    $ENV{PERL_CORE}
-                    ? '../ext/Test-Harness/t/data/catme.1'
-                    : 't/data/catme.1'
+                    't/data/catme.1'
                 ];
             },
         }
@@ -645,9 +635,7 @@ SKIP: {
             stdout    => $capture,
             exec      => sub {
                 open my $fh,
-                  $ENV{PERL_CORE}
-                  ? '../ext/Test-Harness/t/data/catme.1'
-                  : 't/data/catme.1';
+                  't/data/catme.1';
                 return $fh;
             },
         }
@@ -978,11 +966,7 @@ sub _runtests {
     # coverage tests for the basically untested T::H::_open_spool
 
     my @spool = (
-        (   $ENV{PERL_CORE}
-            ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-            : ()
-        ),
-        ( 't', 'spool' )
+        't', 'spool'
     );
     $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(@spool);
 

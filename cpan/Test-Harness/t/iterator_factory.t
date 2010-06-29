@@ -4,13 +4,7 @@
 ##
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+  unshift @INC, 't/lib';
 }
 
 use strict;
@@ -77,10 +71,6 @@ use_ok('TAP::Parser::SourceHandler::RawTAP');
 use_ok('TAP::Parser::SourceHandler::Handle');
 
 my $test_dir = File::Spec->catdir(
-    (   $ENV{PERL_CORE}
-        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-        : ()
-    ),
     't',
     'source_tests'
 );

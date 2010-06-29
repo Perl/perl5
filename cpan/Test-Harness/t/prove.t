@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', '../ext/Test-Harness/t/lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+  unshift @INC, 't/lib';
 }
 
 use strict;
@@ -1017,9 +1011,7 @@ BEGIN {    # START PLAN
             args => {
                 argv => [qw( one two three )],
             },
-            proverc => $ENV{PERL_CORE}
-            ? '../ext/Test-Harness/t/proverc/emptyexec'
-            : 't/proverc/emptyexec',
+            proverc => 't/proverc/emptyexec',
             switches => [$dummy_test],
             expect   => { exec => '' },
             runlog   => [

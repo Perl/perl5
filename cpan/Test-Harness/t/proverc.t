@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = ( '../lib', 'lib' );
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+  unshift @INC, 't/lib';
 }
 
 use strict;
@@ -20,10 +14,6 @@ my $prove = App::Prove->new;
 
 $prove->add_rc_file(
     File::Spec->catfile(
-        (   $ENV{PERL_CORE}
-            ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-            : ()
-        ),
         't', 'data',
         'proverc'
     )

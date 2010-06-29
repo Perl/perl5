@@ -42,10 +42,6 @@ my @schedule = (
             command => [
                 $^X,
                 File::Spec->catfile(
-                    (   $ENV{PERL_CORE}
-                        ? ( File::Spec->updir(), 'ext', 'Test-Harness' )
-                        : ()
-                    ),
                     't',
                     'sample-tests',
                     'out_err_mix'

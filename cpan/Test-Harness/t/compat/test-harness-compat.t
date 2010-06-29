@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = '../lib';
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+  unshift @INC, 't/lib';
 }
 
 use strict;
@@ -22,7 +16,7 @@ use Test::Harness qw(execute_tests);
 local $ENV{HARNESS_PERL_SWITCHES};
 
 my $TEST_DIR
-  = $ENV{PERL_CORE} ? '../ext/Test-Harness/t/sample-tests' : 't/sample-tests';
+  = 't/sample-tests';
 
 {
 

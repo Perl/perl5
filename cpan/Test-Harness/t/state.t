@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't';
-        @INC = '../lib';
-    }
-    else {
-        unshift @INC, 't/lib';
-    }
+  unshift @INC, 't/lib';
 }
 
 use strict;
@@ -16,7 +10,7 @@ use App::Prove::State;
 use App::Prove::State::Result;
 
 sub mn {
-    my $pfx = $ENV{PERL_CORE} ? '../ext/Test-Harness/' : '';
+    my $pfx = '';
     return map {"$pfx$_"} @_;
 }
 
