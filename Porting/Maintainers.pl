@@ -929,6 +929,11 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+  #
+  # To update Module-Build in blead see
+  # http://github.com/dagolden/module-build/blob/master/devtools/patching_blead.pod
+  #
+
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
