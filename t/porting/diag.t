@@ -110,6 +110,7 @@ sub check_file {
     next if /^#/;
     next if /^ * /;
 
+    my $multiline = 0;
     # Loop to accumulate the message text all on one line.
     while (m/$source_msg_re/ and not m/\);$/) {
       my $nextline = <$codefh>;
@@ -127,6 +128,7 @@ sub check_file {
         $nextline =~ s/^"//;
       }
       $_ = "$_$nextline";
+      ++$multiline;
     }
     # This should happen *after* unwrapping, or we don't reformat the things
     # in later lines.
@@ -161,7 +163,7 @@ sub check_file {
         @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $+{'category'};
     }
     my $name;
-    if ($listed_as and $listed_as_line == $.) {
+    if ($listed_as and $listed_as_line == $. - $multiline) {
         $name = $listed_as;
     } else {
         $name = $+{'text'};
