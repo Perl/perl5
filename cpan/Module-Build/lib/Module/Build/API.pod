@@ -181,6 +181,11 @@ files in the directory will be compiled to object files.  The
 directory will be added to the search path during the compilation and
 linking phases of any C or XS files.
 
+[version 0.3604]
+
+A list of directories can be supplied using an anonymous array
+reference of strings.
+
 =item conflicts
 
 [version 0.07]
@@ -1836,7 +1841,7 @@ accessor methods for the following properties:
 
 If you would like to add other useful metadata, C<Module::Build>
 supports this with the C<meta_add> and C<meta_merge> arguments to
-L</new>. The authoritative list of supported metadata can be found at
+L</new()>. The authoritative list of supported metadata can be found at
 L<http://module-build.sourceforge.net/META-spec-current.html>, but for
 convenience - here are a few of the more useful ones:
 

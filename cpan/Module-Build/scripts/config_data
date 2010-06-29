@@ -1,6 +1,6 @@
-#!/opt/perl/5.10.1/bin/perl 
+#!/usr/bin/perl 
 
-eval 'exec /opt/perl/5.10.1/bin/perl  -S $0 ${1+"$@"}'
+eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 use strict;

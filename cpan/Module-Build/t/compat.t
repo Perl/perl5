@@ -218,23 +218,25 @@ ok $mb, "Module::Build->new_from_context";
 
   (my $libdir2 = $libdir) =~ s/libdir/lbiidr/;
   my $libarch2 = File::Spec->catdir($libdir2, 'arch');
+  my $check_base = $libdir2;
+  $check_base =~ s/\]\z// if $^O eq 'VMS'; # trim trailing ] for appending other dirs
 
   SKIP: {
     my @cases = (
       {
         label => "INSTALLDIRS=vendor",
         args => [ 'INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2", "INSTALLVENDORARCH=$libarch2"],
-        check => qr/\Q$libdir2\E .* Simple\.pm/ix,
+        check => qr/\Q$check_base\E .* Simple\.pm/ix,
       },
       {
         label => "PREFIX=\$libdir2",
         args => [ "PREFIX=$libdir2"],
-        check => qr/\Q$libdir2\E .* Simple\.pm/ix,
+        check => qr/\Q$check_base\E .* Simple\.pm/ix,
       },
       {
         label => "PREFIX=\$libdir2 LIB=mylib",
         args => [ "PREFIX=$libdir2", "LIB=mylib" ],
-        check => qr{\Q$libdir2\E[/\\]mylib[/\\]Simple\.pm}ix,
+        check => qr{\Q$check_base\E[/\\\.]mylib[/\\\]]Simple\.pm}ix,
       },
     );
 
@@ -242,15 +244,8 @@ ok $mb, "Module::Build->new_from_context";
     skip "Needs ExtUtils::Install 1.32 or later", 2 * @cases
       if ExtUtils::Install->VERSION < 1.32;
 
-    skip "Needs upstream patch at http://rt.cpan.org/Public/Bug/Display.html?id=55288", 2 * @cases
-      if $^O eq 'VMS';
-
     for my $c (@cases) {
       my @make_args = @{$c->{args}};
-      if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
-        $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
-        pop @make_args while scalar(@make_args) > 1;
-      }
       ($output) = stdout_stderr_of(
         sub {
           $result = $mb->run_perl_script('Makefile.PL', [], \@make_args);

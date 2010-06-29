@@ -12,6 +12,7 @@ use File::Path ();
 BEGIN {
     # Environment variables which might effect our testing
     my @delete_env_keys = qw(
+        HOME
         DEVEL_COVER_OPTIONS
         MODULEBUILDRC
         PERL_MB_OPT
@@ -121,6 +122,10 @@ sub tmpdir {
   my ($self, @args) = @_;
   my $dir = $ENV{PERL_CORE} ? MBTest->original_cwd : File::Spec->tmpdir;
   return File::Temp::tempdir('MB-XXXXXXXX', CLEANUP => 1, DIR => $dir, @args);
+}
+
+BEGIN {
+  $ENV{HOME} = tmpdir; # don't want .modulebuildrc or other things interfering
 }
 
 sub save_handle {

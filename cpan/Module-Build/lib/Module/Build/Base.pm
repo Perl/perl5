@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.3603';
+$VERSION = '0.3607';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -2728,11 +2728,19 @@ sub process_support_files {
   my $p = $self->{properties};
   return unless $p->{c_source};
 
-  push @{$p->{include_dirs}}, $p->{c_source};
+  my $files;
+  if (ref($p->{c_source}) eq "ARRAY") {
+      push @{$p->{include_dirs}}, @{$p->{c_source}};
+      for my $path (@{$p->{c_source}}) {
+          push @$files, @{ $self->rscan_dir($path, file_qr('\.c(c|p|pp|xx|\+\+)?$')) };
+      }
+  } else {
+      push @{$p->{include_dirs}}, $p->{c_source};
+      $files = $self->rscan_dir($p->{c_source}, file_qr('\.c(c|p|pp|xx|\+\+)?$'));
+  }
 
-  my $files = $self->rscan_dir($p->{c_source}, file_qr('\.c(c|p|pp|xx|\+\+)?$'));
   foreach my $file (@$files) {
-    push @{$p->{objects}}, $self->compile_c($file);
+      push @{$p->{objects}}, $self->compile_c($file);
   }
 }
 
@@ -2934,7 +2942,7 @@ sub fix_shebang_line { # Adapted from fixin() in ExtUtils::MM_Unix 1.35
     next unless $cmd =~ /perl/i;
     my $interpreter = $self->{properties}{perl};
 
-    $self->log_verbose("Changing sharpbang in $file to $interpreter");
+    $self->log_verbose("Changing sharpbang in $file to $interpreter\n");
     my $shb = '';
     $shb .= $c->get('sharpbang')."$interpreter $arg\n" if $does_shbang;
 
@@ -3513,7 +3521,8 @@ sub ACTION_pardist {
 sub ACTION_dist {
   my ($self) = @_;
 
-  $self->depends_on('distdir');
+  # MUST dispatch() and not depends_ok() so we generate a clean distdir
+  $self->dispatch('distdir');
 
   my $dist_dir = $self->dist_dir;
 
@@ -4385,6 +4394,8 @@ sub find_dist_packages {
   return $self->find_packages_in_files(\@pm_files, \%dist_files);
 }
 
+# XXX Do not document this function; mst wrote it and now says the API is
+# stupid and needs to be fixed and it shouldn't become a public API until then
 sub find_packages_in_files {
   my ($self, $file_list, $filename_map) = @_;
 
