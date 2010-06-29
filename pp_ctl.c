@@ -3434,11 +3434,6 @@ PP(pp_require)
 			count = call_sv(loader, G_ARRAY);
 		    SPAGAIN;
 
-		    /* Adjust file name if the hook has set an %INC entry */
-		    svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
-		    if (svp)
-			tryname = SvPV_nolen_const(*svp);
-
 		    if (count > 0) {
 			int i = 0;
 			SV *arg;
@@ -3499,6 +3494,12 @@ PP(pp_require)
 		    PUTBACK;
 		    FREETMPS;
 		    LEAVE_with_name("call_INC");
+
+		    /* Adjust file name if the hook has set an %INC entry.
+		       This needs to happen after the FREETMPS above.  */
+		    svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+		    if (svp)
+			tryname = SvPV_nolen_const(*svp);
 
 		    if (tryrsfp) {
 			hook_sv = dirsv;
