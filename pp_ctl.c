@@ -3627,8 +3627,10 @@ PP(pp_require)
 	    }
 	}
     }
-    SAVECOPFILE_FREE(&PL_compiling);
-    CopFILE_set(&PL_compiling, tryrsfp ? tryname : name);
+    if (tryrsfp) {
+	SAVECOPFILE_FREE(&PL_compiling);
+	CopFILE_set(&PL_compiling, tryname);
+    }
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
