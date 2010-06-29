@@ -3634,34 +3634,32 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    const char *msgstr = name;
 	    if(errno == EMFILE) {
-		SV * const msg
-		    = sv_2mortal(Perl_newSVpvf(aTHX_ "%s:   %s", msgstr,
-					       Strerror(errno)));
-		msgstr = SvPV_nolen_const(msg);
+		/* diag_listed_as: Can't locate %s */
+		DIE(aTHX_ "Can't locate %s:   %s", name, Strerror(errno));
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
 		    AV * const ar = GvAVn(PL_incgv);
 		    I32 i;
-		    SV * const msg = sv_2mortal(Perl_newSVpvf(aTHX_ 
-			"%s in @INC%s%s (@INC contains:",
-			msgstr,
+		    SV *const inc = newSVpvs_flags("", SVs_TEMP);
+		    for (i = 0; i <= AvFILL(ar); i++) {
+			sv_catpvs(inc, " ");
+			sv_catsv(inc, *av_fetch(ar, i, TRUE));
+		    }
+
+		    /* diag_listed_as: Can't locate %s */
+		    DIE(aTHX_
+			"Can't locate %s in @INC%s%s (@INC contains:%" SVf ")",
+			name,
 			(memEQ(name + len - 2, ".h", 3)
 			 ? " (change .h to .ph maybe?) (did you run h2ph?)" : ""),
 			(memEQ(name + len - 3, ".ph", 4)
-			 ? " (did you run h2ph?)" : "")
-							      ));
-		    
-		    for (i = 0; i <= AvFILL(ar); i++) {
-			sv_catpvs(msg, " ");
-			sv_catsv(msg, *av_fetch(ar, i, TRUE));
-		    }
-		    sv_catpvs(msg, ")");
-		    msgstr = SvPV_nolen_const(msg);
-		}    
+			 ? " (did you run h2ph?)" : ""),
+			inc
+			);
+		}
 	    }
-	    DIE(aTHX_ "Can't locate %s", msgstr);
+	    DIE(aTHX_ "Can't locate %s", name);
 	}
 
 	RETPUSHUNDEF;
