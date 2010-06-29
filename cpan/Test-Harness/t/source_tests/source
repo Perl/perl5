@@ -2,6 +2,7 @@
 
 BEGIN {
   unshift @INC, 't/lib';
+  unshift @INC, '../../lib' if $ENV{PERL_CORE};
 }
 
 use Test::More tests => 1;

@@ -40,7 +40,10 @@ sub fix_shebang {
     die "$file_in is not perl"
       unless $cmd =~ m{^perl(?:\z|[^a-z])};
 
-    if ( $Config{startperl} =~ m,^\#!.*/perl, ) {
+    if ($ENV{PERL_CORE}) {
+        $interpreter = $^X;
+    }
+    elsif ( $Config{startperl} =~ m,^\#!.*/perl, ) {
         $interpreter = $Config{startperl};
         $interpreter =~ s,^\#!,,;
     }
