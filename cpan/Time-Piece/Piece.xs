@@ -307,19 +307,6 @@ my_mini_mktime(struct tm *ptm)
 #       define strncasecmp(x,y,n) strnicmp(x,y,n)
 #   endif
 
-#if defined(WIN32)
-#if defined(__BORLANDC__)
-void * __cdecl _EXPFUNC alloca(_SIZE_T __size);
-#else
-#define alloca _alloca
-#endif
-#else
-#if defined(_SGIAPI) || defined( __sgi ) || ( defined (__SVR4) && defined (__sun) )
-/* required for IRIX and Solaris */
-#include <alloca.h>
-#endif
-#endif
-
 /* strptime copied from freebsd with the following copyright: */
 /*
  * Copyright (c) 1994 Powerdog Industries.  All rights reserved.
@@ -916,15 +903,19 @@ label:
 			for (cp = buf; *cp && isupper((unsigned char)*cp); ++cp) 
                             {/*empty*/}
 			if (cp - buf) {
-				zonestr = (char *)alloca(cp - buf + 1);
+				zonestr = malloc(cp - buf + 1);
+				if (!zonestr) {
+				    errno = ENOMEM;
+				    return 0;
+				}
 				strncpy(zonestr, buf, cp - buf);
 				zonestr[cp - buf] = '\0';
 				my_tzset(aTHX);
 				if (0 == strcmp(zonestr, "GMT")) {
 				    got_GMT = 1;
-				} else {
-				    return 0;
 				}
+				free(zonestr);
+				if (!got_GMT) return 0;
 				buf += cp - buf;
 			}
 			}
