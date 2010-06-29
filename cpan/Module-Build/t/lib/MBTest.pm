@@ -97,8 +97,12 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 
 # always return to the current directory
 {
-  my $cwd = File::Spec->rel2abs(Cwd::cwd);
+  my $cwd;
+  BEGIN {
+    $cwd = File::Spec->rel2abs(Cwd::cwd);
+  }
 
+  # This is called at BEGIN time below, so anything it uses must be initialised
   sub original_cwd { return $cwd }
 
   END {
