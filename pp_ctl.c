@@ -3647,9 +3647,9 @@ PP(pp_require)
 		    SV * const msg = sv_2mortal(Perl_newSVpvf(aTHX_ 
 			"%s in @INC%s%s (@INC contains:",
 			msgstr,
-			(instr(msgstr, ".h ")
-			 ? " (change .h to .ph maybe?)" : ""),
-			(instr(msgstr, ".ph ")
+			(memEQ(name + len - 2, ".h", 3)
+			 ? " (change .h to .ph maybe?) (did you run h2ph?)" : ""),
+			(memEQ(name + len - 3, ".ph", 4)
 			 ? " (did you run h2ph?)" : "")
 							      ));
 		    
