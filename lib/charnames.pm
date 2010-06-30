@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 use bytes ();		# for $bytes::hint_bits
 
@@ -652,10 +652,10 @@ sub viacode
 
   my $arg = shift;
 
-  # this is derived from Unicode::UCD, where it is nearly the same as the
-  # function _getcode(), but it makes sure that even a hex argument has the
-  # proper number of leading zeros, which is critical in matching against $txt
-  # below
+  # This is derived from Unicode::UCD, where it is nearly the same as the
+  # function _getcode(), but here it makes sure that even a hex argument
+  # has the proper number of leading zeros, which is critical in
+  # matching against $txt below
   my $hex;
   if ($arg =~ $decimal_qr) {
     $hex = sprintf "%04X", $arg;
@@ -746,8 +746,10 @@ charnames - define character names for C<\N{named}> string literal escapes
 
   use charnames ":full", ":alias" => {
     e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
+    mychar => 0xE8000,  # Private use area
   };
   print "\N{e_ACUTE} is a small letter e with an acute.\n";
+  print "\\N{mychar} allows me to name and use private use characters.\n";
 
   use charnames ();
   print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
@@ -756,8 +758,13 @@ charnames - define character names for C<\N{named}> string literal escapes
 
 =head1 DESCRIPTION
 
-Pragma C<use charnames> supports arguments C<:full>, C<:short>, script
-names and customized aliases.  If C<:full> is present, for expansion of
+Pragma C<use charnames> enables the use of C<\N{CHARNAME}> sequences to
+insert a Unicode character into a string based on its name.  (However,
+you don't need this pragma to use C<\N{U+...}> where the C<...> is a
+hexadecimal ordinal number.)
+
+The pragma supports arguments C<:full>, C<:short>, script names and
+customized aliases.  If C<:full> is present, for expansion of
 C<\N{CHARNAME}>, the string C<CHARNAME> is first looked up in the list of
 standard Unicode character names.  If C<:short> is present, and
 C<CHARNAME> has the form C<SCRIPT:CNAME>, then C<CNAME> is looked up
@@ -793,6 +800,13 @@ has been updated, see L</ALIASES>.
 Since the Unicode standard uses "U+HHHH", so can you: "\N{U+263a}"
 is the Unicode smiley face, or "\N{WHITE SMILING FACE}".
 
+If the input name is unknown, C<\N{NAME}> raises a warning and
+substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
+
+It is a fatal error if C<use bytes> is in effect and the input name is
+that of a character that won't fit into a byte (i.e., whose ordinal is
+above 255).
+
 =head1 ALIASES
 
 A few aliases have been defined for convenience: instead of having
@@ -803,7 +817,7 @@ to use the official names
     CARRIAGE RETURN (CR)
     NEXT LINE (NEL)
 
-(yes, with parentheses) one can use
+(yes, with parentheses), one can use
 
     LINE FEED
     FORM FEED
@@ -896,22 +910,23 @@ controls that have no Unicode names:
 
 This version of charnames supports three mechanisms of adding local
 or customized aliases to standard Unicode naming conventions (:full).
-The aliases override any standard definitions, so, if you're twisted enough,
-you can change C<"\N{LATIN CAPITAL LETTER A}"> to mean C<"B">, etc.
+The aliases override any standard definitions, so, if you're twisted
+enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to mean C<"B">,
+etc.
 
 Note that an alias should not be something that is a legal curly
 brace-enclosed quantifier (see L<perlreref/QUANTIFIERS>).  For example
-C<\N{123}> means to match 123 non-newline characters, and is not treated as an
-alias.  Aliases are discouraged from beginning with anything other than an
-alphabetic character and from containing anything other than alphanumerics,
-spaces, dashes, colons, parentheses, and underscores.  Currently they must be
-ASCII.
+C<\N{123}> means to match 123 non-newline characters, and is not treated as a
+charnames alias.  Aliases are discouraged from beginning with anything
+other than an alphabetic character and from containing anything other
+than alphanumerics, spaces, dashes, parentheses, and underscores.
+Currently they must be ASCII.
 
-An alias can map to either an official Unicode character name or numeric
-code point (ordinal).  The latter is useful for assigning names to code
-points in Unicode private use areas such as U+E000 through U+F8FF.  The
-number must look like an unsigned decimal integer, or a hexadecimal
-constant beginning with C<0x>, or <U+>.
+An alias can map to either an official Unicode character name or to a
+numeric code point (ordinal).  The latter is useful for assigning names
+to code points in Unicode private use areas such as U+E800 through
+U+F8FF.  The number must look like an unsigned decimal integer, or a
+hexadecimal constant beginning with C<0x>, or C<U+>.
 
 =head2 Anonymous hashes
 
