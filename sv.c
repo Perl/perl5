@@ -5757,7 +5757,8 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	if (IoIFP(sv) &&
 	    IoIFP(sv) != PerlIO_stdin() &&
 	    IoIFP(sv) != PerlIO_stdout() &&
-	    IoIFP(sv) != PerlIO_stderr())
+	    IoIFP(sv) != PerlIO_stderr() &&
+	    !(IoFLAGS(sv) & IOf_FAKE_DIRP))
 	{
 	    io_close(MUTABLE_IO(sv), FALSE);
 	}
@@ -5839,7 +5840,8 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	    }
 	}
 #ifdef PERL_OLD_COPY_ON_WRITE
-	else if (SvPVX_const(sv)) {
+	else if (SvPVX_const(sv)
+		 && !(SvTYPE(sv) == SVt_PVIO && !(IoFLAGS(sv) & IOf_FAKE_DIRP))) {
             if (SvIsCOW(sv)) {
                 if (DEBUG_C_TEST) {
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
@@ -5857,7 +5859,8 @@ Perl_sv_clear(pTHX_ register SV *const sv)
             }
 	}
 #else
-	else if (SvPVX_const(sv) && SvLEN(sv))
+	else if (SvPVX_const(sv) && SvLEN(sv)
+		 && !(SvTYPE(sv) == SVt_PVIO && !(IoFLAGS(sv) & IOf_FAKE_DIRP)))
 	    Safefree(SvPVX_mutable(sv));
 	else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
 	    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
@@ -11200,11 +11203,6 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 		break;
 	    case SVt_PVIO:
-		IoIFP(dstr)	= fp_dup(IoIFP(dstr), IoTYPE(dstr), param);
-		if (IoOFP(dstr) == IoIFP(sstr))
-		    IoOFP(dstr) = IoIFP(dstr);
-		else
-		    IoOFP(dstr)	= fp_dup(IoOFP(dstr), IoTYPE(dstr), param);
 		/* PL_parser->rsfp_filters entries have fake IoDIRP() */
 		if(IoFLAGS(dstr) & IOf_FAKE_DIRP) {
 		    /* I have no idea why fake dirp (rsfps)
@@ -11223,7 +11221,12 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			NOOP;
 			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */
 		    }
+		    IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(dstr), param);
 		}
+		if (IoOFP(dstr) == IoIFP(sstr))
+		    IoOFP(dstr) = IoIFP(dstr);
+		else
+		    IoOFP(dstr)	= fp_dup(IoOFP(dstr), IoTYPE(dstr), param);
 		IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(dstr));
 		IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(dstr));
 		IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(dstr));
