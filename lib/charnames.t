@@ -1,6 +1,9 @@
 #!./perl
 use strict;
 
+# Because \N{} is compile time, any warnings will get generated before
+# execution, so have to have an array, and arrange things so no warning
+# is generated twice to verify that in fact a warning did happen
 my @WARN;
 
 BEGIN {
@@ -585,6 +588,8 @@ my @prgs;
 
 for (@prgs) {
     my ($code, $exp) = ((split m/\nEXPECT\n/), '$');
+
+    # FILE is the code that generates any abbreviations
     my ($prog, $fil) = ((split m/\nFILE\n/, $code), "");
     my $tmpfile = tempfile();
     open my $tmp, "> $tmpfile" or die "Could not open $tmpfile: $!";
