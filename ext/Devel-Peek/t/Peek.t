@@ -8,11 +8,9 @@ BEGIN {
     }
 }
 
-BEGIN { require "../../t/test.pl"; }
+use Test::More tests => 52;
 
 use Devel::Peek;
-
-plan(52);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -633,7 +631,7 @@ do_test(25,
     BOTTOM_GV = 0x0
     SUBPROCESS = 0				# $] < 5.009
     TYPE = \'>\'
-    FLAGS = 0x0');
+    FLAGS = 0x4');
 
 do_test(26,
 	*PIE{FORMAT},
