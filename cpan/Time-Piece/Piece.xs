@@ -903,7 +903,7 @@ label:
 			for (cp = buf; *cp && isupper((unsigned char)*cp); ++cp) 
                             {/*empty*/}
 			if (cp - buf) {
-				zonestr = malloc(cp - buf + 1);
+				zonestr = (char *)malloc(cp - buf + 1);
 				if (!zonestr) {
 				    errno = ENOMEM;
 				    return 0;
