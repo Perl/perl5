@@ -438,7 +438,7 @@ sub alias (@)
         $inverse_user_aliases{sprintf("%04X", $value)} = $name;
     }
     elsif ($value =~ $hex_qr) {
-        my $decimal = hex $1;
+        my $decimal = CORE::hex $1;
         $user_numeric_aliases{$name} = $decimal;
 
         # Must convert to decimal and back to guarantee canonical form
@@ -668,7 +668,7 @@ sub viacode
   }
 
   # checking the length first is slightly faster
-  if (length($hex) > 5 && hex($hex) > 0x10FFFF) {
+  if (length($hex) > 5 && CORE::hex($hex) > 0x10FFFF) {
     carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
     return;
   }
