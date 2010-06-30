@@ -2866,7 +2866,7 @@ dist/Thread-Semaphore/t/04_nonblocking.t	Thread::Semaphore tests
 dist/Thread-Semaphore/t/05_force.t	Thread::Semaphore tests
 dist/threads/hints/hpux.pl	Hint file for HPUX
 dist/threads/hints/linux.pl	Hint file for Linux
-dist/threads/Makefile.PL	ithreads
+dist/threads/lib/threads.pm		ithreads
 dist/threads-shared/hints/linux.pl	thread shared variables
 dist/threads-shared/Makefile.PL		thread shared variables
 dist/threads-shared/shared.pm		thread shared variables
@@ -2897,7 +2897,6 @@ dist/threads/t/err.t		Test $thr->error()
 dist/threads/t/exit.t		Test exit and die in threads
 dist/threads/t/free2.t		More ithread destruction tests
 dist/threads/t/free.t		Test ithread destruction
-dist/threads/threads.pm		ithreads
 dist/threads/threads.xs		ithreads
 dist/threads/t/join.t		Testing the join function
 dist/threads/t/kill.t		Tests thread signalling
