@@ -974,7 +974,7 @@ viacode should return an empty string for unassigned in-range Unicode code
 points, as that is their correct current name.
 
 vianame returns a chr if the input name is of the form C<U+...>, and an ord
-otherwise.  It is planned to change this to always return an ord.  Send email
+otherwise.  It is proposed to change this to always return an ord.  Send email
 to C<perl5-porters@perl.org> to comment on this proposal.
 
 None of the functions work on almost all the Hangul syllable and CJK Unicode
