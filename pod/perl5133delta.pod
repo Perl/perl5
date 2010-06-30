@@ -28,16 +28,25 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 C<\N{I<name>}> understands a a number of new abbreviations and names
+=head2 C<\N{I<name>}> enhancements
 
 C<\N{}> now knows about the abbreviated character names listed by Unicode, such
 as NBSP, SHY, LRO, ZWJ, etc., as well as all the customary abbreviations for
 the C0 and C1 control characters (such as ACK, BEL, CAN, etc.), as well as a
-few new variants in common usage of some C1 full names.  A complete list is in
-L<charnames>.
+few new variants in common usage of some C1 full names.
 
 In the past, it was ineffective to override one of Perl's abbreviations with
 your own custom alias.  Now it works.
+
+And you can create a custom alias directly to the ordinal of a character, known
+by C<\N{...}> and C<charnames::viacode()>, but not C<charnames::vianame()>.
+Previously, an alias had to be to an official Unicode character name.  This
+made it impossible to create an alias for a code point that had no name,
+such as the ones reserved for private use.  So this change allows you to make
+more effective use of private use characters.  Only if there is no official
+name will C<charnames::viacode()> return your custom one.
+
+See L<charnames> for details on all these changes.
 
 =head1 Security
 

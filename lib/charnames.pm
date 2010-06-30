@@ -6,7 +6,7 @@ our $VERSION = '1.09';
 
 use bytes ();		# for $bytes::hint_bits
 
-my %alias1 = (
+my %system_aliases = (
                 # Icky 3.2 names with parentheses.
                 'LINE FEED'             => 0x0A, # LINE FEED (LF)
                 'FORM FEED'             => 0x0C, # FORM FEED (FF)
@@ -101,7 +101,7 @@ my %alias1 = (
                 # More convenience.  For further convenience,
                 # it is suggested some way of using the NamesList
                 # aliases be implemented, but there are ambiguities in
-                # NamesList.txt)
+                # NamesList.txt
                 'BOM'   => 0xFEFF, # BYTE ORDER MARK
                 'BYTE ORDER MARK'=> 0xFEFF,
                 'CGJ'   => 0x034F, # COMBINING GRAPHEME JOINER
@@ -382,7 +382,7 @@ my %alias1 = (
                 'ZWSP'  => 0x200B, # ZERO WIDTH SPACE
             );
 
-my %alias2 = (
+my %deprecated_aliases = (
                 # Pre-3.2 compatibility (only for the first 256 characters).
                 # Use of these gives deprecated message.
                 'HORIZONTAL TABULATION' => 0x09, # CHARACTER TABULATION
@@ -399,10 +399,22 @@ my %alias2 = (
                 'REVERSE INDEX'           => 0x8D, # REVERSE LINE FEED
             );
 
-my %alias3 = (
+my %user_name_aliases = (
                 # User defined aliases. Even more convenient :)
+                # These are the ones that resolved to names
+            );
+
+my %user_numeric_aliases = (
+                # And these resolve directly to code points.
+            );
+my %inverse_user_aliases = (
+                # Map from code point to name
             );
 my $txt;
+my $decimal_qr = qr/^[1-9]\d*$/;
+
+# Returns the hex number in $1.
+my $hex_qr = qr/^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/;
 
 sub croak
 {
@@ -416,9 +428,26 @@ sub carp
 
 sub alias (@)
 {
-  @_ or return %alias3;
   my $alias = ref $_[0] ? $_[0] : { @_ };
-  @alias3{keys %$alias} = values %$alias;
+  foreach my $name (keys %$alias) {
+    my $value = $alias->{$name};
+    if ($value =~ $decimal_qr) {
+        $user_numeric_aliases{$name} = $value;
+
+        # Use a canonical form.
+        $inverse_user_aliases{sprintf("%04X", $value)} = $name;
+    }
+    elsif ($value =~ $hex_qr) {
+        my $decimal = hex $1;
+        $user_numeric_aliases{$name} = $decimal;
+
+        # Must convert to decimal and back to guarantee canonical form
+        $inverse_user_aliases{sprintf("%04X", $decimal)} = $name;
+    }
+    else {
+        $user_name_aliases{$name} = $value;
+    }
+  }
 } # alias
 
 sub alias_file ($)
@@ -451,19 +480,23 @@ sub charnames
   my $ord;
   my $fname;
 
-  if (exists $alias3{$name}) {  # User alias should be checked first, or else
-                                # can't override ours, and if we add any,
-                                # could conflict with theirs.
-    $name = $alias3{$name};
-  }
-  elsif (exists $alias1{$name}) {
-    $ord = $alias1{$name};
+  # User alias should be checked first or else can't override ours, and if we
+  # add any, could conflict with theirs.
+  if (exists $user_numeric_aliases{$name}) {
+    $ord = $user_numeric_aliases{$name};
     $fname = $name;
   }
-  elsif (exists $alias2{$name}) {
+  elsif (exists $user_name_aliases{$name}) {
+    $name = $user_name_aliases{$name};
+  }
+  elsif (exists $system_aliases{$name}) {
+    $ord = $system_aliases{$name};
+    $fname = $name;
+  }
+  elsif (exists $deprecated_aliases{$name}) {
     require warnings;
-    warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode($alias2{$name}) . "\" instead");
-    $ord = $alias2{$name};
+    warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode($deprecated_aliases{$name}) . "\" instead");
+    $ord = $deprecated_aliases{$name};
     $fname = $name;
   }
 
@@ -624,9 +657,9 @@ sub viacode
   # proper number of leading zeros, which is critical in matching against $txt
   # below
   my $hex;
-  if ($arg =~ /^[1-9]\d*$/) {
+  if ($arg =~ $decimal_qr) {
     $hex = sprintf "%04X", $arg;
-  } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
+  } elsif ($arg =~ $hex_qr) {
     # Below is the line that differs from the _getcode() source
     $hex = sprintf "%04X", hex $1;
   } else {
@@ -644,9 +677,17 @@ sub viacode
 
   $txt = do "unicore/Name.pl" unless $txt;
 
-  return unless $txt =~ m/^$hex\t\t(.+)/m;
+  # Return the official name, if exists
+  if ($txt =~ m/^$hex\t\t(.+)/m) {
+    $viacode{$hex} = $1;
+    return $1;
+  }
 
-  $viacode{$hex} = $1;
+  # See if there is a user name for it, before giving up completely.
+  return if ! exists $inverse_user_aliases{$hex};
+
+  $viacode{$hex} = $inverse_user_aliases{$hex};
+  return $inverse_user_aliases{$hex};
 } # viacode
 
 my %vianame;
@@ -866,10 +907,17 @@ alphabetic character and from containing anything other than alphanumerics,
 spaces, dashes, colons, parentheses, and underscores.  Currently they must be
 ASCII.
 
+An alias can map to either an official Unicode character name or numeric
+code point (ordinal).  The latter is useful for assigning names to code
+points in Unicode private use areas such as U+E000 through U+F8FF.  The
+number must look like an unsigned decimal integer, or a hexadecimal
+constant beginning with C<0x>, or <U+>.
+
 =head2 Anonymous hashes
 
     use charnames ":full", ":alias" => {
         e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
+        mychar1 => 0xE8000,
         };
     my $str = "\N{e_ACUTE}";
 
@@ -888,15 +936,16 @@ ASCII.
     A_BREVE         => "LATIN CAPITAL LETTER A WITH BREVE",
     A_RING          => "LATIN CAPITAL LETTER A WITH RING ABOVE",
     A_MACRON        => "LATIN CAPITAL LETTER A WITH MACRON",
+    mychar2         => U+E8001,
     );
 
 =head2 Alias shortcut
 
     use charnames ":alias" => ":pro";
 
-    works exactly the same as the alias pairs, only this time,
-    ":full" is inserted automatically as first argument (if no
-    other argument is given).
+works exactly the same as the alias pairs, only this time,
+":full" is inserted automatically as the first argument (if no
+other argument is given).
 
 =head1 charnames::viacode(code)
 
@@ -909,8 +958,11 @@ prints "FOUR TEARDROP-SPOKED ASTERISK".
 
 Returns undef if no name is known for the code.
 
-This works only for the standard names, and does not yet apply
-to custom translators.
+The name returned is the official name for the code point, if
+available, otherwise your custom alias for it.  This means that your
+alias will only be returned for code points that don't have an official
+Unicode name (nor Unicode version 1 name), such as private use code
+points, and the 4 control characters U+0080, U+0081, U+0084, and U+0099.
 
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".

@@ -50,6 +50,23 @@ EOE
     is ($res, 'b', "Verify that can redefine a standard alias");
 }
 
+{
+
+    use charnames ':full', ":alias" => { mychar1 => 0xE8000,
+                                         mychar2 => 983040,  # U+F0000
+                                         mychar3 => "U+100000",
+                                         myctrl => 0x80,
+                                       };
+    is ("\N{mychar1}", chr(0xE8000), "Verify that can define hex alias");
+    is (charnames::viacode(0xE8000), "mychar1", "And that can get the alias back");
+    is ("\N{mychar2}", chr(0xF0000), "Verify that can define decimal alias");
+    is (charnames::viacode(0xF0000), "mychar2", "And that can get the alias back");
+    is ("\N{mychar3}", chr(0x100000), "Verify that can define U+... alias");
+    is (charnames::viacode(0x100000), "mychar3", "And that can get the alias back");
+    is (charnames::viacode(0x80), "myctrl", "Verify that can name a nameless control");
+
+}
+
 my $encoded_be;
 my $encoded_alpha;
 my $encoded_bet;
