@@ -1016,14 +1016,13 @@ See L</CUSTOM ALIASES> above for restrictions on C<CHARNAME>.
 If you ask by name for a character that does not exist, a warning is given and
 the Unicode I<replacement character> "\x{FFFD}" is returned.
 
-If you ask by code for a character that is unassigned, no warning is
-given and C<undef> is returned.  (Though if you ask for a code point
-past U+10FFFF you do get a warning.)  See L</BUGS> below.
+If you ask by code (C<charnames::viacode()>) for a character that is
+unassigned, no warning is given and C<undef> is returned.  In Unicode
+the proper name of these is the empty string, which C<undef> stringifies
+to.  (If you ask for a code point past the legal Unicode maximum of
+U+10FFFF you do get C<undef> and a warning.)
 
 =head1 BUGS
-
-viacode should return an empty string for unassigned in-range Unicode code
-points, as that is their correct current name.
 
 vianame returns a chr if the input name is of the form C<U+...>, and an ord
 otherwise.  It is proposed to change this to always return an ord.  Send email
