@@ -2070,6 +2070,7 @@ cpan/Test-Harness/lib/TAP/Formatter/Console/Session.pm	A parser for Test Anythin
 cpan/Test-Harness/lib/TAP/Formatter/File.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Formatter/File/Session.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Formatter/Session.pm		A parser for Test Anything Protocol
+cpan/Test-Harness/lib/TAP/Harness/Beyond.pod
 cpan/Test-Harness/lib/TAP/Harness.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Object.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
@@ -2094,12 +2095,20 @@ cpan/Test-Harness/lib/TAP/Parser/Result/YAML.pm		A parser for Test Anything Prot
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Job.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Scheduler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Spinner.pm	A parser for Test Anything Protocol
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Executable.pm
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/File.pm
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Handle.pm
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/pgTAP.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/RawTAP.pm
 cpan/Test-Harness/lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/Test/Harness.pm			A test harness
+cpan/Test-Harness/MANIFEST				
+cpan/Test-Harness/MANIFEST.CUMMULATIVE			
 cpan/Test-Harness/t/000-load.t				Test::Harness test
 cpan/Test-Harness/t/aggregator.t			Test::Harness test
 cpan/Test-Harness/t/bailout.t				Test::Harness test
@@ -2144,6 +2153,7 @@ cpan/Test-Harness/t/lib/MyShebangger.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MySourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/NoFork.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NOP.pm				Module for testing Test::Harness
+cpan/Test-Harness/t/lib/TAP/Harness/TestSubclass.pm
 cpan/Test-Harness/t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 cpan/Test-Harness/t/multiplexer.t			Test::Harness test
 cpan/Test-Harness/t/nofork-mux.t			Test::Harness test
