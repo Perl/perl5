@@ -9,6 +9,7 @@ use warnings;
 package Git::DeltaTool;
 
 use Class::Struct;
+use File::Basename;
 use File::Temp;
 use Getopt::Long;
 use Git::Wrapper;
@@ -343,6 +344,15 @@ sub y_n {
 # handlers
 #--------------------------------------------------------------------------#
 
+sub do_cherry {
+  my ($self, $choice, $log) = @_;
+  my $id = $log->short_id;
+  $self->y_n("Recommend a cherry pick of '$id' to maint?") or return;
+  my $cherrymaint = dirname($0) . "/cherrymaint";
+  system("$^X $cherrymaint --vote $id");
+  return; # false will re-prompt the same commit
+}
+
 sub do_done {
   my ($self, $choice, $log) = @_;
   my $note = $log->notes;
@@ -444,6 +454,8 @@ sub do_platform {
 
 sub do_quit { exit 0 }
 
+sub do_repeat { return 0 }
+
 sub do_skip { return 1 }
 
 sub do_special {
@@ -471,8 +483,9 @@ HERE
 
 sub do_subsection {
   my ($self, $choice, $log) = @_;
+  my @choices = ( $choice->{subsection}, $self->submenu_choices );
   say "For " . _strip_parens($choice->{name}) . ":";
-  return $self->dispatch( $self->prompt( $choice->{subsection} ), $log);
+  return $self->dispatch( $self->prompt( @choices ), $log);
 }
 
 #--------------------------------------------------------------------------#
@@ -482,11 +495,21 @@ sub do_subsection {
 sub action_choices {
   my ($self) = @_;
   state $action_choices = [
+      { name => '(+)Cherrymaint', handler => 'cherry' },
       { name => 'S(k)ip', handler => 'skip' },
       { name => '(Q)uit', handler => 'quit' },
   ];
   return $action_choices;
 }
+
+sub submenu_choices {
+  my ($self) = @_;
+  state $submenu_choices = [
+      { name => '(B)ack', handler => 'repeat' },
+  ];
+  return $submenu_choices;
+}
+
 
 sub review_choices {
   my ($self) = @_;
