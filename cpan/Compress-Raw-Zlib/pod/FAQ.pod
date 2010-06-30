@@ -77,25 +77,10 @@ write a C<.tar.Z> file
     $tar->write($fh);
     $fh->close ;
 
-=head2 Accessing Zip Files
-
-This module does not support reading/writing zip files.
-
-Support for reading/writing zip files is included with the
-C<IO::Compress::Zip> and C<IO::Uncompress::Unzip> modules.
-
-The primary focus of the C<IO::Compress::Zip> and C<IO::Uncompress::Unzip>
-modules is to provide an C<IO::File> compatible streaming read/write
-interface to zip files/buffers. They are not fully flegged archivers. If
-you are looking for an archiver check out the C<Archive::Zip> module. You
-can find it on CPAN at 
-
-    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
-
 =head2 Zlib Library Version Support
 
 By default C<Compress::Raw::Zlib> will build with a private copy of version
-1.2.3 of the zlib library. (See the F<README> file for details of
+1.2.5 of the zlib library. (See the F<README> file for details of
 how to override this behaviour)
 
 If you decide to use a different version of the zlib library, you need to be

@@ -89,6 +89,14 @@ WriteMakefile(
 
 ) ;
 
+sub version_Macro
+{
+    my $ver = shift ;
+
+    return [ "#if ZLIB_VERNUM >= 0x$ver\n", "#endif\n" ];
+}
+
+
 my @names = qw(
 
     DEF_WBITS
@@ -129,9 +137,13 @@ my @names = qw(
 );
     #ZLIB_VERNUM
 
+my %verSpecificNames = (
+    Z_TREES => '1240',
+);
+
 if (eval {require ExtUtils::Constant; 1}) {
     # Check the constants above all appear in @EXPORT in Zlib.pm
-    my %names = map { $_, 1} @names, 'ZLIB_VERSION';
+    my %names = %verSpecificNames, map { $_, 1} @names, 'ZLIB_VERSION';
     open F, "<lib/Compress/Raw/Zlib.pm" or die "Cannot open Zlib.pm: $!\n";
     while (<F>)
     {
@@ -153,7 +165,13 @@ if (eval {require ExtUtils::Constant; 1}) {
             "\t$missing\n" ;
     }
     
-    push @names, {name => 'ZLIB_VERSION', type => 'PV' };
+    push @names, { name => 'ZLIB_VERSION', type => 'PV' };
+    
+    push @names, map { { name => $_, 
+                         macro => version_Macro $verSpecificNames{$_} 
+                       } 
+                     } 
+                 keys %verSpecificNames ;
 
     ExtUtils::Constant::WriteConstants(
                                      NAME => 'Zlib',
@@ -162,6 +180,7 @@ if (eval {require ExtUtils::Constant; 1}) {
                                      XS_FILE  => 'constants.xs',
                                                                        
                                     );
+
 } 
 else {
     foreach my $name (qw( constants.h constants.xs ))

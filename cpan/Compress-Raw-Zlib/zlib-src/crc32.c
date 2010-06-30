@@ -1,5 +1,5 @@
 /* crc32.c -- compute the CRC-32 of a data stream
- * Copyright (C) 1995-2005 Mark Adler
+ * Copyright (C) 1995-2006, 2010 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  *
  * Thanks to Rodney Brown <rbrown64@csc.com.au> for his contribution of faster
@@ -53,7 +53,7 @@
 
 /* Definitions for doing the crc four data bytes at a time. */
 #ifdef BYFOUR
-#  define REV(w) (((w)>>24)+(((w)>>8)&0xff00)+ \
+#  define REV(w) ((((w)>>24)&0xff)+(((w)>>8)&0xff00)+ \
                 (((w)&0xff00)<<8)+(((w)&0xff)<<24))
    local unsigned long crc32_little OF((unsigned long,
                         const unsigned char FAR *, unsigned));
@@ -68,6 +68,8 @@
 local unsigned long gf2_matrix_times OF((unsigned long *mat,
                                          unsigned long vec));
 local void gf2_matrix_square OF((unsigned long *square, unsigned long *mat));
+local uLong crc32_combine_(uLong crc1, uLong crc2, z_off64_t len2);
+
 
 #ifdef DYNAMIC_CRC_TABLE
 
@@ -180,9 +182,9 @@ local void make_crc_table()
 }
 
 #ifdef MAKECRCH
-local void write_table(
-    FILE *out,
-    const unsigned long FAR *table)
+local void write_table(out, table)
+    FILE *out;
+    const unsigned long FAR *table;
 {
     int n;
 
@@ -216,10 +218,10 @@ const unsigned long FAR * ZEXPORT get_crc_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-unsigned long ZEXPORT crc32(
-    unsigned long crc,
-    const unsigned char FAR *buf,
-    unsigned len)
+unsigned long ZEXPORT crc32(crc, buf, len)
+    unsigned long crc;
+    const unsigned char FAR *buf;
+    uInt len;
 {
     if (buf == Z_NULL) return 0UL;
 
@@ -259,10 +261,10 @@ unsigned long ZEXPORT crc32(
 #define DOLIT32 DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4
 
 /* ========================================================================= */
-local unsigned long crc32_little(
-    unsigned long crc,
-    const unsigned char FAR *buf,
-    unsigned len)
+local unsigned long crc32_little(crc, buf, len)
+    unsigned long crc;
+    const unsigned char FAR *buf;
+    unsigned len;
 {
     register u4 c;
     register const u4 FAR *buf4;
@@ -299,10 +301,10 @@ local unsigned long crc32_little(
 #define DOBIG32 DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4
 
 /* ========================================================================= */
-local unsigned long crc32_big(
-    unsigned long crc,
-    const unsigned char FAR *buf,
-    unsigned len)
+local unsigned long crc32_big(crc, buf, len)
+    unsigned long crc;
+    const unsigned char FAR *buf;
+    unsigned len;
 {
     register u4 c;
     register const u4 FAR *buf4;
@@ -339,9 +341,9 @@ local unsigned long crc32_big(
 #define GF2_DIM 32      /* dimension of GF(2) vectors (length of CRC) */
 
 /* ========================================================================= */
-local unsigned long gf2_matrix_times(
-    unsigned long *mat,
-    unsigned long vec)
+local unsigned long gf2_matrix_times(mat, vec)
+    unsigned long *mat;
+    unsigned long vec;
 {
     unsigned long sum;
 
@@ -356,9 +358,9 @@ local unsigned long gf2_matrix_times(
 }
 
 /* ========================================================================= */
-local void gf2_matrix_square(
-    unsigned long *square,
-    unsigned long *mat)
+local void gf2_matrix_square(square, mat)
+    unsigned long *square;
+    unsigned long *mat;
 {
     int n;
 
@@ -367,22 +369,22 @@ local void gf2_matrix_square(
 }
 
 /* ========================================================================= */
-uLong ZEXPORT crc32_combine(
-    uLong crc1,
-    uLong crc2,
-    z_off_t len2)
+local uLong crc32_combine_(crc1, crc2, len2)
+    uLong crc1;
+    uLong crc2;
+    z_off64_t len2;
 {
     int n;
     unsigned long row;
     unsigned long even[GF2_DIM];    /* even-power-of-two zeros operator */
     unsigned long odd[GF2_DIM];     /* odd-power-of-two zeros operator */
 
-    /* degenerate case */
-    if (len2 == 0)
+    /* degenerate case (also disallow negative lengths) */
+    if (len2 <= 0)
         return crc1;
 
     /* put operator for one zero bit in odd */
-    odd[0] = 0xedb88320L;           /* CRC-32 polynomial */
+    odd[0] = 0xedb88320UL;          /* CRC-32 polynomial */
     row = 1;
     for (n = 1; n < GF2_DIM; n++) {
         odd[n] = row;
@@ -420,4 +422,21 @@ uLong ZEXPORT crc32_combine(
     /* return combined crc */
     crc1 ^= crc2;
     return crc1;
+}
+
+/* ========================================================================= */
+uLong ZEXPORT crc32_combine(crc1, crc2, len2)
+    uLong crc1;
+    uLong crc2;
+    z_off_t len2;
+{
+    return crc32_combine_(crc1, crc2, len2);
+}
+
+uLong ZEXPORT crc32_combine64(crc1, crc2, len2)
+    uLong crc1;
+    uLong crc2;
+    z_off64_t len2;
+{
+    return crc32_combine_(crc1, crc2, len2);
 }

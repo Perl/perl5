@@ -31,7 +31,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <zlib.h> 
+#include "zlib.h" 
 
 /* zlib prior to 1.06 doesn't know about z_off_t */
 #ifndef z_off_t

@@ -1,6 +1,29 @@
 CHANGES
 -------
 
+  2.027 24 April 2010 
+
+      * Updated to include zlib 1.2.5
+
+  2.026 7 April 2010 
+
+      * Fixed definition of Z_TREES in Makefile.PL
+        [RT #65293]
+
+      * Fixed build issue with definition of off64_t not found on Solaris
+        by modifying the zlib source - changed the symbol
+        _LARGEFILE64_SOURCE to _LARGEFILE64_SOURCE_dummy in zconf.h, 
+        zlib.h and zutil.h 
+        [RT #56108]
+
+  2.025 27 March 2010 
+
+      * Updated to include zlib 1.2.4
+
+      * Allow zlib version check to be disabled by setting
+        TEST_SKIP_VERSION_CHECK environment variable.
+        [RT #54510]
+
   2.023 9 November 2009
 
       * fixed instance where $[ should have been $] in t/02zlib.t

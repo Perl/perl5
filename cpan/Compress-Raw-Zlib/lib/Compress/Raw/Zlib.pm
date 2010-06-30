@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.024';
+$VERSION = '2.027';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -60,6 +60,7 @@ $VERSION = eval $VERSION;
         Z_STREAM_END
         Z_STREAM_ERROR
         Z_SYNC_FLUSH
+        Z_TREES
         Z_UNKNOWN
         Z_VERSION_ERROR
 
@@ -629,7 +630,7 @@ The default is C<Z_DEFAULT_COMPRESSION>.
 =item B<-Method>
 
 Defines the compression method. The only valid value at present (and
-the default) is Z_DEFLATED.
+the default) is C<Z_DEFLATED>.
 
 =item B<-WindowBits>
 
@@ -659,7 +660,7 @@ Defines the strategy used to tune the compression. The valid values are
 C<Z_DEFAULT_STRATEGY>, C<Z_FILTERED>, C<Z_RLE>, C<Z_FIXED> and
 C<Z_HUFFMAN_ONLY>.
 
-The default is Z_DEFAULT_STRATEGY.
+The default is C<Z_DEFAULT_STRATEGY>.
 
 =item B<-Dictionary>
 
