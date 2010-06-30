@@ -904,9 +904,24 @@ see F<Porting/how_to_write_a_perldelta.pod>.
 You should be able to do this by just copying in a skeleton template and
 then doing a quick fix up of the version numbers, e.g.
 
+Then commit this file.  (If this new perldelta needs to get cherrypicked
+anywhere, this provides a clean base to merge from.)
+
+For example, assuming 5.10.2:
+
     $ cp -i Porting/perldelta_template.pod pod/perl5102delta.pod
     $ (edit it)
     $ git add pod/perl5102delta.pod
+    $ git commit -m 'create perl5102delta'
+
+Edit the previous delta file to change the C<NAME> from C<perldelta>
+to C<perlNNNdelta> and commit it.  For example:
+
+    $ git add pod/perl5101delta.pod
+    $ git commit -m 'retitle perl5101delta'
+
+Now you need to update various tables of contents, most of which can be
+generated automatically.
 
 Edit F<pod.lst>: add the new entry, flagged as 'D', and unflag the previous
 entry from being 'D'; for example:
@@ -939,16 +954,13 @@ Manually update references to the perlNNNdelta version in these files:
     INSTALL
     README
 
-Edit the previous delta file to change the C<NAME> from C<perldelta>
-to C<perlNNNdelta>.
-
 These two lists of files probably aren't exhaustive; do a recursive grep
 on the previous filename to look for suitable candidates that may have
 been missed.
 
 Finally, commit:
 
-    $ git commit -a -m 'create perlXXXdelta'
+    $ git commit -a -m 'update TOC and perldelta references'
 
 At this point you may want  to compare the commit with a previous bump to
 see if they look similar. See commit ca8de22071 for an example of a
