@@ -1,10 +1,6 @@
 #!./perl -w
 
-BEGIN {
-    require 'test.pl';
-}
-
-plan tests => 2;
+use Test::More tests => 2;
 
 use File::Temp;
 use Fcntl qw(:mode);
