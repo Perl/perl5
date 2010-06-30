@@ -4,26 +4,26 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.024 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.024 ;
-use IO::Compress::Adapter::Deflate 2.024 ;
-use IO::Compress::Adapter::Identity 2.024 ;
-use IO::Compress::Zlib::Extra 2.024 ;
-use IO::Compress::Zip::Constants 2.024 ;
+use IO::Compress::Base::Common  2.027 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.027 ;
+use IO::Compress::Adapter::Deflate 2.027 ;
+use IO::Compress::Adapter::Identity 2.027 ;
+use IO::Compress::Zlib::Extra 2.027 ;
+use IO::Compress::Zip::Constants 2.027 ;
 
 
-use Compress::Raw::Zlib  2.024 qw(crc32) ;
+use Compress::Raw::Zlib  2.027 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.024 ; 
+           import  IO::Compress::Adapter::Bzip2 2.027 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.024 ; 
+           import  IO::Compress::Bzip2 2.027 ; 
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
 #           import  IO::Compress::Adapter::Lzma 2.020 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.024 ; 
+#           import  IO::Compress::Lzma 2.027 ; 
 #         } ;
 }
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.024';
+$VERSION = '2.027';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -513,8 +513,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.024 qw(:Parse);
-    use Compress::Raw::Zlib  2.024 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.027 qw(:Parse);
+    use Compress::Raw::Zlib  2.027 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -538,7 +538,10 @@ sub getExtraParams
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
             'exUnix2'   => [0, 1, Parse_any,       undef], 
-            'ExtAttr'   => [0, 1, Parse_any,       0],
+            'ExtAttr'   => [0, 1, Parse_any, 
+                    $Compress::Raw::Zlib::gzip_os_code == 3 
+                        ? 0666 << 16 
+                        : 0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
            'TextFlag'  => [0, 1, Parse_boolean,   0],
@@ -770,8 +773,6 @@ If C<$input> is a string that is delimited by the characters "<" and ">"
 C<zip> will assume that it is an I<input fileglob string>. The
 input is the list of files that match the fileglob.
 
-If the fileglob does not match any files ...
-
 See L<File::GlobMapper|File::GlobMapper> for more details.
 
 =back
@@ -822,6 +823,8 @@ output is the list of files that match the fileglob.
 
 When C<$output> is an fileglob string, C<$input> must also be a fileglob
 string. Anything else is an error.
+
+See L<File::GlobMapper|File::GlobMapper> for more details.
 
 =back
 
@@ -932,28 +935,32 @@ compressed data to a buffer, C<$buffer>.
     zip $input => \$buffer 
         or die "zip failed: $ZipError\n";
 
-To compress all files in the directory "/my/home" that match "*.txt"
-and store the compressed data in the same directory
+To create a zip file, C<output.zip>, that contains the compressed contents
+of the files C<alpha.txt> and C<beta.txt>
 
     use strict ;
     use warnings ;
     use IO::Compress::Zip qw(zip $ZipError) ;
 
-    zip '</my/home/*.txt>' => '<*.zip>'
+    zip [ 'alpha.txt', 'beta.txt' ] => 'output.zip'
         or die "zip failed: $ZipError\n";
 
-and if you want to compress each file one at a time, this will do the trick
+Alternatively, rather than having to explicitly name each of the files that
+you want to comnpress, you could use a fileglob to select all the C<txt>
+files in the current directory, as follows
 
     use strict ;
     use warnings ;
     use IO::Compress::Zip qw(zip $ZipError) ;
 
-    for my $input ( glob "/my/home/*.txt" )
-    {
-        my $output = "$input.zip" ;
-        zip $input => $output 
-            or die "Error compressing '$input': $ZipError\n";
-    }
+    my @files = <*.txt>;
+    zip \@files => 'output.zip'
+        or die "zip failed: $ZipError\n";
+
+or more succinctly
+
+    zip [ <*.txt> ] => 'output.zip'
+        or die "zip failed: $ZipError\n";
 
 =head1 OO Interface
 

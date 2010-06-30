@@ -42,8 +42,12 @@ plan skip_all => "gzsetparams needs zlib 1.0.6 or better. You have $ver\n"
 plan tests => 51 + $extra ;
 
 # Check zlib_version and ZLIB_VERSION are the same.
-is Compress::Zlib::zlib_version, ZLIB_VERSION,
-    "ZLIB_VERSION matches Compress::Zlib::zlib_version" ;
+SKIP: {
+    skip "TEST_SKIP_VERSION_CHECK is set", 1 
+        if $ENV{TEST_SKIP_VERSION_CHECK};
+    is Compress::Zlib::zlib_version, ZLIB_VERSION,
+        "ZLIB_VERSION matches Compress::Zlib::zlib_version" ;
+}
  
 {
     # gzsetparams

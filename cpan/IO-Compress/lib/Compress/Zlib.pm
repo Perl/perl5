@@ -3,22 +3,21 @@ package Compress::Zlib;
 
 require 5.004 ;
 require Exporter;
-use AutoLoader;
 use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.024 ;
-use Compress::Raw::Zlib 2.024 ;
-use IO::Compress::Gzip 2.024 ;
-use IO::Uncompress::Gunzip 2.024 ;
+use IO::Compress::Base::Common 2.027 ;
+use Compress::Raw::Zlib 2.027 ;
+use IO::Compress::Gzip 2.027 ;
+use IO::Uncompress::Gunzip 2.027 ;
 
 use strict ;
 use warnings ;
 use bytes ;
-our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
+our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.024';
+$VERSION = '2.027';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -44,16 +43,6 @@ push @EXPORT, @Compress::Raw::Zlib::EXPORT ;
 BEGIN
 {
     *zlib_version = \&Compress::Raw::Zlib::zlib_version;
-}
-
-sub AUTOLOAD {
-    my($constname);
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    my ($error, $val) = Compress::Raw::Zlib::constant($constname);
-    Carp::croak $error if $error;
-    no strict 'refs';
-    *{$AUTOLOAD} = sub { $val };
-    goto &{$AUTOLOAD};
 }
 
 use constant FLAG_APPEND             => 1 ;
@@ -462,7 +451,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.024 ;
+use IO::Compress::Gzip::Constants 2.027 ;
 
 sub memGzip($)
 {

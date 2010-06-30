@@ -1,6 +1,28 @@
 CHANGES
 -------
 
+  2.027 24 April 2010
+
+      * Compress::Zlib
+        Remove autoload code from Zlib.pm.
+        [perl #74088]
+
+  2.026 7 April 2010
+
+      * IO::Uncompress::Zip
+        - Some updates to IO::Compress::Zip documentation.
+        - Fixed default setting for ExtAttr.
+
+
+  2.025 27 March 2010
+
+      * IO::Uncompress::Unzip
+        The "Name" option wasn't documented.
+
+      * Allow zlib version check to be disabled by setting
+        TEST_SKIP_VERSION_CHECK environment variable.
+        [RT #54510]
+
   2.024 7 January 2010
 
       * Compress::Zlib

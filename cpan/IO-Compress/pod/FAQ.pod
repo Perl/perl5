@@ -334,7 +334,9 @@ the length of the compressed data stream.
 To illustrate how to use C<InputLength> here is a script that walks a zip
 file and prints out how many lines are in each compressed file (if you
 intend write code to walking through a zip file for real see
-L<IO::Uncompress::Unzip/"Walking through a zip file"> )
+L<IO::Uncompress::Unzip/"Walking through a zip file"> ). Also, although
+this example uses the zlib-based comnpresion, the technique can be used by
+the other C<IO::Uncompress::*> modules.
 
     use strict;
     use warnings;

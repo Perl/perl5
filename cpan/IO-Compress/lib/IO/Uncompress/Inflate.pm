@@ -5,15 +5,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.024 qw(:Status createSelfTiedObject);
-use IO::Compress::Zlib::Constants 2.024 ;
+use IO::Compress::Base::Common  2.027 qw(:Status createSelfTiedObject);
+use IO::Compress::Zlib::Constants 2.027 ;
 
-use IO::Uncompress::RawInflate  2.024 ;
+use IO::Uncompress::RawInflate  2.027 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.024';
+$VERSION = '2.027';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );
@@ -313,8 +313,6 @@ If C<$input> is a string that is delimited by the characters "<" and ">"
 C<inflate> will assume that it is an I<input fileglob string>. The
 input is the list of files that match the fileglob.
 
-If the fileglob does not match any files ...
-
 See L<File::GlobMapper|File::GlobMapper> for more details.
 
 =back
@@ -358,6 +356,8 @@ output is the list of files that match the fileglob.
 
 When C<$output> is an fileglob string, C<$input> must also be a fileglob
 string. Anything else is an error.
+
+See L<File::GlobMapper|File::GlobMapper> for more details.
 
 =back
 
