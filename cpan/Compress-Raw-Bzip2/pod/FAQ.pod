@@ -77,21 +77,6 @@ write a C<.tar.Z> file
     $tar->write($fh);
     $fh->close ;
 
-=head2 Accessing Zip Files
-
-This module does not support reading/writing zip files.
-
-Support for reading/writing zip files is included with the
-C<IO::Compress::Zip> and C<IO::Uncompress::Unzip> modules.
-
-The primary focus of the C<IO::Compress::Zip> and C<IO::Uncompress::Unzip>
-modules is to provide an C<IO::File> compatible streaming read/write
-interface to zip files/buffers. They are not fully flegged archivers. If
-you are looking for an archiver check out the C<Archive::Zip> module. You
-can find it on CPAN at 
-
-    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
-
 =head1 SEE ALSO
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
