@@ -29,6 +29,7 @@ POD = \
 	perl5114delta.pod	\
 	perl5115delta.pod	\
 	perl5120delta.pod	\
+	perl5121delta.pod	\
 	perl5130delta.pod	\
 	perl5131delta.pod	\
 	perl5132delta.pod	\
@@ -167,6 +168,7 @@ MAN = \
 	perl5114delta.man	\
 	perl5115delta.man	\
 	perl5120delta.man	\
+	perl5121delta.man	\
 	perl5130delta.man	\
 	perl5131delta.man	\
 	perl5132delta.man	\
@@ -305,6 +307,7 @@ HTML = \
 	perl5114delta.html	\
 	perl5115delta.html	\
 	perl5120delta.html	\
+	perl5121delta.html	\
 	perl5130delta.html	\
 	perl5131delta.html	\
 	perl5132delta.html	\
@@ -443,6 +446,7 @@ TEX = \
 	perl5114delta.tex	\
 	perl5115delta.tex	\
 	perl5120delta.tex	\
+	perl5121delta.tex	\
 	perl5130delta.tex	\
 	perl5131delta.tex	\
 	perl5132delta.tex	\

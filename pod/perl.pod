@@ -156,11 +156,12 @@ For ease of access, the Perl manual has been split up into several sections.
     perldoc		Look up Perl documentation in Pod format
 
     perlhist		Perl history records
+    perldelta		Perl changes since previous version
     perl5132delta	Perl changes in version 5.13.2
     perl5131delta	Perl changes in version 5.13.1
     perl5130delta	Perl changes in version 5.13.0
+    perl5121delta	Perl changes in version 5.12.1
     perl5120delta	Perl changes in version 5.12.0
-    perldelta		Perl changes since previous version
     perl5115delta	Perl changes in version 5.11.5
     perl5114delta	Perl changes in version 5.11.4
     perl5113delta	Perl changes in version 5.11.3
