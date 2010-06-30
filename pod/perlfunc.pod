@@ -6152,15 +6152,17 @@ Most programs won't even call srand() at all, except those that
 need a cryptographically-strong starting point rather than the
 generally acceptable default, which is based on time of day,
 process ID, and memory allocation, or the F</dev/urandom> device
-if available.
+if available. You may also want to call srand() after a fork() to
+avoid child processes sharing the same seed value as the parent (and
+consequently each other).
 
 You can call srand($seed) with the same $seed to reproduce the
 I<same> sequence from rand(), but this is usually reserved for
 generating predictable results for testing or debugging.
 Otherwise, don't call srand() more than once in your program.
 
-Do B<not> call srand() (i.e., without an argument) more than once in
-a script.  The internal state of the random number generator should
+Do B<not> call srand() (i.e., without an argument) more than once per
+process.  The internal state of the random number generator should
 contain more entropy than can be provided by any seed, so calling
 srand() again actually I<loses> randomness.
 
