@@ -351,18 +351,8 @@ static char sccsid[] = "@(#)strptime.c	0.1 (Powerdog) 94/03/27";
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
-#ifdef _THREAD_SAFE
-#include <pthread.h>
-#include "pthread_private.h"
-#endif /* _THREAD_SAFE */
-
-static char * _strptime(pTHX_ const char *, const char *, struct tm *);
-
-#ifdef _THREAD_SAFE
-static struct pthread_mutex	_gotgmt_mutexd = PTHREAD_MUTEX_STATIC_INITIALIZER;
-static pthread_mutex_t		gotgmt_mutex   = &_gotgmt_mutexd;
-#endif
-static int got_GMT;
+static char * _strptime(pTHX_ const char *, const char *, struct tm *,
+			int *got_GMT);
 
 #define asizeof(a)	(sizeof (a) / sizeof ((a)[0]))
 
@@ -446,7 +436,7 @@ const struct lc_time_T	_C_time_locale = {
 #define Locale (&_C_time_locale)
 
 static char *
-_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
+_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm, int *got_GMT)
 {
 	char c;
 	const char *ptr;
@@ -486,7 +476,7 @@ label:
 			break;
 
 		case '+':
-			buf = _strptime(aTHX_ buf, Locale->date_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->date_fmt, tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
@@ -510,13 +500,13 @@ label:
 
 		case 'c':
 			/* NOTE: c_fmt is intentionally ignored */
-                        buf = _strptime(aTHX_ buf, "%a %Ef %T %Y", tm);
+                        buf = _strptime(aTHX_ buf, "%a %Ef %T %Y", tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'D':
-			buf = _strptime(aTHX_ buf, "%m/%d/%y", tm);
+			buf = _strptime(aTHX_ buf, "%m/%d/%y", tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
@@ -537,19 +527,19 @@ label:
 		case 'f':
 			if (!Ealternative)
 				break;
-			buf = _strptime(aTHX_ buf, (c == 'f') ? Locale->Ef_fmt : Locale->EF_fmt, tm);
+			buf = _strptime(aTHX_ buf, (c == 'f') ? Locale->Ef_fmt : Locale->EF_fmt, tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'R':
-			buf = _strptime(aTHX_ buf, "%H:%M", tm);
+			buf = _strptime(aTHX_ buf, "%H:%M", tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'r':
-			buf = _strptime(aTHX_ buf, "%I:%M:%S %p", tm);
+			buf = _strptime(aTHX_ buf, "%I:%M:%S %p", tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
@@ -563,19 +553,19 @@ label:
 			break;
 		
 		case 'T':
-			buf = _strptime(aTHX_ buf, "%H:%M:%S", tm);
+			buf = _strptime(aTHX_ buf, "%H:%M:%S", tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'X':
-			buf = _strptime(aTHX_ buf, Locale->X_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->X_fmt, tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
 
 		case 'x':
-			buf = _strptime(aTHX_ buf, Locale->x_fmt, tm);
+			buf = _strptime(aTHX_ buf, Locale->x_fmt, tm, got_GMT);
 			if (buf == 0)
 				return 0;
 			break;
@@ -912,10 +902,10 @@ label:
 				zonestr[cp - buf] = '\0';
 				my_tzset(aTHX);
 				if (0 == strcmp(zonestr, "GMT")) {
-				    got_GMT = 1;
+				    *got_GMT = 1;
 				}
 				free(zonestr);
-				if (!got_GMT) return 0;
+				if (!*got_GMT) return 0;
 				buf += cp - buf;
 			}
 			}
@@ -945,7 +935,7 @@ label:
 
 			tm->tm_hour -= sign * (i / 100);
 			tm->tm_min  -= sign * (i % 100);
-			got_GMT = 1;
+			*got_GMT = 1;
 			}
 			break;
 		}
@@ -958,19 +948,9 @@ char *
 our_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
 {
 	char *ret;
+	int got_GMT = 0;
 
-#ifdef _THREAD_SAFE
-pthread_mutex_lock(&gotgmt_mutex);
-#endif
-
-        got_GMT = 0;
-	ret = _strptime(aTHX_ buf, fmt, tm);
-
-#ifdef _THREAD_SAFE
-	pthread_mutex_unlock(&gotgmt_mutex);
-#endif
-
-	return ret;
+	return _strptime(aTHX_ buf, fmt, tm, &got_GMT);
 }
 
 MODULE = Time::Piece     PACKAGE = Time::Piece
