@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 use bytes ();		# for $bytes::hint_bits
 
@@ -473,31 +473,33 @@ sub alias_file ($)
   0;
 } # alias_file
 
-# This is not optimized in any way yet
-sub charnames
-{
+
+sub lookup_name {
   my $name = shift;
+  my $runtime = shift;  # compile vs run time
+
+  # Finds the ordinal of a character name, first in the aliases, then in
+  # the large table.  If not found, returns undef if runtime; complains
+  # and returns the Unicode replacement if compile.
+  # This is not optimized in any way yet
+
   my $ord;
-  my $fname;
 
   # User alias should be checked first or else can't override ours, and if we
   # add any, could conflict with theirs.
   if (exists $user_numeric_aliases{$name}) {
     $ord = $user_numeric_aliases{$name};
-    $fname = $name;
   }
   elsif (exists $user_name_aliases{$name}) {
     $name = $user_name_aliases{$name};
   }
   elsif (exists $system_aliases{$name}) {
     $ord = $system_aliases{$name};
-    $fname = $name;
   }
   elsif (exists $deprecated_aliases{$name}) {
     require warnings;
     warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode($deprecated_aliases{$name}) . "\" instead");
     $ord = $deprecated_aliases{$name};
-    $fname = $name;
   }
 
   my @off;
@@ -511,40 +513,44 @@ sub charnames
     ## @off will hold the index into the code/name string of the start and
     ## end of the name as we find it.
 
-    ## If :full, look for the name exactly
-    if ($^H{charnames_full} and $txt =~ /\t\t\Q$name\E$/m) {
-      @off = ($-[0], $+[0]);
+    ## If :full, look for the name exactly; runtime implies full
+    if (($runtime || $^H{charnames_full}) && $txt =~ /\t\t\Q$name\E$/m) {
+      @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
     }
 
     ## If we didn't get above, and :short allowed, look for the short name.
     ## The short name is like "greek:Sigma"
     unless (@off) {
-      if ($^H{charnames_short} and $name =~ /^(.+?):(.+)/s) {
-	my ($script, $cname) = ($1, $2);
-	my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-	if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
-	  @off = ($-[0], $+[0]);
-	}
+      if (($runtime || $^H{charnames_short}) && $name =~ /^(.+?):(.+)/s) {
+       my ($script, $cname) = ($1, $2);
+       my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+       if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+         @off = ($-[0] + 2, $+[0]);
+       }
       }
     }
 
     ## If we still don't have it, check for the name among the loaded
     ## scripts.
-    if (not @off) {
+    if (! $runtime && not @off) {
       my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
       for my $script (@{$^H{charnames_scripts}}) {
-	if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
-	  @off = ($-[0], $+[0]);
-	  last;
-	}
+        if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
+          @off = ($-[0] + 2, $+[0]);
+          last;
+        }
       }
     }
 
     ## If we don't have it by now, give up.
     unless (@off) {
+      return if $runtime;
       carp "Unknown charname '$name'";
       return "\x{FFFD}";
     }
+
+    # Get the official name in case need to output a message
+    $name = substr($txt, $off[0], $off[1] - $off[0]);
 
     ##
     ## Now know where in the string the name starts.
@@ -563,22 +569,30 @@ sub charnames
 
     ## we know where it starts, so turn into number -
     ## the ordinal for the char.
-    $ord = CORE::hex substr($txt, $hexstart, $off[0] - $hexstart);
+    $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
   }
 
-  if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
-    use bytes;
-    return chr $ord if $ord <= 255;
-    my $hex = sprintf "%04x", $ord;
-    if (not defined $fname) {
-      $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
-    }
-    croak "Character 0x$hex with name '$fname' is above 0xFF";
-  }
+  return $ord if $runtime || $ord <= 255 || ! ($^H & $bytes::hint_bits);
+
+  # Here is compile time, "use bytes" is in effect, and the character
+  # won't fit in a byte
+
+  croak sprintf("Character 0x%04x with name '$name' is above 0xFF", $ord);
+} # lookup_name
+
+sub charnames {
+  my $name = shift;
+
+  # For \N{...}.  Looks up the character name and returns its ordinal if
+  # found, undef otherwise.  If not in 'use bytes', forces into utf8
+
+  my $ord = lookup_name($name, 0); # 0 means compile-time
+  return unless defined $ord;
+  return chr $ord if $^H & $bytes::hint_bits;
 
   no warnings 'utf8'; # allow even illegal characters
   return pack "U", $ord;
-} # charnames
+}
 
 sub import
 {
@@ -641,10 +655,12 @@ sub import
   }
 } # import
 
-my %viacode;
+my %viacode;    # Cache of already-found codes
 
-sub viacode
-{
+sub viacode {
+
+  # Returns the name of the code point argument
+
   if (@_ != 1) {
     carp "charnames::viacode() expects one argument";
     return;
@@ -690,7 +706,7 @@ sub viacode
   return $inverse_user_aliases{$hex};
 } # viacode
 
-my %vianame;
+my %vianame;    # Cache of already-found names
 
 sub vianame
 {
@@ -699,30 +715,24 @@ sub vianame
     return ()
   }
 
+  # Looks up the character name and returns its ordinal if
+  # found, undef otherwise.
+
   my $arg = shift;
 
-  return chr CORE::hex $1 if $arg =~ /^U\+([0-9a-fA-F]+)$/;
+  if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
 
-  return $vianame{$arg} if exists $vianame{$arg};
-
-  $txt = do "unicore/Name.pl" unless $txt;
-
-  my $pos = index $txt, "\t\t$arg\n";
-  if (0 <= $pos) {
-    my $posLF = rindex $txt, "\n", $pos;
-    (my $code = substr $txt, $posLF + 1, 6) =~ tr/\t//d;
-    return $vianame{$arg} = CORE::hex $code;
-
-    # If $pos is at the 1st line, $posLF must be -1 (not found);
-    # then $posLF + 1 equals to 0 (at the beginning of $txt).
-    # Otherwise $posLF is the position of "\n";
-    # then $posLF + 1 must be the position of the next to "\n"
-    # (the beginning of the line).
-    # substr($txt, $posLF + 1, 6) may be "0000\t\t", "00A1\t\t",
-    # "10300\t", "100000", etc. So we can get the code via removing TAB.
-  } else {
-    return;
+    # khw claims that this is bad.  The function should return either a
+    # an ord or a chr for all inputs; not be bipolar.  Also, under 'use
+    # bytes', can create a chr above 255.
+    return chr CORE::hex $1;
   }
+
+  if (! exists $vianame{$arg}) {
+    $vianame{$arg} = lookup_name($arg, 1); # 1 means run-time
+  }
+
+  return $vianame{$arg};
 } # vianame
 
 

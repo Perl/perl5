@@ -28,12 +28,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 C<\N{I<name>}> enhancements
+=head2 C<\N{I<name>}> and C<charnames> enhancements
 
-C<\N{}> now knows about the abbreviated character names listed by Unicode, such
-as NBSP, SHY, LRO, ZWJ, etc., as well as all the customary abbreviations for
-the C0 and C1 control characters (such as ACK, BEL, CAN, etc.), as well as a
-few new variants in common usage of some C1 full names.
+C<\N{}> and C<charnames::vianame> now know about the abbreviated character
+names listed by Unicode, such as NBSP, SHY, LRO, ZWJ, etc., as well as all the
+customary abbreviations for the C0 and C1 control characters (such as ACK, BEL,
+CAN, etc.), as well as a few new variants in common usage of some C1 full
+names.
 
 In the past, it was ineffective to override one of Perl's abbreviations with
 your own custom alias.  Now it works.

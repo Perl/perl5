@@ -56,6 +56,7 @@ EOE
                                          mychar2 => 983040,  # U+F0000
                                          mychar3 => "U+100000",
                                          myctrl => 0x80,
+                                         mylarge => "U+111000",
                                        };
     is ("\N{mychar1}", chr(0xE8000), "Verify that can define hex alias");
     is (charnames::viacode(0xE8000), "mychar1", "And that can get the alias back");
@@ -63,6 +64,7 @@ EOE
     is (charnames::viacode(0xF0000), "mychar2", "And that can get the alias back");
     is ("\N{mychar3}", chr(0x100000), "Verify that can define U+... alias");
     is (charnames::viacode(0x100000), "mychar3", "And that can get the alias back");
+    is ("\N{mylarge}", chr(0x111000), "Verify that can define alias beyond Unicode");
     is (charnames::viacode(0x80), "myctrl", "Verify that can name a nameless control");
 
 }
@@ -151,13 +153,19 @@ sub to_bytes {
 {
     is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE");
 
-    # Unused Hebrew.
-    ok(! defined charnames::viacode(0x0590));
+    # No name
+    ok(! defined charnames::viacode(0xFFFF));
 }
 
 {
     is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330");
+    use warnings;
+    my $warning_count = @WARN;
     ok (! defined charnames::vianame("NONE SUCH"));
+    cmp_ok($warning_count, '==', @WARN, "Verify vianame doesn't warn on unknown names");
+
+    use bytes;
+    is(charnames::vianame("GOTHIC LETTER AHSA"), 0x10330, "Verify vianame \\N{name} is unaffected by 'use bytes'");
 }
 
 {
