@@ -1,4 +1,4 @@
-# This code is used by lib/feature.t, lib/strict.t and lib/warnings.t
+# This code is used by lib/charnames.t, lib/feature.t, lib/strict.t and lib/warnings.t
 
 BEGIN {
     require './test.pl';
@@ -90,10 +90,10 @@ for (@prgs){
 	    my $filename = shift @files ;
 	    my $code = shift @files ;
     	    push @temps, $filename ;
-    	    if ($filename =~ m#(.*)/#) {
+    	    if ($filename =~ m#(.*)/# && $filename !~ m#^\.\./#) {
                 mkpath($1);
                 push(@temp_path, $1);
-    	    }
+	    }
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
 	    print F $code ;
 	    close F or die "Cannot close $filename: $!\n";

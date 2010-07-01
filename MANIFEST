@@ -4287,6 +4287,7 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
+t/lib/charnames/alias		Tests of "use charnames" with aliases.
 t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
