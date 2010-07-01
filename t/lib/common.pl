@@ -1,4 +1,4 @@
-# This code is used by lib/warnings.t and lib/feature.t
+# This code is used by lib/feature.t, lib/strict.t and lib/warnings.t
 
 BEGIN {
     require './test.pl';
@@ -50,7 +50,7 @@ foreach my $file (@w_files) {
 
 undef $/;
 
-plan tests => (scalar(@prgs)-$files);
+plan tests => (scalar(@prgs)-$files + ($::local_tests || 0));
 
 for (@prgs){
     unless (/\n/)
