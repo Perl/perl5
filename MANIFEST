@@ -4316,6 +4316,7 @@ t/lib/Sans_mypragma.pm		Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/subs/subs			Tests of "use subs"
 t/lib/test_use_14937.pm		A test pragma for t/comp/use.t
 t/lib/test_use.pm		A test pragma for t/comp/use.t
 t/lib/warnings/1global		Tests of global warnings for warnings.t

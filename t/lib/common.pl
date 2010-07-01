@@ -1,4 +1,5 @@
-# This code is used by lib/charnames.t, lib/feature.t, lib/strict.t and lib/warnings.t
+# This code is used by lib/charnames.t, lib/feature.t, lib/subs.t,
+# lib/strict.t and lib/warnings.t
 
 BEGIN {
     require './test.pl';
