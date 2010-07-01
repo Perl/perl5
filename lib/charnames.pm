@@ -683,24 +683,29 @@ sub viacode {
     return;
   }
 
-  # checking the length first is slightly faster
-  if (length($hex) > 5 && CORE::hex($hex) > 0x10FFFF) {
-    carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
-    return;
-  }
-
   return $viacode{$hex} if exists $viacode{$hex};
 
-  $txt = do "unicore/Name.pl" unless $txt;
+  # If the code point is above the max in the table, there's no point
+  # looking through it.  Checking the length first is slightly faster
+  if (length($hex) <= 5 || CORE::hex($hex) <= 0x10FFFF) {
+    $txt = do "unicore/Name.pl" unless $txt;
 
-  # Return the official name, if exists
-  if ($txt =~ m/^$hex\t\t(.+)/m) {
-    $viacode{$hex} = $1;
-    return $1;
+    # Return the official name, if exists.  It's unclear to me (khw) at
+    # this juncture if it is better to return a user-defined override, so
+    # leaving it as is for now.
+    if ($txt =~ m/^$hex\t\t(.+)/m) {
+        $viacode{$hex} = $1;
+        return $1;
+    }
   }
 
   # See if there is a user name for it, before giving up completely.
-  return if ! exists $inverse_user_aliases{$hex};
+  if (! exists $inverse_user_aliases{$hex}) {
+    if (CORE::hex($hex) > 0x10FFFF) {
+        carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
+    }
+    return;
+  }
 
   $viacode{$hex} = $inverse_user_aliases{$hex};
   return $inverse_user_aliases{$hex};

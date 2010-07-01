@@ -65,6 +65,7 @@ EOE
     is ("\N{mychar3}", chr(0x100000), "Verify that can define U+... alias");
     is (charnames::viacode(0x100000), "mychar3", "And that can get the alias back");
     is ("\N{mylarge}", chr(0x111000), "Verify that can define alias beyond Unicode");
+    is (charnames::viacode(0x111000), "mylarge", "And that can get the alias back");
     is (charnames::viacode(0x80), "myctrl", "Verify that can name a nameless control");
 
 }
