@@ -4042,6 +4042,7 @@ Porting/check-cpan-pollution	Check for commits that may wrongly touch CPAN distr
 Porting/checkpodencoding.pl	Check POD encoding
 Porting/checkURL.pl		Check whether we have working URLs
 Porting/checkVERSION.pl		Check whether we have $VERSIONs
+Porting/cherrymaint		Command line tool for updating cherrymaint
 Porting/cmpVERSION.pl		Compare whether two trees have changed modules
 Porting/config_H		Sample config.h
 Porting/config_h.pl		Reorder config_h.SH after metaconfig
@@ -4059,6 +4060,7 @@ Porting/findvars		Find occurrences of words
 Porting/fixCORE			Find and fix modules that generate warnings
 Porting/fixvars			Find undeclared variables with C compiler and fix em
 Porting/genlog			Generate formatted changelogs by querying p4d
+Porting/git-deltatool		Mark commits for perldelta in git notes
 Porting/git-find-p4-change	Find the change for a p4 change number
 Porting/git-make-p4-refs	Output git refs for each p4 change number, suitable for appending to .git/packed-refs
 Porting/GitUtils.pm		Generate the contents of a .patch file
