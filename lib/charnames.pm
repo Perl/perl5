@@ -746,7 +746,7 @@ __END__
 
 =head1 NAME
 
-charnames - define character names for C<\N{named}> string literal escapes
+charnames - access to Unicode character names and define character names for C<\N{named}> string literal escapes
 
 =head1 SYNOPSIS
 
@@ -764,7 +764,7 @@ charnames - define character names for C<\N{named}> string literal escapes
     mychar => 0xE8000,  # Private use area
   };
   print "\N{e_ACUTE} is a small letter e with an acute.\n";
-  print "\\N{mychar} allows me to name and use private use characters.\n";
+  print "\\N{mychar} allows me to name private use characters.\n";
 
   use charnames ();
   print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
@@ -773,47 +773,61 @@ charnames - define character names for C<\N{named}> string literal escapes
 
 =head1 DESCRIPTION
 
-Pragma C<use charnames> enables the use of C<\N{CHARNAME}> sequences to
-insert a Unicode character into a string based on its name.  (However,
-you don't need this pragma to use C<\N{U+...}> where the C<...> is a
-hexadecimal ordinal number.)
+Pragma C<use charnames> is used to gain access to the names of the
+Unicode characters, and to allow you to define your own character names.
 
-The pragma supports arguments C<:full>, C<:short>, script names and
-customized aliases.  If C<:full> is present, for expansion of
-C<\N{CHARNAME}>, the string C<CHARNAME> is first looked up in the list of
+All forms of the pragma enable use of the
+L</charnames::vianame(I<name>)> function for run-time lookup of a
+character name to get its ordinal (code point), and the inverse
+function, L</charnames::viacode(I<code>)>.
+
+Forms other than C<S<"use charnames ();">> enable the use of of
+C<\N{I<CHARNAME>}> sequences to compile a Unicode character into a
+string based on its name.
+
+Note that C<\N{U+I<...>}>, where the I<...> is a hexadecimal number,
+also inserts a character into a string, but doesn't require the use of
+this pragma.  The character it inserts is the one whose code point
+(ordinal value) is equal to the number.  For example, C<"\N{U+263a}"> is
+the Unicode (white background, black foreground) smiley face; it doesn't
+require this pragma, whereas the equivalent, C<"\N{WHITE SMILING FACE}">
+does.
+Also, C<\N{I<...>}> can mean a regex quantifier instead of a character
+name, when the I<...> is a number (or comma separated pair of numbers;
+see L<perlreref/QUANTIFIERS>), and is not related to this pragma.
+
+The C<charnames> pragma supports arguments C<:full>, C<:short>, script
+names and customized aliases.  If C<:full> is present, for expansion of
+C<\N{I<CHARNAME>}>, the string I<CHARNAME> is first looked up in the list of
 standard Unicode character names.  If C<:short> is present, and
-C<CHARNAME> has the form C<SCRIPT:CNAME>, then C<CNAME> is looked up
-as a letter in script C<SCRIPT>.  If pragma C<use charnames> is used
-with script name arguments, then for C<\N{CHARNAME}> the name
-C<CHARNAME> is looked up as a letter in the given scripts (in the
+I<CHARNAME> has the form C<I<SCRIPT>:I<CNAME>>, then I<CNAME> is looked up
+as a letter in script I<SCRIPT>.  If C<use charnames> is used
+with script name arguments, then for C<\N{I<CHARNAME>}> the name
+I<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order). Customized aliases can override these, and are explained in
 L</CUSTOM ALIASES>.
 
-For lookup of C<CHARNAME> inside a given script C<SCRIPTNAME>
+For lookup of I<CHARNAME> inside a given script I<SCRIPTNAME>
 this pragma looks for the names
 
   SCRIPTNAME CAPITAL LETTER CHARNAME
   SCRIPTNAME SMALL LETTER CHARNAME
   SCRIPTNAME LETTER CHARNAME
 
-in the table of standard Unicode names.  If C<CHARNAME> is lowercase,
+in the table of standard Unicode names.  If I<CHARNAME> is lowercase,
 then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant
 is ignored.
 
-Note that C<\N{...}> is compile-time, it's a special form of string
-constant used inside double-quoted strings: in other words, you cannot
+Note that C<\N{...}> is compile-time; it's a special form of string
+constant used inside double-quotish strings; this means that you cannot
 use variables inside the C<\N{...}>.  If you want similar run-time
-functionality, use charnames::vianame().
+functionality, use L<charnames::vianame()|/charnames::vianame(I<name>)>.
 
 For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
-as of Unicode 3.1, there are no official Unicode names but you can use
-instead the ISO 6429 names (LINE FEED, ESCAPE, and so forth, and their
-abbreviations, LF, ESC, ...).  In
-Unicode 3.2 (as of Perl 5.8) some naming changes take place ISO 6429
-has been updated, see L</ALIASES>.
-
-Since the Unicode standard uses "U+HHHH", so can you: "\N{U+263a}"
-is the Unicode smiley face, or "\N{WHITE SMILING FACE}".
+there are no official Unicode names but you can use instead the ISO 6429
+names (LINE FEED, ESCAPE, and so forth, and their abbreviations, LF,
+ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes take
+place ISO 6429 has been updated, see L</ALIASES>.
 
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
@@ -821,6 +835,10 @@ substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
 It is a fatal error if C<use bytes> is in effect and the input name is
 that of a character that won't fit into a byte (i.e., whose ordinal is
 above 255).
+
+Otherwise, any string that includes a C<\N{I<charname>}> or
+C<S<\N{U+I<code point>}>> will automatically have Unicode semantics (see
+L<perlunicode/Byte and Character Semantics>).
 
 =head1 ALIASES
 
@@ -923,11 +941,10 @@ controls that have no Unicode names:
 
 =head1 CUSTOM ALIASES
 
-This version of charnames supports three mechanisms of adding local
-or customized aliases to standard Unicode naming conventions (:full).
-The aliases override any standard definitions, so, if you're twisted
-enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to mean C<"B">,
-etc.
+You can add customized aliases to standard Unicode naming conventions
+(C<:full>).  The aliases override any standard definitions, so, if
+you're twisted enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to
+mean C<"B">, etc.
 
 Note that an alias should not be something that is a legal curly
 brace-enclosed quantifier (see L<perlreref/QUANTIFIERS>).  For example
@@ -943,20 +960,20 @@ to code points in Unicode private use areas such as U+E800 through
 U+F8FF.  The number must look like an unsigned decimal integer, or a
 hexadecimal constant beginning with C<0x>, or C<U+>.
 
-=head2 Anonymous hashes
+Aliases are added either by the use of anonymous hashes:
 
-    use charnames ":full", ":alias" => {
+    use charnames ":alias" => {
         e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
         mychar1 => 0xE8000,
         };
     my $str = "\N{e_ACUTE}";
 
-=head2 Alias file
+or by using a file containing aliases:
 
-    use charnames ":full", ":alias" => "pro";
+    use charnames ":alias" => "pro";
 
-    will try to read "unicore/pro_alias.pl" from the @INC path. This
-    file should return a list in plain perl:
+will try to read C<"unicore/pro_alias.pl"> from the C<@INC> path. This
+file should return a list in plain perl:
 
     (
     A_GRAVE         => "LATIN CAPITAL LETTER A WITH GRAVE",
@@ -969,35 +986,39 @@ hexadecimal constant beginning with C<0x>, or C<U+>.
     mychar2         => U+E8001,
     );
 
-=head2 Alias shortcut
+Both these methods insert C<":full"> automatically as the first argument (if no
+other argument is given), and you can give the C<":full"> explicitly as
+well, like
 
-    use charnames ":alias" => ":pro";
+    use charnames ":full", ":alias" => "pro";
 
-works exactly the same as the alias pairs, only this time,
-":full" is inserted automatically as the first argument (if no
-other argument is given).
-
-=head1 charnames::viacode(code)
+=head1 charnames::viacode(I<code>)
 
 Returns the full name of the character indicated by the numeric code.
-The example
+For example,
 
     print charnames::viacode(0x2722);
 
 prints "FOUR TEARDROP-SPOKED ASTERISK".
-
-Returns undef if no name is known for the code.
 
 The name returned is the official name for the code point, if
 available, otherwise your custom alias for it.  This means that your
 alias will only be returned for code points that don't have an official
 Unicode name (nor Unicode version 1 name), such as private use code
 points, and the 4 control characters U+0080, U+0081, U+0084, and U+0099.
+If you define more than one name for the code point, it is indeterminate
+which one will be returned.
+
+The function returns C<undef> if no name is known for the code point.
+In Unicode the proper name of these is the empty string, which
+C<undef> stringifies to.  (If you ask for a code point past the legal
+Unicode maximum of U+10FFFF that you haven't assigned an alias to, you
+get C<undef> and a warning.)
 
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
 
-=head1 charnames::vianame(name)
+=head1 charnames::vianame(I<name>)
 
 Returns the code point indicated by the name.
 The example
@@ -1006,10 +1027,15 @@ The example
 
 prints "2722".
 
-Returns undef if the name is unknown.
+C<vianame> takes the identical inputs that C<\N{...}> does under the
+L<C<:full> and C<:short>|/DESCRIPTION> options to the C<charnames>
+pragma, including any L<custom aliases|/CUSTOM ALIASES> you may have
+defined.
 
-This works only for the standard names, and does not yet apply
-to custom translators.
+There are just two differences.  The first is that if the input name is
+unknown it returns C<undef> instead of the REPLACEMENT CHARACTER, and
+does not raise a warning message.
+The second is the C<S<use bytes>> pragma has no effect on this function.
 
 =head1 CUSTOM TRANSLATORS
 
@@ -1023,9 +1049,9 @@ following magic incantation:
 	$^H{charnames} = \&translator;
     }
 
-Here translator() is a subroutine which takes C<CHARNAME> as an
+Here translator() is a subroutine which takes I<CHARNAME> as an
 argument, and returns text to insert into the string instead of the
-C<\N{CHARNAME}> escape.  Since the text to insert should be different
+C<\N{I<CHARNAME>}> escape.  Since the text to insert should be different
 in C<bytes> mode and out of it, the function should check the current
 state of C<bytes>-flag as in:
 
@@ -1039,18 +1065,7 @@ state of C<bytes>-flag as in:
 	}
     }
 
-See L</CUSTOM ALIASES> above for restrictions on C<CHARNAME>.
-
-=head1 ILLEGAL CHARACTERS
-
-If you ask by name for a character that does not exist, a warning is given and
-the Unicode I<replacement character> "\x{FFFD}" is returned.
-
-If you ask by code (C<charnames::viacode()>) for a character that is
-unassigned, no warning is given and C<undef> is returned.  In Unicode
-the proper name of these is the empty string, which C<undef> stringifies
-to.  (If you ask for a code point past the legal Unicode maximum of
-U+10FFFF you do get C<undef> and a warning.)
+See L</CUSTOM ALIASES> above for restrictions on I<CHARNAME>.
 
 =head1 BUGS
 
@@ -1058,8 +1073,9 @@ vianame returns a chr if the input name is of the form C<U+...>, and an ord
 otherwise.  It is proposed to change this to always return an ord.  Send email
 to C<perl5-porters@perl.org> to comment on this proposal.
 
-None of the functions work on almost all the Hangul syllable and CJK Unicode
-characters that have their code points as part of their names.
+All the Hangul syllable characters are treated as having no names, as
+are almost all the CJK Unicode characters that have their code points as
+part of their names.
 
 Names must be ASCII characters only, which means that you are out of luck if
 you want to create aliases in a language where some or all the characters of
@@ -1072,7 +1088,7 @@ C<COMBINING GRAVE ACCENT>).
 
 Since evaluation of the translation function happens in the middle of
 compilation (of a string literal), the translation function should not
-do any C<eval>s or C<require>s.  This restriction should be lifted in
-a future version of Perl.
+do any C<eval>s or C<require>s.  This restriction should be lifted (but
+is low priority) in a future version of Perl.
 
 =cut
