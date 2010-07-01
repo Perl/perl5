@@ -11,7 +11,9 @@ use File::Spec::Functions;
 
 use strict;
 use warnings;
-our $pragma_name;
+my (undef, $file) = caller;
+my ($pragma_name) = $file =~ /([A-Za-z_0-9]+)\.t$/
+    or die "Can't identify pragama to test from file name '$file'";
 
 $| = 1;
 

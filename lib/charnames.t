@@ -11,7 +11,6 @@ BEGIN {
     $SIG{__WARN__} = sub { push @WARN, @_ };
 }
 
-our $pragma_name = "charnames";
 our $local_tests = 58;
 
 # ---- For the alias extensions

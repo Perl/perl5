@@ -1,12 +1,8 @@
 #!./perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    $ENV{PERL5LIB} = '../lib';
-}
+chdir 't' if -d 't';
+@INC = '../lib';
 
-our $pragma_name = "strict";
 our $local_tests = 4;
 require "../t/lib/common.pl";
 
