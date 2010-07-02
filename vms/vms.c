@@ -12997,6 +12997,8 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     }
     /* If we were successful, leave errno where we found it */
     if (retval == 0) RESTORE_ERRNO;
+    PerlMem_free(temp_fspec);
+    PerlMem_free(fileified);
     return retval;
 
 }  /* end of flex_stat_int() */
