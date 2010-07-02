@@ -91,7 +91,7 @@ if ($::do_nothing) {
 }
 
 # Location to put the Valgrind log.
-my $Valgrind_Log = 'current.valgrind';
+our $Valgrind_Log;
 
 $| = 1;
 
@@ -296,13 +296,17 @@ sub _cmd {
         my $redir = $^O eq 'VMS' ? '2>&1' : '';
 
         if ($ENV{PERL_VALGRIND}) {
+            my $perl_supp = $options->{return_dir} ? "$options->{return_dir}/perl.supp" : "perl.supp";
             my $valgrind = $ENV{VALGRIND} // 'valgrind';
             my $vg_opts = $ENV{VG_OPTS}
-              //  "--suppressions=perl.supp --leak-check=yes "
+              //  "--suppressions=$perl_supp --leak-check=yes "
                 . "--leak-resolution=high --show-reachable=yes "
-                  . "--num-callers=50";
+                  . "--num-callers=50 --track-origins=yes";
             $perl = "$valgrind --log-fd=3 $vg_opts $perl";
             $redir = "3>$Valgrind_Log";
+            if ($options->{run_dir}) {
+                $Valgrind_Log = "$options->{run_dir}/$Valgrind_Log";
+            }
         }
 
         my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
@@ -549,6 +553,7 @@ EOT
 	    $te = '';
 	}
 
+        (local $Valgrind_Log = "$test.valgrind-current") =~ s/^.*\///;
 	my $results = _run_test($test, $type);
 
 	my $failure;

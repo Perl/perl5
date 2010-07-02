@@ -814,6 +814,9 @@ sub watchdog ($)
     my $timeout = shift;
     my $timeout_msg = 'Test process timed out - terminating';
 
+    # Valgrind slows perl way down so give it more time before dying.
+    $timeout *= 10 if $ENV{PERL_VALGRIND};
+
     my $pid_to_kill = $$;   # PID for this process
 
     # Don't use a watchdog process if 'threads' is loaded -
