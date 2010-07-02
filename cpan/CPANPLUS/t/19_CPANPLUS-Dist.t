@@ -199,13 +199,6 @@ ok( $Mod,                       "Got module object" );
                             "   Dist installation failed recorded ok" ) },
             ],
 
-            "Set dependency to be perl-core" => [
-                sub { $cb->module_tree( $ModPrereq )->package(
-                                        'perl-5.8.1.tar.gz' );  'install' },
-                sub { like( CPANPLUS::Error->stack_as_string,
-                      qr/Prerequisite '$ModPrereq' is perl-core/s,
-                            "   Dist installation failed recorded ok" ) },
-            ],
             'Simple ignore'     => [
                 sub { 'ignore' },
                 sub { ok( !$_[0]->status->prepared,
@@ -252,6 +245,14 @@ ok( $Mod,                       "Got module object" );
                             "   Module status says created" ) },
                 sub { ok( $_[0]->status->installed,
                             "   Module status says installed" ) },
+            ],
+
+            "Set dependency to be perl-core" => [
+                sub { $cb->module_tree( $ModPrereq )->package(
+                                        'perl-5.8.1.tar.gz' );  'install' },
+                sub { like( CPANPLUS::Error->stack_as_string,
+                      qr/Prerequisite '$ModPrereq' is perl-core/s,
+                            "   Dist installation failed recorded ok" ) },
             ],
 
             'Install from conf' => [

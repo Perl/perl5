@@ -1001,6 +1001,7 @@ sub install {
         $self->extract( %$params ) or return;
     }
 
+    $args->{'prereq_format'} = $format if $format;
     $format ||= $self->status->installer_type;
 
     unless( $format ) {

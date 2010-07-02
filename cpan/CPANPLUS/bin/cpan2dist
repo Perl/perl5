@@ -624,7 +624,7 @@ sub _default_ban_list {
 
     ^GD$                # Needs c libaries
     ^Berk.*DB           # DB packages require specific options & linking
-    ^DBD::              # DBD drives require database files/headers
+    ^DBD::              # DBD drivers require database files/headers
     ^XML::              # XML modules usually require expat libraries
     Apache              # These usually require apache libraries
     SSL                 # These usually require SSL certificates & libs

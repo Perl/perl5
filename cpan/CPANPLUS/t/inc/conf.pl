@@ -31,11 +31,11 @@ BEGIN {
     ### and friends get picked up
     $old_env_path = $ENV{PATH};
     if ( $ENV{PERL_CORE} ) {
-      $ENV{'PATH'}  = join $Config{'path_sep'},
+      $ENV{'PATH'}  = join $Config{'path_sep'}, 
                     grep { defined } "$FindBin::Bin/../../../utils", $ENV{'PATH'};
     }
     else {
-      $ENV{'PATH'}  = join $Config{'path_sep'},
+      $ENV{'PATH'}  = join $Config{'path_sep'}, 
                     grep { defined } "$FindBin::Bin/../bin", $ENV{'PATH'};
     }
 

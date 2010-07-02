@@ -125,13 +125,13 @@ An example entry would like this:
             },
             {
                 'scheme' => 'ftp',
-                'path' => '/pub/CPAN/',
-                'host' => 'ftp.nl.uu.net'
+                'path' => '/',
+                'host' => 'cpan.hexten.net'
             },
             {
                 'scheme' => 'ftp',
-                'path' => '/pub/CPAN/',
-                'host' => 'cpan.valueclick.com'
+                'path' => '/CPAN/',
+                'host' => 'cpan.cpantesters.org'
             },
             {
                 'scheme' => 'ftp',

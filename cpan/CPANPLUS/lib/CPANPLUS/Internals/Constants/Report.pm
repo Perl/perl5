@@ -80,10 +80,10 @@ use constant RELEVANT_TEST_RESULT
                                 my $name = $mod->module;
                                 my $specific;
                                 for my $platform (keys %OS) {
-                                    if( $name =~ /\b$platform\b/i ) {
+                                    if( $name =~ /^$platform\b/i ) {
                                         # beware the Mac != MAC
                                         next if($platform eq 'Mac' &&
-                                                $name !~ /\b$platform\b/);
+                                                $name !~ /^$platform\b/);
                                         $specific++;
                                         return 1 if
                                             $^O =~ /^(?:$OS{$platform})$/

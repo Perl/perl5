@@ -5,7 +5,7 @@ use strict;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
 
-use Cwd qw[chdir];
+use Cwd                         qw[chdir cwd];
 use File::Copy;
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];

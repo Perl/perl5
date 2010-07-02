@@ -180,7 +180,7 @@ my $map = {
 
         ### test non-relevant tests ###
         my $cp = $Mod->clone;
-        $cp->module( $Mod->module . '::' . ($^O eq 'beos' ? 'MSDOS' : 'Be') );
+        $cp->module( ($^O eq 'beos' ? 'MSDOS' : 'Be') . '::' . $cp->module );
         ok(!RELEVANT_TEST_RESULT->($cp),"Test is irrelevant");
     }
 

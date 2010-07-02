@@ -100,7 +100,9 @@ BEGIN {
     }
 
     sub flush {
-        return reverse $log->flush;
+        my @foo = $log->flush;
+        return unless @foo;
+        return reverse @foo;
     }
 
     sub stack {

@@ -63,7 +63,7 @@ otherwise.
 
     my $send_list = {
         %$query_list,
-        'Test::Reporter' => '1.34',
+        'Test::Reporter' => '1.54',
     };
 
     sub _have_query_report_modules {
@@ -317,6 +317,7 @@ sub _send_report {
     my $name    = $mod->module;
     my $dist    = $mod->package_name . '-' . $mod->package_version;
     my $author  = $mod->author->author;
+    my $distfile= $mod->author->cpanid . "/" . $mod->package;
     my $email   = $mod->author->email || CPAN_MAIL_ACCOUNT->( $author );
     my $cp_conf = $conf->get_conf('cpantest') || '';
     my $int_ver = $CPANPLUS::Internals::VERSION;
@@ -512,6 +513,7 @@ sub _send_report {
         Test::Reporter->new(
             grade           => $grade,
             distribution    => $dist,
+            distfile        => $distfile,
             via             => "CPANPLUS $int_ver",
             timeout         => $conf->get_conf('timeout') || 60,
             debug           => $conf->get_conf('debug'),
