@@ -479,7 +479,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'MSHELOR/Digest-SHA-5.48.tar.gz',
 	'FILES' 	=> q[cpan/Digest-SHA],
 	'EXCLUDED'	=> [ qw{t/pod.t t/podcover.t examples/dups} ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Encode' =>
