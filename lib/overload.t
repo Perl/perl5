@@ -1730,22 +1730,16 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		"do { my \$arg = %s; \$_[2] ? (3 $op \$arg) : (\$arg $op 3) }";
 	    # ARRAY  FETCH: initial
 	    # SCALAR FETCH: initial eval-return,
-	    # with fallback, we just stringify, so eval-return skipped
+	    # with fallback, we just stringify, so eval-return skipped,
+	    #    but an extra FETCH happens in sub"", except for 'x',
+	    #    which passes a copy of the RV to sub"", avoiding the
+	    #    second FETCH
 
-	    # XXX TODO concat overload with fallback calls FETCH too often
-	    if ($_ eq '.') {
-		push @tests, [ 18, "%s $op 3", "($_)", '("")',
-				[ 1, 2, 0,     1, 2, 0 ], 1 ];
-		push @tests, [ 18, "3 $op %s", "($_)", '("")',
-				[ 1, 2, 0,     1, 2, 0 ], 1 ];
-	    }
-	    else {
-		push @tests, [ 18, "%s $op 3", "($_)", '("")',
-				[ 1, 2, 0,     1, 1, 0 ], 1 ];
-		next if $_ eq 'x'; # repeat only overloads on LHS
-		push @tests, [ 18, "3 $op %s", "($_)", '("")',
-				[ 1, 2, 0,     1, 1, 0 ], 1 ];
-	    }
+	    push @tests, [ 18, "%s $op 3", "($_)", '("")',
+			    [ 1, 2, 0,     1, ($_ eq '.' ? 2 : 1), 0 ], 1 ];
+	    next if $_ eq 'x'; # repeat only overloads on LHS
+	    push @tests, [ 18, "3 $op %s", "($_)", '("")',
+			    [ 1, 2, 0,     1, 2, 0 ], 1 ];
 	}
 
 	for (qw(++ --)) {
