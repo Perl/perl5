@@ -255,14 +255,13 @@ PP(pp_concat)
 	    SvUTF8_off(TARG);
     }
     else { /* TARG == left */
-        STRLEN llen;
 	if (!SvOK(TARG)) {
 	    if (left == right && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(right);
 	    sv_setpvs(left, "");
 	}
-	(void)SvPV_nomg_const(left, llen);    /* Needed to set UTF8 flag */
-	lbyte = !DO_UTF8(left);
+	lbyte = (SvROK(left) && SvTYPE(SvRV(left)) == SVt_REGEXP)
+		    ?  !DO_UTF8(SvRV(left)) : !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(TARG);
     }

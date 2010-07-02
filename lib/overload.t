@@ -1722,17 +1722,9 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	    #   SCALAR FETCH: initial, sub=,  sub+=, eval-return,
 	    #          STORE: copy, mutator
 	    # for fallback, we just stringify, so eval-return and copy skipped
-	    #
-	    # XXX TODO concat LH overload with fallback calls "" and FETCH
-	    # too often
-	    if ($_ eq '.') {
-		push @tests, [ 18, $e, "(=)($_=)", '("")("")',
-			[ 3, 4, 2,     2, 4, 1 ], 1 ];
-	    }
-	    else {
-		push @tests, [ 18, $e, "(=)($_=)", '("")',
-			[ 3, 4, 2,     2, 3, 1 ], 1 ];
-	    }
+
+	    push @tests, [ 18, $e, "(=)($_=)", '("")',
+			    [ 3, 4, 2,     2, 3, 1 ], 1 ];
 
 	    $subs{$_} =
 		"do { my \$arg = %s; \$_[2] ? (3 $op \$arg) : (\$arg $op 3) }";
