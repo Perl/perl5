@@ -244,7 +244,7 @@ PP(pp_concat)
 	rcopied = TRUE;
     }
 
-    if (TARG != left) {
+    if (TARG != left) { /* not $l .= $r */
         STRLEN llen;
         const char* const lpv = SvPV_nomg_const(left, llen);
 	lbyte = !DO_UTF8(left);
@@ -254,9 +254,9 @@ PP(pp_concat)
 	else
 	    SvUTF8_off(TARG);
     }
-    else { /* TARG == left */
+    else { /* $l .= $r */
 	if (!SvOK(TARG)) {
-	    if (left == right && ckWARN(WARN_UNINITIALIZED))
+	    if (left == right && ckWARN(WARN_UNINITIALIZED)) /* $l .= $l */
 		report_uninit(right);
 	    sv_setpvs(left, "");
 	}
@@ -268,7 +268,7 @@ PP(pp_concat)
 
     if (!rcopied) {
 	if (left == right)
-	    /* $a.$a: do magic twice: tied might return different 2nd time */
+	    /* $r.$r: do magic twice: tied might return different 2nd time */
 	    SvGETMAGIC(right);
 	rpv = SvPV_nomg_const(right, rlen);
 	rbyte = !DO_UTF8(right);
