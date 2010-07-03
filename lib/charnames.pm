@@ -699,9 +699,13 @@ sub viacode {
     # Return the official name, if exists.  It's unclear to me (khw) at
     # this juncture if it is better to return a user-defined override, so
     # leaving it as is for now.
-    if ($txt =~ m/^$hex\t\t(.+)/m) {
-        $viacode{$hex} = $1;
-        return $1;
+    if ($txt =~ m/^$hex\t\t/m) {
+
+	# The name starts with the next character and goes up to the
+	# next new-line.  Using capturing parentheses above instead of
+	# @$+ more than doubles the execution time in Perl 5.13
+        $viacode{$hex} = substr($txt, $+[0], index($txt, "\n", $+[0]) - $+[0]);
+        return $viacode{$hex};
     }
   }
 
