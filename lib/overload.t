@@ -1798,10 +1798,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	# note: this is testing unary qr, not binary =~
 	$subs{qr} = '(qr/%s/)';
-	# XXX TODO qr overload with fallback calls "" and FETCH too often
-	#push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")', [ 1, 2, 0 ], 0 ];
-	push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")("")',
-			    [ 1, 2, 0,  1, 5, 0 ], 0 ];
+	push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")', [ 1, 2, 0 ], 0 ];
 
 	$e = '"abc" ~~ (%s)';
 	$subs{'~~'} = $e;

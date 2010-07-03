@@ -176,8 +176,9 @@ PP(pp_regcomp)
 	PM_SETRE(pm, re);
     }
     else {
-	STRLEN len;
-	const char *t = SvOK(tmpstr) ? SvPV_const(tmpstr, len) : "";
+	STRLEN len = 0;
+	const char *t = SvOK(tmpstr) ? SvPV_nomg_const(tmpstr, len) : "";
+
 	re = PM_GETRE(pm);
 	assert (re != (REGEXP*) &PL_sv_undef);
 
@@ -214,6 +215,17 @@ PP(pp_regcomp)
 		STRLEN len;
 		const char *const p = SvPV(tmpstr, len);
 		tmpstr = newSVpvn_flags(p, len, SVs_TEMP);
+	    }
+	    else if (SvAMAGIC(tmpstr)) {
+		/* make a copy to avoid extra stringifies */
+		SV* copy = newSV_type(SVt_PV);
+		sv_setpvn(copy, t, len);
+		if (SvUTF8(tmpstr))
+		    SvUTF8_on(copy);
+		else
+		    SvUTF8_off(copy);
+		sv_2mortal(copy);
+		tmpstr = copy;
 	    }
 
  		if (eng) 
