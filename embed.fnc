@@ -738,7 +738,8 @@ Ap	|I32	|my_fflush_all
 Anp	|Pid_t	|my_fork
 Anp	|void	|atfork_lock
 Anp	|void	|atfork_unlock
-Ap	|I32	|my_lstat
+Apmb	|I32	|my_lstat
+pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 AnpP	|I32	|my_memcmp	|NN const char* s1|NN const char* s2|I32 len
 #endif
@@ -749,7 +750,8 @@ Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
 Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
-Ap	|I32	|my_stat
+Apmb	|I32	|my_stat
+pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 #if defined(MYSWAP)
 ApPa	|short	|my_swap	|short s

@@ -3133,7 +3133,7 @@ PP(pp_ftrread)
 #endif
     }
 
-    result = my_stat();
+    result = my_stat_flags(SV_GMAGIC);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3161,7 +3161,7 @@ PP(pp_ftis)
 
     STACKED_FTEST_CHECK;
 
-    result = my_stat();
+    result = my_stat_flags(SV_GMAGIC);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3233,7 +3233,7 @@ PP(pp_ftrowned)
 
     STACKED_FTEST_CHECK;
 
-    result = my_stat();
+    result = my_stat_flags(SV_GMAGIC);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3303,7 +3303,7 @@ PP(pp_ftlink)
     I32 result;
 
     tryAMAGICftest_MG('l');
-    result = my_lstat();
+    result = my_lstat_flags(SV_GMAGIC);
     SPAGAIN;
 
     if (result < 0)

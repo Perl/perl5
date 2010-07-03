@@ -561,7 +561,9 @@
 #define my_fork			Perl_my_fork
 #define atfork_lock		Perl_atfork_lock
 #define atfork_unlock		Perl_atfork_unlock
-#define my_lstat		Perl_my_lstat
+#ifdef PERL_CORE
+#define my_lstat_flags		Perl_my_lstat_flags
+#endif
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 #define my_memcmp		Perl_my_memcmp
 #endif
@@ -572,7 +574,9 @@
 #define my_popen		Perl_my_popen
 #define my_popen_list		Perl_my_popen_list
 #define my_setenv		Perl_my_setenv
-#define my_stat			Perl_my_stat
+#ifdef PERL_CORE
+#define my_stat_flags		Perl_my_stat_flags
+#endif
 #define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #define my_swap			Perl_my_swap
@@ -2997,7 +3001,9 @@
 #define my_fork			Perl_my_fork
 #define atfork_lock		Perl_atfork_lock
 #define atfork_unlock		Perl_atfork_unlock
-#define my_lstat()		Perl_my_lstat(aTHX)
+#ifdef PERL_CORE
+#define my_lstat_flags(a)	Perl_my_lstat_flags(aTHX_ a)
+#endif
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 #define my_memcmp		Perl_my_memcmp
 #endif
@@ -3008,7 +3014,9 @@
 #define my_popen(a,b)		Perl_my_popen(aTHX_ a,b)
 #define my_popen_list(a,b,c)	Perl_my_popen_list(aTHX_ a,b,c)
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
-#define my_stat()		Perl_my_stat(aTHX)
+#ifdef PERL_CORE
+#define my_stat_flags(a)	Perl_my_stat_flags(aTHX_ a)
+#endif
 #define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #if defined(MYSWAP)
 #define my_swap(a)		Perl_my_swap(aTHX_ a)

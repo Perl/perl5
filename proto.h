@@ -2082,7 +2082,8 @@ PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 PERL_CALLCONV Pid_t	Perl_my_fork(void);
 PERL_CALLCONV void	Perl_atfork_lock(void);
 PERL_CALLCONV void	Perl_atfork_unlock(void);
-PERL_CALLCONV I32	Perl_my_lstat(pTHX);
+/* PERL_CALLCONV I32	Perl_my_lstat(pTHX); */
+PERL_CALLCONV I32	Perl_my_lstat_flags(pTHX_ const U32 flags);
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 PERL_CALLCONV I32	Perl_my_memcmp(const char* s1, const char* s2, I32 len)
 			__attribute__pure__
@@ -2113,7 +2114,8 @@ PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ const char* mode, int n, SV ** ar
 	assert(mode); assert(args)
 
 PERL_CALLCONV void	Perl_my_setenv(pTHX_ const char* nam, const char* val);
-PERL_CALLCONV I32	Perl_my_stat(pTHX);
+/* PERL_CALLCONV I32	Perl_my_stat(pTHX); */
+PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
