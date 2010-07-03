@@ -5427,10 +5427,6 @@ Stat_t dst_st;
 	   }
 
 	    /* The source must be a file specification */
-	    vms_dir_file = PerlMem_malloc(VMS_MAXRSS);
-	    if (vms_dir_file == NULL)
-		_ckvmssts_noperl(SS$_INSFMEM);
-
 	    ret_str = do_fileify_dirspec(vms_dst, vms_dir_file, 0, NULL);
 	    if (ret_str == NULL) {
 		PerlMem_free(vms_dst);
@@ -14318,9 +14314,10 @@ struct statbuf_t {
             if (mode) {
                 *mode = statbuf.old_st_mode;
             }
-	    return 0;
 	}
     }
+    PerlMem_free(temp_fspec);
+    PerlMem_free(fileified);
     return sts;
 }
 
