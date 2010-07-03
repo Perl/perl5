@@ -1815,17 +1815,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# long as the tied and untied versions return the same value.
 	# The flags below are chosen to test all uses of tryAMAGICftest_MG
 	for (qw(r e f l t T)) {
-	    # XXX TODO -X overload with fallback calls FETCH too often
-	    # XXX and -t calls "" too often too
-	    #push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")', [ 1, 2, 0 ], 0 ];
-	    if ($_ eq 't') {
-		push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")("")',
-				    [ 1, 2, 0,    1, 5, 0 ], 0 ];
-	    }
-	    else {
-		push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")',
-				    [ 1, 2, 0,    1, 3, 0 ], 0 ];
-	    }
+	    push @tests, [ 'TEST', "-$_ (%s)", '(-X)', '("")', [ 1, 2, 0 ], 0 ];
 	}
 
 	$subs{'${}'} = '%s';

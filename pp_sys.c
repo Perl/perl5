@@ -3133,7 +3133,7 @@ PP(pp_ftrread)
 #endif
     }
 
-    result = my_stat_flags(SV_GMAGIC);
+    result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3161,7 +3161,7 @@ PP(pp_ftis)
 
     STACKED_FTEST_CHECK;
 
-    result = my_stat_flags(SV_GMAGIC);
+    result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3233,7 +3233,7 @@ PP(pp_ftrowned)
 
     STACKED_FTEST_CHECK;
 
-    result = my_stat_flags(SV_GMAGIC);
+    result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3303,7 +3303,7 @@ PP(pp_ftlink)
     I32 result;
 
     tryAMAGICftest_MG('l');
-    result = my_lstat_flags(SV_GMAGIC);
+    result = my_lstat_flags(0);
     SPAGAIN;
 
     if (result < 0)
@@ -3320,6 +3320,8 @@ PP(pp_fttty)
     int fd;
     GV *gv;
     SV *tmpsv = NULL;
+    char *name;
+    STRLEN namelen;
 
     tryAMAGICftest_MG('t');
 
@@ -3331,15 +3333,17 @@ PP(pp_fttty)
 	gv = MUTABLE_GV(POPs);
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
 	gv = MUTABLE_GV(SvRV(POPs));
-    else
-	gv = gv_fetchsv(tmpsv = POPs, 0, SVt_PVIO);
+    else {
+	tmpsv = POPs;
+	name = SvPV_nomg(tmpsv, namelen);
+	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
+    }
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
     else if (tmpsv && SvOK(tmpsv)) {
-	const char *tmps = SvPV_nolen_const(tmpsv);
-	if (isDIGIT(*tmps))
-	    fd = atoi(tmps);
+	if (isDIGIT(*name))
+	    fd = atoi(name);
 	else 
 	    RETPUSHUNDEF;
     }
@@ -3440,7 +3444,7 @@ PP(pp_fttext)
       really_filename:
 	PL_statgv = NULL;
 	PL_laststype = OP_STAT;
-	sv_setpv(PL_statname, SvPV_nolen_const(sv));
+	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
 					       '\n'))
