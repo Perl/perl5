@@ -835,8 +835,8 @@ functionality, use L<charnames::vianame()|/charnames::vianame(I<name>)>.
 For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
 there are no official Unicode names but you can use instead the ISO 6429
 names (LINE FEED, ESCAPE, and so forth, and their abbreviations, LF,
-ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes take
-place ISO 6429 has been updated, see L</ALIASES>.
+ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes took
+place, and ISO 6429 was updated, see L</ALIASES>.
 
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
@@ -933,25 +933,27 @@ will also give a warning about being deprecated.
 And finally, certain published variants are usable, including some for
 controls that have no Unicode names:
 
-    END OF PROTECTED AREA
-    HIGH OCTET PRESET
-    HOP
-    IND
-    INDEX
-    PAD
-    PADDING CHARACTER
-    PRIVATE USE 1
-    PRIVATE USE 2
-    SGC
-    SINGLE GRAPHIC CHARACTER INTRODUCER
-    SINGLE-SHIFT 2
-    SINGLE-SHIFT 3
-    START OF PROTECTED AREA
+    name                                   character
+
+    END OF PROTECTED AREA		   END OF GUARDED AREA, U+0097
+    HIGH OCTET PRESET                      U+0081
+    HOP                                    U+0081
+    IND                                    U+0084
+    INDEX                                  U+0084
+    PAD                                    U+0080
+    PADDING CHARACTER                      U+0080
+    PRIVATE USE 1                          PRIVATE USE ONE, U+0091
+    PRIVATE USE 2                          PRIVATE USE TWO, U+0092
+    SGC                                    U+0099
+    SINGLE GRAPHIC CHARACTER INTRODUCER    U+0099
+    SINGLE-SHIFT 2                         SINGLE SHIFT TWO, U+008E
+    SINGLE-SHIFT 3                         SINGLE SHIFT THREE, U+008F
+    START OF PROTECTED AREA                START OF GUARDED AREA, U+0096
 
 =head1 CUSTOM ALIASES
 
-You can add customized aliases to standard Unicode naming conventions
-(C<:full>).  The aliases override any standard definitions, so, if
+You can add customized aliases to standard (C<:full>) Unicode naming
+conventions.  The aliases override any standard definitions, so, if
 you're twisted enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to
 mean C<"B">, etc.
 
@@ -1030,7 +1032,7 @@ SPACE", not "BYTE ORDER MARK".
 =head1 charnames::vianame(I<name>)
 
 Returns the code point indicated by the name.
-The example
+For example,
 
     printf "%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
 
@@ -1041,10 +1043,18 @@ L<C<:full> and C<:short>|/DESCRIPTION> options to the C<charnames>
 pragma, including any L<custom aliases|/CUSTOM ALIASES> you may have
 defined.
 
-There are just two differences.  The first is that if the input name is
-unknown it returns C<undef> instead of the REPLACEMENT CHARACTER, and
-does not raise a warning message.
-The second is the C<S<use bytes>> pragma has no effect on this function.
+There are just a few differences.  The main one is that under
+most circumstances, (see L</BUGS> for the other ones), vianame returns
+an ord, whereas C<\\N{...}> is seamlessly placed as a chr into the
+string in which it appears.  This leads to a second difference.
+Since an ord is returned, it can be that of any character, even one
+that isn't legal under the C<S<use bytes>> pragma.  It is up to the
+caller to validate the return under C<S<use bytes>> before converting it
+to chr.
+
+The final difference is that if the input name is unknown C<vianame>
+returns C<undef> instead of the REPLACEMENT CHARACTER, and it does not
+raise a warning message.
 
 =head1 CUSTOM TRANSLATORS
 
@@ -1076,11 +1086,16 @@ state of C<bytes>-flag as in:
 
 See L</CUSTOM ALIASES> above for restrictions on I<CHARNAME>.
 
+Of course, C<vianame> and C<viacode> would need to be overridden as
+well.
+
 =head1 BUGS
 
 vianame returns a chr if the input name is of the form C<U+...>, and an ord
 otherwise.  It is proposed to change this to always return an ord.  Send email
-to C<perl5-porters@perl.org> to comment on this proposal.
+to C<perl5-porters@perl.org> to comment on this proposal.  If S<C<use
+bytes>> is in effect when a chr is returned, and if that chr won't fit
+into a byte, C<undef> is returned instead.
 
 All the Hangul syllable characters are treated as having no names, as
 are almost all the CJK Unicode characters that have their code points as
