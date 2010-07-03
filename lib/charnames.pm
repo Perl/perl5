@@ -1116,3 +1116,5 @@ do any C<eval>s or C<require>s.  This restriction should be lifted (but
 is low priority) in a future version of Perl.
 
 =cut
+
+# ex: set ts=8 sts=2 sw=2 noet:
