@@ -450,6 +450,11 @@ sub alias (@)
   }
 } # alias
 
+sub not_legal_use_bytes_msg {
+  my ($name, $ord) = @_;
+  return sprintf("Character 0x%04x with name '$name' is above 0xFF with 'use bytes' in effect", $ord);
+}
+
 sub alias_file ($)
 {
   my ($arg, $file) = @_;
@@ -549,9 +554,6 @@ sub lookup_name {
       return "\x{FFFD}";
     }
 
-    # Get the official name in case need to output a message
-    $name = substr($txt, $off[0], $off[1] - $off[0]);
-
     ##
     ## Now know where in the string the name starts.
     ## The code, in hex, is before that.
@@ -577,7 +579,11 @@ sub lookup_name {
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
 
-  croak sprintf("Character 0x%04x with name '$name' is above 0xFF", $ord);
+
+  # Get the official name if have one for the message
+  $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
+
+  croak not_legal_use_bytes_msg($name, $ord);
 } # lookup_name
 
 sub charnames {
@@ -730,7 +736,10 @@ sub vianame
     # khw claims that this is bad.  The function should return either a
     # an ord or a chr for all inputs; not be bipolar.  Also, under 'use
     # bytes', can create a chr above 255.
-    return chr CORE::hex $1;
+    my $ord = CORE::hex $1;
+    return chr $ord if $ord <= 255 || ! ((caller 0)[8] & $bytes::hint_bits);
+    carp not_legal_use_bytes_msg($arg, $ord);
+    return;
   }
 
   if (! exists $vianame{$arg}) {

@@ -159,7 +159,8 @@ sub to_bytes {
 }
 
 {
-    is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330");
+    cmp_ok(charnames::vianame("GOTHIC LETTER AHSA"), "==", 0x10330, "Verify vianame \\N{name} returns an ord");
+    is(charnames::vianame("U+10330"), "\x{10330}", "Verify vianame \\N{U+hex} returns a chr");
     use warnings;
     my $warning_count = @WARN;
     ok (! defined charnames::vianame("NONE SUCH"));
@@ -167,6 +168,10 @@ sub to_bytes {
 
     use bytes;
     is(charnames::vianame("GOTHIC LETTER AHSA"), 0x10330, "Verify vianame \\N{name} is unaffected by 'use bytes'");
+    is(charnames::vianame("U+FF"), chr(0xFF), "Verify vianame \\N{U+FF} is unaffected by 'use bytes'");
+    cmp_ok($warning_count, '==', @WARN, "Verify vianame doesn't warn on legal inputs");
+    is(charnames::vianame("U+100"), undef, "Verify vianame \\N{U+100} is undef under 'use bytes'");
+    ok($warning_count == @WARN - 1 && $WARN[-1] =~ /above 0xFF/, "Verify vianame gives appropriate warning for previous test");
 }
 
 {
@@ -670,7 +675,7 @@ is($_, 'foobar');
 my $names = do "unicore/Name.pl";
 ok(defined $names);
 my $non_ascii = native_to_latin1($names) =~ tr/\0-\177//c;
-ok(! $non_ascii, "Make sure all names are ASCII-only");
+ok(! $non_ascii, "Verify all official names are ASCII-only");
 
 # Verify that charnames propagate to eval("")
 my $evaltry = eval q[ "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}" ];
