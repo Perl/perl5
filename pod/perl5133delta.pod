@@ -40,7 +40,7 @@ In the past, it was ineffective to override one of Perl's abbreviations with
 your own custom alias.  Now it works.
 
 And you can create a custom alias directly to the ordinal of a character, known
-by C<\N{...}> and C<charnames::viacode()>, but not C<charnames::vianame()>.
+by C<\N{...}>, C<charnames::vianame()>, and C<charnames::viacode()>.
 Previously, an alias had to be to an official Unicode character name.  This
 made it impossible to create an alias for a code point that had no name,
 such as the ones reserved for private use.  So this change allows you to make
