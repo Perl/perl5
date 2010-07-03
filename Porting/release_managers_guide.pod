@@ -233,7 +233,7 @@ previous version to check for for modules that have identical version
 numbers but different contents, e.g.:
 
      $ cd ~/some-perl-root
-     $ ./perl -Ilib Porting/cmpVERSION.pl -xd ~/my_perl-tarballs/perl-5.10.0 .
+     $ ./perl -Ilib Porting/cmpVERSION.pl -xd . v5.10.0
 
 then bump the version numbers of any non-dual-life modules that have
 changed since the previous release, but which still have the old version
@@ -249,7 +249,7 @@ Once all version numbers have been bumped, re-run the checks.
 Then run again without the -x option, to check that dual-life modules are
 also sensible.
 
-     $ ./perl -Ilib Porting/cmpVERSION.pl -d ~/my_perl-tarballs/perl-5.10.0 .
+     $ ./perl -Ilib Porting/cmpVERSION.pl -d . v5.10.0
 
 =item *
 
