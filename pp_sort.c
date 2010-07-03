@@ -1858,7 +1858,7 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 }
 
 #define tryCALL_AMAGICbin(left,right,meth) \
-    (PL_amagic_generation && (SvAMAGIC(left)||SvAMAGIC(right))) \
+    (SvAMAGIC(left)||SvAMAGIC(right)) \
 	? amagic_call(left, right, CAT2(meth,_amg), 0) \
 	: NULL;
 

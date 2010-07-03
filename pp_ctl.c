@@ -117,17 +117,15 @@ PP(pp_regcomp)
 	sv_setpvs(tmpstr, "");
 	while (++MARK <= SP) {
 	    SV *msv = *MARK;
-	    if (PL_amagic_generation) {
-		SV *sv;
+	    SV *sv;
 
-		tryAMAGICregexp(msv);
+	    tryAMAGICregexp(msv);
 
-		if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
-		    (sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
-		{
-		   sv_setsv(tmpstr, sv);
-		   continue;
-		}
+	    if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
+		(sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
+	    {
+	       sv_setsv(tmpstr, sv);
+	       continue;
 	    }
 	    sv_catsv(tmpstr, msv);
 	}
