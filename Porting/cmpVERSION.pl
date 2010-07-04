@@ -78,7 +78,7 @@ my @module_diffs = grep {
     $this_dir = $1 if m/^(.*)\//;
     /\.pm$/ &&
     (!defined($this_dir) || ($this_dir !~ $skip_dirs)) &&
-    !exists $skip{$_} && 
+    !exists $skip{$_} &&
     !exists $dual_files{$_}
 } @all_diffs;
 
