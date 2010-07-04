@@ -367,16 +367,6 @@ L<perlport> has a section currently named I<Supported Platforms> that
 indicates which platforms are known to build in the current release.
 If necessary update the list and the indicated version number.
 
-=item *
-
-I<You MAY SKIP this step for SNAPSHOT>
-
-Update F<AUTHORS>, using the C<Porting/checkAUTHORS.pl> script, and if
-necessary, update the script to include new alias mappings for porters
-already in F<AUTHORS>
-
-    $ git log --pretty=fuller | perl Porting/checkAUTHORS.pl --acknowledged AUTHORS -
-
 =back
 
 =head2 Building a release - on the day
