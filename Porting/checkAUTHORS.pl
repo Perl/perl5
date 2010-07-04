@@ -29,9 +29,69 @@ EOS
 }
 
 
-my $prev = "";
-my %map;
+my $map = generate_author_map();
 
+
+if (@authors) {
+  my %raw;
+  foreach my $filename (@authors) {
+    open FH, "<$filename" or die "Can't open $filename: $!";
+    while (<FH>) {
+      next if /^\#/;
+      next if /^-- /;
+      if (/<([^>]+)>/) {
+    # Easy line.
+    $raw{$1}++;
+      } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
+    # Name only
+    $untraced{$1}++;
+      } elsif (length $_) {
+    chomp;
+    warn "Can't parse line '$_'";
+      } else {
+	  next
+      }
+    }
+  }
+  foreach (keys %raw) {
+    print "E-mail $_ occurs $raw{$_} times\n" if $raw{$_} > 1;
+    $_ = lc $_;
+    $authors{$map->{$_} || $_}++;
+  }
+  ++$authors{'!'};
+  ++$authors{'?'};
+}
+
+my @lines = split(/^commit\s*/sm,join('',<>));
+for ( @lines) {
+  next if m/^$/;
+  next if m/^(\S*?)^Merge:/ism; # skip merge commits
+if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*(.*?)^Commit:\s*(.*?)^(.*)$/gism) {
+    # new patch
+    ($patch, $author, $date, $committer) = ($1,$2,$3,$4);
+    chomp($author);
+    unless ($author) { die $_}
+    chomp($committer);
+    unless ($committer) { die $_}
+    &process($committer, $patch, $author);
+} else { die "XXX $_ did not match";}
+}
+
+
+if ($rank) {
+  display_ordered(\%patchers);
+} elsif ($ta) {
+  display_ordered(\%committers);
+} elsif (%authors) {
+  display_missing_authors(\%patchers, \%authors, \%real_names);
+}
+
+exit(0);
+
+sub generate_author_map {
+    my %map;
+
+my $prev = "";
 while (<DATA>) {
     chomp;
     s/\\100/\@/g;
@@ -113,61 +173,16 @@ $map {$_} = '!' for
     "(none)",
     ;
 
-
-if (@authors) {
-  my %raw;
-  foreach my $filename (@authors) {
-    open FH, "<$filename" or die "Can't open $filename: $!";
-    while (<FH>) {
-      next if /^\#/;
-      next if /^-- /;
-      if (/<([^>]+)>/) {
-    # Easy line.
-    $raw{$1}++;
-      } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
-    # Name only
-    $untraced{$1}++;
-      } elsif (length $_) {
-    chomp;
-    warn "Can't parse line '$_'";
-      } else {
-	  next
-      }
-    }
-  }
-  foreach (keys %raw) {
-    print "E-mail $_ occurs $raw{$_} times\n" if $raw{$_} > 1;
-    $_ = lc $_;
-    $authors{$map{$_} || $_}++;
-  }
-  ++$authors{'!'};
-  ++$authors{'?'};
+    return \%map;
 }
 
-my @lines = split(/^commit\s*/sm,join('',<>));
-for ( @lines) {
-  next if m/^$/;
-  next if m/^(\S*?)^Merge:/ism; # skip merge commits
-if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*(.*?)^Commit:\s*(.*?)^(.*)$/gism) {
-    # new patch
-    ($patch, $author, $date, $committer) = ($1,$2,$3,$4);
-    chomp($author);
-    unless ($author) { die $_}
-    chomp($committer);
-    unless ($committer) { die $_}
-    &process($committer, $patch, $author);
-} else { die "XXX $_ did not match";}
-}
-
-
-if ($rank) {
-  &display_ordered(\%patchers);
-} elsif ($ta) {
-  &display_ordered(\%committers);
-} elsif (%authors) {
+sub display_missing_authors {
+    my $patchers = shift;
+    my $authors = shift;
+    my $real_names = shift;
   my %missing;
-  foreach (sort keys %patchers) {
-    next if $authors{$_};
+  foreach (sort keys %$patchers) {
+    next if $authors->{$_};
     # Sort by number of patches, then name.
     $missing{$patchers{$_}}->{$_}++;
   }
@@ -176,7 +191,7 @@ if ($rank) {
     foreach my $author (sort keys %{$missing{$patches}}) {
         my $xauthor = $author;
         $xauthor =~ s/@/\\100/g; # xxx temp hack
-          print "".($real_names{$author}||$author) ."\t\t\t<" . $xauthor.">\n" ;
+          print "".($real_names->{$author}||$author) ."\t\t\t<" . $xauthor.">\n" ;
     }
   }
 }
@@ -233,7 +248,7 @@ sub _raw_address {
     $addr =~ s/\[mailto://;
     $addr =~ s/\]//;
     $addr = lc $addr;
-    $addr = $map{$addr} || $addr;
+    $addr = $map->{$addr} || $addr;
     $addr =~ s/\\100/@/g;  # Sometimes, there are encoded @ signs in the git log.
 
     if ($real_name) { $real_names{$addr} = $real_name};
