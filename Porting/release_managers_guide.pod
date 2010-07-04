@@ -419,7 +419,7 @@ Check that files managed by F<regen.pl> and friends are up to date. From
 within your working directory:
 
     $ git status
-    $ make regen
+    $ make regen_all
     $ make regen_perly
     $ git status
 
@@ -427,18 +427,6 @@ If any of the files managed by F<regen.pl> have changed, then you should
 re-make perl to check that it's okay, then commit the updated versions:
 
     $ git commit -a -m 'make regen; make regen_perly'
-
-=item *
-
-Rebuild META.yml:
-
-    $ rm META.yml
-    $ make META.yml
-    $ git diff
-
-Commit META.yml if it has changed:
-
-    $ git commit -m 'Update META.yml' META.yml
 
 =item *
 
