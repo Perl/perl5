@@ -1817,8 +1817,6 @@
 #endif
 #define hv_scalar		Perl_hv_scalar
 #define hv_name_set		Perl_hv_name_set
-#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
-#endif
 #define hv_clear_placeholders	Perl_hv_clear_placeholders
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
@@ -4268,10 +4266,6 @@
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define hv_name_set(a,b,c,d)	Perl_hv_name_set(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
-#endif
-#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
-#ifdef PERL_CORE
-#endif
 #endif
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #ifdef PERL_CORE

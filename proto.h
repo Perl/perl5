@@ -6459,13 +6459,6 @@ PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HV_BACKREFERENCES_P	\
 	assert(hv)
 
-#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
-PERL_CALLCONV void	Perl_hv_kill_backrefs(pTHX_ HV *hv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_HV_KILL_BACKREFS	\
-	assert(hv)
-
-#endif
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_CLEAR_PLACEHOLDERS	\
