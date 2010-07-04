@@ -4563,6 +4563,7 @@ t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
+t/porting/authors.t		Check that all authors have been acknowledged
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/diag.t		Test completeness of perldiag.pod
 t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
