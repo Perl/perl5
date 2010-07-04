@@ -1037,9 +1037,6 @@ extras.install: $(PERL_EXE)
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
 
-META.yml:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
-	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta
-
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
 
@@ -1139,7 +1136,13 @@ regen:	FORCE
 regen_headers:	FORCE
 	-perl regen.pl -v
 
-regen_all: regen
+regen_meta:  META.yml
+
+META.yml:   FORCE
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta
+
+
+regen_all: regen regen_meta
 
 .PHONY:	manisort manicheck
 
