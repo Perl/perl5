@@ -2,7 +2,7 @@
 
 # tests 51 onwards aren't all warnings clean. (intentionally)
 
-print "1..71\n";
+print "1..77\n";
 
 my $test = 1;
 
@@ -25,10 +25,10 @@ sub test ($$$) {
     print "ok $test # $act $string\n";
   } else {
     my ($valstr, $resstr);
-    if ($act eq 'hex' or $string =~ /x/) {
+    if ($act eq 'hex' or $string =~ /x/i) {
       $valstr = sprintf "0x%X", $value;
       $resstr = sprintf "0x%X", $result;
-    } elsif ($string =~ /b/) {
+    } elsif ($string =~ /b/i) {
       $valstr = sprintf "0b%b", $value;
       $resstr = sprintf "0b%b", $result;
     } else {
@@ -150,3 +150,12 @@ print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 eval '$a = hex "ab\x{100}"';
 print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+# Allow uppercase base markers (#76296)
+
+test ('hex', "0XCAFE",   0xCAFE);
+test ('hex', "XCAFE",    0xCAFE);
+test ('oct', "0XCAFE",   0xCAFE);
+test ('oct', "XCAFE",    0xCAFE);
+test ('oct', "0B101001", 0b101001);
+test ('oct', "B101001",  0b101001);
