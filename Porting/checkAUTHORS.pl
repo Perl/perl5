@@ -326,6 +326,8 @@ merijn                                  h.m.brand\100xs4all.nl
 +                                       merijn\100a5.(none)
 mhx                                     mhx-perl\100gmx.net
 +                                       mhx\100r2d2.(none)
+mst                                     mst\100shadowcat.co.uk
++                                       matthewt\100hercule.scsys.co.uk
 nicholas                                nick\100unfortu.net
 +                                       nick\100ccl4.org
 +                                       nick\100talking.bollo.cx
@@ -333,6 +335,7 @@ nicholas                                nick\100unfortu.net
 +                                       nick\100babyhippo.co.uk
 +                                       nick\100bagpuss.unfortu.net
 +                                       nick\100babyhippo.com
++                                       nicholas\100dromedary.ams6.corp.booking.com
 +                                       Nicholas Clark (sans From field in mail header)
 pudge                                   pudge\100pobox.com
 rgs                                     rgarciasuarez\100free.fr
@@ -422,6 +425,7 @@ ben\100morrow.me.uk                     mauzo\100csv.warwick.ac.uk
 +                                       mauzo\100.(none)
 bepi\100perl.it                         enrico.sorcinelli\100gmail.com
 bert\100alum.mit.edu                    bert\100genscan.com
+bigbang7\100gmail.com                   ddascalescu+github\100gmail.com
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 
@@ -602,6 +606,7 @@ p5-authors\100crystalflame.net          perl\100crystalflame.net
 +                                       coral\100eekeek.org
 +                                       coral\100moonlight.crystalflame.net
 +                                       rs\100oregonnet.com
++                                       rs\100topsy.com
 paul.green\100stratus.com               paul_greenvos\100vos.stratus.com
 +                                       pgreen\100seussnt.stratus.com
 paul.marquess\100btinternet.com         paul_marquess\100yahoo.co.uk
