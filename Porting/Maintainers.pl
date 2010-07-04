@@ -467,7 +467,7 @@ use File::Glob qw(:case);
     'Digest::MD5' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/Digest-MD5-2.39.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/Digest-MD5-2.40.tar.gz',
 	'FILES'		=> q[cpan/Digest-MD5],
 	'EXCLUDED'	=> [ qw{rfc1321.txt} ],
 	'UPSTREAM'	=> undef,

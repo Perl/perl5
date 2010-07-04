@@ -1,3 +1,18 @@
+2010-07-03   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.40
+
+   Marc Pignat (1):
+      Safer alignment test [RT#35823]
+
+   Robin Barker (1):
+      consting in new ext/
+
+   Gisle Aas (1):
+      Remove the MacOS branch of this test
+
+
+
 2009-06-09   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.39

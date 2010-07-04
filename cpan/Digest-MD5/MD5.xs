@@ -694,7 +694,7 @@ md5(...)
 	MD5Init(&ctx);
 
 	if (DOWARN) {
-            char *msg = 0;
+            const char *msg = 0;
 	    if (items == 1) {
 		if (SvROK(ST(0))) {
                     SV* sv = SvRV(ST(0));
