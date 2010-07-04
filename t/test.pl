@@ -809,15 +809,20 @@ WHOA
 # Set a watchdog to timeout the entire test file
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
-sub watchdog ($)
+sub watchdog ($;$)
 {
     my $timeout = shift;
+    my $method  = shift;
     my $timeout_msg = 'Test process timed out - terminating';
 
     # Valgrind slows perl way down so give it more time before dying.
     $timeout *= 10 if $ENV{PERL_VALGRIND};
 
     my $pid_to_kill = $$;   # PID for this process
+
+    if ($method eq "alarm") {
+        goto WATCHDOG_VIA_ALARM;
+    }
 
     # Don't use a watchdog process if 'threads' is loaded -
     #   use a watchdog thread instead
@@ -925,6 +930,7 @@ sub watchdog ($)
     }
 
     # If everything above fails, then just use an alarm timeout
+WATCHDOG_VIA_ALARM:
     if (eval { alarm($timeout); 1; }) {
         # Load POSIX if available
         eval { require POSIX; };

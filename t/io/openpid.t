@@ -18,7 +18,7 @@ if ($^O eq 'dos') {
 }
 
 plan tests => 10;
-watchdog(15);
+watchdog(15, "alarm");
 
 use Config;
 $| = 1;
