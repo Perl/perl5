@@ -248,10 +248,11 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
+	CV *cv;
 	ENTER;
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */
-	    GvCV(gv) = newCONSTSUB(stash, name, has_constant);
+	    cv = newCONSTSUB(stash, name, has_constant);
 	    /* If this reference was a copy of another, then the subroutine
 	       must have been "imported", by a Perl space assignment to a GV
 	       from a reference to CV.  */
@@ -259,16 +260,17 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 		GvIMPORTED_CV_on(gv);
 	} else {
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
-	    GvCV(gv) = PL_compcv;
+	    cv = PL_compcv;
 	}
+	GvCV(gv) = cv;
 	LEAVE;
 
         mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar($) { (shift) } sub ASDF::baz($); *ASDF::baz = \&Foo::bar */
-	CvGV(GvCV(gv)) = gv;
-	CvFILE_set_from_cop(GvCV(gv), PL_curcop);
-	CvSTASH(GvCV(gv)) = PL_curstash;
+	CvGV(cv) = gv;
+	CvFILE_set_from_cop(cv, PL_curcop);
+	CvSTASH(cv) = PL_curstash;
 	if (proto) {
-	    sv_usepvn_flags(MUTABLE_SV(GvCV(gv)), proto, protolen,
+	    sv_usepvn_flags(MUTABLE_SV(cv), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
 	}
     }
