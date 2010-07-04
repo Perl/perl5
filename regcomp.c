@@ -3316,12 +3316,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			nxt = nxt2;
 		    OP(nxt2)  = SUCCEED; /* Whas WHILEM */
 		    /* Need to optimize away parenths. */
-		    if (data->flags & SF_IN_PAR) {
+		    if ((data->flags & SF_IN_PAR) && OP(nxt) == CLOSE) {
 			/* Set the parenth number.  */
 			regnode *nxt1 = NEXTOPER(oscan) + EXTRA_STEP_2ARGS; /* OPEN*/
 
-			if (OP(nxt) != CLOSE)
-			    FAIL("Panic opt close");
 			oscan->flags = (U8)ARG(nxt);
 			if (RExC_open_parens) {
 			    RExC_open_parens[ARG(nxt1)-1]=oscan; /*open->CURLYM*/
