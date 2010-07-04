@@ -153,11 +153,11 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
            for compatibility silently suffer "b" and "0b" as valid binary
            numbers. */
         if (len >= 1) {
-            if (s[0] == 'b') {
+            if (s[0] == 'b' || s[0] == 'B') {
                 s++;
                 len--;
             }
-            else if (len >= 2 && s[0] == '0' && s[1] == 'b') {
+            else if (len >= 2 && s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) {
                 s+=2;
                 len-=2;
             }
@@ -269,11 +269,11 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
            for compatibility silently suffer "x" and "0x" as valid hex numbers.
         */
         if (len >= 1) {
-            if (s[0] == 'x') {
+            if (s[0] == 'x' || s[0] == 'X') {
                 s++;
                 len--;
             }
-            else if (len >= 2 && s[0] == '0' && s[1] == 'x') {
+            else if (len >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
                 s+=2;
                 len-=2;
             }

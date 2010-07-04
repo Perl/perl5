@@ -3067,11 +3067,11 @@ PP(pp_oct)
         tmps++, len--;
     if (*tmps == '0')
         tmps++, len--;
-    if (*tmps == 'x') {
+    if (*tmps == 'x' || *tmps == 'X') {
     hex:
         result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     }
-    else if (*tmps == 'b')
+    else if (*tmps == 'b' || *tmps == 'B')
         result_uv = grok_bin (tmps, &len, &flags, &result_nv);
     else
         result_uv = grok_oct (tmps, &len, &flags, &result_nv);

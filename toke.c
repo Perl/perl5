@@ -12978,11 +12978,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    const char *base, *Base, *max;
 
 	    /* check for hex */
-	    if (s[1] == 'x') {
+	    if (s[1] == 'x' || s[1] == 'X') {
 		shift = 4;
 		s += 2;
 		just_zero = FALSE;
-	    } else if (s[1] == 'b') {
+	    } else if (s[1] == 'b' || s[1] == 'B') {
 		shift = 1;
 		s += 2;
 		just_zero = FALSE;
