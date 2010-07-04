@@ -1,21 +1,47 @@
 #!/usr/bin/perl -w
 use strict;
-use Text::Wrap;
-$Text::Wrap::columns = 80;
 my ($committer, $patch, $author, $date);
 use Getopt::Long;
+use Text::Wrap;
+$Text::Wrap::columns = 80;
 
 my ($rank, $percentage, $cumulative, $reverse, $ta, @authors, %authors,
-    %untraced, %patchers, %committers, %real_names);
+    %untraced, %patchers, %committers, %real_names, $as_test_output);
 my $result = GetOptions ("rank" => \$rank,            # rank authors
              "thanks-applied" => \$ta,        # ranks committers
              "acknowledged=s"   => \@authors ,  # authors files
              "percentage" => \$percentage,      # show as %age
              "cumulative" => \$cumulative,
              "reverse" => \$reverse,
+             "tap" => \$as_test_output,
             );
 
 if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
+    usage();
+}
+
+my $map = generate_known_author_map();
+
+read_authors_files(@authors);
+
+parse_commits_from_stdin();
+
+if ($rank) {
+  display_ordered(\%patchers);
+} elsif ($ta) {
+  display_ordered(\%committers);
+} elsif ($as_test_output) {
+  display_test_output(\%patchers, \%authors, \%real_names);
+} elsif (%authors) {
+  display_missing_authors(\%patchers, \%authors, \%real_names);
+}
+
+
+
+exit(0);
+
+sub usage {
+
   die <<"EOS";
 $0 --rank changes                           # rank authors by patches
 $0 --acknowledged <authors file> changes    # Display unacknowledged authors
@@ -29,229 +55,246 @@ EOS
 }
 
 
-my $map = generate_author_map();
 
+sub parse_commits_from_stdin {
+    my @lines = split( /^commit\s*/sm, join( '', <> ) );
+    for (@lines) {
+        next if m/^$/;
+        next if m/^(\S*?)^Merge:/ism;    # skip merge commits
+        if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*(.*?)^Commit:\s*(.*?)^(.*)$/gism) {
 
-if (@authors) {
-  my %raw;
-  foreach my $filename (@authors) {
-    open FH, "<$filename" or die "Can't open $filename: $!";
-    while (<FH>) {
-      next if /^\#/;
-      next if /^-- /;
-      if (/<([^>]+)>/) {
-    # Easy line.
-    $raw{$1}++;
-      } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
-    # Name only
-    $untraced{$1}++;
-      } elsif (length $_) {
-    chomp;
-    warn "Can't parse line '$_'";
-      } else {
-	  next
-      }
+            # new patch
+            ( $patch, $author, $date, $committer ) = ( $1, $2, $3, $4 );
+            chomp($author);
+            unless ($author) { die $_ }
+            chomp($committer);
+            unless ($committer) { die $_ }
+            process( $committer, $patch, $author );
+        } else {
+            die "XXX $_ did not match";
+        }
     }
-  }
-  foreach (keys %raw) {
-    print "E-mail $_ occurs $raw{$_} times\n" if $raw{$_} > 1;
-    $_ = lc $_;
-    $authors{$map->{$_} || $_}++;
-  }
-  ++$authors{'!'};
-  ++$authors{'?'};
-}
 
-my @lines = split(/^commit\s*/sm,join('',<>));
-for ( @lines) {
-  next if m/^$/;
-  next if m/^(\S*?)^Merge:/ism; # skip merge commits
-if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*(.*?)^Commit:\s*(.*?)^(.*)$/gism) {
-    # new patch
-    ($patch, $author, $date, $committer) = ($1,$2,$3,$4);
-    chomp($author);
-    unless ($author) { die $_}
-    chomp($committer);
-    unless ($committer) { die $_}
-    &process($committer, $patch, $author);
-} else { die "XXX $_ did not match";}
 }
 
 
-if ($rank) {
-  display_ordered(\%patchers);
-} elsif ($ta) {
-  display_ordered(\%committers);
-} elsif (%authors) {
-  display_missing_authors(\%patchers, \%authors, \%real_names);
-}
-
-exit(0);
-
-sub generate_author_map {
+sub generate_known_author_map {
     my %map;
 
-my $prev = "";
-while (<DATA>) {
-    chomp;
-    s/\\100/\@/g;
-    $_ = lc;
-    if (my ($correct, $alias) = /^\s*([^#\s]\S*)\s+(.*\S)/) {
-        $correct =~ s/^\\043/#/;
-        if ($correct eq '+') {$correct = $prev} else {$prev = $correct}
-        $map {$alias} = $correct;
+    my $prev = "";
+    while (<DATA>) {
+        chomp;
+        s/\\100/\@/g;
+        $_ = lc;
+        if ( my ( $correct, $alias ) = /^\s*([^#\s]\S*)\s+(.*\S)/ ) {
+            $correct =~ s/^\\043/#/;
+            if   ( $correct eq '+' ) { $correct = $prev }
+            else                     { $prev    = $correct }
+            $map{$alias} = $correct;
+        }
     }
-}
 
-#
-# Email addresses for we do not have names.
-#
-$map {$_} = "?" for 
-    "bah\100longitude.com",
-    "bbucklan\100jpl-devvax.jpl.nasa.gov",
-    "bilbo\100ua.fm",
-    "bob\100starlabs.net",
-    "cygwin\100cygwin.com",
-    "david\100dhaller.de",
-    "erik\100cs.uni-jena.de",
-    "info\100lingo.kiev.ua", # Lingo Translation agency
-    "jms\100mathras.comcast.net",
-    "premchai21\100yahoo.com",
-    "pxm\100nubz.org",
-    "raf\100tradingpost.com.au",
-    "smoketst\100hp46t243.cup.hp.com",
-    "root\100chronos.fi.muni.cz", # no clue - jrv 20090803
-    "gomar\100md.media-web.de", # no clue - jrv 20090803
-    "data-drift\100so.uio.no", # no data. originally private message from 199701282014.VAA12645@selters.uio.no
-    "arbor\100al37al08.telecel.pt", # reported perlbug ticket 5196 - no actual code contribution. no real name - jrv 20091006
-    "oracle\100pcr8.pcr.com", # Reported perlbug ticket 1015 - no patch - Probably Ed Eddington ed@pcr.com
-    ;
+    #
+    # Email addresses for we do not have names.
+    #
+    $map{$_} = "?"
+        for
+        "bah\100longitude.com",
+        "bbucklan\100jpl-devvax.jpl.nasa.gov",
+        "bilbo\100ua.fm",
+        "bob\100starlabs.net",
+        "cygwin\100cygwin.com",
+        "david\100dhaller.de", "erik\100cs.uni-jena.de", "info\100lingo.kiev.ua",    # Lingo Translation agency
+        "jms\100mathras.comcast.net",
+        "premchai21\100yahoo.com",
+        "pxm\100nubz.org",
+        "raf\100tradingpost.com.au",
+        "smoketst\100hp46t243.cup.hp.com", "root\100chronos.fi.muni.cz",             # no clue - jrv 20090803
+        "gomar\100md.media-web.de",    # no clue - jrv 20090803
+        "data-drift\100so.uio.no",     # no data. originally private message from 199701282014.VAA12645@selters.uio.no
+        "arbor\100al37al08.telecel.pt"
+        ,    # reported perlbug ticket 5196 - no actual code contribution. no real name - jrv 20091006
+        "oracle\100pcr8.pcr.com",    # Reported perlbug ticket 1015 - no patch - Probably Ed Eddington ed@pcr.com
+        ;
 
-#
-# Email addresses for people that don't have an email address in AUTHORS
-# Presumably deliberately?
-# 
+    #
+    # Email addresses for people that don't have an email address in AUTHORS
+    # Presumably deliberately?
+    #
 
-$map {$_} = '!' for
-    # Nick Ing-Simmons has passed away (2006-09-25).
-    "nick\100ing-simmons.net",
-    "nik\100tiuk.ti.com",
-    "nick.ing-simmons\100elixent.com",
-    "nick\100ni-s.u-net.com",
-    "nick.ing-simmons\100tiuk.ti.com",
+    $map{$_} = '!' for
 
-    # Iain Truskett has passed away (2003-12-29).
-    "perl\100dellah.anu.edu.au",
-    "spoon\100dellah.org",
-    "spoon\100cpan.org",
+        # Nick Ing-Simmons has passed away (2006-09-25).
+        "nick\100ing-simmons.net",
+        "nik\100tiuk.ti.com",
+        "nick.ing-simmons\100elixent.com",
+        "nick\100ni-s.u-net.com",
+        "nick.ing-simmons\100tiuk.ti.com",
 
-    # Ton Hospel
-    "me-02\100ton.iguana.be",
-    "perl-5.8.0\100ton.iguana.be",
-    "perl5-porters\100ton.iguana.be",
+        # Iain Truskett has passed away (2003-12-29).
+        "perl\100dellah.anu.edu.au", "spoon\100dellah.org", "spoon\100cpan.org",
 
-    # Beau Cox
-    "beau\100beaucox.com",
+        # Ton Hospel
+        "me-02\100ton.iguana.be", "perl-5.8.0\100ton.iguana.be", "perl5-porters\100ton.iguana.be",
 
-    # Randy W. Sims 
-    "ml-perl\100thepierianspring.org",
+        # Beau Cox
+        "beau\100beaucox.com",
 
-    # perl internal addresses
-    "perl5-porters\100africa.nicoh.com",
-    "perlbug\100perl.org",,
-    "perl5-porters.nicoh.com",
-    "perlbug-followup\100perl.org",
-    "perlbug-comment\100perl.org",
-    "bug-module-corelist\100rt.cpan.org",
-    "bug-storable\100rt.cpan.org",
-    "bugs-perl5\100bugs6.perl.org",
-    "unknown",
-    "unknown\100unknown",
-    "unknown\100longtimeago",
-    "unknown\100perl.org",
-    "",
-    "(none)",
-    ;
+        # Randy W. Sims
+        "ml-perl\100thepierianspring.org",
+
+        # perl internal addresses
+        "perl5-porters\100africa.nicoh.com",
+        "perlbug\100perl.org",,
+        "perl5-porters.nicoh.com",
+        "perlbug-followup\100perl.org",
+        "perlbug-comment\100perl.org",
+        "bug-module-corelist\100rt.cpan.org",
+        "bug-storable\100rt.cpan.org",
+        "bugs-perl5\100bugs6.perl.org",
+        "unknown",
+        "unknown\100unknown",
+        "unknown\100longtimeago",
+        "unknown\100perl.org",
+        "",
+        "(none)",
+        ;
 
     return \%map;
 }
 
-sub display_missing_authors {
-    my $patchers = shift;
-    my $authors = shift;
-    my $real_names = shift;
-  my %missing;
-  foreach (sort keys %$patchers) {
-    next if $authors->{$_};
-    # Sort by number of patches, then name.
-    $missing{$patchers{$_}}->{$_}++;
-  }
-  foreach my $patches (sort {$b <=> $a} keys %missing) {
-    print "\n\n=head1 $patches patch(es)\n\n";
-    foreach my $author (sort keys %{$missing{$patches}}) {
-        my $xauthor = $author;
-        $xauthor =~ s/@/\\100/g; # xxx temp hack
-          print "".($real_names->{$author}||$author) ."\t\t\t<" . $xauthor.">\n" ;
+sub read_authors_files {
+    my @authors = (@_);
+    return unless (@authors);
+    my %raw;
+    foreach my $filename (@authors) {
+        open FH, "<$filename" or die "Can't open $filename: $!";
+        while (<FH>) {
+            next if /^\#/;
+            next if /^-- /;
+            if (/<([^>]+)>/) {
+
+                # Easy line.
+                $raw{$1}++;
+            } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
+
+                # Name only
+                $untraced{$1}++;
+            } elsif ( length $_ ) {
+                chomp;
+                warn "Can't parse line '$_'";
+            } else {
+                next;
+            }
+        }
     }
-  }
+    foreach ( keys %raw ) {
+        print "E-mail $_ occurs $raw{$_} times\n" if $raw{$_} > 1;
+        $_ = lc $_;
+        $authors{ $map->{$_} || $_ }++;
+    }
+    ++$authors{'!'};
+    ++$authors{'?'};
+}
+
+sub display_test_output {
+    my $patchers   = shift;
+    my $authors    = shift;
+    my $real_names = shift;
+    my $count = 0;
+    foreach ( sort keys %$patchers ) {
+           $count++;
+
+        if ($authors->{$_}) {
+            print "ok $count - ".$real_names->{$_} ." $_\n";
+        } else {
+            print "not ok $count - Contributor not found in AUTHORS: $_ ".($real_names->{$_} || '???' )."\n";
+        }
+
+    }
+    print "1..$count\n";
+}
+
+sub display_missing_authors {
+    my $patchers   = shift;
+    my $authors    = shift;
+    my $real_names = shift;
+    my %missing;
+    foreach ( sort keys %$patchers ) {
+        next if $authors->{$_};
+
+        # Sort by number of patches, then name.
+        $missing{ $patchers{$_} }->{$_}++;
+    }
+    foreach my $patches ( sort { $b <=> $a } keys %missing ) {
+        print "\n\n=head1 $patches patch(es)\n\n";
+        foreach my $author ( sort keys %{ $missing{$patches} } ) {
+            my $xauthor = $author;
+            $xauthor =~ s/@/\\100/g;    # xxx temp hack
+            print "" . ( $real_names->{$author} || $author ) . "\t\t\t<" . $xauthor . ">\n";
+        }
+    }
 }
 
 sub display_ordered {
-  my $what = shift;
-  my @sorted;
-  my $total;
-  while (my ($name, $count) = each %$what) {
-    push @{$sorted[$count]}, $name;
-    $total += $count;
-  }
+    my $what = shift;
+    my @sorted;
+    my $total;
 
-  my $i = @sorted;
-  return unless @sorted;
-  my $sum = 0;
-  foreach my $i ($reverse ? 0 .. $#sorted : reverse 0 .. $#sorted) {
-    next unless $sorted[$i];
-    my $prefix;
-    $sum += $i * @{$sorted[$i]};
-    # Value to display is either this one, or the cumulative sum.
-    my $value = $cumulative ? $sum : $i;
-    if ($percentage) {
-    $prefix = sprintf "%6.2f:\t", 100 * $value / $total;
-    } else {
-    $prefix = "$value:\t";
+    while ( my ( $name, $count ) = each %$what ) {
+        push @{ $sorted[$count] }, $name;
+        $total += $count;
     }
-    print wrap ($prefix, "\t", join (" ", sort @{$sorted[$i]}), "\n");
-  }
+
+    my $i = @sorted;
+    return unless @sorted;
+    my $sum = 0;
+    foreach my $i ( $reverse ? 0 .. $#sorted : reverse 0 .. $#sorted ) {
+        next unless $sorted[$i];
+        my $prefix;
+        $sum += $i * @{ $sorted[$i] };
+
+        # Value to display is either this one, or the cumulative sum.
+        my $value = $cumulative ? $sum : $i;
+        if ($percentage) {
+            $prefix = sprintf "%6.2f:\t", 100 * $value / $total;
+        } else {
+            $prefix = "$value:\t";
+        }
+        print wrap ( $prefix, "\t", join( " ", sort @{ $sorted[$i] } ), "\n" );
+    }
 }
 
 sub process {
-  my ($committer, $patch, $author) = @_;
-  return unless $author;
-  return unless $committer;
+    my ( $committer, $patch, $author ) = @_;
+    return unless $author;
+    return unless $committer;
 
-  $author = _raw_address($author);
-  $patchers{$author}++;
+    $author = _raw_address($author);
+    $patchers{$author}++;
 
-  $committer = _raw_address($committer);
-  if ($committer ne $author) {
-    # separate commit credit only if committing someone else's patch
-    $committers{$committer}++;
-  }
+    $committer = _raw_address($committer);
+    if ( $committer ne $author ) {
+
+        # separate commit credit only if committing someone else's patch
+        $committers{$committer}++;
+    }
 }
 
 sub _raw_address {
     my $addr = shift;
     my $real_name;
-    if ($addr =~ /<.*>/) {
-    $addr =~ s/^\s*(.*)\s*<\s*(.*?)\s*>.*$/$2/ ;
-     $real_name = $1;
+    if ( $addr =~ /<.*>/ ) {
+        $addr =~ s/^\s*(.*)\s*<\s*(.*?)\s*>.*$/$2/;
+        $real_name = $1;
     }
     $addr =~ s/\[mailto://;
     $addr =~ s/\]//;
     $addr = lc $addr;
     $addr = $map->{$addr} || $addr;
-    $addr =~ s/\\100/@/g;  # Sometimes, there are encoded @ signs in the git log.
+    $addr =~ s/\\100/@/g;    # Sometimes, there are encoded @ signs in the git log.
 
-    if ($real_name) { $real_names{$addr} = $real_name};
+    if ($real_name) { $real_names{$addr} = $real_name }
     return $addr;
 }
 
