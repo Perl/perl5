@@ -436,10 +436,6 @@ Rebuild META.yml:
     $ make META.yml
     $ git diff
 
-XXX it would be nice to make Porting/makemeta use regen_lib.pl
-to get the same 'update the file if its changed' functionality
-we get with 'make regen' etc.
-
 Commit META.yml if it has changed:
 
     $ git commit -m 'Update META.yml' META.yml

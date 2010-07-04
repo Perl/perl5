@@ -10,8 +10,15 @@ use lib "Porting";
 
 use File::Basename qw( dirname );
 
+
+BEGIN {
+    # Get function prototypes
+    require 'regen_lib.pl';
+}
+
+
 my $file = "META.yml";
-die "$0: will not override $file, delete it first.\n" if -e $file;
+my $new_file = "META.yml-new";
 
 use Maintainers qw(%Modules get_module_files get_module_pat);
 
@@ -40,7 +47,7 @@ my $files = join '', map { "    - $_\n" }
 
 my $dirs  = join '', map { "    - $_\n" } sort { lc $a cmp lc $b } @dirs;
 
-open my $fh, ">$file" or die "Can't open $file: $!";
+my $fh = safer_open($new_file);
 
 print $fh <<"EOI";
 name: perl
@@ -62,5 +69,6 @@ $dirs
 $files
 EOI
 
-close $fh;
+safer_close($fh);
+rename_if_different($new_file, $file);
 
