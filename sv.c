@@ -5363,8 +5363,8 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
  * with the SV we point to.
  */
 
-STATIC void
-S_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
+void
+Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 {
     dVAR;
     AV *av = NULL;
@@ -5429,6 +5429,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 		SV *const referrer = *svp;
 		if (SvWEAKREF(referrer)) {
 		    /* XXX Should we check that it hasn't changed? */
+		    assert(SvROK(referrer));
 		    SvRV_set(referrer, 0);
 		    SvOK_off(referrer);
 		    SvWEAKREF_off(referrer);
@@ -5439,6 +5440,11 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 		    assert(GvSTASH(referrer));
 		    assert(GvSTASH(referrer) == (const HV *)sv);
 		    GvSTASH(referrer) = 0;
+		} else if (SvTYPE(referrer) == SVt_PVCV) {
+		    /* You lookin' at me?  */
+		    assert(CvSTASH(referrer));
+		    assert(CvSTASH(referrer) == (const HV *)sv);
+		    CvSTASH(referrer) = 0;
 		} else {
 		    Perl_croak(aTHX_
 			       "panic: magic_killbackrefs (flags=%"UVxf")",
@@ -5763,6 +5769,10 @@ Perl_sv_clear(pTHX_ register SV *const sv)
     case SVt_PVCV:
     case SVt_PVFM:
 	cv_undef(MUTABLE_CV(sv));
+	/* If we're in a stash, we don't own a reference to it. However it does
+	   have a back reference to us, which needs to be cleared.  */
+	if ((stash = CvSTASH(sv)))
+	    sv_del_backref(MUTABLE_SV(stash), sv);
 	goto freescalar;
     case SVt_PVHV:
 	if (PL_last_swash_hv == (const HV *)sv) {
@@ -11342,9 +11352,22 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
 		    CvDEPTH(dstr) = 0;
 		}
+		/*FALLTHROUGH*/
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
 		CvSTASH(dstr)	= hv_dup(CvSTASH(dstr), param);
+		if(param->flags & CLONEf_JOIN_IN && CvSTASH(dstr)) {
+		    const HEK * const hvname
+		     = HvNAME_HEK(CvSTASH(dstr));
+		    if( hvname
+		     && CvSTASH(dstr) == gv_stashpvn(
+			 HEK_KEY(hvname), HEK_LEN(hvname), 0
+			)
+		      )
+			Perl_sv_add_backref(
+			 aTHX_ MUTABLE_SV(CvSTASH(dstr)), dstr
+			);
+		}
 		OP_REFCNT_LOCK;
 		if (!CvISXSUB(dstr))
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));

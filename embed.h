@@ -1558,9 +1558,12 @@
 #define save_scalar_at		S_save_scalar_at
 #endif
 #endif
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 #endif
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
+#endif
+#ifdef PERL_CORE
+#define sv_del_backref		Perl_sv_del_backref
 #endif
 #if defined(PERL_IN_SV_C)
 #ifdef PERL_CORE
@@ -1568,7 +1571,6 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#define sv_del_backref		S_sv_del_backref
 #define varname			S_varname
 #endif
 #  ifdef DEBUGGING
@@ -4004,7 +4006,7 @@
 #define save_scalar_at(a,b)	S_save_scalar_at(aTHX_ a,b)
 #endif
 #endif
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #endif
 #endif
@@ -4012,13 +4014,15 @@
 #ifdef PERL_CORE
 #endif
 #endif
+#ifdef PERL_CORE
+#define sv_del_backref(a,b)	Perl_sv_del_backref(aTHX_ a,b)
+#endif
 #if defined(PERL_IN_SV_C)
 #ifdef PERL_CORE
 #define uiv_2buf		S_uiv_2buf
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)
-#define sv_del_backref(a,b)	S_sv_del_backref(aTHX_ a,b)
 #define varname(a,b,c,d,e,f)	S_varname(aTHX_ a,b,c,d,e,f)
 #endif
 #  ifdef DEBUGGING

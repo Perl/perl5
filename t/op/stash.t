@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 31 );
+plan( tests => 32 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -168,4 +168,17 @@ SKIP: {
         {},
         "no segfault with overload/deleted stash entry [#58530]",
     );
+
+    # CvSTASH should be null on a nmed sub if the stash has been deleted
+    {
+	package FOO;
+	sub foo {}
+	my $rfoo = \&foo;
+	package main;
+	delete $::{'FOO::'};
+	my $cv = B::svref_2object($rfoo);
+	# XXX is there a better way of testing for NULL ?
+	my $stash = $cv->STASH;
+	like($stash, qr/B::SPECIAL/, "NULL CvSTASH on named sub");
+    }
 }

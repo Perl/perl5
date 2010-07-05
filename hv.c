@@ -1709,7 +1709,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	    HE *entry;
             struct mro_meta *meta;
 	    struct xpvhv_aux * const iter = HvAUX(hv);
-	    SV *const av = iter->xhv_backreferences;
+	    AV *const av = iter->xhv_backreferences;
 
 	    if (av) {
 		Perl_sv_kill_backrefs(aTHX_ MUTABLE_SV(hv), av);

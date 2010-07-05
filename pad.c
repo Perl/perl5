@@ -1573,6 +1573,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 #endif
     CvGV(cv)		= CvGV(proto);
     CvSTASH(cv)		= CvSTASH(proto);
+    if (CvSTASH(cv))
+	Perl_sv_add_backref(aTHX_ MUTABLE_SV(CvSTASH(cv)), MUTABLE_SV(cv));
     OP_REFCNT_LOCK;
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     OP_REFCNT_UNLOCK;

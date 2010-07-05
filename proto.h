@@ -5735,7 +5735,7 @@ STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 
 #endif
 
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -5752,6 +5752,12 @@ PERL_CALLCONV int	Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 	assert(sv); assert(av)
 
 #endif
+
+PERL_CALLCONV void	Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DEL_BACKREF	\
+	assert(tsv); assert(sv)
 
 #if defined(PERL_IN_SV_C)
 STATIC char *	S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const peob)
@@ -5775,12 +5781,6 @@ STATIC I32	S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_VISIT	\
 	assert(f)
-
-STATIC void	S_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_DEL_BACKREF	\
-	assert(tsv); assert(sv)
 
 STATIC SV *	S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, I32 aindex, int subscript_type)
 			__attribute__warn_unused_result__;

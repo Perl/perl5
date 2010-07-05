@@ -1852,7 +1852,7 @@ s	|SV*	|pm_description	|NN const PMOP *pm
 s	|SV*	|save_scalar_at	|NN SV **sptr|const U32 flags
 #endif
 
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C)
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 : Used in gv.c
 po	|void	|sv_add_backref	|NN SV *const tsv|NN SV *const sv
 #endif
@@ -1862,12 +1862,12 @@ po	|void	|sv_add_backref	|NN SV *const tsv|NN SV *const sv
 poM	|int	|sv_kill_backrefs	|NN SV *const sv|NN AV *const av
 #endif
 
+pX	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
 #if defined(PERL_IN_SV_C)
 nsR	|char *	|uiv_2buf	|NN char *const buf|const IV iv|UV uv|const int is_uv|NN char **const peob
 s	|void	|sv_unglob	|NN SV *const sv
 s	|void	|not_a_number	|NN SV *const sv
 s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
-s	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
 sR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
 				|PADOFFSET targ|NULLOK const SV *const keyname \
 				|I32 aindex|int subscript_type

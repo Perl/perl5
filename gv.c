@@ -269,6 +269,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	CvGV(cv) = gv;
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH(cv) = PL_curstash;
+	if (PL_curstash)
+	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(PL_curstash), MUTABLE_SV(cv));
 	if (proto) {
 	    sv_usepvn_flags(MUTABLE_SV(cv), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
@@ -742,6 +744,8 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * pass along the same data via some unused fields in the CV
          */
         CvSTASH(cv) = stash;
+	if (stash)
+	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(cv));
         SvPV_set(cv, (char *)name); /* cast to lose constness warning */
         SvCUR_set(cv, len);
         return gv;

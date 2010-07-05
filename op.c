@@ -5844,6 +5844,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    pad_fixup_inner_anons(CvPADLIST(cv), PL_compcv, cv);
 	    if (PERLDB_INTER)/* Advice debugger on the new sub. */
 	      ++PL_sub_generation;
+	    if (CvSTASH(cv))
+		sv_del_backref(MUTABLE_SV(CvSTASH(cv)), MUTABLE_SV(cv));
 	}
 	else {
 	    /* Might have had built-in attributes applied -- propagate them. */
@@ -5872,6 +5874,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	CvGV(cv) = gv;
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH(cv) = PL_curstash;
+	if (PL_curstash)
+	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(PL_curstash), MUTABLE_SV(cv));
     }
     if (attrs) {
 	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
