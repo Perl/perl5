@@ -13,9 +13,16 @@ fi
 
 export RTSERVER=http://rt.perl.org/rt3
 
+
+
 if [ -z "$1"  ]; then
     echo "$0 ticketid [patchid]"
     exit
+fi
+
+if [ "$1" = "list" ]; then
+    rt ls "Queue = 'perl5' AND (Status = 'new' OR Status = 'open') AND (Type = 'patch' OR Subject LIKE 'patch')"
+    exit;
 fi
 
 if [ -z "$2" ]; then
