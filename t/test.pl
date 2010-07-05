@@ -812,7 +812,7 @@ WHOA
 sub watchdog ($;$)
 {
     my $timeout = shift;
-    my $method  = shift;
+    my $method  = shift || "";
     my $timeout_msg = 'Test process timed out - terminating';
 
     # Valgrind slows perl way down so give it more time before dying.
