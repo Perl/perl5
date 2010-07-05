@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ -z "$RTUSER" ]; then
+    echo "You need to set the environment variable RTUSER to your rt.perl.org username"
+    exit
+fi
+
+if [ -z "$RTPASSWD" ]; then
+    echo "You need to set the environment variable RTPASSWD to your rt.perl.org password"
+    exit
+fi
+
+
+export RTSERVER=http://rt.perl.org/rt3
+
+if [ -z "$1"  ]; then
+    echo "$0 ticketid [patchid]"
+    exit
+fi
+
+if [ -z "$2" ]; then
+    rt show ticket/$1/attachments  |grep -v ":\s*(" |grep -v "^id"
+    exit
+fi
+
+rt show ticket/$1/attachments/$2/content
