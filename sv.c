@@ -11222,18 +11222,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    /* Danger Will Robinson - GvGP(dstr) isn't initialised
 		       at the point of this comment.  */
 		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
-		    if(param->flags & CLONEf_JOIN_IN) {
-			const HEK * const hvname
-			 = HvNAME_HEK(GvSTASH(dstr));
-			if( hvname
-			 && GvSTASH(dstr) == gv_stashpvn(
-			     HEK_KEY(hvname), HEK_LEN(hvname), 0
-			    )
-			  )
-			    Perl_sv_add_backref(
-			     aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr
-			    );
-		    }
+		    if (param->flags & CLONEf_JOIN_IN)
+			Perl_sv_add_backref(aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr);
 		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
 		    (void)GpREFCNT_inc(GvGP(dstr));
 		} else
@@ -11333,7 +11323,16 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 					cBOOL(HvSHAREKEYS(sstr)), param) : 0;
 			/* backref array needs refcnt=2; see sv_add_backref */
 			daux->xhv_backreferences =
-			    saux->xhv_backreferences
+			    (param->flags & CLONEf_JOIN_IN)
+				/* when joining, we let the individual GVs and
+				 * CVs add themselves to backref as
+				 * needed. This avoids pulling in stuff
+				 * that isn't required, and simplifies the
+				 * case where stashes aren't cloned back
+				 * if they already exist in the parent
+				 * thread */
+			    ? NULL
+			    : saux->xhv_backreferences
 			    ? MUTABLE_AV(SvREFCNT_inc(
 						      sv_dup_inc((const SV *)saux->xhv_backreferences, param)))
 				: 0;
@@ -11358,18 +11357,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
 		CvSTASH(dstr)	= hv_dup(CvSTASH(dstr), param);
-		if(param->flags & CLONEf_JOIN_IN && CvSTASH(dstr)) {
-		    const HEK * const hvname
-		     = HvNAME_HEK(CvSTASH(dstr));
-		    if( hvname
-		     && CvSTASH(dstr) == gv_stashpvn(
-			 HEK_KEY(hvname), HEK_LEN(hvname), 0
-			)
-		      )
-			Perl_sv_add_backref(
-			 aTHX_ MUTABLE_SV(CvSTASH(dstr)), dstr
-			);
-		}
+		if ((param->flags & CLONEf_JOIN_IN) && CvSTASH(dstr))
+		    Perl_sv_add_backref(aTHX_ MUTABLE_SV(CvSTASH(dstr)), dstr);
 		OP_REFCNT_LOCK;
 		if (!CvISXSUB(dstr))
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));
