@@ -19,7 +19,7 @@ if [ -z "$1"  ]; then
 fi
 
 if [ -z "$2" ]; then
-    rt show ticket/$1/attachments  |grep -v ":\s*(" |grep -v "^id"
+    rt show ticket/$1/attachments  |grep -v "^id" |grep -v multipart\/
     exit
 fi
 
