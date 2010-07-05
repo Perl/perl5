@@ -11071,9 +11071,12 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    something that is bad **/
 	if (SvTYPE(sstr) == SVt_PVHV) {
 	    const HEK * const hvname = HvNAME_HEK(sstr);
-	    if (hvname)
+	    if (hvname) {
 		/** don't clone stashes if they already exist **/
-		return MUTABLE_SV(gv_stashpvn(HEK_KEY(hvname), HEK_LEN(hvname), 0));
+		dstr = MUTABLE_SV(gv_stashpvn(HEK_KEY(hvname), HEK_LEN(hvname), 0));
+		ptr_table_store(PL_ptr_table, sstr, dstr);
+		return dstr;
+	    }
         }
     }
 
