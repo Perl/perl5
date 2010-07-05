@@ -216,14 +216,7 @@ PP(pp_regcomp)
 	    }
 	    else if (SvAMAGIC(tmpstr)) {
 		/* make a copy to avoid extra stringifies */
-		SV* copy = newSV_type(SVt_PV);
-		sv_setpvn(copy, t, len);
-		if (SvUTF8(tmpstr))
-		    SvUTF8_on(copy);
-		else
-		    SvUTF8_off(copy);
-		sv_2mortal(copy);
-		tmpstr = copy;
+		tmpstr = newSVpvn_flags(t, len, SVs_TEMP | SvUTF8(tmpstr));
 	    }
 
 	    if (eng)
@@ -3777,10 +3770,10 @@ PP(pp_entereval)
 	/* make sure we've got a plain PV (no overload etc) before testing
 	 * for taint. Making a copy here is probably overkill, but better
 	 * safe than sorry */
-	SV* tmpsv = newSV_type(SVt_PV);
-	sv_copypv(tmpsv, sv);
-	sv_2mortal(tmpsv);
-	sv = tmpsv;
+	STRLEN len;
+	const char * const p = SvPV_const(sv, len);
+
+	sv = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
     }
 
     TAINT_IF(SvTAINTED(sv));
