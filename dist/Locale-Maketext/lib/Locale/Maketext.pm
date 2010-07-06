@@ -10,7 +10,7 @@ use I18N::LangTags 0.30 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
 # define the constant 'DEBUG' at compile-time
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -186,27 +186,44 @@ sub maketext {
     # Look up the value:
 
     my $value;
-    foreach my $h_r (
-        @{  $isa_scan{ref($handle) || $handle} || $handle->_lex_refs  }
-    ) {
-        DEBUG and warn "* Looking up \"$phrase\" in $h_r\n";
-        if(exists $h_r->{$phrase}) {
-            DEBUG and warn "  Found \"$phrase\" in $h_r\n";
-            unless(ref($value = $h_r->{$phrase})) {
-                # Nonref means it's not yet compiled.  Compile and replace.
-                $value = $h_r->{$phrase} = $handle->_compile($value);
+    if (exists $handle->{'_external_lex_cache'}{$phrase}) {
+        DEBUG and warn "* Using external lex cache version of \"$phrase\"\n";
+        $value = $handle->{'_external_lex_cache'}{$phrase};
+    }
+    else {
+        foreach my $h_r (
+            @{  $isa_scan{ref($handle) || $handle} || $handle->_lex_refs  }
+        ) {
+            DEBUG and warn "* Looking up \"$phrase\" in $h_r\n";
+            if(exists $h_r->{$phrase}) {
+                DEBUG and warn "  Found \"$phrase\" in $h_r\n";
+                unless(ref($value = $h_r->{$phrase})) {
+                    # Nonref means it's not yet compiled.  Compile and replace.
+                    if ($handle->{'use_external_lex_cache'}) {
+                        $value = $handle->{'_external_lex_cache'}{$phrase} = $handle->_compile($value);
+                    }
+                    else {
+                        $value = $h_r->{$phrase} = $handle->_compile($value);
+                    }
+                }
+                last;
             }
-            last;
+            # extending packages need to be able to localize _AUTO and if readonly can't "local $h_r->{'_AUTO'} = 1;"
+            # but they can "local $handle->{'_external_lex_cache'}{'_AUTO'} = 1;"
+            elsif($phrase !~ m/^_/s and ($handle->{'use_external_lex_cache'} ? ( exists $handle->{'_external_lex_cache'}{'_AUTO'} ? $handle->{'_external_lex_cache'}{'_AUTO'} : $h_r->{'_AUTO'} ) : $h_r->{'_AUTO'})) {
+                # it's an auto lex, and this is an autoable key!
+                DEBUG and warn "  Automaking \"$phrase\" into $h_r\n";
+                if ($handle->{'use_external_lex_cache'}) {
+                    $value = $handle->{'_external_lex_cache'}{$phrase} = $handle->_compile($phrase);
+                }
+                else {
+                    $value = $h_r->{$phrase} = $handle->_compile($phrase);
+                }
+                last;
+            }
+            DEBUG>1 and print "  Not found in $h_r, nor automakable\n";
+            # else keep looking
         }
-        elsif($phrase !~ m/^_/s and $h_r->{'_AUTO'}) {
-            # it's an auto lex, and this is an autoable key!
-            DEBUG and warn "  Automaking \"$phrase\" into $h_r\n";
-
-            $value = $h_r->{$phrase} = $handle->_compile($phrase);
-            last;
-        }
-        DEBUG>1 and print "  Not found in $h_r, nor automakable\n";
-        # else keep looking
     }
 
     unless(defined($value)) {

@@ -937,6 +937,25 @@ lexicon keys be autoable, except for possibly a few, and I
 arbitrarily decided to use a leading underscore as a signal
 to distinguish those few.
 
+=head1 READONLY LEXICONS
+
+If your lexicon is a tied hash the simple act of caching the compiled value can be fatal.
+
+For example a L<GDBM_File> GDBM_READER tied hash will die with something like:
+
+   gdbm store returned -1, errno 2, key "..." at ...
+
+All you need to do is turn on caching outside of the lexicon hash itself like so:
+
+   sub init {
+       my ($lh) = @_;
+       ...
+       $lh->{'use_external_lex_cache'} = 1;
+       ...
+   }
+
+And then instead of storing the compiled value in the lexicon hash it will store it in $lh->{'_external_lex_cache'}
+
 =head1 CONTROLLING LOOKUP FAILURE
 
 If you call $lh->maketext(I<key>, ...parameters...),
