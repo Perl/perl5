@@ -7263,6 +7263,11 @@ or no unimport method being found.
     no strict 'refs';
     no warnings;
 
+Care should be taken when using the C<no VERSION> form of C<no>.  It is
+I<only> meant to be used to assert that the running perl is of a earlier
+version than its argument and I<not> to undo the feature-enabling side effects
+of C<use VERSION>.
+
 See L<perlmodlib> for a list of standard modules and pragmas.  See L<perlrun>
 for the C<-M> and C<-m> command-line options to Perl that give C<use>
 functionality from the command-line.
