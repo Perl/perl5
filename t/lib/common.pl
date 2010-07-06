@@ -1,5 +1,9 @@
 # This code is used by lib/charnames.t, lib/feature.t, lib/subs.t,
 # lib/strict.t and lib/warnings.t
+#
+# On input, $::local_tests is the number of tests in the caller; or
+# 'no_plan' if unknown, in which case it is the caller's responsibility
+# to call cur_test() to find out how many this executed
 
 BEGIN {
     require './test.pl';
@@ -51,9 +55,11 @@ foreach my $file (@w_files) {
     close F ;
 }
 
-undef $/;
+local $/ = undef;
 
-plan tests => (scalar(@prgs)-$files + ($::local_tests || 0));
+my $tests = $::local_tests || 0;
+$tests = scalar(@prgs)-$files + $tests if $tests !~ /\D/;
+plan $tests;    # If input is 'no_plan', pass it on unchanged
 
 for (@prgs){
     unless (/\n/)
