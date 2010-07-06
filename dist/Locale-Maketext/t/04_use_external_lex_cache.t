@@ -1,8 +1,6 @@
 use Test::More tests => 11;
 
 BEGIN {
-    chdir 't';
-    unshift @INC, qw(lib ../lib);
     use_ok('Locale::Maketext');
 };
 
