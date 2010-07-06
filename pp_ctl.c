@@ -3332,21 +3332,20 @@ PP(pp_require)
 	}
 
 	/* We do this only with "use", not "require" or "no". */
-	if (PL_compcv &&
-		!(cUNOP->op_first->op_private & OPpCONST_NOVER) &&
-	  /* If we request a version >= 5.9.5, load feature.pm with the
-	   * feature bundle that corresponds to the required version. */
-		vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
-	    SV *const importsv = vnormal(sv);
-	    *SvPVX_mutable(importsv) = ':';
-	    ENTER_with_name("load_feature");
-	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
-	    LEAVE_with_name("load_feature");
-	}
-	/* If a version >= 5.11.0 is requested, strictures are on by default! */
-	if (PL_compcv &&
-		vcmp(sv, sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
-	    PL_hints |= (HINT_STRICT_REFS | HINT_STRICT_SUBS | HINT_STRICT_VARS);
+	if (PL_compcv && !(cUNOP->op_first->op_private & OPpCONST_NOVER)) {
+	    /* If we request a version >= 5.9.5, load feature.pm with the
+	     * feature bundle that corresponds to the required version. */
+	    if (vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
+		SV *const importsv = vnormal(sv);
+		*SvPVX_mutable(importsv) = ':';
+		ENTER_with_name("load_feature");
+		Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
+		LEAVE_with_name("load_feature");
+	    }
+	    /* If a version >= 5.11.0 is requested, strictures are on by default! */
+	    if (vcmp(sv, sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
+		PL_hints |= (HINT_STRICT_REFS | HINT_STRICT_SUBS | HINT_STRICT_VARS);
+	    }
 	}
 
 	RETPUSHYES;
