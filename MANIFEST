@@ -2868,8 +2868,7 @@ dist/threads/hints/hpux.pl	Hint file for HPUX
 dist/threads/hints/linux.pl	Hint file for Linux
 dist/threads/lib/threads.pm		ithreads
 dist/threads-shared/hints/linux.pl	thread shared variables
-dist/threads-shared/Makefile.PL		thread shared variables
-dist/threads-shared/shared.pm		thread shared variables
+dist/threads-shared/lib/threads/shared.pm	thread shared variables
 dist/threads-shared/shared.xs		thread shared variables
 dist/threads-shared/t/0nothread.t	Tests for basic shared array functionality.
 dist/threads-shared/t/av_refs.t		Tests for arrays containing references

@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.33_01';
+our $VERSION = '1.33_02';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
