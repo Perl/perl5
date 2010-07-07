@@ -543,7 +543,7 @@ sub lookup_name {
     unless (@off) {
       return if $runtime;
       carp "Unknown charname '$name'";
-      return "\x{FFFD}";
+      return 0xFFFD;
     }
 
     ##
