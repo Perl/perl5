@@ -399,18 +399,10 @@ my %deprecated_aliases = (
                 'REVERSE INDEX'           => 0x8D, # REVERSE LINE FEED
             );
 
-my %user_name_aliases = (
-                # User defined aliases. Even more convenient :)
-                # These are the ones that resolved to names
-            );
-
-my %user_numeric_aliases = (
-                # And these resolve directly to code points.
-            );
-my %inverse_user_aliases = (
-                # Map from code point to name
-            );
 my $txt;
+
+# Designed so that test decimal first, and then hex.  Leading zeros
+# imply non-decimal, as do non-[0-9]
 my $decimal_qr = qr/^[1-9]\d*$/;
 
 # Returns the hex number in $1.
@@ -455,7 +447,7 @@ sub not_legal_use_bytes_msg {
   return sprintf("Character 0x%04x with name '$name' is above 0xFF with 'use bytes' in effect", $ord);
 }
 
-sub alias_file ($)
+sub alias_file ($)  # Reads a file containing alias definitions
 {
   my ($arg, $file) = @_;
   if (-f $arg && File::Spec->file_name_is_absolute ($arg)) {
@@ -578,11 +570,8 @@ sub lookup_name {
 
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
-
-
-  # Get the official name if have one for the message
+  # Get the official name if have one
   $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
-
   croak not_legal_use_bytes_msg($name, $ord);
 } # lookup_name
 
@@ -648,7 +637,7 @@ sub import
 
   ##
   ## If utf8? warnings are enabled, and some scripts were given,
-  ## see if at least we can find one letter of each script.
+  ## see if at least we can find one letter from each script.
   ##
   if (warnings::enabled('utf8') && @{$^H{charnames_scripts}}) {
     $txt = do "unicore/Name.pl" unless $txt;
@@ -678,6 +667,7 @@ sub viacode {
   # function _getcode(), but here it makes sure that even a hex argument
   # has the proper number of leading zeros, which is critical in
   # matching against $txt below
+  # Must check if decimal first; see comments at that definition
   my $hex;
   if ($arg =~ $decimal_qr) {
     $hex = sprintf "%04X", $arg;
