@@ -8,6 +8,12 @@ plan('no_plan');
 
 $|=1;
 
+# --make-exceptions-list outputs the list of strings that don't have
+# perldiag.pod entries to STDERR without TAP formatting, so they can
+# easily be put in the __DATA__ section of this file.  This was done
+# initially so as to not create new test failures upon the initial
+# creation of this test file.  You probably shouldn't do it again.
+# Just add the documentation instead.
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
 chdir '..' or die "Can't chdir ..: $!";
@@ -197,22 +203,31 @@ sub check_file {
         TODO: {
             no warnings 'once';
             local $::TODO = 'in DATA';
-            fail("Presence of '$name' from $codefn line $.");
+            # There is no listing, but it is in the list of exceptions.  TODO FAIL.
+            fail("No listing in pod/perldiag.pod for '$name' from $codefn line $ (but it wasn't documented in 5.10 either, so we're letting it slide).");
           }
         } else {
-          ok("Presence of '$name' from $codefn line $.");
+          # We found an actual valid entry in perldiag.pod for this error.
+          ok("Found listing in pod/perldiag.pod for '$name' from $codefn line $.");
         }
         # Later, should start checking that the severity is correct, too.
       } elsif ($name =~ m/^panic: /) {
         # Just too many panic:s, they are hard to diagnose, and there
         # is a generic "panic: %s" entry.  Leave these for another
         # pass.
-        ok("Presence of '$name' from $codefn line $., covered by panic: %s entry");
+        ok("Skipping lack of explicit perldiag entry for '$name' from $codefn line $., covered by panic: %s entry");
       } else {
         if ($make_exceptions_list) {
+          # We're making an updated version of the exception list, to
+          # stick in the __DATA__ section.  I honestly can't think of
+          # a situation where this is the right thing to do, but I'm
+          # leaving it here, just in case one of my descendents thinks
+          # it's a good idea.
           print STDERR "$name\n";
         } else {
-          fail("Presence of '$name' from $codefn line $.");
+          # No listing found, and no excuse either.
+          # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
+          fail("No listing in pod/perldiag.pod for '$name' from $codefn line $.");
         }
       }
 
