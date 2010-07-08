@@ -115,7 +115,7 @@ please write C<$foo[2]>, or you might have meant to pass an anonymous
 arrayref to the function named foo, then do a scalar deref on the
 value it returns.  If you meant that, write C<${foo([2])}>.
 
-=item Ambiguous use of -%s resolved as -&%s() at - line 3.
+=item Ambiguous use of -%s resolved as -&%s()
 
 (W ambiguous) You wrote something like C<-foo>, which might be the
 string C<"-foo"> (outside of C<use strict 'subs'>), or a call to the
