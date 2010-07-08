@@ -3320,7 +3320,7 @@ PP(pp_fttty)
     int fd;
     GV *gv;
     SV *tmpsv = NULL;
-    char *name;
+    char *name = NULL;
     STRLEN namelen;
 
     tryAMAGICftest_MG('t');
