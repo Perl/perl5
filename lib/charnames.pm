@@ -749,7 +749,7 @@ __END__
 
 =head1 NAME
 
-charnames - access to Unicode character names and define character names for C<\N{named}> string literal escapes
+charnames - access to Unicode character names; define character names for C<\N{named}> string literal escapes
 
 =head1 SYNOPSIS
 
@@ -962,8 +962,12 @@ Currently they must be ASCII.
 An alias can map to either an official Unicode character name or to a
 numeric code point (ordinal).  The latter is useful for assigning names
 to code points in Unicode private use areas such as U+E800 through
-U+F8FF.  The number must look like an unsigned decimal integer, or a
-hexadecimal constant beginning with C<0x>, or C<U+>.
+U+F8FF.
+A numeric code point must be a non-negative integer or a string beginning
+with C<"U+"> or C<"0x"> with the remainder considered to be a
+hexadecimal integer.  A literal numeric constant must be unsigned; it
+will be interpreted as hex if it has a leading zero or contains
+non-decimal hex digits; otherwise it will be interpreted as decimal.
 
 Aliases are added either by the use of anonymous hashes:
 
@@ -988,7 +992,7 @@ file should return a list in plain perl:
     A_BREVE         => "LATIN CAPITAL LETTER A WITH BREVE",
     A_RING          => "LATIN CAPITAL LETTER A WITH RING ABOVE",
     A_MACRON        => "LATIN CAPITAL LETTER A WITH MACRON",
-    mychar2         => U+E8001,
+    mychar2         => "U+E8001",
     );
 
 Both these methods insert C<":full"> automatically as the first argument (if no
@@ -1018,7 +1022,13 @@ The function returns C<undef> if no name is known for the code point.
 In Unicode the proper name of these is the empty string, which
 C<undef> stringifies to.  (If you ask for a code point past the legal
 Unicode maximum of U+10FFFF that you haven't assigned an alias to, you
-get C<undef> and a warning.)
+get C<undef> plus a warning.)
+
+The input number must be a non-negative integer or a string beginning
+with C<"U+"> or C<"0x"> with the remainder considered to be a
+hexadecimal integer.  A literal numeric constant must be unsigned; it
+will be interpreted as hex if it has a leading zero or contains
+non-decimal hex digits; otherwise it will be interpreted as decimal.
 
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
@@ -1042,9 +1052,7 @@ most circumstances, (see L</BUGS> for the other ones), vianame returns
 an ord, whereas C<\\N{...}> is seamlessly placed as a chr into the
 string in which it appears.  This leads to a second difference.
 Since an ord is returned, it can be that of any character, even one
-that isn't legal under the C<S<use bytes>> pragma.  It is up to the
-caller to validate the return under C<S<use bytes>> before converting it
-to chr.
+that isn't legal under the C<S<use bytes>> pragma.
 
 The final difference is that if the input name is unknown C<vianame>
 returns C<undef> instead of the REPLACEMENT CHARACTER, and it does not
@@ -1104,10 +1112,11 @@ C<LATIN CAPITAL LETTER A WITH MACRON AND GRAVE>
 (which should mean C<LATIN CAPITAL LETTER A WITH MACRON> with an additional
 C<COMBINING GRAVE ACCENT>).
 
-Since evaluation of the translation function happens in the middle of
-compilation (of a string literal), the translation function should not
-do any C<eval>s or C<require>s.  This restriction should be lifted (but
-is low priority) in a future version of Perl.
+Since evaluation of the translation function (see L</CUSTOM
+TRANSLATORS>) happens in the middle of compilation (of a string
+literal), the translation function should not do any C<eval>s or
+C<require>s.  This restriction should be lifted (but is low priority) in
+a future version of Perl.
 
 =cut
 
