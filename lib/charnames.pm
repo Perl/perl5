@@ -476,9 +476,8 @@ sub lookup_name {
   my $runtime = shift;  # compile vs run time
 
   # Finds the ordinal of a character name, first in the aliases, then in
-  # the large table.  If not found, returns undef if runtime; complains
-  # and returns the Unicode replacement if compile.
-  # This is not optimized in any way yet
+  # the large table.  If not found, returns undef if runtime; if
+  # compile, complains and returns the Unicode replacement character.
 
   my $ord;
 
@@ -728,8 +727,7 @@ sub vianame
   if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
 
     # khw claims that this is bad.  The function should return either a
-    # an ord or a chr for all inputs; not be bipolar.  Also, under 'use
-    # bytes', can create a chr above 255.
+    # an ord or a chr for all inputs; not be bipolar.
     my $ord = CORE::hex $1;
     return chr $ord if $ord <= 255 || ! ((caller 0)[8] & $bytes::hint_bits);
     carp not_legal_use_bytes_msg($arg, $ord);
