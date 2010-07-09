@@ -399,7 +399,7 @@ my %deprecated_aliases = (
                 'REVERSE INDEX'           => 0x8D, # REVERSE LINE FEED
             );
 
-my $txt;
+my $txt;  # The table of official character names
 
 # Designed so that test decimal first, and then hex.  Leading zeros
 # imply non-decimal, as do non-[0-9]
@@ -418,7 +418,7 @@ sub carp
   require Carp; goto &Carp::carp;
 } # carp
 
-sub alias (@)
+sub alias (@) # Set up a single alias
 {
   my $alias = ref $_[0] ? $_[0] : { @_ };
   foreach my $name (keys %$alias) {
