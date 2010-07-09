@@ -86,19 +86,6 @@ my %temp_no_core =
      '../cpan/Unicode-Normalize' => 1,
     );
 
-if ($::do_nothing) {
-    return 1;
-}
-
-# Location to put the Valgrind log.
-our $Valgrind_Log;
-
-$| = 1;
-
-# for testing TEST only
-#BEGIN { require '../lib/strict.pm'; "strict"->import() };
-#BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
-
 # delete env vars that may influence the results
 # but allow override via *_TEST env var if wanted
 # (e.g. PERL5OPT_TEST=-d:NYTProf)
@@ -112,6 +99,19 @@ for my $envname (qw(PERL5LIB PERLLIB PERL5OPT)) {
 	delete $ENV{$envname};
     }
 }
+
+if ($::do_nothing) {
+    return 1;
+}
+
+# Location to put the Valgrind log.
+our $Valgrind_Log;
+
+$| = 1;
+
+# for testing TEST only
+#BEGIN { require '../lib/strict.pm'; "strict"->import() };
+#BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
