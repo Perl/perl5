@@ -2914,6 +2914,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     int runtime;
     CV* runcv = NULL;	/* initialise to avoid compiler warnings */
     STRLEN len;
+    bool need_catch;
 
     PERL_ARGS_ASSERT_SV_COMPILE_2OP;
 
@@ -2965,11 +2966,14 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
     PUSHEVAL(cx, 0);
+    need_catch = CATCH_GET;
+    CATCH_SET(TRUE);
 
     if (runtime)
 	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
     else
 	(void) doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax);
+    CATCH_SET(need_catch);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
 
