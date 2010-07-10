@@ -6660,7 +6660,7 @@ sub parse_options {
                 local \$doret = -2; 
                 require '$optionRequire{$option}';
                 1;
-               } || die    # XXX: shouldn't happen
+               } || die $@   # XXX: shouldn't happen
           if defined $optionRequire{$option}
           && defined $val;
 
