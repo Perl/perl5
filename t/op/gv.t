@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 191 );
+plan( tests => 192 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -622,6 +622,17 @@ is (eval 'local *::fake = \"chuck"; $fake', 'chuck',
 is ($@, '', "Can localize FAKE glob that's present in stash");
 is (scalar $::{fake}, "*main::sym",
 	"Localized FAKE glob's value was correctly restored");
+
+# [perl #1804] *$x assignment when $x is a copy of another glob
+{
+    no warnings 'once';
+    my $x = *_random::glob_that_is_not_used_elsewhere;
+    *$x = sub{};
+    is(
+      "$x", '*_random::glob_that_is_not_used_elsewhere',
+      '[perl #1804] *$x assignment when $x is FAKE',
+    );
+}
 
 __END__
 Perl

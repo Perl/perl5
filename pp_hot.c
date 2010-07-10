@@ -112,6 +112,7 @@ PP(pp_and)
 PP(pp_sassign)
 {
     dVAR; dSP; dPOPTOPssrl;
+    U32 wasfake = 0;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV * const temp = left;
@@ -197,7 +198,14 @@ PP(pp_sassign)
 	}
 
     }
+    /* Allow glob assignments like *$x = ..., which, when the glob has a
+       SVf_FAKE flag, cannot be distinguished from $x = ... without looking
+       at the op tree. */
+    if( SvTYPE(right) == SVt_PVGV && cBINOP->op_last->op_type == OP_RV2GV
+     && (wasfake = SvFLAGS(right) & SVf_FAKE) )
+	SvFLAGS(right) &= ~SVf_FAKE;
     SvSetMagicSV(right, left);
+    if(wasfake) SvFLAGS(right) |= SVf_FAKE;
     SETs(right);
     RETURN;
 }
