@@ -8617,7 +8617,7 @@ if PadWalker could be loaded.
 
 =cut
 
-        if (not $text =~ /::/ and eval { require PadWalker } and not $@ ) {
+        if (not $text =~ /::/ and eval { require PadWalker } ) {
             my $level = 1;
             while (1) {
                 my @info = caller($level);
