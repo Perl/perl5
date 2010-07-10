@@ -6018,7 +6018,7 @@ sub setterm {
 
         # We don't have a TTY - try to find one via Term::Rendezvous.
         else {
-            eval "require Term::Rendezvous;" or die;
+            require Term::Rendezvous;
 
             # See if we have anything to pass to Term::Rendezvous.
             # Use $HOME/.perldbtty$$ if not.
@@ -8617,7 +8617,7 @@ if PadWalker could be loaded.
 
 =cut
 
-        if (not $text =~ /::/ and eval "require PadWalker; 1" and not $@ ) {
+        if (not $text =~ /::/ and eval { require PadWalker } and not $@ ) {
             my $level = 1;
             while (1) {
                 my @info = caller($level);
