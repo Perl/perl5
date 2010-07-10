@@ -173,9 +173,11 @@ Send in a patch if you can clear up, fill out, or clarify an C<XXX>.
 There are a number of special data structures provided to the debugger by
 the Perl interpreter.
 
-The array C<@{$main::{'_<'.$filename}}> (aliased locally to C<@dbline> via glob
-assignment) contains the text from C<$filename>, with each element
-corresponding to a single line of C<$filename>.
+The array C<@{$main::{'_<'.$filename}}> (aliased locally to C<@dbline>
+via glob assignment) contains the text from C<$filename>, with each
+element corresponding to a single line of C<$filename>. Additionally,
+breakable lines will be dualvars with the numeric component being the
+memory address of a COP node. Non-breakable lines are dualvar to 0.
 
 The hash C<%{'_<'.$filename}> (aliased locally to C<%dbline> via glob 
 assignment) contains breakpoints and actions.  The keys are line numbers; 
