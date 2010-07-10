@@ -6000,7 +6000,7 @@ sub setterm {
     # Load Term::Readline, but quietly; don't debug it and don't trace it.
     local $frame = 0;
     local $doret = -2;
-    eval { require Term::ReadLine } or die $@;
+    require Term::ReadLine;
 
     # If noTTY is set, but we have a TTY name, go ahead and hook up to it.
     if ($notty) {
@@ -6150,7 +6150,7 @@ qq[3>&1 xterm -title "Daughter Perl debugger $pids $name" -e sh -c 'tty 1>&3;\
 
     # We need $term defined or we can not switch to the newly created xterm
     if ($tty ne '' && !defined $term) {
-        eval { require Term::ReadLine } or die $@;
+        require Term::ReadLine;
         if ( !$rl ) {
             $term = Term::ReadLine::Stub->new( 'perldb', $IN, $OUT );
         }
