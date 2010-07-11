@@ -52,7 +52,7 @@ EOE
 
 {
 
-    use charnames ':full', ":alias" => { mychar1 => 0xE8000,
+    use charnames ':full', ":alias" => { mychar1 => "0xE8000",
                                          mychar2 => 983040,  # U+F0000
                                          mychar3 => "U+100000",
                                          myctrl => 0x80,
