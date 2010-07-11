@@ -682,8 +682,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     is(charnames::viacode(0x100000), "myprivate2", "Outer block: verify that myprivate2 viacode works");
     is("\N{BE}", "\N{KATAKANA LETTER BE}", "Outer block: verify that \\N uses the correct script ");
     cmp_ok(charnames::vianame("BE"), "==", ord("\N{KATAKANA LETTER BE}"), "Outer block: verify that vianame uses the correct script");
-    is("\N{Hiragana:BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
-    cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
+    is("\N{Hiragana: BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
+    cmp_ok(charnames::vianame("Hiragana: BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
 
     {
         use charnames ":full",
@@ -710,8 +710,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
         is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
         cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
-        is("\N{Hiragana:BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
-        ok(! defined charnames::vianame("Hiragana:BE"), "Inner block without :short: verify that vianame with short doesn't work");
+        is("\N{Hiragana: BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        ok(! defined charnames::vianame("Hiragana: BE"), "Inner block without :short: verify that vianame with short doesn't work");
 
         {   # An inner block where only :short definitions are valid.
             use charnames ":short";
@@ -729,8 +729,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
             is("\N{BE}", "\x{FFFD}", "Inner inner block without script: verify that outer :script didn't leak with \\N");
             ok(! defined charnames::vianame("BE"), "Inner inner block without script: verify that outer :script didn't leak with vianames");
             is("\N{HIRAGANA LETTER BE}", "\x{FFFD}", "Inner inner block without :full: verify that outer :full didn't leak with \\N");
-            is("\N{Hiragana:BE}", $hiragana_be, "Inner inner block with :short: verify that \\N works with :short");
-            cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Inner inner block with :short: verify that vianame works with :short");
+            is("\N{Hiragana: BE}", $hiragana_be, "Inner inner block with :short: verify that \\N works with :short");
+            cmp_ok(charnames::vianame("Hiragana: BE"), "==", ord($hiragana_be), "Inner inner block with :short: verify that vianame works with :short");
         }
 
         # Back to previous block.  All previous tests should work again.
@@ -747,8 +747,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
         is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
         cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
-        is("\N{Hiragana:BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
-        ok(! defined charnames::vianame("Hiragana:BE"), "Inner block without :short: verify that vianame with short doesn't work");
+        is("\N{Hiragana: BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        ok(! defined charnames::vianame("Hiragana: BE"), "Inner block without :short: verify that vianame with short doesn't work");
     }
 
     # Back to previous block.  All tests from that block should work again.
@@ -764,6 +764,6 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     is(charnames::viacode(0x100000), "myprivate2", "Outer block: verify that myprivate2 viacode works");
     is("\N{BE}", "\N{KATAKANA LETTER BE}", "Outer block: verify that \\N uses the correct script ");
     cmp_ok(charnames::vianame("BE"), "==", ord("\N{KATAKANA LETTER BE}"), "Outer block: verify that vianame uses the correct script");
-    is("\N{Hiragana:BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
-    cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
+    is("\N{Hiragana: BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
+    cmp_ok(charnames::vianame("Hiragana: BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
 }

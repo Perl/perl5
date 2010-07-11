@@ -578,7 +578,8 @@ sub lookup_name ($;$) {
 
 	# If :short is allowed, look for the short name, which is like
 	# "greek:Sigma"
-	if (($^H{charnames_short}) && $name =~ /^(.+?):(.+)/s) {
+	if (($^H{charnames_short})
+	    && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs) {
 	  my ($script, $cname) = ($1, $2);
 	  my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
 	  if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
