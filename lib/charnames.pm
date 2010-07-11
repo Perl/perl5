@@ -550,7 +550,7 @@ sub lookup_name ($;$) {
 
   if (! defined $ord) {
 
-
+    # See if has looked this up earlier.
     if ($^H{charnames_full} && exists $full_names_cache{$name}) {
       $ord = $full_names_cache{$name};
     }
@@ -636,7 +636,7 @@ sub lookup_name ($;$) {
 
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
-  # Use the official name if have one
+  # Prefer any official name over the input one.
   $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
   croak not_legal_use_bytes_msg($name, $ord);
 } # lookup_name
