@@ -1883,12 +1883,12 @@ s	|int	|sv_2iuv_non_preserve	|NN SV *const sv
 sR	|I32	|expect_number	|NN char **const pattern
 #
 sn	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
-		|NN const U8 *const send|STRLEN uoffset
+		|NN const U8 *const send|NN STRLEN *const uoffset
 sn	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
 		|NN const U8 *send|STRLEN uoffset|const STRLEN uend
 s	|STRLEN	|sv_pos_u2b_cached|NN SV *const sv|NN MAGIC **const mgp \
 		|NN const U8 *const start|NN const U8 *const send \
-		|const STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
+		|STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
 s	|void	|utf8_mg_pos_cache_update|NN SV *const sv|NN MAGIC **const mgp \
 		|const STRLEN byte|const STRLEN utf8|const STRLEN blen
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \

@@ -6089,19 +6089,23 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
    offset.  */
 static STRLEN
 S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
-		      STRLEN uoffset)
+		      STRLEN *const uoffset_p)
 {
     const U8 *s = start;
+    STRLEN uoffset = *uoffset_p;
 
     PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS;
 
-    while (s < send && uoffset--)
+    while (s < send && uoffset) {
+	--uoffset;
 	s += UTF8SKIP(s);
+    }
     if (s > send) {
 	/* This is the existing behaviour. Possibly it should be a croak, as
 	   it's actually a bounds error  */
 	s = send;
     }
+    *uoffset_p -= uoffset;
     return s - start;
 }
 
@@ -6148,7 +6152,7 @@ S_sv_pos_u2b_midway(const U8 *const start, const U8 *send,
    created if necessary, and the found value offered to it for update.  */
 static STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start,
-		    const U8 *const send, const STRLEN uoffset,
+		    const U8 *const send, STRLEN uoffset,
 		    STRLEN uoffset0, STRLEN boffset0)
 {
     STRLEN boffset = 0; /* Actually always set, but let's keep gcc happy.  */
@@ -6190,9 +6194,11 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 					      uoffset - uoffset0,
 					      (*mgp)->mg_len - uoffset0);
 		} else {
+		    uoffset -= uoffset0;
 		    boffset = boffset0
 			+ sv_pos_u2b_forwards(start + boffset0,
-						send, uoffset - uoffset0);
+						send, &uoffset);
+		    uoffset += uoffset0;
 		}
 	    }
 	    else if (cache[2] < uoffset) {
@@ -6230,9 +6236,11 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
     }
 
     if (!found || PL_utf8cache < 0) {
-	const STRLEN real_boffset
-	    = boffset0 + sv_pos_u2b_forwards(start + boffset0,
-					       send, uoffset - uoffset0);
+	STRLEN real_boffset;
+	uoffset -= uoffset0;
+	real_boffset = boffset0 + sv_pos_u2b_forwards(start + boffset0,
+						      send, &uoffset);
+	uoffset += uoffset0;
 
 	if (found && PL_utf8cache < 0) {
 	    if (real_boffset != boffset) {

@@ -5809,11 +5809,12 @@ STATIC I32	S_expect_number(pTHX_ char **const pattern)
 	assert(pattern)
 
 #
-STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send, STRLEN uoffset)
+STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send, STRLEN *const uoffset)
 			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS	\
-	assert(start); assert(send)
+	assert(start); assert(send); assert(uoffset)
 
 STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN uoffset, const STRLEN uend)
 			__attribute__nonnull__(1)
@@ -5821,7 +5822,7 @@ STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN 
 #define PERL_ARGS_ASSERT_SV_POS_U2B_MIDWAY	\
 	assert(start); assert(send)
 
-STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start, const U8 *const send, const STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0)
+STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
