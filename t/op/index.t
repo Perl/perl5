@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 111 );
+plan( tests => 113 );
 
 run_tests() unless caller;
 
@@ -197,6 +197,15 @@ SKIP: {
             die $@ if $@;
         }
     }
+}
+
+{
+    # RT#75898
+    is(eval { utf8::upgrade($_ = " "); index $_, " ", 72 }, -1,
+       'UTF-8 cache handles offset beyond the end of the string');
+    $_ = "\x{100}BC";
+    is(index($_, "C", 4), -1,
+       'UTF-8 cache handles offset beyond the end of the string');
 }
 
 }
