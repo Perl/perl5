@@ -5648,7 +5648,7 @@ END
             my $L = $LBase + $SIndex / $NCount;
             my $V = $VBase + ($SIndex % $NCount) / $TCount;
             my $T = $TBase + $SIndex % $TCount;
-            $name = "$HANGUL_SYLLABLE $Jamo{$L}$Jamo{$V}";
+            $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
             $name .= $Jamo{$T} if $T != $TBase;
             return $name;
         }
