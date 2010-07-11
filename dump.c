@@ -789,41 +789,49 @@ S_sequence_num(pTHX_ const OP *o)
 const struct flag_to_name op_flags_names[] = {
     {OPf_KIDS, ",KIDS"},
     {OPf_PARENS, ",PARENS"},
-    {OPf_STACKED, ",STACKED"},
     {OPf_REF, ",REF"},
     {OPf_MOD, ",MOD"},
+    {OPf_STACKED, ",STACKED"},
     {OPf_SPECIAL, ",SPECIAL"}
 };
 
 const struct flag_to_name op_trans_names[] = {
-    {OPpTRANS_SQUASH, ",SQUASH"},
-    {OPpTRANS_DELETE, ",DELETE"},
-    {OPpTRANS_COMPLEMENT, ",COMPLEMENT"},
+    {OPpTRANS_FROM_UTF, ",FROM_UTF"},
+    {OPpTRANS_TO_UTF, ",TO_UTF"},
     {OPpTRANS_IDENTICAL, ",IDENTICAL"},
-    {OPpTRANS_GROWS, ",GROWS"}
+    {OPpTRANS_SQUASH, ",SQUASH"},
+    {OPpTRANS_COMPLEMENT, ",COMPLEMENT"},
+    {OPpTRANS_GROWS, ",GROWS"},
+    {OPpTRANS_DELETE, ",DELETE"}
 };
 
 const struct flag_to_name op_entersub_names[] = {
-    {OPpENTERSUB_AMPER, ",AMPER"},
     {OPpENTERSUB_DB, ",DB"},
     {OPpENTERSUB_HASTARG, ",HASTARG"},
+    {OPpENTERSUB_NOMOD, ",NOMOD"},
+    {OPpENTERSUB_AMPER, ",AMPER"},
     {OPpENTERSUB_NOPAREN, ",NOPAREN"},
-    {OPpENTERSUB_INARGS, ",INARGS"},
-    {OPpENTERSUB_NOMOD, ",NOMOD"}
+    {OPpENTERSUB_INARGS, ",INARGS"}
 };
 
 const struct flag_to_name op_const_names[] = {
-    {OPpCONST_BARE, ",BARE"},
+    {OPpCONST_NOVER, ",NOVER"},
+    {OPpCONST_SHORTCIRCUIT, ",SHORTCIRCUIT"},
     {OPpCONST_STRICT, ",STRICT"},
+    {OPpCONST_ENTERED, ",ENTERED"},
     {OPpCONST_ARYBASE, ",ARYBASE"},
-    {OPpCONST_WARNING, ",WARNING"},
-    {OPpCONST_ENTERED, ",ENTERED"}
+    {OPpCONST_BARE, ",BARE"},
+    {OPpCONST_WARNING, ",WARNING"}
 };
 
 const struct flag_to_name op_sort_names[] = {
     {OPpSORT_NUMERIC, ",NUMERIC"},
     {OPpSORT_INTEGER, ",INTEGER"},
-    {OPpSORT_REVERSE, ",REVERSE"}
+    {OPpSORT_REVERSE, ",REVERSE"},
+    {OPpSORT_INPLACE, ",INPLACE"},
+    {OPpSORT_DESCEND, ",DESCEND"},
+    {OPpSORT_QSORT, ",QSORT"},
+    {OPpSORT_STABLE, ",STABLE"}
 };
 
 const struct flag_to_name op_open_names[] = {
@@ -847,6 +855,7 @@ OP_PRIVATE_ONCE(op_aassign, OPpASSIGN_COMMON, ",COMMON");
 OP_PRIVATE_ONCE(op_leavesub, OPpREFCOUNTED, ",REFCOUNTED");
 OP_PRIVATE_ONCE(op_sassign, OPpASSIGN_BACKWARDS, ",BACKWARDS");
 OP_PRIVATE_ONCE(op_repeat, OPpREPEAT_DOLIST, ",DOLIST");
+OP_PRIVATE_ONCE(op_reverse, OPpREVERSE_INPLACE, ",INPLACE");
 OP_PRIVATE_ONCE(op_rv2cv, OPpLVAL_INTRO, ",INTRO");
 OP_PRIVATE_ONCE(op_flip, OPpFLIP_LINENUM, ",LINENUM");
 OP_PRIVATE_ONCE(op_gv, OPpEARLY_CV, ",EARLY_CV");
