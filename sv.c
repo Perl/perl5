@@ -6158,6 +6158,9 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 
     assert (uoffset >= uoffset0);
 
+    if (!uoffset)
+	return 0;
+
     if (!SvREADONLY(sv)
 	&& PL_utf8cache
 	&& (*mgp || (SvTYPE(sv) >= SVt_PVMG &&
@@ -6287,7 +6290,9 @@ Perl_sv_pos_u2b_flags(pTHX_ SV *const sv, STRLEN uoffset, STRLEN *const lenp,
 	MAGIC *mg = NULL;
 	boffset = sv_pos_u2b_cached(sv, &mg, start, send, uoffset, 0, 0);
 
-	if (lenp) {
+	if (lenp
+	    && *lenp /* don't bother doing work for 0, as its bytes equivalent
+			is 0, and *lenp is already set to that.  */) {
 	    /* Convert the relative offset to absolute.  */
 	    const STRLEN uoffset2 = uoffset + *lenp;
 	    const STRLEN boffset2
