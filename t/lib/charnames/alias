@@ -83,7 +83,7 @@ use charnames ":short", ":alias" => { e_ACUTE => "LATIN:e WITH ACUTE", "a_ACUTE"
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS regex
-Use of uninitialized value
+Unknown charname 'a_ACUTE' at
 ########
 # alias with hashref two aliases
 use charnames ":short", ":alias" => {

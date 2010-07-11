@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 use bytes ();		# for $bytes::hint_bits
 
@@ -399,7 +399,35 @@ my %deprecated_aliases = (
                 'REVERSE INDEX'           => 0x8D, # REVERSE LINE FEED
             );
 
+
 my $txt;  # The table of official character names
+
+my %full_names_cache; # Holds already-looked-up names, so don't have to
+# re-look them up again.  The previous versions of charnames had scoping
+# bugs.  For example if we use script A in one scope and find and cache
+# what Z resolves to, we can't use that cache in a different scope that
+# uses script B instead of A, as Z might be an entirely different letter
+# there; or there might be different aliases in effect in different
+# scopes, or :short may be in effect or not effect in different scopes,
+# or various combinations thereof.  This was solved in this version
+# mostly by moving things to %^H.  But some things couldn't be moved
+# there.  One of them was the cache of runtime looked-up names, in part
+# because %^H is read-only at runtime.  I (khw) don't know why the cache
+# was run-time only in the previous versions: perhaps oversight; perhaps
+# that compile time looking doesn't happen in a loop so didn't think it
+# was worthwhile; perhaps not wanting to make the cache too large.  But
+# I decided to make it compile time as well; this could easily be
+# changed.
+# Anyway, this hash is not scoped, and is added to at runtime.  It
+# doesn't have scoping problems because the data in it is restricted to
+# official names, which are always invariant, and we only set it and
+# look at it at during :full lookups, so is unaffected by any other
+# scoped options.  I put this in to maintain parity with the older
+# version.  If desired, a %short_names cache could also be made, as well
+# as one for each script, say in %script_names_cache, with each key
+# being a hash for a script named in a 'use charnames' statement.  I
+# decided not to do that for now, just because it's added complication,
+# and because I'm just trying to maintain parity, not extend it.
 
 # Designed so that test decimal first, and then hex.  Leading zeros
 # imply non-decimal, as do non-[0-9]
@@ -423,21 +451,25 @@ sub alias (@) # Set up a single alias
   my $alias = ref $_[0] ? $_[0] : { @_ };
   foreach my $name (keys %$alias) {
     my $value = $alias->{$name};
+    next unless defined $value;	  # Omit if screwed up.
+
+    # Is slightly slower to just after this statement see if it is
+    # decimal, since we already know it is after having converted from
+    # hex, but makes the code easier to maintain, and is called
+    # infrequently, only at compile-time
+    if ($value !~ $decimal_qr && $value =~ $hex_qr) {
+      $value = CORE::hex $1;
+    }
     if ($value =~ $decimal_qr) {
-        $user_numeric_aliases{$name} = $value;
+	$^H{charnames_ord_aliases}{$name} = $value;
 
         # Use a canonical form.
-        $inverse_user_aliases{sprintf("%04X", $value)} = $name;
-    }
-    elsif ($value =~ $hex_qr) {
-        my $decimal = CORE::hex $1;
-        $user_numeric_aliases{$name} = $decimal;
-
-        # Must convert to decimal and back to guarantee canonical form
-        $inverse_user_aliases{sprintf("%04X", $decimal)} = $name;
+	$^H{charnames_inverse_ords}{sprintf("%04X", $value)} = $name;
     }
     else {
-        $user_name_aliases{$name} = $value;
+	# XXX validate syntax when deprecation cycle complete. ie. start
+	# with an alpha only, etc.
+	$^H{charnames_name_aliases}{$name} = $value;
     }
   }
 } # alias
@@ -471,23 +503,39 @@ sub alias_file ($)  # Reads a file containing alias definitions
 } # alias_file
 
 
-sub lookup_name {
-  my $name = shift;
-  my $runtime = shift;  # compile vs run time
+sub lookup_name ($;$) {
 
   # Finds the ordinal of a character name, first in the aliases, then in
   # the large table.  If not found, returns undef if runtime; if
   # compile, complains and returns the Unicode replacement character.
 
+  my $runtime = (@_ > 1);  # compile vs run time
+
+  my $name = shift;
+  my $hints_ref = shift;
+
   my $ord;
+
+  if ($runtime) {
+    # At runtime, but currently not at compile time, $^H gets
+    # stringified, so un-stringify back to the original data structures.
+    # These get thrown away by perl before the next invocation
+    # Also fill in the hash with the non-stringified data.
+
+    %{$^H{charnames_name_aliases}} = split ',', $hints_ref->{charnames_stringified_names};
+    %{$^H{charnames_ord_aliases}} = split ',', $hints_ref->{charnames_stringified_ords};
+    @{$^H{charnames_scripts}} = split ',', $hints_ref->{charnames_stringified_scripts};
+    $^H{charnames_full} = $hints_ref->{charnames_full};
+    $^H{charnames_short} = $hints_ref->{charnames_short};
+  }
 
   # User alias should be checked first or else can't override ours, and if we
   # add any, could conflict with theirs.
-  if (exists $user_numeric_aliases{$name}) {
-    $ord = $user_numeric_aliases{$name};
+  if (exists $^H{charnames_ord_aliases}{$name}) {
+    $ord = $^H{charnames_ord_aliases}{$name};
   }
-  elsif (exists $user_name_aliases{$name}) {
-    $name = $user_name_aliases{$name};
+  elsif (exists $^H{charnames_name_aliases}{$name}) {
+    $name = $^H{charnames_name_aliases}{$name};
   }
   elsif (exists $system_aliases{$name}) {
     $ord = $system_aliases{$name};
@@ -501,75 +549,93 @@ sub lookup_name {
   my @off;
 
   if (! defined $ord) {
-    ## Suck in the code/name list as a big string.
-    ## Lines look like:
-    ##     "0052\t\tLATIN CAPITAL LETTER R\n"
-    $txt = do "unicore/Name.pl" unless $txt;
 
-    ## @off will hold the index into the code/name string of the start and
-    ## end of the name as we find it.
 
-    ## If :full, look for the name exactly; runtime implies full
-    if (($runtime || $^H{charnames_full}) && $txt =~ /\t\t\Q$name\E$/m) {
-      @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
+    if ($^H{charnames_full} && exists $full_names_cache{$name}) {
+      $ord = $full_names_cache{$name};
     }
+    else {
 
-    ## If we didn't get above, and :short allowed, look for the short name.
-    ## The short name is like "greek:Sigma"
-    unless (@off) {
-      if (($runtime || $^H{charnames_short}) && $name =~ /^(.+?):(.+)/s) {
-       my ($script, $cname) = ($1, $2);
-       my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-       if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
-         @off = ($-[0] + 2, $+[0]);
-       }
+      ## Suck in the code/name list as a big string.
+      ## Lines look like:
+      ##     "0052\t\tLATIN CAPITAL LETTER R\n"
+      $txt = do "unicore/Name.pl" unless $txt;
+
+      ## @off will hold the index into the code/name string of the start and
+      ## end of the name as we find it.
+
+      ## If :full, look for the name exactly; runtime implies full
+      my $found_full = 0;  # Tells us if can cache the result
+      if ($^H{charnames_full}) {
+	if ($txt =~ /\t\t\Q$name\E$/m) {
+	  @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
+	  $found_full = 1;
+	}
       }
-    }
 
-    ## If we still don't have it, check for the name among the loaded
-    ## scripts.
-    if (! $runtime && not @off) {
-      my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-      for my $script (@{$^H{charnames_scripts}}) {
-        if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
-          @off = ($-[0] + 2, $+[0]);
-          last;
-        }
+      # If we didn't get it above keep looking
+      if (! $found_full) {
+
+	# If :short is allowed, look for the short name, which is like
+	# "greek:Sigma"
+	if (($^H{charnames_short}) && $name =~ /^(.+?):(.+)/s) {
+	  my ($script, $cname) = ($1, $2);
+	  my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+	  if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+	    @off = ($-[0] + 2, $+[0]);
+	  }
+	}
+
+	## If we still don't have it, check for the name among the loaded
+	## scripts.
+	unless (@off) {
+	  my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+	  for my $script (@{$^H{charnames_scripts}}) {
+	    if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
+	      @off = ($-[0] + 2, $+[0]);
+	      last;
+	    }
+	  }
+
+	  ## If we don't have it by now, give up.
+	  unless (@off) {
+	    return if $runtime;
+	    carp "Unknown charname '$name'";
+	    return 0xFFFD;
+	  }
+	}
       }
+
+      ##
+      ## Now know where in the string the name starts.
+      ## The code, in hex, is before that.
+      ##
+      ## The code can be 4-6 characters long, so we've got to sort of
+      ## go look for it, just after the newline that comes before $off[0].
+      ##
+      ## This would be much easier if unicore/Name.pl had info in
+      ## a name/code order, instead of code/name order.
+      ##
+      ## The +1 after the rindex() is to skip past the newline we're finding,
+      ## or, if the rindex() fails, to put us to an offset of zero.
+      ##
+      my $hexstart = rindex($txt, "\n", $off[0]) + 1;
+
+      ## we know where it starts, so turn into number -
+      ## the ordinal for the char.
+      $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
+
+      # Cache the input so as to not have to search the large table
+      # again, but only if it came from the one search that we cache.
+      $full_names_cache{$name} = $ord if $found_full;
     }
-
-    ## If we don't have it by now, give up.
-    unless (@off) {
-      return if $runtime;
-      carp "Unknown charname '$name'";
-      return 0xFFFD;
-    }
-
-    ##
-    ## Now know where in the string the name starts.
-    ## The code, in hex, is before that.
-    ##
-    ## The code can be 4-6 characters long, so we've got to sort of
-    ## go look for it, just after the newline that comes before $off[0].
-    ##
-    ## This would be much easier if unicore/Name.pl had info in
-    ## a name/code order, instead of code/name order.
-    ##
-    ## The +1 after the rindex() is to skip past the newline we're finding,
-    ## or, if the rindex() fails, to put us to an offset of zero.
-    ##
-    my $hexstart = rindex($txt, "\n", $off[0]) + 1;
-
-    ## we know where it starts, so turn into number -
-    ## the ordinal for the char.
-    $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
   }
 
   return $ord if $runtime || $ord <= 255 || ! ($^H & $bytes::hint_bits);
 
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
-  # Get the official name if have one
+  # Use the official name if have one
   $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
   croak not_legal_use_bytes_msg($name, $ord);
 } # lookup_name
@@ -580,8 +646,8 @@ sub charnames {
   # For \N{...}.  Looks up the character name and returns its ordinal if
   # found, undef otherwise.  If not in 'use bytes', forces into utf8
 
-  my $ord = lookup_name($name, 0); # 0 means compile-time
-  return unless defined $ord;
+  my $ord = lookup_name($name);
+  return if ! defined $ord;
   return chr $ord if $^H & $bytes::hint_bits;
 
   no warnings 'utf8'; # allow even illegal characters
@@ -596,6 +662,9 @@ sub import
     carp("`use charnames' needs explicit imports list");
   }
   $^H{charnames} = \&charnames ;
+  $^H{charnames_ord_aliases} = {};
+  $^H{charnames_name_aliases} = {};
+  $^H{charnames_inverse_ords} = {};
 
   ##
   ## fill %h keys with our @_ args.
@@ -647,9 +716,19 @@ sub import
       }
     }
   }
+
+  # %^H gets stringified, so serialize it ourselves so can extract the
+  # real data back later.
+  $^H{charnames_stringified_ords} = join ",", %{$^H{charnames_ord_aliases}};
+  $^H{charnames_stringified_names} = join ",", %{$^H{charnames_name_aliases}};
+  $^H{charnames_stringified_inverse_ords} = join ",", %{$^H{charnames_inverse_ords}};
+  $^H{charnames_stringified_scripts} = join ",", @{$^H{charnames_scripts}};
 } # import
 
-my %viacode;    # Cache of already-found codes
+# Cache of already looked-up values.  This is set to only contain
+# official values, and user aliases can't override them, so scoping is
+# not an issue.
+my %viacode;
 
 sub viacode {
 
@@ -692,25 +771,25 @@ sub viacode {
 
 	# The name starts with the next character and goes up to the
 	# next new-line.  Using capturing parentheses above instead of
-	# @$+ more than doubles the execution time in Perl 5.13
+	# @+ more than doubles the execution time in Perl 5.13
         $viacode{$hex} = substr($txt, $+[0], index($txt, "\n", $+[0]) - $+[0]);
-        return $viacode{$hex};
+	return $viacode{$hex};
     }
   }
 
   # See if there is a user name for it, before giving up completely.
-  if (! exists $inverse_user_aliases{$hex}) {
+  # First get the scoped aliases.
+  my %code_point_aliases = split ',',
+			  (caller(0))[10]->{charnames_stringified_inverse_ords};
+  if (! exists $code_point_aliases{$hex}) {
     if (CORE::hex($hex) > 0x10FFFF) {
         carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
     }
     return;
   }
 
-  $viacode{$hex} = $inverse_user_aliases{$hex};
-  return $inverse_user_aliases{$hex};
+  return $code_point_aliases{$hex};
 } # viacode
-
-my %vianame;    # Cache of already-found names
 
 sub vianame
 {
@@ -734,11 +813,7 @@ sub vianame
     return;
   }
 
-  if (! exists $vianame{$arg}) {
-    $vianame{$arg} = lookup_name($arg, 1); # 1 means run-time
-  }
-
-  return $vianame{$arg};
+  return lookup_name($arg, (caller(0))[10]);
 } # vianame
 
 
@@ -1041,12 +1116,13 @@ For example,
 prints "2722".
 
 C<vianame> takes the identical inputs that C<\N{...}> does under the
-L<C<:full> and C<:short>|/DESCRIPTION> options to the C<charnames>
-pragma, including any L<custom aliases|/CUSTOM ALIASES> you may have
-defined.
+L<C<:full> option|/DESCRIPTION> to C<charnames>.  In addition, any other
+options for the controlling C<"use charnames"> in the same scope apply,
+like any L<script list, C<:short> option|/DESCRIPTION>, or L<custom
+aliases|/CUSTOM ALIASES> you may have defined.
 
 There are just a few differences.  The main one is that under
-most circumstances, (see L</BUGS> for the other ones), vianame returns
+most (see L</BUGS> for the others) circumstances, vianame returns
 an ord, whereas C<\\N{...}> is seamlessly placed as a chr into the
 string in which it appears.  This leads to a second difference.
 Since an ord is returned, it can be that of any character, even one

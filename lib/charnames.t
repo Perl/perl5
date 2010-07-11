@@ -14,7 +14,7 @@ BEGIN {
     $SIG{__WARN__} = sub { push @WARN, @_ };
 }
 
-our $local_tests = 440;
+our $local_tests = 514;
 
 # ---- For the alias extensions
 require "../t/lib/common.pl";
@@ -651,4 +651,119 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     $res .= '-2' if ":" =~ /\N{COLON}/;
     $res .= '-3' if ":" =~ /\N{COLON}/i;
     is($res, "foo-foo-1--2-3");
+}
+
+{
+    # Test scoping.  Outer block sets up some things; inner blocks
+    # override them, and then see if get restored.
+
+    use charnames ":full",
+                  ":alias" => {
+                            mychar1 => "LATIN SMALL LETTER E",
+                            mychar2 => "LATIN CAPITAL LETTER A",
+                            myprivate1 => 0xE8000,  # Private use area
+                            myprivate2 => 0x100000,  # Private use area
+                    },
+                  ":short",
+                  qw( katakana ),
+                ;
+
+    my $hiragana_be = "\N{HIRAGANA LETTER BE}";
+
+    is("\N{mychar1}", "e", "Outer block: verify that \\N{mychar1} works");
+    is(charnames::vianame("mychar1"), ord("e"), "Outer block: verify that vianame(mychar1) works");
+    is("\N{mychar2}", "A", "Outer block: verify that \\N{mychar2} works");
+    is(charnames::vianame("mychar2"), ord("A"), "Outer block: verify that vianame(mychar2) works");
+    is("\N{myprivate1}", "\x{E8000}", "Outer block: verify that \\N{myprivate1} works");
+    cmp_ok(charnames::vianame("myprivate1"), "==", 0xE8000, "Outer block: verify that vianame(myprivate1) works");
+    is(charnames::viacode(0xE8000), "myprivate1", "Outer block: verify that myprivate1 viacode works");
+    is("\N{myprivate2}", "\x{100000}", "Outer block: verify that \\N{myprivate2} works");
+    cmp_ok(charnames::vianame("myprivate2"), "==", 0x100000, "Outer block: verify that vianame(myprivate2) works");
+    is(charnames::viacode(0x100000), "myprivate2", "Outer block: verify that myprivate2 viacode works");
+    is("\N{BE}", "\N{KATAKANA LETTER BE}", "Outer block: verify that \\N uses the correct script ");
+    cmp_ok(charnames::vianame("BE"), "==", ord("\N{KATAKANA LETTER BE}"), "Outer block: verify that vianame uses the correct script");
+    is("\N{Hiragana:BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
+    cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
+
+    {
+        use charnames ":full",
+                      ":alias" => {
+                                    mychar1 => "LATIN SMALL LETTER F",
+                                    myprivate1 => 0xE8001,  # Private use area
+                                },
+
+                      # BE is in both hiragana and katakana; see if
+                      # different default script delivers different
+                      # letter.
+                      qw( hiragana ),
+            ;
+        is("\N{mychar1}", "f", "Inner block: verify that \\N{mychar1} is redefined");
+        is(charnames::vianame("mychar1"), ord("f"), "Inner block: verify that vianame(mychar1) is redefined");
+        is("\N{mychar2}", "\x{FFFD}", "Inner block: verify that \\N{mychar2} outer definition didn't leak");
+        ok( ! defined charnames::vianame("mychar2"), "Inner block: verify that vianame(mychar2) outer definition didn't leak");
+        is("\N{myprivate1}", "\x{E8001}", "Inner block: verify that \\N{myprivate1} is redefined ");
+        cmp_ok(charnames::vianame("myprivate1"), "==", 0xE8001, "Inner block: verify that vianame(myprivate1) is redefined");
+        is(charnames::viacode(0xE8001), "myprivate1", "Inner block: verify that myprivate1 viacode is redefined");
+        ok(! defined charnames::viacode(0xE8000), "Inner block: verify that outer myprivate1 viacode didn't leak");
+        is("\N{myprivate2}", "\x{FFFD}", "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
+        ok(! defined charnames::vianame("myprivate2"), "Inner block: verify that vianame(myprivate2) outer definition didn't leak");
+        ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
+        is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
+        cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
+        is("\N{Hiragana:BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        ok(! defined charnames::vianame("Hiragana:BE"), "Inner block without :short: verify that vianame with short doesn't work");
+
+        {   # An inner block where only :short definitions are valid.
+            use charnames ":short";
+            is("\N{mychar1}", "\x{FFFD}", "Inner inner block: verify that mychar1 outer definition didn't leak with \\N");
+            ok( ! defined charnames::vianame("mychar1"), "Inner inner block: verify that mychar1 outer definition didn't leak with vianame");
+            is("\N{mychar2}", "\x{FFFD}", "Inner inner block: verify that mychar2 outer definition didn't leak with \\N");
+            ok( ! defined charnames::vianame("mychar2"), "Inner inner block: verify that mychar2 outer definition didn't leak with vianame");
+            is("\N{myprivate1}", "\x{FFFD}", "Inner inner block: verify that myprivate1 outer definition didn't leak with \\N");
+            ok(! defined charnames::vianame("myprivate1"), "Inner inner block: verify that myprivate1 outer definition didn't leak with vianame");
+            is("\N{myprivate2}", "\x{FFFD}", "Inner inner block: verify that myprivate2 outer definition didn't leak with \\N");
+            ok(! defined charnames::vianame("myprivate2"), "Inner inner block: verify that myprivate2 outer definition didn't leak with vianame");
+            ok(! defined charnames::viacode(0xE8000), "Inner inner block: verify that mychar1 outer outer definition didn't leak with viacode");
+            ok(! defined charnames::viacode(0xE8001), "Inner inner block: verify that mychar1 outer definition didn't leak with viacode");
+            ok(! defined charnames::viacode(0x100000), "Inner inner block: verify that mychar2 outer definition didn't leak with viacode");
+            is("\N{BE}", "\x{FFFD}", "Inner inner block without script: verify that outer :script didn't leak with \\N");
+            ok(! defined charnames::vianame("BE"), "Inner inner block without script: verify that outer :script didn't leak with vianames");
+            is("\N{HIRAGANA LETTER BE}", "\x{FFFD}", "Inner inner block without :full: verify that outer :full didn't leak with \\N");
+            is("\N{Hiragana:BE}", $hiragana_be, "Inner inner block with :short: verify that \\N works with :short");
+            cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Inner inner block with :short: verify that vianame works with :short");
+        }
+
+        # Back to previous block.  All previous tests should work again.
+        is("\N{mychar1}", "f", "Inner block: verify that \\N{mychar1} is redefined");
+        is(charnames::vianame("mychar1"), ord("f"), "Inner block: verify that vianame(mychar1) is redefined");
+        is("\N{mychar2}", "\x{FFFD}", "Inner block: verify that \\N{mychar2} outer definition didn't leak");
+        ok( ! defined charnames::vianame("mychar2"), "Inner block: verify that vianame(mychar2) outer definition didn't leak");
+        is("\N{myprivate1}", "\x{E8001}", "Inner block: verify that \\N{myprivate1} is redefined ");
+        cmp_ok(charnames::vianame("myprivate1"), "==", 0xE8001, "Inner block: verify that vianame(myprivate1) is redefined");
+        is(charnames::viacode(0xE8001), "myprivate1", "Inner block: verify that myprivate1 viacode is redefined");
+        ok(! defined charnames::viacode(0xE8000), "Inner block: verify that outer myprivate1 viacode didn't leak");
+        is("\N{myprivate2}", "\x{FFFD}", "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
+        ok(! defined charnames::vianame("myprivate2"), "Inner block: verify that vianame(myprivate2) outer definition didn't leak");
+        ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
+        is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
+        cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
+        is("\N{Hiragana:BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        ok(! defined charnames::vianame("Hiragana:BE"), "Inner block without :short: verify that vianame with short doesn't work");
+    }
+
+    # Back to previous block.  All tests from that block should work again.
+    is("\N{mychar1}", "e", "Outer block: verify that \\N{mychar1} works");
+    is(charnames::vianame("mychar1"), ord("e"), "Outer block: verify that vianame(mychar1) works");
+    is("\N{mychar2}", "A", "Outer block: verify that \\N{mychar2} works");
+    is(charnames::vianame("mychar2"), ord("A"), "Outer block: verify that vianame(mychar2) works");
+    is("\N{myprivate1}", "\x{E8000}", "Outer block: verify that \\N{myprivate1} works");
+    cmp_ok(charnames::vianame("myprivate1"), "==", 0xE8000, "Outer block: verify that vianame(myprivate1) works");
+    is(charnames::viacode(0xE8000), "myprivate1", "Outer block: verify that myprivate1 viacode works");
+    is("\N{myprivate2}", "\x{100000}", "Outer block: verify that \\N{myprivate2} works");
+    cmp_ok(charnames::vianame("myprivate2"), "==", 0x100000, "Outer block: verify that vianame(myprivate2) works");
+    is(charnames::viacode(0x100000), "myprivate2", "Outer block: verify that myprivate2 viacode works");
+    is("\N{BE}", "\N{KATAKANA LETTER BE}", "Outer block: verify that \\N uses the correct script ");
+    cmp_ok(charnames::vianame("BE"), "==", ord("\N{KATAKANA LETTER BE}"), "Outer block: verify that vianame uses the correct script");
+    is("\N{Hiragana:BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
+    cmp_ok(charnames::vianame("Hiragana:BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
 }
