@@ -6047,8 +6047,18 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 	    STRLEN ulen;
 	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
-	    if (mg && mg->mg_len != -1) {
-		ulen = mg->mg_len;
+	    if (mg && (mg->mg_len != -1 || mg->mg_ptr)) {
+		if (mg->mg_len != -1)
+		    ulen = mg->mg_len;
+		else {
+		    /* We can use the offset cache for a headstart.
+		       The longer value is stored in the first pair.  */
+		    STRLEN *cache = (STRLEN *) mg->mg_ptr;
+
+		    ulen = cache[0] + Perl_utf8_length(aTHX_ s + cache[1],
+						       s + len);
+		}
+		
 		if (PL_utf8cache < 0) {
 		    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
 		    if (real != ulen) {

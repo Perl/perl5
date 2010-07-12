@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan (tests => 28);
+plan (tests => 30);
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -196,3 +196,10 @@ is(length($uo), undef, "Length of overloaded reference");
 # ok(!defined $uo); Turns you can't test this. FIXME for pp_defined?
 
 is($warnings, 0, "There were no warnings");
+
+{
+    my $y = "\x{100}BC";
+    is(index($y, "B"), 1, 'adds an intermediate position to the offset cache');
+    is(length $y, 3,
+       'Check that sv_len_utf8() can take advantage of the offset cache');
+}
