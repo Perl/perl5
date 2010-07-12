@@ -439,6 +439,7 @@ Apmb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 : Used in scope.c
 pMox	|GP *	|newGP		|NN GV *const gv
+pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 XMpd	|void	|gv_try_downgrade|NN GV* gv
@@ -1498,7 +1499,6 @@ paRxoM	|void*	|get_arena	|const size_t arenasize |const svtype bodytype
 #if defined(PERL_IN_HV_C)
 s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|NN HV *hv
-s	|I32	|anonymise_cv	|NULLOK HEK *stash|NN SV *val
 sa	|HE*	|new_he
 sanR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 sn	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
@@ -1910,6 +1910,7 @@ s	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \
 		|const int dtype
 s	|void	|glob_assign_ref|NN SV *const dstr|NN SV *const sstr
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
+s	|void	|anonymise_cv_maybe	|NN GV *gv|NN CV *cv
 #endif
 
 #if defined(PERL_IN_TOKE_C)

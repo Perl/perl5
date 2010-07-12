@@ -1571,7 +1571,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 #else
     CvFILE(cv)		= CvFILE(proto);
 #endif
-    CvGV(cv)		= CvGV(proto);
+    cvgv_set(cv,CvGV(proto));
     CvSTASH(cv)		= CvSTASH(proto);
     if (CvSTASH(cv))
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(CvSTASH(cv)), MUTABLE_SV(cv));

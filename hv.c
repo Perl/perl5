@@ -1458,8 +1458,8 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (HvNAME(hv) && anonymise_cv(HvNAME_HEK(hv), val) && GvCVu(val))
-	mro_method_changed_in(hv);
+    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvNAME_get(hv))
+        mro_method_changed_in(hv);	/* deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
@@ -1472,33 +1472,6 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     del_HE(entry);
 }
 
-static I32
-S_anonymise_cv(pTHX_ HEK *stash, SV *val)
-{
-    CV *cv;
-
-    PERL_ARGS_ASSERT_ANONYMISE_CV;
-
-    if (val && isGV(val) && isGV_with_GP(val) && (cv = GvCV(val))) {
-	if ((SV *)CvGV(cv) == val) {
-	    GV *anongv;
-
-	    if (stash) {
-		SV *gvname = newSVhek(stash);
-		sv_catpvs(gvname, "::__ANON__");
-		anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
-		SvREFCNT_dec(gvname);
-	    } else {
-		anongv = gv_fetchpvs("__ANON__::__ANON__", GV_ADDMULTI,
-				     SVt_PVCV);
-	    }
-	    CvGV(cv) = anongv;
-	    CvANON_on(cv);
-	    return 1;
-	}
-    }
-    return 0;
-}
 
 void
 Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
@@ -1661,22 +1634,6 @@ S_hfreeentries(pTHX_ HV *hv)
 
     if (!orig_array)
 	return;
-
-    if (HvNAME(hv) && orig_array != NULL) {
-	/* symbol table: make all the contained subs ANON */
-	STRLEN i;
-	XPVHV *xhv = (XPVHV*)SvANY(hv);
-
-	for (i = 0; i <= xhv->xhv_max; i++) {
-	    HE *entry = (HvARRAY(hv))[i];
-	    for (; entry; entry = HeNEXT(entry)) {
-		SV *val = HeVAL(entry);
-		/* we need to put the subs in the __ANON__ symtable, as
-		 * this one is being cleared. */
-		anonymise_cv(NULL, val);
-	    }
-	}
-    }
 
     if (SvOOK(hv)) {
 	/* If the hash is actually a symbol table with a name, look after the

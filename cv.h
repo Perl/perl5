@@ -70,7 +70,10 @@ Returns the stash of the CV.
 #define CVf_WEAKOUTSIDE	0x0010  /* CvOUTSIDE isn't ref counted */
 #define CVf_CLONE	0x0020	/* anon CV uses external lexicals */
 #define CVf_CLONED	0x0040	/* a clone of one of those */
-#define CVf_ANON	0x0080	/* CvGV() can't be trusted */
+#define CVf_ANON	0x0080	/* implies: CV is not pointed to by a GV,
+				            CvGV is refcounted, and
+					    points to an __ANON__ GV;
+				   at compile time only, also implies sub {} */
 #define CVf_UNIQUE	0x0100	/* sub is only called once (eg PL_main_cv,
 				 * require, eval). */
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV

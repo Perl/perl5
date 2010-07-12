@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 32 );
+plan( tests => 37 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -110,56 +110,34 @@ SKIP: {
     is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
     is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
 
-    TODO: {
-        local $TODO = "anon CVs not accounted for yet";
+    my $sub = do {
+	package four;
+	sub { 1 };
+    };
+    %four:: = ();
 
-        my @results = split "\n", runperl(
-            switches    => [ "-MB", "-l" ],
-            prog        => q{
-                my $sub = do {
-                    package four;
-                    sub { 1 };
-                };
-                %four:: = ();
+    my $gv = B::svref_2object($sub)->GV;
+    ok($gv->isa(q/B::GV/), "cleared stash leaves anon CV with valid GV");
 
-                my $gv = B::svref_2object($sub)->GV;
-                print $gv->isa(q/B::GV/) ? q/ok/ : q/not ok/;
-
-                my $st = eval { $gv->STASH->NAME };
-                print $st eq q/__ANON__/ ? q/ok/ : q/not ok/;
-
-                my $sub = do {
-                    package five;
-                    sub { 1 };
-                };
-                undef %five::;
-
-                $gv = B::svref_2object($sub)->GV;
-                print $gv->isa(q/B::GV/) ? q/ok/ : q/not ok/;
-
-                $st = eval { $gv->STASH->NAME };
-                print $st eq q/__ANON__/ ? q/ok/ : q/not ok/;
-
-                print q/done/;
-            },
-            ($^O eq 'VMS') ? (stderr => 1) : ()
-        );
-
-        ok( @results == 5 && $results[4] eq "done",
-            "anon CVs in undefed stash don't segfault" )
-            or todo_skip $TODO, 4;
-
-        ok( $results[0] eq "ok", 
-            "cleared stash leaves anon CV with valid GV");
-        ok( $results[1] eq "ok",
-            "...and an __ANON__ stash");
-            
-        ok( $results[2] eq "ok", 
-            "undefed stash leaves anon CV with valid GV");
-        ok( $results[3] eq "ok",
-            "...and an __ANON__ stash");
+    my $st = eval { $gv->STASH->NAME };
+    { local $TODO = 'STASHES not anonymized';
+	is($st, q/__ANON__/, "...and an __ANON__ stash");
     }
-    
+
+    my $sub = do {
+	package five;
+	sub { 1 };
+    };
+    undef %five::;
+
+    $gv = B::svref_2object($sub)->GV;
+    ok($gv->isa(q/B::GV/), "undefed stash leaves anon CV with valid GV");
+
+    $st = eval { $gv->STASH->NAME };
+    { local $TODO = 'STASHES not anonymized';
+	is($st, q/__ANON__/, "...and an __ANON__ stash");
+    }
+
     # [perl #58530]
     fresh_perl_is(
         'sub foo { 1 }; use overload q/""/ => \&foo;' .
@@ -169,7 +147,7 @@ SKIP: {
         "no segfault with overload/deleted stash entry [#58530]",
     );
 
-    # CvSTASH should be null on a nmed sub if the stash has been deleted
+    # CvSTASH should be null on a named sub if the stash has been deleted
     {
 	package FOO;
 	sub foo {}
@@ -177,8 +155,48 @@ SKIP: {
 	package main;
 	delete $::{'FOO::'};
 	my $cv = B::svref_2object($rfoo);
-	# XXX is there a better way of testing for NULL ?
+	# (is there a better way of testing for NULL ?)
 	my $stash = $cv->STASH;
 	like($stash, qr/B::SPECIAL/, "NULL CvSTASH on named sub");
+    }
+
+    # on glob reassignment, orphaned CV should have anon CvGV
+
+    {
+	my $r;
+	eval q[
+	    package FOO2;
+	    sub f{};
+	    $r = \&f;
+	    *f = sub {};
+	];
+	delete $FOO2::{f};
+	my $cv = B::svref_2object($r);
+	my $gv = $cv->GV;
+	ok($gv->isa(q/B::GV/), "orphaned CV has valid GV");
+	is($gv->NAME, '__ANON__', "orphaned CV has anon GV");
+    }
+
+    # deleting __ANON__ glob shouldn't break things
+
+    {
+	package FOO3;
+	sub named {};
+	my $anon = sub {};
+	my $named = eval q[\&named];
+	package main;
+	delete $FOO3::{named}; # make named anonymous
+
+	delete $FOO3::{__ANON__}; # whoops!
+	my ($cv,$gv);
+	$cv = B::svref_2object($named);
+	$gv = $cv->GV;
+	ok($gv->isa(q/B::GV/), "ex-named CV has valid GV");
+	is($gv->NAME, '__ANON__', "ex-named CV has anon GV");
+
+	$cv = B::svref_2object($anon);
+	$gv = $cv->GV;
+	ok($gv->isa(q/B::GV/), "anon CV has valid GV");
+	is($gv->NAME, '__ANON__', "anon CV has anon GV");
     }
 }

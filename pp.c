@@ -838,7 +838,7 @@ PP(pp_undef)
 	    /* let user-undef'd sub keep its identity */
 	    GV* const gv = CvGV((const CV *)sv);
 	    cv_undef(MUTABLE_CV(sv));
-	    CvGV((const CV *)sv) = gv;
+	    cvgv_set(MUTABLE_CV(sv), gv);
 	}
 	break;
     case SVt_PVGV:

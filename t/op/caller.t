@@ -31,8 +31,8 @@ ok( $c[4], "hasargs true with anon sub" );
 sub foo { @c = caller(0) }
 my $fooref = delete $::{foo};
 $fooref -> ();
-is( $c[3], "(unknown)", "unknown subroutine name" );
-ok( $c[4], "hasargs true with unknown sub" );
+is( $c[3], "main::__ANON__", "deleted subroutine name" );
+ok( $c[4], "hasargs true with deleted sub" );
 
 print "# Tests with caller(1)\n";
 
@@ -60,8 +60,8 @@ ok( $c[4], "hasargs true with anon sub" );
 sub foo2 { f() }
 my $fooref2 = delete $::{foo2};
 $fooref2 -> ();
-is( $c[3], "(unknown)", "unknown subroutine name" );
-ok( $c[4], "hasargs true with unknown sub" );
+is( $c[3], "main::__ANON__", "deleted subroutine name" );
+ok( $c[4], "hasargs true with deleted sub" );
 
 # See if caller() returns the correct warning mask
 

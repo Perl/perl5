@@ -193,6 +193,43 @@ Perl_newGP(pTHX_ GV *const gv)
     return gp;
 }
 
+/* Assign CvGV(cv) = gv, handling weak references.
+ * See also S_anonymise_cv_maybe */
+
+void
+Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
+{
+    GV * const oldgv = CvGV(cv);
+    PERL_ARGS_ASSERT_CVGV_SET;
+
+    if (oldgv == gv)
+	return;
+
+    if (oldgv) {
+	if (CvANON(cv))
+	    SvREFCNT_dec(oldgv);
+	else {
+	    assert(strNE(GvNAME(oldgv),"__ANON__"));
+	    sv_del_backref(MUTABLE_SV(oldgv), MUTABLE_SV(cv));
+	}
+    }
+
+    CvGV(cv) = gv;
+
+    if (!gv)
+	return;
+
+    if (CvANON(cv)) {
+	assert(strnEQ(GvNAME(gv),"__ANON__", 8));
+	SvREFCNT_inc_simple_void_NN(gv);
+    }
+    else {
+	assert(strNE(GvNAME(gv),"__ANON__"));
+	Perl_sv_add_backref(aTHX_ MUTABLE_SV(gv), MUTABLE_SV(cv));
+    }
+}
+
+
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
@@ -266,7 +303,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	LEAVE;
 
         mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar($) { (shift) } sub ASDF::baz($); *ASDF::baz = \&Foo::bar */
-	CvGV(cv) = gv;
+	cvgv_set(cv, gv);
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH(cv) = PL_curstash;
 	if (PL_curstash)
@@ -2497,12 +2534,22 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     SV **gvp;
     PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE;
     if (!(SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
-	    !SvOBJECT(gv) && !SvMAGICAL(gv) && !SvREADONLY(gv) &&
+	    !SvOBJECT(gv) && !SvREADONLY(gv) &&
 	    isGV_with_GP(gv) && GvGP(gv) &&
 	    !GvINTRO(gv) && GvREFCNT(gv) == 1 &&
 	    !GvSV(gv) && !GvAV(gv) && !GvHV(gv) && !GvIOp(gv) && !GvFORM(gv) &&
 	    GvEGVx(gv) == gv && (stash = GvSTASH(gv))))
 	return;
+    if (SvMAGICAL(gv)) {
+        MAGIC *mg;
+	/* only backref magic is allowed */
+	if (SvGMAGICAL(gv) || SvSMAGICAL(gv))
+	    return;
+        for (mg = SvMAGIC(gv); mg; mg = mg->mg_moremagic) {
+            if (mg->mg_type != PERL_MAGIC_backref)
+                return;
+	}
+    }
     cv = GvCV(gv);
     if (!cv) {
 	HEK *gvnhek = GvNAME_HEK(gv);

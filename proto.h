@@ -959,6 +959,11 @@ PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv)
 #define PERL_ARGS_ASSERT_NEWGP	\
 	assert(gv)
 
+PERL_CALLCONV void	Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CVGV_SET	\
+	assert(cv)
+
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
@@ -4489,11 +4494,6 @@ STATIC void	S_hfreeentries(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HFREEENTRIES	\
 	assert(hv)
 
-STATIC I32	S_anonymise_cv(pTHX_ HEK *stash, SV *val)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_ANONYMISE_CV	\
-	assert(val)
-
 STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
@@ -5900,6 +5900,12 @@ STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *const tbl, const void *const 
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_PTR_TABLE_FIND	\
 	assert(tbl)
+
+STATIC void	S_anonymise_cv_maybe(pTHX_ GV *gv, CV *cv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ANONYMISE_CV_MAYBE	\
+	assert(gv); assert(cv)
 
 #endif
 

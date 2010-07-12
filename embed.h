@@ -292,6 +292,9 @@
 #define gv_fetchpv		Perl_gv_fetchpv
 #define gv_fullname		Perl_gv_fullname
 #define gv_fullname4		Perl_gv_fullname4
+#ifdef PERL_CORE
+#define cvgv_set		Perl_cvgv_set
+#endif
 #define gv_init			Perl_gv_init
 #define gv_name_set		Perl_gv_name_set
 #ifdef PERL_CORE
@@ -1243,7 +1246,6 @@
 #ifdef PERL_CORE
 #define hsplit			S_hsplit
 #define hfreeentries		S_hfreeentries
-#define anonymise_cv		S_anonymise_cv
 #define new_he			S_new_he
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
@@ -1614,6 +1616,7 @@
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
 #define ptr_table_find		S_ptr_table_find
+#define anonymise_cv_maybe	S_anonymise_cv_maybe
 #endif
 #endif
 #if defined(PERL_IN_TOKE_C)
@@ -2729,6 +2732,7 @@
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
 #define gv_fullname4(a,b,c,d)	Perl_gv_fullname4(aTHX_ a,b,c,d)
 #ifdef PERL_CORE
+#define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #endif
 #define gv_init(a,b,c,d,e)	Perl_gv_init(aTHX_ a,b,c,d,e)
 #define gv_name_set(a,b,c,d)	Perl_gv_name_set(aTHX_ a,b,c,d)
@@ -3682,7 +3686,6 @@
 #ifdef PERL_CORE
 #define hsplit(a)		S_hsplit(aTHX_ a)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
-#define anonymise_cv(a,b)	S_anonymise_cv(aTHX_ a,b)
 #define new_he()		S_new_he(aTHX)
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
@@ -4066,6 +4069,7 @@
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
 #define ptr_table_find		S_ptr_table_find
+#define anonymise_cv_maybe(a,b)	S_anonymise_cv_maybe(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_TOKE_C)

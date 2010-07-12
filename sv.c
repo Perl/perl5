@@ -5420,7 +5420,6 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     SV **svp = AvARRAY(av);
 
     PERL_ARGS_ASSERT_SV_KILL_BACKREFS;
-    PERL_UNUSED_ARG(sv);
 
     if (svp) {
 	SV *const *const last = svp + AvFILLp(av);
@@ -5438,15 +5437,28 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 		    SvSETMAGIC(referrer);
 		} else if (SvTYPE(referrer) == SVt_PVGV ||
 			   SvTYPE(referrer) == SVt_PVLV) {
+		    assert(SvTYPE(sv) == SVt_PVHV); /* stash backref */
 		    /* You lookin' at me?  */
 		    assert(GvSTASH(referrer));
 		    assert(GvSTASH(referrer) == (const HV *)sv);
 		    GvSTASH(referrer) = 0;
-		} else if (SvTYPE(referrer) == SVt_PVCV) {
-		    /* You lookin' at me?  */
-		    assert(CvSTASH(referrer));
-		    assert(CvSTASH(referrer) == (const HV *)sv);
-		    CvSTASH(referrer) = 0;
+		} else if (SvTYPE(referrer) == SVt_PVCV ||
+			   SvTYPE(referrer) == SVt_PVFM) {
+		    if (SvTYPE(sv) == SVt_PVHV) { /* stash backref */
+			/* You lookin' at me?  */
+			assert(CvSTASH(referrer));
+			assert(CvSTASH(referrer) == (const HV *)sv);
+			CvSTASH(referrer) = 0;
+		    }
+		    else {
+			assert(SvTYPE(sv) == SVt_PVGV);
+			/* You lookin' at me?  */
+			assert(CvGV(referrer));
+			assert(CvGV(referrer) == (const GV *)sv);
+			anonymise_cv_maybe(MUTABLE_GV(sv),
+						MUTABLE_CV(referrer));
+		    }
+
 		} else {
 		    Perl_croak(aTHX_
 			       "panic: magic_killbackrefs (flags=%"UVxf")",
@@ -5640,6 +5652,44 @@ Perl_sv_replace(pTHX_ register SV *const sv, register SV *const nsv)
     SvREFCNT(nsv) = 0;
     del_SV(nsv);
 }
+
+/* We're about to free a GV which has a CV that refers back to us.
+ * If that CV will outlive us, make it anonymous (i.e. fix up its CvGV
+ * field) */
+
+STATIC void
+S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
+{
+    char *stash;
+    SV *gvname;
+    GV *anongv;
+
+    PERL_ARGS_ASSERT_ANONYMISE_CV_MAYBE;
+
+    /* be assertive! */
+    assert(SvREFCNT(gv) == 0);
+    assert(isGV(gv) && isGV_with_GP(gv));
+    assert(GvGP(gv));
+    assert(!CvANON(cv));
+    assert(CvGV(cv) == gv);
+
+    /* will the CV shortly be freed by gp_free() ? */
+    if (GvCV(gv) == cv && GvGP(gv)->gp_refcnt < 2 && SvREFCNT(cv) < 2) {
+	CvGV(cv) = NULL;
+	return;
+    }
+
+    /* if not, anonymise: */
+    stash  = GvSTASH(gv) ? HvNAME(GvSTASH(gv)) : NULL;
+    gvname = Perl_newSVpvf(aTHX_ "%s::__ANON__",
+					stash ? stash : "__ANON__");
+    anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
+    SvREFCNT_dec(gvname);
+
+    CvANON_on(cv);
+    CvGV(cv) = MUTABLE_GV(SvREFCNT_inc(anongv));
+}
+
 
 /*
 =for apidoc sv_clear
@@ -10752,6 +10802,13 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
+
+	if ((param->flags & CLONEf_JOIN_IN)
+		&& mg->mg_type == PERL_MAGIC_backref)
+	    /* when joining, we let the individual SVs add themselves to
+	     * backref as needed. */
+	    continue;
+
 	Newx(nmg, 1, MAGIC);
 	*mgprev_p = nmg;
 	mgprev_p = &(nmg->mg_moremagic);
@@ -10991,10 +11048,16 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
     PERL_ARGS_ASSERT_RVPV_DUP;
 
     if (SvROK(sstr)) {
-	SvRV_set(dstr, SvWEAKREF(sstr)
-		       ? sv_dup(SvRV_const(sstr), param)
-		       : sv_dup_inc(SvRV_const(sstr), param));
-
+	if (SvWEAKREF(sstr)) {
+	    SvRV_set(dstr, sv_dup(SvRV_const(sstr), param));
+	    if (param->flags & CLONEf_JOIN_IN) {
+		/* if joining, we add any back references individually rather
+		 * than copying the whole backref array */
+		Perl_sv_add_backref(aTHX_ SvRV(dstr), dstr);
+	    }
+	}
+	else
+	    SvRV_set(dstr, sv_dup_inc(SvRV_const(sstr), param));
     }
     else if (SvPVX_const(sstr)) {
 	/* Has something there */
@@ -11372,8 +11435,13 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		}
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
-		CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
-		    NULL : gv_dup(CvGV(dstr), param) ;
+		CvGV(dstr) =
+		    CvANON(dstr)
+		    ? gv_dup_inc(CvGV(sstr), param)
+		    : (param->flags & CLONEf_JOIN_IN)
+			? NULL
+			: gv_dup(CvGV(sstr), param);
+
 		CvPADLIST(dstr) = padlist_dup(CvPADLIST(sstr), param);
 		CvOUTSIDE(dstr)	=
 		    CvWEAKOUTSIDE(sstr)

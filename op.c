@@ -5459,7 +5459,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
-    CvGV(cv) = NULL;
+    cvgv_set(cv, NULL);
 
     pad_undef(cv);
 
@@ -5476,8 +5476,9 @@ Perl_cv_undef(pTHX_ CV *cv)
     if (CvISXSUB(cv) && CvXSUB(cv)) {
 	CvXSUB(cv) = NULL;
     }
-    /* delete all flags except WEAKOUTSIDE */
-    CvFLAGS(cv) &= CVf_WEAKOUTSIDE;
+    /* delete all flags except WEAKOUTSIDE and ANON, which indicate the
+     * ref status of CvOUTSIDE and CvGV */
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_ANON);
 }
 
 void
@@ -5871,7 +5872,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (!CvGV(cv)) {
-	CvGV(cv) = gv;
+	cvgv_set(cv, gv);
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH(cv) = PL_curstash;
 	if (PL_curstash)
@@ -6233,7 +6234,9 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
             mro_method_changed_in(GvSTASH(gv)); /* newXS */
 	}
     }
-    CvGV(cv) = gv;
+    if (!name)
+	CvANON_on(cv);
+    cvgv_set(cv, gv);
     (void)gv_fetchfile(filename);
     CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
 				   an external constant string */
@@ -6242,8 +6245,6 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 
     if (name)
 	process_special_blocks(name, gv, cv);
-    else
-	CvANON_on(cv);
 
     return cv;
 }
@@ -6284,7 +6285,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     }
     cv = PL_compcv;
     GvFORM(gv) = cv;
-    CvGV(cv) = gv;
+    cvgv_set(cv, gv);
     CvFILE_set_from_cop(cv, PL_curcop);
 
 
