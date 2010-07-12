@@ -5835,6 +5835,12 @@ STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U
 #define PERL_ARGS_ASSERT_SV_POS_U2B_CACHED	\
 	assert(sv); assert(mgp); assert(start); assert(send)
 
+STATIC void	S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN ulen)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_UTF8_MG_LEN_CACHE_UPDATE	\
+	assert(sv); assert(mgp)
+
 STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN byte, const STRLEN utf8, const STRLEN blen)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

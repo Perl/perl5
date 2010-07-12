@@ -1594,6 +1594,7 @@
 #define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards
 #define sv_pos_u2b_midway	S_sv_pos_u2b_midway
 #define sv_pos_u2b_cached	S_sv_pos_u2b_cached
+#define utf8_mg_len_cache_update	S_utf8_mg_len_cache_update
 #define utf8_mg_pos_cache_update	S_utf8_mg_pos_cache_update
 #define sv_pos_b2u_midway	S_sv_pos_b2u_midway
 #define F0convert		S_F0convert
@@ -4044,6 +4045,7 @@
 #define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards
 #define sv_pos_u2b_midway	S_sv_pos_u2b_midway
 #define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
+#define utf8_mg_len_cache_update(a,b,c)	S_utf8_mg_len_cache_update(aTHX_ a,b,c)
 #define utf8_mg_pos_cache_update(a,b,c,d,e)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #define F0convert		S_F0convert

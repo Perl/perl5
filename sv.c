@@ -6065,19 +6065,7 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 	    }
 	    else {
 		ulen = Perl_utf8_length(aTHX_ s, s + len);
-		if (!SvREADONLY(sv)) {
-		    if (!mg && (SvTYPE(sv) < SVt_PVMG ||
-				!(mg = mg_find(sv, PERL_MAGIC_utf8)))) {
-			mg = sv_magicext(sv, 0, PERL_MAGIC_utf8,
-					 &PL_vtbl_utf8, 0, 0);
-		    }
-		    assert(mg);
-		    mg->mg_len = ulen;
-		    /* For now, treat "overflowed" as "still unknown".
-		       See RT #72924.  */
-		    if (ulen != (STRLEN) mg->mg_len)
-			mg->mg_len = -1;
-		}
+		utf8_mg_len_cache_update(sv, &mg, ulen);
 	    }
 	    return ulen;
 	}
@@ -6356,6 +6344,26 @@ Perl_sv_pos_u2b(pTHX_ register SV *const sv, I32 *const offsetp, I32 *const lenp
 	*offsetp = (I32)sv_pos_u2b_flags(sv, (STRLEN)*offsetp, NULL,
 					 SV_GMAGIC|SV_CONST_RETURN);
     }
+}
+
+static void
+S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp,
+			   const STRLEN ulen)
+{
+    PERL_ARGS_ASSERT_UTF8_MG_LEN_CACHE_UPDATE;
+    if (SvREADONLY(sv))
+	return;
+
+    if (!*mgp && (SvTYPE(sv) < SVt_PVMG ||
+		  !(*mgp = mg_find(sv, PERL_MAGIC_utf8)))) {
+	*mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, &PL_vtbl_utf8, 0, 0);
+    }
+    assert(*mgp);
+
+    (*mgp)->mg_len = ulen;
+    /* For now, treat "overflowed" as "still unknown". See RT #72924.  */
+    if (ulen != (STRLEN) (*mgp)->mg_len)
+	(*mgp)->mg_len = -1;
 }
 
 /* Create and update the UTF8 magic offset cache, with the proffered utf8/

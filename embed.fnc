@@ -1890,6 +1890,8 @@ sn	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
 s	|STRLEN	|sv_pos_u2b_cached|NN SV *const sv|NN MAGIC **const mgp \
 		|NN const U8 *const start|NN const U8 *const send \
 		|STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
+s	|void	|utf8_mg_len_cache_update|NN SV *const sv|NN MAGIC **const mgp \
+		|const STRLEN ulen
 s	|void	|utf8_mg_pos_cache_update|NN SV *const sv|NN MAGIC **const mgp \
 		|const STRLEN byte|const STRLEN utf8|const STRLEN blen
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \
