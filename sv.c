@@ -6676,8 +6676,12 @@ Perl_sv_pos_b2u(pTHX_ register SV *const sv, I32 *const offsetp)
     }
     *offsetp = len;
 
-    if (PL_utf8cache)
-	utf8_mg_pos_cache_update(sv, &mg, byte, len, blen);
+    if (PL_utf8cache) {
+	if (blen == byte)
+	    utf8_mg_len_cache_update(sv, &mg, len);
+	else
+	    utf8_mg_pos_cache_update(sv, &mg, byte, len, blen);
+    }
 }
 
 /*
