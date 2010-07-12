@@ -6061,16 +6061,7 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 		
 		if (PL_utf8cache < 0) {
 		    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
-		    if (real != ulen) {
-			/* Need to turn the assertions off otherwise we may
-			   recurse infinitely while printing error messages.
-			*/
-			SAVEI8(PL_utf8cache);
-			PL_utf8cache = 0;
-			Perl_croak(aTHX_ "panic: sv_len_utf8 cache %"UVuf
-				   " real %"UVuf" for %"SVf,
-				   (UV) ulen, (UV) real, SVfARG(sv));
-		    }
+		    assert_uft8_cache_coherent("sv_len_utf8", ulen, real, sv);
 		}
 	    }
 	    else {
@@ -6245,17 +6236,9 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 						      send, &uoffset, &at_end);
 	uoffset += uoffset0;
 
-	if (found && PL_utf8cache < 0) {
-	    if (real_boffset != boffset) {
-		/* Need to turn the assertions off otherwise we may recurse
-		   infinitely while printing error messages.  */
-		SAVEI8(PL_utf8cache);
-		PL_utf8cache = 0;
-		Perl_croak(aTHX_ "panic: sv_pos_u2b_cache cache %"UVuf
-			   " real %"UVuf" for %"SVf,
-			   (UV) boffset, (UV) real_boffset, SVfARG(sv));
-	    }
-	}
+	if (found && PL_utf8cache < 0)
+	    assert_uft8_cache_coherent("sv_pos_u2b_cache", boffset,
+				       real_boffset, sv);
 	boffset = real_boffset;
     }
 
@@ -6443,14 +6426,8 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	const U8 *start = (const U8 *) SvPVX_const(sv);
 	const STRLEN realutf8 = utf8_length(start, start + byte);
 
-	if (realutf8 != utf8) {
-	    /* Need to turn the assertions off otherwise we may recurse
-	       infinitely while printing error messages.  */
-	    SAVEI8(PL_utf8cache);
-	    PL_utf8cache = 0;
-	    Perl_croak(aTHX_ "panic: utf8_mg_pos_cache_update cache %"UVuf
-		       " real %"UVuf" for %"SVf, (UV) utf8, (UV) realutf8, SVfARG(sv));
-	}
+	assert_uft8_cache_coherent("utf8_mg_pos_cache_update", utf8, realutf8,
+				   sv);
     }
 
     /* Cache is held with the later position first, to simplify the code
@@ -6671,17 +6648,8 @@ Perl_sv_pos_b2u(pTHX_ register SV *const sv, I32 *const offsetp)
     if (!found || PL_utf8cache < 0) {
 	const STRLEN real_len = utf8_length(s, send);
 
-	if (found && PL_utf8cache < 0) {
-	    if (len != real_len) {
-		/* Need to turn the assertions off otherwise we may recurse
-		   infinitely while printing error messages.  */
-		SAVEI8(PL_utf8cache);
-		PL_utf8cache = 0;
-		Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVuf
-			   " real %"UVuf" for %"SVf,
-			   (UV) len, (UV) real_len, SVfARG(sv));
-	    }
-	}
+	if (found && PL_utf8cache < 0)
+	    assert_uft8_cache_coherent("sv_pos_b2u", len, real_len, sv);
 	len = real_len;
     }
     *offsetp = len;
@@ -6692,6 +6660,25 @@ Perl_sv_pos_b2u(pTHX_ register SV *const sv, I32 *const offsetp)
 	else
 	    utf8_mg_pos_cache_update(sv, &mg, byte, len, blen);
     }
+}
+
+static void
+S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
+			     STRLEN real, SV *const sv)
+{
+    PERL_ARGS_ASSERT_ASSERT_UFT8_CACHE_COHERENT;
+
+    /* As this is debugging only code, save space by keeping this test here,
+       rather than inlining it in all the callers.  */
+    if (from_cache == real)
+	return;
+
+    /* Need to turn the assertions off otherwise we may recurse infinitely
+       while printing error messages.  */
+    SAVEI8(PL_utf8cache);
+    PL_utf8cache = 0;
+    Perl_croak(aTHX_ "panic: %s cache %"UVuf" real %"UVuf" for %"SVf,
+	       func, (UV) from_cache, (UV) real, SVfARG(sv));
 }
 
 /*

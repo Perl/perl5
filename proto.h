@@ -5855,6 +5855,12 @@ STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const targe
 #define PERL_ARGS_ASSERT_SV_POS_B2U_MIDWAY	\
 	assert(s); assert(target); assert(end)
 
+STATIC void	S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache, STRLEN real, SV *const sv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_ASSERT_UFT8_CACHE_COHERENT	\
+	assert(func); assert(sv)
+
 STATIC char *	S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);

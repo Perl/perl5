@@ -1597,6 +1597,7 @@
 #define utf8_mg_len_cache_update	S_utf8_mg_len_cache_update
 #define utf8_mg_pos_cache_update	S_utf8_mg_pos_cache_update
 #define sv_pos_b2u_midway	S_sv_pos_b2u_midway
+#define assert_uft8_cache_coherent	S_assert_uft8_cache_coherent
 #define F0convert		S_F0convert
 #endif
 #  if defined(PERL_OLD_COPY_ON_WRITE)
@@ -4048,6 +4049,7 @@
 #define utf8_mg_len_cache_update(a,b,c)	S_utf8_mg_len_cache_update(aTHX_ a,b,c)
 #define utf8_mg_pos_cache_update(a,b,c,d,e)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
+#define assert_uft8_cache_coherent(a,b,c,d)	S_assert_uft8_cache_coherent(aTHX_ a,b,c,d)
 #define F0convert		S_F0convert
 #endif
 #  if defined(PERL_OLD_COPY_ON_WRITE)
