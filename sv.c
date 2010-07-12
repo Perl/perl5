@@ -6077,7 +6077,7 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
    offset.  */
 static STRLEN
 S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
-		      STRLEN *const uoffset_p)
+		      STRLEN *const uoffset_p, bool *const at_end)
 {
     const U8 *s = start;
     STRLEN uoffset = *uoffset_p;
@@ -6088,7 +6088,11 @@ S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
 	--uoffset;
 	s += UTF8SKIP(s);
     }
-    if (s > send) {
+    if (s == send) {
+	*at_end = TRUE;
+    }
+    else if (s > send) {
+	*at_end = TRUE;
 	/* This is the existing behaviour. Possibly it should be a croak, as
 	   it's actually a bounds error  */
 	s = send;
@@ -6145,6 +6149,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 {
     STRLEN boffset = 0; /* Actually always set, but let's keep gcc happy.  */
     bool found = FALSE;
+    bool at_end = FALSE;
 
     PERL_ARGS_ASSERT_SV_POS_U2B_CACHED;
 
@@ -6185,7 +6190,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 		    uoffset -= uoffset0;
 		    boffset = boffset0
 			+ sv_pos_u2b_forwards(start + boffset0,
-						send, &uoffset);
+					      send, &uoffset, &at_end);
 		    uoffset += uoffset0;
 		}
 	    }
@@ -6227,7 +6232,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	STRLEN real_boffset;
 	uoffset -= uoffset0;
 	real_boffset = boffset0 + sv_pos_u2b_forwards(start + boffset0,
-						      send, &uoffset);
+						      send, &uoffset, &at_end);
 	uoffset += uoffset0;
 
 	if (found && PL_utf8cache < 0) {
@@ -6244,8 +6249,12 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	boffset = real_boffset;
     }
 
-    if (PL_utf8cache)
-	utf8_mg_pos_cache_update(sv, mgp, boffset, uoffset, send - start);
+    if (PL_utf8cache) {
+	if (at_end)
+	    utf8_mg_len_cache_update(sv, mgp, uoffset);
+	else
+	    utf8_mg_pos_cache_update(sv, mgp, boffset, uoffset, send - start);
+    }
     return boffset;
 }
 

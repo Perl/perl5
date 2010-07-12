@@ -5814,12 +5814,13 @@ STATIC I32	S_expect_number(pTHX_ char **const pattern)
 	assert(pattern)
 
 #
-STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send, STRLEN *const uoffset)
+STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send, STRLEN *const uoffset, bool *const at_end)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2)
-			__attribute__nonnull__(3);
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4);
 #define PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS	\
-	assert(start); assert(send); assert(uoffset)
+	assert(start); assert(send); assert(uoffset); assert(at_end)
 
 STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN uoffset, const STRLEN uend)
 			__attribute__nonnull__(1)
