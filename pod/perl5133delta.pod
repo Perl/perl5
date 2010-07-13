@@ -51,9 +51,13 @@ See L<charnames> for details on all these changes.
 
 =head2 Other enhancements
 
+=over
+
 =item *
 
 Uppercase X/B allowed in hexadecimal/binary literals (RT#76296) (a674e8d)
+
+=back
 
 =head1 Security
 
@@ -440,9 +444,13 @@ Added prototypes for tie() and untie() to allow overloading (RT#75902)
 
 =back
 
+=over 4
+
 =item *
 
 XXX Lots of block hook changes (PL_blockhooks) -- needs an overall summary
+
+=back
 
 =head1 Selected Bug Fixes
 
