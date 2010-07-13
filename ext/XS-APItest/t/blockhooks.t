@@ -13,9 +13,6 @@ BEGIN { package XS::APItest; *main::bhkav = \@XS::APItest::bhkav }
 # 'no t::BHK' switches recording off again.
 # 'use t::BHK push => "foo"' pushes onto @bhkav
 
-BEGIN { diag "## COMPILE TIME ##" }
-diag "## RUN TIME ##";
-
 use t::BHK;
     1;
 no t::BHK;
