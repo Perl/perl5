@@ -36,6 +36,10 @@ customary abbreviations for the C0 and C1 control characters (such as ACK, BEL,
 CAN, etc.), as well as a few new variants in common usage of some C1 full
 names.
 
+C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
+character in Unicode.  Previously, they didn't know about the Hangul syllables
+nor a number of CJK (Chinese/Japanese/Korean) characters.
+
 In the past, it was ineffective to override one of Perl's abbreviations with
 your own custom alias.  Now it works.
 

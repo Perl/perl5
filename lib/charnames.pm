@@ -568,14 +568,28 @@ sub lookup_name ($;$) {
       ## If :full, look for the name exactly; runtime implies full
       my $found_full_in_table = 0;  # Tells us if can cache the result
       if ($^H{charnames_full}) {
-        if ($txt =~ /\t\t\Q$name\E$/m) {
-          @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
-          $found_full_in_table = 1;
+
+        # See if the name is one which is algorithmically determinable.
+        # The subroutine is included in Name.pl.  The table contained in
+        # $txt doesn't contain these.  Experiments show that checking
+        # for these before checking for the regular names has no
+        # noticeable impact on performance for the regular names, but
+        # the other way around slows down finding these immensely.
+        # Algorithmically determinables are not placed in the cache (that
+        # $found_full_in_table indicates) because that uses up memory,
+        # and finding these again is fast.
+        if (! defined ($ord = name_to_code_point_special($name))) {
+
+          # Not algorthmically determinable; look up in the table.
+          if ($txt =~ /\t\t\Q$name\E$/m) {
+            @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
+            $found_full_in_table = 1;
+          }
         }
       }
 
       # If we didn't get it above, keep looking
-      if (! $found_full_in_table) {
+      if (! $found_full_in_table && ! defined $ord) {
 
         # If :short is allowed, see if input is like "greek:Sigma".
         my $scripts_trie;
@@ -605,24 +619,26 @@ sub lookup_name ($;$) {
         @off = ($-[0] + 2, $+[0]);
       }
 
-      ##
-      ## Now know where in the string the name starts.
-      ## The code, in hex, is before that.
-      ##
-      ## The code can be 4-6 characters long, so we've got to sort of
-      ## go look for it, just after the newline that comes before $off[0].
-      ##
-      ## This would be much easier if unicore/Name.pl had info in
-      ## a name/code order, instead of code/name order.
-      ##
-      ## The +1 after the rindex() is to skip past the newline we're finding,
-      ## or, if the rindex() fails, to put us to an offset of zero.
-      ##
-      my $hexstart = rindex($txt, "\n", $off[0]) + 1;
+      if (! defined $ord) {
+        ##
+        ## Now know where in the string the name starts.
+        ## The code, in hex, is before that.
+        ##
+        ## The code can be 4-6 characters long, so we've got to sort of
+        ## go look for it, just after the newline that comes before $off[0].
+        ##
+        ## This would be much easier if unicore/Name.pl had info in
+        ## a name/code order, instead of code/name order.
+        ##
+        ## The +1 after the rindex() is to skip past the newline we're finding,
+        ## or, if the rindex() fails, to put us to an offset of zero.
+        ##
+        my $hexstart = rindex($txt, "\n", $off[0]) + 1;
 
-      ## we know where it starts, so turn into number -
-      ## the ordinal for the char.
-      $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
+        ## we know where it starts, so turn into number -
+        ## the ordinal for the char.
+        $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
+      }
 
       # Cache the input so as to not have to search the large table
       # again, but only if it came from the one search that we cache.
@@ -768,6 +784,13 @@ sub viacode {
   # looking through it.  Checking the length first is slightly faster
   if (length($hex) <= 5 || CORE::hex($hex) <= 0x10FFFF) {
     $txt = do "unicore/Name.pl" unless $txt;
+
+    # See if the name is algorithmically determinable.
+    my $algorithmic = code_point_to_name_special(CORE::hex $hex);
+    if (defined $algorithmic) {
+      $viacode{$hex} = $algorithmic;
+      return $algorithmic;
+    }
 
     # Return the official name, if exists.  It's unclear to me (khw) at
     # this juncture if it is better to return a user-defined override, so
