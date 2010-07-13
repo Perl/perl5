@@ -514,7 +514,7 @@ sub _resolve_prereqs {
             my $sub = CPANPLUS::Module->can(
                         'module_is_supplied_with_perl_core' );
             my $core = $sub->( $mod );
-            unless ( $core ) {
+            unless ( defined $core ) {
                error( loc( "No such module '%1' found on CPAN", $mod ) );
                next;
             }

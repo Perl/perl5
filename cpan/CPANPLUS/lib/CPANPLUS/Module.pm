@@ -447,7 +447,7 @@ L<Module::ThirdParty> for more details.
 
         my $core = $self->module_is_supplied_with_perl_core;
         ### ok, so it's found in the core, BUT it could be dual-lifed
-        if ($core) {
+        if (defined $core) {
             ### if the package is newer than installed, then it's dual-lifed
             return if $cb->_vcmp($self->version, $self->installed_version) > 0;
             
@@ -480,8 +480,13 @@ L<Module::ThirdParty> for more details.
         ### broken for perl 5.10: Module::CoreList's version key for the 
         ### hash has a different number of trailing zero than $] aka
         ### $PERL_VERSION.
-        my $core = $Module::CoreList::version{ 0+$ver }->{ $name };
 
+        my $core;
+
+        if ( exists $Module::CoreList::version{ 0+$ver }->{ $name } ) {
+          $core = $Module::CoreList::version{ 0+$ver }->{ $name };
+          $core = 0 unless $core;
+        }
         return $core;
     }
 

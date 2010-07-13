@@ -37,12 +37,15 @@ my $Default = SHELL_DEFAULT;
 my $TestMod = TEST_CONF_MODULE;
 my $TestAuth= TEST_CONF_AUTHOR;
 
+unless ( -t ) {
+  ok('We are not on a terminal');
+  exit 0;
+}
  
 ### basic load tests
 use_ok( $Class, 'Default' );
 is( $Class->which,  SHELL_DEFAULT,
                                 "Default shell loaded" );
-
 ### create an object
 my $Shell = $Class->new( $Conf );
 ok( $Shell,                     "   New object created" );

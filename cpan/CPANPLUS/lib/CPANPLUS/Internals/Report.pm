@@ -359,7 +359,7 @@ sub _send_report {
                 ### version of perl (5.8.6+ and 5.9.2-4 at the time of writing)
                 ### 'Config' is not recognized as a core module. See this bug:
                 ###    http://rt.cpan.org/Ticket/Display.html?id=32155
-                if( !$obj and !$sub->( $prq_name ) ) {
+                if( !$obj and !defined $sub->( $prq_name ) ) {
                     msg(loc( "Prerequisite '%1' for '%2' could not be obtained".
                              " from CPAN -- sending N/A grade", 
                              $prq_name, $name ), $verbose );
