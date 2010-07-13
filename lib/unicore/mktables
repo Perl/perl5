@@ -9356,21 +9356,20 @@ END
                 $file->carp_bad_line("Expecting a closing range line, not a $fields[$CHARNAME]'.  Trying anyway");
                 $in_range = 0;
             }
-            # XXX until charnames catches up.
-#            if ($fields[$CHARNAME] =~ s/- $cp $//x) {
-#
-#                # These are code points whose names end in their code points,
-#                # which means the names are algorithmically derivable from the
-#                # code points.  To shorten the output Name file, the algorithm
-#                # for deriving these is placed in the file instead of each
-#                # code point, so they have map type $CP_IN_NAME
-#                $fields[$CHARNAME] = $CMD_DELIM
-#                                 . $MAP_TYPE_CMD
-#                                 . '='
-#                                 . $CP_IN_NAME
-#                                 . $CMD_DELIM
-#                                 . $fields[$CHARNAME];
-#            }
+            if ($fields[$CHARNAME] =~ s/- $cp $//x) {
+
+                # These are code points whose names end in their code points,
+                # which means the names are algorithmically derivable from the
+                # code points.  To shorten the output Name file, the algorithm
+                # for deriving these is placed in the file instead of each
+                # code point, so they have map type $CP_IN_NAME
+                $fields[$CHARNAME] = $CMD_DELIM
+                                 . $MAP_TYPE_CMD
+                                 . '='
+                                 . $CP_IN_NAME
+                                 . $CMD_DELIM
+                                 . $fields[$CHARNAME];
+            }
             $fields[$NAME] = $fields[$CHARNAME];
 
             # Some official names are really two alternate names with one in
