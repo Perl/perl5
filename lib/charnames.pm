@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -576,35 +576,38 @@ sub lookup_name ($;$) {
       # If we didn't get it above keep looking
       if (! $found_full_in_table) {
 
-        # If :short is allowed, look for the short name, which is like
-        # "greek:Sigma"
+        # If :short is allowed, see if input is like "greek:Sigma".
+        my $scripts_ref;
+        my $name_ref;
         if (($^H{charnames_short})
-            && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs) {
-          my ($script, $cname) = ($1, $2);
-          my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-          if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+            && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs)
+        {
+            my @script = uc $1;
+            my $character_name = $2;
+            $scripts_ref = \@script;
+            $name_ref = \$character_name;
+        }
+        else {
+            $scripts_ref = $^H{charnames_scripts};
+            $name_ref = \$name;
+        }
+
+        my $case = $$name_ref =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+        for my $script (@{$scripts_ref}) {
+          if ($txt =~
+              m/\t\t \Q$script\E \ (?:$case\ )? LETTER \ \U\Q$$name_ref\E $/xm)
+          {
             @off = ($-[0] + 2, $+[0]);
+            goto found_one;
           }
         }
 
-        ## If we still don't have it, check for the name among the loaded
-        ## scripts.
-        unless (@off) {
-          my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-          for my $script (@{$^H{charnames_scripts}}) {
-            if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
-              @off = ($-[0] + 2, $+[0]);
-              last;
-            }
-          }
+        # Here we still don't have it, give up.
+        return if $runtime;
+        carp "Unknown charname '$name'";
+        return 0xFFFD;
 
-          ## If we don't have it by now, give up.
-          unless (@off) {
-            return if $runtime;
-            carp "Unknown charname '$name'";
-            return 0xFFFD;
-          }
-        }
+found_one:
       }
 
       ##
