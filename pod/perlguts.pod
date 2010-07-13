@@ -1905,10 +1905,12 @@ start.
 
 Once registered, there is no mechanism to switch these hooks off, so if
 that is necessary you will need to do this yourself. An entry in C<%^H>
-is probably the best way, so the effect is lexically scoped. You should
-also be aware that generally speaking at least one scope will have
-opened before your extension is loaded, so you will see some
-C<pre/post_end> pairs that didn't have a matching C<start>.
+is probably the best way, so the effect is lexically scoped; however it
+is also possible to use the C<BhkDISABLE> and C<BhkENABLE> macros to
+temporarily switch entries on and off. You should also be aware that
+generally speaking at least one scope will have opened before your
+extension is loaded, so you will see some C<pre/post_end> pairs that
+didn't have a matching C<start>.
 
 =head1 Examining internal data structures with the C<dump> functions
 

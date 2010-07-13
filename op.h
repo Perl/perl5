@@ -670,6 +670,17 @@ Set an entry in the BHK structure, and set the flags to indicate it is
 valid. I<which> is a preprocessing token indicating which entry to set.
 The type of I<ptr> depends on the entry.
 
+=for apidoc Am|void|BhkDISABLE|BHK *hk|which
+Temporarily disable an entry in this BHK structure, by clearing the
+appropriate flag. I<which> is a preprocessor token indicating which
+entry to disable.
+
+=for apidoc Am|void|BhkENABLE|BHK *hk|which
+Re-enable an entry in this BHK structure, by setting the appropriate
+flag. I<which> is a preprocessor token indicating which entry to enable.
+This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
+pointer.
+
 =for apidoc m|void|CALL_BLOCK_HOOKS|which|arg
 Call all the registered block hooks for type I<which>. I<which> is a
 preprocessing token; the type of I<arg> depends on I<which>.
@@ -687,10 +698,21 @@ preprocessing token; the type of I<arg> depends on I<which>.
 #define BhkENTRY(hk, which) \
     ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->bhk_ ## which) : NULL)
 
+#define BhkENABLE(hk, which) \
+    STMT_START { \
+	BhkFLAGS(hk) |= BHKf_ ## which; \
+	assert(BhkENTRY(hk, which)); \
+    } STMT_END
+
+#define BhkDISABLE(hk, which) \
+    STMT_START { \
+	BhkFLAGS(hk) &= ~(BHKf_ ## which); \
+    } STMT_END
+
 #define BhkENTRY_set(hk, which, ptr) \
     STMT_START { \
 	(hk)->bhk_ ## which = ptr; \
-	(hk)->bhk_flags |= BHKf_ ## which; \
+	BhkENABLE(hk, which); \
     } STMT_END
 
 #define CALL_BLOCK_HOOKS(which, arg) \
