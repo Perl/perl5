@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.62";
+$VERSION                = "1.64";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -212,10 +212,15 @@ sub read {
 sub _get_handle {
     my $self     = shift;
     my $file     = shift;   return unless defined $file;
-                            return $file if ref $file;
     my $compress = shift || 0;
     my $mode     = shift || READ_ONLY->( ZLIB ); # default to read only
 
+    ### Check if file is a file handle or IO glob
+    if ( ref $file ) {
+	return $file if eval{ *$file{IO} };
+	return $file if eval{ $file->isa(q{IO::Handle}) };
+	$file = q{}.$file;
+    }
 
     ### get a FH opened to the right class, so we can use it transparently
     ### throughout the program
@@ -301,6 +306,7 @@ sub _read_tar {
 
     my $count   = $opts->{limit}    || 0;
     my $filter  = $opts->{filter};
+    my $filter_cb = $opts->{filter_cb};
     my $extract = $opts->{extract}  || 0;
 
     ### set a cap on the amount of files to extract ###
@@ -392,18 +398,55 @@ sub _read_tar {
 
             $data = $entry->get_content_by_ref;
 
-            ### just read everything into memory
-            ### can't do lazy loading since IO::Zlib doesn't support 'seek'
-            ### this is because Compress::Zlib doesn't support it =/
-            ### this reads in the whole data in one read() call.
-            if( $handle->read( $$data, $block ) < $block ) {
-                $self->_error( qq[Read error on tarfile (missing data) '].
-                                    $entry->full_path ."' at offset $offset" );
-                next LOOP;
-            }
+	    my $skip = 0;
+	    ### skip this entry if we're filtering
+	    if ($filter && $entry->name !~ $filter) {
+		$skip = 1;
 
-            ### throw away trailing garbage ###
-            substr ($$data, $entry->size) = "" if defined $$data;
+	    ### skip this entry if it's a pax header. This is a special file added
+	    ### by, among others, git-generated tarballs. It holds comments and is
+	    ### not meant for extracting. See #38932: pax_global_header extracted
+	    } elsif ( $entry->name eq PAX_HEADER ) {
+		$skip = 2;
+	    } elsif ($filter_cb && ! $filter_cb->($entry)) {
+		$skip = 3;
+	    }
+
+	    if ($skip) {
+		#
+		# Since we're skipping, do not allocate memory for the
+		# whole file.  Read it 64 BLOCKS at a time.  Do not 
+		# complete the skip yet because maybe what we read is a
+		# longlink and it won't get skipped after all
+		#
+		my $amt = $block;
+		while ($amt > 0) {
+		    $$data = '';
+		    my $this = 64 * BLOCK;
+		    $this = $amt if $this > $amt;
+		    if( $handle->read( $$data, $this ) < $this ) {
+			$self->_error( qq[Read error on tarfile (missing data) '].
+					    $entry->full_path ."' at offset $offset" );
+			next LOOP;
+		    }
+		    $amt -= $this;
+		}
+		### throw away trailing garbage ###
+		substr ($$data, $entry->size) = "" if defined $$data && $block < 64 * BLOCK;
+            } else {
+
+		### just read everything into memory
+		### can't do lazy loading since IO::Zlib doesn't support 'seek'
+		### this is because Compress::Zlib doesn't support it =/
+		### this reads in the whole data in one read() call.
+		if ( $handle->read( $$data, $block ) < $block ) {
+		    $self->_error( qq[Read error on tarfile (missing data) '].
+                                    $entry->full_path ."' at offset $offset" );
+		    next LOOP;
+		}
+		### throw away trailing garbage ###
+		substr ($$data, $entry->size) = "" if defined $$data;
+            }
 
             ### part II of the @LongLink munging -- need to do /after/
             ### the checksum check.
@@ -444,16 +487,17 @@ sub _read_tar {
             undef $real_name;
         }
 
-        ### skip this entry if we're filtering
-        if ($filter && $entry->name !~ $filter) {
-            next LOOP;
+	if ($filter && $entry->name !~ $filter) {
+	    next LOOP;
 
-        ### skip this entry if it's a pax header. This is a special file added
-        ### by, among others, git-generated tarballs. It holds comments and is
-        ### not meant for extracting. See #38932: pax_global_header extracted
-        } elsif ( $entry->name eq PAX_HEADER ) {
-            next LOOP;
-        }
+	### skip this entry if it's a pax header. This is a special file added
+	### by, among others, git-generated tarballs. It holds comments and is
+	### not meant for extracting. See #38932: pax_global_header extracted
+	} elsif ( $entry->name eq PAX_HEADER ) {
+	    next LOOP;
+	} elsif ($filter_cb && ! $filter_cb->($entry)) {
+	    next LOOP;
+	}
 
         if ( $extract && !$entry->is_longlink
                       && !$entry->is_unknown
@@ -1246,7 +1290,12 @@ sub write {
                         : do { seek $handle, 0, 0; local $/; <$handle> };
 
     ### make sure to close the handle if we created it
-    close $handle unless ref($file);
+    if ( $file ne $handle ) {
+	unless( close $handle ) {
+	    $self->_error( qq[Could not write tar] );
+	    return;
+	}
+    }
 
     return $rv;
 }
