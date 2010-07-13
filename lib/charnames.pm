@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -511,10 +511,10 @@ sub lookup_name ($;$) {
 
   my $runtime = (@_ > 1);  # compile vs run time
 
-  my $name = shift;
-  my $hints_ref = shift;
+  my ($name, $hints_ref) = @_;
 
   my $ord;
+  my $save_input;
 
   if ($runtime) {
     # At runtime, but currently not at compile time, $^H gets
@@ -524,7 +524,7 @@ sub lookup_name ($;$) {
 
     %{$^H{charnames_name_aliases}} = split ',', $hints_ref->{charnames_stringified_names};
     %{$^H{charnames_ord_aliases}} = split ',', $hints_ref->{charnames_stringified_ords};
-    @{$^H{charnames_scripts}} = split ',', $hints_ref->{charnames_stringified_scripts};
+    $^H{charnames_scripts} = $hints_ref->{charnames_scripts};
     $^H{charnames_full} = $hints_ref->{charnames_full};
     $^H{charnames_short} = $hints_ref->{charnames_short};
   }
@@ -536,6 +536,7 @@ sub lookup_name ($;$) {
   }
   elsif (exists $^H{charnames_name_aliases}{$name}) {
     $name = $^H{charnames_name_aliases}{$name};
+    $save_input = $name;  # Cache the result for any error message
   }
   elsif (exists $system_aliases{$name}) {
     $ord = $system_aliases{$name};
@@ -573,41 +574,35 @@ sub lookup_name ($;$) {
         }
       }
 
-      # If we didn't get it above keep looking
+      # If we didn't get it above, keep looking
       if (! $found_full_in_table) {
 
         # If :short is allowed, see if input is like "greek:Sigma".
-        my $scripts_ref;
-        my $name_ref;
+        my $scripts_trie;
         if (($^H{charnames_short})
             && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs)
         {
-            my @script = uc $1;
-            my $character_name = $2;
-            $scripts_ref = \@script;
-            $name_ref = \$character_name;
+            $scripts_trie = "\U\Q$1";
+            $name = $2;
         }
         else {
-            $scripts_ref = $^H{charnames_scripts};
-            $name_ref = \$name;
+            $scripts_trie = $^H{charnames_scripts};
         }
 
-        my $case = $$name_ref =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-        for my $script (@{$scripts_ref}) {
-          if ($txt =~
-              m/\t\t \Q$script\E \ (?:$case\ )? LETTER \ \U\Q$$name_ref\E $/xm)
-          {
-            @off = ($-[0] + 2, $+[0]);
-            goto found_one;
-          }
+        my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+        if ($txt !~
+            /\t\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U\Q$name\E $/xm)
+        {
+          # Here we still don't have it, give up.
+          return if $runtime;
+
+          # May have zapped input name, get it again.
+          $name = (defined $save_input) ? $save_input : $_[0];
+          carp "Unknown charname '$name'";
+          return 0xFFFD;
         }
 
-        # Here we still don't have it, give up.
-        return if $runtime;
-        carp "Unknown charname '$name'";
-        return 0xFFFD;
-
-found_one:
+        @off = ($-[0] + 2, $+[0]);
       }
 
       ##
@@ -640,7 +635,12 @@ found_one:
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
   # Prefer any official name over the input one.
-  $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
+  if (@off) {
+    $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
+  }
+  else {
+    $name = (defined $save_input) ? $save_input : $_[0];
+  }
   croak not_legal_use_bytes_msg($name, $ord);
 } # lookup_name
 
@@ -705,18 +705,19 @@ sub import
 
   $^H{charnames_full} = delete $h{':full'};
   $^H{charnames_short} = delete $h{':short'};
-  $^H{charnames_scripts} = [map uc, keys %h];
+  my @scripts = map uc, keys %h;
 
   ##
   ## If utf8? warnings are enabled, and some scripts were given,
   ## see if at least we can find one letter from each script.
   ##
-  if (warnings::enabled('utf8') && @{$^H{charnames_scripts}}) {
+  if (warnings::enabled('utf8') && @scripts) {
     $txt = do "unicore/Name.pl" unless $txt;
 
-    for my $script (@{$^H{charnames_scripts}}) {
+    for my $script (@scripts) {
       if (not $txt =~ m/\t\t$script (?:CAPITAL |SMALL )?LETTER /) {
         warnings::warn('utf8',  "No such script: '$script'");
+        $script = quotemeta $script;  # Escape it, for use in the re.
       }
     }
   }
@@ -726,7 +727,7 @@ sub import
   $^H{charnames_stringified_ords} = join ",", %{$^H{charnames_ord_aliases}};
   $^H{charnames_stringified_names} = join ",", %{$^H{charnames_name_aliases}};
   $^H{charnames_stringified_inverse_ords} = join ",", %{$^H{charnames_inverse_ords}};
-  $^H{charnames_stringified_scripts} = join ",", @{$^H{charnames_scripts}};
+  $^H{charnames_scripts} = join "|", @scripts;  # Stringifiy them as a trie
 } # import
 
 # Cache of already looked-up values.  This is set to only contain
