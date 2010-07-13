@@ -4,7 +4,7 @@ use warnings;
 use File::Spec;
 our $VERSION = '1.12';
 
-use bytes ();		# for $bytes::hint_bits
+use bytes ();          # for $bytes::hint_bits
 
 my %system_aliases = (
                 # Icky 3.2 names with parentheses.
@@ -451,7 +451,7 @@ sub alias (@) # Set up a single alias
   my $alias = ref $_[0] ? $_[0] : { @_ };
   foreach my $name (keys %$alias) {
     my $value = $alias->{$name};
-    next unless defined $value;	  # Omit if screwed up.
+    next unless defined $value;          # Omit if screwed up.
 
     # Is slightly slower to just after this statement see if it is
     # decimal, since we already know it is after having converted from
@@ -461,15 +461,15 @@ sub alias (@) # Set up a single alias
       $value = CORE::hex $1;
     }
     if ($value =~ $decimal_qr) {
-	$^H{charnames_ord_aliases}{$name} = $value;
+        $^H{charnames_ord_aliases}{$name} = $value;
 
         # Use a canonical form.
-	$^H{charnames_inverse_ords}{sprintf("%04X", $value)} = $name;
+        $^H{charnames_inverse_ords}{sprintf("%04X", $value)} = $name;
     }
     else {
-	# XXX validate syntax when deprecation cycle complete. ie. start
-	# with an alpha only, etc.
-	$^H{charnames_name_aliases}{$name} = $value;
+        # XXX validate syntax when deprecation cycle complete. ie. start
+        # with an alpha only, etc.
+        $^H{charnames_name_aliases}{$name} = $value;
     }
   }
 } # alias
@@ -567,44 +567,44 @@ sub lookup_name ($;$) {
       ## If :full, look for the name exactly; runtime implies full
       my $found_full = 0;  # Tells us if can cache the result
       if ($^H{charnames_full}) {
-	if ($txt =~ /\t\t\Q$name\E$/m) {
-	  @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
-	  $found_full = 1;
-	}
+        if ($txt =~ /\t\t\Q$name\E$/m) {
+          @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
+          $found_full = 1;
+        }
       }
 
       # If we didn't get it above keep looking
       if (! $found_full) {
 
-	# If :short is allowed, look for the short name, which is like
-	# "greek:Sigma"
-	if (($^H{charnames_short})
-	    && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs) {
-	  my ($script, $cname) = ($1, $2);
-	  my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-	  if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
-	    @off = ($-[0] + 2, $+[0]);
-	  }
-	}
+        # If :short is allowed, look for the short name, which is like
+        # "greek:Sigma"
+        if (($^H{charnames_short})
+            && $name =~ /^ \s* (.+?) \s* : \s* (.+?) \s* $ /xs) {
+          my ($script, $cname) = ($1, $2);
+          my $case = $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+          if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+            @off = ($-[0] + 2, $+[0]);
+          }
+        }
 
-	## If we still don't have it, check for the name among the loaded
-	## scripts.
-	unless (@off) {
-	  my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
-	  for my $script (@{$^H{charnames_scripts}}) {
-	    if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
-	      @off = ($-[0] + 2, $+[0]);
-	      last;
-	    }
-	  }
+        ## If we still don't have it, check for the name among the loaded
+        ## scripts.
+        unless (@off) {
+          my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
+          for my $script (@{$^H{charnames_scripts}}) {
+            if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
+              @off = ($-[0] + 2, $+[0]);
+              last;
+            }
+          }
 
-	  ## If we don't have it by now, give up.
-	  unless (@off) {
-	    return if $runtime;
-	    carp "Unknown charname '$name'";
-	    return 0xFFFD;
-	  }
-	}
+          ## If we don't have it by now, give up.
+          unless (@off) {
+            return if $runtime;
+            carp "Unknown charname '$name'";
+            return 0xFFFD;
+          }
+        }
       }
 
       ##
@@ -674,19 +674,19 @@ sub import
   while (my $arg = shift) {
     if ($arg eq ":alias") {
       @_ or
-	croak ":alias needs an argument in charnames";
+        croak ":alias needs an argument in charnames";
       my $alias = shift;
       if (ref $alias) {
-	ref $alias eq "HASH" or
-	  croak "Only HASH reference supported as argument to :alias";
-	alias ($alias);
-	next;
+        ref $alias eq "HASH" or
+          croak "Only HASH reference supported as argument to :alias";
+        alias ($alias);
+        next;
       }
       if ($alias =~ m{:(\w+)$}) {
-	$1 eq "full" || $1 eq "short" and
-	  croak ":alias cannot use existing pragma :$1 (reversed order?)";
-	alias_file ($1) and $promote = 1;
-	next;
+        $1 eq "full" || $1 eq "short" and
+          croak ":alias cannot use existing pragma :$1 (reversed order?)";
+        alias_file ($1) and $promote = 1;
+        next;
       }
       alias_file ($alias);
       next;
@@ -713,7 +713,7 @@ sub import
 
     for my $script (@{$^H{charnames_scripts}}) {
       if (not $txt =~ m/\t\t$script (?:CAPITAL |SMALL )?LETTER /) {
-	warnings::warn('utf8',  "No such script: '$script'");
+        warnings::warn('utf8',  "No such script: '$script'");
       }
     }
   }
@@ -770,18 +770,18 @@ sub viacode {
     # leaving it as is for now.
     if ($txt =~ m/^$hex\t\t/m) {
 
-	# The name starts with the next character and goes up to the
-	# next new-line.  Using capturing parentheses above instead of
-	# @+ more than doubles the execution time in Perl 5.13
+        # The name starts with the next character and goes up to the
+        # next new-line.  Using capturing parentheses above instead of
+        # @+ more than doubles the execution time in Perl 5.13
         $viacode{$hex} = substr($txt, $+[0], index($txt, "\n", $+[0]) - $+[0]);
-	return $viacode{$hex};
+        return $viacode{$hex};
     }
   }
 
   # See if there is a user name for it, before giving up completely.
   # First get the scoped aliases.
   my %code_point_aliases = split ',',
-			  (caller(0))[10]->{charnames_stringified_inverse_ords};
+                          (caller(0))[10]->{charnames_stringified_inverse_ords};
   if (! exists $code_point_aliases{$hex}) {
     if (CORE::hex($hex) > 0x10FFFF) {
         carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
@@ -1003,7 +1003,7 @@ controls that have no Unicode names:
 
     name                                   character
 
-    END OF PROTECTED AREA		   END OF GUARDED AREA, U+0097
+    END OF PROTECTED AREA                  END OF GUARDED AREA, U+0097
     HIGH OCTET PRESET                      U+0081
     HOP                                    U+0081
     IND                                    U+0084
@@ -1141,8 +1141,8 @@ translations (inside the scope which C<use>s the module) with the
 following magic incantation:
 
     sub import {
-	shift;
-	$^H{charnames} = \&translator;
+        shift;
+        $^H{charnames} = \&translator;
     }
 
 Here translator() is a subroutine which takes I<CHARNAME> as an
@@ -1151,14 +1151,14 @@ C<\N{I<CHARNAME>}> escape.  Since the text to insert should be different
 in C<bytes> mode and out of it, the function should check the current
 state of C<bytes>-flag as in:
 
-    use bytes ();			# for $bytes::hint_bits
+    use bytes ();                      # for $bytes::hint_bits
     sub translator {
-	if ($^H & $bytes::hint_bits) {
-	    return bytes_translator(@_);
-	}
-	else {
-	    return utf8_translator(@_);
-	}
+        if ($^H & $bytes::hint_bits) {
+            return bytes_translator(@_);
+        }
+        else {
+            return utf8_translator(@_);
+        }
     }
 
 See L</CUSTOM ALIASES> above for restrictions on I<CHARNAME>.
@@ -1195,4 +1195,4 @@ a future version of Perl.
 
 =cut
 
-# ex: set ts=8 sts=2 sw=2 noet:
+# ex: set ts=8 sts=2 sw=2 et:
