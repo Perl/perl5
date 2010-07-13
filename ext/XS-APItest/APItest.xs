@@ -256,13 +256,13 @@ blockhook_csc_start(pTHX_ int full)
 
     if (cur) {
         I32 i;
-        AV *const new = newAV();
+        AV *const new_av = newAV();
 
         for (i = 0; i <= av_len(cur); i++) {
-            av_store(new, i, newSVsv(*av_fetch(cur, i, 0)));
+            av_store(new_av, i, newSVsv(*av_fetch(cur, i, 0)));
         }
 
-        GvAV(MY_CXT.cscgv) = new;
+        GvAV(MY_CXT.cscgv) = new_av;
     }
 }
 
