@@ -1,5 +1,16 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+2.2206 - Sun Jul  4 15:43:21 EDT 2010
+
+ Bug fixes:
+
+ - Make xsubpp accept the _ prototype (RT#57157) [Rafael Garcia-Suarez]
+
+ - INCLUDE_COMMAND portability fixes for VMS (RT#58181) [Craig Berry]
+
+ - INCLUDE_COMMAND fixes to detect non-zero exit codes (RT#52873)
+   [Steffen Mueller]
+
 2.2205 - Wed Mar 10 18:15:36 EST 2010
 
  Other:
