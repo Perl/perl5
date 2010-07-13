@@ -653,6 +653,29 @@ sub CLEAR    { %{$_[0]} = () }
 
 =cut
 
+
+MODULE = XS::APItest:TempLv		PACKAGE = XS::APItest::TempLv
+
+void
+make_temp_mg_lv(sv)
+SV* sv
+    PREINIT:
+	SV * const lv = newSV_type(SVt_PVLV);
+	STRLEN len;
+    PPCODE:
+        SvPV(sv, len);
+
+	sv_magic(lv, NULL, PERL_MAGIC_substr, NULL, 0);
+	LvTYPE(lv) = 'x';
+	LvTARG(lv) = SvREFCNT_inc_simple(sv);
+	LvTARGOFF(lv) = len == 0 ? 0 : 1;
+	LvTARGLEN(lv) = len < 2 ? 0 : len-2;
+
+	EXTEND(SP, 1);
+	ST(0) = sv_2mortal(lv);
+	XSRETURN(1);
+
+
 MODULE = XS::APItest::PtrTable	PACKAGE = XS::APItest::PtrTable PREFIX = ptr_table_
 
 void
@@ -1137,3 +1160,17 @@ peep_record_clear ()
         dMY_CXT;
     CODE:
         av_clear(MY_CXT.peep_record);
+
+BOOT:
+	{
+	HV* stash;
+	SV** meth = NULL;
+	CV* cv;
+	stash = gv_stashpv("XS::APItest::TempLv", 0);
+	if (stash)
+	    meth = hv_fetchs(stash, "make_temp_mg_lv", 0);
+	if (!meth)
+	    croak("lost method 'make_temp_mg_lv'");
+	cv = GvCV(*meth);
+	CvLVALUE_on(cv);
+	}
