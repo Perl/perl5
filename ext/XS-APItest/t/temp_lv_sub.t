@@ -27,7 +27,6 @@ sub make_temp_mg_lv :lvalue {  XS::APItest::TempLv::make_temp_mg_lv($_[0]); }
 }
 
 {
-    local $TODO = "PP lvalue sub can't return magical temp";
     my $x = "{}";
     eval { make_temp_mg_lv($x) = "b"; };
     is($@, '',    'temp mg lv from pp exception check');
