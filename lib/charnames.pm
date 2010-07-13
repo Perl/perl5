@@ -565,16 +565,16 @@ sub lookup_name ($;$) {
       ## end of the name as we find it.
 
       ## If :full, look for the name exactly; runtime implies full
-      my $found_full = 0;  # Tells us if can cache the result
+      my $found_full_in_table = 0;  # Tells us if can cache the result
       if ($^H{charnames_full}) {
         if ($txt =~ /\t\t\Q$name\E$/m) {
           @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
-          $found_full = 1;
+          $found_full_in_table = 1;
         }
       }
 
       # If we didn't get it above keep looking
-      if (! $found_full) {
+      if (! $found_full_in_table) {
 
         # If :short is allowed, look for the short name, which is like
         # "greek:Sigma"
@@ -628,7 +628,7 @@ sub lookup_name ($;$) {
 
       # Cache the input so as to not have to search the large table
       # again, but only if it came from the one search that we cache.
-      $full_names_cache{$name} = $ord if $found_full;
+      $full_names_cache{$name} = $ord if $found_full_in_table;
     }
   }
 
@@ -1173,10 +1173,6 @@ otherwise.  It is proposed to change this to always return an ord.  Send email
 to C<perl5-porters@perl.org> to comment on this proposal.  If S<C<use
 bytes>> is in effect when a chr is returned, and if that chr won't fit
 into a byte, C<undef> is returned instead.
-
-All the Hangul syllable characters are treated as having no names, as
-are almost all the CJK Unicode characters that have their code points as
-part of their names.
 
 Names must be ASCII characters only, which means that you are out of luck if
 you want to create aliases in a language where some or all the characters of
