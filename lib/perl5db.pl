@@ -954,6 +954,8 @@ sub eval {
 # Changes: 1.32: Jun 03, 2009 Jonathan Leto <jonathan@leto.net>
 #   + Fix bug where a key _< with undefined value was put into the symbol table
 #   +   when the $filename variable is not set
+# Changes: x.xx: Josh ben Jore <jjore@cpan.org>
+#   + TODO
 ########################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -1463,7 +1465,8 @@ if ( defined $ENV{PERLDB_OPTS} ) {
 
 The last thing we do during initialization is determine which subroutine is
 to be used to obtain a new terminal when a new debugger is started. Right now,
-the debugger only handles X Windows, OS/2, and Mac OS X (darwin).
+the debugger only handles TCP sockets, X Windows, OS/2, amd Mac OS X
+(darwin).
 
 =cut
 
@@ -1473,7 +1476,11 @@ the debugger only handles X Windows, OS/2, and Mac OS X (darwin).
 
 if (not defined &get_fork_TTY)       # only if no routine exists
 {
-    if (defined $ENV{TERM}                       # If we know what kind
+    if ( defined $remoteport ) {                 
+                                                 # Expect an inetd-like server
+        *get_fork_TTY = \&socket_get_fork_TTY;   # to listen to us
+    }
+    elsif (defined $ENV{TERM}                    # If we know what kind
                                                  # of terminal this is,
         and $ENV{TERM} eq 'xterm'                # and it's an xterm,
         and defined $ENV{DISPLAY}                # and what display it's on,
@@ -1701,14 +1708,7 @@ and then tries to connect the input and output filehandles to it.
 
         # If RemotePort was defined in the options, connect input and output
         # to the socket.
-        require IO::Socket;
-        $OUT = IO::Socket::INET->new(
-            Timeout  => '10',
-            PeerAddr => $remoteport,
-            Proto    => 'tcp',
-        );
-        if ( !$OUT ) { die "Unable to connect to remote host: $remoteport\n"; }
-        $IN = $OUT;
+        $IN = $OUT = connect_remoteport();
     } ## end if (defined $remoteport)
 
 =pod
@@ -6113,10 +6113,37 @@ is tasked with doing all the necessary operating system mojo to get a new
 TTY (and probably another window) and to direct the new debugger to read and
 write there.
 
-The debugger provides C<get_fork_TTY> functions which work for X Windows,
-OS/2, and Mac OS X. Other systems are not supported. You are encouraged
-to write C<get_fork_TTY> functions which work for I<your> platform
-and contribute them.
+The debugger provides C<get_fork_TTY> functions which work for TCP
+socket servers, X Windows, OS/2, and Mac OS X. Other systems are not
+supported. You are encouraged to write C<get_fork_TTY> functions which
+work for I<your> platform and contribute them.
+
+=head3 C<socket_get_fork_TTY>
+
+=cut 
+
+sub connect_remoteport {
+    require IO::Socket;
+
+    my $socket = IO::Socket::INET->new(
+        Timeout  => '10',
+        PeerAddr => $remoteport,
+        Proto    => 'tcp',
+    );
+    if ( ! $socket ) {
+        die "Unable to connect to remote host: $remoteport\n";
+    }
+    return $socket;
+}
+
+sub socket_get_fork_TTY {
+    $tty = $IN = $OUT = connect_remoteport();
+
+    # Do I need to worry about setting $term?
+
+    reset_IN_OUT( $IN, $OUT );
+    return '';
+}
 
 =head3 C<xterm_get_fork_TTY>
 
