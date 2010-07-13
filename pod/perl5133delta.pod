@@ -49,6 +49,12 @@ name will C<charnames::viacode()> return your custom one.
 
 See L<charnames> for details on all these changes.
 
+=head2 Other enhancements
+
+=item *
+
+Uppercase X/B allowed in hexadecimal/binary literals (RT#76296) (a674e8d)
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -85,7 +91,7 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+There are several small optimizations to improve CPU cache performance
 
 =back
 
@@ -121,6 +127,10 @@ autodie updated to CPAN version 2.10 (a009834)
 
 =item *
 
+charnames -- viacode() is now significantly faster (f3227b7)
+
+=item *
+
 warnings updated to 1.10.  Calling C<use warnings> without
 arguments is now significantly more efficient. (8452af9)
 
@@ -151,6 +161,14 @@ Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
 
 =item *
 
+Compress-Raw-Bzip2 updated to CPAN version 2.027 (9e09409)
+
+=item *
+
+Compress-Raw-Zlib updated  to CPAN version 2.027 (f02c02e)
+
+=item *
+
 Digest-SHA updated to CPAN version 5.48 (dfe1edc)
 
 =item *
@@ -163,7 +181,15 @@ ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
 
 =item *
 
+IO-Compress upated to CPAN version 2.027 (e8796d6)
+
+=item *
+
 IPC-SysV updated to CPAN version 2.03 (10613b6)
+
+=item *
+
+Locale::Maketext adds external cache support (ace47d6)
 
 =item *
 
@@ -211,9 +237,9 @@ XXX Changes which create B<new> files in F<pod/> go here.
 
 =over 4
 
-=item L<XXX>
+=item L<perl5121delta>
 
-XXX
+The Perl 5.12.1 perldelta file was added from the Perl maintenance branch
 
 =back
 
@@ -223,11 +249,27 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlop>
+
 =over 4
 
-=item L<XXX>
+=item *
 
-XXX
+Improved documentation of unusual character escapes (bf82ca4)
+
+=back
+
+=head3 L<perlfunc>
+
+=over
+
+=item *
+
+Added cautionary note about "no VERSION" (e0de7c2)
+
+=item *
+
+Add additional notes regarding srand and forking (d460397)
 
 =back
 
@@ -313,7 +355,15 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/harness> clears PERL5LIB, PERLLIB, PERL5OPT as t/TEST does (a2d3de1)
+
+=item *
+
+Many common testing routines were refactored into t/lib/common.pl
+
+=item *
+
+Several test files have been modernized to use Test::More
 
 =back
 
@@ -390,6 +440,10 @@ Added prototypes for tie() and untie() to allow overloading (RT#75902)
 
 =back
 
+=item *
+
+XXX Lots of block hook changes (PL_blockhooks) -- needs an overall summary
+
 =head1 Selected Bug Fixes
 
 XXX Important bug fixes in the core language are summarised here.
@@ -403,12 +457,29 @@ L</Modules and Pragmata>.
 =item *
 
 Fixed a regression of kill() when a match variable is used for the
-process ID to kill.  (RT #75812) (8af710e)
+process ID to kill.  (RT#75812) (8af710e)
 
 =item *
 
 Fixed several subtle bugs in sort() when @_ is accessed within a subroutine
 used for sorting. (RT#72334) (8f443ca)
+
+=item *
+
+Catch yyparse() exceptions in C<< (?{...}) >> (RT#2353) (634d691)
+
+=item *
+
+Avoid UTF-8 cache panics with offsets beyond a string (RT #75898) (3e2d381)
+
+=item *
+
+Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
+
+=item *
+
+Doesn't set strict with C<no VERSION> if C<VERSION> is greater than 5.12.
+(da8fb5d)
 
 
 =back
