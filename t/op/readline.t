@@ -8,9 +8,12 @@ BEGIN {
 
 plan tests => 18;
 
+# [perl #19566]: sv_gets writes directly to its argument via
+# TARG. Test that we respect SvREADONLY.
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
 
+# [perl #21628]
 {
   my $file = tempfile();
   open A,'+>',$file; $a = 3;
@@ -19,7 +22,8 @@ like($@, 'Modification of a read-only value attempted', '[perl #19566]');
   is($a .= <A>, 4, '#21628 - $a .= <A> , A closed');
 }
 
-# 82 is chosen to exceed the length for sv_grow in do_readline (80)
+# [perl #21614]: 82 is chosen to exceed the length for sv_grow in
+# do_readline (80)
 foreach my $k (1, 82) {
   my $result
     = runperl (stdin => '', stderr => 1,
