@@ -115,19 +115,13 @@ XXX
 XXX Changes to files in F<pod/> go here.  Consider grouping entries by
 file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Documentation
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
-=over 4
+=head3 L<XXX>
 
-=item L<XXX>
-
-XXX
-
-=back
+XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -135,11 +129,13 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<XXX>
+
 =over 4
 
-=item L<XXX>
+=item *
 
-XXX
+XXX Description of the change here
 
 =back
 
@@ -183,12 +179,15 @@ XXX
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
 here. Most of these are built within the directories F<utils> and F<x2p>.
 
-[ List utility changes as a =item entry.  Use L<XXX> with program names to get
-proper documentation linking. ]
+[ List utility changes as a =head3 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head3 L<XXX>
 
 =over 4
 
-=item L<XXX>
+=item *
 
 XXX
 
