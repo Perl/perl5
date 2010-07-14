@@ -15,6 +15,7 @@ use Getopt::Long;
 use Git::Wrapper;
 use Term::ReadKey;
 use Term::ANSIColor;
+use Pod::Usage;
 
 BEGIN { struct( git => '$', last_tag => '$', opt => '%' ) }
 
@@ -37,7 +38,10 @@ sub run {
     'type|t:s', # select by status
     'status|s:s', # status to set for 'update'
     'since:s', # origin commit
+    'help|h',  # help
   );
+
+  pod2usage() if $opt{help};
 
   my $git = Git::Wrapper->new(".");
   my $git_id = $opt{since};
@@ -731,25 +735,25 @@ __END__
 
 =head1 NAME
 
-git-deltatool.pl - Annotate commits for perldelta
+git-deltatool - Annotate commits for perldelta
 
 =head1 SYNOPSIS
 
  # annotate commits back to last 'git describe' tag
 
- $ git-deltatool.pl
+ $ git-deltatool
 
  # review annotations
 
- $ git-deltatool.pl --mode review
+ $ git-deltatool --mode review
 
  # summarize annotations by section to STDOUT
 
- $ git-deltatool.pl --mode render
+ $ git-deltatool --mode render
 
  # mark 'pending' annotations as 'done' (i.e. added to perldelta)
 
- $ git-deltatool.pl --mode update --type pending --status done
+ $ git-deltatool --mode update --type pending --status done
 
 =head1 OPTIONS
 
@@ -777,6 +781,10 @@ it should be one of 'new', 'pending', 'ignored' or 'done'.
 
 Defines the boundary for searching git commits.  Defaults to the last
 major tag (as would be given by 'git describe').
+
+=item B<--help>
+
+Shows the manual.
 
 =back
 
