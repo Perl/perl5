@@ -1639,8 +1639,12 @@ Perl_do_readline(pTHX)
 	}
 	SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
-	if (!tmplen && !SvREADONLY(sv))
-	    Sv_Grow(sv, 80);	/* try short-buffering it */
+	if (!tmplen && !SvREADONLY(sv)) {
+            /* try short-buffering it. Please update t/op/readline.t
+	     * if you change the growth length.
+	     */
+	    Sv_Grow(sv, 80);
+        }
 	offset = 0;
 	if (type == OP_RCATLINE && SvOK(sv)) {
 	    if (!SvPOK(sv)) {
