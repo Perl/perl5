@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 18;
+plan tests => 20;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -90,6 +90,90 @@ fresh_perl_is('BEGIN{<>}', '',
 fresh_perl_is('print readline', 'foo',
               { switches => ['-w'], stdin => 'foo', stderr => 1 },
               'readline() defaults to *ARGV');
+
+# [perl #72720] Test that sv_gets clears any variables that should be
+# empty so if the read() aborts with EINTER, the TARG is actually
+# cleared.
+sub test_eintr_readline {
+    my ( $fh, $timeout ) = @_;
+
+    # This variable, the TARG for the readline is the core of this
+    # test. The test is to see that after a my() and a failure in
+    # readline() has the variable revived old, "dead" values from the
+    # past or is it still undef like expected.
+    my $line;
+
+    # Do a readline into $line.
+    if ( $timeout ) {
+
+	# Do a SIGALARM aborted readline(). The underlying sv_gets()
+	# from sv.c will use the syscall read() while will exit early
+	# and return something like EINTR or ERESTARTSYS.
+	my $timed_out;
+	my $errno;
+	eval {
+	    local $SIG{ALRM} = sub {
+		$timed_out = 1;
+		die 'abort this timeout';
+	    };
+	    alarm $timeout;
+	    undef $!;
+	    $line = readline $fh;
+	    $errno = $!;
+	    alarm 0;
+	};
+
+	# The code should have timed out.
+	if ( ! $timed_out ) {
+	    warn $@
+                ? "$@: $errno\n"
+                : "Interrupted readline() test couldn't get interrupted: $errno";
+	}
+    }
+    else {
+	$line = readline $fh;
+    }
+    return $line;
+}
+SKIP: {
+
+    # Connect two handles together.
+    my ( $in, $out );
+    my $piped;
+    eval {
+	pipe $in, $out;
+	$piped = 1;
+    };
+    if ( ! $piped ) {
+	skip( 2, 'The pipe function is unimplemented' );
+    }
+
+    # Make the pipe autoflushing
+    {
+	my $old_fh = select $out;
+	$| = 1;
+	select $old_fh;
+    }
+
+    # Only one line is loaded into the pipe. It's written unbuffered
+    # so I'm confident it'll not be buffered.
+    syswrite $out, "once\n";
+
+    # Buggy perls will return the last thing successfully
+    # returned. Buggy perls will return "once\n" a second (and
+    # "infinitely" if we desired) as long as the internal read()
+    # syscall fails. In our case, it fails because the inner my($line)
+    # retains all its allocated space and buggy perl sets SvPOK to
+    # make the value valid but before it starts read().
+    my $once  = test_eintr_readline( $in, 0 );
+    my $twice = test_eintr_readline( $in, 1 );
+    is( $once,  "once\n", "readline read first line ok" );
+
+    TODO: {
+        local our $TODO = "bad readline returns '', not undef";
+        is( $twice, undef,   "readline didn't return first line again" );
+    }
+}
 
 my $obj = bless [];
 $obj .= <DATA>;
