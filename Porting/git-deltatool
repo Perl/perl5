@@ -400,7 +400,7 @@ sub do_linked_item {
   my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=item L<LINK-NAME>\n\n$subject ($id)\n\n$body\n"
+    "perldelta: $section [pending]\n\n=head3 L<LINK>\n\n=over\n\n=item *\n\n$subject ($id)\n\n$body\n\n=back\n"
   );
 
   my $note = $self->edit_text($template);
