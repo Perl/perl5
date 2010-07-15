@@ -7577,7 +7577,7 @@ sub print_help {
 
 This routine does a lot of gyrations to be sure that the pager is C<less>.
 It checks for C<less> masquerading as C<more> and records the result in
-C<$ENV{LESS}> so we don't have to go through doing the stats again.
+C<$fixed_less> so we don't have to go through doing the stats again.
 
 =cut
 
@@ -7590,7 +7590,7 @@ sub fix_less {
     return $config_less if $config_less;
 
     # We already know if this is set.
-    return if defined $ENV{LESS} && $ENV{LESS} =~ /r/;
+    return if $fixed_less;
 
     # Pager is less for sure.
     my $is_less = $pager =~ /\bless\b/;
@@ -7609,7 +7609,7 @@ sub fix_less {
 
     # changes environment!
     # 'r' added so we don't do (slow) stats again.
-    $ENV{LESS} .= 'r' if $is_less;
+    $fixed_less = 1 if $is_less;
 } ## end sub fix_less
 
 =head1 DIE AND WARN MANAGEMENT
