@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 21;
+plan tests => 25;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -174,6 +174,54 @@ SKIP: {
         local our $TODO = "bad readline returns '', not undef";
         is( $twice, undef, "readline returned undef when interrupted" );
     }
+}
+
+{
+    my $line = 'ascii';
+    my ( $in, $out );
+    pipe $in, $out;
+    binmode $in;
+    binmode $out;
+    syswrite $out, "...\n";
+    $line .= readline $in;
+
+    is( $line, "ascii...\n", 'Appending from ascii to ascii' );
+}
+
+{
+    my $line = "\x{2080} utf8";
+    my ( $in, $out );
+    pipe $in, $out;
+    binmode $out;
+    binmode $in;
+    syswrite $out, "...\n";
+    $line .= readline $in;
+
+    is( $line, "\x{2080} utf8...\n", 'Appending from ascii to utf8' );
+}
+
+{
+    my $line = 'ascii';
+    my ( $in, $out );
+    pipe $in, $out;
+    binmode $out, ':utf8';
+    binmode $in,  ':utf8';
+    syswrite $out, "...\n";
+    $line .= readline $in;
+
+    is( $line, "ascii...\n", 'Appending from utf8 to ascii' );
+}
+
+{
+    my $line = "\x{2080} utf8";;
+    my ( $in, $out );
+    pipe $in, $out;
+    binmode $out, ':utf8';
+    binmode $in,  ':utf8';
+    syswrite $out, "\x{2080}...\n";
+    $line .= readline $in;
+
+    is( $line, "\x{2080} utf8\x{2080}...\n", 'appending from utf to utf8' );
 }
 
 my $obj = bless [];
