@@ -230,9 +230,8 @@ also work:
  \a          alarm (bell)          (BEL)
  \e          escape (think troff)  (ESC)
  \033        octal char            (example: ESC)
- \x1B        hex char              (example: ESC)
- \x{263a}    long hex char         (example: Unicode SMILEY)
  \cK         control char          (example: VT)
+ \x{}, \x00  character whose ordinal is the given hexadecimal number
  \N{name}    named Unicode character
  \N{U+263D}  Unicode character     (example: FIRST QUARTER MOON)
  \l          lowercase next char (think vi)
@@ -490,8 +489,8 @@ Examples:
     "aa" =~ /${b}/;      # True
     "aa0" =~ /${a}0/;    # False!
     "aa0" =~ /${b}0/;    # True
-    "aa\x8" =~ /${a}0/;  # True!
-    "aa\x8" =~ /${b}0/;  # False
+    "aa\x08" =~ /${a}0/;  # True!
+    "aa\x08" =~ /${b}0/;  # False
 
 Several special variables also refer back to portions of the previous
 match.  C<$+> returns whatever the last bracket match matched.
@@ -1759,9 +1758,9 @@ spell out the character sets in full.
 Characters may be specified using a metacharacter syntax much like that
 used in C: "\n" matches a newline, "\t" a tab, "\r" a carriage return,
 "\f" a form feed, etc.  More generally, \I<nnn>, where I<nnn> is a string
-of octal digits, matches the character whose coded character set value
+of three octal digits, matches the character whose coded character set value
 is I<nnn>.  Similarly, \xI<nn>, where I<nn> are hexadecimal digits,
-matches the character whose numeric value is I<nn>. The expression \cI<x>
+matches the character whose ordinal is I<nn>. The expression \cI<x>
 matches the character control-I<x>.  Finally, the "." metacharacter
 matches any character except "\n" (unless you use C</s>).
 
