@@ -15,7 +15,9 @@ Locale::Maketext::GutsLoader - Deprecated module to load Locale::Maketext utf8 c
 
 =head1 DESCRIPTION
 
-Previously majic was done to load Locale::Maketext when utf8 was unavailable. The subs this module provided were merged back into Locale::Maketext
+Previously Locale::Maketext::Guts performed some magic to load
+Locale::Maketext when utf8 was unavailable. The subs this module provided
+were merged back into Locale::Maketext.
 
 =cut
 
