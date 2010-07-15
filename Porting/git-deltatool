@@ -348,6 +348,13 @@ sub y_n {
 # handlers
 #--------------------------------------------------------------------------#
 
+sub do_blocking {
+  my ($self, $choice, $log) = @_;
+  my $note = "perldelta: Unknown [blocking]\n";
+  $self->add_note( $log->id, $note );
+  return 1;
+}
+
 sub do_cherry {
   my ($self, $choice, $log) = @_;
   my $id = $log->short_id;
@@ -500,6 +507,7 @@ sub action_choices {
   my ($self) = @_;
   state $action_choices = [
       { name => '(+)Cherrymaint', handler => 'cherry' },
+      { name => '(?)NeedHelp', handler => 'blocking' },
       { name => 'S(k)ip', handler => 'skip' },
       { name => '(Q)uit', handler => 'quit' },
   ];
@@ -747,6 +755,10 @@ git-deltatool - Annotate commits for perldelta
 
  $ git-deltatool --mode review
 
+ # review commits needing help
+
+ $ git-deltatool --mode review --type blocking
+
  # summarize annotations by section to STDOUT
 
  $ git-deltatool --mode render
@@ -772,10 +784,12 @@ is 'new', which processes commits without any perldelta notes.  The
 default for 'review' and 'render' modes is 'pending'.  The options
 must be set explicitly for 'update' mode.
 
+The type 'blocking' is reserved for commits needing further review.
+
 =item B<--status>|B<-s> STATUS
 
 For 'update' mode only, sets a new status.  While there is no restriction,
-it should be one of 'new', 'pending', 'ignored' or 'done'.
+it should be one of 'new', 'pending', 'blocking', 'ignored' or 'done'.
 
 =item B<--since> REVISION
 
