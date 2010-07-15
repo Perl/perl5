@@ -7086,7 +7086,9 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
     }
 
     SvPOK_only(sv);
-    SvCUR_set(sv,0);
+    if (!append) {
+        SvCUR_set(sv,0);
+    }
     if (PerlIO_isutf8(fp))
 	SvUTF8_on(sv);
 
