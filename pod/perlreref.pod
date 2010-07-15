@@ -89,11 +89,12 @@ These work as in normal strings.
    \n       Newline
    \r       Carriage return
    \t       Tab
-   \037     Any octal ASCII value
-   \x7f     Any hexadecimal ASCII value
-   \x{263a} A wide hexadecimal value
+   \037     Char whose ordinal is the 3 octal digits, max \777
+   \o{2307} Char whose ordinal is the octal number, unrestricted
+   \x7f     Char whose ordinal is the 2 hex digits, max \xFF
+   \x{263a} Char whose ordinal is the hex number, unrestricted
    \cx      Control-x
-   \N{name} A named character
+   \N{name} A named Unicode character
    \N{U+263D} A Unicode character by hex ordinal
 
    \l  Lowercase next character
