@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 20;
+plan tests => 21;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -167,11 +167,12 @@ SKIP: {
     # make the value valid but before it starts read().
     my $once  = test_eintr_readline( $in, 0 );
     my $twice = test_eintr_readline( $in, 1 );
-    is( $once,  "once\n", "readline read first line ok" );
+    is(   $once,  "once\n", "readline read first line ok" );
+    isnt( $twice, "once\n", "readline didn't re-return things when interrupted" );
 
     TODO: {
         local our $TODO = "bad readline returns '', not undef";
-        is( $twice, undef,   "readline didn't return first line again" );
+        is( $twice, undef, "readline returned undef when interrupted" );
     }
 }
 
