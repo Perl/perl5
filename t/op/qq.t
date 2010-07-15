@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print q(1..26
+print q(1..29
 );
 
 # This is() function is written to avoid ""
@@ -64,6 +64,9 @@ is ("\x{10FFFD}", chr 1114109);
 is ("\400", chr 0x100);
 is ("\600", chr 0x180);
 is ("\777", chr 0x1FF);
+is ("a\o{120}b", "a" . chr(0x50) . "b");
+is ("a\o{400}b", "a" . chr(0x100) . "b");
+is ("a\o{1000}b", "a" . chr(0x200) . "b");
 
 # These kludged tests should change when we remove the temporary fatal error
 # in util.c for "\c{".  And, the warning there should probably not be

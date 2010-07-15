@@ -283,6 +283,7 @@ Perl_vload_module
 Perl_looks_like_number
 Perl_grok_bin
 Perl_grok_bslash_c
+Perl_grok_bslash_o
 Perl_grok_hex
 Perl_grok_number
 Perl_grok_numeric_radix

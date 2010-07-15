@@ -966,3 +966,26 @@ Use of := for an empty attribute list is deprecated at - line 36.
 Use of := for an empty attribute list is deprecated at - line 38.
 Use of := for an empty attribute list is deprecated at - line 41.
 Use of := for an empty attribute list is deprecated at - line 42.
+########
+# toke.c
+use warnings 'syntax' ;
+my $a = "\o";
+my $a = "\o{";
+my $a = "\o{}";
+no warnings 'syntax' ;
+my $a = "\o";
+my $a = "\o{";
+my $a = "\o{}";
+EXPECT
+Missing braces on \o{} at - line 3, within string
+Missing right brace on \o{ at - line 4, within string
+Number with no digits at - line 5, within string
+BEGIN not safe after errors--compilation aborted at - line 6.
+########
+# toke.c
+use warnings 'digit' ;
+my $a = "\o{1238456}";
+no warnings 'digit' ;
+my $a = "\o{1238456}";
+EXPECT
+Non-octal character '8'.  Resolved as "\o{123}" at - line 3.

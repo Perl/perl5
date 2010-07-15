@@ -2510,6 +2510,10 @@ comment) between the C<\N> and the C<{> in a regex with the C</x> modifier.
 This modifier does not change the requirement that the brace immediately follow
 the C<\N>.
 
+=item Missing braces on \o{}
+
+(F) A C<\o> must be followed immediately by a C<{> in double-quotish context.
+
 =item Missing comma after first argument to %s function
 
 (F) While certain functions allow you to specify a filehandle or an
@@ -2978,6 +2982,11 @@ to UTC.  If it's not, define the logical name
 F<SYS$TIMEZONE_DIFFERENTIAL> to translate to the number of seconds which
 need to be added to UTC to get local time.
 
+=item Non-octal character '%c'.  Resolved as "%s"
+
+(W digit)  In parsing an octal numeric constant, a character was unexpectedly
+encountered that isn't octal.  The resulting value is as indicated.
+
 =item Non-string passed as bitmask
 
 (W misc) A number has been passed as a bitmask argument to select().
@@ -3019,6 +3028,11 @@ about 250 characters.  You've exceeded that length.  Future
 versions of Perl are likely to eliminate this arbitrary limitation.  In
 the meantime, try using scientific notation (e.g. "1e6" instead of
 "1_000_000").
+
+=item Number with no digits
+
+(F) Perl was looking for a number but found nothing that looked like a number.
+This happens, for example with C<\o{}>, with no number between the braces.
 
 =item Octal number in vector unsupported
 

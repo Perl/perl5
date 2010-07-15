@@ -463,6 +463,7 @@
 #define grok_bin		Perl_grok_bin
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define grok_bslash_c		Perl_grok_bslash_c
+#define grok_bslash_o		Perl_grok_bslash_o
 #endif
 #define grok_hex		Perl_grok_hex
 #define grok_number		Perl_grok_number
@@ -2909,6 +2910,7 @@
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
+#define grok_bslash_o(a,b,c,d)	Perl_grok_bslash_o(aTHX_ a,b,c,d)
 #endif
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)

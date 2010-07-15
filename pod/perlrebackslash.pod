@@ -62,7 +62,7 @@ quoted constructs>.
 Those not usable within a bracketed character class (like C<[\da-z]>) are marked
 as C<Not in [].>
 
- \000              Octal escape sequence.
+ \000              Octal escape sequence.  See also \o{}.
  \1                Absolute backreference.  Not in [].
  \a                Alarm or bell.
  \A                Beginning of string.  Not in [].
@@ -86,6 +86,7 @@ as C<Not in [].>
  \n                (Logical) newline character.
  \N                Any character but newline.  Experimental.  Not in [].
  \N{}              Named or numbered (Unicode) character.
+ \o{}              Octal escape sequence.
  \p{}, \pP         Character with the given Unicode property.
  \P{}, \PP         Character without the given Unicode property.
  \Q                Quotemeta till \E.  Not in [].
@@ -207,33 +208,57 @@ match "as is".
 
 =head3 Octal escapes
 
-Octal escapes consist of a backslash followed by three octal digits
-matching the code point of the character you want to use.  (In some contexts,
-two or even one octal digits are also accepted, sometimes with a warning.) This
-allows for 512 characters (C<\000> up to C<\777>) that can be expressed this
-way.  Enough in pre-Unicode days,
-but most Unicode characters cannot be escaped this way.
+There are two forms of octal escapes.  Each is used to specify a character by
+its ordinal, specified in octal notation.
+
+One form, available starting in Perl 5.14 looks like C<\o{...}>, where the dots
+represent one or more octal digits.  It can be used for any Unicode character.
+
+It was introduced to avoid the potential problems with the other form,
+available in all Perls.  That form consists of a backslash followed by three
+octal digits.  One problem with this form is that it can look exactly like an
+old-style backreference (see
+L</Disambiguation rules between old-style octal escapes and backreferences>
+below.)  You can avoid this by making the first of the three digits always a
+zero, but that makes \077 the largest ordinal unambiguously specifiable by this
+form.
+
+In some contexts, a backslash followed by two or even one octal digits may be
+interpreted as an octal escape, sometimes with a warning, and because of some
+bugs, sometimes with surprising results.  Also, if you are creating a regex
+out of smaller snippets concatentated together, and you use fewer than three
+digits, the beginning of one snippet may be interpreted as adding digits to the
+ending of the snippet before it.  See L</Absolute referencing> for more
+discussion and examples of the snippet problem.
 
 Note that a character that is expressed as an octal escape is considered
 as a character without special meaning by the regex engine, and will match
 "as is".
 
+To summarize, the C<\o{}> form is always safe to use, and the other form is
+safe to use for ordinals up through \077 when you use exactly three digits to
+specify them.
+
+Mnemonic: I<0>ctal or I<o>ctal.
+
 =head4 Examples (assuming an ASCII platform)
 
  $str = "Perl";
- $str =~ /\120/;    # Match, "\120" is "P".
- $str =~ /\120+/;   # Match, "\120" is "P", it is repeated at least once
- $str =~ /P\053/;   # No match, "\053" is "+" and taken literally.
+ $str =~ /\o{120}/;  # Match, "\120" is "P".
+ $str =~ /\120/;     # Same.
+ $str =~ /\o{120}+/; # Match, "\120" is "P", it's repeated at least once
+ $str =~ /\120+/;    # Same.
+ $str =~ /P\053/;    # No match, "\053" is "+" and taken literally.
+ /\o{23073}/         # Black foreground, white background smiling face.
+ /\o{4801234567}/    # Raises a warning, and yields chr(4)
 
-=head4 Caveat
+=head4 Disambiguation rules between old-style octal escapes and backreferences
 
-Octal escapes potentially clash with old-style backreferences (see L</Absolute
-referencing> below). They both consist of a backslash followed by numbers. So
-Perl has to use heuristics to determine whether it is a backreference or an
-octal escape. You can avoid ambiguity by using the C<\g> form for
-backreferences, and by beginning octal escapes with a "0".  (Since octal
-escapes are 3 digits, this latter method works only up to C<\077>.)  In the
-absence of C<\g>, Perl uses the following rules:
+Octal escapes of the C<\000> form outside of bracketed character classes
+potentially clash with old-style backreferences.  (see L</Absolute referencing>
+below).  They both consist of a backslash followed by numbers.  So Perl has to
+use heuristics to determine whether it is a backreference or an octal escape.
+Perl uses the following rules to disambiguate:
 
 =over 4
 
@@ -258,18 +283,24 @@ the rest are matched as is.
     $pat .= ")" x 999;
  /^($pat)\1000$/;   #  Matches 'aa'; there are 1000 capture groups.
  /^$pat\1000$/;     #  Matches 'a@0'; there are 999 capture groups
-                    #    and \1000 is seen as \100 (a '@') and a '0'.
+                    #    and \1000 is seen as \100 (a '@') and a '0'
 
 =back
 
+You can the force a backreference interpretation always by using the C<\g{...}>
+form.  You can the force an octal interpretation always by using the C<\o{...}>
+form, or for numbers up through \077 (= 63 decimal), by using three digits,
+beginning with a "0".
+
 =head3 Hexadecimal escapes
 
-Hexadecimal escapes start with C<\x> and are then either followed by a
-two digit hexadecimal number, or a hexadecimal number of arbitrary length
-surrounded by curly braces. The hexadecimal number is the code point of
-the character you want to express.
+Like octal escapes, there are two forms of hexadecimal escapes, but both start
+with the same thing, C<\x>.  This is followed by either exactly two hexadecimal
+digits forming a number, or a hexadecimal number of arbitrary length surrounded
+by curly braces. The hexadecimal number is the code point of the character you
+want to express.
 
-Note that a character that is expressed as a hexadecimal escape is considered
+Note that a character that is expressed as one of these escapes is considered
 as a character without special meaning by the regex engine, and will match
 "as is".
 

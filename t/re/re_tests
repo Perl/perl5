@@ -1460,5 +1460,11 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [a\400]	\x{100}	y	$&	\x{100}
 [b\600]	\x{180}	y	$&	\x{180}
 [c\777]	\x{1FF}	y	$&	\x{1FF}
+\o{120}	\x{50}	y	$&	\x{50}
+\o{400}	\x{100}	y	$&	\x{100}
+\o{1000}	\x{200}	y	$&	\x{200}
+[a\o{120}]	\x{50}	y	$&	\x{50}
+[a\o{400}]	\x{100}	y	$&	\x{100}
+[a\o{1000}]	\x{200}	y	$&	\x{200}
 
 # vim: softtabstop=0 noexpandtab

@@ -207,3 +207,33 @@ Useless (?-c) - don't use /gc modifier in regex; marked by <-- HERE in m/(?o-c <
 Useless (?o) - use /o modifier in regex; marked by <-- HERE in m/(?o <-- HERE gc)/ at - line 12.
 Useless (?g) - use /g modifier in regex; marked by <-- HERE in m/(?og <-- HERE c)/ at - line 12.
 Useless (?c) - use /gc modifier in regex; marked by <-- HERE in m/(?ogc <-- HERE )/ at - line 12.
+########
+# regcomp.c [S_regatom]
+$a = qr/\o{/;
+EXPECT
+Missing right brace on \o{ in regex; marked by <-- HERE in m/\ <-- HERE o{/ at - line 2.
+########
+# regcomp.c [S_regatom]
+$a = qr/\o/;
+EXPECT
+Missing braces on \o{} in regex; marked by <-- HERE in m/\ <-- HERE o/ at - line 2.
+########
+# regcomp.c [S_regatom]
+$a = qr/\o{}/;
+EXPECT
+Number with no digits in regex; marked by <-- HERE in m/\ <-- HERE o{}/ at - line 2.
+########
+# regcomp.c [S_regclass]
+$a = qr/[\o{]/;
+EXPECT
+Missing right brace on \o{ in regex; marked by <-- HERE in m/[\ <-- HERE o{]/ at - line 2.
+########
+# regcomp.c [S_regclass]
+$a = qr/[\o]/;
+EXPECT
+Missing braces on \o{} in regex; marked by <-- HERE in m/[\ <-- HERE o]/ at - line 2.
+########
+# regcomp.c [S_regclass]
+$a = qr/[\o{}]/;
+EXPECT
+Number with no digits in regex; marked by <-- HERE in m/[\ <-- HERE o{}]/ at - line 2.

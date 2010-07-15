@@ -7362,6 +7362,7 @@ tryagain:
 	    register UV ender;
 	    register char *p;
 	    char *s;
+	    char *error_msg;
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 
@@ -7462,6 +7463,26 @@ tryagain:
 			  ender = ASCII_TO_NATIVE('\007');
 			p++;
 			break;
+		    case 'o':
+			{
+			    STRLEN brace_len = len;
+			    if ((error_msg = grok_bslash_o(p,
+							   &ender,
+							   &brace_len,
+							   SIZE_ONLY))
+				!= NULL)
+			    {
+				vFAIL(error_msg);
+			    }
+			    p += brace_len;
+			    if (PL_encoding && ender < 0x100) {
+				goto recode_encoding;
+			    }
+			    if (ender > 0xff) {
+				RExC_utf8 = 1;
+			    }
+			    break;
+			}
 		    case 'x':
 			if (*++p == '{') {
 			    char* const e = strchr(p, '}');
@@ -7971,6 +7992,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 
 parseit:
     while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
+	char* error_msg;
 
     charclassloop:
 
@@ -8077,6 +8099,21 @@ parseit:
 	    case 'b':	value = '\b';			break;
 	    case 'e':	value = ASCII_TO_NATIVE('\033');break;
 	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
+	    case 'o':
+		RExC_parse--;	/* function expects to be pointed at the 'o' */
+		if ((error_msg = grok_bslash_o(RExC_parse,
+					       &value,
+					       &numlen,
+					       SIZE_ONLY))
+		    != NULL)
+		{
+		    vFAIL(error_msg);
+		}
+		RExC_parse += numlen;
+		if (PL_encoding && value < 0x100) {
+		    goto recode_encoding;
+		}
+		break;
 	    case 'x':
 		if (*RExC_parse == '{') {
                     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES

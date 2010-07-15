@@ -28,6 +28,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 \o{...}
+
+The escape sequence C<"\o"> in double-quotish contexts is now defined.  It
+must be followed by braces enclosing an octal number of at least one digit.  It
+means the character whose ordinal value is that octal number.  This construct
+allows large octal ordinals beyond the current max of 0777 to be represented.
+It also allows you to specify a character in octal which can safely be
+concatenated with other regex snippets without danger of changing its meaning,
+and one which won't ever be confused with being a backreference to a regex
+capture group.  See L<perlre/Capture groups>
+
 =head2 C<\N{I<name>}> and C<charnames> enhancements
 
 C<\N{}> and C<charnames::vianame> now know about the abbreviated character
@@ -84,7 +95,9 @@ anomalous behavior than their use in all other double-quotish contexts.   Since
 all double-quotish contexts have the same behavior, namely to be equivalent to
 C<\x{100}> - C<\x{1FF}>, with no deprecation warning. Use of these values in the
 command line option C<"-0"> retains the current meaning to slurp input files
-whole; previously, this was documented only for C<"-0777">.
+whole; previously, this was documented only for C<"-0777">.  It is recommended,
+however, because of various ambiguities, to use the new L</\o{...}> construct
+to represent characters in octal.
 
 =head1 Deprecations
 

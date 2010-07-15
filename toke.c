@@ -2879,6 +2879,20 @@ S_scan_const(pTHX_ char *start)
 		}
 		goto NUM_ESCAPE_INSERT;
 
+	    /* eg. \o{24} indicates the octal constant \024 */
+	    case 'o':
+		{
+		    STRLEN len;
+
+		    char* error = grok_bslash_o(s, &uv, &len, 1);
+		    s += len;
+		    if (error) {
+			yyerror(error);
+			continue;
+		    }
+		    goto NUM_ESCAPE_INSERT;
+		}
+
 	    /* eg. \x24 indicates the hex constant 0x24 */
 	    case 'x':
 		++s;

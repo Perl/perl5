@@ -229,11 +229,11 @@ also work:
  \f          form feed             (FF)
  \a          alarm (bell)          (BEL)
  \e          escape (think troff)  (ESC)
- \033        octal char            (example: ESC)
  \cK         control char          (example: VT)
  \x{}, \x00  character whose ordinal is the given hexadecimal number
  \N{name}    named Unicode character
  \N{U+263D}  Unicode character     (example: FIRST QUARTER MOON)
+ \o{}, \000  character whose ordinal is the given octal number
  \l          lowercase next char (think vi)
  \u          uppercase next char (think vi)
  \L          lowercase till \E (think vi)
