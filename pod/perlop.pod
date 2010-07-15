@@ -1019,40 +1019,76 @@ and in transliterations.
 X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
 
     Sequence    Note  Description
-    \t                tab               (HT, TAB)
-    \n                newline           (NL)
-    \r                return            (CR)
-    \f                form feed         (FF)
-    \b                backspace         (BS)
-    \a                alarm (bell)      (BEL)
-    \e                escape            (ESC)
-    \x{263a}     [1]  hex char          (example: SMILEY)
-    \x1b         [2]  narrow hex char   (example: ESC)
+    \t                tab                 (HT, TAB)
+    \n                newline             (NL)
+    \r                return              (CR)
+    \f                form feed           (FF)
+    \b                backspace           (BS)
+    \a                alarm (bell)        (BEL)
+    \e                escape              (ESC)
+    \x{263a}     [1]  hex char            (example: SMILEY)
+    \x1b         [2]  restricted hex char (example: ESC)
     \N{name}     [3]  named Unicode character
-    \N{U+263D}   [4]  Unicode character (example: FIRST QUARTER MOON)
-    \c[          [5]  control char      (example: chr(27))
-    \033         [6]  octal char        (example: ESC)
+    \N{U+263D}   [4]  Unicode character   (example: FIRST QUARTER MOON)
+    \c[          [5]  control char        (example: chr(27))
+    \033         [6]  octal char          (example: ESC)
 
 =over 4
 
 =item [1]
 
-The result is the character whose ordinal is the hexadecimal number between the
-braces.  If something other than a hexadecimal digit is encountered, it and
-everything following it up to the closing brace are discarded, and if warnings
-are enabled, a warning is raised.  The leading digits that are hex then
-comprise the entire number.  If the first thing after the opening brace is not
-a hex digit, the generated character is the NULL character.  C<\x{}> is the
-NULL character with no warning given.
+The result is the character whose ordinal is the hexadecimal number between
+the braces.  If the ordinal is 0x100 and above, the character will be the
+Unicode character corresponding to the ordinal.  If the ordinal is between
+0 and 0xFF, the rules for which character it represents are the same as for
+L<restricted hex chars|/[2]>.
+
+Only hexadecimal digits are valid between the braces. If an invalid
+character is encountered, a warning will be issued and the invalid
+character and all subsequent characters (valid or invalid) within the
+braces will be discarded.
+
+If there are no valid digits between the braces, the generated character is
+the NULL character (C<\x{00}>).  However, an explicit empty brace (C<\x{}>)
+will not cause a warning.
 
 =item [2]
 
-The result is the character whose ordinal is the given two-digit hexadecimal
-number.  But, if I<H> is a hex digit and I<G> is not, then C<\xI<HG>...> is the
-same as C<\x0I<HG>...>, and C<\xI<G>...> is the same thing as C<\x00I<G>...>.
-In both cases, the result is two characters, and if warnings are enabled, a
-misleading warning message is raised that I<G> is ignored, when in fact it is
-used.  Note that in the second case, the first character currently is a NULL.
+The result is a single-byte character whose ordinal is in the range 0x00 to
+0xFF.
+
+Only hexadecimal digits are valid following C<\x>.  When C<\x> is followed
+by less than two valid digits, any valid digits will be zero-padded.  This
+means that C<\x7> will be interpreted as C<\x07> and C<\x> alone will be
+interpreted as C<\x00>.  Except at the end of a string, having less than
+two valid digits will result in a warning.  Note that while the warning
+says the illegal character is ignored, it is only ignored as part of the
+escape and will still be used as the subsequent character in the string.
+For example:
+
+  Original    Result    Warns?
+  "\x7"       "\x07"    no
+  "\x"        "\x00"    no
+  "\x7q"      "\x07q"   yes
+  "\xq"       "\x00q"   yes
+
+The B<run-time> interpretation of single-byte characters depends on the
+platform and on pragmata in effect.  On EBCDIC platforms the character is
+treated as native to the platform's code page.  On other platforms, the
+representation and semantics (sort order and which characters are upper
+case, lower case, digit, non-digit, etc.) depends on the current
+L<S<C<locale>>|perllocale> settings at run-time.
+
+However, when L<C<S<use feature 'unicode_strings'>>|feature> is in effect
+and both L<C<S<use bytes>>|bytes> and L<C<S<use locale>>|locale> are not,
+characters from 0x80 to 0xff are treated as Unicode code points from
+the Latin-1 Supplement block.
+
+Note that the locale semantics of single-byte characters in a regular
+expression are determined when the regular expression is compiled, not when
+the regular expression is used.  When a regular expression is interpolated
+into another regular expression -- any prior semantics are ignored and only
+current locale matters for the resulting regular expression.
 
 =item [3]
 
