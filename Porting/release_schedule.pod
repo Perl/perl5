@@ -23,7 +23,7 @@ you should reset the version numbers to the next blead series.
 
  January 20      -   Ricardo Signes
  February 20     -   Steve Hay
- March 20        -   Ask Bjørn Hansen
+ March 20        -   Ask Bjørn Hansen (skipped due to 5.12.0-RC1)
  April 20        -   Leon Brocard
  May 20          -   Ricardo Signes
  June 20         -   Matt Trout
