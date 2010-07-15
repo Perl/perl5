@@ -366,8 +366,8 @@ Either C<\gI<N>> (starting in Perl 5.10.0), or C<\I<N>> (old-style) where I<N>
 is a positive (unsigned) decimal number of any length is an absolute reference
 to a capturing group.
 
-I<N> refers to the Nth set of parentheses - so C<\gI<N>> refers to whatever has
-been matched by that set of parenthesis.  Thus C<\g1> refers to the first
+I<N> refers to the Nth set of parentheses, so C<\gI<N>> refers to whatever has
+been matched by that set of parentheses.  Thus C<\g1> refers to the first
 capture group in the regex.
 
 The C<\gI<N>> form can be equivalently written as C<\g{I<N>}>
