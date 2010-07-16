@@ -66,6 +66,10 @@ sub run {
     $opt{type} //= 'pending';
     $gdt->render;
   }
+  elsif ( $opt{mode} eq 'summary' ) {
+    $opt{type} //= 'pending';
+    $gdt->summary;
+  }
   elsif ( $opt{mode} eq 'update' ) {
     die "Explicit --type argument required for update mode\n"
       unless defined $opt{type};
@@ -137,6 +141,18 @@ sub render {
     say uc($s) . "\n";
     say join ( "\n", @{ $sections{$s} }, "" );
   }
+  return;
+}
+
+sub summary {
+  my ($self) = @_;
+  $self->_iterate_commits(
+    sub {
+      my $log = shift;
+      $self->show_header($log);
+      return 1;
+    }
+  );
   return;
 }
 
@@ -759,7 +775,11 @@ git-deltatool - Annotate commits for perldelta
 
  $ git-deltatool --mode review --type blocking
 
- # summarize annotations by section to STDOUT
+ # summarize commits needing help
+
+ $ git-deltatool --mode summary --type blocking
+
+ # assemble annotations by section to STDOUT
 
  $ git-deltatool --mode render
 
@@ -775,14 +795,14 @@ git-deltatool - Annotate commits for perldelta
 
 Indicates the run mode for the program.  The default is 'assign' which
 assigns categories and marks the notes as 'pending' (or 'ignored').  Other
-modes are 'review', 'render' and 'update'.
+modes are 'review', 'render', 'summarize' and 'update'.
 
 =item B<--type>|B<-t> TYPE
 
-Indicates what types of commits to process.  The default for 'assign' mode
-is 'new', which processes commits without any perldelta notes.  The
-default for 'review' and 'render' modes is 'pending'.  The options
-must be set explicitly for 'update' mode.
+Indicates what types of commits to process.  The default for 'assign' mode is
+'new', which processes commits without any perldelta notes.  The default for
+'review', 'summarize' and 'render' modes is 'pending'.  The options must be set
+explicitly for 'update' mode.
 
 The type 'blocking' is reserved for commits needing further review.
 
