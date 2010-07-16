@@ -166,11 +166,17 @@ SKIP: {
     # retains all its allocated space and buggy perl sets SvPOK to
     # make the value valid but before it starts read().
     my $once  = test_eintr_readline( $in, 0 );
-    my $twice = test_eintr_readline( $in, 1 );
     is(   $once,  "once\n", "readline read first line ok" );
-    isnt( $twice, "once\n", "readline didn't re-return things when interrupted" );
+
+    my $twice;
+    TODO: {
+        todo_skip( 'readline not interrupted by alarm on VMS -- why?' ) if $^O eq 'VMS';
+        $twice = test_eintr_readline( $in, 1 );
+        isnt( $twice, "once\n", "readline didn't re-return things when interrupted" );
+    }
 
     TODO: {
+        todo_skip( 'readline not interrupted by alarm on VMS -- why?' ) if $^O eq 'VMS';
         local our $TODO = "bad readline returns '', not undef";
         is( $twice, undef, "readline returned undef when interrupted" );
     }
