@@ -84,6 +84,23 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Omitting a space between regular expression and subsequent word
+
+Omitting a space between a regex pattern or pattern modifiers and the
+following word is deprecated. Deprecation for regular expression matches
+was added in Perl 5.13.2.  In this release, the deprecation is extended
+to regular expression substitutions. For example, 
+C<< s/foo/bar/sand $bar >> will still be parsed as
+C<< s/foo/bar/s and $bar >> but will issue a warning.  
+
+=head2 Deprecation warning added for deprecated-in-core .pl libs
+
+This is a mandatory warning, not obeying -X or lexical warning bits.
+The warning is modelled on that supplied by deprecate.pm for
+deprecated-in-core .pm libraries.  It points to the specific CPAN
+distribution that contains the .pl libraries. The CPAN version, of
+course, does not generate the warning. (0111154)
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
@@ -123,6 +140,9 @@ XXX
 
 =head2 Updated Modules and Pragmata
 
+XXX Make sure these get sorted, are phrased similarly and all version
+numbers are correct
+
 =over 4
 
 =item *
@@ -132,6 +152,11 @@ autodie updated to CPAN version 2.10 (a009834)
 =item *
 
 charnames -- viacode() is now significantly faster (f3227b7)
+
+=item *
+
+version now prevents object methods from being called as class methods
+(d808b68)
 
 =item *
 
@@ -150,8 +175,8 @@ modification for the lzma logic to favour IO::Uncompress::Unlzma
 
 =item *
 
-Archive-Tar updated to CPAN version 1.62 (d33cd7c)
-    
+Archive-Tar updated to version 1.64 (afabe0e)
+
 Important changes since 1.54 include: compatibility with busybox
 implementations of tar which was added by Mark Swayne; a fix so
 that write() and create_archive() close only handles
@@ -173,7 +198,23 @@ Compress-Raw-Zlib updated  to CPAN version 2.027 (f02c02e)
 
 =item *
 
+CPANPLUS updated to version 0.9007 (d4e225a)
+
+Fix the shell test to skip if test is not being run under a
+terminal; resolved the issue where a prereq on Config would not be
+recognised as a core module
+
+=item *
+
+Digest-MD5 updated to CPAN version 2.40 (326fafa)
+
+=item *
+
 Digest-SHA updated to CPAN version 5.48 (dfe1edc)
+
+=item *
+
+Exporter no longer overrides C<$SIG{__WARN__}> (RT #74472) (9b86bb5)
 
 =item *
 
@@ -185,15 +226,32 @@ ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
 
 =item *
 
+ExtUtil-ParseXS updated to version 2.2206 (494e8c4)
+
+=item *
+
+File::Copy skips suid tests on a nosuid partition (cae9400)
+
+=item *
+
 IO-Compress upated to CPAN version 2.027 (e8796d6)
+
+=item *
+
+IPC-Cmd updated to CPAN version 0.60 (e667e1e)
 
 =item *
 
 IPC-SysV updated to CPAN version 2.03 (10613b6)
 
+=item * 
+
+Locale::Maketext guts have been merged back into the main module (87d86da)
+and adds external cache support (ace47d6)
+
 =item *
 
-Locale::Maketext adds external cache support (ace47d6)
+Module-Build updated to CPAN version 0.3607 (40c9afb)
 
 =item *
 
@@ -239,13 +297,9 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
-=over 4
-
-=item L<perl5121delta>
+=head3 L<perl5121delta>
 
 The Perl 5.12.1 perldelta file was added from the Perl maintenance branch
-
-=back
 
 =head2 Changes to Existing Documentation
 
@@ -253,13 +307,20 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<perlop>
+=head3 General changes
 
-=over 4
+=over
 
 =item *
 
-Improved documentation of unusual character escapes (bf82ca4)
+Octal character escapes in documentation now prefer either the C<\gDIGIT>
+escape or else a three-digit octal escape as they have less ambiguity than
+other forms of octal escapes.  (ce7b6f0) (d8b950d)
+
+=item *
+
+Documentation now standardizes on the term 'capture group' over 'buffer'
+in regular expression documentation(c27a5cf)
 
 =back
 
@@ -274,6 +335,47 @@ Added cautionary note about "no VERSION" (e0de7c2)
 =item *
 
 Add additional notes regarding srand and forking (d460397)
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+Improved documentation of unusual character escapes (bf82ca4)
+
+=back
+
+=head3 L<perlrun>
+
+=over
+
+=item *
+
+Clarifies the behavior of the C<-0NNN> switch for C<-0400> or higher (7ba31cb)
+
+=back
+
+=head3 L<perlpolicy>
+
+=over
+
+=item *
+
+Added the policy on compatibility and deprecation along with definitions of
+terms like "deprecation" (70e4a83)
+
+=back
+
+=head3 L<perltie>
+
+=over
+
+=item *
+
+Some examples updated for modern Perl style (67d00dd)
 
 =back
 
@@ -317,16 +419,16 @@ XXX
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
 here. Most of these are built within the directories F<utils> and F<x2p>.
 
-[ List utility changes as a =item entry.  Use L<XXX> with program names to get
-proper documentation linking. ]
+=head3 L<perldb>
 
-=over 4
+=over
 
-=item L<XXX>
+=item * 
 
-XXX
+Uses the less pager path from Config instead of searching for it (bf320d6)
 
 =back
+
 
 =head1 Configuration and Compilation
 
@@ -341,7 +443,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Adjusts 'make test.valgrind' to account for cpan/dist/ext separation. (e07ce2e)
 
 =back
 
@@ -416,9 +518,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+t/io/openpid.t now uses the alarm() watchdog strategy for more
+robustness. (5732108)
 
 =back
 
@@ -428,27 +531,35 @@ XXX Changes which affect the interface available to C<XS> code go here.
 Other significant internal changes for future core maintainers should
 be noted as well.
 
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-Added Perl_croak_no_modify() to implement Perl_croak("%s", PL_no_modify).
-(6ad8f25)
-
-=item *
-
-Added prototypes for tie() and untie() to allow overloading (RT#75902)
-(1db4d19)
-
-=back
+[ List each improvement as a =item entry ]
 
 =over 4
 
 =item *
 
 XXX Lots of block hook changes (PL_blockhooks) -- needs an overall summary
+
+=item *
+
+Added C<BhkENABLE> and C<BhkDISABLE> macros to en/disable blockhook entries.
+This allows the individual callbacks to be switched on and off as
+necessary, without removing the entry from PL_blockhooks. (a3e07c8)
+
+=item *
+
+Added C<Perl_croak_no_modify()> to implement 
+C<Perl_croak("%s", PL_no_modify)>. (6ad8f25)
+
+=item *
+
+Added prototypes for C<tie()> and C<untie()> to allow overloading. (RT#75902)
+(1db4d19)
+
+=item * 
+
+Adds C<my_[l]stat_flags()> to replace C<my_[l]stat()>.  C<my_stat()> and
+C<my_lstat()> call get magic on the stack arg, so create C<_flags()>
+variants that allow us to control this. (0d7d409)
 
 =back
 
@@ -489,6 +600,33 @@ Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
 Doesn't set strict with C<no VERSION> if C<VERSION> is greater than 5.12.
 (da8fb5d)
 
+=item *
+
+Avoids multiple FETCH/stringify on filetest ops (40c852d)
+
+=item *
+
+Fixed issue with string C<eval> not detecting taint of overloaded/tied
+arguments (RT #75716) (895b760)
+
+=item *
+
+Fix potential crashes of string C<eval> when evaluating a object with
+overloaded stringification by creating a stringified copy when necessary
+(3e5c018)
+
+=item *
+
+Fixed bug where overloaded stringification could remove tainting
+(RT #75716) (a02ec77)
+
+=item *
+
+Plugs more memory leaks in vms.c. (9e2bec0)
+
+=item *
+
+Fix pthread include error for Time::Piece (e9f284c)
 
 =back
 
