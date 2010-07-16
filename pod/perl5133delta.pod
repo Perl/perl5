@@ -423,6 +423,11 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 
 =over
 
+=item *
+
+The remote terminal works after forking and spawns new sessions - one
+for each forked process.
+
 =item * 
 
 Uses the less pager path from Config instead of searching for it (bf320d6)
@@ -575,6 +580,11 @@ L</Modules and Pragmata>.
 
 =item *
 
+Fixed readline() when interrupted by signals so it no longer returns
+the "same thing" as before or random memory.
+
+=item *
+
 Fixed a regression of kill() when a match variable is used for the
 process ID to kill.  (RT#75812) (8af710e)
 
@@ -645,7 +655,8 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+readline() returns an empty string instead of undef when it is
+interrupted by a signal.
 
 =back
 
