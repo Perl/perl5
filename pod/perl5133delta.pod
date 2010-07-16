@@ -542,13 +542,9 @@ be noted as well.
 
 =item *
 
-XXX Lots of block hook changes (PL_blockhooks) -- needs an overall summary
-
-=item *
-
-Added C<BhkENABLE> and C<BhkDISABLE> macros to en/disable blockhook entries.
-This allows the individual callbacks to be switched on and off as
-necessary, without removing the entry from PL_blockhooks. (a3e07c8)
+It is now possible for XS code to hook into Perl's lexical scope
+mechanism at compile time, using the new C<Perl_blockhook_register>
+function. See L<perlguts/"Compile-time scope hooks">.
 
 =item *
 
