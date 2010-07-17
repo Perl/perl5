@@ -1218,7 +1218,7 @@ PP(pp_qr)
     SvROK_on(rv);
 
     if (pkg) {
-	HV* const stash = gv_stashpv(SvPV_nolen(pkg), GV_ADD);
+	HV *const stash = gv_stashsv(pkg, GV_ADD);
 	SvREFCNT_dec(pkg);
 	(void)sv_bless(rv, stash);
     }
