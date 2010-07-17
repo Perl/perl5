@@ -1017,21 +1017,23 @@ from the next line.  This allows you to write:
 The following escape sequences are available in constructs that interpolate
 and in transliterations.
 X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
+X<\o{}>
 
     Sequence    Note  Description
-    \t                tab                 (HT, TAB)
-    \n                newline             (NL)
-    \r                return              (CR)
-    \f                form feed           (FF)
-    \b                backspace           (BS)
-    \a                alarm (bell)        (BEL)
-    \e                escape              (ESC)
-    \x{263a}     [1]  hex char            (example: SMILEY)
-    \x1b         [2]  restricted hex char (example: ESC)
+    \t                tab               (HT, TAB)
+    \n                newline           (NL)
+    \r                return            (CR)
+    \f                form feed         (FF)
+    \b                backspace         (BS)
+    \a                alarm (bell)      (BEL)
+    \e                escape            (ESC)
+    \x{263a}     [1]  hex char          (example: SMILEY)
+    \x1b         [2]  restricted range hex char (example: ESC)
     \N{name}     [3]  named Unicode character
-    \N{U+263D}   [4]  Unicode character   (example: FIRST QUARTER MOON)
-    \c[          [5]  control char        (example: chr(27))
-    \033         [6]  octal char          (example: ESC)
+    \N{U+263D}   [4]  Unicode character (example: FIRST QUARTER MOON)
+    \c[          [5]  control char      (example: chr(27))
+    \o{23072}    [6]  octal char        (example: SMILEY)
+    \033         [7]  restricted range octal char  (example: ESC)
 
 =over 4
 
@@ -1136,13 +1138,25 @@ To get platform independent controls, you can use C<\N{...}>.
 
 =item [6]
 
+The result is the character whose ordinal is the octal number between the
+braces.
+
+If a character that isn't an octal digit is encountered, a warning is raised,
+and the value is based on the octal digits before it, discarding it and all
+following characters up to the closing brace.  It is a fatal error if there are
+no octal digits at all.
+
+=item [7]
+
 The result is the character whose ordinal is the given three digit octal
 number.  Some contexts allow 2 or even 1 digit, but any usage without exactly
 three digits, the first being a zero, may give unintended results.  (For
-example, see L<perlrebackslash/Octal escapes>.)  It is best therefore to use
-this construct only for ordinals C<\077> and below, remembering to pad to the
-left with zeros to make three digits.  For larger ordinals, it's best to
-convert to some other construct, such as to hex and use C<\x{}> instead.
+example, see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
+use C<\o{}> instead which avoids all these problems.  Otherwise, it is best to
+use this construct only for ordinals C<\077> and below, remembering to pad to
+the left with zeros to make three digits.  For larger ordinals, either use
+C<\o{}> , or convert to someething else, such as to hex and use C<\x{}>
+instead.
 
 A backslash followed by a non-octal digit in a bracketed character class
 (C<[\8]> or C<[\9]>) will be interpreted as a NULL character and the digit.
