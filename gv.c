@@ -206,10 +206,11 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	return;
 
     if (oldgv) {
-	if (CvANON(cv))
+	if (CvCVGV_RC(cv)) {
 	    SvREFCNT_dec(oldgv);
+	    CvCVGV_RC_off(cv);
+	}
 	else {
-	    assert(strNE(GvNAME(oldgv),"__ANON__"));
 	    sv_del_backref(MUTABLE_SV(oldgv), MUTABLE_SV(cv));
 	}
     }
@@ -220,11 +221,10 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	return;
 
     if (CvANON(cv)) {
-	assert(strnEQ(GvNAME(gv),"__ANON__", 8));
+	CvCVGV_RC_on(cv);
 	SvREFCNT_inc_simple_void_NN(gv);
     }
     else {
-	assert(strNE(GvNAME(gv),"__ANON__"));
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(gv), MUTABLE_SV(cv));
     }
 }

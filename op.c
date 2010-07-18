@@ -5476,9 +5476,9 @@ Perl_cv_undef(pTHX_ CV *cv)
     if (CvISXSUB(cv) && CvXSUB(cv)) {
 	CvXSUB(cv) = NULL;
     }
-    /* delete all flags except WEAKOUTSIDE and ANON, which indicate the
+    /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
      * ref status of CvOUTSIDE and CvGV */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_ANON);
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC);
 }
 
 void

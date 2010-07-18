@@ -261,7 +261,7 @@ do_test(13,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
+    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC\\)
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
@@ -276,7 +276,7 @@ do_test(13,
     MUTEXP = $ADDR
     OWNER = $ADDR)?
     FLAGS = 0x404				# $] < 5.009
-    FLAGS = 0x90				# $] >= 5.009
+    FLAGS = 0x490				# $] >= 5.009
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)

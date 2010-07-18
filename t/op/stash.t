@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 37 );
+plan( tests => 38 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -199,4 +199,13 @@ SKIP: {
 	ok($gv->isa(q/B::GV/), "anon CV has valid GV");
 	is($gv->NAME, '__ANON__', "anon CV has anon GV");
     }
+}
+
+# make sure having a sub called __ANON__ doesn't confuse perl.
+
+{
+    my $c;
+    sub __ANON__ { $c = (caller(0))[3]; }
+    __ANON__();
+    is ($c, 'main::__ANON__', '__ANON__ sub called ok');
 }
