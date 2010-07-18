@@ -5675,7 +5675,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     /* will the CV shortly be freed by gp_free() ? */
     if (GvCV(gv) == cv && GvGP(gv)->gp_refcnt < 2 && SvREFCNT(cv) < 2) {
-	CvGV(cv) = NULL;
+	SvANY(cv)->xcv_gv = NULL;
 	return;
     }
 
@@ -5688,7 +5688,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     CvANON_on(cv);
     CvCVGV_RC_on(cv);
-    CvGV(cv) = MUTABLE_GV(SvREFCNT_inc(anongv));
+    SvANY(cv)->xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
 }
 
 
@@ -11438,7 +11438,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		}
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
-		CvGV(dstr) =
+		SvANY(MUTABLE_CV(dstr))->xcv_gv =
 		    CvCVGV_RC(dstr)
 		    ? gv_dup_inc(CvGV(sstr), param)
 		    : (param->flags & CLONEf_JOIN_IN)

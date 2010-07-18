@@ -5459,7 +5459,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
-    cvgv_set(cv, NULL);
+    CvGV_set(cv, NULL);
 
     pad_undef(cv);
 
@@ -5872,7 +5872,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (!CvGV(cv)) {
-	cvgv_set(cv, gv);
+	CvGV_set(cv, gv);
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH(cv) = PL_curstash;
 	if (PL_curstash)
@@ -6236,7 +6236,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     }
     if (!name)
 	CvANON_on(cv);
-    cvgv_set(cv, gv);
+    CvGV_set(cv, gv);
     (void)gv_fetchfile(filename);
     CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
 				   an external constant string */
@@ -6285,7 +6285,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     }
     cv = PL_compcv;
     GvFORM(gv) = cv;
-    cvgv_set(cv, gv);
+    CvGV_set(cv, gv);
     CvFILE_set_from_cop(cv, PL_curcop);
 
 
