@@ -13,6 +13,7 @@ use Getopt::Long;
 use File::Temp ();
 use File::Path ();
 use File::Spec;
+use File::Spec::Unix ();
 use Archive::Extract;
 use IO::Uncompress::Gunzip ();
 use File::Compare ();
@@ -71,6 +72,9 @@ Usage: $0 [opts] [ -d | -v | -x ] [ -a | module ... ]
 -f|force      Force download from CPAN of new 02packages.details.txt file
               (with --crosscheck only).
 
+-m|mirror     Preferred CPAN mirror URI (http:// or file:///)
+              (Local mirror must be a complete mirror, not minicpan)
+
 -o/--output   File name to write output to (defaults to STDOUT).
 
 -r/--reverse  Reverses the diff (perl to CPAN).
@@ -101,6 +105,7 @@ sub run {
     my $reverse    = 0;
     my @wanted_upstreams;
     my $cache_dir;
+    my $mirror_url = "http://www.cpan.org/";
     my $use_diff;
     my $output_file;
     my $verbose;
@@ -114,6 +119,7 @@ sub run {
 	'diffopts:s'   => \$diff_opts,
 	'f|force'      => \$force,
 	'h|help'       => \&usage,
+	'm|mirror=s'   => \$mirror_url,
 	'o|output=s'   => \$output_file,
 	'r|reverse'    => \$reverse,
 	'u|upstream=s@'=> \@wanted_upstreams,
@@ -156,21 +162,42 @@ sub run {
 	die "ERROR: no such directory: '$cache_dir'\n" unless -d $cache_dir;
     }
 
+    $mirror_url .= "/" unless substr($mirror_url,-1) eq "/";
+    my $test_file = "modules/07mirror.yml";
+    my_getstore(cpan_url($mirror_url, $test_file), local_path($cache_dir, $test_file))
+	or die "ERROR: not a CPAN mirror '$mirror_url'\n";
+
     if ($do_crosscheck) {
-	do_crosscheck($outfh, $cache_dir, $force, \@modules);
+	do_crosscheck($outfh, $cache_dir, $mirror_url, $force, \@modules);
     }
     else {
-	do_compare(\@modules, $outfh, $output_file, $cache_dir, $verbose, $use_diff,
+	do_compare(\@modules, $outfh, $output_file, $cache_dir, $mirror_url, $verbose, $use_diff,
 	    $reverse, $diff_opts, \@wanted_upstreams);
     }
 }
 
+# construct a local path either in cache dir or tempdir
 
+sub local_path {
+    my ($cache_dir, @path) = @_;
+    my $local_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
+    return File::Spec->catfile($local_dir, @path);
+}
+
+# construct a CPAN url
+
+sub cpan_url {
+    my ($mirror_url, @path) = @_;
+    return $mirror_url unless @path;
+    my $cpan_path = join( "/", map { split "/", $_ } @path );
+    $cpan_path =~ s{\A/}{}; # remove leading slash since url has one trailing
+    return $mirror_url . $cpan_path;
+}
 
 # compare a list of modules against their CPAN equivalents
 
 sub do_compare {
-    my ($modules, $outfh, $output_file, $cache_dir, $verbose,
+    my ($modules, $outfh, $output_file, $cache_dir, $mirror_url, $verbose,
 		$use_diff, $reverse, $diff_opts, $wanted_upstreams) = @_;
 
 
@@ -220,7 +247,7 @@ sub do_compare {
 
 	my $cpan_dir;
 	eval {
-	    $cpan_dir = get_distribution($cache_dir, $untar_dir, $module, $dist)
+	    $cpan_dir = get_distribution($cache_dir, $mirror_url, $untar_dir, $module, $dist)
 	};
 	if ($@) {
 	    print $outfh "  ", $@;
@@ -342,7 +369,7 @@ sub distro_base {
 # Maintainers.pl
 
 sub do_crosscheck {
-    my ($outfh, $cache_dir, $force, $modules) = @_;
+    my ($outfh, $cache_dir, $mirror_url, $force, $modules) = @_;
 
     my $file = '02packages.details.txt';
     my $download_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
@@ -351,7 +378,7 @@ sub do_crosscheck {
 
     # grab 02packages.details.txt
 
-    my $url = 'http://www.cpan.org/modules/02packages.details.txt.gz';
+    my $url = cpan_url($mirror_url, "modules/02packages.details.txt.gz");
 
     if (! -f $gzfile or $force) {
 	unlink $gzfile;
@@ -529,13 +556,14 @@ sub my_getstore {
 # Returns the full pathname of the extracted directory
 # (eg '/tmp/XYZ/Foo_bar-1.23')
 
-# cache_dir: where to dowenload the .tar.gz file to
-# untar_dir: where to untar or unzup the file 
-# module:    name of module
-# dist:      name of the distribution
+# cache_dir:  where to download the .tar.gz file to
+# mirror_url: CPAN mirror to download from
+# untar_dir:  where to untar or unzup the file 
+# module:     name of module
+# dist:       name of the distribution
 
 sub get_distribution {
-    my ($cache_dir, $untar_dir, $module, $dist) = @_;
+    my ($cache_dir, $mirror_url, $untar_dir, $module, $dist) = @_;
 
     $dist =~ m{.+/([^/]+)$}
 	or die "ERROR: $module: invalid DISTRIBUTION name (no AUTHOR/ prefix): $dist\n";
@@ -556,7 +584,7 @@ sub get_distribution {
 	$dist =~ /^([A-Z])([A-Z])/
 	    or die "ERROR: $module: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $dist\n";
 
-	my $url = "http://www.cpan.org/modules/by-authors/id/$1/$1$2/$dist";
+	my $url = cpan_url($mirror_url, "modules/by-authors/id/$1/$1$2/$dist");
 	my_getstore($url, $download_file)
 	    or die "ERROR: Could not fetch '$url'\n";
     }
