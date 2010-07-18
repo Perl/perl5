@@ -7466,13 +7466,18 @@ tryagain:
 		    case 'o':
 			{
 			    STRLEN brace_len = len;
+			    UV result;
 			    if ((error_msg = grok_bslash_o(p,
-							   &ender,
+							   &result,
 							   &brace_len,
 							   SIZE_ONLY))
 				!= NULL)
 			    {
 				vFAIL(error_msg);
+			    }
+			    else
+			    {
+				ender = result;
 			    }
 			    p += brace_len;
 			    if (PL_encoding && ender < 0x100) {
