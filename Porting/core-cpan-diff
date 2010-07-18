@@ -10,6 +10,8 @@ use warnings;
 use 5.010;
 
 use Getopt::Long;
+use File::Basename ();
+use File::Copy ();
 use File::Temp ();
 use File::Path ();
 use File::Spec;
@@ -539,12 +541,17 @@ my $lwp_simple_available;
 
 sub my_getstore {
     my ($url, $file) = @_;
+    File::Path::mkpath(File::Basename::dirname($file));
     unless (defined $lwp_simple_available) {
 	eval { require LWP::Simple };
 	$lwp_simple_available = $@ eq '';
     }
     if ($lwp_simple_available) {
 	return LWP::Simple::is_success(LWP::Simple::getstore($url, $file));
+    }
+    elsif ( $url =~ qr{\Afile://(?:localhost)?/} ) {
+        (my $local_path = $url) =~ s{\Afile://(?:localhost)?}{};
+        File::Copy::copy( $local_path, $file );
     }
     else {
 	return system(WGET_CMD, "-O", $file, $url) == 0;
