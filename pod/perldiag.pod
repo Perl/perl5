@@ -3799,8 +3799,8 @@ backreferences), but using 0 does not make sense.
 
 (F) You used something like C<\7> in your regular expression, but there are
 not at least seven sets of capturing parentheses in the expression. If you
-wanted to have the character with value 7 inserted into the regular expression,
-prepend a zero to make the number at least two digits: C<\07>
+wanted to have the character with ordinal 7 inserted into the regular expression,
+prepend zeroes to make it three digits long: C<\007>
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.

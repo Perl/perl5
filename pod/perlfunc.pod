@@ -3943,7 +3943,7 @@ the I<length-item> is the string length, not the number of strings.  With
 an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
-    unpack("W/a", "\04Gurusamy")            gives ("Guru")
+    unpack("W/a", "\004Gurusamy")           gives ("Guru")
     unpack("a3/A A*", "007 Bond  J ")       gives (" Bond", "J")
     unpack("a3 x2 /A A*", "007: Bond, J.")  gives ("Bond, J", ".")
 

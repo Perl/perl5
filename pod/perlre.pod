@@ -450,11 +450,12 @@ capture group, or the character whose ordinal in octal is 010 (a backspace in
 ASCII).  Perl resolves this ambiguity by interpreting C<\10> as a backreference
 only if at least 10 left parentheses have opened before it.  Likewise C<\11> is
 a backreference only if at least 11 left parentheses have opened before it.
-And so on.  C<\1> through C<\9> are always interpreted as backreferences.  You
-can minimize the ambiguity by always using C<\g> if you mean capturing groups;
-and always using 3 digits for octal constants, with the first always "0" (which
-works if there are 63 (= \077) or fewer capture groups).  There are several
-examples below that illustrate these perils.
+And so on.  C<\1> through C<\9> are always interpreted as backreferences.
+There are several examples below that illustrate these perils.  You can avoid
+the ambiguity by always using C<\g{}> or C<\g> if you mean capturing groups;
+and for octal constants always using C<\o{}>, or for C<\077> and below, using 3
+digits padded with leading zeros, since a leading zero implies an octal
+constant.
 
 The C<\I<digit>> notation also works in certain circumstances outside
 the pattern.  See L</Warning on \1 Instead of $1> below for details.)
