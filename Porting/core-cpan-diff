@@ -3,7 +3,7 @@
 # core-cpan-diff: Compare CPAN modules with their equivalent in core
 
 # Originally based on App::DualLivedDiff by Steffen Mueller.
- 
+
 use strict;
 use warnings;
 
@@ -205,7 +205,7 @@ sub do_compare {
     # and if its a permanent directory, clear any previous content
     my $untar_dir;
     if ($cache_dir) {
-	$untar_dir = File::Spec->catdir($cache_dir, UNTAR_DIR); 
+	$untar_dir = File::Spec->catdir($cache_dir, UNTAR_DIR);
 	if (-d $untar_dir) {
 	    File::Path::rmtree($untar_dir)
 		    or die "failed to remove $untar_dir\n";
@@ -223,7 +223,7 @@ sub do_compare {
     for my $module (@$modules) {
 	warn "Processing $module ...\n" if defined $output_file;
 
-	my $m = $Maintainers::Modules{$module} 
+	my $m = $Maintainers::Modules{$module}
 	    or die "ERROR: No such module in Maintainers.pl: '$module'\n";
 
 	unless ($m->{CPAN}) {
@@ -389,7 +389,7 @@ sub do_crosscheck {
 	or die "ERROR: failed to ungzip $gzfile: $IO::Uncompress::Gunzip::GunzipError\n";
 
     # suck in the data from it
-    
+
     open my $fh, '<', $path
 	or die "ERROR: open: $file: $!\n";
 
@@ -414,7 +414,7 @@ sub do_crosscheck {
     }
 
     for my $module (@$modules) {
-	my $m = $Maintainers::Modules{$module} 
+	my $m = $Maintainers::Modules{$module}
 	    or die "ERROR: No such module in Maintainers.pl: '$module'\n";
 
 	unless ($m->{CPAN}) {
@@ -488,7 +488,7 @@ sub get_map {
 	    last;
 	}
     }
-    
+
     if (defined $ext) {
 	    $map = { '' => $ext },
     }
@@ -558,7 +558,7 @@ sub my_getstore {
 
 # cache_dir:  where to download the .tar.gz file to
 # mirror_url: CPAN mirror to download from
-# untar_dir:  where to untar or unzup the file 
+# untar_dir:  where to untar or unzup the file
 # module:     name of module
 # dist:       name of the distribution
 
