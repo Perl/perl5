@@ -565,6 +565,15 @@ be noted as well.
 
 =item *
 
+Under some circumstances, the C<CvGV()> field of a CV is now reference
+counted. To ensure consistent behaviour, direct assignment to it, for
+example C<CvGV(cv) = gv> is now a compile-time error. A new macro,
+C<CvGV_set(cv,gv)> has been introduced to perform this operation safely.
+Note that modification of this field is not part of of the public API,
+regardless of this new macro.
+
+=item *
+
 It is now possible for XS code to hook into Perl's lexical scope
 mechanism at compile time, using the new C<Perl_blockhook_register>
 function. See L<perlguts/"Compile-time scope hooks">.
@@ -596,6 +605,14 @@ L</Modules and Pragmata>.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+Some work has been done on the internal pointers that link between symbol
+tables (stashes), typeglobs and subroutines. This has the effect that
+various edge cases related to deleting stashes or stash entries (e.g.
+<%FOO:: = ()>), and complex typeglob or code reference aliasing, will no
+longer crash the interpreter.
 
 =item *
 
