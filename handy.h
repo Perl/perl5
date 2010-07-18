@@ -455,6 +455,10 @@ whitespace.
 Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 digit.
 
+=for apidoc Am|bool|isOCTAL|char ch
+Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
+octal digit, [0-7].
+
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 uppercase character.
@@ -516,6 +520,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
 #define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
+#define isOCTAL(c)	((c) >= '0' && (c) <= '7')
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
 #   define isUPPER(c)	isupper(c)

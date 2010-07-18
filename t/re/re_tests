@@ -1467,4 +1467,19 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [a\o{400}]	\x{100}	y	$&	\x{100}
 [a\o{1000}]	\x{200}	y	$&	\x{200}
 
+# The below was inserting a NULL into the character class.
+[\8\9]	\000	n	-	-
+[\8\9]	8	y	$&	8
+[\8\9]	9	y	$&	9
+
+# Verify that reads 1-3 octal digits, and that \_ works in char class
+[\0]	\000	y	$&	\000
+[\07]	\007	y	$&	\007
+[\07]	7\000	n	-	-
+[\006]	\006	y	$&	\006
+[\006]	6\000	n	-	-
+[\0005]	\0005	y	$&	\000
+[\0005]	5\000	y	$&	5
+[\_]	_	y	$&	_
+
 # vim: softtabstop=0 noexpandtab

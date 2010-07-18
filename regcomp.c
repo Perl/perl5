@@ -7555,8 +7555,9 @@ tryagain:
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
-			  (isDIGIT(p[1]) && atoi(p) >= RExC_npar) ) {
-                            I32 flags = 0;
+			    (isOCTAL(p[1]) && atoi(p) >= RExC_npar))
+			{
+			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    if (ender > 0xff) {
@@ -8179,9 +8180,10 @@ parseit:
 		value = grok_bslash_c(*RExC_parse++, SIZE_ONLY);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
-	    case '5': case '6': case '7': case '8': case '9':
+	    case '5': case '6': case '7':
 		{
-		    I32 flags = 0;
+		    /* Take 1-3 octal digits */
+		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 		    numlen = 3;
 		    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
@@ -8199,10 +8201,12 @@ parseit:
 		    break;
 		}
 	    default:
-		if (!SIZE_ONLY && isALPHA(value))
+		/* Allow \_ to not give an error */
+		if (!SIZE_ONLY && isALNUM(value) && value != '_') {
 		    ckWARN2reg(RExC_parse,
 			       "Unrecognized escape \\%c in character class passed through",
 			       (int)value);
+		}
 		break;
 	    }
 	} /* end of \blah */

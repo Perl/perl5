@@ -1141,9 +1141,6 @@ the left with zeros to make three digits.  For larger ordinals, either use
 C<\o{}> , or convert to someething else, such as to hex and use C<\x{}>
 instead.
 
-A backslash followed by a non-octal digit in a bracketed character class
-(C<[\8]> or C<[\9]>) will be interpreted as a NULL character and the digit.
-
 Having fewer than 3 digits may lead to a misleading warning message that says
 that what follows is ignored.  For example, C<"\128"> in the ASCII character set
 is equivalent to the two characters C<"\n8">, but the warning C<Illegal octal

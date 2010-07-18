@@ -237,3 +237,16 @@ Missing braces on \o{} in regex; marked by <-- HERE in m/[\o <-- HERE ]/ at - li
 $a = qr/[\o{}]/;
 EXPECT
 Number with no digits in regex; marked by <-- HERE in m/[\o{} <-- HERE ]/ at - line 2.
+########
+# regcomp.c [S_regclass]
+use warnings 'regexp' ;
+$a = qr/[\8\9]/;
+$a = qr/[\_\0]/; # Should have no warnings on this and the remainder of this test
+$a = qr/[\07]/;
+$a = qr/[\006]/;
+$a = qr/[\0005]/;
+no warnings 'regexp' ;
+$a = qr/[\8\9]/;
+EXPECT
+Unrecognized escape \8 in character class passed through in regex; marked by <-- HERE in m/[\8 <-- HERE \9]/ at - line 3.
+Unrecognized escape \9 in character class passed through in regex; marked by <-- HERE in m/[\8\9 <-- HERE ]/ at - line 3.
