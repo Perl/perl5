@@ -14,12 +14,12 @@ use File::Basename ();
 use File::Copy ();
 use File::Temp ();
 use File::Path ();
-use File::Spec;
-use File::Spec::Unix ();
+use File::Spec::Functions;
 use Archive::Extract;
 use IO::Uncompress::Gunzip ();
 use File::Compare ();
 use ExtUtils::Manifest;
+use ExtUtils::MakeMaker ();
 
 BEGIN { die "Must be run from root of perl source tree\n" unless -d 'Porting' }
 use lib 'Porting';
@@ -36,20 +36,9 @@ $Module::Load::Conditional::CHECK_INC_HASH = 1;
 # stop Archive::Extract whinging about lack of Archive::Zip
 $Archive::Extract::WARN = 0;
 
-
-# Files, which if they exist in CPAN but not in perl, will not generate
-# an 'Only in CPAN' listing
-#
-our %IGNORABLE = map { ($_ => 1) }
-	qw(.cvsignore .dualLivedDiffConfig .gitignore
-	      ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-	      CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS
-	      GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
-	      MANIFEST MANIFEST.SKIP META.yml NEW NOTES ppport.h README
-	      SIGNATURE THANKS TODO Todo VERSION WHATSNEW);
-
+# where, under the cache dir, to download tarballs to
+use constant SRC_DIR   => 'tarballs';
 # where, under the cache dir, to untar stuff to
-
 use constant UNTAR_DIR => 'untarred';
 
 use constant DIFF_CMD  => 'diff';
@@ -163,10 +152,13 @@ sub run {
     if (defined $cache_dir) {
 	die "ERROR: no such directory: '$cache_dir'\n" unless -d $cache_dir;
     }
+    else {
+      $cache_dir = File::Temp::tempdir( CLEANUP => 1 );
+    }
 
     $mirror_url .= "/" unless substr($mirror_url,-1) eq "/";
     my $test_file = "modules/07mirror.yml";
-    my_getstore(cpan_url($mirror_url, $test_file), local_path($cache_dir, $test_file))
+    my_getstore(cpan_url($mirror_url, $test_file), catfile($cache_dir, $test_file))
 	or die "ERROR: not a CPAN mirror '$mirror_url'\n";
 
     if ($do_crosscheck) {
@@ -176,14 +168,6 @@ sub run {
 	do_compare(\@modules, $outfh, $output_file, $cache_dir, $mirror_url, $verbose, $use_diff,
 	    $reverse, $diff_opts, \@wanted_upstreams);
     }
-}
-
-# construct a local path either in cache dir or tempdir
-
-sub local_path {
-    my ($cache_dir, @path) = @_;
-    my $local_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
-    return File::Spec->catfile($local_dir, @path);
 }
 
 # construct a CPAN url
@@ -205,18 +189,11 @@ sub do_compare {
 
     # first, make sure we have a directory where they can all be untarred,
     # and if its a permanent directory, clear any previous content
-    my $untar_dir;
-    if ($cache_dir) {
-	$untar_dir = File::Spec->catdir($cache_dir, UNTAR_DIR);
-	if (-d $untar_dir) {
-	    File::Path::rmtree($untar_dir)
-		    or die "failed to remove $untar_dir\n";
-	}
-	mkdir $untar_dir
-	    or die "mkdir $untar_dir: $!\n";
-    }
-    else {
-	$untar_dir = File::Temp::tempdir( CLEANUP => 1 );
+    my $untar_dir = catdir($cache_dir, UNTAR_DIR);
+    my $src_dir = catdir($cache_dir, SRC_DIR);
+    for my $d ( $src_dir, $untar_dir ) {
+      next if -d $d;
+      mkdir $d or die "mkdir $d: $!\n";
     }
 
     my %ignorable = map { ($_ => 1) } @Maintainers::IGNORABLE;
@@ -236,20 +213,19 @@ sub do_compare {
 	my $dist = $m->{DISTRIBUTION};
 	die "ERROR: $module has no DISTRIBUTION entry\n" unless defined $dist;
 
-	if ($seen_dist{$dist}) {
+	if ($seen_dist{$dist}++) {
 	    warn "WARNING: duplicate entry for $dist in $module\n"
 	}
 
 	my $upstream = $m->{UPSTREAM} || 'UNKNOWN';
 	next if @$wanted_upstreams and ! ($upstream ~~ $wanted_upstreams);
-	print $outfh "\n$module - ".$Maintainers::Modules{$module}->{DISTRIBUTION}."\n" unless $use_diff;
-	print $outfh "  upstream is: ".($m->{UPSTREAM} || 'UNKNOWN!')."\n";
 
-	$seen_dist{$dist}++;
+        print $outfh "\n$module - ".$Maintainers::Modules{$module}->{DISTRIBUTION}."\n";
+        print $outfh "  upstream is: ".($m->{UPSTREAM} || 'UNKNOWN!')."\n";
 
 	my $cpan_dir;
 	eval {
-	    $cpan_dir = get_distribution($cache_dir, $mirror_url, $untar_dir, $module, $dist)
+	    $cpan_dir = get_distribution($src_dir, $mirror_url, $untar_dir, $module, $dist)
 	};
 	if ($@) {
 	    print $outfh "  ", $@;
@@ -259,11 +235,14 @@ sub do_compare {
 
 	my @perl_files = Maintainers::get_module_files($module);
 
-	my $manifest = File::Spec->catfile($cpan_dir, 'MANIFEST');
+	my $manifest = catfile($cpan_dir, 'MANIFEST');
 	die "ERROR: no such file: $manifest\n" unless  -f $manifest;
 
 	my $cpan_files = ExtUtils::Manifest::maniread($manifest);
 	my @cpan_files = sort keys %$cpan_files;
+
+        (my $main_pm = $module) =~ s{::}{/}g;
+        $main_pm .= ".pm";
 
 	my ($excluded, $map) =  get_map($m, $module, \@perl_files);
 
@@ -311,7 +290,7 @@ EOF
 	    }
 
 
-	    my $abs_cpan_file = File::Spec->catfile($cpan_dir, $cpan_file);
+	    my $abs_cpan_file = catfile($cpan_dir, $cpan_file);
 
 	    # should never happen
 	    die "ERROR: can't find file $abs_cpan_file\n" unless -f $abs_cpan_file;
@@ -322,8 +301,17 @@ EOF
 	        next;
 	    }
 
-			my $relative_mapped_file = $mapped_file;
-			$relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
+            my $relative_mapped_file = $mapped_file;
+            $relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
+
+            for my $f ( catfile('lib', $main_pm), $main_pm ) {
+              next unless $f eq $relative_mapped_file;
+              my $pv = MM->parse_version($mapped_file) || '(unknown)';
+              my $cv = MM->parse_version($abs_cpan_file) || '(unknown)';
+              if ( $pv ne $cv ) {
+                print $outfh "  Version mismatch: $cv (cpan) vs $pv (perl)\n";
+              }
+            }
 
 	    if (File::Compare::compare($abs_cpan_file, $mapped_file)) {
 
@@ -375,7 +363,7 @@ sub do_crosscheck {
 
     my $file = '02packages.details.txt';
     my $download_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
-    my $path = File::Spec->catfile($download_dir, $file);
+    my $path = catfile($download_dir, $file);
     my $gzfile = "$path.gz";
 
     # grab 02packages.details.txt
@@ -570,14 +558,13 @@ sub my_getstore {
 # dist:       name of the distribution
 
 sub get_distribution {
-    my ($cache_dir, $mirror_url, $untar_dir, $module, $dist) = @_;
+    my ($src_dir, $mirror_url, $untar_dir, $module, $dist) = @_;
 
     $dist =~ m{.+/([^/]+)$}
 	or die "ERROR: $module: invalid DISTRIBUTION name (no AUTHOR/ prefix): $dist\n";
     my $filename = $1;
 
-    my $download_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
-    my $download_file = File::Spec->catfile($download_dir, $filename);
+    my $download_file = catfile($src_dir, $filename);
 
     # download distribution
 
@@ -596,19 +583,20 @@ sub get_distribution {
 	    or die "ERROR: Could not fetch '$url'\n";
     }
 
-    # extract distribution
+    # get the expected name of the extracted distribution dir
 
-    my $ae = Archive::Extract->new( archive => $download_file);
-    $ae->extract( to => $untar_dir )
-	or die "ERROR: failed to extract distribution '$download_file to temp. dir: " . $ae->error() . "\n";
-
-    # get the name of the extracted distribution dir
-
-    my $path = File::Spec->catfile($untar_dir, $filename);
+    my $path = catfile($untar_dir, $filename);
 
     $path =~ s/\.tar\.gz$// or
     $path =~ s/\.zip$// or
       die "ERROR: downloaded file does not have a recognised suffix: $path\n";
+
+    # extract it unless we already have it cached or tarball is newer
+    if ( ! -d $path || ( -M $download_file < -M $path ) ) {
+      my $ae = Archive::Extract->new( archive => $download_file);
+      $ae->extract( to => $untar_dir )
+          or die "ERROR: failed to extract distribution '$download_file to temp. dir: " . $ae->error() . "\n";
+    }
 
     die "ERROR: Extracted tarball does not appear as $path\n" unless -d $path;
 
