@@ -216,16 +216,16 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
     }
 
     CvGV(cv) = gv;
+    assert(!CvCVGV_RC(cv));
 
     if (!gv)
 	return;
 
-    if (CvANON(cv)) {
+    if (isGV_with_GP(gv) && GvGP(gv) && (GvCV(gv) == cv || GvFORM(gv) == cv))
+	Perl_sv_add_backref(aTHX_ MUTABLE_SV(gv), MUTABLE_SV(cv));
+    else {
 	CvCVGV_RC_on(cv);
 	SvREFCNT_inc_simple_void_NN(gv);
-    }
-    else {
-	Perl_sv_add_backref(aTHX_ MUTABLE_SV(gv), MUTABLE_SV(cv));
     }
 }
 
