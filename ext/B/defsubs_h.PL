@@ -72,6 +72,10 @@ if ($] < 5.011) {
     doconst(CVf_LOCKED);
 }
 
+# First element in each tuple is the file; second is a regex snippet
+# giving the prefix to limit the names of symbols to define that come
+# from that file.  If none, all symbols will be defined whose values
+# match the pattern below.
 foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
  {
   my $file = $tuple->[0];
