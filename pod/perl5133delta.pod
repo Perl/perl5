@@ -4,6 +4,8 @@
 
 perldelta - what is new for perl v5.13.3
 
+XXX Add links around modules throughout
+
 =head1 DESCRIPTION
 
 This document describes differences between the 5.13.3 release and
