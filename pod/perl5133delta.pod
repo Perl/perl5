@@ -304,7 +304,7 @@ Add additional notes regarding srand and forking (d460397)
 
 =item *
 
-Improved documentation of unusual character escapes (bf82ca4)
+Improved documentation of unusual character escapes (4068718)
 
 =item *
 
