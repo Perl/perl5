@@ -53,7 +53,7 @@ See L<charnames> for details on all these changes.
 
 Literals may now use either upper case C<0X...> or C<0B...> prefixes,
 in addition to the already supported C<0x...> and C<0b...>
-syntax. (RT#76296) (a674e8d)
+syntax. (RT#76296) (a674e8d, 333f87f)
 
 C, Ruby, Python and PHP already supported this syntax, and it makes
 Perl more internally consistent. A round-trip with C<eval sprintf
