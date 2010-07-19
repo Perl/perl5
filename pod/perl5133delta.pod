@@ -72,7 +72,7 @@ C<\x{100}> - C<\x{1FF}>, with no deprecation warning. Use of these values in the
 command line option C<"-0"> retains the current meaning to slurp input files
 whole; previously, this was documented only for C<"-0777">.  It is recommended,
 however, because of various ambiguities, to use the new L</\o{...}> construct
-to represent characters in octal.
+to represent characters in octal (fa1639c..f6993e9).
 
 =head1 Deprecations
 
