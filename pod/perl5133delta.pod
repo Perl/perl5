@@ -226,6 +226,10 @@ Module-Load updated to CPAN version 0.18 (93eaa32)
 
 =item *
 
+Term-ANSIColor to CPAN version 3.00 (2c33c76)
+
+=item *
+
 Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
 
 =item *
