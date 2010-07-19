@@ -238,6 +238,9 @@ Term-ANSIColor to CPAN version 3.00 (2c33c76)
 
 Test-Harness to CPAN version 3.21 (6d31366)
 
+The core update from Test-Harness 3.17 to 3.21 fixed some things, but
+also L<introduced a known problem|/"Known Problems">.
+
 =item *
 
 Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
@@ -551,6 +554,17 @@ patch has been sent upstream to the maintainer.
 
 readline() returns an empty string instead of undef when it is
 interrupted by a signal.
+
+=item *
+
+Test-Harness was updated from 3.17 to 3.21 for this release. A rewrite
+in how it handles non-Perl tests (in 3.17_01) broke argument passing
+to non-Perl tests with L<prove(1)> (RT #59186), and required that
+non-Perl tests be run as C<prove ./test.sh> instead of C<prove
+test.sh> (RT #59457).
+
+These issues are being solved upstream, but didn't make it into this
+release. They're expected to be fixed in time for perl v5.13.4.
 
 =back
 
