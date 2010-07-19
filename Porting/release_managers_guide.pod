@@ -216,6 +216,7 @@ Ensure dual-life CPAN modules are stable, which comes down to:
 I<You MAY SKIP this step for SNAPSHOT>
 
 Similarly, monitor the smoking of core tests, and try to fix.
+See L<http://doc.procura.nl/smoke/index.html> for a summary.
 
 =item *
 
