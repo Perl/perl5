@@ -361,25 +361,25 @@ struct pmop {
 
 
 #define PMf_RETAINT	0x00000040	/* taint $1 etc. if target tainted */
-#define PMf_ONCE	0x00000080	/* match successfully only once per
-                                           reset, with related flag RXf_USED
-                                           in re->extflags holding state.
-					   This is used only for ?? matches,
-					   and only on OP_MATCH and OP_QR */
 
+/* match successfully only once per reset, with related flag RXf_USED in
+ * re->extflags holding state.  This is used only for ?? matches, and only on
+ * OP_MATCH and OP_QR */
+#define PMf_ONCE	0x00000080
 #define PMf_UNUSED	0x00000100	/* free for use */
 #define PMf_MAYBE_CONST	0x00000200	/* replacement contains variables */
 
-#define PMf_USED        0x00000400	/* PMf_ONCE has matched successfully.
-                                           Not used under threading. */
+/* PMf_ONCE has matched successfully. Not used under threading. */
+#define PMf_USED        0x00000400
 
 #define PMf_CONST	0x00000800	/* subst replacement is constant */
 #define PMf_KEEP	0x00001000	/* keep 1st runtime pattern forever */
 #define PMf_GLOBAL	0x00002000	/* pattern had a g modifier */
 #define PMf_CONTINUE	0x00004000	/* don't reset pos() if //g fails */
 #define PMf_EVAL	0x00008000	/* evaluating replacement as expr */
-#define PMf_NONDESTRUCT	0x00010000	/* Return substituted string instead
-					   of modifying it. */
+
+/* Return substituted string instead of modifying it. */
+#define PMf_NONDESTRUCT	0x00010000
 
 /* The following flags have exact equivalents in regcomp.h with the prefix RXf_
  * which are stored in the regexp->extflags member. If you change them here,
