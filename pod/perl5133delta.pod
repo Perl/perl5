@@ -230,6 +230,10 @@ Term-ANSIColor to CPAN version 3.00 (2c33c76)
 
 =item *
 
+Test-Harness to CPAN version 3.21 (6d31366)
+
+=item *
+
 Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
 
 =item *
